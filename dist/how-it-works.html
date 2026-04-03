@@ -1,0 +1,930 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+
+<link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#0E0B07">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>How It Works, Attune</title>
+  <meta name="description" content="Each partner answers independently. Your results combine into a side-by-side picture of how you communicate, what you expect, and how you function together.">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="How Attune Works">
+  <meta property="og:description" content="Two exercises, answered independently. One complete joint picture. About 25 minutes each.">
+  <meta property="og:image" content="https://attune-relationships.com/og-image.png">
+  <meta property="og:url" content="https://attune-relationships.com/how-it-works">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="How Attune Works">
+  <meta name="twitter:description" content="Two exercises, answered independently. One complete joint picture. About 25 minutes each.">
+  <meta name="twitter:image" content="https://attune-relationships.com/og-image.png">
+  <link rel="canonical" href="https://attune-relationships.com/how-it-works">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,800;1,700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  html,body{overflow-x:hidden;max-width:100%}
+  html,body{scroll-snap-type:y proximity}
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  :root{
+    --cream:#FFFDF9;--warm:#FBF8F3;--stone:#E8DDD0;--clay:#C17F47;
+    --ink:#0E0B07;--text:#1E1610;--muted:#8C7A68;--orange:#E8673A;--indigo:#1B5FE8;
+    --hfont:'Playfair Display',Georgia,serif;--bfont:'DM Sans',sans-serif;
+  }
+  html{scroll-behavior:smooth}
+  body{background:var(--cream);color:var(--text);font-family:var(--bfont);-webkit-font-smoothing:antialiased}
+
+  /* NAV */
+  nav{position:fixed;top:0;left:0;right:0;z-index:100;height:58px;background:rgba(255,253,249,.94);backdrop-filter:blur(16px);border-bottom:1px solid var(--stone);display:flex;align-items:center;padding:0 2.5rem;justify-content:space-between}
+  .logo{display:flex;align-items:center;gap:.65rem;text-decoration:none}
+  .logo-mark{display:flex;align-items:center;flex-shrink:0}
+  .logo-text{font-family:var(--hfont);font-size:1.15rem;font-weight:700;color:var(--ink)}
+  .nav-center{display:flex;gap:2.5rem;list-style:none;position:absolute;left:50%;transform:translateX(-50%);align-items:center}.nav-center li{display:flex;align-items:center}.nav-center li{display:flex;align-items:center}
+  .nav-center a{text-decoration:none;color:var(--muted);font-size:.82rem;font-weight:500;transition:color .15s}
+  .nav-center a:hover,.nav-center a.active{color:var(--ink)}
+  .nav-center a.active{font-weight:600}
+  /* LEARN DROPDOWN */
+  .nav-dropdown{position:relative}
+  .nav-dropdown-toggle{text-decoration:none;color:var(--muted);font-size:.82rem;font-weight:500;transition:color .15s;cursor:pointer;display:flex;align-items:center;gap:.28rem;background:none;border:none;padding:0;font-family:var(--bfont)}
+  .nav-dropdown-toggle:hover,.nav-dropdown-toggle.active{color:var(--ink)}
+  .nav-dropdown-toggle svg{transition:transform .2s}
+  .nav-dropdown:hover .nav-dropdown-toggle svg{transform:rotate(180deg)}
+  .nav-dropdown-menu{position:absolute;top:100%;left:50%;transform:translateX(-50%);background:rgba(255,253,249,.98);backdrop-filter:blur(16px);border:1.5px solid var(--stone);border-radius:14px;padding:.85rem .6rem .6rem;min-width:190px;opacity:0;visibility:hidden;pointer-events:none;transition:opacity .15s,visibility .15s;box-shadow:0 12px 40px rgba(14,11,7,.12);z-index:200;margin-top:.4rem}
+  .nav-dropdown-menu::before{content:'';position:absolute;top:-.5rem;left:0;right:0;height:.5rem;background:transparent}
+  .nav-dropdown:hover .nav-dropdown-menu{opacity:1;visibility:visible;pointer-events:auto}
+  .nav-dropdown-menu::before{content:'';position:absolute;top:-12px;left:0;right:0;height:12px;background:transparent;}
+  .nav-dropdown-menu a{display:block;padding:.55rem .8rem;font-size:.78rem;color:var(--muted);text-decoration:none;border-radius:8px;transition:all .15s;font-weight:500}
+  .nav-dropdown-menu a:hover{background:var(--warm);color:var(--ink)}
+  .nav-dropdown-menu .dd-divider{height:1px;background:var(--stone);margin:.35rem .5rem}
+  .nav-right{display:flex;align-items:center;gap:1.25rem}
+  .nav-signin{font-size:.8rem;font-weight:500;color:var(--muted);text-decoration:none;transition:color .15s}
+  .nav-signin:hover{color:var(--ink)}
+  .btn-nav{background:var(--ink);color:white;padding:.5rem 1.2rem;border-radius:10px;font-size:.78rem;font-weight:600;text-decoration:none;transition:opacity .15s}
+  .btn-nav:hover{opacity:.82}
+  .mobile-nav-links{display:none;gap:.85rem;align-items:center}
+  .mobile-nav-links a{font-size:.76rem;font-weight:500;color:var(--muted);text-decoration:none;transition:color .15s}
+  .mobile-cta{background:var(--ink);color:white;padding:.4rem .9rem;border-radius:8px;font-size:.72rem;font-weight:600;text-decoration:none}
+
+  /* SHARED */
+  .eyebrow{font-size:.6rem;letter-spacing:.3em;text-transform:uppercase;color:var(--clay);font-weight:700;margin-bottom:.9rem;display:flex;align-items:center;justify-content:center;gap:.65rem}
+  .eyebrow::before{content:'';width:28px;height:2.5px;border-radius:999px;background:linear-gradient(90deg,var(--orange),var(--indigo));flex-shrink:0}.eyebrow::after{content:'';width:28px;height:2.5px;border-radius:999px;background:linear-gradient(90deg,var(--orange),var(--indigo));flex-shrink:0}
+  .s-eye{font-size:.72rem;letter-spacing:.3em;text-transform:uppercase;color:var(--clay);font-weight:700;margin-bottom:.85rem;display:flex;align-items:center;gap:.65rem}
+  .s-eye::before{content:'';width:28px;height:2.5px;border-radius:999px;background:linear-gradient(90deg,var(--orange),var(--indigo));flex-shrink:0}
+  .s-title{font-family:var(--hfont);font-size:clamp(1.85rem,3.2vw,2.7rem);font-weight:700;line-height:1.1;color:var(--ink);margin-bottom:1.1rem;letter-spacing:-.02em}
+  .s-title em{font-style:italic;color:var(--orange)}
+  .s-sub{font-size:.95rem;color:var(--muted);line-height:1.78;font-weight:300;max-width:540px}
+  section{padding:4rem 2.5rem}
+  .si{max-width:1100px;margin:0 auto}
+  .bg-warm{background:var(--warm);border-top:1px solid var(--stone);border-bottom:1px solid var(--stone)}
+  .bg-dark{background:linear-gradient(150deg,#1c1940,#282560)}
+
+  /* PAGE HEADER */
+  
+  .page-title{font-family:var(--hfont);font-size:clamp(2.4rem,4.5vw,3.4rem);font-weight:700;line-height:1.06;color:var(--ink);margin-bottom:1.25rem;letter-spacing:-.02em}
+  .page-title em{font-style:italic;color:var(--orange)}
+  .page-sub{font-size:1rem;color:var(--muted);line-height:1.78;font-weight:300}
+
+  /* STEP TIMELINE */
+  .steps{display:flex;flex-direction:column;gap:0;margin-top:1rem}
+  .step{display:grid;grid-template-columns:1fr 1fr;gap:4rem;align-items:center;padding:2.5rem 0;border-top:1px solid var(--stone)}
+  .step:first-child{border-top:none;padding-top:0}
+  .step.flip{direction:rtl}.flip>div{direction:ltr}
+  .step.flip > *{direction:ltr}
+  .step-num{display:none}
+  .step-eyebrow{font-size:.6rem;letter-spacing:.28em;text-transform:uppercase;color:var(--clay);font-weight:700;margin-bottom:.75rem;display:flex;align-items:center;gap:.65rem}
+  .step-eyebrow::before{content:'';width:28px;height:2.5px;border-radius:999px;background:linear-gradient(90deg,var(--orange),var(--indigo));flex-shrink:0}
+  .step-ghost-num{font-family:'Playfair Display',Georgia,serif;font-size:clamp(3.5rem,10vw,8rem);font-weight:700;line-height:1;letter-spacing:-.04em;margin-bottom:.5rem;display:block;user-select:none;background:linear-gradient(135deg,#E8673A,#9B5DE5,#1B5FE8);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;opacity:.55}
+  .step-title{font-family:var(--hfont);font-size:clamp(1.6rem,2.8vw,2.2rem);font-weight:700;line-height:1.12;color:var(--ink);margin-bottom:1rem;letter-spacing:-.02em}
+  .step-title em{font-style:italic;color:var(--orange)}
+  .step-body{font-size:.92rem;color:var(--muted);line-height:1.78;margin-bottom:1.5rem;font-weight:300}
+  .step-detail{display:flex;flex-direction:column;gap:.65rem}
+  .step-detail-mobile{display:none}
+  .sd-item{display:flex;align-items:flex-start;gap:.7rem;font-size:.84rem;color:var(--text)}
+  .sd-dot{width:6px;height:6px;border-radius:50%;background:var(--clay);flex-shrink:0;margin-top:.45rem}
+
+  /* VISUAL MOCKUPS */
+  .mock-card{border-radius:20px;overflow:hidden;box-shadow:0 24px 64px rgba(14,11,7,.14);position:relative}
+
+  /* Exercise mock */
+  .ex-mock{background:var(--cream);border:1px solid var(--stone);border-radius:20px;padding:1.75rem;box-shadow:0 24px 64px rgba(14,11,7,.12)}
+  .em-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem}
+  .em-tag{font-size:.56rem;letter-spacing:.24em;text-transform:uppercase;color:var(--orange);font-weight:700}
+  .em-prog{display:flex;gap:3px}
+  .em-prog-dot{width:8px;height:8px;border-radius:50%;background:var(--stone)}
+  .em-prog-dot.done{background:var(--orange)}
+  .em-prog-dot.active{background:var(--orange);box-shadow:0 0 0 2px rgba(232,103,58,.3)}
+  .em-q{font-family:var(--hfont);font-size:1.15rem;font-weight:700;color:var(--ink);margin-bottom:1.25rem;line-height:1.35}
+  .em-options{display:flex;flex-direction:column;gap:.55rem;margin-bottom:1.25rem}
+  .em-opt{padding:.85rem 1rem;border:1.5px solid var(--stone);border-radius:12px;font-size:.83rem;color:var(--text);cursor:pointer;transition:all .15s;background:white}
+  .em-opt:hover{border-color:var(--clay);background:var(--warm)}
+  .em-opt.sel{border-color:var(--orange);background:#FFF0EB;color:var(--orange);font-weight:500}
+  .em-foot{display:flex;justify-content:space-between;align-items:center}
+  .em-count{font-size:.72rem;color:var(--muted)}
+  .em-next{background:var(--orange);color:white;border:none;padding:.55rem 1.25rem;border-radius:8px;font-size:.72rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;font-family:var(--bfont)}
+
+  /* Waiting mock */
+  .wait-mock{background:linear-gradient(150deg,#1e1c42,#2b285c);border-radius:20px;padding:1.75rem;color:white;box-shadow:0 24px 64px rgba(14,11,7,.22);border:1px solid rgba(255,255,255,.06)}
+  .wm-label{font-size:.56rem;letter-spacing:.28em;text-transform:uppercase;color:rgba(232,103,58,.65);margin-bottom:.35rem}
+  .wm-title{font-family:var(--hfont);font-size:1.5rem;font-weight:700;margin-bottom:1.1rem;letter-spacing:-.02em}
+  .wm-people{display:grid;grid-template-columns:1fr 1fr;gap:.6rem;margin-bottom:1rem}
+  .wm-person{border-radius:10px;padding:.85rem;border:1px solid}
+  .wm-person.s{background:rgba(232,103,58,.1);border-color:rgba(232,103,58,.25)}
+  .wm-person.j{background:rgba(91,109,248,.1);border-color:rgba(91,109,248,.25)}
+  .wm-pname{font-size:.54rem;letter-spacing:.2em;text-transform:uppercase;opacity:.5;margin-bottom:.3rem}
+  .wm-status{display:flex;align-items:center;gap:.45rem;font-size:.77rem;font-weight:600}
+  .wm-status-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+  .wm-status-dot.done{background:#34d399}
+  .wm-status-dot.wait{background:rgba(255,255,255,.25)}
+  .wm-lock{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:.85rem;text-align:center;font-size:.75rem;color:rgba(255,255,255,.4)}
+
+  /* Results mock */
+  .results-mock{background:linear-gradient(150deg,#1e1c42,#2b285c);border-radius:20px;padding:1.75rem;color:white;box-shadow:0 24px 64px rgba(14,11,7,.22);border:1px solid rgba(255,255,255,.06)}
+  .rm-lbl{font-size:.56rem;letter-spacing:.28em;text-transform:uppercase;color:rgba(232,103,58,.65);margin-bottom:.3rem}
+  .rm-name{font-family:var(--hfont);font-size:1.65rem;font-weight:700;margin-bottom:.5rem;letter-spacing:-.02em}
+  .rm-badge{display:inline-block;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.18);padding:.28rem .75rem;border-radius:999px;font-size:.68rem;font-weight:600;margin-bottom:.9rem}
+  .rm-profiles{display:grid;grid-template-columns:1fr 1fr;gap:.6rem;margin-bottom:1rem}
+  .rm-prof{border-radius:10px;padding:.75rem .9rem}
+  .rm-prof.s{background:rgba(232,103,58,.14);border:1px solid rgba(232,103,58,.25)}
+  .rm-prof.j{background:rgba(91,109,248,.14);border:1px solid rgba(91,109,248,.25)}
+  .rm-pn{font-size:.52rem;letter-spacing:.18em;text-transform:uppercase;opacity:.45;margin-bottom:.2rem}
+  .rm-pd{font-size:.77rem;font-weight:500;line-height:1.35}
+  .rm-dims{display:grid;grid-template-columns:1fr 1fr;gap:.45rem}
+  .rm-dim{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);border-radius:9px;padding:.6rem .75rem;display:flex;justify-content:space-between;align-items:center}
+  .rm-dn{font-size:.62rem;font-weight:600}
+  .rm-dv{font-size:.55rem;color:rgba(255,255,255,.4)}
+  .rm-chip-row{display:flex;gap:.4rem;flex-wrap:wrap;margin-bottom:.9rem}
+  .rm-chip{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.13);padding:.18rem .55rem;border-radius:999px;font-size:.6rem;color:rgba(255,255,255,.55)}
+
+  /* DIMENSIONS SECTION */
+  .dim-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:1rem;margin-top:1.75rem}
+  .dim-card{background:white;border:1px solid var(--stone);border-radius:16px;padding:1.35rem;transition:box-shadow .2s,transform .2s}
+  .dim-card:hover{border-color:var(--clay)}
+  .dim-icon{width:40px;height:40px;border-radius:11px;display:flex;align-items:center;justify-content:center;margin-bottom:.9rem}
+  .dim-title{font-size:.9rem;font-weight:700;color:var(--ink);margin-bottom:.35rem}
+  .dim-desc{font-size:.77rem;color:var(--muted);line-height:1.6;margin-bottom:.9rem}
+  .dim-example{background:var(--warm);border-radius:8px;padding:.7rem .9rem}
+  .dim-ex-lbl{font-size:.58rem;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);margin-bottom:.3rem;font-weight:600}
+  .dim-ex-row{display:flex;justify-content:space-between;gap:.5rem}
+  .dim-ex-person{font-size:.7rem;text-align:center;flex:1}
+  .dim-ex-name{font-size:.56rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-bottom:.15rem}
+  .dim-ex-val{font-weight:600;font-size:.72rem}
+
+  /* COMPARISON BAR */
+  .comp-wrap{margin-top:3rem}
+  .comp-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem}
+  .comp-names{display:flex;gap:1.5rem;align-items:center}
+  .comp-name{display:flex;align-items:center;gap:.5rem;font-size:.78rem;font-weight:600;color:var(--ink)}
+  .comp-name-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+  .comp-rows{display:flex;flex-direction:column;gap:.85rem}
+  .comp-row{display:grid;grid-template-columns:140px 1fr 1fr;gap:1rem;align-items:center}
+  .comp-label{font-size:.75rem;color:var(--muted);font-weight:500}
+  .comp-bar-wrap{position:relative;height:8px;background:var(--stone);border-radius:999px;overflow:visible}
+  .comp-bar{height:100%;border-radius:999px;position:absolute;top:0}
+  .comp-marker{position:absolute;top:-3px;width:14px;height:14px;border-radius:50%;border:2px solid white;box-shadow:0 1px 4px rgba(0,0,0,.18)}
+  .comp-result{font-size:.72rem;font-weight:600;text-align:right;padding:.18rem .6rem;border-radius:999px;white-space:nowrap}
+  .comp-result.aligned{background:#DCFCE7;color:#16a34a}
+  .comp-result.explore{background:#FFF0EB;color:var(--orange)}
+  .comp-result.diff{background:#EEEFFF;color:var(--indigo)}
+
+  /* EXPECTATIONS */
+  .expect-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-top:3rem}
+  .expect-card{background:white;border:1px solid var(--stone);border-radius:14px;padding:1.25rem}
+  .expect-card-title{font-size:.82rem;font-weight:700;color:var(--ink);margin-bottom:.75rem;display:flex;align-items:center;gap:.6rem}
+  .expect-icon{width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+  .expect-rows{display:flex;flex-direction:column;gap:.5rem}
+  .expect-row{font-size:.76rem;color:var(--text);line-height:1.45;padding:.45rem .65rem;border-radius:8px;border:1px solid var(--stone)}
+  .expect-row.s{background:#FFF0EB;border-color:rgba(232,103,58,.2)}
+  .expect-row.j{background:#EEEFFF;border-color:rgba(91,109,248,.2)}
+  .expect-person{font-size:.55rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;margin-bottom:.1rem}
+  .expect-person.s{color:var(--orange)}
+  .expect-person.j{color:var(--indigo)}
+
+  /* WHO IT'S FOR */
+  .for-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem;margin-top:3rem}
+  .for-card{border-radius:18px;padding:1.85rem;border:1.5px solid var(--stone);transition:border-color .2s,transform .2s}
+  .for-card:hover{border-color:var(--orange)}
+  .for-icon{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;margin-bottom:1.1rem}
+  .for-card h3{font-size:.97rem;font-weight:700;color:var(--ink);margin-bottom:.4rem}
+  .for-card p{font-size:.83rem;color:var(--muted);line-height:1.68}
+
+  /* CTA */
+  .cta-wrap{text-align:center;padding:3rem 2.5rem;background:var(--warm);border-top:1px solid var(--stone)}
+  .cta-title{font-family:var(--hfont);font-size:clamp(2rem,3.8vw,3rem);font-weight:700;line-height:1.08;color:var(--ink);margin-bottom:1.25rem;letter-spacing:-.02em}
+  .cta-title em{font-style:italic;color:var(--orange)}
+  .cta-sub{font-size:.96rem;color:var(--muted);line-height:1.78;margin-bottom:2.75rem;font-weight:300}
+  .btn-primary{background:linear-gradient(135deg,var(--orange),#d45a2e);color:white;border:none;padding:.9rem 2.1rem;border-radius:12px;font-size:.82rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;cursor:pointer;font-family:var(--bfont);text-decoration:none;display:inline-block;box-shadow:0 6px 24px rgba(232,103,58,.38);transition:transform .18s}
+  .btn-primary:hover{transform:translateY(-2px)}
+  .btn-ghost{font-size:.82rem;font-weight:500;color:var(--muted);text-decoration:none;display:inline-flex;align-items:center;gap:.35rem;transition:color .15s}
+  .btn-ghost:hover{color:var(--ink)}
+
+  /* FOOTER */
+  .footer-outer{border-top:1px solid var(--stone)}
+  footer{max-width:1120px;margin:0 auto;padding:2rem 2.5rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem}
+  .footer-links{display:flex;gap:1.75rem;list-style:none}
+  .footer-links a{font-size:.78rem;color:var(--muted);text-decoration:none;transition:color .15s}
+  .footer-links a:hover{color:var(--ink)}
+  .footer-copy{font-size:.72rem;color:var(--muted)}
+
+  @keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+  .fu1{animation:fadeUp .6s ease both}
+  .fu2{animation:fadeUp .6s .1s ease both}
+
+  /* HAMBURGER */
+  .hamburger{display:none;flex-direction:column;gap:4px;background:none;border:none;cursor:pointer;padding:6px;border-radius:6px}
+  .hamburger span{display:block;width:20px;height:2px;background:var(--ink);border-radius:2px}
+  .mobile-menu{display:none;position:fixed;top:66px;right:1rem;left:auto;width:240px;background:rgba(255,253,249,.99);backdrop-filter:blur(20px);border:1.5px solid var(--stone);border-radius:14px;padding:1rem;z-index:200;flex-direction:column;gap:.15rem;box-shadow:0 12px 40px rgba(14,11,7,.14)}
+  .mobile-menu.open{display:flex}
+  .mobile-menu a{font-size:.85rem;font-weight:500;color:var(--muted);text-decoration:none;padding:.5rem .65rem;border-radius:8px;transition:all .15s}
+  .mobile-menu a:last-child{}
+  .mobile-menu .mm-cta{color:var(--orange);font-weight:700}
+  /* SITE FOOTER */
+  .site-footer{background:var(--ink);color:rgba(255,255,255,.55);padding:4rem 0 2rem;width:100%;margin-left:0;margin-right:0;max-width:none;display:block}
+  .sf-inner{max-width:1120px;margin:0 auto;padding:0 2.5rem 3rem;display:grid;grid-template-columns:1fr 2fr;gap:4rem;border-bottom:1px solid rgba(255,255,255,.1)}
+  .sf-brand .logo-text{color:white}
+  .sf-tagline{font-size:.82rem;color:rgba(255,255,255,.38);line-height:1.7;margin-top:.85rem;max-width:200px}
+  .sf-links{display:grid;grid-template-columns:repeat(3,1fr);gap:2rem}
+  .sf-col{display:flex;flex-direction:column;gap:.5rem}
+  .sf-col-title{font-size:.62rem;letter-spacing:.22em;text-transform:uppercase;color:rgba(255,255,255,.35);font-weight:700;margin-bottom:.4rem}
+  .sf-col a{font-size:.82rem;color:rgba(255,255,255,.55);text-decoration:none;transition:color .15s}
+  .sf-col a:hover{color:white}
+  .sf-bottom{max-width:1120px;margin:0 auto;padding:1.75rem 2.5rem 0;display:flex;flex-direction:column;align-items:flex-start;gap:.4rem}
+  .sf-copy,.sf-email{font-size:.72rem;color:rgba(255,255,255,.28)}
+  @media(max-width:900px){
+    section{padding:3.5rem 1.5rem}
+    .steps{margin-top:2rem}
+    .step{grid-template-columns:1fr;gap:2.5rem}
+    .step.flip{direction:ltr}
+    .dim-grid{grid-template-columns:repeat(3,1fr)}
+    .expect-grid,.for-grid{grid-template-columns:1fr}
+    .comp-row{grid-template-columns:100px 1fr auto}
+    .nav-center{display:none}
+    .nav-signin,.btn-nav{display:none}
+    .hamburger{display:flex}
+    nav{padding:0 1.25rem}
+    section{padding-left:1.25rem!important;padding-right:1.25rem!important}
+    .si{padding-left:1.25rem!important;padding-right:1.25rem!important}
+    .ex-side-grid{grid-template-columns:1fr!important;gap:1.25rem!important}
+  }
+  @media(max-width:768px){.sf-inner{grid-template-columns:1fr 1.6fr;gap:1.25rem;padding-left:1.25rem;padding-right:1.25rem}.sf-links{grid-template-columns:1fr 1fr;gap:1rem}.sf-bottom{flex-direction:column;align-items:flex-start}.sf-tagline{font-size:.78rem}.sf-col a{font-size:.8rem}.sf-col-title{font-size:.62rem}}
+  @media(max-width:580px){
+    .dim-grid{grid-template-columns:1fr}
+  }
+  .mm-section{display:flex;flex-direction:column;border-bottom:1px solid var(--stone);padding-bottom:.25rem;margin-bottom:.25rem}
+  .mm-label{font-size:.58rem;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);font-weight:700;padding:.55rem 0 .2rem .75rem}
+  .mm-sub{padding-left:1.25rem !important;font-size:.85rem !important;border-bottom:none !important;font-style:italic;color:var(--muted)}
+  .mm-sub:last-child{border-bottom:none}
+
+  @media(max-width:768px){.page-header{padding:calc(58px + 2rem) 1.25rem 2.5rem!important}}}
+
+  @media(max-width:640px){
+    [style*="grid-template-columns:repeat(4,1fr)"]{grid-template-columns:1fr 1fr!important}
+    [style*="grid-template-columns: repeat(4, 1fr)"]{grid-template-columns:1fr 1fr!important}
+    [style*="grid-template-columns:1fr 2fr"]{grid-template-columns:1fr!important}
+    [style*="grid-template-columns: 1fr 2fr"]{grid-template-columns:1fr!important}
+    .page-header h1{font-size:clamp(2rem,7vw,3.2rem)!important}
+    }
+
+  @media(max-width:640px){
+    .page-header{padding:calc(58px + 2.5rem) 1.25rem 2.5rem;text-align:center}
+    .page-header h1,.page-title{font-size:clamp(2rem,8vw,2.8rem)}
+    .steps{grid-template-columns:1fr!important}
+    .step{grid-template-columns:1fr 1fr!important;gap:1rem!important;align-items:center!important}
+
+    /* dim-grid: keep 2-col on mobile for scannability */
+    .dim-grid{grid-template-columns:1fr 1fr!important}
+    .si{padding-left:1.25rem!important;padding-right:1.25rem!important}
+    .step-title{font-size:1rem!important}
+    .step-body{font-size:.78rem!important;line-height:1.6!important}
+    .step-eyebrow{font-size:.52rem!important}
+    .step-ghost-num{font-size:2.5rem!important;margin-bottom:.25rem!important}
+    .hiw-mock{display:none}
+    .hiw-step-graphic{display:block!important;width:90%!important;margin:0 auto!important;}
+    .step{padding:1rem 0!important}
+    .step-ghost-num{font-size:3.5rem!important;margin-bottom:-.25rem}
+    section{padding-top:2rem!important;padding-bottom:2rem!important}
+    .page-header{padding:calc(58px + 1.75rem) 1.25rem 1.75rem!important}
+    .page-header{padding:calc(58px + 2.5rem) 1.25rem 2.5rem!important}
+    .who-grid{grid-template-columns:1fr!important}
+    /* Who it's for: merge visually into flow — hide eyebrow, compact heading */
+    .for-grid{display:flex!important;flex-direction:column!important;gap:.75rem!important}
+    .for-card{padding:1rem 1.1rem!important}
+    /* Type cards: 2x2 grid on mobile */
+    [style*="grid-template-columns:1fr 1fr 1fr 1fr"]{grid-template-columns:1fr 1fr!important;gap:.65rem!important}
+    /* Remove heavy sub-dimension bullet lists on mobile — these are the sd-item blocks inside steps */
+    .step-detail{display:none!important}
+    /* But keep a one-liner note visible */
+    .step-detail-mobile{display:block!important}
+    /* Axis detail boxes in couple typing: collapse to single col */
+    [style*="grid-template-columns:1fr 1.4fr"]{grid-template-columns:1fr!important}
+    /* Add clear visual breaks between light sections */
+    section.bg-warm+section,section+section.bg-warm{border-top:3px solid var(--stone)!important}
+    .dim-section .si{padding-top:2rem!important;padding-bottom:2rem!important}
+    .hiw-detail-sections{display:none}
+  .hiw-step-graphic{width:80%;margin:0 auto;}
+    .comp-row{grid-template-columns:1fr!important;gap:.4rem!important}
+    .comp-label{white-space:normal;font-size:.72rem;font-weight:600;color:var(--ink);margin-bottom:.15rem}
+    .comp-bar-wrap{margin-bottom:.2rem}
+    .comp-result{text-align:left;margin-top:.1rem}
+    [style*="grid-template-columns:1fr 1fr"]{grid-template-columns:1fr!important}
+    [style*="grid-template-columns: 1fr 1fr"]{grid-template-columns:1fr!important}
+  }
+  .page-header{background:linear-gradient(150deg,#1c1940 0%,#282560 60%,#1e3a6e 100%);padding:calc(58px + 3.5rem) clamp(1.25rem,5vw,2.5rem) 3rem;position:relative;overflow:hidden;max-width:none;margin:0;width:100%;box-sizing:border-box}
+  .page-header::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,#E8673A,#9B5DE5,#1B5FE8);z-index:1}
+  .page-header-glow{position:absolute;inset:0;background:radial-gradient(ellipse 60% 40% at 50% 100%,rgba(232,103,58,.12),transparent);pointer-events:none}
+  .page-header-inner{max-width:700px;margin-left:auto;margin-right:auto;position:relative;z-index:1;text-align:center}
+  .page-header .page-title{color:white;text-align:center}
+  .page-header .page-title em{color:var(--orange);font-style:italic}
+  .page-header .page-sub{color:rgba(255,255,255,.65);text-align:center;margin-top:.75rem}
+  .page-header .eyebrow{color:rgba(232,103,58,.85)}
+  .page-header .eyebrow::before{background:linear-gradient(90deg,rgba(232,103,58,.7),rgba(155,93,229,.5))}
+  .hero-actions{display:flex;align-items:center;justify-content:center;gap:1.5rem;margin-top:1.75rem;flex-wrap:wrap}
+  .gift-link{font-size:.88rem;color:rgba(232,103,58,.8);font-family:var(--bfont);font-weight:500;text-decoration:none;transition:color .15s}
+  .gift-link:hover{color:var(--orange)}
+  </style>
+</head>
+<body>
+
+<nav>
+  <a href="/home" class="logo">
+    <svg width="46" height="33" viewBox="0 0 103 76" fill="none" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="spark_logo_6_2" x1="0" y1="0" x2="103" y2="76" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#E8673A"/><stop offset="100%" stop-color="#1B5FE8"/></linearGradient></defs><path d="M14,4 L44,4 A9,9 0 0,1 53,13 L53,42 A9,9 0 0,1 44,51 L20,51 L6,61 L11,51 A6,6 0 0,1 5,45 L5,13 A9,9 0 0,1 14,4 Z" fill="url(#spark_logo_6_2)"/><path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill="white" opacity="0.93" transform="translate(13.16,11.3) scale(0.72)"/><path d="M89,14 L59,14 A9,9 0 0,0 50,23 L50,52 A9,9 0 0,0 59,61 L83,61 L97,71 L92,61 A6,6 0 0,0 98,55 L98,23 A9,9 0 0,0 89,14 Z" fill="none" stroke="url(#spark_logo_6_2)" stroke-width="2.2" stroke-linejoin="round"/><path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill="url(#spark_logo_6_2)" transform="translate(58.16,21.3) scale(0.72)"/></svg>
+    <span class="logo-text">Attune</span>
+  </a>
+  <ul class="nav-center">
+    <li><a href="/home">Home</a></li>
+    <li class="nav-dropdown">
+      <button class="nav-dropdown-toggle active">Learn <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg></button>
+      <div class="nav-dropdown-menu">
+        <a href="/purpose">Our Purpose</a>
+        <a href="/how-it-works" class="active">How it works</a>
+        <a href="/couple-types">Couple Types</a>
+        <div class="dd-divider"></div>
+        <a href="/practice">In Practice</a>
+        <a href="/faq">FAQs</a>
+        <a href="/reviews">Reviews</a>
+      </div>
+    </li>
+    <li><a href="/offerings">Packages</a></li>
+  </ul>
+  <div class="nav-right">
+    <a href="/portal" class="nav-signin">Sign in</a>
+    <a href="/portal" class="btn-nav">Get started</a>
+    <button class="hamburger" id="hamburger" onclick="toggleMenu()" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</nav>
+<div class="mobile-menu" id="mobile-menu">
+  <a href="/home">Home</a>
+    <div class="mm-section">
+    <span class="mm-label">Learn</span>
+    <a href="/purpose" class="mm-sub">Our Purpose</a>
+    <a href="/how-it-works" class="mm-sub">How it works</a>
+    <a href="/couple-types" class="mm-sub">Couple Types</a>
+    <a href="/practice" class="mm-sub">In Practice</a>
+    <a href="/faq" class="mm-sub">FAQs</a>
+    <a href="/reviews" class="mm-sub">Reviews</a>
+  </div>
+  <a href="/offerings">Packages</a>
+  <a href="/portal">Sign in</a>
+  <a href="/portal?tab=signup" class="mm-cta">Get started →</a>
+</div>
+
+<!-- PAGE HEADER -->
+<div class="page-header">
+  <div class="page-header-glow"></div>
+    <div class="page-header-inner">
+  <p class="eyebrow">How it works</p>
+  <h1 class="page-title">The understanding that used to take years, <em>in one afternoon.</em></h1>
+  <p class="page-sub">Each of you answers independently. Your answers combine into a shared picture neither of you could see alone.</p>
+  <div style="margin-top:.5rem;display:flex;align-items:center;justify-content:center;gap:.5rem;flex-wrap:wrap;">
+    <a href="#methodology" style="font-size:.78rem;color:rgba(232,103,58,.8);font-weight:600;text-decoration:none;font-family:'DM Sans',sans-serif;display:inline-flex;align-items:center;gap:.3rem;" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
+      Read the methodology
+    </a>
+  </div>
+    <div class="hero-actions">
+      <a href="/portal?tab=signup" class="btn-primary">GET STARTED →</a>
+      <a href="/offerings#gift" class="gift-link">Give it as a gift →</a>
+    </div>
+  </div>
+</div>
+
+<!-- STEP 1: Each partner answers alone -->
+<section style="padding-top:1.5rem;">
+  <div class="si">
+    <div class="steps">
+      <div class="step">
+        <div>
+          <span class="step-ghost-num">01</span>
+          <p class="step-eyebrow">Step one</p>
+          <h2 class="step-title">Answer separately.</h2>
+          <p class="step-body">Each partner completes both exercises independently — no comparing notes until you're both done.</p>
+        </div>
+        <div class="hiw-step-graphic" style="padding:0.5rem 0;">
+<svg viewBox="0 0 520 340" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;display:block;">
+  <defs>
+    <linearGradient id="hiw_g1" x1="18" y1="0" x2="502" y2="0" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#E8673A"/><stop offset="50%" stop-color="#9B5DE5"/><stop offset="100%" stop-color="#1B5FE8"/>
+    </linearGradient>
+  </defs>
+  <rect x="18" y="12" width="484" height="292" rx="16" fill="white"/>
+  <rect x="18" y="12" width="484" height="292" rx="16" fill="none" stroke="url(#hiw_g1)" stroke-width="3"/>
+  <rect x="28" y="22" width="464" height="272" rx="10" fill="#FDF8F3" stroke="#C8BFB4" stroke-width="1.5"/>
+  <rect x="28" y="22" width="464" height="4" fill="url(#hiw_g1)"/>
+  <circle cx="162" cy="42" r="5.5" fill="#E8673A"/>
+  <circle cx="190" cy="42" r="5.5" fill="#E8673A"/>
+  <circle cx="218" cy="42" r="5.5" fill="#E8673A"/>
+  <circle cx="246" cy="42" r="5.5" fill="#E8DDD0"/>
+  <circle cx="274" cy="42" r="5.5" fill="#E8DDD0"/>
+  <circle cx="302" cy="42" r="5.5" fill="#E8DDD0"/>
+  <circle cx="330" cy="42" r="5.5" fill="#E8DDD0"/>
+  <circle cx="358" cy="42" r="5.5" fill="#E8DDD0"/>
+  <rect x="36" y="56" width="448" height="222" rx="12" fill="white" stroke="#E8DDD0" stroke-width="1.5"/>
+  <rect x="56" y="76" width="280" height="10" rx="4" fill="#C8BFB4"/>
+  <rect x="56" y="92" width="200" height="10" rx="4" fill="#DDD8D2"/>
+  <line x1="56" y1="112" x2="464" y2="112" stroke="#E8DDD0" stroke-width="1.5"/>
+  <rect x="56" y="120" width="408" height="54" rx="10" fill="rgba(232,103,58,0.09)" stroke="rgba(232,103,58,0.65)" stroke-width="2"/>
+  <rect x="74" y="139" width="180" height="9" rx="3.5" fill="rgba(232,103,58,0.65)"/>
+  <rect x="74" y="153" width="130" height="7" rx="2.5" fill="rgba(232,103,58,0.35)"/>
+  <rect x="56" y="178" width="408" height="54" rx="10" fill="white" stroke="#C8BFB4" stroke-width="2"/>
+  <rect x="74" y="197" width="210" height="9" rx="3.5" fill="#C8BFB4"/>
+  <rect x="74" y="211" width="150" height="7" rx="2.5" fill="#DDD8D2"/>
+  <rect x="416" y="244" width="62" height="26" rx="8" fill="#E8673A"/>
+  <rect x="196" y="306" width="128" height="16" rx="4" fill="#C8BFB4"/>
+  <rect x="172" y="322" width="176" height="10" rx="4" fill="#E8DDD0"/>
+</svg>
+</div>
+      </div>
+
+      <!-- STEP 2: Explore results (was step 3) -->
+      <div class="step flip">
+        <div>
+          <span class="step-ghost-num">02</span>
+          <p class="step-eyebrow">Step two</p>
+          <h2 class="step-title">See yourselves side by side.</h2>
+          <p class="step-body">Your answers combine into a shared view of how you each operate, what you expect, and how you function together as a couple.</p>
+        </div>
+        <div class="hiw-step-graphic" style="padding:0.5rem 0;">
+<svg viewBox="0 0 520 340" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;display:block;">
+  <defs>
+    <linearGradient id="hiw_g2" x1="18" y1="0" x2="502" y2="0" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#E8673A"/><stop offset="50%" stop-color="#9B5DE5"/><stop offset="100%" stop-color="#1B5FE8"/>
+    </linearGradient>
+  </defs>
+  <rect x="18" y="12" width="484" height="292" rx="16" fill="white"/>
+  <rect x="18" y="12" width="484" height="292" rx="16" fill="none" stroke="url(#hiw_g2)" stroke-width="3"/>
+  <rect x="28" y="22" width="464" height="272" rx="10" fill="#FDF8F3" stroke="#C8BFB4" stroke-width="1.5"/>
+  <rect x="28" y="22" width="464" height="4" fill="url(#hiw_g2)"/>
+  <rect x="180" y="32" width="160" height="22" rx="11" fill="rgba(232,103,58,0.12)" stroke="rgba(232,103,58,0.5)" stroke-width="1.5"/>
+  <circle cx="430" cy="38" r="6" fill="#E8673A" stroke="white" stroke-width="2"/>
+  <circle cx="448" cy="38" r="6" fill="#1B5FE8" stroke="white" stroke-width="2"/>
+  <line x1="38" y1="62" x2="482" y2="62" stroke="#E8DDD0" stroke-width="1.5"/>
+  <rect x="38" y="74" width="108" height="12" rx="4" fill="#C8BFB4"/>
+  <line x1="172" y1="80" x2="458" y2="80" stroke="#E8DDD0" stroke-width="1.5"/>
+  <circle cx="275" cy="80" r="8" fill="#E8673A" stroke="#FDF8F3" stroke-width="2.5"/>
+  <circle cx="286" cy="80" r="8" fill="#1B5FE8" stroke="#FDF8F3" stroke-width="2.5"/>
+  <rect x="38" y="106" width="88" height="12" rx="4" fill="#C8BFB4"/>
+  <line x1="172" y1="112" x2="458" y2="112" stroke="#E8DDD0" stroke-width="1.5"/>
+  <circle cx="229" cy="112" r="8" fill="#E8673A" stroke="#FDF8F3" stroke-width="2.5"/>
+  <circle cx="358" cy="112" r="8" fill="#1B5FE8" stroke="#FDF8F3" stroke-width="2.5"/>
+  <rect x="38" y="138" width="98" height="12" rx="4" fill="#C8BFB4"/>
+  <line x1="172" y1="144" x2="458" y2="144" stroke="#E8DDD0" stroke-width="1.5"/>
+  <circle cx="378" cy="144" r="8" fill="#E8673A" stroke="#FDF8F3" stroke-width="2.5"/>
+  <circle cx="269" cy="144" r="8" fill="#1B5FE8" stroke="#FDF8F3" stroke-width="2.5"/>
+  <rect x="38" y="170" width="78" height="12" rx="4" fill="#C8BFB4"/>
+  <line x1="172" y1="176" x2="458" y2="176" stroke="#E8DDD0" stroke-width="1.5"/>
+  <circle cx="329" cy="176" r="8" fill="#E8673A" stroke="#FDF8F3" stroke-width="2.5"/>
+  <circle cx="315" cy="176" r="8" fill="#1B5FE8" stroke="#FDF8F3" stroke-width="2.5"/>
+  <rect x="38" y="202" width="118" height="12" rx="4" fill="#C8BFB4"/>
+  <line x1="172" y1="208" x2="458" y2="208" stroke="#E8DDD0" stroke-width="1.5"/>
+  <circle cx="212" cy="208" r="8" fill="#E8673A" stroke="#FDF8F3" stroke-width="2.5"/>
+  <circle cx="407" cy="208" r="8" fill="#1B5FE8" stroke="#FDF8F3" stroke-width="2.5"/>
+  <rect x="196" y="306" width="128" height="16" rx="4" fill="#C8BFB4"/>
+  <rect x="172" y="322" width="176" height="10" rx="4" fill="#E8DDD0"/>
+</svg>
+</div>
+      </div>
+
+      <!-- STEP 3: Apply what you've learned -->
+      <div class="step">
+        <div>
+          <span class="step-ghost-num">03</span>
+          <p class="step-eyebrow">Step three</p>
+          <h2 class="step-title">Build from what you find.</h2>
+          <p class="step-body">Your results aren't a one-time read. They're a shared language to return to as things shift.</p>
+        </div>
+        <div class="hiw-step-graphic" style="padding:0.5rem 0;">
+<svg viewBox="0 0 520 340" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;display:block;">
+  <defs>
+    <linearGradient id="hiw_g3" x1="18" y1="0" x2="502" y2="0" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#E8673A"/><stop offset="50%" stop-color="#9B5DE5"/><stop offset="100%" stop-color="#1B5FE8"/>
+    </linearGradient>
+  </defs>
+  <rect x="18" y="12" width="484" height="292" rx="16" fill="white"/>
+  <rect x="18" y="12" width="484" height="292" rx="16" fill="none" stroke="url(#hiw_g3)" stroke-width="3"/>
+  <rect x="28" y="22" width="464" height="272" rx="10" fill="#FDF8F3" stroke="#C8BFB4" stroke-width="1.5"/>
+  <rect x="28" y="22" width="464" height="4" fill="url(#hiw_g3)"/>
+  <rect x="36" y="34" width="448" height="150" rx="12" fill="white" stroke="#E8DDD0" stroke-width="1.5"/>
+  <rect x="54" y="54" width="155" height="10" rx="4" fill="#1E1610" opacity=".55"/>
+  <line x1="54" y1="70" x2="468" y2="70" stroke="#E8DDD0" stroke-width="1.5"/>
+  <rect x="54" y="80" width="12" height="12" rx="2.5" fill="#E8673A"/>
+  <rect x="74" y="83" width="120" height="8" rx="3" fill="#C8BFB4"/>
+  <rect x="54" y="100" width="12" height="12" rx="2.5" fill="#E8673A"/>
+  <rect x="74" y="103" width="104" height="8" rx="3" fill="#C8BFB4"/>
+  <rect x="248" y="80" width="12" height="12" rx="2.5" fill="none" stroke="#C8BFB4" stroke-width="1.5"/>
+  <rect x="268" y="83" width="130" height="8" rx="3" fill="#DDD8D2"/>
+  <rect x="248" y="100" width="12" height="12" rx="2.5" fill="none" stroke="#C8BFB4" stroke-width="1.5"/>
+  <rect x="268" y="103" width="110" height="8" rx="3" fill="#DDD8D2"/>
+  <rect x="54" y="128" width="295" height="6" rx="3" fill="#E8DDD0"/>
+  <rect x="54" y="128" width="132" height="6" rx="3" fill="#E8673A"/>
+  <rect x="36" y="196" width="142" height="84" fill="white" stroke="#E8DDD0" stroke-width="1.5"/>
+  <rect x="36" y="196" width="142" height="4" fill="#E8673A"/>
+  <rect x="50" y="216" width="96" height="9" rx="3.5" fill="#1E1610" opacity=".55"/>
+  <rect x="50" y="231" width="110" height="7" rx="2.5" fill="#C8BFB4"/>
+  <rect x="50" y="244" width="88" height="7" rx="2.5" fill="#DDD8D2"/>
+  <rect x="50" y="257" width="100" height="7" rx="2.5" fill="#DDD8D2"/>
+  <rect x="189" y="196" width="142" height="84" fill="white" stroke="#E8DDD0" stroke-width="1.5"/>
+  <rect x="189" y="196" width="142" height="4" fill="#9B5DE5"/>
+  <rect x="203" y="216" width="106" height="9" rx="3.5" fill="#1E1610" opacity=".55"/>
+  <rect x="203" y="231" width="118" height="7" rx="2.5" fill="#C8BFB4"/>
+  <rect x="203" y="244" width="96" height="7" rx="2.5" fill="#DDD8D2"/>
+  <rect x="203" y="257" width="108" height="7" rx="2.5" fill="#DDD8D2"/>
+  <rect x="342" y="196" width="142" height="84" fill="white" stroke="#E8DDD0" stroke-width="1.5"/>
+  <rect x="342" y="196" width="142" height="4" fill="#1B5FE8"/>
+  <rect x="356" y="216" width="84" height="9" rx="3.5" fill="#1E1610" opacity=".55"/>
+  <rect x="356" y="231" width="108" height="7" rx="2.5" fill="#C8BFB4"/>
+  <rect x="356" y="244" width="92" height="7" rx="2.5" fill="#DDD8D2"/>
+  <rect x="356" y="257" width="112" height="7" rx="2.5" fill="#DDD8D2"/>
+  <rect x="196" y="306" width="128" height="16" rx="4" fill="#C8BFB4"/>
+  <rect x="172" y="322" width="176" height="10" rx="4" fill="#E8DDD0"/>
+</svg>
+</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- WHERE THE FEEDBACK COMES FROM — combined side by side -->
+<section class="bg-warm" style="padding:3.5rem 0;">
+  <div class="si">
+    <p class="s-eye">Where the feedback comes from</p>
+    <h2 class="s-title">Two core exercises, one complete picture.</h2>
+    <p class="s-sub" style="margin-bottom:2.25rem;">Each person answers independently. Your results combine the moment both of you are done.</p>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:2rem;align-items:stretch;" class="ex-side-grid">
+
+      <!-- LEFT: Exercise 01 -->
+      <div style="background:white;border:1.5px solid var(--stone);border-radius:20px;padding:1.75rem;">
+        <div style="display:flex;align-items:center;gap:.75rem;margin-bottom:1.1rem;">
+          <div style="width:32px;height:32px;border-radius:9px;background:rgba(155,93,229,.1);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9B5DE5" stroke-width="1.8" stroke-linecap="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          </div>
+          <div>
+            <div style="font-size:.6rem;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);font-weight:700;font-family:'DM Sans',sans-serif;">Exercise 01</div>
+            <div style="font-size:.92rem;font-weight:700;color:var(--ink);font-family:'DM Sans',sans-serif;">How you communicate</div>
+          </div>
+        </div>
+        <p style="font-size:.8rem;color:var(--muted);line-height:1.65;margin-bottom:1.25rem;font-family:'DM Sans',sans-serif;">28 questions calibrated to surface your unique communication style. Each person answers independently. Individual scores in each dimension drive the gap analysis and produce your individual type.</p>
+
+        <!-- 2×5 dimension bars grid -->
+        <div style="border-top:1px solid var(--stone);padding-top:1rem;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.75rem;">
+            <div style="display:flex;align-items:center;gap:1rem;">
+              <div style="display:flex;align-items:center;gap:.3rem;font-size:.65rem;font-weight:600;color:var(--orange);font-family:'DM Sans',sans-serif;"><div style="width:7px;height:7px;border-radius:50%;background:var(--orange);"></div>Sarah</div>
+              <div style="display:flex;align-items:center;gap:.3rem;font-size:.65rem;font-weight:600;color:var(--indigo);font-family:'DM Sans',sans-serif;"><div style="width:7px;height:7px;border-radius:50%;background:var(--indigo);"></div>James</div>
+            </div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:.35rem .75rem;">
+            <div style="display:flex;align-items:center;gap:.4rem;">
+              <span style="font-size:.58rem;color:var(--muted);font-family:'DM Sans',sans-serif;flex-shrink:0;width:88px;line-height:1.2;">Energy &amp; Recharge</span>
+              <div style="flex:1;position:relative;height:4px;background:var(--stone);border-radius:999px;">
+                <div style="position:absolute;left:20%;top:-4px;width:10px;height:10px;border-radius:50%;background:var(--orange);border:2px solid white;box-shadow:0 1px 3px rgba(0,0,0,.15);"></div>
+                <div style="position:absolute;left:24%;top:-4px;width:10px;height:10px;border-radius:50%;background:var(--indigo);border:2px solid white;box-shadow:0 1px 3px rgba(0,0,0,.15);"></div>
+              </div>
+            </div>
+            <div style="display:flex;align-items:center;gap:.4rem;">
+              <span style="font-size:.58rem;color:var(--muted);font-family:'DM Sans',sans-serif;flex-shrink:0;width:88px;line-height:1.2;">Emotional Expression</span>
+              <div style="flex:1;position:relative;height:4px;background:var(--stone);border-radius:999px;">
+                <div style="position:absolute;left:72%;top:-4px;width:10px;height:10px;border-radius:50%;background:var(--orange);border:2px solid white;box-shadow:0 1px 3px rgba(0,0,0,.15);"></div>
+                <div style="position:absolute;left:26%;top:-4px;width:10px;height:10px;border-radius:50%;background:var(--indigo);border:2px solid white;box-shadow:0 1px 3px rgba(0,0,0,.15);"></div>
+              </div>
+            </div>
+            <div style="display:flex;align-items:center;gap:.4rem;">
+              <span style="font-size:.58rem;color:var(--muted);font-family:'DM Sans',sans-serif;flex-shrink:0;width:88px;line-height:1.2;">Closeness &amp; Indep.</span>
+              <div style="flex:1;position:relative;height:4px;background:var(--stone);border-radius:999px;">
+                <div style="position:absolute;left:76%;top:-4px;width:10px;height:10px;border-radius:50%;background:var(--orange);border:2px solid white;box-shadow:0 1px 3px rgba(0,0,0,.15);"></div>
+                <div style="position:absolute;left:44%;top:-4px;width:10px;height:10px;border-radius:50%;background:var(--indigo);border:2px solid white;box-shadow:0 1px 3px rgba(0,0,0,.15);"></div>
+              </div>
+            </div>
+            <div style="display:flex;align-items:center;gap:.4rem;">
+              <span style="font-size:.58rem;color:var(--muted);font-family:'DM Sans',sans-serif;flex-shrink:0;width:88px;line-height:1.2;">How Love Lands</span>
+              <div style="flex:1;position:relative;height:4px;background:var(--stone);border-radius:999px;">
+                <div style="position:absolute;left:18%;top:-4px;width:10px;height:10px;border-radius:50%;background:var(--orange);border:2px solid white;box-shadow:0 1px 3px rgba(0,0,0,.15);"></div>
+                <div style="position:absolute;left:68%;top:-4px;width:10px;height:10px;border-radius:50%;background:var(--indigo);border:2px solid white;box-shadow:0 1px 3px rgba(0,0,0,.15);"></div>
+              </div>
+            </div>
+            <div style="display:flex;align-items:center;gap:.4rem;">
+              <span style="font-size:.58rem;color:var(--muted);font-family:'DM Sans',sans-serif;flex-shrink:0;width:88px;line-height:1.2;">Responding to Bids</span>
+              <div style="flex:1;position:relative;height:4px;background:var(--stone);border-radius:999px;">
+                <div style="position:absolute;left:38%;top:-4px;width:10px;height:10px;border-radius:50%;background:var(--orange);border:2px solid white;box-shadow:0 1px 3px rgba(0,0,0,.15);"></div>
+                <div style="position:absolute;left:62%;top:-4px;width:10px;height:10px;border-radius:50%;background:var(--indigo);border:2px solid white;box-shadow:0 1px 3px rgba(0,0,0,.15);"></div>
+              </div>
+            </div>
+            <div style="display:flex;align-items:center;gap:.4rem;">
+              <span style="font-size:.58rem;color:var(--muted);font-family:'DM Sans',sans-serif;flex-shrink:0;width:88px;line-height:1.2;">Asking for What You Need</span>
+              <div style="flex:1;position:relative;height:4px;background:var(--stone);border-radius:999px;">
+                <div style="position:absolute;left:55%;top:-4px;width:10px;height:10px;border-radius:50%;background:var(--orange);border:2px solid white;box-shadow:0 1px 3px rgba(0,0,0,.15);"></div>
+                <div style="position:absolute;left:48%;top:-4px;width:10px;height:10px;border-radius:50%;background:var(--indigo);border:2px solid white;box-shadow:0 1px 3px rgba(0,0,0,.15);"></div>
+              </div>
+            </div>
+            <div style="display:flex;align-items:center;gap:.4rem;">
+              <span style="font-size:.58rem;color:var(--muted);font-family:'DM Sans',sans-serif;flex-shrink:0;width:88px;line-height:1.2;">Conflict Style</span>
+              <div style="flex:1;position:relative;height:4px;background:var(--stone);border-radius:999px;">
+                <div style="position:absolute;left:14%;top:-4px;width:10px;height:10px;border-radius:50%;background:var(--orange);border:2px solid white;box-shadow:0 1px 3px rgba(0,0,0,.15);"></div>
+                <div style="position:absolute;left:74%;top:-4px;width:10px;height:10px;border-radius:50%;background:var(--indigo);border:2px solid white;box-shadow:0 1px 3px rgba(0,0,0,.15);"></div>
+              </div>
+            </div>
+            <div style="display:flex;align-items:center;gap:.4rem;">
+              <span style="font-size:.58rem;color:var(--muted);font-family:'DM Sans',sans-serif;flex-shrink:0;width:88px;line-height:1.2;">Under Stress</span>
+              <div style="flex:1;position:relative;height:4px;background:var(--stone);border-radius:999px;">
+                <div style="position:absolute;left:28%;top:-4px;width:10px;height:10px;border-radius:50%;background:var(--orange);border:2px solid white;box-shadow:0 1px 3px rgba(0,0,0,.15);"></div>
+                <div style="position:absolute;left:70%;top:-4px;width:10px;height:10px;border-radius:50%;background:var(--indigo);border:2px solid white;box-shadow:0 1px 3px rgba(0,0,0,.15);"></div>
+              </div>
+            </div>
+            <div style="display:flex;align-items:center;gap:.4rem;">
+              <span style="font-size:.58rem;color:var(--muted);font-family:'DM Sans',sans-serif;flex-shrink:0;width:88px;line-height:1.2;">How You Repair</span>
+              <div style="flex:1;position:relative;height:4px;background:var(--stone);border-radius:999px;">
+                <div style="position:absolute;left:42%;top:-4px;width:10px;height:10px;border-radius:50%;background:var(--orange);border:2px solid white;box-shadow:0 1px 3px rgba(0,0,0,.15);"></div>
+                <div style="position:absolute;left:32%;top:-4px;width:10px;height:10px;border-radius:50%;background:var(--indigo);border:2px solid white;box-shadow:0 1px 3px rgba(0,0,0,.15);"></div>
+              </div>
+            </div>
+            <div style="display:flex;align-items:center;gap:.4rem;">
+              <span style="font-size:.58rem;color:var(--muted);font-family:'DM Sans',sans-serif;flex-shrink:0;width:88px;line-height:1.2;">Feedback</span>
+              <div style="flex:1;position:relative;height:4px;background:var(--stone);border-radius:999px;">
+                <div style="position:absolute;left:78%;top:-4px;width:10px;height:10px;border-radius:50%;background:var(--orange);border:2px solid white;box-shadow:0 1px 3px rgba(0,0,0,.15);"></div>
+                <div style="position:absolute;left:30%;top:-4px;width:10px;height:10px;border-radius:50%;background:var(--indigo);border:2px solid white;box-shadow:0 1px 3px rgba(0,0,0,.15);"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT: Exercise 02 -->
+      <div style="background:white;border:1.5px solid var(--stone);border-radius:20px;padding:1.75rem;">
+        <div style="display:flex;align-items:center;gap:.75rem;margin-bottom:1.1rem;">
+          <div style="width:32px;height:32px;border-radius:9px;background:rgba(16,185,129,.1);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="1.8" stroke-linecap="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+          </div>
+          <div>
+            <div style="font-size:.6rem;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);font-weight:700;font-family:'DM Sans',sans-serif;">Exercise 02</div>
+            <div style="font-size:.92rem;font-weight:700;color:var(--ink);font-family:'DM Sans',sans-serif;">What you expect</div>
+          </div>
+        </div>
+        <p style="font-size:.8rem;color:var(--muted);line-height:1.65;margin-bottom:1.25rem;font-family:'DM Sans',sans-serif;">Two questions per responsibility across five categories. Who handled it growing up, and who you expect to handle it. The childhood context surfaces alongside results to understand why you each have the expectations you do.</p>
+
+        <!-- Category alignment bars -->
+        <div style="border-top:1px solid var(--stone);padding-top:1.1rem;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.75rem;">
+            <span style="font-size:.6rem;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);font-weight:700;font-family:'DM Sans',sans-serif;">Alignment by category</span>
+            <span style="font-size:.6rem;color:var(--muted);font-family:'DM Sans',sans-serif;">% aligned</span>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:.65rem;">
+            <!-- Household Labor: 71% -->
+            <div style="display:flex;align-items:center;gap:.6rem;">
+              <span style="font-size:.65rem;color:var(--muted);font-family:'DM Sans',sans-serif;flex-shrink:0;width:110px;line-height:1.2;">Household Labor</span>
+              <div style="flex:1;position:relative;height:6px;background:var(--stone);border-radius:999px;">
+                <div style="position:absolute;left:0;top:0;height:100%;width:71%;background:#E8673A;border-radius:999px;transition:width .3s;"></div>
+              </div>
+              <span style="font-size:.62rem;color:#E8673A;font-weight:700;font-family:'DM Sans',sans-serif;flex-shrink:0;min-width:30px;text-align:right;">71%</span>
+            </div>
+            <!-- Financial: 50% -->
+            <div style="display:flex;align-items:center;gap:.6rem;">
+              <span style="font-size:.65rem;color:var(--muted);font-family:'DM Sans',sans-serif;flex-shrink:0;width:110px;line-height:1.2;">Financial</span>
+              <div style="flex:1;position:relative;height:6px;background:var(--stone);border-radius:999px;">
+                <div style="position:absolute;left:0;top:0;height:100%;width:50%;background:#F87171;border-radius:999px;transition:width .3s;"></div>
+              </div>
+              <span style="font-size:.62rem;color:#F87171;font-weight:700;font-family:'DM Sans',sans-serif;flex-shrink:0;min-width:30px;text-align:right;">50%</span>
+            </div>
+            <!-- Career: 100% -->
+            <div style="display:flex;align-items:center;gap:.6rem;">
+              <span style="font-size:.65rem;color:var(--muted);font-family:'DM Sans',sans-serif;flex-shrink:0;width:110px;line-height:1.2;">Career</span>
+              <div style="flex:1;position:relative;height:6px;background:var(--stone);border-radius:999px;">
+                <div style="position:absolute;left:0;top:0;height:100%;width:100%;background:#10B981;border-radius:999px;transition:width .3s;"></div>
+              </div>
+              <span style="font-size:.62rem;color:#10B981;font-weight:700;font-family:'DM Sans',sans-serif;flex-shrink:0;min-width:30px;text-align:right;">100%</span>
+            </div>
+            <!-- Emotional Labor: 67% -->
+            <div style="display:flex;align-items:center;gap:.6rem;">
+              <span style="font-size:.65rem;color:var(--muted);font-family:'DM Sans',sans-serif;flex-shrink:0;width:110px;line-height:1.2;">Emotional Labor</span>
+              <div style="flex:1;position:relative;height:6px;background:var(--stone);border-radius:999px;">
+                <div style="position:absolute;left:0;top:0;height:100%;width:67%;background:#E8673A;border-radius:999px;transition:width .3s;"></div>
+              </div>
+              <span style="font-size:.62rem;color:#E8673A;font-weight:700;font-family:'DM Sans',sans-serif;flex-shrink:0;min-width:30px;text-align:right;">67%</span>
+            </div>
+            <!-- Life & Values: 38% -->
+            <div style="display:flex;align-items:center;gap:.6rem;">
+              <span style="font-size:.65rem;color:var(--muted);font-family:'DM Sans',sans-serif;flex-shrink:0;width:110px;line-height:1.2;">Life &amp; Values</span>
+              <div style="flex:1;position:relative;height:6px;background:var(--stone);border-radius:999px;">
+                <div style="position:absolute;left:0;top:0;height:100%;width:38%;background:#F87171;border-radius:999px;transition:width .3s;"></div>
+              </div>
+              <span style="font-size:.62rem;color:#F87171;font-weight:700;font-family:'DM Sans',sans-serif;flex-shrink:0;min-width:30px;text-align:right;">38%</span>
+            </div>
+          </div>
+          <div style="display:flex;justify-content:space-between;margin-top:.6rem;">
+            <span style="font-size:.55rem;color:var(--stone);font-family:'DM Sans',sans-serif;">0%</span>
+            <span style="font-size:.55rem;color:var(--stone);font-family:'DM Sans',sans-serif;">100%</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+    <style>@media(max-width:760px){.ex-side-grid{grid-template-columns:1fr!important}}</style>
+  </div>
+</section>
+
+<!-- WHAT COMES NEXT -->
+<section style="padding:3.5rem 0 2.5rem;background:var(--warm);">
+  <div class="si">
+    <p class="s-eye" style="margin-bottom:.75rem;">What comes next</p>
+    <h2 class="s-title" style="margin-bottom:2rem;">Interested in <em style="font-style:italic;color:var(--orange);">more?</em></h2>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1.25rem;" class="wcn-grid">
+
+      <!-- Tile 1: Workbook -->
+      <div style="background:white;border:1.5px solid var(--stone);border-radius:16px;padding:1.5rem;border-top:3px solid var(--orange);">
+        <svg viewBox="0 0 52 52" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:44px;height:44px;margin-bottom:.85rem;display:block;">
+          <rect width="52" height="52" rx="14" fill="rgba(232,103,58,.1)"/>
+          <rect x="14" y="12" width="24" height="28" rx="3" fill="none" stroke="#E8673A" stroke-width="1.75"/>
+          <line x1="19" y1="20" x2="33" y2="20" stroke="#E8673A" stroke-width="1.5" stroke-linecap="round"/>
+          <line x1="19" y1="25" x2="33" y2="25" stroke="#E8673A" stroke-width="1.5" stroke-linecap="round"/>
+          <line x1="19" y1="30" x2="28" y2="30" stroke="#E8673A" stroke-width="1.5" stroke-linecap="round"/>
+          <line x1="14" y1="12" x2="14" y2="40" stroke="#E8673A" stroke-width="3" stroke-linecap="round"/>
+        </svg>
+        <div style="font-size:.88rem;font-weight:700;color:var(--ink);margin-bottom:.6rem;">Download your personalized workbook</div>
+        <p style="font-size:.82rem;color:var(--muted);line-height:1.72;margin:0;font-weight:300;">Guided exercises built directly from your results. Specific to your couple type and the gaps that showed up.</p>
+      </div>
+
+      <!-- Tile 2: Blog post / In Practice -->
+      <div style="background:white;border:1.5px solid var(--stone);border-radius:16px;padding:1.5rem;border-top:3px solid #9B5DE5;">
+        <svg viewBox="0 0 52 52" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:44px;height:44px;margin-bottom:.85rem;display:block;">
+          <rect width="52" height="52" rx="14" fill="rgba(155,93,229,.1)"/>
+          <rect x="13" y="14" width="26" height="24" rx="3" fill="none" stroke="#9B5DE5" stroke-width="1.75"/>
+          <line x1="18" y1="21" x2="34" y2="21" stroke="#9B5DE5" stroke-width="1.5" stroke-linecap="round"/>
+          <line x1="18" y1="26" x2="34" y2="26" stroke="#9B5DE5" stroke-width="1.5" stroke-linecap="round"/>
+          <line x1="18" y1="31" x2="27" y2="31" stroke="#9B5DE5" stroke-width="1.5" stroke-linecap="round"/>
+          <path d="M32 32 L36 28 L38 30 L34 34Z" fill="rgba(155,93,229,.3)" stroke="#9B5DE5" stroke-width="1.25" stroke-linejoin="round"/>
+        </svg>
+        <div style="font-size:.88rem;font-weight:700;color:var(--ink);margin-bottom:.6rem;">Explore In Practice</div>
+        <p style="font-size:.82rem;color:var(--muted);line-height:1.72;margin:0;font-weight:300;">Attune's resource library organized around what your results surface. Articles, prompts, and frameworks — when you need them.</p>
+      </div>
+
+      <!-- Tile 3: Timer / Check in -->
+      <div style="background:white;border:1.5px solid var(--stone);border-radius:16px;padding:1.5rem;border-top:3px solid var(--indigo);">
+        <svg viewBox="0 0 52 52" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:44px;height:44px;margin-bottom:.85rem;display:block;">
+          <rect width="52" height="52" rx="14" fill="rgba(27,95,232,.1)"/>
+          <!-- Timer body -->
+          <circle cx="26" cy="29" r="12" fill="none" stroke="#1B5FE8" stroke-width="1.75"/>
+          <!-- Timer top -->
+          <rect x="22" y="14" width="8" height="3" rx="1.5" fill="none" stroke="#1B5FE8" stroke-width="1.5"/>
+          <line x1="26" y1="14" x2="26" y2="17" stroke="#1B5FE8" stroke-width="1.5" stroke-linecap="round"/>
+          <!-- Timer button -->
+          <rect x="23.5" y="11" width="5" height="3" rx="1.5" fill="#1B5FE8" opacity=".35"/>
+          <!-- Hands -->
+          <line x1="26" y1="29" x2="26" y2="22" stroke="#1B5FE8" stroke-width="1.75" stroke-linecap="round"/>
+          <line x1="26" y1="29" x2="31" y2="33" stroke="#1B5FE8" stroke-width="1.5" stroke-linecap="round"/>
+          <circle cx="26" cy="29" r="2" fill="#1B5FE8"/>
+        </svg>
+        <div style="font-size:.88rem;font-weight:700;color:var(--ink);margin-bottom:.6rem;">Check in</div>
+        <p style="font-size:.82rem;color:var(--muted);line-height:1.72;margin:0;font-weight:300;">What you each need evolves. Attune is yours to return to — a year from now, or whenever something shifts.</p>
+      </div>
+
+    </div>
+    <style>@media(max-width:680px){.wcn-grid{grid-template-columns:1fr!important}}.wcn-grid>div{padding:1.1rem 1.25rem!important}</style>
+  </div>
+</section>
+
+<!-- CTA -->
+<div class="cta-wrap" style="scroll-snap-align:start;">
+  <div style="max-width:760px;margin:0 auto;">
+    <div style="display:grid;grid-template-columns:1fr auto auto;gap:1.5rem;align-items:center;text-align:left;" class="cta-cols-hiw">
+      <div>
+        <h2 style="font-family:var(--hfont);font-size:clamp(1.3rem,2.5vw,1.75rem);font-weight:700;line-height:1.15;color:var(--ink);margin:0 0 .35rem;letter-spacing:-.01em;">The conversation you've been meaning to have.</h2>
+        <p style="font-size:.85rem;color:var(--muted);margin:0;line-height:1.6;">About 25 minutes each. Completely private until you're both done.</p>
+      </div>
+      <a href="/offerings" class="btn-primary" style="white-space:nowrap;">Get started →</a>
+      <a href="/offerings" class="btn-ghost" style="white-space:nowrap;">What's included</a>
+    </div>
+  </div>
+</div>
+<style>@media(max-width:680px){.cta-cols-hiw{grid-template-columns:1fr!important}.cta-cols-hiw a{width:100%;text-align:center;box-sizing:border-box}}</style>
+
+</div>
+
+
+<footer class="site-footer" style="scroll-snap-align:start;">
+  <div class="sf-inner">
+    <div class="sf-brand">
+      <a href="/home" class="logo">
+        <svg width="46" height="33" viewBox="0 0 103 76" fill="none" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="spark_logo_6_1" x1="0" y1="0" x2="103" y2="76" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#E8673A"/><stop offset="100%" stop-color="#1B5FE8"/></linearGradient></defs><path d="M14,4 L44,4 A9,9 0 0,1 53,13 L53,42 A9,9 0 0,1 44,51 L20,51 L6,61 L11,51 A6,6 0 0,1 5,45 L5,13 A9,9 0 0,1 14,4 Z" fill="url(#spark_logo_6_1)"/><path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill="white" opacity="0.93" transform="translate(13.16,11.3) scale(0.72)"/><path d="M89,14 L59,14 A9,9 0 0,0 50,23 L50,52 A9,9 0 0,0 59,61 L83,61 L97,71 L92,61 A6,6 0 0,0 98,55 L98,23 A9,9 0 0,0 89,14 Z" fill="none" stroke="url(#spark_logo_6_1)" stroke-width="2.2" stroke-linejoin="round"/><path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill="url(#spark_logo_6_1)" transform="translate(58.16,21.3) scale(0.72)"/></svg>
+        <span class="logo-text" style="font-size:1.05rem;">Attune</span>
+      </a>
+      <p class="sf-tagline">Because understanding<br>takes intention.</p>
+    </div>
+    <div class="sf-links">
+      <div class="sf-col">
+        <p class="sf-col-title">Product</p>
+        <a href="/home">Home</a>
+        
+        <a href="/offerings">Packages</a>
+        <a href="/portal">Get started</a>
+      </div>
+      <div class="sf-col">
+        <p class="sf-col-title">Learn</p>
+        <a href="/purpose">Our Purpose</a>
+        <a href="/how-it-works" class="active">How it works</a>
+        <a href="/couple-types">Couple Types</a>
+        <a href="/practice">In Practice</a>
+        <a href="/reviews">Reviews</a>
+      </div>
+      <div class="sf-col">
+        <p class="sf-col-title">Support</p>
+        <a href="/faq">FAQs</a>
+        <a href="/contact">Contact us</a>
+        <a href="/legal">Privacy policy</a>
+        <a href="/legal#terms">Terms of service</a>
+      </div>
+      <div class="sf-col">
+        <p class="sf-col-title">Account</p>
+        <a href="/portal">Sign in</a>
+        <a href="/portal">Create account</a>
+      </div>
+    </div>
+  </div>
+  <div class="sf-bottom">
+    <p class="sf-copy">Attune Relationships™</p>
+    <p class="sf-email">hello@attune-relationships.com</p>
+  </div>
+  <div style="background:rgba(255,255,255,.04);border-top:1px solid rgba(255,255,255,.06);padding:.85rem 2rem;display:flex;align-items:center;gap:1rem;flex-wrap:wrap;justify-content:space-between;">
+    <span style="font-family:'Playfair Display',Georgia,serif;font-size:.88rem;font-style:italic;color:rgba(255,255,255,.35);">You love each other, Attune helps you understand each other.</span>
+    <div id="spark-feedback-strip" style="display:flex;gap:.4rem;">
+      <button onclick="window._sparkFeedback('love')" style="background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);border-radius:6px;padding:.3rem .65rem;font-size:.72rem;color:rgba(255,255,255,.6);cursor:pointer;">Love it</button>
+      <button onclick="window._sparkFeedback('good')" style="background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);border-radius:6px;padding:.3rem .65rem;font-size:.72rem;color:rgba(255,255,255,.6);cursor:pointer;">Pretty good</button>
+      <button onclick="window._sparkFeedback('suggest')" style="background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);border-radius:6px;padding:.3rem .65rem;font-size:.72rem;color:rgba(255,255,255,.6);cursor:pointer;">Suggest something</button>
+      <span id="spark-feedback-thanks" style="font-size:.7rem;color:#4ade80;display:none;">Thanks ✓</span>
+    </div>
+  </div>
+  <script>
+window._sparkFeedback = function(t) {
+    try {
+      if(t==='suggest'){
+        var strip=document.getElementById('spark-feedback-strip');
+        if(!strip)return;
+        strip.innerHTML='<input id="sfb-inp" type="text" placeholder="What would make Attune better?" style="background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.25);border-radius:6px;padding:.3rem .65rem;font-size:.72rem;color:white;width:200px;font-family:sans-serif;outline:none;"><button id="sfb-send" style="background:rgba(232,103,58,.9);border:none;border-radius:6px;padding:.3rem .65rem;font-size:.72rem;color:white;cursor:pointer;margin-left:.35rem;">Send</button>';
+        setTimeout(function(){
+          var i=document.getElementById('sfb-inp');
+          if(i)i.focus();
+          var btn=document.getElementById('sfb-send');
+          if(btn)btn.onclick=function(){
+            var m=i?i.value.trim():'';
+            fetch('/api/send-feedback',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({source:'footer_quick',rating:'suggest',message:m,page:window.location.pathname})}).catch(function(){});
+            var s=document.getElementById('spark-feedback-strip');
+            if(s)s.innerHTML='';
+            var th=document.getElementById('spark-feedback-thanks');
+            if(th)th.style.display='inline';
+          };
+        },50);
+        return;
+      }
+      fetch('/api/send-feedback',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({source:'footer_quick',rating:t==='love'?3:2,page:window.location.pathname})}).catch(function(){});
+      var strip=document.getElementById('spark-feedback-strip');
+      if(strip)strip.innerHTML='';
+      var thanks=document.getElementById('spark-feedback-thanks');
+      if(thanks)thanks.style.display='inline';
+    } catch(e){}
+  };
+</script>
+</footer>
+
+<script>
+function toggleMenu() {
+  document.getElementById('mobile-menu').classList.toggle('open');
+}
+document.addEventListener('click', function(e) {
+  const menu = document.getElementById('mobile-menu');
+  const btn = document.getElementById('hamburger');
+  if (menu && menu.classList.contains('open') && !menu.contains(e.target) && !btn.contains(e.target)) {
+    menu.classList.remove('open');
+  }
+});
+
+  // Close mobile menu on outside tap
+  document.addEventListener('click', function(e) {
+    const menu = document.getElementById('mobile-menu');
+    const burger = document.getElementById('hamburger');
+    if (menu && menu.classList.contains('open') && !menu.contains(e.target) && !burger.contains(e.target)) {
+      menu.classList.remove('open');
+      burger.classList.remove('open');
+    }
+  });
+</script>
+</body>
+</html>

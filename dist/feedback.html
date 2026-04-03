@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Attune, Beta Feedback</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  html,body{overflow-x:hidden;max-width:100%}
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --cream: #F7F4EE;
+    --warm-white: #FDFCF9;
+    --ink: #1C1A16;
+    --ink-soft: #5A5750;
+    --ink-faint: #9C9890;
+    --sage: #8A9E8C;
+    --sage-light: #E8EFE8;
+    --terracotta: #C97B5A;
+    --terracotta-light: #F5E9E2;
+    --border: rgba(28,26,22,0.12);
+    --border-soft: rgba(28,26,22,0.07);
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--cream);
+    color: var(--ink);
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 300;
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+
+  /* Layout */
+  .page {
+    max-width: 620px;
+    margin: 0 auto;
+    padding: 3rem 1.5rem 6rem;
+  }
+
+  /* Header */
+  .header {
+    margin-bottom: 3.5rem;
+    opacity: 0;
+    animation: fadeUp 0.7s ease forwards;
+  }
+  .header-eyebrow {
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin-bottom: 1rem;
+  }
+  .header h1 {
+    font-family: 'DM Serif Display', serif;
+    font-size: clamp(28px, 5vw, 38px);
+    font-weight: 400;
+    line-height: 1.2;
+    margin-bottom: 1rem;
+    color: var(--ink);
+  }
+  .header h1 em {
+    font-style: italic;
+    color: var(--terracotta);
+  }
+  .header p {
+    font-size: 15px;
+    color: var(--ink-soft);
+    line-height: 1.7;
+    max-width: 480px;
+  }
+
+  /* Progress */
+  .progress-wrap {
+    margin-bottom: 3rem;
+    opacity: 0;
+    animation: fadeUp 0.7s 0.1s ease forwards;
+  }
+  .progress-label {
+    font-size: 12px;
+    color: var(--ink-faint);
+    margin-bottom: 8px;
+    display: flex;
+    justify-content: space-between;
+  }
+  .progress-track {
+    height: 2px;
+    background: var(--border);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: var(--terracotta);
+    border-radius: 2px;
+    transition: width 0.5s ease;
+    width: 0%;
+  }
+
+  /* Section */
+  .section {
+    margin-bottom: 3rem;
+    opacity: 0;
+    animation: fadeUp 0.6s ease forwards;
+  }
+  .section-label {
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--border-soft);
+  }
+
+  /* Question */
+  .question {
+    margin-bottom: 2rem;
+  }
+  .question-text {
+    font-family: 'DM Serif Display', serif;
+    font-size: 17px;
+    font-weight: 400;
+    line-height: 1.4;
+    margin-bottom: 0.4rem;
+    color: var(--ink);
+  }
+  .question-sub {
+    font-size: 13px;
+    color: var(--ink-faint);
+    margin-bottom: 1rem;
+  }
+
+  /* NPS Scale */
+  .nps-wrap {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+  .nps-btn {
+    width: 42px;
+    height: 42px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: var(--warm-white);
+    font-size: 14px;
+    font-family: 'DM Sans', sans-serif;
+    color: var(--ink-soft);
+    cursor: pointer;
+    transition: all 0.15s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .nps-btn:hover { border-color: var(--terracotta); color: var(--terracotta); }
+  .nps-btn.selected { background: var(--terracotta); border-color: var(--terracotta); color: white; font-weight: 500; }
+  .nps-labels {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 6px;
+    font-size: 11px;
+    color: var(--ink-faint);
+  }
+
+  /* Rating scale (1–5) */
+  .rating-wrap {
+    display: flex;
+    gap: 8px;
+  }
+  .rating-btn {
+    flex: 1;
+    padding: 10px 4px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--warm-white);
+    font-size: 13px;
+    font-family: 'DM Sans', sans-serif;
+    color: var(--ink-soft);
+    cursor: pointer;
+    transition: all 0.15s;
+    text-align: center;
+    line-height: 1.3;
+  }
+  .rating-btn .num { font-size: 17px; display: block; margin-bottom: 2px; }
+  .rating-btn:hover { border-color: var(--sage); color: var(--ink); }
+  .rating-btn.selected { background: var(--sage-light); border-color: var(--sage); color: var(--ink); }
+
+  /* Multi-select chips */
+  .chips-wrap {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .chip {
+    padding: 8px 16px;
+    border: 1px solid var(--border);
+    border-radius: 100px;
+    background: var(--warm-white);
+    font-size: 13px;
+    font-family: 'DM Sans', sans-serif;
+    color: var(--ink-soft);
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .chip:hover { border-color: var(--ink-soft); color: var(--ink); }
+  .chip.selected { background: var(--ink); border-color: var(--ink); color: white; }
+
+  /* Textarea */
+  textarea {
+    width: 100%;
+    padding: 14px 16px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: var(--warm-white);
+    font-size: 14px;
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 300;
+    color: var(--ink);
+    line-height: 1.6;
+    resize: vertical;
+    min-height: 100px;
+    transition: border-color 0.15s;
+    outline: none;
+  }
+  textarea:focus { border-color: var(--ink-soft); }
+  textarea::placeholder { color: var(--ink-faint); }
+
+  /* Text input */
+  input[type="text"], input[type="email"] {
+    width: 100%;
+    padding: 12px 16px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: var(--warm-white);
+    font-size: 14px;
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 300;
+    color: var(--ink);
+    transition: border-color 0.15s;
+    outline: none;
+  }
+  input[type="text"]:focus, input[type="email"]:focus { border-color: var(--ink-soft); }
+  input::placeholder { color: var(--ink-faint); }
+
+  /* Divider */
+  .divider {
+    border: none;
+    border-top: 1px solid var(--border-soft);
+    margin: 2.5rem 0;
+  }
+
+  /* Testimonial section */
+  .testimonial-section {
+    background: var(--terracotta-light);
+    border: 1px solid rgba(201,123,90,0.2);
+    border-radius: 14px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+  }
+  .testimonial-section .section-label {
+    color: var(--terracotta);
+    border-color: rgba(201,123,90,0.2);
+  }
+  .testimonial-section .question-text { font-size: 16px; }
+  .testimonial-section textarea { background: white; min-height: 120px; }
+
+  /* Consent */
+  .consent-row {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    margin-top: 1rem;
+  }
+  .consent-row input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    margin-top: 2px;
+    accent-color: var(--terracotta);
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+  .consent-label {
+    font-size: 13px;
+    color: var(--ink-soft);
+    line-height: 1.5;
+    cursor: pointer;
+  }
+
+  /* Submit */
+  .submit-btn {
+    width: 100%;
+    padding: 16px 24px;
+    background: var(--ink);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-size: 15px;
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    letter-spacing: 0.01em;
+  }
+  .submit-btn:hover { background: var(--terracotta); }
+  .submit-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  /* Success state */
+  .success-state {
+    display: none;
+    text-align: center;
+    padding: 4rem 2rem;
+    opacity: 0;
+    animation: fadeUp 0.7s ease forwards;
+  }
+  .success-state.show { display: block; }
+  .success-mark {
+    width: 56px;
+    height: 56px;
+    background: var(--sage-light);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1.5rem;
+    font-size: 24px;
+  }
+  .success-state h2 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 26px;
+    font-weight: 400;
+    margin-bottom: 0.75rem;
+  }
+  .success-state p { font-size: 15px; color: var(--ink-soft); }
+
+  /* Animations */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .section:nth-child(1) { animation-delay: 0.15s; }
+  .section:nth-child(2) { animation-delay: 0.25s; }
+  .section:nth-child(3) { animation-delay: 0.35s; }
+  .section:nth-child(4) { animation-delay: 0.45s; }
+  .section:nth-child(5) { animation-delay: 0.55s; }
+  .section:nth-child(6) { animation-delay: 0.65s; }
+
+  .char-count {
+    font-size: 11px;
+    color: var(--ink-faint);
+    text-align: right;
+    margin-top: 4px;
+  }
+</style>
+</head>
+<body>
+<div class="page" id="formPage">
+
+  <div class="header">
+    <div class="header-eyebrow">Attune, Beta Feedback</div>
+    <h1>What did you <em>actually</em> discover?</h1>
+    <p>Your honest feedback shapes everything from here. This takes about 8 minutes. There are no right answers, only useful ones.</p>
+  </div>
+
+  <div class="progress-wrap">
+    <div class="progress-label">
+      <span id="progressText">Getting started</span>
+      <span id="progressPct">0%</span>
+    </div>
+    <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+  </div>
+
+  <!-- Section 1: Overall -->
+  <div class="section">
+    <div class="section-label">01, Overall experience</div>
+
+    <div class="question">
+      <div class="question-text">How likely are you to recommend Attune to a couple you know?</div>
+      <div class="question-sub">0 = not at all likely · 10 = absolutely</div>
+      <div class="nps-wrap" id="nps"></div>
+      <div class="nps-labels"><span>Not likely</span><span>Very likely</span></div>
+    </div>
+
+    <div class="question">
+      <div class="question-text">How would you describe the overall experience?</div>
+      <div class="chips-wrap" id="overallFeel">
+        <button class="chip" data-group="overallFeel">Surprisingly revealing</button>
+        <button class="chip" data-group="overallFeel">Thought-provoking</button>
+        <button class="chip" data-group="overallFeel">Comfortable</button>
+        <button class="chip" data-group="overallFeel">A little uncomfortable (in a good way)</button>
+        <button class="chip" data-group="overallFeel">Deeper than expected</button>
+        <button class="chip" data-group="overallFeel">Lighter than expected</button>
+        <button class="chip" data-group="overallFeel">Confusing at points</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 2: The questions -->
+  <div class="section">
+    <div class="section-label">02, The exercise questions</div>
+
+    <div class="question">
+      <div class="question-text">How well did the questions surface things you hadn't already talked about?</div>
+      <div class="rating-wrap" id="questionsNovelty">
+        <button class="rating-btn" data-group="questionsNovelty"><span class="num">1</span>Not at all</button>
+        <button class="rating-btn" data-group="questionsNovelty"><span class="num">2</span>A little</button>
+        <button class="rating-btn" data-group="questionsNovelty"><span class="num">3</span>Somewhat</button>
+        <button class="rating-btn" data-group="questionsNovelty"><span class="num">4</span>Quite well</button>
+        <button class="rating-btn" data-group="questionsNovelty"><span class="num">5</span>Very well</button>
+      </div>
+    </div>
+
+    <div class="question">
+      <div class="question-text">Were there questions that felt off, too obvious, too clinical, or missing the point?</div>
+      <textarea id="questionsFeedback" placeholder="Be specific if you can. Which questions, and why?" maxlength="600" oninput="updateCharCount(this, 'qfCount'); updateProgress()"></textarea>
+      <div class="char-count"><span id="qfCount">0</span>/600</div>
+    </div>
+
+    <div class="question">
+      <div class="question-text">Was there anything you expected to be asked that wasn't?</div>
+      <textarea id="questionsMissing" placeholder="Topics, themes, or specific questions..." maxlength="400" oninput="updateCharCount(this, 'qmCount'); updateProgress()"></textarea>
+      <div class="char-count"><span id="qmCount">0</span>/400</div>
+    </div>
+  </div>
+
+  <!-- Section 3: Results -->
+  <div class="section">
+    <div class="section-label">03, The results & comparison</div>
+
+    <div class="question">
+      <div class="question-text">When you saw your results side by side, what was your first reaction?</div>
+      <div class="chips-wrap" id="resultsReaction">
+        <button class="chip" data-group="resultsReaction">Surprised by the gaps</button>
+        <button class="chip" data-group="resultsReaction">Confirmed what we already knew</button>
+        <button class="chip" data-group="resultsReaction">Relieved we're more aligned than I thought</button>
+        <button class="chip" data-group="resultsReaction">Wanted to talk about it immediately</button>
+        <button class="chip" data-group="resultsReaction">Needed time to process it</button>
+        <button class="chip" data-group="resultsReaction">Felt like it was missing something</button>
+      </div>
+    </div>
+
+    <div class="question">
+      <div class="question-text">How clear and useful were the results to read?</div>
+      <div class="rating-wrap" id="resultsClarity">
+        <button class="rating-btn" data-group="resultsClarity"><span class="num">1</span>Hard to read</button>
+        <button class="rating-btn" data-group="resultsClarity"><span class="num">2</span>Okay</button>
+        <button class="rating-btn" data-group="resultsClarity"><span class="num">3</span>Clear enough</button>
+        <button class="rating-btn" data-group="resultsClarity"><span class="num">4</span>Clear</button>
+        <button class="rating-btn" data-group="resultsClarity"><span class="num">5</span>Really clear</button>
+      </div>
+    </div>
+
+    <div class="question">
+      <div class="question-text">Did the results lead to a real conversation between you and your partner?</div>
+      <div class="chips-wrap" id="resultsConversation" style="gap:8px">
+        <button class="chip" data-group="resultsConversation" data-single="true">Yes, right away</button>
+        <button class="chip" data-group="resultsConversation" data-single="true">Yes, a little later</button>
+        <button class="chip" data-group="resultsConversation" data-single="true">Not yet, but we plan to</button>
+        <button class="chip" data-group="resultsConversation" data-single="true">No</button>
+      </div>
+    </div>
+
+    <div class="question">
+      <div class="question-text">What would have made the results more useful or meaningful?</div>
+      <textarea id="resultsFeedback" placeholder="More context? Conversation prompts? A different format?" maxlength="500" oninput="updateCharCount(this, 'rfCount'); updateProgress()"></textarea>
+      <div class="char-count"><span id="rfCount">0</span>/500</div>
+    </div>
+  </div>
+
+  <!-- Section 4: Ease of use -->
+  <div class="section">
+    <div class="section-label">04, Ease of use & flow</div>
+
+    <div class="question">
+      <div class="question-text">How easy was it to get started and complete the exercise?</div>
+      <div class="rating-wrap" id="easeRating">
+        <button class="rating-btn" data-group="easeRating"><span class="num">1</span>Confusing</button>
+        <button class="rating-btn" data-group="easeRating"><span class="num">2</span>Some friction</button>
+        <button class="rating-btn" data-group="easeRating"><span class="num">3</span>Fine</button>
+        <button class="rating-btn" data-group="easeRating"><span class="num">4</span>Easy</button>
+        <button class="rating-btn" data-group="easeRating"><span class="num">5</span>Very easy</button>
+      </div>
+    </div>
+
+    <div class="question">
+      <div class="question-text">Was there any moment where you nearly gave up or got confused?</div>
+      <textarea id="easePainPoints" placeholder="Where did things feel clunky, slow, or unclear?" maxlength="400" oninput="updateCharCount(this, 'epCount'); updateProgress()"></textarea>
+      <div class="char-count"><span id="epCount">0</span>/400</div>
+    </div>
+
+    <div class="question">
+      <div class="question-text">How long did the exercise take you? (approximate)</div>
+      <div class="chips-wrap" id="timeTaken">
+        <button class="chip" data-group="timeTaken" data-single="true">Under 20 min</button>
+        <button class="chip" data-group="timeTaken" data-single="true">20–30 min</button>
+        <button class="chip" data-group="timeTaken" data-single="true">30–45 min</button>
+        <button class="chip" data-group="timeTaken" data-single="true">45–60 min</button>
+        <button class="chip" data-group="timeTaken" data-single="true">Over an hour</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 5: Emotional impact -->
+  <div class="section">
+    <div class="section-label">05, Emotional impact</div>
+
+    <div class="question">
+      <div class="question-text">Did Attune change how you see anything about your relationship?</div>
+      <div class="chips-wrap" id="emotionalImpact">
+        <button class="chip" data-group="emotionalImpact" data-single="true">Yes, something significant</button>
+        <button class="chip" data-group="emotionalImpact" data-single="true">Yes, something small but worth noting</button>
+        <button class="chip" data-group="emotionalImpact" data-single="true">It confirmed things we already knew</button>
+        <button class="chip" data-group="emotionalImpact" data-single="true">Not really</button>
+      </div>
+    </div>
+
+    <div class="question">
+      <div class="question-text">In your own words, what did you actually learn or notice?</div>
+      <div class="question-sub">This is the most valuable thing you can share with us.</div>
+      <textarea id="emotionalOpenEnded" placeholder="Anything, big or small. What stuck?" maxlength="800" oninput="updateCharCount(this, 'eoCount'); updateProgress()"></textarea>
+      <div class="char-count"><span id="eoCount">0</span>/800</div>
+    </div>
+
+    <div class="question">
+      <div class="question-text">How did it feel to answer the questions independently, before seeing your partner's answers?</div>
+      <div class="chips-wrap" id="independentFeel">
+        <button class="chip" data-group="independentFeel">Important, I answered more honestly</button>
+        <button class="chip" data-group="independentFeel">A little strange at first, then natural</button>
+        <button class="chip" data-group="independentFeel">Didn't make much difference to me</button>
+        <button class="chip" data-group="independentFeel">I wanted to talk to my partner while doing it</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 6: Testimonial -->
+  <div class="section">
+    <div class="testimonial-section">
+      <div class="section-label">06, A word from you</div>
+
+      <div class="question">
+        <div class="question-text">If you were telling a friend about Attune, what would you say?</div>
+        <div class="question-sub">Write it how you'd actually say it, not a review, just what you'd genuinely tell someone.</div>
+        <textarea id="testimonialText" placeholder="e.g. 'We've been together four years and I still learned something I didn't expect...'" maxlength="500" oninput="updateCharCount(this, 'ttCount'); updateProgress()"></textarea>
+        <div class="char-count"><span id="ttCount">0</span>/500</div>
+      </div>
+
+      <div class="question" style="margin-bottom:0">
+        <div class="question-text">May we use your words on our website?</div>
+        <div class="question-sub">We'll only use first names (or initials if you prefer). You can opt out at any time.</div>
+        <div class="chips-wrap" id="testimonialConsent">
+          <button class="chip" data-group="testimonialConsent" data-single="true">Yes, use my full first name</button>
+          <button class="chip" data-group="testimonialConsent" data-single="true">Yes, initials only</button>
+          <button class="chip" data-group="testimonialConsent" data-single="true">Yes, keep it anonymous</button>
+          <button class="chip" data-group="testimonialConsent" data-single="true">No, just for your internal use</button>
+        </div>
+
+        <div style="margin-top: 1.25rem;">
+          <input type="text" id="nameField" placeholder="Your first name (or initials)" style="margin-bottom:10px">
+          <input type="email" id="emailField" placeholder="Your email, in case we have follow-up questions (optional)">
+        </div>
+      </div>
+    </div>
+
+    <button class="submit-btn" id="submitBtn" onclick="submitForm()">Submit feedback →</button>
+    <p style="font-size:12px; color:var(--ink-faint); text-align:center; margin-top:12px;">Your responses are confidential and used only to improve Attune.</p>
+  </div>
+
+</div>
+
+<!-- Success -->
+<div class="success-state" id="successState">
+  <div class="success-mark">✦</div>
+  <h2>Thank you, genuinely.</h2>
+  <p>Your feedback is exactly what we need to make Attune better.<br>We'll be in touch before we launch.</p>
+</div>
+
+<script>
+  // Build NPS
+  const npsWrap = document.getElementById('nps');
+  for (let i = 0; i <= 10; i++) {
+    const btn = document.createElement('button');
+    btn.className = 'nps-btn';
+    btn.textContent = i;
+    btn.dataset.group = 'nps';
+    btn.dataset.single = 'true';
+    btn.onclick = () => selectSingle('nps', btn);
+    npsWrap.appendChild(btn);
+  }
+
+  // Wire up all chip/rating buttons
+  document.querySelectorAll('.chip, .rating-btn, .nps-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const group = btn.dataset.group;
+      const isSingle = btn.dataset.single === 'true';
+      const isRating = btn.classList.contains('rating-btn');
+      if (isSingle || isRating) {
+        document.querySelectorAll(`[data-group="${group}"]`).forEach(b => b.classList.remove('selected'));
+      }
+      btn.classList.toggle('selected');
+      updateProgress();
+    });
+  });
+
+  function selectSingle(group, btn) {
+    document.querySelectorAll(`[data-group="${group}"]`).forEach(b => b.classList.remove('selected'));
+    btn.classList.add('selected');
+    updateProgress();
+  }
+
+  function updateCharCount(el, countId) {
+    document.getElementById(countId).textContent = el.value.length;
+  }
+
+  // Progress tracking
+  const progressSections = [
+    () => document.querySelectorAll('[data-group="nps"].selected').length > 0,
+    () => document.querySelectorAll('[data-group="questionsNovelty"].selected').length > 0,
+    () => document.querySelector('#questionsFeedback').value.length > 5,
+    () => document.querySelectorAll('[data-group="resultsClarity"].selected').length > 0,
+    () => document.querySelectorAll('[data-group="resultsConversation"].selected').length > 0,
+    () => document.querySelectorAll('[data-group="easeRating"].selected').length > 0,
+    () => document.querySelectorAll('[data-group="timeTaken"].selected').length > 0,
+    () => document.querySelectorAll('[data-group="emotionalImpact"].selected').length > 0,
+    () => document.querySelector('#emotionalOpenEnded').value.length > 10,
+    () => document.querySelector('#testimonialConsent').querySelectorAll('.selected').length > 0,
+  ];
+
+  const sectionLabels = ['Overall rating', 'Question quality', 'Open feedback', 'Results clarity', 'Conversation', 'Ease of use', 'Time', 'Emotional impact', 'Your learning', 'Testimonial consent'];
+
+  function updateProgress() {
+    const completed = progressSections.filter(fn => fn()).length;
+    const pct = Math.round((completed / progressSections.length) * 100);
+    document.getElementById('progressFill').style.width = pct + '%';
+    document.getElementById('progressPct').textContent = pct + '%';
+    const nextIdx = progressSections.findIndex(fn => !fn());
+    document.getElementById('progressText').textContent = nextIdx >= 0 ? `Next: ${sectionLabels[nextIdx]}` : 'Ready to submit';
+  }
+
+  function submitForm() {
+    const data = {
+      nps: document.querySelector('[data-group="nps"].selected')?.textContent,
+      overallFeel: [...document.querySelectorAll('[data-group="overallFeel"].selected')].map(b => b.textContent),
+      questionsNovelty: document.querySelector('[data-group="questionsNovelty"].selected')?.textContent,
+      questionsFeedback: document.querySelector('#questionsFeedback').value,
+      questionsMissing: document.querySelector('#questionsMissing').value,
+      resultsReaction: [...document.querySelectorAll('[data-group="resultsReaction"].selected')].map(b => b.textContent),
+      resultsClarity: document.querySelector('[data-group="resultsClarity"].selected')?.textContent,
+      resultsConversation: document.querySelector('[data-group="resultsConversation"].selected')?.textContent,
+      resultsFeedback: document.querySelector('#resultsFeedback').value,
+      easeRating: document.querySelector('[data-group="easeRating"].selected')?.textContent,
+      easePainPoints: document.querySelector('#easePainPoints').value,
+      timeTaken: document.querySelector('[data-group="timeTaken"].selected')?.textContent,
+      emotionalImpact: document.querySelector('[data-group="emotionalImpact"].selected')?.textContent,
+      emotionalOpenEnded: document.querySelector('#emotionalOpenEnded').value,
+      independentFeel: [...document.querySelectorAll('[data-group="independentFeel"].selected')].map(b => b.textContent),
+      testimonial: document.querySelector('#testimonialText').value,
+      testimonialConsent: document.querySelector('[data-group="testimonialConsent"].selected')?.textContent,
+      name: document.querySelector('#nameField').value,
+      email: document.querySelector('#emailField').value,
+    };
+    console.log('Attune Beta Survey Response:', JSON.stringify(data, null, 2));
+    document.getElementById('formPage').style.display = 'none';
+    const success = document.getElementById('successState');
+    success.classList.add('show');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  updateProgress();
+</script>
+</body>
+</html>

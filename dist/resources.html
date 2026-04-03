@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Resources, Attune</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,800;1,700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  html,body{overflow-x:hidden;max-width:100%}
+  html,body{scroll-snap-type:y proximity}
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  :root{--cream:#FFFDF9;--warm:#FBF8F3;--stone:#E8DDD0;--clay:#C17F47;--ink:#0E0B07;--text:#1E1610;--muted:#8C7A68;--orange:#E8673A;--indigo:#1B5FE8;--hfont:'Playfair Display',Georgia,serif;--bfont:'DM Sans',sans-serif;}
+  html{scroll-behavior:smooth}
+  body{background:var(--cream);color:var(--text);font-family:var(--bfont);-webkit-font-smoothing:antialiased}
+  nav{position:fixed;top:0;left:0;right:0;z-index:100;height:58px;background:rgba(255,253,249,.94);backdrop-filter:blur(16px);border-bottom:1px solid var(--stone);display:flex;align-items:center;padding:0 2.5rem;justify-content:space-between}
+  .logo{display:flex;align-items:center;gap:.65rem;text-decoration:none}
+  .logo-mark{display:flex;align-items:center;flex-shrink:0}
+  .logo-text{font-family:var(--hfont);font-size:1.15rem;font-weight:700;color:var(--ink)}
+  .nav-center{display:flex;gap:2.5rem;list-style:none;position:absolute;left:50%;transform:translateX(-50%);align-items:center}.nav-center li{display:flex;align-items:center}.nav-center li{display:flex;align-items:center}
+  .nav-center a{text-decoration:none;color:var(--muted);font-size:.82rem;font-weight:500;transition:color .15s}
+  .nav-center a:hover,.nav-center a.active{color:var(--ink);font-weight:600}
+  .nav-dropdown{position:relative}
+  .nav-dropdown-toggle{text-decoration:none;color:var(--muted);font-size:.82rem;font-weight:500;transition:color .15s;cursor:pointer;display:flex;align-items:center;gap:.28rem;background:none;border:none;padding:0;font-family:var(--bfont)}
+  .nav-dropdown-toggle:hover,.nav-dropdown-toggle.active{color:var(--ink)}
+  .nav-dropdown-toggle svg{transition:transform .2s}
+  .nav-dropdown:hover .nav-dropdown-toggle svg{transform:rotate(180deg)}
+  .nav-dropdown-menu{position:absolute;top:100%;left:50%;transform:translateX(-50%);background:rgba(255,253,249,.98);backdrop-filter:blur(16px);border:1.5px solid var(--stone);border-radius:14px;padding:.6rem;min-width:190px;opacity:0;visibility:hidden;pointer-events:none;transition:opacity .15s,visibility .15s;box-shadow:0 12px 40px rgba(14,11,7,.12);z-index:200;margin-top:0px}
+  .nav-dropdown:hover .nav-dropdown-menu{opacity:1;visibility:visible;pointer-events:auto}
+  .nav-dropdown-menu::before{content:'';position:absolute;top:-16px;left:-10px;right:-10px;height:16px;background:transparent;}
+  .nav-dropdown-menu a{display:block;padding:.55rem .8rem;font-size:.78rem;color:var(--muted);text-decoration:none;border-radius:8px;transition:all .15s;font-weight:500}
+  .nav-dropdown-menu a:hover{background:var(--warm);color:var(--ink)}
+  .nav-dropdown-menu a.active{color:var(--ink);font-weight:600}
+  .nav-dropdown-menu .dd-divider{height:1px;background:var(--stone);margin:.35rem .5rem}
+  .nav-right{display:flex;align-items:center;gap:1.25rem}
+  .nav-signin{font-size:.8rem;font-weight:500;color:var(--muted);text-decoration:none;transition:color .15s}
+  .nav-signin:hover{color:var(--ink)}
+  .btn-nav{background:var(--ink);color:white;padding:.5rem 1.2rem;border-radius:10px;font-size:.78rem;font-weight:600;text-decoration:none;display:inline-block;transition:opacity .15s}
+  .btn-nav:hover{opacity:.82}
+  .hamburger{display:none;flex-direction:column;gap:5px;cursor:pointer;background:none;border:none;padding:.3rem}
+  .hamburger span{width:22px;height:2px;background:var(--ink);border-radius:2px}
+  .mobile-menu{display:none;position:fixed;top:66px;right:1rem;left:auto;width:240px;background:rgba(255,253,249,.99);backdrop-filter:blur(20px);border:1.5px solid var(--stone);border-radius:14px;padding:1rem;z-index:200;flex-direction:column;gap:.15rem;box-shadow:0 12px 40px rgba(14,11,7,.14)}
+  .mobile-menu.open{display:flex}
+  .mobile-menu a{font-size:.85rem;font-weight:500;color:var(--muted);text-decoration:none;padding:.5rem .65rem;border-radius:8px;transition:all .15s}
+  .mobile-menu a:last-child{}
+  .mobile-menu .mm-cta{color:var(--orange);font-weight:700}
+
+  /* PAGE */
+  .si{max-width:1080px;margin:0 auto;padding:0 2.5rem}
+  
+  .eyebrow{font-size:.6rem;letter-spacing:.3em;text-transform:uppercase;color:var(--clay);font-weight:700;margin-bottom:.9rem;display:flex;align-items:center;justify-content:center;gap:.65rem}
+  .eyebrow::before{content:'';width:28px;height:2.5px;border-radius:999px;background:linear-gradient(90deg,var(--orange),var(--indigo));flex-shrink:0}.eyebrow::after{content:'';width:28px;height:2.5px;border-radius:999px;background:linear-gradient(90deg,var(--orange),var(--indigo));flex-shrink:0}
+  h1.page-title{font-family:var(--hfont);font-size:clamp(2.2rem,3.8vw,3.2rem);font-weight:700;line-height:1.08;color:var(--ink);margin-bottom:1.1rem;letter-spacing:-.02em}
+  .page-sub{font-size:1rem;color:var(--muted);line-height:1.8;font-weight:300}
+
+  /* RESOURCE SECTIONS */
+  .res-section{padding:4rem 2.5rem;border-top:1px solid var(--stone);max-width:1080px;margin:0 auto}
+  .s-eye{font-size:.72rem;letter-spacing:.3em;text-transform:uppercase;color:var(--clay);font-weight:700;margin-bottom:.85rem;display:flex;align-items:center;gap:.65rem}
+  .s-eye::before{content:'';width:28px;height:2.5px;border-radius:999px;background:linear-gradient(90deg,var(--orange),var(--indigo));flex-shrink:0}
+  .s-title{font-family:var(--hfont);font-size:clamp(1.75rem,2.8vw,2.3rem);font-weight:700;line-height:1.1;color:var(--ink);margin-bottom:.85rem;letter-spacing:-.02em}
+  .s-sub{font-size:.92rem;color:var(--muted);line-height:1.78;margin-bottom:2.5rem;font-weight:300;max-width:580px}
+
+  /* BOOKS */
+  .books-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem}
+  .book-card{background:var(--warm);border:1.5px solid var(--stone);border-radius:18px;padding:1.75rem;display:flex;flex-direction:column;gap:.75rem;transition:transform .2s,box-shadow .2s}
+  .book-card:hover{transform:translateY(-3px);box-shadow:0 8px 32px rgba(14,11,7,.08)}
+  .book-spine{width:48px;height:64px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:1.5rem;margin-bottom:.25rem;flex-shrink:0}
+  .book-tag{font-size:.58rem;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--clay)}
+  .book-title{font-family:var(--hfont);font-size:1rem;font-weight:700;color:var(--ink);line-height:1.25}
+  .book-author{font-size:.75rem;color:var(--muted)}
+  .book-desc{font-size:.8rem;color:var(--muted);line-height:1.65;flex:1}
+  .book-why{font-size:.75rem;color:var(--clay);font-weight:500;border-top:1px solid var(--stone);padding-top:.75rem;margin-top:auto;line-height:1.55}
+
+  /* GUIDES */
+  .guides-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:1.5rem;margin-top:2rem}
+  .guide-card{background:white;border:1.5px solid var(--stone);border-radius:18px;padding:2rem;position:relative;overflow:hidden;transition:transform .2s,box-shadow .2s}
+  .guide-card:hover{border-color:var(--clay)}
+  .guide-accent{position:absolute;top:0;left:0;bottom:0;width:4px;border-radius:2px 0 0 2px}
+  .guide-tag{font-size:.58rem;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);margin-bottom:.65rem}
+  .guide-title{font-family:var(--hfont);font-size:1.1rem;font-weight:700;color:var(--ink);margin-bottom:.5rem;line-height:1.25}
+  .guide-desc{font-size:.82rem;color:var(--muted);line-height:1.7;margin-bottom:1rem}
+  .guide-steps{display:flex;flex-direction:column;gap:.45rem}
+  .guide-step{font-size:.78rem;color:var(--text);line-height:1.55;padding-left:1.1rem;position:relative}
+  .guide-step::before{content:counter(step);counter-increment:step;position:absolute;left:0;font-size:.65rem;font-weight:700;color:var(--orange);top:.05rem}
+  .guide-steps{counter-reset:step}
+
+  /* PHILOSOPHY NOTE */
+  .philosophy-band{background:linear-gradient(150deg,#0f0c29,#181545);padding:4.5rem 2.5rem;margin-top:2rem}
+  .philosophy-inner{max-width:760px;margin:0 auto;text-align:center}
+
+  /* CTA */
+  .cta-wrap{padding:5rem 2.5rem;text-align:center}
+  .cta-inner{max-width:560px;margin:0 auto}
+  .cta-title{font-family:var(--hfont);font-size:clamp(2rem,3.5vw,2.9rem);font-weight:700;line-height:1.1;color:var(--ink);margin-bottom:1rem;letter-spacing:-.02em}
+  .cta-sub{font-size:.95rem;color:var(--muted);line-height:1.75;margin-bottom:2rem;font-weight:300}
+  .cta-actions{display:flex;gap:1rem;justify-content:center;flex-wrap:wrap}
+  .btn-primary{background:linear-gradient(135deg,var(--orange),#d4592f);color:white;padding:.85rem 2rem;border-radius:14px;font-size:.82rem;font-weight:700;text-decoration:none;display:inline-block;letter-spacing:.04em;box-shadow:0 6px 24px rgba(232,103,58,.3);transition:all .2s}
+  .btn-primary:hover{transform:translateY(-2px);box-shadow:0 10px 32px rgba(232,103,58,.4)}
+  .btn-ghost{border:1.5px solid var(--stone);color:var(--ink);padding:.85rem 2rem;border-radius:14px;font-size:.82rem;font-weight:600;text-decoration:none;display:inline-block;transition:all .2s}
+  .btn-ghost:hover{background:var(--warm);border-color:var(--clay)}
+
+  /* FOOTER */
+  .site-footer{background:var(--ink);padding:3.5rem 2.5rem 2rem}
+  .sf-inner{max-width:1080px;margin:0 auto;display:grid;grid-template-columns:1.4fr 1.8fr;gap:3rem;margin-bottom:2.5rem}
+  .sf-brand .logo-text,.sf-brand .logo-mark{color:white}
+  .sf-tagline{font-size:.82rem;color:rgba(255,255,255,.35);line-height:1.7;margin-top:.85rem}
+  .sf-links{display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem}
+  .sf-col{display:flex;flex-direction:column;gap:.6rem}
+  .sf-col-title{font-size:.62rem;letter-spacing:.2em;text-transform:uppercase;color:rgba(255,255,255,.3);font-weight:700;margin-bottom:.25rem}
+  .sf-col a{font-size:.8rem;color:rgba(255,255,255,.45);text-decoration:none;transition:color .15s}
+  .sf-col a:hover{color:rgba(255,255,255,.85)}
+  .sf-bottom{max-width:1080px;margin:0 auto;padding-top:2rem;border-top:1px solid rgba(255,255,255,.08);display:flex;justify-content:space-between;align-items:center;gap:1rem;flex-wrap:wrap}
+  .sf-copy,.sf-email{font-size:.75rem;color:rgba(255,255,255,.25)}
+
+  @media(max-width:768px){.sf-inner{grid-template-columns:1fr 1.6fr!important;gap:1.25rem!important;padding-left:1.25rem!important;padding-right:1.25rem!important}.sf-links{grid-template-columns:1fr!important}.sf-tagline{font-size:.78rem}.sf-col a{font-size:.8rem}.sf-col-title{font-size:.62rem}}
+    .sf-links{grid-template-columns:repeat(2,1fr)}
+  }
+  .mm-section{display:flex;flex-direction:column;border-bottom:1px solid var(--stone);padding-bottom:.25rem;margin-bottom:.25rem}
+  .mm-label{font-size:.58rem;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);font-weight:700;padding:.55rem 0 .2rem .75rem}
+  .mm-sub{padding-left:1.25rem !important;font-size:.85rem !important;border-bottom:none !important;font-style:italic;color:var(--muted)}
+  .mm-sub:last-child{border-bottom:none}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
+  .fu1{animation:fadeUp .6s ease both}
+  @media(max-width:768px){.page-header{padding:calc(58px + 2rem) 1.25rem 2.5rem!important}}}
+
+  @media(max-width:640px){section{padding-top:1.75rem!important;padding-bottom:1.75rem!important}.si{padding-left:1.25rem!important;padding-right:1.25rem!important}}  .page-header{background:linear-gradient(150deg,#1c1940 0%,#282560 60%,#1e3a6e 100%);padding:calc(58px + 3.5rem) clamp(1.25rem,5vw,2.5rem) 3rem;position:relative;overflow:hidden;max-width:none;margin:0;width:100%;box-sizing:border-box}
+  .page-header::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,#E8673A,#9B5DE5,#1B5FE8);z-index:1}
+  .page-header-glow{position:absolute;inset:0;background:radial-gradient(ellipse 60% 40% at 50% 100%,rgba(232,103,58,.12),transparent);pointer-events:none}
+  .page-header-inner{max-width:700px;margin-left:auto;margin-right:auto;position:relative;z-index:1;text-align:center}
+  .page-header .page-title{color:white;text-align:center}
+  .page-header .page-title em{color:var(--orange);font-style:italic}
+  .page-header .page-sub{color:rgba(255,255,255,.65);text-align:center;margin-top:.75rem}
+  .page-header .eyebrow{color:rgba(232,103,58,.85)}
+  .page-header .eyebrow::before{background:linear-gradient(90deg,rgba(232,103,58,.7),rgba(155,93,229,.5))}
+  .hero-actions{display:flex;align-items:center;justify-content:center;gap:1.5rem;margin-top:1.75rem;flex-wrap:wrap}
+  .gift-link{font-size:.88rem;color:rgba(232,103,58,.8);font-family:var(--bfont);font-weight:500;text-decoration:none;transition:color .15s}
+  .gift-link:hover{color:var(--orange)}
+  </style>
+</head>
+<body>
+
+<nav>
+  <a href="/home" class="logo">
+    <svg width="46" height="33" viewBox="0 0 103 76" fill="none" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="spark_logo_8_3" x1="0" y1="0" x2="103" y2="76" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#E8673A"/><stop offset="100%" stop-color="#1B5FE8"/></linearGradient></defs><path d="M14,4 L44,4 A9,9 0 0,1 53,13 L53,42 A9,9 0 0,1 44,51 L20,51 L6,61 L11,51 A6,6 0 0,1 5,45 L5,13 A9,9 0 0,1 14,4 Z" fill="url(#spark_logo_8_3)"/><path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill="white" opacity="0.93" transform="translate(13.16,11.3) scale(0.72)"/><path d="M89,14 L59,14 A9,9 0 0,0 50,23 L50,52 A9,9 0 0,0 59,61 L83,61 L97,71 L92,61 A6,6 0 0,0 98,55 L98,23 A9,9 0 0,0 89,14 Z" fill="none" stroke="url(#spark_logo_8_3)" stroke-width="2.2" stroke-linejoin="round"/><path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill="url(#spark_logo_8_3)" transform="translate(58.16,21.3) scale(0.72)"/></svg>
+    <span class="logo-text">Attune</span>
+  </a>
+  <ul class="nav-center">
+    <li><a href="/home">Home</a></li>
+    <li class="nav-dropdown">
+      <button class="nav-dropdown-toggle active">Learn <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg></button>
+      <div class="nav-dropdown-menu">
+        <a href="/purpose">Our Purpose</a>
+        <a href="/how-it-works">How it works</a>
+        <div class="dd-divider"></div>
+        <a href="/practice" class="active">In Practice</a>
+        <a href="/faq">FAQs</a>
+        <a href="/reviews">Reviews</a>
+      </div>
+    </li>
+    <li><a href="/offerings">Packages</a></li>
+  </ul>
+  <div class="nav-right">
+    <a href="/portal" class="nav-signin">Sign in</a>
+    <a href="/portal" class="btn-nav">Get started</a>
+    <button class="hamburger" id="hamburger" onclick="toggleMenu()" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</nav>
+<div class="mobile-menu" id="mobile-menu">
+  <a href="/home">Home</a>
+    <div class="mm-section">
+    <span class="mm-label">Learn</span>
+    <a href="/purpose" class="mm-sub">Our Purpose</a>
+    <a href="/how-it-works" class="mm-sub">How it works</a>
+    <a href="/practice" class="mm-sub">In Practice</a>
+    <a href="/faq" class="mm-sub">FAQs</a>
+    <a href="/reviews" class="mm-sub">Reviews</a>
+  </div>
+  <a href="/offerings">Packages</a>
+  <a href="/portal">Sign in</a>
+  <a href="/portal?tab=signup" class="mm-cta">Get started →</a>
+</div>
+
+<div class="page-header">
+  <div class="page-header-glow"></div>
+    <div class="page-header-inner">
+  <p class="eyebrow">Resources</p>
+  <h1 class="page-title">Tools, books, and guides <em>for doing this well.</em></h1>
+  <p class="page-sub">Attune gives you a foundation. What you build on it depends on how you choose to use it. These are the resources we return to, on communication, conflict, understanding, and growth.</p>
+    <div class="hero-actions">
+      <a href="/portal?tab=signup" class="btn-primary">GET STARTED →</a>
+      <a href="/offerings#gift" class="gift-link">Give it as a gift →</a>
+    </div>
+  </div>
+</div>
+
+<section class="res-section">
+  <p class="s-eye">How to use your results</p>
+  <h2 class="s-title">Making the most of what you learn</h2>
+  <p class="s-sub">Your results are a starting point, not a conclusion. Here are a few concrete ways to actually work through them together.</p>
+  <div style="display:flex;align-items:center;gap:.75rem;background:linear-gradient(135deg,#FFF8F5,#F0F3FF);border:1.5px solid #E8DDD0;border-radius:14px;padding:1rem 1.25rem;margin-bottom:1.75rem;">
+    <svg width="46" height="33" viewBox="0 0 103 76" fill="none" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="spark_logo_8_2" x1="0" y1="0" x2="103" y2="76" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#E8673A"/><stop offset="100%" stop-color="#1B5FE8"/></linearGradient></defs><path d="M14,4 L44,4 A9,9 0 0,1 53,13 L53,42 A9,9 0 0,1 44,51 L20,51 L6,61 L11,51 A6,6 0 0,1 5,45 L5,13 A9,9 0 0,1 14,4 Z" fill="url(#spark_logo_8_2)"/><path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill="white" opacity="0.93" transform="translate(13.16,11.3) scale(0.72)"/><path d="M89,14 L59,14 A9,9 0 0,0 50,23 L50,52 A9,9 0 0,0 59,61 L83,61 L97,71 L92,61 A6,6 0 0,0 98,55 L98,23 A9,9 0 0,0 89,14 Z" fill="none" stroke="url(#spark_logo_8_2)" stroke-width="2.2" stroke-linejoin="round"/><path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill="url(#spark_logo_8_2)" transform="translate(58.16,21.3) scale(0.72)"/></svg>
+    <p style="font-size:.8rem;color:#1E1610;line-height:1.6;margin:0;"><strong>Want structured guidance?</strong> The <strong>Personalized Workbook</strong> goes further, built from your specific results, it includes guided exercises, conversation prompts, and reflection activities for each place you two see things differently. Available to add from your portal after you get your results.</p>
+  </div>
+  <div class="guides-grid">
+    <div class="guide-card">
+      <div class="guide-accent" style="background:var(--orange);"></div>
+      <p class="guide-tag">Conversation guide</p>
+      <h3 class="guide-title">How to start a hard conversation</h3>
+      <p class="guide-desc">When you find a gap in your results that feels significant, here's a structure that tends to work, one that opens things up rather than putting either person on the defensive.</p>
+      <div class="guide-steps">
+        <p class="guide-step">Start with curiosity, not conclusions. "I noticed we answered differently on X, I'd love to understand more about how you think about that."</p>
+        <p class="guide-step">Share your own perspective before asking for theirs. It lowers the stakes and models the kind of openness you're asking for.</p>
+        <p class="guide-step">Listen without planning your response. Most conversations derail when both people are preparing to talk rather than actually listening.</p>
+        <p class="guide-step">Acknowledge before you argue. "That makes sense, given how you think about it" creates the foundation for a real exchange.</p>
+        <p class="guide-step">End with a question, not a position. Leave room for it to be an ongoing conversation, not a debate to be resolved in one sitting.</p>
+      </div>
+    </div>
+    <div class="guide-card">
+      <div class="guide-accent" style="background:var(--indigo);"></div>
+      <p class="guide-tag">Review guide</p>
+      <h3 class="guide-title">How to review your results together</h3>
+      <p class="guide-desc">Some couples review their results immediately after unlocking; others wait for a good moment. Either approach works. What matters is how you do it.</p>
+      <div class="guide-steps">
+        <p class="guide-step">Pick a time when neither of you is distracted or tired. Your results deserve better than a Tuesday night when you're half-watching something.</p>
+        <p class="guide-step">Read separately first. Spend 10–15 minutes reading your own results before discussing, it lets you arrive at the conversation with your own perspective formed.</p>
+        <p class="guide-step">Start with the places you're aligned. Before getting into the gaps, appreciate what's clearly working. It's a better tone to start from.</p>
+        <p class="guide-step">Pick two or three things to explore, not everything. Don't try to process the whole thing in one conversation. Depth matters more than coverage.</p>
+        <p class="guide-step">Take notes. Write down the things you want to come back to. Your portal's Notes feature is built for exactly this.</p>
+      </div>
+    </div>
+    <div class="guide-card">
+      <div class="guide-accent" style="background:#10b981;"></div>
+      <p class="guide-tag">Conflict guide</p>
+      <h3 class="guide-title">When a conversation turns heated</h3>
+      <p class="guide-desc">Understanding each other deeply doesn't mean you'll stop having hard moments. It means you have better tools when you do.</p>
+      <div class="guide-steps">
+        <p class="guide-step">Name what's happening. "I can feel this getting tense" is more useful than pushing through as if it isn't.</p>
+        <p class="guide-step">Take a break if you need one. 20–30 minutes apart is usually enough for both nervous systems to settle. Come back to it intentionally.</p>
+        <p class="guide-step">Go back to the results. If a conflict touches a pattern you saw in your communication results, reference it, it depersonalizes things slightly and reminds you both that it's a pattern, not an attack.</p>
+        <p class="guide-step">Ask what the other person needs right now. Not what they think, or what's right, what they need from you in this moment.</p>
+        <p class="guide-step">Repair before you resolve. Sometimes the most important thing isn't getting to an answer, it's reestablishing that you're still on the same team.</p>
+      </div>
+    </div>
+    <div class="guide-card">
+      <div class="guide-accent" style="background:#f59e0b;"></div>
+      <p class="guide-tag">Long-term guide</p>
+      <h3 class="guide-title">Staying current with each other over time</h3>
+      <p class="guide-desc">People change. What you need, value, and envision shifts, sometimes slowly, sometimes suddenly. The couples who stay genuinely close over decades check in.</p>
+      <div class="guide-steps">
+        <p class="guide-step">Set a recurring date for a relationship check-in, quarterly, semi-annual, or annual. Put it on the calendar like you would anything else that matters.</p>
+        <p class="guide-step">Use your Attune results as a baseline. What's stayed consistent? What feels different now than it did when you first did this?</p>
+        <p class="guide-step">Ask about changes, not just feelings. "Has anything shifted in how you think about X?" is more generative than "Are you happy?"</p>
+        <p class="guide-step">Add new topics as your life evolves. Your conversation topics at year 2 will be different from year 7, don't recycle the same questions.</p>
+        <p class="guide-step">Celebrate growth. Notice and acknowledge the ways you've figured things out together. It's easy to only notice what's hard.</p>
+      </div>
+    </div>
+  </div>
+</section>
+<section class="res-section">
+  <p class="s-eye">Reading list</p>
+  <h2 class="s-title">Books worth your time</h2>
+  <p class="s-sub">Not a comprehensive bibliography, a short list of books that genuinely change how couples think about each other. Each one has been read carefully and earns its place here.</p>
+  <div class="books-grid">
+    <a class="book-card" href="https://www.amazon.com/Seven-Principles-Making-Marriage-Work/dp/0553447718" target="_blank" rel="noopener" style="text-decoration:none;color:inherit;">
+      <div class="book-spine" style="background:#FFF0EB;">📖</div>
+      <span class="book-tag">Communication</span>
+      <p class="book-title">The Seven Principles for Making Marriage Work</p>
+      <p class="book-author">John Gottman &amp; Nan Silver</p>
+      <p class="book-desc">Gottman spent decades studying couples in a research lab and identified the behaviors that predict long-term success with remarkable accuracy. Practical, research-backed, and not at all dry.</p>
+      <p class="book-why">Why we recommend it: The best data-grounded book on what actually works, and what quietly destroys relationships.</p>
+      <p style="font-size:.72rem;color:var(--orange);font-weight:600;margin-top:.25rem;">Find this book →</p>
+    </a>
+    <a class="book-card" href="https://www.amazon.com/Attached-Science-Adult-Attachment-YouFind/dp/1585429139" target="_blank" rel="noopener" style="text-decoration:none;color:inherit;">
+      <div class="book-spine" style="background:#EEEFFF;">📖</div>
+      <span class="book-tag">Understanding differences</span>
+      <p class="book-title">Attached</p>
+      <p class="book-author">Amir Levine &amp; Rachel Heller</p>
+      <p class="book-desc">A readable introduction to attachment theory, why some of us need closeness and reassurance while others value independence, and how those patterns interact in relationships.</p>
+      <p class="book-why">Why we recommend it: Helps explain a lot of the patterns Attune's Communication exercise surfaces, especially around closeness and independence.</p>
+      <p style="font-size:.72rem;color:var(--orange);font-weight:600;margin-top:.25rem;">Find this book →</p>
+    </a>
+    <a class="book-card" href="https://www.amazon.com/Difficult-Conversations-Discuss-What-Matters/dp/0143118447" target="_blank" rel="noopener" style="text-decoration:none;color:inherit;">
+      <div class="book-spine" style="background:#EEFAF3;">📖</div>
+      <span class="book-tag">Conflict</span>
+      <p class="book-title">Difficult Conversations</p>
+      <p class="book-author">Douglas Stone, Bruce Patton &amp; Sheila Heen</p>
+      <p class="book-desc">From the Harvard Negotiation Project, a framework for having the conversations that matter without them turning into arguments. Surprisingly applicable to everyday relationship moments.</p>
+      <p class="book-why">Why we recommend it: The best practical guide for turning Attune's conversation starters into real discussions.</p>
+      <p style="font-size:.72rem;color:var(--orange);font-weight:600;margin-top:.25rem;">Find this book →</p>
+    </a>
+    <a class="book-card" href="https://www.amazon.com/Getting-Love-You-Want-Anniversary/dp/0805087001" target="_blank" rel="noopener" style="text-decoration:none;color:inherit;">
+      <div class="book-spine" style="background:#FFF7ED;">📖</div>
+      <span class="book-tag">Expectations</span>
+      <p class="book-title">Getting the Love You Want</p>
+      <p class="book-author">Harville Hendrix &amp; Helen LaKelly Hunt</p>
+      <p class="book-desc">A classic, explores how our early experiences shape what we need in relationships and why we often pick partners who trigger our deepest vulnerabilities. Dense but rewarding.</p>
+      <p class="book-why">Why we recommend it: Provides context for many of the expectations differences that show up in Exercise 2.</p>
+      <p style="font-size:.72rem;color:var(--orange);font-weight:600;margin-top:.25rem;">Find this book →</p>
+    </a>
+    <a class="book-card" href="https://www.amazon.com/Hold-Me-Tight-Conversations-Lifetime/dp/031611300X" target="_blank" rel="noopener" style="text-decoration:none;color:inherit;">
+      <div class="book-spine" style="background:#F5F3FF;">📖</div>
+      <span class="book-tag">Self-understanding</span>
+      <p class="book-title">Hold Me Tight</p>
+      <p class="book-author">Sue Johnson</p>
+      <p class="book-desc">The founder of Emotionally Focused Therapy explains why we fight about the same things over and over, and how to interrupt the cycle. Warm, accessible, and genuinely useful.</p>
+      <p class="book-why">Why we recommend it: Helps couples understand the emotional undercurrents behind communication patterns.</p>
+      <p style="font-size:.72rem;color:var(--orange);font-weight:600;margin-top:.25rem;">Find this book →</p>
+    </a>
+    <a class="book-card" href="https://www.amazon.com/Mating-Captivity-Unlocking-Erotic-Intelligence/dp/0060753641" target="_blank" rel="noopener" style="text-decoration:none;color:inherit;">
+      <div class="book-spine" style="background:#FFF0EB;">📖</div>
+      <span class="book-tag">Long-term growth</span>
+      <p class="book-title">Mating in Captivity</p>
+      <p class="book-author">Esther Perel</p>
+      <p class="book-desc">Perel explores the paradox of long-term intimacy, how familiarity and safety can work against desire, and how couples can cultivate both stability and aliveness over time.</p>
+      <p class="book-why">Why we recommend it: A different kind of relationship book, more philosophical, genuinely thought-provoking, and worth reading together.</p>
+      <p style="font-size:.72rem;color:var(--orange);font-weight:600;margin-top:.25rem;">Find this book →</p>
+    </a>
+  </div>
+</section>
+
+<!-- PROFESSIONAL SUPPORT -->
+<section class="res-section">
+  <p class="s-eye">If you need more than this</p>
+  <h2 style="font-family:var(--hfont);font-size:clamp(1.5rem,2.8vw,2rem);font-weight:700;color:var(--ink);margin-bottom:.75rem;line-height:1.1;">Attune is a starting point. Some conversations need a professional.</h2>
+  <p style="font-size:.92rem;color:var(--muted);line-height:1.78;font-weight:300;max-width:680px;margin-bottom:2rem;">If your results raised something harder, patterns that feel entrenched, pain that predates this relationship, or a sense that things are more serious than a conversation can address, that's not a failure of the process. It's useful information. A good therapist is trained for exactly that.</p>
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:1.25rem;margin-bottom:1.5rem;">
+    <div style="background:white;border:1.5px solid var(--stone);border-radius:14px;padding:1.4rem;">
+      <div style="font-size:.62rem;letter-spacing:.2em;text-transform:uppercase;color:var(--orange);font-weight:700;margin-bottom:.6rem;">Couples therapy</div>
+      <p style="font-size:.82rem;color:var(--muted);line-height:1.65;margin-bottom:.85rem;">For couples navigating sustained difficulty, repetitive conflict, or communication breakdown. A licensed couples therapist works with both of you together.</p>
+      <a href="https://www.psychologytoday.com/us/therapists/couples-counseling" target="_blank" rel="noopener" style="font-size:.75rem;font-weight:600;color:var(--clay);text-decoration:none;">Find a therapist via Psychology Today →</a>
+    </div>
+    <div style="background:white;border:1.5px solid var(--stone);border-radius:14px;padding:1.4rem;">
+      <div style="font-size:.62rem;letter-spacing:.2em;text-transform:uppercase;color:var(--indigo);font-weight:700;margin-bottom:.6rem;">Individual therapy</div>
+      <p style="font-size:.82rem;color:var(--muted);line-height:1.65;margin-bottom:.85rem;">Sometimes patterns in a relationship are rooted in individual history. Individual therapy can help you understand your own responses before or alongside couples work.</p>
+      <a href="https://www.psychologytoday.com/us/therapists" target="_blank" rel="noopener" style="font-size:.75rem;font-weight:600;color:var(--clay);text-decoration:none;">Find an individual therapist →</a>
+    </div>
+    <div style="background:white;border:1.5px solid var(--stone);border-radius:14px;padding:1.4rem;">
+      <div style="font-size:.62rem;letter-spacing:.2em;text-transform:uppercase;color:#10b981;font-weight:700;margin-bottom:.6rem;">Crisis support</div>
+      <p style="font-size:.82rem;color:var(--muted);line-height:1.65;margin-bottom:.85rem;">If you or your partner are in immediate distress, or if safety is a concern, please reach out for support. The 988 Lifeline is free, confidential, and available 24/7.</p>
+      <a href="https://988lifeline.org" target="_blank" rel="noopener" style="font-size:.75rem;font-weight:600;color:var(--clay);text-decoration:none;">988 Suicide & Crisis Lifeline →</a>
+    </div>
+  </div>
+  <p style="font-size:.78rem;color:var(--muted);line-height:1.65;font-style:italic;max-width:580px;">Attune is not a clinical product and is not intended to replace professional support. If your results raised something you weren't expecting, that's worth taking seriously.</p>
+</section>
+
+<!-- PHILOSOPHY BAND -->
+<div class="philosophy-band">
+  <div class="philosophy-inner">
+    <p style="font-size:.62rem;letter-spacing:.3em;text-transform:uppercase;color:rgba(232,103,58,.65);font-weight:700;margin-bottom:1.25rem;">Why we built this page</p>
+    <h2 style="font-family:var(--hfont);font-size:clamp(1.6rem,2.8vw,2.2rem);font-weight:700;color:white;line-height:1.15;margin-bottom:1rem;letter-spacing:-.02em;">We're not trying to be your only resource.</h2>
+    <p style="font-size:.92rem;color:rgba(255,255,255,.45);line-height:1.8;max-width:540px;margin:0 auto;font-weight:300;">Attune gives you a foundation, a precise shared understanding of how you each work and what you each expect. What you do with that foundation is up to you. These books and guides are things we genuinely believe in, curated because they make the kind of work Attune starts easier to continue.</p>
+  </div>
+</div>
+
+<!-- CTA -->
+<div class="cta-wrap">
+  <div class="cta-inner">
+    <h2 class="cta-title">Start with the foundation.</h2>
+    <p class="cta-sub">Two exercises. About 25 minutes each. Everything you learn is yours to keep.</p>
+    <div class="cta-actions">
+      <a href="/portal" class="btn-primary">Start your exercises →</a>
+      <a href="/offerings" class="btn-ghost">See what's included</a>
+    </div>
+  </div>
+</div>
+
+<footer class="site-footer" style="scroll-snap-align:start;">
+  <div class="sf-inner">
+    <div class="sf-brand">
+      <a href="/home" class="logo">
+        <svg width="46" height="33" viewBox="0 0 103 76" fill="none" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="spark_logo_8_1" x1="0" y1="0" x2="103" y2="76" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#E8673A"/><stop offset="100%" stop-color="#1B5FE8"/></linearGradient></defs><path d="M14,4 L44,4 A9,9 0 0,1 53,13 L53,42 A9,9 0 0,1 44,51 L20,51 L6,61 L11,51 A6,6 0 0,1 5,45 L5,13 A9,9 0 0,1 14,4 Z" fill="url(#spark_logo_8_1)"/><path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill="white" opacity="0.93" transform="translate(13.16,11.3) scale(0.72)"/><path d="M89,14 L59,14 A9,9 0 0,0 50,23 L50,52 A9,9 0 0,0 59,61 L83,61 L97,71 L92,61 A6,6 0 0,0 98,55 L98,23 A9,9 0 0,0 89,14 Z" fill="none" stroke="url(#spark_logo_8_1)" stroke-width="2.2" stroke-linejoin="round"/><path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill="url(#spark_logo_8_1)" transform="translate(58.16,21.3) scale(0.72)"/></svg>
+        <span class="logo-text" style="font-size:1.05rem;">Attune</span>
+      </a>
+      <p class="sf-tagline">Because understanding<br>takes intention.</p>
+      
+    </div>
+    <div class="sf-links">
+      <div class="sf-col">
+        <p class="sf-col-title">Product</p>
+        <a href="/home">Home</a>
+        
+        <a href="/offerings">Packages</a>
+        <a href="/portal">Get started</a>
+      </div>
+      <div class="sf-col">
+        <p class="sf-col-title">Learn</p>
+        <a href="/purpose">Our Purpose</a>
+        <a href="/how-it-works">How it works</a>
+        <a href="/practice">In Practice</a>
+        <a href="/reviews">Reviews</a>
+      </div>
+      <div class="sf-col">
+        <p class="sf-col-title">Support</p>
+        <a href="/faq">FAQs</a>
+        <a href="mailto:hello@attune-relationships.com">Contact us</a>
+        <a href="/legal">Privacy policy</a>
+        <a href="/legal#terms">Terms of service</a>
+      </div>
+    </div>
+  </div>
+  <div class="sf-bottom">
+    <p class="sf-copy">Attune Relationships™</p>
+    <p class="sf-email">hello@attune-relationships.com</p>
+  </div>
+  <div style="background:rgba(255,255,255,.04);border-top:1px solid rgba(255,255,255,.06);padding:.85rem 2rem;display:flex;align-items:center;gap:1rem;flex-wrap:wrap;justify-content:space-between;">
+    <span style="font-family:'Playfair Display',Georgia,serif;font-size:.88rem;font-style:italic;color:rgba(255,255,255,.35);">You love each other, Attune helps you understand each other.</span>
+    <div id="spark-feedback-strip" style="display:flex;gap:.4rem;">
+      <button onclick="window._sparkFeedback('love')" style="background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);border-radius:6px;padding:.3rem .65rem;font-size:.72rem;color:rgba(255,255,255,.6);cursor:pointer;">❤️ Love it</button>
+      <button onclick="window._sparkFeedback('good')" style="background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);border-radius:6px;padding:.3rem .65rem;font-size:.72rem;color:rgba(255,255,255,.6);cursor:pointer;">👍 Pretty good</button>
+      <button onclick="window._sparkFeedback('suggest')" style="background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);border-radius:6px;padding:.3rem .65rem;font-size:.72rem;color:rgba(255,255,255,.6);cursor:pointer;">💬 Suggest something</button>
+      <span id="spark-feedback-thanks" style="font-size:.7rem;color:#4ade80;display:none;">Thanks ✓</span>
+    </div>
+  </div>
+  <script>
+window._sparkFeedback = function(t) {
+    try {
+      if(t==='suggest'){
+        var strip=document.getElementById('spark-feedback-strip');
+        if(!strip)return;
+        strip.innerHTML='<input id="sfb-inp" type="text" placeholder="What would make Attune better?" style="background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.25);border-radius:6px;padding:.3rem .65rem;font-size:.72rem;color:white;width:200px;font-family:sans-serif;outline:none;"><button id="sfb-send" style="background:rgba(232,103,58,.9);border:none;border-radius:6px;padding:.3rem .65rem;font-size:.72rem;color:white;cursor:pointer;margin-left:.35rem;">Send</button>';
+        setTimeout(function(){
+          var i=document.getElementById('sfb-inp');
+          if(i)i.focus();
+          var btn=document.getElementById('sfb-send');
+          if(btn)btn.onclick=function(){
+            var m=i?i.value.trim():'';
+            fetch('/api/send-feedback',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({source:'footer_quick',rating:'suggest',message:m,page:window.location.pathname})}).catch(function(){});
+            var s=document.getElementById('spark-feedback-strip');
+            if(s)s.innerHTML='';
+            var th=document.getElementById('spark-feedback-thanks');
+            if(th)th.style.display='inline';
+          };
+        },50);
+        return;
+      }
+      fetch('/api/send-feedback',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({source:'footer_quick',rating:t==='love'?3:2,page:window.location.pathname})}).catch(function(){});
+      var strip=document.getElementById('spark-feedback-strip');
+      if(strip)strip.innerHTML='';
+      var thanks=document.getElementById('spark-feedback-thanks');
+      if(thanks)thanks.style.display='inline';
+    } catch(e){}
+  };
+</script>
+</footer>
+
+<script>
+function toggleMenu() {
+  document.getElementById('mobile-menu').classList.toggle('open');
+}
+document.addEventListener('click', function(e) {
+  const menu = document.getElementById('mobile-menu');
+  const btn = document.getElementById('hamburger');
+  if (menu.classList.contains('open') && !menu.contains(e.target) && !btn.contains(e.target)) {
+    menu.classList.remove('open');
+  }
+});
+
+  // Close mobile menu on outside tap
+  document.addEventListener('click', function(e) {
+    const menu = document.getElementById('mobile-menu');
+    const burger = document.getElementById('hamburger');
+    if (menu && menu.classList.contains('open') && !menu.contains(e.target) && !burger.contains(e.target)) {
+      menu.classList.remove('open');
+      burger.classList.remove('open');
+    }
+  });
+</script>
+</body>
+</html>
