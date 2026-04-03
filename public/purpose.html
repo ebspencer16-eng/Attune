@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+
+<link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#0E0B07">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Our Purpose, Attune</title>
+  <meta name="description" content="Most relationship friction isn't about incompatibility. It's about assumptions neither person knew the other was making. Attune makes those visible.">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Why Attune Exists">
+  <meta property="og:description" content="The relationship you want starts with the conversation you haven't had yet.">
+  <meta property="og:image" content="https://attune-relationships.com/og-image.png">
+  <meta property="og:url" content="https://attune-relationships.com/purpose">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Why Attune Exists">
+  <meta name="twitter:description" content="The relationship you want starts with the conversation you haven't had yet.">
+  <meta name="twitter:image" content="https://attune-relationships.com/og-image.png">
+  <link rel="canonical" href="https://attune-relationships.com/purpose">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,800;1,700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  html,body{overflow-x:hidden;max-width:100%}
+  html,body{scroll-snap-type:y proximity}
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  :root{
+    --cream:#FFFDF9;--warm:#FBF8F3;--stone:#E8DDD0;
+    --clay:#C17F47;--ink:#0E0B07;--text:#1E1610;--muted:#8C7A68;
+    --orange:#E8673A;--indigo:#1B5FE8;
+    --hfont:'Playfair Display',Georgia,serif;
+    --bfont:'DM Sans',sans-serif;
+  }
+  html{scroll-behavior:smooth}
+  body{background:var(--cream);color:var(--text);font-family:var(--bfont);-webkit-font-smoothing:antialiased}
+
+  /* NAV */
+  nav{position:fixed;top:0;left:0;right:0;z-index:100;height:58px;background:rgba(255,253,249,.94);backdrop-filter:blur(16px);border-bottom:1px solid var(--stone);display:flex;align-items:center;padding:0 2.5rem;justify-content:space-between}
+  .logo{display:flex;align-items:center;gap:.65rem;text-decoration:none}
+  .logo-mark{display:flex;align-items:center;flex-shrink:0}
+  .logo-text{font-family:var(--hfont);font-size:1.15rem;font-weight:700;color:var(--ink)}
+  .nav-center{display:flex;gap:2.5rem;list-style:none;position:absolute;left:50%;transform:translateX(-50%);align-items:center}.nav-center li{display:flex;align-items:center}
+  .nav-center a{text-decoration:none;color:var(--muted);font-size:.82rem;font-weight:500;transition:color .15s}
+  .nav-center a:hover{color:var(--ink)}
+  .nav-dropdown{position:relative}
+  .nav-dropdown-toggle{text-decoration:none;color:var(--muted);font-size:.82rem;font-weight:500;transition:color .15s;cursor:pointer;display:flex;align-items:center;gap:.28rem;background:none;border:none;padding:0;font-family:var(--bfont)}
+  .nav-dropdown-toggle:hover,.nav-dropdown-toggle.active{color:var(--ink)}
+  .nav-dropdown-toggle svg{transition:transform .2s}
+  .nav-dropdown:hover .nav-dropdown-toggle svg{transform:rotate(180deg)}
+  .nav-dropdown-menu{position:absolute;top:100%;left:50%;transform:translateX(-50%);background:rgba(255,253,249,.98);backdrop-filter:blur(16px);border:1.5px solid var(--stone);border-radius:14px;padding:.85rem .6rem .6rem;min-width:190px;opacity:0;visibility:hidden;pointer-events:none;transition:opacity .15s,visibility .15s;box-shadow:0 12px 40px rgba(14,11,7,.12);z-index:200;margin-top:.4rem}
+  .nav-dropdown-menu::before{content:'';position:absolute;top:-.5rem;left:0;right:0;height:.5rem;background:transparent}
+  .nav-dropdown:hover .nav-dropdown-menu{opacity:1;visibility:visible;pointer-events:auto}
+  .nav-dropdown-menu::before{content:'';position:absolute;top:-16px;left:-10px;right:-10px;height:16px;background:transparent;}
+  .nav-dropdown-menu a{display:block;padding:.55rem .8rem;font-size:.78rem;color:var(--muted);text-decoration:none;border-radius:8px;transition:all .15s;font-weight:500}
+  .nav-dropdown-menu a:hover{background:var(--warm);color:var(--ink)}
+  .nav-dropdown-menu .dd-divider{height:1px;background:var(--stone);margin:.35rem .5rem}
+  .nav-center a.active{color:var(--ink);font-weight:600}
+  .nav-right{display:flex;align-items:center;gap:1.25rem}
+  .nav-signin{font-size:.8rem;font-weight:500;color:var(--muted);text-decoration:none;transition:color .15s}
+  .nav-signin:hover{color:var(--ink)}
+  .btn-nav{background:var(--ink);color:white;padding:.5rem 1.2rem;border-radius:10px;font-size:.78rem;font-weight:600;text-decoration:none;display:inline-block;transition:opacity .15s}
+  .btn-nav:hover{opacity:.82}
+  .hamburger{display:none;flex-direction:column;gap:4px;background:none;border:none;cursor:pointer;padding:6px;border-radius:6px}
+  .hamburger span{display:block;width:20px;height:2px;background:var(--ink);border-radius:2px;transition:all .25s}
+  .mobile-menu{display:none;position:fixed;top:66px;right:1rem;left:auto;width:240px;background:rgba(255,253,249,.99);backdrop-filter:blur(20px);border:1.5px solid var(--stone);border-radius:14px;padding:1rem;z-index:200;flex-direction:column;gap:.15rem;box-shadow:0 12px 40px rgba(14,11,7,.14)}
+  .mobile-menu.open{display:flex}
+  .mobile-menu a{font-size:.85rem;font-weight:500;color:var(--muted);text-decoration:none;padding:.5rem .65rem;border-radius:8px;transition:all .15s}
+  .mobile-menu a:last-child{}
+  .mobile-menu a:hover{color:var(--ink);background:rgba(14,11,7,.04)}
+  .mm-section{display:flex;flex-direction:column;border-bottom:1px solid var(--stone);padding-bottom:.25rem;margin-bottom:.25rem}
+  .mm-label{font-size:.58rem;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);font-weight:700;padding:.55rem 0 .2rem .75rem}
+  .mm-sub{padding-left:1.25rem !important;font-size:.85rem !important;border-bottom:none !important;font-style:italic;color:var(--muted)}
+  .mm-sub:last-child{border-bottom:none}
+
+  /* SHARED SECTION SYSTEM */
+  .si{max-width:920px;margin:0 auto;padding:3rem 2.5rem}
+  @media(max-width:768px){.si{padding:3rem 1.5rem}}
+  @media(max-width:640px){
+    .page-header{padding:calc(58px + 2.5rem) 1.25rem 2.5rem!important}
+    .si{padding:1.75rem 1.25rem!important}
+
+    /* Research: horizontal scroll strip instead of stacked cards */
+    .research-grid{
+      display:flex!important;
+      flex-wrap:nowrap!important;
+      overflow-x:auto!important;
+      gap:.75rem!important;
+      padding-bottom:.75rem!important;
+      -webkit-overflow-scrolling:touch!important;
+      scrollbar-width:none!important;
+    }
+    .research-grid::-webkit-scrollbar{display:none}
+    .research-card{
+      min-width:72vw!important;
+      max-width:72vw!important;
+      flex-shrink:0!important;
+      padding:1.1rem!important;
+    }
+
+    /* Principles: hide decorative large numbers */
+    .principle-num{display:none!important}
+    .principles-grid{grid-template-columns:1fr!important}
+
+    /* Principles numbered list items: remove left col grid */
+    [style*="padding:2rem 0;border-top"]{padding:1.25rem 0!important}
+    [style*="grid-template-columns:80px 1fr"]{grid-template-columns:1fr!important;gap:.5rem!important}
+    [style*="font-size:3.5rem"]{display:none!important}
+
+    /* Couple typing callout: single column, hide map illustration */
+    section[style*="padding:5rem 2.5rem"]{padding:2.25rem 1.25rem!important}
+    .couple-typing-grid{grid-template-columns:1fr!important}
+    .couple-typing-map{display:none!important}
+
+    /* Hide methodology download buttons on mobile */
+    .methodology-downloads{display:none!important}
+    [style*="display:flex;gap:.65rem;flex-wrap:wrap;flex-shrink:0"]{display:none!important}
+
+    /* CTA section: reduce padding */
+    .cta-section{padding:2.25rem 0!important}
+    .bg-dark .si,.cta-section .cta-inner{padding-top:2rem!important;padding-bottom:2rem!important}
+    section[style*="padding:4rem"]{padding:2rem 1.25rem!important}
+  }
+  .s-eye{font-size:.62rem;letter-spacing:.3em;text-transform:uppercase;color:var(--clay);font-weight:700;margin-bottom:.85rem;display:flex;align-items:center;gap:.5rem}
+  .s-eye::before{content:'';width:28px;height:2.5px;border-radius:999px;background:linear-gradient(90deg,var(--orange),var(--indigo));flex-shrink:0}
+  .s-title{font-family:var(--hfont);font-size:clamp(1.85rem,3.2vw,2.7rem);font-weight:700;line-height:1.1;color:var(--ink);margin-bottom:1.1rem;letter-spacing:-.02em}
+  .s-title em{font-style:italic;color:var(--orange)}
+  .s-sub{font-size:.95rem;color:var(--muted);line-height:1.78;font-weight:300;max-width:600px}
+
+  /* PAGE HEADER */
+  .eyebrow{font-size:.6rem;letter-spacing:.3em;text-transform:uppercase;color:var(--clay);font-weight:700;margin-bottom:.9rem;display:flex;align-items:center;justify-content:center;gap:.65rem}
+  .eyebrow::before{content:'';width:28px;height:2.5px;border-radius:999px;background:linear-gradient(90deg,var(--orange),var(--indigo));flex-shrink:0}.eyebrow::after{content:'';width:28px;height:2.5px;border-radius:999px;background:linear-gradient(90deg,var(--orange),var(--indigo));flex-shrink:0}
+  .page-header{background:linear-gradient(150deg,#1c1940 0%,#282560 60%,#1e3a6e 100%);padding:calc(58px + 3.5rem) clamp(1.25rem,5vw,2.5rem) 3rem;position:relative;overflow:hidden;max-width:none;margin:0;width:100%;box-sizing:border-box;text-align:center}
+  .page-header::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,#E8673A,#9B5DE5,#1B5FE8);z-index:1}
+  .page-header-glow{position:absolute;inset:0;background:radial-gradient(ellipse 60% 40% at 50% 100%,rgba(232,103,58,.12),transparent);pointer-events:none}
+  .page-header-inner{max-width:700px;margin-left:auto;margin-right:auto;position:relative;z-index:1;text-align:center}
+  .page-title{font-family:var(--hfont);font-size:clamp(1.7rem,2.8vw,2.2rem);font-weight:700;line-height:1.15;color:white;margin-bottom:1.25rem;letter-spacing:-.02em}
+  .page-title em{font-style:italic;color:var(--orange)}
+  .page-sub{font-size:1rem;color:rgba(255,255,255,.65);line-height:1.78;font-weight:300}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
+  .fu1{animation:fadeUp .6s ease both}
+
+  /* DARK PHILOSOPHY SECTION */
+  .bg-dark{background:linear-gradient(150deg,#1c1940,#282560)}
+  .bg-dark .si{padding-top:3.5rem;padding-bottom:3.5rem}
+  .bg-dark .s-eye{color:rgba(232,103,58,.8)}
+  .bg-dark .s-eye::before{width:28px;height:2.5px;border-radius:999px;background:linear-gradient(90deg,var(--orange),var(--indigo))}
+  .bg-dark .s-title{color:white}
+  .bg-dark .s-sub{color:rgba(255,255,255,.78);max-width:600px}
+
+  /* QUOTE CARDS */
+  .phil-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem;margin-top:3rem}
+  .phil-card{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.14);border-radius:18px;padding:1.85rem}
+  .phil-q{font-family:var(--hfont);font-size:1.05rem;font-style:italic;line-height:1.62;color:rgba(255,255,255,.94);margin-bottom:1.1rem}
+  .phil-src{font-size:.7rem;color:rgba(255,255,255,.55);font-weight:500;letter-spacing:.04em;text-transform:uppercase}
+
+  /* PRINCIPLES SECTION */
+  .principles{background:white;border-top:1px solid var(--stone);border-bottom:1px solid var(--stone)}
+  .principles-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:2rem;margin-top:2.5rem}
+  .principle-card{padding:1.75rem;background:var(--warm);border:1px solid var(--stone);border-radius:16px}
+  .principle-num{font-family:var(--hfont);font-size:2rem;font-weight:700;color:rgba(232,103,58,.25);margin-bottom:.75rem;line-height:1}
+  .principle-title{font-family:var(--hfont);font-size:1.05rem;font-weight:700;color:var(--ink);margin-bottom:.5rem}
+  .principle-body{font-size:.84rem;color:var(--muted);line-height:1.72;font-weight:300}
+
+  /* RESEARCH SECTION */
+  .research-section{background:var(--warm)}
+  .research-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.25rem;margin-top:2.5rem}
+  .research-card{background:white;border:1.5px solid var(--stone);border-radius:14px;padding:1.5rem;position:relative}
+  .research-card::before{content:'';position:absolute;top:0;left:0;bottom:0;width:3px;border-radius:14px 0 0 14px}
+  .research-card.rc-orange::before{background:var(--orange)}
+  .research-card.rc-blue::before{background:var(--indigo)}
+  .research-card.rc-green::before{background:#10b981}
+  .research-label{font-size:.58rem;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);margin-bottom:.85rem;font-weight:700}
+  .research-body{font-size:.84rem;color:var(--text);line-height:1.72;font-weight:300;margin-bottom:.85rem}
+  .research-src{font-size:.68rem;color:var(--muted);font-style:italic}
+
+  /* CTA SECTION */
+  .cta-section{background:var(--warm);border-top:1px solid var(--stone);padding:5rem 0}
+  .cta-inner{max-width:640px;margin:0 auto;padding:0 2.5rem;text-align:center}
+  .cta-section h2{font-family:var(--hfont);font-size:clamp(1.9rem,3.5vw,2.8rem);font-weight:700;color:var(--ink);line-height:1.1;margin-bottom:1.25rem}
+  .cta-section p{font-size:.95rem;color:var(--muted);line-height:1.75;font-weight:300;margin-bottom:2rem}
+  .cta-btn{background:var(--ink);color:white;padding:.85rem 2.2rem;border-radius:12px;font-size:.9rem;font-weight:700;text-decoration:none;display:inline-block;transition:opacity .15s;font-family:var(--bfont)}
+  .cta-btn:hover{opacity:.82}
+
+  /* FOOTER */
+  .site-footer{background:var(--ink);color:rgba(255,255,255,.55);padding:4rem 0 2rem;width:100%}
+  .sf-inner{max-width:1120px;margin:0 auto;padding:0 2.5rem 3rem;display:grid;grid-template-columns:1fr 2fr;gap:4rem;border-bottom:1px solid rgba(255,255,255,.07)}
+  .sf-brand .logo-text{color:rgba(255,255,255,.9)}
+  .sf-tagline{font-size:.8rem;color:rgba(255,255,255,.38);line-height:1.6;margin-top:.75rem;font-weight:300;max-width:200px}
+  .sf-links{display:grid;grid-template-columns:repeat(4,1fr);gap:2rem}
+  .sf-col p.sf-col-title{font-size:.6rem;letter-spacing:.2em;text-transform:uppercase;color:rgba(255,255,255,.3);margin-bottom:1rem;font-weight:700}
+  .sf-col a{display:block;font-size:.78rem;color:rgba(255,255,255,.5);text-decoration:none;margin-bottom:.55rem;transition:color .15s;font-weight:300}
+  .sf-col a:hover{color:rgba(255,255,255,.9)}
+  .sf-bottom{max-width:1120px;margin:0 auto;padding:1.5rem 2.5rem 0;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:.5rem}
+  .sf-copy,.sf-email{font-size:.72rem;color:rgba(255,255,255,.28);font-weight:300}
+
+  @media(max-width:900px){
+    .phil-grid,.principles-grid,.research-grid{grid-template-columns:1fr}
+    .sf-inner{grid-template-columns:1fr 1.6fr;gap:1.25rem;padding-left:1.25rem;padding-right:1.25rem}
+    .sf-links{grid-template-columns:1fr 1fr;gap:1rem}
+    .sf-tagline{font-size:.78rem}
+    .sf-col a{font-size:.8rem}
+    .sf-col-title{font-size:.62rem}
+    .nav-center{display:none}
+    .nav-right .btn-nav,.nav-signin{display:none}
+    .hamburger{display:flex}
+    nav{padding:0 1.25rem}
+    section{padding-left:1.25rem!important;padding-right:1.25rem!important}
+    .si{padding-left:1.25rem!important;padding-right:1.25rem!important}
+  }
+
+  @media(max-width:768px){.page-header{padding:5rem 1.5rem 2.5rem}}
+
+  @media(max-width:640px){
+    [style*="grid-template-columns:repeat(3,1fr)"]{grid-template-columns:1fr!important}
+    [style*="grid-template-columns: repeat(3, 1fr)"]{grid-template-columns:1fr!important}
+    [style*="grid-template-columns:repeat(4,1fr)"]{grid-template-columns:1fr 1fr!important}
+    [style*="grid-template-columns:1fr 2fr"]{grid-template-columns:1fr!important}
+    [style*="grid-template-columns: 1fr 2fr"]{grid-template-columns:1fr!important}
+    }
+
+  @media(max-width:640px){
+    .page-header{padding:calc(58px + 1.75rem) 1.25rem 2rem}
+    .page-title{font-size:clamp(1.9rem,7vw,2.6rem)}
+    .si{padding:1.75rem 1.25rem!important}
+    .research-grid,.principles-grid,.phil-grid{grid-template-columns:1fr!important}
+    .eyebrow{justify-content:center}
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="/home" class="logo">
+    <svg width="46" height="33" viewBox="0 0 103 76" fill="none" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="spark_logo_purpose_1" x1="0" y1="0" x2="103" y2="76" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#E8673A"/><stop offset="100%" stop-color="#1B5FE8"/></linearGradient></defs><path d="M14,4 L44,4 A9,9 0 0,1 53,13 L53,42 A9,9 0 0,1 44,51 L20,51 L6,61 L11,51 A6,6 0 0,1 5,45 L5,13 A9,9 0 0,1 14,4 Z" fill="url(#spark_logo_purpose_1)"/><path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill="white" opacity="0.93" transform="translate(13.16,11.3) scale(0.72)"/><path d="M89,14 L59,14 A9,9 0 0,0 50,23 L50,52 A9,9 0 0,0 59,61 L83,61 L97,71 L92,61 A6,6 0 0,0 98,55 L98,23 A9,9 0 0,0 89,14 Z" fill="none" stroke="url(#spark_logo_purpose_1)" stroke-width="2.2" stroke-linejoin="round"/><path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill="url(#spark_logo_purpose_1)" transform="translate(58.16,21.3) scale(0.72)"/></svg>
+    <span class="logo-text">Attune</span>
+  </a>
+  <ul class="nav-center">
+    <li><a href="/home">Home</a></li>
+    <li class="nav-dropdown">
+      <button class="nav-dropdown-toggle active">Learn <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg></button>
+      <div class="nav-dropdown-menu">
+        <a href="/purpose" class="active">Our Purpose</a>
+        <a href="/how-it-works">How it works</a>
+        <a href="/couple-types">Couple Types</a>
+        <div class="dd-divider"></div>
+        <a href="/practice">In Practice</a>
+        <a href="/faq">FAQs</a>
+        <a href="/reviews">Reviews</a>
+      </div>
+    </li>
+    <li><a href="/offerings">Packages</a></li>
+  </ul>
+  <div class="nav-right">
+    <a href="/portal" class="nav-signin">Sign in</a>
+    <a href="/portal" class="btn-nav">Get started</a>
+    <button class="hamburger" id="hamburger" onclick="toggleMenu()" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</nav>
+<div class="mobile-menu" id="mobile-menu">
+  <a href="/home">Home</a>
+  <div class="mm-section">
+    <span class="mm-label">Learn</span>
+    <a href="/purpose" class="mm-sub" style="color:var(--ink);font-weight:600">Our Purpose</a>
+    <a href="/how-it-works" class="mm-sub">How it works</a>
+    <a href="/couple-types" class="mm-sub">Couple Types</a>
+    <a href="/practice" class="mm-sub">In Practice</a>
+    <a href="/faq" class="mm-sub">FAQs</a>
+    <a href="/reviews" class="mm-sub">Reviews</a>
+  </div>
+  <a href="/offerings">Packages</a>
+  <a href="/portal">Sign in</a>
+  <a href="/portal?tab=signup" class="mm-cta">Get started →</a>
+</div>
+
+<!-- PAGE HEADER — dark gradient -->
+<div class="page-header">
+  <div class="page-header-glow"></div>
+  <div class="page-header-inner">
+    <p class="eyebrow" style="color:rgba(232,103,58,.85);">Our Purpose</p>
+    <h1 class="page-title">The relationship you want starts with<br>the conversation you haven't had yet.</h1>
+    <p class="page-sub" style="max-width:540px;margin-left:auto;margin-right:auto;">Most relationship friction isn't about incompatibility. It's about assumptions neither person knew the other was making. Attune makes those visible before they become problems.</p>
+    <p style="margin-top:1.25rem;"><a href="/how-it-works" style="font-size:.72rem;color:rgba(255,255,255,.45);text-decoration:none;border-bottom:1px solid rgba(255,255,255,.2);padding-bottom:.1rem;font-family:'DM Sans',sans-serif;">Read about our methodology →</a></p>
+  </div>
+</div>
+
+<!-- WHY IT WORKS -->
+<section style="background:#FEFCF9;border-top:1px solid var(--stone);padding:2.5rem 0 1.25rem;">
+  <div class="si">
+    <p class="s-eye">Why it works</p>
+    <h2 class="s-title">Decades of relationship research point to the same three things.</h2>
+    <div style="display:flex;flex-direction:column;gap:0;margin-top:1.5rem;">
+      <div style="display:grid;grid-template-columns:52px 1fr;gap:1.5rem;align-items:start;padding:.85rem 0;border-top:1px solid var(--stone);">
+        <div style="flex-shrink:0;">
+              <svg viewBox="0 0 52 52" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:44px;height:44px;display:block;">
+  <rect width="52" height="52" rx="14" fill="rgba(232,103,58,.1)"/>
+  <circle cx="26" cy="27" r="13" fill="none" stroke="#E8673A" stroke-width="1.75"/>
+  <circle cx="26" cy="27" r="1.5" fill="#E8673A"/>
+  <line x1="26" y1="27" x2="26" y2="18" stroke="#E8673A" stroke-width="1.75" stroke-linecap="round"/>
+  <line x1="26" y1="27" x2="33" y2="31" stroke="#E8673A" stroke-width="1.5" stroke-linecap="round"/>
+  <line x1="26" y1="14" x2="26" y2="16" stroke="#E8673A" stroke-width="1.5" stroke-linecap="round"/>
+</svg>
+            </div>
+        <div>
+          <h3 style="font-size:1.1rem;font-weight:700;color:var(--ink);margin-bottom:.6rem;">Early conversations compound</h3>
+          <p style="font-size:.9rem;color:var(--muted);line-height:1.78;font-weight:300;max-width:560px;">The things that feel too soon to bring up are usually exactly the right things to bring up. Couples who name expectations early stay closer, longer. <span style="font-size:.75rem;color:var(--muted);font-style:italic;">Gottman &amp; Silver, <em>The Seven Principles</em>, 1999</span></p>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:52px 1fr;gap:1.5rem;align-items:start;padding:.85rem 0;border-top:1px solid var(--stone);">
+        <div style="flex-shrink:0;">
+              <svg viewBox="0 0 52 52" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:44px;height:44px;display:block;">
+  <rect width="52" height="52" rx="14" fill="rgba(155,93,229,.1)"/>
+  <circle cx="16" cy="22" r="5.5" fill="none" stroke="#9B5DE5" stroke-width="1.75"/>
+  <circle cx="36" cy="22" r="5.5" fill="none" stroke="#9B5DE5" stroke-width="1.75"/>
+  <path d="M8 40c0-4.4 3.6-8 8-8h20c4.4 0 8 3.6 8 8" fill="none" stroke="#9B5DE5" stroke-width="1.75" stroke-linecap="round"/>
+  <line x1="22" y1="26" x2="30" y2="26" stroke="#9B5DE5" stroke-width="1.25" stroke-dasharray="2.5 2" stroke-linecap="round"/>
+</svg>
+            </div>
+        <div>
+          <h3 style="font-size:1.1rem;font-weight:700;color:var(--ink);margin-bottom:.6rem;">Most distance comes from what's unsaid</h3>
+          <p style="font-size:.9rem;color:var(--muted);line-height:1.78;font-weight:300;max-width:560px;">It's rarely incompatibility that creates friction. It's the assumptions each person carries privately — about roles, money, the future — that no one's named yet. <span style="font-size:.75rem;color:var(--muted);font-style:italic;">Gottman et al., <em>Journal of Marriage and Family</em>, 1998</span></p>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:52px 1fr;gap:1.5rem;align-items:start;padding:.85rem 0;border-top:1px solid var(--stone);border-bottom:1px solid var(--stone);">
+        <div style="flex-shrink:0;">
+              <svg viewBox="0 0 52 52" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:44px;height:44px;display:block;">
+  <rect width="52" height="52" rx="14" fill="rgba(27,95,232,.1)"/>
+  <path d="M26 38s-14-8-14-18a8 8 0 0 1 14-5.29A8 8 0 0 1 40 20c0 10-14 18-14 18z" fill="none" stroke="#1B5FE8" stroke-width="1.75" stroke-linejoin="round"/>
+</svg>
+            </div>
+        <div>
+          <h3 style="font-size:1.1rem;font-weight:700;color:var(--ink);margin-bottom:.6rem;">The deepest intimacy is being understood</h3>
+          <p style="font-size:.9rem;color:var(--muted);line-height:1.78;font-weight:300;max-width:560px;">More than attraction, more than compatibility, being genuinely known by your partner is what makes a relationship hold. Attune is built to get you there. <span style="font-size:.75rem;color:var(--muted);font-style:italic;">Johnson, <em>Hold Me Tight</em>, 2008</span></p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- WHO IT'S FOR -->
+<section class="bg-warm" style="padding:1.25rem 0 2rem;">
+  <div class="si" style="padding-top:1.5rem;padding-bottom:1.5rem;">
+    <p class="s-eye">Who it's for</p>
+    <h2 class="s-title">Not a rescue tool. A head-start for couples who want to understand each other more deeply.</h2>
+    <p style="font-size:.8rem;color:var(--muted);font-weight:500;margin-bottom:1rem;font-family:'DM Sans',sans-serif;">Perfect for couples who are:</p>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1.25rem;margin-top:.25rem;" class="purpose-who-grid">
+      <div style="background:white;border:1.5px solid var(--stone);border-radius:16px;padding:1.25rem 1rem;">
+        <svg viewBox="0 0 52 52" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:44px;height:44px;margin-bottom:.85rem;display:block;">
+  <rect width="52" height="52" rx="14" fill="rgba(232,103,58,.1)"/>
+  <!-- Two hands clasped -->
+  <path d="M14 28 C14 28 16 24 20 24 L26 24 C26 24 28 22 30 22 C32 22 34 24 34 24 L38 24 C42 24 44 28 44 28" stroke="#E8673A" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+  <path d="M14 28 C12 30 12 34 14 36 L18 38 C20 39 22 38 26 38 C30 38 32 39 34 38 L38 36 C40 34 40 30 38 28" stroke="#E8673A" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+  <line x1="20" y1="24" x2="20" y2="18" stroke="#E8673A" stroke-width="1.5" stroke-linecap="round"/>
+  <line x1="24" y1="24" x2="24" y2="16" stroke="#E8673A" stroke-width="1.5" stroke-linecap="round"/>
+  <line x1="28" y1="24" x2="28" y2="16" stroke="#E8673A" stroke-width="1.5" stroke-linecap="round"/>
+  <line x1="32" y1="24" x2="32" y2="18" stroke="#E8673A" stroke-width="1.5" stroke-linecap="round"/>
+</svg>
+        <div style="font-size:.82rem;font-weight:700;color:var(--ink);margin-bottom:.35rem;">Just starting out</div>
+        <p style="font-size:.78rem;color:var(--muted);line-height:1.55;margin:0;">Before assumptions have time to quietly take root.</p>
+      </div>
+      <div style="background:white;border:1.5px solid var(--stone);border-radius:16px;padding:1.25rem 1rem;">
+        <svg viewBox="0 0 52 52" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:44px;height:44px;margin-bottom:.85rem;display:block;">
+  <rect width="52" height="52" rx="14" fill="rgba(155,93,229,.1)"/>
+  <!-- Two overlapping rings -->
+  <circle cx="20" cy="26" r="10" fill="none" stroke="#9B5DE5" stroke-width="2.5"/>
+  <circle cx="32" cy="26" r="10" fill="none" stroke="#9B5DE5" stroke-width="2.5"/>
+  <!-- Overlap mask to create interlock illusion -->
+  <path d="M26 18 C28.5 20 29 22 28 26 C29 30 28.5 32 26 34 C23.5 32 23 30 24 26 C23 22 23.5 20 26 18Z" fill="#FEFCF9" stroke="none"/>
+</svg>
+        <div style="font-size:.82rem;font-weight:700;color:var(--ink);margin-bottom:.35rem;">In it for the long haul</div>
+        <p style="font-size:.78rem;color:var(--muted);line-height:1.55;margin:0;">You know each other well. There are still things you've never quite named.</p>
+      </div>
+      <div style="background:white;border:1.5px solid var(--stone);border-radius:16px;padding:1.25rem 1rem;">
+        <svg viewBox="0 0 52 52" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:44px;height:44px;margin-bottom:.85rem;display:block;">
+  <rect width="52" height="52" rx="14" fill="rgba(27,95,232,.1)"/>
+  <!-- Mirror frame (tall oval) -->
+  <ellipse cx="26" cy="24" rx="10" ry="13" fill="none" stroke="#1B5FE8" stroke-width="2"/>
+  <rect x="22" y="37" width="8" height="3" rx="1" fill="#1B5FE8" opacity=".5"/>
+  <rect x="18" y="40" width="16" height="2.5" rx="1" fill="#1B5FE8" opacity=".4"/>
+  <!-- Person silhouette reflected in mirror -->
+  <circle cx="26" cy="18" r="4" fill="rgba(27,95,232,.35)" stroke="#1B5FE8" stroke-width="1.25"/>
+  <path d="M19 32 C19 26 21 24 26 24 C31 24 33 26 33 32" fill="rgba(27,95,232,.2)" stroke="#1B5FE8" stroke-width="1.25" stroke-linecap="round"/>
+</svg>
+        <div style="font-size:.82rem;font-weight:700;color:var(--ink);margin-bottom:.35rem;">Checking back in</div>
+        <p style="font-size:.78rem;color:var(--muted);line-height:1.55;margin:0;">What you each need and envision shifts. Attune is worth revisiting.</p>
+      </div>
+    </div>
+  </div>
+</section>
+<style>@media(max-width:680px){
+    .purpose-who-grid{display:flex!important;flex-wrap:nowrap!important;overflow-x:auto!important;gap:.75rem!important;padding-bottom:.75rem!important;-webkit-overflow-scrolling:touch!important;scrollbar-width:none!important;margin-left:-1.25rem!important;margin-right:-1.25rem!important;padding-left:1.25rem!important;padding-right:1.25rem!important;}
+    .purpose-who-grid::-webkit-scrollbar{display:none}
+    .purpose-who-grid>div{min-width:72vw!important;max-width:72vw!important;flex-shrink:0!important;padding:1rem!important;}
+  }
+  @media(max-width:640px){
+    .page-header{padding:calc(58px + 1.75rem) 1.25rem 2rem!important}
+    section{padding-top:1.75rem!important;padding-bottom:1.75rem!important}
+    .page-title{font-size:clamp(1.5rem,6vw,2rem)!important}
+    .page-sub{font-size:.88rem!important}
+  }</style>
+
+
+<!-- COUPLE TYPING CALLOUT -->
+<section style="background:#FBF8F3;border-top:1px solid var(--stone);border-bottom:1px solid var(--stone);padding:2.5rem 2.5rem;">
+  <div style="max-width:760px;margin:0 auto;">
+    <div style="display:grid;grid-template-columns:1fr auto;gap:2rem;align-items:center;" class="typing-callout-grid">
+      <div>
+        <p style="font-size:.6rem;letter-spacing:.22em;text-transform:uppercase;color:rgba(232,103,58,.75);font-weight:700;margin-bottom:.55rem;font-family:'DM Sans',sans-serif;">What makes Attune different</p>
+        <h2 style="font-family:'Playfair Display',Georgia,serif;font-size:clamp(1.3rem,2.5vw,1.9rem);font-weight:700;color:var(--ink);line-height:1.1;margin:0;letter-spacing:-.02em;">A typing system built for couples, not individuals.</h2>
+      </div>
+      <a href="/couple-types" style="display:inline-flex;align-items:center;gap:.5rem;background:#7B5DE5;color:white;padding:.85rem 1.5rem;border-radius:10px;font-size:.78rem;font-weight:700;text-decoration:none;font-family:'DM Sans',sans-serif;letter-spacing:.03em;text-transform:uppercase;white-space:nowrap;flex-shrink:0;">Explore couple typing →</a>
+    </div>
+  </div>
+</section>
+
+
+<div class="cta-section">
+  <div class="cta-inner">
+    <h2>Ready to understand each other at a different level?</h2>
+    <p>Start the exercises together.</p>
+    <a href="/offerings" class="cta-btn">See packages &amp; pricing →</a>
+  </div>
+</div>
+
+<footer class="site-footer" style="scroll-snap-align:start;">
+  <div class="sf-inner">
+    <div class="sf-brand">
+      <a href="/home" class="logo">
+        <svg width="46" height="33" viewBox="0 0 103 76" fill="none" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="spark_logo_purpose_2" x1="0" y1="0" x2="103" y2="76" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#E8673A"/><stop offset="100%" stop-color="#1B5FE8"/></linearGradient></defs><path d="M14,4 L44,4 A9,9 0 0,1 53,13 L53,42 A9,9 0 0,1 44,51 L20,51 L6,61 L11,51 A6,6 0 0,1 5,45 L5,13 A9,9 0 0,1 14,4 Z" fill="url(#spark_logo_purpose_2)"/><path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill="white" opacity="0.93" transform="translate(13.16,11.3) scale(0.72)"/><path d="M89,14 L59,14 A9,9 0 0,0 50,23 L50,52 A9,9 0 0,0 59,61 L83,61 L97,71 L92,61 A6,6 0 0,0 98,55 L98,23 A9,9 0 0,0 89,14 Z" fill="none" stroke="url(#spark_logo_purpose_2)" stroke-width="2.2" stroke-linejoin="round"/><path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill="url(#spark_logo_purpose_2)" transform="translate(58.16,21.3) scale(0.72)"/></svg>
+        <span class="logo-text" style="font-size:1.05rem;">Attune</span>
+      </a>
+      <p class="sf-tagline">Because understanding<br>takes intention.</p>
+      
+    </div>
+    <div class="sf-links">
+      <div class="sf-col">
+        <p class="sf-col-title">Product</p>
+        <a href="/home">Home</a>
+        <a href="/how-it-works">How it works</a>
+        <a href="/offerings">Packages</a>
+        <a href="/portal">Get started</a>
+      </div>
+      <div class="sf-col">
+        <p class="sf-col-title">Learn</p>
+        <a href="/purpose">Our Purpose</a>
+        <a href="/how-it-works">How it works</a>
+        <a href="/couple-types">Couple Types</a>
+        <a href="/practice">In Practice</a>
+        <a href="/reviews">Reviews</a>
+      </div>
+      <div class="sf-col">
+        <p class="sf-col-title">Support</p>
+        <a href="/faq">FAQs</a>
+        <a href="/contact">Contact us</a>
+        <a href="/legal">Privacy policy</a>
+        <a href="/legal#terms">Terms of service</a>
+      </div>
+      <div class="sf-col">
+        <p class="sf-col-title">Account</p>
+        <a href="/portal">Sign in</a>
+        <a href="/portal">Create account</a>
+      </div>
+    </div>
+  </div>
+  <div class="sf-bottom">
+    <p class="sf-copy">Attune Relationships™</p>
+    <p class="sf-email">hello@attune-relationships.com</p>
+  </div>
+</footer>
+
+<script>
+function toggleMenu() {
+  const m = document.getElementById('mobile-menu');
+  m.classList.toggle('open');
+}
+document.addEventListener('click', function(e) {
+  const menu = document.getElementById('mobile-menu');
+  const btn = document.getElementById('hamburger');
+  if (menu && menu.classList.contains('open') && !menu.contains(e.target) && !btn.contains(e.target)) {
+    menu.classList.remove('open');
+  }
+});
+
+  // Close mobile menu on outside tap
+  document.addEventListener('click', function(e) {
+    const menu = document.getElementById('mobile-menu');
+    const burger = document.getElementById('hamburger');
+    if (menu && menu.classList.contains('open') && !menu.contains(e.target) && !burger.contains(e.target)) {
+      menu.classList.remove('open');
+      burger.classList.remove('open');
+    }
+  });
+</script>
+</body>
+</html>

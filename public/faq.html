@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FAQs, Attune</title>
+  <meta name="description" content="Everything you'd want to know before starting. How it works, what your results look like, privacy, refunds, and more.">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Attune FAQ">
+  <meta property="og:description" content="Everything you'd want to know before starting Attune.">
+  <meta property="og:image" content="https://attune-relationships.com/og-image.png">
+  <meta property="og:url" content="https://attune-relationships.com/faq">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Attune FAQ">
+  <meta name="twitter:description" content="Everything you'd want to know before starting Attune.">
+  <meta name="twitter:image" content="https://attune-relationships.com/og-image.png">
+  <link rel="canonical" href="https://attune-relationships.com/faq">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,800;1,700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  html,body{overflow-x:hidden;max-width:100%}
+  html,body{scroll-snap-type:y proximity}
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  :root{--cream:#FFFDF9;--warm:#FBF8F3;--stone:#E8DDD0;--clay:#C17F47;--ink:#0E0B07;--text:#1E1610;--muted:#8C7A68;--orange:#E8673A;--indigo:#1B5FE8;--hfont:'Playfair Display',Georgia,serif;--bfont:'DM Sans',sans-serif;}
+  html{scroll-behavior:smooth}
+  body{background:var(--cream);color:var(--text);font-family:var(--bfont);-webkit-font-smoothing:antialiased}
+  nav{position:fixed;top:0;left:0;right:0;z-index:100;height:58px;background:rgba(255,253,249,.94);backdrop-filter:blur(16px);border-bottom:1px solid var(--stone);display:flex;align-items:center;padding:0 2.5rem;justify-content:space-between}
+  .logo{display:flex;align-items:center;gap:.65rem;text-decoration:none}
+  .logo-mark{display:flex;align-items:center;flex-shrink:0}
+  .logo-text{font-family:var(--hfont);font-size:1.15rem;font-weight:700;color:var(--ink)}
+  .nav-center{display:flex;gap:2.5rem;list-style:none;position:absolute;left:50%;transform:translateX(-50%);align-items:center}.nav-center li{display:flex;align-items:center}.nav-center li{display:flex;align-items:center}
+  .nav-center a{text-decoration:none;color:var(--muted);font-size:.82rem;font-weight:500;transition:color .15s}
+  .nav-center a:hover,.nav-center a.active{color:var(--ink);font-weight:600}
+  .nav-dropdown{position:relative}
+  .nav-dropdown-toggle{text-decoration:none;color:var(--muted);font-size:.82rem;font-weight:500;transition:color .15s;cursor:pointer;display:flex;align-items:center;gap:.28rem;background:none;border:none;padding:0;font-family:var(--bfont)}
+  .nav-dropdown-toggle:hover,.nav-dropdown-toggle.active{color:var(--ink)}
+  .nav-dropdown-toggle svg{transition:transform .2s}
+  .nav-dropdown:hover .nav-dropdown-toggle svg{transform:rotate(180deg)}
+  .nav-dropdown-menu{position:absolute;top:100%;left:50%;transform:translateX(-50%);background:rgba(255,253,249,.98);backdrop-filter:blur(16px);border:1.5px solid var(--stone);border-radius:14px;padding:.85rem .6rem .6rem;min-width:190px;opacity:0;visibility:hidden;pointer-events:none;transition:opacity .15s,visibility .15s;box-shadow:0 12px 40px rgba(14,11,7,.12);z-index:200;margin-top:.4rem}
+  .nav-dropdown-menu::before{content:'';position:absolute;top:-.5rem;left:0;right:0;height:.5rem;background:transparent}
+  .nav-dropdown:hover .nav-dropdown-menu{opacity:1;visibility:visible;pointer-events:auto}
+  .nav-dropdown-menu::before{content:'';position:absolute;top:-16px;left:-10px;right:-10px;height:16px;background:transparent;}
+  .nav-dropdown-menu a{display:block;padding:.55rem .8rem;font-size:.78rem;color:var(--muted);text-decoration:none;border-radius:8px;transition:all .15s;font-weight:500}
+  .nav-dropdown-menu a:hover{background:var(--warm);color:var(--ink)}
+  .nav-dropdown-menu a.active{color:var(--ink);font-weight:600}
+  .nav-dropdown-menu .dd-divider{height:1px;background:var(--stone);margin:.35rem .5rem}
+  .nav-right{display:flex;align-items:center;gap:1.25rem}
+  .nav-signin{font-size:.8rem;font-weight:500;color:var(--muted);text-decoration:none;transition:color .15s}
+  .nav-signin:hover{color:var(--ink)}
+  .btn-nav{background:var(--ink);color:white;padding:.5rem 1.2rem;border-radius:10px;font-size:.78rem;font-weight:600;text-decoration:none;display:inline-block;transition:opacity .15s}
+  .btn-nav:hover{opacity:.82}
+  .hamburger{display:none;flex-direction:column;gap:5px;cursor:pointer;background:none;border:none;padding:.3rem}
+  .hamburger span{width:22px;height:2px;background:var(--ink);border-radius:2px}
+  .mobile-menu{display:none;position:fixed;top:66px;right:1rem;left:auto;width:240px;background:rgba(255,253,249,.99);backdrop-filter:blur(20px);border:1.5px solid var(--stone);border-radius:14px;padding:1rem;z-index:200;flex-direction:column;gap:.15rem;box-shadow:0 12px 40px rgba(14,11,7,.14)}
+  .mobile-menu.open{display:flex}
+  .mobile-menu a{font-size:.85rem;font-weight:500;color:var(--muted);text-decoration:none;padding:.5rem .65rem;border-radius:8px;transition:all .15s}
+  .mobile-menu a:last-child{}
+  .mobile-menu .mm-cta{color:var(--orange);font-weight:700}
+
+  /* PAGE */
+  
+  .eyebrow{font-size:.6rem;letter-spacing:.3em;text-transform:uppercase;color:var(--clay);font-weight:700;margin-bottom:.9rem;display:flex;align-items:center;justify-content:center;gap:.65rem}
+  .eyebrow::before{content:'';width:28px;height:2.5px;border-radius:999px;background:linear-gradient(90deg,var(--orange),var(--indigo));flex-shrink:0}.eyebrow::after{content:'';width:28px;height:2.5px;border-radius:999px;background:linear-gradient(90deg,var(--orange),var(--indigo));flex-shrink:0}
+  h1.page-title{font-family:var(--hfont);font-size:clamp(2.2rem,3.8vw,3.2rem);font-weight:700;line-height:1.08;color:var(--ink);margin-bottom:1.1rem;letter-spacing:-.02em}
+  .page-sub{font-size:1rem;color:var(--muted);line-height:1.8;font-weight:300}
+
+  /* FAQ LAYOUT */
+  .faq-wrap{max-width:760px;margin:0 auto;padding:0 2.5rem 6rem}
+  .faq-category{margin-bottom:3.5rem}
+  .faq-cat-title{font-size:.62rem;letter-spacing:.3em;text-transform:uppercase;color:var(--clay);font-weight:700;margin-bottom:1.5rem;display:flex;align-items:center;gap:.5rem}
+  .faq-cat-title::before{content:'';width:20px;height:1.5px;background:var(--clay)}
+  .faq-item{border-bottom:1px solid var(--stone)}
+  .faq-item:first-of-type{border-top:1px solid var(--stone)}
+  .faq-q{width:100%;background:none;border:none;text-align:left;padding:1.25rem 0;cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:1rem;font-family:var(--bfont);font-size:.92rem;font-weight:600;color:var(--ink);transition:color .15s}
+  .faq-q:hover{color:var(--orange)}
+  .faq-icon{width:20px;height:20px;border-radius:50%;border:1.5px solid var(--stone);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .2s;font-size:.7rem;color:var(--muted)}
+  .faq-item.open .faq-icon{background:var(--orange);border-color:var(--orange);color:white;transform:rotate(45deg)}
+  .faq-a{max-height:0;overflow:hidden;transition:max-height .35s ease,padding .2s}
+  .faq-item.open .faq-a{max-height:500px;padding-bottom:1.25rem}
+  .faq-a p{font-size:.88rem;color:var(--muted);line-height:1.8;font-weight:300}
+  .faq-a a{color:var(--orange);text-decoration:none;font-weight:500}
+  .faq-a a:hover{text-decoration:underline}
+
+  /* CTA */
+  .cta-band{background:var(--warm);border-top:1px solid var(--stone);border-bottom:1px solid var(--stone);padding:4rem 2.5rem;text-align:center}
+  .cta-band h2{font-family:var(--hfont);font-size:clamp(1.8rem,3vw,2.4rem);font-weight:700;color:var(--ink);margin-bottom:.75rem;letter-spacing:-.02em}
+  .cta-band p{font-size:.92rem;color:var(--muted);margin-bottom:1.75rem;line-height:1.7;font-weight:300}
+  .cta-actions{display:flex;gap:1rem;justify-content:center;flex-wrap:wrap}
+  .btn-primary{background:linear-gradient(135deg,var(--orange),#d4592f);color:white;padding:.85rem 2rem;border-radius:14px;font-size:.82rem;font-weight:700;text-decoration:none;display:inline-block;letter-spacing:.04em;box-shadow:0 6px 24px rgba(232,103,58,.3);transition:all .2s}
+  .btn-primary:hover{transform:translateY(-2px);box-shadow:0 10px 32px rgba(232,103,58,.4)}
+  .btn-ghost{border:1.5px solid var(--stone);color:var(--ink);padding:.85rem 2rem;border-radius:14px;font-size:.82rem;font-weight:600;text-decoration:none;display:inline-block;transition:all .2s}
+  .btn-ghost:hover{background:var(--warm);border-color:var(--clay)}
+
+  /* FOOTER */
+  .site-footer{background:var(--ink);padding:3.5rem 2.5rem 2rem}
+  .sf-inner{max-width:1080px;margin:0 auto;display:grid;grid-template-columns:1.4fr 1.8fr;gap:3rem;margin-bottom:2.5rem}
+  .sf-brand .logo-text,.sf-brand .logo-mark{color:white}
+  .sf-tagline{font-size:.82rem;color:rgba(255,255,255,.35);line-height:1.7;margin-top:.85rem}
+  .sf-links{display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem}
+  .sf-col{display:flex;flex-direction:column;gap:.6rem}
+  .sf-col-title{font-size:.62rem;letter-spacing:.2em;text-transform:uppercase;color:rgba(255,255,255,.3);font-weight:700;margin-bottom:.25rem}
+  .sf-col a{font-size:.8rem;color:rgba(255,255,255,.45);text-decoration:none;transition:color .15s}
+  .sf-col a:hover{color:rgba(255,255,255,.85)}
+  .sf-bottom{max-width:1080px;margin:0 auto;padding-top:2rem;border-top:1px solid rgba(255,255,255,.08);display:flex;justify-content:space-between;align-items:center;gap:1rem;flex-wrap:wrap}
+  .sf-copy,.sf-email{font-size:.75rem;color:rgba(255,255,255,.25)}
+
+  @media(max-width:768px){.sf-inner{grid-template-columns:1fr 1.6fr!important;gap:1.25rem!important;padding-left:1.25rem!important;padding-right:1.25rem!important}.sf-links{grid-template-columns:1fr!important}.sf-tagline{font-size:.78rem}.sf-col a{font-size:.8rem}.sf-col-title{font-size:.62rem}}
+    .sf-links{grid-template-columns:repeat(2,1fr)}
+  }
+  .mm-section{display:flex;flex-direction:column;border-bottom:1px solid var(--stone);padding-bottom:.25rem;margin-bottom:.25rem}
+  .mm-label{font-size:.58rem;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);font-weight:700;padding:.55rem 0 .2rem .75rem}
+  .mm-sub{padding-left:1.25rem !important;font-size:.85rem !important;border-bottom:none !important;font-style:italic;color:var(--muted)}
+  .mm-sub:last-child{border-bottom:none}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
+  .fu1{animation:fadeUp .6s ease both}
+  @media(max-width:768px){.page-header{padding:calc(58px + 2rem) 1.25rem 2.5rem!important}}}
+
+    @media(max-width:900px){
+    nav{padding:0 1.25rem}
+    section{padding-left:1.25rem!important;padding-right:1.25rem!important}
+  }
+  @media(max-width:640px){
+    .page-header{padding:calc(58px + 1.25rem) 1.25rem 1.5rem;text-align:center}
+    .faq-inner{padding:0 1.25rem!important}
+    .si{padding-left:1.25rem!important;padding-right:1.25rem!important}
+    .page-title{font-size:clamp(1.9rem,7vw,2.4rem)}
+  }
+
+  @media(max-width:640px){
+    .page-header{padding:calc(58px + 1.25rem) 1.25rem 1.25rem!important}
+    .faq-wrap,.faq-inner{padding:0 1.25rem 3rem!important}
+    .faq-category{margin-bottom:2rem!important}
+    .faq-cat-title{margin-bottom:1rem!important}
+    .cta-band{padding:2.5rem 1.25rem!important}
+  }
+
+  @media(max-width:640px){section{padding-top:1.75rem!important;padding-bottom:1.75rem!important}.si{padding-left:1.25rem!important;padding-right:1.25rem!important}}  .page-header{background:linear-gradient(150deg,#1c1940 0%,#282560 60%,#1e3a6e 100%);padding:calc(58px + 3.5rem) clamp(1.25rem,5vw,2.5rem) 3rem;position:relative;overflow:hidden;max-width:none;margin:0;width:100%;box-sizing:border-box}
+  .page-header::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,#E8673A,#9B5DE5,#1B5FE8);z-index:1}
+  .page-header-glow{position:absolute;inset:0;background:radial-gradient(ellipse 60% 40% at 50% 100%,rgba(232,103,58,.12),transparent);pointer-events:none}
+  .page-header-inner{max-width:700px;margin-left:auto;margin-right:auto;position:relative;z-index:1;text-align:center}
+  .page-header .page-title{color:white;text-align:center}
+  .page-header .page-title em{color:var(--orange);font-style:italic}
+  .page-header .page-sub{color:rgba(255,255,255,.65);text-align:center;margin-top:.75rem}
+  .page-header .eyebrow{color:rgba(232,103,58,.85)}
+  .page-header .eyebrow::before{background:linear-gradient(90deg,rgba(232,103,58,.7),rgba(155,93,229,.5))}
+  .hero-actions{display:flex;align-items:center;justify-content:center;gap:1.5rem;margin-top:1.75rem;flex-wrap:wrap}
+  .gift-link{font-size:.88rem;color:rgba(232,103,58,.8);font-family:var(--bfont);font-weight:500;text-decoration:none;transition:color .15s}
+  .gift-link:hover{color:var(--orange)}
+  </style>
+</head>
+<body>
+
+<nav>
+  <a href="/home" class="logo">
+    <svg width="46" height="33" viewBox="0 0 103 76" fill="none" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="spark_logo_5_2" x1="0" y1="0" x2="103" y2="76" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#E8673A"/><stop offset="100%" stop-color="#1B5FE8"/></linearGradient></defs><path d="M14,4 L44,4 A9,9 0 0,1 53,13 L53,42 A9,9 0 0,1 44,51 L20,51 L6,61 L11,51 A6,6 0 0,1 5,45 L5,13 A9,9 0 0,1 14,4 Z" fill="url(#spark_logo_5_2)"/><path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill="white" opacity="0.93" transform="translate(13.16,11.3) scale(0.72)"/><path d="M89,14 L59,14 A9,9 0 0,0 50,23 L50,52 A9,9 0 0,0 59,61 L83,61 L97,71 L92,61 A6,6 0 0,0 98,55 L98,23 A9,9 0 0,0 89,14 Z" fill="none" stroke="url(#spark_logo_5_2)" stroke-width="2.2" stroke-linejoin="round"/><path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill="url(#spark_logo_5_2)" transform="translate(58.16,21.3) scale(0.72)"/></svg>
+    <span class="logo-text">Attune</span>
+  </a>
+  <ul class="nav-center">
+    <li><a href="/home">Home</a></li>
+    <li class="nav-dropdown">
+      <button class="nav-dropdown-toggle active">Learn <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg></button>
+      <div class="nav-dropdown-menu">
+        <a href="/purpose">Our Purpose</a>
+        <a href="/how-it-works">How it works</a>
+        <a href="/couple-types">Couple Types</a>
+        <div class="dd-divider"></div>
+        <a href="/practice">In Practice</a>
+        <a href="/faq" class="active">FAQs</a>
+        <a href="/reviews">Reviews</a>
+      </div>
+    </li>
+    <li><a href="/offerings">Packages</a></li>
+  </ul>
+  <div class="nav-right">
+    <a href="/portal" class="nav-signin">Sign in</a>
+    <a href="/portal" class="btn-nav">Get started</a>
+    <button class="hamburger" id="hamburger" onclick="toggleMenu()" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</nav>
+<div class="mobile-menu" id="mobile-menu">
+  <a href="/home">Home</a>
+    <div class="mm-section">
+    <span class="mm-label">Learn</span>
+    <a href="/purpose" class="mm-sub">Our Purpose</a>
+    <a href="/how-it-works" class="mm-sub">How it works</a>
+    <a href="/couple-types" class="mm-sub">Couple Types</a>
+    <a href="/practice" class="mm-sub">In Practice</a>
+    <a href="/faq" class="mm-sub">FAQs</a>
+    <a href="/reviews" class="mm-sub">Reviews</a>
+  </div>
+  <a href="/offerings">Packages</a>
+  <a href="/portal">Sign in</a>
+  <a href="/portal?tab=signup" class="mm-cta">Get started →</a>
+</div>
+
+<div class="page-header">
+  <div class="page-header-glow"></div>
+    <div class="page-header-inner">
+  <p class="eyebrow">Questions</p>
+  <h1 class="page-title">Frequently <em>asked questions.</em></h1>
+  <p class="page-sub">Everything you'd want to know before starting. If something's missing, <a href="mailto:hello@attune-relationships.com" style="color:var(--orange);text-decoration:none;font-weight:500;">reach out</a> and we'll add it.</p>
+    <div class="hero-actions">
+      <a href="/portal?tab=signup" class="btn-primary">GET STARTED →</a>
+      <a href="/offerings#gift" class="gift-link">Give it as a gift →</a>
+    </div>
+  </div>
+</div>
+
+<div class="faq-wrap">
+
+  <div class="faq-category">
+    <p class="faq-cat-title">Getting started</p>
+    <div class="faq-item">
+      <button class="faq-q" onclick="toggle(this)">How does Attune work? <span class="faq-icon">+</span></button>
+      <div class="faq-a"><p>Each partner completes two exercises independently, you don't see each other's answers while you're doing them. Once both partners have finished both exercises, your results unlock simultaneously. You'll see a side-by-side comparison of how you each answered, along with observations specific to your pairing. The whole thing takes about 25 minutes per person.</p></div>
+    </div>
+    <div class="faq-item">
+      <button class="faq-q" onclick="toggle(this)">Do we have to do it at the same time? <span class="faq-icon">+</span></button>
+      <div class="faq-a">
+        <div style="background:rgba(232,103,58,.06);border:1.5px solid rgba(232,103,58,.2);border-radius:12px;padding:1rem 1.1rem;margin-bottom:.85rem;display:flex;gap:.75rem;align-items:flex-start;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#E8673A" stroke-width="2" stroke-linecap="round" style="flex-shrink:0;margin-top:.1rem;"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          <p style="margin:0;font-size:.85rem;font-weight:600;color:var(--ink);line-height:1.55;">There is no deadline. Your partner can complete their exercises tomorrow, next month, or a year from now — and your results will unlock the moment they finish.</p>
+        </div>
+        <p>You each complete the exercises on your own schedule. Your answers are saved permanently. There's no expiration, no pressure, and no need to coordinate timing. This is especially worth knowing if you're giving Attune as a gift — the recipient's partner can come back to it whenever they're ready.</p>
+      </div>
+    </div>
+    <div class="faq-item">
+      <button class="faq-q" onclick="toggle(this)">Can my partner see my answers while I'm taking the exercises? <span class="faq-icon">+</span></button>
+      <div class="faq-a"><p>No. Your individual answers are completely private until both partners have completed both exercises. This is intentional, answering honestly is only possible when you know your partner isn't watching. Once both of you are done, everything unlocks together at the same moment.</p></div>
+    </div>
+    <div class="faq-item">
+      <button class="faq-q" onclick="toggle(this)">How long does it take? <span class="faq-icon">+</span></button>
+      <div class="faq-a"><p>Most people finish each exercise in 12–15 minutes, so both exercises together take about 25–30 minutes per person. There's no time pressure, you can pause and come back. Your answers are saved automatically as you go.</p></div>
+    </div>
+  </div>
+
+  <div class="faq-category">
+    <p class="faq-cat-title">The exercises &amp; results</p>
+    <div class="faq-item">
+      <button class="faq-q" onclick="toggle(this)">What do the results look like? <span class="faq-icon">+</span></button>
+      <div class="faq-a"><p>Your results are a side-by-side comparison, not a score or compatibility percentage. You'll see how each of you answered across all 10 communication dimensions and 10 expectation categories, with observations written specifically for your combination. There are also conversation starters drawn from the areas where your answers reveal something worth exploring most. See our <a href="/offerings">packages page</a> for a full breakdown.</p></div>
+    </div>
+    <div class="faq-item">
+      <button class="faq-q" onclick="toggle(this)">Is this a personality test? <span class="faq-icon">+</span></button>
+      <div class="faq-a"><p>Not exactly. Attune isn't about labeling who you are as a person, it's about understanding how you each tend to show up, and what that means for you two specifically. The goal isn't to give you a type; it's to surface the things you'd normally take years to understand about each other, and give you a shared language for them.</p></div>
+    </div>
+    <div class="faq-item">
+      <button class="faq-q" onclick="toggle(this)">What if we're very different? Are different results bad? <span class="faq-icon">+</span></button>
+      <div class="faq-a"><p>Not at all. Differences aren't a problem, unnamed differences are. Couples who navigate differences well aren't the ones without them; they're the ones who see them clearly. Attune is designed to surface those differences in a structure that makes them easier to talk about, not harder.</p></div>
+    </div>
+    <div class="faq-item">
+      <button class="faq-q" onclick="toggle(this)">How is this different from couples therapy? <span class="faq-icon">+</span></button>
+      <div class="faq-a"><p>Attune is a tool, not a therapist. It gives you a structured way to understand each other more deeply, useful on its own, or as a starting point for deeper work. Our Premium package includes a 60-minute session with a licensed LMFT who reviews your results beforehand, which is a great bridge between self-guided insight and professional support.</p></div>
+    </div>
+  </div>
+
+  <div class="faq-category">
+    <p class="faq-cat-title">Packages &amp; purchasing</p>
+    <div class="faq-item">
+      <button class="faq-q" onclick="toggle(this)">What's the difference between the packages? <span class="faq-icon">+</span></button>
+      <div class="faq-a"><p>All packages include both exercises and full joint results. The differences are in what's added: the Starting Out Collection adds a relationship checklist; the Anniversary Collection adds our Relationship Story exercise; Premium adds a 60-minute LMFT session and a shared budget tool. See the full breakdown on our <a href="/offerings">packages page</a>.</p></div>
+    </div>
+    <div class="faq-item">
+      <button class="faq-q" onclick="toggle(this)">Is this a subscription? <span class="faq-icon">+</span></button>
+      <div class="faq-a"><p>No. Attune is a one-time purchase, pay once, yours permanently. Your results live in your portal with no time limit and no recurring charges. We believe in owning what you buy. The only optional add-ons are the Personalized Workbook (digital or printed) and the LMFT session, both of which are also one-time purchases.</p></div>
+    </div>
+    <div class="faq-item">
+      <button class="faq-q" onclick="toggle(this)">Can I give Attune as a gift? <span class="faq-icon">+</span></button>
+      <div class="faq-a"><p>Yes, and it's a meaningful one. You can purchase any package for another couple, and they'll receive instructions for setting up their own accounts and completing the exercises. See all gifting options on our <a href="/offerings">packages page</a>.</p></div>
+    </div>
+    <div class="faq-item">
+      <button class="faq-q" onclick="toggle(this)">What is the Personalized Workbook? <span class="faq-icon">+</span></button>
+      <div class="faq-a"><p>The Personalized Workbook is an add-on available after you complete both exercises. It's built from your actual joint results, conversation starters, reflection activities, and guided exercises drawn from the areas most meaningful to your relationship. Available as a digital PDF ($19) or printed, bound, and shipped ($39). Not generic relationship content, your results, structured for you to work through together.</p></div>
+    </div>
+  </div>
+
+  <div class="faq-category">
+    <p class="faq-cat-title">Privacy &amp; data</p>
+    <div class="faq-item">
+      <button class="faq-q" onclick="toggle(this)">Are my answers private? <span class="faq-icon">+</span></button>
+      <div class="faq-a"><p>Yes. Your individual answers are not visible to your partner until both of you have completed both exercises. After results unlock, you'll both be able to see the side-by-side view. We never sell or share your personal data. See our full <a href="/legal">privacy policy</a> for details.</p></div>
+    </div>
+    <div class="faq-item">
+      <button class="faq-q" onclick="toggle(this)">Can I delete my data? <span class="faq-icon">+</span></button>
+      <div class="faq-a"><p>Yes. You can request data deletion at any time by emailing <a href="mailto:hello@attune-relationships.com">hello@attune-relationships.com</a>. We'll remove your account and all associated data within 30 days.</p></div>
+    </div>
+  </div>
+
+  <div class="faq-category">
+    <p class="faq-cat-title">Still have questions?</p>
+    <div style="background:var(--warm);border:1.5px solid var(--stone);border-radius:16px;padding:2rem;margin-top:1rem;">
+      <p style="font-size:.92rem;color:var(--text);margin-bottom:.65rem;font-weight:500;">We're happy to help.</p>
+      <p style="font-size:.85rem;color:var(--muted);line-height:1.7;margin-bottom:1.25rem;">Send us a message at <a href="mailto:hello@attune-relationships.com" style="color:var(--orange);text-decoration:none;font-weight:500;">hello@attune-relationships.com</a> and we'll get back to you within one business day.</p>
+      <a href="mailto:hello@attune-relationships.com" class="btn-ghost" style="display:inline-block;font-size:.8rem;padding:.65rem 1.4rem;">Email us →</a>
+    </div>
+  </div>
+
+</div>
+
+<!-- Methodology section -->
+<div class="faq-wrap">
+  <div class="si">
+    <div class="faq-category">
+      <div class="faq-cat-title">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
+        Methodology
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-q" onclick="toggleFaq(this)">
+          How does Attune determine couple types?
+          <svg class="faq-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
+        <div class="faq-a" style="display:none;">
+          <p>Each person's Exercise 1 answers are scored across 10 communication dimensions (energy, expression, conflict style, closeness, and six others). From those scores, each person receives a 6-letter individual style code. The system then evaluates both partners' full score profiles against all 25 couple type signatures simultaneously — the type whose pattern best matches the couple's combined profile wins. No single axis dominates; the designation reflects the complete picture.</p>
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-q" onclick="toggleFaq(this)">
+          What research is the methodology based on?
+          <svg class="faq-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
+        <div class="faq-a" style="display:none;">
+          <p>Each of the 10 communication dimensions is grounded in peer-reviewed relationship science. The conflict timing axis draws on Gottman &amp; Levenson's demand-withdraw research (1992). The closeness axis draws on Bowlby's attachment theory and Mikulincer &amp; Shaver's adult attachment research. The expressiveness axis draws on Pennebaker's emotional disclosure work. The needs directness axis draws on Markman and colleagues' PREP research. A full list of sources and the rationale for each axis is available in the methodology document below.</p>
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-q" onclick="toggleFaq(this)">
+          Is Attune a clinical or diagnostic instrument?
+          <svg class="faq-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
+        <div class="faq-a" style="display:none;">
+          <p>No. Attune is a structured conversation tool, not a diagnostic instrument. The measurement system is designed to surface patterns that help couples understand each other — not to assess mental health, predict outcomes, or replace professional support. If you're navigating something serious, a licensed couples therapist can work with your Attune results as context, but Attune is not a substitute for that work.</p>
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-q" onclick="toggleFaq(this)">
+          Where can I read the full methodology?
+          <svg class="faq-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
+        <div class="faq-a" style="display:none;">
+          <p>Two reference documents are available for download:</p>
+          <div style="display:flex;gap:.65rem;flex-wrap:wrap;margin-top:.85rem;">
+            <a href="/attune-methodology.docx" download style="display:inline-flex;align-items:center;gap:.45rem;background:var(--warm);border:1.5px solid var(--stone);border-radius:9px;padding:.55rem 1.1rem;font-size:.78rem;font-weight:600;color:var(--clay);text-decoration:none;font-family:'DM Sans',sans-serif;">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              Methodology &amp; defensibility (.docx)
+            </a>
+            <a href="/attune-couple-type-overview.docx" download style="display:inline-flex;align-items:center;gap:.45rem;background:var(--warm);border:1.5px solid var(--stone);border-radius:9px;padding:.55rem 1.1rem;font-size:.78rem;font-weight:600;color:var(--clay);text-decoration:none;font-family:'DM Sans',sans-serif;">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              Couple type classification (.docx)
+            </a>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<div class="cta-band">
+  <h2>Ready to understand each other more deeply?</h2>
+  <p>Two exercises. About 25 minutes each. Everything you learn is yours to keep.</p>
+  <div class="cta-actions">
+    <a href="/portal" class="btn-primary">Start your exercises →</a>
+    <a href="/offerings" class="btn-ghost">See what's included</a>
+  </div>
+</div>
+
+<footer class="site-footer" style="scroll-snap-align:start;">
+  <div class="sf-inner">
+    <div class="sf-brand">
+      <a href="/home" class="logo">
+        <svg width="46" height="33" viewBox="0 0 103 76" fill="none" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="spark_logo_5_1" x1="0" y1="0" x2="103" y2="76" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#E8673A"/><stop offset="100%" stop-color="#1B5FE8"/></linearGradient></defs><path d="M14,4 L44,4 A9,9 0 0,1 53,13 L53,42 A9,9 0 0,1 44,51 L20,51 L6,61 L11,51 A6,6 0 0,1 5,45 L5,13 A9,9 0 0,1 14,4 Z" fill="url(#spark_logo_5_1)"/><path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill="white" opacity="0.93" transform="translate(13.16,11.3) scale(0.72)"/><path d="M89,14 L59,14 A9,9 0 0,0 50,23 L50,52 A9,9 0 0,0 59,61 L83,61 L97,71 L92,61 A6,6 0 0,0 98,55 L98,23 A9,9 0 0,0 89,14 Z" fill="none" stroke="url(#spark_logo_5_1)" stroke-width="2.2" stroke-linejoin="round"/><path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill="url(#spark_logo_5_1)" transform="translate(58.16,21.3) scale(0.72)"/></svg>
+        <span class="logo-text" style="font-size:1.05rem;">Attune</span>
+      </a>
+      <p class="sf-tagline">Because understanding<br>takes intention.</p>
+      
+    </div>
+    <div class="sf-links">
+      <div class="sf-col">
+        <p class="sf-col-title">Product</p>
+        <a href="/home">Home</a>
+        
+        <a href="/offerings">Packages</a>
+        <a href="/portal">Get started</a>
+      </div>
+      <div class="sf-col">
+        <p class="sf-col-title">Learn</p>
+        <a href="/purpose">Our Purpose</a>
+        <a href="/how-it-works">How it works</a>
+        <a href="/couple-types">Couple Types</a>
+        <a href="/practice">In Practice</a>
+        <a href="/reviews">Reviews</a>
+      </div>
+      <div class="sf-col">
+        <p class="sf-col-title">Support</p>
+        <a href="/faq">FAQs</a>
+        <a href="/contact">Contact us</a>
+        <a href="/legal">Privacy policy</a>
+        <a href="/legal#terms">Terms of service</a>
+      </div>
+    </div>
+  </div>
+  <div class="sf-bottom">
+    <p class="sf-copy">Attune Relationships™</p>
+    <p class="sf-email">hello@attune-relationships.com</p>
+  </div>
+  <div style="background:rgba(255,255,255,.04);border-top:1px solid rgba(255,255,255,.06);padding:.85rem 2rem;display:flex;align-items:center;gap:1rem;flex-wrap:wrap;justify-content:space-between;">
+    <span style="font-family:'Playfair Display',Georgia,serif;font-size:.88rem;font-style:italic;color:rgba(255,255,255,.35);">You love each other, Attune helps you understand each other.</span>
+    <div id="spark-feedback-strip" style="display:flex;gap:.4rem;">
+      <button onclick="window._sparkFeedback('love')" style="background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);border-radius:6px;padding:.3rem .65rem;font-size:.72rem;color:rgba(255,255,255,.6);cursor:pointer;">❤️ Love it</button>
+      <button onclick="window._sparkFeedback('good')" style="background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);border-radius:6px;padding:.3rem .65rem;font-size:.72rem;color:rgba(255,255,255,.6);cursor:pointer;">👍 Pretty good</button>
+      <button onclick="window._sparkFeedback('suggest')" style="background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);border-radius:6px;padding:.3rem .65rem;font-size:.72rem;color:rgba(255,255,255,.6);cursor:pointer;">💬 Suggest something</button>
+      <span id="spark-feedback-thanks" style="font-size:.7rem;color:#4ade80;display:none;">Thanks ✓</span>
+    </div>
+  </div>
+  <script>
+window._sparkFeedback = function(t) {
+    try {
+      if(t==='suggest'){
+        var strip=document.getElementById('spark-feedback-strip');
+        if(!strip)return;
+        strip.innerHTML='<input id="sfb-inp" type="text" placeholder="What would make Attune better?" style="background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.25);border-radius:6px;padding:.3rem .65rem;font-size:.72rem;color:white;width:200px;font-family:sans-serif;outline:none;"><button id="sfb-send" style="background:rgba(232,103,58,.9);border:none;border-radius:6px;padding:.3rem .65rem;font-size:.72rem;color:white;cursor:pointer;margin-left:.35rem;">Send</button>';
+        setTimeout(function(){
+          var i=document.getElementById('sfb-inp');
+          if(i)i.focus();
+          var btn=document.getElementById('sfb-send');
+          if(btn)btn.onclick=function(){
+            var m=i?i.value.trim():'';
+            fetch('/api/send-feedback',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({source:'footer_quick',rating:'suggest',message:m,page:window.location.pathname})}).catch(function(){});
+            var s=document.getElementById('spark-feedback-strip');
+            if(s)s.innerHTML='';
+            var th=document.getElementById('spark-feedback-thanks');
+            if(th)th.style.display='inline';
+          };
+        },50);
+        return;
+      }
+      fetch('/api/send-feedback',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({source:'footer_quick',rating:t==='love'?3:2,page:window.location.pathname})}).catch(function(){});
+      var strip=document.getElementById('spark-feedback-strip');
+      if(strip)strip.innerHTML='';
+      var thanks=document.getElementById('spark-feedback-thanks');
+      if(thanks)thanks.style.display='inline';
+    } catch(e){}
+  };
+</script>
+</footer>
+
+<script>
+function toggle(btn) {
+  const item = btn.closest('.faq-item');
+  const wasOpen = item.classList.contains('open');
+  document.querySelectorAll('.faq-item.open').forEach(i => i.classList.remove('open'));
+  if (!wasOpen) item.classList.add('open');
+}
+function toggleMenu() {
+  document.getElementById('mobile-menu').classList.toggle('open');
+}
+document.addEventListener('click', function(e) {
+  const menu = document.getElementById('mobile-menu');
+  const btn = document.getElementById('hamburger');
+  if (menu.classList.contains('open') && !menu.contains(e.target) && !btn.contains(e.target)) {
+    menu.classList.remove('open');
+  }
+});
+
+  // Close mobile menu on outside tap
+  document.addEventListener('click', function(e) {
+    const menu = document.getElementById('mobile-menu');
+    const burger = document.getElementById('hamburger');
+    if (menu && menu.classList.contains('open') && !menu.contains(e.target) && !burger.contains(e.target)) {
+      menu.classList.remove('open');
+      burger.classList.remove('open');
+    }
+  });
+</script>
+</body>
+</html>
