@@ -588,7 +588,7 @@ const INDIVIDUAL_TYPES = {
        desc: "Needs space first. Carries and expresses feeling when ready.",
        wired: "You need space to process before you can fully show up to a hard conversation — this isn't avoidance, it's how you get to something honest. You're emotionally expressive when you're ready, and the people close to you get real feeling when it comes. What you bring most is depth: you don't stay on the surface.",
        typeDesc: "You process before you can share — not because you're holding back, but because you need the space to understand what's actually true for you before you can say it. You're emotionally present and expressive when you get there. Under pressure, you need time, and pushing you before you're ready usually produces something incomplete. The thing to stay aware of: your withdrawal before sharing can read as avoidance to someone who engages more quickly." },
-  Z: { code: "Z", name: "The Undercurrent", color: "#6B7280", fill: "#F4F5F6", axis1: "Withdraw", axis2: "Guarded",
+  Z: { code: "Z", name: "The Protector", color: "#6B7280", fill: "#F4F5F6", axis1: "Withdraw", axis2: "Guarded",
        desc: "Withdraws and holds things close. Real depth and feeling running quiet beneath the surface.",
        wired: "You process privately and share selectively — there's usually more going on internally than what's visible from the outside. When you do speak, it carries weight precisely because you don't offer it carelessly. What you bring is steadiness: you don't react quickly, which means you don't create unnecessary chaos.",
        typeDesc: "You carry things privately and surface them selectively — which means there's usually more going on internally than what's visible. You don't perform your inner life, and you don't dump it on the people around you. Under pressure, you go quiet and go deep. The thing to stay aware of: the people who love you most sometimes struggle to know what you're carrying, which can make them feel shut out without you intending it." },
@@ -687,9 +687,9 @@ const NEW_COUPLE_TYPES = [
       "Arguments between you are probably not subtle. The feelings are out. The work is making sure what comes out is accurate, not just loud.",
     ],
     tips: [
-      { title: "Notice when you're amplifying each other", body: "When both of you are feeling something strongly, the loop can escalate. One person naming it — 'I think we're feeding each other right now' — can break the cycle before it needs to get bigger." },
-      { title: "Not every feeling needs an audience", body: "{U} and {P} are both expressive, but some feelings are better processed privately before being shared. Practice sitting with something for a beat before putting it into the shared space." },
-      { title: "The visibility is a gift", body: "Most couples are guessing at each other's interior. {U} and {P} don't have to. Appreciate that even when it's uncomfortable — it's the thing that makes real closeness possible." },
+      { title: "Notice when you're amplifying each other", body: "When both of you are feeling something strongly, the loop can escalate. One person naming it — 'I think we're feeding each other right now' — can break the cycle before it needs to get bigger.", phraseTry: "I think we're feeding each other right now — can we both take a breath before we keep going?" },
+      { title: "Not every feeling needs an audience", body: "{U} and {P} are both expressive, but some feelings are better processed privately before being shared. Practice sitting with something for a beat before putting it into the shared space.", phraseTry: "I need a minute with this before I put it out there. Give me twenty minutes." },
+      { title: "The visibility is a gift", body: "Most couples are guessing at each other's interior. {U} and {P} don't have to. Appreciate that even when it's uncomfortable — it's the thing that makes real closeness possible.", phraseTry: "I know this is a lot right now, and I'm glad we can actually see each other in it." },
     ],
   },
   {
@@ -719,9 +719,9 @@ const NEW_COUPLE_TYPES = [
       "The emotional texture of hard moments can sometimes get skipped in the move toward resolution.",
     ],
     tips: [
-      { title: "Check if it's resolved or just closed", body: "Fast repair is a real strength. The watch-out is closing the loop before the thing is actually through. Ask {P}: 'Are we actually okay, or are we both just ready to be done?'" },
-      { title: "Ask what's going on, not just what the plan is", body: "{U} and {P} are both comfortable with the practical mode. Add a deliberate question: 'How does this feel, not just what does it mean?' It changes the quality of the conclusion." },
-      { title: "Give the slower moments their time", body: "Occasionally, slow the repair down enough to make sure you've actually heard each other. The extra few minutes tends to be what prevents the same conversation coming back." },
+      { title: "Check if it's resolved or just closed", body: "Fast repair is a real strength. The watch-out is closing the loop before the thing is actually through. Ask {P}: 'Are we actually okay, or are we both just ready to be done?'", phraseTry: "Are we actually okay, or are we both just ready to be done?" },
+      { title: "Ask what's going on, not just what the plan is", body: "{U} and {P} are both comfortable with the practical mode. Add a deliberate question: 'How does this feel, not just what does it mean?' It changes the quality of the conclusion.", phraseTry: "How does this actually feel for you — not just what it means, but how it sits?" },
+      { title: "Give the slower moments their time", body: "Occasionally, slow the repair down enough to make sure you've actually heard each other. The extra few minutes tends to be what prevents the same conversation coming back.", phraseTry: "I want to make sure we've actually heard each other on this before we move on." },
     ],
   },
   {
@@ -751,9 +751,9 @@ const NEW_COUPLE_TYPES = [
       "When the conversation does happen, it tends to be calmer and more complete than it would have been earlier.",
     ],
     tips: [
-      { title: "Someone has to come back first", body: "Both {U} and {P} tend to wait. The good news is that whoever initiates the return usually gets a warmer reception than they expect. Take the step." },
-      { title: "Bound the space with a time", body: "'I need some time' is not as useful as 'I need until tonight.' A specific return time lets the other person stop the worried waiting and trust the process." },
-      { title: "Build a low-key signal", body: "{U} and {P} don't need a full conversation to signal that you're okay again. A small gesture — a cup of tea, a hand on the shoulder — does most of the work." },
+      { title: "Someone has to come back first", body: "Both {U} and {P} tend to wait. The good news is that whoever initiates the return usually gets a warmer reception than they expect. Take the step.", phraseTry: "I'm ready to talk when you are. No rush — just wanted you to know." },
+      { title: "Bound the space with a time", body: "'I need some time' is not as useful as 'I need until tonight.' A specific return time lets the other person stop the worried waiting and trust the process.", phraseTry: "I need until tonight. I'll come find you after dinner." },
+      { title: "Build a low-key signal", body: "{U} and {P} don't need a full conversation to signal that you're okay again. A small gesture — a cup of tea, a hand on the shoulder — does most of the work.", phraseTry: "I'm okay. We're okay. Just needed a minute." },
     ],
   },
   {
@@ -783,9 +783,9 @@ const NEW_COUPLE_TYPES = [
       "The relationship is probably more stable-looking than many. The thing to watch is what's accumulating beneath the stability.",
     ],
     tips: [
-      { title: "Build in the opening, don't wait for it to happen", body: "A weekly check-in — even 15 minutes, even structured — creates a container for the things that wouldn't come up otherwise. Schedule the opening you both won't naturally make." },
-      { title: "Share the rougher draft", body: "Both {U} and {P} wait until something is fully formed before sharing it. Practice sharing it half-formed. The relationship needs the earlier version too." },
-      { title: "Name what you appreciate", body: "Reserved people often feel deeply — they just don't say it. Make a practice of saying specifically what you value about each other. The other person may not know unless you tell them." },
+      { title: "Build in the opening, don't wait for it to happen", body: "A weekly check-in — even 15 minutes, even structured — creates a container for the things that wouldn't come up otherwise. Schedule the opening you both won't naturally make.", phraseTry: "Can we do a quick check-in this week? Nothing heavy — I just want to know how you're actually doing." },
+      { title: "Share the rougher draft", body: "Both {U} and {P} wait until something is fully formed before sharing it. Practice sharing it half-formed. The relationship needs the earlier version too.", phraseTry: "I'm still figuring out how I feel about this, but I wanted to say it out loud anyway." },
+      { title: "Name what you appreciate", body: "Reserved people often feel deeply — they just don't say it. Make a practice of saying specifically what you value about each other. The other person may not know unless you tell them.", phraseTry: "I don't say this enough, but I want you to know I really value the way you {something specific}." },
     ],
   },
 
@@ -817,9 +817,9 @@ const NEW_COUPLE_TYPES = [
       "When the conversation does happen, it tends to go somewhere useful. You're not fighting about whether to have it — just when.",
     ],
     tips: [
-      { title: "Name which mode you're in", body: "'I need to process this out loud' vs. 'I need to think before I talk.' That one sentence tells the other person how to meet you. Use it early." },
-      { title: "Guarded partner: share the half-formed version", body: "You don't have to wait until it's fully formed. 'I'm still figuring out how I feel about this' is a form of sharing, and it's usually exactly what the expressive partner needs to hear." },
-      { title: "Expressive partner: give the processing room", body: "Pressing for more than the guarded partner is ready to give doesn't create connection — it creates pressure. Ask once, then wait. The sharing will come in its own time." },
+      { title: "Name which mode you're in", body: "'I need to process this out loud' vs. 'I need to think before I talk.' That one sentence tells the other person how to meet you. Use it early.", phraseTry: "I need to process this out loud — bear with me. I don't have it figured out yet." },
+      { title: "Guarded partner: share the half-formed version", body: "You don't have to wait until it's fully formed. 'I'm still figuring out how I feel about this' is a form of sharing, and it's usually exactly what the expressive partner needs to hear.", phraseTry: "I'm still working through it, but I think I'm bothered by {something}. Not sure why yet." },
+      { title: "Expressive partner: give the processing room", body: "Pressing for more than the guarded partner is ready to give doesn't create connection — it creates pressure. Ask once, then wait. The sharing will come in its own time.", phraseTry: "I asked. I'm going to wait. I know it's coming." },
     ],
   },
   {
@@ -849,9 +849,9 @@ const NEW_COUPLE_TYPES = [
       "The conflict clock mismatch doesn't mean one person cares more. It means you're wired differently — and that's solvable.",
     ],
     tips: [
-      { title: "Name the pattern before you're in it", body: "When things are calm, tell each other: 'When I'm upset, I need X first.' That one conversation changes what the next hard moment looks like." },
-      { title: "Make space bounded, not open-ended", body: "If one of you needs time: give a return. 'I need an hour' is different from silence. It lets the other person stop the worried waiting." },
-      { title: "Urgency isn't pressure; silence isn't avoidance", body: "When {U} presses for resolution, that's care, not control. When {P} needs space, that's process, not withdrawal. Say what you mean." },
+      { title: "Name the pattern before you're in it", body: "When things are calm, tell each other: 'When I'm upset, I need X first.' That one conversation changes what the next hard moment looks like.", phraseTry: "When I'm upset, I need a few minutes before I can talk. It's not avoidance — I'll come back." },
+      { title: "Make space bounded, not open-ended", body: "If one of you needs time: give a return. 'I need an hour' is different from silence. It lets the other person stop the worried waiting.", phraseTry: "I need an hour. I'll be back at eight." },
+      { title: "Urgency isn't pressure; silence isn't avoidance", body: "When {U} presses for resolution, that's care, not control. When {P} needs space, that's process, not withdrawal. Say what you mean.", phraseTry: "I know this is hard for you to sit with. I'm not gone — I'm processing. I'll be back." },
     ],
   },
   {
@@ -881,9 +881,9 @@ const NEW_COUPLE_TYPES = [
       "When {U} and {P} are communicating well, it's because you're both actively working to understand, not just assuming you do.",
     ],
     tips: [
-      { title: "Expressiveness isn't depth — and silence isn't emptiness", body: "The reserved partner's inner life is not less rich because it isn't expressed as often. The reaching partner's sharing isn't less valuable because it comes more easily. Name that directly." },
-      { title: "Reaching partner: give the silence its room", body: "Pressing for more than the reserved partner is ready to give doesn't create connection — it creates pressure. Ask once, then wait. The sharing will come in its own time." },
-      { title: "Reserved partner: share the earlier draft", body: "You don't have to wait until it's fully formed. Even 'I'm still figuring out how I feel about this' is a form of sharing, and it's usually exactly what the reaching partner needs to hear." },
+      { title: "Expressiveness isn't depth — and silence isn't emptiness", body: "The reserved partner's inner life is not less rich because it isn't expressed as often. The reaching partner's sharing isn't less valuable because it comes more easily. Name that directly.", phraseTry: "There's more going on for me than I'm showing. I just need to get it in order before I share it." },
+      { title: "Reaching partner: give the silence its room", body: "Pressing for more than the reserved partner is ready to give doesn't create connection — it creates pressure. Ask once, then wait. The sharing will come in its own time.", phraseTry: "I asked. That's enough for now. I trust you'll bring it when you're ready." },
+      { title: "Reserved partner: share the earlier draft", body: "You don't have to wait until it's fully formed. Even 'I'm still figuring out how I feel about this' is a form of sharing, and it's usually exactly what the reaching partner needs to hear.", phraseTry: "I don't have this figured out, but something's been sitting with me and I wanted to say it before I lose it." },
     ],
   },
   {
@@ -913,9 +913,9 @@ const NEW_COUPLE_TYPES = [
       "The gap between your instincts is not a character flaw. It's a wiring difference that has a well-worn solution: naming it before you're in it.",
     ],
     tips: [
-      { title: "Driver: resolution doesn't mean resolved", body: "The feeler needs the space and then the conversation. Moving fast to 'let's talk' before they're ready doesn't get to resolution faster — it delays it." },
-      { title: "Feeler: tell the driver when you'll be back", body: "The uncertainty is harder for them than the wait. 'I need until tonight' lets the driver stop the worried waiting and trust the process." },
-      { title: "Name the pattern out loud before you're in it", body: "When things are calm: 'When I'm upset, I need X before the conversation is possible.' That one sentence changes what the next hard moment looks like." },
+      { title: "Driver: resolution doesn't mean resolved", body: "The feeler needs the space and then the conversation. Moving fast to 'let's talk' before they're ready doesn't get to resolution faster — it delays it.", phraseTry: "I know you're not ready. I'll wait — but can you tell me when you think you will be?" },
+      { title: "Feeler: tell the driver when you'll be back", body: "The uncertainty is harder for them than the wait. 'I need until tonight' lets the driver stop the worried waiting and trust the process.", phraseTry: "I need until tomorrow morning. I'll come to you then." },
+      { title: "Name the pattern out loud before you're in it", body: "When things are calm: 'When I'm upset, I need X before the conversation is possible.' That one sentence changes what the next hard moment looks like.", phraseTry: "When I go quiet, it's not over — it's processing. Give me space and I'll come back." },
     ],
   },
   {
@@ -945,9 +945,9 @@ const NEW_COUPLE_TYPES = [
       "When you do talk through something, it tends to be calmer and more considered than it would be for more expressive pairings.",
     ],
     tips: [
-      { title: "Build a practice of asking", body: "Not 'are you okay?' but 'what's actually going on for you right now?' Two people who both hold things privately need to be asked before they'll share." },
-      { title: "Schedule the emotional check-in", body: "{U} and {P} are both capable of going long stretches without naming what's going on inside. A regular, brief check-in creates the container that neither of you will naturally generate on your own." },
-      { title: "The quiet isn't a problem — until it is", body: "Low-drama is a real quality. The work is making sure the ease isn't covering for avoided conversations. Check in on whether the calm is genuine or whether something is sitting unspoken." },
+      { title: "Build a practice of asking", body: "Not 'are you okay?' but 'what's actually going on for you right now?' Two people who both hold things privately need to be asked before they'll share.", phraseTry: "What's actually going on for you right now — not the plan, the feeling?" },
+      { title: "Schedule the emotional check-in", body: "{U} and {P} are both capable of going long stretches without naming what's going on inside. A regular, brief check-in creates the container that neither of you will naturally generate on your own.", phraseTry: "Can we do fifteen minutes on Sunday? Just to check in properly." },
+      { title: "The quiet isn't a problem — until it is", body: "Low-drama is a real quality. The work is making sure the ease isn't covering for avoided conversations. Check in on whether the calm is genuine or whether something is sitting unspoken.", phraseTry: "Is there anything sitting unspoken between us right now? I want to make sure we're actually okay." },
     ],
   },
   {
@@ -977,9 +977,9 @@ const NEW_COUPLE_TYPES = [
       "When the conversation does happen, it tends to be more complete than it would have been earlier. The depth is real — it just required the time.",
     ],
     tips: [
-      { title: "Let the feeler initiate the return", body: "The feeler, when ready, tends to be more willing to bring it back. Make that the agreed pattern: {U} signals readiness, {P} gets the full space they need without indefinite silence." },
-      { title: "Bound the space with a time", body: "'I need some time' is not as useful as 'I need until tonight.' A specific return time lets the other person stop the worried waiting and trust the process." },
-      { title: "Create a regular container for openness", body: "{U} and {P} need a deliberate structure for things to surface. A weekly check-in — even 10 minutes — creates the opening that neither of you will naturally generate on your own." },
+      { title: "Let the feeler initiate the return", body: "The feeler, when ready, tends to be more willing to bring it back. Make that the agreed pattern: {U} signals readiness, {P} gets the full space they need without indefinite silence.", phraseTry: "I'm ready when you are. Take your time — I'll be here." },
+      { title: "Bound the space with a time", body: "'I need some time' is not as useful as 'I need until tonight.' A specific return time lets the other person stop the worried waiting and trust the process.", phraseTry: "I need until tomorrow morning. I'll come find you then." },
+      { title: "Create a regular container for openness", body: "{U} and {P} need a deliberate structure for things to surface. A weekly check-in — even 10 minutes — creates the opening that neither of you will naturally generate on your own.", phraseTry: "Can we do ten minutes on Sunday? Not about anything specific — I just want to check in." },
     ],
   },
 ];
@@ -1016,7 +1016,7 @@ function CoupleMapSVG({ myS, partS, userName, partnerName, size = 480 }) {
     Z: ["#E8E6E3", "#DEDAD5"],
   };
   const QC = { W: "#E8673A", X: "#1B5FE8", Y: "#7C3AED", Z: "#6B7280" };
-  const QN = { W: "The Reacher", X: "The Driver", Y: "The Feeler", Z: "The Undercurrent" };
+  const QN = { W: "The Reacher", X: "The Driver", Y: "The Feeler", Z: "The Protector" };
 
   // Name tag pill dimensions
   const tagH = 22, tagR = 11, tagPad = 10;
@@ -3231,10 +3231,10 @@ function ExpectationsResults({ myAnswers, partnerAnswers, userName, partnerName,
     WW: "Two Reachers both lean toward open expression. When expectations differ, you'll likely name it — the work is making sure you've actually heard each other before resolving.",
     XX: "Two Drivers tend to move through disagreement efficiently. Watch that practical resolution doesn't skip the emotional weight of what's actually at stake.",
     YY: "Two Feelers both carry feeling deeply. When an expectation gap lands hard, give each other the space before the conversation — it'll go better for it.",
-    ZZ: "Two Undercurrents may let things sit. Build a deliberate practice of raising misaligned expectations before they calcify into resentment.",
+    ZZ: "Two Protectors may let things sit. Build a deliberate practice of raising misaligned expectations before they calcify into resentment.",
     WX: "One of you will surface expectation gaps readily; the other processes first. The one who brings it up isn't necessarily the one who cares more.",
     WY: "Different conflict clocks apply here too. The one who names the expectation gap first isn't pushing — they're ready. The other will need a moment before the conversation is possible.",
-    WZ: "The Reacher will name gaps; The Undercurrent will need time to respond. That asymmetry is wiring, not avoidance — name that explicitly.",
+    WZ: "The Reacher will name gaps; The Protector will need time to respond. That asymmetry is wiring, not avoidance — name that explicitly.",
     XY: "The Driver wants to resolve quickly; The Feeler needs space to process. Neither is wrong. Build a return window into any expectation conversation.",
     XZ: "Both of you hold things close. Expectation gaps that go unnamed can accumulate quietly — schedule the conversation, don't wait for it to happen organically.",
     YZ: "Both withdraw under pressure. When an expectation surfaces, one of you will need to come back first — let that be the agreed pattern.",
@@ -5132,11 +5132,15 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
                 {ct.tagline}
               </p>
             </div>
-            {/* Description on dark */}
+            {/* Description + nuance combined on dark */}
             <div style={{ background: "#2d2250", padding: "1.75rem 2.5rem 2rem" }}>
-              <p style={{ fontSize: "0.9rem", color: "rgba(245,239,230,0.82)", fontFamily: BFONT, fontWeight: 300, lineHeight: 1.85, margin: 0, maxWidth: 540 }}>
+              <p style={{ fontSize: "0.9rem", color: "rgba(245,239,230,0.82)", fontFamily: BFONT, fontWeight: 300, lineHeight: 1.85, margin: "0 0 1rem", maxWidth: 540 }}>
                 {interp(ct.description)}
               </p>
+              <div style={{ borderTop: "1px solid rgba(255,255,255,0.1)", paddingTop: "1rem" }}>
+                <div style={{ fontSize: "0.55rem", letterSpacing: "0.2em", textTransform: "uppercase", color: `${ct.color}bb`, fontFamily: BFONT, fontWeight: 700, marginBottom: "0.4rem" }}>Worth knowing</div>
+                <p style={{ fontSize: "0.84rem", color: "rgba(245,239,230,0.65)", fontFamily: BFONT, fontWeight: 300, lineHeight: 1.72, margin: 0, maxWidth: 520 }}>{interp(ct.nuance)}</p>
+              </div>
             </div>
           </div>
 
@@ -5160,7 +5164,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
           {/* ── TIPS for this type ── */}
           <div style={{ marginBottom: "1.25rem" }}>
             <div style={{ fontSize: "0.6rem", letterSpacing: "0.22em", textTransform: "uppercase", color: C.muted, fontFamily: BFONT, fontWeight: 700, marginBottom: "1rem" }}>
-              For a {ct.name.replace("The ", "").toLowerCase()} dynamic
+              Actionable next steps
             </div>
             <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
               {ct.tips?.map((tip, i) => {
@@ -5168,7 +5172,13 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
                 const tipColor = tipColors[i % 3];
                 return (<div key={i} style={{ background: "white", border: `1.5px solid ${C.stone}`, borderRadius: 14, padding: "1.25rem 1.4rem", borderLeft: `4px solid ${tipColor}` }}>
                   <div style={{ fontSize: "0.8rem", fontWeight: 700, color: C.ink, fontFamily: BFONT, marginBottom: "0.4rem" }}>{interp(tip.title)}</div>
-                  <p style={{ fontSize: "0.82rem", color: C.muted, fontFamily: BFONT, lineHeight: 1.72, margin: 0, fontWeight: 300 }}>{interp(tip.body)}</p>
+                  <p style={{ fontSize: "0.82rem", color: C.muted, fontFamily: BFONT, lineHeight: 1.72, margin: "0 0 0.75rem", fontWeight: 300 }}>{interp(tip.body)}</p>
+                  {tip.phraseTry && (
+                    <div style={{ background: `${tipColor}0d`, border: `1px solid ${tipColor}30`, borderRadius: 8, padding: "0.55rem 0.8rem", display: "flex", gap: "0.5rem", alignItems: "flex-start" }}>
+                      <span style={{ fontSize: "0.58rem", letterSpacing: "0.16em", textTransform: "uppercase", color: tipColor, fontFamily: BFONT, fontWeight: 700, whiteSpace: "nowrap", marginTop: "0.1rem" }}>Phrase to try</span>
+                      <span style={{ fontSize: "0.78rem", color: C.ink, fontFamily: BFONT, fontStyle: "italic", lineHeight: 1.55 }}>"{interp(tip.phraseTry)}"</span>
+                    </div>
+                  )}
                 </div>);
               })}
             </div>
@@ -5181,7 +5191,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
                 What comes naturally to {userName} &amp; {partnerName}
               </div>
               <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
-                {ct.strengths.map((s, i) => (
+                {ct.strengths.slice(0,2).map((s, i) => (
                   <div key={i} style={{ display: "flex", gap: "0.85rem", alignItems: "flex-start" }}>
                     <div style={{ width: 20, height: 20, borderRadius: "50%", background: "rgba(16,185,129,0.12)", border: "1.5px solid rgba(16,185,129,0.3)", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", marginTop: 2 }}>
                       <span style={{ fontSize: "0.6rem", color: "#10b981", fontWeight: 700 }}>✓</span>
@@ -5200,7 +5210,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
                 Worth watching for
               </div>
               <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
-                {ct.stickingPoints.map((s, i) => (
+                {ct.stickingPoints.slice(0,2).map((s, i) => (
                   <div key={i} style={{ display: "flex", gap: "0.85rem", alignItems: "flex-start" }}>
                     <div style={{ width: 20, height: 20, borderRadius: "50%", background: "rgba(232,103,58,0.1)", border: "1.5px solid rgba(232,103,58,0.28)", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", marginTop: 2 }}>
                       <span style={{ fontSize: "0.65rem", color: "#E8673A", fontWeight: 700 }}>!</span>
@@ -5230,10 +5240,17 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
             </div>
           )}
 
-          {/* ── WORTH KNOWING ── */}
-          <div style={{ background: "#FBF8F3", border: `1.5px solid ${C.stone}`, borderRadius: 14, padding: "1.25rem 1.4rem", marginBottom: "1.25rem", borderLeft: `4px solid ${ct.color}55` }}>
-            <div style={{ fontSize: "0.58rem", letterSpacing: "0.2em", textTransform: "uppercase", color: ct.color, fontFamily: BFONT, fontWeight: 700, marginBottom: "0.4rem" }}>Worth knowing</div>
-            <p style={{ fontSize: "0.84rem", color: "#5C4A38", fontFamily: BFONT, fontWeight: 400, lineHeight: 1.75, margin: 0 }}>{interp(ct.nuance)}</p>
+
+
+          {/* ── WORKBOOK CTA ── */}
+          <div style={{ background: `${ct.color}0d`, border: `1px solid ${ct.color}25`, borderRadius: 14, padding: "1rem 1.25rem", marginBottom: "1.25rem", display: "flex", alignItems: "center", justifyContent: "space-between", gap: "1rem", flexWrap: "wrap" }}>
+            <p style={{ fontSize: "0.82rem", color: C.ink, fontFamily: BFONT, lineHeight: 1.55, margin: 0 }}>
+              Like what you're seeing? Explore more curated, practical guidance in your{" "}
+              <span style={{ fontWeight: 600 }}>personalized workbook.</span>
+            </p>
+            <a href="/offerings#workbook" style={{ fontSize: "0.78rem", fontWeight: 700, color: ct.color, fontFamily: BFONT, textDecoration: "none", whiteSpace: "nowrap", display: "flex", alignItems: "center", gap: "0.3rem" }}>
+              See workbook details →
+            </a>
           </div>
 
           {/* ── SHARE ── */}

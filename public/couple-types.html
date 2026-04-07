@@ -26,7 +26,7 @@
     a{text-decoration:none}
     .si{max-width:1100px;margin:0 auto;padding:0 clamp(1.25rem,4vw,2.5rem)}
     /* NAV */
-    .site-nav{position:sticky;top:0;z-index:100;background:rgba(255,253,249,.95);backdrop-filter:blur(12px);height:58px;display:flex;align-items:center;justify-content:space-between;padding:0 2.5rem;border-bottom:1px solid var(--stone);overflow:visible}
+    nav{position:fixed;top:0;left:0;right:0;z-index:100;height:58px;background:rgba(255,253,249,.94);backdrop-filter:blur(16px);border-bottom:1px solid var(--stone);display:flex;align-items:center;padding:0 2.5rem;justify-content:space-between}
     .logo{display:flex;align-items:center;gap:.55rem;text-decoration:none}
     .logo-text{font-family:var(--hfont);font-size:1.1rem;font-weight:700;color:var(--ink)}
     .nav-center{display:flex;list-style:none;gap:2rem;align-items:center}
@@ -134,9 +134,9 @@
 </head>
 <body>
 
-<nav class="site-nav">
+<nav>
   <a href="/home" class="logo">
-    <svg width="36" height="26" viewBox="0 0 103 76" fill="none"><defs><linearGradient id="ct_logo" x1="0" y1="0" x2="103" y2="76" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#E8673A"/><stop offset="100%" stop-color="#1B5FE8"/></linearGradient></defs><path d="M14,4 L44,4 A9,9 0 0,1 53,13 L53,42 A9,9 0 0,1 44,51 L20,51 L6,61 L11,51 A6,6 0 0,1 5,45 L5,13 A9,9 0 0,1 14,4 Z" fill="url(#ct_logo)"/><path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill="white" opacity=".93" transform="translate(13.16,11.3) scale(0.72)"/><path d="M89,14 L59,14 A9,9 0 0,0 50,23 L50,52 A9,9 0 0,0 59,61 L83,61 L97,71 L92,61 A6,6 0 0,0 98,55 L98,23 A9,9 0 0,0 89,14 Z" fill="none" stroke="url(#ct_logo)" stroke-width="2.2" stroke-linejoin="round"/><path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill="url(#ct_logo)" transform="translate(58.16,21.3) scale(0.72)"/></svg>
+    <svg width="46" height="33" viewBox="0 0 103 76" fill="none"><defs><linearGradient id="ct_logo" x1="0" y1="0" x2="103" y2="76" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#E8673A"/><stop offset="100%" stop-color="#1B5FE8"/></linearGradient></defs><path d="M14,4 L44,4 A9,9 0 0,1 53,13 L53,42 A9,9 0 0,1 44,51 L20,51 L6,61 L11,51 A6,6 0 0,1 5,45 L5,13 A9,9 0 0,1 14,4 Z" fill="url(#ct_logo)"/><path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill="white" opacity=".93" transform="translate(13.16,11.3) scale(0.72)"/><path d="M89,14 L59,14 A9,9 0 0,0 50,23 L50,52 A9,9 0 0,0 59,61 L83,61 L97,71 L92,61 A6,6 0 0,0 98,55 L98,23 A9,9 0 0,0 89,14 Z" fill="none" stroke="url(#ct_logo)" stroke-width="2.2" stroke-linejoin="round"/><path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill="url(#ct_logo)" transform="translate(58.16,21.3) scale(0.72)"/></svg>
     <span class="logo-text">Attune</span>
   </a>
   <ul class="nav-center">
@@ -240,7 +240,7 @@
       </div>
       <div class="type-card" style="background:rgba(107,114,128,.06);border-color:rgba(107,114,128,.25);">
         <div class="type-letter" style="color:#6B7280;">Z</div>
-        <div class="type-name">The Undercurrent</div>
+        <div class="type-name">The Protector</div>
         <div class="type-axes">Withdraw + Guarded</div>
         <div class="type-desc">Holds things close; real depth running quiet.</div>
       </div>
@@ -292,7 +292,7 @@
         <text x="44" y="340" font-size="10" font-weight="800" fill="#7C3AED" font-family="Georgia,serif">Y</text>
         <text x="44" y="352" font-size="8" font-weight="600" fill="#7C3AED" font-family="Arial" opacity=".7">The Feeler</text>
         <text x="376" y="340" font-size="10" font-weight="800" fill="#6B7280" font-family="Georgia,serif" text-anchor="end">Z</text>
-        <text x="376" y="352" font-size="8" font-weight="600" fill="#6B7280" font-family="Arial" text-anchor="end" opacity=".7">The Undercurrent</text>
+        <text x="376" y="352" font-size="8" font-weight="600" fill="#6B7280" font-family="Arial" text-anchor="end" opacity=".7">The Protector</text>
 
         <!-- Axis labels — inside the grid edges to stay within viewBox -->
         <text x="210" y="68" font-size="8" font-weight="700" fill="rgba(140,122,104,.7)" font-family="Arial" text-anchor="middle">Engage</text>
