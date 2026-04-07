@@ -1,0 +1,1871 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Your Portal, Attune</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,800;1,700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  html,body{overflow-x:hidden;max-width:100%}
+  html,body{scroll-snap-type:y proximity}
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  :root{--cream:#FFFDF9;--warm:#FBF8F3;--stone:#E8DDD0;--clay:#C17F47;--ink:#0E0B07;--text:#1E1610;--muted:#8C7A68;--orange:#E8673A;--indigo:#1B5FE8;--hfont:'Playfair Display',Georgia,serif;--bfont:'DM Sans',sans-serif}
+  body{background:var(--cream);color:var(--text);font-family:var(--bfont);-webkit-font-smoothing:antialiased;min-height:100vh}
+
+  /* NAV */
+  nav{position:fixed;top:0;left:0;right:0;z-index:100;height:58px;background:rgba(255,253,249,.94);backdrop-filter:blur(16px);border-bottom:1px solid var(--stone);display:flex;align-items:center;padding:0 2.5rem;justify-content:space-between}
+  .logo{display:flex;align-items:center;gap:.65rem;text-decoration:none}
+  .logo-mark{display:flex;align-items:center;flex-shrink:0}
+  .logo-text{font-family:var(--hfont);font-size:1.15rem;font-weight:700;color:var(--ink)}
+  .nav-right{display:flex;align-items:center;gap:1.5rem}
+  .hamburger{display:none;flex-direction:column;gap:4px;background:none;border:none;cursor:pointer;padding:6px;border-radius:6px}
+  .hamburger span{display:block;width:20px;height:2px;background:var(--ink);border-radius:2px;transition:all .25s}
+  .mobile-menu{display:none;position:fixed;top:66px;right:1rem;left:auto;width:240px;background:rgba(255,253,249,.99);backdrop-filter:blur(20px);border:1.5px solid var(--stone);border-radius:14px;padding:1rem;z-index:200;flex-direction:column;gap:.15rem;box-shadow:0 12px 40px rgba(14,11,7,.14)}
+  .mobile-menu.open{display:flex}
+  .mobile-menu a{font-size:.85rem;font-weight:500;color:var(--muted);text-decoration:none;padding:.5rem .65rem;border-radius:8px;transition:all .15s}
+  .mobile-menu a:last-child{}
+  .mobile-menu a:hover{color:var(--ink);background:rgba(14,11,7,.04)}
+  .mobile-menu .mm-cta{color:var(--orange);font-weight:700}
+  @media(max-width:640px){.hamburger{display:flex}.nav-signout{display:none}}
+  .site-footer{background:var(--ink);color:rgba(255,255,255,.55);padding:4rem 0 2rem;width:100%;margin-left:0;margin-right:0;max-width:none;display:block}
+  .sf-inner{max-width:1120px;margin:0 auto;padding:0 2.5rem 3rem;display:grid;grid-template-columns:1fr 2fr;gap:4rem;border-bottom:1px solid rgba(255,255,255,.1)}
+  .sf-brand .logo-text{color:white}
+  .sf-tagline{font-size:.82rem;color:rgba(255,255,255,.38);line-height:1.7;margin-top:.85rem;max-width:200px}
+  .sf-links{display:grid;grid-template-columns:repeat(3,1fr);gap:2rem}
+  .sf-col{display:flex;flex-direction:column;gap:.5rem}
+  .sf-col-title{font-size:.62rem;letter-spacing:.22em;text-transform:uppercase;color:rgba(255,255,255,.35);font-weight:700;margin-bottom:.4rem}
+  .sf-col a{font-size:.82rem;color:rgba(255,255,255,.55);text-decoration:none;transition:color .15s}
+  .sf-col a:hover{color:white}
+  .sf-bottom{max-width:1120px;margin:0 auto;padding:1.75rem 2.5rem 0;display:flex;flex-direction:column;align-items:flex-start;gap:.4rem}
+  .sf-copy,.sf-email{font-size:.72rem;color:rgba(255,255,255,.28)}
+  @media(max-width:768px){.sf-inner{grid-template-columns:1fr 1.6fr;gap:1.25rem;padding-left:1.25rem;padding-right:1.25rem}.sf-links{grid-template-columns:1fr 1fr;gap:1rem}.sf-bottom{flex-direction:column;align-items:flex-start}.sf-tagline{font-size:.78rem}.sf-col a{font-size:.8rem}.sf-col-title{font-size:.62rem}}
+  .nav-user{font-size:.8rem;color:var(--muted);display:none}
+  .nav-signout{background:transparent;border:none;font-size:.78rem;color:var(--muted);cursor:pointer;font-family:var(--bfont);display:none;transition:color .15s}
+  .nav-signout:hover{color:var(--ink)}
+
+  /* VIEWS */
+  .view{display:none}
+  .view.active{display:block}
+
+  /* ── AUTH ── */
+  .auth-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:5rem 1.5rem 3rem}
+  @media(max-width:640px){
+    .auth-wrap{padding:calc(58px + 1rem) 1.25rem 2rem;align-items:flex-start}
+    .auth-card{padding:2rem 1.5rem;border-radius:16px;max-height:calc(100vh - 80px);overflow-y:auto}
+  }
+  .auth-card{background:white;border:1px solid var(--stone);border-radius:22px;padding:2.75rem;width:100%;max-width:420px;box-shadow:0 12px 50px rgba(14,11,7,.09)}
+  .auth-logo{display:flex;align-items:center;gap:.65rem;margin-bottom:2rem;text-decoration:none}
+  .auth-logo-text{font-family:var(--hfont);font-size:1.1rem;font-weight:700;color:var(--ink)}
+  .auth-headline{font-family:var(--hfont);font-size:1.65rem;font-weight:700;color:var(--ink);margin-bottom:.4rem;letter-spacing:-.02em}
+  .auth-sub{font-size:.85rem;color:var(--muted);line-height:1.6;margin-bottom:2rem}
+  .auth-tabs{display:flex;border-bottom:1px solid var(--stone);margin-bottom:2rem}
+  .auth-tab{flex:1;text-align:center;padding:.65rem;font-size:.8rem;font-weight:600;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;transition:all .15s}
+  .auth-tab.active{color:var(--ink);border-bottom-color:var(--ink)}
+  .form-group{margin-bottom:1.15rem}
+  .form-label{display:block;font-size:.68rem;font-weight:700;color:var(--ink);letter-spacing:.06em;margin-bottom:.4rem;text-transform:uppercase}
+  .form-input{width:100%;padding:.8rem 1rem;border:1.5px solid var(--stone);border-radius:11px;font-size:.88rem;font-family:var(--bfont);color:var(--ink);background:var(--cream);outline:none;transition:border-color .15s}
+  .form-input:focus{border-color:var(--clay)}
+  .form-input::placeholder{color:var(--muted)}
+  .form-row{display:grid;grid-template-columns:1fr 1fr;gap:.75rem}
+  .btn-submit{width:100%;padding:.95rem;background:var(--ink);color:white;border:none;border-radius:12px;font-size:.82rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;font-family:var(--bfont);margin-top:.5rem;transition:opacity .15s}
+  .btn-submit:hover{opacity:.88}
+  .btn-demo{width:100%;padding:.95rem;background:var(--warm);color:var(--ink);border:1.5px solid var(--stone);border-radius:12px;font-size:.82rem;font-weight:600;cursor:pointer;font-family:var(--bfont);transition:background .15s}
+  .btn-demo:hover{background:var(--stone)}
+  .pkg-demo-btn{display:flex;flex-direction:column;gap:.3rem;background:white;border:1.5px solid var(--stone);border-radius:10px;padding:.75rem .85rem;cursor:pointer;text-align:left;font-family:var(--bfont);transition:all .15s;align-items:flex-start}
+  .pkg-demo-btn:hover{border-color:var(--clay);background:#FDFAF7}
+  .pkg-demo-badge{font-size:.55rem;font-weight:700;padding:.18rem .55rem;border-radius:999px;display:inline-block}
+  .pkg-demo-name{font-size:.75rem;font-weight:600;color:var(--ink);line-height:1.2}
+  .pkg-demo-price{font-size:.68rem;color:var(--muted)}
+  .divider{display:flex;align-items:center;gap:.85rem;margin:1.35rem 0}
+  .divider::before,.divider::after{content:'';flex:1;height:1px;background:var(--stone)}
+  .divider span{font-size:.7rem;color:var(--muted)}
+  .form-forgot{font-size:.72rem;color:var(--clay);text-decoration:none;display:block;text-align:right;margin-top:.25rem}
+  .auth-note{font-size:.72rem;color:var(--muted);text-align:center;margin-top:1.1rem;line-height:1.6}
+  .auth-note a{color:var(--clay);text-decoration:none}
+
+  /* ── PORTAL SHELL ── */
+  .portal-wrap{padding-top:58px}
+  .portal-hero{background:linear-gradient(150deg,#131130,#1d1a4e 55%,#201d52);padding:3.5rem 2.5rem;position:relative;overflow:hidden}
+  .portal-hero::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--orange),var(--indigo))}
+  .phi{max-width:860px;margin:0 auto}
+  .portal-greeting{font-size:.58rem;letter-spacing:.3em;text-transform:uppercase;color:rgba(232,103,58,.65);margin-bottom:.45rem}
+  .portal-name{font-family:var(--hfont);font-size:2rem;font-weight:700;color:white;margin-bottom:.4rem;letter-spacing:-.02em}
+  .portal-status{font-size:.85rem;color:rgba(255,255,255,.42);margin-bottom:1.75rem}
+  .ppills{display:flex;gap:.5rem;flex-wrap:wrap}
+  .ppill{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);padding:.38rem .9rem;border-radius:999px;font-size:.68rem;display:flex;align-items:center;gap:.45rem;color:rgba(255,255,255,.62)}
+  .pdot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+  .pdot.done{background:#34d399}.pdot.wait{background:rgba(255,255,255,.28)}.pdot.lock{background:rgba(255,255,255,.14)}
+
+  /* Sub-page header (profile / notifications / help) */
+  .sub-hero{background:var(--warm);border-bottom:1px solid var(--stone);padding:2.5rem 2.5rem 2rem}
+  .sub-hero-inner{max-width:860px;margin:0 auto;display:flex;align-items:center;gap:1rem}
+  .sub-back{background:transparent;border:none;color:var(--muted);font-size:.78rem;font-weight:500;cursor:pointer;font-family:var(--bfont);display:flex;align-items:center;gap:.35rem;transition:color .15s;padding:0}
+  .sub-back:hover{color:var(--ink)}
+  .sub-back svg{width:14px;height:14px}
+  .sub-title{font-family:var(--hfont);font-size:1.55rem;font-weight:700;color:var(--ink);letter-spacing:-.02em;margin-left:auto;margin-right:auto}
+
+  .pcontent{max-width:860px;margin:0 auto;padding:2.5rem 2.5rem 4rem}
+  .slabel{font-size:.6rem;letter-spacing:.22em;text-transform:uppercase;color:var(--muted);margin-bottom:1rem;margin-top:2.25rem}
+  .slabel:first-child{margin-top:0}
+
+  /* Results card */
+  .rc{background:linear-gradient(150deg,#131130,#1d1a4e);border-radius:18px;padding:1.85rem;color:white;position:relative;overflow:hidden;margin-bottom:.25rem;text-decoration:none;display:block;transition:transform .18s;cursor:pointer;border:1px solid rgba(255,255,255,.05)}
+  .rc:hover{border-color:var(--clay)}
+  .rc.locked{opacity:.55;cursor:default;pointer-events:none}
+  .rc::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--orange),var(--indigo))}
+  .rc-hdr{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:1rem}
+  .rc-lbl{font-size:.56rem;letter-spacing:.28em;text-transform:uppercase;color:rgba(232,103,58,.65);margin-bottom:.28rem}
+  .rc-title{font-family:var(--hfont);font-size:1.4rem;font-weight:700;letter-spacing:-.02em}
+  .rc-lock{font-size:1.1rem;opacity:.35}
+  .rc-chips{display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:.85rem}
+  .rc-chip{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.14);padding:.2rem .65rem;border-radius:999px;font-size:.62rem;color:rgba(255,255,255,.62)}
+  .rc-sub{font-size:.82rem;color:rgba(255,255,255,.5);line-height:1.65;max-width:520px}
+  .rc-cta{font-size:.72rem;font-weight:700;color:var(--orange);letter-spacing:.05em;margin-top:.85rem;display:flex;align-items:center;gap:.35rem}
+
+  /* Exercise cards */
+  .ex-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.25rem;margin-bottom:.25rem}
+  .ex-card{border-radius:18px;overflow:hidden;border:2px solid var(--stone);background:white;text-decoration:none;display:block;transition:box-shadow .18s}
+  .ex-card:hover{box-shadow:0 0 0 2px var(--orange)}
+  .ex-card.done{border-color:#34d399}
+  @media(max-width:640px){
+    .ex-grid{grid-template-columns:1fr;gap:0;border:2px solid var(--stone);border-radius:18px;overflow:hidden}
+    .ex-grid::before{content:'Both exercises · answer independently';display:block;padding:.55rem 1.25rem;background:linear-gradient(135deg,#1e1a42,#2c2860);font-size:.55rem;letter-spacing:.18em;text-transform:uppercase;color:rgba(255,255,255,.45);font-family:'DM Sans',sans-serif;font-weight:700;border-bottom:1px solid rgba(255,255,255,.08)}
+    .ex-card{border:none!important;border-radius:0!important;border-bottom:1px solid var(--stone)!important}
+    .ex-card:last-of-type{border-bottom:none!important}
+  }
+  .ex-top{padding:1.5rem}
+  .ex-num{font-size:.56rem;letter-spacing:.22em;text-transform:uppercase;color:var(--muted);margin-bottom:.5rem}
+  .ex-title{font-family:var(--hfont);font-size:1.2rem;font-weight:700;color:var(--ink);margin-bottom:.35rem;letter-spacing:-.01em}
+  .ex-desc{font-size:.79rem;color:var(--muted);line-height:1.58;margin-bottom:.85rem}
+  .ex-meta-txt{font-size:.68rem;color:var(--muted)}
+  .ex-foot{border-top:1px solid var(--stone);padding:.9rem 1.5rem;display:flex;justify-content:space-between;align-items:center;background:var(--warm)}
+  .ex-foot.df{background:#EEFAF3;border-top-color:#bbf7d0}
+  .sbadge{display:inline-flex;align-items:center;gap:.35rem;font-size:.65rem;font-weight:700;padding:.22rem .65rem;border-radius:999px;letter-spacing:.03em}
+  .sbadge.done{background:#DCFCE7;color:#16a34a}
+  .sbadge.wait{background:var(--warm);color:var(--muted);border:1px solid var(--stone)}
+  .ex-action{font-size:.72rem;font-weight:700;letter-spacing:.04em}
+
+  /* Partner card */
+  .partner-card{background:var(--warm);border:1px solid var(--stone);border-radius:18px;padding:1.5rem;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem;margin-bottom:.25rem}
+  .pl h3{font-size:.9rem;font-weight:700;color:var(--ink);margin-bottom:.25rem}
+  .pl p{font-size:.79rem;color:var(--muted)}
+  .pp{display:flex;gap:.75rem;align-items:center}
+  .pex{text-align:center}
+  .pex-lbl{font-size:.56rem;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:.3rem}
+  .pex-st{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.78rem;margin:0 auto}
+  .pex-st.done{background:#DCFCE7;color:#16a34a;font-weight:700}
+  .pex-st.pend{background:var(--stone);color:var(--muted)}
+  .btn-invite{background:var(--ink);color:white;border:none;padding:.6rem 1.25rem;border-radius:10px;font-size:.72rem;font-weight:700;letter-spacing:.04em;text-transform:uppercase;cursor:pointer;font-family:var(--bfont);transition:opacity .15s}
+  .btn-invite:hover{opacity:.85}
+
+  /* Account grid */
+  .acct-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem}
+  .acct-tile{background:white;border:1px solid var(--stone);border-radius:14px;padding:1.35rem;cursor:pointer;transition:box-shadow .18s,transform .18s}
+  .acct-tile:hover{box-shadow:0 6px 22px rgba(14,11,7,.08);transform:translateY(-1px)}
+  .acct-icon{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;margin-bottom:.75rem}
+  .acct-title{font-size:.84rem;font-weight:700;color:var(--ink);margin-bottom:.2rem}
+  .acct-desc{font-size:.73rem;color:var(--muted);line-height:1.5}
+
+  /* ── PROFILE PAGE ── */
+  .profile-card{background:white;border:1px solid var(--stone);border-radius:18px;overflow:hidden;margin-bottom:1.25rem}
+  .profile-section{padding:1.75rem;border-bottom:1px solid var(--stone)}
+  .profile-section:last-child{border-bottom:none}
+  .ps-title{font-size:.6rem;letter-spacing:.22em;text-transform:uppercase;color:var(--muted);font-weight:700;margin-bottom:1.1rem}
+  .ps-row{display:flex;justify-content:space-between;align-items:flex-start;gap:2rem;flex-wrap:wrap}
+  .ps-field{flex:1;min-width:180px}
+  .ps-label{font-size:.68rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:.4rem}
+  .ps-value{font-size:.9rem;color:var(--ink);font-weight:500}
+  .ps-edit-btn{background:transparent;border:1.5px solid var(--stone);border-radius:8px;padding:.42rem .9rem;font-size:.72rem;font-weight:600;color:var(--ink);cursor:pointer;font-family:var(--bfont);transition:all .15s;white-space:nowrap;flex-shrink:0;align-self:flex-end}
+  .ps-edit-btn:hover{border-color:var(--ink)}
+  .ps-input{width:100%;padding:.65rem .85rem;border:1.5px solid var(--stone);border-radius:9px;font-size:.88rem;font-family:var(--bfont);color:var(--ink);background:var(--cream);outline:none;transition:border-color .15s;margin-bottom:.5rem}
+  .ps-input:focus{border-color:var(--clay)}
+  .ps-save-btn{background:var(--ink);color:white;border:none;border-radius:8px;padding:.45rem 1.1rem;font-size:.72rem;font-weight:700;cursor:pointer;font-family:var(--bfont);margin-right:.5rem;transition:opacity .15s}
+  .ps-save-btn:hover{opacity:.85}
+  .ps-cancel-btn{background:transparent;border:none;color:var(--muted);font-size:.72rem;cursor:pointer;font-family:var(--bfont);padding:.45rem .5rem}
+  .danger-zone{background:#FFF5F5;border:1px solid #FECACA;border-radius:14px;padding:1.5rem;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem}
+  .dz-text h4{font-size:.88rem;font-weight:700;color:#991b1b;margin-bottom:.22rem}
+  .dz-text p{font-size:.78rem;color:#b91c1c}
+  .dz-btn{background:transparent;border:1.5px solid #ef4444;color:#ef4444;border-radius:8px;padding:.42rem 1rem;font-size:.72rem;font-weight:600;cursor:pointer;font-family:var(--bfont);transition:all .15s}
+  .dz-btn:hover{background:#ef4444;color:white}
+
+  /* ── NOTIFICATIONS PAGE ── */
+  .notif-card{background:white;border:1px solid var(--stone);border-radius:18px;overflow:hidden;margin-bottom:1.25rem}
+  .notif-section{padding:1.75rem;border-bottom:1px solid var(--stone)}
+  .notif-section:last-child{border-bottom:none}
+  .ns-title{font-size:.6rem;letter-spacing:.22em;text-transform:uppercase;color:var(--muted);font-weight:700;margin-bottom:.25rem}
+  .ns-desc{font-size:.78rem;color:var(--muted);margin-bottom:1.25rem;line-height:1.6}
+  .notif-row{display:flex;justify-content:space-between;align-items:flex-start;padding:.9rem 0;border-bottom:1px solid var(--stone)}
+  .notif-row:last-child{border-bottom:none;padding-bottom:0}
+  .notif-row:first-of-type{padding-top:0}
+  .nr-text h4{font-size:.87rem;font-weight:600;color:var(--ink);margin-bottom:.2rem}
+  .nr-text p{font-size:.76rem;color:var(--muted);line-height:1.55}
+  .toggle-wrap{flex-shrink:0;margin-left:1.5rem;padding-top:.1rem}
+  .toggle{position:relative;width:42px;height:24px;cursor:pointer}
+  .toggle input{opacity:0;width:0;height:0;position:absolute}
+  .toggle-slider{position:absolute;inset:0;background:var(--stone);border-radius:999px;transition:background .2s}
+  .toggle-slider::before{content:'';position:absolute;width:18px;height:18px;left:3px;bottom:3px;background:white;border-radius:50%;transition:transform .2s;box-shadow:0 1px 3px rgba(0,0,0,.15)}
+  .toggle input:checked + .toggle-slider{background:var(--indigo)}
+  .toggle input:checked + .toggle-slider::before{transform:translateX(18px)}
+  .notif-save-bar{background:var(--warm);border:1px solid var(--stone);border-radius:14px;padding:1rem 1.5rem;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem;margin-top:.75rem}
+  .notif-save-bar p{font-size:.8rem;color:var(--muted)}
+  .btn-save{background:var(--ink);color:white;border:none;border-radius:8px;padding:.55rem 1.35rem;font-size:.78rem;font-weight:700;cursor:pointer;font-family:var(--bfont);transition:opacity .15s}
+  .btn-save:hover{opacity:.85}
+  .btn-saved{background:#DCFCE7;color:#16a34a;border:none;border-radius:8px;padding:.55rem 1.35rem;font-size:.78rem;font-weight:700;cursor:default;font-family:var(--bfont);display:none}
+
+  /* ── HELP & SUPPORT PAGE ── */
+  .help-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1.5rem}
+  .help-topic{background:white;border:1px solid var(--stone);border-radius:14px;padding:1.35rem;cursor:pointer;transition:box-shadow .18s,border-color .18s}
+  .help-topic:hover{box-shadow:0 6px 22px rgba(14,11,7,.08);border-color:var(--clay)}
+  .ht-icon{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;margin-bottom:.75rem}
+  .ht-title{font-size:.87rem;font-weight:700;color:var(--ink);margin-bottom:.22rem}
+  .ht-desc{font-size:.75rem;color:var(--muted);line-height:1.5}
+  .contact-card{background:white;border:1px solid var(--stone);border-radius:18px;padding:2rem}
+  .cc-title{font-family:var(--hfont);font-size:1.25rem;font-weight:700;color:var(--ink);margin-bottom:.35rem;letter-spacing:-.02em}
+  .cc-sub{font-size:.85rem;color:var(--muted);line-height:1.6;margin-bottom:1.75rem}
+  .cc-form{display:flex;flex-direction:column;gap:1rem}
+  .cc-field label{display:block;font-size:.68rem;font-weight:700;color:var(--ink);letter-spacing:.06em;margin-bottom:.4rem;text-transform:uppercase}
+  .cc-field input,.cc-field select,.cc-field textarea{width:100%;padding:.75rem 1rem;border:1.5px solid var(--stone);border-radius:10px;font-size:.88rem;font-family:var(--bfont);color:var(--ink);background:var(--cream);outline:none;transition:border-color .15s;resize:vertical}
+  .cc-field textarea{min-height:120px}
+  .cc-field input:focus,.cc-field select:focus,.cc-field textarea:focus{border-color:var(--clay)}
+  .cc-submit{background:var(--ink);color:white;border:none;border-radius:12px;padding:.85rem 2rem;font-size:.82rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;cursor:pointer;font-family:var(--bfont);transition:opacity .15s;align-self:flex-start}
+  .cc-submit:hover{opacity:.88}
+  .cc-success{background:#EEFAF3;border:1px solid #bbf7d0;border-radius:12px;padding:1.5rem;text-align:center;display:none}
+  .cc-success h4{font-size:.95rem;font-weight:700;color:#16a34a;margin-bottom:.35rem}
+  .cc-success p{font-size:.82rem;color:#15803d}
+  .help-footnote{font-size:.78rem;color:var(--muted);margin-top:1.25rem;text-align:center;line-height:1.6}
+
+  @keyframes fadeUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+  .fu1{animation:fadeUp .5s ease both}
+  .fu2{animation:fadeUp .5s .08s ease both}
+  .fu3{animation:fadeUp .5s .16s ease both}
+
+  @media(max-width:640px){
+    .ex-grid,.acct-grid,.help-grid{grid-template-columns:1fr}
+    .partner-card{flex-direction:column;align-items:flex-start}
+    .ps-row{flex-direction:column;gap:.75rem}
+  }
+
+  @media(max-width:640px){section{padding-top:1.75rem!important;padding-bottom:1.75rem!important}.si{padding-left:1.25rem!important;padding-right:1.25rem!important}}  .mm-sub{padding-left:1.25rem!important;font-size:.85rem!important;border-bottom:none!important;font-style:italic;color:var(--muted)}
+</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+</head>
+<body>
+
+<nav>
+  <a href="/home" class="logo">
+    <svg width="46" height="33" viewBox="0 0 103 76" fill="none" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="spark_logo_2_3" x1="0" y1="0" x2="103" y2="76" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#E8673A"/><stop offset="100%" stop-color="#1B5FE8"/></linearGradient></defs><path d="M14,4 L44,4 A9,9 0 0,1 53,13 L53,42 A9,9 0 0,1 44,51 L20,51 L6,61 L11,51 A6,6 0 0,1 5,45 L5,13 A9,9 0 0,1 14,4 Z" fill="url(#spark_logo_2_3)"/><path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill="white" opacity="0.93" transform="translate(13.16,11.3) scale(0.72)"/><path d="M89,14 L59,14 A9,9 0 0,0 50,23 L50,52 A9,9 0 0,0 59,61 L83,61 L97,71 L92,61 A6,6 0 0,0 98,55 L98,23 A9,9 0 0,0 89,14 Z" fill="none" stroke="url(#spark_logo_2_3)" stroke-width="2.2" stroke-linejoin="round"/><path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill="url(#spark_logo_2_3)" transform="translate(58.16,21.3) scale(0.72)"/></svg>
+    <span class="logo-text">Attune</span>
+  </a>
+  <div class="nav-right">
+    <span class="nav-user" id="nav-user"></span>
+    <button class="nav-signout" id="nav-signout" onclick="signOut()">Sign out</button>
+    <button class="hamburger" id="portal-hamburger" onclick="togglePortalMenu()" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</nav>
+<div class="mobile-menu" id="portal-mobile-menu">
+  <a href="/home">Home</a>
+  <a href="/how-it-works">How it works</a>
+  <a href="/offerings">What's included</a>
+  <a href="/practice">In Practice</a>
+  <a href="/faq">FAQs</a>
+  <a href="/reviews">Reviews</a>
+  <a href="/offerings">Packages</a>
+  <a href="#" onclick="showSubPage('profile');this.closest('.mobile-menu').classList.remove('open');return false;">Your profile</a>
+  <a href="#" onclick="showSubPage('help');this.closest('.mobile-menu').classList.remove('open');return false;">Help &amp; FAQ</a>
+  <a href="#" onclick="signOut();return false;" class="mm-cta">Sign out</a>
+</div>
+
+<!-- ══════════════════ PARTNER ACCEPT VIEW ══════════════════ -->
+<div class="view" id="view-partner">
+  <div class="auth-wrap" style="background:linear-gradient(150deg,#FFFDF9,#F5F7FF)">
+    <div class="partner-accept-card fu1">
+      <a href="/home" class="auth-logo">
+        <svg width="46" height="33" viewBox="0 0 103 76" fill="none" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="spark_logo_p_1" x1="0" y1="0" x2="103" y2="76" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#E8673A"/><stop offset="100%" stop-color="#1B5FE8"/></linearGradient></defs><path d="M14,4 L44,4 A9,9 0 0,1 53,13 L53,42 A9,9 0 0,1 44,51 L20,51 L6,61 L11,51 A6,6 0 0,1 5,45 L5,13 A9,9 0 0,1 14,4 Z" fill="url(#spark_logo_p_1)"/><path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill="white" opacity="0.93" transform="translate(13.16,11.3) scale(0.72)"/><path d="M89,14 L59,14 A9,9 0 0,0 50,23 L50,52 A9,9 0 0,0 59,61 L83,61 L97,71 L92,61 A6,6 0 0,0 98,55 L98,23 A9,9 0 0,0 89,14 Z" fill="none" stroke="url(#spark_logo_p_1)" stroke-width="2.2" stroke-linejoin="round"/><path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill="url(#spark_logo_p_1)" transform="translate(58.16,21.3) scale(0.72)"/></svg>
+        <span class="auth-logo-text">Attune</span>
+      </a>
+      <div style="font-size:1.5rem;margin-bottom:.5rem;">💌</div>
+      <h1 class="auth-headline" id="partner-headline">You've been invited</h1>
+      <p class="auth-sub" id="partner-sub">Your partner has set up your joint Attune account. Create your profile to get started with your exercises.</p>
+      <div id="partner-joint-badge" style="display:none;background:#F8F5F0;border:1px solid var(--stone);border-radius:12px;padding:.85rem 1rem;margin-bottom:1.5rem;">
+        <p style="font-size:.65rem;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);font-weight:700;margin-bottom:.35rem;">Joining joint account</p>
+        <p id="partner-joint-name" style="font-size:.88rem;font-weight:600;color:var(--ink);"></p>
+        <p id="partner-pkg-name" style="font-size:.72rem;color:var(--muted);margin-top:.15rem;"></p>
+      </div>
+      <!-- Partner create account form -->
+      <div class="form-group"><label class="form-label">Your name</label><input type="text" class="form-input" id="partner-name" placeholder="James"></div>
+      <div class="form-group"><label class="form-label">Email</label><input type="email" class="form-input" id="partner-email" placeholder="james@example.com"></div>
+      <div class="form-group"><label class="form-label">Create a password</label><input type="password" class="form-input" id="partner-pass" placeholder="••••••••"></div>
+      <button class="btn-submit" onclick="doPartnerSignup()" style="margin-top:.25rem;">Join your joint account →</button>
+      <p class="auth-note" style="margin-top:.85rem;">By joining you agree to our <a href="/legal">Terms</a> and <a href="/legal">Privacy Policy</a>.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════ TOKEN REDEMPTION VIEW ══════════════════ -->
+<div class="view" id="view-redeem">
+  <div class="redeem-wrap">
+    <div class="redeem-card fu1">
+      <a href="/home" class="auth-logo" style="margin-bottom:1.5rem;">
+        <svg width="46" height="33" viewBox="0 0 103 76" fill="none" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="spark_logo_r_1" x1="0" y1="0" x2="103" y2="76" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#E8673A"/><stop offset="100%" stop-color="#1B5FE8"/></linearGradient></defs><path d="M14,4 L44,4 A9,9 0 0,1 53,13 L53,42 A9,9 0 0,1 44,51 L20,51 L6,61 L11,51 A6,6 0 0,1 5,45 L5,13 A9,9 0 0,1 14,4 Z" fill="url(#spark_logo_r_1)"/><path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill="white" opacity="0.93" transform="translate(13.16,11.3) scale(0.72)"/><path d="M89,14 L59,14 A9,9 0 0,0 50,23 L50,52 A9,9 0 0,0 59,61 L83,61 L97,71 L92,61 A6,6 0 0,0 98,55 L98,23 A9,9 0 0,0 89,14 Z" fill="none" stroke="url(#spark_logo_r_1)" stroke-width="2.2" stroke-linejoin="round"/><path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill="url(#spark_logo_r_1)" transform="translate(58.16,21.3) scale(0.72)"/></svg>
+        <span class="auth-logo-text">Attune</span>
+      </a>
+
+      <!-- Step indicator -->
+      <div class="step-indicator" id="redeem-steps">
+        <div class="step-dot active" id="rdot-1">1</div>
+        <div class="step-line" id="rline-1"></div>
+        <div class="step-dot todo" id="rdot-2">2</div>
+        <div class="step-line" id="rline-2"></div>
+        <div class="step-dot todo" id="rdot-3">3</div>
+      </div>
+
+      <!-- Step A: Gift reveal + phone verify -->
+      <div id="redeem-step-a">
+        <div id="redeem-gift-badge" class="redeem-badge" style="display:none;">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a4 4 0 0 0-8 0v2"/></svg>
+          Gift from <span id="redeem-giver-name" style="margin-left:.25rem;"></span>
+        </div>
+        <div id="redeem-self-badge" class="redeem-badge" style="display:none;background:rgba(27,95,232,.08);color:var(--indigo);border-color:rgba(27,95,232,.18);">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          Your Attune access
+        </div>
+        <h1 class="redeem-headline" id="redeem-headline">You've received Attune</h1>
+        <p class="redeem-sub" id="redeem-sub">Confirm your identity to claim your gift, then create your account.</p>
+        <div id="redeem-pkg-badge" class="pkg-gift-badge" style="background:#FFF0EB;color:var(--orange);">
+          <span id="redeem-pkg-icon">🎁</span>
+          <div>
+            <div id="redeem-pkg-name" style="font-weight:700;">Loading...</div>
+            <div id="redeem-pkg-sub" style="font-size:.65rem;opacity:.7;">Attune</div>
+          </div>
+        </div>
+
+        <!-- Phone verify (for gift purchases) -->
+        <div id="redeem-phone-verify" style="display:none;">
+          <div style="background:#FFF8F5;border:1.5px solid rgba(232,103,58,.2);border-radius:12px;padding:.85rem 1rem;margin-bottom:1.25rem;display:flex;gap:.65rem;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--orange)" stroke-width="2" stroke-linecap="round" style="flex-shrink:0;margin-top:2px"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            <p style="font-size:.72rem;color:var(--text);line-height:1.6;margin:0;">This gift was personalized for a specific recipient. Enter the last 4 digits of the mobile number where the gift notification was sent to verify it's you.</p>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Last 4 digits of your mobile number</label>
+            <input type="tel" class="form-input" id="redeem-phone-input" maxlength="4" placeholder="e.g. 5309" style="font-size:1.4rem;letter-spacing:.3em;text-align:center;font-weight:700;">
+            <p id="redeem-phone-error" style="font-size:.72rem;color:#ef4444;margin-top:.4rem;display:none;">That doesn't match. Please try the last 4 digits of the mobile number the gift was sent to.</p>
+          </div>
+        </div>
+
+        <!-- Already-claimed notice -->
+        <div id="redeem-claimed-notice" style="display:none;background:#FEF2F2;border:1px solid #FECACA;border-radius:12px;padding:1rem 1.1rem;margin-bottom:1rem;">
+          <p style="font-size:.8rem;color:#991B1B;font-weight:600;margin-bottom:.3rem;">This access link has already been used.</p>
+          <p style="font-size:.72rem;color:#B91C1C;line-height:1.6;">Each Attune link can only be redeemed once. If you believe this is an error, contact <a href="mailto:hello@attune-relationships.com" style="color:#B91C1C;">hello@attune-relationships.com</a>.</p>
+        </div>
+
+        <button class="btn-submit" id="redeem-verify-btn" onclick="verifyAndProceed()">Verify &amp; claim my gift →</button>
+        <p class="auth-note" style="margin-top:.85rem;">This link is unique to you and can only be used once.</p>
+      </div>
+
+      <!-- Step B: Create account -->
+      <div id="redeem-step-b" style="display:none;">
+        <h1 class="auth-headline">Create your account</h1>
+        <p class="auth-sub" style="margin-bottom:1.5rem;">You're all verified. Set up your profile to get started.</p>
+        <div id="redeem-joint-preview" style="background:#F8F5F0;border:1px solid var(--stone);border-radius:12px;padding:.85rem 1rem;margin-bottom:1.5rem;display:flex;align-items:center;gap:.85rem;">
+          <div style="font-size:1.5rem;">🔗</div>
+          <div>
+            <p style="font-size:.65rem;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);font-weight:700;">Your joint account</p>
+            <p id="redeem-joint-name" style="font-size:.85rem;font-weight:600;color:var(--ink);margin-top:.15rem;"></p>
+            <p id="redeem-joint-pkg" style="font-size:.7rem;color:var(--muted);"></p>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">Your name</label><input type="text" class="form-input" id="redeem-name" placeholder="Sarah"></div>
+          <div class="form-group"><label class="form-label">Partner's name</label><input type="text" class="form-input" id="redeem-partner-name" placeholder="James"></div>
+        </div>
+        <div class="form-group"><label class="form-label">Email</label><input type="email" class="form-input" id="redeem-email" placeholder="you@example.com"></div>
+        <div class="form-group"><label class="form-label">Create password</label><input type="password" class="form-input" id="redeem-pass" placeholder="••••••••"></div>
+        <button class="btn-submit" onclick="redeemCreateAccount()">Create my account →</button>
+        <p class="auth-note" style="margin-top:.75rem;">By creating an account you agree to our <a href="/legal">Terms</a> and <a href="/legal">Privacy Policy</a>.</p>
+      </div>
+
+      <!-- Step C: Invite partner -->
+      <div id="redeem-step-c" style="display:none;">
+        <h1 class="auth-headline" id="redeem-step-c-headline">Almost there!</h1>
+        <p class="auth-sub">Your account is set up. Now invite <span id="redeem-partner-name-disp">your partner</span> to create their profile on your joint account.</p>
+        <div class="invite-panel">
+          <p style="font-size:.62rem;letter-spacing:.2em;text-transform:uppercase;color:rgba(255,255,255,.4);margin-bottom:.6rem;">Partner invite link</p>
+          <div class="invite-link-box" id="redeem-invite-link-display" onclick="copyInviteLink(this)">Loading...</div>
+          <div style="display:flex;gap:.65rem;flex-wrap:wrap;margin-top:.75rem;">
+            <button onclick="copyInviteLink(document.getElementById('redeem-invite-link-display'))" style="background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);border-radius:8px;padding:.5rem 1rem;font-size:.72rem;color:white;cursor:pointer;font-family:var(--bfont);font-weight:600;">📋 Copy link</button>
+            <button onclick="shareViaText()" style="background:rgba(232,103,58,.25);border:1px solid rgba(232,103,58,.35);border-radius:8px;padding:.5rem 1rem;font-size:.72rem;color:#FFB899;cursor:pointer;font-family:var(--bfont);font-weight:600;">💬 Send via text</button>
+          </div>
+          <div style="margin-top:1rem;display:flex;align-items:center;gap:.5rem;">
+            <div style="flex:1;height:1px;background:rgba(255,255,255,.1);"></div>
+            <span style="font-size:.62rem;color:rgba(255,255,255,.3);">or scan</span>
+            <div style="flex:1;height:1px;background:rgba(255,255,255,.1);"></div>
+          </div>
+          <div class="invite-qr" id="redeem-partner-qr" style="margin:0.75rem 0;"></div>
+          <p style="font-size:.65rem;color:rgba(255,255,255,.3);line-height:1.5;margin-top:.5rem;">This invite is for your specific joint account. It can only be used once and links directly to your couple's profile.</p>
+        </div>
+        <button class="btn-submit" style="margin-top:1.5rem;" onclick="goToPortalAfterSetup()">Go to my account →</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════ AUTH VIEW ══════════════════ -->
+<div class="view active" id="view-auth">
+  <div class="auth-wrap">
+    <div class="auth-card fu1">
+      <a href="/home" class="auth-logo">
+        <svg width="46" height="33" viewBox="0 0 103 76" fill="none" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="spark_logo_2_2" x1="0" y1="0" x2="103" y2="76" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#E8673A"/><stop offset="100%" stop-color="#1B5FE8"/></linearGradient></defs><path d="M14,4 L44,4 A9,9 0 0,1 53,13 L53,42 A9,9 0 0,1 44,51 L20,51 L6,61 L11,51 A6,6 0 0,1 5,45 L5,13 A9,9 0 0,1 14,4 Z" fill="url(#spark_logo_2_2)"/><path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill="white" opacity="0.93" transform="translate(13.16,11.3) scale(0.72)"/><path d="M89,14 L59,14 A9,9 0 0,0 50,23 L50,52 A9,9 0 0,0 59,61 L83,61 L97,71 L92,61 A6,6 0 0,0 98,55 L98,23 A9,9 0 0,0 89,14 Z" fill="none" stroke="url(#spark_logo_2_2)" stroke-width="2.2" stroke-linejoin="round"/><path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill="url(#spark_logo_2_2)" transform="translate(58.16,21.3) scale(0.72)"/></svg>
+        <span class="auth-logo-text">Attune</span>
+      </a>
+      <h1 class="auth-headline">Welcome back</h1>
+      <p class="auth-sub">Sign in to access your exercises and results.</p>
+      <div class="auth-tabs">
+        <div class="auth-tab active" id="tab-si" onclick="setTab('si')">Sign in</div>
+        <div class="auth-tab" id="tab-su" onclick="setTab('su')">Create account</div>
+      </div>
+
+      <div id="form-si">
+        <div class="form-group"><label class="form-label">Email</label><input type="email" class="form-input" placeholder="you@example.com" id="si-email"></div>
+        <div class="form-group"><label class="form-label">Password</label><input type="password" class="form-input" placeholder="••••••••"><a href="#" class="form-forgot">Forgot password?</a></div>
+        <div id="si-error" style="display:none;color:#dc2626;font-size:.78rem;font-family:'DM Sans',sans-serif;margin-bottom:.75rem;padding:.6rem .85rem;background:rgba(220,38,38,.06);border:1px solid rgba(220,38,38,.2);border-radius:8px;"></div>
+        <button class="btn-submit" id="si-btn" onclick="doSignIn()">Sign in →</button>
+      </div>
+
+      <div id="form-su" style="display:none;">
+        <!-- Step 1: Account -->
+        <div id="su-step1">
+          <div class="form-row">
+            <div class="form-group"><label class="form-label">Your name</label><input type="text" class="form-input" placeholder="Sarah" id="su-name"></div>
+            <div class="form-group"><label class="form-label">Partner's name</label><input type="text" class="form-input" placeholder="James" id="su-partner"></div>
+          </div>
+          <div class="form-group"><label class="form-label">Email</label><input type="email" class="form-input" placeholder="you@example.com" id="su-email"></div>
+          <div class="form-group"><label class="form-label">Password</label><input type="password" class="form-input" placeholder="Create a password" id="su-pass"></div>
+          <button class="btn-submit" onclick="goToStep2()">Continue →</button>
+          <p class="auth-note">By creating an account you agree to our <a href="/legal">Terms</a> and <a href="/legal">Privacy Policy</a>.</p>
+        </div>
+
+        <!-- Step 2: Demographics (anonymized) -->
+        <div id="su-step2" style="display:none;">
+          <div style="background:#F8F5F0;border-radius:12px;padding:.85rem 1rem;margin-bottom:1.5rem;border:1px solid var(--stone);">
+            <p style="font-size:.7rem;color:var(--muted);line-height:1.65;margin:0;">These questions help us improve Attune for couples like you. <strong style="color:var(--ink);">None of this information will ever be linked to your name, email, or any personally identifiable information.</strong> It is stored separately and used only in aggregate.</p>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Your age range</label>
+            <select class="form-input" id="su-age">
+              <option value="">Prefer not to say</option>
+              <option value="18-24">18–24</option>
+              <option value="25-34">25–34</option>
+              <option value="35-44">35–44</option>
+              <option value="45-54">45–54</option>
+              <option value="55+">55 or older</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Gender</label>
+            <select class="form-input" id="su-gender">
+              <option value="">Prefer not to say</option>
+              <option value="woman">Woman</option>
+              <option value="man">Man</option>
+              <option value="nonbinary">Non-binary</option>
+              <option value="other">Other / self-describe</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Relationship status</label>
+            <select class="form-input" id="su-relstatus">
+              <option value="">Prefer not to say</option>
+              <option value="dating">Dating / together</option>
+              <option value="engaged">Engaged</option>
+              <option value="married">Married</option>
+              <option value="remarried">Remarried</option>
+              <option value="partnership">Domestic partnership</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Length of relationship</label>
+            <select class="form-input" id="su-rellength">
+              <option value="">Prefer not to say</option>
+              <option value="<1">Less than 1 year</option>
+              <option value="1-2">1–2 years</option>
+              <option value="3-5">3–5 years</option>
+              <option value="6-10">6–10 years</option>
+              <option value="11-20">11–20 years</option>
+              <option value="20+">More than 20 years</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Children together</label>
+            <select class="form-input" id="su-children">
+              <option value="">Prefer not to say</option>
+              <option value="0">None</option>
+              <option value="1">1</option>
+              <option value="2">2</option>
+              <option value="3+">3 or more</option>
+              <option value="expecting">Expecting</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Do you currently live together?</label>
+            <select class="form-input" id="su-livetogether" onchange="updateChildrenSection()">
+              <option value="">Prefer not to say</option>
+              <option value="yes">Yes</option>
+              <option value="no">No</option>
+              <option value="parttime">Part of the time</option>
+            </select>
+          </div>
+          <div class="form-group" id="su-household-children-group" style="display:none">
+            <label class="form-label">Do any children live with you?</label>
+            <select class="form-input" id="su-household-children" onchange="updateWhoseKids()">
+              <option value="">Prefer not to say</option>
+              <option value="no">No</option>
+              <option value="yes">Yes</option>
+            </select>
+          </div>
+          <div class="form-group" id="su-whose-kids-group" style="display:none">
+            <label class="form-label">Whose children are they?</label>
+            <select class="form-input" id="su-whose-kids">
+              <option value="">Prefer not to say</option>
+              <option value="both" id="su-wk-both">Both of ours</option>
+              <option value="mine" id="su-wk-mine">Mine</option>
+              <option value="partners" id="su-wk-partner">My partner's</option>
+              <option value="mix">A mix</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">How did you hear about Attune?</label>
+            <select class="form-input" id="su-source">
+              <option value="">Prefer not to say</option>
+              <option value="friend">Friend or family</option>
+              <option value="social">Social media</option>
+              <option value="search">Search</option>
+              <option value="gift">Received as a gift</option>
+              <option value="therapist">Therapist / counselor</option>
+              <option value="other">Other</option>
+            </select>
+          </div>
+          <!-- Annual check-in opt-in -->
+          <div style="background:#FBF8F3;border:1.5px solid var(--stone);border-radius:12px;padding:1rem 1.1rem;margin-bottom:1.25rem;">
+            <div style="display:flex;gap:.75rem;align-items:flex-start;">
+              <input type="checkbox" id="su-annual-ok" style="margin-top:.2rem;accent-color:var(--orange);flex-shrink:0;cursor:pointer;" checked>
+              <label for="su-annual-ok" style="font-size:.74rem;color:var(--text);line-height:1.65;cursor:pointer;">
+                <strong>Check-in reminder:</strong> A year from now, it can be meaningful to revisit your results and see what's changed. Attune can send you a one-time email prompt, no other marketing. You can opt out at any time.
+              </label>
+            </div>
+          </div>
+          <!-- Liability acknowledgement -->
+          <div style="background:#FBF8F3;border:1.5px solid var(--stone);border-radius:12px;padding:1rem 1.1rem;margin-bottom:1.25rem;">
+            <div style="display:flex;gap:.75rem;align-items:flex-start;">
+              <input type="checkbox" id="su-liability-ok" required style="margin-top:.2rem;accent-color:var(--orange);flex-shrink:0;cursor:pointer;">
+              <label for="su-liability-ok" style="font-size:.74rem;color:var(--text);line-height:1.65;cursor:pointer;">
+                Attune is a self-guided reflection tool, not therapy or clinical care. By creating an account you agree to our <a href="/legal#terms" style="color:var(--clay);font-weight:600;">full terms</a>.
+              </label>
+            </div>
+          </div>
+          <button class="btn-submit" onclick="doSignUp()">Create account →</button>
+          <p style="font-size:.68rem;color:var(--muted);text-align:center;margin-top:.75rem;">All demographic fields optional. <a href="/legal" style="color:var(--clay);">How we use this data →</a></p>
+        </div>
+
+        <!-- Step 3: Invite partner -->
+        <div id="su-step3" style="display:none;">
+
+          <!-- Confirmation banner -->
+          <div style="display:flex;align-items:center;gap:.75rem;background:#EDFAF5;border:1px solid #A7F3D0;border-radius:12px;padding:.85rem 1rem;margin-bottom:1.5rem;">
+            <div style="width:34px;height:34px;border-radius:50%;background:#10b981;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:1rem;">✓</div>
+            <div>
+              <div style="font-size:.75rem;font-weight:700;color:#065F46;font-family:var(--bfont);">Account created</div>
+              <div style="font-size:.68rem;color:#047857;font-family:var(--bfont);">Your joint account is ready. One step left.</div>
+            </div>
+          </div>
+
+          <!-- Account architecture diagram -->
+          <div style="background:#F8F5F0;border:1px solid var(--stone);border-radius:14px;padding:1.25rem 1.25rem 1rem;margin-bottom:1.5rem;">
+            <div style="font-size:.55rem;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);font-weight:700;margin-bottom:1rem;font-family:var(--bfont);">How your account is structured</div>
+
+            <!-- Diagram -->
+            <div style="display:flex;align-items:center;justify-content:center;gap:.5rem;flex-wrap:wrap;margin-bottom:1rem;">
+              <!-- Your profile -->
+              <div style="text-align:center;">
+                <div style="width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,#E8673A,#FF9A74);display:flex;align-items:center;justify-content:center;margin:0 auto .4rem;font-size:1.3rem;box-shadow:0 4px 12px rgba(232,103,58,.3);">👤</div>
+                <div id="arch-your-name" style="font-size:.65rem;font-weight:700;color:var(--ink);font-family:var(--bfont);">Your profile</div>
+                <div style="font-size:.55rem;color:var(--orange);font-family:var(--bfont);font-weight:600;margin-top:.1rem;">You ✓</div>
+              </div>
+
+              <!-- Arrow left -->
+              <div style="display:flex;flex-direction:column;align-items:center;gap:.2rem;">
+                <div style="width:36px;height:2px;background:linear-gradient(90deg,#E8673A,#1B5FE8);border-radius:1px;"></div>
+                <div style="font-size:.5rem;color:var(--muted);letter-spacing:.05em;font-family:var(--bfont);">linked</div>
+              </div>
+
+              <!-- Joint account -->
+              <div style="text-align:center;">
+                <div style="width:64px;height:64px;border-radius:14px;background:linear-gradient(135deg,#0f0c29,#1d1a4e);display:flex;align-items:center;justify-content:center;margin:0 auto .4rem;box-shadow:0 4px 16px rgba(27,95,232,.25);position:relative;">
+                  <svg width="28" height="20" viewBox="0 0 103 76" fill="none"><defs><linearGradient id="arch-grad" x1="0" y1="0" x2="103" y2="76" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#E8673A"/><stop offset="100%" stop-color="#1B5FE8"/></linearGradient></defs><path d="M14,4 L44,4 A9,9 0 0,1 53,13 L53,42 A9,9 0 0,1 44,51 L20,51 L6,61 L11,51 A6,6 0 0,1 5,45 L5,13 A9,9 0 0,1 14,4 Z" fill="url(#arch-grad)"/><path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill="white" opacity="0.93" transform="translate(13.16,11.3) scale(0.72)"/><path d="M89,14 L59,14 A9,9 0 0,0 50,23 L50,52 A9,9 0 0,0 59,61 L83,61 L97,71 L92,61 A6,6 0 0,0 98,55 L98,23 A9,9 0 0,0 89,14 Z" fill="none" stroke="url(#arch-grad)" stroke-width="2.2" stroke-linejoin="round"/><path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill="url(#arch-grad)" transform="translate(58.16,21.3) scale(0.72)"/></svg>
+                </div>
+                <div style="font-size:.65rem;font-weight:700;color:var(--ink);font-family:var(--bfont);">Joint account</div>
+                <div style="font-size:.55rem;color:#1B5FE8;font-family:var(--bfont);font-weight:600;margin-top:.1rem;">Shared results</div>
+              </div>
+
+              <!-- Arrow right -->
+              <div style="display:flex;flex-direction:column;align-items:center;gap:.2rem;">
+                <div style="width:36px;height:2px;background:linear-gradient(90deg,#1B5FE8,#E8673A);border-radius:1px;"></div>
+                <div style="font-size:.5rem;color:var(--muted);letter-spacing:.05em;font-family:var(--bfont);">linked</div>
+              </div>
+
+              <!-- Partner profile -->
+              <div style="text-align:center;">
+                <div style="width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,#3B82F6,#1B5FE8);display:flex;align-items:center;justify-content:center;margin:0 auto .4rem;font-size:1.3rem;box-shadow:0 4px 12px rgba(27,95,232,.25);border:2px dashed rgba(27,95,232,.4);">👤</div>
+                <div id="arch-partner-name" style="font-size:.65rem;font-weight:700;color:var(--ink);font-family:var(--bfont);">Partner</div>
+                <div style="font-size:.55rem;color:var(--muted);font-family:var(--bfont);margin-top:.1rem;">Awaiting invite</div>
+              </div>
+            </div>
+
+            <!-- Explanation bullets -->
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:.5rem;">
+              <div style="background:white;border-radius:8px;padding:.6rem .75rem;border:1px solid var(--stone);">
+                <div style="font-size:.6rem;font-weight:700;color:var(--orange);font-family:var(--bfont);margin-bottom:.2rem;">🔒 Private answers</div>
+                <div style="font-size:.62rem;color:var(--muted);line-height:1.5;font-family:var(--bfont);">Each profile holds your individual exercise answers. Neither of you sees the other's raw responses.</div>
+              </div>
+              <div style="background:white;border-radius:8px;padding:.6rem .75rem;border:1px solid var(--stone);">
+                <div style="font-size:.6rem;font-weight:700;color:#1B5FE8;font-family:var(--bfont);margin-bottom:.2rem;">💬 Shared results</div>
+                <div style="font-size:.62rem;color:var(--muted);line-height:1.5;font-family:var(--bfont);">Joint results unlock only after both of you have completed the exercises independently.</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Invite panel -->
+          <div class="invite-panel">
+            <p style="font-size:.62rem;letter-spacing:.2em;text-transform:uppercase;color:rgba(255,255,255,.5);margin-bottom:.85rem;font-family:var(--bfont);">Invite <span id="su-partner-name-disp">your partner</span></p>
+
+            <!-- Send via phone -->
+            <div style="margin-bottom:1rem;">
+              <label style="font-size:.6rem;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.4);font-family:var(--bfont);display:block;margin-bottom:.4rem;">Send them a text</label>
+              <div style="display:flex;gap:.5rem;">
+                <input type="tel" id="su-partner-phone" placeholder="(555) 867-5309" oninput="formatPhone(this)" style="flex:1;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.18);border-radius:8px;padding:.55rem .85rem;font-size:.82rem;color:white;font-family:var(--bfont);outline:none;" onfocus="this.style.borderColor='rgba(232,103,58,.6)'" onblur="this.style.borderColor='rgba(255,255,255,.18)'">
+                <button onclick="sendPartnerInviteText()" style="background:rgba(232,103,58,.25);border:1px solid rgba(232,103,58,.4);border-radius:8px;padding:.5rem .85rem;font-size:.72rem;color:#FFB899;cursor:pointer;font-family:var(--bfont);font-weight:700;white-space:nowrap;">💬 Send text</button>
+              </div>
+              <p id="su-sms-sent" style="font-size:.65rem;color:#4ade80;margin-top:.35rem;display:none;">✓ Text sent, they'll receive a link tied to your joint account.</p>
+            </div>
+
+            <div style="display:flex;align-items:center;gap:.5rem;margin:1rem 0;">
+              <div style="flex:1;height:1px;background:rgba(255,255,255,.1);"></div>
+              <span style="font-size:.6rem;color:rgba(255,255,255,.3);font-family:var(--bfont);">or share directly</span>
+              <div style="flex:1;height:1px;background:rgba(255,255,255,.1);"></div>
+            </div>
+
+            <!-- Copy link -->
+            <div class="invite-link-box" id="su-invite-link-display" onclick="copyInviteLink(this)" style="margin-bottom:.65rem;">Generating...</div>
+            <div style="display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:1rem;">
+              <button onclick="copyInviteLink(document.getElementById('su-invite-link-display'))" style="background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);border-radius:8px;padding:.45rem .9rem;font-size:.7rem;color:white;cursor:pointer;font-family:var(--bfont);font-weight:600;">📋 Copy link</button>
+              <button onclick="shareViaTextSU()" style="background:rgba(232,103,58,.18);border:1px solid rgba(232,103,58,.3);border-radius:8px;padding:.45rem .9rem;font-size:.7rem;color:#FFB899;cursor:pointer;font-family:var(--bfont);font-weight:600;">↗ Share via messages</button>
+            </div>
+
+            <!-- Short code -->
+            <div style="padding:.85rem;background:rgba(255,255,255,.04);border-radius:10px;border:1px solid rgba(255,255,255,.08);margin-bottom:.85rem;">
+              <p style="font-size:.55rem;letter-spacing:.15em;text-transform:uppercase;color:rgba(255,255,255,.3);font-family:var(--bfont);margin-bottom:.4rem;">Short code (enter at attune.com/join)</p>
+              <p id="su-short-code" style="font-size:1.3rem;font-weight:800;letter-spacing:.25em;color:#FFD580;font-family:monospace;margin:0;"></p>
+            </div>
+
+            <!-- QR code -->
+            <div style="display:flex;align-items:center;gap:.5rem;margin-bottom:.6rem;">
+              <div style="flex:1;height:1px;background:rgba(255,255,255,.08);"></div>
+              <span style="font-size:.6rem;color:rgba(255,255,255,.3);font-family:var(--bfont);">or scan QR</span>
+              <div style="flex:1;height:1px;background:rgba(255,255,255,.08);"></div>
+            </div>
+            <div id="su-partner-qr" style="background:white;border-radius:10px;padding:.75rem;display:inline-block;margin:.25rem 0 .75rem;"></div>
+
+            <p style="font-size:.6rem;color:rgba(255,255,255,.25);line-height:1.55;font-family:var(--bfont);">This invite is uniquely tied to your joint account. It can only be used once and is not transferable. If unused, it expires in 30 days.</p>
+          </div>
+
+          <button class="btn-submit" style="margin-top:1.25rem;" onclick="goToPortalFromSignup()">Go to my account →</button>
+          <p class="auth-note" style="margin-top:.6rem;font-size:.7rem;">You can resend this invite anytime from your portal.</p>
+        </div>
+      </div>
+
+      <div class="divider"><span>or</span></div>
+      <button class="btn-demo" onclick="doDemo('core')">Continue with demo account</button>
+      <p class="auth-note" style="margin-top:.75rem;">See the full Attune experience with Sarah &amp; James</p>
+      <div style="margin-top:1.25rem;text-align:center;padding-top:1rem;border-top:1px solid var(--stone);">
+
+      </div>
+
+      <div style="margin-top:1.25rem;padding:1rem;background:#F8F5F0;border-radius:12px;border:1px solid var(--stone);">
+        <p style="font-size:.62rem;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);font-weight:700;margin-bottom:.75rem;text-align:center;">Explore demo by package</p>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:.5rem;">
+          <button class="pkg-demo-btn" onclick="doDemo('core')">
+            <span class="pkg-demo-badge" style="background:#FFF0EB;color:var(--orange);">Foundation</span>
+            <span class="pkg-demo-name">The Assessment</span>
+            <span class="pkg-demo-price">$89</span>
+          </button>
+          <button class="pkg-demo-btn" onclick="doDemo('newlywed')">
+            <span class="pkg-demo-badge" style="background:#FFE4D9;color:#c45c2a;">Starting Out</span>
+            <span class="pkg-demo-name">Starting Out Collection</span>
+            <span class="pkg-demo-price">from $109</span>
+          </button>
+          <button class="pkg-demo-btn" onclick="doDemo('anniversary')">
+            <span class="pkg-demo-badge" style="background:#EEEFFF;color:var(--indigo);">Anniversary</span>
+            <span class="pkg-demo-name">Anniversary Collection</span>
+            <span class="pkg-demo-price">from $129</span>
+          </button>
+          <button class="pkg-demo-btn" onclick="doDemo('premium')">
+            <span class="pkg-demo-badge" style="background:linear-gradient(135deg,#0f0c29,#1d1a4e);color:rgba(180,188,255,.9);">Premium</span>
+            <span class="pkg-demo-name">Attune Premium</span>
+            <span class="pkg-demo-price">$299</span>
+          </button>
+        </div>
+      </div>
+      <div style="margin-top:1rem;text-align:center;">
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════ PORTAL VIEW ══════════════════ -->
+<div class="view" id="view-portal">
+  <div class="portal-wrap">
+    <div class="portal-hero">
+      <div class="phi">
+        <p class="portal-greeting">Welcome back</p>
+        <h1 class="portal-name" id="p-name">Sarah</h1>
+        <div id="p-pkg-badge" style="display:none;margin-bottom:.5rem;"></div>
+        <p class="portal-status" id="p-status">Both exercises complete. Your results are ready.</p>
+        <div class="ppills" id="p-pills"></div>
+      </div>
+    </div>
+
+    <div class="pcontent">
+      <p class="slabel">Your results</p>
+      <a class="rc fu1" id="results-card" href="/app" target="_blank">
+        <div class="rc-hdr">
+          <div>
+            <div class="rc-lbl">Your Attune Dashboard</div>
+            <div class="rc-title" id="rc-title">Sarah &amp; James</div>
+          </div>
+          <span class="rc-lock" id="rc-lock" style="display:none;">🔒</span>
+        </div>
+        <div class="rc-chips" id="rc-chips">
+          <span class="rc-chip">10 dimensions mapped</span>
+          <span class="rc-chip">43 topics compared</span>
+          <span class="rc-chip">81% aligned</span>
+        </div>
+        <p class="rc-sub" id="rc-sub">Both exercises complete. Your results, communication profile, and relationship insights are ready to explore.</p>
+        <p class="rc-cta" id="rc-cta">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="flex-shrink:0"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          Go to your dashboard →
+        </p>
+      </a>
+
+      <p class="slabel">Your exercises</p>
+      <div class="ex-grid fu2">
+        <a class="ex-card" id="ex1" href="/app?view=exercise1" target="_blank">
+          <div class="ex-top">
+            <div class="ex-num">Exercise 01</div>
+            <div class="ex-title">How You Communicate</div>
+            <div class="ex-desc">How you recharge, handle conflict, repair, and express care.</div>
+            <div class="ex-meta-txt">~10 min · 30 questions · 10 dimensions</div>
+          </div>
+          <div class="ex-foot" id="ex1-foot"><span class="sbadge wait">Not started</span><span class="ex-action" style="color:var(--orange);">Begin →</span></div>
+        </a>
+        <a class="ex-card" id="ex2" href="/app?view=exercise2" target="_blank">
+          <div class="ex-top">
+            <div class="ex-num">Exercise 02</div>
+            <div class="ex-title">What You Expect</div>
+            <div class="ex-desc">Responsibilities, finances, family, and the assumptions that shape everything.</div>
+            <div class="ex-meta-txt">~15 min · 2 parts · 10 categories</div>
+          </div>
+          <div class="ex-foot" id="ex2-foot"><span class="sbadge wait">Not started</span><span class="ex-action" style="color:var(--indigo);">Begin →</span></div>
+        </a>
+      </div>
+
+      <!-- Package-specific extras (shown based on pkg) -->
+      <div id="pkg-extras" style="display:none;">
+        <!-- Anniversary: Exercise 03 -->
+        <div id="pkg-ann-section" style="display:none;">
+          <p class="slabel">Anniversary exercise</p>
+          <a class="ex-card" id="ex3" href="/app?view=exercise3&pkg=anniversary" target="_blank" style="display:block;text-decoration:none;border-color:rgba(91,109,248,.35);background:#FAFAFE;">
+            <div class="ex-top">
+              <div class="ex-num" style="color:var(--indigo);">Exercise 03</div>
+              <div class="ex-title">Relationship Reflection</div>
+              <div class="ex-desc">Favorite moments, how you've each grown, and what you're looking forward to next.</div>
+              <div class="ex-meta-txt">~15 min · Completed independently</div>
+            </div>
+            <div class="ex-foot"><span class="sbadge done" style="background:rgba(91,109,248,.1);color:var(--indigo);">Complete ✓</span><span class="ex-action" style="color:var(--indigo);">View →</span></div>
+          </a>
+        </div>
+        <!-- Starting Out: Checklist -->
+        <div id="pkg-newlywed-section" style="display:none;">
+          <p class="slabel">Starting Out Checklist</p>
+          <a class="ex-card" id="checklist-card" href="/app?view=checklist&pkg=newlywed" target="_blank" style="display:block;text-decoration:none;border-color:rgba(232,103,58,.35);background:#FFFAF7;">
+            <div class="ex-top">
+              <div class="ex-num" style="color:var(--orange);">Included with Starting Out</div>
+              <div class="ex-title">The Starting Out Checklist</div>
+              <div class="ex-desc">Finances, name changes, estate basics, and the real-world logistics of building a life together.</div>
+              <div class="ex-meta-txt">7 checklist areas · yours to complete together</div>
+            </div>
+            <div class="ex-foot"><span class="sbadge done" style="background:#FFF0EB;color:var(--orange);">Included ✓</span><span class="ex-action" style="color:var(--orange);">Open →</span></div>
+          </a>
+        </div>
+        <!-- Premium: Budget + LMFT -->
+        <div id="pkg-premium-section" style="display:none;">
+          <p class="slabel">Premium features</p>
+          <a class="ex-card" href="/app?view=budget&pkg=premium" target="_blank" style="display:block;text-decoration:none;border-color:rgba(91,109,248,.35);background:#F8F8FF;margin-bottom:.75rem;">
+            <div class="ex-top">
+              <div class="ex-num" style="color:var(--indigo);">Premium Tool</div>
+              <div class="ex-title">Build-a-Budget</div>
+              <div class="ex-desc">Build a real shared budget together, guided by your expectations results. Interactive and collaborative.</div>
+              <div class="ex-meta-txt">Guided · Shareable · Yours to revisit</div>
+            </div>
+            <div class="ex-foot"><span class="sbadge done" style="background:rgba(91,109,248,.1);color:var(--indigo);">Included ✓</span><span class="ex-action" style="color:var(--indigo);">Open →</span></div>
+          </a>
+          <a class="ex-card" id="lmft-card" href="/app?view=lmft&pkg=premium" target="_blank" style="display:block;text-decoration:none;border-color:rgba(91,109,248,.45);background:linear-gradient(135deg,rgba(15,12,41,.04),rgba(29,26,78,.07));">
+            <div class="ex-top">
+              <div class="ex-num" style="color:var(--indigo);">$175 value · Included</div>
+              <div class="ex-title">60-min LMFT Session</div>
+              <div class="ex-desc">A licensed marriage and family therapist reviews your joint results before your session. Not a first appointment, a real, specific conversation about you two.</div>
+              <div class="ex-meta-txt">Virtual · Scheduling available after purchase</div>
+            </div>
+            <div class="ex-foot"><span class="sbadge done" style="background:rgba(91,109,248,.12);color:var(--indigo);">Included ✓</span><span class="ex-action" style="color:var(--indigo);">Schedule →</span></div>
+          </a>
+        </div>
+      </div>
+
+      <p class="slabel">Partner status</p>
+      <div class="partner-card fu3">
+        <div class="pl">
+          <h3 id="p-partner-name">James</h3>
+          <p id="p-partner-status">Both exercises complete</p>
+        </div>
+        <div class="pp">
+          <div class="pex"><div class="pex-lbl">Ex. 01</div><div class="pex-st done" id="pex1">✓</div></div>
+          <div class="pex"><div class="pex-lbl">Ex. 02</div><div class="pex-st done" id="pex2">✓</div></div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:.5rem;align-items:flex-end;">
+          <button class="btn-invite" id="invite-btn" style="display:none;" onclick="copyInvite()">Copy invite link</button>
+          <button id="nudge-btn" style="display:none;background:none;border:1.5px solid var(--stone);color:var(--muted);padding:.5rem 1rem;border-radius:10px;font-size:.72rem;font-weight:600;cursor:pointer;font-family:var(--bfont);transition:all .15s;" onclick="sendNudge()"
+            onmouseover="this.style.borderColor='var(--clay)';this.style.color='var(--ink)'"
+            onmouseout="this.style.borderColor='var(--stone)';this.style.color='var(--muted)'">
+            Send a nudge 👋
+          </button>
+        </div>
+      </div>
+      <!-- Nudge message (shown after nudge sent) -->
+      <div id="nudge-confirm" style="display:none;background:#EDFAF5;border:1px solid #A7F3D0;border-radius:10px;padding:.75rem 1rem;font-size:.75rem;color:#065F46;margin-top:.5rem;margin-bottom:.5rem;">
+        ✓ Nudge copied, paste it into a text or email to your partner.
+      </div>
+      <!-- Nudge copy box -->
+      <div id="nudge-box" style="display:none;background:var(--warm);border:1.5px dashed var(--stone);border-radius:12px;padding:1rem 1.1rem;margin-top:.5rem;margin-bottom:.5rem;cursor:pointer;" onclick="copyNudgeText()" title="Click to copy">
+        <div style="font-size:.6rem;letter-spacing:.18em;text-transform:uppercase;color:var(--clay);font-weight:700;margin-bottom:.5rem;">Tap to copy message</div>
+        <p id="nudge-text" style="font-size:.82rem;color:var(--ink);line-height:1.65;margin:0;font-style:italic;"></p>
+      </div>
+
+      <p class="slabel">Account</p>
+      <div class="acct-grid fu3">
+        <div class="acct-tile" onclick="showSubPage('profile')">
+          <div class="acct-icon" style="background:#FFF0EB;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#E8673A" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.58-7 8-7s8 3 8 7"/></svg>
+          </div>
+          <div class="acct-title">Your profile</div>
+          <div class="acct-desc">Name, email, and account settings.</div>
+        </div>
+        <div class="acct-tile" onclick="showSubPage('notifications')">
+          <div class="acct-icon" style="background:#EEEFFF;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1B5FE8" stroke-width="1.6" stroke-linecap="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+          </div>
+          <div class="acct-title">Notifications</div>
+          <div class="acct-desc">Choose when and how Attune reaches you.</div>
+        </div>
+        <div class="acct-tile" onclick="showSubPage('help')">
+          <div class="acct-icon" style="background:#EEFAF3;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="1.6" stroke-linecap="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          </div>
+          <div class="acct-title">Help &amp; support</div>
+          <div class="acct-desc">Questions about Attune or your results.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════ PROFILE VIEW ══════════════════ -->
+<div class="view" id="view-profile">
+  <div class="portal-wrap">
+    <div class="sub-hero">
+      <div class="sub-hero-inner">
+        <button class="sub-back" onclick="showView('portal')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+          Back
+        </button>
+        <h1 class="sub-title">Your profile</h1>
+      </div>
+    </div>
+    <div class="pcontent">
+
+      <div class="profile-card">
+        <!-- Name -->
+        <div class="profile-section">
+          <div class="ps-title">Your details</div>
+          <div class="ps-row" id="ps-name-display">
+            <div class="ps-field"><div class="ps-label">Your name</div><div class="ps-value" id="ps-name-val">Sarah</div></div>
+            <div class="ps-field"><div class="ps-label">Partner's name</div><div class="ps-value" id="ps-partner-val">James</div></div>
+            <button class="ps-edit-btn" onclick="editField('name')">Edit</button>
+          </div>
+          <div id="ps-name-edit" style="display:none;">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem;margin-bottom:.5rem">
+              <div><div class="ps-label">Your name</div><input class="ps-input" id="edit-name" type="text"></div>
+              <div><div class="ps-label">Partner's name</div><input class="ps-input" id="edit-partner" type="text"></div>
+            </div>
+            <button class="ps-save-btn" onclick="saveField('name')">Save</button>
+            <button class="ps-cancel-btn" onclick="cancelEdit('name')">Cancel</button>
+          </div>
+        </div>
+
+        <!-- Email -->
+        <div class="profile-section">
+          <div class="ps-row" id="ps-email-display">
+            <div class="ps-field"><div class="ps-label">Email address</div><div class="ps-value" id="ps-email-val">sarah@example.com</div></div>
+            <button class="ps-edit-btn" onclick="editField('email')">Edit</button>
+          </div>
+          <div id="ps-email-edit" style="display:none;">
+            <div class="ps-label">Email address</div>
+            <input class="ps-input" id="edit-email" type="email">
+            <button class="ps-save-btn" onclick="saveField('email')">Save</button>
+            <button class="ps-cancel-btn" onclick="cancelEdit('email')">Cancel</button>
+          </div>
+        </div>
+
+        <!-- Password -->
+        <div class="profile-section">
+          <div class="ps-row" id="ps-pw-display">
+            <div class="ps-field"><div class="ps-label">Password</div><div class="ps-value">••••••••••••</div></div>
+            <button class="ps-edit-btn" onclick="editField('pw')">Change password</button>
+          </div>
+          <div id="ps-pw-edit" style="display:none;">
+            <div style="display:flex;flex-direction:column;gap:.5rem;margin-bottom:.5rem">
+              <div><div class="ps-label">Current password</div><input class="ps-input" id="edit-pw-current" type="password" placeholder="••••••••"></div>
+              <div><div class="ps-label">New password</div><input class="ps-input" id="edit-pw-new" type="password" placeholder="••••••••"></div>
+              <div><div class="ps-label">Confirm new password</div><input class="ps-input" id="edit-pw-confirm" type="password" placeholder="••••••••"></div>
+            </div>
+            <button class="ps-save-btn" onclick="saveField('pw')">Update password</button>
+            <button class="ps-cancel-btn" onclick="cancelEdit('pw')">Cancel</button>
+          </div>
+        </div>
+
+        <!-- Package -->
+        <div class="profile-section">
+          <div class="ps-row">
+            <div class="ps-field"><div class="ps-label">Package</div><div class="ps-value">The Attune Assessment</div></div>
+            <a href="/offerings" class="ps-edit-btn" style="text-decoration:none;">View packages</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Danger zone -->
+      <div class="danger-zone">
+        <div class="dz-text">
+          <h4>Delete account</h4>
+          <p>Permanently deletes your account and all associated results. This cannot be undone.</p>
+        </div>
+        <button class="dz-btn" onclick="confirmDelete()">Delete account</button>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════ NOTIFICATIONS VIEW ══════════════════ -->
+<div class="view" id="view-notifications">
+  <div class="portal-wrap">
+    <div class="sub-hero">
+      <div class="sub-hero-inner">
+        <button class="sub-back" onclick="showView('portal')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+          Back
+        </button>
+        <h1 class="sub-title">Notifications</h1>
+      </div>
+    </div>
+    <div class="pcontent">
+
+      <div class="notif-card">
+        <!-- Activity -->
+        <div class="notif-section">
+          <div class="ns-title">Activity</div>
+          <div class="ns-desc">Updates about your exercises and your partner's progress.</div>
+
+          <div class="notif-row">
+            <div class="nr-text">
+              <h4>Partner finishes their exercises</h4>
+              <p>Get notified the moment your partner completes both exercises, so you know your results are ready.</p>
+            </div>
+            <div class="toggle-wrap">
+              <label class="toggle"><input type="checkbox" id="notif-partner-done" checked><span class="toggle-slider"></span></label>
+            </div>
+          </div>
+
+          <div class="notif-row">
+            <div class="nr-text">
+              <h4>You've been invited</h4>
+              <p>When a partner invites you to Attune, we'll let you know with a link to get started.</p>
+            </div>
+            <div class="toggle-wrap">
+              <label class="toggle"><input type="checkbox" id="notif-invited" checked><span class="toggle-slider"></span></label>
+            </div>
+          </div>
+
+          <div class="notif-row">
+            <div class="nr-text">
+              <h4>Exercise reminder</h4>
+              <p>If you've started but haven't finished an exercise in a few days, we'll send a gentle reminder.</p>
+            </div>
+            <div class="toggle-wrap">
+              <label class="toggle"><input type="checkbox" id="notif-reminder" checked><span class="toggle-slider"></span></label>
+            </div>
+          </div>
+        </div>
+
+        <!-- LMFT / Premium -->
+        <div class="notif-section">
+          <div class="ns-title">Premium</div>
+          <div class="ns-desc">For Premium package holders, scheduling and session updates.</div>
+
+          <div class="notif-row">
+            <div class="nr-text">
+              <h4>LMFT session scheduled</h4>
+              <p>Confirmation and calendar invite when your therapist session is booked.</p>
+            </div>
+            <div class="toggle-wrap">
+              <label class="toggle"><input type="checkbox" id="notif-lmft-sched" checked><span class="toggle-slider"></span></label>
+            </div>
+          </div>
+
+          <div class="notif-row">
+            <div class="nr-text">
+              <h4>Session reminder</h4>
+              <p>A reminder 24 hours before your LMFT session.</p>
+            </div>
+            <div class="toggle-wrap">
+              <label class="toggle"><input type="checkbox" id="notif-lmft-remind" checked><span class="toggle-slider"></span></label>
+            </div>
+          </div>
+        </div>
+
+        <!-- Product updates -->
+        <div class="notif-section">
+          <div class="ns-title">Updates</div>
+          <div class="ns-desc">Occasional product news, no marketing, no third parties.</div>
+          <div class="notif-row">
+            <div class="nr-text">
+              <h4>New features and improvements</h4>
+              <p>When we add something meaningful to the product, like the ability to revisit your exercises.</p>
+            </div>
+            <div class="toggle-wrap">
+              <label class="toggle"><input type="checkbox" id="notif-product"><span class="toggle-slider"></span></label>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="notif-save-bar">
+        <p>Notifications are sent to your email address on file.</p>
+        <div style="display:flex;gap:.75rem;align-items:center">
+          <div class="btn-saved" id="notif-saved">✓ Saved</div>
+          <button class="btn-save" onclick="saveNotifications()">Save preferences</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════ HELP VIEW ══════════════════ -->
+<div class="view" id="view-help">
+  <div class="portal-wrap">
+    <div class="sub-hero">
+      <div class="sub-hero-inner">
+        <button class="sub-back" onclick="showView('portal')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+          Back
+        </button>
+        <h1 class="sub-title">Help &amp; support</h1>
+      </div>
+    </div>
+    <div class="pcontent">
+
+      <p class="slabel">Common questions</p>
+      <div class="help-grid">
+        <div class="help-topic" onclick="fillTopic('My partner hasn\'t finished their exercises')">
+          <div class="ht-icon" style="background:#FFF0EB;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#E8673A" stroke-width="1.6" stroke-linecap="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          </div>
+          <div class="ht-title">My partner hasn't finished</div>
+          <div class="ht-desc">Results are locked until both complete both exercises.</div>
+        </div>
+        <div class="help-topic" onclick="fillTopic('I can\'t see my results')">
+          <div class="ht-icon" style="background:#EEEFFF;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1B5FE8" stroke-width="1.6" stroke-linecap="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          </div>
+          <div class="ht-title">I can't see my results</div>
+          <div class="ht-desc">Questions about accessing or understanding your results.</div>
+        </div>
+        <div class="help-topic" onclick="fillTopic('I have a question about the LMFT session')">
+          <div class="ht-icon" style="background:#EEFAF3;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="1.6" stroke-linecap="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          </div>
+          <div class="ht-title">LMFT session question</div>
+          <div class="ht-desc">Scheduling, what to expect, how to prepare.</div>
+        </div>
+        <div class="help-topic" onclick="fillTopic('I want to update my account information')">
+          <div class="ht-icon" style="background:#FBF8F3;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#C17F47" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.58-7 8-7s8 3 8 7"/></svg>
+          </div>
+          <div class="ht-title">Account or billing</div>
+          <div class="ht-desc">Changes to your account, email, or package.</div>
+        </div>
+        <div class="help-topic" onclick="fillTopic('I have a question about privacy and my answers')">
+          <div class="ht-icon" style="background:#FFF0EB;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#E8673A" stroke-width="1.6" stroke-linecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          </div>
+          <div class="ht-title">Privacy &amp; my answers</div>
+          <div class="ht-desc">How your answers are stored and who can see them.</div>
+        </div>
+        <div class="help-topic" onclick="fillTopic('Something else')">
+          <div class="ht-icon" style="background:#EEEFFF;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1B5FE8" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          </div>
+          <div class="ht-title">Something else</div>
+          <div class="ht-desc">Anything else, we read every note.</div>
+        </div>
+      </div>
+
+      <p class="slabel">Send us a note</p>
+      <div class="contact-card" id="contact-card">
+        <h2 class="cc-title">We're here to help</h2>
+        <p class="cc-sub">Write to us about anything, a question, a piece of feedback, or something that felt off. We read every message and reply within one business day.</p>
+
+        <div class="cc-success" id="cc-success">
+          <h4>Message sent</h4>
+          <p>We'll get back to you within one business day.</p>
+        </div>
+
+        <div class="cc-form" id="cc-form">
+          <div class="cc-field">
+            <label>What's this about?</label>
+            <select id="cc-topic">
+              <option value="">Select a topic...</option>
+              <option>My partner hasn't finished their exercises</option>
+              <option>I can't see my results</option>
+              <option>I have a question about the LMFT session</option>
+              <option>I want to update my account information</option>
+              <option>I have a question about privacy and my answers</option>
+              <option>Something else</option>
+            </select>
+          </div>
+          <div class="cc-field">
+            <label>Your message</label>
+            <textarea id="cc-message" placeholder="Tell us what's going on. The more detail, the better we can help."></textarea>
+          </div>
+          <div class="cc-field">
+            <label>Email to reply to</label>
+            <input type="email" id="cc-email" placeholder="you@example.com">
+          </div>
+          <button class="cc-submit" onclick="submitHelp()">Send message →</button>
+        </div>
+
+        <p class="help-footnote">We typically reply within one business day. For urgent matters, reach us at <a href="mailto:hello@attune-relationships.com" style="color:var(--clay);">hello@attune-relationships.com</a></p>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ─── WORKBOOK DEMO PREVIEW ─── -->
+
+
+<footer class="site-footer" style="scroll-snap-align:start;">
+  <div class="sf-inner">
+    <div class="sf-brand">
+      <a href="/home" class="logo">
+        <svg width="46" height="33" viewBox="0 0 103 76" fill="none" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="spark_logo_2_1" x1="0" y1="0" x2="103" y2="76" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#E8673A"/><stop offset="100%" stop-color="#1B5FE8"/></linearGradient></defs><path d="M14,4 L44,4 A9,9 0 0,1 53,13 L53,42 A9,9 0 0,1 44,51 L20,51 L6,61 L11,51 A6,6 0 0,1 5,45 L5,13 A9,9 0 0,1 14,4 Z" fill="url(#spark_logo_2_1)"/><path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill="white" opacity="0.93" transform="translate(13.16,11.3) scale(0.72)"/><path d="M89,14 L59,14 A9,9 0 0,0 50,23 L50,52 A9,9 0 0,0 59,61 L83,61 L97,71 L92,61 A6,6 0 0,0 98,55 L98,23 A9,9 0 0,0 89,14 Z" fill="none" stroke="url(#spark_logo_2_1)" stroke-width="2.2" stroke-linejoin="round"/><path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill="url(#spark_logo_2_1)" transform="translate(58.16,21.3) scale(0.72)"/></svg>
+        <span class="logo-text" style="font-size:1.05rem;">Attune</span>
+      </a>
+      <p class="sf-tagline">Because understanding<br>takes intention.</p>
+      
+    </div>
+    <div class="sf-links">
+      <div class="sf-col">
+        <p class="sf-col-title">Product</p>
+        <a href="/home">Home</a>
+        <a href="/how-it-works">How it works</a>
+        <a href="/offerings">Packages</a>
+      </div>
+      <div class="sf-col">
+        <p class="sf-col-title">Support</p>
+        <a href="#" onclick="showSubPage('help');return false;">Help &amp; FAQ</a>
+        <a href="mailto:hello@attune-relationships.com">Contact us</a>
+        <a href="/legal">Privacy policy</a>
+        <a href="/legal#terms">Terms of service</a>
+      </div>
+      <div class="sf-col">
+        <p class="sf-col-title">Account</p>
+        <a href="#" onclick="showSubPage('profile');return false;">Your profile</a>
+        <a href="#" onclick="showSubPage('notifications');return false;">Notifications</a>
+        <a href="#" onclick="signOut();return false;">Sign out</a>
+      </div>
+    </div>
+  </div>
+  <div class="sf-bottom">
+    <p class="sf-copy">Attune Relationships™</p>
+    <p class="sf-email">hello@attune-relationships.com</p>
+    <a href="/admin" style="font-size:.6rem;color:rgba(255,255,255,.15);text-decoration:none;letter-spacing:.1em;text-transform:uppercase;font-weight:600;margin-top:.35rem;transition:color .2s;" onmouseover="this.style.color='rgba(255,255,255,.45)'" onmouseout="this.style.color='rgba(255,255,255,.15)'">Admin</a>
+  </div>
+  <div style="background:rgba(255,255,255,.04);border-top:1px solid rgba(255,255,255,.06);padding:.85rem 2rem;display:flex;align-items:center;gap:1rem;flex-wrap:wrap;">
+    <span style="font-size:.7rem;color:rgba(255,255,255,.4);font-style:italic;">How's Attune working for you?</span>
+    <div id="spark-feedback-strip" style="display:flex;gap:.4rem;">
+      <button onclick="window._sparkFeedback('love')" style="background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);border-radius:6px;padding:.3rem .65rem;font-size:.72rem;color:rgba(255,255,255,.6);cursor:pointer;">❤️ Love it</button>
+      <button onclick="window._sparkFeedback('good')" style="background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);border-radius:6px;padding:.3rem .65rem;font-size:.72rem;color:rgba(255,255,255,.6);cursor:pointer;">👍 Pretty good</button>
+      <button onclick="window._sparkFeedback('suggest')" style="background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);border-radius:6px;padding:.3rem .65rem;font-size:.72rem;color:rgba(255,255,255,.6);cursor:pointer;">💬 Suggest something</button>
+    </div>
+    <span id="spark-feedback-thanks" style="font-size:.7rem;color:#4ade80;display:none;">Thanks ✓</span>
+  </div>
+  <script>
+window._sparkFeedback = function(t) {
+    try {
+      if(t==='suggest'){
+        var strip=document.getElementById('spark-feedback-strip');
+        if(!strip)return;
+        strip.innerHTML='<input id="sfb-inp" type="text" placeholder="What would make Attune better?" style="background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.25);border-radius:6px;padding:.3rem .65rem;font-size:.72rem;color:white;width:200px;font-family:sans-serif;outline:none;"><button id="sfb-send" style="background:rgba(232,103,58,.9);border:none;border-radius:6px;padding:.3rem .65rem;font-size:.72rem;color:white;cursor:pointer;margin-left:.35rem;">Send</button>';
+        setTimeout(function(){
+          var i=document.getElementById('sfb-inp');
+          if(i)i.focus();
+          var btn=document.getElementById('sfb-send');
+          if(btn)btn.onclick=function(){
+            var m=i?i.value.trim():'';
+            fetch('/api/send-feedback',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({source:'footer_quick',rating:'suggest',message:m,page:window.location.pathname})}).catch(function(){});
+            var s=document.getElementById('spark-feedback-strip');
+            if(s)s.innerHTML='';
+            var th=document.getElementById('spark-feedback-thanks');
+            if(th)th.style.display='inline';
+          };
+        },50);
+        return;
+      }
+      fetch('/api/send-feedback',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({source:'footer_quick',rating:t==='love'?3:2,page:window.location.pathname})}).catch(function(){});
+      var strip=document.getElementById('spark-feedback-strip');
+      if(strip)strip.innerHTML='';
+      var thanks=document.getElementById('spark-feedback-thanks');
+      if(thanks)thanks.style.display='inline';
+    } catch(e){}
+  };
+
+function doDemo(pkg) {
+  const p = pkg || 'core';
+  // Clear any stale account so demo data loads cleanly
+  try { localStorage.removeItem('attune_account'); localStorage.removeItem('attune_order'); } catch(e) {}
+  window.location.href = '/app?pkg=' + p + '&demo=1';
+}
+async function doSignIn() {
+  const email = document.getElementById('si-email').value.trim();
+  const pwInput = document.querySelector('#form-si input[type="password"]');
+  const pw = pwInput ? pwInput.value : '';
+  const errEl = document.getElementById('si-error');
+  const btn = document.getElementById('si-btn');
+
+  if (!email || !pw) {
+    errEl.textContent = 'Please enter your email and password.';
+    errEl.style.display = 'block'; return;
+  }
+
+  btn.disabled = true; btn.textContent = 'Signing in…';
+  errEl.style.display = 'none';
+
+  // Try Supabase if configured
+  if (typeof window.supabaseClient !== 'undefined' && window.supabaseClient) {
+    const { data, error } = await window.supabaseClient.auth.signInWithPassword({ email, password: pw });
+    if (error) {
+      errEl.textContent = 'Incorrect email or password.';
+      errEl.style.display = 'block';
+      btn.disabled = false; btn.textContent = 'Sign in →'; return;
+    }
+    loadPortal({ email: data.user.email, name: data.user.user_metadata?.name || email.split('@')[0] });
+    return;
+  }
+
+  // Supabase not yet connected — inform user
+  errEl.textContent = 'Account sign-in is coming soon. Use the demo account below to explore Attune.';
+  errEl.style.display = 'block';
+  btn.disabled = false; btn.textContent = 'Sign in →';
+}
+
+function signOut() {
+  user = null;
+  document.getElementById('nav-user').style.display = 'none';
+  document.getElementById('nav-signout').style.display = 'none';
+  showView('auth');
+}
+
+/* ── VIEW ROUTING ── */
+function showView(id) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.getElementById('view-' + id).classList.add('active');
+  window.scrollTo(0, 0);
+}
+function showSubPage(page) { showView(page); }
+
+/* ── PORTAL LOAD ── */
+function loadPortal(u) {
+  user = u;
+  document.getElementById('nav-user').textContent = u.name;
+  document.getElementById('nav-user').style.display = 'inline';
+  document.getElementById('nav-signout').style.display = 'inline';
+  document.getElementById('p-name').textContent = u.name;
+  // pre-fill profile fields
+  document.getElementById('ps-name-val').textContent = u.name;
+  document.getElementById('ps-partner-val').textContent = u.partner;
+  document.getElementById('ps-email-val').textContent = u.email || 'you@example.com';
+  document.getElementById('edit-name').value = u.name;
+  document.getElementById('edit-partner').value = u.partner;
+  document.getElementById('edit-email').value = u.email || '';
+  document.getElementById('cc-email').value = u.email || '';
+  // Show/hide package-specific extras
+  const pkg = u.pkg || 'core';
+  // Show package badge
+  const pkgColors = { core: '#E8673A', newlywed: '#E8673A', anniversary: '#1B5FE8', premium: '#3B5BDB' };
+  const pkgBadgeEl = document.getElementById('p-pkg-badge');
+  if (pkgBadgeEl && u.pkgLabel) {
+    pkgBadgeEl.style.display = 'inline-block';
+    pkgBadgeEl.innerHTML = '<span style="font-size:.6rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;padding:.25rem .75rem;border-radius:999px;background:' + (pkgColors[pkg] || '#E8673A') + '25;color:' + (pkgColors[pkg] || '#E8673A') + ';border:1px solid ' + (pkgColors[pkg] || '#E8673A') + '40;">' + u.pkgLabel + '</span>';
+  }
+  const extrasEl = document.getElementById('pkg-extras');
+  const annSect = document.getElementById('pkg-ann-section');
+  const newlywedSect = document.getElementById('pkg-newlywed-section');
+  const premiumSect = document.getElementById('pkg-premium-section');
+  if (extrasEl) extrasEl.style.display = (pkg !== 'core') ? 'block' : 'none';
+  if (annSect) annSect.style.display = (pkg === 'anniversary') ? 'block' : 'none';
+  if (newlywedSect) newlywedSect.style.display = (pkg === 'newlywed') ? 'block' : 'none';
+  if (premiumSect) premiumSect.style.display = (pkg === 'premium') ? 'block' : 'none';
+  applyState(u.state);
+  showView('portal');
+}
+
+/* ── PORTAL STATE ── */
+function pill(t, l) { return '<div class="ppill"><span class="pdot ' + t + '"></span>' + l + '</div>'; }
+
+function applyState(s) {
+  const u = user;
+  const pkg = u.pkg || 'core';
+  const pills = document.getElementById('p-pills');
+  const rc = document.getElementById('results-card');
+  const base = window.location.origin;
+
+  if (s === 'complete') {
+    document.getElementById('p-status').textContent = 'Both exercises complete. Your results are ready.';
+    pills.innerHTML = pill('done','Exercise 01 complete') + pill('done','Exercise 02 complete') + pill('done','Results unlocked');
+    rc.classList.remove('locked');
+    rc.href = base + '/app?pkg=' + pkg;
+    rc.style.pointerEvents = '';
+    document.getElementById('rc-title').innerHTML = u.name + ' &amp; ' + u.partner;
+    document.getElementById('rc-chips').style.display = 'flex';
+    document.getElementById('rc-sub').textContent = 'Each of you answered independently, so what you see reflects how you actually are, not how you thought the other person wanted you to answer. This is your view of each other.';
+    document.getElementById('rc-cta').style.display = 'flex';
+    document.getElementById('rc-lock').style.display = 'none';
+    setEx('ex1','done'); setEx('ex2','done');
+    // Update exercise links with pkg param
+    const ex1el = document.getElementById('ex1');
+    const ex2el = document.getElementById('ex2');
+    if (ex1el) ex1el.href = base + '/app?view=exercise1&pkg=' + pkg;
+    if (ex2el) ex2el.href = base + '/app?view=exercise2&pkg=' + pkg;
+    // Update LMFT card: available for premium OR if order has addonLmft
+    const lmftEl = document.getElementById('lmft-card');
+    if (lmftEl) {
+      let hasLmft = (pkg === 'premium');
+      try { const o = JSON.parse(localStorage.getItem('attune_order') || 'null'); if (o?.addonLmft) hasLmft = true; } catch {}
+      lmftEl.href = base + '/app?view=lmft&pkg=' + pkg;
+      lmftEl.style.opacity = hasLmft ? '1' : '0.45';
+      lmftEl.style.pointerEvents = hasLmft ? 'auto' : 'none';
+    }
+    document.getElementById('p-partner-name').textContent = u.partner;
+    document.getElementById('p-partner-status').textContent = 'Both exercises complete';
+    setPartnerEx('pex1','done'); setPartnerEx('pex2','done');
+    document.getElementById('invite-btn').style.display = 'none';
+    document.getElementById('nudge-btn').style.display = 'none';
+  } else {
+    document.getElementById('p-status').textContent = 'Ready when you are. Start with Exercise 01.';
+    pills.innerHTML = pill('wait','Exercise 01, not started') + pill('wait','Exercise 02, not started') + pill('lock','Results locked');
+    rc.classList.add('locked');
+    rc.removeAttribute('href');
+    document.getElementById('rc-title').textContent = 'Waiting for both partners';
+    document.getElementById('rc-chips').style.display = 'none';
+    document.getElementById('rc-sub').textContent = 'Your results unlock once both of you have finished both exercises. Your individual answers stay private until then.';
+    document.getElementById('rc-cta').style.display = 'none';
+    document.getElementById('rc-lock').style.display = 'block';
+    setEx('ex1','start'); setEx('ex2','start');
+    document.getElementById('p-partner-name').textContent = u.partner;
+    document.getElementById('p-partner-status').textContent = 'Not yet started, waiting on invite';
+    setPartnerEx('pex1','pend'); setPartnerEx('pex2','pend');
+    document.getElementById('invite-btn').style.display = 'block';
+    document.getElementById('nudge-btn').style.display = 'block';
+    // Pre-fill nudge text
+    const nudgeMsg = `Hey ${u.partner}, I just finished setting up my Attune profile. When you get a chance, can you complete yours? It only takes about 25 minutes, and we can't see our joint results until we've both done it. Here's your link: https://attune.com/portal`;
+    document.getElementById('nudge-text').textContent = nudgeMsg;
+  }
+}
+
+function setEx(id, s) {
+  const card = document.getElementById(id);
+  const foot = document.getElementById(id + '-foot');
+  if (s === 'done') {
+    card.classList.add('done');
+    foot.className = 'ex-foot df';
+    foot.innerHTML = '<span class="sbadge done">✓ Complete</span><span class="ex-action" style="color:#16a34a;">Review →</span>';
+  } else {
+    card.classList.remove('done');
+    foot.className = 'ex-foot';
+    const col = id === 'ex1' ? 'var(--orange)' : 'var(--indigo)';
+    foot.innerHTML = '<span class="sbadge wait">Not started</span><span class="ex-action" style="color:' + col + ';">Begin →</span>';
+  }
+}
+function setPartnerEx(id, s) {
+  const el = document.getElementById(id);
+  if (s === 'done') { el.className = 'pex-st done'; el.textContent = '✓'; }
+  else { el.className = 'pex-st pend'; el.textContent = '–'; }
+}
+
+/* ── PARTNER NUDGE ── */
+function sendNudge() {
+  document.getElementById('nudge-box').style.display = 'block';
+  document.getElementById('nudge-btn').style.display = 'none';
+}
+function copyNudgeText() {
+  const text = document.getElementById('nudge-text').textContent;
+  navigator.clipboard.writeText(text).then(() => {
+    document.getElementById('nudge-box').style.display = 'none';
+    document.getElementById('nudge-confirm').style.display = 'block';
+    setTimeout(() => {
+      document.getElementById('nudge-confirm').style.display = 'none';
+      document.getElementById('nudge-btn').style.display = 'block';
+    }, 4000);
+  }).catch(() => { prompt('Copy this message:', text); });
+}
+
+/* ── PARTNER INVITE ── */
+function copyInvite() {
+  const link = window.location.origin + '/portal';
+  navigator.clipboard.writeText(link).then(() => {
+    alert('Invite link copied! Share it with ' + (user?.partner || 'your partner') + '.');
+  }).catch(() => { prompt('Copy this link:', link); });
+}
+
+/* ── PROFILE EDITING ── */
+function editField(field) {
+  document.getElementById('ps-' + field + '-display').style.display = 'none';
+  document.getElementById('ps-' + field + '-edit').style.display = 'block';
+}
+function cancelEdit(field) {
+  document.getElementById('ps-' + field + '-display').style.display = 'flex';
+  document.getElementById('ps-' + field + '-edit').style.display = 'none';
+}
+function saveField(field) {
+  if (field === 'name') {
+    const name = document.getElementById('edit-name').value.trim();
+    const partner = document.getElementById('edit-partner').value.trim();
+    if (!name) { alert('Name cannot be empty.'); return; }
+    user.name = name; user.partner = partner;
+    document.getElementById('ps-name-val').textContent = name;
+    document.getElementById('ps-partner-val').textContent = partner;
+    document.getElementById('p-name').textContent = name;
+    document.getElementById('nav-user').textContent = name;
+  } else if (field === 'email') {
+    const email = document.getElementById('edit-email').value.trim();
+    if (!email) { alert('Email cannot be empty.'); return; }
+    user.email = email;
+    document.getElementById('ps-email-val').textContent = email;
+    document.getElementById('cc-email').value = email;
+  } else if (field === 'pw') {
+    const cur = document.getElementById('edit-pw-current').value;
+    const nw = document.getElementById('edit-pw-new').value;
+    const cf = document.getElementById('edit-pw-confirm').value;
+    if (!cur || !nw) { alert('Please fill in all password fields.'); return; }
+    if (nw !== cf) { alert('New passwords don\'t match.'); return; }
+    if (nw.length < 8) { alert('Password must be at least 8 characters.'); return; }
+    document.getElementById('edit-pw-current').value = '';
+    document.getElementById('edit-pw-new').value = '';
+    document.getElementById('edit-pw-confirm').value = '';
+  }
+  cancelEdit(field);
+}
+function confirmDelete() {
+  if (confirm('Are you sure? This permanently deletes your account and all results. This cannot be undone.')) {
+    alert('Account deletion request received. We\'ll confirm by email within 24 hours.');
+  }
+}
+
+/* ── NOTIFICATIONS ── */
+function saveNotifications() {
+  const btn = document.querySelector('.btn-save');
+  const saved = document.getElementById('notif-saved');
+  btn.style.display = 'none';
+  saved.style.display = 'inline-block';
+  setTimeout(() => { btn.style.display = 'inline-block'; saved.style.display = 'none'; }, 2500);
+}
+
+/* ── HELP ── */
+function fillTopic(topic) {
+  document.getElementById('cc-topic').value = topic;
+  document.getElementById('cc-message').focus();
+  document.getElementById('contact-card') && document.getElementById('contact-card').scrollIntoView({ behavior: 'smooth' });
+}
+function submitHelp() {
+  const topic = document.getElementById('cc-topic').value;
+  const msg = document.getElementById('cc-message').value.trim();
+  const email = document.getElementById('cc-email').value.trim();
+  if (!topic) { alert('Please select a topic.'); return; }
+  if (!msg) { alert('Please write a message.'); return; }
+  if (!email) { alert('Please enter your email so we can reply.'); return; }
+  document.getElementById('cc-form').style.display = 'none';
+  document.getElementById('cc-success').style.display = 'block';
+}
+
+/* ── TOKEN + PARTNER INVITE SYSTEM ── */
+
+function genToken(len) {
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  return Array.from({length: len||32}, () => chars[Math.floor(Math.random()*chars.length)]).join('');
+}
+function genShortCode() {
+  return 'SPARK-' + genToken(4);
+}
+function getTokens() {
+  try { return JSON.parse(localStorage.getItem('attune_tokens')||'[]'); } catch(e) { return []; }
+}
+function saveTokens(t) {
+  try { localStorage.setItem('attune_tokens', JSON.stringify(t)); } catch(e) {}
+}
+function findToken(tok) {
+  return getTokens().find(t => t.token === tok || t.shortCode === tok);
+}
+
+// Current redemption token record
+let _redeemRecord = null;
+let _partnerInviteToken = null;
+let _partnerInviteRecord = null;
+
+function buildInviteUrl(partnerToken) {
+  const base = (window.location.origin || 'https://attune.com');
+  return base + '/portal?partnerToken=' + partnerToken;
+}
+
+function renderQR(containerId, url) {
+  const el = document.getElementById(containerId);
+  if (!el) return;
+  el.innerHTML = '';
+  try {
+    new QRCode(el, { text: url, width: 120, height: 120, colorDark: '#0E0B07', colorLight: '#ffffff', correctLevel: QRCode.CorrectLevel.M });
+  } catch(e) {
+    el.innerHTML = '<div style="font-size:.6rem;color:#666;padding:.5rem;">QR preview requires browser</div>';
+  }
+}
+
+/* ── TOKEN REDEMPTION FLOW ── */
+function initRedeemView(token) {
+  const rec = findToken(token);
+  if (!rec) {
+    // Unrecognized token, show demo with placeholder
+    showView('redeem');
+    document.getElementById('redeem-self-badge').style.display = 'flex';
+    document.getElementById('redeem-pkg-name').textContent = 'Attune Assessment';
+    document.getElementById('redeem-pkg-sub').textContent = 'The Foundation';
+    document.getElementById('redeem-headline').textContent = 'Welcome to Attune';
+    document.getElementById('redeem-sub').textContent = 'This is a demo token. In production, tokens are verified against the order record.';
+    _redeemRecord = { token, packageName: 'The Attune Assessment', packageType: 'core', isGift: false, recipientName: 'you', status: 'unclaimed', recipientPhoneLast4: null };
+    document.getElementById('redeem-phone-verify').style.display = 'none';
+    return;
+  }
+
+  _redeemRecord = rec;
+  showView('redeem');
+
+  if (rec.status === 'claimed') {
+    document.getElementById('redeem-claimed-notice').style.display = 'block';
+    document.getElementById('redeem-verify-btn').style.display = 'none';
+    return;
+  }
+
+  // Package badge
+  const pkgColors = { core:'#FFF0EB', newlywed:'#FFF0EB', 'newlywed-box':'#FFF0EB', anniversary:'#EEEFFF', 'anniversary-box':'#EEEFFF', premium:'#0f0c29', 'premium-box':'#0f0c29' };
+  const pkgIcon = { core:'💬', newlywed:'🥂', 'newlywed-box':'🥂', anniversary:'✨', 'anniversary-box':'✨', premium:'⭐', 'premium-box':'⭐' };
+  const badge = document.getElementById('redeem-pkg-badge');
+  badge.style.background = pkgColors[rec.packageType] || '#FFF0EB';
+  badge.style.color = rec.packageType.includes('anniversary') ? '#1B5FE8' : (rec.packageType.includes('premium') ? 'rgba(180,188,255,.9)' : '#E8673A');
+  document.getElementById('redeem-pkg-icon').textContent = pkgIcon[rec.packageType] || '🎁';
+  document.getElementById('redeem-pkg-name').textContent = rec.packageName || 'Attune';
+  document.getElementById('redeem-pkg-sub').textContent = rec.isGift ? ('A gift from ' + (rec.purchaserName || 'someone special')) : 'Your Attune access';
+
+  if (rec.isGift) {
+    document.getElementById('redeem-gift-badge').style.display = 'flex';
+    document.getElementById('redeem-giver-name').textContent = rec.purchaserName || 'a friend';
+    document.getElementById('redeem-headline').textContent = '\u{1F381} You\u2019ve received Attune';
+    document.getElementById('redeem-sub').textContent = 'Confirm your identity to claim your gift, then create your joint account.';
+    document.getElementById('redeem-phone-verify').style.display = 'block';
+  } else {
+    document.getElementById('redeem-self-badge').style.display = 'flex';
+    document.getElementById('redeem-headline').textContent = 'Set up your account';
+    document.getElementById('redeem-sub').textContent = 'Your order is confirmed. Create your account to get started.';
+    document.getElementById('redeem-phone-verify').style.display = 'none';
+  }
+
+  // Pre-fill joint account preview
+  document.getElementById('redeem-joint-name').textContent = rec.recipientName || 'Your couple';
+  document.getElementById('redeem-joint-pkg').textContent = rec.packageName || 'Attune';
+}
+
+function verifyAndProceed() {
+  const rec = _redeemRecord;
+  if (!rec) return;
+
+  if (rec.isGift && rec.recipientPhoneLast4) {
+    const entered = document.getElementById('redeem-phone-input').value.trim();
+    if (entered.length < 4) { alert('Please enter the last 4 digits of the mobile number.'); return; }
+    if (entered !== rec.recipientPhoneLast4) {
+      document.getElementById('redeem-phone-error').style.display = 'block';
+      document.getElementById('redeem-phone-input').style.borderColor = '#ef4444';
+      return;
+    }
+    document.getElementById('redeem-phone-error').style.display = 'none';
+    document.getElementById('redeem-phone-input').style.borderColor = '';
+  }
+  // Move to step B
+  document.getElementById('rdot-1').className = 'step-dot done'; document.getElementById('rdot-1').textContent = '✓';
+  document.getElementById('rline-1').className = 'step-line done';
+  document.getElementById('rdot-2').className = 'step-dot active';
+  document.getElementById('redeem-step-a').style.display = 'none';
+  document.getElementById('redeem-step-b').style.display = 'block';
+}
+
+function redeemCreateAccount() {
+  const name = document.getElementById('redeem-name').value.trim();
+  const email = document.getElementById('redeem-email').value.trim();
+  const pass = document.getElementById('redeem-pass').value;
+  const partnerName = document.getElementById('redeem-partner-name').value.trim() || 'Your partner';
+  if (!name) { alert('Please enter your name.'); return; }
+  if (!email || !email.includes('@')) { alert('Please enter a valid email.'); return; }
+  if (!pass || pass.length < 6) { alert('Password must be at least 6 characters.'); return; }
+
+  // Mark token as claimed
+  const tokens = getTokens();
+  const idx = tokens.findIndex(t => t.token === (_redeemRecord && _redeemRecord.token));
+  if (idx >= 0) {
+    tokens[idx].status = 'claimed';
+    tokens[idx].claimedAt = new Date().toISOString();
+    // Generate partner invite token
+    const pTok = genToken(32);
+    const pShort = genShortCode();
+    tokens[idx].partnerToken = pTok;
+    tokens[idx].partnerShortCode = pShort;
+    tokens[idx].partnerTokenUsed = false;
+    tokens[idx].primaryName = name;
+    tokens[idx].partnerName = partnerName;
+    _partnerInviteToken = pTok;
+    _partnerInviteRecord = tokens[idx];
+    saveTokens(tokens);
+  } else {
+    // Demo fallback: generate ephemeral partner token
+    _partnerInviteToken = genToken(32);
+    _partnerInviteRecord = { ..._redeemRecord, primaryName: name, partnerName, partnerToken: _partnerInviteToken, partnerShortCode: genShortCode() };
+  }
+
+  // Move to step C
+  document.getElementById('rdot-2').className = 'step-dot done'; document.getElementById('rdot-2').textContent = '✓';
+  document.getElementById('rline-2').className = 'step-line done';
+  document.getElementById('rdot-3').className = 'step-dot active';
+  document.getElementById('redeem-step-b').style.display = 'none';
+  document.getElementById('redeem-step-c').style.display = 'block';
+  document.getElementById('redeem-step-c-headline').textContent = 'Welcome, ' + name + '!';
+  document.getElementById('redeem-partner-name-disp').textContent = partnerName;
+
+  const inviteUrl = buildInviteUrl(_partnerInviteToken);
+  document.getElementById('redeem-invite-link-display').textContent = inviteUrl;
+  document.getElementById('redeem-invite-link-display').dataset.url = inviteUrl;
+  renderQR('redeem-partner-qr', inviteUrl);
+
+  // Load portal in background
+  loadPortal({ name, partner: partnerName, email, state: 'fresh', pkg: _redeemRecord.packageType || 'core', pkgLabel: _redeemRecord.packageName });
+}
+
+function goToPortalAfterSetup() {
+  // Use stored order package if available
+  let pkg = 'core';
+  try { const o = JSON.parse(localStorage.getItem('attune_order') || 'null'); if (o?.pkgKey) pkg = o.pkgKey; } catch {}
+  window.location.href = '/app?pkg=' + pkg;
+}
+
+function copyInviteLink(el) {
+  const url = el.dataset.url || el.textContent;
+  navigator.clipboard?.writeText(url).then(() => {
+    const orig = el.textContent;
+    el.textContent = '✓ Copied!';
+    setTimeout(() => { el.textContent = orig; }, 2000);
+  }).catch(() => {
+    prompt('Copy this link:', url);
+  });
+}
+
+function shareViaText() {
+  const url = document.getElementById('redeem-invite-link-display').dataset.url || document.getElementById('redeem-invite-link-display').textContent;
+  const partnerName = document.getElementById('redeem-partner-name-disp').textContent || 'you';
+  const msg = encodeURIComponent('I just set up our Attune account! Click this link to create your profile and start your exercises: ' + url);
+  window.open('sms:?body=' + msg);
+}
+function shareViaTextSU() {
+  const url = document.getElementById('su-invite-link-display').dataset.url || document.getElementById('su-invite-link-display').textContent;
+  const partner = document.getElementById('su-partner').value.trim() || 'you';
+  const msg = encodeURIComponent('I just set up our Attune account! Join me here to start your exercises: ' + url);
+  window.open('sms:?body=' + msg);
+}
+
+/* ── NORMAL SIGNUP PARTNER INVITE STEP ── */
+function doSignUp() {
+  const name = document.getElementById('su-name').value.trim();
+  const partner = document.getElementById('su-partner').value.trim() || 'Your partner';
+  const email = document.getElementById('su-email').value.trim() || 'you@example.com';
+  const demographics = {
+    age: document.getElementById('su-age')?.value||'',
+    gender: document.getElementById('su-gender')?.value||'',
+    relStatus: document.getElementById('su-relstatus')?.value||'',
+    relLength: document.getElementById('su-rellength')?.value||'',
+    children: document.getElementById('su-children')?.value||'',
+    source: document.getElementById('su-source')?.value||'',
+    signupTs: new Date().toISOString(),
+  };
+  try {
+    const existing = JSON.parse(localStorage.getItem('attune_demo_users')||'[]');
+    existing.push({ uuid:'u_'+Math.random().toString(36).slice(2,9), ...demographics });
+    localStorage.setItem('attune_demo_users', JSON.stringify(existing));
+  } catch(e) {}
+
+  // Generate partner invite token
+  const pTok = genToken(32);
+  const pShort = genShortCode();
+  const newTokenRec = {
+    token: genToken(32), shortCode: genShortCode(),
+    orderId: null, packageType: 'core', packageName: 'The Attune Assessment',
+    recipientName: name + ' & ' + partner,
+    primaryName: name, partnerName: partner,
+    isGift: false, purchaserEmail: email,
+    coupleId: 'cpl_'+genToken(12),
+    status: 'claimed', claimedAt: new Date().toISOString(),
+    partnerToken: pTok, partnerShortCode: pShort, partnerTokenUsed: false,
+  };
+  const tokens = getTokens();
+  tokens.push(newTokenRec);
+  saveTokens(tokens);
+
+  // Show step 3
+  document.getElementById('su-step2').style.display = 'none';
+  document.getElementById('su-step3').style.display = 'block';
+  document.querySelector('.auth-headline').textContent = 'Invite ' + partner;
+  document.getElementById('su-partner-name-disp').textContent = partner;
+
+  // Update architecture diagram names
+  const archYour = document.getElementById('arch-your-name');
+  const archPartner = document.getElementById('arch-partner-name');
+  if (archYour) archYour.textContent = name;
+  if (archPartner) archPartner.textContent = partner;
+
+  const inviteUrl = buildInviteUrl(pTok);
+  const invLinkEl = document.getElementById('su-invite-link-display');
+  invLinkEl.textContent = inviteUrl;
+  invLinkEl.dataset.url = inviteUrl;
+  document.getElementById('su-short-code').textContent = pShort;
+  renderQR('su-partner-qr', inviteUrl);
+
+  loadPortal({ name, partner, email, state:'fresh' });
+}
+
+function goToPortalFromSignup() { showView('portal'); }
+
+function sendPartnerInviteText() {
+  const phone = (document.getElementById('su-partner-phone')?.value||'').replace(/\D/g,'');
+  const url = document.getElementById('su-invite-link-display')?.dataset?.url || document.getElementById('su-invite-link-display')?.textContent || '';
+  if (phone.length < 10) { alert('Please enter a valid 10-digit phone number.'); return; }
+  // In production: POST to SMS API (Twilio/etc)
+  // For demo: open SMS app via href, or simulate sent state
+  const smsLink = `sms:${phone}?body=${encodeURIComponent("You've been invited to Attune! Set up your profile here: " + url + " (This link is uniquely yours, it can only be used once.)")}`;
+  window.open(smsLink, '_self');
+  const sentMsg = document.getElementById('su-sms-sent');
+  if (sentMsg) { sentMsg.style.display = 'block'; setTimeout(()=>{ sentMsg.style.display='none'; }, 5000); }
+}
+
+/* ── PARTNER ACCEPT FLOW ── */
+function initPartnerView(partnerToken) {
+  const tokens = getTokens();
+  const rec = tokens.find(t => t.partnerToken === partnerToken);
+  _partnerInviteRecord = rec;
+  showView('partner');
+  if (rec) {
+    document.getElementById('partner-headline').textContent = (rec.primaryName || 'Your partner') + ' invited you to Attune';
+    document.getElementById('partner-sub').textContent = rec.primaryName + ' has set up your joint ' + (rec.packageName||'Attune') + ' account. Create your profile to get started with your exercises.';
+    document.getElementById('partner-joint-badge').style.display = 'block';
+    document.getElementById('partner-joint-name').textContent = rec.recipientName || (rec.primaryName + ' & you');
+    document.getElementById('partner-pkg-name').textContent = rec.packageName || 'Attune';
+  }
+}
+function doPartnerSignup() {
+  const name = document.getElementById('partner-name').value.trim();
+  const email = document.getElementById('partner-email').value.trim();
+  const pass = document.getElementById('partner-pass').value;
+  if (!name) { alert('Please enter your name.'); return; }
+  if (!email || !email.includes('@')) { alert('Please enter a valid email.'); return; }
+  if (!pass || pass.length < 6) { alert('Password must be at least 6 characters.'); return; }
+
+  // Mark partner token used
+  if (_partnerInviteRecord) {
+    const tokens = getTokens();
+    const idx = tokens.findIndex(t => t.partnerToken === _partnerInviteRecord.partnerToken);
+    if (idx >= 0) { tokens[idx].partnerTokenUsed = true; tokens[idx].partnerName = name; saveTokens(tokens); }
+  }
+
+  const primary = _partnerInviteRecord?.primaryName || 'Your partner';
+  loadPortal({ name, partner: primary, email, state:'fresh', pkg: _partnerInviteRecord?.packageType||'core', pkgLabel: _partnerInviteRecord?.packageName });
+}
+
+/* ── URL PARAM ROUTING ── */
+(function() {
+  const params = new URLSearchParams(window.location.search);
+  const token = params.get('token');
+  const partnerToken = params.get('partnerToken');
+  if (token) {
+    window.addEventListener('DOMContentLoaded', () => initRedeemView(token));
+    return;
+  }
+  if (partnerToken) {
+    window.addEventListener('DOMContentLoaded', () => initPartnerView(partnerToken));
+    return;
+  }
+  // Hash nav (existing behavior)
+  const hash = window.location.hash.replace('#', '');
+  if (hash && ['help','profile','notifications'].includes(hash)) {
+    const orig = window.loadPortal;
+    window.loadPortal = function(u) { orig(u); setTimeout(function() { showView(hash); }, 50); };
+  }
+})();
+
+/* ── HAMBURGER (portal) ── */
+function togglePortalMenu() {
+  const m = document.getElementById('portal-mobile-menu');
+  if (m) m.classList.toggle('open');
+}
+document.addEventListener('click', function(e) {
+  const menu = document.getElementById('portal-mobile-menu');
+  const btn = document.getElementById('portal-hamburger');
+  if (menu && menu.classList.contains('open') && !menu.contains(e.target) && btn && !btn.contains(e.target)) {
+    menu.classList.remove('open');
+  }
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Understanding Each Other, In Practice, Attune</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,800;1,700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  :root{--warm:#FBF8F3;--stone:#E8DDD0;--muted:#8C7A68;--ink:#0E0B07;--clay:#C17F47;--orange:#E8673A;--hfont:'Playfair Display',Georgia,serif;--bfont:'DM Sans',system-ui,sans-serif}
+  body{background:var(--warm);color:var(--ink);font-family:var(--bfont);min-height:100vh}
+  a{text-decoration:none;color:inherit}
+  nav{position:sticky;top:0;z-index:100;background:rgba(251,248,243,.95);backdrop-filter:blur(12px);border-bottom:1px solid var(--stone);height:58px;display:flex;align-items:center;padding:0 2.5rem;gap:2rem}
+  .logo{display:flex;align-items:center;gap:.5rem;font-family:var(--hfont);font-size:1.05rem;font-weight:700}
+  .nav-links{display:flex;gap:1.5rem;font-size:.82rem;color:var(--muted)}
+  .nav-links a:hover{color:var(--ink)}
+  .nav-right{margin-left:auto;display:flex;align-items:center;gap:1rem}
+  .nav-cta{background:var(--ink);color:white;padding:.45rem 1.1rem;border-radius:10px;font-size:.78rem;font-weight:600}
+  .cat-bar{border-top:1px solid var(--stone);border-bottom:1px solid var(--stone);padding:.75rem 0;background:var(--warm)}
+  .cat-bar-inner{display:flex;gap:.5rem;max-width:1100px;margin:0 auto;padding:0 2.5rem;flex-wrap:wrap;justify-content:center}
+  .cat-pill{padding:.4rem .95rem;border-radius:999px;font-size:.72rem;font-weight:500;border:1.5px solid var(--stone);color:var(--muted);background:transparent;transition:all .15s}
+  .cat-pill:hover{border-color:var(--clay);color:var(--ink)}
+  .cat-pill.active{background:var(--ink);color:white;border-color:var(--ink)}
+  .page-hdr{max-width:680px;margin:0 auto;padding:3.5rem 2.5rem 2.5rem;text-align:center}
+  .page-eyebrow{font-size:.6rem;letter-spacing:.28em;text-transform:uppercase;color:#5C6BC0;font-weight:700;margin-bottom:.75rem}
+  .page-title{font-family:var(--hfont);font-size:clamp(1.8rem,4vw,2.5rem);font-weight:700;color:var(--ink);line-height:1.1;margin-bottom:.75rem;letter-spacing:-.02em}
+  .page-sub{font-size:.92rem;color:var(--muted);line-height:1.75;font-weight:300}
+  .articles-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:1.25rem;max-width:1100px;margin:0 auto;padding:0 2.5rem 4rem}
+  .art-card{background:white;border-radius:18px;border:1.5px solid var(--stone);padding:1.75rem;display:flex;flex-direction:column;gap:.65rem;transition:all .2s}
+  .art-card:hover{border-color:var(--clay);transform:translateY(-2px);box-shadow:0 8px 32px rgba(14,11,7,.08)}
+  .art-cat{font-size:.58rem;letter-spacing:.2em;text-transform:uppercase;font-weight:700;color:#5C6BC0}
+  .art-title{font-family:var(--hfont);font-size:1.15rem;font-weight:700;color:var(--ink);line-height:1.25;flex:1}
+  .art-time{font-size:.72rem;color:var(--muted);padding-top:.65rem;border-top:1px solid var(--stone);display:flex;align-items:center;justify-content:space-between}
+  .art-arrow{color:#5C6BC0;font-size:.85rem}
+  @media(max-width:640px){.articles-grid{grid-template-columns:1fr;padding:0 1.25rem 3rem}.page-hdr{padding:2.5rem 1.25rem 2rem}.cat-bar-inner{padding:0 1rem}.nav-links{display:none}}
+</style>
+</head>
+<body>
+<nav>
+  <a href="/home" class="logo">
+    <svg width="26" height="19" viewBox="0 0 103 76" fill="none"><defs><linearGradient id="lg" x1="0" y1="0" x2="103" y2="76" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#E8673A"/><stop offset="100%" stop-color="#1B5FE8"/></linearGradient></defs><path d="M14,4 L44,4 A9,9 0 0,1 53,13 L53,42 A9,9 0 0,1 44,51 L20,51 L6,61 L11,51 A6,6 0 0,1 5,45 L5,13 A9,9 0 0,1 14,4 Z" fill="url(#lg)"/><path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill="white" opacity=".9" transform="translate(13.16,11.3) scale(0.72)"/><path d="M89,14 L59,14 A9,9 0 0,0 50,23 L50,52 A9,9 0 0,0 59,61 L83,61 L97,71 L92,61 A6,6 0 0,0 98,55 L98,23 A9,9 0 0,0 89,14 Z" fill="none" stroke="url(#lg)" stroke-width="2.2"/><path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill="url(#lg)" transform="translate(58.16,21.3) scale(0.72)"/></svg>
+    Attune
+  </a>
+  <div class="nav-links">
+    <a href="/home">Home</a>
+    <a href="/practice" style="color:var(--orange);font-weight:600">In Practice</a>
+    <a href="/offerings">Packages</a>
+  </div>
+  <div class="nav-right">
+    <a href="/portal" style="font-size:.82rem;color:var(--muted);font-weight:500">Sign in</a>
+    <a href="/offerings" class="nav-cta">Get started</a>
+  </div>
+</nav>
+<div class="cat-bar">
+  <div class="cat-bar-inner">
+    <a href="/practice" class="cat-pill">All</a>
+    <a href="/practice/getting-started" class="cat-pill">Getting Started</a>
+    <a href="/practice/when-its-difficult" class="cat-pill">When It's Difficult</a>
+    <a href="/practice/understanding-each-other" class="cat-pill active">Understanding Each Other</a>
+    <a href="/practice/couple-types" class="cat-pill">Couple Types</a>
+  </div>
+</div>
+<div class="page-hdr">
+  <p class="page-eyebrow">In Practice · Understanding Each Other</p>
+  <h1 class="page-title">Understanding Each Other</h1>
+  <p class="page-sub">Deeper reads on communication, attachment, and how people actually work.</p>
+</div>
+<div class="articles-grid">
+  <a href="/practice/conflict-vs-repair" class="art-card">
+    <span class="art-cat">Understanding Each Other</span>
+    <h2 class="art-title">The difference between conflict and repair</h2>
+    <div class="art-time"><span>5 min read</span><span class="art-arrow">→</span></div>
+  </a>
+  <a href="/practice/what-your-communication-style-reveals" class="art-card">
+    <span class="art-cat">Understanding Each Other</span>
+    <h2 class="art-title">What your communication style reveals</h2>
+    <div class="art-time"><span>7 min read</span><span class="art-arrow">→</span></div>
+  </a>
+  <a href="/practice/five-books-that-change-how-couples-think" class="art-card">
+    <span class="art-cat">Understanding Each Other</span>
+    <h2 class="art-title">Five books that change how couples think</h2>
+    <div class="art-time"><span>4 min read</span><span class="art-arrow">→</span></div>
+  </a>
+</div>
+</body>
+</html>

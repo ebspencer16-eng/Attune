@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Checkout, Attune</title>
+<!-- Stripe.js — must load before payment form -->
+<script src="https://js.stripe.com/v3/"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,700&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --cream:#FFFDFA;--warm:#FBF8F3;--stone:#E8DDD0;--clay:#C17F47;
+    --ink:#0E0B07;--muted:#8C7A68;--orange:#E8673A;--green:#10b981;
+    --hfont:'Playfair Display',Georgia,serif;--bfont:'DM Sans',sans-serif;
+  }
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  html,body{min-height:100vh;background:var(--warm);color:var(--ink);font-family:var(--bfont)}
+
+  /* NAV */
+  nav{position:sticky;top:0;z-index:100;height:58px;background:rgba(255,253,249,.97);backdrop-filter:blur(12px);border-bottom:1px solid var(--stone);display:flex;align-items:center;justify-content:space-between;padding:0 1.5rem}
+  .logo{display:flex;align-items:center;gap:.6rem;text-decoration:none}
+  .logo-text{font-family:var(--hfont);font-size:1.05rem;font-weight:700;color:var(--ink)}
+  nav a.back{font-size:.75rem;color:var(--muted);text-decoration:none;font-weight:500}
+  nav a.back:hover{color:var(--clay)}
+  .nav-secure{display:flex;align-items:center;gap:.35rem;font-size:.68rem;color:var(--muted);font-weight:500}
+
+  /* LAYOUT */
+  .co-wrap{max-width:1040px;margin:0 auto;padding:2.5rem 2rem 5rem;display:grid;grid-template-columns:1fr 360px;gap:3rem;align-items:start}
+  @media(max-width:780px){.co-wrap{grid-template-columns:1fr;padding:1.25rem 1rem 4rem}}
+
+  /* CARDS */
+  .co-card{background:white;border:1.5px solid var(--stone);border-radius:18px;overflow:hidden;margin-bottom:1.25rem}
+  .co-card-head{padding:1.1rem 1.5rem;border-bottom:1px solid var(--stone);display:flex;align-items:center;gap:.75rem}
+  .co-num{width:26px;height:26px;border-radius:50%;background:var(--ink);color:white;font-size:.72rem;font-weight:700;display:flex;align-items:center;justify-content:center;font-family:var(--bfont);flex-shrink:0}
+  .co-num.done{background:var(--green)}
+  .co-card-title{font-size:.88rem;font-weight:700;color:var(--ink)}
+  .co-body{padding:1.4rem 1.5rem}
+
+  /* PURPOSE TOGGLE */
+  .purpose-toggle{display:grid;grid-template-columns:1fr 1fr;gap:.75rem;margin-bottom:0}
+  .pt-btn{border:1.5px solid var(--stone);border-radius:14px;padding:1rem 1.1rem;cursor:pointer;background:var(--warm);transition:all .18s;text-align:left;font-family:var(--bfont)}
+  .pt-btn:hover{border-color:var(--clay)}
+  .pt-btn.active{border-color:var(--orange);background:#FFF8F5}
+  .pt-icon{font-size:1.4rem;margin-bottom:.5rem}
+  .pt-label{font-size:.88rem;font-weight:700;color:var(--ink);margin-bottom:.2rem}
+  .pt-sub{font-size:.72rem;color:var(--muted);line-height:1.45}
+  @media(max-width:480px){.purpose-toggle{grid-template-columns:1fr}.pt-icon{display:none}}
+
+  /* FORM */
+  .form-row{display:grid;grid-template-columns:1fr 1fr;gap:.85rem}
+  @media(max-width:480px){.form-row{grid-template-columns:1fr}}
+  .form-group{margin-bottom:1rem}
+  .form-group:last-child{margin-bottom:0}
+  .form-label{display:block;font-size:.63rem;letter-spacing:.09em;text-transform:uppercase;color:var(--ink);font-weight:700;margin-bottom:.4rem}
+  .form-input{width:100%;padding:.78rem 1rem;border:1.5px solid var(--stone);border-radius:10px;font-size:.88rem;font-family:var(--bfont);color:var(--ink);background:var(--cream);outline:none;transition:border-color .15s}
+  .form-input:focus{border-color:var(--clay)}
+  .form-hint{font-size:.67rem;color:var(--muted);margin-top:.35rem;line-height:1.5}
+  .form-divider{font-size:.6rem;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);font-weight:700;margin:1.25rem 0 1rem;display:flex;align-items:center;gap:.65rem}
+  .form-divider::before,.form-divider::after{content:'';flex:1;height:1px;background:var(--stone)}
+
+  /* STRIPE ELEMENT */
+  .stripe-field{width:100%;padding:.78rem 1rem;border:1.5px solid var(--stone);border-radius:10px;background:var(--cream);transition:border-color .15s}
+  .stripe-field.StripeElement--focus{border-color:var(--clay)}
+  .stripe-field.StripeElement--invalid{border-color:#ef4444}
+
+  /* SUBMIT BTN */
+  .btn-primary{background:linear-gradient(135deg,var(--orange),#d45a2e);color:white;border:none;padding:.9rem 2.1rem;border-radius:12px;font-size:.82rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;cursor:pointer;font-family:var(--bfont);text-decoration:none;display:inline-block;box-shadow:0 6px 24px rgba(232,103,58,.38);transition:transform .18s;width:100%}
+  .btn-primary:hover:not(:disabled){transform:translateY(-2px)}
+  .btn-primary:disabled{opacity:.55;cursor:not-allowed;transform:none}
+
+  /* INFO BOXES */
+  .info-box{background:linear-gradient(135deg,#F0F8FF,#F5F0FF);border:1.5px solid #D4E4FF;border-radius:12px;padding:.9rem 1.1rem;display:flex;gap:.7rem;align-items:flex-start;margin-bottom:1.1rem}
+  .info-box.gift{background:linear-gradient(135deg,#FFF8F5,#FFF0E8);border-color:#F0D4C0}
+  .info-box p{font-size:.74rem;color:var(--ink);line-height:1.65;margin:0}
+
+  /* ORDER SUMMARY SIDEBAR */
+  .summary-card{background:white;border:1.5px solid var(--stone);border-radius:18px;overflow:hidden;position:sticky;top:74px}
+  .summary-head{padding:1.1rem 1.5rem;border-bottom:1px solid var(--stone)}
+  .summary-head-title{font-size:.88rem;font-weight:700;color:var(--ink)}
+  .summary-body{padding:1.25rem 1.5rem}
+  .co-card-detail{padding:.6rem 0;border-bottom:1px solid var(--stone);display:flex;justify-content:space-between;align-items:baseline;gap:.5rem}
+  .co-card-detail:last-of-type{border-bottom:none}
+  .co-card-detail .name{font-size:.82rem;color:var(--ink);font-weight:500}
+  .co-card-detail .price{font-size:.82rem;color:var(--ink);font-weight:700;white-space:nowrap}
+  .co-card-detail .sub{font-size:.68rem;color:var(--muted);display:block;margin-top:.1rem}
+  .total-row{display:flex;justify-content:space-between;align-items:baseline;padding-top:1rem;margin-top:.5rem;border-top:1.5px solid var(--stone)}
+  .total-label{font-size:.85rem;font-weight:700;color:var(--ink)}
+  .total-price{font-size:1.15rem;font-weight:700;color:var(--orange);font-family:var(--hfont)}
+  .badge{display:inline-block;font-size:.6rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;background:#EEF2FF;color:#4555e8;border-radius:999px;padding:.2rem .55rem;margin-left:.35rem}
+  .tag-list{display:flex;flex-wrap:wrap;gap:.35rem;margin-top:.65rem}
+  .tag{font-size:.65rem;color:var(--muted);background:var(--warm);border:1px solid var(--stone);border-radius:999px;padding:.18rem .6rem}
+
+  /* SECURITY STRIP */
+  .security-strip{display:flex;align-items:center;justify-content:center;gap:.6rem;padding:.85rem;font-size:.68rem;color:var(--muted);font-weight:500}
+  .security-strip svg{flex-shrink:0}
+
+  /* STEPS COMPLETE */
+  .step-done{display:none;font-size:.7rem;color:var(--green);font-weight:600;margin-left:auto}
+
+  /* GIFT NOTE EXPAND */
+  .gift-note-wrap{display:none;margin-top:1rem}
+  .gift-note-wrap.visible{display:block}
+  textarea.form-input{resize:vertical;min-height:80px}
+
+  /* SUCCESS */
+  .co-success{text-align:center;padding:4rem 2rem;max-width:480px;margin:0 auto;display:none}
+  .co-success.visible{display:block}
+  .success-icon{width:72px;height:72px;border-radius:50%;background:linear-gradient(135deg,var(--orange),#9B5DE5);display:flex;align-items:center;justify-content:center;margin:0 auto 1.5rem;font-size:2rem}
+  .co-success h1{font-family:var(--hfont);font-size:2rem;margin-bottom:.75rem}
+  .co-success p{font-size:.9rem;color:var(--muted);line-height:1.75;margin-bottom:1.5rem}
+
+  /* ERROR */
+  .error-msg{font-size:.75rem;color:#ef4444;margin-top:.4rem;display:none}
+  .error-msg.visible{display:block}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="/offerings" class="back">← Back to packages</a>
+  <a href="/home" class="logo"><span class="logo-text">Attune</span></a>
+  <div class="nav-secure">
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+    Secure checkout
+  </div>
+</nav>
+
+<!-- SUCCESS STATE -->
+<div class="co-success" id="coSuccess">
+  <div class="success-icon">✓</div>
+  <h1>You're all set.</h1>
+  <p>Check your email for order confirmation and access instructions. You can start your exercises any time.</p>
+  <a id="startLink" href="/app" class="btn-primary" style="display:inline-block;width:auto;padding:.85rem 2rem">Start your exercises →</a>
+</div>
+
+<!-- MAIN LAYOUT -->
+<div class="co-wrap" id="coWrap">
+
+  <!-- LEFT COL: FORM STEPS -->
+  <div>
+
+    <!-- STEP 1: WHO IS THIS FOR? -->
+    <div class="co-card">
+      <div class="co-card-head">
+        <div class="co-num" id="num1">1</div>
+        <div class="co-card-title">Who is this for?</div>
+        <span class="step-done" id="done1">✓ Done</span>
+      </div>
+      <div class="co-body">
+        <div class="purpose-toggle">
+          <button class="pt-btn active" id="btn-self" onclick="setIntent('self')">
+            <div class="pt-icon">💑</div>
+            <div class="pt-label">For us</div>
+            <div class="pt-sub">You and your partner will both complete the exercises</div>
+          </button>
+          <button class="pt-btn" id="btn-gift" onclick="setIntent('gift')">
+            <div class="pt-icon">🎁</div>
+            <div class="pt-label">Giving as a gift</div>
+            <div class="pt-sub">A gift for a couple you know — they get full access</div>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 2: COUPLE NAMES -->
+    <div class="co-card">
+      <div class="co-card-head">
+        <div class="co-num" id="num2">2</div>
+        <div class="co-card-title" id="namesTitle">Your names</div>
+        <span class="step-done" id="done2">✓ Done</span>
+      </div>
+      <div class="co-body">
+        <p style="font-size:.78rem;color:var(--muted);margin-bottom:1.1rem;line-height:1.6" id="namesHint">
+          We'll use these throughout your results and in your personalized materials. First names are fine.
+        </p>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="p1name">Partner 1 — first name</label>
+            <input class="form-input" type="text" id="p1name" placeholder="e.g. Sarah" autocomplete="given-name" oninput="onNamesInput()">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="p2name">Partner 2 — first name</label>
+            <input class="form-input" type="text" id="p2name" placeholder="e.g. James" autocomplete="given-name" oninput="onNamesInput()">
+          </div>
+        </div>
+        <!-- Gift note (shown when intent=gift) -->
+        <div class="gift-note-wrap" id="giftNoteWrap">
+          <div class="form-divider">Gift message</div>
+          <div class="form-group">
+            <label class="form-label" for="giftNote">Personal note (optional)</label>
+            <textarea class="form-input" id="giftNote" placeholder="e.g. 'Thinking of you both as you start this chapter — can't wait to see what you discover about each other.'" rows="3"></textarea>
+            <div class="form-hint">This will be printed inside the QR card. Max 200 characters.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 3: CONTACT & PAYMENT -->
+    <div class="co-card">
+      <div class="co-card-head">
+        <div class="co-num" id="num3">3</div>
+        <div class="co-card-title">Contact &amp; payment</div>
+      </div>
+      <div class="co-body">
+        <!-- Email -->
+        <div class="form-group">
+          <label class="form-label" for="email">Email address</label>
+          <input class="form-input" type="email" id="email" placeholder="you@example.com" autocomplete="email">
+          <div class="form-hint">Order confirmation and access instructions will be sent here.</div>
+        </div>
+
+        <!-- Physical shipping (shown for physical packages) -->
+        <div id="shippingSection" style="display:none">
+          <div class="form-divider">Shipping address</div>
+          <div class="form-group">
+            <label class="form-label" for="shipName">Full name</label>
+            <input class="form-input" type="text" id="shipName" placeholder="Name on package" autocomplete="name">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="shipAddr">Street address</label>
+            <input class="form-input" type="text" id="shipAddr" placeholder="123 Main St" autocomplete="street-address">
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="shipCity">City</label>
+              <input class="form-input" type="text" id="shipCity" placeholder="City" autocomplete="address-level2">
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="shipState">State / ZIP</label>
+              <input class="form-input" type="text" id="shipState" placeholder="UT 84601" autocomplete="postal-code">
+            </div>
+          </div>
+        </div>
+
+        <div class="form-divider">Payment</div>
+        <div class="form-group">
+          <label class="form-label">Card number</label>
+          <div id="cardNumber" class="stripe-field"></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Expiration</label>
+            <div id="cardExpiry" class="stripe-field"></div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">CVC</label>
+            <div id="cardCvc" class="stripe-field"></div>
+          </div>
+        </div>
+        <div class="error-msg" id="payError"></div>
+        <div style="margin-top:1.25rem">
+          <button class="btn-primary" id="submitBtn" onclick="handleSubmit(event)" disabled>
+            <span id="btnLabel">Complete order</span>
+          </button>
+        </div>
+        <div class="security-strip">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          Secured by Stripe · 256-bit TLS encryption
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- RIGHT COL: ORDER SUMMARY -->
+  <div>
+    <div class="summary-card">
+      <div class="summary-head">
+        <div class="summary-head-title">Order summary</div>
+      </div>
+      <div class="summary-body">
+
+        <div id="pkgSummary">
+          <!-- Populated by JS -->
+        </div>
+
+        <div class="total-row">
+          <div class="total-label">Total</div>
+          <div class="total-price" id="totalPrice">—</div>
+        </div>
+
+        <div class="tag-list" id="tagList"></div>
+
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ── Package definitions ──────────────────────────────────────────────────────
+const PACKAGES = {
+  core: {
+    name: 'The Attune Assessment',
+    badge: 'Foundation',
+    price: 89,
+    priceLabel: '$89',
+    format: 'digital',
+    tags: ['Digital · instant access', 'Communication assessment', 'Expectations assessment', 'Couple type + map'],
+  },
+  newlywed: {
+    name: 'Starting Out Collection',
+    badge: 'Starting Out',
+    price: 154,
+    priceLabel: 'from $109',
+    format: 'physical',
+    tags: ['Digital + physical gift box', 'Communication & expectations', 'Starting Out Checklist', 'Personalized QR card'],
+  },
+  anniversary: {
+    name: 'Anniversary Collection',
+    badge: 'Anniversary',
+    price: 174,
+    priceLabel: 'from $129',
+    format: 'physical',
+    tags: ['Digital + physical gift box', 'Communication & expectations', 'Relationship Reflection', 'Personalized QR card'],
+  },
+  premium: {
+    name: 'Attune Premium',
+    badge: 'Most Complete',
+    price: 350,
+    priceLabel: '$350',
+    format: 'physical',
+    tags: ['Everything included', 'LMFT session', 'Personalized workbook', 'Premium gift box'],
+  },
+};
+
+const ADDON_LMFT = { label: 'LMFT Session', price: 150 };
+
+const ADDON_WORKBOOK = {
+  digital: { label: 'Personalized Workbook (digital)', price: 19 },
+  print:   { label: 'Personalized Workbook (printed)', price: 39 },
+};
+
+// ── State ────────────────────────────────────────────────────────────────────
+let intent = 'self';   // 'self' | 'gift'
+let pkg = null;
+let addonWorkbook = null;
+
+// ── Init from URL params ─────────────────────────────────────────────────────
+(function init() {
+  const params = new URLSearchParams(location.search);
+  const pkgId  = params.get('pkg') || 'core';
+  addonWorkbook = params.get('addon_workbook') || null;
+  addonLmft = params.get('addon_lmft') === '1';
+  pkg = PACKAGES[pkgId] || PACKAGES.core;
+
+  // Intent from params (gift link from offerings)
+  const giftParam = params.get('gift');
+  if (giftParam === '1' || giftParam === 'true') {
+    setIntent('gift');
+  }
+
+  renderSummary();
+  if (pkg.format === 'physical') {
+    document.getElementById('shippingSection').style.display = 'block';
+  }
+})();
+
+// ── Render order summary ─────────────────────────────────────────────────────
+function renderSummary() {
+  const el = document.getElementById('pkgSummary');
+  const totalEl = document.getElementById('totalPrice');
+  const tagEl   = document.getElementById('tagList');
+
+  let total = pkg.price;
+  let rows = `
+    <div class="co-card-detail">
+      <div>
+        <div class="name">${pkg.name} <span class="badge">${pkg.badge}</span></div>
+        <span class="sub">${pkg.format === 'physical' ? 'Digital + physical gift box' : 'Digital · instant access'}</span>
+      </div>
+      <div class="price">${pkg.priceLabel}</div>
+    </div>`;
+
+  if (addonWorkbook && ADDON_WORKBOOK[addonWorkbook]) {
+    const wb = ADDON_WORKBOOK[addonWorkbook];
+    total += wb.price;
+    rows += `
+      <div class="co-card-detail">
+        <div><div class="name">${wb.label}</div></div>
+        <div class="price">+$${wb.price}</div>
+      </div>`;
+  }
+
+  if (addonLmft) {
+    total += ADDON_LMFT.price;
+    rows += `
+      <div class="co-card-detail">
+        <div><div class="name">${ADDON_LMFT.label}</div></div>
+        <div class="price">+$${ADDON_LMFT.price}</div>
+      </div>`;
+  }
+
+  el.innerHTML = rows;
+  totalEl.textContent = '$' + total;
+  tagEl.innerHTML = pkg.tags.map(t => `<span class="tag">${t}</span>`).join('');
+  document.getElementById('btnLabel').textContent = `Complete order · $${total}`;
+}
+
+// ── Intent toggle ────────────────────────────────────────────────────────────
+function setIntent(val) {
+  intent = val;
+  document.getElementById('btn-self').classList.toggle('active', val === 'self');
+  document.getElementById('btn-gift').classList.toggle('active', val === 'gift');
+  document.getElementById('namesTitle').textContent = val === 'gift' ? 'Their names' : 'Your names';
+  document.getElementById('namesHint').textContent = val === 'gift'
+    ? 'Enter the names of the couple you\'re gifting this to. First names are fine — we\'ll use them throughout the experience.'
+    : 'We\'ll use these throughout your results and in your personalized materials. First names are fine.';
+  document.getElementById('giftNoteWrap').classList.toggle('visible', val === 'gift');
+  validateForm();
+}
+
+// ── Name input validation ────────────────────────────────────────────────────
+function onNamesInput() {
+  validateForm();
+}
+
+function validateForm() {
+  const p1 = document.getElementById('p1name').value.trim();
+  const p2 = document.getElementById('p2name').value.trim();
+  const email = document.getElementById('email').value.trim();
+  const ready = p1.length >= 2 && p2.length >= 2 && email.includes('@') && cardComplete;
+  document.getElementById('submitBtn').disabled = !ready;
+}
+
+// ── Stripe setup ─────────────────────────────────────────────────────────────
+let cardComplete = false;
+let stripe, cardNumberElement, cardExpiryElement, cardCvcElement;
+
+(async function setupStripe() {
+  let key = 'pk_test_placeholder';
+  try {
+    const cfgRes = await fetch('/api/stripe-config');
+    if (cfgRes.ok) { const cfg = await cfgRes.json(); if (cfg.publishableKey) key = cfg.publishableKey; }
+  } catch(e) { console.warn('Could not fetch Stripe config:', e); }
+  try {
+    stripe = Stripe(key);
+    const elements = stripe.elements({
+      fonts: [{ cssSrc: 'https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500&display=swap' }]
+    });
+    const style = {
+      base: { fontFamily: "'DM Sans', sans-serif", fontSize: '14px', color: '#0E0B07',
+              '::placeholder': { color: '#C0B0A0' } },
+      invalid: { color: '#ef4444' }
+    };
+    cardNumberElement = elements.create('cardNumber', { style });
+    cardExpiryElement = elements.create('cardExpiry', { style });
+    cardCvcElement    = elements.create('cardCvc',    { style });
+    cardNumberElement.mount('#cardNumber');
+    cardExpiryElement.mount('#cardExpiry');
+    cardCvcElement.mount('#cardCvc');
+
+    [cardNumberElement, cardExpiryElement, cardCvcElement].forEach(el => {
+      el.on('change', e => {
+        cardComplete = !e.error && e.complete;
+        validateForm();
+        const errEl = document.getElementById('payError');
+        if (e.error) { errEl.textContent = e.error.message; errEl.classList.add('visible'); }
+        else { errEl.textContent = ''; errEl.classList.remove('visible'); }
+      });
+    });
+  } catch(e) {
+    console.warn('Stripe not initialised — key missing or invalid:', e);
+  }
+})();
+
+document.getElementById('email').addEventListener('input', validateForm);
+
+// ── Submit ────────────────────────────────────────────────────────────────────
+async function handleSubmit(e) {
+  e.preventDefault();
+  const btn = document.getElementById('submitBtn');
+  btn.disabled = true;
+  btn.textContent = 'Processing…';
+
+  const p1 = document.getElementById('p1name').value.trim();
+  const p2 = document.getElementById('p2name').value.trim();
+  const email = document.getElementById('email').value.trim();
+  const giftNote = document.getElementById('giftNote').value.trim();
+
+  try {
+    // 1. Create payment intent on server
+    const res = await fetch('/api/create-payment-intent', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        pkg: Object.keys(PACKAGES).find(k => PACKAGES[k] === pkg) || 'core',
+        pkgKey: Object.keys(PACKAGES).find(k => PACKAGES[k] === pkg) || 'core',
+        addonWorkbook,
+        addonLmft,
+        isGift: intent === 'gift',
+        isPhysical: pkg.format === 'physical',
+        partner1Name: p1,
+        partner2Name: p2,
+        email,
+        buyerEmail: email,
+        buyerName: p1,
+        giftNote: giftNote || null,
+        shipping: pkg.format === 'physical' ? {
+          name:    document.getElementById('shipName').value.trim(),
+          address: document.getElementById('shipAddr').value.trim(),
+          city:    document.getElementById('shipCity').value.trim(),
+          state:   document.getElementById('shipState').value.trim(),
+        } : null,
+      }),
+    });
+
+    const { clientSecret, error: serverErr } = await res.json();
+    if (serverErr) throw new Error(serverErr);
+
+    // 2. Confirm card payment
+    const { error: stripeErr, paymentIntent } = await stripe.confirmCardPayment(clientSecret, {
+      payment_method: { card: cardNumberElement, billing_details: { email } }
+    });
+    if (stripeErr) throw new Error(stripeErr.message);
+
+    // 3. Success — build portal link with pkg, partner names, and LMFT flag
+    const pkgId  = Object.keys(PACKAGES).find(k => PACKAGES[k] === pkg) || 'core';
+    // Build /app link with signup flag + context (pkg, names, add-ons)
+    const params = new URLSearchParams({
+      signup: '1',
+      pkg:    pkgId,
+      p1:     document.getElementById('p1name').value.trim(),
+      p2:     document.getElementById('p2name').value.trim(),
+    });
+    if (addonLmft)     params.set('lmft', '1');
+    if (addonWorkbook) params.set('addon_workbook', addonWorkbook);
+    if (intent === 'gift') params.set('gift', '1');
+    document.getElementById('startLink').href = '/app?' + params.toString();
+
+    // Fire the order email (partner invite, get-started instructions)
+    fetch('/api/send-order-email', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        pkgKey:        pkgId,
+        pkgName:       pkg.name,
+        isGift:        intent === 'gift',
+        isPhysical:    pkg.format === 'physical',
+        buyerName:     document.getElementById('p1name').value.trim(),
+        buyerEmail:    email,
+        partnerName:   document.getElementById('p2name').value.trim(),
+        orderNum:      'TBD-' + Date.now(),
+        total:         getPkgTotal(),
+        addonWorkbook,
+        addonLmft,
+        giftNote:      document.getElementById('giftNote').value.trim() || null,
+      }),
+    }).catch(e => console.warn('send-order-email failed (non-blocking):', e));
+
+    // Also save order summary to localStorage so portal knows pkg without URL
+    try {
+      const pkgId2 = Object.keys(PACKAGES).find(k => PACKAGES[k] === pkg) || 'core';
+      localStorage.setItem('attune_order', JSON.stringify({
+        pkgKey:        pkgId2,
+        addonLmft:     addonLmft,
+        addonWorkbook: addonWorkbook,
+        partner1Name:  document.getElementById('p1name').value.trim(),
+        partner2Name:  document.getElementById('p2name').value.trim(),
+        isPhysical:    pkg.format === 'physical',
+        isGift:        intent === 'gift',
+        ts:            Date.now(),
+      }));
+    } catch(e) {}
+
+    document.getElementById('coWrap').style.display = 'none';
+    document.getElementById('coSuccess').classList.add('visible');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+
+  } catch(err) {
+    const errEl = document.getElementById('payError');
+    errEl.textContent = err.message || 'Something went wrong. Please try again.';
+    errEl.classList.add('visible');
+    btn.disabled = false;
+    document.getElementById('btnLabel').textContent = `Complete order · $${getPkgTotal()}`;
+  }
+}
+
+function getPkgTotal() {
+  let t = pkg.price;
+  if (addonWorkbook && ADDON_WORKBOOK[addonWorkbook]) t += ADDON_WORKBOOK[addonWorkbook].price;
+  if (addonLmft) t += ADDON_LMFT.price;
+  return t;
+}
+</script>
+</body>
+</html>

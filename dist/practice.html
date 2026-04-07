@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+<link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#0E0B07">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>In Practice, Attune</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,800;1,700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  html,body{overflow-x:hidden;max-width:100%}
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  :root{--cream:#FFFDF9;--warm:#FBF8F3;--stone:#E8DDD0;--clay:#C17F47;--ink:#0E0B07;--text:#1E1610;--muted:#8C7A68;--orange:#E8673A;--indigo:#1B5FE8;--green:#10b981;--hfont:'Playfair Display',Georgia,serif;--bfont:'DM Sans',sans-serif}
+  html{scroll-behavior:smooth}
+  body{background:var(--cream);color:var(--text);font-family:var(--bfont);-webkit-font-smoothing:antialiased}
+
+  /* NAV */
+  nav{position:fixed;top:0;left:0;right:0;z-index:100;height:58px;background:rgba(255,253,249,.94);backdrop-filter:blur(16px);border-bottom:1px solid var(--stone);display:flex;align-items:center;padding:0 2.5rem;justify-content:space-between}
+  .logo{display:flex;align-items:center;gap:.65rem;text-decoration:none}
+  .logo-text{font-family:var(--hfont);font-size:1.15rem;font-weight:700;color:var(--ink)}
+  .nav-center{display:flex;gap:2.5rem;list-style:none;position:absolute;left:50%;transform:translateX(-50%);align-items:center}
+  .nav-center li{display:flex;align-items:center}
+  .nav-center a{text-decoration:none;color:var(--muted);font-size:.82rem;font-weight:500;transition:color .15s}
+  .nav-center a:hover,.nav-center a.active{color:var(--ink);font-weight:600}
+  .nav-dropdown{position:relative}
+  .nav-dropdown-toggle{text-decoration:none;color:var(--muted);font-size:.82rem;font-weight:500;transition:color .15s;cursor:pointer;display:flex;align-items:center;gap:.28rem;background:none;border:none;padding:0;font-family:var(--bfont)}
+  .nav-dropdown-toggle:hover,.nav-dropdown-toggle.active{color:var(--ink)}
+  .nav-dropdown-toggle svg{transition:transform .2s}
+  .nav-dropdown:hover .nav-dropdown-toggle svg{transform:rotate(180deg)}
+  .nav-dropdown-menu{position:absolute;top:100%;left:50%;transform:translateX(-50%);background:rgba(255,253,249,.98);backdrop-filter:blur(16px);border:1.5px solid var(--stone);border-radius:14px;padding:.85rem .6rem .6rem;min-width:190px;opacity:0;visibility:hidden;pointer-events:none;transition:opacity .15s,visibility .15s;box-shadow:0 12px 40px rgba(14,11,7,.12);z-index:200;margin-top:.4rem}
+  .nav-dropdown-menu::before{content:'';position:absolute;top:-.5rem;left:0;right:0;height:.5rem;background:transparent}
+  .nav-dropdown:hover .nav-dropdown-menu{opacity:1;visibility:visible;pointer-events:auto}
+  .nav-dropdown-menu::before{content:'';position:absolute;top:-16px;left:-10px;right:-10px;height:16px;background:transparent}
+  .nav-dropdown-menu a{display:block;padding:.55rem .8rem;font-size:.78rem;color:var(--muted);text-decoration:none;border-radius:8px;transition:all .15s;font-weight:500}
+  .nav-dropdown-menu a:hover{background:var(--warm);color:var(--ink)}
+  .nav-dropdown-menu a.active{color:var(--ink);font-weight:600}
+  .nav-dropdown-menu .dd-divider{height:1px;background:var(--stone);margin:.35rem .5rem}
+  .nav-right{display:flex;align-items:center;gap:1.25rem}
+  .nav-signin{font-size:.8rem;font-weight:500;color:var(--muted);text-decoration:none;transition:color .15s}
+  .nav-signin:hover{color:var(--ink)}
+  .btn-nav{background:var(--ink);color:white;padding:.5rem 1.2rem;border-radius:10px;font-size:.78rem;font-weight:600;text-decoration:none;display:inline-block;transition:opacity .15s}
+  .btn-nav:hover{opacity:.82}
+  .hamburger{display:none;flex-direction:column;gap:5px;cursor:pointer;background:none;border:none;padding:.3rem}
+  .hamburger span{width:22px;height:2px;background:var(--ink);border-radius:2px}
+  .mobile-menu{display:none;position:fixed;top:58px;left:0;right:0;background:rgba(255,253,249,.98);backdrop-filter:blur(16px);border-bottom:1px solid var(--stone);padding:1.25rem 2rem 1.5rem;z-index:99;flex-direction:column;gap:.2rem}
+  .mobile-menu.open{display:flex}
+  .mobile-menu a{font-size:.9rem;font-weight:500;color:var(--muted);text-decoration:none;padding:.6rem 0;border-bottom:1px solid var(--stone);transition:color .15s}
+  .mobile-menu a:last-child{border-bottom:none}
+  .mobile-menu .mm-cta{color:var(--orange);font-weight:700}
+  .mm-section{display:flex;flex-direction:column;border-bottom:1px solid var(--stone);padding-bottom:.25rem;margin-bottom:.25rem}
+  .mm-label{font-size:.58rem;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);font-weight:700;padding:.55rem 0 .2rem .75rem}
+  .mm-sub{padding-left:.75rem!important;font-size:.85rem!important;border-bottom:none!important}
+
+  /* PAGE */
+  .si{max-width:1100px;margin:0 auto;padding:0 2.5rem}
+
+  /* PAGE HEADER */
+  
+  .s-eye{font-size:.6rem;letter-spacing:.3em;text-transform:uppercase;color:var(--clay);font-weight:700;margin-bottom:.85rem;display:flex;align-items:center;gap:.65rem}
+  .s-eye::before{content:'';width:28px;height:2.5px;border-radius:999px;background:linear-gradient(90deg,var(--orange),var(--indigo));flex-shrink:0}
+  .in-practice-eyebrow{display:flex;align-items:center;gap:.75rem;margin-bottom:.85rem}
+  .ip-mark{width:8px;height:8px;border-radius:50%;background:var(--orange)}
+  .ip-label{font-size:.62rem;letter-spacing:.28em;text-transform:uppercase;color:var(--clay);font-weight:700}
+
+  /* CATEGORY PILLS */
+  .eyebrow{font-size:.6rem;letter-spacing:.3em;text-transform:uppercase;color:var(--clay);font-weight:700;margin-bottom:.9rem;display:flex;align-items:center;justify-content:center;gap:.65rem}
+  .eyebrow::before{content:'';width:28px;height:2.5px;border-radius:999px;background:linear-gradient(90deg,var(--orange),var(--indigo));flex-shrink:0}.eyebrow::after{content:'';width:28px;height:2.5px;border-radius:999px;background:linear-gradient(90deg,var(--orange),var(--indigo));flex-shrink:0}
+  .page-title{font-family:var(--hfont);font-size:clamp(2.4rem,4.5vw,3.4rem);font-weight:700;line-height:1.06;color:var(--ink);margin-bottom:1.25rem;letter-spacing:-.02em}
+  .page-title em{font-style:italic;color:var(--orange)}
+  .page-sub{font-size:1rem;color:var(--muted);line-height:1.78;font-weight:300}
+  .category-bar{border-top:1px solid var(--stone);border-bottom:1px solid var(--stone);padding:.85rem 0;margin-bottom:2.5rem;overflow-x:auto}
+  .category-bar-inner{display:flex;gap:.5rem;white-space:nowrap;justify-content:center;max-width:1100px;margin:0 auto;padding:0 2.5rem;flex-wrap:wrap}
+  .cat-pill{padding:.45rem 1rem;border-radius:999px;font-size:.72rem;font-weight:500;border:1.5px solid var(--stone);color:var(--muted);cursor:pointer;background:transparent;transition:all .15s;font-family:var(--bfont);-webkit-tap-highlight-color:transparent;text-decoration:none;display:inline-block}
+  .cat-pill:hover{border-color:var(--clay);color:var(--ink)}
+  .cat-pill.active{background:var(--ink);border-color:var(--ink);color:white;font-weight:600}
+
+  /* FEATURED ARTICLE HERO */
+  .featured-wrap{margin-bottom:3rem}
+  .featured-article{display:grid;grid-template-columns:1fr 1fr;border-radius:22px;overflow:hidden;background:linear-gradient(145deg,#1e1a30,#2e2848,#1e1a30);min-height:300px;max-height:320px;text-decoration:none;transition:transform .2s;position:relative}
+  .featured-article:hover{transform:translateY(-3px)}
+  .featured-visual{display:flex;align-items:center;justify-content:center;padding:3rem;position:relative;overflow:hidden}
+  .featured-visual-inner{position:relative;z-index:2}
+  .featured-bg-text{position:absolute;font-family:var(--hfont);font-size:14rem;font-weight:700;color:rgba(255,255,255,.03);line-height:1;top:50%;left:50%;transform:translate(-50%,-50%);white-space:nowrap;pointer-events:none}
+  .featured-number{font-family:var(--hfont);font-size:7rem;font-weight:700;color:rgba(232,103,58,.15);line-height:1;position:absolute;bottom:2rem;right:2rem}
+  /* Icon illustration for featured */
+  .featured-icon{width:120px;height:120px;border-radius:24px;background:rgba(232,103,58,.12);border:1.5px solid rgba(232,103,58,.25);display:flex;align-items:center;justify-content:center;position:relative}
+  .featured-icon::after{content:'';position:absolute;inset:-8px;border-radius:32px;border:1px solid rgba(232,103,58,.1)}
+  .featured-content{padding:2rem 2.25rem;display:flex;flex-direction:column;justify-content:center}
+  .featured-tag-row{display:flex;align-items:center;gap:.65rem;margin-bottom:1rem}
+  .featured-tag{font-size:.58rem;letter-spacing:.18em;text-transform:uppercase;font-weight:700;padding:.28rem .75rem;border-radius:999px;background:rgba(232,103,58,.18);color:#E8673A;border:1px solid rgba(232,103,58,.35)}
+  .featured-label{font-size:.58rem;color:rgba(255,255,255,.3);letter-spacing:.12em;text-transform:uppercase;font-weight:500}
+  .featured-title{font-family:var(--hfont);font-size:clamp(1.5rem,2.5vw,2rem);font-weight:700;color:white;line-height:1.05;letter-spacing:-.02em;margin-bottom:.65rem}
+  .featured-title em{font-style:italic;color:rgba(232,103,58,.9)}
+  .featured-excerpt{font-size:.82rem;color:rgba(255,255,255,.55);line-height:1.75;font-weight:300;margin-bottom:1.25rem;max-width:400px}
+  .featured-meta{display:flex;align-items:center;gap:1rem}
+  .featured-read-time{font-size:.72rem;color:rgba(255,255,255,.3);font-weight:500}
+  .featured-cta{font-size:.75rem;font-weight:700;color:var(--orange);letter-spacing:.06em;display:flex;align-items:center;gap:.4rem}
+  .featured-cta::after{content:'→';transition:transform .2s}
+  .featured-article:hover .featured-cta::after{transform:translateX(4px)}
+
+  /* COLLECTIONS */
+  .collections-section{margin-bottom:4.5rem}
+  .section-eyebrow{display:flex;align-items:center;gap:.65rem;margin-bottom:.65rem}
+  .section-eyebrow::before{content:'';width:28px;height:2.5px;border-radius:999px;background:linear-gradient(90deg,var(--orange),var(--indigo));flex-shrink:0}
+  .section-eye-label{font-size:.6rem;letter-spacing:.26em;text-transform:uppercase;color:var(--clay);font-weight:700}
+  .section-title{font-family:var(--hfont);font-size:clamp(1.5rem,2.5vw,2rem);font-weight:700;color:var(--ink);margin-bottom:2rem;letter-spacing:-.015em}
+  .collections-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:1.25rem}
+  .collection-card{background:white;border:1.5px solid var(--stone);border-top:3px solid var(--stone);border-radius:18px;padding:1.75rem;transition:border-color .2s,box-shadow .2s}
+  .collection-card:hover{box-shadow:0 8px 28px rgba(14,11,7,.09);transform:translateY(-1px)}
+  .collection-card:hover{border-color:var(--clay);box-shadow:0 4px 20px rgba(14,11,7,.06)}
+  .coll-header{display:flex;align-items:flex-start;gap:1rem;margin-bottom:1.25rem}
+  .coll-icon{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:1.1rem}
+  .coll-title{font-family:var(--hfont);font-size:1.1rem;font-weight:700;color:var(--ink);line-height:1.2;margin-bottom:.2rem}
+  .coll-desc{font-size:.78rem;color:var(--muted);line-height:1.55}
+  .coll-articles{display:flex;flex-direction:column;gap:.4rem;border-top:1px solid var(--stone);padding-top:1rem}
+  .coll-link{font-size:.8rem;color:var(--text);text-decoration:none;padding:.3rem 0;display:flex;align-items:center;gap:.5rem;transition:color .15s;border-bottom:1px solid transparent}
+  .coll-link:hover{color:var(--orange)}
+  .coll-link::before{content:'';width:4px;height:4px;border-radius:50%;background:var(--stone);flex-shrink:0;transition:background .15s}
+  .coll-link:hover::before{background:var(--orange)}
+  .coll-link span{font-size:.65rem;color:var(--muted);margin-left:auto;white-space:nowrap}
+
+  /* RECENT POSTS */
+  .posts-section{margin-bottom:5rem}
+  .posts-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.25rem}
+  .post-card{background:white;border:1.5px solid var(--stone);border-radius:16px;overflow:hidden;text-decoration:none;display:flex;flex-direction:column;transition:transform .18s,box-shadow .18s,border-color .18s;box-shadow:0 1px 4px rgba(14,11,7,.06)}
+  .post-card:hover{transform:translateY(-3px);box-shadow:0 8px 32px rgba(14,11,7,.07);border-color:rgba(193,127,71,.4)}
+  .post-card-accent{height:3px}
+  .post-card-body{padding:1.25rem 1.4rem 1.5rem;flex:1;display:flex;flex-direction:column}
+  .post-tag{font-size:.58rem;font-weight:700;letter-spacing:.16em;text-transform:uppercase;margin-bottom:.65rem}
+  .post-title{font-family:var(--hfont);font-size:1.05rem;font-weight:700;color:var(--ink);line-height:1.25;margin-bottom:.6rem;letter-spacing:-.01em}
+  .post-excerpt{font-size:.8rem;color:var(--muted);line-height:1.65;font-weight:300;flex:1;margin-bottom:1rem}
+  .post-meta{display:flex;align-items:center;justify-content:space-between}
+  .post-read-time{font-size:.68rem;color:var(--muted);font-weight:500}
+  .post-read-link{font-size:.68rem;font-weight:700;color:var(--clay);letter-spacing:.04em}
+
+  /* EMAIL SIGNUP */
+  .signup-band{background:var(--warm);border-top:1px solid var(--stone);border-bottom:1px solid var(--stone);padding:3.5rem 2.5rem;margin-bottom:0}
+  .signup-inner{max-width:520px;margin:0 auto;text-align:center}
+  .signup-title{font-family:var(--hfont);font-size:1.6rem;font-weight:700;color:var(--ink);margin-bottom:.65rem;letter-spacing:-.015em}
+  .signup-sub{font-size:.88rem;color:var(--muted);line-height:1.75;font-weight:300;margin-bottom:1.5rem}
+  .signup-form{display:flex;gap:.65rem;max-width:420px;margin:0 auto}
+  .signup-input{flex:1;padding:.7rem 1rem;border:1.5px solid var(--stone);border-radius:10px;font-size:.82rem;font-family:var(--bfont);background:white;color:var(--ink);outline:none;transition:border-color .15s}
+  .signup-input:focus{border-color:var(--clay)}
+  .signup-btn{background:var(--ink);color:white;border:none;padding:.7rem 1.4rem;border-radius:10px;font-size:.78rem;font-weight:700;cursor:pointer;white-space:nowrap;font-family:var(--bfont);transition:opacity .15s}
+  .signup-btn:hover{opacity:.82}
+  .signup-note{font-size:.7rem;color:var(--muted);margin-top:.75rem}
+
+  /* FOOTER */
+  .site-footer{background:var(--ink);padding:3.5rem 2.5rem 2rem}
+  .sf-inner{max-width:1100px;margin:0 auto;display:grid;grid-template-columns:1.4fr 1.8fr;gap:3rem;margin-bottom:2.5rem}
+  .sf-brand .logo-text{color:white}
+  .sf-tagline{font-size:.82rem;color:rgba(255,255,255,.35);line-height:1.7;margin-top:.85rem}
+  .sf-links{display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem}
+  .sf-col{display:flex;flex-direction:column;gap:.6rem}
+  .sf-col-title{font-size:.62rem;letter-spacing:.2em;text-transform:uppercase;color:rgba(255,255,255,.3);font-weight:700;margin-bottom:.25rem}
+  .sf-col a{font-size:.8rem;color:rgba(255,255,255,.45);text-decoration:none;transition:color .15s}
+  .sf-col a:hover{color:rgba(255,255,255,.85)}
+  .sf-bottom{max-width:1100px;margin:0 auto;padding-top:2rem;border-top:1px solid rgba(255,255,255,.08);display:flex;justify-content:space-between;align-items:center;gap:1rem;flex-wrap:wrap}
+  .sf-copy,.sf-email{font-size:.75rem;color:rgba(255,255,255,.25)}
+
+  @keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+  .fu1{animation:fadeUp .6s ease both}
+  .fu2{animation:fadeUp .6s .1s ease both}
+  .fu3{animation:fadeUp .6s .2s ease both}
+
+  @media(max-width:900px){
+    .featured-article{grid-template-columns:1fr}
+    .featured-visual{display:none}
+    .collections-grid{grid-template-columns:1fr}
+    .posts-grid{grid-template-columns:repeat(2,1fr)}
+  }
+  @media(max-width:640px){
+    .posts-grid{grid-template-columns:1fr}
+    .nav-center,.nav-right .btn-nav,.nav-signin{display:none}
+    .hamburger{display:flex}
+    nav{padding:0 1.25rem}
+    section{padding-left:1.25rem!important;padding-right:1.25rem!important}
+    .si{padding-left:1.25rem!important;padding-right:1.25rem!important}
+    .sf-inner{grid-template-columns:1fr}
+    .sf-links{grid-template-columns:repeat(2,1fr)}
+    .signup-form{flex-direction:column}
+    .page-header{padding:5rem 1.5rem 2.5rem;text-align:center}
+  }
+
+  @media(max-width:640px){
+    [style*="grid-template-columns:1fr 1fr"]{grid-template-columns:1fr!important}
+    [style*="grid-template-columns: 1fr 1fr"]{grid-template-columns:1fr!important}
+    .collections-grid{grid-template-columns:1fr!important}
+    .page-header{text-align:center!important}
+    .category-bar-inner{padding:0 1rem!important}
+    }
+
+  @media(max-width:640px){
+    .page-header{padding:calc(58px + 1.75rem) 1.25rem 2rem!important;text-align:center}
+    .page-title{font-size:clamp(2rem,8vw,3rem)!important}
+    .featured-article{grid-template-columns:1fr!important}
+    .featured-visual{display:none}
+    .featured-content{padding:2rem 1.75rem 1.75rem!important}
+    .featured-title{font-size:1.5rem!important}
+    .featured-excerpt{margin-bottom:1.25rem!important}
+    .collections-grid{grid-template-columns:1fr!important}
+    .posts-grid{grid-template-columns:1fr!important}
+    .coll-card{padding:1rem!important}
+    .post-card{padding:.85rem!important}
+    .category-bar-inner{gap:.4rem;padding:0 1rem}
+    .cat-pill{font-size:.65rem;padding:.28rem .65rem}
+    .si{padding-left:1.25rem!important;padding-right:1.25rem!important}
+  }
+
+  @media(max-width:640px){
+    .page-header{padding:calc(58px + 1.25rem) 1.25rem 1.5rem!important}
+    .featured-wrap{margin-bottom:2rem!important}
+    .featured-visual{display:none!important}
+    .featured-content{padding:1.5rem!important}
+    .featured-post{grid-template-columns:1fr!important}
+    .category-bar{margin-bottom:2rem!important;padding:.65rem 0!important}
+    .collection-grid{grid-template-columns:1fr!important;gap:1rem!important}
+    .collection-card{padding:1.25rem!important}
+    .posts-section{padding:2rem 1.25rem 2.5rem!important;margin:0 -1.25rem!important}
+    .posts-grid{grid-template-columns:1fr!important;gap:.85rem!important}
+    .cta-section,.cta-inner{padding:2.5rem 1.25rem!important}
+  }
+  .page-header{background:linear-gradient(150deg,#1c1940 0%,#282560 60%,#1e3a6e 100%);padding:calc(58px + 3.5rem) clamp(1.25rem,5vw,2.5rem) 3rem;position:relative;overflow:hidden;max-width:none;margin:0;width:100%;box-sizing:border-box}
+  .page-header::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,#E8673A,#9B5DE5,#1B5FE8);z-index:1}
+  .page-header-glow{position:absolute;inset:0;background:radial-gradient(ellipse 60% 40% at 50% 100%,rgba(232,103,58,.12),transparent);pointer-events:none}
+  .page-header-inner{max-width:700px;margin-left:auto;margin-right:auto;position:relative;z-index:1;text-align:center}
+  .page-header .page-title{color:white;text-align:center}
+  .page-header .page-title em{color:var(--orange);font-style:italic}
+  .page-header .page-sub{color:rgba(255,255,255,.65);text-align:center;margin-top:.75rem}
+  .page-header .eyebrow{color:rgba(232,103,58,.85)}
+  .page-header .eyebrow::before{background:linear-gradient(90deg,rgba(232,103,58,.7),rgba(155,93,229,.5))}
+  .hero-actions{display:flex;align-items:center;justify-content:center;gap:1.5rem;margin-top:1.75rem;flex-wrap:wrap}
+  .gift-link{font-size:.88rem;color:rgba(232,103,58,.8);font-family:var(--bfont);font-weight:500;text-decoration:none;transition:color .15s}
+  .gift-link:hover{color:var(--orange)}
+  </style>
+</head>
+<body>
+
+<nav>
+  <a href="/home" class="logo">
+    <svg width="46" height="33" viewBox="0 0 103 76" fill="none"><defs><linearGradient id="lg1" x1="0" y1="0" x2="103" y2="76" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#E8673A"/><stop offset="100%" stop-color="#1B5FE8"/></linearGradient></defs><path d="M14,4 L44,4 A9,9 0 0,1 53,13 L53,42 A9,9 0 0,1 44,51 L20,51 L6,61 L11,51 A6,6 0 0,1 5,45 L5,13 A9,9 0 0,1 14,4 Z" fill="url(#lg1)"/><path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill="white" opacity="0.93" transform="translate(13.16,11.3) scale(0.72)"/><path d="M89,14 L59,14 A9,9 0 0,0 50,23 L50,52 A9,9 0 0,0 59,61 L83,61 L97,71 L92,61 A6,6 0 0,0 98,55 L98,23 A9,9 0 0,0 89,14 Z" fill="none" stroke="url(#lg1)" stroke-width="2.2" stroke-linejoin="round"/><path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill="url(#lg1)" transform="translate(58.16,21.3) scale(0.72)"/></svg>
+    <span class="logo-text">Attune</span>
+  </a>
+  <ul class="nav-center">
+    <li><a href="/home">Home</a></li>
+    <li class="nav-dropdown">
+      <button class="nav-dropdown-toggle active">Learn <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg></button>
+      <div class="nav-dropdown-menu">
+        <a href="/purpose">Our Purpose</a>
+        <a href="/how-it-works">How it works</a>
+        <a href="/couple-types">Couple Types</a>
+        <div class="dd-divider"></div>
+        <a href="/practice" class="active">In Practice</a>
+        <a href="/faq">FAQs</a>
+        <a href="/reviews">Reviews</a>
+      </div>
+    </li>
+    <li><a href="/offerings">Packages</a></li>
+  </ul>
+  <div class="nav-right">
+    <a href="/portal" class="nav-signin">Sign in</a>
+    <a href="/portal" class="btn-nav">Get started</a>
+    <button class="hamburger" id="hamburger" onclick="toggleMenu()" aria-label="Menu"><span></span><span></span><span></span></button>
+  </div>
+</nav>
+<div class="mobile-menu" id="mobile-menu">
+  <a href="/home">Home</a>
+  <div class="mm-section">
+    <span class="mm-label">Learn</span>
+    <a href="/purpose" class="mm-sub">Our Purpose</a>
+    <a href="/how-it-works" class="mm-sub">How it works</a>
+    <a href="/couple-types" class="mm-sub">Couple Types</a>
+    <a href="/practice" class="mm-sub">In Practice</a>
+    <a href="/faq" class="mm-sub">FAQs</a>
+    <a href="/reviews" class="mm-sub">Reviews</a>
+  </div>
+  <a href="/offerings">Packages</a>
+  <a href="/portal">Sign in</a>
+  <a href="/portal?tab=signup" class="mm-cta">Get started →</a>
+</div>
+
+<!-- PAGE HEADER -->
+<div class="page-header">
+  <div class="page-header-glow"></div>
+    <div class="page-header-inner">
+  <p class="eyebrow">In Practice</p>
+  <h1 class="page-title">Relationship insight,<br><em style="font-style:italic;color:var(--orange)">put to use.</em></h1>
+  <p class="page-sub">Guides, perspectives, and practical tools for couples who take their relationship seriously.</p>
+    <div class="hero-actions">
+      <a href="/portal?tab=signup" class="btn-primary">GET STARTED →</a>
+      <a href="/offerings#gift" class="gift-link">Give it as a gift →</a>
+    </div>
+  </div>
+</div>
+
+<div class="si">
+
+  <!-- CATEGORY PILLS -->
+  <div class="category-bar fu2">
+    <div class="category-bar-inner">
+      <a href="/practice" class="cat-pill active">All</a>
+      <a href="/practice/getting-started" class="cat-pill">Getting Started</a>
+      <a href="/practice/when-its-difficult" class="cat-pill">When It's Difficult</a>
+      <a href="/practice/understanding-each-other" class="cat-pill">Understanding Each Other</a>
+      <a href="/practice/couple-types" class="cat-pill">Couple Types</a>
+    </div>
+  </div>
+
+  <!-- FEATURED POST -->
+  <div class="featured-wrap fu3">
+    <a href="/practice/how-to-use-your-results" class="featured-article">
+      <!-- Visual side -->
+      <div class="featured-visual">
+        <div class="featured-bg-text">01</div>
+        <div class="featured-visual-inner">
+          <div class="featured-icon">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="rgba(232,103,58,0.7)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+          </div>
+        </div>
+      </div>
+      <!-- Content side -->
+      <div class="featured-content">
+        <div class="featured-tag-row">
+          <span class="featured-tag">Getting Started</span>
+          <span class="featured-label">Featured</span>
+        </div>
+        <h2 class="featured-title">How to use<br><em>your results</em></h2>
+        <p class="featured-excerpt">Your results are a starting point, not a conclusion. Here's how to actually work through them together, from the first read to the conversations that matter.</p>
+        <div class="featured-meta">
+          <span class="featured-read-time">8 min read</span>
+          <span class="featured-cta">Read the guide </span>
+        </div>
+      </div>
+    </a>
+  </div>
+
+  <!-- COLLECTIONS -->
+  <div class="collections-section">
+    <div class="section-eyebrow"><span class="section-eye-label">Collections</span></div>
+    <h2 class="section-title">Curated by topic</h2>
+    <div class="collections-grid">
+
+      <div class="collection-card" style="background:#FFF5F0;border-color:rgba(232,103,58,.3);border-top:3px solid var(--orange);">
+        <div class="coll-header">
+          <div class="coll-icon" style="background:#FFF0EB;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#E8673A" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          </div>
+          <div>
+            <p class="coll-title">Getting Started</p>
+            <p class="coll-desc">For new users and couples approaching this for the first time.</p>
+          </div>
+        </div>
+        <div class="coll-articles">
+          <a href="/practice/how-to-use-your-results" class="coll-link">How to use your results <span>8 min</span></a>
+          <a class="coll-link" href="/practice/how-to-review-your-results-together">How to review your results together <span>6 min</span></a>
+          <a class="coll-link" href="/practice/staying-current-with-each-other">Staying current with each other over time <span>5 min</span></a>
+        </div>
+      </div>
+
+      <div class="collection-card" style="background:#FFF5F8;border-color:rgba(233,30,99,.28);border-top:3px solid #E91E63;">
+        <div class="coll-header">
+          <div class="coll-icon" style="background:#FCE4EC;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#E91E63" stroke-width="1.8" stroke-linecap="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+          </div>
+          <div>
+            <p class="coll-title">When It's Difficult</p>
+            <p class="coll-desc">Conflict, hard conversations, and how to repair after a hard moment.</p>
+          </div>
+        </div>
+        <div class="coll-articles">
+          <a class="coll-link" href="/practice/how-to-start-a-hard-conversation">How to start a hard conversation <span>7 min</span></a>
+          <a class="coll-link" href="/practice/when-a-conversation-turns-heated">When a conversation turns heated <span>5 min</span></a>
+          <a class="coll-link" href="/practice/why-couples-fight-about-the-same-things">Why couples fight about the same things <span>6 min</span></a>
+        </div>
+      </div>
+
+      <div class="collection-card" style="background:#F4F5FF;border-color:rgba(92,107,192,.28);border-top:3px solid #5C6BC0;">
+        <div class="coll-header">
+          <div class="coll-icon" style="background:#E8EAF6;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#5C6BC0" stroke-width="1.8" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          </div>
+          <div>
+            <p class="coll-title">Understanding Each Other</p>
+            <p class="coll-desc">Deeper reads on communication, attachment, and how people actually work.</p>
+          </div>
+        </div>
+        <div class="coll-articles">
+          <a class="coll-link" href="/practice/what-your-communication-style-reveals">What your communication style actually reveals <span>7 min</span></a>
+          <a class="coll-link" href="/practice/conflict-vs-repair">The difference between conflict and repair <span>5 min</span></a>
+          <a class="coll-link" href="/practice/five-books-that-change-how-couples-think">Five books that change how couples think <span>4 min</span></a>
+        </div>
+      </div>
+
+      <div class="collection-card" style="background:#F0FDF8;border-color:rgba(16,185,129,.3);border-top:3px solid #10b981;">
+        <div class="coll-header">
+          <div class="coll-icon" style="background:#EDFAF5;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="1.8" stroke-linecap="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          </div>
+          <div>
+            <p class="coll-title">Couple Types</p>
+            <p class="coll-desc">What the 10 couple types mean and how to work with yours specifically.</p>
+          </div>
+        </div>
+        <div class="coll-articles">
+          <a class="coll-link" href="/practice/what-your-couple-type-tells-you">What your couple type actually tells you <span>6 min</span></a>
+          <a class="coll-link" href="/practice/for-the-bridge-the-conversation-you-need">For the Bridge: the conversation you need <span>5 min</span></a>
+          <a class="coll-link" href="/practice/why-naming-the-pattern-changes-everything">Why naming the pattern changes everything <span>4 min</span></a>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- RECENT POSTS -->
+  
+
+<div class="posts-section" style="background:var(--warm);margin:0 -2.5rem;padding:3rem 2.5rem 3.5rem;border-top:1px solid var(--stone);">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.65rem">
+    <div class="section-eyebrow" style="margin-bottom:0"><span class="section-eye-label">Recent</span></div>
+    <a href="/practice/all" style="font-size:.78rem;color:var(--clay);font-weight:600;display:flex;align-items:center;gap:.35rem;transition:gap .15s;text-decoration:none" onmouseover="this.style.gap='.55rem'" onmouseout="this.style.gap='.35rem'">View all posts <span>→</span></a>
+  </div>
+    <div class="posts-grid">
+
+      <a class="post-card" href="/practice/how-to-review-your-results-together" data-cat="getting-started">
+        <div class="post-card-accent" style="background:var(--orange)"></div>
+        <div class="post-card-body">
+          <p class="post-tag" style="color:var(--orange)">Getting Started</p>
+          <h3 class="post-title">How to review your results together</h3>
+          <p class="post-excerpt">Some couples open their results immediately; others wait for a quiet moment. Either approach works. What matters is how you do it.</p>
+          <div class="post-meta">
+            <span class="post-read-time">6 min read</span>
+            <span class="post-read-link">Read →</span>
+          </div>
+        </div>
+      </a>
+
+      <a class="post-card" href="/practice/how-to-start-a-hard-conversation" data-cat="conflict">
+        <div class="post-card-accent" style="background:#E91E63"></div>
+        <div class="post-card-body">
+          <p class="post-tag" style="color:#E91E63">Conflict &amp; Repair</p>
+          <h3 class="post-title">How to start a hard conversation</h3>
+          <p class="post-excerpt">When you find a gap in your results that feels significant, here's a structure that opens things up rather than putting either person on the defensive.</p>
+          <div class="post-meta">
+            <span class="post-read-time">7 min read</span>
+            <span class="post-read-link">Read →</span>
+          </div>
+        </div>
+      </a>
+
+      <a class="post-card" href="/practice/conflict-vs-repair" data-cat="conflict">
+        <div class="post-card-accent" style="background:#5C6BC0"></div>
+        <div class="post-card-body">
+          <p class="post-tag" style="color:#5C6BC0">Conflict &amp; Repair</p>
+          <h3 class="post-title">The difference between conflict and repair</h3>
+          <p class="post-excerpt">Two people can have compatible conflict styles and completely incompatible repair needs. Most couples have never distinguished these.</p>
+          <div class="post-meta">
+            <span class="post-read-time">5 min read</span>
+            <span class="post-read-link">Read →</span>
+          </div>
+        </div>
+      </a>
+
+      <a class="post-card" href="/practice/when-a-conversation-turns-heated" data-cat="conflict">
+        <div class="post-card-accent" style="background:#E91E63"></div>
+        <div class="post-card-body">
+          <p class="post-tag" style="color:#E91E63">Conflict &amp; Repair</p>
+          <h3 class="post-title">When a conversation turns heated</h3>
+          <p class="post-excerpt">Understanding each other deeply doesn't mean you'll stop having hard moments. It means you have better tools when you do.</p>
+          <div class="post-meta">
+            <span class="post-read-time">5 min read</span>
+            <span class="post-read-link">Read →</span>
+          </div>
+        </div>
+      </a>
+
+      <a class="post-card" href="/practice/staying-current-with-each-other" data-cat="getting-started">
+        <div class="post-card-accent" style="background:var(--indigo)"></div>
+        <div class="post-card-body">
+          <p class="post-tag" style="color:var(--indigo)">Getting Started</p>
+          <h3 class="post-title">Staying current with each other over time</h3>
+          <p class="post-excerpt">People change. What you need, value, and envision shifts. The couples who stay genuinely close over decades check in.</p>
+          <div class="post-meta">
+            <span class="post-read-time">5 min read</span>
+            <span class="post-read-link">Read →</span>
+          </div>
+        </div>
+      </a>
+
+      <a class="post-card" href="/practice/five-books-that-change-how-couples-think" data-cat="understanding">
+        <div class="post-card-accent" style="background:var(--clay)"></div>
+        <div class="post-card-body">
+          <p class="post-tag" style="color:var(--clay)">Understanding</p>
+          <h3 class="post-title">Five books that change how couples think</h3>
+          <p class="post-excerpt">Not a comprehensive bibliography. A short list of books that genuinely shift how people see each other, curated because they earn their place.</p>
+          <div class="post-meta">
+            <span class="post-read-time">4 min read</span>
+            <span class="post-read-link">Read →</span>
+          </div>
+        </div>
+      </a>
+
+    </div>
+  </div>
+
+</div><!-- .si -->
+
+
+<!-- FOOTER -->
+<footer class="site-footer">
+  <div class="sf-inner">
+    <div class="sf-brand">
+      <a href="/home" class="logo">
+        <svg width="46" height="33" viewBox="0 0 103 76" fill="none"><defs><linearGradient id="lg2" x1="0" y1="0" x2="103" y2="76" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#E8673A"/><stop offset="100%" stop-color="#1B5FE8"/></linearGradient></defs><path d="M14,4 L44,4 A9,9 0 0,1 53,13 L53,42 A9,9 0 0,1 44,51 L20,51 L6,61 L11,51 A6,6 0 0,1 5,45 L5,13 A9,9 0 0,1 14,4 Z" fill="url(#lg2)"/><path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill="white" opacity="0.93" transform="translate(13.16,11.3) scale(0.72)"/><path d="M89,14 L59,14 A9,9 0 0,0 50,23 L50,52 A9,9 0 0,0 59,61 L83,61 L97,71 L92,61 A6,6 0 0,0 98,55 L98,23 A9,9 0 0,0 89,14 Z" fill="none" stroke="url(#lg2)" stroke-width="2.2" stroke-linejoin="round"/><path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill="url(#lg2)" transform="translate(58.16,21.3) scale(0.72)"/></svg>
+        <span class="logo-text" style="font-size:1.05rem;">Attune</span>
+      </a>
+      <p class="sf-tagline">Because understanding<br>takes intention.</p>
+      
+    </div>
+    <div class="sf-links">
+      <div class="sf-col">
+        <p class="sf-col-title">Product</p>
+        <a href="/home">Home</a>
+        <a href="/offerings">Packages</a>
+        <a href="/portal">Get started</a>
+      </div>
+      <div class="sf-col">
+        <p class="sf-col-title">Learn</p>
+        <a href="/purpose">Our Purpose</a>
+        <a href="/how-it-works">How it works</a>
+        <a href="/couple-types">Couple Types</a>
+        <a href="/practice">In Practice</a>
+        <a href="/faq">FAQs</a>
+        <a href="/reviews">Reviews</a>
+      </div>
+      <div class="sf-col">
+        <p class="sf-col-title">Support</p>
+        <a href="/faq">FAQs</a>
+        <a href="/contact">Contact us</a>
+        <a href="/legal">Privacy policy</a>
+        <a href="/legal#terms">Terms of service</a>
+      </div>
+    </div>
+  </div>
+  <div class="sf-bottom">
+    <p class="sf-copy">Attune Relationships™</p>
+    <p class="sf-email">hello@attune-relationships.com</p>
+  </div>
+</footer>
+
+<script>
+function toggleMenu(){document.getElementById('mobile-menu').classList.toggle('open')}
+document.addEventListener('click',function(e){
+  const menu=document.getElementById('mobile-menu');const btn=document.getElementById('hamburger');
+  if(menu.classList.contains('open')&&!menu.contains(e.target)&&!btn.contains(e.target))menu.classList.remove('open');
+});
+function filterCat(el,cat){
+  document.querySelectorAll('.cat-pill').forEach(p=>p.classList.remove('active'));
+  el.classList.add('active');
+  document.querySelectorAll('.post-card').forEach(card=>{
+    if(cat==='all'||card.dataset.cat===cat){card.style.display='flex'}
+    else{card.style.display='none'}
+  });
+}
+function handleSignup(e){
+  e.preventDefault();
+  const fb=document.getElementById('signup-feedback');
+  fb.textContent='Thanks, you\'re on the list.';
+  fb.style.color='var(--clay)';
+  document.getElementById('signup-email').value='';
+}
+</script>
+
+<!-- EMAIL SIGNUP -->
+<div class="signup-band">
+  <div class="signup-inner">
+    <h2 class="signup-title">New posts, when they're ready.</h2>
+    <p class="signup-sub">We publish occasionally. No noise, no newsletter cadence to hit, just useful pieces when we have something worth saying.</p>
+    <form class="signup-form" onsubmit="handleSignup(event)">
+      <input type="email" class="signup-input" placeholder="Your email" id="signup-email" required>
+      <button type="submit" class="signup-btn">Subscribe</button>
+    </form>
+    <p class="signup-note" id="signup-feedback">No spam. Unsubscribe whenever.</p>
+  </div>
+</div>
+
+</body>
+</html>

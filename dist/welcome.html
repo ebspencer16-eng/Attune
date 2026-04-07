@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>You've received a gift, Attune</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,800;1,700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  html,body{overflow-x:hidden;max-width:100%}
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  :root{
+    --cream:#FFFDF9;--warm:#FBF8F3;--stone:#E8DDD0;--clay:#C17F47;
+    --ink:#0E0B07;--muted:#8C7A68;--orange:#E8673A;--indigo:#1B5FE8;
+    --hfont:'Playfair Display',Georgia,serif;--bfont:'DM Sans',sans-serif;
+  }
+  body{background:var(--cream);color:var(--ink);font-family:var(--bfont);-webkit-font-smoothing:antialiased;min-height:100vh;display:flex;flex-direction:column}
+
+  /* NAV */
+  nav{height:58px;display:flex;align-items:center;padding:0 2.5rem;border-bottom:1px solid var(--stone);background:rgba(255,253,249,.96);backdrop-filter:blur(16px)}
+  .logo{display:flex;align-items:center;gap:.65rem;text-decoration:none}
+  .logo-text{font-family:var(--hfont);font-size:1.1rem;font-weight:700;color:var(--ink)}
+
+  /* HERO */
+  .welcome-wrap{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:4rem 2rem;text-align:center}
+  .gift-icon-wrap{width:80px;height:80px;border-radius:50%;background:linear-gradient(135deg,#FFF0EB,#EEEFFF);border:1.5px solid var(--stone);display:flex;align-items:center;justify-content:center;font-size:2.25rem;margin:0 auto 1.75rem;box-shadow:0 4px 20px rgba(232,103,58,.12)}
+  .from-label{font-size:.62rem;letter-spacing:.26em;text-transform:uppercase;color:var(--clay);font-weight:700;margin-bottom:.75rem}
+  .welcome-title{font-family:var(--hfont);font-size:clamp(2rem,5vw,3rem);font-weight:700;color:var(--ink);line-height:1.08;margin-bottom:1.1rem;letter-spacing:-.02em}
+  .welcome-title em{font-style:italic;color:var(--orange)}
+  .welcome-sub{font-size:.97rem;color:var(--muted);line-height:1.8;font-weight:300;max-width:520px;margin:0 auto 1rem}
+
+  /* WHAT'S INSIDE */
+  .whats-inside{background:var(--warm);border:1.5px solid var(--stone);border-radius:18px;padding:1.75rem 2rem;max-width:480px;width:100%;margin:2rem auto;text-align:left}
+  .wi-title{font-size:.62rem;letter-spacing:.22em;text-transform:uppercase;color:var(--clay);font-weight:700;margin-bottom:1rem}
+  .wi-item{display:flex;gap:.75rem;align-items:flex-start;margin-bottom:.85rem;font-size:.85rem;color:var(--ink);line-height:1.55}
+  .wi-item:last-child{margin-bottom:0}
+  .wi-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:.35rem}
+
+  /* MESSAGE */
+  .gift-message-card{background:white;border:1.5px solid var(--stone);border-radius:14px;padding:1.25rem 1.5rem;max-width:480px;width:100%;margin:0 auto 2rem;text-align:left;font-style:italic;font-size:.9rem;color:var(--ink);line-height:1.7;position:relative}
+  .gift-message-card::before{content:open-quote;font-family:var(--hfont);font-size:3rem;color:var(--stone);position:absolute;top:-.4rem;left:.8rem;line-height:1}
+
+  /* CTA */
+  .btn-setup{display:inline-flex;align-items:center;gap:.6rem;background:linear-gradient(135deg,var(--orange),#d45a2e);color:white;padding:.95rem 2.5rem;border-radius:14px;font-size:.88rem;font-weight:700;text-decoration:none;letter-spacing:.04em;text-transform:uppercase;box-shadow:0 6px 24px rgba(232,103,58,.35);transition:transform .15s,box-shadow .15s}
+  .btn-setup:hover{transform:translateY(-2px);box-shadow:0 10px 32px rgba(232,103,58,.45)}
+  .setup-note{font-size:.72rem;color:var(--muted);margin-top:1rem;line-height:1.6}
+
+  /* FOOTER */
+  footer{text-align:center;padding:1.5rem;font-size:.7rem;color:var(--muted);border-top:1px solid var(--stone)}
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="/home" class="logo">
+    <svg width="46" height="33" viewBox="0 0 103 76" fill="none" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="spark_logo_w_1" x1="0" y1="0" x2="103" y2="76" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#E8673A"/><stop offset="100%" stop-color="#1B5FE8"/></linearGradient></defs><path d="M14,4 L44,4 A9,9 0 0,1 53,13 L53,42 A9,9 0 0,1 44,51 L20,51 L6,61 L11,51 A6,6 0 0,1 5,45 L5,13 A9,9 0 0,1 14,4 Z" fill="url(#spark_logo_w_1)"/><path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill="white" opacity="0.93" transform="translate(13.16,11.3) scale(0.72)"/><path d="M89,14 L59,14 A9,9 0 0,0 50,23 L50,52 A9,9 0 0,0 59,61 L83,61 L97,71 L92,61 A6,6 0 0,0 98,55 L98,23 A9,9 0 0,0 89,14 Z" fill="none" stroke="url(#spark_logo_w_1)" stroke-width="2.2" stroke-linejoin="round"/><path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill="url(#spark_logo_w_1)" transform="translate(58.16,21.3) scale(0.72)"/></svg>
+    <span class="logo-text">Attune</span>
+  </a>
+</nav>
+
+<div class="welcome-wrap">
+  <div class="gift-icon-wrap">🎁</div>
+  <p class="from-label" id="from-label">A gift for you</p>
+  <h1 class="welcome-title">Someone who loves you<br>gave you <em>something real.</em></h1>
+  <p class="welcome-sub">Attune is a relationship experience, two exercises that surface how you and your partner each actually think, what you each expect, and where you naturally connect. Built from your real answers, not assumptions.</p>
+
+  <!-- Gift message (shown if URL param present) -->
+  <div class="gift-message-card" id="gift-message-card" style="display:none">
+    <span id="gift-message-text"></span>
+  </div>
+
+  <!-- What's inside -->
+  <div class="whats-inside" id="whats-inside">
+    <div class="wi-title">What's included</div>
+    <div class="wi-item">
+      <div class="wi-dot" style="background:#E8673A"></div>
+      <div><strong>Exercise 01, How You Communicate.</strong> 10 dimensions of how you're each wired, how you recharge, handle stress, show love, make decisions.</div>
+    </div>
+    <div class="wi-item">
+      <div class="wi-dot" style="background:#1B5FE8"></div>
+      <div><strong>Exercise 02, What You Expect.</strong> The assumptions around money, family, home, and closeness that quietly shape everything. Side by side.</div>
+    </div>
+    <div class="wi-item" id="wi-ex03" style="display:none">
+      <div class="wi-dot" style="background:#10b981"></div>
+      <div><strong>Exercise 03, Relationship Reflection.</strong> Milestone questions about where you've been, what's mattered most, and where you're headed.</div>
+    </div>
+    <div class="wi-item">
+      <div class="wi-dot" style="background:#C17F47"></div>
+      <div><strong>Joint results.</strong> Your answers stay private until both of you finish. Then everything unlocks together.</div>
+    </div>
+  </div>
+
+  <a href="/portal" class="btn-setup" id="setup-btn">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+    Set up your profile
+  </a>
+  <p class="setup-note">Takes about 2 minutes. Your partner creates their own separate profile, you'll invite them after you set up yours.</p>
+</div>
+
+<footer>
+  © 2025 Attune · hello@attune-relationships.com · <a href="/legal" style="color:var(--clay)">Privacy & Terms</a>
+</footer>
+
+<script>
+(function() {
+  const params = new URLSearchParams(location.search);
+  const from = params.get('from');
+  const pkg = params.get('pkg');
+  const msg = params.get('msg');
+  const token = params.get('token');
+
+  if (from) {
+    document.getElementById('from-label').textContent = 'A gift from ' + from;
+  }
+
+  if (msg) {
+    const card = document.getElementById('gift-message-card');
+    document.getElementById('gift-message-text').textContent = decodeURIComponent(msg);
+    card.style.display = 'block';
+  }
+
+  if (pkg === 'anniversary' || pkg === 'newlywed') {
+    document.getElementById('wi-ex03').style.display = pkg === 'anniversary' ? 'flex' : 'none';
+  }
+
+  // Pass token through to portal
+  const btn = document.getElementById('setup-btn');
+  if (token) btn.href = '/portal?token=' + token + (pkg ? '&pkg=' + pkg : '');
+})();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,224 @@
+{
+  "redirects": [
+    {
+      "source": "/",
+      "destination": "/home",
+      "permanent": false
+    }
+  ],
+  "rewrites": [
+    {
+      "source": "/gift-confirmation",
+      "destination": "/gift-confirmation.html"
+    },
+    {
+      "source": "/contact",
+      "destination": "/contact.html"
+    },
+    {
+      "source": "/api/create-payment-intent",
+      "destination": "/api/create-payment-intent.js"
+    },
+    {
+      "source": "/api/stripe-webhook",
+      "destination": "/api/stripe-webhook.js"
+    },
+    {
+      "source": "/api/stripe-config",
+      "destination": "/api/stripe-config.js"
+    },
+    {
+      "source": "/api/get-feedback",
+      "destination": "/api/get-feedback.js"
+    },
+    {
+      "source": "/api/track-type",
+      "destination": "/api/track-type.js"
+    },
+    {
+      "source": "/api/generate-workbook",
+      "destination": "/api/generate-workbook.js"
+    },
+    {
+      "source": "/api/send-order-email",
+      "destination": "/api/send-order-email.js"
+    },
+    {
+      "source": "/api/send-email",
+      "destination": "/api/send-email.js"
+    },
+    {
+      "source": "/api/partner-sync",
+      "destination": "/api/partner-sync.js"
+    },
+    {
+      "source": "/api/orders",
+      "destination": "/api/orders.js"
+    },
+    {
+      "source": "/api/send-feedback",
+      "destination": "/api/send-feedback.js"
+    },
+    {
+      "source": "/home",
+      "destination": "/home.html"
+    },
+    {
+      "source": "/how-it-works",
+      "destination": "/how-it-works.html"
+    },
+    {
+      "source": "/couple-types",
+      "destination": "/couple-types.html"
+    },
+    {
+      "source": "/offerings",
+      "destination": "/offerings.html"
+    },
+    {
+      "source": "/portal",
+      "destination": "/portal.html"
+    },
+    {
+      "source": "/checkout",
+      "destination": "/checkout.html"
+    },
+    {
+      "source": "/admin",
+      "destination": "/admin.html"
+    },
+    {
+      "source": "/legal",
+      "destination": "/legal.html"
+    },
+    {
+      "source": "/faq",
+      "destination": "/faq.html"
+    },
+    {
+      "source": "/resources",
+      "destination": "/resources.html"
+    },
+    {
+      "source": "/reviews",
+      "destination": "/reviews.html"
+    },
+    {
+      "source": "/purpose",
+      "destination": "/purpose.html"
+    },
+    {
+      "source": "/practice",
+      "destination": "/practice.html"
+    },
+    {
+      "source": "/practice/how-to-use-your-results",
+      "destination": "/practice/how-to-use-your-results.html"
+    },
+    {
+      "source": "/practice/how-to-review-your-results-together",
+      "destination": "/practice/how-to-review-your-results-together.html"
+    },
+    {
+      "source": "/practice/how-to-start-a-hard-conversation",
+      "destination": "/practice/how-to-start-a-hard-conversation.html"
+    },
+    {
+      "source": "/practice/conflict-vs-repair",
+      "destination": "/practice/conflict-vs-repair.html"
+    },
+    {
+      "source": "/practice/when-a-conversation-turns-heated",
+      "destination": "/practice/when-a-conversation-turns-heated.html"
+    },
+    {
+      "source": "/practice/staying-current-with-each-other",
+      "destination": "/practice/staying-current-with-each-other.html"
+    },
+    {
+      "source": "/practice/five-books-that-change-how-couples-think",
+      "destination": "/practice/five-books-that-change-how-couples-think.html"
+    },
+    {
+      "source": "/practice/why-couples-fight-about-the-same-things",
+      "destination": "/practice/why-couples-fight-about-the-same-things.html"
+    },
+    {
+      "source": "/practice/what-your-communication-style-reveals",
+      "destination": "/practice/what-your-communication-style-reveals.html"
+    },
+    {
+      "source": "/practice/what-your-couple-type-tells-you",
+      "destination": "/practice/what-your-couple-type-tells-you.html"
+    },
+    {
+      "source": "/practice/for-the-bridge-the-conversation-you-need",
+      "destination": "/practice/for-the-bridge-the-conversation-you-need.html"
+    },
+    {
+      "source": "/practice/why-naming-the-pattern-changes-everything",
+      "destination": "/practice/why-naming-the-pattern-changes-everything.html"
+    },
+    {
+      "source": "/practice/all",
+      "destination": "/practice/all.html"
+    },
+    {
+      "source": "/practice/getting-started",
+      "destination": "/practice/getting-started.html"
+    },
+    {
+      "source": "/practice/when-its-difficult",
+      "destination": "/practice/when-its-difficult.html"
+    },
+    {
+      "source": "/practice/understanding-each-other",
+      "destination": "/practice/understanding-each-other.html"
+    },
+    {
+      "source": "/practice/couple-types",
+      "destination": "/practice/couple-types.html"
+    },
+    {
+      "source": "/app",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/feedback",
+      "destination": "/feedback.html"
+    },
+    {
+      "source": "/email-preview",
+      "destination": "/email-preview.html"
+    },
+    {
+      "source": "/welcome",
+      "destination": "/welcome.html"
+    },
+    {
+      "source": "/app/(.*)",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/api/admin-config",
+      "destination": "/api/admin-config.js"
+    },
+    {
+      "source": "/api/cron-checkin",
+      "destination": "/api/cron-checkin.js"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ],
+  "buildCommand": "",
+  "outputDirectory": "dist",
+  "installCommand": "npm install",
+  "crons": [
+    {
+      "path": "/api/cron-checkin",
+      "schedule": "0 9 * * *"
+    }
+  ]
+}

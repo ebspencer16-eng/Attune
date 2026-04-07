@@ -1,0 +1,1000 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Attune, Gift Cards</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600&family=Cormorant+SC:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+  html,body{overflow-x:hidden;max-width:100%}
+* { margin:0; padding:0; box-sizing:border-box; }
+html { -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+
+:root {
+  --orange: #E8673A;
+  --blue:   #1B5FE8;
+  --serif:  'Cormorant Garamond', Georgia, serif;
+  --sc:     'Cormorant SC', Georgia, serif;
+}
+
+/* ── Body / preview shell ── */
+body {
+  background: #CAC5BE;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 2.5rem 1.5rem 4rem;
+  font-family: var(--serif);
+  background-image: repeating-linear-gradient(
+    45deg, transparent, transparent 2px,
+    rgba(0,0,0,.012) 2px, rgba(0,0,0,.012) 4px
+  );
+}
+
+/* ── Controls ── */
+.controls {
+  display: flex; align-items: center; gap: 1.25rem; flex-wrap: wrap;
+  margin-bottom: 2.5rem;
+  background: rgba(255,255,255,.72);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255,255,255,.55);
+  border-radius: 10px;
+  padding: .85rem 1.5rem;
+  box-shadow: 0 4px 24px rgba(0,0,0,.09);
+}
+.ctrl-label { font-family: var(--sc); font-size: .58rem; letter-spacing: .2em; color: #7A6A58; display:block; margin-bottom:.18rem; }
+.ctrl-select, .ctrl-input {
+  background: transparent; border: none; border-bottom: 1px solid #BFB0A0;
+  padding: .18rem .1rem; font-family: var(--serif); font-size: .9rem;
+  color: #1A1208; outline: none; cursor: pointer; min-width: 140px;
+}
+.ctrl-select:focus, .ctrl-input:focus { border-bottom-color: var(--orange); }
+.ctrl-divider { width:1px; height:28px; background:rgba(0,0,0,.12); }
+.flip-btn, .print-btn {
+  border: none; border-radius: 3px; cursor: pointer;
+  font-family: var(--sc); font-size: .65rem; letter-spacing: .14em;
+  padding: .5rem 1.15rem; transition: opacity .18s;
+}
+.flip-btn { background: #1A1208; color: #F5EFE4; }
+.flip-btn:hover { opacity: .8; }
+.print-btn { background: linear-gradient(135deg, var(--orange), var(--blue)); color: #fff; }
+.print-btn:hover { opacity: .88; }
+.ctrl-note { font-family: var(--sc); font-size: .56rem; letter-spacing: .12em; color: #9A8A78; font-style:italic; }
+
+/* ── Card scene ── */
+.card-scene { position: relative; }
+.card-shadow {
+  filter: drop-shadow(0 24px 48px rgba(0,0,0,.22)) drop-shadow(0 6px 16px rgba(0,0,0,.14));
+}
+.face { display: block; }
+.face-back { display: none; }
+.card-scene.flipped .face-front { display: none; }
+.card-scene.flipped .face-back  { display: block; }
+
+/* ══════════════════════════════════════
+   CARD BASE ,  4 × 6 inches
+══════════════════════════════════════ */
+.card {
+  width: 4in;
+  height: 6in;
+  position: relative;
+  overflow: hidden;
+}
+
+/* ── Grain texture overlay (all cards) ── */
+.card::after {
+  content:''; position:absolute; inset:0; z-index:20; pointer-events:none;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+  background-size: 160px;
+  mix-blend-mode: multiply;
+  opacity:.55;
+}
+
+/* ══════ FOUNDATION ══════ */
+.card-foundation-front { background: #FEFAF4; }
+.card-foundation-back  { background: #FDF7EE; }
+
+/* ══════ STARTING OUT ══════ */
+.card-newlywed-front { background: #FAFCFF; }
+.card-newlywed-back  { background: #F5F8FF; }
+
+/* ══════ ANNIVERSARY ══════ */
+.card-anniversary-front { background: #0C1A4A; }
+.card-anniversary-back  { background: #0A1640; }
+
+/* ══════ PREMIUM ══════ */
+.card-premium-front { background: #0A0806; }
+.card-premium-back  { background: #080604; }
+
+/* ══ Shared inner layout ══ */
+.card-inner {
+  position: relative; z-index: 5;
+  width:100%; height:100%;
+  display:flex; flex-direction:column; align-items:center;
+}
+
+/* SVG decoration layer */
+.card-deco {
+  position:absolute; inset:0; width:100%; height:100%;
+  z-index:2; pointer-events:none;
+}
+
+/* ═══════════════════════════════
+   FRONT CARD LAYOUT
+═══════════════════════════════ */
+.front-inner {
+  padding: .38in .38in .3in;
+  justify-content: space-between;
+}
+
+/* Top wordmark */
+.front-wordmark {
+  display:flex; align-items:center; gap:.3rem;
+  align-self:flex-start;
+}
+.front-wordmark-text {
+  font-family: var(--sc);
+  font-size: .78rem;
+  letter-spacing: .28em;
+}
+
+/* Center ornament area */
+.front-center {
+  display:flex; flex-direction:column; align-items:center;
+  gap:.18in; flex:1; justify-content:center;
+  margin-top: -.15in;
+}
+
+/* Tagline above names */
+.front-tagline {
+  font-family: var(--sc);
+  font-size: .65rem;
+  letter-spacing: .26em;
+  text-align: center;
+}
+
+/* The names */
+.front-names {
+  font-family: var(--serif);
+  font-style: italic;
+  font-weight: 300;
+  font-size: 2.4rem;
+  line-height: 1.0;
+  text-align: center;
+  letter-spacing: .02em;
+}
+
+/* Package label */
+.front-pkg {
+  font-family: var(--sc);
+  font-size: .72rem;
+  letter-spacing: .22em;
+  text-align: center;
+  margin-top: -.06in;
+}
+
+/* A short evocative line */
+.front-hook {
+  font-family: var(--serif);
+  font-style: italic;
+  font-weight: 300;
+  font-size: 1.0rem;
+  text-align: center;
+  line-height: 1.45;
+  max-width: 2.8in;
+}
+
+/* QR section, small and tasteful at bottom */
+.front-qr-section {
+  display:flex; flex-direction:column; align-items:center;
+  gap:.07in;
+  border-top: 1px solid;
+  padding-top: .18in;
+  width: 100%;
+}
+.front-qr-row {
+  display:flex; align-items:center; gap:.22in;
+}
+.front-qr-label {
+  font-family: var(--sc);
+  font-size: .5rem;
+  letter-spacing: .22em;
+  line-height: 1.7;
+}
+.front-code {
+  font-family: var(--sc);
+  font-size: .82rem;
+  letter-spacing: .18em;
+}
+.front-note {
+  font-family: var(--sc);
+  font-size: .46rem;
+  letter-spacing: .16em;
+  text-align:center;
+}
+
+/* ═══════════════════════════════
+   BACK CARD LAYOUT
+═══════════════════════════════ */
+.back-inner {
+  padding: .38in .4in .32in;
+  justify-content: space-between;
+}
+
+/* Back header */
+.back-header {
+  display:flex; flex-direction:column; align-items:center;
+  gap:.07in;
+  padding-bottom:.16in;
+  border-bottom: 1px solid;
+  width:100%;
+}
+.back-header-eyebrow {
+  font-family: var(--sc);
+  font-size: .58rem;
+  letter-spacing: .28em;
+}
+.back-pkg-name {
+  font-family: var(--serif);
+  font-style: italic;
+  font-weight: 300;
+  font-size: 1.55rem;
+  text-align:center;
+  line-height:1.1;
+}
+
+/* Description paragraph */
+.back-description {
+  font-family: var(--serif);
+  font-size: .92rem;
+  line-height: 1.58;
+  text-align: center;
+  font-weight: 300;
+  max-width: 3in;
+}
+
+/* What's included */
+.back-includes-label {
+  font-family: var(--sc);
+  font-size: .58rem;
+  letter-spacing: .22em;
+  text-align:center;
+  margin-bottom: .09in;
+}
+.back-includes {
+  list-style:none;
+  display:flex; flex-direction:column; gap:.07in;
+  width:100%;
+}
+.back-includes li {
+  display:flex; align-items:flex-start; gap:.12in;
+  font-family: var(--serif);
+  font-size: .84rem;
+  line-height: 1.35;
+  font-weight: 400;
+}
+.back-includes li .bullet {
+  flex-shrink:0;
+  font-size:.62rem;
+  margin-top:.06rem;
+}
+
+/* Redemption strip */
+.back-redeem {
+  border-top: 1px solid;
+  padding-top:.16in;
+  width:100%;
+  display:flex; flex-direction:column; align-items:center; gap:.06in;
+}
+.back-redeem-step {
+  font-family: var(--sc);
+  font-size: .54rem;
+  letter-spacing: .16em;
+  text-align:center;
+}
+.back-url {
+  font-family: var(--sc);
+  font-size: .7rem;
+  letter-spacing: .14em;
+  text-align:center;
+}
+.back-footer {
+  font-family: var(--sc);
+  font-size: .46rem;
+  letter-spacing: .18em;
+  text-align:center;
+  opacity:.5;
+}
+
+/* ══════════════════════════
+   FOUNDATION  light colors
+══════════════════════════ */
+.card-foundation-front .front-wordmark-text,
+.card-foundation-back  .front-wordmark-text { color: var(--orange); }
+
+.card-foundation-front .front-tagline     { color: rgba(180,80,40,.65); }
+.card-foundation-front .front-names       { color: #1A0C06; }
+.card-foundation-front .front-pkg         { color: var(--orange); }
+.card-foundation-front .front-hook        { color: #3A2010; }
+.card-foundation-front .front-qr-section  { border-color: rgba(232,103,58,.25); }
+.card-foundation-front .front-qr-label    { color: rgba(180,80,40,.65); }
+.card-foundation-front .front-code        { color: var(--orange); }
+.card-foundation-front .front-note        { color: rgba(180,80,40,.5); }
+
+.card-foundation-back .back-header        { border-color: rgba(232,103,58,.22); }
+.card-foundation-back .back-header-eyebrow{ color: rgba(180,80,40,.6); }
+.card-foundation-back .back-pkg-name      { color: #1A0C06; }
+.card-foundation-back .back-description   { color: #3A2010; }
+.card-foundation-back .back-includes-label{ color: rgba(180,80,40,.65); }
+.card-foundation-back .back-includes li   { color: #2A1608; }
+.card-foundation-back .back-includes .bullet { color: var(--orange); }
+.card-foundation-back .back-redeem        { border-color: rgba(232,103,58,.22); }
+.card-foundation-back .back-redeem-step   { color: rgba(180,80,40,.6); }
+.card-foundation-back .back-url           { color: var(--orange); }
+.card-foundation-back .back-footer        { color: #6A4030; }
+
+/* ══════════════════════════
+   STARTING OUT  blue tones
+══════════════════════════ */
+.card-newlywed-front .front-wordmark-text { color: var(--blue); }
+.card-newlywed-front .front-tagline       { color: rgba(20,70,200,.55); }
+.card-newlywed-front .front-names         { color: #080E22; }
+.card-newlywed-front .front-pkg           { color: var(--blue); }
+.card-newlywed-front .front-hook          { color: #141E3A; }
+.card-newlywed-front .front-qr-section    { border-color: rgba(27,95,232,.2); }
+.card-newlywed-front .front-qr-label      { color: rgba(20,70,200,.55); }
+.card-newlywed-front .front-code          { color: var(--blue); }
+.card-newlywed-front .front-note          { color: rgba(20,70,200,.42); }
+
+.card-newlywed-back .back-header          { border-color: rgba(27,95,232,.2); }
+.card-newlywed-back .back-header-eyebrow  { color: rgba(20,70,200,.55); }
+.card-newlywed-back .back-pkg-name        { color: #080E22; }
+.card-newlywed-back .back-description     { color: #141E3A; }
+.card-newlywed-back .back-includes-label  { color: rgba(20,70,200,.6); }
+.card-newlywed-back .back-includes li     { color: #1A2640; }
+.card-newlywed-back .back-includes .bullet{ color: var(--blue); }
+.card-newlywed-back .back-redeem          { border-color: rgba(27,95,232,.2); }
+.card-newlywed-back .back-redeem-step     { color: rgba(20,70,200,.55); }
+.card-newlywed-back .back-url             { color: var(--blue); }
+.card-newlywed-back .back-footer          { color: #304070; }
+
+/* ══════════════════════════
+   ANNIVERSARY  gold on navy
+══════════════════════════ */
+.card-anniversary-front .front-wordmark-text { color: #E8A83A; }
+.card-anniversary-front .front-tagline        { color: rgba(232,168,58,.55); }
+.card-anniversary-front .front-names          { color: #EDE8FF; }
+.card-anniversary-front .front-pkg            { color: #E8A83A; }
+.card-anniversary-front .front-hook           { color: rgba(220,215,250,.8); }
+.card-anniversary-front .front-qr-section     { border-color: rgba(232,168,58,.2); }
+.card-anniversary-front .front-qr-label       { color: rgba(232,168,58,.5); }
+.card-anniversary-front .front-code           { color: #E8A83A; }
+.card-anniversary-front .front-note           { color: rgba(232,168,58,.38); }
+
+.card-anniversary-back .back-header           { border-color: rgba(232,168,58,.2); }
+.card-anniversary-back .back-header-eyebrow   { color: rgba(232,168,58,.5); }
+.card-anniversary-back .back-pkg-name         { color: #EDE8FF; }
+.card-anniversary-back .back-description      { color: rgba(220,215,250,.82); }
+.card-anniversary-back .back-includes-label   { color: rgba(232,168,58,.55); }
+.card-anniversary-back .back-includes li      { color: rgba(220,215,250,.78); }
+.card-anniversary-back .back-includes .bullet { color: #E8A83A; }
+.card-anniversary-back .back-redeem           { border-color: rgba(232,168,58,.2); }
+.card-anniversary-back .back-redeem-step      { color: rgba(232,168,58,.5); }
+.card-anniversary-back .back-url              { color: #E8A83A; }
+.card-anniversary-back .back-footer           { color: rgba(232,168,58,.3); }
+
+/* ══════════════════════════
+   PREMIUM  white on black
+══════════════════════════ */
+.card-premium-front .front-wordmark-text { color: var(--orange); }
+.card-premium-front .front-tagline        { color: rgba(255,255,255,.38); }
+.card-premium-front .front-names          { color: rgba(255,255,255,.95); }
+.card-premium-front .front-pkg            { color: rgba(255,255,255,.55); }
+.card-premium-front .front-hook           { color: rgba(255,255,255,.75); }
+.card-premium-front .front-qr-section     { border-color: rgba(255,255,255,.1); }
+.card-premium-front .front-qr-label       { color: rgba(255,255,255,.35); }
+.card-premium-front .front-code           { color: rgba(255,255,255,.72); }
+.card-premium-front .front-note           { color: rgba(255,255,255,.25); }
+
+.card-premium-back .back-header           { border-color: rgba(255,255,255,.1); }
+.card-premium-back .back-header-eyebrow   { color: rgba(255,255,255,.35); }
+.card-premium-back .back-pkg-name         { color: rgba(255,255,255,.92); }
+.card-premium-back .back-description      { color: rgba(255,255,255,.68); }
+.card-premium-back .back-includes-label   { color: rgba(255,255,255,.38); }
+.card-premium-back .back-includes li      { color: rgba(255,255,255,.72); }
+.card-premium-back .back-includes .bullet { color: var(--orange); }
+.card-premium-back .back-redeem           { border-color: rgba(255,255,255,.1); }
+.card-premium-back .back-redeem-step      { color: rgba(255,255,255,.35); }
+.card-premium-back .back-url              { color: var(--orange); }
+.card-premium-back .back-footer           { color: rgba(255,255,255,.2); }
+
+/* ══ Print ══ */
+@media print {
+  body { background:white; padding:0; }
+  .controls { display:none; }
+  .card-shadow { filter:none; }
+  .card::after { display:none; }
+  @page { size:4in 6in; margin:0; }
+}
+</style>
+</head>
+<body>
+
+<!-- Controls -->
+<div class="controls">
+  <div>
+    <div class="ctrl-label">Package</div>
+    <select class="ctrl-select" id="pkg-sel" onchange="switchCard()">
+      <option value="foundation">The Foundation</option>
+      <option value="newlywed" selected>Starting Out</option>
+      <option value="anniversary">Anniversary</option>
+      <option value="premium">Premium</option>
+    </select>
+  </div>
+  <div>
+    <div class="ctrl-label">Names</div>
+    <input class="ctrl-input" id="names-in" value="Sarah &amp; James" oninput="updateNames()">
+  </div>
+  <div class="ctrl-divider"></div>
+  <button class="flip-btn" onclick="flipCard()">Flip Card ↺</button>
+  <button class="print-btn" onclick="window.print()">Print</button>
+  <span class="ctrl-note">Showing front · click Flip to see back</span>
+</div>
+
+<!-- ════════════════════════════════
+     FOUNDATION
+════════════════════════════════ -->
+<div class="card-scene" id="card-foundation" style="display:none">
+  <div class="card-shadow">
+    <!-- FRONT -->
+    <div class="face face-front">
+      <div class="card card-foundation-front">
+        <svg class="card-deco" viewBox="0 0 384 576" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="fd-g" x1="0" y1="0" x2="384" y2="0" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stop-color="#E8673A" stop-opacity=".5"/>
+              <stop offset="100%" stop-color="#1B5FE8" stop-opacity=".3"/>
+            </linearGradient>
+          </defs>
+          <!-- Border rules -->
+          <rect x="14" y="14" width="356" height="548" fill="none" stroke="url(#fd-g)" stroke-width="1.2"/>
+          <rect x="19" y="19" width="346" height="538" fill="none" stroke="#E8673A" stroke-width=".4" opacity=".2"/>
+          <!-- Corner marks -->
+          <g stroke="#E8673A" stroke-width=".9" opacity=".55">
+            <line x1="14" y1="26" x2="14" y2="14"/><line x1="14" y1="14" x2="26" y2="14"/>
+            <line x1="370" y1="14" x2="358" y2="14"/><line x1="370" y1="14" x2="370" y2="26"/>
+            <line x1="14" y1="550" x2="14" y2="562"/><line x1="14" y1="562" x2="26" y2="562"/>
+            <line x1="370" y1="562" x2="358" y2="562"/><line x1="370" y1="562" x2="370" y2="550"/>
+          </g>
+          <!-- Subtle watermark: large outline heart, very faint -->
+          <path d="M192 310 C192 310 130 268 130 225 C130 202 148 186 169 186 C181 186 192 196 192 196 C192 196 203 186 215 186 C236 186 254 202 254 225 C254 268 192 310 192 310 Z"
+            fill="none" stroke="#E8673A" stroke-width="1" opacity=".07"/>
+          <!-- Decorative center rule -->
+          <g transform="translate(192,292)" opacity=".3">
+            <line x1="-55" y1="0" x2="-12" y2="0" stroke="#E8673A" stroke-width=".8"/>
+            <circle cx="0" cy="0" r="3" fill="none" stroke="#E8673A" stroke-width="1"/>
+            <line x1="12" y1="0" x2="55" y2="0" stroke="#1B5FE8" stroke-width=".8"/>
+          </g>
+        </svg>
+        <div class="card-inner front-inner">
+          <div class="front-wordmark">
+            <svg width="24" height="17" viewBox="0 0 103 76" fill="none"><defs><linearGradient id="lg-f-f" x1="0" y1="0" x2="103" y2="0" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#E8673A"/><stop offset="100%" stop-color="#1B5FE8"/></linearGradient></defs><path d="M14,4 L44,4 A9,9 0 0,1 53,13 L53,42 A9,9 0 0,1 44,51 L20,51 L6,61 L11,51 A6,6 0 0,1 5,45 L5,13 A9,9 0 0,1 14,4 Z" fill="url(#lg-f-f)"/><path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill="rgba(255,255,255,0.22)" transform="translate(13.16,11.3) scale(0.72)"/><path d="M89,14 L59,14 A9,9 0 0,0 50,23 L50,52 A9,9 0 0,0 59,61 L83,61 L97,71 L92,61 A6,6 0 0,0 98,55 L98,23 A9,9 0 0,0 89,14 Z" fill="none" stroke="url(#lg-f-f)" stroke-width="2.2"/><path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill="#1B5FE8" opacity=".7" transform="translate(58.16,21.3) scale(0.72)"/></svg>
+            <span class="front-wordmark-text">Attune</span>
+          </div>
+          <div class="front-center">
+            <div class="front-tagline">A gift for both of you</div>
+            <div class="front-names fd-names">Sarah &amp; James</div>
+            <div class="front-pkg">The Foundation</div>
+            <div class="front-hook">Guided conversations that reveal how you think, communicate, and see your future together.</div>
+          </div>
+          <div class="front-qr-section">
+            <div class="front-qr-row">
+              <div>
+                <div class="front-qr-label">Scan to begin</div>
+                <div class="front-code fd-code">SPK ·, · -</div>
+                <div class="front-note">One-time access · attune.com</div>
+              </div>
+              <svg id="fd-qr-frame" viewBox="0 0 90 90" style="width:.88in;height:.88in;flex-shrink:0"></svg>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- BACK -->
+    <div class="face face-back">
+      <div class="card card-foundation-back">
+        <svg class="card-deco" viewBox="0 0 384 576" xmlns="http://www.w3.org/2000/svg">
+          <defs><linearGradient id="fd-bg" x1="0" y1="0" x2="384" y2="0" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#E8673A" stop-opacity=".4"/><stop offset="100%" stop-color="#1B5FE8" stop-opacity=".25"/></linearGradient></defs>
+          <rect x="14" y="14" width="356" height="548" fill="none" stroke="url(#fd-bg)" stroke-width="1.2"/>
+          <g stroke="#E8673A" stroke-width=".9" opacity=".45">
+            <line x1="14" y1="26" x2="14" y2="14"/><line x1="14" y1="14" x2="26" y2="14"/>
+            <line x1="370" y1="14" x2="358" y2="14"/><line x1="370" y1="14" x2="370" y2="26"/>
+            <line x1="14" y1="550" x2="14" y2="562"/><line x1="14" y1="562" x2="26" y2="562"/>
+            <line x1="370" y1="562" x2="358" y2="562"/><line x1="370" y1="562" x2="370" y2="550"/>
+          </g>
+        </svg>
+        <div class="card-inner back-inner">
+          <div class="back-header">
+            <div class="back-header-eyebrow">What's included</div>
+            <div class="back-pkg-name">The Foundation</div>
+          </div>
+          <div class="back-description">
+            You'll each answer privately across four guided exercises. When you're both done, your results unlock together, revealing how you communicate, what you each expect, and where you naturally align.
+          </div>
+          <div>
+            <div class="back-includes-label">Your exercises</div>
+            <ul class="back-includes">
+              <li><span class="bullet">✦</span><span>Personality &amp; Communication, how you're each wired, and how you connect</span></li>
+              <li><span class="bullet">✦</span><span>Shared Expectations, where you're aligned, and where to have the conversation</span></li>
+              <li><span class="bullet">✦</span><span>Starting Out Checklist, a practical guide to building your foundation</span></li>
+              <li><span class="bullet">✦</span><span>Joint Results Overview, your full picture, together</span></li>
+            </ul>
+          </div>
+          <div class="back-redeem">
+            <div class="back-redeem-step">To begin, visit attune.com and enter your access code,<br>or scan the QR on the front of this card.</div>
+            <div class="back-url">attune.com</div>
+            <div class="back-footer">© 2025 Attune · Attune, because understanding takes intention.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════
+     STARTING OUT
+════════════════════════════════ -->
+<div class="card-scene" id="card-newlywed">
+  <div class="card-shadow">
+    <!-- FRONT -->
+    <div class="face face-front">
+      <div class="card card-newlywed-front">
+        <svg class="card-deco" viewBox="0 0 384 576" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="nw-g" x1="0" y1="0" x2="384" y2="0" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stop-color="#E8673A" stop-opacity=".45"/>
+              <stop offset="100%" stop-color="#1B5FE8" stop-opacity=".55"/>
+            </linearGradient>
+          </defs>
+          <rect x="14" y="14" width="356" height="548" fill="none" stroke="url(#nw-g)" stroke-width="1.2"/>
+          <!-- Botanical corner sprigs -->
+          <!-- Top-left: orange -->
+          <g transform="translate(16,16)" opacity=".55">
+            <path d="M0 0 Q12 8 20 22" stroke="#E8673A" stroke-width="1" fill="none" stroke-linecap="round"/>
+            <path d="M8 9 Q16 5 14 16 Q7 14 8 9" fill="#E8673A" opacity=".8"/>
+            <path d="M14 16 Q22 18 18 28 Q12 22 14 16" fill="#E8673A" opacity=".6"/>
+            <circle cx="0" cy="0" r="1.5" fill="#E8673A" opacity=".7"/>
+          </g>
+          <!-- Top-right: blue -->
+          <g transform="translate(368,16) scale(-1,1)" opacity=".55">
+            <path d="M0 0 Q12 8 20 22" stroke="#1B5FE8" stroke-width="1" fill="none" stroke-linecap="round"/>
+            <path d="M8 9 Q16 5 14 16 Q7 14 8 9" fill="#1B5FE8" opacity=".8"/>
+            <path d="M14 16 Q22 18 18 28 Q12 22 14 16" fill="#1B5FE8" opacity=".6"/>
+            <circle cx="0" cy="0" r="1.5" fill="#1B5FE8" opacity=".7"/>
+          </g>
+          <!-- Bottom-left: blue -->
+          <g transform="translate(16,560) scale(1,-1)" opacity=".45">
+            <path d="M0 0 Q12 8 20 22" stroke="#1B5FE8" stroke-width="1" fill="none" stroke-linecap="round"/>
+            <path d="M8 9 Q16 5 14 16 Q7 14 8 9" fill="#1B5FE8" opacity=".8"/>
+            <path d="M14 16 Q22 18 18 28 Q12 22 14 16" fill="#1B5FE8" opacity=".6"/>
+          </g>
+          <!-- Bottom-right: orange -->
+          <g transform="translate(368,560) scale(-1,-1)" opacity=".45">
+            <path d="M0 0 Q12 8 20 22" stroke="#E8673A" stroke-width="1" fill="none" stroke-linecap="round"/>
+            <path d="M8 9 Q16 5 14 16 Q7 14 8 9" fill="#E8673A" opacity=".8"/>
+            <path d="M14 16 Q22 18 18 28 Q12 22 14 16" fill="#E8673A" opacity=".6"/>
+          </g>
+          <!-- Interlinked rings watermark -->
+          <circle cx="179" cy="295" r="42" fill="none" stroke="#E8673A" stroke-width=".8" opacity=".07"/>
+          <circle cx="205" cy="295" r="42" fill="none" stroke="#1B5FE8" stroke-width=".8" opacity=".07"/>
+          <!-- Center flourish -->
+          <g transform="translate(192,293)" opacity=".28">
+            <line x1="-55" y1="0" x2="-12" y2="0" stroke="#E8673A" stroke-width=".8"/>
+            <circle cx="0" cy="0" r="3" fill="none" stroke="#1B5FE8" stroke-width="1"/>
+            <line x1="12" y1="0" x2="55" y2="0" stroke="#1B5FE8" stroke-width=".8"/>
+          </g>
+        </svg>
+        <div class="card-inner front-inner">
+          <div class="front-wordmark">
+            <svg width="24" height="17" viewBox="0 0 103 76" fill="none"><defs><linearGradient id="lg-n-f" x1="0" y1="0" x2="103" y2="0" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#E8673A"/><stop offset="100%" stop-color="#1B5FE8"/></linearGradient></defs><path d="M14,4 L44,4 A9,9 0 0,1 53,13 L53,42 A9,9 0 0,1 44,51 L20,51 L6,61 L11,51 A6,6 0 0,1 5,45 L5,13 A9,9 0 0,1 14,4 Z" fill="url(#lg-n-f)"/><path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill="rgba(255,255,255,0.22)" transform="translate(13.16,11.3) scale(0.72)"/><path d="M89,14 L59,14 A9,9 0 0,0 50,23 L50,52 A9,9 0 0,0 59,61 L83,61 L97,71 L92,61 A6,6 0 0,0 98,55 L98,23 A9,9 0 0,0 89,14 Z" fill="none" stroke="url(#lg-n-f)" stroke-width="2.2"/><path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill="#1B5FE8" opacity=".7" transform="translate(58.16,21.3) scale(0.72)"/></svg>
+            <span class="front-wordmark-text">Attune</span>
+          </div>
+          <div class="front-center">
+            <div class="front-tagline">A gift for both of you</div>
+            <div class="front-names nw-names">Sarah &amp; James</div>
+            <div class="front-pkg">Starting Out Collection</div>
+            <div class="front-hook">Everything you need to start your life together with clarity, confidence, and each other.</div>
+          </div>
+          <div class="front-qr-section">
+            <div class="front-qr-row">
+              <div>
+                <div class="front-qr-label">Scan to begin</div>
+                <div class="front-code nw-code">SPK ·, · -</div>
+                <div class="front-note">One-time access · attune.com</div>
+              </div>
+              <svg id="nw-qr-frame" viewBox="0 0 90 90" style="width:.88in;height:.88in;flex-shrink:0"></svg>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- BACK -->
+    <div class="face face-back">
+      <div class="card card-newlywed-back">
+        <svg class="card-deco" viewBox="0 0 384 576" xmlns="http://www.w3.org/2000/svg">
+          <defs><linearGradient id="nw-bg" x1="0" y1="0" x2="384" y2="0" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#E8673A" stop-opacity=".4"/><stop offset="100%" stop-color="#1B5FE8" stop-opacity=".4"/></linearGradient></defs>
+          <rect x="14" y="14" width="356" height="548" fill="none" stroke="url(#nw-bg)" stroke-width="1.2"/>
+          <g transform="translate(16,16)" opacity=".35"><path d="M0 0 Q12 8 20 22" stroke="#E8673A" stroke-width="1" fill="none"/><path d="M8 9 Q16 5 14 16 Q7 14 8 9" fill="#E8673A"/></g>
+          <g transform="translate(368,16) scale(-1,1)" opacity=".35"><path d="M0 0 Q12 8 20 22" stroke="#1B5FE8" stroke-width="1" fill="none"/><path d="M8 9 Q16 5 14 16 Q7 14 8 9" fill="#1B5FE8"/></g>
+          <g transform="translate(16,560) scale(1,-1)" opacity=".28"><path d="M0 0 Q12 8 20 22" stroke="#1B5FE8" stroke-width="1" fill="none"/><path d="M8 9 Q16 5 14 16 Q7 14 8 9" fill="#1B5FE8"/></g>
+          <g transform="translate(368,560) scale(-1,-1)" opacity=".28"><path d="M0 0 Q12 8 20 22" stroke="#E8673A" stroke-width="1" fill="none"/><path d="M8 9 Q16 5 14 16 Q7 14 8 9" fill="#E8673A"/></g>
+        </svg>
+        <div class="card-inner back-inner">
+          <div class="back-header">
+            <div class="back-header-eyebrow">What's included</div>
+            <div class="back-pkg-name">Starting Out Collection</div>
+          </div>
+          <div class="back-description">
+            You'll each answer privately, at your own pace. When you're both finished, your results unlock together, showing you how you're wired, what you each expect, and what to talk about next.
+          </div>
+          <div>
+            <div class="back-includes-label">Your exercises</div>
+            <ul class="back-includes">
+              <li><span class="bullet">✦</span><span>Personality &amp; Communication, how you're each wired, and how to meet in the middle</span></li>
+              <li><span class="bullet">✦</span><span>Shared Expectations, finances, family, roles, and the questions most couples skip</span></li>
+              <li><span class="bullet">✦</span><span>Starting Out Checklist, a practical roadmap for the decisions ahead</span></li>
+              <li><span class="bullet">✦</span><span>Joint Results Overview, your full picture, together</span></li>
+            </ul>
+          </div>
+          <div class="back-redeem">
+            <div class="back-redeem-step">To begin, visit attune.com and enter your access code,<br>or scan the QR on the front of this card.</div>
+            <div class="back-url">attune.com</div>
+            <div class="back-footer">© 2025 Attune · Attune, because understanding takes intention.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════
+     ANNIVERSARY
+════════════════════════════════ -->
+<div class="card-scene" id="card-anniversary" style="display:none">
+  <div class="card-shadow">
+    <!-- FRONT -->
+    <div class="face face-front">
+      <div class="card card-anniversary-front">
+        <svg class="card-deco" viewBox="0 0 384 576" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="an-g" x1="0" y1="0" x2="384" y2="0" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stop-color="#E8673A" stop-opacity=".55"/>
+              <stop offset="50%" stop-color="#E8A83A" stop-opacity=".45"/>
+              <stop offset="100%" stop-color="#1B5FE8" stop-opacity=".55"/>
+            </linearGradient>
+          </defs>
+          <!-- Stars -->
+          <circle cx="42" cy="68" r=".9" fill="#E8A83A" opacity=".5"/>
+          <circle cx="88" cy="42" r=".6" fill="#E8A83A" opacity=".35"/>
+          <circle cx="130" cy="95" r="1.1" fill="#C8B0FF" opacity=".4"/>
+          <circle cx="55" cy="130" r=".7" fill="#E8A83A" opacity=".3"/>
+          <circle cx="165" cy="55" r=".5" fill="#E8A83A" opacity=".45"/>
+          <circle cx="220" cy="38" r=".8" fill="#C8B0FF" opacity=".3"/>
+          <circle cx="290" cy="62" r=".6" fill="#E8A83A" opacity=".4"/>
+          <circle cx="340" cy="90" r=".9" fill="#C8B0FF" opacity=".35"/>
+          <circle cx="318" cy="135" r=".5" fill="#E8A83A" opacity=".3"/>
+          <circle cx="360" cy="170" r=".8" fill="#E8A83A" opacity=".4"/>
+          <circle cx="38" cy="220" r=".6" fill="#C8B0FF" opacity=".3"/>
+          <circle cx="60" cy="280" r=".9" fill="#E8A83A" opacity=".35"/>
+          <circle cx="345" cy="240" r=".7" fill="#C8B0FF" opacity=".4"/>
+          <circle cx="330" cy="310" r=".6" fill="#E8A83A" opacity=".3"/>
+          <circle cx="48" cy="380" r=".8" fill="#E8A83A" opacity=".35"/>
+          <circle cx="340" cy="420" r=".6" fill="#C8B0FF" opacity=".3"/>
+          <circle cx="70" cy="460" r=".7" fill="#E8A83A" opacity=".4"/>
+          <circle cx="310" cy="490" r=".9" fill="#E8A83A" opacity=".35"/>
+          <circle cx="150" cy="520" r=".5" fill="#C8B0FF" opacity=".3"/>
+          <circle cx="240" cy="535" r=".8" fill="#E8A83A" opacity=".3"/>
+          <!-- Border -->
+          <rect x="14" y="14" width="356" height="548" fill="none" stroke="url(#an-g)" stroke-width="1.2"/>
+          <rect x="18" y="18" width="348" height="540" fill="none" stroke="#E8A83A" stroke-width=".35" opacity=".22"/>
+          <!-- Moon -->
+          <g transform="translate(192,34)" opacity=".55">
+            <circle cx="0" cy="0" r="9" fill="none" stroke="#E8A83A" stroke-width="1.2"/>
+            <path d="M0 -9 A9 9 0 0 0 0 9 A5.5 9 0 0 1 0 -9" fill="#E8A83A" opacity=".75"/>
+          </g>
+          <!-- Corner constellation -->
+          <circle cx="22" cy="22" r="1.5" fill="#E8673A" opacity=".7"/>
+          <circle cx="30" cy="17" r=".8" fill="#E8673A" opacity=".45"/>
+          <circle cx="17" cy="30" r=".7" fill="#E8673A" opacity=".4"/>
+          <line x1="22" y1="22" x2="30" y2="17" stroke="#E8673A" stroke-width=".5" opacity=".3"/>
+          <line x1="22" y1="22" x2="17" y2="30" stroke="#E8673A" stroke-width=".5" opacity=".25"/>
+          <circle cx="362" cy="22" r="1.5" fill="#1B5FE8" opacity=".7"/>
+          <circle cx="354" cy="17" r=".8" fill="#1B5FE8" opacity=".45"/>
+          <circle cx="367" cy="30" r=".7" fill="#1B5FE8" opacity=".4"/>
+          <circle cx="22" cy="554" r="1.5" fill="#1B5FE8" opacity=".55"/>
+          <circle cx="362" cy="554" r="1.5" fill="#E8673A" opacity=".55"/>
+          <!-- Center mark -->
+          <g transform="translate(192,293)" opacity=".22">
+            <line x1="-55" y1="0" x2="-12" y2="0" stroke="#E8A83A" stroke-width=".8"/>
+            <circle cx="0" cy="0" r="3.5" fill="none" stroke="#E8A83A" stroke-width="1"/>
+            <line x1="12" y1="0" x2="55" y2="0" stroke="#E8A83A" stroke-width=".8"/>
+          </g>
+        </svg>
+        <div class="card-inner front-inner">
+          <div class="front-wordmark">
+            <svg width="24" height="17" viewBox="0 0 103 76" fill="none"><defs><linearGradient id="lg-a-f" x1="0" y1="0" x2="103" y2="0" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#E8673A"/><stop offset="100%" stop-color="#E8A83A"/></linearGradient></defs><path d="M14,4 L44,4 A9,9 0 0,1 53,13 L53,42 A9,9 0 0,1 44,51 L20,51 L6,61 L11,51 A6,6 0 0,1 5,45 L5,13 A9,9 0 0,1 14,4 Z" fill="url(#lg-a-f)"/><path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill="rgba(255,255,255,0.15)" transform="translate(13.16,11.3) scale(0.72)"/><path d="M89,14 L59,14 A9,9 0 0,0 50,23 L50,52 A9,9 0 0,0 59,61 L83,61 L97,71 L92,61 A6,6 0 0,0 98,55 L98,23 A9,9 0 0,0 89,14 Z" fill="none" stroke="#E8A83A" stroke-width="2.2"/><path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill="#E8A83A" opacity=".55" transform="translate(58.16,21.3) scale(0.72)"/></svg>
+            <span class="front-wordmark-text">Attune</span>
+          </div>
+          <div class="front-center">
+            <div class="front-tagline">A celebration of your story</div>
+            <div class="front-names an-names">Sarah &amp; James</div>
+            <div class="front-pkg">Anniversary Collection</div>
+            <div class="front-hook">A guided reflection on everything you've built, and an honest look at where you want to go next.</div>
+          </div>
+          <div class="front-qr-section">
+            <div class="front-qr-row">
+              <div>
+                <div class="front-qr-label">Scan to begin</div>
+                <div class="front-code an-code">SPK ·, · -</div>
+                <div class="front-note">One-time access · attune.com</div>
+              </div>
+              <svg id="an-qr-frame" viewBox="0 0 90 90" style="width:.88in;height:.88in;flex-shrink:0"></svg>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- BACK -->
+    <div class="face face-back">
+      <div class="card card-anniversary-back">
+        <svg class="card-deco" viewBox="0 0 384 576" xmlns="http://www.w3.org/2000/svg">
+          <defs><linearGradient id="an-bg" x1="0" y1="0" x2="384" y2="0" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#E8673A" stop-opacity=".5"/><stop offset="50%" stop-color="#E8A83A" stop-opacity=".4"/><stop offset="100%" stop-color="#1B5FE8" stop-opacity=".5"/></linearGradient></defs>
+          <rect x="14" y="14" width="356" height="548" fill="none" stroke="url(#an-bg)" stroke-width="1.2"/>
+          <circle cx="42" cy="68" r=".9" fill="#E8A83A" opacity=".4"/>
+          <circle cx="320" cy="88" r=".7" fill="#C8B0FF" opacity=".3"/>
+          <circle cx="360" cy="200" r=".8" fill="#E8A83A" opacity=".35"/>
+          <circle cx="28" cy="380" r=".7" fill="#C8B0FF" opacity=".3"/>
+          <circle cx="348" cy="460" r=".9" fill="#E8A83A" opacity=".3"/>
+        </svg>
+        <div class="card-inner back-inner">
+          <div class="back-header">
+            <div class="back-header-eyebrow">What's included</div>
+            <div class="back-pkg-name">Anniversary Collection</div>
+          </div>
+          <div class="back-description">
+            Answer separately, reflect honestly. When you've both finished, your results come together, showing you how you've each grown, what you treasure, and what you're still building toward.
+          </div>
+          <div>
+            <div class="back-includes-label">Your exercises</div>
+            <ul class="back-includes">
+              <li><span class="bullet">✦</span><span>Relationship Reflection, milestone questions that invite honesty and appreciation</span></li>
+              <li><span class="bullet">✦</span><span>Personality &amp; Communication, how you've each evolved, mapped side by side</span></li>
+              <li><span class="bullet">✦</span><span>Shared Expectations, revisited, with the wisdom of experience</span></li>
+              <li><span class="bullet">✦</span><span>Joint Results Overview, your full picture, together</span></li>
+            </ul>
+          </div>
+          <div class="back-redeem">
+            <div class="back-redeem-step">To begin, visit attune.com and enter your access code,<br>or scan the QR on the front of this card.</div>
+            <div class="back-url">attune.com</div>
+            <div class="back-footer">© 2025 Attune · Attune, because understanding takes intention.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════
+     PREMIUM
+════════════════════════════════ -->
+<div class="card-scene" id="card-premium" style="display:none">
+  <div class="card-shadow">
+    <!-- FRONT -->
+    <div class="face face-front">
+      <div class="card card-premium-front">
+        <svg class="card-deco" viewBox="0 0 384 576" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="pr-g" x1="0" y1="0" x2="384" y2="0" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stop-color="#E8673A"/>
+              <stop offset="45%" stop-color="#D4A030"/>
+              <stop offset="100%" stop-color="#1B5FE8"/>
+            </linearGradient>
+          </defs>
+          <!-- Gradient edge stripes -->
+          <rect x="0" y="0" width="384" height="5" fill="url(#pr-g)"/>
+          <rect x="0" y="571" width="384" height="5" fill="url(#pr-g)" opacity=".4"/>
+          <!-- Outer rule -->
+          <rect x="14" y="14" width="356" height="548" fill="none" stroke="rgba(255,255,255,.1)" stroke-width=".9"/>
+          <!-- Art deco corners -->
+          <g stroke="rgba(232,103,58,.5)" stroke-width=".9">
+            <line x1="14" y1="30" x2="14" y2="14"/><line x1="14" y1="14" x2="30" y2="14"/>
+            <line x1="26" y1="14" x2="14" y2="26"/>
+            <line x1="354" y1="14" x2="370" y2="14"/><line x1="370" y1="14" x2="370" y2="30"/>
+          </g>
+          <g stroke="rgba(27,95,232,.5)" stroke-width=".9">
+            <line x1="14" y1="546" x2="14" y2="562"/><line x1="14" y1="562" x2="30" y2="562"/>
+            <line x1="354" y1="562" x2="370" y2="562"/><line x1="370" y1="562" x2="370" y2="546"/>
+          </g>
+          <!-- Faint center radial -->
+          <circle cx="192" cy="288" r="2.5" fill="url(#pr-g)" opacity=".25"/>
+          <circle cx="192" cy="288" r="65" fill="none" stroke="rgba(255,255,255,.04)" stroke-width="1"/>
+          <!-- Center rule -->
+          <g transform="translate(192,290)" opacity=".25">
+            <line x1="-60" y1="0" x2="-14" y2="0" stroke="#E8673A" stroke-width=".8"/>
+            <circle cx="0" cy="0" r="3.5" fill="none" stroke="rgba(255,255,255,.6)" stroke-width="1"/>
+            <line x1="14" y1="0" x2="60" y2="0" stroke="#1B5FE8" stroke-width=".8"/>
+          </g>
+        </svg>
+        <div class="card-inner front-inner">
+          <div class="front-wordmark">
+            <svg width="24" height="17" viewBox="0 0 103 76" fill="none"><defs><linearGradient id="lg-p-f" x1="0" y1="0" x2="103" y2="0" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#E8673A"/><stop offset="100%" stop-color="#1B5FE8"/></linearGradient></defs><path d="M14,4 L44,4 A9,9 0 0,1 53,13 L53,42 A9,9 0 0,1 44,51 L20,51 L6,61 L11,51 A6,6 0 0,1 5,45 L5,13 A9,9 0 0,1 14,4 Z" fill="url(#lg-p-f)"/><path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill="rgba(255,255,255,0.15)" transform="translate(13.16,11.3) scale(0.72)"/><path d="M89,14 L59,14 A9,9 0 0,0 50,23 L50,52 A9,9 0 0,0 59,61 L83,61 L97,71 L92,61 A6,6 0 0,0 98,55 L98,23 A9,9 0 0,0 89,14 Z" fill="none" stroke="url(#lg-p-f)" stroke-width="2.2"/><path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill="#1B5FE8" opacity=".55" transform="translate(58.16,21.3) scale(0.72)"/></svg>
+            <span class="front-wordmark-text">Attune</span>
+          </div>
+          <div class="front-center">
+            <div class="front-tagline">A gift for both of you</div>
+            <div class="front-names pr-names">Sarah &amp; James</div>
+            <div class="front-pkg">Attune Premium</div>
+            <div class="front-hook">Your most complete relationship experience, every exercise, your joint results, and a private session with a licensed therapist.</div>
+          </div>
+          <div class="front-qr-section">
+            <div class="front-qr-row">
+              <div>
+                <div class="front-qr-label">Scan to begin</div>
+                <div class="front-code pr-code">SPK ·, · -</div>
+                <div class="front-note">One-time access · attune.com</div>
+              </div>
+              <svg id="pr-qr-frame" viewBox="0 0 90 90" style="width:.88in;height:.88in;flex-shrink:0"></svg>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- BACK -->
+    <div class="face face-back">
+      <div class="card card-premium-back">
+        <svg class="card-deco" viewBox="0 0 384 576" xmlns="http://www.w3.org/2000/svg">
+          <defs><linearGradient id="pr-bg" x1="0" y1="0" x2="384" y2="0" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#E8673A"/><stop offset="45%" stop-color="#D4A030"/><stop offset="100%" stop-color="#1B5FE8"/></linearGradient></defs>
+          <rect x="0" y="0" width="384" height="4" fill="url(#pr-bg)"/>
+          <rect x="0" y="572" width="384" height="4" fill="url(#pr-bg)" opacity=".35"/>
+          <rect x="14" y="14" width="356" height="548" fill="none" stroke="rgba(255,255,255,.09)" stroke-width=".9"/>
+          <g stroke="rgba(232,103,58,.45)" stroke-width=".9">
+            <line x1="14" y1="28" x2="14" y2="14"/><line x1="14" y1="14" x2="28" y2="14"/>
+            <line x1="356" y1="14" x2="370" y2="14"/><line x1="370" y1="14" x2="370" y2="28"/>
+          </g>
+          <g stroke="rgba(27,95,232,.45)" stroke-width=".9">
+            <line x1="14" y1="548" x2="14" y2="562"/><line x1="14" y1="562" x2="28" y2="562"/>
+            <line x1="356" y1="562" x2="370" y2="562"/><line x1="370" y1="562" x2="370" y2="548"/>
+          </g>
+        </svg>
+        <div class="card-inner back-inner">
+          <div class="back-header">
+            <div class="back-header-eyebrow">What's included</div>
+            <div class="back-pkg-name">Attune Premium</div>
+          </div>
+          <div class="back-description">
+            Answer privately, go as deep as you want. Your results unlock together, and when you're ready, you'll sit down with a licensed couples therapist to make sense of what you found.
+          </div>
+          <div>
+            <div class="back-includes-label">Everything in your package</div>
+            <ul class="back-includes">
+              <li><span class="bullet">✦</span><span>Personality &amp; Communication, how you're each wired, and how you connect</span></li>
+              <li><span class="bullet">✦</span><span>Shared Expectations, the real conversations, made easier</span></li>
+              <li><span class="bullet">✦</span><span>Shared Budget Tool, build your real financial picture together</span></li>
+              <li><span class="bullet">✦</span><span>60-minute session with a licensed couples therapist (LMFT)</span></li>
+            </ul>
+          </div>
+          <div class="back-redeem">
+            <div class="back-redeem-step">To begin, visit attune.com and enter your access code,<br>or scan the QR on the front of this card.</div>
+            <div class="back-url">attune.com</div>
+            <div class="back-footer">© 2025 Attune · Attune, because understanding takes intention.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── QR helpers ──────────────────────────────────────────
+function qrCorner(x, y, rot, c1, c2) {
+  const col = (rot === 0 || rot === 180) ? c1 : c2;
+  return `<g transform="translate(${x},${y}) rotate(${rot})"><line x1="0" y1="0" x2="9" y2="0" stroke="${col}" stroke-width="1.5" stroke-linecap="square"/><line x1="0" y1="0" x2="0" y2="9" stroke="${col}" stroke-width="1.5" stroke-linecap="square"/></g>`;
+}
+
+function buildQRFrame(dataUrl, fg, bg, c1, c2) {
+  const S = 90, q = 64, x0 = (S-q)/2, y0 = (S-q)/2, p = 3;
+  const img = dataUrl
+    ? `<image href="${dataUrl}" x="${x0}" y="${y0}" width="${q}" height="${q}"/>`
+    : `<rect x="${x0}" y="${y0}" width="${q}" height="${q}" fill="${bg}"/>`;
+  return `<rect x="${x0-2}" y="${y0-2}" width="${q+4}" height="${q+4}" fill="${bg}"/>
+    ${img}
+    ${qrCorner(x0-p, y0-p, 0, c1, c2)}
+    ${qrCorner(x0+q+p, y0-p, 90, c1, c2)}
+    ${qrCorner(x0-p, y0+q+p, -90, c1, c2)}
+    ${qrCorner(x0+q+p, y0+q+p, 180, c1, c2)}`;
+}
+
+function genQR(url, fg, bg, svgId, c1, c2) {
+  const tmp = document.createElement('div');
+  tmp.style.cssText = 'position:absolute;left:-9999px;width:80px;height:80px;';
+  document.body.appendChild(tmp);
+  try { new QRCode(tmp, { text: url, width:80, height:80, colorDark:fg, colorLight:bg, correctLevel:QRCode.CorrectLevel.M }); } catch(e){}
+  setTimeout(() => {
+    const el = tmp.querySelector('img') || tmp.querySelector('canvas');
+    const src = el ? (el.src || el.toDataURL()) : null;
+    document.body.removeChild(tmp);
+    const frame = document.getElementById(svgId);
+    if (frame) frame.innerHTML = buildQRFrame(src, fg, bg, c1, c2);
+  }, 130);
+}
+
+function randStr(n, a='ABCDEFGHJKLMNPQRSTUVWXYZ23456789') {
+  return Array.from({length:n},()=>a[Math.floor(Math.random()*a.length)]).join('');
+}
+
+const SHORT_CODES = {
+  foundation: 'SPK·' + randStr(3) + '·' + randStr(3),
+  newlywed:   'SPK·' + randStr(3) + '·' + randStr(3),
+  anniversary:'SPK·' + randStr(3) + '·' + randStr(3),
+  premium:    'SPK·' + randStr(3) + '·' + randStr(3),
+};
+const BASE = window.location.origin || 'https://attune.com';
+
+// ── Card switching ──────────────────────────────────────
+let currentPkg = 'newlywed';
+let isFlipped = false;
+
+const CARDS = ['foundation','newlywed','anniversary','premium'];
+
+function switchCard() {
+  const pkg = document.getElementById('pkg-sel').value;
+  currentPkg = pkg;
+  isFlipped = false;
+  CARDS.forEach(id => {
+    const el = document.getElementById('card-' + id);
+    el.style.display = (id === pkg) ? 'block' : 'none';
+    el.classList.remove('flipped');
+  });
+  const note = document.querySelector('.ctrl-note');
+  if (note) note.textContent = 'Showing front · click Flip to see back';
+}
+
+function flipCard() {
+  const card = document.getElementById('card-' + currentPkg);
+  isFlipped = !isFlipped;
+  card.classList.toggle('flipped', isFlipped);
+  const note = document.querySelector('.ctrl-note');
+  if (note) note.textContent = isFlipped ? 'Showing back · click Flip to see front' : 'Showing front · click Flip to see back';
+}
+
+function updateNames() {
+  const names = document.getElementById('names-in').value;
+  document.querySelectorAll('.fd-names, .nw-names, .an-names, .pr-names').forEach(el => {
+    el.textContent = names;
+  });
+}
+
+// ── Init ────────────────────────────────────────────────
+window.addEventListener('DOMContentLoaded', () => {
+  // Update code displays
+  document.querySelectorAll('.fd-code').forEach(el => el.textContent = SHORT_CODES.foundation);
+  document.querySelectorAll('.nw-code').forEach(el => el.textContent = SHORT_CODES.newlywed);
+  document.querySelectorAll('.an-code').forEach(el => el.textContent = SHORT_CODES.anniversary);
+  document.querySelectorAll('.pr-code').forEach(el => el.textContent = SHORT_CODES.premium);
+
+  // Generate QR codes
+  genQR(BASE + '/portal?token=' + randStr(32), '#C4421A', '#FEFAF4', 'fd-qr-frame', '#E8673A', '#1B5FE8');
+  genQR(BASE + '/portal?token=' + randStr(32), '#0A1830', '#FAFCFF', 'nw-qr-frame', '#E8673A', '#1B5FE8');
+  genQR(BASE + '/portal?token=' + randStr(32), '#EDE8FF', '#0C1A4A', 'an-qr-frame', '#E8673A', '#E8A83A');
+  genQR(BASE + '/portal?token=' + randStr(32), '#F0EBE5', '#0A0806', 'pr-qr-frame', '#E8673A', '#1B5FE8');
+
+  switchCard();
+});
+</script>
+</body>
+</html>
