@@ -113,8 +113,26 @@ Vercel auto-deploys on push. Takes ~30 seconds.
 ## Known Limitations / Next Up
 - **Couple portrait:** UI exists (initials + color circles). Planned: integrate external silhouette rendering platform (Ellie to provide API). Session: TBD
 - **Print workbook POD:** Digital workbook auto-generates. Print orders flag in admin but no POD API (Lulu/Mixam). Out of scope for now.
-- **Partner B workbook scores:** Workbook generates from Partner A's localStorage data. Partner B's real Supabase scores not yet wired into workbook generation.
-- **Google Drive:** Share Attune Gmail Drive with personal Gmail to enable Drive access in sessions.
+- **Live site verification:** Deployed at `attune-relationships.com` — not yet verified this session's code is running. Check with Chrome MCP + `document.documentElement.outerHTML.indexOf()` pattern.
+
+---
+
+## Google Drive
+Drive is connected to Claude via the Google Drive connector in claude.ai settings. Full read/write access confirmed. Claude in Chrome must be set to "Allow on all sites" for Drive automation to work.
+
+**Drive structure (completed Session 16):**
+```
+ATTUNE/
+├── Internal/        ← Legal, Finances (folder), Passwords (file), Meeting Notes
+├── Marketing/       ← empty, ready
+└── Product/
+    ├── Active/      ← Launch, Exercises, Results, Workbook, Feedback, Emails
+    └── Archive/     ← Exercises (4 subfolders), Workbook, Emails, Misc
+```
+
+**Sync plan:** Drive is the working home for documents. Repo is the home for code. When docs are generated in a session, upload to the correct Active subfolder. Old versions move to Archive, never deleted. Naming convention: `Document Name (vXX) MM/DD/YYYY`.
+
+**For Drive reorganization in future sessions:** Use Google Apps Script (`script.google.com`). Create a new project, paste a script using DriveApp, run it. Authorization is one-time. This executes 40+ moves in seconds vs. UI clicking.
 
 ---
 
@@ -133,4 +151,20 @@ Short declarative sentences. No em dashes. No hedging language. No AI-sounding c
 
 ---
 
-*Last updated: Session 15 — April 2026*
+---
+
+## Session 16 Notes — April 7, 2026
+
+**Completed:**
+- Google Drive fully reorganized via Apps Script. Product/Active and Product/Archive structure in place. All exercise subfolders renamed and versioned. Old versions in Archive.
+- Partner B workbook score wiring fixed. `savePartnerSession` now updates `attune_live_session` with real `calcDimScores(partnerEx1)` and real Partner B expectations answers when Partner B's data arrives via polling. Also clears cached workbook blob so it regenerates with real scores. Previously, workbooks generated before Partner B finished used demo data permanently.
+- `.gitignore` added — `dist/`, `node_modules/`, `.bak` files now excluded from repo.
+- Google Drive connector confirmed working. Claude in Chrome domain access must be set to "Allow on all sites."
+- Apps Script is the correct tool for bulk Drive operations. Much faster than UI automation.
+
+**Still open:**
+- Live site verification (not done this session)
+- Couple portrait API integration (Ellie to provide platform)
+- Print workbook POD
+
+*Last updated: Session 16 — April 2026*
