@@ -7799,6 +7799,52 @@ export default function App() {
       setAccount(updated);
       try { localStorage.setItem('attune_account', JSON.stringify(updated)); } catch {}
     }
+    // ── Update attune_live_session with real Partner B scores ─────────────
+    // If Partner A already viewed results (and wrote demo partner data to
+    // attune_live_session), overwrite partnerScores and expGaps now that
+    // real Partner B data has arrived. This ensures admin workbook generation
+    // and auto-fulfillment both use real data even if Partner B finished late.
+    try {
+      const existing = JSON.parse(localStorage.getItem('attune_live_session') || 'null');
+      if (existing && s?.ex1 && s?.ex2) {
+        const realPartnerScores = calcDimScores(s.ex1);
+        const EXP_LIFE_KEYS = [
+          { key: 'household', label: 'Visible Household Labor' },
+          { key: 'emotional', label: 'Emotional & Invisible Labor' },
+          { key: 'financial', label: 'Financial & Money' },
+          { key: 'career',    label: 'Career' },
+          { key: 'children',  label: 'Children & Family' },
+          { key: 'lifestyle', label: 'Home & Lifestyle' },
+        ];
+        const realExpGaps = EXP_LIFE_KEYS.map(({ key, label }) => {
+          const yourAns    = existing.expGaps?.find(g => g.key === key)?.yourAnswer || null;
+          const partnerAns = s.ex2?.life?.['lq_' + key] || null;
+          return { key, label, yourAnswer: yourAns, partnerAnswer: partnerAns, aligned: yourAns === partnerAns };
+        });
+        localStorage.setItem('attune_live_session', JSON.stringify({
+          ...existing,
+          partnerScores: realPartnerScores,
+          expGaps: realExpGaps,
+          partnerName: s.name || existing.partnerName,
+          partnerDataReal: true,
+          partnerDataArrivedAt: Date.now(),
+        }));
+      }
+    } catch (_) {}
+    // ── Re-trigger workbook auto-generation if it was queued but used demo data ──
+    // If the order had addonWorkbook and the workbook was generated before Partner B
+    // finished, regenerate it now with real partner scores.
+    try {
+      const ord = JSON.parse(localStorage.getItem('attune_order') || 'null');
+      const liveSession = JSON.parse(localStorage.getItem('attune_live_session') || 'null');
+      if (ord?.addonWorkbook === 'digital' && liveSession?.partnerDataReal) {
+        // Clear the existing workbook so it regenerates on next results view
+        localStorage.removeItem('attune_workbook_blob');
+        localStorage.removeItem('attune_workbook_ready');
+        ord.workbookStatus = null;
+        localStorage.setItem('attune_order', JSON.stringify(ord));
+      }
+    } catch (_) {}
   };
 
   // ── Cross-device partner sync polling ────────────────────────────────────

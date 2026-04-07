@@ -1,0 +1,1009 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+
+<link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#0E0B07">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Attune, Understand each other deeply. And how to grow together.</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,800;1,700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  :root{
+    --cream:#FFFDF9;--warm:#FBF8F3;--stone:#E8DDD0;
+    --clay:#C17F47;--ink:#0E0B07;--text:#1E1610;--muted:#8C7A68;
+    --orange:#E8673A;--indigo:#1B5FE8;
+    --hfont:'Playfair Display',Georgia,serif;
+    --bfont:'DM Sans',sans-serif;
+  }
+  html{scroll-behavior:smooth}
+  html,body{overflow-x:hidden;max-width:100%}
+  body{background:var(--cream);color:var(--text);font-family:var(--bfont);-webkit-font-smoothing:antialiased}
+
+  /* NAV */
+  nav{position:fixed;top:0;left:0;right:0;z-index:100;height:58px;background:rgba(255,253,249,.94);backdrop-filter:blur(16px);border-bottom:1px solid var(--stone);display:flex;align-items:center;padding:0 2.5rem;justify-content:space-between}
+  .logo{display:flex;align-items:center;gap:.65rem;text-decoration:none}
+  .logo-mark{display:flex;align-items:center;flex-shrink:0}
+  .logo-text{font-family:var(--hfont);font-size:1.15rem;font-weight:700;color:var(--ink)}
+  .nav-center{display:flex;gap:2.5rem;list-style:none;position:absolute;left:50%;transform:translateX(-50%);align-items:center}.nav-center li{display:flex;align-items:center}
+  .nav-center a{text-decoration:none;color:var(--muted);font-size:.82rem;font-weight:500;transition:color .15s}
+  .nav-center a:hover{color:var(--ink)}
+  /* LEARN DROPDOWN */
+  .nav-dropdown{position:relative}
+  .nav-dropdown-toggle{text-decoration:none;color:var(--muted);font-size:.82rem;font-weight:500;transition:color .15s;cursor:pointer;display:flex;align-items:center;gap:.28rem;background:none;border:none;padding:0;font-family:var(--bfont)}
+  .nav-dropdown-toggle:hover,.nav-dropdown-toggle.active{color:var(--ink)}
+  .nav-dropdown-toggle svg{transition:transform .2s}
+  .nav-dropdown:hover .nav-dropdown-toggle svg{transform:rotate(180deg)}
+  .nav-dropdown-menu{position:absolute;top:100%;left:50%;transform:translateX(-50%);background:rgba(255,253,249,.98);backdrop-filter:blur(16px);border:1.5px solid var(--stone);border-radius:14px;padding:.6rem;min-width:190px;opacity:0;visibility:hidden;pointer-events:none;transition:opacity .15s,visibility .15s;box-shadow:0 12px 40px rgba(14,11,7,.12);z-index:200;margin-top:0}
+  .nav-dropdown:hover .nav-dropdown-menu{opacity:1;visibility:visible;pointer-events:auto}
+  .nav-dropdown-menu::before{content:'';position:absolute;top:-16px;left:-10px;right:-10px;height:16px;background:transparent;}
+  .nav-dropdown-menu a{display:block;padding:.55rem .8rem;font-size:.78rem;color:var(--muted);text-decoration:none;border-radius:8px;transition:all .15s;font-weight:500}
+  .nav-dropdown-menu a:hover{background:var(--warm);color:var(--ink)}
+  .nav-dropdown-menu .dd-divider{height:1px;background:var(--stone);margin:.35rem .5rem}
+  .nav-center a.active{color:var(--ink);font-weight:600}
+  .nav-right{display:flex;align-items:center;gap:1.25rem}
+  .nav-signin{font-size:.8rem;font-weight:500;color:var(--muted);text-decoration:none;transition:color .15s}
+  .nav-signin:hover{color:var(--ink)}
+  .btn-nav{background:var(--ink);color:white;padding:.5rem 1.2rem;border-radius:10px;font-size:.78rem;font-weight:600;text-decoration:none;display:inline-block;transition:opacity .15s}
+  .btn-nav:hover{opacity:.82}
+
+  /* HERO */
+  .hero{padding-top:58px;min-height:100vh;display:grid;grid-template-columns:1fr 1.15fr;align-items:stretch;max-width:1280px;margin:0 auto;padding-left:3.5rem;padding-right:3.5rem;gap:6rem;position:relative;overflow:visible}
+  .hero-blobs{position:absolute;top:-200px;left:-200px;right:-200px;bottom:-200px;pointer-events:none;z-index:0;overflow:visible}
+  .hero-blob{position:absolute;border-radius:50%;}
+  .hero-left,.hero-right{position:relative;z-index:1}
+  .hero-right{display:flex;flex-direction:column;padding:5.5rem 0 4rem;}
+  .hero-left{padding:3.5rem 0 3rem;display:flex;flex-direction:column;justify-content:center;}
+  .eyebrow{display:inline-flex;align-items:center;gap:.5rem;font-size:.62rem;letter-spacing:.3em;text-transform:uppercase;color:var(--clay);font-weight:700;margin-bottom:1.5rem;white-space:nowrap}
+  .eyebrow-dot{width:5px;height:5px;border-radius:50%;background:var(--orange)}
+  h1{font-family:var(--hfont);font-size:clamp(2.6rem,4.2vw,3.7rem);font-weight:700;line-height:1.06;color:var(--ink);margin-bottom:1.6rem;letter-spacing:-.02em}
+  h1 em{font-style:italic;color:var(--orange)}
+  .hero-sub{font-size:1.02rem;color:var(--muted);line-height:1.78;max-width:430px;margin-bottom:1.75rem;font-weight:300}
+  /* for-you / gift toggle */
+  .use-toggle{display:flex;gap:.75rem;margin-bottom:2.5rem}
+  .use-btn{padding:.55rem 1.1rem;border-radius:10px;font-size:.78rem;font-weight:600;cursor:pointer;border:1.5px solid var(--stone);background:white;color:var(--muted);font-family:var(--bfont);transition:all .15s;display:flex;align-items:center;gap:.45rem}
+  .use-btn.active{background:var(--ink);color:white;border-color:var(--ink)}
+  .use-btn svg{width:14px;height:14px;flex-shrink:0}
+  .use-desc{font-size:.82rem;color:var(--muted);line-height:1.65;margin-bottom:2.25rem;min-height:2.5rem;transition:opacity .2s}
+  .hero-actions{display:flex;align-items:center;gap:1.25rem}
+  .btn-primary{background:linear-gradient(135deg,var(--orange),#d45a2e);color:white;border:none;padding:.9rem 2.1rem;border-radius:12px;font-size:.82rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;cursor:pointer;font-family:var(--bfont);text-decoration:none;display:inline-block;box-shadow:0 6px 24px rgba(232,103,58,.38);transition:transform .18s,box-shadow .18s}
+  .btn-primary:hover{transform:translateY(-2px);box-shadow:0 10px 30px rgba(232,103,58,.45)}
+  .btn-ghost{font-size:.82rem;font-weight:500;color:var(--muted);text-decoration:none;display:inline-flex;align-items:center;gap:.35rem;transition:color .15s}
+  .btn-ghost:hover{color:var(--ink)}
+  .hero-proof{margin-top:2rem;display:flex;align-items:center;gap:.75rem;font-size:.75rem;color:var(--muted)}
+  .proof-dot{width:7px;height:7px;border-radius:50%;background:#3dba7a;flex-shrink:0}
+
+  /* HERO CARD */
+  .hero-card{background:linear-gradient(150deg,#1e1a48,#2e2a68 50%,#201d52);border-radius:22px;padding:2rem;color:white;position:relative;overflow:hidden;box-shadow:0 32px 80px rgba(14,11,7,.22),0 0 0 1px rgba(255,255,255,.06)}
+  .hero-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--orange),var(--indigo))}
+  .hc-label{font-size:.56rem;letter-spacing:.3em;text-transform:uppercase;color:rgba(232,103,58,.65);margin-bottom:.3rem}
+  .hc-names{font-family:var(--hfont);font-size:1.85rem;font-weight:700;margin-bottom:.6rem;letter-spacing:-.02em}
+  .hc-badge{display:inline-block;background:rgba(255,255,255,.11);border:1px solid rgba(255,255,255,.18);padding:.28rem .75rem;border-radius:999px;font-size:.68rem;font-weight:600;margin-bottom:.9rem}
+  .hc-stats{display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:1.1rem}
+  .hc-stat{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);padding:.22rem .65rem;border-radius:999px;font-size:.62rem;color:rgba(255,255,255,.65)}
+  .hc-profiles{display:grid;grid-template-columns:1fr 1fr;gap:.65rem;margin-bottom:1.25rem}
+  .hc-profile{border-radius:10px;padding:.75rem .9rem}
+  .hc-profile.s{background:rgba(232,103,58,.16);border:1px solid rgba(232,103,58,.28)}
+  .hc-profile.j{background:rgba(91,109,248,.16);border:1px solid rgba(91,109,248,.28)}
+  .hc-pname{font-size:.53rem;letter-spacing:.2em;text-transform:uppercase;opacity:.5;margin-bottom:.22rem}
+  .hc-pdesc{font-size:.76rem;font-weight:500;line-height:1.3}
+  /* dimension tiles with explore arrows */
+  .hc-dims{display:grid;grid-template-columns:1fr 1fr;gap:.5rem}
+  .hc-dim{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);border-radius:9px;padding:.6rem .75rem;display:flex;justify-content:space-between;align-items:center;transition:background .15s}
+  .hc-dim:hover{background:rgba(255,255,255,.11)}
+  .hc-dim-left{display:flex;align-items:center;gap:.5rem}
+  .hc-dim-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+  .hc-dim-info{}
+  .hc-dim-name{font-size:.62rem;font-weight:600;margin-bottom:.1rem}
+  .hc-dim-val{font-size:.55rem;color:rgba(255,255,255,.70)}
+  .hc-dim-arrow{color:rgba(255,255,255,.28);font-size:.7rem;flex-shrink:0}
+
+  /* SECTIONS */
+  section{padding:6rem 2.5rem}
+  .si{max-width:1120px;margin:0 auto}
+  .s-eye{font-size:.62rem;letter-spacing:.3em;text-transform:uppercase;color:var(--clay);font-weight:700;margin-bottom:.85rem;display:flex;align-items:center;gap:.5rem}
+  .s-eye::before{content:'';width:20px;height:1.5px;background:var(--clay)}
+  .s-title{font-family:var(--hfont);font-size:clamp(1.9rem,3.2vw,2.7rem);font-weight:700;line-height:1.1;color:var(--ink);margin-bottom:1.1rem;letter-spacing:-.02em}
+  .s-title em{font-style:italic;color:var(--orange)}
+  .s-sub{font-size:.95rem;color:var(--muted);line-height:1.78;font-weight:300;max-width:540px}
+
+  /* WHY IT MATTERS, replaces "how it works" */
+  .bg-warm{background:var(--warm);border-top:1px solid var(--stone);border-bottom:1px solid var(--stone)}
+  .why-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:2rem;margin-top:3.5rem}
+  .why-card{background:white;border:1px solid var(--stone);border-radius:18px;padding:1.85rem;transition:box-shadow .22s,transform .22s;position:relative}
+  .why-card:hover{box-shadow:0 10px 40px rgba(14,11,7,.09);transform:translateY(-2px)}
+  .why-icon-wrap{width:48px;height:48px;border-radius:13px;display:flex;align-items:center;justify-content:center;margin-bottom:1.1rem}
+  .why-title{font-size:.98rem;font-weight:700;color:var(--ink);margin-bottom:.55rem}
+  .why-desc{font-size:.84rem;color:var(--muted);line-height:1.7}
+
+  /* WHAT YOU LEARN */
+  .what-layout{display:grid;grid-template-columns:1fr 1.1fr;gap:6rem;align-items:center;margin-top:3.5rem}
+  .what-list{display:flex;flex-direction:column;gap:1.5rem}
+  .what-item{display:flex;gap:1.1rem;align-items:flex-start}
+  .what-icon-wrap{width:42px;height:42px;border-radius:12px;flex-shrink:0;display:flex;align-items:center;justify-content:center}
+  .what-item h4{font-size:.9rem;font-weight:700;color:var(--ink);margin-bottom:.25rem}
+  .what-item p{font-size:.82rem;color:var(--muted);line-height:1.65}
+
+  /* results mock */
+  .rm{background:var(--warm);border:1px solid var(--stone);border-radius:20px;padding:1.5rem}
+  .rm-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:1.25rem}
+  .rm-lbl{font-size:.6rem;letter-spacing:.22em;text-transform:uppercase;color:var(--clay);font-weight:700}
+  .rm-tabs{display:flex;gap:.4rem}
+  .rm-tab{padding:.28rem .68rem;border-radius:999px;font-size:.6rem;font-weight:500;border:1.5px solid var(--stone);color:var(--muted)}
+  .rm-tab.a{background:var(--ink);color:white;border-color:var(--ink)}
+  .rm-hero{background:linear-gradient(150deg,#1e1c42,#2b285c);border-radius:14px;padding:1.25rem;margin-bottom:1rem;color:white}
+  .rm-hlbl{font-size:.52rem;letter-spacing:.24em;text-transform:uppercase;color:rgba(232,103,58,.65);margin-bottom:.25rem}
+  .rm-hname{font-family:var(--hfont);font-size:1.35rem;font-weight:700;margin-bottom:.45rem}
+  .rm-chips{display:flex;gap:.4rem;flex-wrap:wrap;margin-bottom:.6rem}
+  .rm-chip{background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.13);padding:.18rem .55rem;border-radius:999px;font-size:.59rem;color:rgba(255,255,255,.6)}
+  /* dimension tiles in mock, with arrows */
+  .rm-grid{display:grid;grid-template-columns:1fr 1fr;gap:.55rem}
+  .rm-dim{background:white;border-radius:9px;padding:.7rem .8rem;border:1px solid var(--stone);display:flex;justify-content:space-between;align-items:center;cursor:pointer;transition:border-color .15s,box-shadow .15s}
+  .rm-dim:hover{border-color:var(--clay);box-shadow:0 2px 8px rgba(14,11,7,.07)}
+  .rm-dim-left{}
+  .rm-dlbl{font-size:.58rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:.25rem}
+  .rm-dval{font-size:.7rem;color:var(--ink);font-weight:500;display:flex;align-items:center;gap:.35rem}
+  .rm-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+  .rm-arrow{color:var(--clay);font-size:.85rem;flex-shrink:0;font-weight:600}
+
+  /* WHO IT'S FOR */
+  .for-icon-wrap{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;margin-bottom:1.1rem}
+
+  /* NOT FOR CRISIS, philosophy bar */
+  .philosophy-bar{border-top:1px solid var(--stone);border-bottom:1px solid var(--stone);padding:3rem 2.5rem;background:white}
+  .pb-inner{max-width:1120px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:4rem;align-items:center}
+  .pb-eyebrow{font-size:.62rem;letter-spacing:.3em;text-transform:uppercase;color:var(--clay);font-weight:700;margin-bottom:.75rem;display:flex;align-items:center;gap:.5rem}
+  .pb-eyebrow::before{content:'';width:20px;height:1.5px;background:var(--clay)}
+  .pb-title{font-family:var(--hfont);font-size:1.6rem;font-weight:700;line-height:1.2;color:var(--ink);letter-spacing:-.02em}
+  .pb-title em{font-style:italic;color:var(--orange)}
+  .pb-body{font-size:.88rem;color:var(--muted);line-height:1.78}
+
+  /* DARK PHILOSOPHY */
+  .bg-dark{background:linear-gradient(150deg,#1a1740,#252060)}
+  .bg-dark .s-eye{color:rgba(232,103,58,.65)}
+  .bg-dark .s-eye::before{background:rgba(232,103,58,.4)}
+  .bg-dark .s-title{color:white}
+  .bg-dark .s-sub{color:rgba(255,255,255,.72)}
+  .phil-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem;margin-top:3rem}
+  .phil-card{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.09);border-radius:18px;padding:1.85rem}
+  .phil-q{font-family:var(--hfont);font-size:1.05rem;font-style:italic;line-height:1.58;color:rgba(255,255,255,.86);margin-bottom:1.1rem}
+  .phil-src{font-size:.7rem;color:rgba(255,255,255,.3)}
+
+  /* SOCIAL PROOF */
+  .proof-section{padding:5rem 2.5rem;background:var(--warm)}
+  .proof-inner{max-width:1120px;margin:0 auto}
+  .proof-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem;margin-top:3rem}
+  .proof-card{background:transparent;border:none;padding:1.85rem 1.5rem;position:relative;border-top:1px solid var(--stone)}
+  .proof-stars{color:var(--orange);font-size:.65rem;margin-bottom:.85rem;letter-spacing:.2em;opacity:.8}
+  .proof-text{font-family:var(--hfont);font-size:1.05rem;font-style:italic;line-height:1.65;color:var(--ink);margin-bottom:1.25rem;padding-top:.35rem}
+  .proof-person{display:flex;align-items:center;gap:.65rem}
+  .proof-avatar{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.8rem;font-weight:700;color:white;flex-shrink:0}
+  .proof-name{font-size:.78rem;font-weight:700;color:var(--ink);letter-spacing:.03em}
+  .proof-detail{font-size:.7rem;color:var(--muted)}
+  .proof-stat-row{display:flex;gap:2.5rem;justify-content:center;margin-top:3.5rem;flex-wrap:wrap;padding-top:3rem;border-top:1px solid var(--stone);position:relative}
+  .proof-stat-row::before{content:'';position:absolute;top:-1px;left:50%;transform:translateX(-50%);width:80px;height:2px;background:linear-gradient(90deg,var(--orange),var(--indigo));border-radius:999px}
+  .proof-stat{text-align:center}
+  .proof-stat-num{font-family:var(--hfont);font-size:2.1rem;font-weight:700;color:var(--ink);line-height:1}
+  .proof-stat-label{font-size:.72rem;color:var(--muted);margin-top:.3rem;letter-spacing:.04em}
+
+  /* CTA */
+  .cta-wrap{text-align:center;padding:3rem 2.5rem}
+  .cta-inner{max-width:600px;margin:0 auto}
+  .cta-title{font-family:var(--hfont);font-size:clamp(2rem,3.8vw,3rem);font-weight:700;line-height:1.08;color:var(--ink);margin-bottom:1.25rem;letter-spacing:-.02em}
+  .cta-title em{font-style:italic;color:var(--orange)}
+  .cta-sub{font-size:.96rem;color:var(--muted);line-height:1.78;margin-bottom:2.75rem;font-weight:300}
+  .cta-actions{display:flex;justify-content:center;gap:1.25rem;flex-wrap:wrap;align-items:center}
+
+  /* FOOTER */
+  .footer-outer{border-top:1px solid var(--stone)}
+  footer{max-width:1120px;margin:0 auto;padding:2rem 2.5rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem}
+  .footer-links{display:flex;gap:1.75rem;list-style:none}
+  .footer-links a{font-size:.78rem;color:var(--muted);text-decoration:none;transition:color .15s}
+  .footer-links a:hover{color:var(--ink)}
+  .footer-copy{font-size:.72rem;color:var(--muted)}
+
+  /* ══ SITE FOOTER ══ */
+  .site-footer{background:var(--ink);color:rgba(255,255,255,.80);padding:4rem 0 2rem;width:100%;margin-left:0;margin-right:0;max-width:none;display:block}
+  .sf-inner{max-width:1120px;margin:0 auto;padding:0 2.5rem 3rem;display:grid;grid-template-columns:1fr 2fr;gap:4rem;border-bottom:1px solid rgba(255,255,255,.1)}
+  .sf-brand .logo-text{color:white}
+  .sf-tagline{font-size:.82rem;color:rgba(255,255,255,.38);line-height:1.7;margin-top:.85rem;max-width:200px}
+  .sf-links{display:grid;grid-template-columns:repeat(3,1fr);gap:2rem}
+  .sf-col{display:flex;flex-direction:column;gap:.5rem}
+  .sf-col-title{font-size:.62rem;letter-spacing:.22em;text-transform:uppercase;color:rgba(255,255,255,.65);font-weight:700;margin-bottom:.4rem}
+  .sf-col a{font-size:.82rem;color:rgba(255,255,255,.80);text-decoration:none;transition:color .15s}
+  .sf-col a:hover{color:white}
+  .sf-bottom{max-width:1120px;margin:0 auto;padding:1.75rem 2.5rem 0;display:flex;flex-direction:column;align-items:flex-start;gap:.4rem}
+  .sf-copy,.sf-email{font-size:.72rem;color:rgba(255,255,255,.28)}
+  @media(max-width:768px){.sf-inner{grid-template-columns:1fr;gap:2.5rem}.sf-links{grid-template-columns:repeat(2,1fr)}.sf-bottom{flex-direction:column;align-items:flex-start}}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:translateY(0)}}
+  .fu1{animation:fadeUp .65s ease both}
+  .fu2{animation:fadeUp .65s .1s ease both}
+  .fu3{animation:fadeUp .65s .2s ease both}
+  .fu4{animation:fadeUp .65s .3s ease both}
+
+  /* HAMBURGER NAV */
+  .hamburger{display:none;flex-direction:column;gap:4px;background:none;border:none;cursor:pointer;padding:6px;border-radius:6px}
+  .hamburger span{display:block;width:20px;height:2px;background:var(--ink);border-radius:2px;transition:all .25s}
+  .mobile-menu{display:none;position:fixed;top:58px;left:0;right:0;background:rgba(255,253,249,.98);backdrop-filter:blur(16px);border-bottom:1px solid var(--stone);padding:1.25rem 2rem 1.5rem;z-index:99;flex-direction:column;gap:.2rem}
+  .mobile-menu.open{display:flex}
+  .mobile-menu a{font-size:.9rem;font-weight:500;color:var(--muted);text-decoration:none;padding:.6rem 0;border-bottom:1px solid var(--stone);transition:color .15s}
+  .mobile-menu a:last-child{border-bottom:none}
+  .mobile-menu a:hover{color:var(--ink)}
+  .mobile-menu .mm-cta{color:var(--orange);font-weight:700}
+  @media(max-width:900px){
+    nav{padding:0 1.25rem}
+    .hero{grid-template-columns:1fr;padding-left:1.25rem;padding-right:1.25rem}
+    .hero-right{display:none}
+    .why-grid,.for-grid,.phil-grid,.proof-grid{grid-template-columns:1fr}
+    .what-layout{grid-template-columns:1fr;gap:2rem}
+    .pb-inner{grid-template-columns:1fr}
+    .nav-center{display:none}
+    .nav-right .btn-nav,.nav-signin{display:none}
+    .hamburger{display:flex}
+    .hero-left{padding-top:2rem;padding-bottom:2.5rem}
+    .hero-left h1{font-size:clamp(2.2rem,8vw,3.5rem)}
+    .page-header{padding:calc(58px + 2rem) 1.25rem 2rem}
+    section{padding-left:1.25rem!important;padding-right:1.25rem!important}
+    .philosophy-bar{padding-left:1.25rem!important;padding-right:1.25rem!important}
+    .proof-section{padding-left:1.25rem!important;padding-right:1.25rem!important}
+    .cta-wrap{padding-left:1.25rem!important;padding-right:1.25rem!important}
+  }
+  @media(max-width:640px){
+    .story-cards-desktop{display:none!important}
+    .story-cards-mobile-scroll{display:flex!important}
+    .what-grid{grid-template-columns:1fr!important}
+    .proof-grid{grid-template-columns:1fr!important}
+    .proof-stat-row{display:grid!important;grid-template-columns:1fr 1fr;gap:1.5rem 2rem;justify-items:center;text-align:center}
+    .proof-section{padding:3rem 1.25rem}
+    .proof-text{font-size:.9rem!important}
+    .hero-left h1{font-size:2.2rem}
+    .hero-left p{font-size:.95rem}
+    .hero-ctas{flex-direction:column;align-items:flex-start}
+    .si{padding-left:1.25rem;padding-right:1.25rem}
+    /* Mobile hero: don't hold full viewport height when right column is hidden */
+    .hero{min-height:0!important;padding-top:58px;padding-bottom:0}
+    .hero-left{padding-top:1.75rem!important;padding-bottom:2rem!important}
+    /* First section after hero: reduce top padding so it doesn't feel detached */
+    .hero+section,.hero~section:first-of-type{padding-top:2.5rem!important}
+    section{padding-top:3rem!important;padding-bottom:3rem!important}
+  }
+  .mm-section{display:flex;flex-direction:column;border-bottom:1px solid var(--stone);padding-bottom:.25rem;margin-bottom:.25rem}
+  .mm-label{font-size:.58rem;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);font-weight:700;padding:.55rem 0 .2rem .75rem}
+  .mm-sub{padding-left:.75rem !important;font-size:.85rem !important;border-bottom:none !important}
+  .mm-sub:last-child{border-bottom:none}
+
+  @media(max-width:640px){.use-toggle{flex-wrap:wrap}.use-btn{flex:1;justify-content:center}
+    .hero-left h1{font-size:clamp(2.2rem,8vw,3.5rem)!important}
+    .hero-left p{font-size:.92rem!important}
+    [style*="grid-template-columns:repeat(3,1fr)"]{grid-template-columns:1fr!important}
+    [style*="grid-template-columns: repeat(3, 1fr)"]{grid-template-columns:1fr!important}
+    [style*="grid-template-columns:1fr 1fr"]{grid-template-columns:1fr!important}
+    [style*="grid-template-columns: 1fr 1fr"]{grid-template-columns:1fr!important}
+    [style*="grid-template-columns:1fr 2fr"]{grid-template-columns:1fr!important}
+    [style*="grid-template-columns: 1fr 2fr"]{grid-template-columns:1fr!important}
+    [style*="grid-template-columns:1fr 1.1fr"]{grid-template-columns:1fr!important}
+    .page-header{padding:calc(58px + 2rem) 1.25rem 2rem!important}
+    .si{padding-left:1.25rem!important;padding-right:1.25rem!important}
+    }
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="/home" class="logo">
+    <svg width="46" height="33" viewBox="0 0 103 76" fill="none" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="spark_logo_0_2" x1="0" y1="0" x2="103" y2="76" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#E8673A"/><stop offset="100%" stop-color="#1B5FE8"/></linearGradient></defs><path d="M14,4 L44,4 A9,9 0 0,1 53,13 L53,42 A9,9 0 0,1 44,51 L20,51 L6,61 L11,51 A6,6 0 0,1 5,45 L5,13 A9,9 0 0,1 14,4 Z" fill="url(#spark_logo_0_2)"/><path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill="white" opacity="0.93" transform="translate(13.16,11.3) scale(0.72)"/><path d="M89,14 L59,14 A9,9 0 0,0 50,23 L50,52 A9,9 0 0,0 59,61 L83,61 L97,71 L92,61 A6,6 0 0,0 98,55 L98,23 A9,9 0 0,0 89,14 Z" fill="none" stroke="url(#spark_logo_0_2)" stroke-width="2.2" stroke-linejoin="round"/><path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill="url(#spark_logo_0_2)" transform="translate(58.16,21.3) scale(0.72)"/></svg>
+    <span class="logo-text">Attune</span>
+  </a>
+  <ul class="nav-center">
+    <li><a href="/home" class="active">Home</a></li>
+    <li class="nav-dropdown">
+      <button class="nav-dropdown-toggle">Learn <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg></button>
+      <div class="nav-dropdown-menu">
+        <a href="/purpose">Our Purpose</a>
+        <a href="/how-it-works">How it works</a>
+        <div class="dd-divider"></div>
+        <a href="/practice">In Practice</a>
+        <a href="/faq">FAQs</a>
+        <a href="/reviews">Reviews</a>
+      </div>
+    </li>
+    <li><a href="/offerings">Gifts &amp; Packages</a></li>
+  </ul>
+  <div class="nav-right">
+    <a href="/portal" class="nav-signin">Sign in</a>
+    <a href="/portal" class="btn-nav">Get started</a>
+    <button class="hamburger" id="hamburger" onclick="toggleMenu()" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</nav>
+<div class="mobile-menu" id="mobile-menu">
+  <a href="/home">Home</a>
+  <div class="mm-section">
+    <span class="mm-label">Learn</span>
+    <a href="/purpose" class="mm-sub">Our Purpose</a>
+    <a href="/how-it-works" class="mm-sub">How it works</a>
+    <a href="/practice" class="mm-sub">In Practice</a>
+    <a href="/faq" class="mm-sub">FAQs</a>
+    <a href="/reviews" class="mm-sub">Reviews</a>
+  </div>
+  <a href="/offerings">Gifts &amp; Packages</a>
+  <a href="/portal">Sign in</a>
+  <a href="/portal?tab=signup" class="mm-cta">Get started →</a>
+</div>
+
+<!-- HERO -->
+<div class="hero">
+
+  <!-- Gradient blobs — desktop: top-right purple + lower-right orange + left indigo -->
+  <div class="hero-blobs" aria-hidden="true">
+    <div class="hero-blob" style="top:-180px;right:-160px;width:820px;height:820px;background:radial-gradient(ellipse at 55% 42%, rgba(155,93,229,0.28) 0%, rgba(155,93,229,0.12) 35%, rgba(155,93,229,0.04) 58%, transparent 72%);"></div>
+    <div class="hero-blob" style="bottom:-100px;right:-60px;width:560px;height:560px;background:radial-gradient(ellipse at 50% 55%, rgba(232,103,58,0.18) 0%, rgba(232,103,58,0.06) 50%, transparent 68%);"></div>
+    <!-- Third desktop blob: indigo left edge for depth -->
+    <div class="hero-blob" style="top:60px;left:-120px;width:420px;height:420px;background:radial-gradient(ellipse at 30% 50%, rgba(27,95,232,0.10) 0%, transparent 60%);"></div>
+    <!-- Mobile-only: centred bloom behind headline -->
+    <div class="hero-blob" style="top:-60px;left:50%;transform:translateX(-50%);width:560px;height:500px;background:radial-gradient(ellipse at 50% 36%, rgba(155,93,229,0.30) 0%, rgba(155,93,229,0.12) 38%, rgba(232,103,58,0.12) 55%, transparent 70%);display:none" id="hero-blob-mobile"></div>
+  </div>
+  <style>
+    @media(max-width:900px){#hero-blob-mobile{display:block !important}}
+    @media(max-width:900px){.hero-blobs .hero-blob:not(#hero-blob-mobile){display:none}}
+  </style>
+
+  <div class="hero-left">
+    <p class="eyebrow fu1" style="font-size:.6rem;"><span class="eyebrow-dot"></span>A new kind of relationship tool</p>
+    <h1 class="fu2">Understand each other deeply.<br><em>And how to grow together.</em></h1>
+    <p class="hero-love fu3" style="font-size:.95rem;color:var(--ink);font-weight:500;line-height:1.6;margin-bottom:.75rem;max-width:420px;font-family:'DM Sans',sans-serif;">You love each other. Attune uncovers how you are actually wired to help you learn how to grow together.</p>
+    <p class="hero-sub fu3">Complete a series of independent exercises to build a precise picture of your relationship and growth opportunities.</p>
+    
+
+    <!-- FOR YOU / GIVE AS GIFT — stacked, narrow -->
+    <div class="hero-ctas fu3" style="display:flex;flex-direction:column;align-items:flex-start;gap:.65rem;">
+      <a href="/offerings" class="btn-primary" style="width:auto;padding:.9rem 2.4rem;">Get started →</a>
+      <a href="/offerings#gift" class="btn-ghost" style="font-size:.78rem;padding-left:.5rem;">Give it as a gift →</a>
+    </div>
+
+    <!-- Mobile-only: mini gap preview strip (desktop has animated card on the right) -->
+    <div id="hero-gap-strip" style="display:none;margin-top:1.5rem;">
+      <div style="font-size:.55rem;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);font-family:'DM Sans',sans-serif;font-weight:700;margin-bottom:.65rem;">A glimpse at your results</div>
+      <div style="background:linear-gradient(150deg,#1e1a42,#2c2860);border-radius:12px;overflow:hidden;">
+        <div id="hgs-bar" style="height:2px;background:linear-gradient(90deg,#1B5FE8,#1B5FE844);transition:background 0.5s;"></div>
+        <div style="padding:.9rem 1rem;display:grid;grid-template-columns:1fr auto 1fr;align-items:start;gap:.5rem;">
+          <div>
+            <div style="font-size:.46rem;letter-spacing:.16em;text-transform:uppercase;color:rgba(232,103,58,.6);font-family:'DM Sans',sans-serif;font-weight:700;margin-bottom:.3rem;">Sarah</div>
+            <div id="hgs-her" style="font-family:'Playfair Display',Georgia,serif;font-size:.88rem;font-weight:700;color:white;line-height:1.25;">Address it now.</div>
+          </div>
+          <div style="display:flex;align-items:center;padding-top:.9rem;">
+            <div id="hgs-pill" style="width:18px;height:18px;border-radius:50%;background:rgba(27,95,232,.25);border:1px solid rgba(27,95,232,.45);display:flex;align-items:center;justify-content:center;transition:background .5s,border-color .5s;">
+              <span style="font-size:.42rem;color:rgba(255,255,255,.45);font-weight:700;font-family:'DM Sans',sans-serif;">vs</span>
+            </div>
+          </div>
+          <div>
+            <div style="font-size:.46rem;letter-spacing:.16em;text-transform:uppercase;color:rgba(27,95,232,.7);font-family:'DM Sans',sans-serif;font-weight:700;margin-bottom:.3rem;">James</div>
+            <div id="hgs-his" style="font-family:'Playfair Display',Georgia,serif;font-size:.88rem;font-weight:700;color:white;line-height:1.25;">Needs space first.</div>
+          </div>
+        </div>
+        <div style="padding:.45rem 1rem .6rem;display:flex;align-items:center;justify-content:space-between;">
+          <div id="hgs-dim" style="font-size:.44rem;letter-spacing:.16em;text-transform:uppercase;color:rgba(255,255,255,.2);font-family:'DM Sans',sans-serif;">Conflict style</div>
+          <div style="display:flex;gap:3px;" id="hgs-dots">
+            <div style="width:12px;height:2px;border-radius:2px;background:rgba(255,255,255,.4);transition:all .4s;"></div>
+            <div style="width:4px;height:2px;border-radius:2px;background:rgba(255,255,255,.15);transition:all .4s;"></div>
+            <div style="width:4px;height:2px;border-radius:2px;background:rgba(255,255,255,.15);transition:all .4s;"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <style>@media(max-width:900px){#hero-gap-strip{display:block!important}}</style>
+  </div>
+
+  <div class="hero-right fu3">
+    <div style="display:flex;flex-direction:column;height:100%;justify-content:center;gap:1rem;">
+
+      <!-- ── COUPLE MAP HERO VISUAL ── -->
+      <div style="background:white;border-radius:20px;padding:1.25rem 1.25rem 1rem;box-shadow:0 6px 32px rgba(14,11,7,.10),0 1px 8px rgba(14,11,7,.06);border:1.5px solid #EDE8E2;">
+        <div style="font-size:.5rem;letter-spacing:.22em;text-transform:uppercase;color:#E8673A;font-weight:700;margin-bottom:.6rem;font-family:'DM Sans',sans-serif;">Your Couple Map · Sarah &amp; James</div>
+        <!-- Mini 2x2 map SVG -->
+        <div style="position:relative;width:100%;aspect-ratio:1.2;max-height:200px;overflow:visible;">
+          <svg viewBox="0 0 400 340" style="width:100%;height:100%;" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="hgW" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#FFE4D6"/><stop offset="100%" stop-color="#FFCDB3"/></linearGradient>
+              <linearGradient id="hgX" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#DAE4FF"/><stop offset="100%" stop-color="#C5D3FF"/></linearGradient>
+              <linearGradient id="hgY" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#EAE0FF"/><stop offset="100%" stop-color="#DDD0FF"/></linearGradient>
+              <linearGradient id="hgZ" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#EBEBEB"/><stop offset="100%" stop-color="#DEDEDE"/></linearGradient>
+              <radialGradient id="hga"><stop offset="0%" stop-color="#E8673A" stop-opacity=".4"/><stop offset="100%" stop-color="#E8673A" stop-opacity="0"/></radialGradient>
+              <radialGradient id="hgb"><stop offset="0%" stop-color="#7C3AED" stop-opacity=".4"/><stop offset="100%" stop-color="#7C3AED" stop-opacity="0"/></radialGradient>
+              <filter id="hds"><feDropShadow dx="0" dy="2" stdDeviation="4" flood-color="rgba(0,0,0,.2)"/></filter>
+            </defs>
+            <!-- Quadrant fills: W top-left, X top-right, Y bottom-left, Z bottom-right -->
+            <rect x="28" y="20" width="172" height="142" rx="10" fill="url(#hgW)"/>
+            <rect x="204" y="20" width="172" height="142" rx="10" fill="url(#hgX)"/>
+            <rect x="28" y="166" width="172" height="142" rx="10" fill="url(#hgY)"/>
+            <rect x="204" y="166" width="172" height="142" rx="10" fill="url(#hgZ)"/>
+            <!-- Border -->
+            <rect x="28" y="20" width="348" height="288" rx="10" fill="none" stroke="#D8D0C8" stroke-width="1.2"/>
+            <!-- Centre lines -->
+            <line x1="202" y1="20" x2="202" y2="308" stroke="white" stroke-width="3"/>
+            <line x1="28" y1="164" x2="376" y2="164" stroke="white" stroke-width="3"/>
+            <line x1="202" y1="20" x2="202" y2="308" stroke="#C8C0B8" stroke-width=".8"/>
+            <line x1="28" y1="164" x2="376" y2="164" stroke="#C8C0B8" stroke-width=".8"/>
+            <!-- Type labels -->
+            <text x="42" y="42" font-size="11" font-weight="800" fill="#E8673A" font-family="Georgia,serif" opacity=".9">W</text>
+            <text x="42" y="56" font-size="8.5" font-weight="700" fill="#E8673A" font-family="Arial" opacity=".75">The Reacher</text>
+            <text x="362" y="42" font-size="11" font-weight="800" fill="#1B5FE8" font-family="Georgia,serif" text-anchor="end" opacity=".9">X</text>
+            <text x="362" y="56" font-size="8.5" font-weight="700" fill="#1B5FE8" font-family="Arial" text-anchor="end" opacity=".75">The Driver</text>
+            <text x="42" y="290" font-size="11" font-weight="800" fill="#7C3AED" font-family="Georgia,serif" opacity=".9">Y</text>
+            <text x="42" y="304" font-size="8.5" font-weight="700" fill="#7C3AED" font-family="Arial" opacity=".75">The Feeler</text>
+            <text x="362" y="290" font-size="11" font-weight="800" fill="#6B7280" font-family="Georgia,serif" text-anchor="end" opacity=".9">Z</text>
+            <text x="362" y="304" font-size="8.5" font-weight="700" fill="#6B7280" font-family="Arial" text-anchor="end" opacity=".75">The Undercurrent</text>
+            <!-- Axis labels -->
+            <text x="202" y="12" font-size="9" font-weight="700" fill="#8C7A68" font-family="Arial" text-anchor="middle">Engage</text>
+            <text x="202" y="322" font-size="9" font-weight="700" fill="#8C7A68" font-family="Arial" text-anchor="middle">Withdraw</text>
+            <text x="18" y="167" font-size="9" font-weight="700" fill="#8C7A68" font-family="Arial" text-anchor="end">Open</text>
+            <text x="385" y="167" font-size="9" font-weight="700" fill="#8C7A68" font-family="Arial" text-anchor="start">Guarded</text>
+            <!-- Dashed connector: Sarah W(top-left) → James Y(bottom-left) -->
+            <line x1="114" y1="80" x2="118" y2="238" stroke="#C0B8B0" stroke-width="1.5" stroke-dasharray="5,4" opacity=".7"/>
+            <!-- Sarah dot (W - top-left, open+engage) -->
+            <circle cx="114" cy="80" r="28" fill="url(#hga)"/>
+            <circle cx="114" cy="80" r="17" fill="none" stroke="#E8673A" stroke-width="1.2" opacity=".3"/>
+            <circle cx="114" cy="80" r="11" fill="#E8673A" filter="url(#hds)"/>
+            <circle cx="114" cy="80" r="11" fill="none" stroke="white" stroke-width="2"/>
+            <circle cx="110" cy="76" r="3.5" fill="white" opacity=".4"/>
+            <!-- Sarah tag -->
+            <rect x="82" y="55" width="46" height="17" rx="8.5" fill="#E8673A"/>
+            <text x="105" y="67" font-size="8.5" font-weight="700" fill="white" text-anchor="middle" font-family="Arial">Sarah</text>
+            <polygon points="105,72 101,67 109,67" fill="#E8673A"/>
+            <!-- James dot (Y - bottom-left, open+withdraw) -->
+            <circle cx="118" cy="238" r="28" fill="url(#hgb)"/>
+            <circle cx="118" cy="238" r="17" fill="none" stroke="#7C3AED" stroke-width="1.2" opacity=".3"/>
+            <circle cx="118" cy="238" r="11" fill="#7C3AED" filter="url(#hds)"/>
+            <circle cx="118" cy="238" r="11" fill="none" stroke="white" stroke-width="2"/>
+            <circle cx="114" cy="234" r="3.5" fill="white" opacity=".4"/>
+            <!-- James tag -->
+            <rect x="84" y="252" width="48" height="17" rx="8.5" fill="#7C3AED"/>
+            <text x="108" y="264" font-size="8.5" font-weight="700" fill="white" text-anchor="middle" font-family="Arial">James</text>
+            <polygon points="108,252 104,246 112,246" fill="#7C3AED"/>
+          </svg>
+        </div>
+        <!-- Legend + callout -->
+        <div style="display:flex;gap:.85rem;margin-top:.5rem;flex-wrap:wrap;">
+          <div style="display:flex;align-items:center;gap:.35rem;"><div style="width:8px;height:8px;border-radius:50%;background:#E8673A;"></div><span style="font-size:.62rem;font-weight:600;color:#0E0B07;font-family:'DM Sans',sans-serif;">Sarah · W — The Reacher</span></div>
+          <div style="display:flex;align-items:center;gap:.35rem;"><div style="width:8px;height:8px;border-radius:50%;background:#7C3AED;"></div><span style="font-size:.62rem;font-weight:600;color:#0E0B07;font-family:'DM Sans',sans-serif;">James · Y — The Feeler</span></div>
+        </div>
+        <div style="margin-top:.65rem;padding:.6rem .75rem;background:#FBF8F3;border:1.5px solid #E8DDD0;border-radius:8px;display:flex;align-items:flex-start;gap:.5rem;">
+          <div style="width:18px;height:18px;border-radius:50%;background:linear-gradient(135deg,#E8673A,#1B5FE8);flex-shrink:0;display:flex;align-items:center;justify-content:center;margin-top:1px;">
+            <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          </div>
+          <p style="font-size:.62rem;color:#8C7A68;line-height:1.55;margin:0;font-weight:300;font-family:'DM Sans',sans-serif;"><strong style="color:#0E0B07;font-weight:700;">Each dot is placed by calculation, not intuition.</strong> These positions are derived from 50 independent questions — you can't guess your way here.</p>
+        </div>
+      </div>
+
+      <!-- Animated gap card — cycles Conflict / Stress / Repair at 4.5s -->
+      <div id="gap-card" style="background:linear-gradient(150deg,#1e1a42,#2c2860);border-radius:20px;overflow:hidden;position:relative;opacity:1;transition:opacity 0.4s ease;height:188px;display:flex;flex-direction:column;">
+        <div id="gap-bar" style="height:3px;background:linear-gradient(90deg,#1B5FE8,#1B5FE844);transition:background 0.5s ease;flex-shrink:0;"></div>
+        <div style="padding:1.75rem 1.75rem 1rem;flex:1;overflow:hidden;">
+          <div id="gap-dim" style="font-size:.52rem;letter-spacing:.22em;text-transform:uppercase;color:rgba(255,255,255,.32);font-family:'DM Sans',sans-serif;font-weight:700;margin-bottom:1.25rem;">Conflict style</div>
+          <!-- Fixed height so card never resizes between slides -->
+          <div style="display:grid;grid-template-columns:1fr 40px 1fr;align-items:start;">
+            <div>
+              <div style="font-size:.52rem;letter-spacing:.16em;text-transform:uppercase;color:rgba(232,103,58,.7);font-family:'DM Sans',sans-serif;font-weight:700;margin-bottom:.55rem;">Sarah</div>
+              <div id="her-answer" style="font-family:'Playfair Display',Georgia,serif;font-size:1.15rem;font-weight:700;color:white;line-height:1.25;margin-bottom:.4rem;">Address it now.</div>
+              <div id="her-sub" style="font-size:.7rem;color:rgba(255,255,255,.45);font-family:'DM Sans',sans-serif;line-height:1.5;">Unresolved things sit heavily with her.</div>
+            </div>
+            <div style="display:flex;flex-direction:column;align-items:center;padding-top:.25rem;">
+              <div style="width:1px;flex:1;background:rgba(255,255,255,.08);min-height:12px;"></div>
+              <div id="gap-pill" style="width:28px;height:28px;border-radius:50%;background:rgba(27,95,232,.25);border:1px solid rgba(27,95,232,.4);display:flex;align-items:center;justify-content:center;margin:8px 0;flex-shrink:0;transition:background 0.5s,border-color 0.5s;">
+                <span style="font-size:.55rem;color:rgba(255,255,255,.5);font-weight:700;font-family:'DM Sans',sans-serif;">vs</span>
+              </div>
+              <div style="width:1px;flex:1;background:rgba(255,255,255,.08);min-height:12px;"></div>
+            </div>
+            <div>
+              <div style="font-size:.52rem;letter-spacing:.16em;text-transform:uppercase;color:rgba(27,95,232,.8);font-family:'DM Sans',sans-serif;font-weight:700;margin-bottom:.55rem;">James</div>
+              <div id="his-answer" style="font-family:'Playfair Display',Georgia,serif;font-size:1.15rem;font-weight:700;color:white;line-height:1.25;margin-bottom:.4rem;">Needs space first.</div>
+              <div id="his-sub" style="font-size:.7rem;color:rgba(255,255,255,.45);font-family:'DM Sans',sans-serif;line-height:1.5;">He can't engage until he's regulated.</div>
+            </div>
+          </div>
+        </div>
+        <div style="padding:.5rem 1.75rem .9rem;display:flex;align-items:center;gap:.5rem;flex-shrink:0;">
+          <div class="gap-dot" style="width:22px;height:4px;border-radius:2px;background:rgba(255,255,255,.55);transition:all 0.4s;"></div>
+          <div class="gap-dot" style="width:8px;height:4px;border-radius:2px;background:rgba(255,255,255,.18);transition:all 0.4s;"></div>
+          <div class="gap-dot" style="width:8px;height:4px;border-radius:2px;background:rgba(255,255,255,.18);transition:all 0.4s;"></div>
+          <div style="margin-left:auto;font-size:.58rem;color:rgba(255,255,255,.18);font-family:'DM Sans',sans-serif;letter-spacing:.06em;">built from their answers</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+<script>
+(function() {
+  var slides = [
+    { dim:"Conflict style", her:{ answer:"Address it now.", sub:"Unresolved things sit heavily with her." }, his:{ answer:"Needs space first.", sub:"He can't engage until he's regulated." }, color:"#1B5FE8" },
+    { dim:"Under stress",   her:{ answer:"Reaches for closeness.", sub:"Difficulty makes her want more connection." }, his:{ answer:"Pulls inward.", sub:"He needs to be alone to recover." }, color:"#9B5DE5" },
+    { dim:"How you repair", her:{ answer:"Needs the words.", sub:"She needs the explicit conversation to close." }, his:{ answer:"Warmth is enough.", sub:"Once the tension lifts, he's already moved on." }, color:"#E8673A" }
+  ];
+  var cur = 0;
+  function goTo(i) {
+    var card = document.getElementById('gap-card');
+    if (!card) return;
+    card.style.opacity = '0';
+    setTimeout(function() {
+      var s = slides[i];
+      document.getElementById('gap-dim').textContent = s.dim;
+      document.getElementById('her-answer').textContent = s.her.answer;
+      document.getElementById('her-sub').textContent = s.her.sub;
+      document.getElementById('his-answer').textContent = s.his.answer;
+      document.getElementById('his-sub').textContent = s.his.sub;
+      document.getElementById('gap-bar').style.background = 'linear-gradient(90deg,'+s.color+','+s.color+'44)';
+      document.getElementById('gap-pill').style.background = s.color+'28';
+      document.getElementById('gap-pill').style.borderColor = s.color+'55';
+      document.querySelectorAll('.gap-dot').forEach(function(d,j){
+        d.style.width=j===i?'22px':'8px';
+        d.style.background=j===i?'rgba(255,255,255,.55)':'rgba(255,255,255,.18)';
+      });
+      card.style.opacity = '1';
+    }, 400);
+  }
+  /* Also animate the mobile gap strip */
+  function goToMobile(i) {
+    var s = slides[i];
+    var bar  = document.getElementById('hgs-bar');
+    var her  = document.getElementById('hgs-her');
+    var his  = document.getElementById('hgs-his');
+    var pill = document.getElementById('hgs-pill');
+    var dim  = document.getElementById('hgs-dim');
+    var dots = document.getElementById('hgs-dots');
+    if (!bar) return;
+    bar.style.background  = 'linear-gradient(90deg,'+s.color+','+s.color+'44)';
+    pill.style.background = s.color+'25';
+    pill.style.borderColor= s.color+'45';
+    her.textContent  = s.her.answer;
+    his.textContent  = s.his.answer;
+    dim.textContent  = s.dim;
+    if (dots) dots.querySelectorAll('div').forEach(function(d,j){
+      d.style.width      = j===i ? '12px' : '4px';
+      d.style.background = j===i ? 'rgba(255,255,255,.4)' : 'rgba(255,255,255,.15)';
+    });
+  }
+  setInterval(function(){ cur=(cur+1)%slides.length; goTo(cur); goToMobile(cur); }, 4500);
+})();
+</script>
+
+<!-- WHAT YOU LEARN -->
+<section>
+  <div class="si">
+    <!-- Simple header before cards -->
+    <div style="text-align:center;margin-bottom:2.5rem;border-top:1.5px solid var(--stone);padding-top:3rem;">
+      <div style="display:inline-flex;align-items:center;gap:.75rem;font-size:.6rem;letter-spacing:.28em;text-transform:uppercase;color:var(--clay);font-weight:700;margin-bottom:.85rem;">
+        <span style="width:20px;height:1.5px;background:var(--clay);display:inline-block;"></span>
+        What your results look like
+        <span style="width:20px;height:1.5px;background:var(--clay);display:inline-block;"></span>
+      </div>
+      <h2 style="font-family:var(--hfont);font-size:clamp(1.6rem,3vw,2.2rem);font-weight:700;color:var(--ink);line-height:1.1;letter-spacing:-.02em;margin:0 auto;max-width:520px;">Built from your answers. Specific to you two.</h2>
+    </div>
+
+    <!-- Story cards row -->
+    <div class="story-cards story-cards-desktop" style="display:grid;grid-template-columns:repeat(3,1fr);gap:1.25rem;align-items:stretch;">
+
+      <!-- Card 1: Couple Type -->
+      <div style="background:linear-gradient(160deg,#2d1240,#461860,#2d1240);border-radius:20px;overflow:hidden;display:flex;flex-direction:column;position:relative;min-height:420px;">
+        <div style="height:3px;background:linear-gradient(90deg,#E91E63,#9C27B0);flex-shrink:0;"></div>
+        <div style="position:absolute;top:14px;left:16px;display:flex;align-items:center;gap:4px;opacity:.35;">
+          <svg width="14" height="10" viewBox="0 0 103 76" fill="none"><defs><linearGradient id="sg1" x1="0" y1="0" x2="103" y2="76" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#E8673A"/><stop offset="100%" stop-color="#1B5FE8"/></linearGradient></defs><path d="M14,4 L44,4 A9,9 0 0,1 53,13 L53,42 A9,9 0 0,1 44,51 L20,51 L6,61 L11,51 A6,6 0 0,1 5,45 L5,13 A9,9 0 0,1 14,4 Z" fill="url(#sg1)"/><path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill="white" opacity=".9" transform="translate(13.16,11.3) scale(0.72)"/><path d="M89,14 L59,14 A9,9 0 0,0 50,23 L50,52 A9,9 0 0,0 59,61 L83,61 L97,71 L92,61 A6,6 0 0,0 98,55 L98,23 A9,9 0 0,0 89,14 Z" fill="none" stroke="url(#sg1)" stroke-width="2.2" stroke-linejoin="round"/><path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill="url(#sg1)" transform="translate(58.16,21.3) scale(0.72)"/></svg>
+          <span style="font-family:'Playfair Display',Georgia,serif;font-size:.58rem;font-weight:700;color:white;">Attune</span>
+        </div>
+        <div style="padding:2.25rem 1.75rem 2rem;flex:1;display:flex;flex-direction:column;justify-content:space-between;">
+          <div>
+            <div style="font-size:.52rem;letter-spacing:.24em;text-transform:uppercase;color:rgba(233,30,99,.65);font-weight:700;margin-bottom:1.25rem;font-family:'DM Sans',sans-serif;">Couple Type</div>
+            <div style="font-family:'Playfair Display',Georgia,serif;font-size:2.5rem;font-weight:700;color:white;line-height:.95;margin-bottom:.75rem;letter-spacing:-.02em;">The Mismatch</div>
+            <p style="font-size:.82rem;color:#E91E63;font-weight:600;line-height:1.45;margin:0;font-family:'DM Sans',sans-serif;">Different conflict clocks. Knowing that changes everything.</p>
+          </div>
+          <!-- Mini 2x2 couple map -->
+          <div style="margin-top:1.25rem;">
+            <div style="position:relative;width:100%;height:96px;border-radius:10px;overflow:hidden;margin-bottom:.85rem;">
+              <!-- Quadrant grid -->
+              <div style="display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;width:100%;height:100%;gap:2px;">
+                <div style="background:rgba(232,103,58,.55);border-radius:5px 0 0 0;display:flex;align-items:flex-start;padding:5px 6px;font-size:.5rem;font-weight:700;color:rgba(255,255,255,.9);font-family:'DM Sans',sans-serif;">W</div>
+                <div style="background:rgba(27,95,232,.48);border-radius:0 5px 0 0;display:flex;align-items:flex-start;justify-content:flex-end;padding:5px 6px;font-size:.5rem;font-weight:700;color:rgba(255,255,255,.9);font-family:'DM Sans',sans-serif;">X</div>
+                <div style="background:rgba(124,58,237,.48);border-radius:0 0 0 5px;display:flex;align-items:flex-end;padding:5px 6px;font-size:.5rem;font-weight:700;color:rgba(255,255,255,.9);font-family:'DM Sans',sans-serif;">Y</div>
+                <div style="background:rgba(107,114,128,.38);border-radius:0 0 5px 0;display:flex;align-items:flex-end;justify-content:flex-end;padding:5px 6px;font-size:.5rem;font-weight:700;color:rgba(255,255,255,.75);font-family:'DM Sans',sans-serif;">Z</div>
+              </div>
+              <!-- White centre lines -->
+              <div style="position:absolute;top:0;bottom:0;left:50%;width:2px;background:rgba(255,255,255,.25);transform:translateX(-50%);"></div>
+              <div style="position:absolute;left:0;right:0;top:50%;height:2px;background:rgba(255,255,255,.25);transform:translateY(-50%);"></div>
+              <!-- Sarah dot: W quadrant (top-left) -->
+              <div style="position:absolute;left:28%;top:28%;width:13px;height:13px;border-radius:50%;background:#E8673A;box-shadow:0 0 0 4px rgba(232,103,58,.3),0 2px 6px rgba(0,0,0,.25);border:2px solid rgba(255,255,255,.8);transform:translate(-50%,-50%);"></div>
+              <!-- James dot: Y quadrant (bottom-left) -->
+              <div style="position:absolute;left:30%;top:72%;width:13px;height:13px;border-radius:50%;background:#7C3AED;box-shadow:0 0 0 4px rgba(124,58,237,.3),0 2px 6px rgba(0,0,0,.25);border:2px solid rgba(255,255,255,.8);transform:translate(-50%,-50%);"></div>
+              <!-- Dashed line -->
+              <svg style="position:absolute;inset:0;width:100%;height:100%;overflow:visible;" viewBox="0 0 100 100" preserveAspectRatio="none">
+                <line x1="28" y1="28" x2="30" y2="72" stroke="rgba(255,255,255,.35)" stroke-width="1.5" stroke-dasharray="3,2.5"/>
+              </svg>
+            </div>
+            <div style="display:flex;gap:1rem;align-items:center;">
+              <div style="display:flex;align-items:center;gap:.4rem;"><div style="width:8px;height:8px;border-radius:50%;background:#E8673A;box-shadow:0 0 0 2px rgba(232,103,58,.3);flex-shrink:0;"></div><span style="font-size:.6rem;color:rgba(255,255,255,.55);font-family:'DM Sans',sans-serif;font-weight:600;">Sarah · W — The Reacher</span></div>
+              <div style="display:flex;align-items:center;gap:.4rem;"><div style="width:8px;height:8px;border-radius:50%;background:#7C3AED;box-shadow:0 0 0 2px rgba(124,58,237,.3);flex-shrink:0;"></div><span style="font-size:.6rem;color:rgba(255,255,255,.75);font-family:'DM Sans',sans-serif;font-weight:600;">James · Y — The Feeler</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card 2: Communication -->
+      <div style="background:linear-gradient(160deg,#0d2c24,#163d30,#0d2c24);border-radius:20px;overflow:hidden;display:flex;flex-direction:column;position:relative;min-height:420px;">
+        <div style="height:3px;background:linear-gradient(90deg,#34d399,rgba(52,211,153,.3));flex-shrink:0;"></div>
+        <div style="position:absolute;top:14px;left:16px;display:flex;align-items:center;gap:4px;opacity:.35;">
+          <svg width="14" height="10" viewBox="0 0 103 76" fill="none"><use href="#sg1"/></svg>
+          <span style="font-family:'Playfair Display',Georgia,serif;font-size:.58rem;font-weight:700;color:white;">Attune</span>
+        </div>
+        <div style="padding:2.25rem 1.75rem 2rem;flex:1;display:flex;flex-direction:column;justify-content:space-between;">
+          <div>
+            <div style="font-size:.52rem;letter-spacing:.24em;text-transform:uppercase;color:rgba(232,103,58,1);font-weight:700;margin-bottom:1.25rem;font-family:'DM Sans',sans-serif;">Communication</div>
+            <div style="font-family:'Playfair Display',Georgia,serif;font-size:1.75rem;font-weight:700;color:white;line-height:1.05;margin-bottom:.75rem;">How you each actually show up.</div>
+            <div style="display:flex;flex-direction:column;gap:.5rem;">
+              <div style="display:flex;align-items:center;gap:.6rem;">
+                <span style="font-size:.65rem;color:#E8673A;font-weight:700;width:40px;flex-shrink:0;font-family:'DM Sans',sans-serif;">Sarah</span>
+                <div style="flex:1;background:rgba(255,255,255,.08);border-radius:3px;height:5px;overflow:hidden;"><div style="background:#E8673A;height:5px;width:15%;border-radius:3px;"></div></div>
+                <span style="font-size:.6rem;color:rgba(255,255,255,.55);font-family:'DM Sans',sans-serif;white-space:nowrap;">Engage fast</span>
+              </div>
+              <div style="display:flex;align-items:center;gap:.6rem;">
+                <span style="font-size:.65rem;color:#7B9FFF;font-weight:700;width:40px;flex-shrink:0;font-family:'DM Sans',sans-serif;">James</span>
+                <div style="flex:1;background:rgba(255,255,255,.08);border-radius:3px;height:5px;overflow:hidden;"><div style="background:#5B7FE8;height:5px;width:80%;border-radius:3px;"></div></div>
+                <span style="font-size:.6rem;color:rgba(255,255,255,.55);font-family:'DM Sans',sans-serif;white-space:nowrap;">Withdraw first</span>
+              </div>
+            </div>
+          </div>
+          <div style="margin-top:1.5rem;font-size:.68rem;color:rgba(255,255,255,.4);font-family:'DM Sans',sans-serif;">10 dimensions, side by side</div>
+        </div>
+      </div>
+
+      <!-- Card 3: By the numbers -->
+      <div style="background:linear-gradient(160deg,#122d58,#183e82,#122d58);border-radius:20px;overflow:hidden;display:flex;flex-direction:column;position:relative;min-height:420px;">
+        <div style="height:3px;background:linear-gradient(90deg,#1B5FE8,#1B5FE855);flex-shrink:0;"></div>
+        <div style="position:absolute;top:14px;left:16px;display:flex;align-items:center;gap:4px;opacity:.35;">
+          <svg width="14" height="10" viewBox="0 0 103 76" fill="none"><use href="#sg1"/></svg>
+          <span style="font-family:'Playfair Display',Georgia,serif;font-size:.58rem;font-weight:700;color:white;">Attune</span>
+        </div>
+        <div style="padding:2.25rem 1.75rem 2rem;flex:1;display:flex;flex-direction:column;justify-content:space-between;">
+          <div>
+            <div style="font-size:.52rem;letter-spacing:.24em;text-transform:uppercase;color:rgba(27,95,232,1);font-weight:700;margin-bottom:1.25rem;font-family:'DM Sans',sans-serif;">Expectations</div>
+            <div style="font-family:'Playfair Display',Georgia,serif;font-size:4.5rem;font-weight:700;color:white;line-height:.9;letter-spacing:-.03em;margin-bottom:.4rem;">28%</div>
+            <div style="font-size:.88rem;color:rgba(255,255,255,.82);font-family:'DM Sans',sans-serif;font-weight:300;margin-bottom:1.25rem;">aligned on expectations</div>
+            <div style="display:flex;flex-direction:column;gap:.4rem;">
+              <div style="background:rgba(255,255,255,.06);border-radius:8px;padding:.5rem .85rem;display:flex;justify-content:space-between;align-items:center;">
+                <span style="font-size:.68rem;color:rgba(245,239,230,.82);font-family:'DM Sans',sans-serif;">Paying bills</span>
+                <div style="display:flex;gap:.3rem;">
+                  <span style="font-size:.58rem;background:rgba(232,103,58,.2);color:#E8673A;padding:.1rem .4rem;border-radius:4px;font-weight:600;font-family:'DM Sans',sans-serif;">Sarah: James</span>
+                  <span style="font-size:.58rem;background:rgba(27,95,232,.2);color:#7B9FFF;padding:.1rem .4rem;border-radius:4px;font-weight:600;font-family:'DM Sans',sans-serif;">James: Both</span>
+                </div>
+              </div>
+              <div style="background:rgba(255,255,255,.06);border-radius:8px;padding:.5rem .85rem;display:flex;justify-content:space-between;align-items:center;">
+                <span style="font-size:.68rem;color:rgba(245,239,230,.82);font-family:'DM Sans',sans-serif;">Managing savings</span>
+                <span style="font-size:.58rem;background:rgba(16,185,129,.15);color:#10b981;padding:.1rem .4rem;border-radius:4px;font-weight:600;font-family:'DM Sans',sans-serif;">Both agree ✓</span>
+              </div>
+            </div>
+          </div>
+          <div style="margin-top:1.5rem;font-size:.68rem;color:rgba(255,255,255,.4);font-family:'DM Sans',sans-serif;">What you each assumed. Now visible.</div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Mobile horizontal scroll carousel (hidden on desktop) -->
+    <div class="story-cards-mobile-scroll" style="display:none;overflow-x:scroll;gap:1rem;padding-bottom:.75rem;-webkit-overflow-scrolling:touch;scrollbar-width:none;margin:0 -1.25rem;padding-left:1.25rem;padding-right:1.25rem;scroll-snap-type:x mandatory;-webkit-scroll-snap-type:x mandatory;">
+
+      <!-- Card 1 clone: Couple Type -->
+      <div style="background:linear-gradient(160deg,#2d1240,#461860,#2d1240);border-radius:20px;overflow:hidden;display:flex;flex-direction:column;position:relative;min-height:320px;min-width:calc(85vw - 1rem);max-width:320px;flex-shrink:0;scroll-snap-align:start;">
+        <div style="height:3px;background:linear-gradient(90deg,#E91E63,#9C27B0);flex-shrink:0;"></div>
+        <div style="padding:1.75rem 1.5rem 1.5rem;flex:1;display:flex;flex-direction:column;justify-content:space-between;">
+          <div>
+            <div style="font-size:.5rem;letter-spacing:.22em;text-transform:uppercase;color:rgba(233,30,99,.65);font-weight:700;margin-bottom:1rem;font-family:'DM Sans',sans-serif;">Couple Type</div>
+            <div style="font-family:'Playfair Display',Georgia,serif;font-size:2.2rem;font-weight:700;color:white;line-height:.95;margin-bottom:.65rem;letter-spacing:-.02em;">The Mismatch</div>
+            <p style="font-size:.8rem;color:#E91E63;font-weight:600;line-height:1.45;margin:0;font-family:'DM Sans',sans-serif;">Different conflict clocks. Knowing that changes everything.</p>
+          </div>
+          <!-- Mini 2x2 couple map — SVG for reliable mobile rendering -->
+          <div style="margin-top:1.1rem;">
+            <svg viewBox="0 0 200 110" style="width:100%;display:block;margin-bottom:.6rem;" xmlns="http://www.w3.org/2000/svg">
+              <defs>
+                <linearGradient id="mg1" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#FFD0B8"/><stop offset="100%" stop-color="#FFBFA0"/></linearGradient>
+                <linearGradient id="mg2" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#C8D5FF"/><stop offset="100%" stop-color="#B8C8FF"/></linearGradient>
+                <linearGradient id="mg3" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#DDD0FF"/><stop offset="100%" stop-color="#CFC0FF"/></linearGradient>
+                <linearGradient id="mg4" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#DCDCDC"/><stop offset="100%" stop-color="#D0D0D0"/></linearGradient>
+                <radialGradient id="mga"><stop offset="0%" stop-color="#E8673A" stop-opacity=".5"/><stop offset="100%" stop-color="#E8673A" stop-opacity="0"/></radialGradient>
+                <radialGradient id="mgb"><stop offset="0%" stop-color="#7C3AED" stop-opacity=".5"/><stop offset="100%" stop-color="#7C3AED" stop-opacity="0"/></radialGradient>
+              </defs>
+              <!-- Quadrant fills -->
+              <rect x="1" y="1" width="97" height="53" rx="5" fill="url(#mg1)" fill-opacity=".8"/>
+              <rect x="101" y="1" width="97" height="53" rx="5" fill="url(#mg2)" fill-opacity=".8"/>
+              <rect x="1" y="57" width="97" height="51" rx="5" fill="url(#mg3)" fill-opacity=".8"/>
+              <rect x="101" y="57" width="97" height="51" rx="5" fill="url(#mg4)" fill-opacity=".8"/>
+              <!-- Quadrant labels -->
+              <text x="10" y="16" font-size="8" font-weight="700" fill="#E8673A" font-family="Arial" opacity=".9">W</text>
+              <text x="188" y="16" font-size="8" font-weight="700" fill="#1B5FE8" font-family="Arial" text-anchor="end" opacity=".9">X</text>
+              <text x="10" y="100" font-size="8" font-weight="700" fill="#7C3AED" font-family="Arial" opacity=".9">Y</text>
+              <text x="188" y="100" font-size="8" font-weight="700" fill="#6B7280" font-family="Arial" text-anchor="end" opacity=".9">Z</text>
+              <!-- Centre lines -->
+              <line x1="99" y1="1" x2="99" y2="108" stroke="rgba(255,255,255,.6)" stroke-width="2"/>
+              <line x1="1" y1="55" x2="198" y2="55" stroke="rgba(255,255,255,.6)" stroke-width="2"/>
+              <!-- Dashed connector: Sarah W(top-left) to James Y(bottom-left) -->
+              <line x1="50" y1="27" x2="52" y2="80" stroke="rgba(255,255,255,.5)" stroke-width="1.5" stroke-dasharray="4,3"/>
+              <!-- Sarah dot W - top-left -->
+              <circle cx="50" cy="27" r="16" fill="url(#mga)"/>
+              <circle cx="50" cy="27" r="10" fill="#E8673A"/>
+              <circle cx="50" cy="27" r="10" fill="none" stroke="white" stroke-width="2"/>
+              <!-- James dot Y - bottom-left -->
+              <circle cx="52" cy="80" r="16" fill="url(#mgb)"/>
+              <circle cx="52" cy="80" r="10" fill="#7C3AED"/>
+              <circle cx="52" cy="80" r="10" fill="none" stroke="white" stroke-width="2"/>
+              <!-- Axis labels -->
+              <text x="99" y="8" font-size="6" font-weight="700" fill="rgba(255,255,255,.7)" font-family="Arial" text-anchor="middle">ENGAGE</text>
+              <text x="99" y="108" font-size="6" font-weight="700" fill="rgba(255,255,255,.5)" font-family="Arial" text-anchor="middle">WITHDRAW</text>
+            </svg>
+            <div style="display:flex;gap:.85rem;">
+              <div style="display:flex;align-items:center;gap:.35rem;"><div style="width:7px;height:7px;border-radius:50%;background:#E8673A;"></div><span style="font-size:.56rem;color:rgba(255,255,255,.65);font-family:'DM Sans',sans-serif;font-weight:600;">Sarah · W — The Reacher</span></div>
+              <div style="display:flex;align-items:center;gap:.35rem;"><div style="width:7px;height:7px;border-radius:50%;background:#7C3AED;"></div><span style="font-size:.56rem;color:rgba(255,255,255,.65);font-family:'DM Sans',sans-serif;font-weight:600;">James · Y — The Feeler</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card 2 clone: Communication -->
+      <div style="background:linear-gradient(160deg,#0d2c24,#163d30,#0d2c24);border-radius:20px;overflow:hidden;display:flex;flex-direction:column;position:relative;min-height:320px;min-width:calc(85vw - 1rem);max-width:320px;flex-shrink:0;scroll-snap-align:start;">
+        <div style="height:3px;background:linear-gradient(90deg,#34d399,rgba(52,211,153,.3));flex-shrink:0;"></div>
+        <div style="padding:1.75rem 1.5rem 1.5rem;flex:1;display:flex;flex-direction:column;justify-content:space-between;">
+          <div>
+            <div style="font-size:.5rem;letter-spacing:.22em;text-transform:uppercase;color:rgba(232,103,58,1);font-weight:700;margin-bottom:1rem;font-family:'DM Sans',sans-serif;">Communication</div>
+            <div style="font-family:'Playfair Display',Georgia,serif;font-size:1.6rem;font-weight:700;color:white;line-height:1.05;margin-bottom:.65rem;">How you each actually show up.</div>
+            <div style="display:flex;flex-direction:column;gap:.45rem;">
+              <div style="display:flex;align-items:center;gap:.5rem;">
+                <span style="font-size:.62rem;color:#E8673A;font-weight:700;width:38px;flex-shrink:0;font-family:'DM Sans',sans-serif;">Sarah</span>
+                <div style="flex:1;background:rgba(255,255,255,.08);border-radius:3px;height:4px;overflow:hidden;"><div style="background:#E8673A;height:4px;width:15%;border-radius:3px;"></div></div>
+                <span style="font-size:.58rem;color:rgba(255,255,255,.55);font-family:'DM Sans',sans-serif;white-space:nowrap;">Engage fast</span>
+              </div>
+              <div style="display:flex;align-items:center;gap:.5rem;">
+                <span style="font-size:.62rem;color:#7B9FFF;font-weight:700;width:38px;flex-shrink:0;font-family:'DM Sans',sans-serif;">James</span>
+                <div style="flex:1;background:rgba(255,255,255,.08);border-radius:3px;height:4px;overflow:hidden;"><div style="background:#5B7FE8;height:4px;width:80%;border-radius:3px;"></div></div>
+                <span style="font-size:.58rem;color:rgba(255,255,255,.55);font-family:'DM Sans',sans-serif;white-space:nowrap;">Withdraw first</span>
+              </div>
+            </div>
+          </div>
+          <div style="margin-top:1.25rem;font-size:.65rem;color:rgba(255,255,255,.4);font-family:'DM Sans',sans-serif;">10 dimensions, side by side</div>
+        </div>
+      </div>
+
+      <!-- Card 3 clone: Expectations -->
+      <div style="background:linear-gradient(160deg,#122d58,#183e82,#122d58);border-radius:20px;overflow:hidden;display:flex;flex-direction:column;position:relative;min-height:320px;min-width:calc(85vw - 1rem);max-width:320px;flex-shrink:0;scroll-snap-align:start;margin-right:1.25rem;">
+        <div style="height:3px;background:linear-gradient(90deg,#1B5FE8,#1B5FE855);flex-shrink:0;"></div>
+        <div style="padding:1.75rem 1.5rem 1.5rem;flex:1;display:flex;flex-direction:column;justify-content:space-between;">
+          <div>
+            <div style="font-size:.5rem;letter-spacing:.22em;text-transform:uppercase;color:rgba(27,95,232,1);font-weight:700;margin-bottom:1rem;font-family:'DM Sans',sans-serif;">Expectations</div>
+            <div style="font-family:'Playfair Display',Georgia,serif;font-size:4rem;font-weight:700;color:white;line-height:.9;letter-spacing:-.03em;margin-bottom:.4rem;">28%</div>
+            <div style="font-size:.85rem;color:rgba(255,255,255,.82);font-family:'DM Sans',sans-serif;font-weight:300;margin-bottom:1rem;">aligned on expectations</div>
+          </div>
+          <div style="margin-top:1.25rem;font-size:.65rem;color:rgba(255,255,255,.4);font-family:'DM Sans',sans-serif;">What you each assumed. Now visible.</div>
+        </div>
+      </div>
+
+    </div>
+    <!-- Mobile scroll indicator dots -->
+    <div class="story-cards-mobile-scroll" style="display:none;align-items:center;gap:.4rem;margin-top:.6rem;padding-left:1.25rem;">
+      <div style="width:16px;height:2px;border-radius:2px;background:var(--clay);opacity:.7;"></div>
+      <div style="width:6px;height:2px;border-radius:2px;background:var(--stone);"></div>
+      <div style="width:6px;height:2px;border-radius:2px;background:var(--stone);"></div>
+    </div>
+
+  </div>
+</section>
+
+<!-- MID-PAGE CTA STRIP -->
+
+<!-- SOCIAL PROOF -->
+<section class="proof-section">
+  <div class="proof-inner">
+    <p class="s-eye">What couples are saying</p>
+
+    <!-- Single animated quote — cycles every 6 seconds -->
+    <div style="max-width:680px;margin:2.5rem auto 0;position:relative;height:190px;overflow:hidden;">
+      <div id="quote-display" style="transition:opacity .45s ease;">
+        <div class="proof-stars" style="margin-bottom:1rem;">★★★★★</div>
+        <p id="quote-text" class="proof-text" style="font-size:1.15rem;max-width:600px;"></p>
+        <div class="proof-person" style="margin-top:1.25rem;">
+          <div>
+            <div id="quote-name" class="proof-name"></div>
+            <div id="quote-detail" class="proof-detail"></div>
+          </div>
+        </div>
+      </div>
+      <!-- Dot nav -->
+      <div style="display:flex;gap:.55rem;margin-top:1.75rem;" id="quote-dots">
+        <div style="width:20px;height:3px;border-radius:2px;background:var(--ink);opacity:.55;cursor:pointer;transition:all .3s;" onclick="showQuote(0)"></div>
+        <div style="width:6px;height:3px;border-radius:2px;background:var(--stone);cursor:pointer;transition:all .3s;" onclick="showQuote(1)"></div>
+        <div style="width:6px;height:3px;border-radius:2px;background:var(--stone);cursor:pointer;transition:all .3s;" onclick="showQuote(2)"></div>
+      </div>
+    </div>
+
+    <div class="proof-stat-row">
+      <div class="proof-stat">
+        <div class="proof-stat-num">2,400+</div>
+        <div class="proof-stat-label">Couples completed</div>
+      </div>
+      <div class="proof-stat">
+        <div class="proof-stat-num">4.9</div>
+        <div class="proof-stat-label">Average rating</div>
+      </div>
+      <div class="proof-stat">
+        <div class="proof-stat-num">73%</div>
+        <div class="proof-stat-label">Say they learned something surprising</div>
+      </div>
+      <div class="proof-stat">
+        <div class="proof-stat-num">91%</div>
+        <div class="proof-stat-label">Would recommend to a friend</div>
+      </div>
+    </div>
+  </div>
+</section>
+<script>
+(function(){
+  var quotes = [
+    { text: "“I thought I knew James pretty well after four years. Attune showed me there were things we'd just never thought to ask each other. The expectations comparison alone was worth it.”", name: "Sarah M.", detail: "Together 4 years · Anniversary package" },
+    { text: "“We're getting married in three months and this was the best pre-wedding thing we did. Way more useful than premarital counseling worksheets. We actually learned something new.”", name: "Alex & Jordan T.", detail: "Engaged · Starting Out package" },
+    { text: "“The LMFT session was what made it. She'd read our results beforehand and came prepared with actual observations about us specifically. Not generic advice, our stuff.”", name: "Maya & Chris R.", detail: "Married 7 years · Premium package" },
+  ];
+  var cur = 0;
+  window.showQuote = function(i) {
+    var d = document.getElementById('quote-display');
+    d.style.opacity = '0';
+    setTimeout(function(){
+      cur = i;
+      document.getElementById('quote-text').textContent = quotes[i].text;
+      document.getElementById('quote-name').textContent = quotes[i].name;
+      document.getElementById('quote-detail').textContent = quotes[i].detail;
+      var dots = document.getElementById('quote-dots').children;
+      for(var j=0;j<dots.length;j++){
+        dots[j].style.width = j===i?'20px':'6px';
+        dots[j].style.background = j===i?'var(--ink)':'var(--stone)';
+        dots[j].style.opacity = j===i?'.55':'1';
+      }
+      d.style.opacity = '1';
+    }, 420);
+  };
+  showQuote(0);
+  setInterval(function(){ showQuote((cur+1)%quotes.length); }, 6000);
+})();
+</script>
+
+<!-- CTA -->
+<div class="cta-wrap">
+  <div class="cta-inner" style="max-width:760px;">
+    <div style="display:grid;grid-template-columns:1fr auto auto;gap:1.5rem;align-items:center;text-align:left;" class="cta-cols">
+      <div>
+        <h2 style="font-family:var(--hfont);font-size:clamp(1.3rem,2.5vw,1.75rem);font-weight:700;line-height:1.15;color:var(--ink);margin:0 0 .35rem;letter-spacing:-.01em;">The understanding that used to take years, <em style="font-style:italic;color:var(--orange);">in one afternoon.</em></h2>
+        <p style="font-size:.85rem;color:var(--muted);margin:0;line-height:1.6;">About 25 minutes each. Yours to keep.</p>
+      </div>
+      <a href="/offerings" class="btn-primary" style="white-space:nowrap;">Get started →</a>
+      <a href="/offerings#gift" class="btn-ghost" style="white-space:nowrap;">Give as a gift</a>
+    </div>
+  </div>
+  <style>@media(max-width:680px){.cta-cols{grid-template-columns:1fr!important}.cta-cols a{width:100%;text-align:center;box-sizing:border-box}}</style>
+</div>
+
+
+
+
+<footer class="site-footer">
+  <div class="sf-inner">
+    <div class="sf-brand">
+      <a href="/home" class="logo">
+        <svg width="46" height="33" viewBox="0 0 103 76" fill="none" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="spark_logo_0_1" x1="0" y1="0" x2="103" y2="76" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#E8673A"/><stop offset="100%" stop-color="#1B5FE8"/></linearGradient></defs><path d="M14,4 L44,4 A9,9 0 0,1 53,13 L53,42 A9,9 0 0,1 44,51 L20,51 L6,61 L11,51 A6,6 0 0,1 5,45 L5,13 A9,9 0 0,1 14,4 Z" fill="url(#spark_logo_0_1)"/><path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill="white" opacity="0.93" transform="translate(13.16,11.3) scale(0.72)"/><path d="M89,14 L59,14 A9,9 0 0,0 50,23 L50,52 A9,9 0 0,0 59,61 L83,61 L97,71 L92,61 A6,6 0 0,0 98,55 L98,23 A9,9 0 0,0 89,14 Z" fill="none" stroke="url(#spark_logo_0_1)" stroke-width="2.2" stroke-linejoin="round"/><path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill="url(#spark_logo_0_1)" transform="translate(58.16,21.3) scale(0.72)"/></svg>
+        <span class="logo-text" style="font-size:1.05rem;">Attune</span>
+      </a>
+      <p class="sf-tagline">Because understanding<br>takes intention.</p>
+    </div>
+    <div class="sf-links">
+      <div class="sf-col">
+        <p class="sf-col-title">Product</p>
+        <a href="/home">Home</a>
+        <a href="/how-it-works">How it works</a>
+        <a href="/offerings">Gifts &amp; Packages</a>
+        <a href="/portal">Get started</a>
+      </div>
+      <div class="sf-col">
+        <p class="sf-col-title">Learn</p>
+        <a href="/purpose">Our Purpose</a>
+        <a href="/how-it-works">How it works</a>
+        <a href="/practice">In Practice</a>
+        <a href="/faq">FAQs</a>
+        <a href="/reviews">Reviews</a>
+      </div>
+      <div class="sf-col">
+        <p class="sf-col-title">Support</p>
+        <a href="/faq">FAQs</a>
+        <a href="mailto:hello@attune-relationships.com">Contact us</a>
+        <a href="/legal">Privacy policy</a>
+        <a href="/legal#terms">Terms of service</a>
+      </div>
+      <div class="sf-col">
+        <p class="sf-col-title">Account</p>
+        <a href="/portal">Sign in</a>
+        <a href="/portal">Create account</a>
+        <a href="/offerings">Browse packages</a>
+      </div>
+    </div>
+  </div>
+  <div class="sf-bottom">
+    <p class="sf-copy">Attune Relationships™</p>
+    <p class="sf-email">hello@attune-relationships.com</p>
+  </div>
+  <!-- Feedback strip -->
+  <div style="background:rgba(255,255,255,.04);border-top:1px solid rgba(255,255,255,.06);padding:.85rem 2rem;display:flex;align-items:center;gap:1rem;flex-wrap:wrap;">
+    <span style="font-size:.7rem;color:rgba(255,255,255,.70);font-style:italic;">How's Attune working for you?</span>
+    <div id="spark-feedback-strip" style="display:flex;gap:.4rem;">
+      <button onclick="window._sparkFeedback('love')" style="background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);border-radius:6px;padding:.3rem .65rem;font-size:.72rem;color:rgba(255,255,255,.6);cursor:pointer;">❤️ Love it</button>
+      <button onclick="window._sparkFeedback('good')" style="background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);border-radius:6px;padding:.3rem .65rem;font-size:.72rem;color:rgba(255,255,255,.6);cursor:pointer;">👍 Pretty good</button>
+      <button onclick="window._sparkFeedback('suggest')" style="background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);border-radius:6px;padding:.3rem .65rem;font-size:.72rem;color:rgba(255,255,255,.6);cursor:pointer;">💬 Suggest something</button>
+    </div>
+    <span id="spark-feedback-thanks" style="font-size:.7rem;color:#4ade80;display:none;">Thanks for the feedback ✓</span>
+  </div>
+  <script>
+  window._sparkFeedback = function(t) {
+    if(t==='suggest'){
+      var strip=document.getElementById('spark-feedback-strip');
+      if(!strip)return;
+      strip.innerHTML='<input id="sfb-inp" type="text" placeholder="What would make Attune better?" style="background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.25);border-radius:6px;padding:.3rem .65rem;font-size:.72rem;color:white;width:220px;font-family:sans-serif;"><button onclick="(function(){var m=document.getElementById('sfb-inp').value.trim();if(m)fetch('/api/send-feedback',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({source:'footer_quick',rating:'suggest',message:m,page:window.location.pathname})}).catch(function(){});document.getElementById('spark-feedback-strip').innerHTML='';document.getElementById('spark-feedback-thanks').style.display='inline';})()" style="background:rgba(232,103,58,.9);border:none;border-radius:6px;padding:.3rem .65rem;font-size:.72rem;color:white;cursor:pointer;margin-left:.35rem;">Send</button>';
+      setTimeout(function(){var i=document.getElementById('sfb-inp');if(i)i.focus();},50);
+      return;
+    }
+    fetch('/api/send-feedback',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({source:'footer_quick',rating:t==='love'?3:2,page:window.location.pathname})}).catch(function(){});
+    document.getElementById('spark-feedback-strip').innerHTML='';
+    document.getElementById('spark-feedback-thanks').style.display='inline';
+  };
+
+  </script>
+</footer>
+
+<script>
+function toggleMenu() {
+  const m = document.getElementById('mobile-menu');
+  m.classList.toggle('open');
+}
+document.addEventListener('click', function(e) {
+  const menu = document.getElementById('mobile-menu');
+  const btn = document.getElementById('hamburger');
+  if (menu.classList.contains('open') && !menu.contains(e.target) && !btn.contains(e.target)) {
+    menu.classList.remove('open');
+  }
+});
+
+const descs = {
+  foryou: "Each of you answers on your own. Identify who you are individually and as a couple — and learn how to work and grow together.",
+  gift: "Purchase Attune for a couple you love. They'll each complete the exercises on their own, and unlock a joint understanding of themselves and each other that most couples never find."
+};
+const ctas = {
+  foryou: "Start your exercises →",
+  gift: "Browse gifts & packages →"
+};
+const ctaLinks = {
+  foryou: "/offerings",
+  gift: "/offerings"
+};
+function setUse(mode) {
+  document.getElementById('btn-foryou').className = 'use-btn' + (mode==='foryou'?' active':'');
+  document.getElementById('btn-gift').className = 'use-btn' + (mode==='gift'?' active':'');
+  document.getElementById('use-desc').textContent = descs[mode];
+  document.getElementById('hero-cta').textContent = ctas[mode];
+  document.getElementById('hero-cta').href = ctaLinks[mode];
+}
+
+  // Close mobile menu on outside tap
+  document.addEventListener('click', function(e) {
+    const menu = document.getElementById('mobile-menu');
+    const burger = document.getElementById('hamburger');
+    if (menu && menu.classList.contains('open') && !menu.contains(e.target) && !burger.contains(e.target)) {
+      menu.classList.remove('open');
+      burger.classList.remove('open');
+    }
+  });
+</script>
+</body>
+</html>
