@@ -16,12 +16,24 @@
 
 ---
 
-## Deployment (one command)
+## Session Setup (do this first, every session)
+The container is always fresh. Run this before anything else:
+
+```bash
+mkdir -p /home/claude/unison && cd /home/claude/unison
+GH_TOKEN="[TOKEN]"
+git clone "https://${GH_TOKEN}@github.com/ebspencer16-eng/Attune.git" . 2>/dev/null || (git remote set-url origin "https://${GH_TOKEN}@github.com/ebspencer16-eng/Attune.git" && git pull)
+npm install --silent 2>/dev/null
+```
+
+The GitHub token is provided in the session prompt. Do not embed it in any committed file — GitHub secret scanning will block the push.
+
+## Deployment (end of session)
 ```bash
 cd /home/claude/unison
 git add -A && git commit -m "description" && git push
 ```
-GitHub token is stored in the remote URL. Vercel auto-deploys on push.
+Vercel auto-deploys on push. Takes ~30 seconds.
 
 ---
 
