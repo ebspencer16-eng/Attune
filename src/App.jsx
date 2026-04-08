@@ -7370,7 +7370,7 @@ const UPSELL_PRODUCTS = {
     badgeColor: "#FFF0EB",
     badgeText: "#E8673A",
     title: "Starting Out Checklist",
-    price: "$119",
+    price: "$139",
     tagline: "The real-world logistics of merging your lives.",
     description: "A comprehensive checklist covering the practical steps most couples discover too late: finances, name changes, insurance, estate basics, and the administrative setup of a shared life. Included as part of the Starting Out Collection.",
     includes: [
@@ -7964,9 +7964,9 @@ export default function App() {
   // Package config
   const pkgConfig = {
     core:        { label: "The Attune Assessment",     color: "#E8673A", hasChecklist: false, hasAnniversary: false, hasBudget: false, hasLMFT: false },
-    newlywed:    { label: "Starting Out Collection",   color: "#E8673A", hasChecklist: true,  hasAnniversary: false, hasBudget: false, hasLMFT: false },
+    newlywed:    { label: "Starting Out Collection",   color: "#E8673A", hasChecklist: true,  hasAnniversary: false, hasBudget: true,  hasLMFT: false },
     anniversary: { label: "Anniversary Collection",    color: "#1B5FE8", hasChecklist: false, hasAnniversary: true,  hasBudget: false, hasLMFT: false },
-    premium:     { label: "Attune Premium",            color: "#3B5BDB", hasChecklist: false, hasAnniversary: false, hasBudget: true,  hasLMFT: true  },
+    premium:     { label: "Attune Premium",            color: "#3B5BDB", hasChecklist: false, hasAnniversary: false, hasBudget: false, hasLMFT: true  },
   };
   // Merge add-on flags from stored order (e.g. LMFT add-on on non-premium packages)
   const _basePkg = pkgConfig[demoPkg] || pkgConfig.core;
