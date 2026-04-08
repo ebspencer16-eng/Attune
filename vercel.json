@@ -212,7 +212,7 @@
       "destination": "/index.html"
     }
   ],
-  "buildCommand": "",
+  "buildCommand": "npx vite build",
   "outputDirectory": "dist",
   "installCommand": "npm install",
   "crons": [
