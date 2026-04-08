@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500;600;700&display=swap');
+html{background:#D0C9C0}
+body{font-family:'DM Sans',Arial,sans-serif;padding:0.35in;display:flex;flex-direction:column;align-items:center;gap:0.25in;width:8.5in}
+.section-lbl{font-size:8px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:#8C7A68;text-align:center;margin-bottom:4px}
+.pkg-label{font-size:9px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:#8C7A68;text-align:center;margin:0.1in 0 4px}
+
+/* Card base */
+.card{width:7in;height:4.25in;display:flex;flex-shrink:0;position:relative;border-radius:4px}
+.card.front{background:#FFFEF9;box-shadow:0 16px 48px rgba(0,0,0,.18),0 2px 8px rgba(0,0,0,.07);border:.5px solid rgba(0,0,0,.06)}
+.card.back {background:#FFFEF9;box-shadow:0 8px 24px rgba(0,0,0,.10);border:.5px solid rgba(0,0,0,.05)}
+
+/* Gradient panel */
+.grad-panel{width:210px;flex-shrink:0;border-radius:4px 0 0 4px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:32px 28px}
+.right{flex:1;display:flex;flex-direction:column;overflow:hidden}
+.right-body{flex:1;display:flex;flex-direction:column;align-items:flex-start;justify-content:center;padding:38px 40px 24px}
+.right-footer{padding:10px 40px;border-top:1px solid #EDE8E0;display:flex;align-items:center;gap:5px;flex-shrink:0}
+.footer-dot{width:3px;height:3px;border-radius:50%;background:#C8B8A8}
+.footer-txt{font-size:7px;letter-spacing:.14em;text-transform:uppercase;color:#C0B4A8}
+
+/* Back */
+.back-accent{height:2px;flex-shrink:0}
+.back-inner{flex:1;display:flex;overflow:hidden}
+.back-left{flex:1;padding:18px 22px;display:flex;flex-direction:column;border-right:1px solid #F0EBE4}
+.back-right{width:176px;flex-shrink:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;gap:12px}
+.back-footer{padding:8px 22px;border-top:1px solid #EDE8E0;display:flex;justify-content:space-between;flex-shrink:0}
+
+/* Steps */
+.step{display:flex;gap:9px;align-items:flex-start;padding-bottom:9px;border-bottom:1px solid #F2EFEB}
+.step:last-child{border-bottom:none;padding-bottom:0}
+.step-num{font-family:'Playfair Display',Georgia,serif;font-size:13px;font-weight:700;flex-shrink:0;line-height:1.2;width:11px}
+.step-t{font-size:9px;font-weight:700;color:#0E0B07;margin-bottom:2px}
+.step-d{font-size:7.5px;color:#8C7A68;line-height:1.45}
+
+/* Typography */
+.names{font-family:'Playfair Display',Georgia,serif;font-weight:700;line-height:1.0;letter-spacing:-.03em}
+.tagline{font-family:'Playfair Display',Georgia,serif;font-size:10px;font-style:italic;color:#8C7A68}
+.for-label{font-size:7.5px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:#C0B4A8;margin-bottom:10px}
+.divider-line{height:1px;background:linear-gradient(90deg,#C8522E,#1B5FE8);opacity:.3;margin:14px 0;width:32px}
+.url-txt{font-size:8px;color:#8C7A68;letter-spacing:.06em}
+.badge-lbl{font-size:7px;letter-spacing:.18em;text-transform:uppercase;font-weight:700}
+
+@media print{
+  @page{size:8.5in 11in;margin:.3in}
+  html{background:white}
+  body{background:white;padding:0;gap:0.2in}
+  .card{box-shadow:none!important;border:0.5px solid #DDD8D0!important}
+  .section-lbl,.pkg-label{break-before:avoid}
+  .pair{page-break-inside:avoid;page-break-after:always}
+  .pair:last-child{page-break-after:auto}
+}
+</style>
+</head>
+<body>
+
+<script>
+function logoSVG(sz, white) {
+  const grad = white
+    ? `fill="rgba(255,255,255,.92)" / fill="rgba(255,255,255,.85)" / stroke="rgba(255,255,255,.85)"`
+    : '';
+  if (white) {
+    return `<svg width="${sz}" height="${Math.round(sz*.74)}" viewBox="0 0 103 76" fill="none">
+      <path d="M14,4L44,4A9,9,0,0,1,53,13L53,42A9,9,0,0,1,44,51L20,51L6,61L11,51A6,6,0,0,1,5,45L5,13A9,9,0,0,1,14,4Z" fill="rgba(255,255,255,.92)"/>
+      <path d="M22,11C20,8.5,16.5,5,11.5,5C5.5,5,2,9.5,2,14.5C2,23,11,30,22,40C33,30,42,23,42,14.5C42,9.5,38.5,5,32.5,5C27.5,5,24,8.5,22,11Z" fill="rgba(90,40,150,.55)" transform="translate(13.16,11.3) scale(.72)"/>
+      <path d="M89,14L59,14A9,9,0,0,0,50,23L50,52A9,9,0,0,0,59,61L83,61L97,71L92,61A6,6,0,0,0,98,55L98,23A9,9,0,0,0,89,14Z" fill="none" stroke="rgba(255,255,255,.85)" stroke-width="2.2" stroke-linejoin="round"/>
+      <path d="M22,11C20,8.5,16.5,5,11.5,5C5.5,5,2,9.5,2,14.5C2,23,11,30,22,40C33,30,42,23,42,14.5C42,9.5,38.5,5,32.5,5C27.5,5,24,8.5,22,11Z" fill="rgba(255,255,255,.85)" transform="translate(58.16,21.3) scale(.72)"/>
+    </svg>`;
+  }
+  return `<svg width="${sz}" height="${Math.round(sz*.74)}" viewBox="0 0 103 76" fill="none">
+    <defs><linearGradient id="lg${sz}" x1="0" y1="0" x2="103" y2="76" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#E8673A"/><stop offset="100%" stop-color="#1B5FE8"/></linearGradient></defs>
+    <path d="M14,4L44,4A9,9,0,0,1,53,13L53,42A9,9,0,0,1,44,51L20,51L6,61L11,51A6,6,0,0,1,5,45L5,13A9,9,0,0,1,14,4Z" fill="url(#lg${sz})"/>
+    <path d="M22,11C20,8.5,16.5,5,11.5,5C5.5,5,2,9.5,2,14.5C2,23,11,30,22,40C33,30,42,23,42,14.5C42,9.5,38.5,5,32.5,5C27.5,5,24,8.5,22,11Z" fill="white" opacity=".93" transform="translate(13.16,11.3) scale(.72)"/>
+    <path d="M89,14L59,14A9,9,0,0,0,50,23L50,52A9,9,0,0,0,59,61L83,61L97,71L92,61A6,6,0,0,0,98,55L98,23A9,9,0,0,0,89,14Z" fill="none" stroke="url(#lg${sz})" stroke-width="2.2" stroke-linejoin="round"/>
+    <path d="M22,11C20,8.5,16.5,5,11.5,5C5.5,5,2,9.5,2,14.5C2,23,11,30,22,40C33,30,42,23,42,14.5C42,9.5,38.5,5,32.5,5C27.5,5,24,8.5,22,11Z" fill="url(#lg${sz})" transform="translate(58.16,21.3) scale(.72)"/>
+  </svg>`;
+}
+
+const PKGS = [
+  { id:'core',        name:'The Attune Assessment',    badge:'Your Attune Access Card', badgeColor:'#E8673A', grad:'linear-gradient(160deg,#C8522E 0%,#6B3FA0 52%,#1B5FE8 100%)', accentColor:'#E8673A', url:'attune-relationships.com/app' },
+  { id:'newlywed',    name:'Starting Out Collection',  badge:'Your Attune Access Card', badgeColor:'#C45C2A', grad:'linear-gradient(160deg,#C8522E 0%,#6B3FA0 52%,#1B5FE8 100%)', accentColor:'#C45C2A', url:'attune-relationships.com/app' },
+  { id:'anniversary', name:'Anniversary Collection',   badge:'Your Attune Access Card', badgeColor:'#4A5BE8', grad:'linear-gradient(160deg,#1E1A4A 0%,#3B3A8A 52%,#1B5FE8 100%)', accentColor:'#4A5BE8', url:'attune-relationships.com/app' },
+  { id:'premium',     name:'Attune Premium',           badge:'Your Attune Access Card', badgeColor:'#5B6DF8', grad:'linear-gradient(160deg,#1E1A4A 0%,#2D2870 52%,#5B6DF8 100%)', accentColor:'#5B6DF8', url:'attune-relationships.com/app' },
+];
+
+function renderCards() {
+  const root = document.getElementById('root');
+  PKGS.forEach((pkg, pi) => {
+    const pair = document.createElement('div');
+    pair.className = 'pair';
+    pair.style.cssText = 'display:flex;flex-direction:column;align-items:center;gap:8px;margin-bottom:.15in';
+
+    pair.innerHTML = `
+      <div class="pkg-label">${pkg.name}</div>
+
+      <!-- FRONT -->
+      <div class="section-lbl">Front</div>
+      <div class="card front">
+        <div class="grad-panel" style="background:${pkg.grad}">
+          ${logoSVG(46, true)}
+          <div style="text-align:center">
+            <div style="font-family:'Playfair Display',Georgia,serif;font-size:20px;font-weight:700;color:rgba(255,255,255,.95);letter-spacing:-.02em;">Attune</div>
+            <div style="font-size:7px;letter-spacing:.2em;text-transform:uppercase;color:rgba(255,255,255,.45);margin-top:4px;font-family:'DM Sans',sans-serif;">Relationship</div>
+          </div>
+          <div style="text-align:center">
+            <div style="font-size:7px;letter-spacing:.16em;text-transform:uppercase;color:rgba(255,255,255,.38);margin-bottom:5px;font-family:'DM Sans',sans-serif;">Package</div>
+            <div style="font-family:'Playfair Display',Georgia,serif;font-size:9.5px;font-style:italic;color:rgba(255,255,255,.75);line-height:1.3;">${pkg.name}</div>
+          </div>
+        </div>
+        <div class="right">
+          <div class="right-body">
+            <div class="for-label">Welcome to</div>
+            <div class="names" style="font-size:22px;background:linear-gradient(120deg,${pkg.accentColor} 0%,#6B3FA0 50%,#1B5FE8 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:4px">Attune</div>
+            <div class="divider-line"></div>
+            <div style="font-size:11px;color:#4A3C34;font-family:'Playfair Display',Georgia,serif;font-style:italic;line-height:1.6;max-width:300px;margin-bottom:16px">
+              Understanding takes intention. You've taken the first step.
+            </div>
+            <div style="background:#F9F5F1;border-radius:8px;padding:10px 14px;border-left:3px solid ${pkg.accentColor}">
+              <div style="font-size:7.5px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:${pkg.accentColor};margin-bottom:5px;font-family:'DM Sans',sans-serif">To get started</div>
+              <div style="font-size:9px;color:#4A3C34;font-family:'DM Sans',sans-serif;line-height:1.5;">Scan the QR code on the back of this card, or visit<br><strong>${pkg.url}</strong></div>
+            </div>
+          </div>
+          <div class="right-footer">
+            ${logoSVG(18, false)}
+            <div class="footer-dot"></div>
+            <div class="footer-txt">attune-relationships.com</div>
+            <div class="footer-dot"></div>
+            <div class="footer-txt">${pkg.name}</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- BACK -->
+      <div class="section-lbl" style="margin-top:6px">Back</div>
+      <div class="card back">
+        <div class="back-accent" style="background:linear-gradient(90deg,${pkg.accentColor},#6B3FA0,#1B5FE8)"></div>
+        <div class="back-inner">
+          <div class="back-left">
+            <div style="font-size:7.5px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:#C0B4A8;margin-bottom:12px;font-family:'DM Sans',sans-serif">How to get started</div>
+            <div style="display:flex;flex-direction:column;gap:9px;flex:1;justify-content:center">
+              <div class="step">
+                <div class="step-num" style="color:${pkg.accentColor}">1</div>
+                <div><div class="step-t">Scan the QR code</div><div class="step-d">Use your phone's camera to scan the code and open your Attune account.</div></div>
+              </div>
+              <div class="step">
+                <div class="step-num" style="color:${pkg.accentColor}">2</div>
+                <div><div class="step-t">Create your account</div><div class="step-d">Set up your profile. Takes about two minutes. You'll invite your partner from inside.</div></div>
+              </div>
+              <div class="step">
+                <div class="step-num" style="color:${pkg.accentColor}">3</div>
+                <div><div class="step-t">Answer on your own</div><div class="step-d">Both partners answer independently. Don't share answers until you see the results together.</div></div>
+              </div>
+              <div class="step">
+                <div class="step-num" style="color:${pkg.accentColor}">4</div>
+                <div><div class="step-t">See your results</div><div class="step-d">Once both of you finish, your joint results unlock. Your couple type, your map, what it means for you.</div></div>
+              </div>
+            </div>
+          </div>
+          <div class="back-right">
+            <div style="font-size:7.5px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:#C0B4A8;text-align:center;font-family:'DM Sans',sans-serif">Scan to start</div>
+            <div id="qr-${pkg.id}" style="width:112px;height:112px;display:flex;align-items:center;justify-content:center;background:#F9F5F1;border-radius:6px;border:1px solid #EDE8E0">
+              <div style="text-align:center">
+                <div style="font-size:7px;color:#C0B4A8;font-family:'DM Sans',sans-serif">QR Code</div>
+                <div style="font-size:6px;color:#C8B8A8;font-family:'DM Sans',sans-serif;margin-top:3px">${pkg.url}</div>
+              </div>
+            </div>
+            <div class="url-txt" style="text-align:center;font-size:7.5px;color:#8C7A68;font-family:'DM Sans',sans-serif">${pkg.url}</div>
+            ${logoSVG(22, false)}
+          </div>
+        </div>
+        <div class="back-footer">
+          <div style="font-size:7px;color:#C0B4A8;letter-spacing:.12em;text-transform:uppercase;font-family:'DM Sans',sans-serif">Attune · ${pkg.name}</div>
+          <div style="font-size:7px;color:#C0B4A8;font-family:'DM Sans',sans-serif">Understanding takes intention.</div>
+        </div>
+      </div>
+    `;
+    root.appendChild(pair);
+  });
+
+  // Generate QR codes
+  setTimeout(() => {
+    if (typeof QRCode === 'undefined') return;
+    PKGS.forEach(pkg => {
+      const container = document.getElementById('qr-' + pkg.id);
+      if (container) {
+        container.innerHTML = '';
+        new QRCode(container, {
+          text: 'https://' + pkg.url + '?pkg=' + pkg.id,
+          width: 108, height: 108,
+          colorDark: '#1A1208', colorLight: '#F9F5F1',
+          correctLevel: QRCode.CorrectLevel.M
+        });
+      }
+    });
+  }, 800);
+}
+
+document.addEventListener('DOMContentLoaded', renderCards);
+</script>
+<div id="root"></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+</body>
+</html>
