@@ -7353,7 +7353,7 @@ const UPSELL_PRODUCTS = {
     badgeColor: "#EEEFFF",
     badgeText: "#5B6DF8",
     title: "Relationship Reflection",
-    price: "$174",
+    price: "$139",
     tagline: "A third exercise about the moments that shaped your relationship.",
     description: "Each of you reflects independently on the moments that defined you, how you're feeling about the relationship right now, and where you want to go. Your answers are shown side by side, with insights drawn from where your reflections converge and where they diverge.",
     includes: [
@@ -7370,7 +7370,7 @@ const UPSELL_PRODUCTS = {
     badgeColor: "#FFF0EB",
     badgeText: "#E8673A",
     title: "Starting Out Checklist",
-    price: "$174",
+    price: "$119",
     tagline: "The real-world logistics of merging your lives.",
     description: "A comprehensive checklist covering the practical steps most couples discover too late: finances, name changes, insurance, estate basics, and the administrative setup of a shared life. Included as part of the Starting Out Collection.",
     includes: [
