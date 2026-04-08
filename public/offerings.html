@@ -554,16 +554,16 @@
   <div class="pov-tile pov-orange" style="border-top:3px solid #c45c2a;" onclick="scrollToPkg('pkg-newlywed')">
     <div class="pov-badge" style="background:#FFE4D9;color:#c45c2a;">Starting Out Gift</div>
     <div class="pov-name">Starting Out Collection</div>
-    <div class="pov-price">from $109</div>
-    <div style="font-size:.65rem;color:var(--muted);margin-top:.2rem;">$109 digital · $139 physical</div>
+    <div class="pov-price">from $154</div>
+    <div style="font-size:.65rem;color:var(--muted);margin-top:.2rem;">$154 digital · $189 physical gift box</div>
     <div class="pov-desc">Two relationship exercises plus a real-world checklist for merging your lives, the perfect wedding gift.</div>
     <div class="pov-cta">See details →</div>
   </div>
   <div class="pov-tile pov-indigo" style="border-top:3px solid var(--indigo);" onclick="scrollToPkg('pkg-anniversary')">
     <div class="pov-badge" style="background:#EEEFFF;color:var(--indigo);">Anniversary Gift</div>
     <div class="pov-name">Anniversary Collection</div>
-    <div class="pov-price">from $129</div>
-    <div style="font-size:.65rem;color:var(--muted);margin-top:.2rem;">$129 digital · $159 physical</div>
+    <div class="pov-price">from $174</div>
+    <div style="font-size:.65rem;color:var(--muted);margin-top:.2rem;">$174 digital · $214 physical gift box</div>
     <div class="pov-desc">Adds a relationship reflection exercise, for couples with history worth celebrating.</div>
     <div class="pov-cta">See details →</div>
   </div>
@@ -649,7 +649,8 @@
         </div>
         <div class="pkg-price">
           <div class="pkg-price-row"><span class="price-main">$89</span><span class="price-label">per couple</span></div>
-          <div class="price-alt">Digital only · instant access · yours to keep</div>
+          <div class="price-alt">Digital · instant access · yours to keep</div>
+          <div class="price-alt" style="margin-top:.35rem;">Physical gift box · <strong>$114</strong> · ships in 5–7 days</div>
         </div>
       </div>
     </div>
@@ -682,6 +683,45 @@
         </div>
       </div>
     </div>
+    
+    <!-- Physical box contents — Core -->
+    <div class="pkg-body" id="core-physical-col" style="padding-top:0">
+            <div class="inc-block">
+          <div class="inc-block-title">In the gift box</div>
+          <div class="physical-items">
+            <div class="physical-item">
+              <div class="physical-icon" style="background:#E8673A15;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#E8673A" stroke-width="1.6" stroke-linecap="round"><rect x="2" y="4" width="20" height="16" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+              </div>
+              <span>Welcome card with registration instructions</span>
+            </div>
+            <div class="physical-item">
+              <div class="physical-icon" style="background:#E8673A15;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#E8673A" stroke-width="1.6" stroke-linecap="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+              </div>
+              <span>Gift note from sender (if applicable)</span>
+            </div>
+            <div class="physical-item">
+              <div class="physical-icon" style="background:#E8673A15;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#E8673A" stroke-width="1.6" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="3" x2="9" y2="21"/></svg>
+              </div>
+              <span>Attune notepad with tearaway sheets</span>
+            </div>
+            <div class="physical-item">
+              <div class="physical-icon" style="background:#E8673A15;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#E8673A" stroke-width="1.6" stroke-linecap="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+              </div>
+              <span>Attune vinyl stickers</span>
+            </div>
+            <div class="physical-item">
+              <div class="physical-icon" style="background:#E8673A15;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#E8673A" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/></svg>
+              </div>
+              <span>'Understanding takes intention' wristbands</span>
+            </div>
+          </div>
+        </div>
+    </div>
     <div class="pkg-actions">
       <button onclick="addToCartWithIntent('core')" class="btn-primary">Purchase The Attune Assessment →</button>
       <span class="pkg-note">Answers stay private until both partners are done</span>
@@ -700,7 +740,8 @@
         </div>
         <div class="pkg-price">
           <div class="pkg-price-row"><span class="price-main" id="newlywed-price">$154</span><span class="price-label">per couple</span></div>
-          <div class="price-alt" id="newlywed-price-sub">Physical gift box · shipping included</div>
+          <div class="price-alt" id="newlywed-price-sub">Digital · instant access · yours to keep</div>
+          <div class="price-alt" style="margin-top:.35rem;">Physical gift box · <strong>$189</strong> · ships in 5–7 days</div>
         </div>
       </div>
     </div>
@@ -744,32 +785,44 @@
         </div>
       </div>
       <div id="newlywed-physical-col">
-        <div class="inc-block">
+              <div class="inc-block">
           <div class="inc-block-title">In the gift box</div>
           <div class="physical-items">
             <div class="physical-item">
-              <div class="physical-icon" style="background:#FFF0EB;">
+              <div class="physical-icon" style="background:#E8673A15;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#E8673A" stroke-width="1.6" stroke-linecap="round"><rect x="2" y="4" width="20" height="16" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+              </div>
+              <span>Welcome card with registration instructions</span>
+            </div>
+            <div class="physical-item">
+              <div class="physical-icon" style="background:#E8673A15;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#E8673A" stroke-width="1.6" stroke-linecap="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+              </div>
+              <span>Gift note from sender (if applicable)</span>
+            </div>
+            <div class="physical-item">
+              <div class="physical-icon" style="background:#E8673A15;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#E8673A" stroke-width="1.6" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="3" x2="9" y2="21"/></svg>
+              </div>
+              <span>Attune notepad with tearaway sheets</span>
+            </div>
+            <div class="physical-item">
+              <div class="physical-icon" style="background:#E8673A15;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#E8673A" stroke-width="1.6" stroke-linecap="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+              </div>
+              <span>Attune vinyl stickers</span>
+            </div>
+            <div class="physical-item">
+              <div class="physical-icon" style="background:#E8673A15;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#E8673A" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/></svg>
+              </div>
+              <span>'Understanding takes intention' wristbands</span>
+            </div>
+            <div class="physical-item">
+              <div class="physical-icon" style="background:#E8673A15;">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#E8673A" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2"/></svg>
               </div>
-              <span>Personalized ceramic ring tray</span>
-            </div>
-            <div class="physical-item">
-              <div class="physical-icon" style="background:#FFF0EB;">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#E8673A" stroke-width="1.6" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 9h6M9 12h6M9 15h4"/></svg>
-              </div>
-              <span>Printed QR card to start their experience</span>
-            </div>
-            <div class="physical-item">
-              <div class="physical-icon" style="background:#FFF0EB;">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#E8673A" stroke-width="1.6" stroke-linecap="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
-              </div>
-              <span>Personalized gift message from you</span>
-            </div>
-            <div class="physical-item">
-              <div class="physical-icon" style="background:#FFF0EB;">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#E8673A" stroke-width="1.6" stroke-linecap="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a4 4 0 0 0-8 0v2"/></svg>
-              </div>
-              <span>Premium Attune gift packaging</span>
+              <span>Handcrafted ceramic ring tray — 'understanding takes intention' stamped</span>
             </div>
           </div>
         </div>
@@ -793,7 +846,8 @@
         </div>
         <div class="pkg-price">
           <div class="pkg-price-row"><span class="price-main" id="ann-price">$174</span><span class="price-label">per couple</span></div>
-          <div class="price-alt" id="ann-price-sub">Physical gift box · shipping included</div>
+          <div class="price-alt" id="ann-price-sub">Digital · instant access · yours to keep</div>
+          <div class="price-alt" style="margin-top:.35rem;">Physical gift box · <strong>$214</strong> · ships in 5–7 days</div>
         </div>
       </div>
     </div>
@@ -890,7 +944,8 @@
         </div>
         <div class="pkg-price">
           <div class="pkg-price-row"><span class="price-main" id="premium-price">$350</span><span class="price-label">per couple</span></div>
-          <div class="price-alt" id="premium-price-sub">Digital edition · instant delivery</div>
+          <div class="price-alt" id="premium-price-sub">Digital · instant access · yours to keep</div>
+          <div class="price-alt" style="margin-top:.35rem;">Physical gift box · <strong>$390</strong> · ships in 5–7 days</div>
           <div class="price-alt" style="margin-top:.25rem;font-size:.7rem;color:rgba(255,255,255,.28);">Includes $175 LMFT session value</div>
         </div>
       </div>
@@ -1374,8 +1429,8 @@ function toggleFaq(item){
 function setFormat(pkg,format){
   if(pkg==='newlywed'){
     const physical=format==='physical';
-    document.getElementById('newlywed-price').textContent=physical?'$154':'$109';
-    document.getElementById('newlywed-price-sub').textContent=physical?'Physical gift box · shipping included':'Digital edition · instant delivery';
+    document.getElementById('newlywed-price').textContent=physical?'$189':'$154';
+    document.getElementById('newlywed-price-sub').textContent=physical?'Physical gift box (+$35) · ships in 5–7 days':'Digital · instant access · yours to keep';
     document.getElementById('newlywed-cta').textContent=physical?'Order gift box →':'Get digital edition →';
     document.getElementById('newlywed-physical-col').style.display=physical?'block':'none';
     document.querySelectorAll('#pkg-newlywed .fmt-btn').forEach((b,i)=>{
@@ -1384,8 +1439,8 @@ function setFormat(pkg,format){
     document.querySelector('#pkg-newlywed .pkg-note').textContent=physical?'Ships within 3–5 business days':'Access delivered by email immediately';
   } else if(pkg==='ann'){
     const physical=format==='physical';
-    document.getElementById('ann-price').textContent=physical?'$174':'$129';
-    document.getElementById('ann-price-sub').textContent=physical?'Physical gift box · shipping included':'Digital edition · instant delivery';
+    document.getElementById('ann-price').textContent=physical?'$214':'$174';
+    document.getElementById('ann-price-sub').textContent=physical?'Physical gift box (+$40) · ships in 5–7 days':'Digital · instant access · yours to keep';
     document.getElementById('ann-cta').textContent=physical?'Order gift box →':'Get digital edition →';
     document.getElementById('ann-physical-col').style.display=physical?'block':'none';
     document.querySelectorAll('#pkg-anniversary .fmt-btn').forEach((b,i)=>{
@@ -1394,8 +1449,8 @@ function setFormat(pkg,format){
     document.querySelector('#pkg-anniversary .pkg-note').textContent=physical?'Ships within 3–5 business days':'Access delivered by email immediately';
   } else if(pkg==='premium'){
     const physical=format==='physical';
-    document.getElementById('premium-price').textContent=physical?'$350':'$350';
-    document.getElementById('premium-price-sub').textContent=physical?'Includes gift box · shipping included':'Digital edition · instant delivery';
+    document.getElementById('premium-price').textContent=physical?'$390':'$350';
+    document.getElementById('premium-price-sub').textContent=physical?'Physical gift box (+$40) · ships in 5–7 days':'Digital · instant access · yours to keep';
     document.getElementById('premium-cta').textContent=physical?'Order Premium gift box →':'Get Attune Premium →';
     document.getElementById('premium-lmft-col').style.display=physical?'none':'block';
     document.getElementById('premium-physical-col').style.display=physical?'block':'none';

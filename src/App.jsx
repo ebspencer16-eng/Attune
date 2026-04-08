@@ -5132,16 +5132,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
                 {ct.tagline}
               </p>
             </div>
-            {/* Description + nuance combined on dark */}
-            <div style={{ background: "#2d2250", padding: "1.75rem 2.5rem 2rem" }}>
-              <p style={{ fontSize: "0.9rem", color: "rgba(245,239,230,0.82)", fontFamily: BFONT, fontWeight: 300, lineHeight: 1.85, margin: "0 0 1rem", maxWidth: 540 }}>
-                {interp(ct.description)}
-              </p>
-              <div style={{ borderTop: "1px solid rgba(255,255,255,0.1)", paddingTop: "1rem" }}>
-                <div style={{ fontSize: "0.55rem", letterSpacing: "0.2em", textTransform: "uppercase", color: `${ct.color}bb`, fontFamily: BFONT, fontWeight: 700, marginBottom: "0.4rem" }}>Worth knowing</div>
-                <p style={{ fontSize: "0.84rem", color: "rgba(245,239,230,0.65)", fontFamily: BFONT, fontWeight: 300, lineHeight: 1.72, margin: 0, maxWidth: 520 }}>{interp(ct.nuance)}</p>
-              </div>
-            </div>
+
           </div>
 
           {/* ── WHAT THIS LOOKS LIKE for names ── */}
@@ -5149,40 +5140,12 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
             <div style={{ fontSize: "0.6rem", letterSpacing: "0.22em", textTransform: "uppercase", color: ct.color, fontFamily: BFONT, fontWeight: 700, marginBottom: "1rem" }}>
               What this looks like for {userName} &amp; {partnerName}
             </div>
-            <div style={{ display: "flex", flexDirection: "column", gap: "0.85rem" }}>
-              {ct.patterns?.map((pattern, i) => (
-                <div key={i} style={{ display: "flex", gap: "0.9rem", alignItems: "flex-start" }}>
-                  <div style={{ width: 22, height: 22, borderRadius: "50%", background: ct.color + "18", border: `1.5px solid ${ct.color}40`, flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", marginTop: 1 }}>
-                    <div style={{ width: 6, height: 6, borderRadius: "50%", background: ct.color }} />
-                  </div>
-                  <p style={{ fontSize: "0.88rem", color: C.ink, fontFamily: BFONT, lineHeight: 1.7, margin: 0, fontWeight: 400 }}>{interp(pattern)}</p>
-                </div>
-              ))}
-            </div>
+            <p style={{ fontSize: "0.88rem", color: C.ink, fontFamily: BFONT, lineHeight: 1.75, margin: 0, fontWeight: 400 }}>
+              {ct.patterns?.map(p => interp(p)).join(" ")}
+            </p>
           </div>
 
-          {/* ── TIPS for this type ── */}
-          <div style={{ marginBottom: "1.25rem" }}>
-            <div style={{ fontSize: "0.6rem", letterSpacing: "0.22em", textTransform: "uppercase", color: C.muted, fontFamily: BFONT, fontWeight: 700, marginBottom: "1rem" }}>
-              Actionable next steps
-            </div>
-            <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
-              {ct.tips?.map((tip, i) => {
-                const tipColors = [ct.color, ct.shade || "#1B5FE8", "#10b981"];
-                const tipColor = tipColors[i % 3];
-                return (<div key={i} style={{ background: "white", border: `1.5px solid ${C.stone}`, borderRadius: 14, padding: "1.25rem 1.4rem", borderLeft: `4px solid ${tipColor}` }}>
-                  <div style={{ fontSize: "0.8rem", fontWeight: 700, color: C.ink, fontFamily: BFONT, marginBottom: "0.4rem" }}>{interp(tip.title)}</div>
-                  <p style={{ fontSize: "0.82rem", color: C.muted, fontFamily: BFONT, lineHeight: 1.72, margin: "0 0 0.75rem", fontWeight: 300 }}>{interp(tip.body)}</p>
-                  {tip.phraseTry && (
-                    <div style={{ background: `${tipColor}0d`, border: `1px solid ${tipColor}30`, borderRadius: 8, padding: "0.55rem 0.8rem", display: "flex", gap: "0.5rem", alignItems: "flex-start" }}>
-                      <span style={{ fontSize: "0.58rem", letterSpacing: "0.16em", textTransform: "uppercase", color: tipColor, fontFamily: BFONT, fontWeight: 700, whiteSpace: "nowrap", marginTop: "0.1rem" }}>Phrase to try</span>
-                      <span style={{ fontSize: "0.78rem", color: C.ink, fontFamily: BFONT, fontStyle: "italic", lineHeight: 1.55 }}>"{interp(tip.phraseTry)}"</span>
-                    </div>
-                  )}
-                </div>);
-              })}
-            </div>
-          </div>
+
 
           {/* ── STRENGTHS ── */}
           {ct.strengths?.length > 0 && (
@@ -5222,23 +5185,28 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
             </div>
           )}
 
-          {/* ── FAMOUS DUOS ── */}
-          {ct.famousDuos?.length > 0 && (
-            <div style={{ background: "#FBF8F3", border: `1.5px solid ${C.stone}`, borderRadius: 14, padding: "1.25rem 1.4rem", marginBottom: "1.25rem" }}>
-              <div style={{ fontSize: "0.58rem", letterSpacing: "0.2em", textTransform: "uppercase", color: C.muted, fontFamily: BFONT, fontWeight: 700, marginBottom: "0.85rem" }}>You're in good company</div>
-              <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
-                {ct.famousDuos.map((duo, i) => (
-                  <div key={i} style={{ display: "flex", gap: "0.85rem", alignItems: "flex-start" }}>
-                    <div>
-                      <span style={{ fontSize: "0.82rem", fontWeight: 700, color: C.ink, fontFamily: BFONT }}>{duo.names}</span>
-                      <span style={{ fontSize: "0.75rem", color: C.muted, fontFamily: BFONT }}> · {duo.show}</span>
-                      <p style={{ fontSize: "0.78rem", color: C.muted, fontFamily: BFONT, lineHeight: 1.6, margin: "0.2rem 0 0" }}>{duo.note}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
+          {/* ── TIPS for this type ── */}
+          <div style={{ marginBottom: "1.25rem" }}>
+            <div style={{ fontSize: "0.6rem", letterSpacing: "0.22em", textTransform: "uppercase", color: C.muted, fontFamily: BFONT, fontWeight: 700, marginBottom: "1rem" }}>
+              Actionable next steps
             </div>
-          )}
+            <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
+              {ct.tips?.map((tip, i) => {
+                const tipColors = [ct.color, ct.shade || "#1B5FE8", "#10b981"];
+                const tipColor = tipColors[i % 3];
+                return (<div key={i} style={{ background: "white", border: `1.5px solid ${C.stone}`, borderRadius: 14, padding: "1.25rem 1.4rem", borderLeft: `4px solid ${tipColor}` }}>
+                  <div style={{ fontSize: "0.8rem", fontWeight: 700, color: C.ink, fontFamily: BFONT, marginBottom: "0.4rem" }}>{interp(tip.title)}</div>
+                  <p style={{ fontSize: "0.82rem", color: C.muted, fontFamily: BFONT, lineHeight: 1.72, margin: "0 0 0.75rem", fontWeight: 300 }}>{interp(tip.body)}</p>
+                  {tip.phraseTry && (
+                    <div style={{ background: `${tipColor}0d`, border: `1px solid ${tipColor}30`, borderRadius: 8, padding: "0.55rem 0.8rem", display: "flex", gap: "0.5rem", alignItems: "flex-start" }}>
+                      <span style={{ fontSize: "0.58rem", letterSpacing: "0.16em", textTransform: "uppercase", color: tipColor, fontFamily: BFONT, fontWeight: 700, whiteSpace: "nowrap", marginTop: "0.1rem" }}>Phrase to try</span>
+                      <span style={{ fontSize: "0.78rem", color: C.ink, fontFamily: BFONT, fontStyle: "italic", lineHeight: 1.55 }}>"{interp(tip.phraseTry)}"</span>
+                    </div>
+                  )}
+                </div>);
+              })}
+            </div>
+          </div>
 
 
 
@@ -5317,6 +5285,83 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
           <div style={{ background: "white", border: `1.5px solid ${C.stone}`, borderRadius: 20, padding: "1.5rem", marginBottom: "1.5rem" }}>
             <CoupleMapSVG myS={myS} partS={partS} userName={userName} partnerName={partnerName} size={480} />
           </div>
+
+          {/* ── AXIS DESCRIPTIONS ── */}
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.75rem", marginBottom: "1.25rem" }}>
+            {[
+              { label: "Engage / Withdraw", desc: "How you respond when something is hard or unresolved — do you move toward the situation or pull back from it first?", dims: "Conflict 55% · Stress 30% · Repair 15%", poles: ["Engage: moves toward resolution, addresses quickly", "Withdraw: needs space first, processes privately"], color: "#9B5DE5" },
+              { label: "Open / Guarded", desc: "How freely you express what's going on inside — do you share it openly or hold it privately until ready?", dims: "Expression 45% · Feedback 30% · Needs 25%", poles: ["Open: partner usually knows how you're feeling", "Guarded: processes internally, expressive when ready"], color: "#1B5FE8" },
+            ].map(ax => (
+              <div key={ax.label} style={{ background: "white", border: `1.5px solid ${C.stone}`, borderRadius: 16, padding: "1.25rem", borderTop: `4px solid ${ax.color}` }}>
+                <div style={{ fontSize: "0.6rem", letterSpacing: "0.2em", textTransform: "uppercase", color: ax.color, fontFamily: BFONT, fontWeight: 700, marginBottom: "0.5rem" }}>{ax.label}</div>
+                <p style={{ fontSize: "0.82rem", color: C.ink, fontFamily: BFONT, lineHeight: 1.65, margin: "0 0 0.65rem" }}>{ax.desc}</p>
+                <div style={{ fontSize: "0.62rem", color: C.muted, fontFamily: BFONT, fontStyle: "italic", marginBottom: "0.5rem" }}>Scored from: {ax.dims}</div>
+                {ax.poles.map((p, i) => (
+                  <div key={i} style={{ fontSize: "0.72rem", color: C.muted, fontFamily: BFONT, marginBottom: "0.2rem" }}>
+                    <span style={{ fontWeight: 700, color: ax.color }}>{i === 0 ? "↑ " : "↓ "}</span>{p}
+                  </div>
+                ))}
+              </div>
+            ))}
+          </div>
+
+          {/* ── PLACEMENT BLURBS ── */}
+          {(() => {
+            const getBlurb = (name, info) => {
+              const { typeCode, engageCoord, openCoord } = info;
+              const eS = Math.abs(engageCoord - 0.5);
+              const oS = Math.abs(openCoord - 0.5);
+              const strongEngage = engageCoord > 0.8;
+              const nearEngageCenter = engageCoord >= 0.35 && engageCoord <= 0.65;
+              const strongWithdraw = engageCoord < 0.2;
+              const nearOpenCenter = openCoord >= 0.35 && openCoord <= 0.65;
+              const blurbs = {
+                W: strongEngage
+                  ? `${name} engages quickly and with full momentum — when something is unresolved, they feel it and move toward it without hesitation.`
+                  : nearEngageCenter
+                  ? `${name} leans toward resolution but has a slightly longer runway than a typical Reacher — there's a beat of processing before they engage fully.`
+                  : nearOpenCenter
+                  ? `${name} engages readily but holds their inner experience a little closer than a typical Reacher — they show up for the conversation; they just don't put every feeling into the shared space immediately.`
+                  : `${name} moves toward resolution and expresses openly, with enough self-awareness to calibrate what they're sharing and when.`,
+                X: strongEngage
+                  ? `${name} pushes hard toward resolution — once they've processed internally, they don't sit on it. The urgency toward resolution is real; it's just preceded by a private preparation phase.`
+                  : nearEngageCenter
+                  ? `${name} has a longer internal preparation phase before engaging — they push toward resolution, but the processing takes real time before anything surfaces.`
+                  : nearOpenCenter
+                  ? `${name} is a Driver who runs slightly warmer than average — they process privately but share a bit more of the working-through than a typical Driver.`
+                  : `${name} engages toward resolution and processes privately, with a comfortable mix of thoughtfulness and forward momentum.`,
+                Y: strongWithdraw
+                  ? `${name} needs significant space before they can show up to a hard conversation — not avoidance, just a longer processing runway. What they eventually bring is emotionally complete and worth the wait.`
+                  : nearEngageCenter
+                  ? `${name} needs space first, but it's a shorter runway than many Feelers — they come back relatively quickly once they've landed somewhere.`
+                  : nearOpenCenter
+                  ? `${name} processes inward and holds what's going on privately until ready — emotionally expressive when they arrive, but the arrival takes both time and internal settling.`
+                  : `${name} needs space to process before engaging, carries emotional weight visibly in the interim, and returns when ready with something real.`,
+                Z: strongWithdraw
+                  ? `${name} has the longest runway in the room — they process privately and need substantial space before anything surfaces. What comes out is considered and real; it just requires time and no pressure.`
+                  : nearEngageCenter
+                  ? `${name} processes privately but has a slightly stronger pull toward resolution than a typical Protector — they'll surface what's going on, they just need space and no pressure.`
+                  : nearOpenCenter
+                  ? `${name} holds things privately but is slightly more emotionally accessible than a typical Protector — more going on internally than most Protectors show.`
+                  : `${name} holds things close and processes privately, with a baseline steadiness and a comfortable relationship with quiet.`,
+              };
+              return blurbs[typeCode] || "";
+            };
+            return (
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.75rem", marginBottom: "1.25rem" }}>
+                {[
+                  { name: userName, info: newType.typeInfoA, it: itA },
+                  { name: partnerName, info: newType.typeInfoB, it: itB },
+                ].map(({ name, info, it }) => (
+                  <div key={name} style={{ background: "white", border: `1.5px solid ${C.stone}`, borderRadius: 16, padding: "1.25rem", borderTop: `4px solid ${it.color}` }}>
+                    <div style={{ fontSize: "0.58rem", letterSpacing: "0.2em", textTransform: "uppercase", color: it.color, fontFamily: BFONT, fontWeight: 700, marginBottom: "0.35rem" }}>{name}</div>
+                    <div style={{ fontFamily: HFONT, fontSize: "1rem", fontWeight: 700, color: C.ink, marginBottom: "0.5rem" }}>{it.name}</div>
+                    <p style={{ fontSize: "0.82rem", color: C.muted, fontFamily: BFONT, lineHeight: 1.7, margin: 0 }}>{getBlurb(name, info)}</p>
+                  </div>
+                ))}
+              </div>
+            );
+          })()}
 
           {/* ── INDIVIDUAL TYPES ── */}
           <div style={{ display: "grid", gridTemplateColumns: "minmax(0,1fr) minmax(0,1fr)", gap: isMobile ? "0.5rem" : "0.85rem", marginBottom: "1.5rem" }}>
