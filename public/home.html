@@ -64,12 +64,12 @@
   .btn-nav:hover{opacity:.82}
 
   /* HERO */
-  .hero{padding-top:58px;min-height:82vh;display:grid;grid-template-columns:1fr 1.4fr;align-items:stretch;max-width:1280px;margin:0 auto;padding-left:3.5rem;padding-right:2rem;gap:2.5rem;position:relative;overflow:visible}
+  .hero{padding-top:58px;min-height:70vh;display:grid;grid-template-columns:1fr 1.4fr;align-items:stretch;max-width:1280px;margin:0 auto;padding-left:3.5rem;padding-right:2rem;gap:2.5rem;position:relative;overflow:visible}
   .hero-blobs{position:absolute;top:-200px;left:-200px;right:-200px;bottom:-200px;pointer-events:none;z-index:0;overflow:visible}
   .hero-blob{position:absolute;border-radius:50%;}
   .hero-left,.hero-right{position:relative;z-index:1}
   .hero-right{display:flex;flex-direction:column;padding:0.5rem 0 1rem;width:100%;}
-  .hero-left{padding:3rem 0 2rem;display:flex;flex-direction:column;justify-content:center;}
+  .hero-left{padding:3rem 0 0.5rem;display:flex;flex-direction:column;justify-content:center;}
   .eyebrow{display:inline-flex;align-items:center;gap:.65rem;font-size:.72rem;letter-spacing:.3em;text-transform:uppercase;color:var(--clay);font-weight:700;margin-bottom:1rem;white-space:nowrap}
   .eyebrow-dot{width:28px;height:2.5px;border-radius:999px;background:linear-gradient(90deg,var(--orange),var(--indigo));flex-shrink:0}
   h1{font-family:var(--hfont);font-size:clamp(2.6rem,4.2vw,3.7rem);font-weight:700;line-height:1.06;color:var(--ink);margin-bottom:1.6rem;letter-spacing:-.02em}
@@ -501,7 +501,7 @@
           </div>
           <!-- Mini 2x2 couple map -->
           <div style="margin-top:0;">
-            <div style="position:relative;width:100%;aspect-ratio:1/1;border-radius:10px;overflow:hidden;margin-bottom:.85rem;">
+            <div style="position:relative;width:60%;aspect-ratio:1/1;border-radius:10px;overflow:hidden;margin-bottom:.85rem;">
               <!-- Quadrant grid -->
               <div style="display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;width:100%;height:100%;gap:2px;">
                 <div style="background:rgba(232,103,58,.78);border-radius:5px 0 0 0;display:flex;align-items:flex-start;padding:5px 6px;font-size:.5rem;font-weight:700;color:rgba(255,255,255,.9);font-family:'DM Sans',sans-serif;">W</div>
@@ -537,7 +537,7 @@
       <div style="background:linear-gradient(160deg,#0d2c24,#163d30,#0d2c24);border-radius:20px;overflow:hidden;display:flex;flex-direction:column;position:relative;min-height:420px;">
         <div style="height:3px;background:linear-gradient(90deg,#34d399,rgba(52,211,153,.3));flex-shrink:0;"></div>
         <div style="position:absolute;top:14px;left:16px;display:flex;align-items:center;gap:4px;opacity:.35;">
-          <svg width="14" height="10" viewBox="0 0 103 76" fill="none"><use href="#sg1"/></svg>
+          <svg width="14" height="10" viewBox="0 0 103 76" fill="none"><defs><linearGradient id="sg2" x1="0" y1="0" x2="103" y2="76" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#E8673A"/><stop offset="100%" stop-color="#1B5FE8"/></linearGradient></defs><path d="M14,4 L44,4 A9,9 0 0,1 53,13 L53,42 A9,9 0 0,1 44,51 L20,51 L6,61 L11,51 A6,6 0 0,1 5,45 L5,13 A9,9 0 0,1 14,4 Z" fill="url(#sg2)"/><path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill="white" opacity=".9" transform="translate(13.16,11.3) scale(0.72)"/><path d="M89,14 L59,14 A9,9 0 0,0 50,23 L50,52 A9,9 0 0,0 59,61 L83,61 L97,71 L92,61 A6,6 0 0,0 98,55 L98,23 A9,9 0 0,0 89,14 Z" fill="none" stroke="url(#sg2)" stroke-width="2.2" stroke-linejoin="round"/><path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill="url(#sg2)" transform="translate(58.16,21.3) scale(0.72)"/></svg>
           <span style="font-family:'Playfair Display',Georgia,serif;font-size:.58rem;font-weight:700;color:white;">Attune</span>
         </div>
         <div style="padding:2.25rem 1.75rem 2rem;flex:1;display:flex;flex-direction:column;justify-content:space-between;">
@@ -568,7 +568,7 @@
       <div style="background:linear-gradient(160deg,#122d58,#183e82,#122d58);border-radius:20px;overflow:hidden;display:flex;flex-direction:column;position:relative;min-height:420px;">
         <div style="height:3px;background:linear-gradient(90deg,#1B5FE8,#1B5FE855);flex-shrink:0;"></div>
         <div style="position:absolute;top:14px;left:16px;display:flex;align-items:center;gap:4px;opacity:.35;">
-          <svg width="14" height="10" viewBox="0 0 103 76" fill="none"><use href="#sg1"/></svg>
+          <svg width="14" height="10" viewBox="0 0 103 76" fill="none"><defs><linearGradient id="sg3" x1="0" y1="0" x2="103" y2="76" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#E8673A"/><stop offset="100%" stop-color="#1B5FE8"/></linearGradient></defs><path d="M14,4 L44,4 A9,9 0 0,1 53,13 L53,42 A9,9 0 0,1 44,51 L20,51 L6,61 L11,51 A6,6 0 0,1 5,45 L5,13 A9,9 0 0,1 14,4 Z" fill="url(#sg3)"/><path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill="white" opacity=".9" transform="translate(13.16,11.3) scale(0.72)"/><path d="M89,14 L59,14 A9,9 0 0,0 50,23 L50,52 A9,9 0 0,0 59,61 L83,61 L97,71 L92,61 A6,6 0 0,0 98,55 L98,23 A9,9 0 0,0 89,14 Z" fill="none" stroke="url(#sg3)" stroke-width="2.2" stroke-linejoin="round"/><path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill="url(#sg3)" transform="translate(58.16,21.3) scale(0.72)"/></svg>
           <span style="font-family:'Playfair Display',Georgia,serif;font-size:.58rem;font-weight:700;color:white;">Attune</span>
         </div>
         <div style="padding:2.25rem 1.75rem 2rem;flex:1;display:flex;flex-direction:column;justify-content:space-between;">
@@ -598,7 +598,7 @@
 
     <!-- Subtitle labels below story cards (desktop) -->
     <div class="story-cards story-cards-desktop" style="display:grid;grid-template-columns:repeat(3,1fr);gap:1.25rem;margin-top:.75rem;">
-      <div style="font-size:.68rem;color:var(--muted);font-family:'DM Sans',sans-serif;padding-left:.25rem;">how you're wired together</div>
+      <div style="font-size:.68rem;color:var(--muted);font-family:'DM Sans',sans-serif;padding-left:.25rem;">your couple type, out of ten</div>
       <div style="font-size:.68rem;color:var(--muted);font-family:'DM Sans',sans-serif;padding-left:.25rem;">10 dimensions, side by side</div>
       <div style="font-size:.68rem;color:var(--muted);font-family:'DM Sans',sans-serif;padding-left:.25rem;">what you each assumed, now visible</div>
     </div>
