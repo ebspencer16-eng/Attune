@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Get Started · Attune</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,700&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --cream:#FFFDFA;--warm:#FBF8F3;--stone:#E8DDD0;--clay:#C17F47;
+  --ink:#0E0B07;--muted:#8C7A68;--orange:#E8673A;--indigo:#5B6DF8;
+  --green:#10b981;--hfont:'Playfair Display',Georgia,serif;--bfont:'DM Sans',sans-serif;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{min-height:100vh;background:var(--warm);color:var(--ink);font-family:var(--bfont)}
+
+/* NAV */
+nav{position:sticky;top:0;z-index:100;height:58px;background:rgba(255,253,249,.97);backdrop-filter:blur(12px);border-bottom:1px solid var(--stone);display:flex;align-items:center;justify-content:space-between;padding:0 1.5rem}
+.logo{display:flex;align-items:center;gap:.6rem;text-decoration:none}
+.logo-text{font-family:var(--hfont);font-size:1.05rem;font-weight:700;color:var(--ink)}
+.nav-back{font-size:.75rem;color:var(--muted);text-decoration:none;font-weight:500}
+.nav-back:hover{color:var(--clay)}
+
+/* PAGE HEADER */
+.page-head{text-align:center;padding:3rem 1.5rem 2rem}
+.page-eyebrow{font-size:.65rem;letter-spacing:.2em;text-transform:uppercase;color:var(--clay);font-weight:700;margin-bottom:.85rem}
+.page-title{font-family:var(--hfont);font-size:clamp(2rem,4vw,2.8rem);font-weight:700;line-height:1.08;letter-spacing:-.02em;color:var(--ink);margin-bottom:1.5rem}
+
+/* FORMAT TOGGLE */
+.format-toggle{display:inline-flex;border:1.5px solid var(--stone);border-radius:12px;overflow:hidden;background:white}
+.fmt-btn{padding:.55rem 1.4rem;font-size:.8rem;font-weight:600;font-family:var(--bfont);cursor:pointer;border:none;background:transparent;color:var(--muted);transition:all .15s;letter-spacing:.02em}
+.fmt-btn.active{background:var(--ink);color:white}
+
+/* PACKAGE GRID */
+.pkg-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;max-width:1080px;margin:0 auto;padding:0 1.5rem 2rem}
+@media(max-width:900px){.pkg-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:500px){.pkg-grid{grid-template-columns:1fr}}
+
+/* PACKAGE TILE */
+.pkg-tile{background:white;border:2px solid var(--stone);border-radius:18px;padding:1.4rem 1.25rem;cursor:pointer;transition:all .18s;display:flex;flex-direction:column;position:relative;overflow:hidden}
+.pkg-tile:hover{border-color:var(--clay);box-shadow:0 4px 18px rgba(0,0,0,.06)}
+.pkg-tile.selected{border-color:var(--orange);box-shadow:0 0 0 3px rgba(232,103,58,.15)}
+.pkg-tile.selected-indigo{border-color:var(--indigo);box-shadow:0 0 0 3px rgba(91,109,248,.15)}
+.pkg-check{position:absolute;top:.9rem;right:.9rem;width:22px;height:22px;border-radius:50%;border:2px solid var(--stone);display:flex;align-items:center;justify-content:center;transition:all .15s}
+.pkg-tile.selected .pkg-check,.pkg-tile.selected-indigo .pkg-check{background:var(--orange);border-color:var(--orange)}
+.pkg-tile.selected-indigo .pkg-check{background:var(--indigo);border-color:var(--indigo)}
+.pkg-check svg{display:none}
+.pkg-tile.selected .pkg-check svg,.pkg-tile.selected-indigo .pkg-check svg{display:block}
+.pkg-badge{display:inline-block;font-size:.6rem;letter-spacing:.14em;text-transform:uppercase;font-weight:700;padding:.28rem .65rem;border-radius:6px;margin-bottom:.85rem}
+.pkg-name{font-family:var(--hfont);font-size:1.05rem;font-weight:700;color:var(--ink);margin-bottom:.35rem;line-height:1.2}
+.pkg-price{font-size:1.5rem;font-weight:700;color:var(--ink);margin-bottom:.2rem;font-family:var(--bfont)}
+.pkg-price-sub{font-size:.7rem;color:var(--muted);margin-bottom:1rem;line-height:1.4}
+.pkg-features{list-style:none;flex:1}
+.pkg-features li{font-size:.78rem;color:var(--muted);line-height:1.6;padding:.18rem 0;display:flex;gap:.5rem;align-items:flex-start}
+.pkg-features li::before{content:'—';color:var(--clay);flex-shrink:0;font-size:.7rem;margin-top:.15rem}
+.pkg-features li.bold-feat::before{color:var(--orange)}
+.pkg-features li.bold-feat{color:var(--ink);font-weight:500}
+
+/* POPULAR BADGE */
+.pkg-tile.popular::after{content:'Most popular';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--orange),#d45a2e)}
+
+/* ADD-ONS */
+.addons-section{max-width:1080px;margin:0 auto;padding:0 1.5rem 2rem}
+.addons-head{display:flex;align-items:baseline;gap:.75rem;margin-bottom:1rem}
+.addons-title{font-family:var(--hfont);font-size:1.3rem;font-weight:700;color:var(--ink)}
+.addons-sub{font-size:.78rem;color:var(--muted)}
+.addon-grid{display:grid;grid-template-columns:1fr 1fr;gap:.85rem}
+@media(max-width:600px){.addon-grid{grid-template-columns:1fr}}
+.addon-card{background:white;border:2px solid var(--stone);border-radius:14px;padding:1.1rem 1.2rem;cursor:pointer;transition:all .15s;display:flex;gap:1rem;align-items:flex-start}
+.addon-card:hover{border-color:var(--clay)}
+.addon-card.selected{border-color:var(--orange);background:#FFF8F5}
+.addon-card.selected .addon-check{background:var(--orange);border-color:var(--orange)}
+.addon-card.selected .addon-check svg{display:block}
+.addon-check{width:20px;height:20px;border-radius:50%;border:2px solid var(--stone);flex-shrink:0;display:flex;align-items:center;justify-content:center;margin-top:.1rem;transition:all .15s}
+.addon-check svg{display:none}
+.addon-body{flex:1}
+.addon-name{font-size:.88rem;font-weight:700;color:var(--ink);margin-bottom:.2rem}
+.addon-desc{font-size:.74rem;color:var(--muted);line-height:1.55;margin-bottom:.5rem}
+.addon-price{font-size:.82rem;font-weight:700;color:var(--orange)}
+.workbook-variants{display:none;gap:.5rem;margin-top:.6rem}
+.workbook-variants.show{display:flex}
+.wb-var{padding:.3rem .7rem;border:1.5px solid var(--stone);border-radius:8px;font-size:.72rem;font-weight:600;cursor:pointer;font-family:var(--bfont);background:white;color:var(--muted);transition:all .13s}
+.wb-var.active{border-color:var(--orange);background:#FFF0EB;color:var(--orange)}
+
+/* STICKY NEXT BAR */
+.next-bar{position:sticky;bottom:0;background:rgba(255,253,249,.97);backdrop-filter:blur(12px);border-top:1px solid var(--stone);padding:.9rem 1.5rem;z-index:50}
+.next-inner{max-width:1080px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:1rem}
+.next-summary{font-size:.82rem;color:var(--muted)}
+.next-summary strong{color:var(--ink)}
+.next-summary .next-total{font-size:1rem;font-weight:700;color:var(--ink)}
+.btn-next{background:linear-gradient(135deg,var(--orange),#d45a2e);color:white;border:none;padding:.85rem 2.2rem;border-radius:12px;font-size:.82rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;cursor:pointer;font-family:var(--bfont);box-shadow:0 6px 22px rgba(232,103,58,.35);transition:all .18s}
+.btn-next:hover:not(:disabled){transform:translateY(-2px)}
+.btn-next:disabled{opacity:.4;cursor:not-allowed;transform:none}
+@media(max-width:500px){.next-bar{padding:.75rem 1rem}.next-inner{flex-wrap:wrap}.btn-next{width:100%}}
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="/home" class="logo">
+    <svg width="36" height="26" viewBox="0 0 103 76" fill="none" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="logo_start" x1="0" y1="0" x2="103" y2="76" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#E8673A"/><stop offset="100%" stop-color="#1B5FE8"/></linearGradient></defs><path d="M14,4 L44,4 A9,9 0 0,1 53,13 L53,42 A9,9 0 0,1 44,51 L20,51 L6,61 L11,51 A6,6 0 0,1 5,45 L5,13 A9,9 0 0,1 14,4 Z" fill="url(#logo_start)"/><path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill="white" opacity="0.93" transform="translate(13.16,11.3) scale(0.72)"/><path d="M89,14 L59,14 A9,9 0 0,0 50,23 L50,52 A9,9 0 0,0 59,61 L83,61 L97,71 L92,61 A6,6 0 0,0 98,55 L98,23 A9,9 0 0,0 89,14 Z" fill="none" stroke="url(#logo_start)" stroke-width="2.2" stroke-linejoin="round"/><path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill="url(#logo_start)" transform="translate(58.16,21.3) scale(0.72)"/></svg>
+    <span class="logo-text">Attune</span>
+  </a>
+  <a href="/home" class="nav-back">← Back</a>
+</nav>
+
+<div class="page-head">
+  <p class="page-eyebrow">Get started</p>
+  <h1 class="page-title">Choose your package</h1>
+  <div class="format-toggle">
+    <button class="fmt-btn active" id="btn-physical" onclick="setFormat('physical')">Physical</button>
+    <button class="fmt-btn" id="btn-digital" onclick="setFormat('digital')">Digital only</button>
+  </div>
+</div>
+
+<!-- PACKAGE TILES -->
+<div class="pkg-grid">
+
+  <!-- Assessment -->
+  <div class="pkg-tile" id="tile-core" onclick="selectPkg('core')">
+    <div class="pkg-check">
+      <svg width="11" height="9" viewBox="0 0 11 9" fill="none"><path d="M1 4.5L4 7.5L10 1" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </div>
+    <span class="pkg-badge" style="background:#FFF0EB;color:#E8673A;">The Foundation</span>
+    <div class="pkg-name">The Attune Assessment</div>
+    <div class="pkg-price" id="price-core">$114</div>
+    <div class="pkg-price-sub" id="pricesub-core">Physical gift box · shipping included</div>
+    <ul class="pkg-features">
+      <li>Communication assessment</li>
+      <li>Expectations comparison</li>
+      <li>Couple type + map</li>
+      <li>Results portal — yours to keep</li>
+    </ul>
+  </div>
+
+  <!-- Starting Out -->
+  <div class="pkg-tile popular" id="tile-newlywed" onclick="selectPkg('newlywed')">
+    <div class="pkg-check">
+      <svg width="11" height="9" viewBox="0 0 11 9" fill="none"><path d="M1 4.5L4 7.5L10 1" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </div>
+    <span class="pkg-badge" style="background:#FFF0EB;color:#E8673A;">Starting Out</span>
+    <div class="pkg-name">Starting Out Collection</div>
+    <div class="pkg-price" id="price-newlywed">$169</div>
+    <div class="pkg-price-sub" id="pricesub-newlywed">Physical gift box · shipping included</div>
+    <ul class="pkg-features">
+      <li class="bold-feat">Everything in Assessment</li>
+      <li>Starting Out Checklist</li>
+      <li>Budget priorities exercise</li>
+      <li>Personalized QR card</li>
+    </ul>
+  </div>
+
+  <!-- Anniversary -->
+  <div class="pkg-tile" id="tile-anniversary" onclick="selectPkg('anniversary')">
+    <div class="pkg-check">
+      <svg width="11" height="9" viewBox="0 0 11 9" fill="none"><path d="M1 4.5L4 7.5L10 1" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </div>
+    <span class="pkg-badge" style="background:#EEEFFF;color:#5B6DF8;">Anniversary</span>
+    <div class="pkg-name">Anniversary Collection</div>
+    <div class="pkg-price" id="price-anniversary">$169</div>
+    <div class="pkg-price-sub" id="pricesub-anniversary">Physical gift box · shipping included</div>
+    <ul class="pkg-features">
+      <li class="bold-feat">Everything in Assessment</li>
+      <li>Relationship Reflection exercise</li>
+      <li>Relationship Principles print</li>
+      <li>Personalized QR card</li>
+    </ul>
+  </div>
+
+  <!-- Premium -->
+  <div class="pkg-tile" id="tile-premium" onclick="selectPkg('premium')">
+    <div class="pkg-check">
+      <svg width="11" height="9" viewBox="0 0 11 9" fill="none"><path d="M1 4.5L4 7.5L10 1" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </div>
+    <span class="pkg-badge" style="background:rgba(91,109,248,.1);color:#5B6DF8;">Most Complete</span>
+    <div class="pkg-name">Attune Premium</div>
+    <div class="pkg-price" id="price-premium">$345</div>
+    <div class="pkg-price-sub" id="pricesub-premium">Physical gift box · shipping included</div>
+    <ul class="pkg-features">
+      <li class="bold-feat">Everything in Assessment</li>
+      <li>LMFT session included</li>
+      <li>Personalized workbook</li>
+      <li>Premium gift box</li>
+    </ul>
+  </div>
+
+</div>
+
+<!-- ADD-ONS -->
+<div class="addons-section">
+  <div class="addons-head">
+    <span class="addons-title">Add-ons</span>
+    <span class="addons-sub">Optional · available on any package</span>
+  </div>
+  <div class="addon-grid">
+
+    <!-- LMFT -->
+    <div class="addon-card" id="addon-lmft" onclick="toggleLmft()">
+      <div class="addon-check" id="lmft-check">
+        <svg width="10" height="8" viewBox="0 0 11 9" fill="none"><path d="M1 4.5L4 7.5L10 1" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      <div class="addon-body">
+        <div class="addon-name">LMFT Session</div>
+        <div class="addon-desc">A 50-minute video session with a licensed marriage and family therapist to go deeper on your results.</div>
+        <div class="addon-price">+$150</div>
+      </div>
+    </div>
+
+    <!-- Workbook -->
+    <div class="addon-card" id="addon-workbook" onclick="toggleWorkbook()">
+      <div class="addon-check" id="wb-check">
+        <svg width="10" height="8" viewBox="0 0 11 9" fill="none"><path d="M1 4.5L4 7.5L10 1" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      <div class="addon-body">
+        <div class="addon-name">Personalized Workbook</div>
+        <div class="addon-desc">A custom workbook built from your results — exercises, insights, and conversation starters tailored to your couple type.</div>
+        <div class="addon-price" id="wb-price">+$19</div>
+        <div class="workbook-variants" id="wb-variants">
+          <button class="wb-var active" id="wv-digital" onclick="setWbFormat('digital',event)">Digital PDF — $19</button>
+          <button class="wb-var" id="wv-print" onclick="setWbFormat('print',event)">Printed — $39</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- STICKY NEXT BAR -->
+<div class="next-bar">
+  <div class="next-inner">
+    <div class="next-summary">
+      <span id="bar-pkg-name" style="display:block;font-size:.78rem;margin-bottom:.1rem;">Select a package to continue</span>
+      <span class="next-total" id="bar-total"></span>
+    </div>
+    <button class="btn-next" id="btn-next" onclick="goNext()" disabled>Next →</button>
+  </div>
+</div>
+
+<script>
+const PRICES = {
+  core:        { physical: 114, digital: 89 },
+  newlywed:    { physical: 169, digital: 139 },
+  anniversary: { physical: 169, digital: 139 },
+  premium:     { physical: 345, digital: 295 },
+};
+const PKG_NAMES = {
+  core: 'The Attune Assessment',
+  newlywed: 'Starting Out Collection',
+  anniversary: 'Anniversary Collection',
+  premium: 'Attune Premium',
+};
+const PHYSICAL_SUB = 'Physical gift box · shipping included';
+const DIGITAL_SUB  = 'Digital · instant access · yours to keep';
+
+let selectedPkg = null;
+let format = 'physical';
+let addonLmft = false;
+let addonWorkbook = false;
+let wbFormat = 'digital';
+
+function setFormat(f) {
+  format = f;
+  document.getElementById('btn-physical').classList.toggle('active', f === 'physical');
+  document.getElementById('btn-digital').classList.toggle('active', f === 'digital');
+  // Update all prices
+  ['core','newlywed','anniversary','premium'].forEach(id => {
+    document.getElementById('price-' + id).textContent = '$' + PRICES[id][f];
+    document.getElementById('pricesub-' + id).textContent = f === 'physical' ? PHYSICAL_SUB : DIGITAL_SUB;
+  });
+  updateBar();
+}
+
+function selectPkg(id) {
+  if (selectedPkg) {
+    const prev = document.getElementById('tile-' + selectedPkg);
+    prev.classList.remove('selected', 'selected-indigo');
+  }
+  selectedPkg = id;
+  const tile = document.getElementById('tile-' + id);
+  tile.classList.add(id === 'anniversary' || id === 'premium' ? 'selected-indigo' : 'selected');
+  document.getElementById('btn-next').disabled = false;
+  updateBar();
+}
+
+function toggleLmft() {
+  addonLmft = !addonLmft;
+  document.getElementById('addon-lmft').classList.toggle('selected', addonLmft);
+  updateBar();
+}
+
+function toggleWorkbook() {
+  addonWorkbook = !addonWorkbook;
+  document.getElementById('addon-workbook').classList.toggle('selected', addonWorkbook);
+  document.getElementById('wb-variants').classList.toggle('show', addonWorkbook);
+  updateBar();
+}
+
+function setWbFormat(f, e) {
+  e.stopPropagation();
+  wbFormat = f;
+  document.getElementById('wv-digital').classList.toggle('active', f === 'digital');
+  document.getElementById('wv-print').classList.toggle('active', f === 'print');
+  document.getElementById('wb-price').textContent = f === 'print' ? '+$39' : '+$19';
+  updateBar();
+}
+
+function updateBar() {
+  if (!selectedPkg) return;
+  let total = PRICES[selectedPkg][format];
+  if (addonLmft) total += 150;
+  if (addonWorkbook) total += wbFormat === 'print' ? 39 : 19;
+  document.getElementById('bar-pkg-name').textContent = PKG_NAMES[selectedPkg] + ' · ' + (format === 'physical' ? 'Physical' : 'Digital');
+  document.getElementById('bar-total').textContent = '$' + total;
+}
+
+function goNext() {
+  if (!selectedPkg) return;
+  const params = new URLSearchParams({ pkg: selectedPkg, format });
+  if (addonLmft) params.set('addon_lmft', '1');
+  if (addonWorkbook) params.set('addon_workbook', wbFormat);
+  window.location.href = '/checkout?' + params.toString();
+}
+</script>
+</body>
+</html>
