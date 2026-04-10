@@ -7941,6 +7941,30 @@ export default function App() {
     };
   }, [view, highlightsSeen]);
 
+  // ── Fire results_viewed email once after highlights are seen ─────────────
+  useEffect(() => {
+    if (!highlightsSeen) return;
+    if (!isLoggedIn || !account?.email) return;
+    const fired = localStorage.getItem('attune_results_email_sent');
+    if (fired) return;
+    localStorage.setItem('attune_results_email_sent', '1');
+    fetch('/api/send-email', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        type: 'results_viewed',
+        toEmail: account.email,
+        toName: account.name || '',
+        partnerName: account.partnerName || '',
+        coupleType: coupleType?.name || '',
+        portalUrl: window.location.origin + '/app',
+        hasReflection: pkg.hasAnniversary,
+        hasBudget: pkg.hasBudget,
+        hasLMFT: pkg.hasLMFT,
+      }),
+    }).catch(() => {});
+  }, [highlightsSeen]);
+
   const go = (newView) => {
     if (newView !== "results") setHighlightsSeen(false);
     setView(newView);
@@ -8730,6 +8754,23 @@ export default function App() {
                       </div>
                     ))}
                   </div>
+                  {/* Side-by-side responses link */}
+                  {bothDone && (
+                    <div style={{ display: "flex", gap: "0.5rem", marginTop: "0.85rem", flexWrap: "wrap" }}>
+                      {[
+                        { label: "Communication side by side →", section: "personality", color: "#E8673A" },
+                        { label: "Expectations side by side →", section: "expectations", color: "#1B5FE8" },
+                        ...(pkg.hasAnniversary && ex3Answers ? [{ label: "Reflection side by side →", section: "anniversary", color: "#1B5FE8" }] : []),
+                      ].map(({ label, section, color }) => (
+                        <button key={section} onClick={() => { setActiveResult(section); setView("results"); setHighlightsSeen(true); }}
+                          style={{ background: "transparent", border: "1.5px solid #E8DDD0", borderRadius: 8, padding: "0.45rem 0.85rem", fontSize: 11, fontWeight: 600, color: "#8C7A68", cursor: "pointer", fontFamily: "'DM Sans', sans-serif", letterSpacing: ".03em", transition: "all .15s" }}
+                          onMouseEnter={e => { e.currentTarget.style.borderColor = color; e.currentTarget.style.color = color; }}
+                          onMouseLeave={e => { e.currentTarget.style.borderColor = "#E8DDD0"; e.currentTarget.style.color = "#8C7A68"; }}>
+                          {label}
+                        </button>
+                      ))}
+                    </div>
+                  )}
                 </div>
 
                 {/* ── WHAT'S WAITING ── shown when both complete */}

@@ -9,6 +9,7 @@
  *   workbook_ready  — { toEmail, toName, partnerName, downloadUrl, orderNum }
  *   beta_survey     — { toEmail, toName, partnerName, coupleType, surveyUrl }
  *   checkin_6mo     — { toEmail, toName, partnerName, retakeUrl }
+ *   results_viewed  — { toEmail, toName, partnerName, coupleType, portalUrl, hasReflection, hasBudget, hasLMFT }
  *
  * Required env vars (Vercel dashboard):
  *   RESEND_API_KEY   — from https://resend.com
@@ -139,6 +140,102 @@ function checkin6moEmail({ toName, partnerName, retakeUrl }) {
   };
 }
 
+// ── results_viewed email ─────────────────────────────────────────────────────
+function resultsViewedEmail({ toName, partnerName, coupleType, portalUrl, hasReflection, hasBudget, hasLMFT }) {
+  const name = toName || "there";
+  const partner = partnerName || "your partner";
+  const appUrl = portalUrl || "https://attune-relationships.com/app";
+
+  const addonRows = [
+    ...(!hasReflection ? [`
+    <tr>
+      <td style="padding:12px 0;border-bottom:1px solid #F3EDE6;vertical-align:top">
+        <div style="display:flex;align-items:flex-start;gap:12px">
+          <div style="width:36px;height:36px;border-radius:10px;background:#EEF2FF;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:1rem">♡</div>
+          <div>
+            <div style="font-size:0.88rem;font-weight:700;color:#0E0B07;margin-bottom:3px">Relationship Reflection</div>
+            <div style="font-size:0.78rem;color:#8C7A68;line-height:1.6">A third exercise: shared history, meaningful moments, priorities, and what you admire in each other. Includes side-by-side insights and action plan.</div>
+          </div>
+          <div style="text-align:right;flex-shrink:0;padding-left:8px">
+            <div style="font-size:0.92rem;font-weight:700;color:#0E0B07">+$40</div>
+          </div>
+        </div>
+      </td>
+    </tr>`] : []),
+    ...(!hasBudget ? [`
+    <tr>
+      <td style="padding:12px 0;border-bottom:1px solid #F3EDE6;vertical-align:top">
+        <div style="display:flex;align-items:flex-start;gap:12px">
+          <div style="width:36px;height:36px;border-radius:10px;background:#FFF8F5;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:1rem">💰</div>
+          <div>
+            <div style="font-size:0.88rem;font-weight:700;color:#0E0B07;margin-bottom:3px">Shared Budget Builder</div>
+            <div style="font-size:0.78rem;color:#8C7A68;line-height:1.6">An interactive worksheet for building a real shared budget together, with context from your expectations results.</div>
+          </div>
+          <div style="text-align:right;flex-shrink:0;padding-left:8px">
+            <div style="font-size:0.92rem;font-weight:700;color:#0E0B07">+$15</div>
+          </div>
+        </div>
+      </td>
+    </tr>`] : []),
+    ...(!hasLMFT ? [`
+    <tr>
+      <td style="padding:12px 0;border-bottom:1px solid #F3EDE6;vertical-align:top">
+        <div style="display:flex;align-items:flex-start;gap:12px">
+          <div style="width:36px;height:36px;border-radius:10px;background:#F0F0FF;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:1rem">🧠</div>
+          <div>
+            <div style="font-size:0.88rem;font-weight:700;color:#0E0B07;margin-bottom:3px">LMFT Session</div>
+            <div style="font-size:0.78rem;color:#8C7A68;line-height:1.6">A 50-minute video session with a licensed marriage and family therapist who reviews your joint results before you meet. Not a first appointment — a real conversation about what your results mean.</div>
+          </div>
+          <div style="text-align:right;flex-shrink:0;padding-left:8px">
+            <div style="font-size:0.92rem;font-weight:700;color:#0E0B07">+$150</div>
+          </div>
+        </div>
+      </td>
+    </tr>`] : []),
+    `<tr>
+      <td style="padding:12px 0;vertical-align:top">
+        <div style="display:flex;align-items:flex-start;gap:12px">
+          <div style="width:36px;height:36px;border-radius:10px;background:#FDF8F3;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:1rem">📖</div>
+          <div>
+            <div style="font-size:0.88rem;font-weight:700;color:#0E0B07;margin-bottom:3px">Personalized Workbook</div>
+            <div style="font-size:0.78rem;color:#8C7A68;line-height:1.6">A 20–30 page workbook drawn entirely from your results — conversation starters, reflection activities, and exercises built for how you two are actually wired.</div>
+          </div>
+          <div style="text-align:right;flex-shrink:0;padding-left:8px">
+            <div style="font-size:0.92rem;font-weight:700;color:#0E0B07">from $19</div>
+          </div>
+        </div>
+      </td>
+    </tr>`,
+  ].join('');
+
+  return {
+    subject: `Your Attune results are ready${coupleType ? ` — you're ${coupleType}` : ""}`,
+    html: layout(`
+      <h1>Your results are ready.</h1>
+      <p>Hi ${name}, you and ${partner} just completed Attune${coupleType ? ` — your couple type is <strong>${coupleType}</strong>` : ""}. Everything you need is in your results portal.</p>
+      <div class="btn-wrap"><a href="${appUrl}" class="btn">View your results →</a></div>
+      <div class="divider"></div>
+      <p style="font-size:0.82rem;font-weight:700;color:#0E0B07;margin-bottom:6px">What did you think?</p>
+      <p style="font-size:0.82rem;">We'd love to hear how it landed. Reply to this email with anything — what was useful, what felt off, what surprised you. We read every response.</p>
+      <div class="divider"></div>
+      <p style="font-size:0.82rem;font-weight:700;color:#0E0B07;margin-bottom:10px">Go deeper with your results</p>
+      <p style="font-size:0.8rem;color:#8C7A68;margin-bottom:14px">A few things you can add from your portal, based on what you've already completed:</p>
+      <table style="width:100%;border-collapse:collapse">
+        ${addonRows}
+      </table>
+      <div class="btn-wrap" style="margin-top:20px"><a href="${appUrl}" class="btn" style="background:linear-gradient(135deg,#0E0B07,#2D2250)">Add to your package →</a></div>
+      <div class="divider"></div>
+      <p style="font-size:0.82rem;font-weight:700;color:#0E0B07;margin-bottom:6px">In Practice</p>
+      <p style="font-size:0.8rem;color:#8C7A68;margin-bottom:14px">A few things worth reading while your results are fresh:</p>
+      ${[
+        { title: "How to review your results together", url: "https://attune-relationships.com/practice/how-to-review-your-results-together", tag: "Guide" },
+        { title: "Why couples fight about the same things", url: "https://attune-relationships.com/practice/why-couples-fight-about-the-same-things", tag: "Read" },
+        { title: "How to start a hard conversation", url: "https://attune-relationships.com/practice/how-to-start-a-hard-conversation", tag: "Guide" },
+      ].map(r => `<p style="margin:0 0 10px"><a href="${r.url}" style="color:#E8673A;font-weight:600;font-size:0.82rem;text-decoration:none">${r.tag}: ${r.title} →</a></p>`).join('')}
+    `),
+  };
+}
+
 // ── Handler ──────────────────────────────────────────────────────────────────
 
 export default async function handler(req) {
@@ -166,6 +263,10 @@ export default async function handler(req) {
   } else if (type === 'checkin_6mo') {
     if (!body.toEmail) return new Response('Missing toEmail', { status: 400 });
     email = checkin6moEmail(body);
+    email.to = body.toEmail;
+  } else if (type === 'results_viewed') {
+    if (!body.toEmail) return new Response('Missing toEmail', { status: 400 });
+    email = resultsViewedEmail(body);
     email.to = body.toEmail;
   } else {
     return new Response(`Unknown type: ${type}`, { status: 400 });
