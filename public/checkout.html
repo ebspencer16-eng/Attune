@@ -327,6 +327,7 @@ const PACKAGES = {
 };
 
 const ADDON_LMFT = { label: 'LMFT Session', price: 150 };
+const ADDON_REFLECTION = { label: 'Relationship Reflection', price: 40 };
 
 const ADDON_WORKBOOK = {
   digital: { label: 'Personalized Workbook (digital)', price: 19 },
@@ -337,6 +338,7 @@ const ADDON_WORKBOOK = {
 let intent = 'self';   // 'self' | 'gift'
 let pkg = null;
 let addonWorkbook = null;
+let addonReflection = false;
 
 // ── Init from URL params ─────────────────────────────────────────────────────
 (function init() {
@@ -344,6 +346,7 @@ let addonWorkbook = null;
   const pkgId  = params.get('pkg') || 'core';
   addonWorkbook = params.get('addon_workbook') || null;
   addonLmft = params.get('addon_lmft') === '1';
+  addonReflection = params.get('addon_reflection') === '1';
   pkg = PACKAGES[pkgId] || PACKAGES.core;
 
   // Intent from params (gift link from offerings)
@@ -390,6 +393,15 @@ function renderSummary() {
       <div class="co-card-detail">
         <div><div class="name">${ADDON_LMFT.label}</div></div>
         <div class="price">+$${ADDON_LMFT.price}</div>
+      </div>`;
+  }
+
+  if (addonReflection) {
+    total += ADDON_REFLECTION.price;
+    rows += `
+      <div class="co-card-detail">
+        <div><div class="name">${ADDON_REFLECTION.label}</div></div>
+        <div class="price">+$${ADDON_REFLECTION.price}</div>
       </div>`;
   }
 
@@ -490,6 +502,7 @@ async function handleSubmit(e) {
         pkgKey: Object.keys(PACKAGES).find(k => PACKAGES[k] === pkg) || 'core',
         addonWorkbook,
         addonLmft,
+        addonReflection,
         isGift: intent === 'gift',
         isPhysical: pkg.format === 'physical',
         partner1Name: p1,
@@ -526,6 +539,7 @@ async function handleSubmit(e) {
       p2:     document.getElementById('p2name').value.trim(),
     });
     if (addonLmft)     params.set('lmft', '1');
+    if (addonReflection) params.set('addon_reflection', '1');
     if (addonWorkbook) params.set('addon_workbook', addonWorkbook);
     if (intent === 'gift') params.set('gift', '1');
     document.getElementById('startLink').href = '/app?' + params.toString();
@@ -556,6 +570,7 @@ async function handleSubmit(e) {
       localStorage.setItem('attune_order', JSON.stringify({
         pkgKey:        pkgId2,
         addonLmft:     addonLmft,
+        addonReflection: addonReflection,
         addonWorkbook: addonWorkbook,
         partner1Name:  document.getElementById('p1name').value.trim(),
         partner2Name:  document.getElementById('p2name').value.trim(),
@@ -582,6 +597,7 @@ function getPkgTotal() {
   let t = pkg.price;
   if (addonWorkbook && ADDON_WORKBOOK[addonWorkbook]) t += ADDON_WORKBOOK[addonWorkbook].price;
   if (addonLmft) t += ADDON_LMFT.price;
+  if (addonReflection) t += ADDON_REFLECTION.price;
   return t;
 }
 </script>

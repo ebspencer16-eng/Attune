@@ -3673,9 +3673,12 @@ const ANNIVERSARY_QUESTIONS = [
   // What matters
   { id: "a3", category: "What Matters", type: "text", text: "The part of our relationship I'm most grateful for:", placeholder: "e.g. How you make me feel safe, the way we laugh together, the life we've built..." },
   { id: "a4", category: "What Matters", type: "text", text: "Something I want to do more of together in the next year:", placeholder: "e.g. Travel, slow weekends, have the big conversations, invest in our friendship..." },
+  { id: "a7", category: "What Matters", type: "text", text: "Something we handled less well than I'd have liked — I wish we'd approached it differently:", placeholder: "e.g. A disagreement we got stuck on, a decision we made without fully talking it through..." },
+  { id: "a8", category: "What Matters", type: "pick", text: "The quality I most admire in my partner right now:", options: ["Patient","Funny","Supportive","Ambitious","Kind","Curious","Steady","Adventurous","Honest","Thoughtful"] },
   // Looking forward
   { id: "a5", category: "Looking Forward", type: "text", text: "Where I see us in 5 years, what matters most to me about that picture:", placeholder: "e.g. Financially stable and adventurous, close to family, in a home we love..." },
-  { id: "a6", category: "Looking Forward", type: "text", text: "One thing I want to work on, in myself or in how I show up for you:", placeholder: "e.g. Being more present, communicating when I'm stressed, showing appreciation more..." },
+  { id: "a6", category: "Looking Forward", type: "text", text: "One thing I want to work on, in the next 6 months, in how I show up for you:", placeholder: "e.g. Being more present, saying what I need directly, making more time for us..." },
+  { id: "a_priority", category: "Looking Forward", type: "rank", text: "Rank these from most to least important to invest in together this year:", options: ["Quality time","Communication","Financial alignment","Physical intimacy","Shared adventures","Long-term planning"] },
 ];
 
 
@@ -3685,7 +3688,12 @@ function AnniversaryExercise({ userName, partnerName, onComplete, onBack }) {
   const total = ANNIVERSARY_QUESTIONS.length;
   const q = ANNIVERSARY_QUESTIONS[step];
   // Scale questions are answered when they have a numeric value; text questions need non-empty string
-  const isAnswered = (q, answers) => q.type === "scale" ? answers[q.id] !== undefined : !!answers[q.id]?.trim();
+  const isAnswered = (q, answers) => {
+    if (q.type === "scale") return answers[q.id] !== undefined;
+    if (q.type === "pick") return !!answers[q.id];
+    if (q.type === "rank") return Array.isArray(answers[q.id]) && answers[q.id].length === q.options.length;
+    return !!answers[q.id]?.trim();
+  };
   const allDone = ANNIVERSARY_QUESTIONS.every(q => isAnswered(q, answers));
 
   const handleNext = () => {
@@ -3699,10 +3707,10 @@ function AnniversaryExercise({ userName, partnerName, onComplete, onBack }) {
   if (allDone && step >= total) {
     return (
       <div style={{ textAlign: "center", padding: "4rem 1rem" }}>
-        <div style={{ width: 72, height: 72, borderRadius: "50%", background: "linear-gradient(135deg, #10b981, #059669)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 1.25rem", fontSize: "1.8rem" }}>✓</div>
+        <div style={{ width: 72, height: 72, borderRadius: "50%", background: "linear-gradient(135deg, #1B5FE8, #3B3A8A)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 1.25rem", fontSize: "1.8rem" }}>✓</div>
         <p style={{ fontFamily: font.display, fontSize: "1.8rem", fontWeight: 700, color: C.ink, marginBottom: "0.5rem" }}>Reflection Complete.</p>
         <p style={{ fontSize: "0.82rem", color: C.muted, fontFamily: font.body, marginBottom: "1.75rem", lineHeight: 1.7 }}>Your answers are saved. When {partnerName} completes theirs, you'll see a side-by-side view of your shared story.</p>
-        <button onClick={() => onComplete(answers)} style={{ background: "linear-gradient(135deg, #10b981, #059669)", color: "white", border: "none", padding: "0.85rem 2.25rem", fontSize: "0.75rem", letterSpacing: "0.1em", textTransform: "uppercase", cursor: "pointer", fontFamily: font.body, borderRadius: 10, fontWeight: 600 }}>View My Results →</button>
+        <button onClick={() => onComplete(answers)} style={{ background: "linear-gradient(135deg, #1B5FE8, #3B3A8A)", color: "white", border: "none", padding: "0.85rem 2.25rem", fontSize: "0.75rem", letterSpacing: "0.1em", textTransform: "uppercase", cursor: "pointer", fontFamily: font.body, borderRadius: 10, fontWeight: 600 }}>View My Results →</button>
       </div>
     );
   }
@@ -3717,9 +3725,9 @@ function AnniversaryExercise({ userName, partnerName, onComplete, onBack }) {
           <span style={{ fontSize: "0.6rem", letterSpacing: "0.2em", textTransform: "uppercase", color: "#10b981", fontWeight: 700, fontFamily: font.body }}>Exercise 03 · Our Relationship Story</span>
         </div>
         <div style={{ background: C.stone + "40", borderRadius: 999, height: 4, marginBottom: "2rem" }}>
-          <div style={{ background: "#10b981", height: 4, borderRadius: 999, width: (((step) / total) * 100) + "%", transition: "width 0.3s" }} />
+          <div style={{ background: "#1B5FE8", height: 4, borderRadius: 999, width: (((step) / total) * 100) + "%", transition: "width 0.3s" }} />
         </div>
-        <span style={{ fontSize: "0.6rem", color: "#10b981", fontWeight: 700, fontFamily: font.body, letterSpacing: "0.15em", textTransform: "uppercase" }}>{q.category}</span>
+        <span style={{ fontSize: "0.6rem", color: "#1B5FE8", fontWeight: 700, fontFamily: font.body, letterSpacing: "0.15em", textTransform: "uppercase" }}>{q.category}</span>
         <h2 style={{ fontFamily: font.display, fontSize: "1.35rem", fontWeight: 700, color: C.ink, margin: "0.5rem 0 1.5rem", lineHeight: 1.35 }}>{q.text}</h2>
 
         {q.type === "scale" ? (
@@ -3738,7 +3746,55 @@ function AnniversaryExercise({ userName, partnerName, onComplete, onBack }) {
               );
             })}
           </div>
-        ) : (
+        ) : q.type === "pick" ? (
+          <div style={{ display: "flex", flexWrap: "wrap", gap: "0.55rem" }}>
+            {q.options.map((opt, i) => {
+              const selected = answers[q.id] === opt;
+              return (
+                <button key={i} onClick={() => setAnswers({ ...answers, [q.id]: opt })}
+                  style={{ padding: "0.55rem 1.1rem", borderRadius: 999, border: "1.5px solid " + (selected ? "#1B5FE8" : C.stone), background: selected ? "#EEF2FF" : "white", color: selected ? "#1B5FE8" : C.text, fontFamily: font.body, fontSize: "0.85rem", fontWeight: selected ? 700 : 400, cursor: "pointer", transition: "all 0.15s" }}>
+                  {opt}
+                </button>
+              );
+            })}
+          </div>
+        ) : q.type === "rank" ? (() => {
+          const ranked = answers[q.id] || [];
+          const unranked = q.options.filter(o => !ranked.includes(o));
+          const move = (item, dir) => {
+            const arr = [...ranked];
+            const idx = arr.indexOf(item);
+            if (dir === "up" && idx > 0) { [arr[idx-1], arr[idx]] = [arr[idx], arr[idx-1]]; }
+            if (dir === "down" && idx < arr.length-1) { [arr[idx], arr[idx+1]] = [arr[idx+1], arr[idx]]; }
+            setAnswers({ ...answers, [q.id]: arr });
+          };
+          return (
+            <div>
+              <div style={{ fontSize: "0.65rem", color: C.muted, fontFamily: font.body, marginBottom: "0.75rem" }}>Tap an option to add it to your ranking, then use the arrows to reorder.</div>
+              {ranked.length > 0 && (
+                <div style={{ display: "flex", flexDirection: "column", gap: "0.4rem", marginBottom: "0.75rem" }}>
+                  {ranked.map((item, i) => (
+                    <div key={item} style={{ display: "flex", alignItems: "center", gap: "0.5rem", background: "#EEF2FF", border: "1.5px solid #1B5FE8", borderRadius: 10, padding: "0.6rem 0.85rem" }}>
+                      <span style={{ fontSize: "0.7rem", fontWeight: 700, color: "#1B5FE8", fontFamily: font.body, width: 20, flexShrink: 0 }}>#{i+1}</span>
+                      <span style={{ flex: 1, fontSize: "0.85rem", color: C.ink, fontFamily: font.body }}>{item}</span>
+                      <button onClick={() => move(item,"up")} disabled={i===0} style={{ background: "none", border: "none", cursor: i===0?"default":"pointer", color: i===0?C.stone:"#1B5FE8", fontSize: "0.8rem", padding: "0 0.2rem" }}>▲</button>
+                      <button onClick={() => move(item,"down")} disabled={i===ranked.length-1} style={{ background: "none", border: "none", cursor: i===ranked.length-1?"default":"pointer", color: i===ranked.length-1?C.stone:"#1B5FE8", fontSize: "0.8rem", padding: "0 0.2rem" }}>▼</button>
+                      <button onClick={() => setAnswers({ ...answers, [q.id]: ranked.filter(r=>r!==item) })} style={{ background: "none", border: "none", cursor: "pointer", color: C.muted, fontSize: "0.75rem", padding: "0 0.2rem" }}>✕</button>
+                    </div>
+                  ))}
+                </div>
+              )}
+              <div style={{ display: "flex", flexWrap: "wrap", gap: "0.45rem" }}>
+                {unranked.map(opt => (
+                  <button key={opt} onClick={() => setAnswers({ ...answers, [q.id]: [...ranked, opt] })}
+                    style={{ padding: "0.45rem 0.9rem", borderRadius: 999, border: "1.5px solid " + C.stone, background: "white", color: C.muted, fontFamily: font.body, fontSize: "0.82rem", cursor: "pointer" }}>
+                    + {opt}
+                  </button>
+                ))}
+              </div>
+            </div>
+          );
+        })() : (
           <textarea
             value={answers[q.id] || ""}
             onChange={e => setAnswers({ ...answers, [q.id]: e.target.value })}
@@ -3752,9 +3808,9 @@ function AnniversaryExercise({ userName, partnerName, onComplete, onBack }) {
         <div style={{ display: "flex", gap: "0.75rem" }}>
           {step > 0 && <button onClick={handleBack} style={{ background: "transparent", border: "1.5px solid " + C.stone, color: C.muted, padding: "0.6rem 1.1rem", fontSize: "0.72rem", cursor: "pointer", fontFamily: font.body, borderRadius: 8 }}>← Back</button>}
           {step < total - 1 ? (
-            <button onClick={handleNext} disabled={!currentAnswered} style={{ background: currentAnswered ? "#10b981" : C.stone, color: currentAnswered ? "white" : C.muted, border: "none", padding: "0.6rem 1.5rem", fontSize: "0.72rem", letterSpacing: "0.08em", textTransform: "uppercase", cursor: currentAnswered ? "pointer" : "default", fontFamily: font.body, borderRadius: 8, fontWeight: 600 }}>Continue →</button>
+            <button onClick={handleNext} disabled={!currentAnswered} style={{ background: currentAnswered ? "#1B5FE8" : C.stone, color: currentAnswered ? "white" : C.muted, border: "none", padding: "0.6rem 1.5rem", fontSize: "0.72rem", letterSpacing: "0.08em", textTransform: "uppercase", cursor: currentAnswered ? "pointer" : "default", fontFamily: font.body, borderRadius: 8, fontWeight: 600 }}>Continue →</button>
           ) : (
-            <button onClick={() => { if (allDone) { onComplete(answers); } }} disabled={!currentAnswered} style={{ background: currentAnswered ? "linear-gradient(135deg, #10b981, #059669)" : C.stone, color: currentAnswered ? "white" : C.muted, border: "none", padding: "0.6rem 1.75rem", fontSize: "0.72rem", letterSpacing: "0.08em", textTransform: "uppercase", cursor: currentAnswered ? "pointer" : "default", fontFamily: font.body, borderRadius: 8, fontWeight: 600 }}>Complete Reflection →</button>
+            <button onClick={() => { if (allDone) { onComplete(answers); } }} disabled={!currentAnswered} style={{ background: currentAnswered ? "linear-gradient(135deg, #1B5FE8, #3B3A8A)" : C.stone, color: currentAnswered ? "white" : C.muted, border: "none", padding: "0.6rem 1.75rem", fontSize: "0.72rem", letterSpacing: "0.08em", textTransform: "uppercase", cursor: currentAnswered ? "pointer" : "default", fontFamily: font.body, borderRadius: 8, fontWeight: 600 }}>Complete Reflection →</button>
           )}
         </div>
       </div>
@@ -4168,8 +4224,11 @@ const SARAH_ANNIVERSARY_DEMO = {
   a_sat_fun: 2,   // "About right"
   a3: "The way you always notice when I'm struggling before I say anything. And how you've learned exactly when to give me space and when to pull me in.",
   a4: "More spontaneous adventures, even small ones. And I'd love for us to carve out real time each month that's just about us.",
+  a7: "The conversation about the apartment. We were both stressed and I don't think either of us really listened — we just talked past each other and made the decision without actually agreeing.",
+  a8: "Steady",
   a5: "I want us to feel financially stable but still adventurous, not trapped by our own lives. And I want to still be choosing each other, obviously.",
   a6: "Being more present when I'm home. I catch myself half-somewhere-else too often. You deserve someone who's actually in the room.",
+  a_priority: ["Quality time","Communication","Shared adventures","Financial alignment","Long-term planning","Physical intimacy"],
 };
 const JAMES_ANNIVERSARY_DEMO = {
   a0: 4,  // "Better than ever"
@@ -4181,14 +4240,18 @@ const JAMES_ANNIVERSARY_DEMO = {
   a_sat_fun: 1,   // "Less than I'd like"
   a3: "Your curiosity. You make me more interested in things I'd otherwise ignore. And the fact that you still laugh at my jokes.",
   a4: "I want to start some kind of shared ritual, something small and weekly that's just ours. A walk, a dinner, something consistent.",
+  a7: "How we handled the stress around my job applications. I went quiet when I should have said I was scared. I let you figure it out instead of saying it.",
+  a8: "Curious",
   a5: "Somewhere with more space, a home we actually love. And a version of us that's less reactive and more intentional about the time we have.",
-  a6: "I'm more willing to say what I need. I used to just hint around things and hope you'd catch it. I've gotten better at just saying it.",
+  a6: "I'm going to say what I need more directly. I used to hint around things and hope you'd catch it. I want to just say it.",
+  a_priority: ["Communication","Long-term planning","Quality time","Financial alignment","Physical intimacy","Shared adventures"],
 };
 
 // Derive insights from anniversary answers
-function deriveAnniversaryInsights(mine, theirs, userName, partnerName) {
+function deriveAnniversaryInsights(mine, theirs, userName, partnerName, coupleType) {
   const insights = [];
   const scaleQ = ANNIVERSARY_QUESTIONS.filter(q => q.type === "scale");
+  const ctNote = coupleType ? `As a ${coupleType.name} couple, ` : "";
 
   // --- SCALE ALIGNMENT ---
   const scaleGaps = scaleQ.map(q => ({
@@ -4340,7 +4403,105 @@ function deriveAnniversaryInsights(mine, theirs, userName, partnerName) {
       body: `${userName} is working on being more present. ${partnerName} is working on saying what he needs directly. Notice what's happening: each of you independently identified the thing that would most benefit the other person. That's rare.`,
       priority: "Make this mutual",
       action: `Tell each other. ${userName}: "I know I disappear sometimes, I'm working on it, and I want you to tell me when it's happening." ${partnerName}: "I'm going to try to say what I actually need instead of waiting for you to notice." Saying it out loud creates accountability and removes the guesswork.`,
+      coupleTypeNote: coupleType ? `${ctNote}this complementary dynamic is characteristic of your pairing — lean into naming it explicitly rather than hoping the other person notices.` : "",
     });
+  }
+
+  // --- APPRECIATION (a8) ---
+  if (mine.a8 && theirs.a8) {
+    if (mine.a8 === theirs.a8) {
+      insights.push({
+        type: "strength",
+        title: `You both admire the same thing in each other`,
+        body: `Both of you independently named "${mine.a8}" as the quality you most admire in your partner right now. When two people independently land on the same word to describe what they value in the other, it usually means that quality is genuinely visible in daily life — not just something they say.`,
+        priority: "Say it out loud",
+        action: `Tell each other directly. "The thing I most admire about you right now is ${mine.a8.toLowerCase()}." Hearing it said plainly lands differently than assuming the other person knows.`,
+        coupleTypeNote: coupleType ? `${ctNote}shared admiration for the same quality is a meaningful signal of mutual recognition in your dynamic.` : "",
+      });
+    } else {
+      insights.push({
+        type: "strength",
+        title: `You admire different things in each other — both real`,
+        body: `${userName} most admires ${partnerName}'s ${theirs.a8.toLowerCase()}. ${partnerName} most admires ${userName}'s ${mine.a8.toLowerCase()}. Different qualities, both freely given. This suggests each of you is genuinely being seen for something specific rather than getting generic praise.`,
+        priority: "Make it direct",
+        action: `Say it to each other: "${userName}, I most admire your ${mine.a8.toLowerCase()} right now." It takes about eight seconds and lands better than you'd think.`,
+        coupleTypeNote: coupleType ? `${ctNote}the ability to name specific admiration rather than general appreciation is a sign of real attunement.` : "",
+      });
+    }
+  }
+
+  // --- WHAT SHOULD HAVE GONE DIFFERENTLY (a7) ---
+  if (mine.a7 && theirs.a7) {
+    const stressWords = ["stress","stressed","scared","anxious","worry","worried","pressure"];
+    const communicationWords = ["said","listen","talk","told","quiet","silent","hint","assume"];
+    const bothStress = stressWords.some(w => mine.a7.toLowerCase().includes(w)) || stressWords.some(w => theirs.a7.toLowerCase().includes(w));
+    const bothComm = communicationWords.some(w => mine.a7.toLowerCase().includes(w)) || communicationWords.some(w => theirs.a7.toLowerCase().includes(w));
+    if (bothStress || bothComm) {
+      insights.push({
+        type: "explore",
+        title: "You both identified a moment where communication broke down under pressure",
+        body: `You each named a situation where something wasn't fully said or heard — ${mine.a7.split(".")[0].toLowerCase().trim()} (${userName}), and ${theirs.a7.split(".")[0].toLowerCase().trim()} (${partnerName}). Naming these independently, without coordinating, suggests this is a real pattern worth looking at directly.`,
+        priority: "Have the meta-conversation",
+        action: `Don't relitigate the specific situation — instead, talk about the pattern. "When things get hard between us, what does each of us actually need in the first hour?" Getting to that agreement before the next hard moment changes how it plays out.`,
+        coupleTypeNote: coupleType ? `${ctNote}understanding your default stress responses is one of the highest-leverage things you can do together.` : "",
+      });
+    } else {
+      insights.push({
+        type: "explore",
+        title: "You each identified something you wish had gone differently",
+        body: `${userName} named: "${mine.a7.trim()}" ${partnerName} named: "${theirs.a7.trim()}" These don't have to match to be useful. The fact that both of you can identify something shows self-awareness — which is the first requirement for handling it better next time.`,
+        priority: "Talk about it directly",
+        action: `Pick one of these to talk about. Not to assign blame — to understand what each person was feeling in that moment that the other person didn't know. "When that happened, I was feeling X and I didn't say it because Y." That's the whole conversation.`,
+        coupleTypeNote: coupleType ? `${ctNote}naming what should have gone differently is more useful than relitigating what actually happened.` : "",
+      });
+    }
+  }
+
+  // --- PRIORITY RANKING (a_priority) ---
+  if (Array.isArray(mine.a_priority) && Array.isArray(theirs.a_priority) && mine.a_priority.length > 0 && theirs.a_priority.length > 0) {
+    const myTop = mine.a_priority[0];
+    const theirTop = theirs.a_priority[0];
+    const myBottom = mine.a_priority[mine.a_priority.length - 1];
+    const theirBottom = theirs.a_priority[theirs.a_priority.length - 1];
+    // Find biggest rank gap
+    const rankGaps = mine.a_priority.map(item => ({
+      item,
+      myRank: mine.a_priority.indexOf(item),
+      theirRank: theirs.a_priority.indexOf(item),
+      gap: Math.abs(mine.a_priority.indexOf(item) - theirs.a_priority.indexOf(item)),
+    })).sort((a, b) => b.gap - a.gap);
+    const biggestRankGap = rankGaps[0];
+
+    if (myTop === theirTop) {
+      insights.push({
+        type: "strength",
+        title: `You agree on what matters most this year`,
+        body: `Both of you independently ranked "${myTop}" as your top priority for the year ahead. When two people rank the same thing first without discussing it, that alignment is real — and it makes it much easier to act on.`,
+        priority: "Turn it into a plan",
+        action: `Alignment on priorities is only useful if it produces decisions. Agree on one concrete thing you'll do differently in the next 30 days that reflects this priority. Even one change made on purpose counts.`,
+        coupleTypeNote: coupleType ? `${ctNote}shared priority alignment reduces the invisible negotiation that often drains energy between partners.` : "",
+      });
+    } else {
+      insights.push({
+        type: "explore",
+        title: `Your top priorities for this year are different`,
+        body: `${userName}'s top priority: "${myTop}." ${partnerName}'s top priority: "${theirTop}." Neither is wrong — but without naming it, this difference quietly shapes decisions, energy allocation, and what each of you feels is being neglected.`,
+        priority: "Negotiate, not compromise",
+        action: `Both priorities deserve to be real. The question isn't which one wins — it's how to protect both. What would it look like to honor "${myTop}" and "${theirTop}" in the same month? Start with something small and specific.`,
+        coupleTypeNote: coupleType ? `${ctNote}different investment priorities are common in your pairing — naming them explicitly tends to unlock a lot of unspoken frustration.` : "",
+      });
+    }
+
+    if (biggestRankGap && biggestRankGap.gap >= 3) {
+      insights.push({
+        type: "explore",
+        title: `You see "${biggestRankGap.item}" very differently`,
+        body: `${userName} ranked "${biggestRankGap.item}" #${biggestRankGap.myRank + 1}. ${partnerName} ranked it #${biggestRankGap.theirRank + 1}. That's a significant gap on the same item — and the kind of thing that creates friction without either person fully understanding why.`,
+        priority: "Worth one honest conversation",
+        action: `Ask each other: "What would it feel like if we invested more in ${biggestRankGap.item.toLowerCase()} this year?" The answer usually reveals something about what's been missing that neither person has said directly.`,
+        coupleTypeNote: coupleType ? `${ctNote}gaps in how you value the same area often reflect different experiences of that area, not different values overall.` : "",
+      });
+    }
   }
 
   return insights;
@@ -4355,7 +4516,7 @@ function AnniversaryResultsView({ userName, partnerName, myAnswers, onBack }) {
   const mine = myAnswers || SARAH_ANNIVERSARY_DEMO;
   const theirs = JAMES_ANNIVERSARY_DEMO;
   const [activeSection, setActiveSection] = useState("insights");
-  const insights = deriveAnniversaryInsights(mine, theirs, userName, partnerName);
+  const insights = deriveAnniversaryInsights(mine, theirs, userName, partnerName, coupleType);
 
   const questions = [
     { id: "a1", label: "A moment that defined us", category: "Milestones" },
@@ -4378,7 +4539,7 @@ function AnniversaryResultsView({ userName, partnerName, myAnswers, onBack }) {
 
       {/* Hero */}
       <div style={{ background: "linear-gradient(145deg, #071a10, #0d3320, #0f3d26)", borderRadius: 20, padding: "2rem 2rem 1.75rem", marginBottom: "1.25rem", color: "white", position: "relative", overflow: "hidden" }}>
-        <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 3, background: "linear-gradient(90deg, #10b981, #34d399)" }} />
+        <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 3, background: "linear-gradient(90deg, #1B5FE8, #5B6DF8)" }} />
         <div style={{ position: "absolute", bottom: -40, right: -20, width: 160, height: 160, borderRadius: "50%", background: "radial-gradient(circle, rgba(16,185,129,0.1), transparent 70%)", pointerEvents: "none" }} />
         <div style={{ fontSize: "0.6rem", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(52,211,153,0.9)", marginBottom: "0.5rem", fontFamily: BFONT }}>Anniversary Collection · Relationship Reflection</div>
         <div style={{ fontSize: "clamp(1.8rem,5vw,2.4rem)", fontWeight: 700, fontFamily: HFONT, lineHeight: 1.1, marginBottom: "0.6rem" }}>
@@ -4492,7 +4653,7 @@ function AnniversaryResultsView({ userName, partnerName, myAnswers, onBack }) {
             const catQs = questions.filter(q => q.category === cat);
             return (
               <div key={cat} style={{ marginBottom: "1.5rem" }}>
-                <div style={{ fontSize: "0.6rem", letterSpacing: "0.2em", textTransform: "uppercase", color: "#10b981", fontWeight: 700, fontFamily: BFONT, marginBottom: "0.6rem" }}>{cat}</div>
+                <div style={{ fontSize: "0.6rem", letterSpacing: "0.2em", textTransform: "uppercase", color: "#1B5FE8", fontWeight: 700, fontFamily: BFONT, marginBottom: "0.6rem" }}>{cat}</div>
                 {catQs.map(q => (
                   <div key={q.id} style={{ background: "white", border: "1.5px solid " + C.stone, borderRadius: 14, marginBottom: "0.65rem", overflow: "hidden" }}>
                     <div style={{ padding: "0.7rem 1.1rem", borderBottom: "1px solid " + C.stone + "50", background: "#FAFAF8" }}>
@@ -4916,12 +5077,12 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
       ]
     },
     ...(hasAnniversary ? [{
-      id: "reflection", label: "Reflection", icon: "◈", color: "#10b981",
+      id: "reflection", label: "Relationship Reflection", shortLabel: "Refl.", icon: "♡", color: "#1B5FE8",
       children: [
         { id: "reflection-overview", label: "Overview" },
         { id: "reflection-insights", label: "Insights" },
         { id: "reflection-story", label: "Side by Side" },
-        { id: "reflection-plan", label: "Reflection Action Plan" },
+        { id: "reflection-plan", label: "Action Plan" },
       ]
     }] : []),
     { id: "what-comes-next", label: "What Comes Next", icon: "→", color: "#E8673A" },
@@ -4979,7 +5140,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
         { id: "summary", label: "Summary", color: "#8C7A68" },
         { id: "comm-overview", label: "Comms", color: "#9B5DE5" },
         { id: "exp-overview", label: "Expectations", color: "#1B5FE8" },
-        ...(hasAnniversary ? [{ id: "reflection", label: "Reflection", color: "#10b981" }] : []),
+        ...(hasAnniversary ? [{ id: "reflection", label: "Refl.", color: "#1B5FE8" }] : []),
       ].map(t => (
         <button key={t.id} onClick={() => go(t.id)} style={{ background: section.startsWith(t.id.replace("-overview","")) ? t.color + "15" : "transparent", border: `1.5px solid ${section.startsWith(t.id.replace("-overview","")) ? t.color : C.stone}`, borderRadius: 999, padding: "0.3rem 0.75rem", fontSize: "0.7rem", fontWeight: 600, color: section.startsWith(t.id.replace("-overview","")) ? t.color : C.muted, cursor: "pointer", fontFamily: BFONT, whiteSpace: "nowrap", flexShrink: 0 }}>
           {t.label}
@@ -5085,6 +5246,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
           <ResultsHighlights
             ex1Answers={ex1Answers} partnerEx1={partnerEx1}
             ex2Answers={ex2Answers} partnerEx2={partnerEx2}
+            ex3Answers={ex3Answers} partnerEx3={partnerEx3}
             userName={userName} partnerName={partnerName}
             portrait={portrait}
             onDone={() => go("summary")}
@@ -5541,13 +5703,14 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
   if (section.startsWith("reflection") && hasAnniversary) {
     const mine = ex3Answers || SARAH_ANNIVERSARY_DEMO;
     const theirs = partnerEx3 || JAMES_ANNIVERSARY_DEMO;
-    const insights = deriveAnniversaryInsights(mine, theirs, userName, partnerName);
+    const insights = deriveAnniversaryInsights(mine, theirs, userName, partnerName, coupleType);
     const scaleQs = ANNIVERSARY_QUESTIONS.filter(q => q.type === "scale");
     const textQs = [
       { id: "a1", label: "A moment that defined us", category: "Milestones" },
       { id: "a2", label: "Something that made us stronger", category: "Milestones" },
       { id: "a3", label: "What I'm most grateful for", category: "What matters" },
       { id: "a4", label: "What I want more of together", category: "What matters" },
+      { id: "a7", label: "Something I wish we'd handled differently", category: "What matters" },
       { id: "a5", label: "Where I see us in 5 years", category: "Looking forward" },
       { id: "a6", label: "What I want to work on", category: "Looking forward" },
     ];
@@ -5557,43 +5720,76 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
     if (section === "reflection-overview" || section === "reflection") {
       const strengths = insights.filter(i => i.type === "strength").length;
       const explores = insights.filter(i => i.type === "explore").length;
+      const overallQ = ANNIVERSARY_QUESTIONS.find(q => q.id === "a0");
+      const myOverall = mine.a0 ?? 3;
+      const theirOverall = theirs.a0 ?? 3;
+      const avgOverall = (myOverall + theirOverall) / 2;
+      const overallLabel = overallQ ? overallQ.scaleLabels[Math.round(avgOverall)] : "really good";
+      const overallAligned = Math.abs(myOverall - theirOverall) <= 1;
+      const myAdmire = mine.a8;
+      const theirAdmire = theirs.a8;
       return (
-        <Layout accent="#10b981">
+        <Layout accent="#1B5FE8">
           <div style={{ maxWidth: 660 }}>
-            <div style={{ background: "linear-gradient(145deg, #071a10, #0d3320, #0f3d26)", borderRadius: 20, padding: "2rem 2rem 1.75rem", marginBottom: "1.5rem", color: "white", position: "relative", overflow: "hidden" }}>
-              <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 3, background: "linear-gradient(90deg, #10b981, #34d399)" }} />
-              <div style={{ fontSize: "0.6rem", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(52,211,153,0.9)", marginBottom: "0.5rem", fontFamily: BFONT }}>Relationship Reflection</div>
-              <div style={{ fontSize: "clamp(1.8rem,5vw,2.4rem)", fontWeight: 700, fontFamily: HFONT, lineHeight: 1.1, marginBottom: "0.6rem" }}>{userName} & {partnerName}</div>
-              <p style={{ fontSize: "0.82rem", color: "rgba(255,255,255,0.65)", fontFamily: BFONT, fontWeight: 300, lineHeight: 1.65, marginBottom: "1.25rem", maxWidth: 440 }}>Both of you reflected independently. Here's what your answers reveal — strengths to build on and areas worth prioritizing.</p>
+            {/* Hero card */}
+            <div style={{ background: "linear-gradient(145deg, #0f0c29, #1d1a4e, #0f0c29)", borderRadius: 20, padding: "2rem 2rem 1.75rem", marginBottom: "1.25rem", color: "white", position: "relative", overflow: "hidden" }}>
+              <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 3, background: "linear-gradient(90deg, #1B5FE8, #5B6DF8)" }} />
+              <div style={{ position: "absolute", top: "50%", right: -40, transform: "translateY(-50%)", fontSize: "9rem", opacity: 0.04, fontFamily: HFONT, userSelect: "none", lineHeight: 1, pointerEvents: "none" }}>♡</div>
+              <div style={{ fontSize: "0.58rem", letterSpacing: "0.24em", textTransform: "uppercase", color: "rgba(91,109,248,0.85)", marginBottom: "0.6rem", fontFamily: BFONT, fontWeight: 700 }}>Relationship Reflection</div>
+              <div style={{ fontSize: "clamp(1.6rem,4vw,2.2rem)", fontWeight: 700, fontFamily: HFONT, lineHeight: 1.1, marginBottom: "0.75rem" }}>{userName} & {partnerName}</div>
+              {/* How you're both feeling */}
+              <div style={{ background: "rgba(255,255,255,0.08)", borderRadius: 12, padding: "0.9rem 1.1rem", marginBottom: "1rem", border: "1px solid rgba(255,255,255,0.1)" }}>
+                <div style={{ fontSize: "0.55rem", letterSpacing: "0.2em", textTransform: "uppercase", color: "rgba(91,109,248,0.7)", fontFamily: BFONT, fontWeight: 700, marginBottom: "0.35rem" }}>How you're both feeling right now</div>
+                <div style={{ fontSize: "1.05rem", fontWeight: 700, color: "white", fontFamily: HFONT, marginBottom: "0.2rem" }}>
+                  {overallAligned ? `You're both feeling ${overallLabel.toLowerCase()}.` : `${userName} says ${(overallQ?.scaleLabels[myOverall] || "really good").toLowerCase()}. ${partnerName} says ${(overallQ?.scaleLabels[theirOverall] || "better than ever").toLowerCase()}.`}
+                </div>
+                <div style={{ fontSize: "0.75rem", color: "rgba(255,255,255,0.5)", fontFamily: BFONT, fontWeight: 300 }}>
+                  {overallAligned ? "A shared read on where you are — that's a meaningful starting point." : "Different vantage points on the same relationship. Both worth understanding."}
+                </div>
+              </div>
+              {/* Appreciation reveal if available */}
+              {myAdmire && theirAdmire && (
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.65rem", marginBottom: "1rem" }}>
+                  {[[userName, theirAdmire], [partnerName, myAdmire]].map(([name, admires]) => (
+                    <div key={name} style={{ background: "rgba(255,255,255,0.07)", borderRadius: 10, padding: "0.75rem 0.9rem", border: "1px solid rgba(255,255,255,0.08)" }}>
+                      <div style={{ fontSize: "0.52rem", letterSpacing: "0.16em", textTransform: "uppercase", color: "rgba(255,255,255,0.4)", fontFamily: BFONT, marginBottom: "0.3rem" }}>{name} is admired for</div>
+                      <div style={{ fontSize: "0.9rem", fontWeight: 700, color: "white", fontFamily: HFONT }}>{admires}</div>
+                    </div>
+                  ))}
+                </div>
+              )}
               <div style={{ display: "flex", gap: "1rem" }}>
                 <div style={{ display: "flex", alignItems: "center", gap: "0.4rem" }}>
-                  <div style={{ width: 8, height: 8, borderRadius: "50%", background: "#10b981" }} />
-                  <span style={{ fontSize: "0.78rem", color: "rgba(255,255,255,0.85)", fontFamily: BFONT }}>{strengths} strengths</span>
+                  <div style={{ width: 7, height: 7, borderRadius: "50%", background: "#10b981" }} />
+                  <span style={{ fontSize: "0.75rem", color: "rgba(255,255,255,0.8)", fontFamily: BFONT }}>{strengths} strength{strengths !== 1 ? "s" : ""}</span>
                 </div>
                 <div style={{ display: "flex", alignItems: "center", gap: "0.4rem" }}>
-                  <div style={{ width: 8, height: 8, borderRadius: "50%", background: "#F59E0B" }} />
-                  <span style={{ fontSize: "0.78rem", color: "rgba(255,255,255,0.85)", fontFamily: BFONT }}>{explores} areas to explore</span>
+                  <div style={{ width: 7, height: 7, borderRadius: "50%", background: "#F59E0B" }} />
+                  <span style={{ fontSize: "0.75rem", color: "rgba(255,255,255,0.8)", fontFamily: BFONT }}>{explores} area{explores !== 1 ? "s" : ""} to explore</span>
                 </div>
               </div>
             </div>
-            {/* TOC */}
-            <div style={{ display: "flex", flexDirection: "column", gap: "0.6rem", marginBottom: "1.5rem" }}>
-              {[
-                { label: "Insights & Next Steps", sub: `${insights.length} insights drawn from your answers`, id: "reflection-insights" },
-                { label: "Side by Side", sub: "Your reflections shown together", id: "reflection-story" },
-                { label: "Reflection Action Plan", sub: `${explores} conversation${explores !== 1 ? "s" : ""} worth having`, id: "reflection-plan" },
-              ].map(item => (
-                <div key={item.id} onClick={() => go(item.id)}
-                  style={{ display: "flex", alignItems: "center", gap: "1rem", background: "#f8fffe", border: "1.5px solid rgba(16,185,129,0.2)", borderRadius: 14, padding: "0.85rem 1.25rem", cursor: "pointer", transition: "all 0.15s" }}
-                  onMouseEnter={e => e.currentTarget.style.background = "#edfdf8"}
-                  onMouseLeave={e => e.currentTarget.style.background = "#f8fffe"}>
-                  <div style={{ flex: 1 }}>
-                    <div style={{ fontSize: "0.88rem", fontWeight: 700, color: C.ink, fontFamily: BFONT }}>{item.label}</div>
-                    <div style={{ fontSize: "0.72rem", color: C.muted, fontFamily: BFONT }}>{item.sub}</div>
+            {/* What's in this section */}
+            <div style={{ background: "white", border: `1.5px solid ${C.stone}`, borderRadius: 16, padding: "1.25rem 1.25rem 0.85rem", marginBottom: "1.25rem" }}>
+              <div style={{ fontSize: "0.55rem", letterSpacing: "0.18em", textTransform: "uppercase", color: "#1B5FE8", fontFamily: BFONT, fontWeight: 700, marginBottom: "0.75rem" }}>What's in this section</div>
+              <div style={{ display: "flex", flexDirection: "column", gap: "0.35rem" }}>
+                {[
+                  { label: "Insights", sub: `${insights.length} insights drawn from your answers`, id: "reflection-insights" },
+                  { label: "Side by Side", sub: "Your answers shown together with synthesis", id: "reflection-story" },
+                  { label: "Action Plan", sub: `${explores} conversation${explores !== 1 ? "s" : ""} worth having`, id: "reflection-plan" },
+                ].map(item => (
+                  <div key={item.id} onClick={() => go(item.id)}
+                    style={{ display: "flex", alignItems: "center", gap: "0.75rem", padding: "0.55rem 0.75rem", borderRadius: 10, background: "rgba(27,95,232,0.04)", cursor: "pointer", transition: "all 0.12s", border: "1px solid rgba(27,95,232,0.08)" }}
+                    onMouseEnter={e => e.currentTarget.style.background = "rgba(27,95,232,0.09)"}
+                    onMouseLeave={e => e.currentTarget.style.background = "rgba(27,95,232,0.04)"}>
+                    <div style={{ flex: 1 }}>
+                      <div style={{ fontSize: "0.8rem", fontWeight: 700, color: C.ink, fontFamily: BFONT }}>{item.label}</div>
+                      <div style={{ fontSize: "0.65rem", color: C.muted, fontFamily: BFONT, marginTop: "0.1rem" }}>{item.sub}</div>
+                    </div>
+                    <span style={{ color: "#1B5FE8", fontSize: "0.85rem", fontFamily: BFONT, flexShrink: 0 }}>→</span>
                   </div>
-                  <span style={{ color: "#10b981", fontSize: "1.1rem" }}>→</span>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
             <PrevNext />
           </div>
@@ -5606,11 +5802,11 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
       return (
         <Layout accent="#10b981">
           <div style={{ maxWidth: 660 }}>
-            <div style={{ fontSize: "0.62rem", letterSpacing: "0.22em", textTransform: "uppercase", color: "#10b981", fontWeight: 700, fontFamily: BFONT, marginBottom: "0.5rem" }}>Relationship Reflection</div>
+            <div style={{ fontSize: "0.62rem", letterSpacing: "0.22em", textTransform: "uppercase", color: "#1B5FE8", fontWeight: 700, fontFamily: BFONT, marginBottom: "0.5rem" }}>Relationship Reflection</div>
             <h2 style={{ fontFamily: HFONT, fontSize: "clamp(1.6rem,3vw,2.2rem)", fontWeight: 700, color: C.ink, lineHeight: 1.1, marginBottom: "0.75rem" }}>How you're feeling right now</h2>
             {/* Scale snapshot */}
             <div style={{ background: "white", border: `1.5px solid ${C.stone}`, borderRadius: 16, padding: "1.25rem", marginBottom: "1.25rem" }}>
-              <div style={{ fontSize: "0.6rem", fontWeight: 700, color: C.clay, textTransform: "uppercase", letterSpacing: "0.18em", fontFamily: BFONT, marginBottom: "1rem" }}>Scale questions</div>
+              <div style={{ fontSize: "0.6rem", fontWeight: 700, color: "#1B5FE8", textTransform: "uppercase", letterSpacing: "0.18em", fontFamily: BFONT, marginBottom: "1rem" }}>Scale questions</div>
               {scaleQs.map(q => {
                 const myVal = mine[q.id] ?? 2;
                 const theirVal = theirs[q.id] ?? 2;
@@ -5654,6 +5850,12 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
                       <div style={{ fontSize: "0.58rem", fontWeight: 700, color: col.label, textTransform: "uppercase", letterSpacing: "0.1em", fontFamily: BFONT, marginBottom: "0.4rem" }}>{ins.priority}</div>
                       <p style={{ fontSize: "0.8rem", color: C.text, fontFamily: BFONT, fontWeight: 400, lineHeight: 1.7, margin: 0 }}>{ins.action}</p>
                     </div>
+                    {ins.coupleTypeNote && (
+                      <div style={{ marginTop: "0.6rem", padding: "0.6rem 0.85rem", background: "rgba(27,95,232,0.05)", borderRadius: 8, border: "1px solid rgba(27,95,232,0.12)" }}>
+                        <span style={{ fontSize: "0.55rem", fontWeight: 700, color: "#1B5FE8", textTransform: "uppercase", letterSpacing: "0.12em", fontFamily: BFONT }}>For your couple type · </span>
+                        <span style={{ fontSize: "0.76rem", color: "#1B5FE8", fontFamily: BFONT, fontWeight: 300, lineHeight: 1.6 }}>{ins.coupleTypeNote}</span>
+                      </div>
+                    )}
                   </div>
                 </div>
               );
@@ -5666,34 +5868,130 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
 
     // ── REFLECTION STORY (SIDE BY SIDE) ──────────────────────────────────────
     if (section === "reflection-story") {
+      // Simple keyword-bucket synthesis for text questions
+      const synthesize = (myAns, theirAns) => {
+        if (!myAns || !theirAns) return null;
+        const buckets = {
+          time: ["time","together","weekly","ritual","consistent","routine","slow","moment","daily"],
+          future: ["future","years","someday","eventually","plan","goal","stable","adventurous","home","space"],
+          emotional: ["feel","felt","feeling","safe","scared","anxious","proud","grateful","love","hard","afraid"],
+          relational: ["us","we","team","together","each other","partner","choose","choosing","support"],
+          effort: ["work","working","try","trying","better","improve","grow","change","different","effort"],
+          joy: ["laugh","fun","spontaneous","adventure","joy","happy","light","easy","playful"],
+        };
+        const score = (ans, bucket) => bucket.filter(w => ans.toLowerCase().includes(w)).length;
+        const topBucket = (ans) => Object.entries(buckets).sort((a,b) => score(ans,b[1]) - score(ans,a[1]))[0][0];
+        const myTop = topBucket(myAns);
+        const theirTop = topBucket(theirAns);
+        if (myTop === theirTop) {
+          const labels = { time:"a shared sense of time and presence", future:"the same kind of future", emotional:"similar emotional territory", relational:"the same relational instinct", effort:"a commitment to growth", joy:"a shared pull toward joy and lightness" };
+          return { type: "resonance", text: `You both pointed to ${labels[myTop] || "similar things"}.` };
+        }
+        const compatible = [["time","relational"],["future","effort"],["joy","time"],["emotional","relational"],["effort","relational"]];
+        const isCompat = compatible.some(([a,b]) => (myTop===a&&theirTop===b)||(myTop===b&&theirTop===a));
+        if (isCompat) return { type: "complement", text: "Different angles on the same underlying thing — worth comparing." };
+        return { type: "discuss", text: "You're coming at this from different places. Worth talking about." };
+      };
+      const synthColors = { resonance: { bg:"#EEF2FF", text:"#1B5FE8" }, complement: { bg:"#FFF8F5", text:"#E8673A" }, discuss: { bg:"#FFFBF0", text:"#D97706" } };
+
       return (
-        <Layout accent="#10b981">
+        <Layout accent="#1B5FE8">
           <div style={{ maxWidth: 660 }}>
-            <div style={{ fontSize: "0.62rem", letterSpacing: "0.22em", textTransform: "uppercase", color: "#10b981", fontWeight: 700, fontFamily: BFONT, marginBottom: "0.5rem" }}>Relationship Reflection</div>
-            <h2 style={{ fontFamily: HFONT, fontSize: "clamp(1.6rem,3vw,2.2rem)", fontWeight: 700, color: C.ink, lineHeight: 1.1, marginBottom: "1.5rem" }}>Side by Side</h2>
+            <div style={{ fontSize: "0.62rem", letterSpacing: "0.22em", textTransform: "uppercase", color: "#1B5FE8", fontWeight: 700, fontFamily: BFONT, marginBottom: "0.5rem" }}>Relationship Reflection</div>
+            <h2 style={{ fontFamily: HFONT, fontSize: "clamp(1.6rem,3vw,2.2rem)", fontWeight: 700, color: C.ink, lineHeight: 1.1, marginBottom: "0.5rem" }}>Side by Side</h2>
+            <p style={{ fontSize: "0.82rem", color: C.muted, fontFamily: BFONT, fontWeight: 300, marginBottom: "1.5rem", lineHeight: 1.65 }}>Your answers shown together. Each synthesis note is generated from what you actually wrote.</p>
             {["Milestones", "What matters", "Looking forward"].map(cat => {
               const catQs = textQs.filter(q => q.category === cat);
               return (
-                <div key={cat} style={{ marginBottom: "1.5rem" }}>
-                  <div style={{ fontSize: "0.6rem", letterSpacing: "0.2em", textTransform: "uppercase", color: "#10b981", fontWeight: 700, fontFamily: BFONT, marginBottom: "0.6rem" }}>{cat}</div>
-                  {catQs.map(q => (
-                    <div key={q.id} style={{ background: "white", border: `1.5px solid ${C.stone}`, borderRadius: 14, marginBottom: "0.65rem", overflow: "hidden" }}>
-                      <div style={{ padding: "0.7rem 1.1rem", borderBottom: `1px solid ${C.stone}50`, background: "#FAFAF8" }}>
-                        <span style={{ fontFamily: HFONT, fontSize: "0.82rem", fontWeight: 700, color: C.ink }}>{q.label}</span>
-                      </div>
-                      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr" }}>
-                        {[[userName, mine[q.id], "#E8673A"], [partnerName, theirs[q.id], "#1B5FE8"]].map(([name, ans, col], i) => (
-                          <div key={name} style={{ padding: "0.9rem 1.1rem", borderRight: i === 0 ? `1px solid ${C.stone}40` : "none" }}>
-                            <div style={{ fontSize: "0.58rem", letterSpacing: "0.14em", textTransform: "uppercase", color: col, fontWeight: 700, fontFamily: BFONT, marginBottom: "0.45rem" }}>{name}</div>
-                            <p style={{ fontSize: "0.79rem", color: C.text, fontFamily: BFONT, fontWeight: 300, lineHeight: 1.72, margin: 0, fontStyle: "italic" }}>"{ans || "–"}"</p>
+                <div key={cat} style={{ marginBottom: "1.75rem" }}>
+                  <div style={{ fontSize: "0.6rem", letterSpacing: "0.2em", textTransform: "uppercase", color: "#1B5FE8", fontWeight: 700, fontFamily: BFONT, marginBottom: "0.6rem" }}>{cat}</div>
+                  {catQs.map(q => {
+                    const synth = synthesize(mine[q.id], theirs[q.id]);
+                    const sc = synth ? synthColors[synth.type] : null;
+                    return (
+                      <div key={q.id} style={{ background: "white", border: `1.5px solid ${C.stone}`, borderRadius: 14, marginBottom: "0.75rem", overflow: "hidden" }}>
+                        <div style={{ padding: "0.7rem 1.1rem", borderBottom: `1px solid ${C.stone}50`, background: "#FAFAF8" }}>
+                          <span style={{ fontFamily: HFONT, fontSize: "0.82rem", fontWeight: 700, color: C.ink }}>{q.label}</span>
+                        </div>
+                        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr" }}>
+                          {[[userName, mine[q.id], "#E8673A"], [partnerName, theirs[q.id], "#1B5FE8"]].map(([name, ans, col], i) => (
+                            <div key={name} style={{ padding: "0.9rem 1.1rem", borderRight: i === 0 ? `1px solid ${C.stone}40` : "none" }}>
+                              <div style={{ fontSize: "0.58rem", letterSpacing: "0.14em", textTransform: "uppercase", color: col, fontWeight: 700, fontFamily: BFONT, marginBottom: "0.45rem" }}>{name}</div>
+                              <p style={{ fontSize: "0.79rem", color: C.text, fontFamily: BFONT, fontWeight: 300, lineHeight: 1.72, margin: 0, fontStyle: "italic" }}>"{ans || "–"}"</p>
+                            </div>
+                          ))}
+                        </div>
+                        {synth && sc && (
+                          <div style={{ padding: "0.55rem 1.1rem", background: sc.bg, borderTop: `1px solid ${C.stone}30` }}>
+                            <span style={{ fontSize: "0.7rem", color: sc.text, fontFamily: BFONT, fontWeight: 500 }}>{synth.text}</span>
                           </div>
-                        ))}
+                        )}
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               );
             })}
+
+            {/* Appreciation picks side by side */}
+            {mine.a8 && theirs.a8 && (
+              <div style={{ marginBottom: "1.75rem" }}>
+                <div style={{ fontSize: "0.6rem", letterSpacing: "0.2em", textTransform: "uppercase", color: "#1B5FE8", fontWeight: 700, fontFamily: BFONT, marginBottom: "0.6rem" }}>What you admire</div>
+                <div style={{ background: "white", border: `1.5px solid ${C.stone}`, borderRadius: 14, overflow: "hidden" }}>
+                  <div style={{ padding: "0.7rem 1.1rem", borderBottom: `1px solid ${C.stone}50`, background: "#FAFAF8" }}>
+                    <span style={{ fontFamily: HFONT, fontSize: "0.82rem", fontWeight: 700, color: C.ink }}>The quality I most admire in my partner right now</span>
+                  </div>
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr" }}>
+                    {[[userName, theirs.a8, "#E8673A"], [partnerName, mine.a8, "#1B5FE8"]].map(([name, admires, col], i) => (
+                      <div key={name} style={{ padding: "1rem 1.1rem", borderRight: i === 0 ? `1px solid ${C.stone}40` : "none" }}>
+                        <div style={{ fontSize: "0.55rem", letterSpacing: "0.14em", textTransform: "uppercase", color: C.muted, fontFamily: BFONT, marginBottom: "0.35rem" }}>{name} is admired for</div>
+                        <div style={{ fontSize: "1.1rem", fontWeight: 700, color: col, fontFamily: HFONT }}>{admires}</div>
+                      </div>
+                    ))}
+                  </div>
+                  {mine.a8 === theirs.a8 && (
+                    <div style={{ padding: "0.55rem 1.1rem", background: "#EEF2FF", borderTop: `1px solid ${C.stone}30` }}>
+                      <span style={{ fontSize: "0.7rem", color: "#1B5FE8", fontFamily: BFONT, fontWeight: 500 }}>You both named the same quality. That level of resonance is real.</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Priority ranking side by side */}
+            {Array.isArray(mine.a_priority) && mine.a_priority.length > 0 && Array.isArray(theirs.a_priority) && theirs.a_priority.length > 0 && (
+              <div style={{ marginBottom: "1.75rem" }}>
+                <div style={{ fontSize: "0.6rem", letterSpacing: "0.2em", textTransform: "uppercase", color: "#1B5FE8", fontWeight: 700, fontFamily: BFONT, marginBottom: "0.6rem" }}>Priority ranking</div>
+                <div style={{ background: "white", border: `1.5px solid ${C.stone}`, borderRadius: 14, overflow: "hidden" }}>
+                  <div style={{ padding: "0.7rem 1.1rem", borderBottom: `1px solid ${C.stone}50`, background: "#FAFAF8" }}>
+                    <span style={{ fontFamily: HFONT, fontSize: "0.82rem", fontWeight: 700, color: C.ink }}>What to invest in together this year</span>
+                  </div>
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr" }}>
+                    {[[userName, mine.a_priority, "#E8673A"], [partnerName, theirs.a_priority, "#1B5FE8"]].map(([name, ranked, col], gi) => (
+                      <div key={name} style={{ padding: "0.85rem 1.1rem", borderRight: gi === 0 ? `1px solid ${C.stone}40` : "none" }}>
+                        <div style={{ fontSize: "0.55rem", letterSpacing: "0.14em", textTransform: "uppercase", color: col, fontWeight: 700, fontFamily: BFONT, marginBottom: "0.5rem" }}>{name}</div>
+                        {ranked.map((item, ri) => {
+                          const otherRank = (gi === 0 ? theirs.a_priority : mine.a_priority).indexOf(item);
+                          const gap = Math.abs(ri - otherRank);
+                          return (
+                            <div key={item} style={{ display: "flex", alignItems: "center", gap: "0.4rem", marginBottom: "0.25rem" }}>
+                              <span style={{ fontSize: "0.62rem", fontWeight: 700, color: col, width: 16, flexShrink: 0, fontFamily: BFONT }}>#{ri+1}</span>
+                              <span style={{ fontSize: "0.75rem", color: C.ink, fontFamily: BFONT, flex: 1 }}>{item}</span>
+                              {gap >= 3 && <span style={{ fontSize: "0.55rem", color: "#F59E0B", fontFamily: BFONT, fontWeight: 700 }}>↕</span>}
+                              {gap === 0 && ri <= 1 && <span style={{ fontSize: "0.55rem", color: "#10b981", fontFamily: BFONT, fontWeight: 700 }}>✓</span>}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    ))}
+                  </div>
+                  <div style={{ padding: "0.55rem 1.1rem", background: "#FAFAF8", borderTop: `1px solid ${C.stone}30` }}>
+                    <span style={{ fontSize: "0.68rem", color: C.muted, fontFamily: BFONT }}>✓ Shared top priority &nbsp;&nbsp; ↕ More than 3 positions apart</span>
+                  </div>
+                </div>
+              </div>
+            )}
+
             <PrevNext />
           </div>
         </Layout>
@@ -5703,30 +6001,38 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
     // ── REFLECTION ACTION PLAN ────────────────────────────────────────────────
     if (section === "reflection-plan") {
       return (
-        <Layout accent="#10b981">
+        <Layout accent="#1B5FE8">
           <div style={{ maxWidth: 560 }}>
-            <div style={{ fontSize: "0.62rem", letterSpacing: "0.22em", textTransform: "uppercase", color: "#10b981", fontWeight: 700, fontFamily: BFONT, marginBottom: "0.5rem" }}>Reflection Action Plan</div>
+            <div style={{ fontSize: "0.62rem", letterSpacing: "0.22em", textTransform: "uppercase", color: "#1B5FE8", fontWeight: 700, fontFamily: BFONT, marginBottom: "0.5rem" }}>Reflection Action Plan</div>
             <h2 style={{ fontFamily: HFONT, fontSize: "clamp(1.6rem,3vw,2.2rem)", fontWeight: 700, color: C.ink, lineHeight: 1.1, marginBottom: "0.5rem" }}>Conversations worth having.</h2>
             <p style={{ fontSize: "0.85rem", color: C.muted, fontFamily: BFONT, fontWeight: 300, lineHeight: 1.72, marginBottom: "1.5rem" }}>
               {actionItems.length > 0
-                ? `${actionItems.length} area${actionItems.length !== 1 ? "s" : ""} where your reflections point to a conversation worth having.`
+                ? `${actionItems.length} area${actionItems.length !== 1 ? "s" : ""} where your reflections point to a real conversation.`
                 : "You're well-aligned across your reflections. Keep building on this foundation."}
             </p>
             {actionItems.length === 0 ? (
-              <div style={{ background: "#EDFAF5", border: "1.5px solid rgba(16,185,129,0.3)", borderRadius: 16, padding: "1.5rem", textAlign: "center", marginBottom: "1.5rem" }}>
-                <div style={{ width: 28, height: 28, borderRadius: "50%", background: "#10b981", marginBottom: "0.5rem" }} />
+              <div style={{ background: "#EEF2FF", border: "1.5px solid rgba(27,95,232,0.25)", borderRadius: 16, padding: "1.5rem", textAlign: "center", marginBottom: "1.5rem" }}>
+                <div style={{ width: 28, height: 28, borderRadius: "50%", background: "#1B5FE8", margin: "0 auto 0.5rem", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                  <span style={{ color: "white", fontSize: "0.85rem" }}>♡</span>
+                </div>
                 <div style={{ fontSize: "0.9rem", fontWeight: 700, color: C.ink, fontFamily: BFONT }}>Strong alignment across the board.</div>
               </div>
             ) : (
-              <div style={{ display: "flex", flexDirection: "column", gap: "0.65rem", marginBottom: "1.5rem" }}>
+              <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem", marginBottom: "1.5rem" }}>
                 {insights.filter(i => i.type === "explore").map((ins, i) => (
                   <div key={i} style={{ background: "white", border: `1.5px solid ${C.stone}`, borderRadius: 14, overflow: "hidden" }}>
-                    <div style={{ background: "#FFFBF0", borderBottom: `1px solid ${C.stone}`, padding: "0.65rem 1.1rem", display: "flex", alignItems: "center", gap: "0.75rem" }}>
-                      <div style={{ width: 16, height: 16, borderRadius: 4, border: "1.5px solid #F59E0B", flexShrink: 0 }} />
+                    <div style={{ background: "#F5F7FF", borderBottom: `1px solid rgba(27,95,232,0.12)`, padding: "0.75rem 1.1rem", display: "flex", alignItems: "center", gap: "0.75rem" }}>
+                      <div style={{ width: 8, height: 8, borderRadius: "50%", background: "#1B5FE8", flexShrink: 0 }} />
                       <span style={{ fontSize: "0.85rem", fontWeight: 700, color: C.ink, fontFamily: BFONT }}>{ins.title}</span>
                     </div>
-                    <div style={{ padding: "0.75rem 1.1rem" }}>
-                      <p style={{ fontSize: "0.8rem", color: C.muted, fontFamily: BFONT, fontWeight: 300, lineHeight: 1.65, margin: 0 }}>{ins.action}</p>
+                    <div style={{ padding: "0.85rem 1.1rem" }}>
+                      <p style={{ fontSize: "0.8rem", color: C.muted, fontFamily: BFONT, fontWeight: 300, lineHeight: 1.65, margin: "0 0 0.65rem" }}>{ins.action}</p>
+                      {ins.coupleTypeNote && (
+                        <div style={{ padding: "0.5rem 0.75rem", background: "rgba(27,95,232,0.05)", borderRadius: 8, border: "1px solid rgba(27,95,232,0.1)" }}>
+                          <span style={{ fontSize: "0.55rem", fontWeight: 700, color: "#1B5FE8", textTransform: "uppercase", letterSpacing: "0.1em", fontFamily: BFONT }}>Your couple type · </span>
+                          <span style={{ fontSize: "0.74rem", color: "#1B5FE8", fontFamily: BFONT, fontWeight: 300 }}>{ins.coupleTypeNote}</span>
+                        </div>
+                      )}
                     </div>
                   </div>
                 ))}
@@ -5779,7 +6085,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
               <NavActionLink onClick={() => go("comm-plan")} bg="linear-gradient(135deg,#FFF5F2,#FFE8E0)" border={`1.5px solid rgba(232,103,58,0.25)`} icon="💬" title="Communication Action Plan" sub="Practices drawn from your communication results" accentColor={C.orange} />
               <NavActionLink onClick={() => go("exp-action-plan")} bg="linear-gradient(135deg,#F5F7FF,#E8EDFF)" border={`1.5px solid rgba(27,95,232,0.2)`} icon="📋" title="Expectations Action Plan" sub="Topics to discuss, organized by area" accentColor="#1B5FE8" />
               {hasAnniversary && (
-                <NavActionLink onClick={() => go("reflection-plan")} bg="linear-gradient(135deg,#F0FDF9,#E0FAF0)" border={`1.5px solid rgba(16,185,129,0.25)`} icon="💚" title="Reflection Action Plan" sub="Conversations from your relationship reflection" accentColor="#10b981" />
+                <NavActionLink onClick={() => go("reflection-plan")} bg="linear-gradient(135deg,#F0F4FF,#E8EDFF)" border={`1.5px solid rgba(27,95,232,0.25)`} icon="♡" title="Reflection Action Plan" sub="Conversations from your relationship reflection" accentColor="#1B5FE8" />
               )}
             </div>
           </div>
@@ -6235,7 +6541,7 @@ function WrappedCard({ children, bg, onDownload, cardIndex, cardRef, inline, por
   );
 }
 
-function ResultsHighlights({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, userName, partnerName, portrait, onDone, inline = false }) {
+function ResultsHighlights({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Answers, partnerEx3, userName, partnerName, portrait, onDone, inline = false }) {
   const [cardIdx, setCardIdx] = useState(0);
   const cardRef = useRef(null);
   const isMobile = useMobile(640);
@@ -6311,12 +6617,25 @@ function ResultsHighlights({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, use
     </div>
   );
 
-  const TOTAL_CARDS = 7;
+  const TOTAL_CARDS = (ex3Answers && partnerEx3) ? 8 : 7;
   const isLast = cardIdx === TOTAL_CARDS - 1;
   const handleDl = () => {
     if (cardRef.current) downloadCard(cardRef.current, "attune-" + userName.toLowerCase() + "-" + partnerName.toLowerCase() + "-" + (cardIdx + 1) + ".png");
   };
   const advance = () => { if (!isLast) setCardIdx(n => n + 1); else onDone(); };
+
+  // Reflection data (if available)
+  const hasReflData = !!(ex3Answers && partnerEx3);
+  const reflOverallQ = ANNIVERSARY_QUESTIONS.find(q => q.id === "a0");
+  const reflMyOverall = ex3Answers?.a0 ?? 3;
+  const reflTheirOverall = partnerEx3?.a0 ?? 3;
+  const reflAvgOverall = (reflMyOverall + reflTheirOverall) / 2;
+  const reflOverallLabel = reflOverallQ ? reflOverallQ.scaleLabels[Math.round(reflAvgOverall)] : "really good";
+  const reflOverallAligned = Math.abs(reflMyOverall - reflTheirOverall) <= 1;
+  const reflMyAdmire = ex3Answers?.a8;
+  const reflTheirAdmire = partnerEx3?.a8;
+  const reflMyPriority = Array.isArray(ex3Answers?.a_priority) ? ex3Answers.a_priority[0] : null;
+  const reflTheirPriority = Array.isArray(partnerEx3?.a_priority) ? partnerEx3.a_priority[0] : null;
 
   // Card dimensions — portrait ratio ideal for stories (9:16)
   const CARD_ASPECT = inline ? "min(72vw, 500px)" : CARD_H + "px";
@@ -6495,8 +6814,73 @@ function ResultsHighlights({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, use
       </div>
     </WrappedCard>,
 
-    // ── 6. ONE CONVERSATION — Quote is the star ────────────────────────────────
-    <WrappedCard key={5} bg="linear-gradient(145deg, #120d2e 0%, #2a1a5e 50%, #120d2e 100%)" onDownload={handleDl} cardIndex={5} cardRef={cardRef} inline={inline} isMobile={isMobile} portraitCorner={portrait}>
+    // ── 6. RELATIONSHIP REFLECTION (conditional) ──────────────────────────────
+    ...(hasReflData ? [
+    <WrappedCard key={5} bg="linear-gradient(145deg, #0f0c29 0%, #1d1a4e 50%, #0f0c29 100%)" onDownload={handleDl} cardIndex={5} cardRef={cardRef} inline={inline} isMobile={isMobile} portraitCorner={portrait}>
+      <style>{cardAnim}</style>
+      <div onClick={advance} style={{ flex: 1, display: "flex", flexDirection: "column", cursor: "pointer", position: "relative", overflow: "hidden" }}>
+        {watermark}
+        <div style={{ height: 3, background: "linear-gradient(90deg, #1B5FE8, #5B6DF8)", flexShrink: 0 }} />
+        <div style={{ flex: 1, display: "flex", flexDirection: "column", padding: "2.25rem 2.25rem 2rem", position: "relative" }}>
+          <div style={{ fontSize: "0.48rem", letterSpacing: "0.28em", textTransform: "uppercase", color: "rgba(91,109,248,0.8)", fontFamily: BFONT, fontWeight: 700, marginBottom: "0.6rem", animation: "fadeUp 0.4s 0.05s both" }}>
+            Relationship Reflection
+          </div>
+          {/* Overall feel */}
+          <div style={{ fontFamily: HFONT, fontSize: "clamp(1.4rem,5vw,2rem)", fontWeight: 700, color: "white", lineHeight: 1.05, letterSpacing: "-0.02em", marginBottom: "0.4rem", animation: "fadeUp 0.5s 0.12s cubic-bezier(0.22,1,0.36,1) both" }}>
+            {reflOverallAligned
+              ? `You're both feeling ${reflOverallLabel.toLowerCase()}.`
+              : `Different reads on the same relationship.`}
+          </div>
+          <p style={{ fontSize: "0.75rem", color: "rgba(255,255,255,0.5)", fontFamily: BFONT, fontWeight: 300, marginBottom: "1.25rem", animation: "fadeUp 0.4s 0.2s both" }}>
+            {reflOverallAligned ? "Shared perception of where you are right now." : "Both perspectives are worth understanding."}
+          </p>
+          {/* Scale bars */}
+          {[
+            { id: "a_sat_conn", label: "Day-to-day connection", q: ANNIVERSARY_QUESTIONS.find(q=>q.id==="a_sat_conn") },
+            { id: "a_sat_comm", label: "Communication", q: ANNIVERSARY_QUESTIONS.find(q=>q.id==="a_sat_comm") },
+            { id: "a_sat_fun", label: "Fun & lightness", q: ANNIVERSARY_QUESTIONS.find(q=>q.id==="a_sat_fun") },
+          ].filter(({q}) => q).map(({id, label, q}) => {
+            const myVal = ex3Answers[id] ?? 2;
+            const theirVal = partnerEx3[id] ?? 2;
+            const total = q.scaleLabels.length - 1;
+            return (
+              <div key={id} style={{ marginBottom: "0.6rem", animation: "fadeUp 0.4s 0.28s both" }}>
+                <div style={{ fontSize: "0.52rem", color: "rgba(255,255,255,0.45)", fontFamily: BFONT, marginBottom: "0.2rem", letterSpacing: "0.08em" }}>{label}</div>
+                {[[userName, myVal, "#E8673A"], [partnerName, theirVal, "#5B6DF8"]].map(([name, val, color]) => (
+                  <div key={name} style={{ display: "flex", alignItems: "center", gap: "0.4rem", marginBottom: "0.15rem" }}>
+                    <span style={{ fontSize: "0.5rem", color: "rgba(255,255,255,0.4)", width: 36, flexShrink: 0, fontFamily: BFONT }}>{name.split(" ")[0]}</span>
+                    <div style={{ display: "flex", gap: 2, flex: 1 }}>
+                      {q.scaleLabels.map((_, i) => (
+                        <div key={i} style={{ flex: 1, height: 5, borderRadius: 2, background: i <= val ? color : color + "22" }} />
+                      ))}
+                    </div>
+                    <span style={{ fontSize: "0.48rem", color: "rgba(255,255,255,0.35)", fontFamily: BFONT, width: 56, textAlign: "right", flexShrink: 0 }}>{q.scaleLabels[val]}</span>
+                  </div>
+                ))}
+              </div>
+            );
+          })}
+          {/* Appreciation reveal */}
+          {reflMyAdmire && reflTheirAdmire && (
+            <div style={{ marginTop: "0.75rem", background: "rgba(255,255,255,0.07)", borderRadius: 12, padding: "0.85rem 1rem", border: "1px solid rgba(255,255,255,0.1)", animation: "fadeUp 0.4s 0.38s both" }}>
+              <div style={{ fontSize: "0.46rem", letterSpacing: "0.2em", textTransform: "uppercase", color: "rgba(91,109,248,0.7)", fontFamily: BFONT, marginBottom: "0.45rem" }}>What you admire in each other</div>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.75rem" }}>
+                {[[userName, reflTheirAdmire, "#E8673A"], [partnerName, reflMyAdmire, "#5B6DF8"]].map(([name, admires, color]) => (
+                  <div key={name}>
+                    <div style={{ fontSize: "0.46rem", color: "rgba(255,255,255,0.35)", fontFamily: BFONT, marginBottom: "0.2rem" }}>{name} is admired for</div>
+                    <div style={{ fontSize: "0.88rem", fontWeight: 700, color, fontFamily: HFONT }}>{admires}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    </WrappedCard>
+    ] : []),
+
+    // ── 7. ONE CONVERSATION — Quote is the star ────────────────────────────────
+    <WrappedCard key={hasReflData ? 6 : 5} bg="linear-gradient(145deg, #120d2e 0%, #2a1a5e 50%, #120d2e 100%)" onDownload={handleDl} cardIndex={hasReflData ? 6 : 5} cardRef={cardRef} inline={inline} isMobile={isMobile} portraitCorner={portrait}>
       <style>{cardAnim}</style>
       <div onClick={advance} style={{ flex: 1, display: "flex", flexDirection: "column", cursor: "pointer", position: "relative", overflow: "hidden" }}>
         {watermark}
@@ -6517,8 +6901,8 @@ function ResultsHighlights({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, use
       </div>
     </WrappedCard>,
 
-    // ── 7. FINALE — View results + download ───────────────────────────────────
-    <WrappedCard key={6} bg="linear-gradient(145deg, #0e0b1e 0%, #1a1040 50%, #0e0b1e 100%)" onDownload={handleDl} cardIndex={6} cardRef={cardRef} inline={inline} isMobile={isMobile} portraitCorner={portrait}>
+    // ── 8. FINALE — View results + download ───────────────────────────────────
+    <WrappedCard key={hasReflData ? 7 : 6} bg="linear-gradient(145deg, #0e0b1e 0%, #1a1040 50%, #0e0b1e 100%)" onDownload={handleDl} cardIndex={hasReflData ? 7 : 6} cardRef={cardRef} inline={inline} isMobile={isMobile} portraitCorner={portrait}>
       <style>{cardAnim}</style>
       <div style={{ flex: 1, display: "flex", flexDirection: "column", position: "relative", overflow: "hidden" }}>
         {watermark}
@@ -7973,6 +8357,7 @@ export default function App() {
   const pkg = {
     ..._basePkg,
     hasLMFT: _basePkg.hasLMFT || !!(order?.addonLmft),
+    hasAnniversary: _basePkg.hasAnniversary || !!(order?.addonReflection),
   };
 
   // ── PASSWORD RESET ROUTING ────────────────────────────────────────────────
@@ -8322,7 +8707,7 @@ export default function App() {
                     {[
                       { num: "01", title: "Communication", done: !!ex1Answers, viewId: "exercise1", color: "#E8673A", desc: "Map your communication style across 10 dimensions — how you recharge, express, conflict, and connect." },
                       { num: "02", title: "Expectations", done: !!ex2Answers, viewId: "exercise2", color: "#1B5FE8", desc: "Align on who handles what and what you each expect — household, finances, career, emotional labor." },
-                      ...(pkg.hasAnniversary ? [{ num: "03", title: "Reflection", done: !!ex3Answers, viewId: "exercise3", color: "#10b981", desc: "Capture the moments that shaped your relationship — a third lens on your shared story." }] : []),
+                      ...(pkg.hasAnniversary ? [{ num: "03", title: "Reflection", done: !!ex3Answers, viewId: "exercise3", color: "#1B5FE8", desc: "Capture the moments that shaped your relationship — a third lens on your shared story." }] : []),
                     ].map(item => (
                       <div key={item.num} onClick={() => setView(item.viewId)}
                         style={{ background: "white", border: `1.5px solid ${item.done ? "rgba(16,185,129,0.25)" : "#E8DDD0"}`, borderRadius: 16, padding: "1.25rem", cursor: "pointer", transition: "box-shadow .15s, border-color .15s", display: "flex", flexDirection: "column", gap: "0.6rem" }}
@@ -8605,7 +8990,7 @@ export default function App() {
           <div style={{ maxWidth: 620, margin: "0 auto" }}>
             {ex3Answers ? (
               <div style={{ textAlign: "center", padding: "4rem 1rem 3rem", maxWidth: 440, margin: "0 auto" }}>
-                <div style={{ width: 72, height: 72, borderRadius: "50%", background: "linear-gradient(135deg, #10b981, #059669)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 1.25rem", fontSize: "1.8rem" }}>✓</div>
+                <div style={{ width: 72, height: 72, borderRadius: "50%", background: "linear-gradient(135deg, #1B5FE8, #3B3A8A)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 1.25rem", fontSize: "1.8rem" }}>✓</div>
                 <p style={{ fontFamily: font.display, fontSize: "1.8rem", fontWeight: 700, color: C.ink, marginBottom: "0.5rem", lineHeight: 1.1 }}>Reflection Complete.</p>
                 <p style={{ fontSize: "0.78rem", letterSpacing: "0.1em", textTransform: "uppercase", color: "#10b981", fontWeight: 700, fontFamily: font.body, marginBottom: "1.5rem" }}>Your relationship story is captured</p>
                 <div style={{ display: "flex", gap: "0.75rem", justifyContent: "center", flexWrap: "wrap" }}>
@@ -8945,6 +9330,8 @@ export default function App() {
       <ResultsHighlights
         ex1Answers={ex1Answers || sarahEx1} partnerEx1={partnerEx1}
         ex2Answers={ex2Answers || sarahEx2} partnerEx2={partnerEx2}
+        ex3Answers={ex3Answers || (pkg.hasAnniversary ? SARAH_ANNIVERSARY_DEMO : null)}
+        partnerEx3={pkg.hasAnniversary ? JAMES_ANNIVERSARY_DEMO : null}
         userName={userName} partnerName={partnerName}
         portrait={couplePortrait}
         onDone={() => setHighlightsSeen(true)}
