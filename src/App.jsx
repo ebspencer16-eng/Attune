@@ -7882,9 +7882,10 @@ export default function App() {
   const params = new URLSearchParams(window.location.search);
   const initialView = params.get("view") || "home";
   // Prefer the real purchase package from localStorage order over URL ?pkg= param
-  const _urlPkg = params.get("pkg") || params.get("demo") || "core";
+  const _urlPkg = params.get("pkg") || "core";
+  const _demoParam = params.get("demo"); // ?demo=anniversary bypasses localStorage
   const _orderPkg = (() => { try { const o = JSON.parse(localStorage.getItem('attune_order') || 'null'); return o?.pkgKey || null; } catch { return null; } })();
-  const demoPkg = _orderPkg || _urlPkg;
+  const demoPkg = _demoParam || _orderPkg || _urlPkg;
   const urlInviteCode = params.get("invite");
   const urlInviteFrom = params.get("from") ? decodeURIComponent(params.get("from")) : null;
   const urlIsReset = params.get("reset") === "1";
