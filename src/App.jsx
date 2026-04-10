@@ -9041,7 +9041,17 @@ export default function App() {
                 </div>
               </div>
             ) : (
-              <AnniversaryExercise userName={userName} partnerName={partnerName} onComplete={a => setEx3State(a)} onBack={() => setView("home")} />
+              <AnniversaryExercise userName={userName} partnerName={partnerName} onComplete={a => {
+                  setEx3State(a);
+                  // Mark ex3 complete in Supabase so check-in emails suppress the Reflection CTA
+                  if (isLoggedIn && account?.id) {
+                    (async () => {
+                      const { supabase: sb, hasSupabase } = await import('./supabase.js');
+                      if (!hasSupabase()) return;
+                      await sb.from('profiles').update({ ex3_completed: true }).eq('id', account.id);
+                    })();
+                  }
+                }} onBack={() => setView("home")} />
             )}
           </div>
         )}
