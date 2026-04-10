@@ -7882,7 +7882,7 @@ export default function App() {
   const params = new URLSearchParams(window.location.search);
   const initialView = params.get("view") || "home";
   // Prefer the real purchase package from localStorage order over URL ?pkg= param
-  const _urlPkg = params.get("pkg") || "core";
+  const _urlPkg = params.get("pkg") || params.get("demo") || "core";
   const _orderPkg = (() => { try { const o = JSON.parse(localStorage.getItem('attune_order') || 'null'); return o?.pkgKey || null; } catch { return null; } })();
   const demoPkg = _orderPkg || _urlPkg;
   const urlInviteCode = params.get("invite");
@@ -8201,7 +8201,7 @@ export default function App() {
     responsibilities: sarahEx2.responsibilities,
     life: sarahEx2.life,
   };
-  const sarahEx3Demo = demoPkg === "anniversary" ? Object.fromEntries(ANNIVERSARY_QUESTIONS.map(q => [q.id, q.type==="scale" ? 3 : (q.options?.[1] ?? "")])) : null;
+  const sarahEx3Demo = demoPkg === "anniversary" ? SARAH_ANNIVERSARY_DEMO : null;
   const [ex1Answers, setEx1State] = useState(sarahEx1Demo);
   const [ex2Answers, setEx2State] = useState(sarahEx2Demo);
   const [ex3Answers, setEx3State] = useState(sarahEx3Demo); // Anniversary exercise
