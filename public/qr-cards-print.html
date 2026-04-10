@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Attune Relationships — QR Cards</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{background:#D0C9C0;font-family:'DM Sans',Arial,sans-serif}
+body{padding:24px;display:flex;flex-direction:column;align-items:center;gap:24px}
+
+.page{display:flex;flex-direction:column;align-items:center;gap:6px}
+.page-label{font-size:9px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:#8C7A68}
+
+/* Card */
+.card{width:7in;height:4.25in;display:flex;flex-shrink:0;position:relative;border-radius:4px}
+.front{background:#FFFEF9;box-shadow:0 16px 48px rgba(0,0,0,.18),0 2px 8px rgba(0,0,0,.07);border:.5px solid rgba(0,0,0,.06)}
+.back{background:#FFFEF9;flex-direction:column;box-shadow:0 8px 24px rgba(0,0,0,.10);border:.5px solid rgba(0,0,0,.05)}
+
+/* Front panels */
+.grad-panel{width:210px;flex-shrink:0;border-radius:4px 0 0 4px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:32px 28px}
+.right{flex:1;display:flex;flex-direction:column;overflow:hidden}
+.right-body{flex:1;display:flex;flex-direction:column;align-items:flex-start;justify-content:center;padding:36px 40px 22px}
+.right-footer{padding:9px 40px;border-top:1px solid #EDE8E0;display:flex;align-items:center;gap:5px;flex-shrink:0}
+.footer-dot{width:3px;height:3px;border-radius:50%;background:#C8B8A8}
+.footer-txt{font-size:7px;letter-spacing:.14em;text-transform:uppercase;color:#C0B4A8}
+.for-label{font-size:7.5px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:#C0B4A8;margin-bottom:8px}
+.divider-line{height:1px;background:linear-gradient(90deg,#C8522E,#1B5FE8);opacity:.3;margin:12px 0;width:32px}
+
+/* Back panels */
+.back-accent{height:2px;flex-shrink:0}
+.back-inner{flex:1;display:flex;overflow:hidden}
+.back-left{flex:1;padding:18px 22px;display:flex;flex-direction:column;border-right:1px solid #F0EBE4}
+.back-right{width:176px;flex-shrink:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:18px;gap:0}
+.back-footer{padding:7px 22px;border-top:1px solid #EDE8E0;display:flex;justify-content:space-between;flex-shrink:0}
+.step{display:flex;gap:9px;align-items:flex-start;padding-bottom:9px;border-bottom:1px solid #F2EFEB}
+.step-num{font-family:'Playfair Display',Georgia,serif;font-size:13px;font-weight:700;flex-shrink:0;line-height:1.2;width:11px}
+.step-t{font-size:9px;font-weight:700;color:#0E0B07;margin-bottom:2px;font-family:'DM Sans',sans-serif}
+.step-d{font-size:7.5px;color:#8C7A68;line-height:1.45;font-family:'DM Sans',sans-serif}
+
+@media print{
+  @page{size:8.5in 5.5in landscape;margin:.4in .5in}
+  html,body{background:white;padding:0;gap:0;display:block}
+  .page{page-break-after:always;page-break-inside:avoid;display:flex;flex-direction:column;align-items:center;justify-content:center;height:4.7in;gap:4px}
+  .page:last-child{page-break-after:auto}
+  .page-label{display:block}
+  .card{box-shadow:none!important;border:0.5px solid #DDD8D0!important}
+}
+</style>
+</head>
+<body>
+<div class="page front-page">
+  <div class="card front">
+    <div class="grad-panel" style="background:linear-gradient(160deg,#C8522E 0%,#6B3FA0 52%,#1B5FE8 100%)">
+      <svg width="46" height="34" viewBox="0 0 103 76" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <path d="M14,4L44,4A9,9,0,0,1,53,13L53,42A9,9,0,0,1,44,51L20,51L6,61L11,51A6,6,0,0,1,5,45L5,13A9,9,0,0,1,14,4Z" fill="rgba(255,255,255,.92)"/>
+  <path d="M22,11C20,8.5,16.5,5,11.5,5C5.5,5,2,9.5,2,14.5C2,23,11,30,22,40C33,30,42,23,42,14.5C42,9.5,38.5,5,32.5,5C27.5,5,24,8.5,22,11Z" fill="rgba(90,40,150,.55)" transform="translate(13.16,11.3) scale(.72)"/>
+  <path d="M89,14L59,14A9,9,0,0,0,50,23L50,52A9,9,0,0,0,59,61L83,61L97,71L92,61A6,6,0,0,0,98,55L98,23A9,9,0,0,0,89,14Z" fill="none" stroke="rgba(255,255,255,.85)" stroke-width="2.2" stroke-linejoin="round"/>
+  <path d="M22,11C20,8.5,16.5,5,11.5,5C5.5,5,2,9.5,2,14.5C2,23,11,30,22,40C33,30,42,23,42,14.5C42,9.5,38.5,5,32.5,5C27.5,5,24,8.5,22,11Z" fill="rgba(255,255,255,.85)" transform="translate(58.16,21.3) scale(.72)"/>
+</svg>
+      <div style="text-align:center">
+        <div style="font-family:'Playfair Display',Georgia,serif;font-size:22px;font-weight:700;color:rgba(255,255,255,.95);letter-spacing:-.02em">Attune</div>
+        <div style="font-size:7px;letter-spacing:.22em;text-transform:uppercase;color:rgba(255,255,255,.45);margin-top:3px;font-family:'DM Sans',sans-serif">Relationships</div>
+      </div>
+      <div style="text-align:center">
+        <div style="font-size:7px;letter-spacing:.16em;text-transform:uppercase;color:rgba(255,255,255,.35);margin-bottom:4px;font-family:'DM Sans',sans-serif">Package</div>
+        <div style="font-family:'Playfair Display',Georgia,serif;font-size:9.5px;font-style:italic;color:rgba(255,255,255,.78);line-height:1.3">The Attune Assessment</div>
+      </div>
+    </div>
+    <div class="right">
+      <div class="right-body">
+        <div class="for-label">Welcome to</div>
+        <div style="font-family:'Playfair Display',Georgia,serif;font-weight:700;font-size:36px;line-height:1.0;letter-spacing:-.03em;background:linear-gradient(120deg,#E8673A 0%,#6B3FA0 50%,#1B5FE8 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:4px">Attune<br>Relationships</div>
+        <div class="divider-line"></div>
+        <div style="font-family:'Playfair Display',Georgia,serif;font-size:11px;font-style:italic;color:#4A3C34;line-height:1.65;max-width:300px;margin-bottom:14px">Understanding takes intention. You've taken the first step.</div>
+        <div style="background:#F9F5F1;border-radius:8px;padding:10px 14px;border-left:3px solid #E8673A">
+          <div style="font-size:7.5px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#E8673A;margin-bottom:4px;font-family:'DM Sans',sans-serif">To get started</div>
+          <div style="font-size:9px;color:#4A3C34;font-family:'DM Sans',sans-serif;line-height:1.5">Scan the QR code on the back of this card, or visit<br><strong>attune-relationships.com/app</strong></div>
+        </div>
+      </div>
+      <div class="right-footer">
+        <svg width="18" height="13" viewBox="0 0 103 76" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs><linearGradient id="lgc" x1="0" y1="0" x2="103" y2="76" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#E8673A"/><stop offset="100%" stop-color="#1B5FE8"/></linearGradient></defs>
+  <path d="M14,4L44,4A9,9,0,0,1,53,13L53,42A9,9,0,0,1,44,51L20,51L6,61L11,51A6,6,0,0,1,5,45L5,13A9,9,0,0,1,14,4Z" fill="url(#lgc)"/>
+  <path d="M22,11C20,8.5,16.5,5,11.5,5C5.5,5,2,9.5,2,14.5C2,23,11,30,22,40C33,30,42,23,42,14.5C42,9.5,38.5,5,32.5,5C27.5,5,24,8.5,22,11Z" fill="white" opacity=".93" transform="translate(13.16,11.3) scale(.72)"/>
+  <path d="M89,14L59,14A9,9,0,0,0,50,23L50,52A9,9,0,0,0,59,61L83,61L97,71L92,61A6,6,0,0,0,98,55L98,23A9,9,0,0,0,89,14Z" fill="none" stroke="url(#lgc)" stroke-width="2.2" stroke-linejoin="round"/>
+  <path d="M22,11C20,8.5,16.5,5,11.5,5C5.5,5,2,9.5,2,14.5C2,23,11,30,22,40C33,30,42,23,42,14.5C42,9.5,38.5,5,32.5,5C27.5,5,24,8.5,22,11Z" fill="url(#lgc)" transform="translate(58.16,21.3) scale(.72)"/>
+</svg>
+        <div class="footer-dot"></div>
+        <div class="footer-txt">attune-relationships.com</div>
+        <div class="footer-dot"></div>
+        <div class="footer-txt">The Attune Assessment</div>
+      </div>
+    </div>
+  </div>
+  <div class="page-label front-lbl">Assessment — Front</div>
+</div><div class="page back-page">
+  <div class="card back">
+    <div class="back-accent" style="background:linear-gradient(90deg,#E8673A,#6B3FA0,#1B5FE8)"></div>
+    <div class="back-inner">
+      <div class="back-left">
+        <div style="font-size:7.5px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:#C0B4A8;margin-bottom:10px;font-family:'DM Sans',sans-serif">How to get started</div>
+        <div style="display:flex;flex-direction:column;gap:0;flex:1;justify-content:center">
+          <div class="step"><div class="step-num" style="color:#E8673A">1</div><div><div class="step-t">Scan the QR code</div><div class="step-d">Use your phone's camera. Opens directly to your Attune account setup.</div></div></div>
+          <div class="step" style="padding-top:9px"><div class="step-num" style="color:#E8673A">2</div><div><div class="step-t">Create your account</div><div class="step-d">Takes about two minutes. You'll invite your partner from inside the app.</div></div></div>
+          <div class="step" style="padding-top:9px"><div class="step-num" style="color:#E8673A">3</div><div><div class="step-t">Answer on your own</div><div class="step-d">Both partners answer independently. Your answers stay private until you both finish.</div></div></div>
+          <div class="step" style="padding-top:9px;border-bottom:none"><div class="step-num" style="color:#E8673A">4</div><div><div class="step-t">See your results together</div><div class="step-d">Couple type, map, and insights unlock when both of you are done.</div></div></div>
+        </div>
+      </div>
+      <div class="back-right">
+        <div style="font-size:7px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:#C0B4A8;text-align:center;font-family:'DM Sans',sans-serif;margin-bottom:8px">Scan to start</div>
+        <img src="data:image/png;base64,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" width="108" height="108" style="border-radius:6px;border:1px solid #EDE8E0;display:block"/>
+        <div style="text-align:center;margin-top:8px">
+          <div style="font-size:8px;font-weight:700;color:#0E0B07;font-family:'DM Sans',sans-serif;margin-bottom:3px">attune-relationships.com</div>
+          <div style="font-size:7px;color:#8C7A68;font-family:'DM Sans',sans-serif">Attune Relationships</div>
+        </div>
+        <svg width="18" height="13" viewBox="0 0 103 76" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs><linearGradient id="lgc" x1="0" y1="0" x2="103" y2="76" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#E8673A"/><stop offset="100%" stop-color="#1B5FE8"/></linearGradient></defs>
+  <path d="M14,4L44,4A9,9,0,0,1,53,13L53,42A9,9,0,0,1,44,51L20,51L6,61L11,51A6,6,0,0,1,5,45L5,13A9,9,0,0,1,14,4Z" fill="url(#lgc)"/>
+  <path d="M22,11C20,8.5,16.5,5,11.5,5C5.5,5,2,9.5,2,14.5C2,23,11,30,22,40C33,30,42,23,42,14.5C42,9.5,38.5,5,32.5,5C27.5,5,24,8.5,22,11Z" fill="white" opacity=".93" transform="translate(13.16,11.3) scale(.72)"/>
+  <path d="M89,14L59,14A9,9,0,0,0,50,23L50,52A9,9,0,0,0,59,61L83,61L97,71L92,61A6,6,0,0,0,98,55L98,23A9,9,0,0,0,89,14Z" fill="none" stroke="url(#lgc)" stroke-width="2.2" stroke-linejoin="round"/>
+  <path d="M22,11C20,8.5,16.5,5,11.5,5C5.5,5,2,9.5,2,14.5C2,23,11,30,22,40C33,30,42,23,42,14.5C42,9.5,38.5,5,32.5,5C27.5,5,24,8.5,22,11Z" fill="url(#lgc)" transform="translate(58.16,21.3) scale(.72)"/>
+</svg>
+      </div>
+    </div>
+    <div class="back-footer">
+      <div style="font-family:'Playfair Display',Georgia,serif;font-size:7px;color:#C0B8B0;font-style:italic">Understanding takes intention.</div>
+      <div style="font-size:7px;color:#C0B8B0;font-family:'DM Sans',sans-serif">Attune Relationships · The Attune Assessment</div>
+    </div>
+  </div>
+  <div class="page-label back-lbl">Assessment — Back</div>
+</div><div class="page front-page">
+  <div class="card front">
+    <div class="grad-panel" style="background:linear-gradient(160deg,#C8522E 0%,#6B3FA0 52%,#1B5FE8 100%)">
+      <svg width="46" height="34" viewBox="0 0 103 76" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <path d="M14,4L44,4A9,9,0,0,1,53,13L53,42A9,9,0,0,1,44,51L20,51L6,61L11,51A6,6,0,0,1,5,45L5,13A9,9,0,0,1,14,4Z" fill="rgba(255,255,255,.92)"/>
+  <path d="M22,11C20,8.5,16.5,5,11.5,5C5.5,5,2,9.5,2,14.5C2,23,11,30,22,40C33,30,42,23,42,14.5C42,9.5,38.5,5,32.5,5C27.5,5,24,8.5,22,11Z" fill="rgba(90,40,150,.55)" transform="translate(13.16,11.3) scale(.72)"/>
+  <path d="M89,14L59,14A9,9,0,0,0,50,23L50,52A9,9,0,0,0,59,61L83,61L97,71L92,61A6,6,0,0,0,98,55L98,23A9,9,0,0,0,89,14Z" fill="none" stroke="rgba(255,255,255,.85)" stroke-width="2.2" stroke-linejoin="round"/>
+  <path d="M22,11C20,8.5,16.5,5,11.5,5C5.5,5,2,9.5,2,14.5C2,23,11,30,22,40C33,30,42,23,42,14.5C42,9.5,38.5,5,32.5,5C27.5,5,24,8.5,22,11Z" fill="rgba(255,255,255,.85)" transform="translate(58.16,21.3) scale(.72)"/>
+</svg>
+      <div style="text-align:center">
+        <div style="font-family:'Playfair Display',Georgia,serif;font-size:22px;font-weight:700;color:rgba(255,255,255,.95);letter-spacing:-.02em">Attune</div>
+        <div style="font-size:7px;letter-spacing:.22em;text-transform:uppercase;color:rgba(255,255,255,.45);margin-top:3px;font-family:'DM Sans',sans-serif">Relationships</div>
+      </div>
+      <div style="text-align:center">
+        <div style="font-size:7px;letter-spacing:.16em;text-transform:uppercase;color:rgba(255,255,255,.35);margin-bottom:4px;font-family:'DM Sans',sans-serif">Package</div>
+        <div style="font-family:'Playfair Display',Georgia,serif;font-size:9.5px;font-style:italic;color:rgba(255,255,255,.78);line-height:1.3">Starting Out Collection</div>
+      </div>
+    </div>
+    <div class="right">
+      <div class="right-body">
+        <div class="for-label">Welcome to</div>
+        <div style="font-family:'Playfair Display',Georgia,serif;font-weight:700;font-size:36px;line-height:1.0;letter-spacing:-.03em;background:linear-gradient(120deg,#C45C2A 0%,#6B3FA0 50%,#1B5FE8 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:4px">Attune<br>Relationships</div>
+        <div class="divider-line"></div>
+        <div style="font-family:'Playfair Display',Georgia,serif;font-size:11px;font-style:italic;color:#4A3C34;line-height:1.65;max-width:300px;margin-bottom:14px">Understanding takes intention. You've taken the first step.</div>
+        <div style="background:#F9F5F1;border-radius:8px;padding:10px 14px;border-left:3px solid #C45C2A">
+          <div style="font-size:7.5px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#C45C2A;margin-bottom:4px;font-family:'DM Sans',sans-serif">To get started</div>
+          <div style="font-size:9px;color:#4A3C34;font-family:'DM Sans',sans-serif;line-height:1.5">Scan the QR code on the back of this card, or visit<br><strong>attune-relationships.com/app</strong></div>
+        </div>
+      </div>
+      <div class="right-footer">
+        <svg width="18" height="13" viewBox="0 0 103 76" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs><linearGradient id="lgc" x1="0" y1="0" x2="103" y2="76" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#E8673A"/><stop offset="100%" stop-color="#1B5FE8"/></linearGradient></defs>
+  <path d="M14,4L44,4A9,9,0,0,1,53,13L53,42A9,9,0,0,1,44,51L20,51L6,61L11,51A6,6,0,0,1,5,45L5,13A9,9,0,0,1,14,4Z" fill="url(#lgc)"/>
+  <path d="M22,11C20,8.5,16.5,5,11.5,5C5.5,5,2,9.5,2,14.5C2,23,11,30,22,40C33,30,42,23,42,14.5C42,9.5,38.5,5,32.5,5C27.5,5,24,8.5,22,11Z" fill="white" opacity=".93" transform="translate(13.16,11.3) scale(.72)"/>
+  <path d="M89,14L59,14A9,9,0,0,0,50,23L50,52A9,9,0,0,0,59,61L83,61L97,71L92,61A6,6,0,0,0,98,55L98,23A9,9,0,0,0,89,14Z" fill="none" stroke="url(#lgc)" stroke-width="2.2" stroke-linejoin="round"/>
+  <path d="M22,11C20,8.5,16.5,5,11.5,5C5.5,5,2,9.5,2,14.5C2,23,11,30,22,40C33,30,42,23,42,14.5C42,9.5,38.5,5,32.5,5C27.5,5,24,8.5,22,11Z" fill="url(#lgc)" transform="translate(58.16,21.3) scale(.72)"/>
+</svg>
+        <div class="footer-dot"></div>
+        <div class="footer-txt">attune-relationships.com</div>
+        <div class="footer-dot"></div>
+        <div class="footer-txt">Starting Out Collection</div>
+      </div>
+    </div>
+  </div>
+  <div class="page-label front-lbl">Starting Out — Front</div>
+</div><div class="page back-page">
+  <div class="card back">
+    <div class="back-accent" style="background:linear-gradient(90deg,#C45C2A,#6B3FA0,#1B5FE8)"></div>
+    <div class="back-inner">
+      <div class="back-left">
+        <div style="font-size:7.5px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:#C0B4A8;margin-bottom:10px;font-family:'DM Sans',sans-serif">How to get started</div>
+        <div style="display:flex;flex-direction:column;gap:0;flex:1;justify-content:center">
+          <div class="step"><div class="step-num" style="color:#C45C2A">1</div><div><div class="step-t">Scan the QR code</div><div class="step-d">Use your phone's camera. Opens directly to your Attune account setup.</div></div></div>
+          <div class="step" style="padding-top:9px"><div class="step-num" style="color:#C45C2A">2</div><div><div class="step-t">Create your account</div><div class="step-d">Takes about two minutes. You'll invite your partner from inside the app.</div></div></div>
+          <div class="step" style="padding-top:9px"><div class="step-num" style="color:#C45C2A">3</div><div><div class="step-t">Answer on your own</div><div class="step-d">Both partners answer independently. Your answers stay private until you both finish.</div></div></div>
+          <div class="step" style="padding-top:9px;border-bottom:none"><div class="step-num" style="color:#C45C2A">4</div><div><div class="step-t">See your results together</div><div class="step-d">Couple type, map, and insights unlock when both of you are done.</div></div></div>
+        </div>
+      </div>
+      <div class="back-right">
+        <div style="font-size:7px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:#C0B4A8;text-align:center;font-family:'DM Sans',sans-serif;margin-bottom:8px">Scan to start</div>
+        <img src="data:image/png;base64,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" width="108" height="108" style="border-radius:6px;border:1px solid #EDE8E0;display:block"/>
+        <div style="text-align:center;margin-top:8px">
+          <div style="font-size:8px;font-weight:700;color:#0E0B07;font-family:'DM Sans',sans-serif;margin-bottom:3px">attune-relationships.com</div>
+          <div style="font-size:7px;color:#8C7A68;font-family:'DM Sans',sans-serif">Attune Relationships</div>
+        </div>
+        <svg width="18" height="13" viewBox="0 0 103 76" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs><linearGradient id="lgc" x1="0" y1="0" x2="103" y2="76" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#E8673A"/><stop offset="100%" stop-color="#1B5FE8"/></linearGradient></defs>
+  <path d="M14,4L44,4A9,9,0,0,1,53,13L53,42A9,9,0,0,1,44,51L20,51L6,61L11,51A6,6,0,0,1,5,45L5,13A9,9,0,0,1,14,4Z" fill="url(#lgc)"/>
+  <path d="M22,11C20,8.5,16.5,5,11.5,5C5.5,5,2,9.5,2,14.5C2,23,11,30,22,40C33,30,42,23,42,14.5C42,9.5,38.5,5,32.5,5C27.5,5,24,8.5,22,11Z" fill="white" opacity=".93" transform="translate(13.16,11.3) scale(.72)"/>
+  <path d="M89,14L59,14A9,9,0,0,0,50,23L50,52A9,9,0,0,0,59,61L83,61L97,71L92,61A6,6,0,0,0,98,55L98,23A9,9,0,0,0,89,14Z" fill="none" stroke="url(#lgc)" stroke-width="2.2" stroke-linejoin="round"/>
+  <path d="M22,11C20,8.5,16.5,5,11.5,5C5.5,5,2,9.5,2,14.5C2,23,11,30,22,40C33,30,42,23,42,14.5C42,9.5,38.5,5,32.5,5C27.5,5,24,8.5,22,11Z" fill="url(#lgc)" transform="translate(58.16,21.3) scale(.72)"/>
+</svg>
+      </div>
+    </div>
+    <div class="back-footer">
+      <div style="font-family:'Playfair Display',Georgia,serif;font-size:7px;color:#C0B8B0;font-style:italic">Understanding takes intention.</div>
+      <div style="font-size:7px;color:#C0B8B0;font-family:'DM Sans',sans-serif">Attune Relationships · Starting Out Collection</div>
+    </div>
+  </div>
+  <div class="page-label back-lbl">Starting Out — Back</div>
+</div><div class="page front-page">
+  <div class="card front">
+    <div class="grad-panel" style="background:linear-gradient(160deg,#1E1A4A 0%,#3B3A8A 52%,#1B5FE8 100%)">
+      <svg width="46" height="34" viewBox="0 0 103 76" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <path d="M14,4L44,4A9,9,0,0,1,53,13L53,42A9,9,0,0,1,44,51L20,51L6,61L11,51A6,6,0,0,1,5,45L5,13A9,9,0,0,1,14,4Z" fill="rgba(255,255,255,.92)"/>
+  <path d="M22,11C20,8.5,16.5,5,11.5,5C5.5,5,2,9.5,2,14.5C2,23,11,30,22,40C33,30,42,23,42,14.5C42,9.5,38.5,5,32.5,5C27.5,5,24,8.5,22,11Z" fill="rgba(90,40,150,.55)" transform="translate(13.16,11.3) scale(.72)"/>
+  <path d="M89,14L59,14A9,9,0,0,0,50,23L50,52A9,9,0,0,0,59,61L83,61L97,71L92,61A6,6,0,0,0,98,55L98,23A9,9,0,0,0,89,14Z" fill="none" stroke="rgba(255,255,255,.85)" stroke-width="2.2" stroke-linejoin="round"/>
+  <path d="M22,11C20,8.5,16.5,5,11.5,5C5.5,5,2,9.5,2,14.5C2,23,11,30,22,40C33,30,42,23,42,14.5C42,9.5,38.5,5,32.5,5C27.5,5,24,8.5,22,11Z" fill="rgba(255,255,255,.85)" transform="translate(58.16,21.3) scale(.72)"/>
+</svg>
+      <div style="text-align:center">
+        <div style="font-family:'Playfair Display',Georgia,serif;font-size:22px;font-weight:700;color:rgba(255,255,255,.95);letter-spacing:-.02em">Attune</div>
+        <div style="font-size:7px;letter-spacing:.22em;text-transform:uppercase;color:rgba(255,255,255,.45);margin-top:3px;font-family:'DM Sans',sans-serif">Relationships</div>
+      </div>
+      <div style="text-align:center">
+        <div style="font-size:7px;letter-spacing:.16em;text-transform:uppercase;color:rgba(255,255,255,.35);margin-bottom:4px;font-family:'DM Sans',sans-serif">Package</div>
+        <div style="font-family:'Playfair Display',Georgia,serif;font-size:9.5px;font-style:italic;color:rgba(255,255,255,.78);line-height:1.3">Anniversary Collection</div>
+      </div>
+    </div>
+    <div class="right">
+      <div class="right-body">
+        <div class="for-label">Welcome to</div>
+        <div style="font-family:'Playfair Display',Georgia,serif;font-weight:700;font-size:36px;line-height:1.0;letter-spacing:-.03em;background:linear-gradient(120deg,#4A5BE8 0%,#6B3FA0 50%,#1B5FE8 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:4px">Attune<br>Relationships</div>
+        <div class="divider-line"></div>
+        <div style="font-family:'Playfair Display',Georgia,serif;font-size:11px;font-style:italic;color:#4A3C34;line-height:1.65;max-width:300px;margin-bottom:14px">Understanding takes intention. You've taken the first step.</div>
+        <div style="background:#F9F5F1;border-radius:8px;padding:10px 14px;border-left:3px solid #4A5BE8">
+          <div style="font-size:7.5px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#4A5BE8;margin-bottom:4px;font-family:'DM Sans',sans-serif">To get started</div>
+          <div style="font-size:9px;color:#4A3C34;font-family:'DM Sans',sans-serif;line-height:1.5">Scan the QR code on the back of this card, or visit<br><strong>attune-relationships.com/app</strong></div>
+        </div>
+      </div>
+      <div class="right-footer">
+        <svg width="18" height="13" viewBox="0 0 103 76" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs><linearGradient id="lgc" x1="0" y1="0" x2="103" y2="76" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#E8673A"/><stop offset="100%" stop-color="#1B5FE8"/></linearGradient></defs>
+  <path d="M14,4L44,4A9,9,0,0,1,53,13L53,42A9,9,0,0,1,44,51L20,51L6,61L11,51A6,6,0,0,1,5,45L5,13A9,9,0,0,1,14,4Z" fill="url(#lgc)"/>
+  <path d="M22,11C20,8.5,16.5,5,11.5,5C5.5,5,2,9.5,2,14.5C2,23,11,30,22,40C33,30,42,23,42,14.5C42,9.5,38.5,5,32.5,5C27.5,5,24,8.5,22,11Z" fill="white" opacity=".93" transform="translate(13.16,11.3) scale(.72)"/>
+  <path d="M89,14L59,14A9,9,0,0,0,50,23L50,52A9,9,0,0,0,59,61L83,61L97,71L92,61A6,6,0,0,0,98,55L98,23A9,9,0,0,0,89,14Z" fill="none" stroke="url(#lgc)" stroke-width="2.2" stroke-linejoin="round"/>
+  <path d="M22,11C20,8.5,16.5,5,11.5,5C5.5,5,2,9.5,2,14.5C2,23,11,30,22,40C33,30,42,23,42,14.5C42,9.5,38.5,5,32.5,5C27.5,5,24,8.5,22,11Z" fill="url(#lgc)" transform="translate(58.16,21.3) scale(.72)"/>
+</svg>
+        <div class="footer-dot"></div>
+        <div class="footer-txt">attune-relationships.com</div>
+        <div class="footer-dot"></div>
+        <div class="footer-txt">Anniversary Collection</div>
+      </div>
+    </div>
+  </div>
+  <div class="page-label front-lbl">Anniversary — Front</div>
+</div><div class="page back-page">
+  <div class="card back">
+    <div class="back-accent" style="background:linear-gradient(90deg,#4A5BE8,#6B3FA0,#1B5FE8)"></div>
+    <div class="back-inner">
+      <div class="back-left">
+        <div style="font-size:7.5px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:#C0B4A8;margin-bottom:10px;font-family:'DM Sans',sans-serif">How to get started</div>
+        <div style="display:flex;flex-direction:column;gap:0;flex:1;justify-content:center">
+          <div class="step"><div class="step-num" style="color:#4A5BE8">1</div><div><div class="step-t">Scan the QR code</div><div class="step-d">Use your phone's camera. Opens directly to your Attune account setup.</div></div></div>
+          <div class="step" style="padding-top:9px"><div class="step-num" style="color:#4A5BE8">2</div><div><div class="step-t">Create your account</div><div class="step-d">Takes about two minutes. You'll invite your partner from inside the app.</div></div></div>
+          <div class="step" style="padding-top:9px"><div class="step-num" style="color:#4A5BE8">3</div><div><div class="step-t">Answer on your own</div><div class="step-d">Both partners answer independently. Your answers stay private until you both finish.</div></div></div>
+          <div class="step" style="padding-top:9px;border-bottom:none"><div class="step-num" style="color:#4A5BE8">4</div><div><div class="step-t">See your results together</div><div class="step-d">Couple type, map, and insights unlock when both of you are done.</div></div></div>
+        </div>
+      </div>
+      <div class="back-right">
+        <div style="font-size:7px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:#C0B4A8;text-align:center;font-family:'DM Sans',sans-serif;margin-bottom:8px">Scan to start</div>
+        <img src="data:image/png;base64,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" width="108" height="108" style="border-radius:6px;border:1px solid #EDE8E0;display:block"/>
+        <div style="text-align:center;margin-top:8px">
+          <div style="font-size:8px;font-weight:700;color:#0E0B07;font-family:'DM Sans',sans-serif;margin-bottom:3px">attune-relationships.com</div>
+          <div style="font-size:7px;color:#8C7A68;font-family:'DM Sans',sans-serif">Attune Relationships</div>
+        </div>
+        <svg width="18" height="13" viewBox="0 0 103 76" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs><linearGradient id="lgc" x1="0" y1="0" x2="103" y2="76" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#E8673A"/><stop offset="100%" stop-color="#1B5FE8"/></linearGradient></defs>
+  <path d="M14,4L44,4A9,9,0,0,1,53,13L53,42A9,9,0,0,1,44,51L20,51L6,61L11,51A6,6,0,0,1,5,45L5,13A9,9,0,0,1,14,4Z" fill="url(#lgc)"/>
+  <path d="M22,11C20,8.5,16.5,5,11.5,5C5.5,5,2,9.5,2,14.5C2,23,11,30,22,40C33,30,42,23,42,14.5C42,9.5,38.5,5,32.5,5C27.5,5,24,8.5,22,11Z" fill="white" opacity=".93" transform="translate(13.16,11.3) scale(.72)"/>
+  <path d="M89,14L59,14A9,9,0,0,0,50,23L50,52A9,9,0,0,0,59,61L83,61L97,71L92,61A6,6,0,0,0,98,55L98,23A9,9,0,0,0,89,14Z" fill="none" stroke="url(#lgc)" stroke-width="2.2" stroke-linejoin="round"/>
+  <path d="M22,11C20,8.5,16.5,5,11.5,5C5.5,5,2,9.5,2,14.5C2,23,11,30,22,40C33,30,42,23,42,14.5C42,9.5,38.5,5,32.5,5C27.5,5,24,8.5,22,11Z" fill="url(#lgc)" transform="translate(58.16,21.3) scale(.72)"/>
+</svg>
+      </div>
+    </div>
+    <div class="back-footer">
+      <div style="font-family:'Playfair Display',Georgia,serif;font-size:7px;color:#C0B8B0;font-style:italic">Understanding takes intention.</div>
+      <div style="font-size:7px;color:#C0B8B0;font-family:'DM Sans',sans-serif">Attune Relationships · Anniversary Collection</div>
+    </div>
+  </div>
+  <div class="page-label back-lbl">Anniversary — Back</div>
+</div><div class="page front-page">
+  <div class="card front">
+    <div class="grad-panel" style="background:linear-gradient(160deg,#1E1A4A 0%,#2D2870 52%,#5B6DF8 100%)">
+      <svg width="46" height="34" viewBox="0 0 103 76" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <path d="M14,4L44,4A9,9,0,0,1,53,13L53,42A9,9,0,0,1,44,51L20,51L6,61L11,51A6,6,0,0,1,5,45L5,13A9,9,0,0,1,14,4Z" fill="rgba(255,255,255,.92)"/>
+  <path d="M22,11C20,8.5,16.5,5,11.5,5C5.5,5,2,9.5,2,14.5C2,23,11,30,22,40C33,30,42,23,42,14.5C42,9.5,38.5,5,32.5,5C27.5,5,24,8.5,22,11Z" fill="rgba(90,40,150,.55)" transform="translate(13.16,11.3) scale(.72)"/>
+  <path d="M89,14L59,14A9,9,0,0,0,50,23L50,52A9,9,0,0,0,59,61L83,61L97,71L92,61A6,6,0,0,0,98,55L98,23A9,9,0,0,0,89,14Z" fill="none" stroke="rgba(255,255,255,.85)" stroke-width="2.2" stroke-linejoin="round"/>
+  <path d="M22,11C20,8.5,16.5,5,11.5,5C5.5,5,2,9.5,2,14.5C2,23,11,30,22,40C33,30,42,23,42,14.5C42,9.5,38.5,5,32.5,5C27.5,5,24,8.5,22,11Z" fill="rgba(255,255,255,.85)" transform="translate(58.16,21.3) scale(.72)"/>
+</svg>
+      <div style="text-align:center">
+        <div style="font-family:'Playfair Display',Georgia,serif;font-size:22px;font-weight:700;color:rgba(255,255,255,.95);letter-spacing:-.02em">Attune</div>
+        <div style="font-size:7px;letter-spacing:.22em;text-transform:uppercase;color:rgba(255,255,255,.45);margin-top:3px;font-family:'DM Sans',sans-serif">Relationships</div>
+      </div>
+      <div style="text-align:center">
+        <div style="font-size:7px;letter-spacing:.16em;text-transform:uppercase;color:rgba(255,255,255,.35);margin-bottom:4px;font-family:'DM Sans',sans-serif">Package</div>
+        <div style="font-family:'Playfair Display',Georgia,serif;font-size:9.5px;font-style:italic;color:rgba(255,255,255,.78);line-height:1.3">Attune Premium</div>
+      </div>
+    </div>
+    <div class="right">
+      <div class="right-body">
+        <div class="for-label">Welcome to</div>
+        <div style="font-family:'Playfair Display',Georgia,serif;font-weight:700;font-size:36px;line-height:1.0;letter-spacing:-.03em;background:linear-gradient(120deg,#5B6DF8 0%,#6B3FA0 50%,#1B5FE8 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:4px">Attune<br>Relationships</div>
+        <div class="divider-line"></div>
+        <div style="font-family:'Playfair Display',Georgia,serif;font-size:11px;font-style:italic;color:#4A3C34;line-height:1.65;max-width:300px;margin-bottom:14px">Understanding takes intention. You've taken the first step.</div>
+        <div style="background:#F9F5F1;border-radius:8px;padding:10px 14px;border-left:3px solid #5B6DF8">
+          <div style="font-size:7.5px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#5B6DF8;margin-bottom:4px;font-family:'DM Sans',sans-serif">To get started</div>
+          <div style="font-size:9px;color:#4A3C34;font-family:'DM Sans',sans-serif;line-height:1.5">Scan the QR code on the back of this card, or visit<br><strong>attune-relationships.com/app</strong></div>
+        </div>
+      </div>
+      <div class="right-footer">
+        <svg width="18" height="13" viewBox="0 0 103 76" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs><linearGradient id="lgc" x1="0" y1="0" x2="103" y2="76" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#E8673A"/><stop offset="100%" stop-color="#1B5FE8"/></linearGradient></defs>
+  <path d="M14,4L44,4A9,9,0,0,1,53,13L53,42A9,9,0,0,1,44,51L20,51L6,61L11,51A6,6,0,0,1,5,45L5,13A9,9,0,0,1,14,4Z" fill="url(#lgc)"/>
+  <path d="M22,11C20,8.5,16.5,5,11.5,5C5.5,5,2,9.5,2,14.5C2,23,11,30,22,40C33,30,42,23,42,14.5C42,9.5,38.5,5,32.5,5C27.5,5,24,8.5,22,11Z" fill="white" opacity=".93" transform="translate(13.16,11.3) scale(.72)"/>
+  <path d="M89,14L59,14A9,9,0,0,0,50,23L50,52A9,9,0,0,0,59,61L83,61L97,71L92,61A6,6,0,0,0,98,55L98,23A9,9,0,0,0,89,14Z" fill="none" stroke="url(#lgc)" stroke-width="2.2" stroke-linejoin="round"/>
+  <path d="M22,11C20,8.5,16.5,5,11.5,5C5.5,5,2,9.5,2,14.5C2,23,11,30,22,40C33,30,42,23,42,14.5C42,9.5,38.5,5,32.5,5C27.5,5,24,8.5,22,11Z" fill="url(#lgc)" transform="translate(58.16,21.3) scale(.72)"/>
+</svg>
+        <div class="footer-dot"></div>
+        <div class="footer-txt">attune-relationships.com</div>
+        <div class="footer-dot"></div>
+        <div class="footer-txt">Attune Premium</div>
+      </div>
+    </div>
+  </div>
+  <div class="page-label front-lbl">Premium — Front</div>
+</div><div class="page back-page">
+  <div class="card back">
+    <div class="back-accent" style="background:linear-gradient(90deg,#5B6DF8,#6B3FA0,#1B5FE8)"></div>
+    <div class="back-inner">
+      <div class="back-left">
+        <div style="font-size:7.5px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:#C0B4A8;margin-bottom:10px;font-family:'DM Sans',sans-serif">How to get started</div>
+        <div style="display:flex;flex-direction:column;gap:0;flex:1;justify-content:center">
+          <div class="step"><div class="step-num" style="color:#5B6DF8">1</div><div><div class="step-t">Scan the QR code</div><div class="step-d">Use your phone's camera. Opens directly to your Attune account setup.</div></div></div>
+          <div class="step" style="padding-top:9px"><div class="step-num" style="color:#5B6DF8">2</div><div><div class="step-t">Create your account</div><div class="step-d">Takes about two minutes. You'll invite your partner from inside the app.</div></div></div>
+          <div class="step" style="padding-top:9px"><div class="step-num" style="color:#5B6DF8">3</div><div><div class="step-t">Answer on your own</div><div class="step-d">Both partners answer independently. Your answers stay private until you both finish.</div></div></div>
+          <div class="step" style="padding-top:9px;border-bottom:none"><div class="step-num" style="color:#5B6DF8">4</div><div><div class="step-t">See your results together</div><div class="step-d">Couple type, map, and insights unlock when both of you are done.</div></div></div>
+        </div>
+      </div>
+      <div class="back-right">
+        <div style="font-size:7px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:#C0B4A8;text-align:center;font-family:'DM Sans',sans-serif;margin-bottom:8px">Scan to start</div>
+        <img src="data:image/png;base64,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" width="108" height="108" style="border-radius:6px;border:1px solid #EDE8E0;display:block"/>
+        <div style="text-align:center;margin-top:8px">
+          <div style="font-size:8px;font-weight:700;color:#0E0B07;font-family:'DM Sans',sans-serif;margin-bottom:3px">attune-relationships.com</div>
+          <div style="font-size:7px;color:#8C7A68;font-family:'DM Sans',sans-serif">Attune Relationships</div>
+        </div>
+        <svg width="18" height="13" viewBox="0 0 103 76" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs><linearGradient id="lgc" x1="0" y1="0" x2="103" y2="76" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#E8673A"/><stop offset="100%" stop-color="#1B5FE8"/></linearGradient></defs>
+  <path d="M14,4L44,4A9,9,0,0,1,53,13L53,42A9,9,0,0,1,44,51L20,51L6,61L11,51A6,6,0,0,1,5,45L5,13A9,9,0,0,1,14,4Z" fill="url(#lgc)"/>
+  <path d="M22,11C20,8.5,16.5,5,11.5,5C5.5,5,2,9.5,2,14.5C2,23,11,30,22,40C33,30,42,23,42,14.5C42,9.5,38.5,5,32.5,5C27.5,5,24,8.5,22,11Z" fill="white" opacity=".93" transform="translate(13.16,11.3) scale(.72)"/>
+  <path d="M89,14L59,14A9,9,0,0,0,50,23L50,52A9,9,0,0,0,59,61L83,61L97,71L92,61A6,6,0,0,0,98,55L98,23A9,9,0,0,0,89,14Z" fill="none" stroke="url(#lgc)" stroke-width="2.2" stroke-linejoin="round"/>
+  <path d="M22,11C20,8.5,16.5,5,11.5,5C5.5,5,2,9.5,2,14.5C2,23,11,30,22,40C33,30,42,23,42,14.5C42,9.5,38.5,5,32.5,5C27.5,5,24,8.5,22,11Z" fill="url(#lgc)" transform="translate(58.16,21.3) scale(.72)"/>
+</svg>
+      </div>
+    </div>
+    <div class="back-footer">
+      <div style="font-family:'Playfair Display',Georgia,serif;font-size:7px;color:#C0B8B0;font-style:italic">Understanding takes intention.</div>
+      <div style="font-size:7px;color:#C0B8B0;font-family:'DM Sans',sans-serif">Attune Relationships · Attune Premium</div>
+    </div>
+  </div>
+  <div class="page-label back-lbl">Premium — Back</div>
+</div>
+</body>
+</html>
