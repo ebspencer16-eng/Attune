@@ -9406,7 +9406,7 @@ export default function App() {
       />
     )}
     {view === "results" && highlightsSeen && (
-          <div style={{ position: "fixed", top: 56, left: 0, right: 0, bottom: 0, display: "flex", flexDirection: "column", overflow: "hidden", zIndex: 50, background: C.warm, paddingBottom: "env(safe-area-inset-bottom)" }}>
+          <div style={{ position: "fixed", top: 56, left: 0, right: 0, bottom: 60, display: "flex", flexDirection: "column", overflow: "hidden", zIndex: 50, background: C.warm, paddingBottom: "env(safe-area-inset-bottom)" }}>
             <div style={{ background: "rgba(255,253,249,0.97)", backdropFilter: "blur(12px)", borderBottom: ("1px solid " + (C.stone)), padding: isMobile ? "0.75rem 1rem" : "0.9rem 1.5rem", flexShrink: 0, display: "flex", alignItems: "center", gap: "0.5rem" }}>
               <button onClick={() => setView("home")} style={{ background: "transparent", border: "none", color: C.clay, fontSize: "0.72rem", letterSpacing: "0.1em", textTransform: "uppercase", cursor: "pointer", fontFamily: font.body, padding: 0, fontWeight: 600, flexShrink: 0 }}>← {isMobile ? "" : "Dashboard"}</button>
               {activeResult !== "overview" && (
@@ -9478,7 +9478,7 @@ export default function App() {
                 </div>
               );
             })()}
-            <div data-results-scroll style={{ flex: 1, overflowY: "auto", WebkitOverflowScrolling: "touch", overscrollBehavior: "contain" }}>
+            <div data-results-scroll style={{ flex: 1, overflowY: "auto", WebkitOverflowScrolling: "touch", overscrollBehavior: "contain", scrollPaddingBottom: "60px" }}>
               <div style={{ maxWidth: 920, margin: "0 auto", padding: isMobile ? "1rem 1rem 0" : "1.25rem 1.5rem 0" }}>
                 <UnifiedResults
                   isMobile={isMobile}
@@ -9497,8 +9497,8 @@ export default function App() {
                   initialSection={activeResult !== "overview" ? activeResult : undefined}
                 />
               </div>
-              {/* Dark footer banner */}
-              <div style={{ marginTop: "3rem", background: "#2d2250", width: "100%" }}>
+              {/* Dark footer banner — inside pane so it scrolls into view */}
+              <div style={{ marginTop: "3rem", background: "#2d2250", width: "100%", paddingBottom: "3rem" }}>
                 <div style={{ maxWidth: 920, margin: "0 auto", padding: "3rem 1.5rem 0" }}>
                 <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 2fr", gap: isMobile ? "1.5rem" : "3rem", paddingBottom: "2.5rem", borderBottom: "1px solid rgba(255,255,255,.08)" }}>
                   <div>
@@ -9532,6 +9532,20 @@ export default function App() {
                 </div>
                 </div>
               </div>
+            </div>
+          </div>
+        )}
+        {/* Footer peek strip — visible below results pane when in results view */}
+        {view === "results" && highlightsSeen && (
+          <div style={{ position: "fixed", bottom: 0, left: 0, right: 0, height: 60, background: "#2d2250", zIndex: 49, display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 2rem", gap: "1rem", overflow: "hidden" }}>
+            <span style={{ fontSize: "0.72rem", color: "rgba(255,255,255,0.4)", fontFamily: BFONT, fontWeight: 300, letterSpacing: "0.04em" }}>Attune Relationships™</span>
+            <div style={{ display: "flex", gap: "1.5rem", flexWrap: "nowrap" }}>
+              {[["Home", "/home"], ["Packages", "/offerings"], ["FAQs", "/faq"], ["Contact", "mailto:hello@attune-relationships.com"]].map(([label, href]) => (
+                <a key={label} href={href} style={{ fontSize: "0.7rem", color: "rgba(255,255,255,0.5)", textDecoration: "none", fontFamily: BFONT, transition: "color .15s" }}
+                  onMouseOver={e => e.target.style.color = "rgba(255,255,255,0.85)"}
+                  onMouseOut={e => e.target.style.color = "rgba(255,255,255,0.5)"}
+                >{label}</a>
+              ))}
             </div>
           </div>
         )}
