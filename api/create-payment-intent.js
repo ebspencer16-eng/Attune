@@ -10,23 +10,27 @@
 
 export const config = { runtime: 'edge' };
 
-const PRICES = {
+// Digital base prices (default)
+const DIGITAL_PRICES = {
   core:        89,
-  newlywed:   154,
-  anniversary: 174,
-  premium:    350,
+  newlywed:   139,
+  anniversary: 139,
+  premium:    295,
+};
+
+// Physical prices (includes shipping)
+const PHYSICAL_PRICES = {
+  core:        119,
+  newlywed:   169,
+  anniversary: 169,
+  premium:    340,
 };
 
 const ADDON_PRICES = {
-  digital: 19,
-  print:   39,
-  lmft:   150,  // LMFT session add-on
-};
-
-// Digital-only prices for newlywed and anniversary
-const DIGITAL_PRICES = {
-  newlywed:   109,
-  anniversary: 129,
+  digital:    19,   // workbook digital
+  print:      39,   // workbook print
+  lmft:      150,   // LMFT session add-on (non-premium)
+  reflection:  40,  // Relationship Reflection add-on
 };
 
 export default async function handler(req) {
@@ -67,21 +71,20 @@ export default async function handler(req) {
     });
   }
 
-  const basePrice = PRICES[pkgKey];
-  if (!basePrice) {
+  const effectiveBase = isPhysical
+    ? PHYSICAL_PRICES[pkgKey]
+    : DIGITAL_PRICES[pkgKey];
+
+  if (!effectiveBase) {
     return new Response(JSON.stringify({ error: 'Invalid package' }), {
       status: 400, headers: { 'Content-Type': 'application/json' }
     });
   }
 
-  // Use digital price for newlywed/anniversary when not physical
-  const effectiveBase = (!isPhysical && DIGITAL_PRICES[pkgKey])
-    ? DIGITAL_PRICES[pkgKey]
-    : basePrice;
-
-  const addonWorkbookPrice = ADDON_PRICES[addonWorkbook] || 0;
-  const addonLmftPrice     = addonLmft ? ADDON_PRICES.lmft : 0;
-  const totalCents  = (effectiveBase + addonWorkbookPrice + addonLmftPrice) * 100; // Stripe uses cents
+  const addonWorkbookPrice   = ADDON_PRICES[addonWorkbook] || 0;
+  const addonLmftPrice       = addonLmft ? ADDON_PRICES.lmft : 0;
+  const addonReflectionPrice = body.addonReflection ? ADDON_PRICES.reflection : 0;
+  const totalCents = (effectiveBase + addonWorkbookPrice + addonLmftPrice + addonReflectionPrice) * 100;
 
   const payload = new URLSearchParams({
     amount:   totalCents,
@@ -94,6 +97,7 @@ export default async function handler(req) {
     'metadata[partner2Name]': partner2Name || '',
     'metadata[addonWorkbook]': addonWorkbook || '',
     'metadata[addonLmft]':    addonLmft ? '1' : '',
+    'metadata[addonReflection]': body.addonReflection ? '1' : '',
     'metadata[isGift]':       isGift ? '1' : '',
     'metadata[isPhysical]':   isPhysical ? '1' : '',
     'metadata[giftNote]':     (giftNote || '').slice(0, 500),

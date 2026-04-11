@@ -1954,9 +1954,11 @@ function renderFulfillmentTable() {
   });
 }
 
-function markStatus(orderId, newStatus) {
+async function markStatus(orderId, newStatus) {
   const order = ORDERS.find(o=>o.id===orderId);
   if (!order) return;
+
+  // Optimistic update
   order.fulfillStatus = newStatus;
   if (newStatus === 'shipped') {
     const days = Math.round((Date.now()-order.date)/86400000*10)/10;
@@ -1965,6 +1967,25 @@ function markStatus(orderId, newStatus) {
   }
   renderFulfillmentTable();
   updateDashboardFulfillmentKPIs();
+
+  // Persist to Supabase via orders API
+  const statusMap = { pending: 'pending', packed: 'packed', shipped: 'shipped' };
+  try {
+    await fetch('/api/orders', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        action: 'update',
+        orderId: order.dbId || order.id,
+        updates: {
+          card_status: statusMap[newStatus] || newStatus,
+          workbook_status: order.hasWorkbook ? (newStatus === 'shipped' ? 'shipped' : order.workbookStatus) : undefined,
+        }
+      })
+    });
+  } catch(e) {
+    console.warn('[admin] markStatus persist failed:', e);
+  }
 }
 
 // ── Generate workbook for a specific order ─────────────

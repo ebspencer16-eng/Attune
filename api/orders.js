@@ -52,6 +52,7 @@ export default async function handler(req) {
           addon_lmft:       order.addonLmft || false,
           gift_note:        order.giftNote || null,
           workbook_status:  'pending',
+          card_status:      'pending',
           stripe_payment_intent_id: order.stripePaymentIntentId || null,
           stripe_session_id: order.stripeSessionId || null,
         })

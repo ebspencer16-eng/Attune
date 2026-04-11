@@ -293,40 +293,32 @@
 // ── Package definitions ──────────────────────────────────────────────────────
 const PACKAGES = {
   core: {
-    id: 'core',
-    name: 'The Attune Assessment',
-    badge: 'Foundation',
-    price: 89,
-    priceLabel: '$89',
-    format: 'digital',
+    id: 'core', name: 'The Attune Assessment', badge: 'Foundation',
+    digitalPrice: 89, physicalPrice: 119,
+    price: 89, priceLabel: '$89', format: 'digital',
     tags: ['Digital · instant access', 'Communication assessment', 'Expectations assessment', 'Couple type + map'],
+    physicalTags: ['Digital + physical gift box', 'Communication assessment', 'Expectations assessment', 'Couple type + map'],
   },
   newlywed: {
-    id: 'newlywed',
-    name: 'Starting Out Collection',
-    badge: 'Starting Out',
-    price: 139,
-    priceLabel: 'from $139',
-    format: 'physical',
-    tags: ['Digital + physical gift box', 'Communication & expectations', 'Starting Out Checklist', 'Personalized QR card'],
+    id: 'newlywed', name: 'Starting Out Collection', badge: 'Starting Out',
+    digitalPrice: 139, physicalPrice: 169,
+    price: 139, priceLabel: 'from $139', format: 'physical',
+    tags: ['Digital · instant access', 'Communication & expectations', 'Starting Out Checklist', 'Couple type + map'],
+    physicalTags: ['Digital + physical gift box', 'Communication & expectations', 'Starting Out Checklist', 'Personalized QR card'],
   },
   anniversary: {
-    id: 'anniversary',
-    name: 'Relationship Reflection',
-    badge: 'Anniversary',
-    price: 139,
-    priceLabel: 'from $139',
-    format: 'physical',
-    tags: ['Digital + physical gift box', 'Communication & expectations', 'Relationship Reflection', 'Personalized QR card'],
+    id: 'anniversary', name: 'Relationship Reflection', badge: 'Anniversary',
+    digitalPrice: 139, physicalPrice: 169,
+    price: 139, priceLabel: 'from $139', format: 'physical',
+    tags: ['Digital · instant access', 'Communication & expectations', 'Relationship Reflection', 'Couple type + map'],
+    physicalTags: ['Digital + physical gift box', 'Communication & expectations', 'Relationship Reflection', 'Personalized QR card'],
   },
   premium: {
-    id: 'premium',
-    name: 'Attune Premium',
-    badge: 'Most Complete',
-    price: 295,
-    priceLabel: '$295',
-    format: 'physical',
-    tags: ['Everything included', 'LMFT session', 'Personalized workbook', 'Premium gift box'],
+    id: 'premium', name: 'Attune Premium', badge: 'Most Complete',
+    digitalPrice: 295, physicalPrice: 340,
+    price: 295, priceLabel: '$295', format: 'physical',
+    tags: ['Everything in Assessment', 'LMFT session included', 'Personalized workbook', 'Couple type + map'],
+    physicalTags: ['Everything included', 'LMFT session included', 'Personalized workbook', 'Premium gift box'],
   },
 };
 
@@ -371,7 +363,9 @@ function renderSummary() {
   const totalEl = document.getElementById('totalPrice');
   const tagEl   = document.getElementById('tagList');
 
-  let total = pkg.price;
+  const isPhys = pkg.format === 'physical';
+  let total = isPhys ? pkg.physicalPrice : pkg.digitalPrice;
+  pkg.price = total; // keep in sync for payment intent
   // One-line summary of what they're getting
   const summaryLine = {
     core: 'Two relationship exercises + your couple type and full results profile.',
@@ -386,7 +380,7 @@ function renderSummary() {
         <div class="name">${pkg.name} <span class="badge">${pkg.badge}</span></div>
         <span class="sub">${pkg.format === 'physical' ? 'Digital + physical gift box' : 'Digital · instant access'}</span>
       </div>
-      <div class="price">${pkg.priceLabel}</div>
+      <div class="price">$${isPhys ? pkg.physicalPrice : pkg.digitalPrice}</div>
     </div>`;
 
   if (addonWorkbook && ADDON_WORKBOOK[addonWorkbook]) {
@@ -419,7 +413,8 @@ function renderSummary() {
 
   el.innerHTML = rows;
   totalEl.textContent = '$' + total;
-  tagEl.innerHTML = pkg.tags.map(t => `<span class="tag">${t}</span>`).join('');
+  const activeTags = isPhys ? (pkg.physicalTags || pkg.tags) : pkg.tags;
+  tagEl.innerHTML = activeTags.map(t => `<span class="tag">${t}</span>`).join('');
   document.getElementById('btnLabel').textContent = `Complete order · $${total}`;
 }
 

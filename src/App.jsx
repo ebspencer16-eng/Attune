@@ -8047,6 +8047,18 @@ export default function App() {
     };
   }, [view, highlightsSeen]);
 
+  // ── Warn before closing mid-exercise ────────────────────────────────────────
+  useEffect(() => {
+    const inExercise = view === "exercise1" || view === "exercise2" || view === "exercise3";
+    if (!inExercise) return;
+    const handler = (e) => {
+      e.preventDefault();
+      e.returnValue = '';
+    };
+    window.addEventListener('beforeunload', handler);
+    return () => window.removeEventListener('beforeunload', handler);
+  }, [view]);
+
   // ── Fire results_viewed email once after highlights are seen ─────────────
   useEffect(() => {
     if (!highlightsSeen) return;
@@ -8533,12 +8545,29 @@ export default function App() {
     />;
   }
   // Case 3: Partner B has completed exercises → waiting/ready screen
+  // Poll partner-sync to check if Partner A has also completed theirs
+  const [partnerADone, setPartnerADone] = useState(false);
+  useEffect(() => {
+    if (!account?.isPartnerB || !partnerSession || hasRealPartner) return;
+    const code = account.inviteCode || partnerSession?.inviteCode;
+    if (!code) return;
+    const check = async () => {
+      try {
+        const res = await fetch(`/api/partner-sync?inviteCode=${encodeURIComponent(code)}`);
+        const d = await res.json();
+        if (d.found && d.session?.ex1_answers) setPartnerADone(true);
+      } catch {}
+    };
+    check();
+    const iv = setInterval(check, 15000); // poll every 15s
+    return () => clearInterval(iv);
+  }, [account?.isPartnerB, partnerSession, hasRealPartner]);
+
   if (account?.isPartnerB && partnerSession && !hasRealPartner) {
-    const partnerASession = null; // will be real data once Supabase is connected
     return <PartnerBCompletionScreen
       partnerAName={account.partnerName}
       partnerBName={account.name}
-      partnerADone={false}
+      partnerADone={partnerADone}
     />;
   }
   // ── END PARTNER B ROUTING ─────────────────────────────────────────────────
