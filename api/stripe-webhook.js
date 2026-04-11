@@ -108,8 +108,10 @@ export default async function handler(req) {
     // Fire confirmation email if Resend is configured
     const apiKey    = process.env.RESEND_API_KEY;
     const fromEmail = process.env.FROM_EMAIL || 'hello@attune-relationships.com';
+    const baseUrl   = process.env.SITE_URL || 'https://attune-relationships.com';
 
     if (apiKey && intent.receipt_email) {
+      // Order confirmation
       const subject = `Order confirmed — ${meta.pkgKey || 'Attune'}`;
       const html = `
         <div style="font-family:Arial,sans-serif;max-width:520px;margin:0 auto;padding:2rem;color:#1E1610;">
@@ -137,17 +139,26 @@ export default async function handler(req) {
 
       await fetch('https://api.resend.com/emails', {
         method: 'POST',
-        headers: {
-          Authorization: `Bearer ${apiKey}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          from: `Attune <${fromEmail}>`,
-          to:   [intent.receipt_email],
-          subject,
-          html,
-        }),
+        headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ from: `Attune <${fromEmail}>`, to: [intent.receipt_email], subject, html }),
       }).catch(err => console.warn('Confirmation email failed:', err));
+
+      // LMFT scheduling email — fires for premium pkg or when addonLmft=1
+      const needsLmft = meta.pkgKey === 'premium' || meta.addonLmft === '1';
+      if (needsLmft) {
+        await fetch(`${baseUrl}/api/send-email`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            type: 'lmft_scheduled',
+            toEmail: intent.receipt_email,
+            toName: meta.buyerName || meta.partner1Name || 'there',
+            partnerName: meta.partner2Name || 'your partner',
+            schedulingUrl: `${baseUrl}/lmft-booking?order=${meta.orderNum || intent.id}`,
+            orderNum: meta.orderNum || intent.id,
+          }),
+        }).catch(err => console.warn('LMFT email failed:', err));
+      }
     }
   }
 

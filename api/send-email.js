@@ -10,6 +10,10 @@
  *   beta_survey     — { toEmail, toName, partnerName, coupleType, surveyUrl }
  *   checkin_6mo     — { toEmail, toName, partnerName, retakeUrl }
  *   results_viewed  — { toEmail, toName, partnerName, coupleType, portalUrl, hasReflection, hasBudget, hasLMFT }
+ *   welcome_account — { toEmail, toName, partnerName, portalUrl }
+ *   partner_joined_notification — { toEmail, toName, partnerName, portalUrl }
+ *   lmft_scheduled  — { toEmail, toName, partnerName, schedulingUrl, orderNum }
+ *   checkin_1yr     — { toEmail, toName, partnerName, retakeUrl, portalUrl }
  *
  * Required env vars (Vercel dashboard):
  *   RESEND_API_KEY   — from https://resend.com
@@ -236,6 +240,96 @@ function resultsViewedEmail({ toName, partnerName, coupleType, portalUrl, hasRef
   };
 }
 
+
+// ── welcome_account email ────────────────────────────────────────────────────
+function welcomeAccountEmail({ toName, toEmail, portalUrl, partnerName }) {
+  const name = toName || "there";
+  const url = portalUrl || "https://attune-relationships.com/app";
+  return {
+    subject: "Welcome to Attune — let's get started",
+    html: layout(`
+      <h1>You're in. Let's get started.</h1>
+      <p>Hi ${name},</p>
+      <p>Your Attune account is set up. Both you and ${partnerName ? `<strong>${partnerName}</strong>` : "your partner"} each complete the exercises independently — your answers stay private until both of you are done.</p>
+      <div class="btn-wrap"><a href="${url}" class="btn">Go to my dashboard →</a></div>
+      <div class="divider"></div>
+      <p style="font-size:0.82rem;font-weight:700;color:#0E0B07;margin-bottom:6px;">What happens next</p>
+      <p style="font-size:0.8rem;">1. Complete Exercise 01: Communication (about 10 minutes).<br/>
+      2. Complete Exercise 02: Expectations (about 15 minutes).<br/>
+      3. Invite your partner — or they'll receive a link if you already added their email.<br/>
+      4. Once both of you are done, your joint results unlock.</p>
+      <div class="divider"></div>
+      <p style="font-size:0.78rem;color:#8C7A68;">Your answers are never visible to your partner while you're in progress. Results unlock the moment you both finish.</p>
+    `),
+  };
+}
+
+// ── partner_joined_notification email ────────────────────────────────────────
+function partnerJoinedNotificationEmail({ toName, partnerName, portalUrl }) {
+  const name = toName || "there";
+  const url = portalUrl || "https://attune-relationships.com/app";
+  return {
+    subject: `${partnerName} just joined Attune`,
+    html: layout(`
+      <span class="badge badge-green">Partner joined</span>
+      <h1 style="margin-top:14px;">${partnerName} just created their account.</h1>
+      <p>Hi ${name},</p>
+      <p>${partnerName} has joined Attune. Once both of you have completed your exercises, your joint results will unlock. Your answers stay private until then.</p>
+      <div class="btn-wrap"><a href="${url}" class="btn">Go to my dashboard →</a></div>
+      <div class="divider"></div>
+      <p style="font-size:0.78rem;color:#8C7A68;">Results unlock automatically when both partners have finished. You'll receive another email when they're ready.</p>
+    `),
+  };
+}
+
+// ── lmft_scheduled email ─────────────────────────────────────────────────────
+function lmftScheduledEmail({ toName, partnerName, schedulingUrl, orderNum }) {
+  const name = toName || "there";
+  const url = schedulingUrl || "https://attune-relationships.com/app";
+  return {
+    subject: "Book your LMFT session — Attune",
+    html: layout(`
+      <span class="badge badge-blue">LMFT session included</span>
+      <h1 style="margin-top:14px;">Book your session with a licensed therapist.</h1>
+      <p>Hi ${name},</p>
+      <p>Your Attune package includes a 50-minute session with a licensed marriage and family therapist (LMFT). They'll review your joint results before you meet — so the session starts from your actual data, not from scratch.</p>
+      <div class="btn-wrap"><a href="${url}" class="btn">Book your session →</a></div>
+      <div class="divider"></div>
+      <p style="font-size:0.82rem;font-weight:700;color:#0E0B07;margin-bottom:6px;">How it works</p>
+      <p style="font-size:0.8rem;">1. Complete your Attune exercises if you haven't yet.<br/>
+      2. Once both partners are done, click the link above to book your session.<br/>
+      3. Your therapist will receive your joint results in advance.<br/>
+      4. The session is conducted over video — 50 minutes, just the two of you and the therapist.</p>
+      <div class="divider"></div>
+      <p style="font-size:0.82rem;font-weight:700;color:#0E0B07;margin-bottom:6px;">What to expect</p>
+      <p style="font-size:0.8rem;">This is not a first therapy appointment. The therapist uses your Attune results as the starting point — they already know your couple type, your biggest dimension gaps, and your expectation misalignments. The session is focused on translating your data into practical next steps.</p>
+      <div class="divider"></div>
+      <div class="detail-row"><span>Order</span><strong>#${orderNum || "—"}</strong></div>
+      <div class="detail-row"><span>Format</span><strong>50-minute video session</strong></div>
+      <div class="detail-row"><span>Participants</span><strong>${name} + ${partnerName || "partner"} + LMFT</strong></div>
+      <p style="font-size:0.78rem;color:#8C7A68;margin-top:16px;">The scheduling link above lets you select a time that works for both of you. If you have trouble booking, reply to this email.</p>
+    `),
+  };
+}
+
+// ── checkin_1yr email ─────────────────────────────────────────────────────────
+function checkin1yrEmail({ toName, partnerName, retakeUrl, portalUrl }) {
+  const name = toName || "there";
+  const url = retakeUrl || portalUrl || "https://attune-relationships.com/app";
+  return {
+    subject: "One year with Attune — your results are worth revisiting",
+    html: layout(`
+      <h1>A year is a meaningful unit of time.</h1>
+      <p>Hi ${name},</p>
+      <p>You and ${partnerName} took Attune a year ago. In that time, you've navigated seasons, decisions, and the ordinary accumulation of a shared life. The patterns that showed up in your results may look different now.</p>
+      <p>Couples who retake the assessment after a year typically find that some dimensions have shifted significantly — often in ways they can trace to specific experiences. The comparison is usually more useful than either session on its own.</p>
+      <div class="btn-wrap"><a href="${url}" class="btn">Retake Attune →</a></div>
+      <div class="divider"></div>
+      <p style="font-size:0.78rem;color:#8C7A68;">Your original results are still in your dashboard. Retaking creates a new session — you'll be able to see both side by side.</p>
+    `),
+  };
+}
+
 // ── Handler ──────────────────────────────────────────────────────────────────
 
 export default async function handler(req) {
@@ -267,6 +361,22 @@ export default async function handler(req) {
   } else if (type === 'results_viewed') {
     if (!body.toEmail) return new Response('Missing toEmail', { status: 400 });
     email = resultsViewedEmail(body);
+    email.to = body.toEmail;
+  } else if (type === 'welcome_account') {
+    if (!body.toEmail) return new Response('Missing toEmail', { status: 400 });
+    email = welcomeAccountEmail(body);
+    email.to = body.toEmail;
+  } else if (type === 'partner_joined_notification') {
+    if (!body.toEmail) return new Response('Missing toEmail', { status: 400 });
+    email = partnerJoinedNotificationEmail(body);
+    email.to = body.toEmail;
+  } else if (type === 'lmft_scheduled') {
+    if (!body.toEmail) return new Response('Missing toEmail', { status: 400 });
+    email = lmftScheduledEmail(body);
+    email.to = body.toEmail;
+  } else if (type === 'checkin_1yr') {
+    if (!body.toEmail) return new Response('Missing toEmail', { status: 400 });
+    email = checkin1yrEmail(body);
     email.to = body.toEmail;
   } else {
     return new Response(`Unknown type: ${type}`, { status: 400 });

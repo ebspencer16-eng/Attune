@@ -7097,6 +7097,21 @@ function AuthModal({ mode, onClose, onSuccess }) {
         }).catch(() => {});
       }
 
+      // Send welcome email to new user
+      if (form.emailOptIn !== false) {
+        fetch('/api/send-email', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            type: 'welcome_account',
+            toEmail: form.email.trim().toLowerCase(),
+            toName: form.name.trim(),
+            partnerName: form.partnerName.trim() || null,
+            portalUrl: `${window.location.origin}/app`,
+          }),
+        }).catch(() => {});
+      }
+
       setLoading(false);
       onSuccess(account);
       return;
@@ -8301,6 +8316,20 @@ export default function App() {
       const updated = { ...account, partnerJoined: true };
       setAccount(updated);
       try { localStorage.setItem('attune_account', JSON.stringify(updated)); } catch {}
+      // Notify Partner A that their partner has joined
+      if (account.email && account.emailOptIn !== false) {
+        fetch('/api/send-email', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            type: 'partner_joined_notification',
+            toEmail: account.email,
+            toName: account.name,
+            partnerName: s?.name || account.partnerName || 'Your partner',
+            portalUrl: `${window.location.origin}/app`,
+          }),
+        }).catch(() => {});
+      }
     }
     // ── Update attune_live_session with real Partner B scores ─────────────
     // If Partner A already viewed results (and wrote demo partner data to
