@@ -212,7 +212,20 @@
         </div>
 
         <!-- Physical shipping (shown for physical packages) -->
-        <div id="shippingSection" style="display:none">
+        <div id="formatToggleSection" style="display:none;margin-bottom:1rem">
+  <div style="font-size:.72rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#8C7A68;margin-bottom:.5rem;font-family:'DM Sans',sans-serif">Format</div>
+  <div style="display:flex;gap:.5rem">
+    <button class="fmt-btn active" data-fmt="digital" onclick="setFormat('digital')"
+      style="flex:1;padding:.6rem;border-radius:10px;border:1.5px solid #E8673A;background:#FFF0EB;color:#E8673A;font-size:.78rem;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .15s">
+      Digital · $89
+    </button>
+    <button class="fmt-btn" data-fmt="physical" onclick="setFormat('physical')"
+      style="flex:1;padding:.6rem;border-radius:10px;border:1.5px solid #E8DDD0;background:white;color:#8C7A68;font-size:.78rem;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .15s">
+      Gift box · $119
+    </button>
+  </div>
+</div>
+<div id="shippingSection" style="display:none">
           <div class="form-divider">Shipping address</div>
           <div class="form-group">
             <label class="form-label" for="shipName">Full name</label>
@@ -360,10 +373,23 @@ let addonReflection = false;
   }
 
   renderSummary();
+  // Show format toggle for assessment (core) package — others are always physical
+  if (pkg.id === 'core') {
+    const ftEl = document.getElementById('formatToggleSection');
+    if (ftEl) ftEl.style.display = 'block';
+  }
   if (pkg.format === 'physical') {
     document.getElementById('shippingSection').style.display = 'block';
   }
 })();
+
+// ── Format toggle (core package only) ────────────────────────────────────────
+function setFormat(fmt) {
+  pkg.format = fmt;
+  document.querySelectorAll('.fmt-btn').forEach(b => b.classList.toggle('active', b.dataset.fmt === fmt));
+  document.getElementById('shippingSection').style.display = fmt === 'physical' ? 'block' : 'none';
+  renderSummary();
+}
 
 // ── Render order summary ─────────────────────────────────────────────────────
 function renderSummary() {

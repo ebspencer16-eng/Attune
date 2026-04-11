@@ -160,6 +160,32 @@ export default async function handler(req) {
           }),
         }).catch(err => console.warn('LMFT email failed:', err));
       }
+
+      // Auto-generate QR card for physical orders — stores URL in order record
+      if (meta.isPhysical === '1') {
+        const p1 = encodeURIComponent(meta.partner1Name || meta.buyerName || '');
+        const p2 = encodeURIComponent(meta.partner2Name || '');
+        const pkg = encodeURIComponent(meta.pkgKey || 'core');
+        const orderId = encodeURIComponent(meta.orderNum || intent.id);
+        const isGift = meta.isGift === '1';
+        const version = isGift ? (meta.giftNote ? 'gift_printed' : 'gift_blank') : 'standard';
+        const cardUrl = `${baseUrl}/qr-card-v4?pkg=${pkg}&p1=${p1}&p2=${p2}&orderId=${orderId}&version=${encodeURIComponent(version)}`;
+        // Store card URL in order record for admin fulfillment
+        const supabaseUrl = process.env.SUPABASE_URL;
+        const serviceKey = process.env.SUPABASE_SERVICE_KEY;
+        if (supabaseUrl && serviceKey && (meta.orderNum || intent.id)) {
+          await fetch(`${supabaseUrl}/rest/v1/orders?order_num=eq.${encodeURIComponent(meta.orderNum || intent.id)}`, {
+            method: 'PATCH',
+            headers: {
+              'Content-Type': 'application/json',
+              'apikey': serviceKey,
+              'Authorization': `Bearer ${serviceKey}`,
+              'Prefer': 'return=minimal',
+            },
+            body: JSON.stringify({ card_url: cardUrl, card_status: 'generated' }),
+          }).catch(err => console.warn('[webhook] card URL save failed:', err));
+        }
+      }
     }
   }
 

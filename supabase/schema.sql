@@ -64,6 +64,7 @@ create table if not exists public.orders (
   workbook_status           text default 'pending',
   card_status               text default 'pending',
   fulfillment_notes         text,
+  card_url                  text,
   created_at                timestamptz default now()
 );
 alter table public.orders enable row level security;

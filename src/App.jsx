@@ -8482,7 +8482,8 @@ export default function App() {
   const hasRealPartner = !!(partnerSession?.inviteCode === account?.inviteCode && partnerSession?.ex1 && partnerSession?.ex2);
   const partnerEx1 = hasRealPartner ? partnerSession.ex1 : jamesEx1;
   const partnerEx2 = hasRealPartner ? partnerSession.ex2 : jamesEx2;
-  const bothDone = ex1Answers && ex2Answers;
+  // bothDone: local exercises complete AND partner has joined (from Supabase profile.partner_joined or real session)
+  const bothDone = !!(ex1Answers && ex2Answers && (hasRealPartner || account?.partnerJoined || partnerSession));
   // Package config
   const pkgConfig = {
     core:        { label: "The Attune Assessment",     color: "#E8673A", hasChecklist: false, hasAnniversary: false, hasBudget: false, hasLMFT: false },
@@ -9721,7 +9722,7 @@ export default function App() {
     )}
 
     {/* ── PROFILE SETUP MODAL (inline edit panel) ── */}
-    {view === "home" && showProfileSetup && (() => {
+    {showProfileSetup && (() => {
       const PronounPicker = ({ label, fieldKey, accentColor, bgColor }) => {
         const [sel, setSel] = React.useState(account?.[fieldKey] || "");
         React.useEffect(() => { document.getElementById(`profile_${fieldKey}_val`).value = sel; }, [sel]);

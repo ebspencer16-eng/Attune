@@ -1618,9 +1618,12 @@ async function loadRealData() {
             address: [o.shipping_address, o.shipping_city, o.shipping_state].filter(Boolean).join(', ') || null,
             hasWorkbook: !!(o.addon_workbook),
             workbookType: o.addon_workbook,
-            fulfillStatus: ['shipped','sent'].includes(o.workbook_status) ? 'shipped' : o.workbook_status === 'packed' ? 'packed' : 'pending',
+            fulfillStatus: o.card_status === 'shipped' ? 'shipped' : o.card_status === 'packed' ? 'packed' : 'pending',
             isRealOrder: true,
             workbookStatus: o.workbook_status,
+            dbId: o.id,
+            cardStatus: o.card_status || 'pending',
+            cardUrl: o.card_url || null,
             _raw: o,
           });
         });
