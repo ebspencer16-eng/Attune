@@ -547,8 +547,8 @@
   <div class="pov-tile" style="border-top:3px solid var(--orange);" onclick="addToCartWithIntent('core')">
     <div class="pov-badge" style="background:#FFF0EB;color:var(--orange);">The Foundation</div>
     <div class="pov-name">The Attune Assessment</div>
-    <div class="pov-price">$89</div>
-    <div style="font-size:.65rem;color:var(--muted);margin-top:.2rem;">$89 digital · $119 physical gift box</div>
+    <div class="pov-price">from $89</div>
+    <div style="font-size:.65rem;color:var(--muted);margin-top:.2rem;line-height:1.5;">For any couple ready to understand each other better.</div>
     <div class="pov-desc">Two exercises that map how you communicate and what you expect from each other. For any couple that wants to understand each other better.</div>
     <div class="pov-cta">Add to cart →</div>
   </div>
@@ -556,15 +556,15 @@
     <div class="pov-badge" style="background:#FFE4D9;color:#c45c2a;">Starting Out Gift</div>
     <div class="pov-name">Starting Out Collection</div>
     <div class="pov-price">from $139</div>
-    <div style="font-size:.65rem;color:var(--muted);margin-top:.2rem;">$139 digital · $169 physical gift box</div>
+    <div style="font-size:.65rem;color:var(--muted);margin-top:.2rem;line-height:1.5;">For couples just starting out — or who want to start right.</div>
     <div class="pov-desc">Everything in the Assessment plus a practical checklist for merging finances, names, and household logistics. For couples who are just starting out together.</div>
     <div class="pov-cta">Add to cart →</div>
   </div>
   <div class="pov-tile pov-indigo" style="border-top:3px solid var(--indigo);" onclick="addToCartWithIntent('anniversary')">
     <div class="pov-badge" style="background:#EEEFFF;color:var(--indigo);">Anniversary Gift</div>
-    <div class="pov-name">Anniversary Collection</div>
+    <div class="pov-name">Relationship Reflection</div>
     <div class="pov-price">from $139</div>
-    <div style="font-size:.65rem;color:var(--muted);margin-top:.2rem;">$139 digital · $169 physical gift box</div>
+    <div style="font-size:.65rem;color:var(--muted);margin-top:.2rem;line-height:1.5;">For couples with a chapter or two behind them.</div>
     <div class="pov-desc">The Assessment plus a third exercise built around shared history, meaningful moments, and where you're headed next. For couples with a chapter or two behind them.</div>
     <div class="pov-cta">Add to cart →</div>
   </div>
@@ -572,7 +572,7 @@
     <div class="pov-badge" style="background:rgba(91,109,248,.15);color:#7b8fff;">Most Complete</div>
     <div class="pov-name">Attune Premium</div>
     <div class="pov-price">from $295</div>
-    <div style="font-size:.65rem;color:rgba(255,255,255,.45);margin-top:.2rem;">$295 digital · $340 physical gift box</div>
+    <div style="font-size:.65rem;color:rgba(255,255,255,.45);margin-top:.2rem;line-height:1.5;">For couples who want expert guidance alongside the data.</div>
     <div class="pov-desc">The full Assessment plus a 50-minute session with a licensed marriage therapist who reviews your results before you meet. For couples who want expert guidance alongside the data.</div>
     <div class="pov-cta">Add to cart →</div>
   </div>
@@ -800,7 +800,6 @@
               <div class="inc-block">
           <div class="inc-block-title">In the gift box</div>
           <div class="physical-items">
-<div class="physical-items">
             <div class="physical-item">
               <div class="physical-icon" style="background:#E8673A15;">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#E8673A" stroke-width="1.6" stroke-linecap="round"><rect x="2" y="4" width="20" height="16" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
@@ -832,7 +831,6 @@
               <span>Ceramic ring tray — 'understanding takes intention'</span>
             </div>
           </div>
-          </div>
         </div>
       </div>
     </div>
@@ -849,7 +847,7 @@
       <div class="pkg-meta">
         <div class="pkg-left">
           <div class="pkg-badge" style="background:#EEEFFF;color:var(--indigo);">Anniversary Gift</div>
-          <h2 class="pkg-title">The Anniversary Collection</h2>
+          <h2 class="pkg-title">The Relationship Reflection</h2>
           <p class="pkg-sub">The full Assessment plus a third exercise covering shared history, meaningful moments, what you each prioritize, and what you admire in each other. For couples with a chapter or two behind them.</p>
         </div>
         <div class="pkg-price">
@@ -1300,7 +1298,7 @@ window._sparkFeedback = function(t) {
 const CART_PKGS = {
   core:        { name: 'The Attune Assessment',    badge: 'The Foundation',        badgeColor: '#FFF0EB', badgeText: '#E8673A', basePrice: 74,  sub: 'Digital · instant access · yours to keep' },
   newlywed:    { name: 'Starting Out Collection',  badge: 'Wedding Gift',          badgeColor: '#FFF0EB', badgeText: '#E8673A', basePrice: 119,  sub: 'Physical gift box · shipping included' },
-  anniversary: { name: 'Anniversary Collection',   badge: 'Anniversary Gift',      badgeColor: '#EEEFFF', badgeText: '#5B6DF8', basePrice: 139, sub: 'Physical gift box · shipping included' },
+  anniversary: { name: 'Relationship Reflection',   badge: 'Anniversary Gift',      badgeColor: '#EEEFFF', badgeText: '#5B6DF8', basePrice: 139, sub: 'Physical gift box · shipping included' },
   premium:     { name: 'Attune Premium',           badge: 'Most Complete',         badgeColor: 'rgba(91,109,248,.12)', badgeText: '#7b8fff', basePrice: 295, sub: 'Digital · LMFT session included' },
 };
 
@@ -1669,7 +1667,7 @@ function submitAnnualNotify() {
 const pkgSections = [
   {id:'pkg-core', cart:'core', label:'The Attune Assessment', price:'$89', cta:'Start your exercises →'},
   {id:'pkg-newlywed', cart:'newlywed', label:'Starting Out Collection', price:'$139', cta:'Add to cart →'},
-  {id:'pkg-anniversary', cart:'anniversary', label:'Anniversary Collection', price:'$139', cta:'Add to cart →'},
+  {id:'pkg-anniversary', cart:'anniversary', label:'Relationship Reflection', price:'$139', cta:'Add to cart →'},
   {id:'pkg-premium', cart:'premium', label:'Attune Premium', price:'$295', cta:'Get Attune Premium →'},
 ];
 function updateStickyFromScroll() {

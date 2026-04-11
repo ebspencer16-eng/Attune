@@ -4625,7 +4625,7 @@ function AnniversaryResultsView({ userName, partnerName, myAnswers, onBack }) {
       <div style={{ background: "linear-gradient(145deg, #071a10, #0d3320, #0f3d26)", borderRadius: 20, padding: "2rem 2rem 1.75rem", marginBottom: "1.25rem", color: "white", position: "relative", overflow: "hidden" }}>
         <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 3, background: "linear-gradient(90deg, #1B5FE8, #5B6DF8)" }} />
         <div style={{ position: "absolute", bottom: -40, right: -20, width: 160, height: 160, borderRadius: "50%", background: "radial-gradient(circle, rgba(16,185,129,0.1), transparent 70%)", pointerEvents: "none" }} />
-        <div style={{ fontSize: "0.6rem", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(52,211,153,0.9)", marginBottom: "0.5rem", fontFamily: BFONT }}>Anniversary Collection · Relationship Reflection</div>
+        <div style={{ fontSize: "0.6rem", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(52,211,153,0.9)", marginBottom: "0.5rem", fontFamily: BFONT }}>Relationship Reflection</div>
         <div style={{ fontSize: "clamp(1.8rem,5vw,2.4rem)", fontWeight: 700, fontFamily: HFONT, lineHeight: 1.1, marginBottom: "0.6rem" }}>
           {userName} & {partnerName}
         </div>
@@ -7739,7 +7739,7 @@ const UPSELL_PRODUCTS = {
     cartParam: "workbook",
   },
   reflection: {
-    badge: "Anniversary Collection",
+    badge: "Relationship Reflection",
     badgeColor: "#EEEFFF",
     badgeText: "#5B6DF8",
     title: "Relationship Reflection",
@@ -8390,7 +8390,7 @@ export default function App() {
   const pkgConfig = {
     core:        { label: "The Attune Assessment",     color: "#E8673A", hasChecklist: false, hasAnniversary: false, hasBudget: false, hasLMFT: false },
     newlywed:    { label: "Starting Out Collection",   color: "#E8673A", hasChecklist: true,  hasAnniversary: false, hasBudget: true,  hasLMFT: false },
-    anniversary: { label: "Anniversary Collection",    color: "#1B5FE8", hasChecklist: false, hasAnniversary: true,  hasBudget: false, hasLMFT: false },
+    anniversary: { label: "Relationship Reflection",    color: "#1B5FE8", hasChecklist: false, hasAnniversary: true,  hasBudget: false, hasLMFT: false },
     premium:     { label: "Attune Premium",            color: "#3B5BDB", hasChecklist: false, hasAnniversary: false, hasBudget: false, hasLMFT: true  },
   };
   // Merge add-on flags from stored order (e.g. LMFT add-on on non-premium packages)
@@ -9193,7 +9193,7 @@ export default function App() {
           const PACKAGE_FEATURES = {
             core:        { name: "The Attune Assessment", color: "#E8673A", features: ["Communication exercise", "Expectations exercise", "Full joint results", "Couple type profile"] },
             newlywed:    { name: "Starting Out Collection", color: "#E8673A", features: ["Everything in Assessment", "Starting Out checklist", "Partner comparison deep-dives"] },
-            anniversary: { name: "Anniversary Collection", color: "#1B5FE8", features: ["Everything in Assessment", "Relationship reflection exercise", "Anniversary-specific prompts"] },
+            anniversary: { name: "Relationship Reflection", color: "#1B5FE8", features: ["Everything in Assessment", "Relationship reflection exercise", "Anniversary-specific prompts"] },
             premium:     { name: "Attune Premium", color: "#3B5BDB", features: ["Everything in Assessment", "Shared budgeting tool", "LMFT session included", "Personalized workbook"] },
           };
           const pkg2 = PACKAGE_FEATURES[demoPkg] || PACKAGE_FEATURES.core;
