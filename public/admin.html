@@ -878,6 +878,7 @@
   </div>
 
   <div class="page" id="page-feedback">
+    <div id="fb-real-data" style="display:none;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:1.25rem 1.5rem;margin-bottom:1.5rem;overflow-x:auto"></div>
     <div class="topbar">
       <div>
         <div class="topbar-title">Beta Feedback</div>
@@ -1146,6 +1147,31 @@ async function loadLmftRequests() {
   } catch(e) { container.innerHTML = `<p style="color:var(--rose)">Failed to load: ${e.message}</p>`; }
 }
 
+function exportOrdersCSV() {
+  const headers = ['Order','Date','Package','Partner 1','Partner 2','Email','Total','Physical','Gift','LMFT','Workbook','Status'];
+  const rows = ORDERS.map(o => [
+    o.id || '',
+    o.dateStr || '',
+    o.pkg || '',
+    o.partner1Name || o.shipTo || '',
+    o.partner2Name || '',
+    o.buyerEmail || '',
+    o.price || '',
+    o.physical ? 'Yes' : 'No',
+    o.giftNote ? 'Yes' : 'No',
+    o.addonLmft ? 'Yes' : 'No',
+    o.addonWorkbook || '',
+    o.fulfillStatus || '',
+  ]);
+  const csv = [headers, ...rows].map(r => r.map(v => `"${String(v||'').replace(/"/g,'""')}"`).join(',')).join('
+');
+  const blob = new Blob([csv], {type: 'text/csv'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `Attune_Orders_${new Date().toISOString().slice(0,10)}.csv`;
+  a.click();
+}
+
 function showPage(id) {
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.sb-item').forEach(i=>i.classList.remove('active'));
@@ -1205,6 +1231,36 @@ function renderQuoteCard(text, name, score, color='') {
 // ── Load feedback data ────────────────────────────────
 async function loadFeedbackData() {
   document.getElementById('fb-last-updated').textContent = new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
+
+  // Try loading real feedback_submissions from Supabase
+  const SUPABASE_URL = window.__SUPABASE_URL;
+  const SUPABASE_ANON = window.__SUPABASE_ANON;
+  if (SUPABASE_URL && SUPABASE_ANON) {
+    try {
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/feedback_submissions?select=*&order=submitted_at.desc&limit=100`, {
+        headers: { 'apikey': SUPABASE_ANON, 'Authorization': `Bearer ${SUPABASE_ANON}` }
+      });
+      const rows = await res.json();
+      if (rows.length > 0) {
+        const container = document.getElementById('fb-real-data');
+        if (container) {
+          container.style.display = 'block';
+          container.innerHTML = `<div style="margin-bottom:1rem;font-size:.78rem;color:var(--muted)">${rows.length} submission${rows.length!==1?'s':''} from beta survey</div>` +
+            `<table style="width:100%;border-collapse:collapse;font-size:.75rem">
+              <thead><tr style="background:var(--surface);border-bottom:1px solid var(--border)">${['Date','Type','Source','Email','Couple type','Rating'].map(h=>`<th style="text-align:left;padding:.5rem .75rem;font-size:.62rem;letter-spacing:.1em;text-transform:uppercase;color:var(--dim)">${h}</th>`).join('')}</tr></thead>
+              <tbody>${rows.map(r=>`<tr style="border-bottom:1px solid var(--border)">
+                <td style="padding:.5rem .75rem;color:var(--dim)">${new Date(r.submitted_at).toLocaleDateString('en-US',{month:'short',day:'numeric'})}</td>
+                <td style="padding:.5rem .75rem">${r.type||'—'}</td>
+                <td style="padding:.5rem .75rem;color:var(--muted)">${r.source||'—'}</td>
+                <td style="padding:.5rem .75rem;color:var(--muted)">${r.email||'—'}</td>
+                <td style="padding:.5rem .75rem;color:var(--muted)">${r.couple_type||'—'}</td>
+                <td style="padding:.5rem .75rem;color:var(--muted)">${r.rating||'—'}</td>
+              </tr>`).join('')}</tbody>
+            </table>`;
+        }
+      }
+    } catch(e) { console.warn('[admin] feedback load failed:', e); }
+  }
 
   // ── Simulated data matching beta survey v3 ────────
   const SIM = {

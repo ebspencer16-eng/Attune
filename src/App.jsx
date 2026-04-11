@@ -9130,8 +9130,8 @@ export default function App() {
                   </div>
                 )}
 
-                {/* Partner invite card (when partner hasn't joined) */}
-                {isLoggedIn && !hasRealPartner && (
+                {/* Partner invite card (when partner hasn't joined yet) */}
+                {isLoggedIn && !hasRealPartner && !account?.partnerJoined && (
                   <div style={{ marginBottom: "1.75rem" }}>
                     <PartnerInviteCard
                       account={account}
@@ -9142,6 +9142,17 @@ export default function App() {
                         setTimeout(() => setInviteCopied(false), 2000);
                       }}
                     />
+                  </div>
+                )}
+
+                {/* Partner joined but real session not yet loaded — brief waiting state */}
+                {isLoggedIn && !hasRealPartner && account?.partnerJoined && (
+                  <div style={{ background: "linear-gradient(135deg,#EEF2FF,#F5F7FF)", border: "1.5px solid rgba(27,95,232,.25)", borderRadius: 14, padding: "1.1rem 1.4rem", marginBottom: "1.5rem", display: "flex", alignItems: "center", gap: "0.9rem" }}>
+                    <div style={{ width: 36, height: 36, borderRadius: "50%", background: "linear-gradient(135deg,#1B5FE8,#3B3A8A)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, fontSize: "1rem" }}>✓</div>
+                    <div>
+                      <div style={{ fontSize: "0.85rem", fontWeight: 700, color: "#0E0B07", fontFamily: "'DM Sans',sans-serif", marginBottom: 2 }}>{account.partnerName || "Your partner"} has joined.</div>
+                      <div style={{ fontSize: "0.75rem", color: "#8C7A68", fontFamily: "'DM Sans',sans-serif", lineHeight: 1.5 }}>Once both of you complete your exercises, your results will unlock.</div>
+                    </div>
                   </div>
                 )}
 
