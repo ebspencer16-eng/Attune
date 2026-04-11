@@ -236,6 +236,10 @@
       "destination": "/workbook-render.html"
     },
     {
+      "source": "/api/store-workbook",
+      "destination": "/api/store-workbook.js"
+    },
+    {
       "source": "/app/(.*)",
       "destination": "/index.html"
     },

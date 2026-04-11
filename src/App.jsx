@@ -6137,6 +6137,16 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
               };
 
               try {
+                // Use pre-generated workbook URL if available
+                const ord = JSON.parse(localStorage.getItem('attune_order') || 'null');
+                if (ord?.workbookUrl) {
+                  const a = document.createElement('a');
+                  a.href = ord.workbookUrl;
+                  a.download = `Attune_Workbook_${userName}_and_${partnerName}.docx`;
+                  a.target = '_blank';
+                  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+                  return;
+                }
                 // Try PDF first (Browserless) — falls back to docx if not configured
                 const pdfResp = await fetch('/api/generate-pdf', {
                   method: 'POST',
@@ -9177,6 +9187,30 @@ export default function App() {
                     import('./supabase.js').then(({ supabase: sb, hasSupabase }) => {
                       if (hasSupabase()) sb.from('profiles').update({ ex2_answers: a }).eq('id', account.id).then(() => {});
                     }).catch(() => {});
+                  }
+                  // Auto-trigger workbook generation if both partners are done and order includes workbook
+                  if (bothDone && hasWorkbookOrder) {
+                    setTimeout(() => {
+                      const ord = JSON.parse(localStorage.getItem('attune_order') || 'null');
+                      if (!ord) return;
+                      const myS = calcDimScores(ex1Answers);
+                      const partS = calcDimScores(partnerEx1);
+                      fetch('/api/store-workbook', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                          userName, partnerName,
+                          scores: myS, partnerScores: partS,
+                          coupleType: coupleType ? { name: coupleType.name, tagline: coupleType.tagline, color: coupleType.color } : null,
+                          orderId: ord.orderNum || null,
+                        }),
+                      }).then(r => r.json()).then(d => {
+                        if (d.url) {
+                          const updated = { ...ord, workbookUrl: d.url, workbook_status: 'ready' };
+                          try { localStorage.setItem('attune_order', JSON.stringify(updated)); } catch {}
+                        }
+                      }).catch(() => {});
+                    }, 2000);
                   }
                 }} isAnniversary={demoPkg === "anniversary"} />
             }
