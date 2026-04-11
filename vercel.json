@@ -224,6 +224,10 @@
       "destination": "/gift-cards.html"
     },
     {
+      "source": "/api/submit-beta-survey",
+      "destination": "/api/submit-beta-survey.js"
+    },
+    {
       "source": "/app/(.*)",
       "destination": "/index.html"
     },

@@ -569,6 +569,10 @@ async function handleSubmit(e) {
       payment_method: { card: cardNumberElement, billing_details: { email } }
     });
     if (stripeErr) throw new Error(stripeErr.message);
+    // Generate order number from payment intent ID
+    const realOrderNum = paymentIntent?.id
+      ? 'ATT-' + new Date().toISOString().slice(0,10).replace(/-/g,'') + '-' + paymentIntent.id.slice(-4).toUpperCase()
+      : 'ATT-' + Date.now();
 
     // 3. Success — build portal link with pkg, partner names, and LMFT flag
     const pkgId  = Object.keys(PACKAGES).find(k => PACKAGES[k] === pkg) || 'core';
@@ -583,6 +587,7 @@ async function handleSubmit(e) {
     if (addonReflection) params.set('addon_reflection', '1');
     if (addonWorkbook) params.set('addon_workbook', addonWorkbook);
     if (intent === 'gift') params.set('gift', '1');
+    params.set('orderNum', realOrderNum);
     document.getElementById('startLink').href = '/app?' + params.toString();
 
     // Fire the order email (partner invite, get-started instructions)
@@ -597,7 +602,7 @@ async function handleSubmit(e) {
         buyerName:     document.getElementById('p1name').value.trim(),
         buyerEmail:    email,
         partnerName:   document.getElementById('p2name').value.trim(),
-        orderNum:      'TBD-' + Date.now(),
+        orderNum:      realOrderNum,
         total:         getPkgTotal(),
         addonWorkbook,
         addonLmft,
