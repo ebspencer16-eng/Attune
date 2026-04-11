@@ -134,6 +134,7 @@ export default async function handler(req) {
             </tr>
           </table>
           <p style="margin-bottom:.75rem;">You'll receive a separate email with your account setup link. If you don't see it within a few minutes, check your spam folder.</p>
+          ${meta.addonWorkbook ? `<p style="margin-bottom:.75rem;color:#5C4D3C;">Your personalized digital workbook will be available for download in your <a href="https://attune-relationships.com/app" style="color:#E8673A;font-weight:600;">Attune dashboard</a> once both partners complete their exercises. If you have any issues, contact us at hello@attune-relationships.com.</p>` : ''}
           <p style="color:#8C7A68;font-size:.82rem;margin-top:1.5rem;">Attune Relationships · hello@attune-relationships.com</p>
         </div>
       `;

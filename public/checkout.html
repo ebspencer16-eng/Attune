@@ -589,6 +589,11 @@ async function handleSubmit(e) {
     if (intent === 'gift') params.set('gift', '1');
     params.set('orderNum', realOrderNum);
     document.getElementById('startLink').href = '/app?' + params.toString();
+    // Show workbook note if relevant
+    if (addonWorkbook) {
+      const wbNote = document.getElementById('workbookNote');
+      if (wbNote) wbNote.style.display = 'block';
+    }
 
     // Fire the order email (partner invite, get-started instructions)
     fetch('/api/send-order-email', {

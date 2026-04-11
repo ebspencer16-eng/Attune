@@ -119,3 +119,8 @@ create trigger profiles_updated_at
 alter table public.profiles add column if not exists ex1_answers jsonb;
 alter table public.profiles add column if not exists ex2_answers jsonb;
 alter table public.profiles add column if not exists ex3_answers jsonb;
+
+-- ── Gift box and profile setup columns ──────────────────────────────────────
+alter table public.orders add column if not exists claimed boolean default false;
+alter table public.orders add column if not exists claimed_at timestamptz;
+alter table public.profiles add column if not exists profile_setup_complete boolean default false;

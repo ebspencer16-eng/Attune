@@ -1270,6 +1270,218 @@ function CouplePortraitBubble({ portrait, size = 32, dark = false, uid, onClick,
     </div>
   );
 }
+// ── GIFT LANDING SCREEN ──────────────────────────────────────────────────────
+// Shown when someone scans a QR card from a physical gift box.
+// ?gift=1&p1=Sarah&p2=James&pkg=X&order=ATT-xxx
+function GiftLandingScreen({ p1, p2, pkg, orderId, onCreateAccount }) {
+  const [step, setStep] = React.useState('who'); // 'who' | 'email' | 'signup'
+  const [chosenPartner, setChosenPartner] = React.useState(null); // 'p1' | 'p2'
+  const [partnerEmail, setPartnerEmail] = React.useState('');
+  const [emailErr, setEmailErr] = React.useState('');
+  const [loading, setLoading] = React.useState(false);
+
+  const myName = chosenPartner === 'p1' ? p1 : p2;
+  const theirName = chosenPartner === 'p1' ? p2 : p1;
+
+  const C = { orange: '#E8673A', indigo: '#1B5FE8', ink: '#0E0B07', muted: '#8C7A68', stone: '#E8DDD0', warm: '#FFFDF9' };
+  const inp = { width: '100%', padding: '0.78rem 1rem', border: `1.5px solid ${C.stone}`, borderRadius: 11, fontSize: '0.88rem', fontFamily: "'DM Sans', sans-serif", color: C.ink, background: C.warm, outline: 'none', boxSizing: 'border-box' };
+
+  return (
+    <div style={{ minHeight: '100vh', background: '#F3EDE6', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem 1.25rem', fontFamily: "'DM Sans', sans-serif" }}>
+      <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+      <div style={{ background: C.warm, borderRadius: 22, padding: '2.25rem 2rem', width: '100%', maxWidth: 400, boxShadow: '0 24px 64px rgba(0,0,0,0.1)' }}>
+        {/* Logo */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1.75rem' }}>
+          <svg width="28" height="20" viewBox="0 0 103 76" fill="none"><defs><linearGradient id="glg" x1="0" y1="0" x2="103" y2="76" gradientUnits="userSpaceOnUse"><stop offset="0%" stopColor="#E8673A"/><stop offset="100%" stopColor="#1B5FE8"/></linearGradient></defs><path d="M14,4 L44,4 A9,9 0 0,1 53,13 L53,42 A9,9 0 0,1 44,51 L20,51 L6,61 L11,51 A6,6 0 0,1 5,45 L5,13 A9,9 0 0,1 14,4 Z" fill="url(#glg)"/><path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill="white" opacity=".93" transform="translate(13.16,11.3) scale(0.72)"/></svg>
+          <span style={{ fontFamily: "'Playfair Display', Georgia, serif", fontSize: '0.95rem', fontWeight: 700, color: C.ink }}>Attune</span>
+        </div>
+
+        {step === 'who' && (
+          <>
+            <div style={{ fontFamily: "'Playfair Display', serif", fontSize: '1.2rem', fontWeight: 700, color: C.ink, marginBottom: '0.4rem', lineHeight: 1.2 }}>Welcome to Attune.</div>
+            <p style={{ fontSize: '0.82rem', color: C.muted, marginBottom: '1.75rem', lineHeight: 1.65 }}>Someone sent you this as a gift. Let's get you set up. First — who are you?</p>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+              {[{name: p1, key: 'p1'}, {name: p2, key: 'p2'}].filter(x => x.name).map(({ name, key }) => (
+                <button key={key} onClick={() => { setChosenPartner(key); setStep('email'); }}
+                  style={{ width: '100%', padding: '1rem', border: `1.5px solid ${C.stone}`, borderRadius: 12, background: 'white', cursor: 'pointer', textAlign: 'left', fontSize: '1rem', fontWeight: 600, color: C.ink, fontFamily: "'DM Sans', sans-serif", transition: 'border-color 0.15s' }}
+                  onMouseEnter={e => e.currentTarget.style.borderColor = C.orange}
+                  onMouseLeave={e => e.currentTarget.style.borderColor = C.stone}>
+                  I'm {name} →
+                </button>
+              ))}
+              {!p2 && (
+                <button onClick={() => { setChosenPartner('p1'); setStep('email'); }}
+                  style={{ width: '100%', padding: '1rem', border: `1.5px solid ${C.stone}`, borderRadius: 12, background: 'white', cursor: 'pointer', textAlign: 'left', fontSize: '1rem', fontWeight: 600, color: C.ink, fontFamily: "'DM Sans', sans-serif" }}>
+                  I'm {p1} →
+                </button>
+              )}
+            </div>
+          </>
+        )}
+
+        {step === 'email' && (
+          <>
+            <div style={{ fontFamily: "'Playfair Display', serif", fontSize: '1.15rem', fontWeight: 700, color: C.ink, marginBottom: '0.4rem', lineHeight: 1.2 }}>Hi, {myName}.</div>
+            <p style={{ fontSize: '0.82rem', color: C.muted, marginBottom: '1.5rem', lineHeight: 1.65 }}>
+              {theirName ? `Let's invite ${theirName} so you can do this together.` : "Let's invite your partner so you can do this together."}
+            </p>
+            <div style={{ fontSize: '0.7rem', letterSpacing: '0.08em', textTransform: 'uppercase', color: C.muted, fontWeight: 700, marginBottom: '0.35rem' }}>
+              {theirName ? `${theirName}'s email` : "Your partner's email"}
+            </div>
+            <input
+              type="email"
+              placeholder={theirName ? `${theirName}@example.com` : "partner@example.com"}
+              value={partnerEmail}
+              onChange={e => { setPartnerEmail(e.target.value); setEmailErr(''); }}
+              style={inp}
+            />
+            {emailErr && <p style={{ color: '#ef4444', fontSize: '0.75rem', marginTop: '0.4rem' }}>{emailErr}</p>}
+            <div style={{ display: 'flex', gap: '0.65rem', marginTop: '1.25rem' }}>
+              <button onClick={() => setStep('who')} style={{ flex: 1, padding: '0.75rem', border: `1.5px solid ${C.stone}`, borderRadius: 11, background: 'transparent', cursor: 'pointer', fontSize: '0.85rem', fontFamily: "'DM Sans', sans-serif", color: C.muted }}>← Back</button>
+              <button onClick={() => {
+                if (!partnerEmail.includes('@')) return setEmailErr('Please enter a valid email.');
+                setStep('signup');
+              }} style={{ flex: 2, padding: '0.75rem', border: 'none', borderRadius: 11, background: `linear-gradient(135deg, ${C.orange}, ${C.indigo})`, color: 'white', cursor: 'pointer', fontWeight: 700, fontSize: '0.85rem', fontFamily: "'DM Sans', sans-serif" }}>
+                {theirName ? `Invite ${theirName} →` : 'Send invite →'}
+              </button>
+            </div>
+            <button onClick={() => setStep('signup')} style={{ width: '100%', marginTop: '0.75rem', background: 'none', border: 'none', cursor: 'pointer', fontSize: '0.75rem', color: C.muted, fontFamily: "'DM Sans', sans-serif", textDecoration: 'underline' }}>
+              Skip for now — I'll invite them later
+            </button>
+          </>
+        )}
+
+        {step === 'signup' && (
+          <GiftSignupForm
+            myName={myName}
+            theirName={theirName}
+            theirEmail={partnerEmail}
+            pkg={pkg}
+            orderId={orderId}
+            onCreateAccount={onCreateAccount}
+          />
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ── GIFT SIGNUP FORM ─────────────────────────────────────────────────────────
+function GiftSignupForm({ myName, theirName, theirEmail, pkg, orderId, onCreateAccount }) {
+  const [email, setEmail] = React.useState('');
+  const [password, setPassword] = React.useState('');
+  const [err, setErr] = React.useState('');
+  const [loading, setLoading] = React.useState(false);
+  const C = { orange: '#E8673A', indigo: '#1B5FE8', ink: '#0E0B07', muted: '#8C7A68', stone: '#E8DDD0', warm: '#FFFDF9' };
+  const inp = { width: '100%', padding: '0.78rem 1rem', border: `1.5px solid ${C.stone}`, borderRadius: 11, fontSize: '0.88rem', fontFamily: "'DM Sans', sans-serif", color: C.ink, background: C.warm, outline: 'none', marginBottom: '0.65rem', boxSizing: 'border-box' };
+  const genInvite = () => Math.random().toString(36).slice(2, 10).toUpperCase();
+
+  const handleCreate = async () => {
+    if (!email.includes('@')) return setErr('Please enter a valid email.');
+    if (password.length < 6) return setErr('Password must be at least 6 characters.');
+    setLoading(true); setErr('');
+
+    // Check if order is already claimed (prevents QR code sharing)
+    if (orderId) {
+      try {
+        const { supabase: sb, hasSupabase } = await import('./supabase.js');
+        if (hasSupabase()) {
+          const { data: ord } = await sb.from('orders').select('claimed').eq('order_num', orderId).maybeSingle();
+          if (ord?.claimed) {
+            setLoading(false);
+            return setErr('This gift has already been redeemed. If you think this is an error, contact hello@attune-relationships.com');
+          }
+        }
+      } catch {}
+    }
+
+    // Create account
+    try {
+      const { supabase: sb, hasSupabase } = await import('./supabase.js');
+      const inviteCode = genInvite();
+      if (hasSupabase()) {
+        const { data: authData, error: authErr } = await sb.auth.signUp({ email: email.trim().toLowerCase(), password, options: { data: { name: myName } } });
+        if (authErr) { setLoading(false); return setErr(authErr.message); }
+        await sb.from('profiles').upsert({
+          id: authData.user.id, name: myName, partner_name: theirName || '',
+          partner_email: theirEmail || '', email_opt_in: true, invite_code: inviteCode,
+          partner_joined: false, pkg: pkg || 'core', profile_setup_complete: false,
+        });
+        // Mark order as claimed
+        if (orderId) {
+          await sb.from('orders').update({ claimed: true, buyer_email: email.trim().toLowerCase() }).eq('order_num', orderId).catch(() => {});
+        }
+        // Send partner invite email if email provided
+        if (theirEmail) {
+          const inviteUrl = `${window.location.origin}/app?invite=${inviteCode}&from=${encodeURIComponent(myName)}&pae=${encodeURIComponent(email.trim().toLowerCase())}`;
+          fetch('/api/send-email', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ type: 'partner_invite', fromName: myName, toEmail: theirEmail, toName: theirName || 'Your partner', inviteUrl }) }).catch(() => {});
+        }
+        // Send welcome email
+        fetch('/api/send-email', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ type: 'welcome_account', toEmail: email.trim().toLowerCase(), toName: myName, partnerName: theirName || '', portalUrl: `${window.location.origin}/app` }) }).catch(() => {});
+
+        const account = { id: authData.user.id, email: email.trim().toLowerCase(), name: myName, partnerName: theirName || '', partnerEmail: theirEmail || '', emailOptIn: true, inviteCode, partnerJoined: false, pkg: pkg || 'core', createdAt: Date.now(), isGiftRecipient: true };
+        try { localStorage.setItem('attune_account', JSON.stringify(account)); } catch {}
+        setLoading(false);
+        onCreateAccount(account);
+      }
+    } catch (e) { setLoading(false); setErr('Something went wrong. Please try again.'); }
+  };
+
+  return (
+    <>
+      <div style={{ fontFamily: "'Playfair Display', serif", fontSize: '1.1rem', fontWeight: 700, color: '#0E0B07', marginBottom: '0.35rem' }}>Create your account</div>
+      <p style={{ fontSize: '0.78rem', color: C.muted, marginBottom: '1.25rem', lineHeight: 1.55 }}>
+        {theirEmail ? `We've sent ${theirName || 'your partner'} an invite. Create your account to get started.` : 'Create your account to begin the exercises.'}
+      </p>
+      <input type="email" placeholder="Your email" value={email} onChange={e => { setEmail(e.target.value); setErr(''); }} style={inp} />
+      <input type="password" placeholder="Choose a password" value={password} onChange={e => { setPassword(e.target.value); setErr(''); }} style={inp} />
+      {err && <p style={{ color: '#ef4444', fontSize: '0.75rem', marginBottom: '0.75rem' }}>{err}</p>}
+      <button onClick={handleCreate} disabled={loading}
+        style={{ width: '100%', padding: '0.9rem', background: `linear-gradient(135deg, ${C.orange}, ${C.indigo})`, color: 'white', border: 'none', borderRadius: 12, fontSize: '0.85rem', fontWeight: 700, cursor: loading ? 'default' : 'pointer', opacity: loading ? 0.7 : 1, fontFamily: "'DM Sans', sans-serif" }}>
+        {loading ? 'Creating account…' : 'Create account →'}
+      </button>
+    </>
+  );
+}
+
+// ── PROFILE SETUP TILE ────────────────────────────────────────────────────────
+// Shown on dashboard until user completes profile setup. Per-person.
+function ProfileSetupTile({ account, onSetup, onDismiss }) {
+  const hasPortrait = false; // Placeholder until portrait integration ships
+  const steps = [
+    { label: "Set your name & pronouns", done: !!(account?.name && account?.pronouns) },
+    { label: "Add your partner's name", done: !!(account?.partnerName) },
+    { label: account?.partnerEmail ? "Partner invited \u2713" : "Invite your partner", done: !!(account?.partnerEmail) },
+    { label: "Couple portrait", done: false, comingSoon: true },
+  ];
+  const doneCount = steps.filter(s => s.done).length;
+
+  return (
+    <div style={{ background: 'white', border: '1.5px solid #E8DDD0', borderRadius: 16, padding: '1.25rem 1.5rem', marginBottom: '1.5rem', position: 'relative' }}>
+      <button onClick={onDismiss} title="Dismiss" style={{ position: 'absolute', top: 12, right: 14, background: 'none', border: 'none', cursor: 'pointer', color: '#8C7A68', fontSize: '1rem', lineHeight: 1 }}>✕</button>
+      <div style={{ display: 'flex', alignItems: 'flex-start', gap: '1rem' }}>
+        <div style={{ width: 40, height: 40, borderRadius: 12, background: 'linear-gradient(135deg,#E8673A20,#1B5FE820)', border: '1.5px solid #E8DDD0', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, fontSize: '1.1rem' }}>✦</div>
+        <div style={{ flex: 1 }}>
+          <div style={{ fontSize: '0.85rem', fontWeight: 700, color: '#0E0B07', marginBottom: '0.25rem', fontFamily: "'DM Sans', sans-serif" }}>Before you start your exercises</div>
+          <div style={{ fontSize: '0.75rem', color: '#8C7A68', marginBottom: '1rem', lineHeight: 1.55 }}>Complete your profile so your results are personalized to you.</div>
+          <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginBottom: '1rem' }}>
+            {steps.map((s, i) => (
+              <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', fontSize: '0.72rem', color: s.comingSoon ? '#C17F47' : s.done ? '#059669' : '#8C7A68', background: s.comingSoon ? '#FFF8EE' : s.done ? '#ECFDF5' : '#F5F0EC', borderRadius: 99, padding: '0.25rem 0.7rem' }}>
+                <span>{s.done ? '✓' : s.comingSoon ? '○' : '·'}</span>
+                <span>{s.label}{s.comingSoon ? ' (coming soon)' : ''}</span>
+              </div>
+            ))}
+          </div>
+          <button onClick={onSetup} style={{ background: 'linear-gradient(135deg,#E8673A,#1B5FE8)', color: 'white', border: 'none', borderRadius: 9, padding: '0.55rem 1.25rem', fontSize: '0.75rem', fontWeight: 700, cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", letterSpacing: '0.04em' }}>
+            Complete setup →
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 // ── PORTRAIT SETUP MODAL ─────────────────────────────────────────────────────
 // Minimal modal for setting up couple portrait (avatars + initials).
@@ -6137,7 +6349,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
               };
 
               try {
-                // Use pre-generated workbook URL if available
+                // Use pre-generated workbook URL if available (fastest)
                 const ord = JSON.parse(localStorage.getItem('attune_order') || 'null');
                 if (ord?.workbookUrl) {
                   const a = document.createElement('a');
@@ -6147,40 +6359,50 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
                   document.body.appendChild(a); a.click(); document.body.removeChild(a);
                   return;
                 }
-                // Try PDF first (Browserless) — falls back to docx if not configured
-                const pdfResp = await fetch('/api/generate-pdf', {
-                  method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify(payload),
+                // Generate PDF in-browser using html2pdf.js
+                showToast('Generating your workbook… this takes about 5 seconds.');
+                const script = document.createElement('script');
+                script.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js';
+                await new Promise((res, rej) => { script.onload = res; script.onerror = rej; document.head.appendChild(script); });
+                // Build render URL with workbook data
+                const renderPayload = encodeURIComponent(JSON.stringify({
+                  p1: userName, p2: partnerName,
+                  ct: coupleType?.name || '', ctTagline: coupleType?.tagline || '', ctColor: coupleType?.color || '#E8673A',
+                  scores: payload.scores, partnerScores: payload.partnerScores, expGaps: payload.expGaps,
+                }));
+                // Load workbook-render.html content into an off-screen iframe
+                const iframe = document.createElement('iframe');
+                iframe.style.cssText = 'position:fixed;left:-9999px;top:0;width:794px;height:1123px;border:none;';
+                document.body.appendChild(iframe);
+                await new Promise(res => {
+                  iframe.onload = res;
+                  iframe.src = `/workbook-render?data=${renderPayload}`;
                 });
-                if (pdfResp.ok && pdfResp.headers.get('content-type')?.includes('pdf')) {
-                  const blob = await pdfResp.blob();
-                  const url = URL.createObjectURL(blob);
-                  const a = document.createElement('a');
-                  a.href = url;
-                  a.download = `Attune_Workbook_${userName}_and_${partnerName}.pdf`;
-                  document.body.appendChild(a); a.click();
-                  document.body.removeChild(a);
-                  URL.revokeObjectURL(url);
-                  return;
-                }
-                // Fall back to docx
-                const resp = await fetch('/api/generate-workbook', {
-                  method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify(payload),
-                });
-                if (!resp.ok) throw new Error('Generation failed');
-                const blob = await resp.blob();
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = `Attune_Workbook_${userName}_and_${partnerName}.docx`;
-                document.body.appendChild(a); a.click();
-                document.body.removeChild(a);
-                URL.revokeObjectURL(url);
+                await new Promise(res => setTimeout(res, 1500)); // Wait for fonts/images
+                const el = iframe.contentDocument.body;
+                const filename = `Attune_Workbook_${userName.replace(/\s+/g,'_')}_and_${partnerName.replace(/\s+/g,'_')}.pdf`;
+                await window.html2pdf().set({
+                  margin: [10, 14],
+                  filename,
+                  image: { type: 'jpeg', quality: 0.97 },
+                  html2canvas: { scale: 2, useCORS: true, logging: false },
+                  jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+                  pagebreak: { mode: ['avoid-all', 'css'] },
+                }).from(el).save();
+                document.body.removeChild(iframe);
               } catch (e) {
-                showToast('Workbook generation failed. Please try again.');
+                console.error('Workbook PDF generation failed:', e);
+                // Final fallback: docx
+                try {
+                  const resp = await fetch('/api/generate-workbook', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+                  if (!resp.ok) throw new Error();
+                  const blob = await resp.blob();
+                  const url = URL.createObjectURL(blob);
+                  const a = document.createElement('a'); a.href = url;
+                  a.download = `Attune_Workbook_${userName}_and_${partnerName}.docx`;
+                  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+                  URL.revokeObjectURL(url);
+                } catch { showToast('Workbook generation failed. Please try again.'); }
               }
             };
 
@@ -7994,6 +8216,11 @@ export default function App() {
   const urlInviteCode = params.get("invite");
   const urlInviteFrom = params.get("from") ? decodeURIComponent(params.get("from")) : null;
   const urlIsReset = params.get("reset") === "1";
+  // Gift box QR flow params
+  const urlIsGift = params.get("gift") === "1";
+  const urlGiftP1 = params.get("p1") ? decodeURIComponent(params.get("p1")) : null;
+  const urlGiftP2 = params.get("p2") ? decodeURIComponent(params.get("p2")) : null;
+  const urlGiftOrder = params.get("order") || null;
 
   // ── AUTH STATE (localStorage-backed for now, ready for real backend) ──────
   const loadAccount = () => {
@@ -8007,6 +8234,20 @@ export default function App() {
 
   const isLoggedIn = !!account;
   const profileComplete = !!(account?.name && account?.partnerName);
+  // Per-person profile setup: has the user completed the onboarding tile?
+  const [profileSetupDone, setProfileSetupDone] = useState(() => {
+    try { return localStorage.getItem('attune_profile_setup_done') === '1'; } catch { return false; }
+  });
+  const completeProfileSetup = () => {
+    setProfileSetupDone(true);
+    try { localStorage.setItem('attune_profile_setup_done', '1'); } catch {}
+    // Persist to Supabase
+    if (account?.id) {
+      import('./supabase.js').then(({ supabase: sb, hasSupabase }) => {
+        if (hasSupabase()) sb.from('profiles').update({ profile_setup_complete: true }).eq('id', account.id).catch(() => {});
+      }).catch(() => {});
+    }
+  };
 
   // ── VIEW STATE ────────────────────────────────────────────────────────────
   const [view, setView] = useState(initialView);
@@ -8374,6 +8615,10 @@ export default function App() {
   });
   const hasWorkbookOrder = order?.addonWorkbook != null; // 'digital' | 'print'
   const isWorkbookPrint  = order?.addonWorkbook === 'print';
+  // Workbook notification: show prominent tile when workbook is generated
+  const [workbookNotifSeen, setWorkbookNotifSeen] = useState(() => {
+    try { return localStorage.getItem('attune_workbook_notif_seen') === '1'; } catch { return false; }
+  });
   const [workbookReady,  setWorkbookReady]  = useState(() => {
     try { return localStorage.getItem('attune_workbook_ready') === 'true'; } catch { return false; }
   });
@@ -8536,6 +8781,18 @@ export default function App() {
       window.history.replaceState({}, '', '/app');
       window.location.reload();
     }} />;
+  }
+
+  // ── GIFT BOX QR ROUTING ──────────────────────────────────────────────────
+  // When someone scans a QR card from a physical box: ?gift=1&p1=Sarah&p2=James&order=ATT-xxx
+  if (urlIsGift && urlGiftP1 && !account) {
+    return <GiftLandingScreen
+      p1={urlGiftP1}
+      p2={urlGiftP2}
+      pkg={_urlPkg}
+      orderId={urlGiftOrder}
+      onCreateAccount={(acct) => { setAccount(acct); saveAccount(acct); }}
+    />;
   }
 
   // ── PARTNER B INVITE ROUTING ─────────────────────────────────────────────
@@ -8844,9 +9101,27 @@ export default function App() {
               {/* ── CONTENT AREA ─────────────────────────────────────────── */}
               <div style={{ flex: 1, padding: isMobile ? "1.5rem 1.25rem" : "2rem 2rem", background: "#FBF8F3" }}>
 
-                {/* Profile setup */}
-                {isLoggedIn && !profileComplete && (
-                  <ProfileSetupPrompt account={account} onSetupProfile={() => setShowProfileSetup(true)} />
+                {/* Profile setup tile — shown until dismissed or completed */}
+                {isLoggedIn && !profileSetupDone && (
+                  <ProfileSetupTile
+                    account={account}
+                    onSetup={() => setShowProfileSetup(true)}
+                    onDismiss={completeProfileSetup}
+                  />
+                )}
+
+                {/* Workbook ready notification — shown when workbook is generated and not yet seen */}
+                {isLoggedIn && hasWorkbookOrder && workbookReady && !workbookNotifSeen && (
+                  <div style={{ background: 'linear-gradient(135deg,#ECFDF5,#D1FAE5)', border: '1.5px solid rgba(16,185,129,0.35)', borderRadius: 16, padding: '1.1rem 1.4rem', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem', flexWrap: 'wrap' }}>
+                    <div>
+                      <div style={{ fontSize: '0.85rem', fontWeight: 700, color: '#065F46', fontFamily: "'DM Sans',sans-serif", marginBottom: 3 }}>Your personalized workbook is ready.</div>
+                      <div style={{ fontSize: '0.75rem', color: '#059669', fontFamily: "'DM Sans',sans-serif" }}>Go to Workbook in the sidebar to download your PDF.</div>
+                    </div>
+                    <div style={{ display: 'flex', gap: '0.6rem', flexShrink: 0 }}>
+                      <button onClick={() => setView('workbook')} style={{ background: '#059669', color: 'white', border: 'none', borderRadius: 9, padding: '0.5rem 1rem', fontSize: '0.75rem', fontWeight: 700, cursor: 'pointer', fontFamily: "'DM Sans',sans-serif" }}>Download →</button>
+                      <button onClick={() => { setWorkbookNotifSeen(true); try { localStorage.setItem('attune_workbook_notif_seen','1'); } catch {} }} style={{ background: 'transparent', border: '1px solid rgba(16,185,129,0.4)', borderRadius: 9, padding: '0.5rem 0.75rem', fontSize: '0.72rem', color: '#059669', cursor: 'pointer', fontFamily: "'DM Sans',sans-serif" }}>Dismiss</button>
+                    </div>
+                  </div>
                 )}
 
                 {/* Partner invite card (when partner hasn't joined) */}

@@ -188,9 +188,13 @@ render();
   const isGift = p.get('version') === 'gift';
   // QR encodes the signup URL — scanner lands on /app ready to create their account
   const base = window.location.origin;
+  const orderId = p.get('orderId') || p.get('order') || '';
   const qrParams = new URLSearchParams({ signup: '1', pkg: pkgId });
-  if (isGift) qrParams.set('gift', '1');
-  if (token)  qrParams.set('invite', token);
+  if (p.get('version') === 'gift_printed' || p.get('version') === 'gift_blank' || isGift) qrParams.set('gift', '1');
+  if (token) qrParams.set('invite', token);
+  if (p.get('p1')) qrParams.set('p1', p.get('p1'));
+  if (p.get('p2')) qrParams.set('p2', p.get('p2'));
+  if (orderId) qrParams.set('order', orderId);
   const qrUrl = `${base}/app?${qrParams.toString()}`;
   // Render after a short tick to let DOM settle
   setTimeout(() => renderQRCode(qrUrl), 80);
