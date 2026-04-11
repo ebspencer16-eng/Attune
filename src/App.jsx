@@ -7063,6 +7063,9 @@ function AuthModal({ mode, onClose, onSuccess }) {
         invite_code:      inviteCode,
         partner_joined:   false,
         pkg:              new URLSearchParams(window.location.search).get("pkg") || "core",
+        ex1_answers:      null,
+        ex2_answers:      null,
+        ex3_answers:      null,
       });
 
       const account = {
@@ -7179,6 +7182,33 @@ function AuthModal({ mode, onClose, onSuccess }) {
         createdAt: profile?.created_at ? new Date(profile.created_at).getTime() : Date.now(),
       };
       try { localStorage.setItem("attune_account", JSON.stringify(account)); } catch {}
+
+      // Restore exercise answers from Supabase (cross-device support)
+      if (profile?.ex1_answers) {
+        try { localStorage.setItem('attune_ex1', JSON.stringify(profile.ex1_answers)); } catch {}
+      }
+      if (profile?.ex2_answers) {
+        try { localStorage.setItem('attune_ex2', JSON.stringify(profile.ex2_answers)); } catch {}
+      }
+      if (profile?.ex3_answers) {
+        try { localStorage.setItem('attune_ex3', JSON.stringify(profile.ex3_answers)); } catch {}
+      }
+      // Restore partner session if partner already completed
+      if (profile?.partner_joined && profile?.invite_code) {
+        try {
+          const psRes = await fetch(`/api/partner-sync?inviteCode=${encodeURIComponent(profile.invite_code)}`);
+          const ps = await psRes.json();
+          if (ps.found && ps.session) {
+            localStorage.setItem('attune_partner_session', JSON.stringify({
+              name: ps.session.partner_b_name,
+              ex1: ps.session.ex1_answers,
+              ex2: ps.session.ex2_answers,
+              ex3: ps.session.ex3_answers,
+              inviteCode: profile.invite_code,
+            }));
+          }
+        } catch {}
+      }
 
       // Send partner invite email if partner email was provided
       if (form.partnerEmail.trim()) {
@@ -7669,6 +7699,29 @@ function PartnerBCompletionScreen({ partnerAName, partnerBName, partnerADone }) 
 function PartnerInviteCard({ account, onCopy, copied }) {
   if (!account) return null;
   const inviteUrl = `${window.location.origin}/app?invite=${account.inviteCode}&from=${encodeURIComponent(account.name)}`;
+  const [resent, setResent] = React.useState(false);
+  const [resending, setResending] = React.useState(false);
+
+  const handleResend = async () => {
+    if (!account.partnerEmail || resending || resent) return;
+    setResending(true);
+    try {
+      await fetch('/api/send-email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          type: 'partner_invite',
+          fromName: account.name,
+          toEmail: account.partnerEmail,
+          toName: account.partnerName || 'Your partner',
+          inviteUrl,
+        }),
+      });
+      setResent(true);
+    } catch {}
+    setResending(false);
+  };
+
   return (
     <div style={{ background: "linear-gradient(135deg, #1B5FE8, #1447b8)", borderRadius: 16, padding: "1.35rem 1.5rem", marginBottom: "1rem", color: "white" }}>
       <div style={{ fontSize: "0.58rem", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.55)", fontFamily: "'DM Sans',sans-serif", fontWeight: 700, marginBottom: "0.4rem" }}>
@@ -7690,9 +7743,15 @@ function PartnerInviteCard({ account, onCopy, copied }) {
         </button>
       </div>
       {account.partnerEmail && (
-        <p style={{ fontSize: "0.68rem", color: "rgba(255,255,255,0.45)", fontFamily: "'DM Sans',sans-serif", marginTop: "0.6rem" }}>
-          We'll also email this link to {account.partnerEmail}
-        </p>
+        <div style={{ marginTop: "0.75rem", display: "flex", alignItems: "center", justifyContent: "space-between", gap: "0.75rem" }}>
+          <p style={{ fontSize: "0.68rem", color: "rgba(255,255,255,0.45)", fontFamily: "'DM Sans',sans-serif", margin: 0 }}>
+            We emailed this link to {account.partnerEmail}
+          </p>
+          <button onClick={handleResend} disabled={resent || resending}
+            style={{ background: "transparent", border: "1px solid rgba(255,255,255,0.3)", borderRadius: 8, padding: "0.3rem 0.65rem", fontSize: "0.65rem", fontWeight: 600, color: resent ? "#10b981" : "rgba(255,255,255,0.7)", cursor: resent ? "default" : "pointer", fontFamily: "'DM Sans',sans-serif", flexShrink: 0, transition: "all 0.2s" }}>
+            {resent ? "Sent ✓" : resending ? "Sending…" : "Resend email"}
+          </button>
+        </div>
       )}
     </div>
   );
@@ -9025,8 +9084,13 @@ export default function App() {
                 </div>
               : <Exercise01Flow userName={userName} partnerName={partnerName} onComplete={a => {
                   setEx1State(a);
-                  // Persist exercise 1 answers so admin can access real data
                   try { localStorage.setItem('attune_ex1', JSON.stringify(a)); } catch {}
+                  // Persist exercise 1 answers to Supabase for cross-device access
+                  if (account?.id) {
+                    import('./supabase.js').then(({ supabase: sb, hasSupabase }) => {
+                      if (hasSupabase()) sb.from('profiles').update({ ex1_answers: a }).eq('id', account.id).then(() => {});
+                    }).catch(() => {});
+                  }
                 }} />
             }
           </div>
@@ -9079,8 +9143,12 @@ export default function App() {
                 </div>
               : <ExpectationsExercise userName={userName} partnerName={partnerName} onComplete={a => {
                   setEx2State(a);
-                  // Persist exercise 2 answers so admin can access real data
                   try { localStorage.setItem('attune_ex2', JSON.stringify(a)); } catch {}
+                  if (account?.id) {
+                    import('./supabase.js').then(({ supabase: sb, hasSupabase }) => {
+                      if (hasSupabase()) sb.from('profiles').update({ ex2_answers: a }).eq('id', account.id).then(() => {});
+                    }).catch(() => {});
+                  }
                 }} isAnniversary={demoPkg === "anniversary"} />
             }
           </div>
