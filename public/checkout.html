@@ -145,7 +145,7 @@
     <div class="co-card">
       <div class="co-card-head">
         <div class="co-num" id="num1">1</div>
-        <div class="co-card-title">Who is this for?</div>
+        <div class="co-card-title">Is this for you two, or a gift?</div>
         <span class="step-done" id="done1">✓ Done</span>
       </div>
       <div class="co-body">
@@ -153,7 +153,7 @@
           <button class="pt-btn active" id="btn-self" onclick="setIntent('self')">
             <div class="pt-icon">💑</div>
             <div class="pt-label">For us</div>
-            <div class="pt-sub">You and your partner will both complete the exercises</div>
+            <div class="pt-sub">You and your partner each complete the exercises on your own</div>
           </button>
           <button class="pt-btn" id="btn-gift" onclick="setIntent('gift')">
             <div class="pt-icon">🎁</div>
@@ -293,6 +293,7 @@
 // ── Package definitions ──────────────────────────────────────────────────────
 const PACKAGES = {
   core: {
+    id: 'core',
     name: 'The Attune Assessment',
     badge: 'Foundation',
     price: 89,
@@ -301,6 +302,7 @@ const PACKAGES = {
     tags: ['Digital · instant access', 'Communication assessment', 'Expectations assessment', 'Couple type + map'],
   },
   newlywed: {
+    id: 'newlywed',
     name: 'Starting Out Collection',
     badge: 'Starting Out',
     price: 139,
@@ -309,6 +311,7 @@ const PACKAGES = {
     tags: ['Digital + physical gift box', 'Communication & expectations', 'Starting Out Checklist', 'Personalized QR card'],
   },
   anniversary: {
+    id: 'anniversary',
     name: 'Anniversary Collection',
     badge: 'Anniversary',
     price: 139,
@@ -317,6 +320,7 @@ const PACKAGES = {
     tags: ['Digital + physical gift box', 'Communication & expectations', 'Relationship Reflection', 'Personalized QR card'],
   },
   premium: {
+    id: 'premium',
     name: 'Attune Premium',
     badge: 'Most Complete',
     price: 295,
@@ -368,7 +372,15 @@ function renderSummary() {
   const tagEl   = document.getElementById('tagList');
 
   let total = pkg.price;
-  let rows = `
+  // One-line summary of what they're getting
+  const summaryLine = {
+    core: 'Two relationship exercises + your couple type and full results profile.',
+    newlywed: 'Two relationship exercises + real-world logistics checklist for merging lives.',
+    anniversary: 'Two exercises + a third reflection exercise built around your shared history.',
+    premium: 'The full assessment + a 50-min LMFT session reviewing your results together.',
+  }[pkg.id] || '';
+  let rows = summaryLine ? `<div style="font-size:.75rem;color:#5C4D3C;line-height:1.6;padding:.6rem 0 .8rem;border-bottom:1px solid #F3EDE6;margin-bottom:.2rem;">${summaryLine}</div>` : '';
+  rows += `
     <div class="co-card-detail">
       <div>
         <div class="name">${pkg.name} <span class="badge">${pkg.badge}</span></div>

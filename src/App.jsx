@@ -5828,38 +5828,56 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
                 );
               })}
             </div>
-            {/* Insight cards */}
-            {insights.map((ins, i) => {
-              const col = INSIGHT_COLORS[ins.type] || INSIGHT_COLORS.explore;
+            {/* Insight cards with show-more */}
+            {(() => {
+              const SHOW_INIT = 3;
+              const [showAll3, setShowAll3] = React.useState(false);
+              const visible = showAll3 ? insights : insights.slice(0, SHOW_INIT);
+              const hidden = insights.length - SHOW_INIT;
               return (
-                <div key={i} style={{ background: "white", border: `1.5px solid ${C.stone}`, borderRadius: 16, marginBottom: "1rem", overflow: "hidden" }}>
-                  <div style={{ padding: "0.85rem 1.25rem", borderBottom: `1px solid ${C.stone}50`, background: col.bg, display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: "0.75rem" }}>
-                    <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", flex: 1 }}>
-                      <div style={{ width: 8, height: 8, borderRadius: "50%", background: col.dot, flexShrink: 0 }} />
-                      <span style={{ fontFamily: HFONT, fontSize: "0.9rem", fontWeight: 700, color: C.ink, lineHeight: 1.3 }}>{ins.title}</span>
-                    </div>
-                    <div style={{ background: col.labelBg, borderRadius: 999, padding: "0.2rem 0.6rem", flexShrink: 0 }}>
-                      <span style={{ fontSize: "0.58rem", fontWeight: 700, color: col.label, fontFamily: BFONT, letterSpacing: "0.06em", textTransform: "uppercase" }}>
-                        {ins.type === "strength" ? "Strength" : "Worth exploring"}
-                      </span>
-                    </div>
-                  </div>
-                  <div style={{ padding: "1.1rem 1.25rem" }}>
-                    <p style={{ fontSize: "0.84rem", color: C.text, fontFamily: BFONT, fontWeight: 300, lineHeight: 1.75, marginBottom: "1rem" }}>{ins.body}</p>
-                    <div style={{ background: "#F9F7F4", borderRadius: 10, padding: "0.85rem 1rem", borderLeft: `3px solid ${col.dot}` }}>
-                      <div style={{ fontSize: "0.58rem", fontWeight: 700, color: col.label, textTransform: "uppercase", letterSpacing: "0.1em", fontFamily: BFONT, marginBottom: "0.4rem" }}>{ins.priority}</div>
-                      <p style={{ fontSize: "0.8rem", color: C.text, fontFamily: BFONT, fontWeight: 400, lineHeight: 1.7, margin: 0 }}>{ins.action}</p>
-                    </div>
-                    {ins.coupleTypeNote && (
-                      <div style={{ marginTop: "0.6rem", padding: "0.6rem 0.85rem", background: "rgba(27,95,232,0.05)", borderRadius: 8, border: "1px solid rgba(27,95,232,0.12)" }}>
-                        <span style={{ fontSize: "0.55rem", fontWeight: 700, color: "#1B5FE8", textTransform: "uppercase", letterSpacing: "0.12em", fontFamily: BFONT }}>For your couple type · </span>
-                        <span style={{ fontSize: "0.76rem", color: "#1B5FE8", fontFamily: BFONT, fontWeight: 300, lineHeight: 1.6 }}>{ins.coupleTypeNote}</span>
+                <>
+                  {visible.map((ins, i) => {
+                    const col = INSIGHT_COLORS[ins.type] || INSIGHT_COLORS.explore;
+                    return (
+                      <div key={i} style={{ background: "white", border: `1.5px solid ${C.stone}`, borderRadius: 16, marginBottom: "1rem", overflow: "hidden" }}>
+                        <div style={{ padding: "0.85rem 1.25rem", borderBottom: `1px solid ${C.stone}50`, background: col.bg, display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: "0.75rem" }}>
+                          <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", flex: 1 }}>
+                            <div style={{ width: 8, height: 8, borderRadius: "50%", background: col.dot, flexShrink: 0 }} />
+                            <span style={{ fontFamily: HFONT, fontSize: "0.9rem", fontWeight: 700, color: C.ink, lineHeight: 1.3 }}>{ins.title}</span>
+                          </div>
+                          <div style={{ background: col.labelBg, borderRadius: 999, padding: "0.2rem 0.6rem", flexShrink: 0 }}>
+                            <span style={{ fontSize: "0.58rem", fontWeight: 700, color: col.label, fontFamily: BFONT, letterSpacing: "0.06em", textTransform: "uppercase" }}>
+                              {ins.type === "strength" ? "Strength" : "Worth exploring"}
+                            </span>
+                          </div>
+                        </div>
+                        <div style={{ padding: "1.1rem 1.25rem" }}>
+                          <p style={{ fontSize: "0.84rem", color: C.text, fontFamily: BFONT, fontWeight: 300, lineHeight: 1.75, marginBottom: "1rem" }}>{ins.body}</p>
+                          <div style={{ background: "#F9F7F4", borderRadius: 10, padding: "0.85rem 1rem", borderLeft: `3px solid ${col.dot}` }}>
+                            <div style={{ fontSize: "0.58rem", fontWeight: 700, color: col.label, textTransform: "uppercase", letterSpacing: "0.1em", fontFamily: BFONT, marginBottom: "0.4rem" }}>{ins.priority}</div>
+                            <p style={{ fontSize: "0.8rem", color: C.text, fontFamily: BFONT, fontWeight: 400, lineHeight: 1.7, margin: 0 }}>{ins.action}</p>
+                          </div>
+                          {ins.coupleTypeNote && (
+                            <div style={{ marginTop: "0.6rem", padding: "0.6rem 0.85rem", background: "rgba(27,95,232,0.05)", borderRadius: 8, border: "1px solid rgba(27,95,232,0.12)" }}>
+                              <span style={{ fontSize: "0.55rem", fontWeight: 700, color: "#1B5FE8", textTransform: "uppercase", letterSpacing: "0.12em", fontFamily: BFONT }}>For your couple type · </span>
+                              <span style={{ fontSize: "0.76rem", color: "#1B5FE8", fontFamily: BFONT, fontWeight: 300, lineHeight: 1.6 }}>{ins.coupleTypeNote}</span>
+                            </div>
+                          )}
+                        </div>
                       </div>
-                    )}
-                  </div>
-                </div>
+                    );
+                  })}
+                  {!showAll3 && hidden > 0 && (
+                    <button onClick={() => setShowAll3(true)}
+                      style={{ width: "100%", background: "white", border: `1.5px solid ${C.stone}`, borderRadius: 12, padding: "0.85rem 1rem", fontSize: "0.78rem", fontWeight: 600, color: C.clay, cursor: "pointer", fontFamily: BFONT, marginBottom: "1rem", display: "flex", alignItems: "center", justifyContent: "center", gap: "0.4rem", transition: "border-color 0.15s" }}
+                      onMouseEnter={e => e.currentTarget.style.borderColor = C.orange}
+                      onMouseLeave={e => e.currentTarget.style.borderColor = C.stone}>
+                      Show {hidden} more insight{hidden !== 1 ? "s" : ""} ↓
+                    </button>
+                  )}
+                </>
               );
-            })}
+            })()}
             <PrevNext />
           </div>
         </Layout>
@@ -5922,8 +5940,9 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
                           ))}
                         </div>
                         {synth && sc && (
-                          <div style={{ padding: "0.55rem 1.1rem", background: sc.bg, borderTop: `1px solid ${C.stone}30` }}>
-                            <span style={{ fontSize: "0.7rem", color: sc.text, fontFamily: BFONT, fontWeight: 500 }}>{synth.text}</span>
+                          <div style={{ padding: "0.7rem 1.1rem", background: sc.bg, borderTop: `1px solid ${C.stone}30`, display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                            <div style={{ width: 6, height: 6, borderRadius: "50%", background: sc.text, opacity: 0.7, flexShrink: 0 }} />
+                            <span style={{ fontSize: "0.78rem", color: sc.text, fontFamily: BFONT, fontWeight: 600 }}>{synth.text}</span>
                           </div>
                         )}
                       </div>
@@ -8590,7 +8609,7 @@ export default function App() {
               {/* Nav items */}
               <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 1, padding: "0.25rem 0.7rem 0" }}>
                 {[
-                  { label: "Dashboard", viewId: "home", icon: <svg width="15" height="15" viewBox="0 0 20 20" fill="none"><rect x="2" y="2" width="7" height="7" rx="1.5" fill="currentColor"/><rect x="11" y="2" width="7" height="7" rx="1.5" fill="currentColor"/><rect x="2" y="11" width="7" height="7" rx="1.5" fill="currentColor"/><rect x="11" y="11" width="7" height="7" rx="1.5" fill="currentColor"/></svg> },
+                  { label: "Dashboard", viewId: "home", icon: <svg width="15" height="15" viewBox="0 0 20 20" fill="none"><rect x="2" y="2" width="7" height="7" rx="1.5" stroke="currentColor" strokeWidth="1.5"/><rect x="11" y="2" width="7" height="7" rx="1.5" stroke="currentColor" strokeWidth="1.5"/><rect x="2" y="11" width="7" height="7" rx="1.5" stroke="currentColor" strokeWidth="1.5"/><rect x="11" y="11" width="7" height="7" rx="1.5" stroke="currentColor" strokeWidth="1.5"/></svg> },
                   { label: "Exercises", viewId: "exercises", icon: <svg width="15" height="15" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="7.5" stroke="currentColor" strokeWidth="1.5"/><path d="M7 10l2 2 4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg> },
                   { label: "Results", viewId: "results", icon: <svg width="15" height="15" viewBox="0 0 20 20" fill="none"><path d="M3 5h14M3 9h14M3 13h9" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/></svg> },
                   { label: "Resources", viewId: "resources", icon: <svg width="15" height="15" viewBox="0 0 20 20" fill="none"><rect x="3" y="2" width="14" height="16" rx="2" stroke="currentColor" strokeWidth="1.5"/><path d="M7 7h6M7 10h6M7 13h3" stroke="currentColor" strokeWidth="1.25" strokeLinecap="round"/></svg> },
@@ -8726,7 +8745,7 @@ export default function App() {
                 <div style={{ marginBottom: "2rem" }}>
                   <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "1rem" }}>
                     <div style={{ fontSize: "0.6rem", letterSpacing: ".2em", textTransform: "uppercase", color: "#8C7A68", fontWeight: 700, fontFamily: "'DM Sans', sans-serif" }}>Your exercises</div>
-                    {bothDone && <div style={{ fontSize: "0.65rem", color: "#10b981", fontWeight: 600, fontFamily: "'DM Sans', sans-serif" }}>Both complete</div>}
+                    {bothDone && <div style={{ fontSize: "0.6rem", color: "#059669", fontWeight: 700, background: "rgba(16,185,129,0.1)", border: "1px solid rgba(16,185,129,0.25)", borderRadius: 999, padding: "0.15rem 0.65rem", fontFamily: "'DM Sans', sans-serif", letterSpacing: "0.02em" }}>Both complete</div>}
                   </div>
                   <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "repeat(2, 1fr)", gap: "0.75rem" }}>
                     {[
@@ -8758,9 +8777,9 @@ export default function App() {
                   {bothDone && (
                     <div style={{ display: "flex", gap: "0.5rem", marginTop: "0.85rem", flexWrap: "wrap" }}>
                       {[
-                        { label: "Communication side by side →", section: "personality", color: "#E8673A" },
-                        { label: "Expectations side by side →", section: "expectations", color: "#1B5FE8" },
-                        ...(pkg.hasAnniversary && ex3Answers ? [{ label: "Reflection side by side →", section: "anniversary", color: "#1B5FE8" }] : []),
+                        { label: "Communication responses →", section: "personality", color: "#E8673A" },
+                        { label: "Expectations responses →", section: "expectations", color: "#1B5FE8" },
+                        ...(pkg.hasAnniversary && ex3Answers ? [{ label: "Reflection responses →", section: "anniversary", color: "#1B5FE8" }] : []),
                       ].map(({ label, section, color }) => (
                         <button key={section} onClick={() => { setActiveResult(section); setView("results"); setHighlightsSeen(true); }}
                           style={{ background: "transparent", border: "1.5px solid #E8DDD0", borderRadius: 8, padding: "0.45rem 0.85rem", fontSize: 11, fontWeight: 600, color: "#8C7A68", cursor: "pointer", fontFamily: "'DM Sans', sans-serif", letterSpacing: ".03em", transition: "all .15s" }}
@@ -9412,6 +9431,52 @@ export default function App() {
                 ✦ Beta feedback
               </a>}
             </div>
+            {/* Mobile sticky sub-section nav */}
+            {isMobile && (() => {
+              const inRefl = activeResult && activeResult.startsWith("reflection");
+              const inComm = activeResult === "personality" || activeResult && activeResult.startsWith("comm");
+              const inExp = activeResult === "expectations" || activeResult && activeResult.startsWith("exp");
+              let subnav = [];
+              if (inRefl) {
+                subnav = [
+                  { label: "Overview", id: "reflection-overview" },
+                  { label: "Insights", id: "reflection-insights" },
+                  { label: "Side by Side", id: "reflection-story" },
+                  { label: "Action Plan", id: "reflection-plan" },
+                ];
+              } else if (inComm) {
+                subnav = [
+                  { label: "Overview", id: "comm-overview" },
+                  { label: "By Dimension", id: "personality" },
+                  { label: "Side by Side", id: "comm-detail" },
+                  { label: "Action Plan", id: "comm-action" },
+                ];
+              } else if (inExp) {
+                subnav = [
+                  { label: "Overview", id: "exp-overview" },
+                  { label: "Expectations", id: "expectations" },
+                  { label: "Action Plan", id: "exp-action" },
+                ];
+              }
+              if (!subnav.length) return null;
+              return (
+                <div style={{ display: "flex", overflowX: "auto", gap: 0, background: "white", borderBottom: "1px solid " + C.stone, flexShrink: 0, WebkitOverflowScrolling: "touch", scrollbarWidth: "none" }}>
+                  <style>{".subnav-scroll::-webkit-scrollbar{display:none}"}</style>
+                  <div className="subnav-scroll" style={{ display: "flex", padding: "0 0.5rem" }}>
+                    {subnav.map(item => {
+                      const isActive = activeResult === item.id || (item.id === "reflection-overview" && activeResult === "reflection") || (item.id === "comm-overview" && activeResult === "overview");
+                      return (
+                        <button key={item.id}
+                          onClick={() => { setActiveResult(item.id); document.querySelector("[data-results-scroll]") && (document.querySelector("[data-results-scroll]").scrollTop = 0); }}
+                          style={{ background: "none", border: "none", borderBottom: isActive ? "2px solid #E8673A" : "2px solid transparent", padding: "0.6rem 0.85rem", fontSize: "0.7rem", fontWeight: isActive ? 700 : 400, color: isActive ? "#0E0B07" : "#8C7A68", cursor: "pointer", whiteSpace: "nowrap", fontFamily: "'DM Sans', sans-serif", transition: "all 0.15s", flexShrink: 0 }}>
+                          {item.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              );
+            })()}
             <div data-results-scroll style={{ flex: 1, overflowY: "auto", WebkitOverflowScrolling: "touch" }}>
               <div style={{ maxWidth: 920, margin: "0 auto", padding: isMobile ? "1rem 1rem 0" : "1.25rem 1.5rem 0" }}>
                 <UnifiedResults
