@@ -6953,7 +6953,7 @@ function ResultsHighlights({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3
         ))}
       </div>}
 
-      <div style={{ flex: inline ? undefined : 1, display: "flex", alignItems: "flex-start", justifyContent: "center", padding: inline ? "0 0 3rem" : isMobile ? "0.5rem 0 4rem" : "1rem 0.5rem 5rem", overflowY: inline ? undefined : "auto", WebkitOverflowScrolling: "touch" }}>
+      <div style={{ flex: inline ? undefined : 1, display: "flex", alignItems: "flex-start", justifyContent: "center", padding: inline ? "0 0 3rem" : isMobile ? "0.5rem 0 4rem" : "1rem 0.5rem 5rem", overflowY: inline ? undefined : "auto", WebkitOverflowScrolling: "touch", overscrollBehavior: "contain" }}>
         {cards[cardIdx]}
       </div>
 
@@ -7930,6 +7930,16 @@ export default function App() {
   const isMobile = useMobile(680);
 
   // Lock body scroll when results are shown (prevents mobile page drift)
+  // Lock outer scroll when in results view
+  useEffect(() => {
+    if (view === 'results' && highlightsSeen) {
+      document.documentElement.style.overflow = 'hidden';
+    } else {
+      document.documentElement.style.overflow = '';
+    }
+    return () => { document.documentElement.style.overflow = ''; };
+  }, [view, highlightsSeen]);
+
   useEffect(() => {
     if (view === 'results' && highlightsSeen) {
       document.body.style.overflow = 'hidden';
@@ -9406,7 +9416,11 @@ export default function App() {
                     style={{ background: "transparent", border: "none", color: C.clay, fontSize: "0.72rem", letterSpacing: "0.1em", textTransform: "uppercase", cursor: "pointer", fontFamily: font.body, padding: 0, fontWeight: 600 }}>Overview</button>}
                   <span style={{ color: C.clay, fontSize: isMobile ? "0.9rem" : "1rem", fontWeight: 700, lineHeight: 1, margin: "0 4px", opacity: 0.7 }}>›</span>
                   <span style={{ fontSize: "0.72rem", letterSpacing: "0.1em", textTransform: "uppercase", color: C.ink, fontFamily: font.body, fontWeight: 700, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                    {activeResult === "personality" ? "Comms" : activeResult === "expectations" ? "Expectations" : "Reflection"}
+                    {activeResult === "personality" || activeResult?.startsWith("comm") ? "Comms"
+                      : activeResult === "expectations" || activeResult?.startsWith("exp") ? "Expectations"
+                      : activeResult?.startsWith("reflection") ? "Reflection"
+                      : activeResult === "what-comes-next" ? "What's Next"
+                      : activeResult || "Results"}
                   </span>
                 </>
               )}
@@ -9464,7 +9478,7 @@ export default function App() {
                 </div>
               );
             })()}
-            <div data-results-scroll style={{ flex: 1, overflowY: "auto", WebkitOverflowScrolling: "touch" }}>
+            <div data-results-scroll style={{ flex: 1, overflowY: "auto", WebkitOverflowScrolling: "touch", overscrollBehavior: "contain" }}>
               <div style={{ maxWidth: 920, margin: "0 auto", padding: isMobile ? "1rem 1rem 0" : "1.25rem 1.5rem 0" }}>
                 <UnifiedResults
                   isMobile={isMobile}
