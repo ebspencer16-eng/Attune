@@ -6533,9 +6533,9 @@ function downloadCard(cardRef, filename) {
 // Individual card wrapper with download affordance
 function WrappedCard({ children, bg, onDownload, cardIndex, cardRef, inline, portraitCorner, isMobile = false }) {
   return (
-    <div style={{ position: "relative", userSelect: "none", width: inline ? "100%" : isMobile ? "min(390px, 100vw - 2rem)" : CARD_W }}>
+    <div style={{ position: "relative", userSelect: "none", width: inline ? "100%" : isMobile ? "min(390px, calc(100vw - 1rem))" : CARD_W }}>
       <div ref={cardRef}
-        style={{ width: inline ? "100%" : isMobile ? "min(390px, 100vw - 2rem)" : CARD_W, height: inline ? "min(72vw, 560px)" : isMobile ? "min(680px, 90vw * 1.85)" : CARD_H, background: bg || "#2d2250", borderRadius: 20, overflow: "hidden", position: "relative", flexShrink: 0, display: "flex", flexDirection: "column" }}>
+        style={{ width: inline ? "100%" : isMobile ? "min(390px, calc(100vw - 1rem))" : CARD_W, height: inline ? "min(72vw, 560px)" : isMobile ? "min(660px, calc(100vh - 130px))" : CARD_H, background: bg || "#2d2250", borderRadius: 20, overflow: "hidden", position: "relative", flexShrink: 0, display: "flex", flexDirection: "column" }}>
         {/* Attune watermark */}
         <div style={{ position: "absolute", bottom: 16, left: 20, display: "flex", alignItems: "center", gap: 6, opacity: 0.45 }}>
           <svg width="22" height="16" viewBox="0 0 103 76" fill="none"><defs><linearGradient id={"wg"+cardIndex} x1="0" y1="0" x2="103" y2="76" gradientUnits="userSpaceOnUse"><stop offset="0%" stopColor="#E8673A"/><stop offset="100%" stopColor="#1B5FE8"/></linearGradient></defs><path d="M14,4 L44,4 A9,9 0 0,1 53,13 L53,42 A9,9 0 0,1 44,51 L20,51 L6,61 L11,51 A6,6 0 0,1 5,45 L5,13 A9,9 0 0,1 14,4 Z" fill={"url(#wg"+cardIndex+")"}/><path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill="white" opacity="0.9" transform="translate(13.16,11.3) scale(0.72)"/><path d="M89,14 L59,14 A9,9 0 0,0 50,23 L50,52 A9,9 0 0,0 59,61 L83,61 L97,71 L92,61 A6,6 0 0,0 98,55 L98,23 A9,9 0 0,0 89,14 Z" fill="none" stroke={"url(#wg"+cardIndex+")"} strokeWidth="2.2" strokeLinejoin="round"/><path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill={"url(#wg"+cardIndex+")"} transform="translate(58.16,21.3) scale(0.72)"/></svg>
@@ -6966,7 +6966,7 @@ function ResultsHighlights({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3
         ))}
       </div>}
 
-      <div style={{ flex: inline ? undefined : 1, display: "flex", alignItems: "flex-start", justifyContent: "center", padding: inline ? "0 0 3rem" : "1rem 0.5rem 5rem", overflowY: inline ? undefined : "auto", WebkitOverflowScrolling: "touch" }}>
+      <div style={{ flex: inline ? undefined : 1, display: "flex", alignItems: "flex-start", justifyContent: "center", padding: inline ? "0 0 3rem" : isMobile ? "0.5rem 0 4rem" : "1rem 0.5rem 5rem", overflowY: inline ? undefined : "auto", WebkitOverflowScrolling: "touch" }}>
         {cards[cardIdx]}
       </div>
 
@@ -6998,7 +6998,7 @@ function ResultsHighlights({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3
 
   if (inline) return <div style={{ display: "flex", flexDirection: "column" }}>{content}</div>;
   return (
-    <div style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, background: "#120f22", display: "flex", flexDirection: "column", zIndex: 200, overflow: "hidden", paddingBottom: "env(safe-area-inset-bottom)" }}>
+    <div style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, background: "#120f22", display: "flex", flexDirection: "column", zIndex: 200, overflow: "hidden", paddingBottom: "env(safe-area-inset-bottom)", alignItems: isMobile ? "center" : undefined }}>
       {/* Subtle side gradient panels on desktop */}
       <div style={{ position: "absolute", inset: 0, background: "radial-gradient(ellipse at 15% 50%, rgba(232,103,58,0.06) 0%, transparent 60%), radial-gradient(ellipse at 85% 50%, rgba(27,95,232,0.06) 0%, transparent 60%)", pointerEvents: "none" }} />
       {content}
