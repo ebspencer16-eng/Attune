@@ -1792,7 +1792,7 @@ function WithSideNav({ navItems = [], currentStep, onGo, accent = "#9B5DE5", chi
   return (
     <div style={{ display: "flex", alignItems: "flex-start", gap: 0, minHeight: "100vh" }}>
       {/* Sidebar */}
-      <div style={{
+      <div className="desktop-sidebar" style={{
         width: 220, flexShrink: 0, position: "sticky", top: 0, height: "100vh",
         overflowY: "auto", background: "white", borderRight: "1px solid #E5E2DC",
         padding: "1.5rem 0", display: "flex", flexDirection: "column", gap: 2,

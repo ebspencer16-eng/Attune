@@ -1086,7 +1086,7 @@
       </div>
     </div>
     <div class="pkg-actions">
-      <button onclick="addToCartWithIntent('premium')" class="btn-primary" id="premium-cta" style="background:linear-gradient(135deg,var(--indigo),#4555e8);box-shadow:0 6px 22px rgba(91,109,248,.4);">Get Attune Premium →</button>
+      <button onclick="addToCartWithIntent('premium')" class="btn-primary" id="premium-cta" style="background:linear-gradient(135deg,var(--indigo),#4555e8);box-shadow:0 6px 22px rgba(91,109,248,.4);">Add to cart →</button>
       <span class="pkg-note" id="premium-note" style="color:rgba(255,255,255,.35);">Includes scheduling link for your LMFT session after purchase</span>
     </div>
   </div>
@@ -1451,7 +1451,7 @@ function setFormat(pkg,format){
     const physical=format==='physical';
     document.getElementById('newlywed-price').textContent=physical?'$169':'$139';
     document.getElementById('newlywed-price-sub').textContent=physical?'Physical gift box (+$30) · ships in 5–7 days':'Digital · instant access · yours to keep';
-    document.getElementById('newlywed-cta').textContent=physical?'Order gift box →':'Get digital edition →';
+    document.getElementById('newlywed-cta').textContent='Add to cart →';
     document.getElementById('newlywed-physical-col').style.display=physical?'block':'none';
     document.querySelectorAll('#pkg-newlywed .fmt-btn').forEach((b,i)=>{
       b.className='fmt-btn'+(i===(physical?0:1)?' active':'');
@@ -1461,7 +1461,7 @@ function setFormat(pkg,format){
     const physical=format==='physical';
     document.getElementById('ann-price').textContent=physical?'$169':'$139';
     document.getElementById('ann-price-sub').textContent=physical?'Physical gift box (+$45) · ships in 5–7 days':'Digital · instant access · yours to keep';
-    document.getElementById('ann-cta').textContent=physical?'Order gift box →':'Get digital edition →';
+    document.getElementById('ann-cta').textContent='Add to cart →';
     document.getElementById('ann-physical-col').style.display=physical?'block':'none';
     document.querySelectorAll('#pkg-anniversary .fmt-btn').forEach((b,i)=>{
       b.className='fmt-btn'+(i===(physical?0:1)?' active':'');
@@ -1471,7 +1471,7 @@ function setFormat(pkg,format){
     const physical=format==='physical';
     document.getElementById('premium-price').textContent=physical?'$340':'$295';
     document.getElementById('premium-price-sub').textContent=physical?'Physical gift box (+$45) · ships in 5–7 days':'Digital · instant access · yours to keep';
-    document.getElementById('premium-cta').textContent=physical?'Order Premium gift box →':'Get Attune Premium →';
+    document.getElementById('premium-cta').textContent='Add to cart →';
     document.getElementById('premium-lmft-col').style.display=physical?'none':'block';
     document.getElementById('premium-physical-col').style.display=physical?'block':'none';
     document.querySelectorAll('#pkg-premium .fmt-btn').forEach((b,i)=>{
