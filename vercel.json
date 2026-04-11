@@ -196,6 +196,34 @@
       "destination": "/welcome.html"
     },
     {
+      "source": "/methodology",
+      "destination": "/methodology.html"
+    },
+    {
+      "source": "/lmft-booking",
+      "destination": "/lmft-booking.html"
+    },
+    {
+      "source": "/api/unsubscribe",
+      "destination": "/api/unsubscribe.js"
+    },
+    {
+      "source": "/api/generate-card",
+      "destination": "/api/generate-card.js"
+    },
+    {
+      "source": "/api/lmft-request",
+      "destination": "/api/lmft-request.js"
+    },
+    {
+      "source": "/start",
+      "destination": "/start.html"
+    },
+    {
+      "source": "/gift-cards",
+      "destination": "/gift-cards.html"
+    },
+    {
       "source": "/app/(.*)",
       "destination": "/index.html"
     },
