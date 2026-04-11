@@ -6458,7 +6458,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
                 </div>
                 <div>
                   <div style={{ fontSize: "0.85rem", fontWeight: 700, color: C.ink, fontFamily: BFONT }}>Review your results with a licensed therapist</div>
-                  <div style={{ fontSize: "0.72rem", color: C.muted, fontFamily: BFONT }}>One-time · Virtual · 60 minutes</div>
+                  <div style={{ fontSize: "0.72rem", color: C.muted, fontFamily: BFONT }}>One-time · Virtual · 50 minutes</div>
                 </div>
               </div>
               <p style={{ fontSize: "0.82rem", color: C.muted, fontFamily: BFONT, fontWeight: 300, lineHeight: 1.7, marginBottom: "1rem" }}>
