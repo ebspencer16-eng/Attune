@@ -6137,6 +6137,24 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
               };
 
               try {
+                // Try PDF first (Browserless) — falls back to docx if not configured
+                const pdfResp = await fetch('/api/generate-pdf', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify(payload),
+                });
+                if (pdfResp.ok && pdfResp.headers.get('content-type')?.includes('pdf')) {
+                  const blob = await pdfResp.blob();
+                  const url = URL.createObjectURL(blob);
+                  const a = document.createElement('a');
+                  a.href = url;
+                  a.download = `Attune_Workbook_${userName}_and_${partnerName}.pdf`;
+                  document.body.appendChild(a); a.click();
+                  document.body.removeChild(a);
+                  URL.revokeObjectURL(url);
+                  return;
+                }
+                // Fall back to docx
                 const resp = await fetch('/api/generate-workbook', {
                   method: 'POST',
                   headers: { 'Content-Type': 'application/json' },

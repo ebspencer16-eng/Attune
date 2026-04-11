@@ -228,6 +228,14 @@
       "destination": "/api/submit-beta-survey.js"
     },
     {
+      "source": "/api/generate-pdf",
+      "destination": "/api/generate-pdf.js"
+    },
+    {
+      "source": "/workbook-render",
+      "destination": "/workbook-render.html"
+    },
+    {
       "source": "/app/(.*)",
       "destination": "/index.html"
     },

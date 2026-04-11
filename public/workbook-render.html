@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Attune Workbook</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,700&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --orange: #E8673A; --indigo: #1B5FE8; --ink: #0E0B07; --muted: #8C7A68;
+    --stone: #E8DDD0; --cream: #FFFDF9; --warm: #F5F0EC;
+    --hfont: 'Playfair Display', Georgia, serif;
+    --bfont: 'DM Sans', system-ui, sans-serif;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  body { font-family: var(--bfont); background: white; color: var(--ink); font-size: 10pt; line-height: 1.6; }
+
+  /* Page breaks */
+  .page { page-break-after: always; min-height: 100vh; padding: 60px 64px; position: relative; }
+  .page:last-child { page-break-after: avoid; }
+
+  /* Cover page */
+  .cover { background: linear-gradient(150deg, #1c1940 0%, #282560 55%, #1e3a6e 100%); color: white; display: flex; flex-direction: column; justify-content: center; }
+  .cover-eyebrow { font-size: 7pt; letter-spacing: 0.25em; text-transform: uppercase; color: rgba(255,255,255,0.5); margin-bottom: 20px; }
+  .cover-names { font-family: var(--hfont); font-size: 48pt; font-weight: 700; line-height: 1.0; margin-bottom: 12px; }
+  .cover-names span { font-style: italic; }
+  .cover-amp { color: rgba(255,255,255,0.4); font-size: 36pt; margin: 0 8px; }
+  .cover-sub { font-size: 11pt; color: rgba(255,255,255,0.6); font-weight: 300; margin-bottom: 48px; }
+  .cover-type-card { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 16px; padding: 28px 32px; max-width: 480px; }
+  .cover-type-label { font-size: 7pt; letter-spacing: 0.2em; text-transform: uppercase; color: rgba(255,255,255,0.5); margin-bottom: 8px; }
+  .cover-type-name { font-family: var(--hfont); font-size: 22pt; margin-bottom: 10px; }
+  .cover-type-tagline { font-size: 10pt; color: rgba(255,255,255,0.7); font-style: italic; line-height: 1.5; }
+  .grad-bar { height: 3px; background: linear-gradient(90deg, var(--orange), var(--indigo)); border-radius: 2px; margin: 40px 0 32px; width: 80px; }
+
+  /* Section headers */
+  .section-header { border-bottom: 2px solid var(--stone); padding-bottom: 16px; margin-bottom: 32px; }
+  .section-eyebrow { font-size: 7pt; letter-spacing: 0.2em; text-transform: uppercase; color: var(--orange); font-weight: 700; margin-bottom: 6px; display: flex; align-items: center; gap: 8px; }
+  .section-eyebrow::before { content: ''; display: block; width: 24px; height: 2px; background: linear-gradient(90deg, var(--orange), var(--indigo)); border-radius: 1px; }
+  h2 { font-family: var(--hfont); font-size: 22pt; line-height: 1.1; letter-spacing: -0.01em; }
+  h3 { font-family: var(--hfont); font-size: 14pt; line-height: 1.2; margin-bottom: 10px; }
+  p { font-size: 10pt; color: var(--muted); line-height: 1.75; margin-bottom: 10px; }
+  p strong { color: var(--ink); }
+
+  /* Dimension score cards */
+  .dim-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 24px; }
+  .dim-card { background: var(--warm); border-radius: 12px; padding: 16px 18px; border: 1px solid var(--stone); }
+  .dim-name { font-size: 8pt; letter-spacing: 0.1em; text-transform: uppercase; font-weight: 700; color: var(--muted); margin-bottom: 10px; }
+  .dim-scores { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+  .dim-score-badge { padding: 3px 8px; border-radius: 6px; font-size: 9pt; font-weight: 700; }
+  .dim-you { background: #FFF0EB; color: var(--orange); }
+  .dim-partner { background: #EEF2FF; color: var(--indigo); }
+  .dim-label { font-size: 9pt; color: var(--ink); font-weight: 600; }
+  .dim-gap { font-size: 7.5pt; color: var(--muted); margin-top: 4px; }
+  .gap-bar-wrap { height: 4px; background: var(--stone); border-radius: 2px; margin-top: 8px; }
+  .gap-bar { height: 100%; border-radius: 2px; background: linear-gradient(90deg, var(--orange), var(--indigo)); }
+
+  /* Expectations section */
+  .exp-row { display: flex; gap: 16px; padding: 12px 0; border-bottom: 1px solid var(--stone); }
+  .exp-row:last-child { border-bottom: none; }
+  .exp-domain { font-size: 8pt; letter-spacing: 0.08em; text-transform: uppercase; font-weight: 700; color: var(--muted); width: 120px; flex-shrink: 0; padding-top: 2px; }
+  .exp-answers { display: flex; gap: 12px; flex: 1; }
+  .exp-answer { flex: 1; background: var(--warm); border-radius: 8px; padding: 10px 12px; border: 1px solid var(--stone); }
+  .exp-answer-who { font-size: 7pt; letter-spacing: 0.1em; text-transform: uppercase; font-weight: 700; margin-bottom: 4px; }
+  .exp-you .exp-answer-who { color: var(--orange); }
+  .exp-partner .exp-answer-who { color: var(--indigo); }
+  .exp-answer-text { font-size: 9pt; color: var(--ink); line-height: 1.5; }
+  .aligned-badge { font-size: 7.5pt; padding: 2px 7px; border-radius: 10px; font-weight: 700; }
+  .aligned-yes { background: #ECFDF5; color: #059669; }
+  .aligned-no { background: #FFF7ED; color: #B45309; }
+
+  /* Conversation prompts */
+  .prompt-list { list-style: none; display: flex; flex-direction: column; gap: 12px; margin-top: 16px; }
+  .prompt-item { background: var(--warm); border-left: 3px solid var(--orange); border-radius: 0 10px 10px 0; padding: 12px 16px; }
+  .prompt-num { font-size: 7.5pt; letter-spacing: 0.12em; text-transform: uppercase; color: var(--orange); font-weight: 700; margin-bottom: 4px; }
+  .prompt-text { font-size: 10pt; color: var(--ink); line-height: 1.6; }
+
+  /* Reflection space */
+  .reflection-box { background: var(--warm); border: 1.5px solid var(--stone); border-radius: 12px; padding: 20px; margin-top: 12px; min-height: 80px; }
+  .reflection-label { font-size: 7pt; letter-spacing: 0.15em; text-transform: uppercase; color: var(--muted); font-weight: 700; margin-bottom: 8px; }
+  .reflection-lines { display: flex; flex-direction: column; gap: 18px; }
+  .reflection-line { height: 1px; background: var(--stone); }
+
+  /* Priority grid */
+  .priority-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 20px; }
+  .priority-card { border-radius: 12px; padding: 16px; }
+  .priority-1 { background: linear-gradient(135deg, #FFF0EB, #FFF5F0); border: 1.5px solid rgba(232,103,58,0.3); }
+  .priority-2 { background: linear-gradient(135deg, #EEF2FF, #F3F6FF); border: 1.5px solid rgba(27,95,232,0.3); }
+  .priority-3 { background: var(--warm); border: 1px solid var(--stone); }
+  .priority-rank { font-size: 7pt; letter-spacing: 0.15em; text-transform: uppercase; font-weight: 700; margin-bottom: 6px; }
+  .priority-1 .priority-rank { color: var(--orange); }
+  .priority-2 .priority-rank { color: var(--indigo); }
+  .priority-3 .priority-rank { color: var(--muted); }
+  .priority-name { font-size: 11pt; font-weight: 700; color: var(--ink); margin-bottom: 4px; }
+  .priority-desc { font-size: 8.5pt; color: var(--muted); line-height: 1.5; }
+
+  /* Footer */
+  .page-footer { position: absolute; bottom: 32px; left: 64px; right: 64px; display: flex; justify-content: space-between; align-items: center; }
+  .footer-brand { font-size: 8pt; color: var(--stone); font-weight: 600; }
+  .footer-page { font-size: 8pt; color: var(--stone); }
+
+  @media print {
+    body { background: white; }
+    .page { padding: 0.75in 0.9in; }
+  }
+</style>
+</head>
+<body>
+
+<script>
+// Parse workbook data from URL params
+const params = new URLSearchParams(window.location.search);
+let D = {};
+try { D = JSON.parse(decodeURIComponent(params.get('data') || '{}')); } catch(e) {}
+
+const p1 = D.p1 || 'Partner A';
+const p2 = D.p2 || 'Partner B';
+const ct = D.ct || 'The Attune Assessment';
+const ctTagline = D.ctTagline || '';
+const ctColor = D.ctColor || '#E8673A';
+const scores = D.scores || {};
+const pScores = D.partnerScores || {};
+const expGaps = D.expGaps || [];
+
+const DIMS = [
+  { key: 'energy', label: 'Energy & Recharge', lo: 'Inward', hi: 'Outward' },
+  { key: 'expression', label: 'Emotional Expression', lo: 'Guarded', hi: 'Expressive' },
+  { key: 'needs', label: 'Asking for Needs', lo: 'Direct', hi: 'Indirect' },
+  { key: 'bids', label: 'Connection Bids', lo: 'Reserved', hi: 'Attuned' },
+  { key: 'conflict', label: 'Conflict Style', lo: 'Engages fast', hi: 'Withdraws first' },
+  { key: 'repair', label: 'Repair Approach', lo: 'Verbal', hi: 'Gestural' },
+  { key: 'closeness', label: 'Closeness', lo: 'Independent', hi: 'Close-seeking' },
+  { key: 'love', label: 'Love Language', lo: 'Acts of service', hi: 'Words & affirmation' },
+  { key: 'stress', label: 'Stress Response', lo: 'Externalises', hi: 'Internalises' },
+  { key: 'feedback', label: 'Feedback Receptivity', lo: 'Defensive', hi: 'Open' },
+];
+
+function scoreLabel(score, lo, hi) {
+  if (score <= 2) return lo;
+  if (score >= 4) return hi;
+  return 'In between';
+}
+
+function gapLabel(gap) {
+  if (gap < 0.8) return { text: 'In sync', color: '#059669' };
+  if (gap < 1.5) return { text: 'Close', color: '#6B7280' };
+  if (gap < 2.5) return { text: 'Different', color: '#B45309' };
+  return { text: 'Very different', color: '#DC2626' };
+}
+
+const CONV_PROMPTS = [
+  `What does it feel like when I show you love in the way that works best for me but not necessarily for you?`,
+  `Is there a moment from the past few months where you wanted something from me but didn't ask? What was it?`,
+  `When I go quiet after something difficult, what does that feel like from your side?`,
+  `What's one expectation you have of me that you've never directly said out loud?`,
+  `Where in our relationship do you most want us to grow in the next year?`,
+  `What does repair look like to you — what tells you we're actually okay?`,
+];
+
+function buildPage(num, content) {
+  return `<div class="page">${content}<div class="page-footer"><span class="footer-brand">Attune</span><span class="footer-page">${num}</span></div></div>`;
+}
+
+// PAGE 1: Cover
+document.write(buildPage('', `
+<div class="page cover">
+  <div class="cover-eyebrow">Personalized Relationship Workbook</div>
+  <div class="cover-names">
+    <span>${p1}</span>
+    <span class="cover-amp">&</span>
+    <span>${p2}</span>
+  </div>
+  <div class="cover-sub">Built from your independent answers to the Attune exercises.</div>
+  <div class="grad-bar"></div>
+  ${ct ? `
+  <div class="cover-type-card">
+    <div class="cover-type-label">Your couple type</div>
+    <div class="cover-type-name" style="color:${ctColor}">${ct}</div>
+    ${ctTagline ? `<div class="cover-type-tagline">${ctTagline}</div>` : ''}
+  </div>` : ''}
+</div>
+`));
+
+// PAGE 2: How to use this workbook
+document.write(buildPage('2', `
+<div class="section-header">
+  <div class="section-eyebrow">Before you begin</div>
+  <h2>How to use this workbook</h2>
+</div>
+<p>This workbook was built from your actual answers to the Attune exercises — not from templates or averages. Every dimension score, every conversation prompt, and every focus area on these pages reflects what you two specifically brought in.</p>
+<p>The workbook works best as a conversation tool, not a reading exercise. The intention is to move through one section at a time, together, talking about what you find.</p>
+<div class="priority-grid" style="margin-top:28px">
+  ${[
+    { title: 'Start with the Snapshot', desc: 'Skim your dimension scores. Notice what stands out — especially where your scores diverge.' },
+    { title: 'Use the prompts', desc: 'Each prompt is designed to open a real conversation, not close one. There are no right answers.' },
+    { title: 'Write in the reflection spaces', desc: 'After each section, there\'s space to write. Capture what lands — not what should land.' },
+    { title: 'Revisit in 3–6 months', desc: 'Relationships shift. The same conversation will mean something different in half a year.' },
+    { title: 'Go slowly', desc: 'This doesn\'t need to be done in one sitting. One section per conversation is a good pace.' },
+    { title: 'Not a verdict', desc: 'No score in here is good or bad. These are patterns, not diagnoses. Treat them that way.' },
+  ].map((c, i) => `
+  <div class="priority-card priority-${Math.min(i+1, 3)}">
+    <div class="priority-name">${c.title}</div>
+    <div class="priority-desc">${c.desc}</div>
+  </div>`).join('')}
+</div>
+`));
+
+// PAGE 3: Communication snapshot
+document.write(buildPage('3', `
+<div class="section-header">
+  <div class="section-eyebrow">Exercise 01 — Communication</div>
+  <h2>Your dimension snapshot</h2>
+</div>
+<p>Each row shows where each of you scored on the 10 communication dimensions. The gap between you on each dimension is what drives most of the content in this workbook.</p>
+<div class="dim-grid">
+  ${DIMS.map(d => {
+    const s1 = Number(scores[d.key] || 3).toFixed(1);
+    const s2 = Number(pScores[d.key] || 3).toFixed(1);
+    const gap = Math.abs(s1 - s2);
+    const gl = gapLabel(gap);
+    const pct = (gap / 4) * 100;
+    return `
+    <div class="dim-card">
+      <div class="dim-name">${d.label}</div>
+      <div class="dim-scores">
+        <span class="dim-score-badge dim-you">${p1.split(' ')[0]}: ${s1}</span>
+        <span class="dim-score-badge dim-partner">${p2.split(' ')[0]}: ${s2}</span>
+      </div>
+      <div class="dim-label">${scoreLabel(Number(s1), d.lo, d.hi)} / ${scoreLabel(Number(s2), d.lo, d.hi)}</div>
+      <div class="dim-gap" style="color:${gl.color}">● ${gl.text}</div>
+      <div class="gap-bar-wrap"><div class="gap-bar" style="width:${Math.max(4,pct)}%"></div></div>
+    </div>`;
+  }).join('')}
+</div>
+`));
+
+// PAGE 4: Expectations
+if (expGaps.length > 0) {
+  document.write(buildPage('4', `
+<div class="section-header">
+  <div class="section-eyebrow">Exercise 02 — Expectations</div>
+  <h2>Where you're aligned and where you're not</h2>
+</div>
+<p>These are the expectations both of you brought into your relationship — many of them inherited from your family of origin, never quite articulated. Alignment means you described things similarly. Misalignment means you're working from different assumptions.</p>
+<div style="margin-top:20px">
+  ${expGaps.slice(0, 6).map(g => `
+  <div class="exp-row">
+    <div class="exp-domain">${g.label}</div>
+    <div class="exp-answers">
+      <div class="exp-answer exp-you">
+        <div class="exp-answer-who">${p1.split(' ')[0]}</div>
+        <div class="exp-answer-text">${g.yourAnswer || '—'}</div>
+      </div>
+      <div class="exp-answer exp-partner">
+        <div class="exp-answer-who">${p2.split(' ')[0]}</div>
+        <div class="exp-answer-text">${g.partnerAnswer || '—'}</div>
+      </div>
+    </div>
+    <div style="display:flex;align-items:flex-start;padding-top:12px;padding-left:8px">
+      <span class="aligned-badge ${g.aligned ? 'aligned-yes' : 'aligned-no'}">${g.aligned ? 'Aligned' : 'Gap'}</span>
+    </div>
+  </div>`).join('')}
+</div>
+`));
+}
+
+// PAGE 5: Conversation prompts
+document.write(buildPage('5', `
+<div class="section-header">
+  <div class="section-eyebrow">Conversation guide</div>
+  <h2>Six questions for ${p1} & ${p2}</h2>
+</div>
+<p>These prompts were selected based on where your scores diverge most. They're designed to open conversations that get somewhere — not just surface ones. Go one at a time. Give the other person room to answer before responding.</p>
+<ul class="prompt-list">
+  ${CONV_PROMPTS.map((q, i) => `
+  <li class="prompt-item">
+    <div class="prompt-num">Prompt ${i+1}</div>
+    <div class="prompt-text">${q}</div>
+  </li>`).join('')}
+</ul>
+`));
+
+// PAGE 6: Reflection space
+document.write(buildPage('6', `
+<div class="section-header">
+  <div class="section-eyebrow">Your notes</div>
+  <h2>Reflection space</h2>
+</div>
+<p>Write here after your conversations. What surprised you? What landed differently than you expected? What do you want to come back to?</p>
+${[`After reading our results together`, `What I want ${p2} to know`, `What I want to remember`, `What we want to work on`].map(label => `
+<div style="margin-top:20px">
+  <div class="reflection-label">${label}</div>
+  <div class="reflection-box">
+    <div class="reflection-lines">
+      <div class="reflection-line"></div>
+      <div class="reflection-line"></div>
+      <div class="reflection-line"></div>
+      <div class="reflection-line"></div>
+    </div>
+  </div>
+</div>`).join('')}
+`));
+
+// Signal to Browserless that the page is ready to render
+document.addEventListener('DOMContentLoaded', () => {
+  document.body.classList.add('workbook-ready');
+});
+// Also set immediately in case DOMContentLoaded already fired
+document.body.classList.add('workbook-ready');
+</script>
+</body>
+</html>
