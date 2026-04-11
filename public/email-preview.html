@@ -28,6 +28,10 @@
   <div class="tab" onclick="show('workbook_ready',this)">Workbook ready</div>
   <div class="tab" onclick="show('beta_survey',this)">Beta survey</div>
   <div class="tab" onclick="show('checkin_6mo',this)">6-month check-in</div>
+  <div class="tab" onclick="show('welcome_account',this)">Welcome</div>
+  <div class="tab" onclick="show('partner_joined',this)">Partner joined</div>
+  <div class="tab" onclick="show('lmft_scheduled',this)">LMFT scheduled</div>
+  <div class="tab" onclick="show('checkin_1yr',this)">1-year check-in</div>
   <div class="tab" onclick="show('order_confirm',this)">Order confirm</div>
 </div>
 
@@ -113,6 +117,44 @@ const templates = {
       <p style="font-size:.78rem;color:#8C7A68;">This is a beta product. Your feedback shapes what we build next.</p>
     `)
   },
+  welcome_account: {
+    subject: "Welcome to Attune — let's get started",
+    preview: "To: maya@example.com",
+    html: wrap(`
+      <h1>You're in. Let's get started.</h1>
+      <p>Hi Maya,</p>
+      <p>Your Attune account is set up. Both you and <strong>Alex</strong> each complete the exercises independently — your answers stay private until both of you are done.</p>
+      <div class="btn-wrap"><a href="#" class="btn">Go to my dashboard →</a></div>
+      <div class="divider"></div>
+      <p style="font-size:0.82rem;font-weight:700;color:#0E0B07;margin-bottom:6px;">What happens next</p>
+      <p style="font-size:0.8rem;">1. Complete Exercise 01: Communication (about 10 minutes).<br/>2. Complete Exercise 02: Expectations (about 15 minutes).<br/>3. Once both of you are done, your joint results unlock.</p>
+    `)
+  },
+  partner_joined: {
+    subject: "Alex just joined Attune",
+    preview: "To: maya@example.com",
+    html: wrap(`
+      <span class="badge badge-green">Partner joined</span>
+      <h1 style="margin-top:14px;">Alex just created their account.</h1>
+      <p>Hi Maya,</p>
+      <p>Alex has joined Attune. Once both of you have completed your exercises, your joint results will unlock. Your answers stay private until then.</p>
+      <div class="btn-wrap"><a href="#" class="btn">Go to my dashboard →</a></div>
+    `)
+  },
+  lmft_scheduled: {
+    subject: "Book your LMFT session — Attune",
+    preview: "To: maya@example.com",
+    html: wrap(`
+      <span class="badge badge-blue">LMFT session included</span>
+      <h1 style="margin-top:14px;">Book your session with a licensed therapist.</h1>
+      <p>Hi Maya,</p>
+      <p>Your Attune package includes a 50-minute session with a licensed marriage and family therapist (LMFT). They'll review your joint results before you meet — so the session starts from your actual data, not from scratch.</p>
+      <div class="btn-wrap"><a href="#" class="btn">Book your session →</a></div>
+      <div class="divider"></div>
+      <div class="detail-row"><span>Order</span><strong>#ATT-20260401-DEMO</strong></div>
+      <div class="detail-row"><span>Format</span><strong>50-minute video session</strong></div>
+    `)
+  },
   checkin_6mo: {
     subject: "Six months with Attune — worth a look",
     preview: "To: maya@example.com",
@@ -140,6 +182,16 @@ const templates = {
       <div class="divider"></div>
       <p>Open Attune and complete your exercises. When you're both done, your couple type, dimension breakdown, and personalized insights unlock together.</p>
       <div class="btn-wrap"><a href="#" class="btn">Start your exercises →</a></div>
+    `)
+  },
+  checkin_1yr: {
+    subject: "One year with Attune — your results are worth revisiting",
+    preview: "To: maya@example.com",
+    html: wrap(`
+      <h1>A year is a meaningful unit of time.</h1>
+      <p>Hi Maya,</p>
+      <p>You and Alex took Attune a year ago. In that time, you've navigated seasons, decisions, and the ordinary accumulation of a shared life. The patterns that showed up in your results may look different now.</p>
+      <div class="btn-wrap"><a href="#" class="btn">Retake Attune →</a></div>
     `)
   },
 };

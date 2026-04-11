@@ -197,6 +197,22 @@
       </div>
     </div>
 
+    <!-- LMFT Add-on (shown for non-premium packages) -->
+    <div id="lmftAddonRow" class="co-card" style="display:none">
+      <div style="padding:1rem 1.5rem">
+        <label style="display:flex;align-items:flex-start;gap:.85rem;cursor:pointer">
+          <div style="position:relative;flex-shrink:0;margin-top:.15rem">
+            <input type="checkbox" id="lmftCheck" style="position:absolute;opacity:0;width:0;height:0"/>
+            <div id="lmftBox" style="width:20px;height:20px;border:1.5px solid #E8DDD0;border-radius:6px;background:white;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .15s"></div>
+          </div>
+          <div style="flex:1">
+            <div style="font-size:.88rem;font-weight:700;color:#0E0B07;margin-bottom:.2rem">Add LMFT Session <span style="color:#E8673A">+$150</span></div>
+            <div style="font-size:.75rem;color:#8C7A68;line-height:1.6">A 50-minute video session with a licensed marriage and family therapist who reviews your joint results before you meet. Available on any package.</div>
+          </div>
+        </label>
+      </div>
+    </div>
+
     <!-- STEP 3: CONTACT & PAYMENT -->
     <div class="co-card">
       <div class="co-card-head">
@@ -378,25 +394,28 @@ let addonReflection = false;
     const ftEl = document.getElementById('formatToggleSection');
     if (ftEl) ftEl.style.display = 'block';
   }
-  // LMFT add-on available on all packages (not shown if premium already includes it)
+  // LMFT add-on: show for all packages except premium (which includes it)
   if (pkg.id !== 'premium') {
     const lmftRow = document.getElementById('lmftAddonRow');
     if (lmftRow) lmftRow.style.display = 'block';
   }
-  // Sync checkbox visual state
-  const lmftCheck = document.getElementById('lmftCheck');
-  const lmftBox = document.getElementById('lmftBox');
-  if (lmftCheck && lmftBox) {
-    lmftCheck.checked = addonLmft;
-    lmftBox.style.background = addonLmft ? '#E8673A' : 'white';
-    lmftBox.style.borderColor = addonLmft ? '#E8673A' : '#E8DDD0';
-    lmftBox.innerHTML = addonLmft ? '<svg width="11" height="9" viewBox="0 0 11 9" fill="none"><path d="M1 4.5L4 7.5L10 1" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>' : '';
-    lmftCheck.addEventListener('change', () => {
-      lmftBox.style.background = lmftCheck.checked ? '#E8673A' : 'white';
-      lmftBox.style.borderColor = lmftCheck.checked ? '#E8673A' : '#E8DDD0';
-      lmftBox.innerHTML = lmftCheck.checked ? '<svg width="11" height="9" viewBox="0 0 11 9" fill="none"><path d="M1 4.5L4 7.5L10 1" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>' : '';
-    });
+  // Wire LMFT checkbox
+  function syncLmftBox() {
+    const chk = document.getElementById('lmftCheck');
+    const box = document.getElementById('lmftBox');
+    if (!chk || !box) return;
+    box.style.background = chk.checked ? '#E8673A' : 'white';
+    box.style.borderColor = chk.checked ? '#E8673A' : '#E8DDD0';
+    box.innerHTML = chk.checked ? '<svg width="11" height="9" viewBox="0 0 11 9" fill="none"><path d="M1 4.5L4 7.5L10 1" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>' : '';
   }
+  document.getElementById('lmftBox')?.addEventListener('click', () => {
+    const chk = document.getElementById('lmftCheck');
+    chk.checked = !chk.checked;
+    addonLmft = chk.checked;
+    syncLmftBox();
+    renderSummary();
+  });
+  syncLmftBox();
   if (pkg.format === 'physical') {
     document.getElementById('shippingSection').style.display = 'block';
   }
