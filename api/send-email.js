@@ -25,7 +25,7 @@ export const config = { runtime: 'edge' };
 const FROM = process.env.FROM_EMAIL || 'hello@attune-relationships.com';
 
 // ── Shared layout wrapper ────────────────────────────────────────────────────
-function layout(bodyHtml) {
+function layout(bodyHtml, userId = null) {
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -71,7 +71,7 @@ ${bodyHtml}
 <div class="footer">
   Attune · <a href="https://attune-relationships.com" style="color:#C17F47">attune-relationships.com</a><br/>
   Questions? Reply to this email or write to hello@attune-relationships.com<br/>
-  <a href="{{{unsubscribe_url}}}" style="color:#C17F47">Unsubscribe</a>
+  ${userId ? `<a href="https://attune-relationships.com/api/unsubscribe?token=${btoa(userId)}" style="color:#C17F47">Unsubscribe</a>` : '<a href="mailto:hello@attune-relationships.com?subject=Unsubscribe" style="color:#C17F47">Unsubscribe</a>'}
 </div>
 </div>
 </body>
@@ -80,7 +80,7 @@ ${bodyHtml}
 
 // ── Email builders ───────────────────────────────────────────────────────────
 
-function partnerInviteEmail({ fromName, toName, inviteUrl }) {
+function partnerInviteEmail({ fromName, toName, inviteUrl }, userId = null) {
   const name = toName || "there";
   return {
     subject: `${fromName} invited you to take Attune`,
@@ -342,9 +342,10 @@ export default async function handler(req) {
   const { type } = body;
   let email;
 
+  const userId = body.userId || null;
   if (type === 'partner_invite') {
     if (!body.toEmail || !body.fromName) return new Response('Missing toEmail or fromName', { status: 400 });
-    email = partnerInviteEmail(body);
+    email = partnerInviteEmail(body, userId);
     email.to = body.toEmail;
   } else if (type === 'workbook_ready') {
     if (!body.toEmail) return new Response('Missing toEmail', { status: 400 });

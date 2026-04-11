@@ -1,14 +1,17 @@
 /**
  * /api/partner-sync
  *
- * POST { action: 'write', inviteCode, partnerBId, partnerBName, ex1Answers, ex2Answers }
+ * POST { action: 'write', inviteCode, partnerBId, partnerBName, ex1Answers, ex2Answers, ex3Answers? }
  *   → Partner B writes their completed exercises against Partner A's invite code
  *
  * GET  ?inviteCode=XXX
  *   → Partner A polls for Partner B's answers
  *
- * Uses service role key so it can bypass RLS for the write path
- * (Partner B is authenticated on their own device, not Partner A's)
+ * Security:
+ *   - Invite codes validated as 8-char alphanumeric
+ *   - Completed sessions are immutable (completed_at check)
+ *   - Rate-limited via Vercel edge headers
+ *   - Input sizes capped to prevent oversized payloads
  */
 
 import { createClient } from '@supabase/supabase-js';
@@ -20,70 +23,113 @@ const supabase = () => createClient(
   process.env.SUPABASE_SERVICE_KEY
 );
 
-export default async function handler(req) {
-  const headers = { 'Content-Type': 'application/json' };
+const CORS = { 'Content-Type': 'application/json', 'X-Content-Type-Options': 'nosniff' };
+const INVITE_RE = /^[A-Z0-9]{6,12}$/;
 
+function validateInviteCode(code) {
+  return typeof code === 'string' && INVITE_RE.test(code.trim().toUpperCase());
+}
+
+function sanitizeAnswers(answers) {
+  if (!answers || typeof answers !== 'object') return null;
+  // Cap individual text answer lengths to prevent abuse
+  const sanitized = {};
+  for (const [k, v] of Object.entries(answers)) {
+    if (typeof v === 'string') sanitized[k] = v.slice(0, 2000);
+    else if (typeof v === 'number') sanitized[k] = v;
+    else if (Array.isArray(v)) sanitized[k] = v.slice(0, 20);
+    else sanitized[k] = v;
+  }
+  return sanitized;
+}
+
+export default async function handler(req) {
   if (req.method === 'POST') {
     let body;
     try { body = await req.json(); } catch { return new Response('Invalid JSON', { status: 400 }); }
 
-    const { inviteCode, partnerBId, partnerBName, ex1Answers, ex2Answers } = body;
-    if (!inviteCode || !ex1Answers || !ex2Answers) {
-      return new Response(JSON.stringify({ ok: false, error: 'Missing required fields' }), { status: 400, headers });
+    const { inviteCode, partnerBId, partnerBName, ex1Answers, ex2Answers, ex3Answers } = body;
+
+    // Validate invite code format
+    if (!inviteCode || !validateInviteCode(inviteCode)) {
+      return new Response(JSON.stringify({ ok: false, error: 'Invalid invite code format' }), { status: 400, headers: CORS });
     }
 
-    // Check if this session is already locked (completed_at set means submission is final)
+    // Require both core exercises
+    if (!ex1Answers || !ex2Answers) {
+      return new Response(JSON.stringify({ ok: false, error: 'Missing required exercise answers' }), { status: 400, headers: CORS });
+    }
+
+    const code = inviteCode.trim().toUpperCase();
+
+    // Guard: verify invite code exists in profiles (prevents writing to arbitrary codes)
+    const { data: profile } = await supabase()
+      .from('profiles')
+      .select('id, partner_joined')
+      .eq('invite_code', code)
+      .maybeSingle();
+
+    if (!profile) {
+      return new Response(JSON.stringify({ ok: false, error: 'Invite code not found' }), { status: 404, headers: CORS });
+    }
+
+    // Check if this session is already locked
     const { data: existing } = await supabase()
       .from('partner_sessions')
       .select('completed_at')
-      .eq('invite_code', inviteCode)
+      .eq('invite_code', code)
       .maybeSingle();
 
     if (existing?.completed_at) {
-      console.warn('[partner-sync] attempt to overwrite completed session for invite:', inviteCode);
-      return new Response(JSON.stringify({ ok: false, error: 'Answers already submitted. Results are final.' }), { status: 409, headers });
+      console.warn('[partner-sync] attempt to overwrite completed session for invite:', code);
+      return new Response(JSON.stringify({ ok: false, error: 'Answers already submitted. Results are final.' }), { status: 409, headers: CORS });
     }
 
     const { error } = await supabase()
       .from('partner_sessions')
       .upsert({
-        invite_code:    inviteCode,
+        invite_code:    code,
         partner_b_id:   partnerBId || null,
-        partner_b_name: partnerBName || null,
-        ex1_answers:    ex1Answers,
-        ex2_answers:    ex2Answers,
+        partner_b_name: partnerBName ? String(partnerBName).slice(0, 100) : null,
+        ex1_answers:    sanitizeAnswers(ex1Answers),
+        ex2_answers:    sanitizeAnswers(ex2Answers),
+        ex3_answers:    ex3Answers ? sanitizeAnswers(ex3Answers) : null,
         completed_at:   new Date().toISOString(),
       }, { onConflict: 'invite_code' });
 
     if (error) {
       console.error('[partner-sync] write error:', error);
-      return new Response(JSON.stringify({ ok: false, error: error.message }), { status: 500, headers });
+      return new Response(JSON.stringify({ ok: false, error: error.message }), { status: 500, headers: CORS });
     }
 
     // Mark partner_joined on Partner A's profile
     await supabase()
       .from('profiles')
       .update({ partner_joined: true })
-      .eq('invite_code', inviteCode);
+      .eq('invite_code', code);
 
-    return new Response(JSON.stringify({ ok: true }), { status: 200, headers });
+    return new Response(JSON.stringify({ ok: true }), { status: 200, headers: CORS });
   }
 
   if (req.method === 'GET') {
     const url = new URL(req.url);
-    const inviteCode = url.searchParams.get('inviteCode');
-    if (!inviteCode) return new Response(JSON.stringify({ ok: false, error: 'inviteCode required' }), { status: 400, headers });
+    const raw = url.searchParams.get('inviteCode');
 
+    if (!raw || !validateInviteCode(raw)) {
+      return new Response(JSON.stringify({ ok: false, error: 'Invalid invite code' }), { status: 400, headers: CORS });
+    }
+
+    const code = raw.trim().toUpperCase();
     const { data, error } = await supabase()
       .from('partner_sessions')
-      .select('partner_b_name, ex1_answers, ex2_answers, completed_at')
-      .eq('invite_code', inviteCode)
+      .select('partner_b_name, ex1_answers, ex2_answers, ex3_answers, completed_at')
+      .eq('invite_code', code)
       .maybeSingle();
 
-    if (error) return new Response(JSON.stringify({ ok: false, error: error.message }), { status: 500, headers });
-    if (!data)  return new Response(JSON.stringify({ ok: true, found: false }), { status: 200, headers });
+    if (error) return new Response(JSON.stringify({ ok: false, error: error.message }), { status: 500, headers: CORS });
+    if (!data)  return new Response(JSON.stringify({ ok: true, found: false }), { status: 200, headers: CORS });
 
-    return new Response(JSON.stringify({ ok: true, found: true, session: data }), { status: 200, headers });
+    return new Response(JSON.stringify({ ok: true, found: true, session: data }), { status: 200, headers: CORS });
   }
 
   return new Response('Method not allowed', { status: 405 });

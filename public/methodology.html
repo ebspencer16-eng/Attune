@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Methodology — Attune</title>
+<meta name="description" content="How Attune works: the exercises, the scoring, and how we generate your results."/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,700&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --orange:#E8673A;--indigo:#1B5FE8;--ink:#0E0B07;--muted:#8C7A68;
+    --warm:#FFFDF9;--stone:#E8DDD0;--cream:#F5F0EC;
+    --hfont:'Playfair Display',Georgia,serif;
+    --bfont:'DM Sans',system-ui,sans-serif;
+  }
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{font-family:var(--bfont);background:var(--warm);color:var(--ink);-webkit-font-smoothing:antialiased}
+  a{color:var(--orange);text-decoration:none}
+  a:hover{text-decoration:underline}
+
+  /* NAV */
+  .nav{position:sticky;top:0;z-index:100;background:rgba(255,253,249,.97);backdrop-filter:blur(12px);border-bottom:1px solid var(--stone);padding:0 1.5rem;display:flex;align-items:center;justify-content:space-between;min-height:56px}
+  .nav-logo{display:flex;align-items:center;gap:.5rem;font-family:var(--hfont);font-size:1rem;font-weight:700;color:var(--ink);cursor:pointer}
+  .nav-links{display:flex;align-items:center;gap:1.5rem;font-size:.78rem;font-weight:600;color:var(--muted)}
+  .nav-links a{color:var(--muted);transition:color .15s}
+  .nav-links a:hover{color:var(--ink);text-decoration:none}
+  .nav-cta{background:var(--orange);color:white!important;padding:.5rem 1.1rem;border-radius:8px;font-size:.75rem;font-weight:700;letter-spacing:.04em;text-transform:uppercase;transition:opacity .15s}
+  .nav-cta:hover{opacity:.88;text-decoration:none!important}
+
+  /* HERO */
+  .hero{background:linear-gradient(150deg,#1c1940 0%,#282560 60%,#1e3a6e 100%);padding:calc(56px + 4rem) clamp(1.25rem,5vw,2.5rem) 4rem;text-align:center;position:relative;overflow:hidden}
+  .hero::after{content:'';position:absolute;inset:0;background:url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Ccircle cx='30' cy='30' r='1'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");pointer-events:none}
+  .hero-eyebrow{font-size:.6rem;letter-spacing:.2em;text-transform:uppercase;color:rgba(255,255,255,.5);font-weight:700;margin-bottom:1rem}
+  .hero h1{font-family:var(--hfont);font-size:clamp(2rem,4vw,3.2rem);font-weight:700;color:white;line-height:1.08;margin-bottom:1.25rem;letter-spacing:-.02em;position:relative;z-index:1}
+  .hero h1 em{font-style:italic;color:#A5B8FF}
+  .hero-sub{font-size:1rem;color:rgba(255,255,255,.65);line-height:1.8;max-width:520px;margin:0 auto 2rem;position:relative;z-index:1}
+  .hero-pills{display:flex;flex-wrap:wrap;justify-content:center;gap:.6rem;position:relative;z-index:1}
+  .pill{padding:.4rem .9rem;border-radius:20px;font-size:.7rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;border:1px solid rgba(255,255,255,.2);color:rgba(255,255,255,.75)}
+
+  /* SECTIONS */
+  .si{padding:5rem clamp(1.25rem,5vw,2.5rem);max-width:860px;margin:0 auto}
+  .si-wide{padding:5rem clamp(1.25rem,5vw,2.5rem);max-width:1060px;margin:0 auto}
+  .eyebrow{font-size:.6rem;letter-spacing:.2em;text-transform:uppercase;color:var(--orange);font-weight:700;margin-bottom:.9rem;display:flex;align-items:center;gap:.5rem}
+  .eyebrow-dot{width:20px;height:2px;border-radius:999px;background:linear-gradient(90deg,var(--orange),var(--indigo));flex-shrink:0}
+  h2{font-family:var(--hfont);font-size:clamp(1.7rem,3vw,2.5rem);font-weight:700;line-height:1.1;color:var(--ink);margin-bottom:1.1rem;letter-spacing:-.02em}
+  h3{font-family:var(--hfont);font-size:clamp(1.2rem,2vw,1.5rem);font-weight:700;color:var(--ink);margin-bottom:.75rem;margin-top:2rem;letter-spacing:-.01em}
+  p{font-size:.95rem;color:var(--muted);line-height:1.85;margin-bottom:1.1rem}
+  p strong{color:var(--ink);font-weight:600}
+
+  /* PRINCIPLES GRID */
+  .principles-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem;margin-top:2.5rem}
+  .principle-card{background:var(--cream);border-radius:16px;padding:1.5rem}
+  .principle-number{font-size:.6rem;letter-spacing:.2em;text-transform:uppercase;font-weight:700;color:var(--orange);margin-bottom:.6rem}
+  .principle-title{font-size:.95rem;font-weight:700;color:var(--ink);margin-bottom:.5rem}
+  .principle-body{font-size:.82rem;color:var(--muted);line-height:1.7;margin:0}
+
+  /* EXERCISE CARDS */
+  .exercise-cards{display:flex;flex-direction:column;gap:1.5rem;margin-top:2.5rem}
+  .ex-card{border-radius:18px;overflow:hidden;border:1px solid var(--stone)}
+  .ex-card-header{padding:1.25rem 1.5rem;display:flex;align-items:flex-start;justify-content:space-between;gap:1rem}
+  .ex-num{font-size:.6rem;letter-spacing:.2em;text-transform:uppercase;font-weight:700;color:var(--orange);margin-bottom:.3rem}
+  .ex-title{font-size:1.05rem;font-weight:700;color:var(--ink)}
+  .ex-badge{padding:.35rem .8rem;border-radius:20px;font-size:.65rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;white-space:nowrap;flex-shrink:0}
+  .ex-body{padding:0 1.5rem 1.5rem;border-top:1px solid var(--stone);background:var(--cream)}
+  .ex-body p{font-size:.85rem;margin-bottom:.85rem}
+  .ex-body p:first-child{padding-top:1.25rem}
+
+  /* DIMENSION TABLE */
+  .dim-table{width:100%;border-collapse:collapse;margin-top:1.5rem;font-size:.82rem}
+  .dim-table th{text-align:left;padding:.75rem 1rem;background:var(--cream);font-size:.65rem;letter-spacing:.12em;text-transform:uppercase;font-weight:700;color:var(--muted);border-bottom:1px solid var(--stone)}
+  .dim-table td{padding:.75rem 1rem;border-bottom:1px solid var(--stone);color:var(--ink);vertical-align:top;line-height:1.6}
+  .dim-table tr:last-child td{border-bottom:none}
+  .dim-table tr:nth-child(even) td{background:#FAF8F5}
+
+  /* INSIGHT TYPES */
+  .insight-types{display:grid;grid-template-columns:1fr 1fr;gap:1.25rem;margin-top:1.75rem}
+  .insight-type{border-radius:14px;padding:1.25rem 1.4rem;border:1.5px solid}
+  .insight-strength{background:#EDFAF5;border-color:#A7F3D0}
+  .insight-explore{background:#FFF7ED;border-color:#FDE68A}
+  .insight-type-label{font-size:.6rem;letter-spacing:.15em;text-transform:uppercase;font-weight:700;margin-bottom:.5rem}
+  .insight-strength .insight-type-label{color:#059669}
+  .insight-explore .insight-type-label{color:#B45309}
+  .insight-type-title{font-size:.9rem;font-weight:700;color:var(--ink);margin-bottom:.4rem}
+  .insight-type-body{font-size:.8rem;color:var(--muted);line-height:1.7;margin:0}
+
+  /* LIMITATIONS */
+  .limitations-list{list-style:none;display:flex;flex-direction:column;gap:.85rem;margin-top:1.5rem}
+  .limitations-list li{display:flex;align-items:flex-start;gap:.75rem;font-size:.88rem;color:var(--muted);line-height:1.7}
+  .lim-dot{width:6px;height:6px;border-radius:50%;background:var(--stone);flex-shrink:0;margin-top:.55rem}
+
+  /* DIVIDER */
+  .divider{height:1px;background:var(--stone);margin:0}
+
+  /* CTA */
+  .cta-section{background:linear-gradient(135deg,#E8673A08,#1B5FE808);border-top:1px solid var(--stone);padding:5rem clamp(1.25rem,5vw,2.5rem);text-align:center}
+  .cta-section h2{font-size:clamp(1.6rem,3vw,2.2rem);margin-bottom:.75rem}
+  .cta-section p{max-width:420px;margin:0 auto 2rem}
+  .btn-primary{display:inline-block;padding:.9rem 2.2rem;background:linear-gradient(135deg,var(--orange),var(--indigo));color:white;border-radius:12px;font-weight:700;font-size:.82rem;letter-spacing:.06em;text-transform:uppercase;transition:opacity .15s}
+  .btn-primary:hover{opacity:.88;text-decoration:none}
+
+  /* FOOTER */
+  .footer{background:#2d2250;padding:3rem clamp(1.25rem,5vw,2.5rem) 2rem}
+  .footer-inner{max-width:860px;margin:0 auto;display:flex;justify-content:space-between;align-items:flex-start;gap:2rem;flex-wrap:wrap}
+  .footer-brand{font-family:var(--hfont);font-size:1rem;font-weight:700;color:white}
+  .footer-links{display:flex;gap:1.5rem;flex-wrap:wrap}
+  .footer-links a{font-size:.78rem;color:rgba(255,255,255,.5);transition:color .15s}
+  .footer-links a:hover{color:white;text-decoration:none}
+  .footer-bottom{max-width:860px;margin:1.5rem auto 0;padding-top:1.25rem;border-top:1px solid rgba(255,255,255,.08);font-size:.72rem;color:rgba(255,255,255,.3)}
+
+  @media(max-width:680px){
+    .principles-grid{grid-template-columns:1fr}
+    .insight-types{grid-template-columns:1fr}
+    .nav-links{display:none}
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="nav">
+  <a href="/home" class="nav-logo" style="text-decoration:none">
+    <svg width="24" height="18" viewBox="0 0 103 76" fill="none"><defs><linearGradient id="ng" x1="0" y1="0" x2="103" y2="76" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#E8673A"/><stop offset="100%" stop-color="#1B5FE8"/></linearGradient></defs><path d="M14,4 L44,4 A9,9 0 0,1 53,13 L53,42 A9,9 0 0,1 44,51 L20,51 L6,61 L11,51 A6,6 0 0,1 5,45 L5,13 A9,9 0 0,1 14,4 Z" fill="url(#ng)"/><path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill="white" opacity="0.93" transform="translate(13.16,11.3) scale(0.72)"/><path d="M89,14 L59,14 A9,9 0 0,0 50,23 L50,52 A9,9 0 0,0 59,61 L83,61 L97,71 L92,61 A6,6 0 0,0 98,55 L98,23 A9,9 0 0,0 89,14 Z" fill="none" stroke="url(#ng)" stroke-width="2.2" stroke-linejoin="round"/><path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill="url(#ng)" transform="translate(58.16,21.3) scale(0.72)"/></svg>
+    Attune
+  </a>
+  <div class="nav-links">
+    <a href="/home">Home</a>
+    <a href="/how-it-works">How it works</a>
+    <a href="/offerings">Packages</a>
+    <a href="/purpose">Our purpose</a>
+    <a href="/start" class="nav-cta">Get started</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <p class="hero-eyebrow">Methodology</p>
+  <h1>How we produce<br><em>your results</em></h1>
+  <p class="hero-sub">What the exercises measure, how your answers are processed, and what the outputs mean.</p>
+  <div class="hero-pills">
+    <span class="pill">No AI interpretation</span>
+    <span class="pill">Fully auditable</span>
+    <span class="pill">Both partners required</span>
+    <span class="pill">Real answers only</span>
+  </div>
+</section>
+
+<!-- PRINCIPLES -->
+<section class="si">
+  <p class="eyebrow"><span class="eyebrow-dot"></span>Design principles</p>
+  <h2>What we believe<br>about how this should work</h2>
+  <p>Attune was designed around a few non-negotiable constraints. They shape everything about how the exercises are built, how answers are processed, and what results mean.</p>
+  <div class="principles-grid">
+    <div class="principle-card">
+      <p class="principle-number">01</p>
+      <p class="principle-title">No AI interpretation</p>
+      <p class="principle-body">Your open-text answers are never sent to a language model for analysis. Pattern detection runs locally using auditable keyword matching. We know exactly why every insight fires, and we can explain it plainly.</p>
+    </div>
+    <div class="principle-card">
+      <p class="principle-number">02</p>
+      <p class="principle-title">Both partners required</p>
+      <p class="principle-body">No output — no couple type, no gap score, no insight — can be generated from one person's data alone. Everything is built from the comparison. There's no such thing as a single-person Attune result.</p>
+    </div>
+    <div class="principle-card">
+      <p class="principle-number">03</p>
+      <p class="principle-title">Descriptive, not evaluative</p>
+      <p class="principle-body">No score is good or bad. Attune surfaces where two people are similar and where they differ — and what those differences mean in practice. There is no "right" couple type.</p>
+    </div>
+    <div class="principle-card">
+      <p class="principle-number">04</p>
+      <p class="principle-title">Your answers, not averages</p>
+      <p class="principle-body">Every output — every dimension score, every insight card, every conversation starter — is produced from the actual answers of your specific couple. Personalisation isn't cosmetic.</p>
+    </div>
+    <div class="principle-card">
+      <p class="principle-number">05</p>
+      <p class="principle-title">Snapshot, not diagnosis</p>
+      <p class="principle-body">Attune captures how you're relating at a specific point in time. It is not a clinical assessment, not a diagnostic tool, and not a substitute for professional support when that's what's needed.</p>
+    </div>
+    <div class="principle-card">
+      <p class="principle-number">06</p>
+      <p class="principle-title">Privacy by default</p>
+      <p class="principle-body">Neither partner sees the other's answers while exercises are in progress. Results unlock only when both have finished. Your answers are never shared with third parties for advertising or research without explicit consent.</p>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- EXERCISES -->
+<section class="si">
+  <p class="eyebrow"><span class="eyebrow-dot"></span>The exercises</p>
+  <h2>Three exercises.<br>One shared picture.</h2>
+  <p>Exercises 01 and 02 are included in every package. Exercise 03 is included in the Relationship Reflection Collection and Attune Premium, and available as an add-on.</p>
+  <div class="exercise-cards">
+    <!-- EX 01 -->
+    <div class="ex-card">
+      <div class="ex-card-header">
+        <div>
+          <p class="ex-num">Exercise 01</p>
+          <p class="ex-title">Communication &amp; Personality</p>
+        </div>
+        <span class="ex-badge" style="background:#FFF0EB;color:var(--orange)">~10 min</span>
+      </div>
+      <div class="ex-body">
+        <p>50 questions across 10 behavioural dimensions. Each question presents two options — you choose the one that feels more like you. There's no scoring trap: neither option is better, and both are realistic descriptions of real people.</p>
+        <p>Both partners complete the exercise independently. Neither sees the other's answers until both are done. Once both finish, dimension scores are compared to produce a gap analysis, individual profiles, a couple type, and a position on the Couple Map.</p>
+        <p><strong>What it measures:</strong> how you draw energy, how freely feelings surface, how you ask for what you need, how you read connection bids, how you instinctively respond when tension arrives, how you initiate repair, how close you want to be, how you express and receive love, how stress enters your shared space, and how you receive honest feedback.</p>
+      </div>
+    </div>
+    <!-- EX 02 -->
+    <div class="ex-card">
+      <div class="ex-card-header">
+        <div>
+          <p class="ex-num">Exercise 02</p>
+          <p class="ex-title">Expectations</p>
+        </div>
+        <span class="ex-badge" style="background:#EEF2FF;color:var(--indigo)">~15 min</span>
+      </div>
+      <div class="ex-body">
+        <p>A structured mapping of what each person expects across five areas of shared life. Both partners answer independently. Results are compared to produce an alignment map showing where you agree, where you don't, and which gaps are likely to show up as friction.</p>
+        <p><strong>What it covers:</strong> Visible household labor, Financial planning and spending, Career and work, Emotional and invisible labor, Life and values (children, family, religion, long-term vision).</p>
+        <p>A childhood context question — about the structure of your household growing up — appears at the start. The answers shape the framing of the responsibility grid, because where expectations come from matters as much as what they are.</p>
+      </div>
+    </div>
+    <!-- EX 03 -->
+    <div class="ex-card" style="border-color:#C7D2FE">
+      <div class="ex-card-header" style="background:linear-gradient(135deg,#EEF2FF,#F5F7FF)">
+        <div>
+          <p class="ex-num" style="color:var(--indigo)">Exercise 03</p>
+          <p class="ex-title">Relationship Reflection</p>
+        </div>
+        <span class="ex-badge" style="background:#EEF2FF;color:var(--indigo)">~10 min · Optional</span>
+      </div>
+      <div class="ex-body" style="background:#F8F9FF">
+        <p>A different kind of exercise. Rather than mapping stable traits or expectation structures, it asks: how is this couple experiencing their relationship right now, and what do their answers reveal when placed side by side?</p>
+        <p>14 items across five categories: an overall feel rating, milestone reflections (the moments that made you proud, the challenges that made you stronger), three satisfaction scales (connection, communication, fun), open-text gratitude and forward-looking prompts, and a priority ranking for the year ahead.</p>
+        <p>Neither partner sees the other's answers until both have finished. The comparison produces personalised insight cards, a side-by-side view of both partners' answers, and a reflection action plan.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- SCORING -->
+<section class="si-wide">
+  <p class="eyebrow"><span class="eyebrow-dot"></span>How scoring works</p>
+  <h2>Exercise 01: Communication dimensions</h2>
+  <p>Each of the 10 dimensions is measured by 5 questions. Questions are binary forced-choice scored 1 or 5, with a middle option scored 3 where appropriate. Dimension scores are the average of the 5 question scores — a continuous value from 1.0 to 5.0.</p>
+  <p>Gap scores are calculated as the absolute difference between both partners' scores on a given dimension. Gap size determines labelling and the order items appear in results.</p>
+
+  <table class="dim-table">
+    <thead><tr><th>Dimension</th><th>Low end (1.0)</th><th>High end (5.0)</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Energy</strong></td><td>Inward · recharges alone</td><td>Outward · energised by people</td></tr>
+      <tr><td><strong>Expression</strong></td><td>Guarded · holds feelings close</td><td>Expressive · shares readily</td></tr>
+      <tr><td><strong>Needs</strong></td><td>Indirect · signals, hints</td><td>Direct · asks explicitly</td></tr>
+      <tr><td><strong>Bids</strong></td><td>Misses or delays connection bids</td><td>Reads and responds quickly</td></tr>
+      <tr><td><strong>Conflict</strong></td><td>Engages fast when tension arrives</td><td>Withdraws first, needs space</td></tr>
+      <tr><td><strong>Repair</strong></td><td>Verbal · needs conversation</td><td>Gestural · repairs through action</td></tr>
+      <tr><td><strong>Closeness</strong></td><td>Independent · values own space</td><td>Close-seeking · prefers togetherness</td></tr>
+      <tr><td><strong>Love</strong></td><td>Acts of service</td><td>Words and affirmation</td></tr>
+      <tr><td><strong>Stress</strong></td><td>Externalises · stress enters shared space</td><td>Internalises · processes privately</td></tr>
+      <tr><td><strong>Feedback</strong></td><td>Defensive under critical input</td><td>Open · can hear hard feedback</td></tr>
+    </tbody>
+  </table>
+
+  <h3>Gap score thresholds</h3>
+  <table class="dim-table">
+    <thead><tr><th>Gap range</th><th>Label</th><th>What it means</th></tr></thead>
+    <tbody>
+      <tr><td>&lt; 0.8</td><td><strong>In sync</strong></td><td>Same orientation — low friction on this dimension</td></tr>
+      <tr><td>0.8 – 1.4</td><td><strong>Close</strong></td><td>Minor difference — usually complementary</td></tr>
+      <tr><td>1.5 – 2.4</td><td><strong>Different</strong></td><td>Meaningful gap — worth naming and understanding</td></tr>
+      <tr><td>≥ 2.5</td><td><strong>Very different</strong></td><td>Significant divergence — primary action priority</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<div class="divider"></div>
+
+<!-- COUPLE TYPE -->
+<section class="si">
+  <p class="eyebrow"><span class="eyebrow-dot"></span>Individual and couple types</p>
+  <h2>From dimension scores<br>to a couple type</h2>
+  <p>Exercise 01 scores feed into two composite axes. Each person's position on both axes determines their individual type. The combination of both partners' types produces the couple type.</p>
+
+  <h3>Axis 1: Engage ↔ Withdraw</h3>
+  <p>Weighted combination of Conflict (55%), Stress (30%), and Repair (15%) scores. This axis captures how each person's instinct responds when something difficult enters the relationship — toward or away from direct engagement.</p>
+
+  <h3>Axis 2: Open ↔ Guarded</h3>
+  <p>Weighted combination of Expression (45%), Feedback (30%), and Needs (25%) scores. This axis captures how much of each person's inner life surfaces into shared space — readily or selectively.</p>
+
+  <h3>The four individual types</h3>
+  <p>Axis scores above 3.0 are Engage-leaning or Open-leaning. Below 3.0 are Withdraw-leaning or Guarded-leaning. The crossings produce four individual types: The Reacher (W), The Driver (X), The Feeler (Y), and The Protector (Z).</p>
+
+  <p>Individual type position is continuous, not binary. Two people who both score as The Reacher may sit very differently on the Couple Map. Proximity to the axis threshold matters when interpreting how each partner's type plays out in practice.</p>
+
+  <h3>The 10 couple pairings</h3>
+  <p>With four individual types, there are 10 unique unordered pairings: 4 same-type (amplification dynamics) and 6 cross-type (complementary or friction dynamics). The couple type name, core dynamic, and result content are derived from the specific pairing.</p>
+</section>
+
+<div class="divider"></div>
+
+<!-- REFLECTION INSIGHTS -->
+<section class="si">
+  <p class="eyebrow"><span class="eyebrow-dot"></span>Exercise 03: Relationship Reflection</p>
+  <h2>How insight cards<br>are generated</h2>
+  <p>The Relationship Reflection insight engine runs a series of comparisons across both partners' answers and generates a set of personalised cards. Each card is classified as either a <strong>Strength</strong> or <strong>Worth Exploring</strong>.</p>
+
+  <div class="insight-types">
+    <div class="insight-type insight-strength">
+      <p class="insight-type-label">Strength</p>
+      <p class="insight-type-title">Alignment worth naming</p>
+      <p class="insight-type-body">Both partners' answers indicate alignment, mutual recognition, or a pattern that tends to decay when not made explicit. Strength cards are not participation trophies — they're markers of something real that benefits from being named directly.</p>
+    </div>
+    <div class="insight-type insight-explore">
+      <p class="insight-type-label">Worth Exploring</p>
+      <p class="insight-type-title">Difference worth a conversation</p>
+      <p class="insight-type-body">Partners' answers reveal a gap, a difference in what each person needs or wants, or a pattern that is likely creating friction without being articulated. The framing is always toward conversation — not toward blame or diagnosis.</p>
+    </div>
+  </div>
+
+  <h3>What drives each card</h3>
+  <p>Scale items (the satisfaction ratings) are compared numerically — the gap between partners' scores determines which variant of an insight fires. Text items are processed locally using keyword pattern matching against curated word lists — the engine detects whether each partner's answer contains language that signals a specific theme.</p>
+  <p>This approach was chosen because it is fully auditable, fully transparent, and requires no external processing of personal writing. It means that an insight may not fire if a couple's answers describe a pattern using language outside the current keyword set — an absence of an insight is not confirmation that the pattern doesn't exist.</p>
+  <p>Open-text answers from both partners are quoted directly in insight card body text. The engine selects which pre-written insight to show and fills in partner names and quoted phrases — it does not generate new text from your answers.</p>
+
+  <h3>Couple type context</h3>
+  <p>Where a couple's Exercise 01 type has been computed, selected insight cards include a one-sentence note situating the detected pattern within the dynamics of their specific pairing. These notes are brief and additive — they do not override the insight or replace the content generated from actual answers.</p>
+</section>
+
+<div class="divider"></div>
+
+<!-- LIMITATIONS -->
+<section class="si">
+  <p class="eyebrow"><span class="eyebrow-dot"></span>Limitations</p>
+  <h2>What Attune is,<br>and what it isn't</h2>
+  <p>We believe in telling you where the limits are. Attune is built carefully, but it is not a clinical instrument, and it should not be treated as one.</p>
+  <ul class="limitations-list">
+    <li><span class="lim-dot"></span><span><strong>Self-report basis.</strong> All scores reflect each partner's subjective perception at the time of completing the exercise. They are not behavioural observations, clinician ratings, or longitudinal measurements.</span></li>
+    <li><span class="lim-dot"></span><span><strong>Snapshot, not trend.</strong> The exercises capture a single point in time. Dimension scores in particular may differ across administrations. Attune is not designed for longitudinal tracking without re-administration.</span></li>
+    <li><span class="lim-dot"></span><span><strong>Keyword coverage.</strong> Text-based insights rely on pattern matching against curated word lists. A couple whose answers describe a concept in language outside the current keyword set may not see the relevant insight card — even if the pattern exists.</span></li>
+    <li><span class="lim-dot"></span><span><strong>Not a diagnostic tool.</strong> Nothing Attune produces should be used as evidence of a psychological condition, a compatibility verdict, or grounds for a major life decision. Attune surfaces patterns for conversation — not conclusions.</span></li>
+    <li><span class="lim-dot"></span><span><strong>Not a substitute for professional support.</strong> If you are experiencing significant relationship distress, domestic conflict, or mental health challenges, please seek support from a qualified professional. The LMFT add-on is not a therapy service — it is a structured review session using your results as a starting point.</span></li>
+  </ul>
+</section>
+
+<!-- CTA -->
+<div class="divider"></div>
+<section class="cta-section">
+  <p class="eyebrow" style="justify-content:center"><span class="eyebrow-dot"></span>Get started</p>
+  <h2>See what your results<br>actually look like</h2>
+  <p style="color:var(--muted)">Takes about 25 minutes total. Completely private until both of you are done.</p>
+  <a href="/start" class="btn-primary">Get started →</a>
+</section>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <div class="footer-inner">
+    <span class="footer-brand">Attune</span>
+    <div class="footer-links">
+      <a href="/home">Home</a>
+      <a href="/how-it-works">How it works</a>
+      <a href="/offerings">Packages</a>
+      <a href="/purpose">Our purpose</a>
+      <a href="/faq">FAQs</a>
+      <a href="/legal">Privacy</a>
+      <a href="mailto:hello@attune-relationships.com">Contact</a>
+    </div>
+  </div>
+  <div class="footer-bottom">Attune Relationships™ · attune-relationships.com</div>
+</footer>
+
+</body>
+</html>
