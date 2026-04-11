@@ -1,0 +1,11 @@
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /api/
+Disallow: /app
+Disallow: /portal
+Disallow: /checkout
+Disallow: /feedback
+Disallow: /workbook-render
+
+Sitemap: https://attune-relationships.com/sitemap.xml

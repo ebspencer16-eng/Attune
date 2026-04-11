@@ -343,8 +343,8 @@ const PACKAGES = {
   },
 };
 
-const ADDON_LMFT = { label: 'LMFT Session', price: 150 };
-const ADDON_REFLECTION = { label: 'Relationship Reflection', price: 40 };
+const ADDON_LMFT = { label: 'LMFT Session (50 min · licensed therapist)', price: 150 };
+const ADDON_REFLECTION = { label: 'Relationship Reflection exercise', price: 40 };
 
 const ADDON_WORKBOOK = {
   digital: { label: 'Personalized Workbook (digital)', price: 19 },
@@ -377,6 +377,25 @@ let addonReflection = false;
   if (pkg.id === 'core') {
     const ftEl = document.getElementById('formatToggleSection');
     if (ftEl) ftEl.style.display = 'block';
+  }
+  // LMFT add-on available on all packages (not shown if premium already includes it)
+  if (pkg.id !== 'premium') {
+    const lmftRow = document.getElementById('lmftAddonRow');
+    if (lmftRow) lmftRow.style.display = 'block';
+  }
+  // Sync checkbox visual state
+  const lmftCheck = document.getElementById('lmftCheck');
+  const lmftBox = document.getElementById('lmftBox');
+  if (lmftCheck && lmftBox) {
+    lmftCheck.checked = addonLmft;
+    lmftBox.style.background = addonLmft ? '#E8673A' : 'white';
+    lmftBox.style.borderColor = addonLmft ? '#E8673A' : '#E8DDD0';
+    lmftBox.innerHTML = addonLmft ? '<svg width="11" height="9" viewBox="0 0 11 9" fill="none"><path d="M1 4.5L4 7.5L10 1" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>' : '';
+    lmftCheck.addEventListener('change', () => {
+      lmftBox.style.background = lmftCheck.checked ? '#E8673A' : 'white';
+      lmftBox.style.borderColor = lmftCheck.checked ? '#E8673A' : '#E8DDD0';
+      lmftBox.innerHTML = lmftCheck.checked ? '<svg width="11" height="9" viewBox="0 0 11 9" fill="none"><path d="M1 4.5L4 7.5L10 1" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>' : '';
+    });
   }
   if (pkg.format === 'physical') {
     document.getElementById('shippingSection').style.display = 'block';

@@ -240,6 +240,14 @@
       "destination": "/api/store-workbook.js"
     },
     {
+      "source": "/robots.txt",
+      "destination": "/robots.txt"
+    },
+    {
+      "source": "/sitemap.xml",
+      "destination": "/sitemap.xml"
+    },
+    {
       "source": "/app/(.*)",
       "destination": "/index.html"
     },
