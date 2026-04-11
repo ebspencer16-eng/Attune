@@ -19,6 +19,33 @@
 
 export const config = { runtime: 'edge' };
 
+// Also write to Supabase for richer analytics
+async function supabaseStore(entry) {
+  const url = process.env.SUPABASE_URL;
+  const key = process.env.SUPABASE_SERVICE_KEY;
+  if (!url || !key) return;
+  try {
+    await fetch(`${url}/rest/v1/feedback_submissions`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'apikey': key,
+        'Authorization': `Bearer ${key}`,
+        'Prefer': 'return=minimal',
+      },
+      body: JSON.stringify({
+        type: entry.type || 'quick',
+        rating: entry.rating || null,
+        text: entry.text || null,
+        email: entry.email || null,
+        couple_type: entry.coupleType || null,
+        source: entry.source || null,
+        submitted_at: new Date().toISOString(),
+      }),
+    });
+  } catch(e) { console.warn('[feedback] supabase write failed:', e); }
+}
+
 async function kvStore(key, value) {
   const url = process.env.KV_REST_API_URL;
   const token = process.env.KV_REST_API_TOKEN;
