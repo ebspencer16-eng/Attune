@@ -144,6 +144,8 @@
 <script>
 const params = new URLSearchParams(window.location.search);
 if (params.get('order')) document.getElementById('orderId').value = params.get('order');
+if (params.get('p1')) document.getElementById('p1name').value = params.get('p1');
+if (params.get('p2')) document.getElementById('p2name').value = params.get('p2');
 
 async function submitBooking() {
   const p1 = document.getElementById('p1name').value.trim();

@@ -4146,67 +4146,34 @@ function NotesView({ userName, partnerName, notesState, setNotesState, onBack })
 // LMFT SESSION -- Premium
 // ======================================================
 function LMFTSession({ userName, partnerName, onBack }) {
-  const [selected, setSelected] = useState(null);
-  const [confirmed, setConfirmed] = useState(false);
-
-  const slots = [
-    { id: "s1", day: "Tuesday", date: "Mar 18", time: "10:00 AM EST", therapist: "Dr. Maya Reyes", speciality: "Relationship transitions, communication, couples development" },
-    { id: "s2", day: "Wednesday", date: "Mar 19", time: "2:00 PM EST", therapist: "Dr. Marcus Chen", speciality: "Premarital counseling, financial communication, life planning" },
-    { id: "s3", day: "Thursday", date: "Mar 20", time: "11:00 AM EST", therapist: "Dr. Sofia Ortega", speciality: "Communication styles, values alignment, relationship growth" },
-    { id: "s4", day: "Friday", date: "Mar 21", time: "4:00 PM EST", therapist: "Dr. Maya Reyes", speciality: "Relationship transitions, communication, couples development" },
-    { id: "s5", day: "Monday", date: "Mar 24", time: "9:00 AM EST", therapist: "Dr. Marcus Chen", speciality: "Premarital counseling, financial communication, life planning" },
-    { id: "s6", day: "Tuesday", date: "Mar 25", time: "3:00 PM EST", therapist: "Dr. Sofia Ortega", speciality: "Communication styles, values alignment, relationship growth" },
-  ];
-
-  if (confirmed) {
-    const slot = slots.find(s => s.id === selected);
-    return (
-      <div style={{ maxWidth: 520, margin: "0 auto", textAlign: "center" }}>
-        <button onClick={onBack} style={{ background: "transparent", border: "none", color: C.muted, fontSize: "0.72rem", letterSpacing: "0.1em", textTransform: "uppercase", cursor: "pointer", fontFamily: font.body, padding: 0, marginBottom: "2rem", display: "block", textAlign: "left" }}>← Back to Dashboard</button>
-        <div style={{ width: 72, height: 72, borderRadius: "50%", background: "linear-gradient(135deg, #0f0c29, #1d1a4e)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 1.25rem", fontSize: "1.8rem" }}>✓</div>
-        <p style={{ fontFamily: font.display, fontSize: "1.8rem", fontWeight: 700, color: C.ink, marginBottom: "0.75rem", lineHeight: 1.1 }}>Session Confirmed.</p>
-        <div style={{ background: "linear-gradient(135deg, #0f0c29, #1d1a4e)", borderRadius: 14, padding: "1.5rem", color: "white", marginBottom: "1.5rem", textAlign: "left" }}>
-          <div style={{ fontSize: "0.58rem", letterSpacing: "0.2em", textTransform: "uppercase", color: "rgba(255,255,255,0.72)", marginBottom: "0.75rem", fontFamily: font.body }}>Your session details</div>
-          <div style={{ fontFamily: font.display, fontSize: "1.1rem", fontWeight: 700, marginBottom: "0.35rem" }}>{slot.therapist}</div>
-          <div style={{ fontSize: "0.82rem", color: "rgba(255,255,255,0.6)", fontFamily: font.body, marginBottom: "0.85rem" }}>{slot.speciality}</div>
-          <div style={{ display: "flex", gap: "1rem", flexWrap: "wrap" }}>
-            {[{ label: "Date", val: slot.day + ", " + slot.date }, { label: "Time", val: slot.time }, { label: "Format", val: "Virtual · Zoom" }, { label: "Duration", val: "60 minutes" }].map(({ label, val }) => (
-              <div key={label} style={{ background: "rgba(255,255,255,0.06)", borderRadius: 8, padding: "0.5rem 0.85rem" }}>
-                <div style={{ fontSize: "0.55rem", color: "rgba(255,255,255,0.65)", letterSpacing: "0.15em", textTransform: "uppercase", fontFamily: font.body }}>{label}</div>
-                <div style={{ fontSize: "0.82rem", color: "rgba(255,255,255,0.85)", fontFamily: font.body, marginTop: "0.15rem" }}>{val}</div>
-              </div>
-            ))}
-          </div>
-        </div>
-        <p style={{ fontSize: "0.82rem", color: C.muted, fontFamily: font.body, fontWeight: 300, lineHeight: 1.7 }}>A calendar invite has been sent to both {userName} and {partnerName}. Your therapist will receive your joint results 24 hours before the session.</p>
-      </div>
-    );
-  }
+  // Redirect to the real booking page — /lmft-booking handles scheduling
+  // Pass names as URL params so the form can pre-fill
+  const bookingUrl = `/lmft-booking?p1=${encodeURIComponent(userName || '')}&p2=${encodeURIComponent(partnerName || '')}`;
 
   return (
-    <div style={{ maxWidth: 620, margin: "0 auto" }}>
+    <div style={{ maxWidth: 520, margin: "0 auto" }}>
       <button onClick={onBack} style={{ background: "transparent", border: "none", color: C.muted, fontSize: "0.72rem", letterSpacing: "0.1em", textTransform: "uppercase", cursor: "pointer", fontFamily: font.body, padding: 0, marginBottom: "1.5rem", display: "block" }}>← Back to Dashboard</button>
       <div style={{ fontSize: "0.6rem", letterSpacing: "0.22em", textTransform: "uppercase", color: "#3B5BDB", fontWeight: 700, fontFamily: font.body, marginBottom: "0.35rem" }}>Attune Premium</div>
-      <h1 style={{ fontFamily: font.display, fontSize: "1.8rem", fontWeight: 700, color: C.ink, lineHeight: 1.1, marginBottom: "0.5rem" }}>Schedule Your LMFT Session</h1>
-      <p style={{ fontSize: "0.85rem", color: C.muted, fontFamily: font.body, fontWeight: 300, lineHeight: 1.65, marginBottom: "0.35rem" }}>Your therapist will review your joint results before the session, so the hour is focused, specific to you, and actually useful. Not a first appointment. A real conversation about what your results mean.</p>
-      <p style={{ fontSize: "0.78rem", color: C.muted, fontFamily: font.body, fontWeight: 300, lineHeight: 1.55, marginBottom: "1.75rem" }}>Both {userName} and {partnerName} attend together. 60 minutes, virtual.</p>
-
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.75rem", marginBottom: "1.5rem" }}>
-        {slots.map(slot => (
-          <div key={slot.id} onClick={() => setSelected(slot.id)}
-            style={{ border: "1.5px solid " + (selected === slot.id ? "#3B5BDB" : C.stone), borderRadius: 12, padding: "1rem", cursor: "pointer", background: selected === slot.id ? "#F6F5FF" : "white", transition: "all 0.15s", boxShadow: selected === slot.id ? "0 4px 16px rgba(124,107,248,0.18)" : "none" }}>
-            <div style={{ fontSize: "0.62rem", color: selected === slot.id ? "#3B5BDB" : C.muted, fontFamily: font.body, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: "0.25rem" }}>{slot.day}, {slot.date}</div>
-            <div style={{ fontFamily: font.display, fontSize: "1rem", fontWeight: 700, color: C.ink, marginBottom: "0.25rem" }}>{slot.time}</div>
-            <div style={{ fontSize: "0.72rem", color: selected === slot.id ? "#3B5BDB" : C.ink, fontFamily: font.body, fontWeight: 600, marginBottom: "0.2rem" }}>{slot.therapist}</div>
-            <div style={{ fontSize: "0.68rem", color: C.muted, fontFamily: font.body, lineHeight: 1.4 }}>{slot.speciality.split(",")[0]}</div>
+      <h1 style={{ fontFamily: font.display, fontSize: "1.8rem", fontWeight: 700, color: C.ink, lineHeight: 1.1, marginBottom: "0.75rem" }}>Schedule Your LMFT Session</h1>
+      <p style={{ fontSize: "0.88rem", color: C.muted, fontFamily: font.body, fontWeight: 300, lineHeight: 1.7, marginBottom: "0.5rem" }}>Your therapist will review your joint results before the session — so the conversation starts from your actual data, not from scratch.</p>
+      <p style={{ fontSize: "0.82rem", color: C.muted, fontFamily: font.body, fontWeight: 300, lineHeight: 1.65, marginBottom: "2rem" }}>Both {userName} and {partnerName} attend together. 50 minutes, virtual.</p>
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "1rem", marginBottom: "2rem" }}>
+        {[
+          { icon: "1", label: "Finish your exercises", body: "Both partners need to complete their exercises before the session." },
+          { icon: "2", label: "Request a time", body: "Share your availability and we'll match you with an available therapist." },
+          { icon: "3", label: "Meet over video", body: "50 minutes. Your results are the starting point — not an intake form." },
+        ].map(s => (
+          <div key={s.icon} style={{ background: "#F5F7FF", borderRadius: 14, padding: "1.1rem" }}>
+            <div style={{ fontSize: "0.58rem", letterSpacing: "0.18em", textTransform: "uppercase", color: "#3B5BDB", fontWeight: 700, fontFamily: font.body, marginBottom: "0.4rem" }}>Step {s.icon}</div>
+            <div style={{ fontSize: "0.82rem", fontWeight: 700, color: C.ink, fontFamily: font.body, marginBottom: "0.35rem" }}>{s.label}</div>
+            <div style={{ fontSize: "0.75rem", color: C.muted, fontFamily: font.body, lineHeight: 1.6 }}>{s.body}</div>
           </div>
         ))}
       </div>
-
-      <button onClick={() => { if (selected) setConfirmed(true); }} disabled={!selected}
-        style={{ width: "100%", background: selected ? "linear-gradient(135deg, #0f0c29, #1d1a4e)" : C.stone, color: selected ? "white" : C.muted, border: "none", padding: "1rem", fontSize: "0.78rem", letterSpacing: "0.1em", textTransform: "uppercase", cursor: selected ? "pointer" : "default", fontFamily: font.body, borderRadius: 12, fontWeight: 600 }}>
-        Confirm Session {selected ? "→" : "- Select a Time First"}
-      </button>
+      <a href={bookingUrl} style={{ display: "block", textAlign: "center", padding: "0.95rem 2rem", background: "linear-gradient(135deg,#1B5FE8,#3B3A8A)", color: "white", borderRadius: 14, fontWeight: 700, fontSize: "0.9rem", fontFamily: font.body, textDecoration: "none", letterSpacing: "0.02em" }}>
+        Book my session →
+      </a>
+      <p style={{ fontSize: "0.72rem", color: C.muted, fontFamily: font.body, textAlign: "center", marginTop: "1rem", lineHeight: 1.6 }}>We'll confirm your time and therapist within 48 hours.</p>
     </div>
   );
 }
@@ -7023,6 +6990,8 @@ function AuthModal({ mode, onClose, onSuccess }) {
   const [err, setErr] = useState("");
   const [loading, setLoading] = useState(false);
   const [resetSent, setResetSent] = useState(false);
+  const [loginAttempts, setLoginAttempts] = useState(0);
+  const [lockedUntil, setLockedUntil] = useState(null);
   const upd = (k, v) => setForm(f => ({ ...f, [k]: v }));
 
   const genInvite = () => Math.random().toString(36).slice(2, 10).toUpperCase();
@@ -7152,6 +7121,11 @@ function AuthModal({ mode, onClose, onSuccess }) {
 
   const handleLogin = async () => {
     if (!form.email.trim() || !form.password) return setErr("Please enter your email and password.");
+    // Client-side rate limiting: lock after 5 failed attempts for 30 seconds
+    if (lockedUntil && Date.now() < lockedUntil) {
+      const secs = Math.ceil((lockedUntil - Date.now()) / 1000);
+      return setErr(`Too many attempts. Please wait ${secs} seconds.`);
+    }
     setLoading(true);
     setErr("");
 
@@ -7162,7 +7136,14 @@ function AuthModal({ mode, onClose, onSuccess }) {
         email: form.email.trim().toLowerCase(),
         password: form.password,
       });
-      if (authErr) { setLoading(false); return setErr("Incorrect email or password."); }
+      if (authErr) {
+        setLoading(false);
+        const attempts = loginAttempts + 1;
+        setLoginAttempts(attempts);
+        if (attempts >= 5) { setLockedUntil(Date.now() + 30000); setLoginAttempts(0); return setErr("Too many failed attempts. Please wait 30 seconds."); }
+        return setErr("Incorrect email or password.");
+      }
+      setLoginAttempts(0); // reset on success
 
       // Fetch profile
       const { data: profile } = await sb.from('profiles').select('*').eq('id', authData.user.id).single();

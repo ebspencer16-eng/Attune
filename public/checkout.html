@@ -289,6 +289,14 @@
 
 </div>
 
+<div id="test-mode-banner" style="display:none;position:fixed;top:0;left:0;right:0;z-index:9999;background:#F59E0B;color:#000;text-align:center;font-size:.72rem;font-weight:700;padding:.35rem;font-family:monospace;letter-spacing:.05em">
+  ⚠ TEST MODE — No real charges · Use card 4242 4242 4242 4242
+</div>
+<script>
+if(new URLSearchParams(location.search).get('test')==='1' || location.hostname==='localhost'){
+  document.getElementById('test-mode-banner').style.display='block';
+}
+</script>
 <script>
 // ── Package definitions ──────────────────────────────────────────────────────
 const PACKAGES = {
