@@ -4561,6 +4561,41 @@ function InsightCardList({ insights = [] }) {
   );
 }
 
+// ── Action plan item list with show-more ─────────────────────────────────────
+function ActionPlanList({ explores = [] }) {
+  const [showAll, setShowAll] = useState(false);
+  const SHOW_INIT = 3;
+  const visible = showAll ? explores : explores.slice(0, SHOW_INIT);
+  const hidden = explores.length - SHOW_INIT;
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem", marginBottom: "1.5rem" }}>
+      {visible.map((ins, i) => (
+        <div key={i} style={{ background: "white", border: `1.5px solid ${C.stone}`, borderRadius: 14, overflow: "hidden" }}>
+          <div style={{ background: "#F5F7FF", borderBottom: "1px solid rgba(27,95,232,0.12)", padding: "0.75rem 1.1rem", display: "flex", alignItems: "center", gap: "0.75rem" }}>
+            <div style={{ width: 8, height: 8, borderRadius: "50%", background: "#1B5FE8", flexShrink: 0 }} />
+            <span style={{ fontSize: "0.85rem", fontWeight: 700, color: C.ink, fontFamily: BFONT }}>{ins.title}</span>
+          </div>
+          <div style={{ padding: "0.85rem 1.1rem" }}>
+            <p style={{ fontSize: "0.8rem", color: C.muted, fontFamily: BFONT, fontWeight: 300, lineHeight: 1.65, margin: "0 0 0.65rem" }}>{ins.action}</p>
+            {ins.coupleTypeNote && (
+              <div style={{ padding: "0.5rem 0.75rem", background: "rgba(27,95,232,0.05)", borderRadius: 8, border: "1px solid rgba(27,95,232,0.1)" }}>
+                <span style={{ fontSize: "0.55rem", fontWeight: 700, color: "#1B5FE8", textTransform: "uppercase", letterSpacing: "0.1em", fontFamily: BFONT }}>Your couple type · </span>
+                <span style={{ fontSize: "0.74rem", color: "#1B5FE8", fontFamily: BFONT, fontWeight: 300 }}>{ins.coupleTypeNote}</span>
+              </div>
+            )}
+          </div>
+        </div>
+      ))}
+      {!showAll && hidden > 0 && (
+        <button onClick={() => setShowAll(true)}
+          style={{ background: "white", border: `1.5px solid ${C.stone}`, borderRadius: 12, padding: "0.8rem 1rem", fontSize: "0.78rem", fontWeight: 600, color: C.clay, cursor: "pointer", fontFamily: BFONT, display: "flex", alignItems: "center", justifyContent: "center", gap: "0.4rem" }}>
+          Show {hidden} more {hidden === 1 ? "item" : "items"} ↓
+        </button>
+      )}
+    </div>
+  );
+}
+
 function AnniversaryResultsView({ userName, partnerName, myAnswers, onBack }) {
   const mine = myAnswers || SARAH_ANNIVERSARY_DEMO;
   const theirs = JAMES_ANNIVERSARY_DEMO;
@@ -4652,38 +4687,7 @@ function AnniversaryResultsView({ userName, partnerName, myAnswers, onBack }) {
           </div>
 
           {/* Insight cards */}
-          {insights.map((ins, i) => {
-            const col = INSIGHT_COLORS[ins.type] || INSIGHT_COLORS.explore;
-            return (
-              <div key={i} style={{ background: "white", border: "1.5px solid " + C.stone, borderRadius: 16, marginBottom: "1rem", overflow: "hidden" }}>
-                {/* Card header */}
-                <div style={{ padding: "0.85rem 1.25rem", borderBottom: "1px solid " + C.stone + "50", background: col.bg, display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: "0.75rem" }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", flex: 1 }}>
-                    <div style={{ width: 8, height: 8, borderRadius: "50%", background: col.dot, flexShrink: 0, marginTop: 1 }} />
-                    <span style={{ fontFamily: font.display, fontSize: "0.9rem", fontWeight: 700, color: C.ink, lineHeight: 1.3 }}>{ins.title}</span>
-                  </div>
-                  <div style={{ background: col.labelBg, borderRadius: 999, padding: "0.2rem 0.6rem", flexShrink: 0 }}>
-                    <span style={{ fontSize: "0.58rem", fontWeight: 700, color: col.label, fontFamily: BFONT, letterSpacing: "0.06em", textTransform: "uppercase" }}>
-                      {ins.type === "strength" ? "Strength" : "Worth exploring"}
-                    </span>
-                  </div>
-                </div>
-
-                {/* Card body */}
-                <div style={{ padding: "1.1rem 1.25rem" }}>
-                  <p style={{ fontSize: "0.84rem", color: C.text, fontFamily: BFONT, fontWeight: 300, lineHeight: 1.75, marginBottom: "1rem" }}>{ins.body}</p>
-
-                  {/* Action block */}
-                  <div style={{ background: "#F9F7F4", borderRadius: 10, padding: "0.85rem 1rem", borderLeft: "3px solid " + col.dot }}>
-                    <div style={{ fontSize: "0.58rem", fontWeight: 700, color: col.label, textTransform: "uppercase", letterSpacing: "0.1em", fontFamily: BFONT, marginBottom: "0.4rem" }}>
-                      {ins.priority}
-                    </div>
-                    <p style={{ fontSize: "0.8rem", color: C.text, fontFamily: BFONT, fontWeight: 400, lineHeight: 1.7, margin: 0 }}>{ins.action}</p>
-                  </div>
-                </div>
-              </div>
-            );
-          })}
+          <InsightCardList insights={insights} />
 
           {/* Closing card */}
           <div style={{ background: "linear-gradient(145deg, #071a10, #0d3320)", borderRadius: 16, padding: "2rem", color: "white", textAlign: "center", marginTop: "0.5rem" }}>
@@ -6038,25 +6042,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
                 <div style={{ fontSize: "0.9rem", fontWeight: 700, color: C.ink, fontFamily: BFONT }}>Strong alignment across the board.</div>
               </div>
             ) : (
-              <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem", marginBottom: "1.5rem" }}>
-                {insights.filter(i => i.type === "explore").map((ins, i) => (
-                  <div key={i} style={{ background: "white", border: `1.5px solid ${C.stone}`, borderRadius: 14, overflow: "hidden" }}>
-                    <div style={{ background: "#F5F7FF", borderBottom: `1px solid rgba(27,95,232,0.12)`, padding: "0.75rem 1.1rem", display: "flex", alignItems: "center", gap: "0.75rem" }}>
-                      <div style={{ width: 8, height: 8, borderRadius: "50%", background: "#1B5FE8", flexShrink: 0 }} />
-                      <span style={{ fontSize: "0.85rem", fontWeight: 700, color: C.ink, fontFamily: BFONT }}>{ins.title}</span>
-                    </div>
-                    <div style={{ padding: "0.85rem 1.1rem" }}>
-                      <p style={{ fontSize: "0.8rem", color: C.muted, fontFamily: BFONT, fontWeight: 300, lineHeight: 1.65, margin: "0 0 0.65rem" }}>{ins.action}</p>
-                      {ins.coupleTypeNote && (
-                        <div style={{ padding: "0.5rem 0.75rem", background: "rgba(27,95,232,0.05)", borderRadius: 8, border: "1px solid rgba(27,95,232,0.1)" }}>
-                          <span style={{ fontSize: "0.55rem", fontWeight: 700, color: "#1B5FE8", textTransform: "uppercase", letterSpacing: "0.1em", fontFamily: BFONT }}>Your couple type · </span>
-                          <span style={{ fontSize: "0.74rem", color: "#1B5FE8", fontFamily: BFONT, fontWeight: 300 }}>{ins.coupleTypeNote}</span>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                ))}
-              </div>
+              <ActionPlanList explores={insights.filter(i => i.type === "explore")} />
             )}
             <PrevNext />
           </div>
