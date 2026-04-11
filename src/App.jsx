@@ -4337,72 +4337,88 @@ function deriveAnniversaryInsights(mine, theirs, userName, partnerName, coupleTy
   }
 
   // --- GRATITUDE RECIPROCITY ---
-  const sarahGrateful = mine.a3.toLowerCase();
-  const jamesGrateful = theirs.a3.toLowerCase();
-  const noticeWords = ["notice","see","understand","get me","gets me","knows","space","pull"];
-  const sarahFeelsKnown = noticeWords.some(w => sarahGrateful.includes(w));
-  const jamesFeelsSeen = ["curiosity","curious","interest","interested","make me","laugh"].some(w => jamesGrateful.includes(w));
-  if (sarahFeelsKnown || jamesFeelsSeen) {
+  // Unified keyword set — same check applied to both partners
+  const myGrateful = (mine.a3 || "").toLowerCase();
+  const theirGrateful = (theirs.a3 || "").toLowerCase();
+  const seenWords = ["notice","see","understand","get me","gets me","knows","space","pull","curiosity","curious","interest","interested","make me","laugh","appreciat","pay attention","attentiv","present","remember"];
+  const myFeelsSeen = seenWords.some(w => myGrateful.includes(w));
+  const theirFeelsSeen = seenWords.some(w => theirGrateful.includes(w));
+  if (myFeelsSeen || theirFeelsSeen) {
+    const myQ = mine.a3 ? `"${mine.a3.trim()}"` : "something specific";
+    const theirQ = theirs.a3 ? `"${theirs.a3.trim()}"` : "something specific";
     insights.push({
       type: "strength",
       title: "You each feel genuinely seen",
-      body: `${userName} values being noticed before she has to say anything. ${partnerName} values the way she expands his world. These aren't just nice things to say, they're descriptions of how each of you is actually showing up for the other.`,
+      body: `What each of you is most grateful for right now speaks to being known — not just liked. ${userName}: ${myQ}. ${partnerName}: ${theirQ}. These are descriptions of how you're actually showing up for each other.`,
       priority: "Preserve intentionally",
-      action: `${userName}: keep noticing. ${partnerName}: keep sharing what you find interesting. These are the things that decay quietly when life gets busy, protect them with the same intention you'd give to anything you don't want to lose.`,
+      action: `The things you're each most grateful for are the things most worth protecting. Whatever you're each doing that makes the other feel known — keep doing it deliberately. These are the first things to quietly erode when life gets full.`,
     });
   }
 
   // --- WHAT THEY WANT NEXT ---
-  const sarahNext = mine.a4.toLowerCase();
-  const jamesNext = theirs.a4.toLowerCase();
+  const myNext = (mine.a4 || "").toLowerCase();
+  const theirNext = (theirs.a4 || "").toLowerCase();
   const adventureWords = ["adventure","spontaneous","trip","travel","explore","new","something different"];
   const ritualWords = ["ritual","routine","regular","weekly","walk","dinner","consistent","monthly","carve","time"];
-  const sarahWantsAdventure = adventureWords.some(w => sarahNext.includes(w));
-  const jamesWantsRitual = ritualWords.some(w => jamesNext.includes(w));
+  const myWantsAdventure = adventureWords.some(w => myNext.includes(w));
+  const myWantsRitual = ritualWords.some(w => myNext.includes(w));
+  const theirWantsAdventure = adventureWords.some(w => theirNext.includes(w));
+  const theirWantsRitual = ritualWords.some(w => theirNext.includes(w));
 
-  if (sarahWantsAdventure && jamesWantsRitual) {
+  if ((myWantsAdventure && theirWantsRitual) || (myWantsRitual && theirWantsAdventure)) {
+    const adventurePerson = myWantsAdventure ? userName : partnerName;
+    const ritualPerson = myWantsRitual ? userName : partnerName;
     insights.push({
       type: "explore",
       title: "You want the same closeness through different things",
-      body: `${userName} is reaching for spontaneity and new experiences together. ${partnerName} is reaching for consistency and ritual. These aren't opposites, they're two different answers to the same underlying need: more intentional time that feels like us.`,
+      body: `${adventurePerson} is reaching for spontaneity and new experiences together. ${ritualPerson} is reaching for consistency and ritual. These aren't opposites — they're two different answers to the same underlying need: more intentional time that feels like you.`,
       priority: "Resolve this together",
-      action: `Try this: pick one small weekly ritual (${partnerName}'s instinct) and one slightly bigger spontaneous thing per month (${userName}'s instinct). You're not compromising, you're combining. Start with what's easier to plan.`,
+      action: `Try this: pick one small weekly ritual (${ritualPerson}'s instinct) and one slightly bigger spontaneous thing per month (${adventurePerson}'s instinct). You're not compromising, you're combining. Start with what's easier to plan.`,
     });
   }
 
   // --- FIVE-YEAR PICTURE ---
-  const sarahFive = mine.a5.toLowerCase();
-  const jamesFive = theirs.a5.toLowerCase();
+  const myFive = (mine.a5 || "").toLowerCase();
+  const theirFive = (theirs.a5 || "").toLowerCase();
   const financialWords = ["stable","financial","money","save","security","secure","trapped"];
   const spaceWords = ["space","home","house","somewhere","live","room","intentional"];
-  const sarahFinancial = financialWords.some(w => sarahFive.includes(w));
-  const jamesSpace = spaceWords.some(w => jamesFive.includes(w));
+  const myFinancial = financialWords.some(w => myFive.includes(w));
+  const theirFinancial = financialWords.some(w => theirFive.includes(w));
+  const mySpace = spaceWords.some(w => myFive.includes(w));
+  const theirSpace = spaceWords.some(w => theirFive.includes(w));
 
-  if (sarahFinancial && jamesSpace) {
+  if ((myFinancial && theirSpace) || (mySpace && theirFinancial)) {
+    const financialPerson = myFinancial ? userName : partnerName;
+    const spacePerson = theirSpace ? partnerName : userName;
     insights.push({
       type: "explore",
       title: "Your 5-year pictures share a theme, with different textures",
-      body: `${userName} pictures financial stability that still leaves room for adventure. ${partnerName} pictures a home you genuinely love, more space, more intentionality about where you live. These visions are compatible but haven't been fully reconciled into a shared plan yet.`,
+      body: `${financialPerson} pictures financial stability — security that leaves room for the future you both want. ${spacePerson} pictures a home and space that feel genuinely intentional. These visions are compatible but haven't been reconciled into a shared plan yet.`,
       priority: "Build a shared map",
-      action: `Block an evening to talk about this specifically: what does "financially stable and still adventurous" look like in numbers and choices? What does "a home we love" mean in terms of location and timeline? The answers will shape a lot of smaller decisions you're probably already making independently.`,
+      action: `Block an evening to talk about this specifically: what does financial stability look like in actual numbers and choices? What does the right space mean in terms of location and timeline? These answers shape a lot of smaller decisions you're probably already making independently.`,
     });
   }
 
   // --- GROWTH EDGES ---
-  const sarahGrowth = mine.a6.toLowerCase();
-  const jamesGrowth = theirs.a6.toLowerCase();
+  const myGrowth = (mine.a6 || "").toLowerCase();
+  const theirGrowth = (theirs.a6 || "").toLowerCase();
   const presenceWords = ["present","here","in the room","phone","distracted","somewhere else","half"];
   const expressionWords = ["say","tell","hint","communicate","speak","need","express","directly"];
-  const sarahWorksOnPresence = presenceWords.some(w => sarahGrowth.includes(w));
-  const jamesWorksOnExpression = expressionWords.some(w => jamesGrowth.includes(w));
+  const myWorksOnPresence = presenceWords.some(w => myGrowth.includes(w));
+  const myWorksOnExpression = expressionWords.some(w => myGrowth.includes(w));
+  const theirWorksOnPresence = presenceWords.some(w => theirGrowth.includes(w));
+  const theirWorksOnExpression = expressionWords.some(w => theirGrowth.includes(w));
+  // Fire if one partner works on presence and the other on expression — either direction
+  const presencePerson = myWorksOnPresence ? userName : (theirWorksOnPresence ? partnerName : null);
+  const expressionPerson = myWorksOnExpression ? userName : (theirWorksOnExpression ? partnerName : null);
 
-  if (sarahWorksOnPresence && jamesWorksOnExpression) {
+  if (presencePerson && expressionPerson && presencePerson !== expressionPerson) {
     insights.push({
       type: "strength",
       title: "Where you each struggle is exactly what the other one offers",
-      body: `${userName} is working on being more present. ${partnerName} is working on saying what he needs directly. Notice what's happening: each of you independently identified the thing that would most benefit the other person. That's rare.`,
+      body: `${presencePerson} is working on being more present. ${expressionPerson} is working on saying what they need directly. Notice what's happening: each of you independently identified the thing that would most benefit the other person. That's rare.`,
       priority: "Make this mutual",
-      action: `Tell each other. ${userName}: "I know I disappear sometimes, I'm working on it, and I want you to tell me when it's happening." ${partnerName}: "I'm going to try to say what I actually need instead of waiting for you to notice." Saying it out loud creates accountability and removes the guesswork.`,
+      action: `Tell each other. ${presencePerson}: "I know I disappear sometimes — I'm working on it, and I want you to tell me when it's happening." ${expressionPerson}: "I'm going to try to say what I actually need instead of waiting for you to notice." Saying it out loud creates accountability and removes the guesswork.`,
       coupleTypeNote: coupleType ? `${ctNote}this complementary dynamic is characteristic of your pairing — lean into naming it explicitly rather than hoping the other person notices.` : "",
     });
   }
