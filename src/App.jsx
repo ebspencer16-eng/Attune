@@ -1419,7 +1419,8 @@ function GiftSignupForm({ myName, theirName, theirEmail, pkg, orderId, onCreateA
         }
         // Send welcome email
         fetch('/api/send-email', { method: 'POST', headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ type: 'welcome_account', toEmail: email.trim().toLowerCase(), toName: myName, partnerName: theirName || '', portalUrl: `${window.location.origin}/app` }) }).catch(() => {});
+          body: JSON.stringify({ type: 'welcome_account',
+            userId: account?.id || null, toEmail: email.trim().toLowerCase(), toName: myName, partnerName: theirName || '', portalUrl: `${window.location.origin}/app` }) }).catch(() => {});
 
         const account = { id: authData.user.id, email: email.trim().toLowerCase(), name: myName, partnerName: theirName || '', partnerEmail: theirEmail || '', emailOptIn: true, inviteCode, partnerJoined: false, pkg: pkg || 'core', createdAt: Date.now(), isGiftRecipient: true };
         try { localStorage.setItem('attune_account', JSON.stringify(account)); } catch {}
@@ -5114,7 +5115,8 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
       await fetch('/api/send-email', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ type: 'beta_survey', toEmail: stayEmail, toName: userName, partnerName, coupleType: coupleType?.name, surveyUrl: window.location.origin + '/feedback' }),
+        body: JSON.stringify({ type: 'beta_survey',
+            userId: account?.id || null, toEmail: stayEmail, toName: userName, partnerName, coupleType: coupleType?.name, surveyUrl: window.location.origin + '/feedback' }),
       });
       localStorage.setItem('attune_stay_subscribed', '1');
     } catch {}
@@ -5265,7 +5267,8 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
                 fetch('/api/send-email', {
                   method: 'POST',
                   headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({ type: 'workbook_ready', toEmail: ord.buyerEmail, toName: ord.partner1Name || 'there', partnerName: ord.partner2Name || '', downloadUrl: window.location.origin + '/app', orderNum: ord.orderNum || '' }),
+                  body: JSON.stringify({ type: 'workbook_ready',
+            userId: account?.id || null, toEmail: ord.buyerEmail, toName: ord.partner1Name || 'there', partnerName: ord.partner2Name || '', downloadUrl: window.location.origin + '/app', orderNum: ord.orderNum || '' }),
                 }).catch(() => {});
               }
             } catch (e) {
@@ -7326,6 +7329,7 @@ function AuthModal({ mode, onClose, onSuccess }) {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             type: 'welcome_account',
+            userId: account?.id || null,
             toEmail: form.email.trim().toLowerCase(),
             toName: form.name.trim(),
             partnerName: form.partnerName.trim() || null,
@@ -8321,6 +8325,7 @@ export default function App() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         type: 'results_viewed',
+            userId: account?.id || null,
         toEmail: account.email,
         toName: account.name || '',
         partnerName: account.partnerName || '',
@@ -8648,6 +8653,7 @@ export default function App() {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             type: 'partner_joined_notification',
+            userId: account?.id || null,
             toEmail: account.email,
             toName: account.name,
             partnerName: s?.name || account.partnerName || 'Your partner',
