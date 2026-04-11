@@ -4512,6 +4512,55 @@ const INSIGHT_COLORS = {
   explore:  { bg: "#FFF7ED", border: "#F59E0B", label: "rgba(180,83,9,0.9)",  labelBg: "#FEF3C7", dot: "#F59E0B" },
 };
 
+// ── Reusable insight card list with show-more ─────────────────────────────────
+function InsightCardList({ insights = [] }) {
+  const [showAll, setShowAll] = useState(false);
+  const SHOW_INIT = 3;
+  const visible = showAll ? insights : insights.slice(0, SHOW_INIT);
+  const hidden = insights.length - SHOW_INIT;
+  return (
+    <>
+      {visible.map((ins, i) => {
+        const col = INSIGHT_COLORS[ins.type] || INSIGHT_COLORS.explore;
+        return (
+          <div key={i} style={{ background: "white", border: `1.5px solid ${C.stone}`, borderRadius: 16, marginBottom: "1rem", overflow: "hidden" }}>
+            <div style={{ padding: "0.85rem 1.25rem", borderBottom: `1px solid ${C.stone}50`, background: col.bg, display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: "0.75rem" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", flex: 1 }}>
+                <div style={{ width: 8, height: 8, borderRadius: "50%", background: col.dot, flexShrink: 0 }} />
+                <span style={{ fontFamily: HFONT, fontSize: "0.9rem", fontWeight: 700, color: C.ink, lineHeight: 1.3 }}>{ins.title}</span>
+              </div>
+              <div style={{ background: col.labelBg, borderRadius: 999, padding: "0.2rem 0.6rem", flexShrink: 0 }}>
+                <span style={{ fontSize: "0.58rem", fontWeight: 700, color: col.label, fontFamily: BFONT, letterSpacing: "0.06em", textTransform: "uppercase" }}>
+                  {ins.type === "strength" ? "Strength" : "Worth exploring"}
+                </span>
+              </div>
+            </div>
+            <div style={{ padding: "1.1rem 1.25rem" }}>
+              <p style={{ fontSize: "0.84rem", color: C.text, fontFamily: BFONT, fontWeight: 300, lineHeight: 1.75, marginBottom: "1rem" }}>{ins.body}</p>
+              <div style={{ background: "#F9F7F4", borderRadius: 10, padding: "0.85rem 1rem", borderLeft: `3px solid ${col.dot}` }}>
+                <div style={{ fontSize: "0.58rem", fontWeight: 700, color: col.label, textTransform: "uppercase", letterSpacing: "0.1em", fontFamily: BFONT, marginBottom: "0.4rem" }}>{ins.priority}</div>
+                <p style={{ fontSize: "0.8rem", color: C.text, fontFamily: BFONT, fontWeight: 400, lineHeight: 1.7, margin: 0 }}>{ins.action}</p>
+              </div>
+              {ins.coupleTypeNote && (
+                <div style={{ marginTop: "0.6rem", padding: "0.6rem 0.85rem", background: "rgba(27,95,232,0.05)", borderRadius: 8, border: "1px solid rgba(27,95,232,0.12)" }}>
+                  <span style={{ fontSize: "0.55rem", fontWeight: 700, color: "#1B5FE8", textTransform: "uppercase", letterSpacing: "0.12em", fontFamily: BFONT }}>For your couple type · </span>
+                  <span style={{ fontSize: "0.76rem", color: "#1B5FE8", fontFamily: BFONT, fontWeight: 300, lineHeight: 1.6 }}>{ins.coupleTypeNote}</span>
+                </div>
+              )}
+            </div>
+          </div>
+        );
+      })}
+      {!showAll && hidden > 0 && (
+        <button onClick={() => setShowAll(true)}
+          style={{ width: "100%", background: "white", border: `1.5px solid ${C.stone}`, borderRadius: 12, padding: "0.85rem 1rem", fontSize: "0.78rem", fontWeight: 600, color: C.clay, cursor: "pointer", fontFamily: BFONT, marginBottom: "1rem", display: "flex", alignItems: "center", justifyContent: "center", gap: "0.4rem" }}>
+          Show {hidden} more insight{hidden !== 1 ? "s" : ""} ↓
+        </button>
+      )}
+    </>
+  );
+}
+
 function AnniversaryResultsView({ userName, partnerName, myAnswers, onBack }) {
   const mine = myAnswers || SARAH_ANNIVERSARY_DEMO;
   const theirs = JAMES_ANNIVERSARY_DEMO;
@@ -5829,55 +5878,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
               })}
             </div>
             {/* Insight cards with show-more */}
-            {(() => {
-              const SHOW_INIT = 3;
-              const [showAll3, setShowAll3] = React.useState(false);
-              const visible = showAll3 ? insights : insights.slice(0, SHOW_INIT);
-              const hidden = insights.length - SHOW_INIT;
-              return (
-                <>
-                  {visible.map((ins, i) => {
-                    const col = INSIGHT_COLORS[ins.type] || INSIGHT_COLORS.explore;
-                    return (
-                      <div key={i} style={{ background: "white", border: `1.5px solid ${C.stone}`, borderRadius: 16, marginBottom: "1rem", overflow: "hidden" }}>
-                        <div style={{ padding: "0.85rem 1.25rem", borderBottom: `1px solid ${C.stone}50`, background: col.bg, display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: "0.75rem" }}>
-                          <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", flex: 1 }}>
-                            <div style={{ width: 8, height: 8, borderRadius: "50%", background: col.dot, flexShrink: 0 }} />
-                            <span style={{ fontFamily: HFONT, fontSize: "0.9rem", fontWeight: 700, color: C.ink, lineHeight: 1.3 }}>{ins.title}</span>
-                          </div>
-                          <div style={{ background: col.labelBg, borderRadius: 999, padding: "0.2rem 0.6rem", flexShrink: 0 }}>
-                            <span style={{ fontSize: "0.58rem", fontWeight: 700, color: col.label, fontFamily: BFONT, letterSpacing: "0.06em", textTransform: "uppercase" }}>
-                              {ins.type === "strength" ? "Strength" : "Worth exploring"}
-                            </span>
-                          </div>
-                        </div>
-                        <div style={{ padding: "1.1rem 1.25rem" }}>
-                          <p style={{ fontSize: "0.84rem", color: C.text, fontFamily: BFONT, fontWeight: 300, lineHeight: 1.75, marginBottom: "1rem" }}>{ins.body}</p>
-                          <div style={{ background: "#F9F7F4", borderRadius: 10, padding: "0.85rem 1rem", borderLeft: `3px solid ${col.dot}` }}>
-                            <div style={{ fontSize: "0.58rem", fontWeight: 700, color: col.label, textTransform: "uppercase", letterSpacing: "0.1em", fontFamily: BFONT, marginBottom: "0.4rem" }}>{ins.priority}</div>
-                            <p style={{ fontSize: "0.8rem", color: C.text, fontFamily: BFONT, fontWeight: 400, lineHeight: 1.7, margin: 0 }}>{ins.action}</p>
-                          </div>
-                          {ins.coupleTypeNote && (
-                            <div style={{ marginTop: "0.6rem", padding: "0.6rem 0.85rem", background: "rgba(27,95,232,0.05)", borderRadius: 8, border: "1px solid rgba(27,95,232,0.12)" }}>
-                              <span style={{ fontSize: "0.55rem", fontWeight: 700, color: "#1B5FE8", textTransform: "uppercase", letterSpacing: "0.12em", fontFamily: BFONT }}>For your couple type · </span>
-                              <span style={{ fontSize: "0.76rem", color: "#1B5FE8", fontFamily: BFONT, fontWeight: 300, lineHeight: 1.6 }}>{ins.coupleTypeNote}</span>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    );
-                  })}
-                  {!showAll3 && hidden > 0 && (
-                    <button onClick={() => setShowAll3(true)}
-                      style={{ width: "100%", background: "white", border: `1.5px solid ${C.stone}`, borderRadius: 12, padding: "0.85rem 1rem", fontSize: "0.78rem", fontWeight: 600, color: C.clay, cursor: "pointer", fontFamily: BFONT, marginBottom: "1rem", display: "flex", alignItems: "center", justifyContent: "center", gap: "0.4rem", transition: "border-color 0.15s" }}
-                      onMouseEnter={e => e.currentTarget.style.borderColor = C.orange}
-                      onMouseLeave={e => e.currentTarget.style.borderColor = C.stone}>
-                      Show {hidden} more insight{hidden !== 1 ? "s" : ""} ↓
-                    </button>
-                  )}
-                </>
-              );
-            })()}
+            <InsightCardList insights={insights} />
             <PrevNext />
           </div>
         </Layout>
