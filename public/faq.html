@@ -606,6 +606,25 @@ window._sparkFeedback = function(t) {
 </footer>
 
 <script>
+function toggleFaq(btn) {
+  const item = btn.closest('.faq-item');
+  const answer = item.querySelector('.faq-a');
+  const chevron = btn.querySelector('.faq-chevron');
+  const isOpen = answer && answer.style.display !== 'none';
+  // Close all
+  document.querySelectorAll('.faq-item').forEach(i => {
+    const a = i.querySelector('.faq-a');
+    const c = i.querySelector('.faq-chevron');
+    if (a) a.style.display = 'none';
+    if (c) c.style.transform = '';
+  });
+  // Open this one if it was closed
+  if (!isOpen) {
+    if (answer) answer.style.display = 'block';
+    if (chevron) chevron.style.transform = 'rotate(180deg)';
+  }
+}
+
 function toggle(btn) {
   const item = btn.closest('.faq-item');
   const wasOpen = item.classList.contains('open');
