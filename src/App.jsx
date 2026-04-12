@@ -6362,8 +6362,20 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
                   document.body.appendChild(a); a.click(); document.body.removeChild(a);
                   return;
                 }
-                // Generate PDF in-browser using html2pdf.js
-                showToast('Generating your workbook… this takes about 5 seconds.');
+                // Always try docx API first — reliable on all browsers
+                showToast('Generating your workbook…');
+                const resp2 = await fetch('/api/generate-workbook', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+                if (resp2.ok) {
+                  const blob2 = await resp2.blob();
+                  const url2 = URL.createObjectURL(blob2);
+                  const a2 = document.createElement('a'); a2.href = url2;
+                  a2.download = `Attune_Workbook_${userName}_and_${partnerName}.docx`;
+                  document.body.appendChild(a2); a2.click(); document.body.removeChild(a2);
+                  URL.revokeObjectURL(url2);
+                  return;
+                }
+                // Fallback: Generate PDF in-browser using html2pdf.js
+                showToast('Generating your workbook as PDF… this takes about 5 seconds.');
                 const script = document.createElement('script');
                 script.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js';
                 await new Promise((res, rej) => { script.onload = res; script.onerror = rej; document.head.appendChild(script); });
@@ -8599,10 +8611,11 @@ export default function App() {
     responsibilities: sarahEx2.responsibilities,
     life: sarahEx2.life,
   };
-  const sarahEx3Demo = demoPkg === "anniversary" ? SARAH_ANNIVERSARY_DEMO : null;
+  // Don't pre-populate ex3 in demo — let the user click through the exercise.
+  // Results views fall back to SARAH_ANNIVERSARY_DEMO when ex3Answers is null.
   const [ex1Answers, setEx1State] = useState(sarahEx1Demo);
   const [ex2Answers, setEx2State] = useState(sarahEx2Demo);
-  const [ex3Answers, setEx3State] = useState(sarahEx3Demo); // Anniversary exercise
+  const [ex3Answers, setEx3State] = useState(null); // Anniversary exercise
   const [checklistState, setChecklistState] = useState({}); // Starting Out checklist
   const [budgetState, setBudgetState] = useState(null); // Premium budget tool
   const [notesState, setNotesState] = useState({ partner1: "", partner2: "", shared: "" }); // Conversation notes
@@ -8762,7 +8775,8 @@ export default function App() {
   const partnerEx1 = hasRealPartner ? partnerSession.ex1 : jamesEx1;
   const partnerEx2 = hasRealPartner ? partnerSession.ex2 : jamesEx2;
   // bothDone: local exercises complete AND partner has joined (from Supabase profile.partner_joined or real session)
-  const bothDone = !!(ex1Answers && ex2Answers && (hasRealPartner || account?.partnerJoined || partnerSession));
+  const isDemo = !!_demoParam; // true when ?demo=xxx is in URL
+  const bothDone = !!(ex1Answers && ex2Answers && (isDemo || hasRealPartner || account?.partnerJoined || partnerSession));
   // Package config
   const pkgConfig = {
     core:        { label: "The Attune Assessment",     color: "#E8673A", hasChecklist: false, hasAnniversary: false, hasBudget: false, hasLMFT: false },
