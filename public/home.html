@@ -482,12 +482,13 @@
     </div>
 
     <!-- Desktop: step labels above, then 3-column card grid -->
+    <!-- Step labels: always visible on desktop, hidden on mobile (mobile cards have no labels) -->
+    <div class="story-cards-desktop" style="display:grid;grid-template-columns:repeat(3,1fr);gap:1.25rem;margin-bottom:.6rem;">
+      <div style="font-size:.6rem;letter-spacing:.18em;text-transform:uppercase;font-weight:700;color:var(--orange);font-family:'DM Sans',sans-serif;">Step 01</div>
+      <div style="font-size:.6rem;letter-spacing:.18em;text-transform:uppercase;font-weight:700;color:#9B5DE5;font-family:'DM Sans',sans-serif;">Step 02</div>
+      <div style="font-size:.6rem;letter-spacing:.18em;text-transform:uppercase;font-weight:700;color:#1B5FE8;font-family:'DM Sans',sans-serif;">Step 03</div>
+    </div>
     <div class="story-cards story-cards-desktop">
-      <div style="display:flex;gap:1.25rem;margin-bottom:.6rem;">
-        <div style="flex:1;font-size:.6rem;letter-spacing:.18em;text-transform:uppercase;font-weight:700;color:var(--orange);font-family:'DM Sans',sans-serif;">Step 01</div>
-        <div style="flex:1;font-size:.6rem;letter-spacing:.18em;text-transform:uppercase;font-weight:700;color:#9B5DE5;font-family:'DM Sans',sans-serif;">Step 02</div>
-        <div style="flex:1;font-size:.6rem;letter-spacing:.18em;text-transform:uppercase;font-weight:700;color:#1B5FE8;font-family:'DM Sans',sans-serif;">Step 03</div>
-      </div>
       <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1.25rem;align-items:end;">
       <div style="background:#2C1A10;border-radius:20px;overflow:hidden;display:flex;flex-direction:column;">
         <div style="height:3px;background:#E8673A;flex-shrink:0;"></div>
@@ -517,7 +518,7 @@
   <rect x="416" y="244" width="62" height="26" rx="8" fill="#E8673A"/>
 </svg></div>
       </div>
-      <div style="background:#1C1530;border-radius:20px;overflow:hidden;display:flex;flex-direction:column;">
+      <div style="background:#1A0F2E;border-radius:20px;overflow:hidden;display:flex;flex-direction:column;">
         <div style="height:3px;background:#9B5DE5;flex-shrink:0;"></div>
         <div style="padding:1.5rem 1.5rem .75rem;display:flex;flex-direction:column;gap:.6rem;">
           <div style="font-family:'Playfair Display',Georgia,serif;font-size:1.9rem;font-weight:700;color:white;line-height:1.05;letter-spacing:-.02em;">See yourselves side by side.</div>
@@ -550,7 +551,7 @@
   <circle cx="212" cy="208" r="8" fill="#E8673A" stroke="#FDF8F3" stroke-width="2.5"/><circle cx="407" cy="208" r="8" fill="#1B5FE8" stroke="#FDF8F3" stroke-width="2.5"/>
 </svg></div>
       </div>
-      <div style="background:#0F1B35;border-radius:20px;overflow:hidden;display:flex;flex-direction:column;">
+      <div style="background:#091424;border-radius:20px;overflow:hidden;display:flex;flex-direction:column;">
         <div style="height:3px;background:#1B5FE8;flex-shrink:0;"></div>
         <div style="padding:1.5rem 1.5rem .75rem;display:flex;flex-direction:column;gap:.6rem;">
           <div style="font-family:'Playfair Display',Georgia,serif;font-size:1.9rem;font-weight:700;color:white;line-height:1.05;letter-spacing:-.02em;">Build from what you find.</div>
@@ -617,7 +618,7 @@
   <rect x="416" y="244" width="62" height="26" rx="8" fill="#E8673A"/>
 </svg></div>
       </div>
-      <div style="background:#1C1530;border-radius:20px;overflow:hidden;display:flex;flex-direction:column;min-height:340px;min-width:calc(85vw - 1rem);max-width:320px;flex-shrink:0;scroll-snap-align:start;">
+      <div style="background:#1A0F2E;border-radius:20px;overflow:hidden;display:flex;flex-direction:column;min-height:340px;min-width:calc(85vw - 1rem);max-width:320px;flex-shrink:0;scroll-snap-align:start;">
         <div style="height:3px;background:#9B5DE5;flex-shrink:0;"></div>
         <div style="padding:1.35rem 1.25rem .6rem;display:flex;flex-direction:column;gap:.55rem;">
           <div style="font-family:'Playfair Display',Georgia,serif;font-size:1.75rem;font-weight:700;color:white;line-height:1.05;letter-spacing:-.02em;">See yourselves side by side.</div>
@@ -650,7 +651,7 @@
   <circle cx="212" cy="208" r="8" fill="#E8673A" stroke="#FDF8F3" stroke-width="2.5"/><circle cx="407" cy="208" r="8" fill="#1B5FE8" stroke="#FDF8F3" stroke-width="2.5"/>
 </svg></div>
       </div>
-      <div style="background:#0F1B35;border-radius:20px;overflow:hidden;display:flex;flex-direction:column;min-height:340px;min-width:calc(85vw - 1rem);max-width:320px;flex-shrink:0;scroll-snap-align:start;">
+      <div style="background:#091424;border-radius:20px;overflow:hidden;display:flex;flex-direction:column;min-height:340px;min-width:calc(85vw - 1rem);max-width:320px;flex-shrink:0;scroll-snap-align:start;">
         <div style="height:3px;background:#1B5FE8;flex-shrink:0;"></div>
         <div style="padding:1.35rem 1.25rem .6rem;display:flex;flex-direction:column;gap:.55rem;">
           <div style="font-family:'Playfair Display',Georgia,serif;font-size:1.75rem;font-weight:700;color:white;line-height:1.05;letter-spacing:-.02em;">Build from what you find.</div>
