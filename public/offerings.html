@@ -294,7 +294,7 @@
 
   /* TOAST */
   .cart-toast{position:fixed;bottom:2rem;left:50%;transform:translateX(-50%) translateY(20px);background:var(--ink);color:white;padding:.7rem 1.4rem;border-radius:999px;font-size:.82rem;font-weight:600;font-family:var(--bfont);display:flex;align-items:center;gap:.55rem;box-shadow:0 8px 32px rgba(14,11,7,.22);opacity:0;pointer-events:none;transition:opacity .25s,transform .25s;z-index:600}
-  .cart-toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+  .cart-toast.show{opacity:1;transform:translateX(-50%) translateY(0);pointer-events:auto}
   .cart-toast svg{color:#4ade80}
   .cart-overlay{position:fixed;inset:0;background:rgba(14,11,7,.45);backdrop-filter:blur(4px);z-index:500;display:none;align-items:center;justify-content:center;padding:1.5rem}
   .cart-overlay.open{display:flex}
@@ -1313,18 +1313,19 @@ let _workbookVariant = 'digital'; // 'digital' | 'print'
 
 function addToCart(pkg) {
   _cartPkg = pkg;
+  _addonLmft = false;
   _addonWorkbook = false;
   _workbookVariant = 'digital';
-  // Show toast briefly, then open modal
+  renderCart();
+  // Show "Added to cart" toast
   const p = CART_PKGS[pkg];
-  document.getElementById('cart-toast-text').textContent = p.name + ' added';
   const toast = document.getElementById('cart-toast');
+  document.getElementById('cart-toast-text').textContent = p.name + ' added to cart';
   toast.classList.add('show');
-  setTimeout(() => {
-    toast.classList.remove('show');
-    renderCart();
-    openCart();
-  }, 900);
+  setTimeout(() => toast.classList.remove('show'), 2800);
+  // Update nav badge
+  document.getElementById('cart-badge').classList.add('show');
+  document.getElementById('cart-badge').textContent = '1';
 }
 
 function renderCart() {
@@ -1346,8 +1347,6 @@ function renderCart() {
   document.getElementById('workbook-variants').style.display = _addonWorkbook ? 'flex' : 'none';
   updateWorkbookVariantUI();
   updateTotal();
-  // Badge on nav
-  document.getElementById('cart-badge').classList.add('show');
 }
 
 function toggleAddon(id) {
@@ -1402,20 +1401,9 @@ function openCart() {
 function closeCart() { document.getElementById('cart-overlay').classList.remove('open'); document.body.style.overflow = ''; }
 function overlayClick(e) { if (e.target === document.getElementById('cart-overlay')) closeCart(); }
 
-var _pendingCart = null;
-
 function addToCartWithIntent(pkgId) {
-  _pendingCart = pkgId;
-  var m = document.getElementById('gift-intent-modal');
-  m.style.display = 'flex';
-}
-
-function selectGiftIntent(intent) {
-  document.getElementById('gift-intent-modal').style.display = 'none';
-  if (_pendingCart) {
-    addToCart(_pendingCart, intent === 'gift');
-    _pendingCart = null;
-  }
+  // Add to cart immediately — "who is it for" and add-ons are handled in the cart drawer
+  addToCart(pkgId);
 }
 
 function goCheckout() {
@@ -1506,6 +1494,7 @@ function submitAnnualNotify() {
 <div class="cart-toast" id="cart-toast">
   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
   <span id="cart-toast-text">Added to cart</span>
+  <span onclick="openCart()" style="margin-left:.6rem;text-decoration:underline;cursor:pointer;opacity:.75;white-space:nowrap">View cart</span>
 </div>
 
 <!-- CART MODAL -->
@@ -1715,33 +1704,6 @@ if (firstPkg) observer.observe(firstPkg);
 </script>
 
 <!-- GIFT OR SELF MODAL -->
-<div id="gift-intent-modal" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(14,11,7,.6);backdrop-filter:blur(4px);align-items:center;justify-content:center;padding:1.5rem;">
-  <div style="background:white;border-radius:24px;padding:2.5rem;max-width:440px;width:100%;box-shadow:0 24px 80px rgba(14,11,7,.25);">
-    <div style="font-size:1.5rem;font-weight:700;color:#0E0B07;font-family:'Playfair Display',Georgia,serif;line-height:1.1;margin-bottom:.6rem;">Who is this for?</div>
-    <p style="font-size:.88rem;color:#8C7A68;line-height:1.7;margin-bottom:1.75rem;font-family:'DM Sans',sans-serif;">We'll set up your account and checkout to match.</p>
-    <div style="display:flex;flex-direction:column;gap:.85rem;">
-      <button onclick="selectGiftIntent('self')" style="display:flex;align-items:flex-start;gap:1rem;background:#FBF8F3;border:1.5px solid #E8DDD0;border-radius:14px;padding:1.25rem 1.4rem;cursor:pointer;text-align:left;transition:all .15s;" onmouseover="this.style.borderColor='#E8673A'" onmouseout="this.style.borderColor='#E8DDD0'">
-        <div style="width:36px;height:36px;border-radius:10px;background:rgba(232,103,58,.1);display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px;">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#E8673A" stroke-width="2" stroke-linecap="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
-        </div>
-        <div>
-          <div style="font-size:.9rem;font-weight:700;color:#0E0B07;font-family:'DM Sans',sans-serif;margin-bottom:.2rem;">For me and my partner</div>
-          <div style="font-size:.78rem;color:#8C7A68;font-family:'DM Sans',sans-serif;line-height:1.5;">You'll create an account and invite your partner to complete their exercises independently.</div>
-        </div>
-      </button>
-      <button onclick="selectGiftIntent('gift')" style="display:flex;align-items:flex-start;gap:1rem;background:#FBF8F3;border:1.5px solid #E8DDD0;border-radius:14px;padding:1.25rem 1.4rem;cursor:pointer;text-align:left;transition:all .15s;" onmouseover="this.style.borderColor='#C17F47'" onmouseout="this.style.borderColor='#E8DDD0'">
-        <div style="width:36px;height:36px;border-radius:10px;background:rgba(193,127,71,.1);display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px;">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#C17F47" stroke-width="2" stroke-linecap="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a4 4 0 0 0-8 0v2"/><line x1="12" y1="12" x2="12" y2="17"/><line x1="9.5" y1="14.5" x2="14.5" y2="14.5"/></svg>
-        </div>
-        <div>
-          <div style="font-size:.9rem;font-weight:700;color:#0E0B07;font-family:'DM Sans',sans-serif;margin-bottom:.2rem;">I'm gifting this to another couple</div>
-          <div style="font-size:.78rem;color:#8C7A68;font-family:'DM Sans',sans-serif;line-height:1.5;">You'll purchase as a gift. They'll receive everything they need to get started — no coordination required on your end.</div>
-        </div>
-      </button>
-    </div>
-    <button onclick="document.getElementById('gift-intent-modal').style.display='none'" style="width:100%;margin-top:1rem;background:none;border:none;color:#8C7A68;font-size:.78rem;font-family:'DM Sans',sans-serif;cursor:pointer;padding:.5rem;">Cancel</button>
-  </div>
-</div>
 
 </body>
 </html>
