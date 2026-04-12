@@ -1,0 +1,21 @@
+
+REVERT NOTE — saved at this commit
+===================================
+If Ellie asks to revert: "separate how-it-works and couple-types pages"
+
+WHAT WAS CHANGED:
+1. public/how-it-works.html → content folded into new methodology page, file retired (kept as .bak)
+2. public/couple-types.html → retired (kept as .bak)
+3. public/methodology.html → replaced with new merged page (old academic methodology in .bak)
+4. public/purpose.html → couple typing callout section removed
+5. vercel.json → /couple-types and /how-it-works routes updated to redirect to /methodology
+6. Nav links updated across all pages
+
+TO REVERT:
+- cp public/how-it-works.html.bak public/how-it-works.html
+- cp public/couple-types.html.bak public/couple-types.html
+- cp public/methodology.html.bak public/methodology_new.html
+  then swap back the old methodology content
+- Restore the purpose.html callout section from .bak
+- Restore vercel.json routing
+- Restore nav links

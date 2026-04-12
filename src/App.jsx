@@ -9978,8 +9978,8 @@ export default function App() {
                   </div>
                   <div style={{ display: "grid", gridTemplateColumns: isMobile ? "repeat(2, 1fr)" : "repeat(3, 1fr)", gap: "1.5rem" }}>
                     {[
-                      { title: "Product", links: [["Home", "/home"], ["How it works", "/how-it-works"], ["Gifts & Packages", "/offerings"], ["Get started", "/portal"]] },
-                      { title: "Learn", links: [["How it works", "/how-it-works"], ["Packages & pricing", "/offerings"], ["Resources", "/resources"], ["FAQs", "/faq"], ["Reviews", "/reviews"]] },
+                      { title: "Product", links: [["Home", "/home"], ["How it works", "/methodology"], ["Gifts & Packages", "/offerings"], ["Get started", "/portal"]] },
+                      { title: "Learn", links: [["How it works", "/methodology"], ["Packages & pricing", "/offerings"], ["Resources", "/resources"], ["FAQs", "/faq"], ["Reviews", "/reviews"]] },
                       { title: "Support", links: [["FAQs", "/faq"], ["Contact us", "mailto:hello@attune-relationships.com"], ["Privacy policy", "/legal"], ["Terms of service", "/legal#terms"]] },
                     ].map(({ title, links }) => (
                       <div key={title}>
