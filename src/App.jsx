@@ -580,7 +580,7 @@ const INDIVIDUAL_TYPES = {
        desc: "Moves toward resolution. Processes and expresses relatively freely.",
        wired: "You move toward connection when things need addressing — you don't wait for an opening, you create one. You process outward, which means the people close to you usually know where you stand without having to ask. This makes you easy to know, and relatively easy to be in productive conflict with.",
        typeDesc: "You engage quickly and express freely — which means the people close to you usually know where they stand, and they know where you stand too. You don't make them guess. Under pressure, you tend to reach toward the relationship rather than away from it, which can be genuinely stabilizing. The thing to stay aware of: your speed to engage can feel like a lot when someone else needs more time to get there." },
-  X: { code: "X", name: "The Driver", color: "#1B5FE8", fill: "#EFF1FF", axis1: "Engage", axis2: "Guarded",
+  X: { code: "X", name: "The Anchor", color: "#1B5FE8", fill: "#EFF1FF", axis1: "Engage", axis2: "Guarded",
        desc: "Pushes toward resolution. Processes internally, shares selectively.",
        wired: "You move toward resolution rather than away from it — when something needs addressing, you don't avoid the conversation. You process before you speak, which means your perspective is usually considered by the time it comes out. This makes you direct and deliberate, but sometimes harder to read in the middle of something.",
        typeDesc: "You engage with problems directly but process privately before speaking — which means you tend to arrive at conversations with something considered to say. You don't react out loud. Under pressure, you want resolution, but you need your own thinking to be in order first. The thing to stay aware of: your internal processing can look like distance to someone who expresses more freely." },
@@ -904,7 +904,7 @@ const NEW_COUPLE_TYPES = [
     ],
     stickingPoints: [
       "The driver's move toward resolution can close off the space the feeler needs. The feeler isn't ready, and the conversation starts before they are.",
-      "The feeler's visible emotion during withdrawal can look to the driver like something that needs fixing immediately — which makes the driver push harder.",
+      "The feeler's visible emotion during withdrawal can look to the anchor like something that needs fixing immediately — which makes the anchor push harder.",
       "It can feel like one person cares more than the other — not because that's true, but because they're expressing it at different times and in different ways.",
     ],
     patterns: [
@@ -914,7 +914,7 @@ const NEW_COUPLE_TYPES = [
     ],
     tips: [
       { title: "Driver: resolution doesn't mean resolved", body: "The feeler needs the space and then the conversation. Moving fast to 'let's talk' before they're ready doesn't get to resolution faster — it delays it.", phraseTry: "I know you're not ready. I'll wait — but can you tell me when you think you will be?" },
-      { title: "Feeler: tell the driver when you'll be back", body: "The uncertainty is harder for them than the wait. 'I need until tonight' lets the driver stop the worried waiting and trust the process.", phraseTry: "I need until tomorrow morning. I'll come to you then." },
+      { title: "Feeler: tell the anchor when you'll be back", body: "The uncertainty is harder for them than the wait. 'I need until tonight' lets the anchor stop the worried waiting and trust the process.", phraseTry: "I need until tomorrow morning. I'll come to you then." },
       { title: "Name the pattern out loud before you're in it", body: "When things are calm: 'When I'm upset, I need X before the conversation is possible.' That one sentence changes what the next hard moment looks like.", phraseTry: "When I go quiet, it's not over — it's processing. Give me space and I'll come back." },
     ],
   },
@@ -1016,7 +1016,7 @@ function CoupleMapSVG({ myS, partS, userName, partnerName, size = 480 }) {
     Z: ["#E8E6E3", "#DEDAD5"],
   };
   const QC = { W: "#E8673A", X: "#1B5FE8", Y: "#7C3AED", Z: "#6B7280" };
-  const QN = { W: "The Reacher", X: "The Driver", Y: "The Feeler", Z: "The Protector" };
+  const QN = { W: "The Reacher", X: "The Anchor", Y: "The Feeler", Z: "The Protector" };
 
   // Name tag pill dimensions
   const tagH = 22, tagR = 11, tagPad = 10;
@@ -3448,7 +3448,7 @@ function ExpectationsResults({ myAnswers, partnerAnswers, userName, partnerName,
     WX: "One of you will surface expectation gaps readily; the other processes first. The one who brings it up isn't necessarily the one who cares more.",
     WY: "Different conflict clocks apply here too. The one who names the expectation gap first isn't pushing — they're ready. The other will need a moment before the conversation is possible.",
     WZ: "The Reacher will name gaps; The Protector will need time to respond. That asymmetry is wiring, not avoidance — name that explicitly.",
-    XY: "The Driver wants to resolve quickly; The Feeler needs space to process. Neither is wrong. Build a return window into any expectation conversation.",
+    XY: "The Anchor wants to resolve quickly; The Feeler needs space to process. Neither is wrong. Build a return window into any expectation conversation.",
     XZ: "Both of you hold things close. Expectation gaps that go unnamed can accumulate quietly — schedule the conversation, don't wait for it to happen organically.",
     YZ: "Both withdraw under pressure. When an expectation surfaces, one of you will need to come back first — let that be the agreed pattern.",
   };
