@@ -262,6 +262,31 @@ nav{position:sticky;top:0;z-index:100;height:58px;background:rgba(255,253,249,.9
       </div>
     </div>
 
+
+    <!-- Budget priorities exercise -->
+    <div class="addon-card" id="addon-budget" onclick="toggleBudget()">
+      <div class="addon-check" id="budget-check">
+        <svg width="10" height="8" viewBox="0 0 11 9" fill="none"><path d="M1 4.5L4 7.5L10 1" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      <div class="addon-body">
+        <div class="addon-name">Budget Priorities Exercise</div>
+        <div class="addon-desc">Map what each of you values spending on and where your instincts differ. Included in Starting Out — add it to any other package here.</div>
+        <div class="addon-price">+$20</div>
+      </div>
+    </div>
+
+    <!-- Relationship Reflection exercise -->
+    <div class="addon-card" id="addon-reflection" onclick="toggleReflection()">
+      <div class="addon-check" id="reflection-check">
+        <svg width="10" height="8" viewBox="0 0 11 9" fill="none"><path d="M1 4.5L4 7.5L10 1" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      <div class="addon-body">
+        <div class="addon-name">Relationship Reflection Exercise</div>
+        <div class="addon-desc">A third exercise capturing the moments that shaped your relationship, your shared story, and where you're pointed together. Included in Relationship Reflection — add it to any other package here.</div>
+        <div class="addon-price">+$20</div>
+      </div>
+    </div>
+
   </div>
 </div>
 
@@ -297,6 +322,8 @@ let format = 'physical';
 let addonLmft = false;
 let addonWorkbook = false;
 let wbFormat = 'digital';
+let addonBudget = false;
+let addonReflection = false;
 
 function setFormat(f) {
   format = f;
@@ -319,7 +346,32 @@ function selectPkg(id) {
   const tile = document.getElementById('tile-' + id);
   tile.classList.add(id === 'anniversary' || id === 'premium' ? 'selected-indigo' : 'selected');
   document.getElementById('btn-next').disabled = false;
+  // Dim add-ons that are already included in this package
+  const budgetIncluded = id === 'newlywed';
+  const reflectionIncluded = id === 'anniversary';
+  const lmftIncluded = id === 'premium';
+  setAddonIncluded('addon-budget', budgetIncluded);
+  setAddonIncluded('addon-reflection', reflectionIncluded);
+  setAddonIncluded('addon-lmft', lmftIncluded);
   updateBar();
+}
+
+function setAddonIncluded(id, included) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.style.opacity = included ? '.45' : '1';
+  el.style.pointerEvents = included ? 'none' : 'auto';
+  if (included) el.classList.remove('selected');
+  const badge = el.querySelector('.addon-included-badge');
+  if (included && !badge) {
+    const b = document.createElement('div');
+    b.className = 'addon-included-badge';
+    b.textContent = 'Included in this package';
+    b.style.cssText = 'font-size:.65rem;color:var(--clay);font-weight:600;margin-top:.25rem;font-family:var(--bfont)';
+    el.querySelector('.addon-body').appendChild(b);
+  } else if (!included && badge) {
+    badge.remove();
+  }
 }
 
 function toggleLmft() {
@@ -344,11 +396,25 @@ function setWbFormat(f, e) {
   updateBar();
 }
 
+function toggleBudget() {
+  addonBudget = !addonBudget;
+  document.getElementById('addon-budget').classList.toggle('selected', addonBudget);
+  updateBar();
+}
+
+function toggleReflection() {
+  addonReflection = !addonReflection;
+  document.getElementById('addon-reflection').classList.toggle('selected', addonReflection);
+  updateBar();
+}
+
 function updateBar() {
   if (!selectedPkg) return;
   let total = PRICES[selectedPkg][format];
   if (addonLmft) total += 150;
   if (addonWorkbook) total += wbFormat === 'print' ? 39 : 19;
+  if (addonBudget) total += 20;
+  if (addonReflection) total += 20;
   document.getElementById('bar-pkg-name').textContent = PKG_NAMES[selectedPkg] + ' · ' + (format === 'physical' ? 'Physical' : 'Digital');
   document.getElementById('bar-total').textContent = '$' + total;
 }
@@ -358,6 +424,8 @@ function goNext() {
   const params = new URLSearchParams({ pkg: selectedPkg, format });
   if (addonLmft) params.set('addon_lmft', '1');
   if (addonWorkbook) params.set('addon_workbook', wbFormat);
+  if (addonBudget) params.set('addon_budget', '1');
+  if (addonReflection) params.set('addon_reflection', '1');
   window.location.href = '/checkout?' + params.toString();
 }
 </script>
