@@ -171,7 +171,6 @@
         <div class="dd-divider"></div>
         <a href="/practice">In Practice</a>
         <a href="/faq" class="active">FAQs</a>
-        <a href="/reviews">Reviews</a>
       </div>
     </li>
     <li><a href="/offerings">Packages</a></li>
@@ -193,7 +192,6 @@
     
     <a href="/practice" class="mm-sub">In Practice</a>
     <a href="/faq" class="mm-sub">FAQs</a>
-    <a href="/reviews" class="mm-sub">Reviews</a>
   </div>
   <a href="/offerings">Packages</a>
   <a href="/portal">Sign in</a>
@@ -274,6 +272,154 @@
 
     </div>
   </div>
+</div>
+
+<!-- REVIEWS SECTION (from /reviews) -->
+<div id="reviews" style="scroll-snap-align:start;">
+
+  <!-- Inject review styles -->
+  <style>
+  .reviews-wrap{max-width:1080px;margin:0 auto;padding:0 2.5rem 3rem}
+  .reviews-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem}
+  .review-card{background:white;border:1.5px solid var(--stone);border-radius:18px;padding:1.5rem;display:flex;flex-direction:column;gap:.85rem}
+  .review-stars{color:#E8673A;font-size:1rem;letter-spacing:.1em}
+  .review-pkg{display:inline-block;font-size:.62rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;padding:.25rem .65rem;border-radius:6px;margin-bottom:.25rem}
+  .review-text{font-size:.85rem;color:var(--muted);line-height:1.75;flex:1;font-style:italic}
+  .review-person{display:flex;align-items:center;gap:.7rem;margin-top:.25rem}
+  .review-avatar{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--hfont);font-size:.85rem;font-weight:700;color:white;flex-shrink:0}
+  .review-name{font-size:.82rem;font-weight:600;color:var(--ink)}
+  .review-detail{font-size:.72rem;color:var(--muted)}
+  .stats-bar{background:var(--warm);border-top:1px solid var(--stone);border-bottom:1px solid var(--stone);padding:2.5rem 2.5rem}
+  .stats-inner{max-width:1080px;margin:0 auto;display:grid;grid-template-columns:repeat(4,1fr);gap:1.5rem}
+  .stat-num{font-family:var(--hfont);font-size:2.4rem;font-weight:700;color:var(--ink);line-height:1;margin-bottom:.35rem}
+  .stat-label{font-size:.76rem;color:var(--muted);line-height:1.5;max-width:140px}
+  .featured-quote{background:linear-gradient(150deg,#1c1940 0%,#282560 60%,#1e3a6e 100%);padding:3.5rem 2.5rem;text-align:center}
+  .fq-inner{max-width:720px;margin:0 auto}
+  .leave-review{background:var(--warm);border-top:1px solid var(--stone);padding:3rem 2.5rem;text-align:center}
+  .leave-review-inner{max-width:520px;margin:0 auto}
+  @media(max-width:768px){
+    .reviews-grid{grid-template-columns:1fr!important}
+    .stats-inner{grid-template-columns:1fr 1fr!important;gap:1rem!important}
+    .reviews-wrap{padding:0 1.25rem 2rem!important}
+    .stats-bar{padding:2rem 1.25rem!important}
+    .featured-quote,.leave-review{padding:2.5rem 1.25rem!important}
+  }
+  </style>
+
+  <!-- Stats bar -->
+  <div style="border-top:1.5px solid var(--stone);padding:2rem 0 0;margin-bottom:0;">
+    <div class="faq-wrap" style="padding-bottom:0;">
+      <p class="s-eye" style="margin-bottom:.5rem;">What couples say</p>
+      <h2 class="s-title">What couples found <em>when they looked.</em></h2>
+    </div>
+  </div>
+
+  <div class="stats-bar">
+    <div class="stats-inner">
+      <div style="border-left:2.5px solid var(--orange);padding-left:1.1rem;">
+        <div class="stat-num">2,400<span style="font-size:1.4rem;color:var(--clay);">+</span></div>
+        <div class="stat-label">couples have completed Attune since launch</div>
+      </div>
+      <div style="border-left:2.5px solid var(--indigo);padding-left:1.1rem;">
+        <div class="stat-num">73<span style="font-size:1.4rem;color:var(--clay);">%</span></div>
+        <div class="stat-label">learned something that surprised them about their partner</div>
+      </div>
+      <div style="border-left:2.5px solid var(--orange);padding-left:1.1rem;">
+        <div class="stat-num">4.9<span style="font-size:1.4rem;color:var(--clay);">/5</span></div>
+        <div class="stat-label">average rating across all packages</div>
+      </div>
+      <div style="border-left:2.5px solid var(--indigo);padding-left:1.1rem;">
+        <div class="stat-num">91<span style="font-size:1.4rem;color:var(--clay);">%</span></div>
+        <div class="stat-label">would recommend it to a couple they know</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Reviews grid -->
+  <div class="reviews-wrap" style="padding-top:2.5rem;">
+    <div class="reviews-grid">
+      <div class="review-card">
+        <span class="review-pkg" style="background:#FFF0EB;color:var(--orange);">Anniversary package</span>
+        <div class="review-stars">★ ★ ★ ★ ★</div>
+        <p class="review-text">"We've been together for eight years and I still learned things about my husband I didn't know. The communication section especially — seeing his answers next to mine made something click that I'd been trying to put into words for years."</p>
+        <div class="review-person">
+          <div class="review-avatar" style="background:linear-gradient(135deg,var(--orange),#f59e0b);">S</div>
+          <div><div class="review-name">Sarah M.</div><div class="review-detail">Married 8 years</div></div>
+        </div>
+      </div>
+      <div class="review-card">
+        <span class="review-pkg" style="background:#EEEFFF;color:var(--indigo);">Starting Out</span>
+        <div class="review-stars">★ ★ ★ ★ ★</div>
+        <p class="review-text">"We're engaged and felt like we'd talked about everything. This showed us we hadn't — not because we'd avoided things, but because some questions never come up naturally. The finances and family sections opened up the best conversation we've had."</p>
+        <div class="review-person">
+          <div class="review-avatar" style="background:linear-gradient(135deg,var(--indigo),#2563EB);">A</div>
+          <div><div class="review-name">Alex & Jordan T.</div><div class="review-detail">Engaged · getting married this fall</div></div>
+        </div>
+      </div>
+      <div class="review-card">
+        <span class="review-pkg" style="background:#EEFAF3;color:#10b981;">Premium</span>
+        <div class="review-stars">★ ★ ★ ★ ★</div>
+        <p class="review-text">"The LMFT session was what made it. She'd read our results beforehand and came prepared with actual observations about us specifically. Not generic advice — our stuff. It was the most useful session we've spent on our relationship."</p>
+        <div class="review-person">
+          <div class="review-avatar" style="background:linear-gradient(135deg,#10b981,#059669);">M</div>
+          <div><div class="review-name">Maya & Chris R.</div><div class="review-detail">Married 7 years</div></div>
+        </div>
+      </div>
+      <div class="review-card">
+        <span class="review-pkg" style="background:#FBF8F3;color:var(--clay);">Core</span>
+        <div class="review-stars">★ ★ ★ ★ ★</div>
+        <p class="review-text">"Simple, clean, and useful. I was skeptical because I've tried other relationship apps and they felt gimmicky. This felt like something I could actually use. The side-by-side comparison is exactly the right format."</p>
+        <div class="review-person">
+          <div class="review-avatar" style="background:linear-gradient(135deg,#C17F47,#E8673A);">D</div>
+          <div><div class="review-name">David & Priya L.</div><div class="review-detail">Together 3 years</div></div>
+        </div>
+      </div>
+      <div class="review-card">
+        <span class="review-pkg" style="background:#FFF0EB;color:var(--orange);">Anniversary package</span>
+        <div class="review-stars">★ ★ ★ ★ ★</div>
+        <p class="review-text">"We gave this to ourselves as a 5th anniversary gift and I'm so glad we did. The 'Our Story' exercises brought up things we hadn't thought about in years, in the best way. The physical gift box was beautiful too."</p>
+        <div class="review-person">
+          <div class="review-avatar" style="background:linear-gradient(135deg,#1B5FE8,#10b981);">K</div>
+          <div><div class="review-name">Keisha & Marcus W.</div><div class="review-detail">Married 5 years</div></div>
+        </div>
+      </div>
+      <div class="review-card">
+        <span class="review-pkg" style="background:#EEEFFF;color:var(--indigo);">Starting Out</span>
+        <div class="review-stars">★ ★ ★ ★ ★</div>
+        <p class="review-text">"We did this before moving in together. So many of our early disagreements were just expectations that hadn't been said out loud — finances especially. Wish we'd done it sooner."</p>
+        <div class="review-person">
+          <div class="review-avatar" style="background:linear-gradient(135deg,#f59e0b,#E8673A);">T</div>
+          <div><div class="review-name">Tom & Sophie A.</div><div class="review-detail">Dating 2 years · recently moved in together</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Featured quote -->
+  <div class="featured-quote">
+    <div class="fq-inner">
+      <p style="font-size:.62rem;letter-spacing:.3em;text-transform:uppercase;color:rgba(232,103,58,.65);font-weight:700;margin-bottom:1.5rem;">On the experience</p>
+      <blockquote style="font-family:var(--hfont);font-size:clamp(1.4rem,2.8vw,2rem);font-weight:700;color:white;line-height:1.35;margin-bottom:1.5rem;font-style:italic;">"We thought we knew each other. We did, <em style="background:linear-gradient(90deg,var(--orange),#d45a2e);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">but not precisely.</em> Attune gave us a shared language for things we'd been circling around for years."</blockquote>
+      <div style="display:flex;align-items:center;gap:.85rem;justify-content:center;">
+        <div style="width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,var(--orange),var(--indigo));display:flex;align-items:center;justify-content:center;font-family:var(--hfont);font-size:1rem;font-weight:700;color:white;">J</div>
+        <div style="text-align:left;">
+          <div style="font-size:.85rem;font-weight:600;color:white;">James & Caitlin M.</div>
+          <div style="font-size:.75rem;color:rgba(255,255,255,.4);">Together 6 years · Premium package</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Leave a review -->
+  <div class="leave-review">
+    <div class="leave-review-inner">
+      <p style="font-size:.62rem;letter-spacing:.3em;text-transform:uppercase;color:var(--clay);font-weight:700;margin-bottom:1rem;">Have you completed Attune?</p>
+      <h2 style="font-family:var(--hfont);font-size:1.9rem;font-weight:700;color:var(--ink);margin-bottom:.75rem;line-height:1.1;letter-spacing:-.02em;">Share your experience.</h2>
+      <p style="font-size:.88rem;color:var(--muted);line-height:1.75;margin-bottom:1.75rem;font-weight:300;">We'd love to hear what Attune was like for you and your partner. Reviews help other couples decide if it's right for them.</p>
+      <a href="mailto:hello@attune-relationships.com?subject=My Attune review" class="btn-ghost">Leave a review →</a>
+    </div>
+  </div>
+
 </div>
 
 <div class="cta-wrap" style="text-align:center;padding:4rem 2.5rem;background:var(--warm);border-top:1px solid var(--stone);">
@@ -403,11 +549,11 @@
         <a href="/methodology">Methodology</a>
         
         <a href="/practice">In Practice</a>
-        <a href="/reviews">Reviews</a>
       </div>
       <div class="sf-col">
         <p class="sf-col-title">Support</p>
         <a href="/faq">FAQs</a>
+        <a href="/reviews">Reviews</a>
         <a href="/contact">Contact us</a>
         <a href="/legal">Privacy policy</a>
         <a href="/legal#terms">Terms of service</a>
