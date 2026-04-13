@@ -8611,11 +8611,13 @@ export default function App() {
     responsibilities: sarahEx2.responsibilities,
     life: sarahEx2.life,
   };
-  // Don't pre-populate ex3 in demo — let the user click through the exercise.
-  // Results views fall back to SARAH_ANNIVERSARY_DEMO when ex3Answers is null.
+  // In demo mode for anniversary/premium packages, pre-populate ex3 so the full
+  // reflection experience (8-card highlights + reflection results sections) is visible.
+  // Users can still retake the exercise from the exercise tile.
+  const sarahEx3Demo = isDemo && (_basePkg.hasAnniversary) ? SARAH_ANNIVERSARY_DEMO : null;
   const [ex1Answers, setEx1State] = useState(sarahEx1Demo);
   const [ex2Answers, setEx2State] = useState(sarahEx2Demo);
-  const [ex3Answers, setEx3State] = useState(null); // Anniversary exercise
+  const [ex3Answers, setEx3State] = useState(sarahEx3Demo); // Anniversary exercise
   const [checklistState, setChecklistState] = useState({}); // Starting Out checklist
   const [budgetState, setBudgetState] = useState(null); // Premium budget tool
   const [notesState, setNotesState] = useState({ partner1: "", partner2: "", shared: "" }); // Conversation notes
@@ -8625,6 +8627,7 @@ export default function App() {
   const [authMode, setAuthMode] = useState(_urlSignup ? "signup" : "signup"); // "signup" | "login"
   const [showProfileSetup, setShowProfileSetup] = useState(false);
   const [showNavDropdown, setShowNavDropdown] = useState(false); // Profile nav dropdown
+  const [mobileNavOpen, setMobileNavOpen] = useState(false); // Mobile hamburger nav
   const [inviteCopied, setInviteCopied] = useState(false);
   const [upsellModal, setUpsellModal] = useState(null); // { product: 'workbook'|'reflection'|'checklist', cartAdded: false }
   // Load order record from localStorage (written by checkout on purchase)
@@ -9069,54 +9072,98 @@ export default function App() {
             {/* ── MAIN CONTENT ───────────────────────────────────────────── */}
             <div style={{ flex: 1, display: "flex", flexDirection: "column", overflowY: "auto", minWidth: 0 }}>
 
-              {/* Mobile top bar */}
-              {isMobile && (
-                <div style={{ background: "#9B5DE5", padding: "0.85rem 1.25rem", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                  <span style={{ fontSize: "1rem", fontWeight: 700, color: "white", fontFamily: "'Playfair Display', Georgia, serif" }}>Attune</span>
-                  <div style={{ width: 32, height: 32, borderRadius: "50%", background: "linear-gradient(135deg,#E8673A,#1B5FE8)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 13, fontWeight: 700, color: "white" }}>
-                    {userName ? userName[0].toUpperCase() : "?"}
-                  </div>
-                </div>
-              )}
-
-              {/* ── GRADIENT BANNER ──────────────────────────────────────── */}
-              <div style={{ background: "linear-gradient(120deg, #C8522E 0%, #6B3FA0 52%, #1B5FE8 100%)", padding: isMobile ? "1.25rem 1.5rem" : "1.5rem 2rem", flexShrink: 0, position: "relative", overflow: "hidden" }}>
-                {/* Subtle texture overlay */}
+              {/* ── GRADIENT BANNER (mobile: full nav bar; desktop: banner only) ── */}
+              <div style={{ background: "linear-gradient(120deg, #C8522E 0%, #6B3FA0 52%, #1B5FE8 100%)", flexShrink: 0, position: "relative", overflow: "hidden" }}>
                 <div style={{ position: "absolute", inset: 0, background: "linear-gradient(180deg, rgba(255,255,255,0.04) 0%, transparent 100%)", pointerEvents: "none" }} />
 
-                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", position: "relative", gap: "1rem" }}>
-                  {/* Left: logo + names */}
-                  <div style={{ display: "flex", alignItems: "center", gap: isMobile ? "0.85rem" : "1.25rem" }}>
-                    {/* Logo mark */}
-                    <svg width="34" height="24" viewBox="0 0 103 76" fill="none" style={{ flexShrink: 0, opacity: 0.92 }}>
-                      <defs><linearGradient id="bannerLogoGrad" x1="0" y1="0" x2="103" y2="76" gradientUnits="userSpaceOnUse"><stop offset="0%" stopColor="rgba(255,255,255,0.95)"/><stop offset="100%" stopColor="rgba(255,255,255,0.7)"/></linearGradient></defs>
-                      <path d="M14,4 L44,4 A9,9 0 0,1 53,13 L53,42 A9,9 0 0,1 44,51 L20,51 L6,61 L11,51 A6,6 0 0,1 5,45 L5,13 A9,9 0 0,1 14,4 Z" fill="url(#bannerLogoGrad)"/>
-                      <path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill="rgba(100,60,180,0.7)" transform="translate(13.16,11.3) scale(0.72)"/>
-                      <path d="M89,14 L59,14 A9,9 0 0,0 50,23 L50,52 A9,9 0 0,0 59,61 L83,61 L97,71 L92,61 A6,6 0 0,0 98,55 L98,23 A9,9 0 0,0 89,14 Z" fill="none" stroke="url(#bannerLogoGrad)" strokeWidth="2.2" strokeLinejoin="round"/>
-                      <path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill="url(#bannerLogoGrad)" transform="translate(58.16,21.3) scale(0.72)"/>
-                    </svg>
-                    {/* Couple names */}
+                {/* Mobile: logo row + hamburger at top */}
+                {isMobile && (
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0.85rem 1.25rem 0", position: "relative" }}>
+                    {/* Logo — links to landing page */}
+                    <div onClick={() => window.location.href = '/home'} style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer" }}>
+                      <svg width="28" height="20" viewBox="0 0 103 76" fill="none" style={{ flexShrink: 0 }}>
+                        <defs><linearGradient id="mobileNavLogo" x1="0" y1="0" x2="103" y2="76" gradientUnits="userSpaceOnUse"><stop offset="0%" stopColor="rgba(255,255,255,0.95)"/><stop offset="100%" stopColor="rgba(255,255,255,0.75)"/></linearGradient></defs>
+                        <path d="M14,4 L44,4 A9,9 0 0,1 53,13 L53,42 A9,9 0 0,1 44,51 L20,51 L6,61 L11,51 A6,6 0 0,1 5,45 L5,13 A9,9 0 0,1 14,4 Z" fill="url(#mobileNavLogo)"/>
+                        <path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill="rgba(100,60,180,0.6)" transform="translate(13.16,11.3) scale(0.72)"/>
+                        <path d="M89,14 L59,14 A9,9 0 0,0 50,23 L50,52 A9,9 0 0,0 59,61 L83,61 L97,71 L92,61 A6,6 0 0,0 98,55 L98,23 A9,9 0 0,0 89,14 Z" fill="none" stroke="url(#mobileNavLogo)" strokeWidth="2.2" strokeLinejoin="round"/>
+                        <path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill="url(#mobileNavLogo)" transform="translate(58.16,21.3) scale(0.72)"/>
+                      </svg>
+                      <span style={{ fontSize: "0.95rem", fontWeight: 700, color: "white", fontFamily: "'Playfair Display', Georgia, serif", letterSpacing: "-.01em" }}>Attune</span>
+                    </div>
+                    {/* Hamburger button */}
+                    <button onClick={() => setMobileNavOpen(o => !o)}
+                      style={{ background: "rgba(255,255,255,0.15)", border: "1px solid rgba(255,255,255,0.25)", borderRadius: 8, width: 36, height: 36, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 4, cursor: "pointer", flexShrink: 0, padding: 0 }}>
+                      <div style={{ width: 16, height: 1.5, background: "white", borderRadius: 1, transition: "transform .2s, opacity .2s", transform: mobileNavOpen ? "rotate(45deg) translate(0,4px)" : "none" }} />
+                      <div style={{ width: 16, height: 1.5, background: "white", borderRadius: 1, transition: "opacity .2s", opacity: mobileNavOpen ? 0 : 1 }} />
+                      <div style={{ width: 16, height: 1.5, background: "white", borderRadius: 1, transition: "transform .2s, opacity .2s", transform: mobileNavOpen ? "rotate(-45deg) translate(0,-4px)" : "none" }} />
+                    </button>
+                  </div>
+                )}
+
+                {/* Names + optional View Results CTA */}
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", position: "relative", gap: "1rem", padding: isMobile ? "0.85rem 1.25rem 1.25rem" : "1.5rem 2rem" }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: isMobile ? "0.75rem" : "1.25rem" }}>
+                    {/* Desktop only: logo mark in banner */}
+                    {!isMobile && (
+                      <svg width="34" height="24" viewBox="0 0 103 76" fill="none" style={{ flexShrink: 0, opacity: 0.92 }}>
+                        <defs><linearGradient id="bannerLogoGrad" x1="0" y1="0" x2="103" y2="76" gradientUnits="userSpaceOnUse"><stop offset="0%" stopColor="rgba(255,255,255,0.95)"/><stop offset="100%" stopColor="rgba(255,255,255,0.7)"/></linearGradient></defs>
+                        <path d="M14,4 L44,4 A9,9 0 0,1 53,13 L53,42 A9,9 0 0,1 44,51 L20,51 L6,61 L11,51 A6,6 0 0,1 5,45 L5,13 A9,9 0 0,1 14,4 Z" fill="url(#bannerLogoGrad)"/>
+                        <path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill="rgba(100,60,180,0.7)" transform="translate(13.16,11.3) scale(0.72)"/>
+                        <path d="M89,14 L59,14 A9,9 0 0,0 50,23 L50,52 A9,9 0 0,0 59,61 L83,61 L97,71 L92,61 A6,6 0 0,0 98,55 L98,23 A9,9 0 0,0 89,14 Z" fill="none" stroke="url(#bannerLogoGrad)" strokeWidth="2.2" strokeLinejoin="round"/>
+                        <path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill="url(#bannerLogoGrad)" transform="translate(58.16,21.3) scale(0.72)"/>
+                      </svg>
+                    )}
                     <div>
                       <div style={{ display: "flex", alignItems: "baseline", gap: "0.35rem", flexWrap: "wrap" }}>
-                        <span style={{ fontFamily: "'Playfair Display', Georgia, serif", fontSize: isMobile ? "1.35rem" : "1.75rem", fontWeight: 700, lineHeight: 1, letterSpacing: "-.02em", color: "white" }}>{userName || "You"}</span>
-                        <span style={{ fontFamily: "'Playfair Display', Georgia, serif", fontSize: isMobile ? "1rem" : "1.3rem", fontWeight: 400, fontStyle: "italic", color: "rgba(255,255,255,0.5)", lineHeight: 1 }}>&</span>
-                        <span style={{ fontFamily: "'Playfair Display', Georgia, serif", fontSize: isMobile ? "1.35rem" : "1.75rem", fontWeight: 700, lineHeight: 1, letterSpacing: "-.02em", color: "white" }}>{partnerName || "Partner"}</span>
+                        <span style={{ fontFamily: "'Playfair Display', Georgia, serif", fontSize: isMobile ? "1.3rem" : "1.75rem", fontWeight: 700, lineHeight: 1, letterSpacing: "-.02em", color: "white" }}>{userName || "You"}</span>
+                        <span style={{ fontFamily: "'Playfair Display', Georgia, serif", fontSize: isMobile ? "0.95rem" : "1.3rem", fontWeight: 400, fontStyle: "italic", color: "rgba(255,255,255,0.5)", lineHeight: 1 }}>&</span>
+                        <span style={{ fontFamily: "'Playfair Display', Georgia, serif", fontSize: isMobile ? "1.3rem" : "1.75rem", fontWeight: 700, lineHeight: 1, letterSpacing: "-.02em", color: "white" }}>{partnerName || "Partner"}</span>
                       </div>
-
                     </div>
                   </div>
-
-                  {/* Right: CTA */}
-                  {bothDone && (
+                  {/* Desktop only: View Results in banner */}
+                  {!isMobile && bothDone && (
                     <button onClick={() => setView("results")}
-                      style={{ background: "rgba(255,255,255,0.18)", backdropFilter: "blur(8px)", color: "white", border: "1px solid rgba(255,255,255,0.3)", borderRadius: 10, padding: isMobile ? "0.55rem 1rem" : "0.65rem 1.25rem", fontSize: "0.75rem", fontWeight: 600, cursor: "pointer", whiteSpace: "nowrap", letterSpacing: ".04em", textTransform: "uppercase", fontFamily: "'DM Sans', sans-serif", flexShrink: 0, transition: "background .15s" }}
+                      style={{ background: "rgba(255,255,255,0.18)", backdropFilter: "blur(8px)", color: "white", border: "1px solid rgba(255,255,255,0.3)", borderRadius: 10, padding: "0.65rem 1.25rem", fontSize: "0.75rem", fontWeight: 600, cursor: "pointer", whiteSpace: "nowrap", letterSpacing: ".04em", textTransform: "uppercase", fontFamily: "'DM Sans', sans-serif", flexShrink: 0, transition: "background .15s" }}
                       onMouseEnter={e => e.currentTarget.style.background = "rgba(255,255,255,0.26)"}
                       onMouseLeave={e => e.currentTarget.style.background = "rgba(255,255,255,0.18)"}>
                       View results →
                     </button>
                   )}
                 </div>
+
+                {/* Mobile hamburger dropdown nav */}
+                {isMobile && mobileNavOpen && (
+                  <div style={{ background: "rgba(14,11,7,0.92)", backdropFilter: "blur(16px)", borderTop: "1px solid rgba(255,255,255,0.12)", padding: "0.75rem 1rem 1rem", display: "flex", flexDirection: "column", gap: "0.2rem" }}>
+                    {[
+                      { label: "Dashboard", viewId: "home", icon: "⊞" },
+                      { label: "Exercises", viewId: "exercises", icon: "◎" },
+                      { label: "Results", viewId: "results", icon: "≡" },
+                      { label: "Resources", viewId: "resources", icon: "◻" },
+                      { label: "Workbook", viewId: "workbook", icon: "◈" },
+                      { label: "Account", viewId: "account", icon: "○" },
+                    ].map(item => (
+                      <button key={item.viewId}
+                        onClick={() => { setView(item.viewId); setMobileNavOpen(false); }}
+                        style={{ display: "flex", alignItems: "center", gap: "0.85rem", padding: "0.75rem 0.85rem", background: view === item.viewId ? "rgba(232,103,58,0.2)" : "transparent", border: "none", borderRadius: 10, cursor: "pointer", textAlign: "left", width: "100%", transition: "background .15s" }}>
+                        <span style={{ fontSize: "0.8rem", color: view === item.viewId ? "#E8673A" : "rgba(255,255,255,0.6)", width: 16 }}>{item.icon}</span>
+                        <span style={{ fontSize: "0.88rem", fontWeight: view === item.viewId ? 700 : 400, color: view === item.viewId ? "white" : "rgba(255,255,255,0.75)", fontFamily: "'DM Sans', sans-serif" }}>{item.label}</span>
+                        {item.viewId === "results" && bothDone && <span style={{ marginLeft: "auto", fontSize: "0.65rem", background: "#E8673A", color: "white", borderRadius: 99, padding: "2px 8px", fontFamily: "'DM Sans', sans-serif", fontWeight: 700 }}>Ready</span>}
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
+
+              {/* Mobile: View Results button below banner (centered) */}
+              {isMobile && bothDone && (
+                <div style={{ background: "#FBF8F3", padding: "1rem 1.25rem 0", display: "flex", justifyContent: "center" }}>
+                  <button onClick={() => setView("results")}
+                    style={{ background: "linear-gradient(135deg,#E8673A,#1B5FE8)", color: "white", border: "none", borderRadius: 12, padding: "0.75rem 2rem", fontSize: "0.82rem", fontWeight: 700, cursor: "pointer", fontFamily: "'DM Sans', sans-serif", letterSpacing: ".04em", textTransform: "uppercase", boxShadow: "0 4px 16px rgba(232,103,58,0.3)" }}>
+                    View Results →
+                  </button>
+                </div>
+              )}
 
               {/* ── CONTENT AREA ─────────────────────────────────────────── */}
               <div style={{ flex: 1, padding: isMobile ? "1.5rem 1.25rem" : "2rem 2rem", background: "#FBF8F3" }}>
