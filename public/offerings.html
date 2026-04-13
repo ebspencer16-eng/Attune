@@ -1420,7 +1420,8 @@ function goCheckout() {
 // ─────────────────────────────────────────────────────────────────────────────
 
 function scrollToPkg(id) {
-  const el = document.getElementById(id);
+  const clean = id.replace(/^#/, '');
+  const el = document.getElementById(clean);
   if (el) { el.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
 }
 function toggleMenu() {
