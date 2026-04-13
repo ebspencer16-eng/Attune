@@ -31,9 +31,9 @@
     --bfont:'DM Sans',sans-serif;
   }
   html{scroll-behavior:smooth}
-  html,body{overflow-x:clip;max-width:100%}
+  html{overflow-x:clip;max-width:100%}
   html{scroll-behavior:smooth}
-  body{background:var(--cream);color:var(--text);font-family:var(--bfont);-webkit-font-smoothing:antialiased;overflow-y:scroll;scroll-snap-type:y proximity;scroll-padding-top:58px}
+  body{overflow-x:clip;background:var(--cream);color:var(--text);font-family:var(--bfont);-webkit-font-smoothing:antialiased;overflow-y:scroll;scroll-snap-type:y proximity;scroll-padding-top:58px}
 
   /* NAV */
   nav{position:fixed;top:0;left:0;right:0;z-index:100;height:58px;background:rgba(255,253,249,.94);backdrop-filter:blur(16px);border-bottom:1px solid var(--stone);display:flex;align-items:center;padding:0 2.5rem;justify-content:space-between}
@@ -588,7 +588,7 @@
 
     <!-- Mobile: step label inline in card, swipeable -->
     <div class="story-cards-mobile-scroll" style="display:none;overflow-x:scroll;gap:1rem;padding-bottom:.75rem;-webkit-overflow-scrolling:touch;scrollbar-width:none;margin:0 -1.25rem;padding-left:1.25rem;padding-right:1.25rem;scroll-snap-type:x mandatory;">
-      <div style="background:linear-gradient(150deg,#3D1A08,#5A2810);border-radius:20px;overflow:hidden;display:flex;flex-direction:column;min-height:340px;min-width:calc(85vw - 1rem);max-width:320px;flex-shrink:0;scroll-snap-align:start;">
+      <div style="background:linear-gradient(150deg,#3D1A08,#5A2810);border-radius:20px;overflow:hidden;display:flex;flex-direction:column;min-height:340px;min-width:calc(85vw - 1rem);max-width:320px;flex-shrink:0;scroll-snap-align:start;scroll-snap-stop:always;">
         <div style="height:3px;background:#E8673A;flex-shrink:0;"></div>
         <div style="padding:1.35rem 1.25rem .6rem;display:flex;flex-direction:column;gap:.55rem;">
           <div style="font-family:'Playfair Display',Georgia,serif;font-size:1.75rem;font-weight:700;color:white;line-height:1.05;letter-spacing:-.02em;">Answer separately.</div>
@@ -616,7 +616,7 @@
   <rect x="416" y="244" width="62" height="26" rx="8" fill="#E8673A"/>
 </svg></div>
       </div>
-      <div style="background:linear-gradient(150deg,#1E0E42,#2E1560);border-radius:20px;overflow:hidden;display:flex;flex-direction:column;min-height:340px;min-width:calc(85vw - 1rem);max-width:320px;flex-shrink:0;scroll-snap-align:start;">
+      <div style="background:linear-gradient(150deg,#1E0E42,#2E1560);border-radius:20px;overflow:hidden;display:flex;flex-direction:column;min-height:340px;min-width:calc(85vw - 1rem);max-width:320px;flex-shrink:0;scroll-snap-align:start;scroll-snap-stop:always;">
         <div style="height:3px;background:#9B5DE5;flex-shrink:0;"></div>
         <div style="padding:1.35rem 1.25rem .6rem;display:flex;flex-direction:column;gap:.55rem;">
           <div style="font-family:'Playfair Display',Georgia,serif;font-size:1.75rem;font-weight:700;color:white;line-height:1.05;letter-spacing:-.02em;">See yourselves side by side.</div>
@@ -649,7 +649,7 @@
   <circle cx="212" cy="208" r="8" fill="#E8673A" stroke="#FDF8F3" stroke-width="2.5"/><circle cx="407" cy="208" r="8" fill="#1B5FE8" stroke="#FDF8F3" stroke-width="2.5"/>
 </svg></div>
       </div>
-      <div style="background:linear-gradient(150deg,#0C1E48,#102860);border-radius:20px;overflow:hidden;display:flex;flex-direction:column;min-height:340px;min-width:calc(85vw - 1rem);max-width:320px;flex-shrink:0;scroll-snap-align:start;">
+      <div style="background:linear-gradient(150deg,#0C1E48,#102860);border-radius:20px;overflow:hidden;display:flex;flex-direction:column;min-height:340px;min-width:calc(85vw - 1rem);max-width:320px;flex-shrink:0;scroll-snap-align:start;scroll-snap-stop:always;">
         <div style="height:3px;background:#1B5FE8;flex-shrink:0;"></div>
         <div style="padding:1.35rem 1.25rem .6rem;display:flex;flex-direction:column;gap:.55rem;">
           <div style="font-family:'Playfair Display',Georgia,serif;font-size:1.75rem;font-weight:700;color:white;line-height:1.05;letter-spacing:-.02em;">Build from what you find.</div>
