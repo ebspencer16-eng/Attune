@@ -22,8 +22,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,800;1,700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
-  html,body{overflow-x:hidden;max-width:100%}
-  html,body{scroll-snap-type:y proximity}
+  html,body{overflow-x:clip;max-width:100%}
+  html{scroll-behavior:smooth}
   *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
   :root{
     --cream:#FFFDF9;--warm:#FBF8F3;--stone:#E8DDD0;--clay:#C17F47;
@@ -31,7 +31,7 @@
     --hfont:'Playfair Display',Georgia,serif;--bfont:'DM Sans',sans-serif;
   }
   html{scroll-behavior:smooth}
-  body{background:var(--cream);color:var(--text);font-family:var(--bfont);-webkit-font-smoothing:antialiased}
+  body{background:var(--cream);color:var(--text);font-family:var(--bfont);-webkit-font-smoothing:antialiased;overflow-y:scroll;scroll-snap-type:y proximity;scroll-padding-top:58px}
 
   /* NAV */
   nav{position:fixed;top:0;left:0;right:0;z-index:100;height:58px;background:rgba(255,253,249,.94);backdrop-filter:blur(16px);border-bottom:1px solid var(--stone);display:flex;align-items:center;padding:0 2.5rem;justify-content:space-between}
