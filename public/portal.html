@@ -1295,7 +1295,7 @@ async function doSignIn() {
     return;
   }
 
-  // Supabase not yet connected — inform user
+  // Supabase not yet connected – inform user
   errEl.textContent = 'Account sign-in is coming soon. Use the demo account below to explore Attune.';
   errEl.style.display = 'block';
   btn.disabled = false; btn.textContent = 'Sign in →';
@@ -1859,13 +1859,6 @@ function togglePortalMenu() {
   const m = document.getElementById('portal-mobile-menu');
   if (m) m.classList.toggle('open');
 }
-document.addEventListener('click', function(e) {
-  const menu = document.getElementById('portal-mobile-menu');
-  const btn = document.getElementById('portal-hamburger');
-  if (menu && menu.classList.contains('open') && !menu.contains(e.target) && btn && !btn.contains(e.target)) {
-    menu.classList.remove('open');
-  }
-});
 </script>
 </body>
 </html>

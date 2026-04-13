@@ -60,7 +60,7 @@
   /* PAGE HEADER */
   
   .s-eye{font-size:.6rem;letter-spacing:.3em;text-transform:uppercase;color:var(--clay);font-weight:700;margin-bottom:.85rem;display:flex;align-items:center;gap:.65rem}
-  .s-eye::before{content:'';width:28px;height:2.5px;border-radius:999px;background:linear-gradient(90deg,var(--orange),var(--indigo));flex-shrink:0}
+  .s-eye::before{content:'';width:28px;height:2.5px;border-radius:999px;background:var(--stone);flex-shrink:0}
   .in-practice-eyebrow{display:flex;align-items:center;gap:.75rem;margin-bottom:.85rem}
   .ip-mark{width:8px;height:8px;border-radius:50%;background:var(--orange)}
   .ip-label{font-size:.62rem;letter-spacing:.28em;text-transform:uppercase;color:var(--clay);font-weight:700}
@@ -569,6 +569,14 @@ function handleSignup(e){
   fb.style.color='var(--clay)';
   document.getElementById('signup-email').value='';
 }
+document.addEventListener('click', function(e) {
+  var menu = document.getElementById('mobile-menu');
+  var burger = document.getElementById('hamburger');
+  if (menu && menu.classList.contains('open') && !menu.contains(e.target) && !burger.contains(e.target)) {
+    menu.classList.remove('open');
+    if (burger) burger.classList.remove('open');
+  }
+});
 </script>
 
 <!-- EMAIL SIGNUP -->

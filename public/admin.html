@@ -390,12 +390,12 @@
       </select>
       <select class="filter-select" id="orders-type-filter" onchange="applyOrderFilters()">
         <option value="">All couple types</option>
-        <option value="WW">WW — The Mirror</option>
-        <option value="WY">WY — The Balance</option>
-        <option value="WZ">WZ — The Bridge</option>
-        <option value="YY">YY — The Steady</option>
-        <option value="YZ">YZ — The Channel</option>
-        <option value="ZZ">ZZ — The Current</option>
+        <option value="WW">WW – The Mirror</option>
+        <option value="WY">WY – The Balance</option>
+        <option value="WZ">WZ – The Bridge</option>
+        <option value="YY">YY – The Steady</option>
+        <option value="YZ">YZ – The Channel</option>
+        <option value="ZZ">ZZ – The Current</option>
       </select>
       <input type="text" id="orders-search" placeholder="Search order ID or name…" oninput="applyOrderFilters()"
         style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:.45rem .85rem;font-size:.75rem;color:var(--text);font-family:var(--bfont);outline:none;min-width:200px;transition:border-color .15s"
@@ -779,7 +779,7 @@
   <div style="max-width:900px">
     <div class="section-header">
       <div class="section-title">LMFT Session Requests</div>
-      <div class="section-sub">Booking requests from /lmft-booking — review and schedule</div>
+      <div class="section-sub">Booking requests from /lmft-booking – review and schedule</div>
     </div>
     <div id="lmft-requests-container" style="font-size:.8rem;color:var(--muted);padding:2rem 0">Loading requests…</div>
   </div>
@@ -789,7 +789,7 @@
     <div class="topbar">
       <div>
         <div class="topbar-title">Type Analytics</div>
-        <div class="topbar-sub">Couple type distribution, individual style codes, and axis breakdowns — all anonymous, no PII</div>
+        <div class="topbar-sub">Couple type distribution, individual style codes, and axis breakdowns – all anonymous, no PII</div>
       </div>
       <div class="topbar-right">
         <div class="date-badge" id="types-last-updated">Loading…</div>
@@ -868,7 +868,7 @@
       <div class="chart-card">
         <div class="chart-card-header">
           <div class="chart-card-title">Individual style code frequency</div>
-          <div class="chart-card-sub">All 16 possible 4-letter codes (E/I · X/G · F/S · C/A) — codes with zero occurrences hidden</div>
+          <div class="chart-card-sub">All 16 possible 4-letter codes (E/I · X/G · F/S · C/A) – codes with zero occurrences hidden</div>
         </div>
         <div id="types-code-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:.5rem;padding:.25rem 0;">
           <div style="color:var(--muted);font-size:.78rem;">Loading…</div>
@@ -882,7 +882,7 @@
     <div class="topbar">
       <div>
         <div class="topbar-title">Beta Feedback</div>
-        <div class="topbar-sub">Beta survey v3 responses — benchmarkable metrics, grid scores, and open text</div>
+        <div class="topbar-sub">Beta survey v3 responses – benchmarkable metrics, grid scores, and open text</div>
       </div>
       <div class="topbar-right">
         <div class="date-badge" id="fb-last-updated">Loading…</div>
@@ -956,7 +956,7 @@
     <div class="chart-grid">
       <div class="chart-card">
         <div class="chart-card-header">
-          <div class="chart-card-title">Communication exercise — grid averages</div>
+          <div class="chart-card-title">Communication exercise – grid averages</div>
           <div class="chart-card-sub">Design · Accuracy · Relevance · Likely to apply</div>
         </div>
         <div id="fb-comms-grid-bars" style="display:flex;flex-direction:column;gap:.6rem;padding:.5rem 0;">
@@ -965,7 +965,7 @@
       </div>
       <div class="chart-card">
         <div class="chart-card-header">
-          <div class="chart-card-title">Expectations exercise — grid averages</div>
+          <div class="chart-card-title">Expectations exercise – grid averages</div>
           <div class="chart-card-sub">Design · Accuracy · Relevance · Likely to apply</div>
         </div>
         <div id="fb-exp-grid-bars" style="display:flex;flex-direction:column;gap:.6rem;padding:.5rem 0;">
@@ -978,7 +978,7 @@
     <div class="chart-grid chart-grid full">
       <div class="chart-card">
         <div class="chart-card-header">
-          <div class="chart-card-title">Overall experience — execution · impact · satisfaction</div>
+          <div class="chart-card-title">Overall experience – execution · impact · satisfaction</div>
           <div class="chart-card-sub">Per product element · avg 1–5</div>
         </div>
         <div id="fb-overall-grid-bars" style="display:flex;flex-direction:column;gap:.6rem;padding:.5rem 0;">
@@ -991,7 +991,7 @@
     <div class="chart-grid">
       <div class="chart-card">
         <div class="chart-card-header">
-          <div class="chart-card-title">Comms exercise — lead questions</div>
+          <div class="chart-card-title">Comms exercise – lead questions</div>
           <div class="chart-card-sub">Overall · Impact · Honesty · Safety</div>
         </div>
         <div id="fb-comms-lead-bars" style="display:flex;flex-direction:column;gap:.6rem;padding:.5rem 0;">
@@ -1000,7 +1000,7 @@
       </div>
       <div class="chart-card">
         <div class="chart-card-header">
-          <div class="chart-card-title">Expectations exercise — lead questions</div>
+          <div class="chart-card-title">Expectations exercise – lead questions</div>
           <div class="chart-card-sub">Overall · Impact · Honesty · Safety</div>
         </div>
         <div id="fb-exp-lead-bars" style="display:flex;flex-direction:column;gap:.6rem;padding:.5rem 0;">
@@ -1013,7 +1013,7 @@
     <div class="chart-grid">
       <div class="chart-card">
         <div class="chart-card-header">
-          <div class="chart-card-title">Aha moment — biggest recognition</div>
+          <div class="chart-card-title">Aha moment – biggest recognition</div>
           <div class="chart-card-sub">Which part of Attune produced the biggest moment</div>
         </div>
         <div id="fb-aha-bars" style="display:flex;flex-direction:column;gap:.55rem;padding:.5rem 0;">
@@ -1045,7 +1045,7 @@
       <div class="chart-card">
         <div class="chart-card-header">
           <div class="chart-card-title">Prior experience</div>
-          <div class="chart-card-sub">Segmentation — what they've tried before</div>
+          <div class="chart-card-sub">Segmentation – what they've tried before</div>
         </div>
         <div id="fb-prior-bars" style="display:flex;flex-direction:column;gap:.55rem;padding:.5rem 0;">
           <div style="color:var(--muted);font-size:.78rem;">Loading…</div>
@@ -1121,7 +1121,7 @@ async function loadLmftRequests() {
   const SUPABASE_URL = window.__SUPABASE_URL;
   const SUPABASE_ANON = window.__SUPABASE_ANON;
   if (!SUPABASE_URL || !SUPABASE_ANON) {
-    container.innerHTML = '<p style="color:var(--muted)">Supabase not connected — add VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY to load real requests.</p>';
+    container.innerHTML = '<p style="color:var(--muted)">Supabase not connected – add VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY to load real requests.</p>';
     return;
   }
   try {
@@ -1338,22 +1338,22 @@ async function loadFeedbackData() {
     ],
     negative: [
       {text:"The expectations section felt repetitive in places. A few of the responsibilities categories overlapped and I wasn't sure which to put things in.",name:"Beta tester",nps:6},
-      {text:"The workbook arrived slightly damaged — packaging could be better. The content inside was really good though.",name:"Anonymous",nps:7},
+      {text:"The workbook arrived slightly damaged – packaging could be better. The content inside was really good though.",name:"Anonymous",nps:7},
     ],
     positive: [
       {text:"The independence piece was the thing I was most skeptical about and it turned out to be the most important. Answering honestly without knowing what my partner said changed everything.",name:"Chris R.",nps:10},
       {text:"The results are beautiful. I was expecting something clinical and it felt more like a real document about us.",name:"Leila A.",nps:9},
     ],
     testimonials: [
-      {text:"I'd tell them: do it before a major decision. We did it three months before our wedding and I genuinely think we're going into it more clear-eyed than most couples.",name:"Rachel & Tom",nps:10,consent:"Yes — use my words and first name on the reviews section"},
-      {text:"It's like getting a translation of your partner. Not fixing anything, just finally being able to read each other.",name:"Dev M.",nps:9,consent:"Yes — use my words and first name on the reviews section"},
+      {text:"I'd tell them: do it before a major decision. We did it three months before our wedding and I genuinely think we're going into it more clear-eyed than most couples.",name:"Rachel & Tom",nps:10,consent:"Yes – use my words and first name on the reviews section"},
+      {text:"It's like getting a translation of your partner. Not fixing anything, just finally being able to read each other.",name:"Dev M.",nps:9,consent:"Yes – use my words and first name on the reviews section"},
     ],
     detractors: [
       {text:"I think the questions are a little too abstract for people who aren't already into this kind of thing. My partner found some of them confusing.",name:"Anonymous",nps:5},
     ],
     wishKnew: [
       {text:"I wish I'd known it would take more than 30 minutes. We started it on a weeknight and ran out of time, which broke the flow.",name:"Anonymous"},
-      {text:"That answering separately wasn't just a suggestion — it's the whole point. I almost texted my partner mid-exercise to compare notes.",name:"Sam L."},
+      {text:"That answering separately wasn't just a suggestion – it's the whole point. I almost texted my partner mid-exercise to compare notes.",name:"Sam L."},
     ],
   };
 
@@ -1546,7 +1546,7 @@ function generateOrders() {
     { id:'ZZ', name:'Still Waters',    color:'#6B7280',
       tagline:'Real depth runs here. The work is building structures for it to surface.',
       description:'{U} and {P} both go inward when things get hard and hold your interior life privately.',
-      nuance:'The risk for this pairing is not that you do not care — it is that things you care about never get said.',
+      nuance:'The risk for this pairing is not that you do not care – it is that things you care about never get said.',
       scoresA:{ energy:2.2, expression:1.9, closeness:2.1, values:3.1, love:2.0, needs:4.1, bids:2.0, conflict:4.2, stress:2.1, repair:2.8, feedback:2.2 },
       scoresB:{ energy:3.1, expression:2.8, closeness:2.7, values:3.4, love:3.8, needs:3.3, bids:3.1, conflict:3.6, stress:2.7, repair:3.5, feedback:2.8 } },
     { id:'WY', name:'The Counterpart',      color:'#E8673A',
@@ -1563,7 +1563,7 @@ function generateOrders() {
       scoresB:{ energy:3.5, expression:2.2, closeness:3.2, values:3.3, love:3.5, needs:3.8, bids:3.2, conflict:2.2, stress:3.5, repair:2.4, feedback:2.3 } },
     { id:'WZ', name:'Reach & Reserve', color:'#C17F47',
       tagline:'One reaches, one reserves. The gap between those instincts is the conversation worth having.',
-      description:'{U} and {P} have the widest gap in the pairing set — full mismatch on both axes.',
+      description:'{U} and {P} have the widest gap in the pairing set – full mismatch on both axes.',
       nuance:'Complementary styles create strong balance when named explicitly. Without naming, they create distance.',
       scoresA:{ energy:2.5, expression:4.1, closeness:4.0, values:2.9, love:2.2, needs:2.1, bids:3.9, conflict:1.8, stress:2.1, repair:3.8, feedback:3.9 },
       scoresB:{ energy:3.2, expression:2.0, closeness:2.3, values:3.5, love:3.7, needs:4.0, bids:2.1, conflict:4.0, stress:2.2, repair:2.9, feedback:2.1 } },
@@ -1640,7 +1640,7 @@ function generateOrders() {
     const jScore = s => Math.min(5, Math.max(1, s + jitter()));
     const orderScores = Object.fromEntries(Object.entries(ct.scoresA).map(([k,v])=>[k,jScore(v)]));
     const orderPartnerScores = Object.fromEntries(Object.entries(ct.scoresB).map(([k,v])=>[k,jScore(v)]));
-    // Expectations gaps — randomly align ~40% per area
+    // Expectations gaps – randomly align ~40% per area
     const orderExpGaps = EXP_AREAS.map(ea => {
       const opts = EXP_OPTIONS[ea.key];
       const yourAns = opts[Math.floor(Math.random()*opts.length)];
@@ -1669,7 +1669,7 @@ function generateOrders() {
       partnerA: fn, partnerB: fn2,
       recipientPhone: physical ? phones[Math.floor(Math.random()*phones.length)] : null,
       token: tok,
-      // Exercise results — populated from real data in production
+      // Exercise results – populated from real data in production
       coupleType: ct,
       scores: orderScores,
       partnerScores: orderPartnerScores,
@@ -1768,7 +1768,7 @@ fetch('/api/admin-config').then(r => r.json()).then(cfg => {
 }).catch(() => { window.__adminConfigReady = true; });
 
 // ── Admin login gate ──────────────────────────────────────────────────────────
-// Credentials are compared against SHA-256 hashes — plaintext is never stored.
+// Credentials are compared against SHA-256 hashes – plaintext is never stored.
 // Hash computed with: crypto.subtle.digest('SHA-256', new TextEncoder().encode(str))
 // Email hash:    SHA-256('buildunison@gmail.com')
 // Password hash: SHA-256('3xC1c3r0!!')
@@ -1841,7 +1841,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const printQueued = localStorage.getItem('attune_workbook_print_queued');
 
     if (!orderRaw) {
-      // No real order — fall back to live session only if available
+      // No real order – fall back to live session only if available
       if (!sessionRaw) return;
       const s = JSON.parse(sessionRaw);
       if (!s?.scores || !s?.coupleType) return;
@@ -2156,7 +2156,7 @@ async function generateWorkbookForOrder(orderId) {
     console.error('Workbook generation failed:', e);
     if (btn) {
       btn.disabled = false;
-      btn.innerHTML = '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/></svg> Failed — retry';
+      btn.innerHTML = '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/></svg> Failed – retry';
       btn.style.color = '#EF4444';
       btn.style.borderColor = 'rgba(239,68,68,.4)';
       btn.style.background = 'rgba(239,68,68,.08)';
@@ -2177,7 +2177,7 @@ function printQRCard(orderId, pkg, coupleNames, token, giftMsg) {
   const cardPkg = pkgMap[pkg] || 'core';
   // Use gift version if there is a gift message, blank version otherwise
   const version = giftMsg ? 'gift' : 'standard';
-  // Build the card URL — the card template reads these params to auto-populate
+  // Build the card URL – the card template reads these params to auto-populate
   const params = new URLSearchParams({
     pkg: cardPkg,
     version,
@@ -2338,7 +2338,7 @@ async function loadTypesData(force) {
     return `<div><div style="font-size:.65rem;letter-spacing:.12em;text-transform:uppercase;color:${ax.color};font-weight:700;margin-bottom:.45rem;">${ax.label}</div>${ax.letters.map(([letter,lbl]) => {
       const n = d[letter]||0;
       const pct = Math.round((n/t)*100);
-      return `<div style="display:flex;align-items:center;gap:.75rem;margin-bottom:.3rem;"><span style="font-size:.7rem;color:#9CA3AF;width:120px;flex-shrink:0;">${letter} — ${lbl}</span><div style="flex:1;background:#2A2E3A;border-radius:999px;height:5px;"><div style="background:${ax.color};width:${pct}%;height:100%;border-radius:999px;"></div></div><span style="font-size:.68rem;color:#6B7280;width:52px;text-align:right;">${n} (${pct}%)</span></div>`;
+      return `<div style="display:flex;align-items:center;gap:.75rem;margin-bottom:.3rem;"><span style="font-size:.7rem;color:#9CA3AF;width:120px;flex-shrink:0;">${letter} – ${lbl}</span><div style="flex:1;background:#2A2E3A;border-radius:999px;height:5px;"><div style="background:${ax.color};width:${pct}%;height:100%;border-radius:999px;"></div></div><span style="font-size:.68rem;color:#6B7280;width:52px;text-align:right;">${n} (${pct}%)</span></div>`;
     }).join('')}</div>`;
   }).join('');
 
@@ -2526,15 +2526,15 @@ const SURVEY_QUESTIONS = [
   { id: 'expectations',     label: 'What they hoped to get out of Attune', type: 'multi-chip' },
   { id: 'expectationMatch', label: 'How well Attune delivered (1–5)',    type: 'scale', min: 1, max: 5 },
   { id: 'skepticism',       label: 'What they were skeptical about',     type: 'chip' },
-  { id: 'commsOverall',     label: 'Comms exercise — overall rating (1–5)', type: 'scale', min: 1, max: 5 },
-  { id: 'commsImpact',      label: 'Comms exercise — impact (1–5)',      type: 'scale', min: 1, max: 5 },
-  { id: 'commsHonesty',     label: 'Comms exercise — honesty (1–5)',     type: 'scale', min: 1, max: 5 },
-  { id: 'commsSafety',      label: 'Comms exercise — emotional safety (1–5)', type: 'scale', min: 1, max: 5 },
+  { id: 'commsOverall',     label: 'Comms exercise – overall rating (1–5)', type: 'scale', min: 1, max: 5 },
+  { id: 'commsImpact',      label: 'Comms exercise – impact (1–5)',      type: 'scale', min: 1, max: 5 },
+  { id: 'commsHonesty',     label: 'Comms exercise – honesty (1–5)',     type: 'scale', min: 1, max: 5 },
+  { id: 'commsSafety',      label: 'Comms exercise – emotional safety (1–5)', type: 'scale', min: 1, max: 5 },
   { id: 'commsIndependent', label: 'How independent answering felt',     type: 'chip' },
-  { id: 'expOverall',       label: 'Expectations exercise — overall rating (1–5)', type: 'scale', min: 1, max: 5 },
-  { id: 'expImpact',        label: 'Expectations exercise — impact (1–5)', type: 'scale', min: 1, max: 5 },
-  { id: 'expHonesty',       label: 'Expectations exercise — honesty (1–5)', type: 'scale', min: 1, max: 5 },
-  { id: 'expSafety',        label: 'Expectations exercise — emotional safety (1–5)', type: 'scale', min: 1, max: 5 },
+  { id: 'expOverall',       label: 'Expectations exercise – overall rating (1–5)', type: 'scale', min: 1, max: 5 },
+  { id: 'expImpact',        label: 'Expectations exercise – impact (1–5)', type: 'scale', min: 1, max: 5 },
+  { id: 'expHonesty',       label: 'Expectations exercise – honesty (1–5)', type: 'scale', min: 1, max: 5 },
+  { id: 'expSafety',        label: 'Expectations exercise – emotional safety (1–5)', type: 'scale', min: 1, max: 5 },
   { id: 'ahaMarker',        label: 'Biggest moment of recognition',      type: 'chip' },
   { id: 'convoHappened',    label: 'Did it lead to a new conversation',  type: 'chip' },
   { id: 'shiftCouple',      label: 'Shift in understanding couple dynamic (1–5)', type: 'scale', min: 1, max: 5 },
@@ -2564,7 +2564,7 @@ function generateSimResponses(n = 47) {
   const returnOpts = ['Significant life change', 'Anniversary or milestone', 'Something feeling off', 'Regular check-in', 'Sharing with another couple', 'Probably won't return'];
   const skepticOpts = ['Whether questions would feel real', 'Whether partner would engage', 'Whether results would say anything', 'Whether it would surface anything new', 'I wasn't skeptical'];
   const timeOpts = ['Under 20 minutes', '20–30 minutes', '30–45 minutes', '45–60 minutes', 'Over an hour'];
-  const consentOpts = ['Yes — use my words and first name on the reviews section', 'Yes — initials only', 'Yes — keep it anonymous', 'No, internal use only'];
+  const consentOpts = ['Yes – use my words and first name on the reviews section', 'Yes – initials only', 'Yes – keep it anonymous', 'No, internal use only'];
   const rand = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
   const pick = (arr) => arr[Math.floor(Math.random() * arr.length)];
   const skew = (base, sd) => Math.max(1, Math.min(5, Math.round(base + (Math.random() - 0.5) * sd * 2)));
@@ -2572,10 +2572,10 @@ function generateSimResponses(n = 47) {
   const discoveries = [
     'We had completely different assumptions about who should initiate hard conversations.',
     'The couple type was unsettlingly accurate.',
-    'I thought we were aligned on career — we weren't.',
+    'I thought we were aligned on career – we weren't.',
     'The childhood context piece caught me off guard.',
     'Seeing our scores side by side made abstract feelings concrete.',
-    'I learned that my partner processes conflict internally — I always thought they didn't care.',
+    'I learned that my partner processes conflict internally – I always thought they didn't care.',
     'We named something that had been causing friction for two years.',
     'The expectations section was harder than I expected. In a good way.',
   ];

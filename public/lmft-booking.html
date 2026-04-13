@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>Book Your LMFT Session — Attune</title>
+<title>Book Your LMFT Session – Attune</title>
 <meta name="description" content="Book a 50-minute session with a licensed marriage and family therapist who reviews your Attune results before you meet."/>
 <meta property="og:image" content="https://attune-relationships.com/og-image.png"/>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
@@ -56,10 +56,10 @@
 <div class="wrap">
   <div class="badge">
     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-    LMFT Session — included in your package
+    LMFT Session – included in your package
   </div>
   <h1>Book your session<br>with a licensed therapist.</h1>
-  <p class="sub">Your package includes a 50-minute video session with a licensed marriage and family therapist (LMFT). They'll review your joint Attune results before you meet — so the session starts from your actual data.</p>
+  <p class="sub">Your package includes a 50-minute video session with a licensed marriage and family therapist (LMFT). They'll review your joint Attune results before you meet – so the session starts from your actual data.</p>
 
   <div class="how-grid">
     <div class="how-card">
@@ -107,7 +107,7 @@
         <option>Hawaii (HST)</option>
         <option>UK / GMT</option>
         <option>CET / Central Europe</option>
-        <option>Other — I'll mention in notes</option>
+        <option>Other – I'll mention in notes</option>
       </select>
     </div>
     <div class="field">
@@ -116,7 +116,7 @@
     </div>
     <div class="field">
       <label>Anything you want the therapist to know before your session? (optional)</label>
-      <textarea id="notes" placeholder="No need to go deep — just anything that feels relevant as context"></textarea>
+      <textarea id="notes" placeholder="No need to go deep – just anything that feels relevant as context"></textarea>
     </div>
     <div class="field">
       <label>Order number (from your confirmation email)</label>
@@ -128,9 +128,9 @@
       <h3>What to expect in the session</h3>
       <ul>
         <li><span class="check">✓</span><span>The therapist reads your joint results before you meet. They come in with context, not a blank slate.</span></li>
-        <li><span class="check">✓</span><span>The session is about translating your data into practical next steps — not diagnosing you.</span></li>
+        <li><span class="check">✓</span><span>The session is about translating your data into practical next steps – not diagnosing you.</span></li>
         <li><span class="check">✓</span><span>50 minutes, video call. Both partners should be present if possible.</span></li>
-        <li><span class="check">✓</span><span>Not an ongoing therapy relationship — unless you and the therapist choose to continue independently.</span></li>
+        <li><span class="check">✓</span><span>Not an ongoing therapy relationship – unless you and the therapist choose to continue independently.</span></li>
       </ul>
     </div>
   </div>
@@ -138,7 +138,7 @@
   <div class="success" id="successCard">
     <div style="font-size:2.5rem;margin-bottom:1rem">✓</div>
     <h2>Request received.</h2>
-    <p>We'll confirm your time and therapist within 48 hours at the email you provided. Check your inbox — and your spam folder if you don't hear from us.</p>
+    <p>We'll confirm your time and therapist within 48 hours at the email you provided. Check your inbox – and your spam folder if you don't hear from us.</p>
     <p style="margin-top:1.25rem"><a href="/app" style="color:var(--indigo);font-weight:600">Back to your results →</a></p>
   </div>
 </div>
@@ -175,7 +175,7 @@ async function submitBooking() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload),
     });
-  } catch(e) { /* silent — show success regardless to not leave user hanging */ }
+  } catch(e) { /* silent – show success regardless to not leave user hanging */ }
 
   document.getElementById('formCard').style.display = 'none';
   document.getElementById('successCard').style.display = 'block';

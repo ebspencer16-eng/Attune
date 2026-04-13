@@ -122,7 +122,7 @@
     section[style*="padding:4rem"]{padding:2rem 1.25rem!important}
   }
   .s-eye{font-size:.6rem;letter-spacing:.3em;text-transform:uppercase;color:var(--clay);font-weight:700;margin-bottom:.85rem;display:flex;align-items:center;gap:.65rem}
-  .s-eye::before{content:'';width:28px;height:2.5px;border-radius:999px;background:linear-gradient(90deg,var(--orange),var(--indigo));flex-shrink:0}
+  .s-eye::before{content:'';width:28px;height:2.5px;border-radius:999px;background:var(--stone);flex-shrink:0}
   .s-title{font-family:var(--hfont);font-size:clamp(1.85rem,3.2vw,2.7rem);font-weight:700;line-height:1.1;color:var(--ink);margin-bottom:1.1rem;letter-spacing:-.02em}
   .s-title em{font-style:italic;color:var(--orange)}
   .s-sub{font-size:.95rem;color:var(--muted);line-height:1.78;font-weight:300;max-width:600px}
@@ -144,7 +144,7 @@
   .bg-dark{background:linear-gradient(150deg,#1c1940,#282560)}
   .bg-dark .si{padding-top:3.5rem;padding-bottom:3.5rem}
   .bg-dark .s-eye{color:rgba(232,103,58,.8)}
-  .bg-dark .s-eye::before{width:28px;height:2.5px;border-radius:999px;background:linear-gradient(90deg,var(--orange),var(--indigo))}
+  .bg-dark .s-eye::before{width:28px;height:2.5px;border-radius:999px;background:var(--stone)}
   .bg-dark .s-title{color:white}
   .bg-dark .s-sub{color:rgba(255,255,255,.78);max-width:600px}
 
@@ -274,7 +274,7 @@
   <a href="/start" class="mm-cta">Get started →</a>
 </div>
 
-<!-- PAGE HEADER — dark gradient -->
+<!-- PAGE HEADER – dark gradient -->
 <div class="page-header">
   <div class="page-header-glow"></div>
   <div class="page-header-inner">
@@ -319,7 +319,7 @@
             </div>
         <div>
           <h3 style="font-size:1.1rem;font-weight:700;color:var(--ink);margin-bottom:.6rem;">Most distance comes from what's unsaid</h3>
-          <p style="font-size:.9rem;color:var(--muted);line-height:1.78;font-weight:300;max-width:560px;">It's rarely incompatibility that creates friction. It's the assumptions each person carries privately — about roles, money, the future — that no one's named yet. <span style="font-size:.75rem;color:var(--muted);font-style:italic;">Gottman et al., <em>Journal of Marriage and Family</em>, 1998</span></p>
+          <p style="font-size:.9rem;color:var(--muted);line-height:1.78;font-weight:300;max-width:560px;">It's rarely incompatibility that creates friction. It's the assumptions each person carries privately – about roles, money, the future – that no one's named yet. <span style="font-size:.75rem;color:var(--muted);font-style:italic;">Gottman et al., <em>Journal of Marriage and Family</em>, 1998</span></p>
         </div>
       </div>
       <div style="display:grid;grid-template-columns:52px 1fr;gap:1.5rem;align-items:start;padding:.85rem 0;border-top:1px solid var(--stone);border-bottom:1px solid var(--stone);">
@@ -463,23 +463,15 @@ function toggleMenu() {
   const m = document.getElementById('mobile-menu');
   m.classList.toggle('open');
 }
-document.addEventListener('click', function(e) {
-  const menu = document.getElementById('mobile-menu');
-  const btn = document.getElementById('hamburger');
-  if (menu && menu.classList.contains('open') && !menu.contains(e.target) && !btn.contains(e.target)) {
+// Close mobile menu on outside tap
+  document.addEventListener('click', function(e) {
+  var menu = document.getElementById('mobile-menu');
+  var burger = document.getElementById('hamburger');
+  if (menu && menu.classList.contains('open') && !menu.contains(e.target) && !burger.contains(e.target)) {
     menu.classList.remove('open');
+    if (burger) burger.classList.remove('open');
   }
 });
-
-  // Close mobile menu on outside tap
-  document.addEventListener('click', function(e) {
-    const menu = document.getElementById('mobile-menu');
-    const burger = document.getElementById('hamburger');
-    if (menu && menu.classList.contains('open') && !menu.contains(e.target) && !burger.contains(e.target)) {
-      menu.classList.remove('open');
-      burger.classList.remove('open');
-    }
-  });
 </script>
 </body>
 </html>

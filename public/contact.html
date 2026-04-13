@@ -45,7 +45,7 @@
 <div class="wrap">
   <p style="font-size:.62rem;letter-spacing:.28em;text-transform:uppercase;color:var(--clay);font-weight:700;margin-bottom:.65rem;">Get in touch</p>
   <h1>We'd love to hear from you.</h1>
-  <p class="sub">Questions about a purchase, feedback on the experience, or anything else — send us a note and we'll get back to you within one business day.</p>
+  <p class="sub">Questions about a purchase, feedback on the experience, or anything else – send us a note and we'll get back to you within one business day.</p>
 
   <div id="contact-form">
     <label for="name">Your name</label>
@@ -104,7 +104,7 @@ async function submitContact() {
         text: `From: ${name} <${email}>\nTopic: ${subject}\n\n${message}`
       })
     });
-  } catch(e) { /* silently fail — show success anyway */ }
+  } catch(e) { /* silently fail – show success anyway */ }
 
   document.getElementById('contact-form').style.display = 'none';
   document.getElementById('success-msg').style.display = 'block';

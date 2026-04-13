@@ -6,7 +6,7 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Reviews, Attune</title>
-  <meta name="description" content="What couples discovered when they looked. From newly engaged to married for years — 2,400+ couples, 4.9 average rating.">
+  <meta name="description" content="What couples discovered when they looked. From newly engaged to married for years – 2,400+ couples, 4.9 average rating.">
   <meta property="og:type" content="website">
   <meta property="og:title" content="What Couples Say About Attune">
   <meta property="og:description" content="2,400+ couples. 4.9 average rating. 91% would recommend to a couple they know.">
@@ -479,23 +479,15 @@ window._sparkFeedback = function(t) {
 function toggleMenu() {
   document.getElementById('mobile-menu').classList.toggle('open');
 }
-document.addEventListener('click', function(e) {
-  const menu = document.getElementById('mobile-menu');
-  const btn = document.getElementById('hamburger');
-  if (menu.classList.contains('open') && !menu.contains(e.target) && !btn.contains(e.target)) {
+// Close mobile menu on outside tap
+  document.addEventListener('click', function(e) {
+  var menu = document.getElementById('mobile-menu');
+  var burger = document.getElementById('hamburger');
+  if (menu && menu.classList.contains('open') && !menu.contains(e.target) && !burger.contains(e.target)) {
     menu.classList.remove('open');
+    if (burger) burger.classList.remove('open');
   }
 });
-
-  // Close mobile menu on outside tap
-  document.addEventListener('click', function(e) {
-    const menu = document.getElementById('mobile-menu');
-    const burger = document.getElementById('hamburger');
-    if (menu && menu.classList.contains('open') && !menu.contains(e.target) && !burger.contains(e.target)) {
-      menu.classList.remove('open');
-      burger.classList.remove('open');
-    }
-  });
 </script>
 </body>
 </html>

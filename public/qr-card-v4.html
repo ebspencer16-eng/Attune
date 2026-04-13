@@ -102,7 +102,7 @@ function render() {
   const hasNote = isGift && note;
   const hasLines= isGift && !note;
 
-  // Name sizing — scale down for long names
+  // Name sizing – scale down for long names
   const nameLen = names.length;
   const nameFontSize = nameLen > 20 ? '28px' : nameLen > 15 ? '32px' : '40px';
 
@@ -129,8 +129,8 @@ function render() {
 
   const STEPS = [
     ['Create your accounts','Each of you scans and creates a separate account. Your answers stay private.'],
-    ['Complete your exercises independently','About 25 minutes each. Two exercises — communication and expectations.'],
-    ['Your results unlock together','Couple type, communication profile, and expectations map — built from your answers.'],
+    ['Complete your exercises independently','About 25 minutes each. Two exercises – communication and expectations.'],
+    ['Your results unlock together','Couple type, communication profile, and expectations map – built from your answers.'],
   ];
 
   document.getElementById('root').innerHTML = `
@@ -186,7 +186,7 @@ render();
   const pkgId  = p.get('pkg') || 'core';
   const token  = p.get('token') || '';
   const isGift = p.get('version') === 'gift';
-  // QR encodes the signup URL — scanner lands on /app ready to create their account
+  // QR encodes the signup URL – scanner lands on /app ready to create their account
   const base = window.location.origin;
   const orderId = p.get('orderId') || p.get('order') || '';
   const qrParams = new URLSearchParams({ signup: '1', pkg: pkgId });

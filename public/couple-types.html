@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
-  <title>Couple Types — Attune</title>
+  <title>Couple Types – Attune</title>
   <meta name="description" content="Every couple is one of 10 types, based on how each partner responds under tension and closeness. Discover what your pairing means for how you grow together.">
   <meta property="og:type" content="website">
   <meta property="og:title" content="The 10 Attune Couple Types">
@@ -181,7 +181,7 @@
     <div class="page-header-inner">
   <p class="eyebrow">Couple types</p>
   <h1 class="page-title">A typing system built for couples, <em>not individuals.</em></h1>
-  <p class="page-sub">Your type emerges from the combination — not from either person alone.</p>
+  <p class="page-sub">Your type emerges from the combination – not from either person alone.</p>
 <p style="margin-top:1.25rem;"><a href="/how-it-works" style="font-size:.72rem;color:rgba(255,255,255,.45);text-decoration:none;border-bottom:1px solid rgba(255,255,255,.2);padding-bottom:.1rem;font-family:'DM Sans',sans-serif;">Read about our methodology →</a></p>
     <div class="hero-actions">
       <a href="/start" class="btn-primary">GET STARTED →</a>
@@ -292,7 +292,7 @@
         <text x="376" y="340" font-size="10" font-weight="800" fill="#6B7280" font-family="Georgia,serif" text-anchor="end">Z</text>
         <text x="376" y="352" font-size="8" font-weight="600" fill="#6B7280" font-family="Arial" text-anchor="end" opacity=".7">The Protector</text>
 
-        <!-- Axis labels — inside the grid edges to stay within viewBox -->
+        <!-- Axis labels – inside the grid edges to stay within viewBox -->
         <text x="210" y="68" font-size="8" font-weight="700" fill="rgba(140,122,104,.7)" font-family="Arial" text-anchor="middle">Engage</text>
         <text x="210" y="348" font-size="8" font-weight="700" fill="rgba(140,122,104,.7)" font-family="Arial" text-anchor="middle">Withdraw</text>
         <text x="38" y="208" font-size="8" font-weight="700" fill="rgba(140,122,104,.7)" font-family="Arial" text-anchor="start">Open</text>
@@ -342,7 +342,7 @@
   <div class="si" style="max-width:680px;">
     <p style="font-size:.6rem;letter-spacing:.28em;text-transform:uppercase;color:var(--clay);font-weight:700;margin-bottom:.75rem;">Your couple type</p>
     <h2 style="font-family:var(--hfont);font-size:clamp(1.5rem,2.5vw,2rem);font-weight:700;color:var(--ink);line-height:1.12;margin-bottom:1rem;letter-spacing:-.02em;">Your type is based on <em style="font-style:italic;color:var(--orange);">both</em> of your placements.</h2>
-    <p style="font-size:.96rem;color:var(--muted);line-height:1.85;font-weight:300;max-width:560px;margin-bottom:1.5rem;">The couple type isn't about either person individually — it emerges from the combination. Where your dot sits relative to your partner's is what creates the pairing. That's why two people with the same individual type can have very different couple types depending on who they're with.</p>
+    <p style="font-size:.96rem;color:var(--muted);line-height:1.85;font-weight:300;max-width:560px;margin-bottom:1.5rem;">The couple type isn't about either person individually – it emerges from the combination. Where your dot sits relative to your partner's is what creates the pairing. That's why two people with the same individual type can have very different couple types depending on who they're with.</p>
     <a href="/how-it-works#methodology" style="display:inline-flex;align-items:center;gap:.45rem;font-size:.78rem;color:var(--clay);font-family:'DM Sans',sans-serif;font-weight:600;text-decoration:none;border-bottom:1px solid var(--stone);padding-bottom:.15rem;transition:color .15s;" onmouseover="this.style.color='var(--orange)'" onmouseout="this.style.color='var(--clay)'">
       <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
       Read the methodology
@@ -394,6 +394,14 @@ function toggleMenu(){
   m.classList.toggle('open');
   h.classList.toggle('open');
 }
+document.addEventListener('click', function(e) {
+  var menu = document.getElementById('mobile-menu');
+  var burger = document.getElementById('hamburger');
+  if (menu && menu.classList.contains('open') && !menu.contains(e.target) && !burger.contains(e.target)) {
+    menu.classList.remove('open');
+    if (burger) burger.classList.remove('open');
+  }
+});
 </script>
 </body>
 </html>

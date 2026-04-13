@@ -154,7 +154,7 @@ const CONV_PROMPTS = [
   `When I go quiet after something difficult, what does that feel like from your side?`,
   `What's one expectation you have of me that you've never directly said out loud?`,
   `Where in our relationship do you most want us to grow in the next year?`,
-  `What does repair look like to you — what tells you we're actually okay?`,
+  `What does repair look like to you – what tells you we're actually okay?`,
 ];
 
 function buildPage(num, content) {
@@ -187,13 +187,13 @@ document.write(buildPage('2', `
   <div class="section-eyebrow">Before you begin</div>
   <h2>How to use this workbook</h2>
 </div>
-<p>This workbook was built from your actual answers to the Attune exercises — not from templates or averages. Every dimension score, every conversation prompt, and every focus area on these pages reflects what you two specifically brought in.</p>
+<p>This workbook was built from your actual answers to the Attune exercises – not from templates or averages. Every dimension score, every conversation prompt, and every focus area on these pages reflects what you two specifically brought in.</p>
 <p>The workbook works best as a conversation tool, not a reading exercise. The intention is to move through one section at a time, together, talking about what you find.</p>
 <div class="priority-grid" style="margin-top:28px">
   ${[
-    { title: 'Start with the Snapshot', desc: 'Skim your dimension scores. Notice what stands out — especially where your scores diverge.' },
+    { title: 'Start with the Snapshot', desc: 'Skim your dimension scores. Notice what stands out – especially where your scores diverge.' },
     { title: 'Use the prompts', desc: 'Each prompt is designed to open a real conversation, not close one. There are no right answers.' },
-    { title: 'Write in the reflection spaces', desc: 'After each section, there\'s space to write. Capture what lands — not what should land.' },
+    { title: 'Write in the reflection spaces', desc: 'After each section, there\'s space to write. Capture what lands – not what should land.' },
     { title: 'Revisit in 3–6 months', desc: 'Relationships shift. The same conversation will mean something different in half a year.' },
     { title: 'Go slowly', desc: 'This doesn\'t need to be done in one sitting. One section per conversation is a good pace.' },
     { title: 'Not a verdict', desc: 'No score in here is good or bad. These are patterns, not diagnoses. Treat them that way.' },
@@ -208,7 +208,7 @@ document.write(buildPage('2', `
 // PAGE 3: Communication snapshot
 document.write(buildPage('3', `
 <div class="section-header">
-  <div class="section-eyebrow">Exercise 01 — Communication</div>
+  <div class="section-eyebrow">Exercise 01 – Communication</div>
   <h2>Your dimension snapshot</h2>
 </div>
 <p>Each row shows where each of you scored on the 10 communication dimensions. The gap between you on each dimension is what drives most of the content in this workbook.</p>
@@ -238,10 +238,10 @@ document.write(buildPage('3', `
 if (expGaps.length > 0) {
   document.write(buildPage('4', `
 <div class="section-header">
-  <div class="section-eyebrow">Exercise 02 — Expectations</div>
+  <div class="section-eyebrow">Exercise 02 – Expectations</div>
   <h2>Where you're aligned and where you're not</h2>
 </div>
-<p>These are the expectations both of you brought into your relationship — many of them inherited from your family of origin, never quite articulated. Alignment means you described things similarly. Misalignment means you're working from different assumptions.</p>
+<p>These are the expectations both of you brought into your relationship – many of them inherited from your family of origin, never quite articulated. Alignment means you described things similarly. Misalignment means you're working from different assumptions.</p>
 <div style="margin-top:20px">
   ${expGaps.slice(0, 6).map(g => `
   <div class="exp-row">
@@ -270,7 +270,7 @@ document.write(buildPage('5', `
   <div class="section-eyebrow">Conversation guide</div>
   <h2>Six questions for ${p1} & ${p2}</h2>
 </div>
-<p>These prompts were selected based on where your scores diverge most. They're designed to open conversations that get somewhere — not just surface ones. Go one at a time. Give the other person room to answer before responding.</p>
+<p>These prompts were selected based on where your scores diverge most. They're designed to open conversations that get somewhere – not just surface ones. Go one at a time. Give the other person room to answer before responding.</p>
 <ul class="prompt-list">
   ${CONV_PROMPTS.map((q, i) => `
   <li class="prompt-item">

@@ -68,7 +68,7 @@
   .eyebrow{font-size:.6rem;letter-spacing:.3em;text-transform:uppercase;color:var(--clay);font-weight:700;margin-bottom:.9rem;display:flex;align-items:center;justify-content:center;gap:.65rem}
   .eyebrow::before{content:'';width:28px;height:2.5px;border-radius:999px;background:linear-gradient(90deg,var(--orange),var(--indigo));flex-shrink:0}.eyebrow::after{content:'';width:28px;height:2.5px;border-radius:999px;background:linear-gradient(90deg,var(--orange),var(--indigo));flex-shrink:0}
   .s-eye{font-size:.6rem;letter-spacing:.3em;text-transform:uppercase;color:var(--clay);font-weight:700;margin-bottom:.85rem;display:flex;align-items:center;gap:.65rem}
-  .s-eye::before{content:'';width:28px;height:2.5px;border-radius:999px;background:linear-gradient(90deg,var(--orange),var(--indigo));flex-shrink:0}
+  .s-eye::before{content:'';width:28px;height:2.5px;border-radius:999px;background:var(--stone);flex-shrink:0}
   .s-title{font-family:var(--hfont);font-size:clamp(1.85rem,3.2vw,2.7rem);font-weight:700;line-height:1.1;color:var(--ink);margin-bottom:1.1rem;letter-spacing:-.02em}
   .s-title em{font-style:italic;color:var(--orange)}
   .s-sub{font-size:.95rem;color:var(--muted);line-height:1.78;font-weight:300;max-width:540px}
@@ -304,12 +304,12 @@
     .page-header{padding:calc(58px + 1.75rem) 1.25rem 1.75rem!important}
     .page-header{padding:calc(58px + 2.5rem) 1.25rem 2.5rem!important}
     .who-grid{grid-template-columns:1fr!important}
-    /* Who it's for: merge visually into flow — hide eyebrow, compact heading */
+    /* Who it's for: merge visually into flow – hide eyebrow, compact heading */
     .for-grid{display:flex!important;flex-direction:column!important;gap:.75rem!important}
     .for-card{padding:1rem 1.1rem!important}
     /* Type cards: 2x2 grid on mobile */
     [style*="grid-template-columns:1fr 1fr 1fr 1fr"]{grid-template-columns:1fr 1fr!important;gap:.65rem!important}
-    /* Remove heavy sub-dimension bullet lists on mobile — these are the sd-item blocks inside steps */
+    /* Remove heavy sub-dimension bullet lists on mobile – these are the sd-item blocks inside steps */
     .step-detail{display:none!important}
     /* But keep a one-liner note visible */
     .step-detail-mobile{display:block!important}
@@ -416,7 +416,7 @@
           <span class="step-ghost-num">01</span>
           <p class="step-eyebrow">Step one</p>
           <h2 class="step-title">Answer separately.</h2>
-          <p class="step-body">Each partner completes both exercises independently — no comparing notes until you're both done.</p>
+          <p class="step-body">Each partner completes both exercises independently – no comparing notes until you're both done.</p>
         </div>
         <div class="hiw-step-graphic" style="padding:0.5rem 0;">
 <svg viewBox="0 0 520 340" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;display:block;">
@@ -563,7 +563,7 @@
 </section>
 
 
-<!-- WHERE THE FEEDBACK COMES FROM — combined side by side -->
+<!-- WHERE THE FEEDBACK COMES FROM – combined side by side -->
 <section class="bg-warm" style="padding:3.5rem 0;">
   <div class="si">
     <p class="s-eye">Where the feedback comes from</p>
@@ -773,7 +773,7 @@
           <path d="M32 32 L36 28 L38 30 L34 34Z" fill="rgba(155,93,229,.3)" stroke="#9B5DE5" stroke-width="1.25" stroke-linejoin="round"/>
         </svg>
         <div style="font-size:.88rem;font-weight:700;color:var(--ink);margin-bottom:.6rem;">Explore In Practice</div>
-        <p style="font-size:.82rem;color:var(--muted);line-height:1.72;margin:0;font-weight:300;">Attune's resource library organized around what your results surface. Articles, prompts, and frameworks — when you need them.</p>
+        <p style="font-size:.82rem;color:var(--muted);line-height:1.72;margin:0;font-weight:300;">Attune's resource library organized around what your results surface. Articles, prompts, and frameworks – when you need them.</p>
       </div>
 
       <!-- Tile 3: Timer / Check in -->
@@ -793,7 +793,7 @@
           <circle cx="26" cy="29" r="2" fill="#1B5FE8"/>
         </svg>
         <div style="font-size:.88rem;font-weight:700;color:var(--ink);margin-bottom:.6rem;">Check in</div>
-        <p style="font-size:.82rem;color:var(--muted);line-height:1.72;margin:0;font-weight:300;">What you each need evolves. Attune is yours to return to — a year from now, or whenever something shifts.</p>
+        <p style="font-size:.82rem;color:var(--muted);line-height:1.72;margin:0;font-weight:300;">What you each need evolves. Attune is yours to return to – a year from now, or whenever something shifts.</p>
       </div>
 
     </div>
@@ -904,23 +904,15 @@ window._sparkFeedback = function(t) {
 function toggleMenu() {
   document.getElementById('mobile-menu').classList.toggle('open');
 }
-document.addEventListener('click', function(e) {
-  const menu = document.getElementById('mobile-menu');
-  const btn = document.getElementById('hamburger');
-  if (menu && menu.classList.contains('open') && !menu.contains(e.target) && !btn.contains(e.target)) {
+// Close mobile menu on outside tap
+  document.addEventListener('click', function(e) {
+  var menu = document.getElementById('mobile-menu');
+  var burger = document.getElementById('hamburger');
+  if (menu && menu.classList.contains('open') && !menu.contains(e.target) && !burger.contains(e.target)) {
     menu.classList.remove('open');
+    if (burger) burger.classList.remove('open');
   }
 });
-
-  // Close mobile menu on outside tap
-  document.addEventListener('click', function(e) {
-    const menu = document.getElementById('mobile-menu');
-    const burger = document.getElementById('hamburger');
-    if (menu && menu.classList.contains('open') && !menu.contains(e.target) && !burger.contains(e.target)) {
-      menu.classList.remove('open');
-      burger.classList.remove('open');
-    }
-  });
 </script>
 </body>
 </html>

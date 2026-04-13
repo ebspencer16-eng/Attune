@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Checkout, Attune</title>
-<!-- Stripe.js — must load before payment form -->
+<!-- Stripe.js – must load before payment form -->
 <script src="https://js.stripe.com/v3/"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,700&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -158,7 +158,7 @@
           <button class="pt-btn" id="btn-gift" onclick="setIntent('gift')">
             <div class="pt-icon">🎁</div>
             <div class="pt-label">Giving as a gift</div>
-            <div class="pt-sub">A gift for a couple you know — they get full access</div>
+            <div class="pt-sub">A gift for a couple you know – they get full access</div>
           </button>
         </div>
       </div>
@@ -177,11 +177,11 @@
         </p>
         <div class="form-row">
           <div class="form-group">
-            <label class="form-label" for="p1name">Partner 1 — first name</label>
+            <label class="form-label" for="p1name">Partner 1 – first name</label>
             <input class="form-input" type="text" id="p1name" placeholder="e.g. Sarah" autocomplete="given-name" oninput="onNamesInput()">
           </div>
           <div class="form-group">
-            <label class="form-label" for="p2name">Partner 2 — first name</label>
+            <label class="form-label" for="p2name">Partner 2 – first name</label>
             <input class="form-input" type="text" id="p2name" placeholder="e.g. James" autocomplete="given-name" oninput="onNamesInput()">
           </div>
         </div>
@@ -190,7 +190,7 @@
           <div class="form-divider">Gift message</div>
           <div class="form-group">
             <label class="form-label" for="giftNote">Personal note (optional)</label>
-            <textarea class="form-input" id="giftNote" placeholder="e.g. 'Thinking of you both as you start this chapter — can't wait to see what you discover about each other.'" rows="3"></textarea>
+            <textarea class="form-input" id="giftNote" placeholder="e.g. 'Thinking of you both as you start this chapter – can't wait to see what you discover about each other.'" rows="3"></textarea>
             <div class="form-hint">This will be printed inside the QR card. Max 200 characters.</div>
           </div>
         </div>
@@ -319,7 +319,7 @@
 </div>
 
 <div id="test-mode-banner" style="display:none;position:fixed;top:0;left:0;right:0;z-index:9999;background:#F59E0B;color:#000;text-align:center;font-size:.72rem;font-weight:700;padding:.35rem;font-family:monospace;letter-spacing:.05em">
-  ⚠ TEST MODE — No real charges · Use card 4242 4242 4242 4242
+  ⚠ TEST MODE – No real charges · Use card 4242 4242 4242 4242
 </div>
 <script>
 if(new URLSearchParams(location.search).get('test')==='1' || location.hostname==='localhost'){
@@ -389,7 +389,7 @@ let addonReflection = false;
   }
 
   renderSummary();
-  // Show format toggle for assessment (core) package — others are always physical
+  // Show format toggle for assessment (core) package – others are always physical
   if (pkg.id === 'core') {
     const ftEl = document.getElementById('formatToggleSection');
     if (ftEl) ftEl.style.display = 'block';
@@ -497,7 +497,7 @@ function setIntent(val) {
   document.getElementById('btn-gift').classList.toggle('active', val === 'gift');
   document.getElementById('namesTitle').textContent = val === 'gift' ? 'Their names' : 'Your names';
   document.getElementById('namesHint').textContent = val === 'gift'
-    ? 'Enter the names of the couple you\'re gifting this to. First names are fine — we\'ll use them throughout the experience.'
+    ? 'Enter the names of the couple you\'re gifting this to. First names are fine – we\'ll use them throughout the experience.'
     : 'We\'ll use these throughout your results and in your personalized materials. First names are fine.';
   document.getElementById('giftNoteWrap').classList.toggle('visible', val === 'gift');
   validateForm();
@@ -553,7 +553,7 @@ let stripe, cardNumberElement, cardExpiryElement, cardCvcElement;
       });
     });
   } catch(e) {
-    console.warn('Stripe not initialised — key missing or invalid:', e);
+    console.warn('Stripe not initialised – key missing or invalid:', e);
   }
 })();
 
@@ -612,7 +612,7 @@ async function handleSubmit(e) {
       ? 'ATT-' + new Date().toISOString().slice(0,10).replace(/-/g,'') + '-' + paymentIntent.id.slice(-4).toUpperCase()
       : 'ATT-' + Date.now();
 
-    // 3. Success — build portal link with pkg, partner names, and LMFT flag
+    // 3. Success – build portal link with pkg, partner names, and LMFT flag
     const pkgId  = Object.keys(PACKAGES).find(k => PACKAGES[k] === pkg) || 'core';
     // Build /app link with signup flag + context (pkg, names, add-ons)
     const params = new URLSearchParams({
