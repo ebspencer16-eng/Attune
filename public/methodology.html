@@ -22,7 +22,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,800;1,700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
-  html{overflow-x:clip;max-width:100%}
+  html{overflow-x:hidden;max-width:100%}
   html{scroll-behavior:smooth}
   *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
   :root{
@@ -31,7 +31,7 @@
     --hfont:'Playfair Display',Georgia,serif;--bfont:'DM Sans',sans-serif;
   }
   
-  body{overflow-x:clip;background:var(--cream);color:var(--text);font-family:var(--bfont);-webkit-font-smoothing:antialiased;overflow-y:scroll;scroll-snap-type:y proximity;scroll-padding-top:58px}
+  body{overflow-x:hidden;background:var(--cream);color:var(--text);font-family:var(--bfont);-webkit-font-smoothing:antialiased}
 
   /* NAV */
   nav{position:fixed;top:0;left:0;right:0;z-index:100;height:58px;background:rgba(255,253,249,.94);backdrop-filter:blur(16px);border-bottom:1px solid var(--stone);display:flex;align-items:center;padding:0 2.5rem;justify-content:space-between}
@@ -408,7 +408,7 @@
 
 
 <!-- THE 3 STEPS – desktop grid / mobile swipe -->
-<section style="scroll-snap-align:start;scroll-snap-stop:always;padding:3rem 0 1rem;">
+<section style=";padding:3rem 0 1rem;">
   <div class="si">
     <div style="margin-bottom:1.5rem;">
       <p class="s-eye" style="margin-bottom:.5rem;">How it works</p>
@@ -506,8 +506,8 @@
     </div>
 
     <!-- Mobile swipe -->
-    <div class="hiw-mobile-scroll" style="display:none;overflow-x:scroll;gap:1rem;padding-bottom:.75rem;-webkit-overflow-scrolling:touch;scrollbar-width:none;margin:0 -1.25rem;padding-left:1.25rem;padding-right:1.25rem;scroll-snap-type:x mandatory;">
-      <div style="background:linear-gradient(150deg,#3D1A08,#5A2810);border-radius:20px;overflow:hidden;display:flex;flex-direction:column;min-width:calc(85vw - 1rem);max-width:320px;flex-shrink:0;scroll-snap-align:start;scroll-snap-stop:always;">
+    <div class="hiw-mobile-scroll" style="display:none;overflow-x:scroll;gap:1rem;padding-bottom:.75rem;-webkit-overflow-scrolling:touch;scrollbar-width:none;margin:0 -1.25rem;padding-left:1.25rem;padding-right:1.25rem;">
+      <div style="background:linear-gradient(150deg,#3D1A08,#5A2810);border-radius:20px;overflow:hidden;display:flex;flex-direction:column;min-width:calc(85vw - 1rem);max-width:320px;flex-shrink:0;">
         <div style="height:3px;background:#E8673A;flex-shrink:0;"></div>
         <div style="padding:1.5rem 1.5rem .75rem;flex:1;display:flex;flex-direction:column;gap:.6rem;">
           <div style="font-family:'Playfair Display',Georgia,serif;font-size:1.9rem;font-weight:700;color:white;line-height:1.05;letter-spacing:-.02em;">Answer separately.</div>
@@ -529,7 +529,7 @@
   <rect x="416" y="244" width="62" height="26" rx="8" fill="#E8673A"/>
 </svg></div>
       </div>
-      <div style="background:linear-gradient(150deg,#1E0E42,#2E1560);border-radius:20px;overflow:hidden;display:flex;flex-direction:column;min-width:calc(85vw - 1rem);max-width:320px;flex-shrink:0;scroll-snap-align:start;scroll-snap-stop:always;">
+      <div style="background:linear-gradient(150deg,#1E0E42,#2E1560);border-radius:20px;overflow:hidden;display:flex;flex-direction:column;min-width:calc(85vw - 1rem);max-width:320px;flex-shrink:0;">
         <div style="height:3px;background:#9B5DE5;flex-shrink:0;"></div>
         <div style="padding:1.5rem 1.5rem .75rem;flex:1;display:flex;flex-direction:column;gap:.6rem;">
           <div style="font-family:'Playfair Display',Georgia,serif;font-size:1.9rem;font-weight:700;color:white;line-height:1.05;letter-spacing:-.02em;">See yourselves side by side.</div>
@@ -559,7 +559,7 @@
   <circle cx="212" cy="208" r="8" fill="#E8673A" stroke="#FDF8F3" stroke-width="2.5"/><circle cx="407" cy="208" r="8" fill="#1B5FE8" stroke="#FDF8F3" stroke-width="2.5"/>
 </svg></div>
       </div>
-      <div style="background:linear-gradient(150deg,#0C1E48,#102860);border-radius:20px;overflow:hidden;display:flex;flex-direction:column;min-width:calc(85vw - 1rem);max-width:320px;flex-shrink:0;scroll-snap-align:start;scroll-snap-stop:always;">
+      <div style="background:linear-gradient(150deg,#0C1E48,#102860);border-radius:20px;overflow:hidden;display:flex;flex-direction:column;min-width:calc(85vw - 1rem);max-width:320px;flex-shrink:0;">
         <div style="height:3px;background:#1B5FE8;flex-shrink:0;"></div>
         <div style="padding:1.5rem 1.5rem .75rem;flex:1;display:flex;flex-direction:column;gap:.6rem;">
           <div style="font-family:'Playfair Display',Georgia,serif;font-size:1.9rem;font-weight:700;color:white;line-height:1.05;letter-spacing:-.02em;">Build from what you find.</div>
@@ -782,7 +782,7 @@
 
 
 <!-- COUPLE TYPING SECTION -->
-<section id="methodology"  style="scroll-snap-align:start;scroll-snap-stop:always;padding:3.5rem 0;">
+<section id="methodology"  style=";padding:3.5rem 0;">
   <div class="si">
     <div style="border-top:1.5px solid var(--stone);padding-top:2rem;margin-bottom:2rem;">
       <p class="s-eye" style="margin-bottom:.5rem;">Couple typing</p>
@@ -824,26 +824,26 @@
     </div>
 
     <!-- Mobile swipe -->
-    <div class="ct-mobile-scroll" style="display:none;overflow-x:scroll;gap:1rem;padding-bottom:.75rem;-webkit-overflow-scrolling:touch;scrollbar-width:none;margin:0 -1.25rem;padding-left:1.25rem;padding-right:1.25rem;scroll-snap-type:x mandatory;">
-      <div style="background:white;border:1.5px solid var(--stone);border-top:3px solid #E8673A;border-radius:16px;padding:1.4rem 1.25rem;min-width:75vw;flex-shrink:0;scroll-snap-align:start;scroll-snap-stop:always;">
+    <div class="ct-mobile-scroll" style="display:none;overflow-x:scroll;gap:1rem;padding-bottom:.75rem;-webkit-overflow-scrolling:touch;scrollbar-width:none;margin:0 -1.25rem;padding-left:1.25rem;padding-right:1.25rem;">
+      <div style="background:white;border:1.5px solid var(--stone);border-top:3px solid #E8673A;border-radius:16px;padding:1.4rem 1.25rem;min-width:75vw;flex-shrink:0;">
         <div style="font-size:1.4rem;margin-bottom:.6rem;">📊</div>
         <div style="font-size:.6rem;letter-spacing:.18em;text-transform:uppercase;font-weight:700;color:#E8673A;font-family:'DM Sans',sans-serif;margin-bottom:.45rem;">Step 1</div>
         <div style="font-size:.9rem;font-weight:700;color:var(--ink);margin-bottom:.4rem;">Plotted on two axes</div>
         <p style="font-size:.78rem;color:var(--muted);line-height:1.6;margin:0;">Each person is scored across 10 dimensions and plotted on two axes: Engage ↔ Withdraw and Open ↔ Guarded.</p>
       </div>
-      <div style="background:white;border:1.5px solid var(--stone);border-top:3px solid #9B5DE5;border-radius:16px;padding:1.4rem 1.25rem;min-width:75vw;flex-shrink:0;scroll-snap-align:start;scroll-snap-stop:always;">
+      <div style="background:white;border:1.5px solid var(--stone);border-top:3px solid #9B5DE5;border-radius:16px;padding:1.4rem 1.25rem;min-width:75vw;flex-shrink:0;">
         <div style="font-size:1.4rem;margin-bottom:.6rem;">🔷</div>
         <div style="font-size:.6rem;letter-spacing:.18em;text-transform:uppercase;font-weight:700;color:#9B5DE5;font-family:'DM Sans',sans-serif;margin-bottom:.45rem;">Step 2</div>
         <div style="font-size:.9rem;font-weight:700;color:var(--ink);margin-bottom:.4rem;">Assigned an individual type</div>
         <p style="font-size:.78rem;color:var(--muted);line-height:1.6;margin:0;">Axis position determines one of four types: The Reacher, The Anchor, The Feeler, or The Protector.</p>
       </div>
-      <div style="background:white;border:1.5px solid var(--stone);border-top:3px solid #5B6DF8;border-radius:16px;padding:1.4rem 1.25rem;min-width:75vw;flex-shrink:0;scroll-snap-align:start;scroll-snap-stop:always;">
+      <div style="background:white;border:1.5px solid var(--stone);border-top:3px solid #5B6DF8;border-radius:16px;padding:1.4rem 1.25rem;min-width:75vw;flex-shrink:0;">
         <div style="font-size:1.4rem;margin-bottom:.6rem;">💑</div>
         <div style="font-size:.6rem;letter-spacing:.18em;text-transform:uppercase;font-weight:700;color:#5B6DF8;font-family:'DM Sans',sans-serif;margin-bottom:.45rem;">Step 3</div>
         <div style="font-size:.9rem;font-weight:700;color:var(--ink);margin-bottom:.4rem;">Assigned a couple type</div>
         <p style="font-size:.78rem;color:var(--muted);line-height:1.6;margin:0;">Both individual types combine into one of ten couple types – describing how your patterns interact together.</p>
       </div>
-      <div style="background:white;border:1.5px solid var(--stone);border-top:3px solid #1B5FE8;border-radius:16px;padding:1.4rem 1.25rem;min-width:75vw;flex-shrink:0;scroll-snap-align:start;scroll-snap-stop:always;">
+      <div style="background:white;border:1.5px solid var(--stone);border-top:3px solid #1B5FE8;border-radius:16px;padding:1.4rem 1.25rem;min-width:75vw;flex-shrink:0;">
         <div style="font-size:1.4rem;margin-bottom:.6rem;">📍</div>
         <div style="font-size:.6rem;letter-spacing:.18em;text-transform:uppercase;font-weight:700;color:#1B5FE8;font-family:'DM Sans',sans-serif;margin-bottom:.45rem;">Step 4</div>
         <div style="font-size:.9rem;font-weight:700;color:var(--ink);margin-bottom:.4rem;">Placed across four quadrants</div>
@@ -906,7 +906,7 @@
 </section>
 
 <!-- CTA -->
-<div class="cta-wrap scroll-snap-align:start;scroll-snap-stop:always;" style="text-align:center;padding:4rem 2.5rem;background:var(--warm);border-top:1px solid var(--stone);">
+<div class="cta-wrap ;" style="text-align:center;padding:4rem 2.5rem;background:var(--warm);border-top:1px solid var(--stone);">
   <div style="max-width:860px;margin:0 auto;">
     <h2 style="font-family:var(--hfont);font-size:clamp(2.2rem,4vw,3rem);font-weight:700;line-height:1.08;color:var(--ink);margin-bottom:1rem;letter-spacing:-.02em;">The conversation<br><em style="font-style:italic;color:var(--orange);">you've been meaning to have.</em></h2>
     <p style="font-size:.95rem;color:var(--muted);line-height:1.7;font-weight:300;margin-bottom:1.75rem;">Two exercises. About 25 minutes each. Completely private until you're both done.</p>
@@ -920,7 +920,7 @@
 </div>
 
 
-<footer class="site-footer" style="scroll-snap-align:start;">
+<footer class="site-footer">
   <div class="sf-inner">
     <div class="sf-brand">
       <a href="/home" class="logo">

@@ -115,7 +115,7 @@
     .sf-bottom{max-width:1120px;margin:0 auto;padding:1.5rem 2.5rem 0;display:flex;justify-content:space-between;align-items:center}
     .sf-copy,.sf-email{font-size:.75rem;color:rgba(255,255,255,.25)}
     @media(max-width:768px){.sf-inner{grid-template-columns:1fr 1.6fr;gap:1.25rem;padding-left:1.25rem;padding-right:1.25rem}.sf-links{grid-template-columns:1fr 1fr;gap:1rem}.sf-bottom{flex-direction:column;align-items:flex-start}.sf-tagline{font-size:.78rem}.sf-col a{font-size:.8rem}.sf-col-title{font-size:.62rem}}
-    html,body{scroll-snap-type:y proximity}
+    html,body{}
   .page-header{background:linear-gradient(150deg,#1c1940 0%,#282560 60%,#1e3a6e 100%);padding:calc(58px + 3.5rem) clamp(1.25rem,5vw,2.5rem) 3rem;position:relative;overflow:hidden;max-width:none;margin:0;width:100%;box-sizing:border-box}
   .page-header::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,#E8673A,#9B5DE5,#1B5FE8);z-index:1}
   .page-header-glow{position:absolute;inset:0;background:radial-gradient(ellipse 60% 40% at 50% 100%,rgba(232,103,58,.12),transparent);pointer-events:none}
@@ -350,7 +350,7 @@
   </div>
 </section>
 <!-- CTA -->
-<div class="cta-wrap scroll-snap-align:start;" style="text-align:center;padding:4rem 2.5rem;background:var(--warm);border-top:1px solid var(--stone);">
+<div class="cta-wrap ;" style="text-align:center;padding:4rem 2.5rem;background:var(--warm);border-top:1px solid var(--stone);">
   <div style="max-width:860px;margin:0 auto;">
     <h2 style="font-family:var(--hfont);font-size:clamp(2.2rem,4vw,3rem);font-weight:700;line-height:1.08;color:var(--ink);margin-bottom:1rem;letter-spacing:-.02em;">Ready to find<br><em style="font-style:italic;color:var(--orange);">your couple type?</em></h2>
     <p style="font-size:.95rem;color:var(--muted);line-height:1.7;font-weight:300;margin-bottom:1.75rem;">Two exercises. About 25 minutes each. Everything you learn is yours to keep.</p>
@@ -368,7 +368,7 @@
     .type-card{padding:.9rem 1rem!important}
   }</style>
 
-<footer class="site-footer" style="scroll-snap-align:start;">
+<footer class="site-footer">
   <div class="sf-inner">
     <div class="sf-brand">
       <a href="/home" class="logo">
