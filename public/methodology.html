@@ -68,7 +68,7 @@
   .eyebrow{font-size:.6rem;letter-spacing:.3em;text-transform:uppercase;color:var(--clay);font-weight:700;margin-bottom:.9rem;display:flex;align-items:center;justify-content:center;gap:.65rem}
   .eyebrow::before{content:'';width:28px;height:2.5px;border-radius:999px;background:linear-gradient(90deg,var(--orange),var(--indigo));flex-shrink:0}.eyebrow::after{content:'';width:28px;height:2.5px;border-radius:999px;background:linear-gradient(90deg,var(--orange),var(--indigo));flex-shrink:0}
   .s-eye{font-size:.6rem;letter-spacing:.3em;text-transform:uppercase;color:var(--clay);font-weight:700;margin-bottom:.85rem;display:flex;align-items:center;gap:.65rem}
-  .s-eye::before{content:'';width:28px;height:2.5px;border-radius:999px;background:var(--stone);flex-shrink:0}
+  .s-eye::before{content:'';width:28px;height:2.5px;border-radius:999px;background:linear-gradient(90deg,var(--orange),var(--indigo));flex-shrink:0}
   .s-title{font-family:var(--hfont);font-size:clamp(1.85rem,3.2vw,2.7rem);font-weight:700;line-height:1.1;color:var(--ink);margin-bottom:1.1rem;letter-spacing:-.02em}
   .s-title em{font-style:italic;color:var(--orange)}
   .s-sub{font-size:.95rem;color:var(--muted);line-height:1.78;font-weight:300;max-width:540px}
@@ -824,26 +824,26 @@
     </div>
 
     <!-- Mobile swipe -->
-    <div class="ct-mobile-scroll" style="display:none;overflow-x:scroll;gap:1rem;padding-bottom:.75rem;-webkit-overflow-scrolling:touch;scrollbar-width:none;margin:0 -1.25rem;padding-left:1.25rem;padding-right:1.25rem;">
-      <div style="background:white;border:1.5px solid var(--stone);border-top:3px solid #E8673A;border-radius:16px;padding:1.4rem 1.25rem;min-width:75vw;flex-shrink:0;">
+    <div class="ct-mobile-scroll" style="display:none;overflow-x:scroll;gap:1rem;padding-bottom:.75rem;-webkit-overflow-scrolling:touch;scrollbar-width:none;margin:0 -1.25rem;padding-left:1.25rem;padding-right:1.25rem;scroll-snap-type:x mandatory;">
+      <div style="background:white;border:1.5px solid var(--stone);border-top:3px solid #E8673A;border-radius:16px;padding:1.4rem 1.25rem;min-width:calc(80vw - 1.5rem);max-width:280px;flex-shrink:0;scroll-snap-align:start;">
         <div style="font-size:1.4rem;margin-bottom:.6rem;">📊</div>
         <div style="font-size:.6rem;letter-spacing:.18em;text-transform:uppercase;font-weight:700;color:#E8673A;font-family:'DM Sans',sans-serif;margin-bottom:.45rem;">Step 1</div>
         <div style="font-size:.9rem;font-weight:700;color:var(--ink);margin-bottom:.4rem;">Plotted on two axes</div>
         <p style="font-size:.78rem;color:var(--muted);line-height:1.6;margin:0;">Each person is scored across 10 dimensions and plotted on two axes: Engage ↔ Withdraw and Open ↔ Guarded.</p>
       </div>
-      <div style="background:white;border:1.5px solid var(--stone);border-top:3px solid #9B5DE5;border-radius:16px;padding:1.4rem 1.25rem;min-width:75vw;flex-shrink:0;">
+      <div style="background:white;border:1.5px solid var(--stone);border-top:3px solid #9B5DE5;border-radius:16px;padding:1.4rem 1.25rem;min-width:calc(80vw - 1.5rem);max-width:280px;flex-shrink:0;scroll-snap-align:start;">
         <div style="font-size:1.4rem;margin-bottom:.6rem;">🔷</div>
         <div style="font-size:.6rem;letter-spacing:.18em;text-transform:uppercase;font-weight:700;color:#9B5DE5;font-family:'DM Sans',sans-serif;margin-bottom:.45rem;">Step 2</div>
         <div style="font-size:.9rem;font-weight:700;color:var(--ink);margin-bottom:.4rem;">Assigned an individual type</div>
         <p style="font-size:.78rem;color:var(--muted);line-height:1.6;margin:0;">Axis position determines one of four types: The Reacher, The Anchor, The Feeler, or The Protector.</p>
       </div>
-      <div style="background:white;border:1.5px solid var(--stone);border-top:3px solid #5B6DF8;border-radius:16px;padding:1.4rem 1.25rem;min-width:75vw;flex-shrink:0;">
+      <div style="background:white;border:1.5px solid var(--stone);border-top:3px solid #5B6DF8;border-radius:16px;padding:1.4rem 1.25rem;min-width:calc(80vw - 1.5rem);max-width:280px;flex-shrink:0;scroll-snap-align:start;">
         <div style="font-size:1.4rem;margin-bottom:.6rem;">💑</div>
         <div style="font-size:.6rem;letter-spacing:.18em;text-transform:uppercase;font-weight:700;color:#5B6DF8;font-family:'DM Sans',sans-serif;margin-bottom:.45rem;">Step 3</div>
         <div style="font-size:.9rem;font-weight:700;color:var(--ink);margin-bottom:.4rem;">Assigned a couple type</div>
         <p style="font-size:.78rem;color:var(--muted);line-height:1.6;margin:0;">Both individual types combine into one of ten couple types – describing how your patterns interact together.</p>
       </div>
-      <div style="background:white;border:1.5px solid var(--stone);border-top:3px solid #1B5FE8;border-radius:16px;padding:1.4rem 1.25rem;min-width:75vw;flex-shrink:0;">
+      <div style="background:white;border:1.5px solid var(--stone);border-top:3px solid #1B5FE8;border-radius:16px;padding:1.4rem 1.25rem;min-width:calc(80vw - 1.5rem);max-width:280px;flex-shrink:0;scroll-snap-align:start;">
         <div style="font-size:1.4rem;margin-bottom:.6rem;">📍</div>
         <div style="font-size:.6rem;letter-spacing:.18em;text-transform:uppercase;font-weight:700;color:#1B5FE8;font-family:'DM Sans',sans-serif;margin-bottom:.45rem;">Step 4</div>
         <div style="font-size:.9rem;font-weight:700;color:var(--ink);margin-bottom:.4rem;">Placed across four quadrants</div>

@@ -120,8 +120,8 @@
   section{padding:6rem 2.5rem}
   .si{max-width:1120px;margin:0 auto}
   .s-eye{font-size:.6rem;letter-spacing:.3em;text-transform:uppercase;color:var(--clay);font-weight:700;margin-bottom:.85rem;display:flex;align-items:center;gap:.65rem}
-  .s-eye::before{content:'';width:28px;height:2.5px;border-radius:999px;background:var(--stone);flex-shrink:0}
-  .s-eye::before{content:'';width:28px;height:2.5px;border-radius:999px;background:var(--stone);flex-shrink:0}
+  .s-eye::before{content:'';width:28px;height:2.5px;border-radius:999px;background:linear-gradient(90deg,var(--orange),var(--indigo));flex-shrink:0}
+  .s-eye::before{content:'';width:28px;height:2.5px;border-radius:999px;background:linear-gradient(90deg,var(--orange),var(--indigo));flex-shrink:0}
   .s-title{font-family:var(--hfont);font-size:clamp(1.9rem,3.2vw,2.7rem);font-weight:700;line-height:1.1;color:var(--ink);margin-bottom:1.1rem;letter-spacing:-.02em}
   .s-title em{font-style:italic;color:var(--orange)}
   .s-sub{font-size:.95rem;color:var(--muted);line-height:1.78;font-weight:300;max-width:540px}
@@ -493,7 +493,7 @@
 
     <!-- Desktop: step labels above, then 3-column card grid -->
     <!-- Step labels: always visible on desktop, hidden on mobile (mobile cards have no labels) -->
-    <div class="hiw-step-labels" style="display:grid;grid-template-columns:repeat(3,1fr);gap:1.25rem;margin-bottom:.6rem;">
+    <div class="story-cards-desktop" style="display:grid;grid-template-columns:repeat(3,1fr);gap:1.25rem;margin-bottom:.6rem;">
       <div style="font-size:.6rem;letter-spacing:.18em;text-transform:uppercase;font-weight:700;color:var(--orange);font-family:'DM Sans',sans-serif;">Step 01</div>
       <div style="font-size:.6rem;letter-spacing:.18em;text-transform:uppercase;font-weight:700;color:#9B5DE5;font-family:'DM Sans',sans-serif;">Step 02</div>
       <div style="font-size:.6rem;letter-spacing:.18em;text-transform:uppercase;font-weight:700;color:#1B5FE8;font-family:'DM Sans',sans-serif;">Step 03</div>
@@ -603,6 +603,7 @@
       <div style="background:linear-gradient(150deg,#3D1A08,#5A2810);border-radius:20px;overflow:hidden;display:flex;flex-direction:column;min-height:340px;min-width:calc(85vw - 1rem);max-width:320px;flex-shrink:0;">
         <div style="height:3px;background:#E8673A;flex-shrink:0;"></div>
         <div style="padding:1.35rem 1.25rem .6rem;display:flex;flex-direction:column;gap:.55rem;">
+          <div style="font-size:.55rem;letter-spacing:.18em;text-transform:uppercase;font-weight:700;color:var(--orange);font-family:'DM Sans',sans-serif;margin-bottom:.4rem;">Step 01</div>
           <div style="font-family:'Playfair Display',Georgia,serif;font-size:1.75rem;font-weight:700;color:white;line-height:1.05;letter-spacing:-.02em;">Answer separately.</div>
           <p style="font-size:.77rem;color:rgba(255,255,255,.55);line-height:1.65;margin:0;font-family:'DM Sans',sans-serif;">Each partner completes both exercises independently. Feedback is not shared until both partners are done.</p>
         </div>
@@ -631,6 +632,7 @@
       <div style="background:linear-gradient(150deg,#1E0E42,#2E1560);border-radius:20px;overflow:hidden;display:flex;flex-direction:column;min-height:340px;min-width:calc(85vw - 1rem);max-width:320px;flex-shrink:0;">
         <div style="height:3px;background:#9B5DE5;flex-shrink:0;"></div>
         <div style="padding:1.35rem 1.25rem .6rem;display:flex;flex-direction:column;gap:.55rem;">
+          <div style="font-size:.55rem;letter-spacing:.18em;text-transform:uppercase;font-weight:700;color:#9B5DE5;font-family:'DM Sans',sans-serif;margin-bottom:.4rem;">Step 02</div>
           <div style="font-family:'Playfair Display',Georgia,serif;font-size:1.75rem;font-weight:700;color:white;line-height:1.05;letter-spacing:-.02em;">See yourselves side by side.</div>
           <p style="font-size:.77rem;color:rgba(255,255,255,.55);line-height:1.65;margin:0;font-family:'DM Sans',sans-serif;">Your answers combine into a shared view of how you each operate, what you expect, and how you function together.</p>
         </div>
@@ -664,6 +666,7 @@
       <div style="background:linear-gradient(150deg,#0C1E48,#102860);border-radius:20px;overflow:hidden;display:flex;flex-direction:column;min-height:340px;min-width:calc(85vw - 1rem);max-width:320px;flex-shrink:0;">
         <div style="height:3px;background:#1B5FE8;flex-shrink:0;"></div>
         <div style="padding:1.35rem 1.25rem .6rem;display:flex;flex-direction:column;gap:.55rem;">
+          <div style="font-size:.55rem;letter-spacing:.18em;text-transform:uppercase;font-weight:700;color:#1B5FE8;font-family:'DM Sans',sans-serif;margin-bottom:.4rem;">Step 03</div>
           <div style="font-family:'Playfair Display',Georgia,serif;font-size:1.75rem;font-weight:700;color:white;line-height:1.05;letter-spacing:-.02em;">Build from what you find.</div>
           <p style="font-size:.77rem;color:rgba(255,255,255,.55);line-height:1.65;margin:0;font-family:'DM Sans',sans-serif;">Your results aren't a one-time read. They're a shared language to return to as things shift.</p>
         </div>
