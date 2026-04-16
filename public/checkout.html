@@ -237,7 +237,7 @@
     </button>
     <button class="fmt-btn" data-fmt="physical" onclick="setFormat('physical')"
       style="flex:1;padding:.6rem;border-radius:10px;border:1.5px solid #E8DDD0;background:white;color:#8C7A68;font-size:.78rem;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .15s">
-      Gift box · $119
+      Gift box · $124
     </button>
   </div>
 </div>
@@ -331,28 +331,28 @@ if(new URLSearchParams(location.search).get('test')==='1' || location.hostname==
 const PACKAGES = {
   core: {
     id: 'core', name: 'The Attune Assessment', badge: 'Foundation',
-    digitalPrice: 89, physicalPrice: 119,
+    digitalPrice: 89, physicalPrice: 124,
     price: 89, priceLabel: '$89', format: 'digital',
     tags: ['Digital · instant access', 'Communication assessment', 'Expectations assessment', 'Couple type + map'],
     physicalTags: ['Digital + physical gift box', 'Communication assessment', 'Expectations assessment', 'Couple type + map'],
   },
   newlywed: {
     id: 'newlywed', name: 'Starting Out Collection', badge: 'Starting Out',
-    digitalPrice: 139, physicalPrice: 169,
+    digitalPrice: 139, physicalPrice: 174,
     price: 139, priceLabel: 'from $139', format: 'physical',
     tags: ['Digital · instant access', 'Communication & expectations', 'Starting Out Checklist', 'Couple type + map'],
     physicalTags: ['Digital + physical gift box', 'Communication & expectations', 'Starting Out Checklist', 'Personalized QR card'],
   },
   anniversary: {
     id: 'anniversary', name: 'Relationship Reflection', badge: 'Anniversary',
-    digitalPrice: 139, physicalPrice: 169,
+    digitalPrice: 139, physicalPrice: 174,
     price: 139, priceLabel: 'from $139', format: 'physical',
     tags: ['Digital · instant access', 'Communication & expectations', 'Relationship Reflection', 'Couple type + map'],
     physicalTags: ['Digital + physical gift box', 'Communication & expectations', 'Relationship Reflection', 'Personalized QR card'],
   },
   premium: {
     id: 'premium', name: 'Attune Premium', badge: 'Most Complete',
-    digitalPrice: 295, physicalPrice: 340,
+    digitalPrice: 295, physicalPrice: 330,
     price: 295, priceLabel: '$295', format: 'physical',
     tags: ['Everything in Assessment', 'LMFT session included', 'Personalized workbook', 'Couple type + map'],
     physicalTags: ['Everything included', 'LMFT session included', 'Personalized workbook', 'Premium gift box'],
@@ -360,7 +360,7 @@ const PACKAGES = {
 };
 
 const ADDON_LMFT = { label: 'LMFT Session (50 min · licensed therapist)', price: 150 };
-const ADDON_REFLECTION = { label: 'Relationship Reflection exercise', price: 40 };
+const ADDON_REFLECTION = { label: "Relationship Reflection exercise", price: 20 };
 
 const ADDON_WORKBOOK = {
   digital: { label: 'Personalized Workbook (digital)', price: 19 },
@@ -372,6 +372,8 @@ let intent = 'self';   // 'self' | 'gift'
 let pkg = null;
 let addonWorkbook = null;
 let addonReflection = false;
+let addonBudget = false;
+let addonLmft = false;
 
 // ── Init from URL params ─────────────────────────────────────────────────────
 (function init() {
@@ -380,6 +382,7 @@ let addonReflection = false;
   addonWorkbook = params.get('addon_workbook') || null;
   addonLmft = params.get('addon_lmft') === '1';
   addonReflection = params.get('addon_reflection') === '1';
+  addonBudget = params.get('addon_budget') === '1';
   pkg = PACKAGES[pkgId] || PACKAGES.core;
 
   // Intent from params (gift link from offerings)
@@ -483,6 +486,15 @@ function renderSummary() {
       </div>`;
   }
 
+  if (addonBudget) {
+    total += 20;
+    rows += `
+      <div class="co-card-detail">
+        <div><div class="name">Budget Priorities Exercise</div></div>
+        <div class="price">+$20</div>
+      </div>`;
+  }
+
   el.innerHTML = rows;
   totalEl.textContent = '$' + total;
   const activeTags = isPhys ? (pkg.physicalTags || pkg.tags) : pkg.tags;
@@ -582,6 +594,7 @@ async function handleSubmit(e) {
         addonWorkbook,
         addonLmft,
         addonReflection,
+        addonBudget,
         isGift: intent === 'gift',
         isPhysical: pkg.format === 'physical',
         partner1Name: p1,
@@ -621,9 +634,10 @@ async function handleSubmit(e) {
       p1:     document.getElementById('p1name').value.trim(),
       p2:     document.getElementById('p2name').value.trim(),
     });
-    if (addonLmft)     params.set('lmft', '1');
+    if (addonLmft)       params.set('lmft', '1');
     if (addonReflection) params.set('addon_reflection', '1');
-    if (addonWorkbook) params.set('addon_workbook', addonWorkbook);
+    if (addonWorkbook)   params.set('addon_workbook', addonWorkbook);
+    if (addonBudget)     params.set('addon_budget', '1');
     if (intent === 'gift') params.set('gift', '1');
     params.set('orderNum', realOrderNum);
     document.getElementById('startLink').href = '/app?' + params.toString();

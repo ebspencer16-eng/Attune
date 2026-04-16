@@ -1437,7 +1437,7 @@ function toggleFaq(item){
 function setFormat(pkg,format){
   if(pkg==='newlywed'){
     const physical=format==='physical';
-    document.getElementById('newlywed-price').textContent=physical?'$169':'$139';
+    document.getElementById('newlywed-price').textContent=physical?'$174':'$139';
     document.getElementById('newlywed-price-sub').textContent=physical?'Physical gift box (+$35) · ships in 5–7 days':'Digital · instant access · yours to keep';
     document.getElementById('newlywed-cta').textContent='Add to cart →';
     document.getElementById('newlywed-physical-col').style.display=physical?'block':'none';
@@ -1447,7 +1447,7 @@ function setFormat(pkg,format){
     document.querySelector('#pkg-newlywed .pkg-note').textContent=physical?'Ships within 3–5 business days':'Access delivered by email immediately';
   } else if(pkg==='ann'){
     const physical=format==='physical';
-    document.getElementById('ann-price').textContent=physical?'$169':'$139';
+    document.getElementById('ann-price').textContent=physical?'$174':'$139';
     document.getElementById('ann-price-sub').textContent=physical?'Physical gift box (+$35) · ships in 5–7 days':'Digital · instant access · yours to keep';
     document.getElementById('ann-cta').textContent='Add to cart →';
     document.getElementById('ann-physical-col').style.display=physical?'block':'none';
@@ -1457,7 +1457,7 @@ function setFormat(pkg,format){
     document.querySelector('#pkg-anniversary .pkg-note').textContent=physical?'Ships within 3–5 business days':'Access delivered by email immediately';
   } else if(pkg==='premium'){
     const physical=format==='physical';
-    document.getElementById('premium-price').textContent=physical?'$340':'$295';
+    document.getElementById('premium-price').textContent=physical?'$330':'$295';
     document.getElementById('premium-price-sub').textContent=physical?'Physical gift box (+$35) · ships in 5–7 days':'Digital · instant access · yours to keep';
     document.getElementById('premium-cta').textContent='Add to cart →';
     document.getElementById('premium-lmft-col').style.display=physical?'none':'block';

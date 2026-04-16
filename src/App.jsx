@@ -580,15 +580,15 @@ const INDIVIDUAL_TYPES = {
        desc: "Moves toward resolution. Processes and expresses relatively freely.",
        wired: "You move toward connection when things need addressing — you don't wait for an opening, you create one. You process outward, which means the people close to you usually know where you stand without having to ask. This makes you easy to know, and relatively easy to be in productive conflict with.",
        typeDesc: "You engage quickly and express freely — which means the people close to you usually know where they stand, and they know where you stand too. You don't make them guess. Under pressure, you tend to reach toward the relationship rather than away from it, which can be genuinely stabilizing. The thing to stay aware of: your speed to engage can feel like a lot when someone else needs more time to get there." },
-  X: { code: "X", name: "The Problem Solver", color: "#1B5FE8", fill: "#EFF1FF", axis1: "Engage", axis2: "Guarded",
+  X: { code: "X", name: "The Anchor", color: "#1B5FE8", fill: "#EFF1FF", axis1: "Engage", axis2: "Guarded",
        desc: "Pushes toward resolution. Processes internally, shares selectively.",
        wired: "You move toward resolution rather than away from it — when something needs addressing, you don't avoid the conversation. You process before you speak, which means your perspective is usually considered by the time it comes out. This makes you direct and deliberate, but sometimes harder to read in the middle of something.",
        typeDesc: "You engage with problems directly but process privately before speaking — which means you tend to arrive at conversations with something considered to say. You don't react out loud. Under pressure, you want resolution, but you need your own thinking to be in order first. The thing to stay aware of: your internal processing can look like distance to someone who expresses more freely." },
-  Y: { code: "Y", name: "The Space Seeker", color: "#7C3AED", fill: "#F5F0FF", axis1: "Withdraw", axis2: "Open",
+  Y: { code: "Y", name: "The Feeler", color: "#7C3AED", fill: "#F5F0FF", axis1: "Withdraw", axis2: "Open",
        desc: "Needs space first. Carries and expresses feeling when ready.",
        wired: "You need space to process before you can fully show up to a hard conversation — this isn't avoidance, it's how you get to something honest. You're emotionally expressive when you're ready, and the people close to you get real feeling when it comes. What you bring most is depth: you don't stay on the surface.",
        typeDesc: "You process before you can share — not because you're holding back, but because you need the space to understand what's actually true for you before you can say it. You're emotionally present and expressive when you get there. Under pressure, you need time, and pushing you before you're ready usually produces something incomplete. The thing to stay aware of: your withdrawal before sharing can read as avoidance to someone who engages more quickly." },
-  Z: { code: "Z", name: "The Holder", color: "#6B7280", fill: "#F4F5F6", axis1: "Withdraw", axis2: "Guarded",
+  Z: { code: "Z", name: "The Protector", color: "#6B7280", fill: "#F4F5F6", axis1: "Withdraw", axis2: "Guarded",
        desc: "Withdraws and holds things close. Real depth and feeling running quiet beneath the surface.",
        wired: "You process privately and share selectively — there's usually more going on internally than what's visible from the outside. When you do speak, it carries weight precisely because you don't offer it carelessly. What you bring is steadiness: you don't react quickly, which means you don't create unnecessary chaos.",
        typeDesc: "You carry things privately and surface them selectively — which means there's usually more going on internally than what's visible. You don't perform your inner life, and you don't dump it on the people around you. Under pressure, you go quiet and go deep. The thing to stay aware of: the people who love you most sometimes struggle to know what you're carrying, which can make them feel shut out without you intending it." },
@@ -1016,7 +1016,7 @@ function CoupleMapSVG({ myS, partS, userName, partnerName, size = 480 }) {
     Z: ["#E8E6E3", "#DEDAD5"],
   };
   const QC = { W: "#E8673A", X: "#1B5FE8", Y: "#7C3AED", Z: "#6B7280" };
-  const QN = { W: "The Initiator", X: "The Problem Solver", Y: "The Space Seeker", Z: "The Holder" };
+  const QN = { W: "The Initiator", X: "The Anchor", Y: "The Feeler", Z: "The Protector" };
 
   // Name tag pill dimensions
   const tagH = 22, tagR = 11, tagPad = 10;
@@ -3442,12 +3442,12 @@ function ExpectationsResults({ myAnswers, partnerAnswers, userName, partnerName,
   const EXP_COUPLE_CONTEXT = {
     WW: "Two Initiators both lean toward open expression. When expectations differ, you'll likely name it — the work is making sure you've actually heard each other before resolving.",
     XX: "The collaboration tend to move through disagreement efficiently. Watch that practical resolution doesn't skip the emotional weight of what's actually at stake.",
-    YY: "Two Space Seekers both carry feeling deeply. When an expectation gap lands hard, give each other the space before the conversation — it'll go better for it.",
+    YY: "Two Feelers both carry feeling deeply. When an expectation gap lands hard, give each other the space before the conversation — it'll go better for it.",
     ZZ: "Two Holders may let things sit. Build a deliberate practice of raising misaligned expectations before they calcify into resentment.",
     WX: "One of you will surface expectation gaps readily; the other processes first. The one who brings it up isn't necessarily the one who cares more.",
     WY: "Different conflict clocks apply here too. The one who names the expectation gap first isn't pushing — they're ready. The other will need a moment before the conversation is possible.",
-    WZ: "The Initiator will name gaps; The Holder will need time to respond. That asymmetry is wiring, not avoidance — name that explicitly.",
-    XY: "The Problem Solver wants to resolve quickly; The Space Seeker needs space to process. Neither is wrong. Build a return window into any expectation conversation.",
+    WZ: "The Initiator will name gaps; The Protector will need time to respond. That asymmetry is wiring, not avoidance — name that explicitly.",
+    XY: "The Anchor wants to resolve quickly; The Feeler needs space to process. Neither is wrong. Build a return window into any expectation conversation.",
     XZ: "Both of you hold things close. Expectation gaps that go unnamed can accumulate quietly — schedule the conversation, don't wait for it to happen organically.",
     YZ: "Both withdraw under pressure. When an expectation surfaces, one of you will need to come back first — let that be the agreed pattern.",
   };
@@ -5746,7 +5746,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
                 Y: strongWithdraw
                   ? `${name} needs significant space before they can show up to a hard conversation — not avoidance, just a longer processing runway. What they eventually bring is emotionally complete and worth the wait.`
                   : nearEngageCenter
-                  ? `${name} needs space first, but it's a shorter runway than many Space Seekers — they come back relatively quickly once they've landed somewhere.`
+                  ? `${name} needs space first, but it's a shorter runway than many Feelers — they come back relatively quickly once they've landed somewhere.`
                   : nearOpenCenter
                   ? `${name} processes inward and holds what's going on privately until ready — emotionally expressive when they arrive, but the arrival takes both time and internal settling.`
                   : `${name} needs space to process before engaging, carries emotional weight visibly in the interim, and returns when ready with something real.`,
@@ -6476,9 +6476,9 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
               <p style={{ fontSize: "0.82rem", color: C.muted, fontFamily: BFONT, fontWeight: 300, lineHeight: 1.7, marginBottom: "1rem" }}>
                 A licensed LMFT receives your joint results before your session and comes prepared with context specific to your pairing. One focused conversation, no ongoing commitment.
               </p>
-              <a href="/offerings#pkg-premium" style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", background: "rgba(91,109,248,0.08)", border: "1.5px solid rgba(91,109,248,0.25)", color: "#5B6DF8", borderRadius: 10, padding: "0.6rem 1.25rem", textDecoration: "none", fontSize: "0.78rem", fontWeight: 700, fontFamily: BFONT }}>
-                Learn more about the LMFT session →
-              </a>
+              <button onClick={() => onNavigateTool && onNavigateTool('lmft-upsell')} style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", background: "rgba(91,109,248,0.08)", border: "1.5px solid rgba(91,109,248,0.25)", color: "#5B6DF8", borderRadius: 10, padding: "0.6rem 1.25rem", textDecoration: "none", fontSize: "0.78rem", fontWeight: 700, fontFamily: BFONT, cursor: "pointer" }}>
+                Add LMFT session · $150 →
+              </button>
             </div>
           )}
 
@@ -6579,6 +6579,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
                 </div>
               ) : (
                 <a href="/offerings" style={{ display: "flex", alignItems: "center", gap: "1rem", background: C.warm, border: `1.5px solid ${C.stone}`, borderRadius: 14, padding: "0.85rem 1.1rem", textDecoration: "none", cursor: "pointer", transition: "all 0.15s" }}
+                  onClick={(e) => { e.preventDefault(); onNavigateTool && onNavigateTool('lmft-upsell'); }}
                   onMouseEnter={e => { e.currentTarget.style.borderColor = "#5B6DF8"; }}
                   onMouseLeave={e => { e.currentTarget.style.borderColor = C.stone; }}>
                   <div style={{ width: 34, height: 34, borderRadius: 10, background: "rgba(91,109,248,0.08)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
@@ -7945,7 +7946,7 @@ function PartnerBCompletionScreen({ partnerAName, partnerBName, partnerADone }) 
 // ─────────────────────────────────────────────────────────────────────────────
 function PartnerInviteCard({ account, onCopy, copied }) {
   if (!account) return null;
-  const inviteUrl = `${window.location.origin}/app?invite=${account.inviteCode}&from=${encodeURIComponent(account.name)}`;
+  const inviteUrl = `${window.location.origin}/app?invite=${account.inviteCode}&from=${encodeURIComponent(account.name)}${account.email ? `&pae=${encodeURIComponent(account.email)}` : ''}`;
   const [resent, setResent] = React.useState(false);
   const [resending, setResending] = React.useState(false);
 
@@ -8053,6 +8054,23 @@ function ProfileSetupPrompt({ account, onSetupProfile }) {
 // UPSELL MODAL — shown when users click workbook/reflection cards post-exercise
 // ─────────────────────────────────────────────────────────────────────────────
 const UPSELL_PRODUCTS = {
+  lmft: {
+    badge: "Add-on · Any package",
+    badgeColor: "rgba(91,109,248,0.1)",
+    badgeText: "#5B6DF8",
+    title: "LMFT Session",
+    price: "$150",
+    tagline: "50 minutes with a licensed therapist, prepared with your results.",
+    description: "A licensed marriage and family therapist receives your joint results before your session. They come prepared with context specific to your couple type and the gaps that showed up — no generic intake, no wasted time getting them up to speed. One focused session, no ongoing commitment.",
+    includes: [
+      "Therapist reviews your results before you meet",
+      "50-minute virtual session",
+      "Focused on what your specific results surface",
+      "No ongoing commitment required",
+    ],
+    accentColor: "#5B6DF8",
+    cartParam: "lmft",
+  },
   workbook: {
     badge: "Add-on",
     badgeColor: "#FFF0EB",
@@ -8228,7 +8246,8 @@ export default function App() {
   const _urlPkg = params.get("pkg") || "core";
   const _demoParam = params.get("demo"); // ?demo=anniversary bypasses localStorage
   const _orderPkg = (() => { try { const o = JSON.parse(localStorage.getItem('attune_order') || 'null'); return o?.pkgKey || null; } catch { return null; } })();
-  const demoPkg = _demoParam || _orderPkg || _urlPkg;
+  // If demo=1 (generic), use _urlPkg for package; if demo=anniversary etc, use that value
+  const demoPkg = (_demoParam && _demoParam !== '1') ? _demoParam : (_orderPkg || _urlPkg);
   const urlInviteCode = params.get("invite");
   const urlInviteFrom = params.get("from") ? decodeURIComponent(params.get("from")) : null;
   const urlIsReset = params.get("reset") === "1";
@@ -8624,8 +8643,9 @@ export default function App() {
   const [notesState, setNotesState] = useState({ partner1: "", partner2: "", shared: "" }); // Conversation notes
   // Auto-open auth if ?signup=1 in URL (comes from checkout success redirect)
   const _urlSignup = params.get('signup') === '1';
-  const [showAuth, setShowAuth] = useState(!isLoggedIn && _urlSignup); // Auth/signup modal
-  const [authMode, setAuthMode] = useState(_urlSignup ? "signup" : "signup"); // "signup" | "login"
+  const _urlSignin = params.get('signin') === '1';
+  const [showAuth, setShowAuth] = useState(!isLoggedIn && (_urlSignup || _urlSignin)); // Auth modal
+  const [authMode, setAuthMode] = useState(_urlSignin ? "login" : "signup"); // "signup" | "login"
   const [showProfileSetup, setShowProfileSetup] = useState(false);
   const [showNavDropdown, setShowNavDropdown] = useState(false); // Profile nav dropdown
   const [mobileNavOpen, setMobileNavOpen] = useState(false); // Mobile hamburger nav
@@ -8656,6 +8676,8 @@ export default function App() {
   const [partnerSession, setPartnerSession] = useState(() => {
     try { return JSON.parse(localStorage.getItem('attune_partner_session') || 'null'); } catch { return null; }
   });
+  // True during the initial partner-sync fetch on mount — prevents flicker of stale "waiting" card
+  const [partnerSyncing, setPartnerSyncing] = useState(false);
   const savePartnerSession = (s) => {
     setPartnerSession(s);
     try { localStorage.setItem('attune_partner_session', JSON.stringify(s)); } catch {}
@@ -8734,8 +8756,10 @@ export default function App() {
     const code = account?.inviteCode;
     if (!code || hasRealPartner || account?.isPartnerB) return;
     let cancelled = false;
+    let isFirst = true;
 
     const poll = async () => {
+      if (isFirst) setPartnerSyncing(true);
       try {
         const res = await fetch(`/api/partner-sync?inviteCode=${encodeURIComponent(code)}`);
         if (!res.ok || cancelled) return;
@@ -8751,6 +8775,9 @@ export default function App() {
           if (!cancelled) savePartnerSession(s);
         }
       } catch {}
+      finally {
+        if (isFirst && !cancelled) { setPartnerSyncing(false); isFirst = false; }
+      }
     };
 
     poll(); // immediate check on mount
@@ -8771,7 +8798,7 @@ export default function App() {
     fetch('/api/send-email', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ type: 'checkin_6mo', toEmail: account.email, toName: account.name || '', partnerName: account.partnerName || '', retakeUrl: window.location.origin + '/app' }),
+      body: JSON.stringify({ type: 'checkin_6mo', toEmail: account.email, toName: account.name || '', partnerName: account.partnerName || '', retakeUrl: window.location.origin + '/app?signin=1' }),
     }).catch(() => {});
   }, [account?.email]);
 
@@ -9207,8 +9234,18 @@ export default function App() {
                   </div>
                 )}
 
-                {/* Partner joined but real session not yet loaded — brief waiting state */}
-                {isLoggedIn && !hasRealPartner && account?.partnerJoined && (
+                {/* Partner joined — spinner during initial sync, then static waiting card */}
+                {isLoggedIn && !hasRealPartner && account?.partnerJoined && partnerSyncing && (
+                  <div style={{ background: "linear-gradient(135deg,#EEF2FF,#F5F7FF)", border: "1.5px solid rgba(27,95,232,.25)", borderRadius: 14, padding: "1.1rem 1.4rem", marginBottom: "1.5rem", display: "flex", alignItems: "center", gap: "0.9rem" }}>
+                    <style>{`@keyframes attune-spin{to{transform:rotate(360deg)}}`}</style>
+                    <div style={{ width: 36, height: 36, borderRadius: "50%", border: "3px solid rgba(27,95,232,0.18)", borderTopColor: "#1B5FE8", flexShrink: 0, animation: "attune-spin 0.8s linear infinite" }} />
+                    <div>
+                      <div style={{ fontSize: "0.85rem", fontWeight: 700, color: "#0E0B07", fontFamily: "'DM Sans',sans-serif", marginBottom: 2 }}>Checking for {account.partnerName || "your partner"}'s results…</div>
+                      <div style={{ fontSize: "0.75rem", color: "#8C7A68", fontFamily: "'DM Sans',sans-serif", lineHeight: 1.5 }}>Just a moment.</div>
+                    </div>
+                  </div>
+                )}
+                {isLoggedIn && !hasRealPartner && account?.partnerJoined && !partnerSyncing && (
                   <div style={{ background: "linear-gradient(135deg,#EEF2FF,#F5F7FF)", border: "1.5px solid rgba(27,95,232,.25)", borderRadius: 14, padding: "1.1rem 1.4rem", marginBottom: "1.5rem", display: "flex", alignItems: "center", gap: "0.9rem" }}>
                     <div style={{ width: 36, height: 36, borderRadius: "50%", background: "linear-gradient(135deg,#1B5FE8,#3B3A8A)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, fontSize: "1rem" }}>✓</div>
                     <div>
@@ -10050,7 +10087,7 @@ export default function App() {
                   hasChecklist={pkg.hasChecklist}
                   hasBudget={pkg.hasBudget}
                   hasLMFT={pkg.hasLMFT}
-                  onNavigateTool={setView}
+                  onNavigateTool={(tool) => { if (tool === 'lmft-upsell') { setUpsellModal({ product: 'lmft', cartAdded: false }); } else { setView(tool); } }}
                   initialSection={activeResult !== "overview" ? activeResult : undefined}
                 />
               </div>
@@ -10124,7 +10161,17 @@ export default function App() {
         product={upsellModal.product}
         cartAdded={upsellModal.cartAdded}
         onAddToCart={(product, variant) => setUpsellModal({ product, variant, cartAdded: true })}
-        onCheckout={() => { setUpsellModal(null); window.location.href = "/offerings#pkg-" + (UPSELL_PRODUCTS[upsellModal.product]?.cartParam || "core"); }}
+        onCheckout={() => {
+          const prod = upsellModal.product;
+          setUpsellModal(null);
+          if (prod === 'lmft') {
+            // LMFT is an add-on purchasable on any package — go to checkout with current pkg + lmft
+            const currentPkg = Object.keys({ core: 1, newlywed: 1, anniversary: 1, premium: 1 }).includes(demoPkg) ? demoPkg : 'core';
+            window.location.href = `/checkout?pkg=${currentPkg}&addon_lmft=1`;
+          } else {
+            window.location.href = "/offerings#pkg-" + (UPSELL_PRODUCTS[prod]?.cartParam || "core");
+          }
+        }}
         onClose={() => setUpsellModal(null)}
       />
     )}
@@ -10223,7 +10270,7 @@ export default function App() {
               // Send partner invite if email newly added
               const prevEmail = account?.partnerEmail || '';
               if (partnerEmail && partnerEmail !== prevEmail && account?.inviteCode) {
-                const inviteUrl = `${window.location.origin}/app?invite=${encodeURIComponent(account.inviteCode)}&from=${encodeURIComponent(name || '')}`;
+                const inviteUrl = `${window.location.origin}/app?invite=${encodeURIComponent(account.inviteCode)}&from=${encodeURIComponent(name || '')}${account?.email ? `&pae=${encodeURIComponent(account.email)}` : ''}`;
                 fetch('/api/send-email', {
                   method: 'POST',
                   headers: { 'Content-Type': 'application/json' },

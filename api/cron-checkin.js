@@ -85,7 +85,7 @@ export default async function handler(req) {
     const ok = await sendEmail(
       user.email,
       `How are you and ${user.partner_name || 'your partner'} doing?`,
-      checkinHtml({ toName: user.name || 'there', partnerName: user.partner_name || 'your partner', months: 6, hasReflection: hasRefl, retakeUrl: 'https://attune-relationships.com/app' })
+      checkinHtml({ toName: user.name || 'there', partnerName: user.partner_name || 'your partner', months: 6, hasReflection: hasRefl, retakeUrl: 'https://attune-relationships.com/app?signin=1' })
     );
     if (ok) { await markSent(user.id, 'checkin_sent_at'); sent6mo++; }
     else { console.error('[cron-checkin] 6mo email failed:', user.email); failed++; }
@@ -99,7 +99,7 @@ export default async function handler(req) {
     const ok = await sendEmail(
       user.email,
       `A year with ${user.partner_name || 'your partner'} — how things look now`,
-      checkinHtml({ toName: user.name || 'there', partnerName: user.partner_name || 'your partner', months: 12, hasReflection: hasRefl, retakeUrl: 'https://attune-relationships.com/app' })
+      checkinHtml({ toName: user.name || 'there', partnerName: user.partner_name || 'your partner', months: 12, hasReflection: hasRefl, retakeUrl: 'https://attune-relationships.com/app?signin=1' })
     );
     if (ok) { await markSent(user.id, 'checkin_1yr_sent_at'); sent1yr++; }
     else { console.error('[cron-checkin] 1yr email failed:', user.email); failed++; }
