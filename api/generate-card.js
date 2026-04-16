@@ -58,9 +58,13 @@ export default async function handler(req) {
   const note = sanitize(p.get('note') || '', 500);
   const from = sanitize(p.get('from'), 80);
 
-  // Build card URL params
-  const cardParams = new URLSearchParams({ pkg, p1, version });
-  if (p2) cardParams.set('p2', p2);
+  // Build card URL params — qr-card-v5.html reads 'names' and 'token'
+  const namesStr = p2 ? `${p1} & ${p2}` : p1;
+  // QR code links to the app (gift flow if applicable)
+  const appUrl = version.startsWith('gift')
+    ? `${baseUrl}/app?gift=1&p1=${encodeURIComponent(p1)}&p2=${encodeURIComponent(p2 || '')}&order=${encodeURIComponent(orderId)}`
+    : baseUrl;
+  const cardParams = new URLSearchParams({ pkg, names: namesStr, token: appUrl, version });
   if (note) cardParams.set('note', note);
   if (from) cardParams.set('from', from);
   if (orderId) cardParams.set('orderId', orderId);
