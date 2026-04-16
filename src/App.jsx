@@ -9324,28 +9324,54 @@ export default function App() {
 
                 {/* ── COUPLE PORTRAIT ── */}
                 {isLoggedIn && (
-                  <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: "0.75rem", marginBottom: "2rem" }}>
-                    {/* Portrait frame — top left */}
-                    <div style={{ background: "white", border: "1.5px dashed #C8B8A8", borderRadius: 16, padding: "1.75rem 1.5rem", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: "1rem", minHeight: 160 }}>
-                      {/* Empty frame SVG */}
-                      <div style={{ width: 80, height: 80, borderRadius: "50%", border: "2px dashed #C8B8A8", background: "#FAF7F4", display: "flex", alignItems: "center", justifyContent: "center", position: "relative" }}>
-                        <div style={{ width: 48, height: 48, borderRadius: "50%", border: "1.5px dashed #DDD5CC", background: "#F5F0EC" }} />
-                        <div style={{ position: "absolute", bottom: -4, right: -4, width: 28, height: 28, borderRadius: "50%", border: "1.5px dashed #DDD5CC", background: "#FAF7F4" }} />
-                      </div>
-                      <div style={{ textAlign: "center" }}>
-                        <div style={{ fontSize: "0.82rem", fontWeight: 700, color: "#0E0B07", marginBottom: "0.3rem", fontFamily: "'DM Sans', sans-serif" }}>Set up your couple portrait</div>
-                        <div style={{ fontSize: "0.72rem", color: "#8C7A68", lineHeight: 1.5, marginBottom: "0.85rem", fontFamily: "'DM Sans', sans-serif" }}>A shared illustration that represents you two.</div>
-                        <button
-                          style={{ background: "#F5F0EC", border: "1.5px solid #DDD5CC", borderRadius: 9, padding: "0.45rem 1.1rem", fontSize: "0.72rem", fontWeight: 600, color: "#8C7A68", cursor: "not-allowed", fontFamily: "'DM Sans', sans-serif", letterSpacing: "0.02em" }}
-                          disabled
-                          title="Coming soon"
-                        >
-                          Coming soon
-                        </button>
-                      </div>
+                  <div style={{ marginBottom: "2rem" }}>
+                    <div
+                      onClick={() => setShowPortraitSetup(true)}
+                      style={{ background: couplePortrait ? "white" : "linear-gradient(135deg, #FDF8F4 0%, #F5EEE8 100%)", border: couplePortrait ? `1.5px solid ${C.stone}` : "2px dashed #C8B8A8", borderRadius: 20, padding: "2.5rem 2rem", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: "1.25rem", minHeight: 220, cursor: "pointer", transition: "box-shadow .15s, border-color .15s", position: "relative", overflow: "hidden" }}
+                      onMouseEnter={e => { e.currentTarget.style.boxShadow = "0 6px 28px rgba(0,0,0,.08)"; e.currentTarget.style.borderColor = couplePortrait ? "#C8B8A8" : "#B09080"; }}
+                      onMouseLeave={e => { e.currentTarget.style.boxShadow = "none"; e.currentTarget.style.borderColor = couplePortrait ? C.stone : "#C8B8A8"; }}
+                    >
+                      {couplePortrait ? (
+                        <>
+                          {/* Rendered portrait */}
+                          <div style={{ display: "flex", alignItems: "center", gap: "1.5rem" }}>
+                            <div style={{ position: "relative" }}>
+                              {mkCouple(couplePortrait.p1, couplePortrait.p2, false, "dash-portrait")}
+                            </div>
+                            <div style={{ textAlign: "left" }}>
+                              <div style={{ fontSize: "1.15rem", fontWeight: 700, color: C.ink, fontFamily: "'Playfair Display', Georgia, serif", lineHeight: 1.2, marginBottom: 4 }}>
+                                {userName}{partnerName ? ` & ${partnerName}` : ""}
+                              </div>
+                              {coupleType && (
+                                <div style={{ fontSize: "0.78rem", color: coupleType.color || C.clay, fontWeight: 600, fontFamily: font.body }}>{coupleType.name}</div>
+                              )}
+                            </div>
+                          </div>
+                          <div style={{ fontSize: "0.68rem", color: C.muted, fontFamily: font.body, letterSpacing: "0.06em", textTransform: "uppercase" }}>Tap to update portrait</div>
+                        </>
+                      ) : (
+                        <>
+                          {/* Empty frame — two overlapping circles */}
+                          <div style={{ position: "relative", width: 120, height: 80 }}>
+                            <div style={{ position: "absolute", left: 0, top: 0, width: 80, height: 80, borderRadius: "50%", border: "2.5px dashed #C8B8A8", background: "#FAF7F4", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#C8B8A8" strokeWidth="1.5" strokeLinecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7"/></svg>
+                            </div>
+                            <div style={{ position: "absolute", right: 0, top: 0, width: 80, height: 80, borderRadius: "50%", border: "2.5px dashed #C8B8A8", background: "#F5F0EC", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#C8B8A8" strokeWidth="1.5" strokeLinecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7"/></svg>
+                            </div>
+                          </div>
+                          <div style={{ textAlign: "center" }}>
+                            <div style={{ fontSize: "0.95rem", fontWeight: 700, color: C.ink, fontFamily: "'Playfair Display', Georgia, serif", marginBottom: 6 }}>Create your couple portrait</div>
+                            <div style={{ fontSize: "0.78rem", color: C.muted, fontFamily: font.body, lineHeight: 1.6, maxWidth: 280 }}>Add a photo or illustration for each partner. Shows up across your results and shareable cards.</div>
+                          </div>
+                          <button
+                            onClick={e => { e.stopPropagation(); setShowPortraitSetup(true); }}
+                            style={{ background: C.ink, color: "white", border: "none", borderRadius: 10, padding: "0.6rem 1.5rem", fontSize: "0.78rem", fontWeight: 700, cursor: "pointer", fontFamily: font.body, letterSpacing: "0.02em" }}>
+                            Add portrait
+                          </button>
+                        </>
+                      )}
                     </div>
-                    {/* Placeholder second cell — empty on mobile, hidden on mobile to keep layout clean */}
-                    {!isMobile && <div />}
                   </div>
                 )}
 
