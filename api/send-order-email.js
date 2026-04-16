@@ -26,6 +26,12 @@ export default async function handler(req) {
     return new Response('Method not allowed', { status: 405 });
   }
 
+  // Origin guard
+  const origin = req.headers.get('origin') || '';
+  if (origin && !origin.includes('attune-relationships.com') && !origin.includes('localhost') && !origin.includes('vercel.app')) {
+    return new Response('Forbidden', { status: 403 });
+  }
+
   let body;
   try { body = await req.json(); }
   catch { return new Response('Invalid JSON', { status: 400 }); }

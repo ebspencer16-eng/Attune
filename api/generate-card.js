@@ -59,6 +59,7 @@ export default async function handler(req) {
   const from = sanitize(p.get('from'), 80);
 
   // Build card URL params — qr-card-v5.html reads 'names' and 'token'
+  const baseUrl = process.env.SITE_URL || 'https://attune-relationships.com';
   const namesStr = p2 ? `${p1} & ${p2}` : p1;
   // QR code links to the app (gift flow if applicable)
   const appUrl = version.startsWith('gift')
@@ -69,7 +70,6 @@ export default async function handler(req) {
   if (from) cardParams.set('from', from);
   if (orderId) cardParams.set('orderId', orderId);
 
-  const baseUrl = process.env.SITE_URL || 'https://attune-relationships.com';
   const cardUrl = `${baseUrl}/qr-card-v5?${cardParams.toString()}`;
 
   // Production PDF generation — if a PDF render service is configured

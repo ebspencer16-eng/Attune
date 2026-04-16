@@ -335,6 +335,12 @@ function checkin1yrEmail({ toName, partnerName, retakeUrl, portalUrl }) {
 export default async function handler(req) {
   if (req.method !== 'POST') return new Response('Method not allowed', { status: 405 });
 
+  // Basic origin guard — only accept requests from our own domain or internal (no origin = server-to-server)
+  const origin = req.headers.get('origin') || '';
+  if (origin && !origin.includes('attune-relationships.com') && !origin.includes('localhost') && !origin.includes('vercel.app')) {
+    return new Response('Forbidden', { status: 403 });
+  }
+
   let body;
   try { body = await req.json(); }
   catch { return new Response('Invalid JSON', { status: 400 }); }
