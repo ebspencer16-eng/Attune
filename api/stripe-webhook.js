@@ -171,7 +171,7 @@ export default async function handler(req) {
         const orderId = encodeURIComponent(meta.orderNum || intent.id);
         const isGift = meta.isGift === '1';
         const version = isGift ? (meta.giftNote ? 'gift_printed' : 'gift_blank') : 'standard';
-        const cardUrl = `${baseUrl}/qr-card-v4?pkg=${pkg}&p1=${p1}&p2=${p2}&orderId=${orderId}&version=${encodeURIComponent(version)}`;
+        const cardUrl = `${baseUrl}/qr-card-v5?pkg=${pkg}&p1=${p1}&p2=${p2}&orderId=${orderId}&version=${encodeURIComponent(version)}`;
         // Store card URL in order record for admin fulfillment
         const supabaseUrl = process.env.SUPABASE_URL;
         const serviceKey = process.env.SUPABASE_SERVICE_KEY;

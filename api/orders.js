@@ -50,6 +50,8 @@ export default async function handler(req) {
           total:            order.total,
           addon_workbook:   order.addonWorkbook || null,
           addon_lmft:       order.addonLmft || false,
+          addon_reflection: order.addonReflection || false,
+          addon_budget:     order.addonBudget || false,
           gift_note:        order.giftNote || null,
           workbook_status:  'pending',
           card_status:      'pending',

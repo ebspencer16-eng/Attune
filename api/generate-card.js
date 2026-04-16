@@ -14,7 +14,7 @@
  *   from      — gift sender name (optional)
  *
  * Response:
- *   In preview mode (no PDF_SERVICE_URL env var): redirects to /qr-card-v4 with params
+ *   In preview mode (no PDF_SERVICE_URL env var): redirects to /qr-card-v5 with params
  *   In production (PDF_SERVICE_URL set): proxies the PDF from the configured renderer
  *
  * Security:
@@ -66,7 +66,7 @@ export default async function handler(req) {
   if (orderId) cardParams.set('orderId', orderId);
 
   const baseUrl = process.env.SITE_URL || 'https://attune-relationships.com';
-  const cardUrl = `${baseUrl}/qr-card-v4?${cardParams.toString()}`;
+  const cardUrl = `${baseUrl}/qr-card-v5?${cardParams.toString()}`;
 
   // Production PDF generation — if a PDF render service is configured
   const pdfServiceUrl = process.env.PDF_SERVICE_URL;

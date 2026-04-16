@@ -1715,6 +1715,8 @@ async function loadRealData() {
             buyerEmail: o.buyer_email || null,
             addonLmft: o.addon_lmft || false,
             addonWorkbook: o.addon_workbook || null,
+            addonReflection: o.addon_reflection || false,
+            addonBudget: o.addon_budget || false,
             giftNote: o.gift_note || null,
             coupleNames: [o.partner1_name || o.buyer_name, o.partner2_name].filter(Boolean).join(' & ') || 'Couple',
             address: [o.shipping_address, o.shipping_city, o.shipping_state].filter(Boolean).join(', ') || null,
@@ -1780,7 +1782,7 @@ async function sha256(str) {
   return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
 }
 
-async async function attemptLogin() {
+async function attemptLogin() {
   const email = document.getElementById('login-email').value.trim().toLowerCase();
   const pass  = document.getElementById('login-password').value;
   const btn   = document.getElementById('login-btn');
