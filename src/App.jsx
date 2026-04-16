@@ -8854,15 +8854,15 @@ export default function App() {
   const hasRealPartner = !!(partnerSession?.inviteCode === account?.inviteCode && partnerSession?.ex1 && partnerSession?.ex2);
   const partnerEx1 = hasRealPartner ? partnerSession.ex1 : jamesEx1;
   const partnerEx2 = hasRealPartner ? partnerSession.ex2 : jamesEx2;
-  // bothDone: local exercises complete AND partner has joined (from Supabase profile.partner_joined or real session)
+  // bothDone: local exercises complete AND partner has submitted real answers (not just joined)
   const isDemo = !!_demoParam; // true when ?demo=xxx is in URL
-  const bothDone = !!(ex1Answers && ex2Answers && (isDemo || hasRealPartner || account?.partnerJoined || partnerSession));
+  const bothDone = !!(ex1Answers && ex2Answers && (isDemo || hasRealPartner || account?.partnerJoined));
   // Package config
   const pkgConfig = {
     core:        { label: "The Attune Assessment",     color: "#E8673A", hasChecklist: false, hasAnniversary: false, hasBudget: false, hasLMFT: false },
     newlywed:    { label: "Starting Out Collection",   color: "#E8673A", hasChecklist: true,  hasAnniversary: false, hasBudget: true,  hasLMFT: false },
     anniversary: { label: "Relationship Reflection",    color: "#1B5FE8", hasChecklist: false, hasAnniversary: true,  hasBudget: false, hasLMFT: false },
-    premium:     { label: "Attune Premium",            color: "#3B5BDB", hasChecklist: false, hasAnniversary: false, hasBudget: false, hasLMFT: true  },
+    premium:     { label: "Attune Premium",            color: "#3B5BDB", hasChecklist: false, hasAnniversary: true,  hasBudget: true,  hasLMFT: true  },
   };
   // Merge add-on flags from stored order (e.g. LMFT add-on on non-premium packages)
   const _basePkg = pkgConfig[demoPkg] || pkgConfig.core;
