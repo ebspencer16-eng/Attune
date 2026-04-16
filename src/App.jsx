@@ -7782,20 +7782,36 @@ function PartnerLandingScreen({ inviteFrom, inviteCode, onCreateAccount }) {
 // PARTNER B EXERCISE FLOW — clean exercise wrapper for invited partner
 // ─────────────────────────────────────────────────────────────────────────────
 function PartnerBExerciseFlow({ account, onComplete }) {
-  const [step, setStep] = React.useState('intro'); // 'intro' | 'ex1' | 'ex2' | 'done'
+  const hasReflection = !!(account?.pkg === 'anniversary' || account?.pkg === 'premium' || account?.addonReflection);
+  const [step, setStep] = React.useState('intro'); // 'intro' | 'ex1' | 'ex2' | 'ex3' | 'done'
   const [ex1, setEx1] = React.useState(null);
+  const [ex2, setEx2] = React.useState(null);
 
   const handleEx1Done = (answers) => {
     setEx1(answers);
     setStep('ex2');
   };
 
-  const handleEx2Done = async (answers) => {
+  const handleEx2Done = (answers) => {
+    setEx2(answers);
+    if (hasReflection) {
+      setStep('ex3');
+    } else {
+      submitSession(ex1, answers, null);
+    }
+  };
+
+  const handleEx3Done = (answers) => {
+    submitSession(ex1, ex2, answers);
+  };
+
+  const submitSession = async (ex1Answers, ex2Answers, ex3Answers) => {
     const session = {
       inviteCode: account.inviteCode,
       name: account.name,
-      ex1: ex1,
-      ex2: answers,
+      ex1: ex1Answers,
+      ex2: ex2Answers,
+      ...(ex3Answers ? { ex3: ex3Answers } : {}),
       completedAt: Date.now(),
     };
     try { localStorage.setItem('attune_partner_session', JSON.stringify(session)); } catch {}
@@ -7809,8 +7825,9 @@ function PartnerBExerciseFlow({ account, onComplete }) {
           inviteCode:    account.inviteCode,
           partnerBId:    account.id || null,
           partnerBName:  account.name,
-          ex1Answers:    ex1,
-          ex2Answers:    answers,
+          ex1Answers:    ex1Answers,
+          ex2Answers:    ex2Answers,
+          ...(ex3Answers ? { ex3Answers } : {}),
         }),
       });
     } catch (e) {
@@ -7880,6 +7897,14 @@ function PartnerBExerciseFlow({ account, onComplete }) {
           <span style={{ fontSize: '0.68rem', color: C.muted, fontFamily: "'DM Sans', sans-serif", marginLeft: '0.5rem' }}>· Exercise 02 of 02</span>
         </div>
         <ExpectationsExercise userName={account.name} partnerName={account.partnerName} onComplete={handleEx2Done} />
+      </div>
+    </div>
+  );
+
+  if (step === 'ex3') return (
+    <div>
+      <div>
+        <AnniversaryExercise userName={account.name} partnerName={account.partnerName} onComplete={handleEx3Done} onBack={() => setStep('ex2')} />
       </div>
     </div>
   );
@@ -8770,6 +8795,7 @@ export default function App() {
             name: json.session.partner_b_name,
             ex1: json.session.ex1_answers,
             ex2: json.session.ex2_answers,
+            ...(json.session.ex3_answers ? { ex3: json.session.ex3_answers } : {}),
             completedAt: json.session.completed_at,
           };
           if (!cancelled) savePartnerSession(s);
