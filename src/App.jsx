@@ -576,19 +576,19 @@ function deriveNewCoupleType(myS, partS) {
 
 // Individual type metadata
 const INDIVIDUAL_TYPES = {
-  W: { code: "W", name: "The Reacher", color: "#E8673A", fill: "#FFF4F0", axis1: "Engage", axis2: "Open",
+  W: { code: "W", name: "The Initiator", color: "#E8673A", fill: "#FFF4F0", axis1: "Engage", axis2: "Open",
        desc: "Moves toward resolution. Processes and expresses relatively freely.",
        wired: "You move toward connection when things need addressing — you don't wait for an opening, you create one. You process outward, which means the people close to you usually know where you stand without having to ask. This makes you easy to know, and relatively easy to be in productive conflict with.",
        typeDesc: "You engage quickly and express freely — which means the people close to you usually know where they stand, and they know where you stand too. You don't make them guess. Under pressure, you tend to reach toward the relationship rather than away from it, which can be genuinely stabilizing. The thing to stay aware of: your speed to engage can feel like a lot when someone else needs more time to get there." },
-  X: { code: "X", name: "The Anchor", color: "#1B5FE8", fill: "#EFF1FF", axis1: "Engage", axis2: "Guarded",
+  X: { code: "X", name: "The Problem Solver", color: "#1B5FE8", fill: "#EFF1FF", axis1: "Engage", axis2: "Guarded",
        desc: "Pushes toward resolution. Processes internally, shares selectively.",
        wired: "You move toward resolution rather than away from it — when something needs addressing, you don't avoid the conversation. You process before you speak, which means your perspective is usually considered by the time it comes out. This makes you direct and deliberate, but sometimes harder to read in the middle of something.",
        typeDesc: "You engage with problems directly but process privately before speaking — which means you tend to arrive at conversations with something considered to say. You don't react out loud. Under pressure, you want resolution, but you need your own thinking to be in order first. The thing to stay aware of: your internal processing can look like distance to someone who expresses more freely." },
-  Y: { code: "Y", name: "The Feeler", color: "#7C3AED", fill: "#F5F0FF", axis1: "Withdraw", axis2: "Open",
+  Y: { code: "Y", name: "The Space Seeker", color: "#7C3AED", fill: "#F5F0FF", axis1: "Withdraw", axis2: "Open",
        desc: "Needs space first. Carries and expresses feeling when ready.",
        wired: "You need space to process before you can fully show up to a hard conversation — this isn't avoidance, it's how you get to something honest. You're emotionally expressive when you're ready, and the people close to you get real feeling when it comes. What you bring most is depth: you don't stay on the surface.",
        typeDesc: "You process before you can share — not because you're holding back, but because you need the space to understand what's actually true for you before you can say it. You're emotionally present and expressive when you get there. Under pressure, you need time, and pushing you before you're ready usually produces something incomplete. The thing to stay aware of: your withdrawal before sharing can read as avoidance to someone who engages more quickly." },
-  Z: { code: "Z", name: "The Protector", color: "#6B7280", fill: "#F4F5F6", axis1: "Withdraw", axis2: "Guarded",
+  Z: { code: "Z", name: "The Holder", color: "#6B7280", fill: "#F4F5F6", axis1: "Withdraw", axis2: "Guarded",
        desc: "Withdraws and holds things close. Real depth and feeling running quiet beneath the surface.",
        wired: "You process privately and share selectively — there's usually more going on internally than what's visible from the outside. When you do speak, it carries weight precisely because you don't offer it carelessly. What you bring is steadiness: you don't react quickly, which means you don't create unnecessary chaos.",
        typeDesc: "You carry things privately and surface them selectively — which means there's usually more going on internally than what's visible. You don't perform your inner life, and you don't dump it on the people around you. Under pressure, you go quiet and go deep. The thing to stay aware of: the people who love you most sometimes struggle to know what you're carrying, which can make them feel shut out without you intending it." },
@@ -662,7 +662,7 @@ const NEW_COUPLE_TYPES = [
   // ── Same-type pairings ──────────────────────────────────────────────────────
   {
     id: "WW", typeA: "W", typeB: "W",
-    name: "The Open Fire",
+    name: "The ignition",
     tagline: "Both reach. Both express. Neither has to go looking for the other.",
     description: "{U} and {P} both move toward resolution and process outward. High warmth and emotional availability in both directions. Neither partner has to coax the other into the conversation or wait for the signal that it's okay to share what's going on.",
     nuance: "The risk isn't disconnection. It's feedback loops. When both of you are feeling something strongly, the intensity can amplify rather than settle. One of you naming that — 'I think we're feeding each other right now' — is usually enough to break the loop.",
@@ -694,7 +694,7 @@ const NEW_COUPLE_TYPES = [
   },
   {
     id: "XX", typeA: "X", typeB: "X",
-    name: "The Two Drivers",
+    name: "The collaboration",
     tagline: "Both want resolution. Both process it privately. The machinery works.",
     description: "{U} and {P} both move toward resolving things and both handle the feeling internally before it comes out. Decisions get made. Disagreements get worked through. The practical machinery of the relationship runs efficiently — and quietly.",
     nuance: "Efficient repair can mean closing the loop before it's actually through. Two people who both move fast toward resolution can sometimes resolve the surface without fully addressing what's underneath. The same thing comes back because the real conversation happened too quickly.",
@@ -726,7 +726,7 @@ const NEW_COUPLE_TYPES = [
   },
   {
     id: "YY", typeA: "Y", typeB: "Y",
-    name: "The Quiet Storm",
+    name: "The safe space",
     tagline: "Both need space first. Both carry it visibly when withdrawn.",
     description: "When things get hard, {U} and {P} both pull back before coming forward. Neither of you is avoiding — you're both protecting the quality of the eventual conversation. When you do come back together, you both bring the full emotional weight of what you've been carrying.",
     nuance: "Two people who both need space can wait for the other to come back first for a very long time. That waiting can start to feel like abandonment even when it's just process. Build an agreed-upon signal — even something small — that means 'I'm ready when you are' without requiring a full conversation to get there.",
@@ -758,7 +758,7 @@ const NEW_COUPLE_TYPES = [
   },
   {
     id: "ZZ", typeA: "Z", typeB: "Z",
-    name: "The Still Waters",
+    name: "The depth",
     tagline: "Both withdraw. Both hold it close. Real depth running beneath a calm surface.",
     description: "{U} and {P} both go inward when things get hard and both hold their interior life privately. The relationship tends to be stable, low-drama, and genuinely deep — but the depth doesn't surface readily. There is often more going on beneath the calm than either of you shows.",
     nuance: "Important things can go unsaid for a very long time. The comfort with quiet can become avoidance without either person intending it. The relationship looks more okay from the outside than it sometimes is from the inside. Creating a deliberate structure for openness is worth more here than in most pairings.",
@@ -792,7 +792,7 @@ const NEW_COUPLE_TYPES = [
   // ── Cross-type pairings ────────────────────────────────────────────────────
   {
     id: "WX", typeA: "W", typeB: "X",
-    name: "The Common Goal",
+    name: "The jumpstart",
     tagline: "Both want resolution. Different instruments, same direction.",
     description: "{U} and {P} both move toward resolution when things get hard — you're pulling in the same direction. Where you differ is in how the internal experience travels: one processes outward, and one holds it closer. The destination is the same. The path there looks different.",
     nuance: "The expressive partner can feel like the guarded one isn't sharing what's actually going on. The guarded partner can feel like too much is being put into the shared space before it's ready. Neither is wrong. The registers are just different.",
@@ -824,7 +824,7 @@ const NEW_COUPLE_TYPES = [
   },
   {
     id: "WY", typeA: "W", typeB: "Y",
-    name: "The Counterpart",
+    name: "The orbit",
     tagline: "You have different conflict clocks. One is ready before the other — and naming that changes everything.",
     description: "When things get hard, {U} moves toward resolution and {P} pulls back — or vice versa, depending on your individual types. The reaching can feel like pressure. The withdrawal can feel like abandonment. Neither is true — you're just wired differently for when the conversation becomes possible.",
     nuance: "This is one of the most common and most solvable friction patterns in relationships. The solution isn't changing your instinct — it's naming it out loud before the hard moment arrives. A simple agreement — 'I need a few hours, let's talk at 9' — short-circuits the loop that otherwise runs on its own.",
@@ -856,7 +856,7 @@ const NEW_COUPLE_TYPES = [
   },
   {
     id: "WZ", typeA: "W", typeB: "Z",
-    name: "The Reach & The Reserve",
+    name: "The opening",
     tagline: "One reaches. One holds. The gap between those instincts is the conversation.",
     description: "One of {U} and {P} reaches toward resolution and expresses things openly; the other pulls back and holds things privately. The gap exists on both axes simultaneously — different conflict timing and different expressiveness — which means there's more translation work here than in most pairings.",
     nuance: "The reaching partner often doesn't know what the reserved partner is feeling until long after the fact, which can feel like withholding. The reserved partner often feels pressure to perform an emotional openness they don't naturally have. Naming this as a difference — not a deficiency — is the most useful thing {U} and {P} can do.",
@@ -888,7 +888,7 @@ const NEW_COUPLE_TYPES = [
   },
   {
     id: "XY", typeA: "X", typeB: "Y",
-    name: "The Long Game",
+    name: "The translators",
     tagline: "Strong instincts on both sides, pointed differently. Moving forward together takes understanding and intention.",
     description: "{U} pushes toward resolution while processing internally; {P} needs space before the conversation is possible, and carries visible feeling in the meantime. They can read each other as simultaneously too much and not enough — the driving toward resolution can close off the space, and the visible feeling during withdrawal can look like something that needs fixing right now.",
     nuance: "The driver's urgency toward resolution can feel like pressure to the feeler, who isn't ready yet. The feeler's emotional visibility during withdrawal can feel like an invitation to engage, when it's actually a signal to wait. Both readings are understandable. Both are wrong.",
@@ -920,7 +920,7 @@ const NEW_COUPLE_TYPES = [
   },
   {
     id: "XZ", typeA: "X", typeB: "Z",
-    name: "The Deliberate Pair",
+    name: "The stethoscope",
     tagline: "You both work things out privately before anything surfaces. The relationship runs quietly — and real depth lives beneath that.",
     description: "{U} and {P} both hold things privately and both process what's going on before it comes out — if it comes out at all. The dynamic is low-temperature and rarely explosive. The practical machinery of the relationship runs smoothly. The emotional layer tends to stay quiet.",
     nuance: "Neither partner is offering a lot of emotional visibility to the other. The relationship can run on logic, shared purpose, and good-enough communication while the emotional texture goes largely unaddressed. That gap tends to show up during life transitions, when something that's been running quietly needs to be named.",
@@ -952,7 +952,7 @@ const NEW_COUPLE_TYPES = [
   },
   {
     id: "YZ", typeA: "Y", typeB: "Z",
-    name: "The Current & The Shore",
+    name: "The sanctuary",
     tagline: "You both need space when things get hard. The difference is how much it shows — and that gap is worth understanding.",
     description: "When things get hard, {U} and {P} both pull back — but one of you carries the emotional weight visibly while withdrawn, and the other holds everything privately. The return is slow for both. Hard moments can sit for a long time before either of you surfaces them.",
     nuance: "Real depth runs in this pairing — often more than either partner shows. The risk is that the depth never surfaces because neither person naturally initiates the opening. The feeler, when ready, tends to be more willing to bring it back. Making that the agreed pattern gives the still-depth partner the full space they need without indefinite silence.",
@@ -1016,7 +1016,7 @@ function CoupleMapSVG({ myS, partS, userName, partnerName, size = 480 }) {
     Z: ["#E8E6E3", "#DEDAD5"],
   };
   const QC = { W: "#E8673A", X: "#1B5FE8", Y: "#7C3AED", Z: "#6B7280" };
-  const QN = { W: "The Reacher", X: "The Anchor", Y: "The Feeler", Z: "The Protector" };
+  const QN = { W: "The Initiator", X: "The Problem Solver", Y: "The Space Seeker", Z: "The Holder" };
 
   // Name tag pill dimensions
   const tagH = 22, tagR = 11, tagPad = 10;
@@ -1455,7 +1455,6 @@ function ProfileSetupTile({ account, onSetup, onDismiss }) {
     { label: "Set your name & pronouns", done: !!(account?.name && account?.pronouns) },
     { label: "Add your partner's name", done: !!(account?.partnerName) },
     { label: account?.partnerEmail ? "Partner invited \u2713" : "Invite your partner", done: !!(account?.partnerEmail) },
-    { label: "Couple portrait", done: false, comingSoon: true },
   ];
   const doneCount = steps.filter(s => s.done).length;
 
@@ -3441,14 +3440,14 @@ function ExpectationsResults({ myAnswers, partnerAnswers, userName, partnerName,
   const coupleTypeName = expNewType?.name || null;
   const coupleTypeColor = expNewType?.color || "#E8673A";
   const EXP_COUPLE_CONTEXT = {
-    WW: "Two Reachers both lean toward open expression. When expectations differ, you'll likely name it — the work is making sure you've actually heard each other before resolving.",
-    XX: "Two Drivers tend to move through disagreement efficiently. Watch that practical resolution doesn't skip the emotional weight of what's actually at stake.",
-    YY: "Two Feelers both carry feeling deeply. When an expectation gap lands hard, give each other the space before the conversation — it'll go better for it.",
-    ZZ: "Two Protectors may let things sit. Build a deliberate practice of raising misaligned expectations before they calcify into resentment.",
+    WW: "Two Initiators both lean toward open expression. When expectations differ, you'll likely name it — the work is making sure you've actually heard each other before resolving.",
+    XX: "The collaboration tend to move through disagreement efficiently. Watch that practical resolution doesn't skip the emotional weight of what's actually at stake.",
+    YY: "Two Space Seekers both carry feeling deeply. When an expectation gap lands hard, give each other the space before the conversation — it'll go better for it.",
+    ZZ: "Two Holders may let things sit. Build a deliberate practice of raising misaligned expectations before they calcify into resentment.",
     WX: "One of you will surface expectation gaps readily; the other processes first. The one who brings it up isn't necessarily the one who cares more.",
     WY: "Different conflict clocks apply here too. The one who names the expectation gap first isn't pushing — they're ready. The other will need a moment before the conversation is possible.",
-    WZ: "The Reacher will name gaps; The Protector will need time to respond. That asymmetry is wiring, not avoidance — name that explicitly.",
-    XY: "The Anchor wants to resolve quickly; The Feeler needs space to process. Neither is wrong. Build a return window into any expectation conversation.",
+    WZ: "The Initiator will name gaps; The Holder will need time to respond. That asymmetry is wiring, not avoidance — name that explicitly.",
+    XY: "The Problem Solver wants to resolve quickly; The Space Seeker needs space to process. Neither is wrong. Build a return window into any expectation conversation.",
     XZ: "Both of you hold things close. Expectation gaps that go unnamed can accumulate quietly — schedule the conversation, don't wait for it to happen organically.",
     YZ: "Both withdraw under pressure. When an expectation surfaces, one of you will need to come back first — let that be the agreed pattern.",
   };
@@ -5732,9 +5731,9 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
                 W: strongEngage
                   ? `${name} engages quickly and with full momentum — when something is unresolved, they feel it and move toward it without hesitation.`
                   : nearEngageCenter
-                  ? `${name} leans toward resolution but has a slightly longer runway than a typical Reacher — there's a beat of processing before they engage fully.`
+                  ? `${name} leans toward resolution but has a slightly longer runway than a typical Initiator — there's a beat of processing before they engage fully.`
                   : nearOpenCenter
-                  ? `${name} engages readily but holds their inner experience a little closer than a typical Reacher — they show up for the conversation; they just don't put every feeling into the shared space immediately.`
+                  ? `${name} engages readily but holds their inner experience a little closer than a typical Initiator — they show up for the conversation; they just don't put every feeling into the shared space immediately.`
                   : `${name} moves toward resolution and expresses openly, with enough self-awareness to calibrate what they're sharing and when.`,
                 X: strongEngage
                   ? `${name} pushes hard toward resolution — once they've processed internally, they don't sit on it. The urgency toward resolution is real; it's just preceded by a private preparation phase.`
@@ -5746,16 +5745,16 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
                 Y: strongWithdraw
                   ? `${name} needs significant space before they can show up to a hard conversation — not avoidance, just a longer processing runway. What they eventually bring is emotionally complete and worth the wait.`
                   : nearEngageCenter
-                  ? `${name} needs space first, but it's a shorter runway than many Feelers — they come back relatively quickly once they've landed somewhere.`
+                  ? `${name} needs space first, but it's a shorter runway than many Space Seekers — they come back relatively quickly once they've landed somewhere.`
                   : nearOpenCenter
                   ? `${name} processes inward and holds what's going on privately until ready — emotionally expressive when they arrive, but the arrival takes both time and internal settling.`
                   : `${name} needs space to process before engaging, carries emotional weight visibly in the interim, and returns when ready with something real.`,
                 Z: strongWithdraw
                   ? `${name} has the longest runway in the room — they process privately and need substantial space before anything surfaces. What comes out is considered and real; it just requires time and no pressure.`
                   : nearEngageCenter
-                  ? `${name} processes privately but has a slightly stronger pull toward resolution than a typical Protector — they'll surface what's going on, they just need space and no pressure.`
+                  ? `${name} processes privately but has a slightly stronger pull toward resolution than a typical Holder — they'll surface what's going on, they just need space and no pressure.`
                   : nearOpenCenter
-                  ? `${name} holds things privately but is slightly more emotionally accessible than a typical Protector — more going on internally than most Protectors show.`
+                  ? `${name} holds things privately but is slightly more emotionally accessible than a typical Holder — more going on internally than most Protectors show.`
                   : `${name} holds things close and processes privately, with a baseline steadiness and a comfortable relationship with quiet.`,
               };
               return blurbs[typeCode] || "";
@@ -6941,7 +6940,7 @@ function ResultsHighlights({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3
           </div>
           {/* Type name — clamped so it always fits */}
           <div style={{ fontFamily: HFONT, fontSize: "clamp(2rem,8vw,3rem)", fontWeight: 700, color: "white", lineHeight: 1.0, letterSpacing: "-0.02em", marginBottom: "0.75rem", wordBreak: "break-word", animation: "fadeUp 0.5s 0.12s cubic-bezier(0.22,1,0.36,1) both" }}>
-            {coupleType?.name || "The Counterpart"}
+            {coupleType?.name || "The orbit"}
           </div>
           {/* Tagline */}
           <p style={{ fontSize: "0.92rem", color: "rgba(255,255,255,0.85)", fontFamily: BFONT, fontWeight: 500, lineHeight: 1.45, margin: "0 0 1.25rem", fontStyle: "italic", animation: "fadeUp 0.4s 0.2s both" }}>
@@ -8614,7 +8613,8 @@ export default function App() {
   // In demo mode for anniversary/premium packages, pre-populate ex3 so the full
   // reflection experience (8-card highlights + reflection results sections) is visible.
   // Users can still retake the exercise from the exercise tile.
-  const sarahEx3Demo = isDemo && (_basePkg.hasAnniversary) ? SARAH_ANNIVERSARY_DEMO : null;
+  // Fix: use _demoParam and demoPkg directly (available here) instead of isDemo/_basePkg (defined later)
+  const sarahEx3Demo = _demoParam && (demoPkg === 'anniversary' || demoPkg === 'premium') ? SARAH_ANNIVERSARY_DEMO : null;
   const [ex1Answers, setEx1State] = useState(sarahEx1Demo);
   const [ex2Answers, setEx2State] = useState(sarahEx2Demo);
   const [ex3Answers, setEx3State] = useState(sarahEx3Demo); // Anniversary exercise
@@ -9231,6 +9231,33 @@ export default function App() {
                         See results
                       </button>
                     </div>
+                  </div>
+                )}
+
+                {/* ── COUPLE PORTRAIT ── */}
+                {isLoggedIn && (
+                  <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: "0.75rem", marginBottom: "2rem" }}>
+                    {/* Portrait frame — top left */}
+                    <div style={{ background: "white", border: "1.5px dashed #C8B8A8", borderRadius: 16, padding: "1.75rem 1.5rem", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: "1rem", minHeight: 160 }}>
+                      {/* Empty frame SVG */}
+                      <div style={{ width: 80, height: 80, borderRadius: "50%", border: "2px dashed #C8B8A8", background: "#FAF7F4", display: "flex", alignItems: "center", justifyContent: "center", position: "relative" }}>
+                        <div style={{ width: 48, height: 48, borderRadius: "50%", border: "1.5px dashed #DDD5CC", background: "#F5F0EC" }} />
+                        <div style={{ position: "absolute", bottom: -4, right: -4, width: 28, height: 28, borderRadius: "50%", border: "1.5px dashed #DDD5CC", background: "#FAF7F4" }} />
+                      </div>
+                      <div style={{ textAlign: "center" }}>
+                        <div style={{ fontSize: "0.82rem", fontWeight: 700, color: "#0E0B07", marginBottom: "0.3rem", fontFamily: "'DM Sans', sans-serif" }}>Set up your couple portrait</div>
+                        <div style={{ fontSize: "0.72rem", color: "#8C7A68", lineHeight: 1.5, marginBottom: "0.85rem", fontFamily: "'DM Sans', sans-serif" }}>A shared illustration that represents you two.</div>
+                        <button
+                          style={{ background: "#F5F0EC", border: "1.5px solid #DDD5CC", borderRadius: 9, padding: "0.45rem 1.1rem", fontSize: "0.72rem", fontWeight: 600, color: "#8C7A68", cursor: "not-allowed", fontFamily: "'DM Sans', sans-serif", letterSpacing: "0.02em" }}
+                          disabled
+                          title="Coming soon"
+                        >
+                          Coming soon
+                        </button>
+                      </div>
+                    </div>
+                    {/* Placeholder second cell — empty on mobile, hidden on mobile to keep layout clean */}
+                    {!isMobile && <div />}
                   </div>
                 )}
 

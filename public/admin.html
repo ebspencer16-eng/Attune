@@ -1525,43 +1525,43 @@ function generateOrders() {
 
   // Couple types with representative score profiles for each partner
   const COUPLE_TYPES = [
-    { id:'WW', name:'Open Fire',       color:'#E8673A',
+    { id:'WW', name:'The ignition',       color:'#E8673A',
       tagline:'When you both run hot, the question is whether you can keep the temperature productive.',
       description:'{U} and {P} both engage quickly and express freely. The warmth between you is real and visible.',
       nuance:'The most common trap for this pairing is saying too much before either of you is regulated.',
       scoresA:{ energy:2.5, expression:4.2, closeness:4.1, values:2.8, love:2.2, needs:2.1, bids:4.0, conflict:1.9, stress:2.3, repair:3.8, feedback:3.9 },
       scoresB:{ energy:3.3, expression:3.7, closeness:3.5, values:3.1, love:3.3, needs:2.5, bids:3.8, conflict:2.3, stress:2.6, repair:2.3, feedback:3.3 } },
-    { id:'XX', name:'Two Drivers',     color:'#1B5FE8',
+    { id:'XX', name:'The collaboration',     color:'#1B5FE8',
       tagline:'You both want resolution. The work is making sure efficiency does not skip what needs to be felt.',
       description:'{U} and {P} both process internally and push toward resolution. The practical machinery of the relationship works.',
       nuance:'Speed can masquerade as resolution. Check in on whether things are actually closed, or just quiet.',
       scoresA:{ energy:4.0, expression:1.8, closeness:2.5, values:3.2, love:1.9, needs:1.9, bids:2.5, conflict:1.8, stress:4.1, repair:1.9, feedback:1.8 },
       scoresB:{ energy:3.3, expression:2.6, closeness:3.9, values:2.8, love:3.8, needs:2.4, bids:2.2, conflict:2.3, stress:3.4, repair:2.9, feedback:2.5 } },
-    { id:'YY', name:'The Quiet Storm', color:'#7C3AED',
+    { id:'YY', name:'The safe space', color:'#7C3AED',
       tagline:'Both of you need space before the conversation is possible. The work is who comes back first.',
       description:'{U} and {P} both need time before a hard conversation is possible. The repair between you tends to be real.',
       nuance:'If both of you need space at the same time, someone has to come back first. Build that agreement when things are calm.',
       scoresA:{ energy:3.9, expression:4.1, closeness:4.2, values:2.5, love:2.1, needs:2.0, bids:3.8, conflict:4.0, stress:4.1, repair:3.9, feedback:3.7 },
       scoresB:{ energy:2.9, expression:3.5, closeness:3.3, values:2.9, love:3.5, needs:2.4, bids:3.5, conflict:3.4, stress:3.5, repair:3.3, feedback:3.2 } },
-    { id:'ZZ', name:'Still Waters',    color:'#6B7280',
+    { id:'ZZ', name:'The depth',    color:'#6B7280',
       tagline:'Real depth runs here. The work is building structures for it to surface.',
       description:'{U} and {P} both go inward when things get hard and hold your interior life privately.',
       nuance:'The risk for this pairing is not that you do not care – it is that things you care about never get said.',
       scoresA:{ energy:2.2, expression:1.9, closeness:2.1, values:3.1, love:2.0, needs:4.1, bids:2.0, conflict:4.2, stress:2.1, repair:2.8, feedback:2.2 },
       scoresB:{ energy:3.1, expression:2.8, closeness:2.7, values:3.4, love:3.8, needs:3.3, bids:3.1, conflict:3.6, stress:2.7, repair:3.5, feedback:2.8 } },
-    { id:'WY', name:'The Counterpart',      color:'#E8673A',
+    { id:'WY', name:'The orbit',      color:'#E8673A',
       tagline:'Different conflict clocks. Knowing that changes everything.',
       description:'{U} and {P} have different instincts when tension arrives. One moves toward resolution; the other needs space first.',
       nuance:'The pursuer-withdrawer pattern is solvable. The fix is a named protocol, built when things are calm.',
       scoresA:{ energy:2.8, expression:4.0, closeness:3.9, values:2.7, love:2.1, needs:2.2, bids:4.1, conflict:1.9, stress:2.2, repair:3.7, feedback:3.8 },
       scoresB:{ energy:3.5, expression:3.6, closeness:3.2, values:3.0, love:3.4, needs:2.7, bids:3.3, conflict:3.8, stress:3.7, repair:3.5, feedback:2.9 } },
-    { id:'WX', name:'The Common Goal', color:'#10B981',
+    { id:'WX', name:'The jumpstart', color:'#10B981',
       tagline:'Both moving in the same direction. What differs is how the journey travels inside each of you.',
       description:'{U} and {P} both want resolution. Where you differ is how the internal experience travels.',
       nuance:'The risk is one person feeling unheard while the other is confused, because resolution happened on the surface but not underneath.',
       scoresA:{ energy:2.8, expression:4.0, closeness:3.9, values:2.7, love:2.1, needs:2.2, bids:4.1, conflict:1.9, stress:2.2, repair:3.7, feedback:3.8 },
       scoresB:{ energy:3.5, expression:2.2, closeness:3.2, values:3.3, love:3.5, needs:3.8, bids:3.2, conflict:2.2, stress:3.5, repair:2.4, feedback:2.3 } },
-    { id:'WZ', name:'Reach & Reserve', color:'#C17F47',
+    { id:'WZ', name:'The opening', color:'#C17F47',
       tagline:'One reaches, one reserves. The gap between those instincts is the conversation worth having.',
       description:'{U} and {P} have the widest gap in the pairing set – full mismatch on both axes.',
       nuance:'Complementary styles create strong balance when named explicitly. Without naming, they create distance.',
@@ -2186,7 +2186,7 @@ function printQRCard(orderId, pkg, coupleNames, token, giftMsg) {
     ...(token ? { token } : {}),
     ...(giftMsg ? { note: giftMsg } : {}),
   });
-  window.open(`/qr-card-v4?${params}`, '_blank', 'width=900,height=640,toolbar=0,scrollbars=1');
+  window.open(`/qr-card-v5?${params}`, '_blank', 'width=520,height=700,toolbar=0,scrollbars=1');
 }
 
 // ── Fulfillment CSV export ────────────────────────────
@@ -2282,7 +2282,7 @@ function initCharts(page) {
 
 
 // ── TYPE ANALYTICS ──────────────────────────────────────────────────────────────
-const CT_NAMES = {"WW":"The Open Fire","XX":"The Two Drivers","YY":"The Quiet Storm","ZZ":"The Still Waters","WX":"The Common Goal","WY":"The Counterpart","WZ":"The Reach & The Reserve","XY":"The Long Game","XZ":"The Deliberate Pair","YZ":"The Current & The Shore"};
+const CT_NAMES = {"WW":"The ignition","XX":"The collaboration","YY":"The safe space","ZZ":"The depth","WX":"The jumpstart","WY":"The orbit","WZ":"The opening","XY":"The translators","XZ":"The stethoscope","YZ":"The sanctuary"};
 
 async function loadTypesData(force) {
   const secret = new URLSearchParams(window.location.search).get('s') || '';

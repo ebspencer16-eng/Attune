@@ -653,7 +653,7 @@
         <div class="pkg-price">
           <div class="pkg-price-row"><span class="price-main">$89</span><span class="price-label">per couple</span></div>
           <div class="price-alt">Digital · instant access · yours to keep</div>
-          <div class="price-alt" style="margin-top:.35rem;">Physical gift box · <strong>$119</strong> · shipping included · ships in 5–7 days</div>
+          <div class="price-alt" style="margin-top:.35rem;">Physical gift box · <strong>$124</strong> · shipping included · ships in 5–7 days</div>
         </div>
       </div>
     </div>
@@ -754,7 +754,7 @@
         <div class="pkg-price">
           <div class="pkg-price-row"><span class="price-main" id="newlywed-price">$139</span><span class="price-label">per couple</span></div>
           <div class="price-alt" id="newlywed-price-sub">Digital · instant access · yours to keep</div>
-          <div class="price-alt" style="margin-top:.35rem;">Physical gift box · <strong>$169</strong> · shipping included · ships in 5–7 days</div>
+          <div class="price-alt" style="margin-top:.35rem;">Physical gift box · <strong>$174</strong> · shipping included · ships in 5–7 days</div>
         </div>
       </div>
     </div>
@@ -860,7 +860,7 @@
         <div class="pkg-price">
           <div class="pkg-price-row"><span class="price-main" id="ann-price">$139</span><span class="price-label">per couple</span></div>
           <div class="price-alt" id="ann-price-sub">Digital · instant access · yours to keep</div>
-          <div class="price-alt" style="margin-top:.35rem;">Physical gift box · <strong>$169</strong> · shipping included · ships in 5–7 days</div>
+          <div class="price-alt" style="margin-top:.35rem;">Physical gift box · <strong>$174</strong> · shipping included · ships in 5–7 days</div>
         </div>
       </div>
     </div>
@@ -964,7 +964,7 @@
         <div class="pkg-price">
           <div class="pkg-price-row"><span class="price-main" id="premium-price">$295</span><span class="price-label">per couple</span></div>
           <div class="price-alt" id="premium-price-sub">Digital · instant access · yours to keep</div>
-          <div class="price-alt" style="margin-top:.35rem;">Physical gift box · <strong>$340</strong> · shipping included · ships in 5–7 days</div>
+          <div class="price-alt" style="margin-top:.35rem;">Physical gift box · <strong>$330</strong> · shipping included · ships in 5–7 days</div>
           <div class="price-alt" style="margin-top:.25rem;font-size:.7rem;color:rgba(255,255,255,.28);">Includes LMFT session value</div>
         </div>
       </div>
@@ -1299,7 +1299,7 @@ window._sparkFeedback = function(t) {
 // ── CART SYSTEM ──────────────────────────────────────────────────────────────
 const CART_PKGS = {
   core:        { name: 'The Attune Assessment',    badge: 'The Foundation',        badgeColor: '#FFF0EB', badgeText: '#E8673A', basePrice: 74,  sub: 'Digital · instant access · yours to keep' },
-  newlywed:    { name: 'Starting Out Collection',  badge: 'Wedding Gift',          badgeColor: '#FFF0EB', badgeText: '#E8673A', basePrice: 119,  sub: 'Physical gift box · shipping included' },
+  newlywed:    { name: 'Starting Out Collection',  badge: 'Wedding Gift',          badgeColor: '#FFF0EB', badgeText: '#E8673A', basePrice: 124,  sub: 'Physical gift box · shipping included' },
   anniversary: { name: 'Relationship Reflection',   badge: 'Anniversary Gift',      badgeColor: '#EEEFFF', badgeText: '#5B6DF8', basePrice: 139, sub: 'Physical gift box · shipping included' },
   premium:     { name: 'Attune Premium',           badge: 'Most Complete',         badgeColor: 'rgba(91,109,248,.12)', badgeText: '#7b8fff', basePrice: 295, sub: 'Digital · LMFT session included' },
 };
@@ -1438,7 +1438,7 @@ function setFormat(pkg,format){
   if(pkg==='newlywed'){
     const physical=format==='physical';
     document.getElementById('newlywed-price').textContent=physical?'$169':'$139';
-    document.getElementById('newlywed-price-sub').textContent=physical?'Physical gift box (+$30) · ships in 5–7 days':'Digital · instant access · yours to keep';
+    document.getElementById('newlywed-price-sub').textContent=physical?'Physical gift box (+$35) · ships in 5–7 days':'Digital · instant access · yours to keep';
     document.getElementById('newlywed-cta').textContent='Add to cart →';
     document.getElementById('newlywed-physical-col').style.display=physical?'block':'none';
     document.querySelectorAll('#pkg-newlywed .fmt-btn').forEach((b,i)=>{
@@ -1448,7 +1448,7 @@ function setFormat(pkg,format){
   } else if(pkg==='ann'){
     const physical=format==='physical';
     document.getElementById('ann-price').textContent=physical?'$169':'$139';
-    document.getElementById('ann-price-sub').textContent=physical?'Physical gift box (+$45) · ships in 5–7 days':'Digital · instant access · yours to keep';
+    document.getElementById('ann-price-sub').textContent=physical?'Physical gift box (+$35) · ships in 5–7 days':'Digital · instant access · yours to keep';
     document.getElementById('ann-cta').textContent='Add to cart →';
     document.getElementById('ann-physical-col').style.display=physical?'block':'none';
     document.querySelectorAll('#pkg-anniversary .fmt-btn').forEach((b,i)=>{
@@ -1458,7 +1458,7 @@ function setFormat(pkg,format){
   } else if(pkg==='premium'){
     const physical=format==='physical';
     document.getElementById('premium-price').textContent=physical?'$340':'$295';
-    document.getElementById('premium-price-sub').textContent=physical?'Physical gift box (+$45) · ships in 5–7 days':'Digital · instant access · yours to keep';
+    document.getElementById('premium-price-sub').textContent=physical?'Physical gift box (+$35) · ships in 5–7 days':'Digital · instant access · yours to keep';
     document.getElementById('premium-cta').textContent='Add to cart →';
     document.getElementById('premium-lmft-col').style.display=physical?'none':'block';
     document.getElementById('premium-physical-col').style.display=physical?'block':'none';

@@ -262,6 +262,10 @@
     {
       "source": "/(.*)",
       "destination": "/index.html"
+    },
+    {
+      "source": "/qr-card-v5",
+      "destination": "/qr-card-v5.html"
     }
   ],
   "buildCommand": "npx vite build",

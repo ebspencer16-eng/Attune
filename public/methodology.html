@@ -790,69 +790,186 @@
       <p class="s-sub" style="max-width:580px;">A typing system built for couples, not individuals. Your type emerges from the combination of where you each land.</p>
     </div>
 
-    <!-- Desktop 4-column grid -->
-    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;" class="ct-grid">
+    <!-- Step labels row (desktop) -->
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1.25rem;align-items:stretch;margin-bottom:.6rem;" class="ct-labels">
+      <div style="font-size:.6rem;letter-spacing:.18em;text-transform:uppercase;font-weight:700;color:#E8673A;font-family:'DM Sans',sans-serif;">Step 01</div>
+      <div style="font-size:.6rem;letter-spacing:.18em;text-transform:uppercase;font-weight:700;color:#9B5DE5;font-family:'DM Sans',sans-serif;">Step 02</div>
+      <div style="font-size:.6rem;letter-spacing:.18em;text-transform:uppercase;font-weight:700;color:#1B5FE8;font-family:'DM Sans',sans-serif;">Step 03</div>
+    </div>
 
-      <div style="background:white;border:1.5px solid var(--stone);border-top:3px solid #E8673A;border-radius:16px;padding:1.4rem 1.25rem;">
-        <div style="font-size:1.6rem;margin-bottom:.75rem;">📊</div>
-        <div style="font-size:.6rem;letter-spacing:.18em;text-transform:uppercase;font-weight:700;color:#E8673A;font-family:'DM Sans',sans-serif;margin-bottom:.5rem;">Step 1</div>
-        <div style="font-size:.92rem;font-weight:700;color:var(--ink);margin-bottom:.5rem;font-family:'DM Sans',sans-serif;line-height:1.2;">Plotted on two axes</div>
-        <p style="font-size:.78rem;color:var(--muted);line-height:1.65;margin:0;">Based on your exercise responses, each person is scored across 10 dimensions and plotted on two axes: Engage ↔ Withdraw and Open ↔ Guarded.</p>
+    <!-- Desktop 3-card grid -->
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1.25rem;align-items:stretch;" class="ct-grid">
+
+      <!-- Card 1: Individual type assigned — 2-axes SVG -->
+      <div style="background:linear-gradient(150deg,#3D1A08,#5A2810);border-radius:20px;overflow:hidden;display:flex;flex-direction:column;">
+        <div style="height:3px;background:#E8673A;flex-shrink:0;"></div>
+        <div style="padding:1.5rem 1.5rem .75rem;flex:1;display:flex;flex-direction:column;gap:.6rem;">
+          <div style="font-family:'Playfair Display',Georgia,serif;font-size:1.9rem;font-weight:700;color:white;line-height:1.05;letter-spacing:-.02em;">Individual type is assigned.</div>
+          <p style="font-size:.8rem;color:rgba(255,255,255,.55);line-height:1.65;margin:0;font-family:'DM Sans',sans-serif;">Each person is scored and plotted on two axes: Engage ↔ Withdraw and Open ↔ Guarded. Your position determines one of four individual types.</p>
+        </div>
+        <div style="margin-top:auto;padding:.75rem 1rem 1rem;">
+          <svg viewBox="0 0 520 340" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;display:block;">
+            <defs>
+              <linearGradient id="ct_g1" x1="0" y1="0" x2="520" y2="0" gradientUnits="userSpaceOnUse">
+                <stop offset="0%" stop-color="#E8673A"/>
+                <stop offset="100%" stop-color="#9B5DE5"/>
+              </linearGradient>
+            </defs>
+            <!-- Card frame -->
+            <rect x="18" y="12" width="484" height="292" rx="16" fill="white"/>
+            <rect x="18" y="12" width="484" height="292" rx="16" fill="none" stroke="url(#ct_g1)" stroke-width="3"/>
+            <rect x="28" y="22" width="464" height="272" rx="10" fill="#FDF8F3" stroke="#C8BFB4" stroke-width="1.5"/>
+            <!-- Axes -->
+            <line x1="260" y1="44" x2="260" y2="278" stroke="#C8BFB4" stroke-width="1.5" stroke-dasharray="4 3"/>
+            <line x1="44" y1="161" x2="476" y2="161" stroke="#C8BFB4" stroke-width="1.5" stroke-dasharray="4 3"/>
+            <!-- Axis labels (abstract bars) -->
+            <rect x="44" y="152" width="48" height="8" rx="3" fill="#DDD8D2"/>
+            <rect x="420" y="152" width="52" height="8" rx="3" fill="#DDD8D2"/>
+            <rect x="248" y="44" width="60" height="8" rx="3" fill="#DDD8D2"/>
+            <rect x="248" y="270" width="60" height="8" rx="3" fill="#DDD8D2"/>
+            <!-- Quadrant shading -->
+            <rect x="44" y="44" width="212" height="113" rx="8" fill="rgba(232,103,58,0.06)"/>
+            <rect x="260" y="44" width="212" height="113" rx="8" fill="rgba(155,93,229,0.06)"/>
+            <rect x="44" y="161" width="212" height="113" rx="8" fill="rgba(155,93,229,0.06)"/>
+            <rect x="260" y="161" width="212" height="113" rx="8" fill="rgba(27,95,232,0.06)"/>
+            <!-- Single person dot with halo -->
+            <circle cx="340" cy="100" r="16" fill="rgba(232,103,58,0.15)"/>
+            <circle cx="340" cy="100" r="10" fill="#E8673A"/>
+            <circle cx="340" cy="100" r="10" fill="none" stroke="white" stroke-width="2.5"/>
+            <!-- Dotted lines to axes -->
+            <line x1="340" y1="100" x2="340" y2="161" stroke="#E8673A" stroke-width="1.5" stroke-dasharray="3 3" opacity="0.5"/>
+            <line x1="340" y1="100" x2="260" y2="100" stroke="#E8673A" stroke-width="1.5" stroke-dasharray="3 3" opacity="0.5"/>
+          </svg>
+        </div>
       </div>
 
-      <div style="background:white;border:1.5px solid var(--stone);border-top:3px solid #9B5DE5;border-radius:16px;padding:1.4rem 1.25rem;">
-        <div style="font-size:1.6rem;margin-bottom:.75rem;">🔷</div>
-        <div style="font-size:.6rem;letter-spacing:.18em;text-transform:uppercase;font-weight:700;color:#9B5DE5;font-family:'DM Sans',sans-serif;margin-bottom:.5rem;">Step 2</div>
-        <div style="font-size:.92rem;font-weight:700;color:var(--ink);margin-bottom:.5rem;font-family:'DM Sans',sans-serif;line-height:1.2;">Assigned an individual type</div>
-        <p style="font-size:.78rem;color:var(--muted);line-height:1.65;margin:0;">Each person's position on both axes determines one of four individual types: The Reacher, The Anchor, The Feeler, or The Protector.</p>
+      <!-- Card 2: Couple type assigned — 4 quadrant + 2 dots -->
+      <div style="background:linear-gradient(150deg,#1E0E42,#2E1560);border-radius:20px;overflow:hidden;display:flex;flex-direction:column;">
+        <div style="height:3px;background:#9B5DE5;flex-shrink:0;"></div>
+        <div style="padding:1.5rem 1.5rem .75rem;flex:1;display:flex;flex-direction:column;gap:.6rem;">
+          <div style="font-family:'Playfair Display',Georgia,serif;font-size:1.9rem;font-weight:700;color:white;line-height:1.05;letter-spacing:-.02em;">Couple type is assigned.</div>
+          <p style="font-size:.8rem;color:rgba(255,255,255,.55);line-height:1.65;margin:0;font-family:'DM Sans',sans-serif;">Both individual types combine into one of ten couple types — describing how your specific patterns interact, not just who you are alone.</p>
+        </div>
+        <div style="margin-top:auto;padding:.75rem 1rem 1rem;">
+          <svg viewBox="0 0 520 340" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;display:block;">
+            <defs>
+              <linearGradient id="ct_g2" x1="0" y1="0" x2="520" y2="0" gradientUnits="userSpaceOnUse">
+                <stop offset="0%" stop-color="#9B5DE5"/>
+                <stop offset="100%" stop-color="#1B5FE8"/>
+              </linearGradient>
+            </defs>
+            <rect x="18" y="12" width="484" height="292" rx="16" fill="white"/>
+            <rect x="18" y="12" width="484" height="292" rx="16" fill="none" stroke="url(#ct_g2)" stroke-width="3"/>
+            <rect x="28" y="22" width="464" height="272" rx="10" fill="#FDF8F3" stroke="#C8BFB4" stroke-width="1.5"/>
+            <!-- Axes -->
+            <line x1="260" y1="44" x2="260" y2="278" stroke="#C8BFB4" stroke-width="1.5" stroke-dasharray="4 3"/>
+            <line x1="44" y1="161" x2="476" y2="161" stroke="#C8BFB4" stroke-width="1.5" stroke-dasharray="4 3"/>
+            <!-- Quadrant shading -->
+            <rect x="44" y="44" width="212" height="113" rx="8" fill="rgba(232,103,58,0.06)"/>
+            <rect x="260" y="44" width="212" height="113" rx="8" fill="rgba(155,93,229,0.08)"/>
+            <rect x="44" y="161" width="212" height="113" rx="8" fill="rgba(155,93,229,0.06)"/>
+            <rect x="260" y="161" width="212" height="113" rx="8" fill="rgba(27,95,232,0.06)"/>
+            <!-- Quadrant labels (abstract) -->
+            <rect x="56" y="56" width="56" height="7" rx="2.5" fill="rgba(232,103,58,0.3)"/>
+            <rect x="272" y="56" width="56" height="7" rx="2.5" fill="rgba(155,93,229,0.3)"/>
+            <rect x="56" y="173" width="56" height="7" rx="2.5" fill="rgba(155,93,229,0.3)"/>
+            <rect x="272" y="173" width="56" height="7" rx="2.5" fill="rgba(27,95,232,0.3)"/>
+            <!-- Partner A dot -->
+            <circle cx="340" cy="100" r="14" fill="rgba(232,103,58,0.15)"/>
+            <circle cx="340" cy="100" r="9" fill="#E8673A" stroke="white" stroke-width="2.5"/>
+            <!-- Partner B dot -->
+            <circle cx="175" cy="210" r="14" fill="rgba(27,95,232,0.15)"/>
+            <circle cx="175" cy="210" r="9" fill="#1B5FE8" stroke="white" stroke-width="2.5"/>
+            <!-- Connector line -->
+            <line x1="340" y1="100" x2="175" y2="210" stroke="#9B5DE5" stroke-width="2" stroke-dasharray="5 4" opacity="0.6"/>
+            <!-- Couple type badge -->
+            <rect x="220" y="138" width="80" height="26" rx="13" fill="#9B5DE5"/>
+            <rect x="228" y="148" width="64" height="7" rx="2.5" fill="rgba(255,255,255,0.8)"/>
+          </svg>
+        </div>
       </div>
 
-      <div style="background:white;border:1.5px solid var(--stone);border-top:3px solid #5B6DF8;border-radius:16px;padding:1.4rem 1.25rem;">
-        <div style="font-size:1.6rem;margin-bottom:.75rem;">💑</div>
-        <div style="font-size:.6rem;letter-spacing:.18em;text-transform:uppercase;font-weight:700;color:#5B6DF8;font-family:'DM Sans',sans-serif;margin-bottom:.5rem;">Step 3</div>
-        <div style="font-size:.92rem;font-weight:700;color:var(--ink);margin-bottom:.5rem;font-family:'DM Sans',sans-serif;line-height:1.2;">Assigned a couple type</div>
-        <p style="font-size:.78rem;color:var(--muted);line-height:1.65;margin:0;">Your partner's individual type and yours combine into one of ten possible couple types – describing how your specific patterns interact, not just who you are alone.</p>
+      <!-- Card 3: Curated feedback — results page layout -->
+      <div style="background:linear-gradient(150deg,#0C1E48,#102860);border-radius:20px;overflow:hidden;display:flex;flex-direction:column;">
+        <div style="height:3px;background:#1B5FE8;flex-shrink:0;"></div>
+        <div style="padding:1.5rem 1.5rem .75rem;flex:1;display:flex;flex-direction:column;gap:.6rem;">
+          <div style="font-family:'Playfair Display',Georgia,serif;font-size:1.9rem;font-weight:700;color:white;line-height:1.05;letter-spacing:-.02em;">Curated feedback is shared.</div>
+          <p style="font-size:.8rem;color:rgba(255,255,255,.55);line-height:1.65;margin:0;font-family:'DM Sans',sans-serif;">Your couple type unlocks a full results page — what comes naturally, where to watch out, and actionable next steps built for your specific pairing.</p>
+        </div>
+        <div style="margin-top:auto;padding:.75rem 1rem 1rem;">
+          <svg viewBox="0 0 520 340" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;display:block;">
+            <defs>
+              <linearGradient id="ct_g3" x1="0" y1="0" x2="520" y2="0" gradientUnits="userSpaceOnUse">
+                <stop offset="0%" stop-color="#9B5DE5"/>
+                <stop offset="100%" stop-color="#1B5FE8"/>
+              </linearGradient>
+            </defs>
+            <rect x="18" y="12" width="484" height="292" rx="16" fill="white"/>
+            <rect x="18" y="12" width="484" height="292" rx="16" fill="none" stroke="url(#ct_g3)" stroke-width="3"/>
+            <rect x="28" y="22" width="464" height="272" rx="10" fill="#FDF8F3" stroke="#C8BFB4" stroke-width="1.5"/>
+            <!-- Top gradient bar -->
+            <rect x="28" y="22" width="464" height="4" fill="url(#ct_g3)"/>
+            <!-- Couple type hero heading -->
+            <rect x="44" y="36" width="200" height="14" rx="4" fill="#1E1610" opacity=".7"/>
+            <rect x="44" y="56" width="140" height="9" rx="3" fill="#C8BFB4"/>
+            <!-- Divider -->
+            <line x1="44" y1="76" x2="476" y2="76" stroke="#E8DDD0" stroke-width="1.5"/>
+            <!-- "What comes naturally" section -->
+            <rect x="44" y="86" width="130" height="9" rx="3" fill="#1E1610" opacity=".5"/>
+            <rect x="44" y="102" width="380" height="7" rx="2.5" fill="#DDD8D2"/>
+            <rect x="44" y="114" width="300" height="7" rx="2.5" fill="#DDD8D2"/>
+            <!-- "Worth watching" section -->
+            <rect x="44" y="132" width="130" height="9" rx="3" fill="#1E1610" opacity=".5"/>
+            <rect x="44" y="148" width="360" height="7" rx="2.5" fill="#DDD8D2"/>
+            <rect x="44" y="160" width="280" height="7" rx="2.5" fill="#DDD8D2"/>
+            <!-- Divider -->
+            <line x1="44" y1="178" x2="476" y2="178" stroke="#E8DDD0" stroke-width="1.5"/>
+            <!-- Next steps -->
+            <rect x="44" y="188" width="100" height="9" rx="3" fill="#1E1610" opacity=".5"/>
+            <!-- 3 tip rows -->
+            <rect x="44" y="206" width="10" height="10" rx="2" fill="#E8673A"/>
+            <rect x="62" y="208" width="200" height="7" rx="2.5" fill="#C8BFB4"/>
+            <rect x="44" y="224" width="10" height="10" rx="2" fill="#9B5DE5"/>
+            <rect x="62" y="226" width="180" height="7" rx="2.5" fill="#C8BFB4"/>
+            <rect x="44" y="242" width="10" height="10" rx="2" fill="#1B5FE8"/>
+            <rect x="62" y="244" width="220" height="7" rx="2.5" fill="#C8BFB4"/>
+            <!-- Workbook CTA button -->
+            <rect x="44" y="264" width="140" height="22" rx="8" fill="#1B5FE8"/>
+            <rect x="56" y="271" width="88" height="7" rx="2.5" fill="rgba(255,255,255,0.85)"/>
+          </svg>
+        </div>
       </div>
-
-      <div style="background:white;border:1.5px solid var(--stone);border-top:3px solid #1B5FE8;border-radius:16px;padding:1.4rem 1.25rem;">
-        <div style="font-size:1.6rem;margin-bottom:.75rem;">📍</div>
-        <div style="font-size:.6rem;letter-spacing:.18em;text-transform:uppercase;font-weight:700;color:#1B5FE8;font-family:'DM Sans',sans-serif;margin-bottom:.5rem;">Step 4</div>
-        <div style="font-size:.92rem;font-weight:700;color:var(--ink);margin-bottom:.5rem;font-family:'DM Sans',sans-serif;line-height:1.2;">Placed across four quadrants</div>
-        <p style="font-size:.78rem;color:var(--muted);line-height:1.65;margin:0;">Based on in-depth answers, each partner is placed at a specific point within the four-quadrant map – not just a quadrant, but a precise location within it.</p>
-      </div>
-
     </div>
 
     <!-- Mobile swipe -->
     <div class="ct-mobile-scroll" style="display:none;overflow-x:scroll;gap:1rem;padding-bottom:.75rem;-webkit-overflow-scrolling:touch;scrollbar-width:none;margin:0 -1.25rem;padding-left:1.25rem;padding-right:1.25rem;scroll-snap-type:x mandatory;">
-      <div style="background:white;border:1.5px solid var(--stone);border-top:3px solid #E8673A;border-radius:16px;padding:1.4rem 1.25rem;min-width:calc(80vw - 1.5rem);max-width:280px;flex-shrink:0;scroll-snap-align:start;">
-        <div style="font-size:1.4rem;margin-bottom:.6rem;">📊</div>
-        <div style="font-size:.6rem;letter-spacing:.18em;text-transform:uppercase;font-weight:700;color:#E8673A;font-family:'DM Sans',sans-serif;margin-bottom:.45rem;">Step 1</div>
-        <div style="font-size:.9rem;font-weight:700;color:var(--ink);margin-bottom:.4rem;">Plotted on two axes</div>
-        <p style="font-size:.78rem;color:var(--muted);line-height:1.6;margin:0;">Each person is scored across 10 dimensions and plotted on two axes: Engage ↔ Withdraw and Open ↔ Guarded.</p>
+      <div style="background:linear-gradient(150deg,#3D1A08,#5A2810);border-radius:20px;overflow:hidden;display:flex;flex-direction:column;min-width:calc(85vw - 1rem);max-width:320px;flex-shrink:0;scroll-snap-align:start;">
+        <div style="height:3px;background:#E8673A;flex-shrink:0;"></div>
+        <div style="padding:1.5rem 1.5rem .75rem;flex:1;display:flex;flex-direction:column;gap:.6rem;">
+          <div style="font-size:.6rem;letter-spacing:.18em;text-transform:uppercase;font-weight:700;color:#E8673A;font-family:'DM Sans',sans-serif;margin-bottom:.25rem;">Step 01</div>
+          <div style="font-family:'Playfair Display',Georgia,serif;font-size:1.9rem;font-weight:700;color:white;line-height:1.05;letter-spacing:-.02em;">Individual type is assigned.</div>
+          <p style="font-size:.8rem;color:rgba(255,255,255,.55);line-height:1.65;margin:0;font-family:'DM Sans',sans-serif;">Each person is scored and plotted on two axes. Your position determines one of four individual types.</p>
+        </div>
       </div>
-      <div style="background:white;border:1.5px solid var(--stone);border-top:3px solid #9B5DE5;border-radius:16px;padding:1.4rem 1.25rem;min-width:calc(80vw - 1.5rem);max-width:280px;flex-shrink:0;scroll-snap-align:start;">
-        <div style="font-size:1.4rem;margin-bottom:.6rem;">🔷</div>
-        <div style="font-size:.6rem;letter-spacing:.18em;text-transform:uppercase;font-weight:700;color:#9B5DE5;font-family:'DM Sans',sans-serif;margin-bottom:.45rem;">Step 2</div>
-        <div style="font-size:.9rem;font-weight:700;color:var(--ink);margin-bottom:.4rem;">Assigned an individual type</div>
-        <p style="font-size:.78rem;color:var(--muted);line-height:1.6;margin:0;">Axis position determines one of four types: The Reacher, The Anchor, The Feeler, or The Protector.</p>
+      <div style="background:linear-gradient(150deg,#1E0E42,#2E1560);border-radius:20px;overflow:hidden;display:flex;flex-direction:column;min-width:calc(85vw - 1rem);max-width:320px;flex-shrink:0;scroll-snap-align:start;">
+        <div style="height:3px;background:#9B5DE5;flex-shrink:0;"></div>
+        <div style="padding:1.5rem 1.5rem .75rem;flex:1;display:flex;flex-direction:column;gap:.6rem;">
+          <div style="font-size:.6rem;letter-spacing:.18em;text-transform:uppercase;font-weight:700;color:#9B5DE5;font-family:'DM Sans',sans-serif;margin-bottom:.25rem;">Step 02</div>
+          <div style="font-family:'Playfair Display',Georgia,serif;font-size:1.9rem;font-weight:700;color:white;line-height:1.05;letter-spacing:-.02em;">Couple type is assigned.</div>
+          <p style="font-size:.8rem;color:rgba(255,255,255,.55);line-height:1.65;margin:0;font-family:'DM Sans',sans-serif;">Both individual types combine into one of ten couple types.</p>
+        </div>
       </div>
-      <div style="background:white;border:1.5px solid var(--stone);border-top:3px solid #5B6DF8;border-radius:16px;padding:1.4rem 1.25rem;min-width:calc(80vw - 1.5rem);max-width:280px;flex-shrink:0;scroll-snap-align:start;">
-        <div style="font-size:1.4rem;margin-bottom:.6rem;">💑</div>
-        <div style="font-size:.6rem;letter-spacing:.18em;text-transform:uppercase;font-weight:700;color:#5B6DF8;font-family:'DM Sans',sans-serif;margin-bottom:.45rem;">Step 3</div>
-        <div style="font-size:.9rem;font-weight:700;color:var(--ink);margin-bottom:.4rem;">Assigned a couple type</div>
-        <p style="font-size:.78rem;color:var(--muted);line-height:1.6;margin:0;">Both individual types combine into one of ten couple types – describing how your patterns interact together.</p>
-      </div>
-      <div style="background:white;border:1.5px solid var(--stone);border-top:3px solid #1B5FE8;border-radius:16px;padding:1.4rem 1.25rem;min-width:calc(80vw - 1.5rem);max-width:280px;flex-shrink:0;scroll-snap-align:start;">
-        <div style="font-size:1.4rem;margin-bottom:.6rem;">📍</div>
-        <div style="font-size:.6rem;letter-spacing:.18em;text-transform:uppercase;font-weight:700;color:#1B5FE8;font-family:'DM Sans',sans-serif;margin-bottom:.45rem;">Step 4</div>
-        <div style="font-size:.9rem;font-weight:700;color:var(--ink);margin-bottom:.4rem;">Placed across four quadrants</div>
-        <p style="font-size:.78rem;color:var(--muted);line-height:1.6;margin:0;">Each partner is placed at a specific point within the four-quadrant map – not just a quadrant, but a precise location.</p>
+      <div style="background:linear-gradient(150deg,#0C1E48,#102860);border-radius:20px;overflow:hidden;display:flex;flex-direction:column;min-width:calc(85vw - 1rem);max-width:320px;flex-shrink:0;scroll-snap-align:start;">
+        <div style="height:3px;background:#1B5FE8;flex-shrink:0;"></div>
+        <div style="padding:1.5rem 1.5rem .75rem;flex:1;display:flex;flex-direction:column;gap:.6rem;">
+          <div style="font-size:.6rem;letter-spacing:.18em;text-transform:uppercase;font-weight:700;color:#1B5FE8;font-family:'DM Sans',sans-serif;margin-bottom:.25rem;">Step 03</div>
+          <div style="font-family:'Playfair Display',Georgia,serif;font-size:1.9rem;font-weight:700;color:white;line-height:1.05;letter-spacing:-.02em;">Curated feedback is shared.</div>
+          <p style="font-size:.8rem;color:rgba(255,255,255,.55);line-height:1.65;margin:0;font-family:'DM Sans',sans-serif;">Your couple type unlocks a full results page with next steps built for your pairing.</p>
+        </div>
       </div>
     </div>
     <div class="ct-mobile-scroll" style="display:none;align-items:center;gap:.4rem;margin-top:.6rem;padding-left:1.25rem;">
       <div style="width:18px;height:2px;border-radius:2px;background:#E8673A;"></div>
-      <div style="width:6px;height:2px;border-radius:2px;background:#E8DDD0;"></div>
       <div style="width:6px;height:2px;border-radius:2px;background:#E8DDD0;"></div>
       <div style="width:6px;height:2px;border-radius:2px;background:#E8DDD0;"></div>
     </div>
@@ -861,6 +978,7 @@
 <style>
   @media(max-width:680px){
     .ct-grid{display:none!important}
+    .ct-labels{display:none!important}
     .ct-mobile-scroll{display:flex!important}
   }
 </style>
