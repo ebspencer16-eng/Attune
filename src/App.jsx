@@ -3878,19 +3878,19 @@ const ANNIVERSARY_QUESTIONS = [
   // Milestones
   { id: "a1", category: "Milestones", type: "text", text: "The moment I felt most proud of us as a couple:", placeholder: "e.g. When we navigated something hard together, or when we supported each other through..." },
   { id: "a2", category: "Milestones", type: "text", text: "A challenge we faced together that made our relationship stronger:", placeholder: "e.g. Moving cities, a hard year, a disagreement we worked through..." },
-  // Satisfaction scales
+  // How we're doing — connection, communication, admiration, fun
   { id: "a_sat_conn", category: "How We're Doing", type: "scale", text: "How connected do I feel to you day-to-day right now?", scaleLabels: ["Not very connected", "A bit distant", "Somewhat connected", "Quite connected", "Very connected"], scaleColors: ["#ef4444","#f97316","#eab308","#22c55e","#10b981"] },
   { id: "a_sat_comm", category: "How We're Doing", type: "scale", text: "How well do I feel we communicate when something is bothering one of us?", scaleLabels: ["We avoid it", "It's hard", "We manage", "Pretty well", "Really well"], scaleColors: ["#ef4444","#f97316","#eab308","#22c55e","#10b981"] },
+  { id: "a8", category: "How We're Doing", type: "pick", text: "The quality I most admire in my partner right now:", options: ["Patient","Funny","Supportive","Ambitious","Kind","Curious","Steady","Adventurous","Honest","Thoughtful"] },
   { id: "a_sat_fun", category: "How We're Doing", type: "scale", text: "How much do we prioritize fun and lightness together?", scaleLabels: ["Not enough", "Less than I'd like", "About right", "Quite a bit", "A lot"], scaleColors: ["#ef4444","#f97316","#eab308","#22c55e","#10b981"] },
-  // What matters
+  // Looking forward — priorities first, then 6mo, then honest reflection, then 5yr
+  { id: "a_priority", category: "Looking Forward", type: "rank", text: "Rank these from most to least important to invest in together this year:", options: ["Quality time","Communication","Financial alignment","Physical intimacy","Shared adventures","Long-term planning"] },
+  { id: "a6", category: "Looking Forward", type: "text", text: "One thing I want to work on, in the next 6 months, in how I show up for you:", placeholder: "e.g. Being more present, saying what I need directly, making more time for us..." },
+  { id: "a7", category: "Looking Forward", type: "text", text: "Something we handled less well than I'd have liked — I wish we'd approached it differently:", placeholder: "e.g. A disagreement we got stuck on, a decision we made without fully talking it through..." },
+  { id: "a5", category: "Looking Forward", type: "text", text: "Where I see us in 5 years, what matters most to me about that picture:", placeholder: "e.g. Financially stable and adventurous, close to family, in a home we love..." },
+  // What matters — gratitude and intention, ends the exercise on a high note
   { id: "a3", category: "What Matters", type: "text", text: "The part of our relationship I'm most grateful for:", placeholder: "e.g. How you make me feel safe, the way we laugh together, the life we've built..." },
   { id: "a4", category: "What Matters", type: "text", text: "Something I want to do more of together in the next year:", placeholder: "e.g. Travel, slow weekends, have the big conversations, invest in our friendship..." },
-  { id: "a7", category: "What Matters", type: "text", text: "Something we handled less well than I'd have liked — I wish we'd approached it differently:", placeholder: "e.g. A disagreement we got stuck on, a decision we made without fully talking it through..." },
-  { id: "a8", category: "What Matters", type: "pick", text: "The quality I most admire in my partner right now:", options: ["Patient","Funny","Supportive","Ambitious","Kind","Curious","Steady","Adventurous","Honest","Thoughtful"] },
-  // Looking forward
-  { id: "a5", category: "Looking Forward", type: "text", text: "Where I see us in 5 years, what matters most to me about that picture:", placeholder: "e.g. Financially stable and adventurous, close to family, in a home we love..." },
-  { id: "a6", category: "Looking Forward", type: "text", text: "One thing I want to work on, in the next 6 months, in how I show up for you:", placeholder: "e.g. Being more present, saying what I need directly, making more time for us..." },
-  { id: "a_priority", category: "Looking Forward", type: "rank", text: "Rank these from most to least important to invest in together this year:", options: ["Quality time","Communication","Financial alignment","Physical intimacy","Shared adventures","Long-term planning"] },
 ];
 
 
@@ -4800,10 +4800,11 @@ function AnniversaryResultsView({ userName, partnerName, myAnswers, onBack }) {
   const questions = [
     { id: "a1", label: "A moment that defined us", category: "Milestones" },
     { id: "a2", label: "Something that made us stronger", category: "Milestones" },
-    { id: "a3", label: "What I'm most grateful for", category: "What matters" },
-    { id: "a4", label: "What I want more of together", category: "What matters" },
-    { id: "a5", label: "Where I see us in 5 years", category: "Looking forward" },
-    { id: "a6", label: "What I want to work on", category: "Looking forward" },
+    { id: "a6", label: "What I want to work on", category: "Looking Forward" },
+    { id: "a7", label: "Something I wish we'd handled differently", category: "Looking Forward" },
+    { id: "a5", label: "Where I see us in 5 years", category: "Looking Forward" },
+    { id: "a3", label: "What I'm most grateful for", category: "What Matters" },
+    { id: "a4", label: "What I want more of together", category: "What Matters" },
   ];
 
   const sections = [
@@ -4897,7 +4898,7 @@ function AnniversaryResultsView({ userName, partnerName, myAnswers, onBack }) {
       {activeSection === "story" && (
         <div>
           {/* Group by category */}
-          {["Milestones", "What matters", "Looking forward"].map(cat => {
+          {["Milestones", "How We're Doing", "Looking Forward", "What Matters"].map(cat => {
             const catQs = questions.filter(q => q.category === cat);
             return (
               <div key={cat} style={{ marginBottom: "1.5rem" }}>
@@ -5958,11 +5959,11 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
     const textQs = [
       { id: "a1", label: "A moment that defined us", category: "Milestones" },
       { id: "a2", label: "Something that made us stronger", category: "Milestones" },
-      { id: "a3", label: "What I'm most grateful for", category: "What matters" },
-      { id: "a4", label: "What I want more of together", category: "What matters" },
-      { id: "a7", label: "Something I wish we'd handled differently", category: "What matters" },
-      { id: "a5", label: "Where I see us in 5 years", category: "Looking forward" },
-      { id: "a6", label: "What I want to work on", category: "Looking forward" },
+      { id: "a6", label: "What I want to work on", category: "Looking Forward" },
+      { id: "a7", label: "Something I wish we'd handled differently", category: "Looking Forward" },
+      { id: "a5", label: "Where I see us in 5 years", category: "Looking Forward" },
+      { id: "a3", label: "What I'm most grateful for", category: "What Matters" },
+      { id: "a4", label: "What I want more of together", category: "What Matters" },
     ];
     const actionItems = insights.filter(i => i.type === "explore").map(i => i.title);
 
@@ -6120,7 +6121,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
             <div style={{ fontSize: "0.62rem", letterSpacing: "0.22em", textTransform: "uppercase", color: "#1B5FE8", fontWeight: 700, fontFamily: BFONT, marginBottom: "0.5rem" }}>Relationship Reflection</div>
             <h2 style={{ fontFamily: HFONT, fontSize: "clamp(1.6rem,3vw,2.2rem)", fontWeight: 700, color: C.ink, lineHeight: 1.1, marginBottom: "0.5rem" }}>Side by Side</h2>
             <p style={{ fontSize: "0.82rem", color: C.muted, fontFamily: BFONT, fontWeight: 300, marginBottom: "1.5rem", lineHeight: 1.65 }}>Your answers shown together. Each synthesis note is generated from what you actually wrote.</p>
-            {["Milestones", "What matters", "Looking forward"].map(cat => {
+            {["Milestones", "How We're Doing", "Looking Forward", "What Matters"].map(cat => {
               const catQs = textQs.filter(q => q.category === cat);
               return (
                 <div key={cat} style={{ marginBottom: "1.75rem" }}>
