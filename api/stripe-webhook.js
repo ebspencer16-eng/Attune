@@ -165,13 +165,18 @@ export default async function handler(req) {
 
       // Auto-generate QR card for physical orders — stores URL in order record
       if (meta.isPhysical === '1') {
-        const p1 = encodeURIComponent(meta.partner1Name || meta.buyerName || '');
-        const p2 = encodeURIComponent(meta.partner2Name || '');
+        const p1raw = meta.partner1Name || meta.buyerName || '';
+        const p2raw = meta.partner2Name || '';
+        const namesStr = p2raw ? `${p1raw} & ${p2raw}` : p1raw;
         const pkg = encodeURIComponent(meta.pkgKey || 'core');
         const orderId = encodeURIComponent(meta.orderNum || intent.id);
         const isGift = meta.isGift === '1';
         const version = isGift ? (meta.giftNote ? 'gift_printed' : 'gift_blank') : 'standard';
-        const cardUrl = `${baseUrl}/qr-card-v5?pkg=${pkg}&p1=${p1}&p2=${p2}&orderId=${orderId}&version=${encodeURIComponent(version)}`;
+        // Build app URL with gift params for QR code
+        const appUrl = isGift
+          ? `${baseUrl}/app?gift=1&p1=${encodeURIComponent(p1raw)}&p2=${encodeURIComponent(p2raw)}&pkg=${encodeURIComponent(meta.pkgKey||'core')}&order=${orderId}`
+          : `${baseUrl}/app`;
+        const cardUrl = `${baseUrl}/qr-card-v5?pkg=${pkg}&names=${encodeURIComponent(namesStr)}&token=${encodeURIComponent(appUrl)}&orderId=${orderId}&version=${encodeURIComponent(version)}`;
         // Store card URL in order record for admin fulfillment
         const supabaseUrl = process.env.SUPABASE_URL;
         const serviceKey = process.env.SUPABASE_SERVICE_KEY;
