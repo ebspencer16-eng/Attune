@@ -7458,7 +7458,28 @@ function AuthModal({ mode, onClose, onSuccess }) {
         } catch {}
       }
 
-      // Send partner invite email if partner email was provided
+      // Restore order from Supabase so pkg features (budget, LMFT, reflection) work on a new device
+      if (!localStorage.getItem('attune_order') && authData.user.email) {
+        try {
+          const { data: orderRow } = await sb.from('orders')
+            .select('pkg_key,addon_lmft,addon_reflection,addon_budget,addon_workbook,is_physical,order_num')
+            .eq('buyer_email', authData.user.email)
+            .order('created_at', { ascending: false })
+            .limit(1)
+            .single();
+          if (orderRow) {
+            localStorage.setItem('attune_order', JSON.stringify({
+              pkgKey:          orderRow.pkg_key,
+              addonLmft:       orderRow.addon_lmft || false,
+              addonReflection: orderRow.addon_reflection || false,
+              addonBudget:     orderRow.addon_budget || false,
+              addonWorkbook:   orderRow.addon_workbook || null,
+              isPhysical:      orderRow.is_physical || false,
+              orderNum:        orderRow.order_num || null,
+            }));
+          }
+        } catch {}
+      }
       if (form.partnerEmail.trim()) {
         const inviteUrl = `${window.location.origin}/app?invite=${encodeURIComponent(inviteCode)}&from=${encodeURIComponent(form.name.trim())}&pae=${encodeURIComponent(form.email.trim().toLowerCase())}`;
         fetch('/api/send-email', {
@@ -8271,8 +8292,10 @@ export default function App() {
   const _urlPkg = params.get("pkg") || "core";
   const _demoParam = params.get("demo"); // ?demo=anniversary bypasses localStorage
   const _orderPkg = (() => { try { const o = JSON.parse(localStorage.getItem('attune_order') || 'null'); return o?.pkgKey || null; } catch { return null; } })();
+  const _accountPkg = (() => { try { const a = JSON.parse(localStorage.getItem('attune_account') || 'null'); return a?.pkg || null; } catch { return null; } })();
   // If demo=1 (generic), use _urlPkg for package; if demo=anniversary etc, use that value
-  const demoPkg = (_demoParam && _demoParam !== '1') ? _demoParam : (_orderPkg || _urlPkg);
+  // Fall back chain: explicit demo param → order localStorage → account.pkg (cross-device) → URL param
+  const demoPkg = (_demoParam && _demoParam !== '1') ? _demoParam : (_orderPkg || _accountPkg || _urlPkg);
   const urlInviteCode = params.get("invite");
   const urlInviteFrom = params.get("from") ? decodeURIComponent(params.get("from")) : null;
   const urlIsReset = params.get("reset") === "1";
