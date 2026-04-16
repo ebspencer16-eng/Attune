@@ -9703,12 +9703,13 @@ export default function App() {
             ) : (
               <AnniversaryExercise userName={userName} partnerName={partnerName} onComplete={a => {
                   setEx3State(a);
-                  // Mark ex3 complete in Supabase so check-in emails suppress the Reflection CTA
+                  try { localStorage.setItem('attune_ex3', JSON.stringify(a)); } catch {}
+                  // Persist ex3 answers and mark complete in Supabase
                   if (isLoggedIn && account?.id) {
                     (async () => {
                       const { supabase: sb, hasSupabase } = await import('./supabase.js');
                       if (!hasSupabase()) return;
-                      await sb.from('profiles').update({ ex3_completed: true }).eq('id', account.id);
+                      await sb.from('profiles').update({ ex3_answers: a, ex3_completed: true }).eq('id', account.id);
                     })();
                   }
                 }} onBack={() => setView("home")} />
