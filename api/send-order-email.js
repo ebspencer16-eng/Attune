@@ -38,6 +38,8 @@ export default async function handler(req) {
     orderNum, total,
     addonWorkbook,
     addonLmft,
+    addonReflection,
+    addonBudget,
   } = body;
 
   const apiKey = process.env.RESEND_API_KEY;
@@ -50,7 +52,7 @@ export default async function handler(req) {
     from: `Attune <${FROM}>`,
     to: [buyerEmail],
     subject: `Your Attune order — ${orderNum}`,
-    html: orderConfirmationHtml({ buyerName, pkgName, orderNum, total, isGift, isPhysical, recipientName, addonWorkbook, addonLmft }),
+    html: orderConfirmationHtml({ buyerName, pkgName, orderNum, total, isGift, isPhysical, recipientName, addonWorkbook, addonLmft, addonReflection, addonBudget }),
   });
 
   // ── 2. "Get started" to buyer (digital, for-self) ──────────────────────────
@@ -110,7 +112,7 @@ export default async function handler(req) {
 
 // ── Email HTML templates ────────────────────────────────────────────────────
 
-function orderConfirmationHtml({ buyerName, pkgName, orderNum, total, isGift, isPhysical, recipientName, addonWorkbook, addonLmft }) {
+function orderConfirmationHtml({ buyerName, pkgName, orderNum, total, isGift, isPhysical, recipientName, addonWorkbook, addonLmft, addonReflection, addonBudget }) {
   const deliveryNote = isPhysical
     ? 'Your gift box will arrive within 3–5 business days.'
     : isGift
@@ -129,6 +131,8 @@ function orderConfirmationHtml({ buyerName, pkgName, orderNum, total, isGift, is
         <div style="display:flex;justify-content:space-between;font-size:.88rem;margin-bottom:.4rem"><span style="color:#8C7A68">${pkgName}</span><span style="font-weight:600">$${total}</span></div>
         ${addonWorkbook ? `<div style="display:flex;justify-content:space-between;font-size:.88rem;margin-bottom:.4rem"><span style="color:#8C7A68">Personalized Workbook</span><span style="font-weight:600;color:#C17F47">included</span></div>` : ''}
         ${addonLmft ? `<div style="display:flex;justify-content:space-between;font-size:.88rem;margin-bottom:.4rem"><span style="color:#8C7A68">LMFT Session</span><span style="font-weight:600;color:#5B6DF8">scheduling link to follow</span></div>` : ''}
+        ${addonReflection ? `<div style="display:flex;justify-content:space-between;font-size:.88rem;margin-bottom:.4rem"><span style="color:#8C7A68">Relationship Reflection</span><span style="font-weight:600;color:#5B6DF8">included</span></div>` : ''}
+        ${addonBudget ? `<div style="display:flex;justify-content:space-between;font-size:.88rem;margin-bottom:.4rem"><span style="color:#8C7A68">Budget Priorities Exercise</span><span style="font-weight:600;color:#C17F47">included</span></div>` : ''}
         <div style="border-top:1px solid #E8DDD0;margin-top:.75rem;padding-top:.75rem;font-size:.75rem;color:#8C7A68">Order #${orderNum}</div>
       </div>
       <p style="font-size:.85rem;color:#8C7A68;line-height:1.7">${deliveryNote}</p>

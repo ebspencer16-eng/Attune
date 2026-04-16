@@ -20,17 +20,18 @@ const DIGITAL_PRICES = {
 
 // Physical prices (includes shipping)
 const PHYSICAL_PRICES = {
-  core:        119,
-  newlywed:   169,
-  anniversary: 169,
-  premium:    340,
+  core:        124,
+  newlywed:   174,
+  anniversary: 174,
+  premium:    330,
 };
 
 const ADDON_PRICES = {
   digital:    19,   // workbook digital
   print:      39,   // workbook print
-  lmft:      150,   // LMFT session add-on (non-premium)
-  reflection:  40,  // Relationship Reflection add-on
+  lmft:      150,   // LMFT session add-on
+  reflection:  20,  // Relationship Reflection add-on
+  budget:      20,  // Budget Priorities Exercise add-on
 };
 
 export default async function handler(req) {
@@ -84,7 +85,8 @@ export default async function handler(req) {
   const addonWorkbookPrice   = ADDON_PRICES[addonWorkbook] || 0;
   const addonLmftPrice       = addonLmft ? ADDON_PRICES.lmft : 0;
   const addonReflectionPrice = body.addonReflection ? ADDON_PRICES.reflection : 0;
-  const totalCents = (effectiveBase + addonWorkbookPrice + addonLmftPrice + addonReflectionPrice) * 100;
+  const addonBudgetPrice     = body.addonBudget ? ADDON_PRICES.budget : 0;
+  const totalCents = (effectiveBase + addonWorkbookPrice + addonLmftPrice + addonReflectionPrice + addonBudgetPrice) * 100;
 
   const payload = new URLSearchParams({
     amount:   totalCents,
@@ -98,6 +100,7 @@ export default async function handler(req) {
     'metadata[addonWorkbook]': addonWorkbook || '',
     'metadata[addonLmft]':    addonLmft ? '1' : '',
     'metadata[addonReflection]': body.addonReflection ? '1' : '',
+    'metadata[addonBudget]':  body.addonBudget ? '1' : '',
     'metadata[isGift]':       isGift ? '1' : '',
     'metadata[isPhysical]':   isPhysical ? '1' : '',
     'metadata[giftNote]':     (giftNote || '').slice(0, 500),

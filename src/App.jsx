@@ -8819,8 +8819,9 @@ export default function App() {
   const _basePkg = pkgConfig[demoPkg] || pkgConfig.core;
   const pkg = {
     ..._basePkg,
-    hasLMFT: _basePkg.hasLMFT || !!(order?.addonLmft),
+    hasLMFT:        _basePkg.hasLMFT        || !!(order?.addonLmft),
     hasAnniversary: _basePkg.hasAnniversary || !!(order?.addonReflection),
+    hasBudget:      _basePkg.hasBudget      || !!(order?.addonBudget),
   };
 
   // ── PASSWORD RESET ROUTING ────────────────────────────────────────────────

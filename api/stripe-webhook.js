@@ -95,6 +95,7 @@ export default async function handler(req) {
             addon_workbook:          meta.addonWorkbook || null,
             addon_lmft:              meta.addonLmft === '1',
             addon_reflection:        meta.addonReflection === '1',
+            addon_budget:            meta.addonBudget === '1',
             gift_note:               meta.giftNote || null,
             stripe_payment_intent_id: intent.id,
             workbook_status:         'pending',
