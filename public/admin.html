@@ -1121,6 +1121,102 @@
   </div>
 
 <script>
+// ══════════════════════════════════════════════════════════════════════════════
+// ADMIN LOGIN GATE — initialized FIRST so it works even if the rest of the
+// script fails (e.g. if an external CDN like Chart.js hasn't loaded)
+// ══════════════════════════════════════════════════════════════════════════════
+const ADMIN_EMAIL_HASH    = '761c28fe9802521c2cb3dac1150d1603263cff76501934488936216bcd09e5e7';
+const ADMIN_PASSWORD_HASH = '2add3de7e0e78e353d5973686114f3e198ae4982eda80a3f4bfb4d515e3f05e5';
+
+async function sha256(str) {
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
+}
+
+async function attemptLogin() {
+  const btn      = document.getElementById('login-btn');
+  const errEl    = document.getElementById('login-err');
+  const card     = document.querySelector('.login-card');
+  const emailInp = document.getElementById('login-email');
+  const passInp  = document.getElementById('login-password');
+
+  if (!btn || !errEl || !card || !emailInp || !passInp) {
+    const missing = [!btn && 'button', !errEl && 'error display', !card && 'card', !emailInp && 'email input', !passInp && 'password input'].filter(Boolean).join(', ');
+    if (errEl) errEl.textContent = 'Setup error: missing ' + missing;
+    console.error('[Admin login] missing elements:', missing);
+    return;
+  }
+
+  const email = emailInp.value.trim().toLowerCase();
+  const pass  = passInp.value;
+
+  card.classList.remove('shake');
+  emailInp.classList.remove('err');
+  passInp.classList.remove('err');
+
+  if (!email || !pass) {
+    errEl.textContent = 'Please enter your email and password.';
+    void card.offsetWidth;
+    card.classList.add('shake');
+    if (!email) emailInp.classList.add('err');
+    if (!pass) passInp.classList.add('err');
+    return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = 'Checking…';
+  errEl.textContent = '';
+
+  try {
+    if (!window.crypto || !window.crypto.subtle) {
+      throw new Error('Browser crypto unavailable. Ensure you are on HTTPS.');
+    }
+    const [eHash, pHash] = await Promise.all([sha256(email), sha256(pass)]);
+
+    if (eHash === ADMIN_EMAIL_HASH && pHash === ADMIN_PASSWORD_HASH) {
+      sessionStorage.setItem('attune_admin_auth', '1');
+      document.getElementById('admin-login-gate').classList.add('hidden');
+    } else {
+      const emailMatches = eHash === ADMIN_EMAIL_HASH;
+      if (!emailMatches) {
+        errEl.textContent = 'Wrong email';
+        emailInp.classList.add('err');
+      } else {
+        errEl.textContent = 'Wrong password';
+        passInp.classList.add('err');
+      }
+      void card.offsetWidth;
+      card.classList.add('shake');
+      btn.disabled = false;
+      btn.textContent = 'Sign in →';
+    }
+  } catch (err) {
+    console.error('[Admin login] unexpected error:', err);
+    errEl.textContent = 'Error: ' + (err && err.message ? err.message : String(err));
+    btn.disabled = false;
+    btn.textContent = 'Sign in →';
+  }
+}
+
+// Hook Enter key to inputs (added immediately — script runs after HTML is parsed)
+(function wireLoginEnterKey() {
+  const emailInp = document.getElementById('login-email');
+  const passInp  = document.getElementById('login-password');
+  if (emailInp) emailInp.addEventListener('keydown', e => { if (e.key === 'Enter') attemptLogin(); });
+  if (passInp)  passInp.addEventListener('keydown',  e => { if (e.key === 'Enter') attemptLogin(); });
+})();
+
+// Check session on load
+if (sessionStorage.getItem('attune_admin_auth') === '1') {
+  const gate = document.getElementById('admin-login-gate');
+  if (gate) gate.classList.add('hidden');
+}
+// Make attemptLogin globally accessible for the onclick handler
+window.attemptLogin = attemptLogin;
+// ══════════════════════════════════════════════════════════════════════════════
+// END ADMIN LOGIN GATE
+// ══════════════════════════════════════════════════════════════════════════════
+
 // ── Date ──────────────────────────────────────────────
 document.getElementById('today-date').textContent = new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
 
@@ -1459,9 +1555,11 @@ function exportCSV() {
   a.download = 'unison-orders-anonymized.csv';
   a.click();
 }
-Chart.defaults.color = '#6B7280';
-Chart.defaults.borderColor = '#2A2E3A';
-Chart.defaults.font.family = "'DM Sans',sans-serif";
+if (typeof Chart !== 'undefined') {
+  Chart.defaults.color = '#6B7280';
+  Chart.defaults.borderColor = '#2A2E3A';
+  Chart.defaults.font.family = "'DM Sans',sans-serif";
+}
 
 const MONTHS = ['Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec','Jan','Feb','Mar'];
 const PKG_COLORS = ['#FF6B35','#FBBF24','#6C7FFF','#34D399'];
@@ -1778,102 +1876,10 @@ fetch('/api/admin-config').then(r => r.json()).then(cfg => {
   if (typeof loadRealData === 'function') loadRealData();
 }).catch(() => { window.__adminConfigReady = true; });
 
-// ── Admin login gate ──────────────────────────────────────────────────────────
-// Credentials are compared against SHA-256 hashes – plaintext is never stored.
-// Hash computed with: crypto.subtle.digest('SHA-256', new TextEncoder().encode(str))
-// Email hash:    SHA-256('buildunison@gmail.com')
-// Password hash: SHA-256('3xC1c3r0!!')
-const ADMIN_EMAIL_HASH    = '761c28fe9802521c2cb3dac1150d1603263cff76501934488936216bcd09e5e7';
-const ADMIN_PASSWORD_HASH = '2add3de7e0e78e353d5973686114f3e198ae4982eda80a3f4bfb4d515e3f05e5';
+// ── Admin login gate moved to top of script for init-order safety ────────────
+// (see start of script block for login handler definitions)
 
-async function sha256(str) {
-  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
-  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
-}
-
-async function attemptLogin() {
-  const btn      = document.getElementById('login-btn');
-  const errEl    = document.getElementById('login-err');
-  const card     = document.querySelector('.login-card');
-  const emailInp = document.getElementById('login-email');
-  const passInp  = document.getElementById('login-password');
-
-  // Bail with a visible message if any required element is missing
-  if (!btn || !errEl || !card || !emailInp || !passInp) {
-    const missing = [
-      !btn && 'button',
-      !errEl && 'error display',
-      !card && 'card',
-      !emailInp && 'email input',
-      !passInp && 'password input',
-    ].filter(Boolean).join(', ');
-    if (errEl) errEl.textContent = 'Setup error: missing ' + missing;
-    console.error('[Admin login] missing elements:', missing);
-    return;
-  }
-
-  const email = emailInp.value.trim().toLowerCase();
-  const pass  = passInp.value;
-
-  // Clear prior shake / error styling
-  card.classList.remove('shake');
-  emailInp.classList.remove('err');
-  passInp.classList.remove('err');
-
-  if (!email || !pass) {
-    errEl.textContent = 'Please enter your email and password.';
-    void card.offsetWidth; // restart animation
-    card.classList.add('shake');
-    if (!email) emailInp.classList.add('err');
-    if (!pass) passInp.classList.add('err');
-    return;
-  }
-
-  btn.disabled = true;
-  btn.textContent = 'Checking…';
-  errEl.textContent = '';
-
-  try {
-    // Check crypto.subtle is available (only works on secure origins)
-    if (!window.crypto || !window.crypto.subtle) {
-      throw new Error('Browser crypto unavailable. Ensure you are on HTTPS.');
-    }
-    const [eHash, pHash] = await Promise.all([sha256(email), sha256(pass)]);
-
-    if (eHash === ADMIN_EMAIL_HASH && pHash === ADMIN_PASSWORD_HASH) {
-      sessionStorage.setItem('attune_admin_auth', '1');
-      document.getElementById('admin-login-gate').classList.add('hidden');
-    } else {
-      const emailMatches = eHash === ADMIN_EMAIL_HASH;
-      if (!emailMatches) {
-        errEl.textContent = 'Wrong email';
-        emailInp.classList.add('err');
-      } else {
-        errEl.textContent = 'Wrong password';
-        passInp.classList.add('err');
-      }
-      void card.offsetWidth;
-      card.classList.add('shake');
-      btn.disabled = false;
-      btn.textContent = 'Sign in →';
-    }
-  } catch (err) {
-    console.error('[Admin login] unexpected error:', err);
-    errEl.textContent = 'Error: ' + (err && err.message ? err.message : String(err));
-    btn.disabled = false;
-    btn.textContent = 'Sign in →';
-  }
-}
-
-// Keydown listeners attached up-front on the inputs (not after successful login)
-document.addEventListener('DOMContentLoaded', () => {
-  const emailInp = document.getElementById('login-email');
-  const passInp  = document.getElementById('login-password');
-  if (emailInp) emailInp.addEventListener('keydown', e => { if (e.key === 'Enter') attemptLogin(); });
-  if (passInp)  passInp.addEventListener('keydown',  e => { if (e.key === 'Enter') attemptLogin(); });
-});
-
-// Allow Enter key to submit
+// Allow Enter key to submit (document-level fallback if per-input listener misses)
 document.addEventListener('keydown', e => {
   if (e.key === 'Enter' && !document.getElementById('admin-login-gate').classList.contains('hidden')) {
     attemptLogin();
@@ -1881,11 +1887,6 @@ document.addEventListener('keydown', e => {
 });
 
 document.addEventListener('DOMContentLoaded', () => {
-  // Check if already authenticated this session
-  if (sessionStorage.getItem('attune_admin_auth') === '1') {
-    document.getElementById('admin-login-gate').classList.add('hidden');
-  }
-
   // loadRealData is called by the credential fetch on completion (see above)
   // Only call directly if credentials already loaded (e.g. hot reload)
   if (window.__adminConfigReady) loadRealData();
