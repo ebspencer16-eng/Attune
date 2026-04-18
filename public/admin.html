@@ -174,13 +174,12 @@
 
 <!-- ══ ADMIN LOGIN GATE ══ -->
 <div id="admin-login-gate">
-  <a href="/home" style="display:flex;align-items:center;gap:.6rem;text-decoration:none;margin-bottom:2rem;justify-content:center;">
-    <svg width="36" height="26" viewBox="0 0 103 76" fill="none"><defs><linearGradient id="adm_logo" x1="0" y1="0" x2="103" y2="76" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#E8673A"/><stop offset="100%" stop-color="#1B5FE8"/></linearGradient></defs><path d="M14,4 L44,4 A9,9 0 0,1 53,13 L53,42 A9,9 0 0,1 44,51 L20,51 L6,61 L11,51 A6,6 0 0,1 5,45 L5,13 A9,9 0 0,1 14,4 Z" fill="url(#adm_logo)"/><path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill="white" opacity=".93" transform="translate(13.16,11.3) scale(0.72)"/><path d="M89,14 L59,14 A9,9 0 0,0 50,23 L50,52 A9,9 0 0,0 59,61 L83,61 L97,71 L92,61 A6,6 0 0,0 98,55 L98,23 A9,9 0 0,0 89,14 Z" fill="none" stroke="url(#adm_logo)" stroke-width="2.2" stroke-linejoin="round"/><path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill="url(#adm_logo)" transform="translate(58.16,21.3) scale(0.72)"/></svg>
-    <span style="font-family:'Playfair Display',Georgia,serif;font-size:1.1rem;font-weight:700;color:#1E1610;">Attune</span>
-  </a>
   <div class="login-card">
     <div class="grad-bar"></div>
-    <h2>Attune Admin</h2>
+    <div style="display:flex;align-items:center;gap:.65rem;margin-bottom:.3rem;">
+      <svg width="26" height="19" viewBox="0 0 103 76" fill="none" style="flex-shrink:0;"><defs><linearGradient id="adm_logo" x1="0" y1="0" x2="103" y2="76" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#E8673A"/><stop offset="100%" stop-color="#1B5FE8"/></linearGradient></defs><path d="M14,4 L44,4 A9,9 0 0,1 53,13 L53,42 A9,9 0 0,1 44,51 L20,51 L6,61 L11,51 A6,6 0 0,1 5,45 L5,13 A9,9 0 0,1 14,4 Z" fill="url(#adm_logo)"/><path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill="white" opacity=".93" transform="translate(13.16,11.3) scale(0.72)"/><path d="M89,14 L59,14 A9,9 0 0,0 50,23 L50,52 A9,9 0 0,0 59,61 L83,61 L97,71 L92,61 A6,6 0 0,0 98,55 L98,23 A9,9 0 0,0 89,14 Z" fill="none" stroke="url(#adm_logo)" stroke-width="2.2" stroke-linejoin="round"/><path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill="url(#adm_logo)" transform="translate(58.16,21.3) scale(0.72)"/></svg>
+      <h2 style="margin:0;">Attune Admin</h2>
+    </div>
     <div class="sub">Sign in to continue</div>
     <input id="login-email" class="login-inp" type="email" placeholder="Email" autocomplete="username"/>
     <input id="login-password" class="login-inp" type="password" placeholder="Password" autocomplete="current-password"/>
@@ -1174,8 +1173,7 @@ function exportOrdersCSV() {
     o.addonWorkbook || '',
     o.fulfillStatus || '',
   ]);
-  const csv = [headers, ...rows].map(r => r.map(v => `"${String(v||'').replace(/"/g,'""')}"`).join(',')).join('
-');
+  const csv = [headers, ...rows].map(r => r.map(v => `"${String(v||'').replace(/"/g,'""')}"`).join(',')).join('\n');
   const blob = new Blob([csv], {type: 'text/csv'});
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
@@ -1331,11 +1329,11 @@ async function loadFeedbackData() {
     ],
     returnReasons: [
       {l:'Significant life change',v:38},{l:'Anniversary/milestone',v:26},{l:'Something feeling off',v:19},
-      {l:'Sharing with another couple',v:9},{l:'Regular check-in',v:5},{l:'Probably won't return',v:3},
+      {l:'Sharing with another couple',v:9},{l:'Regular check-in',v:5},{l:"Probably won't return",v:3},
     ],
     completion: [
       {l:'Yes, both finished',v:71},{l:'I finished, partner pending',v:14},
-      {l:'Partner finished, I'm pending',v:8},{l:'Neither fully finished',v:7},
+      {l:"Partner finished, I'm pending",v:8},{l:'Neither fully finished',v:7},
     ],
     priorExp: [
       {l:'Nothing structured before',v:44},{l:'A relationship book together',v:28},
@@ -2091,10 +2089,10 @@ function renderFulfillmentTable() {
         const isPrint  = o.workbookType === 'print';
         const isPrintQ = wbStatus === 'print_queued';
         const noData   = !o.scores;  // exercises not yet complete
-        if (isPrintQ) return \`<span style="background:rgba(124,58,237,.12);color:#7C3AED;border:1px solid rgba(124,58,237,.3);border-radius:7px;padding:.3rem .6rem;font-size:.62rem;font-weight:700;font-family:var(--mono);white-space:nowrap;display:inline-flex;align-items:center;gap:.3rem;"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="2" y="3" width="20" height="14" rx="2"/><polyline points="8 21 12 17 16 21"/></svg> Print queued</span>\`;
-        if (noData) return \`<span style="color:rgba(255,255,255,.25);font-size:.65rem;font-style:italic">Exercises incomplete</span>\`;
-        if (isReady && isPrint) return \`<span style="background:rgba(16,185,129,.12);color:#10B981;border:1px solid rgba(16,185,129,.3);border-radius:7px;padding:.3rem .6rem;font-size:.62rem;font-weight:700;font-family:var(--mono);">✓ Sent to print</span>\`;
-        return \`<button onclick="generateWorkbookForOrder('\${o.id}')" id="wb-btn-\${o.id}" style="background:rgba(27,95,232,.12);color:#1B5FE8;border:1px solid rgba(27,95,232,.3);border-radius:7px;padding:.3rem .6rem;font-size:.62rem;font-weight:700;cursor:pointer;font-family:var(--mono);white-space:nowrap;display:inline-flex;align-items:center;gap:.3rem;"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg> \${isPrint ? '🖨 Print' : '↓ Workbook'}</button>\`;
+        if (isPrintQ) return `<span style="background:rgba(124,58,237,.12);color:#7C3AED;border:1px solid rgba(124,58,237,.3);border-radius:7px;padding:.3rem .6rem;font-size:.62rem;font-weight:700;font-family:var(--mono);white-space:nowrap;display:inline-flex;align-items:center;gap:.3rem;"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="2" y="3" width="20" height="14" rx="2"/><polyline points="8 21 12 17 16 21"/></svg> Print queued</span>`;
+        if (noData) return `<span style="color:rgba(255,255,255,.25);font-size:.65rem;font-style:italic">Exercises incomplete</span>`;
+        if (isReady && isPrint) return `<span style="background:rgba(16,185,129,.12);color:#10B981;border:1px solid rgba(16,185,129,.3);border-radius:7px;padding:.3rem .6rem;font-size:.62rem;font-weight:700;font-family:var(--mono);">✓ Sent to print</span>`;
+        return `<button onclick="generateWorkbookForOrder('${o.id}')" id="wb-btn-${o.id}" style="background:rgba(27,95,232,.12);color:#1B5FE8;border:1px solid rgba(27,95,232,.3);border-radius:7px;padding:.3rem .6rem;font-size:.62rem;font-weight:700;cursor:pointer;font-family:var(--mono);white-space:nowrap;display:inline-flex;align-items:center;gap:.3rem;"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg> ${isPrint ? '🖨 Print' : '↓ Workbook'}</button>`;
       })()}</td>
       <td>${action}</td>
     </tr>`;
@@ -2599,7 +2597,7 @@ const SURVEY_QUESTIONS = [
   { id: 'whatDiscovered',   label: 'What they discovered',              type: 'text' },
   { id: 'negative',         label: 'Negative / fell flat',              type: 'text' },
   { id: 'positive',         label: 'Particularly good',                 type: 'text' },
-  { id: 'wishKnew',         label: 'Wish they'd known before',         type: 'text' },
+  { id: 'wishKnew',         label: "Wish they'd known before",         type: 'text' },
   { id: 'testimonial',      label: 'Testimonial text',                  type: 'text' },
 ];
 
@@ -2610,8 +2608,8 @@ function generateSimResponses(n = 47) {
   const ahaOpts = ['The expectations gaps', 'Seeing scores side by side', 'Our couple type', 'Conversation afterward', 'Detailed feedback pages', 'No clear moment'];
   const priorOpts = ['Nothing structured before', 'A relationship book together', 'Couples therapy', 'Another tool or assessment'];
   const completionOpts = ['Together in the same room', 'Separately, on own schedule', 'Separately but same time', 'Mix of both'];
-  const returnOpts = ['Significant life change', 'Anniversary or milestone', 'Something feeling off', 'Regular check-in', 'Sharing with another couple', 'Probably won't return'];
-  const skepticOpts = ['Whether questions would feel real', 'Whether partner would engage', 'Whether results would say anything', 'Whether it would surface anything new', 'I wasn't skeptical'];
+  const returnOpts = ['Significant life change', 'Anniversary or milestone', 'Something feeling off', 'Regular check-in', 'Sharing with another couple', "Probably won't return"];
+  const skepticOpts = ['Whether questions would feel real', 'Whether partner would engage', 'Whether results would say anything', 'Whether it would surface anything new', "I wasn't skeptical"];
   const timeOpts = ['Under 20 minutes', '20–30 minutes', '30–45 minutes', '45–60 minutes', 'Over an hour'];
   const consentOpts = ['Yes – use my words and first name on the reviews section', 'Yes – initials only', 'Yes – keep it anonymous', 'No, internal use only'];
   const rand = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
@@ -2621,10 +2619,10 @@ function generateSimResponses(n = 47) {
   const discoveries = [
     'We had completely different assumptions about who should initiate hard conversations.',
     'The couple type was unsettlingly accurate.',
-    'I thought we were aligned on career – we weren't.',
+    "I thought we were aligned on career – we weren't.",
     'The childhood context piece caught me off guard.',
     'Seeing our scores side by side made abstract feelings concrete.',
-    'I learned that my partner processes conflict internally – I always thought they didn't care.',
+    "I learned that my partner processes conflict internally – I always thought they didn't care.",
     'We named something that had been causing friction for two years.',
     'The expectations section was harder than I expected. In a good way.',
   ];
@@ -2662,7 +2660,7 @@ function generateSimResponses(n = 47) {
       negative: Math.random() > 0.5 ? 'Some friction in the expectations section.' : '',
       positive: Math.random() > 0.4 ? 'The results presentation was beautiful and clear.' : '',
       wishKnew: Math.random() > 0.6 ? 'That it would take more than 30 minutes.' : '',
-      testimonial: Math.random() > 0.5 ? 'I'd tell any couple to do this before a major decision.' : '',
+      testimonial: Math.random() > 0.5 ? "I'd tell any couple to do this before a major decision." : '',
     });
   }
   return responses;
