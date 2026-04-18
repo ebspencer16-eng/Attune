@@ -9181,16 +9181,6 @@ export default function App() {
                 {/* Names + optional View Results CTA */}
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", position: "relative", gap: "1rem", padding: isMobile ? "0.85rem 1.25rem 1.25rem" : "1.5rem 2rem" }}>
                   <div style={{ display: "flex", alignItems: "center", gap: isMobile ? "0.75rem" : "1.25rem" }}>
-                    {/* Desktop only: logo mark in banner */}
-                    {!isMobile && (
-                      <svg width="34" height="24" viewBox="0 0 103 76" fill="none" style={{ flexShrink: 0, opacity: 0.92 }}>
-                        <defs><linearGradient id="bannerLogoGrad" x1="0" y1="0" x2="103" y2="76" gradientUnits="userSpaceOnUse"><stop offset="0%" stopColor="rgba(255,255,255,0.95)"/><stop offset="100%" stopColor="rgba(255,255,255,0.7)"/></linearGradient></defs>
-                        <path d="M14,4 L44,4 A9,9 0 0,1 53,13 L53,42 A9,9 0 0,1 44,51 L20,51 L6,61 L11,51 A6,6 0 0,1 5,45 L5,13 A9,9 0 0,1 14,4 Z" fill="url(#bannerLogoGrad)"/>
-                        <path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill="rgba(100,60,180,0.7)" transform="translate(13.16,11.3) scale(0.72)"/>
-                        <path d="M89,14 L59,14 A9,9 0 0,0 50,23 L50,52 A9,9 0 0,0 59,61 L83,61 L97,71 L92,61 A6,6 0 0,0 98,55 L98,23 A9,9 0 0,0 89,14 Z" fill="none" stroke="url(#bannerLogoGrad)" strokeWidth="2.2" strokeLinejoin="round"/>
-                        <path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill="url(#bannerLogoGrad)" transform="translate(58.16,21.3) scale(0.72)"/>
-                      </svg>
-                    )}
                     <div>
                       <div style={{ display: "flex", alignItems: "baseline", gap: "0.35rem", flexWrap: "wrap" }}>
                         <span style={{ fontFamily: "'Playfair Display', Georgia, serif", fontSize: isMobile ? "1.3rem" : "1.75rem", fontWeight: 700, lineHeight: 1, letterSpacing: "-.02em", color: "white" }}>{userName || "You"}</span>
