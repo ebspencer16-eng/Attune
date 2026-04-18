@@ -8266,6 +8266,113 @@ function UpsellModal({ product, cartAdded, onAddToCart, onCheckout, onClose }) {
   );
 }
 
+// Packages modal — reused styling from UpsellModal
+function PackagesModal({ currentPkg, onClose, onPick }) {
+  const packages = [
+    {
+      id: "core",
+      name: "The Attune Assessment",
+      badge: "The Foundation",
+      price: "$89",
+      tagline: "Two exercises. One complete picture.",
+      description: "How you communicate and what you each expect, independently mapped and jointly revealed.",
+      color: "#E8673A",
+      features: ["Communication exercise", "Expectations exercise", "Full joint results", "Couple type profile"],
+    },
+    {
+      id: "newlywed",
+      name: "Starting Out Collection",
+      badge: "For couples starting out",
+      price: "$139",
+      tagline: "Everything in Assessment + the logistics of merging lives.",
+      description: "Adds a bonus budget exercise and a practical checklist for finances, name changes, insurance, and estate basics.",
+      color: "#E8673A",
+      features: ["Everything in Assessment", "Starting Out checklist", "Build a budget exercise"],
+    },
+    {
+      id: "anniversary",
+      name: "Relationship Reflection",
+      badge: "For established couples",
+      price: "$139",
+      tagline: "Everything in Assessment + a third exercise on what shaped you.",
+      description: "Reflect on the moments that defined you, what you prioritize, and what you admire in each other.",
+      color: "#1B5FE8",
+      features: ["Everything in Assessment", "Relationship reflection exercise", "Anniversary-specific prompts"],
+    },
+    {
+      id: "premium",
+      name: "Attune Premium",
+      badge: "The complete experience",
+      price: "$295",
+      tagline: "Everything, plus a therapist session built around your results.",
+      description: "All three exercises, the budget worksheet, the personalized workbook, and a 50-minute session with a licensed therapist.",
+      color: "#3B5BDB",
+      features: ["Everything in Assessment", "Both bonus exercises", "LMFT session included", "Personalized workbook"],
+    },
+  ];
+
+  return (
+    <div onClick={e => e.target === e.currentTarget && onClose()}
+      style={{ position: "fixed", inset: 0, background: "rgba(14,11,7,0.55)", zIndex: 600, display: "flex", alignItems: "center", justifyContent: "center", padding: "1.25rem", backdropFilter: "blur(4px)" }}>
+      <div style={{ background: "white", borderRadius: 22, maxWidth: 640, width: "100%", maxHeight: "90vh", overflowY: "auto", boxShadow: "0 24px 80px rgba(14,11,7,0.22)", position: "relative" }}>
+        {/* Header */}
+        <div style={{ padding: "1.5rem 1.75rem 1rem", borderBottom: "1px solid #E8DDD0", display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: "1rem" }}>
+          <div>
+            <div style={{ display: "inline-block", background: "#FFF0EB", color: "#E8673A", fontSize: "0.58rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", padding: "0.22rem 0.65rem", borderRadius: 999, marginBottom: "0.5rem", fontFamily: "'DM Sans', sans-serif" }}>Explore packages</div>
+            <div style={{ fontFamily: "'Playfair Display', Georgia, serif", fontSize: "1.3rem", fontWeight: 700, color: "#0E0B07", lineHeight: 1.15 }}>Upgrade your experience</div>
+            <div style={{ fontSize: "0.82rem", color: "#8C7A68", fontFamily: "'DM Sans', sans-serif", marginTop: "0.2rem", fontStyle: "italic" }}>Choose the package that fits where you are.</div>
+          </div>
+          <button onClick={onClose} style={{ background: "none", border: "none", cursor: "pointer", color: "#8C7A68", fontSize: "1.3rem", lineHeight: 1, padding: "0.15rem", flexShrink: 0, marginTop: "-0.15rem" }}>✕</button>
+        </div>
+
+        {/* Packages list */}
+        <div style={{ padding: "1.25rem 1.75rem", display: "flex", flexDirection: "column", gap: "0.85rem" }}>
+          {packages.map(p => {
+            const isCurrent = p.id === currentPkg;
+            return (
+              <div key={p.id}
+                style={{ border: "1.5px solid " + (isCurrent ? p.color + "60" : "#E8DDD0"), background: isCurrent ? p.color + "08" : "white", borderRadius: 14, padding: "1rem 1.1rem", display: "flex", alignItems: "flex-start", gap: "1rem", position: "relative" }}>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.3rem", flexWrap: "wrap" }}>
+                    <div style={{ fontSize: "0.55rem", letterSpacing: "0.12em", textTransform: "uppercase", color: p.color, fontWeight: 700, fontFamily: "'DM Sans', sans-serif" }}>{p.badge}</div>
+                    {isCurrent && <div style={{ fontSize: "0.55rem", letterSpacing: "0.1em", textTransform: "uppercase", color: "#8C7A68", fontWeight: 700, fontFamily: "'DM Sans', sans-serif", background: "#F3EDE6", padding: "0.15rem 0.5rem", borderRadius: 999 }}>Current</div>}
+                  </div>
+                  <div style={{ fontFamily: "'Playfair Display', Georgia, serif", fontSize: "1.05rem", fontWeight: 700, color: "#0E0B07", lineHeight: 1.15, marginBottom: "0.25rem" }}>{p.name}</div>
+                  <div style={{ fontSize: "0.78rem", color: "#5C4A38", fontFamily: "'DM Sans', sans-serif", lineHeight: 1.5, marginBottom: "0.6rem" }}>{p.description}</div>
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: "0.35rem 0.85rem", marginBottom: "0.2rem" }}>
+                    {p.features.slice(0, 3).map(f => (
+                      <div key={f} style={{ display: "flex", alignItems: "center", gap: "0.35rem" }}>
+                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke={p.color} strokeWidth="3" strokeLinecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+                        <span style={{ fontSize: "0.72rem", color: "#3C3C43", fontFamily: "'DM Sans', sans-serif" }}>{f}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "0.5rem", flexShrink: 0 }}>
+                  <div style={{ fontFamily: "'Playfair Display', Georgia, serif", fontSize: "1.25rem", fontWeight: 700, color: "#0E0B07", lineHeight: 1 }}>{p.price}</div>
+                  {!isCurrent && (
+                    <button onClick={() => onPick(p.id)}
+                      style={{ background: "linear-gradient(135deg," + p.color + ",#d45a2e)", color: "white", border: "none", borderRadius: 10, padding: "0.55rem 0.9rem", fontSize: "0.72rem", fontWeight: 700, cursor: "pointer", fontFamily: "'DM Sans', sans-serif", letterSpacing: "0.03em", whiteSpace: "nowrap" }}>
+                      Choose →
+                    </button>
+                  )}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Footer link */}
+        <div style={{ padding: "0.85rem 1.75rem 1.5rem", borderTop: "1px solid #E8DDD0", textAlign: "center" }}>
+          <a href="/offerings" style={{ fontSize: "0.75rem", fontWeight: 600, color: "#8C7A68", fontFamily: "'DM Sans', sans-serif", textDecoration: "none" }}>
+            See full package details on the offerings page →
+          </a>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function App() {
   const [toastMsg, setToastMsg] = useState('');
   const [toastTimer, setToastTimer] = useState(null);
@@ -8699,6 +8806,7 @@ export default function App() {
   const [mobileNavOpen, setMobileNavOpen] = useState(false); // Mobile hamburger nav
   const [inviteCopied, setInviteCopied] = useState(false);
   const [upsellModal, setUpsellModal] = useState(null); // { product: 'workbook'|'reflection'|'checklist', cartAdded: false }
+  const [showPackagesModal, setShowPackagesModal] = useState(false); // "Explore other packages" modal
   // Load order record from localStorage (written by checkout on purchase)
   const [order, setOrder] = useState(() => {
     try { return JSON.parse(localStorage.getItem('attune_order') || 'null'); } catch { return null; }
@@ -9914,9 +10022,9 @@ export default function App() {
                       ))}
                     </div>
                     <div style={{ marginTop: "1rem", paddingTop: "1rem", borderTop: "1px solid #F3EDE6" }}>
-                      <a href="/offerings" style={{ fontSize: "0.75rem", fontWeight: 600, color: "#E8673A", fontFamily: font.body, textDecoration: "none" }}>
+                      <button onClick={() => setShowPackagesModal(true)} style={{ fontSize: "0.75rem", fontWeight: 600, color: "#E8673A", fontFamily: font.body, background: "none", border: "none", cursor: "pointer", padding: 0, letterSpacing: ".02em" }}>
                         Explore other packages →
-                      </a>
+                      </button>
                     </div>
                   </div>
                 </div>
@@ -10240,6 +10348,18 @@ export default function App() {
           }
         }}
         onClose={() => setUpsellModal(null)}
+      />
+    )}
+
+    {/* ── PACKAGES MODAL — "Explore other packages" ── */}
+    {showPackagesModal && (
+      <PackagesModal
+        currentPkg={demoPkg}
+        onClose={() => setShowPackagesModal(false)}
+        onPick={(pkgId) => {
+          setShowPackagesModal(false);
+          window.location.href = `/checkout?pkg=${pkgId}`;
+        }}
       />
     )}
 
