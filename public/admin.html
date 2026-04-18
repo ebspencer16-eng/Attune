@@ -1792,13 +1792,28 @@ async function sha256(str) {
 }
 
 async function attemptLogin() {
-  const email = document.getElementById('login-email').value.trim().toLowerCase();
-  const pass  = document.getElementById('login-password').value;
-  const btn   = document.getElementById('login-btn');
-  const errEl = document.getElementById('login-err');
-  const card  = document.querySelector('.login-card');
+  const btn      = document.getElementById('login-btn');
+  const errEl    = document.getElementById('login-err');
+  const card     = document.querySelector('.login-card');
   const emailInp = document.getElementById('login-email');
   const passInp  = document.getElementById('login-password');
+
+  // Bail with a visible message if any required element is missing
+  if (!btn || !errEl || !card || !emailInp || !passInp) {
+    const missing = [
+      !btn && 'button',
+      !errEl && 'error display',
+      !card && 'card',
+      !emailInp && 'email input',
+      !passInp && 'password input',
+    ].filter(Boolean).join(', ');
+    if (errEl) errEl.textContent = 'Setup error: missing ' + missing;
+    console.error('[Admin login] missing elements:', missing);
+    return;
+  }
+
+  const email = emailInp.value.trim().toLowerCase();
+  const pass  = passInp.value;
 
   // Clear prior shake / error styling
   card.classList.remove('shake');
@@ -1807,7 +1822,6 @@ async function attemptLogin() {
 
   if (!email || !pass) {
     errEl.textContent = 'Please enter your email and password.';
-    // Brief shake + highlight missing fields
     void card.offsetWidth; // restart animation
     card.classList.add('shake');
     if (!email) emailInp.classList.add('err');
@@ -1820,13 +1834,16 @@ async function attemptLogin() {
   errEl.textContent = '';
 
   try {
+    // Check crypto.subtle is available (only works on secure origins)
+    if (!window.crypto || !window.crypto.subtle) {
+      throw new Error('Browser crypto unavailable. Ensure you are on HTTPS.');
+    }
     const [eHash, pHash] = await Promise.all([sha256(email), sha256(pass)]);
 
     if (eHash === ADMIN_EMAIL_HASH && pHash === ADMIN_PASSWORD_HASH) {
       sessionStorage.setItem('attune_admin_auth', '1');
       document.getElementById('admin-login-gate').classList.add('hidden');
     } else {
-      // Wrong credentials — shake + specific message
       const emailMatches = eHash === ADMIN_EMAIL_HASH;
       if (!emailMatches) {
         errEl.textContent = 'Wrong email';
@@ -1842,7 +1859,7 @@ async function attemptLogin() {
     }
   } catch (err) {
     console.error('[Admin login] unexpected error:', err);
-    errEl.textContent = 'Something went wrong. Please try again.';
+    errEl.textContent = 'Error: ' + (err && err.message ? err.message : String(err));
     btn.disabled = false;
     btn.textContent = 'Sign in →';
   }
