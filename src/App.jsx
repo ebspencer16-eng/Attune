@@ -7258,7 +7258,15 @@ function AuthModal({ mode, onClose, onSuccess }) {
   const [resetSent, setResetSent] = useState(false);
   const [loginAttempts, setLoginAttempts] = useState(0);
   const [lockedUntil, setLockedUntil] = useState(null);
+  const [shake, setShake] = useState(false);
   const upd = (k, v) => setForm(f => ({ ...f, [k]: v }));
+
+  // Trigger shake + clear after animation (0.45s)
+  const triggerShake = () => {
+    setShake(false);
+    // Force reflow so animation restarts if triggered twice in a row
+    requestAnimationFrame(() => { setShake(true); setTimeout(() => setShake(false), 500); });
+  };
 
   const genInvite = () => Math.random().toString(36).slice(2, 10).toUpperCase();
 
@@ -7407,8 +7415,16 @@ function AuthModal({ mode, onClose, onSuccess }) {
         setLoading(false);
         const attempts = loginAttempts + 1;
         setLoginAttempts(attempts);
+        // Trigger shake animation on every failed attempt
+        triggerShake();
         if (attempts >= 5) { setLockedUntil(Date.now() + 30000); setLoginAttempts(0); return setErr("Too many failed attempts. Please wait 30 seconds."); }
-        return setErr("Incorrect email or password.");
+        // Try to distinguish email vs password error. Supabase returns a generic message for security,
+        // but we can check if the error mentions "email" specifically.
+        const msg = (authErr.message || '').toLowerCase();
+        if (msg.includes('email not confirmed') || msg.includes('not confirmed')) return setErr("Please confirm your email first.");
+        if (msg.includes('user not found') || msg.includes('no user') || msg.includes('invalid email')) return setErr("Wrong email — no account found.");
+        // Default: assume wrong password (most common case when email exists)
+        return setErr("Wrong password. Please try again.");
       }
       setLoginAttempts(0); // reset on success
 
@@ -7543,7 +7559,8 @@ function AuthModal({ mode, onClose, onSuccess }) {
   return (
     <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.55)", zIndex: 500, display: "flex", alignItems: "center", justifyContent: "center", padding: "1rem" }}
       onClick={e => e.target === e.currentTarget && onClose()}>
-      <div style={{ background: "#FFFDF9", borderRadius: 22, padding: "2rem 2rem 1.75rem", width: "100%", maxWidth: 440, boxShadow: "0 32px 80px rgba(0,0,0,0.28)", position: "relative" }}>
+      <style>{`@keyframes authShake { 0%,100% { transform: translateX(0); } 15% { transform: translateX(-10px); } 30% { transform: translateX(10px); } 45% { transform: translateX(-8px); } 60% { transform: translateX(8px); } 75% { transform: translateX(-4px); } 90% { transform: translateX(4px); } }`}</style>
+      <div style={{ background: "#FFFDF9", borderRadius: 22, padding: "2rem 2rem 1.75rem", width: "100%", maxWidth: 440, boxShadow: "0 32px 80px rgba(0,0,0,0.28)", position: "relative", animation: shake ? "authShake 0.45s cubic-bezier(.36,.07,.19,.97)" : undefined }}>
         <button onClick={onClose} style={{ position: "absolute", top: "1rem", right: "1rem", background: "none", border: "none", fontSize: "1.2rem", cursor: "pointer", color: "#8C7A68", lineHeight: 1 }}>✕</button>
 
         {/* Logo */}

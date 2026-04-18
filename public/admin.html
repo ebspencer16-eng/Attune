@@ -122,6 +122,17 @@
   .login-btn{width:100%;padding:.85rem;background:linear-gradient(135deg,#E8673A,#1B5FE8);color:white;border:none;border-radius:11px;font-size:.85rem;font-weight:700;cursor:pointer;font-family:var(--bfont);margin-top:.25rem;transition:opacity .15s;}
   .login-btn:disabled{opacity:.55;cursor:default;}
   .login-err{color:#f87171;font-size:.75rem;font-family:var(--bfont);margin-bottom:.65rem;min-height:1.1rem;}
+  @keyframes login-shake {
+    0%,100% { transform: translateX(0); }
+    15% { transform: translateX(-10px); }
+    30% { transform: translateX(10px); }
+    45% { transform: translateX(-8px); }
+    60% { transform: translateX(8px); }
+    75% { transform: translateX(-4px); }
+    90% { transform: translateX(4px); }
+  }
+  .login-card.shake { animation: login-shake 0.45s cubic-bezier(.36,.07,.19,.97); }
+  .login-inp.err { border-color: #f87171 !important; }
 
   /* HEATMAP */
   .heatmap{display:grid;grid-template-columns:repeat(7,1fr);gap:3px}
@@ -1787,29 +1798,65 @@ async function attemptLogin() {
   const pass  = document.getElementById('login-password').value;
   const btn   = document.getElementById('login-btn');
   const errEl = document.getElementById('login-err');
+  const card  = document.querySelector('.login-card');
+  const emailInp = document.getElementById('login-email');
+  const passInp  = document.getElementById('login-password');
 
-  if (!email || !pass) { errEl.textContent = 'Please enter your email and password.'; return; }
+  // Clear prior shake / error styling
+  card.classList.remove('shake');
+  emailInp.classList.remove('err');
+  passInp.classList.remove('err');
+
+  if (!email || !pass) {
+    errEl.textContent = 'Please enter your email and password.';
+    // Brief shake + highlight missing fields
+    void card.offsetWidth; // restart animation
+    card.classList.add('shake');
+    if (!email) emailInp.classList.add('err');
+    if (!pass) passInp.classList.add('err');
+    return;
+  }
 
   btn.disabled = true;
   btn.textContent = 'Checking…';
   errEl.textContent = '';
 
-  const [eHash, pHash] = await Promise.all([sha256(email), sha256(pass)]);
+  try {
+    const [eHash, pHash] = await Promise.all([sha256(email), sha256(pass)]);
 
-  // Compare against stored hashes
-  if (eHash === ADMIN_EMAIL_HASH && pHash === ADMIN_PASSWORD_HASH) {
-    // Store session for this browser tab (sessionStorage clears on tab close)
-    sessionStorage.setItem('attune_admin_auth', '1');
-    document.getElementById('admin-login-gate').classList.add('hidden');
-    // Allow pressing Enter to submit
-    document.getElementById('login-email').addEventListener('keydown', function(e){ if(e.key==='Enter') attemptLogin(); });
-    document.getElementById('login-password').addEventListener('keydown', function(e){ if(e.key==='Enter') attemptLogin(); });
-  } else {
-    errEl.textContent = 'Incorrect email or password.';
+    if (eHash === ADMIN_EMAIL_HASH && pHash === ADMIN_PASSWORD_HASH) {
+      sessionStorage.setItem('attune_admin_auth', '1');
+      document.getElementById('admin-login-gate').classList.add('hidden');
+    } else {
+      // Wrong credentials — shake + specific message
+      const emailMatches = eHash === ADMIN_EMAIL_HASH;
+      if (!emailMatches) {
+        errEl.textContent = 'Wrong email';
+        emailInp.classList.add('err');
+      } else {
+        errEl.textContent = 'Wrong password';
+        passInp.classList.add('err');
+      }
+      void card.offsetWidth;
+      card.classList.add('shake');
+      btn.disabled = false;
+      btn.textContent = 'Sign in →';
+    }
+  } catch (err) {
+    console.error('[Admin login] unexpected error:', err);
+    errEl.textContent = 'Something went wrong. Please try again.';
     btn.disabled = false;
     btn.textContent = 'Sign in →';
   }
 }
+
+// Keydown listeners attached up-front on the inputs (not after successful login)
+document.addEventListener('DOMContentLoaded', () => {
+  const emailInp = document.getElementById('login-email');
+  const passInp  = document.getElementById('login-password');
+  if (emailInp) emailInp.addEventListener('keydown', e => { if (e.key === 'Enter') attemptLogin(); });
+  if (passInp)  passInp.addEventListener('keydown',  e => { if (e.key === 'Enter') attemptLogin(); });
+});
 
 // Allow Enter key to submit
 document.addEventListener('keydown', e => {
