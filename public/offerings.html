@@ -720,7 +720,7 @@
               <div class="physical-icon" style="background:#E8673A15;">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#E8673A" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3"/><line x1="12" y1="3" x2="12" y2="9"/></svg>
               </div>
-              <span>Ceramic ring tray – 'understanding takes intention'</span>
+              <span>Handmade ceramic ring tray – 'understanding takes intention'</span>
             </div>
           </div>
         </div>
@@ -835,7 +835,7 @@
               <div class="physical-icon" style="background:#E8673A15;">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#E8673A" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3"/><line x1="12" y1="3" x2="12" y2="9"/></svg>
               </div>
-              <span>Ceramic ring tray – 'understanding takes intention'</span>
+              <span>Handmade ceramic ring tray – 'understanding takes intention'</span>
             </div>
           </div>
         </div>
@@ -939,7 +939,7 @@
               <div class="physical-icon" style="background:#E8673A15;">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#E8673A" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3"/><line x1="12" y1="3" x2="12" y2="9"/></svg>
               </div>
-              <span>Ceramic ring tray – 'understanding takes intention'</span>
+              <span>Handmade ceramic ring tray – 'understanding takes intention'</span>
             </div>
           </div>
         </div>
@@ -1075,7 +1075,7 @@
               <div class="physical-icon" style="background:#E8673A15;">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#E8673A" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3"/><line x1="12" y1="3" x2="12" y2="9"/></svg>
               </div>
-              <span>Ceramic ring tray – 'understanding takes intention'</span>
+              <span>Handmade ceramic ring tray – 'understanding takes intention'</span>
             </div>
           </div>
         </div>
@@ -1478,6 +1478,15 @@ function submitAnnualNotify() {
   document.getElementById('annual-email').style.display='none';
   document.getElementById('annual-confirm').style.display='block';
 }
+
+  // Initialize all packages to physical (default) on page load so prices match the active toggle
+  document.addEventListener('DOMContentLoaded', function(){
+    try {
+      setFormat('newlywed','physical');
+      setFormat('ann','physical');
+      setFormat('premium','physical');
+    } catch(e) { /* elements may not all exist on every render */ }
+  });
 
   // Close mobile menu on outside tap
   </script>
