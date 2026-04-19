@@ -691,11 +691,21 @@
           <p class="pkg-sub">Two independent exercises that map how you communicate and what you each expect. The results unlock together, built entirely from your own answers.</p>
         </div>
         <div class="pkg-price">
-          <div class="pkg-price-row"><span class="price-main">$89</span><span class="price-label">per couple</span></div>
-          <div class="price-alt">Digital · instant access · yours to keep</div>
+          <div class="pkg-price-row"><span class="price-main" id="core-price">$89</span><span class="price-label">per couple</span></div>
+          <div class="price-alt" id="core-price-sub">Digital · instant access · yours to keep</div>
           <div class="price-alt" style="margin-top:.35rem;">Physical gift box · <strong>$124</strong> · shipping included · ships in 5–7 days</div>
         </div>
       </div>
+    </div>
+    <div class="format-toggle">
+      <button class="fmt-btn active" onclick="setFormat('core','virtual')">
+        <svg style="display:inline;margin-right:.3rem" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><polyline points="8 21 12 17 16 21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+        Digital edition
+      </button>
+      <button class="fmt-btn" onclick="setFormat('core','physical')">
+        <svg style="display:inline;margin-right:.3rem" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a4 4 0 0 0-8 0v2"/></svg>
+        Physical box
+      </button>
     </div>
     <div class="pkg-body two-col" style="padding-top:0">
       <div>
@@ -776,7 +786,7 @@
           <div style="font-size:.95rem;font-weight:700;color:#0E0B07;">+$40</div>
         </div>
       </div>
-      <button onclick="addToCartWithIntent('core')" class="btn-primary">Add to cart →</button>
+      <button onclick="addToCartWithIntent('core')" class="btn-primary" id="core-cta">Add to cart →</button>
       <span class="pkg-note">Answers stay private until both partners are done</span>
     </div>
     <p style="font-size:.75rem;color:var(--muted);margin-top:0;padding:1rem 2.25rem 1.5rem;">Looking for more? <a href="#pkg-premium" onclick="addToCartWithIntent('premium')" style="color:var(--clay);font-weight:600;text-decoration:none;">Check out the premium package →</a></p>
@@ -1319,7 +1329,7 @@ const CART_PKGS = {
     name: 'The Attune Assessment', badge: 'The Foundation',
     badgeColor: '#FFF0EB', badgeText: '#E8673A',
     digitalPrice: 89, physicalPrice: 124,
-    supportsPhysical: false,  // core is digital-only
+    supportsPhysical: true,
   },
   newlywed: {
     name: 'Starting Out Collection', badge: 'Wedding Gift',
@@ -1646,7 +1656,23 @@ function setFormat(pkg,format){
   const isDigital = format === 'virtual' || format === 'digital';
   _currentFormats[cartKey] = isDigital ? 'digital' : 'physical';
 
-  if(pkg==='newlywed'){
+  if(pkg==='core'){
+    const physical=format==='physical';
+    const priceEl = document.getElementById('core-price');
+    const subEl   = document.getElementById('core-price-sub');
+    if (priceEl) priceEl.textContent = physical ? '$124' : '$89';
+    if (subEl)   subEl.textContent   = physical
+      ? 'Physical gift box (+$35) · ships in 5–7 days'
+      : 'Digital · instant access · yours to keep';
+    const coreCta = document.getElementById('core-cta');
+    if (coreCta) coreCta.textContent = 'Add to cart →';
+    const physicalCol = document.getElementById('core-physical-col');
+    if (physicalCol) physicalCol.style.display = physical ? 'block' : 'none';
+    document.querySelectorAll('#pkg-core .fmt-btn').forEach((b,i)=>{
+      // Button 0 is Digital, 1 is Physical (matches HTML order)
+      b.className = 'fmt-btn' + (i === (physical ? 1 : 0) ? ' active' : '');
+    });
+  } else if(pkg==='newlywed'){
     const physical=format==='physical';
     document.getElementById('newlywed-price').textContent=physical?'$174':'$139';
     document.getElementById('newlywed-price-sub').textContent=physical?'Physical gift box (+$35) · ships in 5–7 days':'Digital · instant access · yours to keep';
@@ -1693,6 +1719,7 @@ function submitAnnualNotify() {
   // Initialize all packages to physical (default) on page load so prices match the active toggle
   document.addEventListener('DOMContentLoaded', function(){
     try {
+      setFormat('core','virtual');     // core defaults to digital; hides physical col
       setFormat('newlywed','physical');
       setFormat('ann','physical');
       setFormat('premium','physical');
