@@ -117,6 +117,39 @@
   /* ERROR */
   .error-msg{font-size:.75rem;color:#ef4444;margin-top:.4rem;display:none}
   .error-msg.visible{display:block}
+
+  /* Multi-item checkout: per-couple block styling */
+  .item-block + .item-block{
+    margin-top:1.6rem;padding-top:1.3rem;border-top:1px solid #F0EBE4;
+  }
+  .item-block-header{
+    display:flex;align-items:center;gap:.8rem;margin-bottom:.9rem;
+  }
+  .item-block-num{
+    width:28px;height:28px;border-radius:50%;background:#FFF0EB;color:#E8673A;
+    display:flex;align-items:center;justify-content:center;font-weight:700;
+    font-size:.8rem;font-family:'DM Sans',sans-serif;flex-shrink:0;
+  }
+  .item-block-title{
+    font-family:'Playfair Display',Georgia,serif;font-size:1rem;font-weight:700;
+    color:#0E0B07;line-height:1.2;
+  }
+  .item-block-sub{
+    font-size:.72rem;color:#8C7A68;margin-top:.1rem;
+  }
+  .item-intent{
+    display:flex;gap:.5rem;margin-bottom:.9rem;
+  }
+  .item-intent-btn{
+    flex:1;padding:.55rem .75rem;border-radius:10px;border:1.5px solid #E8DDD0;
+    background:white;color:#5C4A38;font-size:.78rem;font-weight:600;cursor:pointer;
+    font-family:'DM Sans',sans-serif;transition:all .12s;
+    display:flex;align-items:center;justify-content:center;gap:.4rem;
+  }
+  .item-intent-btn.active{
+    border-color:#E8673A;background:#FFF0EB;color:#E8673A;
+  }
+  .item-intent-ico{font-size:.95rem;line-height:1;}
 </style>
 </head>
 <body>
@@ -145,8 +178,8 @@
   <!-- LEFT COL: FORM STEPS -->
   <div>
 
-    <!-- STEP 1: WHO IS THIS FOR? -->
-    <div class="co-card">
+    <!-- STEP 1: WHO IS THIS FOR? (hidden when multi-item; intent is per-item) -->
+    <div class="co-card" id="step1Card">
       <div class="co-card-head">
         <div class="co-num" id="num1">1</div>
         <div class="co-card-title">Is this for you two, or a gift?</div>
@@ -168,7 +201,7 @@
       </div>
     </div>
 
-    <!-- STEP 2: COUPLE NAMES -->
+    <!-- STEP 2: COUPLE DETAILS (one block per couple in cart) -->
     <div class="co-card">
       <div class="co-card-head">
         <div class="co-num" id="num2">2</div>
@@ -179,25 +212,9 @@
         <p style="font-size:.78rem;color:var(--muted);margin-bottom:1.1rem;line-height:1.6" id="namesHint">
           We'll use these throughout your results and in your personalized materials. First names are fine.
         </p>
-        <div class="form-row">
-          <div class="form-group">
-            <label class="form-label" for="p1name">Partner 1 – first name</label>
-            <input class="form-input" type="text" id="p1name" placeholder="e.g. Sarah" autocomplete="given-name" oninput="onNamesInput()">
-          </div>
-          <div class="form-group">
-            <label class="form-label" for="p2name">Partner 2 – first name</label>
-            <input class="form-input" type="text" id="p2name" placeholder="e.g. James" autocomplete="given-name" oninput="onNamesInput()">
-          </div>
-        </div>
-        <!-- Gift note (shown when intent=gift) -->
-        <div class="gift-note-wrap" id="giftNoteWrap">
-          <div class="form-divider">Gift message</div>
-          <div class="form-group">
-            <label class="form-label" for="giftNote">Personal note (optional)</label>
-            <textarea class="form-input" id="giftNote" placeholder="e.g. 'Thinking of you both as you start this chapter – can't wait to see what you discover about each other.'" rows="3"></textarea>
-            <div class="form-hint">This will be printed inside the QR card. Max 200 characters.</div>
-          </div>
-        </div>
+
+        <!-- Dynamically rendered per-item blocks -->
+        <div id="items-container"></div>
       </div>
     </div>
 
@@ -391,6 +408,13 @@ const ADDON_WORKBOOK = {
 };
 
 // ── State ────────────────────────────────────────────────────────────────────
+// Stripe state (declared here so validateForm() can reference before setupStripe runs)
+let cardComplete = false;
+let appliedPromoCode = null;
+let stripe, cardNumberElement, cardExpiryElement, cardCvcElement;
+
+// Single-item legacy vars (used when cart has exactly one item, for
+// backward compat with the simpler single-item UI)
 let intent = 'self';   // 'self' | 'gift'
 let pkg = null;
 let addonWorkbook = null;
@@ -398,30 +422,81 @@ let addonReflection = false;
 let addonBudget = false;
 let addonLmft = false;
 
-// ── Init from URL params ─────────────────────────────────────────────────────
+// Multi-item state: one entry per couple (qty expanded). Each entry:
+//   { pkg, format, addons:{workbook,workbookVariant,lmft,reflection,budget,checklist},
+//     intent:'self'|'gift', partner1Name, partner2Name, giftNote, shipping:{name,address,city,state} }
+let _items = [];
+
+// ── Init: read cart from sessionStorage or fall back to URL params ───────────
 (function init() {
   const params = new URLSearchParams(location.search);
-  const pkgId  = params.get('pkg') || 'core';
-  addonWorkbook = params.get('addon_workbook') || null;
-  addonLmft = params.get('addon_lmft') === '1';
-  addonReflection = params.get('addon_reflection') === '1';
-  addonBudget = params.get('addon_budget') === '1';
-  pkg = PACKAGES[pkgId] || PACKAGES.core;
 
-  // Intent from params (gift link from offerings)
-  const giftParam = params.get('gift');
-  if (giftParam === '1' || giftParam === 'true') {
-    setIntent('gift');
+  // Try sessionStorage first (set by offerings cart)
+  let cartItems = null;
+  try {
+    const raw = sessionStorage.getItem('attune_cart');
+    if (raw) cartItems = JSON.parse(raw);
+  } catch {}
+
+  if (Array.isArray(cartItems) && cartItems.length > 0) {
+    // Expand each cart line by qty into a separate couple entry
+    _items = [];
+    for (const ci of cartItems) {
+      for (let i = 0; i < (ci.qty || 1); i++) {
+        _items.push({
+          pkg:    ci.pkg,
+          format: ci.format || 'digital',
+          addons: { ...ci.addons },
+          intent: 'self',
+          partner1Name: '',
+          partner2Name: '',
+          giftNote: '',
+          shipping: { name:'', address:'', city:'', state:'' },
+        });
+      }
+    }
+  } else {
+    // Fallback: single-item from URL params (legacy link-in or gift link)
+    const pkgId  = params.get('pkg') || 'core';
+    const format = params.get('format') === 'physical' ? 'physical' :
+                   (PACKAGES[pkgId]?.format || 'digital');
+    _items = [{
+      pkg:    pkgId,
+      format,
+      addons: {
+        workbook:         params.get('addon_workbook') || false,
+        workbookVariant:  params.get('addon_workbook') === 'print' ? 'print' : 'digital',
+        lmft:             params.get('addon_lmft') === '1',
+        reflection:       params.get('addon_reflection') === '1',
+        budget:           params.get('addon_budget') === '1',
+        checklist:        false,
+      },
+      intent: params.get('gift') === '1' ? 'gift' : 'self',
+      partner1Name: '', partner2Name: '', giftNote: '',
+      shipping: { name:'', address:'', city:'', state:'' },
+    }];
   }
 
+  // Mirror first item into legacy vars (for summary code that still uses them)
+  const first = _items[0];
+  pkg = PACKAGES[first.pkg] || PACKAGES.core;
+  pkg.format = first.format;
+  addonWorkbook   = first.addons.workbook ? (first.addons.workbookVariant || 'digital') : null;
+  addonLmft       = !!first.addons.lmft;
+  addonReflection = !!first.addons.reflection;
+  addonBudget     = !!first.addons.budget;
+  intent          = first.intent;
+
+  renderItemsStep();
   renderSummary();
-  // Show format toggle for assessment (core) package – others are always physical
-  if (pkg.id === 'core') {
+
+  // Show format toggle for assessment (core) package when single-item legacy flow
+  if (_items.length === 1 && pkg.id === 'core') {
     const ftEl = document.getElementById('formatToggleSection');
     if (ftEl) ftEl.style.display = 'block';
   }
   // LMFT add-on: show for all packages except premium (which includes it)
-  if (pkg.id !== 'premium') {
+  if (_items.length === 1 && pkg.id !== 'premium') {
     const lmftRow = document.getElementById('lmftAddonRow');
     if (lmftRow) lmftRow.style.display = 'block';
   }
@@ -438,14 +513,139 @@ let addonLmft = false;
     const chk = document.getElementById('lmftCheck');
     chk.checked = !chk.checked;
     addonLmft = chk.checked;
+    if (_items.length === 1) _items[0].addons.lmft = chk.checked;
     syncLmftBox();
     renderSummary();
   });
   syncLmftBox();
-  if (pkg.format === 'physical') {
-    document.getElementById('shippingSection').style.display = 'block';
-  }
 })();
+
+// ── Render per-item forms (Step 2) ───────────────────────────────────────────
+// Builds one block per couple in the cart. For a single item this looks
+// like a single compact form; for multiple it becomes a stacked list.
+function renderItemsStep() {
+  const container = document.getElementById('items-container');
+  if (!container) return;
+
+  // Hide the global Step 1 (self/gift toggle) when we have per-item intent
+  const step1 = document.getElementById('step1Card');
+  if (step1) step1.style.display = 'none';
+
+  // Title based on cart shape
+  const titleEl = document.getElementById('namesTitle');
+  if (titleEl) {
+    titleEl.textContent = _items.length > 1
+      ? `Details for each couple (${_items.length})`
+      : 'Your names';
+  }
+  const hintEl = document.getElementById('namesHint');
+  if (hintEl) {
+    hintEl.textContent = _items.length > 1
+      ? "Fill in the names for each couple below. If any are gifts, toggle the gift option for that couple and add an optional note."
+      : "We'll use these throughout your results and in your personalized materials. First names are fine.";
+  }
+
+  container.innerHTML = _items.map((it, idx) => {
+    const p = PACKAGES[it.pkg] || PACKAGES.core;
+    const pkgLabel = p.name;
+    const isPhysical = it.format === 'physical';
+    const header = _items.length > 1
+      ? `<div class="item-block-header">
+           <span class="item-block-num">${idx + 1}</span>
+           <div>
+             <div class="item-block-title">${pkgLabel}</div>
+             <div class="item-block-sub">${isPhysical ? 'Physical gift box' : 'Digital'}</div>
+           </div>
+         </div>`
+      : '';
+
+    return `
+    <div class="item-block" data-idx="${idx}">
+      ${header}
+
+      <!-- Self / gift toggle per item -->
+      <div class="item-intent">
+        <button type="button" class="item-intent-btn ${it.intent==='self'?'active':''}" onclick="setItemIntent(${idx},'self')">
+          <span class="item-intent-ico">💑</span>
+          <span>For us</span>
+        </button>
+        <button type="button" class="item-intent-btn ${it.intent==='gift'?'active':''}" onclick="setItemIntent(${idx},'gift')">
+          <span class="item-intent-ico">🎁</span>
+          <span>A gift</span>
+        </button>
+      </div>
+
+      <!-- Names -->
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Partner 1 – first name</label>
+          <input class="form-input item-input" type="text" data-idx="${idx}" data-field="partner1Name" value="${(it.partner1Name||'').replace(/"/g,'&quot;')}" placeholder="e.g. Sarah" autocomplete="given-name" oninput="onItemInput(this)">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Partner 2 – first name</label>
+          <input class="form-input item-input" type="text" data-idx="${idx}" data-field="partner2Name" value="${(it.partner2Name||'').replace(/"/g,'&quot;')}" placeholder="e.g. James" autocomplete="given-name" oninput="onItemInput(this)">
+        </div>
+      </div>
+
+      ${it.intent === 'gift' ? `
+        <div class="form-group" style="margin-top:.65rem">
+          <label class="form-label">Personal note (optional)</label>
+          <textarea class="form-input item-input" rows="2" data-idx="${idx}" data-field="giftNote" placeholder="Thinking of you both..." oninput="onItemInput(this)">${it.giftNote || ''}</textarea>
+          <div class="form-hint">Printed inside their QR card. Max 200 characters.</div>
+        </div>
+      ` : ''}
+
+      ${isPhysical ? `
+        <div class="form-divider" style="margin-top:.9rem">Shipping address</div>
+        <div class="form-group">
+          <label class="form-label">Full name</label>
+          <input class="form-input item-input" type="text" data-idx="${idx}" data-field="shipping.name" value="${(it.shipping.name||'').replace(/"/g,'&quot;')}" placeholder="Recipient's name" autocomplete="name" oninput="onItemInput(this)">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Street address</label>
+          <input class="form-input item-input" type="text" data-idx="${idx}" data-field="shipping.address" value="${(it.shipping.address||'').replace(/"/g,'&quot;')}" placeholder="123 Main St" autocomplete="street-address" oninput="onItemInput(this)">
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">City</label>
+            <input class="form-input item-input" type="text" data-idx="${idx}" data-field="shipping.city" value="${(it.shipping.city||'').replace(/"/g,'&quot;')}" placeholder="City" autocomplete="address-level2" oninput="onItemInput(this)">
+          </div>
+          <div class="form-group">
+            <label class="form-label">State / ZIP</label>
+            <input class="form-input item-input" type="text" data-idx="${idx}" data-field="shipping.state" value="${(it.shipping.state||'').replace(/"/g,'&quot;')}" placeholder="UT 84601" autocomplete="postal-code" oninput="onItemInput(this)">
+          </div>
+        </div>
+      ` : ''}
+    </div>`;
+  }).join('');
+
+  // Hide the legacy shipping section since we now render it per physical item
+  const legacyShip = document.getElementById('shippingSection');
+  if (legacyShip) legacyShip.style.display = 'none';
+
+  validateForm();
+}
+
+function setItemIntent(idx, v) {
+  if (!_items[idx]) return;
+  _items[idx].intent = v;
+  if (idx === 0) intent = v;
+  renderItemsStep();
+  renderSummary();
+}
+
+function onItemInput(el) {
+  const idx = parseInt(el.dataset.idx, 10);
+  const field = el.dataset.field;
+  if (!_items[idx]) return;
+  if (field.startsWith('shipping.')) {
+    const k = field.split('.')[1];
+    _items[idx].shipping[k] = el.value;
+  } else {
+    _items[idx][field] = el.value;
+  }
+  validateForm();
+}
 
 // ── Format toggle (core package only) ────────────────────────────────────────
 function setFormat(fmt) {
@@ -461,80 +661,80 @@ function renderSummary() {
   const totalEl = document.getElementById('totalPrice');
   const tagEl   = document.getElementById('tagList');
 
-  const isPhys = pkg.format === 'physical';
-  let total = isPhys ? pkg.physicalPrice : pkg.digitalPrice;
-  pkg.price = total; // keep in sync for payment intent
-  // One-line summary of what they're getting
-  const summaryLine = {
-    core: 'Two relationship exercises + your couple type and full results profile.',
-    newlywed: 'Two relationship exercises + real-world logistics checklist for merging lives.',
-    anniversary: 'Two exercises + a third reflection exercise built around your shared history.',
-    premium: 'The full assessment + a 50-min LMFT session reviewing your results together.',
-  }[pkg.id] || '';
-  let rows = summaryLine ? `<div style="font-size:.75rem;color:#5C4D3C;line-height:1.6;padding:.6rem 0 .8rem;border-bottom:1px solid #F3EDE6;margin-bottom:.2rem;">${summaryLine}</div>` : '';
-  rows += `
-    <div class="co-card-detail">
-      <div>
-        <div class="name">${pkg.name} <span class="badge">${pkg.badge}</span></div>
-        <span class="sub">${pkg.format === 'physical' ? 'Digital + physical gift box' : 'Digital · instant access'}</span>
-      </div>
-      <div class="price">$${isPhys ? pkg.physicalPrice : pkg.digitalPrice}</div>
-    </div>`;
-
-  if (addonWorkbook && ADDON_WORKBOOK[addonWorkbook]) {
-    const wb = ADDON_WORKBOOK[addonWorkbook];
-    total += wb.price;
-    rows += `
-      <div class="co-card-detail">
-        <div><div class="name">${wb.label}</div></div>
-        <div class="price">+$${wb.price}</div>
-      </div>`;
+  // Compute total across all items in cart
+  function itemPrice(it) {
+    const p = PACKAGES[it.pkg] || PACKAGES.core;
+    let base = it.format === 'physical' ? p.physicalPrice : p.digitalPrice;
+    let add = 0;
+    if (it.addons.workbook) add += (it.addons.workbookVariant === 'print') ? 39 : 19;
+    if (it.addons.lmft)       add += ADDON_LMFT.price;
+    if (it.addons.reflection) add += ADDON_REFLECTION.price;
+    if (it.addons.budget)     add += 15;
+    if (it.addons.checklist)  add += 12;
+    return base + add;
   }
 
-  if (addonLmft) {
-    total += ADDON_LMFT.price;
-    rows += `
-      <div class="co-card-detail">
-        <div><div class="name">${ADDON_LMFT.label}</div></div>
-        <div class="price">+$${ADDON_LMFT.price}</div>
-      </div>`;
+  let total = 0;
+  let rows = '';
+
+  // Group identical (pkg+format+addons) items to show qty when multiple
+  const groups = [];
+  for (const it of _items) {
+    const sig = [it.pkg, it.format, JSON.stringify(it.addons)].join('|');
+    let g = groups.find(x => x.sig === sig);
+    if (g) { g.qty += 1; g.subtotal += itemPrice(it); }
+    else groups.push({ sig, item: it, qty: 1, subtotal: itemPrice(it) });
   }
 
-  if (addonReflection) {
-    total += ADDON_REFLECTION.price;
+  for (const g of groups) {
+    const p = PACKAGES[g.item.pkg] || PACKAGES.core;
+    const isPhys = g.item.format === 'physical';
+    total += g.subtotal;
+    const qtyLabel = g.qty > 1 ? ` <span style="color:#8C7A68;font-size:.7rem">× ${g.qty}</span>` : '';
     rows += `
       <div class="co-card-detail">
-        <div><div class="name">${ADDON_REFLECTION.label}</div></div>
-        <div class="price">+$${ADDON_REFLECTION.price}</div>
+        <div>
+          <div class="name">${p.name}${qtyLabel} <span class="badge">${p.badge}</span></div>
+          <span class="sub">${isPhys ? 'Digital + physical gift box' : 'Digital · instant access'}</span>
+        </div>
+        <div class="price">$${g.subtotal}</div>
       </div>`;
+    // Addon summary rows if any
+    const addonBits = [];
+    if (g.item.addons.workbook)   addonBits.push(`Workbook${g.item.addons.workbookVariant === 'print' ? ' (print)' : ''}`);
+    if (g.item.addons.lmft)       addonBits.push('LMFT Session');
+    if (g.item.addons.reflection) addonBits.push('Reflection');
+    if (g.item.addons.budget)     addonBits.push('Budget');
+    if (g.item.addons.checklist)  addonBits.push('Checklist');
+    if (addonBits.length) {
+      rows += `<div style="font-size:.66rem;color:#8C7A68;padding:0 0 .6rem .1rem">+ ${addonBits.join(', ')}</div>`;
+    }
   }
 
-  if (addonBudget) {
-    total += 20;
-    rows += `
-      <div class="co-card-detail">
-        <div><div class="name">Budget Priorities Exercise</div></div>
-        <div class="price">+$20</div>
-      </div>`;
-  }
+  if (el) el.innerHTML = rows;
+  if (totalEl) totalEl.textContent = '$' + total;
 
-  el.innerHTML = rows;
-  totalEl.textContent = '$' + total;
-  const activeTags = isPhys ? (pkg.physicalTags || pkg.tags) : pkg.tags;
-  tagEl.innerHTML = activeTags.map(t => `<span class="tag">${t}</span>`).join('');
-  document.getElementById('btnLabel').textContent = `Complete order · $${total}`;
+  // Tag list uses first item's package
+  const firstPkg = PACKAGES[_items[0]?.pkg] || PACKAGES.core;
+  const firstPhys = _items[0]?.format === 'physical';
+  const activeTags = firstPhys ? (firstPkg.physicalTags || firstPkg.tags) : firstPkg.tags;
+  if (tagEl) tagEl.innerHTML = (activeTags || []).map(t => `<span class="tag">${t}</span>`).join('');
+
+  const btnLabel = document.getElementById('btnLabel');
+  if (btnLabel) btnLabel.textContent = `Complete order · $${total}`;
 }
 
 // ── Intent toggle ────────────────────────────────────────────────────────────
 function setIntent(val) {
   intent = val;
-  document.getElementById('btn-self').classList.toggle('active', val === 'self');
-  document.getElementById('btn-gift').classList.toggle('active', val === 'gift');
-  document.getElementById('namesTitle').textContent = val === 'gift' ? 'Their names' : 'Your names';
-  document.getElementById('namesHint').textContent = val === 'gift'
-    ? 'Enter the names of the couple you\'re gifting this to. First names are fine – we\'ll use them throughout the experience.'
-    : 'We\'ll use these throughout your results and in your personalized materials. First names are fine.';
-  document.getElementById('giftNoteWrap').classList.toggle('visible', val === 'gift');
+  const self = document.getElementById('btn-self');
+  const gift = document.getElementById('btn-gift');
+  if (self) self.classList.toggle('active', val === 'self');
+  if (gift) gift.classList.toggle('active', val === 'gift');
+  // When multi-item, intent is per-item. Global setIntent only applies to
+  // the legacy single-item path. Sync first item for consistency.
+  if (_items[0]) _items[0].intent = val;
+  renderItemsStep();
   validateForm();
 }
 
@@ -544,19 +744,27 @@ function onNamesInput() {
 }
 
 function validateForm() {
-  const p1 = document.getElementById('p1name').value.trim();
-  const p2 = document.getElementById('p2name').value.trim();
-  const email = document.getElementById('email').value.trim();
+  const email = document.getElementById('email')?.value?.trim() || '';
   const hasValidBilling = cardComplete || !!appliedPromoCode;
-  const ready = p1.length >= 2 && p2.length >= 2 && email.includes('@') && hasValidBilling;
-  document.getElementById('submitBtn').disabled = !ready;
+
+  // Validate every item: partner 1 + partner 2 names (min 2 chars each).
+  // For physical items, also validate shipping address fields.
+  let itemsValid = _items.length > 0;
+  for (const it of _items) {
+    if (!it.partner1Name || it.partner1Name.trim().length < 2) { itemsValid = false; break; }
+    if (!it.partner2Name || it.partner2Name.trim().length < 2) { itemsValid = false; break; }
+    if (it.format === 'physical') {
+      const s = it.shipping || {};
+      if (!s.name || !s.address || !s.city || !s.state) { itemsValid = false; break; }
+    }
+  }
+
+  const ready = itemsValid && email.includes('@') && hasValidBilling;
+  const btn = document.getElementById('submitBtn');
+  if (btn) btn.disabled = !ready;
 }
 
 // ── Stripe setup ─────────────────────────────────────────────────────────────
-let cardComplete = false;
-let appliedPromoCode = null;
-let stripe, cardNumberElement, cardExpiryElement, cardCvcElement;
-
 (async function setupStripe() {
   let key = 'pk_test_placeholder';
   try {
@@ -605,10 +813,12 @@ async function handleSubmit(e) {
   btn.disabled = true;
   btn.textContent = 'Processing…';
 
-  const p1 = document.getElementById('p1name').value.trim();
-  const p2 = document.getElementById('p2name').value.trim();
   const email = document.getElementById('email').value.trim();
-  const giftNote = document.getElementById('giftNote').value.trim();
+
+  // Build the items payload. If the API doesn't know about items (legacy),
+  // we also pass top-level fields reflecting the first item.
+  const first = _items[0];
+  const firstPkg = PACKAGES[first.pkg] || PACKAGES.core;
 
   try {
     // 1. Create payment intent on server
@@ -616,27 +826,39 @@ async function handleSubmit(e) {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        pkg: Object.keys(PACKAGES).find(k => PACKAGES[k] === pkg) || 'core',
-        pkgKey: Object.keys(PACKAGES).find(k => PACKAGES[k] === pkg) || 'core',
-        addonWorkbook,
-        addonLmft,
-        addonReflection,
-        addonBudget,
-        isGift: intent === 'gift',
-        isPhysical: pkg.format === 'physical',
-        partner1Name: p1,
-        partner2Name: p2,
+        // Multi-item payload (new canonical shape)
+        items: _items.map(it => ({
+          pkgKey:           it.pkg,
+          format:           it.format,
+          isGift:           it.intent === 'gift',
+          isPhysical:       it.format === 'physical',
+          partner1Name:     it.partner1Name,
+          partner2Name:     it.partner2Name,
+          giftNote:         it.giftNote || null,
+          addonWorkbook:    it.addons.workbook ? (it.addons.workbookVariant || 'digital') : null,
+          addonLmft:        !!it.addons.lmft,
+          addonReflection:  !!it.addons.reflection,
+          addonBudget:      !!it.addons.budget,
+          addonChecklist:   !!it.addons.checklist,
+          shipping:         it.format === 'physical' ? it.shipping : null,
+        })),
+        // Legacy top-level fields (mirror of first item, for older API versions)
+        pkg:              first.pkg,
+        pkgKey:           first.pkg,
+        addonWorkbook:    first.addons.workbook ? (first.addons.workbookVariant || 'digital') : null,
+        addonLmft:        !!first.addons.lmft,
+        addonReflection:  !!first.addons.reflection,
+        addonBudget:      !!first.addons.budget,
+        isGift:           first.intent === 'gift',
+        isPhysical:       first.format === 'physical',
+        partner1Name:     first.partner1Name,
+        partner2Name:     first.partner2Name,
         email,
-        buyerEmail: email,
-        buyerName: p1,
-        giftNote: giftNote || null,
-        promoCode: appliedPromoCode || null,
-        shipping: pkg.format === 'physical' ? {
-          name:    document.getElementById('shipName').value.trim(),
-          address: document.getElementById('shipAddr').value.trim(),
-          city:    document.getElementById('shipCity').value.trim(),
-          state:   document.getElementById('shipState').value.trim(),
-        } : null,
+        buyerEmail:       email,
+        buyerName:        first.partner1Name,
+        giftNote:         first.giftNote || null,
+        promoCode:        appliedPromoCode || null,
+        shipping:         first.format === 'physical' ? first.shipping : null,
       }),
     });
 
@@ -662,61 +884,64 @@ async function handleSubmit(e) {
       ? 'ATT-' + new Date().toISOString().slice(0,10).replace(/-/g,'') + '-' + paymentIntent.id.slice(-4).toUpperCase()
       : 'ATT-' + Date.now();
 
-    // 3. Success – build portal link with pkg, partner names, and LMFT flag
-    const pkgId  = Object.keys(PACKAGES).find(k => PACKAGES[k] === pkg) || 'core';
-    // Build /app link with signup flag + context (pkg, names, add-ons)
+    // 3. Success — build portal link using the first item's details
     const params = new URLSearchParams({
       signup: '1',
-      pkg:    pkgId,
-      p1:     document.getElementById('p1name').value.trim(),
-      p2:     document.getElementById('p2name').value.trim(),
+      pkg:    first.pkg,
+      p1:     first.partner1Name,
+      p2:     first.partner2Name,
     });
-    if (addonLmft)       params.set('lmft', '1');
-    if (addonReflection) params.set('addon_reflection', '1');
-    if (addonWorkbook)   params.set('addon_workbook', addonWorkbook);
-    if (addonBudget)     params.set('addon_budget', '1');
-    if (intent === 'gift') params.set('gift', '1');
+    if (first.addons.lmft)       params.set('lmft', '1');
+    if (first.addons.reflection) params.set('addon_reflection', '1');
+    if (first.addons.workbook)   params.set('addon_workbook', first.addons.workbookVariant || 'digital');
+    if (first.addons.budget)     params.set('addon_budget', '1');
+    if (first.intent === 'gift') params.set('gift', '1');
     params.set('orderNum', realOrderNum);
     document.getElementById('startLink').href = '/app?' + params.toString();
     // Show workbook note if relevant
-    if (addonWorkbook) {
+    if (first.addons.workbook) {
       const wbNote = document.getElementById('workbookNote');
       if (wbNote) wbNote.style.display = 'block';
     }
 
-    // Fire the order email (partner invite, get-started instructions)
-    fetch('/api/send-order-email', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        pkgKey:        pkgId,
-        pkgName:       pkg.name,
-        isGift:        intent === 'gift',
-        isPhysical:    pkg.format === 'physical',
-        buyerName:     document.getElementById('p1name').value.trim(),
-        buyerEmail:    email,
-        partnerName:   document.getElementById('p2name').value.trim(),
-        orderNum:      realOrderNum,
-        total:         getPkgTotal(),
-        addonWorkbook,
-        addonLmft,
-        giftNote:      document.getElementById('giftNote').value.trim() || null,
-      }),
-    }).catch(e => console.warn('send-order-email failed (non-blocking):', e));
+    // Fire the order email(s) — one per item so each couple gets their own
+    for (const it of _items) {
+      const itPkg = PACKAGES[it.pkg] || PACKAGES.core;
+      fetch('/api/send-order-email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          pkgKey:        it.pkg,
+          pkgName:       itPkg.name,
+          isGift:        it.intent === 'gift',
+          isPhysical:    it.format === 'physical',
+          buyerName:     it.partner1Name,
+          buyerEmail:    email,
+          partnerName:   it.partner2Name,
+          orderNum:      realOrderNum,
+          total:         it.format === 'physical' ? itPkg.physicalPrice : itPkg.digitalPrice,
+          addonWorkbook: it.addons.workbook ? (it.addons.workbookVariant || 'digital') : null,
+          addonLmft:     !!it.addons.lmft,
+          giftNote:      it.giftNote || null,
+        }),
+      }).catch(e => console.warn('send-order-email failed (non-blocking):', e));
+    }
 
-    // Also save order summary to localStorage so portal knows pkg without URL
+    // Clear the cart now that checkout is complete
+    try { sessionStorage.removeItem('attune_cart'); } catch {}
+
+    // Also save first-item summary to localStorage for portal
     try {
-      const pkgId2 = Object.keys(PACKAGES).find(k => PACKAGES[k] === pkg) || 'core';
       localStorage.setItem('attune_order', JSON.stringify({
-        pkgKey:        pkgId2,
-        addonLmft:     addonLmft,
-        addonReflection: addonReflection,
-        addonWorkbook: addonWorkbook,
-        addonBudget:   addonBudget,
-        partner1Name:  document.getElementById('p1name').value.trim(),
-        partner2Name:  document.getElementById('p2name').value.trim(),
-        isPhysical:    pkg.format === 'physical',
-        isGift:        intent === 'gift',
+        pkgKey:        first.pkg,
+        addonLmft:     !!first.addons.lmft,
+        addonReflection: !!first.addons.reflection,
+        addonWorkbook: first.addons.workbook ? (first.addons.workbookVariant || 'digital') : null,
+        addonBudget:   !!first.addons.budget,
+        partner1Name:  first.partner1Name,
+        partner2Name:  first.partner2Name,
+        isPhysical:    first.format === 'physical',
+        isGift:        first.intent === 'gift',
         ts:            Date.now(),
       }));
     } catch(e) {}

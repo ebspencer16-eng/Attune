@@ -65,47 +65,112 @@ export default async function handler(req) {
 
   // ── payment_intent.succeeded ───────────────────────────────────────────────
   if (event.type === 'payment_intent.succeeded') {
-    console.log(`Payment succeeded: ${intent.id} — ${intent.amount / 100} ${intent.currency.toUpperCase()} — ${meta.pkgKey || '?'}`);
+    console.log(`Payment succeeded: ${intent.id} — ${intent.amount / 100} ${intent.currency.toUpperCase()} — ${meta.pkgKey || '?'} — itemCount: ${meta.itemCount || 1}`);
 
-    // Create order record in Supabase
+    // Create order record(s) in Supabase. Multi-item orders ship an `items`
+    // array (or chunked items0..itemsN keys) in metadata; we parse that and
+    // write one row per item. Legacy single-item orders write one row from
+    // the top-level metadata fields.
     const supabaseUrl = process.env.SUPABASE_URL;
-    const serviceKey  = process.env.SUPABASE_SERVICE_KEY;
+    const serviceKey  = process.env.SUPABASE_SERVICE_ROLE
+                     || process.env.SUPABASE_SERVICE_ROLE_KEY
+                     || process.env.SUPABASE_SERVICE_KEY;
     if (supabaseUrl && serviceKey) {
+      // Helper: unique QR token
+      const newQrToken = () => 'ATQR-' + Array.from(crypto.getRandomValues(new Uint8Array(6)))
+        .map(b => b.toString(16).padStart(2, '0')).join('').toUpperCase();
+
+      // Try to parse items metadata
+      let items = null;
       try {
-        const d = new Date();
-        const orderNum = meta.orderNum || `ATT-${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}-${Math.random().toString(36).substring(2,6).toUpperCase()}`;
-        // Unique, unguessable token for this order's physical QR card.
-        const qrToken = 'ATQR-' + Array.from(crypto.getRandomValues(new Uint8Array(6)))
-          .map(b => b.toString(16).padStart(2, '0')).join('').toUpperCase();
-        await fetch(`${supabaseUrl}/rest/v1/orders`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'apikey': serviceKey,
-            'Authorization': `Bearer ${serviceKey}`,
-            'Prefer': 'return=minimal',
-          },
-          body: JSON.stringify({
-            order_num:               orderNum,
-            buyer_name:              meta.buyerName || meta.partner1Name || null,
-            buyer_email:             intent.receipt_email || null,
-            partner1_name:           meta.partner1Name || null,
-            partner2_name:           meta.partner2Name || null,
-            pkg_key:                 meta.pkgKey || null,
-            is_gift:                 meta.isGift === '1',
-            is_physical:             meta.isPhysical === '1',
-            total:                   (intent.amount / 100),
-            addon_workbook:          meta.addonWorkbook || null,
-            addon_lmft:              meta.addonLmft === '1',
-            addon_reflection:        meta.addonReflection === '1',
-            addon_budget:            meta.addonBudget === '1',
-            gift_note:               meta.giftNote || null,
-            stripe_payment_intent_id: intent.id,
-            workbook_status:         'pending',
-            qr_token:                qrToken,
-          }),
-        });
-        console.log(`[webhook] order created: ${orderNum} (qr ${qrToken})`);
+        if (meta.items) {
+          items = JSON.parse(meta.items);
+        } else if (meta.itemsChunks) {
+          const n = parseInt(meta.itemsChunks, 10);
+          let joined = '';
+          for (let i = 0; i < n; i++) joined += meta[`items${i}`] || '';
+          items = JSON.parse(joined);
+        }
+      } catch (e) {
+        console.warn('[webhook] could not parse items metadata, falling back to single-item:', e);
+      }
+
+      const d = new Date();
+      const dateStr = `${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}`;
+      const baseOrderNum = meta.orderNum || `ATT-${dateStr}-${Math.random().toString(36).substring(2,6).toUpperCase()}`;
+
+      try {
+        if (Array.isArray(items) && items.length > 0) {
+          // Multi-item: one row per item
+          for (let i = 0; i < items.length; i++) {
+            const it = items[i];
+            const shipParts = (it.s || '').split('|');
+            const suffix = items.length > 1 ? `-${i+1}` : '';
+            const orderNum = `${baseOrderNum}${suffix}`;
+            const qrToken = newQrToken();
+            await fetch(`${supabaseUrl}/rest/v1/orders`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'apikey': serviceKey,
+                'Authorization': `Bearer ${serviceKey}`,
+                'Prefer': 'return=minimal',
+              },
+              body: JSON.stringify({
+                order_num:               orderNum,
+                buyer_name:              meta.buyerName || it.p1 || null,
+                buyer_email:             intent.receipt_email || null,
+                partner1_name:           it.p1 || null,
+                partner2_name:           it.p2 || null,
+                pkg_key:                 it.p,
+                is_gift:                 !!it.g,
+                is_physical:             !!it.ph,
+                total:                   null, // itemized total — aggregate is on the PaymentIntent
+                addon_workbook:          it.w || null,
+                addon_lmft:              !!it.l,
+                addon_reflection:        !!it.r,
+                addon_budget:            !!it.b,
+                gift_note:               it.gn || null,
+                stripe_payment_intent_id: items.length > 1 ? `${intent.id}_${i}` : intent.id,
+                workbook_status:         'pending',
+                qr_token:                qrToken,
+              }),
+            });
+            console.log(`[webhook] order ${i+1}/${items.length} created: ${orderNum} (qr ${qrToken})`);
+          }
+        } else {
+          // Legacy single-item path
+          const qrToken = newQrToken();
+          await fetch(`${supabaseUrl}/rest/v1/orders`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'apikey': serviceKey,
+              'Authorization': `Bearer ${serviceKey}`,
+              'Prefer': 'return=minimal',
+            },
+            body: JSON.stringify({
+              order_num:               baseOrderNum,
+              buyer_name:              meta.buyerName || meta.partner1Name || null,
+              buyer_email:             intent.receipt_email || null,
+              partner1_name:           meta.partner1Name || null,
+              partner2_name:           meta.partner2Name || null,
+              pkg_key:                 meta.pkgKey || null,
+              is_gift:                 meta.isGift === '1',
+              is_physical:             meta.isPhysical === '1',
+              total:                   (intent.amount / 100),
+              addon_workbook:          meta.addonWorkbook || null,
+              addon_lmft:              meta.addonLmft === '1',
+              addon_reflection:        meta.addonReflection === '1',
+              addon_budget:            meta.addonBudget === '1',
+              gift_note:               meta.giftNote || null,
+              stripe_payment_intent_id: intent.id,
+              workbook_status:         'pending',
+              qr_token:                qrToken,
+            }),
+          });
+          console.log(`[webhook] order created: ${baseOrderNum} (qr ${qrToken})`);
+        }
       } catch(e) {
         console.error('[webhook] order creation failed:', e);
       }
