@@ -118,95 +118,166 @@ export default async function handler(req) {
 
 // ── Email HTML templates ────────────────────────────────────────────────────
 
-function orderConfirmationHtml({ buyerName, pkgName, orderNum, total, isGift, isPhysical, recipientName, addonWorkbook, addonLmft, addonReflection, addonBudget }) {
-  const deliveryNote = isPhysical
-    ? 'Your gift box will arrive within 3–5 business days.'
-    : isGift
-      ? `We'll send ${recipientName}'s access link to this email address.`
-      : 'Your access link has been sent in a separate email.';
+// Shared layout matching the notepad brand: navy header with logo + tagline,
+// gradient rule, cream body with serif + sans blend.
+function brandedEmail({ preheader = '', title, subtitle, bodyHtml, ctaLabel, ctaUrl, ctaColor = '#E8673A', footerNote = 'Questions? Reply to this email or reach us at hello@attune-relationships.com' }) {
+  const cta = ctaLabel && ctaUrl
+    ? `<tr><td style="padding:0 40px 28px;text-align:center">
+         <a href="${ctaUrl}" style="display:inline-block;background:linear-gradient(135deg,${ctaColor},#d45a2e);color:#ffffff;padding:14px 34px;border-radius:12px;font-size:14px;font-weight:700;text-decoration:none;letter-spacing:.04em;font-family:'DM Sans',Arial,sans-serif">${ctaLabel}</a>
+       </td></tr>`
+    : '';
 
-  return `<!DOCTYPE html><html><body style="font-family:'DM Sans',Arial,sans-serif;background:#FFFDF9;color:#1E1610;max-width:560px;margin:0 auto;padding:2rem">
-    <div style="text-align:center;margin-bottom:2rem">
-      <div style="font-family:Georgia,serif;font-size:1.4rem;font-weight:700;color:#0E0B07">Attune</div>
+  return `<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>${title}</title>
+<!--[if mso]><style>body,table,td,a,p,h1,h2,h3{font-family:Arial,sans-serif!important}</style><![endif]-->
+</head>
+<body style="margin:0;padding:0;background:#FBF8F3;font-family:'DM Sans',Helvetica,Arial,sans-serif;color:#1E1610;-webkit-text-size-adjust:100%">
+<div style="display:none;max-height:0;overflow:hidden;mso-hide:all">${preheader}</div>
+<table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="background:#FBF8F3">
+<tr><td align="center" style="padding:32px 16px">
+<table role="presentation" cellpadding="0" cellspacing="0" width="560" style="max-width:560px;width:100%;background:#ffffff;border-radius:16px;overflow:hidden;box-shadow:0 4px 18px rgba(14,11,7,.08)">
+
+  <!-- Navy header with mark + tagline -->
+  <tr><td style="background:#162040;padding:28px 40px 26px" align="left">
+    <table role="presentation" cellpadding="0" cellspacing="0" width="100%"><tr>
+      <td width="50" valign="middle" style="vertical-align:middle;padding-right:16px">
+        <img src="https://attune-relationships.com/attune-mark-navy.png" width="44" height="32" alt="Attune" style="display:block;border:0;outline:none">
+      </td>
+      <td valign="middle" style="vertical-align:middle;border-left:1px solid rgba(255,255,255,.3);padding-left:16px">
+        <div style="font-family:Georgia,'Playfair Display',serif;font-style:italic;font-size:18px;font-weight:400;color:#ffffff;line-height:1.2">Understanding takes intention.</div>
+        <div style="font-family:'DM Sans',Helvetica,Arial,sans-serif;font-size:10px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:rgba(255,255,255,.55);margin-top:4px">Attune Relationships</div>
+      </td>
+    </tr></table>
+  </td></tr>
+
+  <!-- Gradient rule under header -->
+  <tr><td style="height:4px;background:linear-gradient(90deg,#E8673A 0%,#9B5DE5 50%,#1B5FE8 100%);font-size:0;line-height:0">&nbsp;</td></tr>
+
+  <!-- Title -->
+  <tr><td style="padding:32px 40px 8px">
+    <h1 style="font-family:Georgia,'Playfair Display',serif;font-size:24px;font-weight:700;color:#1E1610;margin:0;line-height:1.2;letter-spacing:-.02em">${title}</h1>
+    ${subtitle ? `<p style="font-family:'DM Sans',Helvetica,Arial,sans-serif;font-size:14px;color:#8C7A68;line-height:1.65;margin:10px 0 0;font-weight:400">${subtitle}</p>` : ''}
+  </td></tr>
+
+  <!-- Body content -->
+  <tr><td style="padding:20px 40px 12px;font-family:'DM Sans',Helvetica,Arial,sans-serif">
+    ${bodyHtml}
+  </td></tr>
+
+  ${cta}
+
+  <!-- Footer note -->
+  <tr><td style="padding:18px 40px 28px;border-top:1px solid #F3EDE6">
+    <p style="font-family:'DM Sans',Helvetica,Arial,sans-serif;font-size:12px;color:#8C7A68;margin:0;line-height:1.6;text-align:center">${footerNote}</p>
+  </td></tr>
+
+</table>
+<p style="font-family:'DM Sans',Helvetica,Arial,sans-serif;font-size:11px;color:#B8A898;margin:16px 0 0;text-align:center">© 2026 Attune Relationships · attune-relationships.com</p>
+</td></tr>
+</table>
+</body>
+</html>`;
+}
+
+function orderConfirmationHtml({ buyerName, pkgName, orderNum, total, isGift, isPhysical, recipientName, addonWorkbook, addonLmft, addonReflection, addonBudget }) {
+  const deliveryLine = isPhysical
+    ? 'Your gift box will arrive within 3–5 business days. Setup instructions are inside.'
+    : isGift
+      ? `We've sent ${recipientName}'s access link in a separate email.`
+      : 'Your access link has been sent in a separate email — check your inbox to set up your profile.';
+
+  const addonRows = [
+    addonWorkbook ? `<tr><td style="padding:6px 0;color:#8C7A68;font-size:14px">Personalized Workbook</td><td align="right" style="padding:6px 0;color:#C17F47;font-size:14px;font-weight:600">included</td></tr>` : '',
+    addonLmft ? `<tr><td style="padding:6px 0;color:#8C7A68;font-size:14px">LMFT Session</td><td align="right" style="padding:6px 0;color:#5B6DF8;font-size:14px;font-weight:600">scheduling link to follow</td></tr>` : '',
+    addonReflection ? `<tr><td style="padding:6px 0;color:#8C7A68;font-size:14px">Relationship Reflection</td><td align="right" style="padding:6px 0;color:#5B6DF8;font-size:14px;font-weight:600">included</td></tr>` : '',
+    addonBudget ? `<tr><td style="padding:6px 0;color:#8C7A68;font-size:14px">Budget Priorities Exercise</td><td align="right" style="padding:6px 0;color:#C17F47;font-size:14px;font-weight:600">included</td></tr>` : '',
+  ].filter(Boolean).join('');
+
+  const body = `
+    <div style="background:#FBF8F3;border:1px solid #F3EDE6;border-radius:10px;padding:20px 22px;margin:8px 0 16px">
+      <div style="font-family:'DM Sans',Helvetica,Arial,sans-serif;font-size:11px;color:#C17F47;font-weight:700;letter-spacing:.2em;text-transform:uppercase;margin-bottom:12px">Order summary</div>
+      <table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="font-family:'DM Sans',Helvetica,Arial,sans-serif">
+        <tr><td style="padding:6px 0;color:#1E1610;font-size:14px;font-weight:600">${pkgName}</td><td align="right" style="padding:6px 0;color:#1E1610;font-size:14px;font-weight:600">$${total}</td></tr>
+        ${addonRows}
+        <tr><td colspan="2" style="border-top:1px solid #E8DDD0;padding-top:10px;margin-top:10px;font-size:12px;color:#8C7A68;font-family:'Menlo','SF Mono',monospace">Order #${orderNum}</td></tr>
+      </table>
     </div>
-    <div style="background:white;border:1.5px solid #E8DDD0;border-radius:16px;padding:2rem">
-      <p style="font-size:1rem;font-weight:700;color:#0E0B07;margin-bottom:.5rem">Order confirmed ✓</p>
-      <p style="color:#8C7A68;font-size:.9rem;margin-bottom:1.5rem">Hi ${buyerName}, your order is confirmed and being processed.</p>
-      <div style="background:#FBF8F3;border-radius:10px;padding:1.1rem;margin-bottom:1.25rem">
-        <div style="font-size:.7rem;color:#C17F47;font-weight:700;letter-spacing:.12em;text-transform:uppercase;margin-bottom:.75rem">Order summary</div>
-        <div style="display:flex;justify-content:space-between;font-size:.88rem;margin-bottom:.4rem"><span style="color:#8C7A68">${pkgName}</span><span style="font-weight:600">$${total}</span></div>
-        ${addonWorkbook ? `<div style="display:flex;justify-content:space-between;font-size:.88rem;margin-bottom:.4rem"><span style="color:#8C7A68">Personalized Workbook</span><span style="font-weight:600;color:#C17F47">included</span></div>` : ''}
-        ${addonLmft ? `<div style="display:flex;justify-content:space-between;font-size:.88rem;margin-bottom:.4rem"><span style="color:#8C7A68">LMFT Session</span><span style="font-weight:600;color:#5B6DF8">scheduling link to follow</span></div>` : ''}
-        ${addonReflection ? `<div style="display:flex;justify-content:space-between;font-size:.88rem;margin-bottom:.4rem"><span style="color:#8C7A68">Relationship Reflection</span><span style="font-weight:600;color:#5B6DF8">included</span></div>` : ''}
-        ${addonBudget ? `<div style="display:flex;justify-content:space-between;font-size:.88rem;margin-bottom:.4rem"><span style="color:#8C7A68">Budget Priorities Exercise</span><span style="font-weight:600;color:#C17F47">included</span></div>` : ''}
-        <div style="border-top:1px solid #E8DDD0;margin-top:.75rem;padding-top:.75rem;font-size:.75rem;color:#8C7A68">Order #${orderNum}</div>
-      </div>
-      <p style="font-size:.85rem;color:#8C7A68;line-height:1.7">${deliveryNote}</p>
-    </div>
-    <p style="text-align:center;font-size:.72rem;color:#C17F47;margin-top:1.5rem">Questions? Reply to this email or reach us at hello@attune-relationships.com</p>
-  </body></html>`;
+    <p style="font-family:'DM Sans',Helvetica,Arial,sans-serif;font-size:14px;color:#5C4A38;line-height:1.7;margin:0">${deliveryLine}</p>
+  `;
+
+  return brandedEmail({
+    preheader: `Order confirmed — ${pkgName}`,
+    title: 'Order confirmed.',
+    subtitle: `Hi ${buyerName}, thank you for your order. Here's what's coming next.`,
+    bodyHtml: body,
+  });
 }
 
 function getStartedBuyerHtml({ name, partnerName, accessUrl, partnerInviteUrl, partnerEmail }) {
-  return `<!DOCTYPE html><html><body style="font-family:'DM Sans',Arial,sans-serif;background:#FFFDF9;color:#1E1610;max-width:560px;margin:0 auto;padding:2rem">
-    <div style="text-align:center;margin-bottom:2rem">
-      <div style="font-family:Georgia,serif;font-size:1.4rem;font-weight:700;color:#0E0B07">Attune</div>
-    </div>
-    <div style="background:white;border:1.5px solid #E8DDD0;border-radius:16px;padding:2rem">
-      <p style="font-size:1rem;font-weight:700;color:#0E0B07;margin-bottom:.5rem">Set up your profile, ${name}</p>
-      <p style="color:#8C7A68;font-size:.88rem;line-height:1.7;margin-bottom:1.5rem">Your access is ready. Click below to create your profile and start your exercises. Each of you should complete them independently — don't compare answers until you're both done.</p>
-      <div style="text-align:center;margin-bottom:1.5rem">
-        <a href="${accessUrl}" style="display:inline-block;background:linear-gradient(135deg,#E8673A,#d45a2e);color:white;padding:.85rem 2rem;border-radius:12px;font-size:.85rem;font-weight:700;text-decoration:none;letter-spacing:.04em">Set up my profile →</a>
-      </div>
-      <div style="background:#FBF8F3;border-radius:10px;padding:1.1rem;margin-bottom:1rem">
-        <div style="font-size:.7rem;color:#C17F47;font-weight:700;letter-spacing:.12em;text-transform:uppercase;margin-bottom:.75rem">Your partner's invite link</div>
-        <p style="font-size:.83rem;color:#8C7A68;line-height:1.65;margin-bottom:.75rem">
-          ${partnerEmail
-            ? `We've sent ${partnerName}'s invite directly to ${partnerEmail}. They'll receive their own unique link to set up their profile.`
-            : `Share this link with ${partnerName} so they can set up their own profile:`
-          }
-        </p>
-        ${!partnerEmail ? `<div style="background:white;border:1px solid #E8DDD0;border-radius:8px;padding:.65rem .85rem;font-size:.75rem;color:#0E0B07;word-break:break-all">${partnerInviteUrl}</div>` : ''}
-      </div>
-      <p style="font-size:.75rem;color:#8C7A68;line-height:1.6"><strong>Important:</strong> Each partner uses their own unique link. Results stay private until both of you have finished both exercises.</p>
-    </div>
-    <p style="text-align:center;font-size:.72rem;color:#C17F47;margin-top:1.5rem">Attune · hello@attune-relationships.com</p>
-  </body></html>`;
+  const partnerBlock = partnerEmail
+    ? `<div style="background:#FBF8F3;border:1px solid #F3EDE6;border-radius:10px;padding:16px 20px;margin:16px 0 0">
+         <div style="font-family:'DM Sans',Helvetica,Arial,sans-serif;font-size:11px;color:#C17F47;font-weight:700;letter-spacing:.2em;text-transform:uppercase;margin-bottom:8px">Your partner</div>
+         <p style="font-family:'DM Sans',Helvetica,Arial,sans-serif;font-size:14px;color:#5C4A38;line-height:1.65;margin:0">We've sent ${partnerName}'s invite directly to <strong style="color:#1E1610">${partnerEmail}</strong>. They'll get their own unique link to set up their profile.</p>
+       </div>`
+    : `<div style="background:#FBF8F3;border:1px solid #F3EDE6;border-radius:10px;padding:16px 20px;margin:16px 0 0">
+         <div style="font-family:'DM Sans',Helvetica,Arial,sans-serif;font-size:11px;color:#C17F47;font-weight:700;letter-spacing:.2em;text-transform:uppercase;margin-bottom:8px">Invite ${partnerName}</div>
+         <p style="font-family:'DM Sans',Helvetica,Arial,sans-serif;font-size:14px;color:#5C4A38;line-height:1.65;margin:0 0 10px">Share this link so ${partnerName} can set up their own profile:</p>
+         <div style="background:#ffffff;border:1px solid #E8DDD0;border-radius:8px;padding:10px 14px;font-family:'Menlo','SF Mono',monospace;font-size:12px;color:#1E1610;word-break:break-all">${partnerInviteUrl}</div>
+       </div>`;
+
+  const body = `
+    <p style="font-family:'DM Sans',Helvetica,Arial,sans-serif;font-size:15px;color:#5C4A38;line-height:1.75;margin:0 0 6px">Your access is ready. Two exercises, about 25 minutes each. Answer independently — your joint results unlock when both of you are done.</p>
+    ${partnerBlock}
+    <p style="font-family:'DM Sans',Helvetica,Arial,sans-serif;font-size:13px;color:#8C7A68;line-height:1.6;margin:20px 0 0"><strong style="color:#1E1610">One note:</strong> don't compare answers until you're both finished. The value comes from answering honestly first.</p>
+  `;
+
+  return brandedEmail({
+    preheader: `Set up your Attune profile, ${name}`,
+    title: `Welcome, ${name}.`,
+    subtitle: `Let's get your profile set up.`,
+    bodyHtml: body,
+    ctaLabel: 'Set up my profile →',
+    ctaUrl: accessUrl,
+  });
 }
 
 function partnerInviteHtml({ partnerName, buyerName, inviteUrl }) {
-  return `<!DOCTYPE html><html><body style="font-family:'DM Sans',Arial,sans-serif;background:#FFFDF9;color:#1E1610;max-width:560px;margin:0 auto;padding:2rem">
-    <div style="text-align:center;margin-bottom:2rem">
-      <div style="font-family:Georgia,serif;font-size:1.4rem;font-weight:700;color:#0E0B07">Attune</div>
-    </div>
-    <div style="background:white;border:1.5px solid #E8DDD0;border-radius:16px;padding:2rem">
-      <p style="font-size:1rem;font-weight:700;color:#0E0B07;margin-bottom:.5rem">${buyerName} invited you to Attune</p>
-      <p style="color:#8C7A68;font-size:.88rem;line-height:1.7;margin-bottom:1.5rem">Hi ${partnerName}, ${buyerName} has set up Attune for the two of you. Click below to create your own profile and complete your exercises. Take your time — your answers stay private until you're both done.</p>
-      <div style="text-align:center;margin-bottom:1.5rem">
-        <a href="${inviteUrl}" style="display:inline-block;background:linear-gradient(135deg,#1B5FE8,#4555e8);color:white;padding:.85rem 2rem;border-radius:12px;font-size:.85rem;font-weight:700;text-decoration:none;letter-spacing:.04em">Set up my profile →</a>
-      </div>
-      <p style="font-size:.75rem;color:#8C7A68;line-height:1.6">This link is unique to you and can only be used once. Don't share it.</p>
-    </div>
-    <p style="text-align:center;font-size:.72rem;color:#C17F47;margin-top:1.5rem">Attune · hello@attune-relationships.com</p>
-  </body></html>`;
+  const body = `
+    <p style="font-family:'DM Sans',Helvetica,Arial,sans-serif;font-size:15px;color:#5C4A38;line-height:1.75;margin:0 0 6px">${buyerName} set up Attune for the two of you — two short exercises mapping how you each communicate and what you each expect. Your answers stay private until you're both done.</p>
+    <p style="font-family:'DM Sans',Helvetica,Arial,sans-serif;font-size:14px;color:#5C4A38;line-height:1.7;margin:16px 0 0">Plan on about 25 minutes. Find a quiet moment and answer honestly — that's where the value is.</p>
+    <p style="font-family:'DM Sans',Helvetica,Arial,sans-serif;font-size:13px;color:#8C7A68;line-height:1.6;margin:20px 0 0"><strong style="color:#1E1610">Heads up:</strong> this link is unique to you and works only once. Don't share it.</p>
+  `;
+
+  return brandedEmail({
+    preheader: `${buyerName} invited you to Attune`,
+    title: `${buyerName} invited you.`,
+    subtitle: `Hi ${partnerName}, here's how to get started.`,
+    bodyHtml: body,
+    ctaLabel: 'Set up my profile →',
+    ctaUrl: inviteUrl,
+    ctaColor: '#1B5FE8',
+  });
 }
 
 function giftRecipientHtml({ recipientName, buyerName, pkgName, giftUrl }) {
-  return `<!DOCTYPE html><html><body style="font-family:'DM Sans',Arial,sans-serif;background:#FFFDF9;color:#1E1610;max-width:560px;margin:0 auto;padding:2rem">
-    <div style="text-align:center;margin-bottom:2rem">
-      <div style="font-family:Georgia,serif;font-size:1.4rem;font-weight:700;color:#0E0B07">Attune</div>
+  const body = `
+    <p style="font-family:'DM Sans',Helvetica,Arial,sans-serif;font-size:15px;color:#5C4A38;line-height:1.75;margin:0 0 6px">${buyerName} gave you <strong style="color:#1E1610">${pkgName}</strong> — an experience for you and your partner. Two exercises that map how you communicate and what you each expect. The joint results only appear once you're both done.</p>
+    <div style="background:#FBF8F3;border:1px solid #F3EDE6;border-radius:10px;padding:16px 20px;margin:20px 0 0">
+      <div style="font-family:'DM Sans',Helvetica,Arial,sans-serif;font-size:11px;color:#C17F47;font-weight:700;letter-spacing:.2em;text-transform:uppercase;margin-bottom:8px">When you claim it</div>
+      <p style="font-family:'DM Sans',Helvetica,Arial,sans-serif;font-size:14px;color:#5C4A38;line-height:1.65;margin:0">You'll set up your profile and add your partner's email. They'll receive their own unique link. Answer independently — your results unlock together when you're both finished.</p>
     </div>
-    <div style="background:white;border:1.5px solid #E8DDD0;border-radius:16px;padding:2rem">
-      <p style="font-size:1rem;font-weight:700;color:#0E0B07;margin-bottom:.5rem">You've received a gift 🎁</p>
-      <p style="color:#8C7A68;font-size:.88rem;line-height:1.7;margin-bottom:1.5rem">Hi ${recipientName}, ${buyerName} gave you ${pkgName} — a relationship experience for you and your partner.</p>
-      <div style="text-align:center;margin-bottom:1.5rem">
-        <a href="${giftUrl}" style="display:inline-block;background:linear-gradient(135deg,#E8673A,#d45a2e);color:white;padding:.85rem 2rem;border-radius:12px;font-size:.85rem;font-weight:700;text-decoration:none;letter-spacing:.04em">Claim my gift →</a>
-      </div>
-      <div style="background:#FBF8F3;border-radius:10px;padding:1.1rem">
-        <div style="font-size:.7rem;color:#C17F47;font-weight:700;letter-spacing:.12em;text-transform:uppercase;margin-bottom:.75rem">When you claim your gift</div>
-        <p style="font-size:.83rem;color:#8C7A68;line-height:1.65">You'll set up your profile and enter your partner's email so we can send them their own unique link. Each of you completes the exercises privately — your results unlock together when you're both done.</p>
-      </div>
-    </div>
-    <p style="text-align:center;font-size:.72rem;color:#C17F47;margin-top:1.5rem">Attune · hello@attune-relationships.com</p>
-  </body></html>`;
+  `;
+
+  return brandedEmail({
+    preheader: `You've received an Attune gift from ${buyerName}`,
+    title: `A gift from ${buyerName}.`,
+    subtitle: `Hi ${recipientName}, here's how to open it.`,
+    bodyHtml: body,
+    ctaLabel: 'Claim my gift →',
+    ctaUrl: giftUrl,
+  });
 }
