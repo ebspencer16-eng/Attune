@@ -233,6 +233,8 @@
   .page-header .eyebrow{color:rgba(232,103,58,.85)}
   .page-header .eyebrow::before{background:linear-gradient(90deg,rgba(232,103,58,.7),rgba(155,93,229,.5))}
   .hero-actions{display:flex;align-items:center;justify-content:center;gap:1.5rem;margin-top:1.75rem;flex-wrap:wrap}
+  .btn-primary{background:linear-gradient(135deg,var(--orange),#d45a2e);color:white;border:none;padding:.9rem 2.1rem;border-radius:12px;font-size:.82rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;cursor:pointer;font-family:var(--bfont);text-decoration:none;display:inline-block;box-shadow:0 6px 24px rgba(232,103,58,.38);transition:transform .18s}
+  .btn-primary:hover{transform:translateY(-1px)}
   .gift-link{font-size:.88rem;color:rgba(232,103,58,.8);font-family:var(--bfont);font-weight:500;text-decoration:none;transition:color .15s}
   .gift-link:hover{color:var(--orange)}
   </style>
@@ -506,6 +508,20 @@
 </div><!-- .si -->
 
 
+<!-- EMAIL SIGNUP -->
+<div class="signup-band">
+  <div class="signup-inner">
+    <h2 class="signup-title">New posts, when they're ready.</h2>
+    <p class="signup-sub">We publish occasionally. No noise, no newsletter cadence to hit, just useful pieces when we have something worth saying.</p>
+    <form class="signup-form" onsubmit="handleSignup(event)">
+      <input type="email" class="signup-input" placeholder="Your email" id="signup-email" required>
+      <button type="submit" class="signup-btn">Subscribe</button>
+    </form>
+    <p class="signup-note" id="signup-feedback">No spam. Unsubscribe whenever.</p>
+  </div>
+</div>
+
+
 <!-- FOOTER -->
 <footer class="site-footer">
   <div class="sf-inner">
@@ -522,7 +538,7 @@
         <p class="sf-col-title">Product</p>
         <a href="/home">Home</a>
         <a href="/offerings">Packages</a>
-        <a href="/portal">Get started</a>
+        <a href="/start">Get started</a>
       </div>
       <div class="sf-col">
         <p class="sf-col-title">Learn</p>
@@ -578,19 +594,6 @@ document.addEventListener('click', function(e) {
   }
 });
 </script>
-
-<!-- EMAIL SIGNUP -->
-<div class="signup-band">
-  <div class="signup-inner">
-    <h2 class="signup-title">New posts, when they're ready.</h2>
-    <p class="signup-sub">We publish occasionally. No noise, no newsletter cadence to hit, just useful pieces when we have something worth saying.</p>
-    <form class="signup-form" onsubmit="handleSignup(event)">
-      <input type="email" class="signup-input" placeholder="Your email" id="signup-email" required>
-      <button type="submit" class="signup-btn">Subscribe</button>
-    </form>
-    <p class="signup-note" id="signup-feedback">No spam. Unsubscribe whenever.</p>
-  </div>
-</div>
 
 </body>
 </html>
