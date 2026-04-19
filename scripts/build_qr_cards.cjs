@@ -153,9 +153,19 @@ body{padding:24px;display:flex;flex-direction:column;align-items:center;gap:24px
 .step-t{font-size:9.5px;font-weight:700;color:#0E0B07;margin-bottom:2px;font-family:'DM Sans',sans-serif}
 .step-d{font-size:7.5px;color:#8C7A68;line-height:1.5;font-family:'DM Sans',sans-serif}
 
+/* Force ALL gradient/colored backgrounds to render when printing.
+   Without this, most browsers strip background colors/images on print
+   and the colored panels disappear entirely. */
+.grad-panel,.back-accent,.welcome-h,.back-footer,.get-started{
+  -webkit-print-color-adjust:exact !important;
+  print-color-adjust:exact !important;
+  color-adjust:exact !important;
+}
+
 @media print{
   @page{size:8.5in 5.5in landscape;margin:.4in .5in}
-  html,body{background:white;padding:0;gap:0;display:block}
+  html,body{background:white;padding:0;gap:0;display:block;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  *{-webkit-print-color-adjust:exact !important;print-color-adjust:exact !important;color-adjust:exact !important}
   .page{page-break-after:always;page-break-inside:avoid;display:flex;flex-direction:column;align-items:center;justify-content:center;height:4.7in;gap:4px}
   .page:last-child{page-break-after:auto}
   .page-label{display:none}
