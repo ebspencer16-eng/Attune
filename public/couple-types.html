@@ -369,22 +369,63 @@
   }</style>
 
 <footer class="site-footer">
+  <style>
+    .site-footer{background:#1E1610!important;color:rgba(255,255,255,.75)!important;padding:3rem 0 1.5rem!important;width:100%!important;margin:0!important;max-width:none!important;display:block!important}
+    .site-footer .sf-inner{max-width:1120px!important;margin:0 auto!important;padding:0 2.5rem 2rem!important;display:grid!important;grid-template-columns:1fr 2fr!important;gap:3rem!important;border-bottom:1px solid rgba(255,255,255,.1)!important}
+    .site-footer .sf-brand{display:flex!important;flex-direction:column!important;gap:.75rem!important}
+    .site-footer .sf-brand .logo{display:flex!important;align-items:center!important;gap:.5rem!important;text-decoration:none!important}
+    .site-footer .sf-brand .logo-text{color:white!important;font-family:'Playfair Display',Georgia,serif!important;font-weight:700!important;font-size:1.05rem!important}
+    .site-footer .sf-tagline{font-size:.82rem!important;color:rgba(255,255,255,.5)!important;line-height:1.5!important;font-family:'DM Sans',sans-serif!important;font-weight:300!important;margin:0!important}
+    .site-footer .sf-links{display:grid!important;grid-template-columns:repeat(3,1fr)!important;gap:1.5rem!important}
+    .site-footer .sf-col{display:flex!important;flex-direction:column!important;gap:.55rem!important}
+    .site-footer .sf-col-title{font-size:.6rem!important;letter-spacing:.2em!important;text-transform:uppercase!important;color:rgba(255,255,255,.5)!important;font-weight:700!important;margin:0 0 .35rem!important;font-family:'DM Sans',sans-serif!important}
+    .site-footer .sf-col a{font-size:.82rem!important;color:rgba(255,255,255,.75)!important;text-decoration:none!important;transition:color .15s!important;font-family:'DM Sans',sans-serif!important;font-weight:400!important;display:block!important;margin:0!important;padding:0!important;border:none!important}
+    .site-footer .sf-col a:hover{color:white!important}
+    .site-footer .sf-bottom{max-width:1120px!important;margin:0 auto!important;padding:1.25rem 2.5rem 0!important;display:flex!important;justify-content:space-between!important;align-items:center!important;gap:.75rem!important;flex-wrap:wrap!important}
+    .site-footer .sf-copy,.site-footer .sf-email{font-size:.72rem!important;color:rgba(255,255,255,.4)!important;margin:0!important;font-family:'DM Sans',sans-serif!important}
+    @media(max-width:640px){
+      .site-footer{padding:2rem 0 1rem!important}
+      .site-footer .sf-inner{grid-template-columns:1fr!important;gap:1.75rem!important;padding:0 1.25rem 1.5rem!important}
+      .site-footer .sf-links{grid-template-columns:1fr 1fr 1fr!important;gap:.75rem!important}
+      .site-footer .sf-col-title{font-size:.55rem!important}
+      .site-footer .sf-col a{font-size:.75rem!important}
+      .site-footer .sf-tagline{font-size:.78rem!important}
+      .site-footer .sf-bottom{padding:1rem 1.25rem 0!important;flex-direction:column!important;align-items:flex-start!important;gap:.3rem!important}
+      .site-footer .sf-copy,.site-footer .sf-email{font-size:.7rem!important}
+    }
+  </style>
   <div class="sf-inner">
     <div class="sf-brand">
       <a href="/home" class="logo">
-        <svg width="46" height="33" viewBox="0 0 103 76" fill="none"><defs><linearGradient id="ct_footer" x1="0" y1="0" x2="103" y2="76" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#E8673A"/><stop offset="100%" stop-color="#1B5FE8"/></linearGradient></defs><path d="M14,4 L44,4 A9,9 0 0,1 53,13 L53,42 A9,9 0 0,1 44,51 L20,51 L6,61 L11,51 A6,6 0 0,1 5,45 L5,13 A9,9 0 0,1 14,4 Z" fill="url(#ct_footer)"/><path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill="white" opacity=".93" transform="translate(13.16,11.3) scale(0.72)"/><path d="M89,14 L59,14 A9,9 0 0,0 50,23 L50,52 A9,9 0 0,0 59,61 L83,61 L97,71 L92,61 A6,6 0 0,0 98,55 L98,23 A9,9 0 0,0 89,14 Z" fill="none" stroke="url(#ct_footer)" stroke-width="2.2" stroke-linejoin="round"/><path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill="url(#ct_footer)" transform="translate(58.16,21.3) scale(0.72)"/></svg>
-        <span class="logo-text" style="font-size:1.05rem;">Attune</span>
+        <svg width="46" height="33" viewBox="0 0 103 76" fill="none" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="sfLogoGrad" x1="0" y1="0" x2="103" y2="76" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#E8673A"/><stop offset="100%" stop-color="#1B5FE8"/></linearGradient></defs><path d="M14,4 L44,4 A9,9 0 0,1 53,13 L53,42 A9,9 0 0,1 44,51 L20,51 L6,61 L11,51 A6,6 0 0,1 5,45 L5,13 A9,9 0 0,1 14,4 Z" fill="url(#sfLogoGrad)"/><path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill="white" opacity="0.93" transform="translate(13.16,11.3) scale(0.72)"/><path d="M89,14 L59,14 A9,9 0 0,0 50,23 L50,52 A9,9 0 0,0 59,61 L83,61 L97,71 L92,61 A6,6 0 0,0 98,55 L98,23 A9,9 0 0,0 89,14 Z" fill="none" stroke="url(#sfLogoGrad)" stroke-width="2.2" stroke-linejoin="round"/><path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill="url(#sfLogoGrad)" transform="translate(58.16,21.3) scale(0.72)"/></svg>
+        <span class="logo-text">Attune</span>
       </a>
-      <p style="font-size:.82rem;color:rgba(255,255,255,.35);margin-top:.75rem;line-height:1.6;">Because understanding<br>takes intention.</p>
+      <p class="sf-tagline">Because understanding takes intention.</p>
     </div>
     <div class="sf-links">
-      <div class="sf-col"><p>Product</p><a href="/home">Home</a><a href="/offerings">Packages</a><a href="/start">Get started</a></div>
-      <div class="sf-col"><p>Learn</p><a href="/purpose">Our Purpose</a><a href="/how-it-works">How it works</a><a href="/couple-types">Couple Types</a><a href="/practice">In Practice</a></div>
-      <div class="sf-col"><p>Support</p><a href="/faq">FAQs</a><a href="/contact">Contact us</a><a href="/legal">Privacy policy</a></div>
-      <div class="sf-col"><p>Account</p><a href="/portal">Sign in</a><a href="/portal">Create account</a></div>
+      <div class="sf-col">
+        <p class="sf-col-title">Product</p>
+        <a href="/offerings">Packages</a>
+        <a href="/start">Get started</a>
+      </div>
+      <div class="sf-col">
+        <p class="sf-col-title">Learn</p>
+        <a href="/purpose">Our Purpose</a>
+        <a href="/methodology">Methodology</a>
+        <a href="/practice">In Practice</a>
+        <a href="/faq">FAQs</a>
+      </div>
+      <div class="sf-col">
+        <p class="sf-col-title">Support</p>
+        <a href="/contact">Contact</a>
+        <a href="/legal">Privacy</a>
+      </div>
     </div>
   </div>
-  <div class="sf-bottom"><p class="sf-copy">Attune Relationships™</p><p class="sf-email">hello@attune-relationships.com</p></div>
+  <div class="sf-bottom">
+    <p class="sf-copy">© 2026 Attune Relationships</p>
+    <p class="sf-email">hello@attune-relationships.com</p>
+  </div>
 </footer>
 
 <script>
