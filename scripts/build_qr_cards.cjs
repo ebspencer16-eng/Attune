@@ -21,6 +21,30 @@ const path = require('path');
 
 const PUBLIC_HTML = path.join(__dirname, '..', 'public', 'qr-cards-print.html');
 
+/**
+ * Returns an inline SVG for a full-panel diagonal gradient.
+ * Using SVG means the gradient is a bona fide image and always prints,
+ * unlike CSS background-gradient which browsers strip by default.
+ */
+function gradPanelSvg(id, stops) {
+  const stopTags = stops.map((s) => `<stop offset="${s.offset}" stop-color="${s.color}"/>`).join('');
+  return `<svg class="gp-bg" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none" viewBox="0 0 210 408">
+  <defs><linearGradient id="${id}" x1="0" y1="0" x2="1" y2="1">${stopTags}</linearGradient></defs>
+  <rect width="210" height="408" fill="url(#${id})"/>
+</svg>`;
+}
+
+/**
+ * Returns an inline SVG for a full-width gradient strip (for .back-accent).
+ */
+function gradStripSvg(id, stops, height = 6) {
+  const stopTags = stops.map((s) => `<stop offset="${s.offset}" stop-color="${s.color}"/>`).join('');
+  return `<svg xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none" viewBox="0 0 1008 ${height}" style="display:block;width:100%;height:${height}px">
+  <defs><linearGradient id="${id}" x1="0" y1="0" x2="1" y2="0">${stopTags}</linearGradient></defs>
+  <rect width="1008" height="${height}" fill="url(#${id})"/>
+</svg>`;
+}
+
 // ── Mark variant for gradient/dark panel ─────────────────────────────────────
 // Same white-backed mark used in the notepad's navy header: coral-filled left
 // bubble with white heart, white-filled right bubble with coral heart. On a
@@ -58,36 +82,36 @@ const PACKAGES = [
     name: 'The Attune Assessment',
     label: 'Assessment',
     accent: '#E8673A',
-    panelGradient: 'linear-gradient(160deg,#C8522E 0%,#6B3FA0 52%,#1B5FE8 100%)',
+    panelStops: [{offset:'0%',color:'#C8522E'},{offset:'52%',color:'#6B3FA0'},{offset:'100%',color:'#1B5FE8'}],
     headlineGradient: 'linear-gradient(120deg,#E8673A 0%,#6B3FA0 50%,#1B5FE8 100%)',
-    stripGradient: 'linear-gradient(90deg,#E8673A,#6B3FA0,#1B5FE8)',
+    stripStops: [{offset:'0%',color:'#E8673A'},{offset:'50%',color:'#6B3FA0'},{offset:'100%',color:'#1B5FE8'}],
   },
   {
     id: 'newlywed',
     name: 'Starting Out Collection',
     label: 'Starting Out',
     accent: '#C45C2A',
-    panelGradient: 'linear-gradient(160deg,#C8522E 0%,#6B3FA0 52%,#1B5FE8 100%)',
+    panelStops: [{offset:'0%',color:'#C8522E'},{offset:'52%',color:'#6B3FA0'},{offset:'100%',color:'#1B5FE8'}],
     headlineGradient: 'linear-gradient(120deg,#C45C2A 0%,#6B3FA0 50%,#1B5FE8 100%)',
-    stripGradient: 'linear-gradient(90deg,#C45C2A,#6B3FA0,#1B5FE8)',
+    stripStops: [{offset:'0%',color:'#C45C2A'},{offset:'50%',color:'#6B3FA0'},{offset:'100%',color:'#1B5FE8'}],
   },
   {
     id: 'anniversary',
     name: 'Relationship Reflection',
     label: 'Anniversary',
     accent: '#9B5DE5',
-    panelGradient: 'linear-gradient(160deg,#6B3FA0 0%,#9B5DE5 52%,#1B5FE8 100%)',
+    panelStops: [{offset:'0%',color:'#6B3FA0'},{offset:'52%',color:'#9B5DE5'},{offset:'100%',color:'#1B5FE8'}],
     headlineGradient: 'linear-gradient(120deg,#C8522E 0%,#9B5DE5 50%,#1B5FE8 100%)',
-    stripGradient: 'linear-gradient(90deg,#9B5DE5,#6B3FA0,#1B5FE8)',
+    stripStops: [{offset:'0%',color:'#9B5DE5'},{offset:'50%',color:'#6B3FA0'},{offset:'100%',color:'#1B5FE8'}],
   },
   {
     id: 'premium',
     name: 'Attune Premium',
     label: 'Premium',
     accent: '#5B6DF8',
-    panelGradient: 'linear-gradient(160deg,#3E4DD8 0%,#6B3FA0 52%,#1B5FE8 100%)',
+    panelStops: [{offset:'0%',color:'#3E4DD8'},{offset:'52%',color:'#6B3FA0'},{offset:'100%',color:'#1B5FE8'}],
     headlineGradient: 'linear-gradient(120deg,#5B6DF8 0%,#6B3FA0 50%,#1B5FE8 100%)',
-    stripGradient: 'linear-gradient(90deg,#5B6DF8,#6B3FA0,#1B5FE8)',
+    stripStops: [{offset:'0%',color:'#5B6DF8'},{offset:'50%',color:'#6B3FA0'},{offset:'100%',color:'#1B5FE8'}],
   },
 ];
 
@@ -118,7 +142,9 @@ body{padding:24px;display:flex;flex-direction:column;align-items:center;gap:24px
 .back{background:#FFFEF9;flex-direction:column;box-shadow:0 8px 24px rgba(0,0,0,.10);border:.5px solid rgba(0,0,0,.05)}
 
 /* FRONT — gradient panel (original structure) */
-.grad-panel{width:210px;flex-shrink:0;border-radius:4px 0 0 4px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;padding:32px 26px;color:white}
+.grad-panel{width:210px;height:100%;flex-shrink:0;align-self:stretch;border-radius:4px 0 0 4px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;padding:32px 26px;color:white;position:relative;overflow:hidden}
+.grad-panel>*:not(.gp-bg){position:relative;z-index:1}
+.gp-bg{position:absolute;inset:0;width:100%;height:100%;display:block;z-index:0}
 .gp-lockup{display:flex;flex-direction:column;align-items:center;gap:6px}
 .gp-wordmark{font-family:'Playfair Display',Georgia,serif;font-size:22px;font-weight:700;color:white;letter-spacing:-.015em;line-height:1}
 .gp-kicker{font-family:'DM Sans',sans-serif;font-size:7px;font-weight:700;letter-spacing:.28em;text-transform:uppercase;color:rgba(255,255,255,.6)}
@@ -178,7 +204,8 @@ body{padding:24px;display:flex;flex-direction:column;align-items:center;gap:24px
 function frontCard(pkg) {
   return `<div class="page front-page">
   <div class="card front">
-    <div class="grad-panel" style="background:${pkg.panelGradient}">
+    <div class="grad-panel">
+      ${gradPanelSvg('gp_' + pkg.id, pkg.panelStops)}
       ${markOnDark(44, 32)}
       <div class="gp-lockup">
         <div class="gp-wordmark">Attune</div>
@@ -216,7 +243,7 @@ function frontCard(pkg) {
 function backCard(pkg, qrDataUri) {
   return `<div class="page back-page">
   <div class="card back">
-    <div class="back-accent" style="background:${pkg.stripGradient}"></div>
+    ${gradStripSvg('gs_' + pkg.id, pkg.stripStops)}
     <div class="back-inner">
       <div class="back-left">
         <div class="back-steps-head">How to get started</div>

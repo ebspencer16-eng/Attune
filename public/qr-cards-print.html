@@ -18,7 +18,9 @@ body{padding:24px;display:flex;flex-direction:column;align-items:center;gap:24px
 .back{background:#FFFEF9;flex-direction:column;box-shadow:0 8px 24px rgba(0,0,0,.10);border:.5px solid rgba(0,0,0,.05)}
 
 /* FRONT — gradient panel (original structure) */
-.grad-panel{width:210px;flex-shrink:0;border-radius:4px 0 0 4px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;padding:32px 26px;color:white}
+.grad-panel{width:210px;height:100%;flex-shrink:0;align-self:stretch;border-radius:4px 0 0 4px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;padding:32px 26px;color:white;position:relative;overflow:hidden}
+.grad-panel>*:not(.gp-bg){position:relative;z-index:1}
+.gp-bg{position:absolute;inset:0;width:100%;height:100%;display:block;z-index:0}
 .gp-lockup{display:flex;flex-direction:column;align-items:center;gap:6px}
 .gp-wordmark{font-family:'Playfair Display',Georgia,serif;font-size:22px;font-weight:700;color:white;letter-spacing:-.015em;line-height:1}
 .gp-kicker{font-family:'DM Sans',sans-serif;font-size:7px;font-weight:700;letter-spacing:.28em;text-transform:uppercase;color:rgba(255,255,255,.6)}
@@ -76,7 +78,11 @@ body{padding:24px;display:flex;flex-direction:column;align-items:center;gap:24px
 <body>
 <div class="page front-page">
   <div class="card front">
-    <div class="grad-panel" style="background:linear-gradient(160deg,#C8522E 0%,#6B3FA0 52%,#1B5FE8 100%)">
+    <div class="grad-panel">
+      <svg class="gp-bg" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none" viewBox="0 0 210 408">
+  <defs><linearGradient id="gp_core" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#C8522E"/><stop offset="52%" stop-color="#6B3FA0"/><stop offset="100%" stop-color="#1B5FE8"/></linearGradient></defs>
+  <rect width="210" height="408" fill="url(#gp_core)"/>
+</svg>
       <svg width="44" height="32" viewBox="0 0 103 76" fill="none" xmlns="http://www.w3.org/2000/svg">
   <defs>
     <linearGradient id="mCoral" x1="0" y1="0" x2="103" y2="76" gradientUnits="userSpaceOnUse">
@@ -127,7 +133,10 @@ body{padding:24px;display:flex;flex-direction:column;align-items:center;gap:24px
   <div class="page-label">Assessment – Front</div>
 </div><div class="page back-page">
   <div class="card back">
-    <div class="back-accent" style="background:linear-gradient(90deg,#E8673A,#6B3FA0,#1B5FE8)"></div>
+    <svg xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none" viewBox="0 0 1008 6" style="display:block;width:100%;height:6px">
+  <defs><linearGradient id="gs_core" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#E8673A"/><stop offset="50%" stop-color="#6B3FA0"/><stop offset="100%" stop-color="#1B5FE8"/></linearGradient></defs>
+  <rect width="1008" height="6" fill="url(#gs_core)"/>
+</svg>
     <div class="back-inner">
       <div class="back-left">
         <div class="back-steps-head">How to get started</div>
@@ -156,7 +165,11 @@ body{padding:24px;display:flex;flex-direction:column;align-items:center;gap:24px
 </div>
 <div class="page front-page">
   <div class="card front">
-    <div class="grad-panel" style="background:linear-gradient(160deg,#C8522E 0%,#6B3FA0 52%,#1B5FE8 100%)">
+    <div class="grad-panel">
+      <svg class="gp-bg" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none" viewBox="0 0 210 408">
+  <defs><linearGradient id="gp_newlywed" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#C8522E"/><stop offset="52%" stop-color="#6B3FA0"/><stop offset="100%" stop-color="#1B5FE8"/></linearGradient></defs>
+  <rect width="210" height="408" fill="url(#gp_newlywed)"/>
+</svg>
       <svg width="44" height="32" viewBox="0 0 103 76" fill="none" xmlns="http://www.w3.org/2000/svg">
   <defs>
     <linearGradient id="mCoral" x1="0" y1="0" x2="103" y2="76" gradientUnits="userSpaceOnUse">
@@ -207,7 +220,10 @@ body{padding:24px;display:flex;flex-direction:column;align-items:center;gap:24px
   <div class="page-label">Starting Out – Front</div>
 </div><div class="page back-page">
   <div class="card back">
-    <div class="back-accent" style="background:linear-gradient(90deg,#C45C2A,#6B3FA0,#1B5FE8)"></div>
+    <svg xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none" viewBox="0 0 1008 6" style="display:block;width:100%;height:6px">
+  <defs><linearGradient id="gs_newlywed" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#C45C2A"/><stop offset="50%" stop-color="#6B3FA0"/><stop offset="100%" stop-color="#1B5FE8"/></linearGradient></defs>
+  <rect width="1008" height="6" fill="url(#gs_newlywed)"/>
+</svg>
     <div class="back-inner">
       <div class="back-left">
         <div class="back-steps-head">How to get started</div>
@@ -236,7 +252,11 @@ body{padding:24px;display:flex;flex-direction:column;align-items:center;gap:24px
 </div>
 <div class="page front-page">
   <div class="card front">
-    <div class="grad-panel" style="background:linear-gradient(160deg,#6B3FA0 0%,#9B5DE5 52%,#1B5FE8 100%)">
+    <div class="grad-panel">
+      <svg class="gp-bg" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none" viewBox="0 0 210 408">
+  <defs><linearGradient id="gp_anniversary" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#6B3FA0"/><stop offset="52%" stop-color="#9B5DE5"/><stop offset="100%" stop-color="#1B5FE8"/></linearGradient></defs>
+  <rect width="210" height="408" fill="url(#gp_anniversary)"/>
+</svg>
       <svg width="44" height="32" viewBox="0 0 103 76" fill="none" xmlns="http://www.w3.org/2000/svg">
   <defs>
     <linearGradient id="mCoral" x1="0" y1="0" x2="103" y2="76" gradientUnits="userSpaceOnUse">
@@ -287,7 +307,10 @@ body{padding:24px;display:flex;flex-direction:column;align-items:center;gap:24px
   <div class="page-label">Anniversary – Front</div>
 </div><div class="page back-page">
   <div class="card back">
-    <div class="back-accent" style="background:linear-gradient(90deg,#9B5DE5,#6B3FA0,#1B5FE8)"></div>
+    <svg xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none" viewBox="0 0 1008 6" style="display:block;width:100%;height:6px">
+  <defs><linearGradient id="gs_anniversary" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#9B5DE5"/><stop offset="50%" stop-color="#6B3FA0"/><stop offset="100%" stop-color="#1B5FE8"/></linearGradient></defs>
+  <rect width="1008" height="6" fill="url(#gs_anniversary)"/>
+</svg>
     <div class="back-inner">
       <div class="back-left">
         <div class="back-steps-head">How to get started</div>
@@ -316,7 +339,11 @@ body{padding:24px;display:flex;flex-direction:column;align-items:center;gap:24px
 </div>
 <div class="page front-page">
   <div class="card front">
-    <div class="grad-panel" style="background:linear-gradient(160deg,#3E4DD8 0%,#6B3FA0 52%,#1B5FE8 100%)">
+    <div class="grad-panel">
+      <svg class="gp-bg" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none" viewBox="0 0 210 408">
+  <defs><linearGradient id="gp_premium" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#3E4DD8"/><stop offset="52%" stop-color="#6B3FA0"/><stop offset="100%" stop-color="#1B5FE8"/></linearGradient></defs>
+  <rect width="210" height="408" fill="url(#gp_premium)"/>
+</svg>
       <svg width="44" height="32" viewBox="0 0 103 76" fill="none" xmlns="http://www.w3.org/2000/svg">
   <defs>
     <linearGradient id="mCoral" x1="0" y1="0" x2="103" y2="76" gradientUnits="userSpaceOnUse">
@@ -367,7 +394,10 @@ body{padding:24px;display:flex;flex-direction:column;align-items:center;gap:24px
   <div class="page-label">Premium – Front</div>
 </div><div class="page back-page">
   <div class="card back">
-    <div class="back-accent" style="background:linear-gradient(90deg,#5B6DF8,#6B3FA0,#1B5FE8)"></div>
+    <svg xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none" viewBox="0 0 1008 6" style="display:block;width:100%;height:6px">
+  <defs><linearGradient id="gs_premium" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#5B6DF8"/><stop offset="50%" stop-color="#6B3FA0"/><stop offset="100%" stop-color="#1B5FE8"/></linearGradient></defs>
+  <rect width="1008" height="6" fill="url(#gs_premium)"/>
+</svg>
     <div class="back-inner">
       <div class="back-left">
         <div class="back-steps-head">How to get started</div>
