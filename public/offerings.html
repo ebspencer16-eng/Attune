@@ -304,6 +304,46 @@
   .cart-close{background:none;border:none;cursor:pointer;color:var(--muted);padding:.25rem;border-radius:6px;display:flex;align-items:center;justify-content:center;transition:color .15s}
   .cart-close:hover{color:var(--ink)}
   .cart-pkg-row{padding:1.25rem 1.75rem;background:var(--warm);border-bottom:1px solid var(--stone);display:flex;align-items:center;justify-content:space-between;gap:1rem}
+
+  /* Multi-item cart styles */
+  #cart-items{}
+  .cart-item{padding:1.1rem 1.75rem;border-bottom:1px solid var(--stone);background:var(--warm)}
+  .cart-item + .cart-item{background:#FDFAF5}
+  .cart-item-top{display:flex;align-items:flex-start;justify-content:space-between;gap:1rem;margin-bottom:.7rem}
+  .cart-item-info{flex:1;min-width:0}
+  .cart-item-info .cart-pkg-badge{display:inline-block;font-size:.58rem;font-weight:700;letter-spacing:.2em;text-transform:uppercase;padding:.2rem .55rem;border-radius:8px;margin-bottom:.35rem}
+  .cart-item-name{font-family:var(--hfont);font-size:1rem;font-weight:700;color:var(--ink);line-height:1.2;margin-bottom:.15rem}
+  .cart-item-sub{font-size:.7rem;color:var(--muted);margin-bottom:.5rem}
+  .cart-item-fmt-row{display:flex;gap:.35rem;margin-top:.2rem}
+  .cart-fmt-btn{font-size:.64rem;font-weight:600;padding:.25rem .6rem;border-radius:6px;border:1px solid var(--stone);background:white;color:var(--muted);cursor:pointer;font-family:var(--bfont)}
+  .cart-fmt-btn.active{background:var(--ink);color:white;border-color:var(--ink)}
+  .cart-item-right{text-align:right;flex-shrink:0}
+  .cart-item-price{font-family:var(--hfont);font-size:1.25rem;font-weight:700;color:var(--ink);white-space:nowrap}
+  .cart-item-price-sub{font-size:.6rem;color:var(--muted);margin-top:.1rem}
+  .cart-item-controls{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap}
+  .qty-ctrl{display:inline-flex;align-items:center;border:1px solid var(--stone);border-radius:8px;overflow:hidden;background:white}
+  .qty-ctrl button{width:26px;height:26px;border:none;background:white;font-size:1rem;color:var(--ink);cursor:pointer;font-family:var(--bfont);line-height:1}
+  .qty-ctrl button:hover{background:var(--warm)}
+  .qty-ctrl .qty-val{padding:0 .55rem;font-size:.78rem;font-weight:600;color:var(--ink);font-family:var(--bfont);min-width:24px;text-align:center}
+  .cart-item-customize{flex:1;min-width:120px;font-size:.68rem;color:var(--muted);background:transparent;border:1px dashed var(--stone);border-radius:8px;padding:.3rem .55rem;cursor:pointer;font-family:var(--bfont);text-align:left;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .cart-item-customize:hover{border-color:var(--orange);color:var(--ink)}
+  .cart-item-remove{width:28px;height:28px;border:1px solid var(--stone);background:white;border-radius:8px;color:var(--muted);cursor:pointer;display:flex;align-items:center;justify-content:center}
+  .cart-item-remove:hover{color:#D14343;border-color:#F0C5C5}
+  .cart-item-addons{margin-top:.75rem;padding-top:.75rem;border-top:1px dashed var(--stone);display:flex;flex-direction:column;gap:.4rem}
+  .mini-addon{display:flex;justify-content:space-between;align-items:center;gap:.75rem;padding:.55rem .7rem;border:1px solid var(--stone);border-radius:10px;background:white;cursor:pointer;transition:all .12s}
+  .mini-addon:hover{border-color:#D4C7B8}
+  .mini-addon.sel{border-color:var(--orange);background:#FFF7F1}
+  .mini-addon-title{font-size:.76rem;font-weight:600;color:var(--ink);font-family:var(--bfont);line-height:1.25}
+  .mini-addon-desc{font-size:.64rem;color:var(--muted);line-height:1.35;margin-top:.1rem}
+  .mini-addon-right{display:flex;align-items:center;gap:.55rem;flex-shrink:0}
+  .mini-addon-price{font-size:.72rem;font-weight:700;color:var(--ink);font-family:var(--bfont)}
+  .mini-check{width:18px;height:18px;border-radius:50%;border:1.5px solid var(--stone);display:flex;align-items:center;justify-content:center;background:white;transition:all .12s}
+  .mini-check svg{opacity:0}
+  .mini-check.sel{background:var(--orange);border-color:var(--orange)}
+  .mini-check.sel svg{opacity:1}
+  .mini-variants{display:flex;gap:.4rem;padding:.1rem .25rem .35rem}
+  .mini-variant{flex:1;font-size:.66rem;font-weight:600;padding:.4rem .5rem;border:1px solid var(--stone);border-radius:8px;background:white;color:var(--muted);cursor:pointer;font-family:var(--bfont);transition:all .12s}
+  .mini-variant.sel{border-color:var(--orange);background:#FFF0EB;color:var(--orange)}
   .cart-pkg-badge{font-size:.58rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:.25rem .65rem;border-radius:999px;margin-bottom:.4rem;display:inline-block}
   .cart-pkg-name{font-family:var(--hfont);font-size:1rem;font-weight:700;color:var(--ink)}
   .cart-pkg-price{font-family:var(--hfont);font-size:1.5rem;font-weight:700;color:var(--ink);text-align:right;white-space:nowrap}
@@ -1272,34 +1312,106 @@
 
 <script>
 // ── CART SYSTEM ──────────────────────────────────────────────────────────────
+// Canonical pricing — matches the offering cards and checkout.html PACKAGES.
+// If you change prices, update checkout.html/PACKAGES too.
 const CART_PKGS = {
-  core:        { name: 'The Attune Assessment',    badge: 'The Foundation',        badgeColor: '#FFF0EB', badgeText: '#E8673A', basePrice: 74,  sub: 'Digital · instant access · yours to keep' },
-  newlywed:    { name: 'Starting Out Collection',  badge: 'Wedding Gift',          badgeColor: '#FFF0EB', badgeText: '#E8673A', basePrice: 124,  sub: 'Physical gift box · shipping included' },
-  anniversary: { name: 'Relationship Reflection',   badge: 'Anniversary Gift',      badgeColor: '#EEEFFF', badgeText: '#5B6DF8', basePrice: 139, sub: 'Physical gift box · shipping included' },
-  premium:     { name: 'Attune Premium',           badge: 'Most Complete',         badgeColor: 'rgba(91,109,248,.12)', badgeText: '#7b8fff', basePrice: 295, sub: 'Digital · LMFT session included' },
+  core: {
+    name: 'The Attune Assessment', badge: 'The Foundation',
+    badgeColor: '#FFF0EB', badgeText: '#E8673A',
+    digitalPrice: 89, physicalPrice: 124,
+    supportsPhysical: false,  // core is digital-only
+  },
+  newlywed: {
+    name: 'Starting Out Collection', badge: 'Wedding Gift',
+    badgeColor: '#FFF0EB', badgeText: '#E8673A',
+    digitalPrice: 139, physicalPrice: 174,
+    supportsPhysical: true,
+  },
+  anniversary: {
+    name: 'Relationship Reflection', badge: 'Anniversary Gift',
+    badgeColor: '#EEEFFF', badgeText: '#5B6DF8',
+    digitalPrice: 139, physicalPrice: 174,
+    supportsPhysical: true,
+  },
+  premium: {
+    name: 'Attune Premium', badge: 'Most Complete',
+    badgeColor: 'rgba(91,109,248,.12)', badgeText: '#7b8fff',
+    digitalPrice: 295, physicalPrice: 330,
+    supportsPhysical: true,
+  },
 };
 
-let _cartPkg = null;
-let _addonWorkbook = false;
-let _addonLmft = false;
-let _workbookVariant = 'digital'; // 'digital' | 'print'
+// Add-on pricing — also mirrored in checkout.html
+const ADDON_PRICES = {
+  workbookDigital: 19,
+  workbookPrint:   39,
+  lmft:            150,
+  reflection:      20,
+  budget:          15,
+  checklist:       12,
+};
+
+// ── State ──────────────────────────────────────────────────────────────────
+// Each item: { id, pkg, format, qty, addons: { workbook, workbookVariant, lmft, reflection, budget, checklist } }
+let _cartItems = [];
+// Track which format is currently selected on each offering card
+let _currentFormats = { core:'digital', newlywed:'physical', anniversary:'physical', premium:'digital' };
+// Which item's add-on panel is currently expanded (null = none)
+let _expandedItemId = null;
+
+function _newItemId() { return 'i' + Date.now().toString(36) + Math.random().toString(36).slice(2,6); }
+
+function _defaultAddons() {
+  return { workbook:false, workbookVariant:'digital', lmft:false, reflection:false, budget:false, checklist:false };
+}
+
+function _itemPrice(item) {
+  const p = CART_PKGS[item.pkg];
+  const base = item.format === 'physical' ? p.physicalPrice : p.digitalPrice;
+  let add = 0;
+  if (item.addons.workbook)   add += item.addons.workbookVariant === 'print' ? ADDON_PRICES.workbookPrint : ADDON_PRICES.workbookDigital;
+  if (item.addons.lmft)       add += ADDON_PRICES.lmft;
+  if (item.addons.reflection) add += ADDON_PRICES.reflection;
+  if (item.addons.budget)     add += ADDON_PRICES.budget;
+  if (item.addons.checklist)  add += ADDON_PRICES.checklist;
+  return base + add;
+}
+
+function _cartItemCount() {
+  return _cartItems.reduce((sum, i) => sum + i.qty, 0);
+}
 
 function addToCart(pkg) {
-  _cartPkg = pkg;
-  _addonLmft = false;
-  _addonWorkbook = false;
-  _workbookVariant = 'digital';
+  const cfg = CART_PKGS[pkg];
+  if (!cfg) return;
+  const format = cfg.supportsPhysical ? (_currentFormats[pkg] || 'digital') : 'digital';
+  // Reuse existing line item if it matches pkg + format + default addons
+  // (user can customize addons separately). New line item gets fresh addons.
+  const sig = (it) => [it.pkg, it.format, JSON.stringify(it.addons)].join('|');
+  const defaultAddons = _defaultAddons();
+  const newItem = { id: _newItemId(), pkg, format, qty: 1, addons: defaultAddons };
+  const existing = _cartItems.find(i => sig(i) === sig(newItem));
+  if (existing) {
+    existing.qty += 1;
+  } else {
+    _cartItems.push(newItem);
+  }
   renderCart();
-  // Update nav badge
-  document.getElementById('cart-badge').classList.add('show');
-  document.getElementById('cart-badge').textContent = '1';
-  // Show modal popup
-  const p = CART_PKGS[pkg];
-  document.getElementById('added-modal-name').textContent = p.name + ' added to cart';
+  updateCartBadge();
+  // Show the "added to cart" confirmation modal
   const modal = document.getElementById('added-modal');
-  modal.style.display = 'flex';
-  modal.style.background = 'rgba(14,11,7,0.5)';
-  modal.style.backdropFilter = 'blur(4px)';
+  const nameEl = document.getElementById('added-modal-name');
+  if (nameEl) {
+    const count = _cartItemCount();
+    nameEl.textContent = count > 1
+      ? `${cfg.name} added (${count} items in cart)`
+      : `${cfg.name} added to cart`;
+  }
+  if (modal) {
+    modal.style.display = 'flex';
+    modal.style.background = 'rgba(14,11,7,0.5)';
+    modal.style.backdropFilter = 'blur(4px)';
+  }
 }
 
 function closeAddedModal() {
@@ -1307,73 +1419,177 @@ function closeAddedModal() {
   if (modal) modal.style.display = 'none';
 }
 
-function renderCart() {
-  const p = CART_PKGS[_cartPkg];
-  // Badge
-  const badge = document.getElementById('cart-pkg-badge');
-  badge.textContent = p.badge;
-  badge.style.background = p.badgeColor;
-  badge.style.color = p.badgeText;
-  // Name / sub / price
-  document.getElementById('cart-pkg-name').textContent = p.name;
-  document.getElementById('cart-pkg-sub').textContent = p.sub;
-  document.getElementById('cart-pkg-price').textContent = '$' + p.basePrice;
-  // Addon state
-  const wbCard = document.getElementById('addon-workbook');
-  wbCard.classList.toggle('selected', _addonWorkbook);
-  const lmftCard = document.getElementById('addon-lmft');
-  if (lmftCard) lmftCard.classList.toggle('selected', _addonLmft);
-  document.getElementById('workbook-variants').style.display = _addonWorkbook ? 'flex' : 'none';
-  updateWorkbookVariantUI();
-  updateTotal();
-}
-
-function toggleAddon(id) {
-  if (id === 'workbook') {
-    _addonWorkbook = !_addonWorkbook;
-    renderCart();
+function updateCartBadge() {
+  const badge = document.getElementById('cart-badge');
+  if (!badge) return;
+  const n = _cartItemCount();
+  if (n > 0) {
+    badge.classList.add('show');
+    badge.textContent = String(n);
+  } else {
+    badge.classList.remove('show');
   }
 }
 
-function selectWorkbookVariant(v, e) {
-  e.stopPropagation();
-  _workbookVariant = v;
-  updateWorkbookVariantUI();
+function removeItem(id) {
+  _cartItems = _cartItems.filter(i => i.id !== id);
+  if (_expandedItemId === id) _expandedItemId = null;
+  renderCart();
+  updateCartBadge();
+}
+
+function changeQty(id, delta) {
+  const item = _cartItems.find(i => i.id === id);
+  if (!item) return;
+  item.qty = Math.max(1, item.qty + delta);
+  renderCart();
+  updateCartBadge();
+}
+
+function toggleItemAddon(id, addon) {
+  const item = _cartItems.find(i => i.id === id);
+  if (!item) return;
+  item.addons[addon] = !item.addons[addon];
+  // If turning off workbook, reset variant to digital
+  if (addon === 'workbook' && !item.addons.workbook) item.addons.workbookVariant = 'digital';
+  renderCart();
+}
+
+function setItemWorkbookVariant(id, variant, ev) {
+  if (ev) ev.stopPropagation();
+  const item = _cartItems.find(i => i.id === id);
+  if (!item) return;
+  item.addons.workbookVariant = variant;
+  renderCart();
+}
+
+function toggleItemPanel(id) {
+  _expandedItemId = (_expandedItemId === id) ? null : id;
+  renderCart();
+}
+
+function renderCart() {
+  const container = document.getElementById('cart-items');
+  const filled = document.getElementById('cart-filled');
+  const empty  = document.getElementById('cart-empty-state');
+  if (!container) return;
+
+  if (_cartItems.length === 0) {
+    filled.style.display = 'none';
+    empty.style.display = '';
+    return;
+  }
+  filled.style.display = '';
+  empty.style.display = 'none';
+
+  const itemHtml = (item) => {
+    const cfg = CART_PKGS[item.pkg];
+    const unitPrice = _itemPrice(item);
+    const lineTotal = unitPrice * item.qty;
+    const expanded = _expandedItemId === item.id;
+    const formatLabel = cfg.supportsPhysical
+      ? (item.format === 'physical' ? 'Physical gift box' : 'Digital · instant access')
+      : 'Digital · instant access';
+    // Addon chips summary when collapsed
+    const activeAddons = [];
+    if (item.addons.workbook)   activeAddons.push('Workbook ' + (item.addons.workbookVariant === 'print' ? '(print)' : '(digital)'));
+    if (item.addons.lmft)       activeAddons.push('LMFT');
+    if (item.addons.reflection) activeAddons.push('Reflection');
+    if (item.addons.budget)     activeAddons.push('Budget');
+    if (item.addons.checklist)  activeAddons.push('Checklist');
+
+    return `
+    <div class="cart-item" data-id="${item.id}">
+      <div class="cart-item-top">
+        <div class="cart-item-info">
+          <span class="cart-pkg-badge" style="background:${cfg.badgeColor};color:${cfg.badgeText}">${cfg.badge}</span>
+          <div class="cart-item-name">${cfg.name}</div>
+          <div class="cart-item-sub">${formatLabel}</div>
+          ${cfg.supportsPhysical ? `
+            <div class="cart-item-fmt-row">
+              <button class="cart-fmt-btn ${item.format==='physical'?'active':''}" onclick="setItemFormat('${item.id}','physical')">Physical</button>
+              <button class="cart-fmt-btn ${item.format==='digital'?'active':''}" onclick="setItemFormat('${item.id}','digital')">Digital</button>
+            </div>
+          ` : ''}
+        </div>
+        <div class="cart-item-right">
+          <div class="cart-item-price">$${lineTotal}</div>
+          ${item.qty > 1 ? `<div class="cart-item-price-sub">$${unitPrice} each</div>` : ''}
+        </div>
+      </div>
+
+      <div class="cart-item-controls">
+        <div class="qty-ctrl">
+          <button onclick="changeQty('${item.id}',-1)" aria-label="Decrease">−</button>
+          <span class="qty-val">${item.qty}</span>
+          <button onclick="changeQty('${item.id}',1)" aria-label="Increase">+</button>
+        </div>
+        <button class="cart-item-customize" onclick="toggleItemPanel('${item.id}')">
+          ${expanded ? 'Hide add-ons' : (activeAddons.length ? activeAddons.join(' · ') : 'Add-ons')} ${expanded ? '▾' : '▸'}
+        </button>
+        <button class="cart-item-remove" onclick="removeItem('${item.id}')" aria-label="Remove">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/></svg>
+        </button>
+      </div>
+
+      ${expanded ? `
+      <div class="cart-item-addons">
+        <div class="mini-addon ${item.addons.workbook?'sel':''}" onclick="toggleItemAddon('${item.id}','workbook')">
+          <div><div class="mini-addon-title">Personalized Workbook</div><div class="mini-addon-desc">Conversation prompts drawn from your results</div></div>
+          <div class="mini-addon-right">
+            <div class="mini-addon-price">${item.addons.workbook ? '$'+(item.addons.workbookVariant==='print'?ADDON_PRICES.workbookPrint:ADDON_PRICES.workbookDigital) : '$'+ADDON_PRICES.workbookDigital}</div>
+            <div class="mini-check ${item.addons.workbook?'sel':''}"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+          </div>
+        </div>
+        ${item.addons.workbook ? `
+          <div class="mini-variants">
+            <button class="mini-variant ${item.addons.workbookVariant==='digital'?'sel':''}" onclick="setItemWorkbookVariant('${item.id}','digital',event)">Digital · $${ADDON_PRICES.workbookDigital}</button>
+            <button class="mini-variant ${item.addons.workbookVariant==='print'?'sel':''}" onclick="setItemWorkbookVariant('${item.id}','print',event)">Print · $${ADDON_PRICES.workbookPrint}</button>
+          </div>
+        ` : ''}
+        <div class="mini-addon ${item.addons.lmft?'sel':''}" onclick="toggleItemAddon('${item.id}','lmft')">
+          <div><div class="mini-addon-title">LMFT Session</div><div class="mini-addon-desc">Licensed therapist reviews your results</div></div>
+          <div class="mini-addon-right"><div class="mini-addon-price">$${ADDON_PRICES.lmft}</div><div class="mini-check ${item.addons.lmft?'sel':''}"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div></div>
+        </div>
+        <div class="mini-addon ${item.addons.reflection?'sel':''}" onclick="toggleItemAddon('${item.id}','reflection')">
+          <div><div class="mini-addon-title">Relationship Reflection</div><div class="mini-addon-desc">Exercise on experiences that shaped you</div></div>
+          <div class="mini-addon-right"><div class="mini-addon-price">$${ADDON_PRICES.reflection}</div><div class="mini-check ${item.addons.reflection?'sel':''}"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div></div>
+        </div>
+        <div class="mini-addon ${item.addons.budget?'sel':''}" onclick="toggleItemAddon('${item.id}','budget')">
+          <div><div class="mini-addon-title">Shared Budgeting Activity</div><div class="mini-addon-desc">Build a shared budget together</div></div>
+          <div class="mini-addon-right"><div class="mini-addon-price">$${ADDON_PRICES.budget}</div><div class="mini-check ${item.addons.budget?'sel':''}"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div></div>
+        </div>
+        <div class="mini-addon ${item.addons.checklist?'sel':''}" onclick="toggleItemAddon('${item.id}','checklist')">
+          <div><div class="mini-addon-title">Starting Out Checklist</div><div class="mini-addon-desc">Merging lives, finances, logistics</div></div>
+          <div class="mini-addon-right"><div class="mini-addon-price">$${ADDON_PRICES.checklist}</div><div class="mini-check ${item.addons.checklist?'sel':''}"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div></div>
+        </div>
+      </div>
+      ` : ''}
+    </div>`;
+  };
+
+  container.innerHTML = _cartItems.map(itemHtml).join('');
   updateTotal();
 }
 
-function updateWorkbookVariantUI() {
-  document.getElementById('wv-digital').className = 'addon-variant' + (_workbookVariant === 'digital' ? ' sel' : '');
-  document.getElementById('wv-print').className   = 'addon-variant' + (_workbookVariant === 'print'   ? ' sel' : '');
-  const price = _workbookVariant === 'print' ? '$39' : '$19';
-  document.getElementById('workbook-price-display').textContent = price;
-}
-
-function toggleAddonLmft() {
-  _addonLmft = !_addonLmft;
-  document.getElementById('addon-lmft').classList.toggle('selected', _addonLmft);
-  updateTotal();
+function setItemFormat(id, format) {
+  const item = _cartItems.find(i => i.id === id);
+  if (!item) return;
+  const cfg = CART_PKGS[item.pkg];
+  if (!cfg.supportsPhysical) return;
+  item.format = format;
+  renderCart();
 }
 
 function updateTotal() {
-  const p = CART_PKGS[_cartPkg];
-  let total = p.basePrice;
-  if (_addonWorkbook) total += _workbookVariant === 'print' ? 39 : 19;
-  if (_addonLmft) total += 150;
-  document.getElementById('cart-total').textContent = '$' + total;
+  const total = _cartItems.reduce((sum, i) => sum + _itemPrice(i) * i.qty, 0);
+  const el = document.getElementById('cart-total');
+  if (el) el.textContent = '$' + total;
 }
 
 function openCart() {
   const overlay = document.getElementById('cart-overlay');
-  const filled = document.getElementById('cart-filled');
-  const empty = document.getElementById('cart-empty-state');
-  if (_cartPkg) {
-    filled.style.display = '';
-    empty.style.display = 'none';
-  } else {
-    filled.style.display = 'none';
-    empty.style.display = '';
-  }
+  renderCart();  // ensure fresh
   overlay.classList.add('open');
   document.body.style.overflow = 'hidden';
 }
@@ -1381,14 +1597,30 @@ function closeCart() { document.getElementById('cart-overlay').classList.remove(
 function overlayClick(e) { if (e.target === document.getElementById('cart-overlay')) closeCart(); }
 
 function addToCartWithIntent(pkgId) {
-  // Add to cart immediately – "who is it for" and add-ons are handled in the cart drawer
   addToCart(pkgId);
 }
 
+// ── Checkout handoff ─────────────────────────────────────────────────────
+// Encode the full cart (items, qty, addons) and hand off to /checkout.
+// Checkout reads from sessionStorage because URL params would explode for
+// multi-item carts with addons.
 function goCheckout() {
-  const params = new URLSearchParams({ pkg: _cartPkg });
-  if (_addonWorkbook) params.set('addon_workbook', _workbookVariant);
-  if (_addonLmft) params.set('addon_lmft', '1');
+  if (_cartItems.length === 0) return;
+  try {
+    sessionStorage.setItem('attune_cart', JSON.stringify(_cartItems));
+  } catch (e) {
+    console.warn('[cart] sessionStorage write failed:', e);
+  }
+  // Preserve a simple URL param for the first item as fallback (so checkout
+  // still works if sessionStorage is blocked, e.g. private browsing edge case)
+  const first = _cartItems[0];
+  const params = new URLSearchParams({ pkg: first.pkg });
+  if (first.format === 'physical') params.set('format', 'physical');
+  if (first.addons.workbook) params.set('addon_workbook', first.addons.workbookVariant);
+  if (first.addons.lmft) params.set('addon_lmft', '1');
+  if (first.addons.reflection) params.set('addon_reflection', '1');
+  if (first.addons.budget) params.set('addon_budget', '1');
+  if (_cartItems.length > 1 || _cartItems[0].qty > 1) params.set('multi', '1');
   window.location.href = '/checkout?' + params.toString();
 }
 // ─────────────────────────────────────────────────────────────────────────────
@@ -1409,6 +1641,11 @@ function toggleFaq(item){
 }
 
 function setFormat(pkg,format){
+  // Map offerings-card pkg id to cart pkg id (the card uses 'ann' but cart uses 'anniversary')
+  const cartKey = pkg === 'ann' ? 'anniversary' : pkg;
+  const isDigital = format === 'virtual' || format === 'digital';
+  _currentFormats[cartKey] = isDigital ? 'digital' : 'physical';
+
   if(pkg==='newlywed'){
     const physical=format==='physical';
     document.getElementById('newlywed-price').textContent=physical?'$174':'$139';
@@ -1460,6 +1697,18 @@ function submitAnnualNotify() {
       setFormat('ann','physical');
       setFormat('premium','physical');
     } catch(e) { /* elements may not all exist on every render */ }
+    // Restore cart from sessionStorage so the user sees their items if they
+    // navigate back from checkout or open the offerings page in a new tab.
+    try {
+      const raw = sessionStorage.getItem('attune_cart');
+      if (raw) {
+        const items = JSON.parse(raw);
+        if (Array.isArray(items) && items.length) {
+          _cartItems = items;
+          updateCartBadge();
+        }
+      }
+    } catch (e) { /* sessionStorage unavailable, ignore */ }
   });
 
   // Close mobile menu on outside tap
@@ -1493,124 +1742,13 @@ function submitAnnualNotify() {
 
     <!-- Filled cart -->
     <div id="cart-filled">
-    <!-- Selected package -->
-    <div class="cart-pkg-row">
-      <div>
-        <div class="cart-pkg-badge" id="cart-pkg-badge"></div>
-        <div class="cart-pkg-name" id="cart-pkg-name"></div>
-        <div style="font-size:.72rem;color:var(--muted);margin-top:.2rem" id="cart-pkg-sub"></div>
-      </div>
-      <div>
-        <div class="cart-pkg-price" id="cart-pkg-price"></div>
-        <div class="cart-pkg-price-label">per couple</div>
-      </div>
-    </div>
-
-    <!-- Add-ons -->
-    <div class="cart-addons">
-      <div class="cart-addons-title">Optional add-ons</div>
-
-      <!-- Workbook -->
-      <div class="addon-card" id="addon-workbook" onclick="toggleAddon('workbook')">
-        <div class="addon-card-top">
-          <div>
-            <div class="addon-title">Personalized Workbook</div>
-            <div class="addon-desc">Conversation prompts, reflections, and guided exercises drawn directly from your joint results.</div>
-          </div>
-          <div>
-            <div class="addon-price" id="workbook-price-display">$19</div>
-            <div class="addon-price-sub">add-on</div>
-            <div class="addon-check" id="workbook-check">
-              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-            </div>
-          </div>
-        </div>
-        <div class="addon-variants" id="workbook-variants" style="display:none">
-          <div class="addon-variant sel" id="wv-digital" onclick="selectWorkbookVariant('digital',event)">
-            <div class="addon-variant-label">Digital PDF</div>
-            <div class="addon-variant-price">$19</div>
-          </div>
-          <div class="addon-variant" id="wv-print" onclick="selectWorkbookVariant('print',event)">
-            <div class="addon-variant-label">Printed &amp; bound</div>
-            <div class="addon-variant-price">$39 shipped</div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Shared Budgeting Activity -->
-      <div class="addon-card" id="addon-budget" onclick="toggleAddon('budget')">
-        <div class="addon-card-top">
-          <div>
-            <div class="addon-title">Shared Budgeting Activity</div>
-            <div class="addon-desc">A guided exercise for building a real shared budget together, with context from your expectations results to ground the conversation.</div>
-          </div>
-          <div>
-            <div class="addon-price">$15</div>
-            <div class="addon-price-sub">add-on</div>
-            <div class="addon-check" id="budget-check">
-              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Relationship Reflection -->
-      <div class="addon-card" id="addon-reflection" onclick="toggleAddon('reflection')">
-        <div class="addon-card-top">
-          <div>
-            <div class="addon-title">Relationship Reflection</div>
-            <div class="addon-desc">A third exercise about the moments and experiences that shaped each of you, and how they show up in your relationship today.</div>
-          </div>
-          <div>
-            <div class="addon-price">$20</div>
-            <div class="addon-price-sub">add-on</div>
-            <div class="addon-check" id="reflection-check">
-              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Starting Out Checklist -->
-      <div class="addon-card" id="addon-checklist" onclick="toggleAddon('checklist')">
-        <div class="addon-card-top">
-          <div>
-            <div class="addon-title">Starting Out Checklist</div>
-            <div class="addon-desc">A practical checklist for couples merging their lives, finances, name changes, estate basics, and the logistics that usually get missed.</div>
-          </div>
-          <div>
-            <div class="addon-price">$12</div>
-            <div class="addon-price-sub">add-on</div>
-            <div class="addon-check" id="checklist-check">
-              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- LMFT Session -->
-      <div class="addon-card" id="addon-lmft" onclick="toggleAddonLmft()">
-        <div class="addon-card-top">
-          <div>
-            <div class="addon-title">LMFT Session</div>
-            <div class="addon-desc">A licensed marriage and family therapist reviews your joint results before your session and comes prepared with context specific to your couple type.</div>
-          </div>
-          <div>
-            <div class="addon-price">$150</div>
-            <div class="addon-price-sub">add-on</div>
-            <div class="addon-check" id="lmft-check">
-              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-            </div>
-          </div>
-        </div>
-      </div>
-
-    </div>
+    <!-- Line items (dynamically rendered) -->
+    <div id="cart-items"></div>
 
     <!-- Total -->
     <div class="cart-total">
       <div class="cart-total-label">Total</div>
-      <div class="cart-total-amount" id="cart-total">$89</div>
+      <div class="cart-total-amount" id="cart-total">$0</div>
     </div>
 
     <!-- Actions -->
