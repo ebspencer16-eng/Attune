@@ -2458,16 +2458,19 @@ function printQRCard(orderId, pkg, coupleNames, token, giftMsg) {
   const cardPkg = pkgMap[pkg] || 'core';
   // Use gift version if there is a gift message, blank version otherwise
   const version = giftMsg ? 'gift' : 'standard';
-  // Build the card URL – the card template reads these params to auto-populate
+  // Map pkg ID to the key qr-cards-print.html expects
+  const pkgKeyMap = { 'newlywed-box':'newlywed', 'anniversary-box':'anniversary', 'premium-box':'premium' };
+  const qrPkgKey = pkgKeyMap[cardPkg] || 'core';
+  // Build the card URL — qr-cards-print.html reads these params to render
+  // a single personalized card for this order.
   const params = new URLSearchParams({
-    pkg: cardPkg,
-    version,
-    orderId,
+    pkg: qrPkgKey,
     names: decodeURIComponent(coupleNames),
-    ...(token ? { token } : {}),
-    ...(giftMsg ? { note: giftMsg } : {}),
+    orderId,
   });
-  window.open(`/qr-card-v5?${params}`, '_blank', 'width=520,height=700,toolbar=0,scrollbars=1');
+  if (token) params.set('token', token);
+  if (giftMsg) params.set('note', decodeURIComponent(giftMsg));
+  window.open(`/qr-cards-print.html?${params}`, '_blank', 'width=900,height=700,toolbar=0,scrollbars=1');
 }
 
 // ── Fulfillment CSV export ────────────────────────────
