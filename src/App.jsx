@@ -7257,7 +7257,10 @@ function AuthModal({ mode, onClose, onSuccess }) {
   const _p1 = _authParams.get('p1') || '';
   const _p2 = _authParams.get('p2') || '';
   const _partnerAEmail = (_authParams.get('pae') || '').toLowerCase(); // for uniqueness check on Partner B signup
+  const _qrToken = _authParams.get('qr') || '';
   const [form, setForm] = useState({ name: _p1, pronouns: "", partnerName: _p2, partnerPronouns: "", partnerEmail: "", email: "", password: "", emailOptIn: true });
+  const [qrOrder, setQrOrder] = useState(null);     // populated if a qr token resolves to a real order
+  const [qrStatus, setQrStatus] = useState(_qrToken ? 'loading' : 'none'); // 'none' | 'loading' | 'ok' | 'claimed' | 'invalid'
   const [err, setErr] = useState("");
   const [loading, setLoading] = useState(false);
   const [resetSent, setResetSent] = useState(false);
@@ -7265,6 +7268,38 @@ function AuthModal({ mode, onClose, onSuccess }) {
   const [lockedUntil, setLockedUntil] = useState(null);
   const [shake, setShake] = useState(false);
   const upd = (k, v) => setForm(f => ({ ...f, [k]: v }));
+
+  // When we arrive via a QR-code scan, look up the order it was issued to and
+  // prefill the signup form with the partner names. This makes the first step
+  // feel personal ("Welcome Sarah and James") instead of starting from blank.
+  React.useEffect(() => {
+    if (!_qrToken) return;
+    let cancelled = false;
+    fetch(`/api/qr-claim?token=${encodeURIComponent(_qrToken)}`)
+      .then(r => r.json())
+      .then(data => {
+        if (cancelled) return;
+        if (data?.error === 'not-found' || data?.error === 'Missing token') {
+          setQrStatus('invalid');
+          return;
+        }
+        if (!data?.order) { setQrStatus('invalid'); return; }
+        setQrOrder(data.order);
+        setQrStatus(data.order.claimed ? 'claimed' : 'ok');
+        // Only prefill for unclaimed orders — if already claimed, user is
+        // probably signing in or the second partner (who should use the
+        // invite link, not the QR).
+        if (!data.order.claimed) {
+          setForm(f => ({
+            ...f,
+            name: f.name || data.order.partner1Name || data.order.buyerName || '',
+            partnerName: f.partnerName || data.order.partner2Name || '',
+          }));
+        }
+      })
+      .catch(() => { if (!cancelled) setQrStatus('invalid'); });
+    return () => { cancelled = true; };
+  }, [_qrToken]);
 
   // Trigger shake + clear after animation (0.45s)
   const triggerShake = () => {
@@ -7364,6 +7399,16 @@ function AuthModal({ mode, onClose, onSuccess }) {
         }).catch(() => {});
       }
 
+      // If the user arrived via a QR-code scan, claim the order so the token
+      // can't be reused. Fire-and-forget — we don't block signup on this.
+      if (_qrToken && qrStatus === 'ok') {
+        fetch('/api/qr-claim', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ token: _qrToken, email: form.email.trim().toLowerCase() }),
+        }).catch(() => {});
+      }
+
       setLoading(false);
       onSuccess(account);
       return;
@@ -7392,6 +7437,15 @@ function AuthModal({ mode, onClose, onSuccess }) {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ type: 'partner_invite', fromName: form.name.trim(), toEmail: form.partnerEmail.trim(), toName: form.partnerName.trim() || 'Your partner', inviteUrl }),
+      }).catch(() => {});
+    }
+
+    // Claim the QR token if we arrived from a physical card scan
+    if (_qrToken && qrStatus === 'ok') {
+      fetch('/api/qr-claim', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token: _qrToken, email: form.email.trim().toLowerCase() }),
       }).catch(() => {});
     }
 
@@ -7573,6 +7627,28 @@ function AuthModal({ mode, onClose, onSuccess }) {
           <svg width="28" height="20" viewBox="0 0 103 76" fill="none"><defs><linearGradient id="am1" x1="0" y1="0" x2="103" y2="76" gradientUnits="userSpaceOnUse"><stop offset="0%" stopColor="#E8673A"/><stop offset="100%" stopColor="#1B5FE8"/></linearGradient></defs><path d="M14,4 L44,4 A9,9 0 0,1 53,13 L53,42 A9,9 0 0,1 44,51 L20,51 L6,61 L11,51 A6,6 0 0,1 5,45 L5,13 A9,9 0 0,1 14,4 Z" fill="url(#am1)"/><path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill="white" opacity="0.93" transform="translate(13.16,11.3) scale(0.72)"/><path d="M89,14 L59,14 A9,9 0 0,0 50,23 L50,52 A9,9 0 0,0 59,61 L83,61 L97,71 L92,61 A6,6 0 0,0 98,55 L98,23 A9,9 0 0,0 89,14 Z" fill="white" stroke="url(#am1)" strokeWidth="2.2" strokeLinejoin="round"/><path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill="url(#am1)" transform="translate(58.16,21.3) scale(0.72)"/></svg>
           <span style={{ fontFamily: "'Playfair Display', Georgia, serif", fontSize: "1.05rem", fontWeight: 700, color: "#0E0B07" }}>Attune</span>
         </div>
+
+        {/* QR-scan welcome banner — shown when user arrived via physical card scan */}
+        {qrStatus === 'ok' && qrOrder && (
+          <div style={{ background: "#FFF4EC", border: "1px solid #FFD4BF", borderRadius: 10, padding: "0.7rem 0.85rem", marginBottom: "1rem", display: "flex", alignItems: "flex-start", gap: "0.65rem" }}>
+            <div style={{ color: "#E8673A", fontSize: "1rem", lineHeight: 1, marginTop: "0.1rem" }}>✦</div>
+            <div style={{ flex: 1 }}>
+              <div style={{ fontFamily: "'DM Sans',sans-serif", fontSize: "0.7rem", fontWeight: 700, letterSpacing: "0.04em", color: "#C45C2A", textTransform: "uppercase", marginBottom: "0.15rem" }}>Welcome</div>
+              <div style={{ fontFamily: "'Playfair Display',Georgia,serif", fontSize: "0.95rem", color: "#2B2218", lineHeight: 1.35 }}>Let's set up your account.</div>
+            </div>
+          </div>
+        )}
+        {qrStatus === 'claimed' && qrOrder && (
+          <div style={{ background: "#FDF4E7", border: "1px solid #E8DDB8", borderRadius: 10, padding: "0.7rem 0.85rem", marginBottom: "1rem" }}>
+            <div style={{ fontFamily: "'DM Sans',sans-serif", fontSize: "0.7rem", fontWeight: 700, letterSpacing: "0.04em", color: "#8B6F1F", textTransform: "uppercase", marginBottom: "0.2rem" }}>Card already claimed</div>
+            <div style={{ fontFamily: "'DM Sans',sans-serif", fontSize: "0.78rem", color: "#5C4A38", lineHeight: 1.45 }}>This card was already linked to an account. If that's you, sign in below. If your partner set it up, you'll get a separate invite by email.</div>
+          </div>
+        )}
+        {qrStatus === 'invalid' && (
+          <div style={{ background: "#FDF2F2", border: "1px solid #F3C7C7", borderRadius: 10, padding: "0.7rem 0.85rem", marginBottom: "1rem" }}>
+            <div style={{ fontFamily: "'DM Sans',sans-serif", fontSize: "0.78rem", color: "#8B2F2F", lineHeight: 1.45 }}>This QR code isn't recognized. You can still create an account below.</div>
+          </div>
+        )}
 
         {/* Tab switcher */}
         <div style={{ display: "flex", background: "#F3EDE6", borderRadius: 10, padding: "0.22rem", marginBottom: "1.5rem" }}>
