@@ -58,6 +58,10 @@
   .form-hint{font-size:.67rem;color:var(--muted);margin-top:.35rem;line-height:1.5}
   .form-divider{font-size:.6rem;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);font-weight:700;margin:1.25rem 0 1rem;display:flex;align-items:center;gap:.65rem}
   .form-divider::before,.form-divider::after{content:'';flex:1;height:1px;background:var(--stone)}
+  /* iOS auto-zooms inputs smaller than 16px. Force 16px on mobile so taps don't zoom the page. */
+  @media(max-width:780px){
+    .form-input,textarea.form-input,#promoInput{font-size:16px!important}
+  }
 
   /* STRIPE ELEMENT */
   .stripe-field{width:100%;padding:.78rem 1rem;border:1.5px solid var(--stone);border-radius:10px;background:var(--cream);transition:border-color .15s}
@@ -564,8 +568,10 @@ let stripe, cardNumberElement, cardExpiryElement, cardCvcElement;
     const elements = stripe.elements({
       fonts: [{ cssSrc: 'https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500&display=swap' }]
     });
+    // Mobile needs 16px to prevent iOS from zooming on input focus
+    const isMobileWidth = window.matchMedia('(max-width:780px)').matches;
     const style = {
-      base: { fontFamily: "'DM Sans', sans-serif", fontSize: '14px', color: '#0E0B07',
+      base: { fontFamily: "'DM Sans', sans-serif", fontSize: isMobileWidth ? '16px' : '14px', color: '#0E0B07',
               '::placeholder': { color: '#C0B0A0' } },
       invalid: { color: '#ef4444' }
     };
