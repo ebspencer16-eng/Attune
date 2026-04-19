@@ -62,25 +62,17 @@ export default async function handler(req) {
   });
 
   // ── 2. "Get started" to buyer (digital, for-self) ──────────────────────────
+  // Note: partner invite is NOT sent here — AuthModal sends the real partner
+  // invite (with a proper invite code) when the buyer completes signup and
+  // enters their partner's email in the profile setup step.
   if (!isGift && !isPhysical) {
     const accessUrl = `https://attune-relationships.com/app?signup=1&pkg=${pkgKey}&p1=${encodeURIComponent(buyerName||"")}`;
-    const partnerInviteUrl = `https://attune-relationships.com/app?invite=INVITE_CODE&from=${encodeURIComponent(buyerName||"")}&pkg=${pkgKey}`;
     emails.push({
       from: `Attune <${FROM}>`,
       to: [buyerEmail],
       subject: `Set up your Attune profile — ${buyerName}`,
-      html: getStartedBuyerHtml({ name: buyerName, partnerName, accessUrl, partnerInviteUrl, partnerEmail }),
+      html: getStartedBuyerHtml({ name: buyerName, partnerName, accessUrl, partnerEmail }),
     });
-
-    // If buyer provided partner's email, send partner their invite directly
-    if (partnerEmail) {
-      emails.push({
-        from: `Attune <${FROM}>`,
-        to: [partnerEmail],
-        subject: `${buyerName} invited you to Attune`,
-        html: partnerInviteHtml({ partnerName, buyerName, inviteUrl: partnerInviteUrl }),
-      });
-    }
   }
 
   // ── 3. Gift digital: email to recipient ────────────────────────────────────
@@ -217,16 +209,15 @@ function orderConfirmationHtml({ buyerName, pkgName, orderNum, total, isGift, is
   });
 }
 
-function getStartedBuyerHtml({ name, partnerName, accessUrl, partnerInviteUrl, partnerEmail }) {
+function getStartedBuyerHtml({ name, partnerName, accessUrl, partnerEmail }) {
   const partnerBlock = partnerEmail
     ? `<div style="background:#FBF8F3;border:1px solid #F3EDE6;border-radius:10px;padding:16px 20px;margin:16px 0 0">
          <div style="font-family:'DM Sans',Helvetica,Arial,sans-serif;font-size:11px;color:#C17F47;font-weight:700;letter-spacing:.2em;text-transform:uppercase;margin-bottom:8px">Your partner</div>
-         <p style="font-family:'DM Sans',Helvetica,Arial,sans-serif;font-size:14px;color:#5C4A38;line-height:1.65;margin:0">We've sent ${partnerName}'s invite directly to <strong style="color:#1E1610">${partnerEmail}</strong>. They'll get their own unique link to set up their profile.</p>
+         <p style="font-family:'DM Sans',Helvetica,Arial,sans-serif;font-size:14px;color:#5C4A38;line-height:1.65;margin:0">Once you finish setting up your profile, we'll email <strong style="color:#1E1610">${partnerEmail}</strong> their own unique invite link to get started.</p>
        </div>`
     : `<div style="background:#FBF8F3;border:1px solid #F3EDE6;border-radius:10px;padding:16px 20px;margin:16px 0 0">
-         <div style="font-family:'DM Sans',Helvetica,Arial,sans-serif;font-size:11px;color:#C17F47;font-weight:700;letter-spacing:.2em;text-transform:uppercase;margin-bottom:8px">Invite ${partnerName}</div>
-         <p style="font-family:'DM Sans',Helvetica,Arial,sans-serif;font-size:14px;color:#5C4A38;line-height:1.65;margin:0 0 10px">Share this link so ${partnerName} can set up their own profile:</p>
-         <div style="background:#ffffff;border:1px solid #E8DDD0;border-radius:8px;padding:10px 14px;font-family:'Menlo','SF Mono',monospace;font-size:12px;color:#1E1610;word-break:break-all">${partnerInviteUrl}</div>
+         <div style="font-family:'DM Sans',Helvetica,Arial,sans-serif;font-size:11px;color:#C17F47;font-weight:700;letter-spacing:.2em;text-transform:uppercase;margin-bottom:8px">Inviting ${partnerName || 'your partner'}</div>
+         <p style="font-family:'DM Sans',Helvetica,Arial,sans-serif;font-size:14px;color:#5C4A38;line-height:1.65;margin:0">When you set up your profile, you'll be able to send ${partnerName || 'your partner'} their own unique invite link.</p>
        </div>`;
 
   const body = `

@@ -250,6 +250,10 @@
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.22 4.22l2.12 2.12M17.66 17.66l2.12 2.12M2 12h3M19 12h3M4.22 19.78l2.12-2.12M17.66 6.34l2.12-2.12"/></svg>
       Type Analytics
     </a>
+    <a class="sb-item" onclick="showPage('beta-codes')">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12V7a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h10"/><path d="M7 12h2M12 12h2M17 12h1"/><circle cx="18" cy="18" r="3"/><path d="m17 18 1 1 2-2"/></svg>
+      Beta Codes
+    </a>
   </nav>
   <div class="sb-footer">
     <div style="font-size:.6rem;color:var(--dim);margin-bottom:.5rem;font-family:var(--mono);">DATA NOTICE</div>
@@ -887,6 +891,62 @@
     </div>
   </div>
 
+  <!-- ══ BETA CODES ══ -->
+  <div class="page" id="page-beta-codes">
+    <div class="topbar">
+      <div>
+        <div class="topbar-title">Beta Codes</div>
+        <div class="topbar-sub">Per-package promo codes for beta testers. One code per package. Codes unlock the package for free at checkout.</div>
+      </div>
+      <div class="topbar-right">
+        <div class="date-badge" id="beta-codes-last-updated">—</div>
+        <button class="export-btn" onclick="loadBetaCodes()">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.95"/></svg>
+          Refresh
+        </button>
+      </div>
+    </div>
+
+    <div class="data-notice" style="background:rgba(108,127,255,.08);border-color:rgba(108,127,255,.25);">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6C7FFF" stroke-width="2" stroke-linecap="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M7 10h2M12 10h5"/></svg>
+      <p><strong>How codes work.</strong> Beta codes make the package free at checkout. Each code is tied to a specific package — testers must pick the matching package. Codes are reusable. Deactivate a code to stop it from working without deleting the record.</p>
+    </div>
+
+    <div class="kpi-grid" style="grid-template-columns:repeat(4,1fr);">
+      <div class="kpi-card orange">
+        <div class="kpi-label">Total redemptions</div>
+        <div class="kpi-val" id="bc-total-uses">—</div>
+        <div class="kpi-sub">Across all codes</div>
+      </div>
+      <div class="kpi-card indigo">
+        <div class="kpi-label">Active codes</div>
+        <div class="kpi-val" id="bc-active-count">—</div>
+        <div class="kpi-sub">Of total codes</div>
+      </div>
+      <div class="kpi-card green">
+        <div class="kpi-label">Last redemption</div>
+        <div class="kpi-val" id="bc-last-used" style="font-size:1.2rem;">—</div>
+        <div class="kpi-sub">Most recent</div>
+      </div>
+      <div class="kpi-card amber">
+        <div class="kpi-label">Most-used code</div>
+        <div class="kpi-val" id="bc-top-code" style="font-size:1.05rem;">—</div>
+        <div class="kpi-sub">By redemption count</div>
+      </div>
+    </div>
+
+    <div class="chart-card" style="grid-column:1/-1;overflow:hidden;">
+      <div class="chart-card-header">
+        <div class="chart-card-title">All codes</div>
+        <div class="chart-card-sub">Tap "Deactivate" to stop a code from working without deleting the usage history</div>
+      </div>
+      <div id="bc-table" style="overflow-x:auto">
+        <p style="color:var(--muted);font-size:.82rem;padding:.5rem 0;">Loading…</p>
+      </div>
+    </div>
+  </div>
+  <!-- ══ END BETA CODES ══ -->
+
   <div class="page" id="page-feedback">
     <div id="fb-real-data" style="display:none;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:1.25rem 1.5rem;margin-bottom:1.5rem;overflow-x:auto"></div>
     <div class="topbar">
@@ -1221,6 +1281,161 @@ window.attemptLogin = attemptLogin;
 document.getElementById('today-date').textContent = new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
 
 // ── Navigation ────────────────────────────────────────
+// ── Beta codes ─────────────────────────────────────────
+// Fetch all codes from Supabase `beta_codes` table (upserted on redemption by
+// api/create-payment-intent). Render as a table with deactivate buttons.
+async function loadBetaCodes() {
+  const container = document.getElementById('bc-table');
+  if (!container) return;
+  const SUPABASE_URL = window.__SUPABASE_URL;
+  const SUPABASE_ANON = window.__SUPABASE_ANON;
+  const updatedEl = document.getElementById('beta-codes-last-updated');
+
+  // Known seeded codes (shown even if they haven't been redeemed yet)
+  const SEEDS = [
+    { code: 'BETA-CORE',        package_key: 'core',        label: 'The Attune Assessment' },
+    { code: 'BETA-NEWLYWED',    package_key: 'newlywed',    label: 'Starting Out Collection' },
+    { code: 'BETA-ANNIVERSARY', package_key: 'anniversary', label: 'Relationship Reflection' },
+    { code: 'BETA-PREMIUM',     package_key: 'premium',     label: 'Attune Premium' },
+  ];
+  const pkgLabel = {
+    core: 'Assessment', newlywed: 'Starting Out', anniversary: 'Anniversary',
+    premium: 'Premium', '*': 'Universal',
+  };
+
+  let rows = [];
+  if (SUPABASE_URL && SUPABASE_ANON) {
+    try {
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/beta_codes?select=*&order=code.asc`, {
+        headers: { apikey: SUPABASE_ANON, Authorization: `Bearer ${SUPABASE_ANON}` }
+      });
+      const data = await res.json();
+      if (Array.isArray(data)) rows = data;
+    } catch (e) {
+      console.warn('[beta codes] supabase fetch failed:', e);
+    }
+  }
+
+  // Merge seeds with rows so all 4 beta codes always appear, even at 0 uses
+  const rowByCode = {};
+  rows.forEach(r => { rowByCode[r.code] = r; });
+  SEEDS.forEach(s => {
+    if (!rowByCode[s.code]) {
+      rowByCode[s.code] = {
+        code: s.code,
+        package_key: s.package_key,
+        uses_count: 0,
+        active: true,
+        last_used_at: null,
+        last_used_by: null,
+      };
+    }
+  });
+  const all = Object.values(rowByCode).sort((a, b) => a.code.localeCompare(b.code));
+
+  // KPIs
+  const totalUses = all.reduce((s, r) => s + (r.uses_count || 0), 0);
+  const activeCount = all.filter(r => r.active !== false).length;
+  const lastUsed = all.map(r => r.last_used_at).filter(Boolean).sort().pop();
+  const top = all.slice().sort((a, b) => (b.uses_count || 0) - (a.uses_count || 0))[0];
+  document.getElementById('bc-total-uses').textContent = totalUses;
+  document.getElementById('bc-active-count').textContent = `${activeCount} / ${all.length}`;
+  document.getElementById('bc-last-used').textContent = lastUsed
+    ? new Date(lastUsed).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+    : '—';
+  document.getElementById('bc-top-code').textContent = top && top.uses_count > 0 ? top.code : '—';
+
+  // Table
+  const tableRows = all.map(r => {
+    const isActive = r.active !== false;
+    const lastUsedDisp = r.last_used_at
+      ? new Date(r.last_used_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+      : '—';
+    const lastUserDisp = r.last_used_by
+      ? `<span style="color:var(--muted);font-size:.72rem">${(r.last_used_by || '').slice(0, 30)}</span>`
+      : '';
+    const statusPill = isActive
+      ? '<span style="background:rgba(16,185,129,.15);color:#10B981;padding:2px 10px;border-radius:999px;font-size:.65rem;font-weight:700;letter-spacing:.04em">Active</span>'
+      : '<span style="background:rgba(100,116,139,.15);color:#94A3B8;padding:2px 10px;border-radius:999px;font-size:.65rem;font-weight:700;letter-spacing:.04em">Inactive</span>';
+    const actionBtn = isActive
+      ? `<button onclick="toggleBetaCode('${r.code}',false)" style="background:rgba(248,113,113,.12);color:#F87171;border:1px solid rgba(248,113,113,.3);border-radius:6px;padding:.35rem .7rem;font-size:.7rem;font-weight:600;cursor:pointer;font-family:var(--bfont)">Deactivate</button>`
+      : `<button onclick="toggleBetaCode('${r.code}',true)" style="background:rgba(16,185,129,.12);color:#10B981;border:1px solid rgba(16,185,129,.3);border-radius:6px;padding:.35rem .7rem;font-size:.7rem;font-weight:600;cursor:pointer;font-family:var(--bfont)">Reactivate</button>`;
+
+    return `<tr style="border-bottom:1px solid var(--border)">
+      <td style="padding:.9rem 1rem;font-family:var(--mono);font-size:.82rem;font-weight:700;color:var(--text)">${r.code}</td>
+      <td style="padding:.9rem 1rem;color:var(--muted);font-size:.78rem">${pkgLabel[r.package_key] || r.package_key}</td>
+      <td style="padding:.9rem 1rem;text-align:center;font-weight:700;color:var(--text);font-family:var(--mono)">${r.uses_count || 0}</td>
+      <td style="padding:.9rem 1rem;color:var(--muted);font-size:.78rem">${lastUsedDisp}${lastUserDisp ? '<br>' + lastUserDisp : ''}</td>
+      <td style="padding:.9rem 1rem">${statusPill}</td>
+      <td style="padding:.9rem 1rem;text-align:right">${actionBtn}</td>
+    </tr>`;
+  }).join('');
+
+  container.innerHTML = `<table style="width:100%;border-collapse:collapse;font-size:.82rem">
+    <thead><tr style="background:var(--surface);border-bottom:1px solid var(--border)">
+      <th style="text-align:left;padding:.6rem 1rem;font-size:.65rem;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);font-weight:700">Code</th>
+      <th style="text-align:left;padding:.6rem 1rem;font-size:.65rem;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);font-weight:700">Package</th>
+      <th style="text-align:center;padding:.6rem 1rem;font-size:.65rem;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);font-weight:700">Uses</th>
+      <th style="text-align:left;padding:.6rem 1rem;font-size:.65rem;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);font-weight:700">Last used</th>
+      <th style="text-align:left;padding:.6rem 1rem;font-size:.65rem;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);font-weight:700">Status</th>
+      <th style="text-align:right;padding:.6rem 1rem;font-size:.65rem;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);font-weight:700">Action</th>
+    </tr></thead>
+    <tbody>${tableRows}</tbody>
+  </table>`;
+
+  if (updatedEl) updatedEl.textContent = `Updated ${new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}`;
+}
+
+async function toggleBetaCode(code, active) {
+  const SUPABASE_URL = window.__SUPABASE_URL;
+  const SUPABASE_ANON = window.__SUPABASE_ANON;
+  if (!SUPABASE_URL || !SUPABASE_ANON) {
+    alert('Supabase credentials missing. Cannot update code status.');
+    return;
+  }
+  const verb = active ? 'reactivate' : 'deactivate';
+  if (!confirm(`Are you sure you want to ${verb} the code "${code}"?`)) return;
+  try {
+    // Upsert with new active status
+    // First check if row exists
+    const checkRes = await fetch(
+      `${SUPABASE_URL}/rest/v1/beta_codes?code=eq.${encodeURIComponent(code)}&select=code`,
+      { headers: { apikey: SUPABASE_ANON, Authorization: `Bearer ${SUPABASE_ANON}` } }
+    );
+    const existing = await checkRes.json();
+    if (Array.isArray(existing) && existing.length > 0) {
+      // Update
+      await fetch(`${SUPABASE_URL}/rest/v1/beta_codes?code=eq.${encodeURIComponent(code)}`, {
+        method: 'PATCH',
+        headers: {
+          apikey: SUPABASE_ANON,
+          Authorization: `Bearer ${SUPABASE_ANON}`,
+          'Content-Type': 'application/json',
+          Prefer: 'return=minimal',
+        },
+        body: JSON.stringify({ active }),
+      });
+    } else {
+      // Insert fresh row (for codes that have never been redeemed)
+      const pkgMap = { 'BETA-CORE': 'core', 'BETA-NEWLYWED': 'newlywed', 'BETA-ANNIVERSARY': 'anniversary', 'BETA-PREMIUM': 'premium', 'ATTUNE-BETA-FEEDBACK': '*' };
+      await fetch(`${SUPABASE_URL}/rest/v1/beta_codes`, {
+        method: 'POST',
+        headers: {
+          apikey: SUPABASE_ANON,
+          Authorization: `Bearer ${SUPABASE_ANON}`,
+          'Content-Type': 'application/json',
+          Prefer: 'return=minimal',
+        },
+        body: JSON.stringify({ code, package_key: pkgMap[code] || '*', active, uses_count: 0 }),
+      });
+    }
+    loadBetaCodes();
+  } catch (e) {
+    console.error('[beta codes] toggle failed:', e);
+    alert('Could not update code. Check console for details.');
+  }
+}
+
 async function loadLmftRequests() {
   const container = document.getElementById('lmft-requests-container');
   if (!container) return;
@@ -1287,6 +1502,7 @@ function showPage(id) {
   if (id==='feedback') loadFeedbackData();
   if (id==='survey-explorer') initSurveyExplorer();
   if (id==='types') loadTypesData();
+  if (id==='beta-codes') loadBetaCodes();
 }
 const chartsInit = {overview:false,orders:false,packages:false,demographics:false,responses:false,satisfaction:false,fulfillment:false,feedback:false,types:false,'survey-explorer':false,'lmft-requests':false};
 // ── Feedback tab switcher ─────────────────────────────

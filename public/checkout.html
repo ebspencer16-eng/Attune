@@ -310,6 +310,25 @@
           <div class="total-price" id="totalPrice">—</div>
         </div>
 
+        <!-- Promo code input -->
+        <div id="promoBlock" style="margin-top:1.1rem;padding-top:1rem;border-top:1px solid #F3EDE6">
+          <button type="button" id="promoToggle" onclick="togglePromo()" style="background:none;border:none;color:#8C7A68;font-size:.78rem;font-family:'DM Sans',sans-serif;cursor:pointer;padding:0;text-decoration:underline;text-decoration-color:#E8DDD0;text-underline-offset:3px">Have a promo code?</button>
+          <div id="promoInputWrap" style="display:none;margin-top:.75rem">
+            <div style="display:flex;gap:.5rem">
+              <input id="promoInput" type="text" placeholder="Enter code" style="flex:1;min-width:0;padding:.55rem .7rem;border:1.5px solid #E8DDD0;border-radius:8px;font-size:.82rem;font-family:'DM Sans',sans-serif;text-transform:uppercase;color:#1E1610;background:white;outline:none;letter-spacing:.02em" oninput="this.value=this.value.toUpperCase()" onkeydown="if(event.key==='Enter'){event.preventDefault();applyPromo();}">
+              <button type="button" onclick="applyPromo()" style="padding:.55rem 1rem;background:#1E1610;color:white;border:none;border-radius:8px;font-size:.76rem;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;white-space:nowrap">Apply</button>
+            </div>
+            <div id="promoFeedback" style="margin-top:.5rem;font-size:.72rem;font-family:'DM Sans',sans-serif;color:#8C7A68;line-height:1.5;min-height:1rem"></div>
+          </div>
+          <div id="promoApplied" style="display:none;margin-top:.25rem;padding:.55rem .75rem;background:rgba(16,185,129,.08);border:1px solid rgba(16,185,129,.3);border-radius:8px;display:none;align-items:center;justify-content:space-between;gap:.5rem;font-family:'DM Sans',sans-serif">
+            <div>
+              <div style="font-size:.72rem;font-weight:700;color:#059669;letter-spacing:.08em;text-transform:uppercase">Promo applied</div>
+              <div id="promoAppliedCode" style="font-size:.8rem;color:#1E1610;font-weight:600;margin-top:.15rem"></div>
+            </div>
+            <button type="button" onclick="removePromo()" style="background:none;border:none;color:#8C7A68;font-size:1.1rem;cursor:pointer;padding:.15rem .4rem;line-height:1">×</button>
+          </div>
+        </div>
+
         <div class="tag-list" id="tagList"></div>
 
       </div>
@@ -524,12 +543,14 @@ function validateForm() {
   const p1 = document.getElementById('p1name').value.trim();
   const p2 = document.getElementById('p2name').value.trim();
   const email = document.getElementById('email').value.trim();
-  const ready = p1.length >= 2 && p2.length >= 2 && email.includes('@') && cardComplete;
+  const hasValidBilling = cardComplete || !!appliedPromoCode;
+  const ready = p1.length >= 2 && p2.length >= 2 && email.includes('@') && hasValidBilling;
   document.getElementById('submitBtn').disabled = !ready;
 }
 
 // ── Stripe setup ─────────────────────────────────────────────────────────────
 let cardComplete = false;
+let appliedPromoCode = null;
 let stripe, cardNumberElement, cardExpiryElement, cardCvcElement;
 
 (async function setupStripe() {
@@ -603,6 +624,7 @@ async function handleSubmit(e) {
         buyerEmail: email,
         buyerName: p1,
         giftNote: giftNote || null,
+        promoCode: appliedPromoCode || null,
         shipping: pkg.format === 'physical' ? {
           name:    document.getElementById('shipName').value.trim(),
           address: document.getElementById('shipAddr').value.trim(),
@@ -612,14 +634,23 @@ async function handleSubmit(e) {
       }),
     });
 
-    const { clientSecret, error: serverErr } = await res.json();
+    const serverResponse = await res.json();
+    const { clientSecret, error: serverErr, free: isFreePromo } = serverResponse;
     if (serverErr) throw new Error(serverErr);
 
-    // 2. Confirm card payment
-    const { error: stripeErr, paymentIntent } = await stripe.confirmCardPayment(clientSecret, {
-      payment_method: { card: cardNumberElement, billing_details: { email } }
-    });
-    if (stripeErr) throw new Error(stripeErr.message);
+    let paymentIntent = null;
+
+    if (isFreePromo) {
+      // Promo code redemption — skip Stripe entirely
+      paymentIntent = { id: 'promo_' + Date.now() };
+    } else {
+      // 2. Confirm card payment
+      const { error: stripeErr, paymentIntent: stripePi } = await stripe.confirmCardPayment(clientSecret, {
+        payment_method: { card: cardNumberElement, billing_details: { email } }
+      });
+      if (stripeErr) throw new Error(stripeErr.message);
+      paymentIntent = stripePi;
+    }
     // Generate order number from payment intent ID
     const realOrderNum = paymentIntent?.id
       ? 'ATT-' + new Date().toISOString().slice(0,10).replace(/-/g,'') + '-' + paymentIntent.id.slice(-4).toUpperCase()
@@ -698,11 +729,91 @@ async function handleSubmit(e) {
 }
 
 function getPkgTotal() {
+  if (appliedPromoCode) return 0;
   let t = pkg.price;
   if (addonWorkbook && ADDON_WORKBOOK[addonWorkbook]) t += ADDON_WORKBOOK[addonWorkbook].price;
   if (addonLmft) t += ADDON_LMFT.price;
   if (addonReflection) t += ADDON_REFLECTION.price;
   return t;
+}
+
+// ── Promo code handlers ─────────────────────────────────────────────────────
+
+function togglePromo() {
+  const wrap = document.getElementById('promoInputWrap');
+  const toggle = document.getElementById('promoToggle');
+  const isOpen = wrap.style.display === 'block';
+  wrap.style.display = isOpen ? 'none' : 'block';
+  toggle.style.display = isOpen ? 'inline' : 'none';
+  if (!isOpen) {
+    setTimeout(() => document.getElementById('promoInput')?.focus(), 50);
+  }
+}
+
+async function applyPromo() {
+  const inp = document.getElementById('promoInput');
+  const fb = document.getElementById('promoFeedback');
+  const code = (inp.value || '').trim().toUpperCase();
+  if (!code) { fb.textContent = 'Please enter a code.'; fb.style.color = '#B45309'; return; }
+  fb.textContent = 'Checking…';
+  fb.style.color = '#8C7A68';
+
+  // Client-side validation first so we don't show a loading state for obviously
+  // invalid codes. Server will also validate.
+  const VALID_CODES = {
+    'BETA-CORE':        'core',
+    'BETA-NEWLYWED':    'newlywed',
+    'BETA-ANNIVERSARY': 'anniversary',
+    'BETA-PREMIUM':     'premium',
+    'ATTUNE-BETA-FEEDBACK': '*',
+  };
+  const unlocks = VALID_CODES[code];
+  if (!unlocks) {
+    fb.textContent = 'Invalid code.';
+    fb.style.color = '#B45309';
+    return;
+  }
+  const pkgId = Object.keys(PACKAGES).find(k => PACKAGES[k] === pkg) || 'core';
+  if (unlocks !== '*' && unlocks !== pkgId) {
+    const pkgDisplayName = {
+      core: 'The Attune Assessment',
+      newlywed: 'Starting Out Collection',
+      anniversary: 'Relationship Reflection',
+      premium: 'Attune Premium',
+    }[unlocks] || unlocks;
+    fb.textContent = `This code is for ${pkgDisplayName}.`;
+    fb.style.color = '#B45309';
+    return;
+  }
+
+  // Apply
+  appliedPromoCode = code;
+  document.getElementById('promoInputWrap').style.display = 'none';
+  document.getElementById('promoToggle').style.display = 'none';
+  document.getElementById('promoAppliedCode').textContent = code;
+  document.getElementById('promoApplied').style.display = 'flex';
+  renderSummary();
+  validateForm();
+  // Update the pay button
+  const btnLabel = document.getElementById('btnLabel');
+  if (btnLabel) btnLabel.textContent = 'Complete order (free) →';
+  // Hide the card input section since no payment needed
+  const cardBlock = document.getElementById('cardBlock');
+  if (cardBlock) cardBlock.style.opacity = '0.45';
+}
+
+function removePromo() {
+  appliedPromoCode = null;
+  document.getElementById('promoApplied').style.display = 'none';
+  document.getElementById('promoToggle').style.display = 'inline';
+  document.getElementById('promoInput').value = '';
+  document.getElementById('promoFeedback').textContent = '';
+  renderSummary();
+  validateForm();
+  const btnLabel = document.getElementById('btnLabel');
+  if (btnLabel) btnLabel.textContent = `Complete order · $${getPkgTotal()}`;
+  const cardBlock = document.getElementById('cardBlock');
+  if (cardBlock) cardBlock.style.opacity = '1';
 }
 </script>
 </body>

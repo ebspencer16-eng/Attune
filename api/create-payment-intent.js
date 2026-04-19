@@ -64,10 +64,86 @@ export default async function handler(req) {
   const orderNum     = body.orderNum || null;
   const promoCode    = body.promoCode || null;
 
-  // Valid promo codes — promo orders bypass Stripe
-  const DEMO_CODES = ['ATTUNE-BETA-FEEDBACK'];
-  if (promoCode && DEMO_CODES.includes(promoCode.toUpperCase())) {
-    return new Response(JSON.stringify({ free: true, promoCode }), {
+  // ── Promo code validation ──────────────────────────────────────────────────
+  // Each code unlocks exactly one package for free. The code must match the
+  // package being purchased. On success we record the redemption in Supabase
+  // so Ellie can see usage in the admin panel.
+  const BETA_CODES = {
+    'BETA-CORE':        'core',
+    'BETA-NEWLYWED':    'newlywed',
+    'BETA-ANNIVERSARY': 'anniversary',
+    'BETA-PREMIUM':     'premium',
+    // Legacy universal code — kept for anyone already using it
+    'ATTUNE-BETA-FEEDBACK': '*',
+  };
+
+  if (promoCode) {
+    const normalizedCode = promoCode.toUpperCase().trim();
+    const codeUnlocks = BETA_CODES[normalizedCode];
+
+    if (!codeUnlocks) {
+      return new Response(JSON.stringify({ error: 'Invalid promo code' }), {
+        status: 400, headers: { 'Content-Type': 'application/json' }
+      });
+    }
+
+    // Code must match package (unless it's the universal legacy code)
+    if (codeUnlocks !== '*' && codeUnlocks !== pkgKey) {
+      const unlocksName = {
+        core: 'The Attune Assessment',
+        newlywed: 'Starting Out Collection',
+        anniversary: 'Relationship Reflection',
+        premium: 'Attune Premium',
+      }[codeUnlocks] || codeUnlocks;
+      return new Response(JSON.stringify({
+        error: `This code is for ${unlocksName}, not the package in your cart.`
+      }), { status: 400, headers: { 'Content-Type': 'application/json' } });
+    }
+
+    // Check if code is active + increment uses in Supabase (if configured)
+    const supabaseUrl = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
+    const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE || process.env.SUPABASE_SERVICE_ROLE_KEY;
+    if (supabaseUrl && supabaseServiceKey) {
+      try {
+        // Check the code is still active
+        const checkRes = await fetch(
+          `${supabaseUrl}/rest/v1/beta_codes?code=eq.${encodeURIComponent(normalizedCode)}&select=active,uses_count`,
+          { headers: { apikey: supabaseServiceKey, Authorization: `Bearer ${supabaseServiceKey}` } }
+        );
+        const rows = await checkRes.json();
+        if (Array.isArray(rows) && rows.length > 0 && rows[0].active === false) {
+          return new Response(JSON.stringify({ error: 'This promo code has been deactivated.' }), {
+            status: 400, headers: { 'Content-Type': 'application/json' }
+          });
+        }
+        // Upsert: if row exists, increment; if not, insert with uses_count=1
+        const currentUses = rows[0]?.uses_count ?? 0;
+        await fetch(
+          `${supabaseUrl}/rest/v1/beta_codes?on_conflict=code`,
+          {
+            method: 'POST',
+            headers: {
+              apikey: supabaseServiceKey,
+              Authorization: `Bearer ${supabaseServiceKey}`,
+              'Content-Type': 'application/json',
+              Prefer: 'resolution=merge-duplicates',
+            },
+            body: JSON.stringify({
+              code: normalizedCode,
+              package_key: codeUnlocks,
+              uses_count: currentUses + 1,
+              active: true,
+              last_used_at: new Date().toISOString(),
+              last_used_by: buyerEmail || null,
+            }),
+          }
+        );
+      } catch (e) {
+        console.warn('[promo] supabase tracking failed (non-blocking):', e);
+      }
+    }
+
+    return new Response(JSON.stringify({ free: true, promoCode: normalizedCode }), {
       status: 200, headers: { 'Content-Type': 'application/json' }
     });
   }
