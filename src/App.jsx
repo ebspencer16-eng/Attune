@@ -2133,12 +2133,14 @@ function Exercise01Flow({ userName, partnerName, onComplete }) {
         <div style={{ display: "flex", gap: "0.5rem", justifyContent: "center", flexWrap: "wrap", marginBottom: "2.5rem" }}>
           {SCALE.map(s => (
             <button key={s.val} onClick={() => pick(s.val)} style={{
-              padding: "0.65rem 1rem", borderRadius: 10, cursor: "pointer",
-              fontFamily: "'DM Sans', sans-serif", fontSize: "0.8rem", fontWeight: 500,
+              padding: "0.85rem 1.1rem", borderRadius: 10, cursor: "pointer",
+              fontFamily: "'DM Sans', sans-serif", fontSize: "0.88rem", fontWeight: 500,
+              minHeight: 48,
               transition: "all 0.15s",
               background: chosen === s.val ? "#9B5DE5" : "white",
               color: chosen === s.val ? "white" : "#3C3C43",
               border: chosen === s.val ? "2px solid #9B5DE5" : "1.5px solid #E5E2DC",
+              WebkitTapHighlightColor: "transparent",
             }}>
               {s.label}
             </button>
@@ -2150,15 +2152,17 @@ function Exercise01Flow({ userName, partnerName, onComplete }) {
           {idx > 0 && (
             <button onClick={back} style={{
               background: "transparent", border: "1.5px solid #E5E2DC", color: "#999",
-              padding: "0.7rem 1.5rem", borderRadius: 10, cursor: "pointer",
-              fontFamily: "'DM Sans', sans-serif", fontSize: "0.85rem",
+              padding: "0.9rem 1.5rem", borderRadius: 10, cursor: "pointer",
+              fontFamily: "'DM Sans', sans-serif", fontSize: "0.9rem", minHeight: 48,
+              WebkitTapHighlightColor: "transparent",
             }}>← Back</button>
           )}
           <button onClick={next} disabled={chosen === null} style={{
             background: chosen !== null ? "linear-gradient(135deg,#E8673A,#1B5FE8)" : "#E5E2DC",
-            color: "white", border: "none", padding: "0.7rem 2rem", borderRadius: 10,
+            color: "white", border: "none", padding: "0.9rem 2rem", borderRadius: 10,
             cursor: chosen !== null ? "pointer" : "not-allowed",
-            fontFamily: "'DM Sans', sans-serif", fontSize: "0.85rem", fontWeight: 600,
+            fontFamily: "'DM Sans', sans-serif", fontSize: "0.9rem", fontWeight: 600,
+            minHeight: 48, WebkitTapHighlightColor: "transparent",
           }}>
             {idx + 1 < total ? "Next →" : "Complete Exercise →"}
           </button>
@@ -7246,6 +7250,7 @@ function ResultsHighlights({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3
 // AUTH MODAL — Sign up / Log in
 // ─────────────────────────────────────────────────────────────────────────────
 function AuthModal({ mode, onClose, onSuccess }) {
+  const isMobile = useMobile(560);
   const [tab, setTab] = useState(mode || "signup");
   // Pre-fill names from URL params (passed from checkout on purchase)
   const _authParams = new URLSearchParams(window.location.search);
@@ -7557,10 +7562,10 @@ function AuthModal({ mode, onClose, onSuccess }) {
   );
 
   return (
-    <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.55)", zIndex: 500, display: "flex", alignItems: "center", justifyContent: "center", padding: "1rem" }}
+    <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.55)", zIndex: 500, display: "flex", alignItems: isMobile ? "flex-start" : "center", justifyContent: "center", padding: isMobile ? "0" : "1rem", overflowY: "auto" }}
       onClick={e => e.target === e.currentTarget && onClose()}>
       <style>{`@keyframes authShake { 0%,100% { transform: translateX(0); } 15% { transform: translateX(-10px); } 30% { transform: translateX(10px); } 45% { transform: translateX(-8px); } 60% { transform: translateX(8px); } 75% { transform: translateX(-4px); } 90% { transform: translateX(4px); } }`}</style>
-      <div style={{ background: "#FFFDF9", borderRadius: 22, padding: "2rem 2rem 1.75rem", width: "100%", maxWidth: 440, boxShadow: "0 32px 80px rgba(0,0,0,0.28)", position: "relative", animation: shake ? "authShake 0.45s cubic-bezier(.36,.07,.19,.97)" : undefined }}>
+      <div style={{ background: "#FFFDF9", borderRadius: isMobile ? 0 : 22, padding: isMobile ? "1.5rem 1.25rem 1.25rem" : "2rem 2rem 1.75rem", width: "100%", minHeight: isMobile ? "100vh" : "auto", maxWidth: isMobile ? "none" : 440, boxShadow: isMobile ? "none" : "0 32px 80px rgba(0,0,0,0.28)", position: "relative", animation: shake ? "authShake 0.45s cubic-bezier(.36,.07,.19,.97)" : undefined }}>
         <button onClick={onClose} style={{ position: "absolute", top: "1rem", right: "1rem", background: "none", border: "none", fontSize: "1.2rem", cursor: "pointer", color: "#8C7A68", lineHeight: 1 }}>✕</button>
 
         {/* Logo */}
@@ -8012,6 +8017,19 @@ function PartnerInviteCard({ account, onCopy, copied }) {
   const inviteUrl = `${window.location.origin}/app?invite=${account.inviteCode}&from=${encodeURIComponent(account.name)}${account.email ? `&pae=${encodeURIComponent(account.email)}` : ''}`;
   const [resent, setResent] = React.useState(false);
   const [resending, setResending] = React.useState(false);
+  const canShare = typeof navigator !== 'undefined' && typeof navigator.share === 'function';
+
+  const handleNativeShare = async () => {
+    try {
+      await navigator.share({
+        title: 'Attune',
+        text: `${account.name} invited you to Attune. Set up your profile here:`,
+        url: inviteUrl,
+      });
+    } catch {
+      // User cancelled or share unavailable — no-op
+    }
+  };
 
   const handleResend = async () => {
     if (!account.partnerEmail || resending || resent) return;
@@ -8048,10 +8066,18 @@ function PartnerInviteCard({ account, onCopy, copied }) {
         <div style={{ flex: 1, background: "rgba(255,255,255,0.12)", borderRadius: 10, padding: "0.55rem 0.85rem", fontSize: "0.68rem", fontFamily: "'DM Sans',sans-serif", color: "rgba(255,255,255,0.8)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
           {inviteUrl}
         </div>
-        <button onClick={() => onCopy(inviteUrl)}
-          style={{ background: copied ? "#10b981" : "white", color: copied ? "white" : "#1B5FE8", border: "none", borderRadius: 10, padding: "0.55rem 1rem", fontSize: "0.75rem", fontWeight: 700, cursor: "pointer", fontFamily: "'DM Sans',sans-serif", flexShrink: 0, transition: "all 0.2s" }}>
-          {copied ? "Copied ✓" : "Copy link"}
-        </button>
+        {canShare ? (
+          <button onClick={handleNativeShare}
+            style={{ background: "white", color: "#1B5FE8", border: "none", borderRadius: 10, padding: "0.55rem 1rem", fontSize: "0.75rem", fontWeight: 700, cursor: "pointer", fontFamily: "'DM Sans',sans-serif", flexShrink: 0, display: "flex", alignItems: "center", gap: "0.35rem", minHeight: 44, WebkitTapHighlightColor: "transparent" }}>
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.25" strokeLinecap="round" strokeLinejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
+            Share
+          </button>
+        ) : (
+          <button onClick={() => onCopy(inviteUrl)}
+            style={{ background: copied ? "#10b981" : "white", color: copied ? "white" : "#1B5FE8", border: "none", borderRadius: 10, padding: "0.55rem 1rem", fontSize: "0.75rem", fontWeight: 700, cursor: "pointer", fontFamily: "'DM Sans',sans-serif", flexShrink: 0, transition: "all 0.2s", minHeight: 44 }}>
+            {copied ? "Copied ✓" : "Copy link"}
+          </button>
+        )}
       </div>
       {account.partnerEmail && (
         <div style={{ marginTop: "0.75rem", display: "flex", alignItems: "center", justifyContent: "space-between", gap: "0.75rem" }}>
