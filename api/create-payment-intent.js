@@ -141,6 +141,42 @@ export default async function handler(req) {
       } catch (e) {
         console.warn('[promo] supabase tracking failed (non-blocking):', e);
       }
+
+      // Write order row to Supabase — free promo orders skip Stripe's webhook,
+      // so this is the only place they get recorded. The admin relies on this.
+      try {
+        const d = new Date();
+        const generatedOrderNum = orderNum || `ATT-${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}-PR${Math.random().toString(36).substring(2,5).toUpperCase()}`;
+        await fetch(`${supabaseUrl}/rest/v1/orders`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            apikey: supabaseServiceKey,
+            Authorization: `Bearer ${supabaseServiceKey}`,
+            Prefer: 'return=minimal',
+          },
+          body: JSON.stringify({
+            order_num:         generatedOrderNum,
+            buyer_name:        buyerName || partner1Name || null,
+            buyer_email:       buyerEmail || null,
+            partner1_name:     partner1Name || null,
+            partner2_name:     partner2Name || null,
+            pkg_key:           pkgKey || null,
+            is_gift:           !!isGift,
+            is_physical:       !!isPhysical,
+            total:             0,
+            addon_workbook:    addonWorkbook || null,
+            addon_lmft:        !!addonLmft,
+            addon_reflection:  !!body.addonReflection,
+            addon_budget:      !!body.addonBudget,
+            gift_note:         giftNote || null,
+            stripe_payment_intent_id: `promo_${normalizedCode}_${Date.now()}`,
+            promo_code:        normalizedCode,
+          }),
+        });
+      } catch (e) {
+        console.warn('[promo] order write failed (non-blocking):', e);
+      }
     }
 
     return new Response(JSON.stringify({ free: true, promoCode: normalizedCode }), {
