@@ -74,6 +74,9 @@ export default async function handler(req) {
       try {
         const d = new Date();
         const orderNum = meta.orderNum || `ATT-${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}-${Math.random().toString(36).substring(2,6).toUpperCase()}`;
+        // Unique, unguessable token for this order's physical QR card.
+        const qrToken = 'ATQR-' + Array.from(crypto.getRandomValues(new Uint8Array(6)))
+          .map(b => b.toString(16).padStart(2, '0')).join('').toUpperCase();
         await fetch(`${supabaseUrl}/rest/v1/orders`, {
           method: 'POST',
           headers: {
@@ -99,9 +102,10 @@ export default async function handler(req) {
             gift_note:               meta.giftNote || null,
             stripe_payment_intent_id: intent.id,
             workbook_status:         'pending',
+            qr_token:                qrToken,
           }),
         });
-        console.log(`[webhook] order created: ${orderNum}`);
+        console.log(`[webhook] order created: ${orderNum} (qr ${qrToken})`);
       } catch(e) {
         console.error('[webhook] order creation failed:', e);
       }

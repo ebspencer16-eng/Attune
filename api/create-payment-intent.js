@@ -147,6 +147,11 @@ export default async function handler(req) {
       try {
         const d = new Date();
         const generatedOrderNum = orderNum || `ATT-${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}-PR${Math.random().toString(36).substring(2,5).toUpperCase()}`;
+        // Unique, unguessable token for this order's physical QR card.
+        // Format: ATQR-<12 random hex chars>. Stored in orders.qr_token,
+        // consumed by /app?qr=<token> on first claim.
+        const qrToken = 'ATQR-' + Array.from(crypto.getRandomValues(new Uint8Array(6)))
+          .map(b => b.toString(16).padStart(2, '0')).join('').toUpperCase();
         await fetch(`${supabaseUrl}/rest/v1/orders`, {
           method: 'POST',
           headers: {
@@ -172,6 +177,7 @@ export default async function handler(req) {
             gift_note:         giftNote || null,
             stripe_payment_intent_id: `promo_${normalizedCode}_${Date.now()}`,
             promo_code:        normalizedCode,
+            qr_token:          qrToken,
           }),
         });
       } catch (e) {

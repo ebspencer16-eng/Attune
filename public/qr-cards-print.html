@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <title>Attune Relationships – QR Cards</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 html,body{background:#D0C9C0;font-family:'DM Sans',Arial,sans-serif}
@@ -12,57 +13,57 @@ body{padding:24px;display:flex;flex-direction:column;align-items:center;gap:24px
 .page{display:flex;flex-direction:column;align-items:center;gap:6px}
 .page-label{font-size:9px;font-weight:700;letter-spacing:.22em;text-transform:uppercase;color:#8C7A68}
 
-/* Card base */
-.card{width:7in;height:4.25in;display:flex;flex-shrink:0;position:relative;border-radius:4px}
+/* Card base — 5in x 3in (standard index-card landscape) */
+.card{width:5in;height:3in;display:flex;flex-shrink:0;position:relative;border-radius:3px}
 .front{background:#FFFEF9;box-shadow:0 16px 48px rgba(0,0,0,.18),0 2px 8px rgba(0,0,0,.07);border:.5px solid rgba(0,0,0,.06)}
 .back{background:#FFFEF9;flex-direction:column;box-shadow:0 8px 24px rgba(0,0,0,.10);border:.5px solid rgba(0,0,0,.05)}
 
 /* FRONT — gradient panel on left */
-.grad-panel{width:210px;height:100%;flex-shrink:0;align-self:stretch;border-radius:4px 0 0 4px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px;padding:36px 22px;color:white;position:relative;overflow:hidden}
+.grad-panel{width:150px;height:100%;flex-shrink:0;align-self:stretch;border-radius:3px 0 0 3px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;padding:24px 18px;color:white;position:relative;overflow:hidden}
 .grad-panel>*:not(.gp-bg){position:relative;z-index:1}
 .gp-bg{position:absolute;inset:0;width:100%;height:100%;display:block;z-index:0}
-.gp-pkg-label{font-family:'DM Sans',sans-serif;font-size:7.5px;font-weight:700;letter-spacing:.28em;text-transform:uppercase;color:rgba(255,255,255,.55);margin-bottom:5px;text-align:center}
-.gp-pkg-name{font-family:'Playfair Display',Georgia,serif;font-size:13px;font-style:italic;color:rgba(255,255,255,.95);line-height:1.3;text-align:center;max-width:160px}
+.gp-pkg-label{font-family:'DM Sans',sans-serif;font-size:7.5px;font-weight:700;letter-spacing:.28em;text-transform:uppercase;color:rgba(255,255,255,.55);margin-bottom:4px;text-align:center}
+.gp-pkg-name{font-family:'Playfair Display',Georgia,serif;font-size:12px;font-style:italic;color:rgba(255,255,255,.95);line-height:1.3;text-align:center;max-width:120px}
 
 /* FRONT — right body */
 .right{flex:1;display:flex;flex-direction:column;overflow:hidden}
-.right-body{flex:1;display:flex;flex-direction:column;align-items:flex-start;justify-content:center;padding:34px 42px 20px}
-.right-footer{padding:10px 42px;border-top:1px solid #EDE8E0;display:flex;align-items:center;gap:5px;flex-shrink:0}
+.right-body{flex:1;display:flex;flex-direction:column;align-items:flex-start;justify-content:center;padding:22px 26px 14px}
+.right-footer{padding:7px 26px;border-top:1px solid #EDE8E0;display:flex;align-items:center;gap:5px;flex-shrink:0;white-space:nowrap;overflow:hidden}
 .footer-dot{width:3px;height:3px;border-radius:50%;background:#C8B8A8}
 .footer-txt{font-size:7px;letter-spacing:.18em;text-transform:uppercase;color:#B8AC9C;font-family:'DM Sans',sans-serif}
 
 /* Main headline — partner names (or fallback) */
-.welcome-eye{font-size:7.5px;font-weight:700;letter-spacing:.26em;text-transform:uppercase;color:#B8AC9C;margin-bottom:10px;font-family:'DM Sans',sans-serif}
-.names-h{font-family:'Playfair Display',Georgia,serif;font-weight:700;font-size:34px;line-height:1.0;letter-spacing:-.025em;color:#2B2218;margin-bottom:10px}
-.names-h.two-lines{font-size:30px;line-height:1.08}
+.welcome-eye{font-size:7.5px;font-weight:700;letter-spacing:.26em;text-transform:uppercase;color:#B8AC9C;margin-bottom:8px;font-family:'DM Sans',sans-serif}
+.names-h{font-family:'Playfair Display',Georgia,serif;font-weight:700;font-size:26px;line-height:1.0;letter-spacing:-.025em;color:#2B2218;margin-bottom:8px}
+.names-h.two-lines{font-size:22px;line-height:1.08}
 .names-h .amp{font-style:italic;font-weight:400;color:#8C7A68;padding:0 4px}
-.welcome-sub{font-family:'Playfair Display',Georgia,serif;font-size:13px;font-style:italic;color:#5C4A38;line-height:1.5;max-width:340px;margin-bottom:14px}
+.welcome-sub{font-family:'Playfair Display',Georgia,serif;font-size:11px;font-style:italic;color:#5C4A38;line-height:1.5;max-width:230px;margin-bottom:10px}
 
 /* "Get started" as a printed note — not a webpage alert */
-.get-started{display:flex;align-items:center;gap:14px;padding-top:12px;border-top:1px solid #E8DDD0;margin-top:6px}
-.gs-mark{font-family:'Playfair Display',Georgia,serif;font-size:22px;font-weight:700;line-height:1;flex-shrink:0}
-.gs-body{flex:1;font-size:10px;color:#5C4A38;font-family:'DM Sans',sans-serif;line-height:1.55}
+.get-started{display:flex;align-items:center;gap:10px;padding-top:9px;border-top:1px solid #E8DDD0;margin-top:4px}
+.gs-mark{font-family:'Playfair Display',Georgia,serif;font-size:18px;font-weight:700;line-height:1;flex-shrink:0}
+.gs-body{flex:1;font-size:9px;color:#5C4A38;font-family:'DM Sans',sans-serif;line-height:1.55}
 .gs-body strong{color:#2B2218;font-weight:600}
 
 /* Gift note (variant) */
-.gift-note-wrap{margin-top:6px;padding:14px 16px 12px;background:#FAF4EB;border:1px solid #E8DDD0;border-radius:2px}
-.gift-note-eye{font-family:'DM Sans',sans-serif;font-size:7px;font-weight:700;letter-spacing:.28em;text-transform:uppercase;color:#C17F47;margin-bottom:6px}
-.gift-note-text{font-family:'Playfair Display',Georgia,serif;font-style:italic;font-size:16px;line-height:1.45;color:#3C2E22;font-weight:400}
-.gift-note-from{font-family:'DM Sans',sans-serif;font-size:9px;color:#8C7A68;margin-top:8px;text-align:right;letter-spacing:.02em;font-style:italic}
+.gift-note-wrap{margin-top:4px;padding:10px 12px 9px;background:#FAF4EB;border:1px solid #E8DDD0;border-radius:2px}
+.gift-note-eye{font-family:'DM Sans',sans-serif;font-size:7px;font-weight:700;letter-spacing:.28em;text-transform:uppercase;color:#C17F47;margin-bottom:4px}
+.gift-note-text{font-family:'Playfair Display',Georgia,serif;font-style:italic;font-size:12px;line-height:1.4;color:#3C2E22;font-weight:400}
+.gift-note-from{font-family:'DM Sans',sans-serif;font-size:8px;color:#8C7A68;margin-top:5px;text-align:right;letter-spacing:.02em;font-style:italic}
 
-/* BACK */
+/* BACK — bumped font sizes for readability */
 .back-accent{height:3px;flex-shrink:0}
 .back-inner{flex:1;display:flex;overflow:hidden}
-.back-left{flex:1;padding:20px 24px 16px;display:flex;flex-direction:column;border-right:1px solid #F0EBE4}
-.back-right{width:180px;flex-shrink:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:18px 16px}
-.back-footer{padding:8px 24px;border-top:1px solid #EDE8E0;display:flex;justify-content:space-between;align-items:center;flex-shrink:0;background:#FAF6F0}
-.back-steps-head{font-size:7.5px;font-weight:700;letter-spacing:.26em;text-transform:uppercase;color:#B8AC9C;margin-bottom:12px;font-family:'DM Sans',sans-serif;display:flex;align-items:center;gap:8px}
+.back-left{flex:1;padding:16px 18px 12px;display:flex;flex-direction:column;border-right:1px solid #F0EBE4}
+.back-right{width:135px;flex-shrink:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:12px 10px}
+.back-footer{padding:6px 18px;border-top:1px solid #EDE8E0;display:flex;justify-content:space-between;align-items:center;flex-shrink:0;background:#FAF6F0}
+.back-steps-head{font-size:9px;font-weight:700;letter-spacing:.22em;text-transform:uppercase;color:#B8AC9C;margin-bottom:8px;font-family:'DM Sans',sans-serif;display:flex;align-items:center;gap:8px}
 .back-steps-head::after{content:"";flex:1;height:1px;background:#E8E0D4;margin-top:1px}
-.step{display:flex;gap:11px;align-items:flex-start;padding-bottom:10px;border-bottom:1px solid #F2EFEB}
+.step{display:flex;gap:9px;align-items:flex-start;padding-bottom:7px;border-bottom:1px solid #F2EFEB}
 .step:last-child{border-bottom:none;padding-bottom:0}
 .step-num{font-family:'Playfair Display',Georgia,serif;font-size:15px;font-weight:700;flex-shrink:0;line-height:1.1;width:13px}
-.step-t{font-size:9.5px;font-weight:700;color:#0E0B07;margin-bottom:2px;font-family:'DM Sans',sans-serif}
-.step-d{font-size:7.5px;color:#8C7A68;line-height:1.5;font-family:'DM Sans',sans-serif}
+.step-t{font-size:11px;font-weight:700;color:#0E0B07;margin-bottom:2px;font-family:'DM Sans',sans-serif}
+.step-d{font-size:9px;color:#6C5C4A;line-height:1.45;font-family:'DM Sans',sans-serif}
 
 /* Force backgrounds to render when printing */
 .grad-panel,.back-accent,.back-footer,.gift-note-wrap{
@@ -72,13 +73,13 @@ body{padding:24px;display:flex;flex-direction:column;align-items:center;gap:24px
 }
 
 @media print{
-  @page{size:8.5in 5.5in landscape;margin:.4in .5in}
+  @page{size:5in 3in;margin:0}
   html,body{background:white;padding:0;gap:0;display:block;-webkit-print-color-adjust:exact;print-color-adjust:exact}
   *{-webkit-print-color-adjust:exact !important;print-color-adjust:exact !important;color-adjust:exact !important}
-  .page{page-break-after:always;page-break-inside:avoid;display:flex;flex-direction:column;align-items:center;justify-content:center;height:4.7in;gap:4px}
+  .page{page-break-after:always;page-break-inside:avoid;display:block;height:3in;gap:0}
   .page:last-child{page-break-after:auto}
   .page-label{display:none}
-  .card{box-shadow:none!important;border:0.5px solid #DDD8D0!important}
+  .card{box-shadow:none!important;border:0!important;border-radius:0!important}
 }
 </style>
 </head>
@@ -186,7 +187,7 @@ function cardHtml(pkgKey, opts = {}) {
         ${gradDefs('gp_' + pkgKey, pkg)}
         <rect width="210" height="408" fill="url(#gp_${pkgKey})"/>
       </svg>
-      ${markSvg(92, 68)}
+      ${markSvg(64, 47)}
       <div>
         <div class="gp-pkg-label">Package</div>
         <div class="gp-pkg-name">${esc(pkg.name)}</div>
@@ -229,7 +230,7 @@ function cardHtml(pkgKey, opts = {}) {
       </div>
       <div class="back-right">
         <div style="font-size:7.5px;font-weight:700;letter-spacing:.26em;text-transform:uppercase;color:#B8AC9C;text-align:center;font-family:'DM Sans',sans-serif;margin-bottom:10px">Scan to start</div>
-        <img src="${DEFAULT_QR}" width="108" height="108" style="border-radius:6px;border:1px solid #EDE8E0;display:block"/>
+        <img src="${DEFAULT_QR}" width="108" height="108" class="qr-img" style="border-radius:4px;border:1px solid #EDE8E0;display:block"/>
         <div style="text-align:center;margin-top:10px">
           <div style="font-size:8px;font-weight:700;color:#0E0B07;font-family:'DM Sans',sans-serif;margin-bottom:3px">attune-relationships.com</div>
         </div>
@@ -257,9 +258,11 @@ function cardHtml(pkgKey, opts = {}) {
       note:    params.get('note')    || '',
       from:    params.get('from')    || '',
       orderId: params.get('orderId') || '',
+      token:   params.get('token')   || '',
     };
     document.title = `Attune – ${PACKAGES[pkg].label}${opts.names ? ' – ' + opts.names : ''}`;
     root.innerHTML = cardHtml(pkg, opts);
+    generateQR(opts.token);
   } else {
     // Default preview: show a sample of each package, including one gift variant
     root.innerHTML = [
@@ -268,8 +271,34 @@ function cardHtml(pkgKey, opts = {}) {
       cardHtml('anniversary', { names: 'Elena & David', note: "Fifteen years. Still the best partner I could ask for.", from: 'David' }),
       cardHtml('premium',     { names: 'Taylor & Morgan' }),
     ].join('');
+    generateQR(''); // preview uses generic URL
   }
 })();
+
+/** Generate a real QR code and replace all .qr-img placeholders.
+ *  With a token: encodes https://attune-relationships.com/app?qr=<token>
+ *  Without: encodes the plain /app URL (for preview) */
+function generateQR(token) {
+  const url = token
+    ? `https://attune-relationships.com/app?qr=${encodeURIComponent(token)}`
+    : 'https://attune-relationships.com/app';
+  const imgs = document.querySelectorAll('.qr-img');
+  if (!imgs.length) return;
+  // Wait briefly if QRCode lib isn't ready yet
+  const tryGen = () => {
+    if (typeof QRCode === 'undefined') { setTimeout(tryGen, 50); return; }
+    QRCode.toDataURL(url, {
+      width: 300,
+      margin: 1,
+      errorCorrectionLevel: 'M',
+      color: { dark: '#0E0B07', light: '#FFFFFF' },
+    }, (err, dataUrl) => {
+      if (err) { console.error('[qr] generation failed:', err); return; }
+      imgs.forEach(img => img.src = dataUrl);
+    });
+  };
+  tryGen();
+}
 </script>
 </body>
 </html>
