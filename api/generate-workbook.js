@@ -12,7 +12,7 @@ import {
   AlignmentType, HeadingLevel, BorderStyle, WidthType, ShadingType,
   PageBreak, LevelFormat,
   Header, Footer, PageNumber, TableOfContents, StyleLevel, HeightRule,
-  TabStopType, TabStopPosition, LeaderType,
+  TabStopType, TabStopPosition, LeaderType, Tab,
 } from 'docx';
 import { DIM_META, DIM_CONTENT, EXP_DOMAINS, DIMS } from './_workbook-content.js';
 
@@ -304,19 +304,61 @@ function estimatePageOffsets({ s1, s2, expGaps, priorities, gapThreshold = 1.0 }
 }
 
 function buildTOC(offsets, priorities) {
-  // A row in the TOC: left-aligned label + dotted leader + right-aligned page.
-  // The leader tab stop makes the dots fill the gap like a traditional TOC.
+  // TOC rows rendered as 2-column tables: label cell (left) + page-number
+  // cell (right). This is more robust than tab-stop leaders, which render
+  // inconsistently across Word / Pages / Google Docs / online previewers.
+  // The "dashed line between" is drawn as a bottom border on the label cell,
+  // which every renderer supports cleanly.
+  const PAGE_COL = 700;            // fixed width for page-number column
+  const LABEL_COL = W - PAGE_COL;  // rest for label + dashes
+
   function tocRow({ label, labelBold = false, labelColor = INK, labelSize = 22,
-                    pageNum, indent = 0, italic = false, before = 0, after = 120 }) {
-    return new Paragraph({
-      spacing: { before, after },
-      indent: { left: indent },
-      tabStops: [{ type: TabStopType.RIGHT, position: W, leader: LeaderType.HYPHEN }],
-      children: [
-        run(label, { size: labelSize, bold: labelBold, italics: italic, color: labelColor }),
-        new TextRun({ children: ['\t'] }),
-        run(pageNum != null ? String(pageNum) : '', { size: labelSize, bold: labelBold, color: MUTED }),
-      ],
+                    pageNum, indent = 0, italic = false, before = 60, after = 60 }) {
+    // Dashed bottom border on the label cell creates the leader line;
+    // positioned at the text baseline via cell bottom margin so it
+    // visually sits between the text and the page number.
+    const dashedBottom = { bottom: { style: BorderStyle.DASHED, size: 6, color: STONE, space: 1 } };
+    const noOtherBorders = {
+      top:    { style: BorderStyle.NONE },
+      left:   { style: BorderStyle.NONE },
+      right:  { style: BorderStyle.NONE },
+    };
+    return new Table({
+      width: { size: W, type: WidthType.DXA },
+      columnWidths: [LABEL_COL, PAGE_COL],
+      borders: {
+        top:    { style: BorderStyle.NONE },
+        bottom: { style: BorderStyle.NONE },
+        left:   { style: BorderStyle.NONE },
+        right:  { style: BorderStyle.NONE },
+        insideHorizontal: { style: BorderStyle.NONE },
+        insideVertical:   { style: BorderStyle.NONE },
+      },
+      rows: [new TableRow({
+        children: [
+          // Label cell — dashed bottom border provides the leader line
+          new TableCell({
+            borders: { ...noOtherBorders, ...dashedBottom },
+            width: { size: LABEL_COL, type: WidthType.DXA },
+            margins: { top: before, bottom: 30, left: indent, right: 160 },
+            children: [new Paragraph({
+              spacing: { after: 0 },
+              children: [run(label, { size: labelSize, bold: labelBold, italics: italic, color: labelColor })],
+            })],
+          }),
+          // Page number cell — right-aligned, no border
+          new TableCell({
+            borders: { ...noOtherBorders, ...dashedBottom },
+            width: { size: PAGE_COL, type: WidthType.DXA },
+            margins: { top: before, bottom: 30, left: 80, right: 0 },
+            children: [new Paragraph({
+              alignment: AlignmentType.RIGHT,
+              spacing: { after: 0 },
+              children: [run(pageNum != null ? String(pageNum) : '', { size: labelSize, bold: labelBold, color: MUTED })],
+            })],
+          }),
+        ],
+      })],
     });
   }
 
