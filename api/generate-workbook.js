@@ -311,7 +311,7 @@ function buildTOC(offsets, priorities) {
     return new Paragraph({
       spacing: { before, after },
       indent: { left: indent },
-      tabStops: [{ type: TabStopType.RIGHT, position: W - 80, leader: LeaderType.DOT }],
+      tabStops: [{ type: TabStopType.RIGHT, position: W, leader: LeaderType.HYPHEN }],
       children: [
         run(label, { size: labelSize, bold: labelBold, italics: italic, color: labelColor }),
         new TextRun({ children: ['\t'] }),
