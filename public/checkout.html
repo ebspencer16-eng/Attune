@@ -285,6 +285,19 @@
         </div>
 
         <div class="form-divider" id="paymentDivider">Payment</div>
+
+        <!-- Apple Pay / Google Pay / Link button. Only renders on supported
+             devices with a saved wallet. Requires names+email+shipping to be
+             filled before it can be tapped (otherwise we can't create the order). -->
+        <div id="expressCheckoutWrap" style="display:none;margin-bottom:1rem">
+          <div id="expressCheckout"></div>
+          <div style="display:flex;align-items:center;gap:.75rem;margin:1rem 0 .25rem">
+            <div style="flex:1;height:1px;background:#E8DDD0"></div>
+            <div style="font-size:.68rem;letter-spacing:.18em;text-transform:uppercase;color:#B8AC9C;font-weight:700;font-family:'DM Sans',sans-serif">Or pay with card</div>
+            <div style="flex:1;height:1px;background:#E8DDD0"></div>
+          </div>
+        </div>
+
         <div id="cardBlock">
           <div class="form-group">
             <label class="form-label">Card number</label>
@@ -413,7 +426,7 @@ const ADDON_WORKBOOK = {
 // Stripe state (declared here so validateForm() can reference before setupStripe runs)
 let cardComplete = false;
 let appliedPromoCode = null;
-let stripe, cardNumberElement, cardExpiryElement, cardCvcElement;
+let stripe, cardNumberElement, cardExpiryElement, cardCvcElement, paymentRequest;
 
 // Single-item legacy vars (used when cart has exactly one item, for
 // backward compat with the simpler single-item UI)
@@ -737,6 +750,9 @@ function renderSummary() {
 
   const btnLabel = document.getElementById('btnLabel');
   if (btnLabel) btnLabel.textContent = `Complete order · $${total}`;
+
+  // Keep the Apple Pay / Google Pay button's total in sync with the cart
+  if (typeof updatePaymentRequestTotal === 'function') updatePaymentRequestTotal();
 }
 
 // ── Intent toggle ────────────────────────────────────────────────────────────
@@ -814,10 +830,168 @@ function validateForm() {
         else { errEl.textContent = ''; errEl.classList.remove('visible'); }
       });
     });
+
+    // ── Apple Pay / Google Pay / Link via Payment Request Button ─────────
+    // The button only shows if the user has a wallet configured on a
+    // compatible device. Our domain (attune-relationships.com) must also
+    // be registered in the Stripe dashboard for Apple Pay.
+    try {
+      const total = _items.reduce((sum, it) => {
+        const p = PACKAGES[it.pkg] || PACKAGES.core;
+        const base = it.format === 'physical' ? p.physicalPrice : p.digitalPrice;
+        let add = 0;
+        if (it.addons.workbook) add += (it.addons.workbookVariant === 'print') ? 39 : 19;
+        if (it.addons.lmft)       add += 150;
+        if (it.addons.reflection) add += 40;
+        if (it.addons.budget)     add += 20;
+        if (it.addons.checklist)  add += 20;
+        return sum + (base + add);
+      }, 0);
+
+      paymentRequest = stripe.paymentRequest({
+        country: 'US',
+        currency: 'usd',
+        total: { label: 'Attune Relationships', amount: total * 100 },
+        requestPayerName:  true,
+        requestPayerEmail: true,
+      });
+
+      const prButton = elements.create('paymentRequestButton', {
+        paymentRequest,
+        style: {
+          paymentRequestButton: {
+            type: 'buy',
+            theme: 'dark',
+            height: '44px',
+          },
+        },
+      });
+
+      // Only show button if the browser/device supports wallets
+      const result = await paymentRequest.canMakePayment();
+      if (result) {
+        prButton.mount('#expressCheckout');
+        const wrap = document.getElementById('expressCheckoutWrap');
+        wrap.style.display = 'block';
+        wrap.dataset.supported = '1';
+
+        paymentRequest.on('paymentmethod', async (ev) => {
+          // User authorized the Apple Pay / Google Pay payment. Our flow:
+          // 1. Validate form has names/shipping (they might not have scrolled
+          //    to fill those yet). If missing, reject the sheet.
+          // 2. Create a PaymentIntent via our API using the current cart.
+          // 3. Confirm with the wallet's paymentMethodId.
+          // 4. On success, run the same post-payment logic as the card flow.
+          if (!_items.every(it => it.partner1Name && it.partner2Name &&
+              (it.format !== 'physical' || (it.shipping.name && it.shipping.address && it.shipping.city && it.shipping.state)))) {
+            ev.complete('fail');
+            alert('Please fill in partner names and shipping details for each couple before paying.');
+            return;
+          }
+          // Use wallet-provided email if checkout email field is empty
+          const emailField = document.getElementById('email');
+          if (!emailField.value.trim() && ev.payerEmail) {
+            emailField.value = ev.payerEmail;
+          }
+          const email = emailField.value.trim();
+          if (!email) {
+            ev.complete('fail');
+            alert('Please enter an email address before paying.');
+            return;
+          }
+
+          try {
+            // Reuse the existing payment intent creation path
+            const first = _items[0];
+            const res = await fetch('/api/create-payment-intent', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                items: _items.map(it => ({
+                  pkgKey: it.pkg, format: it.format,
+                  isGift: it.intent === 'gift', isPhysical: it.format === 'physical',
+                  partner1Name: it.partner1Name, partner2Name: it.partner2Name,
+                  giftNote: it.giftNote || null,
+                  addonWorkbook: it.addons.workbook ? (it.addons.workbookVariant || 'digital') : null,
+                  addonLmft: !!it.addons.lmft, addonReflection: !!it.addons.reflection,
+                  addonBudget: !!it.addons.budget, addonChecklist: !!it.addons.checklist,
+                  shipping: it.format === 'physical' ? it.shipping : null,
+                })),
+                pkgKey: first.pkg, buyerEmail: email, buyerName: first.partner1Name,
+                partner1Name: first.partner1Name, partner2Name: first.partner2Name,
+                isGift: first.intent === 'gift', isPhysical: first.format === 'physical',
+                email,
+              }),
+            });
+            const { clientSecret, error } = await res.json();
+            if (error) throw new Error(error);
+
+            // Confirm the payment with Apple Pay's payment method ID
+            const { error: confirmErr, paymentIntent } = await stripe.confirmCardPayment(
+              clientSecret,
+              { payment_method: ev.paymentMethod.id },
+              { handleActions: false }
+            );
+
+            if (confirmErr) {
+              ev.complete('fail');
+              alert('Payment failed: ' + confirmErr.message);
+              return;
+            }
+            ev.complete('success');
+
+            // If further action required (rare — e.g. 3DS), trigger it
+            if (paymentIntent.status === 'requires_action') {
+              const { error: actionErr } = await stripe.confirmCardPayment(clientSecret);
+              if (actionErr) { alert('Payment failed: ' + actionErr.message); return; }
+            }
+
+            // Mirror post-payment UI from handleSubmit(): show success state
+            try { sessionStorage.removeItem('attune_cart'); } catch {}
+            const realOrderNum = paymentIntent?.id
+              ? 'ATT-' + new Date().toISOString().slice(0,10).replace(/-/g,'') + '-' + paymentIntent.id.slice(-4).toUpperCase()
+              : 'ATT-' + Date.now();
+            const params = new URLSearchParams({
+              signup: '1', pkg: first.pkg,
+              p1: first.partner1Name, p2: first.partner2Name,
+              orderNum: realOrderNum,
+            });
+            if (first.addons.lmft)       params.set('lmft', '1');
+            if (first.addons.workbook)   params.set('addon_workbook', first.addons.workbookVariant || 'digital');
+            if (first.intent === 'gift') params.set('gift', '1');
+            document.getElementById('startLink').href = '/app?' + params.toString();
+            document.getElementById('coWrap').style.display = 'none';
+            document.getElementById('coSuccess').style.display = 'block';
+          } catch (err) {
+            ev.complete('fail');
+            alert('Payment error: ' + err.message);
+          }
+        });
+      }
+    } catch (e) {
+      console.warn('Payment Request Button setup failed:', e);
+    }
   } catch(e) {
     console.warn('Stripe not initialised – key missing or invalid:', e);
   }
 })();
+
+// Update the Payment Request Button's total whenever the cart total changes
+function updatePaymentRequestTotal() {
+  if (!paymentRequest) return;
+  const total = _items.reduce((sum, it) => {
+    const p = PACKAGES[it.pkg] || PACKAGES.core;
+    const base = it.format === 'physical' ? p.physicalPrice : p.digitalPrice;
+    let add = 0;
+    if (it.addons.workbook) add += (it.addons.workbookVariant === 'print') ? 39 : 19;
+    if (it.addons.lmft)       add += 150;
+    if (it.addons.reflection) add += 40;
+    if (it.addons.budget)     add += 20;
+    if (it.addons.checklist)  add += 20;
+    return sum + (base + add);
+  }, 0);
+  paymentRequest.update({ total: { label: 'Attune Relationships', amount: total * 100 } });
+}
 
 document.getElementById('email').addEventListener('input', validateForm);
 
@@ -1055,6 +1229,9 @@ async function applyPromo() {
   if (paymentDivider) paymentDivider.style.display = 'none';
   const securityStrip = document.getElementById('securityStrip');
   if (securityStrip) securityStrip.style.display = 'none';
+  // Hide the Apple Pay / Google Pay button — no need for a wallet on a free order
+  const expressWrap = document.getElementById('expressCheckoutWrap');
+  if (expressWrap) expressWrap.style.display = 'none';
 
   // Tell Stripe's card elements they're no longer required for validation
   cardComplete = true;
@@ -1081,6 +1258,12 @@ function removePromo() {
   if (paymentDivider) paymentDivider.style.display = '';
   const securityStrip = document.getElementById('securityStrip');
   if (securityStrip) securityStrip.style.display = '';
+  // Show express checkout again — but only if the browser supported it in
+  // the first place (we keep a data attr to track this)
+  const expressWrap = document.getElementById('expressCheckoutWrap');
+  if (expressWrap && expressWrap.dataset.supported === '1') {
+    expressWrap.style.display = 'block';
+  }
   // Stripe will update cardComplete on next input change; reset here so
   // the submit button stays disabled until user re-enters a card.
   cardComplete = false;
