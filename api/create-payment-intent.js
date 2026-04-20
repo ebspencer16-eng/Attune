@@ -23,9 +23,9 @@ const ADDON_PRICES = {
   workbookDigital: 19,
   workbookPrint:   39,
   lmft:           150,
-  reflection:      20,
-  budget:          15,
-  checklist:       12,
+  reflection:      40,
+  budget:          20,
+  checklist:       20,
 };
 
 function newQrToken() {

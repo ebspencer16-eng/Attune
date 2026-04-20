@@ -284,28 +284,30 @@
           </div>
         </div>
 
-        <div class="form-divider">Payment</div>
-        <div class="form-group">
-          <label class="form-label">Card number</label>
-          <div id="cardNumber" class="stripe-field"></div>
-        </div>
-        <div class="form-row">
+        <div class="form-divider" id="paymentDivider">Payment</div>
+        <div id="cardBlock">
           <div class="form-group">
-            <label class="form-label">Expiration</label>
-            <div id="cardExpiry" class="stripe-field"></div>
+            <label class="form-label">Card number</label>
+            <div id="cardNumber" class="stripe-field"></div>
           </div>
-          <div class="form-group">
-            <label class="form-label">CVC</label>
-            <div id="cardCvc" class="stripe-field"></div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Expiration</label>
+              <div id="cardExpiry" class="stripe-field"></div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">CVC</label>
+              <div id="cardCvc" class="stripe-field"></div>
+            </div>
           </div>
+          <div class="error-msg" id="payError"></div>
         </div>
-        <div class="error-msg" id="payError"></div>
         <div style="margin-top:1.25rem">
           <button class="btn-primary" id="submitBtn" onclick="handleSubmit(event)" disabled>
             <span id="btnLabel">Complete order</span>
           </button>
         </div>
-        <div class="security-strip">
+        <div class="security-strip" id="securityStrip">
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
           Secured by Stripe · 256-bit TLS encryption
         </div>
@@ -400,7 +402,7 @@ const PACKAGES = {
 };
 
 const ADDON_LMFT = { label: 'LMFT Session (50 min · licensed therapist)', price: 150 };
-const ADDON_REFLECTION = { label: "Relationship Reflection exercise", price: 20 };
+const ADDON_REFLECTION = { label: "Relationship Reflection exercise", price: 40 };
 
 const ADDON_WORKBOOK = {
   digital: { label: 'Personalized Workbook (digital)', price: 19 },
@@ -669,8 +671,8 @@ function renderSummary() {
     if (it.addons.workbook) add += (it.addons.workbookVariant === 'print') ? 39 : 19;
     if (it.addons.lmft)       add += ADDON_LMFT.price;
     if (it.addons.reflection) add += ADDON_REFLECTION.price;
-    if (it.addons.budget)     add += 15;
-    if (it.addons.checklist)  add += 12;
+    if (it.addons.budget)     add += 20;
+    if (it.addons.checklist)  add += 20;
     return base + add;
   }
 
@@ -709,6 +711,19 @@ function renderSummary() {
     if (addonBits.length) {
       rows += `<div style="font-size:.66rem;color:#8C7A68;padding:0 0 .6rem .1rem">+ ${addonBits.join(', ')}</div>`;
     }
+  }
+
+  // If a promo code is applied, show the discount line and zero out total
+  if (appliedPromoCode) {
+    rows += `
+      <div class="co-card-detail" style="border-top:1px solid #E8DDD0;margin-top:.4rem;padding-top:.5rem">
+        <div>
+          <div class="name" style="color:#10B981">Promo code applied</div>
+          <span class="sub" style="font-family:monospace;font-size:.7rem;color:#8C7A68">${appliedPromoCode}</span>
+        </div>
+        <div class="price" style="color:#10B981">−$${total}</div>
+      </div>`;
+    total = 0;
   }
 
   if (el) el.innerHTML = rows;
@@ -1004,33 +1019,51 @@ async function applyPromo() {
     fb.style.color = '#B45309';
     return;
   }
-  const pkgId = Object.keys(PACKAGES).find(k => PACKAGES[k] === pkg) || 'core';
-  if (unlocks !== '*' && unlocks !== pkgId) {
-    const pkgDisplayName = {
-      core: 'The Attune Assessment',
-      newlywed: 'Starting Out Collection',
-      anniversary: 'Relationship Reflection',
-      premium: 'Attune Premium',
-    }[unlocks] || unlocks;
-    fb.textContent = `This code is for ${pkgDisplayName}.`;
-    fb.style.color = '#B45309';
-    return;
+
+  // Every item in the cart must match the code (unless it's the universal).
+  // Beta codes are package-specific and work on both digital and physical
+  // of that package.
+  if (unlocks !== '*') {
+    const mismatched = _items.find(it => it.pkg !== unlocks);
+    if (mismatched) {
+      const pkgDisplayName = {
+        core: 'The Attune Assessment',
+        newlywed: 'Starting Out Collection',
+        anniversary: 'Relationship Reflection',
+        premium: 'Attune Premium',
+      }[unlocks] || unlocks;
+      fb.textContent = `This code only unlocks ${pkgDisplayName}. Remove other packages to use it.`;
+      fb.style.color = '#B45309';
+      return;
+    }
   }
 
   // Apply
   appliedPromoCode = code;
+  fb.textContent = '';
   document.getElementById('promoInputWrap').style.display = 'none';
   document.getElementById('promoToggle').style.display = 'none';
   document.getElementById('promoAppliedCode').textContent = code;
   document.getElementById('promoApplied').style.display = 'flex';
+
+  // Hide the payment card section entirely (not just dim it) — a free promo
+  // means no card needed. Also remove the PAYMENT divider and Stripe
+  // security badge so nothing dangles.
+  const cardBlock = document.getElementById('cardBlock');
+  if (cardBlock) cardBlock.style.display = 'none';
+  const paymentDivider = document.getElementById('paymentDivider');
+  if (paymentDivider) paymentDivider.style.display = 'none';
+  const securityStrip = document.getElementById('securityStrip');
+  if (securityStrip) securityStrip.style.display = 'none';
+
+  // Tell Stripe's card elements they're no longer required for validation
+  cardComplete = true;
+
   renderSummary();
   validateForm();
   // Update the pay button
   const btnLabel = document.getElementById('btnLabel');
   if (btnLabel) btnLabel.textContent = 'Complete order (free) →';
-  // Hide the card input section since no payment needed
-  const cardBlock = document.getElementById('cardBlock');
-  if (cardBlock) cardBlock.style.opacity = '0.45';
 }
 
 function removePromo() {
@@ -1039,12 +1072,23 @@ function removePromo() {
   document.getElementById('promoToggle').style.display = 'inline';
   document.getElementById('promoInput').value = '';
   document.getElementById('promoFeedback').textContent = '';
+  document.getElementById('promoInputWrap').style.display = 'none';
+
+  // Restore card section
+  const cardBlock = document.getElementById('cardBlock');
+  if (cardBlock) cardBlock.style.display = '';
+  const paymentDivider = document.getElementById('paymentDivider');
+  if (paymentDivider) paymentDivider.style.display = '';
+  const securityStrip = document.getElementById('securityStrip');
+  if (securityStrip) securityStrip.style.display = '';
+  // Stripe will update cardComplete on next input change; reset here so
+  // the submit button stays disabled until user re-enters a card.
+  cardComplete = false;
+
   renderSummary();
   validateForm();
   const btnLabel = document.getElementById('btnLabel');
-  if (btnLabel) btnLabel.textContent = `Complete order · $${getPkgTotal()}`;
-  const cardBlock = document.getElementById('cardBlock');
-  if (cardBlock) cardBlock.style.opacity = '1';
+  if (btnLabel) btnLabel.textContent = 'Complete order';
 }
 </script>
 </body>
