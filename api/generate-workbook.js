@@ -270,23 +270,23 @@ function scoreBarRow(label, score, leftAxis, rightAxis, color) {
     columnWidths: [1600, 1400, 2200, 1400, 800],
     borders: { top: { style: BorderStyle.NIL }, bottom: { style: BorderStyle.NIL }, left: { style: BorderStyle.NIL }, right: { style: BorderStyle.NIL }, insideHorizontal: { style: BorderStyle.NIL }, insideVertical: { style: BorderStyle.NIL } },
     rows: [new TableRow({
-      height: { value: 320, rule: HeightRule.EXACT },
+      height: { value: 440, rule: HeightRule.ATLEAST },
       children: [
-        new TableCell({ borders: noBrds, width: { size: 1600, type: WidthType.DXA }, margins: { top: 60, bottom: 60, left: 0, right: 120 },
+        new TableCell({ borders: noBrds, width: { size: 1600, type: WidthType.DXA }, margins: { top: 120, bottom: 120, left: 0, right: 120 },
           children: [new Paragraph({ spacing: { after: 0 }, children: [run(label, { size: 20, bold: true })] })] }),
-        new TableCell({ borders: noBrds, width: { size: 1400, type: WidthType.DXA }, margins: { top: 60, bottom: 60, left: 80, right: 80 },
+        new TableCell({ borders: noBrds, width: { size: 1400, type: WidthType.DXA }, margins: { top: 120, bottom: 120, left: 80, right: 80 },
           children: [new Paragraph({ alignment: AlignmentType.RIGHT, spacing: { after: 0 }, children: [run(leftAxis, { size: 16, color: MUTED, italics: true })] })] }),
         // Bar itself: inner 5-segment table
-        new TableCell({ borders: noBrds, width: { size: 2200, type: WidthType.DXA }, margins: { top: 100, bottom: 100, left: 40, right: 40 },
+        new TableCell({ borders: noBrds, width: { size: 2200, type: WidthType.DXA }, margins: { top: 160, bottom: 160, left: 40, right: 40 },
           children: [new Table({
             width: { size: 2200, type: WidthType.DXA },
             columnWidths: [440, 440, 440, 440, 440],
             borders: { top: { style: BorderStyle.NIL }, bottom: { style: BorderStyle.NIL }, left: { style: BorderStyle.NIL }, right: { style: BorderStyle.NIL }, insideHorizontal: { style: BorderStyle.NIL }, insideVertical: { style: BorderStyle.NIL } },
-            rows: [new TableRow({ height: { value: 120, rule: HeightRule.EXACT }, children: segments })],
+            rows: [new TableRow({ height: { value: 140, rule: HeightRule.EXACT }, children: segments })],
           })] }),
-        new TableCell({ borders: noBrds, width: { size: 1400, type: WidthType.DXA }, margins: { top: 60, bottom: 60, left: 80, right: 80 },
+        new TableCell({ borders: noBrds, width: { size: 1400, type: WidthType.DXA }, margins: { top: 120, bottom: 120, left: 80, right: 80 },
           children: [new Paragraph({ spacing: { after: 0 }, children: [run(rightAxis, { size: 16, color: MUTED, italics: true })] })] }),
-        new TableCell({ borders: noBrds, width: { size: 800, type: WidthType.DXA }, margins: { top: 60, bottom: 60, left: 80, right: 0 },
+        new TableCell({ borders: noBrds, width: { size: 800, type: WidthType.DXA }, margins: { top: 120, bottom: 120, left: 80, right: 0 },
           children: [new Paragraph({ alignment: AlignmentType.RIGHT, spacing: { after: 0 }, children: [run(clamped.toFixed(1) + ' / 5', { size: 18, bold: true, color: fillColor })] })] }),
       ],
     })],
@@ -378,28 +378,28 @@ function estimatePageOffsets({ s1, s2, expGaps, priorities, gapThreshold = 1.0 }
   p += 1;                                     // Part 2 cover
   p += 1;                                     // epigraph
   const insightsPage = p + 1;  p += 1;        // Part 2 intro on p
-  // Each domain group averages ~2 pages total (header + 1-2 dims).
-  // The domain header spills onto the first dim's page.
+  // Each domain's dims pack about 1 page per dim. Header spills onto the
+  // first dim's page (so no separate header page cost).
   const domainPages = visibleDomains.map(dom => {
     const page = p + 1;
-    p += Math.max(2, dom.visibleDims.length + 1);
+    p += Math.max(1, dom.visibleDims.length);
     return { title: dom.title, page };
   });
   const expPage = p + 1;
-  p += Math.max(1, Math.ceil(unalignedExp / 2));
+  p += Math.max(1, Math.ceil(unalignedExp / 3));
 
   p += 1;                                     // Part 3 cover
   p += 1;                                     // epigraph
   const workingKnowledgePage = p + 1;
-  // Six Moments — same-type: 1 page, cross-type: 2 pages
-  // Rough estimate: 3-4 pages per partner (6 moments per page is too dense)
-  const sameType = coupleTypeIsSame(/* we don't have it here; assume cross */);
-  p += sameType ? 4 : 8;
+  // Six Moments — same-type: ~4 pages (1 intro + 3 content). Cross-type:
+  // ~7 pages (1 intro + 3 per partner × 2 partners).
+  const sameType = coupleTypeIsSame();
+  p += sameType ? 4 : 7;
 
   p += 1;                                     // Part 4 cover
   p += 1;                                     // epigraph
   const patternsPage = p + 1;
-  p += 4;                                     // 1 intro + 3 patterns (1 page each)
+  p += 5;                                     // 1 intro + 3 patterns + some breathing
 
   p += 1;                                     // Part 5 cover
   p += 1;                                     // epigraph
@@ -415,7 +415,7 @@ function estimatePageOffsets({ s1, s2, expGaps, priorities, gapThreshold = 1.0 }
   p += 1;                                     // Part 7 cover
   p += 1;                                     // epigraph
   const overTimePage = p + 1;
-  p += 3;                                     // intro + 90-day + year-1 letter
+  p += 2;                                     // 90-day + year-1 letter (intro + 2 pages)
 
   p += 1;                                     // Part 8 cover
   const referencePage = p + 1;
