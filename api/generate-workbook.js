@@ -202,6 +202,101 @@ const accentBox = (label, text, fill, accent) => {
   });
 };
 
+// Accent box variant that accepts arbitrary paragraph children on the right
+// side (instead of a single text string). Used for checklists, score bars,
+// multi-paragraph story blocks, etc.
+const accentBoxRich = (label, children, fill, accent) => {
+  const a = accent || ORANGE, f = fill || 'FFF8F0';
+  return new Table({
+    width: { size: W, type: WidthType.DXA }, columnWidths: [160, W - 160],
+    rows: [new TableRow({ children: [
+      new TableCell({ borders: noBrds, width: { size: 160, type: WidthType.DXA },
+        shading: { fill: a, type: ShadingType.CLEAR }, margins: { top: 0, bottom: 0, left: 0, right: 0 },
+        children: [new Paragraph({ spacing: { after: 0 }, children: [new TextRun(' ')] })] }),
+      new TableCell({ borders: noBrds, width: { size: W - 160, type: WidthType.DXA },
+        shading: { fill: f, type: ShadingType.CLEAR }, margins: { top: 200, bottom: 200, left: 280, right: 280 },
+        children: [
+          ...(label ? [new Paragraph({ spacing: { after: 120 }, children: [run(label, { size: 16, bold: true, color: a, allCaps: true, characterSpacing: 40 })] })] : []),
+          ...children,
+        ] }),
+    ]})]
+  });
+};
+
+// Epigraph — a centered italic quote with attribution, placed at the start
+// of each Part to set tone before the content begins. One per part.
+const epigraph = (quote, author) => [
+  sp(),
+  new Paragraph({ alignment: AlignmentType.CENTER, spacing: { after: 80 },
+    children: [run(`"${quote}"`, { size: 22, italics: true, color: MUTED })] }),
+  new Paragraph({ alignment: AlignmentType.CENTER, spacing: { after: 240 },
+    children: [run(`— ${author}`, { size: 16, color: MUTED })] }),
+];
+
+// Check-item — an unchecked box followed by editable content. Used for
+// action items (Try this week), longitudinal prompts (revisit in 30 days).
+const checkAction = (text, opts = {}) => new Paragraph({
+  spacing: { after: opts.after ?? 160 },
+  indent: { left: 240 },
+  children: [
+    run('\u2610   ', { size: 26 }),
+    run(text, { size: 22, color: opts.color || INK, italics: !!opts.italics }),
+  ],
+});
+
+// Horizontal score bar — renders a visual bar showing a single person's
+// position on a dimension, with left/right axis labels. Used in the
+// Patterns section where we compare two scores on the same dimension.
+function scoreBarRow(label, score, leftAxis, rightAxis, color) {
+  const clamped = Math.max(1, Math.min(5, score));
+  // 5 segments; filled up to the rounded score
+  const filled = Math.round(clamped);
+  const fillColor = color || ORANGE;
+
+  const segments = [];
+  for (let i = 1; i <= 5; i++) {
+    segments.push(new TableCell({
+      borders: { top: { style: BorderStyle.NIL }, bottom: { style: BorderStyle.NIL }, left: { style: BorderStyle.NIL }, right: { style: BorderStyle.NIL } },
+      width: { size: 440, type: WidthType.DXA },
+      shading: { fill: i <= filled ? fillColor : 'EAE3D6', type: ShadingType.CLEAR },
+      margins: { top: 0, bottom: 0, left: 0, right: 0 },
+      children: [new Paragraph({ spacing: { after: 0, line: 120, lineRule: 'exact' }, children: [run('', { size: 2 })] })],
+    }));
+  }
+
+  // Row: [label 1600] [leftAxis 1400] [bar 2200] [rightAxis 1400] [score 800]
+  return new Table({
+    width: { size: W, type: WidthType.DXA },
+    columnWidths: [1600, 1400, 2200, 1400, 800],
+    borders: { top: { style: BorderStyle.NIL }, bottom: { style: BorderStyle.NIL }, left: { style: BorderStyle.NIL }, right: { style: BorderStyle.NIL }, insideHorizontal: { style: BorderStyle.NIL }, insideVertical: { style: BorderStyle.NIL } },
+    rows: [new TableRow({
+      height: { value: 320, rule: HeightRule.EXACT },
+      children: [
+        new TableCell({ borders: noBrds, width: { size: 1600, type: WidthType.DXA }, margins: { top: 60, bottom: 60, left: 0, right: 120 },
+          children: [new Paragraph({ spacing: { after: 0 }, children: [run(label, { size: 20, bold: true })] })] }),
+        new TableCell({ borders: noBrds, width: { size: 1400, type: WidthType.DXA }, margins: { top: 60, bottom: 60, left: 80, right: 80 },
+          children: [new Paragraph({ alignment: AlignmentType.RIGHT, spacing: { after: 0 }, children: [run(leftAxis, { size: 16, color: MUTED, italics: true })] })] }),
+        // Bar itself: inner 5-segment table
+        new TableCell({ borders: noBrds, width: { size: 2200, type: WidthType.DXA }, margins: { top: 100, bottom: 100, left: 40, right: 40 },
+          children: [new Table({
+            width: { size: 2200, type: WidthType.DXA },
+            columnWidths: [440, 440, 440, 440, 440],
+            borders: { top: { style: BorderStyle.NIL }, bottom: { style: BorderStyle.NIL }, left: { style: BorderStyle.NIL }, right: { style: BorderStyle.NIL }, insideHorizontal: { style: BorderStyle.NIL }, insideVertical: { style: BorderStyle.NIL } },
+            rows: [new TableRow({ height: { value: 120, rule: HeightRule.EXACT }, children: segments })],
+          })] }),
+        new TableCell({ borders: noBrds, width: { size: 1400, type: WidthType.DXA }, margins: { top: 60, bottom: 60, left: 80, right: 80 },
+          children: [new Paragraph({ spacing: { after: 0 }, children: [run(rightAxis, { size: 16, color: MUTED, italics: true })] })] }),
+        new TableCell({ borders: noBrds, width: { size: 800, type: WidthType.DXA }, margins: { top: 60, bottom: 60, left: 80, right: 0 },
+          children: [new Paragraph({ alignment: AlignmentType.RIGHT, spacing: { after: 0 }, children: [run(clamped.toFixed(1) + ' / 5', { size: 18, bold: true, color: fillColor })] })] }),
+      ],
+    })],
+  });
+}
+
+// PLACEHOLDER marker — used to clearly distinguish structure from
+// final content while the template is under review.
+const PH = (text) => `[PLACEHOLDER — ${text}]`;
+
 // ─── Personalization helpers ──────────────────────────────────────────────────
 function fill(template, u, p) {
   return String(template || '')
@@ -275,33 +370,65 @@ function estimatePageOffsets({ s1, s2, expGaps, priorities, gapThreshold = 1.0 }
   // Cover p1, TOC p2, Intro p3.
   const introPage = 3;
   let p = 3;                                  // last known page after intro
-  p += 1;                                     // Part 1 cover (p4)
-  const snapshotPage = p + 1;  p += 2;        // Snapshot on p5, couple-type spills to p6
-  p += 1;                                     // Part 2 cover (p7)
-  const insightsPage = p + 1;  p += 1;        // Part 2 intro on p8
+  p += 1;                                     // Part 1 cover
+  p += 1;                                     // epigraph + snapshot intro page
+  const snapshotPage = p;
+  p += 2;                                     // snapshot content (tables + distinctive callout)
+
+  p += 1;                                     // Part 2 cover
+  p += 1;                                     // epigraph
+  const insightsPage = p + 1;  p += 1;        // Part 2 intro on p
   // Each domain group averages ~2 pages total (header + 1-2 dims).
   // The domain header spills onto the first dim's page.
   const domainPages = visibleDomains.map(dom => {
     const page = p + 1;
-    // Per dim: count at least 1 page + 0.5 for each additional dim
     p += Math.max(2, dom.visibleDims.length + 1);
     return { title: dom.title, page };
   });
-  // The Life You're Building — expectations domain block
   const expPage = p + 1;
   p += Math.max(1, Math.ceil(unalignedExp / 2));
+
   p += 1;                                     // Part 3 cover
-  const prioritiesPage = p + 1;
-  // Priorities pack 2 per page (smaller tables), not 1 per page
-  p += Math.max(1, Math.ceil(priorities.length / 1.5));
+  p += 1;                                     // epigraph
+  const workingKnowledgePage = p + 1;
+  // Six Moments — same-type: 1 page, cross-type: 2 pages
+  // Rough estimate: 3-4 pages per partner (6 moments per page is too dense)
+  const sameType = coupleTypeIsSame(/* we don't have it here; assume cross */);
+  p += sameType ? 4 : 8;
+
   p += 1;                                     // Part 4 cover
-  const guidePage = p + 1;     p += 2;        // Conversation guide
+  p += 1;                                     // epigraph
+  const patternsPage = p + 1;
+  p += 4;                                     // 1 intro + 3 patterns (1 page each)
+
   p += 1;                                     // Part 5 cover
+  p += 1;                                     // epigraph
+  const prioritiesPage = p + 1;
+  p += Math.max(1, Math.ceil(priorities.length / 1.5));
+  p += 1;                                     // 30-day check-in page
+
+  p += 1;                                     // Part 6 cover
+  p += 1;                                     // epigraph
+  const conversationPage = p + 1;
+  p += 4;                                     // 8 situations ~ 3 pages + structured guide
+
+  p += 1;                                     // Part 7 cover
+  p += 1;                                     // epigraph
+  const overTimePage = p + 1;
+  p += 3;                                     // intro + 90-day + year-1 letter
+
+  p += 1;                                     // Part 8 cover
   const referencePage = p + 1;
 
   return { introPage, snapshotPage, insightsPage, domainPages, expPage,
-           prioritiesPage, guidePage, referencePage, visibleDomains };
+           workingKnowledgePage, patternsPage,
+           prioritiesPage, conversationPage, overTimePage,
+           referencePage, visibleDomains };
 }
+
+// Quick helper used inside estimator. In a future pass we can thread the
+// actual coupleType into estimatePageOffsets; for now default to cross-type.
+function coupleTypeIsSame() { return false; }
 
 function buildTOC(offsets, priorities) {
   // TOC rows rendered as 2-column tables: label cell (left) + page-number
@@ -380,9 +507,10 @@ function buildTOC(offsets, priorities) {
 
   // Part 1
   rows.push(...tocSection({ partEyebrow: 'PART 1', title: 'Your Snapshot', pageNum: offsets.snapshotPage, color: ORANGE }));
-  rows.push(tocRow({ label: 'Communication dimensions', pageNum: offsets.snapshotPage, indent: 280, italic: false, labelSize: 20, labelColor: MUTED }));
+  rows.push(tocRow({ label: 'Communication dimensions', pageNum: offsets.snapshotPage, indent: 280, labelSize: 20, labelColor: MUTED }));
   rows.push(tocRow({ label: 'Expectations alignment',   pageNum: offsets.snapshotPage, indent: 280, labelSize: 20, labelColor: MUTED }));
   rows.push(tocRow({ label: 'Your couple type',          pageNum: offsets.snapshotPage, indent: 280, labelSize: 20, labelColor: MUTED }));
+  rows.push(tocRow({ label: 'Worth noting about your combination', pageNum: offsets.snapshotPage, indent: 280, labelSize: 20, labelColor: MUTED }));
 
   // Part 2
   rows.push(...tocSection({ partEyebrow: 'PART 2', title: 'Exercise by Exercise Insights', pageNum: offsets.insightsPage, color: BLUE }));
@@ -391,8 +519,16 @@ function buildTOC(offsets, priorities) {
   });
   rows.push(tocRow({ label: "The Life You're Building",  pageNum: offsets.expPage, indent: 280, labelSize: 20, labelColor: MUTED }));
 
-  // Part 3
-  rows.push(...tocSection({ partEyebrow: 'PART 3', title: 'Your 3 Priorities', pageNum: offsets.prioritiesPage, color: ORANGE }));
+  // Part 3 — Working Knowledge (NEW)
+  rows.push(...tocSection({ partEyebrow: 'PART 3', title: 'Working Knowledge', pageNum: offsets.workingKnowledgePage, color: PURPLE }));
+  rows.push(tocRow({ label: 'Six Moments — guidance for each partner', pageNum: offsets.workingKnowledgePage, indent: 280, labelSize: 20, labelColor: MUTED }));
+
+  // Part 4 — Patterns (NEW)
+  rows.push(...tocSection({ partEyebrow: 'PART 4', title: 'Patterns That Shape Your Relationship', pageNum: offsets.patternsPage, color: BLUE }));
+  rows.push(tocRow({ label: 'Three patterns specific to the two of you', pageNum: offsets.patternsPage, indent: 280, labelSize: 20, labelColor: MUTED }));
+
+  // Part 5 — Priorities
+  rows.push(...tocSection({ partEyebrow: 'PART 5', title: 'Your 3 Priorities', pageNum: offsets.prioritiesPage, color: ORANGE }));
   priorities.forEach((dim, i) => {
     const meta = DIM_META[dim];
     rows.push(tocRow({
@@ -401,12 +537,20 @@ function buildTOC(offsets, priorities) {
       indent: 280, labelSize: 20, labelColor: MUTED,
     }));
   });
+  rows.push(tocRow({ label: '30-day check-in', pageNum: offsets.prioritiesPage + 2, indent: 280, labelSize: 20, labelColor: MUTED, italic: true }));
 
-  // Part 4
-  rows.push(...tocSection({ partEyebrow: 'PART 4', title: 'Conversation Guide', pageNum: offsets.guidePage, color: PURPLE }));
+  // Part 6 — Conversation Library (NEW)
+  rows.push(...tocSection({ partEyebrow: 'PART 6', title: 'Conversation Library', pageNum: offsets.conversationPage, color: PURPLE }));
+  rows.push(tocRow({ label: 'Eight situations, three prompts each', pageNum: offsets.conversationPage, indent: 280, labelSize: 20, labelColor: MUTED }));
+  rows.push(tocRow({ label: 'A structured first conversation', pageNum: offsets.conversationPage + 2, indent: 280, labelSize: 20, labelColor: MUTED }));
 
-  // Part 5
-  rows.push(...tocSection({ partEyebrow: 'PART 5', title: 'Reference Card', pageNum: offsets.referencePage, color: GREEN }));
+  // Part 7 — Over Time (NEW)
+  rows.push(...tocSection({ partEyebrow: 'PART 7', title: 'Over Time', pageNum: offsets.overTimePage, color: GREEN }));
+  rows.push(tocRow({ label: '90-day check-in', pageNum: offsets.overTimePage, indent: 280, labelSize: 20, labelColor: MUTED }));
+  rows.push(tocRow({ label: 'A letter to a year ago', pageNum: offsets.overTimePage + 2, indent: 280, labelSize: 20, labelColor: MUTED }));
+
+  // Part 8 — Reference Card
+  rows.push(...tocSection({ partEyebrow: 'PART 8', title: 'Reference Card', pageNum: offsets.referencePage, color: GREEN }));
 
   return [
     pb(),
@@ -589,6 +733,18 @@ function buildSnapshot(u, p, scores, partnerScores, coupleType, expGaps) {
         ]
       })
     ] : []),
+
+    // Distinctive Data callout — names what's statistically unusual about
+    // this specific couple's combination of scores. Fires based on a
+    // library of distinction patterns (each with a trigger condition and
+    // a projected firing rate < 25%). Placeholder copy; final patterns
+    // will be pulled from a reviewed library.
+    ...sps(2),
+    eyebrow('Worth noting about your combination', ORANGE),
+    accentBox(
+      null,
+      PH(`1–2 sentences naming what is specifically unusual or worth noting about ${u} and ${p}'s combination of scores — e.g. "You're aligned on conflict style but gap widely on repair, which is rarer than the reverse pattern."`),
+      'FFF8F0', ORANGE),
   ];
 }
 
@@ -644,6 +800,16 @@ function buildOneDimension(dim, u, p, score1, score2) {
 
   // Try this week
   result.push(accentBox('Try this week', thisWeek, 'F0F9FF', color));
+  result.push(sp());
+
+  // Referenceable "When this shows up" callout — turns each dimension page
+  // from explanation into a reference users can flip back to during a
+  // specific moment. Placeholder copy; final content will be in
+  // _workbook-content.js as a per-dimension "whenThisShowsUp" field.
+  result.push(accentBox(
+    'When this shows up',
+    PH(`specific, referenceable guidance for ${meta.label.toLowerCase()} — one short paragraph telling ${u} and ${p} what to do the next time this dimension creates friction in a real moment`),
+    'FFFDF5', MUTED));
   result.push(sp());
 
   // Notes space
@@ -878,7 +1044,7 @@ function buildReferenceCard(u, p, coupleType, priorities) {
 
   return [
     pb(),
-    new Paragraph({ heading: HeadingLevel.HEADING_1, children: [run('Part 5 \u2014 Reference Card')] }),
+    new Paragraph({ heading: HeadingLevel.HEADING_1, children: [run('Part 8 \u2014 Reference Card')] }),
     para('Print on cardstock and cut along the dotted line. Put it on your fridge.', { color: MUTED }),
     sp(),
     para('\u00b7 \u00b7 \u00b7 \u00b7 \u00b7 \u00b7 \u00b7 \u00b7 \u00b7 \u00b7 \u00b7 \u00b7 CUT HERE \u00b7 \u00b7 \u00b7 \u00b7 \u00b7 \u00b7 \u00b7 \u00b7 \u00b7 \u00b7 \u00b7 \u00b7', { color: MUTED, italics: true, size: 16 }),
@@ -966,6 +1132,365 @@ function buildReferenceCard(u, p, coupleType, priorities) {
   ];
 }
 
+// ─── Working Knowledge (Part 3) ──────────────────────────────────────────────
+// For each partner, one page with six recurring "moments" and specific
+// guidance for the other partner on what to do in each. Cross-type couples
+// get two pages (one per partner). Same-type couples get one combined page.
+
+const MOMENTS = [
+  { key: 'hard_workday',     title: 'After a hard workday' },
+  { key: 'quiet_worry',      title: "When they're worried but haven't said it" },
+  { key: 'during_conflict',  title: 'During a disagreement' },
+  { key: 'after_conflict',   title: 'After a disagreement' },
+  { key: 'wanting_closeness', title: 'When they want to feel close' },
+  { key: 'external_stress',  title: 'When stress is coming from outside the relationship' },
+];
+
+// Derive each partner's individual type letter from the couple type id
+// (e.g. 'WX' → ['W', 'X'], 'WW' → ['W', 'W']).
+function partnerTypes(coupleType) {
+  if (!coupleType?.id || coupleType.id.length !== 2) return ['—', '—'];
+  return [coupleType.id[0], coupleType.id[1]];
+}
+
+function buildMomentCard(moment, subjectName, otherName, typeLetter) {
+  // Each moment renders as a titled block with five short labeled sections:
+  // THE MOMENT, WHAT'S HAPPENING, WHAT NOT TO DO, WHAT WORKS, PHRASE THAT LANDS.
+  // Content is placeholder for now — final copy will come from a scene
+  // library keyed to (moment × individualType).
+  const rowLabel = (label, color) => new Paragraph({
+    spacing: { before: 100, after: 60 },
+    children: [run(label, { size: 14, bold: true, color: color || ORANGE, allCaps: true, characterSpacing: 50 })],
+  });
+  const rowBody = (text, opts = {}) => new Paragraph({
+    spacing: { after: 120 },
+    children: [run(text, { size: 20, color: opts.color || INK, italics: !!opts.italics })],
+  });
+
+  return [
+    // Moment title bar
+    new Table({
+      width: { size: W, type: WidthType.DXA }, columnWidths: [600, W - 600],
+      rows: [new TableRow({ children: [
+        new TableCell({ borders: noBrds, width: { size: 600, type: WidthType.DXA },
+          shading: { fill: PURPLE, type: ShadingType.CLEAR }, margins: { top: 120, bottom: 120, left: 160, right: 0 },
+          children: [new Paragraph({ alignment: AlignmentType.CENTER, spacing: { after: 0 }, children: [run(moment.number || '', { size: 24, bold: true, color: 'FFFFFF' })] })] }),
+        new TableCell({ borders: noBrds, width: { size: W - 600, type: WidthType.DXA },
+          shading: { fill: 'F7F3FC', type: ShadingType.CLEAR }, margins: { top: 120, bottom: 120, left: 240, right: 200 },
+          children: [new Paragraph({ spacing: { after: 0 }, children: [run(moment.title, { size: 24, bold: true, color: INK })] })] }),
+      ]})],
+    }),
+    sp(),
+
+    rowLabel('THE MOMENT', MUTED),
+    rowBody(PH(`1 sentence: concrete setup for "${moment.title.toLowerCase()}" — e.g. "${subjectName} comes home after a tough day and goes quiet."`)),
+
+    rowLabel(`WHAT'S HAPPENING FOR ${subjectName.toUpperCase()}`, PURPLE),
+    rowBody(PH(`2–3 sentences keyed to Type ${typeLetter}: what's actually going on inside ${subjectName}, why the surface behavior looks the way it does, grounded in their specific communication style.`)),
+
+    rowLabel('WHAT NOT TO DO', 'C8402A'),
+    rowBody(PH(`1 sentence: the natural but wrong move for ${otherName} to make in this moment.`)),
+
+    rowLabel('WHAT WORKS', GREEN),
+    rowBody(PH(`1–2 sentences: the specific action ${otherName} should take instead.`)),
+
+    rowLabel('PHRASE THAT LANDS', BLUE),
+    rowBody(PH(`literal line for ${otherName} to say to ${subjectName} in this moment`), { italics: true, color: BLUE }),
+
+    hr(STONE, 2),
+  ];
+}
+
+function buildWorkingKnowledge(u, p, coupleType) {
+  const [typeU, typeP] = partnerTypes(coupleType);
+  const sameType = typeU === typeP;
+
+  const introPage = [
+    pb(),
+    new Paragraph({ heading: HeadingLevel.HEADING_1, children: [run('Part 3 \u2014 Working Knowledge')] }),
+    para(
+      sameType
+        ? `${u} and ${p} share the same communication type (${typeU}). That means the six moments below apply to both of you — use this page as a mutual reference.`
+        : `Two pages. One is the working knowledge ${p} needs about ${u}. The other is what ${u} needs about ${p}. Read your own first, then read your partner's aloud together.`,
+      { size: 22, color: MUTED, after: 200 }),
+    accentBox(
+      'How to use this section',
+      `Six moments that come up again and again in every long-term relationship. Each one gives you specific guidance for what to do, what not to do, and a phrase that actually lands. When a hard moment shows up in real life, flip to the moment that matches. The goal is not to memorize it — it's to have the language ready before you need it.`,
+      'FFF8F0', ORANGE),
+  ];
+
+  if (sameType) {
+    return [
+      ...introPage,
+      pb(),
+      new Paragraph({ heading: HeadingLevel.HEADING_2, children: [run(`Six Moments · Type ${typeU}`, { color: PURPLE })] }),
+      para(PH(`1 sentence framing these moments for a same-type couple — both ${u} and ${p} are Type ${typeU}, so the dynamic here is about what both of you need to know about how your shared type shows up.`),
+        { size: 20, color: MUTED, after: 240 }),
+      ...MOMENTS.flatMap((m, i) => buildMomentCard({ ...m, number: `${i + 1}` }, `${u} & ${p}`, 'each other', typeU)),
+    ];
+  }
+
+  // Cross-type: one page for each partner
+  return [
+    ...introPage,
+
+    pb(),
+    new Paragraph({ heading: HeadingLevel.HEADING_2, children: [run(`What ${p} should know about ${u}`, { color: PURPLE })] }),
+    para(`Six moments where ${u} (Type ${typeU}) benefits from ${p} responding in a specific way. Not generic relationship advice — situational guidance keyed to how ${u} is actually wired.`,
+      { size: 20, color: MUTED, after: 240 }),
+    ...MOMENTS.flatMap((m, i) => buildMomentCard({ ...m, number: `${i + 1}` }, u, p, typeU)),
+
+    pb(),
+    new Paragraph({ heading: HeadingLevel.HEADING_2, children: [run(`What ${u} should know about ${p}`, { color: PURPLE })] }),
+    para(`Same structure, mirrored. Six moments where ${p} (Type ${typeP}) benefits from ${u} responding in a specific way.`,
+      { size: 20, color: MUTED, after: 240 }),
+    ...MOMENTS.flatMap((m, i) => buildMomentCard({ ...m, number: `${i + 1}` }, p, u, typeP)),
+  ];
+}
+
+// ─── Patterns (Part 4) ───────────────────────────────────────────────────────
+// Three dimension-interaction patterns specific to this couple's score
+// combination. Each pattern gets its own page with visual score bars,
+// a story-style narrative, and three actionable takeaways with checkboxes.
+
+function buildPatternPage(pattern, u, p, s1, s2) {
+  const { dimA, dimB, color } = pattern;
+  const metaA = DIM_META[dimA];
+  const metaB = DIM_META[dimB];
+
+  return [
+    pb(),
+    new Paragraph({ heading: HeadingLevel.HEADING_2,
+      children: [run(pattern.name, { color: color || ORANGE })] }),
+    para(PH(`1 sentence framing this pattern — why it matters for ${u} and ${p} specifically.`),
+      { size: 20, italics: true, color: MUTED, after: 200 }),
+
+    // Visual score bars for both dimensions
+    eyebrow('Where each of you sits', color || ORANGE),
+    scoreBarRow(u, s1[dimA], metaA.left, metaA.right, color || ORANGE),
+    scoreBarRow(p, s2[dimA], metaA.left, metaA.right, color || ORANGE),
+    sp(),
+    scoreBarRow(u, s1[dimB], metaB.left, metaB.right, color || BLUE),
+    scoreBarRow(p, s2[dimB], metaB.left, metaB.right, color || BLUE),
+    sp(),
+
+    // Narrative: Setup → How it plays out → What's happening
+    eyebrow('The setup', MUTED),
+    para(PH(`2–3 sentences: plain-language framing of what's different between ${u} and ${p} on these two dimensions.`),
+      { size: 22, after: 200 }),
+
+    eyebrow('How it plays out', MUTED),
+    para(PH(`4–5 sentences: a concrete scene showing how this pattern appears in real life. Tuesday morning, a small disagreement, whatever — the specific sequence of events and what each partner interprets.`),
+      { size: 22, after: 200 }),
+
+    accentBox(
+      "What's happening",
+      PH(`2–3 sentences: the meaning behind the scene. Not a summary — an insight. Both partners are behaving correctly from their own vantage point; name the gap between those vantage points.`),
+      'F7F3FC', color || PURPLE),
+    sp(),
+
+    // Three actionable takeaways with checkboxes
+    accentBoxRich('Try this together', [
+      new Paragraph({ spacing: { after: 120 }, children: [run('Three specific things to do with this information.', { size: 20, italics: true, color: MUTED })] }),
+      checkAction(PH(`ONE EXPERIMENT TO RUN THIS WEEK: a specific action they can try once.`), { after: 140 }),
+      checkAction(PH(`ONE PHRASE TO ADD TO YOUR VOCABULARY: a literal line to start using — italic: "____"`), { after: 140, italics: true, color: BLUE }),
+      checkAction(PH(`ONE THING TO NOTICE AND REVISIT IN 30 DAYS: a behavioral pattern to watch for — feeds into Part 5's check-in.`), { after: 0 }),
+    ], 'FFF8F0', ORANGE),
+  ];
+}
+
+// Pick the 3 highest-leverage pattern combinations for this couple.
+// Final logic will consult a library of 15-20 named patterns with
+// trigger conditions. For now, we pick the 3 dimension pairs with
+// largest combined gap among the highest-influence dims.
+function rankPatterns(s1, s2) {
+  const influence = { conflict: 1.4, repair: 1.3, needs: 1.3, stress: 1.2, bids: 1.1, expression: 1.1 };
+  const gap = d => Math.abs((s1[d] || 3) - (s2[d] || 3));
+  // Candidate pairings that are known to create meaningful dynamics.
+  // Each entry is a hand-picked combination, not all C(10,2) = 45 pairs.
+  const candidates = [
+    { dimA: 'conflict', dimB: 'repair',     name: 'Conflict × Repair',      color: BLUE },
+    { dimA: 'needs',    dimB: 'expression', name: 'Directness × Expression', color: ORANGE },
+    { dimA: 'energy',   dimB: 'closeness',  name: 'Energy × Closeness',      color: PURPLE },
+    { dimA: 'stress',   dimB: 'bids',       name: 'Stress Response × Bids',  color: BLUE },
+    { dimA: 'love',     dimB: 'bids',       name: 'Love Language × Bids',    color: GREEN },
+    { dimA: 'feedback', dimB: 'repair',     name: 'Feedback × Repair',       color: ORANGE },
+  ];
+  return candidates
+    .map(c => ({ ...c, score: (gap(c.dimA) * (influence[c.dimA] || 1)) + (gap(c.dimB) * (influence[c.dimB] || 1)) }))
+    .sort((a, b) => b.score - a.score)
+    .slice(0, 3);
+}
+
+function buildPatterns(u, p, s1, s2) {
+  const patterns = rankPatterns(s1, s2);
+  return [
+    pb(),
+    new Paragraph({ heading: HeadingLevel.HEADING_1, children: [run('Part 4 \u2014 Patterns That Shape Your Relationship')] }),
+    para(`Three patterns that emerge specifically from ${u} and ${p}'s combination of scores. Each one is a dynamic that plays out in real moments — not a score summary. Recognizing the pattern is most of the work.`,
+      { size: 22, color: MUTED, after: 200 }),
+    accentBox('How these were picked',
+      `These three were selected from all possible dimension pairings because, for ${u} and ${p} specifically, they create the highest-leverage dynamics to understand. A different couple would see different patterns here.`,
+      'F7F3FC', PURPLE),
+
+    ...patterns.flatMap(pat => buildPatternPage(pat, u, p, s1, s2)),
+  ];
+}
+
+// ─── 30-day check-in (embedded at end of Part 5) ────────────────────────────
+function buildPriorityCheckIn(u, p, priorities) {
+  return [
+    pb(),
+    new Paragraph({ heading: HeadingLevel.HEADING_2, children: [run('Check in on these priorities — 30 days from now', { color: ORANGE })] }),
+    para(`Come back to this page in about a month. For each of your three priorities, answer the questions honestly. Write in the workbook — that's what it's for.`,
+      { size: 22, color: MUTED, after: 240 }),
+
+    ...priorities.flatMap((dim, i) => {
+      const meta = DIM_META[dim];
+      return [
+        new Paragraph({ spacing: { before: 200, after: 80 }, children: [run(`Priority ${i + 1} — ${meta.label}`, { size: 24, bold: true, color: ORANGE })] }),
+        new Table({
+          width: { size: W, type: WidthType.DXA }, columnWidths: [W],
+          rows: [
+            new TableRow({ children: [tc('What changed (if anything) over the last 30 days?', W, { bold: true, fill: 'FAFAF8', color: MUTED, size: 18 })] }),
+            new TableRow({ children: [tc('\n\n', W)] }),
+            new TableRow({ children: [tc(`Did the weekly practice we committed to actually happen? What got in the way?`, W, { bold: true, fill: 'FAFAF8', color: MUTED, size: 18 })] }),
+            new TableRow({ children: [tc('\n\n', W)] }),
+            new TableRow({ children: [tc('One small thing to try differently in the next 30 days:', W, { bold: true, fill: 'FAFAF8', color: MUTED, size: 18 })] }),
+            new TableRow({ children: [tc('\n\n', W)] }),
+          ]
+        }),
+      ];
+    }),
+  ];
+}
+
+// ─── Conversation Library (Part 6) ───────────────────────────────────────────
+// Situational conversation starters — 8 situations every couple faces,
+// each with 3 prompts personalized to this couple's type. Final prompts
+// will be pulled from a reviewed master library (~40-60 prompts total,
+// tagged by situation and couple type).
+
+const SITUATIONS = [
+  { key: 'quiet_night',    title: 'At dinner on a quiet night',             blurb: 'Low-stakes depth.' },
+  { key: 'before_event',   title: 'Before a trip or big event',             blurb: 'Getting aligned.' },
+  { key: 'after_hard_week', title: 'After a hard week',                     blurb: 'Mutual care.' },
+  { key: 'one_is_off',     title: "When one of you is off but won't say why", blurb: 'Gentle excavation.' },
+  { key: 'milestone',      title: 'Milestone check-ins',                    blurb: 'Birthdays, anniversaries, year-end.' },
+  { key: 'before_hard',    title: 'Before a difficult conversation',        blurb: 'Setting it up.' },
+  { key: 'after_clear',    title: 'After a disagreement that cleared',      blurb: 'Integration.' },
+  { key: 'tired_of_logistics', title: "When you're tired of talking about logistics", blurb: 'Romance restoration.' },
+];
+
+function buildConversationLibrary(u, p, coupleType, priorities) {
+  const typeName = coupleType?.name || 'your couple type';
+
+  // Each situation gets 3 curated prompts — content placeholder, final
+  // selection comes from master library tagged by couple type.
+  const situationBlock = (s) => [
+    new Paragraph({ spacing: { before: 280, after: 60 }, children: [run(s.title, { size: 24, bold: true, color: INK })] }),
+    new Paragraph({ spacing: { after: 160 }, children: [run(s.blurb, { size: 18, italics: true, color: MUTED })] }),
+    ...[1, 2, 3].map(n => new Paragraph({
+      spacing: { after: 120 },
+      indent: { left: 280 },
+      children: [
+        run('• ', { size: 22, color: BLUE, bold: true }),
+        run(PH(`prompt ${n} curated for ${typeName}, matched to "${s.title.toLowerCase()}"`), { size: 22, italics: true, color: INK }),
+      ],
+    })),
+    hr(STONE, 2),
+  ];
+
+  // The structured first conversation (old Part 4 content) gets folded
+  // into this part as a separate block at the end — it does a similar job
+  // but is more scaffolded.
+  const structuredIntro = [
+    pb(),
+    new Paragraph({ heading: HeadingLevel.HEADING_2, children: [run('A structured first conversation', { color: PURPLE })] }),
+    para(`If you want a guided path through your three priorities together, this is it. Roughly 60 minutes.`,
+      { size: 22, color: MUTED, after: 200 }),
+
+    accentBox('Ground rules before you start',
+      `Both of you take turns. No interrupting. When one of you is talking, the other's job is to understand — not to respond, prepare a counter, or fix anything. You can use the reference card at the back as a prompt.`,
+      'F7F3FC', PURPLE),
+    sp(),
+
+    ...priorities.map((dim, i) => {
+      const meta = DIM_META[dim];
+      return new Paragraph({ spacing: { before: 240, after: 80 },
+        children: [run(`Phase ${i + 1} — ${meta.label} (20 min)`, { size: 22, bold: true, color: ORANGE })] });
+    }).flatMap(p => [p,
+      para(PH(`3–4 guiding questions for this phase, tailored to the specific dimension.`), { size: 20, color: MUTED, after: 160 }),
+      hr(STONE, 2),
+    ]),
+  ];
+
+  return [
+    pb(),
+    new Paragraph({ heading: HeadingLevel.HEADING_1, children: [run('Part 6 \u2014 Conversation Library')] }),
+    para(`Eight situations every couple faces, with three prompts each — chosen to match ${typeName}. Flip to the situation you're in. Pick one. The prompt does the work.`,
+      { size: 22, color: MUTED, after: 200 }),
+    accentBox('How this works',
+      `The eight situations are the same for every couple. The prompts inside each one are picked based on what couples like yours tend to need in that moment.`,
+      'F0F9FF', BLUE),
+
+    ...SITUATIONS.flatMap(situationBlock),
+
+    ...structuredIntro,
+  ];
+}
+
+// ─── Over Time (Part 7) ──────────────────────────────────────────────────────
+// Final longitudinal content: a 90-day check-in and a Year 1 letter.
+// 30-day check-in lives embedded at end of Part 5 (Priorities).
+
+function buildOverTime(u, p, priorities) {
+  return [
+    pb(),
+    new Paragraph({ heading: HeadingLevel.HEADING_1, children: [run('Part 7 \u2014 Over Time')] }),
+    para(`The workbook is built to be opened more than once. Here are two returns.`,
+      { size: 22, color: MUTED, after: 200 }),
+
+    // 90-day check-in page
+    pb(),
+    new Paragraph({ heading: HeadingLevel.HEADING_2, children: [run('90 days in — what shifted?', { color: ORANGE })] }),
+    para(`Revisit this about three months after your first read-through.`, { size: 20, color: MUTED, after: 200 }),
+
+    eyebrow('For each of you separately, then together', ORANGE),
+
+    checkAction('Write down one thing that\'s easier than it was three months ago.', { after: 200 }),
+    new Table({ width: { size: W, type: WidthType.DXA }, columnWidths: [W],
+      rows: [new TableRow({ children: [tc('\n\n\n', W, { fill: 'FAFAF8' })] })] }),
+    sp(),
+
+    checkAction('Write down one thing that\'s still stuck.', { after: 200 }),
+    new Table({ width: { size: W, type: WidthType.DXA }, columnWidths: [W],
+      rows: [new TableRow({ children: [tc('\n\n\n', W, { fill: 'FAFAF8' })] })] }),
+    sp(),
+
+    checkAction('Re-rank your three priorities. Is the order still right?', { after: 200 }),
+    new Table({ width: { size: W, type: WidthType.DXA }, columnWidths: [W],
+      rows: [new TableRow({ children: [tc('\n\n\n', W, { fill: 'FAFAF8' })] })] }),
+    sp(),
+
+    checkAction('Retake the exercise at attune-relationships.com. Compare against the snapshot in Part 1.', { italics: true, color: BLUE, after: 0 }),
+
+    // Year 1 letter
+    pb(),
+    new Paragraph({ heading: HeadingLevel.HEADING_2, children: [run('A letter to a year ago', { color: PURPLE })] }),
+    para(`A year after your first read, write to the version of yourselves who opened this workbook.`,
+      { size: 20, color: MUTED, after: 240 }),
+
+    accentBox('Prompt',
+      `Dear ${u} and ${p} from a year ago — what do you need us to know?`,
+      'F7F3FC', PURPLE),
+    sp(),
+
+    new Table({ width: { size: W, type: WidthType.DXA }, columnWidths: [W],
+      rows: [new TableRow({ children: [tc('\n\n\n\n\n\n\n\n\n', W, { fill: 'FAFAF8' })] })] }),
+  ];
+}
+
 // ─── Gap ranking — find top 3 priorities ─────────────────────────────────────
 function rankPriorities(scores, partnerScores) {
   // High-influence dims get a weight bonus even at moderate gap
@@ -1020,20 +1545,59 @@ export default async function handler(req, res) {
     ...buildCover(u, p, coupleType),
     ...buildTOC(offsets, priorities),
     ...buildIntro(u, p),
+
     ...buildPartCover(1, 'Your Snapshot',
       `Where ${u} and ${p} are aligned — and where the gaps are.`, ORANGE),
+    ...epigraph(
+      PH('opening quote for Part 1 — short, attributable, tone-setting'),
+      PH('Attribution')),
     ...buildSnapshot(u, p, s1, s2, coupleType, expGaps),
+
     ...buildPartCover(2, 'Exercise by Exercise Insights',
       `Only the dimensions where the two of you showed a meaningful gap.`, BLUE),
+    ...epigraph(
+      PH('opening quote for Part 2'),
+      PH('Attribution')),
     ...buildInsights(u, p, s1, s2),
     ...buildExpDomains(u, p, expGaps),
-    ...buildPartCover(3, 'Your 3 Priorities',
+
+    ...buildPartCover(3, 'Working Knowledge',
+      `Six moments with ${p}. Six with ${u}. Specific language for each.`, PURPLE),
+    ...epigraph(
+      PH('opening quote for Part 3 — something about knowing another person'),
+      PH('Attribution')),
+    ...buildWorkingKnowledge(u, p, coupleType),
+
+    ...buildPartCover(4, 'Patterns That Shape Your Relationship',
+      `Three dynamics specific to ${u} and ${p}. Named, explained, actionable.`, BLUE),
+    ...epigraph(
+      PH('opening quote for Part 4 — something about noticing patterns'),
+      PH('Attribution')),
+    ...buildPatterns(u, p, s1, s2),
+
+    ...buildPartCover(5, 'Your 3 Priorities',
       `Where the leverage is highest. Start here.`, ORANGE),
+    ...epigraph(
+      PH('opening quote for Part 5 — something about focus, leverage, or choosing'),
+      PH('Attribution')),
     ...buildPriorities(u, p, s1, s2, priorities),
-    ...buildPartCover(4, 'Conversation Guide',
-      `A structured first conversation you can use together.`, PURPLE),
-    ...buildConversationGuide(u, p, priorities),
-    ...buildPartCover(5, 'Reference Card',
+    ...buildPriorityCheckIn(u, p, priorities),
+
+    ...buildPartCover(6, 'Conversation Library',
+      `Words for the situations you'll actually find yourselves in.`, PURPLE),
+    ...epigraph(
+      PH('opening quote for Part 6 — something about language or talking'),
+      PH('Attribution')),
+    ...buildConversationLibrary(u, p, coupleType, priorities),
+
+    ...buildPartCover(7, 'Over Time',
+      `This workbook is built to be opened more than once.`, GREEN),
+    ...epigraph(
+      PH('opening quote for Part 7 — something about time, return, or practice'),
+      PH('Attribution')),
+    ...buildOverTime(u, p, priorities),
+
+    ...buildPartCover(8, 'Reference Card',
       `A half-page summary. Keep it somewhere you'll see it.`, GREEN),
     ...buildReferenceCard(u, p, coupleType, priorities),
   ];
