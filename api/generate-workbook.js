@@ -11,6 +11,7 @@ import {
   Document, Packer, Paragraph, TextRun, Table, TableRow, TableCell,
   AlignmentType, HeadingLevel, BorderStyle, WidthType, ShadingType,
   PageBreak, LevelFormat,
+  Header, Footer, PageNumber, TableOfContents, StyleLevel,
 } from 'docx';
 import { DIM_META, DIM_CONTENT, EXP_DOMAINS, DIMS } from './_workbook-content.js';
 
@@ -137,6 +138,29 @@ function fill(template, u, p) {
     .replace(/\{P\}/g, p);
 }
 
+// Map a raw exercise answer value to a readable label. Handles three cases:
+//   1. Full-text answer (what the current app stores, e.g. "Split equally")
+//      → returned as-is
+//   2. Stray letter codes from legacy data ("a", "b", "c")
+//      → mapped to partner-relative labels using the current couple's names
+//   3. null / empty → "—"
+function answerLabel(rawValue, userName, partnerName) {
+  if (rawValue === null || rawValue === undefined) return '—';
+  const s = String(rawValue).trim();
+  if (!s) return '—';
+  // Legacy single-letter codes. In older datasets these meant "self / partner
+  // / both-equally" for responsibility-style questions.
+  if (s.length === 1) {
+    const map = {
+      a: userName,
+      b: partnerName,
+      c: 'Both equally',
+    };
+    return map[s.toLowerCase()] || s;
+  }
+  return s;
+}
+
 function gapLabel(gap) {
   if (gap < 0.8) return 'Closely matched';
   if (gap < 1.5) return 'Minor difference';
@@ -158,6 +182,78 @@ function scoreBar(score, color) {
 }
 
 // ─── SECTION BUILDERS ─────────────────────────────────────────────────────────
+
+// Table of contents. The auto-generated TableOfContents element populates
+// when Word/Pages opens the file and the reader updates the field. For
+// readers who don't, we render a styled static fallback alongside.
+function buildTOC() {
+  const tocEntry = (part, title, description) => new Paragraph({
+    spacing: { after: 280 },
+    children: [
+      run(part, { size: 15, bold: true, color: ORANGE, allCaps: true, characterSpacing: 140 }),
+      run('   ', { size: 15 }),
+      run(title, { size: 24, bold: true, color: INK }),
+      new TextRun({ text: '', break: 1 }),
+      run(description, { size: 18, italics: true, color: MUTED }),
+    ],
+  });
+
+  return [
+    pb(),
+    ...sps(2),
+    new Paragraph({ alignment: AlignmentType.CENTER, spacing: { after: 60 },
+      children: [run('CONTENTS', { size: 22, bold: true, color: ORANGE, allCaps: true, characterSpacing: 320 })] }),
+    new Paragraph({
+      alignment: AlignmentType.CENTER,
+      border: { bottom: { style: BorderStyle.SINGLE, size: 8, color: ORANGE, space: 1 } },
+      spacing: { before: 0, after: 400 },
+      children: [run('', { size: 1 })],
+    }),
+
+    // Auto-generated TOC (populates in Word / Pages on open)
+    new TableOfContents('Contents', {
+      hyperlink: true,
+      headingStyleRange: '1-2',
+      stylesWithLevels: [
+        new StyleLevel('Heading1', 1),
+        new StyleLevel('Heading2', 2),
+      ],
+    }),
+
+    // Styled static overview — always visible, doubles as a "how to use this"
+    ...sps(2),
+    tocEntry('Introduction', 'How to read this workbook', 'Start here. Five minutes.'),
+    tocEntry('Part 1', 'Your Snapshot', 'Where you\'re aligned, where the gaps are.'),
+    tocEntry('Part 2', 'Exercise by Exercise Insights', 'The dimensions that matter most for you.'),
+    tocEntry('Part 3', 'Your 3 Priorities', 'Where the leverage is highest.'),
+    tocEntry('Part 4', 'Conversation Guide', 'A structured first conversation.'),
+    tocEntry('Part 5', 'Reference Card', 'A half-page summary for your fridge.'),
+  ];
+}
+
+// Full-page section cover, used as a visual divider between Parts. Think of
+// these as chapter title pages in a printed book — they give the reader a
+// pause and signal a shift in material.
+function buildPartCover(num, title, subtitle, accentColor) {
+  const color = accentColor || ORANGE;
+  return [
+    pb(),
+    ...sps(6),
+    new Paragraph({ alignment: AlignmentType.CENTER, spacing: { after: 40 },
+      children: [run(`PART ${num}`, { size: 22, bold: true, color: color, allCaps: true, characterSpacing: 400 })] }),
+    ...sps(1),
+    // Thin top rule
+    new Paragraph({
+      border: { bottom: { style: BorderStyle.SINGLE, size: 8, color: color, space: 1 } },
+      alignment: AlignmentType.CENTER, spacing: { before: 0, after: 160 },
+      children: [run('', { size: 1 })]
+    }),
+    new Paragraph({ alignment: AlignmentType.CENTER, spacing: { after: 240 },
+      children: [run(title, { size: 56, bold: true, color: INK })] }),
+    new Paragraph({ alignment: AlignmentType.CENTER, spacing: { after: 0 },
+      children: [run(subtitle, { size: 26, italics: true, color: MUTED })] }),
+  ];
+}
 
 function buildCover(u, p, coupleType) {
   return [
@@ -195,7 +291,7 @@ function buildIntro(u, p) {
     para('The workbook is organized in five parts:'),
     sp(),
     numItem('Snapshot — your scores and gap levels across all 10 communication dimensions'),
-    numItem('Exercise by Exercise Insights — each dimension explored in depth, with your specific scores highlighted and only the relevant gap guidance shown'),
+    numItem('Exercise by Exercise Insights — only the dimensions where the two of you showed a meaningful gap, explored with your specific scores'),
     numItem(`Your 3 Priorities — the three dimensions where ${u} and ${p} have the most to gain, identified from your results`),
     numItem('Conversation Guide — a structured first conversation you can use together, with or without a therapist'),
     numItem('Reference Card — a half-page summary designed to go on your fridge'),
@@ -238,8 +334,8 @@ function buildSnapshot(u, p, scores, partnerScores, coupleType, expGaps) {
 
   const expRows = expGaps.map(eg => new TableRow({ children: [
     tc(eg.label, 2800),
-    tc(eg.yourAnswer || '—', 2400),
-    tc(eg.partnerAnswer || '—', 2400),
+    tc(answerLabel(eg.yourAnswer, u, p), 2400),
+    tc(answerLabel(eg.partnerAnswer, u, p), 2400),
     tc(eg.aligned ? '\u2713 Aligned' : '\u25CF Gap', 1760, { color: eg.aligned ? GREEN : ORANGE, bold: true }),
   ]}));
 
@@ -357,14 +453,42 @@ const DOMAIN_ORDER = [
 ];
 
 function buildInsights(u, p, scores, partnerScores) {
+  // Compute per-dimension gaps. Part 2 only covers dimensions where the gap
+  // is meaningful — aligned dimensions don't need guidance, and including
+  // them would dilute the focus.
+  const GAP_THRESHOLD = 1.0;  // below this, the partners are already close
+  const gapsByDim = {};
+  DIMS.forEach(d => {
+    gapsByDim[d] = Math.abs((scores[d] || 3) - (partnerScores[d] || 3));
+  });
+
+  // For each domain group, keep only the dimensions that have a real gap.
+  // If a domain has no gap dimensions at all, skip the whole group.
+  const domainsToShow = DOMAIN_ORDER
+    .map(domain => ({
+      ...domain,
+      dims: domain.dims.filter(d => gapsByDim[d] >= GAP_THRESHOLD),
+    }))
+    .filter(domain => domain.dims.length > 0);
+
   const result = [
     pb(),
     new Paragraph({ heading: HeadingLevel.HEADING_1, children: [run('Part 2 \u2014 Exercise by Exercise Insights')] }),
-    para(`Each dimension, explored in depth. Only the guidance relevant to ${u} and ${p}'s specific scores is shown.`, { size: 24, color: MUTED }),
+    para(`Each communication dimension where ${u} and ${p} showed a meaningful gap is explored in depth here. Dimensions where you're already closely aligned aren't covered — no guidance is needed where you're in sync.`,
+      { size: 24, color: MUTED }),
     sp(),
   ];
 
-  DOMAIN_ORDER.forEach(domain => {
+  if (domainsToShow.length === 0) {
+    result.push(sp());
+    result.push(accentBox(
+      'A rare finding',
+      `${u} and ${p}'s answers are aligned across every communication dimension. Skip ahead to Part 3 — the priorities there are drawn from the smaller gaps and from dimensions with the highest downstream influence.`,
+      'F0FDF9', GREEN));
+    return result;
+  }
+
+  domainsToShow.forEach(domain => {
     result.push(pb());
     result.push(hr(domain.color, 12));
     result.push(new Paragraph({ heading: HeadingLevel.HEADING_2, children: [run(domain.title, { color: domain.color })] }));
@@ -398,8 +522,8 @@ function buildExpDomains(u, p, expGaps) {
       width: { size: W, type: WidthType.DXA }, columnWidths: [2200, 2800, 2800, 1560],
       rows: [new TableRow({ children: [
         hc(domain.label, 2200, GREEN),
-        hc(`${u}: ${eg.yourAnswer || 'Not answered'}`, 2800, '555555'),
-        hc(`${p}: ${eg.partnerAnswer || 'Not answered'}`, 2800, '555555'),
+        hc(`${u}: ${answerLabel(eg.yourAnswer, u, p)}`, 2800, '555555'),
+        hc(`${p}: ${answerLabel(eg.partnerAnswer, u, p)}`, 2800, '555555'),
         hc(eg.aligned ? '\u2713 Aligned' : 'Gap', 1560, eg.aligned ? GREEN : ORANGE),
       ]})]
     }));
@@ -676,19 +800,53 @@ export default async function handler(req, res) {
   // Build document
   const children = [
     ...buildCover(u, p, coupleType),
+    ...buildTOC(),
     ...buildIntro(u, p),
+    ...buildPartCover(1, 'Your Snapshot',
+      `Where ${u} and ${p} are aligned — and where the gaps are.`, ORANGE),
     ...buildSnapshot(u, p, s1, s2, coupleType, expGaps),
+    ...buildPartCover(2, 'Exercise by Exercise Insights',
+      `Only the dimensions where the two of you showed a meaningful gap.`, BLUE),
     ...buildInsights(u, p, s1, s2),
     ...buildExpDomains(u, p, expGaps),
+    ...buildPartCover(3, 'Your 3 Priorities',
+      `Where the leverage is highest. Start here.`, ORANGE),
     ...buildPriorities(u, p, s1, s2, priorities),
+    ...buildPartCover(4, 'Conversation Guide',
+      `A structured first conversation you can use together.`, PURPLE),
     ...buildConversationGuide(u, p, priorities),
+    ...buildPartCover(5, 'Reference Card',
+      `A half-page summary. Keep it somewhere you'll see it.`, GREEN),
     ...buildReferenceCard(u, p, coupleType, priorities),
   ];
+
+  // Footer with page numbers and a light brand line. Page numbers are
+  // generated as a Word field — readers see them live in Word/Pages.
+  const docFooter = new Footer({
+    children: [
+      new Paragraph({
+        alignment: AlignmentType.CENTER,
+        border: { top: { style: BorderStyle.SINGLE, size: 4, color: STONE, space: 8 } },
+        spacing: { before: 120, after: 0 },
+        children: [
+          run(`${u} & ${p}   ·   Attune Relationship Workbook   ·   `, { size: 16, color: MUTED }),
+          new TextRun({ children: [PageNumber.CURRENT], size: 16, color: INK.substring(0), font: 'Arial', bold: true }),
+          run(' / ', { size: 16, color: MUTED }),
+          new TextRun({ children: [PageNumber.TOTAL_PAGES], size: 16, color: MUTED, font: 'Arial' }),
+        ],
+      }),
+    ],
+  });
 
   const doc = new Document({
     numbering: NUMBERING,
     styles: STYLES,
-    sections: [{ properties: { page: PAGE }, children }],
+    features: { updateFields: true },
+    sections: [{
+      properties: { page: PAGE },
+      footers: { default: docFooter },
+      children,
+    }],
   });
 
   const buffer = await Packer.toBuffer(doc);
