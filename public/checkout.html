@@ -611,7 +611,10 @@ function renderItemsStep() {
       ` : ''}
 
       ${isPhysical ? `
-        <div class="form-divider" style="margin-top:.9rem">Shipping address</div>
+        <div class="form-divider" style="margin-top:.9rem">
+          Shipping address
+          <span style="font-weight:400;font-family:'DM Sans',sans-serif;font-size:.68rem;color:#8C7A68;letter-spacing:0;text-transform:none;margin-left:.5rem">or use Apple Pay / Google Pay below</span>
+        </div>
         <div class="form-group">
           <label class="form-label">Full name</label>
           <input class="form-input item-input" type="text" data-idx="${idx}" data-field="shipping.name" value="${(it.shipping.name||'').replace(/"/g,'&quot;')}" placeholder="Recipient's name" autocomplete="name" oninput="onItemInput(this)">
@@ -848,12 +851,28 @@ function validateForm() {
         return sum + (base + add);
       }, 0);
 
+      // Does the cart have any physical items? If so, Apple Pay needs
+      // to request a shipping address.
+      const hasPhysical = _items.some(it => it.format === 'physical');
+
       paymentRequest = stripe.paymentRequest({
         country: 'US',
         currency: 'usd',
         total: { label: 'Attune Relationships', amount: total * 100 },
         requestPayerName:  true,
         requestPayerEmail: true,
+        // If any item in the cart ships physically, collect the shipping
+        // address via Apple Pay / Google Pay's native sheet. One address
+        // covers all physical items in the cart (one buyer, one destination).
+        requestShipping: hasPhysical,
+        shippingOptions: hasPhysical ? [
+          {
+            id: 'standard',
+            label: 'Standard shipping',
+            detail: 'Ships in 5–7 business days',
+            amount: 0,  // shipping is already rolled into physical price
+          },
+        ] : undefined,
       });
 
       const prButton = elements.create('paymentRequestButton', {
@@ -876,27 +895,63 @@ function validateForm() {
         wrap.dataset.supported = '1';
 
         paymentRequest.on('paymentmethod', async (ev) => {
-          // User authorized the Apple Pay / Google Pay payment. Our flow:
-          // 1. Validate form has names/shipping (they might not have scrolled
-          //    to fill those yet). If missing, reject the sheet.
-          // 2. Create a PaymentIntent via our API using the current cart.
-          // 3. Confirm with the wallet's paymentMethodId.
-          // 4. On success, run the same post-payment logic as the card flow.
-          if (!_items.every(it => it.partner1Name && it.partner2Name &&
-              (it.format !== 'physical' || (it.shipping.name && it.shipping.address && it.shipping.city && it.shipping.state)))) {
-            ev.complete('fail');
-            alert('Please fill in partner names and shipping details for each couple before paying.');
-            return;
+          // User authorized the Apple Pay / Google Pay payment.
+          //
+          // Required from our side: partner names per couple (Apple Pay can't
+          // provide these). Everything else — email, shipping address, payer
+          // name — comes from the wallet event if the user didn't type it.
+
+          // 1. Copy shipping from Apple Pay's sheet into every physical item
+          //    in the cart. If the user already typed shipping, this overrides
+          //    with what they confirmed in Apple Pay (which is what they
+          //    probably want, since they explicitly picked from the sheet).
+          if (ev.shippingAddress) {
+            const a = ev.shippingAddress;
+            // Stripe's shipping address schema:
+            // { recipient, addressLine[], city, region, postalCode, country, phone }
+            const shipping = {
+              name:    a.recipient || ev.payerName || '',
+              address: (a.addressLine && a.addressLine.join(', ')) || '',
+              city:    a.city || '',
+              state:   [a.region, a.postalCode].filter(Boolean).join(' '),
+            };
+            for (const it of _items) {
+              if (it.format === 'physical') it.shipping = { ...shipping };
+            }
+            // Also update the visible form fields so the user sees the
+            // captured address (in case they return to the page)
+            renderItemsStep();
           }
-          // Use wallet-provided email if checkout email field is empty
+
+          // 2. Copy email from Apple Pay if our email field is empty
           const emailField = document.getElementById('email');
           if (!emailField.value.trim() && ev.payerEmail) {
             emailField.value = ev.payerEmail;
           }
           const email = emailField.value.trim();
+
+          // 3. Validate we have everything we need. Partner names are the
+          //    one thing Apple Pay can't give us — if they're missing, the
+          //    user scrolled past the forms without filling them.
+          const missing = _items.find(it => !it.partner1Name?.trim() || !it.partner2Name?.trim());
+          if (missing) {
+            ev.complete('fail');
+            alert('Please fill in partner names for each couple before paying.');
+            return;
+          }
           if (!email) {
             ev.complete('fail');
             alert('Please enter an email address before paying.');
+            return;
+          }
+          // Physical items without shipping (only possible if Apple Pay
+          // skipped collecting it — shouldn't happen since requestShipping
+          // is set, but guard anyway)
+          const missingShip = _items.find(it => it.format === 'physical' &&
+            (!it.shipping?.name || !it.shipping?.address || !it.shipping?.city || !it.shipping?.state));
+          if (missingShip) {
+            ev.complete('fail');
+            alert('Shipping address missing. Please enter it in the form, or tap Apple Pay again and include an address.');
             return;
           }
 

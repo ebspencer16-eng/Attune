@@ -104,7 +104,9 @@ export default async function handler(req) {
           // Multi-item: one row per item
           for (let i = 0; i < items.length; i++) {
             const it = items[i];
+            // Shipping is packed as "name|address|city|state" in metadata
             const shipParts = (it.s || '').split('|');
+            const [shipName, shipAddr, shipCity, shipState] = shipParts;
             const suffix = items.length > 1 ? `-${i+1}` : '';
             const orderNum = `${baseOrderNum}${suffix}`;
             const qrToken = newQrToken();
@@ -134,6 +136,10 @@ export default async function handler(req) {
                 stripe_payment_intent_id: items.length > 1 ? `${intent.id}_${i}` : intent.id,
                 workbook_status:         'pending',
                 qr_token:                qrToken,
+                shipping_name:           shipName || null,
+                shipping_address:        shipAddr || null,
+                shipping_city:           shipCity || null,
+                shipping_state:          shipState || null,
               }),
             });
             console.log(`[webhook] order ${i+1}/${items.length} created: ${orderNum} (qr ${qrToken})`);

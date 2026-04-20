@@ -235,6 +235,10 @@ export default async function handler(req) {
             stripe_payment_intent_id: `promo_${normalizedCode}_${Date.now()}_${i}`,
             promo_code:        normalizedCode,
             qr_token:          newQrToken(),
+            shipping_name:     item.shipping?.name || null,
+            shipping_address:  item.shipping?.address || null,
+            shipping_city:     item.shipping?.city || null,
+            shipping_state:    item.shipping?.state || null,
           });
         }
       } catch (e) {
