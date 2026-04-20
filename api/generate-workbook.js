@@ -11,7 +11,8 @@ import {
   Document, Packer, Paragraph, TextRun, Table, TableRow, TableCell,
   AlignmentType, HeadingLevel, BorderStyle, WidthType, ShadingType,
   PageBreak, LevelFormat,
-  Header, Footer, PageNumber, TableOfContents, StyleLevel,
+  Header, Footer, PageNumber, TableOfContents, StyleLevel, HeightRule,
+  TabStopType, TabStopPosition, LeaderType,
 } from 'docx';
 import { DIM_META, DIM_CONTENT, EXP_DOMAINS, DIMS } from './_workbook-content.js';
 
@@ -68,7 +69,7 @@ const para = (text, opts = {}) => new Paragraph({
 
 const eyebrow = (text, color) => new Paragraph({
   spacing: { after: 100 },
-  children: [run(text, { size: 16, bold: true, color: color || ORANGE, allCaps: true, characterSpacing: 160 })]
+  children: [run(text, { size: 16, bold: true, color: color || ORANGE, allCaps: true, characterSpacing: 100 })]
 });
 
 const bullet = (text, color) => new Paragraph({
@@ -90,6 +91,77 @@ const hr = (color, thick) => new Paragraph({
   border: { bottom: { style: BorderStyle.SINGLE, size: thick || 4, color: color || STONE, space: 6 } },
   spacing: { before: 100, after: 200 }, children: [new TextRun('')]
 });
+
+// A gradient bar built from adjacent colored cells. docx doesn't support
+// true CSS gradients, but stepping through many small cells produces a
+// visually convincing gradient strip that we use as section dividers and
+// as accent elements on the cover page.
+function hexToRgb(h) {
+  return [parseInt(h.slice(0,2), 16), parseInt(h.slice(2,4), 16), parseInt(h.slice(4,6), 16)];
+}
+function rgbToHex([r,g,b]) {
+  return [r,g,b].map(v => Math.max(0, Math.min(255, Math.round(v))).toString(16).padStart(2,'0').toUpperCase()).join('');
+}
+function gradientColors(from, to, segments) {
+  // Optional mid-point for richer gradients. Pass `from` and `to` as arrays
+  // of hex strings to get a multi-stop gradient; a single stop on each end
+  // works as a 2-color gradient.
+  const stops = [].concat(from).concat(to).map(hexToRgb);
+  const out = [];
+  for (let i = 0; i < segments; i++) {
+    const t = segments === 1 ? 0 : i / (segments - 1);
+    const pos = t * (stops.length - 1);
+    const idx = Math.min(stops.length - 2, Math.floor(pos));
+    const local = pos - idx;
+    const [r1,g1,b1] = stops[idx], [r2,g2,b2] = stops[idx + 1];
+    out.push(rgbToHex([r1 + (r2-r1)*local, g1 + (g2-g1)*local, b1 + (b2-b1)*local]));
+  }
+  return out;
+}
+// gradientBar: renders a thin horizontal gradient strip.
+// fromHex / toHex can each be a single hex string or an array of stops.
+function gradientBar(fromHex, toHex, opts = {}) {
+  const segments = opts.segments || 30;
+  const height   = opts.height   || 120;   // twips; ~6pt at default
+  const width    = opts.width    || W;
+  const cellWidth = Math.floor(width / segments);
+  const colors = gradientColors(fromHex, toHex, segments);
+  // Zero-width borders on every cell edge so adjacent cells render flush.
+  // Also zero cell margins so the fill covers the entire cell area.
+  const flushBorders = {
+    top:    { style: BorderStyle.NIL },
+    bottom: { style: BorderStyle.NIL },
+    left:   { style: BorderStyle.NIL },
+    right:  { style: BorderStyle.NIL },
+  };
+  return new Table({
+    width: { size: width, type: WidthType.DXA },
+    alignment: AlignmentType.CENTER,
+    columnWidths: Array(segments).fill(cellWidth),
+    borders: {
+      ...flushBorders,
+      insideHorizontal: { style: BorderStyle.NIL },
+      insideVertical:   { style: BorderStyle.NIL },
+    },
+    rows: [new TableRow({
+      height: { value: height, rule: HeightRule.EXACT },
+      children: colors.map(c => new TableCell({
+        borders: flushBorders,
+        width: { size: cellWidth, type: WidthType.DXA },
+        shading: { fill: c, type: ShadingType.CLEAR },
+        margins: { top: 0, bottom: 0, left: 0, right: 0 },
+        children: [new Paragraph({ spacing: { before: 0, after: 0, line: 120, lineRule: 'exact' }, children: [run('', { size: 2 })] })],
+      })),
+    })],
+  });
+}
+// A paragraph wrapper that pads the gradient bar so it doesn't butt up
+// against other content.
+const gradRule = (fromHex, toHex, opts = {}) => [
+  new Paragraph({ spacing: { before: opts.before ?? 80, after: 0 }, children: [run('', { size: 1 })] }),
+  gradientBar(fromHex, toHex, opts),
+  new Paragraph({ spacing: { before: 0, after: opts.after ?? 160 }, children: [run('', { size: 1 })] }),
+];
 
 // ─── Borders ──────────────────────────────────────────────────────────────────
 const brd = { style: BorderStyle.SINGLE, size: 1, color: STONE };
@@ -123,7 +195,7 @@ const accentBox = (label, text, fill, accent) => {
       new TableCell({ borders: noBrds, width: { size: W - 160, type: WidthType.DXA },
         shading: { fill: f, type: ShadingType.CLEAR }, margins: { top: 200, bottom: 200, left: 280, right: 280 },
         children: [
-          ...(label ? [new Paragraph({ spacing: { after: 80 }, children: [run(label, { size: 16, bold: true, color: a, allCaps: true, characterSpacing: 160 })] })] : []),
+          ...(label ? [new Paragraph({ spacing: { after: 80 }, children: [run(label, { size: 16, bold: true, color: a, allCaps: true, characterSpacing: 100 })] })] : []),
           new Paragraph({ spacing: { after: 0 }, children: [run(text, { size: 22 })] }),
         ] }),
     ]})]
@@ -183,51 +255,125 @@ function scoreBar(score, color) {
 
 // ─── SECTION BUILDERS ─────────────────────────────────────────────────────────
 
-// Table of contents. The auto-generated TableOfContents element populates
-// when Word/Pages opens the file and the reader updates the field. For
-// readers who don't, we render a styled static fallback alongside.
-function buildTOC() {
-  const tocEntry = (part, title, description) => new Paragraph({
-    spacing: { after: 280 },
-    children: [
-      run(part, { size: 15, bold: true, color: ORANGE, allCaps: true, characterSpacing: 140 }),
-      run('   ', { size: 15 }),
-      run(title, { size: 24, bold: true, color: INK }),
-      new TextRun({ text: '', break: 1 }),
-      run(description, { size: 18, italics: true, color: MUTED }),
-    ],
+// Table of contents. Detailed, hierarchical (parts + subsections), with
+// page numbers. Page numbers are approximated at generation time based on
+// the content going into this specific copy: the snapshot & insights
+// sections vary in length by couple (filtered to only gap-dimensions for
+// Part 2). Numbers may be off by a page in dense sections; that's a
+// reasonable trade given the alternative is leaving them blank.
+function estimatePageOffsets({ s1, s2, expGaps, priorities, gapThreshold = 1.0 }) {
+  // Dimensions shown in Part 2 (gap ≥ threshold)
+  const gapDims = DIMS.filter(d => Math.abs((s1[d] || 3) - (s2[d] || 3)) >= gapThreshold);
+  const visibleDomains = DOMAIN_ORDER.map(dom => ({
+    title: dom.title,
+    visibleDims: dom.dims.filter(d => gapDims.includes(d)),
+  })).filter(dom => dom.visibleDims.length > 0);
+  const unalignedExp = expGaps.filter(g => !g.aligned).length;
+
+  // Page-number estimates, calibrated against the reference sample. Will
+  // drift by ±1 on denser couples (more expectation gaps / longer content).
+  // Cover p1, TOC p2, Intro p3.
+  const introPage = 3;
+  let p = 3;                                  // last known page after intro
+  p += 1;                                     // Part 1 cover (p4)
+  const snapshotPage = p + 1;  p += 2;        // Snapshot on p5, couple-type spills to p6
+  p += 1;                                     // Part 2 cover (p7)
+  const insightsPage = p + 1;  p += 1;        // Part 2 intro on p8
+  // Each domain group averages ~2 pages total (header + 1-2 dims).
+  // The domain header spills onto the first dim's page.
+  const domainPages = visibleDomains.map(dom => {
+    const page = p + 1;
+    // Per dim: count at least 1 page + 0.5 for each additional dim
+    p += Math.max(2, dom.visibleDims.length + 1);
+    return { title: dom.title, page };
   });
+  // The Life You're Building — expectations domain block
+  const expPage = p + 1;
+  p += Math.max(1, Math.ceil(unalignedExp / 2));
+  p += 1;                                     // Part 3 cover
+  const prioritiesPage = p + 1;
+  // Priorities pack 2 per page (smaller tables), not 1 per page
+  p += Math.max(1, Math.ceil(priorities.length / 1.5));
+  p += 1;                                     // Part 4 cover
+  const guidePage = p + 1;     p += 2;        // Conversation guide
+  p += 1;                                     // Part 5 cover
+  const referencePage = p + 1;
+
+  return { introPage, snapshotPage, insightsPage, domainPages, expPage,
+           prioritiesPage, guidePage, referencePage, visibleDomains };
+}
+
+function buildTOC(offsets, priorities) {
+  // A row in the TOC: left-aligned label + dotted leader + right-aligned page.
+  // The leader tab stop makes the dots fill the gap like a traditional TOC.
+  function tocRow({ label, labelBold = false, labelColor = INK, labelSize = 22,
+                    pageNum, indent = 0, italic = false, before = 0, after = 120 }) {
+    return new Paragraph({
+      spacing: { before, after },
+      indent: { left: indent },
+      tabStops: [{ type: TabStopType.RIGHT, position: W - 80, leader: LeaderType.DOT }],
+      children: [
+        run(label, { size: labelSize, bold: labelBold, italics: italic, color: labelColor }),
+        new TextRun({ children: ['\t'] }),
+        run(pageNum != null ? String(pageNum) : '', { size: labelSize, bold: labelBold, color: MUTED }),
+      ],
+    });
+  }
+
+  // Section header row (Part label) — no page number, visually separates groups
+  function tocSection({ partEyebrow, title, pageNum, color }) {
+    return [
+      new Paragraph({
+        spacing: { before: 240, after: 40 },
+        children: [run(partEyebrow, { size: 14, bold: true, color: color || ORANGE, allCaps: true, characterSpacing: 140 })],
+      }),
+      tocRow({ label: title, labelBold: true, labelSize: 24, pageNum, after: 80 }),
+    ];
+  }
+
+  const rows = [];
+
+  // Introduction (top-level)
+  rows.push(tocRow({ label: 'Introduction', labelBold: true, pageNum: offsets.introPage, after: 180 }));
+
+  // Part 1
+  rows.push(...tocSection({ partEyebrow: 'PART 1', title: 'Your Snapshot', pageNum: offsets.snapshotPage, color: ORANGE }));
+  rows.push(tocRow({ label: 'Communication dimensions', pageNum: offsets.snapshotPage, indent: 280, italic: false, labelSize: 20, labelColor: MUTED }));
+  rows.push(tocRow({ label: 'Expectations alignment',   pageNum: offsets.snapshotPage, indent: 280, labelSize: 20, labelColor: MUTED }));
+  rows.push(tocRow({ label: 'Your couple type',          pageNum: offsets.snapshotPage, indent: 280, labelSize: 20, labelColor: MUTED }));
+
+  // Part 2
+  rows.push(...tocSection({ partEyebrow: 'PART 2', title: 'Exercise by Exercise Insights', pageNum: offsets.insightsPage, color: BLUE }));
+  offsets.domainPages.forEach(dp => {
+    rows.push(tocRow({ label: dp.title, pageNum: dp.page, indent: 280, labelSize: 20, labelColor: MUTED }));
+  });
+  rows.push(tocRow({ label: "The Life You're Building",  pageNum: offsets.expPage, indent: 280, labelSize: 20, labelColor: MUTED }));
+
+  // Part 3
+  rows.push(...tocSection({ partEyebrow: 'PART 3', title: 'Your 3 Priorities', pageNum: offsets.prioritiesPage, color: ORANGE }));
+  priorities.forEach((dim, i) => {
+    const meta = DIM_META[dim];
+    rows.push(tocRow({
+      label: `Priority ${i + 1} — ${meta?.label || dim}`,
+      pageNum: offsets.prioritiesPage + Math.floor(i / 2),
+      indent: 280, labelSize: 20, labelColor: MUTED,
+    }));
+  });
+
+  // Part 4
+  rows.push(...tocSection({ partEyebrow: 'PART 4', title: 'Conversation Guide', pageNum: offsets.guidePage, color: PURPLE }));
+
+  // Part 5
+  rows.push(...tocSection({ partEyebrow: 'PART 5', title: 'Reference Card', pageNum: offsets.referencePage, color: GREEN }));
 
   return [
     pb(),
-    ...sps(2),
-    new Paragraph({ alignment: AlignmentType.CENTER, spacing: { after: 60 },
-      children: [run('CONTENTS', { size: 22, bold: true, color: ORANGE, allCaps: true, characterSpacing: 320 })] }),
-    new Paragraph({
-      alignment: AlignmentType.CENTER,
-      border: { bottom: { style: BorderStyle.SINGLE, size: 8, color: ORANGE, space: 1 } },
-      spacing: { before: 0, after: 400 },
-      children: [run('', { size: 1 })],
-    }),
-
-    // Auto-generated TOC (populates in Word / Pages on open)
-    new TableOfContents('Contents', {
-      hyperlink: true,
-      headingStyleRange: '1-2',
-      stylesWithLevels: [
-        new StyleLevel('Heading1', 1),
-        new StyleLevel('Heading2', 2),
-      ],
-    }),
-
-    // Styled static overview — always visible, doubles as a "how to use this"
-    ...sps(2),
-    tocEntry('Introduction', 'How to read this workbook', 'Start here. Five minutes.'),
-    tocEntry('Part 1', 'Your Snapshot', 'Where you\'re aligned, where the gaps are.'),
-    tocEntry('Part 2', 'Exercise by Exercise Insights', 'The dimensions that matter most for you.'),
-    tocEntry('Part 3', 'Your 3 Priorities', 'Where the leverage is highest.'),
-    tocEntry('Part 4', 'Conversation Guide', 'A structured first conversation.'),
-    tocEntry('Part 5', 'Reference Card', 'A half-page summary for your fridge.'),
+    ...sps(1),
+    new Paragraph({ alignment: AlignmentType.CENTER, spacing: { after: 120 },
+      children: [run('CONTENTS', { size: 22, bold: true, color: INK, allCaps: true, characterSpacing: 100 })] }),
+    // Gradient rule instead of a solid line
+    ...gradRule(ORANGE, [PURPLE, BLUE], { segments: 30, height: 50, before: 0, after: 320 }),
+    ...rows,
   ];
 }
 
@@ -236,18 +382,23 @@ function buildTOC() {
 // pause and signal a shift in material.
 function buildPartCover(num, title, subtitle, accentColor) {
   const color = accentColor || ORANGE;
+  // Each part gets its own gradient — a short run from the accent color to
+  // a darker shade of itself for a subtle signature. Falls back cleanly
+  // for any accent.
+  const accentDeep = {
+    [ORANGE]: ['D4502D', '9E3618'],
+    [BLUE]:   ['1844B8', '0E2880'],
+    [PURPLE]: ['7B3FC4', '4E1F85'],
+    [GREEN]:  ['0E8C63', '075B40'],
+  }[color] || ['555555', '333333'];
+
   return [
     pb(),
-    ...sps(6),
-    new Paragraph({ alignment: AlignmentType.CENTER, spacing: { after: 40 },
-      children: [run(`PART ${num}`, { size: 22, bold: true, color: color, allCaps: true, characterSpacing: 400 })] }),
-    ...sps(1),
-    // Thin top rule
-    new Paragraph({
-      border: { bottom: { style: BorderStyle.SINGLE, size: 8, color: color, space: 1 } },
-      alignment: AlignmentType.CENTER, spacing: { before: 0, after: 160 },
-      children: [run('', { size: 1 })]
-    }),
+    ...sps(5),
+    new Paragraph({ alignment: AlignmentType.CENTER, spacing: { after: 120 },
+      children: [run(`PART ${num}`, { size: 22, bold: true, color: color, allCaps: true, characterSpacing: 180 })] }),
+    // Gradient rule in the part's accent color
+    ...gradRule(color, accentDeep, { segments: 30, height: 60, before: 0, after: 200, width: W / 2 }),
     new Paragraph({ alignment: AlignmentType.CENTER, spacing: { after: 240 },
       children: [run(title, { size: 56, bold: true, color: INK })] }),
     new Paragraph({ alignment: AlignmentType.CENTER, spacing: { after: 0 },
@@ -256,26 +407,75 @@ function buildPartCover(num, title, subtitle, accentColor) {
 }
 
 function buildCover(u, p, coupleType) {
+  // A three-stop gradient that matches Attune's brand palette: warm orange
+  // → plum → deep blue. Two-color orange→blue interpolates through muddy
+  // gray, so we route it through plum for a cleaner transition.
+  const BRAND_GRAD_FROM = [ORANGE];
+  const BRAND_GRAD_TO   = [PURPLE, BLUE];
+
+  // Large monogram block: couple initials rendered at display size inside a
+  // thin-bordered box, anchored by gradient rules above and below.
+  const initialsU = (u || ' ')[0].toUpperCase();
+  const initialsP = (p || ' ')[0].toUpperCase();
+
   return [
-    ...sps(4),
-    new Paragraph({ alignment: AlignmentType.CENTER, spacing: { after: 80 },
-      children: [run('ATTUNE', { size: 24, bold: true, color: ORANGE, allCaps: true, characterSpacing: 400 })] }),
-    new Paragraph({ alignment: AlignmentType.CENTER, spacing: { after: 80 },
-      children: [run('Relationship Workbook', { size: 72, bold: true, color: INK })] }),
-    new Paragraph({ alignment: AlignmentType.CENTER, spacing: { after: 0 },
-      children: [run('Built from your answers.', { size: 28, italics: true, color: MUTED })] }),
+    // Top gradient bar
     ...sps(1),
-    hr(STONE, 10),
+    gradientBar(BRAND_GRAD_FROM, BRAND_GRAD_TO, { segments: 40, height: 180 }),
+    ...sps(3),
+
+    // Eyebrow
+    new Paragraph({ alignment: AlignmentType.CENTER, spacing: { after: 120 },
+      children: [run('ATTUNE', { size: 22, bold: true, color: ORANGE, allCaps: true, characterSpacing: 180 })] }),
+
+    // Large title
+    new Paragraph({ alignment: AlignmentType.CENTER, spacing: { after: 120 },
+      children: [run('Relationship Workbook', { size: 72, bold: true, color: INK })] }),
+
+    // Tagline
+    new Paragraph({ alignment: AlignmentType.CENTER, spacing: { after: 200 },
+      children: [run('Built from your answers.', { size: 26, italics: true, color: MUTED })] }),
+
+    // Monogram block — big couple initials with subtle gradient tint
     ...sps(2),
-    new Paragraph({ alignment: AlignmentType.CENTER, spacing: { after: 80 },
-      children: [run('Prepared for', { size: 22, color: MUTED })] }),
-    new Paragraph({ alignment: AlignmentType.CENTER, spacing: { after: 80 },
-      children: [run(`${u} & ${p}`, { size: 48, bold: true, color: INK })] }),
+    new Table({
+      width: { size: W, type: WidthType.DXA },
+      columnWidths: [W],
+      alignment: AlignmentType.CENTER,
+      rows: [new TableRow({
+        height: { value: 2400, rule: HeightRule.EXACT },
+        children: [new TableCell({
+          borders: noBrds,
+          width: { size: W, type: WidthType.DXA },
+          margins: { top: 600, bottom: 600, left: 0, right: 0 },
+          children: [
+            new Paragraph({ alignment: AlignmentType.CENTER, spacing: { after: 0 },
+              children: [
+                run(initialsU, { size: 140, bold: true, color: ORANGE }),
+                run('   &   ', { size: 80, bold: false, color: STONE }),
+                run(initialsP, { size: 140, bold: true, color: BLUE }),
+              ]}),
+          ],
+        })],
+      })],
+    }),
+
+    // Prepared for + full names
+    new Paragraph({ alignment: AlignmentType.CENTER, spacing: { after: 100 },
+      children: [run('PREPARED FOR', { size: 15, color: MUTED, allCaps: true, characterSpacing: 140, bold: true })] }),
+    new Paragraph({ alignment: AlignmentType.CENTER, spacing: { after: 120 },
+      children: [run(`${u} & ${p}`, { size: 40, bold: true, color: INK })] }),
+
+    // Couple type (if present)
     ...(coupleType ? [
       new Paragraph({ alignment: AlignmentType.CENTER, spacing: { after: 0 },
         children: [run(coupleType.name, { size: 24, italics: true, color: ORANGE })] }),
     ] : []),
-    ...sps(5),
+
+    // Bottom gradient bar + URL
+    ...sps(10),
+    gradientBar(BRAND_GRAD_TO.slice().reverse(), BRAND_GRAD_FROM, { segments: 40, height: 80 }),
+    ...sps(1),
     para('attune-relationships.com', { center: true, color: MUTED, size: 18 }),
   ];
 }
@@ -678,7 +878,7 @@ function buildReferenceCard(u, p, coupleType, priorities) {
           borders: { top: thickBrd(INK), bottom: { style: BorderStyle.NONE }, left: thickBrd(INK), right: thickBrd(INK) },
           shading: { fill: INK, type: ShadingType.CLEAR }, margins: { top: 260, bottom: 220, left: 400, right: 400 },
           children: [
-            new Paragraph({ alignment: AlignmentType.CENTER, spacing: { after: 60 }, children: [run('ATTUNE', { size: 17, bold: true, color: ORANGE, allCaps: true, characterSpacing: 400 })] }),
+            new Paragraph({ alignment: AlignmentType.CENTER, spacing: { after: 60 }, children: [run('ATTUNE', { size: 17, bold: true, color: ORANGE, allCaps: true, characterSpacing: 180 })] }),
             new Paragraph({ alignment: AlignmentType.CENTER, spacing: { after: 0 }, children: [run(`${u} & ${p}`, { size: 30, bold: true, color: 'FFFFFF' })] }),
           ]
         })] }),
@@ -697,7 +897,7 @@ function buildReferenceCard(u, p, coupleType, priorities) {
                 shading: { fill: 'F5F4F0', type: ShadingType.CLEAR },
                 margins: { top: 280, bottom: 280, left: 320, right: 240 },
                 children: [
-                  new Paragraph({ spacing: { after: 100 }, children: [run('YOUR COUPLE TYPE', { size: 13, bold: true, color: ORANGE, allCaps: true, characterSpacing: 140 })] }),
+                  new Paragraph({ spacing: { after: 100 }, children: [run('YOUR COUPLE TYPE', { size: 13, bold: true, color: ORANGE, allCaps: true, characterSpacing: 100 })] }),
                   new Paragraph({ spacing: { after: 80 }, children: [run(typeName, { size: 22, bold: true, color: INK })] }),
                   new Paragraph({ spacing: { after: 0 }, children: [run(typeNote, { size: 17, italics: true, color: MUTED })] }),
                 ],
@@ -708,7 +908,7 @@ function buildReferenceCard(u, p, coupleType, priorities) {
                 width: { size: 2960, type: WidthType.DXA },
                 margins: { top: 280, bottom: 280, left: 260, right: 240 },
                 children: [
-                  new Paragraph({ spacing: { after: 120 }, children: [run('OUR 3 PRIORITIES', { size: 13, bold: true, color: BLUE, allCaps: true, characterSpacing: 140 })] }),
+                  new Paragraph({ spacing: { after: 120 }, children: [run('OUR 3 PRIORITIES', { size: 13, bold: true, color: BLUE, allCaps: true, characterSpacing: 100 })] }),
                   ...priorityNames.flatMap((name, i) => [
                     new Paragraph({ spacing: { after: 40 }, children: [run(`${i+1}.  ${name}`, { size: 18, bold: true, color: INK })] }),
                     new Paragraph({ spacing: { after: 160 }, children: [run('    This week: ______________', { size: 15, italics: true, color: MUTED })] }),
@@ -722,7 +922,7 @@ function buildReferenceCard(u, p, coupleType, priorities) {
                 shading: { fill: 'F5F4F0', type: ShadingType.CLEAR },
                 margins: { top: 280, bottom: 280, left: 260, right: 320 },
                 children: [
-                  new Paragraph({ spacing: { after: 120 }, children: [run('PHRASES TO TRY', { size: 13, bold: true, color: GREEN, allCaps: true, characterSpacing: 140 })] }),
+                  new Paragraph({ spacing: { after: 120 }, children: [run('PHRASES TO TRY', { size: 13, bold: true, color: GREEN, allCaps: true, characterSpacing: 100 })] }),
                   ...[
                     '"I need space \u2014 back by ___."',
                     '"I need to talk this through now."',
@@ -797,10 +997,13 @@ export default async function handler(req, res) {
   // Auto-pick priorities
   const priorities = rankPriorities(s1, s2);
 
+  // Compute approximate page offsets so the TOC can show real page numbers.
+  const offsets = estimatePageOffsets({ s1, s2, expGaps, priorities });
+
   // Build document
   const children = [
     ...buildCover(u, p, coupleType),
-    ...buildTOC(),
+    ...buildTOC(offsets, priorities),
     ...buildIntro(u, p),
     ...buildPartCover(1, 'Your Snapshot',
       `Where ${u} and ${p} are aligned — and where the gaps are.`, ORANGE),
