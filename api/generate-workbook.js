@@ -69,7 +69,7 @@ const para = (text, opts = {}) => new Paragraph({
 
 const eyebrow = (text, color) => new Paragraph({
   spacing: { after: 100 },
-  children: [run(text, { size: 16, bold: true, color: color || ORANGE, allCaps: true, characterSpacing: 100 })]
+  children: [run(text, { size: 16, bold: true, color: color || ORANGE, allCaps: true, characterSpacing: 40 })]
 });
 
 const bullet = (text, color) => new Paragraph({
@@ -195,7 +195,7 @@ const accentBox = (label, text, fill, accent) => {
       new TableCell({ borders: noBrds, width: { size: W - 160, type: WidthType.DXA },
         shading: { fill: f, type: ShadingType.CLEAR }, margins: { top: 200, bottom: 200, left: 280, right: 280 },
         children: [
-          ...(label ? [new Paragraph({ spacing: { after: 80 }, children: [run(label, { size: 16, bold: true, color: a, allCaps: true, characterSpacing: 100 })] })] : []),
+          ...(label ? [new Paragraph({ spacing: { after: 80 }, children: [run(label, { size: 16, bold: true, color: a, allCaps: true, characterSpacing: 40 })] })] : []),
           new Paragraph({ spacing: { after: 0 }, children: [run(text, { size: 22 })] }),
         ] }),
     ]})]
@@ -325,7 +325,7 @@ function buildTOC(offsets, priorities) {
     return [
       new Paragraph({
         spacing: { before: 240, after: 40 },
-        children: [run(partEyebrow, { size: 14, bold: true, color: color || ORANGE, allCaps: true, characterSpacing: 140 })],
+        children: [run(partEyebrow, { size: 14, bold: true, color: color || ORANGE, allCaps: true, characterSpacing: 60 })],
       }),
       tocRow({ label: title, labelBold: true, labelSize: 24, pageNum, after: 80 }),
     ];
@@ -370,7 +370,7 @@ function buildTOC(offsets, priorities) {
     pb(),
     ...sps(1),
     new Paragraph({ alignment: AlignmentType.CENTER, spacing: { after: 120 },
-      children: [run('CONTENTS', { size: 22, bold: true, color: INK, allCaps: true, characterSpacing: 100 })] }),
+      children: [run('CONTENTS', { size: 22, bold: true, color: INK, allCaps: true, characterSpacing: 40 })] }),
     // Gradient rule instead of a solid line
     ...gradRule(ORANGE, [PURPLE, BLUE], { segments: 30, height: 50, before: 0, after: 320 }),
     ...rows,
@@ -396,7 +396,7 @@ function buildPartCover(num, title, subtitle, accentColor) {
     pb(),
     ...sps(5),
     new Paragraph({ alignment: AlignmentType.CENTER, spacing: { after: 120 },
-      children: [run(`PART ${num}`, { size: 22, bold: true, color: color, allCaps: true, characterSpacing: 180 })] }),
+      children: [run(`PART ${num}`, { size: 22, bold: true, color: color, allCaps: true, characterSpacing: 80 })] }),
     // Gradient rule in the part's accent color
     ...gradRule(color, accentDeep, { segments: 30, height: 60, before: 0, after: 200, width: W / 2 }),
     new Paragraph({ alignment: AlignmentType.CENTER, spacing: { after: 240 },
@@ -413,20 +413,15 @@ function buildCover(u, p, coupleType) {
   const BRAND_GRAD_FROM = [ORANGE];
   const BRAND_GRAD_TO   = [PURPLE, BLUE];
 
-  // Large monogram block: couple initials rendered at display size inside a
-  // thin-bordered box, anchored by gradient rules above and below.
-  const initialsU = (u || ' ')[0].toUpperCase();
-  const initialsP = (p || ' ')[0].toUpperCase();
-
   return [
     // Top gradient bar
     ...sps(1),
     gradientBar(BRAND_GRAD_FROM, BRAND_GRAD_TO, { segments: 40, height: 180 }),
-    ...sps(3),
+    ...sps(6),
 
     // Eyebrow
     new Paragraph({ alignment: AlignmentType.CENTER, spacing: { after: 120 },
-      children: [run('ATTUNE', { size: 22, bold: true, color: ORANGE, allCaps: true, characterSpacing: 180 })] }),
+      children: [run('ATTUNE', { size: 22, bold: true, color: ORANGE, allCaps: true, characterSpacing: 80 })] }),
 
     // Large title
     new Paragraph({ alignment: AlignmentType.CENTER, spacing: { after: 120 },
@@ -436,33 +431,11 @@ function buildCover(u, p, coupleType) {
     new Paragraph({ alignment: AlignmentType.CENTER, spacing: { after: 200 },
       children: [run('Built from your answers.', { size: 26, italics: true, color: MUTED })] }),
 
-    // Monogram block — big couple initials with subtle gradient tint
-    ...sps(2),
-    new Table({
-      width: { size: W, type: WidthType.DXA },
-      columnWidths: [W],
-      alignment: AlignmentType.CENTER,
-      rows: [new TableRow({
-        height: { value: 2400, rule: HeightRule.EXACT },
-        children: [new TableCell({
-          borders: noBrds,
-          width: { size: W, type: WidthType.DXA },
-          margins: { top: 600, bottom: 600, left: 0, right: 0 },
-          children: [
-            new Paragraph({ alignment: AlignmentType.CENTER, spacing: { after: 0 },
-              children: [
-                run(initialsU, { size: 140, bold: true, color: ORANGE }),
-                run('   &   ', { size: 80, bold: false, color: STONE }),
-                run(initialsP, { size: 140, bold: true, color: BLUE }),
-              ]}),
-          ],
-        })],
-      })],
-    }),
+    ...sps(6),
 
     // Prepared for + full names
     new Paragraph({ alignment: AlignmentType.CENTER, spacing: { after: 100 },
-      children: [run('PREPARED FOR', { size: 15, color: MUTED, allCaps: true, characterSpacing: 140, bold: true })] }),
+      children: [run('PREPARED FOR', { size: 15, color: MUTED, allCaps: true, characterSpacing: 60, bold: true })] }),
     new Paragraph({ alignment: AlignmentType.CENTER, spacing: { after: 120 },
       children: [run(`${u} & ${p}`, { size: 40, bold: true, color: INK })] }),
 
@@ -878,7 +851,7 @@ function buildReferenceCard(u, p, coupleType, priorities) {
           borders: { top: thickBrd(INK), bottom: { style: BorderStyle.NONE }, left: thickBrd(INK), right: thickBrd(INK) },
           shading: { fill: INK, type: ShadingType.CLEAR }, margins: { top: 260, bottom: 220, left: 400, right: 400 },
           children: [
-            new Paragraph({ alignment: AlignmentType.CENTER, spacing: { after: 60 }, children: [run('ATTUNE', { size: 17, bold: true, color: ORANGE, allCaps: true, characterSpacing: 180 })] }),
+            new Paragraph({ alignment: AlignmentType.CENTER, spacing: { after: 60 }, children: [run('ATTUNE', { size: 17, bold: true, color: ORANGE, allCaps: true, characterSpacing: 80 })] }),
             new Paragraph({ alignment: AlignmentType.CENTER, spacing: { after: 0 }, children: [run(`${u} & ${p}`, { size: 30, bold: true, color: 'FFFFFF' })] }),
           ]
         })] }),
@@ -897,7 +870,7 @@ function buildReferenceCard(u, p, coupleType, priorities) {
                 shading: { fill: 'F5F4F0', type: ShadingType.CLEAR },
                 margins: { top: 280, bottom: 280, left: 320, right: 240 },
                 children: [
-                  new Paragraph({ spacing: { after: 100 }, children: [run('YOUR COUPLE TYPE', { size: 13, bold: true, color: ORANGE, allCaps: true, characterSpacing: 100 })] }),
+                  new Paragraph({ spacing: { after: 100 }, children: [run('YOUR COUPLE TYPE', { size: 13, bold: true, color: ORANGE, allCaps: true, characterSpacing: 40 })] }),
                   new Paragraph({ spacing: { after: 80 }, children: [run(typeName, { size: 22, bold: true, color: INK })] }),
                   new Paragraph({ spacing: { after: 0 }, children: [run(typeNote, { size: 17, italics: true, color: MUTED })] }),
                 ],
@@ -908,7 +881,7 @@ function buildReferenceCard(u, p, coupleType, priorities) {
                 width: { size: 2960, type: WidthType.DXA },
                 margins: { top: 280, bottom: 280, left: 260, right: 240 },
                 children: [
-                  new Paragraph({ spacing: { after: 120 }, children: [run('OUR 3 PRIORITIES', { size: 13, bold: true, color: BLUE, allCaps: true, characterSpacing: 100 })] }),
+                  new Paragraph({ spacing: { after: 120 }, children: [run('OUR 3 PRIORITIES', { size: 13, bold: true, color: BLUE, allCaps: true, characterSpacing: 40 })] }),
                   ...priorityNames.flatMap((name, i) => [
                     new Paragraph({ spacing: { after: 40 }, children: [run(`${i+1}.  ${name}`, { size: 18, bold: true, color: INK })] }),
                     new Paragraph({ spacing: { after: 160 }, children: [run('    This week: ______________', { size: 15, italics: true, color: MUTED })] }),
@@ -922,7 +895,7 @@ function buildReferenceCard(u, p, coupleType, priorities) {
                 shading: { fill: 'F5F4F0', type: ShadingType.CLEAR },
                 margins: { top: 280, bottom: 280, left: 260, right: 320 },
                 children: [
-                  new Paragraph({ spacing: { after: 120 }, children: [run('PHRASES TO TRY', { size: 13, bold: true, color: GREEN, allCaps: true, characterSpacing: 100 })] }),
+                  new Paragraph({ spacing: { after: 120 }, children: [run('PHRASES TO TRY', { size: 13, bold: true, color: GREEN, allCaps: true, characterSpacing: 40 })] }),
                   ...[
                     '"I need space \u2014 back by ___."',
                     '"I need to talk this through now."',
