@@ -5247,11 +5247,9 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
           body: JSON.stringify({
             userName, partnerName,
             scores: myS, partnerScores: partS,
-            coupleType: coupleType ? {
-              name: coupleType?.name, tagline: coupleType?.tagline,
-              description: coupleType?.description, nuance: coupleType?.nuance,
-              color: coupleType?.color,
-            } : null,
+            // Pass the full couple type so the workbook can render the
+            // couple-type intro page with strengths / sticking / patterns.
+            coupleType: coupleType || null,
             expGaps: autoExpGaps,
           }),
         });
@@ -6345,13 +6343,9 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
                 partnerName,
                 scores: myS,
                 partnerScores: partS,
-                coupleType: coupleType ? {
-                  name: coupleType?.name,
-                  tagline: coupleType?.tagline,
-                  description: coupleType?.description,
-                  nuance: coupleType?.nuance,
-                  color: coupleType?.color,
-                } : null,
+                // Pass the full couple type object so the workbook can render
+                // the couple-type intro page with strengths / sticking points / patterns.
+                coupleType: coupleType || null,
                 expGaps,
               };
 
@@ -9912,7 +9906,8 @@ export default function App() {
                         body: JSON.stringify({
                           userName, partnerName,
                           scores: myS, partnerScores: partS,
-                          coupleType: coupleType ? { name: coupleType.name, tagline: coupleType.tagline, color: coupleType.color } : null,
+                          // Full couple type so the intro page has all fields.
+                          coupleType: coupleType || null,
                           orderId: ord.orderNum || null,
                         }),
                       }).then(r => r.json()).then(d => {

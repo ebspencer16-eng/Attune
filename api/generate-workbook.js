@@ -167,7 +167,8 @@ const gradRule = (fromHex, toHex, opts = {}) => [
 // ─── Borders ──────────────────────────────────────────────────────────────────
 const brd = { style: BorderStyle.SINGLE, size: 1, color: STONE };
 const allBrds = { top: brd, bottom: brd, left: brd, right: brd };
-const noBrds  = { top: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.NONE }, left: { style: BorderStyle.NONE }, right: { style: BorderStyle.NONE } };
+const noBrd = { style: BorderStyle.NONE };
+const noBrds  = { top: noBrd, bottom: noBrd, left: noBrd, right: noBrd };
 
 // ─── Table cell helpers ───────────────────────────────────────────────────────
 const tc = (text, width, opts = {}) => new TableCell({
@@ -185,39 +186,49 @@ const hc = (text, width, fill) => new TableCell({
 });
 
 // Accent box: left colour bar + shaded body
+// Soft editorial card: colored thin left rule + cream-pale fill + content.
+// Much less boxy than the previous filled-rectangle-with-stripe treatment.
+// The fill color is kept very close to white (cream tones) so the card
+// reads as a gentle emphasis rather than a hard container.
 const accentBox = (label, text, fill, accent) => {
-  const a = accent || ORANGE, f = fill || 'FFF8F0';
+  const a = accent || ORANGE;
+  // Nudge fills toward cream/off-white so they read as softer cards.
+  // Any provided fill is respected but very pale is preferred.
+  const f = fill || 'FBF8F2';
   return new Table({
-    width: { size: W, type: WidthType.DXA }, columnWidths: [160, W - 160],
+    width: { size: W, type: WidthType.DXA }, columnWidths: [W],
+    borders: { top: noBrd, bottom: noBrd, left: noBrd, right: noBrd, insideHorizontal: noBrd, insideVertical: noBrd },
     rows: [new TableRow({ children: [
-      new TableCell({ borders: noBrds, width: { size: 160, type: WidthType.DXA },
-        shading: { fill: a, type: ShadingType.CLEAR }, margins: { top: 0, bottom: 0, left: 0, right: 0 },
-        children: [new Paragraph({ spacing: { after: 0 }, children: [new TextRun(' ')] })] }),
-      new TableCell({ borders: noBrds, width: { size: W - 160, type: WidthType.DXA },
-        shading: { fill: f, type: ShadingType.CLEAR }, margins: { top: 200, bottom: 200, left: 280, right: 280 },
+      new TableCell({
+        borders: { top: noBrd, bottom: noBrd, right: noBrd,
+          left: { style: BorderStyle.SINGLE, size: 16, color: a, space: 6 } },
+        width: { size: W, type: WidthType.DXA },
+        shading: { fill: f, type: ShadingType.CLEAR },
+        margins: { top: 160, bottom: 160, left: 240, right: 240 },
         children: [
-          ...(label ? [new Paragraph({ spacing: { after: 80 }, children: [run(label, { size: 16, bold: true, color: a, allCaps: true, characterSpacing: 40 })] })] : []),
-          new Paragraph({ spacing: { after: 0 }, children: [run(text, { size: 22 })] }),
+          ...(label ? [new Paragraph({ spacing: { after: 60 }, children: [run(label, { size: 14, bold: true, color: a, allCaps: true, characterSpacing: 60 })] })] : []),
+          new Paragraph({ spacing: { after: 0 }, children: [run(text, { size: 20, color: INK })] }),
         ] }),
     ]})]
   });
 };
 
-// Accent box variant that accepts arbitrary paragraph children on the right
-// side (instead of a single text string). Used for checklists, score bars,
-// multi-paragraph story blocks, etc.
+// Soft editorial card variant that accepts arbitrary paragraph children.
 const accentBoxRich = (label, children, fill, accent) => {
-  const a = accent || ORANGE, f = fill || 'FFF8F0';
+  const a = accent || ORANGE;
+  const f = fill || 'FBF8F2';
   return new Table({
-    width: { size: W, type: WidthType.DXA }, columnWidths: [160, W - 160],
+    width: { size: W, type: WidthType.DXA }, columnWidths: [W],
+    borders: { top: noBrd, bottom: noBrd, left: noBrd, right: noBrd, insideHorizontal: noBrd, insideVertical: noBrd },
     rows: [new TableRow({ children: [
-      new TableCell({ borders: noBrds, width: { size: 160, type: WidthType.DXA },
-        shading: { fill: a, type: ShadingType.CLEAR }, margins: { top: 0, bottom: 0, left: 0, right: 0 },
-        children: [new Paragraph({ spacing: { after: 0 }, children: [new TextRun(' ')] })] }),
-      new TableCell({ borders: noBrds, width: { size: W - 160, type: WidthType.DXA },
-        shading: { fill: f, type: ShadingType.CLEAR }, margins: { top: 200, bottom: 200, left: 280, right: 280 },
+      new TableCell({
+        borders: { top: noBrd, bottom: noBrd, right: noBrd,
+          left: { style: BorderStyle.SINGLE, size: 16, color: a, space: 6 } },
+        width: { size: W, type: WidthType.DXA },
+        shading: { fill: f, type: ShadingType.CLEAR },
+        margins: { top: 160, bottom: 160, left: 240, right: 240 },
         children: [
-          ...(label ? [new Paragraph({ spacing: { after: 120 }, children: [run(label, { size: 16, bold: true, color: a, allCaps: true, characterSpacing: 40 })] })] : []),
+          ...(label ? [new Paragraph({ spacing: { after: 100 }, children: [run(label, { size: 14, bold: true, color: a, allCaps: true, characterSpacing: 60 })] })] : []),
           ...children,
         ] }),
     ]})]
@@ -358,7 +369,6 @@ function scoreBar(score, color) {
 // Part 2). Numbers may be off by a page in dense sections; that's a
 // reasonable trade given the alternative is leaving them blank.
 function estimatePageOffsets({ s1, s2, expGaps, priorities, gapThreshold = 1.0 }) {
-  // Dimensions shown in Part 2 (gap ≥ threshold)
   const gapDims = DIMS.filter(d => Math.abs((s1[d] || 3) - (s2[d] || 3)) >= gapThreshold);
   const visibleDomains = DOMAIN_ORDER.map(dom => ({
     title: dom.title,
@@ -366,49 +376,47 @@ function estimatePageOffsets({ s1, s2, expGaps, priorities, gapThreshold = 1.0 }
   })).filter(dom => dom.visibleDims.length > 0);
   const unalignedExp = expGaps.filter(g => !g.aligned).length;
 
-  // Page-number estimates, calibrated against the reference sample. Will
-  // drift by ±1 on denser couples (more expectation gaps / longer content).
-  // Cover p1, TOC p2, Intro p3.
-  const introPage = 3;
-  let p = 3;
-  p += 1;                                     // intro callouts spill to p4
-  const snapshotPage = p + 1;
-  p += 1;                                     // snapshot on p5
+  // Pre-parts: Cover p1, TOC pp2-3 (typically 2 pages because of the
+  // Working Knowledge moments list). Intro p4, snapshot p5.
+  const introPage = 4;
+  const snapshotPage = 5;
+  let p = 5;
 
-  // Part 1 — Deeper dive
-  p += 1;                                     // Part 1 cover
-  p += 1;                                     // epigraph (short, shares space with first domain)
-  const insightsPage = p;                     // first content starts here
+  // Part 1 — Deeper dive. Epigraph shares the Part cover page (just a
+  // short quote, not a dedicated page). First content page is couple
+  // type intro; dimension pages average 2 dims per page; expectations
+  // average 3 gap-domains per page.
+  p += 1;                                      // Part 1 cover (epigraph inline)
+  const insightsPage = p + 1;
+  p += 1;                                      // couple type intro page
   const domainPages = visibleDomains.map(dom => {
     const page = p + 1;
-    p += Math.max(1, dom.visibleDims.length);
+    // Category header shares the page with the first dim. Total pages
+    // for this category = ceil(dims / 2), minimum 1.
+    p += Math.max(1, Math.ceil(dom.visibleDims.length / 2));
     return { title: dom.title, page };
   });
   const expPage = p + 1;
   p += Math.max(1, Math.ceil(unalignedExp / 3));
 
   // Part 2 — Working Knowledge
-  p += 1;                                     // Part 2 cover
-  p += 1;                                     // epigraph
+  p += 1;                                      // Part 2 cover (epigraph inline)
   const workingKnowledgePage = p + 1;
   const sameType = coupleTypeIsSame();
-  p += sameType ? 3 : 6;                      // 3 moments per page; tighter now w/o intro page
+  p += sameType ? 2 : 6;                       // cross-type: 3 moments/page × 2 partners
 
-  // Part 3 — Priorities
-  p += 1;                                     // Part 3 cover
-  p += 1;                                     // epigraph
+  // Part 3 — Workbook. 3 content pages: Before you focus, Your focus areas, 30-day check-in.
+  p += 1;                                      // Part 3 cover (epigraph inline)
   const prioritiesPage = p + 1;
-  p += 3;                                     // priorities + commitment space: ~1 per page
-  p += 1;                                     // 30-day check-in page (now taller boxes)
+  p += 3;
 
-  // Part 4 — Conversation Library
-  p += 1;                                     // Part 4 cover
-  p += 1;                                     // epigraph
+  // Part 4 — Conversation Library (~3 pages)
+  p += 1;                                      // Part 4 cover (epigraph inline)
   const conversationPage = p + 1;
-  p += 3;                                     // 5 situations ~ 2 pages + structured guide
+  p += 3;
 
   // Part 5 — Reference Card
-  p += 1;                                     // Part 5 cover
+  p += 1;                                      // Part 5 cover
   const referencePage = p + 1;
 
   return { introPage, snapshotPage, insightsPage, domainPages, expPage,
@@ -499,10 +507,12 @@ function buildTOC(offsets, priorities, u, p, coupleType) {
 
   // Part 1 — Deeper dive into the dimensions
   rows.push(...tocSection({ partEyebrow: 'PART 1', title: 'A closer look at the dimensions that matter', pageNum: offsets.insightsPage, color: BLUE }));
+  // Couple type intro page (if present) sits at the top of Part 1 before the categories
+  rows.push(tocRow({ label: 'Your couple type',     pageNum: offsets.insightsPage,     indent: 280, labelSize: 20, labelColor: MUTED, italic: true }));
   offsets.domainPages.forEach(dp => {
     rows.push(tocRow({ label: dp.title, pageNum: dp.page, indent: 280, labelSize: 20, labelColor: MUTED }));
   });
-  rows.push(tocRow({ label: "The Life You're Building",  pageNum: offsets.expPage, indent: 280, labelSize: 20, labelColor: MUTED }));
+  rows.push(tocRow({ label: 'Expectations', pageNum: offsets.expPage, indent: 280, labelSize: 20, labelColor: MUTED }));
 
   // Part 2 — Working Knowledge
   rows.push(...tocSection({ partEyebrow: 'PART 2', title: 'Working Knowledge', pageNum: offsets.workingKnowledgePage, color: PURPLE }));
@@ -549,17 +559,11 @@ function buildTOC(offsets, priorities, u, p, coupleType) {
     }
   }
 
-  // Part 3 — Priorities
-  rows.push(...tocSection({ partEyebrow: 'PART 3', title: 'Your 3 Priorities', pageNum: offsets.prioritiesPage, color: ORANGE }));
-  priorities.forEach((dim, i) => {
-    const meta = DIM_META[dim];
-    rows.push(tocRow({
-      label: `Priority ${i + 1} — ${meta?.label || dim}`,
-      pageNum: offsets.prioritiesPage + Math.floor(i / 2),
-      indent: 280, labelSize: 20, labelColor: MUTED,
-    }));
-  });
-  rows.push(tocRow({ label: '30-day check-in', pageNum: offsets.prioritiesPage + 2, indent: 280, labelSize: 20, labelColor: MUTED, italic: true }));
+  // Part 3 — Workbook (guided journaling, user picks their own focus)
+  rows.push(...tocSection({ partEyebrow: 'PART 3', title: 'Workbook', pageNum: offsets.prioritiesPage, color: ORANGE }));
+  rows.push(tocRow({ label: 'Before you focus',  pageNum: offsets.prioritiesPage,     indent: 280, labelSize: 20, labelColor: MUTED }));
+  rows.push(tocRow({ label: 'Your focus areas',  pageNum: offsets.prioritiesPage + 1, indent: 280, labelSize: 20, labelColor: MUTED }));
+  rows.push(tocRow({ label: '30-day check-in',   pageNum: offsets.prioritiesPage + 3, indent: 280, labelSize: 20, labelColor: MUTED, italic: true }));
 
   // Part 4 — Conversation Library — list each of the 5 situations so readers can flip to the one they need
   rows.push(...tocSection({ partEyebrow: 'PART 4', title: 'Conversation Library', pageNum: offsets.conversationPage, color: PURPLE }));
@@ -865,227 +869,373 @@ function buildOneDimension(dim, u, p, score1, score2) {
   const isClose = gap < 1.5;
   const color  = meta.color || ORANGE;
 
-  // Personalise text
   const mainText = fill(isClose ? content.closeText : content.gapText, u, p);
   const thisWeek = fill(content.thisWeek, u, p);
 
   const result = [];
 
-  // Hero block — replaces the old score-banner table + plain-text bar
+  // Hero at the top
   result.push(buildDimensionHero(meta, u, p, score1, score2, color));
   result.push(sp());
-  result.push(hr(color, 4));
-  result.push(sp());
 
-  // What this means — only the relevant gap level text
+  // What this means
   result.push(eyebrow(`What this means for ${u} and ${p}`, color));
-  result.push(accentBox(null, mainText, isClose ? 'F0FDF9' : 'FFF8F0', isClose ? GREEN : ORANGE));
+  result.push(accentBox(null, mainText, 'FBF8F2', isClose ? GREEN : color));
   result.push(sp());
 
-  // Reflection prompts (checkbox items without bullets — see checkItem impl)
+  // Reflection prompts — no filled box, just the eyebrow + indented checkable items
   result.push(eyebrow('Reflection prompts', color));
   content.prompts.forEach(pr => result.push(checkItem(fill(pr, u, p))));
   result.push(sp());
 
-  // Try this week
-  result.push(accentBox('Try this week', thisWeek, 'F0F9FF', color));
+  // Try this week — keep as accent card
+  result.push(accentBox('Try this week', thisWeek, 'FBF8F2', BLUE));
   result.push(sp());
 
-  // Referenceable "When this shows up" callout
-  result.push(accentBox(
-    'When this shows up',
-    PH(`specific, referenceable guidance for ${meta.label.toLowerCase()} — one short paragraph telling ${u} and ${p} what to do the next time this dimension creates friction in a real moment`),
-    'FFFDF5', MUTED));
-  result.push(sp());
-
-  // Notes space
+  // Commitment slot — practical content that used to live in priorities.
+  // Kept compact; the large guided journaling lives in Part 3 (Workbook).
+  result.push(eyebrow('If this is one you want to work on', color));
   result.push(new Table({
     width: { size: W, type: WidthType.DXA }, columnWidths: [W],
+    borders: { top: noBrd, bottom: noBrd, left: noBrd, right: noBrd, insideHorizontal: noBrd, insideVertical: noBrd },
     rows: [
-      new TableRow({ children: [tc(`Notes for ${meta.label}:`, W, { bold: true, fill: 'FAFAF8', color: MUTED, size: 18 })] }),
-      new TableRow({ children: [tc('\n\n\n', W)] }),
-    ]
+      new TableRow({ children: [new TableCell({
+        borders: { top: noBrd, bottom: noBrd, right: noBrd,
+          left: { style: BorderStyle.SINGLE, size: 12, color: STONE, space: 6 } },
+        width: { size: W, type: WidthType.DXA },
+        margins: { top: 60, bottom: 40, left: 240, right: 0 },
+        children: [new Paragraph({ spacing: { after: 0 },
+          children: [run('What we want to change:', { size: 13, bold: true, color: MUTED, allCaps: true, characterSpacing: 60 })] })],
+      })]}),
+      new TableRow({ height: { value: 1000, rule: HeightRule.ATLEAST },
+        children: [new TableCell({
+          borders: { top: noBrd, bottom: noBrd, right: noBrd,
+            left: { style: BorderStyle.SINGLE, size: 12, color: STONE, space: 6 } },
+          width: { size: W, type: WidthType.DXA },
+          margins: { top: 40, bottom: 80, left: 240, right: 0 },
+          children: [new Paragraph({ spacing: { after: 0 }, children: [new TextRun('')] })],
+        })]}),
+    ],
   }));
-  result.push(sp());
-  result.push(hr(STONE, 2));
 
   return result;
 }
 
-// Domain group headers
+// Domain group headers for communication dimensions. These match the 3
+// categories used in the comms exercise on the website, so the workbook
+// feels like a direct extension of what the couple just did.
 const DOMAIN_ORDER = [
-  { title: 'Your Inner Worlds',          color: PURPLE, dims: ['energy','expression','closeness'] },
-  { title: 'How You Connect Day to Day', color: ORANGE, dims: ['love','needs','bids'] },
-  { title: 'When Things Get Hard',       color: BLUE,   dims: ['conflict','stress','repair','feedback'] },
+  { title: 'Your Inner Worlds',    color: PURPLE, dims: ['energy','expression','closeness'] },
+  { title: 'How You Connect',      color: ORANGE, dims: ['love','needs','bids'] },
+  { title: 'When Things Get Hard', color: BLUE,   dims: ['conflict','stress','repair','feedback'] },
 ];
 
-function buildInsights(u, p, scores, partnerScores) {
-  // Compute per-dimension gaps. Part 2 only covers dimensions where the gap
+// Expectations groupings that match the 5 categories used in the
+// expectations exercise: Household / Financial / Career & Work / Emotional
+// Labor / Life & Values. The workbook's existing 7 content domains (in
+// EXP_DOMAINS) are mapped into these 5 exercise categories for display.
+const EXP_CATEGORIES = [
+  { id: 'household', title: 'Household',       color: ORANGE, domainKeys: ['household'] },
+  { id: 'financial', title: 'Financial',       color: BLUE,   domainKeys: ['financial'] },
+  { id: 'career',    title: 'Career & Work',   color: PURPLE, domainKeys: ['career'] },
+  { id: 'emotional', title: 'Emotional Labor', color: GREEN,  domainKeys: ['emotional'] },
+  { id: 'life',      title: 'Life & Values',   color: PURPLE, domainKeys: ['children', 'lifestyle', 'values'] },
+];
+
+// Large colored section header used to demarcate major sub-sections inside
+// Part 1. Bigger and more navigable than a plain H2 — gives the reader a
+// clear "I'm now in Communication / Expectations" wayfinding cue.
+function bigSectionHeader(label, subtitle, color) {
+  return [
+    new Paragraph({ spacing: { before: 240, after: 80 },
+      children: [run(label, { size: 40, bold: true, color })] }),
+    ...(subtitle ? [new Paragraph({ spacing: { after: 100 },
+      children: [run(subtitle, { size: 18, italics: true, color: MUTED })] })] : []),
+    new Paragraph({ spacing: { before: 0, after: 240 },
+      border: { bottom: { style: BorderStyle.SINGLE, size: 16, color, space: 4 } },
+      children: [new TextRun('')] }),
+  ];
+}
+
+// Smaller category header within a section (e.g. "Your Inner Worlds"
+// within Communication). Meant to feel like a chapter subtitle.
+function categoryHeader(label, color) {
+  return [
+    new Paragraph({ spacing: { before: 200, after: 60 },
+      children: [run(label, { size: 26, bold: true, color })] }),
+    new Paragraph({ spacing: { after: 200 },
+      border: { bottom: { style: BorderStyle.SINGLE, size: 6, color, space: 4 } },
+      children: [new TextRun('')] }),
+  ];
+}
+
+// Couple type intro — shown at the start of Part 1 to set context before
+// the reader hits the dimension pages. Pulls from NEW_COUPLE_TYPES data
+// (description, nuance, strengths/sticking/patterns). If the couple type
+// object doesn't include these richer fields, falls back to a minimal
+// name + description display.
+function buildCoupleTypeIntro(u, p, coupleType) {
+  if (!coupleType) return [];
+  const color = (coupleType.color || '#E8673A').replace('#', '');
+  const hasRich = Array.isArray(coupleType.strengths) && Array.isArray(coupleType.stickingPoints) && Array.isArray(coupleType.patterns);
+
+  // 3-column strengths / sticking points / patterns table (if present)
+  let threeCol = null;
+  if (hasRich) {
+    const columns = [
+      { title: 'Strengths',       items: coupleType.strengths,      c: GREEN },
+      { title: 'Sticking points', items: coupleType.stickingPoints, c: ORANGE },
+      { title: 'Patterns',        items: coupleType.patterns,       c: PURPLE },
+    ];
+    const cells = columns.map(({ title, items, c }) => new TableCell({
+      borders: { top: { style: BorderStyle.SINGLE, size: 8, color: c }, bottom: noBrd, left: noBrd, right: noBrd },
+      width: { size: Math.floor(W / 3), type: WidthType.DXA },
+      margins: { top: 160, bottom: 80, left: 0, right: 160 },
+      children: [
+        new Paragraph({ spacing: { after: 100 },
+          children: [run(title, { size: 13, bold: true, color: c, allCaps: true, characterSpacing: 60 })] }),
+        ...items.map(item => new Paragraph({
+          spacing: { after: 100 }, indent: { left: 160, hanging: 160 },
+          children: [run('·  ', { size: 14, color: c }), run(fill(item, u, p), { size: 14, color: INK })],
+        })),
+      ],
+    }));
+    threeCol = new Table({
+      width: { size: W, type: WidthType.DXA },
+      columnWidths: [Math.floor(W / 3), Math.floor(W / 3), Math.floor(W / 3)],
+      borders: { top: noBrd, bottom: noBrd, left: noBrd, right: noBrd, insideHorizontal: noBrd, insideVertical: noBrd },
+      rows: [new TableRow({ children: cells })],
+    });
+  }
+
+  return [
+    pb(),
+    // Section header
+    new Paragraph({ spacing: { before: 120, after: 60 },
+      children: [run(`${u} & ${p}`, { size: 14, bold: true, color: MUTED, allCaps: true, characterSpacing: 80 })] }),
+    new Paragraph({ spacing: { after: 40 },
+      children: [run(coupleType.name || 'Your couple type', { size: 40, bold: true, color })] }),
+    ...(coupleType.tagline ? [new Paragraph({ spacing: { after: 240 },
+      children: [run(coupleType.tagline, { size: 18, italics: true, color: MUTED })] })] : []),
+    new Paragraph({ spacing: { before: 0, after: 280 },
+      border: { bottom: { style: BorderStyle.SINGLE, size: 16, color, space: 4 } },
+      children: [new TextRun('')] }),
+
+    // Description + nuance as soft cards
+    ...(coupleType.description ? [
+      accentBox('What this couple type is', fill(coupleType.description, u, p), 'FBF8F2', color),
+      sp(),
+    ] : []),
+    ...(coupleType.nuance ? [
+      accentBox('Watch out for', fill(coupleType.nuance, u, p), 'FBF8F2', ORANGE),
+      sp(),
+    ] : []),
+
+    ...(threeCol ? [sp(), threeCol] : []),
+  ];
+}
+
+function buildInsights(u, p, scores, partnerScores, coupleType) {
+  // Compute per-dimension gaps. Part 1 only covers dimensions where the gap
   // is meaningful — aligned dimensions don't need guidance, and including
   // them would dilute the focus.
-  const GAP_THRESHOLD = 1.0;  // below this, the partners are already close
+  const GAP_THRESHOLD = 1.0;
   const gapsByDim = {};
   DIMS.forEach(d => {
     gapsByDim[d] = Math.abs((scores[d] || 3) - (partnerScores[d] || 3));
   });
 
-  // For each domain group, keep only the dimensions that have a real gap.
-  // If a domain has no gap dimensions at all, skip the whole group.
   const domainsToShow = DOMAIN_ORDER
-    .map(domain => ({
-      ...domain,
-      dims: domain.dims.filter(d => gapsByDim[d] >= GAP_THRESHOLD),
-    }))
+    .map(domain => ({ ...domain, dims: domain.dims.filter(d => gapsByDim[d] >= GAP_THRESHOLD) }))
     .filter(domain => domain.dims.length > 0);
 
   const result = [];
 
-  if (domainsToShow.length === 0) {
+  // Couple type intro page — sets context before the reader hits any
+  // individual dimension pages.
+  if (coupleType) {
+    result.push(...buildCoupleTypeIntro(u, p, coupleType));
+  }
+
+  // If no comms gaps at all, skip to expectations directly
+  if (domainsToShow.length === 0 && coupleType) {
     result.push(pb());
     result.push(accentBox(
       'A rare finding',
-      `${u} and ${p}'s answers are aligned across every communication dimension. Skip ahead to Part 3 — the priorities there are drawn from the smaller gaps and from dimensions with the highest downstream influence.`,
+      `${u} and ${p}'s answers are aligned across every communication dimension. The expectations review below is where to focus.`,
       'F0FDF9', GREEN));
     return result;
   }
 
-  domainsToShow.forEach((domain, dIdx) => {
-    // First domain starts on a fresh page (right after the Part cover).
-    // Subsequent domains also pagebreak so each domain starts clean.
+  // Communication section header
+  if (domainsToShow.length > 0) {
     result.push(pb());
-    result.push(hr(domain.color, 12));
-    result.push(new Paragraph({ heading: HeadingLevel.HEADING_2, children: [run(domain.title, { color: domain.color })] }));
-    result.push(sp());
-    domain.dims.forEach(dim => {
-      result.push(...buildOneDimension(dim, u, p, scores[dim] || 3, partnerScores[dim] || 3));
-    });
-  });
+    result.push(...bigSectionHeader('Communication',
+      `The dimensions where ${u} and ${p} showed a meaningful gap.`, BLUE));
 
-  // Expectations domains
-  result.push(pb());
-  result.push(hr(GREEN, 12));
-  result.push(new Paragraph({ heading: HeadingLevel.HEADING_2, children: [run('The Life You\'re Building', { color: GREEN })] }));
-  result.push(sp());
+    domainsToShow.forEach(domain => {
+      // Each domain gets its own category header then its dim pages
+      result.push(...categoryHeader(domain.title, domain.color));
+      domain.dims.forEach(dim => {
+        result.push(...buildOneDimension(dim, u, p, scores[dim] || 3, partnerScores[dim] || 3));
+      });
+    });
+  }
 
   return result;
 }
 
 function buildExpDomains(u, p, expGaps) {
+  // Group by the 5 exercise categories so the workbook mirrors what
+  // couples saw in the expectations exercise.
+  const byKey = Object.fromEntries(expGaps.map(eg => [eg.key, eg]));
+  const categoriesToShow = EXP_CATEGORIES.map(cat => {
+    // Get all domains in this category that have unaligned answers
+    const unaligned = cat.domainKeys
+      .map(k => byKey[k])
+      .filter(Boolean)
+      .filter(eg => !eg.aligned);
+    const aligned = cat.domainKeys
+      .map(k => byKey[k])
+      .filter(Boolean)
+      .filter(eg => eg.aligned);
+    return { ...cat, unaligned, aligned };
+  }).filter(cat => cat.unaligned.length > 0);
+
+  if (categoriesToShow.length === 0) return [];
+
   const result = [];
-  expGaps.forEach((eg, idx) => {
-    const domain = EXP_DOMAINS.find(d => d.key === eg.key);
-    if (!domain) return;
-    const isClose = eg.aligned;
-    const mainText = fill(isClose ? domain.closeText : domain.gapText, u, p);
-    const accentColor = isClose ? GREEN : ORANGE;
 
-    // Header row: domain name in accent-color bold + small status pill on
-    // the right. No filled banner row — just clean text with an inline
-    // status indicator.
-    result.push(new Table({
-      width: { size: W, type: WidthType.DXA }, columnWidths: [W - 1800, 1800],
-      borders: { top: { style: BorderStyle.NIL }, bottom: { style: BorderStyle.NIL }, left: { style: BorderStyle.NIL }, right: { style: BorderStyle.NIL }, insideHorizontal: { style: BorderStyle.NIL }, insideVertical: { style: BorderStyle.NIL } },
-      rows: [new TableRow({ children: [
-        new TableCell({ borders: noBrds, width: { size: W - 1800, type: WidthType.DXA }, margins: { top: 0, bottom: 60, left: 0, right: 0 },
-          children: [new Paragraph({ spacing: { after: 0 }, children: [run(domain.label, { size: 24, bold: true, color: GREEN })] })] }),
-        new TableCell({ borders: noBrds, width: { size: 1800, type: WidthType.DXA }, margins: { top: 0, bottom: 60, left: 0, right: 0 },
-          children: [new Paragraph({ alignment: AlignmentType.RIGHT, spacing: { after: 0 },
-            children: [
-              run(isClose ? '\u2713  ' : '\u25CF  ', { size: 16, bold: true, color: accentColor }),
-              run(isClose ? 'ALIGNED' : 'GAP', { size: 13, bold: true, color: accentColor, allCaps: true, characterSpacing: 80 }),
-            ],
-          })] }),
-      ]})],
-    }));
+  // Expectations section header
+  result.push(pb());
+  result.push(...bigSectionHeader('Expectations',
+    `Where ${u} and ${p} have different ideas about the life you're building.`, GREEN));
 
-    // Answer summary as a small inline comparison — italic, light weight,
-    // not a table. Reads like a caption rather than data.
-    result.push(new Paragraph({ spacing: { after: 160 },
-      children: [
-        run(`${u}: `, { size: 18, bold: true, color: MUTED }),
-        run(answerLabel(eg.yourAnswer, u, p), { size: 18, color: INK, italics: true }),
-        run('    ·    ', { size: 18, color: STONE }),
-        run(`${p}: `, { size: 18, bold: true, color: MUTED }),
-        run(answerLabel(eg.partnerAnswer, u, p), { size: 18, color: INK, italics: true }),
-      ],
-    }));
+  categoriesToShow.forEach(cat => {
+    result.push(...categoryHeader(cat.title, cat.color));
 
-    // What this means — the accent box stays, but the fill is lighter now
-    // to feel less "boxy." Dim the background toward cream rather than
-    // saturated mint.
-    result.push(accentBox(null, mainText, 'FBF9F3', accentColor));
-    result.push(sp());
-    // Try this week — same lighter treatment.
-    result.push(accentBox('Try this week', fill(domain.thisWeek, u, p), 'FBF9F3', GREEN));
+    cat.unaligned.forEach(eg => {
+      const domain = EXP_DOMAINS.find(d => d.key === eg.key);
+      if (!domain) return;
+      const mainText = fill(domain.gapText, u, p);
 
-    // Subtle separator between domains — dashed, not a hard rule
-    if (idx < expGaps.length - 1) {
-      result.push(new Paragraph({
-        spacing: { before: 320, after: 320 },
-        border: { bottom: { style: BorderStyle.DASHED, size: 4, color: STONE, space: 6 } },
-        children: [new TextRun('')],
+      // Compact card-style block for each gap — softer than before
+      // with inline status indicator and cream-pale accent box.
+      result.push(new Table({
+        width: { size: W, type: WidthType.DXA }, columnWidths: [W - 1800, 1800],
+        borders: { top: noBrd, bottom: noBrd, left: noBrd, right: noBrd, insideHorizontal: noBrd, insideVertical: noBrd },
+        rows: [new TableRow({ children: [
+          new TableCell({ borders: noBrds, width: { size: W - 1800, type: WidthType.DXA }, margins: { top: 0, bottom: 60, left: 0, right: 0 },
+            children: [new Paragraph({ spacing: { after: 0 }, children: [run(domain.label, { size: 22, bold: true, color: cat.color })] })] }),
+          new TableCell({ borders: noBrds, width: { size: 1800, type: WidthType.DXA }, margins: { top: 0, bottom: 60, left: 0, right: 0 },
+            children: [new Paragraph({ alignment: AlignmentType.RIGHT, spacing: { after: 0 },
+              children: [
+                run('\u25CF  ', { size: 14, color: ORANGE }),
+                run('GAP', { size: 12, bold: true, color: ORANGE, allCaps: true, characterSpacing: 80 }),
+              ] })] }),
+        ]})],
       }));
-    } else {
+
+      // Partner answers as italic inline caption
+      result.push(new Paragraph({ spacing: { after: 160 },
+        children: [
+          run(`${u}: `, { size: 17, bold: true, color: MUTED }),
+          run(answerLabel(eg.yourAnswer, u, p), { size: 17, color: INK, italics: true }),
+          run('    ·    ', { size: 17, color: STONE }),
+          run(`${p}: `, { size: 17, bold: true, color: MUTED }),
+          run(answerLabel(eg.partnerAnswer, u, p), { size: 17, color: INK, italics: true }),
+        ],
+      }));
+
+      result.push(accentBox(null, mainText, 'FBF8F2', cat.color));
       result.push(sp());
+      result.push(accentBox('Try this week', fill(domain.thisWeek, u, p), 'FBF8F2', BLUE));
+      result.push(sp(200));
+    });
+
+    // Note aligned domains briefly at the end of the category
+    if (cat.aligned.length > 0) {
+      result.push(new Paragraph({ spacing: { before: 120, after: 220 },
+        children: [
+          run('Aligned: ', { size: 12, bold: true, color: GREEN, allCaps: true, characterSpacing: 60 }),
+          run(cat.aligned.map(a => EXP_DOMAINS.find(d => d.key === a.key)?.label || a.label).join(', '), { size: 14, italics: true, color: MUTED }),
+        ],
+      }));
     }
   });
+
   return result;
 }
 
-function buildPriorities(u, p, scores, partnerScores, priorities) {
-  return [
-    pb(),
+// Workbook section (Part 3). Formerly "Your 3 Priorities" — now a guided
+// journaling experience where the user decides what to focus on rather than
+// the algorithm choosing for them.
+//
+// Flow:
+//   1. Intro: now that you've read everything, what do you want to focus on?
+//   2. Reflection prompts (3 questions)
+//   3. 3 focus area blocks — user-written, not pre-filled
+//   4. 30-day check-in at the end
+function buildWorkbook(u, p) {
+  const writeInBlock = (heightTwips = 1400) => new Table({
+    width: { size: W, type: WidthType.DXA }, columnWidths: [W],
+    borders: { top: noBrd, bottom: noBrd, left: noBrd, right: noBrd, insideHorizontal: noBrd, insideVertical: noBrd },
+    rows: [new TableRow({ height: { value: heightTwips, rule: HeightRule.ATLEAST },
+      children: [new TableCell({
+        borders: { top: noBrd, bottom: { style: BorderStyle.SINGLE, size: 6, color: STONE, space: 4 }, left: noBrd, right: noBrd },
+        width: { size: W, type: WidthType.DXA },
+        margins: { top: 40, bottom: 60, left: 0, right: 0 },
+        children: [new Paragraph({ spacing: { after: 0 }, children: [new TextRun('')] })],
+      })]})],
+  });
 
-    ...priorities.flatMap((dim, i) => {
-      const meta    = DIM_META[dim];
-      const content = DIM_CONTENT[dim];
-      const s1 = scores[dim] || 3, s2 = partnerScores[dim] || 3;
-      const thisWeek = fill(content.thisWeek, u, p);
-      const gapText  = fill(content.gapText, u, p);
-      const color = meta.color || ORANGE;
-
-      return [
-        // Start each priority on a fresh page so commitment space never
-        // gets cut off and each priority reads like its own spread.
-        i === 0 ? sp() : pb(),
-
-        // Priority label as eyebrow
-        new Paragraph({ spacing: { after: 80 },
-          children: [run(`PRIORITY ${i + 1}`, { size: 14, bold: true, color: ORANGE, allCaps: true, characterSpacing: 80 })] }),
-
-        // Hero: same visual treatment as dimension pages
-        buildDimensionHero(meta, u, p, s1, s2, color),
-        sp(),
-        hr(color, 4),
-        sp(),
-
-        // What this means
-        eyebrow(`What this means for ${u} and ${p}`, color),
-        accentBox(null, gapText, 'FFF8F0', ORANGE),
-        sp(),
-
-        // Try this week
-        accentBox('Try this week', thisWeek, 'F0F9FF', color),
-        sp(),
-
-        // Commitment space — the bit that differentiates a priority from a
-        // dimension page. Generous write-in boxes so the commitment section
-        // actually feels usable, not cramped.
-        eyebrow('Our commitment', color),
-        new Table({
-          width: { size: W, type: WidthType.DXA }, columnWidths: [W],
-          rows: [
-            new TableRow({ children: [tc(`What we're each committing to:`, W, { bold: true, fill: 'FAFAF8', color: MUTED, size: 18 })] }),
-            new TableRow({ height: { value: 2000, rule: HeightRule.ATLEAST },
-              children: [tc('', W)] }),
-            new TableRow({ children: [tc(`We'll revisit this on:`, W, { bold: true, fill: 'FAFAF8', color: MUTED, size: 18 })] }),
-            new TableRow({ height: { value: 500, rule: HeightRule.ATLEAST },
-              children: [tc('', W)] }),
-          ]
-        }),
-      ];
-    }),
+  const labeledWriteIn = (label, color, heightTwips = 1400) => [
+    new Paragraph({ spacing: { before: 200, after: 80 },
+      children: [run(label, { size: 13, bold: true, color, allCaps: true, characterSpacing: 60 })] }),
+    writeInBlock(heightTwips),
   ];
+
+  const result = [
+    pb(),
+    // Large opening header
+    new Paragraph({ spacing: { after: 60 },
+      children: [run('A space to make it yours', { size: 40, bold: true, color: ORANGE })] }),
+    new Paragraph({ spacing: { after: 240 },
+      children: [run(`What stood out? What do you want to work on? Write it down. This is the part of the workbook where you put your own words in.`,
+        { size: 18, italics: true, color: MUTED })] }),
+    new Paragraph({ spacing: { before: 0, after: 320 },
+      border: { bottom: { style: BorderStyle.SINGLE, size: 16, color: ORANGE, space: 4 } },
+      children: [new TextRun('')] }),
+
+    // Opening reflection — three prompts to orient
+    new Paragraph({ spacing: { before: 0, after: 120 },
+      children: [run('Before you focus', { size: 26, bold: true, color: ORANGE })] }),
+    para(`Three quick questions. Answer them together or separately. No right answers.`,
+      { size: 16, italics: true, color: MUTED, after: 200 }),
+
+    ...labeledWriteIn('1.  What\'s the thing you want to say but haven\'t said yet?', ORANGE, 1000),
+    ...labeledWriteIn('2.  What\'s been sitting with you most from this workbook?', ORANGE, 1000),
+    ...labeledWriteIn('3.  If one thing changed in how you two talk, what would you want it to be?', ORANGE, 1000),
+
+    pb(),
+    // Focus areas — the main commitment section
+    new Paragraph({ spacing: { before: 0, after: 120 },
+      children: [run('Your focus areas', { size: 30, bold: true, color: BLUE })] }),
+    para(`Pick one to three things to work on over the next month. They don't have to be big. Smaller and specific beats vague and ambitious.`,
+      { size: 16, italics: true, color: MUTED, after: 240 }),
+  ];
+
+  // Three focus area commitment blocks — same structure, user-written
+  for (let i = 1; i <= 3; i++) {
+    result.push(new Paragraph({ spacing: { before: i === 1 ? 0 : 280, after: 80 },
+      children: [run(`Focus area ${i}`, { size: 13, bold: true, color: BLUE, allCaps: true, characterSpacing: 80 })] }));
+
+    result.push(...labeledWriteIn('What we\'re focusing on', BLUE, 700));
+    result.push(...labeledWriteIn('What we want to try', BLUE, 1000));
+    result.push(...labeledWriteIn('When we\'ll check in', BLUE, 500));
+  }
+
+  return result;
 }
 
 function buildConversationGuide(u, p, priorities) {
@@ -1121,14 +1271,14 @@ function buildConversationGuide(u, p, priorities) {
     sp(),
 
     hr(GREEN, 8),
-    new Paragraph({ heading: HeadingLevel.HEADING_2, children: [run('Phase 3 \u2014 Your 3 Priorities   (20 min)', { color: GREEN })] }),
-    para(`Walk through ${p1}, ${p2}, and ${p3} from Part 3. For each one:`),
+    new Paragraph({ heading: HeadingLevel.HEADING_2, children: [run('Phase 3 \u2014 Your focus areas   (20 min)', { color: GREEN })] }),
+    para(`Open Part 3 — the Workbook section. Together, pick one to three things you want to focus on over the next month. For each one:`),
     sp(),
-    numItem('Read the dimension description aloud.'),
-    numItem('Each person describes their experience of this dimension — a recent moment where it showed up.'),
-    numItem('Together, name one thing you want to do differently. Be specific. Write it in Part 3.'),
+    numItem('Say it out loud. Name what you want to change and why.'),
+    numItem('Each person describes a recent moment where this showed up.'),
+    numItem('Write your commitment in the workbook. Be specific. Small and specific beats ambitious and vague.'),
     sp(),
-    accentBox('Keep it small', 'Don\'t try to solve everything. Pick one action per priority that\'s small enough to actually do this week. Small and specific beats ambitious and vague.', 'F0F9FF', BLUE),
+    accentBox('Keep it small', `Don't try to solve everything. Pick one action per focus area that's small enough to actually do this week.`, 'F0F9FF', BLUE),
     sp(),
 
     hr(PURPLE, 8),
@@ -1142,7 +1292,7 @@ function buildConversationGuide(u, p, priorities) {
 
     hr(MUTED, 8),
     new Paragraph({ heading: HeadingLevel.HEADING_2, children: [run('Phase 5 \u2014 Closing & Next Steps   (5 min)', { color: MUTED })] }),
-    numItem(`State your three priorities and the one action each of you is committing to this week.`),
+    numItem(`State your focus areas and the action each of you is committing to this week.`),
     numItem('Set a date — within two weeks — to briefly check in on how those actions landed.'),
     numItem('Decide together: will you work through Part 2 on your own, together, or with a facilitator?'),
     sp(),
@@ -1375,32 +1525,44 @@ function buildWorkingKnowledge(u, p, coupleType) {
 
 // ─── 30-day check-in (embedded at end of Priorities) ────────────────────────
 function buildPriorityCheckIn(u, p, priorities) {
+  const writeInRow = (heightTwips = 1600) => new TableRow({
+    height: { value: heightTwips, rule: HeightRule.ATLEAST },
+    children: [new TableCell({
+      borders: { top: noBrd, bottom: { style: BorderStyle.SINGLE, size: 6, color: STONE, space: 4 }, left: noBrd, right: noBrd },
+      width: { size: W, type: WidthType.DXA },
+      margins: { top: 40, bottom: 40, left: 0, right: 0 },
+      children: [new Paragraph({ spacing: { after: 0 }, children: [new TextRun('')] })],
+    })],
+  });
+
+  const promptRow = (label) => new Paragraph({ spacing: { before: 240, after: 80 },
+    children: [run(label, { size: 13, bold: true, color: ORANGE, allCaps: true, characterSpacing: 60 })] });
+
   return [
     pb(),
-    new Paragraph({ heading: HeadingLevel.HEADING_2, children: [run('Check in on these priorities — 30 days from now', { color: ORANGE })] }),
-    para(`Come back to this page in about a month. For each of your three priorities, answer the questions honestly. Write in the workbook — that's what it's for.`,
-      { size: 22, color: MUTED, after: 240 }),
+    new Paragraph({ spacing: { after: 60 },
+      children: [run('30-day check-in', { size: 36, bold: true, color: ORANGE })] }),
+    new Paragraph({ spacing: { after: 240 },
+      children: [run(`Come back to this page in about a month. Answer honestly. Write in the workbook — that's what it's for.`,
+        { size: 18, italics: true, color: MUTED })] }),
+    new Paragraph({ spacing: { before: 0, after: 320 },
+      border: { bottom: { style: BorderStyle.SINGLE, size: 12, color: ORANGE, space: 4 } },
+      children: [new TextRun('')] }),
 
-    ...priorities.flatMap((dim, i) => {
-      const meta = DIM_META[dim];
-      return [
-        new Paragraph({ spacing: { before: 200, after: 80 }, children: [run(`Priority ${i + 1} — ${meta.label}`, { size: 24, bold: true, color: ORANGE })] }),
-        new Table({
-          width: { size: W, type: WidthType.DXA }, columnWidths: [W],
-          rows: [
-            new TableRow({ children: [tc('What changed (if anything) over the last 30 days?', W, { bold: true, fill: 'FAFAF8', color: MUTED, size: 18 })] }),
-            new TableRow({ height: { value: 1600, rule: HeightRule.ATLEAST },
-              children: [tc('', W)] }),
-            new TableRow({ children: [tc(`Did the weekly practice we committed to actually happen? What got in the way?`, W, { bold: true, fill: 'FAFAF8', color: MUTED, size: 18 })] }),
-            new TableRow({ height: { value: 1600, rule: HeightRule.ATLEAST },
-              children: [tc('', W)] }),
-            new TableRow({ children: [tc('One small thing to try differently in the next 30 days:', W, { bold: true, fill: 'FAFAF8', color: MUTED, size: 18 })] }),
-            new TableRow({ height: { value: 1600, rule: HeightRule.ATLEAST },
-              children: [tc('', W)] }),
-          ]
-        }),
-      ];
-    }),
+    promptRow('1.  What changed (if anything) over the last 30 days?'),
+    new Table({ width: { size: W, type: WidthType.DXA }, columnWidths: [W],
+      borders: { top: noBrd, bottom: noBrd, left: noBrd, right: noBrd, insideHorizontal: noBrd, insideVertical: noBrd },
+      rows: [writeInRow(1400)] }),
+
+    promptRow('2.  Did the focus areas we wrote down actually get attention? What got in the way?'),
+    new Table({ width: { size: W, type: WidthType.DXA }, columnWidths: [W],
+      borders: { top: noBrd, bottom: noBrd, left: noBrd, right: noBrd, insideHorizontal: noBrd, insideVertical: noBrd },
+      rows: [writeInRow(1400)] }),
+
+    promptRow('3.  One small thing to try differently in the next 30 days:'),
+    new Table({ width: { size: W, type: WidthType.DXA }, columnWidths: [W],
+      borders: { top: noBrd, bottom: noBrd, left: noBrd, right: noBrd, insideHorizontal: noBrd, insideVertical: noBrd },
+      rows: [writeInRow(1400)] }),
   ];
 }
 
@@ -1443,7 +1605,7 @@ function buildConversationLibrary(u, p, coupleType, priorities) {
   const structuredIntro = [
     pb(),
     new Paragraph({ heading: HeadingLevel.HEADING_2, children: [run('A structured first conversation', { color: PURPLE })] }),
-    para(`If you want a guided path through your three priorities together, this is it. Roughly 60 minutes.`,
+    para(`If you want a guided path through your focus areas together, this is it. Roughly 60 minutes.`,
       { size: 22, color: MUTED, after: 200 }),
 
     accentBox('Ground rules before you start',
@@ -1540,7 +1702,7 @@ export default async function handler(req, res) {
     ...epigraph(
       PH('opening quote for Part 1'),
       PH('Attribution')),
-    ...buildInsights(u, p, s1, s2),
+    ...buildInsights(u, p, s1, s2, coupleType),
     ...buildExpDomains(u, p, expGaps),
 
     ...buildPartCover(2, 'Working Knowledge',
@@ -1550,12 +1712,12 @@ export default async function handler(req, res) {
       PH('Attribution')),
     ...buildWorkingKnowledge(u, p, coupleType),
 
-    ...buildPartCover(3, 'Your 3 Priorities',
-      `Where the leverage is highest. Start here.`, ORANGE),
+    ...buildPartCover(3, 'Workbook',
+      `Your focus areas. Your words. Your pace.`, ORANGE),
     ...epigraph(
-      PH('opening quote for Part 3 — something about focus, leverage, or choosing'),
+      PH('opening quote for Part 3 — something about focus or choosing'),
       PH('Attribution')),
-    ...buildPriorities(u, p, s1, s2, priorities),
+    ...buildWorkbook(u, p),
     ...buildPriorityCheckIn(u, p, priorities),
 
     ...buildPartCover(4, 'Conversation Library',

@@ -2396,13 +2396,9 @@ async function generateWorkbookForOrder(orderId) {
     partnerName: partnerB,
     scores: order.scores || {},
     partnerScores: order.partnerScores || {},
-    coupleType: order.coupleType ? {
-      name: order.coupleType.name,
-      tagline: order.coupleType.tagline,
-      description: order.coupleType.description,
-      nuance: order.coupleType.nuance,
-      color: order.coupleType.color,
-    } : null,
+    // Pass the full couple type object so the workbook can render the
+    // couple-type intro page with strengths / sticking points / patterns.
+    coupleType: order.coupleType || null,
     expGaps: order.expGaps || [],
   };
 
