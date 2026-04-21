@@ -1,9 +1,20 @@
-// Generates a .docx review document organized by content layer:
-//   1. Workbook-level content (DIM_META, DIM_CONTENT, EXP_DOMAINS)
-//   2. Couple-type-level content (the 10 NEW_COUPLE_TYPES from src/App.jsx)
+// Generates a comprehensive .docx review document covering every piece of
+// content that plugs into the personalized workbook template.
 //
-// This is for Ellie to read through and edit the copy. The workbook
-// generator uses this exact content when producing personalized workbooks.
+// Seven content areas, in the order they appear in the workbook:
+//   1. Epigraphs — one quote per Part (5 total)
+//   2. Dimensions — 10 communication dimensions (measures, close/gap text,
+//      prompts, weekly exercise, and the new "when this shows up" callout)
+//   3. Expectations — 7 expectations domains (close/gap text + weekly exercise)
+//   4. Couple Types — 10 couple type narratives (description, nuance,
+//      strengths, sticking points, patterns, tips, famous duos)
+//   5. Six Moments Library — 24 scene cards (6 moments × 4 individual types)
+//   6. Conversation Starters — ~25 prompts tagged by situation and couple type
+//   7. Dimension "When This Shows Up" — 10 paragraphs, one per dimension
+//
+// For each content item, this doc renders a colored label card with the
+// content. Ellie reviews via tracked changes or comments; edits are
+// reconciled back into the appropriate source files afterward.
 
 import { writeFileSync, readFileSync } from 'fs';
 import {
@@ -18,7 +29,6 @@ import { DIM_META, DIM_CONTENT, EXP_DOMAINS, DIMS } from '../api/_workbook-conte
 const appSource = readFileSync(new URL('../src/App.jsx', import.meta.url), 'utf-8');
 const m = appSource.match(/const NEW_COUPLE_TYPES = (\[[\s\S]+?\n\];)/);
 if (!m) throw new Error('Could not locate NEW_COUPLE_TYPES in App.jsx');
-// Evaluate in a bare context. This is internal tooling, not user input.
 const NEW_COUPLE_TYPES = eval(m[1]);
 
 // ─── Style tokens ─────────────────────────────────────────────────────────────
@@ -55,24 +65,8 @@ const hr = (color, thick) => new Paragraph({
   border: { bottom: { style: BorderStyle.SINGLE, size: thick || 4, color: color || STONE, space: 6 } },
   spacing: { before: 100, after: 200 }, children: [new TextRun('')],
 });
-const eyebrow = (text, color) => new Paragraph({
-  spacing: { after: 120 },
-  children: [run(text, { size: 18, bold: true, color: color || ORANGE, allCaps: true, tracking: 100 })],
-});
 const noBrds = { top: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.NONE }, left: { style: BorderStyle.NONE }, right: { style: BorderStyle.NONE } };
-const brd = { style: BorderStyle.SINGLE, size: 1, color: STONE };
-const allBrds = { top: brd, bottom: brd, left: brd, right: brd };
 
-const tc = (text, width, opts = {}) => new TableCell({
-  borders: opts.noBorder ? noBrds : allBrds,
-  width: { size: width, type: WidthType.DXA },
-  shading: opts.fill ? { fill: opts.fill, type: ShadingType.CLEAR } : undefined,
-  margins: { top: 140, bottom: 140, left: 200, right: 200 },
-  children: Array.isArray(text) ? text : [new Paragraph({ spacing: { after: 0 }, children: [run(text, { size: opts.size || 20, bold: !!opts.bold, italics: !!opts.italics, color: opts.color || INK })] })],
-});
-
-// Labeled block: an editable copy card with a colored label bar on the
-// left and the content on the right. Makes the structure easy to scan.
 const editCard = (label, content, color) => {
   const c = color || ORANGE;
   return new Table({
@@ -96,7 +90,25 @@ const editCard = (label, content, color) => {
   });
 };
 
-// ─── Build the review doc ────────────────────────────────────────────────────
+const emptyCard = (label, hint, color) => {
+  return editCard(label,
+    [new Paragraph({ spacing: { after: 0 },
+      children: [run(`[ TO WRITE ] ${hint}`, { size: 20, italics: true, color: MUTED })] })],
+    color || ORANGE);
+};
+
+function partCover(num, title, subtitle) {
+  return [
+    pb(),
+    ...sps(4),
+    new Paragraph({ alignment: AlignmentType.CENTER, spacing: { after: 120 },
+      children: [run(`SECTION ${num}`, { size: 18, bold: true, color: ORANGE, allCaps: true, tracking: 100 })] }),
+    new Paragraph({ alignment: AlignmentType.CENTER, spacing: { after: 200 },
+      children: [run(title, { size: 40, bold: true, color: INK })] }),
+    new Paragraph({ alignment: AlignmentType.CENTER, spacing: { after: 0 },
+      children: [run(subtitle, { size: 20, italics: true, color: MUTED })] }),
+  ];
+}
 
 function buildCover() {
   return [
@@ -106,19 +118,63 @@ function buildCover() {
     new Paragraph({ alignment: AlignmentType.CENTER, spacing: { after: 200 },
       children: [run('Workbook Content — Review Doc', { size: 54, bold: true, color: INK })] }),
     new Paragraph({ alignment: AlignmentType.CENTER, spacing: { after: 400 },
-      children: [run('Everything that gets plugged into the personalized workbook template, in one place.', { size: 22, italics: true, color: MUTED })] }),
+      children: [run('Every piece of copy that plugs into the personalized workbook template.', { size: 22, italics: true, color: MUTED })] }),
     hr(STONE, 10),
     ...sps(2),
-    para('There are two layers here:', { after: 120 }),
-    para('1. Dimension and expectations content — the copy for each of the 10 communication dimensions and 7 expectations areas. This is the same for every couple; only the partner names are substituted via {U} (user) and {P} (partner). Lives in api/_workbook-content.js.',
-      { size: 20, color: MUTED, after: 140 }),
-    para('2. Couple-type content — the 10 couple type narratives (4 same-type pairings + 6 cross pairings). This is how the couple-type section gets personalized to each pair. Lives in src/App.jsx (NEW_COUPLE_TYPES).',
-      { size: 20, color: MUTED, after: 200 }),
+
+    para('Seven content areas to review, in the order they appear in the workbook:',
+      { size: 22, after: 140 }),
+
+    para('1.  EPIGRAPHS — one short quote at the start of each Part. Five needed.',
+      { size: 20, color: MUTED, after: 100 }),
+    para('2.  DIMENSIONS — the 10 communication dimensions. Already drafted; review for tone and copy tightness.',
+      { size: 20, color: MUTED, after: 100 }),
+    para('3.  EXPECTATIONS — 7 life-expectations domains (household, financial, etc). Already drafted.',
+      { size: 20, color: MUTED, after: 100 }),
+    para('4.  COUPLE TYPES — the 10 couple type narratives. Already drafted.',
+      { size: 20, color: MUTED, after: 100 }),
+    para('5.  SIX MOMENTS LIBRARY (new) — 24 scene cards: 6 moments × 4 individual types.',
+      { size: 20, color: MUTED, after: 100 }),
+    para('6.  CONVERSATION STARTERS (new) — 5 situations, curated prompts per couple type.',
+      { size: 20, color: MUTED, after: 100 }),
+    para('7.  DIMENSION "WHEN THIS SHOWS UP" (new) — a short reference paragraph per dimension.',
+      { size: 20, color: MUTED, after: 240 }),
+
     para('To edit: make edits in this .docx with tracked changes or comments. I\'ll reconcile them back into the source files.',
       { size: 20, italics: true, color: ORANGE }),
   ];
 }
 
+// ─── Section 1: Epigraphs ────────────────────────────────────────────────────
+const EPIGRAPH_SLOTS = [
+  { part: 1, title: 'A closer look at the dimensions that matter', tone: 'reflection, observation, seeing clearly' },
+  { part: 2, title: 'Working Knowledge',                            tone: 'knowing another person, long attention' },
+  { part: 3, title: 'Your 3 Priorities',                            tone: 'focus, choosing, leverage' },
+  { part: 4, title: 'Conversation Library',                         tone: 'words, dialogue, listening' },
+];
+
+function buildEpigraphs() {
+  const out = [...partCover(1, 'Epigraphs', 'One short quote per Part. Four needed (Reference Card has no epigraph). Give me 2–3 candidates per slot.')];
+
+  EPIGRAPH_SLOTS.forEach((slot) => {
+    out.push(pb());
+    out.push(new Paragraph({ heading: HeadingLevel.HEADING_2,
+      children: [run(`Part ${slot.part} — ${slot.title}`, { color: ORANGE })] }));
+    out.push(para(`Tone to aim for: ${slot.tone}`, { size: 18, color: MUTED, after: 240 }));
+
+    for (let i = 1; i <= 3; i++) {
+      out.push(editCard(`CANDIDATE ${i}`,
+        [new Paragraph({ spacing: { after: 80 }, children: [run('[ TO WRITE ]  Quote text', { size: 22, italics: true, color: MUTED })] }),
+         new Paragraph({ spacing: { after: 0 }, children: [run('[ TO WRITE ]  Attribution', { size: 18, color: MUTED })] })],
+        BLUE));
+      out.push(sp());
+    }
+  });
+
+  return out;
+}
+
+// ─── Section 2: Dimensions ───────────────────────────────────────────────────
 function buildDimSection(dim) {
   const meta = DIM_META[dim];
   const content = DIM_CONTENT[dim];
@@ -144,6 +200,7 @@ function buildDimSection(dim) {
   ];
 }
 
+// ─── Section 3: Expectations ─────────────────────────────────────────────────
 function buildExpSection(domain) {
   return [
     pb(),
@@ -158,21 +215,19 @@ function buildExpSection(domain) {
   ];
 }
 
+// ─── Section 4: Couple Types ─────────────────────────────────────────────────
 function buildCoupleType(t) {
   const out = [pb()];
 
-  // Header block: name, tagline, color
-  out.push(new Paragraph({ heading: HeadingLevel.HEADING_1, children: [run(t.name, { color: t.color?.replace('#','') || ORANGE })] }));
+  out.push(new Paragraph({ heading: HeadingLevel.HEADING_2, children: [run(t.name, { color: t.color?.replace('#','') || ORANGE })] }));
   out.push(para(`ID: ${t.id}    ·    Type A: ${t.typeA}    ·    Type B: ${t.typeB}`, { size: 18, color: MUTED, after: 80 }));
   out.push(para(`"${t.tagline}"`, { size: 24, italics: true, color: INK, after: 280 }));
 
-  // Description + nuance
   out.push(editCard('DESCRIPTION', t.description, t.color?.replace('#','') || ORANGE));
   out.push(sp());
   out.push(editCard('NUANCE / RISK', t.nuance, ORANGE));
   out.push(sp());
 
-  // Strengths
   if (Array.isArray(t.strengths) && t.strengths.length) {
     out.push(editCard('STRENGTHS',
       t.strengths.map(s => new Paragraph({ spacing: { after: 100 }, children: [run('•  ' + s, { size: 22 })] })),
@@ -180,7 +235,6 @@ function buildCoupleType(t) {
     out.push(sp());
   }
 
-  // Sticking points
   if (Array.isArray(t.stickingPoints) && t.stickingPoints.length) {
     out.push(editCard('STICKING POINTS',
       t.stickingPoints.map(s => new Paragraph({ spacing: { after: 100 }, children: [run('•  ' + s, { size: 22 })] })),
@@ -188,7 +242,6 @@ function buildCoupleType(t) {
     out.push(sp());
   }
 
-  // Patterns
   if (Array.isArray(t.patterns) && t.patterns.length) {
     out.push(editCard('PATTERNS',
       t.patterns.map(s => new Paragraph({ spacing: { after: 100 }, children: [run('•  ' + s, { size: 22 })] })),
@@ -196,7 +249,6 @@ function buildCoupleType(t) {
     out.push(sp());
   }
 
-  // Tips (each has title + body + phraseTry)
   if (Array.isArray(t.tips) && t.tips.length) {
     t.tips.forEach((tip, i) => {
       out.push(editCard(`TIP ${i + 1} — ${tip.title.toUpperCase()}`, [
@@ -214,7 +266,6 @@ function buildCoupleType(t) {
     });
   }
 
-  // Famous duos
   if (Array.isArray(t.famousDuos) && t.famousDuos.length) {
     out.push(editCard('FAMOUS DUOS (optional examples)',
       t.famousDuos.map(d => new Paragraph({
@@ -232,35 +283,167 @@ function buildCoupleType(t) {
   return out;
 }
 
+// ─── Section 5: Six Moments Library ──────────────────────────────────────────
+const MOMENTS = [
+  { key: 'hard_workday',      title: 'After a hard workday' },
+  { key: 'quiet_worry',       title: "When they're worried but haven't said it" },
+  { key: 'during_conflict',   title: 'During a disagreement' },
+  { key: 'after_conflict',    title: 'After a disagreement' },
+  { key: 'wanting_closeness', title: 'When they want to feel close' },
+  { key: 'external_stress',   title: 'When stress is coming from outside the relationship' },
+];
+
+const INDIVIDUAL_TYPES = [
+  { letter: 'W', label: 'W — Open + Engages quickly', gist: 'expressive, seeks connection under stress, wants to talk things out' },
+  { letter: 'X', label: 'X — Guarded + Engages quickly', gist: 'direct and resolution-oriented, but processes feelings internally' },
+  { letter: 'Y', label: 'Y — Open + Needs space', gist: 'emotionally expressive but needs quiet to recover; warms up over time' },
+  { letter: 'Z', label: 'Z — Guarded + Needs space', gist: 'reserved, withdraws to process; shares once settled' },
+];
+
+function buildMomentsLibrary() {
+  const out = [...partCover(5, 'Six Moments Library',
+    '24 scene cards. For each of 6 moments × 4 individual types. Each card should give the other partner situational guidance.')];
+
+  out.push(pb());
+  out.push(new Paragraph({ heading: HeadingLevel.HEADING_1, children: [run('How the workbook uses this', { color: PURPLE })] }));
+  out.push(para(
+    'In Part 2, each partner gets a page titled "What [other partner] should know about [them]." The page lists all 6 moments, and for each moment, uses the content keyed to that partner\'s individual type (W, X, Y, or Z).',
+    { size: 22, after: 140 }));
+  out.push(para(
+    'For a cross-type couple like Jordan (W) and Alex (X): Jordan\'s page uses all 6 W-moment cards. Alex\'s page uses all 6 X-moment cards. 24 cards total cover every combination.',
+    { size: 22, after: 140 }));
+  out.push(para(
+    'Each moment card has 5 blocks: THE MOMENT (the concrete situation), WHAT\'S HAPPENING FOR [PARTNER] (their internal state), WHAT NOT TO DO, WHAT WORKS, and PHRASE THAT LANDS.',
+    { size: 22, after: 0 }));
+
+  MOMENTS.forEach((moment, mIdx) => {
+    out.push(pb());
+    out.push(new Paragraph({ heading: HeadingLevel.HEADING_1,
+      children: [run(`Moment ${mIdx + 1} — ${moment.title}`, { color: PURPLE })] }));
+    out.push(para(
+      `One card per individual type below. The "subject" is the partner this moment describes; the "reader" is the other partner getting guidance.`,
+      { size: 18, italics: true, color: MUTED, after: 240 }));
+
+    INDIVIDUAL_TYPES.forEach(t => {
+      out.push(pb());
+      out.push(new Paragraph({ heading: HeadingLevel.HEADING_2,
+        children: [run(`${moment.title}  ·  Subject type ${t.letter}`, { color: PURPLE })] }));
+      out.push(para(t.label, { size: 20, bold: true, after: 60 }));
+      out.push(para(t.gist, { size: 18, italics: true, color: MUTED, after: 240 }));
+
+      out.push(emptyCard('THE MOMENT',
+        `1 sentence: the concrete situation, e.g. "They come home after a tough day and go quiet." Keep it specific.`,
+        MUTED));
+      out.push(sp());
+      out.push(emptyCard('WHAT\'S HAPPENING FOR [SUBJECT]',
+        `2–3 sentences keyed to Type ${t.letter}: what's actually going on inside them in this moment. Grounded in how Type ${t.letter} is wired.`,
+        PURPLE));
+      out.push(sp());
+      out.push(emptyCard('WHAT NOT TO DO',
+        '1 sentence: the natural but wrong move the other partner tends to make.',
+        'C8402A'));
+      out.push(sp());
+      out.push(emptyCard('WHAT WORKS',
+        '1–2 sentences: the specific action the other partner should take instead.',
+        GREEN));
+      out.push(sp());
+      out.push(emptyCard('PHRASE THAT LANDS',
+        'A literal line the other partner can say — in quotation marks, short, specific.',
+        BLUE));
+    });
+  });
+
+  return out;
+}
+
+// ─── Section 6: Conversation Starters ────────────────────────────────────────
+const SITUATIONS = [
+  { key: 'quiet_night',    title: 'At dinner on a quiet night',             blurb: 'Low-stakes depth.' },
+  { key: 'after_hard_week', title: 'After a hard week',                     blurb: 'Mutual care.' },
+  { key: 'one_is_off',     title: "When one of you is off but won't say why", blurb: 'Gentle excavation.' },
+  { key: 'before_hard',    title: 'Before a difficult conversation',        blurb: 'Setting it up.' },
+  { key: 'tired_of_logistics', title: "When you're tired of talking about logistics", blurb: 'Romance restoration.' },
+];
+
+function buildStartersLibrary() {
+  const out = [...partCover(6, 'Conversation Starters',
+    'Per-situation prompt libraries, curated by couple type. Each couple sees 3 prompts per situation, matched to their dynamic.')];
+
+  out.push(pb());
+  out.push(new Paragraph({ heading: HeadingLevel.HEADING_1, children: [run('How this works', { color: PURPLE })] }));
+  out.push(para(
+    'Each of the 5 situations gets a master prompt list below. When generating a workbook for a specific couple type, we select 3 prompts from that situation\'s master list tagged for their couple type.',
+    { size: 22, after: 140 }));
+  out.push(para(
+    'Minimum viable library: 5 situations × ~5 prompts each = 25 prompts. Each prompt tagged with the couple types it fits best. A single prompt can serve multiple couple types if it\'s broadly useful.',
+    { size: 22, after: 0 }));
+
+  SITUATIONS.forEach((s, sIdx) => {
+    out.push(pb());
+    out.push(new Paragraph({ heading: HeadingLevel.HEADING_1,
+      children: [run(`Situation ${sIdx + 1} — ${s.title}`, { color: PURPLE })] }));
+    out.push(para(s.blurb, { size: 20, italics: true, color: MUTED, after: 240 }));
+
+    for (let i = 1; i <= 5; i++) {
+      out.push(editCard(`PROMPT ${i}`, [
+        new Paragraph({ spacing: { after: 100 }, children: [run('[ TO WRITE ]  The prompt', { size: 22, italics: true, color: MUTED })] }),
+        new Paragraph({ spacing: { before: 80, after: 0 }, children: [
+          run('BEST FOR: ', { size: 14, bold: true, color: ORANGE, allCaps: true, tracking: 100 }),
+          run('[ TO TAG ]  Couple types this works for — e.g. WX, WY, XX, or ALL', { size: 18, italics: true, color: MUTED }),
+        ]}),
+      ], BLUE));
+      out.push(sp());
+    }
+  });
+
+  return out;
+}
+
+// ─── Section 7: Dimension "When This Shows Up" ───────────────────────────────
+function buildWhenThisShowsUpLibrary() {
+  const out = [...partCover(7, 'Dimension "When This Shows Up"',
+    'A short reference paragraph per dimension. Rendered at the bottom of each dimension page — tells the couple what to do the next time this friction shows up in real life.')];
+
+  out.push(pb());
+  out.push(new Paragraph({ heading: HeadingLevel.HEADING_1, children: [run('How this works', { color: PURPLE })] }));
+  out.push(para(
+    'At the bottom of every dimension page in Part 1, a small "When this shows up" callout gives referenceable guidance. Unlike "Try this week" (an experiment) or the close/gap text (diagnosis), this text is what the couple consults during a real moment.',
+    { size: 22, after: 140 }));
+  out.push(para(
+    'Each paragraph should be 2–3 sentences. Concrete, actionable, no hedging. Think: "The next time ___ happens, do ___." If you can name a specific scene, even better.',
+    { size: 22, after: 0 }));
+
+  DIMS.forEach(dim => {
+    const meta = DIM_META[dim];
+    out.push(pb());
+    out.push(new Paragraph({ heading: HeadingLevel.HEADING_2, children: [run(meta.label, { color: meta.color })] }));
+    out.push(para(`Axis: ${meta.left} ← → ${meta.right}`, { size: 18, color: MUTED, after: 240 }));
+    out.push(emptyCard('WHEN THIS SHOWS UP',
+      `2–3 sentences: concrete, referenceable guidance for ${meta.label.toLowerCase()}. "The next time ___, do ___." No hedging.`,
+      meta.color));
+  });
+
+  return out;
+}
+
 // ─── Main build ──────────────────────────────────────────────────────────────
 const children = [
   ...buildCover(),
-
-  // Part 1: Dimensions
-  pb(),
-  new Paragraph({ heading: HeadingLevel.HEADING_1, children: [run('Part 1 — Communication Dimensions')] }),
-  para('Ten dimensions. Each has a Close text (shown when the couple is within ~1.0 of each other) and a Gap text (shown when the scores diverge). The prompts and "try this week" appear on the dimension page in Part 2 of the workbook. Edit any text in the orange/blue/green blocks below.',
-    { size: 22, color: MUTED, after: 240 }),
+  ...buildEpigraphs(),
+  ...partCover(2, 'Dimensions',
+    'The 10 communication dimensions. Already drafted; this pass is for tone, clarity, and tightness.'),
   ...DIMS.flatMap(buildDimSection),
-
-  // Part 2: Expectations
-  pb(),
-  new Paragraph({ heading: HeadingLevel.HEADING_1, children: [run('Part 2 — Expectations Domains')] }),
-  para('Seven areas of expectations (household, financial, career, etc). Shorter than dimensions — each has a close text, a gap text, and a weekly exercise. Appears in the "Life You\'re Building" section of Part 2.',
-    { size: 22, color: MUTED, after: 240 }),
+  ...partCover(3, 'Expectations',
+    'The 7 life-expectations domains. Already drafted; same tone-and-clarity pass.'),
   ...EXP_DOMAINS.flatMap(buildExpSection),
-
-  // Part 3: Couple Types
-  pb(),
-  new Paragraph({ heading: HeadingLevel.HEADING_1, children: [run('Part 3 — Couple Types')] }),
-  para(`There are 10 couple types total: 4 same-type pairings (WW, XX, YY, ZZ) and 6 cross pairings (WX, WY, WZ, XY, XZ, YZ). Each has a narrative describing the dynamic, strengths, sticking points, patterns, a few tips with phrases to try, and some famous-duo examples. The couple type shows up on the cover page of the workbook and in Part 1 (the snapshot).`,
-    { size: 22, color: MUTED, after: 160 }),
-  para('The type letters represent underlying communication styles: W / X / Y / Z. Detail on what each letter means is in the source; the couple-type text is what readers actually see.',
-    { size: 20, italics: true, color: MUTED, after: 320 }),
+  ...partCover(4, 'Couple Types',
+    'The 10 couple type narratives. 4 same-type + 6 cross-type pairings. Already drafted.'),
   ...NEW_COUPLE_TYPES.flatMap(buildCoupleType),
+  ...buildMomentsLibrary(),
+  ...buildStartersLibrary(),
+  ...buildWhenThisShowsUpLibrary(),
 ];
 
-// Footer with page numbers
 const docFooter = new Footer({
   children: [
     new Paragraph({
