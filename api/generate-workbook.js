@@ -430,7 +430,7 @@ function estimatePageOffsets({ s1, s2, expGaps, priorities, gapThreshold = 1.0 }
 // actual coupleType into estimatePageOffsets; for now default to cross-type.
 function coupleTypeIsSame() { return false; }
 
-function buildTOC(offsets, priorities) {
+function buildTOC(offsets, priorities, u, p, coupleType) {
   // TOC rows rendered as 2-column tables: label cell (left) + page-number
   // cell (right). This is more robust than tab-stop leaders, which render
   // inconsistently across Word / Pages / Google Docs / online previewers.
@@ -521,7 +521,57 @@ function buildTOC(offsets, priorities) {
 
   // Part 3 — Working Knowledge (NEW)
   rows.push(...tocSection({ partEyebrow: 'PART 3', title: 'Working Knowledge', pageNum: offsets.workingKnowledgePage, color: PURPLE }));
-  rows.push(tocRow({ label: 'Six Moments — guidance for each partner', pageNum: offsets.workingKnowledgePage, indent: 280, labelSize: 20, labelColor: MUTED }));
+  // Inside Part 3, list each of the six moments with its page, so users
+  // can flip to relevant guidance in a real moment (e.g. "after a
+  // disagreement"). For cross-type couples there are two sets (one per
+  // partner); for same-type there's just one.
+  {
+    const [typeU, typeP] = partnerTypes(coupleType || {});
+    const sameType = typeU === typeP;
+    // Cross-type layout: intro page, then Partner1 moments 1-3, moments 4-6,
+    // then Partner2 moments 1-3, moments 4-6. Each moment-page holds 3 moments.
+    // Same-type: intro page, then moments 1-3, moments 4-6.
+    const firstPage = offsets.workingKnowledgePage;
+
+    if (sameType) {
+      const momentsPage1 = firstPage + 1;  // moments 1-3
+      const momentsPage2 = firstPage + 2;  // moments 4-6
+      MOMENTS.forEach((m, i) => {
+        rows.push(tocRow({
+          label: `${i + 1}. ${m.title}`,
+          pageNum: i < 3 ? momentsPage1 : momentsPage2,
+          indent: 280, labelSize: 20, labelColor: MUTED,
+        }));
+      });
+    } else {
+      // Partner U first
+      rows.push(tocRow({
+        label: `What ${p} should know about ${u}`,
+        pageNum: firstPage + 1,
+        indent: 280, labelSize: 20, labelColor: MUTED, italic: true,
+      }));
+      MOMENTS.forEach((m, i) => {
+        rows.push(tocRow({
+          label: `${i + 1}. ${m.title}`,
+          pageNum: i < 3 ? firstPage + 1 : firstPage + 2,
+          indent: 560, labelSize: 18, labelColor: MUTED,
+        }));
+      });
+      // Partner P second
+      rows.push(tocRow({
+        label: `What ${u} should know about ${p}`,
+        pageNum: firstPage + 4,
+        indent: 280, labelSize: 20, labelColor: MUTED, italic: true,
+      }));
+      MOMENTS.forEach((m, i) => {
+        rows.push(tocRow({
+          label: `${i + 1}. ${m.title}`,
+          pageNum: i < 3 ? firstPage + 4 : firstPage + 5,
+          indent: 560, labelSize: 18, labelColor: MUTED,
+        }));
+      });
+    }
+  }
 
   // Part 4 — Patterns (NEW)
   rows.push(...tocSection({ partEyebrow: 'PART 4', title: 'Patterns That Shape Your Relationship', pageNum: offsets.patternsPage, color: BLUE }));
@@ -1543,7 +1593,7 @@ export default async function handler(req, res) {
   // Build document
   const children = [
     ...buildCover(u, p, coupleType),
-    ...buildTOC(offsets, priorities),
+    ...buildTOC(offsets, priorities, u, p, coupleType),
     ...buildIntro(u, p),
 
     ...buildPartCover(1, 'Your Snapshot',
