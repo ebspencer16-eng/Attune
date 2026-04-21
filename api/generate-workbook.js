@@ -700,9 +700,9 @@ function buildSnapshot(u, p, scores, partnerScores, coupleType, expGaps) {
       tc(meta.label, 2800, { size: 18 }),
       tc(s1 + ' / 5', 1000, { color: ORANGE, size: 18 }),
       tc(s2 + ' / 5', 1000, { color: ORANGE, size: 18 }),
-      tc(gap.toFixed(1), 700, { color: color, bold: true, size: 18 }),
+      tc(gap.toFixed(1), 900, { color: color, bold: true, size: 18 }),
       tc(label, 1800, { color: color, size: 18 }),
-      tc(scoreBar(Number(s1)) + ' / ' + scoreBar(Number(s2)), 2060, { size: 16, color: MUTED }),
+      tc(scoreBar(Number(s1)) + ' / ' + scoreBar(Number(s2)), 1860, { size: 16, color: MUTED }),
     ]});
   });
 
@@ -743,9 +743,9 @@ function buildSnapshot(u, p, scores, partnerScores, coupleType, expGaps) {
 
     eyebrow('Communication dimensions', ORANGE),
     new Table({
-      width: { size: W, type: WidthType.DXA }, columnWidths: [2800, 1000, 1000, 700, 1800, 2060],
+      width: { size: W, type: WidthType.DXA }, columnWidths: [2800, 1000, 1000, 900, 1800, 1860],
       rows: [
-        new TableRow({ children: [hc('Dimension', 2800, INK), hc(`${u}`, 1000, ORANGE), hc(`${p}`, 1000, ORANGE), hc('Gap', 700, ORANGE), hc('Alignment', 1800, ORANGE), hc('Score bars', 2060, INK)] }),
+        new TableRow({ children: [hc('Dimension', 2800, INK), hc(`${u}`, 1000, ORANGE), hc(`${p}`, 1000, ORANGE), hc('Gap', 900, ORANGE), hc('Alignment', 1800, ORANGE), hc('Score bars', 1860, INK)] }),
         ...dimRows,
       ]
     }),
