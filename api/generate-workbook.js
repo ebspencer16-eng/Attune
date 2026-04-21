@@ -767,10 +767,10 @@ function buildDimensionHero(meta, u, p, score1, score2, accentColor) {
   const gColor = gapColour(gap);
   const gLabel = gapLabel(gap);
 
-  // Left column: big label, axis summary as small caps, gap badge
+  // Left column: big label + gap badge. Axis label moved to the right
+  // column (above the scales) so it reads as a label for the scales
+  // themselves rather than a tagline for the dimension name.
   const leftCellChildren = [
-    new Paragraph({ spacing: { after: 40 },
-      children: [run(`${meta.left}  ←→  ${meta.right}`, { size: 14, color: MUTED, italics: true })] }),
     new Paragraph({ spacing: { after: 120 },
       children: [run(meta.label, { size: 34, bold: true, color })] }),
     // Gap badge
@@ -793,9 +793,8 @@ function buildDimensionHero(meta, u, p, score1, score2, accentColor) {
     }),
   ];
 
-  // Right column: two score bars stacked. Each bar shows partner name, axis,
-  // filled segments, and numeric score. Compact version of scoreBarRow —
-  // inline in a narrower space.
+  // Right column: axis header above, then two score bars stacked. Each bar
+  // shows partner name, filled segments, and numeric score.
   const compactBar = (partnerLabel, score, fillColor) => {
     const clamped = Math.max(1, Math.min(5, score));
     const filled = Math.round(clamped);
@@ -826,7 +825,22 @@ function buildDimensionHero(meta, u, p, score1, score2, accentColor) {
     ];
   };
 
+  // Axis header: left label flush-left, right label flush-right, tiny
+  // italics in MUTED color. Rendered as a 2-col borderless table so the
+  // labels sit at the extremes of the bar width.
+  const axisHeader = new Table({
+    width: { size: 3400, type: WidthType.DXA }, columnWidths: [1700, 1700],
+    borders: { top: { style: BorderStyle.NIL }, bottom: { style: BorderStyle.NIL }, left: { style: BorderStyle.NIL }, right: { style: BorderStyle.NIL }, insideHorizontal: { style: BorderStyle.NIL }, insideVertical: { style: BorderStyle.NIL } },
+    rows: [new TableRow({ children: [
+      new TableCell({ borders: noBrds, width: { size: 1700, type: WidthType.DXA }, margins: { top: 0, bottom: 40, left: 0, right: 0 },
+        children: [new Paragraph({ spacing: { after: 0 }, children: [run(meta.left, { size: 11, color: MUTED, italics: true, allCaps: true, characterSpacing: 30 })] })] }),
+      new TableCell({ borders: noBrds, width: { size: 1700, type: WidthType.DXA }, margins: { top: 0, bottom: 40, left: 0, right: 0 },
+        children: [new Paragraph({ alignment: AlignmentType.RIGHT, spacing: { after: 0 }, children: [run(meta.right, { size: 11, color: MUTED, italics: true, allCaps: true, characterSpacing: 30 })] })] }),
+    ]})],
+  });
+
   const rightCellChildren = [
+    axisHeader,
     ...compactBar(u, score1, ORANGE),
     ...compactBar(p, score2, BLUE),
   ];
@@ -958,32 +972,62 @@ function buildInsights(u, p, scores, partnerScores) {
 
 function buildExpDomains(u, p, expGaps) {
   const result = [];
-  expGaps.forEach(eg => {
+  expGaps.forEach((eg, idx) => {
     const domain = EXP_DOMAINS.find(d => d.key === eg.key);
     if (!domain) return;
     const isClose = eg.aligned;
     const mainText = fill(isClose ? domain.closeText : domain.gapText, u, p);
+    const accentColor = isClose ? GREEN : ORANGE;
 
-    result.push(new Paragraph({ heading: HeadingLevel.HEADING_3, children: [run(domain.label, { color: GREEN })] }));
-
-    // Answer comparison
+    // Header row: domain name in accent-color bold + small status pill on
+    // the right. No filled banner row — just clean text with an inline
+    // status indicator.
     result.push(new Table({
-      width: { size: W, type: WidthType.DXA }, columnWidths: [2200, 2800, 2800, 1560],
+      width: { size: W, type: WidthType.DXA }, columnWidths: [W - 1800, 1800],
+      borders: { top: { style: BorderStyle.NIL }, bottom: { style: BorderStyle.NIL }, left: { style: BorderStyle.NIL }, right: { style: BorderStyle.NIL }, insideHorizontal: { style: BorderStyle.NIL }, insideVertical: { style: BorderStyle.NIL } },
       rows: [new TableRow({ children: [
-        hc(domain.label, 2200, GREEN),
-        hc(`${u}: ${answerLabel(eg.yourAnswer, u, p)}`, 2800, '555555'),
-        hc(`${p}: ${answerLabel(eg.partnerAnswer, u, p)}`, 2800, '555555'),
-        hc(eg.aligned ? '\u2713 Aligned' : 'Gap', 1560, eg.aligned ? GREEN : ORANGE),
-      ]})]
+        new TableCell({ borders: noBrds, width: { size: W - 1800, type: WidthType.DXA }, margins: { top: 0, bottom: 60, left: 0, right: 0 },
+          children: [new Paragraph({ spacing: { after: 0 }, children: [run(domain.label, { size: 24, bold: true, color: GREEN })] })] }),
+        new TableCell({ borders: noBrds, width: { size: 1800, type: WidthType.DXA }, margins: { top: 0, bottom: 60, left: 0, right: 0 },
+          children: [new Paragraph({ alignment: AlignmentType.RIGHT, spacing: { after: 0 },
+            children: [
+              run(isClose ? '\u2713  ' : '\u25CF  ', { size: 16, bold: true, color: accentColor }),
+              run(isClose ? 'ALIGNED' : 'GAP', { size: 13, bold: true, color: accentColor, allCaps: true, characterSpacing: 80 }),
+            ],
+          })] }),
+      ]})],
     }));
-    result.push(sp());
 
-    result.push(eyebrow(`What this means for ${u} and ${p}`, GREEN));
-    result.push(accentBox(null, mainText, isClose ? 'F0FDF9' : 'F0FFF8', isClose ? GREEN : ORANGE));
+    // Answer summary as a small inline comparison — italic, light weight,
+    // not a table. Reads like a caption rather than data.
+    result.push(new Paragraph({ spacing: { after: 160 },
+      children: [
+        run(`${u}: `, { size: 18, bold: true, color: MUTED }),
+        run(answerLabel(eg.yourAnswer, u, p), { size: 18, color: INK, italics: true }),
+        run('    ·    ', { size: 18, color: STONE }),
+        run(`${p}: `, { size: 18, bold: true, color: MUTED }),
+        run(answerLabel(eg.partnerAnswer, u, p), { size: 18, color: INK, italics: true }),
+      ],
+    }));
+
+    // What this means — the accent box stays, but the fill is lighter now
+    // to feel less "boxy." Dim the background toward cream rather than
+    // saturated mint.
+    result.push(accentBox(null, mainText, 'FBF9F3', accentColor));
     result.push(sp());
-    result.push(accentBox('Try this week', fill(domain.thisWeek, u, p), 'F0F9FF', GREEN));
-    result.push(sp());
-    result.push(hr(STONE, 2));
+    // Try this week — same lighter treatment.
+    result.push(accentBox('Try this week', fill(domain.thisWeek, u, p), 'FBF9F3', GREEN));
+
+    // Subtle separator between domains — dashed, not a hard rule
+    if (idx < expGaps.length - 1) {
+      result.push(new Paragraph({
+        spacing: { before: 320, after: 320 },
+        border: { bottom: { style: BorderStyle.DASHED, size: 4, color: STONE, space: 6 } },
+        children: [new TextRun('')],
+      }));
+    } else {
+      result.push(sp());
+    }
   });
   return result;
 }
@@ -1001,8 +1045,12 @@ function buildPriorities(u, p, scores, partnerScores, priorities) {
       const color = meta.color || ORANGE;
 
       return [
+        // Start each priority on a fresh page so commitment space never
+        // gets cut off and each priority reads like its own spread.
+        i === 0 ? sp() : pb(),
+
         // Priority label as eyebrow
-        new Paragraph({ spacing: { before: i === 0 ? 0 : 400, after: 80 },
+        new Paragraph({ spacing: { after: 80 },
           children: [run(`PRIORITY ${i + 1}`, { size: 14, bold: true, color: ORANGE, allCaps: true, characterSpacing: 80 })] }),
 
         // Hero: same visual treatment as dimension pages
@@ -1021,19 +1069,20 @@ function buildPriorities(u, p, scores, partnerScores, priorities) {
         sp(),
 
         // Commitment space — the bit that differentiates a priority from a
-        // dimension page. What are you specifically going to do?
+        // dimension page. Generous write-in boxes so the commitment section
+        // actually feels usable, not cramped.
         eyebrow('Our commitment', color),
         new Table({
           width: { size: W, type: WidthType.DXA }, columnWidths: [W],
           rows: [
             new TableRow({ children: [tc(`What we're each committing to:`, W, { bold: true, fill: 'FAFAF8', color: MUTED, size: 18 })] }),
-            new TableRow({ children: [tc('\n\n\n\n', W)] }),
+            new TableRow({ height: { value: 2000, rule: HeightRule.ATLEAST },
+              children: [tc('', W)] }),
             new TableRow({ children: [tc(`We'll revisit this on:`, W, { bold: true, fill: 'FAFAF8', color: MUTED, size: 18 })] }),
-            new TableRow({ children: [tc('\n', W)] }),
+            new TableRow({ height: { value: 500, rule: HeightRule.ATLEAST },
+              children: [tc('', W)] }),
           ]
         }),
-        sp(),
-        hr(STONE, 2),
       ];
     }),
   ];
@@ -1251,16 +1300,27 @@ function buildMomentCard(moment, subjectName, otherName, typeLetter) {
 
   return [
     // Moment title bar
+    // Header: small colored square "badge" with the number in white, sitting
+    // inline with the moment title in accent color. Much more editorial than
+    // a full-row filled banner. The square cell is rendered as a narrow
+    // 2-column table with a background fill.
     new Table({
-      width: { size: W, type: WidthType.DXA }, columnWidths: [600, W - 600],
-      rows: [new TableRow({ children: [
-        new TableCell({ borders: noBrds, width: { size: 600, type: WidthType.DXA },
-          shading: { fill: PURPLE, type: ShadingType.CLEAR }, margins: { top: 120, bottom: 120, left: 160, right: 0 },
-          children: [new Paragraph({ alignment: AlignmentType.CENTER, spacing: { after: 0 }, children: [run(moment.number || '', { size: 24, bold: true, color: 'FFFFFF' })] })] }),
-        new TableCell({ borders: noBrds, width: { size: W - 600, type: WidthType.DXA },
-          shading: { fill: 'F7F3FC', type: ShadingType.CLEAR }, margins: { top: 120, bottom: 120, left: 240, right: 200 },
-          children: [new Paragraph({ spacing: { after: 0 }, children: [run(moment.title, { size: 24, bold: true, color: INK })] })] }),
-      ]})],
+      width: { size: W, type: WidthType.DXA }, columnWidths: [500, W - 500],
+      borders: { top: { style: BorderStyle.NIL }, bottom: { style: BorderStyle.NIL }, left: { style: BorderStyle.NIL }, right: { style: BorderStyle.NIL }, insideHorizontal: { style: BorderStyle.NIL }, insideVertical: { style: BorderStyle.NIL } },
+      rows: [new TableRow({
+        height: { value: 500, rule: HeightRule.ATLEAST },
+        children: [
+          new TableCell({ borders: noBrds, width: { size: 500, type: WidthType.DXA },
+            shading: { fill: PURPLE, type: ShadingType.CLEAR },
+            margins: { top: 80, bottom: 80, left: 0, right: 0 },
+            children: [new Paragraph({ alignment: AlignmentType.CENTER, spacing: { after: 0 },
+              children: [run(moment.number || '', { size: 22, bold: true, color: 'FFFFFF' })] })] }),
+          new TableCell({ borders: noBrds, width: { size: W - 500, type: WidthType.DXA },
+            margins: { top: 80, bottom: 80, left: 280, right: 0 },
+            children: [new Paragraph({ spacing: { after: 0 },
+              children: [run(moment.title, { size: 24, bold: true, color: PURPLE })] })] }),
+        ],
+      })],
     }),
     sp(),
 
