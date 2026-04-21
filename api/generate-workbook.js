@@ -407,17 +407,13 @@ function estimatePageOffsets({ s1, s2, expGaps, priorities, gapThreshold = 1.0 }
   const conversationPage = p + 1;
   p += 3;                                     // 5 situations ~ 2 pages + structured guide
 
-  // Unnumbered coda — "A letter to a year ago" (no cover, no epigraph)
-  const overTimePage = p + 1;
-  p += 1;
-
   // Part 5 — Reference Card
   p += 1;                                     // Part 5 cover
   const referencePage = p + 1;
 
   return { introPage, snapshotPage, insightsPage, domainPages, expPage,
            workingKnowledgePage,
-           prioritiesPage, conversationPage, overTimePage,
+           prioritiesPage, conversationPage,
            referencePage, visibleDomains };
 }
 
@@ -575,9 +571,6 @@ function buildTOC(offsets, priorities, u, p, coupleType) {
     }));
   });
   rows.push(tocRow({ label: 'A structured first conversation', pageNum: offsets.conversationPage + 2, indent: 280, labelSize: 20, labelColor: MUTED, italic: true }));
-
-  // A letter to a year ago — unnumbered coda, not a full Part
-  rows.push(tocRow({ label: 'A letter to a year ago', labelBold: true, pageNum: offsets.overTimePage, after: 180 }));
 
   // Part 5 — Reference Card
   rows.push(...tocSection({ partEyebrow: 'PART 5', title: 'Reference Card', pageNum: offsets.referencePage, color: GREEN }));
@@ -1423,33 +1416,6 @@ function buildConversationLibrary(u, p, coupleType, priorities) {
   ];
 }
 
-// ─── Over Time (Part 6) ──────────────────────────────────────────────────────
-// A single dedicated page placed between the Conversation Library and the
-// Reference Card. Not a full Part — just a quiet coda where the couple
-// writes back to themselves a year from now.
-
-function buildOverTime(u, p, priorities) {
-  return [
-    pb(),
-    new Paragraph({ heading: HeadingLevel.HEADING_1, children: [run('A letter to a year ago', { color: PURPLE })] }),
-    para(`A year from now, write back to the version of yourselves who opened this workbook today. A 30-day check-in lives in Part 3 — this is the longer return.`,
-      { size: 22, color: MUTED, after: 240 }),
-
-    accentBox('Before you write',
-      `Take a minute first. What was different a year ago? What did you wish you'd known? What had been stuck that isn't anymore? What's still stuck?`,
-      'F7F3FC', PURPLE),
-    sp(),
-
-    accentBox('The prompt',
-      `Dear ${u} and ${p} from a year ago — what do you need us to know?`,
-      'FFF8F0', ORANGE),
-    sp(),
-
-    new Table({ width: { size: W, type: WidthType.DXA }, columnWidths: [W],
-      rows: [new TableRow({ children: [tc('\n\n\n\n\n\n\n\n\n\n\n\n', W, { fill: 'FAFAF8' })] })] }),
-  ];
-}
-
 // ─── Gap ranking — find top 3 priorities ─────────────────────────────────────
 function rankPriorities(scores, partnerScores) {
   // High-influence dims get a weight bonus even at moderate gap
@@ -1538,9 +1504,6 @@ export default async function handler(req, res) {
       PH('opening quote for Part 4 — something about language or talking'),
       PH('Attribution')),
     ...buildConversationLibrary(u, p, coupleType, priorities),
-
-    // Year 1 letter — unnumbered coda, single page before the Reference Card
-    ...buildOverTime(u, p, priorities),
 
     ...buildPartCover(5, 'Reference Card',
       `A half-page summary. Keep it somewhere you'll see it.`, GREEN),
