@@ -4037,20 +4037,235 @@ function AnniversaryExercise({ userName, partnerName, onComplete, onBack }) {
 // ======================================================
 // STARTING OUT CHECKLIST
 // ======================================================
+// Starting Out (newlywed) checklist.
+// Items are objects: { text, description, links? }.
+// State key uses item.text so existing checkmarks survive when only
+// descriptions/links change. The `text` strings should stay stable.
+//
+// Section order matters: Name Change is first because it cascades into
+// most other sections (IDs, bank accounts, insurance, etc.). Merging
+// Finances is second since it involves decisions that shape later steps.
 const CHECKLIST_AREAS = [
-  { id: "finances", label: "Merging Finances", icon: "💳", color: "#E8673A", items: ["Open a joint bank account", "Review and align on a monthly budget", "Set up automatic bill payment from joint account", "Update direct deposit allocations", "Decide on individual spending allowances", "Create an emergency fund goal together"] },
-  { id: "namechange", label: "Name Change", icon: "✍", color: "#1B5FE8", items: ["Apply for updated Social Security card", "Update driver's license / state ID", "Update passport (or apply if needed)", "Notify employer HR for payroll records", "Update bank and financial accounts", "Update voter registration"] },
-  { id: "insurance", label: "Insurance & Benefits", icon: "🛡", color: "#10b981", items: ["Add spouse to health insurance plan", "Update life insurance beneficiaries", "Update car insurance to joint policy", "Review home/renters insurance together", "Update employer benefits forms"] },
-  { id: "estate", label: "Estate Basics", icon: "📋", color: "#F59E0B", items: ["Create or update your wills", "Set up healthcare proxies / medical directives", "Designate beneficiaries on retirement accounts", "Consider a durable power of attorney", "Store important documents in one place"] },
-  { id: "taxes", label: "Taxes", icon: "🧾", color: "#8B5CF6", items: ["Decide on tax filing status (MFJ vs MFS)", "Update W-4 withholding at work", "Plan for any marriage tax penalty or bonus", "Start tracking deductible expenses", "Discuss approach with a tax professional if needed"] },
-  { id: "home", label: "Household Setup", icon: "🏠", color: "#EC4899", items: ["Consolidate or organize household subscriptions", "Set up shared calendar for household tasks", "Establish a system for shared errands", "Inventory and organize important documents", "Set up an emergency contact system"] },
-  { id: "social", label: "Social & Admin", icon: "📬", color: "#06B6D4", items: ["Update address with USPS if applicable", "Notify key contacts of name / address changes", "Update social media and professional profiles", "Merge or update streaming/subscription accounts", "Update contact info on important accounts"] },
+  {
+    id: "namechange", label: "Name Change", icon: "✍", color: "#1B5FE8",
+    items: [
+      {
+        text: "Apply for updated Social Security card",
+        description: "Start here. Most other name changes require your updated Social Security card first. File Form SS-5 with the Social Security Administration — in person or by mail, with your marriage certificate. This is free.",
+        links: [
+          { label: "SSA Form SS-5 (PDF)", url: "https://www.ssa.gov/forms/ss-5.pdf" },
+          { label: "SSA: Change of name", url: "https://www.ssa.gov/personal-record/change-name" },
+        ],
+      },
+      {
+        text: "Update driver's license / state ID",
+        description: "Once you have your new Social Security card, visit your state's DMV with your marriage certificate and current ID. Requirements and fees vary by state.",
+        links: [
+          { label: "usa.gov: change your name after marriage", url: "https://www.usa.gov/legally-change-name" },
+        ],
+      },
+      {
+        text: "Update passport (or apply if needed)",
+        description: "If your passport was issued in the last year, you may qualify for a free update via Form DS-5504. Otherwise use Form DS-82 for renewals with a name change.",
+        links: [
+          { label: "Change passport name", url: "https://travel.state.gov/content/travel/en/passports/have-passport/change-of-name.html" },
+        ],
+      },
+      {
+        text: "Notify employer HR for payroll records",
+        description: "Update your payroll name, direct deposit, and benefits enrollment. Do this before the end of the tax year so your W-2 reflects the correct name.",
+      },
+      {
+        text: "Update bank and financial accounts",
+        description: "Visit each bank with your new ID and marriage certificate. This cascades to linked credit cards, loans, and retirement accounts. Update brokerage and retirement beneficiaries while you're at it.",
+      },
+      {
+        text: "Update voter registration",
+        description: "Most states let you update voter registration online once your driver's license is updated.",
+        links: [
+          { label: "vote.gov", url: "https://vote.gov/" },
+        ],
+      },
+      {
+        text: "Notify key contacts and update accounts",
+        description: "Let doctors, dentists, pharmacies, insurance, utilities, and other important accounts know. Low stakes individually, easy to forget.",
+      },
+      {
+        text: "Update social media and professional profiles",
+        description: "LinkedIn, email signature, professional website, personal social accounts. Optional but ties everything together.",
+      },
+    ],
+  },
+  {
+    id: "finances", label: "Merging Finances", icon: "💳", color: "#E8673A",
+    items: [
+      {
+        text: "Decide whether to combine finances, keep them separate, or do a hybrid approach",
+        description: "This is the foundational decision. It shapes everything that follows — joint accounts, bill pay, savings goals, spending allowances. Attune's Build a Budget exercise walks you through this decision together.",
+        links: [
+          { label: "Attune Build a Budget exercise", url: "/portal" },
+        ],
+      },
+      {
+        text: "Open a joint bank account",
+        description: "If you're combining or going hybrid, open a joint checking and savings together. Bring both IDs and marriage certificate if recently changing names.",
+      },
+      {
+        text: "Review and align on a monthly budget",
+        description: "Use Attune's Build a Budget exercise to set shared categories and amounts. Revisit quarterly.",
+        links: [
+          { label: "Attune Build a Budget exercise", url: "/portal" },
+        ],
+      },
+      {
+        text: "Set up automatic bill payment from joint account",
+        description: "Rent/mortgage, utilities, subscriptions, insurance. Removes the month-to-month question of who's paying what.",
+      },
+      {
+        text: "Update direct deposit allocations",
+        description: "If you want money flowing into a joint account automatically, update your payroll direct deposit through your employer.",
+      },
+      {
+        text: "Decide on individual spending allowances",
+        description: "Most couples benefit from each person having some money that doesn't need to be discussed. Decide the amount and the cadence.",
+      },
+      {
+        text: "Create an emergency fund goal together",
+        description: "Typical target is 3–6 months of essential expenses in a high-yield savings account. Start with a smaller milestone ($1,000, then one month) if that feels more reachable.",
+      },
+    ],
+  },
+  {
+    id: "insurance", label: "Insurance & Benefits", icon: "🛡", color: "#10b981",
+    items: [
+      {
+        text: "Review and update health insurance plan",
+        description: "Marriage is a qualifying life event. Most policies give you a 30-day window after the wedding to add a spouse or switch plans — contact your HR or insurer immediately. Compare both partners' plans to pick the better option.",
+      },
+      {
+        text: "Update life insurance beneficiaries",
+        description: "Check employer-provided and private life insurance policies. Old beneficiaries (parents, siblings, exes) don't update automatically.",
+      },
+      {
+        text: "Update car insurance to joint policy",
+        description: "Combining policies often drops per-person rates. Call both carriers, compare, and pick the better offer.",
+      },
+      {
+        text: "Review home/renters insurance together",
+        description: "Update the policy to list both names and revise coverage if you're combining households with more belongings.",
+      },
+      {
+        text: "Update employer benefits forms",
+        description: "HSA, FSA, 401(k), disability, emergency contact. Life event window applies here too.",
+      },
+    ],
+  },
+  {
+    id: "estate", label: "Estate Basics", icon: "📋", color: "#F59E0B",
+    items: [
+      {
+        text: "Create or update your wills",
+        description: "Simple wills are inexpensive and usually fine for young couples. Services like FreeWill or Trust & Will are popular; a local estate attorney is worth it if you have significant assets or complex family.",
+        links: [
+          { label: "FreeWill", url: "https://www.freewill.com/" },
+        ],
+      },
+      {
+        text: "Set up healthcare proxies / medical directives",
+        description: "Names the person who makes medical decisions if you can't. Often bundled with a will — check what your state requires.",
+      },
+      {
+        text: "Designate beneficiaries on retirement accounts",
+        description: "401(k), IRA, pension. Retirement account beneficiaries override your will — update them directly with each institution.",
+      },
+      {
+        text: "Consider a durable power of attorney",
+        description: "Lets your spouse act on your behalf for financial and legal matters if you're incapacitated. Pairs with the healthcare proxy.",
+      },
+      {
+        text: "Consider term life insurance",
+        description: "If someone depends on your income, term life insurance protects them if something happens to you. 20–30 year policies are common and often affordable when you're young and healthy. Start with 10–12× your annual income as a rough rule.",
+      },
+      {
+        text: "Store important documents in one place",
+        description: "Marriage certificate, wills, insurance policies, deeds, account numbers. Tell your spouse where it is. A small fireproof safe or a shared encrypted folder both work.",
+      },
+    ],
+  },
+  {
+    id: "taxes", label: "Taxes", icon: "🧾", color: "#8B5CF6",
+    items: [
+      {
+        text: "Decide on tax filing status (MFJ vs MFS)",
+        description: "Marriage any time in the year — even December 31 — updates your filing status for the whole year. Most couples benefit from Married Filing Jointly, but there are edge cases (high medical expenses, income-based student loans) where Married Filing Separately wins.",
+        links: [
+          { label: "IRS: Filing status", url: "https://www.irs.gov/individuals/how-a-taxpayer-may-obtain-a-tax-filing-extension" },
+        ],
+      },
+      {
+        text: "Update W-4 withholding at work",
+        description: "File a new W-4 with your employer. The IRS withholding estimator helps you choose an amount.",
+        links: [
+          { label: "IRS Tax Withholding Estimator", url: "https://www.irs.gov/individuals/tax-withholding-estimator" },
+        ],
+      },
+      {
+        text: "Plan for any marriage tax penalty or bonus",
+        description: "Couples with similar incomes sometimes owe more combined than they would separately. Couples with very different incomes usually benefit.",
+      },
+      {
+        text: "Start tracking deductible expenses",
+        description: "Mortgage interest, charitable giving, HSA contributions. Decide if you're itemizing this year or taking the standard deduction.",
+      },
+      {
+        text: "Discuss approach with a tax professional if needed",
+        description: "Worth a one-time consult if you have business income, rental property, or significant investment income. Otherwise good tax software is usually fine.",
+      },
+    ],
+  },
+  {
+    id: "home", label: "Household Setup", icon: "🏠", color: "#EC4899",
+    items: [
+      {
+        text: "If moving in together or to a new place, update your address with USPS, the IRS, your bank, subscriptions, and employer",
+        description: "USPS mail forwarding lasts 12 months — do this right after the move. File IRS Form 8822 separately (mail forwarding does not update your address with the IRS). Then update bank, employer, and recurring subscriptions.",
+        links: [
+          { label: "USPS Change of Address", url: "https://moversguide.usps.com/" },
+          { label: "IRS Form 8822", url: "https://www.irs.gov/forms-pubs/about-form-8822" },
+        ],
+      },
+      {
+        text: "Consolidate or organize household subscriptions, including streaming subscriptions",
+        description: "Cancel duplicates, swap to family plans where cheaper. Common overlaps: Netflix, Spotify, Disney+, Amazon, iCloud, cloud storage, gym memberships.",
+      },
+      {
+        text: "Set up shared calendar for household tasks",
+        description: "Google Calendar, iCloud, Notion — whichever you both already use. Recurring tasks (trash day, bill due dates) and one-offs (doctor visits, trips).",
+      },
+      {
+        text: "Establish a system for shared errands",
+        description: "Shared grocery list, chore rotation, whose turn for what. Low-tech works: a whiteboard on the fridge. High-tech works too: Todoist, Cozi, Tody.",
+      },
+      {
+        text: "Inventory and organize important documents",
+        description: "Birth certificates, passports, Social Security cards, marriage certificate, vehicle titles, tax returns. Stored somewhere both of you can find.",
+      },
+      {
+        text: "Set up an emergency contact system",
+        description: "Update each other's phones with emergency contact info. Share a list of key people (parents, close friends, doctors) with the other partner.",
+      },
+    ],
+  },
 ];
 
 function StartingOutChecklist({ userName, partnerName, onBack, checklistState, setChecklistState }) {
   const totalItems = CHECKLIST_AREAS.reduce((s, a) => s + a.items.length, 0);
   const checkedCount = Object.values(checklistState).filter(v => v === true || v === 'na').length;
   const pct = Math.round((checkedCount / totalItems) * 100);
+
+  // Which item's description is currently expanded. Single-open behavior
+  // keeps the page compact; clicking an already-open item collapses it.
+  const [expandedKey, setExpandedKey] = useState(null);
 
   const toggle = (key) => {
     const cur = checklistState[key];
@@ -4065,7 +4280,7 @@ function StartingOutChecklist({ userName, partnerName, onBack, checklistState, s
       <div style={{ marginBottom: "1.75rem" }}>
         <div style={{ fontSize: "0.6rem", letterSpacing: "0.22em", textTransform: "uppercase", color: "#E8673A", fontWeight: 700, fontFamily: font.body, marginBottom: "0.35rem" }}>Starting Out Collection</div>
         <h1 style={{ fontFamily: font.display, fontSize: "1.8rem", fontWeight: 700, color: C.ink, lineHeight: 1.1, marginBottom: "0.6rem" }}>Starting Out Checklist</h1>
-        <p style={{ fontSize: "0.85rem", color: C.muted, fontFamily: font.body, fontWeight: 300, lineHeight: 1.65, marginBottom: "1.25rem" }}>The real-world logistics of merging your lives. Check things off as you go, no rush, just a clear picture of what's done and what's next.</p>
+        <p style={{ fontSize: "0.85rem", color: C.muted, fontFamily: font.body, fontWeight: 300, lineHeight: 1.65, marginBottom: "1.25rem" }}>The real-world logistics of merging your lives. Tap the arrow next to each item for a bit more context. Check things off as you go, no rush, just a clear picture of what's done and what's next.</p>
         <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
           <div style={{ flex: 1, background: C.stone + "60", borderRadius: 999, height: 6 }}>
             <div style={{ background: "linear-gradient(90deg, #E8673A, #1B5FE8)", height: 6, borderRadius: 999, width: pct + "%", transition: "width 0.3s" }} />
@@ -4074,7 +4289,7 @@ function StartingOutChecklist({ userName, partnerName, onBack, checklistState, s
         </div>
       </div>
       {CHECKLIST_AREAS.map(area => {
-        const areaChecked = area.items.filter(item => { const v = checklistState[area.id + "__" + item]; return v === true || v === 'na'; }).length;
+        const areaChecked = area.items.filter(item => { const v = checklistState[area.id + "__" + item.text]; return v === true || v === 'na'; }).length;
         return (
           <div key={area.id} style={{ background: "white", border: "1.5px solid " + C.stone, borderRadius: 14, marginBottom: "0.75rem", overflow: "hidden" }}>
             <div style={{ padding: "1rem 1.25rem", borderBottom: "1px solid " + C.stone + "60", display: "flex", alignItems: "center", gap: "0.75rem", background: area.color + "08" }}>
@@ -4087,19 +4302,57 @@ function StartingOutChecklist({ userName, partnerName, onBack, checklistState, s
             </div>
             <div style={{ padding: "0.75rem 1.25rem" }}>
               {area.items.map(item => {
-                const key = area.id + "__" + item;
+                const key = area.id + "__" + item.text;
                 const state = checklistState[key]; // false | true | 'na'
                 const isDone = state === true;
                 const isNA   = state === 'na';
+                const isExpanded = expandedKey === key;
+                const hasDetail = !!(item.description || (item.links && item.links.length));
                 return (
-                  <div key={item} onClick={() => toggle(key)} style={{ display: "flex", alignItems: "flex-start", gap: "0.75rem", padding: "0.5rem 0", cursor: "pointer", borderBottom: "1px solid " + C.stone + "40" }}>
-                    <div style={{ width: 18, height: 18, borderRadius: 5, border: "2px solid " + (isDone ? area.color : isNA ? C.muted : C.stone), background: isDone ? area.color : isNA ? C.stone + "80" : "white", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, marginTop: "0.05rem", transition: "all 0.15s" }}>
-                      {isDone && <span style={{ color: "white", fontSize: "0.7rem", fontWeight: 700, lineHeight: 1 }}>✓</span>}
-                      {isNA   && <span style={{ color: C.muted, fontSize: "0.6rem", fontWeight: 700, lineHeight: 1 }}>-</span>}
+                  <div key={item.text} style={{ borderBottom: "1px solid " + C.stone + "40" }}>
+                    <div style={{ display: "flex", alignItems: "flex-start", gap: "0.75rem", padding: "0.5rem 0" }}>
+                      <div onClick={() => toggle(key)} style={{ display: "flex", alignItems: "flex-start", gap: "0.75rem", flex: 1, cursor: "pointer", minWidth: 0 }}>
+                        <div style={{ width: 18, height: 18, borderRadius: 5, border: "2px solid " + (isDone ? area.color : isNA ? C.muted : C.stone), background: isDone ? area.color : isNA ? C.stone + "80" : "white", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, marginTop: "0.05rem", transition: "all 0.15s" }}>
+                          {isDone && <span style={{ color: "white", fontSize: "0.7rem", fontWeight: 700, lineHeight: 1 }}>✓</span>}
+                          {isNA   && <span style={{ color: C.muted, fontSize: "0.6rem", fontWeight: 700, lineHeight: 1 }}>-</span>}
+                        </div>
+                        <span style={{ fontSize: "0.82rem", color: isDone || isNA ? C.muted : C.text, fontFamily: font.body, textDecoration: isDone ? "line-through" : "none", fontStyle: isNA ? "italic" : "normal", lineHeight: 1.45 }}>
+                          {item.text}{isNA ? <span style={{ fontSize: "0.7rem", marginLeft: "0.5rem", color: C.muted }}>(not applicable)</span> : null}
+                        </span>
+                      </div>
+                      {hasDetail && (
+                        <button
+                          onClick={(e) => { e.stopPropagation(); setExpandedKey(isExpanded ? null : key); }}
+                          aria-label={isExpanded ? "Hide details" : "Show details"}
+                          aria-expanded={isExpanded}
+                          style={{ background: "transparent", border: "none", color: C.muted, cursor: "pointer", padding: "0.15rem 0.35rem", fontSize: "0.72rem", fontFamily: font.body, flexShrink: 0, lineHeight: 1, display: "flex", alignItems: "center", justifyContent: "center", borderRadius: 6, transition: "color 0.15s, background 0.15s" }}
+                          onMouseEnter={(e) => { e.currentTarget.style.color = area.color; e.currentTarget.style.background = area.color + "12"; }}
+                          onMouseLeave={(e) => { e.currentTarget.style.color = C.muted; e.currentTarget.style.background = "transparent"; }}
+                        >
+                          <span style={{ display: "inline-block", transition: "transform 0.2s ease", transform: isExpanded ? "rotate(180deg)" : "rotate(0)", fontSize: "0.7rem" }}>▾</span>
+                        </button>
+                      )}
                     </div>
-                    <span style={{ fontSize: "0.82rem", color: isDone || isNA ? C.muted : C.text, fontFamily: font.body, textDecoration: isDone ? "line-through" : "none", fontStyle: isNA ? "italic" : "normal", lineHeight: 1.45 }}>
-                      {item}{isNA ? <span style={{ fontSize: "0.7rem", marginLeft: "0.5rem", color: C.muted }}>(not applicable)</span> : null}
-                    </span>
+                    {hasDetail && isExpanded && (
+                      <div style={{ padding: "0.1rem 0 0.85rem 2.4rem", animation: "fadein 0.2s ease" }}>
+                        {item.description && (
+                          <p style={{ fontSize: "0.76rem", color: C.muted, fontFamily: font.body, lineHeight: 1.6, margin: "0 0 0.55rem", fontWeight: 300 }}>
+                            {item.description}
+                          </p>
+                        )}
+                        {item.links && item.links.length > 0 && (
+                          <div style={{ display: "flex", flexWrap: "wrap", gap: "0.4rem 0.75rem" }}>
+                            {item.links.map(link => (
+                              <a key={link.url} href={link.url} target={link.url.startsWith("http") ? "_blank" : undefined} rel={link.url.startsWith("http") ? "noopener noreferrer" : undefined}
+                                style={{ fontSize: "0.72rem", color: area.color, fontFamily: font.body, textDecoration: "none", fontWeight: 500, borderBottom: "1px solid " + area.color + "40", paddingBottom: 1 }}
+                                onMouseEnter={(e) => { e.currentTarget.style.borderBottomColor = area.color; }}
+                                onMouseLeave={(e) => { e.currentTarget.style.borderBottomColor = area.color + "40"; }}
+                              >{link.label} →</a>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    )}
                   </div>
                 );
               })}
@@ -8276,12 +8529,12 @@ const UPSELL_PRODUCTS = {
     title: "Starting Out Checklist",
     price: "$139",
     tagline: "The real-world logistics of merging your lives.",
-    description: "A comprehensive checklist covering the practical steps most couples discover too late: finances, name changes, insurance, estate basics, and the administrative setup of a shared life. Included as part of the Starting Out Collection.",
+    description: "A comprehensive checklist covering the practical steps most couples discover too late: name changes, finances, insurance, estate basics, and the administrative setup of a shared life. Included as part of the Starting Out Collection.",
     includes: [
+      "Name change checklist across government and financial accounts",
       "Merging finances and setting up joint accounts",
-      "Name change checklist across government and financial",
       "Insurance and benefits setup",
-      "Estate basics: wills, proxies, beneficiaries",
+      "Estate basics: wills, proxies, beneficiaries, term life",
     ],
     accentColor: "#E8673A",
     cartParam: "newlywed",
@@ -8398,7 +8651,7 @@ function PackagesModal({ currentPkg, onClose, onPick }) {
       badge: "For couples starting out",
       price: "$139",
       tagline: "Everything in Assessment + the logistics of merging lives.",
-      description: "Adds a bonus budget exercise and a practical checklist for finances, name changes, insurance, and estate basics.",
+      description: "Adds a bonus budget exercise and a practical checklist for name changes, finances, insurance, and estate basics.",
       color: "#E8673A",
       features: ["Everything in Assessment", "Starting Out checklist", "Build a budget exercise"],
     },
@@ -9879,7 +10132,7 @@ export default function App() {
                       <span style={{ fontSize: "1.1rem", flexShrink: 0 }}>☑</span>
                       <div style={{ flex: 1 }}>
                         <div style={{ fontSize: "0.75rem", fontWeight: 700, color: C.ink, fontFamily: font.body, marginBottom: "0.2rem" }}>Starting Out Checklist</div>
-                        <p style={{ fontSize: "0.72rem", color: C.muted, fontFamily: font.body, lineHeight: 1.55, margin: "0 0 0.4rem" }}>Finances, name changes, estate basics, and the real-world logistics of building a life together.</p>
+                        <p style={{ fontSize: "0.72rem", color: C.muted, fontFamily: font.body, lineHeight: 1.55, margin: "0 0 0.4rem" }}>Name changes, finances, estate basics, and the real-world logistics of building a life together.</p>
                         <span style={{ fontSize: "0.7rem", color: "#E8673A", fontWeight: 700, fontFamily: font.body }}>See details + add to cart →</span>
                       </div>
                     </div>

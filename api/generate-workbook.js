@@ -12,9 +12,9 @@ import {
   AlignmentType, HeadingLevel, BorderStyle, WidthType, ShadingType,
   PageBreak, LevelFormat,
   Header, Footer, PageNumber, TableOfContents, StyleLevel, HeightRule,
-  TabStopType, TabStopPosition, LeaderType, Tab,
+  TabStopType, TabStopPosition, LeaderType, Tab, VerticalAlign,
 } from 'docx';
-import { DIM_META, DIM_CONTENT, EXP_DOMAINS, DIMS } from './_workbook-content.js';
+import { DIM_META, DIM_CONTENT, EXP_DOMAINS, DIMS, WHEN_THIS_SHOWS_UP } from './_workbook-content.js';
 
 export const config = { runtime: 'nodejs' };
 
@@ -26,12 +26,16 @@ const MUTED  = '8C7A68';
 const STONE  = 'E8DDD0';
 const GREEN  = '10B981';
 const PURPLE = '9B5DE5';
+const NAVY   = '2D2250';   // Attune brand navy — used in portal UI and Reference Card
 
 // ─── Layout ───────────────────────────────────────────────────────────────────
 const W = 9360;
 const PAGE = {
   size: { width: 12240, height: 15840 },
-  margin: { top: 1440, right: 1440, bottom: 1440, left: 1440 },
+  // Tighter vertical margins so dim pages can fit a full analysis + two
+  // write-in sections without overflowing. Horizontal margins stay at 1"
+  // for comfortable line length on the hero's right column.
+  margin: { top: 720, right: 1440, bottom: 720, left: 1440 },
 };
 
 // ─── Doc primitives ───────────────────────────────────────────────────────────
@@ -186,6 +190,51 @@ const hc = (text, width, fill) => new TableCell({
 });
 
 // Accent box: left colour bar + shaded body
+// Lined-paper write-in: N horizontal dotted lines, no outer border, no
+// fill. Renders as a borderless table where each row has a dotted
+// bottom border — more reliable than paragraphs-with-borders because
+// LibreOffice collapses empty paragraphs.
+function ruledWriteIn(numLines = 5, opts = {}) {
+  const color      = opts.color      || 'C8BEB0';
+  const lineHeight = opts.lineHeight || 340;
+  const width      = opts.width      || W;
+  return new Table({
+    width: { size: width, type: WidthType.DXA }, columnWidths: [width],
+    borders: {
+      top: noBrd, bottom: noBrd, left: noBrd, right: noBrd,
+      insideHorizontal: noBrd, insideVertical: noBrd,
+    },
+    rows: Array.from({ length: numLines }, () => new TableRow({
+      height: { value: lineHeight, rule: HeightRule.EXACT },
+      cantSplit: false,
+      children: [new TableCell({
+        borders: {
+          top:    noBrd,
+          bottom: { style: BorderStyle.DOTTED, size: 4, color, space: 0 },
+          left:   noBrd,
+          right:  noBrd,
+        },
+        width: { size: width, type: WidthType.DXA },
+        margins: { top: 0, bottom: 0, left: 0, right: 0 },
+        children: [new Paragraph({ spacing: { after: 0, line: 120, lineRule: 'exact' }, children: [new TextRun('')] })],
+      })],
+    })),
+  });
+}
+
+// Labeled ruled write-in: small-caps colored label + optional italic hint
+// + lined-paper writing area. Replaces labeledWriteIn / softWriteIn
+// wherever we want the "notebook" feel instead of a dashed-border box.
+function labeledRuled(label, color, numLines, opts = {}) {
+  return [
+    new Paragraph({ spacing: { before: opts.beforeLabel ?? 200, after: 80 },
+      children: [run(label, { size: 13, bold: true, color, allCaps: true, characterSpacing: 60 })] }),
+    ...(opts.hint ? [new Paragraph({ spacing: { after: 100 },
+      children: [run(opts.hint, { size: 13, italics: true, color: MUTED })] })] : []),
+    ruledWriteIn(numLines, opts),
+  ];
+}
+
 // Soft editorial card: colored thin left rule + cream-pale fill + content.
 // Much less boxy than the previous filled-rectangle-with-stripe treatment.
 // The fill color is kept very close to white (cream tones) so the card
@@ -244,6 +293,64 @@ const epigraph = (quote, author) => [
   new Paragraph({ alignment: AlignmentType.CENTER, spacing: { after: 240 },
     children: [run(`— ${author}`, { size: 16, color: MUTED })] }),
 ];
+
+// Soft write-in: ghost fill + dashed border all 4 sides. Used wherever
+// people should actually write. Replaces the old "bottom-rule only" look
+// that reads as word-doc form field.
+//    heightTwips: minimum height of the writable area (1000 ≈ 2 lines)
+//    ghostFill:   pale background — defaults to cream-white
+//    borderColor: dashed border color — defaults to stone
+function softWriteIn(heightTwips, ghostFill = 'FDFCF8', borderColor = 'D9CEBE') {
+  const dashed = { style: BorderStyle.DASHED, size: 6, color: borderColor };
+  return new Table({
+    width: { size: W, type: WidthType.DXA }, columnWidths: [W],
+    borders: { top: noBrd, bottom: noBrd, left: noBrd, right: noBrd, insideHorizontal: noBrd, insideVertical: noBrd },
+    rows: [new TableRow({
+      height: { value: heightTwips, rule: HeightRule.ATLEAST },
+      children: [new TableCell({
+        borders: { top: dashed, bottom: dashed, left: dashed, right: dashed },
+        width: { size: W, type: WidthType.DXA },
+        shading: { fill: ghostFill, type: ShadingType.CLEAR },
+        margins: { top: 120, bottom: 120, left: 200, right: 200 },
+        children: [new Paragraph({ spacing: { after: 0 }, children: [new TextRun('')] })],
+      })],
+    })],
+  });
+}
+
+// Labeled write-in: small-caps colored label + ghost/dashed write-in below.
+function labeledWriteIn(label, color, heightTwips, opts = {}) {
+  return [
+    new Paragraph({ spacing: { before: 160, after: 80 },
+      children: [run(label, { size: 13, bold: true, color, allCaps: true, characterSpacing: 60 })] }),
+    ...(opts.hint ? [new Paragraph({ spacing: { after: 60 },
+      children: [run(opts.hint, { size: 13, italics: true, color: MUTED })] })] : []),
+    softWriteIn(heightTwips, opts.ghostFill, opts.borderColor),
+  ];
+}
+
+// Soft outlined card: thin colored border (all 4 sides) + ghost fill.
+// Used for containing visual groupings — e.g., a focus-area block that
+// wraps multiple labeled write-ins.
+function softCard(accentColor, children, opts = {}) {
+  const ghostFill = opts.ghostFill || 'FDFCF8';
+  return new Table({
+    width: { size: W, type: WidthType.DXA }, columnWidths: [W],
+    borders: { top: noBrd, bottom: noBrd, left: noBrd, right: noBrd, insideHorizontal: noBrd, insideVertical: noBrd },
+    rows: [new TableRow({ children: [new TableCell({
+      borders: {
+        top:    { style: BorderStyle.SINGLE, size: 6, color: accentColor },
+        bottom: { style: BorderStyle.SINGLE, size: 6, color: accentColor },
+        left:   { style: BorderStyle.SINGLE, size: 6, color: accentColor },
+        right:  { style: BorderStyle.SINGLE, size: 6, color: accentColor },
+      },
+      width: { size: W, type: WidthType.DXA },
+      shading: { fill: ghostFill, type: ShadingType.CLEAR },
+      margins: { top: 240, bottom: 240, left: 320, right: 320 },
+      children,
+    })]})],
+  });
+}
 
 // Check-item — an unchecked box followed by editable content. Used for
 // action items (Try this week), longitudinal prompts (revisit in 30 days).
@@ -317,6 +424,29 @@ function fill(template, u, p) {
     .replace(/\{P\}/g, p);
 }
 
+// Turn "the W" / "the X" style type-references into partner name markers.
+// Couple-type content is written with shorthand like "the W wants to debrief
+// the weekend and the X is done talking" — but Ellie wants these replaced
+// with actual partner names so the workbook reads personally, not clinically.
+// Mapping: first letter of coupleType.id → {U}, second letter → {P}.
+// After substitution, fill() replaces {U}/{P} with real names as usual.
+// Case-insensitive on "the" so we catch sentence-start "The W" too.
+function personalizeTypeRefs(template, coupleType) {
+  if (!coupleType?.id || coupleType.id.length !== 2) return String(template || '');
+  const [firstLetter, secondLetter] = [coupleType.id[0], coupleType.id[1]];
+  let result = String(template || '');
+  // Match `the X` with word boundaries so we don't replace inside words.
+  // Replace with the appropriate marker, dropping the "the" (since the
+  // replacement is a proper name).
+  result = result.replace(new RegExp(`\\bthe ${firstLetter}\\b`, 'g'), '{U}');
+  result = result.replace(new RegExp(`\\bThe ${firstLetter}\\b`, 'g'), '{U}');
+  if (firstLetter !== secondLetter) {
+    result = result.replace(new RegExp(`\\bthe ${secondLetter}\\b`, 'g'), '{P}');
+    result = result.replace(new RegExp(`\\bThe ${secondLetter}\\b`, 'g'), '{P}');
+  }
+  return result;
+}
+
 // Map a raw exercise answer value to a readable label. Handles three cases:
 //   1. Full-text answer (what the current app stores, e.g. "Split equally")
 //      → returned as-is
@@ -375,51 +505,44 @@ function estimatePageOffsets({ s1, s2, expGaps, priorities, gapThreshold = 1.0 }
     visibleDims: dom.dims.filter(d => gapDims.includes(d)),
   })).filter(dom => dom.visibleDims.length > 0);
   const unalignedExp = expGaps.filter(g => !g.aligned).length;
+  const totalGapDims = visibleDomains.reduce((n, d) => n + d.visibleDims.length, 0);
 
-  // Pre-parts: Cover p1, TOC pp2-3 (typically 2 pages because of the
-  // Working Knowledge moments list). Intro p4, snapshot p5.
+  // Pre-parts: Cover p1, TOC pp2-3, Intro p4, snapshot p5.
   const introPage = 4;
   const snapshotPage = 5;
   let p = 5;
 
-  // Part 1 — Deeper dive. Epigraph shares the Part cover page (just a
-  // short quote, not a dedicated page). First content page is couple
-  // type intro; dimension pages average 2 dims per page; expectations
-  // average 3 gap-domains per page.
+  // Part 1 — Deeper dive.
   p += 1;                                      // Part 1 cover (epigraph inline)
-  const insightsPage = p + 1;
-  p += 1;                                      // couple type intro page
-  const domainPages = visibleDomains.map(dom => {
-    const page = p + 1;
-    // Category header shares the page with the first dim. Total pages
-    // for this category = ceil(dims / 2), minimum 1.
-    p += Math.max(1, Math.ceil(dom.visibleDims.length / 2));
-    return { title: dom.title, page };
-  });
+  const insightsPage = p + 1;                  // Part 1 intro page ("Practical help...")
+  p += 1;                                      // intro page
+  const commsPage = p + 1;                     // first dim page
+  p += Math.max(1, totalGapDims);              // one page per dim
   const expPage = p + 1;
   p += Math.max(1, Math.ceil(unalignedExp / 3));
 
   // Part 2 — Working Knowledge
-  p += 1;                                      // Part 2 cover (epigraph inline)
+  p += 1;                                      // Part 2 cover
   const workingKnowledgePage = p + 1;
   const sameType = coupleTypeIsSame();
-  p += sameType ? 2 : 6;                       // cross-type: 3 moments/page × 2 partners
+  p += sameType ? 2 : 6;
 
-  // Part 3 — Workbook. 3 content pages: Before you focus, Your focus areas, 30-day check-in.
-  p += 1;                                      // Part 3 cover (epigraph inline)
+  // Part 3 — Workbook. 5 content pages: Preparation + 3 focus areas + 30-day check-in.
+  p += 1;                                      // Part 3 cover
   const prioritiesPage = p + 1;
-  p += 3;
+  p += 5;
 
   // Part 4 — Conversation Library (~3 pages)
-  p += 1;                                      // Part 4 cover (epigraph inline)
+  p += 1;                                      // Part 4 cover
   const conversationPage = p + 1;
   p += 3;
 
-  // Part 5 — Reference Card
+  // Part 5 — Reference Card (smaller card, single page)
   p += 1;                                      // Part 5 cover
   const referencePage = p + 1;
 
-  return { introPage, snapshotPage, insightsPage, domainPages, expPage,
+  return { introPage, snapshotPage, insightsPage, commsPage, expPage,
+           domainPages: [], // kept for backward-compat; unused in new TOC
            workingKnowledgePage,
            prioritiesPage, conversationPage,
            referencePage, visibleDomains };
@@ -439,11 +562,15 @@ function buildTOC(offsets, priorities, u, p, coupleType) {
   const LABEL_COL = W - PAGE_COL;  // rest for label + dashes
 
   function tocRow({ label, labelBold = false, labelColor = INK, labelSize = 22,
-                    pageNum, indent = 0, italic = false, before = 60, after = 60 }) {
+                    pageNum, indent = 0, italic = false, before = 60, after = 60, noLeader = false }) {
     // Dashed bottom border on the label cell creates the leader line;
     // positioned at the text baseline via cell bottom margin so it
-    // visually sits between the text and the page number.
-    const dashedBottom = { bottom: { style: BorderStyle.DASHED, size: 6, color: STONE, space: 1 } };
+    // visually sits between the text and the page number. When noLeader
+    // is true the bottom border is omitted — used on the last row of
+    // each section group so the group ends cleanly.
+    const dashedBottom = noLeader
+      ? { bottom: { style: BorderStyle.NONE } }
+      : { bottom: { style: BorderStyle.DASHED, size: 6, color: STONE, space: 1 } };
     const noOtherBorders = {
       top:    { style: BorderStyle.NONE },
       left:   { style: BorderStyle.NONE },
@@ -503,16 +630,13 @@ function buildTOC(offsets, priorities, u, p, coupleType) {
 
   // Introduction with a single Snapshot subsection
   rows.push(tocRow({ label: 'Introduction', labelBold: true, pageNum: offsets.introPage, after: 80 }));
-  rows.push(tocRow({ label: 'Your snapshot', pageNum: offsets.snapshotPage, indent: 280, labelSize: 20, labelColor: MUTED, after: 180 }));
+  rows.push(tocRow({ label: 'Your snapshot', pageNum: offsets.snapshotPage, indent: 280, labelSize: 20, labelColor: MUTED, after: 180, noLeader: true }));
 
-  // Part 1 — Deeper dive into the dimensions
+  // Part 1 — A closer look at the dimensions that matter.
+  // Subentries point to the two logical halves of Part 1.
   rows.push(...tocSection({ partEyebrow: 'PART 1', title: 'A closer look at the dimensions that matter', pageNum: offsets.insightsPage, color: BLUE }));
-  // Couple type intro page (if present) sits at the top of Part 1 before the categories
-  rows.push(tocRow({ label: 'Your couple type',     pageNum: offsets.insightsPage,     indent: 280, labelSize: 20, labelColor: MUTED, italic: true }));
-  offsets.domainPages.forEach(dp => {
-    rows.push(tocRow({ label: dp.title, pageNum: dp.page, indent: 280, labelSize: 20, labelColor: MUTED }));
-  });
-  rows.push(tocRow({ label: 'Expectations', pageNum: offsets.expPage, indent: 280, labelSize: 20, labelColor: MUTED }));
+  rows.push(tocRow({ label: 'Communication', pageNum: offsets.commsPage, indent: 280, labelSize: 20, labelColor: MUTED }));
+  rows.push(tocRow({ label: 'Expectations',  pageNum: offsets.expPage,  indent: 280, labelSize: 20, labelColor: MUTED, noLeader: true }));
 
   // Part 2 — Working Knowledge
   rows.push(...tocSection({ partEyebrow: 'PART 2', title: 'Working Knowledge', pageNum: offsets.workingKnowledgePage, color: PURPLE }));
@@ -529,6 +653,7 @@ function buildTOC(offsets, priorities, u, p, coupleType) {
           label: `${i + 1}. ${m.title}`,
           pageNum: i < 3 ? momentsPage1 : momentsPage2,
           indent: 280, labelSize: 20, labelColor: MUTED,
+          noLeader: i === MOMENTS.length - 1,
         }));
       });
     } else {
@@ -554,6 +679,7 @@ function buildTOC(offsets, priorities, u, p, coupleType) {
           label: `${i + 1}. ${m.title}`,
           pageNum: i < 3 ? firstPage + 4 : firstPage + 5,
           indent: 560, labelSize: 18, labelColor: MUTED,
+          noLeader: i === MOMENTS.length - 1,
         }));
       });
     }
@@ -561,11 +687,13 @@ function buildTOC(offsets, priorities, u, p, coupleType) {
 
   // Part 3 — Workbook (guided journaling, user picks their own focus)
   rows.push(...tocSection({ partEyebrow: 'PART 3', title: 'Workbook', pageNum: offsets.prioritiesPage, color: ORANGE }));
-  rows.push(tocRow({ label: 'Before you focus',  pageNum: offsets.prioritiesPage,     indent: 280, labelSize: 20, labelColor: MUTED }));
-  rows.push(tocRow({ label: 'Your focus areas',  pageNum: offsets.prioritiesPage + 1, indent: 280, labelSize: 20, labelColor: MUTED }));
-  rows.push(tocRow({ label: '30-day check-in',   pageNum: offsets.prioritiesPage + 3, indent: 280, labelSize: 20, labelColor: MUTED, italic: true }));
+  rows.push(tocRow({ label: 'Preparing together', pageNum: offsets.prioritiesPage,     indent: 280, labelSize: 20, labelColor: MUTED }));
+  rows.push(tocRow({ label: 'Focus area 1',       pageNum: offsets.prioritiesPage + 1, indent: 280, labelSize: 20, labelColor: MUTED }));
+  rows.push(tocRow({ label: 'Focus area 2',       pageNum: offsets.prioritiesPage + 2, indent: 280, labelSize: 20, labelColor: MUTED }));
+  rows.push(tocRow({ label: 'Focus area 3',       pageNum: offsets.prioritiesPage + 3, indent: 280, labelSize: 20, labelColor: MUTED }));
+  rows.push(tocRow({ label: '30-day check-in',    pageNum: offsets.prioritiesPage + 4, indent: 280, labelSize: 20, labelColor: MUTED, italic: true, noLeader: true }));
 
-  // Part 4 — Conversation Library — list each of the 5 situations so readers can flip to the one they need
+  // Part 4 — Conversation Library
   rows.push(...tocSection({ partEyebrow: 'PART 4', title: 'Conversation Library', pageNum: offsets.conversationPage, color: PURPLE }));
   SITUATIONS.forEach((s, i) => {
     rows.push(tocRow({
@@ -574,7 +702,7 @@ function buildTOC(offsets, priorities, u, p, coupleType) {
       indent: 280, labelSize: 20, labelColor: MUTED,
     }));
   });
-  rows.push(tocRow({ label: 'A structured first conversation', pageNum: offsets.conversationPage + 2, indent: 280, labelSize: 20, labelColor: MUTED, italic: true }));
+  rows.push(tocRow({ label: 'A structured first conversation', pageNum: offsets.conversationPage + 2, indent: 280, labelSize: 20, labelColor: MUTED, italic: true, noLeader: true }));
 
   // Part 5 — Reference Card
   rows.push(...tocSection({ partEyebrow: 'PART 5', title: 'Reference Card', pageNum: offsets.referencePage, color: GREEN }));
@@ -636,7 +764,7 @@ function buildCover(u, p, coupleType) {
 
     // Eyebrow
     new Paragraph({ alignment: AlignmentType.CENTER, spacing: { after: 120 },
-      children: [run('ATTUNE', { size: 22, bold: true, color: ORANGE, allCaps: true, characterSpacing: 80 })] }),
+      children: [run('ATTUNE', { size: 22, bold: true, color: ORANGE, allCaps: true })] }),
 
     // Large title
     new Paragraph({ alignment: AlignmentType.CENTER, spacing: { after: 120 },
@@ -765,158 +893,260 @@ function buildSnapshot(u, p, scores, partnerScores, coupleType, expGaps) {
 // status badge. Right side has two stacked score bars — one per partner —
 // using the scoreBarRow infrastructure. Replaces the previous data-table +
 // plain-text-bar combo, which read like a word-doc form.
-function buildDimensionHero(meta, u, p, score1, score2, accentColor) {
+function buildDimensionHero(meta, u, p, score1, score2, accentColor, gapAnalysisText) {
   const gap = Math.abs(score1 - score2);
   const color = accentColor || meta.color || ORANGE;
   const gColor = gapColour(gap);
   const gLabel = gapLabel(gap);
 
-  // Left column: big label + gap badge. Axis label moved to the right
-  // column (above the scales) so it reads as a label for the scales
-  // themselves rather than a tagline for the dimension name.
-  const leftCellChildren = [
-    new Paragraph({ spacing: { after: 120 },
-      children: [run(meta.label, { size: 34, bold: true, color })] }),
-    // Gap badge
-    new Table({
-      width: { size: 3400, type: WidthType.DXA }, columnWidths: [3400],
-      borders: { top: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.NONE }, left: { style: BorderStyle.NONE }, right: { style: BorderStyle.NONE }, insideHorizontal: { style: BorderStyle.NONE }, insideVertical: { style: BorderStyle.NONE } },
-      rows: [new TableRow({ children: [new TableCell({
-        borders: noBrds,
-        width: { size: 3400, type: WidthType.DXA },
-        shading: { fill: gColor === GREEN ? 'F0FDF9' : gColor === '999999' ? 'F5F5F2' : 'FFF8F0', type: ShadingType.CLEAR },
-        margins: { top: 100, bottom: 100, left: 200, right: 200 },
-        children: [new Paragraph({ spacing: { after: 0 },
-          children: [
-            run('GAP ', { size: 12, bold: true, color: MUTED, allCaps: true, characterSpacing: 60 }),
-            run(`${gap.toFixed(1)}  ·  `, { size: 16, bold: true, color: gColor }),
-            run(gLabel, { size: 14, bold: true, color: gColor, allCaps: true, characterSpacing: 40 }),
-          ],
-        })],
-      })]})],
-    }),
+  // Centered title + gap eyebrow. More breathing room below the eyebrow
+  // so it doesn't crowd the hero columns.
+  const titleBlock = [
+    new Paragraph({ alignment: AlignmentType.CENTER, spacing: { before: 200, after: 100 },
+      children: [run(meta.label, { size: 52, bold: true, color })] }),
+    new Paragraph({ alignment: AlignmentType.CENTER, spacing: { after: 520 },
+      children: [
+        run('GAP ', { size: 16, bold: true, color: MUTED, allCaps: true }),
+        run(`${gap.toFixed(1)}  ·  `, { size: 18, bold: true, color: gColor }),
+        run(gLabel, { size: 16, bold: true, color: gColor, allCaps: true }),
+      ] }),
   ];
 
-  // Right column: axis header above, then two score bars stacked. Each bar
-  // shows partner name, filled segments, and numeric score.
-  const compactBar = (partnerLabel, score, fillColor) => {
+  // Two-column hero: spectrum bars (left) + analysis text (right)
+  const LEFT_W = 4800, RIGHT_W = W - LEFT_W;
+  const barsInnerW = LEFT_W - 160;
+
+  // Spectrum bar rendered as a line of characters rather than a shaded
+  // table row. This lets the score dot naturally be MUCH larger than the
+  // thin grey line it sits on, since both are just glyphs in the same
+  // paragraph — the dot's font size dictates its visual size, and the
+  // line's font size dictates its thickness, independently.
+  //
+  // Characters:
+  //   ─ (U+2500 BOX DRAWINGS LIGHT HORIZONTAL) — the line segments
+  //   ● (U+25CF BLACK CIRCLE) — the score dot
+  //
+  // The dashes tile horizontally with no gap, so a row of them reads as
+  // a single continuous line. Font sizes: dashes at 14 (thin line), dot
+  // at 48 (large circle).
+  const BAR_CHARS = 46;  // total chars at size 12 (6pt dashes) fills barsInnerW
+  const DASH = '\u2500';
+  const DOT = '\u25CF';
+  const LINE_COLOR = 'C8BEB0';  // warm neutral grey
+
+  const spectrumBar = (partnerLabel, score, dotColor) => {
     const clamped = Math.max(1, Math.min(5, score));
-    const filled = Math.round(clamped);
-    const segments = [];
-    for (let i = 1; i <= 5; i++) {
-      segments.push(new TableCell({
-        borders: { top: { style: BorderStyle.NIL }, bottom: { style: BorderStyle.NIL }, left: { style: BorderStyle.NIL }, right: { style: BorderStyle.NIL } },
-        width: { size: 680, type: WidthType.DXA },
-        shading: { fill: i <= filled ? fillColor : 'EAE3D6', type: ShadingType.CLEAR },
-        margins: { top: 0, bottom: 0, left: 0, right: 0 },
-        children: [new Paragraph({ spacing: { after: 0, line: 120, lineRule: 'exact' }, children: [run('', { size: 2 })] })],
-      }));
-    }
+    const dotIdx = Math.round(((clamped - 1) / 4) * (BAR_CHARS - 1));
+    const leftDashes  = DASH.repeat(dotIdx);
+    const rightDashes = DASH.repeat(BAR_CHARS - 1 - dotIdx);
+
     return [
-      new Paragraph({ spacing: { before: 80, after: 60 },
+      new Paragraph({ spacing: { before: 80, after: 20 },
         children: [
-          run(partnerLabel, { size: 16, bold: true, color: INK }),
-          run('   ', { size: 14 }),
-          run(clamped.toFixed(1) + ' / 5', { size: 16, bold: true, color: fillColor }),
+          run(partnerLabel, { size: 18, bold: true, color: INK }),
+          run('   ', { size: 16 }),
+          run(clamped.toFixed(1) + ' / 5', { size: 16, bold: true, color: dotColor }),
+        ] }),
+      // Bar: left dashes + dot + right dashes in one paragraph so they
+      // share a baseline. Dashes at size 12 (6pt) tile into a thin
+      // continuous line. Dot at size 48 is much bigger than the line.
+      //
+      // `position: -10` shifts the dot DOWN by 5pt from the baseline so
+      // its visual center aligns with the dash midline (the `─` box-drawing
+      // char sits at ~x-height, not baseline; without this, the dot
+      // appears to float above the line rather than sit through it).
+      new Paragraph({
+        spacing: { after: 40, line: 240, lineRule: 'exact' },
+        children: [
+          run(leftDashes,  { size: 12, color: LINE_COLOR }),
+          run(DOT,         { size: 48, color: dotColor, position: -10 }),
+          run(rightDashes, { size: 12, color: LINE_COLOR }),
         ],
-      }),
-      new Table({
-        width: { size: 3400, type: WidthType.DXA },
-        columnWidths: [680, 680, 680, 680, 680],
-        borders: { top: { style: BorderStyle.NIL }, bottom: { style: BorderStyle.NIL }, left: { style: BorderStyle.NIL }, right: { style: BorderStyle.NIL }, insideHorizontal: { style: BorderStyle.NIL }, insideVertical: { style: BorderStyle.NIL } },
-        rows: [new TableRow({ height: { value: 140, rule: HeightRule.EXACT }, children: segments })],
       }),
     ];
   };
 
-  // Axis header: left label flush-left, right label flush-right, tiny
-  // italics in MUTED color. Rendered as a 2-col borderless table so the
-  // labels sit at the extremes of the bar width.
+  // Axis labels — "1 — INWARD" at far left, "5 — OUTWARD" at far right.
+  // Numbers anchor the scale at its numeric endpoints; label words
+  // describe what each end means. No arrow/line between — the bars
+  // below already provide the continuous-spectrum visual.
   const axisHeader = new Table({
-    width: { size: 3400, type: WidthType.DXA }, columnWidths: [1700, 1700],
-    borders: { top: { style: BorderStyle.NIL }, bottom: { style: BorderStyle.NIL }, left: { style: BorderStyle.NIL }, right: { style: BorderStyle.NIL }, insideHorizontal: { style: BorderStyle.NIL }, insideVertical: { style: BorderStyle.NIL } },
+    width: { size: barsInnerW, type: WidthType.DXA }, columnWidths: [barsInnerW / 2, barsInnerW / 2],
+    borders: { top: noBrd, bottom: noBrd, left: noBrd, right: noBrd, insideHorizontal: noBrd, insideVertical: noBrd },
     rows: [new TableRow({ children: [
-      new TableCell({ borders: noBrds, width: { size: 1700, type: WidthType.DXA }, margins: { top: 0, bottom: 40, left: 0, right: 0 },
-        children: [new Paragraph({ spacing: { after: 0 }, children: [run(meta.left, { size: 11, color: MUTED, italics: true, allCaps: true, characterSpacing: 30 })] })] }),
-      new TableCell({ borders: noBrds, width: { size: 1700, type: WidthType.DXA }, margins: { top: 0, bottom: 40, left: 0, right: 0 },
-        children: [new Paragraph({ alignment: AlignmentType.RIGHT, spacing: { after: 0 }, children: [run(meta.right, { size: 11, color: MUTED, italics: true, allCaps: true, characterSpacing: 30 })] })] }),
+      new TableCell({ borders: noBrds, width: { size: barsInnerW / 2, type: WidthType.DXA }, margins: { top: 0, bottom: 80, left: 0, right: 0 },
+        children: [new Paragraph({ spacing: { after: 0 },
+          children: [
+            run('1  ', { size: 13, bold: true, color: MUTED, characterSpacing: 30 }),
+            run(meta.left, { size: 13, color: MUTED, italics: true, allCaps: true, characterSpacing: 30 }),
+          ] })] }),
+      new TableCell({ borders: noBrds, width: { size: barsInnerW / 2, type: WidthType.DXA }, margins: { top: 0, bottom: 80, left: 0, right: 0 },
+        children: [new Paragraph({ alignment: AlignmentType.RIGHT, spacing: { after: 0 },
+          children: [
+            run(meta.right, { size: 13, color: MUTED, italics: true, allCaps: true, characterSpacing: 30 }),
+            run('  5', { size: 13, bold: true, color: MUTED, characterSpacing: 30 }),
+          ] })] }),
     ]})],
   });
 
-  const rightCellChildren = [
-    axisHeader,
-    ...compactBar(u, score1, ORANGE),
-    ...compactBar(p, score2, BLUE),
-  ];
+  // Column titles — eyebrows at the top of each column. Bumped to size 18
+  // (9pt) to match the bold section headers further down the page. Titles
+  // have matching after-spacing so content below aligns on both sides.
+  const leftTitle = new Paragraph({ spacing: { after: 140 },
+    children: [run('Your scores', { size: 18, bold: true, color, allCaps: true, characterSpacing: 60 })] });
+  const rightTitle = new Paragraph({ spacing: { after: 140 },
+    children: [run('What this means', { size: 18, bold: true, color, allCaps: true, characterSpacing: 60 })] });
 
-  // The hero itself — 2-column borderless table
-  return new Table({
-    width: { size: W, type: WidthType.DXA }, columnWidths: [4800, W - 4800],
-    borders: { top: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.NONE }, left: { style: BorderStyle.NONE }, right: { style: BorderStyle.NONE }, insideHorizontal: { style: BorderStyle.NONE }, insideVertical: { style: BorderStyle.NONE } },
+  const twoColHero = new Table({
+    width: { size: W, type: WidthType.DXA }, columnWidths: [LEFT_W, RIGHT_W],
+    borders: { top: noBrd, bottom: noBrd, left: noBrd, right: noBrd, insideHorizontal: noBrd, insideVertical: noBrd },
     rows: [new TableRow({ children: [
-      new TableCell({ borders: noBrds, width: { size: 4800, type: WidthType.DXA }, margins: { top: 120, bottom: 120, left: 0, right: 240 },
-        children: leftCellChildren }),
-      new TableCell({ borders: noBrds, width: { size: W - 4800, type: WidthType.DXA }, margins: { top: 120, bottom: 120, left: 240, right: 0 },
-        children: rightCellChildren }),
+      // LEFT: column title + axis labels + spectrum bars (top-aligned by default)
+      new TableCell({ borders: noBrds, width: { size: LEFT_W, type: WidthType.DXA }, margins: { top: 0, bottom: 0, left: 0, right: 240 },
+        children: [
+          leftTitle,
+          axisHeader,
+          ...spectrumBar(u, score1, ORANGE),
+          ...spectrumBar(p, score2, BLUE),
+        ] }),
+      // RIGHT: column title + analysis prose, top-aligned. Italic grey
+      // body — italic returns so the analysis reads as interpretive text
+      // distinct from the sections below.
+      new TableCell({ borders: noBrds, width: { size: RIGHT_W, type: WidthType.DXA },
+        margins: { top: 0, bottom: 0, left: 240, right: 0 },
+        children: [
+          rightTitle,
+          new Paragraph({ spacing: { after: 0, line: 340, lineRule: 'atLeast' },
+            children: [run(gapAnalysisText || '', { size: 22, italics: true, color: MUTED })] }),
+        ] }),
     ]})],
   });
+
+  return [...titleBlock, twoColHero];
 }
 
-function buildOneDimension(dim, u, p, score1, score2) {
-  const meta   = DIM_META[dim];
+function buildOneDimension(dim, u, p, score1, score2, coupleType) {
+  const meta    = DIM_META[dim];
   const content = DIM_CONTENT[dim];
-  const gap    = Math.abs(score1 - score2);
-  const isClose = gap < 1.5;
-  const color  = meta.color || ORANGE;
+  const color   = meta.color || ORANGE;
 
-  const mainText = fill(isClose ? content.closeText : content.gapText, u, p);
   const thisWeek = fill(content.thisWeek, u, p);
 
-  const result = [];
+  // Main analysis text — couple-type-specific prose keyed to the dim
+  // and the couple's type id. This renders in the hero's right column
+  // as "What this means for your relationship." Falls back to WW if
+  // the specific type's entry hasn't been written yet.
+  // (Gap pages only render for gap >= 1.5, so we don't need the close
+  // text branch anymore — closeText remains in _workbook-content.js for
+  // reference but is no longer rendered.)
+  const ctId = coupleType?.id || 'WW';
+  const whenLookup = WHEN_THIS_SHOWS_UP[dim] || {};
+  const rawMainText = whenLookup[ctId] || whenLookup.WW || '';
+  const mainText = fill(personalizeTypeRefs(rawMainText, coupleType), u, p);
 
-  // Hero at the top
-  result.push(buildDimensionHero(meta, u, p, score1, score2, color));
-  result.push(sp());
+  // Standard section header — 18pt bold uppercase (was 15pt), tight
+  // (not tracked), tighter spacing between header and its content.
+  // Optionally accepts a leading icon that hangs into the left margin.
+  const HANG_INDENT = 420;
+  const standardEyebrow = (text, opts = {}) => {
+    const headerColor = opts.color || color;
+    if (opts.icon) {
+      return new Paragraph({
+        spacing: { before: opts.before ?? 380, after: opts.after ?? 140 },
+        indent: { left: HANG_INDENT, hanging: HANG_INDENT },
+        children: [
+          run(opts.icon + '  ', { size: 18, bold: true, color: headerColor }),
+          run(text, { size: 18, bold: true, color: headerColor, allCaps: true }),
+        ],
+      });
+    }
+    return new Paragraph({
+      spacing: { before: opts.before ?? 380, after: opts.after ?? 140 },
+      children: [run(text, { size: 18, bold: true, color: headerColor, allCaps: true })],
+    });
+  };
 
-  // What this means
-  result.push(eyebrow(`What this means for ${u} and ${p}`, color));
-  result.push(accentBox(null, mainText, 'FBF8F2', isClose ? GREEN : color));
-  result.push(sp());
+  // Unified body paragraph — 11pt (size 22). All three main sections
+  // (what this might look like / reflection prompts / try this week) use
+  // the same size so the page reads as one continuous document.
+  const body = (text, opts = {}) => new Paragraph({
+    spacing: { after: opts.after ?? 120, line: 320, lineRule: 'atLeast' },
+    indent: opts.indent ? { left: opts.indent } : undefined,
+    children: [run(text, { size: 22, color: INK })],
+  });
 
-  // Reflection prompts — no filled box, just the eyebrow + indented checkable items
-  result.push(eyebrow('Reflection prompts', color));
-  content.prompts.forEach(pr => result.push(checkItem(fill(pr, u, p))));
-  result.push(sp());
+  // Colored box for "Try this week" content — transparent-feeling tinted
+  // background via a light version of the accent color + a thick left rule.
+  const tryThisWeekBox = (text) => {
+    const tint = color === ORANGE ? 'FFF3EB'
+               : color === BLUE   ? 'EEF2FC'
+               : color === PURPLE ? 'F3EEFB'
+               : color === GREEN  ? 'E8F7F0'
+               : 'FFF3EB';
 
-  // Try this week — keep as accent card
-  result.push(accentBox('Try this week', thisWeek, 'FBF8F2', BLUE));
-  result.push(sp());
-
-  // Commitment slot — practical content that used to live in priorities.
-  // Kept compact; the large guided journaling lives in Part 3 (Workbook).
-  result.push(eyebrow('If this is one you want to work on', color));
-  result.push(new Table({
-    width: { size: W, type: WidthType.DXA }, columnWidths: [W],
-    borders: { top: noBrd, bottom: noBrd, left: noBrd, right: noBrd, insideHorizontal: noBrd, insideVertical: noBrd },
-    rows: [
-      new TableRow({ children: [new TableCell({
-        borders: { top: noBrd, bottom: noBrd, right: noBrd,
-          left: { style: BorderStyle.SINGLE, size: 12, color: STONE, space: 6 } },
+    return new Table({
+      width: { size: W, type: WidthType.DXA }, columnWidths: [W],
+      borders: noBrds,
+      rows: [new TableRow({ children: [new TableCell({
+        borders: {
+          top: noBrd, bottom: noBrd, right: noBrd,
+          left: { style: BorderStyle.SINGLE, size: 24, color, space: 8 },
+        },
         width: { size: W, type: WidthType.DXA },
-        margins: { top: 60, bottom: 40, left: 240, right: 0 },
-        children: [new Paragraph({ spacing: { after: 0 },
-          children: [run('What we want to change:', { size: 13, bold: true, color: MUTED, allCaps: true, characterSpacing: 60 })] })],
-      })]}),
-      new TableRow({ height: { value: 1000, rule: HeightRule.ATLEAST },
-        children: [new TableCell({
-          borders: { top: noBrd, bottom: noBrd, right: noBrd,
-            left: { style: BorderStyle.SINGLE, size: 12, color: STONE, space: 6 } },
-          width: { size: W, type: WidthType.DXA },
-          margins: { top: 40, bottom: 80, left: 240, right: 0 },
-          children: [new Paragraph({ spacing: { after: 0 }, children: [new TextRun('')] })],
-        })]}),
+        shading: { fill: tint, type: ShadingType.CLEAR },
+        margins: { top: 140, bottom: 140, left: 260, right: 260 },
+        children: [new Paragraph({
+          spacing: { after: 0, line: 320, lineRule: 'atLeast' },
+          children: [run(text, { size: 22, color: INK })],
+        })],
+      })]})],
+    });
+  };
+
+  // Reflection prompt — matches the unified 11pt body size.
+  const reflectionPrompt = (text) => new Paragraph({
+    spacing: { after: 120, line: 320, lineRule: 'atLeast' },
+    indent: { left: 320, hanging: 320 },
+    children: [
+      run('\u2610  ', { size: 22, color: INK }),
+      run(String(text || ''), { size: 22, color: INK }),
     ],
+  });
+
+  const result = [pb()];
+
+  // 1. Hero: title + gap eyebrow + two-column (spectrum / analysis)
+  result.push(...buildDimensionHero(meta, u, p, score1, score2, color, mainText));
+
+  // 2. Thin horizontal rule separating hero from practical help.
+  //    Tight `before` so the rule sits close under the hero; reflection
+  //    prompts follow with the standard section spacing.
+  result.push(new Paragraph({
+    spacing: { before: 120, after: 0 },
+    border: { bottom: { style: BorderStyle.SINGLE, size: 6, color: STONE, space: 4 } },
+    children: [new TextRun('')],
   }));
+
+  // 3. Reflection prompts — 3 items at 11pt
+  result.push(standardEyebrow('Reflection prompts'));
+  content.prompts.slice(0, 3).forEach(pr => result.push(reflectionPrompt(fill(pr, u, p))));
+
+  // 4. Try this week — colored tinted box so it visually stands out
+  result.push(standardEyebrow('Try this week', { icon: '★' }));
+  result.push(tryThisWeekBox(thisWeek));
+
+  // 5. What we want to try — 3 ruled lines for the specific commitment
+  result.push(standardEyebrow('What we want to try'));
+  result.push(new Paragraph({ spacing: { after: 100 },
+    children: [run(`e.g., "we'll share one thing we'd normally hold back, every Sunday evening."`,
+      { size: 14, italics: true, color: MUTED })] }));
+  result.push(ruledWriteIn(3, { lineHeight: 400 }));
+
+  // 6. Our notes — 4 ruled lines for free-form notes. Slightly tighter
+  //    `before` since the preceding ruled write-in provides natural
+  //    visual separation already.
+  result.push(standardEyebrow('Our notes', { before: 280 }));
+  result.push(ruledWriteIn(4, { lineHeight: 400 }));
 
   return result;
 }
@@ -974,64 +1204,41 @@ function categoryHeader(label, color) {
 // (description, nuance, strengths/sticking/patterns). If the couple type
 // object doesn't include these richer fields, falls back to a minimal
 // name + description display.
-function buildCoupleTypeIntro(u, p, coupleType) {
-  if (!coupleType) return [];
-  const color = (coupleType.color || '#E8673A').replace('#', '');
-  const hasRich = Array.isArray(coupleType.strengths) && Array.isArray(coupleType.stickingPoints) && Array.isArray(coupleType.patterns);
+// Part 1 intro — frames what's coming as practical help built from the
+// couple's answers. Briefly references couple type by name/tagline. Does
+// NOT dedicate a full page to couple type data (that lives in the
+// Reference Card now).
+function buildPartOneIntro(u, p, coupleType, domainsToShow) {
+  const gapCount = (domainsToShow || []).reduce((n, d) => n + (d.dims?.length || 0), 0);
+  const color = coupleType ? (coupleType.color || '#E8673A').replace('#', '') : BLUE;
 
-  // 3-column strengths / sticking points / patterns table (if present)
-  let threeCol = null;
-  if (hasRich) {
-    const columns = [
-      { title: 'Strengths',       items: coupleType.strengths,      c: GREEN },
-      { title: 'Sticking points', items: coupleType.stickingPoints, c: ORANGE },
-      { title: 'Patterns',        items: coupleType.patterns,       c: PURPLE },
-    ];
-    const cells = columns.map(({ title, items, c }) => new TableCell({
-      borders: { top: { style: BorderStyle.SINGLE, size: 8, color: c }, bottom: noBrd, left: noBrd, right: noBrd },
-      width: { size: Math.floor(W / 3), type: WidthType.DXA },
-      margins: { top: 160, bottom: 80, left: 0, right: 160 },
-      children: [
-        new Paragraph({ spacing: { after: 100 },
-          children: [run(title, { size: 13, bold: true, color: c, allCaps: true, characterSpacing: 60 })] }),
-        ...items.map(item => new Paragraph({
-          spacing: { after: 100 }, indent: { left: 160, hanging: 160 },
-          children: [run('·  ', { size: 14, color: c }), run(fill(item, u, p), { size: 14, color: INK })],
-        })),
-      ],
-    }));
-    threeCol = new Table({
-      width: { size: W, type: WidthType.DXA },
-      columnWidths: [Math.floor(W / 3), Math.floor(W / 3), Math.floor(W / 3)],
-      borders: { top: noBrd, bottom: noBrd, left: noBrd, right: noBrd, insideHorizontal: noBrd, insideVertical: noBrd },
-      rows: [new TableRow({ children: cells })],
-    });
-  }
+  const dimsLine = gapCount > 0
+    ? `The next pages walk through the ${gapCount} communication dimension${gapCount === 1 ? '' : 's'} where ${u} and ${p}'s answers diverged, followed by the expectations where you're not yet aligned.`
+    : `${u} and ${p} are aligned across every communication dimension. The rest of this part covers the expectations where you're still working out the picture.`;
 
   return [
     pb(),
-    // Section header
+    // Opening
     new Paragraph({ spacing: { before: 120, after: 60 },
       children: [run(`${u} & ${p}`, { size: 14, bold: true, color: MUTED, allCaps: true, characterSpacing: 80 })] }),
     new Paragraph({ spacing: { after: 40 },
-      children: [run(coupleType.name || 'Your couple type', { size: 40, bold: true, color })] }),
-    ...(coupleType.tagline ? [new Paragraph({ spacing: { after: 240 },
+      children: [run('Practical help, built from your answers.', { size: 36, bold: true, color: INK })] }),
+    ...(coupleType?.tagline ? [new Paragraph({ spacing: { after: 240 },
       children: [run(coupleType.tagline, { size: 18, italics: true, color: MUTED })] })] : []),
     new Paragraph({ spacing: { before: 0, after: 280 },
       border: { bottom: { style: BorderStyle.SINGLE, size: 16, color, space: 4 } },
       children: [new TextRun('')] }),
 
-    // Description + nuance as soft cards
-    ...(coupleType.description ? [
-      accentBox('What this couple type is', fill(coupleType.description, u, p), 'FBF8F2', color),
-      sp(),
-    ] : []),
-    ...(coupleType.nuance ? [
-      accentBox('Watch out for', fill(coupleType.nuance, u, p), 'FBF8F2', ORANGE),
-      sp(),
-    ] : []),
+    // Framing paragraphs — what this section is and isn't
+    para(
+      `This section is built specifically for you. Each page focuses on one place where your alignment showed a meaningful gap, and gives you what to do about it — what the pattern looks like, questions to sit with, one thing to try this week, and space to decide what you actually want to change.`,
+      { size: 20, color: INK, after: 200 }),
+    para(dimsLine, { size: 20, color: INK, after: 240 }),
 
-    ...(threeCol ? [sp(), threeCol] : []),
+    // Soft card with "how to use this section"
+    accentBox('How to use this section',
+      `Read each page in order or skip to the ones that feel most alive. You don't have to act on every one. The page-level commitment space is small by design — the bigger workbook lives in Part 3, where you'll decide what to focus on overall.`,
+      'FBF8F2', color),
   ];
 }
 
@@ -1039,7 +1246,7 @@ function buildInsights(u, p, scores, partnerScores, coupleType) {
   // Compute per-dimension gaps. Part 1 only covers dimensions where the gap
   // is meaningful — aligned dimensions don't need guidance, and including
   // them would dilute the focus.
-  const GAP_THRESHOLD = 1.0;
+  const GAP_THRESHOLD = 1.5;
   const gapsByDim = {};
   DIMS.forEach(d => {
     gapsByDim[d] = Math.abs((scores[d] || 3) - (partnerScores[d] || 3));
@@ -1051,13 +1258,10 @@ function buildInsights(u, p, scores, partnerScores, coupleType) {
 
   const result = [];
 
-  // Couple type intro page — sets context before the reader hits any
-  // individual dimension pages.
-  if (coupleType) {
-    result.push(...buildCoupleTypeIntro(u, p, coupleType));
-  }
+  // Part 1 intro page — practical framing for what's coming.
+  result.push(...buildPartOneIntro(u, p, coupleType, domainsToShow));
 
-  // If no comms gaps at all, skip to expectations directly
+  // If no comms gaps at all, skip to expectations directly.
   if (domainsToShow.length === 0 && coupleType) {
     result.push(pb());
     result.push(accentBox(
@@ -1067,17 +1271,12 @@ function buildInsights(u, p, scores, partnerScores, coupleType) {
     return result;
   }
 
-  // Communication section header
+  // Dim pages flow continuously. No category grouping — every dim gets
+  // its own single page (buildOneDimension starts with a pagebreak).
   if (domainsToShow.length > 0) {
-    result.push(pb());
-    result.push(...bigSectionHeader('Communication',
-      `The dimensions where ${u} and ${p} showed a meaningful gap.`, BLUE));
-
     domainsToShow.forEach(domain => {
-      // Each domain gets its own category header then its dim pages
-      result.push(...categoryHeader(domain.title, domain.color));
       domain.dims.forEach(dim => {
-        result.push(...buildOneDimension(dim, u, p, scores[dim] || 3, partnerScores[dim] || 3));
+        result.push(...buildOneDimension(dim, u, p, scores[dim] || 3, partnerScores[dim] || 3, coupleType));
       });
     });
   }
@@ -1086,28 +1285,16 @@ function buildInsights(u, p, scores, partnerScores, coupleType) {
 }
 
 function buildExpDomains(u, p, expGaps) {
-  // Group by the 5 exercise categories so the workbook mirrors what
-  // couples saw in the expectations exercise.
   const byKey = Object.fromEntries(expGaps.map(eg => [eg.key, eg]));
   const categoriesToShow = EXP_CATEGORIES.map(cat => {
-    // Get all domains in this category that have unaligned answers
-    const unaligned = cat.domainKeys
-      .map(k => byKey[k])
-      .filter(Boolean)
-      .filter(eg => !eg.aligned);
-    const aligned = cat.domainKeys
-      .map(k => byKey[k])
-      .filter(Boolean)
-      .filter(eg => eg.aligned);
+    const unaligned = cat.domainKeys.map(k => byKey[k]).filter(Boolean).filter(eg => !eg.aligned);
+    const aligned   = cat.domainKeys.map(k => byKey[k]).filter(Boolean).filter(eg => eg.aligned);
     return { ...cat, unaligned, aligned };
   }).filter(cat => cat.unaligned.length > 0);
 
   if (categoriesToShow.length === 0) return [];
 
-  const result = [];
-
-  // Expectations section header
-  result.push(pb());
+  const result = [pb()];
   result.push(...bigSectionHeader('Expectations',
     `Where ${u} and ${p} have different ideas about the life you're building.`, GREEN));
 
@@ -1119,41 +1306,48 @@ function buildExpDomains(u, p, expGaps) {
       if (!domain) return;
       const mainText = fill(domain.gapText, u, p);
 
-      // Compact card-style block for each gap — softer than before
-      // with inline status indicator and cream-pale accent box.
+      // Domain label — plain bold header, no gap badge in the corner.
+      result.push(new Paragraph({ spacing: { before: 200, after: 160 },
+        children: [run(domain.label, { size: 22, bold: true, color: cat.color })] }));
+
+      // Prominent two-column responses. Each partner gets their own
+      // column: small-caps name label above, big italic answer below.
+      // Reads as data you actually compare, not a caption.
+      const answerCol = (name, answer, accent) => new TableCell({
+        borders: { top: noBrd, bottom: noBrd, left: noBrd, right: noBrd },
+        width: { size: W / 2, type: WidthType.DXA },
+        margins: { top: 80, bottom: 80, left: 0, right: 120 },
+        children: [
+          new Paragraph({ spacing: { after: 80 },
+            children: [run(name, { size: 11, bold: true, color: accent, allCaps: true, characterSpacing: 80 })] }),
+          new Paragraph({ spacing: { after: 0 },
+            children: [run(answerLabel(answer, u, p), { size: 20, italics: true, color: INK })] }),
+        ],
+      });
       result.push(new Table({
-        width: { size: W, type: WidthType.DXA }, columnWidths: [W - 1800, 1800],
-        borders: { top: noBrd, bottom: noBrd, left: noBrd, right: noBrd, insideHorizontal: noBrd, insideVertical: noBrd },
+        width: { size: W, type: WidthType.DXA }, columnWidths: [W / 2, W / 2],
+        borders: { top: { style: BorderStyle.SINGLE, size: 6, color: STONE },
+                   bottom: { style: BorderStyle.SINGLE, size: 6, color: STONE },
+                   left: noBrd, right: noBrd, insideHorizontal: noBrd,
+                   insideVertical: { style: BorderStyle.SINGLE, size: 4, color: STONE } },
         rows: [new TableRow({ children: [
-          new TableCell({ borders: noBrds, width: { size: W - 1800, type: WidthType.DXA }, margins: { top: 0, bottom: 60, left: 0, right: 0 },
-            children: [new Paragraph({ spacing: { after: 0 }, children: [run(domain.label, { size: 22, bold: true, color: cat.color })] })] }),
-          new TableCell({ borders: noBrds, width: { size: 1800, type: WidthType.DXA }, margins: { top: 0, bottom: 60, left: 0, right: 0 },
-            children: [new Paragraph({ alignment: AlignmentType.RIGHT, spacing: { after: 0 },
-              children: [
-                run('\u25CF  ', { size: 14, color: ORANGE }),
-                run('GAP', { size: 12, bold: true, color: ORANGE, allCaps: true, characterSpacing: 80 }),
-              ] })] }),
+          answerCol(u, eg.yourAnswer, ORANGE),
+          answerCol(p, eg.partnerAnswer, BLUE),
         ]})],
       }));
 
-      // Partner answers as italic inline caption
-      result.push(new Paragraph({ spacing: { after: 160 },
-        children: [
-          run(`${u}: `, { size: 17, bold: true, color: MUTED }),
-          run(answerLabel(eg.yourAnswer, u, p), { size: 17, color: INK, italics: true }),
-          run('    ·    ', { size: 17, color: STONE }),
-          run(`${p}: `, { size: 17, bold: true, color: MUTED }),
-          run(answerLabel(eg.partnerAnswer, u, p), { size: 17, color: INK, italics: true }),
-        ],
-      }));
+      // Gap analysis — plain grey italic, no box, no fill.
+      result.push(new Paragraph({ spacing: { before: 200, after: 120, line: 300, lineRule: 'atLeast' },
+        children: [run(mainText, { size: 17, italics: true, color: MUTED })] }));
 
-      result.push(accentBox(null, mainText, 'FBF8F2', cat.color));
-      result.push(sp());
-      result.push(accentBox('Try this week', fill(domain.thisWeek, u, p), 'FBF8F2', BLUE));
-      result.push(sp(200));
+      // Try this week — eyebrow + plain body, no filled card.
+      result.push(new Paragraph({ spacing: { before: 160, after: 80 },
+        children: [run('Try this week', { size: 17, bold: true, color: BLUE, allCaps: true })] }));
+      result.push(new Paragraph({ spacing: { after: 280, line: 300, lineRule: 'atLeast' },
+        children: [run(fill(domain.thisWeek, u, p), { size: 17, color: INK })] }));
     });
 
-    // Note aligned domains briefly at the end of the category
+    // Aligned domains footer
     if (cat.aligned.length > 0) {
       result.push(new Paragraph({ spacing: { before: 120, after: 220 },
         children: [
@@ -1177,62 +1371,101 @@ function buildExpDomains(u, p, expGaps) {
 //   3. 3 focus area blocks — user-written, not pre-filled
 //   4. 30-day check-in at the end
 function buildWorkbook(u, p) {
-  const writeInBlock = (heightTwips = 1400) => new Table({
-    width: { size: W, type: WidthType.DXA }, columnWidths: [W],
-    borders: { top: noBrd, bottom: noBrd, left: noBrd, right: noBrd, insideHorizontal: noBrd, insideVertical: noBrd },
-    rows: [new TableRow({ height: { value: heightTwips, rule: HeightRule.ATLEAST },
-      children: [new TableCell({
-        borders: { top: noBrd, bottom: { style: BorderStyle.SINGLE, size: 6, color: STONE, space: 4 }, left: noBrd, right: noBrd },
-        width: { size: W, type: WidthType.DXA },
-        margins: { top: 40, bottom: 60, left: 0, right: 0 },
-        children: [new Paragraph({ spacing: { after: 0 }, children: [new TextRun('')] })],
-      })]})],
+  const reflectionPrompts = [
+    { n: 1, q: `What's the thing you want to say but haven't said yet?`,
+      hint: `e.g., "I've been feeling overwhelmed but haven't named it."` },
+    { n: 2, q: `What's been sitting with you most from this workbook?`,
+      hint: `e.g., "I didn't realize how differently we handle stress."` },
+    { n: 3, q: `If one thing changed in how you two talk, what would you want it to be?`,
+      hint: `e.g., "I want to stop defaulting to 'fine' when I'm not."` },
+  ];
+
+  // Standard eyebrow used across all Workbook pages — keeps typography
+  // consistent with dim pages.
+  const eyebrowOf = (label, color) => new Paragraph({
+    spacing: { before: 260, after: 100 },
+    children: [run(label, { size: 17, bold: true, color, allCaps: true })],
   });
 
-  const labeledWriteIn = (label, color, heightTwips = 1400) => [
-    new Paragraph({ spacing: { before: 200, after: 80 },
-      children: [run(label, { size: 13, bold: true, color, allCaps: true, characterSpacing: 60 })] }),
-    writeInBlock(heightTwips),
-  ];
+  const result = [];
 
-  const result = [
+  // ── Page 1: Preparing together ────────────────────────────────────────
+  result.push(
     pb(),
-    // Large opening header
     new Paragraph({ spacing: { after: 60 },
-      children: [run('A space to make it yours', { size: 40, bold: true, color: ORANGE })] }),
-    new Paragraph({ spacing: { after: 240 },
-      children: [run(`What stood out? What do you want to work on? Write it down. This is the part of the workbook where you put your own words in.`,
-        { size: 18, italics: true, color: MUTED })] }),
+      children: [run('Preparing together', { size: 36, bold: true, color: ORANGE })] }),
+    new Paragraph({ spacing: { after: 200 },
+      children: [run(`A few questions to answer together before you pick what to focus on. No right answers. Write what comes up.`,
+        { size: 16, italics: true, color: MUTED })] }),
     new Paragraph({ spacing: { before: 0, after: 320 },
-      border: { bottom: { style: BorderStyle.SINGLE, size: 16, color: ORANGE, space: 4 } },
+      border: { bottom: { style: BorderStyle.SINGLE, size: 6, color: ORANGE, space: 4 } },
       children: [new TextRun('')] }),
+  );
 
-    // Opening reflection — three prompts to orient
-    new Paragraph({ spacing: { before: 0, after: 120 },
-      children: [run('Before you focus', { size: 26, bold: true, color: ORANGE })] }),
-    para(`Three quick questions. Answer them together or separately. No right answers.`,
-      { size: 16, italics: true, color: MUTED, after: 200 }),
+  reflectionPrompts.forEach(({ n, q, hint }, idx) => {
+    result.push(new Paragraph({ spacing: { before: idx === 0 ? 0 : 320, after: 60 },
+      children: [
+        run(`${n}.  `, { size: 16, bold: true, color: ORANGE }),
+        run(q, { size: 18, bold: true, color: INK }),
+      ] }));
+    result.push(new Paragraph({ spacing: { after: 120 },
+      children: [run(hint, { size: 13, italics: true, color: MUTED })] }));
+    result.push(ruledWriteIn(5, { lineHeight: 420 }));
+  });
 
-    ...labeledWriteIn('1.  What\'s the thing you want to say but haven\'t said yet?', ORANGE, 1000),
-    ...labeledWriteIn('2.  What\'s been sitting with you most from this workbook?', ORANGE, 1000),
-    ...labeledWriteIn('3.  If one thing changed in how you two talk, what would you want it to be?', ORANGE, 1000),
-
-    pb(),
-    // Focus areas — the main commitment section
-    new Paragraph({ spacing: { before: 0, after: 120 },
-      children: [run('Your focus areas', { size: 30, bold: true, color: BLUE })] }),
-    para(`Pick one to three things to work on over the next month. They don't have to be big. Smaller and specific beats vague and ambitious.`,
-      { size: 16, italics: true, color: MUTED, after: 240 }),
-  ];
-
-  // Three focus area commitment blocks — same structure, user-written
+  // ── Pages 2-4: one page per focus area ────────────────────────────────
   for (let i = 1; i <= 3; i++) {
-    result.push(new Paragraph({ spacing: { before: i === 1 ? 0 : 280, after: 80 },
-      children: [run(`Focus area ${i}`, { size: 13, bold: true, color: BLUE, allCaps: true, characterSpacing: 80 })] }));
+    result.push(pb());
+    result.push(new Paragraph({ spacing: { after: 40 },
+      children: [run(`FOCUS AREA ${i}`, { size: 17, bold: true, color: BLUE, allCaps: true })] }));
+    result.push(new Paragraph({ spacing: { after: 40 },
+      children: [run('What we\'re focusing on', { size: 32, bold: true, color: INK })] }));
+    result.push(new Paragraph({ spacing: { before: 0, after: 240 },
+      border: { bottom: { style: BorderStyle.SINGLE, size: 6, color: BLUE, space: 4 } },
+      children: [new TextRun('')] }));
 
-    result.push(...labeledWriteIn('What we\'re focusing on', BLUE, 700));
-    result.push(...labeledWriteIn('What we want to try', BLUE, 1000));
-    result.push(...labeledWriteIn('When we\'ll check in', BLUE, 500));
+    // Single-line topic — taller line to give it visual weight
+    result.push(new Paragraph({ spacing: { after: 80 },
+      children: [run('the dimension, expectation area, or pattern you want to work on',
+        { size: 13, italics: true, color: MUTED })] }));
+    result.push(ruledWriteIn(2, { lineHeight: 460 }));
+
+    // Why this matters
+    result.push(eyebrowOf('Why this matters to us', BLUE));
+    result.push(ruledWriteIn(3, { lineHeight: 420 }));
+
+    // Two-column task lists — each partner gets their own ruled lines
+    // sized to half-page width, with a narrow gutter between the two.
+    const TASK_COL_W = Math.floor((W - 240) / 2);   // 240 twips gutter
+    const taskCol = (name, side) => new TableCell({
+      borders: { top: noBrd, bottom: noBrd, left: noBrd, right: noBrd },
+      width: { size: TASK_COL_W, type: WidthType.DXA },
+      margins: { top: 0, bottom: 0,
+        left:  side === 'right' ? 120 : 0,
+        right: side === 'left'  ? 120 : 0 },
+      children: [
+        new Paragraph({ spacing: { before: 320, after: 140 },
+          children: [run(`What ${name} will do`, { size: 17, bold: true, color: BLUE, allCaps: true })] }),
+        ruledWriteIn(5, { lineHeight: 420, width: TASK_COL_W }),
+      ],
+    });
+    result.push(new Table({
+      width: { size: W, type: WidthType.DXA }, columnWidths: [TASK_COL_W, 240, TASK_COL_W],
+      borders: { top: noBrd, bottom: noBrd, left: noBrd, right: noBrd, insideHorizontal: noBrd, insideVertical: noBrd },
+      rows: [new TableRow({ children: [
+        taskCol(u, 'left'),
+        new TableCell({ borders: noBrds, width: { size: 240, type: WidthType.DXA },
+          margins: { top: 0, bottom: 0, left: 0, right: 0 },
+          children: [new Paragraph({ spacing: { after: 0 }, children: [new TextRun('')] })] }),
+        taskCol(p, 'right'),
+      ] })],
+    }));
+
+    // Timeline + check-in
+    result.push(eyebrowOf('Timeline and check-in', BLUE));
+    result.push(new Paragraph({ spacing: { after: 80 },
+      children: [run('e.g., "small check-in every Sunday; revisit the whole thing in 30 days."', { size: 13, italics: true, color: MUTED })] }));
+    result.push(ruledWriteIn(3, { lineHeight: 420 }));
   }
 
   return result;
@@ -1315,101 +1548,116 @@ function buildConversationGuide(u, p, priorities) {
 }
 
 function buildReferenceCard(u, p, coupleType, priorities) {
-  const thickBrd = color => ({ style: BorderStyle.THICK, size: 24, color: color || INK });
-  const sideBrd = { style: BorderStyle.SINGLE, size: 4, color: STONE };
+  const typeName = coupleType?.name || 'Your couple type';
+  const typeTagline = coupleType ? fill(String(coupleType.tagline || ''), u, p) : '';
 
-  const typeName = coupleType?.name || '_________________';
-  const typeNote = coupleType ? fill(String(coupleType.tagline || ''), u, p) : '';
+  // Pull a phrase specific to this couple type if available — the first
+  // tip's phraseTry is the couple-type-calibrated line. Fall back to a
+  // generic starter if the couple type object doesn't include tips.
+  const phrase = coupleType?.tips?.[0]?.phraseTry
+    ? fill(String(coupleType.tips[0].phraseTry), u, p)
+    : 'What do you need from me right now?';
 
-  const priorityNames = priorities.slice(0, 3).map(d => DIM_META[d]?.label || '');
+  // Card geometry: ~5.5" wide × ~3.5" tall, centered on the page.
+  const CARD_W = 8000;
+  const TILE_W = Math.floor((CARD_W - 240) / 3);   // 3 equal side-by-side tiles
+  const NAVY_LIGHT = 'CFC3E8';  // soft lavender for secondary text on navy
+  const NAVY_DIM   = '8F80B0';  // even softer for metadata
+
+  // Each tile is a table cell with white fill inside the navy card.
+  // Consistent padding, colored eyebrow at top, content below.
+  const tileCell = (accentColor, eyebrow, bodyParagraphs) => new TableCell({
+    borders: { top: noBrd, bottom: noBrd, left: noBrd, right: noBrd },
+    width: { size: TILE_W, type: WidthType.DXA },
+    shading: { fill: 'FCFAF5', type: ShadingType.CLEAR },
+    margins: { top: 180, bottom: 180, left: 200, right: 200 },
+    children: [
+      new Paragraph({ spacing: { after: 100 },
+        children: [run(eyebrow, { size: 10, bold: true, color: accentColor, allCaps: true, characterSpacing: 80 })] }),
+      ...bodyParagraphs,
+    ],
+  });
+
+  // Left tile — names (prominent) + couple type underneath
+  const leftTile = tileCell(ORANGE, 'Us', [
+    new Paragraph({ spacing: { after: 120 },
+      children: [run(`${u} & ${p}`, { size: 20, bold: true, color: INK })] }),
+    new Paragraph({ spacing: { after: 40 },
+      children: [run(typeName, { size: 13, bold: true, color: ORANGE })] }),
+    ...(typeTagline ? [new Paragraph({ spacing: { after: 0 },
+      children: [run(typeTagline, { size: 11, italics: true, color: MUTED })] })] : []),
+  ]);
+
+  // Center tile — one phrase that works for this couple type
+  const centerTile = tileCell(PURPLE, 'Phrase that lands', [
+    new Paragraph({ spacing: { after: 0, line: 260, lineRule: 'atLeast' },
+      children: [run(`"${phrase}"`, { size: 15, italics: true, color: INK })] }),
+  ]);
+
+  // Right tile — "Goal for this week" with notebook-paper ruled lines
+  const rightTile = new TableCell({
+    borders: { top: noBrd, bottom: noBrd, left: noBrd, right: noBrd },
+    width: { size: TILE_W, type: WidthType.DXA },
+    shading: { fill: 'FCFAF5', type: ShadingType.CLEAR },
+    margins: { top: 180, bottom: 180, left: 200, right: 200 },
+    children: [
+      new Paragraph({ spacing: { after: 120 },
+        children: [run('Goal for this week', { size: 10, bold: true, color: BLUE, allCaps: true })] }),
+      // Ruled lines, tighter than other write-ins to fit the small tile
+      ruledWriteIn(4, { lineHeight: 240, afterEach: 60, color: 'D9CEBE' }),
+    ],
+  });
+
+  // The 3-column tile row
+  const tileRow = new Table({
+    width: { size: CARD_W - 240, type: WidthType.DXA },
+    columnWidths: [TILE_W, TILE_W, TILE_W],
+    alignment: AlignmentType.CENTER,
+    borders: {
+      top: noBrd, bottom: noBrd, left: noBrd, right: noBrd,
+      insideHorizontal: noBrd,
+      insideVertical: { style: BorderStyle.SINGLE, size: 6, color: NAVY },  // navy gap visible between tiles
+    },
+    rows: [new TableRow({ children: [leftTile, centerTile, rightTile] })],
+  });
+
+  // The navy card itself — not full page, centered, ~5.5" × ~3.5"
+  const navyCard = new Table({
+    width: { size: CARD_W, type: WidthType.DXA },
+    columnWidths: [CARD_W],
+    alignment: AlignmentType.CENTER,
+    borders: { top: noBrd, bottom: noBrd, left: noBrd, right: noBrd, insideHorizontal: noBrd, insideVertical: noBrd },
+    rows: [new TableRow({ children: [new TableCell({
+      borders: noBrds,
+      width: { size: CARD_W, type: WidthType.DXA },
+      shading: { fill: NAVY, type: ShadingType.CLEAR },
+      margins: { top: 0, bottom: 200, left: 0, right: 0 },
+      children: [
+        // Top gradient strip
+        gradientBar(ORANGE, PURPLE, { height: 100, segments: 32, width: CARD_W }),
+        // Title
+        new Paragraph({ alignment: AlignmentType.CENTER, spacing: { before: 160, after: 20 },
+          children: [run('ATTUNE  ·  REFERENCE CARD', { size: 10, bold: true, color: NAVY_LIGHT, allCaps: true, characterSpacing: 120 })] }),
+        new Paragraph({ alignment: AlignmentType.CENTER, spacing: { after: 200 },
+          children: [run('Keep this somewhere you\'ll see it.', { size: 11, italics: true, color: NAVY_DIM })] }),
+        // Tile row
+        tileRow,
+        // Footer
+        new Paragraph({ alignment: AlignmentType.CENTER, spacing: { before: 240, after: 0 },
+          children: [run('attune-relationships.com', { size: 10, color: NAVY_LIGHT, allCaps: true, characterSpacing: 80 })] }),
+      ],
+    })]})],
+  });
 
   return [
     pb(),
-    new Paragraph({ heading: HeadingLevel.HEADING_1, children: [run('Part 5 \u2014 Reference Card')] }),
-    para('Print on cardstock and cut along the dotted line. Put it on your fridge.', { color: MUTED }),
-    sp(),
-    para('\u00b7 \u00b7 \u00b7 \u00b7 \u00b7 \u00b7 \u00b7 \u00b7 \u00b7 \u00b7 \u00b7 \u00b7 CUT HERE \u00b7 \u00b7 \u00b7 \u00b7 \u00b7 \u00b7 \u00b7 \u00b7 \u00b7 \u00b7 \u00b7 \u00b7', { color: MUTED, italics: true, size: 16 }),
-    sp(),
-
-    // The card
-    new Table({
-      width: { size: W, type: WidthType.DXA }, columnWidths: [W],
-      rows: [
-        // Header
-        new TableRow({ children: [new TableCell({
-          borders: { top: thickBrd(INK), bottom: { style: BorderStyle.NONE }, left: thickBrd(INK), right: thickBrd(INK) },
-          shading: { fill: INK, type: ShadingType.CLEAR }, margins: { top: 260, bottom: 220, left: 400, right: 400 },
-          children: [
-            new Paragraph({ alignment: AlignmentType.CENTER, spacing: { after: 60 }, children: [run('ATTUNE', { size: 17, bold: true, color: ORANGE, allCaps: true, characterSpacing: 80 })] }),
-            new Paragraph({ alignment: AlignmentType.CENTER, spacing: { after: 0 }, children: [run(`${u} & ${p}`, { size: 30, bold: true, color: 'FFFFFF' })] }),
-          ]
-        })] }),
-
-        // Three-column body
-        new TableRow({ children: [new TableCell({
-          borders: { top: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.NONE }, left: thickBrd(INK), right: thickBrd(INK) },
-          margins: { top: 0, bottom: 0, left: 0, right: 0 },
-          children: [new Table({
-            width: { size: W, type: WidthType.DXA }, columnWidths: [2960, 2960, 3440],
-            rows: [new TableRow({ children: [
-              // Column 1: Couple type
-              new TableCell({
-                borders: { ...noBrds, right: sideBrd },
-                width: { size: 2960, type: WidthType.DXA },
-                shading: { fill: 'F5F4F0', type: ShadingType.CLEAR },
-                margins: { top: 280, bottom: 280, left: 320, right: 240 },
-                children: [
-                  new Paragraph({ spacing: { after: 100 }, children: [run('YOUR COUPLE TYPE', { size: 13, bold: true, color: ORANGE, allCaps: true, characterSpacing: 40 })] }),
-                  new Paragraph({ spacing: { after: 80 }, children: [run(typeName, { size: 22, bold: true, color: INK })] }),
-                  new Paragraph({ spacing: { after: 0 }, children: [run(typeNote, { size: 17, italics: true, color: MUTED })] }),
-                ],
-              }),
-              // Column 2: Priorities
-              new TableCell({
-                borders: { ...noBrds, right: sideBrd },
-                width: { size: 2960, type: WidthType.DXA },
-                margins: { top: 280, bottom: 280, left: 260, right: 240 },
-                children: [
-                  new Paragraph({ spacing: { after: 120 }, children: [run('OUR 3 PRIORITIES', { size: 13, bold: true, color: BLUE, allCaps: true, characterSpacing: 40 })] }),
-                  ...priorityNames.flatMap((name, i) => [
-                    new Paragraph({ spacing: { after: 40 }, children: [run(`${i+1}.  ${name}`, { size: 18, bold: true, color: INK })] }),
-                    new Paragraph({ spacing: { after: 160 }, children: [run('    This week: ______________', { size: 15, italics: true, color: MUTED })] }),
-                  ]),
-                ],
-              }),
-              // Column 3: Phrases
-              new TableCell({
-                borders: noBrds,
-                width: { size: 3440, type: WidthType.DXA },
-                shading: { fill: 'F5F4F0', type: ShadingType.CLEAR },
-                margins: { top: 280, bottom: 280, left: 260, right: 320 },
-                children: [
-                  new Paragraph({ spacing: { after: 120 }, children: [run('PHRASES TO TRY', { size: 13, bold: true, color: GREEN, allCaps: true, characterSpacing: 40 })] }),
-                  ...[
-                    '"I need space \u2014 back by ___."',
-                    '"I need to talk this through now."',
-                    '"Fix it, or just be here?"',
-                    '"What would help me most is ___."',
-                    '"Are we actually okay?"',
-                    '"I noticed that \u2014 it matters."',
-                  ].map(phrase => new Paragraph({ spacing: { after: 100 }, children: [run(phrase, { size: 17, italics: true, color: '333333' })] })),
-                ],
-              }),
-            ]})]
-          })]
-        })] }),
-
-        // Footer
-        new TableRow({ children: [new TableCell({
-          borders: { top: { style: BorderStyle.NONE }, bottom: thickBrd(INK), left: thickBrd(INK), right: thickBrd(INK) },
-          shading: { fill: INK, type: ShadingType.CLEAR }, margins: { top: 160, bottom: 160, left: 400, right: 400 },
-          children: [new Paragraph({ alignment: AlignmentType.CENTER, spacing: { after: 0 }, children: [run('attune-relationships.com  \u00b7  Come back to this. Build the habit.', { size: 16, color: '888888' })] })]
-        })] }),
-      ]
-    }),
-
-    sp(),
-    para('\u00b7 \u00b7 \u00b7 \u00b7 \u00b7 \u00b7 \u00b7 \u00b7 \u00b7 \u00b7 \u00b7 \u00b7 CUT HERE \u00b7 \u00b7 \u00b7 \u00b7 \u00b7 \u00b7 \u00b7 \u00b7 \u00b7 \u00b7 \u00b7 \u00b7', { color: MUTED, italics: true, size: 16 }),
+    // Breathing room above the card
+    new Paragraph({ spacing: { before: 400, after: 200 }, children: [new TextRun('')] }),
+    navyCard,
+    // A thin guide note below the card, outside the navy area
+    new Paragraph({ alignment: AlignmentType.CENTER, spacing: { before: 200, after: 0 },
+      children: [run('Print on cardstock. Cut out and keep it somewhere you\'ll see it.',
+        { size: 12, italics: true, color: MUTED })] }),
   ];
 }
 
@@ -1435,61 +1683,50 @@ function partnerTypes(coupleType) {
 }
 
 function buildMomentCard(moment, subjectName, otherName, typeLetter) {
-  // Each moment renders as a titled block with five short labeled sections:
-  // THE MOMENT, WHAT'S HAPPENING, WHAT NOT TO DO, WHAT WORKS, PHRASE THAT LANDS.
-  // Content is placeholder for now — final copy will come from a scene
-  // library keyed to (moment × individualType).
+  // Editorial header: big numeral in muted weight, then title in accent color.
+  // No filled square, no banner — reads like a magazine section not a form.
   const rowLabel = (label, color) => new Paragraph({
-    spacing: { before: 100, after: 60 },
-    children: [run(label, { size: 14, bold: true, color: color || ORANGE, allCaps: true, characterSpacing: 50 })],
+    spacing: { before: 200, after: 80 },
+    children: [run(label, { size: 16, bold: true, color: color || MUTED, allCaps: true })],
   });
   const rowBody = (text, opts = {}) => new Paragraph({
-    spacing: { after: 120 },
-    children: [run(text, { size: 20, color: opts.color || INK, italics: !!opts.italics })],
+    spacing: { after: 100, line: 280, lineRule: 'atLeast' },
+    children: [run(text, { size: 18, color: opts.color || INK, italics: !!opts.italics })],
   });
 
   return [
-    // Moment title bar
-    // Header: small colored square "badge" with the number in white, sitting
-    // inline with the moment title in accent color. Much more editorial than
-    // a full-row filled banner. The square cell is rendered as a narrow
-    // 2-column table with a background fill.
-    new Table({
-      width: { size: W, type: WidthType.DXA }, columnWidths: [500, W - 500],
-      borders: { top: { style: BorderStyle.NIL }, bottom: { style: BorderStyle.NIL }, left: { style: BorderStyle.NIL }, right: { style: BorderStyle.NIL }, insideHorizontal: { style: BorderStyle.NIL }, insideVertical: { style: BorderStyle.NIL } },
-      rows: [new TableRow({
-        height: { value: 500, rule: HeightRule.ATLEAST },
-        children: [
-          new TableCell({ borders: noBrds, width: { size: 500, type: WidthType.DXA },
-            shading: { fill: PURPLE, type: ShadingType.CLEAR },
-            margins: { top: 80, bottom: 80, left: 0, right: 0 },
-            children: [new Paragraph({ alignment: AlignmentType.CENTER, spacing: { after: 0 },
-              children: [run(moment.number || '', { size: 22, bold: true, color: 'FFFFFF' })] })] }),
-          new TableCell({ borders: noBrds, width: { size: W - 500, type: WidthType.DXA },
-            margins: { top: 80, bottom: 80, left: 280, right: 0 },
-            children: [new Paragraph({ spacing: { after: 0 },
-              children: [run(moment.title, { size: 24, bold: true, color: PURPLE })] })] }),
-        ],
-      })],
+    // Moment header: big numeral + title on one line
+    new Paragraph({ spacing: { before: 240, after: 40 },
+      children: [
+        run(String(moment.number || '').padStart(2, '0'), { size: 14, bold: true, color: MUTED, characterSpacing: 40 }),
+        run('   ', { size: 14 }),
+        run(moment.title, { size: 26, bold: true, color: INK }),
+      ],
     }),
-    sp(),
+    // Thin accent rule under the moment title
+    new Paragraph({ spacing: { before: 0, after: 180 },
+      border: { bottom: { style: BorderStyle.SINGLE, size: 6, color: PURPLE, space: 4 } },
+      children: [new TextRun('')] }),
 
-    rowLabel('THE MOMENT', MUTED),
+    rowLabel('The moment', MUTED),
     rowBody(PH(`1 sentence: concrete setup for "${moment.title.toLowerCase()}" — e.g. "${subjectName} comes home after a tough day and goes quiet."`)),
 
-    rowLabel(`WHAT'S HAPPENING FOR ${subjectName.toUpperCase()}`, PURPLE),
+    rowLabel(`What's happening for ${subjectName}`, PURPLE),
     rowBody(PH(`2–3 sentences keyed to Type ${typeLetter}: what's actually going on inside ${subjectName}, why the surface behavior looks the way it does, grounded in their specific communication style.`)),
 
-    rowLabel('WHAT NOT TO DO', 'C8402A'),
+    rowLabel('What not to do', 'C8402A'),
     rowBody(PH(`1 sentence: the natural but wrong move for ${otherName} to make in this moment.`)),
 
-    rowLabel('WHAT WORKS', GREEN),
+    rowLabel('What works', GREEN),
     rowBody(PH(`1–2 sentences: the specific action ${otherName} should take instead.`)),
 
-    rowLabel('PHRASE THAT LANDS', BLUE),
+    rowLabel('Phrase that lands', BLUE),
     rowBody(PH(`literal line for ${otherName} to say to ${subjectName} in this moment`), { italics: true, color: BLUE }),
 
-    hr(STONE, 2),
+    // Dotted divider between moments — softer than the old stone hr
+    new Paragraph({ spacing: { before: 160, after: 200 },
+      border: { bottom: { style: BorderStyle.DOTTED, size: 6, color: STONE, space: 4 } },
+      children: [new TextRun('')] }),
   ];
 }
 
@@ -1523,47 +1760,36 @@ function buildWorkingKnowledge(u, p, coupleType) {
   ];
 }
 
-// ─── 30-day check-in (embedded at end of Priorities) ────────────────────────
+// ─── 30-day check-in (embedded at end of Workbook section) ─────────────
 function buildPriorityCheckIn(u, p, priorities) {
-  const writeInRow = (heightTwips = 1600) => new TableRow({
-    height: { value: heightTwips, rule: HeightRule.ATLEAST },
-    children: [new TableCell({
-      borders: { top: noBrd, bottom: { style: BorderStyle.SINGLE, size: 6, color: STONE, space: 4 }, left: noBrd, right: noBrd },
-      width: { size: W, type: WidthType.DXA },
-      margins: { top: 40, bottom: 40, left: 0, right: 0 },
-      children: [new Paragraph({ spacing: { after: 0 }, children: [new TextRun('')] })],
-    })],
-  });
+  const checkInPrompts = [
+    { n: 1, q: `What changed (if anything) over the last 30 days?` },
+    { n: 2, q: `Did the focus areas we wrote down actually get attention? What got in the way?` },
+    { n: 3, q: `One small thing to try differently in the next 30 days.` },
+  ];
 
-  const promptRow = (label) => new Paragraph({ spacing: { before: 240, after: 80 },
-    children: [run(label, { size: 13, bold: true, color: ORANGE, allCaps: true, characterSpacing: 60 })] });
-
-  return [
+  const result = [
     pb(),
     new Paragraph({ spacing: { after: 60 },
       children: [run('30-day check-in', { size: 36, bold: true, color: ORANGE })] }),
-    new Paragraph({ spacing: { after: 240 },
+    new Paragraph({ spacing: { after: 200 },
       children: [run(`Come back to this page in about a month. Answer honestly. Write in the workbook — that's what it's for.`,
-        { size: 18, italics: true, color: MUTED })] }),
+        { size: 16, italics: true, color: MUTED })] }),
     new Paragraph({ spacing: { before: 0, after: 320 },
-      border: { bottom: { style: BorderStyle.SINGLE, size: 12, color: ORANGE, space: 4 } },
+      border: { bottom: { style: BorderStyle.SINGLE, size: 6, color: ORANGE, space: 4 } },
       children: [new TextRun('')] }),
-
-    promptRow('1.  What changed (if anything) over the last 30 days?'),
-    new Table({ width: { size: W, type: WidthType.DXA }, columnWidths: [W],
-      borders: { top: noBrd, bottom: noBrd, left: noBrd, right: noBrd, insideHorizontal: noBrd, insideVertical: noBrd },
-      rows: [writeInRow(1400)] }),
-
-    promptRow('2.  Did the focus areas we wrote down actually get attention? What got in the way?'),
-    new Table({ width: { size: W, type: WidthType.DXA }, columnWidths: [W],
-      borders: { top: noBrd, bottom: noBrd, left: noBrd, right: noBrd, insideHorizontal: noBrd, insideVertical: noBrd },
-      rows: [writeInRow(1400)] }),
-
-    promptRow('3.  One small thing to try differently in the next 30 days:'),
-    new Table({ width: { size: W, type: WidthType.DXA }, columnWidths: [W],
-      borders: { top: noBrd, bottom: noBrd, left: noBrd, right: noBrd, insideHorizontal: noBrd, insideVertical: noBrd },
-      rows: [writeInRow(1400)] }),
   ];
+
+  checkInPrompts.forEach(({ n, q }, idx) => {
+    result.push(new Paragraph({ spacing: { before: idx === 0 ? 0 : 320, after: 120 },
+      children: [
+        run(`${n}.  `, { size: 16, bold: true, color: ORANGE }),
+        run(q, { size: 18, bold: true, color: INK }),
+      ] }));
+    result.push(ruledWriteIn(6, { lineHeight: 420 }));
+  });
+
+  return result;
 }
 
 // ─── Conversation Library (Part 6) ───────────────────────────────────────────

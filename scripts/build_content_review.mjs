@@ -1,451 +1,445 @@
-// Concise content review doc for the Attune workbook.
+// Workbook content review — the authoritative map of what's in the workbook.
 //
-// Covers five areas of copy that plug into the personalized workbook:
-//   1. Epigraphs     — 12 draft candidates across 4 parts (pick or overwrite)
-//   2. Dimensions    — existing copy for 10 communication dimensions, plus
-//                      the NEW "when this shows up" slot that needs writing
-//   3. Expectations  — existing copy for 7 life-expectations domains
-//   4. Six Moments   — overview + 6 moment titles + 5-block structure
-//   5. Conversation  — 5 situations + prompt format
+// Columns:
+//   1. What's on the page
+//   2. Description
+//   3. Where it comes from (source category)
+//   4. Content — inline text for universal items, or "varies, see X.Y"
+//      for items that appear in the specific content review doc.
 //
-// Couple types live in couple_types_review.docx (one page per type).
+// Landscape to give the Content column room to breathe.
 
 import { writeFileSync } from 'fs';
+import { execSync } from 'child_process';
 import {
   Document, Packer, Paragraph, TextRun, Table, TableRow, TableCell,
-  AlignmentType, BorderStyle, WidthType, ShadingType, Footer, PageNumber,
+  AlignmentType, BorderStyle, WidthType,
+  Footer, PageNumber, PageOrientation,
 } from 'docx';
-import { DIM_META, DIM_CONTENT, EXP_DOMAINS, DIMS } from '../api/_workbook-content.js';
 
 const ORANGE = 'E8673A', BLUE = '1B5FE8', PURPLE = '9B5DE5', GREEN = '10B981';
 const INK = '0E0B07', MUTED = '8C7A68', STONE = 'E8DDD0';
-const W = 9360;
+
+// Landscape US Letter: 11 × 8.5 in. Usable after 720-twip side margins: 14400.
+const W = 14400;
 
 const run = (t, o = {}) => new TextRun({ text: String(t ?? ''), font: 'Arial', ...o });
-const para = (t, o = {}) => new Paragraph({ spacing: { after: o.after ?? 120, before: o.before ?? 0 }, alignment: o.align,
-  indent: o.indent,
-  children: [run(t, { size: o.size ?? 20, color: o.color ?? INK, bold: o.bold, italics: o.italics })] });
-const sp = (after = 80) => new Paragraph({ spacing: { after }, children: [new TextRun('')] });
+const sp = (n = 1) => Array.from({ length: n }, () => new Paragraph({ children: [new TextRun('')], spacing: { after: 80 } }));
 const pb = () => new Paragraph({ children: [new TextRun({ break: 1 })], pageBreakBefore: true });
 const noBrd = { style: BorderStyle.NONE };
 const noBrds = { top: noBrd, bottom: noBrd, left: noBrd, right: noBrd, insideHorizontal: noBrd, insideVertical: noBrd };
 
-function sectionHeader(n, title, subtitle, color) {
+const SOURCE_COLORS = {
+  'Exercise responses':   ORANGE,
+  'Couple-type-specific': PURPLE,
+  'Universal':            GREEN,
+  'Their names':          BLUE,
+  'Calculated':           '8B5CF6',
+  'User-written':         MUTED,
+};
+
+const COL_WHAT = 2800;
+const COL_DESC = 3200;
+const COL_SRC  = 1900;
+const COL_CONTENT = W - COL_WHAT - COL_DESC - COL_SRC;
+
+function sectionHeader(title, subtitle, color) {
   return [
     pb(),
-    new Paragraph({ spacing: { before: 0, after: 60 },
-      children: [
-        run(`SECTION ${n}`, { size: 14, bold: true, color, allCaps: true, characterSpacing: 80 }),
-        run('   of 5', { size: 12, color: MUTED }),
-      ] }),
-    new Paragraph({ spacing: { after: 60 },
-      children: [run(title, { size: 30, bold: true, color: INK })] }),
-    new Paragraph({ spacing: { after: 220 },
-      children: [run(subtitle, { size: 16, italics: true, color: MUTED })] }),
+    new Paragraph({ spacing: { before: 120, after: 80 },
+      children: [run(title, { size: 32, bold: true, color })] }),
+    new Paragraph({ spacing: { after: 200 },
+      children: [run(subtitle, { size: 15, italics: true, color: MUTED })] }),
+    new Paragraph({ spacing: { before: 0, after: 200 },
+      border: { bottom: { style: BorderStyle.SINGLE, size: 8, color, space: 4 } },
+      children: [new TextRun('')] }),
   ];
 }
 
-function labeledBlock(label, body, color, opts = {}) {
-  return new Paragraph({ spacing: { after: opts.after ?? 100, before: opts.before ?? 0 },
-    children: [
-      run(`${label}  `, { size: 11, bold: true, color, allCaps: true, characterSpacing: 60 }),
-      run(body, { size: 14, color: opts.color ?? INK, italics: opts.italics }),
-    ],
+function tableHeader() {
+  const mk = (label, width) => new TableCell({
+    borders: { top: noBrd, bottom: { style: BorderStyle.SINGLE, size: 8, color: INK },
+               left: noBrd, right: noBrd },
+    width: { size: width, type: WidthType.DXA },
+    margins: { top: 80, bottom: 100, left: 0, right: 160 },
+    children: [new Paragraph({ spacing: { after: 0 },
+      children: [run(label, { size: 11, bold: true, color: INK, allCaps: true, characterSpacing: 60 })] })],
   });
+  return new TableRow({ children: [
+    mk("What's on the page", COL_WHAT),
+    mk('Description',         COL_DESC),
+    mk('Where it comes from', COL_SRC),
+    mk('Content',             COL_CONTENT),
+  ]});
 }
 
-function toWriteBlock(instructions, color = BLUE) {
+function contentRow(what, description, source, content) {
+  const sourceColor = SOURCE_COLORS[source] || MUTED;
+  const textCell = (text, width, rightPad, opts = {}) => new TableCell({
+    borders: noBrds, width: { size: width, type: WidthType.DXA },
+    margins: { top: 140, bottom: 140, left: 0, right: rightPad ?? 160 },
+    verticalAlign: 'top',
+    children: [new Paragraph({ spacing: { after: 0, line: 280, lineRule: 'atLeast' },
+      children: [run(text, {
+        size: opts.size ?? 14,
+        color: opts.color ?? INK,
+        italics: opts.italics,
+        bold: opts.bold,
+      })] })],
+  });
+
+  const sourceCell = new TableCell({
+    borders: noBrds, width: { size: COL_SRC, type: WidthType.DXA },
+    margins: { top: 140, bottom: 140, left: 0, right: 160 },
+    verticalAlign: 'top',
+    children: [new Paragraph({ spacing: { after: 0 },
+      children: [
+        new TextRun({ text: '●  ', font: 'Arial', size: 18, color: sourceColor }),
+        run(source, { size: 12, bold: true, color: sourceColor }),
+      ] })],
+  });
+
+  // Reference pointer (varies, see X.Y) gets italic purple treatment
+  const isReference = /^varies,|^see /i.test(content);
+  const contentCell = textCell(content, COL_CONTENT, 0, {
+    size: 12,
+    italics: isReference,
+    color: isReference ? PURPLE : INK,
+  });
+
+  return new TableRow({ children: [
+    textCell(what, COL_WHAT, 160),
+    textCell(description, COL_DESC, 160, { italics: true, color: MUTED, size: 12 }),
+    sourceCell,
+    contentCell,
+  ]});
+}
+
+function sectionTable(rows) {
   return new Table({
-    width: { size: W, type: WidthType.DXA }, columnWidths: [W],
-    borders: noBrds,
-    rows: [new TableRow({ children: [new TableCell({
-      borders: { top: noBrd, bottom: noBrd, left: { style: BorderStyle.SINGLE, size: 16, color, space: 8 }, right: noBrd },
-      width: { size: W, type: WidthType.DXA },
-      shading: { fill: 'F5F8FE', type: ShadingType.CLEAR },
-      margins: { top: 100, bottom: 100, left: 200, right: 200 },
-      children: [new Paragraph({ spacing: { after: 0 },
-        children: [
-          run('TO WRITE   ', { size: 11, bold: true, color, allCaps: true, characterSpacing: 80 }),
-          run(instructions, { size: 13, color: INK, italics: true }),
-        ],
-      })],
-    })]})],
+    width: { size: W, type: WidthType.DXA },
+    columnWidths: [COL_WHAT, COL_DESC, COL_SRC, COL_CONTENT],
+    borders: {
+      top: noBrd, bottom: noBrd, left: noBrd, right: noBrd,
+      insideHorizontal: { style: BorderStyle.SINGLE, size: 2, color: STONE },
+      insideVertical: noBrd,
+    },
+    rows: [tableHeader(), ...rows.map(r => contentRow(r.what, r.desc, r.source, r.content))],
   });
 }
 
-// ── COVER ────────────────────────────────────────────────────────────────────
+// ── Cover + legend ───────────────────────────────────────────────────────
 const coverPage = [
-  sp(400),
-  new Paragraph({ alignment: AlignmentType.CENTER, spacing: { after: 80 },
-    children: [run('ATTUNE', { size: 20, bold: true, color: ORANGE, allCaps: true, characterSpacing: 80 })] }),
+  ...sp(3),
+  new Paragraph({ alignment: AlignmentType.CENTER, spacing: { after: 60 },
+    children: [run('ATTUNE', { size: 22, bold: true, color: ORANGE, allCaps: true, characterSpacing: 120 })] }),
   new Paragraph({ alignment: AlignmentType.CENTER, spacing: { after: 100 },
-    children: [run('Workbook Content — Review Doc', { size: 34, bold: true, color: INK })] }),
-  new Paragraph({ alignment: AlignmentType.CENTER, spacing: { after: 400 },
-    children: [run('Five content areas to review. No fluff.', { size: 18, italics: true, color: MUTED })] }),
-  sp(120),
+    children: [run('Workbook content review', { size: 44, bold: true, color: INK })] }),
+  new Paragraph({ alignment: AlignmentType.CENTER, spacing: { after: 320 },
+    children: [run('Every section of the workbook. What\'s on each page, where the content comes from, and the content itself.',
+      { size: 17, italics: true, color: MUTED })] }),
 
-  para('What\'s in this doc', { bold: true, size: 20, color: ORANGE, after: 160 }),
+  new Paragraph({ alignment: AlignmentType.CENTER, spacing: { before: 120, after: 160 },
+    children: [run('Source categories', { size: 13, bold: true, color: ORANGE, allCaps: true, characterSpacing: 80 })] }),
 
   new Table({
-    width: { size: W, type: WidthType.DXA }, columnWidths: [700, 2800, W - 700 - 2800],
-    borders: noBrds,
+    width: { size: 9000, type: WidthType.DXA },
+    alignment: AlignmentType.CENTER,
+    columnWidths: [2400, 6600],
+    borders: { top: noBrd, bottom: noBrd, left: noBrd, right: noBrd,
+      insideHorizontal: { style: BorderStyle.SINGLE, size: 2, color: STONE }, insideVertical: noBrd },
     rows: [
-      ...[
-        ['1', 'Epigraphs', 'Draft candidates for each of the 4 Parts. Pick or overwrite.', ORANGE],
-        ['2', 'Dimensions', '10 dimensions. Existing copy + a new "when this shows up" slot.', BLUE],
-        ['3', 'Expectations', '7 life-expectations domains. Existing copy.', GREEN],
-        ['4', 'Six Moments Library', 'New content library. Structure + per-type matrix.', PURPLE],
-        ['5', 'Conversation Starters', 'New content library. 5 situations + prompt format.', PURPLE],
-      ].map(([n, title, desc, color]) => new TableRow({
-        children: [
-          new TableCell({ borders: noBrds, width: { size: 700, type: WidthType.DXA },
-            margins: { top: 120, bottom: 80, left: 0, right: 120 },
-            children: [new Paragraph({ spacing: { after: 0 },
-              children: [run(n, { size: 22, bold: true, color })] })] }),
-          new TableCell({ borders: noBrds, width: { size: 2800, type: WidthType.DXA },
-            margins: { top: 120, bottom: 80, left: 0, right: 120 },
-            children: [new Paragraph({ spacing: { after: 0 },
-              children: [run(title, { size: 16, bold: true, color: INK })] })] }),
-          new TableCell({ borders: noBrds, width: { size: W - 700 - 2800, type: WidthType.DXA },
-            margins: { top: 120, bottom: 80, left: 120, right: 0 },
-            children: [new Paragraph({ spacing: { after: 0 },
-              children: [run(desc, { size: 14, color: MUTED, italics: true })] })] }),
-        ],
-      })),
-    ],
+      ['Exercise responses',   ORANGE, 'Their specific answers from the communication + expectations exercises. Changes per couple.'],
+      ['Couple-type-specific', PURPLE, 'One of 10 versions, depending on which couple type they were assigned.'],
+      ['Universal',            GREEN,  'Same for every couple. Written once, appears in every workbook.'],
+      ['Their names',          BLUE,   'Filled in wherever the copy says {U} or {P}, e.g. "Jordan and Alex."'],
+      ['Calculated',           '8B5CF6', 'Derived from their scores: gap sizes, gap labels, which dimensions to show.'],
+      ['User-written',         MUTED,  'Blank writing space for them to fill in themselves (notebook-paper ruled lines).'],
+    ].map(([label, color, desc]) => new TableRow({ children: [
+      new TableCell({ borders: noBrds, width: { size: 2400, type: WidthType.DXA },
+        margins: { top: 100, bottom: 100, left: 120, right: 120 },
+        children: [new Paragraph({ spacing: { after: 0 },
+          children: [
+            new TextRun({ text: '●  ', font: 'Arial', size: 20, color }),
+            run(label, { size: 15, bold: true, color }),
+          ] })] }),
+      new TableCell({ borders: noBrds, width: { size: 6600, type: WidthType.DXA },
+        margins: { top: 100, bottom: 100, left: 0, right: 120 },
+        children: [new Paragraph({ spacing: { after: 0, line: 280, lineRule: 'atLeast' },
+          children: [run(desc, { size: 13, italics: true, color: MUTED })] })] }),
+    ]})),
   }),
 
-  sp(300),
+  new Paragraph({ alignment: AlignmentType.CENTER, spacing: { before: 320, after: 120 },
+    children: [run('The Content column', { size: 13, bold: true, color: ORANGE, allCaps: true, characterSpacing: 80 })] }),
+  new Paragraph({ alignment: AlignmentType.CENTER, spacing: { after: 60 },
+    children: [run('Universal content is shown inline.', { size: 14, color: INK })] }),
+  new Paragraph({ alignment: AlignmentType.CENTER, spacing: { after: 60 },
+    children: [run('Non-universal content: references like "varies, see 3.1" — look up that section in the Specific Content Review doc.',
+      { size: 14, italics: true, color: PURPLE })] }),
 
-  para('How to review', { bold: true, size: 20, color: ORANGE, after: 120 }),
-  para('Add comments or tracked changes directly in the .docx version. When the review is done, send it back and I\'ll reconcile edits into the source files.',
-    { size: 16, after: 120 }),
-  para('Couple types are in a separate doc (couple_types_review.docx) since each one gets its own page there.',
-    { size: 14, italics: true, color: MUTED }),
+  // Callout: epigraphs need to be picked
+  new Paragraph({ alignment: AlignmentType.CENTER, spacing: { before: 320, after: 140 },
+    children: [run('Action needed: pick 4 epigraphs', { size: 13, bold: true, color: ORANGE, allCaps: true, characterSpacing: 80 })] }),
+  new Paragraph({ alignment: AlignmentType.CENTER, spacing: { after: 0 },
+    children: [run('Each of the 4 main Parts (1–4) opens with an epigraph. The Specific Content Review doc has 3 candidates per Part in Section 6. Pick one from each, or write your own. Marked in this doc as "varies, pick one from 6.X".',
+      { size: 13, italics: true, color: MUTED })] }),
 ];
 
-// ── SECTION 1 — EPIGRAPHS ────────────────────────────────────────────────────
-
-const EPIGRAPH_DRAFTS = [
-  {
-    part: 'Part 1',
-    title: 'A closer look at the dimensions that matter',
-    tone: 'Clarity. Seeing what was there the whole time.',
-    candidates: [
-      { quote: 'We don\'t see things as they are; we see them as we are.', attribution: 'Anaïs Nin' },
-      { quote: 'What you see depends not only on what you look at, but also on where you look from.', attribution: 'James Deese' },
-      { quote: 'The real voyage of discovery consists not in seeking new landscapes, but in having new eyes.', attribution: 'Marcel Proust' },
-    ],
-  },
-  {
-    part: 'Part 2',
-    title: 'Working Knowledge',
-    tone: 'Knowing another person. The practice of it.',
-    candidates: [
-      { quote: 'To love without knowing how to love wounds the person we love.', attribution: 'Thich Nhat Hanh' },
-      { quote: 'We repeat what we don\'t repair.', attribution: 'Christine Langley-Obaugh' },
-      { quote: 'The greatest gift you can give another is the purity of your attention.', attribution: 'Richard Moss' },
-    ],
-  },
-  {
-    part: 'Part 3',
-    title: 'Your 3 Priorities',
-    tone: 'Focus. Choosing where to put the effort.',
-    candidates: [
-      { quote: 'If you chase two rabbits, you will catch neither.', attribution: 'Russian proverb' },
-      { quote: 'The difference between successful people and very successful people is that very successful people say no to almost everything.', attribution: 'Warren Buffett' },
-      { quote: 'You can do anything, but not everything.', attribution: 'David Allen' },
-    ],
-  },
-  {
-    part: 'Part 4',
-    title: 'Conversation Library',
-    tone: 'Words. What they do. What to say.',
-    candidates: [
-      { quote: 'The single biggest problem in communication is the illusion that it has taken place.', attribution: 'George Bernard Shaw' },
-      { quote: 'When the right word is found, the right word is an answer.', attribution: 'Georges Braque' },
-      { quote: 'The most important thing in communication is hearing what isn\'t said.', attribution: 'Peter Drucker' },
-    ],
-  },
+// ── Intro pages ──────────────────────────────────────────────────────────
+const introSection = [
+  ...sectionHeader('Introduction pages', 'Cover, TOC, Intro, Snapshot — the opening of the workbook.', ORANGE),
+  sectionTable([
+    { what: 'Cover page',
+      desc: 'Names sit below "A workbook for". Couple type name appears as subhead.',
+      source: 'Their names',
+      content: '"{U} & {P}" — couple type name below (varies, see 1.1–1.10 in Specific Content Review).' },
+    { what: 'Table of contents',
+      desc: 'Hierarchical TOC with page numbers and part labels.',
+      source: 'Calculated',
+      content: 'Structure is fixed; page numbers vary based on how many dimensions and expectations had gaps.' },
+    { what: 'Introduction text',
+      desc: 'Frames the workbook and how to read it together.',
+      source: 'Universal',
+      content: '"This workbook was built from {U} and {P}\'s actual exercise answers. Every insight, gap level, and weekly practice was selected because it reflects your specific combination of scores. The snapshot below summarizes where the two of you are aligned and where the gaps are. The rest of the workbook explores what to do about it."' },
+    { what: 'Your Snapshot — dimension scores',
+      desc: "Each partner's score across all 12 comms dimensions with gap label.",
+      source: 'Exercise responses',
+      content: 'Row per dimension: label · {U} score · {P} score · gap · gap label. All 12 dims shown.' },
+    { what: 'Your Snapshot — expectations alignment',
+      desc: "Each partner's answer on the 7 expectation domains with aligned/gap flag.",
+      source: 'Exercise responses',
+      content: 'Row per domain: label · {U} answer · {P} answer · aligned or gap.' },
+    { what: 'Your Snapshot — couple type line',
+      desc: 'Type name and tagline for one of the 10 types.',
+      source: 'Couple-type-specific',
+      content: 'Name + tagline — varies, see 1.1–1.10.' },
+  ]),
 ];
 
-function epigraphSection() {
-  return [
-    ...sectionHeader(1, 'Epigraphs', 'Four Parts. Three drafted candidates each. Pick one per Part or replace with your own.', ORANGE),
-    ...EPIGRAPH_DRAFTS.flatMap(p => [
-      new Paragraph({ spacing: { before: 120, after: 40 },
-        children: [
-          run(p.part, { size: 11, bold: true, color: ORANGE, allCaps: true, characterSpacing: 80 }),
-          run('   ·   ', { size: 11, color: STONE }),
-          run(p.title, { size: 14, bold: true, color: INK }),
-          run('   ·   ', { size: 11, color: STONE }),
-          run(p.tone, { size: 12, italics: true, color: MUTED }),
-        ] }),
-      ...p.candidates.map((c, i) => new Paragraph({ spacing: { after: 60 }, indent: { left: 280, hanging: 280 },
-        children: [
-          run(`${i + 1}.  `, { size: 13, bold: true, color: MUTED }),
-          run(`"${c.quote}"`, { size: 13, color: INK }),
-          run(`  —  ${c.attribution}`, { size: 12, italics: true, color: MUTED }),
-        ],
-      })),
-    ]),
-  ];
-}
-
-// ── SECTION 2 — DIMENSIONS ───────────────────────────────────────────────────
-
-function dimensionBlock(dimKey) {
-  const meta = DIM_META[dimKey];
-  const c = DIM_CONTENT[dimKey];
-  const color = meta.color || BLUE;
-
-  return [
-    new Paragraph({ spacing: { before: 160, after: 40 },
-      children: [
-        run(meta.label, { size: 18, bold: true, color }),
-        run(`     ${meta.left}  ←→  ${meta.right}`, { size: 12, italics: true, color: MUTED }),
-      ] }),
-    labeledBlock('Measures', c.measures, color, { after: 60 }),
-    labeledBlock('If aligned', c.closeText, GREEN, { after: 60 }),
-    labeledBlock('If there\'s a gap', c.gapText, ORANGE, { after: 60 }),
-    new Paragraph({ spacing: { after: 60 },
-      children: [
-        run('Prompts  ', { size: 11, bold: true, color, allCaps: true, characterSpacing: 60 }),
-        ...c.prompts.map((pr, i) => run(`${i === 0 ? '' : '  ·  '}${pr}`, { size: 13, color: INK })),
-      ] }),
-    labeledBlock('Try this week', c.thisWeek, BLUE, { after: 100, italics: true }),
-    toWriteBlock(`"When this shows up" — 2-3 sentences of concrete, referenceable guidance for ${meta.label.toLowerCase()}. Present-tense, second-person, written as advice you'd flip to during a real moment. No hedging.`),
-  ];
-}
-
-function dimensionsSection() {
-  return [
-    ...sectionHeader(2, 'Dimensions', 'All 10 communication dimensions. Existing copy is already drafted — review for tone and accuracy. Each dimension also needs a "when this shows up" paragraph written from scratch.', BLUE),
-    ...DIMS.flatMap(d => dimensionBlock(d)),
-  ];
-}
-
-// ── SECTION 3 — EXPECTATIONS ─────────────────────────────────────────────────
-
-function expectationBlock(dom) {
-  return [
-    new Paragraph({ spacing: { before: 160, after: 40 },
-      children: [run(dom.label, { size: 18, bold: true, color: GREEN })] }),
-    labeledBlock('If aligned', dom.closeText, GREEN, { after: 60 }),
-    labeledBlock('If there\'s a gap', dom.gapText, ORANGE, { after: 60 }),
-    labeledBlock('Try this week', dom.thisWeek, BLUE, { after: 60, italics: true }),
-  ];
-}
-
-function expectationsSection() {
-  return [
-    ...sectionHeader(3, 'Expectations', 'All 7 life-expectations domains. Review existing copy for tone.', GREEN),
-    ...EXP_DOMAINS.flatMap(e => expectationBlock(e)),
-  ];
-}
-
-// ── SECTION 4 — SIX MOMENTS LIBRARY ──────────────────────────────────────────
-
-const MOMENTS = [
-  { n: 1, title: 'After a hard workday', blurb: 'One of them comes home drained. The other wants to connect or catch up.' },
-  { n: 2, title: 'When they\'re worried but haven\'t said it', blurb: 'Something\'s off. Not shared yet. The signal is showing up other ways.' },
-  { n: 3, title: 'During a disagreement', blurb: 'In the moment. Tensions are up. How to stay in conversation, not escalate.' },
-  { n: 4, title: 'After a disagreement', blurb: 'The heat has passed but neither knows if things are resolved yet.' },
-  { n: 5, title: 'When they want to feel close', blurb: 'Low-key bid for connection — not dramatic, but it matters.' },
-  { n: 6, title: 'When stress is coming from outside the relationship', blurb: 'Work, family, health. Not about them, but lands inside the partnership.' },
+// ── Part 1 ───────────────────────────────────────────────────────────────
+const part1Section = [
+  ...sectionHeader('Part 1 · A closer look at the dimensions that matter',
+    'The bulk of the book. One page per dimension where they had a gap, plus expectations.', BLUE),
+  sectionTable([
+    { what: 'Part 1 cover page',
+      desc: 'Part opener with opening quote/epigraph.',
+      source: 'Couple-type-specific',
+      content: 'Epigraph: varies, pick one from 6.1 (3 candidates). Remainder is universal.' },
+    { what: 'Part 1 intro page ("Practical help…")',
+      desc: 'Framing for what Part 1 contains, with couple type tagline.',
+      source: 'Couple-type-specific',
+      content: '"{U} & {P}" eyebrow + "Practical help, built from your answers." + couple type tagline (varies, see 1.1–1.10).' },
+    { what: 'Dimension page — title + gap eyebrow',
+      desc: 'Big centered dimension title + small gap eyebrow below it.',
+      source: 'Calculated',
+      content: '10 possible dimensions (Energy, Emotional Expression, How You Ask for Needs, Responding to Bids, Conflict Style, How You Repair, Closeness & Independence, How Love Lands, Communication Under Stress, Giving & Receiving Feedback). Gap eyebrow: "GAP X.X · [label]" where label is derived from gap size.' },
+    { what: 'Dimension page — "Your scores" column (left side of hero)',
+      desc: 'Spectrum with axis endpoints and a dot per partner showing their 1–5 score.',
+      source: 'Exercise responses',
+      content: 'Axis labels show numeric endpoints: "1 [LEFT LABEL]" on far left, "[RIGHT LABEL] 5" on far right. Below, two rows — one per partner — with a thin grey line and a colored dot at the score position. Axis pairs per dim: Energy (Inward/Outward) · Emotional Expression (Guarded/Expressive) · Needs (Direct/Indirect) · Bids (Reserved/Attuned) · Conflict (Engage quickly/Needs space first) · Repair (Formal-verbal/Informal-warmth) · Closeness (Autonomous/Close-seeking) · Love (Words/Actions & Presence) · Stress (Withdraw/Seek connection) · Feedback (Guarded/Open).' },
+    { what: 'Dimension page — "What this means" column (right side of hero)',
+      desc: 'Italic grey analysis of what this gap means for this specific couple type.',
+      source: 'Couple-type-specific',
+      content: 'Varies by couple type. See 2.1–2.10 in Specific Content Review (10 dims × 10 types = 100 blocks drafted). Prose uses partner names by substitution — e.g. "the W" and "the X" in the draft become "Jordan" and "Alex" at render time.' },
+    { what: 'Dimension page — gap label',
+      desc: 'Short label like "Worth exploring" in the gap eyebrow.',
+      source: 'Calculated',
+      content: 'Derived from gap size: <0.8 Close alignment · 0.8–1.4 Minor gap · 1.5–2.4 Worth exploring · ≥2.5 Significant gap. Dim pages only render when gap ≥ 1.5, so "Close alignment" and "Minor gap" labels never appear in practice.' },
+    { what: 'Dimension page — reflection prompts (3)',
+      desc: 'Three open-ended questions specific to this dimension.',
+      source: 'Universal',
+      content: 'Same 3 prompts per dimension. Example (Energy): "After a big social event, what does each of you need in the next 24 hours?" / "When does one of you feel most energized, and when does the other feel most depleted?" / "Is your current daily rhythm giving each person the kind of recovery they need?"' },
+    { what: 'Dimension page — "Try this week" (in a colored box)',
+      desc: 'One specific practice for this dimension, rendered in a tinted colored box with the dim\'s accent color.',
+      source: 'Universal',
+      content: 'One per dimension, same for every couple. Example (Energy): "Pick one upcoming situation likely to produce different energy states, a party, a family visit, a busy week. Before it happens, name what you\'ll each need afterward. Then check in."' },
+    { what: 'Dimension page — "What we want to try" write-in',
+      desc: 'Blank ruled lines for the commitment they want to try.',
+      source: 'User-written',
+      content: 'Label "What we want to try" + italic hint (e.g., "we\'ll share one thing we\'d normally hold back, every Sunday evening.") + 3 ruled notebook-paper lines.' },
+    { what: 'Dimension page — "Our notes" write-in',
+      desc: 'Additional blank ruled lines for free-form notes.',
+      source: 'User-written',
+      content: 'Label "Our notes" + 4 ruled notebook-paper lines.' },
+    { what: 'Expectations — section header',
+      desc: 'Opening for the expectations half of Part 1.',
+      source: 'Their names',
+      content: '"Expectations — Where {U} and {P} have different ideas about the life you\'re building."' },
+    { what: 'Expectations — domain responses',
+      desc: "Each partner's answer, shown side by side.",
+      source: 'Exercise responses',
+      content: 'Two columns per domain. 7 domains possible: Household, Financial, Career, Family / Kids, Lifestyle, Sex & Affection, Faith & Values.' },
+    { what: 'Expectations — gap analysis',
+      desc: 'Grey italic text explaining the pattern for this domain.',
+      source: 'Universal',
+      content: 'One version per domain, shown when the couple has a gap. Full text in /api/_workbook-content.js → EXP_DOMAINS[].gapText.' },
+    { what: 'Expectations — "Try this week"',
+      desc: 'One specific practice per expectation domain.',
+      source: 'Universal',
+      content: 'Same for every couple per domain.' },
+  ]),
 ];
 
-const INDIVIDUAL_TYPES = [
-  { letter: 'W', label: 'Open + Engages quickly',  gist: 'emotionally expressive, wants resolution fast' },
-  { letter: 'X', label: 'Guarded + Engages quickly', gist: 'direct and resolution-oriented, but processes feelings internally' },
-  { letter: 'Y', label: 'Open + Needs space',       gist: 'emotionally expressive but needs quiet to recover; warms up over time' },
-  { letter: 'Z', label: 'Guarded + Needs space',    gist: 'reserved, withdraws to process; shares once settled' },
+// ── Part 2 ───────────────────────────────────────────────────────────────
+const part2Section = [
+  ...sectionHeader('Part 2 · Working Knowledge',
+    "Six recurring moments with guidance keyed to each partner's individual type.", PURPLE),
+  sectionTable([
+    { what: 'Part 2 cover page',
+      desc: 'Part opener with epigraph.',
+      source: 'Couple-type-specific',
+      content: 'Epigraph: varies, pick one from 6.2 (3 candidates). Remainder is universal.' },
+    { what: 'Partner page header',
+      desc: 'Cross-type couples get two pages (one per subject partner); same-type get one.',
+      source: 'Their names',
+      content: '"What {Partner} should know about {You}"' },
+    { what: 'The 6 moments (titles + blurbs)',
+      desc: 'Same 6 moments in every workbook.',
+      source: 'Universal',
+      content: '1. After a hard workday · 2. When they\'re worried but haven\'t said it · 3. During a disagreement · 4. After a disagreement · 5. When they want to feel close · 6. When stress is coming from outside the relationship.' },
+    { what: 'Each moment — "What\'s happening for them"',
+      desc: '2-3 sentences. What\'s going on inside the subject partner.',
+      source: 'Couple-type-specific',
+      content: 'Varies, see 3.1–3.6 (each has W/X/Y/Z versions).' },
+    { what: 'Each moment — "What NOT to do"',
+      desc: 'One sentence. The natural but wrong move.',
+      source: 'Couple-type-specific',
+      content: 'Varies, see 3.1–3.6.' },
+    { what: 'Each moment — "What works"',
+      desc: '1-2 sentences. The specific action that lands.',
+      source: 'Couple-type-specific',
+      content: 'Varies, see 3.1–3.6.' },
+    { what: 'Each moment — "Phrase that lands"',
+      desc: 'A literal line the other partner can say.',
+      source: 'Couple-type-specific',
+      content: 'Varies, see 3.1–3.6.' },
+  ]),
 ];
 
-function sixMomentsSection() {
-  return [
-    ...sectionHeader(4, 'Six Moments Library', 'Six universal relationship moments. For each moment, we write four versions — one per individual type (W/X/Y/Z). That\'s 24 scenes total.', PURPLE),
-
-    para('The six moments', { bold: true, size: 16, color: PURPLE, after: 80 }),
-    para('Approve the list first. These are the moments the workbook will give every couple language for. They need to feel universal — anyone should recognize them.',
-      { size: 14, italics: true, color: MUTED, after: 140 }),
-    ...MOMENTS.map(m => new Paragraph({ spacing: { after: 80 }, indent: { left: 280, hanging: 280 },
-      children: [
-        run(`${m.n}.  `, { size: 14, bold: true, color: PURPLE }),
-        run(m.title, { size: 14, bold: true, color: INK }),
-        run(`  —  ${m.blurb}`, { size: 13, italics: true, color: MUTED }),
-      ],
-    })),
-
-    sp(200),
-
-    para('The four individual types', { bold: true, size: 16, color: PURPLE, after: 80 }),
-    para('Each moment gets written four times, keyed to the subject partner\'s type. Reference:',
-      { size: 14, italics: true, color: MUTED, after: 120 }),
-    ...INDIVIDUAL_TYPES.map(t => new Paragraph({ spacing: { after: 60 }, indent: { left: 280, hanging: 280 },
-      children: [
-        run(`${t.letter}  `, { size: 16, bold: true, color: PURPLE }),
-        run(t.label, { size: 13, bold: true, color: INK }),
-        run(`  —  ${t.gist}`, { size: 13, italics: true, color: MUTED }),
-      ],
-    })),
-
-    sp(200),
-
-    para('What each scene contains', { bold: true, size: 16, color: PURPLE, after: 80 }),
-    para('Five short blocks per scene. Every scene follows this exact shape so readers can flip to any moment and know where to look.',
-      { size: 14, italics: true, color: MUTED, after: 140 }),
-
-    new Table({
-      width: { size: W, type: WidthType.DXA }, columnWidths: [2400, W - 2400],
-      borders: { top: { style: BorderStyle.SINGLE, size: 4, color: STONE }, bottom: { style: BorderStyle.SINGLE, size: 4, color: STONE }, left: noBrd, right: noBrd, insideHorizontal: { style: BorderStyle.SINGLE, size: 2, color: STONE }, insideVertical: noBrd },
-      rows: [
-        ['The moment',       MUTED,   '1 sentence. The concrete situation. "They come home after a tough day and go quiet."'],
-        ['What\'s happening for [them]', PURPLE, '2-3 sentences keyed to the subject\'s type. What\'s actually going on inside them. Grounded in how that type is wired.'],
-        ['What NOT to do',    'C8402A', '1 sentence. The natural but wrong move the other partner tends to make.'],
-        ['What works',        GREEN,   '1-2 sentences. The specific action the other partner should take instead.'],
-        ['Phrase that lands', BLUE,    'A literal line. Short, specific, something a real person would actually say.'],
-      ].map(([label, color, desc]) => new TableRow({ children: [
-        new TableCell({ borders: noBrds, width: { size: 2400, type: WidthType.DXA }, margins: { top: 80, bottom: 80, left: 0, right: 120 },
-          children: [new Paragraph({ spacing: { after: 0 },
-            children: [run(label, { size: 12, bold: true, color, allCaps: true, characterSpacing: 60 })] })] }),
-        new TableCell({ borders: noBrds, width: { size: W - 2400, type: WidthType.DXA }, margins: { top: 80, bottom: 80, left: 120, right: 0 },
-          children: [new Paragraph({ spacing: { after: 0 },
-            children: [run(desc, { size: 13, color: INK })] })] }),
-      ]})),
-    }),
-
-    sp(200),
-
-    para('What to review in this section', { bold: true, size: 16, color: PURPLE, after: 80 }),
-    ...[
-      'Are these the right 6 moments? Anything missing, anything to replace?',
-      'Are the 4 individual-type labels and gists accurate?',
-      'Does the 5-block structure work, or should a block be added/removed?',
-    ].map(t => new Paragraph({ spacing: { after: 60 }, indent: { left: 280 },
-      children: [run('·  ', { size: 14, color: PURPLE, bold: true }), run(t, { size: 14, color: INK })] })),
-
-    sp(200),
-    toWriteBlock('After this structure is approved, 24 scene cards get written — 6 moments × 4 individual types. Sample drafting happens in a separate working doc.', PURPLE),
-  ];
-}
-
-// ── SECTION 5 — CONVERSATION STARTERS ────────────────────────────────────────
-
-const SITUATIONS = [
-  { n: 1, title: 'At dinner on a quiet night', blurb: 'Low-stakes depth. Not a fight, not a date — just present together.' },
-  { n: 2, title: 'After a hard week', blurb: 'One or both are worn down. Mutual care, not problem-solving.' },
-  { n: 3, title: 'When one of you is off but won\'t say why', blurb: 'Something\'s there. Gentle excavation, not interrogation.' },
-  { n: 4, title: 'Before a difficult conversation', blurb: 'Setting it up. Framing first, hard content second.' },
-  { n: 5, title: 'When you\'re tired of talking about logistics', blurb: 'Life has become admin. Restoring romance, not scheduling it.' },
+// ── Part 3 ───────────────────────────────────────────────────────────────
+const part3Section = [
+  ...sectionHeader('Part 3 · Workbook',
+    'Guided journaling pages where they write their own focus areas.', ORANGE),
+  sectionTable([
+    { what: 'Part 3 cover page',
+      desc: 'Part opener with epigraph.',
+      source: 'Couple-type-specific',
+      content: 'Epigraph: varies, pick one from 6.3 (3 candidates). Remainder is universal.' },
+    { what: '"Preparing together" — 3 prompts',
+      desc: 'Reflection questions before picking focus areas.',
+      source: 'Universal',
+      content: '1. "What\'s the thing you want to say but haven\'t said yet?" · 2. "What\'s been sitting with you most from this workbook?" · 3. "If one thing changed in how you two talk, what would you want it to be?" (each with an italic example hint)' },
+    { what: '"Preparing together" — answer space',
+      desc: 'Blank ruled lines for their answers.',
+      source: 'User-written',
+      content: '5 ruled lines per prompt.' },
+    { what: 'Focus area pages (3 pages)',
+      desc: 'One page per focus area. Labels + blank ruled write-ins.',
+      source: 'Universal',
+      content: 'Labels: "FOCUS AREA N" · "What we\'re focusing on" (with hint) · "Why this matters to us" · "What {U} will do" / "What {P} will do" (two columns) · "Timeline and check-in". Structure universal; content written by the couple.' },
+    { what: 'Focus area pages — ruled write-ins',
+      desc: 'Every labeled section has blank ruled lines below.',
+      source: 'User-written',
+      content: 'Couple writes their own focus area, reasons, tasks, timeline.' },
+    { what: '30-day check-in page',
+      desc: 'Three prompts revisited after 30 days.',
+      source: 'Universal',
+      content: '1. "What changed (if anything) over the last 30 days?" · 2. "Did the focus areas we wrote down actually get attention? What got in the way?" · 3. "One small thing to try differently in the next 30 days."' },
+    { what: '30-day check-in — answer space',
+      desc: 'Blank ruled lines for their answers.',
+      source: 'User-written',
+      content: '6 ruled lines per prompt.' },
+  ]),
 ];
 
-function conversationSection() {
-  return [
-    ...sectionHeader(5, 'Conversation Starters', 'Five universal situations. Each gets a master list of prompts; three are shown per workbook, chosen for that couple\'s type.', PURPLE),
-
-    para('The five situations', { bold: true, size: 16, color: PURPLE, after: 80 }),
-    para('Approve the list first. These are moments where couples want language, not therapy.', { size: 14, italics: true, color: MUTED, after: 140 }),
-    ...SITUATIONS.map(s => new Paragraph({ spacing: { after: 80 }, indent: { left: 280, hanging: 280 },
-      children: [
-        run(`${s.n}.  `, { size: 14, bold: true, color: PURPLE }),
-        run(s.title, { size: 14, bold: true, color: INK }),
-        run(`  —  ${s.blurb}`, { size: 13, italics: true, color: MUTED }),
-      ],
-    })),
-
-    sp(200),
-
-    para('What each prompt contains', { bold: true, size: 16, color: PURPLE, after: 80 }),
-    para('Minimum viable library: 5 situations × ~5 prompts each = 25 prompts. Each prompt has:', { size: 14, italics: true, color: MUTED, after: 100 }),
-
-    new Table({
-      width: { size: W, type: WidthType.DXA }, columnWidths: [2400, W - 2400],
-      borders: { top: { style: BorderStyle.SINGLE, size: 4, color: STONE }, bottom: { style: BorderStyle.SINGLE, size: 4, color: STONE }, left: noBrd, right: noBrd, insideHorizontal: { style: BorderStyle.SINGLE, size: 2, color: STONE }, insideVertical: noBrd },
-      rows: [
-        ['The prompt',         BLUE,   'One sentence. A question or invitation. Opens something, doesn\'t close it.'],
-        ['Best for',           ORANGE, 'Couple type tag(s) this prompt fits — e.g. WX, WY, or ALL if universal. A single prompt can fit multiple types.'],
-      ].map(([label, color, desc]) => new TableRow({ children: [
-        new TableCell({ borders: noBrds, width: { size: 2400, type: WidthType.DXA }, margins: { top: 80, bottom: 80, left: 0, right: 120 },
-          children: [new Paragraph({ spacing: { after: 0 },
-            children: [run(label, { size: 12, bold: true, color, allCaps: true, characterSpacing: 60 })] })] }),
-        new TableCell({ borders: noBrds, width: { size: W - 2400, type: WidthType.DXA }, margins: { top: 80, bottom: 80, left: 120, right: 0 },
-          children: [new Paragraph({ spacing: { after: 0 },
-            children: [run(desc, { size: 13, color: INK })] })] }),
-      ]})),
-    }),
-
-    sp(180),
-
-    para('Example (for reference)', { bold: true, size: 16, color: PURPLE, after: 80 }),
-    new Table({
-      width: { size: W, type: WidthType.DXA }, columnWidths: [W],
-      borders: noBrds,
-      rows: [new TableRow({ children: [new TableCell({
-        borders: { top: noBrd, bottom: noBrd, left: { style: BorderStyle.SINGLE, size: 16, color: PURPLE, space: 8 }, right: noBrd },
-        width: { size: W, type: WidthType.DXA },
-        shading: { fill: 'FBF7FE', type: ShadingType.CLEAR },
-        margins: { top: 120, bottom: 120, left: 240, right: 200 },
-        children: [
-          new Paragraph({ spacing: { after: 40 },
-            children: [run('Situation 1  ·  At dinner on a quiet night', { size: 12, bold: true, color: PURPLE, allCaps: true, characterSpacing: 40 })] }),
-          new Paragraph({ spacing: { after: 80 },
-            children: [run('"What\'s something you noticed this week that you didn\'t tell me about yet?"', { size: 14, color: INK, italics: true })] }),
-          new Paragraph({ spacing: { after: 0 },
-            children: [
-              run('Best for:  ', { size: 11, bold: true, color: ORANGE, allCaps: true, characterSpacing: 40 }),
-              run('ALL (works broadly, not type-specific)', { size: 12, color: MUTED }),
-            ] }),
-        ],
-      })]})],
-    }),
-
-    sp(200),
-    para('What to review in this section', { bold: true, size: 16, color: PURPLE, after: 80 }),
-    ...[
-      'Are these the right 5 situations? Anything missing, anything to replace?',
-      'Does the format (prompt + "best for" tag) work?',
-      'Is the example in the right register for the rest?',
-    ].map(t => new Paragraph({ spacing: { after: 60 }, indent: { left: 280 },
-      children: [run('·  ', { size: 14, color: PURPLE, bold: true }), run(t, { size: 14, color: INK })] })),
-
-    sp(200),
-    toWriteBlock('After the structure is approved, 25 prompts get written — 5 per situation. Each tagged with one or more couple types. Drafted in a separate working doc.', PURPLE),
-  ];
-}
-
-// ── Assemble ─────────────────────────────────────────────────────────────────
-const children = [
-  ...coverPage,
-  ...epigraphSection(),
-  ...dimensionsSection(),
-  ...expectationsSection(),
-  ...sixMomentsSection(),
-  ...conversationSection(),
+// ── Part 4 ───────────────────────────────────────────────────────────────
+const part4Section = [
+  ...sectionHeader('Part 4 · Conversation Library',
+    'Conversation starters for five common situations.', PURPLE),
+  sectionTable([
+    { what: 'Part 4 cover page',
+      desc: 'Part opener with epigraph.',
+      source: 'Couple-type-specific',
+      content: 'Epigraph: varies, pick one from 6.4 (3 candidates). Remainder is universal.' },
+    { what: 'The 5 situations (titles + blurbs)',
+      desc: 'Same 5 situations in every workbook.',
+      source: 'Universal',
+      content: '1. At dinner on a quiet night · 2. After a hard week · 3. When one of you is off but won\'t say why · 4. Before a difficult conversation · 5. When you\'re tired of talking about logistics.' },
+    { what: 'Prompts shown per situation',
+      desc: 'Master list of 25 prompts (5 per situation), tagged by couple type fit. Workbook shows the 3 best-fit per situation.',
+      source: 'Couple-type-specific',
+      content: 'Varies, see 4.1–4.5 (each has 5 prompts with "Best for" tags).' },
+    { what: '"A structured first conversation"',
+      desc: 'A longer guided conversation framework at the end of Part 4.',
+      source: 'Universal',
+      content: 'Same for every couple. Currently placeholder in the workbook — final framework content pending.' },
+  ]),
 ];
 
+// ── Part 5 ───────────────────────────────────────────────────────────────
+const part5Section = [
+  ...sectionHeader('Part 5 · Reference Card',
+    'A small card they can print and keep somewhere visible.', GREEN),
+  sectionTable([
+    { what: 'Card layout + design',
+      desc: 'Small navy card, centered on page, three tiles side by side.',
+      source: 'Universal',
+      content: '~5.5" × 3.5" with orange→purple gradient strip at top. Same layout in every workbook.' },
+    { what: 'Left tile — names + couple type',
+      desc: 'Names prominent, couple type name + tagline below.',
+      source: 'Their names',
+      content: '"{U} & {P}" + couple type name + tagline (varies, see 1.1–1.10 for type-specific content).' },
+    { what: 'Center tile — "Phrase that lands"',
+      desc: 'One short phrase for this specific couple type.',
+      source: 'Couple-type-specific',
+      content: 'Varies, see 5.1–5.10 (first tip\'s phraseTry per couple type).' },
+    { what: 'Right tile — "Goal for this week"',
+      desc: 'Blank notebook-paper lines for them to write their own goal.',
+      source: 'User-written',
+      content: '4 ruled notebook-paper lines under the "Goal for this week" label.' },
+    { what: 'Card footer',
+      desc: 'Small URL under the tiles.',
+      source: 'Universal',
+      content: 'ATTUNE · REFERENCE CARD header and attune-relationships.com footer. "Print on cardstock. Cut out and keep it somewhere you\'ll see it." note.' },
+  ]),
+];
+
+// ── Assemble ─────────────────────────────────────────────────────────────
 const doc = new Document({
-  styles: { default: { document: { run: { font: 'Arial', size: 20 } } } },
+  styles: { default: { document: { run: { font: 'Arial', size: 22 } } } },
   sections: [{
-    properties: { page: { margin: { top: 720, right: 720, bottom: 720, left: 720 } } },
+    properties: { page: {
+      margin: { top: 720, right: 720, bottom: 720, left: 720 },
+      size: { orientation: PageOrientation.LANDSCAPE, width: 12240, height: 15840 },
+    } },
     footers: {
       default: new Footer({
         children: [new Paragraph({ alignment: AlignmentType.CENTER,
           border: { top: { style: BorderStyle.SINGLE, size: 4, color: STONE, space: 8 } },
           spacing: { before: 120, after: 0 },
           children: [
-            run('Attune — Content Review   ·   ', { size: 13, color: MUTED }),
+            run('Attune · Workbook content review   ·   ', { size: 13, color: MUTED }),
             new TextRun({ children: [PageNumber.CURRENT], size: 13, color: INK, font: 'Arial' }),
             run(' / ', { size: 13, color: MUTED }),
             new TextRun({ children: [PageNumber.TOTAL_PAGES], size: 13, color: MUTED, font: 'Arial' }),
-          ],
-        })],
+          ] })],
       }),
     },
-    children,
+    children: [
+      ...coverPage,
+      ...introSection,
+      ...part1Section,
+      ...part2Section,
+      ...part3Section,
+      ...part4Section,
+      ...part5Section,
+    ],
   }],
 });
 
 const buf = await Packer.toBuffer(doc);
-writeFileSync('/tmp/workbook_content_review.docx', buf);
-console.log(`✓ Content review: /tmp/workbook_content_review.docx (${buf.length} bytes)`);
+const outPath = '/tmp/workbook_content_review.docx';
+writeFileSync(outPath, buf);
+execSync('libreoffice --headless --convert-to pdf --outdir /tmp ' + outPath, { stdio: 'pipe' });
+console.log(`✓ Workbook content review: ${outPath} (${buf.length} bytes)`);
