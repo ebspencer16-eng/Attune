@@ -4364,178 +4364,525 @@ function StartingOutChecklist({ userName, partnerName, onBack, checklistState, s
   );
 }
 
-// ======================================================
-// BUDGET TOOL -- Premium
-// ======================================================
+// ──────────────────────────────────────────────────────────────────────────
+// SHARED BUDGET TOOL (Premium add-on)
+// ──────────────────────────────────────────────────────────────────────────
+// Redesigned flow:
+//   1. ORIENT   — each partner's post-tax monthly income + pooling model
+//   2. ESSENTIALS — housing, transport, food, health, debt, regular savings
+//   3. DISCRETIONARY — lifestyle, giving, personal spending (split per partner)
+//   4. GOALS    — target + timeline, auto-calc monthly contribution, shown
+//                 against remaining surplus
+//   5. REVEAL   — pure facts, no commentary: what the budget does, what each
+//                 partner said on ex2 finances questions, how money moves
+//                 under the chosen pooling model
+//
+// Data shape persisted (localStorage + Supabase profiles.budget_data):
+//   {
+//     incomes: { [userName]: "5500", [partnerName]: "4000" },
+//     pooling: 'combined' | 'proportional' | 'fifty_fifty' | 'separate',
+//     expenses: { "housing__Rent / Mortgage": "1850", ... },
+//     personal: { [userName]: "400", [partnerName]: "350" },
+//     goals: [ { id, name, target, months } ],
+//   }
+// ──────────────────────────────────────────────────────────────────────────
+
 const BUDGET_CATEGORIES = [
-  { id: "housing", label: "Housing", icon: "🏠", items: ["Rent / Mortgage", "Utilities (electric, gas, water)", "Internet & phone", "Home insurance / renters insurance", "Home maintenance / repairs"] },
-  { id: "food", label: "Food & Dining", icon: "🍽", items: ["Groceries", "Dining out", "Coffee & snacks", "Meal delivery services"] },
-  { id: "transport", label: "Transportation", icon: "🚗", items: ["Car payment(s)", "Car insurance", "Gas", "Parking & tolls", "Public transit / rideshare"] },
-  { id: "savings", label: "Savings & Investments", icon: "💰", items: ["Emergency fund contribution", "Retirement (401k/IRA)", "Joint savings goal", "Individual savings"] },
-  { id: "health", label: "Health & Wellness", icon: "💊", items: ["Health insurance premiums", "Gym / fitness", "Medical copays", "Prescriptions", "Mental health / therapy"] },
-  { id: "lifestyle", label: "Lifestyle & Fun", icon: "✨", items: ["Streaming & subscriptions", "Hobbies & activities", "Vacations / travel fund", "Gifts & celebrations", "Personal spending money (each)"] },
-  { id: "giving", label: "Giving & Charity", icon: "🤲", items: ["Regular charitable donations", "Religious / tithing contributions", "One-time causes or fundraisers", "Community or family support"] },
-  { id: "debt", label: "Debt Payments", icon: "📊", items: ["Student loans", "Credit card minimums", "Personal loans"] },
+  { id: "housing",   label: "Housing",                      icon: "🏠", group: "essentials",
+    items: ["Rent / Mortgage", "Utilities (electric, gas, water)", "Internet & phone", "Home insurance / renters insurance", "Home maintenance / repairs"] },
+  { id: "transport", label: "Transportation",               icon: "🚗", group: "essentials",
+    items: ["Car payment(s)", "Car insurance", "Gas", "Parking & tolls", "Public transit / rideshare"] },
+  { id: "food",      label: "Food & Dining",                icon: "🍽", group: "essentials",
+    items: ["Groceries", "Dining out", "Coffee & snacks", "Meal delivery services"] },
+  { id: "health",    label: "Health & Wellness",            icon: "💊", group: "essentials",
+    items: ["Health insurance premiums", "Gym / fitness", "Medical copays", "Prescriptions", "Mental health / therapy"] },
+  { id: "debt",      label: "Debt Payments",                icon: "📊", group: "essentials",
+    items: ["Student loans", "Credit card minimums", "Personal loans"] },
+  { id: "savings",   label: "Regular savings & retirement", icon: "💰", group: "essentials",
+    items: ["401(k) / employer retirement", "IRA contribution", "Emergency fund contribution", "Joint savings", "Individual savings"] },
+  { id: "lifestyle", label: "Lifestyle & Fun",              icon: "✨", group: "discretionary",
+    items: ["Streaming & subscriptions", "Hobbies & activities", "Vacations / travel fund", "Gifts & celebrations"] },
+  { id: "giving",    label: "Giving & Charity",             icon: "🤲", group: "discretionary",
+    items: ["Regular charitable donations", "Religious / tithing contributions", "One-time causes or fundraisers", "Community or family support"] },
 ];
 
-function BudgetTool({ userName, partnerName, onBack, budgetState, setBudgetState }) {
-  const [budget, setBudget] = useState(budgetState || {});
-  const [incomes, setIncomes] = useState({ [userName]: "", [partnerName]: "" });
-  const [activeTab, setActiveTab] = useState("income");
+// Pooling-model cards shown in the Orient section. Label + description read
+// as plain statements; the math logic lives in the computeReveal function.
+const POOLING_MODELS = [
+  { id: "combined",     label: "Fully combined",         desc: "All income into one pool. All expenses come from the pool." },
+  { id: "proportional", label: "Proportional to income", desc: "Each of you contributes to shared expenses in proportion to your income." },
+  { id: "fifty_fifty",  label: "50 / 50 split",          desc: "Each of you covers half of shared expenses regardless of income." },
+  { id: "separate",     label: "Fully separate",         desc: "You each cover your own expenses. No shared calculation." },
+];
 
-  const totalIncome = Object.values(incomes).reduce((s, v) => s + (parseFloat(v) || 0), 0);
-  const totalExpenses = Object.values(budget).reduce((s, v) => s + (parseFloat(v) || 0), 0);
-  const remaining = totalIncome - totalExpenses;
+// Parse a currency-like string to a number. Tolerates "1,500", "$1500", "1500.50".
+function bNum(v) { return parseFloat(String(v || "").replace(/[^0-9.-]/g, '')) || 0; }
 
-  const tabs = [{ id: "income", label: "Income" }, ...BUDGET_CATEGORIES.map(c => ({ id: c.id, label: c.label }))];
+// Format a number as currency for display.
+function bFmt(n) {
+  const num = Math.round(Math.abs(n));
+  return '$' + num.toLocaleString();
+}
+
+// Compute the reveal numbers from a budget state. Returns a flat object
+// with all the facts needed — no commentary, no interpretation.
+function computeReveal(state, userName, partnerName) {
+  const uIncome = bNum(state.incomes?.[userName]);
+  const pIncome = bNum(state.incomes?.[partnerName]);
+  const totalIncome = uIncome + pIncome;
+
+  // Sum shared category expenses (everything except personal spending)
+  const catSums = {};
+  BUDGET_CATEGORIES.forEach(cat => {
+    catSums[cat.id] = cat.items.reduce((s, item) =>
+      s + bNum(state.expenses?.[cat.id + '__' + item]), 0);
+  });
+  const sharedExpenses = Object.values(catSums).reduce((s, n) => s + n, 0);
+
+  // Personal spending is per-partner, not shared
+  const uPersonal = bNum(state.personal?.[userName]);
+  const pPersonal = bNum(state.personal?.[partnerName]);
+
+  // Goals are treated as shared savings commitments
+  const goalsMonthly = (state.goals || []).reduce((s, g) => {
+    const t = bNum(g.target), m = bNum(g.months);
+    return s + (m > 0 ? t / m : 0);
+  }, 0);
+
+  const totalAllocated = sharedExpenses + uPersonal + pPersonal + goalsMonthly;
+  const surplus = totalIncome - totalAllocated;
+
+  // Savings rate: regular savings contributions + goal contributions over income
+  const savingsSpend = catSums.savings + goalsMonthly;
+  const savingsRate = totalIncome > 0 ? (savingsSpend / totalIncome) * 100 : 0;
+
+  // Top 3 categories by spend
+  const topCats = Object.entries(catSums)
+    .filter(([, v]) => v > 0)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 3)
+    .map(([id, v]) => {
+      const cat = BUDGET_CATEGORIES.find(c => c.id === id);
+      return { label: cat?.label || id, amount: v, pct: totalIncome > 0 ? (v / totalIncome) * 100 : 0 };
+    });
+
+  // Contribution math under each pooling model
+  const pooling = state.pooling || 'proportional';
+  let uContribution = 0, pContribution = 0, uLeftover = 0, pLeftover = 0;
+  const sharedPlusGoals = sharedExpenses + goalsMonthly;
+  if (pooling === 'combined') {
+    // No separate contributions; report pool math instead.
+    uContribution = uIncome; pContribution = pIncome;
+    uLeftover = 0; pLeftover = 0;  // Not meaningful under this model
+  } else if (pooling === 'proportional') {
+    if (totalIncome > 0) {
+      uContribution = (uIncome / totalIncome) * sharedPlusGoals;
+      pContribution = sharedPlusGoals - uContribution;
+    }
+    uLeftover = uIncome - uContribution - uPersonal;
+    pLeftover = pIncome - pContribution - pPersonal;
+  } else if (pooling === 'fifty_fifty') {
+    uContribution = sharedPlusGoals / 2;
+    pContribution = sharedPlusGoals / 2;
+    uLeftover = uIncome - uContribution - uPersonal;
+    pLeftover = pIncome - pContribution - pPersonal;
+  }
+  // 'separate' — no contribution math
+
+  return {
+    uIncome, pIncome, totalIncome,
+    sharedExpenses, uPersonal, pPersonal, goalsMonthly,
+    totalAllocated, surplus,
+    savingsRate, savingsSpend,
+    topCats,
+    pooling,
+    uContribution, pContribution, uLeftover, pLeftover,
+    catSums,
+  };
+}
+
+function BudgetTool({ userName, partnerName, onBack, budgetState, setBudgetState,
+                     ex2Answers, partnerEx2, accountId }) {
+  const font = { display: HFONT, body: BFONT };
+
+  // Seed from persisted state if present; otherwise sensible empty shape.
+  const init = budgetState || {};
+  const [incomes, setIncomes]       = useState(init.incomes       || { [userName]: "", [partnerName]: "" });
+  const [pooling, setPooling]       = useState(init.pooling       || "proportional");
+  const [expenses, setExpenses]     = useState(init.expenses      || {});
+  const [personal, setPersonal]     = useState(init.personal      || { [userName]: "", [partnerName]: "" });
+  const [goals, setGoals]           = useState(init.goals         || []);
+  const [dirty, setDirty]           = useState(false);
+  const [saveStatus, setSaveStatus] = useState("idle"); // 'idle' | 'saving' | 'saved'
+
+  // Mark dirty whenever the user changes anything
+  const markDirty = () => { if (!dirty) setDirty(true); if (saveStatus === 'saved') setSaveStatus('idle'); };
+  const setIncome  = (who, v) => { setIncomes(x => ({ ...x, [who]: v })); markDirty(); };
+  const setExpense = (k, v)   => { setExpenses(x => ({ ...x, [k]: v })); markDirty(); };
+  const setPers    = (who, v) => { setPersonal(x => ({ ...x, [who]: v })); markDirty(); };
+  const changePool = (id)     => { setPooling(id); markDirty(); };
+  const addGoal    = ()       => { setGoals(g => [...g, { id: 'g_' + Date.now(), name: "", target: "", months: "" }]); markDirty(); };
+  const editGoal   = (id, patch) => { setGoals(g => g.map(x => x.id === id ? { ...x, ...patch } : x)); markDirty(); };
+  const delGoal    = (id)     => { setGoals(g => g.filter(x => x.id !== id)); markDirty(); };
+
+  // Save: write to localStorage immediately, also upsert to Supabase if
+  // logged in. Flow: idle → saving → saved (2s) → idle.
+  const save = async () => {
+    const snapshot = { incomes, pooling, expenses, personal, goals };
+    setSaveStatus("saving");
+    setBudgetState(snapshot);
+    try { localStorage.setItem('attune_budget', JSON.stringify(snapshot)); } catch {}
+    if (accountId) {
+      try {
+        const { supabase: sb, hasSupabase } = await import('./supabase.js');
+        if (hasSupabase()) await sb.from('profiles').update({ budget_data: snapshot }).eq('id', accountId);
+      } catch {}
+    }
+    setDirty(false);
+    setSaveStatus("saved");
+    setTimeout(() => setSaveStatus("idle"), 2000);
+  };
+
+  // Current reveal calc (always running — cheap + used for sticky summary)
+  const rev = computeReveal({ incomes, pooling, expenses, personal, goals }, userName, partnerName);
+  const hasIncome   = rev.totalIncome > 0;
+  const hasExpenses = rev.sharedExpenses > 0 || rev.uPersonal > 0 || rev.pPersonal > 0 || rev.goalsMonthly > 0;
+  const showReveal  = hasIncome && hasExpenses;
+
+  // Number input — currency format, responsive to keyboard + mobile numeric
+  const numInput = (value, onChange, placeholder = "0", w = 130) => (
+    <div style={{ display: "flex", alignItems: "center", gap: 4, background: "white", border: "1.5px solid " + C.stone, borderRadius: 8, padding: "0.35rem 0.65rem", width: w }}>
+      <span style={{ color: C.muted, fontFamily: font.body, fontSize: "0.82rem" }}>$</span>
+      <input
+        type="text" inputMode="decimal" value={value || ""} onChange={e => onChange(e.target.value)}
+        placeholder={placeholder}
+        style={{ border: "none", outline: "none", background: "transparent", fontFamily: font.body, fontSize: "0.88rem", color: C.ink, width: "100%", padding: 0 }}
+      />
+    </div>
+  );
 
   return (
-    <div style={{ maxWidth: 620, margin: "0 auto" }}>
+    <div style={{ maxWidth: 720, margin: "0 auto", paddingBottom: "6rem" }}>
+      {/* ── Back + title ───────────────────────────────────────────── */}
       <button onClick={onBack} style={{ background: "transparent", border: "none", color: C.muted, fontSize: "0.72rem", letterSpacing: "0.1em", textTransform: "uppercase", cursor: "pointer", fontFamily: font.body, padding: 0, marginBottom: "1.5rem", display: "block" }}>← Back to Dashboard</button>
       <div style={{ fontSize: "0.6rem", letterSpacing: "0.22em", textTransform: "uppercase", color: "#1B5FE8", fontWeight: 700, fontFamily: font.body, marginBottom: "0.35rem" }}>Attune Premium</div>
-      <h1 style={{ fontFamily: font.display, fontSize: "1.8rem", fontWeight: 700, color: C.ink, lineHeight: 1.1, marginBottom: "0.5rem" }}>Shared Budget Tool</h1>
-      <p style={{ fontSize: "0.85rem", color: C.muted, fontFamily: font.body, fontWeight: 300, lineHeight: 1.65, marginBottom: "1.5rem" }}>Build your real shared budget together. Your answers from the expectations exercise are reflected here.</p>
+      <h1 style={{ fontFamily: font.display, fontSize: "1.9rem", fontWeight: 700, color: C.ink, lineHeight: 1.1, marginBottom: "0.5rem" }}>Shared Budget Tool</h1>
+      <p style={{ fontSize: "0.92rem", color: C.muted, fontFamily: font.body, fontWeight: 300, lineHeight: 1.65, marginBottom: "0.4rem" }}>
+        Build your real shared budget together. Your numbers stay yours — Attune is a calculator, not a financial advisor.
+      </p>
+      <p style={{ fontSize: "0.78rem", color: C.muted, fontFamily: font.body, fontWeight: 300, lineHeight: 1.6, marginBottom: "1.5rem", fontStyle: "italic" }}>
+        Both of you can access and edit this from your dashboard. Use <strong>Save changes</strong> to sync across devices.
+      </p>
 
-      {/* Summary bar */}
-      <div style={{ background: "linear-gradient(135deg, #0f0c29, #1d1a4e)", borderRadius: 14, padding: "1.25rem 1.5rem", marginBottom: "1.5rem", color: "white", display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "1rem" }}>
-        {[
-          { label: "Monthly Income", value: "$" + totalIncome.toLocaleString(), color: "#34d399" },
-          { label: "Monthly Expenses", value: "$" + totalExpenses.toLocaleString(), color: "#E8673A" },
-          { label: remaining >= 0 ? "Surplus" : "Deficit", value: (remaining >= 0 ? "+" : "") + "$" + Math.abs(remaining).toLocaleString(), color: remaining >= 0 ? "#34d399" : "#f87171" },
-        ].map(({ label, value, color }) => (
-          <div key={label}>
-            <div style={{ fontSize: "0.58rem", color: "rgba(255,255,255,0.72)", letterSpacing: "0.15em", textTransform: "uppercase", fontFamily: font.body, marginBottom: "0.25rem" }}>{label}</div>
-            <div style={{ fontFamily: font.display, fontSize: "1.25rem", fontWeight: 700, color }}>{value}</div>
-          </div>
-        ))}
-      </div>
-
-      {/* Tabs */}
-      <div style={{ display: "flex", gap: "0.4rem", flexWrap: "wrap", marginBottom: "1.25rem" }}>
-        {tabs.map(tab => (
-          <button key={tab.id} onClick={() => setActiveTab(tab.id)}
-            style={{ background: activeTab === tab.id ? "#1B5FE8" : "white", color: activeTab === tab.id ? "white" : C.muted, border: "1.5px solid " + (activeTab === tab.id ? "#1B5FE8" : C.stone), padding: "0.35rem 0.75rem", borderRadius: 999, fontSize: "0.68rem", cursor: "pointer", fontFamily: font.body, fontWeight: activeTab === tab.id ? 600 : 400, transition: "all 0.15s" }}>{tab.label}</button>
-        ))}
-      </div>
-
-      {/* Income tab */}
-      {activeTab === "income" && (
-        <div style={{ background: "white", border: "1.5px solid " + C.stone, borderRadius: 14, padding: "1.25rem" }}>
-          <h3 style={{ fontFamily: font.display, fontSize: "1rem", fontWeight: 700, color: C.ink, marginBottom: "1rem" }}>Monthly Take-Home Income</h3>
-          {[userName, partnerName].map(name => (
-            <div key={name} style={{ marginBottom: "1rem" }}>
-              <label style={{ fontSize: "0.72rem", fontWeight: 700, color: C.ink, fontFamily: font.body, display: "block", marginBottom: "0.35rem", letterSpacing: "0.06em", textTransform: "uppercase" }}>{name}'s monthly income</label>
-              <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-                <span style={{ fontSize: "1rem", color: C.muted, fontFamily: font.body }}>$</span>
-                <input type="number" value={incomes[name]} onChange={e => setIncomes({ ...incomes, [name]: e.target.value })} placeholder="0" style={{ flex: 1, padding: "0.65rem 0.85rem", borderRadius: 8, border: "1.5px solid " + C.stone, fontFamily: font.body, fontSize: "0.95rem", color: C.ink, outline: "none" }} />
-              </div>
+      {/* ── Sticky summary bar ─────────────────────────────────────── */}
+      <div style={{ position: "sticky", top: 0, zIndex: 10, background: "linear-gradient(135deg, #0f0c29, #1d1a4e)", borderRadius: 14, padding: "1rem 1.25rem", marginBottom: "1.5rem", color: "white", boxShadow: "0 6px 24px rgba(15,12,41,0.25)" }}>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "1rem" }}>
+          {[
+            { label: "Monthly income",  value: bFmt(rev.totalIncome),  color: "#34d399" },
+            { label: rev.surplus >= 0 ? "Left to allocate" : "Over budget",
+              value: (rev.surplus >= 0 ? "" : "-") + bFmt(rev.surplus),
+              color: rev.surplus >= 0 ? "#E8C572" : "#f87171" },
+            { label: "Savings rate",    value: rev.savingsRate.toFixed(1) + "%", color: "#93C5FD" },
+          ].map(({ label, value, color }) => (
+            <div key={label}>
+              <div style={{ fontSize: "0.56rem", color: "rgba(255,255,255,0.72)", letterSpacing: "0.15em", textTransform: "uppercase", fontFamily: font.body, marginBottom: "0.2rem" }}>{label}</div>
+              <div style={{ fontFamily: font.display, fontSize: "1.3rem", fontWeight: 700, color }}>{value}</div>
             </div>
           ))}
+        </div>
+        {dirty && (
+          <div style={{ marginTop: "0.6rem", fontSize: "0.68rem", color: "rgba(255,220,170,0.9)", fontFamily: font.body, letterSpacing: "0.05em" }}>
+            ● Unsaved changes
+          </div>
+        )}
+      </div>
+
+      {/* ── Section: ORIENT ─────────────────────────────────────────── */}
+      <section style={{ marginBottom: "2.25rem" }}>
+        <div style={{ fontSize: "0.6rem", letterSpacing: "0.22em", textTransform: "uppercase", color: "#1B5FE8", fontFamily: font.body, fontWeight: 700, marginBottom: "0.35rem" }}>Step 1</div>
+        <h2 style={{ fontFamily: font.display, fontSize: "1.35rem", fontWeight: 700, color: C.ink, margin: "0 0 0.4rem" }}>Start with where you stand</h2>
+        <p style={{ fontSize: "0.85rem", color: C.muted, fontFamily: font.body, lineHeight: 1.6, marginBottom: "1.25rem" }}>
+          Each of you enters your post-tax monthly take-home. Then pick the model that matches how you want to handle shared expenses.
+        </p>
+
+        {/* Incomes */}
+        <div style={{ background: "white", border: "1.5px solid " + C.stone, borderRadius: 14, padding: "1.15rem 1.25rem", marginBottom: "1.25rem" }}>
+          <div style={{ fontSize: "0.7rem", letterSpacing: "0.16em", textTransform: "uppercase", color: C.muted, fontWeight: 700, fontFamily: font.body, marginBottom: "0.9rem" }}>Post-tax monthly income</div>
+          {[userName, partnerName].map((name, i) => (
+            <div key={name} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0.5rem 0", borderTop: i === 0 ? "none" : "1px solid " + C.stone + "40" }}>
+              <span style={{ fontSize: "0.9rem", color: C.ink, fontFamily: font.body, fontWeight: 500 }}>{name}</span>
+              {numInput(incomes[name], v => setIncome(name, v), "0", 140)}
+            </div>
+          ))}
+        </div>
+
+        {/* Pooling model */}
+        <div style={{ fontSize: "0.7rem", letterSpacing: "0.16em", textTransform: "uppercase", color: C.muted, fontWeight: 700, fontFamily: font.body, marginBottom: "0.7rem" }}>How you'll split shared expenses</div>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: "0.65rem" }}>
+          {POOLING_MODELS.map(m => {
+            const sel = pooling === m.id;
+            return (
+              <button key={m.id} onClick={() => changePool(m.id)}
+                style={{ textAlign: "left", background: sel ? "#1B5FE808" : "white", border: "2px solid " + (sel ? "#1B5FE8" : C.stone), borderRadius: 12, padding: "0.85rem 1rem", cursor: "pointer", fontFamily: font.body, transition: "all 0.15s" }}>
+                <div style={{ fontSize: "0.9rem", fontWeight: 700, color: sel ? "#1B5FE8" : C.ink, marginBottom: "0.3rem" }}>{m.label}</div>
+                <div style={{ fontSize: "0.76rem", color: C.muted, lineHeight: 1.5 }}>{m.desc}</div>
+              </button>
+            );
+          })}
+        </div>
+      </section>
+
+      {/* ── Section: ESSENTIALS ─────────────────────────────────────── */}
+      <section style={{ marginBottom: "2.25rem" }}>
+        <div style={{ fontSize: "0.6rem", letterSpacing: "0.22em", textTransform: "uppercase", color: "#10b981", fontFamily: font.body, fontWeight: 700, marginBottom: "0.35rem" }}>Step 2</div>
+        <h2 style={{ fontFamily: font.display, fontSize: "1.35rem", fontWeight: 700, color: C.ink, margin: "0 0 0.4rem" }}>Essentials</h2>
+        <p style={{ fontSize: "0.85rem", color: C.muted, fontFamily: font.body, lineHeight: 1.6, marginBottom: "1.25rem" }}>
+          The things you pay every month to keep life running. Include regular savings and retirement contributions here.
+        </p>
+        {BUDGET_CATEGORIES.filter(c => c.group === "essentials").map(cat =>
+          <BudgetCategoryBlock key={cat.id} cat={cat} expenses={expenses} setExpense={setExpense} numInput={numInput} font={font} />)}
+      </section>
+
+      {/* ── Section: DISCRETIONARY ──────────────────────────────────── */}
+      <section style={{ marginBottom: "2.25rem" }}>
+        <div style={{ fontSize: "0.6rem", letterSpacing: "0.22em", textTransform: "uppercase", color: "#E8673A", fontFamily: font.body, fontWeight: 700, marginBottom: "0.35rem" }}>Step 3</div>
+        <h2 style={{ fontFamily: font.display, fontSize: "1.35rem", fontWeight: 700, color: C.ink, margin: "0 0 0.4rem" }}>Discretionary</h2>
+        <p style={{ fontSize: "0.85rem", color: C.muted, fontFamily: font.body, lineHeight: 1.6, marginBottom: "1.25rem" }}>
+          Everything else. Personal spending at the bottom is split per partner — your walking-around money.
+        </p>
+        {BUDGET_CATEGORIES.filter(c => c.group === "discretionary").map(cat =>
+          <BudgetCategoryBlock key={cat.id} cat={cat} expenses={expenses} setExpense={setExpense} numInput={numInput} font={font} />)}
+
+        {/* Personal spending — per partner */}
+        <div style={{ background: "white", border: "1.5px solid " + C.stone, borderRadius: 14, padding: "0.85rem 1.15rem", marginTop: "0.6rem" }}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0.55rem 0 0.85rem", borderBottom: "1px solid " + C.stone + "60" }}>
+            <div>
+              <span style={{ fontSize: "1.05rem", marginRight: "0.5rem" }}>👤</span>
+              <span style={{ fontSize: "0.95rem", fontWeight: 700, color: C.ink, fontFamily: font.display }}>Personal spending</span>
+            </div>
+          </div>
+          {[userName, partnerName].map(name => (
+            <div key={name} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0.55rem 0", borderBottom: "1px solid " + C.stone + "30" }}>
+              <span style={{ fontSize: "0.88rem", color: C.ink, fontFamily: font.body }}>{name}</span>
+              {numInput(personal[name], v => setPers(name, v), "0", 130)}
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* ── Section: GOALS ──────────────────────────────────────────── */}
+      <section style={{ marginBottom: "2.25rem" }}>
+        <div style={{ fontSize: "0.6rem", letterSpacing: "0.22em", textTransform: "uppercase", color: "#F59E0B", fontFamily: font.body, fontWeight: 700, marginBottom: "0.35rem" }}>Step 4</div>
+        <h2 style={{ fontFamily: font.display, fontSize: "1.35rem", fontWeight: 700, color: C.ink, margin: "0 0 0.4rem" }}>Savings goals</h2>
+        <p style={{ fontSize: "0.85rem", color: C.muted, fontFamily: font.body, lineHeight: 1.6, marginBottom: "1.25rem" }}>
+          Add a goal and Attune will show the monthly contribution needed. Compare it against your surplus above to see what's realistic.
+        </p>
+
+        {goals.map(g => {
+          const monthly = bNum(g.months) > 0 ? bNum(g.target) / bNum(g.months) : 0;
+          return (
+            <div key={g.id} style={{ background: "white", border: "1.5px solid " + C.stone, borderRadius: 12, padding: "0.9rem 1rem", marginBottom: "0.6rem", display: "grid", gridTemplateColumns: "1fr auto auto auto", gap: "0.55rem", alignItems: "center" }}>
+              <input value={g.name} onChange={e => editGoal(g.id, { name: e.target.value })} placeholder="Goal name"
+                style={{ border: "1.5px solid " + C.stone, borderRadius: 8, padding: "0.45rem 0.7rem", fontFamily: font.body, fontSize: "0.85rem", color: C.ink, minWidth: 0 }}/>
+              <div style={{ display: "flex", alignItems: "center", gap: 4, background: "white", border: "1.5px solid " + C.stone, borderRadius: 8, padding: "0.35rem 0.65rem", width: 110 }}>
+                <span style={{ color: C.muted, fontFamily: font.body, fontSize: "0.78rem" }}>$</span>
+                <input type="text" inputMode="decimal" value={g.target} onChange={e => editGoal(g.id, { target: e.target.value })} placeholder="target"
+                  style={{ border: "none", outline: "none", background: "transparent", fontFamily: font.body, fontSize: "0.85rem", color: C.ink, width: "100%", padding: 0 }}/>
+              </div>
+              <div style={{ display: "flex", alignItems: "center", gap: 4, background: "white", border: "1.5px solid " + C.stone, borderRadius: 8, padding: "0.35rem 0.65rem", width: 90 }}>
+                <input type="text" inputMode="numeric" value={g.months} onChange={e => editGoal(g.id, { months: e.target.value })} placeholder="months"
+                  style={{ border: "none", outline: "none", background: "transparent", fontFamily: font.body, fontSize: "0.85rem", color: C.ink, width: "100%", padding: 0 }}/>
+                <span style={{ color: C.muted, fontFamily: font.body, fontSize: "0.7rem" }}>mo</span>
+              </div>
+              <button onClick={() => delGoal(g.id)} aria-label="Remove goal"
+                style={{ background: "transparent", border: "none", color: C.muted, cursor: "pointer", padding: "0.3rem 0.5rem", fontSize: "1.1rem", lineHeight: 1 }}>×</button>
+              {monthly > 0 && (
+                <div style={{ gridColumn: "1 / -1", fontSize: "0.75rem", color: C.muted, fontFamily: font.body, paddingTop: "0.3rem" }}>
+                  Needs <strong style={{ color: C.ink }}>{bFmt(monthly)}/month</strong> · {bNum(g.months)} months to target
+                </div>
+              )}
+            </div>
+          );
+        })}
+        <button onClick={addGoal}
+          style={{ background: C.warm, border: "1.5px dashed " + C.stone, color: C.ink, padding: "0.75rem 1.2rem", borderRadius: 10, cursor: "pointer", fontFamily: font.body, fontSize: "0.82rem", fontWeight: 500, width: "100%" }}>
+          + Add a savings goal
+        </button>
+      </section>
+
+      {/* ── Section: REVEAL ─────────────────────────────────────────── */}
+      {showReveal && (
+        <section style={{ marginBottom: "2.25rem" }}>
+          <div style={{ fontSize: "0.6rem", letterSpacing: "0.22em", textTransform: "uppercase", color: "#9B5DE5", fontFamily: font.body, fontWeight: 700, marginBottom: "0.35rem" }}>The picture</div>
+          <h2 style={{ fontFamily: font.display, fontSize: "1.35rem", fontWeight: 700, color: C.ink, margin: "0 0 1.25rem" }}>What your budget shows</h2>
+
+          <BudgetReveal rev={rev} userName={userName} partnerName={partnerName}
+            ex2Answers={ex2Answers} partnerEx2={partnerEx2} font={font} />
+        </section>
+      )}
+
+      {/* ── Save bar (sticky footer) ────────────────────────────────── */}
+      <div style={{ position: "fixed", bottom: 0, left: 0, right: 0, background: "white", borderTop: "1.5px solid " + C.stone, padding: "0.85rem 1.25rem", display: "flex", alignItems: "center", justifyContent: "center", gap: "0.9rem", boxShadow: "0 -4px 18px rgba(0,0,0,0.06)", zIndex: 20 }}>
+        <div style={{ fontSize: "0.78rem", color: C.muted, fontFamily: font.body }}>
+          {saveStatus === 'saved'  ? "✓ Saved" :
+           saveStatus === 'saving' ? "Saving…" :
+           dirty                   ? "Unsaved changes" :
+                                     "All changes saved"}
+        </div>
+        <button onClick={save} disabled={!dirty || saveStatus === 'saving'}
+          style={{ background: (!dirty || saveStatus === 'saving') ? C.stone : "linear-gradient(135deg, #1B5FE8, #1447b8)",
+                   color: (!dirty || saveStatus === 'saving') ? C.muted : "white", border: "none",
+                   padding: "0.7rem 1.6rem", fontSize: "0.76rem", letterSpacing: "0.08em", textTransform: "uppercase",
+                   cursor: (!dirty || saveStatus === 'saving') ? "default" : "pointer",
+                   fontFamily: font.body, borderRadius: 9, fontWeight: 700 }}>
+          Save changes
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// ── Helper: one category block with its line items ────────────────────────
+function BudgetCategoryBlock({ cat, expenses, setExpense, numInput, font }) {
+  const catTotal = cat.items.reduce((s, item) => s + bNum(expenses[cat.id + '__' + item]), 0);
+  return (
+    <div style={{ background: "white", border: "1.5px solid " + C.stone, borderRadius: 14, padding: "0.85rem 1.15rem", marginBottom: "0.6rem" }}>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0.55rem 0 0.85rem", borderBottom: "1px solid " + C.stone + "60" }}>
+        <div>
+          <span style={{ fontSize: "1.05rem", marginRight: "0.5rem" }}>{cat.icon}</span>
+          <span style={{ fontSize: "0.95rem", fontWeight: 700, color: C.ink, fontFamily: font.display }}>{cat.label}</span>
+        </div>
+        {catTotal > 0 && <span style={{ fontSize: "0.8rem", color: C.muted, fontFamily: font.body, fontWeight: 500 }}>{bFmt(catTotal)}</span>}
+      </div>
+      {cat.items.map(item => {
+        const key = cat.id + '__' + item;
+        return (
+          <div key={item} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0.55rem 0", borderBottom: "1px solid " + C.stone + "30" }}>
+            <span style={{ fontSize: "0.85rem", color: C.ink, fontFamily: font.body, flex: 1, marginRight: "0.75rem" }}>{item}</span>
+            {numInput(expenses[key], v => setExpense(key, v), "0", 120)}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+// ── Helper: the reveal. Pure facts, no commentary. ────────────────────────
+function BudgetReveal({ rev, userName, partnerName, ex2Answers, partnerEx2, font }) {
+  // Expectations echo — pulled from ex2 Life & Values. We surface three
+  // questions only: lq_finances, lq_money_lean, lq_money_risk.
+  const echoQs = [
+    { id: 'lq_finances',   label: 'How you want to manage money' },
+    { id: 'lq_money_lean', label: 'Saving vs spending' },
+    { id: 'lq_money_risk', label: 'Financial risk' },
+  ];
+  const myLife = ex2Answers?.life || {};
+  const parLife = partnerEx2?.life || {};
+
+  const blockStyle = { background: "white", border: "1.5px solid " + C.stone, borderRadius: 14, padding: "1.15rem 1.35rem", marginBottom: "0.9rem" };
+  const blockHeader = { fontSize: "0.65rem", letterSpacing: "0.2em", textTransform: "uppercase", color: "#9B5DE5", fontFamily: font.body, fontWeight: 700, marginBottom: "0.75rem" };
+
+  return (
+    <>
+      {/* Block 1 — what the budget does */}
+      <div style={blockStyle}>
+        <div style={blockHeader}>What your budget does</div>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: "1rem", marginBottom: rev.topCats.length ? "1rem" : 0 }}>
+          <RevealStat label="Savings rate" value={rev.savingsRate.toFixed(1) + "%"} font={font}/>
+          <RevealStat label={rev.surplus >= 0 ? "Unallocated each month" : "Over budget"} value={bFmt(rev.surplus)} font={font}/>
+          <RevealStat label="Toward goals monthly" value={bFmt(rev.goalsMonthly)} font={font}/>
+        </div>
+        {rev.topCats.length > 0 && (
+          <div style={{ paddingTop: "0.9rem", borderTop: "1px solid " + C.stone }}>
+            <div style={{ fontSize: "0.72rem", color: C.muted, fontFamily: font.body, marginBottom: "0.5rem", fontWeight: 500 }}>
+              Top categories as share of income
+            </div>
+            {rev.topCats.map(c => (
+              <div key={c.label} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0.35rem 0" }}>
+                <span style={{ fontSize: "0.85rem", color: C.ink, fontFamily: font.body }}>{c.label}</span>
+                <span style={{ fontSize: "0.85rem", color: C.ink, fontFamily: font.body, fontWeight: 600 }}>{c.pct.toFixed(1)}% · {bFmt(c.amount)}</span>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Block 2 — what you each said */}
+      {(ex2Answers?.life || partnerEx2?.life) && (
+        <div style={blockStyle}>
+          <div style={blockHeader}>What you each said</div>
+          <div style={{ fontSize: "0.75rem", color: C.muted, fontFamily: font.body, marginBottom: "0.75rem", fontStyle: "italic" }}>
+            From your Expectations Exercise answers.
+          </div>
+          {echoQs.map((q, i) => {
+            const mine = myLife[q.id];
+            const theirs = parLife[q.id];
+            if (!mine && !theirs) return null;
+            return (
+              <div key={q.id} style={{ padding: "0.7rem 0", borderTop: i === 0 ? "none" : "1px solid " + C.stone + "60" }}>
+                <div style={{ fontSize: "0.78rem", color: C.muted, fontFamily: font.body, marginBottom: "0.35rem" }}>{q.label}</div>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.75rem" }}>
+                  <div>
+                    <div style={{ fontSize: "0.72rem", color: C.muted, fontFamily: font.body, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: "0.15rem" }}>{userName}</div>
+                    <div style={{ fontSize: "0.88rem", color: C.ink, fontFamily: font.body, fontWeight: 500 }}>{mine || "—"}</div>
+                  </div>
+                  <div>
+                    <div style={{ fontSize: "0.72rem", color: C.muted, fontFamily: font.body, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: "0.15rem" }}>{partnerName}</div>
+                    <div style={{ fontSize: "0.88rem", color: C.ink, fontFamily: font.body, fontWeight: 500 }}>{theirs || "—"}</div>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
         </div>
       )}
 
-      {/* Expense tabs */}
-      {BUDGET_CATEGORIES.map(cat => activeTab === cat.id && (
-        <div key={cat.id} style={{ background: "white", border: "1.5px solid " + C.stone, borderRadius: 14, padding: "1.25rem" }}>
-          <h3 style={{ fontFamily: font.display, fontSize: "1rem", fontWeight: 700, color: C.ink, marginBottom: "1rem" }}>{cat.icon} {cat.label}</h3>
-          {cat.items.map(item => (
-            <div key={item} style={{ display: "flex", alignItems: "center", gap: "1rem", marginBottom: "0.75rem", justifyContent: "space-between" }}>
-              <label style={{ fontSize: "0.8rem", color: C.text, fontFamily: font.body, flex: 1 }}>{item}</label>
-              <div style={{ display: "flex", alignItems: "center", gap: "0.4rem", flexShrink: 0 }}>
-                <span style={{ fontSize: "0.9rem", color: C.muted }}>$</span>
-                <input type="number" value={budget[cat.id + "__" + item] || ""} onChange={e => setBudget({ ...budget, [cat.id + "__" + item]: e.target.value })} placeholder="0" style={{ width: 90, padding: "0.45rem 0.6rem", borderRadius: 8, border: "1.5px solid " + C.stone, fontFamily: font.body, fontSize: "0.82rem", color: C.ink, outline: "none", textAlign: "right" }} />
-              </div>
+      {/* Block 3 — how the money moves */}
+      <div style={blockStyle}>
+        <div style={blockHeader}>How the money moves</div>
+        {rev.pooling === 'separate' ? (
+          <div style={{ fontSize: "0.88rem", color: C.ink, fontFamily: font.body, lineHeight: 1.6 }}>
+            You chose <strong>fully separate</strong>. Each of you tracks your own contribution independently — no shared split is calculated.
+          </div>
+        ) : rev.pooling === 'combined' ? (
+          <div style={{ fontSize: "0.88rem", color: C.ink, fontFamily: font.body, lineHeight: 1.6 }}>
+            You chose <strong>fully combined</strong>. Combined pool of {bFmt(rev.totalIncome)}/month covers {bFmt(rev.sharedExpenses + rev.goalsMonthly)} in shared expenses and savings, leaving {bFmt(rev.surplus)} unallocated from the pool.
+          </div>
+        ) : (
+          <div>
+            <div style={{ fontSize: "0.75rem", color: C.muted, fontFamily: font.body, marginBottom: "0.75rem" }}>
+              Under <strong>{POOLING_MODELS.find(m => m.id === rev.pooling)?.label}</strong>:
             </div>
-          ))}
-        </div>
-      ))}
-
-      {/* Done + Save as PDF */}
-      <div style={{ marginTop: "2rem", paddingTop: "1.5rem", borderTop: "1.5px solid " + C.stone, display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "0.75rem" }}>
-        <div>
-          <div style={{ fontSize: "0.72rem", color: C.muted, fontFamily: font.body, marginBottom: "0.2rem" }}>
-            {totalIncome > 0
-              ? (remaining >= 0
-                  ? `✓ ${userName} & ${partnerName} have $${remaining.toLocaleString()} unallocated`
-                  : `⚠ Over budget by $${Math.abs(remaining).toLocaleString()}`)
-              : "Add income to see your full picture"}
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.85rem" }}>
+              {[
+                { name: userName,    contribution: rev.uContribution, personal: rev.uPersonal, leftover: rev.uLeftover },
+                { name: partnerName, contribution: rev.pContribution, personal: rev.pPersonal, leftover: rev.pLeftover },
+              ].map(p => (
+                <div key={p.name} style={{ border: "1px solid " + C.stone, borderRadius: 10, padding: "0.75rem 0.9rem" }}>
+                  <div style={{ fontSize: "0.76rem", color: C.muted, fontFamily: font.body, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: "0.4rem" }}>{p.name}</div>
+                  <div style={{ fontSize: "0.78rem", color: C.ink, fontFamily: font.body, lineHeight: 1.7 }}>
+                    <div>Contribution to shared: <strong>{bFmt(p.contribution)}</strong></div>
+                    <div>Personal spending: <strong>{bFmt(p.personal)}</strong></div>
+                    <div style={{ paddingTop: "0.3rem", borderTop: "1px solid " + C.stone + "80", marginTop: "0.3rem" }}>
+                      Leftover: <strong>{bFmt(p.leftover)}</strong>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
-          <div style={{ fontSize: "0.62rem", color: C.muted, fontFamily: font.body, opacity: 0.6 }}>
-            Budget saved to this device
-          </div>
-        </div>
-        <div style={{ display: "flex", gap: "0.65rem" }}>
-          <button onClick={() => { setBudgetState(budget); onBack(); }}
-            style={{ background: C.warm, border: "1.5px solid " + C.stone, color: C.ink, padding: "0.65rem 1.4rem", fontSize: "0.72rem", letterSpacing: "0.08em", textTransform: "uppercase", cursor: "pointer", fontFamily: font.body, borderRadius: 9, fontWeight: 600 }}>
-            ← Done
-          </button>
-          <button onClick={() => {
-            // Save first then print
-            setBudgetState(budget);
-            // Brief pause to let state settle, then print
-            setTimeout(() => {
-              const style = document.createElement('style');
-              style.id = 'print-budget-style';
-              style.textContent = `
-                @media print {
-                  body > * { display: none !important; }
-                  #budget-print-area { display: block !important; }
-                }
-              `;
-              document.head.appendChild(style);
-
-              // Build print content
-              const allCats = BUDGET_CATEGORIES;
-              const rows = allCats.flatMap(cat =>
-                cat.items
-                  .filter(item => budget[cat.id + '__' + item])
-                  .map(item => `<tr><td style="padding:4px 8px;font-size:12px;">${cat.label} — ${item}</td><td style="padding:4px 8px;text-align:right;font-size:12px;">$${parseFloat(budget[cat.id+'__'+item]).toLocaleString()}</td></tr>`)
-              ).join('');
-
-              const el = document.createElement('div');
-              el.id = 'budget-print-area';
-              el.style.display = 'none';
-              el.innerHTML = `
-                <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:2rem;">
-                  <div style="font-size:10px;letter-spacing:0.2em;text-transform:uppercase;color:#E8673A;margin-bottom:0.5rem;">Attune</div>
-                  <h1 style="font-size:22px;margin:0 0 0.25rem;color:#0E0B07;">${userName} & ${partnerName}</h1>
-                  <div style="font-size:13px;color:#8C7A68;margin-bottom:1.5rem;">Shared Budget · Monthly</div>
-                  <table style="width:100%;border-collapse:collapse;margin-bottom:1rem;">
-                    <thead><tr style="background:#f5f5f0;">
-                      <th style="padding:6px 8px;text-align:left;font-size:11px;letter-spacing:0.1em;text-transform:uppercase;">Item</th>
-                      <th style="padding:6px 8px;text-align:right;font-size:11px;letter-spacing:0.1em;text-transform:uppercase;">Monthly</th>
-                    </tr></thead>
-                    <tbody>${rows}</tbody>
-                    <tfoot>
-                      <tr style="border-top:2px solid #E8DDD0;">
-                        <td style="padding:8px;font-weight:700;font-size:13px;">Total income</td>
-                        <td style="padding:8px;text-align:right;font-weight:700;font-size:13px;color:#10b981;">$${totalIncome.toLocaleString()}</td>
-                      </tr>
-                      <tr>
-                        <td style="padding:8px;font-weight:700;font-size:13px;">Total expenses</td>
-                        <td style="padding:8px;text-align:right;font-weight:700;font-size:13px;color:#E8673A;">$${totalExpenses.toLocaleString()}</td>
-                      </tr>
-                      <tr style="background:${remaining >= 0 ? '#f0fdf9' : '#fff1f0'};">
-                        <td style="padding:8px;font-weight:700;font-size:13px;">${remaining >= 0 ? 'Surplus' : 'Deficit'}</td>
-                        <td style="padding:8px;text-align:right;font-weight:700;font-size:13px;color:${remaining >= 0 ? '#10b981' : '#ef4444'};">${remaining >= 0 ? '+' : ''}$${Math.abs(remaining).toLocaleString()}</td>
-                      </tr>
-                    </tfoot>
-                  </table>
-                  <div style="font-size:10px;color:#aaa;margin-top:1rem;">attune-relationships.com</div>
-                </div>`;
-              document.body.appendChild(el);
-              window.print();
-              setTimeout(() => {
-                document.body.removeChild(el);
-                document.head.removeChild(style);
-              }, 1000);
-            }, 100);
-          }}
-            style={{ background: "linear-gradient(135deg, #1B5FE8, #1447b8)", color: "white", border: "none", padding: "0.65rem 1.5rem", fontSize: "0.72rem", letterSpacing: "0.08em", textTransform: "uppercase", cursor: "pointer", fontFamily: font.body, borderRadius: 9, fontWeight: 600 }}>
-            Save as PDF ↓
-          </button>
-        </div>
+        )}
       </div>
+    </>
+  );
+}
+
+// Reveal stat tile — bold number with a small label above
+function RevealStat({ label, value, font }) {
+  return (
+    <div>
+      <div style={{ fontSize: "0.65rem", letterSpacing: "0.15em", textTransform: "uppercase", color: C.muted, fontFamily: font.body, fontWeight: 600, marginBottom: "0.25rem" }}>{label}</div>
+      <div style={{ fontFamily: font.display, fontSize: "1.4rem", fontWeight: 700, color: C.ink }}>{value}</div>
     </div>
   );
 }
@@ -7763,6 +8110,9 @@ function AuthModal({ mode, onClose, onSuccess }) {
       if (profile?.ex3_answers) {
         try { localStorage.setItem('attune_ex3', JSON.stringify(profile.ex3_answers)); } catch {}
       }
+      if (profile?.budget_data) {
+        try { localStorage.setItem('attune_budget', JSON.stringify(profile.budget_data)); } catch {}
+      }
       // Restore partner session if partner already completed
       if (profile?.partner_joined && profile?.invite_code) {
         try {
@@ -9160,7 +9510,17 @@ export default function App() {
   const [ex2Answers, setEx2State] = useState(sarahEx2Demo);
   const [ex3Answers, setEx3State] = useState(sarahEx3Demo); // Anniversary exercise
   const [checklistState, setChecklistState] = useState({}); // Starting Out checklist
-  const [budgetState, setBudgetState] = useState(null); // Premium budget tool
+  const [budgetState, setBudgetState] = useState(() => {
+    // Hydrate from localStorage so the budget persists across refreshes.
+    // Supabase restore on login fills this in cross-device; see the Supabase
+    // hydration block further down where attune_budget is set.
+    try {
+      const raw = localStorage.getItem('attune_budget');
+      return raw ? JSON.parse(raw) : null;
+    } catch {
+      return null;
+    }
+  }); // Premium budget tool
   const [notesState, setNotesState] = useState({ partner1: "", partner2: "", shared: "" }); // Conversation notes
   // Auto-open auth if ?signup=1 in URL (comes from checkout success redirect)
   const _urlSignup = params.get('signup') === '1';
@@ -10215,7 +10575,16 @@ export default function App() {
 
         {/* ── BUDGET TOOL: Premium ── */}
         {view === "budget" && pkg.hasBudget && (
-          <BudgetTool userName={userName} partnerName={partnerName} onBack={() => setView("home")} budgetState={budgetState} setBudgetState={setBudgetState} />
+          <BudgetTool
+            userName={userName}
+            partnerName={partnerName}
+            onBack={() => setView("home")}
+            budgetState={budgetState}
+            setBudgetState={setBudgetState}
+            ex2Answers={ex2Answers || sarahEx2}
+            partnerEx2={partnerEx2}
+            accountId={account?.id}
+          />
         )}
 
         {/* ── LMFT SESSION: Premium ── */}
