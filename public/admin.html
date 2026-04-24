@@ -1922,8 +1922,14 @@ const PKG_COLORS = ['#FF6B35','#FBBF24','#6C7FFF','#34D399'];
 const PKG_LABELS = ['Assessment','Starting Out','Anniversary','Premium'];
 
 // ── Simulated data ────────────────────────────────────
+// These are mutable (`let`) so loadRealAnalytics() and loadRealPackageTrend()
+// can overwrite them with real data from Supabase feedback_submissions and
+// orders tables when real data exists. The synthetic defaults below render
+// while the real-data fetches are in flight or when no data exists yet.
 const revenueData = [4200,5800,6100,7300,8800,9200,9800,10200,11400,13100,14200,15800];
-const pkgMix = [185,262,237,163];
+let pkgMix = [185,262,237,163];
+let pkgTrendMonths = [...MONTHS];
+let pkgTrendStacked = null; // {Assessment:[...12], StartingOut:[...], Anniversary:[...], Premium:[...]} — null means use mock
 const sourceData = {labels:['Friend/family','Social media','Search','Received as gift','Therapist/counselor','Other'],data:[31,24,18,14,8,5]};
 const relLengths = [{l:'Less than 1 year',v:14},{l:'1–2 years',v:22},{l:'3–5 years',v:28},{l:'6–10 years',v:19},{l:'11–20 years',v:11},{l:'20+ years',v:6}];
 const ageData = {labels:['18–24','25–34','35–44','45–54','55+'],data:[8,42,29,14,7]};
@@ -1935,9 +1941,16 @@ const commTypes = [{l:'Balanced pair',v:24},{l:'Expressive + Reserved',v:19},{l:
 const expAlign = {labels:['Finances','Household','Social life','Career','Family','Intimacy','Faith/values','Recreation'],data:[48,72,65,56,61,43,78,69]};
 const expGaps = [{l:'Intimacy expectations',v:57},{l:'Financial approach',v:52},{l:'Career priorities',v:44},{l:'Extended family',v:38},{l:'Social time',v:35}];
 const storyGaps = [{l:'Fun & lightness',v:44},{l:'Communication ease',v:38},{l:'Day-to-day connection',v:31},{l:'Overall feel',v:22}];
-const funnelData = [847,731,618,541];
-const ratingsData = {labels:['5 ★','4 ★','3 ★','2 ★','1 ★'],data:[312,148,39,10,3]};
-const npsData = [52,55,58,60,63,61,65,67,68,67,70,71];
+let funnelData = [847,731,618,541];
+let ratingsData = {labels:['5 ★','4 ★','3 ★','2 ★','1 ★'],data:[312,148,39,10,3]};
+// npsData: monthly NPS score. Real NPS = %promoters(9-10) - %detractors(0-6), range -100..100
+let npsData = [52,55,58,60,63,61,65,67,68,67,70,71];
+// Real analytics overrides — populated by loadRealAnalytics when real feedback exists
+let realNpsScore = null;      // null when no data yet
+let realAvgRating = null;     // null when no data yet
+let realNpsDist = null;       // {promoters, passives, detractors} percents
+let realRatingN = 0;          // sample size for avg rating
+let realDropoffExercise = null; // "Ex 01" | "Ex 02" | null
 
 // ── Bar renderer ──────────────────────────────────────
 function renderBars(containerId, items, color='#6C7FFF') {
@@ -2333,6 +2346,267 @@ function updateStatsFromRealData(orders) {
   loadCompletionRate().catch(() => {});
   // Real demographics from profiles — async, falls back to mock if empty.
   loadRealDemographics().catch(() => {});
+  // Real package-mix trend from orders table, grouped by pkg_key + month
+  loadRealPackageTrend(orders).catch(() => {});
+  // Real satisfaction analytics from feedback_submissions (NPS + ratings)
+  loadRealAnalytics().catch(() => {});
+  // Real funnel data from orders + exercise completion on profiles
+  loadRealFunnel(orders).catch(() => {});
+}
+
+// Real funnel: [Ordered, Started, Both completed, Results viewed].
+// "Started" = any profile where ex1_answers or ex2_answers is non-null
+// "Both completed" = both partners in a couple have ex2_answers
+// "Results viewed" = proxied by a `results_viewed_at` column if present, else
+// just mirrors Both completed (we don't track view events yet).
+async function loadRealFunnel(orders) {
+  const SUPABASE_URL  = window.__SUPABASE_URL;
+  const SUPABASE_ANON = window.__SUPABASE_ANON;
+  if (!SUPABASE_URL || !SUPABASE_ANON) return;
+  if (!orders || orders.length === 0) return;
+
+  try {
+    const headers = { 'apikey': SUPABASE_ANON, 'Authorization': `Bearer ${SUPABASE_ANON}`, 'Prefer': 'count=exact' };
+
+    // Total orders = the funnel's first bar
+    const ordered = orders.length;
+
+    // Started: profiles with at least one of ex1_answers or ex2_answers
+    const startedRes = await fetch(`${SUPABASE_URL}/rest/v1/profiles?select=id&or=(ex1_answers.not.is.null,ex2_answers.not.is.null)`, { headers });
+    const started = parseInt(startedRes.headers.get('content-range')?.split('/')[1] || '0', 10);
+
+    // Both completed: profiles where both ex1 and ex2 are done AND the profile has a partner
+    // (proxy: both answered means the user finished their side; we also need partner done)
+    const bothRes = await fetch(`${SUPABASE_URL}/rest/v1/profiles?select=id&ex1_answers=not.is.null&ex2_answers=not.is.null&partner_profile_id=not.is.null`, { headers });
+    const bothDoneRough = parseInt(bothRes.headers.get('content-range')?.split('/')[1] || '0', 10);
+    // This counts individuals; divide by 2 to estimate couples
+    const bothDone = Math.floor(bothDoneRough / 2);
+
+    // Results viewed — no tracking column today, so mirror both-done
+    // TODO: add results_viewed_at to profiles and query here
+    const viewed = bothDone;
+
+    funnelData = [ordered, started, bothDone, viewed];
+
+    // Force re-render if the satisfaction page is currently open
+    if (chartsInit.satisfaction) {
+      chartsInit.satisfaction = false;
+      if (document.getElementById('page-satisfaction')?.classList.contains('active')) initCharts('satisfaction');
+    }
+  } catch (e) {
+    console.warn('[admin] real funnel load failed:', e);
+  }
+
+// Real package-mix trend: groups orders by pkg_key + month, produces a
+// 12-month stacked dataset (1 series per package). Replaces the static
+// `pkgTrendStacked` mock so the /packages page chart renders real data.
+// Also rebuilds `pkgMix` (the donut) from the full order set.
+async function loadRealPackageTrend(orders) {
+  if (!orders || orders.length === 0) {
+    pkgTrendStacked = null; // keep mock
+    return;
+  }
+
+  // Build 12 month buckets ending at this month
+  const now = new Date();
+  const buckets = [];
+  for (let i = 11; i >= 0; i--) {
+    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+    buckets.push({
+      key: d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0'),
+      label: d.toLocaleDateString('en-US', { month: 'short' }),
+      counts: { core: 0, newlywed: 0, anniversary: 0, premium: 0 },
+    });
+  }
+
+  // Distribute real orders into buckets
+  orders.forEach(o => {
+    if (!o.created_at || !o.pkg_key) return;
+    const d = new Date(o.created_at);
+    const key = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0');
+    const b = buckets.find(x => x.key === key);
+    if (!b) return;
+    if (b.counts[o.pkg_key] != null) b.counts[o.pkg_key]++;
+  });
+
+  pkgTrendMonths = buckets.map(b => b.label);
+  pkgTrendStacked = {
+    Assessment:   buckets.map(b => b.counts.core),
+    StartingOut:  buckets.map(b => b.counts.newlywed),
+    Anniversary:  buckets.map(b => b.counts.anniversary),
+    Premium:      buckets.map(b => b.counts.premium),
+  };
+
+  // Also rebuild the donut mix from the full order set
+  const mixCounts = { core: 0, newlywed: 0, anniversary: 0, premium: 0 };
+  orders.forEach(o => { if (o.pkg_key && mixCounts[o.pkg_key] != null) mixCounts[o.pkg_key]++; });
+  pkgMix = [mixCounts.core, mixCounts.newlywed, mixCounts.anniversary, mixCounts.premium];
+
+  // Force re-render if the packages page is currently open
+  if (chartsInit.packages) {
+    chartsInit.packages = false;
+    if (document.getElementById('page-packages')?.classList.contains('active')) initCharts('packages');
+  }
+  // Overview donut also depends on pkgMix
+  if (chartsInit.overview) {
+    chartsInit.overview = false;
+    if (document.getElementById('page-overview')?.classList.contains('active')) initCharts('overview');
+  }
+}
+
+// Real satisfaction analytics: queries feedback_submissions for beta_survey
+// rows, parses the JSON text column, extracts NPS (0-10), rating-ish signals,
+// and produces:
+//   - npsData           (12-month NPS trend, -100..100 scale)
+//   - realNpsScore      (current-period NPS score)
+//   - realNpsDist       ({promoters, passives, detractors} percents)
+//   - realAvgRating     (avg returnLikelihood 1-5, mapped to ~★ scale)
+//   - ratingsData       ({labels:[5★..1★], data:[counts]})
+//   - realDropoffExercise (most common drop-off point)
+//
+// Falls back to mock silently if no real surveys exist yet.
+async function loadRealAnalytics() {
+  const SUPABASE_URL  = window.__SUPABASE_URL;
+  const SUPABASE_ANON = window.__SUPABASE_ANON;
+  if (!SUPABASE_URL || !SUPABASE_ANON) return;
+
+  try {
+    // Pull beta_survey rows from feedback_submissions
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/feedback_submissions?select=text,submitted_at,type&type=eq.beta_survey&order=submitted_at.desc&limit=2000`, {
+      headers: { 'apikey': SUPABASE_ANON, 'Authorization': `Bearer ${SUPABASE_ANON}` }
+    });
+    if (!res.ok) return;
+    const rows = await res.json();
+    if (!rows || rows.length === 0) return; // keep mock
+
+    // Parse the text JSON blob for each row
+    const surveys = rows.map(r => {
+      try { return { ...(typeof r.text === 'string' ? JSON.parse(r.text) : r.text), _ts: r.submitted_at }; }
+      catch { return null; }
+    }).filter(Boolean);
+    if (surveys.length === 0) return;
+
+    // ── NPS trend by month ──────────────────────────────────────────────
+    // Build 12 month buckets ending at current month. For each, compute NPS:
+    // %promoters(9-10) - %detractors(0-6). Buckets with zero responses inherit
+    // the previous bucket's value to keep the trend line readable (cosmetic).
+    const now = new Date();
+    const monthBuckets = [];
+    for (let i = 11; i >= 0; i--) {
+      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      monthBuckets.push({
+        key: d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0'),
+        label: d.toLocaleDateString('en-US', { month: 'short' }),
+        scores: [],
+      });
+    }
+    surveys.forEach(s => {
+      if (!s._ts) return;
+      const d = new Date(s._ts);
+      const key = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0');
+      const b = monthBuckets.find(x => x.key === key);
+      if (!b) return;
+      const nps = parseInt(s.nps, 10);
+      if (Number.isFinite(nps) && nps >= 0 && nps <= 10) b.scores.push(nps);
+    });
+    // Compute bucket NPS scores
+    const bucketNps = monthBuckets.map(b => {
+      if (b.scores.length === 0) return null;
+      const promoters  = b.scores.filter(v => v >= 9).length;
+      const detractors = b.scores.filter(v => v <= 6).length;
+      return Math.round(((promoters - detractors) / b.scores.length) * 100);
+    });
+    // Forward-fill nulls with previous value (or 0 if leading)
+    let lastVal = 0;
+    const filledNps = bucketNps.map(v => { if (v != null) { lastVal = v; return v; } return lastVal; });
+    npsData = filledNps;
+
+    // Overall current-period NPS (last 90 days)
+    const cutoff = Date.now() - (90 * 24 * 60 * 60 * 1000);
+    const recentNps = surveys
+      .filter(s => s._ts && new Date(s._ts).getTime() > cutoff)
+      .map(s => parseInt(s.nps, 10))
+      .filter(v => Number.isFinite(v) && v >= 0 && v <= 10);
+    if (recentNps.length > 0) {
+      const prom = recentNps.filter(v => v >= 9).length;
+      const pas  = recentNps.filter(v => v === 7 || v === 8).length;
+      const det  = recentNps.filter(v => v <= 6).length;
+      realNpsScore = Math.round(((prom - det) / recentNps.length) * 100);
+      realNpsDist = {
+        promoters:  Math.round((prom / recentNps.length) * 100),
+        passives:   Math.round((pas / recentNps.length) * 100),
+        detractors: Math.round((det / recentNps.length) * 100),
+      };
+    }
+
+    // ── Rating distribution from returnLikelihood (1-5) mapped to ★ ──────
+    // feedback.html collects returnLikelihood on a 1-5 scale. This isn't
+    // a pure "overall rating" but it's the closest signal we have to map
+    // to the 5★..1★ buckets the admin chart expects.
+    const ratings = surveys
+      .map(s => parseInt(s.returnLikelihood, 10))
+      .filter(v => Number.isFinite(v) && v >= 1 && v <= 5);
+    if (ratings.length > 0) {
+      const counts = { 5:0, 4:0, 3:0, 2:0, 1:0 };
+      ratings.forEach(v => { counts[v] = (counts[v] || 0) + 1; });
+      ratingsData = {
+        labels: ['5 ★','4 ★','3 ★','2 ★','1 ★'],
+        data:   [counts[5], counts[4], counts[3], counts[2], counts[1]],
+      };
+      const sum = ratings.reduce((a,b) => a+b, 0);
+      realAvgRating = Math.round((sum / ratings.length) * 10) / 10;
+      realRatingN = ratings.length;
+    }
+
+    // ── Drop-off point (most common stopping exercise) ──────────────────
+    // bothDone responses indicate where things stalled. "Not done" often
+    // correlates with getting stuck at Ex 02 (expectations is longer).
+    const notDone = surveys.filter(s => {
+      const v = s.bothDone;
+      return v === 'no' || (Array.isArray(v) && v.includes('no'));
+    }).length;
+    // If >30% of surveyed couples didn't both finish, assume Ex 02 drop-off
+    // (longer exercise). Otherwise "None" — most couples completing.
+    if (surveys.length >= 5) {
+      realDropoffExercise = (notDone / surveys.length) > 0.3 ? 'Ex 02' : 'None';
+    }
+
+    // ── Update KPI text live ────────────────────────────────────────────
+    // These are static-text elements on the satisfaction page header. We
+    // update them here so the numbers reflect reality even before the
+    // page is first visited.
+    const el = id => document.getElementById(id);
+    // The NPS KPI card text node is the 2nd element inside the green kpi-card;
+    // we find it by scanning for '.kpi-label' === 'NPS score' and mutating
+    // the sibling .kpi-val + .kpi-sub safely.
+    document.querySelectorAll('#page-satisfaction .kpi-card').forEach(card => {
+      const label = card.querySelector('.kpi-label')?.textContent || '';
+      const val   = card.querySelector('.kpi-val');
+      const sub   = card.querySelector('.kpi-sub');
+      const trend = card.querySelector('.kpi-trend');
+      if (label === 'NPS score' && realNpsScore != null && val) {
+        val.textContent = realNpsScore;
+        if (sub)   sub.textContent = 'Last 90 days · n=' + recentNps.length;
+        if (trend) trend.textContent = realNpsDist ? `P: ${realNpsDist.promoters}% · Pa: ${realNpsDist.passives}% · D: ${realNpsDist.detractors}%` : '';
+      }
+      if (label === 'Avg rating' && realAvgRating != null && val) {
+        val.innerHTML = realAvgRating + '<span style="font-size:1rem;color:var(--muted)">/5</span>';
+        if (sub) sub.textContent = 'n=' + realRatingN + ' returnLikelihood';
+      }
+      if (label === 'Drop-off point' && realDropoffExercise && val) {
+        val.textContent = realDropoffExercise;
+        if (sub) sub.textContent = realDropoffExercise === 'None' ? 'Most couples completing' : 'Most incomplete at Exercise 2';
+      }
+    });
+
+    // Force re-render if satisfaction page is currently open
+    if (chartsInit.satisfaction) {
+      chartsInit.satisfaction = false;
+      if (document.getElementById('page-satisfaction')?.classList.contains('active')) initCharts('satisfaction');
+    }
+  } catch (e) {
+    console.warn('[admin] real analytics load failed:', e);
+  }
 }
 
 // Completion rate = (partner_sessions with completed_at) / (total profiles with invite codes)
@@ -2834,7 +3108,17 @@ function initCharts(page) {
     new Chart(document.getElementById('chart-weekly-ship'),{type:'bar',data:{labels:weekLabels,datasets:[{label:'Shipped',data:weeks,backgroundColor:'#6C7FFF',borderRadius:4}]},options:{plugins:{legend:{display:false}},scales:{x:{grid:{display:false},ticks:{maxRotation:45}},y:{grid:{color:'#2A2E3A'},ticks:{precision:0}}}}});
   }
   else if (page==='packages') {
-    const pkgStacked = {labels:MONTHS,datasets:[
+    // Use real package-trend data when loadRealPackageTrend has populated it
+    const realTrend = pkgTrendStacked;
+    const pkgStacked = realTrend ? {
+      labels: pkgTrendMonths,
+      datasets: [
+        {label:'Assessment',  data: realTrend.Assessment,  backgroundColor:'#FF6B35'},
+        {label:'Starting Out',data: realTrend.StartingOut, backgroundColor:'#FBBF24'},
+        {label:'Anniversary', data: realTrend.Anniversary, backgroundColor:'#6C7FFF'},
+        {label:'Premium',     data: realTrend.Premium,     backgroundColor:'#34D399'},
+      ]
+    } : {labels:MONTHS,datasets:[
       {label:'Assessment',data:[18,21,19,22,24,20,23,26,21,19,22,24],backgroundColor:'#FF6B35'},
       {label:'Starting Out',data:[25,28,32,29,35,38,41,39,43,45,47,50],backgroundColor:'#FBBF24'},
       {label:'Anniversary',data:[22,25,27,31,30,33,36,34,38,40,42,44],backgroundColor:'#6C7FFF'},
@@ -2873,7 +3157,9 @@ function initCharts(page) {
   else if (page==='satisfaction') {
     new Chart(document.getElementById('chart-funnel'),{type:'bar',data:{labels:['Ordered','Started exercises','Both completed','Results viewed'],datasets:[{data:funnelData,backgroundColor:['#FF6B35','#FBBF24','#6C7FFF','#34D399'],borderRadius:6}]},options:{plugins:{legend:{display:false}},scales:{x:{grid:{display:false}},y:{grid:{color:'#2A2E3A'}}}}});
     new Chart(document.getElementById('chart-ratings'),{type:'bar',data:{labels:ratingsData.labels,datasets:[{data:ratingsData.data,backgroundColor:ratingsData.data.map((_,i)=>['#34D399','#6C7FFF','#FBBF24','#F87171','#EF4444'][i]),borderRadius:6}]},options:{plugins:{legend:{display:false}},scales:{x:{grid:{display:false}},y:{grid:{color:'#2A2E3A'}}}}});
-    new Chart(document.getElementById('chart-nps'),{type:'line',data:{labels:MONTHS,datasets:[{label:'NPS',data:npsData,borderColor:'#34D399',backgroundColor:'rgba(52,211,153,.1)',tension:.4,fill:true,borderWidth:2.5,pointRadius:3,pointBackgroundColor:'#34D399'},{label:'Benchmark (50)',data:Array(12).fill(50),borderColor:'#4B5563',borderDash:[5,5],borderWidth:1.5,pointRadius:0}]},options:{plugins:{legend:{position:'bottom'}},scales:{y:{grid:{color:'#2A2E3A'},min:40,max:80},x:{grid:{display:false}}}}});
+    // NPS trend — use real-data month labels when available, fall back to rolling 12-month default
+    const npsLabels = (pkgTrendStacked && pkgTrendMonths.length === npsData.length) ? pkgTrendMonths : MONTHS;
+    new Chart(document.getElementById('chart-nps'),{type:'line',data:{labels:npsLabels,datasets:[{label:'NPS',data:npsData,borderColor:'#34D399',backgroundColor:'rgba(52,211,153,.1)',tension:.4,fill:true,borderWidth:2.5,pointRadius:3,pointBackgroundColor:'#34D399'},{label:'Benchmark (50)',data:Array(12).fill(50),borderColor:'#4B5563',borderDash:[5,5],borderWidth:1.5,pointRadius:0}]},options:{plugins:{legend:{position:'bottom'}},scales:{y:{grid:{color:'#2A2E3A'},min:-20,max:100},x:{grid:{display:false}}}}});
   }
 }
 
