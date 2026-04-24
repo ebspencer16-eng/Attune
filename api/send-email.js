@@ -14,6 +14,7 @@
  *   partner_joined_notification — { toEmail, toName, partnerName, portalUrl }
  *   lmft_scheduled  — { toEmail, toName, partnerName, schedulingUrl, orderNum }
  *   checkin_1yr     — { toEmail, toName, partnerName, retakeUrl, portalUrl }
+ *   shipping_notification — { toEmail, toName, partnerName, orderNum, trackingUrl?, trackingNumber?, carrier? }
  *
  * Required env vars (Vercel dashboard):
  *   RESEND_API_KEY   — from https://resend.com
@@ -109,6 +110,34 @@ function workbookReadyEmail({ toName, partnerName, downloadUrl, orderNum }) {
       <div class="detail-row"><span>Order</span><strong>#${orderNum}</strong></div>
       <div class="detail-row"><span>Format</span><strong>.docx — opens in Word, Pages, or Google Docs</strong></div>
       <p style="font-size:0.78rem;color:#8C7A68;margin-top:16px;">The download link is active for 30 days. Reply to this email if you have trouble accessing your file.</p>
+    `),
+  };
+}
+
+// ── shipping_notification email ──────────────────────────────────────────────
+// Sent when admin flips card_status to 'shipped'. trackingUrl is optional.
+function shippingNotificationEmail({ toName, partnerName, orderNum, trackingUrl, trackingNumber, carrier }) {
+  const who = partnerName ? `${toName} &amp; ${partnerName}` : toName;
+  const trackingBlock = trackingUrl ? `
+    <div class="btn-wrap"><a href="${trackingUrl}" class="btn">Track your package</a></div>
+    ${trackingNumber ? `<div class="detail-row"><span>Tracking number</span><strong>${trackingNumber}</strong></div>` : ''}
+    ${carrier ? `<div class="detail-row"><span>Carrier</span><strong>${carrier}</strong></div>` : ''}
+  ` : `
+    ${trackingNumber ? `<div class="detail-row"><span>Tracking number</span><strong>${trackingNumber}</strong></div>` : ''}
+    ${carrier ? `<div class="detail-row"><span>Carrier</span><strong>${carrier}</strong></div>` : ''}
+    <p style="font-size:0.82rem;color:#8C7A68;">Tracking details will arrive separately if not listed above.</p>
+  `;
+  return {
+    subject: "Your Attune box has shipped",
+    html: layout(`
+      <span class="badge badge-green">Shipped</span>
+      <h1 style="margin-top:14px;">Your Attune box is on its way.</h1>
+      <p>Hi ${toName},</p>
+      <p>Your package for ${who} has shipped. It includes your printed workbook and anything else you added to your box.</p>
+      ${trackingBlock}
+      <div class="divider"></div>
+      <div class="detail-row"><span>Order</span><strong>#${orderNum}</strong></div>
+      <p style="font-size:0.78rem;color:#8C7A68;margin-top:16px;">Most shipments arrive within 5–7 business days. Reply to this email if you have any questions.</p>
     `),
   };
 }
@@ -384,6 +413,10 @@ export default async function handler(req) {
   } else if (type === 'checkin_1yr') {
     if (!body.toEmail) return new Response('Missing toEmail', { status: 400 });
     email = checkin1yrEmail(body);
+    email.to = body.toEmail;
+  } else if (type === 'shipping_notification') {
+    if (!body.toEmail) return new Response('Missing toEmail', { status: 400 });
+    email = shippingNotificationEmail(body);
     email.to = body.toEmail;
   } else {
     return new Response(`Unknown type: ${type}`, { status: 400 });

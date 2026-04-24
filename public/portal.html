@@ -1503,9 +1503,45 @@ function saveField(field) {
   }
   cancelEdit(field);
 }
-function confirmDelete() {
-  if (confirm('Are you sure? This permanently deletes your account and all results. This cannot be undone.')) {
-    alert('Account deletion request received. We\'ll confirm by email within 24 hours.');
+async function confirmDelete() {
+  if (!confirm('Are you sure? This permanently deletes your account and all results. This cannot be undone.')) return;
+  if (!confirm('Last chance — this cannot be reversed. Continue?')) return;
+
+  try {
+    if (typeof window.supabaseClient === 'undefined' || !window.supabaseClient) {
+      alert('Account system unavailable. Please refresh and try again.');
+      return;
+    }
+    // Get current session — endpoint verifies the token matches the userId.
+    const { data: sess } = await window.supabaseClient.auth.getSession();
+    const token  = sess?.session?.access_token;
+    const userId = sess?.session?.user?.id;
+    if (!token || !userId) {
+      alert('You need to be signed in to delete your account.');
+      return;
+    }
+
+    const res = await fetch('/api/delete-account', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+      body: JSON.stringify({ userId }),
+    });
+    const json = await res.json().catch(() => ({}));
+
+    if (!res.ok || !json.ok) {
+      alert('Deletion failed: ' + (json.error || 'Please try again or contact support.'));
+      return;
+    }
+
+    // Clean up local state + sign out
+    try { localStorage.clear(); } catch {}
+    try { await window.supabaseClient.auth.signOut(); } catch {}
+
+    alert('Your account and all data have been deleted.');
+    window.location.href = '/';
+  } catch (e) {
+    console.error('[confirmDelete] error:', e);
+    alert('Something went wrong. Please try again or contact support.');
   }
 }
 

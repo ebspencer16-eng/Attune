@@ -115,11 +115,34 @@ function InlineChoice({ options, value, onChange }) {
 // -- EXERCISE 2 --
 function ExpectationsExercise({ partnerName, userName = "Partner A", onComplete, isAnniversary = false, isRevisited = false }) {
   const activeLifeQs = isRevisited ? LIFE_QUESTIONS_REVISITED : isAnniversary ? LIFE_QUESTIONS_ANNIVERSARY : LIFE_QUESTIONS;
-  const [phase, setPhase] = useState("intro");
-  const [catIndex, setCatIndex] = useState(0);
-  const [childhoodStructure, setChildhoodStructure] = useState(null);
-  const [answers, setAnswers] = useState({ responsibilities: {}, childhood: {}, bothDetail: {}, childhoodBothDetail: {}, life: {} });
-  const [lifeQ, setLifeQ] = useState(0);
+
+  // Variant-specific progress key so Core / Anniversary / Revisiting don't clobber.
+  const progressKey = isRevisited ? 'attune_ex2_progress_revisited' : isAnniversary ? 'attune_ex2_progress_anniv' : 'attune_ex2_progress';
+
+  const hydrate = () => {
+    try {
+      const raw = localStorage.getItem(progressKey);
+      if (!raw) return null;
+      return JSON.parse(raw);
+    } catch { return null; }
+  };
+  const saved = hydrate();
+
+  const [phase, setPhase]                       = useState(saved?.phase || "intro");
+  const [catIndex, setCatIndex]                 = useState(saved?.catIndex ?? 0);
+  const [childhoodStructure, setChildhoodStructure] = useState(saved?.childhoodStructure ?? null);
+  const [answers, setAnswers]                   = useState(saved?.answers || { responsibilities: {}, childhood: {}, bothDetail: {}, childhoodBothDetail: {}, life: {} });
+  const [lifeQ, setLifeQ]                       = useState(saved?.lifeQ ?? 0);
+
+  // Persist after every change. Cheap — state snapshot is <50KB.
+  useEffect(() => {
+    try {
+      localStorage.setItem(progressKey, JSON.stringify({
+        phase, catIndex, childhoodStructure, answers, lifeQ,
+      }));
+    } catch {}
+  }, [phase, catIndex, childhoodStructure, answers, lifeQ, progressKey]);
+
   const setLife = (id, value) => setAnswers(a => ({ ...a, life: { ...a.life, [id]: value } }));
   const lifeAnswered = activeLifeQs.every(q => answers.life?.[q.id]);
 
@@ -411,7 +434,10 @@ function ExpectationsExercise({ partnerName, userName = "Partner A", onComplete,
               style={{ background: "transparent", border: ("1.5px solid " + C.stone), color: C.muted, padding: "0.65rem 1.25rem", fontSize: "0.7rem", letterSpacing: "0.1em", textTransform: "uppercase", cursor: "pointer", fontFamily: font.body, borderRadius: 8 }}>
               ← Back
             </button>
-            <button onClick={() => allAnswered && onComplete({ ...answers, childhoodStructure })}
+            <button onClick={() => allAnswered && (() => {
+                try { localStorage.removeItem(progressKey); } catch {}
+                onComplete({ ...answers, childhoodStructure });
+              })()}
               style={{ background: allAnswered ? "#4CAF50" : C.stone, color: "white", border: "none", padding: "0.75rem 2rem", fontSize: "0.72rem", letterSpacing: "0.1em", textTransform: "uppercase", cursor: allAnswered ? "pointer" : "default", fontFamily: font.body, borderRadius: 10, fontWeight: 600, transition: "background 0.2s", boxShadow: allAnswered ? "0 3px 16px rgba(76,175,80,0.45)" : "none" }}>
               {allAnswered ? "All done →" : ((totalItems - answeredItems) + " left to answer")}
             </button>
@@ -465,7 +491,14 @@ function ExpectationsExercise({ partnerName, userName = "Partner A", onComplete,
           ← Back
         </button>
         {lqIsLast
-          ? <button onClick={() => lqSel && (isRevisited ? onComplete({ ...answers, childhoodStructure }) : setPhase("childhood-setup"))}
+          ? <button onClick={() => lqSel && (() => {
+              if (isRevisited) {
+                try { localStorage.removeItem(progressKey); } catch {}
+                onComplete({ ...answers, childhoodStructure });
+              } else {
+                setPhase("childhood-setup");
+              }
+            })()}
               style={{ background: lqSel ? "#4CAF50" : C.stone, color: "white", border: "none", padding: "0.7rem 1.8rem", fontSize: "0.72rem", letterSpacing: "0.1em", textTransform: "uppercase", cursor: lqSel ? "pointer" : "default", fontFamily: font.body, borderRadius: 8, fontWeight: 600, boxShadow: lqSel ? "0 3px 16px rgba(76,175,80,0.45)" : "none" }}>
               All done →
             </button>
@@ -2054,9 +2087,37 @@ function WithSideNav({ navItems = [], currentStep, onGo, accent = "#9B5DE5", chi
 // On completion, calls onComplete(answers) with full dimension key map.
 function Exercise01Flow({ userName, partnerName, onComplete }) {
   const questions = PERSONALITY_QUESTIONS;
-  const [idx, setIdx] = useState(0);
-  const [answers, setAnswers] = useState({});
+
+  // Mid-exercise persistence: save after each answer, hydrate on mount.
+  // Under key attune_ex1_progress so final submission's attune_ex1 stays
+  // distinct. Cleared after onComplete runs.
+  const [idx, setIdx] = useState(() => {
+    try {
+      const raw = localStorage.getItem('attune_ex1_progress');
+      if (!raw) return 0;
+      const saved = JSON.parse(raw);
+      return typeof saved?.idx === 'number' ? saved.idx : 0;
+    } catch { return 0; }
+  });
+  const [answers, setAnswers] = useState(() => {
+    try {
+      const raw = localStorage.getItem('attune_ex1_progress');
+      if (!raw) return {};
+      const saved = JSON.parse(raw);
+      return saved?.answers || {};
+    } catch { return {}; }
+  });
   const [chosen, setChosen] = useState(null); // current question selection
+
+  // On first render after hydration, if the current question already has a
+  // saved answer (user refreshed after Next but before selecting again),
+  // pre-fill so they can see what they picked.
+  useEffect(() => {
+    if (answers[questions[idx]?.id] !== undefined && chosen === null) {
+      setChosen(answers[questions[idx].id]);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const q = questions[idx];
   const total = questions.length;
@@ -2072,8 +2133,13 @@ function Exercise01Flow({ userName, partnerName, onComplete }) {
     if (idx + 1 < total) {
       setAnswers(updated);
       setChosen(null);
-      setIdx(idx + 1);
+      const nextIdx = idx + 1;
+      setIdx(nextIdx);
+      // Persist after each answer so refresh resumes mid-exercise
+      try { localStorage.setItem('attune_ex1_progress', JSON.stringify({ answers: updated, idx: nextIdx })); } catch {}
     } else {
+      // Clear progress cache — final result goes to attune_ex1 (done by onComplete)
+      try { localStorage.removeItem('attune_ex1_progress'); } catch {}
       // Only submit answered keys — calcDimScores handles missing keys gracefully
       // by averaging only what exists (no synthetic 3s that dilute real answers)
       onComplete(updated);
@@ -3899,8 +3965,29 @@ const ANNIVERSARY_QUESTIONS = [
 
 
 function AnniversaryExercise({ userName, partnerName, onComplete, onBack }) {
-  const [answers, setAnswers] = useState({});
-  const [step, setStep] = useState(0);
+  // Mid-exercise persistence — same pattern as Ex01 and Ex02.
+  const [answers, setAnswers] = useState(() => {
+    try {
+      const raw = localStorage.getItem('attune_ex3_progress');
+      if (!raw) return {};
+      const s = JSON.parse(raw);
+      return s?.answers || {};
+    } catch { return {}; }
+  });
+  const [step, setStep] = useState(() => {
+    try {
+      const raw = localStorage.getItem('attune_ex3_progress');
+      if (!raw) return 0;
+      const s = JSON.parse(raw);
+      return typeof s?.step === 'number' ? s.step : 0;
+    } catch { return 0; }
+  });
+
+  // Persist on every change
+  useEffect(() => {
+    try { localStorage.setItem('attune_ex3_progress', JSON.stringify({ answers, step })); } catch {}
+  }, [answers, step]);
+
   const total = ANNIVERSARY_QUESTIONS.length;
   const q = ANNIVERSARY_QUESTIONS[step];
   // Scale questions are answered when they have a numeric value; text questions need non-empty string
@@ -3926,7 +4013,7 @@ function AnniversaryExercise({ userName, partnerName, onComplete, onBack }) {
         <div style={{ width: 72, height: 72, borderRadius: "50%", background: "linear-gradient(135deg, #1B5FE8, #3B3A8A)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 1.25rem", fontSize: "1.8rem" }}>✓</div>
         <p style={{ fontFamily: font.display, fontSize: "1.8rem", fontWeight: 700, color: C.ink, marginBottom: "0.5rem" }}>Reflection Complete.</p>
         <p style={{ fontSize: "0.82rem", color: C.muted, fontFamily: font.body, marginBottom: "1.75rem", lineHeight: 1.7 }}>Your answers are saved. When {partnerName} completes theirs, you'll see a side-by-side view of your shared story.</p>
-        <button onClick={() => onComplete(answers)} style={{ background: "linear-gradient(135deg, #1B5FE8, #3B3A8A)", color: "white", border: "none", padding: "0.85rem 2.25rem", fontSize: "0.75rem", letterSpacing: "0.1em", textTransform: "uppercase", cursor: "pointer", fontFamily: font.body, borderRadius: 10, fontWeight: 600 }}>View My Results →</button>
+        <button onClick={() => { try { localStorage.removeItem('attune_ex3_progress'); } catch {} ; onComplete(answers); }} style={{ background: "linear-gradient(135deg, #1B5FE8, #3B3A8A)", color: "white", border: "none", padding: "0.85rem 2.25rem", fontSize: "0.75rem", letterSpacing: "0.1em", textTransform: "uppercase", cursor: "pointer", fontFamily: font.body, borderRadius: 10, fontWeight: 600 }}>View My Results →</button>
       </div>
     );
   }
@@ -4026,7 +4113,7 @@ function AnniversaryExercise({ userName, partnerName, onComplete, onBack }) {
           {step < total - 1 ? (
             <button onClick={handleNext} disabled={!currentAnswered} style={{ background: currentAnswered ? "#1B5FE8" : C.stone, color: currentAnswered ? "white" : C.muted, border: "none", padding: "0.6rem 1.5rem", fontSize: "0.72rem", letterSpacing: "0.08em", textTransform: "uppercase", cursor: currentAnswered ? "pointer" : "default", fontFamily: font.body, borderRadius: 8, fontWeight: 600 }}>Continue →</button>
           ) : (
-            <button onClick={() => { if (allDone) { onComplete(answers); } }} disabled={!currentAnswered} style={{ background: currentAnswered ? "linear-gradient(135deg, #1B5FE8, #3B3A8A)" : C.stone, color: currentAnswered ? "white" : C.muted, border: "none", padding: "0.6rem 1.75rem", fontSize: "0.72rem", letterSpacing: "0.08em", textTransform: "uppercase", cursor: currentAnswered ? "pointer" : "default", fontFamily: font.body, borderRadius: 8, fontWeight: 600 }}>Complete Reflection →</button>
+            <button onClick={() => { if (allDone) { try { localStorage.removeItem('attune_ex3_progress'); } catch {} ; onComplete(answers); } }} disabled={!currentAnswered} style={{ background: currentAnswered ? "linear-gradient(135deg, #1B5FE8, #3B3A8A)" : C.stone, color: currentAnswered ? "white" : C.muted, border: "none", padding: "0.6rem 1.75rem", fontSize: "0.72rem", letterSpacing: "0.08em", textTransform: "uppercase", cursor: currentAnswered ? "pointer" : "default", fontFamily: font.body, borderRadius: 8, fontWeight: 600 }}>Complete Reflection →</button>
           )}
         </div>
       </div>

@@ -2420,6 +2420,31 @@ async function markStatus(orderId, newStatus) {
   } catch(e) {
     console.warn('[admin] markStatus persist failed:', e);
   }
+
+  // Send shipping notification email when status flips to 'shipped' for the first time.
+  // Guarded so re-clicking 'shipped' does not resend. Also guarded on having an email.
+  if (newStatus === 'shipped' && !order._shippingEmailSent && order.email) {
+    order._shippingEmailSent = true;
+    try {
+      await fetch('/api/send-email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          type: 'shipping_notification',
+          toEmail: order.email,
+          toName: order.partnerA || (order.coupleNames || '').split(' & ')[0] || 'there',
+          partnerName: order.partnerB || (order.coupleNames || '').split(' & ')[1] || '',
+          orderNum: order.dbId || order.id,
+          trackingUrl: order.trackingUrl || '',
+          trackingNumber: order.trackingNumber || '',
+          carrier: order.carrier || '',
+        }),
+      });
+    } catch(e) {
+      console.warn('[admin] shipping email failed:', e);
+      order._shippingEmailSent = false; // Allow retry
+    }
+  }
 }
 
 // ── Generate workbook for a specific order ─────────────
