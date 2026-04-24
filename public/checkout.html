@@ -119,6 +119,29 @@
   .error-msg{font-size:.75rem;color:#ef4444;margin-top:.4rem;display:none}
   .error-msg.visible{display:block}
 
+  /* Payment failure card — more prominent than a single line */
+  .pay-error-card{
+    display:none;
+    background:rgba(239,68,68,.06);
+    border:1px solid rgba(239,68,68,.24);
+    border-radius:12px;
+    padding:.9rem 1rem;
+    margin-top:1rem;
+  }
+  .pay-error-card.visible{display:block;animation:slideDown .2s ease}
+  @keyframes slideDown{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:translateY(0)}}
+  .pay-error-card .pay-error-title{
+    font-size:.82rem;font-weight:700;color:#c02f2f;margin-bottom:.25rem;
+    display:flex;align-items:center;gap:.4rem;
+  }
+  .pay-error-card .pay-error-body{
+    font-size:.76rem;color:#8a3030;line-height:1.55;
+  }
+  .pay-error-card .pay-error-hint{
+    font-size:.72rem;color:#5C4A38;margin-top:.5rem;padding-top:.5rem;
+    border-top:1px solid rgba(239,68,68,.18);
+  }
+
   /* Multi-item checkout: per-couple block styling */
   .item-block + .item-block{
     margin-top:1.6rem;padding-top:1.3rem;border-top:1px solid #F0EBE4;
@@ -349,7 +372,13 @@
               <div id="cardCvc" class="stripe-field"></div>
             </div>
           </div>
-          <div class="error-msg" id="payError"></div>
+          <div class="pay-error-card" id="payErrorCard" role="alert" aria-live="polite">
+            <div class="pay-error-title"><span>⚠</span> <span id="payErrorTitle">Payment didn't go through</span></div>
+            <div class="pay-error-body" id="payErrorBody"></div>
+            <div class="pay-error-hint" id="payErrorHint" style="display:none"></div>
+          </div>
+          <!-- Kept for backward compat but hidden in favor of the card above -->
+          <div class="error-msg" id="payError" style="display:none"></div>
         </div>
         <div style="margin-top:1.25rem">
           <button class="btn-primary" id="submitBtn" onclick="handleSubmit(event)" disabled>
@@ -1193,7 +1222,7 @@ function validateForm() {
 
             if (confirmErr) {
               ev.complete('fail');
-              alert('Payment failed: ' + confirmErr.message);
+              showPaymentError(confirmErr);
               return;
             }
             ev.complete('success');
@@ -1201,7 +1230,7 @@ function validateForm() {
             // If further action required (rare — e.g. 3DS), trigger it
             if (paymentIntent.status === 'requires_action') {
               const { error: actionErr } = await stripe.confirmCardPayment(clientSecret);
-              if (actionErr) { alert('Payment failed: ' + actionErr.message); return; }
+              if (actionErr) { showPaymentError(actionErr); return; }
             }
 
             // Mirror post-payment UI from handleSubmit(): show success state
@@ -1259,6 +1288,8 @@ async function handleSubmit(e) {
   const btn = document.getElementById('submitBtn');
   btn.disabled = true;
   btn.textContent = 'Processing…';
+  // Clear any previous error card so the user isn't staring at a stale failure
+  clearPaymentError();
 
   const email = document.getElementById('email').value.trim();
 
@@ -1326,7 +1357,15 @@ async function handleSubmit(e) {
       const { error: stripeErr, paymentIntent: stripePi } = await stripe.confirmCardPayment(clientSecret, {
         payment_method: { card: cardNumberElement, billing_details: { email } }
       });
-      if (stripeErr) throw new Error(stripeErr.message);
+      if (stripeErr) {
+        // Preserve the full error object (including code + decline_code) for
+        // downstream mapStripeError() to show user-friendly messages.
+        const richErr = new Error(stripeErr.message);
+        richErr.code = stripeErr.code;
+        richErr.decline_code = stripeErr.decline_code;
+        richErr.type = stripeErr.type;
+        throw richErr;
+      }
       paymentIntent = stripePi;
     }
     // Generate order number from payment intent ID
@@ -1401,12 +1440,117 @@ async function handleSubmit(e) {
     window.scrollTo({ top: 0, behavior: 'smooth' });
 
   } catch(err) {
-    const errEl = document.getElementById('payError');
-    errEl.textContent = err.message || 'Something went wrong. Please try again.';
-    errEl.classList.add('visible');
+    showPaymentError(err);
     btn.disabled = false;
     document.getElementById('btnLabel').textContent = `Complete order · $${getPkgTotal()}`;
   }
+}
+
+// ── Payment error handling ───────────────────────────────────────────────────
+// Stripe's error messages are sometimes too technical or not actionable.
+// This helper translates them to user-friendly copy + an actionable hint.
+function mapStripeError(err) {
+  const code = err?.code || err?.decline_code || '';
+  const raw  = err?.message || err?.toString?.() || 'Something went wrong.';
+
+  const map = {
+    card_declined: {
+      title: 'Your card was declined',
+      body: "Your bank didn't authorize this payment. They might need your approval for an online purchase of this size.",
+      hint: 'Try a different card, or call your bank to approve the charge and then retry.',
+    },
+    insufficient_funds: {
+      title: 'Your card was declined',
+      body: 'The card on file has insufficient funds available for this purchase.',
+      hint: 'Try a different card, or add funds and retry.',
+    },
+    expired_card: {
+      title: "That card's expired",
+      body: 'The expiration date on this card has passed.',
+      hint: 'Enter a card that is still active.',
+    },
+    incorrect_cvc: {
+      title: "CVC doesn't match",
+      body: "The 3-digit code (CVC) you entered doesn't match the card on file.",
+      hint: 'Double-check the 3 digits on the back of the card, or 4 digits on the front for Amex.',
+    },
+    incorrect_number: {
+      title: 'Card number looks off',
+      body: "The card number you entered isn't recognized.",
+      hint: 'Double-check the number you entered.',
+    },
+    incorrect_zip: {
+      title: "ZIP doesn't match",
+      body: "The ZIP code on your billing address doesn't match your bank's records.",
+      hint: 'Check the ZIP in the Billing address section above.',
+    },
+    processing_error: {
+      title: 'Payment processor hiccup',
+      body: "Something went wrong on the payment processor's end (not your card).",
+      hint: 'Wait a few seconds and click Complete order again — nothing was charged.',
+    },
+    rate_limit: {
+      title: 'Too many requests',
+      body: "You're trying too many times in a row.",
+      hint: 'Wait a minute and try again.',
+    },
+    authentication_required: {
+      title: 'Your bank needs to verify',
+      body: 'Your card issuer requires extra authentication for this purchase.',
+      hint: "Follow the prompts from your bank — we'll complete the order once you're verified.",
+    },
+    generic_decline: {
+      title: 'Your card was declined',
+      body: 'Your bank declined the charge without giving a specific reason.',
+      hint: "Call your bank's support line, or try a different card.",
+    },
+  };
+
+  if (map[code]) return map[code];
+
+  if (err?.type === 'validation_error') {
+    return {
+      title: 'Check your card details',
+      body: raw,
+      hint: null,
+    };
+  }
+
+  if (raw.toLowerCase().includes('network') || raw.toLowerCase().includes('fetch')) {
+    return {
+      title: 'Connection issue',
+      body: "We couldn't reach the payment processor. Your card hasn't been charged.",
+      hint: 'Check your connection and click Complete order again.',
+    };
+  }
+
+  return {
+    title: "Payment didn't go through",
+    body: raw,
+    hint: 'Your card has not been charged. Try again or use a different card.',
+  };
+}
+
+function showPaymentError(err) {
+  const mapped = mapStripeError(err);
+  const card = document.getElementById('payErrorCard');
+  const title = document.getElementById('payErrorTitle');
+  const body = document.getElementById('payErrorBody');
+  const hint = document.getElementById('payErrorHint');
+  if (!card) return;
+  if (title) title.textContent = mapped.title;
+  if (body)  body.textContent  = mapped.body;
+  if (hint) {
+    if (mapped.hint) { hint.textContent = mapped.hint; hint.style.display = 'block'; }
+    else { hint.style.display = 'none'; }
+  }
+  card.classList.add('visible');
+  setTimeout(() => card.scrollIntoView({ behavior: 'smooth', block: 'center' }), 50);
+}
+
+function clearPaymentError() {
+  const card = document.getElementById('payErrorCard');
+  if (card) card.classList.remove('visible');
 }
 
 function getPkgTotal() {
