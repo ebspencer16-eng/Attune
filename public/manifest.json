@@ -1,0 +1,30 @@
+{
+  "name": "Attune Relationships",
+  "short_name": "Attune",
+  "description": "Two exercises. One shared picture. Relationship understanding that used to take years, in one afternoon.",
+  "start_url": "/home",
+  "display": "standalone",
+  "background_color": "#FBF8F3",
+  "theme_color": "#0E0B07",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}
