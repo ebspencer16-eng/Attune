@@ -92,7 +92,7 @@ function partnerInviteEmail({ fromName, toName, inviteUrl }, userId = null) {
       <p>Your answers are private until both of you are done. Results unlock the moment you finish.</p>
       <div class="btn-wrap"><a href="${inviteUrl}" class="btn">Start my exercises →</a></div>
       <div class="divider"></div>
-      <p style="font-size:0.78rem;color:#8C7A68;">Takes about 15 minutes. No right answers — just yours.</p>
+      <p style="font-size:0.78rem;color:#8C7A68;">Takes about 25 minutes total. No right answers — just yours.</p>
     `),
   };
 }
@@ -201,11 +201,11 @@ function resultsViewedEmail({ toName, partnerName, coupleType, portalUrl, hasRef
         <div style="display:flex;align-items:flex-start;gap:12px">
           <div style="width:36px;height:36px;border-radius:10px;background:#FFF8F5;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:1rem">💰</div>
           <div>
-            <div style="font-size:0.88rem;font-weight:700;color:#0E0B07;margin-bottom:3px">Shared Budget Builder</div>
-            <div style="font-size:0.78rem;color:#8C7A68;line-height:1.6">An interactive worksheet for building a real shared budget together, with context from your expectations results.</div>
+            <div style="font-size:0.88rem;font-weight:700;color:#0E0B07;margin-bottom:3px">Budget Priorities Exercise</div>
+            <div style="font-size:0.78rem;color:#8C7A68;line-height:1.6">Map what each of you values spending on and where your instincts differ. Adds context to your expectations results.</div>
           </div>
           <div style="text-align:right;flex-shrink:0;padding-left:8px">
-            <div style="font-size:0.92rem;font-weight:700;color:#0E0B07">+$15</div>
+            <div style="font-size:0.92rem;font-weight:700;color:#0E0B07">+$20</div>
           </div>
         </div>
       </td>

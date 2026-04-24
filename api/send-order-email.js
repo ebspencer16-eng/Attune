@@ -112,12 +112,17 @@ export default async function handler(req) {
 
 // Shared layout matching the notepad brand: navy header with logo + tagline,
 // gradient rule, cream body with serif + sans blend.
-function brandedEmail({ preheader = '', title, subtitle, bodyHtml, ctaLabel, ctaUrl, ctaColor = '#E8673A', footerNote = 'Questions? Reply to this email or reach us at hello@attune-relationships.com' }) {
+function brandedEmail({ preheader = '', title, subtitle, bodyHtml, ctaLabel, ctaUrl, ctaColor = '#E8673A', footerNote = 'Questions? Reply to this email or reach us at hello@attune-relationships.com', userId = null }) {
   const cta = ctaLabel && ctaUrl
     ? `<tr><td style="padding:0 40px 28px;text-align:center">
          <a href="${ctaUrl}" style="display:inline-block;background:linear-gradient(135deg,${ctaColor},#d45a2e);color:#ffffff;padding:14px 34px;border-radius:12px;font-size:14px;font-weight:700;text-decoration:none;letter-spacing:.04em;font-family:'DM Sans',Arial,sans-serif">${ctaLabel}</a>
        </td></tr>`
     : '';
+
+  // Unsubscribe link — uses encoded userId when available, else a mailto
+  const unsubUrl = userId
+    ? `https://attune-relationships.com/api/unsubscribe?token=${btoa(userId)}`
+    : 'mailto:hello@attune-relationships.com?subject=Unsubscribe';
 
   return `<!DOCTYPE html>
 <html>
@@ -163,8 +168,9 @@ function brandedEmail({ preheader = '', title, subtitle, bodyHtml, ctaLabel, cta
   ${cta}
 
   <!-- Footer note -->
-  <tr><td style="padding:18px 40px 28px;border-top:1px solid #F3EDE6">
+  <tr><td style="padding:18px 40px 24px;border-top:1px solid #F3EDE6">
     <p style="font-family:'DM Sans',Helvetica,Arial,sans-serif;font-size:12px;color:#8C7A68;margin:0;line-height:1.6;text-align:center">${footerNote}</p>
+    <p style="font-family:'DM Sans',Helvetica,Arial,sans-serif;font-size:11px;color:#B8A898;margin:10px 0 0;text-align:center"><a href="${unsubUrl}" style="color:#B8A898;text-decoration:underline">Manage email preferences</a></p>
   </td></tr>
 
 </table>
@@ -221,7 +227,7 @@ function getStartedBuyerHtml({ name, partnerName, accessUrl, partnerEmail }) {
        </div>`;
 
   const body = `
-    <p style="font-family:'DM Sans',Helvetica,Arial,sans-serif;font-size:15px;color:#5C4A38;line-height:1.75;margin:0 0 6px">Your access is ready. Two exercises, about 25 minutes each. Answer independently — your joint results unlock when both of you are done.</p>
+    <p style="font-family:'DM Sans',Helvetica,Arial,sans-serif;font-size:15px;color:#5C4A38;line-height:1.75;margin:0 0 6px">Your access is ready. Two exercises, about 25 minutes total. Answer independently — your joint results unlock when both of you are done.</p>
     ${partnerBlock}
     <p style="font-family:'DM Sans',Helvetica,Arial,sans-serif;font-size:13px;color:#8C7A68;line-height:1.6;margin:20px 0 0"><strong style="color:#1E1610">One note:</strong> don't compare answers until you're both finished. The value comes from answering honestly first.</p>
   `;
