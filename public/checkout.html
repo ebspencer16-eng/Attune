@@ -729,17 +729,26 @@ function renderSummary() {
     }
   }
 
-  // If a promo code is applied, show the discount line and zero out total
+  // If a promo code is applied, discount only the PACKAGE BASE cost for
+  // matching items, not the add-ons. Add-ons remain payable.
   if (appliedPromoCode) {
+    // Package base total (digital or physical) for all items in cart.
+    // Matches PRICES structure above.
+    const PKG_BASE = { core: {digital:89, physical:124}, newlywed:{digital:139,physical:174}, anniversary:{digital:139,physical:174}, premium:{digital:295,physical:330} };
+    const baseTotal = _items.reduce((s, it) => {
+      const p = PKG_BASE[it.pkg];
+      return s + (p ? (it.format === 'physical' ? p.physical : p.digital) : 0);
+    }, 0);
+    // Discount is exactly the package base total (not the add-ons)
     rows += `
       <div class="co-card-detail" style="border-top:1px solid #E8DDD0;margin-top:.4rem;padding-top:.5rem">
         <div>
           <div class="name" style="color:#10B981">Promo code applied</div>
-          <span class="sub" style="font-family:monospace;font-size:.7rem;color:#8C7A68">${appliedPromoCode}</span>
+          <span class="sub" style="font-family:monospace;font-size:.7rem;color:#8C7A68">${appliedPromoCode} · covers package only</span>
         </div>
-        <div class="price" style="color:#10B981">−$${total}</div>
+        <div class="price" style="color:#10B981">−$${baseTotal}</div>
       </div>`;
-    total = 0;
+    total = Math.max(0, total - baseTotal);
   }
 
   if (el) el.innerHTML = rows;

@@ -239,19 +239,7 @@ nav{position:sticky;top:0;z-index:100;height:58px;background:rgba(255,253,249,.9
   </div>
   <div class="addon-grid">
 
-    <!-- LMFT -->
-    <div class="addon-card" id="addon-lmft" onclick="toggleLmft()">
-      <div class="addon-check" id="lmft-check">
-        <svg width="10" height="8" viewBox="0 0 11 9" fill="none"><path d="M1 4.5L4 7.5L10 1" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-      </div>
-      <div class="addon-body">
-        <div class="addon-name">LMFT Session</div>
-        <div class="addon-desc">A 50-minute video session with a licensed marriage and family therapist to go deeper on your results.</div>
-        <div class="addon-price">+$150</div>
-      </div>
-    </div>
-
-    <!-- Workbook -->
+    <!-- Workbook — $19/$39 — least expensive first -->
     <div class="addon-card" id="addon-workbook" onclick="toggleWorkbook()">
       <div class="addon-check" id="wb-check">
         <svg width="10" height="8" viewBox="0 0 11 9" fill="none"><path d="M1 4.5L4 7.5L10 1" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -267,8 +255,7 @@ nav{position:sticky;top:0;z-index:100;height:58px;background:rgba(255,253,249,.9
       </div>
     </div>
 
-
-    <!-- Budget priorities exercise -->
+    <!-- Budget priorities exercise — $20 -->
     <div class="addon-card" id="addon-budget" onclick="toggleBudget()">
       <div class="addon-check" id="budget-check">
         <svg width="10" height="8" viewBox="0 0 11 9" fill="none"><path d="M1 4.5L4 7.5L10 1" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -280,7 +267,7 @@ nav{position:sticky;top:0;z-index:100;height:58px;background:rgba(255,253,249,.9
       </div>
     </div>
 
-    <!-- Relationship Reflection exercise -->
+    <!-- Relationship Reflection exercise — $40 -->
     <div class="addon-card" id="addon-reflection" onclick="toggleReflection()">
       <div class="addon-check" id="reflection-check">
         <svg width="10" height="8" viewBox="0 0 11 9" fill="none"><path d="M1 4.5L4 7.5L10 1" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -288,7 +275,19 @@ nav{position:sticky;top:0;z-index:100;height:58px;background:rgba(255,253,249,.9
       <div class="addon-body">
         <div class="addon-name">Relationship Reflection Exercise</div>
         <div class="addon-desc">A third exercise capturing the moments that shaped your relationship, your shared story, and where you're pointed together. Included in Relationship Reflection – add it to any other package here.</div>
-        <div class="addon-price">+$20</div>
+        <div class="addon-price">+$40</div>
+      </div>
+    </div>
+
+    <!-- LMFT — $150 — most expensive -->
+    <div class="addon-card" id="addon-lmft" onclick="toggleLmft()">
+      <div class="addon-check" id="lmft-check">
+        <svg width="10" height="8" viewBox="0 0 11 9" fill="none"><path d="M1 4.5L4 7.5L10 1" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      <div class="addon-body">
+        <div class="addon-name">LMFT Session</div>
+        <div class="addon-desc">A 50-minute video session with a licensed marriage and family therapist to go deeper on your results.</div>
+        <div class="addon-price">+$150</div>
       </div>
     </div>
 
@@ -364,19 +363,10 @@ function selectPkg(id) {
 function setAddonIncluded(id, included) {
   const el = document.getElementById(id);
   if (!el) return;
-  el.style.opacity = included ? '.45' : '1';
-  el.style.pointerEvents = included ? 'none' : 'auto';
+  // Fully hide add-ons already included in the package rather than dimming.
+  // The user can still see what's in the package via the package tile itself.
+  el.style.display = included ? 'none' : '';
   if (included) el.classList.remove('selected');
-  const badge = el.querySelector('.addon-included-badge');
-  if (included && !badge) {
-    const b = document.createElement('div');
-    b.className = 'addon-included-badge';
-    b.textContent = 'Included in this package';
-    b.style.cssText = 'font-size:.65rem;color:var(--clay);font-weight:600;margin-top:.25rem;font-family:var(--bfont)';
-    el.querySelector('.addon-body').appendChild(b);
-  } else if (!included && badge) {
-    badge.remove();
-  }
 }
 
 function toggleLmft() {

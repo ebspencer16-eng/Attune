@@ -1544,35 +1544,57 @@ function renderCart() {
 
       ${expanded ? `
       <div class="cart-item-addons">
-        <div class="mini-addon ${item.addons.workbook?'sel':''}" onclick="toggleItemAddon('${item.id}','workbook')">
-          <div><div class="mini-addon-title">Personalized Workbook</div><div class="mini-addon-desc">Conversation prompts drawn from your results</div></div>
-          <div class="mini-addon-right">
-            <div class="mini-addon-price">${item.addons.workbook ? '$'+(item.addons.workbookVariant==='print'?ADDON_PRICES.workbookPrint:ADDON_PRICES.workbookDigital) : '$'+ADDON_PRICES.workbookDigital}</div>
-            <div class="mini-check ${item.addons.workbook?'sel':''}"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
-          </div>
-        </div>
-        ${item.addons.workbook ? `
-          <div class="mini-variants">
-            <button class="mini-variant ${item.addons.workbookVariant==='digital'?'sel':''}" onclick="setItemWorkbookVariant('${item.id}','digital',event)">Digital · $${ADDON_PRICES.workbookDigital}</button>
-            <button class="mini-variant ${item.addons.workbookVariant==='print'?'sel':''}" onclick="setItemWorkbookVariant('${item.id}','print',event)">Print · $${ADDON_PRICES.workbookPrint}</button>
-          </div>
-        ` : ''}
-        <div class="mini-addon ${item.addons.lmft?'sel':''}" onclick="toggleItemAddon('${item.id}','lmft')">
-          <div><div class="mini-addon-title">LMFT Session</div><div class="mini-addon-desc">Licensed therapist reviews your results</div></div>
-          <div class="mini-addon-right"><div class="mini-addon-price">$${ADDON_PRICES.lmft}</div><div class="mini-check ${item.addons.lmft?'sel':''}"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div></div>
-        </div>
-        <div class="mini-addon ${item.addons.reflection?'sel':''}" onclick="toggleItemAddon('${item.id}','reflection')">
-          <div><div class="mini-addon-title">Relationship Reflection</div><div class="mini-addon-desc">Exercise on experiences that shaped you</div></div>
-          <div class="mini-addon-right"><div class="mini-addon-price">$${ADDON_PRICES.reflection}</div><div class="mini-check ${item.addons.reflection?'sel':''}"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div></div>
-        </div>
-        <div class="mini-addon ${item.addons.budget?'sel':''}" onclick="toggleItemAddon('${item.id}','budget')">
-          <div><div class="mini-addon-title">Shared Budgeting Activity</div><div class="mini-addon-desc">Build a shared budget together</div></div>
-          <div class="mini-addon-right"><div class="mini-addon-price">$${ADDON_PRICES.budget}</div><div class="mini-check ${item.addons.budget?'sel':''}"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div></div>
-        </div>
-        <div class="mini-addon ${item.addons.checklist?'sel':''}" onclick="toggleItemAddon('${item.id}','checklist')">
-          <div><div class="mini-addon-title">Starting Out Checklist</div><div class="mini-addon-desc">Merging lives, finances, logistics</div></div>
-          <div class="mini-addon-right"><div class="mini-addon-price">$${ADDON_PRICES.checklist}</div><div class="mini-check ${item.addons.checklist?'sel':''}"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div></div>
-        </div>
+        ${(() => {
+          // Package inclusion map — these come WITH the package, so don't
+          // show them as add-ons.
+          //   newlywed    → checklist + budget
+          //   anniversary → reflection
+          //   premium     → reflection + budget + LMFT
+          const included = {
+            core:        { checklist: false, budget: false, reflection: false, lmft: false },
+            newlywed:    { checklist: true,  budget: true,  reflection: false, lmft: false },
+            anniversary: { checklist: false, budget: false, reflection: true,  lmft: false },
+            premium:     { checklist: false, budget: true,  reflection: true,  lmft: true  },
+          }[item.pkg] || { checklist: false, budget: false, reflection: false, lmft: false };
+
+          // Ordered by cheapest → most expensive (user-requested).
+          // Workbook has a format toggle so it renders separately below; here
+          // we just pass its base (digital) price for sort purposes.
+          const addons = [
+            { key: 'workbook',   price: ADDON_PRICES.workbookDigital, title: 'Personalized Workbook',  desc: 'Conversation prompts drawn from your results',
+              // Workbook is never "included" in a package; always offered.
+              alwaysShow: true },
+            { key: 'budget',     price: ADDON_PRICES.budget,          title: 'Shared Budgeting Activity', desc: 'Build a shared budget together' },
+            { key: 'checklist',  price: ADDON_PRICES.checklist,       title: 'Starting Out Checklist',    desc: 'Merging lives, finances, logistics' },
+            { key: 'reflection', price: ADDON_PRICES.reflection,      title: 'Relationship Reflection',   desc: 'Exercise on experiences that shaped you' },
+            { key: 'lmft',       price: ADDON_PRICES.lmft,            title: 'LMFT Session',              desc: 'Licensed therapist reviews your results' },
+          ];
+
+          // Sort ascending by price, then filter out anything already included.
+          const visible = addons
+            .sort((a, b) => a.price - b.price)
+            .filter(a => a.alwaysShow || !included[a.key]);
+
+          return visible.map(a => {
+            const selected = !!item.addons[a.key];
+            // Workbook gets its own pricing display because of the digital/print toggle
+            const priceDisplay = a.key === 'workbook'
+              ? (item.addons.workbook ? '$'+(item.addons.workbookVariant==='print'?ADDON_PRICES.workbookPrint:ADDON_PRICES.workbookDigital) : '$'+ADDON_PRICES.workbookDigital)
+              : '$' + a.price;
+            // The main card
+            const card = `<div class="mini-addon ${selected?'sel':''}" onclick="toggleItemAddon('${item.id}','${a.key}')">
+              <div><div class="mini-addon-title">${a.title}</div><div class="mini-addon-desc">${a.desc}</div></div>
+              <div class="mini-addon-right"><div class="mini-addon-price">${priceDisplay}</div><div class="mini-check ${selected?'sel':''}"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div></div>
+            </div>`;
+            // Workbook has a format variant selector when selected
+            const variantSelector = (a.key === 'workbook' && item.addons.workbook) ? `
+              <div class="mini-variants">
+                <button class="mini-variant ${item.addons.workbookVariant==='digital'?'sel':''}" onclick="setItemWorkbookVariant('${item.id}','digital',event)">Digital · $${ADDON_PRICES.workbookDigital}</button>
+                <button class="mini-variant ${item.addons.workbookVariant==='print'?'sel':''}" onclick="setItemWorkbookVariant('${item.id}','print',event)">Print · $${ADDON_PRICES.workbookPrint}</button>
+              </div>` : '';
+            return card + variantSelector;
+          }).join('');
+        })()}
       </div>
       ` : ''}
     </div>`;

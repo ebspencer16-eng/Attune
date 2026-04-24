@@ -34,10 +34,13 @@ function newQrToken() {
     .map(b => b.toString(16).padStart(2, '0')).join('').toUpperCase();
 }
 
-function itemSubtotal(item) {
-  const base = item.isPhysical
+function itemBasePrice(item) {
+  return item.isPhysical
     ? (PHYSICAL_PRICES[item.pkgKey] ?? 0)
     : (DIGITAL_PRICES[item.pkgKey]  ?? 0);
+}
+
+function itemAddonTotal(item) {
   let addons = 0;
   if (item.addonWorkbook === 'print')   addons += ADDON_PRICES.workbookPrint;
   if (item.addonWorkbook === 'digital') addons += ADDON_PRICES.workbookDigital;
@@ -45,7 +48,11 @@ function itemSubtotal(item) {
   if (item.addonReflection) addons += ADDON_PRICES.reflection;
   if (item.addonBudget)     addons += ADDON_PRICES.budget;
   if (item.addonChecklist)  addons += ADDON_PRICES.checklist;
-  return base + addons;
+  return addons;
+}
+
+function itemSubtotal(item) {
+  return itemBasePrice(item) + itemAddonTotal(item);
 }
 
 function normalizeItem(item) {
@@ -168,6 +175,11 @@ export default async function handler(req) {
       }
     }
 
+    // Compute the add-on-only total across all items. The promo code
+    // covers the PACKAGE cost for matching items; add-ons still have to
+    // be paid for. Shipping is included in base prices so isn't added here.
+    const addonsTotal = items.reduce((sum, it) => sum + itemAddonTotal(it), 0);
+
     if (supabaseUrl && supabaseServiceKey) {
       // Check code is active + increment uses
       try {
@@ -206,57 +218,82 @@ export default async function handler(req) {
         console.warn('[promo] supabase tracking failed (non-blocking):', e);
       }
 
-      // Write one order row per item. Free-promo orders skip Stripe's
-      // webhook, so this is the only place they get recorded.
-      try {
-        const d = new Date();
-        const dateStr = `${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}`;
-        for (let i = 0; i < items.length; i++) {
-          const item = items[i];
-          const suffix = items.length > 1 ? `-${i+1}` : '';
-          const generatedOrderNum = orderNum
-            ? `${orderNum}${suffix}`
-            : `ATT-${dateStr}-PR${Math.random().toString(36).substring(2,5).toUpperCase()}${suffix}`;
-          await writeOrderRow(supabaseUrl, supabaseServiceKey, {
-            order_num:         generatedOrderNum,
-            buyer_name:        buyerName || item.partner1Name || null,
-            buyer_email:       buyerEmail || null,
-            partner1_name:     item.partner1Name || null,
-            partner2_name:     item.partner2Name || null,
-            pkg_key:           item.pkgKey || null,
-            is_gift:           item.isGift,
-            is_physical:       item.isPhysical,
-            total:             0,
-            addon_workbook:    item.addonWorkbook || null,
-            addon_lmft:        item.addonLmft,
-            addon_reflection:  item.addonReflection,
-            addon_budget:      item.addonBudget,
-            gift_note:         item.giftNote || null,
-            stripe_payment_intent_id: `promo_${normalizedCode}_${Date.now()}_${i}`,
-            promo_code:        normalizedCode,
-            qr_token:          newQrToken(),
-            shipping_name:     item.shipping?.name || null,
-            shipping_address:  item.shipping?.address || null,
-            shipping_city:     item.shipping?.city || null,
-            shipping_state:    item.shipping?.state || null,
-          });
+      // Only write orders here when the promo covers the ENTIRE cart.
+      // If there are add-ons, we fall through to the Stripe path below so
+      // the customer is charged for the add-ons, and the Stripe webhook
+      // writes the orders normally with the promo code flagged.
+      if (addonsTotal === 0) {
+        try {
+          const d = new Date();
+          const dateStr = `${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}`;
+          for (let i = 0; i < items.length; i++) {
+            const item = items[i];
+            const suffix = items.length > 1 ? `-${i+1}` : '';
+            const generatedOrderNum = orderNum
+              ? `${orderNum}${suffix}`
+              : `ATT-${dateStr}-PR${Math.random().toString(36).substring(2,5).toUpperCase()}${suffix}`;
+            await writeOrderRow(supabaseUrl, supabaseServiceKey, {
+              order_num:         generatedOrderNum,
+              buyer_name:        buyerName || item.partner1Name || null,
+              buyer_email:       buyerEmail || null,
+              partner1_name:     item.partner1Name || null,
+              partner2_name:     item.partner2Name || null,
+              pkg_key:           item.pkgKey || null,
+              is_gift:           item.isGift,
+              is_physical:       item.isPhysical,
+              total:             0,
+              addon_workbook:    item.addonWorkbook || null,
+              addon_lmft:        item.addonLmft,
+              addon_reflection:  item.addonReflection,
+              addon_budget:      item.addonBudget,
+              gift_note:         item.giftNote || null,
+              stripe_payment_intent_id: `promo_${normalizedCode}_${Date.now()}_${i}`,
+              promo_code:        normalizedCode,
+              qr_token:          newQrToken(),
+              shipping_name:     item.shipping?.name || null,
+              shipping_address:  item.shipping?.address || null,
+              shipping_city:     item.shipping?.city || null,
+              shipping_state:    item.shipping?.state || null,
+            });
+          }
+        } catch (e) {
+          console.warn('[promo] order writes failed (non-blocking):', e);
         }
-      } catch (e) {
-        console.warn('[promo] order writes failed (non-blocking):', e);
       }
     }
 
-    return new Response(JSON.stringify({
-      free: true,
-      promoCode: promoCode.toUpperCase().trim(),
-      itemCount: items.length,
-    }), {
-      status: 200, headers: { 'Content-Type': 'application/json' }
+    // Fully-free path: entire cart covered, nothing to charge. Return early.
+    if (addonsTotal === 0) {
+      return new Response(JSON.stringify({
+        free: true,
+        promoCode: promoCode.toUpperCase().trim(),
+        itemCount: items.length,
+      }), {
+        status: 200, headers: { 'Content-Type': 'application/json' }
+      });
+    }
+
+    // Otherwise fall through to the Stripe path BELOW with a flag that the
+    // promo covers the package base. We rewrite each item to zero out its
+    // package base and keep only the add-on charges, then mark the
+    // payment intent with the promo_code so the webhook records it.
+    // Accomplish this by adjusting items in place — we want Stripe to
+    // charge ONLY the add-on total.
+    items.forEach(it => {
+      // Leave addon fields intact; clear the package price by flagging it
+      // internally. The Stripe payment math reduces to itemAddonTotal below.
+      it._promoCoveredBase = true;
     });
+    // Fall through to the Stripe path below.
   }
 
   // ── Paid checkout via Stripe ────────────────────────────────────────────
-  const totalDollars = items.reduce((sum, it) => sum + itemSubtotal(it), 0);
+  // If a promo code covered the package base, only charge for add-ons.
+  // Otherwise the full subtotal.
+  const totalDollars = items.reduce((sum, it) => {
+    return sum + (it._promoCoveredBase ? itemAddonTotal(it) : itemSubtotal(it));
+  }, 0);
+  const promoCovered = items.some(it => it._promoCoveredBase);
   if (totalDollars <= 0) {
     return new Response(JSON.stringify({ error: 'Empty cart' }), {
       status: 400, headers: { 'Content-Type': 'application/json' }
@@ -301,6 +338,10 @@ export default async function handler(req) {
     'metadata[addonReflection]':items[0].addonReflection ? '1' : '',
     'metadata[addonBudget]':  items[0].addonBudget ? '1' : '',
     'metadata[giftNote]':     (items[0].giftNote || '').slice(0, 500),
+    // When a promo covers the package base, pass it through so the webhook
+    // tags the resulting order rows with promo_code + adjusts accounting.
+    'metadata[promoCode]':    promoCovered ? (promoCode || '').toUpperCase().trim() : '',
+    'metadata[promoCoversBase]': promoCovered ? '1' : '',
   });
 
   // Split items JSON across keys if needed
