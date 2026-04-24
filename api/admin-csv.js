@@ -105,15 +105,278 @@ export default async function handler(req) {
   const admin = createClient(SUPABASE_URL, SUPABASE_KEY);
 
   try {
+    if (type === 'combined')      return await exportCombined(admin);
     if (type === 'orders')        return await exportOrders(admin);
     if (type === 'demographics')  return await exportDemographics(admin);
     if (type === 'engagement')    return await exportEngagement(admin);
     if (type === 'results')       return await exportResults(admin);
     if (type === 'feedback')      return await exportFeedback();
-    return errResponse(400, 'Unknown type. Use orders|demographics|engagement|results|feedback');
+    return errResponse(400, 'Unknown type. Use combined|orders|demographics|engagement|results|feedback');
   } catch (e) {
     console.error('[admin-csv]', type, e);
     return errResponse(500, 'Export failed: ' + (e.message || e));
+  }
+}
+
+// ── 0. COMBINED ─────────────────────────────────────────────────────────
+// One row per couple with ALL fields across every category, plus a top
+// header row naming the category over each group of columns. Real "merged
+// cells" aren't a CSV feature — we place the category label in the first
+// column of each span and leave the rest blank. Excel/Sheets displays this
+// visually like a merged header and filters applied on row 2 still work
+// because data starts on row 3.
+async function exportCombined(admin) {
+  // ── Gather everything we need in parallel ─────────────────────────────
+  const [
+    { data: profiles = [] },
+    { data: sessions = [] },
+    { data: partnerRows = [] },
+    { data: workbooks = [] },
+    { data: orders = [] },
+  ] = await Promise.all([
+    admin.from('profiles').select('id, invite_code, pkg, gender, relationship_status, relationship_length, budget_data, created_at'),
+    admin.from('exercise_sessions').select('user_id, ex1_answers, ex2_answers, ex3_answers, couple_type'),
+    admin.from('partner_sessions').select('invite_code, ex1_answers, ex2_answers, ex3_answers, gender, relationship_status, relationship_length'),
+    admin.from('workbooks').select('user_id, storage_path'),
+    admin.from('orders').select('*'),
+  ]);
+
+  // Lookups
+  const sessByUser = Object.fromEntries(sessions.map(s => [s.user_id, s]));
+  const pbyCode    = Object.fromEntries(partnerRows.map(p => [p.invite_code, p]));
+  const wbByUser   = Object.fromEntries(workbooks.map(w => [w.user_id, w]));
+  // Orders: take most recent per user (orders may have multiple per couple
+  // when add-ons are added later; most recent has the latest add-on state)
+  const ordersByUser = {};
+  orders.sort((a, b) => new Date(b.created_at) - new Date(a.created_at)).forEach(o => {
+    if (o.user_id && !ordersByUser[o.user_id]) ordersByUser[o.user_id] = o;
+  });
+
+  // Feedback by email (best we can do since it's in KV, not tied to user_id)
+  const feedbackByEmail = await loadFeedbackByEmail();
+
+  // ── Column layout ────────────────────────────────────────────────────
+  // Each entry: [category_label, column_name]. category_label only appears
+  // on the FIRST column of each category's span (for the "merged" top row).
+  const DIMS = Object.keys(DIM_KEYS); // 10 dimension keys in canonical order
+  const SAT_KEYS = ['sf_feel', 'sf_future', 'sf_growth'];
+
+  const cols = [
+    // Identity
+    ['Identity', 'anon_couple_id'],
+    ['',         'signed_up_at'],
+    ['',         'package'],
+
+    // Order details
+    ['Order details', 'order_num'],
+    ['',              'order_date'],
+    ['',              'physical_or_digital'],
+    ['',              'gift_or_self'],
+    ['',              'workbook_purchased'],
+    ['',              'workbook_when'],
+    ['',              'reflection_purchased'],
+    ['',              'reflection_when'],
+    ['',              'budget_purchased'],
+    ['',              'budget_when'],
+    ['',              'checklist_purchased'],
+    ['',              'checklist_when'],
+    ['',              'lmft_purchased'],
+    ['',              'lmft_when'],
+
+    // Demographics
+    ['Demographics', 'partner_a_gender'],
+    ['',             'partner_b_gender'],
+    ['',             'relationship_length'],
+    ['',             'marital_status'],
+    ['',             'partner_a_childhood_context'],
+    ['',             'partner_b_childhood_context'],
+    ['',             'partner_a_individual_type'],
+    ['',             'partner_b_individual_type'],
+    ['',             'couple_type'],
+
+    // Engagement
+    ['Engagement', 'partner_a_comms_complete'],
+    ['',           'partner_b_comms_complete'],
+    ['',           'partner_a_expectations_complete'],
+    ['',           'partner_b_expectations_complete'],
+    ['',           'partner_a_reflection_complete'],
+    ['',           'partner_b_reflection_complete'],
+    ['',           'partner_a_budget_complete'],
+    ['',           'workbook_generated'],
+    ['',           'workbook_shipped'],
+
+    // Results — axis scores + per-partner dim scores + ex3 satisfaction
+    ['Results', 'partner_a_engage_withdraw_score'],
+    ['',        'partner_a_open_guarded_score'],
+    ['',        'partner_b_engage_withdraw_score'],
+    ['',        'partner_b_open_guarded_score'],
+    ...DIMS.map(d => ['', `partner_a_comms_${d}`]),
+    ...DIMS.map(d => ['', `partner_b_comms_${d}`]),
+    ...SAT_KEYS.map(k => ['', `partner_a_satisfaction_${k}`]),
+    ...SAT_KEYS.map(k => ['', `partner_b_satisfaction_${k}`]),
+
+    // Feedback — dynamic columns based on what's in KV
+    // Shape them as feedback_<key>. If no feedback survey responses exist,
+    // these are empty columns.
+    // Populated below after we know all keys.
+  ];
+
+  // Discover feedback keys
+  const feedbackKeys = new Set();
+  Object.values(feedbackByEmail).forEach(fb => {
+    Object.keys(fb || {}).forEach(k => feedbackKeys.add(k));
+  });
+  const SKIP_FB = new Set(['email', 'user_id', 'submitted_at']);
+  const feedbackCols = [...feedbackKeys].filter(k => !SKIP_FB.has(k)).sort();
+  feedbackCols.forEach((fk, i) => {
+    cols.push([i === 0 ? 'Feedback' : '', `feedback_${fk}`]);
+  });
+  // Always include submitted_at if any feedback exists
+  if (feedbackCols.length > 0) {
+    cols.splice(cols.length - feedbackCols.length, 0, [feedbackCols.length === 0 ? 'Feedback' : (cols[cols.length - feedbackCols.length][0] || ''), 'feedback_submitted_at']);
+    // Re-tag first feedback col's category label since insertion shifted it
+    const fbStart = cols.findIndex(c => c[1] === 'feedback_submitted_at');
+    if (fbStart >= 0) {
+      cols[fbStart][0] = 'Feedback';
+      // Clear category from the later one
+      const firstQ = cols.findIndex((c, i) => i > fbStart && c[1].startsWith('feedback_'));
+      if (firstQ >= 0) cols[firstQ][0] = '';
+    }
+  }
+
+  const categoryRow = cols.map(c => c[0]);
+  const nameRow = cols.map(c => c[1]);
+
+  // ── Build data rows ──────────────────────────────────────────────────
+  const fmt = (n) => n == null ? '' : Number(n).toFixed(3);
+
+  const dataRows = profiles.map(p => {
+    const s = sessByUser[p.id];
+    const ps = p.invite_code ? pbyCode[p.invite_code] : null;
+    const w = wbByUser[p.id];
+    const o = ordersByUser[p.id];
+    const ex2a = s?.ex2_answers || {};
+    const ex2b = ps?.ex2_answers || {};
+    const aScores = calcDimScores(s?.ex1_answers);
+    const bScores = calcDimScores(ps?.ex1_answers);
+    const aAxes = computeAxes(aScores);
+    const bAxes = computeAxes(bScores);
+    const aEx3 = s?.ex3_answers || {};
+    const bEx3 = ps?.ex3_answers || {};
+    const budgetComplete = p.budget_data && Object.keys(p.budget_data).length > 0;
+
+    // Order add-ons (package inclusion + explicit add-on)
+    const pkgHasChecklist   = o?.pkg_key === 'newlywed';
+    const pkgHasBudget      = o?.pkg_key === 'newlywed' || o?.pkg_key === 'premium';
+    const pkgHasReflection  = o?.pkg_key === 'anniversary' || o?.pkg_key === 'premium';
+    const pkgHasLMFT        = o?.pkg_key === 'premium';
+    const whenHeuristic = (o_, field) => {
+      if (!o_ || !o_[field]) return '';
+      if (!o_.updated_at || !o_.created_at) return 'initial_checkout';
+      return (new Date(o_.updated_at) - new Date(o_.created_at)) < 3.6e6 ? 'initial_checkout' : 'post_results';
+    };
+    const whenFor = (pkgIncluded, field) => {
+      if (pkgIncluded) return 'initial_checkout';
+      return whenHeuristic(o, field);
+    };
+    const hasWorkbook   = !!o?.addon_workbook;
+    const hasReflection = pkgHasReflection || !!o?.addon_reflection;
+    const hasBudget     = pkgHasBudget     || !!o?.addon_budget;
+    const hasChecklist  = pkgHasChecklist;
+    const hasLMFT       = pkgHasLMFT       || !!o?.addon_lmft;
+
+    const anonId = (p.id || '').replace(/-/g, '').slice(0, 8);
+    const fb = (o?.buyer_email && feedbackByEmail[o.buyer_email.toLowerCase()]) || null;
+
+    const row = [
+      // Identity
+      anonId,
+      p.created_at ? new Date(p.created_at).toISOString().slice(0,10) : '',
+      p.pkg || '',
+      // Order details
+      o?.order_num || '',
+      o?.created_at ? new Date(o.created_at).toISOString().slice(0,10) : '',
+      o?.is_physical ? 'physical' : (o ? 'digital' : ''),
+      o?.is_gift ? 'gift' : (o ? 'self' : ''),
+      hasWorkbook   ? 'Y' : 'N',  hasWorkbook   ? whenHeuristic(o, 'addon_workbook') : '',
+      hasReflection ? 'Y' : 'N',  hasReflection ? whenFor(pkgHasReflection, 'addon_reflection') : '',
+      hasBudget     ? 'Y' : 'N',  hasBudget     ? whenFor(pkgHasBudget, 'addon_budget') : '',
+      hasChecklist  ? 'Y' : 'N',  hasChecklist  ? 'initial_checkout' : '',
+      hasLMFT       ? 'Y' : 'N',  hasLMFT       ? whenFor(pkgHasLMFT, 'addon_lmft') : '',
+      // Demographics
+      p.gender || '',
+      ps?.gender || '',
+      p.relationship_length || ps?.relationship_length || '',
+      p.relationship_status || ps?.relationship_status || '',
+      ex2a.childhoodStructure || '',
+      ex2b.childhoodStructure || '',
+      aAxes.typeCode || '',
+      bAxes.typeCode || '',
+      s?.couple_type?.id || '',
+      // Engagement
+      s?.ex1_answers ? 'Y' : 'N',  ps?.ex1_answers ? 'Y' : 'N',
+      s?.ex2_answers ? 'Y' : 'N',  ps?.ex2_answers ? 'Y' : 'N',
+      s?.ex3_answers ? 'Y' : 'N',  ps?.ex3_answers ? 'Y' : 'N',
+      budgetComplete ? 'Y' : 'N',
+      w ? 'Y' : 'N',
+      (o?.is_physical && o?.card_status === 'shipped') ? 'Y' : 'N',
+      // Results
+      fmt(aAxes.withdrawScore), fmt(aAxes.openScore),
+      fmt(bAxes.withdrawScore), fmt(bAxes.openScore),
+      ...DIMS.map(d => fmt(aScores[d])),
+      ...DIMS.map(d => fmt(bScores[d])),
+      ...SAT_KEYS.map(k => aEx3[k] != null ? aEx3[k] : ''),
+      ...SAT_KEYS.map(k => bEx3[k] != null ? bEx3[k] : ''),
+    ];
+
+    // Feedback columns — appended in the same order as the header
+    if (feedbackCols.length > 0) {
+      row.push(fb?.submitted_at || '');
+      feedbackCols.forEach(fk => row.push(fb?.[fk] != null ? fb[fk] : ''));
+    }
+    return row;
+  });
+
+  // Assemble CSV — category row, then name row, then data rows
+  const csv = [
+    categoryRow.map(csvEscape).join(','),
+    nameRow.map(csvEscape).join(','),
+    ...dataRows.map(r => r.map(csvEscape).join(','))
+  ].join('\n');
+
+  return csvResponse(`attune_all_${new Date().toISOString().slice(0,10)}.csv`, csv);
+}
+
+// Pull feedback responses from Vercel KV and key by email where possible.
+// Returns { [email_lowercased]: response_object }
+async function loadFeedbackByEmail() {
+  const kvUrl = process.env.KV_REST_API_URL;
+  const kvToken = process.env.KV_REST_API_TOKEN;
+  if (!kvUrl || !kvToken) return {};
+  try {
+    const res = await fetch(`${kvUrl}/lrange/feedback:beta_survey/0/-1`, {
+      headers: { Authorization: `Bearer ${kvToken}` },
+    });
+    if (!res.ok) return {};
+    const data = await res.json();
+    const entries = (data.result || []).map(r => {
+      try { return typeof r === 'string' ? JSON.parse(r) : r; } catch { return null; }
+    }).filter(Boolean);
+
+    const byEmail = {};
+    entries.forEach(e => {
+      const email = (e.email || '').toLowerCase();
+      if (email) {
+        // Keep the most recent response if a user answered multiple times
+        const prev = byEmail[email];
+        if (!prev || new Date(e.submitted_at || 0) > new Date(prev.submitted_at || 0)) {
+          byEmail[email] = e;
+        }
+      }
+    });
+    return byEmail;
+  } catch {
+    return {};
   }
 }
 
@@ -198,9 +461,9 @@ async function exportOrders(admin) {
 // partner_pronouns-like fields, which don't exist yet — so Partner B gender
 // is left blank until we collect it). Childhood contexts from ex2.
 async function exportDemographics(admin) {
-  const { data: profiles } = await admin.from('profiles').select('id, gender, partner_pronouns, relationship_length, relationship_status, invite_code');
+  const { data: profiles } = await admin.from('profiles').select('id, gender, relationship_length, relationship_status, invite_code');
   const { data: sessions } = await admin.from('exercise_sessions').select('user_id, ex1_answers, ex2_answers, couple_type');
-  const { data: partnerRows } = await admin.from('partner_sessions').select('invite_code, ex1_answers, ex2_answers');
+  const { data: partnerRows } = await admin.from('partner_sessions').select('invite_code, ex1_answers, ex2_answers, gender, relationship_length, relationship_status');
 
   const sessByUser = Object.fromEntries((sessions || []).map(s => [s.user_id, s]));
   const pbyCode    = Object.fromEntries((partnerRows || []).map(p => [p.invite_code, p]));
@@ -208,7 +471,7 @@ async function exportDemographics(admin) {
   const headers = [
     'anon_couple_id',
     'partner_a_gender',
-    'partner_b_gender',            // Not currently collected — will stay blank
+    'partner_b_gender',
     'relationship_length',
     'marital_status',
     'partner_a_childhood_context',
@@ -230,15 +493,14 @@ async function exportDemographics(admin) {
     const aAxes = computeAxes(aScores);
     const bAxes = computeAxes(bScores);
 
-    // Anonymize couple id — first 8 chars of profile UUID, not reversible
     const anonId = (p.id || '').replace(/-/g, '').slice(0, 8);
 
     return [
       anonId,
       p.gender || '',
-      '', // Partner B gender — not collected via the B-signup flow yet
-      p.relationship_length || '',
-      p.relationship_status || '',
+      partnerSession?.gender || '',
+      p.relationship_length || partnerSession?.relationship_length || '',
+      p.relationship_status || partnerSession?.relationship_status || '',
       ex2a.childhoodStructure || '',
       ex2b.childhoodStructure || '',
       aAxes.typeCode || '',

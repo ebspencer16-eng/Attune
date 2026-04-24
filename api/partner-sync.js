@@ -48,7 +48,7 @@ export default async function handler(req) {
     let body;
     try { body = await req.json(); } catch { return new Response('Invalid JSON', { status: 400 }); }
 
-    const { inviteCode, partnerBId, partnerBName, ex1Answers, ex2Answers, ex3Answers } = body;
+    const { inviteCode, partnerBId, partnerBName, ex1Answers, ex2Answers, ex3Answers, demographics } = body;
 
     // Validate invite code format
     if (!inviteCode || !validateInviteCode(inviteCode)) {
@@ -94,7 +94,16 @@ export default async function handler(req) {
         ex1_answers:    sanitizeAnswers(ex1Answers),
         ex2_answers:    sanitizeAnswers(ex2Answers),
         ex3_answers:    ex3Answers ? sanitizeAnswers(ex3Answers) : null,
-        completed_at:   new Date().toISOString(),
+        // Demographics columns exist from migration 005. Values are short
+        // controlled-vocabulary strings (dropdown options) so no sanitize
+        // needed beyond truncation.
+        age_range:           demographics?.age_range ? String(demographics.age_range).slice(0, 20) : null,
+        gender:              demographics?.gender ? String(demographics.gender).slice(0, 20) : null,
+        relationship_status: demographics?.relationship_status ? String(demographics.relationship_status).slice(0, 30) : null,
+        relationship_length: demographics?.relationship_length ? String(demographics.relationship_length).slice(0, 10) : null,
+        children:            demographics?.children ? String(demographics.children).slice(0, 20) : null,
+        signup_source:       demographics?.signup_source ? String(demographics.signup_source).slice(0, 30) : null,
+        completed_at:        new Date().toISOString(),
       }, { onConflict: 'invite_code' });
 
     if (error) {

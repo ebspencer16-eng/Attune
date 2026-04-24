@@ -8545,7 +8545,7 @@ function NewPasswordScreen({ onDone }) {
 }
 
 function PartnerLandingScreen({ inviteFrom, inviteCode, onCreateAccount }) {
-  const [form, setForm] = React.useState({ name: '', email: '', password: '' });
+  const [form, setForm] = React.useState({ name: '', email: '', password: '', ageRange: '', gender: '', relationshipStatus: '', relationshipLength: '', children: '', signupSource: '' });
   const [loading, setLoading] = React.useState(false);
   const [err, setErr] = React.useState('');
   const upd = (k, v) => setForm(p => ({ ...p, [k]: v }));
@@ -8563,6 +8563,16 @@ function PartnerLandingScreen({ inviteFrom, inviteCode, onCreateAccount }) {
         inviteCode: inviteCode,
         isPartnerB: true,
         createdAt: Date.now(),
+        // Demographics ride along on the local account object so
+        // PartnerBExerciseFlow can pass them to the partner-sync write.
+        demographics: {
+          age_range: form.ageRange || null,
+          gender: form.gender || null,
+          relationship_status: form.relationshipStatus || null,
+          relationship_length: form.relationshipLength || null,
+          children: form.children || null,
+          signup_source: form.signupSource || null,
+        },
       };
       try { localStorage.setItem('attune_account', JSON.stringify(acct)); } catch {}
       setLoading(false);
@@ -8603,6 +8613,33 @@ function PartnerLandingScreen({ inviteFrom, inviteCode, onCreateAccount }) {
         {inp('Your first name', 'name')}
         {inp('Your email', 'email', 'email')}
         {inp('Password (6+ characters)', 'password', 'password')}
+
+        {/* ── Optional demographics ── same block as Partner A signup ── */}
+        <details style={{ marginBottom: "0.85rem" }}>
+          <summary style={{ cursor: "pointer", fontSize: "0.76rem", fontWeight: 600, color: "#0E0B07", fontFamily: "'DM Sans',sans-serif", padding: "0.55rem 0", listStyle: "none" }}>
+            <span style={{ color: "#E8673A", marginRight: "0.4rem" }}>+</span>
+            Tell us about yourself (optional)
+          </summary>
+          <p style={{ fontSize: "0.68rem", color: "#8C7A68", fontFamily: "'DM Sans',sans-serif", lineHeight: 1.6, marginBottom: "0.75rem", marginTop: "0.3rem" }}>
+            Aggregate research only. Kept separately from your name and email.
+          </p>
+          {[
+            { k: "ageRange", label: "Your age range", opts: [["", "Prefer not to say"], ["18-24", "18–24"], ["25-34", "25–34"], ["35-44", "35–44"], ["45-54", "45–54"], ["55+", "55 or older"]] },
+            { k: "gender", label: "Your gender", opts: [["", "Prefer not to say"], ["woman", "Woman"], ["man", "Man"], ["nonbinary", "Non-binary"], ["other", "Other / self-describe"]] },
+            { k: "relationshipStatus", label: "Relationship status", opts: [["", "Prefer not to say"], ["dating", "Dating / together"], ["engaged", "Engaged"], ["married", "Married"], ["remarried", "Remarried"], ["partnership", "Domestic partnership"]] },
+            { k: "relationshipLength", label: "How long together", opts: [["", "Prefer not to say"], ["<1", "Less than 1 year"], ["1-2", "1–2 years"], ["3-5", "3–5 years"], ["6-10", "6–10 years"], ["11-20", "11–20 years"], ["20+", "20+ years"]] },
+            { k: "children", label: "Children", opts: [["", "Prefer not to say"], ["none", "None"], ["1", "1"], ["2", "2"], ["3+", "3 or more"], ["expecting", "Expecting"]] },
+            { k: "signupSource", label: "How did you hear about Attune?", opts: [["", "Prefer not to say"], ["friend", "Friend or family"], ["social", "Social media"], ["search", "Search"], ["gift", "Received as a gift"], ["therapist", "Therapist or counselor"], ["other", "Other"]] },
+          ].map(({ k, label, opts }) => (
+            <div key={k} style={{ marginBottom: "0.5rem" }}>
+              <label style={{ fontSize: "0.66rem", color: "#8C7A68", fontFamily: "'DM Sans',sans-serif", display: "block", marginBottom: "0.15rem" }}>{label}</label>
+              <select value={form[k]} onChange={e => upd(k, e.target.value)}
+                style={{ width: "100%", padding: "0.5rem 0.7rem", border: "1.5px solid #E8DDD0", borderRadius: 8, fontSize: "0.78rem", fontFamily: "'DM Sans',sans-serif", color: "#0E0B07", background: "#FFFDF9" }}>
+                {opts.map(([v, l]) => <option key={v} value={v}>{l}</option>)}
+              </select>
+            </div>
+          ))}
+        </details>
 
         {err && <p style={{ color: '#ef4444', fontSize: '0.75rem', fontFamily: "'DM Sans', sans-serif", marginBottom: '0.75rem' }}>{err}</p>}
 
@@ -8669,6 +8706,9 @@ function PartnerBExerciseFlow({ account, onComplete }) {
           ex1Answers:    ex1Answers,
           ex2Answers:    ex2Answers,
           ...(ex3Answers ? { ex3Answers } : {}),
+          // Partner B demographics collected during landing-screen signup.
+          // Stored on partner_sessions since Partner B has no profile row.
+          demographics: account.demographics || null,
         }),
       });
     } catch (e) {
