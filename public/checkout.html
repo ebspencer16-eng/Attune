@@ -570,10 +570,23 @@ function debounceTaxRefresh() {
 async function refreshTax() {
   const addr = getBillingAddress();
   if (!addr) {
-    // Not enough address info yet — leave quote null so summary shows "calculated at next step"
     taxQuote = null;
     renderSummary();
     return;
+  }
+
+  // Show calculating state in the tax line so user knows we're working on it
+  const taxLineEl = document.getElementById('taxLine');
+  if (taxLineEl) {
+    taxLineEl.innerHTML = `
+      <div style="display:flex;justify-content:space-between;align-items:baseline;padding:.4rem 0;font-size:.8rem;color:#8C7A68">
+        <span>Sales tax</span>
+        <span style="font-size:.72rem;color:#B8AC9C;display:inline-flex;align-items:center;gap:.35rem">
+          <span class="tax-spinner" style="width:10px;height:10px;border:1.5px solid rgba(140,122,104,.3);border-top-color:#8C7A68;border-radius:50%;display:inline-block;animation:taxSpin .7s linear infinite"></span>
+          calculating…
+        </span>
+      </div>
+      <style>@keyframes taxSpin{to{transform:rotate(360deg)}}</style>`;
   }
 
   try {
@@ -596,8 +609,6 @@ async function refreshTax() {
     });
     if (!res.ok) { taxQuote = null; renderSummary(); return; }
     const data = await res.json();
-    // If tax calc came back unavailable (stripe tax disabled, or jurisdiction
-    // not registered), store zero tax so we don't block checkout
     taxQuote = data;
     renderSummary();
   } catch (e) {
@@ -1287,7 +1298,11 @@ async function handleSubmit(e) {
   e.preventDefault();
   const btn = document.getElementById('submitBtn');
   btn.disabled = true;
-  btn.textContent = 'Processing…';
+  // Inline spinner + text while payment is processing
+  btn.innerHTML = `<span style="display:inline-flex;align-items:center;gap:.55rem">
+    <span style="width:14px;height:14px;border:2px solid rgba(255,255,255,.35);border-top-color:white;border-radius:50%;display:inline-block;animation:taxSpin .7s linear infinite"></span>
+    <span>Processing…</span>
+  </span>`;
   // Clear any previous error card so the user isn't staring at a stale failure
   clearPaymentError();
 
