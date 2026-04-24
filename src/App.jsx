@@ -112,6 +112,77 @@ function InlineChoice({ options, value, onChange }) {
   );
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// SHARED EDGE-CASE UI — resume toast, anon-storage banner, sync helpers
+// Small presentational helpers reused across exercises so all three get
+// consistent behavior for welcome-back, save failures, etc.
+// ─────────────────────────────────────────────────────────────────────────────
+
+// Checks for an authenticated account. Used to decide whether to show the
+// anonymous storage warning banner inside exercises.
+function _hasAttuneAccount() {
+  try {
+    const a = JSON.parse(localStorage.getItem('attune_account') || 'null');
+    return !!(a && a.id);
+  } catch { return false; }
+}
+
+// Banner shown at the top of any exercise when the user is not logged in.
+// Non-alarming phrasing per the approved edge-case copy draft.
+function AnonymousStorageBanner() {
+  if (_hasAttuneAccount()) return null;
+  return (
+    <div style={{ background: "rgba(251,191,36,0.08)", border: "1px solid rgba(251,191,36,0.28)", borderRadius: 10, padding: "0.6rem 0.85rem", marginBottom: "1.25rem", display: "flex", alignItems: "flex-start", gap: "0.55rem", maxWidth: 560, marginLeft: "auto", marginRight: "auto" }}>
+      <span style={{ fontSize: "0.9rem", flexShrink: 0, lineHeight: 1 }}>ⓘ</span>
+      <p style={{ fontSize: "0.72rem", color: "#8C6B1F", fontFamily: "'DM Sans',sans-serif", lineHeight: 1.55, margin: 0 }}>
+        Your progress saves on this device. Create an account at the end to save it permanently.
+      </p>
+    </div>
+  );
+}
+
+// Short-lived "picking up where you left off" toast for exercise resume.
+// Shows for ~3s when mounted; no dismiss button.
+function ResumeToast({ show, message }) {
+  const [visible, setVisible] = React.useState(show);
+  React.useEffect(() => {
+    if (!show) return;
+    setVisible(true);
+    const t = setTimeout(() => setVisible(false), 3000);
+    return () => clearTimeout(t);
+  }, [show]);
+  if (!visible) return null;
+  return (
+    <div style={{ position: "fixed", top: 20, left: "50%", transform: "translateX(-50%)", background: "#0E0B07", color: "white", padding: "0.55rem 1.15rem", borderRadius: 999, fontSize: "0.78rem", fontFamily: "'DM Sans',sans-serif", fontWeight: 500, boxShadow: "0 4px 16px rgba(0,0,0,0.18)", zIndex: 1000, animation: "fadeInDown .25s ease" }}>
+      <style>{`@keyframes fadeInDown{from{opacity:0;transform:translate(-50%,-8px)}to{opacity:1;transform:translate(-50%,0)}}`}</style>
+      {message}
+    </div>
+  );
+}
+
+// Wraps a Supabase write with sync-state tracking. On failure shows a toast
+// ("Saved on this device. We'll sync when you're back online.") and sets a
+// window flag. On next success if the flag is set, shows "Synced." toast.
+// Uses window.__attuneShowToast if showToast is not provided explicitly.
+async function trackedSupabaseWrite(promise, showToast) {
+  const toast = showToast || (typeof window !== 'undefined' ? window.__attuneShowToast : null);
+  try {
+    const res = await promise;
+    if (res?.error) throw res.error;
+    // Recovery toast if a prior save failed
+    if (typeof window !== 'undefined' && window.__attune_sync_failed && toast) {
+      toast('Synced.');
+      window.__attune_sync_failed = false;
+    }
+    return res;
+  } catch (e) {
+    if (typeof window !== 'undefined') window.__attune_sync_failed = true;
+    if (toast) toast("Saved on this device. We'll sync when you're back online.");
+    console.warn('[Attune] supabase write failed:', e);
+    return { error: e };
+  }
+}
+
 // -- EXERCISE 2 --
 function ExpectationsExercise({ partnerName, userName = "Partner A", onComplete, isAnniversary = false, isRevisited = false }) {
   const activeLifeQs = isRevisited ? LIFE_QUESTIONS_REVISITED : isAnniversary ? LIFE_QUESTIONS_ANNIVERSARY : LIFE_QUESTIONS;
@@ -127,6 +198,9 @@ function ExpectationsExercise({ partnerName, userName = "Partner A", onComplete,
     } catch { return null; }
   };
   const saved = hydrate();
+  // Used to trigger the resume toast only on a real mid-exercise restore
+  // (not fresh starts and not the intro phase).
+  const resumedMidExercise = !!(saved && saved.phase && saved.phase !== 'intro');
 
   const [phase, setPhase]                       = useState(saved?.phase || "intro");
   const [catIndex, setCatIndex]                 = useState(saved?.catIndex ?? 0);
@@ -456,6 +530,8 @@ function ExpectationsExercise({ partnerName, userName = "Partner A", onComplete,
   return (
     <div>
       <link href={FONT_LINK} rel="stylesheet" />
+      <AnonymousStorageBanner />
+      <ResumeToast show={resumedMidExercise} message="Picking up where you left off." />
       {/* Progress */}
       <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", marginBottom: "2rem" }}>
         <div style={{ flex: 1, height: 3, background: C.stone, borderRadius: 2 }}>
@@ -2213,6 +2289,10 @@ function Exercise01Flow({ userName, partnerName, onComplete, skipIntro = false }
       </div>
 
       <div style={{ maxWidth: 600, margin: "0 auto", padding: "3rem 1.5rem 6rem" }}>
+        {/* Anonymous storage banner — only renders when no logged-in account */}
+        <AnonymousStorageBanner />
+        {/* Resume toast — fires once when the component mounts with saved progress */}
+        <ResumeToast show={hasProgress} message={`You're on question ${idx + 1} of ${total}.`} />
         {/* Header */}
         <div style={{ marginBottom: "2rem" }}>
           <p style={{ fontSize: "0.72rem", letterSpacing: "0.1em", textTransform: "uppercase", color: "#999", fontFamily: "'DM Sans', sans-serif", marginBottom: "0.4rem" }}>
@@ -4024,14 +4104,15 @@ function AnniversaryExercise({ userName, partnerName, onComplete, onBack }) {
     } catch { return 0; }
   });
   // 'intro' → 'questions'. Show intro only for fresh starts (no saved progress).
-  const [phase, setPhase] = useState(() => {
+  // Also used to trigger the resume toast when the user comes back mid-exercise.
+  const [resumedMidExercise] = useState(() => {
     try {
       const raw = localStorage.getItem('attune_ex3_progress');
       const s = raw ? JSON.parse(raw) : null;
-      const hasProgress = s?.answers && Object.keys(s.answers).length > 0;
-      return hasProgress ? 'questions' : 'intro';
-    } catch { return 'intro'; }
+      return !!(s?.answers && Object.keys(s.answers).length > 0);
+    } catch { return false; }
   });
+  const [phase, setPhase] = useState(() => resumedMidExercise ? 'questions' : 'intro');
 
   // Persist on every change
   useEffect(() => {
@@ -4113,6 +4194,8 @@ function AnniversaryExercise({ userName, partnerName, onComplete, onBack }) {
 
   return (
     <div style={{ maxWidth: 560, margin: "0 auto" }}>
+      <AnonymousStorageBanner />
+      <ResumeToast show={resumedMidExercise} message="Picking up where you left off." />
       <div style={{ marginBottom: "2rem" }}>
         <button onClick={handleBack} style={{ background: "transparent", border: "none", color: C.muted, fontSize: "0.72rem", letterSpacing: "0.1em", textTransform: "uppercase", cursor: "pointer", fontFamily: font.body, padding: 0, marginBottom: "1.5rem", display: "block" }}>← Back</button>
         <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.5rem" }}>
@@ -4713,7 +4796,7 @@ function BudgetTool({ userName, partnerName, onBack, budgetState, setBudgetState
     if (accountId) {
       try {
         const { supabase: sb, hasSupabase } = await import('./supabase.js');
-        if (hasSupabase()) await sb.from('profiles').update({ budget_data: snapshot }).eq('id', accountId);
+        if (hasSupabase()) await trackedSupabaseWrite(sb.from('profiles').update({ budget_data: snapshot }).eq('id', accountId));
       } catch {}
     }
     setDirty(false);
@@ -8993,16 +9076,24 @@ function PartnerInviteCard({ account, onCopy, copied }) {
     setResending(false);
   };
 
+  // Days since the account was created (proxy for "how long has partner been invited")
+  const daysSinceInvite = account.createdAt ? Math.floor((Date.now() - account.createdAt) / 86400000) : 0;
+  const isOverdue = daysSinceInvite >= 5;
+
   return (
     <div style={{ background: "linear-gradient(135deg, #1B5FE8, #1447b8)", borderRadius: 16, padding: "1.35rem 1.5rem", marginBottom: "1rem", color: "white" }}>
       <div style={{ fontSize: "0.58rem", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.55)", fontFamily: "'DM Sans',sans-serif", fontWeight: 700, marginBottom: "0.4rem" }}>
-        Invite your partner
+        {isOverdue ? 'Still waiting' : 'Invite your partner'}
       </div>
       <p style={{ fontSize: "0.88rem", fontWeight: 600, color: "white", fontFamily: "'Playfair Display',Georgia,serif", marginBottom: "0.25rem", lineHeight: 1.3 }}>
-        {account.partnerName ? `Send this to ${account.partnerName}` : "Share this link with your partner"}
+        {isOverdue
+          ? `It's been a few days since you invited ${account.partnerName || 'your partner'}.`
+          : (account.partnerName ? `Send this to ${account.partnerName}` : "Share this link with your partner")}
       </p>
       <p style={{ fontSize: "0.72rem", color: "rgba(255,255,255,0.65)", fontFamily: "'DM Sans',sans-serif", marginBottom: "1rem", lineHeight: 1.5 }}>
-        They'll create their own account and complete the exercises independently. Results unlock when both of you are done.
+        {isOverdue
+          ? (account.partnerEmail ? 'Resend the invite email, or share the link below directly.' : 'Share the link below to nudge them.')
+          : "They'll create their own account and complete the exercises independently. Results unlock when both of you are done."}
       </p>
       <div style={{ display: "flex", gap: "0.6rem", alignItems: "center" }}>
         <div style={{ flex: 1, background: "rgba(255,255,255,0.12)", borderRadius: 10, padding: "0.55rem 0.85rem", fontSize: "0.68rem", fontFamily: "'DM Sans',sans-serif", color: "rgba(255,255,255,0.8)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
@@ -9367,6 +9458,12 @@ export default function App() {
     const t = setTimeout(() => setToastMsg(''), 4000);
     setToastTimer(t);
   };
+  // Expose globally so leaf components without showToast in scope (e.g. the
+  // budget tool's save handler) can surface sync errors.
+  useEffect(() => { window.__attuneShowToast = showToast; return () => { delete window.__attuneShowToast; }; }, [toastTimer]);
+  // Expose globally so helpers outside the React tree (e.g. trackedSupabaseWrite
+  // called from leaf components without toast access) can surface sync errors.
+  useEffect(() => { window.__attuneShowToast = showToast; return () => { delete window.__attuneShowToast; }; }, [toastTimer]);
   const [pwaPrompt, setPwaPrompt] = useState(null);
   const [pwaDismissed, setPwaDismissed] = useState(false);
   useEffect(() => {
@@ -9483,6 +9580,93 @@ export default function App() {
     window.addEventListener('beforeunload', handler);
     return () => window.removeEventListener('beforeunload', handler);
   }, [view]);
+
+  // ── Supabase session sync ────────────────────────────────────────────────
+  // Single source of truth for login is the Supabase session. On mount we
+  // reconcile `attune_account` localStorage against `supabase.auth.getSession()`
+  // and also listen for TOKEN_REFRESHED / SIGNED_OUT events so the UI reacts
+  // when a session silently expires.
+  //
+  // Partner B accounts have `isPartnerB: true` with no Supabase auth — they
+  // skip this flow and continue to live in localStorage only.
+  //
+  // Gift recipients (`isGiftRecipient: true`) DO have a Supabase auth session
+  // and go through this flow like regular users.
+  useEffect(() => {
+    let cancelled = false;
+    let authSubscription = null;
+
+    (async () => {
+      try {
+        const { supabase: sb, hasSupabase } = await import('./supabase.js');
+        if (!hasSupabase() || cancelled) return;
+
+        // Pull the current session from Supabase storage.
+        const { data: { session } } = await sb.auth.getSession();
+        const localAcct = loadAccount();
+
+        if (session?.user) {
+          // Session is valid. If localStorage account is missing OR belongs to
+          // a different user, rebuild it from the profile.
+          if (!localAcct || localAcct.id !== session.user.id) {
+            // Don't overwrite Partner B accounts even if their id doesn't match
+            if (localAcct?.isPartnerB) return;
+
+            const { data: profile } = await sb.from('profiles').select('*').eq('id', session.user.id).maybeSingle();
+            if (cancelled) return;
+
+            const rebuilt = {
+              id: session.user.id,
+              email: session.user.email,
+              name: profile?.name || '',
+              pronouns: profile?.pronouns || '',
+              partnerName: profile?.partner_name || '',
+              partnerPronouns: profile?.partner_pronouns || '',
+              partnerEmail: profile?.partner_email || '',
+              emailOptIn: profile?.email_opt_in !== false,
+              inviteCode: profile?.invite_code || '',
+              partnerJoined: profile?.partner_joined || false,
+              pkg: profile?.pkg || 'core',
+              createdAt: profile?.created_at ? new Date(profile.created_at).getTime() : Date.now(),
+            };
+            setAccount(rebuilt);
+            saveAccount(rebuilt);
+          }
+        } else {
+          // No Supabase session. If we have a localStorage account with a
+          // real Supabase id (not Partner B), the session has expired —
+          // clear and bounce them to login.
+          if (localAcct && localAcct.id && !localAcct.isPartnerB) {
+            setAccount(null);
+            try { localStorage.removeItem('attune_account'); } catch {}
+          }
+        }
+
+        // Listen for token refresh failures + explicit signouts. The subscribe
+        // callback fires for SIGNED_IN, SIGNED_OUT, TOKEN_REFRESHED, USER_UPDATED.
+        const { data: { subscription } } = sb.auth.onAuthStateChange((event, sess) => {
+          if (cancelled) return;
+          if (event === 'SIGNED_OUT' || (event === 'TOKEN_REFRESHED' && !sess)) {
+            // Session is gone — clear local account (unless it's Partner B)
+            const cur = loadAccount();
+            if (cur && !cur.isPartnerB) {
+              setAccount(null);
+              try { localStorage.removeItem('attune_account'); } catch {}
+            }
+          }
+        });
+        authSubscription = subscription;
+      } catch (e) {
+        console.warn('[Attune] session sync failed:', e);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+      try { authSubscription?.unsubscribe(); } catch {}
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // ── Fire results_viewed email once after highlights are seen ─────────────
   useEffect(() => {
@@ -10339,6 +10523,46 @@ export default function App() {
               {/* ── CONTENT AREA ─────────────────────────────────────────── */}
               <div style={{ flex: 1, padding: isMobile ? "1.5rem 1.25rem" : "2rem 2rem", background: "#FBF8F3" }}>
 
+                {/* Welcome-back banner — surfaces any in-progress exercise so
+                    the user can jump straight back in. Covers both session
+                    expiry (user was signed out, came back, re-authenticated)
+                    and normal resume (came back a day later). Dismissible
+                    per-session. */}
+                {isLoggedIn && (() => {
+                  if (window.__attune_welcome_back_dismissed) return null;
+                  // Detect the first exercise that has saved progress
+                  let target = null;
+                  try {
+                    const ex1 = JSON.parse(localStorage.getItem('attune_ex1_progress') || 'null');
+                    const ex2 = JSON.parse(localStorage.getItem('attune_ex2_progress') || 'null');
+                    const ex3 = JSON.parse(localStorage.getItem('attune_ex3_progress') || 'null');
+                    if (ex1 && Object.keys(ex1.answers || {}).length > 0) target = { view: 'exercise1', label: 'Exercise 1' };
+                    else if (ex2 && ex2.phase && ex2.phase !== 'intro') target = { view: 'exercise2', label: 'Exercise 2' };
+                    else if (ex3 && Object.keys(ex3.answers || {}).length > 0) target = { view: 'exercise3', label: 'Exercise 3' };
+                  } catch {}
+                  if (!target) return null;
+                  return (
+                    <div style={{ background: "linear-gradient(135deg, rgba(232,103,58,0.07), rgba(27,95,232,0.05))", border: "1.5px solid rgba(232,103,58,0.28)", borderRadius: 14, padding: "1rem 1.25rem", marginBottom: "1.25rem", display: "flex", alignItems: "center", gap: "0.85rem", flexWrap: "wrap" }}>
+                      <div style={{ flex: 1, minWidth: 200 }}>
+                        <div style={{ fontSize: "0.58rem", letterSpacing: "0.2em", textTransform: "uppercase", color: "#E8673A", fontWeight: 700, fontFamily: "'DM Sans',sans-serif", marginBottom: "0.2rem" }}>Welcome back, {userName}</div>
+                        <p style={{ fontSize: "0.82rem", color: "#0E0B07", fontFamily: "'DM Sans',sans-serif", margin: 0, lineHeight: 1.5 }}>
+                          You were in the middle of {target.label}. Your progress is saved.
+                        </p>
+                      </div>
+                      <div style={{ display: "flex", gap: "0.5rem" }}>
+                        <button onClick={() => setView(target.view)}
+                          style={{ background: "linear-gradient(135deg,#E8673A,#1B5FE8)", color: "white", border: "none", borderRadius: 10, padding: "0.55rem 1.1rem", fontSize: "0.74rem", fontWeight: 700, cursor: "pointer", fontFamily: "'DM Sans',sans-serif" }}>
+                          Continue {target.label} →
+                        </button>
+                        <button onClick={() => { window.__attune_welcome_back_dismissed = true; setView(view); }}
+                          style={{ background: "transparent", border: "1px solid rgba(140,122,104,0.3)", borderRadius: 10, padding: "0.55rem 0.8rem", fontSize: "0.72rem", color: "#8C7A68", cursor: "pointer", fontFamily: "'DM Sans',sans-serif" }}>
+                          Dismiss
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })()}
+
                 {/* Profile setup tile — shown until dismissed or completed */}
                 {isLoggedIn && !profileSetupDone && (
                   <ProfileSetupTile
@@ -10725,7 +10949,7 @@ export default function App() {
                   // Persist exercise 1 answers to Supabase for cross-device access
                   if (account?.id) {
                     import('./supabase.js').then(({ supabase: sb, hasSupabase }) => {
-                      if (hasSupabase()) sb.from('profiles').update({ ex1_answers: a }).eq('id', account.id).then(() => {});
+                      if (hasSupabase()) trackedSupabaseWrite(sb.from('profiles').update({ ex1_answers: a }).eq('id', account.id));
                     }).catch(() => {});
                   }
                 }} />
@@ -10783,7 +11007,7 @@ export default function App() {
                   try { localStorage.setItem('attune_ex2', JSON.stringify(a)); } catch {}
                   if (account?.id) {
                     import('./supabase.js').then(({ supabase: sb, hasSupabase }) => {
-                      if (hasSupabase()) sb.from('profiles').update({ ex2_answers: a }).eq('id', account.id).then(() => {});
+                      if (hasSupabase()) trackedSupabaseWrite(sb.from('profiles').update({ ex2_answers: a }).eq('id', account.id));
                     }).catch(() => {});
                   }
                   // Auto-trigger workbook generation if both partners are done and order includes workbook
@@ -10839,7 +11063,7 @@ export default function App() {
                     (async () => {
                       const { supabase: sb, hasSupabase } = await import('./supabase.js');
                       if (!hasSupabase()) return;
-                      await sb.from('profiles').update({ ex3_answers: a, ex3_completed: true }).eq('id', account.id);
+                      await trackedSupabaseWrite(sb.from('profiles').update({ ex3_answers: a, ex3_completed: true }).eq('id', account.id));
                     })();
                   }
                 }} onBack={() => setView("home")} />
