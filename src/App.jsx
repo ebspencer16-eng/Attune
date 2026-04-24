@@ -190,7 +190,7 @@ function ExpectationsExercise({ partnerName, userName = "Partner A", onComplete,
           Who were the primary adults<br /><em style={{ fontStyle: "italic", color: "#1B5FE8" }}>in your home growing up?</em>
         </h2>
         <p style={{ fontSize: "0.88rem", color: C.muted, lineHeight: 1.75, fontFamily: font.body, fontWeight: 300, marginBottom: "2rem" }}>
-          This shapes how you answer the next section, and helps us give you more meaningful context in your results.
+          This shapes how you answer the next section, and helps us give you more personalized context in your results.
         </p>
         <button onClick={() => { setPhase("life"); setLifeQ(activeLifeQs.length - 1); }}
         style={{ background: "transparent", border: "none", color: C.muted, fontSize: "0.72rem", cursor: "pointer", fontFamily: font.body, padding: "0 0 1rem", textAlign: "left" }}>
@@ -2085,7 +2085,7 @@ function WithSideNav({ navItems = [], currentStep, onGo, accent = "#9B5DE5", chi
 // Shows PERSONALITY_QUESTIONS one at a time. Each question has two poles (a/b).
 // User picks from a 5-point scale: 1=strongly a, 3=middle, 5=strongly b.
 // On completion, calls onComplete(answers) with full dimension key map.
-function Exercise01Flow({ userName, partnerName, onComplete }) {
+function Exercise01Flow({ userName, partnerName, onComplete, skipIntro = false }) {
   const questions = PERSONALITY_QUESTIONS;
 
   // Mid-exercise persistence: save after each answer, hydrate on mount.
@@ -2109,6 +2109,12 @@ function Exercise01Flow({ userName, partnerName, onComplete }) {
   });
   const [chosen, setChosen] = useState(null); // current question selection
 
+  // Combined intro phase. Skipped when:
+  //   (a) skipIntro=true — Partner B's wrapper already showed its own intro
+  //   (b) user has saved progress (hydrated idx > 0 or any answers) — resume
+  const hasProgress = idx > 0 || Object.keys(answers).length > 0;
+  const [phase, setPhase] = useState((skipIntro || hasProgress) ? 'questions' : 'intro');
+
   // On first render after hydration, if the current question already has a
   // saved answer (user refreshed after Next but before selecting again),
   // pre-fill so they can see what they picked.
@@ -2118,6 +2124,41 @@ function Exercise01Flow({ userName, partnerName, onComplete }) {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // ── Combined intro (Exercise 01 + 02 preview) — matches Partner B copy ─
+  if (phase === 'intro') {
+    return (
+      <div style={{ maxWidth: 520, margin: "0 auto", padding: "3rem 1rem 2rem", animation: "fadeIn 0.5s ease" }}>
+        <link href={FONT_LINK} rel="stylesheet" />
+        <style>{'@keyframes fadeIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}'}</style>
+        <p style={{ fontSize: "0.62rem", letterSpacing: "0.22em", textTransform: "uppercase", color: "#E8673A", fontWeight: 700, fontFamily: font.body, marginBottom: "1rem" }}>
+          Your exercises — {userName} &amp; {partnerName}
+        </p>
+        <p style={{ fontFamily: font.display, fontSize: "clamp(1.6rem, 5vw, 2.2rem)", fontWeight: 700, color: C.ink, lineHeight: 1.1, marginBottom: "1.25rem" }}>
+          Two exercises.<br/>Your answers are yours alone.
+        </p>
+        <p style={{ fontSize: "0.92rem", color: C.muted, fontFamily: font.body, lineHeight: 1.75, marginBottom: "1.75rem" }}>
+          Exercise 01 covers how you communicate and connect. Exercise 02 maps your expectations. Both take about 15 minutes. Answer honestly — your partner won't see your individual answers.
+        </p>
+        <div style={{ display: "flex", gap: "0.85rem", marginBottom: "1.75rem", flexWrap: "wrap" }}>
+          {[
+            { num: '01', title: 'Communication', color: '#E8673A', desc: '30 questions · 10 dimensions' },
+            { num: '02', title: 'Expectations',  color: '#1B5FE8', desc: 'Responsibilities & life' },
+          ].map(e => (
+            <div key={e.num} style={{ flex: "1 1 180px", background: C.warm, border: `1.5px solid ${e.color}33`, borderRadius: 12, padding: "0.9rem 1rem" }}>
+              <div style={{ fontSize: "0.56rem", letterSpacing: "0.18em", color: e.color, fontWeight: 700, fontFamily: font.body, textTransform: "uppercase", marginBottom: "0.3rem" }}>Exercise {e.num}</div>
+              <div style={{ fontFamily: font.display, fontSize: "0.95rem", fontWeight: 700, color: C.ink, marginBottom: "0.2rem" }}>{e.title}</div>
+              <div style={{ fontSize: "0.7rem", color: C.muted, fontFamily: font.body }}>{e.desc}</div>
+            </div>
+          ))}
+        </div>
+        <button onClick={() => setPhase('questions')}
+          style={{ background: "linear-gradient(135deg, #E8673A, #1B5FE8)", color: "white", border: "none", padding: "0.9rem 2.25rem", fontSize: "0.78rem", letterSpacing: "0.1em", textTransform: "uppercase", cursor: "pointer", fontFamily: font.body, borderRadius: 12, fontWeight: 700 }}>
+          Begin Exercise 01 →
+        </button>
+      </div>
+    );
+  }
 
   const q = questions[idx];
   const total = questions.length;
@@ -3982,6 +4023,15 @@ function AnniversaryExercise({ userName, partnerName, onComplete, onBack }) {
       return typeof s?.step === 'number' ? s.step : 0;
     } catch { return 0; }
   });
+  // 'intro' → 'questions'. Show intro only for fresh starts (no saved progress).
+  const [phase, setPhase] = useState(() => {
+    try {
+      const raw = localStorage.getItem('attune_ex3_progress');
+      const s = raw ? JSON.parse(raw) : null;
+      const hasProgress = s?.answers && Object.keys(s.answers).length > 0;
+      return hasProgress ? 'questions' : 'intro';
+    } catch { return 'intro'; }
+  });
 
   // Persist on every change
   useEffect(() => {
@@ -4007,13 +4057,54 @@ function AnniversaryExercise({ userName, partnerName, onComplete, onBack }) {
     else onBack();
   };
 
+  // ── Intro screen (Exercise 03) ────────────────────────────────────────
+  // Mirrors the Expectations intro format: eyebrow, hook title, concrete
+  // description, follow-up, duration, button. Shown once per fresh start;
+  // resumed sessions skip straight to questions.
+  if (phase === 'intro') {
+    return (
+      <div style={{ maxWidth: 480, margin: "0 auto", padding: "3rem 1rem 2rem", animation: "fadeIn 0.5s ease" }}>
+        <link href={FONT_LINK} rel="stylesheet" />
+        <style>{'@keyframes fadeIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}'}</style>
+        <p style={{ fontSize: "0.62rem", letterSpacing: "0.2em", textTransform: "uppercase", color: "#10b981", marginBottom: "1.25rem", fontFamily: font.body }}>Exercise 03 · Our Relationship Story</p>
+        <p style={{ fontFamily: font.display, fontSize: "1.8rem", fontWeight: 700, color: C.ink, lineHeight: 1.15, marginBottom: "1.25rem" }}>
+          The moments that make a relationship are worth naming.
+        </p>
+        <p style={{ fontSize: "0.92rem", color: C.muted, fontFamily: font.body, lineHeight: 1.7, marginBottom: "1rem" }}>
+          A mix of scale questions, short reflections, and a few rankings. Nothing to study for. Just answer.
+        </p>
+        <p style={{ fontSize: "0.88rem", color: C.ink, fontFamily: font.body, lineHeight: 1.7, marginBottom: "1.5rem", borderLeft: "3px solid #10b981", paddingLeft: "0.85rem", fontStyle: "italic" }}>
+          When {partnerName} finishes theirs, you'll see where your stories overlap and where you each saw something the other didn't.
+        </p>
+        <p style={{ fontSize: "0.72rem", color: C.muted, fontFamily: font.body, marginBottom: "1.75rem", letterSpacing: "0.05em" }}>
+          ~10 minutes
+        </p>
+        <button onClick={() => setPhase('questions')}
+          style={{ background: "linear-gradient(135deg, #10b981, #059669)", color: "white", border: "none", padding: "0.85rem 2rem", fontSize: "0.75rem", letterSpacing: "0.1em", textTransform: "uppercase", cursor: "pointer", fontFamily: font.body, borderRadius: 10, fontWeight: 600 }}>
+          Start →
+        </button>
+      </div>
+    );
+  }
+
   if (allDone && step >= total) {
     return (
-      <div style={{ textAlign: "center", padding: "4rem 1rem" }}>
-        <div style={{ width: 72, height: 72, borderRadius: "50%", background: "linear-gradient(135deg, #1B5FE8, #3B3A8A)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 1.25rem", fontSize: "1.8rem" }}>✓</div>
-        <p style={{ fontFamily: font.display, fontSize: "1.8rem", fontWeight: 700, color: C.ink, marginBottom: "0.5rem" }}>Reflection Complete.</p>
-        <p style={{ fontSize: "0.82rem", color: C.muted, fontFamily: font.body, marginBottom: "1.75rem", lineHeight: 1.7 }}>Your answers are saved. When {partnerName} completes theirs, you'll see a side-by-side view of your shared story.</p>
-        <button onClick={() => { try { localStorage.removeItem('attune_ex3_progress'); } catch {} ; onComplete(answers); }} style={{ background: "linear-gradient(135deg, #1B5FE8, #3B3A8A)", color: "white", border: "none", padding: "0.85rem 2.25rem", fontSize: "0.75rem", letterSpacing: "0.1em", textTransform: "uppercase", cursor: "pointer", fontFamily: font.body, borderRadius: 10, fontWeight: 600 }}>View My Results →</button>
+      <div style={{ textAlign: "center", padding: "3.5rem 1.25rem 3rem", maxWidth: 520, margin: "0 auto", animation: "fadeIn 0.6s ease" }}>
+        <style>{`@keyframes fadeIn{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}} @keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.04)}}`}</style>
+        {/* Gradient ring with check — softer celebration, not a confetti blast */}
+        <div style={{ position: "relative", width: 104, height: 104, margin: "0 auto 1.5rem" }}>
+          <div style={{ position: "absolute", inset: 0, borderRadius: "50%", background: "conic-gradient(from 180deg, #10b981, #1B5FE8, #9B5DE5, #10b981)", padding: 3, animation: "pulse 2.2s ease-in-out infinite" }}>
+            <div style={{ width: "100%", height: "100%", borderRadius: "50%", background: "white", display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <div style={{ width: 86, height: 86, borderRadius: "50%", background: "linear-gradient(135deg, #10b981, #059669)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "2.4rem", color: "white", fontWeight: 700 }}>✓</div>
+            </div>
+          </div>
+        </div>
+        <p style={{ fontSize: "0.66rem", letterSpacing: "0.22em", textTransform: "uppercase", color: "#10b981", fontWeight: 700, fontFamily: font.body, marginBottom: "0.6rem" }}>Your story is captured</p>
+        <p style={{ fontFamily: font.display, fontSize: "2rem", fontWeight: 700, color: C.ink, marginBottom: "0.85rem", lineHeight: 1.1 }}>Reflection Complete.</p>
+        <p style={{ fontSize: "0.95rem", color: C.muted, fontFamily: font.body, marginBottom: "2rem", lineHeight: 1.7, maxWidth: 420, margin: "0 auto 2rem" }}>
+          You named the moments, the shifts, and the things you hope for. When {partnerName} finishes theirs, you'll see where your stories overlap and where you each saw something the other didn't.
+        </p>
+        <button onClick={() => { try { localStorage.removeItem('attune_ex3_progress'); } catch {} ; onComplete(answers); }} style={{ background: "linear-gradient(135deg, #10b981, #059669)", color: "white", border: "none", padding: "0.95rem 2.5rem", fontSize: "0.78rem", letterSpacing: "0.12em", textTransform: "uppercase", cursor: "pointer", fontFamily: font.body, borderRadius: 12, fontWeight: 700, boxShadow: "0 6px 20px rgba(16,185,129,0.28)" }}>View My Results →</button>
       </div>
     );
   }
@@ -4658,7 +4749,7 @@ function BudgetTool({ userName, partnerName, onBack, budgetState, setBudgetState
         Build your real shared budget together. Your numbers stay yours — Attune is a calculator, not a financial advisor.
       </p>
       <p style={{ fontSize: "0.78rem", color: C.muted, fontFamily: font.body, fontWeight: 300, lineHeight: 1.6, marginBottom: "1.5rem", fontStyle: "italic" }}>
-        Both of you can access and edit this from your dashboard. Use <strong>Save changes</strong> to sync across devices.
+        Both of you can access and edit this tool from your dashboard. Use <strong>Save changes</strong> to sync across devices.
       </p>
 
       {/* ── Sticky summary bar ─────────────────────────────────────── */}
@@ -4959,6 +5050,19 @@ function BudgetReveal({ rev, userName, partnerName, ex2Answers, partnerEx2, font
             </div>
           </div>
         )}
+      </div>
+
+      {/* Outro: this is a living tool, not a one-time exercise. Keep the
+          copy declarative and un-congratulatory — the budget isn't finished,
+          it's alive. */}
+      <div style={{ marginTop: "2rem", background: "linear-gradient(135deg, rgba(217,83,124,.05), rgba(232,103,58,.05))", border: "1.5px solid rgba(217,83,124,.22)", borderRadius: 16, padding: "1.5rem 1.6rem", textAlign: "center" }}>
+        <p style={{ fontSize: "0.62rem", letterSpacing: "0.22em", textTransform: "uppercase", color: "#D9537C", fontWeight: 700, fontFamily: font.body, marginBottom: "0.65rem" }}>Your shared budget</p>
+        <p style={{ fontFamily: font.display, fontSize: "1.2rem", fontWeight: 700, color: C.ink, lineHeight: 1.3, marginBottom: "0.6rem" }}>
+          Built together. Revisit as things change.
+        </p>
+        <p style={{ fontSize: "0.82rem", color: C.muted, fontFamily: font.body, lineHeight: 1.7, margin: 0, maxWidth: 420, marginLeft: "auto", marginRight: "auto" }}>
+          Raises, new expenses, goals that shift. Come back whenever the numbers do. Use <strong>Save changes</strong> to sync updates across both of your devices.
+        </p>
       </div>
     </>
   );
@@ -8743,7 +8847,7 @@ function PartnerBExerciseFlow({ account, onComplete }) {
         <div style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.15)', borderRadius: 12, padding: '1rem 1.25rem', marginBottom: '1.75rem', textAlign: 'left', maxWidth: 400, margin: '0 auto 1.75rem' }}>
           <div style={{ fontSize: '0.6rem', letterSpacing: '0.18em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.4)', fontFamily: "'DM Sans', sans-serif", fontWeight: 700, marginBottom: '0.5rem' }}>Before you start</div>
           <p style={{ fontSize: '0.78rem', color: 'rgba(255,255,255,0.7)', fontFamily: "'DM Sans', sans-serif", lineHeight: 1.65, margin: 0 }}>
-            If this is <strong style={{ color: 'white' }}>{account.partnerName}</strong> checking your own partner's view — close this tab. Submitting here will overwrite {account.name}'s results. Each partner uses their own account and their own link.
+            If this is <strong style={{ color: 'white' }}>{account.partnerName}</strong> checking your own partner's view — close this tab to prevent overwriting {account.name}'s results. Each partner uses their own account and their own link.
           </p>
         </div>
         <button onClick={() => setStep('ex1')}
@@ -8763,7 +8867,7 @@ function PartnerBExerciseFlow({ account, onComplete }) {
           <span style={{ fontFamily: "'Playfair Display', Georgia, serif", fontSize: '0.95rem', fontWeight: 700, color: C.ink }}>Attune</span>
           <span style={{ fontSize: '0.68rem', color: C.muted, fontFamily: "'DM Sans', sans-serif", marginLeft: '0.5rem' }}>· Exercise 01 of 02</span>
         </div>
-        <Exercise01Flow userName={account.name} partnerName={account.partnerName} onComplete={handleEx1Done} />
+        <Exercise01Flow userName={account.name} partnerName={account.partnerName} onComplete={handleEx1Done} skipIntro={true} />
       </div>
     </div>
   );
@@ -10568,12 +10672,23 @@ export default function App() {
                   <div style={{ width: 72, height: 72, borderRadius: "50%", background: "linear-gradient(135deg, #E8673A, #1B5FE8)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 1.25rem", fontSize: "1.8rem" }}>✓</div>
                   <p style={{ fontFamily: font.display, fontSize: "2rem", fontWeight: 700, color: C.ink, marginBottom: "0.5rem", lineHeight: 1.1 }}>Exercise 1 Complete.</p>
                   <p style={{ fontSize: "0.78rem", letterSpacing: "0.1em", textTransform: "uppercase", color: "#4CAF50", fontWeight: 700, fontFamily: font.body, marginBottom: "1.25rem" }}>Your communication profile is mapped</p>
-                  <p style={{ fontSize: "0.88rem", color: C.muted, fontFamily: font.body, fontWeight: 300, marginBottom: "2rem", lineHeight: 1.75 }}>{bothDone ? ("Both exercises complete. Your results are ready.") : ("When " + partnerName + " finishes, you'll unlock your couple type and learn what that means for the two of you.")}</p>
+                  {/* Body copy prioritizes the next concrete action:
+                      - If they haven't done Ex2 → tell them that's next
+                      - Else if waiting on partner → say so
+                      - Else (both done) → results */}
+                  <p style={{ fontSize: "0.88rem", color: C.muted, fontFamily: font.body, fontWeight: 300, marginBottom: "2rem", lineHeight: 1.75 }}>{
+                    !ex2Answers
+                      ? ("Next up: Exercise 2. Your expectations, about 15 minutes.")
+                      : bothDone
+                        ? ("Both exercises complete. Your results are ready.")
+                        : ("When " + partnerName + " finishes, you'll unlock your couple type and learn what that means for the two of you.")
+                  }</p>
                   <div style={{ display: "flex", gap: "0.75rem", justifyContent: "center", flexWrap: "wrap" }}>
-                    
-                    {bothDone
-                      ? <button onClick={() => setView("results")} style={{ background: "linear-gradient(135deg, #E8673A, #1B5FE8)", color: "white", border: "none", padding: "0.6rem 1.75rem", fontSize: "0.7rem", letterSpacing: "0.1em", textTransform: "uppercase", cursor: "pointer", fontFamily: font.body, borderRadius: 8, fontWeight: 600 }}>See Your Results →</button>
-                      : <button onClick={() => setView("home")} style={{ background: "#2d2250", color: "white", border: "none", padding: "0.6rem 1.5rem", fontSize: "0.7rem", letterSpacing: "0.1em", textTransform: "uppercase", cursor: "pointer", fontFamily: font.body, borderRadius: 8 }}>Back to Dashboard →</button>
+                    {!ex2Answers
+                      ? <button onClick={() => setView("exercise2")} style={{ background: "linear-gradient(135deg, #E8673A, #1B5FE8)", color: "white", border: "none", padding: "0.7rem 1.85rem", fontSize: "0.72rem", letterSpacing: "0.1em", textTransform: "uppercase", cursor: "pointer", fontFamily: font.body, borderRadius: 8, fontWeight: 700 }}>Start Exercise 2 →</button>
+                      : bothDone
+                        ? <button onClick={() => setView("results")} style={{ background: "linear-gradient(135deg, #E8673A, #1B5FE8)", color: "white", border: "none", padding: "0.6rem 1.75rem", fontSize: "0.7rem", letterSpacing: "0.1em", textTransform: "uppercase", cursor: "pointer", fontFamily: font.body, borderRadius: 8, fontWeight: 600 }}>See Your Results →</button>
+                        : <button onClick={() => setView("home")} style={{ background: "#2d2250", color: "white", border: "none", padding: "0.6rem 1.5rem", fontSize: "0.7rem", letterSpacing: "0.1em", textTransform: "uppercase", cursor: "pointer", fontFamily: font.body, borderRadius: 8 }}>Back to Dashboard →</button>
                     }
                   </div>
                   {/* Workbook upsell */}
@@ -10625,7 +10740,7 @@ export default function App() {
                   <div style={{ width: 72, height: 72, borderRadius: "50%", background: "linear-gradient(135deg, #E8673A, #1B5FE8)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 1.25rem", fontSize: "1.8rem" }}>✓</div>
                   <p style={{ fontFamily: font.display, fontSize: "2rem", fontWeight: 700, color: C.ink, marginBottom: "0.5rem", lineHeight: 1.1 }}>Exercise 2 Complete.</p>
                   <p style={{ fontSize: "0.78rem", letterSpacing: "0.1em", textTransform: "uppercase", color: "#1B5FE8", fontWeight: 700, fontFamily: font.body, marginBottom: "1.25rem" }}>Your expectations are recorded</p>
-                  <p style={{ fontSize: "0.92rem", color: C.muted, fontFamily: font.body, fontWeight: 300, marginBottom: "0.75rem", lineHeight: 1.75 }}>That took honesty. Most couples never have these conversations until they have to.</p>
+                  <p style={{ fontSize: "0.92rem", color: C.muted, fontFamily: font.body, fontWeight: 300, marginBottom: "0.75rem", lineHeight: 1.75 }}>That took honesty. Most couples don't have these conversations until they have to.</p>
                   <p style={{ fontSize: "0.88rem", color: C.muted, fontFamily: font.body, fontWeight: 300, marginBottom: "2rem", lineHeight: 1.75 }}>{bothDone ? ("Both exercises complete. Your results are ready.") : ("When " + partnerName + " finishes both exercises, you'll unlock your couple type and learn what that means for the two of you.")}</p>
                   <div style={{ display: "flex", gap: "0.75rem", justifyContent: "center", flexWrap: "wrap" }}>
                     
@@ -10712,7 +10827,6 @@ export default function App() {
                 <p style={{ fontFamily: font.display, fontSize: "1.8rem", fontWeight: 700, color: C.ink, marginBottom: "0.5rem", lineHeight: 1.1 }}>Reflection Complete.</p>
                 <p style={{ fontSize: "0.78rem", letterSpacing: "0.1em", textTransform: "uppercase", color: "#10b981", fontWeight: 700, fontFamily: font.body, marginBottom: "1.5rem" }}>Your relationship story is captured</p>
                 <div style={{ display: "flex", gap: "0.75rem", justifyContent: "center", flexWrap: "wrap" }}>
-                  <button onClick={() => setEx3State(null)} style={{ background: "transparent", border: "1.5px solid " + C.stone, color: C.muted, padding: "0.6rem 1.25rem", fontSize: "0.7rem", letterSpacing: "0.1em", textTransform: "uppercase", cursor: "pointer", fontFamily: font.body, borderRadius: 8 }}>Retake</button>
                   <button onClick={() => setView("results")} style={{ background: "linear-gradient(135deg, #10b981, #059669)", color: "white", border: "none", padding: "0.6rem 1.75rem", fontSize: "0.7rem", letterSpacing: "0.1em", textTransform: "uppercase", cursor: "pointer", fontFamily: font.body, borderRadius: 8, fontWeight: 600 }}>See Your Results →</button>
                 </div>
               </div>
