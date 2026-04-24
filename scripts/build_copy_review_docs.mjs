@@ -243,7 +243,7 @@ function buildIntroOutroDoc() {
       ['Section 3', 'Relationship Reflection (Exercise 03)',  'Also known as Anniversary exercise',         GREEN],
       ['Section 4', 'Starting Out Checklist',                 'Inline intro, no outro',  GOLD],
       ['Section 5', 'Shared Budget Tool',                     'Intro philosophy, reveal headers', ROSE],
-      ['Section 6', 'Gaps + suggested drafts',               'Proposed copy for places where text is missing', ORANGE],
+      ['Section 6', 'Remaining gaps',                         'Intro/outro copy still missing (checklist celebration only)', ORANGE],
     ].map(([step, title, desc, color]) => new Paragraph({
       alignment: AlignmentType.CENTER,
       spacing: { after: 100 },
@@ -269,25 +269,18 @@ function buildIntroOutroDoc() {
 
     eyebrow('Intro copy', BLUE),
     ...copyCard({
-      where: 'Partner A — no dedicated intro screen',
-      when: 'When the logged-in user clicks "Exercise 1" from their dashboard, the exercise starts directly at Question 1 of 30. There is no intro page, description, or "Begin" button in the Partner A flow.',
-      text: '(No intro copy exists for Partner A.)',
-      source: 'src/App.jsx:10442 — Exercise01Flow rendered inline without wrapper',
-      notes: 'Compare to the Expectations exercise, which does have a dedicated intro phase. Worth deciding whether Exercise 01 should have one too.',
-      color: BLUE,
-    }),
-
-    ...copyCard({
-      where: 'Partner B — combined intro for both exercises',
-      when: 'Shown to Partner B when they first open their invite link, before they start either exercise. This is the only intro screen for Exercise 01 that users see.',
+      where: 'Both partners — combined intro for Exercise 01 and 02',
+      when: 'Partner A: shown on first launch of Exercise 01 from the dashboard (skipped on resume). Partner B: shown as a full-screen intro when they first open their invite link. Both partners see the same copy.',
       text: [
-        'Header eyebrow: "Your exercises — {account.name} & {account.partnerName}"',
+        'Header eyebrow: "Your exercises — {userName} & {partnerName}"',
         'Title: "Two exercises. Your answers are yours alone."',
         'Body: "Exercise 01 covers how you communicate and connect. Exercise 02 maps your expectations. Both take about 15 minutes. Answer honestly — your partner won\'t see your individual answers."',
         'Exercise 01 card label: "Communication — 30 questions · 10 dimensions"',
         'Exercise 02 card label: "Expectations — Responsibilities & life"',
+        'Button: "Begin Exercise 01 →"',
       ],
-      source: 'src/App.jsx:8560-8576 — PartnerBExerciseFlow intro step',
+      source: 'src/App.jsx:2131-2163 (Partner A intro inside Exercise01Flow), 8776-8805 (Partner B full-screen intro)',
+      notes: 'Copy matches exactly across the two paths. Partner A sees a light-theme version inside the portal; Partner B sees a dark-theme full-page version. Partner B skips the inner intro via skipIntro={true}.',
       color: BLUE,
     }),
 
@@ -309,16 +302,25 @@ function buildIntroOutroDoc() {
     eyebrow('Outro copy', BLUE),
     ...copyCard({
       where: 'Completion screen after submitting',
-      when: 'Shown immediately after the user completes Exercise 01, before they return to the dashboard or see results.',
+      when: 'Shown immediately after the user completes Exercise 01. The three states below are mutually exclusive.',
       text: [
         'Title: "Exercise 1 Complete."',
         'Eyebrow: "Your communication profile is mapped"',
-        'Body (partner not done): "When {partnerName} finishes, you\'ll unlock your couple type and learn what that means for the two of you."',
-        'Body (both done): "Both exercises complete. Your results are ready."',
-        'Button (partner not done): "Back to Dashboard →"',
-        'Button (both done): "See Your Results →"',
+        '',
+        'State 1 — Exercise 02 not yet done (most common):',
+        '  Body: "Next up: Exercise 2. Your expectations, about 15 minutes."',
+        '  Button: "Start Exercise 2 →"',
+        '',
+        'State 2 — Exercise 02 done, partner not yet done:',
+        '  Body: "When {partnerName} finishes, you\'ll unlock your couple type and learn what that means for the two of you."',
+        '  Button: "Back to Dashboard →"',
+        '',
+        'State 3 — both partners done:',
+        '  Body: "Both exercises complete. Your results are ready."',
+        '  Button: "See Your Results →"',
       ],
-      source: 'src/App.jsx:10400-10413',
+      source: 'src/App.jsx:10660-10700',
+      notes: 'Prioritizes the next concrete action for the user. State 1 is what most Partner A users see right after finishing Ex01 for the first time.',
       color: BLUE,
     }),
 
@@ -392,7 +394,7 @@ function buildIntroOutroDoc() {
       text: [
         'Eyebrow: "Exercise 02 · Before we start"',
         'Title: "Who were the primary adults in your home growing up?"',
-        'Body: "This shapes how you answer the next section, and helps us give you more meaningful context in your results."',
+        'Body: "This shapes how you answer the next section, and helps us give you more personalized context in your results."',
       ],
       source: 'src/App.jsx:160-181 — ExpectationsExercise childhood-setup phase',
       color: PURPLE,
@@ -419,7 +421,7 @@ function buildIntroOutroDoc() {
       text: [
         'Title: "Exercise 2 Complete."',
         'Eyebrow: "Your expectations are recorded"',
-        'Body (first line): "That took honesty. Most couples never have these conversations until they have to."',
+        'Body (first line): "That took honesty. Most couples don\'t have these conversations until they have to."',
         'Body (second line, partner not done): "When {partnerName} finishes both exercises, you\'ll unlock your couple type and learn what that means for the two of you."',
         'Body (second line, both done): "Both exercises complete. Your results are ready."',
       ],
@@ -435,11 +437,17 @@ function buildIntroOutroDoc() {
 
     eyebrow('Intro copy', GREEN),
     ...copyCard({
-      where: 'No dedicated intro screen',
-      when: 'Clicking "Exercise 3" or "Relationship Reflection" from the dashboard drops the user directly into Question 1.',
-      text: '(No intro copy exists.)',
-      source: 'src/App.jsx:3901-3946 — AnniversaryExercise starts at step 0 immediately',
-      notes: 'Same gap as Exercise 01. If intro screens get added for these, they should match the Expectations intro format.',
+      where: 'Dedicated intro phase before Question 1 — both partners',
+      when: 'Shown the first time the user opens Exercise 03. Skipped on resume when saved progress exists.',
+      text: [
+        'Eyebrow: "Exercise 03 · Our Relationship Story"',
+        'Title: "The moments that make a relationship are worth naming."',
+        'Body: "A mix of scale questions, short reflections, and a few rankings. Nothing to study for. Just answer."',
+        'Follow-up (block-quoted): "When {partnerName} finishes theirs, you\'ll see where your stories overlap and where you each saw something the other didn\'t."',
+        'Duration line: "~10 minutes"',
+        'Button: "Start →"',
+      ],
+      source: 'src/App.jsx:4028-4050 — AnniversaryExercise intro phase',
       color: GREEN,
     }),
 
@@ -453,20 +461,21 @@ function buildIntroOutroDoc() {
         'Back button: "← Back" (returns to dashboard if on first question)',
         'Next button: "Next →"',
       ],
-      source: 'src/App.jsx:3939-3946',
+      source: 'src/App.jsx:4067-4074',
       color: GREEN,
     }),
 
-    eyebrow('Outro copy', GREEN),
+    eyebrow('Outro copy — completion celebration', GREEN),
     ...copyCard({
       where: 'Inline completion screen inside the exercise component',
-      when: 'Shown briefly after the last question is answered, before the user is returned to the dashboard.',
+      when: 'Shown after all questions are answered. Redesigned as a full celebration screen (gradient conic-ring with pulsing check, larger title, fuller acknowledgement).',
       text: [
+        'Eyebrow: "Your story is captured"',
         'Title: "Reflection Complete."',
-        'Body: "Your answers are saved. When {partnerName} completes theirs, you\'ll see a side-by-side view of your shared story."',
+        'Body: "You named the moments, the shifts, and the things you hope for. When {partnerName} finishes theirs, you\'ll see where your stories overlap and where you each saw something the other didn\'t."',
         'Button: "View My Results →"',
       ],
-      source: 'src/App.jsx:3923-3931 — AnniversaryExercise inline outro',
+      source: 'src/App.jsx:4092-4113 — AnniversaryExercise celebration outro',
       color: GREEN,
     }),
 
@@ -476,10 +485,10 @@ function buildIntroOutroDoc() {
       text: [
         'Title: "Reflection Complete."',
         'Eyebrow: "Your relationship story is captured"',
-        'Button 1: "Retake"  (clears ex3 state and starts over)',
-        'Button 2: "See Your Results →"',
+        'Button: "See Your Results →"',
       ],
-      source: 'src/App.jsx:10544-10552',
+      source: 'src/App.jsx:10715-10718',
+      notes: 'Retake button removed per product decision. Users cannot retake Exercise 03 once submitted.',
       color: GREEN,
     }),
   ];
@@ -534,7 +543,7 @@ function buildIntroOutroDoc() {
   // ── Section 5: Shared Budget Tool ───────────────────────────────────────
   const budgetSection = [
     ...secHead(5, 'Shared Budget Tool',
-      'Inline intro + reveal (appears automatically when enough data is entered). No intro or outro screen.', ROSE),
+      'Inline intro, auto-revealing summary, and a post-reveal outro that frames the budget as a living tool rather than a one-time exercise.', ROSE),
 
     eyebrow('Intro copy', ROSE),
     ...copyCard({
@@ -544,9 +553,9 @@ function buildIntroOutroDoc() {
         'Eyebrow: "Attune Premium"',
         'Title: "Shared Budget Tool"',
         'Body: "Build your real shared budget together. Your numbers stay yours — Attune is a calculator, not a financial advisor."',
-        'Secondary note: "Both of you can access and edit this from your dashboard. Use Save changes to sync across devices."',
+        'Secondary note: "Both of you can access and edit this tool from your dashboard. Use Save changes to sync across devices."',
       ],
-      source: 'src/App.jsx:4568-4573',
+      source: 'src/App.jsx:4658-4663',
       color: ROSE,
     }),
 
@@ -560,11 +569,11 @@ function buildIntroOutroDoc() {
         'Step 3 · "Discretionary" — "Everything else. Personal spending at the bottom is split per partner — your walking-around money."',
         'Step 4 · "Savings goals" — "Add a goal and Attune will show the monthly contribution needed. Compare it against your surplus above to see what\'s realistic."',
       ],
-      source: 'src/App.jsx:4610-4720',
+      source: 'src/App.jsx:4700-4810',
       color: ROSE,
     }),
 
-    eyebrow('Reveal (outro-equivalent) copy', ROSE),
+    eyebrow('Reveal copy', ROSE),
     ...copyCard({
       where: 'Appears at the bottom of the page when income > 0 AND at least one expense > 0',
       when: 'Auto-appears; no button to trigger.',
@@ -578,59 +587,37 @@ function buildIntroOutroDoc() {
         'Under fully separate: "You chose fully separate. Each of you tracks your own contribution independently — no shared split is calculated."',
         'Under fully combined: "You chose fully combined. Combined pool of {total} covers {shared} in shared expenses and savings, leaving {surplus} unallocated from the pool."',
       ],
-      source: 'src/App.jsx:4780-4900',
+      source: 'src/App.jsx:4870-4990',
+      color: ROSE,
+    }),
+
+    eyebrow('Outro copy', ROSE),
+    ...copyCard({
+      where: 'Bottom of the reveal section, below "How the money moves"',
+      when: 'Visible whenever the reveal is visible (income > 0 AND at least one expense > 0).',
+      text: [
+        'Eyebrow: "Your shared budget"',
+        'Title: "Built together. Revisit as things change."',
+        'Body: "Raises, new expenses, goals that shift. Come back whenever the numbers do. Use Save changes to sync updates across both of your devices."',
+      ],
+      source: 'src/App.jsx:5057-5070',
+      notes: 'Designed as a reassurance, not a "you\'re done" message — the budget is iterative by design.',
       color: ROSE,
     }),
   ];
 
-  // ── Section 6: Gaps + suggested drafts ─────────────────────────────────
+  // ── Section 6: Remaining gaps ──────────────────────────────────────────
   const gapsSection = [
-    ...secHead(6, 'Gaps + suggested copy drafts',
-      'Places where intro or outro copy is missing, with draft text proposed for each.', ORANGE),
+    ...secHead(6, 'Remaining gaps',
+      'Places where intro or outro copy is still missing.', ORANGE),
 
-    body('Each entry below flags a copy gap and proposes draft text. Drafts follow the Attune tone rules: short declarative sentences, no hedging, confident but not threatening. Green-bordered blocks are proposed new copy, not currently shipped.',
+    body('Previous gaps for Exercise 01 intro, Exercise 03 intro, and the Budget Tool outro have all been addressed in the sections above. The one remaining intro/outro gap is the Starting Out Checklist completion celebration.',
       { italics: true, color: MUTED, after: 240 }),
-
-    ...draftCard({
-      gap: 'Exercise 01 has no dedicated intro screen for Partner A',
-      where: 'New phase before Question 1 in the Exercise 01 flow, matching the Expectations intro format',
-      when: 'When a logged-in user clicks "Exercise 1" from their dashboard and ex1Answers is null',
-      draft: [
-        'Eyebrow: "Exercise 01 · How You Communicate"',
-        'Title: "The way you communicate shapes everything else."',
-        'Body: "Thirty questions. Each asks you to choose between two ways of doing the same thing. Answer for how you actually are, not how you think you should be."',
-        'Follow-up (block-quoted): "Your answers map your communication style across ten dimensions. You\'ll see where you and {partnerName} line up, and where you don\'t."',
-        'Duration line: "~10 minutes · 30 questions"',
-        'Button: "Start →"',
-      ],
-      notes: 'Structure mirrors the Expectations intro: hook title, concrete description, follow-up explaining why this matters, duration, button.',
-    }),
-
-    ...draftCard({
-      gap: 'Exercise 03 / Relationship Reflection has no dedicated intro screen',
-      where: 'New phase before Question 1 in the AnniversaryExercise component',
-      when: 'When a user opens Exercise 3 and ex3Answers is null',
-      draft: [
-        'Eyebrow: "Exercise 03 · Our Relationship Story"',
-        'Title: "The moments that make a relationship are worth naming."',
-        'Body: "A mix of scale questions, short reflections, and a few rankings. Nothing to study for. Just answer."',
-        'Follow-up (block-quoted): "When {partnerName} finishes theirs, you\'ll see where your stories overlap and where you each saw something the other didn\'t."',
-        'Duration line: "~10 minutes"',
-        'Button: "Start →"',
-      ],
-      notes: 'The "Our Relationship Story" eyebrow matches the progress label already shown inside the exercise, so the user has continuity moving from intro to questions.',
-    }),
 
     ...decisionCard({
       gap: 'Starting Out Checklist has no completion celebration',
       decision: 'Decide whether completing the checklist should trigger a celebration screen, and whether that celebration should appear immediately on the final check or on next dashboard visit.',
       notes: 'Low priority. Completing the full checklist typically takes weeks or months. A celebration at 100% could feel nice but could also feel anticlimactic if the user completes the last item days after the second-to-last.',
-    }),
-
-    ...decisionCard({
-      gap: 'Budget Tool has no outro',
-      decision: 'By current design, the reveal block at the bottom of the page is the closest thing to an outro. No summary screen after saving. Decide whether a distinct post-save experience is needed.',
-      notes: 'Users iterate on the budget over time, so a one-time "you\'re done" message may not fit. Current design assumes users return to edit.',
     }),
   ];
 
@@ -790,7 +777,7 @@ function buildEdgeCaseDoc() {
       where: 'Exercise 02 completion screen',
       when: 'Shown after Partner A finishes Exercise 02 but their partner hasn\'t finished both exercises.',
       text: [
-        '"That took honesty. Most couples never have these conversations until they have to."',
+        '"That took honesty. Most couples don\'t have these conversations until they have to."',
         '"When {partnerName} finishes both exercises, you\'ll unlock your couple type and learn what that means for the two of you."',
       ],
       source: 'src/App.jsx:10463-10464',
@@ -861,7 +848,7 @@ function buildEdgeCaseDoc() {
       when: 'Shown on the Partner B intro screen as a "before you start" warning, to prevent Partner A from accidentally submitting under Partner B\'s identity.',
       text: [
         'Heading: "Before you start"',
-        'Body: "If this is {account.partnerName} checking your own partner\'s view — close this tab. Submitting here will overwrite {account.name}\'s results. Each partner uses their own account and their own link."',
+        'Body: "If this is {account.partnerName} checking your own partner\'s view — close this tab to prevent overwriting {account.name}\'s results. Each partner uses their own account and their own link."',
       ],
       source: 'src/App.jsx:8578-8583',
       color: GOLD,
@@ -1083,18 +1070,6 @@ function buildEdgeCaseDoc() {
         'Banner: "Your progress saves on this device. Create an account at the end to save it permanently."',
       ],
       notes: 'Non-alarming. Not a warning about losing data, just a statement of how storage works. Avoid language about private browsing unless we actually detect it.',
-    }),
-
-    ...decisionCard({
-      gap: 'Retake for Exercise 01 or Exercise 02',
-      decision: 'Decide whether Ex01 and Ex02 should support retakes. Currently only Exercise 03 has a Retake button. The Expectations Revisiting variant implies Ex02 retakes will eventually work — but the flow, results-comparison, and UI for retakes are not yet built.',
-      notes: 'Before drafting copy, decide: (a) what changes on retake, (b) how prior results are preserved or replaced, (c) how the couple is notified.',
-    }),
-
-    ...decisionCard({
-      gap: 'Change partner / unlink partner flow',
-      decision: 'Decide whether users can change partners after initial setup. Today there is no UI for unlinking a partner, transferring to a new partner, or starting over. This is a major feature involving data, auth, and results migration.',
-      notes: 'Edge case but it happens: breakup, mistaken signup, new relationship. Worth deciding whether this is supported before launch or deferred.',
     }),
   ];
 
