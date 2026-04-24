@@ -1355,6 +1355,28 @@ function loadPortal(u) {
   if (premiumSect) premiumSect.style.display = (pkg === 'premium') ? 'block' : 'none';
   applyState(u.state);
   showView('portal');
+  // Load persisted notification preferences in the background. If none saved,
+  // toggles stay at their HTML defaults.
+  loadNotificationPrefs().catch(() => {});
+}
+
+async function loadNotificationPrefs() {
+  if (typeof window.supabaseClient === 'undefined' || !window.supabaseClient) return;
+  try {
+    const { data: sess } = await window.supabaseClient.auth.getSession();
+    const uid = sess?.session?.user?.id;
+    if (!uid) return;
+    const { data: profile } = await window.supabaseClient.from('profiles').select('notification_prefs').eq('id', uid).maybeSingle();
+    const prefs = profile?.notification_prefs;
+    if (!prefs) return;
+    const set = (id, val) => { const el = document.getElementById(id); if (el) el.checked = !!val; };
+    set('notif-partner-done', prefs.partner_done);
+    set('notif-invited',      prefs.invited);
+    set('notif-reminder',     prefs.reminder);
+    set('notif-lmft-sched',   prefs.lmft_sched);
+    set('notif-lmft-remind',  prefs.lmft_remind);
+    set('notif-product',      prefs.product);
+  } catch (e) { console.warn('[portal] loadNotificationPrefs:', e); }
 }
 
 /* ── PORTAL STATE ── */
@@ -1474,7 +1496,7 @@ function cancelEdit(field) {
   document.getElementById('ps-' + field + '-display').style.display = 'flex';
   document.getElementById('ps-' + field + '-edit').style.display = 'none';
 }
-function saveField(field) {
+async function saveField(field) {
   if (field === 'name') {
     const name = document.getElementById('edit-name').value.trim();
     const partner = document.getElementById('edit-partner').value.trim();
@@ -1484,12 +1506,33 @@ function saveField(field) {
     document.getElementById('ps-partner-val').textContent = partner;
     document.getElementById('p-name').textContent = name;
     document.getElementById('nav-user').textContent = name;
+
+    // Persist to Supabase profile
+    try {
+      if (typeof window.supabaseClient !== 'undefined' && window.supabaseClient) {
+        const { data: sess } = await window.supabaseClient.auth.getSession();
+        const uid = sess?.session?.user?.id;
+        if (uid) {
+          await window.supabaseClient.from('profiles').update({ name, partner_name: partner }).eq('id', uid);
+        }
+      }
+    } catch (e) { console.warn('[portal] name save failed:', e); }
   } else if (field === 'email') {
     const email = document.getElementById('edit-email').value.trim();
     if (!email) { alert('Email cannot be empty.'); return; }
+
+    // Update Supabase auth email — user will get a confirmation email before it takes effect.
+    try {
+      if (typeof window.supabaseClient !== 'undefined' && window.supabaseClient) {
+        const { error } = await window.supabaseClient.auth.updateUser({ email });
+        if (error) { alert('Email update failed: ' + error.message); return; }
+        alert('Check your new inbox — Supabase sent a confirmation link. Your email changes once you confirm.');
+      }
+    } catch (e) { alert('Email update failed. Please try again.'); return; }
+
     user.email = email;
     document.getElementById('ps-email-val').textContent = email;
-    document.getElementById('cc-email').value = email;
+    const cc = document.getElementById('cc-email'); if (cc) cc.value = email;
   } else if (field === 'pw') {
     const cur = document.getElementById('edit-pw-current').value;
     const nw = document.getElementById('edit-pw-new').value;
@@ -1497,6 +1540,23 @@ function saveField(field) {
     if (!cur || !nw) { alert('Please fill in all password fields.'); return; }
     if (nw !== cf) { alert('New passwords don\'t match.'); return; }
     if (nw.length < 8) { alert('Password must be at least 8 characters.'); return; }
+
+    // Verify the current password by attempting re-authentication (Supabase doesn't
+    // require it for updateUser, but users expect the check for security).
+    try {
+      if (typeof window.supabaseClient !== 'undefined' && window.supabaseClient) {
+        const { data: sess } = await window.supabaseClient.auth.getSession();
+        const currentEmail = sess?.session?.user?.email;
+        if (currentEmail) {
+          const { error: signInErr } = await window.supabaseClient.auth.signInWithPassword({ email: currentEmail, password: cur });
+          if (signInErr) { alert('Current password is incorrect.'); return; }
+        }
+        const { error } = await window.supabaseClient.auth.updateUser({ password: nw });
+        if (error) { alert('Password update failed: ' + error.message); return; }
+        alert('Password updated.');
+      }
+    } catch (e) { alert('Password update failed. Please try again.'); return; }
+
     document.getElementById('edit-pw-current').value = '';
     document.getElementById('edit-pw-new').value = '';
     document.getElementById('edit-pw-confirm').value = '';
@@ -1547,12 +1607,39 @@ async function confirmDelete() {
 }
 
 /* ── NOTIFICATIONS ── */
-function saveNotifications() {
+async function saveNotifications() {
   const btn = document.querySelector('.btn-save');
   const saved = document.getElementById('notif-saved');
-  btn.style.display = 'none';
-  saved.style.display = 'inline-block';
-  setTimeout(() => { btn.style.display = 'inline-block'; saved.style.display = 'none'; }, 2500);
+  const get = id => !!document.getElementById(id)?.checked;
+  const prefs = {
+    partner_done: get('notif-partner-done'),
+    invited:      get('notif-invited'),
+    reminder:     get('notif-reminder'),
+    lmft_sched:   get('notif-lmft-sched'),
+    lmft_remind:  get('notif-lmft-remind'),
+    product:      get('notif-product'),
+  };
+
+  try {
+    if (typeof window.supabaseClient !== 'undefined' && window.supabaseClient) {
+      const { data: sess } = await window.supabaseClient.auth.getSession();
+      const uid = sess?.session?.user?.id;
+      if (uid) {
+        const { error } = await window.supabaseClient.from('profiles').update({ notification_prefs: prefs }).eq('id', uid);
+        if (error) throw error;
+      }
+    }
+  } catch (e) {
+    alert('Could not save preferences. Please try again.');
+    console.warn('[portal] saveNotifications failed:', e);
+    return;
+  }
+
+  if (btn && saved) {
+    btn.style.display = 'none';
+    saved.style.display = 'inline-block';
+    setTimeout(() => { btn.style.display = 'inline-block'; saved.style.display = 'none'; }, 2500);
+  }
 }
 
 /* ── HELP ── */

@@ -290,24 +290,22 @@
     <div class="kpi-grid">
       <div class="kpi-card orange">
         <div class="kpi-label">Total orders</div>
-        <div class="kpi-val">847</div>
-        <div class="kpi-trend up">↑ 12% this month</div>
+        <div class="kpi-val" id="stat-orders">—</div>
+        <div class="kpi-trend up" id="stat-orders-trend"></div>
       </div>
       <div class="kpi-card green">
         <div class="kpi-label">Total revenue</div>
-        <div class="kpi-val">$94K</div>
-        <div class="kpi-trend up">↑ 18% vs last month</div>
+        <div class="kpi-val" id="stat-revenue">—</div>
+        <div class="kpi-trend up" id="stat-revenue-trend"></div>
       </div>
       <div class="kpi-card indigo">
         <div class="kpi-label">Completion rate</div>
-        <div class="kpi-val">73%</div>
+        <div class="kpi-val" id="stat-completion">—</div>
         <div class="kpi-sub">Both partners complete</div>
-        <div class="kpi-trend up">↑ 4pts from last month</div>
       </div>
       <div class="kpi-card amber">
         <div class="kpi-label">Avg order value</div>
-        <div class="kpi-val">$111</div>
-        <div class="kpi-trend up">↑ $8 vs last month</div>
+        <div class="kpi-val" id="stat-aov">—</div>
       </div>
       <div class="kpi-card amber" style="cursor:pointer;" onclick="document.querySelector('[onclick*=fulfillment]').click()">
         <div class="kpi-label">📦 Pending shipments</div>
@@ -2120,12 +2118,46 @@ function updateStatsFromRealData(orders) {
   const revenue = orders.reduce((s, o) => s + (parseFloat(o.total) || 0), 0);
   const digital = orders.filter(o => !o.is_physical).length;
   const physical = orders.filter(o => o.is_physical).length;
+  const aov = total > 0 ? revenue / total : 0;
 
   const el = id => document.getElementById(id);
-  if (el('stat-orders'))  el('stat-orders').textContent  = total;
-  if (el('stat-revenue')) el('stat-revenue').textContent = '$' + revenue.toLocaleString(undefined, { minimumFractionDigits: 0 });
+  if (el('stat-orders'))  el('stat-orders').textContent  = total.toLocaleString();
+  if (el('stat-revenue')) el('stat-revenue').textContent = '$' + Math.round(revenue).toLocaleString();
+  if (el('stat-aov'))     el('stat-aov').textContent     = '$' + aov.toFixed(0);
   if (el('stat-digital')) el('stat-digital').textContent = digital;
   if (el('stat-physical')) el('stat-physical').textContent = physical;
+
+  // Completion rate requires partner_sessions data — fetched separately.
+  // Async, safe to run in the background.
+  loadCompletionRate().catch(() => {});
+}
+
+// Completion rate = (partner_sessions with completed_at) / (total profiles with invite codes)
+// Rough proxy: couples where Partner B has submitted at least ex1 + ex2.
+async function loadCompletionRate() {
+  const SUPABASE_URL  = window.__SUPABASE_URL;
+  const SUPABASE_ANON = window.__SUPABASE_ANON;
+  if (!SUPABASE_URL || !SUPABASE_ANON) return;
+
+  try {
+    const headers = { 'apikey': SUPABASE_ANON, 'Authorization': `Bearer ${SUPABASE_ANON}` };
+    // Total couples = profiles with an invite_code
+    const tRes = await fetch(`${SUPABASE_URL}/rest/v1/profiles?select=id&invite_code=not.is.null`, { headers: { ...headers, 'Prefer': 'count=exact' } });
+    const totalCount = parseInt(tRes.headers.get('content-range')?.split('/')[1] || '0', 10);
+
+    // Completed couples = partner_sessions with both ex1 and ex2 non-null
+    const cRes = await fetch(`${SUPABASE_URL}/rest/v1/partner_sessions?select=invite_code&ex1_answers=not.is.null&ex2_answers=not.is.null`, { headers: { ...headers, 'Prefer': 'count=exact' } });
+    const doneCount = parseInt(cRes.headers.get('content-range')?.split('/')[1] || '0', 10);
+
+    const el = document.getElementById('stat-completion');
+    if (el && totalCount > 0) {
+      el.textContent = Math.round((doneCount / totalCount) * 100) + '%';
+    } else if (el) {
+      el.textContent = '—';
+    }
+  } catch (e) {
+    console.warn('[admin] completion rate fetch failed:', e);
+  }
 }
 
 // Credentials fetched at runtime from /api/admin-config (works with zip deployments)
