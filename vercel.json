@@ -72,6 +72,10 @@
       "destination": "/couple-types.html"
     },
     {
+      "source": "/wedding-registry",
+      "destination": "/wedding-registry.html"
+    },
+    {
       "source": "/offerings",
       "destination": "/offerings.html"
     },

@@ -622,6 +622,16 @@ async function refreshTax() {
 (function init() {
   const params = new URLSearchParams(location.search);
 
+  // Arrived from a wedding registry link? The buyer is almost certainly
+  // a guest giving this as a gift — default to gift mode so they don't
+  // have to toggle it manually.
+  let fromRegistry = false;
+  try {
+    fromRegistry = sessionStorage.getItem('attune_from_registry') === '1';
+    // Clear it so a subsequent direct checkout visit doesn't inherit the flag
+    if (fromRegistry) sessionStorage.removeItem('attune_from_registry');
+  } catch {}
+
   // Try sessionStorage first (set by offerings cart)
   let cartItems = null;
   try {
@@ -638,7 +648,7 @@ async function refreshTax() {
           pkg:    ci.pkg,
           format: ci.format || 'digital',
           addons: { ...ci.addons },
-          intent: 'self',
+          intent: fromRegistry ? 'gift' : 'self',
           partner1Name: '',
           partner2Name: '',
           giftNote: '',
@@ -662,10 +672,16 @@ async function refreshTax() {
         budget:           params.get('addon_budget') === '1',
         checklist:        false,
       },
-      intent: params.get('gift') === '1' ? 'gift' : 'self',
+      intent: (fromRegistry || params.get('gift') === '1') ? 'gift' : 'self',
       partner1Name: '', partner2Name: '', giftNote: '',
       shipping: { name:'', address:'', city:'', state:'' },
     }];
+  }
+
+  // If this is a registry arrival, stash a marker so we can customize the
+  // gift-note copy + confirmation messaging to match the wedding context
+  if (fromRegistry) {
+    window.__attuneFromRegistry = true;
   }
 
   // Mirror first item into legacy vars (for summary code that still uses them)

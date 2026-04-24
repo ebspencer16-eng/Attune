@@ -1300,6 +1300,7 @@
         <p class="sf-col-title">Product</p>
         <a href="/offerings">Packages</a>
         <a href="/start">Get started</a>
+        <a href="/wedding-registry">Wedding registry</a>
       </div>
       <div class="sf-col">
         <p class="sf-col-title">Learn</p>
@@ -1747,6 +1748,33 @@ function submitAnnualNotify() {
       setFormat('ann','physical');
       setFormat('premium','physical');
     } catch(e) { /* elements may not all exist on every render */ }
+
+    // ── Registry arrivals ──────────────────────────────────────────────
+    // When someone arrives via a wedding registry link (Zola, Joy, etc.),
+    // they clicked "Attune" on a couple's registry. They need to (a) know
+    // what this is quickly, (b) know it's meant to be gifted, (c) get to
+    // the right package without scrolling through 4 options.
+    try {
+      const _params = new URLSearchParams(location.search);
+      if (_params.get('source') === 'registry') {
+        const pkg = _params.get('pkg') || 'newlywed';
+        // Store the registry signal so checkout knows to default to gift mode
+        try { sessionStorage.setItem('attune_from_registry', '1'); } catch {}
+        // Scroll to the package after layout settles
+        setTimeout(() => {
+          const target = document.getElementById('pkg-' + pkg);
+          if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          // Show a small banner at top
+          const banner = document.createElement('div');
+          banner.style.cssText = 'position:fixed;top:58px;left:0;right:0;z-index:50;background:linear-gradient(90deg,#FFF8F3,#F3F1FF);border-bottom:1px solid #F0E0D0;padding:.55rem 1rem;text-align:center;font-size:.78rem;color:#5C4A38;font-family:var(--bfont)';
+          banner.innerHTML = '<strong>Giving this as a wedding gift?</strong> Add to cart below — you\'ll enter the couple\'s details at checkout.';
+          document.body.appendChild(banner);
+          // Offset nav so banner doesn't overlap
+          setTimeout(() => banner.style.top = '58px', 10);
+        }, 150);
+      }
+    } catch {}
+
     // Restore cart from sessionStorage so the user sees their items if they
     // navigate back from checkout or open the offerings page in a new tab.
     try {

@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#0E0B07">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Add Attune to your wedding registry</title>
+  <meta name="description" content="Register for the Attune Starting Out Collection on Zola, Joy, MyRegistry, or The Knot. A wedding gift your guests can give that helps you start your marriage with a shared picture.">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Attune Starting Out Collection — Wedding Registry">
+  <meta property="og:description" content="A wedding gift for couples starting out. Two exercises, one shared picture of how you communicate and what you each expect. $139 digital · $174 gift box.">
+  <meta property="og:image" content="https://attune-relationships.com/og-image.png">
+  <meta property="og:url" content="https://attune-relationships.com/wedding-registry">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Attune Starting Out Collection — Wedding Registry">
+  <meta name="twitter:description" content="A wedding gift for couples starting out. Two exercises, one shared picture.">
+  <meta name="twitter:image" content="https://attune-relationships.com/og-image.png">
+  <link rel="canonical" href="https://attune-relationships.com/wedding-registry">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,700&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  :root{
+    --cream:#FFFDF9;--warm:#FBF8F3;--stone:#E8DDD0;--clay:#C17F47;
+    --ink:#0E0B07;--text:#1E1610;--muted:#8C7A68;--orange:#E8673A;--indigo:#1B5FE8;
+    --hfont:'Playfair Display',Georgia,serif;--bfont:'DM Sans',sans-serif;
+  }
+  html{scroll-behavior:smooth;overflow-x:hidden}
+  body{background:var(--warm);color:var(--text);font-family:var(--bfont);-webkit-font-smoothing:antialiased;line-height:1.6}
+
+  /* NAV */
+  nav{position:fixed;top:0;left:0;right:0;z-index:100;height:58px;background:rgba(255,253,249,.94);backdrop-filter:blur(16px);border-bottom:1px solid var(--stone);display:flex;align-items:center;padding:0 2rem;justify-content:space-between}
+  .logo{display:flex;align-items:center;gap:.5rem;text-decoration:none}
+  .logo-text{font-family:var(--hfont);font-weight:700;font-size:1.1rem;color:var(--ink)}
+  .nav-right{display:flex;gap:1.25rem;align-items:center}
+  .nav-right a{font-size:.82rem;color:var(--muted);text-decoration:none;font-weight:500}
+  .nav-right a:hover{color:var(--ink)}
+
+  main{max-width:760px;margin:0 auto;padding:100px 1.5rem 5rem}
+
+  /* HERO */
+  .eyebrow{font-size:.68rem;letter-spacing:.24em;text-transform:uppercase;color:var(--orange);font-weight:700;margin-bottom:1rem}
+  h1{font-family:var(--hfont);font-size:clamp(2rem,5vw,2.75rem);line-height:1.12;color:var(--ink);margin-bottom:1rem;font-weight:700}
+  h1 em{font-style:italic;background:linear-gradient(120deg,var(--orange),var(--indigo));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .lede{font-size:1.05rem;color:var(--muted);line-height:1.7;margin-bottom:2.5rem;max-width:620px}
+
+  /* Product card — what guests see */
+  .product-card{
+    background:white;border:1px solid var(--stone);border-radius:16px;
+    padding:1.75rem;margin:2.5rem 0 3rem;
+    display:flex;gap:1.25rem;align-items:flex-start;
+    box-shadow:0 4px 16px rgba(14,11,7,.04);
+  }
+  .product-icon{
+    flex-shrink:0;width:64px;height:64px;border-radius:14px;
+    background:linear-gradient(135deg,#FFF0EB,#EEF2FF);
+    display:flex;align-items:center;justify-content:center;font-size:1.8rem;
+  }
+  .product-info{flex:1;min-width:0}
+  .product-badge{display:inline-block;background:#FFF0EB;color:var(--orange);font-size:.66rem;letter-spacing:.16em;text-transform:uppercase;font-weight:700;padding:.3rem .7rem;border-radius:6px;margin-bottom:.55rem}
+  .product-name{font-family:var(--hfont);font-size:1.3rem;font-weight:700;color:var(--ink);margin-bottom:.35rem;line-height:1.2}
+  .product-desc{font-size:.88rem;color:var(--muted);line-height:1.55;margin-bottom:.9rem}
+  .product-prices{display:flex;gap:.9rem;flex-wrap:wrap;font-size:.84rem;color:var(--text)}
+  .product-prices span strong{color:var(--ink);font-weight:700}
+  @media(max-width:520px){
+    .product-card{flex-direction:column;gap:1rem}
+    .product-icon{width:56px;height:56px;font-size:1.5rem}
+  }
+
+  /* Section headers */
+  h2{font-family:var(--hfont);font-size:1.6rem;font-weight:700;color:var(--ink);margin:3rem 0 1rem;line-height:1.2}
+  h3{font-size:1rem;font-weight:700;color:var(--ink);margin:1.5rem 0 .5rem}
+  p{font-size:.95rem;color:var(--text);margin-bottom:1rem;line-height:1.7}
+
+  /* Platform cards */
+  .platforms{display:grid;grid-template-columns:1fr 1fr;gap:.75rem;margin:1.5rem 0}
+  @media(max-width:640px){.platforms{grid-template-columns:1fr}}
+  .platform-card{
+    display:flex;gap:.9rem;align-items:flex-start;
+    padding:1.1rem 1.2rem;background:white;border:1px solid var(--stone);
+    border-radius:12px;text-decoration:none;color:var(--text);
+    transition:border-color .15s,transform .1s;
+    cursor:pointer;
+  }
+  .platform-card:hover{border-color:var(--clay);transform:translateY(-1px)}
+  .platform-logo{
+    flex-shrink:0;width:36px;height:36px;border-radius:9px;
+    background:var(--warm);display:flex;align-items:center;justify-content:center;
+    font-family:var(--hfont);font-weight:700;font-size:.92rem;color:var(--ink);
+  }
+  .platform-name{font-size:.9rem;font-weight:700;color:var(--ink);margin-bottom:.15rem}
+  .platform-hint{font-size:.72rem;color:var(--muted);line-height:1.5}
+
+  /* Copy-URL block */
+  .copy-block{background:white;border:1px solid var(--stone);border-radius:12px;padding:1.1rem 1.2rem;margin:1.5rem 0;display:flex;gap:.75rem;align-items:center}
+  .copy-url{
+    flex:1;min-width:0;font-family:ui-monospace,'SF Mono',Menlo,monospace;
+    font-size:.82rem;color:var(--ink);background:var(--warm);padding:.55rem .75rem;
+    border-radius:8px;overflow-x:auto;white-space:nowrap;
+  }
+  .copy-btn{
+    background:var(--ink);color:white;border:none;padding:.55rem 1rem;
+    border-radius:8px;font-size:.78rem;font-weight:600;cursor:pointer;
+    font-family:var(--bfont);white-space:nowrap;transition:opacity .15s;
+  }
+  .copy-btn:hover{opacity:.88}
+  .copy-btn.copied{background:#059669}
+
+  /* Steps */
+  .steps{counter-reset:step;margin:1.5rem 0}
+  .step{position:relative;padding-left:2.5rem;margin-bottom:1.25rem;counter-increment:step}
+  .step::before{
+    content:counter(step);position:absolute;left:0;top:0;
+    width:28px;height:28px;border-radius:50%;
+    background:linear-gradient(135deg,var(--orange),var(--indigo));color:white;
+    display:flex;align-items:center;justify-content:center;
+    font-size:.78rem;font-weight:700;
+  }
+  .step strong{color:var(--ink)}
+
+  /* Why-it-fits card */
+  .fits-card{
+    background:linear-gradient(135deg,#FFF8F3,#F3F1FF);
+    border:1px solid #F0E0D0;border-radius:14px;
+    padding:1.75rem;margin:2.5rem 0;
+  }
+  .fits-card p{font-size:.95rem;line-height:1.75;color:var(--text);margin-bottom:0}
+  .fits-card em{font-style:italic;font-family:var(--hfont);color:var(--clay)}
+
+  /* FAQ */
+  .faq-item{border-bottom:1px solid var(--stone);padding:1rem 0}
+  .faq-item:last-child{border-bottom:none}
+  .faq-q{font-weight:700;color:var(--ink);margin-bottom:.4rem;font-size:.92rem}
+  .faq-a{font-size:.88rem;color:var(--muted);line-height:1.7}
+
+  /* CTA footer */
+  .cta-row{display:flex;gap:.75rem;flex-wrap:wrap;margin-top:1.5rem}
+  .btn-primary{
+    display:inline-block;background:linear-gradient(135deg,var(--orange),var(--indigo));
+    color:white;padding:.85rem 1.6rem;border-radius:10px;text-decoration:none;
+    font-weight:600;font-size:.88rem;
+  }
+  .btn-secondary{
+    display:inline-block;background:transparent;color:var(--ink);
+    padding:.85rem 1.6rem;border-radius:10px;text-decoration:none;
+    font-weight:600;font-size:.88rem;border:1.5px solid var(--stone);
+  }
+  .btn-secondary:hover{border-color:var(--clay)}
+
+  /* Toast */
+  .toast{
+    position:fixed;bottom:24px;left:50%;transform:translateX(-50%);
+    background:var(--ink);color:white;padding:.7rem 1.2rem;border-radius:10px;
+    font-size:.82rem;font-weight:500;opacity:0;pointer-events:none;
+    transition:opacity .2s;z-index:200;
+  }
+  .toast.visible{opacity:1}
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="/home" class="logo">
+    <svg width="32" height="23" viewBox="0 0 103 76" fill="none" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="wrlogo" x1="0" y1="0" x2="103" y2="76" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#E8673A"/><stop offset="100%" stop-color="#1B5FE8"/></linearGradient></defs><path d="M14,4 L44,4 A9,9 0 0,1 53,13 L53,42 A9,9 0 0,1 44,51 L20,51 L6,61 L11,51 A6,6 0 0,1 5,45 L5,13 A9,9 0 0,1 14,4 Z" fill="url(#wrlogo)"/><path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill="white" opacity="0.93" transform="translate(13.16,11.3) scale(0.72)"/><path d="M89,14 L59,14 A9,9 0 0,0 50,23 L50,52 A9,9 0 0,0 59,61 L83,61 L97,71 L92,61 A6,6 0 0,0 98,55 L98,23 A9,9 0 0,0 89,14 Z" fill="white" stroke="url(#wrlogo)" stroke-width="2.2" stroke-linejoin="round"/><path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill="url(#wrlogo)" transform="translate(58.16,21.3) scale(0.72)"/></svg>
+    <span class="logo-text">Attune</span>
+  </a>
+  <div class="nav-right">
+    <a href="/offerings">Offerings</a>
+    <a href="/how-it-works">How it works</a>
+  </div>
+</nav>
+
+<main>
+
+  <div class="eyebrow">For wedding couples</div>
+  <h1>Register for something your <em>marriage</em> will actually use.</h1>
+  <p class="lede">The Starting Out Collection is a gift for couples beginning a shared life — two exercises, one shared picture of how you communicate and what you each expect. Add it to your Zola, Joy, MyRegistry, or The Knot registry in under a minute.</p>
+
+  <!-- Product card — matches what registry platforms will render -->
+  <div class="product-card">
+    <div class="product-icon">💌</div>
+    <div class="product-info">
+      <div class="product-badge">Wedding gift</div>
+      <div class="product-name">The Starting Out Collection</div>
+      <div class="product-desc">The full Attune assessment plus a practical checklist for name changes, finances, and household logistics. For couples building a shared life together.</div>
+      <div class="product-prices">
+        <span>Digital · <strong>$139</strong></span>
+        <span>Physical gift box · <strong>$174</strong></span>
+      </div>
+    </div>
+  </div>
+
+  <div class="fits-card">
+    <p>Most registry items fill a cabinet. <em>This one fills a gap you didn't know you had.</em> The guests closest to you — the ones who've watched you become a couple — are often the ones who wish they could give you something that actually helps you become a family. This is that gift.</p>
+  </div>
+
+  <h2>Add it to your registry</h2>
+  <p>Zola, Joy, MyRegistry, and The Knot all support adding gifts from any online store. Tap your platform below — we'll help you set it up.</p>
+
+  <div class="platforms">
+    <div class="platform-card" onclick="openPlatform('zola')">
+      <div class="platform-logo">Z</div>
+      <div>
+        <div class="platform-name">Zola</div>
+        <div class="platform-hint">Use the "Add a gift from another store" button.</div>
+      </div>
+    </div>
+    <div class="platform-card" onclick="openPlatform('joy')">
+      <div class="platform-logo">J</div>
+      <div>
+        <div class="platform-name">Joy</div>
+        <div class="platform-hint">Add via the "Quick Add Button" or paste the URL.</div>
+      </div>
+    </div>
+    <div class="platform-card" onclick="openPlatform('myregistry')">
+      <div class="platform-logo">M</div>
+      <div>
+        <div class="platform-name">MyRegistry</div>
+        <div class="platform-hint">Use the MyRegistry browser button on this page.</div>
+      </div>
+    </div>
+    <div class="platform-card" onclick="openPlatform('theknot')">
+      <div class="platform-logo">K</div>
+      <div>
+        <div class="platform-name">The Knot</div>
+        <div class="platform-hint">Add via "Other Registry" using the link below.</div>
+      </div>
+    </div>
+  </div>
+
+  <h3>The link to paste</h3>
+  <p style="font-size:.88rem;color:var(--muted);margin-bottom:.5rem">Copy this and paste it into your registry platform:</p>
+  <div class="copy-block">
+    <div class="copy-url" id="registryUrl">https://attune-relationships.com/offerings?source=registry&amp;pkg=newlywed</div>
+    <button class="copy-btn" id="copyBtn" onclick="copyRegistryUrl()" aria-label="Copy link">Copy</button>
+  </div>
+
+  <h2>How it works for your guests</h2>
+  <div class="steps">
+    <div class="step"><strong>They find Attune on your registry</strong> alongside your other gift options. The Starting Out Collection shows up with a clear description and price.</div>
+    <div class="step"><strong>They click through to Attune</strong> and land on a page tailored for registry purchases — no guessing about what they're buying.</div>
+    <div class="step"><strong>They complete the purchase on Attune</strong> with a gift message for you. Payment is handled securely through Stripe.</div>
+    <div class="step"><strong>You get notified by email</strong> with their name and note. Your access to the full experience is waiting when you're ready to begin — together.</div>
+  </div>
+
+  <h2>One small note about registries</h2>
+  <p>Most registry platforms mark items as "purchased" automatically when the purchase happens on their site. For items added from external stores — including Attune — you'll need to mark it as purchased yourself after the guest buys it. We'll email you the moment a gift is made, so it takes 10 seconds.</p>
+
+  <h2>Questions couples ask</h2>
+
+  <div class="faq-item">
+    <div class="faq-q">Is this a real gift, or just an online thing?</div>
+    <div class="faq-a">Both. You can register for the digital version ($139) — instant access the moment your guest buys it — or the physical gift box ($174), which includes everything in the digital plus a printed workbook and notepad shipped in a keepsake box. Some couples like having the box to open together after the wedding.</div>
+  </div>
+
+  <div class="faq-item">
+    <div class="faq-q">What do we actually receive?</div>
+    <div class="faq-a">Two exercises you each complete privately (about 25 minutes total), a shared results page that shows both of you how you each communicate and what you each expect, and a practical checklist for the first few months of married life — name changes, finances, household logistics. The physical version adds a printed 20-30 page workbook generated from your specific results.</div>
+  </div>
+
+  <div class="faq-item">
+    <div class="faq-q">When should we do it?</div>
+    <div class="faq-a">Whenever feels right. Some couples use it in the weeks before the wedding to surface expectations they haven't talked about. Others wait until a quiet moment after the honeymoon. You have access for as long as your account exists — there's no expiration.</div>
+  </div>
+
+  <div class="faq-item">
+    <div class="faq-q">Is this a therapy thing?</div>
+    <div class="faq-a">No. Attune is a self-guided assessment — not therapy, not counseling. It surfaces how you each see things and gives you language to talk about them. Think of it as a structured conversation starter, not a clinical tool.</div>
+  </div>
+
+  <div class="faq-item">
+    <div class="faq-q">What if we already own a lot of this — can we exchange it?</div>
+    <div class="faq-a">Gift cards are valid indefinitely and transferable, so you can pass along an unwanted Attune gift to another couple getting married. Or redeem it for the anniversary package later if the newlywed version doesn't fit.</div>
+  </div>
+
+  <div class="faq-item">
+    <div class="faq-q">We're not sure our guests will "get it."</div>
+    <div class="faq-a">The couples who've gifted it tell us the same thing: the friends and family closest to you already know you're the kind of people who'd want this. Registry guests who want to give something meaningful (and not another wine decanter) tend to pick Attune first.</div>
+  </div>
+
+  <div class="cta-row">
+    <a href="/offerings?pkg=newlywed" class="btn-primary">See the full package →</a>
+    <a href="/contact" class="btn-secondary">Questions? Get in touch</a>
+  </div>
+
+</main>
+
+<div class="toast" id="toast">Link copied</div>
+
+<script>
+  const REGISTRY_URL = 'https://attune-relationships.com/offerings?source=registry&pkg=newlywed';
+
+  function copyRegistryUrl() {
+    navigator.clipboard.writeText(REGISTRY_URL).then(() => {
+      const btn = document.getElementById('copyBtn');
+      const toast = document.getElementById('toast');
+      btn.textContent = 'Copied ✓';
+      btn.classList.add('copied');
+      toast.classList.add('visible');
+      setTimeout(() => {
+        btn.textContent = 'Copy';
+        btn.classList.remove('copied');
+        toast.classList.remove('visible');
+      }, 1800);
+    }).catch(() => {
+      // Fallback: select the URL so user can ctrl+c
+      const range = document.createRange();
+      range.selectNodeContents(document.getElementById('registryUrl'));
+      const sel = window.getSelection();
+      sel.removeAllRanges();
+      sel.addRange(range);
+    });
+  }
+
+  // Platform deep links — open the right "add item" flow on each platform
+  function openPlatform(platform) {
+    // Copy URL first so it's ready to paste
+    navigator.clipboard.writeText(REGISTRY_URL).catch(() => {});
+    const urls = {
+      zola:       'https://www.zola.com/wedding-registry/apps',  // browser button install page
+      joy:        'https://withjoy.com/registry',
+      myregistry: 'https://www.myregistry.com/Info/Add-To-MyRegistry-Button-Extension',
+      theknot:    'https://www.theknot.com/registry',
+    };
+    const url = urls[platform];
+    if (!url) return;
+    // Show toast confirming the URL was copied
+    const toast = document.getElementById('toast');
+    toast.textContent = 'Link copied — paste into ' + (platform === 'myregistry' ? 'MyRegistry' : platform === 'theknot' ? 'The Knot' : platform.charAt(0).toUpperCase() + platform.slice(1));
+    toast.classList.add('visible');
+    setTimeout(() => toast.classList.remove('visible'), 2400);
+    // Open the platform in a new tab
+    window.open(url, '_blank', 'noopener');
+  }
+</script>
+
+</body>
+</html>
