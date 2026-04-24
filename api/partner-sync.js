@@ -1,17 +1,33 @@
 /**
  * /api/partner-sync
  *
- * POST { action: 'write', inviteCode, partnerBId, partnerBName, ex1Answers, ex2Answers, ex3Answers? }
- *   → Partner B writes their completed exercises against Partner A's invite code
+ * Unified partner model — both partners are real Supabase auth users with
+ * their own profiles row. Linked via profiles.partner_profile_id (FK to
+ * each other).
  *
  * GET  ?inviteCode=XXX
- *   → Partner A polls for Partner B's answers
+ *   → Used during Partner B signup to resolve an invite code to
+ *     Partner A's profile id + basic info. Called BEFORE Partner B
+ *     signs up to validate the code and look up who invited them.
+ *
+ * GET  ?partnerProfileId=XXX
+ *   → Used by Partner A's dashboard to fetch Partner B's exercise
+ *     answers. Returns {found, profile: {name, ex1_answers, ex2_answers,
+ *     ex3_answers, ex3_completed}} or {found: false}.
+ *
+ * POST { action: 'link', inviteCode, partnerBId }
+ *   → Links Partner B to Partner A after signup. Sets
+ *     profiles.partner_profile_id on both rows, sets joined_via_invite
+ *     on Partner B, sets partner_joined on Partner A.
+ *
+ * The old partner_sessions flow (POST with ex1Answers/ex2Answers) is
+ * removed — exercise answers now save to the partner's own profile
+ * row via the normal Ex01/Ex02/Ex03 write paths.
  *
  * Security:
- *   - Invite codes validated as 8-char alphanumeric
- *   - Completed sessions are immutable (completed_at check)
+ *   - Invite codes validated as 6-12 char alphanumeric
+ *   - Linking requires inviteCode + partnerBId both valid
  *   - Rate-limited via Vercel edge headers
- *   - Input sizes capped to prevent oversized payloads
  */
 
 import { createClient } from '@supabase/supabase-js';
@@ -25,22 +41,13 @@ const supabase = () => createClient(
 
 const CORS = { 'Content-Type': 'application/json', 'X-Content-Type-Options': 'nosniff' };
 const INVITE_RE = /^[A-Z0-9]{6,12}$/;
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 function validateInviteCode(code) {
   return typeof code === 'string' && INVITE_RE.test(code.trim().toUpperCase());
 }
-
-function sanitizeAnswers(answers) {
-  if (!answers || typeof answers !== 'object') return null;
-  // Cap individual text answer lengths to prevent abuse
-  const sanitized = {};
-  for (const [k, v] of Object.entries(answers)) {
-    if (typeof v === 'string') sanitized[k] = v.slice(0, 2000);
-    else if (typeof v === 'number') sanitized[k] = v;
-    else if (Array.isArray(v)) sanitized[k] = v.slice(0, 20);
-    else sanitized[k] = v;
-  }
-  return sanitized;
+function validateUuid(id) {
+  return typeof id === 'string' && UUID_RE.test(id.trim());
 }
 
 export default async function handler(req) {
@@ -48,97 +55,117 @@ export default async function handler(req) {
     let body;
     try { body = await req.json(); } catch { return new Response('Invalid JSON', { status: 400 }); }
 
-    const { inviteCode, partnerBId, partnerBName, ex1Answers, ex2Answers, ex3Answers, demographics } = body;
+    const { action, inviteCode, partnerBId } = body;
 
-    // Validate invite code format
-    if (!inviteCode || !validateInviteCode(inviteCode)) {
-      return new Response(JSON.stringify({ ok: false, error: 'Invalid invite code format' }), { status: 400, headers: CORS });
+    // Only `link` action is supported post-unification. Reject everything
+    // else explicitly so we catch stale clients trying to write via the
+    // old partner_sessions path.
+    if (action !== 'link') {
+      return new Response(JSON.stringify({ ok: false, error: 'Only action=link is supported. Exercise answers save directly to profiles.' }), { status: 400, headers: CORS });
     }
 
-    // Require both core exercises
-    if (!ex1Answers || !ex2Answers) {
-      return new Response(JSON.stringify({ ok: false, error: 'Missing required exercise answers' }), { status: 400, headers: CORS });
+    if (!validateInviteCode(inviteCode)) {
+      return new Response(JSON.stringify({ ok: false, error: 'Invalid invite code format' }), { status: 400, headers: CORS });
+    }
+    if (!validateUuid(partnerBId)) {
+      return new Response(JSON.stringify({ ok: false, error: 'Invalid partner id' }), { status: 400, headers: CORS });
     }
 
     const code = inviteCode.trim().toUpperCase();
+    const bId = partnerBId.trim();
+    const sb = supabase();
 
-    // Guard: verify invite code exists in profiles (prevents writing to arbitrary codes)
-    const { data: profile } = await supabase()
+    // Find Partner A by invite code
+    const { data: partnerA, error: findErr } = await sb
       .from('profiles')
-      .select('id, partner_joined')
+      .select('id, partner_profile_id')
       .eq('invite_code', code)
       .maybeSingle();
 
-    if (!profile) {
-      return new Response(JSON.stringify({ ok: false, error: 'Invite code not found' }), { status: 404, headers: CORS });
+    if (findErr) return new Response(JSON.stringify({ ok: false, error: findErr.message }), { status: 500, headers: CORS });
+    if (!partnerA) return new Response(JSON.stringify({ ok: false, error: 'Invite code not found' }), { status: 404, headers: CORS });
+
+    // Prevent self-linking (e.g. Partner A opening their own invite link)
+    if (partnerA.id === bId) {
+      return new Response(JSON.stringify({ ok: false, error: 'Cannot link to your own invite' }), { status: 400, headers: CORS });
     }
 
-    // Check if this session is already locked
-    const { data: existing } = await supabase()
-      .from('partner_sessions')
-      .select('completed_at')
-      .eq('invite_code', code)
-      .maybeSingle();
-
-    if (existing?.completed_at) {
-      console.warn('[partner-sync] attempt to overwrite completed session for invite:', code);
-      return new Response(JSON.stringify({ ok: false, error: 'Answers already submitted. Results are final.' }), { status: 409, headers: CORS });
+    // If Partner A already has a different linked partner, refuse
+    if (partnerA.partner_profile_id && partnerA.partner_profile_id !== bId) {
+      return new Response(JSON.stringify({ ok: false, error: 'This invite has already been used' }), { status: 409, headers: CORS });
     }
 
-    const { error } = await supabase()
-      .from('partner_sessions')
-      .upsert({
-        invite_code:    code,
-        partner_b_id:   partnerBId || null,
-        partner_b_name: partnerBName ? String(partnerBName).slice(0, 100) : null,
-        ex1_answers:    sanitizeAnswers(ex1Answers),
-        ex2_answers:    sanitizeAnswers(ex2Answers),
-        ex3_answers:    ex3Answers ? sanitizeAnswers(ex3Answers) : null,
-        // Demographics columns exist from migration 005. Values are short
-        // controlled-vocabulary strings (dropdown options) so no sanitize
-        // needed beyond truncation.
-        age_range:           demographics?.age_range ? String(demographics.age_range).slice(0, 20) : null,
-        gender:              demographics?.gender ? String(demographics.gender).slice(0, 20) : null,
-        relationship_status: demographics?.relationship_status ? String(demographics.relationship_status).slice(0, 30) : null,
-        relationship_length: demographics?.relationship_length ? String(demographics.relationship_length).slice(0, 10) : null,
-        children:            demographics?.children ? String(demographics.children).slice(0, 20) : null,
-        signup_source:       demographics?.signup_source ? String(demographics.signup_source).slice(0, 30) : null,
-        completed_at:        new Date().toISOString(),
-      }, { onConflict: 'invite_code' });
+    // Link both sides, mark Partner A's partner_joined, and flag Partner B
+    // as joined-via-invite for lightweight UX differentiation.
+    const [linkAResult, linkBResult] = await Promise.all([
+      sb.from('profiles').update({ partner_profile_id: bId, partner_joined: true }).eq('id', partnerA.id),
+      sb.from('profiles').update({ partner_profile_id: partnerA.id, joined_via_invite: true }).eq('id', bId),
+    ]);
 
-    if (error) {
-      console.error('[partner-sync] write error:', error);
-      return new Response(JSON.stringify({ ok: false, error: error.message }), { status: 500, headers: CORS });
+    if (linkAResult.error || linkBResult.error) {
+      const msg = linkAResult.error?.message || linkBResult.error?.message;
+      return new Response(JSON.stringify({ ok: false, error: msg }), { status: 500, headers: CORS });
     }
 
-    // Mark partner_joined on Partner A's profile
-    await supabase()
-      .from('profiles')
-      .update({ partner_joined: true })
-      .eq('invite_code', code);
-
-    return new Response(JSON.stringify({ ok: true }), { status: 200, headers: CORS });
+    return new Response(JSON.stringify({ ok: true, partnerAId: partnerA.id }), { status: 200, headers: CORS });
   }
 
   if (req.method === 'GET') {
     const url = new URL(req.url);
-    const raw = url.searchParams.get('inviteCode');
 
-    if (!raw || !validateInviteCode(raw)) {
-      return new Response(JSON.stringify({ ok: false, error: 'Invalid invite code' }), { status: 400, headers: CORS });
+    const rawCode = url.searchParams.get('inviteCode');
+    const rawPartnerId = url.searchParams.get('partnerProfileId');
+
+    const sb = supabase();
+
+    // ─── Mode A: invite code lookup (pre-signup) ──────────────────────
+    if (rawCode) {
+      if (!validateInviteCode(rawCode)) {
+        return new Response(JSON.stringify({ ok: false, error: 'Invalid invite code' }), { status: 400, headers: CORS });
+      }
+      const code = rawCode.trim().toUpperCase();
+
+      const { data: inviter, error } = await sb
+        .from('profiles')
+        .select('id, name, pkg, partner_profile_id')
+        .eq('invite_code', code)
+        .maybeSingle();
+
+      if (error) return new Response(JSON.stringify({ ok: false, error: error.message }), { status: 500, headers: CORS });
+      if (!inviter) return new Response(JSON.stringify({ ok: true, found: false }), { status: 200, headers: CORS });
+
+      return new Response(JSON.stringify({
+        ok: true,
+        found: true,
+        inviter: {
+          id: inviter.id,
+          name: inviter.name,
+          pkg: inviter.pkg,
+          alreadyLinked: !!inviter.partner_profile_id,
+        },
+      }), { status: 200, headers: CORS });
     }
 
-    const code = raw.trim().toUpperCase();
-    const { data, error } = await supabase()
-      .from('partner_sessions')
-      .select('partner_b_name, ex1_answers, ex2_answers, ex3_answers, completed_at')
-      .eq('invite_code', code)
-      .maybeSingle();
+    // ─── Mode B: partner profile lookup (post-link, for polling) ──────
+    if (rawPartnerId) {
+      if (!validateUuid(rawPartnerId)) {
+        return new Response(JSON.stringify({ ok: false, error: 'Invalid partner id' }), { status: 400, headers: CORS });
+      }
+      const pid = rawPartnerId.trim();
 
-    if (error) return new Response(JSON.stringify({ ok: false, error: error.message }), { status: 500, headers: CORS });
-    if (!data)  return new Response(JSON.stringify({ ok: true, found: false }), { status: 200, headers: CORS });
+      const { data, error } = await sb
+        .from('profiles')
+        .select('name, ex1_answers, ex2_answers, ex3_answers, ex3_completed')
+        .eq('id', pid)
+        .maybeSingle();
 
-    return new Response(JSON.stringify({ ok: true, found: true, session: data }), { status: 200, headers: CORS });
+      if (error) return new Response(JSON.stringify({ ok: false, error: error.message }), { status: 500, headers: CORS });
+      if (!data)  return new Response(JSON.stringify({ ok: true, found: false }), { status: 200, headers: CORS });
+
+      return new Response(JSON.stringify({ ok: true, found: true, profile: data }), { status: 200, headers: CORS });
+    }
+
+    return new Response(JSON.stringify({ ok: false, error: 'Missing inviteCode or partnerProfileId' }), { status: 400, headers: CORS });
   }
 
   return new Response('Method not allowed', { status: 405 });

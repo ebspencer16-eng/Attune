@@ -134,22 +134,30 @@ export default async function handler(req) {
 // difference is the output format.
 async function buildCombinedData(admin) {
   // ── Gather everything we need in parallel ─────────────────────────────
+  // In the unified model, both partners are rows in `profiles`. Partner A
+  // has an invite_code; Partner B has joined_via_invite=true. They link to
+  // each other via partner_profile_id.
+  //
+  // To produce one row per COUPLE, we iterate over Partner A's rows
+  // (i.e. rows with an invite_code) and join to Partner B via the
+  // partner_profile_id FK.
+  //
+  // Exercise answers are read directly from profiles.ex{1,2,3}_answers —
+  // no more partner_sessions or exercise_sessions lookups.
   const [
     { data: profiles = [] },
-    { data: sessions = [] },
-    { data: partnerRows = [] },
     { data: workbooks = [] },
     { data: orders = [] },
   ] = await Promise.all([
-    admin.from('profiles').select('id, invite_code, pkg, gender, relationship_status, relationship_length, budget_data, created_at'),
-    admin.from('exercise_sessions').select('user_id, ex1_answers, ex2_answers, ex3_answers, couple_type'),
-    admin.from('partner_sessions').select('invite_code, ex1_answers, ex2_answers, ex3_answers, gender, relationship_status, relationship_length'),
+    admin.from('profiles').select('id, invite_code, partner_profile_id, joined_via_invite, pkg, name, gender, relationship_status, relationship_length, budget_data, created_at, ex1_answers, ex2_answers, ex3_answers, ex3_completed'),
     admin.from('workbooks').select('user_id, storage_path'),
     admin.from('orders').select('*'),
   ]);
 
-  const sessByUser = Object.fromEntries(sessions.map(s => [s.user_id, s]));
-  const pbyCode    = Object.fromEntries(partnerRows.map(p => [p.invite_code, p]));
+  // Two lookups — one by id (for joining Partner A→B), one filtered to Partner A
+  const byId = Object.fromEntries(profiles.map(p => [p.id, p]));
+  const partnerAList = profiles.filter(p => p.invite_code && !p.joined_via_invite);
+
   const wbByUser   = Object.fromEntries(workbooks.map(w => [w.user_id, w]));
   const ordersByUser = {};
   orders.sort((a, b) => new Date(b.created_at) - new Date(a.created_at)).forEach(o => {
@@ -231,18 +239,18 @@ async function buildCombinedData(admin) {
 
   const fmt = (n) => n == null ? '' : Number(n).toFixed(3);
 
-  const dataRows = profiles.map(p => {
-    const s = sessByUser[p.id];
-    const ps = p.invite_code ? pbyCode[p.invite_code] : null;
+  const dataRows = partnerAList.map(p => {
+    // p = Partner A profile. Partner B is the linked profile row.
+    const ps = p.partner_profile_id ? byId[p.partner_profile_id] : null;
     const w = wbByUser[p.id];
     const o = ordersByUser[p.id];
-    const ex2a = s?.ex2_answers || {};
+    const ex2a = p.ex2_answers || {};
     const ex2b = ps?.ex2_answers || {};
-    const aScores = calcDimScores(s?.ex1_answers);
+    const aScores = calcDimScores(p.ex1_answers);
     const bScores = calcDimScores(ps?.ex1_answers);
     const aAxes = computeAxes(aScores);
     const bAxes = computeAxes(bScores);
-    const aEx3 = s?.ex3_answers || {};
+    const aEx3 = p.ex3_answers || {};
     const bEx3 = ps?.ex3_answers || {};
     const budgetComplete = p.budget_data && Object.keys(p.budget_data).length > 0;
 
@@ -509,17 +517,14 @@ async function exportOrders(admin) {
 }
 
 // ── 2. DEMOGRAPHICS ────────────────────────────────────────────────────
-// One row per couple. Pulls Partner A demographics from profiles, Partner B
-// from partner_sessions (limited: only pronouns of B are known via
-// partner_pronouns-like fields, which don't exist yet — so Partner B gender
-// is left blank until we collect it). Childhood contexts from ex2.
+// One row per couple in the unified model. Partner A rows have an
+// invite_code and link to Partner B via partner_profile_id. Both
+// partners' data lives on their respective profile rows.
 async function exportDemographics(admin) {
-  const { data: profiles } = await admin.from('profiles').select('id, gender, relationship_length, relationship_status, invite_code');
-  const { data: sessions } = await admin.from('exercise_sessions').select('user_id, ex1_answers, ex2_answers, couple_type');
-  const { data: partnerRows } = await admin.from('partner_sessions').select('invite_code, ex1_answers, ex2_answers, gender, relationship_length, relationship_status');
+  const { data: profiles } = await admin.from('profiles').select('id, partner_profile_id, invite_code, joined_via_invite, gender, relationship_length, relationship_status, ex1_answers, ex2_answers, couple_type');
 
-  const sessByUser = Object.fromEntries((sessions || []).map(s => [s.user_id, s]));
-  const pbyCode    = Object.fromEntries((partnerRows || []).map(p => [p.invite_code, p]));
+  const byId = Object.fromEntries((profiles || []).map(p => [p.id, p]));
+  const partnerAList = (profiles || []).filter(p => p.invite_code && !p.joined_via_invite);
 
   const headers = [
     'anon_couple_id',
@@ -534,15 +539,14 @@ async function exportDemographics(admin) {
     'couple_type',
   ];
 
-  const rows = (profiles || []).map(p => {
-    const session = sessByUser[p.id];
-    const partnerSession = p.invite_code ? pbyCode[p.invite_code] : null;
+  const rows = partnerAList.map(p => {
+    const partnerB = p.partner_profile_id ? byId[p.partner_profile_id] : null;
 
-    const ex2a = session?.ex2_answers || {};
-    const ex2b = partnerSession?.ex2_answers || {};
+    const ex2a = p.ex2_answers || {};
+    const ex2b = partnerB?.ex2_answers || {};
 
-    const aScores = calcDimScores(session?.ex1_answers);
-    const bScores = calcDimScores(partnerSession?.ex1_answers);
+    const aScores = calcDimScores(p.ex1_answers);
+    const bScores = calcDimScores(partnerB?.ex1_answers);
     const aAxes = computeAxes(aScores);
     const bAxes = computeAxes(bScores);
 
@@ -551,14 +555,14 @@ async function exportDemographics(admin) {
     return [
       anonId,
       p.gender || '',
-      partnerSession?.gender || '',
-      p.relationship_length || partnerSession?.relationship_length || '',
-      p.relationship_status || partnerSession?.relationship_status || '',
+      partnerB?.gender || '',
+      p.relationship_length || partnerB?.relationship_length || '',
+      p.relationship_status || partnerB?.relationship_status || '',
       ex2a.childhoodStructure || '',
       ex2b.childhoodStructure || '',
       aAxes.typeCode || '',
       bAxes.typeCode || '',
-      session?.couple_type?.id || '',
+      p.couple_type?.id || '',
     ];
   });
   return csvResponse(`attune_demographics_${new Date().toISOString().slice(0,10)}.csv`, toCSV(headers, rows));
@@ -567,15 +571,14 @@ async function exportDemographics(admin) {
 // ── 3. ENGAGEMENT ──────────────────────────────────────────────────────
 // One row per couple. Y/N for each exercise + workbook download/ship.
 async function exportEngagement(admin) {
-  const { data: profiles } = await admin.from('profiles').select('id, invite_code, pkg, budget_data');
-  const { data: sessions } = await admin.from('exercise_sessions').select('user_id, ex1_answers, ex2_answers, ex3_answers');
-  const { data: partnerRows } = await admin.from('partner_sessions').select('invite_code, ex1_answers, ex2_answers, ex3_answers');
+  const { data: profiles } = await admin.from('profiles').select('id, invite_code, partner_profile_id, joined_via_invite, pkg, budget_data, ex1_answers, ex2_answers, ex3_answers');
   const { data: workbooks } = await admin.from('workbooks').select('user_id, storage_path, generated_at');
   const { data: orders } = await admin.from('orders').select('user_id, addon_workbook, is_physical, workbook_status, card_status');
 
-  const sessByUser = Object.fromEntries((sessions || []).map(s => [s.user_id, s]));
-  const pbyCode    = Object.fromEntries((partnerRows || []).map(p => [p.invite_code, p]));
-  const wbByUser   = Object.fromEntries((workbooks || []).map(w => [w.user_id, w]));
+  const byId = Object.fromEntries((profiles || []).map(p => [p.id, p]));
+  const partnerAList = (profiles || []).filter(p => p.invite_code && !p.joined_via_invite);
+
+  const wbByUser = Object.fromEntries((workbooks || []).map(w => [w.user_id, w]));
   const ordersByUser = {};
   (orders || []).forEach(o => { if (o.user_id) ordersByUser[o.user_id] = o; });
 
@@ -589,9 +592,8 @@ async function exportEngagement(admin) {
     'workbook_shipped',
   ];
 
-  const rows = (profiles || []).map(p => {
-    const s = sessByUser[p.id];
-    const ps = p.invite_code ? pbyCode[p.invite_code] : null;
+  const rows = partnerAList.map(p => {
+    const ps = p.partner_profile_id ? byId[p.partner_profile_id] : null;
     const w = wbByUser[p.id];
     const o = ordersByUser[p.id];
     const budgetComplete = p.budget_data && Object.keys(p.budget_data).length > 0;
@@ -599,9 +601,9 @@ async function exportEngagement(admin) {
 
     return [
       anonId, p.pkg || '',
-      s?.ex1_answers ? 'Y' : 'N',   ps?.ex1_answers ? 'Y' : 'N',
-      s?.ex2_answers ? 'Y' : 'N',   ps?.ex2_answers ? 'Y' : 'N',
-      s?.ex3_answers ? 'Y' : 'N',   ps?.ex3_answers ? 'Y' : 'N',
+      p.ex1_answers ? 'Y' : 'N',   ps?.ex1_answers ? 'Y' : 'N',
+      p.ex2_answers ? 'Y' : 'N',   ps?.ex2_answers ? 'Y' : 'N',
+      p.ex3_answers ? 'Y' : 'N',   ps?.ex3_answers ? 'Y' : 'N',
       budgetComplete ? 'Y' : 'N',
       w ? 'Y' : 'N',
       (o?.is_physical && o?.card_status === 'shipped') ? 'Y' : 'N',
@@ -614,12 +616,10 @@ async function exportEngagement(admin) {
 // Full scored results. Per-partner axis scores + 10 dim scores +
 // ex3 satisfaction scale questions.
 async function exportResults(admin) {
-  const { data: profiles } = await admin.from('profiles').select('id, invite_code');
-  const { data: sessions } = await admin.from('exercise_sessions').select('user_id, ex1_answers, ex3_answers, couple_type');
-  const { data: partnerRows } = await admin.from('partner_sessions').select('invite_code, ex1_answers, ex3_answers');
+  const { data: profiles } = await admin.from('profiles').select('id, invite_code, partner_profile_id, joined_via_invite, couple_type, ex1_answers, ex3_answers');
 
-  const sessByUser = Object.fromEntries((sessions || []).map(s => [s.user_id, s]));
-  const pbyCode    = Object.fromEntries((partnerRows || []).map(p => [p.invite_code, p]));
+  const byId = Object.fromEntries((profiles || []).map(p => [p.id, p]));
+  const partnerAList = (profiles || []).filter(p => p.invite_code && !p.joined_via_invite);
 
   const dimCols = (prefix) => Object.keys(DIM_KEYS).map(d => `${prefix}_${d}`);
   // Ex3 has three scale questions specifically for couple satisfaction.
@@ -640,20 +640,19 @@ async function exportResults(admin) {
   ];
 
   const fmt = (n) => n == null ? '' : Number(n).toFixed(3);
-  const rows = (profiles || []).map(p => {
-    const s = sessByUser[p.id];
-    const ps = p.invite_code ? pbyCode[p.invite_code] : null;
-    const aScores = calcDimScores(s?.ex1_answers);
+  const rows = partnerAList.map(p => {
+    const ps = p.partner_profile_id ? byId[p.partner_profile_id] : null;
+    const aScores = calcDimScores(p.ex1_answers);
     const bScores = calcDimScores(ps?.ex1_answers);
     const aAxes = computeAxes(aScores);
     const bAxes = computeAxes(bScores);
-    const aEx3 = s?.ex3_answers || {};
+    const aEx3 = p.ex3_answers || {};
     const bEx3 = ps?.ex3_answers || {};
     const anonId = (p.id || '').replace(/-/g, '').slice(0, 8);
 
     return [
       anonId,
-      s?.couple_type?.id || '',
+      p.couple_type?.id || '',
       fmt(aAxes.withdrawScore), fmt(aAxes.openScore),
       fmt(bAxes.withdrawScore), fmt(bAxes.openScore),
       ...Object.keys(DIM_KEYS).map(d => fmt(aScores[d])),

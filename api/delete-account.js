@@ -118,18 +118,20 @@ export default async function handler(req) {
     summary.ordersRemoved = count || 0;
   } catch (e) { console.warn('[delete-account] orders cleanup failed:', e?.message); }
 
-  // ── 4. Anonymize Partner B entries ────────────────────────────────────────
-  // If the deleting user ever participated as Partner B, their name is in
-  // partner_sessions.partner_b_name. Null it out. The answers stay (they're
-  // part of Partner A's joint results, and Partner A didn't request deletion).
+  // ── 4. Unlink partner (both directions) ──────────────────────────────────
+  // In the unified model, both partners have their own profiles row. The
+  // partner_profile_id FK has ON DELETE SET NULL, so after auth deletion
+  // the other partner's link drops automatically. However, we explicitly
+  // null out the reverse link here to be defensive in case of timing issues.
+  //
+  // The other partner's answers stay — they're part of that partner's own
+  // data, and they didn't request deletion.
   try {
-    const { count } = await admin.from('partner_sessions')
-      .update({ partner_b_name: null }, { count: 'exact' })
-      .eq('partner_b_id', userId);
-    summary.partnerSessionsAnonymized = count || 0;
-    // Note: partner_sessions.partner_b_id has ON DELETE SET NULL, so after auth
-    // user deletion the id link drops automatically. Name is the only PII here.
-  } catch (e) { console.warn('[delete-account] partner_sessions anonymize failed:', e?.message); }
+    const { count } = await admin.from('profiles')
+      .update({ partner_profile_id: null, partner_joined: false }, { count: 'exact' })
+      .eq('partner_profile_id', userId);
+    summary.partnerUnlinked = count || 0;
+  } catch (e) { console.warn('[delete-account] partner unlink failed:', e?.message); }
 
   // ── 5. Null out feedback attribution ──────────────────────────────────────
   // feedback.user_id is ON DELETE SET NULL per schema, so the auth delete will

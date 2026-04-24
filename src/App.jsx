@@ -8395,16 +8395,17 @@ function AuthModal({ mode, onClose, onSuccess }) {
         try { localStorage.setItem('attune_budget', JSON.stringify(profile.budget_data)); } catch {}
       }
       // Restore partner session if partner already completed
-      if (profile?.partner_joined && profile?.invite_code) {
+      if (profile?.partner_profile_id) {
         try {
-          const psRes = await fetch(`/api/partner-sync?inviteCode=${encodeURIComponent(profile.invite_code)}`);
+          const psRes = await fetch(`/api/partner-sync?partnerProfileId=${encodeURIComponent(profile.partner_profile_id)}`);
           const ps = await psRes.json();
-          if (ps.found && ps.session) {
+          if (ps.found && ps.profile?.ex1_answers && ps.profile?.ex2_answers) {
             localStorage.setItem('attune_partner_session', JSON.stringify({
-              name: ps.session.partner_b_name,
-              ex1: ps.session.ex1_answers,
-              ex2: ps.session.ex2_answers,
-              ex3: ps.session.ex3_answers,
+              name: ps.profile.name,
+              ex1: ps.profile.ex1_answers,
+              ex2: ps.profile.ex2_answers,
+              ex3: ps.profile.ex3_answers,
+              partnerProfileId: profile.partner_profile_id,
               inviteCode: profile.invite_code,
             }));
           }
@@ -8737,34 +8738,114 @@ function PartnerLandingScreen({ inviteFrom, inviteCode, onCreateAccount }) {
   const [err, setErr] = React.useState('');
   const upd = (k, v) => setForm(p => ({ ...p, [k]: v }));
 
-  const handleSubmit = () => {
+  // Unified signup: creates a real Supabase auth user + profiles row for
+  // Partner B (same as Partner A), then calls /api/partner-sync?action=link
+  // to wire both partners' partner_profile_id FKs together.
+  const handleSubmit = async () => {
     if (!form.name.trim()) return setErr('Please enter your first name.');
     if (!form.email.trim() || !form.email.includes('@')) return setErr('Please enter a valid email.');
     if (!form.password || form.password.length < 6) return setErr('Password must be at least 6 characters.');
     setLoading(true);
-    setTimeout(() => {
+    setErr('');
+
+    try {
+      const { supabase: sb, hasSupabase } = await import('./supabase.js');
+
+      // Fallback: if Supabase isn't configured (dev without env vars),
+      // fall back to the old local-only account so the demo still works.
+      if (!hasSupabase()) {
+        const acct = {
+          email: form.email.trim().toLowerCase(),
+          name: form.name.trim(),
+          partnerName: inviteFrom,
+          inviteCode: inviteCode,
+          joinedViaInvite: true,
+          createdAt: Date.now(),
+        };
+        try { localStorage.setItem('attune_account', JSON.stringify(acct)); } catch {}
+        setLoading(false);
+        onCreateAccount(acct);
+        return;
+      }
+
+      // Real signup — same flow as Partner A's AuthModal
+      const { data: authData, error: authErr } = await sb.auth.signUp({
+        email: form.email.trim().toLowerCase(),
+        password: form.password,
+        options: { data: { name: form.name.trim() } },
+      });
+      if (authErr) {
+        setErr(authErr.message.includes('registered') ? 'An account with this email already exists. Try signing in.' : authErr.message);
+        setLoading(false);
+        return;
+      }
+      if (!authData?.user) {
+        setErr('Signup failed. Please try again.');
+        setLoading(false);
+        return;
+      }
+
+      // Create the profile row. Partner B does NOT get an invite_code of
+      // their own — they joined via someone else's. partner_name is
+      // populated from the inviter's name so the UI always shows both.
+      const { error: profileErr } = await sb.from('profiles').upsert({
+        id:                   authData.user.id,
+        name:                 form.name.trim(),
+        pronouns:             '',
+        partner_name:         inviteFrom || '',
+        partner_pronouns:     '',
+        partner_email:        '',
+        email_opt_in:         true,
+        invite_code:          null,  // Partner B has no invite of their own
+        partner_joined:       true,  // They've already "joined" by signing up
+        joined_via_invite:    true,
+        pkg:                  null,  // Inherits package visibility through partner
+        ex1_answers:          null,
+        ex2_answers:          null,
+        ex3_answers:          null,
+        age_range:            form.ageRange || null,
+        gender:               form.gender || null,
+        relationship_status:  form.relationshipStatus || null,
+        relationship_length:  form.relationshipLength || null,
+        children:             form.children || null,
+        signup_source:        form.signupSource || null,
+      });
+      if (profileErr) console.warn('[Attune] Partner B profile upsert:', profileErr);
+
+      // Link both partners via /api/partner-sync
+      try {
+        const linkRes = await fetch('/api/partner-sync', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'link', inviteCode, partnerBId: authData.user.id }),
+        });
+        if (!linkRes.ok) {
+          const j = await linkRes.json().catch(() => ({}));
+          console.warn('[Attune] Partner link failed:', j.error);
+          // Don't block the signup — Partner B can still do exercises; the
+          // polling endpoint will fall back to invite_code if needed.
+        }
+      } catch (e) { console.warn('[Attune] Partner link error:', e); }
+
+      // Build the local account object in the standard shape (same as
+      // Partner A). joinedViaInvite is the only marker; isPartnerB is gone.
       const acct = {
+        id: authData.user.id,
         email: form.email.trim().toLowerCase(),
         name: form.name.trim(),
         partnerName: inviteFrom,
-        inviteCode: inviteCode,
-        isPartnerB: true,
+        inviteCode: inviteCode,         // Retained so the dashboard can look up partner
+        joinedViaInvite: true,
         createdAt: Date.now(),
-        // Demographics ride along on the local account object so
-        // PartnerBExerciseFlow can pass them to the partner-sync write.
-        demographics: {
-          age_range: form.ageRange || null,
-          gender: form.gender || null,
-          relationship_status: form.relationshipStatus || null,
-          relationship_length: form.relationshipLength || null,
-          children: form.children || null,
-          signup_source: form.signupSource || null,
-        },
       };
       try { localStorage.setItem('attune_account', JSON.stringify(acct)); } catch {}
       setLoading(false);
       onCreateAccount(acct);
-    }, 600);
+    } catch (e) {
+      console.error('[Attune] Partner B signup error:', e);
+      setErr('Signup failed. Please try again.');
+      setLoading(false);
+    }
   };
 
   const inp = (placeholder, key, type = 'text') => (
@@ -8852,25 +8933,47 @@ function PartnerBExerciseFlow({ account, onComplete }) {
   const [ex1, setEx1] = React.useState(null);
   const [ex2, setEx2] = React.useState(null);
 
-  const handleEx1Done = (answers) => {
-    setEx1(answers);
-    setStep('ex2');
-  };
-
-  const handleEx2Done = (answers) => {
-    setEx2(answers);
-    if (hasReflection) {
-      setStep('ex3');
-    } else {
-      submitSession(ex1, answers, null);
+  // In the unified model, Partner B saves to their OWN profile row
+  // exactly like Partner A. Each exercise completion calls this helper
+  // which persists to localStorage + profiles, then advances state.
+  const saveAnswersToProfile = async (patch) => {
+    try {
+      const { supabase: sb, hasSupabase } = await import('./supabase.js');
+      if (hasSupabase() && account?.id) {
+        await trackedSupabaseWrite(sb.from('profiles').update(patch).eq('id', account.id));
+      }
+    } catch (e) {
+      console.warn('[Attune] Partner B save failed, continuing locally:', e);
     }
   };
 
-  const handleEx3Done = (answers) => {
-    submitSession(ex1, ex2, answers);
+  const handleEx1Done = async (answers) => {
+    setEx1(answers);
+    try { localStorage.setItem('attune_ex1', JSON.stringify(answers)); } catch {}
+    await saveAnswersToProfile({ ex1_answers: answers });
+    setStep('ex2');
   };
 
-  const submitSession = async (ex1Answers, ex2Answers, ex3Answers) => {
+  const handleEx2Done = async (answers) => {
+    setEx2(answers);
+    try { localStorage.setItem('attune_ex2', JSON.stringify(answers)); } catch {}
+    await saveAnswersToProfile({ ex2_answers: answers });
+    if (hasReflection) {
+      setStep('ex3');
+    } else {
+      finishSession(ex1, answers, null);
+    }
+  };
+
+  const handleEx3Done = async (answers) => {
+    try { localStorage.setItem('attune_ex3', JSON.stringify(answers)); } catch {}
+    await saveAnswersToProfile({ ex3_answers: answers, ex3_completed: true });
+    finishSession(ex1, ex2, answers);
+  };
+
+  const finishSession = (ex1Answers, ex2Answers, ex3Answers) => {
+    // Legacy-compatible local marker so downstream code that checks for
+    // completion still works during the transition.
     const session = {
       inviteCode: account.inviteCode,
       name: account.name,
@@ -8880,28 +8983,6 @@ function PartnerBExerciseFlow({ account, onComplete }) {
       completedAt: Date.now(),
     };
     try { localStorage.setItem('attune_partner_session', JSON.stringify(session)); } catch {}
-
-    // Push to server so Partner A can sync cross-device
-    try {
-      await fetch('/api/partner-sync', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          inviteCode:    account.inviteCode,
-          partnerBId:    account.id || null,
-          partnerBName:  account.name,
-          ex1Answers:    ex1Answers,
-          ex2Answers:    ex2Answers,
-          ...(ex3Answers ? { ex3Answers } : {}),
-          // Partner B demographics collected during landing-screen signup.
-          // Stored on partner_sessions since Partner B has no profile row.
-          demographics: account.demographics || null,
-        }),
-      });
-    } catch (e) {
-      console.warn('[Attune] partner-sync write failed, localStorage only:', e);
-    }
-
     onComplete(session);
   };
 
@@ -9587,11 +9668,8 @@ export default function App() {
   // and also listen for TOKEN_REFRESHED / SIGNED_OUT events so the UI reacts
   // when a session silently expires.
   //
-  // Partner B accounts have `isPartnerB: true` with no Supabase auth — they
-  // skip this flow and continue to live in localStorage only.
-  //
-  // Gift recipients (`isGiftRecipient: true`) DO have a Supabase auth session
-  // and go through this flow like regular users.
+  // Both Partner A and Partner B are real Supabase auth users — no special
+  // cases. joined_via_invite is a UX flag only.
   useEffect(() => {
     let cancelled = false;
     let authSubscription = null;
@@ -9609,9 +9687,6 @@ export default function App() {
           // Session is valid. If localStorage account is missing OR belongs to
           // a different user, rebuild it from the profile.
           if (!localAcct || localAcct.id !== session.user.id) {
-            // Don't overwrite Partner B accounts even if their id doesn't match
-            if (localAcct?.isPartnerB) return;
-
             const { data: profile } = await sb.from('profiles').select('*').eq('id', session.user.id).maybeSingle();
             if (cancelled) return;
 
@@ -9626,6 +9701,7 @@ export default function App() {
               emailOptIn: profile?.email_opt_in !== false,
               inviteCode: profile?.invite_code || '',
               partnerJoined: profile?.partner_joined || false,
+              joinedViaInvite: profile?.joined_via_invite || false,
               pkg: profile?.pkg || 'core',
               createdAt: profile?.created_at ? new Date(profile.created_at).getTime() : Date.now(),
             };
@@ -9633,10 +9709,9 @@ export default function App() {
             saveAccount(rebuilt);
           }
         } else {
-          // No Supabase session. If we have a localStorage account with a
-          // real Supabase id (not Partner B), the session has expired —
-          // clear and bounce them to login.
-          if (localAcct && localAcct.id && !localAcct.isPartnerB) {
+          // No Supabase session. If we have a localStorage account, the
+          // session has expired — clear and bounce them to login.
+          if (localAcct && localAcct.id) {
             setAccount(null);
             try { localStorage.removeItem('attune_account'); } catch {}
           }
@@ -9647,12 +9722,8 @@ export default function App() {
         const { data: { subscription } } = sb.auth.onAuthStateChange((event, sess) => {
           if (cancelled) return;
           if (event === 'SIGNED_OUT' || (event === 'TOKEN_REFRESHED' && !sess)) {
-            // Session is gone — clear local account (unless it's Partner B)
-            const cur = loadAccount();
-            if (cur && !cur.isPartnerB) {
-              setAccount(null);
-              try { localStorage.removeItem('attune_account'); } catch {}
-            }
+            setAccount(null);
+            try { localStorage.removeItem('attune_account'); } catch {}
           }
         });
         authSubscription = subscription;
@@ -10085,32 +10156,50 @@ export default function App() {
   };
 
   // ── Cross-device partner sync polling ────────────────────────────────────
-  // If Partner A is logged in, has an inviteCode, and doesn't yet have real
-  // partner data, poll /api/partner-sync every 15s to check if Partner B finished.
+  // Unified model: partner data lives on the linked partner's own profile
+  // row. On mount we look up Partner A's profile to get partner_profile_id,
+  // then poll /api/partner-sync?partnerProfileId=X every 15s.
+  //
+  // Fall-back: if partner_profile_id isn't set yet (Partner B hasn't signed
+  // up), nothing to poll — we just exit and wait for the next re-run.
   useEffect(() => {
-    const code = account?.inviteCode;
-    if (!code || hasRealPartner || account?.isPartnerB) return;
+    // Don't poll if: we're on Partner B's device (they joined via invite —
+    // they see Partner A's results on Partner A's device) or we already have
+    // real partner data.
+    if (!account?.id || hasRealPartner || account?.joinedViaInvite) return;
     let cancelled = false;
     let isFirst = true;
 
     const poll = async () => {
       if (isFirst) setPartnerSyncing(true);
       try {
-        const res = await fetch(`/api/partner-sync?inviteCode=${encodeURIComponent(code)}`);
+        const { supabase: sb, hasSupabase } = await import('./supabase.js');
+        if (!hasSupabase()) return;
+
+        // 1. Look up own profile to get partner_profile_id
+        const { data: ownProfile } = await sb.from('profiles').select('partner_profile_id').eq('id', account.id).maybeSingle();
+        const partnerId = ownProfile?.partner_profile_id;
+        if (!partnerId) return; // Partner hasn't signed up yet
+
+        // 2. Fetch partner's latest answers
+        const res = await fetch(`/api/partner-sync?partnerProfileId=${encodeURIComponent(partnerId)}`);
         if (!res.ok || cancelled) return;
         const json = await res.json();
-        if (json.found && json.session?.ex1_answers && json.session?.ex2_answers) {
+        if (json.found && json.profile?.ex1_answers && json.profile?.ex2_answers) {
           const s = {
-            inviteCode: code,
-            name: json.session.partner_b_name,
-            ex1: json.session.ex1_answers,
-            ex2: json.session.ex2_answers,
-            ...(json.session.ex3_answers ? { ex3: json.session.ex3_answers } : {}),
-            completedAt: json.session.completed_at,
+            partnerProfileId: partnerId,
+            inviteCode: account.inviteCode,
+            name: json.profile.name,
+            ex1: json.profile.ex1_answers,
+            ex2: json.profile.ex2_answers,
+            ...(json.profile.ex3_answers ? { ex3: json.profile.ex3_answers } : {}),
+            completedAt: Date.now(),
           };
           if (!cancelled) savePartnerSession(s);
         }
-      } catch {}
+      } catch (e) {
+        console.warn('[Attune] partner poll failed:', e);
+      }
       finally {
         if (isFirst && !cancelled) { setPartnerSyncing(false); isFirst = false; }
       }
@@ -10119,7 +10208,7 @@ export default function App() {
     poll(); // immediate check on mount
     const interval = setInterval(poll, 15000); // then every 15s
     return () => { cancelled = true; clearInterval(interval); };
-  }, [account?.inviteCode, account?.isPartnerB]);
+  }, [account?.id, account?.joinedViaInvite, hasRealPartner]);
 
   // ── 6-month check-in email ───────────────────────────────────────────────
   // Fires once, client-side, when the user returns 6+ months after signup.
@@ -10192,33 +10281,38 @@ export default function App() {
       onCreateAccount={(acct) => { setAccount(acct); saveAccount(acct); }}
     />;
   }
-  // Case 2: Account exists, is Partner B, exercises not yet done → exercise flow
-  if (account?.isPartnerB && !partnerSession) {
+  // Case 2: Account exists, joined via invite, exercises not yet done → exercise flow
+  if (account?.joinedViaInvite && !partnerSession) {
     return <PartnerBExerciseFlow
       account={account}
       onComplete={(session) => savePartnerSession(session)}
     />;
   }
   // Case 3: Partner B has completed exercises → waiting/ready screen
-  // Poll partner-sync to check if Partner A has also completed theirs
+  // Poll Partner A's profile to check if they've also completed.
   const [partnerADone, setPartnerADone] = useState(false);
   useEffect(() => {
-    if (!account?.isPartnerB || !partnerSession || hasRealPartner) return;
-    const code = account.inviteCode || partnerSession?.inviteCode;
-    if (!code) return;
+    if (!account?.joinedViaInvite || !partnerSession || hasRealPartner) return;
+    let cancelled = false;
     const check = async () => {
       try {
-        const res = await fetch(`/api/partner-sync?inviteCode=${encodeURIComponent(code)}`);
+        const { supabase: sb, hasSupabase } = await import('./supabase.js');
+        if (!hasSupabase()) return;
+        // Look up Partner A's profile id via our own partner_profile_id
+        const { data: own } = await sb.from('profiles').select('partner_profile_id').eq('id', account.id).maybeSingle();
+        if (!own?.partner_profile_id) return;
+        const res = await fetch(`/api/partner-sync?partnerProfileId=${encodeURIComponent(own.partner_profile_id)}`);
+        if (!res.ok || cancelled) return;
         const d = await res.json();
-        if (d.found && d.session?.ex1_answers) setPartnerADone(true);
+        if (d.found && d.profile?.ex1_answers && d.profile?.ex2_answers) setPartnerADone(true);
       } catch {}
     };
     check();
-    const iv = setInterval(check, 15000); // poll every 15s
-    return () => clearInterval(iv);
-  }, [account?.isPartnerB, partnerSession, hasRealPartner]);
+    const iv = setInterval(check, 15000);
+    return () => { cancelled = true; clearInterval(iv); };
+  }, [account?.joinedViaInvite, account?.id, partnerSession, hasRealPartner]);
 
-  if (account?.isPartnerB && partnerSession && !hasRealPartner) {
+  if (account?.joinedViaInvite && partnerSession && !hasRealPartner) {
     return <PartnerBCompletionScreen
       partnerAName={account.partnerName}
       partnerBName={account.name}
