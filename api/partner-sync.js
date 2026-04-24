@@ -34,6 +34,8 @@ import { createClient } from '@supabase/supabase-js';
 
 export const config = { runtime: 'edge' };
 
+import { reportToSentry } from './_lib/sentry-edge.js';
+
 const supabase = () => createClient(
   process.env.SUPABASE_URL,
   process.env.SUPABASE_SERVICE_KEY
@@ -51,6 +53,16 @@ function validateUuid(id) {
 }
 
 export default async function handler(req) {
+  try {
+    return await handlePartnerSync(req);
+  } catch (err) {
+    console.error('[partner-sync] unhandled error:', err);
+    reportToSentry(err, { route: '/api/partner-sync', request: req }).catch(() => {});
+    return new Response(JSON.stringify({ ok: false, error: 'Internal error' }), { status: 500, headers: CORS });
+  }
+}
+
+async function handlePartnerSync(req) {
   if (req.method === 'POST') {
     let body;
     try { body = await req.json(); } catch { return new Response('Invalid JSON', { status: 400 }); }

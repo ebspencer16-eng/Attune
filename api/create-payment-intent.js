@@ -13,6 +13,8 @@
  *   SUPABASE_SERVICE_ROLE    — service-role secret for Supabase writes
  */
 
+import { reportToSentry } from './_lib/sentry-edge.js';
+
 export const config = { runtime: 'edge' };
 
 // Canonical pricing — kept in sync with checkout.html PACKAGES.
@@ -27,6 +29,162 @@ const ADDON_PRICES = {
   budget:          20,
   checklist:       20,
 };
+
+// ── Stripe Tax product codes ─────────────────────────────────────────────
+// Per-line-item tax category. Stripe uses these to determine:
+//   (a) whether a line is taxable in a given state,
+//   (b) the correct rate for that category.
+// See: https://stripe.com/docs/tax/tax-codes
+//
+// Ellie — review these. If the wrong code is set, tax calculations will be
+// wrong (e.g. LMFT therapy is generally tax-exempt but if coded as "service"
+// it could be taxed).
+const TAX_CODES = {
+  // Digital delivery of the Attune package (assessment + workbook access)
+  digitalPackage:   'txcd_10000000', // General Services — fallback for digital
+  // Physical gift boxes (newlywed/anniversary/premium boxes)
+  physicalPackage:  'txcd_99999999', // General Tangible Goods
+  // Professional counseling session — tax-exempt in most US states
+  lmft:             'txcd_20030000', // Professional Services
+  // Digital workbook PDF
+  workbookDigital:  'txcd_10304100', // Books and Magazines (electronic)
+  // Print workbook
+  workbookPrint:    'txcd_20030007', // Printed Books
+  // Other digital add-on exercises (budget, checklist, reflection)
+  digitalAddon:     'txcd_10000000', // General Services
+};
+
+// Build a Stripe Tax calculation line item for each part of the cart.
+// Returns an array of { amount, tax_code, reference, quantity } objects.
+function buildTaxLineItems(item, itemIndex) {
+  const lines = [];
+  const basePrice = itemBasePrice(item);
+  // Base package as one line item
+  if (basePrice > 0) {
+    lines.push({
+      amount:    basePrice * 100, // Stripe wants cents
+      tax_code:  item.isPhysical ? TAX_CODES.physicalPackage : TAX_CODES.digitalPackage,
+      reference: `item-${itemIndex}-pkg`,
+      quantity:  1,
+    });
+  }
+  // Each add-on as its own line item so tax categorization is clean
+  if (item.addonWorkbook === 'print') {
+    lines.push({ amount: ADDON_PRICES.workbookPrint * 100,   tax_code: TAX_CODES.workbookPrint,   reference: `item-${itemIndex}-wbprint`,   quantity: 1 });
+  }
+  if (item.addonWorkbook === 'digital') {
+    lines.push({ amount: ADDON_PRICES.workbookDigital * 100, tax_code: TAX_CODES.workbookDigital, reference: `item-${itemIndex}-wbdigital`, quantity: 1 });
+  }
+  if (item.addonLmft) {
+    lines.push({ amount: ADDON_PRICES.lmft * 100,       tax_code: TAX_CODES.lmft,         reference: `item-${itemIndex}-lmft`,       quantity: 1 });
+  }
+  if (item.addonReflection) {
+    lines.push({ amount: ADDON_PRICES.reflection * 100, tax_code: TAX_CODES.digitalAddon, reference: `item-${itemIndex}-reflection`, quantity: 1 });
+  }
+  if (item.addonBudget) {
+    lines.push({ amount: ADDON_PRICES.budget * 100,     tax_code: TAX_CODES.digitalAddon, reference: `item-${itemIndex}-budget`,     quantity: 1 });
+  }
+  if (item.addonChecklist) {
+    lines.push({ amount: ADDON_PRICES.checklist * 100,  tax_code: TAX_CODES.digitalAddon, reference: `item-${itemIndex}-checklist`,  quantity: 1 });
+  }
+  return lines;
+}
+
+// Call Stripe Tax to calculate tax for the cart. Returns an object with:
+//   { calculationId, taxAmount (cents), totalAmount (cents) }
+// or { calculationId: null, taxAmount: 0, totalAmount: subtotalCents } if
+// tax calculation fails or isn't enabled (graceful fallback — order still
+// processes at subtotal, we just log the problem).
+//
+// `customerAddress` must include at minimum line1, city, state, postal_code,
+// country. If it doesn't (e.g. legacy checkout payload missing address),
+// we skip tax calculation and return subtotal only.
+async function calculateTaxWithStripe(secretKey, items, customerAddress, promoCovered) {
+  try {
+    if (!customerAddress || !customerAddress.postal_code || !customerAddress.country) {
+      console.warn('[tax] No customer address provided; skipping tax calc');
+      return { calculationId: null, taxAmount: 0, totalAmount: itemsTotalCents(items, promoCovered) };
+    }
+
+    // Flatten cart into individual Stripe Tax line items
+    const lineItems = [];
+    items.forEach((item, idx) => {
+      const itemLines = buildTaxLineItems(item, idx);
+      // If a promo covers the base, drop the package line from tax calc
+      // (Stripe Tax is calculated on actual paid amount).
+      if (item._promoCoveredBase) {
+        const filtered = itemLines.filter(l => !l.reference.endsWith('-pkg'));
+        lineItems.push(...filtered);
+      } else {
+        lineItems.push(...itemLines);
+      }
+    });
+
+    if (lineItems.length === 0) {
+      return { calculationId: null, taxAmount: 0, totalAmount: 0 };
+    }
+
+    // Build the Stripe Tax calculation request payload (application/x-www-form-urlencoded)
+    const payload = new URLSearchParams();
+    payload.set('currency', 'usd');
+    payload.set('customer_details[address][line1]',       customerAddress.line1 || '');
+    if (customerAddress.line2) payload.set('customer_details[address][line2]', customerAddress.line2);
+    payload.set('customer_details[address][city]',        customerAddress.city || '');
+    payload.set('customer_details[address][state]',       customerAddress.state || '');
+    payload.set('customer_details[address][postal_code]', customerAddress.postal_code);
+    payload.set('customer_details[address][country]',     customerAddress.country || 'US');
+    payload.set('customer_details[address_source]',       'billing');
+
+    lineItems.forEach((line, idx) => {
+      payload.set(`line_items[${idx}][amount]`,    String(line.amount));
+      payload.set(`line_items[${idx}][tax_code]`,  line.tax_code);
+      payload.set(`line_items[${idx}][reference]`, line.reference);
+      payload.set(`line_items[${idx}][quantity]`,  String(line.quantity));
+    });
+
+    const res = await fetch('https://api.stripe.com/v1/tax/calculations', {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${secretKey}`,
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: payload.toString(),
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      // Common failure modes:
+      //   - Stripe Tax not enabled on account → error.code = 'tax_not_configured'
+      //   - Unsupported country → error.code = 'tax_location_unknown'
+      // Either way: log and fall back to zero tax so checkout doesn't break.
+      console.error('[tax] Stripe Tax calculation failed:', data.error?.message || data);
+      reportToSentry(new Error('Stripe Tax failed: ' + (data.error?.message || 'unknown')), {
+        route: '/api/create-payment-intent',
+        extra: { stripeError: data.error, customerAddress },
+      }).catch(() => {});
+      return { calculationId: null, taxAmount: 0, totalAmount: itemsTotalCents(items, promoCovered) };
+    }
+
+    return {
+      calculationId: data.id,
+      taxAmount:     data.tax_amount_exclusive || 0,
+      totalAmount:   data.amount_total || itemsTotalCents(items, promoCovered),
+    };
+  } catch (e) {
+    console.error('[tax] Exception during tax calc:', e);
+    reportToSentry(e, { route: '/api/create-payment-intent', extra: { step: 'tax_calc' } }).catch(() => {});
+    return { calculationId: null, taxAmount: 0, totalAmount: itemsTotalCents(items, promoCovered) };
+  }
+}
+
+// Helper — compute cart total in cents, respecting promo coverage
+function itemsTotalCents(items, promoCovered) {
+  return items.reduce((sum, it) => {
+    const dollars = it._promoCoveredBase ? itemAddonTotal(it) : itemSubtotal(it);
+    return sum + dollars * 100;
+  }, 0);
+}
 
 function newQrToken() {
   // ATQR-<12 hex chars>, unguessable per-order token for physical QR card.
@@ -290,15 +448,26 @@ export default async function handler(req) {
   // ── Paid checkout via Stripe ────────────────────────────────────────────
   // If a promo code covered the package base, only charge for add-ons.
   // Otherwise the full subtotal.
-  const totalDollars = items.reduce((sum, it) => {
+  const subtotalDollars = items.reduce((sum, it) => {
     return sum + (it._promoCoveredBase ? itemAddonTotal(it) : itemSubtotal(it));
   }, 0);
   const promoCovered = items.some(it => it._promoCoveredBase);
-  if (totalDollars <= 0) {
+  if (subtotalDollars <= 0) {
     return new Response(JSON.stringify({ error: 'Empty cart' }), {
       status: 400, headers: { 'Content-Type': 'application/json' }
     });
   }
+
+  // ── Stripe Tax calculation ────────────────────────────────────────────
+  // Pull customer's billing address from request. If no address is provided
+  // (e.g. legacy client that doesn't collect it), skip tax calc and charge
+  // subtotal only — graceful degradation so a schema change doesn't break
+  // checkout on older deploys.
+  const customerAddress = body.customerAddress || body.billingAddress || null;
+  const taxResult = await calculateTaxWithStripe(secretKey, items, customerAddress, promoCovered);
+  const totalCents = taxResult.totalAmount || (subtotalDollars * 100);
+  const taxCents   = taxResult.taxAmount   || 0;
+  const subtotalCents = subtotalDollars * 100;
 
   // Compact items metadata for the webhook. Each item is serialized as a
   // short object. Stripe caps metadata values at 500 chars per key, so we
@@ -321,7 +490,7 @@ export default async function handler(req) {
   const itemsJson = JSON.stringify(compactItems);
 
   const payload = new URLSearchParams({
-    amount:   String(totalDollars * 100),
+    amount:   String(totalCents),  // subtotal + tax, from Stripe Tax calc
     currency: 'usd',
     'automatic_payment_methods[enabled]': 'true',
     'metadata[itemCount]':    String(items.length),
@@ -342,6 +511,12 @@ export default async function handler(req) {
     // tags the resulting order rows with promo_code + adjusts accounting.
     'metadata[promoCode]':    promoCovered ? (promoCode || '').toUpperCase().trim() : '',
     'metadata[promoCoversBase]': promoCovered ? '1' : '',
+    // Tax calculation pass-through. The webhook uses taxCalculationId to
+    // create a matching tax transaction after payment succeeds, which is
+    // how Stripe Tax records revenue for reporting/filing.
+    'metadata[taxCalculationId]': taxResult.calculationId || '',
+    'metadata[taxAmount]':        String(taxCents),
+    'metadata[subtotal]':         String(subtotalCents),
   });
 
   // Split items JSON across keys if needed
@@ -380,12 +555,27 @@ export default async function handler(req) {
       });
     }
 
-    return new Response(JSON.stringify({ clientSecret: data.client_secret }), {
+    return new Response(JSON.stringify({
+      clientSecret: data.client_secret,
+      // Tax breakdown for the UI to display:
+      //   subtotalCents: what the user is buying (pre-tax)
+      //   taxCents:      sales tax for their jurisdiction
+      //   totalCents:    what Stripe will charge
+      //   taxCalculationId: reference used by webhook to record the transaction
+      taxBreakdown: {
+        subtotalCents,
+        taxCents,
+        totalCents,
+        calculationId: taxResult.calculationId,
+      },
+    }), {
       status: 200, headers: { 'Content-Type': 'application/json' }
     });
 
   } catch (err) {
     console.error('Payment intent creation failed:', err);
+    // Fire-and-forget to Sentry — don't block response if Sentry is slow
+    reportToSentry(err, { route: '/api/create-payment-intent', request: req }).catch(() => {});
     return new Response(JSON.stringify({ error: 'Payment service unavailable' }), {
       status: 500, headers: { 'Content-Type': 'application/json' }
     });

@@ -452,6 +452,7 @@ async function exportOrders(admin) {
   const headers = [
     'order_num', 'order_date', 'package',
     'physical_or_digital', 'gift_or_self',
+    'subtotal', 'tax', 'total', 'promo_code',
     'workbook_purchased', 'workbook_purchased_when',
     'reflection_purchased', 'reflection_purchased_when',
     'budget_purchased', 'budget_purchased_when',
@@ -506,6 +507,10 @@ async function exportOrders(admin) {
       o.pkg_key || '',
       o.is_physical ? 'physical' : 'digital',
       o.is_gift ? 'gift' : 'self',
+      o.subtotal != null ? Number(o.subtotal).toFixed(2) : '',
+      o.tax_amount != null ? Number(o.tax_amount).toFixed(2) : '',
+      o.total != null ? Number(o.total).toFixed(2) : '',
+      o.promo_code || '',
       hasWorkbook   ? 'Y' : 'N',   hasWorkbook   ? whenForAddon(o, 'addon_workbook') : '',
       hasReflection ? 'Y' : 'N',   hasReflection ? whenFor(pkgHasReflection, 'addon_reflection') : '',
       hasBudget     ? 'Y' : 'N',   hasBudget     ? whenFor(pkgHasBudget, 'addon_budget') : '',

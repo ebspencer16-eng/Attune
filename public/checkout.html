@@ -270,16 +270,51 @@
           </div>
           <div class="form-group">
             <label class="form-label" for="shipAddr">Street address</label>
-            <input class="form-input" type="text" id="shipAddr" placeholder="123 Main St" autocomplete="street-address">
+            <input class="form-input" type="text" id="shipAddr" placeholder="123 Main St" autocomplete="street-address" oninput="debounceTaxRefresh()">
           </div>
           <div class="form-row">
             <div class="form-group">
               <label class="form-label" for="shipCity">City</label>
-              <input class="form-input" type="text" id="shipCity" placeholder="City" autocomplete="address-level2">
+              <input class="form-input" type="text" id="shipCity" placeholder="City" autocomplete="address-level2" oninput="debounceTaxRefresh()">
             </div>
             <div class="form-group">
               <label class="form-label" for="shipState">State / ZIP</label>
-              <input class="form-input" type="text" id="shipState" placeholder="UT 84601" autocomplete="postal-code">
+              <input class="form-input" type="text" id="shipState" placeholder="UT 84601" autocomplete="postal-code" oninput="debounceTaxRefresh()">
+            </div>
+          </div>
+        </div>
+
+        <!-- Billing address (required for tax calculation) -->
+        <div id="billingSection">
+          <div class="form-divider">Billing address</div>
+          <div class="form-group" id="billingSameAsShippingWrap" style="display:none">
+            <label style="display:flex;align-items:center;gap:.5rem;font-size:.8rem;color:#5A4A3A;cursor:pointer">
+              <input type="checkbox" id="billingSameAsShipping" checked onchange="toggleBillingSame()">
+              <span>Same as shipping address</span>
+            </label>
+          </div>
+          <div id="billingFields">
+            <div class="form-group">
+              <label class="form-label" for="billAddr">Street address</label>
+              <input class="form-input" type="text" id="billAddr" placeholder="123 Main St" autocomplete="billing street-address" oninput="debounceTaxRefresh()">
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="billAddr2">Apt, suite, unit <span style="color:#B8AC9C;font-weight:400">(optional)</span></label>
+              <input class="form-input" type="text" id="billAddr2" placeholder="Apt 4B" autocomplete="billing address-line2" oninput="debounceTaxRefresh()">
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label" for="billCity">City</label>
+                <input class="form-input" type="text" id="billCity" placeholder="City" autocomplete="billing address-level2" oninput="debounceTaxRefresh()">
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="billState">State</label>
+                <input class="form-input" type="text" id="billState" placeholder="UT" maxlength="2" autocomplete="billing address-level1" oninput="debounceTaxRefresh()" style="text-transform:uppercase">
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="billZip">ZIP</label>
+                <input class="form-input" type="text" id="billZip" placeholder="84601" autocomplete="billing postal-code" oninput="debounceTaxRefresh()">
+              </div>
             </div>
           </div>
         </div>
@@ -340,6 +375,9 @@
         <div id="pkgSummary">
           <!-- Populated by JS -->
         </div>
+
+        <!-- Tax line (populated by JS after billing ZIP entered) -->
+        <div id="taxLine"></div>
 
         <div class="total-row">
           <div class="total-label">Total</div>
@@ -441,6 +479,103 @@ let addonLmft = false;
 //   { pkg, format, addons:{workbook,workbookVariant,lmft,reflection,budget,checklist},
 //     intent:'self'|'gift', partner1Name, partner2Name, giftNote, shipping:{name,address,city,state} }
 let _items = [];
+
+// ── Tax quote state ──────────────────────────────────────────────────────────
+// Populated by /api/calculate-tax on address change. When taxQuote is null,
+// the summary shows "Sales tax: calculated at next step". When populated,
+// the line shows the real amount.
+let taxQuote = null; // { subtotalCents, taxCents, totalCents } or null
+let _taxTimer = null;
+
+// Read the billing address fields from the DOM and normalize for the API.
+// Returns null if any required field is missing.
+function getBillingAddress() {
+  const line1      = document.getElementById('billAddr')?.value.trim() || '';
+  const line2      = document.getElementById('billAddr2')?.value.trim() || '';
+  const city       = document.getElementById('billCity')?.value.trim() || '';
+  const state      = document.getElementById('billState')?.value.trim().toUpperCase() || '';
+  const postal     = document.getElementById('billZip')?.value.trim() || '';
+  const sameAsShip = document.getElementById('billingSameAsShipping')?.checked;
+
+  // If the "same as shipping" checkbox is on and we have a shipping
+  // address, pull from there instead.
+  if (sameAsShip) {
+    const shipState = (document.getElementById('shipState')?.value || '').trim();
+    // Shipping state field is combined "UT 84601"; split on whitespace
+    const parts = shipState.split(/\s+/);
+    return {
+      line1:       document.getElementById('shipAddr')?.value.trim() || '',
+      city:        document.getElementById('shipCity')?.value.trim() || '',
+      state:       (parts[0] || '').toUpperCase(),
+      postal_code: parts[1] || '',
+      country:     'US',
+    };
+  }
+
+  // Require at minimum zip + country to calculate tax
+  if (!postal) return null;
+  return {
+    line1, line2, city, state,
+    postal_code: postal,
+    country: 'US',
+  };
+}
+
+// Show/hide the billing address fields based on "same as shipping" checkbox
+function toggleBillingSame() {
+  const checked = document.getElementById('billingSameAsShipping')?.checked;
+  const fields = document.getElementById('billingFields');
+  if (fields) fields.style.display = checked ? 'none' : '';
+  debounceTaxRefresh();
+}
+
+// Debounced tax refresh — called on every address keystroke. Waits 600ms
+// after the last keystroke before hitting the tax API so we don't thrash
+// Stripe on every character typed.
+function debounceTaxRefresh() {
+  if (_taxTimer) clearTimeout(_taxTimer);
+  _taxTimer = setTimeout(refreshTax, 600);
+}
+
+async function refreshTax() {
+  const addr = getBillingAddress();
+  if (!addr) {
+    // Not enough address info yet — leave quote null so summary shows "calculated at next step"
+    taxQuote = null;
+    renderSummary();
+    return;
+  }
+
+  try {
+    const res = await fetch('/api/calculate-tax', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        items: _items.map(it => ({
+          pkgKey:          it.pkg,
+          isPhysical:      it.format === 'physical',
+          addonWorkbook:   it.addons.workbook ? (it.addons.workbookVariant || 'digital') : null,
+          addonLmft:       !!it.addons.lmft,
+          addonReflection: !!it.addons.reflection,
+          addonBudget:     !!it.addons.budget,
+          addonChecklist:  !!it.addons.checklist,
+        })),
+        customerAddress: addr,
+        promoCode:       appliedPromoCode || null,
+      }),
+    });
+    if (!res.ok) { taxQuote = null; renderSummary(); return; }
+    const data = await res.json();
+    // If tax calc came back unavailable (stripe tax disabled, or jurisdiction
+    // not registered), store zero tax so we don't block checkout
+    taxQuote = data;
+    renderSummary();
+  } catch (e) {
+    console.warn('[tax] refresh failed:', e);
+    taxQuote = null;
+    renderSummary();
+  }
+}
 
 // ── Init: read cart from sessionStorage or fall back to URL params ───────────
 (function init() {
@@ -670,7 +805,18 @@ function setFormat(fmt) {
   pkg.format = fmt;
   document.querySelectorAll('.fmt-btn').forEach(b => b.classList.toggle('active', b.dataset.fmt === fmt));
   document.getElementById('shippingSection').style.display = fmt === 'physical' ? 'block' : 'none';
+  // When physical, offer to reuse shipping as billing
+  const sameWrap = document.getElementById('billingSameAsShippingWrap');
+  const billFields = document.getElementById('billingFields');
+  if (sameWrap) sameWrap.style.display = fmt === 'physical' ? 'block' : 'none';
+  // If shipping is visible and "same as shipping" is checked, hide the billing fields
+  if (fmt === 'physical' && document.getElementById('billingSameAsShipping')?.checked) {
+    if (billFields) billFields.style.display = 'none';
+  } else if (billFields) {
+    billFields.style.display = '';
+  }
   renderSummary();
+  debounceTaxRefresh();
 }
 
 // ── Render order summary ─────────────────────────────────────────────────────
@@ -752,7 +898,41 @@ function renderSummary() {
   }
 
   if (el) el.innerHTML = rows;
-  if (totalEl) totalEl.textContent = '$' + total;
+
+  // ── Tax line ───────────────────────────────────────────────────────────
+  // After the promo discount, show sales tax (either from the live quote
+  // or as a placeholder). Tax applies to post-discount subtotal.
+  const postDiscountSubtotal = total;
+  let taxDollars = 0;
+  let grandTotal = postDiscountSubtotal;
+
+  const taxLineEl = document.getElementById('taxLine');
+  if (!taxQuote) {
+    // No quote yet — show placeholder
+    if (taxLineEl) {
+      taxLineEl.innerHTML = `
+        <div style="display:flex;justify-content:space-between;align-items:baseline;padding:.4rem 0;font-size:.8rem;color:#8C7A68">
+          <span>Sales tax</span>
+          <span style="font-size:.72rem;color:#B8AC9C">calculated from billing ZIP</span>
+        </div>`;
+    }
+  } else if (taxQuote.taxUnavailable || !taxQuote.taxCents) {
+    // Stripe Tax returned zero (either not registered in that jurisdiction,
+    // or the item is tax-exempt there). Don't show a tax line at all.
+    if (taxLineEl) taxLineEl.innerHTML = '';
+  } else {
+    taxDollars = taxQuote.taxCents / 100;
+    grandTotal = postDiscountSubtotal + taxDollars;
+    if (taxLineEl) {
+      taxLineEl.innerHTML = `
+        <div style="display:flex;justify-content:space-between;align-items:baseline;padding:.4rem 0;font-size:.8rem;color:#5A4A3A;border-top:1px solid #E8DDD0;margin-top:.4rem;padding-top:.5rem">
+          <span>Sales tax</span>
+          <span style="font-weight:700;color:#1E1610">$${taxDollars.toFixed(2)}</span>
+        </div>`;
+    }
+  }
+
+  if (totalEl) totalEl.textContent = '$' + (Number.isInteger(grandTotal) ? grandTotal : grandTotal.toFixed(2));
 
   // Tag list uses first item's package
   const firstPkg = PACKAGES[_items[0]?.pkg] || PACKAGES.core;
@@ -761,7 +941,7 @@ function renderSummary() {
   if (tagEl) tagEl.innerHTML = (activeTags || []).map(t => `<span class="tag">${t}</span>`).join('');
 
   const btnLabel = document.getElementById('btnLabel');
-  if (btnLabel) btnLabel.textContent = `Complete order · $${total}`;
+  if (btnLabel) btnLabel.textContent = `Complete order · $${Number.isInteger(grandTotal) ? grandTotal : grandTotal.toFixed(2)}`;
 
   // Keep the Apple Pay / Google Pay button's total in sync with the cart
   if (typeof updatePaymentRequestTotal === 'function') updatePaymentRequestTotal();
@@ -967,6 +1147,18 @@ function validateForm() {
           try {
             // Reuse the existing payment intent creation path
             const first = _items[0];
+            // Apple Pay / Google Pay includes a billing address on the payment
+            // method. Extract it for Stripe Tax calc.
+            const applePayBillAddr = ev.paymentMethod?.billing_details?.address;
+            const customerAddress = applePayBillAddr ? {
+              line1:       applePayBillAddr.line1 || '',
+              line2:       applePayBillAddr.line2 || '',
+              city:        applePayBillAddr.city || '',
+              state:       (applePayBillAddr.state || '').toUpperCase(),
+              postal_code: applePayBillAddr.postal_code || '',
+              country:     applePayBillAddr.country || 'US',
+            } : getBillingAddress();
+
             const res = await fetch('/api/create-payment-intent', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
@@ -985,6 +1177,7 @@ function validateForm() {
                 partner1Name: first.partner1Name, partner2Name: first.partner2Name,
                 isGift: first.intent === 'gift', isPhysical: first.format === 'physical',
                 email,
+                customerAddress,
               }),
             });
             const { clientSecret, error } = await res.json();
@@ -1112,6 +1305,9 @@ async function handleSubmit(e) {
         giftNote:         first.giftNote || null,
         promoCode:        appliedPromoCode || null,
         shipping:         first.format === 'physical' ? first.shipping : null,
+        // Billing address — required by Stripe Tax. Collected via the
+        // Billing address form section in the UI.
+        customerAddress:  getBillingAddress(),
       }),
     });
 

@@ -14,6 +14,8 @@
 
 export const config = { runtime: 'edge' };
 
+import { reportToSentry } from './_lib/sentry-edge.js';
+
 async function verifyStripeSignature(body, signature, secret) {
   // Stripe webhook signature format: t=timestamp,v1=hash
   const parts = signature.split(',');
@@ -37,6 +39,21 @@ async function verifyStripeSignature(body, signature, secret) {
 }
 
 export default async function handler(req) {
+  try {
+    return await handleWebhook(req);
+  } catch (err) {
+    console.error('[stripe-webhook] unhandled error:', err);
+    reportToSentry(err, { route: '/api/stripe-webhook', request: req }).catch(() => {});
+    // Return 200 even on error — Stripe retries webhook failures up to
+    // 72 hours, so we'd rather log + continue than get a storm of retries
+    // for a bug that Sentry will let us fix.
+    return new Response(JSON.stringify({ received: true, error: 'logged' }), {
+      status: 200, headers: { 'Content-Type': 'application/json' },
+    });
+  }
+}
+
+async function handleWebhook(req) {
   if (req.method !== 'POST') {
     return new Response('Method not allowed', { status: 405 });
   }
@@ -99,6 +116,43 @@ export default async function handler(req) {
       const dateStr = `${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}`;
       const baseOrderNum = meta.orderNum || `ATT-${dateStr}-${Math.random().toString(36).substring(2,6).toUpperCase()}`;
 
+      // ── Stripe Tax: record the transaction ──────────────────────────────
+      // If the checkout computed a tax_calculation_id, we need to convert
+      // that calculation into a transaction now that payment succeeded.
+      // This is what tells Stripe Tax to include the sale in your tax
+      // reports/filings. Without this step, tax is charged but not tracked.
+      const taxCalcId = meta.taxCalculationId;
+      const stripeSecret = process.env.STRIPE_SECRET_KEY;
+      if (taxCalcId && stripeSecret) {
+        try {
+          const transPayload = new URLSearchParams();
+          transPayload.set('calculation', taxCalcId);
+          transPayload.set('reference',    baseOrderNum);
+          const transRes = await fetch('https://api.stripe.com/v1/tax/transactions/create_from_calculation', {
+            method: 'POST',
+            headers: {
+              Authorization: `Bearer ${stripeSecret}`,
+              'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: transPayload.toString(),
+          });
+          if (!transRes.ok) {
+            const errJson = await transRes.json();
+            console.warn('[webhook] Stripe Tax transaction create failed:', errJson.error?.message);
+            // Don't block order creation — the tax was charged; worst case we
+            // log it manually in the Stripe dashboard.
+          } else {
+            console.log(`[webhook] Stripe Tax transaction recorded for ${baseOrderNum}`);
+          }
+        } catch (e) {
+          console.warn('[webhook] Stripe Tax transaction exception:', e);
+        }
+      }
+
+      // Parse tax + subtotal metadata (in cents) for persistence on the order
+      const taxAmount   = parseInt(meta.taxAmount   || '0', 10) / 100;
+      const subtotalAmt = parseInt(meta.subtotal    || '0', 10) / 100;
+
       try {
         if (Array.isArray(items) && items.length > 0) {
           // Multi-item: one row per item
@@ -140,6 +194,12 @@ export default async function handler(req) {
                 shipping_address:        shipAddr || null,
                 shipping_city:           shipCity || null,
                 shipping_state:          shipState || null,
+                // Tax (proportional share for multi-item; null for the single-item
+                // case since the PaymentIntent's total already includes tax).
+                tax_amount:              items.length > 1 ? null : (taxAmount || null),
+                subtotal:                items.length > 1 ? null : (subtotalAmt || null),
+                tax_calculation_id:      taxCalcId || null,
+                promo_code:              meta.promoCode || null,
               }),
             });
             console.log(`[webhook] order ${i+1}/${items.length} created: ${orderNum} (qr ${qrToken})`);
@@ -173,6 +233,10 @@ export default async function handler(req) {
               stripe_payment_intent_id: intent.id,
               workbook_status:         'pending',
               qr_token:                qrToken,
+              tax_amount:              taxAmount || null,
+              subtotal:                subtotalAmt || null,
+              tax_calculation_id:      taxCalcId || null,
+              promo_code:              meta.promoCode || null,
             }),
           });
           console.log(`[webhook] order created: ${baseOrderNum} (qr ${qrToken})`);
