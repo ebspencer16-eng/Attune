@@ -183,6 +183,67 @@ async function trackedSupabaseWrite(promise, showToast) {
   }
 }
 
+/**
+ * Save exercise answers to profiles with automatic retake-snapshot handling.
+ *
+ * When a user completes an exercise for the 2nd+ time, we preserve their
+ * previous answers in `ex{N}_answers_prior` + `ex{N}_prior_completed_at`
+ * BEFORE overwriting `ex{N}_answers` with the new completion. This enables
+ * the retake comparison view (1 step back of history).
+ *
+ * Usage:
+ *   await saveExerciseWithRetakeSnapshot(sb, accountId, 2, newAnswers, extraPatch);
+ *
+ * Params:
+ *   sb         - supabase client (from './supabase.js')
+ *   accountId  - profiles.id uuid
+ *   exerciseNum - 1 | 2 | 3
+ *   answers    - the new answers object (written to ex{N}_answers)
+ *   extraPatch - optional extra fields to include in the update (e.g. ex3_completed: true)
+ *
+ * Returns the supabase response from the final write. Never throws —
+ * failures fall through to trackedSupabaseWrite's sync-retry toast.
+ *
+ * Behavior on first completion (no prior answers exist):
+ *   Writes { ex{N}_answers: answers, ...extraPatch }. Prior columns untouched.
+ *
+ * Behavior on retake (prior answers exist):
+ *   Reads current ex{N}_answers, then writes
+ *   { ex{N}_answers: newAnswers,
+ *     ex{N}_answers_prior: old ex{N}_answers,
+ *     ex{N}_prior_completed_at: now,
+ *     ...extraPatch }
+ *   in a single update. Atomic from the caller's perspective; the SELECT
+ *   + UPDATE isn't a transaction but retake races are extremely unlikely
+ *   (user would have to hit the finish button on two devices within ms).
+ */
+async function saveExerciseWithRetakeSnapshot(sb, accountId, exerciseNum, answers, extraPatch = {}) {
+  if (!sb || !accountId || !exerciseNum || !answers) return { error: new Error('bad args') };
+  const col     = `ex${exerciseNum}_answers`;
+  const priorCol = `ex${exerciseNum}_answers_prior`;
+  const priorAt  = `ex${exerciseNum}_prior_completed_at`;
+
+  // Fetch the current value to detect retake vs. first completion.
+  // If the fetch fails, fall through to a plain write (no snapshot) so
+  // we never block the user's completion on a read failure.
+  let existingAnswers = null;
+  try {
+    const { data, error } = await sb.from('profiles').select(col).eq('id', accountId).single();
+    if (!error && data && data[col]) existingAnswers = data[col];
+  } catch (e) {
+    console.warn('[Attune] retake check failed, writing without snapshot:', e);
+  }
+
+  // Build the patch
+  const patch = { [col]: answers, ...extraPatch };
+  if (existingAnswers) {
+    patch[priorCol] = existingAnswers;
+    patch[priorAt]  = new Date().toISOString();
+  }
+
+  return trackedSupabaseWrite(sb.from('profiles').update(patch).eq('id', accountId));
+}
+
 // -- EXERCISE 2 --
 function ExpectationsExercise({ partnerName, userName = "Partner A", onComplete, isAnniversary = false, isRevisited = false }) {
   const activeLifeQs = isRevisited ? LIFE_QUESTIONS_REVISITED : isAnniversary ? LIFE_QUESTIONS_ANNIVERSARY : LIFE_QUESTIONS;
@@ -5944,7 +6005,226 @@ function BetaSurveyModal({ userName, coupleType, onClose }) {
   );
 }
 
-function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Answers, partnerEx3, hasAnniversary, userName, partnerName, initialSection, isMobile = false, portrait = null, hasChecklist = false, hasBudget = false, hasLMFT = false, onNavigateTool = null, userPronouns = "", partnerPronouns = "" }) {
+// ─────────────────────────────────────────────────────────────────────────────
+// RETAKE COMPARISON CARD
+// Shows on the results page when the user has completed an exercise more than
+// once (we have both current answers and a prior snapshot). Surfaces the
+// delta between completions as:
+//   (a) a banner summary — "X of Y questions shifted since {date}"
+//   (b) an expandable side-by-side accordion with before → after per change
+// Returns null when there's no prior snapshot or when answers are identical.
+//
+// Focused on Exercise 2 (expectations) because those answers are
+// categorical strings with stable keys — well-suited to string-equality
+// delta detection. A future version can extend this to Ex1 and Ex3.
+// ─────────────────────────────────────────────────────────────────────────────
+function RetakeComparisonCard({ currentEx2, priorEx2, priorAt, userName }) {
+  const [expanded, setExpanded] = useState(false);
+
+  // Flatten both answer sets into {categorizedKey: answerString} dicts so we
+  // can compare apples to apples. Skip keys that are objects (bothDetail,
+  // childhoodBothDetail) — those are secondary fields, not primary answers.
+  const flatten = (obj) => {
+    if (!obj || typeof obj !== 'object') return {};
+    const out = {};
+    // Responsibilities: keyed by `category__item` like household__Cooking meals
+    if (obj.responsibilities && typeof obj.responsibilities === 'object') {
+      Object.entries(obj.responsibilities).forEach(([k, v]) => {
+        if (typeof v === 'string' && v.length > 0) out[`resp:${k}`] = v;
+      });
+    }
+    // Life: keyed by lq_* like lq_children, lq_location
+    if (obj.life && typeof obj.life === 'object') {
+      Object.entries(obj.life).forEach(([k, v]) => {
+        if (typeof v === 'string' && v.length > 0) out[`life:${k}`] = v;
+      });
+    }
+    // Childhood: structured similar to responsibilities
+    if (obj.childhood && typeof obj.childhood === 'object') {
+      Object.entries(obj.childhood).forEach(([k, v]) => {
+        if (typeof v === 'string' && v.length > 0) out[`child:${k}`] = v;
+      });
+    }
+    // childhoodStructure — scalar
+    if (typeof obj.childhoodStructure === 'string' && obj.childhoodStructure) {
+      out['child:_structure'] = obj.childhoodStructure;
+    }
+    return out;
+  };
+
+  const cur = flatten(currentEx2);
+  const prior = flatten(priorEx2);
+  const priorKeys = Object.keys(prior);
+  // No snapshot at all, or snapshot was empty — don't render
+  if (priorKeys.length === 0) return null;
+
+  // Find changed answers (present in both, different value)
+  const changes = [];
+  const unchanged = [];
+  priorKeys.forEach(k => {
+    if (!cur[k]) return; // question dropped between takes — skip
+    if (cur[k] === prior[k]) unchanged.push(k);
+    else changes.push({ key: k, before: prior[k], after: cur[k] });
+  });
+
+  // Nothing to show if everything stayed identical (still surface that fact
+  // but in a muted way — it's a meaningful result that the user is
+  // consistent across time)
+  const totalComparable = changes.length + unchanged.length;
+  if (totalComparable === 0) return null;
+
+  // Friendly label for a question key
+  const labelFor = (key) => {
+    const [scope, rest] = key.split(':', 2);
+    if (scope === 'resp') {
+      // Format: "household__Cooking meals" → "Cooking meals (household)"
+      const [cat, item] = rest.split('__');
+      return item ? `${item}` : rest;
+    }
+    if (scope === 'life') {
+      // lq_children → Children, lq_conflict_when → Conflict timing
+      const map = {
+        lq_children: 'Children', lq_parents: 'Parents / aging family',
+        lq_family_conf: 'Family conflict loyalty', lq_location: 'Where you live',
+        lq_social: 'Social life', lq_routine: 'Routine vs spontaneity',
+        lq_faith: 'Faith / spirituality', lq_values: 'Core values',
+        lq_finances: 'Combining finances', lq_money_lean: 'Saving vs spending',
+        lq_money_risk: 'Risk tolerance', lq_conflict_when: 'When to talk after conflict',
+        lq_conflict_after: 'How long you need', lq_conflict_repair: 'What repair feels like',
+        lq_affection: 'Physical affection', lq_closeness: 'Closeness under stress',
+        lq_independence: 'Independence',
+      };
+      return map[rest] || rest;
+    }
+    if (scope === 'child') {
+      if (rest === '_structure') return 'Childhood home structure';
+      const [cat, item] = rest.split('__');
+      return item ? `${item}` : rest;
+    }
+    return key;
+  };
+
+  // Category grouping for the expanded view
+  const scopeLabel = (key) => {
+    if (key.startsWith('resp:')) return 'Responsibilities';
+    if (key.startsWith('life:')) return 'Life & values';
+    if (key.startsWith('child:')) return 'Childhood context';
+    return 'Other';
+  };
+  const changesByScope = {};
+  changes.forEach(c => {
+    const scope = scopeLabel(c.key);
+    if (!changesByScope[scope]) changesByScope[scope] = [];
+    changesByScope[scope].push(c);
+  });
+
+  // Format the prior-completion date
+  const priorDateStr = priorAt ? new Date(priorAt).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) : 'your last completion';
+
+  const pctChanged = Math.round((changes.length / totalComparable) * 100);
+  const shiftLevel = pctChanged >= 30 ? 'significant' : pctChanged >= 10 ? 'notable' : 'minor';
+  const shiftColor = pctChanged >= 30 ? '#E8673A' : pctChanged >= 10 ? '#C17F47' : '#10b981';
+
+  return (
+    <div style={{
+      background: 'linear-gradient(135deg, rgba(232,103,58,0.04), rgba(27,95,232,0.04))',
+      border: '1.5px solid rgba(232,103,58,0.18)',
+      borderRadius: 14,
+      padding: '1.1rem 1.25rem',
+      marginBottom: '1.5rem',
+    }}>
+      {/* Eyebrow + summary */}
+      <div style={{
+        fontSize: '0.58rem',
+        letterSpacing: '0.22em',
+        textTransform: 'uppercase',
+        color: shiftColor,
+        fontWeight: 700,
+        fontFamily: BFONT,
+        marginBottom: '0.55rem',
+      }}>
+        ✦ Since last time
+      </div>
+      <div style={{ fontFamily: HFONT, fontSize: '1.15rem', fontWeight: 700, color: '#0E0B07', lineHeight: 1.35, marginBottom: '0.35rem' }}>
+        {changes.length === 0
+          ? `${userName}, your answers are consistent across time.`
+          : `${userName}, you shifted on ${changes.length} of ${totalComparable} questions.`}
+      </div>
+      <p style={{ fontSize: '0.82rem', color: '#8C7A68', fontFamily: BFONT, lineHeight: 1.6, margin: '0 0 0.85rem' }}>
+        {changes.length === 0
+          ? `You completed this on ${priorDateStr} and your views have held steady.`
+          : `You completed this on ${priorDateStr}. That's a ${shiftLevel} shift — ${pctChanged}% of your answers changed.`}
+      </p>
+
+      {changes.length > 0 && (
+        <button onClick={() => setExpanded(!expanded)}
+          style={{
+            background: 'transparent',
+            border: '1px solid rgba(232,103,58,0.35)',
+            color: '#C17F47',
+            fontSize: '0.72rem',
+            fontWeight: 600,
+            padding: '0.5rem 0.9rem',
+            borderRadius: 8,
+            cursor: 'pointer',
+            fontFamily: BFONT,
+            letterSpacing: '0.06em',
+          }}>
+          {expanded ? '✕ Hide comparison' : 'View side-by-side →'}
+        </button>
+      )}
+
+      {expanded && (
+        <div style={{ marginTop: '1rem', borderTop: '1px solid rgba(232,103,58,0.15)', paddingTop: '1rem' }}>
+          {Object.entries(changesByScope).map(([scope, list]) => (
+            <div key={scope} style={{ marginBottom: '1.1rem' }}>
+              <div style={{
+                fontSize: '0.6rem',
+                letterSpacing: '0.2em',
+                textTransform: 'uppercase',
+                color: '#8C7A68',
+                fontWeight: 700,
+                fontFamily: BFONT,
+                marginBottom: '0.55rem',
+              }}>
+                {scope} · {list.length} shift{list.length === 1 ? '' : 's'}
+              </div>
+              {list.map(c => (
+                <div key={c.key} style={{
+                  background: 'white',
+                  border: '1px solid #E8DDD0',
+                  borderRadius: 10,
+                  padding: '0.7rem 0.85rem',
+                  marginBottom: '0.45rem',
+                }}>
+                  <div style={{ fontSize: '0.78rem', fontWeight: 600, color: '#0E0B07', fontFamily: BFONT, marginBottom: '0.45rem' }}>
+                    {labelFor(c.key)}
+                  </div>
+                  <div style={{ display: 'flex', gap: '0.55rem', alignItems: 'stretch', flexWrap: 'wrap' }}>
+                    <div style={{ flex: '1 1 140px', background: '#FBF8F3', border: '1px solid #E8DDD0', borderRadius: 7, padding: '0.45rem 0.6rem' }}>
+                      <div style={{ fontSize: '0.58rem', letterSpacing: '0.16em', textTransform: 'uppercase', color: '#8C7A68', fontWeight: 700, fontFamily: BFONT, marginBottom: '0.2rem' }}>Before</div>
+                      <div style={{ fontSize: '0.76rem', color: '#5C4A38', fontFamily: BFONT, lineHeight: 1.45 }}>{c.before}</div>
+                    </div>
+                    <div style={{ flex: '0 0 auto', display: 'flex', alignItems: 'center', fontSize: '0.9rem', color: '#C17F47' }}>→</div>
+                    <div style={{ flex: '1 1 140px', background: 'linear-gradient(135deg, rgba(232,103,58,0.06), rgba(27,95,232,0.06))', border: '1px solid rgba(232,103,58,0.25)', borderRadius: 7, padding: '0.45rem 0.6rem' }}>
+                      <div style={{ fontSize: '0.58rem', letterSpacing: '0.16em', textTransform: 'uppercase', color: '#C17F47', fontWeight: 700, fontFamily: BFONT, marginBottom: '0.2rem' }}>Now</div>
+                      <div style={{ fontSize: '0.76rem', color: '#0E0B07', fontFamily: BFONT, lineHeight: 1.45 }}>{c.after}</div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ))}
+          <p style={{ fontSize: '0.7rem', color: '#8C7A68', fontFamily: BFONT, lineHeight: 1.6, margin: '0.5rem 0 0', fontStyle: 'italic' }}>
+            Shifts between retakes are normal and often meaningful. They're worth a conversation.
+          </p>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Answers, partnerEx3, ex2AnswersPrior = null, ex2PriorAt = null, hasAnniversary, userName, partnerName, initialSection, isMobile = false, portrait = null, hasChecklist = false, hasBudget = false, hasLMFT = false, onNavigateTool = null, userPronouns = "", partnerPronouns = "" }) {
 
   // Compute all the data we need up front
   const myS = calcDimScores(ex1Answers);
@@ -6366,6 +6646,14 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
     return (
       <Layout accent={coupleType?.color || "#E8673A"}>
         <div style={{ maxWidth: 620 }}>
+          {/* Retake comparison — renders only when the user has a prior
+              Ex2 snapshot. Shows delta summary + expandable side-by-side. */}
+          <RetakeComparisonCard
+            currentEx2={ex2Answers}
+            priorEx2={ex2AnswersPrior}
+            priorAt={ex2PriorAt}
+            userName={userName}
+          />
           <div style={{ marginBottom: "1.5rem" }}>
             <div style={{ fontFamily: HFONT, fontSize: "1.6rem", fontWeight: 700, color: C.ink, marginBottom: "0.25rem" }}>Your highlights</div>
             <p style={{ fontSize: "0.82rem", color: C.muted, fontFamily: BFONT, margin: 0 }}>Swipe through each card. Download any to share or save.</p>
@@ -8391,6 +8679,18 @@ function AuthModal({ mode, onClose, onSuccess }) {
       if (profile?.ex3_answers) {
         try { localStorage.setItem('attune_ex3', JSON.stringify(profile.ex3_answers)); } catch {}
       }
+      // Prior-completion snapshots (for retake comparison). These exist only
+      // when the user has re-taken an exercise. Stored in localStorage so
+      // the retake comparison card can render without a round-trip.
+      if (profile?.ex1_answers_prior) {
+        try { localStorage.setItem('attune_ex1_prior', JSON.stringify({ answers: profile.ex1_answers_prior, at: profile.ex1_prior_completed_at })); } catch {}
+      }
+      if (profile?.ex2_answers_prior) {
+        try { localStorage.setItem('attune_ex2_prior', JSON.stringify({ answers: profile.ex2_answers_prior, at: profile.ex2_prior_completed_at })); } catch {}
+      }
+      if (profile?.ex3_answers_prior) {
+        try { localStorage.setItem('attune_ex3_prior', JSON.stringify({ answers: profile.ex3_answers_prior, at: profile.ex3_prior_completed_at })); } catch {}
+      }
       if (profile?.budget_data) {
         try { localStorage.setItem('attune_budget', JSON.stringify(profile.budget_data)); } catch {}
       }
@@ -8936,11 +9236,13 @@ function PartnerBExerciseFlow({ account, onComplete }) {
   // In the unified model, Partner B saves to their OWN profile row
   // exactly like Partner A. Each exercise completion calls this helper
   // which persists to localStorage + profiles, then advances state.
-  const saveAnswersToProfile = async (patch) => {
+  // Uses saveExerciseWithRetakeSnapshot to preserve prior-completion
+  // answers automatically when this is a retake.
+  const saveExercise = async (exNum, answers, extraPatch = {}) => {
     try {
       const { supabase: sb, hasSupabase } = await import('./supabase.js');
       if (hasSupabase() && account?.id) {
-        await trackedSupabaseWrite(sb.from('profiles').update(patch).eq('id', account.id));
+        await saveExerciseWithRetakeSnapshot(sb, account.id, exNum, answers, extraPatch);
       }
     } catch (e) {
       console.warn('[Attune] Partner B save failed, continuing locally:', e);
@@ -8950,14 +9252,14 @@ function PartnerBExerciseFlow({ account, onComplete }) {
   const handleEx1Done = async (answers) => {
     setEx1(answers);
     try { localStorage.setItem('attune_ex1', JSON.stringify(answers)); } catch {}
-    await saveAnswersToProfile({ ex1_answers: answers });
+    await saveExercise(1, answers);
     setStep('ex2');
   };
 
   const handleEx2Done = async (answers) => {
     setEx2(answers);
     try { localStorage.setItem('attune_ex2', JSON.stringify(answers)); } catch {}
-    await saveAnswersToProfile({ ex2_answers: answers });
+    await saveExercise(2, answers);
     if (hasReflection) {
       setStep('ex3');
     } else {
@@ -8967,7 +9269,7 @@ function PartnerBExerciseFlow({ account, onComplete }) {
 
   const handleEx3Done = async (answers) => {
     try { localStorage.setItem('attune_ex3', JSON.stringify(answers)); } catch {}
-    await saveAnswersToProfile({ ex3_answers: answers, ex3_completed: true });
+    await saveExercise(3, answers, { ex3_completed: true });
     finishSession(ex1, ex2, answers);
   };
 
@@ -9633,6 +9935,26 @@ export default function App() {
     return () => { document.documentElement.style.overflow = ''; };
   }, [view, highlightsSeen]);
 
+  // ── Hydrate retake-prior state from localStorage ────────────────────────
+  // The prior answers are written to localStorage on profile load (see
+  // loadAccountFromSession). This effect pulls them into component state
+  // so the RetakeComparisonCard can render. Runs once on mount + any time
+  // the account ID changes (covers sign-in after mount).
+  useEffect(() => {
+    const hydrate = (key, setAns, setAt) => {
+      try {
+        const raw = localStorage.getItem(key);
+        if (!raw) return;
+        const parsed = JSON.parse(raw);
+        if (parsed?.answers) setAns(parsed.answers);
+        if (parsed?.at) setAt(parsed.at);
+      } catch {}
+    };
+    hydrate('attune_ex1_prior', setEx1Prior, setEx1PriorAt);
+    hydrate('attune_ex2_prior', setEx2Prior, setEx2PriorAt);
+    hydrate('attune_ex3_prior', setEx3Prior, setEx3PriorAt);
+  }, [account?.id]);
+
   useEffect(() => {
     if (view === 'results' && highlightsSeen) {
       document.body.style.overflow = 'hidden';
@@ -10033,6 +10355,15 @@ export default function App() {
   const [ex1Answers, setEx1State] = useState(sarahEx1Demo);
   const [ex2Answers, setEx2State] = useState(sarahEx2Demo);
   const [ex3Answers, setEx3State] = useState(sarahEx3Demo); // Anniversary exercise
+  // Prior completions — populated from profile.ex{N}_answers_prior when the
+  // user has retaken an exercise. Powers the RetakeComparisonCard on
+  // the results page. null for first-time completions.
+  const [ex1AnswersPrior, setEx1Prior] = useState(null);
+  const [ex2AnswersPrior, setEx2Prior] = useState(null);
+  const [ex3AnswersPrior, setEx3Prior] = useState(null);
+  const [ex1PriorAt, setEx1PriorAt] = useState(null); // ISO string timestamps
+  const [ex2PriorAt, setEx2PriorAt] = useState(null);
+  const [ex3PriorAt, setEx3PriorAt] = useState(null);
   const [checklistState, setChecklistState] = useState({}); // Starting Out checklist
   const [budgetState, setBudgetState] = useState(() => {
     // Hydrate from localStorage so the budget persists across refreshes.
@@ -11040,10 +11371,11 @@ export default function App() {
               : <Exercise01Flow userName={userName} partnerName={partnerName} onComplete={a => {
                   setEx1State(a);
                   try { localStorage.setItem('attune_ex1', JSON.stringify(a)); } catch {}
-                  // Persist exercise 1 answers to Supabase for cross-device access
+                  // Persist exercise 1 answers to Supabase for cross-device access.
+                  // Uses saveExerciseWithRetakeSnapshot so retakes preserve prior.
                   if (account?.id) {
                     import('./supabase.js').then(({ supabase: sb, hasSupabase }) => {
-                      if (hasSupabase()) trackedSupabaseWrite(sb.from('profiles').update({ ex1_answers: a }).eq('id', account.id));
+                      if (hasSupabase()) saveExerciseWithRetakeSnapshot(sb, account.id, 1, a);
                     }).catch(() => {});
                   }
                 }} />
@@ -11101,7 +11433,7 @@ export default function App() {
                   try { localStorage.setItem('attune_ex2', JSON.stringify(a)); } catch {}
                   if (account?.id) {
                     import('./supabase.js').then(({ supabase: sb, hasSupabase }) => {
-                      if (hasSupabase()) trackedSupabaseWrite(sb.from('profiles').update({ ex2_answers: a }).eq('id', account.id));
+                      if (hasSupabase()) saveExerciseWithRetakeSnapshot(sb, account.id, 2, a);
                     }).catch(() => {});
                   }
                   // Auto-trigger workbook generation if both partners are done and order includes workbook
@@ -11152,12 +11484,13 @@ export default function App() {
               <AnniversaryExercise userName={userName} partnerName={partnerName} onComplete={a => {
                   setEx3State(a);
                   try { localStorage.setItem('attune_ex3', JSON.stringify(a)); } catch {}
-                  // Persist ex3 answers and mark complete in Supabase
+                  // Persist ex3 answers and mark complete in Supabase.
+                  // Retake snapshot happens automatically via the helper.
                   if (isLoggedIn && account?.id) {
                     (async () => {
                       const { supabase: sb, hasSupabase } = await import('./supabase.js');
                       if (!hasSupabase()) return;
-                      await trackedSupabaseWrite(sb.from('profiles').update({ ex3_answers: a, ex3_completed: true }).eq('id', account.id));
+                      await saveExerciseWithRetakeSnapshot(sb, account.id, 3, a, { ex3_completed: true });
                     })();
                   }
                 }} onBack={() => setView("home")} />
@@ -11588,6 +11921,8 @@ export default function App() {
                   ex2Answers={ex2Answers || sarahEx2} partnerEx2={partnerEx2}
                   ex3Answers={ex3Answers || (pkg.hasAnniversary ? SARAH_ANNIVERSARY_DEMO : null)}
                   partnerEx3={pkg.hasAnniversary ? (partnerSession?.ex3 || (hasRealPartner ? null : JAMES_ANNIVERSARY_DEMO)) : null}
+                  ex2AnswersPrior={ex2AnswersPrior}
+                  ex2PriorAt={ex2PriorAt}
                   hasAnniversary={pkg.hasAnniversary}
                   userName={userName} partnerName={partnerName}
                   userPronouns={userPronouns} partnerPronouns={partnerPronouns}
