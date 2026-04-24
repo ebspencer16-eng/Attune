@@ -1504,7 +1504,8 @@ function saveField(field) {
   cancelEdit(field);
 }
 async function confirmDelete() {
-  if (!confirm('Are you sure? This permanently deletes your account and all results. This cannot be undone.')) return;
+  const msg = 'Deleting your account removes your name, email, partner info, ordered items, and generated workbooks permanently.\n\nYour anonymized exercise answers and couple type are kept for internal research, with no way to link them back to you.\n\nContinue?';
+  if (!confirm(msg)) return;
   if (!confirm('Last chance — this cannot be reversed. Continue?')) return;
 
   try {

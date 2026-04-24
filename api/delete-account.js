@@ -2,17 +2,19 @@
  * /api/delete-account
  *
  * POST { userId }   (Authorization: Bearer <user access token>)
- *   → Verifies the token belongs to userId, then cascade-deletes everything:
- *     workbooks (storage + rows), partner_sessions (where user is Partner A or B),
- *     orders, feedback, profile, and finally the auth user itself.
+ *   → Verifies the token belongs to userId, then:
+ *     1. Archives de-identified research data to deleted_user_archive
+ *        (exercise answers, couple type, expectation gaps, package tier,
+ *         signup date, pronouns — NO names, emails, or invite codes).
+ *     2. Removes all PII: workbooks (storage + rows), orders (contain
+ *        shipping addresses), auth user (cascades profiles +
+ *        exercise_sessions).
+ *     3. Nulls Partner B's name from any partner_sessions where this user
+ *        was Partner B.
+ *     4. Sets feedback.user_id to null (feedback survives without attribution).
  *
- * Uses SUPABASE_SERVICE_KEY so it can:
- *   - delete auth users (requires service role)
- *   - remove Storage objects in the workbooks bucket
- *
- * Foreign keys on most tables are ON DELETE CASCADE, but we run the deletes
- * explicitly so that (a) we can also clean up Storage and (b) partner_sessions
- * that reference the user only by invite_code (not FK) are handled.
+ * The archive row has no FK to the deleted user — it's a fresh UUID with
+ * only non-identifying fields. Re-identification is not possible.
  */
 
 import { createClient } from '@supabase/supabase-js';
@@ -26,11 +28,11 @@ const ok  = (body)            => new Response(JSON.stringify({ ok: true, ...body
 export default async function handler(req) {
   if (req.method !== 'POST') return err(405, 'Method not allowed');
 
-  // Admin client (service role). Required for auth.admin.* + Storage writes
-  // that bypass RLS.
+  // Admin client — required for auth.admin.deleteUser + Storage writes + writing
+  // to the RLS-locked deleted_user_archive table.
   const admin = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY);
 
-  // ── Verify the caller actually owns the account they're asking to delete ──
+  // ── Verify the caller actually owns the account they're deleting ─────────
   const authHeader = req.headers.get('authorization') || '';
   const token = authHeader.replace(/^Bearer\s+/i, '').trim();
   if (!token) return err(401, 'Missing access token');
@@ -46,11 +48,46 @@ export default async function handler(req) {
   if (!userId || typeof userId !== 'string') return err(400, 'Missing userId');
   if (userId !== caller.id) return err(403, 'You can only delete your own account');
 
-  const cleanup = { workbooksRemoved: 0, storageRemoved: 0, partnerSessionsRemoved: 0, ordersRemoved: 0, feedbackRemoved: 0 };
+  const summary = { archived: false, workbooksRemoved: 0, storageRemoved: 0, ordersRemoved: 0, partnerSessionsAnonymized: 0, feedbackNulled: 0 };
 
-  // ── 1. Workbooks: fetch storage paths, then remove files + rows ────────
-  // Must happen before auth.users delete because the FK is ON DELETE CASCADE;
-  // we want to remove Storage objects first so we don't orphan them.
+  // ── 1. Gather non-PII research data to archive ────────────────────────────
+  // Pull from exercise_sessions (canonical) and profile (for demographic fields).
+  // Note: exercise_sessions.user_id has ON DELETE CASCADE, so this data disappears
+  // when we delete the auth user. We copy it to the archive table first.
+  try {
+    const { data: profile } = await admin.from('profiles')
+      .select('pkg, pronouns, partner_pronouns, created_at')
+      .eq('id', userId)
+      .maybeSingle();
+
+    const { data: session } = await admin.from('exercise_sessions')
+      .select('ex1_answers, ex2_answers, ex3_answers, couple_type, exp_gaps')
+      .eq('user_id', userId)
+      .maybeSingle();
+
+    // Only write the archive row if there's something worth archiving.
+    // Users who signed up but never finished an exercise have no research value.
+    const hasAnswers = session && (session.ex1_answers || session.ex2_answers || session.ex3_answers);
+    if (hasAnswers) {
+      const { error: archiveErr } = await admin.from('deleted_user_archive').insert({
+        pkg:              profile?.pkg || null,
+        signed_up_at:     profile?.created_at || null,
+        pronouns:         profile?.pronouns || null,
+        partner_pronouns: profile?.partner_pronouns || null,
+        ex1_answers:      session.ex1_answers || null,
+        ex2_answers:      session.ex2_answers || null,
+        ex3_answers:      session.ex3_answers || null,
+        couple_type:      session.couple_type || null,
+        exp_gaps:         session.exp_gaps || null,
+      });
+      if (!archiveErr) summary.archived = true;
+      else console.warn('[delete-account] archive insert failed:', archiveErr.message);
+    }
+  } catch (e) { console.warn('[delete-account] archive step failed:', e?.message); }
+
+  // ── 2. Remove personalized workbook files + rows ──────────────────────────
+  // Workbooks contain names, personalized language, and couple-specific content.
+  // They're PII even though the underlying couple_type is not.
   try {
     const { data: books } = await admin.from('workbooks')
       .select('id, storage_path')
@@ -59,57 +96,51 @@ export default async function handler(req) {
       const paths = books.map(b => b.storage_path).filter(Boolean);
       if (paths.length) {
         const { error: rmErr } = await admin.storage.from('workbooks').remove(paths);
-        if (!rmErr) cleanup.storageRemoved = paths.length;
+        if (!rmErr) summary.storageRemoved = paths.length;
       }
       await admin.from('workbooks').delete().eq('user_id', userId);
-      cleanup.workbooksRemoved = books.length;
+      summary.workbooksRemoved = books.length;
     }
   } catch (e) { console.warn('[delete-account] workbook cleanup failed:', e?.message); }
 
-  // ── 2. Partner sessions: user may appear as Partner A (via invite_code on
-  //      their profile) or as Partner B (via partner_b_id). Clean both. ────
-  try {
-    const { data: profile } = await admin.from('profiles')
-      .select('invite_code')
-      .eq('id', userId)
-      .maybeSingle();
-
-    if (profile?.invite_code) {
-      const { count } = await admin.from('partner_sessions')
-        .delete({ count: 'exact' })
-        .eq('invite_code', profile.invite_code);
-      cleanup.partnerSessionsRemoved += count || 0;
-    }
-
-    const { count: bCount } = await admin.from('partner_sessions')
-      .delete({ count: 'exact' })
-      .eq('partner_b_id', userId);
-    cleanup.partnerSessionsRemoved += bCount || 0;
-  } catch (e) { console.warn('[delete-account] partner_sessions cleanup failed:', e?.message); }
-
-  // ── 3. Orders ─────────────────────────────────────────────────────────
+  // ── 3. Delete orders (shipping addresses, buyer/partner names/emails are PII) ─
+  // orders.user_id is ON DELETE SET NULL, so we must delete explicitly.
   try {
     const { count } = await admin.from('orders')
       .delete({ count: 'exact' })
       .eq('user_id', userId);
-    cleanup.ordersRemoved = count || 0;
+    summary.ordersRemoved = count || 0;
   } catch (e) { console.warn('[delete-account] orders cleanup failed:', e?.message); }
 
-  // ── 4. Feedback ───────────────────────────────────────────────────────
+  // ── 4. Anonymize Partner B entries ────────────────────────────────────────
+  // If the deleting user ever participated as Partner B, their name is in
+  // partner_sessions.partner_b_name. Null it out. The answers stay (they're
+  // part of Partner A's joint results, and Partner A didn't request deletion).
+  try {
+    const { count } = await admin.from('partner_sessions')
+      .update({ partner_b_name: null }, { count: 'exact' })
+      .eq('partner_b_id', userId);
+    summary.partnerSessionsAnonymized = count || 0;
+    // Note: partner_sessions.partner_b_id has ON DELETE SET NULL, so after auth
+    // user deletion the id link drops automatically. Name is the only PII here.
+  } catch (e) { console.warn('[delete-account] partner_sessions anonymize failed:', e?.message); }
+
+  // ── 5. Null out feedback attribution ──────────────────────────────────────
+  // feedback.user_id is ON DELETE SET NULL per schema, so the auth delete will
+  // handle this automatically. Explicit call here is belt-and-suspenders in
+  // case feedback RLS or triggers interfere.
   try {
     const { count } = await admin.from('feedback')
-      .delete({ count: 'exact' })
+      .update({ user_id: null }, { count: 'exact' })
       .eq('user_id', userId);
-    cleanup.feedbackRemoved = count || 0;
-  } catch (e) { console.warn('[delete-account] feedback cleanup failed:', e?.message); }
+    summary.feedbackNulled = count || 0;
+  } catch (e) { console.warn('[delete-account] feedback null failed:', e?.message); }
 
-  // ── 5. Profile ────────────────────────────────────────────────────────
-  try { await admin.from('profiles').delete().eq('id', userId); }
-  catch (e) { console.warn('[delete-account] profile cleanup failed:', e?.message); }
-
-  // ── 6. Auth user (final step — cascades anything we missed) ───────────
+  // ── 6. Delete auth user ───────────────────────────────────────────────────
+  // This cascades: profiles (FK on delete cascade), exercise_sessions
+  // (FK on delete cascade). Everything else was already handled above.
   const { error: delErr } = await admin.auth.admin.deleteUser(userId);
   if (delErr) return err(500, 'Failed to delete auth user: ' + delErr.message);
 
-  return ok({ cleanup });
+  return ok({ summary });
 }
