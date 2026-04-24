@@ -275,10 +275,19 @@
       </div>
       <div class="topbar-right">
         <span class="date-badge" id="today-date"></span>
-        <button class="export-btn" onclick="exportCSV()">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-          Export CSV
-        </button>
+        <div style="position:relative;display:inline-block">
+          <button class="export-btn" onclick="toggleExportMenu(event)">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Export CSV
+          </button>
+          <div id="export-menu" style="display:none;position:absolute;right:0;top:calc(100% + 6px);background:var(--surface);border:1px solid var(--border);border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,.25);min-width:220px;z-index:100;overflow:hidden">
+            <button class="export-menu-item" onclick="exportAdminCSV('orders')" style="display:block;width:100%;text-align:left;padding:.65rem .9rem;background:transparent;border:none;color:var(--text);font-size:.78rem;font-family:var(--bfont);cursor:pointer">Order details</button>
+            <button class="export-menu-item" onclick="exportAdminCSV('demographics')" style="display:block;width:100%;text-align:left;padding:.65rem .9rem;background:transparent;border:none;color:var(--text);font-size:.78rem;font-family:var(--bfont);cursor:pointer;border-top:1px solid var(--border)">Couple demographics</button>
+            <button class="export-menu-item" onclick="exportAdminCSV('engagement')" style="display:block;width:100%;text-align:left;padding:.65rem .9rem;background:transparent;border:none;color:var(--text);font-size:.78rem;font-family:var(--bfont);cursor:pointer;border-top:1px solid var(--border)">Product engagement</button>
+            <button class="export-menu-item" onclick="exportAdminCSV('results')" style="display:block;width:100%;text-align:left;padding:.65rem .9rem;background:transparent;border:none;color:var(--text);font-size:.78rem;font-family:var(--bfont);cursor:pointer;border-top:1px solid var(--border)">Results (all scored)</button>
+            <button class="export-menu-item" onclick="exportAdminCSV('feedback')" style="display:block;width:100%;text-align:left;padding:.65rem .9rem;background:transparent;border:none;color:var(--text);font-size:.78rem;font-family:var(--bfont);cursor:pointer;border-top:1px solid var(--border)">Feedback responses</button>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -374,7 +383,7 @@
         <div class="topbar-sub">Anonymized transaction records</div>
       </div>
       <div class="topbar-right">
-        <button class="export-btn" onclick="exportCSV()">
+        <button class="export-btn" onclick="exportAdminCSV('orders')">
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
           Export CSV
         </button>
@@ -1475,8 +1484,23 @@ async function loadLmftRequests() {
     { created_at: new Date(now - 14*86400000).toISOString(),  p1_name: 'Dani',     p2_name: 'Ash',      email: 'dani.sample@example.com',     timezone: 'America/Chicago',     availability: 'Weekday mornings best',                               notes: 'Would like help thinking through household expectations.', order_id: 'AT-00141', status: 'completed' },
   ];
 
+  const LMFT_STATUSES = {
+    requested:   { label: 'Requested',   bg: 'rgba(245,158,11,.15)',  color: '#B45309' },
+    scheduled:   { label: 'Scheduled',   bg: 'rgba(16,185,129,.15)',  color: '#059669' },
+    completed:   { label: 'Completed',   bg: 'rgba(100,116,139,.15)', color: '#475569' },
+    cancelled:   { label: 'Cancelled',   bg: 'rgba(239,68,68,.15)',   color: '#B91C1C' },
+    rescheduled: { label: 'Rescheduled', bg: 'rgba(168,85,247,.15)',  color: '#7E22CE' },
+  };
+  const normalizeStatus = (s) => (s === 'pending' || !s) ? 'requested' : s;
+  const statusPill = (s) => {
+    const v = LMFT_STATUSES[normalizeStatus(s)] || LMFT_STATUSES.requested;
+    return `<span style="background:${v.bg};color:${v.color};padding:2px 8px;border-radius:20px;font-size:.65rem;font-weight:700">${v.label}</span>`;
+  };
+  const statusDropdown = (id, current) => `<select onchange="updateLMFTStatus('${id}', this.value)" style="background:var(--surface);color:var(--text);border:1px solid var(--border);border-radius:6px;padding:.25rem .5rem;font-size:.7rem;font-family:var(--bfont);cursor:pointer">
+    ${Object.entries(LMFT_STATUSES).map(([k, v]) => `<option value="${k}" ${k === normalizeStatus(current) ? 'selected' : ''}>${v.label}</option>`).join('')}
+  </select>`;
+
   const renderRows = (rows, isDemo) => {
-    const statusPill = { pending: '<span style="background:rgba(245,158,11,.15);color:#B45309;padding:2px 8px;border-radius:20px;font-size:.65rem;font-weight:700">Pending</span>', scheduled: '<span style="background:rgba(16,185,129,.15);color:#059669;padding:2px 8px;border-radius:20px;font-size:.65rem;font-weight:700">Scheduled</span>', completed: '<span style="background:rgba(100,116,139,.15);color:#475569;padding:2px 8px;border-radius:20px;font-size:.65rem;font-weight:700">Completed</span>' };
     const demoNote = isDemo ? '<div style="margin-bottom:.75rem;padding:.5rem .75rem;background:rgba(251,191,36,.1);border-left:3px solid var(--amber);border-radius:4px;font-size:.72rem;color:#92400E">Demo data shown — no real LMFT requests yet.</div>' : '';
     container.innerHTML = demoNote + `<table style="width:100%;border-collapse:collapse;font-size:.78rem">
       <thead><tr style="background:var(--surface);border-bottom:1px solid var(--border)">${['Date','Partners','Email','Timezone','Availability','Notes','Order','Status'].map(h=>`<th style="text-align:left;padding:.6rem .75rem;font-size:.65rem;letter-spacing:.1em;text-transform:uppercase;color:var(--dim)">${h}</th>`).join('')}</tr></thead>
@@ -1488,7 +1512,7 @@ async function loadLmftRequests() {
         <td style="padding:.6rem .75rem;color:var(--muted);max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${r.availability || ''}">${r.availability || '—'}</td>
         <td style="padding:.6rem .75rem;color:var(--muted);max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${r.notes || ''}">${r.notes || '—'}</td>
         <td style="padding:.6rem .75rem;color:var(--muted);font-family:var(--mono)">${r.order_id || '—'}</td>
-        <td style="padding:.6rem .75rem">${statusPill[r.status] || statusPill.pending}</td>
+        <td style="padding:.6rem .75rem">${isDemo ? statusPill(r.status) : statusDropdown(r.id, r.status || 'requested')}</td>
       </tr>`).join('')}</tbody>
     </table>`;
   };
@@ -1510,6 +1534,63 @@ async function loadLmftRequests() {
   } catch(e) {
     renderRows(DEMO_LMFT, true);
   }
+}
+
+// Update LMFT request status. Called from the per-row dropdown.
+async function updateLMFTStatus(id, newStatus) {
+  const SUPABASE_URL  = window.__SUPABASE_URL;
+  const SUPABASE_ANON = window.__SUPABASE_ANON;
+  if (!SUPABASE_URL || !SUPABASE_ANON) {
+    alert('Supabase credentials missing. Cannot update status.');
+    return;
+  }
+  try {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/lmft_requests?id=eq.${encodeURIComponent(id)}`, {
+      method: 'PATCH',
+      headers: {
+        'apikey': SUPABASE_ANON,
+        'Authorization': `Bearer ${SUPABASE_ANON}`,
+        'Content-Type': 'application/json',
+        'Prefer': 'return=minimal',
+      },
+      body: JSON.stringify({ status: newStatus }),
+    });
+    if (!res.ok) {
+      const msg = await res.text().catch(() => '');
+      alert('Status update failed: ' + (msg || res.statusText));
+    }
+  } catch (e) {
+    alert('Status update failed: ' + (e.message || e));
+  }
+}
+
+// ── Admin CSV export menu ─────────────────────────────────────────────
+// Toggles the 5-option dropdown next to the Export CSV button.
+function toggleExportMenu(e) {
+  e.stopPropagation();
+  const menu = document.getElementById('export-menu');
+  if (!menu) return;
+  menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
+  // Close menu on any outside click — one-shot listener
+  if (menu.style.display === 'block') {
+    setTimeout(() => {
+      document.addEventListener('click', function closeOnce() {
+        menu.style.display = 'none';
+        document.removeEventListener('click', closeOnce);
+      });
+    }, 0);
+  }
+}
+
+// Request one of the 5 admin CSVs from /api/admin-csv. Opens in a new tab
+// so the browser handles the Content-Disposition download attachment header.
+function exportAdminCSV(type) {
+  const secret = new URLSearchParams(window.location.search).get('s') || '';
+  const qs = new URLSearchParams({ type });
+  if (secret) qs.set('secret', secret);
+  window.location.href = `/api/admin-csv?${qs.toString()}`;
+  const menu = document.getElementById('export-menu');
+  if (menu) menu.style.display = 'none';
 }
 
 function exportOrdersCSV() {
@@ -2113,7 +2194,60 @@ async function loadRealData() {
   }
 }
 
-function updateStatsFromRealData(orders) {
+// Real demographics: overrides the static arrays when Supabase is configured
+// and at least one profile has answered a demographic field. Populated
+// asynchronously; charts re-render via initCharts.
+async function loadRealDemographics() {
+  const SUPABASE_URL  = window.__SUPABASE_URL;
+  const SUPABASE_ANON = window.__SUPABASE_ANON;
+  if (!SUPABASE_URL || !SUPABASE_ANON) return;
+  try {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/profiles?select=age_range,gender,relationship_status,relationship_length,children,signup_source`, {
+      headers: { 'apikey': SUPABASE_ANON, 'Authorization': `Bearer ${SUPABASE_ANON}` }
+    });
+    if (!res.ok) return;
+    const rows = await res.json();
+    if (!rows || rows.length === 0) return;
+
+    // Count distribution. Nulls/empties skip silently.
+    const dist = (field, labels) => {
+      const counts = {};
+      rows.forEach(r => { if (r[field]) counts[r[field]] = (counts[r[field]] || 0) + 1; });
+      const total = Object.values(counts).reduce((s, v) => s + v, 0);
+      if (total === 0) return null;
+      return labels.map(([k, label]) => ({
+        label, count: counts[k] || 0, pct: Math.round(((counts[k] || 0) / total) * 100),
+      }));
+    };
+
+    const age = dist('age_range', [['18-24','18–24'],['25-34','25–34'],['35-44','35–44'],['45-54','45–54'],['55+','55+']]);
+    const gender = dist('gender', [['woman','Woman'],['man','Man'],['nonbinary','Non-binary'],['other','Other']]);
+    const relStatus = dist('relationship_status', [['dating','Dating'],['engaged','Engaged'],['married','Married'],['remarried','Remarried'],['partnership','Partnership']]);
+    const relLen = dist('relationship_length', [['<1','Less than 1 year'],['1-2','1–2 years'],['3-5','3–5 years'],['6-10','6–10 years'],['11-20','11–20 years'],['20+','20+ years']]);
+    const childrenDist = dist('children', [['none','None'],['1','1'],['2','2'],['3+','3+'],['expecting','Expecting']]);
+    const source = dist('signup_source', [['friend','Friend/family'],['social','Social media'],['search','Search'],['gift','Received as gift'],['therapist','Therapist/counselor'],['other','Other']]);
+
+    if (age)       { ageData.labels = age.map(x => x.label);       ageData.data = age.map(x => x.pct); }
+    if (gender)    { genderData.labels = gender.map(x => x.label); genderData.data = gender.map(x => x.pct); }
+    if (relStatus) { relStatusData.labels = relStatus.map(x => x.label); relStatusData.data = relStatus.map(x => x.pct); }
+    if (relLen)    { relLengths.length = 0; relLen.forEach(x => relLengths.push({ l: x.label, v: x.pct })); }
+    if (childrenDist) { childrenData.labels = childrenDist.map(x => x.label); childrenData.data = childrenDist.map(x => x.pct); }
+    if (source)    { sourceData.labels = source.map(x => x.label); sourceData.data = source.map(x => x.pct); }
+
+    // Update n= captions
+    const setN = (sel, n) => { document.querySelectorAll(sel).forEach(el => el.textContent = `n=${n}`); };
+    const total = rows.length;
+    setN('#page-demographics .chart-subtitle', total);
+
+    // If the demographics page was already rendered, force re-init so charts pick up new data
+    if (chartsInit.demographics) {
+      chartsInit.demographics = false;
+      if (document.getElementById('page-demographics')?.classList.contains('active')) initCharts('demographics');
+    }
+  } catch (e) {
+    console.warn('[admin] real demographics load failed:', e);
+  }
+}
   const total = orders.length;
   const revenue = orders.reduce((s, o) => s + (parseFloat(o.total) || 0), 0);
   const digital = orders.filter(o => !o.is_physical).length;
@@ -2130,6 +2264,8 @@ function updateStatsFromRealData(orders) {
   // Completion rate requires partner_sessions data — fetched separately.
   // Async, safe to run in the background.
   loadCompletionRate().catch(() => {});
+  // Real demographics from profiles — async, falls back to mock if empty.
+  loadRealDemographics().catch(() => {});
 }
 
 // Completion rate = (partner_sessions with completed_at) / (total profiles with invite codes)

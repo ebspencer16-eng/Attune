@@ -56,7 +56,7 @@ export default async function handler(req) {
   // when we delete the auth user. We copy it to the archive table first.
   try {
     const { data: profile } = await admin.from('profiles')
-      .select('pkg, pronouns, partner_pronouns, created_at')
+      .select('pkg, pronouns, partner_pronouns, created_at, age_range, gender, relationship_status, relationship_length, children, signup_source')
       .eq('id', userId)
       .maybeSingle();
 
@@ -70,15 +70,21 @@ export default async function handler(req) {
     const hasAnswers = session && (session.ex1_answers || session.ex2_answers || session.ex3_answers);
     if (hasAnswers) {
       const { error: archiveErr } = await admin.from('deleted_user_archive').insert({
-        pkg:              profile?.pkg || null,
-        signed_up_at:     profile?.created_at || null,
-        pronouns:         profile?.pronouns || null,
-        partner_pronouns: profile?.partner_pronouns || null,
-        ex1_answers:      session.ex1_answers || null,
-        ex2_answers:      session.ex2_answers || null,
-        ex3_answers:      session.ex3_answers || null,
-        couple_type:      session.couple_type || null,
-        exp_gaps:         session.exp_gaps || null,
+        pkg:                  profile?.pkg || null,
+        signed_up_at:         profile?.created_at || null,
+        pronouns:             profile?.pronouns || null,
+        partner_pronouns:     profile?.partner_pronouns || null,
+        age_range:            profile?.age_range || null,
+        gender:               profile?.gender || null,
+        relationship_status:  profile?.relationship_status || null,
+        relationship_length:  profile?.relationship_length || null,
+        children:             profile?.children || null,
+        signup_source:        profile?.signup_source || null,
+        ex1_answers:          session.ex1_answers || null,
+        ex2_answers:          session.ex2_answers || null,
+        ex3_answers:          session.ex3_answers || null,
+        couple_type:          session.couple_type || null,
+        exp_gaps:             session.exp_gaps || null,
       });
       if (!archiveErr) summary.archived = true;
       else console.warn('[delete-account] archive insert failed:', archiveErr.message);
