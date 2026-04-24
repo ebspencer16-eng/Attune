@@ -106,12 +106,13 @@ export default async function handler(req) {
 
   try {
     if (type === 'combined')      return await exportCombined(admin);
+    if (type === 'combined_xlsx') return await exportCombinedXlsx(admin);
     if (type === 'orders')        return await exportOrders(admin);
     if (type === 'demographics')  return await exportDemographics(admin);
     if (type === 'engagement')    return await exportEngagement(admin);
     if (type === 'results')       return await exportResults(admin);
     if (type === 'feedback')      return await exportFeedback();
-    return errResponse(400, 'Unknown type. Use combined|orders|demographics|engagement|results|feedback');
+    return errResponse(400, 'Unknown type. Use combined|combined_xlsx|orders|demographics|engagement|results|feedback');
   } catch (e) {
     console.error('[admin-csv]', type, e);
     return errResponse(500, 'Export failed: ' + (e.message || e));
@@ -120,12 +121,18 @@ export default async function handler(req) {
 
 // ── 0. COMBINED ─────────────────────────────────────────────────────────
 // One row per couple with ALL fields across every category, plus a top
-// header row naming the category over each group of columns. Real "merged
-// cells" aren't a CSV feature — we place the category label in the first
-// column of each span and leave the rest blank. Excel/Sheets displays this
-// visually like a merged header and filters applied on row 2 still work
-// because data starts on row 3.
-async function exportCombined(admin) {
+// header row naming the category over each group of columns.
+//
+// For CSV: we place the category label in the first column of each span
+// and leave the rest blank. Excel/Sheets displays this visually like a
+// merged header and filters applied on row 2 still work.
+//
+// For XLSX: we use real merged cells via SheetJS !merges. Bold headers,
+// frozen panes, and an auto-filter on row 2.
+//
+// The data-building is shared between CSV and XLSX paths so the only
+// difference is the output format.
+async function buildCombinedData(admin) {
   // ── Gather everything we need in parallel ─────────────────────────────
   const [
     { data: profiles = [] },
@@ -141,33 +148,26 @@ async function exportCombined(admin) {
     admin.from('orders').select('*'),
   ]);
 
-  // Lookups
   const sessByUser = Object.fromEntries(sessions.map(s => [s.user_id, s]));
   const pbyCode    = Object.fromEntries(partnerRows.map(p => [p.invite_code, p]));
   const wbByUser   = Object.fromEntries(workbooks.map(w => [w.user_id, w]));
-  // Orders: take most recent per user (orders may have multiple per couple
-  // when add-ons are added later; most recent has the latest add-on state)
   const ordersByUser = {};
   orders.sort((a, b) => new Date(b.created_at) - new Date(a.created_at)).forEach(o => {
     if (o.user_id && !ordersByUser[o.user_id]) ordersByUser[o.user_id] = o;
   });
 
-  // Feedback by email (best we can do since it's in KV, not tied to user_id)
   const feedbackByEmail = await loadFeedbackByEmail();
 
-  // ── Column layout ────────────────────────────────────────────────────
-  // Each entry: [category_label, column_name]. category_label only appears
-  // on the FIRST column of each category's span (for the "merged" top row).
-  const DIMS = Object.keys(DIM_KEYS); // 10 dimension keys in canonical order
+  // Column layout: [category_label, column_name]. Category only appears on
+  // the first column of each span.
+  const DIMS = Object.keys(DIM_KEYS);
   const SAT_KEYS = ['sf_feel', 'sf_future', 'sf_growth'];
 
   const cols = [
-    // Identity
     ['Identity', 'anon_couple_id'],
     ['',         'signed_up_at'],
     ['',         'package'],
 
-    // Order details
     ['Order details', 'order_num'],
     ['',              'order_date'],
     ['',              'physical_or_digital'],
@@ -183,7 +183,6 @@ async function exportCombined(admin) {
     ['',              'lmft_purchased'],
     ['',              'lmft_when'],
 
-    // Demographics
     ['Demographics', 'partner_a_gender'],
     ['',             'partner_b_gender'],
     ['',             'relationship_length'],
@@ -194,7 +193,6 @@ async function exportCombined(admin) {
     ['',             'partner_b_individual_type'],
     ['',             'couple_type'],
 
-    // Engagement
     ['Engagement', 'partner_a_comms_complete'],
     ['',           'partner_b_comms_complete'],
     ['',           'partner_a_expectations_complete'],
@@ -205,7 +203,6 @@ async function exportCombined(admin) {
     ['',           'workbook_generated'],
     ['',           'workbook_shipped'],
 
-    // Results — axis scores + per-partner dim scores + ex3 satisfaction
     ['Results', 'partner_a_engage_withdraw_score'],
     ['',        'partner_a_open_guarded_score'],
     ['',        'partner_b_engage_withdraw_score'],
@@ -214,40 +211,24 @@ async function exportCombined(admin) {
     ...DIMS.map(d => ['', `partner_b_comms_${d}`]),
     ...SAT_KEYS.map(k => ['', `partner_a_satisfaction_${k}`]),
     ...SAT_KEYS.map(k => ['', `partner_b_satisfaction_${k}`]),
-
-    // Feedback — dynamic columns based on what's in KV
-    // Shape them as feedback_<key>. If no feedback survey responses exist,
-    // these are empty columns.
-    // Populated below after we know all keys.
   ];
 
-  // Discover feedback keys
+  // Discover feedback keys dynamically
   const feedbackKeys = new Set();
   Object.values(feedbackByEmail).forEach(fb => {
     Object.keys(fb || {}).forEach(k => feedbackKeys.add(k));
   });
   const SKIP_FB = new Set(['email', 'user_id', 'submitted_at']);
   const feedbackCols = [...feedbackKeys].filter(k => !SKIP_FB.has(k)).sort();
-  feedbackCols.forEach((fk, i) => {
-    cols.push([i === 0 ? 'Feedback' : '', `feedback_${fk}`]);
-  });
-  // Always include submitted_at if any feedback exists
   if (feedbackCols.length > 0) {
-    cols.splice(cols.length - feedbackCols.length, 0, [feedbackCols.length === 0 ? 'Feedback' : (cols[cols.length - feedbackCols.length][0] || ''), 'feedback_submitted_at']);
-    // Re-tag first feedback col's category label since insertion shifted it
-    const fbStart = cols.findIndex(c => c[1] === 'feedback_submitted_at');
-    if (fbStart >= 0) {
-      cols[fbStart][0] = 'Feedback';
-      // Clear category from the later one
-      const firstQ = cols.findIndex((c, i) => i > fbStart && c[1].startsWith('feedback_'));
-      if (firstQ >= 0) cols[firstQ][0] = '';
-    }
+    // First feedback column gets the 'Feedback' category label
+    cols.push(['Feedback', 'feedback_submitted_at']);
+    feedbackCols.forEach(fk => cols.push(['', `feedback_${fk}`]));
   }
 
   const categoryRow = cols.map(c => c[0]);
   const nameRow = cols.map(c => c[1]);
 
-  // ── Build data rows ──────────────────────────────────────────────────
   const fmt = (n) => n == null ? '' : Number(n).toFixed(3);
 
   const dataRows = profiles.map(p => {
@@ -265,7 +246,6 @@ async function exportCombined(admin) {
     const bEx3 = ps?.ex3_answers || {};
     const budgetComplete = p.budget_data && Object.keys(p.budget_data).length > 0;
 
-    // Order add-ons (package inclusion + explicit add-on)
     const pkgHasChecklist   = o?.pkg_key === 'newlywed';
     const pkgHasBudget      = o?.pkg_key === 'newlywed' || o?.pkg_key === 'premium';
     const pkgHasReflection  = o?.pkg_key === 'anniversary' || o?.pkg_key === 'premium';
@@ -289,11 +269,10 @@ async function exportCombined(admin) {
     const fb = (o?.buyer_email && feedbackByEmail[o.buyer_email.toLowerCase()]) || null;
 
     const row = [
-      // Identity
       anonId,
       p.created_at ? new Date(p.created_at).toISOString().slice(0,10) : '',
       p.pkg || '',
-      // Order details
+
       o?.order_num || '',
       o?.created_at ? new Date(o.created_at).toISOString().slice(0,10) : '',
       o?.is_physical ? 'physical' : (o ? 'digital' : ''),
@@ -303,7 +282,7 @@ async function exportCombined(admin) {
       hasBudget     ? 'Y' : 'N',  hasBudget     ? whenFor(pkgHasBudget, 'addon_budget') : '',
       hasChecklist  ? 'Y' : 'N',  hasChecklist  ? 'initial_checkout' : '',
       hasLMFT       ? 'Y' : 'N',  hasLMFT       ? whenFor(pkgHasLMFT, 'addon_lmft') : '',
-      // Demographics
+
       p.gender || '',
       ps?.gender || '',
       p.relationship_length || ps?.relationship_length || '',
@@ -313,14 +292,14 @@ async function exportCombined(admin) {
       aAxes.typeCode || '',
       bAxes.typeCode || '',
       s?.couple_type?.id || '',
-      // Engagement
+
       s?.ex1_answers ? 'Y' : 'N',  ps?.ex1_answers ? 'Y' : 'N',
       s?.ex2_answers ? 'Y' : 'N',  ps?.ex2_answers ? 'Y' : 'N',
       s?.ex3_answers ? 'Y' : 'N',  ps?.ex3_answers ? 'Y' : 'N',
       budgetComplete ? 'Y' : 'N',
       w ? 'Y' : 'N',
       (o?.is_physical && o?.card_status === 'shipped') ? 'Y' : 'N',
-      // Results
+
       fmt(aAxes.withdrawScore), fmt(aAxes.openScore),
       fmt(bAxes.withdrawScore), fmt(bAxes.openScore),
       ...DIMS.map(d => fmt(aScores[d])),
@@ -329,7 +308,6 @@ async function exportCombined(admin) {
       ...SAT_KEYS.map(k => bEx3[k] != null ? bEx3[k] : ''),
     ];
 
-    // Feedback columns — appended in the same order as the header
     if (feedbackCols.length > 0) {
       row.push(fb?.submitted_at || '');
       feedbackCols.forEach(fk => row.push(fb?.[fk] != null ? fb[fk] : ''));
@@ -337,14 +315,89 @@ async function exportCombined(admin) {
     return row;
   });
 
-  // Assemble CSV — category row, then name row, then data rows
+  return { categoryRow, nameRow, dataRows };
+}
+
+async function exportCombined(admin) {
+  const { categoryRow, nameRow, dataRows } = await buildCombinedData(admin);
   const csv = [
     categoryRow.map(csvEscape).join(','),
     nameRow.map(csvEscape).join(','),
     ...dataRows.map(r => r.map(csvEscape).join(','))
   ].join('\n');
-
   return csvResponse(`attune_all_${new Date().toISOString().slice(0,10)}.csv`, csv);
+}
+
+// ── 0b. COMBINED XLSX ───────────────────────────────────────────────────
+// Same data as exportCombined but as a native XLSX file with actual merged
+// cells on the category row, bold headers, frozen top 2 rows, and an
+// auto-filter on row 2. Uses SheetJS (xlsx package).
+async function exportCombinedXlsx(admin) {
+  const XLSX = (await import('xlsx')).default || (await import('xlsx'));
+  const { categoryRow, nameRow, dataRows } = await buildCombinedData(admin);
+
+  // Build worksheet from arrays-of-arrays
+  const aoa = [categoryRow, nameRow, ...dataRows];
+  const ws = XLSX.utils.aoa_to_sheet(aoa);
+
+  // Compute merges for the category row (row 0). A category span starts
+  // wherever a non-empty label appears and continues until the next
+  // non-empty label (or the end of the row).
+  const merges = [];
+  let spanStart = null;
+  for (let c = 0; c < categoryRow.length; c++) {
+    const label = categoryRow[c];
+    if (label) {
+      // Close any prior span
+      if (spanStart !== null && c - 1 > spanStart) {
+        merges.push({ s: { r: 0, c: spanStart }, e: { r: 0, c: c - 1 } });
+      }
+      spanStart = c;
+    }
+  }
+  // Close the final span
+  if (spanStart !== null && spanStart < categoryRow.length - 1) {
+    merges.push({ s: { r: 0, c: spanStart }, e: { r: 0, c: categoryRow.length - 1 } });
+  }
+  ws['!merges'] = merges;
+
+  // Style: category row bold + centered, column-name row bold.
+  // SheetJS free version supports the `s` property on cells when the file
+  // is written with cellStyles: true. Note: full styling requires the Pro
+  // version; we set basic alignment + bold that the free writer supports.
+  const range = XLSX.utils.decode_range(ws['!ref']);
+  for (let c = range.s.c; c <= range.e.c; c++) {
+    const topAddr = XLSX.utils.encode_cell({ r: 0, c });
+    if (ws[topAddr]) ws[topAddr].s = { font: { bold: true, sz: 12 }, alignment: { horizontal: 'center' }, fill: { fgColor: { rgb: 'F3EDE6' } } };
+    const nameAddr = XLSX.utils.encode_cell({ r: 1, c });
+    if (ws[nameAddr]) ws[nameAddr].s = { font: { bold: true, sz: 10 }, alignment: { horizontal: 'left' } };
+  }
+
+  // Freeze the two header rows + set auto-filter on row 2 so users can
+  // immediately filter/sort every column.
+  ws['!freeze'] = { xSplit: 0, ySplit: 2 };
+  ws['!autofilter'] = { ref: XLSX.utils.encode_range({
+    s: { r: 1, c: 0 },
+    e: { r: Math.max(1, dataRows.length + 1), c: categoryRow.length - 1 },
+  }) };
+
+  // Column widths — guess based on header length; Excel will honor these
+  // as initial widths, users can adjust.
+  ws['!cols'] = nameRow.map(n => ({ wch: Math.max(12, Math.min(28, n.length + 2)) }));
+
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Attune data');
+
+  // Write to buffer. `type: 'buffer'` returns a Node Buffer we can return.
+  const buf = XLSX.write(wb, { type: 'buffer', bookType: 'xlsx', cellStyles: true });
+
+  return new Response(buf, {
+    status: 200,
+    headers: {
+      'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      'Content-Disposition': `attachment; filename="attune_all_${new Date().toISOString().slice(0,10)}.xlsx"`,
+    },
+  });
 }
 
 // Pull feedback responses from Vercel KV and key by email where possible.
