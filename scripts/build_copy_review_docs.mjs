@@ -673,7 +673,7 @@ function buildEdgeCaseDoc() {
       ['Section 5', 'Save + sync states',              'Budget tool save button, localStorage, Supabase sync', GREEN],
       ['Section 6', 'Privacy reassurances',            'Shown at key decision points',              ORANGE],
       ['Section 7', 'Generic fallback errors',         'Network failures and unexpected errors',    INK],
-      ['Section 8', 'Gaps + suggested drafts',       'Proposed copy for edge cases without text today', ORANGE],
+      ['Section 8', 'Edge-case copy — shipped',       'Copy for session expiry, resume, invite reminder, sync failures, and anonymous storage', ORANGE],
     ].map(([step, title, desc, color]) => new Paragraph({
       alignment: AlignmentType.CENTER,
       spacing: { after: 100 },
@@ -998,78 +998,95 @@ function buildEdgeCaseDoc() {
     }),
   ];
 
-  // ── Section 8: Gaps + suggested drafts ─────────────────────────────────
+  // ── Section 8: Edge-case copy — shipped ────────────────────────────────
   const gapsSection = [
-    ...secHead(8, 'Gaps + suggested copy drafts',
-      'Edge cases where copy is missing, with draft text proposed for each.', ORANGE),
+    ...secHead(8, 'Edge-case copy — shipped',
+      'Copy for session expiry, resume, invite reminder, sync failures, and anonymous storage. All six drafts from the previous review are now live.', ORANGE),
 
-    body('Each entry flags a gap and proposes draft text. Green-bordered blocks are proposed new copy. Orange "needs product decision" blocks flag gaps where a product choice has to come first.',
+    body('These were proposed drafts in the prior version of this document. All have since been implemented. Each card shows the shipped copy and a source reference in src/App.jsx.',
       { italics: true, color: MUTED, after: 240 }),
 
-    ...draftCard({
-      gap: 'Session expired, in-progress exercise detected',
-      where: 'Banner at the top of the dashboard after the user re-authenticates',
-      when: 'User\'s Supabase session expires mid-exercise, they re-login, land on the dashboard, and have non-null ex1Answers or ex2Answers that are partially complete',
-      draft: [
+    eyebrow('Welcome back — session expiry or normal resume', ORANGE),
+    ...copyCard({
+      where: 'Dashboard banner at the top of the content area, above the profile setup tile',
+      when: 'Shown whenever the user lands on the dashboard and has saved progress in any of ex1/ex2/ex3. Covers both session expiry (user was signed out, came back, re-authenticated) and normal resume (came back a day later). Dismissible per session.',
+      text: [
         'Eyebrow: "Welcome back, {userName}"',
-        'Body: "Your session expired while you were in Exercise 2. Your progress is saved."',
-        'Button: "Continue Exercise 2 →"',
+        'Body: "You were in the middle of {Exercise N}. Your progress is saved."',
+        'Primary button: "Continue {Exercise N} →"',
+        'Secondary button: "Dismiss"',
       ],
-      notes: 'If the interrupted exercise is different (Ex1, Ex3, or Budget), substitute the correct name in body + button. Applies to any in-progress tool, not just Exercise 2.',
+      source: 'src/App.jsx:10672-10711 — detects first in-progress exercise from localStorage ex1/ex2/ex3 progress keys',
+      notes: 'Target exercise is the first one with saved progress in order Ex1 → Ex2 → Ex3. Dismissal is session-scoped via window.__attune_welcome_back_dismissed — banner will reappear on a fresh session if progress still exists.',
+      color: ORANGE,
     }),
 
-    ...draftCard({
-      gap: 'Welcome-back when returning to an in-progress exercise (no session expiry)',
-      where: 'Small toast at the top of the exercise when resumed, or inline banner above Q1',
-      when: 'User opens an exercise where they have answers saved but have not yet submitted. Shows on the first render of that session',
-      draft: [
-        'Toast: "Picking up where you left off."',
-        'Alt for inside exercise: "You\'re on question {n} of {total}."',
+    eyebrow('Resume toast inside each exercise', ORANGE),
+    ...copyCard({
+      where: 'Centered toast pill at the top of Ex01, Ex02, and Ex03',
+      when: 'Fires once when the exercise component mounts with saved progress. Auto-dismisses after 3 seconds. No button.',
+      text: [
+        'Ex01: "You\'re on question {n} of {total}."',
+        'Ex02: "Picking up where you left off."',
+        'Ex03: "Picking up where you left off."',
       ],
-      notes: 'Short and unobtrusive. Auto-dismisses after 3 seconds. No button — the user just continues with whatever was on screen.',
+      source: 'src/App.jsx:146-161 — ResumeToast component, used in Exercise01Flow, ExpectationsExercise, and AnniversaryExercise',
+      notes: 'Ex01 shows the specific question number because the mid-exercise state there is granular (idx + answers). Ex02 and Ex03 are phase-based so the generic copy reads better.',
+      color: ORANGE,
     }),
 
-    ...draftCard({
-      gap: 'Partial completion — Exercise 01 done, Exercise 02 not started',
-      where: 'Callout above the Exercise 02 card on the dashboard, or badge on the card itself',
-      when: 'User has completed Exercise 01 (ex1Answers not null) but has not started Exercise 02 (ex2Answers is null)',
-      draft: [
-        'Callout: "Up next: Exercise 2. Your expectations, about 15 minutes."',
-        'Alt (subtler): Just a small "Up next" badge on the Exercise 02 card',
+    eyebrow('Partial completion — Ex01 done, Ex02 not started', ORANGE),
+    ...copyCard({
+      where: 'Exercise 01 completion screen',
+      when: 'The user has just finished Exercise 01 and ex2Answers is still null.',
+      text: [
+        'Body: "Next up: Exercise 2. Your expectations, about 15 minutes."',
+        'Button: "Start Exercise 2 →"',
       ],
-      notes: 'Same pattern can apply to any partial-completion state (Ex02 done, Ex03 pending, etc). The copy is the next exercise\'s name and duration.',
+      source: 'src/App.jsx:10660-10700 — Exercise 01 completion screen (see Section 1 of the intro/outro doc for full three-state detail)',
+      notes: 'Implemented as the first of three mutually-exclusive states on the Ex01 completion screen. Covers the "next up" case without needing a separate dashboard callout.',
+      color: ORANGE,
     }),
 
-    ...draftCard({
-      gap: 'Partner invite reminder after several days of waiting',
-      where: 'Dashboard banner below the exercise cards, replacing or escalating the current "Waiting on {partnerName}" message',
-      when: 'Partner B has not signed up or started anything, and it has been 5+ days since invite was sent',
-      draft: [
-        'Message: "It\'s been a few days since you invited {partnerName}. Resend the invite?"',
-        'Button: "Resend invite"',
+    eyebrow('Partner invite — escalated reminder after 5+ days', ORANGE),
+    ...copyCard({
+      where: 'Partner invite card on the dashboard',
+      when: 'Shown when partner has not joined and it has been 5+ days since the user\'s account was created.',
+      text: [
+        'Eyebrow: "Still waiting" (replaces "Invite your partner")',
+        'Title: "It\'s been a few days since you invited {partnerName}."',
+        'Body (with partnerEmail on file): "Resend the invite email, or share the link below directly."',
+        'Body (without partnerEmail): "Share the link below to nudge them."',
+        'Actions: existing Resend email button + link-copy area',
       ],
-      notes: 'Keep the existing "Waiting on {partnerName}" message for the first few days. This escalates only after 5+ days. Avoid language that implies the user has done something wrong.',
+      source: 'src/App.jsx:9143-9166 — PartnerInviteCard with daysSinceInvite >= 5 trigger',
+      notes: 'Below 5 days the card shows the original "Invite your partner" copy. Above 5 days it swaps in this escalated version. Resend button logic and copy flow unchanged.',
+      color: ORANGE,
     }),
 
-    ...draftCard({
-      gap: 'Network / sync failure during save',
-      where: 'Toast at bottom of the screen (existing toast system)',
-      when: 'Supabase write fails (network error, auth issue, or server error) on any save operation',
-      draft: [
-        'When save fails: "Saved on this device. We\'ll sync when you\'re back online."',
-        'When retry succeeds: "Synced."',
+    eyebrow('Network / sync failure during save', ORANGE),
+    ...copyCard({
+      where: 'Global toast pill at the bottom of the screen',
+      when: 'Any of the four main save paths (Ex01 answers, Ex02 answers, Ex03 answers, Budget data) fails to write to Supabase.',
+      text: [
+        'On first failure: "Saved on this device. We\'ll sync when you\'re back online."',
+        'On next success after a prior failure: "Synced."',
       ],
-      notes: 'App already writes to localStorage first and wraps Supabase calls in try/catch, so no data is lost. This just surfaces what\'s happening. The "Synced." toast only shows if a prior failure was recovered; otherwise saves stay silent.',
+      source: 'src/App.jsx:167-184 — trackedSupabaseWrite() helper',
+      notes: 'Wraps each save in a try/catch, sets a window-level sync-failed flag on error. LocalStorage writes happen unconditionally before the Supabase call, so no answer data is ever lost. The "Synced." toast only shows if a prior failure was recovered — successful saves are otherwise silent.',
+      color: ORANGE,
     }),
 
-    ...draftCard({
-      gap: 'Storage warning when user is not logged in',
-      where: 'Banner at the top of the exercise, visible from Q1 until they create an account',
-      when: 'User is using Attune via QR or direct link but has not yet created an account (account?.id is null)',
-      draft: [
+    eyebrow('Anonymous-storage banner', ORANGE),
+    ...copyCard({
+      where: 'Banner at the top of Ex01, Ex02, and Ex03',
+      when: 'The user has no Supabase account (reached the app via QR or gift link and has not yet signed up). Banner disappears automatically once they have an account.',
+      text: [
         'Banner: "Your progress saves on this device. Create an account at the end to save it permanently."',
       ],
-      notes: 'Non-alarming. Not a warning about losing data, just a statement of how storage works. Avoid language about private browsing unless we actually detect it.',
+      source: 'src/App.jsx:132-142 — AnonymousStorageBanner component, mounted at the top of each exercise',
+      notes: 'Amber-tinted, low-urgency treatment. Factual rather than alarming.',
+      color: ORANGE,
     }),
   ];
 
