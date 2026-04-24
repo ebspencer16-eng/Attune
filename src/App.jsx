@@ -1569,7 +1569,7 @@ function ProfileSetupTile({ account, onSetup, onDismiss }) {
 
   return (
     <div style={{ background: 'white', border: '1.5px solid #E8DDD0', borderRadius: 16, padding: '1.25rem 1.5rem', marginBottom: '1.5rem', position: 'relative' }}>
-      <button onClick={onDismiss} title="Dismiss" style={{ position: 'absolute', top: 12, right: 14, background: 'none', border: 'none', cursor: 'pointer', color: '#8C7A68', fontSize: '1rem', lineHeight: 1 }}>✕</button>
+      <button onClick={onDismiss} aria-label="Dismiss" title="Dismiss" style={{ position: 'absolute', top: 12, right: 14, background: 'none', border: 'none', cursor: 'pointer', color: '#8C7A68', fontSize: '1rem', lineHeight: 1 }}>✕</button>
       <div style={{ display: 'flex', alignItems: 'flex-start', gap: '1rem' }}>
         <div style={{ width: 40, height: 40, borderRadius: 12, background: 'linear-gradient(135deg,#E8673A20,#1B5FE820)', border: '1.5px solid #E8DDD0', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, fontSize: '1.1rem' }}>✦</div>
         <div style={{ flex: 1 }}>
@@ -5884,7 +5884,7 @@ function BetaSurveyModal({ userName, coupleType, onClose }) {
             <div style={{ fontSize: "0.55rem", letterSpacing: "0.22em", textTransform: "uppercase", color: "#E8673A", fontFamily: font.body, fontWeight: 700, marginBottom: "0.2rem" }}>Beta feedback</div>
             <div style={{ fontSize: "0.7rem", color: C.muted, fontFamily: font.body }}>{step + 1} of {total}</div>
           </div>
-          <button onClick={onClose} style={{ background: "transparent", border: "none", fontSize: "1.1rem", cursor: "pointer", color: C.muted }}>✕</button>
+          <button onClick={onClose} aria-label="Close" style={{ background: "transparent", border: "none", fontSize: "1.1rem", cursor: "pointer", color: C.muted }}>✕</button>
         </div>
 
         {/* Progress bar */}
@@ -8499,7 +8499,7 @@ function AuthModal({ mode, onClose, onSuccess }) {
       onClick={e => e.target === e.currentTarget && onClose()}>
       <style>{`@keyframes authShake { 0%,100% { transform: translateX(0); } 15% { transform: translateX(-10px); } 30% { transform: translateX(10px); } 45% { transform: translateX(-8px); } 60% { transform: translateX(8px); } 75% { transform: translateX(-4px); } 90% { transform: translateX(4px); } }`}</style>
       <div style={{ background: "#FFFDF9", borderRadius: isMobile ? 0 : 22, padding: isMobile ? "1.5rem 1.25rem 1.25rem" : "2rem 2rem 1.75rem", width: "100%", minHeight: isMobile ? "100vh" : "auto", maxWidth: isMobile ? "none" : 440, boxShadow: isMobile ? "none" : "0 32px 80px rgba(0,0,0,0.28)", position: "relative", animation: shake ? "authShake 0.45s cubic-bezier(.36,.07,.19,.97)" : undefined }}>
-        <button onClick={onClose} style={{ position: "absolute", top: "1rem", right: "1rem", background: "none", border: "none", fontSize: "1.2rem", cursor: "pointer", color: "#8C7A68", lineHeight: 1 }}>✕</button>
+        <button onClick={onClose} aria-label="Close" style={{ position: "absolute", top: "1rem", right: "1rem", background: "none", border: "none", fontSize: "1.2rem", cursor: "pointer", color: "#8C7A68", lineHeight: 1 }}>✕</button>
 
         {/* Logo */}
         <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "1.5rem" }}>
@@ -9349,7 +9349,7 @@ function UpsellModal({ product, cartAdded, onAddToCart, onCheckout, onClose }) {
             <div style={{ fontFamily: HFONT, fontSize: "1.3rem", fontWeight: 700, color: "#0E0B07", lineHeight: 1.15 }}>{p.title}</div>
             <div style={{ fontSize: "0.82rem", color: "#8C7A68", fontFamily: BFONT, marginTop: "0.2rem", fontStyle: "italic" }}>{p.tagline}</div>
           </div>
-          <button onClick={onClose} style={{ background: "none", border: "none", cursor: "pointer", color: "#8C7A68", fontSize: "1.3rem", lineHeight: 1, padding: "0.15rem", flexShrink: 0, marginTop: "-0.15rem" }}>✕</button>
+          <button onClick={onClose} aria-label="Close" style={{ background: "none", border: "none", cursor: "pointer", color: "#8C7A68", fontSize: "1.3rem", lineHeight: 1, padding: "0.15rem", flexShrink: 0, marginTop: "-0.15rem" }}>✕</button>
         </div>
 
         {/* Body */}
@@ -9479,7 +9479,7 @@ function PackagesModal({ currentPkg, onClose, onPick }) {
             <div style={{ fontFamily: "'Playfair Display', Georgia, serif", fontSize: "1.3rem", fontWeight: 700, color: "#0E0B07", lineHeight: 1.15 }}>Upgrade your experience</div>
             <div style={{ fontSize: "0.82rem", color: "#8C7A68", fontFamily: "'DM Sans', sans-serif", marginTop: "0.2rem", fontStyle: "italic" }}>Choose the package that fits where you are.</div>
           </div>
-          <button onClick={onClose} style={{ background: "none", border: "none", cursor: "pointer", color: "#8C7A68", fontSize: "1.3rem", lineHeight: 1, padding: "0.15rem", flexShrink: 0, marginTop: "-0.15rem" }}>✕</button>
+          <button onClick={onClose} aria-label="Close" style={{ background: "none", border: "none", cursor: "pointer", color: "#8C7A68", fontSize: "1.3rem", lineHeight: 1, padding: "0.15rem", flexShrink: 0, marginTop: "-0.15rem" }}>✕</button>
         </div>
 
         {/* Packages list */}
