@@ -58,6 +58,16 @@
   .data-notice p{font-size:.74rem;color:#6EE7B7;line-height:1.65}
   .data-notice strong{color:var(--green)}
 
+  /* DEMO-DATA BANNER — shown on every page when no real orders exist yet */
+  .demo-banner{background:rgba(251,191,36,.1);border:1px solid rgba(251,191,36,.35);border-radius:10px;padding:.7rem .95rem;margin-bottom:1.25rem;display:flex;gap:.6rem;align-items:flex-start}
+  .demo-banner svg{flex-shrink:0;margin-top:1px;color:var(--amber)}
+  .demo-banner p{font-size:.72rem;color:#F2C563;line-height:1.55;margin:0}
+  .demo-banner strong{color:#FBBF24;font-weight:700}
+
+  /* EMPTY STATE — for tables/charts without real data */
+  .empty-state{text-align:center;padding:3rem 1rem;color:var(--dim);font-size:.82rem;font-family:var(--bfont);background:var(--surface);border:1px dashed var(--border);border-radius:10px}
+  .empty-state-sub{font-size:.7rem;color:var(--dim);margin-top:.4rem}
+
   /* KPI CARDS */
   .kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(175px,1fr));gap:1rem;margin-bottom:1.75rem}
   .kpi-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:1.25rem 1.35rem;position:relative;overflow:hidden}
@@ -2131,13 +2141,41 @@ function generateOrders() {
 }
 const ORDERS = generateOrders();
 
+// Track whether we've loaded real orders. Used to decide whether to show
+// the amber "demo data" banner at the top of every page.
+window.__attuneHasRealData = false;
+
+// Inject a "Demo data only" banner into every page that doesn't already
+// have one. Called on every loadRealData tick so the banner appears or
+// disappears as the flag flips.
+function syncDemoBanner() {
+  const demo = !window.__attuneHasRealData;
+  const pages = document.querySelectorAll('.page');
+  pages.forEach(page => {
+    let banner = page.querySelector('.demo-banner');
+    if (demo) {
+      if (!banner) {
+        banner = document.createElement('div');
+        banner.className = 'demo-banner';
+        banner.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg><p><strong>Showing placeholder demo data.</strong> No real orders have been placed yet. Real numbers will populate as soon as orders start coming in.</p>';
+        // Insert right after .topbar (or at the top of the page if topbar is absent)
+        const topbar = page.querySelector('.topbar');
+        if (topbar) topbar.parentNode.insertBefore(banner, topbar.nextSibling);
+        else page.prepend(banner);
+      }
+    } else if (banner) {
+      banner.remove();
+    }
+  });
+}
+
 // ── Real data from Supabase (progressive enhancement) ─────────────────────────
 // When env vars are configured, fetches real orders and feedback from Supabase.
 // Falls back gracefully to synthetic data if not available.
 async function loadRealData() {
   const SUPABASE_URL  = window.__SUPABASE_URL;
   const SUPABASE_ANON = window.__SUPABASE_ANON;
-  if (!SUPABASE_URL || !SUPABASE_ANON) return;
+  if (!SUPABASE_URL || !SUPABASE_ANON) { syncDemoBanner(); return; }
 
   try {
     // Fetch real orders
@@ -2147,6 +2185,7 @@ async function loadRealData() {
     if (ordersRes.ok) {
       const realOrders = await ordersRes.json();
       if (realOrders.length > 0) {
+        window.__attuneHasRealData = true;
         // Clear synthetic orders and replace with real ones
         ORDERS.length = 0;
         const pkgNames = { core: 'Assessment', newlywed: 'Starting Out', anniversary: 'Anniversary', premium: 'Premium' };
@@ -2190,11 +2229,30 @@ async function loadRealData() {
         if (activePage === 'orders') applyOrderFilters();
         if (activePage === 'fulfillment') renderFulfillmentTable();
         updateStatsFromRealData(realOrders);
+      } else {
+        // No real orders yet. Clear synthetic orders so pages render
+        // empty states instead of fake data. The demo banner at the top
+        // of every page will tell the admin why everything looks bare.
+        window.__attuneHasRealData = false;
+        ORDERS.length = 0;
+        // Zero out any KPI that was computed from synthetic orders
+        const el = id => document.getElementById(id);
+        if (el('stat-orders'))    el('stat-orders').textContent    = '0';
+        if (el('stat-revenue'))   el('stat-revenue').textContent   = '$0';
+        if (el('stat-aov'))       el('stat-aov').textContent       = '$0';
+        if (el('stat-digital'))   el('stat-digital').textContent   = '0';
+        if (el('stat-physical'))  el('stat-physical').textContent  = '0';
+        if (el('stat-completion')) el('stat-completion').textContent = '—';
+        // Re-render so tables show empty state
+        const activePage = document.querySelector('.page.active')?.id?.replace('page-', '');
+        if (activePage === 'orders') applyOrderFilters();
+        if (activePage === 'fulfillment' && typeof renderFulfillmentTable === 'function') renderFulfillmentTable();
       }
     }
   } catch (e) {
     console.warn('[Admin] Real data fetch failed, using synthetic data:', e);
   }
+  syncDemoBanner();
 }
 
 // Real demographics: overrides the static arrays when Supabase is configured
@@ -2251,6 +2309,10 @@ async function loadRealDemographics() {
     console.warn('[admin] real demographics load failed:', e);
   }
 }
+
+// Writes the four overview KPIs (orders, revenue, AOV, completion rate)
+// from real order data. Called from loadRealData after orders are fetched.
+function updateStatsFromRealData(orders) {
   const total = orders.length;
   const revenue = orders.reduce((s, o) => s + (parseFloat(o.total) || 0), 0);
   const digital = orders.filter(o => !o.is_physical).length;
@@ -2466,6 +2528,14 @@ function renderOrdersTable(rows) {
   const pkgNames  = {core:'Assessment',newlywed:'Starting Out','newlywed-box':'Starting Out',anniversary:'Anniversary','anniversary-box':'Anniversary',premium:'Premium','premium-box':'Premium'};
   const label = document.getElementById('orders-count-label');
   if (label) label.textContent = `${rows.length} order${rows.length === 1 ? '' : 's'}`;
+
+  if (rows.length === 0) {
+    // Empty state — use colspan so the row spans the full table
+    const colCount = tbody.closest('table')?.querySelector('thead tr')?.children.length || 8;
+    tbody.innerHTML = `<tr><td colspan="${colCount}" style="padding:3rem 1rem;text-align:center;color:var(--dim);font-size:.82rem">No orders yet.<br><span style="font-size:.7rem;color:var(--dim);margin-top:.4rem;display:inline-block">Orders will appear here as soon as customers start checking out.</span></td></tr>`;
+    return;
+  }
+
   tbody.innerHTML = rows.slice(0,100).map(o=>`
     <tr${o.isLiveSession||o.isRealOrder ? ' style="background:rgba(16,185,129,0.07)"' : ''}>
       <td><span style="font-family:var(--mono);font-size:.7rem;color:var(--muted)">${o.id}</span></td>
@@ -2499,7 +2569,10 @@ function renderFulfillmentTable() {
   const statusPill = { pending:'<span class="pill amber">🟡 Pending</span>', packed:'<span class="pill indigo">🔵 Packed</span>', shipped:'<span class="pill green">🟢 Shipped</span>' };
 
   if (rows.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="12" style="text-align:center;color:var(--muted);padding:2rem;font-size:.8rem;">No orders match this filter.</td></tr>`;
+    const msg = ORDERS.length === 0
+      ? `No physical orders yet.<br><span style="font-size:.7rem;color:var(--dim);margin-top:.4rem;display:inline-block">Box orders will appear here once customers purchase a physical package.</span>`
+      : `No orders match this filter.`;
+    tbody.innerHTML = `<tr><td colspan="12" style="text-align:center;color:var(--muted);padding:2rem;font-size:.8rem;">${msg}</td></tr>`;
     return;
   }
 
