@@ -236,6 +236,10 @@
       "destination": "/design-sandbox-v3.html"
     },
     {
+      "source": "/design-sandbox-v4",
+      "destination": "/design-sandbox-v4.html"
+    },
+    {
       "source": "/gift-cards",
       "destination": "/gift-cards.html"
     },
