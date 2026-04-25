@@ -1,0 +1,736 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex,nofollow">
+<title>Attune · Design Sandbox v1</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=DM+Sans:wght@300;400;500;600;700&family=Syne:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+/* ─────────────────────────────────────────────────────────────
+   ATTUNE DESIGN TOKENS v1
+   "Editorial intimacy" — warm, credible, coffee-table magazine.
+   Pulls from logo gradient (coral → indigo) on cream surfaces.
+───────────────────────────────────────────────────────────── */
+:root{
+  /* SURFACES — warm to cool, lightest to heaviest */
+  --cream:        #FFFDF9;   /* page base */
+  --warm:         #FBF6EE;   /* secondary surface */
+  --shell:        #F8EDE0;   /* peach-tinted card */
+  --linen:        #F1E5D2;   /* warmer card / divider */
+  --stone:        #E8DDD0;   /* hairline / muted surface */
+  --mist:         #EDEAF4;   /* cool-tinted card (indigo side) */
+
+  /* INK — text and depth */
+  --ink:          #1A140E;   /* primary text (warmer than #0E0B07) */
+  --graphite:     #3A2E22;
+  --muted:        #8C7A68;
+  --hairline:     #E2D5C2;
+
+  /* BRAND — from logo */
+  --coral:        #E8673A;
+  --coral-soft:   #F2A37A;
+  --coral-bg:     #FFF0E6;
+  --coral-deep:   #C2410C;
+
+  --indigo:       #1B5FE8;
+  --indigo-soft:  #7A8FF5;
+  --indigo-bg:    #EBE9F8;
+  --indigo-deep:  #1E3A8A;
+
+  /* DIMENSION ACCENTS — meaning system, kept from existing */
+  --inner:        #9B5DE5;   /* purple — inner worlds */
+  --inner-bg:     #F3EEFF;
+  --connect:      #E8673A;   /* coral — connection */
+  --connect-bg:   #FFF3EE;
+  --hard:         #1B5FE8;   /* indigo — hard moments */
+  --hard-bg:      #EEF3FF;
+  --building:     #10B981;   /* green — life building */
+  --building-bg:  #E7FAF1;
+
+  /* GRADIENTS — signature brand washes */
+  --grad-dawn:    linear-gradient(135deg, #F8EDE0 0%, #FFF0E6 50%, #F2D9C8 100%);
+  --grad-dusk:    linear-gradient(135deg, #EDEAF4 0%, #E0D9F0 100%);
+  --grad-signature: linear-gradient(110deg, #E8673A 0%, #C2410C 30%, #5B6DF8 75%, #1B5FE8 100%);
+  --grad-aura:    radial-gradient(ellipse at top left, rgba(232,103,58,.18) 0%, transparent 55%),
+                  radial-gradient(ellipse at bottom right, rgba(27,95,232,.14) 0%, transparent 55%);
+
+  /* TYPOGRAPHY */
+  --font-display: 'Playfair Display', Georgia, serif;
+  --font-body:    'DM Sans', system-ui, sans-serif;
+  --font-special: 'Syne', sans-serif;
+
+  /* SPACING — 4px scale */
+  --s-1: 4px; --s-2: 8px; --s-3: 12px; --s-4: 16px; --s-5: 20px;
+  --s-6: 24px; --s-8: 32px; --s-10: 40px; --s-12: 48px; --s-16: 64px;
+  --s-20: 80px; --s-24: 96px; --s-32: 128px;
+
+  /* RADIUS */
+  --r-xs: 6px; --r-sm: 10px; --r-md: 14px; --r-lg: 18px; --r-xl: 24px; --r-2xl: 32px; --r-pill: 999px;
+
+  /* SHADOWS — warm-tinted, not pure black */
+  --shadow-1: 0 1px 2px rgba(60,30,10,.04), 0 1px 3px rgba(60,30,10,.06);
+  --shadow-2: 0 2px 4px rgba(60,30,10,.04), 0 6px 16px rgba(60,30,10,.08);
+  --shadow-3: 0 4px 8px rgba(60,30,10,.05), 0 14px 32px rgba(60,30,10,.10);
+  --shadow-glow-coral: 0 0 0 4px rgba(232,103,58,.14);
+  --shadow-glow-indigo: 0 0 0 4px rgba(27,95,232,.14);
+
+  /* MOTION */
+  --ease: cubic-bezier(.2,.8,.25,1);
+  --dur-fast: 150ms; --dur-base: 220ms; --dur-slow: 360ms;
+}
+
+/* ─────────────── RESET ─────────────── */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{
+  background:var(--cream);
+  color:var(--ink);
+  font-family:var(--font-body);
+  font-size:16px;
+  line-height:1.55;
+  -webkit-font-smoothing:antialiased;
+  text-rendering:optimizeLegibility;
+}
+
+/* ─────────────── NAV ─────────────── */
+.nav{
+  position:sticky;top:0;z-index:100;
+  height:64px;
+  background:rgba(255,253,249,.92);
+  backdrop-filter:blur(14px) saturate(1.1);
+  -webkit-backdrop-filter:blur(14px) saturate(1.1);
+  border-bottom:1px solid var(--hairline);
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 var(--s-6);
+}
+.nav-brand{display:flex;align-items:center;gap:var(--s-3);text-decoration:none;color:var(--ink)}
+.nav-brand-mark{
+  width:36px;height:36px;border-radius:var(--r-md);
+  background:var(--grad-signature);
+  display:flex;align-items:center;justify-content:center;
+  color:white;font-family:var(--font-display);font-weight:700;font-size:17px;
+  box-shadow:var(--shadow-1);
+}
+.nav-brand-text{font-family:var(--font-display);font-weight:700;font-size:1.1rem;letter-spacing:-.01em}
+.nav-links{display:flex;gap:var(--s-6);align-items:center}
+.nav-link{font-size:.86rem;color:var(--graphite);text-decoration:none;font-weight:500;transition:color var(--dur-fast) var(--ease)}
+.nav-link:hover{color:var(--coral-deep)}
+.nav-cta{
+  font-family:var(--font-body);font-size:.84rem;font-weight:600;
+  padding:.55rem 1.1rem;border-radius:var(--r-pill);
+  background:var(--ink);color:var(--cream);text-decoration:none;
+  transition:transform var(--dur-fast) var(--ease), box-shadow var(--dur-fast) var(--ease);
+}
+.nav-cta:hover{transform:translateY(-1px);box-shadow:var(--shadow-2)}
+@media(max-width:720px){.nav-links{gap:var(--s-3)} .nav-link{display:none} .nav-cta{padding:.45rem .9rem;font-size:.78rem}}
+
+/* ─────────────── HERO ─────────────── */
+.hero{
+  position:relative;
+  padding:var(--s-24) var(--s-6) var(--s-20);
+  overflow:hidden;
+  background:var(--grad-dawn);
+}
+.hero::before{
+  content:"";position:absolute;inset:0;
+  background:var(--grad-aura);
+  pointer-events:none;
+}
+.hero::after{
+  content:"";position:absolute;
+  bottom:-1px;left:0;right:0;height:60px;
+  background:linear-gradient(to bottom, transparent, var(--cream));
+  pointer-events:none;
+}
+.hero-inner{position:relative;max-width:1080px;margin:0 auto;text-align:center}
+.hero-eyebrow{
+  display:inline-block;
+  font-family:var(--font-body);
+  font-size:.72rem;font-weight:600;
+  letter-spacing:.18em;text-transform:uppercase;
+  color:var(--coral-deep);
+  padding:.4rem .9rem;
+  background:rgba(255,253,249,.7);
+  border:1px solid rgba(232,103,58,.2);
+  border-radius:var(--r-pill);
+  margin-bottom:var(--s-6);
+  backdrop-filter:blur(8px);
+}
+.hero-title{
+  font-family:var(--font-display);
+  font-weight:700;
+  font-size:clamp(2.4rem, 6vw, 4.4rem);
+  line-height:1.02;
+  letter-spacing:-.025em;
+  color:var(--ink);
+  margin-bottom:var(--s-6);
+  max-width:14ch;
+  margin-left:auto;margin-right:auto;
+}
+.hero-title em{
+  font-style:italic;
+  background:var(--grad-signature);
+  -webkit-background-clip:text;background-clip:text;
+  -webkit-text-fill-color:transparent;
+}
+.hero-lead{
+  font-size:clamp(1.05rem, 1.6vw, 1.22rem);
+  color:var(--graphite);
+  max-width:54ch;
+  margin:0 auto var(--s-10);
+  line-height:1.55;
+}
+.hero-actions{display:flex;gap:var(--s-3);justify-content:center;flex-wrap:wrap}
+
+/* Decorative shapes — coral and indigo blobs */
+.hero-shape{position:absolute;border-radius:50%;filter:blur(40px);opacity:.6;pointer-events:none}
+.hero-shape--coral{width:340px;height:340px;background:radial-gradient(circle, rgba(232,103,58,.55), transparent 70%);top:-80px;left:-100px}
+.hero-shape--indigo{width:380px;height:380px;background:radial-gradient(circle, rgba(27,95,232,.4), transparent 70%);bottom:-120px;right:-120px}
+
+/* ─────────────── BUTTONS ─────────────── */
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:var(--s-2);
+  font-family:var(--font-body);font-weight:600;font-size:.92rem;
+  padding:.85rem 1.6rem;border-radius:var(--r-pill);
+  border:none;cursor:pointer;text-decoration:none;
+  transition:all var(--dur-fast) var(--ease);
+  letter-spacing:.005em;
+}
+.btn-primary{background:var(--ink);color:var(--cream);box-shadow:var(--shadow-1)}
+.btn-primary:hover{transform:translateY(-1px);box-shadow:var(--shadow-2);background:#000}
+.btn-coral{background:var(--coral);color:white;box-shadow:var(--shadow-1)}
+.btn-coral:hover{transform:translateY(-1px);box-shadow:var(--shadow-2),0 0 0 4px rgba(232,103,58,.16);background:var(--coral-deep)}
+.btn-ghost{background:transparent;color:var(--ink);border:1.5px solid var(--ink)}
+.btn-ghost:hover{background:var(--ink);color:var(--cream)}
+.btn-soft{background:white;color:var(--ink);border:1.5px solid var(--hairline)}
+.btn-soft:hover{border-color:var(--ink);transform:translateY(-1px);box-shadow:var(--shadow-1)}
+.btn-arrow{font-size:1.1rem;transition:transform var(--dur-fast) var(--ease)}
+.btn:hover .btn-arrow{transform:translateX(3px)}
+
+/* ─────────────── SECTION ─────────────── */
+.section{padding:var(--s-20) var(--s-6)}
+.section-inner{max-width:1080px;margin:0 auto}
+.section-eyebrow{
+  font-family:var(--font-body);font-size:.7rem;font-weight:700;
+  letter-spacing:.2em;text-transform:uppercase;
+  color:var(--coral-deep);
+  margin-bottom:var(--s-4);
+}
+.section-title{
+  font-family:var(--font-display);font-weight:700;
+  font-size:clamp(1.8rem, 3.5vw, 2.6rem);
+  line-height:1.12;letter-spacing:-.02em;
+  color:var(--ink);
+  margin-bottom:var(--s-4);
+  max-width:22ch;
+}
+.section-lead{
+  font-size:1.08rem;color:var(--graphite);
+  max-width:60ch;line-height:1.6;
+  margin-bottom:var(--s-12);
+}
+
+/* ─────────────── COLOR SWATCHES ─────────────── */
+.swatch-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:var(--s-3)}
+.swatch{
+  border-radius:var(--r-md);overflow:hidden;
+  background:white;border:1px solid var(--hairline);
+  box-shadow:var(--shadow-1);
+}
+.swatch-color{height:88px;display:flex;align-items:flex-end;padding:var(--s-3)}
+.swatch-meta{padding:var(--s-3) var(--s-3) var(--s-4)}
+.swatch-name{font-family:var(--font-body);font-size:.78rem;font-weight:600;color:var(--ink);margin-bottom:2px}
+.swatch-hex{font-family:'SFMono-Regular',Consolas,monospace;font-size:.7rem;color:var(--muted)}
+
+/* ─────────────── TYPE SCALE ─────────────── */
+.type-row{display:flex;align-items:baseline;gap:var(--s-4);padding:var(--s-3) 0;border-bottom:1px solid var(--hairline)}
+.type-row:last-child{border-bottom:none}
+.type-label{font-family:var(--font-body);font-size:.7rem;color:var(--muted);width:130px;flex-shrink:0;text-transform:uppercase;letter-spacing:.1em;font-weight:600}
+.type-sample{flex:1;color:var(--ink)}
+.t-eyebrow{font-size:.72rem;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--coral-deep)}
+.t-tiny{font-size:.78rem}
+.t-small{font-size:.88rem}
+.t-body{font-size:1rem}
+.t-lead{font-size:1.13rem}
+.t-h4{font-size:1.25rem;font-weight:600}
+.t-h3{font-family:var(--font-display);font-size:1.6rem;font-weight:700;letter-spacing:-.015em}
+.t-h2{font-family:var(--font-display);font-size:2.2rem;font-weight:700;letter-spacing:-.02em;line-height:1.1}
+.t-h1{font-family:var(--font-display);font-size:3rem;font-weight:700;letter-spacing:-.022em;line-height:1.05}
+.t-special{font-family:var(--font-special);font-size:1.4rem;font-weight:700;letter-spacing:-.005em}
+
+/* ─────────────── PACKAGE TILE (reimagined) ─────────────── */
+.pkg-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:var(--s-4)}
+@media(max-width:900px){.pkg-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:540px){.pkg-grid{grid-template-columns:1fr}}
+.pkg{
+  position:relative;
+  background:white;
+  border:1px solid var(--hairline);
+  border-radius:var(--r-xl);
+  padding:var(--s-6) var(--s-5) var(--s-5);
+  display:flex;flex-direction:column;
+  cursor:pointer;
+  transition:all var(--dur-base) var(--ease);
+  overflow:hidden;
+}
+.pkg::before{
+  content:"";position:absolute;inset:0;
+  background:linear-gradient(180deg, transparent 0%, rgba(248,237,224,.4) 100%);
+  opacity:0;transition:opacity var(--dur-base) var(--ease);
+  pointer-events:none;
+}
+.pkg:hover{transform:translateY(-3px);box-shadow:var(--shadow-3);border-color:var(--coral-soft)}
+.pkg:hover::before{opacity:1}
+.pkg-tag{
+  display:inline-block;
+  font-size:.65rem;font-weight:700;letter-spacing:.16em;text-transform:uppercase;
+  color:var(--coral-deep);
+  margin-bottom:var(--s-4);
+}
+.pkg-name{
+  font-family:var(--font-display);font-size:1.4rem;font-weight:700;
+  letter-spacing:-.015em;color:var(--ink);
+  margin-bottom:var(--s-2);
+  line-height:1.15;
+}
+.pkg-desc{font-size:.86rem;color:var(--muted);line-height:1.5;margin-bottom:var(--s-5);min-height:3em}
+.pkg-price-row{display:flex;align-items:baseline;gap:var(--s-2);margin-bottom:var(--s-5)}
+.pkg-price{font-family:var(--font-display);font-size:1.8rem;font-weight:700;color:var(--ink);letter-spacing:-.02em}
+.pkg-price-suffix{font-size:.78rem;color:var(--muted)}
+.pkg-includes{
+  list-style:none;margin-bottom:var(--s-5);
+  display:flex;flex-direction:column;gap:var(--s-2);
+  padding-top:var(--s-4);border-top:1px solid var(--hairline);
+}
+.pkg-includes li{
+  font-size:.82rem;color:var(--graphite);
+  padding-left:var(--s-5);position:relative;line-height:1.4;
+}
+.pkg-includes li::before{
+  content:"";
+  position:absolute;left:0;top:.5em;
+  width:6px;height:6px;border-radius:50%;
+  background:var(--coral);
+}
+.pkg-cta{
+  margin-top:auto;
+  display:flex;align-items:center;justify-content:space-between;
+  font-size:.84rem;font-weight:600;color:var(--ink);
+  padding-top:var(--s-3);
+}
+.pkg-cta-arrow{transition:transform var(--dur-fast) var(--ease)}
+.pkg:hover .pkg-cta-arrow{transform:translateX(4px);color:var(--coral)}
+
+/* ─────────────── EDITORIAL CARD ─────────────── */
+.editorial{
+  display:grid;grid-template-columns:1fr 1fr;gap:var(--s-12);
+  align-items:center;
+}
+@media(max-width:780px){.editorial{grid-template-columns:1fr;gap:var(--s-8)}}
+.editorial-art{
+  aspect-ratio:4/5;
+  background:var(--grad-dawn);
+  border-radius:var(--r-2xl);
+  position:relative;overflow:hidden;
+  box-shadow:var(--shadow-2);
+}
+.editorial-art::before{
+  content:"";position:absolute;inset:0;
+  background:radial-gradient(circle at 30% 30%, rgba(232,103,58,.35), transparent 60%),
+             radial-gradient(circle at 70% 70%, rgba(27,95,232,.3), transparent 60%);
+}
+.editorial-art-mark{
+  position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+  font-family:var(--font-display);font-style:italic;font-weight:600;
+  font-size:clamp(2rem,4.5vw,3.4rem);
+  color:var(--ink);text-align:center;line-height:1.1;
+  letter-spacing:-.015em;
+  max-width:80%;
+}
+.editorial-eyebrow{font-size:.72rem;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--indigo-deep);margin-bottom:var(--s-4)}
+.editorial-title{font-family:var(--font-display);font-size:clamp(1.6rem,2.5vw,2.2rem);font-weight:700;letter-spacing:-.02em;line-height:1.12;margin-bottom:var(--s-4)}
+.editorial-body{font-size:1rem;color:var(--graphite);line-height:1.65;margin-bottom:var(--s-5)}
+.editorial-body p+p{margin-top:var(--s-3)}
+
+/* ─────────────── BADGES & TAGS ─────────────── */
+.tag-row{display:flex;flex-wrap:wrap;gap:var(--s-2)}
+.tag{
+  display:inline-flex;align-items:center;gap:var(--s-2);
+  font-size:.74rem;font-weight:600;
+  padding:.32rem .8rem;
+  border-radius:var(--r-pill);
+}
+.tag-coral{background:var(--coral-bg);color:var(--coral-deep)}
+.tag-indigo{background:var(--indigo-bg);color:var(--indigo-deep)}
+.tag-inner{background:var(--inner-bg);color:#5B21B6}
+.tag-building{background:var(--building-bg);color:#047857}
+.tag-stone{background:var(--linen);color:var(--graphite)}
+.tag-dot{width:6px;height:6px;border-radius:50%;background:currentColor}
+
+/* ─────────────── FORM FIELDS ─────────────── */
+.field{display:flex;flex-direction:column;gap:var(--s-2);max-width:420px}
+.field-label{font-size:.78rem;font-weight:600;color:var(--ink);letter-spacing:.005em}
+.field-input{
+  font-family:var(--font-body);font-size:.95rem;
+  padding:.85rem 1rem;
+  border:1.5px solid var(--hairline);
+  border-radius:var(--r-md);
+  background:white;color:var(--ink);
+  outline:none;
+  transition:border-color var(--dur-fast) var(--ease), box-shadow var(--dur-fast) var(--ease);
+}
+.field-input:hover{border-color:var(--muted)}
+.field-input:focus{border-color:var(--coral);box-shadow:var(--shadow-glow-coral)}
+.field-help{font-size:.76rem;color:var(--muted)}
+
+/* ─────────────── PROOF STRIP ─────────────── */
+.proof{
+  background:var(--ink);color:var(--cream);
+  padding:var(--s-12) var(--s-6);
+  position:relative;overflow:hidden;
+}
+.proof::before{
+  content:"";position:absolute;inset:0;
+  background:radial-gradient(ellipse at 20% 50%, rgba(232,103,58,.18), transparent 50%),
+             radial-gradient(ellipse at 80% 50%, rgba(27,95,232,.15), transparent 50%);
+}
+.proof-inner{position:relative;max-width:1080px;margin:0 auto;text-align:center}
+.proof-quote{
+  font-family:var(--font-display);font-style:italic;
+  font-size:clamp(1.4rem,2.5vw,1.9rem);
+  line-height:1.4;letter-spacing:-.01em;
+  max-width:30ch;margin:0 auto var(--s-6);
+}
+.proof-attr{font-size:.82rem;color:var(--coral-soft);letter-spacing:.04em}
+
+/* ─────────────── FOOTER ─────────────── */
+.footer{
+  background:var(--warm);
+  padding:var(--s-16) var(--s-6) var(--s-8);
+  border-top:1px solid var(--hairline);
+}
+.footer-inner{max-width:1080px;margin:0 auto;display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:var(--s-10)}
+@media(max-width:780px){.footer-inner{grid-template-columns:1fr 1fr;gap:var(--s-8)}}
+@media(max-width:480px){.footer-inner{grid-template-columns:1fr}}
+.footer-brand-mark{
+  width:44px;height:44px;border-radius:var(--r-md);
+  background:var(--grad-signature);
+  display:inline-flex;align-items:center;justify-content:center;
+  color:white;font-family:var(--font-display);font-weight:700;font-size:20px;
+  margin-bottom:var(--s-4);
+}
+.footer-tagline{font-family:var(--font-display);font-style:italic;font-size:1rem;color:var(--graphite);max-width:32ch;line-height:1.5;margin-bottom:var(--s-5)}
+.footer-h{font-family:var(--font-body);font-size:.72rem;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--ink);margin-bottom:var(--s-4)}
+.footer-link{display:block;font-size:.86rem;color:var(--graphite);text-decoration:none;padding:.3rem 0;transition:color var(--dur-fast) var(--ease)}
+.footer-link:hover{color:var(--coral-deep)}
+.footer-bottom{
+  max-width:1080px;margin:var(--s-12) auto 0;
+  padding-top:var(--s-6);
+  border-top:1px solid var(--hairline);
+  display:flex;justify-content:space-between;align-items:center;
+  font-size:.76rem;color:var(--muted);
+  flex-wrap:wrap;gap:var(--s-4);
+}
+
+/* ─────────────── DEMO HELPERS ─────────────── */
+.demo-label{
+  display:flex;align-items:center;gap:var(--s-3);
+  font-family:var(--font-body);font-size:.7rem;font-weight:700;
+  letter-spacing:.18em;text-transform:uppercase;color:var(--muted);
+  margin:var(--s-12) 0 var(--s-4);
+}
+.demo-label::before,.demo-label::after{content:"";flex:1;height:1px;background:var(--hairline)}
+.demo-grid-2{display:grid;grid-template-columns:1fr 1fr;gap:var(--s-6)}
+@media(max-width:680px){.demo-grid-2{grid-template-columns:1fr}}
+.demo-card{
+  background:white;border:1px solid var(--hairline);
+  border-radius:var(--r-lg);padding:var(--s-6);
+  box-shadow:var(--shadow-1);
+}
+.demo-row{display:flex;gap:var(--s-3);flex-wrap:wrap;align-items:center}
+
+/* ─────────────── ENTRANCE ANIM ─────────────── */
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+.hero-eyebrow,.hero-title,.hero-lead,.hero-actions{animation:fadeUp .7s var(--ease) backwards}
+.hero-title{animation-delay:.08s}
+.hero-lead{animation-delay:.16s}
+.hero-actions{animation-delay:.24s}
+</style>
+</head>
+<body>
+
+<!-- ─────────────── NAV ─────────────── -->
+<nav class="nav">
+  <a class="nav-brand" href="#">
+    <div class="nav-brand-mark">a</div>
+    <div class="nav-brand-text">Attune</div>
+  </a>
+  <div class="nav-links">
+    <a class="nav-link" href="#">How it works</a>
+    <a class="nav-link" href="#">Packages</a>
+    <a class="nav-link" href="#">FAQ</a>
+    <a class="nav-cta" href="#">Sign in</a>
+  </div>
+</nav>
+
+<!-- ─────────────── HERO ─────────────── -->
+<section class="hero">
+  <div class="hero-shape hero-shape--coral"></div>
+  <div class="hero-shape hero-shape--indigo"></div>
+  <div class="hero-inner">
+    <div class="hero-eyebrow">Design sandbox · v1</div>
+    <h1 class="hero-title">A new visual <em>language</em> for Attune.</h1>
+    <p class="hero-lead">Editorial intimacy. The warmth of a well-made magazine, the credibility of a serious product. Built from your existing palette, refined into a cohesive system.</p>
+    <div class="hero-actions">
+      <a class="btn btn-primary" href="#tokens">See the system <span class="btn-arrow">→</span></a>
+      <a class="btn btn-soft" href="#components">View components</a>
+    </div>
+  </div>
+</section>
+
+<!-- ─────────────── COLOR SYSTEM ─────────────── -->
+<section class="section" id="tokens">
+  <div class="section-inner">
+    <div class="section-eyebrow">01 · Color</div>
+    <h2 class="section-title">Pulled from your logo, organized for the whole product.</h2>
+    <p class="section-lead">Coral and indigo are your brand. Cream, shell, and linen are the surfaces they live on. Dimension accents stay tied to meaning. Gradients are reserved for signature moments.</p>
+
+    <div class="demo-label">Surfaces</div>
+    <div class="swatch-grid">
+      <div class="swatch"><div class="swatch-color" style="background:var(--cream);border-bottom:1px solid var(--hairline)"></div><div class="swatch-meta"><div class="swatch-name">Cream</div><div class="swatch-hex">#FFFDF9</div></div></div>
+      <div class="swatch"><div class="swatch-color" style="background:var(--warm)"></div><div class="swatch-meta"><div class="swatch-name">Warm</div><div class="swatch-hex">#FBF6EE</div></div></div>
+      <div class="swatch"><div class="swatch-color" style="background:var(--shell)"></div><div class="swatch-meta"><div class="swatch-name">Shell</div><div class="swatch-hex">#F8EDE0</div></div></div>
+      <div class="swatch"><div class="swatch-color" style="background:var(--linen)"></div><div class="swatch-meta"><div class="swatch-name">Linen</div><div class="swatch-hex">#F1E5D2</div></div></div>
+      <div class="swatch"><div class="swatch-color" style="background:var(--stone)"></div><div class="swatch-meta"><div class="swatch-name">Stone</div><div class="swatch-hex">#E8DDD0</div></div></div>
+      <div class="swatch"><div class="swatch-color" style="background:var(--mist)"></div><div class="swatch-meta"><div class="swatch-name">Mist</div><div class="swatch-hex">#EDEAF4</div></div></div>
+    </div>
+
+    <div class="demo-label">Brand</div>
+    <div class="swatch-grid">
+      <div class="swatch"><div class="swatch-color" style="background:var(--coral)"></div><div class="swatch-meta"><div class="swatch-name">Coral</div><div class="swatch-hex">#E8673A</div></div></div>
+      <div class="swatch"><div class="swatch-color" style="background:var(--coral-deep)"></div><div class="swatch-meta"><div class="swatch-name">Coral deep</div><div class="swatch-hex">#C2410C</div></div></div>
+      <div class="swatch"><div class="swatch-color" style="background:var(--coral-soft)"></div><div class="swatch-meta"><div class="swatch-name">Coral soft</div><div class="swatch-hex">#F2A37A</div></div></div>
+      <div class="swatch"><div class="swatch-color" style="background:var(--indigo)"></div><div class="swatch-meta"><div class="swatch-name">Indigo</div><div class="swatch-hex">#1B5FE8</div></div></div>
+      <div class="swatch"><div class="swatch-color" style="background:var(--indigo-deep)"></div><div class="swatch-meta"><div class="swatch-name">Indigo deep</div><div class="swatch-hex">#1E3A8A</div></div></div>
+      <div class="swatch"><div class="swatch-color" style="background:var(--indigo-soft)"></div><div class="swatch-meta"><div class="swatch-name">Indigo soft</div><div class="swatch-hex">#7A8FF5</div></div></div>
+    </div>
+
+    <div class="demo-label">Dimension accents</div>
+    <div class="swatch-grid">
+      <div class="swatch"><div class="swatch-color" style="background:var(--inner)"></div><div class="swatch-meta"><div class="swatch-name">Inner worlds</div><div class="swatch-hex">#9B5DE5</div></div></div>
+      <div class="swatch"><div class="swatch-color" style="background:var(--connect)"></div><div class="swatch-meta"><div class="swatch-name">Connection</div><div class="swatch-hex">#E8673A</div></div></div>
+      <div class="swatch"><div class="swatch-color" style="background:var(--hard)"></div><div class="swatch-meta"><div class="swatch-name">Hard moments</div><div class="swatch-hex">#1B5FE8</div></div></div>
+      <div class="swatch"><div class="swatch-color" style="background:var(--building)"></div><div class="swatch-meta"><div class="swatch-name">Life building</div><div class="swatch-hex">#10B981</div></div></div>
+    </div>
+
+    <div class="demo-label">Signature gradient</div>
+    <div style="height:120px;background:var(--grad-signature);border-radius:var(--r-xl);box-shadow:var(--shadow-2);display:flex;align-items:center;justify-content:center">
+      <div style="font-family:var(--font-display);font-style:italic;font-size:1.6rem;color:white;letter-spacing:-.01em">coral → indigo · the brand line</div>
+    </div>
+  </div>
+</section>
+
+<!-- ─────────────── TYPE SCALE ─────────────── -->
+<section class="section" style="background:var(--warm)">
+  <div class="section-inner">
+    <div class="section-eyebrow">02 · Typography</div>
+    <h2 class="section-title">Three families, each with a job.</h2>
+    <p class="section-lead">Playfair Display carries titles and emotional moments. DM Sans is the working voice. Syne is reserved for distinctive moments where personality breaks through.</p>
+
+    <div class="demo-card">
+      <div class="type-row"><div class="type-label">Eyebrow</div><div class="type-sample t-eyebrow">Approved before launch</div></div>
+      <div class="type-row"><div class="type-label">Tiny</div><div class="type-sample t-tiny">Helper text and microcopy.</div></div>
+      <div class="type-row"><div class="type-label">Small</div><div class="type-sample t-small">Captions, labels, and supporting context.</div></div>
+      <div class="type-row"><div class="type-label">Body</div><div class="type-sample t-body">The default reading size for paragraphs and form copy.</div></div>
+      <div class="type-row"><div class="type-label">Lead</div><div class="type-sample t-lead">A slightly larger paragraph used for intros and emphasis.</div></div>
+      <div class="type-row"><div class="type-label">H4 (sans)</div><div class="type-sample t-h4">Working header in DM Sans</div></div>
+      <div class="type-row"><div class="type-label">H3 (display)</div><div class="type-sample t-h3">A section-level title</div></div>
+      <div class="type-row"><div class="type-label">H2 (display)</div><div class="type-sample t-h2">A page-level title</div></div>
+      <div class="type-row"><div class="type-label">H1 (display)</div><div class="type-sample t-h1">A hero moment</div></div>
+      <div class="type-row"><div class="type-label">Special (Syne)</div><div class="type-sample t-special">Reserved for results moments</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ─────────────── BUTTONS & FORM ─────────────── -->
+<section class="section" id="components">
+  <div class="section-inner">
+    <div class="section-eyebrow">03 · Components</div>
+    <h2 class="section-title">A small vocabulary, used consistently.</h2>
+    <p class="section-lead">Every page draws from the same kit. Consistency comes from the system, not from page-by-page discipline.</p>
+
+    <div class="demo-grid-2">
+      <div class="demo-card">
+        <div class="demo-label" style="margin-top:0">Buttons</div>
+        <div class="demo-row" style="margin-bottom:var(--s-4)">
+          <button class="btn btn-primary">Primary <span class="btn-arrow">→</span></button>
+          <button class="btn btn-coral">Coral CTA</button>
+        </div>
+        <div class="demo-row">
+          <button class="btn btn-soft">Secondary</button>
+          <button class="btn btn-ghost">Ghost</button>
+        </div>
+      </div>
+
+      <div class="demo-card">
+        <div class="demo-label" style="margin-top:0">Tags</div>
+        <div class="tag-row" style="margin-bottom:var(--s-4)">
+          <span class="tag tag-coral"><span class="tag-dot"></span>Connection</span>
+          <span class="tag tag-indigo"><span class="tag-dot"></span>Hard moments</span>
+          <span class="tag tag-inner"><span class="tag-dot"></span>Inner worlds</span>
+        </div>
+        <div class="tag-row">
+          <span class="tag tag-building"><span class="tag-dot"></span>Life building</span>
+          <span class="tag tag-stone">Pre-launch</span>
+        </div>
+      </div>
+
+      <div class="demo-card">
+        <div class="demo-label" style="margin-top:0">Form field</div>
+        <div class="field">
+          <label class="field-label" for="demoEmail">Your email</label>
+          <input id="demoEmail" class="field-input" type="email" placeholder="you@example.com" value="">
+          <span class="field-help">We'll send your assessment link here.</span>
+        </div>
+      </div>
+
+      <div class="demo-card">
+        <div class="demo-label" style="margin-top:0">Quote</div>
+        <blockquote style="font-family:var(--font-display);font-style:italic;font-size:1.15rem;color:var(--graphite);line-height:1.5;border-left:3px solid var(--coral);padding-left:var(--s-4)">
+          We took it on a Saturday and spent the whole evening talking through the results. It was the most useful thing we've done as a couple.
+          <footer style="font-family:var(--font-body);font-style:normal;font-size:.78rem;color:var(--muted);margin-top:var(--s-3);letter-spacing:.04em">— Jamie & Ravi, married 4 years</footer>
+        </blockquote>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─────────────── PACKAGE TILES ─────────────── -->
+<section class="section" style="background:var(--warm)">
+  <div class="section-inner">
+    <div class="section-eyebrow">04 · Package tiles</div>
+    <h2 class="section-title">Editorial cards. Same skeleton, distinct feel.</h2>
+    <p class="section-lead">Replaces the current bordered tile with a softer, magazine-style card. Coral pin, Playfair name, dot-led list, gentle hover lift.</p>
+
+    <div class="pkg-grid">
+      <article class="pkg">
+        <div class="pkg-tag">Most popular</div>
+        <div class="pkg-name">Assessment</div>
+        <div class="pkg-desc">The core experience. Two exercises, your results, conversation starters.</div>
+        <div class="pkg-price-row"><div class="pkg-price">$89</div><div class="pkg-price-suffix">digital</div></div>
+        <ul class="pkg-includes">
+          <li>40-question personality scan</li>
+          <li>Couple-type results</li>
+          <li>Three conversation starters</li>
+        </ul>
+        <div class="pkg-cta">Choose this <span class="pkg-cta-arrow">→</span></div>
+      </article>
+
+      <article class="pkg">
+        <div class="pkg-tag" style="color:var(--indigo-deep)">For newlyweds</div>
+        <div class="pkg-name">Starting Out</div>
+        <div class="pkg-desc">Assessment plus the budget-priorities exercise and a starter workbook.</div>
+        <div class="pkg-price-row"><div class="pkg-price">$139</div><div class="pkg-price-suffix">digital</div></div>
+        <ul class="pkg-includes">
+          <li>Everything in Assessment</li>
+          <li>Budget priorities exercise</li>
+          <li>Starter workbook</li>
+        </ul>
+        <div class="pkg-cta">Choose this <span class="pkg-cta-arrow">→</span></div>
+      </article>
+
+      <article class="pkg">
+        <div class="pkg-tag">Anniversary</div>
+        <div class="pkg-name">Anniversary</div>
+        <div class="pkg-desc">A second-cycle assessment and a reflection exercise on the year you've built.</div>
+        <div class="pkg-price-row"><div class="pkg-price">$139</div><div class="pkg-price-suffix">digital</div></div>
+        <ul class="pkg-includes">
+          <li>Everything in Assessment</li>
+          <li>Reflection exercise</li>
+          <li>Year-over-year comparison</li>
+        </ul>
+        <div class="pkg-cta">Choose this <span class="pkg-cta-arrow">→</span></div>
+      </article>
+
+      <article class="pkg" style="background:var(--shell);border-color:var(--coral-soft)">
+        <div class="pkg-tag">Premium</div>
+        <div class="pkg-name">Premium</div>
+        <div class="pkg-desc">The complete experience including a 50-minute LMFT session.</div>
+        <div class="pkg-price-row"><div class="pkg-price">$295</div><div class="pkg-price-suffix">digital</div></div>
+        <ul class="pkg-includes">
+          <li>Everything above</li>
+          <li>50-min LMFT session</li>
+          <li>Custom workbook</li>
+        </ul>
+        <div class="pkg-cta">Choose this <span class="pkg-cta-arrow">→</span></div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ─────────────── EDITORIAL ─────────────── -->
+<section class="section">
+  <div class="section-inner">
+    <div class="editorial">
+      <div class="editorial-art">
+        <div class="editorial-art-mark">Two people,<br>one rhythm.</div>
+      </div>
+      <div>
+        <div class="editorial-eyebrow">How it feels</div>
+        <h2 class="editorial-title">A magazine-page treatment for storytelling sections.</h2>
+        <div class="editorial-body">
+          <p>The site has visual stories worth telling. Two-column editorial sections give those moments room to breathe. Soft gradient art, italic display type, and asymmetric weighting do the storytelling work.</p>
+          <p>Your existing SVG graphics fit naturally into this art-block treatment. They get a frame instead of floating loose.</p>
+        </div>
+        <a class="btn btn-soft" href="#">Read the methodology <span class="btn-arrow">→</span></a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─────────────── PROOF STRIP ─────────────── -->
+<section class="proof">
+  <div class="proof-inner">
+    <blockquote class="proof-quote">"It found things we didn't know how to say. We've been talking about them ever since."</blockquote>
+    <div class="proof-attr">— Maya & Jordan · Beta couple</div>
+  </div>
+</section>
+
+<!-- ─────────────── FOOTER ─────────────── -->
+<footer class="footer">
+  <div class="footer-inner">
+    <div>
+      <div class="footer-brand-mark">a</div>
+      <div class="footer-tagline">A relationship assessment built for the way two people actually move through life together.</div>
+    </div>
+    <div>
+      <div class="footer-h">Product</div>
+      <a class="footer-link" href="#">Packages</a>
+      <a class="footer-link" href="#">How it works</a>
+      <a class="footer-link" href="#">Methodology</a>
+      <a class="footer-link" href="#">Wedding registry</a>
+    </div>
+    <div>
+      <div class="footer-h">Support</div>
+      <a class="footer-link" href="#">FAQ</a>
+      <a class="footer-link" href="#">Contact</a>
+      <a class="footer-link" href="#">Reviews</a>
+    </div>
+    <div>
+      <div class="footer-h">Company</div>
+      <a class="footer-link" href="#">About</a>
+      <a class="footer-link" href="#">Privacy</a>
+      <a class="footer-link" href="#">Terms</a>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <div>© 2026 Attune. All rights reserved.</div>
+    <div>Made with care.</div>
+  </div>
+</footer>
+
+</body>
+</html>
