@@ -228,6 +228,10 @@
       "destination": "/design-sandbox.html"
     },
     {
+      "source": "/design-sandbox-v2",
+      "destination": "/design-sandbox-v2.html"
+    },
+    {
       "source": "/gift-cards",
       "destination": "/gift-cards.html"
     },

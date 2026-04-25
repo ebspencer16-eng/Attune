@@ -1,0 +1,1016 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex,nofollow">
+<title>Attune · Design Sandbox v2</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;0,900;1,400;1,600;1,700&family=DM+Sans:wght@300;400;500;600;700&family=Syne:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+/* ─────────────────────────────────────────────────────────────
+   ATTUNE DESIGN TOKENS v2
+   Editorial intimacy. Print-magazine warmth, serious-product
+   credibility. Real Attune logo + real Attune copy. Anti
+   "AI-built" through editorial detail.
+───────────────────────────────────────────────────────────── */
+:root{
+  --cream:#FFFDF9; --warm:#FBF6EE; --shell:#F8EDE0; --linen:#F1E5D2;
+  --stone:#E8DDD0; --mist:#EDEAF4;
+  --ink:#1A140E; --graphite:#3A2E22; --muted:#8C7A68; --hairline:#E2D5C2;
+  --coral:#E8673A; --coral-soft:#F2A37A; --coral-bg:#FFF0E6; --coral-deep:#C2410C;
+  --indigo:#1B5FE8; --indigo-soft:#7A8FF5; --indigo-bg:#EBE9F8; --indigo-deep:#1E3A8A;
+  --purple:#9B5DE5; --green:#10B981;
+
+  --grad-dawn:linear-gradient(180deg, #FBF6EE 0%, #F8EDE0 50%, #F2D9C8 100%);
+  --grad-warm-down:linear-gradient(180deg, #FBF6EE 0%, #FFFDF9 100%);
+  --grad-signature:linear-gradient(110deg, #E8673A 0%, #C2410C 28%, #9B5DE5 55%, #1B5FE8 100%);
+
+  --font-display:'Playfair Display', Georgia, serif;
+  --font-body:'DM Sans', system-ui, sans-serif;
+  --font-special:'Syne', sans-serif;
+
+  --s-1:4px; --s-2:8px; --s-3:12px; --s-4:16px; --s-5:20px;
+  --s-6:24px; --s-8:32px; --s-10:40px; --s-12:48px; --s-16:64px;
+  --s-20:80px; --s-24:96px; --s-32:128px;
+
+  --r-xs:6px; --r-sm:10px; --r-md:14px; --r-lg:18px; --r-xl:24px; --r-2xl:32px; --r-pill:999px;
+
+  --shadow-1:0 1px 2px rgba(60,30,10,.04), 0 1px 3px rgba(60,30,10,.06);
+  --shadow-2:0 2px 4px rgba(60,30,10,.04), 0 6px 16px rgba(60,30,10,.08);
+  --shadow-3:0 4px 8px rgba(60,30,10,.05), 0 14px 32px rgba(60,30,10,.10);
+
+  --ease:cubic-bezier(.2,.8,.25,1);
+  --dur-fast:150ms; --dur-base:220ms; --dur-slow:360ms;
+}
+
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{
+  background:var(--cream);
+  color:var(--ink);
+  font-family:var(--font-body);
+  font-size:16px; line-height:1.55;
+  -webkit-font-smoothing:antialiased;
+  text-rendering:optimizeLegibility;
+}
+
+/* ─────────────── EDITORIAL MASTHEAD ─────────────── */
+/* Newspaper-style ribbon above nav. Tiny, letterspaced,
+   reads as print-considered, not AI-default. */
+.masthead{
+  background:var(--ink);
+  color:var(--cream);
+  padding:.45rem var(--s-6);
+  display:flex; justify-content:space-between; align-items:center;
+  font-size:.66rem; letter-spacing:.18em; text-transform:uppercase;
+  font-weight:500;
+}
+.masthead-left{display:flex;gap:var(--s-5);align-items:center}
+.masthead-issue{color:var(--coral-soft);font-weight:600}
+.masthead-divider{opacity:.3}
+.masthead-right{color:rgba(255,253,249,.6)}
+@media(max-width:680px){
+  .masthead-right{display:none}
+  .masthead{justify-content:center}
+}
+
+/* ─────────────── NAV ─────────────── */
+/* Tinted to blend with the warm hero gradient that follows.
+   No more white slab. */
+.nav{
+  position:sticky; top:0; z-index:100;
+  background:linear-gradient(180deg, rgba(251,246,238,.94) 0%, rgba(251,246,238,.88) 100%);
+  backdrop-filter:blur(14px) saturate(1.15);
+  -webkit-backdrop-filter:blur(14px) saturate(1.15);
+  border-bottom:1px solid rgba(226,213,194,.6);
+  display:flex; align-items:center; justify-content:space-between;
+  padding:var(--s-3) var(--s-6);
+  height:64px;
+}
+.nav-brand{display:flex;align-items:center;gap:var(--s-3);text-decoration:none;color:var(--ink)}
+.nav-brand svg{width:34px;height:auto;display:block}
+.nav-brand-text{
+  font-family:var(--font-display);font-weight:700;font-size:1.15rem;
+  letter-spacing:-.01em;color:var(--ink);
+}
+.nav-links{display:flex;gap:var(--s-6);align-items:center}
+.nav-link{
+  font-size:.84rem; color:var(--graphite); text-decoration:none; font-weight:500;
+  letter-spacing:.005em;
+  transition:color var(--dur-fast) var(--ease);
+}
+.nav-link:hover{color:var(--coral-deep)}
+.nav-cta{
+  font-family:var(--font-body); font-size:.82rem; font-weight:600;
+  padding:.5rem 1.05rem; border-radius:var(--r-pill);
+  background:var(--ink); color:var(--cream); text-decoration:none;
+  transition:all var(--dur-fast) var(--ease);
+}
+.nav-cta:hover{transform:translateY(-1px); box-shadow:var(--shadow-2)}
+@media(max-width:760px){.nav-link{display:none}}
+
+/* ─────────────── HERO (asymmetric, editorial) ─────────────── */
+/* No centered blob hero. Left-weighted typography, right-weighted
+   illustration zone, vertical rule binding them. The signature
+   gradient wash sits behind, not as floating shapes. */
+.hero{
+  position:relative;
+  background:var(--grad-dawn);
+  padding:var(--s-16) var(--s-6) var(--s-20);
+  overflow:hidden;
+}
+.hero::after{
+  content:""; position:absolute; bottom:-1px; left:0; right:0; height:80px;
+  background:linear-gradient(to bottom, transparent, var(--cream));
+  pointer-events:none;
+}
+.hero-grid{
+  position:relative;
+  max-width:1180px; margin:0 auto;
+  display:grid; grid-template-columns:1.1fr 1px 1fr; gap:var(--s-12);
+  align-items:start;
+}
+@media(max-width:880px){.hero-grid{grid-template-columns:1fr;gap:var(--s-8)}.hero-rule{display:none}}
+
+.hero-left{padding-top:var(--s-6)}
+.hero-eyebrow{
+  display:inline-flex; align-items:center; gap:var(--s-2);
+  font-size:.68rem; font-weight:600;
+  letter-spacing:.2em; text-transform:uppercase;
+  color:var(--coral-deep);
+  margin-bottom:var(--s-6);
+}
+.hero-eyebrow-dot{width:6px; height:6px; border-radius:50%; background:var(--coral)}
+.hero-title{
+  font-family:var(--font-display); font-weight:700;
+  font-size:clamp(2.6rem, 6.5vw, 4.6rem);
+  line-height:1.02; letter-spacing:-.025em;
+  color:var(--ink);
+  margin-bottom:var(--s-6);
+}
+.hero-title em{font-style:italic; font-weight:400; color:var(--coral-deep)}
+.hero-lead{
+  font-size:1.13rem; color:var(--graphite);
+  max-width:42ch; line-height:1.6;
+  margin-bottom:var(--s-8);
+}
+.hero-actions{display:flex; gap:var(--s-3); flex-wrap:wrap; align-items:center}
+.hero-aside{
+  margin-top:var(--s-8); padding-top:var(--s-5);
+  border-top:1px solid rgba(60,30,10,.12);
+  display:flex; gap:var(--s-6); flex-wrap:wrap;
+  font-size:.78rem; color:var(--muted);
+}
+.hero-aside-stat{display:flex;flex-direction:column;gap:2px}
+.hero-aside-num{font-family:var(--font-display); font-size:1.35rem; font-weight:700; color:var(--ink); letter-spacing:-.01em}
+.hero-aside-label{font-size:.7rem; letter-spacing:.08em; text-transform:uppercase; color:var(--muted)}
+
+.hero-rule{
+  background:linear-gradient(to bottom, transparent, rgba(60,30,10,.16) 20%, rgba(60,30,10,.16) 80%, transparent);
+  width:1px; align-self:stretch;
+  min-height:340px;
+}
+
+.hero-right{
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  position:relative;
+  padding-top:var(--s-4);
+}
+.hero-illustration{
+  width:100%; max-width:480px;
+  filter:drop-shadow(0 14px 32px rgba(60,30,10,.10));
+}
+.hero-caption{
+  margin-top:var(--s-5);
+  font-family:var(--font-display); font-style:italic;
+  font-size:.95rem; color:var(--graphite); text-align:center;
+  max-width:32ch; line-height:1.45;
+}
+.hero-caption-rule{display:inline-block; width:24px; height:1px; background:var(--coral); vertical-align:middle; margin:0 8px}
+
+/* BUTTONS */
+.btn{
+  display:inline-flex; align-items:center; justify-content:center; gap:var(--s-2);
+  font-family:var(--font-body); font-weight:600; font-size:.92rem;
+  padding:.85rem 1.6rem; border-radius:var(--r-pill);
+  border:none; cursor:pointer; text-decoration:none;
+  transition:all var(--dur-fast) var(--ease);
+  letter-spacing:.005em;
+}
+.btn-primary{background:var(--ink); color:var(--cream); box-shadow:var(--shadow-1)}
+.btn-primary:hover{transform:translateY(-1px); box-shadow:var(--shadow-2); background:#000}
+.btn-coral{background:var(--coral); color:white; box-shadow:var(--shadow-1)}
+.btn-coral:hover{transform:translateY(-1px); box-shadow:var(--shadow-2),0 0 0 4px rgba(232,103,58,.16); background:var(--coral-deep)}
+.btn-soft{background:white; color:var(--ink); border:1.5px solid var(--hairline)}
+.btn-soft:hover{border-color:var(--ink); transform:translateY(-1px); box-shadow:var(--shadow-1)}
+.btn-text{background:transparent; color:var(--ink); padding:.85rem .5rem; font-weight:600; border-bottom:1.5px solid var(--ink); border-radius:0}
+.btn-text:hover{color:var(--coral-deep); border-color:var(--coral-deep)}
+.btn-arrow{font-size:1.05rem; transition:transform var(--dur-fast) var(--ease)}
+.btn:hover .btn-arrow{transform:translateX(3px)}
+
+/* ─────────────── SECTION SCAFFOLD ─────────────── */
+.section{padding:var(--s-20) var(--s-6); position:relative}
+.section-warm{background:var(--warm)}
+.section-dark{background:var(--ink); color:var(--cream)}
+.section-inner{max-width:1180px; margin:0 auto}
+
+/* Editorial section header — Roman numeral marker, hairline rule.
+   Anti-generic: not "01 — TITLE", but a real masthead. */
+.sec-head{display:flex; align-items:baseline; gap:var(--s-5); margin-bottom:var(--s-8); padding-bottom:var(--s-5); border-bottom:1px solid var(--hairline)}
+.sec-num{
+  font-family:var(--font-display); font-weight:400; font-style:italic;
+  font-size:2.4rem; color:var(--coral); line-height:1; flex-shrink:0;
+  letter-spacing:-.01em;
+}
+.sec-eyebrow-block{flex:1}
+.sec-eyebrow{font-size:.7rem; font-weight:700; letter-spacing:.2em; text-transform:uppercase; color:var(--muted); margin-bottom:var(--s-2)}
+.sec-title{font-family:var(--font-display); font-weight:700; font-size:clamp(1.7rem,3vw,2.4rem); line-height:1.1; letter-spacing:-.02em; color:var(--ink); max-width:24ch}
+.section-dark .sec-num{color:var(--coral-soft)}
+.section-dark .sec-eyebrow{color:rgba(255,253,249,.5)}
+.section-dark .sec-title{color:var(--cream)}
+.section-dark .sec-head{border-bottom-color:rgba(255,253,249,.15)}
+
+/* ─────────────── EDITORIAL INTRO + DROP CAP ─────────────── */
+/* Drop cap: print-considered move that AI templates rarely use.
+   Three-line cap in display Playfair, gradient-filled. */
+.intro-grid{display:grid; grid-template-columns:1fr 1.4fr; gap:var(--s-12); align-items:start}
+@media(max-width:880px){.intro-grid{grid-template-columns:1fr;gap:var(--s-6)}}
+.intro-aside{position:sticky; top:96px}
+.intro-aside-label{font-size:.66rem; letter-spacing:.22em; text-transform:uppercase; color:var(--muted); font-weight:700; margin-bottom:var(--s-3)}
+.intro-aside-quote{font-family:var(--font-display); font-style:italic; font-size:1.15rem; color:var(--graphite); line-height:1.5}
+.intro-body{font-size:1.08rem; line-height:1.75; color:var(--graphite); max-width:60ch}
+.intro-body p+p{margin-top:var(--s-5)}
+.intro-body .dropcap{
+  float:left;
+  font-family:var(--font-display); font-weight:700;
+  font-size:5.4rem; line-height:.85;
+  margin:.05em .12em -.05em 0;
+  background:var(--grad-signature);
+  -webkit-background-clip:text; background-clip:text;
+  -webkit-text-fill-color:transparent;
+  letter-spacing:-.04em;
+}
+
+/* ─────────────── HOW IT WORKS ─────────────── */
+/* Three editorial step cards on the dark surface. Step number
+   in display italic, headline in Playfair, body in DM Sans.
+   Real Attune copy. The graphic placeholder is where the
+   existing storytelling SVGs sit. */
+.steps{display:grid; grid-template-columns:repeat(3,1fr); gap:var(--s-5)}
+@media(max-width:880px){.steps{grid-template-columns:1fr}}
+.step{
+  background:linear-gradient(155deg, rgba(255,253,249,.04) 0%, rgba(255,253,249,.01) 100%);
+  border:1px solid rgba(255,253,249,.10);
+  border-radius:var(--r-xl);
+  padding:var(--s-6);
+  display:flex; flex-direction:column; gap:var(--s-4);
+  position:relative; overflow:hidden;
+}
+.step::before{
+  content:""; position:absolute; top:0; left:0; right:0; height:3px;
+}
+.step--01::before{background:var(--coral)}
+.step--02::before{background:var(--purple)}
+.step--03::before{background:var(--indigo)}
+.step-num{
+  font-family:var(--font-display); font-style:italic; font-weight:400;
+  font-size:1.2rem; line-height:1;
+  letter-spacing:.02em;
+}
+.step--01 .step-num{color:var(--coral-soft)}
+.step--02 .step-num{color:#C9A6F2}
+.step--03 .step-num{color:var(--indigo-soft)}
+.step-title{font-family:var(--font-display); font-weight:700; font-size:1.55rem; line-height:1.1; letter-spacing:-.02em; color:var(--cream)}
+.step-body{font-size:.86rem; color:rgba(255,253,249,.65); line-height:1.65}
+.step-art{
+  margin-top:auto;
+  background:var(--cream);
+  border-radius:var(--r-md);
+  padding:var(--s-3);
+  aspect-ratio:520/340;
+  display:flex; align-items:center; justify-content:center;
+  position:relative; overflow:hidden;
+}
+.step-art-frame{
+  position:absolute; inset:8px;
+  border:1px dashed rgba(60,30,10,.12);
+  border-radius:var(--r-sm);
+  display:flex; align-items:center; justify-content:center;
+}
+.step-art-note{
+  font-family:var(--font-display); font-style:italic;
+  font-size:.8rem; color:var(--muted);
+  text-align:center; max-width:80%; line-height:1.4;
+}
+
+/* ─────────────── ICON SYSTEM ─────────────── */
+/* Custom monoline icons. 1.5px stroke, rounded caps, with a
+   subtle "personality dot" in coral that makes them distinctly
+   Attune. Different from Lucide/Heroicons enough to register. */
+.icons-grid{display:grid; grid-template-columns:repeat(6,1fr); gap:var(--s-5)}
+@media(max-width:880px){.icons-grid{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:480px){.icons-grid{grid-template-columns:repeat(2,1fr)}}
+.icon-tile{
+  background:white;
+  border:1px solid var(--hairline);
+  border-radius:var(--r-md);
+  padding:var(--s-5) var(--s-3);
+  display:flex; flex-direction:column; align-items:center; gap:var(--s-3);
+  text-align:center;
+  transition:all var(--dur-fast) var(--ease);
+}
+.icon-tile:hover{border-color:var(--coral-soft); transform:translateY(-2px); box-shadow:var(--shadow-1)}
+.icon-tile svg{width:36px; height:36px; color:var(--ink)}
+.icon-name{font-size:.74rem; font-weight:600; color:var(--graphite)}
+.icon-detail{font-size:.66rem; color:var(--muted); letter-spacing:.04em}
+
+/* ─────────────── GRAPHIC TREATMENTS ─────────────── */
+.graphic-grid{display:grid; grid-template-columns:1fr 1fr; gap:var(--s-8)}
+@media(max-width:880px){.graphic-grid{grid-template-columns:1fr}}
+.graphic-card{
+  background:white;
+  border:1px solid var(--hairline);
+  border-radius:var(--r-xl);
+  overflow:hidden;
+  box-shadow:var(--shadow-1);
+}
+.graphic-frame{
+  background:var(--shell);
+  padding:var(--s-8) var(--s-6);
+  border-bottom:1px solid var(--hairline);
+  position:relative;
+}
+.graphic-frame-tag{
+  position:absolute; top:var(--s-3); left:var(--s-3);
+  font-family:var(--font-display); font-style:italic;
+  font-size:.78rem; color:var(--coral-deep);
+}
+.graphic-frame-tag::before{content:"fig. "; font-style:normal; color:var(--muted)}
+.graphic-meta{padding:var(--s-5) var(--s-6) var(--s-6)}
+.graphic-meta-name{font-family:var(--font-display); font-size:1.2rem; font-weight:700; letter-spacing:-.015em; margin-bottom:var(--s-2)}
+.graphic-meta-desc{font-size:.86rem; color:var(--muted); line-height:1.55}
+
+/* ─────────────── PULL QUOTE ─────────────── */
+/* Real typographic pull quote, not a card. Vertical rule, hanging
+   open quote, attribution as small caps. */
+.pullquote{
+  max-width:920px; margin:0 auto;
+  padding:0 var(--s-8);
+  position:relative;
+}
+.pullquote-rule{
+  position:absolute; left:var(--s-3); top:0; bottom:0;
+  width:2px; background:var(--coral);
+}
+.pullquote-mark{
+  position:absolute; left:-.05em; top:-.4em;
+  font-family:var(--font-display); font-weight:700; font-style:italic;
+  font-size:5rem; color:var(--coral); line-height:1;
+}
+.pullquote-text{
+  font-family:var(--font-display); font-weight:500;
+  font-size:clamp(1.5rem,3vw,2.1rem);
+  line-height:1.35; letter-spacing:-.012em;
+  color:var(--ink);
+  padding-left:var(--s-3);
+}
+.pullquote-text em{font-style:italic; color:var(--coral-deep); font-weight:600}
+.pullquote-attr{
+  margin-top:var(--s-5); padding-left:calc(var(--s-3) + var(--s-2));
+  font-size:.74rem; color:var(--muted);
+  text-transform:uppercase; letter-spacing:.18em; font-weight:600;
+}
+
+/* ─────────────── PACKAGE TILES ─────────────── */
+.pkg-grid{display:grid; grid-template-columns:repeat(4,1fr); gap:var(--s-4)}
+@media(max-width:900px){.pkg-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:540px){.pkg-grid{grid-template-columns:1fr}}
+.pkg{
+  position:relative;
+  background:white; border:1px solid var(--hairline);
+  border-radius:var(--r-xl);
+  padding:var(--s-6) var(--s-5) var(--s-5);
+  display:flex; flex-direction:column;
+  cursor:pointer;
+  transition:all var(--dur-base) var(--ease);
+}
+.pkg:hover{transform:translateY(-3px); box-shadow:var(--shadow-3); border-color:var(--coral-soft)}
+.pkg-tag{font-size:.62rem; font-weight:700; letter-spacing:.2em; text-transform:uppercase; color:var(--coral-deep); margin-bottom:var(--s-4)}
+.pkg-name{font-family:var(--font-display); font-size:1.4rem; font-weight:700; letter-spacing:-.015em; line-height:1.15; margin-bottom:var(--s-2)}
+.pkg-desc{font-size:.85rem; color:var(--muted); line-height:1.5; margin-bottom:var(--s-5); min-height:3em}
+.pkg-price-row{display:flex; align-items:baseline; gap:var(--s-2); margin-bottom:var(--s-5)}
+.pkg-price{font-family:var(--font-display); font-size:1.8rem; font-weight:700; letter-spacing:-.02em}
+.pkg-price-suffix{font-size:.76rem; color:var(--muted)}
+.pkg-includes{list-style:none; display:flex; flex-direction:column; gap:var(--s-2); padding-top:var(--s-4); border-top:1px solid var(--hairline); margin-bottom:var(--s-5)}
+.pkg-includes li{font-size:.82rem; color:var(--graphite); padding-left:var(--s-5); position:relative; line-height:1.4}
+.pkg-includes li::before{content:""; position:absolute; left:0; top:.5em; width:6px; height:6px; border-radius:50%; background:var(--coral)}
+.pkg-cta{margin-top:auto; display:flex; align-items:center; justify-content:space-between; font-size:.84rem; font-weight:600; padding-top:var(--s-3)}
+.pkg-cta-arrow{transition:transform var(--dur-fast) var(--ease)}
+.pkg:hover .pkg-cta-arrow{transform:translateX(4px); color:var(--coral)}
+
+/* ─────────────── FOOTER ─────────────── */
+.footer{background:var(--warm); border-top:1px solid var(--hairline); padding:var(--s-16) var(--s-6) var(--s-8)}
+.footer-inner{max-width:1180px; margin:0 auto; display:grid; grid-template-columns:2fr 1fr 1fr 1fr; gap:var(--s-10)}
+@media(max-width:780px){.footer-inner{grid-template-columns:1fr 1fr}}
+@media(max-width:480px){.footer-inner{grid-template-columns:1fr}}
+.footer-brand{display:flex; align-items:center; gap:var(--s-3); margin-bottom:var(--s-4)}
+.footer-brand svg{width:38px}
+.footer-brand-name{font-family:var(--font-display); font-weight:700; font-size:1.2rem}
+.footer-tagline{font-family:var(--font-display); font-style:italic; font-size:1rem; color:var(--graphite); max-width:32ch; line-height:1.5; margin-bottom:var(--s-5)}
+.footer-h{font-family:var(--font-body); font-size:.7rem; font-weight:700; letter-spacing:.18em; text-transform:uppercase; color:var(--ink); margin-bottom:var(--s-4)}
+.footer-link{display:block; font-size:.86rem; color:var(--graphite); text-decoration:none; padding:.32rem 0; transition:color var(--dur-fast) var(--ease)}
+.footer-link:hover{color:var(--coral-deep)}
+.footer-bottom{
+  max-width:1180px; margin:var(--s-12) auto 0;
+  padding-top:var(--s-6);
+  border-top:1px solid var(--hairline);
+  display:flex; justify-content:space-between; align-items:center;
+  font-size:.74rem; color:var(--muted);
+  flex-wrap:wrap; gap:var(--s-3);
+}
+
+/* ─────────────── ANIM ─────────────── */
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+.hero-eyebrow,.hero-title,.hero-lead,.hero-actions,.hero-aside,.hero-right{animation:fadeUp .7s var(--ease) backwards}
+.hero-title{animation-delay:.05s}
+.hero-lead{animation-delay:.13s}
+.hero-actions{animation-delay:.21s}
+.hero-aside{animation-delay:.29s}
+.hero-right{animation-delay:.18s}
+
+/* Sandbox section markers (just for this preview page) */
+.sandbox-marker{
+  background:var(--mist); padding:var(--s-3) var(--s-6); border-top:1px solid var(--hairline); border-bottom:1px solid var(--hairline);
+  font-size:.66rem; font-weight:700; letter-spacing:.2em; text-transform:uppercase; color:var(--indigo-deep);
+  text-align:center;
+}
+</style>
+</head>
+<body>
+
+<!-- ─────────────── EDITORIAL MASTHEAD ─────────────── -->
+<div class="masthead">
+  <div class="masthead-left">
+    <span class="masthead-issue">Attune · Issue 01</span>
+    <span class="masthead-divider">·</span>
+    <span>A foundational assessment for couples</span>
+  </div>
+  <div class="masthead-right">Friday · April 25, 2026</div>
+</div>
+
+<!-- ─────────────── NAV ─────────────── -->
+<nav class="nav">
+  <a class="nav-brand" href="#">
+    <svg viewBox="0 0 103 76" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Attune logo">
+      <defs>
+        <linearGradient id="navlogo" x1="0" y1="0" x2="103" y2="76" gradientUnits="userSpaceOnUse">
+          <stop offset="0%" stop-color="#E8673A"/>
+          <stop offset="100%" stop-color="#1B5FE8"/>
+        </linearGradient>
+      </defs>
+      <path d="M14,4 L44,4 A9,9 0 0,1 53,13 L53,42 A9,9 0 0,1 44,51 L20,51 L6,61 L11,51 A6,6 0 0,1 5,45 L5,13 A9,9 0 0,1 14,4 Z" fill="url(#navlogo)"/>
+      <path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill="white" opacity=".93" transform="translate(13.16,11.3) scale(0.72)"/>
+      <path d="M89,14 L59,14 A9,9 0 0,0 50,23 L50,52 A9,9 0 0,0 59,61 L83,61 L97,71 L92,61 A6,6 0 0,0 98,55 L98,23 A9,9 0 0,0 89,14 Z" fill="white" stroke="url(#navlogo)" stroke-width="2.2" stroke-linejoin="round"/>
+      <path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill="url(#navlogo)" transform="translate(58.16,21.3) scale(0.72)"/>
+    </svg>
+    <span class="nav-brand-text">Attune</span>
+  </a>
+  <div class="nav-links">
+    <a class="nav-link" href="#">How it works</a>
+    <a class="nav-link" href="#">Methodology</a>
+    <a class="nav-link" href="#">Reviews</a>
+    <a class="nav-link" href="#">FAQ</a>
+    <a class="nav-cta" href="#">Get started</a>
+  </div>
+</nav>
+
+<!-- ─────────────── HERO (asymmetric editorial) ─────────────── -->
+<section class="hero">
+  <div class="hero-grid">
+    <div class="hero-left">
+      <p class="hero-eyebrow"><span class="hero-eyebrow-dot"></span>A new kind of relationship tool</p>
+      <h1 class="hero-title">Because understanding<br><em>takes intention.</em></h1>
+      <p class="hero-lead">Complete exercises independently. See how you each actually operate. Understand each other the way most couples never do.</p>
+      <div class="hero-actions">
+        <a class="btn btn-coral" href="#">Get started <span class="btn-arrow">→</span></a>
+        <a class="btn btn-text" href="#">Give as a gift</a>
+      </div>
+      <div class="hero-aside">
+        <div class="hero-aside-stat">
+          <span class="hero-aside-num">40</span>
+          <span class="hero-aside-label">Personality questions</span>
+        </div>
+        <div class="hero-aside-stat">
+          <span class="hero-aside-num">8</span>
+          <span class="hero-aside-label">Dimensions of fit</span>
+        </div>
+        <div class="hero-aside-stat">
+          <span class="hero-aside-num">25 min</span>
+          <span class="hero-aside-label">Total, both partners</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="hero-rule"></div>
+
+    <div class="hero-right">
+      <!-- Hero illustration zone — your existing storytelling SVG sits here.
+           Sandbox uses a simplified placeholder that conveys the same idea. -->
+      <svg class="hero-illustration" viewBox="0 0 480 360" xmlns="http://www.w3.org/2000/svg" aria-label="Two people, one shared view">
+        <defs>
+          <linearGradient id="sigGrad" x1="0" y1="0" x2="480" y2="0" gradientUnits="userSpaceOnUse">
+            <stop offset="0%" stop-color="#E8673A"/>
+            <stop offset="50%" stop-color="#9B5DE5"/>
+            <stop offset="100%" stop-color="#1B5FE8"/>
+          </linearGradient>
+          <linearGradient id="cardL" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#FFF0E6"/>
+            <stop offset="100%" stop-color="#FFFDF9"/>
+          </linearGradient>
+          <linearGradient id="cardR" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#EBE9F8"/>
+            <stop offset="100%" stop-color="#FFFDF9"/>
+          </linearGradient>
+        </defs>
+
+        <!-- Two paper cards offset, suggesting "two perspectives" -->
+        <g transform="translate(40,40)">
+          <rect x="0" y="0" width="200" height="260" rx="14" fill="url(#cardL)" stroke="#E8DDD0" stroke-width="1.5"/>
+          <rect x="20" y="22" width="160" height="6" rx="3" fill="#E8673A" opacity=".7"/>
+          <rect x="20" y="38" width="100" height="4" rx="2" fill="#C8BFB4"/>
+          <line x1="20" y1="58" x2="180" y2="58" stroke="#E8DDD0" stroke-width="1"/>
+          <rect x="20" y="74" width="160" height="38" rx="6" fill="rgba(232,103,58,.14)" stroke="rgba(232,103,58,.55)" stroke-width="1.5"/>
+          <rect x="34" y="84" width="80" height="5" rx="2.5" fill="rgba(232,103,58,.7)"/>
+          <rect x="34" y="94" width="60" height="3" rx="1.5" fill="rgba(232,103,58,.4)"/>
+          <rect x="20" y="124" width="160" height="38" rx="6" fill="white" stroke="#E8DDD0" stroke-width="1.5"/>
+          <rect x="34" y="134" width="100" height="5" rx="2.5" fill="#C8BFB4"/>
+          <rect x="34" y="144" width="64" height="3" rx="1.5" fill="#DDD8D2"/>
+          <rect x="20" y="178" width="160" height="6" rx="3" fill="#E8DDD0"/>
+          <rect x="20" y="178" width="92" height="6" rx="3" fill="rgba(232,103,58,.7)"/>
+          <text x="20" y="220" font-family="DM Sans" font-size="9" font-weight="600" fill="#8C7A68" letter-spacing="1.2">PARTNER A</text>
+        </g>
+
+        <g transform="translate(240,60)">
+          <rect x="0" y="0" width="200" height="260" rx="14" fill="url(#cardR)" stroke="#E8DDD0" stroke-width="1.5"/>
+          <rect x="20" y="22" width="160" height="6" rx="3" fill="#1B5FE8" opacity=".7"/>
+          <rect x="20" y="38" width="100" height="4" rx="2" fill="#C8BFB4"/>
+          <line x1="20" y1="58" x2="180" y2="58" stroke="#E8DDD0" stroke-width="1"/>
+          <rect x="20" y="74" width="160" height="38" rx="6" fill="white" stroke="#E8DDD0" stroke-width="1.5"/>
+          <rect x="34" y="84" width="80" height="5" rx="2.5" fill="#C8BFB4"/>
+          <rect x="34" y="94" width="60" height="3" rx="1.5" fill="#DDD8D2"/>
+          <rect x="20" y="124" width="160" height="38" rx="6" fill="rgba(27,95,232,.14)" stroke="rgba(27,95,232,.55)" stroke-width="1.5"/>
+          <rect x="34" y="134" width="100" height="5" rx="2.5" fill="rgba(27,95,232,.7)"/>
+          <rect x="34" y="144" width="64" height="3" rx="1.5" fill="rgba(27,95,232,.4)"/>
+          <rect x="20" y="178" width="160" height="6" rx="3" fill="#E8DDD0"/>
+          <rect x="20" y="178" width="118" height="6" rx="3" fill="rgba(27,95,232,.7)"/>
+          <text x="20" y="220" font-family="DM Sans" font-size="9" font-weight="600" fill="#8C7A68" letter-spacing="1.2">PARTNER B</text>
+        </g>
+
+        <!-- Connecting heart in the center suggests the merge -->
+        <g transform="translate(218, 152)">
+          <circle cx="22" cy="22" r="26" fill="white" stroke="url(#sigGrad)" stroke-width="2"/>
+          <path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill="url(#sigGrad)" transform="translate(0,0) scale(1)"/>
+        </g>
+      </svg>
+      <p class="hero-caption"><span class="hero-caption-rule"></span>Two perspectives, one shared view<span class="hero-caption-rule"></span></p>
+    </div>
+  </div>
+</section>
+
+<div class="sandbox-marker">v2 changes — tinted nav · real logo + copy · editorial masthead · asymmetric hero · drop cap intro · custom icons · graphic frames · pull quote</div>
+
+<!-- ─────────────── EDITORIAL INTRO ─────────────── -->
+<section class="section">
+  <div class="section-inner">
+    <div class="sec-head">
+      <div class="sec-num">I.</div>
+      <div class="sec-eyebrow-block">
+        <div class="sec-eyebrow">What it is</div>
+        <h2 class="sec-title">A foundational assessment for couples, designed to be taken once and returned to often.</h2>
+      </div>
+    </div>
+
+    <div class="intro-grid">
+      <aside class="intro-aside">
+        <div class="intro-aside-label">From the methodology</div>
+        <p class="intro-aside-quote">We assume more than we realize. Putting language to it is the first move.</p>
+      </aside>
+      <div class="intro-body">
+        <p><span class="dropcap">A</span>ttune is two exercises and a shared results experience. Each partner answers independently. The results merge into a single document showing where you align, where you diverge, and where the conversation might go next.</p>
+        <p>You take it once. You keep it. You return to it as life changes. The questions are written from a clinical foundation, not from intuition or vibes, and the framing avoids the false certainty of personality quizzes. What you get back is a working document, not a verdict.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─────────────── HOW IT WORKS (real Attune copy on dark) ─────────────── -->
+<section class="section section-dark">
+  <div class="section-inner">
+    <div class="sec-head">
+      <div class="sec-num">II.</div>
+      <div class="sec-eyebrow-block">
+        <div class="sec-eyebrow">How it works</div>
+        <h2 class="sec-title">Two exercises. One shared view. Yours to keep.</h2>
+      </div>
+    </div>
+
+    <div class="steps">
+      <article class="step step--01">
+        <div class="step-num">Step ⅰ</div>
+        <h3 class="step-title">Answer separately.</h3>
+        <p class="step-body">Each partner completes both exercises independently. Feedback is not shared until both partners are done.</p>
+        <div class="step-art">
+          <div class="step-art-frame">
+            <p class="step-art-note">Existing storytelling SVG sits here, framed in a cream card with hairline border.</p>
+          </div>
+        </div>
+      </article>
+
+      <article class="step step--02">
+        <div class="step-num">Step ⅱ</div>
+        <h3 class="step-title">See yourselves side by side.</h3>
+        <p class="step-body">Your answers combine into a shared view of how you each operate, what you expect, and how you function together.</p>
+        <div class="step-art">
+          <div class="step-art-frame">
+            <p class="step-art-note">Existing storytelling SVG sits here, framed in a cream card with hairline border.</p>
+          </div>
+        </div>
+      </article>
+
+      <article class="step step--03">
+        <div class="step-num">Step ⅲ</div>
+        <h3 class="step-title">Build from what you find.</h3>
+        <p class="step-body">Your results aren't a one-time read. They're a shared language to return to as things shift.</p>
+        <div class="step-art">
+          <div class="step-art-frame">
+            <p class="step-art-note">Existing storytelling SVG sits here, framed in a cream card with hairline border.</p>
+          </div>
+        </div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ─────────────── ICON SYSTEM ─────────────── -->
+<section class="section">
+  <div class="section-inner">
+    <div class="sec-head">
+      <div class="sec-num">III.</div>
+      <div class="sec-eyebrow-block">
+        <div class="sec-eyebrow">Iconography</div>
+        <h2 class="sec-title">A custom monoline kit with one signature touch.</h2>
+      </div>
+    </div>
+    <p style="max-width:62ch;color:var(--graphite);line-height:1.65;margin-bottom:var(--s-10);font-size:1rem">
+      Every icon shares the same line weight, cap style, and proportions. The signature touch is a small coral dot somewhere intentional in each glyph. It makes the set distinctly Attune at a glance, even at small sizes. Replaces the inline Lucide-style icons currently used.
+    </p>
+
+    <div class="icons-grid">
+
+      <!-- HEART (with coral dot inside as personality detail) -->
+      <div class="icon-tile">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+          <circle cx="12" cy="13" r="1" fill="#E8673A" stroke="none"/>
+        </svg>
+        <div class="icon-name">Heart</div>
+        <div class="icon-detail">connection</div>
+      </div>
+
+      <!-- TWO BUBBLES (couples, brand-specific) -->
+      <div class="icon-tile">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 5a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2H7l-3 2.5V5z"/>
+          <path d="M11 12a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-3l-3 2.5V14"/>
+          <circle cx="8" cy="7.5" r="1" fill="#E8673A" stroke="none"/>
+        </svg>
+        <div class="icon-name">Bubbles</div>
+        <div class="icon-detail">conversation</div>
+      </div>
+
+      <!-- COMPASS -->
+      <div class="icon-tile">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="9"/>
+          <polygon points="14,8 16,16 12,13 8,16"/>
+          <circle cx="12" cy="12" r="1" fill="#E8673A" stroke="none"/>
+        </svg>
+        <div class="icon-name">Compass</div>
+        <div class="icon-detail">methodology</div>
+      </div>
+
+      <!-- LAYERS -->
+      <div class="icon-tile">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <polygon points="12,3 21,8 12,13 3,8"/>
+          <polyline points="3,13 12,18 21,13"/>
+          <circle cx="12" cy="8" r="1" fill="#E8673A" stroke="none"/>
+        </svg>
+        <div class="icon-name">Layers</div>
+        <div class="icon-detail">dimensions</div>
+      </div>
+
+      <!-- SCALE -->
+      <div class="icon-tile">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 3v18M5 6h14M3 11l3-5 3 5M15 11l3-5 3 5"/>
+          <path d="M3 11a3 3 0 0 0 6 0M15 11a3 3 0 0 0 6 0"/>
+          <circle cx="12" cy="3" r="1" fill="#E8673A" stroke="none"/>
+        </svg>
+        <div class="icon-name">Scale</div>
+        <div class="icon-detail">balance</div>
+      </div>
+
+      <!-- SUNRISE (energy) -->
+      <div class="icon-tile">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 18h18M5.5 14a6.5 6.5 0 0 1 13 0"/>
+          <path d="M2 18h0M22 18h0M5 11l-1-1M19 11l1-1M12 6V3"/>
+          <circle cx="12" cy="14" r="1" fill="#E8673A" stroke="none"/>
+        </svg>
+        <div class="icon-name">Sunrise</div>
+        <div class="icon-detail">energy</div>
+      </div>
+
+      <!-- KNOT -->
+      <div class="icon-tile">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M7 8c0-2 2-4 5-4s5 2 5 4-2 4-5 4-5 2-5 4 2 4 5 4 5-2 5-4"/>
+          <circle cx="12" cy="12" r="1" fill="#E8673A" stroke="none"/>
+        </svg>
+        <div class="icon-name">Knot</div>
+        <div class="icon-detail">closeness</div>
+      </div>
+
+      <!-- DOORWAY -->
+      <div class="icon-tile">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M5 21V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16M5 21h14"/>
+          <circle cx="15" cy="13" r="1" fill="#E8673A" stroke="none"/>
+        </svg>
+        <div class="icon-name">Doorway</div>
+        <div class="icon-detail">repair</div>
+      </div>
+
+      <!-- BOOK -->
+      <div class="icon-tile">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M4 5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v15a1 1 0 0 1-1 1H6a2 2 0 0 1-2-2V5z"/>
+          <path d="M8 7h8M8 11h6"/>
+          <circle cx="9" cy="15" r="1" fill="#E8673A" stroke="none"/>
+        </svg>
+        <div class="icon-name">Book</div>
+        <div class="icon-detail">workbook</div>
+      </div>
+
+      <!-- THREAD (woven) -->
+      <div class="icon-tile">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 12c4-4 6-4 9 0s5 4 9 0"/>
+          <path d="M3 18c4-4 6-4 9 0s5 4 9 0"/>
+          <circle cx="12" cy="9" r="1" fill="#E8673A" stroke="none"/>
+        </svg>
+        <div class="icon-name">Thread</div>
+        <div class="icon-detail">attunement</div>
+      </div>
+
+      <!-- ENVELOPE -->
+      <div class="icon-tile">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="5" width="18" height="14" rx="2"/>
+          <polyline points="3,7 12,13 21,7"/>
+          <circle cx="12" cy="13" r="1" fill="#E8673A" stroke="none"/>
+        </svg>
+        <div class="icon-name">Envelope</div>
+        <div class="icon-detail">delivery</div>
+      </div>
+
+      <!-- GIFT -->
+      <div class="icon-tile">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="8" width="18" height="13" rx="1.5"/>
+          <path d="M3 12h18M12 8v13"/>
+          <path d="M8 8c0-2 2-4 4-2s4 0 4 2"/>
+          <circle cx="12" cy="14" r="1" fill="#E8673A" stroke="none"/>
+        </svg>
+        <div class="icon-name">Gift</div>
+        <div class="icon-detail">registry</div>
+      </div>
+
+    </div>
+
+    <p style="margin-top:var(--s-8);font-family:var(--font-display);font-style:italic;font-size:.95rem;color:var(--muted);line-height:1.5;max-width:60ch">
+      The set above is the starter kit. The full system would include 30–40 glyphs covering the dimension words (energy, expression, conflict, repair, etc.), action verbs (download, share, play, edit), and structural elements (chevrons, checks, X marks).
+    </p>
+  </div>
+</section>
+
+<!-- ─────────────── GRAPHIC TREATMENTS ─────────────── -->
+<section class="section section-warm">
+  <div class="section-inner">
+    <div class="sec-head">
+      <div class="sec-num">IV.</div>
+      <div class="sec-eyebrow-block">
+        <div class="sec-eyebrow">Graphics</div>
+        <h2 class="sec-title">Your existing illustrations, framed editorially.</h2>
+      </div>
+    </div>
+    <p style="max-width:62ch;color:var(--graphite);line-height:1.65;margin-bottom:var(--s-10);font-size:1rem">
+      The illustrations you have on the homepage and how-it-works section already carry the brand. The change is the surrounding treatment: a shell-tinted frame, a "fig." caption in italic Playfair, and a hairline border. They become figures in a magazine, not floating decorations.
+    </p>
+
+    <div class="graphic-grid">
+      <article class="graphic-card">
+        <div class="graphic-frame">
+          <div class="graphic-frame-tag">01</div>
+          <!-- existing-style storytelling illustration; simplified for sandbox -->
+          <svg viewBox="0 0 480 280" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;display:block">
+            <defs>
+              <linearGradient id="gA" x1="0" y1="0" x2="480" y2="0" gradientUnits="userSpaceOnUse">
+                <stop offset="0%" stop-color="#E8673A"/><stop offset="50%" stop-color="#9B5DE5"/><stop offset="100%" stop-color="#1B5FE8"/>
+              </linearGradient>
+            </defs>
+            <rect x="20" y="20" width="440" height="240" rx="12" fill="white" stroke="#E8DDD0" stroke-width="1.5"/>
+            <rect x="20" y="20" width="440" height="3" fill="url(#gA)"/>
+            <rect x="40" y="50" width="200" height="8" rx="4" fill="#C8BFB4"/>
+            <rect x="40" y="66" width="140" height="6" rx="3" fill="#DDD8D2"/>
+            <rect x="40" y="100" width="400" height="48" rx="8" fill="rgba(232,103,58,.12)" stroke="rgba(232,103,58,.55)" stroke-width="1.5"/>
+            <rect x="56" y="116" width="160" height="6" rx="3" fill="rgba(232,103,58,.7)"/>
+            <rect x="56" y="128" width="100" height="4" rx="2" fill="rgba(232,103,58,.4)"/>
+            <rect x="40" y="160" width="400" height="48" rx="8" fill="white" stroke="#E8DDD0" stroke-width="1.5"/>
+            <rect x="56" y="176" width="180" height="6" rx="3" fill="#C8BFB4"/>
+            <rect x="56" y="188" width="120" height="4" rx="2" fill="#DDD8D2"/>
+            <rect x="380" y="222" width="60" height="22" rx="6" fill="#E8673A"/>
+          </svg>
+        </div>
+        <div class="graphic-meta">
+          <div class="graphic-meta-name">The exercise interface</div>
+          <div class="graphic-meta-desc">A simulated screen showing the assessment question pattern. Lives in the "Answer separately" step.</div>
+        </div>
+      </article>
+
+      <article class="graphic-card">
+        <div class="graphic-frame" style="background:var(--mist)">
+          <div class="graphic-frame-tag" style="color:var(--indigo-deep)">02</div>
+          <svg viewBox="0 0 480 280" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;display:block">
+            <defs>
+              <linearGradient id="gB" x1="0" y1="0" x2="480" y2="0" gradientUnits="userSpaceOnUse">
+                <stop offset="0%" stop-color="#E8673A"/><stop offset="50%" stop-color="#9B5DE5"/><stop offset="100%" stop-color="#1B5FE8"/>
+              </linearGradient>
+            </defs>
+            <rect x="20" y="20" width="440" height="240" rx="12" fill="white" stroke="#E8DDD0" stroke-width="1.5"/>
+            <rect x="20" y="20" width="440" height="3" fill="url(#gB)"/>
+            <line x1="240" y1="50" x2="240" y2="240" stroke="#E8DDD0" stroke-width="1.5" stroke-dasharray="3,3"/>
+            <text x="40" y="70" font-family="DM Sans" font-size="11" font-weight="700" fill="#8C7A68" letter-spacing="2">PARTNER A</text>
+            <text x="260" y="70" font-family="DM Sans" font-size="11" font-weight="700" fill="#8C7A68" letter-spacing="2">PARTNER B</text>
+            <circle cx="120" cy="140" r="38" fill="rgba(232,103,58,.18)" stroke="#E8673A" stroke-width="2"/>
+            <circle cx="120" cy="140" r="8" fill="#E8673A"/>
+            <circle cx="340" cy="160" r="38" fill="rgba(27,95,232,.18)" stroke="#1B5FE8" stroke-width="2"/>
+            <circle cx="340" cy="160" r="8" fill="#1B5FE8"/>
+            <line x1="120" y1="140" x2="340" y2="160" stroke="url(#gB)" stroke-width="2" stroke-dasharray="4,3"/>
+            <rect x="40" y="222" width="120" height="22" rx="6" fill="rgba(232,103,58,.12)"/>
+            <rect x="320" y="222" width="120" height="22" rx="6" fill="rgba(27,95,232,.12)"/>
+          </svg>
+        </div>
+        <div class="graphic-meta">
+          <div class="graphic-meta-name">The shared map</div>
+          <div class="graphic-meta-desc">Where two perspectives merge into a single document. Lives in the "See yourselves side by side" step.</div>
+        </div>
+      </article>
+    </div>
+
+    <p style="margin-top:var(--s-8);font-family:var(--font-display);font-style:italic;font-size:.95rem;color:var(--muted);line-height:1.5;max-width:60ch">
+      Every illustration on the site gets one of four frame variants: shell (warm, default), mist (cool, for shared-view moments), linen (denser, for methodology figures), or unframed (for full-bleed hero illustrations).
+    </p>
+  </div>
+</section>
+
+<!-- ─────────────── PULL QUOTE (real typography) ─────────────── -->
+<section class="section">
+  <div class="section-inner">
+    <div class="pullquote">
+      <div class="pullquote-rule"></div>
+      <div class="pullquote-mark">"</div>
+      <p class="pullquote-text">It found things we didn't know how to say. We've been <em>talking about them ever since</em>.</p>
+      <div class="pullquote-attr">— Maya & Jordan · Beta couple, married four years</div>
+    </div>
+  </div>
+</section>
+
+<!-- ─────────────── PACKAGE TILES ─────────────── -->
+<section class="section section-warm">
+  <div class="section-inner">
+    <div class="sec-head">
+      <div class="sec-num">V.</div>
+      <div class="sec-eyebrow-block">
+        <div class="sec-eyebrow">Packages</div>
+        <h2 class="sec-title">Take it for yourselves, or give it as a gift.</h2>
+      </div>
+    </div>
+
+    <div class="pkg-grid">
+      <article class="pkg">
+        <div class="pkg-tag">Most popular</div>
+        <div class="pkg-name">Assessment</div>
+        <div class="pkg-desc">The core experience. Two exercises, your shared results, three conversation starters.</div>
+        <div class="pkg-price-row"><div class="pkg-price">$89</div><div class="pkg-price-suffix">digital</div></div>
+        <ul class="pkg-includes">
+          <li>40-question personality scan</li>
+          <li>Couple-type results</li>
+          <li>Three conversation starters</li>
+        </ul>
+        <div class="pkg-cta">Choose this <span class="pkg-cta-arrow">→</span></div>
+      </article>
+
+      <article class="pkg">
+        <div class="pkg-tag" style="color:var(--indigo-deep)">For newlyweds</div>
+        <div class="pkg-name">Starting Out</div>
+        <div class="pkg-desc">Assessment plus the budget priorities exercise and a starter workbook.</div>
+        <div class="pkg-price-row"><div class="pkg-price">$139</div><div class="pkg-price-suffix">digital</div></div>
+        <ul class="pkg-includes">
+          <li>Everything in Assessment</li>
+          <li>Budget priorities exercise</li>
+          <li>Starter workbook</li>
+        </ul>
+        <div class="pkg-cta">Choose this <span class="pkg-cta-arrow">→</span></div>
+      </article>
+
+      <article class="pkg">
+        <div class="pkg-tag">Anniversary</div>
+        <div class="pkg-name">Anniversary</div>
+        <div class="pkg-desc">A second-cycle assessment and a reflection exercise on the year you've built.</div>
+        <div class="pkg-price-row"><div class="pkg-price">$139</div><div class="pkg-price-suffix">digital</div></div>
+        <ul class="pkg-includes">
+          <li>Everything in Assessment</li>
+          <li>Reflection exercise</li>
+          <li>Year-over-year comparison</li>
+        </ul>
+        <div class="pkg-cta">Choose this <span class="pkg-cta-arrow">→</span></div>
+      </article>
+
+      <article class="pkg" style="background:var(--shell);border-color:var(--coral-soft)">
+        <div class="pkg-tag">Premium</div>
+        <div class="pkg-name">Premium</div>
+        <div class="pkg-desc">The complete experience including a 50-minute LMFT session.</div>
+        <div class="pkg-price-row"><div class="pkg-price">$295</div><div class="pkg-price-suffix">digital</div></div>
+        <ul class="pkg-includes">
+          <li>Everything above</li>
+          <li>50-min LMFT session</li>
+          <li>Custom workbook</li>
+        </ul>
+        <div class="pkg-cta">Choose this <span class="pkg-cta-arrow">→</span></div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ─────────────── FOOTER ─────────────── -->
+<footer class="footer">
+  <div class="footer-inner">
+    <div>
+      <div class="footer-brand">
+        <svg viewBox="0 0 103 76" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Attune logo">
+          <defs>
+            <linearGradient id="footlogo" x1="0" y1="0" x2="103" y2="76" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stop-color="#E8673A"/>
+              <stop offset="100%" stop-color="#1B5FE8"/>
+            </linearGradient>
+          </defs>
+          <path d="M14,4 L44,4 A9,9 0 0,1 53,13 L53,42 A9,9 0 0,1 44,51 L20,51 L6,61 L11,51 A6,6 0 0,1 5,45 L5,13 A9,9 0 0,1 14,4 Z" fill="url(#footlogo)"/>
+          <path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill="white" opacity=".93" transform="translate(13.16,11.3) scale(0.72)"/>
+          <path d="M89,14 L59,14 A9,9 0 0,0 50,23 L50,52 A9,9 0 0,0 59,61 L83,61 L97,71 L92,61 A6,6 0 0,0 98,55 L98,23 A9,9 0 0,0 89,14 Z" fill="white" stroke="url(#footlogo)" stroke-width="2.2" stroke-linejoin="round"/>
+          <path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill="url(#footlogo)" transform="translate(58.16,21.3) scale(0.72)"/>
+        </svg>
+        <span class="footer-brand-name">Attune</span>
+      </div>
+      <div class="footer-tagline">Because understanding takes intention.</div>
+    </div>
+    <div>
+      <div class="footer-h">Product</div>
+      <a class="footer-link" href="#">Packages</a>
+      <a class="footer-link" href="#">How it works</a>
+      <a class="footer-link" href="#">Methodology</a>
+      <a class="footer-link" href="#">Wedding registry</a>
+    </div>
+    <div>
+      <div class="footer-h">Support</div>
+      <a class="footer-link" href="#">FAQ</a>
+      <a class="footer-link" href="#">Contact</a>
+      <a class="footer-link" href="#">Reviews</a>
+    </div>
+    <div>
+      <div class="footer-h">Company</div>
+      <a class="footer-link" href="#">About</a>
+      <a class="footer-link" href="#">Privacy</a>
+      <a class="footer-link" href="#">Terms</a>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <div>© 2026 Attune. All rights reserved.</div>
+    <div>Made with care.</div>
+  </div>
+</footer>
+
+</body>
+</html>
