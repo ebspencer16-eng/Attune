@@ -1,0 +1,970 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex,nofollow">
+<title>Attune · Design Sandbox v3</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;0,900;1,400;1,600;1,700&family=DM+Sans:wght@300;400;500;600;700&family=Syne:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+/* ─────────────────────────────────────────────────────────────
+   ATTUNE DESIGN TOKENS v3
+   Softer · more exciting · still credible. Less newspaper, more
+   premium product. Real Attune graphics preserved verbatim.
+───────────────────────────────────────────────────────────── */
+:root{
+  --cream:#FFFDF9; --warm:#FBF6EE; --shell:#F8EDE0; --linen:#F1E5D2;
+  --stone:#E8DDD0; --mist:#EDEAF4;
+  --ink:#1A140E; --graphite:#3A2E22; --muted:#8C7A68; --hairline:#E2D5C2;
+  --coral:#E8673A; --coral-soft:#F2A37A; --coral-bg:#FFF0E6; --coral-deep:#C2410C;
+  --indigo:#1B5FE8; --indigo-soft:#7A8FF5; --indigo-bg:#EBE9F8; --indigo-deep:#1E3A8A;
+  --purple:#9B5DE5; --green:#10B981;
+
+  /* Atmospheric gradients — bigger washes, more energy */
+  --grad-dawn:linear-gradient(180deg, #FBF6EE 0%, #F8EDE0 40%, #F2D9C8 75%, #FFFDF9 100%);
+  --grad-aura:radial-gradient(ellipse 70% 60% at 15% 30%, rgba(232,103,58,.16) 0%, transparent 60%),
+              radial-gradient(ellipse 70% 60% at 85% 70%, rgba(27,95,232,.13) 0%, transparent 60%);
+  --grad-signature:linear-gradient(110deg, #E8673A 0%, #C2410C 28%, #9B5DE5 55%, #1B5FE8 100%);
+  --grad-warm-down:linear-gradient(180deg, #FBF6EE 0%, #FFFDF9 100%);
+
+  --font-display:'Playfair Display', Georgia, serif;
+  --font-body:'DM Sans', system-ui, sans-serif;
+  --font-special:'Syne', sans-serif;
+
+  --s-1:4px; --s-2:8px; --s-3:12px; --s-4:16px; --s-5:20px;
+  --s-6:24px; --s-8:32px; --s-10:40px; --s-12:48px; --s-16:64px;
+  --s-20:80px; --s-24:96px; --s-32:128px;
+
+  --r-xs:6px; --r-sm:10px; --r-md:14px; --r-lg:18px; --r-xl:24px; --r-2xl:32px; --r-pill:999px;
+
+  --shadow-1:0 1px 2px rgba(60,30,10,.04), 0 1px 3px rgba(60,30,10,.06);
+  --shadow-2:0 2px 4px rgba(60,30,10,.04), 0 6px 16px rgba(60,30,10,.08);
+  --shadow-3:0 4px 8px rgba(60,30,10,.05), 0 14px 32px rgba(60,30,10,.10);
+  --shadow-icon:0 4px 12px rgba(232,103,58,.18), 0 1px 2px rgba(60,30,10,.04);
+
+  --ease:cubic-bezier(.2,.8,.25,1);
+  --dur-fast:150ms; --dur-base:220ms; --dur-slow:360ms;
+}
+
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{
+  background:var(--cream);
+  color:var(--ink);
+  font-family:var(--font-body);
+  font-size:16px; line-height:1.55;
+  -webkit-font-smoothing:antialiased;
+  text-rendering:optimizeLegibility;
+}
+
+/* ─────────────── BRAND BAR (replaces newspaper masthead) ─────────────── */
+/* Thin signature-gradient line at the very top. Not a content bar.
+   Just a quiet brand presence so the page feels "branded" without
+   reading as masthead. */
+.brand-bar{
+  height:3px;
+  background:var(--grad-signature);
+  width:100%;
+}
+
+/* ─────────────── NAV ─────────────── */
+.nav{
+  position:sticky; top:0; z-index:100;
+  background:linear-gradient(180deg, rgba(251,246,238,.94) 0%, rgba(251,246,238,.88) 100%);
+  backdrop-filter:blur(14px) saturate(1.15);
+  -webkit-backdrop-filter:blur(14px) saturate(1.15);
+  border-bottom:1px solid rgba(226,213,194,.5);
+  display:flex; align-items:center; justify-content:space-between;
+  padding:var(--s-3) var(--s-6);
+  height:68px;
+}
+.nav-brand{display:flex;align-items:center;gap:var(--s-3);text-decoration:none;color:var(--ink)}
+.nav-brand svg{width:38px;height:auto;display:block}
+.nav-brand-text{
+  font-family:var(--font-display);font-weight:700;font-size:1.2rem;
+  letter-spacing:-.01em;color:var(--ink);
+}
+.nav-links{display:flex;gap:var(--s-6);align-items:center}
+.nav-link{
+  font-size:.86rem; color:var(--graphite); text-decoration:none; font-weight:500;
+  transition:color var(--dur-fast) var(--ease);
+}
+.nav-link:hover{color:var(--coral-deep)}
+.nav-cta{
+  font-family:var(--font-body); font-size:.84rem; font-weight:600;
+  padding:.55rem 1.15rem; border-radius:var(--r-pill);
+  background:var(--ink); color:var(--cream); text-decoration:none;
+  transition:all var(--dur-fast) var(--ease);
+}
+.nav-cta:hover{transform:translateY(-1px); box-shadow:var(--shadow-2)}
+@media(max-width:760px){.nav-link{display:none}}
+
+/* ─────────────── HERO (asymmetric, softer, with real graphic) ─────────────── */
+.hero{
+  position:relative;
+  background:var(--grad-dawn);
+  padding:var(--s-16) var(--s-6) var(--s-20);
+  overflow:hidden;
+}
+.hero::before{
+  content:""; position:absolute; inset:0;
+  background:var(--grad-aura);
+  pointer-events:none;
+}
+.hero::after{
+  content:""; position:absolute; bottom:-1px; left:0; right:0; height:80px;
+  background:linear-gradient(to bottom, transparent, var(--cream));
+  pointer-events:none;
+}
+.hero-grid{
+  position:relative;
+  max-width:1200px; margin:0 auto;
+  display:grid; grid-template-columns:1fr 1.05fr; gap:var(--s-10);
+  align-items:center;
+}
+@media(max-width:920px){.hero-grid{grid-template-columns:1fr;gap:var(--s-8);text-align:center}.hero-stats{justify-content:center}}
+
+.hero-left{padding-top:var(--s-3)}
+.hero-eyebrow{
+  display:inline-flex; align-items:center; gap:var(--s-2);
+  font-size:.7rem; font-weight:600;
+  letter-spacing:.18em; text-transform:uppercase;
+  color:var(--coral-deep);
+  margin-bottom:var(--s-5);
+}
+.hero-eyebrow-dot{width:6px; height:6px; border-radius:50%; background:var(--coral)}
+.hero-title{
+  font-family:var(--font-display); font-weight:700;
+  font-size:clamp(2.6rem, 6.5vw, 4.6rem);
+  line-height:1.02; letter-spacing:-.025em;
+  color:var(--ink);
+  margin-bottom:var(--s-5);
+}
+.hero-title em{font-style:italic; font-weight:400; color:var(--coral-deep)}
+.hero-lead{
+  font-size:1.13rem; color:var(--graphite);
+  max-width:48ch; line-height:1.6;
+  margin-bottom:var(--s-8);
+}
+@media(max-width:920px){.hero-lead{margin-left:auto;margin-right:auto}}
+.hero-actions{display:flex; gap:var(--s-3); flex-wrap:wrap; align-items:center}
+@media(max-width:920px){.hero-actions{justify-content:center}}
+
+/* Stats — desktop only per feedback */
+.hero-stats{
+  margin-top:var(--s-10); padding-top:var(--s-5);
+  border-top:1px solid rgba(60,30,10,.10);
+  display:flex; gap:var(--s-8); flex-wrap:wrap;
+}
+@media(max-width:760px){.hero-stats{display:none}}
+.hero-stat{display:flex; flex-direction:column; gap:2px}
+.hero-stat-num{font-family:var(--font-display); font-size:1.5rem; font-weight:700; color:var(--ink); letter-spacing:-.015em; line-height:1}
+.hero-stat-label{font-size:.7rem; letter-spacing:.1em; text-transform:uppercase; color:var(--muted); font-weight:600}
+
+/* Hero illustration container — real graphic preserved verbatim */
+.hero-illustration{
+  position:relative;
+  filter:drop-shadow(0 16px 40px rgba(60,30,10,.10));
+}
+.hero-illustration svg{width:100%; height:auto; display:block}
+
+/* ─────────────── BUTTONS ─────────────── */
+.btn{
+  display:inline-flex; align-items:center; justify-content:center; gap:var(--s-2);
+  font-family:var(--font-body); font-weight:600; font-size:.94rem;
+  padding:.9rem 1.7rem; border-radius:var(--r-pill);
+  border:none; cursor:pointer; text-decoration:none;
+  transition:all var(--dur-fast) var(--ease);
+}
+.btn-coral{background:var(--coral); color:white; box-shadow:var(--shadow-1)}
+.btn-coral:hover{transform:translateY(-1px); box-shadow:var(--shadow-2),0 0 0 4px rgba(232,103,58,.16); background:var(--coral-deep)}
+.btn-soft{background:white; color:var(--ink); border:1.5px solid var(--hairline)}
+.btn-soft:hover{border-color:var(--ink); transform:translateY(-1px); box-shadow:var(--shadow-1)}
+.btn-text{background:transparent; color:var(--ink); padding:.9rem .25rem; font-weight:600; border-bottom:1.5px solid var(--ink); border-radius:0}
+.btn-text:hover{color:var(--coral-deep); border-color:var(--coral-deep)}
+.btn-arrow{transition:transform var(--dur-fast) var(--ease)}
+.btn:hover .btn-arrow{transform:translateX(3px)}
+
+/* ─────────────── SECTION SCAFFOLD ─────────────── */
+.section{padding:var(--s-20) var(--s-6); position:relative}
+.section-warm{background:var(--warm)}
+.section-dark{background:var(--ink); color:var(--cream)}
+.section-inner{max-width:1200px; margin:0 auto}
+
+/* Softer section header — small eyebrow, big serif title.
+   No Roman numerals, no hairline rule. Air around it. */
+.sec-eyebrow{
+  display:inline-flex; align-items:center; gap:var(--s-2);
+  font-size:.7rem; font-weight:700; letter-spacing:.2em;
+  text-transform:uppercase; color:var(--coral-deep);
+  margin-bottom:var(--s-4);
+}
+.sec-eyebrow-dot{width:5px; height:5px; border-radius:50%; background:var(--coral)}
+.sec-title{
+  font-family:var(--font-display); font-weight:700;
+  font-size:clamp(1.9rem,3.4vw,2.8rem);
+  line-height:1.08; letter-spacing:-.022em;
+  color:var(--ink);
+  max-width:24ch;
+}
+.sec-lead{
+  font-size:1.08rem; color:var(--graphite);
+  max-width:62ch; line-height:1.65;
+  margin-top:var(--s-5);
+}
+.section-dark .sec-eyebrow{color:var(--coral-soft)}
+.section-dark .sec-eyebrow-dot{background:var(--coral)}
+.section-dark .sec-title{color:var(--cream)}
+.section-dark .sec-lead{color:rgba(255,253,249,.72)}
+
+/* ─────────────── INTRO — two-column simple, no drop cap ─────────────── */
+.intro-grid{display:grid; grid-template-columns:1fr 1.4fr; gap:var(--s-12); align-items:start; margin-top:var(--s-10)}
+@media(max-width:920px){.intro-grid{grid-template-columns:1fr;gap:var(--s-6)}}
+.intro-aside{position:sticky; top:96px}
+.intro-aside-quote{
+  font-family:var(--font-display); font-style:italic;
+  font-size:1.4rem; color:var(--ink); line-height:1.4;
+  letter-spacing:-.005em;
+  padding-left:var(--s-5);
+  border-left:2px solid var(--coral);
+  max-width:24ch;
+}
+.intro-aside-attr{
+  margin-top:var(--s-4); padding-left:var(--s-5);
+  font-size:.72rem; color:var(--muted);
+  letter-spacing:.16em; text-transform:uppercase; font-weight:600;
+}
+.intro-body{font-size:1.08rem; line-height:1.75; color:var(--graphite); max-width:60ch}
+.intro-body p+p{margin-top:var(--s-5)}
+.intro-body strong{color:var(--ink); font-weight:600}
+
+/* ─────────────── HOW IT WORKS — real step graphics ─────────────── */
+.steps{display:grid; grid-template-columns:repeat(3,1fr); gap:var(--s-5); margin-top:var(--s-10)}
+@media(max-width:920px){.steps{grid-template-columns:1fr}}
+.step{
+  border-radius:var(--r-xl);
+  overflow:hidden;
+  display:flex; flex-direction:column;
+  position:relative;
+}
+.step--01{background:linear-gradient(155deg, #3D1A08 0%, #5A2810 100%)}
+.step--02{background:linear-gradient(155deg, #1E0E42 0%, #2E1560 100%)}
+.step--03{background:linear-gradient(155deg, #0C1E48 0%, #102860 100%)}
+.step::before{content:""; position:absolute; top:0; left:0; right:0; height:3px; z-index:1}
+.step--01::before{background:var(--coral)}
+.step--02::before{background:var(--purple)}
+.step--03::before{background:var(--indigo)}
+.step-body{padding:var(--s-6) var(--s-5) var(--s-3); flex:1; display:flex; flex-direction:column; gap:var(--s-3)}
+.step-eyebrow{font-size:.66rem; letter-spacing:.18em; text-transform:uppercase; font-weight:700; font-family:var(--font-body)}
+.step--01 .step-eyebrow{color:var(--coral)}
+.step--02 .step-eyebrow{color:var(--purple)}
+.step--03 .step-eyebrow{color:var(--indigo-soft)}
+.step-title{font-family:var(--font-display); font-weight:700; font-size:1.6rem; line-height:1.08; letter-spacing:-.02em; color:white}
+.step-desc{font-size:.86rem; color:rgba(255,255,255,.62); line-height:1.65}
+.step-art{margin-top:auto; padding:var(--s-3) var(--s-4) var(--s-4)}
+.step-art svg{width:100%; height:auto; display:block; border-radius:var(--r-md)}
+
+/* ─────────────── ICON SYSTEM (redone: filled in soft circle) ─────────────── */
+.icons-grid{display:grid; grid-template-columns:repeat(6,1fr); gap:var(--s-5); margin-top:var(--s-10)}
+@media(max-width:880px){.icons-grid{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:480px){.icons-grid{grid-template-columns:repeat(2,1fr)}}
+.icon-tile{
+  display:flex; flex-direction:column; align-items:center; gap:var(--s-3);
+  padding:var(--s-4) var(--s-3);
+  text-align:center;
+}
+.icon-disc{
+  width:64px; height:64px;
+  border-radius:50%;
+  background:var(--coral-bg);
+  display:flex; align-items:center; justify-content:center;
+  position:relative;
+  transition:all var(--dur-base) var(--ease);
+  box-shadow:var(--shadow-1);
+}
+.icon-disc::after{
+  content:""; position:absolute; inset:-4px;
+  border-radius:50%;
+  background:radial-gradient(circle, rgba(232,103,58,.18), transparent 70%);
+  opacity:0; transition:opacity var(--dur-base) var(--ease);
+  z-index:-1;
+}
+.icon-tile:hover .icon-disc{transform:translateY(-3px); box-shadow:var(--shadow-icon); background:white}
+.icon-tile:hover .icon-disc::after{opacity:1}
+.icon-disc svg{width:28px; height:28px; color:var(--coral-deep)}
+.icon-name{font-size:.8rem; font-weight:600; color:var(--ink)}
+.icon-detail{font-size:.7rem; color:var(--muted)}
+
+/* Some icons get the indigo or purple tint to map to dimensions */
+.icon-disc--indigo{background:var(--indigo-bg)}
+.icon-disc--indigo svg{color:var(--indigo-deep)}
+.icon-disc--indigo::after{background:radial-gradient(circle, rgba(27,95,232,.18), transparent 70%)}
+.icon-disc--purple{background:#F3EEFF}
+.icon-disc--purple svg{color:#5B21B6}
+.icon-disc--purple::after{background:radial-gradient(circle, rgba(155,93,229,.18), transparent 70%)}
+.icon-disc--green{background:#E7FAF1}
+.icon-disc--green svg{color:#047857}
+.icon-disc--green::after{background:radial-gradient(circle, rgba(16,185,129,.18), transparent 70%)}
+
+/* ─────────────── PULL QUOTE (refined, less newspapery) ─────────────── */
+.pullquote-section{padding:var(--s-16) var(--s-6)}
+.pullquote{
+  max-width:920px; margin:0 auto;
+  text-align:center;
+}
+.pullquote-mark{
+  font-family:var(--font-display); font-weight:700;
+  font-size:4.5rem; line-height:.5;
+  color:var(--coral); margin-bottom:var(--s-4);
+  letter-spacing:-.05em;
+}
+.pullquote-text{
+  font-family:var(--font-display); font-weight:500;
+  font-size:clamp(1.5rem,3vw,2.2rem);
+  line-height:1.35; letter-spacing:-.012em;
+  color:var(--ink);
+  max-width:30ch; margin:0 auto;
+}
+.pullquote-text em{font-style:italic; color:var(--coral-deep); font-weight:600}
+.pullquote-attr{
+  margin-top:var(--s-6);
+  font-size:.74rem; color:var(--muted);
+  text-transform:uppercase; letter-spacing:.18em; font-weight:600;
+}
+
+/* ─────────────── PACKAGE TILES ─────────────── */
+.pkg-grid{display:grid; grid-template-columns:repeat(4,1fr); gap:var(--s-4); margin-top:var(--s-10)}
+@media(max-width:900px){.pkg-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:540px){.pkg-grid{grid-template-columns:1fr}}
+.pkg{
+  position:relative;
+  background:white; border:1px solid var(--hairline);
+  border-radius:var(--r-xl);
+  padding:var(--s-6) var(--s-5) var(--s-5);
+  display:flex; flex-direction:column;
+  cursor:pointer;
+  transition:all var(--dur-base) var(--ease);
+}
+.pkg:hover{transform:translateY(-3px); box-shadow:var(--shadow-3); border-color:var(--coral-soft)}
+.pkg-tag{font-size:.62rem; font-weight:700; letter-spacing:.2em; text-transform:uppercase; color:var(--coral-deep); margin-bottom:var(--s-4)}
+.pkg-name{font-family:var(--font-display); font-size:1.4rem; font-weight:700; letter-spacing:-.015em; line-height:1.15; margin-bottom:var(--s-2)}
+.pkg-desc{font-size:.85rem; color:var(--muted); line-height:1.5; margin-bottom:var(--s-5); min-height:3em}
+.pkg-price-row{display:flex; align-items:baseline; gap:var(--s-2); margin-bottom:var(--s-5)}
+.pkg-price{font-family:var(--font-display); font-size:1.85rem; font-weight:700; letter-spacing:-.02em}
+.pkg-price-suffix{font-size:.78rem; color:var(--muted)}
+.pkg-includes{list-style:none; display:flex; flex-direction:column; gap:var(--s-2); padding-top:var(--s-4); border-top:1px solid var(--hairline); margin-bottom:var(--s-5)}
+.pkg-includes li{font-size:.83rem; color:var(--graphite); padding-left:var(--s-5); position:relative; line-height:1.4}
+.pkg-includes li::before{content:""; position:absolute; left:0; top:.5em; width:6px; height:6px; border-radius:50%; background:var(--coral)}
+.pkg-cta{margin-top:auto; display:flex; align-items:center; justify-content:space-between; font-size:.85rem; font-weight:600; padding-top:var(--s-3)}
+.pkg-cta-arrow{transition:transform var(--dur-fast) var(--ease)}
+.pkg:hover .pkg-cta-arrow{transform:translateX(4px); color:var(--coral)}
+
+/* ─────────────── FOOTER — dark, with warm gradient atmosphere ─────────────── */
+.footer{
+  background:var(--ink);
+  color:var(--cream);
+  padding:var(--s-20) var(--s-6) var(--s-8);
+  position:relative;
+  overflow:hidden;
+}
+.footer::before{
+  content:""; position:absolute; inset:0;
+  background:radial-gradient(ellipse 60% 50% at 15% 30%, rgba(232,103,58,.18) 0%, transparent 55%),
+             radial-gradient(ellipse 60% 50% at 85% 70%, rgba(27,95,232,.14) 0%, transparent 55%);
+  pointer-events:none;
+}
+.footer-inner{
+  position:relative;
+  max-width:1200px; margin:0 auto;
+  display:grid; grid-template-columns:2fr 1fr 1fr 1fr; gap:var(--s-10);
+}
+@media(max-width:780px){.footer-inner{grid-template-columns:1fr 1fr}}
+@media(max-width:480px){.footer-inner{grid-template-columns:1fr}}
+.footer-brand{display:flex; align-items:center; gap:var(--s-3); margin-bottom:var(--s-4)}
+.footer-brand svg{width:42px}
+.footer-brand-name{font-family:var(--font-display); font-weight:700; font-size:1.3rem; color:var(--cream)}
+.footer-tagline{
+  font-family:var(--font-display); font-style:italic;
+  font-size:1.05rem; color:rgba(255,253,249,.78);
+  max-width:32ch; line-height:1.5; margin-bottom:var(--s-5);
+}
+.footer-h{
+  font-family:var(--font-body); font-size:.7rem; font-weight:700;
+  letter-spacing:.2em; text-transform:uppercase;
+  color:var(--coral-soft);
+  margin-bottom:var(--s-4);
+}
+.footer-link{
+  display:block; font-size:.88rem; color:rgba(255,253,249,.7);
+  text-decoration:none; padding:.32rem 0;
+  transition:color var(--dur-fast) var(--ease);
+}
+.footer-link:hover{color:var(--cream)}
+.footer-bottom{
+  position:relative;
+  max-width:1200px; margin:var(--s-12) auto 0;
+  padding-top:var(--s-6);
+  border-top:1px solid rgba(255,253,249,.12);
+  display:flex; justify-content:space-between; align-items:center;
+  font-size:.76rem; color:rgba(255,253,249,.45);
+  flex-wrap:wrap; gap:var(--s-3);
+}
+
+/* ─────────────── ANIMATIONS ─────────────── */
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+.hero-eyebrow,.hero-title,.hero-lead,.hero-actions,.hero-stats,.hero-illustration{animation:fadeUp .7s var(--ease) backwards}
+.hero-title{animation-delay:.05s}
+.hero-lead{animation-delay:.13s}
+.hero-actions{animation-delay:.21s}
+.hero-stats{animation-delay:.29s}
+.hero-illustration{animation-delay:.18s}
+
+/* Sandbox marker */
+.sandbox-marker{
+  background:var(--mist); padding:var(--s-3) var(--s-6);
+  border-top:1px solid var(--hairline); border-bottom:1px solid var(--hairline);
+  font-size:.66rem; font-weight:700; letter-spacing:.2em; text-transform:uppercase; color:var(--indigo-deep);
+  text-align:center;
+}
+</style>
+</head>
+<body>
+
+<!-- ─────────────── BRAND BAR (replaces masthead ribbon) ─────────────── -->
+<div class="brand-bar"></div>
+
+<!-- ─────────────── NAV ─────────────── -->
+<nav class="nav">
+  <a class="nav-brand" href="#">
+    <svg viewBox="0 0 103 76" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Attune logo">
+      <defs>
+        <linearGradient id="navlogo3" x1="0" y1="0" x2="103" y2="76" gradientUnits="userSpaceOnUse">
+          <stop offset="0%" stop-color="#E8673A"/>
+          <stop offset="100%" stop-color="#1B5FE8"/>
+        </linearGradient>
+      </defs>
+      <path d="M14,4 L44,4 A9,9 0 0,1 53,13 L53,42 A9,9 0 0,1 44,51 L20,51 L6,61 L11,51 A6,6 0 0,1 5,45 L5,13 A9,9 0 0,1 14,4 Z" fill="url(#navlogo3)"/>
+      <path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill="white" opacity=".93" transform="translate(13.16,11.3) scale(0.72)"/>
+      <path d="M89,14 L59,14 A9,9 0 0,0 50,23 L50,52 A9,9 0 0,0 59,61 L83,61 L97,71 L92,61 A6,6 0 0,0 98,55 L98,23 A9,9 0 0,0 89,14 Z" fill="white" stroke="url(#navlogo3)" stroke-width="2.2" stroke-linejoin="round"/>
+      <path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill="url(#navlogo3)" transform="translate(58.16,21.3) scale(0.72)"/>
+    </svg>
+    <span class="nav-brand-text">Attune</span>
+  </a>
+  <div class="nav-links">
+    <a class="nav-link" href="#">How it works</a>
+    <a class="nav-link" href="#">Methodology</a>
+    <a class="nav-link" href="#">Reviews</a>
+    <a class="nav-link" href="#">FAQ</a>
+    <a class="nav-cta" href="#">Get started</a>
+  </div>
+</nav>
+
+<!-- ─────────────── HERO with REAL phone+laptop graphic ─────────────── -->
+<section class="hero">
+  <div class="hero-grid">
+    <div class="hero-left">
+      <p class="hero-eyebrow"><span class="hero-eyebrow-dot"></span>A new kind of relationship tool</p>
+      <h1 class="hero-title">Because understanding<br><em>takes intention.</em></h1>
+      <p class="hero-lead">Complete exercises independently. See how you each actually operate. Understand each other the way most couples never do.</p>
+      <div class="hero-actions">
+        <a class="btn btn-coral" href="#">Get started <span class="btn-arrow">→</span></a>
+        <a class="btn btn-text" href="#">Give as a gift</a>
+      </div>
+      <div class="hero-stats">
+        <div class="hero-stat">
+          <span class="hero-stat-num">40</span>
+          <span class="hero-stat-label">Personality questions</span>
+        </div>
+        <div class="hero-stat">
+          <span class="hero-stat-num">10</span>
+          <span class="hero-stat-label">Dimensions of fit</span>
+        </div>
+        <div class="hero-stat">
+          <span class="hero-stat-num">25 min</span>
+          <span class="hero-stat-label">Total, both partners</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- REAL HERO ILLUSTRATION — phone + laptop, preserved verbatim from home.html -->
+    <div class="hero-illustration">
+      <svg viewBox="0 0 680 400" xmlns="http://www.w3.org/2000/svg" style="overflow:visible">
+        <defs>
+          <linearGradient id="lg_h3" x1="0" y1="0" x2="103" y2="76" gradientUnits="userSpaceOnUse">
+            <stop offset="0%" stop-color="#E8673A"/>
+            <stop offset="100%" stop-color="#1B5FE8"/>
+          </linearGradient>
+          <linearGradient id="comp_h3" x1="130" y1="0" x2="656" y2="0" gradientUnits="userSpaceOnUse">
+            <stop offset="0%"   stop-color="#E8673A"/>
+            <stop offset="48%"  stop-color="#9B5DE5"/>
+            <stop offset="100%" stop-color="#1B5FE8"/>
+          </linearGradient>
+        </defs>
+
+        <!-- LOGO (centered top) -->
+        <g transform="translate(246, 82) scale(1.85)">
+          <path d="M14,4 L44,4 A9,9 0 0,1 53,13 L53,42 A9,9 0 0,1 44,51 L20,51 L6,61 L11,51 A6,6 0 0,1 5,45 L5,13 A9,9 0 0,1 14,4 Z" fill="url(#lg_h3)"/>
+          <path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill="white" opacity=".93" transform="translate(13.16,11.3) scale(0.72)"/>
+          <path d="M89,14 L59,14 A9,9 0 0,0 50,23 L50,52 A9,9 0 0,0 59,61 L83,61 L97,71 L92,61 A6,6 0 0,0 98,55 L98,23 A9,9 0 0,0 89,14 Z" fill="white" stroke="url(#lg_h3)" stroke-width="2.2" stroke-linejoin="round"/>
+          <path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill="url(#lg_h3)" transform="translate(58.16,21.3) scale(0.72)"/>
+        </g>
+
+        <!-- PHONE -->
+        <rect x="130" y="198" width="96" height="164" rx="16" fill="white"/>
+        <rect x="130" y="198" width="96" height="164" rx="16" fill="none" stroke="url(#comp_h3)" stroke-width="2.5"/>
+        <rect x="140" y="212" width="76" height="136" rx="7" fill="#FDF8F3" stroke="#C8BFB4" stroke-width="1"/>
+        <rect x="164" y="205" width="28" height="8" rx="4" fill="#C8BFB4"/>
+        <rect x="148" y="224" width="54" height="5" rx="2.5" fill="#C8BFB4"/>
+        <rect x="148" y="233" width="38" height="4" rx="2" fill="#DDD8D2"/>
+        <rect x="148" y="244" width="60" height="20" rx="7" fill="rgba(232,103,58,0.12)" stroke="rgba(232,103,58,0.7)" stroke-width="1.5"/>
+        <rect x="152" y="249" width="26" height="4" rx="2" fill="rgba(232,103,58,0.75)"/>
+        <rect x="152" y="256" width="18" height="3" rx="1.5" fill="rgba(232,103,58,0.4)"/>
+        <rect x="148" y="269" width="60" height="20" rx="7" fill="white" stroke="#C8BFB4" stroke-width="1.5"/>
+        <rect x="152" y="274" width="32" height="4" rx="2" fill="#C8BFB4"/>
+        <rect x="152" y="281" width="22" height="3" rx="1.5" fill="#DDD8D2"/>
+        <rect x="148" y="300" width="60" height="3.5" rx="1.5" fill="#EDE8E2"/>
+        <rect x="148" y="300" width="36" height="3.5" rx="1.5" fill="rgba(232,103,58,0.65)"/>
+        <rect x="164" y="349" width="28" height="3.5" rx="1.5" fill="#C8BFB4"/>
+
+        <!-- LAPTOP SCREEN -->
+        <rect x="456" y="198" width="196" height="140" rx="10" fill="white"/>
+        <rect x="456" y="198" width="196" height="140" rx="10" fill="none" stroke="url(#comp_h3)" stroke-width="2.5"/>
+        <rect x="465" y="207" width="178" height="122" rx="6" fill="#FDF8F3" stroke="#C8BFB4" stroke-width="1"/>
+        <rect x="474" y="223" width="68" height="58" rx="5" fill="white" stroke="#C8BFB4" stroke-width="1.5"/>
+        <rect x="474" y="223" width="34" height="29" fill="rgba(232,103,58,0.18)"/>
+        <rect x="508" y="223" width="34" height="29" fill="rgba(27,95,232,0.15)"/>
+        <rect x="474" y="252" width="34" height="29" fill="rgba(124,58,237,0.13)"/>
+        <rect x="508" y="252" width="34" height="29" fill="rgba(107,114,128,0.1)"/>
+        <line x1="508" y1="223" x2="508" y2="281" stroke="white" stroke-width="2"/>
+        <line x1="474" y1="252" x2="542" y2="252" stroke="white" stroke-width="2"/>
+        <circle cx="489" cy="235" r="6.5" fill="#E8673A" stroke="white" stroke-width="1.5"/>
+        <circle cx="523" cy="265" r="6.5" fill="#7C3AED" stroke="white" stroke-width="1.5"/>
+        <line x1="489" y1="235" x2="523" y2="265" stroke="rgba(0,0,0,0.18)" stroke-width="1.2" stroke-dasharray="3,2"/>
+        <rect x="554" y="223" width="78" height="17" rx="7" fill="rgba(16,185,129,0.1)" stroke="rgba(16,185,129,0.65)" stroke-width="1.5"/>
+        <rect x="559" y="227.5" width="34" height="4" rx="2" fill="rgba(16,185,129,0.75)"/>
+        <rect x="559" y="234" width="22" height="3" rx="1.5" fill="rgba(16,185,129,0.4)"/>
+        <rect x="554" y="245" width="78" height="17" rx="7" fill="white" stroke="#C8BFB4" stroke-width="1.5"/>
+        <rect x="559" y="249.5" width="40" height="4" rx="2" fill="#C8BFB4"/>
+        <rect x="559" y="256" width="28" height="3" rx="1.5" fill="#DDD8D2"/>
+        <rect x="554" y="267" width="78" height="17" rx="7" fill="white" stroke="#C8BFB4" stroke-width="1.5"/>
+        <rect x="559" y="271.5" width="30" height="4" rx="2" fill="#C8BFB4"/>
+        <rect x="559" y="278" width="20" height="3" rx="1.5" fill="#DDD8D2"/>
+        <rect x="474" y="291" width="158" height="3.5" rx="1.5" fill="#EDE8E2"/>
+        <rect x="474" y="291" width="100" height="3.5" rx="1.5" fill="rgba(27,95,232,0.45)"/>
+
+        <!-- LAPTOP BASE -->
+        <line x1="445" y1="338" x2="663" y2="338" stroke="rgba(155,93,229,0.3)" stroke-width="1"/>
+        <rect x="445" y="338" width="218" height="20" rx="6" fill="white"/>
+        <rect x="445" y="338" width="218" height="20" rx="6" fill="none" stroke="url(#comp_h3)" stroke-width="2.5"/>
+        <rect x="535" y="343" width="38" height="10" rx="4" fill="#EDE8E2" stroke="#C8BFB4" stroke-width="1"/>
+      </svg>
+    </div>
+  </div>
+</section>
+
+<div class="sandbox-marker">v3 changes — masthead removed · drop cap removed · roman numerals removed · real hero graphic · real step graphics · icons redone · stats hidden on mobile · darker footer with brand glow</div>
+
+<!-- ─────────────── INTRO ─────────────── -->
+<section class="section">
+  <div class="section-inner">
+    <p class="sec-eyebrow"><span class="sec-eyebrow-dot"></span>What it is</p>
+    <h2 class="sec-title">A foundational assessment for couples, designed to be taken once and returned to often.</h2>
+
+    <div class="intro-grid">
+      <aside class="intro-aside">
+        <p class="intro-aside-quote">You assume more than you realize.</p>
+        <p class="intro-aside-attr">From the methodology</p>
+      </aside>
+      <div class="intro-body">
+        <p>Attune is two exercises and a shared results experience. Each partner answers independently. The results merge into a single document showing where you align, where you diverge, and where the conversation might go next.</p>
+        <p>You take it once. You keep it. You return to it as life changes. The questions are written from a clinical foundation, not from intuition or vibes, and the framing avoids the false certainty of personality quizzes. <strong>What you get back is a working document, not a verdict.</strong></p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─────────────── HOW IT WORKS — REAL step graphics on dark cards ─────────────── -->
+<section class="section section-dark">
+  <div class="section-inner">
+    <p class="sec-eyebrow"><span class="sec-eyebrow-dot"></span>How it works</p>
+    <h2 class="sec-title">Two exercises. One shared view. Yours to keep.</h2>
+
+    <div class="steps">
+
+      <article class="step step--01">
+        <div class="step-body">
+          <div class="step-eyebrow">Step 01</div>
+          <h3 class="step-title">Answer separately.</h3>
+          <p class="step-desc">Each partner completes both exercises independently. Feedback is not shared until both partners are done.</p>
+        </div>
+        <div class="step-art">
+          <!-- Real step 1 SVG, preserved verbatim -->
+          <svg viewBox="0 0 520 340" xmlns="http://www.w3.org/2000/svg">
+            <defs><linearGradient id="hc_g31" x1="18" y1="0" x2="502" y2="0" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#E8673A"/><stop offset="50%" stop-color="#9B5DE5"/><stop offset="100%" stop-color="#1B5FE8"/></linearGradient></defs>
+            <rect x="18" y="12" width="484" height="292" rx="16" fill="white"/>
+            <rect x="18" y="12" width="484" height="292" rx="16" fill="none" stroke="url(#hc_g31)" stroke-width="3"/>
+            <rect x="28" y="22" width="464" height="272" rx="10" fill="#FDF8F3" stroke="#C8BFB4" stroke-width="1.5"/>
+            <rect x="28" y="22" width="464" height="4" fill="url(#hc_g31)"/>
+            <circle cx="162" cy="42" r="5.5" fill="#E8673A"/><circle cx="190" cy="42" r="5.5" fill="#E8673A"/><circle cx="218" cy="42" r="5.5" fill="#E8673A"/>
+            <circle cx="246" cy="42" r="5.5" fill="#E8DDD0"/><circle cx="274" cy="42" r="5.5" fill="#E8DDD0"/><circle cx="302" cy="42" r="5.5" fill="#E8DDD0"/>
+            <circle cx="330" cy="42" r="5.5" fill="#E8DDD0"/><circle cx="358" cy="42" r="5.5" fill="#E8DDD0"/>
+            <rect x="36" y="56" width="448" height="222" rx="12" fill="white" stroke="#E8DDD0" stroke-width="1.5"/>
+            <rect x="56" y="76" width="280" height="10" rx="4" fill="#C8BFB4"/>
+            <rect x="56" y="92" width="200" height="10" rx="4" fill="#DDD8D2"/>
+            <line x1="56" y1="112" x2="464" y2="112" stroke="#E8DDD0" stroke-width="1.5"/>
+            <rect x="56" y="120" width="408" height="54" rx="10" fill="rgba(232,103,58,0.09)" stroke="rgba(232,103,58,0.65)" stroke-width="2"/>
+            <rect x="74" y="139" width="180" height="9" rx="3.5" fill="rgba(232,103,58,0.65)"/>
+            <rect x="74" y="153" width="130" height="7" rx="2.5" fill="rgba(232,103,58,0.35)"/>
+            <rect x="56" y="178" width="408" height="54" rx="10" fill="white" stroke="#C8BFB4" stroke-width="2"/>
+            <rect x="74" y="197" width="210" height="9" rx="3.5" fill="#C8BFB4"/>
+            <rect x="74" y="211" width="150" height="7" rx="2.5" fill="#DDD8D2"/>
+            <rect x="416" y="244" width="62" height="26" rx="8" fill="#E8673A"/>
+          </svg>
+        </div>
+      </article>
+
+      <article class="step step--02">
+        <div class="step-body">
+          <div class="step-eyebrow">Step 02</div>
+          <h3 class="step-title">See yourselves side by side.</h3>
+          <p class="step-desc">Your answers combine into a shared view of how you each operate, what you expect, and how you function together.</p>
+        </div>
+        <div class="step-art">
+          <!-- Real step 2 SVG, preserved verbatim -->
+          <svg viewBox="0 0 520 340" xmlns="http://www.w3.org/2000/svg">
+            <defs><linearGradient id="hc_g32" x1="18" y1="0" x2="502" y2="0" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#E8673A"/><stop offset="50%" stop-color="#9B5DE5"/><stop offset="100%" stop-color="#1B5FE8"/></linearGradient></defs>
+            <rect x="18" y="12" width="484" height="292" rx="16" fill="white"/>
+            <rect x="18" y="12" width="484" height="292" rx="16" fill="none" stroke="url(#hc_g32)" stroke-width="3"/>
+            <rect x="28" y="22" width="464" height="272" rx="10" fill="#FDF8F3" stroke="#C8BFB4" stroke-width="1.5"/>
+            <rect x="28" y="22" width="464" height="4" fill="url(#hc_g32)"/>
+            <rect x="180" y="32" width="160" height="22" rx="11" fill="rgba(232,103,58,0.12)" stroke="rgba(232,103,58,0.5)" stroke-width="1.5"/>
+            <circle cx="430" cy="38" r="6" fill="#E8673A" stroke="white" stroke-width="2"/>
+            <circle cx="448" cy="38" r="6" fill="#1B5FE8" stroke="white" stroke-width="2"/>
+            <line x1="38" y1="62" x2="482" y2="62" stroke="#E8DDD0" stroke-width="1.5"/>
+            <rect x="38" y="74" width="108" height="12" rx="4" fill="#C8BFB4"/>
+            <line x1="172" y1="80" x2="458" y2="80" stroke="#E8DDD0" stroke-width="1.5"/>
+            <circle cx="275" cy="80" r="8" fill="#E8673A" stroke="#FDF8F3" stroke-width="2.5"/><circle cx="286" cy="80" r="8" fill="#1B5FE8" stroke="#FDF8F3" stroke-width="2.5"/>
+            <rect x="38" y="106" width="88" height="12" rx="4" fill="#C8BFB4"/>
+            <line x1="172" y1="112" x2="458" y2="112" stroke="#E8DDD0" stroke-width="1.5"/>
+            <circle cx="229" cy="112" r="8" fill="#E8673A" stroke="#FDF8F3" stroke-width="2.5"/><circle cx="358" cy="112" r="8" fill="#1B5FE8" stroke="#FDF8F3" stroke-width="2.5"/>
+            <rect x="38" y="138" width="98" height="12" rx="4" fill="#C8BFB4"/>
+            <line x1="172" y1="144" x2="458" y2="144" stroke="#E8DDD0" stroke-width="1.5"/>
+            <circle cx="378" cy="144" r="8" fill="#E8673A" stroke="#FDF8F3" stroke-width="2.5"/><circle cx="269" cy="144" r="8" fill="#1B5FE8" stroke="#FDF8F3" stroke-width="2.5"/>
+            <rect x="38" y="170" width="78" height="12" rx="4" fill="#C8BFB4"/>
+            <line x1="172" y1="176" x2="458" y2="176" stroke="#E8DDD0" stroke-width="1.5"/>
+            <circle cx="329" cy="176" r="8" fill="#E8673A" stroke="#FDF8F3" stroke-width="2.5"/><circle cx="315" cy="176" r="8" fill="#1B5FE8" stroke="#FDF8F3" stroke-width="2.5"/>
+            <rect x="38" y="202" width="118" height="12" rx="4" fill="#C8BFB4"/>
+            <line x1="172" y1="208" x2="458" y2="208" stroke="#E8DDD0" stroke-width="1.5"/>
+            <circle cx="212" cy="208" r="8" fill="#E8673A" stroke="#FDF8F3" stroke-width="2.5"/><circle cx="407" cy="208" r="8" fill="#1B5FE8" stroke="#FDF8F3" stroke-width="2.5"/>
+          </svg>
+        </div>
+      </article>
+
+      <article class="step step--03">
+        <div class="step-body">
+          <div class="step-eyebrow">Step 03</div>
+          <h3 class="step-title">Build from what you find.</h3>
+          <p class="step-desc">Your results aren't a one-time read. They're a shared language to return to as things shift.</p>
+        </div>
+        <div class="step-art">
+          <!-- Real step 3 SVG, preserved verbatim -->
+          <svg viewBox="0 0 520 340" xmlns="http://www.w3.org/2000/svg">
+            <defs><linearGradient id="hc_g33" x1="18" y1="0" x2="502" y2="0" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#E8673A"/><stop offset="50%" stop-color="#9B5DE5"/><stop offset="100%" stop-color="#1B5FE8"/></linearGradient></defs>
+            <rect x="18" y="12" width="484" height="292" rx="16" fill="white"/>
+            <rect x="18" y="12" width="484" height="292" rx="16" fill="none" stroke="url(#hc_g33)" stroke-width="3"/>
+            <rect x="28" y="22" width="464" height="272" rx="10" fill="#FDF8F3" stroke="#C8BFB4" stroke-width="1.5"/>
+            <rect x="28" y="22" width="464" height="4" fill="url(#hc_g33)"/>
+            <rect x="36" y="34" width="448" height="150" rx="12" fill="white" stroke="#E8DDD0" stroke-width="1.5"/>
+            <rect x="54" y="54" width="155" height="10" rx="4" fill="#1E1610" opacity=".55"/>
+            <line x1="54" y1="70" x2="468" y2="70" stroke="#E8DDD0" stroke-width="1.5"/>
+            <rect x="54" y="80" width="12" height="12" rx="2.5" fill="#E8673A"/><rect x="74" y="83" width="120" height="8" rx="3" fill="#C8BFB4"/>
+            <rect x="54" y="100" width="12" height="12" rx="2.5" fill="#E8673A"/><rect x="74" y="103" width="104" height="8" rx="3" fill="#C8BFB4"/>
+            <rect x="248" y="80" width="12" height="12" rx="2.5" fill="none" stroke="#C8BFB4" stroke-width="1.5"/><rect x="268" y="83" width="130" height="8" rx="3" fill="#DDD8D2"/>
+            <rect x="248" y="100" width="12" height="12" rx="2.5" fill="none" stroke="#C8BFB4" stroke-width="1.5"/><rect x="268" y="103" width="110" height="8" rx="3" fill="#DDD8D2"/>
+            <rect x="54" y="128" width="295" height="6" rx="3" fill="#E8DDD0"/><rect x="54" y="128" width="132" height="6" rx="3" fill="#E8673A"/>
+            <rect x="36" y="196" width="142" height="84" fill="white" stroke="#E8DDD0" stroke-width="1.5"/>
+            <rect x="36" y="196" width="142" height="4" fill="#E8673A"/>
+            <rect x="50" y="216" width="96" height="9" rx="3.5" fill="#1E1610" opacity=".55"/>
+            <rect x="50" y="231" width="110" height="7" rx="2.5" fill="#C8BFB4"/><rect x="50" y="244" width="88" height="7" rx="2.5" fill="#DDD8D2"/><rect x="50" y="257" width="100" height="7" rx="2.5" fill="#DDD8D2"/>
+            <rect x="189" y="196" width="142" height="84" fill="white" stroke="#E8DDD0" stroke-width="1.5"/>
+            <rect x="189" y="196" width="142" height="4" fill="#9B5DE5"/>
+            <rect x="203" y="216" width="106" height="9" rx="3.5" fill="#1E1610" opacity=".55"/>
+            <rect x="203" y="231" width="118" height="7" rx="2.5" fill="#C8BFB4"/><rect x="203" y="244" width="96" height="7" rx="2.5" fill="#DDD8D2"/><rect x="203" y="257" width="108" height="7" rx="2.5" fill="#DDD8D2"/>
+            <rect x="342" y="196" width="142" height="84" fill="white" stroke="#E8DDD0" stroke-width="1.5"/>
+            <rect x="342" y="196" width="142" height="4" fill="#1B5FE8"/>
+            <rect x="356" y="216" width="84" height="9" rx="3.5" fill="#1E1610" opacity=".55"/>
+            <rect x="356" y="231" width="108" height="7" rx="2.5" fill="#C8BFB4"/><rect x="356" y="244" width="92" height="7" rx="2.5" fill="#DDD8D2"/><rect x="356" y="257" width="112" height="7" rx="2.5" fill="#DDD8D2"/>
+          </svg>
+        </div>
+      </article>
+
+    </div>
+  </div>
+</section>
+
+<!-- ─────────────── ICONS — redone: filled in soft tinted disc ─────────────── -->
+<section class="section">
+  <div class="section-inner">
+    <p class="sec-eyebrow"><span class="sec-eyebrow-dot"></span>Iconography</p>
+    <h2 class="sec-title">Soft tinted discs. Filled glyphs.</h2>
+    <p class="sec-lead">Each icon sits in a softly-tinted circular disc. The disc tint maps to a dimension family (coral for connection, indigo for hard moments, purple for inner worlds, green for life building). On hover, the disc lifts and brightens. Replaces the inline Lucide-style icons currently scattered across the codebase.</p>
+
+    <div class="icons-grid">
+
+      <div class="icon-tile">
+        <div class="icon-disc">
+          <svg viewBox="0 0 24 24" fill="currentColor" stroke="none">
+            <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+          </svg>
+        </div>
+        <div class="icon-name">Heart</div>
+        <div class="icon-detail">connection</div>
+      </div>
+
+      <div class="icon-tile">
+        <div class="icon-disc">
+          <svg viewBox="0 0 24 24" fill="currentColor" stroke="none">
+            <path d="M2 4a2 2 0 0 1 2-2h7a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2H7l-3 2.5a.5.5 0 0 1-.83-.38V12a2 2 0 0 1-1.17-1.82V4z"/>
+            <path d="M11 13a2 2 0 0 1 2-2h7a2 2 0 0 1 2 2v6a2 2 0 0 1-1.17 1.82V22.12a.5.5 0 0 1-.83.38L17 20h-4a2 2 0 0 1-2-2v-5z" opacity=".5"/>
+          </svg>
+        </div>
+        <div class="icon-name">Conversation</div>
+        <div class="icon-detail">two voices</div>
+      </div>
+
+      <div class="icon-tile">
+        <div class="icon-disc icon-disc--purple">
+          <svg viewBox="0 0 24 24" fill="currentColor" stroke="none">
+            <path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm-1 14.5l-3-1 1.5-4.5L14 9.5l-1.5 4.5z"/>
+          </svg>
+        </div>
+        <div class="icon-name">Compass</div>
+        <div class="icon-detail">methodology</div>
+      </div>
+
+      <div class="icon-tile">
+        <div class="icon-disc icon-disc--indigo">
+          <svg viewBox="0 0 24 24" fill="currentColor" stroke="none">
+            <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+            <path d="M2 12l10 5 10-5" opacity=".55"/>
+            <path d="M2 17l10 5 10-5" opacity=".25"/>
+          </svg>
+        </div>
+        <div class="icon-name">Layers</div>
+        <div class="icon-detail">dimensions</div>
+      </div>
+
+      <div class="icon-tile">
+        <div class="icon-disc icon-disc--green">
+          <svg viewBox="0 0 24 24" fill="currentColor" stroke="none">
+            <path d="M12 2v20M5 6h14M3 12c0 1.66 1.34 3 3 3s3-1.34 3-3-3-6-3-6-3 4.34-3 6zm12 0c0 1.66 1.34 3 3 3s3-1.34 3-3-3-6-3-6-3 4.34-3 6z"/>
+          </svg>
+        </div>
+        <div class="icon-name">Balance</div>
+        <div class="icon-detail">expectations</div>
+      </div>
+
+      <div class="icon-tile">
+        <div class="icon-disc">
+          <svg viewBox="0 0 24 24" fill="currentColor" stroke="none">
+            <path d="M3 18h18v2H3zM12 6V2M5.6 8.6l-1.4-1.4M19.8 7.2l-1.4 1.4M2 14h2M20 14h2"/>
+            <path d="M6.5 16.5a5.5 5.5 0 0 1 11 0H6.5z"/>
+          </svg>
+        </div>
+        <div class="icon-name">Sunrise</div>
+        <div class="icon-detail">energy</div>
+      </div>
+
+      <div class="icon-tile">
+        <div class="icon-disc icon-disc--purple">
+          <svg viewBox="0 0 24 24" fill="currentColor" stroke="none">
+            <path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96-.46 2.5 2.5 0 0 1-1.04-4.69A2.5 2.5 0 0 1 5 12a2.5 2.5 0 0 1 2-2.45V4.5A2.5 2.5 0 0 1 9.5 2z"/>
+            <path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96-.46 2.5 2.5 0 0 0 1.04-4.69A2.5 2.5 0 0 0 19 12a2.5 2.5 0 0 0-2-2.45V4.5A2.5 2.5 0 0 0 14.5 2z" opacity=".55"/>
+          </svg>
+        </div>
+        <div class="icon-name">Mind</div>
+        <div class="icon-detail">inner worlds</div>
+      </div>
+
+      <div class="icon-tile">
+        <div class="icon-disc icon-disc--indigo">
+          <svg viewBox="0 0 24 24" fill="currentColor" stroke="none">
+            <path d="M5 3a2 2 0 0 0-2 2v16h2v-9h14v9h2V5a2 2 0 0 0-2-2H5zm0 8V5h14v6H5z"/>
+          </svg>
+        </div>
+        <div class="icon-name">Doorway</div>
+        <div class="icon-detail">repair</div>
+      </div>
+
+      <div class="icon-tile">
+        <div class="icon-disc">
+          <svg viewBox="0 0 24 24" fill="currentColor" stroke="none">
+            <path d="M19 2H8a3 3 0 0 0-3 3v14a3 3 0 0 0 3 3h11a1 1 0 0 0 1-1V3a1 1 0 0 0-1-1zM8 4h10v12H8a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1z"/>
+          </svg>
+        </div>
+        <div class="icon-name">Workbook</div>
+        <div class="icon-detail">practice</div>
+      </div>
+
+      <div class="icon-tile">
+        <div class="icon-disc icon-disc--green">
+          <svg viewBox="0 0 24 24" fill="currentColor" stroke="none">
+            <path d="M3 11c3-3 5-3 8 0s7 3 10 0v3c-3 3-7 3-10 0s-5-3-8 0v-3z"/>
+            <path d="M3 17c3-3 5-3 8 0s7 3 10 0v3c-3 3-7 3-10 0s-5-3-8 0v-3z" opacity=".5"/>
+          </svg>
+        </div>
+        <div class="icon-name">Thread</div>
+        <div class="icon-detail">attunement</div>
+      </div>
+
+      <div class="icon-tile">
+        <div class="icon-disc">
+          <svg viewBox="0 0 24 24" fill="currentColor" stroke="none">
+            <path d="M3 5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5zm2 .5L12 11l7-5.5V5H5v.5z"/>
+          </svg>
+        </div>
+        <div class="icon-name">Email</div>
+        <div class="icon-detail">delivery</div>
+      </div>
+
+      <div class="icon-tile">
+        <div class="icon-disc">
+          <svg viewBox="0 0 24 24" fill="currentColor" stroke="none">
+            <path d="M20 7h-3.17a3 3 0 0 0-5.66 0H8a3 3 0 0 0-3-3v17a1 1 0 0 0 1 1h13a1 1 0 0 0 1-1V8a1 1 0 0 0-1-1zM8 11h3v9H8v-9zm5 0h3v9h-3v-9z" opacity=".4"/>
+            <path d="M3 8h18v3H3z"/>
+            <path d="M11 11h2v10h-2z"/>
+          </svg>
+        </div>
+        <div class="icon-name">Gift</div>
+        <div class="icon-detail">registry</div>
+      </div>
+
+    </div>
+
+    <p style="margin-top:var(--s-10);font-family:var(--font-display);font-style:italic;font-size:.95rem;color:var(--muted);line-height:1.5;max-width:60ch">
+      The 12 icons above are the starter kit. Full system extends to 30–40 glyphs. Disc tint follows the dimension color system already in use across the site.
+    </p>
+  </div>
+</section>
+
+<!-- ─────────────── PULL QUOTE ─────────────── -->
+<section class="pullquote-section section-warm">
+  <div class="pullquote">
+    <div class="pullquote-mark">"</div>
+    <p class="pullquote-text">It found things we didn't know how to say. We've been <em>talking about them ever since.</em></p>
+    <div class="pullquote-attr">— Maya & Jordan · Beta couple, married four years</div>
+  </div>
+</section>
+
+<!-- ─────────────── PACKAGES ─────────────── -->
+<section class="section">
+  <div class="section-inner">
+    <p class="sec-eyebrow"><span class="sec-eyebrow-dot"></span>Packages</p>
+    <h2 class="sec-title">Take it for yourselves, or give it as a gift.</h2>
+
+    <div class="pkg-grid">
+      <article class="pkg">
+        <div class="pkg-tag">Most popular</div>
+        <div class="pkg-name">Assessment</div>
+        <div class="pkg-desc">The core experience. Two exercises, your shared results, three conversation starters.</div>
+        <div class="pkg-price-row"><div class="pkg-price">$89</div><div class="pkg-price-suffix">digital</div></div>
+        <ul class="pkg-includes">
+          <li>40-question personality scan</li>
+          <li>Couple-type results</li>
+          <li>Three conversation starters</li>
+        </ul>
+        <div class="pkg-cta">Choose this <span class="pkg-cta-arrow">→</span></div>
+      </article>
+
+      <article class="pkg">
+        <div class="pkg-tag" style="color:var(--indigo-deep)">For newlyweds</div>
+        <div class="pkg-name">Starting Out</div>
+        <div class="pkg-desc">Assessment plus the budget priorities exercise and a starter workbook.</div>
+        <div class="pkg-price-row"><div class="pkg-price">$139</div><div class="pkg-price-suffix">digital</div></div>
+        <ul class="pkg-includes">
+          <li>Everything in Assessment</li>
+          <li>Budget priorities exercise</li>
+          <li>Starter workbook</li>
+        </ul>
+        <div class="pkg-cta">Choose this <span class="pkg-cta-arrow">→</span></div>
+      </article>
+
+      <article class="pkg">
+        <div class="pkg-tag">Anniversary</div>
+        <div class="pkg-name">Anniversary</div>
+        <div class="pkg-desc">A second-cycle assessment and a reflection exercise on the year you've built.</div>
+        <div class="pkg-price-row"><div class="pkg-price">$139</div><div class="pkg-price-suffix">digital</div></div>
+        <ul class="pkg-includes">
+          <li>Everything in Assessment</li>
+          <li>Reflection exercise</li>
+          <li>Year-over-year comparison</li>
+        </ul>
+        <div class="pkg-cta">Choose this <span class="pkg-cta-arrow">→</span></div>
+      </article>
+
+      <article class="pkg" style="background:var(--shell);border-color:var(--coral-soft)">
+        <div class="pkg-tag">Premium</div>
+        <div class="pkg-name">Premium</div>
+        <div class="pkg-desc">The complete experience including a 50-minute LMFT session.</div>
+        <div class="pkg-price-row"><div class="pkg-price">$295</div><div class="pkg-price-suffix">digital</div></div>
+        <ul class="pkg-includes">
+          <li>Everything above</li>
+          <li>50-min LMFT session</li>
+          <li>Custom workbook</li>
+        </ul>
+        <div class="pkg-cta">Choose this <span class="pkg-cta-arrow">→</span></div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ─────────────── FOOTER (dark with brand glow) ─────────────── -->
+<footer class="footer">
+  <div class="footer-inner">
+    <div>
+      <div class="footer-brand">
+        <svg viewBox="0 0 103 76" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Attune logo">
+          <defs>
+            <linearGradient id="footlogo3" x1="0" y1="0" x2="103" y2="76" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stop-color="#E8673A"/>
+              <stop offset="100%" stop-color="#1B5FE8"/>
+            </linearGradient>
+          </defs>
+          <path d="M14,4 L44,4 A9,9 0 0,1 53,13 L53,42 A9,9 0 0,1 44,51 L20,51 L6,61 L11,51 A6,6 0 0,1 5,45 L5,13 A9,9 0 0,1 14,4 Z" fill="url(#footlogo3)"/>
+          <path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill="white" opacity=".93" transform="translate(13.16,11.3) scale(0.72)"/>
+          <path d="M89,14 L59,14 A9,9 0 0,0 50,23 L50,52 A9,9 0 0,0 59,61 L83,61 L97,71 L92,61 A6,6 0 0,0 98,55 L98,23 A9,9 0 0,0 89,14 Z" fill="white" stroke="url(#footlogo3)" stroke-width="2.2" stroke-linejoin="round"/>
+          <path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill="url(#footlogo3)" transform="translate(58.16,21.3) scale(0.72)"/>
+        </svg>
+        <span class="footer-brand-name">Attune</span>
+      </div>
+      <div class="footer-tagline">Because understanding takes intention.</div>
+    </div>
+    <div>
+      <div class="footer-h">Product</div>
+      <a class="footer-link" href="#">Packages</a>
+      <a class="footer-link" href="#">How it works</a>
+      <a class="footer-link" href="#">Methodology</a>
+      <a class="footer-link" href="#">Wedding registry</a>
+    </div>
+    <div>
+      <div class="footer-h">Support</div>
+      <a class="footer-link" href="#">FAQ</a>
+      <a class="footer-link" href="#">Contact</a>
+      <a class="footer-link" href="#">Reviews</a>
+    </div>
+    <div>
+      <div class="footer-h">Company</div>
+      <a class="footer-link" href="#">About</a>
+      <a class="footer-link" href="#">Privacy</a>
+      <a class="footer-link" href="#">Terms</a>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <div>© 2026 Attune. All rights reserved.</div>
+    <div>Made with care.</div>
+  </div>
+</footer>
+
+</body>
+</html>
