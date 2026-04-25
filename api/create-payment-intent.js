@@ -110,11 +110,24 @@ async function calculateTaxWithStripe(secretKey, items, customerAddress, promoCo
     const lineItems = [];
     items.forEach((item, idx) => {
       const itemLines = buildTaxLineItems(item, idx);
-      // If a promo covers the base, drop the package line from tax calc
-      // (Stripe Tax is calculated on actual paid amount).
       if (item._promoCoveredBase) {
-        const filtered = itemLines.filter(l => !l.reference.endsWith('-pkg'));
-        lineItems.push(...filtered);
+        // Free-mode promo: drop the package line entirely from tax calc.
+        // Fixed-mode promo: replace the package line's amount with the
+        // fixed final amount (in cents) so tax is calculated on what the
+        // customer actually pays for the package.
+        if (item._promoMode === 'fixed' && item._promoFixedAmount > 0) {
+          const adjusted = itemLines.map(l => {
+            if (l.reference.endsWith('-pkg')) {
+              return { ...l, amount: Math.round(item._promoFixedAmount * 100) };
+            }
+            return l;
+          });
+          lineItems.push(...adjusted);
+        } else {
+          // Free mode: drop the package line entirely
+          const filtered = itemLines.filter(l => !l.reference.endsWith('-pkg'));
+          lineItems.push(...filtered);
+        }
       } else {
         lineItems.push(...itemLines);
       }
@@ -181,7 +194,14 @@ async function calculateTaxWithStripe(secretKey, items, customerAddress, promoCo
 // Helper — compute cart total in cents, respecting promo coverage
 function itemsTotalCents(items, promoCovered) {
   return items.reduce((sum, it) => {
-    const dollars = it._promoCoveredBase ? itemAddonTotal(it) : itemSubtotal(it);
+    let dollars;
+    if (!it._promoCoveredBase) {
+      dollars = itemSubtotal(it);
+    } else if (it._promoMode === 'fixed') {
+      dollars = itemAddonTotal(it) + (it._promoFixedAmount || 0);
+    } else {
+      dollars = itemAddonTotal(it); // free-mode
+    }
     return sum + dollars * 100;
   }, 0);
 }
@@ -298,23 +318,33 @@ export default async function handler(req) {
   const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE || process.env.SUPABASE_SERVICE_ROLE_KEY;
 
   // ── Promo code path ────────────────────────────────────────────────────
+  // Code value shapes:
+  //   string          → covers full package (free), value is the package key
+  //   { pkg, mode: 'fixed', amount: N } → package costs exactly $N, add-ons billed normally
   const BETA_CODES = {
-    'BETA-CORE':        'core',
-    'BETA-NEWLYWED':    'newlywed',
-    'BETA-ANNIVERSARY': 'anniversary',
-    'BETA-PREMIUM':     'premium',
+    'BETA-CORE':            'core',
+    'BETA-NEWLYWED':        'newlywed',
+    'BETA-ANNIVERSARY':     'anniversary',
+    'BETA-PREMIUM':         'premium',
     'ATTUNE-BETA-FEEDBACK': '*',
+    'BETA-CORE-1':          { pkg: 'core', mode: 'fixed', amount: 1 },
   };
 
   if (promoCode) {
     const normalizedCode = promoCode.toUpperCase().trim();
-    const codeUnlocks = BETA_CODES[normalizedCode];
+    const codeEntry = BETA_CODES[normalizedCode];
 
-    if (!codeUnlocks) {
+    if (!codeEntry) {
       return new Response(JSON.stringify({ error: 'Invalid promo code' }), {
         status: 400, headers: { 'Content-Type': 'application/json' }
       });
     }
+
+    // Normalize to { pkg, mode, amount }
+    const codeMeta = (typeof codeEntry === 'string')
+      ? { pkg: codeEntry, mode: 'free', amount: 0 }
+      : codeEntry;
+    const codeUnlocks = codeMeta.pkg;
 
     // Every item in a multi-item cart must match the code (else reject — the
     // mixed free + paid flow is out of scope).
@@ -376,11 +406,11 @@ export default async function handler(req) {
         console.warn('[promo] supabase tracking failed (non-blocking):', e);
       }
 
-      // Only write orders here when the promo covers the ENTIRE cart.
-      // If there are add-ons, we fall through to the Stripe path below so
-      // the customer is charged for the add-ons, and the Stripe webhook
-      // writes the orders normally with the promo code flagged.
-      if (addonsTotal === 0) {
+      // Only write orders here when the code is FREE-mode AND covers the
+      // entire cart (no add-ons). Other cases (free + add-ons, fixed mode)
+      // fall through to Stripe and the webhook writes the orders normally
+      // with the promo code flagged.
+      if (codeMeta.mode === 'free' && addonsTotal === 0) {
         try {
           const d = new Date();
           const dateStr = `${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}`;
@@ -420,8 +450,9 @@ export default async function handler(req) {
       }
     }
 
-    // Fully-free path: entire cart covered, nothing to charge. Return early.
-    if (addonsTotal === 0) {
+    // Fully-free path: entire cart covered AND code is free-mode AND no
+    // add-ons to bill. Skip Stripe entirely.
+    if (codeMeta.mode === 'free' && addonsTotal === 0) {
       return new Response(JSON.stringify({
         free: true,
         promoCode: promoCode.toUpperCase().trim(),
@@ -431,16 +462,15 @@ export default async function handler(req) {
       });
     }
 
-    // Otherwise fall through to the Stripe path BELOW with a flag that the
-    // promo covers the package base. We rewrite each item to zero out its
-    // package base and keep only the add-on charges, then mark the
-    // payment intent with the promo_code so the webhook records it.
-    // Accomplish this by adjusting items in place — we want Stripe to
-    // charge ONLY the add-on total.
+    // Otherwise fall through to the Stripe path BELOW.
+    // Two sub-cases:
+    //   free-mode + add-ons: package $0, Stripe charges add-ons only.
+    //   fixed-mode: package $appliedPromoAmount/each, Stripe charges
+    //     (amount * itemCount) + add-ons.
     items.forEach(it => {
-      // Leave addon fields intact; clear the package price by flagging it
-      // internally. The Stripe payment math reduces to itemAddonTotal below.
       it._promoCoveredBase = true;
+      it._promoMode        = codeMeta.mode;
+      it._promoFixedAmount = codeMeta.amount; // 0 for free, N for fixed
     });
     // Fall through to the Stripe path below.
   }
@@ -448,8 +478,15 @@ export default async function handler(req) {
   // ── Paid checkout via Stripe ────────────────────────────────────────────
   // If a promo code covered the package base, only charge for add-ons.
   // Otherwise the full subtotal.
+  // Per-item charge:
+  //   no promo                  → full itemSubtotal (package + add-ons)
+  //   free-mode promo covered   → itemAddonTotal only
+  //   fixed-mode promo covered  → itemAddonTotal + fixed package amount
   const subtotalDollars = items.reduce((sum, it) => {
-    return sum + (it._promoCoveredBase ? itemAddonTotal(it) : itemSubtotal(it));
+    if (!it._promoCoveredBase) return sum + itemSubtotal(it);
+    const addons = itemAddonTotal(it);
+    if (it._promoMode === 'fixed') return sum + addons + (it._promoFixedAmount || 0);
+    return sum + addons; // free-mode
   }, 0);
   const promoCovered = items.some(it => it._promoCoveredBase);
   if (subtotalDollars <= 0) {

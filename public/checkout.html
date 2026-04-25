@@ -494,6 +494,8 @@ const ADDON_WORKBOOK = {
 // Stripe state (declared here so validateForm() can reference before setupStripe runs)
 let cardComplete = false;
 let appliedPromoCode = null;
+let appliedPromoMode = null;     // 'free' | 'fixed'
+let appliedPromoAmount = 0;      // dollars; the package's final price under fixed mode
 let stripe, cardNumberElement, cardExpiryElement, cardCvcElement, paymentRequest;
 
 // Single-item legacy vars (used when cart has exactly one item, for
@@ -932,8 +934,10 @@ function renderSummary() {
     }
   }
 
-  // If a promo code is applied, discount only the PACKAGE BASE cost for
-  // matching items, not the add-ons. Add-ons remain payable.
+  // If a promo code is applied, discount the PACKAGE BASE for matching items
+  // (add-ons remain payable). Two modes:
+  //   free  — package costs $0, discount = full base
+  //   fixed — package costs exactly $appliedPromoAmount, discount = base − amount
   if (appliedPromoCode) {
     // Package base total (digital or physical) for all items in cart.
     // Matches PRICES structure above.
@@ -942,16 +946,24 @@ function renderSummary() {
       const p = PKG_BASE[it.pkg];
       return s + (p ? (it.format === 'physical' ? p.physical : p.digital) : 0);
     }, 0);
-    // Discount is exactly the package base total (not the add-ons)
+    // For fixed-price codes, the user still owes appliedPromoAmount per package.
+    // Discount = base − (per-item fixed amount × num items).
+    const finalPackageCost = (appliedPromoMode === 'fixed')
+      ? appliedPromoAmount * _items.length
+      : 0;
+    const discount = Math.max(0, baseTotal - finalPackageCost);
+    const subLabel = (appliedPromoMode === 'fixed')
+      ? `${appliedPromoCode} · package $${appliedPromoAmount}, add-ons billed normally`
+      : `${appliedPromoCode} · covers package only`;
     rows += `
       <div class="co-card-detail" style="border-top:1px solid #E8DDD0;margin-top:.4rem;padding-top:.5rem">
         <div>
           <div class="name" style="color:#10B981">Promo code applied</div>
-          <span class="sub" style="font-family:monospace;font-size:.7rem;color:#8C7A68">${appliedPromoCode} · covers package only</span>
+          <span class="sub" style="font-family:monospace;font-size:.7rem;color:#8C7A68">${subLabel}</span>
         </div>
-        <div class="price" style="color:#10B981">−$${baseTotal}</div>
+        <div class="price" style="color:#10B981">−$${discount}</div>
       </div>`;
-    total = Math.max(0, total - baseTotal);
+    total = Math.max(0, total - discount);
   }
 
   if (el) el.innerHTML = rows;
@@ -1025,7 +1037,12 @@ function onNamesInput() {
 
 function validateForm() {
   const email = document.getElementById('email')?.value?.trim() || '';
-  const hasValidBilling = cardComplete || !!appliedPromoCode;
+  // Free-mode promos (mode='free' OR no code) don't need a card UNLESS
+  // there are paid add-ons. Fixed-mode promos always need a card.
+  // We rely on cardComplete from Stripe Elements; promo code only
+  // bypasses card validation when it's a free-mode promo with no add-ons.
+  const isFreePromo = appliedPromoCode && appliedPromoMode === 'free';
+  const hasValidBilling = cardComplete || isFreePromo;
 
   // Validate every item: partner 1 + partner 2 names (min 2 chars each).
   // For physical items, also validate shipping address fields.
@@ -1585,7 +1602,18 @@ function clearPaymentError() {
 }
 
 function getPkgTotal() {
-  if (appliedPromoCode) return 0;
+  // With a promo: free-mode → $0; fixed-mode → the fixed amount.
+  // No promo: full package + addons.
+  if (appliedPromoCode) {
+    if (appliedPromoMode === 'fixed') {
+      let t = appliedPromoAmount;
+      if (addonWorkbook && ADDON_WORKBOOK[addonWorkbook]) t += ADDON_WORKBOOK[addonWorkbook].price;
+      if (addonLmft) t += ADDON_LMFT.price;
+      if (addonReflection) t += ADDON_REFLECTION.price;
+      return t;
+    }
+    return 0; // free-mode covers the whole package
+  }
   let t = pkg.price;
   if (addonWorkbook && ADDON_WORKBOOK[addonWorkbook]) t += ADDON_WORKBOOK[addonWorkbook].price;
   if (addonLmft) t += ADDON_LMFT.price;
@@ -1616,19 +1644,34 @@ async function applyPromo() {
 
   // Client-side validation first so we don't show a loading state for obviously
   // invalid codes. Server will also validate.
+  //
+  // Code shape:
+  //   - string  → legacy "covers full package" code, value is the package key
+  //              ('core' | 'newlywed' | ... | '*' for any)
+  //   - object  → richer code with mode flag:
+  //              { pkg, mode: 'free' }              full package free (same as legacy string)
+  //              { pkg, mode: 'fixed', amount: N }  package costs exactly $N final
   const VALID_CODES = {
-    'BETA-CORE':        'core',
-    'BETA-NEWLYWED':    'newlywed',
-    'BETA-ANNIVERSARY': 'anniversary',
-    'BETA-PREMIUM':     'premium',
+    'BETA-CORE':            'core',
+    'BETA-NEWLYWED':        'newlywed',
+    'BETA-ANNIVERSARY':     'anniversary',
+    'BETA-PREMIUM':         'premium',
     'ATTUNE-BETA-FEEDBACK': '*',
+    // Fixed-price beta codes — package costs a flat amount instead of free.
+    // $1 lets us validate the full Stripe path end-to-end with real charges.
+    'BETA-CORE-1':          { pkg: 'core', mode: 'fixed', amount: 1 },
   };
-  const unlocks = VALID_CODES[code];
-  if (!unlocks) {
+  const codeEntry = VALID_CODES[code];
+  if (!codeEntry) {
     fb.textContent = 'Invalid code.';
     fb.style.color = '#B45309';
     return;
   }
+  // Normalize into { pkg, mode, amount } regardless of the source shape
+  const codeMeta = (typeof codeEntry === 'string')
+    ? { pkg: codeEntry, mode: 'free', amount: 0 }
+    : codeEntry;
+  const unlocks = codeMeta.pkg;
 
   // Every item in the cart must match the code (unless it's the universal).
   // Beta codes are package-specific and work on both digital and physical
@@ -1650,37 +1693,49 @@ async function applyPromo() {
 
   // Apply
   appliedPromoCode = code;
+  // Stash mode + amount so renderSummary and the server payload know how
+  // to compute the discount line.
+  appliedPromoMode = codeMeta.mode;     // 'free' | 'fixed'
+  appliedPromoAmount = codeMeta.amount; // dollars; 0 for free, N for fixed
   fb.textContent = '';
   document.getElementById('promoInputWrap').style.display = 'none';
   document.getElementById('promoToggle').style.display = 'none';
   document.getElementById('promoAppliedCode').textContent = code;
   document.getElementById('promoApplied').style.display = 'flex';
 
-  // Hide the payment card section entirely (not just dim it) — a free promo
-  // means no card needed. Also remove the PAYMENT divider and Stripe
-  // security badge so nothing dangles.
-  const cardBlock = document.getElementById('cardBlock');
-  if (cardBlock) cardBlock.style.display = 'none';
-  const paymentDivider = document.getElementById('paymentDivider');
-  if (paymentDivider) paymentDivider.style.display = 'none';
-  const securityStrip = document.getElementById('securityStrip');
-  if (securityStrip) securityStrip.style.display = 'none';
-  // Hide the Apple Pay / Google Pay button — no need for a wallet on a free order
-  const expressWrap = document.getElementById('expressCheckoutWrap');
-  if (expressWrap) expressWrap.style.display = 'none';
-
-  // Tell Stripe's card elements they're no longer required for validation
-  cardComplete = true;
+  // For FREE-mode codes (full package free): hide the payment card section
+  // entirely — no card needed if the order has no add-ons. The placeOrder
+  // path detects free orders and skips Stripe.
+  // For FIXED-mode codes ($1 etc.): keep the card visible — there's still
+  // a charge to collect.
+  if (codeMeta.mode === 'free') {
+    const cardBlock = document.getElementById('cardBlock');
+    if (cardBlock) cardBlock.style.display = 'none';
+    const paymentDivider = document.getElementById('paymentDivider');
+    if (paymentDivider) paymentDivider.style.display = 'none';
+    const securityStrip = document.getElementById('securityStrip');
+    if (securityStrip) securityStrip.style.display = 'none';
+    // Hide the Apple Pay / Google Pay button — no wallet needed on a free order
+    const expressWrap = document.getElementById('expressCheckoutWrap');
+    if (expressWrap) expressWrap.style.display = 'none';
+    // Tell Stripe's card elements they're no longer required for validation
+    cardComplete = true;
+  }
 
   renderSummary();
   validateForm();
-  // Update the pay button
+  // Update the pay button: free codes say "Complete order (free)";
+  // fixed codes use the normal pay-with-amount label that renderSummary sets.
   const btnLabel = document.getElementById('btnLabel');
-  if (btnLabel) btnLabel.textContent = 'Complete order (free) →';
+  if (btnLabel && codeMeta.mode === 'free') {
+    btnLabel.textContent = 'Complete order (free) →';
+  }
 }
 
 function removePromo() {
   appliedPromoCode = null;
+  appliedPromoMode = null;
+  appliedPromoAmount = 0;
   document.getElementById('promoApplied').style.display = 'none';
   document.getElementById('promoToggle').style.display = 'inline';
   document.getElementById('promoInput').value = '';
