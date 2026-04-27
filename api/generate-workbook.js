@@ -1135,18 +1135,18 @@ function buildOneDimension(dim, u, p, score1, score2, coupleType) {
   result.push(standardEyebrow('Try this week', { icon: '★' }));
   result.push(tryThisWeekBox(thisWeek));
 
-  // 5. What we want to try — 3 ruled lines for the specific commitment
+  // 5. What we want to try — 4 ruled lines for the specific commitment
   result.push(standardEyebrow('What we want to try'));
   result.push(new Paragraph({ spacing: { after: 100 },
     children: [run(`e.g., "we'll share one thing we'd normally hold back, every Sunday evening."`,
       { size: 14, italics: true, color: MUTED })] }));
-  result.push(ruledWriteIn(3, { lineHeight: 400 }));
+  result.push(ruledWriteIn(4, { lineHeight: 400 }));
 
-  // 6. Our notes — 4 ruled lines for free-form notes. Slightly tighter
+  // 6. Our notes — 5 ruled lines for free-form notes. Slightly tighter
   //    `before` since the preceding ruled write-in provides natural
   //    visual separation already.
   result.push(standardEyebrow('Our notes', { before: 280 }));
-  result.push(ruledWriteIn(4, { lineHeight: 400 }));
+  result.push(ruledWriteIn(5, { lineHeight: 400 }));
 
   return result;
 }
@@ -1432,7 +1432,7 @@ function buildWorkbook(u, p) {
 
     // Why this matters
     result.push(eyebrowOf('Why this matters to us', BLUE));
-    result.push(ruledWriteIn(3, { lineHeight: 420 }));
+    result.push(ruledWriteIn(4, { lineHeight: 420 }));
 
     // Two-column task lists — each partner gets their own ruled lines
     // sized to half-page width, with a narrow gutter between the two.
@@ -1465,7 +1465,7 @@ function buildWorkbook(u, p) {
     result.push(eyebrowOf('Timeline and check-in', BLUE));
     result.push(new Paragraph({ spacing: { after: 80 },
       children: [run('e.g., "small check-in every Sunday; revisit the whole thing in 30 days."', { size: 13, italics: true, color: MUTED })] }));
-    result.push(ruledWriteIn(3, { lineHeight: 420 }));
+    result.push(ruledWriteIn(5, { lineHeight: 420 }));
   }
 
   return result;
@@ -1814,7 +1814,7 @@ function buildConversationLibrary(u, p, coupleType, priorities) {
   const situationBlock = (s) => [
     new Paragraph({ spacing: { before: 280, after: 60 }, children: [run(s.title, { size: 24, bold: true, color: INK })] }),
     new Paragraph({ spacing: { after: 160 }, children: [run(s.blurb, { size: 18, italics: true, color: MUTED })] }),
-    ...[1, 2, 3].map(n => new Paragraph({
+    ...[1, 2, 3, 4, 5].map(n => new Paragraph({
       spacing: { after: 120 },
       indent: { left: 280 },
       children: [
