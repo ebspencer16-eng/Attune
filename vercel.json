@@ -240,6 +240,10 @@
       "destination": "/design-sandbox-v4.html"
     },
     {
+      "source": "/design-sandbox-v6",
+      "destination": "/design-sandbox-v6.html"
+    },
+    {
       "source": "/gift-cards",
       "destination": "/gift-cards.html"
     },

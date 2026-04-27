@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex,nofollow">
+<title>Attune · Design Sandbox v6</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;0,6..72,700;1,6..72,400;1,6..72,500;1,6..72,600&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --cream:#FFFDF9; --warm:#FBF6EE; --shell:#F8EDE0; --linen:#F1E5D2;
+  --stone:#E8DDD0; --mist:#EDEAF4;
+  --ink:#2A1F14; --graphite:#3A2E22; --muted:#8C7A68; --hairline:#E2D5C2; --clay:#A0805C;
+  --coral:#E8673A; --coral-soft:#F2A37A; --coral-bg:#FFF0E6; --coral-deep:#C2410C;
+  --indigo:#1B5FE8; --indigo-soft:#7A8FF5; --indigo-bg:#EBE9F8; --indigo-deep:#1E3A8A;
+  --purple:#9B5DE5; --purple-bg:#F3EEFF;
+  --green:#10B981; --green-bg:#E7FAF1; --green-deep:#047857;
+  --deep-navy:linear-gradient(150deg,#1c1940 0%,#282560 60%,#1e3a6e 100%);
+  --grad-dawn:linear-gradient(180deg,#FBF6EE 0%,#F8EDE0 40%,#F2D9C8 75%,#FFFDF9 100%);
+  --grad-aura:radial-gradient(ellipse 70% 60% at 15% 30%,rgba(232,103,58,.16) 0%,transparent 60%),radial-gradient(ellipse 70% 60% at 85% 70%,rgba(27,95,232,.13) 0%,transparent 60%);
+  --grad-signature:linear-gradient(110deg,#E8673A 0%,#C2410C 28%,#9B5DE5 55%,#1B5FE8 100%);
+  --grad-progress:linear-gradient(90deg,#E8673A,#1B5FE8);
+  --font-display:'Newsreader',Georgia,serif;
+  --font-body:'DM Sans',system-ui,sans-serif;
+  --s-1:4px;--s-2:8px;--s-3:12px;--s-4:16px;--s-5:20px;--s-6:24px;--s-8:32px;--s-10:40px;--s-12:48px;--s-16:64px;
+  --r-sm:10px;--r-md:14px;--r-lg:18px;--r-xl:24px;--r-2xl:32px;--r-pill:999px;
+  --shadow-1:0 1px 2px rgba(60,30,10,.04),0 1px 3px rgba(60,30,10,.06);
+  --shadow-2:0 2px 4px rgba(60,30,10,.04),0 6px 16px rgba(60,30,10,.08);
+  --shadow-3:0 4px 8px rgba(60,30,10,.05),0 14px 32px rgba(60,30,10,.10);
+  --ease:cubic-bezier(.2,.8,.25,1);
+}
+
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--cream);color:var(--ink);font-family:var(--font-body);font-size:16px;line-height:1.55;-webkit-font-smoothing:antialiased}
+
+.page-divider{background:var(--mist);padding:var(--s-4) var(--s-6);border-top:2px solid var(--indigo-soft);border-bottom:2px solid var(--indigo-soft);text-align:center;font-size:.7rem;letter-spacing:.22em;text-transform:uppercase;font-weight:700;color:var(--indigo-deep)}
+.page-divider strong{color:var(--coral-deep);margin:0 var(--s-2)}
+
+/* MARKETING NAV */
+.nav{position:relative;background:linear-gradient(180deg,rgba(251,246,238,.94),rgba(251,246,238,.88));backdrop-filter:blur(14px) saturate(1.15);display:flex;align-items:center;justify-content:space-between;padding:var(--s-3) var(--s-6);height:68px}
+.nav::after{content:"";position:absolute;bottom:0;left:0;right:0;height:1.5px;background:var(--grad-signature)}
+.nav-brand{display:flex;align-items:center;gap:var(--s-3);text-decoration:none;color:var(--ink)}
+.nav-brand svg{width:38px;height:auto;display:block}
+.nav-brand-text{font-family:var(--font-display);font-weight:600;font-size:1.2rem;letter-spacing:-.005em}
+.nav-center{display:flex;gap:var(--s-6);align-items:center;list-style:none}
+.nav-link,.nav-dropdown-toggle{font-size:.86rem;color:var(--graphite);text-decoration:none;font-weight:500;background:none;border:none;cursor:pointer;font-family:var(--font-body);padding:0;display:flex;align-items:center;gap:.28rem}
+.nav-link.active{color:var(--ink);font-weight:600}
+.nav-link:hover,.nav-dropdown-toggle:hover{color:var(--coral-deep)}
+.nav-dropdown{position:relative}
+.nav-right{display:flex;gap:var(--s-3);align-items:center}
+.nav-signin{font-size:.84rem;color:var(--graphite);text-decoration:none;font-weight:500}
+.nav-cta{font-size:.84rem;font-weight:600;padding:.55rem 1.15rem;border-radius:var(--r-pill);background:var(--ink);color:var(--cream);text-decoration:none}
+
+/* APP CHROME (auth, exercise, premium pages) */
+.app-chrome{display:flex;align-items:center;justify-content:space-between;padding:var(--s-3) var(--s-6);background:white;border-bottom:1px solid var(--hairline);position:relative;height:64px}
+.app-chrome::after{content:"";position:absolute;bottom:0;left:0;right:0;height:1.5px;background:var(--grad-signature)}
+.app-chrome-brand{display:flex;align-items:center;gap:var(--s-3);text-decoration:none;color:var(--ink)}
+.app-chrome-brand svg{width:34px;height:auto}
+.app-chrome-brand-text{font-family:var(--font-display);font-weight:600;font-size:1.1rem}
+.app-chrome-end{display:flex;align-items:center;gap:var(--s-4);font-size:.84rem;color:var(--muted)}
+.app-chrome-link{color:var(--graphite);text-decoration:none;font-weight:500;font-size:.84rem}
+
+/* AUTH */
+.auth-page{min-height:100vh;background:var(--grad-dawn);display:flex;align-items:flex-start;justify-content:center;padding:var(--s-12) var(--s-5);position:relative;overflow:hidden}
+.auth-page::before{content:"";position:absolute;inset:0;background:var(--grad-aura);pointer-events:none}
+.auth-card{position:relative;background:white;border:1px solid var(--hairline);border-radius:var(--r-2xl);padding:var(--s-10) var(--s-8) var(--s-8);max-width:460px;width:100%;box-shadow:var(--shadow-3);text-align:center}
+.auth-headline{font-family:var(--font-display);font-variation-settings:"opsz" 72;font-weight:500;font-size:2rem;letter-spacing:-.018em;line-height:1.1;margin-bottom:var(--s-2)}
+.auth-sub{font-size:.92rem;color:var(--muted);margin-bottom:var(--s-6);font-weight:300;line-height:1.6}
+.auth-tabs{display:grid;grid-template-columns:1fr 1fr;background:var(--shell);border-radius:var(--r-pill);padding:4px;margin-bottom:var(--s-6)}
+.auth-tab{padding:.65rem 1rem;border-radius:var(--r-pill);font-size:.84rem;font-weight:600;color:var(--muted);cursor:pointer}
+.auth-tab.active{background:white;color:var(--ink);box-shadow:var(--shadow-1)}
+.form-group{text-align:left;margin-bottom:var(--s-4)}
+.form-label{display:block;font-size:.78rem;font-weight:600;color:var(--graphite);margin-bottom:var(--s-2)}
+.form-input{width:100%;padding:.85rem 1rem;border:1.5px solid var(--hairline);border-radius:var(--r-md);font-family:var(--font-body);font-size:.94rem;color:var(--ink);background:var(--cream)}
+.form-forgot{display:inline-block;margin-top:var(--s-2);font-size:.78rem;color:var(--coral-deep);text-decoration:none;font-weight:500}
+.form-submit{width:100%;background:var(--ink);color:white;padding:.95rem;border-radius:var(--r-md);border:none;font-family:var(--font-body);font-size:.94rem;font-weight:600;cursor:pointer;margin-top:var(--s-2)}
+
+/* DASHBOARD WITH LEFT NAV (FIX #1) */
+.dash-page{min-height:100vh;background:var(--cream);display:flex;align-items:flex-start}
+.dash-sidebar{width:220px;flex-shrink:0;position:sticky;top:0;height:100vh;overflow-y:auto;background:white;border-right:1px solid var(--hairline);padding:var(--s-6) 0;display:flex;flex-direction:column;gap:2px}
+.dash-sidebar-section{padding:var(--s-3) var(--s-5) var(--s-2);font-size:.58rem;letter-spacing:.22em;text-transform:uppercase;color:var(--muted);font-weight:700}
+.dash-sidebar-item{display:flex;align-items:center;gap:.6rem;padding:.55rem 1.1rem;background:transparent;border:none;cursor:pointer;text-align:left;width:100%;border-left:3px solid transparent;transition:all .15s var(--ease);text-decoration:none}
+.dash-sidebar-item.active{background:rgba(232,103,58,.07);border-left-color:var(--coral)}
+.dash-sidebar-num{width:20px;height:20px;border-radius:50%;flex-shrink:0;background:#E5E2DC;display:flex;align-items:center;justify-content:center;font-size:.6rem;color:white;font-weight:700}
+.dash-sidebar-item.active .dash-sidebar-num,.dash-sidebar-item.done .dash-sidebar-num{background:var(--coral)}
+.dash-sidebar-label{font-size:.78rem;font-family:var(--font-body);color:#999;font-weight:400;line-height:1.3}
+.dash-sidebar-item.active .dash-sidebar-label{color:var(--coral);font-weight:600}
+.dash-sidebar-item.done .dash-sidebar-label{color:#555}
+.dash-main{flex:1;min-width:0;display:flex;flex-direction:column}
+.dash-hero{background:var(--deep-navy);color:white;padding:var(--s-12) var(--s-6) var(--s-12);position:relative;overflow:hidden}
+.dash-hero::before{content:"";position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,#E8673A,#9B5DE5,#1B5FE8);z-index:1}
+.dash-hero::after{content:"";position:absolute;inset:0;background:radial-gradient(ellipse 60% 40% at 80% 50%,rgba(232,103,58,.18),transparent 60%);pointer-events:none}
+.dash-hero-inner{position:relative;max-width:780px;margin:0 auto;z-index:2}
+.dash-greeting{font-size:.78rem;letter-spacing:.18em;text-transform:uppercase;color:rgba(232,103,58,.85);font-weight:600;margin-bottom:var(--s-3)}
+.dash-name{font-family:var(--font-display);font-variation-settings:"opsz" 72;font-weight:500;font-size:clamp(2rem,4vw,2.8rem);line-height:1.04;letter-spacing:-.022em;margin-bottom:var(--s-3)}
+.dash-pkg-badge{display:inline-flex;align-items:center;gap:var(--s-2);background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);border-radius:var(--r-pill);padding:.3rem .7rem;font-size:.7rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;margin-bottom:var(--s-3)}
+.dash-status{font-size:.95rem;color:rgba(255,255,255,.78);font-weight:300;line-height:1.6;max-width:60ch}
+.dash-pills{display:flex;gap:var(--s-2);flex-wrap:wrap;margin-top:var(--s-4)}
+.dash-pill{display:inline-flex;align-items:center;gap:var(--s-2);background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);padding:.4rem .9rem;border-radius:var(--r-pill);font-size:.74rem;font-weight:500;color:rgba(255,255,255,.85)}
+.dash-pill-dot{width:6px;height:6px;border-radius:50%;background:var(--green)}
+.dash-content{max-width:780px;margin:calc(var(--s-10) * -1) auto 0;padding:0 var(--s-6) var(--s-12);position:relative;z-index:3;width:100%}
+.section-label{font-size:.66rem;letter-spacing:.22em;text-transform:uppercase;color:var(--muted);font-weight:700;margin-bottom:var(--s-3);margin-top:var(--s-8)}
+.section-label:first-child{margin-top:0}
+.results-card{display:block;background:white;border:1px solid var(--hairline);border-radius:var(--r-xl);padding:var(--s-6);text-decoration:none;color:inherit;box-shadow:var(--shadow-2);position:relative;overflow:hidden}
+.results-card::before{content:"";position:absolute;top:0;left:0;right:0;height:3px;background:var(--grad-signature)}
+.rc-lbl{font-size:.66rem;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);font-weight:700;margin-bottom:var(--s-2)}
+.rc-title{font-family:var(--font-display);font-variation-settings:"opsz" 72;font-weight:500;font-size:1.5rem;letter-spacing:-.012em}
+.rc-chips{display:flex;gap:var(--s-2);flex-wrap:wrap;margin:var(--s-3) 0}
+.rc-chip{font-size:.72rem;background:var(--shell);color:var(--graphite);padding:.35rem .8rem;border-radius:var(--r-pill);font-weight:500}
+.rc-sub{font-size:.88rem;color:var(--muted);line-height:1.65;font-weight:300;margin-bottom:var(--s-3)}
+.rc-cta{font-size:.82rem;color:var(--coral-deep);font-weight:600}
+.ex-grid{display:grid;grid-template-columns:1fr 1fr;gap:var(--s-3)}
+.ex-card{display:flex;flex-direction:column;justify-content:space-between;background:white;border:1px solid var(--hairline);border-radius:var(--r-lg);padding:var(--s-5);text-decoration:none;color:inherit;min-height:200px}
+.ex-num{font-size:.66rem;letter-spacing:.18em;text-transform:uppercase;color:var(--coral-deep);font-weight:700;margin-bottom:var(--s-2)}
+.ex-card.ex-02 .ex-num{color:var(--indigo-deep)}
+.ex-card.ex-03 .ex-num{color:var(--indigo-deep)}
+.ex-title{font-family:var(--font-display);font-variation-settings:"opsz" 72;font-weight:500;font-size:1.2rem;line-height:1.15;margin-bottom:var(--s-2);letter-spacing:-.008em}
+.ex-desc{font-size:.84rem;color:var(--muted);line-height:1.55;font-weight:300}
+.ex-meta{font-size:.72rem;color:var(--clay);margin-top:var(--s-3);font-weight:500}
+.ex-foot{display:flex;justify-content:space-between;align-items:center;margin-top:var(--s-4);padding-top:var(--s-3);border-top:1px solid var(--hairline)}
+.sbadge{font-size:.7rem;font-weight:600;padding:.25rem .65rem;border-radius:var(--r-pill);letter-spacing:.02em}
+.sbadge-wait{background:var(--shell);color:var(--clay)}
+.sbadge-progress{background:var(--coral-bg);color:var(--coral-deep)}
+.sbadge-done{background:var(--green-bg);color:var(--green-deep)}
+.ex-action{font-size:.78rem;font-weight:600;color:var(--coral-deep)}
+.ex-card.ex-02 .ex-action{color:var(--indigo-deep)}
+.ex-card.ex-03 .ex-action{color:var(--indigo-deep)}
+
+/* EXERCISES (shared shell) */
+.exercise-page{min-height:100vh;background:#FBF8F3}
+.exercise-progress{height:3px;background:#E5E2DC}
+.exercise-progress-fill{height:100%;background:var(--grad-progress)}
+.exercise-shell{max-width:760px;margin:0 auto;padding:var(--s-12) var(--s-6) var(--s-16)}
+.q-meta{font-size:.7rem;letter-spacing:.18em;text-transform:uppercase;color:var(--clay);font-weight:600;margin-bottom:var(--s-3)}
+.q-prompt{font-family:var(--font-display);font-variation-settings:"opsz" 60;font-weight:500;font-size:1.4rem;line-height:1.35;letter-spacing:-.008em;color:var(--ink);margin-bottom:var(--s-8)}
+.poles{display:flex;gap:var(--s-3);margin-bottom:var(--s-8)}
+.pole{flex:1;padding:var(--s-4) var(--s-5);background:white;border:1.5px solid var(--hairline);border-radius:var(--r-md)}
+.pole-label{font-size:.66rem;letter-spacing:.18em;text-transform:uppercase;color:var(--purple);font-weight:700;margin-bottom:var(--s-2);display:block}
+.pole-text{font-size:.92rem;color:var(--graphite);line-height:1.6}
+
+/* EX1 SCALE — HORIZONTAL ROW (FIX #2) */
+.exq-scale-row{display:grid;grid-template-columns:repeat(5,1fr);gap:var(--s-2);margin-bottom:var(--s-10)}
+.exq-scale-row .scale-btn{padding:.85rem .5rem;border-radius:var(--r-md);cursor:pointer;font-family:var(--font-body);font-size:.82rem;font-weight:500;background:white;border:1.5px solid var(--hairline);color:var(--graphite);min-height:48px;text-align:center;line-height:1.2}
+.exq-scale-row .scale-btn.selected{background:var(--purple);border-color:var(--purple);color:white}
+.q-nav{display:flex;gap:var(--s-3);justify-content:center}
+.q-back{background:transparent;border:1.5px solid var(--hairline);color:var(--muted);padding:.85rem 1.4rem;border-radius:var(--r-md);cursor:pointer;font-family:var(--font-body);font-size:.88rem}
+.q-next{background:var(--ink);color:white;padding:.85rem 1.8rem;border-radius:var(--r-md);border:none;font-family:var(--font-body);font-size:.88rem;font-weight:600}
+
+/* EX2 STICKY TABLE (FIX #3) */
+.ex2-title{font-family:var(--font-display);font-variation-settings:"opsz" 60;font-weight:500;font-size:1.5rem;letter-spacing:-.01em;margin-bottom:var(--s-2);color:var(--ink)}
+.ex2-sub{font-size:.84rem;color:var(--muted);line-height:1.6;font-weight:300;margin-bottom:var(--s-5);max-width:60ch}
+.ex2-callout{background:#FBF8F3;border:1px solid #E8DDD0;border-radius:12px;padding:.85rem 1rem;margin-bottom:1.25rem;display:flex;gap:.85rem;align-items:flex-start}
+.ex2-callout-icon{font-size:1rem;flex-shrink:0;margin-top:.05rem}
+.ex2-callout-text{font-size:.78rem;color:var(--muted);font-weight:300;line-height:1.65;margin:0}
+.ex2-sheet{border:1px solid var(--stone);border-radius:14px;overflow:hidden;box-shadow:0 2px 16px rgba(14,11,7,.07);background:white;max-height:760px;overflow-y:auto;overflow-x:auto}
+.ex2-table{display:grid;grid-template-columns:minmax(180px,1.6fr) repeat(8,minmax(48px,1fr));min-width:780px}
+.ex2-h-resp{position:sticky;top:0;z-index:25;background:#F5F0EA;padding:.75rem .85rem;border-right:1.5px solid #E0D4C4;display:flex;align-items:flex-end;font-size:.55rem;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);font-weight:600;grid-row:1/3;border-bottom:1px solid var(--stone)}
+.ex2-h-growup,.ex2-h-now{position:sticky;top:0;z-index:24;padding:.5rem .4rem;display:flex;align-items:center;justify-content:center;font-size:.55rem;letter-spacing:.16em;text-transform:uppercase;font-weight:700;grid-row:1}
+.ex2-h-growup{grid-column:2/6;background:linear-gradient(135deg,#FDF0E3,#F5E4CE);border-right:1.5px solid #E0C9A8;color:#A0622A}
+.ex2-h-now{grid-column:6/10;background:linear-gradient(135deg,#E8EFFF,#D8E6FF);color:#1B3A8C}
+.ex2-h-col{position:sticky;top:34px;z-index:24;padding:.5rem .25rem;text-align:center;font-size:.58rem;color:var(--muted);font-weight:600;font-family:var(--font-body);border-bottom:1px solid var(--stone);grid-row:2;line-height:1.2}
+.ex2-h-col--child{background:#FDF0E3;color:#7C4D28}
+.ex2-h-col--child-last{border-right:1.5px solid #E0C9A8}
+.ex2-h-col--now{background:#E8EFFF;color:#1B3A8C}
+.ex2-cat-row{grid-column:1/-1;background:#F0EDE8;border-top:1.5px solid var(--stone);border-bottom:1px solid var(--stone);padding:.4rem .85rem;font-size:.58rem;letter-spacing:.16em;text-transform:uppercase;color:var(--clay);font-weight:700;position:sticky;top:60px;z-index:18}
+.ex2-row{display:contents}
+.ex2-cell{padding:.6rem .25rem;display:flex;align-items:center;justify-content:center;border-bottom:1px solid rgba(232,221,208,.6)}
+.ex2-cell--label{justify-content:flex-start;padding:.65rem .85rem;border-right:1px solid rgba(232,221,208,.5);font-size:.78rem;color:var(--ink);line-height:1.35}
+.ex2-cell--child-last{border-right:1.5px solid #E0C9A8}
+.ex2-radio{width:22px;height:22px;border-radius:50%;border:2px solid #D4C0A8;background:transparent;cursor:pointer;transition:all .12s;padding:0;flex-shrink:0}
+.ex2-radio--child.selected{border-color:#A0622A;background:#A0622A}
+.ex2-radio--now{border-color:#C8D8F0}
+.ex2-radio--now.selected{border-color:var(--indigo);background:var(--indigo)}
+.ex2-radio--now.selected-coral{border-color:var(--coral);background:var(--coral)}
+.ex2-radio--now.selected-green{border-color:var(--green);background:var(--green)}
+.ex2-row--filled .ex2-cell{background:rgba(184,150,110,.04)}
+
+/* EX3 NAVY (FIX #4) */
+.ex3-card{background:var(--deep-navy);border-radius:var(--r-xl);padding:var(--s-6);color:white;margin-bottom:var(--s-6);position:relative;overflow:hidden}
+.ex3-card::before{content:"";position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,#E8673A,#9B5DE5,#1B5FE8)}
+.ex3-card::after{content:"";position:absolute;top:-30%;right:-20%;width:240px;height:240px;border-radius:50%;background:radial-gradient(circle,rgba(232,103,58,.16),transparent 70%);pointer-events:none}
+.ex3-card-eye{font-size:.66rem;letter-spacing:.18em;text-transform:uppercase;color:rgba(232,103,58,.9);font-weight:700;margin-bottom:var(--s-2);position:relative}
+.ex3-card-q{font-family:var(--font-display);font-variation-settings:"opsz" 72;font-weight:500;font-size:1.3rem;line-height:1.3;color:white;position:relative}
+.ann-text-card{background:white;border:1px solid var(--hairline);border-radius:var(--r-xl);padding:var(--s-6);margin-bottom:var(--s-4)}
+.ann-text-eye{font-size:.66rem;letter-spacing:.2em;text-transform:uppercase;color:var(--indigo-deep);font-weight:700;margin-bottom:var(--s-2)}
+.ann-text-q{font-family:var(--font-display);font-variation-settings:"opsz" 60;font-weight:500;font-size:1.05rem;line-height:1.4;margin-bottom:var(--s-3)}
+.ann-textarea{width:100%;min-height:90px;padding:var(--s-3) var(--s-4);background:var(--cream);border:1.5px solid var(--hairline);border-radius:var(--r-md);font-family:var(--font-body);font-size:.9rem;color:var(--ink);resize:vertical;line-height:1.55}
+.ann-scale{display:grid;grid-template-columns:repeat(5,1fr);gap:var(--s-2);margin-top:var(--s-4)}
+.ann-scale-btn{padding:.7rem .4rem;background:rgba(255,255,255,.1);border:1.5px solid rgba(255,255,255,.2);border-radius:var(--r-sm);font-family:var(--font-body);font-size:.7rem;font-weight:500;color:rgba(255,255,255,.85);min-height:55px;display:flex;align-items:center;justify-content:center;text-align:center;line-height:1.2;cursor:pointer}
+.ann-scale-btn.selected{background:white;color:var(--indigo-deep);border-color:white;font-weight:700}
+
+/* CHECKLIST */
+.checklist-page{min-height:100vh;background:var(--cream)}
+.checklist-shell{max-width:760px;margin:0 auto;padding:var(--s-10) var(--s-6) var(--s-12)}
+.checklist-hdr{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:var(--s-6);flex-wrap:wrap;gap:var(--s-3)}
+.checklist-title{font-family:var(--font-display);font-variation-settings:"opsz" 72;font-weight:500;font-size:2rem;letter-spacing:-.018em;line-height:1.1}
+.checklist-sub{font-size:.92rem;color:var(--muted);font-weight:300;margin-top:var(--s-2);max-width:50ch;line-height:1.65}
+.progress-pill{display:inline-flex;align-items:center;gap:var(--s-2);background:white;border:1px solid var(--hairline);padding:.5rem .9rem;border-radius:var(--r-pill);font-size:.78rem;font-weight:600;color:var(--graphite)}
+.progress-bar{width:80px;height:6px;background:var(--shell);border-radius:3px;overflow:hidden}
+.progress-bar-fill{height:100%;background:var(--grad-progress);border-radius:3px}
+.checklist-area{background:white;border:1px solid var(--hairline);border-radius:var(--r-lg);margin-bottom:var(--s-3);overflow:hidden}
+.checklist-area-hdr{display:flex;align-items:center;gap:var(--s-3);padding:var(--s-4) var(--s-5);background:var(--warm);border-bottom:1px solid var(--hairline)}
+.checklist-area-icon{width:36px;height:36px;border-radius:var(--r-sm);display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0}
+.checklist-area-title{flex:1;font-family:var(--font-display);font-variation-settings:"opsz" 60;font-weight:500;font-size:1.1rem;letter-spacing:-.005em}
+.checklist-area-count{font-size:.74rem;color:var(--muted);font-weight:600}
+.checklist-items{padding:var(--s-2) 0}
+.checklist-item{display:flex;align-items:flex-start;gap:var(--s-3);padding:.75rem var(--s-5);font-size:.92rem;color:var(--graphite);line-height:1.55}
+.checklist-checkbox{flex-shrink:0;width:20px;height:20px;border-radius:6px;border:1.5px solid var(--hairline);background:white;margin-top:2px;display:flex;align-items:center;justify-content:center;color:white;font-size:.7rem}
+.checklist-item.checked .checklist-checkbox{background:var(--green-deep);border-color:var(--green-deep)}
+.checklist-item.checked{color:var(--muted);text-decoration:line-through}
+
+/* BUDGET */
+.budget-page{min-height:100vh;background:var(--cream)}
+.budget-shell{max-width:780px;margin:0 auto;padding:var(--s-10) var(--s-6) var(--s-12)}
+.budget-hdr{margin-bottom:var(--s-6)}
+.budget-eye{font-size:.66rem;letter-spacing:.22em;text-transform:uppercase;color:var(--coral-deep);font-weight:700;margin-bottom:var(--s-2)}
+.budget-title{font-family:var(--font-display);font-variation-settings:"opsz" 72;font-weight:500;font-size:2rem;letter-spacing:-.018em;line-height:1.1;margin-bottom:var(--s-2)}
+.budget-sub{font-size:.92rem;color:var(--muted);line-height:1.65;font-weight:300;max-width:55ch}
+.budget-section{background:white;border:1px solid var(--hairline);border-radius:var(--r-lg);padding:var(--s-5);margin-bottom:var(--s-3)}
+.budget-section-hdr{display:flex;align-items:center;gap:var(--s-2);margin-bottom:var(--s-4)}
+.budget-section-title{font-family:var(--font-display);font-variation-settings:"opsz" 60;font-weight:500;font-size:1.15rem;letter-spacing:-.005em}
+.budget-cat{display:flex;align-items:center;justify-content:space-between;padding:var(--s-3) 0;border-bottom:1px solid var(--hairline)}
+.budget-cat:last-child{border-bottom:none}
+.budget-cat-left{display:flex;align-items:center;gap:var(--s-3)}
+.budget-cat-icon{font-size:1.1rem;width:36px;height:36px;border-radius:var(--r-sm);background:var(--shell);display:flex;align-items:center;justify-content:center}
+.budget-cat-name{font-size:.94rem;font-weight:500;color:var(--ink)}
+.budget-cat-items{font-size:.74rem;color:var(--muted);font-weight:300;margin-top:2px}
+.budget-cat-input{width:120px;padding:.55rem .8rem;border:1.5px solid var(--hairline);border-radius:var(--r-md);font-family:var(--font-body);font-size:.88rem;font-weight:600;text-align:right;background:var(--cream);color:var(--ink)}
+.budget-totals{background:linear-gradient(135deg,#FBF6EE,#F8EDE0);border:1px solid var(--coral-bg);border-radius:var(--r-lg);padding:var(--s-5);margin-top:var(--s-4);display:grid;grid-template-columns:1fr 1fr;gap:var(--s-4)}
+.budget-totals-label{font-size:.7rem;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);font-weight:600;margin-bottom:var(--s-2)}
+.budget-totals-value{font-family:var(--font-display);font-variation-settings:"opsz" 72;font-weight:500;font-size:1.6rem;letter-spacing:-.012em;color:var(--ink)}
+
+/* STORY CARD */
+.story-page{min-height:100vh;background:var(--cream);padding:var(--s-10) var(--s-5)}
+.story-shell{max-width:520px;margin:0 auto}
+.story-back{font-size:.84rem;color:var(--muted);text-decoration:none;display:inline-flex;align-items:center;gap:var(--s-2);margin-bottom:var(--s-4);font-weight:500}
+.story-counter{display:flex;justify-content:space-between;align-items:center;margin-bottom:var(--s-4);font-size:.74rem;color:var(--muted);font-weight:600;letter-spacing:.04em}
+.story-dots{display:flex;gap:.4rem}
+.story-dot{width:6px;height:6px;border-radius:50%;background:var(--hairline)}
+.story-dot.active{width:24px;border-radius:3px;background:var(--coral)}
+.story-dot.done{background:var(--coral-soft)}
+.story-card{background:linear-gradient(160deg,#FFF8F4,#FFE9DC);border:1px solid var(--hairline);border-radius:var(--r-2xl);padding:var(--s-8) var(--s-6) var(--s-6);position:relative;overflow:hidden;box-shadow:var(--shadow-3);min-height:560px;display:flex;flex-direction:column}
+.story-card-eye{font-size:.66rem;letter-spacing:.22em;text-transform:uppercase;color:var(--coral-deep);font-weight:700;margin-bottom:var(--s-3)}
+.story-card-headline{font-family:var(--font-display);font-variation-settings:"opsz" 72;font-weight:500;font-size:2rem;line-height:1.08;letter-spacing:-.018em;margin-bottom:var(--s-3);color:var(--ink)}
+.story-card-headline em{color:var(--coral-deep)}
+.story-card-sub{font-size:.94rem;color:var(--graphite);line-height:1.6;margin-bottom:var(--s-5)}
+.story-chart{background:white;border:1px solid var(--hairline);border-radius:var(--r-md);padding:var(--s-4);margin-bottom:var(--s-4)}
+.story-chart-row{display:flex;align-items:center;gap:var(--s-3);padding:.4rem 0}
+.story-chart-name{font-size:.74rem;font-weight:600;color:var(--ink);width:54px;flex-shrink:0}
+.story-chart-bar{flex:1;height:14px;background:var(--shell);border-radius:7px;position:relative;overflow:hidden}
+.story-chart-fill{position:absolute;height:100%;border-radius:7px}
+.story-prose{font-size:.9rem;color:var(--graphite);line-height:1.7;font-family:var(--font-display);font-style:italic;font-variation-settings:"opsz" 24;background:rgba(255,255,255,.4);border-left:3px solid var(--coral);padding:var(--s-3) var(--s-4);border-radius:var(--r-sm);margin-top:auto}
+.story-actions{display:flex;justify-content:space-between;align-items:center;margin-top:var(--s-5);padding:0 var(--s-2)}
+.story-action{font-size:.84rem;color:var(--graphite);text-decoration:none;font-weight:600;display:inline-flex;align-items:center;gap:var(--s-2)}
+.story-action--prev{color:var(--muted)}
+.story-action--next{color:white;background:var(--coral);padding:.7rem 1.3rem;border-radius:var(--r-pill)}
+</style>
+</head>
+<body>
+
+<!-- ═════ NAV reference ═════ -->
+<div class="page-divider"><strong>NAV</strong> Marketing top nav (Learn dropdown)</div>
+<nav class="nav">
+  <a class="nav-brand" href="#"><svg viewBox="0 0 103 76" fill="none"><defs><linearGradient id="lgN" x1="0" y1="0" x2="103" y2="76" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#E8673A"/><stop offset="100%" stop-color="#1B5FE8"/></linearGradient></defs><path d="M14,4 L44,4 A9,9 0 0,1 53,13 L53,42 A9,9 0 0,1 44,51 L20,51 L6,61 L11,51 A6,6 0 0,1 5,45 L5,13 A9,9 0 0,1 14,4 Z" fill="url(#lgN)"/><path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill="white" opacity=".93" transform="translate(13.16,11.3) scale(0.72)"/><path d="M89,14 L59,14 A9,9 0 0,0 50,23 L50,52 A9,9 0 0,0 59,61 L83,61 L97,71 L92,61 A6,6 0 0,0 98,55 L98,23 A9,9 0 0,0 89,14 Z" fill="white" stroke="url(#lgN)" stroke-width="2.2" stroke-linejoin="round"/><path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill="url(#lgN)" transform="translate(58.16,21.3) scale(0.72)"/></svg><span class="nav-brand-text">Attune</span></a>
+  <ul class="nav-center">
+    <li><a class="nav-link active" href="#">Home</a></li>
+    <li class="nav-dropdown"><button class="nav-dropdown-toggle">Learn <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg></button></li>
+    <li><a class="nav-link" href="#">Packages</a></li>
+  </ul>
+  <div class="nav-right"><a class="nav-signin" href="#">Sign in</a><a class="nav-cta" href="#">Get started</a></div>
+</nav>
+<div style="padding:32px;background:var(--cream);text-align:center"><p style="font-size:.86rem;color:var(--muted);max-width:560px;margin:0 auto">Hover Learn for the dropdown menu (Our Purpose, Methodology, In Practice, FAQs).</p></div>
+
+<!-- ═════ 1 · SIGN IN ═════ -->
+<div class="page-divider"><strong>USER 01</strong> Sign in</div>
+<div class="app-chrome">
+  <a class="app-chrome-brand" href="#"><svg viewBox="0 0 103 76" fill="none"><defs><linearGradient id="lg1" x1="0" y1="0" x2="103" y2="76" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#E8673A"/><stop offset="100%" stop-color="#1B5FE8"/></linearGradient></defs><path d="M14,4 L44,4 A9,9 0 0,1 53,13 L53,42 A9,9 0 0,1 44,51 L20,51 L6,61 L11,51 A6,6 0 0,1 5,45 L5,13 A9,9 0 0,1 14,4 Z" fill="url(#lg1)"/><path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill="white" opacity=".93" transform="translate(13.16,11.3) scale(0.72)"/><path d="M89,14 L59,14 A9,9 0 0,0 50,23 L50,52 A9,9 0 0,0 59,61 L83,61 L97,71 L92,61 A6,6 0 0,0 98,55 L98,23 A9,9 0 0,0 89,14 Z" fill="white" stroke="url(#lg1)" stroke-width="2.2" stroke-linejoin="round"/><path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill="url(#lg1)" transform="translate(58.16,21.3) scale(0.72)"/></svg><span class="app-chrome-brand-text">Attune</span></a>
+  <div class="app-chrome-end"><a class="app-chrome-link" href="#">Need help?</a></div>
+</div>
+<div class="auth-page">
+  <div class="auth-card">
+    <h1 class="auth-headline">Welcome back</h1>
+    <p class="auth-sub">Sign in to access your exercises and results.</p>
+    <div class="auth-tabs"><div class="auth-tab active">Sign in</div><div class="auth-tab">Create account</div></div>
+    <div class="form-group"><label class="form-label">Email</label><input class="form-input" value="sarah@example.com"></div>
+    <div class="form-group"><label class="form-label">Password</label><input class="form-input" type="password" value="••••••••••"><a class="form-forgot" href="#">Forgot password?</a></div>
+    <button class="form-submit">Sign in →</button>
+  </div>
+</div>
+
+<!-- ═════ 2 · DASHBOARD with LEFT NAV ═════ -->
+<div class="page-divider"><strong>USER 02</strong> Dashboard (with left nav)</div>
+<div class="app-chrome">
+  <a class="app-chrome-brand" href="#"><svg viewBox="0 0 103 76" fill="none"><defs><linearGradient id="lg2" x1="0" y1="0" x2="103" y2="76" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#E8673A"/><stop offset="100%" stop-color="#1B5FE8"/></linearGradient></defs><path d="M14,4 L44,4 A9,9 0 0,1 53,13 L53,42 A9,9 0 0,1 44,51 L20,51 L6,61 L11,51 A6,6 0 0,1 5,45 L5,13 A9,9 0 0,1 14,4 Z" fill="url(#lg2)"/><path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill="white" opacity=".93" transform="translate(13.16,11.3) scale(0.72)"/><path d="M89,14 L59,14 A9,9 0 0,0 50,23 L50,52 A9,9 0 0,0 59,61 L83,61 L97,71 L92,61 A6,6 0 0,0 98,55 L98,23 A9,9 0 0,0 89,14 Z" fill="white" stroke="url(#lg2)" stroke-width="2.2" stroke-linejoin="round"/><path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill="url(#lg2)" transform="translate(58.16,21.3) scale(0.72)"/></svg><span class="app-chrome-brand-text">Attune</span></a>
+  <div class="app-chrome-end"><a class="app-chrome-link" href="#">Profile</a><a class="app-chrome-link" href="#">Sign out</a></div>
+</div>
+<div class="dash-page">
+  <aside class="dash-sidebar">
+    <div class="dash-sidebar-section">Main</div>
+    <a class="dash-sidebar-item active" href="#"><span class="dash-sidebar-num">1</span><span class="dash-sidebar-label">Home</span></a>
+    <a class="dash-sidebar-item done" href="#"><span class="dash-sidebar-num">2</span><span class="dash-sidebar-label">Your results</span></a>
+    <a class="dash-sidebar-item done" href="#"><span class="dash-sidebar-num">3</span><span class="dash-sidebar-label">Exercises</span></a>
+    <div class="dash-sidebar-section" style="margin-top:24px">Premium</div>
+    <a class="dash-sidebar-item" href="#"><span class="dash-sidebar-num">4</span><span class="dash-sidebar-label">Budget priorities</span></a>
+    <a class="dash-sidebar-item" href="#"><span class="dash-sidebar-num">5</span><span class="dash-sidebar-label">LMFT session</span></a>
+    <a class="dash-sidebar-item" href="#"><span class="dash-sidebar-num">6</span><span class="dash-sidebar-label">Newlywed checklist</span></a>
+    <div class="dash-sidebar-section" style="margin-top:24px">Account</div>
+    <a class="dash-sidebar-item" href="#"><span class="dash-sidebar-num">·</span><span class="dash-sidebar-label">Settings</span></a>
+    <a class="dash-sidebar-item" href="#"><span class="dash-sidebar-num">?</span><span class="dash-sidebar-label">Help &amp; support</span></a>
+  </aside>
+  <main class="dash-main">
+    <div class="dash-hero">
+      <div class="dash-hero-inner">
+        <p class="dash-greeting">Welcome back</p>
+        <h1 class="dash-name">Sarah</h1>
+        <span class="dash-pkg-badge">Premium Package</span>
+        <p class="dash-status">Both exercises complete. Your results are ready.</p>
+        <div class="dash-pills">
+          <span class="dash-pill"><span class="dash-pill-dot"></span>10 dimensions mapped</span>
+          <span class="dash-pill"><span class="dash-pill-dot"></span>43 topics compared</span>
+          <span class="dash-pill"><span class="dash-pill-dot"></span>81% aligned</span>
+        </div>
+      </div>
+    </div>
+    <div class="dash-content">
+      <p class="section-label">Your results</p>
+      <a class="results-card" href="#">
+        <div class="rc-lbl">Your Attune dashboard</div>
+        <div class="rc-title">Sarah &amp; James</div>
+        <div class="rc-chips"><span class="rc-chip">10 dimensions mapped</span><span class="rc-chip">43 topics compared</span><span class="rc-chip">81% aligned</span></div>
+        <p class="rc-sub">Both exercises complete. Your results, communication profile, and relationship insights are ready to explore.</p>
+        <p class="rc-cta">Go to your dashboard →</p>
+      </a>
+      <p class="section-label">Your exercises</p>
+      <div class="ex-grid">
+        <a class="ex-card ex-01" href="#">
+          <div><div class="ex-num">Exercise 01</div><div class="ex-title">How You Communicate</div><div class="ex-desc">How you recharge, handle conflict, repair, and express care.</div><div class="ex-meta">~10 min · 30 questions · 10 dimensions</div></div>
+          <div class="ex-foot"><span class="sbadge sbadge-done">Complete ✓</span><span class="ex-action">View →</span></div>
+        </a>
+        <a class="ex-card ex-02" href="#">
+          <div><div class="ex-num">Exercise 02</div><div class="ex-title">What You Expect</div><div class="ex-desc">Responsibilities, finances, family, and the assumptions that shape everything.</div><div class="ex-meta">~15 min · 2 parts · 10 categories</div></div>
+          <div class="ex-foot"><span class="sbadge sbadge-done">Complete ✓</span><span class="ex-action">View →</span></div>
+        </a>
+      </div>
+      <p class="section-label">Premium tools</p>
+      <div class="ex-grid">
+        <a class="ex-card ex-03" href="#">
+          <div><div class="ex-num">Premium</div><div class="ex-title">Budget Priorities</div><div class="ex-desc">A side-by-side look at how each of you allocates the household.</div><div class="ex-meta">~10 min · 3 categories</div></div>
+          <div class="ex-foot"><span class="sbadge sbadge-progress">In progress</span><span class="ex-action">Continue →</span></div>
+        </a>
+        <a class="ex-card ex-03" href="#">
+          <div><div class="ex-num">Premium</div><div class="ex-title">LMFT session</div><div class="ex-desc">A 50-minute session with a licensed couples therapist, built around your results.</div><div class="ex-meta">50 min · One-on-one with a partner</div></div>
+          <div class="ex-foot"><span class="sbadge sbadge-wait">Not booked</span><span class="ex-action">Book →</span></div>
+        </a>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- ═════ 3 · EXERCISE 01 (HORIZONTAL SCALE) ═════ -->
+<div class="page-divider"><strong>USER 03</strong> Exercise 01 · Horizontal scale</div>
+<div class="app-chrome">
+  <a class="app-chrome-brand" href="#"><svg viewBox="0 0 103 76" fill="none"><defs><linearGradient id="lg3" x1="0" y1="0" x2="103" y2="76" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#E8673A"/><stop offset="100%" stop-color="#1B5FE8"/></linearGradient></defs><path d="M14,4 L44,4 A9,9 0 0,1 53,13 L53,42 A9,9 0 0,1 44,51 L20,51 L6,61 L11,51 A6,6 0 0,1 5,45 L5,13 A9,9 0 0,1 14,4 Z" fill="url(#lg3)"/><path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill="white" opacity=".93" transform="translate(13.16,11.3) scale(0.72)"/><path d="M89,14 L59,14 A9,9 0 0,0 50,23 L50,52 A9,9 0 0,0 59,61 L83,61 L97,71 L92,61 A6,6 0 0,0 98,55 L98,23 A9,9 0 0,0 89,14 Z" fill="white" stroke="url(#lg3)" stroke-width="2.2" stroke-linejoin="round"/><path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill="url(#lg3)" transform="translate(58.16,21.3) scale(0.72)"/></svg><span class="app-chrome-brand-text">Attune</span></a>
+  <div class="app-chrome-end"><a class="app-chrome-link" href="#">Save &amp; exit</a></div>
+</div>
+<div class="exercise-page">
+  <div class="exercise-progress"><div class="exercise-progress-fill" style="width:23%"></div></div>
+  <div class="exercise-shell">
+    <p class="q-meta">Question 7 of 30</p>
+    <h2 class="q-prompt">When you're working through something hard, you tend to:</h2>
+    <div class="poles">
+      <div class="pole"><span class="pole-label">A</span><p class="pole-text">Think it through privately first, then share once you've landed somewhere.</p></div>
+      <div class="pole"><span class="pole-label">B</span><p class="pole-text">Talk it out. Saying it aloud is how you figure out what you think.</p></div>
+    </div>
+    <div class="exq-scale-row">
+      <button class="scale-btn">Strongly A</button>
+      <button class="scale-btn">Mostly A</button>
+      <button class="scale-btn selected">In the middle</button>
+      <button class="scale-btn">Mostly B</button>
+      <button class="scale-btn">Strongly B</button>
+    </div>
+    <div class="q-nav"><button class="q-back">← Back</button><button class="q-next">Next →</button></div>
+  </div>
+</div>
+
+<!-- ═════ 4 · EXERCISE 02 (STICKY TABLE) ═════ -->
+<div class="page-divider"><strong>USER 04</strong> Exercise 02 · Sticky responsibility table</div>
+<div class="app-chrome">
+  <a class="app-chrome-brand" href="#"><svg viewBox="0 0 103 76" fill="none"><defs><linearGradient id="lg4" x1="0" y1="0" x2="103" y2="76" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#E8673A"/><stop offset="100%" stop-color="#1B5FE8"/></linearGradient></defs><path d="M14,4 L44,4 A9,9 0 0,1 53,13 L53,42 A9,9 0 0,1 44,51 L20,51 L6,61 L11,51 A6,6 0 0,1 5,45 L5,13 A9,9 0 0,1 14,4 Z" fill="url(#lg4)"/><path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill="white" opacity=".93" transform="translate(13.16,11.3) scale(0.72)"/><path d="M89,14 L59,14 A9,9 0 0,0 50,23 L50,52 A9,9 0 0,0 59,61 L83,61 L97,71 L92,61 A6,6 0 0,0 98,55 L98,23 A9,9 0 0,0 89,14 Z" fill="white" stroke="url(#lg4)" stroke-width="2.2" stroke-linejoin="round"/><path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill="url(#lg4)" transform="translate(58.16,21.3) scale(0.72)"/></svg><span class="app-chrome-brand-text">Attune</span></a>
+  <div class="app-chrome-end"><a class="app-chrome-link" href="#">Save &amp; exit</a></div>
+</div>
+<div class="exercise-page">
+  <div class="exercise-progress"><div class="exercise-progress-fill" style="width:42%"></div></div>
+  <div class="exercise-shell">
+    <p class="q-meta">Your Expectations · Part 2 of 2</p>
+    <h2 class="ex2-title">Who handles what?</h2>
+    <p class="ex2-sub">For each responsibility, select who handled it growing up, and who you expect to handle it in your relationship.</p>
+    <div class="ex2-callout">
+      <span class="ex2-callout-icon">📖</span>
+      <p class="ex2-callout-text">This list is representative, not exhaustive. The Personalized Workbook includes detailed breakdowns built directly from your answers.</p>
+    </div>
+    <div class="ex2-sheet">
+      <div class="ex2-table">
+        <div class="ex2-h-resp">Responsibility</div>
+        <div class="ex2-h-growup">Growing up</div>
+        <div class="ex2-h-now">In our home now</div>
+        <div class="ex2-h-col ex2-h-col--child">Mom</div>
+        <div class="ex2-h-col ex2-h-col--child">Dad</div>
+        <div class="ex2-h-col ex2-h-col--child">Both</div>
+        <div class="ex2-h-col ex2-h-col--child ex2-h-col--child-last">N/A</div>
+        <div class="ex2-h-col ex2-h-col--now">Sarah</div>
+        <div class="ex2-h-col ex2-h-col--now">James</div>
+        <div class="ex2-h-col ex2-h-col--now">Both</div>
+        <div class="ex2-h-col ex2-h-col--now">N/A</div>
+        <div class="ex2-cat-row">Household</div>
+        <div class="ex2-row ex2-row--filled"><div class="ex2-cell ex2-cell--label">Cooking meals</div><div class="ex2-cell"><button class="ex2-radio ex2-radio--child selected"></button></div><div class="ex2-cell"><button class="ex2-radio ex2-radio--child"></button></div><div class="ex2-cell"><button class="ex2-radio ex2-radio--child"></button></div><div class="ex2-cell ex2-cell--child-last"><button class="ex2-radio ex2-radio--child"></button></div><div class="ex2-cell"><button class="ex2-radio ex2-radio--now"></button></div><div class="ex2-cell"><button class="ex2-radio ex2-radio--now"></button></div><div class="ex2-cell"><button class="ex2-radio ex2-radio--now selected"></button></div><div class="ex2-cell"><button class="ex2-radio ex2-radio--now"></button></div></div>
+        <div class="ex2-row ex2-row--filled"><div class="ex2-cell ex2-cell--label">Grocery shopping and meal planning</div><div class="ex2-cell"><button class="ex2-radio ex2-radio--child"></button></div><div class="ex2-cell"><button class="ex2-radio ex2-radio--child"></button></div><div class="ex2-cell"><button class="ex2-radio ex2-radio--child selected"></button></div><div class="ex2-cell ex2-cell--child-last"><button class="ex2-radio ex2-radio--child"></button></div><div class="ex2-cell"><button class="ex2-radio ex2-radio--now selected-coral"></button></div><div class="ex2-cell"><button class="ex2-radio ex2-radio--now"></button></div><div class="ex2-cell"><button class="ex2-radio ex2-radio--now"></button></div><div class="ex2-cell"><button class="ex2-radio ex2-radio--now"></button></div></div>
+        <div class="ex2-row"><div class="ex2-cell ex2-cell--label">Keeping the home tidy day-to-day</div><div class="ex2-cell"><button class="ex2-radio ex2-radio--child"></button></div><div class="ex2-cell"><button class="ex2-radio ex2-radio--child"></button></div><div class="ex2-cell"><button class="ex2-radio ex2-radio--child"></button></div><div class="ex2-cell ex2-cell--child-last"><button class="ex2-radio ex2-radio--child"></button></div><div class="ex2-cell"><button class="ex2-radio ex2-radio--now"></button></div><div class="ex2-cell"><button class="ex2-radio ex2-radio--now"></button></div><div class="ex2-cell"><button class="ex2-radio ex2-radio--now"></button></div><div class="ex2-cell"><button class="ex2-radio ex2-radio--now"></button></div></div>
+        <div class="ex2-row ex2-row--filled"><div class="ex2-cell ex2-cell--label">Managing home repairs and maintenance</div><div class="ex2-cell"><button class="ex2-radio ex2-radio--child"></button></div><div class="ex2-cell"><button class="ex2-radio ex2-radio--child selected"></button></div><div class="ex2-cell"><button class="ex2-radio ex2-radio--child"></button></div><div class="ex2-cell ex2-cell--child-last"><button class="ex2-radio ex2-radio--child"></button></div><div class="ex2-cell"><button class="ex2-radio ex2-radio--now"></button></div><div class="ex2-cell"><button class="ex2-radio ex2-radio--now selected"></button></div><div class="ex2-cell"><button class="ex2-radio ex2-radio--now"></button></div><div class="ex2-cell"><button class="ex2-radio ex2-radio--now"></button></div></div>
+        <div class="ex2-cat-row">Financial</div>
+        <div class="ex2-row ex2-row--filled"><div class="ex2-cell ex2-cell--label">Paying bills and managing day-to-day finances</div><div class="ex2-cell"><button class="ex2-radio ex2-radio--child"></button></div><div class="ex2-cell"><button class="ex2-radio ex2-radio--child selected"></button></div><div class="ex2-cell"><button class="ex2-radio ex2-radio--child"></button></div><div class="ex2-cell ex2-cell--child-last"><button class="ex2-radio ex2-radio--child"></button></div><div class="ex2-cell"><button class="ex2-radio ex2-radio--now selected-coral"></button></div><div class="ex2-cell"><button class="ex2-radio ex2-radio--now"></button></div><div class="ex2-cell"><button class="ex2-radio ex2-radio--now"></button></div><div class="ex2-cell"><button class="ex2-radio ex2-radio--now"></button></div></div>
+        <div class="ex2-row ex2-row--filled"><div class="ex2-cell ex2-cell--label">Making major financial decisions</div><div class="ex2-cell"><button class="ex2-radio ex2-radio--child"></button></div><div class="ex2-cell"><button class="ex2-radio ex2-radio--child"></button></div><div class="ex2-cell"><button class="ex2-radio ex2-radio--child selected"></button></div><div class="ex2-cell ex2-cell--child-last"><button class="ex2-radio ex2-radio--child"></button></div><div class="ex2-cell"><button class="ex2-radio ex2-radio--now"></button></div><div class="ex2-cell"><button class="ex2-radio ex2-radio--now"></button></div><div class="ex2-cell"><button class="ex2-radio ex2-radio--now selected-green"></button></div><div class="ex2-cell"><button class="ex2-radio ex2-radio--now"></button></div></div>
+        <div class="ex2-row"><div class="ex2-cell ex2-cell--label">Filing taxes</div><div class="ex2-cell"><button class="ex2-radio ex2-radio--child"></button></div><div class="ex2-cell"><button class="ex2-radio ex2-radio--child"></button></div><div class="ex2-cell"><button class="ex2-radio ex2-radio--child"></button></div><div class="ex2-cell ex2-cell--child-last"><button class="ex2-radio ex2-radio--child"></button></div><div class="ex2-cell"><button class="ex2-radio ex2-radio--now"></button></div><div class="ex2-cell"><button class="ex2-radio ex2-radio--now"></button></div><div class="ex2-cell"><button class="ex2-radio ex2-radio--now"></button></div><div class="ex2-cell"><button class="ex2-radio ex2-radio--now"></button></div></div>
+      </div>
+    </div>
+    <div class="q-nav" style="margin-top:32px"><button class="q-back">← Back</button><button class="q-next">Continue →</button></div>
+  </div>
+</div>
+
+<!-- ═════ 5 · EXERCISE 03 (NAVY) ═════ -->
+<div class="page-divider"><strong>USER 05</strong> Exercise 03 · Navy theme</div>
+<div class="app-chrome">
+  <a class="app-chrome-brand" href="#"><svg viewBox="0 0 103 76" fill="none"><defs><linearGradient id="lg5" x1="0" y1="0" x2="103" y2="76" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#E8673A"/><stop offset="100%" stop-color="#1B5FE8"/></linearGradient></defs><path d="M14,4 L44,4 A9,9 0 0,1 53,13 L53,42 A9,9 0 0,1 44,51 L20,51 L6,61 L11,51 A6,6 0 0,1 5,45 L5,13 A9,9 0 0,1 14,4 Z" fill="url(#lg5)"/><path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill="white" opacity=".93" transform="translate(13.16,11.3) scale(0.72)"/><path d="M89,14 L59,14 A9,9 0 0,0 50,23 L50,52 A9,9 0 0,0 59,61 L83,61 L97,71 L92,61 A6,6 0 0,0 98,55 L98,23 A9,9 0 0,0 89,14 Z" fill="white" stroke="url(#lg5)" stroke-width="2.2" stroke-linejoin="round"/><path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill="url(#lg5)" transform="translate(58.16,21.3) scale(0.72)"/></svg><span class="app-chrome-brand-text">Attune</span></a>
+  <div class="app-chrome-end"><a class="app-chrome-link" href="#">Save &amp; exit</a></div>
+</div>
+<div class="exercise-page">
+  <div class="exercise-progress"><div class="exercise-progress-fill" style="width:35%;background:linear-gradient(90deg,#1B5FE8,#1E3A8A)"></div></div>
+  <div class="exercise-shell">
+    <div class="ex3-card">
+      <div class="ex3-card-eye">Exercise 03 · Anniversary Reflection</div>
+      <div class="ex3-card-q">How well do I feel my partner understands me right now?</div>
+      <div class="ann-scale">
+        <button class="ann-scale-btn">Not at all</button>
+        <button class="ann-scale-btn">A little</button>
+        <button class="ann-scale-btn">Somewhat</button>
+        <button class="ann-scale-btn selected">Mostly</button>
+        <button class="ann-scale-btn">Deeply</button>
+      </div>
+    </div>
+    <div class="ann-text-card">
+      <p class="ann-text-eye">Reflection</p>
+      <p class="ann-text-q">A moment from this past year that defined us was…</p>
+      <textarea class="ann-textarea">Our trip to Maine in October. We barely planned it and somehow that's what made it feel like ours.</textarea>
+    </div>
+    <div class="ann-text-card">
+      <p class="ann-text-eye">Reflection</p>
+      <p class="ann-text-q">What I'm most grateful for in our partnership is…</p>
+      <textarea class="ann-textarea" placeholder="Take your time. There's no length you have to hit."></textarea>
+    </div>
+    <div class="q-nav" style="margin-top:32px"><button class="q-back">← Back</button><button class="q-next" style="background:var(--indigo-deep)">Continue →</button></div>
+  </div>
+</div>
+
+<!-- ═════ 6 · NEWLYWED CHECKLIST ═════ -->
+<div class="page-divider"><strong>USER 06</strong> Newlywed Checklist</div>
+<div class="app-chrome">
+  <a class="app-chrome-brand" href="#"><svg viewBox="0 0 103 76" fill="none"><defs><linearGradient id="lg6" x1="0" y1="0" x2="103" y2="76" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#E8673A"/><stop offset="100%" stop-color="#1B5FE8"/></linearGradient></defs><path d="M14,4 L44,4 A9,9 0 0,1 53,13 L53,42 A9,9 0 0,1 44,51 L20,51 L6,61 L11,51 A6,6 0 0,1 5,45 L5,13 A9,9 0 0,1 14,4 Z" fill="url(#lg6)"/><path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill="white" opacity=".93" transform="translate(13.16,11.3) scale(0.72)"/><path d="M89,14 L59,14 A9,9 0 0,0 50,23 L50,52 A9,9 0 0,0 59,61 L83,61 L97,71 L92,61 A6,6 0 0,0 98,55 L98,23 A9,9 0 0,0 89,14 Z" fill="white" stroke="url(#lg6)" stroke-width="2.2" stroke-linejoin="round"/><path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill="url(#lg6)" transform="translate(58.16,21.3) scale(0.72)"/></svg><span class="app-chrome-brand-text">Attune</span></a>
+  <div class="app-chrome-end"><a class="app-chrome-link" href="#">← Back to dashboard</a></div>
+</div>
+<div class="checklist-page">
+  <div class="checklist-shell">
+    <div class="checklist-hdr">
+      <div>
+        <h1 class="checklist-title">Starting Out Checklist</h1>
+        <p class="checklist-sub">Finances, name changes, estate basics, and the real-world logistics of building a life together.</p>
+      </div>
+      <div class="progress-pill"><div class="progress-bar"><div class="progress-bar-fill" style="width:33%"></div></div><span>8 of 24 done</span></div>
+    </div>
+    <div class="checklist-area">
+      <div class="checklist-area-hdr"><div class="checklist-area-icon" style="background:var(--coral-bg);color:var(--coral-deep)">$</div><div class="checklist-area-title">Money &amp; joint accounts</div><div class="checklist-area-count">3 of 6</div></div>
+      <div class="checklist-items">
+        <div class="checklist-item checked"><div class="checklist-checkbox">✓</div><div>Open a joint checking account</div></div>
+        <div class="checklist-item checked"><div class="checklist-checkbox">✓</div><div>Decide on a banking arrangement (joint, separate, or hybrid)</div></div>
+        <div class="checklist-item checked"><div class="checklist-checkbox">✓</div><div>Update beneficiaries on retirement accounts</div></div>
+        <div class="checklist-item"><div class="checklist-checkbox"></div><div>Review and consolidate insurance — health, auto, home</div></div>
+        <div class="checklist-item"><div class="checklist-checkbox"></div><div>Discuss credit and any outstanding debt</div></div>
+        <div class="checklist-item"><div class="checklist-checkbox"></div><div>Plan filing status for taxes</div></div>
+      </div>
+    </div>
+    <div class="checklist-area">
+      <div class="checklist-area-hdr"><div class="checklist-area-icon" style="background:var(--purple-bg);color:#5B21B6">A</div><div class="checklist-area-title">Name &amp; identity</div><div class="checklist-area-count">2 of 4</div></div>
+      <div class="checklist-items">
+        <div class="checklist-item checked"><div class="checklist-checkbox">✓</div><div>Decide on a name approach (keep, change, hyphenate, hybrid)</div></div>
+        <div class="checklist-item checked"><div class="checklist-checkbox">✓</div><div>Update Social Security and driver's license</div></div>
+        <div class="checklist-item"><div class="checklist-checkbox"></div><div>Update passport and travel documents</div></div>
+        <div class="checklist-item"><div class="checklist-checkbox"></div><div>Update employer, payroll, and email</div></div>
+      </div>
+    </div>
+    <div class="checklist-area">
+      <div class="checklist-area-hdr"><div class="checklist-area-icon" style="background:var(--indigo-bg);color:var(--indigo-deep)">§</div><div class="checklist-area-title">Estate &amp; legal basics</div><div class="checklist-area-count">1 of 5</div></div>
+      <div class="checklist-items">
+        <div class="checklist-item checked"><div class="checklist-checkbox">✓</div><div>Talk through wills and healthcare proxies</div></div>
+        <div class="checklist-item"><div class="checklist-checkbox"></div><div>Draft basic wills</div></div>
+        <div class="checklist-item"><div class="checklist-checkbox"></div><div>Designate powers of attorney</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═════ 7 · BUDGET TOOL ═════ -->
+<div class="page-divider"><strong>USER 07</strong> Budget Priorities</div>
+<div class="app-chrome">
+  <a class="app-chrome-brand" href="#"><svg viewBox="0 0 103 76" fill="none"><defs><linearGradient id="lg7" x1="0" y1="0" x2="103" y2="76" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#E8673A"/><stop offset="100%" stop-color="#1B5FE8"/></linearGradient></defs><path d="M14,4 L44,4 A9,9 0 0,1 53,13 L53,42 A9,9 0 0,1 44,51 L20,51 L6,61 L11,51 A6,6 0 0,1 5,45 L5,13 A9,9 0 0,1 14,4 Z" fill="url(#lg7)"/><path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill="white" opacity=".93" transform="translate(13.16,11.3) scale(0.72)"/><path d="M89,14 L59,14 A9,9 0 0,0 50,23 L50,52 A9,9 0 0,0 59,61 L83,61 L97,71 L92,61 A6,6 0 0,0 98,55 L98,23 A9,9 0 0,0 89,14 Z" fill="white" stroke="url(#lg7)" stroke-width="2.2" stroke-linejoin="round"/><path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill="url(#lg7)" transform="translate(58.16,21.3) scale(0.72)"/></svg><span class="app-chrome-brand-text">Attune</span></a>
+  <div class="app-chrome-end"><a class="app-chrome-link" href="#">Save &amp; exit</a></div>
+</div>
+<div class="budget-page">
+  <div class="budget-shell">
+    <div class="budget-hdr">
+      <p class="budget-eye">Premium Tool</p>
+      <h1 class="budget-title">Budget Priorities</h1>
+      <p class="budget-sub">Move the sliders to reflect how you'd allocate the household. We'll compare with James's after you finish.</p>
+    </div>
+    <div class="budget-section">
+      <div class="budget-section-hdr"><div class="budget-section-title">Monthly allocation</div></div>
+      <div class="budget-cat"><div class="budget-cat-left"><div class="budget-cat-icon" style="background:var(--coral-bg);color:var(--coral-deep)">·</div><div><div class="budget-cat-name">Essentials</div><div class="budget-cat-items">Rent, utilities, groceries, transportation</div></div></div><input class="budget-cat-input" value="50%"></div>
+      <div class="budget-cat"><div class="budget-cat-left"><div class="budget-cat-icon" style="background:var(--purple-bg);color:#5B21B6">·</div><div><div class="budget-cat-name">Lifestyle</div><div class="budget-cat-items">Dining out, travel, entertainment, hobbies</div></div></div><input class="budget-cat-input" value="30%"></div>
+      <div class="budget-cat"><div class="budget-cat-left"><div class="budget-cat-icon" style="background:var(--indigo-bg);color:var(--indigo-deep)">·</div><div><div class="budget-cat-name">Saving &amp; long-term</div><div class="budget-cat-items">Retirement, emergency fund, big-ticket goals</div></div></div><input class="budget-cat-input" value="20%"></div>
+    </div>
+    <div class="budget-totals">
+      <div><div class="budget-totals-label">Total monthly</div><div class="budget-totals-value">$6,000</div></div>
+      <div><div class="budget-totals-label">Allocated</div><div class="budget-totals-value">100%</div></div>
+    </div>
+    <div class="q-nav" style="margin-top:32px"><button class="q-back">← Back</button><button class="q-next">Save my answer →</button></div>
+  </div>
+</div>
+
+<!-- ═════ 8 · STORY CARD ═════ -->
+<div class="page-divider"><strong>USER 08</strong> Story Card click-through</div>
+<div class="app-chrome">
+  <a class="app-chrome-brand" href="#"><svg viewBox="0 0 103 76" fill="none"><defs><linearGradient id="lg8" x1="0" y1="0" x2="103" y2="76" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#E8673A"/><stop offset="100%" stop-color="#1B5FE8"/></linearGradient></defs><path d="M14,4 L44,4 A9,9 0 0,1 53,13 L53,42 A9,9 0 0,1 44,51 L20,51 L6,61 L11,51 A6,6 0 0,1 5,45 L5,13 A9,9 0 0,1 14,4 Z" fill="url(#lg8)"/><path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill="white" opacity=".93" transform="translate(13.16,11.3) scale(0.72)"/><path d="M89,14 L59,14 A9,9 0 0,0 50,23 L50,52 A9,9 0 0,0 59,61 L83,61 L97,71 L92,61 A6,6 0 0,0 98,55 L98,23 A9,9 0 0,0 89,14 Z" fill="white" stroke="url(#lg8)" stroke-width="2.2" stroke-linejoin="round"/><path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill="url(#lg8)" transform="translate(58.16,21.3) scale(0.72)"/></svg><span class="app-chrome-brand-text">Attune</span></a>
+  <div class="app-chrome-end"><a class="app-chrome-link" href="#">← Back to results</a></div>
+</div>
+<div class="story-page">
+  <div class="story-shell">
+    <a class="story-back" href="#">← Back to results</a>
+    <div class="story-counter">
+      <span>Highlight 03 of 06</span>
+      <div class="story-dots"><div class="story-dot done"></div><div class="story-dot done"></div><div class="story-dot active"></div><div class="story-dot"></div><div class="story-dot"></div><div class="story-dot"></div></div>
+    </div>
+    <div class="story-card">
+      <p class="story-card-eye">Where you're aligned</p>
+      <h2 class="story-card-headline">You're both <em>planful</em> when it counts.</h2>
+      <p class="story-card-sub">When something matters, both of you reach for a plan before you reach for a feeling. That alignment is rare.</p>
+      <div class="story-chart">
+        <div class="story-chart-row"><div class="story-chart-name">Sarah</div><div class="story-chart-bar"><div class="story-chart-fill" style="width:84%;background:var(--coral)"></div></div></div>
+        <div class="story-chart-row"><div class="story-chart-name">James</div><div class="story-chart-bar"><div class="story-chart-fill" style="width:90%;background:var(--indigo)"></div></div></div>
+      </div>
+      <p class="story-prose">"We don't really fight about the big stuff. We always know we're working from the same map."</p>
+    </div>
+    <div class="story-actions">
+      <a class="story-action story-action--prev" href="#">← Previous</a>
+      <a class="story-action story-action--next" href="#">Next →</a>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
