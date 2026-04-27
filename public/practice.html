@@ -71,16 +71,16 @@
 
   /* PAGE HEADER */
   
-  .s-eye{font-size:.6rem;letter-spacing:.3em;text-transform:uppercase;color:var(--clay);font-weight:700;margin-bottom:.85rem;display:flex;align-items:center;gap:.65rem}
-  .s-eye::before{content:'';width:28px;height:2.5px;border-radius:999px;background:linear-gradient(90deg,var(--orange),var(--indigo));flex-shrink:0}
+  .s-eye{font-size:.62rem;letter-spacing:.32em;text-transform:uppercase;color:var(--coral-deep, #C2410C);font-weight:600;margin-bottom:.85rem;display:inline-flex;align-items:center;gap:.65rem}
+  .s-eye::before{content:'';width:32px;height:1px;border-radius:999px;background:currentColor;flex-shrink:0}
   .in-practice-eyebrow{display:flex;align-items:center;gap:.75rem;margin-bottom:.85rem}
   .ip-mark{width:8px;height:8px;border-radius:50%;background:var(--orange)}
   .ip-label{font-size:.62rem;letter-spacing:.28em;text-transform:uppercase;color:var(--clay);font-weight:700}
 
   /* CATEGORY PILLS */
   .eyebrow{font-size:.6rem;letter-spacing:.3em;text-transform:uppercase;color:var(--clay);font-weight:700;margin-bottom:.9rem;display:flex;align-items:center;justify-content:center;gap:.65rem}
-  .eyebrow::before{content:'';width:28px;height:2.5px;border-radius:999px;background:linear-gradient(90deg,var(--orange),var(--indigo));flex-shrink:0}.eyebrow::after{content:'';width:28px;height:2.5px;border-radius:999px;background:linear-gradient(90deg,var(--orange),var(--indigo));flex-shrink:0}
-  .page-title{font-family:var(--hfont);font-size:clamp(2.4rem,4.5vw,3.4rem);font-weight:700;line-height:1.06;color:var(--ink);margin-bottom:1.25rem;letter-spacing:-.02em}
+  .eyebrow::before{content:'';width:32px;height:1px;border-radius:999px;background:currentColor;flex-shrink:0}.eyebrow::after{content:"";width:32px;height:1px;background:currentColor;flex-shrink:0}
+  .page-title{font-family:var(--hfont);font-size:clamp(2.4rem,4.5vw,3.4rem);font-weight:500;line-height:1.06;color:var(--ink);margin-bottom:1.25rem;letter-spacing:-.028em}
   .page-title em{font-style:italic;color:var(--orange)}
   .page-sub{font-size:1rem;color:var(--muted);line-height:1.78;font-weight:300}
   .category-bar{border-top:1px solid var(--stone);border-bottom:1px solid var(--stone);padding:.85rem 0;margin-bottom:2.5rem;overflow-x:auto}
@@ -104,7 +104,7 @@
   .featured-tag-row{display:flex;align-items:center;gap:.65rem;margin-bottom:1rem}
   .featured-tag{font-size:.58rem;letter-spacing:.18em;text-transform:uppercase;font-weight:700;padding:.28rem .75rem;border-radius:999px;background:rgba(232,103,58,.18);color:#E8673A;border:1px solid rgba(232,103,58,.35)}
   .featured-label{font-size:.58rem;color:rgba(255,255,255,.3);letter-spacing:.12em;text-transform:uppercase;font-weight:500}
-  .featured-title{font-family:var(--hfont);font-size:clamp(1.5rem,2.5vw,2rem);font-weight:700;color:white;line-height:1.05;letter-spacing:-.02em;margin-bottom:.65rem}
+  .featured-title{font-family:var(--hfont);font-size:clamp(1.5rem,2.5vw,2rem);font-weight:500;color:white;line-height:1.05;letter-spacing:-.024em;margin-bottom:.65rem}
   .featured-title em{font-style:italic;color:rgba(232,103,58,.9)}
   .featured-excerpt{font-size:.82rem;color:rgba(255,255,255,.55);line-height:1.75;font-weight:300;margin-bottom:1.25rem;max-width:400px}
   .featured-meta{display:flex;align-items:center;gap:1rem}
@@ -115,10 +115,10 @@
 
   /* COLLECTIONS */
   .collections-section{margin-bottom:4.5rem}
-  .section-eyebrow{display:flex;align-items:center;gap:.65rem;margin-bottom:.65rem}
-  .section-eyebrow::before{content:'';width:28px;height:2.5px;border-radius:999px;background:linear-gradient(90deg,var(--orange),var(--indigo));flex-shrink:0}
-  .section-eye-label{font-size:.6rem;letter-spacing:.26em;text-transform:uppercase;color:var(--clay);font-weight:700}
-  .section-title{font-family:var(--hfont);font-size:clamp(1.5rem,2.5vw,2rem);font-weight:700;color:var(--ink);margin-bottom:2rem;letter-spacing:-.015em}
+  .section-eyebrow{display:inline-flex;align-items:center;gap:.85rem;margin-bottom:.85rem}
+  .section-eyebrow::before{content:'';width:32px;height:1px;background:var(--coral-deep);flex-shrink:0}
+  .section-eye-label{font-size:.62rem;letter-spacing:.32em;text-transform:uppercase;color:var(--coral-deep);font-weight:600}
+  .section-title{font-family:var(--hfont);font-size:clamp(1.5rem,2.5vw,2rem);font-weight:500;color:var(--ink);margin-bottom:2rem;letter-spacing:-.024em}
   .collections-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:1.25rem}
   .collection-card{background:white;border:1.5px solid var(--stone);border-top:3px solid var(--stone);border-radius:18px;padding:1.75rem;transition:border-color .2s,box-shadow .2s}
   .collection-card:hover{box-shadow:0 8px 28px rgba(14,11,7,.09);transform:translateY(-1px)}
@@ -151,7 +151,7 @@
   /* EMAIL SIGNUP */
   .signup-band{background:var(--warm);border-top:1px solid var(--stone);border-bottom:1px solid var(--stone);padding:3.5rem 2.5rem;margin-bottom:0}
   .signup-inner{max-width:520px;margin:0 auto;text-align:center}
-  .signup-title{font-family:var(--hfont);font-size:1.6rem;font-weight:700;color:var(--ink);margin-bottom:.65rem;letter-spacing:-.015em}
+  .signup-title{font-family:var(--hfont);font-size:1.6rem;font-weight:500;color:var(--ink);margin-bottom:.65rem;letter-spacing:-.024em}
   .signup-sub{font-size:.88rem;color:var(--muted);line-height:1.75;font-weight:300;margin-bottom:1.5rem}
   .signup-form{display:flex;gap:.65rem;max-width:420px;margin:0 auto}
   .signup-input{flex:1;padding:.7rem 1rem;border:1.5px solid var(--stone);border-radius:10px;font-size:.82rem;font-family:var(--bfont);background:white;color:var(--ink);outline:none;transition:border-color .15s}
