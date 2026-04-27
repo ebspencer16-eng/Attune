@@ -9429,6 +9429,76 @@ function PartnerBCompletionScreen({ partnerAName, partnerBName, partnerADone }) 
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
+// DASHBOARD HERO — editorial v6 navy welcome block
+// ─────────────────────────────────────────────────────────────────────────────
+// Anchors every dashboard session. Big Newsreader name, package badge, status
+// pills with live completion data. Sits above the existing content cards.
+function DashboardHero({ userName, partnerName, pkg, ex1Answers, ex2Answers, ex3Answers, hasRealPartner, isMobile }) {
+  // Live completion stats so the pills carry real data
+  const ex1Done = !!ex1Answers && Object.keys(ex1Answers).length > 5;
+  const ex2Done = !!ex2Answers && (ex2Answers.life || ex2Answers.responsibilities);
+  const ex3Done = !!ex3Answers && Object.keys(ex3Answers).length > 0;
+  const partnerHere = !!hasRealPartner;
+  const exDoneCount = [ex1Done, ex2Done, pkg.hasAnniversary && ex3Done].filter(Boolean).length;
+  const exTotal = pkg.hasAnniversary ? 3 : 2;
+  const allDone = exDoneCount === exTotal;
+  // Status line — adapts to where the couple is in the flow
+  const statusLine = !ex1Done && !ex2Done
+    ? "Two exercises ahead. Take them in any order, in your own time."
+    : !allDone
+      ? `${exDoneCount} of ${exTotal} complete. Pick up where you left off.`
+      : !partnerHere
+        ? `You've finished. Your results unlock when ${partnerName} is done.`
+        : "Both exercises complete. Your results, communication profile, and relationship insights are ready to explore.";
+
+  const pills = [
+    { label: ex1Done ? "Communication mapped" : "Communication", done: ex1Done },
+    { label: ex2Done ? "Expectations aligned" : "Expectations", done: ex2Done },
+    ...(pkg.hasAnniversary ? [{ label: ex3Done ? "Reflection captured" : "Reflection", done: ex3Done }] : []),
+    { label: partnerHere ? `${partnerName} is here` : `Inviting ${partnerName}`, done: partnerHere },
+  ];
+
+  return (
+    <div style={{ background: "linear-gradient(150deg,#1c1940 0%,#282560 60%,#1e3a6e 100%)", color: "white", padding: isMobile ? "2.5rem 1.25rem 3rem" : "3.25rem 2rem 3.5rem", marginLeft: isMobile ? "-1.25rem" : "-2rem", marginRight: isMobile ? "-1.25rem" : "-2rem", marginTop: isMobile ? "-1.5rem" : "-2rem", marginBottom: "1.75rem", position: "relative", overflow: "hidden", borderRadius: 0 }}>
+      {/* Signature gradient stripe at the very top — same motif as nav, auth */}
+      <div aria-hidden style={{ position: "absolute", top: 0, left: 0, right: 0, height: 3, background: "linear-gradient(90deg,#E8673A 0%,#9B5DE5 50%,#1B5FE8 100%)", zIndex: 1 }} />
+      {/* Coral aura — radial bloom on the right for depth */}
+      <div aria-hidden style={{ position: "absolute", inset: 0, background: "radial-gradient(ellipse 60% 40% at 80% 50%,rgba(232,103,58,.18),transparent 60%)", pointerEvents: "none" }} />
+      <div style={{ position: "relative", maxWidth: 760, zIndex: 2 }}>
+        {/* Eyebrow with gradient dash */}
+        <div style={{ display: "inline-flex", alignItems: "center", gap: "0.65rem", marginBottom: "0.9rem" }}>
+          <span aria-hidden style={{ display: "inline-block", width: 28, height: 2.5, borderRadius: 999, background: "linear-gradient(90deg,#FBA67E,#9B5DE5,#7A8FF5)" }} />
+          <span style={{ fontSize: "0.68rem", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(232,103,58,0.95)", fontWeight: 700, fontFamily: "'DM Sans',sans-serif" }}>Welcome back</span>
+        </div>
+        {/* Big editorial name — opsz 72 Newsreader, weight 500 */}
+        <div style={{ fontFamily: "'Newsreader',Georgia,serif", fontVariationSettings: "'opsz' 72", fontWeight: 500, fontSize: isMobile ? "2.1rem" : "clamp(2.4rem,4.4vw,3rem)", lineHeight: 1.04, letterSpacing: "-0.024em", marginBottom: "0.75rem", color: "white" }}>
+          {userName}
+          {partnerName ? <> <span style={{ color: "rgba(255,255,255,0.55)", fontWeight: 400, fontStyle: "italic" }}>&</span> {partnerName}</> : ""}
+        </div>
+        {/* Package badge — pill */}
+        <div style={{ display: "inline-flex", alignItems: "center", gap: 8, background: "rgba(255,255,255,0.1)", border: "1px solid rgba(255,255,255,0.2)", borderRadius: 999, padding: "0.32rem 0.85rem", fontSize: "0.66rem", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: "1rem", color: "rgba(255,255,255,0.92)", fontFamily: "'DM Sans',sans-serif" }}>
+          <span aria-hidden style={{ width: 5, height: 5, borderRadius: "50%", background: "#E8673A" }} />
+          {pkg.label}
+        </div>
+        {/* Status line — varies by progress */}
+        <p style={{ fontSize: isMobile ? "0.92rem" : "1rem", color: "rgba(255,255,255,0.78)", fontWeight: 300, lineHeight: 1.55, maxWidth: "60ch", margin: 0, fontFamily: "'DM Sans',sans-serif" }}>
+          {statusLine}
+        </p>
+        {/* Status pills — green dot for done, dim for pending */}
+        <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginTop: "1.35rem" }}>
+          {pills.map((p, i) => (
+            <div key={i} style={{ display: "inline-flex", alignItems: "center", gap: 8, background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.15)", padding: "0.4rem 0.85rem", borderRadius: 999, fontSize: "0.74rem", fontWeight: 500, color: "rgba(255,255,255,0.85)", fontFamily: "'DM Sans',sans-serif" }}>
+              <span aria-hidden style={{ width: 6, height: 6, borderRadius: "50%", background: p.done ? "#10B981" : "rgba(255,255,255,0.35)" }} />
+              {p.label}
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 // PARTNER INVITE PANEL — shown on dashboard when partner hasn't joined
 // ─────────────────────────────────────────────────────────────────────────────
 function PartnerInviteCard({ account, onCopy, copied }) {
@@ -10879,9 +10949,12 @@ export default function App() {
             {/* ── MAIN CONTENT ───────────────────────────────────────────── */}
             <div style={{ flex: 1, display: "flex", flexDirection: "column", overflowY: "auto", minWidth: 0 }}>
 
-              {/* ── GRADIENT BANNER (mobile: full nav bar; desktop: banner only) ── */}
-              <div style={{ background: "linear-gradient(120deg, #C8522E 0%, #6B3FA0 52%, #1B5FE8 100%)", flexShrink: 0, position: "relative", overflow: "hidden" }}>
-                <div style={{ position: "absolute", inset: 0, background: "linear-gradient(180deg, rgba(255,255,255,0.04) 0%, transparent 100%)", pointerEvents: "none" }} />
+              {/* ── GRADIENT BANNER (mobile: full nav bar; desktop: thin signature stripe only) ── */}
+              <div style={{ background: isMobile ? "linear-gradient(120deg, #C8522E 0%, #6B3FA0 52%, #1B5FE8 100%)" : "transparent", flexShrink: 0, position: "relative", overflow: "hidden" }}>
+                {!isMobile && (
+                  <div aria-hidden style={{ height: 3, background: "linear-gradient(90deg, #E8673A 0%, #9B5DE5 50%, #1B5FE8 100%)" }} />
+                )}
+                {isMobile && <div style={{ position: "absolute", inset: 0, background: "linear-gradient(180deg, rgba(255,255,255,0.04) 0%, transparent 100%)", pointerEvents: "none" }} />}
 
                 {/* Mobile: logo row + hamburger at top */}
                 {isMobile && (
@@ -10907,27 +10980,21 @@ export default function App() {
                   </div>
                 )}
 
-                {/* Names + optional View Results CTA */}
-                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", position: "relative", gap: "1rem", padding: isMobile ? "0.85rem 1.25rem 1.25rem" : "1.5rem 2rem" }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: isMobile ? "0.75rem" : "1.25rem" }}>
+                {/* Names + optional View Results CTA — mobile only.
+                    Desktop welcome lives in DashboardHero below. */}
+                {isMobile && (
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", position: "relative", gap: "1rem", padding: "0.85rem 1.25rem 1.25rem" }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
                     <div>
                       <div style={{ display: "flex", alignItems: "baseline", gap: "0.35rem", flexWrap: "wrap" }}>
-                        <span style={{ fontFamily: "'Newsreader', Georgia, serif", fontSize: isMobile ? "1.3rem" : "1.75rem", fontWeight: 700, lineHeight: 1, letterSpacing: "-.02em", color: "white" }}>{userName || "You"}</span>
-                        <span style={{ fontFamily: "'Newsreader', Georgia, serif", fontSize: isMobile ? "0.95rem" : "1.3rem", fontWeight: 400, fontStyle: "italic", color: "rgba(255,255,255,0.5)", lineHeight: 1 }}>&</span>
-                        <span style={{ fontFamily: "'Newsreader', Georgia, serif", fontSize: isMobile ? "1.3rem" : "1.75rem", fontWeight: 700, lineHeight: 1, letterSpacing: "-.02em", color: "white" }}>{partnerName || "Partner"}</span>
+                        <span style={{ fontFamily: "'Newsreader', Georgia, serif", fontSize: "1.3rem", fontWeight: 700, lineHeight: 1, letterSpacing: "-.02em", color: "white" }}>{userName || "You"}</span>
+                        <span style={{ fontFamily: "'Newsreader', Georgia, serif", fontSize: "0.95rem", fontWeight: 400, fontStyle: "italic", color: "rgba(255,255,255,0.5)", lineHeight: 1 }}>&</span>
+                        <span style={{ fontFamily: "'Newsreader', Georgia, serif", fontSize: "1.3rem", fontWeight: 700, lineHeight: 1, letterSpacing: "-.02em", color: "white" }}>{partnerName || "Partner"}</span>
                       </div>
                     </div>
                   </div>
-                  {/* Desktop only: View Results in banner */}
-                  {!isMobile && bothDone && (
-                    <button onClick={() => setView("results")}
-                      style={{ background: "rgba(255,255,255,0.18)", backdropFilter: "blur(8px)", color: "white", border: "1px solid rgba(255,255,255,0.3)", borderRadius: 10, padding: "0.65rem 1.25rem", fontSize: "0.75rem", fontWeight: 600, cursor: "pointer", whiteSpace: "nowrap", letterSpacing: ".04em", textTransform: "uppercase", fontFamily: "'DM Sans', sans-serif", flexShrink: 0, transition: "background .15s" }}
-                      onMouseEnter={e => e.currentTarget.style.background = "rgba(255,255,255,0.26)"}
-                      onMouseLeave={e => e.currentTarget.style.background = "rgba(255,255,255,0.18)"}>
-                      View results →
-                    </button>
-                  )}
                 </div>
+                )}
 
                 {/* Mobile hamburger dropdown nav */}
                 {isMobile && mobileNavOpen && (
@@ -10964,6 +11031,22 @@ export default function App() {
 
               {/* ── CONTENT AREA ─────────────────────────────────────────── */}
               <div style={{ flex: 1, padding: isMobile ? "1.5rem 1.25rem" : "2rem 2rem", background: "#FBF8F3" }}>
+
+                {/* Editorial dashboard hero — anchors every session.  Sits
+                    flush to top of content area via negative margins; bleeds
+                    full-width above the inner content cards. */}
+                {(isLoggedIn || isDemo) && (
+                  <DashboardHero
+                    userName={userName}
+                    partnerName={partnerName}
+                    pkg={pkg}
+                    ex1Answers={ex1Answers}
+                    ex2Answers={ex2Answers}
+                    ex3Answers={ex3Answers}
+                    hasRealPartner={hasRealPartner || isDemo}
+                    isMobile={isMobile}
+                  />
+                )}
 
                 {/* Welcome-back banner — surfaces any in-progress exercise so
                     the user can jump straight back in. Covers both session
