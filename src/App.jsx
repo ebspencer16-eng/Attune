@@ -8789,23 +8789,37 @@ function AuthModal({ mode, onClose, onSuccess }) {
       placeholder={placeholder}
       value={form[key]}
       onChange={e => { upd(key, e.target.value); setErr(""); }}
-      style={{ width: "100%", padding: "0.78rem 1rem", border: `1.5px solid ${err && !form[key] ? "#ef4444" : "#E8DDD0"}`, borderRadius: 11, fontSize: "0.88rem", fontFamily: "'DM Sans', sans-serif", color: "#0E0B07", background: "#FFFDF9", outline: "none", marginBottom: "0.6rem", boxSizing: "border-box" }}
+      style={{ width: "100%", padding: "0.85rem 1rem", border: `1.5px solid ${err && !form[key] ? "#ef4444" : "#E2D5C2"}`, borderRadius: 14, fontSize: "0.92rem", fontFamily: "'DM Sans', sans-serif", color: "#0E0B07", background: "#FFFDF9", outline: "none", marginBottom: "0.6rem", boxSizing: "border-box", transition: "border-color .15s, box-shadow .15s" }}
+      onFocus={e => e.target.style.borderColor = "#0E0B07"}
+      onBlur={e => e.target.style.borderColor = err && !form[key] ? "#ef4444" : "#E2D5C2"}
       {...extra}
     />
   );
 
   return (
-    <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.55)", zIndex: 500, display: "flex", alignItems: isMobile ? "flex-start" : "center", justifyContent: "center", padding: isMobile ? "0" : "1rem", overflowY: "auto" }}
+    <div style={{ position: "fixed", inset: 0, zIndex: 500, display: "flex", alignItems: isMobile ? "flex-start" : "center", justifyContent: "center", padding: isMobile ? "0" : "1rem", overflowY: "auto", background: "linear-gradient(180deg,#FBF6EE 0%,#F8EDE0 40%,#F2D9C8 75%,#FFFDF9 100%)" }}
       onClick={e => e.target === e.currentTarget && onClose()}>
       <style>{`@keyframes authShake { 0%,100% { transform: translateX(0); } 15% { transform: translateX(-10px); } 30% { transform: translateX(10px); } 45% { transform: translateX(-8px); } 60% { transform: translateX(8px); } 75% { transform: translateX(-4px); } 90% { transform: translateX(4px); } }`}</style>
-      <div style={{ background: "#FFFDF9", borderRadius: isMobile ? 0 : 22, padding: isMobile ? "1.5rem 1.25rem 1.25rem" : "2rem 2rem 1.75rem", width: "100%", minHeight: isMobile ? "100vh" : "auto", maxWidth: isMobile ? "none" : 440, boxShadow: isMobile ? "none" : "0 32px 80px rgba(0,0,0,0.28)", position: "relative", animation: shake ? "authShake 0.45s cubic-bezier(.36,.07,.19,.97)" : undefined }}>
-        <button onClick={onClose} aria-label="Close" style={{ position: "absolute", top: "1rem", right: "1rem", background: "none", border: "none", fontSize: "1.2rem", cursor: "pointer", color: "#8C7A68", lineHeight: 1 }}>✕</button>
+      {/* Aura — radial blooms behind the card for depth */}
+      <div aria-hidden style={{ position: "fixed", inset: 0, pointerEvents: "none", background: "radial-gradient(ellipse 70% 60% at 15% 30%,rgba(232,103,58,.16) 0%,transparent 60%),radial-gradient(ellipse 70% 60% at 85% 70%,rgba(27,95,232,.13) 0%,transparent 60%)" }} />
+      <div style={{ background: "white", borderRadius: isMobile ? 0 : 32, padding: isMobile ? "1.5rem 1.25rem 1.25rem" : "2.5rem 2.25rem 2rem", width: "100%", minHeight: isMobile ? "100vh" : "auto", maxWidth: isMobile ? "none" : 460, boxShadow: isMobile ? "none" : "0 4px 8px rgba(60,30,10,.05),0 14px 32px rgba(60,30,10,.10)", border: isMobile ? "none" : "1px solid #E2D5C2", position: "relative", animation: shake ? "authShake 0.45s cubic-bezier(.36,.07,.19,.97)" : undefined, overflow: "hidden" }}>
+        {/* Signature gradient stripe at the top edge of the card */}
+        <div aria-hidden style={{ position: "absolute", top: 0, left: 0, right: 0, height: 3, background: "linear-gradient(110deg,#E8673A 0%,#C2410C 28%,#9B5DE5 55%,#1B5FE8 100%)" }} />
+        <button onClick={onClose} aria-label="Close" style={{ position: "absolute", top: "1rem", right: "1rem", background: "none", border: "none", fontSize: "1.2rem", cursor: "pointer", color: "#8C7A68", lineHeight: 1, zIndex: 2 }}>✕</button>
 
         {/* Logo */}
-        <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "1.5rem" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "1.25rem", position: "relative", zIndex: 1 }}>
           <svg width="28" height="20" viewBox="0 0 103 76" fill="none"><defs><linearGradient id="am1" x1="0" y1="0" x2="103" y2="76" gradientUnits="userSpaceOnUse"><stop offset="0%" stopColor="#E8673A"/><stop offset="100%" stopColor="#1B5FE8"/></linearGradient></defs><path d="M14,4 L44,4 A9,9 0 0,1 53,13 L53,42 A9,9 0 0,1 44,51 L20,51 L6,61 L11,51 A6,6 0 0,1 5,45 L5,13 A9,9 0 0,1 14,4 Z" fill="url(#am1)"/><path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill="white" opacity="0.93" transform="translate(13.16,11.3) scale(0.72)"/><path d="M89,14 L59,14 A9,9 0 0,0 50,23 L50,52 A9,9 0 0,0 59,61 L83,61 L97,71 L92,61 A6,6 0 0,0 98,55 L98,23 A9,9 0 0,0 89,14 Z" fill="white" stroke="url(#am1)" strokeWidth="2.2" strokeLinejoin="round"/><path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill="url(#am1)" transform="translate(58.16,21.3) scale(0.72)"/></svg>
-          <span style={{ fontFamily: "'Newsreader', Georgia, serif", fontSize: "1.05rem", fontWeight: 700, color: "#0E0B07" }}>Attune</span>
+          <span style={{ fontFamily: "'Newsreader', Georgia, serif", fontSize: "1.05rem", fontWeight: 600, color: "#0E0B07" }}>Attune</span>
         </div>
+
+        {/* Editorial headline — opsz 72 Newsreader, 500 weight */}
+        <div style={{ fontFamily: "'Newsreader',Georgia,serif", fontVariationSettings: "'opsz' 72", fontSize: "1.85rem", fontWeight: 500, color: "#0E0B07", lineHeight: 1.1, letterSpacing: "-0.02em", marginBottom: "0.4rem", position: "relative", zIndex: 1 }}>
+          {tab === "signup" ? <>Begin together.</> : tab === "reset" ? <>Reset your password.</> : <>Welcome back.</>}
+        </div>
+        <p style={{ fontSize: "0.86rem", color: "#8C7A68", fontFamily: "'DM Sans',sans-serif", lineHeight: 1.55, fontWeight: 300, marginBottom: "1.5rem", position: "relative", zIndex: 1 }}>
+          {tab === "signup" ? "Two exercises, separately. One shared view, together." : tab === "reset" ? "Enter the email you used to create your account. We'll send you a link." : "Sign in to access your exercises and results."}
+        </p>
 
         {/* QR-scan welcome banner — shown when user arrived via physical card scan */}
         {qrStatus === 'ok' && qrOrder && (
@@ -8829,11 +8843,11 @@ function AuthModal({ mode, onClose, onSuccess }) {
           </div>
         )}
 
-        {/* Tab switcher */}
-        <div style={{ display: "flex", background: "#F3EDE6", borderRadius: 10, padding: "0.22rem", marginBottom: "1.5rem" }}>
+        {/* Tab switcher — pill shape, segmented */}
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", background: "#F8EDE0", borderRadius: 999, padding: 4, marginBottom: "1.5rem", position: "relative", zIndex: 1 }}>
           {["signup", "login"].map(t => (
             <button key={t} onClick={() => { setTab(t); setErr(""); }}
-              style={{ flex: 1, padding: "0.5rem", borderRadius: 8, border: "none", cursor: "pointer", fontFamily: "'DM Sans', sans-serif", fontSize: "0.82rem", fontWeight: 600, background: tab === t ? "white" : "transparent", color: tab === t ? "#0E0B07" : "#8C7A68", boxShadow: tab === t ? "0 1px 4px rgba(0,0,0,0.1)" : "none", transition: "all 0.15s" }}>
+              style={{ padding: "0.65rem 1rem", borderRadius: 999, border: "none", cursor: "pointer", fontFamily: "'DM Sans', sans-serif", fontSize: "0.84rem", fontWeight: 600, background: tab === t ? "white" : "transparent", color: tab === t ? "#0E0B07" : "#8C7A68", boxShadow: tab === t ? "0 1px 2px rgba(60,30,10,.04),0 1px 3px rgba(60,30,10,.06)" : "none", transition: "all 0.18s cubic-bezier(.2,.8,.25,1)" }}>
               {t === "signup" ? "Create account" : "Sign in"}
             </button>
           ))}
@@ -8841,7 +8855,6 @@ function AuthModal({ mode, onClose, onSuccess }) {
 
         {tab === "signup" ? (
           <>
-            <div style={{ fontFamily: "'Newsreader',Georgia,serif", fontSize: "1.1rem", fontWeight: 700, color: "#0E0B07", marginBottom: "0.35rem" }}>Start with your account</div>
             <p style={{ fontSize: "0.78rem", color: "#8C7A68", fontFamily: "'DM Sans',sans-serif", marginBottom: "1.25rem", lineHeight: 1.55 }}>Your answers are private until both of you are done. We'll never show your partner what you wrote until results unlock.</p>
             {inp("Your first name", "name")}
             <div style={{ display: "flex", gap: "0.5rem", marginBottom: "0rem" }}>
@@ -8910,18 +8923,17 @@ function AuthModal({ mode, onClose, onSuccess }) {
             </label>
             {err && <p style={{ color: "#ef4444", fontSize: "0.75rem", fontFamily: "'DM Sans',sans-serif", marginBottom: "0.75rem" }}>{err}</p>}
             <button onClick={handleSignup} disabled={loading}
-              style={{ width: "100%", padding: "0.9rem", background: "linear-gradient(135deg, #E8673A, #d45a2e)", color: "white", border: "none", borderRadius: 12, fontSize: "0.85rem", fontWeight: 700, cursor: loading ? "default" : "pointer", fontFamily: "'DM Sans',sans-serif", opacity: loading ? 0.7 : 1 }}>
+              style={{ width: "100%", padding: "0.95rem", background: "#0E0B07", color: "white", border: "none", borderRadius: 14, fontSize: "0.92rem", fontWeight: 600, cursor: loading ? "default" : "pointer", fontFamily: "'DM Sans',sans-serif", opacity: loading ? 0.7 : 1, letterSpacing: "0.01em", transition: "transform .15s cubic-bezier(.2,.8,.25,1)" }}>
               {loading ? "Creating account…" : "Create account →"}
             </button>
           </>
         ) : tab === "login" ? (
           <>
-            <div style={{ fontFamily: "'Newsreader',Georgia,serif", fontSize: "1.1rem", fontWeight: 700, color: "#0E0B07", marginBottom: "1.25rem" }}>Welcome back</div>
             {inp("Email", "email", "email")}
             {inp("Password", "password", "password")}
             {err && <p style={{ color: "#ef4444", fontSize: "0.75rem", fontFamily: "'DM Sans',sans-serif", marginBottom: "0.75rem" }}>{err}</p>}
             <button onClick={handleLogin} disabled={loading}
-              style={{ width: "100%", padding: "0.9rem", background: "#0E0B07", color: "white", border: "none", borderRadius: 12, fontSize: "0.85rem", fontWeight: 700, cursor: loading ? "default" : "pointer", fontFamily: "'DM Sans',sans-serif", opacity: loading ? 0.7 : 1 }}>
+              style={{ width: "100%", padding: "0.95rem", background: "#0E0B07", color: "white", border: "none", borderRadius: 14, fontSize: "0.92rem", fontWeight: 600, cursor: loading ? "default" : "pointer", fontFamily: "'DM Sans',sans-serif", opacity: loading ? 0.7 : 1, letterSpacing: "0.01em", transition: "transform .15s cubic-bezier(.2,.8,.25,1)" }}>
               {loading ? "Signing in…" : "Sign in →"}
             </button>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: "0.85rem" }}>
@@ -8945,12 +8957,11 @@ function AuthModal({ mode, onClose, onSuccess }) {
               </div>
             ) : (
               <>
-                <div style={{ fontFamily: "'Newsreader',Georgia,serif", fontSize: "1.1rem", fontWeight: 700, color: "#0E0B07", marginBottom: "0.35rem" }}>Reset your password</div>
-                <p style={{ fontSize: "0.78rem", color: "#8C7A68", fontFamily: "'DM Sans',sans-serif", marginBottom: "1.25rem", lineHeight: 1.55 }}>Enter the email you used to create your account. We'll send you a link to reset your password.</p>
+                <p style={{ fontSize: "0.78rem", color: "#8C7A68", fontFamily: "'DM Sans',sans-serif", marginBottom: "1.25rem", lineHeight: 1.55 }}>We'll send a link to that email if an account exists. The link expires in 30 minutes.</p>
                 {inp("Your email address", "email", "email")}
                 {err && <p style={{ color: "#ef4444", fontSize: "0.75rem", fontFamily: "'DM Sans',sans-serif", marginBottom: "0.75rem" }}>{err}</p>}
                 <button onClick={handleReset} disabled={loading}
-                  style={{ width: "100%", padding: "0.9rem", background: "#0E0B07", color: "white", border: "none", borderRadius: 12, fontSize: "0.85rem", fontWeight: 700, cursor: loading ? "default" : "pointer", fontFamily: "'DM Sans',sans-serif", opacity: loading ? 0.7 : 1 }}>
+                  style={{ width: "100%", padding: "0.95rem", background: "#0E0B07", color: "white", border: "none", borderRadius: 14, fontSize: "0.92rem", fontWeight: 600, cursor: loading ? "default" : "pointer", fontFamily: "'DM Sans',sans-serif", opacity: loading ? 0.7 : 1, letterSpacing: "0.01em" }}>
                   {loading ? "Sending…" : "Send reset link →"}
                 </button>
                 <p style={{ textAlign: "center", marginTop: "0.85rem", fontSize: "0.75rem", color: "#8C7A68", fontFamily: "'DM Sans',sans-serif" }}>
