@@ -10486,6 +10486,13 @@ export default function App() {
     } catch (_) {}
   };
 
+  // hasRealPartner is derived here (early) because the partner-sync useEffect
+  // below uses it both inside its body and as a dependency. JS const TDZ
+  // means the dep-array read during render would throw if this lived after
+  // the effect. The other derived constants (partnerEx1/Ex2, isDemo, bothDone)
+  // stay further down where they're consumed.
+  const hasRealPartner = !!(partnerSession?.inviteCode === account?.inviteCode && partnerSession?.ex1 && partnerSession?.ex2);
+
   // ── Cross-device partner sync polling ────────────────────────────────────
   // Unified model: partner data lives on the linked partner's own profile
   // row. On mount we look up Partner A's profile to get partner_profile_id,
@@ -10558,7 +10565,6 @@ export default function App() {
     }).catch(() => {});
   }, [account?.email]);
 
-  const hasRealPartner = !!(partnerSession?.inviteCode === account?.inviteCode && partnerSession?.ex1 && partnerSession?.ex2);
   const partnerEx1 = hasRealPartner ? partnerSession.ex1 : jamesEx1;
   const partnerEx2 = hasRealPartner ? partnerSession.ex2 : jamesEx2;
   // bothDone: local exercises complete AND partner has submitted real answers (not just joined)
