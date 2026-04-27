@@ -21,8 +21,8 @@ const C = {
   // Dimension accent palette -- used on exercise cards
   dAccent: ["#E8673A","#1B5FE8","#2AB07F","#E040A0","#F5A623","#9B5DE5","#00B4CC","#E8503A"],
 };
-const font = { display: "'Newsreader', Georgia, serif", body: "'DM Sans', system-ui, sans-serif" };
-const FONT_LINK = "https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;0,6..72,700;1,6..72,400;1,6..72,500;1,6..72,600&family=DM+Sans:wght@300;400;500;600;700&display=swap";
+const font = { display: "'Playfair Display', Georgia, serif", body: "'DM Sans', system-ui, sans-serif" };
+const FONT_LINK = "https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600;1,700&family=DM+Sans:wght@300;400;500;600;700&display=swap";
 
 // -- 8-DIMENSION PERSONALITY QUESTIONS (5 each = 40 total) --
 // ── INTENTIONAL COLOR SCHEMA ──────────────────────────────────────────────────
@@ -55,8 +55,8 @@ const DIMS = ["energy","expression","needs","bids","conflict","repair","closenes
 // -- Results font constants --
 const RFONT = "'Syne', sans-serif";
 const BFONT = "'DM Sans', sans-serif";
-const HFONT = "'Newsreader', Georgia, serif";
-const FONT_URL = "https://fonts.googleapis.com/css2?family=Syne:wght@700;800;900&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;0,6..72,700;1,6..72,400;1,6..72,500;1,6..72,600&family=DM+Sans:wght@300;400;500;600&display=swap";
+const HFONT = "'Playfair Display', Georgia, serif";
+const FONT_URL = "https://fonts.googleapis.com/css2?family=Syne:wght@700;800;900&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600;1,700&family=DM+Sans:wght@300;400;500;600&display=swap";
 
 
 const PERSONALITY_QUESTIONS = [
@@ -1458,17 +1458,17 @@ function GiftLandingScreen({ p1, p2, pkg, orderId, onCreateAccount }) {
 
   return (
     <div style={{ minHeight: '100vh', background: '#F3EDE6', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem 1.25rem', fontFamily: "'DM Sans', sans-serif" }}>
-      <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;0,6..72,700;1,6..72,400;1,6..72,500;1,6..72,600&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+      <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600;1,700&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
       <div style={{ background: C.warm, borderRadius: 22, padding: '2.25rem 2rem', width: '100%', maxWidth: 400, boxShadow: '0 24px 64px rgba(0,0,0,0.1)' }}>
         {/* Logo */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1.75rem' }}>
           <svg width="28" height="20" viewBox="0 0 103 76" fill="none"><defs><linearGradient id="glg" x1="0" y1="0" x2="103" y2="76" gradientUnits="userSpaceOnUse"><stop offset="0%" stopColor="#E8673A"/><stop offset="100%" stopColor="#1B5FE8"/></linearGradient></defs><path d="M14,4 L44,4 A9,9 0 0,1 53,13 L53,42 A9,9 0 0,1 44,51 L20,51 L6,61 L11,51 A6,6 0 0,1 5,45 L5,13 A9,9 0 0,1 14,4 Z" fill="url(#glg)"/><path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill="white" opacity=".93" transform="translate(13.16,11.3) scale(0.72)"/></svg>
-          <span style={{ fontFamily: "'Newsreader', Georgia, serif", fontSize: '0.95rem', fontWeight: 700, color: C.ink }}>Attune</span>
+          <span style={{ fontFamily: "'Playfair Display', Georgia, serif", fontSize: '0.95rem', fontWeight: 700, color: C.ink }}>Attune</span>
         </div>
 
         {step === 'who' && (
           <>
-            <div style={{ fontFamily: "'Newsreader', serif", fontSize: '1.2rem', fontWeight: 700, color: C.ink, marginBottom: '0.4rem', lineHeight: 1.2 }}>Welcome to Attune.</div>
+            <div style={{ fontFamily: "'Playfair Display', serif", fontSize: '1.2rem', fontWeight: 700, color: C.ink, marginBottom: '0.4rem', lineHeight: 1.2 }}>Welcome to Attune.</div>
             <p style={{ fontSize: '0.82rem', color: C.muted, marginBottom: '1.75rem', lineHeight: 1.65 }}>Someone sent you this as a gift. Let's get you set up. First — who are you?</p>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
               {[{name: p1, key: 'p1'}, {name: p2, key: 'p2'}].filter(x => x.name).map(({ name, key }) => (
@@ -1491,7 +1491,7 @@ function GiftLandingScreen({ p1, p2, pkg, orderId, onCreateAccount }) {
 
         {step === 'email' && (
           <>
-            <div style={{ fontFamily: "'Newsreader', serif", fontSize: '1.15rem', fontWeight: 700, color: C.ink, marginBottom: '0.4rem', lineHeight: 1.2 }}>Hi, {myName}.</div>
+            <div style={{ fontFamily: "'Playfair Display', serif", fontSize: '1.15rem', fontWeight: 700, color: C.ink, marginBottom: '0.4rem', lineHeight: 1.2 }}>Hi, {myName}.</div>
             <p style={{ fontSize: '0.82rem', color: C.muted, marginBottom: '1.5rem', lineHeight: 1.65 }}>
               {theirName ? `Let's invite ${theirName} so you can do this together.` : "Let's invite your partner so you can do this together."}
             </p>
@@ -1602,7 +1602,7 @@ function GiftSignupForm({ myName, theirName, theirEmail, pkg, orderId, onCreateA
 
   return (
     <>
-      <div style={{ fontFamily: "'Newsreader', serif", fontSize: '1.1rem', fontWeight: 700, color: '#0E0B07', marginBottom: '0.35rem' }}>Create your account</div>
+      <div style={{ fontFamily: "'Playfair Display', serif", fontSize: '1.1rem', fontWeight: 700, color: '#0E0B07', marginBottom: '0.35rem' }}>Create your account</div>
       <p style={{ fontSize: '0.78rem', color: C.muted, marginBottom: '1.25rem', lineHeight: 1.55 }}>
         {theirEmail ? `We've sent ${theirName || 'your partner'} an invite. Create your account to get started.` : 'Create your account to begin the exercises.'}
       </p>
@@ -2359,7 +2359,7 @@ function Exercise01Flow({ userName, partnerName, onComplete, skipIntro = false }
           <p style={{ fontSize: "0.72rem", letterSpacing: "0.1em", textTransform: "uppercase", color: "#999", fontFamily: "'DM Sans', sans-serif", marginBottom: "0.4rem" }}>
             Question {idx + 1} of {total}
           </p>
-          <p style={{ fontSize: "1.25rem", fontWeight: 600, color: "#1C1C1E", fontFamily: "'Newsreader', serif", lineHeight: 1.4, margin: 0 }}>
+          <p style={{ fontSize: "1.25rem", fontWeight: 600, color: "#1C1C1E", fontFamily: "'Playfair Display', serif", lineHeight: 1.4, margin: 0 }}>
             {q.text}
           </p>
         </div>
@@ -8810,11 +8810,11 @@ function AuthModal({ mode, onClose, onSuccess }) {
         {/* Logo */}
         <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "1.25rem", position: "relative", zIndex: 1 }}>
           <svg width="28" height="20" viewBox="0 0 103 76" fill="none"><defs><linearGradient id="am1" x1="0" y1="0" x2="103" y2="76" gradientUnits="userSpaceOnUse"><stop offset="0%" stopColor="#E8673A"/><stop offset="100%" stopColor="#1B5FE8"/></linearGradient></defs><path d="M14,4 L44,4 A9,9 0 0,1 53,13 L53,42 A9,9 0 0,1 44,51 L20,51 L6,61 L11,51 A6,6 0 0,1 5,45 L5,13 A9,9 0 0,1 14,4 Z" fill="url(#am1)"/><path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill="white" opacity="0.93" transform="translate(13.16,11.3) scale(0.72)"/><path d="M89,14 L59,14 A9,9 0 0,0 50,23 L50,52 A9,9 0 0,0 59,61 L83,61 L97,71 L92,61 A6,6 0 0,0 98,55 L98,23 A9,9 0 0,0 89,14 Z" fill="white" stroke="url(#am1)" strokeWidth="2.2" strokeLinejoin="round"/><path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill="url(#am1)" transform="translate(58.16,21.3) scale(0.72)"/></svg>
-          <span style={{ fontFamily: "'Newsreader', Georgia, serif", fontSize: "1.05rem", fontWeight: 600, color: "#0E0B07" }}>Attune</span>
+          <span style={{ fontFamily: "'Playfair Display', Georgia, serif", fontSize: "1.05rem", fontWeight: 600, color: "#0E0B07" }}>Attune</span>
         </div>
 
         {/* Editorial headline — opsz 72 Newsreader, 500 weight */}
-        <div style={{ fontFamily: "'Newsreader',Georgia,serif", fontVariationSettings: "'opsz' 72", fontSize: "1.85rem", fontWeight: 500, color: "#0E0B07", lineHeight: 1.1, letterSpacing: "-0.02em", marginBottom: "0.4rem", position: "relative", zIndex: 1 }}>
+        <div style={{ fontFamily: "'Playfair Display',Georgia,serif", fontVariationSettings: "'opsz' 72", fontSize: "1.85rem", fontWeight: 500, color: "#0E0B07", lineHeight: 1.1, letterSpacing: "-0.02em", marginBottom: "0.4rem", position: "relative", zIndex: 1 }}>
           {tab === "signup" ? <>Begin together.</> : tab === "reset" ? <>Reset your password.</> : <>Welcome back.</>}
         </div>
         <p style={{ fontSize: "0.86rem", color: "#8C7A68", fontFamily: "'DM Sans',sans-serif", lineHeight: 1.55, fontWeight: 300, marginBottom: "1.5rem", position: "relative", zIndex: 1 }}>
@@ -8827,7 +8827,7 @@ function AuthModal({ mode, onClose, onSuccess }) {
             <div style={{ color: "#E8673A", fontSize: "1rem", lineHeight: 1, marginTop: "0.1rem" }}>✦</div>
             <div style={{ flex: 1 }}>
               <div style={{ fontFamily: "'DM Sans',sans-serif", fontSize: "0.7rem", fontWeight: 700, letterSpacing: "0.04em", color: "#C45C2A", textTransform: "uppercase", marginBottom: "0.15rem" }}>Welcome</div>
-              <div style={{ fontFamily: "'Newsreader',Georgia,serif", fontSize: "0.95rem", color: "#2B2218", lineHeight: 1.35 }}>Let's set up your account.</div>
+              <div style={{ fontFamily: "'Playfair Display',Georgia,serif", fontSize: "0.95rem", color: "#2B2218", lineHeight: 1.35 }}>Let's set up your account.</div>
             </div>
           </div>
         )}
@@ -8949,7 +8949,7 @@ function AuthModal({ mode, onClose, onSuccess }) {
             {resetSent ? (
               <div style={{ textAlign: "center", padding: "1.5rem 0" }}>
                 <div style={{ width: 52, height: 52, borderRadius: "50%", background: "linear-gradient(135deg,#E8673A,#1B5FE8)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 1rem", fontSize: "1.4rem" }}>✓</div>
-                <div style={{ fontFamily: "'Newsreader',Georgia,serif", fontSize: "1.1rem", fontWeight: 700, color: "#0E0B07", marginBottom: "0.5rem" }}>Check your inbox</div>
+                <div style={{ fontFamily: "'Playfair Display',Georgia,serif", fontSize: "1.1rem", fontWeight: 700, color: "#0E0B07", marginBottom: "0.5rem" }}>Check your inbox</div>
                 <p style={{ fontSize: "0.82rem", color: "#8C7A68", fontFamily: "'DM Sans',sans-serif", lineHeight: 1.6, marginBottom: "1.5rem" }}>
                   If an account exists for <strong style={{ color: "#0E0B07" }}>{form.email}</strong>, we've sent a reset link. It expires in 30 minutes.
                 </p>
@@ -9017,17 +9017,17 @@ function NewPasswordScreen({ onDone }) {
       <div style={{ background: '#FFFDF9', borderRadius: 22, padding: '2.25rem 2rem', width: '100%', maxWidth: 400, boxShadow: '0 24px 64px rgba(0,0,0,0.1)' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1.75rem' }}>
           <svg width="28" height="20" viewBox="0 0 103 76" fill="none"><defs><linearGradient id="npg" x1="0" y1="0" x2="103" y2="76" gradientUnits="userSpaceOnUse"><stop offset="0%" stopColor="#E8673A"/><stop offset="100%" stopColor="#1B5FE8"/></linearGradient></defs><path d="M14,4 L44,4 A9,9 0 0,1 53,13 L53,42 A9,9 0 0,1 44,51 L20,51 L6,61 L11,51 A6,6 0 0,1 5,45 L5,13 A9,9 0 0,1 14,4 Z" fill="url(#npg)"/><g transform="translate(13.16,11.3) scale(0.72)"><path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill="white" opacity="0.93"/></g></svg>
-          <span style={{ fontFamily: "'Newsreader', Georgia, serif", fontSize: '0.95rem', fontWeight: 700, color: '#0E0B07' }}>Attune</span>
+          <span style={{ fontFamily: "'Playfair Display', Georgia, serif", fontSize: '0.95rem', fontWeight: 700, color: '#0E0B07' }}>Attune</span>
         </div>
         {done ? (
           <div style={{ textAlign: 'center', padding: '1rem 0' }}>
             <div style={{ width: 52, height: 52, borderRadius: '50%', background: 'linear-gradient(135deg,#10b981,#059669)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1rem', fontSize: '1.4rem' }}>✓</div>
-            <div style={{ fontFamily: "'Newsreader', Georgia, serif", fontSize: '1.15rem', fontWeight: 700, color: '#0E0B07', marginBottom: '0.5rem' }}>Password updated.</div>
+            <div style={{ fontFamily: "'Playfair Display', Georgia, serif", fontSize: '1.15rem', fontWeight: 700, color: '#0E0B07', marginBottom: '0.5rem' }}>Password updated.</div>
             <p style={{ fontSize: '0.82rem', color: '#8C7A68', lineHeight: 1.6 }}>Signing you in now…</p>
           </div>
         ) : (
           <>
-            <div style={{ fontFamily: "'Newsreader', Georgia, serif", fontSize: '1.15rem', fontWeight: 700, color: '#0E0B07', marginBottom: '0.35rem' }}>Set a new password</div>
+            <div style={{ fontFamily: "'Playfair Display', Georgia, serif", fontSize: '1.15rem', fontWeight: 700, color: '#0E0B07', marginBottom: '0.35rem' }}>Set a new password</div>
             <p style={{ fontSize: '0.78rem', color: '#8C7A68', marginBottom: '1.5rem', lineHeight: 1.55 }}>Choose something you haven't used before.</p>
             {inp('New password', password, setPassword)}
             {inp('Confirm password', confirm, setConfirm)}
@@ -9170,7 +9170,7 @@ function PartnerLandingScreen({ inviteFrom, inviteCode, onCreateAccount }) {
       <link href={FONT_LINK} rel="stylesheet" />
       <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '2.5rem' }}>
         <svg width="32" height="23" viewBox="0 0 103 76" fill="none"><defs><linearGradient id="plg" x1="0" y1="0" x2="103" y2="76" gradientUnits="userSpaceOnUse"><stop offset="0%" stopColor="#E8673A"/><stop offset="100%" stopColor="#1B5FE8"/></linearGradient></defs><path d="M14,4 L44,4 A9,9 0 0,1 53,13 L53,42 A9,9 0 0,1 44,51 L20,51 L6,61 L11,51 A6,6 0 0,1 5,45 L5,13 A9,9 0 0,1 14,4 Z" fill="url(#plg)"/><g transform="translate(13.16,11.3) scale(0.72)"><path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill="white" opacity="0.93"/></g><path d="M89,14 L59,14 A9,9 0 0,0 50,23 L50,52 A9,9 0 0,0 59,61 L83,61 L97,71 L92,61 A6,6 0 0,0 98,55 L98,23 A9,9 0 0,0 89,14 Z" fill="white" stroke="url(#plg)" strokeWidth="2.2" strokeLinejoin="round"/><g transform="translate(58.16,21.3) scale(0.72)"><path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill="url(#plg)"/></g></svg>
-        <span style={{ fontFamily: "'Newsreader', Georgia, serif", fontSize: '1.05rem', fontWeight: 700, color: 'white' }}>Attune</span>
+        <span style={{ fontFamily: "'Playfair Display', Georgia, serif", fontSize: '1.05rem', fontWeight: 700, color: 'white' }}>Attune</span>
       </div>
 
       <div style={{ background: '#FFFDF9', borderRadius: 24, padding: '2.25rem 2rem', width: '100%', maxWidth: 420, boxShadow: '0 32px 80px rgba(0,0,0,0.45)' }}>
@@ -9181,7 +9181,7 @@ function PartnerLandingScreen({ inviteFrom, inviteCode, onCreateAccount }) {
           </div>
           <div>
             <div style={{ fontSize: '0.62rem', fontWeight: 700, color: '#E8673A', fontFamily: "'DM Sans', sans-serif", letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '0.2rem' }}>You've been invited</div>
-            <div style={{ fontSize: '0.92rem', fontWeight: 700, color: '#0E0B07', fontFamily: "'Newsreader', Georgia, serif", lineHeight: 1.25 }}>{inviteFrom} invited you to take Attune together</div>
+            <div style={{ fontSize: '0.92rem', fontWeight: 700, color: '#0E0B07', fontFamily: "'Playfair Display', Georgia, serif", lineHeight: 1.25 }}>{inviteFrom} invited you to take Attune together</div>
           </div>
         </div>
 
@@ -9306,7 +9306,7 @@ function PartnerBExerciseFlow({ account, onComplete }) {
         <div style={{ fontSize: '0.62rem', letterSpacing: '0.22em', textTransform: 'uppercase', color: 'rgba(232,103,58,0.8)', fontFamily: "'DM Sans', sans-serif", fontWeight: 700, marginBottom: '1rem' }}>
           Your exercises — {account.name} &amp; {account.partnerName}
         </div>
-        <div style={{ fontFamily: "'Newsreader', Georgia, serif", fontSize: 'clamp(1.6rem, 5vw, 2.4rem)', fontWeight: 700, color: 'white', lineHeight: 1.1, marginBottom: '1.25rem' }}>
+        <div style={{ fontFamily: "'Playfair Display', Georgia, serif", fontSize: 'clamp(1.6rem, 5vw, 2.4rem)', fontWeight: 700, color: 'white', lineHeight: 1.1, marginBottom: '1.25rem' }}>
           Two exercises.<br/>Your answers are yours alone.
         </div>
         <p style={{ fontSize: '0.88rem', color: 'rgba(255,255,255,0.6)', fontFamily: "'DM Sans', sans-serif", lineHeight: 1.75, marginBottom: '2.5rem', maxWidth: 380, margin: '0 auto 2.5rem' }}>
@@ -9316,7 +9316,7 @@ function PartnerBExerciseFlow({ account, onComplete }) {
           {[{ num: '01', title: 'Communication', color: '#E8673A', desc: '30 questions · 10 dimensions' }, { num: '02', title: 'Expectations', color: '#1B5FE8', desc: 'Responsibilities & life' }].map(e => (
             <div key={e.num} style={{ background: 'rgba(255,255,255,0.06)', border: `1px solid ${e.color}33`, borderRadius: 14, padding: '1.1rem 1.4rem', textAlign: 'left', minWidth: 160 }}>
               <div style={{ fontSize: '0.58rem', letterSpacing: '0.18em', color: e.color, fontWeight: 700, fontFamily: "'DM Sans', sans-serif", textTransform: 'uppercase', marginBottom: '0.35rem' }}>Exercise {e.num}</div>
-              <div style={{ fontFamily: "'Newsreader', Georgia, serif", fontSize: '1rem', fontWeight: 700, color: 'white', marginBottom: '0.25rem' }}>{e.title}</div>
+              <div style={{ fontFamily: "'Playfair Display', Georgia, serif", fontSize: '1rem', fontWeight: 700, color: 'white', marginBottom: '0.25rem' }}>{e.title}</div>
               <div style={{ fontSize: '0.68rem', color: 'rgba(255,255,255,0.4)', fontFamily: "'DM Sans', sans-serif" }}>{e.desc}</div>
             </div>
           ))}
@@ -9341,7 +9341,7 @@ function PartnerBExerciseFlow({ account, onComplete }) {
       <div style={{ maxWidth: 860, margin: '0 auto', padding: '3rem 2rem' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '2rem' }}>
           <svg width="28" height="20" viewBox="0 0 103 76" fill="none"><defs><linearGradient id="bfg1" x1="0" y1="0" x2="103" y2="76" gradientUnits="userSpaceOnUse"><stop offset="0%" stopColor="#E8673A"/><stop offset="100%" stopColor="#1B5FE8"/></linearGradient></defs><path d="M14,4 L44,4 A9,9 0 0,1 53,13 L53,42 A9,9 0 0,1 44,51 L20,51 L6,61 L11,51 A6,6 0 0,1 5,45 L5,13 A9,9 0 0,1 14,4 Z" fill="url(#bfg1)"/><g transform="translate(13.16,11.3) scale(0.72)"><path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill="white" opacity="0.93"/></g></svg>
-          <span style={{ fontFamily: "'Newsreader', Georgia, serif", fontSize: '0.95rem', fontWeight: 700, color: C.ink }}>Attune</span>
+          <span style={{ fontFamily: "'Playfair Display', Georgia, serif", fontSize: '0.95rem', fontWeight: 700, color: C.ink }}>Attune</span>
           <span style={{ fontSize: '0.68rem', color: C.muted, fontFamily: "'DM Sans', sans-serif", marginLeft: '0.5rem' }}>· Exercise 01 of 02</span>
         </div>
         <Exercise01Flow userName={account.name} partnerName={account.partnerName} onComplete={handleEx1Done} skipIntro={true} />
@@ -9355,7 +9355,7 @@ function PartnerBExerciseFlow({ account, onComplete }) {
       <div style={{ maxWidth: 860, margin: '0 auto', padding: '3rem 2rem' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '2rem' }}>
           <svg width="28" height="20" viewBox="0 0 103 76" fill="none"><defs><linearGradient id="bfg2" x1="0" y1="0" x2="103" y2="76" gradientUnits="userSpaceOnUse"><stop offset="0%" stopColor="#E8673A"/><stop offset="100%" stopColor="#1B5FE8"/></linearGradient></defs><path d="M14,4 L44,4 A9,9 0 0,1 53,13 L53,42 A9,9 0 0,1 44,51 L20,51 L6,61 L11,51 A6,6 0 0,1 5,45 L5,13 A9,9 0 0,1 14,4 Z" fill="url(#bfg2)"/><g transform="translate(13.16,11.3) scale(0.72)"><path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill="white" opacity="0.93"/></g></svg>
-          <span style={{ fontFamily: "'Newsreader', Georgia, serif", fontSize: '0.95rem', fontWeight: 700, color: C.ink }}>Attune</span>
+          <span style={{ fontFamily: "'Playfair Display', Georgia, serif", fontSize: '0.95rem', fontWeight: 700, color: C.ink }}>Attune</span>
           <span style={{ fontSize: '0.68rem', color: C.muted, fontFamily: "'DM Sans', sans-serif", marginLeft: '0.5rem' }}>· Exercise 02 of 02</span>
         </div>
         <ExpectationsExercise userName={account.name} partnerName={account.partnerName} onComplete={handleEx2Done} />
@@ -9386,7 +9386,7 @@ function PartnerBCompletionScreen({ partnerAName, partnerBName, partnerADone }) 
           <>
             <div style={{ width: 64, height: 64, borderRadius: '50%', background: 'linear-gradient(135deg, #10b981, #059669)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.5rem', fontSize: '1.6rem' }}>✓</div>
             <div style={{ fontSize: '0.62rem', letterSpacing: '0.22em', textTransform: 'uppercase', color: '#10b981', fontFamily: "'DM Sans', sans-serif", fontWeight: 700, marginBottom: '0.85rem' }}>Both exercises complete</div>
-            <div style={{ fontFamily: "'Newsreader', Georgia, serif", fontSize: 'clamp(1.5rem, 5vw, 2.2rem)', fontWeight: 700, color: 'white', lineHeight: 1.15, marginBottom: '1.25rem' }}>
+            <div style={{ fontFamily: "'Playfair Display', Georgia, serif", fontSize: 'clamp(1.5rem, 5vw, 2.2rem)', fontWeight: 700, color: 'white', lineHeight: 1.15, marginBottom: '1.25rem' }}>
               Your results are ready.
             </div>
             <p style={{ fontSize: '0.88rem', color: 'rgba(255,255,255,0.6)', fontFamily: "'DM Sans', sans-serif", lineHeight: 1.75, marginBottom: '2rem' }}>
@@ -9401,7 +9401,7 @@ function PartnerBCompletionScreen({ partnerAName, partnerBName, partnerADone }) 
           <>
             <div style={{ width: 64, height: 64, borderRadius: '50%', background: 'linear-gradient(135deg, #E8673A33, #1B5FE833)', border: '2px solid rgba(232,103,58,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.5rem', fontSize: '1.8rem' }}>✦</div>
             <div style={{ fontSize: '0.62rem', letterSpacing: '0.22em', textTransform: 'uppercase', color: 'rgba(232,103,58,0.8)', fontFamily: "'DM Sans', sans-serif", fontWeight: 700, marginBottom: '0.85rem' }}>Your exercises are done</div>
-            <div style={{ fontFamily: "'Newsreader', Georgia, serif", fontSize: 'clamp(1.5rem, 5vw, 2.2rem)', fontWeight: 700, color: 'white', lineHeight: 1.15, marginBottom: '1.25rem' }}>
+            <div style={{ fontFamily: "'Playfair Display', Georgia, serif", fontSize: 'clamp(1.5rem, 5vw, 2.2rem)', fontWeight: 700, color: 'white', lineHeight: 1.15, marginBottom: '1.25rem' }}>
               Waiting for {partnerAName}.
             </div>
             <p style={{ fontSize: '0.88rem', color: 'rgba(255,255,255,0.6)', fontFamily: "'DM Sans', sans-serif", lineHeight: 1.75, marginBottom: '2rem' }}>
@@ -9471,7 +9471,7 @@ function DashboardHero({ userName, partnerName, pkg, ex1Answers, ex2Answers, ex3
           <span style={{ fontSize: "0.68rem", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(232,103,58,0.95)", fontWeight: 700, fontFamily: "'DM Sans',sans-serif" }}>Welcome back</span>
         </div>
         {/* Big editorial name — opsz 72 Newsreader, weight 500 */}
-        <div style={{ fontFamily: "'Newsreader',Georgia,serif", fontVariationSettings: "'opsz' 72", fontWeight: 500, fontSize: isMobile ? "2.1rem" : "clamp(2.4rem,4.4vw,3rem)", lineHeight: 1.04, letterSpacing: "-0.024em", marginBottom: "0.75rem", color: "white" }}>
+        <div style={{ fontFamily: "'Playfair Display',Georgia,serif", fontVariationSettings: "'opsz' 72", fontWeight: 500, fontSize: isMobile ? "2.1rem" : "clamp(2.4rem,4.4vw,3rem)", lineHeight: 1.04, letterSpacing: "-0.024em", marginBottom: "0.75rem", color: "white" }}>
           {userName}
           {partnerName ? <> <span style={{ color: "rgba(255,255,255,0.55)", fontWeight: 400, fontStyle: "italic" }}>&</span> {partnerName}</> : ""}
         </div>
@@ -9549,7 +9549,7 @@ function PartnerInviteCard({ account, onCopy, copied }) {
       <div style={{ fontSize: "0.58rem", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.55)", fontFamily: "'DM Sans',sans-serif", fontWeight: 700, marginBottom: "0.4rem" }}>
         {isOverdue ? 'Still waiting' : 'Invite your partner'}
       </div>
-      <p style={{ fontSize: "0.88rem", fontWeight: 600, color: "white", fontFamily: "'Newsreader',Georgia,serif", marginBottom: "0.25rem", lineHeight: 1.3 }}>
+      <p style={{ fontSize: "0.88rem", fontWeight: 600, color: "white", fontFamily: "'Playfair Display',Georgia,serif", marginBottom: "0.25rem", lineHeight: 1.3 }}>
         {isOverdue
           ? `It's been a few days since you invited ${account.partnerName || 'your partner'}.`
           : (account.partnerName ? `Send this to ${account.partnerName}` : "Share this link with your partner")}
@@ -9602,7 +9602,7 @@ function ProfileSetupPrompt({ account, onSetupProfile }) {
           ✦
         </div>
         <div style={{ flex: 1 }}>
-          <div style={{ fontFamily: "'Newsreader',Georgia,serif", fontSize: "1.15rem", fontWeight: 700, color: "#0E0B07", marginBottom: "0.35rem" }}>
+          <div style={{ fontFamily: "'Playfair Display',Georgia,serif", fontSize: "1.15rem", fontWeight: 700, color: "#0E0B07", marginBottom: "0.35rem" }}>
             Set up your profile to get started
           </div>
           <p style={{ fontSize: "0.82rem", color: "#8C7A68", fontFamily: "'DM Sans',sans-serif", lineHeight: 1.65, marginBottom: "1rem", margin: "0 0 1rem" }}>
@@ -9859,7 +9859,7 @@ function PackagesModal({ currentPkg, onClose, onPick }) {
         <div style={{ padding: "1.5rem 1.75rem 1rem", borderBottom: "1px solid #E8DDD0", display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: "1rem" }}>
           <div>
             <div style={{ display: "inline-block", background: "#FFF0EB", color: "#E8673A", fontSize: "0.58rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", padding: "0.22rem 0.65rem", borderRadius: 999, marginBottom: "0.5rem", fontFamily: "'DM Sans', sans-serif" }}>Explore packages</div>
-            <div style={{ fontFamily: "'Newsreader', Georgia, serif", fontSize: "1.3rem", fontWeight: 700, color: "#0E0B07", lineHeight: 1.15 }}>Upgrade your experience</div>
+            <div style={{ fontFamily: "'Playfair Display', Georgia, serif", fontSize: "1.3rem", fontWeight: 700, color: "#0E0B07", lineHeight: 1.15 }}>Upgrade your experience</div>
             <div style={{ fontSize: "0.82rem", color: "#8C7A68", fontFamily: "'DM Sans', sans-serif", marginTop: "0.2rem", fontStyle: "italic" }}>Choose the package that fits where you are.</div>
           </div>
           <button onClick={onClose} aria-label="Close" style={{ background: "none", border: "none", cursor: "pointer", color: "#8C7A68", fontSize: "1.3rem", lineHeight: 1, padding: "0.15rem", flexShrink: 0, marginTop: "-0.15rem" }}>✕</button>
@@ -9877,7 +9877,7 @@ function PackagesModal({ currentPkg, onClose, onPick }) {
                     <div style={{ fontSize: "0.55rem", letterSpacing: "0.12em", textTransform: "uppercase", color: p.color, fontWeight: 700, fontFamily: "'DM Sans', sans-serif" }}>{p.badge}</div>
                     {isCurrent && <div style={{ fontSize: "0.55rem", letterSpacing: "0.1em", textTransform: "uppercase", color: "#8C7A68", fontWeight: 700, fontFamily: "'DM Sans', sans-serif", background: "#F3EDE6", padding: "0.15rem 0.5rem", borderRadius: 999 }}>Current</div>}
                   </div>
-                  <div style={{ fontFamily: "'Newsreader', Georgia, serif", fontSize: "1.05rem", fontWeight: 700, color: "#0E0B07", lineHeight: 1.15, marginBottom: "0.25rem" }}>{p.name}</div>
+                  <div style={{ fontFamily: "'Playfair Display', Georgia, serif", fontSize: "1.05rem", fontWeight: 700, color: "#0E0B07", lineHeight: 1.15, marginBottom: "0.25rem" }}>{p.name}</div>
                   <div style={{ fontSize: "0.78rem", color: "#5C4A38", fontFamily: "'DM Sans', sans-serif", lineHeight: 1.5, marginBottom: "0.6rem" }}>{p.description}</div>
                   <div style={{ display: "flex", flexWrap: "wrap", gap: "0.35rem 0.85rem", marginBottom: "0.2rem" }}>
                     {p.features.slice(0, 3).map(f => (
@@ -9889,7 +9889,7 @@ function PackagesModal({ currentPkg, onClose, onPick }) {
                   </div>
                 </div>
                 <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "0.5rem", flexShrink: 0 }}>
-                  <div style={{ fontFamily: "'Newsreader', Georgia, serif", fontSize: "1.25rem", fontWeight: 700, color: "#0E0B07", lineHeight: 1 }}>{p.price}</div>
+                  <div style={{ fontFamily: "'Playfair Display', Georgia, serif", fontSize: "1.25rem", fontWeight: 700, color: "#0E0B07", lineHeight: 1 }}>{p.price}</div>
                   {!isCurrent && (
                     <button onClick={() => onPick(p.id)}
                       style={{ background: "linear-gradient(135deg," + p.color + ",#d45a2e)", color: "white", border: "none", borderRadius: 10, padding: "0.55rem 0.9rem", fontSize: "0.72rem", fontWeight: 700, cursor: "pointer", fontFamily: "'DM Sans', sans-serif", letterSpacing: "0.03em", whiteSpace: "nowrap" }}>
@@ -10888,7 +10888,7 @@ export default function App() {
                     <path d="M89,14 L59,14 A9,9 0 0,0 50,23 L50,52 A9,9 0 0,0 59,61 L83,61 L97,71 L92,61 A6,6 0 0,0 98,55 L98,23 A9,9 0 0,0 89,14 Z" fill="white" stroke="url(#sidebarLogoGrad)" strokeWidth="2.2" strokeLinejoin="round"/>
                     <path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill="url(#sidebarLogoGrad)" transform="translate(58.16,21.3) scale(0.72)"/>
                   </svg>
-                  <span style={{ fontSize: "1rem", fontWeight: 700, color: "#0E0B07", fontFamily: "'Newsreader', Georgia, serif", letterSpacing: "-.01em" }}>Attune</span>
+                  <span style={{ fontSize: "1rem", fontWeight: 700, color: "#0E0B07", fontFamily: "'Playfair Display', Georgia, serif", letterSpacing: "-.01em" }}>Attune</span>
                 </div>
               </div>
 
@@ -10968,7 +10968,7 @@ export default function App() {
                         <path d="M89,14 L59,14 A9,9 0 0,0 50,23 L50,52 A9,9 0 0,0 59,61 L83,61 L97,71 L92,61 A6,6 0 0,0 98,55 L98,23 A9,9 0 0,0 89,14 Z" fill="white" stroke="url(#mobileNavLogo)" strokeWidth="2.2" strokeLinejoin="round"/>
                         <path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill="url(#mobileNavLogo)" transform="translate(58.16,21.3) scale(0.72)"/>
                       </svg>
-                      <span style={{ fontSize: "0.95rem", fontWeight: 700, color: "white", fontFamily: "'Newsreader', Georgia, serif", letterSpacing: "-.01em" }}>Attune</span>
+                      <span style={{ fontSize: "0.95rem", fontWeight: 700, color: "white", fontFamily: "'Playfair Display', Georgia, serif", letterSpacing: "-.01em" }}>Attune</span>
                     </div>
                     {/* Hamburger button */}
                     <button onClick={() => setMobileNavOpen(o => !o)}
@@ -10987,9 +10987,9 @@ export default function App() {
                   <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
                     <div>
                       <div style={{ display: "flex", alignItems: "baseline", gap: "0.35rem", flexWrap: "wrap" }}>
-                        <span style={{ fontFamily: "'Newsreader', Georgia, serif", fontSize: "1.3rem", fontWeight: 700, lineHeight: 1, letterSpacing: "-.02em", color: "white" }}>{userName || "You"}</span>
-                        <span style={{ fontFamily: "'Newsreader', Georgia, serif", fontSize: "0.95rem", fontWeight: 400, fontStyle: "italic", color: "rgba(255,255,255,0.5)", lineHeight: 1 }}>&</span>
-                        <span style={{ fontFamily: "'Newsreader', Georgia, serif", fontSize: "1.3rem", fontWeight: 700, lineHeight: 1, letterSpacing: "-.02em", color: "white" }}>{partnerName || "Partner"}</span>
+                        <span style={{ fontFamily: "'Playfair Display', Georgia, serif", fontSize: "1.3rem", fontWeight: 700, lineHeight: 1, letterSpacing: "-.02em", color: "white" }}>{userName || "You"}</span>
+                        <span style={{ fontFamily: "'Playfair Display', Georgia, serif", fontSize: "0.95rem", fontWeight: 400, fontStyle: "italic", color: "rgba(255,255,255,0.5)", lineHeight: 1 }}>&</span>
+                        <span style={{ fontFamily: "'Playfair Display', Georgia, serif", fontSize: "1.3rem", fontWeight: 700, lineHeight: 1, letterSpacing: "-.02em", color: "white" }}>{partnerName || "Partner"}</span>
                       </div>
                     </div>
                   </div>
@@ -11181,7 +11181,7 @@ export default function App() {
                               {mkCouple(couplePortrait.p1, couplePortrait.p2, false, "dash-portrait")}
                             </div>
                             <div style={{ textAlign: "left" }}>
-                              <div style={{ fontSize: "1.15rem", fontWeight: 700, color: C.ink, fontFamily: "'Newsreader', Georgia, serif", lineHeight: 1.2, marginBottom: 4 }}>
+                              <div style={{ fontSize: "1.15rem", fontWeight: 700, color: C.ink, fontFamily: "'Playfair Display', Georgia, serif", lineHeight: 1.2, marginBottom: 4 }}>
                                 {userName}{partnerName ? ` & ${partnerName}` : ""}
                               </div>
                               {coupleType && (
@@ -11203,7 +11203,7 @@ export default function App() {
                             </div>
                           </div>
                           <div style={{ textAlign: "center" }}>
-                            <div style={{ fontSize: "0.95rem", fontWeight: 700, color: C.ink, fontFamily: "'Newsreader', Georgia, serif", marginBottom: 6 }}>Create your couple portrait</div>
+                            <div style={{ fontSize: "0.95rem", fontWeight: 700, color: C.ink, fontFamily: "'Playfair Display', Georgia, serif", marginBottom: 6 }}>Create your couple portrait</div>
                             <div style={{ fontSize: "0.78rem", color: C.muted, fontFamily: font.body, lineHeight: 1.6, maxWidth: 280 }}>Add a photo or illustration for each partner. Shows up across your results and shareable cards.</div>
                           </div>
                           <button
@@ -11855,7 +11855,7 @@ export default function App() {
               {/* Hero */}
               <div style={{ marginBottom: "2.5rem" }}>
                 <div style={{ fontSize: "0.6rem", letterSpacing: ".22em", textTransform: "uppercase", color: "#C17F47", fontWeight: 700, marginBottom: "0.6rem", fontFamily: "'DM Sans', sans-serif" }}>Add-on</div>
-                <h1 style={{ fontFamily: "'Newsreader', Georgia, serif", fontSize: isMobile ? "1.75rem" : "2.3rem", fontWeight: 700, color: "#0E0B07", lineHeight: 1.1, letterSpacing: "-.02em", marginBottom: "1rem" }}>
+                <h1 style={{ fontFamily: "'Playfair Display', Georgia, serif", fontSize: isMobile ? "1.75rem" : "2.3rem", fontWeight: 700, color: "#0E0B07", lineHeight: 1.1, letterSpacing: "-.02em", marginBottom: "1rem" }}>
                   The Personalized Workbook
                 </h1>
                 <p style={{ fontSize: "0.92rem", color: "#5C4F45", lineHeight: 1.78, fontWeight: 300, marginBottom: 0, fontFamily: "'DM Sans', sans-serif", maxWidth: 520 }}>
@@ -11865,7 +11865,7 @@ export default function App() {
 
               {/* Pull quote */}
               <div style={{ borderLeft: "3px solid #9B5DE5", paddingLeft: "1.25rem", marginBottom: "2.5rem" }}>
-                <p style={{ fontFamily: "'Newsreader', Georgia, serif", fontSize: "1.05rem", fontStyle: "italic", color: "#3C3430", lineHeight: 1.7, margin: 0 }}>
+                <p style={{ fontFamily: "'Playfair Display', Georgia, serif", fontSize: "1.05rem", fontStyle: "italic", color: "#3C3430", lineHeight: 1.7, margin: 0 }}>
                   "Most relationship content is written for every couple. This is written for yours."
                 </p>
               </div>
@@ -11904,7 +11904,7 @@ export default function App() {
                 ].map(opt => (
                   <div key={opt.format} style={{ background: "white", border: "1.5px solid #E8DDD0", borderRadius: 14, padding: "1.25rem" }}>
                     <div style={{ fontSize: "0.88rem", fontWeight: 600, color: "#0E0B07", marginBottom: "0.35rem", fontFamily: "'DM Sans', sans-serif" }}>{opt.format}</div>
-                    <div style={{ fontSize: "1.75rem", fontWeight: 700, color: "#0E0B07", fontFamily: "'Newsreader', Georgia, serif", marginBottom: "0.35rem" }}>{opt.price}</div>
+                    <div style={{ fontSize: "1.75rem", fontWeight: 700, color: "#0E0B07", fontFamily: "'Playfair Display', Georgia, serif", marginBottom: "0.35rem" }}>{opt.price}</div>
                     <div style={{ fontSize: "0.75rem", color: "#8C7A68", lineHeight: 1.55, fontFamily: "'DM Sans', sans-serif" }}>{opt.detail}</div>
                   </div>
                 ))}
@@ -12181,7 +12181,7 @@ export default function App() {
           onClick={e => e.target === e.currentTarget && setShowProfileSetup(false)}>
           <div style={{ background: "#FFFDF9", borderRadius: 22, padding: "2rem", width: "100%", maxWidth: 440, boxShadow: "0 32px 80px rgba(0,0,0,0.28)", position: "relative", maxHeight: "90vh", overflowY: "auto" }}>
             <button onClick={() => setShowProfileSetup(false)} style={{ position: "absolute", top: "1rem", right: "1rem", background: "none", border: "none", fontSize: "1.2rem", cursor: "pointer", color: "#8C7A68" }}>✕</button>
-            <div style={{ fontFamily: "'Newsreader',Georgia,serif", fontSize: "1.2rem", fontWeight: 700, color: "#0E0B07", marginBottom: "1.5rem" }}>Your profile</div>
+            <div style={{ fontFamily: "'Playfair Display',Georgia,serif", fontSize: "1.2rem", fontWeight: 700, color: "#0E0B07", marginBottom: "1.5rem" }}>Your profile</div>
             <div style={{ fontSize: "0.7rem", color: "#8C7A68", fontFamily: "'DM Sans',sans-serif", fontWeight: 600, marginBottom: "0.35rem", letterSpacing: "0.04em" }}>Your name</div>
             <input type="text" placeholder="Your first name" defaultValue={account?.name || ""} id="profile_name"
               style={{ width: "100%", padding: "0.78rem 1rem", border: "1.5px solid #E8DDD0", borderRadius: 11, fontSize: "0.88rem", fontFamily: "'DM Sans',sans-serif", color: "#0E0B07", background: "#FFFDF9", outline: "none", marginBottom: "0.65rem", boxSizing: "border-box" }} />
