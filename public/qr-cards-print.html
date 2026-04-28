@@ -8,10 +8,8 @@
 <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
 <style>
 /* ─────────────────────────────────────────────────────────────────────
-   ATTUNE WELCOME CARD — letterpress-style printed insert
-   Card trim: 5×7 in portrait. Aesthetic: heavy paper, single-color
-   "ink" per package, centered envelope/invitation typography, no
-   gradient stripes, minimal text density.
+   ATTUNE WELCOME CARD — top-half gradient, bottom-half cream.
+   5×7 in portrait. Three packages × note variants per order.
    ───────────────────────────────────────────────────────────────────── */
 
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -29,252 +27,268 @@ body{padding:32px 24px;display:flex;flex-direction:column;align-items:center;gap
 }
 
 /* ────────── CARD BASE ──────────
-   5×7 in portrait. Cream paper field with subtle paper-grain texture
-   and an inner highlight. */
+   5×7 in portrait. */
 .card{
   width:5in;
   height:7in;
   flex-shrink:0;
   position:relative;
-  background:
-    repeating-radial-gradient(circle at 30% 20%,
-      rgba(140,110,80,.012) 0,
-      rgba(140,110,80,.012) 1px,
-      transparent 1px,
-      transparent 3px),
-    radial-gradient(ellipse 90% 70% at 50% 30%, #FBF7EE 0%, #F4EDDF 60%, #EAE0CD 100%);
+  background:#F4EDDF;
   box-shadow:
     inset 0 0 0 1px rgba(120,90,60,.08),
     0 18px 48px rgba(60,30,10,.18),
     0 4px 12px rgba(60,30,10,.10);
+  overflow:hidden;
 }
 
-/* ────────── FRONT FACE ──────────
-   Top-aligned welcome composition. No ceremonial border. Reads like a
-   thoughtful welcome card, not an invitation. */
+/* ════════════════ FRONT FACE ════════════════ */
 .front{
   height:100%;
-  padding:0;
   display:flex;flex-direction:column;
   position:relative;
 }
 
-/* Brand gradient stripe — top of card, full bleed */
-.front-brand-stripe{
-  height:6px;flex-shrink:0;
-  background:linear-gradient(90deg,
+/* ── TOP HALF — solid gradient, cream "Welcome to Attune" text ── */
+.front-top{
+  height:50%;
+  background:linear-gradient(140deg,
     var(--grad-start) 0%,
-    var(--grad-mid) 50%,
+    var(--grad-mid) 52%,
     var(--grad-end) 100%);
-}
-
-.front-inner{
-  flex:1;
-  padding:.4in .5in .32in;
-  display:flex;flex-direction:column;
   position:relative;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:.45in .55in;
 }
 
-/* Top brand row — Attune mark on the left, package label on the right */
-.front-brand-row{
+/* Inset cream border line in the top half */
+.front-top-border{
+  position:absolute;
+  top:.32in;left:.32in;right:.32in;bottom:.32in;
+  border:1px solid #FBF7EE;
+  opacity:.5;
+  pointer-events:none;
+}
+
+/* Brand row anchored at top of gradient — Attune mark + package label */
+.front-top-brand{
+  position:absolute;
+  top:.46in;left:.55in;right:.55in;
   display:flex;align-items:center;justify-content:space-between;
-  margin-bottom:.32in;
+  z-index:2;
 }
-.front-attune-mark{
+.front-top-mark{
   width:.7in;height:.5in;
-  color:currentColor;
 }
-.front-attune-mark svg{width:100%;height:100%;display:block}
-.front-pkg-label{
-  font-family:'DM Sans',sans-serif;
-  font-size:7.5px;font-weight:700;
-  letter-spacing:.28em;text-transform:uppercase;
-  color:currentColor;opacity:.7;
-  text-align:right;
-  line-height:1.4;
-}
-
-/* Eyebrow — sits above the headline as section label */
-.front-eye{
-  font-family:'DM Sans',sans-serif;
-  font-size:8px;font-weight:700;
-  letter-spacing:.32em;text-transform:uppercase;
-  color:currentColor;opacity:.65;
-  margin-bottom:.1in;
-}
-
-/* Names — left-aligned, mixed-weight headline (not italic Playfair) */
-.front-names{
-  font-family:'Playfair Display',Georgia,serif;
-  font-size:30px;font-weight:500;
-  line-height:1;letter-spacing:-.022em;
-  color:#1A1410;
-  margin-bottom:.14in;
-}
-.front-names.two-lines{font-size:24px;line-height:1.08}
-.front-names .amp{font-style:italic;font-weight:400;color:currentColor;opacity:.7;padding:0 4px}
-
-/* Tagline — short body description, not italic */
-.front-tagline{
-  font-family:'DM Sans',sans-serif;
-  font-size:11px;font-weight:400;
-  line-height:1.55;color:#3C2E22;
-  max-width:3.8in;
-  margin-bottom:.28in;
-}
-.front-tagline strong{color:var(--ink-anchor,#1A1410);font-weight:600}
-
-/* Contents block — left-aligned bordered list. Reads like a packing
-   slip / itinerary, not a wedding program. */
-.front-contents-eye{
+.front-top-mark svg{width:100%;height:100%;display:block}
+.front-top-pkg{
   font-family:'DM Sans',sans-serif;
   font-size:8px;font-weight:700;
   letter-spacing:.3em;text-transform:uppercase;
-  color:currentColor;opacity:.7;
-  padding-bottom:.1in;
-  margin-bottom:.14in;
-  border-bottom:.5px solid rgba(0,0,0,.12);
+  color:rgba(255,255,255,.85);
+  text-align:right;
 }
 
-.front-contents{
-  display:flex;flex-direction:column;align-items:flex-start;
-  gap:7px;margin-bottom:.18in;
+/* "Welcome to Attune" — cream text centered in the gradient */
+.front-top-eye{
+  font-family:'DM Sans',sans-serif;
+  font-size:8.5px;font-weight:700;
+  letter-spacing:.36em;text-transform:uppercase;
+  color:rgba(251,247,238,.75);
+  margin-bottom:.12in;
+  position:relative;z-index:1;
 }
-.front-content-item{
+.front-top-headline{
   font-family:'Playfair Display',Georgia,serif;
-  font-size:13px;line-height:1.3;
-  color:#1A1410;font-weight:500;
-  letter-spacing:-.005em;
-  display:flex;align-items:baseline;gap:10px;
-}
-.front-content-item::before{
-  content:"";display:block;
-  width:5px;height:5px;flex-shrink:0;
-  background:currentColor;opacity:.4;
-  border-radius:50%;
-  transform:translateY(-2px);
+  font-size:34px;font-weight:500;font-style:italic;
+  color:#FBF7EE;
+  line-height:1;letter-spacing:-.018em;
+  position:relative;z-index:1;
+  text-align:center;
 }
 
-/* Bridge sentence between contents and footer — directs to the back. */
-.front-bridge{
+/* ── BOTTOM HALF — cream, gradient-fill name, body, contents ── */
+.front-bottom{
+  height:50%;
+  background:#F4EDDF;
+  position:relative;
+  display:flex;flex-direction:column;align-items:center;
+  padding:.36in .55in;
+  text-align:center;
+}
+
+/* Inner content wrapper sits above the absolute border with proper z-index */
+.front-bottom-content{
+  position:relative;z-index:1;
+  display:flex;flex-direction:column;align-items:center;
+  flex:1;width:100%;
+  padding:.04in .04in .08in;
+}
+
+/* Inset gradient border line in the bottom half (mirrors the top one) */
+.front-bottom-border{
+  position:absolute;
+  top:.32in;left:.32in;right:.32in;bottom:.32in;
+  pointer-events:none;
+  /* Use a 4-side linear-gradient border emulation via padding+background */
+  padding:1px;
+  background:linear-gradient(140deg,
+    var(--grad-start),
+    var(--grad-mid) 52%,
+    var(--grad-end)) border-box;
+  -webkit-mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);
+  -webkit-mask-composite:xor;
+  mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);
+  mask-composite:exclude;
+  opacity:.45;
+}
+
+/* Names — large gradient-fill text using background-clip */
+.front-names{
   font-family:'Playfair Display',Georgia,serif;
-  font-style:italic;font-size:11.5px;font-weight:400;
+  font-size:38px;font-weight:500;font-style:italic;
+  line-height:1;letter-spacing:-.022em;
+  margin-top:.06in;margin-bottom:.14in;
+  /* Gradient-fill via background-clip: text */
+  background:linear-gradient(120deg,
+    var(--grad-start) 0%,
+    var(--grad-mid) 50%,
+    var(--grad-end) 100%);
+  -webkit-background-clip:text;
+  background-clip:text;
+  -webkit-text-fill-color:transparent;
+  color:transparent;
+  position:relative;z-index:1;
+}
+.front-names.two-lines{font-size:30px;line-height:1.1}
+
+/* Body description — regular ink, not gradient */
+.front-body{
+  font-family:'DM Sans',sans-serif;
+  font-size:11px;font-weight:400;
   line-height:1.5;color:#3C2E22;
   max-width:3.6in;
-  margin-top:.04in;
+  margin-bottom:.18in;
+  position:relative;z-index:1;
 }
 
-/* Printed gift note — left-aligned, simple inset block */
+/* "Your package includes" eyebrow + pipe-separated content list */
+.front-pkg-eye{
+  font-family:'DM Sans',sans-serif;
+  font-size:8px;font-weight:700;
+  letter-spacing:.32em;text-transform:uppercase;
+  color:#5C4A38;
+  margin-bottom:.1in;
+  position:relative;z-index:1;
+}
+.front-pkg-list{
+  font-family:'Playfair Display',Georgia,serif;
+  font-size:11.5px;font-weight:500;
+  line-height:1.6;color:#1A1410;
+  letter-spacing:-.005em;
+  max-width:4.2in;
+  position:relative;z-index:1;
+  text-align:center;
+}
+.front-pkg-list .pkg-row{
+  white-space:nowrap;
+}
+.front-pkg-list .sep{
+  margin:0 6px;color:currentColor;opacity:.4;font-weight:400;
+}
+
+/* Gift note — printed (when present) */
 .front-gift-note{
-  margin:0 0 .2in;
-  padding:.14in .16in;
-  background:rgba(255,255,255,.5);
-  border-left:2px solid currentColor;
+  margin-bottom:.18in;
+  padding:.12in .16in;
+  background:rgba(255,255,255,.6);
+  border-left:2px solid;
+  border-image:linear-gradient(180deg, var(--grad-start), var(--grad-end)) 1;
+  text-align:left;
+  width:90%;
+  position:relative;z-index:1;
 }
 .front-gift-eye{
   font-family:'DM Sans',sans-serif;
   font-size:7.5px;font-weight:700;
-  letter-spacing:.28em;text-transform:uppercase;
-  color:currentColor;opacity:.7;
-  margin-bottom:6px;
+  letter-spacing:.3em;text-transform:uppercase;
+  color:#5C4A38;opacity:.8;
+  margin-bottom:5px;
 }
 .front-gift-text{
   font-family:'Playfair Display',Georgia,serif;
-  font-style:italic;font-size:12px;
+  font-style:italic;font-size:11.5px;
   line-height:1.5;color:#1A1410;font-weight:400;
 }
 
-/* Handwritten lines variant */
-.front-write-area{
-  margin:0 0 .18in;
-  padding:0;
-}
-.front-write-eye{
-  font-family:'DM Sans',sans-serif;
-  font-size:7.5px;font-weight:700;
-  letter-spacing:.28em;text-transform:uppercase;
-  color:currentColor;opacity:.7;
-  margin-bottom:.1in;
-}
-.front-write-lines{
-  height:.85in;
-  background:repeating-linear-gradient(
-    transparent,
-    transparent 16px,
-    rgba(0,0,0,.18) 16px,
-    rgba(0,0,0,.18) 16.5px
-  );
-}
-
-/* Footer row — anchored at bottom */
-.front-foot{
-  margin-top:auto;
-  padding-top:.18in;
-  border-top:.5px solid rgba(0,0,0,.1);
-  display:flex;align-items:center;justify-content:space-between;
-  gap:12px;flex-shrink:0;
-}
-.front-foot-text{
-  display:flex;align-items:center;gap:8px;
-  font-family:'DM Sans',sans-serif;
-  font-size:8px;font-weight:600;
-  letter-spacing:.3em;text-transform:uppercase;
-  color:currentColor;opacity:.75;
-}
-.front-foot-arrow{
-  width:14px;height:8px;color:currentColor;
-}
+/* Order ID — pushed to bottom of content area via margin-top auto */
 .front-orderid{
+  margin-top:auto;
+  padding-top:.16in;
   font-family:'DM Mono',monospace;
   font-size:7px;letter-spacing:.14em;
   text-transform:uppercase;
-  color:#9A8772;text-align:right;
+  color:#9A8772;text-align:center;
   font-weight:500;
 }
 
-/* ────────── BACK FACE ──────────
-   Cream paper section on top with steps, gradient terminus on bottom
-   with QR code. */
+/* ════════════════ BACK FACE ════════════════ */
 .back{
   height:100%;
-  padding:0;
   display:flex;flex-direction:column;
   position:relative;
+  background:#F4EDDF;
 }
 
-/* Top cream section — eyebrow + title + steps */
-.back-body{
+.back-top{
   flex:1;
-  padding:.42in .55in .26in;
+  padding:.6in .55in .4in;
   display:flex;flex-direction:column;
   position:relative;
 }
 
-.back-body-eye{
-  font-family:'DM Sans',sans-serif;
-  font-size:8.5px;font-weight:700;
-  letter-spacing:.36em;text-transform:uppercase;
-  color:currentColor;opacity:.65;
-  margin-bottom:.14in;
-  display:flex;align-items:center;gap:10px;justify-content:center;
-}
-.back-body-eye::before,.back-body-eye::after{
-  content:"";display:block;width:18px;height:.5px;background:currentColor;opacity:.5;
-}
-
-.back-body-title{
+/* Tagline at top — gradient-fill text */
+.back-tagline{
   font-family:'Playfair Display',Georgia,serif;
   font-size:24px;font-weight:500;font-style:italic;
-  line-height:1.05;letter-spacing:-.018em;
-  color:#1A1410;text-align:center;
-  margin-bottom:.26in;
-  max-width:3.8in;align-self:center;
+  line-height:1.15;letter-spacing:-.018em;
+  text-align:center;
+  margin-bottom:.24in;
+  background:linear-gradient(120deg,
+    var(--grad-start) 0%,
+    var(--grad-mid) 50%,
+    var(--grad-end) 100%);
+  -webkit-background-clip:text;
+  background-clip:text;
+  -webkit-text-fill-color:transparent;
+  color:transparent;
 }
-.back-body-title em{font-style:italic;color:currentColor;opacity:.7;font-weight:400}
+
+/* Gradient horizontal divider */
+.back-divider{
+  height:2px;
+  background:linear-gradient(90deg,
+    var(--grad-start) 0%,
+    var(--grad-mid) 50%,
+    var(--grad-end) 100%);
+  margin-bottom:.34in;
+  flex-shrink:0;
+}
+
+/* "How to begin" eyebrow */
+.back-eye{
+  font-family:'DM Sans',sans-serif;
+  font-size:9px;font-weight:700;
+  letter-spacing:.34em;text-transform:uppercase;
+  color:#5C4A38;
+  margin-bottom:.22in;
+  text-align:center;
+}
 
 .back-steps{
-  display:flex;flex-direction:column;gap:.16in;
-  padding:0 .04in;
+  display:flex;flex-direction:column;
+  flex:1;
+  justify-content:flex-start;
+  gap:.3in;
 }
 
 .back-step{
@@ -285,7 +299,14 @@ body{padding:32px 24px;display:flex;flex-direction:column;align-items:center;gap
   font-family:'Playfair Display',Georgia,serif;
   font-size:20px;font-weight:500;font-style:italic;
   line-height:1;letter-spacing:-.018em;
-  color:currentColor;
+  background:linear-gradient(140deg,
+    var(--grad-start),
+    var(--grad-mid) 50%,
+    var(--grad-end));
+  -webkit-background-clip:text;
+  background-clip:text;
+  -webkit-text-fill-color:transparent;
+  color:transparent;
   padding-top:1px;
 }
 
@@ -303,93 +324,65 @@ body{padding:32px 24px;display:flex;flex-direction:column;align-items:center;gap
   color:#5C4A38;font-weight:400;
 }
 
-/* Bottom gradient terminus — QR code lives here as the final action */
-.back-qr-block{
+/* Bottom gradient banner — solid gradient, no texture, with QR + links */
+.back-banner{
   flex-shrink:0;
   height:2.3in;
-  padding:.34in .55in .3in;
+  padding:.32in .5in;
   background:linear-gradient(140deg,
     var(--grad-start) 0%,
     var(--grad-mid) 52%,
     var(--grad-end) 100%);
   color:white;
-  position:relative;
   display:flex;align-items:center;gap:.3in;
-  overflow:hidden;
-}
-/* Subtle dotted texture */
-.back-qr-block::before{
-  content:"";
-  position:absolute;inset:0;
-  background-image:radial-gradient(circle at 1px 1px,rgba(255,255,255,.18) 1px,transparent 0);
-  background-size:14px 14px;
-  pointer-events:none;
-}
-.back-qr-block::after{
-  content:"";position:absolute;
-  bottom:-.4in;right:-.3in;width:1.4in;height:1.4in;
-  border-radius:50%;
-  background:radial-gradient(circle,rgba(255,255,255,.15),transparent 70%);
-  pointer-events:none;
 }
 
 .back-qr{
-  width:1.3in;height:1.3in;
+  width:1.5in;height:1.5in;
   flex-shrink:0;
   background:white;
   padding:.07in;
-  position:relative;z-index:1;
-  box-shadow:0 4px 16px rgba(0,0,0,.18);
 }
 .back-qr img{width:100%;height:100%;display:block}
 
-.back-qr-text{
+.back-banner-text{
   flex:1;display:flex;flex-direction:column;gap:6px;
-  position:relative;z-index:1;color:white;
+  color:white;
 }
-.back-qr-eye{
+.back-banner-eye{
   font-family:'DM Sans',sans-serif;
-  font-size:8px;font-weight:700;
-  letter-spacing:.34em;text-transform:uppercase;
-  color:rgba(255,255,255,.85);
+  font-size:7.5px;font-weight:700;
+  letter-spacing:.3em;text-transform:uppercase;
+  color:rgba(255,255,255,.78);
+  margin-bottom:2px;
 }
-.back-qr-instruct{
+.back-banner-title{
   font-family:'Playfair Display',Georgia,serif;
   font-size:14px;font-style:italic;font-weight:500;
-  line-height:1.3;color:white;
-  letter-spacing:-.008em;
-}
-.back-qr-instruct em{color:rgba(255,255,255,.78);font-style:italic;font-weight:400}
-
-.back-qr-or{
-  font-family:'DM Sans',sans-serif;
-  font-size:8px;font-weight:600;
-  letter-spacing:.32em;text-transform:uppercase;
-  color:rgba(255,255,255,.7);
-  margin-top:6px;margin-bottom:2px;
+  line-height:1.25;color:white;
+  margin-bottom:.1in;
 }
 
-.back-qr-url{
+.back-link-row{
+  display:flex;align-items:center;gap:8px;
   font-family:'DM Mono',monospace;
-  font-size:8.5px;letter-spacing:.02em;
-  color:rgba(255,255,255,.92);font-weight:500;
-  word-break:break-all;line-height:1.4;
+  font-size:8px;letter-spacing:.04em;
+  color:rgba(255,255,255,.92);
+  font-weight:500;
 }
-.back-qr-foot{
-  font-family:'DM Sans',sans-serif;
-  font-size:7.5px;font-weight:600;
-  letter-spacing:.32em;text-transform:uppercase;
-  color:rgba(255,255,255,.55);
-  margin-top:.18in;
-  padding-top:.1in;
-  border-top:.5px solid rgba(255,255,255,.25);
+.back-link-row .icon{
+  width:11px;height:11px;flex-shrink:0;
+  display:inline-flex;align-items:center;justify-content:center;
+  color:rgba(255,255,255,.78);
 }
+.back-link-row .icon svg{width:100%;height:100%;display:block}
 
-.card,.front,.back,.front-gift-note,.back-qr,
-.front-brand-stripe,.back-qr-block,.back-qr-block::before,.back-qr-block::after,
-.front-eye::before,.front-eye::after,
-.back-body-eye::before,.back-body-eye::after,
-.front-attune-mark,.front-foot-arrow{
+/* Force background colors when printing */
+.card,.front,.back,
+.front-top,.front-bottom,.front-top-border,.front-bottom-border,
+.front-top-mark,.front-top-headline,.front-names,
+.back-tagline,.back-divider,.back-step-num,
+.back-banner,.back-qr,.front-gift-note{
   -webkit-print-color-adjust:exact !important;
   print-color-adjust:exact !important;
   color-adjust:exact !important;
@@ -411,7 +404,7 @@ body{padding:32px 24px;display:flex;flex-direction:column;align-items:center;gap
   .card{box-shadow:none!important;border:0!important}
 }
 
-/* Preview-grid layout (no params): show all variants in a multi-column grid */
+/* Preview-grid layout */
 .preview-grid{
   display:flex;flex-direction:column;gap:48px;
   align-items:center;
@@ -451,96 +444,60 @@ body{padding:32px 24px;display:flex;flex-direction:column;align-items:center;gap
 //   ?pkg=newlywed|anniversary|premium|core   (required for single-card mode)
 //   &names=Sarah+%26+James                    (displayed as headline)
 //   &note=Saw+this+and+thought...             (optional; printed gift note)
-//   &mode=handwrite                           (optional; renders blank lines instead)
-//   &orderId=ARW-2026-0247                    (shown in footer, encoded in QR if no token)
+//   &orderId=ARW-2026-0247                    (encoded in QR if no token)
 //   &token=xyz                                (encoded into QR URL)
-//
-// Without params → renders a complete preview grid.
 // ═══════════════════════════════════════════════════════════════════════════
 
-// ─────────────────────────────────────────────────────────────────────────
-// Per-package definitions: ink color (for engraved letterpress details),
-// gradient stops (for the brand stripe + back hero), package name, what's
-// inside the box.
-// All packages share the Attune mark — package identity comes from ink + gradient.
-// ─────────────────────────────────────────────────────────────────────────
+const SITE_URL  = 'attune-relationships.com';
+const INSTAGRAM = '@attunerelationships';
+
 const PACKAGES = {
   newlywed: {
     label: 'Starting Out Collection',
-    eyebrow: 'A gift for two',
-    ink: '#9C3D1A',                                 // burnt sienna
-    grad: ['#C8522E', '#6B3FA0', '#1B5FE8'],        // coral → purple → indigo
-    what: "Attune is a guided experience that helps couples understand how they communicate, where they align, and where they differ.",
+    grad: ['#C8522E', '#6B3FA0', '#1B5FE8'],
     contents: [
-      'The Attune Assessment',
+      'Communication Styles Assessment',
+      'Expectations Alignment Exercise',
       'Starting Out Checklist',
-      'Build a Budget exercise',
+      'Build a Budget Exercise',
     ],
   },
   anniversary: {
     label: 'Relationship Reflection',
-    eyebrow: 'A gift for two',
-    ink: '#1E3A6E',                                 // deep indigo
-    grad: ['#C8522E', '#9B5DE5', '#1B5FE8'],        // coral → lavender → indigo
-    what: "Attune is a guided experience that helps couples understand how they communicate, where they align, and where they differ.",
+    grad: ['#C8522E', '#9B5DE5', '#1B5FE8'],
     contents: [
-      'The Attune Assessment',
-      'Relationship Reflection exercise',
-      'Anniversary-specific prompts',
+      'Communication Styles Assessment',
+      'Expectations Alignment Exercise',
+      'Relationship Reflection Exercise',
+      'Anniversary Prompts',
     ],
   },
   premium: {
     label: 'Attune Premium',
-    eyebrow: 'A gift for two',
-    ink: '#5A2E5C',                                 // deep plum
-    grad: ['#5B6DF8', '#6B3FA0', '#1B5FE8'],        // blue → purple → indigo
-    what: "Attune is a guided experience that helps couples understand how they communicate, where they align, and where they differ.",
+    grad: ['#5B6DF8', '#6B3FA0', '#1B5FE8'],
     contents: [
-      'The Attune Assessment',
-      'Both bonus exercises',
-      'Personalized workbook',
-      'Session with a licensed therapist',
+      'Communication Styles Assessment',
+      'Expectations Alignment Exercise',
+      'Personalized Workbook',
+      'Therapist Session',
     ],
   },
-  // Digital-only fallback
   core: {
     label: 'The Attune Assessment',
-    eyebrow: 'A gift for two',
-    ink: '#9C3D1A',
     grad: ['#C8522E', '#6B3FA0', '#1B5FE8'],
-    what: "Attune is a guided experience that helps couples understand how they communicate, where they align, and where they differ.",
     contents: [
-      'Communication exercise',
-      'Expectations exercise',
-      'Full joint results',
+      'Communication Styles Assessment',
+      'Expectations Alignment Exercise',
     ],
   },
 };
 
-// ─────────────────────────────────────────────────────────────────────────
-// Attune mark — the official brand logo (two speech bubbles with hearts).
-// Two color modes:
-//   ink: solid currentColor on cream — for the front of the card
-//   white: white outlines on the gradient hero — for the back of the card
-// ─────────────────────────────────────────────────────────────────────────
-function attuneMark(mode = 'ink'){
-  if (mode === 'white') {
-    // White-on-gradient version: both bubbles outlined in white,
-    // hearts filled in white. Reads as a clean monogram on dark gradient.
-    return `<svg viewBox="0 0 103 76" fill="none" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet">
-      <path d="M14,4L44,4A9,9,0,0,1,53,13L53,42A9,9,0,0,1,44,51L20,51L6,61L11,51A6,6,0,0,1,5,45L5,13A9,9,0,0,1,14,4Z" fill="white" fill-opacity=".18" stroke="white" stroke-width="1.5"/>
-      <path d="M22,11C20,8.5,16.5,5,11.5,5C5.5,5,2,9.5,2,14.5C2,23,11,30,22,40C33,30,42,23,42,14.5C42,9.5,38.5,5,32.5,5C27.5,5,24,8.5,22,11Z" fill="white" transform="translate(13.16,11.3) scale(.72)"/>
-      <path d="M89,14L59,14A9,9,0,0,0,50,23L50,52A9,9,0,0,0,59,61L83,61L97,71L92,61A6,6,0,0,0,98,55L98,23A9,9,0,0,0,89,14Z" fill="white"/>
-      <path d="M22,11C20,8.5,16.5,5,11.5,5C5.5,5,2,9.5,2,14.5C2,23,11,30,22,40C33,30,42,23,42,14.5C42,9.5,38.5,5,32.5,5C27.5,5,24,8.5,22,11Z" fill="#1B5FE8" transform="translate(58.16,21.3) scale(.72)"/>
-    </svg>`;
-  }
-  // Ink version (front of card): one bubble filled with ink color, the
-  // other outlined. Heart ornaments inverted between the two for the
-  // signature Attune mark.
+// Attune mark — speech bubbles + hearts in white (used on gradient top half)
+function attuneMarkWhite(){
   return `<svg viewBox="0 0 103 76" fill="none" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet">
-    <path d="M14,4L44,4A9,9,0,0,1,53,13L53,42A9,9,0,0,1,44,51L20,51L6,61L11,51A6,6,0,0,1,5,45L5,13A9,9,0,0,1,14,4Z" fill="currentColor"/>
-    <path d="M22,11C20,8.5,16.5,5,11.5,5C5.5,5,2,9.5,2,14.5C2,23,11,30,22,40C33,30,42,23,42,14.5C42,9.5,38.5,5,32.5,5C27.5,5,24,8.5,22,11Z" fill="#FBF7EE" transform="translate(13.16,11.3) scale(.72)"/>
-    <path d="M89,14L59,14A9,9,0,0,0,50,23L50,52A9,9,0,0,0,59,61L83,61L97,71L92,61A6,6,0,0,0,98,55L98,23A9,9,0,0,0,89,14Z" fill="none" stroke="currentColor" stroke-width="1.6"/>
+    <path d="M14,4L44,4A9,9,0,0,1,53,13L53,42A9,9,0,0,1,44,51L20,51L6,61L11,51A6,6,0,0,1,5,45L5,13A9,9,0,0,1,14,4Z" fill="white" fill-opacity=".18" stroke="white" stroke-width="1.5"/>
+    <path d="M22,11C20,8.5,16.5,5,11.5,5C5.5,5,2,9.5,2,14.5C2,23,11,30,22,40C33,30,42,23,42,14.5C42,9.5,38.5,5,32.5,5C27.5,5,24,8.5,22,11Z" fill="white" transform="translate(13.16,11.3) scale(.72)"/>
+    <path d="M89,14L59,14A9,9,0,0,0,50,23L50,52A9,9,0,0,0,59,61L83,61L97,71L92,61A6,6,0,0,0,98,55L98,23A9,9,0,0,0,89,14Z" fill="white"/>
     <path d="M22,11C20,8.5,16.5,5,11.5,5C5.5,5,2,9.5,2,14.5C2,23,11,30,22,40C33,30,42,23,42,14.5C42,9.5,38.5,5,32.5,5C27.5,5,24,8.5,22,11Z" fill="currentColor" transform="translate(58.16,21.3) scale(.72)"/>
   </svg>`;
 }
@@ -551,109 +508,105 @@ function esc(s){
   return String(s ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
 }
 
-function splitNames(namesStr){
+// "Sarah & James" / "Sarah and James" → standardized "A and B" form
+function namesToHtml(namesStr){
   if (!namesStr) return { html: 'Welcome', twoLines: false };
-  const raw = namesStr.trim().replace(/\s+and\s+/i,' & ').replace(/\s*\+\s*/,' & ');
-  const parts = raw.split(/\s*&\s*/);
+  const raw = namesStr.trim().replace(/\s+&\s+/i,' and ').replace(/\s*\+\s*/, ' and ');
+  const parts = raw.split(/\s+and\s+/i);
   if (parts.length >= 2 && parts[0] && parts[1]) {
     const [a, b] = parts;
-    const combined = `${a} & ${b}`;
-    if (combined.length > 18) {
-      return { html: `${esc(a)}<br><span class="amp">&amp;</span> ${esc(b)}`, twoLines: true };
+    const combined = `${a} and ${b}`;
+    if (combined.length > 22) {
+      return { html: `${esc(a)} and<br>${esc(b)}`, twoLines: true };
     }
-    return { html: `${esc(a)} <span class="amp">&amp;</span> ${esc(b)}`, twoLines: false };
+    return { html: `${esc(a)} and ${esc(b)}`, twoLines: false };
   }
   return { html: esc(raw), twoLines: false };
 }
 
+// Front of card
 function frontHtml(pkgKey, opts = {}){
   const pkg = PACKAGES[pkgKey] || PACKAGES.newlywed;
-  const { names = '', note = '', orderId = '', mode } = opts;
-  const nm = splitNames(names);
+  const { names = '', note = '', orderId = '' } = opts;
+  const nm = namesToHtml(names);
+  const gradVars = `--grad-start:${pkg.grad[0]};--grad-mid:${pkg.grad[1]};--grad-end:${pkg.grad[2]}`;
 
-  const showHandwrite = mode === 'handwrite';
-  const showPrintedNote = !showHandwrite && note && note.length > 0;
-
-  const gradVars = `--grad-start:${pkg.grad[0]};--grad-mid:${pkg.grad[1]};--grad-end:${pkg.grad[2]};color:${pkg.ink}`;
-
-  // Gift note inset (printed)
-  const printedNoteBlock = showPrintedNote ? `
+  const giftNoteBlock = note ? `
     <div class="front-gift-note">
       <div class="front-gift-eye">A note for you</div>
       <div class="front-gift-text">${esc(note)}</div>
     </div>
   ` : '';
 
-  // Handwritten lines for the gift giver
-  const handwriteBlock = showHandwrite ? `
-    <div class="front-write-area">
-      <div class="front-write-eye">A note for you</div>
-      <div class="front-write-lines"></div>
-    </div>
-  ` : '';
-
-  // Contents block — left-aligned with bullets, package-specific list
-  const contentsBlock = !showHandwrite ? `
-    <div class="front-contents-eye">Your gift includes</div>
-    <div class="front-contents">
-      ${pkg.contents.map(c => `<div class="front-content-item">${esc(c)}</div>`).join('')}
-    </div>
-    <p class="front-bridge">When you're both ready, scan the code on the back to begin together.</p>
-  ` : '';
+  // Pipe-separated contents — pre-grouped into rows of 2 items so each
+  // line is "item | item" with no trailing pipe at row breaks.
+  const rows = [];
+  for (let i = 0; i < pkg.contents.length; i += 2) {
+    const row = pkg.contents.slice(i, i + 2).map(esc).join(' <span class="sep">|</span> ');
+    rows.push(`<div class="pkg-row">${row}</div>`);
+  }
+  const contentsList = rows.join('');
 
   return `
 <div class="page">
   <div class="card" style="${gradVars}">
     <div class="front">
-      <div class="front-brand-stripe"></div>
-      <div class="front-inner">
-        <div class="front-brand-row">
-          <div class="front-attune-mark">${attuneMark('ink')}</div>
-          <div class="front-pkg-label">${esc(pkg.label)}</div>
+      <div class="front-top">
+        <div class="front-top-border"></div>
+        <div class="front-top-brand">
+          <div class="front-top-mark">${attuneMarkWhite()}</div>
+          <div class="front-top-pkg">${esc(pkg.label)}</div>
         </div>
-
-        <div class="front-eye">${esc(pkg.eyebrow)}</div>
-        <h1 class="front-names ${nm.twoLines ? 'two-lines' : ''}">${nm.html}</h1>
-        <p class="front-tagline">A guided experience to help you understand each other — <strong>welcome to Attune.</strong></p>
-
-        ${printedNoteBlock}
-        ${handwriteBlock}
-        ${contentsBlock}
-
-        <div class="front-foot">
-          <div class="front-foot-text">
-            <span>attune-relationships.com</span>
-          </div>
+        <div class="front-top-eye">A gift for two</div>
+        <div class="front-top-headline">Welcome to Attune</div>
+      </div>
+      <div class="front-bottom">
+        <div class="front-bottom-border"></div>
+        <div class="front-bottom-content">
+          <h1 class="front-names ${nm.twoLines ? 'two-lines' : ''}">${nm.html}</h1>
+          <p class="front-body">Attune Relationships offers an engaging and meaningful way to grow closer together.</p>
+          ${giftNoteBlock}
+          <div class="front-pkg-eye">Your package includes:</div>
+          <div class="front-pkg-list">${contentsList}</div>
           ${orderId ? `<div class="front-orderid">${esc(orderId)}</div>` : ''}
         </div>
       </div>
     </div>
   </div>
-  <div class="page-label">${esc(pkg.label)} · Front${showPrintedNote ? ' (printed gift note)' : showHandwrite ? ' (handwritten lines)' : ''}</div>
+  <div class="page-label">${esc(pkg.label)} · Front${note ? ' (with gift note)' : ''}</div>
 </div>`;
 }
 
+// Back of card
 function backHtml(pkgKey, opts = {}){
   const pkg = PACKAGES[pkgKey] || PACKAGES.newlywed;
   const { token = '' } = opts;
-  const qrUrl = token
-    ? `attune-relationships.com/welcome?qr=${token}`
-    : 'attune-relationships.com/app';
+  const gradVars = `--grad-start:${pkg.grad[0]};--grad-mid:${pkg.grad[1]};--grad-end:${pkg.grad[2]}`;
 
-  const gradVars = `--grad-start:${pkg.grad[0]};--grad-mid:${pkg.grad[1]};--grad-end:${pkg.grad[2]};color:${pkg.ink}`;
+  // Globe and Instagram icons (line, currentColor — render in white on gradient)
+  const globeIcon = `<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.6"/>
+    <path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18" stroke="currentColor" stroke-width="1.6"/>
+  </svg>`;
+  const instaIcon = `<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <rect x="3" y="3" width="18" height="18" rx="5" stroke="currentColor" stroke-width="1.6"/>
+    <circle cx="12" cy="12" r="4" stroke="currentColor" stroke-width="1.6"/>
+    <circle cx="17.5" cy="6.5" r="1" fill="currentColor"/>
+  </svg>`;
 
   return `
 <div class="page">
   <div class="card" style="${gradVars}">
     <div class="back">
-      <div class="back-body">
-        <div class="back-body-eye">How to begin</div>
-        <h2 class="back-body-title">What you'll do <em>together.</em></h2>
+      <div class="back-top">
+        <h2 class="back-tagline">Understanding takes intention.</h2>
+        <div class="back-divider"></div>
+        <div class="back-eye">How to begin</div>
         <div class="back-steps">
           <div class="back-step">
             <span class="back-step-num">01</span>
             <div class="back-step-content">
-              <h3 class="back-step-title">Scan the code below.</h3>
+              <h3 class="back-step-title">Scan the code together.</h3>
               <p class="back-step-text">It opens a private welcome page just for the two of you. Use any phone camera.</p>
             </div>
           </div>
@@ -673,16 +626,21 @@ function backHtml(pkgKey, opts = {}){
           </div>
         </div>
       </div>
-      <div class="back-qr-block">
+      <div class="back-banner">
         <div class="back-qr">
           <img src="${DEFAULT_QR}" class="qr-img" data-token="${esc(token)}" alt="Scan to start"/>
         </div>
-        <div class="back-qr-text">
-          <div class="back-qr-eye">Scan to begin</div>
-          <div class="back-qr-instruct">Open your phone camera and point it at the code.</div>
-          <div class="back-qr-or">— or visit —</div>
-          <div class="back-qr-url">${esc(qrUrl)}</div>
-          <div class="back-qr-foot">attune-relationships.com</div>
+        <div class="back-banner-text">
+          <div class="back-banner-eye">Scan to begin</div>
+          <div class="back-banner-title">Your unique sign-in portal.</div>
+          <div class="back-link-row">
+            <span class="icon">${globeIcon}</span>
+            <span>${SITE_URL}</span>
+          </div>
+          <div class="back-link-row">
+            <span class="icon">${instaIcon}</span>
+            <span>${INSTAGRAM}</span>
+          </div>
         </div>
       </div>
     </div>
@@ -691,6 +649,7 @@ function backHtml(pkgKey, opts = {}){
 </div>`;
 }
 
+// Render entry
 (function render(){
   const params = new URLSearchParams(location.search);
   const pkg    = params.get('pkg');
@@ -702,26 +661,25 @@ function backHtml(pkgKey, opts = {}){
       note:    params.get('note')    || '',
       orderId: params.get('orderId') || '',
       token:   params.get('token')   || '',
-      mode:    params.get('mode')    || '',
     };
     document.title = `Attune · ${PACKAGES[pkg].label}${opts.names ? ' · ' + opts.names : ''}`;
     root.innerHTML = frontHtml(pkg, opts) + backHtml(pkg, opts);
     generateQR();
   } else {
-    // Preview mode — show all packages × all variants
+    // Preview mode
     const sample = {
       newlywed: {
-        names: 'Maya & David',
+        names: 'Maya and David',
         orderId: 'ARW-2026-0247',
         note: "I saw this and thought of you two. So happy you found each other.",
       },
       anniversary: {
-        names: 'Elena & Marcus',
+        names: 'Elena and Marcus',
         orderId: 'ARW-2026-0312',
         note: "Fifteen years. Still the best partner I could ask for.",
       },
       premium: {
-        names: 'Taylor & Morgan',
+        names: 'Taylor and Morgan',
         orderId: 'ARW-2026-0418',
         note: "Wishing you both years of growing closer. With love.",
       },
@@ -736,7 +694,6 @@ function backHtml(pkgKey, opts = {}){
           <div class="preview-row">
             ${frontHtml(key, { names: data.names, orderId: data.orderId })}
             ${frontHtml(key, { names: data.names, orderId: data.orderId, note: data.note })}
-            ${frontHtml(key, { names: data.names, orderId: data.orderId, mode: 'handwrite' })}
             ${backHtml(key, { orderId: data.orderId })}
           </div>
         </div>
