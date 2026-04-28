@@ -50,8 +50,8 @@ body{padding:32px 24px;display:flex;flex-direction:column;align-items:center;gap
 }
 
 /* ────────── FRONT FACE ──────────
-   Letterpress invitation aesthetic with brand stripe + Attune mark.
-   Single ink color per package for the engraved details. */
+   Top-aligned welcome composition. No ceremonial border. Reads like a
+   thoughtful welcome card, not an invitation. */
 .front{
   height:100%;
   padding:0;
@@ -68,186 +68,136 @@ body{padding:32px 24px;display:flex;flex-direction:column;align-items:center;gap
     var(--grad-end) 100%);
 }
 
-/* Inner content area — contains border + everything else */
 .front-inner{
   flex:1;
-  padding:.42in .55in .3in;
-  display:flex;flex-direction:column;align-items:center;text-align:center;
+  padding:.4in .5in .32in;
+  display:flex;flex-direction:column;
   position:relative;
 }
 
-/* Engraved inner border */
-.front-inner::before{
-  content:"";
-  position:absolute;
-  top:.18in;left:.34in;right:.34in;bottom:.34in;
-  border:.5px solid currentColor;
-  opacity:.18;
-  pointer-events:none;
+/* Top brand row — Attune mark on the left, package label on the right */
+.front-brand-row{
+  display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:.32in;
 }
-
-/* Centered composition wrapper — pushes the main content to vertical center
-   while leaving the footer (arrow + order ID) anchored at the bottom. */
-.front-stack{
-  flex:1;
-  display:flex;flex-direction:column;align-items:center;
-  justify-content:center;
-  width:100%;
-}
-
-/* Attune mark — the official brand logo. Sits at top, centered, in package ink. */
 .front-attune-mark{
-  width:.95in;height:.7in;
-  margin:.16in 0 .14in;
+  width:.7in;height:.5in;
   color:currentColor;
-  position:relative;z-index:1;
 }
 .front-attune-mark svg{width:100%;height:100%;display:block}
+.front-pkg-label{
+  font-family:'DM Sans',sans-serif;
+  font-size:7.5px;font-weight:700;
+  letter-spacing:.28em;text-transform:uppercase;
+  color:currentColor;opacity:.7;
+  text-align:right;
+  line-height:1.4;
+}
 
+/* Eyebrow — sits above the headline as section label */
 .front-eye{
   font-family:'DM Sans',sans-serif;
-  font-size:8.5px;font-weight:700;
-  letter-spacing:.36em;text-transform:uppercase;
+  font-size:8px;font-weight:700;
+  letter-spacing:.32em;text-transform:uppercase;
   color:currentColor;opacity:.65;
-  margin-bottom:.18in;
-  display:flex;align-items:center;gap:10px;
-}
-.front-eye::before,.front-eye::after{
-  content:"";display:block;width:18px;height:.5px;background:currentColor;opacity:.5;
+  margin-bottom:.1in;
 }
 
+/* Names — left-aligned, mixed-weight headline (not italic Playfair) */
 .front-names{
   font-family:'Playfair Display',Georgia,serif;
-  font-size:34px;font-weight:500;font-style:italic;
-  line-height:1;letter-spacing:-.02em;
+  font-size:30px;font-weight:500;
+  line-height:1;letter-spacing:-.022em;
   color:#1A1410;
-  margin-bottom:.12in;
+  margin-bottom:.14in;
 }
-.front-names.two-lines{font-size:26px;line-height:1.08}
+.front-names.two-lines{font-size:24px;line-height:1.08}
 .front-names .amp{font-style:italic;font-weight:400;color:currentColor;opacity:.7;padding:0 4px}
 
-/* Short tagline that lives between the names and the rule —
-   gives the recipient an immediate "what this is" anchor without
-   competing with the gift list. */
+/* Tagline — short body description, not italic */
 .front-tagline{
-  font-family:'Playfair Display',Georgia,serif;
-  font-style:italic;font-size:13px;
-  color:currentColor;opacity:.78;
-  font-weight:400;line-height:1.3;
-  max-width:3.4in;
-  margin-bottom:.06in;
-}
-
-.front-rule{
-  width:48px;height:1px;
-  background:currentColor;opacity:.4;
-  margin:.18in 0;
-}
-
-.front-bottom-rule{
-  width:36px;height:1px;
-  background:currentColor;opacity:.3;
-  margin:.18in auto .12in;
-}
-
-.front-signoff{
-  font-family:'Playfair Display',Georgia,serif;
-  font-size:11.5px;font-weight:400;font-style:italic;
-  color:currentColor;opacity:.75;
-  letter-spacing:-.005em;
-}
-.front-signoff span{
-  font-weight:500;font-style:italic;color:currentColor;opacity:1;
-  letter-spacing:.02em;
-}
-
-.front-welcome{
-  font-family:'Playfair Display',Georgia,serif;
-  font-size:13px;font-weight:500;font-style:italic;
-  color:#1A1410;
-  margin-bottom:.04in;
-}
-
-.front-what{
   font-family:'DM Sans',sans-serif;
-  font-size:9.5px;font-weight:400;
+  font-size:11px;font-weight:400;
   line-height:1.55;color:#3C2E22;
-  max-width:3.4in;
-  margin-bottom:.16in;
+  max-width:3.8in;
+  margin-bottom:.28in;
 }
-.front-what.compact{
-  font-size:9px;line-height:1.5;
-  margin-bottom:.14in;
-}
+.front-tagline strong{color:var(--ink-anchor,#1A1410);font-weight:600}
 
+/* Contents block — left-aligned bordered list. Reads like a packing
+   slip / itinerary, not a wedding program. */
 .front-contents-eye{
-  font-family:'Playfair Display',Georgia,serif;
-  font-size:11.5px;font-weight:500;font-style:italic;
-  color:currentColor;opacity:.8;
+  font-family:'DM Sans',sans-serif;
+  font-size:8px;font-weight:700;
+  letter-spacing:.3em;text-transform:uppercase;
+  color:currentColor;opacity:.7;
+  padding-bottom:.1in;
   margin-bottom:.14in;
-  display:flex;align-items:center;gap:8px;justify-content:center;
-}
-.front-contents-eye::before,.front-contents-eye::after{
-  content:"";display:block;width:14px;height:.5px;background:currentColor;opacity:.5;
+  border-bottom:.5px solid rgba(0,0,0,.12);
 }
 
 .front-contents{
-  display:flex;flex-direction:column;align-items:center;
-  gap:7px;margin-bottom:.04in;
+  display:flex;flex-direction:column;align-items:flex-start;
+  gap:7px;margin-bottom:.18in;
 }
 .front-content-item{
   font-family:'Playfair Display',Georgia,serif;
-  font-size:12px;line-height:1.35;
+  font-size:13px;line-height:1.3;
   color:#1A1410;font-weight:500;
   letter-spacing:-.005em;
+  display:flex;align-items:baseline;gap:10px;
+}
+.front-content-item::before{
+  content:"";display:block;
+  width:5px;height:5px;flex-shrink:0;
+  background:currentColor;opacity:.4;
+  border-radius:50%;
+  transform:translateY(-2px);
 }
 
-.front-contents{
-  display:flex;flex-direction:column;align-items:center;
-  gap:5px;margin-bottom:.06in;
-}
-.front-content-item{
+/* Bridge sentence between contents and footer — directs to the back. */
+.front-bridge{
   font-family:'Playfair Display',Georgia,serif;
-  font-size:11px;line-height:1.35;
-  color:#1A1410;font-weight:500;
-  letter-spacing:-.005em;
+  font-style:italic;font-size:11.5px;font-weight:400;
+  line-height:1.5;color:#3C2E22;
+  max-width:3.6in;
+  margin-top:.04in;
 }
 
-/* Printed gift note */
+/* Printed gift note — left-aligned, simple inset block */
 .front-gift-note{
-  margin:.04in auto .14in;max-width:3.4in;
-  padding:.14in .18in;
-  background:rgba(255,255,255,.55);
-  border-top:.5px solid currentColor;
-  border-bottom:.5px solid currentColor;
+  margin:0 0 .2in;
+  padding:.14in .16in;
+  background:rgba(255,255,255,.5);
+  border-left:2px solid currentColor;
 }
 .front-gift-eye{
   font-family:'DM Sans',sans-serif;
-  font-size:7px;font-weight:700;
-  letter-spacing:.3em;text-transform:uppercase;
+  font-size:7.5px;font-weight:700;
+  letter-spacing:.28em;text-transform:uppercase;
   color:currentColor;opacity:.7;
   margin-bottom:6px;
 }
 .front-gift-text{
   font-family:'Playfair Display',Georgia,serif;
-  font-style:italic;font-size:11.5px;
+  font-style:italic;font-size:12px;
   line-height:1.5;color:#1A1410;font-weight:400;
 }
 
 /* Handwritten lines variant */
 .front-write-area{
-  margin:.06in auto .12in;max-width:3.4in;width:100%;
-  padding:.04in 0 .12in;
+  margin:0 0 .18in;
+  padding:0;
 }
 .front-write-eye{
   font-family:'DM Sans',sans-serif;
-  font-size:7px;font-weight:700;
-  letter-spacing:.3em;text-transform:uppercase;
+  font-size:7.5px;font-weight:700;
+  letter-spacing:.28em;text-transform:uppercase;
   color:currentColor;opacity:.7;
   margin-bottom:.1in;
 }
 .front-write-lines{
-  height:.7in;
+  height:.85in;
   background:repeating-linear-gradient(
     transparent,
     transparent 16px,
@@ -256,28 +206,29 @@ body{padding:32px 24px;display:flex;flex-direction:column;align-items:center;gap
   );
 }
 
+/* Footer row — anchored at bottom */
 .front-foot{
+  margin-top:auto;
   padding-top:.18in;
-  display:flex;flex-direction:column;align-items:center;gap:6px;
-  flex-shrink:0;
-}
-.front-foot-arrow{
-  width:14px;height:8px;color:currentColor;opacity:.55;
+  border-top:.5px solid rgba(0,0,0,.1);
+  display:flex;align-items:center;justify-content:space-between;
+  gap:12px;flex-shrink:0;
 }
 .front-foot-text{
+  display:flex;align-items:center;gap:8px;
   font-family:'DM Sans',sans-serif;
-  font-size:7.5px;font-weight:600;
+  font-size:8px;font-weight:600;
   letter-spacing:.3em;text-transform:uppercase;
-  color:currentColor;opacity:.7;
+  color:currentColor;opacity:.75;
 }
-
+.front-foot-arrow{
+  width:14px;height:8px;color:currentColor;
+}
 .front-orderid{
-  position:absolute;
-  bottom:.16in;left:.34in;right:.34in;
   font-family:'DM Mono',monospace;
-  font-size:6.5px;letter-spacing:.18em;
+  font-size:7px;letter-spacing:.14em;
   text-transform:uppercase;
-  color:#9A8772;text-align:center;
+  color:#9A8772;text-align:right;
   font-weight:500;
 }
 
@@ -438,7 +389,7 @@ body{padding:32px 24px;display:flex;flex-direction:column;align-items:center;gap
 .front-brand-stripe,.back-qr-block,.back-qr-block::before,.back-qr-block::after,
 .front-eye::before,.front-eye::after,
 .back-body-eye::before,.back-body-eye::after,
-.front-rule,.front-attune-mark,.front-foot-arrow{
+.front-attune-mark,.front-foot-arrow{
   -webkit-print-color-adjust:exact !important;
   print-color-adjust:exact !important;
   color-adjust:exact !important;
@@ -625,6 +576,7 @@ function frontHtml(pkgKey, opts = {}){
 
   const gradVars = `--grad-start:${pkg.grad[0]};--grad-mid:${pkg.grad[1]};--grad-end:${pkg.grad[2]};color:${pkg.ink}`;
 
+  // Gift note inset (printed)
   const printedNoteBlock = showPrintedNote ? `
     <div class="front-gift-note">
       <div class="front-gift-eye">A note for you</div>
@@ -632,6 +584,7 @@ function frontHtml(pkgKey, opts = {}){
     </div>
   ` : '';
 
+  // Handwritten lines for the gift giver
   const handwriteBlock = showHandwrite ? `
     <div class="front-write-area">
       <div class="front-write-eye">A note for you</div>
@@ -639,24 +592,14 @@ function frontHtml(pkgKey, opts = {}){
     </div>
   ` : '';
 
+  // Contents block — left-aligned with bullets, package-specific list
   const contentsBlock = !showHandwrite ? `
     <div class="front-contents-eye">Your gift includes</div>
     <div class="front-contents">
       ${pkg.contents.map(c => `<div class="front-content-item">${esc(c)}</div>`).join('')}
     </div>
+    <p class="front-bridge">When you're both ready, scan the code on the back to begin together.</p>
   ` : '';
-
-  // Tagline near top establishes identity. Bottom gets a short sign-off
-  // that completes the letter-style composition.
-  const signoff = !showHandwrite ? `
-    <div class="front-bottom-rule"></div>
-    <p class="front-signoff">With care, <span>Attune</span></p>
-  ` : '';
-
-  // Short italic tagline that introduces what Attune does — appears
-  // between the names and the rule so the recipient understands the gift
-  // before seeing the contents list.
-  const tagline = '<p class="front-tagline">A guided experience to help you understand each other.</p>';
 
   return `
 <div class="page">
@@ -664,24 +607,25 @@ function frontHtml(pkgKey, opts = {}){
     <div class="front">
       <div class="front-brand-stripe"></div>
       <div class="front-inner">
-        <div class="front-stack">
+        <div class="front-brand-row">
           <div class="front-attune-mark">${attuneMark('ink')}</div>
-          <div class="front-eye">${esc(pkg.eyebrow)}</div>
-          <h1 class="front-names ${nm.twoLines ? 'two-lines' : ''}">${nm.html}</h1>
-          ${tagline}
-          <div class="front-rule"></div>
-          ${printedNoteBlock}
-          ${handwriteBlock}
-          ${contentsBlock}
-          ${signoff}
+          <div class="front-pkg-label">${esc(pkg.label)}</div>
         </div>
+
+        <div class="front-eye">${esc(pkg.eyebrow)}</div>
+        <h1 class="front-names ${nm.twoLines ? 'two-lines' : ''}">${nm.html}</h1>
+        <p class="front-tagline">A guided experience to help you understand each other — <strong>welcome to Attune.</strong></p>
+
+        ${printedNoteBlock}
+        ${handwriteBlock}
+        ${contentsBlock}
+
         <div class="front-foot">
-          <svg class="front-foot-arrow" viewBox="0 0 14 8" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M1 4h12m0 0L9.5 1m3.5 3l-3.5 3" stroke="currentColor" stroke-width="1" stroke-linecap="round"/>
-          </svg>
-          <div class="front-foot-text">Begin on the back</div>
+          <div class="front-foot-text">
+            <span>attune-relationships.com</span>
+          </div>
+          ${orderId ? `<div class="front-orderid">${esc(orderId)}</div>` : ''}
         </div>
-        ${orderId ? `<div class="front-orderid">${esc(pkg.label)} · ${esc(orderId)}</div>` : `<div class="front-orderid">${esc(pkg.label)}</div>`}
       </div>
     </div>
   </div>
