@@ -3036,30 +3036,29 @@ async function generateWorkbookForOrder(orderId) {
 }
 
 // ── Print QR card ─────────────────────────────────────
+// Opens a print-ready welcome card for this order, with names, package,
+// gift note (if any), and the QR code linking to the per-order welcome URL.
+// The new qr-cards-print.html template handles all variants.
 function printQRCard(orderId, pkg, coupleNames, token, giftMsg) {
-  // Use the new per-package 5x7 card templates
-  const pkgMap = {
-    'core': 'core', 'foundation': 'core',
+  // Map both the digital and -box variants to the same template package key
+  const pkgKeyMap = {
+    'core': 'core',
     'newlywed': 'newlywed', 'newlywed-box': 'newlywed',
     'anniversary': 'anniversary', 'anniversary-box': 'anniversary',
     'premium': 'premium', 'premium-box': 'premium',
   };
-  const cardPkg = pkgMap[pkg] || 'core';
-  // Use gift version if there is a gift message, blank version otherwise
-  const version = giftMsg ? 'gift' : 'standard';
-  // Map pkg ID to the key qr-cards-print.html expects
-  const pkgKeyMap = { 'newlywed-box':'newlywed', 'anniversary-box':'anniversary', 'premium-box':'premium' };
-  const qrPkgKey = pkgKeyMap[cardPkg] || 'core';
-  // Build the card URL — qr-cards-print.html reads these params to render
-  // a single personalized card for this order.
+  const qrPkgKey = pkgKeyMap[pkg] || 'newlywed';
+
+  // Build URL — qr-cards-print.html reads these params to render the card
   const params = new URLSearchParams({
     pkg: qrPkgKey,
-    names: decodeURIComponent(coupleNames),
+    names: decodeURIComponent(coupleNames || ''),
     orderId,
   });
   if (token) params.set('token', token);
   if (giftMsg) params.set('note', decodeURIComponent(giftMsg));
-  window.open(`/qr-cards-print.html?${params}`, '_blank', 'width=900,height=700,toolbar=0,scrollbars=1');
+
+  window.open(`/qr-cards-print.html?${params}`, '_blank', 'width=900,height=900,toolbar=0,scrollbars=1');
 }
 
 // ── Fulfillment CSV export ────────────────────────────

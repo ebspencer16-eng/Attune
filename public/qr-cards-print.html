@@ -3,84 +3,379 @@
 <head>
 <meta charset="UTF-8">
 <meta name="robots" content="noindex,nofollow">
-<title>Attune Relationships – QR Cards</title>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<title>Attune Relationships – Welcome Card</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400;1,500&family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
 <style>
+/* ─────────────────────────────────────────────────────────────────────
+   ATTUNE WELCOME CARD — letterpress-style printed insert
+   Card trim: 5×7 in portrait. Aesthetic: heavy paper, single-color
+   "ink" per package, centered envelope/invitation typography, no
+   gradient stripes, minimal text density.
+   ───────────────────────────────────────────────────────────────────── */
+
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-html,body{background:#D0C9C0;font-family:'DM Sans',Arial,sans-serif}
-body{padding:24px;display:flex;flex-direction:column;align-items:center;gap:24px}
+html,body{
+  background:#D7CDC0;
+  font-family:'DM Sans',Arial,sans-serif;
+  color:#1A1410;
+}
+body{padding:32px 24px;display:flex;flex-direction:column;align-items:center;gap:32px}
 
-.page{display:flex;flex-direction:column;align-items:center;gap:6px}
-.page-label{font-size:9px;font-weight:700;letter-spacing:.22em;text-transform:uppercase;color:#8C7A68}
+.page{display:flex;flex-direction:column;align-items:center;gap:8px}
+.page-label{
+  font-size:9px;font-weight:700;letter-spacing:.24em;
+  text-transform:uppercase;color:#8C7A68;
+}
 
-/* Card base — 5in x 3in (standard index-card landscape) */
-.card{width:5in;height:3in;display:flex;flex-shrink:0;position:relative;border-radius:3px}
-.front{background:#FFFEF9;box-shadow:0 16px 48px rgba(0,0,0,.18),0 2px 8px rgba(0,0,0,.07);border:.5px solid rgba(0,0,0,.06)}
-.back{background:#FFFEF9;flex-direction:column;box-shadow:0 8px 24px rgba(0,0,0,.10);border:.5px solid rgba(0,0,0,.05)}
+/* ────────── CARD BASE ──────────
+   5×7 in portrait. Cream paper field with subtle paper-grain texture
+   and an inner highlight. */
+.card{
+  width:5in;
+  height:7in;
+  flex-shrink:0;
+  position:relative;
+  background:
+    repeating-radial-gradient(circle at 30% 20%,
+      rgba(140,110,80,.012) 0,
+      rgba(140,110,80,.012) 1px,
+      transparent 1px,
+      transparent 3px),
+    radial-gradient(ellipse 90% 70% at 50% 30%, #FBF7EE 0%, #F4EDDF 60%, #EAE0CD 100%);
+  box-shadow:
+    inset 0 0 0 1px rgba(120,90,60,.08),
+    0 18px 48px rgba(60,30,10,.18),
+    0 4px 12px rgba(60,30,10,.10);
+}
 
-/* FRONT — gradient panel on left */
-.grad-panel{width:150px;height:100%;flex-shrink:0;align-self:stretch;border-radius:3px 0 0 3px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;padding:24px 18px;color:white;position:relative;overflow:hidden}
-.grad-panel>*:not(.gp-bg){position:relative;z-index:1}
-.gp-bg{position:absolute;inset:0;width:100%;height:100%;display:block;z-index:0}
-.gp-pkg-label{font-family:'DM Sans',sans-serif;font-size:7.5px;font-weight:700;letter-spacing:.28em;text-transform:uppercase;color:rgba(255,255,255,.55);margin-bottom:4px;text-align:center}
-.gp-pkg-name{font-family:'Playfair Display',Georgia,serif;font-size:12px;font-style:italic;color:rgba(255,255,255,.95);line-height:1.3;text-align:center;max-width:120px}
+/* ────────── FRONT FACE ──────────
+   Letterpress invitation aesthetic. Centered single-column composition.
+   Single ink color per package. */
+.front{
+  height:100%;
+  padding:.5in .55in;
+  display:flex;flex-direction:column;align-items:center;text-align:center;
+  position:relative;
+}
 
-/* FRONT — right body */
-.right{flex:1;display:flex;flex-direction:column;overflow:hidden}
-.right-body{flex:1;display:flex;flex-direction:column;align-items:flex-start;justify-content:center;padding:22px 26px 14px}
-.right-footer{padding:7px 26px;border-top:1px solid #EDE8E0;display:flex;align-items:center;gap:5px;flex-shrink:0;white-space:nowrap;overflow:hidden}
-.footer-dot{width:3px;height:3px;border-radius:50%;background:#C8B8A8}
-.footer-txt{font-size:7px;letter-spacing:.18em;text-transform:uppercase;color:#B8AC9C;font-family:'DM Sans',sans-serif}
+/* Engraved inner border */
+.front::before{
+  content:"";
+  position:absolute;
+  top:.34in;left:.34in;right:.34in;bottom:.34in;
+  border:.5px solid currentColor;
+  opacity:.18;
+  pointer-events:none;
+}
 
-/* Main headline — partner names (or fallback) */
-.welcome-eye{font-size:7.5px;font-weight:700;letter-spacing:.26em;text-transform:uppercase;color:#B8AC9C;margin-bottom:8px;font-family:'DM Sans',sans-serif}
-.names-h{font-family:'Playfair Display',Georgia,serif;font-weight:700;font-size:26px;line-height:1.0;letter-spacing:-.025em;color:#2B2218;margin-bottom:8px}
-.names-h.two-lines{font-size:22px;line-height:1.08}
-.names-h .amp{font-style:italic;font-weight:400;color:#8C7A68;padding:0 4px}
-.welcome-sub{font-family:'Playfair Display',Georgia,serif;font-size:11px;font-style:italic;color:#5C4A38;line-height:1.5;max-width:230px;margin-bottom:10px}
+.front-eye{
+  font-family:'DM Sans',sans-serif;
+  font-size:8px;font-weight:700;
+  letter-spacing:.34em;text-transform:uppercase;
+  color:currentColor;opacity:.7;
+  margin-top:.18in;margin-bottom:.18in;
+  display:flex;align-items:center;gap:10px;
+}
+.front-eye::before,.front-eye::after{
+  content:"";display:block;width:18px;height:.5px;background:currentColor;opacity:.5;
+}
 
-/* "Get started" as a printed note — not a webpage alert */
-.get-started{display:flex;align-items:center;gap:10px;padding-top:9px;border-top:1px solid #E8DDD0;margin-top:4px}
-.gs-mark{font-family:'Playfair Display',Georgia,serif;font-size:18px;font-weight:700;line-height:1;flex-shrink:0}
-.gs-body{flex:1;font-size:9px;color:#5C4A38;font-family:'DM Sans',sans-serif;line-height:1.55}
-.gs-body strong{color:#2B2218;font-weight:600}
+.front-mark{
+  width:.62in;height:.62in;
+  margin-bottom:.16in;
+  color:currentColor;
+}
+.front-mark svg{width:100%;height:100%;display:block;color:inherit}
 
-/* Gift note (variant) */
-.gift-note-wrap{margin-top:4px;padding:10px 12px 9px;background:#FAF4EB;border:1px solid #E8DDD0;border-radius:2px}
-.gift-note-eye{font-family:'DM Sans',sans-serif;font-size:7px;font-weight:700;letter-spacing:.28em;text-transform:uppercase;color:#C17F47;margin-bottom:4px}
-.gift-note-text{font-family:'Playfair Display',Georgia,serif;font-style:italic;font-size:12px;line-height:1.4;color:#3C2E22;font-weight:400}
-.gift-note-from{font-family:'DM Sans',sans-serif;font-size:8px;color:#8C7A68;margin-top:5px;text-align:right;letter-spacing:.02em;font-style:italic}
+.front-names{
+  font-family:'Playfair Display',Georgia,serif;
+  font-size:30px;font-weight:500;font-style:italic;
+  line-height:1;letter-spacing:-.018em;
+  color:#1A1410;
+  margin-bottom:.06in;
+}
+.front-names.two-lines{font-size:24px;line-height:1.1}
+.front-names .amp{font-style:italic;font-weight:400;color:currentColor;opacity:.7;padding:0 4px}
 
-/* BACK — bumped font sizes for readability */
-.back-accent{height:3px;flex-shrink:0}
-.back-inner{flex:1;display:flex;overflow:hidden}
-.back-left{flex:1;padding:16px 18px 12px;display:flex;flex-direction:column;border-right:1px solid #F0EBE4}
-.back-right{width:135px;flex-shrink:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:12px 10px}
-.back-footer{padding:6px 18px;border-top:1px solid #EDE8E0;display:flex;justify-content:space-between;align-items:center;flex-shrink:0;background:#FAF6F0}
-.back-steps-head{font-size:9px;font-weight:700;letter-spacing:.22em;text-transform:uppercase;color:#B8AC9C;margin-bottom:8px;font-family:'DM Sans',sans-serif;display:flex;align-items:center;gap:8px}
-.back-steps-head::after{content:"";flex:1;height:1px;background:#E8E0D4;margin-top:1px}
-.step{display:flex;gap:9px;align-items:flex-start;padding-bottom:7px;border-bottom:1px solid #F2EFEB}
-.step:last-child{border-bottom:none;padding-bottom:0}
-.step-num{font-family:'Playfair Display',Georgia,serif;font-size:15px;font-weight:700;flex-shrink:0;line-height:1.1;width:13px}
-.step-t{font-size:11px;font-weight:700;color:#0E0B07;margin-bottom:2px;font-family:'DM Sans',sans-serif}
-.step-d{font-size:9px;color:#6C5C4A;line-height:1.45;font-family:'DM Sans',sans-serif}
+.front-rule{
+  width:48px;height:1px;
+  background:currentColor;opacity:.4;
+  margin:.18in 0;
+}
 
-/* Force backgrounds to render when printing */
-.grad-panel,.back-accent,.back-footer,.gift-note-wrap{
+.front-welcome{
+  font-family:'Playfair Display',Georgia,serif;
+  font-size:15px;font-weight:500;font-style:italic;
+  color:#1A1410;
+  margin-bottom:.06in;
+}
+
+.front-what{
+  font-family:'DM Sans',sans-serif;
+  font-size:9.5px;font-weight:400;
+  line-height:1.55;color:#3C2E22;
+  max-width:3.4in;
+  margin-bottom:.22in;
+}
+.front-what.compact{
+  font-size:9px;line-height:1.5;
+  margin-bottom:.16in;
+}
+
+.front-contents-eye{
+  font-family:'Playfair Display',Georgia,serif;
+  font-size:11px;font-weight:500;font-style:italic;
+  color:currentColor;opacity:.8;
+  margin-bottom:.1in;
+  display:flex;align-items:center;gap:8px;justify-content:center;
+}
+.front-contents-eye::before,.front-contents-eye::after{
+  content:"";display:block;width:14px;height:.5px;background:currentColor;opacity:.5;
+}
+
+.front-contents{
+  display:flex;flex-direction:column;align-items:center;
+  gap:5px;margin-bottom:.06in;
+}
+.front-content-item{
+  font-family:'Playfair Display',Georgia,serif;
+  font-size:11px;line-height:1.35;
+  color:#1A1410;font-weight:500;
+  letter-spacing:-.005em;
+}
+
+/* Printed gift note */
+.front-gift-note{
+  margin:.04in auto .14in;max-width:3.4in;
+  padding:.14in .18in;
+  background:rgba(255,255,255,.55);
+  border-top:.5px solid currentColor;
+  border-bottom:.5px solid currentColor;
+}
+.front-gift-eye{
+  font-family:'DM Sans',sans-serif;
+  font-size:7px;font-weight:700;
+  letter-spacing:.3em;text-transform:uppercase;
+  color:currentColor;opacity:.7;
+  margin-bottom:6px;
+}
+.front-gift-text{
+  font-family:'Playfair Display',Georgia,serif;
+  font-style:italic;font-size:11.5px;
+  line-height:1.5;color:#1A1410;font-weight:400;
+}
+
+/* Handwritten lines variant */
+.front-write-area{
+  margin:.06in auto .12in;max-width:3.4in;width:100%;
+  padding:.04in 0 .12in;
+}
+.front-write-eye{
+  font-family:'DM Sans',sans-serif;
+  font-size:7px;font-weight:700;
+  letter-spacing:.3em;text-transform:uppercase;
+  color:currentColor;opacity:.7;
+  margin-bottom:.1in;
+}
+.front-write-lines{
+  height:.7in;
+  background:repeating-linear-gradient(
+    transparent,
+    transparent 16px,
+    rgba(0,0,0,.18) 16px,
+    rgba(0,0,0,.18) 16.5px
+  );
+}
+
+.front-foot{
+  margin-top:auto;
+  padding-top:.14in;
+  display:flex;flex-direction:column;align-items:center;gap:6px;
+}
+.front-foot-arrow{
+  width:14px;height:8px;color:currentColor;opacity:.55;
+}
+.front-foot-text{
+  font-family:'DM Sans',sans-serif;
+  font-size:7.5px;font-weight:600;
+  letter-spacing:.3em;text-transform:uppercase;
+  color:currentColor;opacity:.7;
+}
+
+.front-orderid{
+  position:absolute;
+  bottom:.16in;left:.34in;right:.34in;
+  font-family:'DM Mono',monospace;
+  font-size:6.5px;letter-spacing:.18em;
+  text-transform:uppercase;
+  color:#9A8772;text-align:center;
+  font-weight:500;
+}
+
+/* ────────── BACK FACE ────────── */
+.back{
+  height:100%;
+  padding:.5in .5in;
+  display:flex;flex-direction:column;
+  position:relative;
+}
+
+.back::before{
+  content:"";
+  position:absolute;
+  top:.34in;left:.34in;right:.34in;bottom:.34in;
+  border:.5px solid currentColor;
+  opacity:.18;
+  pointer-events:none;
+}
+
+.back-eye{
+  font-family:'DM Sans',sans-serif;
+  font-size:8px;font-weight:700;
+  letter-spacing:.34em;text-transform:uppercase;
+  color:currentColor;opacity:.7;
+  margin-top:.14in;
+  display:flex;align-items:center;gap:10px;justify-content:center;
+}
+.back-eye::before,.back-eye::after{
+  content:"";display:block;width:18px;height:.5px;background:currentColor;opacity:.5;
+}
+
+.back-title{
+  font-family:'Playfair Display',Georgia,serif;
+  font-size:24px;font-weight:500;font-style:italic;
+  line-height:1.05;letter-spacing:-.018em;
+  color:#1A1410;text-align:center;
+  margin:.18in 0 .26in;
+  max-width:3.6in;align-self:center;
+}
+
+.back-steps{
+  display:flex;flex-direction:column;gap:.16in;
+  padding:0 .04in;flex:1;
+}
+
+.back-step{
+  display:grid;grid-template-columns:auto 1fr;gap:14px;align-items:start;
+}
+
+.back-step-num{
+  font-family:'Playfair Display',Georgia,serif;
+  font-size:18px;font-weight:500;font-style:italic;
+  line-height:1;letter-spacing:-.018em;
+  color:currentColor;
+  padding-top:1px;
+}
+
+.back-step-content{display:flex;flex-direction:column;gap:3px}
+
+.back-step-title{
+  font-family:'Playfair Display',Georgia,serif;
+  font-size:12px;font-weight:500;
+  letter-spacing:-.005em;color:#1A1410;line-height:1.25;
+}
+
+.back-step-text{
+  font-family:'DM Sans',sans-serif;
+  font-size:9px;line-height:1.55;
+  color:#5C4A38;font-weight:400;
+}
+
+.back-qr-section{
+  margin-top:.22in;
+  display:flex;align-items:center;gap:.22in;
+  padding-top:.18in;
+  border-top:.5px solid rgba(120,90,60,.25);
+}
+.back-qr{
+  width:1.2in;height:1.2in;
+  flex-shrink:0;
+  background:white;
+  padding:.06in;
+  border:.5px solid rgba(120,90,60,.3);
+}
+.back-qr img{width:100%;height:100%;display:block}
+.back-qr-text{flex:1;display:flex;flex-direction:column;gap:5px}
+.back-qr-eye{
+  font-family:'DM Sans',sans-serif;
+  font-size:7px;font-weight:700;
+  letter-spacing:.3em;text-transform:uppercase;
+  color:currentColor;opacity:.75;
+}
+.back-qr-instruct{
+  font-family:'Playfair Display',Georgia,serif;
+  font-size:11px;font-style:italic;font-weight:500;
+  line-height:1.35;color:#1A1410;
+  margin-bottom:2px;
+}
+.back-qr-url{
+  font-family:'DM Mono',monospace;
+  font-size:7px;letter-spacing:.04em;
+  color:#5C4A38;font-weight:500;
+  word-break:break-all;line-height:1.3;
+}
+
+.back-foot{
+  margin-top:.14in;padding-top:.1in;
+  text-align:center;
+  font-family:'DM Sans',sans-serif;
+  font-size:7px;font-weight:600;
+  letter-spacing:.3em;text-transform:uppercase;
+  color:currentColor;opacity:.6;
+}
+
+.card,.front,.back,.front-gift-note,.back-qr,
+.front-eye::before,.front-eye::after,
+.back-eye::before,.back-eye::after,
+.front-rule,.front-mark,.front-foot-arrow{
   -webkit-print-color-adjust:exact !important;
   print-color-adjust:exact !important;
   color-adjust:exact !important;
 }
 
 @media print{
-  @page{size:5in 3in;margin:0}
-  html,body{background:white;padding:0;gap:0;display:block;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  @page{size:5in 7in;margin:0}
+  html,body{
+    background:white;padding:0;gap:0;display:block;
+    -webkit-print-color-adjust:exact;print-color-adjust:exact;
+  }
   *{-webkit-print-color-adjust:exact !important;print-color-adjust:exact !important;color-adjust:exact !important}
-  .page{page-break-after:always;page-break-inside:avoid;display:block;height:3in;gap:0}
+  .page{
+    page-break-after:always;page-break-inside:avoid;
+    display:block;height:7in;gap:0;
+  }
   .page:last-child{page-break-after:auto}
   .page-label{display:none}
-  .card{box-shadow:none!important;border:0!important;border-radius:0!important}
+  .card{box-shadow:none!important;border:0!important}
+}
+
+/* Preview-grid layout (no params): show all variants in a multi-column grid */
+.preview-grid{
+  display:flex;flex-direction:column;gap:48px;
+  align-items:center;
+}
+.preview-section{
+  display:flex;flex-direction:column;gap:12px;align-items:center;
+  width:100%;max-width:1300px;
+}
+.preview-section-label{
+  font-family:'DM Sans',sans-serif;
+  font-size:11px;font-weight:700;
+  letter-spacing:.22em;text-transform:uppercase;
+  color:#5C4A38;
+  border-bottom:1px solid #C8B8A8;
+  padding-bottom:8px;margin-bottom:4px;
+  width:100%;text-align:center;
+}
+.preview-row{
+  display:flex;gap:24px;flex-wrap:wrap;justify-content:center;
+}
+@media print{
+  .preview-grid{display:block}
+  .preview-section{display:block}
+  .preview-section-label{display:none}
+  .preview-row{display:block}
 }
 </style>
 </head>
@@ -88,48 +383,116 @@ body{padding:24px;display:flex;flex-direction:column;align-items:center;gap:24px
 <div id="cards-root"></div>
 
 <script>
-// ─────────────────────────────────────────────────────────────────────────────
-// Card renderer
+// ═══════════════════════════════════════════════════════════════════════════
+// ATTUNE WELCOME CARD RENDERER
 //
-// Without URL params → renders 4 sample cards (one per package), each with
-// fallback copy for preview.
+// URL contract:
+//   ?pkg=newlywed|anniversary|premium|core   (required for single-card mode)
+//   &names=Sarah+%26+James                    (displayed as headline)
+//   &note=Saw+this+and+thought...             (optional; printed gift note)
+//   &mode=handwrite                           (optional; renders blank lines instead)
+//   &orderId=ARW-2026-0247                    (shown in footer, encoded in QR if no token)
+//   &token=xyz                                (encoded into QR URL)
 //
-// With URL params → renders a single personalized card:
-//   ?pkg=core|newlywed|anniversary|premium
-//   &names=Sarah+%26+James     (displayed as headline)
-//   &note=Happy+anniversary... (optional; front becomes gift layout)
-//   &from=Mom+%26+Dad          (optional attribution for gift note)
-//   &orderId=ATT-...           (optional; shown small in footer)
-//   &token=xyz                 (optional; appended to QR URL)
-// ─────────────────────────────────────────────────────────────────────────────
+// Without params → renders a complete preview grid.
+// ═══════════════════════════════════════════════════════════════════════════
 
 const PACKAGES = {
-  core:        { label:'Assessment',   name:'The Attune Assessment',   accent:'#E8673A',
-                 grad:[{s:'0%',c:'#C8522E'},{s:'52%',c:'#6B3FA0'},{s:'100%',c:'#1B5FE8'}] },
-  newlywed:    { label:'Starting Out', name:'Starting Out Collection', accent:'#C45C2A',
-                 grad:[{s:'0%',c:'#B84A24'},{s:'52%',c:'#6B3FA0'},{s:'100%',c:'#1B5FE8'}] },
-  anniversary: { label:'Anniversary',  name:'Relationship Reflection', accent:'#6B3FA0',
-                 grad:[{s:'0%',c:'#C8522E'},{s:'45%',c:'#9B5DE5'},{s:'100%',c:'#1B5FE8'}] },
-  premium:     { label:'Premium',      name:'Attune Premium',          accent:'#5B6DF8',
-                 grad:[{s:'0%',c:'#5B6DF8'},{s:'52%',c:'#6B3FA0'},{s:'100%',c:'#1B5FE8'}] },
+  newlywed: {
+    label: 'Starting Out Collection',
+    eyebrow: 'A gift for two',
+    ink: '#9C3D1A',          // burnt sienna
+    what: "Attune is a guided experience that helps couples understand how they communicate, where they align, and where they differ.",
+    contents: [
+      'The Attune Assessment',
+      'Starting Out Checklist',
+      'Build a Budget exercise',
+    ],
+    mark: 'rings',
+  },
+  anniversary: {
+    label: 'Relationship Reflection',
+    eyebrow: 'A gift for two',
+    ink: '#1E3A6E',          // deep indigo
+    what: "Attune is a guided experience that helps couples understand how they communicate, where they align, and where they differ.",
+    contents: [
+      'The Attune Assessment',
+      'Relationship Reflection exercise',
+      'Anniversary-specific prompts',
+    ],
+    mark: 'sun-moon',
+  },
+  premium: {
+    label: 'Attune Premium',
+    eyebrow: 'A gift for two',
+    ink: '#5A2E5C',          // deep plum
+    what: "Attune is a guided experience that helps couples understand how they communicate, where they align, and where they differ.",
+    contents: [
+      'The Attune Assessment',
+      'Both bonus exercises',
+      'Personalized workbook',
+      'Session with a licensed therapist',
+    ],
+    mark: 'seal',
+  },
+  // Digital-only fallback. No physical box but render gracefully.
+  core: {
+    label: 'The Attune Assessment',
+    eyebrow: 'A gift for two',
+    ink: '#9C3D1A',
+    what: "Attune is a guided experience that helps couples understand how they communicate, where they align, and where they differ.",
+    contents: [
+      'Communication exercise',
+      'Expectations exercise',
+      'Full joint results',
+    ],
+    mark: 'rings',
+  },
 };
 
-const DEFAULT_QR = 'data:image/png;base64,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';
+// SVG marks — engraved-line style, single-color via currentColor
+const MARKS = {
+  rings: `<svg viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="22" cy="30" r="14" stroke="currentColor" stroke-width="1.4"/>
+    <circle cx="38" cy="30" r="14" stroke="currentColor" stroke-width="1.4"/>
+  </svg>`,
+  'sun-moon': `<svg viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="22" cy="28" r="9" stroke="currentColor" stroke-width="1.4"/>
+    <g stroke="currentColor" stroke-width="1.2" stroke-linecap="round">
+      <line x1="22" y1="13" x2="22" y2="17"/>
+      <line x1="22" y1="39" x2="22" y2="43"/>
+      <line x1="7" y1="28" x2="11" y2="28"/>
+      <line x1="33" y1="28" x2="37" y2="28"/>
+      <line x1="11.5" y1="17.5" x2="14.5" y2="20.5"/>
+      <line x1="29.5" y1="35.5" x2="32.5" y2="38.5"/>
+      <line x1="11.5" y1="38.5" x2="14.5" y2="35.5"/>
+      <line x1="29.5" y1="20.5" x2="32.5" y2="17.5"/>
+    </g>
+    <path d="M50 32 a8 8 0 1 1 -8 -8 a6 6 0 0 0 8 8 z" stroke="currentColor" stroke-width="1.4" fill="none"/>
+  </svg>`,
+  seal: `<svg viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="30" cy="30" r="22" stroke="currentColor" stroke-width="1.4"/>
+    <circle cx="30" cy="30" r="18" stroke="currentColor" stroke-width=".6" stroke-dasharray="1 2"/>
+    <text x="30" y="37" font-family="Playfair Display, Georgia, serif"
+          font-size="20" font-style="italic" font-weight="500"
+          text-anchor="middle" fill="currentColor">A</text>
+  </svg>`,
+};
 
-function esc(s) {
+const DEFAULT_QR = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxIDEiPjxyZWN0IHdpZHRoPSIxIiBoZWlnaHQ9IjEiIGZpbGw9IiNFRUUiLz48L3N2Zz4=';
+
+function esc(s){
   return String(s ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
 }
 
-/** Parse names like "Sarah & James" / "Sarah and James" / "Sarah + James"
- *  into two-line HTML with an italic ampersand. */
-function splitNames(namesStr) {
+function splitNames(namesStr){
   if (!namesStr) return { html: 'Welcome', twoLines: false };
-  const raw = namesStr.trim().replace(/\s+and\s+/i, ' & ').replace(/\s*\+\s*/, ' & ');
+  const raw = namesStr.trim().replace(/\s+and\s+/i,' & ').replace(/\s*\+\s*/,' & ');
   const parts = raw.split(/\s*&\s*/);
   if (parts.length >= 2 && parts[0] && parts[1]) {
     const [a, b] = parts;
     const combined = `${a} & ${b}`;
-    if (combined.length > 16) {
+    if (combined.length > 18) {
       return { html: `${esc(a)}<br><span class="amp">&amp;</span> ${esc(b)}`, twoLines: true };
     }
     return { html: `${esc(a)} <span class="amp">&amp;</span> ${esc(b)}`, twoLines: false };
@@ -137,165 +500,209 @@ function splitNames(namesStr) {
   return { html: esc(raw), twoLines: false };
 }
 
-function gradDefs(id, pkg) {
-  const stops = pkg.grad.map(p => `<stop offset="${p.s}" stop-color="${p.c}"/>`).join('');
-  return `<defs><linearGradient id="${id}" x1="0" y1="0" x2="1" y2="1">${stops}</linearGradient></defs>`;
-}
-
-function gradStripDefs(id, pkg) {
-  const stops = pkg.grad.map(p => `<stop offset="${p.s}" stop-color="${p.c}"/>`).join('');
-  return `<defs><linearGradient id="${id}" x1="0" y1="0" x2="1" y2="0">${stops}</linearGradient></defs>`;
-}
-
-/** Attune mark — coral left bubble with white heart, white right bubble
- *  with coral heart. Matches the notepad white-fill variant. */
-function markSvg(w = 92, h = 68) {
-  return `<svg width="${w}" height="${h}" viewBox="0 0 103 76" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <defs><linearGradient id="mCoral" x1="0" y1="0" x2="103" y2="76" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#E8906F"/><stop offset="100%" stop-color="#C8522E"/></linearGradient></defs>
-  <path d="M14,4L44,4A9,9,0,0,1,53,13L53,42A9,9,0,0,1,44,51L20,51L6,61L11,51A6,6,0,0,1,5,45L5,13A9,9,0,0,1,14,4Z" fill="url(#mCoral)"/>
-  <path d="M22,11C20,8.5,16.5,5,11.5,5C5.5,5,2,9.5,2,14.5C2,23,11,30,22,40C33,30,42,23,42,14.5C42,9.5,38.5,5,32.5,5C27.5,5,24,8.5,22,11Z" fill="white" transform="translate(13.16,11.3) scale(.72)"/>
-  <path d="M89,14L59,14A9,9,0,0,0,50,23L50,52A9,9,0,0,0,59,61L83,61L97,71L92,61A6,6,0,0,0,98,55L98,23A9,9,0,0,0,89,14Z" fill="white"/>
-  <path d="M22,11C20,8.5,16.5,5,11.5,5C5.5,5,2,9.5,2,14.5C2,23,11,30,22,40C33,30,42,23,42,14.5C42,9.5,38.5,5,32.5,5C27.5,5,24,8.5,22,11Z" fill="url(#mCoral)" transform="translate(58.16,21.3) scale(.72)"/>
-</svg>`;
-}
-
-function cardHtml(pkgKey, opts = {}) {
-  const pkg = PACKAGES[pkgKey];
-  if (!pkg) return '';
-  const { names = '', note = '', from = '', orderId = '' } = opts;
+function frontHtml(pkgKey, opts = {}){
+  const pkg = PACKAGES[pkgKey] || PACKAGES.newlywed;
+  const { names = '', note = '', orderId = '', mode } = opts;
   const nm = splitNames(names);
-  const hasGiftNote = !!note;
 
-  const giftBlock = `
-    <div class="gift-note-wrap">
-      <div class="gift-note-eye">A note for you</div>
-      <div class="gift-note-text">${esc(note)}</div>
-      ${from ? `<div class="gift-note-from">— ${esc(from)}</div>` : ''}
+  const showHandwrite = mode === 'handwrite';
+  const showPrintedNote = !showHandwrite && note && note.length > 0;
+
+  const printedNoteBlock = showPrintedNote ? `
+    <div class="front-gift-note">
+      <div class="front-gift-eye">A note for you</div>
+      <div class="front-gift-text">${esc(note)}</div>
     </div>
-  `;
+  ` : '';
 
-  const gsBlock = `
-    <div class="get-started">
-      <div class="gs-mark" style="color:${pkg.accent}">→</div>
-      <div class="gs-body">Scan the QR code on the back to begin, or visit <strong>attune-relationships.com/app</strong></div>
-    </div>`;
+  const handwriteBlock = showHandwrite ? `
+    <div class="front-write-area">
+      <div class="front-write-eye">A note for you</div>
+      <div class="front-write-lines"></div>
+    </div>
+  ` : '';
 
-  const front = `
+  // Always show package contents — the recipient needs to know what they got
+  const contentsBlock = !showHandwrite ? `
+    <div class="front-contents-eye">Inside the box</div>
+    <div class="front-contents">
+      ${pkg.contents.map(c => `<div class="front-content-item">${esc(c)}</div>`).join('')}
+    </div>
+  ` : '';
+
+  // Always anchor identity. On standard variant: full welcome + 2-line description.
+  // On gift-note variant: shorter 1-line context (note already takes up space).
+  // On handwrite variant: omit (the gift giver will write context personally).
+  let identityBlock = '';
+  if (!showHandwrite) {
+    if (showPrintedNote) {
+      // Compact: just the welcome line
+      identityBlock = `
+        <div class="front-welcome">Welcome to Attune.</div>
+      `;
+    } else {
+      // Full: welcome + 2-line "what this is"
+      identityBlock = `
+        <div class="front-welcome">Welcome to Attune.</div>
+        <p class="front-what">${esc(pkg.what)}</p>
+      `;
+    }
+  }
+
+  return `
 <div class="page">
-  <div class="card front">
-    <div class="grad-panel">
-      <svg class="gp-bg" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none" viewBox="0 0 210 408">
-        ${gradDefs('gp_' + pkgKey, pkg)}
-        <rect width="210" height="408" fill="url(#gp_${pkgKey})"/>
-      </svg>
-      ${markSvg(64, 47)}
-      <div>
-        <div class="gp-pkg-label">Package</div>
-        <div class="gp-pkg-name">${esc(pkg.name)}</div>
+  <div class="card" style="color:${pkg.ink}">
+    <div class="front">
+      <div class="front-eye">${esc(pkg.eyebrow)}</div>
+      <div class="front-mark">${MARKS[pkg.mark] || MARKS.rings}</div>
+      <h1 class="front-names ${nm.twoLines ? 'two-lines' : ''}">${nm.html}</h1>
+      <div class="front-rule"></div>
+      ${identityBlock}
+      ${printedNoteBlock}
+      ${handwriteBlock}
+      ${contentsBlock}
+      <div class="front-foot">
+        <svg class="front-foot-arrow" viewBox="0 0 14 8" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M1 4h12m0 0L9.5 1m3.5 3l-3.5 3" stroke="currentColor" stroke-width="1" stroke-linecap="round"/>
+        </svg>
+        <div class="front-foot-text">Begin on the back</div>
       </div>
-    </div>
-    <div class="right">
-      <div class="right-body">
-        <div class="welcome-eye">${names ? 'For' : 'Welcome'}</div>
-        <div class="names-h ${nm.twoLines ? 'two-lines' : ''}">${nm.html}</div>
-        <div class="welcome-sub">Welcome to your Attune relationship experience.</div>
-        ${hasGiftNote ? giftBlock : gsBlock}
-      </div>
-      <div class="right-footer">
-        <div class="footer-txt">attune-relationships.com</div>
-        <div class="footer-dot"></div>
-        <div class="footer-txt">${esc(pkg.name)}</div>
-        ${orderId ? `<div class="footer-dot"></div><div class="footer-txt" style="font-family:monospace;letter-spacing:.06em;text-transform:none">${esc(orderId)}</div>` : ''}
-      </div>
+      ${orderId ? `<div class="front-orderid">${esc(pkg.label)} · ${esc(orderId)}</div>` : `<div class="front-orderid">${esc(pkg.label)}</div>`}
     </div>
   </div>
-  <div class="page-label">${esc(pkg.label)} – Front${hasGiftNote ? ' (gift)' : ''}</div>
+  <div class="page-label">${esc(pkg.label)} · Front${showPrintedNote ? ' (printed gift note)' : showHandwrite ? ' (handwritten lines)' : ''}</div>
 </div>`;
-
-  const back = `
-<div class="page">
-  <div class="card back">
-    <svg xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none" viewBox="0 0 1008 6" style="display:block;width:100%;height:6px">
-      ${gradStripDefs('gs_' + pkgKey, pkg)}
-      <rect width="1008" height="6" fill="url(#gs_${pkgKey})"/>
-    </svg>
-    <div class="back-inner">
-      <div class="back-left">
-        <div class="back-steps-head">How to get started</div>
-        <div style="display:flex;flex-direction:column;gap:9px;flex:1;justify-content:center">
-          <div class="step"><div class="step-num" style="color:${pkg.accent}">1</div><div><div class="step-t">Scan the QR code</div><div class="step-d">Use your phone's camera. Opens directly to your Attune account setup.</div></div></div>
-          <div class="step"><div class="step-num" style="color:${pkg.accent}">2</div><div><div class="step-t">Create your account</div><div class="step-d">Takes about two minutes. You'll invite your partner from inside the app.</div></div></div>
-          <div class="step"><div class="step-num" style="color:${pkg.accent}">3</div><div><div class="step-t">Answer on your own</div><div class="step-d">Both partners answer independently. Your answers stay private until you both finish.</div></div></div>
-          <div class="step"><div class="step-num" style="color:${pkg.accent}">4</div><div><div class="step-t">See your results together</div><div class="step-d">Couple type, map, and insights unlock when both of you are done.</div></div></div>
-        </div>
-      </div>
-      <div class="back-right">
-        <div style="font-size:7.5px;font-weight:700;letter-spacing:.26em;text-transform:uppercase;color:#B8AC9C;text-align:center;font-family:'DM Sans',sans-serif;margin-bottom:10px">Scan to start</div>
-        <img src="${DEFAULT_QR}" width="108" height="108" alt="QR code for Attune access" class="qr-img" style="border-radius:4px;border:1px solid #EDE8E0;display:block"/>
-        <div style="text-align:center;margin-top:10px">
-          <div style="font-size:8px;font-weight:700;color:#0E0B07;font-family:'DM Sans',sans-serif;margin-bottom:3px">attune-relationships.com</div>
-        </div>
-      </div>
-    </div>
-    <div class="back-footer">
-      <div style="font-family:'Playfair Display',Georgia,serif;font-size:9px;font-style:italic;color:#8C7A68">Understanding takes intention.</div>
-      <div style="font-family:'DM Sans',sans-serif;font-size:7px;color:#B8AC9C;letter-spacing:.04em">${esc(pkg.name)}</div>
-    </div>
-  </div>
-  <div class="page-label">${esc(pkg.label)} – Back</div>
-</div>`;
-
-  return front + back;
 }
 
-(function render() {
+function backHtml(pkgKey, opts = {}){
+  const pkg = PACKAGES[pkgKey] || PACKAGES.newlywed;
+  const { token = '' } = opts;
+  const qrUrl = token
+    ? `attune-relationships.com/welcome?qr=${token}`
+    : 'attune-relationships.com/app';
+
+  return `
+<div class="page">
+  <div class="card" style="color:${pkg.ink}">
+    <div class="back">
+      <div class="back-eye">How to begin</div>
+      <h2 class="back-title">Three small steps to start.</h2>
+      <div class="back-steps">
+        <div class="back-step">
+          <span class="back-step-num">01</span>
+          <div class="back-step-content">
+            <h3 class="back-step-title">Scan the code below.</h3>
+            <p class="back-step-text">It opens a private welcome page just for the two of you. Use any phone camera.</p>
+          </div>
+        </div>
+        <div class="back-step">
+          <span class="back-step-num">02</span>
+          <div class="back-step-content">
+            <h3 class="back-step-title">Each take the assessment — separately.</h3>
+            <p class="back-step-text">About 15 minutes each. Honest answers work better than strategic ones. Your responses stay private until you both finish.</p>
+          </div>
+        </div>
+        <div class="back-step">
+          <span class="back-step-num">03</span>
+          <div class="back-step-content">
+            <h3 class="back-step-title">See your results together.</h3>
+            <p class="back-step-text">Your couple type, communication map, and personalized guidance unlock the moment you both submit.</p>
+          </div>
+        </div>
+      </div>
+      <div class="back-qr-section">
+        <div class="back-qr">
+          <img src="${DEFAULT_QR}" class="qr-img" data-token="${esc(token)}" alt="Scan to start"/>
+        </div>
+        <div class="back-qr-text">
+          <div class="back-qr-eye">Scan to begin</div>
+          <div class="back-qr-instruct">Or visit the link below in your browser.</div>
+          <div class="back-qr-url">${esc(qrUrl)}</div>
+        </div>
+      </div>
+      <div class="back-foot">attune-relationships.com</div>
+    </div>
+  </div>
+  <div class="page-label">${esc(pkg.label)} · Back</div>
+</div>`;
+}
+
+(function render(){
   const params = new URLSearchParams(location.search);
-  const pkg = params.get('pkg');
-  const root = document.getElementById('cards-root');
+  const pkg    = params.get('pkg');
+  const root   = document.getElementById('cards-root');
 
   if (pkg && PACKAGES[pkg]) {
     const opts = {
       names:   params.get('names')   || '',
       note:    params.get('note')    || '',
-      from:    params.get('from')    || '',
       orderId: params.get('orderId') || '',
       token:   params.get('token')   || '',
+      mode:    params.get('mode')    || '',
     };
-    document.title = `Attune – ${PACKAGES[pkg].label}${opts.names ? ' – ' + opts.names : ''}`;
-    root.innerHTML = cardHtml(pkg, opts);
-    generateQR(opts.token);
+    document.title = `Attune · ${PACKAGES[pkg].label}${opts.names ? ' · ' + opts.names : ''}`;
+    root.innerHTML = frontHtml(pkg, opts) + backHtml(pkg, opts);
+    generateQR();
   } else {
-    // Default preview: show a sample of each package, including one gift variant
-    root.innerHTML = [
-      cardHtml('core',        { names: 'Sarah & James' }),
-      cardHtml('newlywed',    { names: 'Maya & Chris' }),
-      cardHtml('anniversary', { names: 'Elena & David', note: "Fifteen years. Still the best partner I could ask for.", from: 'David' }),
-      cardHtml('premium',     { names: 'Taylor & Morgan' }),
-    ].join('');
-    generateQR(''); // preview uses generic URL
+    // Preview mode — show all packages × all variants
+    const sample = {
+      newlywed: {
+        names: 'Maya & David',
+        orderId: 'ARW-2026-0247',
+        note: "I saw this and thought of you two. So happy you found each other.",
+      },
+      anniversary: {
+        names: 'Elena & Marcus',
+        orderId: 'ARW-2026-0312',
+        note: "Fifteen years. Still the best partner I could ask for.",
+      },
+      premium: {
+        names: 'Taylor & Morgan',
+        orderId: 'ARW-2026-0418',
+        note: "Wishing you both years of growing closer. With love.",
+      },
+    };
+
+    const sections = Object.keys(sample).map(key => {
+      const data = sample[key];
+      const pkg = PACKAGES[key];
+      return `
+        <div class="preview-section">
+          <div class="preview-section-label">${esc(pkg.label)}</div>
+          <div class="preview-row">
+            ${frontHtml(key, { names: data.names, orderId: data.orderId })}
+            ${frontHtml(key, { names: data.names, orderId: data.orderId, note: data.note })}
+            ${frontHtml(key, { names: data.names, orderId: data.orderId, mode: 'handwrite' })}
+            ${backHtml(key, { orderId: data.orderId })}
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    root.innerHTML = `<div class="preview-grid">${sections}</div>`;
+    generateQR();
   }
 })();
 
-/** Generate a real QR code and replace all .qr-img placeholders.
- *  With a token: encodes https://attune-relationships.com/app?qr=<token>
- *  Without: encodes the plain /app URL (for preview) */
-function generateQR(token) {
-  const url = token
-    ? `https://attune-relationships.com/app?qr=${encodeURIComponent(token)}`
-    : 'https://attune-relationships.com/app';
+function generateQR(){
   const imgs = document.querySelectorAll('.qr-img');
   if (!imgs.length) return;
-  // Wait briefly if QRCode lib isn't ready yet
   const tryGen = () => {
     if (typeof QRCode === 'undefined') { setTimeout(tryGen, 50); return; }
-    QRCode.toDataURL(url, {
-      width: 300,
-      margin: 1,
-      errorCorrectionLevel: 'M',
-      color: { dark: '#0E0B07', light: '#FFFFFF' },
-    }, (err, dataUrl) => {
-      if (err) { console.error('[qr] generation failed:', err); return; }
-      imgs.forEach(img => img.src = dataUrl);
+    imgs.forEach(img => {
+      const token = img.dataset.token;
+      const url = token
+        ? `https://attune-relationships.com/welcome?qr=${encodeURIComponent(token)}`
+        : 'https://attune-relationships.com/app';
+      QRCode.toDataURL(url, {
+        width: 320,
+        margin: 1,
+        errorCorrectionLevel: 'M',
+        color: { dark: '#1A1410', light: '#FFFFFF' },
+      }, (err, dataUrl) => {
+        if (err) { console.error('[qr] generation failed:', err); return; }
+        img.src = dataUrl;
+      });
     });
   };
   tryGen();
