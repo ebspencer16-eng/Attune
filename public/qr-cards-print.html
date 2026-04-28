@@ -595,7 +595,7 @@ function frontHtml(pkgKey, opts = {}){
   ` : '';
 
   const contentsBlock = !showHandwrite ? `
-    <div class="front-contents-eye">Inside the box</div>
+    <div class="front-contents-eye">Your gift includes</div>
     <div class="front-contents">
       ${pkg.contents.map(c => `<div class="front-content-item">${esc(c)}</div>`).join('')}
     </div>
@@ -658,7 +658,7 @@ function backHtml(pkgKey, opts = {}){
       <div class="back-hero">
         <div class="back-hero-mark">${attuneMark('white')}</div>
         <div class="back-hero-eye">How to begin</div>
-        <h2 class="back-hero-title">Three small <em>steps to start.</em></h2>
+        <h2 class="back-hero-title">What you'll do <em>together.</em></h2>
       </div>
       <div class="back-body">
         <div class="back-steps">
