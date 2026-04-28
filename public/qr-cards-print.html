@@ -71,7 +71,7 @@ body{padding:32px 24px;display:flex;flex-direction:column;align-items:center;gap
 /* Inner content area — contains border + everything else */
 .front-inner{
   flex:1;
-  padding:.5in .55in;
+  padding:.42in .55in .3in;
   display:flex;flex-direction:column;align-items:center;text-align:center;
   position:relative;
 }
@@ -86,11 +86,19 @@ body{padding:32px 24px;display:flex;flex-direction:column;align-items:center;gap
   pointer-events:none;
 }
 
-/* Attune mark — the official brand logo (two speech bubbles + hearts).
-   Sits at top, centered, in the package ink color. */
+/* Centered composition wrapper — pushes the main content to vertical center
+   while leaving the footer (arrow + order ID) anchored at the bottom. */
+.front-stack{
+  flex:1;
+  display:flex;flex-direction:column;align-items:center;
+  justify-content:center;
+  width:100%;
+}
+
+/* Attune mark — the official brand logo. Sits at top, centered, in package ink. */
 .front-attune-mark{
-  width:.85in;height:.62in;
-  margin:.18in 0 .14in;
+  width:.95in;height:.7in;
+  margin:.16in 0 .14in;
   color:currentColor;
   position:relative;z-index:1;
 }
@@ -98,10 +106,10 @@ body{padding:32px 24px;display:flex;flex-direction:column;align-items:center;gap
 
 .front-eye{
   font-family:'DM Sans',sans-serif;
-  font-size:8px;font-weight:700;
-  letter-spacing:.34em;text-transform:uppercase;
+  font-size:8.5px;font-weight:700;
+  letter-spacing:.36em;text-transform:uppercase;
   color:currentColor;opacity:.65;
-  margin-bottom:.2in;
+  margin-bottom:.18in;
   display:flex;align-items:center;gap:10px;
 }
 .front-eye::before,.front-eye::after{
@@ -110,13 +118,25 @@ body{padding:32px 24px;display:flex;flex-direction:column;align-items:center;gap
 
 .front-names{
   font-family:'Playfair Display',Georgia,serif;
-  font-size:30px;font-weight:500;font-style:italic;
-  line-height:1;letter-spacing:-.018em;
+  font-size:34px;font-weight:500;font-style:italic;
+  line-height:1;letter-spacing:-.02em;
   color:#1A1410;
+  margin-bottom:.12in;
+}
+.front-names.two-lines{font-size:26px;line-height:1.08}
+.front-names .amp{font-style:italic;font-weight:400;color:currentColor;opacity:.7;padding:0 4px}
+
+/* Short tagline that lives between the names and the rule —
+   gives the recipient an immediate "what this is" anchor without
+   competing with the gift list. */
+.front-tagline{
+  font-family:'Playfair Display',Georgia,serif;
+  font-style:italic;font-size:13px;
+  color:currentColor;opacity:.78;
+  font-weight:400;line-height:1.3;
+  max-width:3.4in;
   margin-bottom:.06in;
 }
-.front-names.two-lines{font-size:24px;line-height:1.1}
-.front-names .amp{font-style:italic;font-weight:400;color:currentColor;opacity:.7;padding:0 4px}
 
 .front-rule{
   width:48px;height:1px;
@@ -124,11 +144,28 @@ body{padding:32px 24px;display:flex;flex-direction:column;align-items:center;gap
   margin:.18in 0;
 }
 
+.front-bottom-rule{
+  width:36px;height:1px;
+  background:currentColor;opacity:.3;
+  margin:.18in auto .12in;
+}
+
+.front-signoff{
+  font-family:'Playfair Display',Georgia,serif;
+  font-size:11.5px;font-weight:400;font-style:italic;
+  color:currentColor;opacity:.75;
+  letter-spacing:-.005em;
+}
+.front-signoff span{
+  font-weight:500;font-style:italic;color:currentColor;opacity:1;
+  letter-spacing:.02em;
+}
+
 .front-welcome{
   font-family:'Playfair Display',Georgia,serif;
-  font-size:15px;font-weight:500;font-style:italic;
+  font-size:13px;font-weight:500;font-style:italic;
   color:#1A1410;
-  margin-bottom:.06in;
+  margin-bottom:.04in;
 }
 
 .front-what{
@@ -136,22 +173,33 @@ body{padding:32px 24px;display:flex;flex-direction:column;align-items:center;gap
   font-size:9.5px;font-weight:400;
   line-height:1.55;color:#3C2E22;
   max-width:3.4in;
-  margin-bottom:.22in;
+  margin-bottom:.16in;
 }
 .front-what.compact{
   font-size:9px;line-height:1.5;
-  margin-bottom:.16in;
+  margin-bottom:.14in;
 }
 
 .front-contents-eye{
   font-family:'Playfair Display',Georgia,serif;
-  font-size:11px;font-weight:500;font-style:italic;
+  font-size:11.5px;font-weight:500;font-style:italic;
   color:currentColor;opacity:.8;
-  margin-bottom:.1in;
+  margin-bottom:.14in;
   display:flex;align-items:center;gap:8px;justify-content:center;
 }
 .front-contents-eye::before,.front-contents-eye::after{
   content:"";display:block;width:14px;height:.5px;background:currentColor;opacity:.5;
+}
+
+.front-contents{
+  display:flex;flex-direction:column;align-items:center;
+  gap:7px;margin-bottom:.04in;
+}
+.front-content-item{
+  font-family:'Playfair Display',Georgia,serif;
+  font-size:12px;line-height:1.35;
+  color:#1A1410;font-weight:500;
+  letter-spacing:-.005em;
 }
 
 .front-contents{
@@ -209,9 +257,9 @@ body{padding:32px 24px;display:flex;flex-direction:column;align-items:center;gap
 }
 
 .front-foot{
-  margin-top:auto;
-  padding-top:.14in;
+  padding-top:.18in;
   display:flex;flex-direction:column;align-items:center;gap:6px;
+  flex-shrink:0;
 }
 .front-foot-arrow{
   width:14px;height:8px;color:currentColor;opacity:.55;
@@ -234,7 +282,8 @@ body{padding:32px 24px;display:flex;flex-direction:column;align-items:center;gap
 }
 
 /* ────────── BACK FACE ──────────
-   Gradient hero on top (brand presence), cream below with steps + QR. */
+   Cream paper section on top with steps, gradient terminus on bottom
+   with QR code. */
 .back{
   height:100%;
   padding:0;
@@ -242,81 +291,39 @@ body{padding:32px 24px;display:flex;flex-direction:column;align-items:center;gap
   position:relative;
 }
 
-/* Gradient hero block — top ~2.4in. Brand-colored, full bleed. */
-.back-hero{
-  flex-shrink:0;
-  height:2.4in;
-  padding:.42in .55in .38in;
-  background:linear-gradient(140deg,
-    var(--grad-start) 0%,
-    var(--grad-mid) 52%,
-    var(--grad-end) 100%);
-  color:white;
-  position:relative;
-  display:flex;flex-direction:column;align-items:center;text-align:center;
-  overflow:hidden;
-}
-/* Subtle dotted texture on the gradient — gives it tactile depth */
-.back-hero::before{
-  content:"";
-  position:absolute;inset:0;
-  background-image:radial-gradient(circle at 1px 1px,rgba(255,255,255,.18) 1px,transparent 0);
-  background-size:14px 14px;
-  pointer-events:none;
-}
-/* Soft accent glow */
-.back-hero::after{
-  content:"";position:absolute;
-  bottom:-.4in;right:-.3in;width:1.4in;height:1.4in;
-  border-radius:50%;
-  background:radial-gradient(circle,rgba(255,255,255,.12),transparent 70%);
-  pointer-events:none;
-}
-
-.back-hero-mark{
-  width:.85in;height:.62in;
-  margin-bottom:.18in;
-  position:relative;z-index:1;
-}
-.back-hero-mark svg{width:100%;height:100%;display:block}
-
-.back-hero-eye{
-  font-family:'DM Sans',sans-serif;
-  font-size:8px;font-weight:700;
-  letter-spacing:.34em;text-transform:uppercase;
-  color:rgba(255,255,255,.85);
-  margin-bottom:.14in;
-  display:flex;align-items:center;gap:10px;
-  position:relative;z-index:1;
-}
-.back-hero-eye::before,.back-hero-eye::after{
-  content:"";display:block;width:18px;height:.5px;background:rgba(255,255,255,.6);
-}
-
-.back-hero-title{
-  font-family:'Playfair Display',Georgia,serif;
-  font-size:22px;font-weight:500;font-style:italic;
-  line-height:1.1;letter-spacing:-.018em;
-  color:white;
-  max-width:3.4in;
-  position:relative;z-index:1;
-}
-.back-hero-title em{
-  font-style:italic;color:rgba(255,255,255,.78);font-weight:400;
-}
-
-/* Cream lower section — steps + QR */
+/* Top cream section — eyebrow + title + steps */
 .back-body{
   flex:1;
-  padding:.32in .55in .3in;
+  padding:.42in .55in .26in;
   display:flex;flex-direction:column;
   position:relative;
 }
 
+.back-body-eye{
+  font-family:'DM Sans',sans-serif;
+  font-size:8.5px;font-weight:700;
+  letter-spacing:.36em;text-transform:uppercase;
+  color:currentColor;opacity:.65;
+  margin-bottom:.14in;
+  display:flex;align-items:center;gap:10px;justify-content:center;
+}
+.back-body-eye::before,.back-body-eye::after{
+  content:"";display:block;width:18px;height:.5px;background:currentColor;opacity:.5;
+}
+
+.back-body-title{
+  font-family:'Playfair Display',Georgia,serif;
+  font-size:24px;font-weight:500;font-style:italic;
+  line-height:1.05;letter-spacing:-.018em;
+  color:#1A1410;text-align:center;
+  margin-bottom:.26in;
+  max-width:3.8in;align-self:center;
+}
+.back-body-title em{font-style:italic;color:currentColor;opacity:.7;font-weight:400}
+
 .back-steps{
   display:flex;flex-direction:column;gap:.16in;
   padding:0 .04in;
-  flex:1;
 }
 
 .back-step{
@@ -325,7 +332,7 @@ body{padding:32px 24px;display:flex;flex-direction:column;align-items:center;gap
 
 .back-step-num{
   font-family:'Playfair Display',Georgia,serif;
-  font-size:18px;font-weight:500;font-style:italic;
+  font-size:20px;font-weight:500;font-style:italic;
   line-height:1;letter-spacing:-.018em;
   color:currentColor;
   padding-top:1px;
@@ -335,64 +342,103 @@ body{padding:32px 24px;display:flex;flex-direction:column;align-items:center;gap
 
 .back-step-title{
   font-family:'Playfair Display',Georgia,serif;
-  font-size:12px;font-weight:500;
+  font-size:13px;font-weight:500;
   letter-spacing:-.005em;color:#1A1410;line-height:1.25;
 }
 
 .back-step-text{
   font-family:'DM Sans',sans-serif;
-  font-size:9px;line-height:1.55;
+  font-size:9.5px;line-height:1.55;
   color:#5C4A38;font-weight:400;
 }
 
-.back-qr-section{
-  margin-top:.18in;
-  display:flex;align-items:center;gap:.22in;
-  padding-top:.16in;
-  border-top:.5px solid rgba(120,90,60,.25);
+/* Bottom gradient terminus — QR code lives here as the final action */
+.back-qr-block{
+  flex-shrink:0;
+  height:2.3in;
+  padding:.34in .55in .3in;
+  background:linear-gradient(140deg,
+    var(--grad-start) 0%,
+    var(--grad-mid) 52%,
+    var(--grad-end) 100%);
+  color:white;
+  position:relative;
+  display:flex;align-items:center;gap:.3in;
+  overflow:hidden;
 }
+/* Subtle dotted texture */
+.back-qr-block::before{
+  content:"";
+  position:absolute;inset:0;
+  background-image:radial-gradient(circle at 1px 1px,rgba(255,255,255,.18) 1px,transparent 0);
+  background-size:14px 14px;
+  pointer-events:none;
+}
+.back-qr-block::after{
+  content:"";position:absolute;
+  bottom:-.4in;right:-.3in;width:1.4in;height:1.4in;
+  border-radius:50%;
+  background:radial-gradient(circle,rgba(255,255,255,.15),transparent 70%);
+  pointer-events:none;
+}
+
 .back-qr{
-  width:1.2in;height:1.2in;
+  width:1.3in;height:1.3in;
   flex-shrink:0;
   background:white;
-  padding:.06in;
-  border:.5px solid rgba(120,90,60,.3);
+  padding:.07in;
+  position:relative;z-index:1;
+  box-shadow:0 4px 16px rgba(0,0,0,.18);
 }
 .back-qr img{width:100%;height:100%;display:block}
-.back-qr-text{flex:1;display:flex;flex-direction:column;gap:5px}
+
+.back-qr-text{
+  flex:1;display:flex;flex-direction:column;gap:6px;
+  position:relative;z-index:1;color:white;
+}
 .back-qr-eye{
   font-family:'DM Sans',sans-serif;
-  font-size:7px;font-weight:700;
-  letter-spacing:.3em;text-transform:uppercase;
-  color:currentColor;opacity:.75;
+  font-size:8px;font-weight:700;
+  letter-spacing:.34em;text-transform:uppercase;
+  color:rgba(255,255,255,.85);
 }
 .back-qr-instruct{
   font-family:'Playfair Display',Georgia,serif;
-  font-size:11px;font-style:italic;font-weight:500;
-  line-height:1.35;color:#1A1410;
-  margin-bottom:2px;
+  font-size:14px;font-style:italic;font-weight:500;
+  line-height:1.3;color:white;
+  letter-spacing:-.008em;
 }
-.back-qr-url{
-  font-family:'DM Mono',monospace;
-  font-size:7px;letter-spacing:.04em;
-  color:#5C4A38;font-weight:500;
-  word-break:break-all;line-height:1.3;
+.back-qr-instruct em{color:rgba(255,255,255,.78);font-style:italic;font-weight:400}
+
+.back-qr-or{
+  font-family:'DM Sans',sans-serif;
+  font-size:8px;font-weight:600;
+  letter-spacing:.32em;text-transform:uppercase;
+  color:rgba(255,255,255,.7);
+  margin-top:6px;margin-bottom:2px;
 }
 
-.back-foot{
-  margin-top:.12in;padding-top:.08in;
-  text-align:center;
+.back-qr-url{
+  font-family:'DM Mono',monospace;
+  font-size:8.5px;letter-spacing:.02em;
+  color:rgba(255,255,255,.92);font-weight:500;
+  word-break:break-all;line-height:1.4;
+}
+.back-qr-foot{
   font-family:'DM Sans',sans-serif;
-  font-size:7px;font-weight:600;
-  letter-spacing:.3em;text-transform:uppercase;
-  color:currentColor;opacity:.5;
+  font-size:7.5px;font-weight:600;
+  letter-spacing:.32em;text-transform:uppercase;
+  color:rgba(255,255,255,.55);
+  margin-top:.18in;
+  padding-top:.1in;
+  border-top:.5px solid rgba(255,255,255,.25);
 }
 
 .card,.front,.back,.front-gift-note,.back-qr,
-.front-brand-stripe,.back-hero,.back-hero::before,.back-hero::after,
+.front-brand-stripe,.back-qr-block,.back-qr-block::before,.back-qr-block::after,
 .front-eye::before,.front-eye::after,
-.back-hero-eye::before,.back-hero-eye::after,
-.front-rule,.front-attune-mark,.back-hero-mark,.front-foot-arrow{
+.back-body-eye::before,.back-body-eye::after,
+.front-rule,.front-attune-mark,.front-foot-arrow{
   -webkit-print-color-adjust:exact !important;
   print-color-adjust:exact !important;
   color-adjust:exact !important;
@@ -577,7 +623,6 @@ function frontHtml(pkgKey, opts = {}){
   const showHandwrite = mode === 'handwrite';
   const showPrintedNote = !showHandwrite && note && note.length > 0;
 
-  // Gradient CSS variables piped to .front-brand-stripe
   const gradVars = `--grad-start:${pkg.grad[0]};--grad-mid:${pkg.grad[1]};--grad-end:${pkg.grad[2]};color:${pkg.ink}`;
 
   const printedNoteBlock = showPrintedNote ? `
@@ -601,18 +646,17 @@ function frontHtml(pkgKey, opts = {}){
     </div>
   ` : '';
 
-  // Identity anchor — full on standard, compact on note variants
-  let identityBlock = '';
-  if (!showHandwrite) {
-    if (showPrintedNote) {
-      identityBlock = `<div class="front-welcome">Welcome to Attune.</div>`;
-    } else {
-      identityBlock = `
-        <div class="front-welcome">Welcome to Attune.</div>
-        <p class="front-what">${esc(pkg.what)}</p>
-      `;
-    }
-  }
+  // Tagline near top establishes identity. Bottom gets a short sign-off
+  // that completes the letter-style composition.
+  const signoff = !showHandwrite ? `
+    <div class="front-bottom-rule"></div>
+    <p class="front-signoff">With care, <span>Attune</span></p>
+  ` : '';
+
+  // Short italic tagline that introduces what Attune does — appears
+  // between the names and the rule so the recipient understands the gift
+  // before seeing the contents list.
+  const tagline = '<p class="front-tagline">A guided experience to help you understand each other.</p>';
 
   return `
 <div class="page">
@@ -620,14 +664,17 @@ function frontHtml(pkgKey, opts = {}){
     <div class="front">
       <div class="front-brand-stripe"></div>
       <div class="front-inner">
-        <div class="front-attune-mark">${attuneMark('ink')}</div>
-        <div class="front-eye">${esc(pkg.eyebrow)}</div>
-        <h1 class="front-names ${nm.twoLines ? 'two-lines' : ''}">${nm.html}</h1>
-        <div class="front-rule"></div>
-        ${identityBlock}
-        ${printedNoteBlock}
-        ${handwriteBlock}
-        ${contentsBlock}
+        <div class="front-stack">
+          <div class="front-attune-mark">${attuneMark('ink')}</div>
+          <div class="front-eye">${esc(pkg.eyebrow)}</div>
+          <h1 class="front-names ${nm.twoLines ? 'two-lines' : ''}">${nm.html}</h1>
+          ${tagline}
+          <div class="front-rule"></div>
+          ${printedNoteBlock}
+          ${handwriteBlock}
+          ${contentsBlock}
+          ${signoff}
+        </div>
         <div class="front-foot">
           <svg class="front-foot-arrow" viewBox="0 0 14 8" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M1 4h12m0 0L9.5 1m3.5 3l-3.5 3" stroke="currentColor" stroke-width="1" stroke-linecap="round"/>
@@ -655,12 +702,9 @@ function backHtml(pkgKey, opts = {}){
 <div class="page">
   <div class="card" style="${gradVars}">
     <div class="back">
-      <div class="back-hero">
-        <div class="back-hero-mark">${attuneMark('white')}</div>
-        <div class="back-hero-eye">How to begin</div>
-        <h2 class="back-hero-title">What you'll do <em>together.</em></h2>
-      </div>
       <div class="back-body">
+        <div class="back-body-eye">How to begin</div>
+        <h2 class="back-body-title">What you'll do <em>together.</em></h2>
         <div class="back-steps">
           <div class="back-step">
             <span class="back-step-num">01</span>
@@ -684,17 +728,18 @@ function backHtml(pkgKey, opts = {}){
             </div>
           </div>
         </div>
-        <div class="back-qr-section">
-          <div class="back-qr">
-            <img src="${DEFAULT_QR}" class="qr-img" data-token="${esc(token)}" alt="Scan to start"/>
-          </div>
-          <div class="back-qr-text">
-            <div class="back-qr-eye">Scan to begin</div>
-            <div class="back-qr-instruct">Or visit the link below in your browser.</div>
-            <div class="back-qr-url">${esc(qrUrl)}</div>
-          </div>
+      </div>
+      <div class="back-qr-block">
+        <div class="back-qr">
+          <img src="${DEFAULT_QR}" class="qr-img" data-token="${esc(token)}" alt="Scan to start"/>
         </div>
-        <div class="back-foot">attune-relationships.com</div>
+        <div class="back-qr-text">
+          <div class="back-qr-eye">Scan to begin</div>
+          <div class="back-qr-instruct">Open your phone camera and point it at the code.</div>
+          <div class="back-qr-or">— or visit —</div>
+          <div class="back-qr-url">${esc(qrUrl)}</div>
+          <div class="back-qr-foot">attune-relationships.com</div>
+        </div>
       </div>
     </div>
   </div>
