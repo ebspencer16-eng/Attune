@@ -60,36 +60,36 @@ body{padding:32px 24px;display:flex;flex-direction:column;align-items:center;gap
   padding:.45in .55in;
 }
 
-/* Continuous border around the WHOLE card — visible cream segment in
-   the top half (against gradient), gradient segment in the bottom half
-   (against cream). Two stacked elements with clip-path, both at the
-   same .32in inset so they form one visual rectangle. */
-.front-frame-cream{
+/* Continuous border around the WHOLE card — assembled from two
+   per-half borders that each draw only 3 sides (omitting the edge at
+   the seam between halves). Together they read as one rectangular
+   frame: cream segment on the top half (sides + top edge), gradient
+   segment on the bottom half (sides + bottom edge). */
+.front-top::after{
+  content:"";
   position:absolute;
-  top:.32in;left:.32in;right:.32in;bottom:.32in;
-  border:1px solid #FBF7EE;
+  top:.32in;left:.32in;right:.32in;bottom:0;
+  border-top:1px solid #FBF7EE;
+  border-left:1px solid #FBF7EE;
+  border-right:1px solid #FBF7EE;
+  /* No border-bottom — this is where it joins the gradient half */
   opacity:.55;
   pointer-events:none;
-  /* Show only the top half of the rectangle (top edge + upper portion of sides) */
-  clip-path:inset(0 0 50% 0);
   z-index:1;
 }
-.front-frame-gradient{
+.front-bottom::after{
+  content:"";
   position:absolute;
-  top:.32in;left:.32in;right:.32in;bottom:.32in;
-  pointer-events:none;
-  padding:1px;
-  background:linear-gradient(140deg,
+  top:0;left:.32in;right:.32in;bottom:.32in;
+  border:1px solid;
+  border-top:0;
+  /* Gradient color via border-image */
+  border-image:linear-gradient(140deg,
     var(--grad-start),
     var(--grad-mid) 50%,
-    var(--grad-end)) border-box;
-  -webkit-mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);
-  -webkit-mask-composite:xor;
-  mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);
-  mask-composite:exclude;
-  opacity:.55;
-  /* Show only the bottom half of the rectangle */
-  clip-path:inset(50% 0 0 0);
+    var(--grad-end)) 1;
+  opacity:.6;
+  pointer-events:none;
   z-index:1;
 }
 
@@ -368,7 +368,13 @@ body{padding:32px 24px;display:flex;flex-direction:column;align-items:center;gap
   font-size:14px;font-style:italic;font-weight:500;
   line-height:1.25;color:white;
   margin-bottom:.1in;
+  display:flex;align-items:center;gap:8px;
 }
+.back-banner-title-arrow{
+  width:14px;height:10px;flex-shrink:0;
+  color:rgba(255,255,255,.85);
+}
+.back-banner-title-arrow svg{width:100%;height:100%;display:block}
 
 .back-link-row{
   display:flex;align-items:center;gap:8px;
@@ -386,7 +392,7 @@ body{padding:32px 24px;display:flex;flex-direction:column;align-items:center;gap
 
 /* Force background colors when printing */
 .card,.front,.back,
-.front-top,.front-bottom,.front-frame-cream,.front-frame-gradient,
+.front-top,.front-bottom,.front-top::after,.front-bottom::after,
 .front-top-mark,.front-top-headline,.front-names,
 .back-tagline,.back-divider,.back-step-num,
 .back-banner,.back-qr,.front-gift-note{
@@ -576,8 +582,6 @@ function frontHtml(pkgKey, opts = {}){
           ${orderId ? `<div class="front-orderid">${esc(orderId)}</div>` : ''}
         </div>
       </div>
-      <div class="front-frame-cream"></div>
-      <div class="front-frame-gradient"></div>
     </div>
   </div>
   <div class="page-label">${esc(pkg.label)} · Front${note ? ' (with gift note)' : ''}</div>
@@ -639,7 +643,14 @@ function backHtml(pkgKey, opts = {}){
         </div>
         <div class="back-banner-text">
           <div class="back-banner-eye">Scan to begin</div>
-          <div class="back-banner-title">Your unique sign-in portal.</div>
+          <div class="back-banner-title">
+            <span class="back-banner-title-arrow">
+              <svg viewBox="0 0 14 10" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M13 5H1m0 0l4-4M1 5l4 4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </span>
+            <span>Your unique sign-in portal.</span>
+          </div>
           <div class="back-link-row">
             <span class="icon">${globeIcon}</span>
             <span>${SITE_URL}</span>
