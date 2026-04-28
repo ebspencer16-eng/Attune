@@ -50,43 +50,63 @@ body{padding:32px 24px;display:flex;flex-direction:column;align-items:center;gap
 }
 
 /* ────────── FRONT FACE ──────────
-   Letterpress invitation aesthetic. Centered single-column composition.
-   Single ink color per package. */
+   Letterpress invitation aesthetic with brand stripe + Attune mark.
+   Single ink color per package for the engraved details. */
 .front{
   height:100%;
+  padding:0;
+  display:flex;flex-direction:column;
+  position:relative;
+}
+
+/* Brand gradient stripe — top of card, full bleed */
+.front-brand-stripe{
+  height:6px;flex-shrink:0;
+  background:linear-gradient(90deg,
+    var(--grad-start) 0%,
+    var(--grad-mid) 50%,
+    var(--grad-end) 100%);
+}
+
+/* Inner content area — contains border + everything else */
+.front-inner{
+  flex:1;
   padding:.5in .55in;
   display:flex;flex-direction:column;align-items:center;text-align:center;
   position:relative;
 }
 
 /* Engraved inner border */
-.front::before{
+.front-inner::before{
   content:"";
   position:absolute;
-  top:.34in;left:.34in;right:.34in;bottom:.34in;
+  top:.18in;left:.34in;right:.34in;bottom:.34in;
   border:.5px solid currentColor;
   opacity:.18;
   pointer-events:none;
 }
 
+/* Attune mark — the official brand logo (two speech bubbles + hearts).
+   Sits at top, centered, in the package ink color. */
+.front-attune-mark{
+  width:.85in;height:.62in;
+  margin:.18in 0 .14in;
+  color:currentColor;
+  position:relative;z-index:1;
+}
+.front-attune-mark svg{width:100%;height:100%;display:block}
+
 .front-eye{
   font-family:'DM Sans',sans-serif;
   font-size:8px;font-weight:700;
   letter-spacing:.34em;text-transform:uppercase;
-  color:currentColor;opacity:.7;
-  margin-top:.18in;margin-bottom:.18in;
+  color:currentColor;opacity:.65;
+  margin-bottom:.2in;
   display:flex;align-items:center;gap:10px;
 }
 .front-eye::before,.front-eye::after{
   content:"";display:block;width:18px;height:.5px;background:currentColor;opacity:.5;
 }
-
-.front-mark{
-  width:.62in;height:.62in;
-  margin-bottom:.16in;
-  color:currentColor;
-}
-.front-mark svg{width:100%;height:100%;display:block;color:inherit}
 
 .front-names{
   font-family:'Playfair Display',Georgia,serif;
@@ -213,47 +233,90 @@ body{padding:32px 24px;display:flex;flex-direction:column;align-items:center;gap
   font-weight:500;
 }
 
-/* ────────── BACK FACE ────────── */
+/* ────────── BACK FACE ──────────
+   Gradient hero on top (brand presence), cream below with steps + QR. */
 .back{
   height:100%;
-  padding:.5in .5in;
+  padding:0;
   display:flex;flex-direction:column;
   position:relative;
 }
 
-.back::before{
+/* Gradient hero block — top ~2.4in. Brand-colored, full bleed. */
+.back-hero{
+  flex-shrink:0;
+  height:2.4in;
+  padding:.42in .55in .38in;
+  background:linear-gradient(140deg,
+    var(--grad-start) 0%,
+    var(--grad-mid) 52%,
+    var(--grad-end) 100%);
+  color:white;
+  position:relative;
+  display:flex;flex-direction:column;align-items:center;text-align:center;
+  overflow:hidden;
+}
+/* Subtle dotted texture on the gradient — gives it tactile depth */
+.back-hero::before{
   content:"";
-  position:absolute;
-  top:.34in;left:.34in;right:.34in;bottom:.34in;
-  border:.5px solid currentColor;
-  opacity:.18;
+  position:absolute;inset:0;
+  background-image:radial-gradient(circle at 1px 1px,rgba(255,255,255,.18) 1px,transparent 0);
+  background-size:14px 14px;
+  pointer-events:none;
+}
+/* Soft accent glow */
+.back-hero::after{
+  content:"";position:absolute;
+  bottom:-.4in;right:-.3in;width:1.4in;height:1.4in;
+  border-radius:50%;
+  background:radial-gradient(circle,rgba(255,255,255,.12),transparent 70%);
   pointer-events:none;
 }
 
-.back-eye{
+.back-hero-mark{
+  width:.85in;height:.62in;
+  margin-bottom:.18in;
+  position:relative;z-index:1;
+}
+.back-hero-mark svg{width:100%;height:100%;display:block}
+
+.back-hero-eye{
   font-family:'DM Sans',sans-serif;
   font-size:8px;font-weight:700;
   letter-spacing:.34em;text-transform:uppercase;
-  color:currentColor;opacity:.7;
-  margin-top:.14in;
-  display:flex;align-items:center;gap:10px;justify-content:center;
+  color:rgba(255,255,255,.85);
+  margin-bottom:.14in;
+  display:flex;align-items:center;gap:10px;
+  position:relative;z-index:1;
 }
-.back-eye::before,.back-eye::after{
-  content:"";display:block;width:18px;height:.5px;background:currentColor;opacity:.5;
+.back-hero-eye::before,.back-hero-eye::after{
+  content:"";display:block;width:18px;height:.5px;background:rgba(255,255,255,.6);
 }
 
-.back-title{
+.back-hero-title{
   font-family:'Playfair Display',Georgia,serif;
-  font-size:24px;font-weight:500;font-style:italic;
-  line-height:1.05;letter-spacing:-.018em;
-  color:#1A1410;text-align:center;
-  margin:.18in 0 .26in;
-  max-width:3.6in;align-self:center;
+  font-size:22px;font-weight:500;font-style:italic;
+  line-height:1.1;letter-spacing:-.018em;
+  color:white;
+  max-width:3.4in;
+  position:relative;z-index:1;
+}
+.back-hero-title em{
+  font-style:italic;color:rgba(255,255,255,.78);font-weight:400;
+}
+
+/* Cream lower section — steps + QR */
+.back-body{
+  flex:1;
+  padding:.32in .55in .3in;
+  display:flex;flex-direction:column;
+  position:relative;
 }
 
 .back-steps{
   display:flex;flex-direction:column;gap:.16in;
-  padding:0 .04in;flex:1;
+  padding:0 .04in;
+  flex:1;
 }
 
 .back-step{
@@ -283,9 +346,9 @@ body{padding:32px 24px;display:flex;flex-direction:column;align-items:center;gap
 }
 
 .back-qr-section{
-  margin-top:.22in;
+  margin-top:.18in;
   display:flex;align-items:center;gap:.22in;
-  padding-top:.18in;
+  padding-top:.16in;
   border-top:.5px solid rgba(120,90,60,.25);
 }
 .back-qr{
@@ -317,18 +380,19 @@ body{padding:32px 24px;display:flex;flex-direction:column;align-items:center;gap
 }
 
 .back-foot{
-  margin-top:.14in;padding-top:.1in;
+  margin-top:.12in;padding-top:.08in;
   text-align:center;
   font-family:'DM Sans',sans-serif;
   font-size:7px;font-weight:600;
   letter-spacing:.3em;text-transform:uppercase;
-  color:currentColor;opacity:.6;
+  color:currentColor;opacity:.5;
 }
 
 .card,.front,.back,.front-gift-note,.back-qr,
+.front-brand-stripe,.back-hero,.back-hero::before,.back-hero::after,
 .front-eye::before,.front-eye::after,
-.back-eye::before,.back-eye::after,
-.front-rule,.front-mark,.front-foot-arrow{
+.back-hero-eye::before,.back-hero-eye::after,
+.front-rule,.front-attune-mark,.back-hero-mark,.front-foot-arrow{
   -webkit-print-color-adjust:exact !important;
   print-color-adjust:exact !important;
   color-adjust:exact !important;
@@ -397,35 +461,42 @@ body{padding:32px 24px;display:flex;flex-direction:column;align-items:center;gap
 // Without params → renders a complete preview grid.
 // ═══════════════════════════════════════════════════════════════════════════
 
+// ─────────────────────────────────────────────────────────────────────────
+// Per-package definitions: ink color (for engraved letterpress details),
+// gradient stops (for the brand stripe + back hero), package name, what's
+// inside the box.
+// All packages share the Attune mark — package identity comes from ink + gradient.
+// ─────────────────────────────────────────────────────────────────────────
 const PACKAGES = {
   newlywed: {
     label: 'Starting Out Collection',
     eyebrow: 'A gift for two',
-    ink: '#9C3D1A',          // burnt sienna
+    ink: '#9C3D1A',                                 // burnt sienna
+    grad: ['#C8522E', '#6B3FA0', '#1B5FE8'],        // coral → purple → indigo
     what: "Attune is a guided experience that helps couples understand how they communicate, where they align, and where they differ.",
     contents: [
       'The Attune Assessment',
       'Starting Out Checklist',
       'Build a Budget exercise',
     ],
-    mark: 'rings',
   },
   anniversary: {
     label: 'Relationship Reflection',
     eyebrow: 'A gift for two',
-    ink: '#1E3A6E',          // deep indigo
+    ink: '#1E3A6E',                                 // deep indigo
+    grad: ['#C8522E', '#9B5DE5', '#1B5FE8'],        // coral → lavender → indigo
     what: "Attune is a guided experience that helps couples understand how they communicate, where they align, and where they differ.",
     contents: [
       'The Attune Assessment',
       'Relationship Reflection exercise',
       'Anniversary-specific prompts',
     ],
-    mark: 'sun-moon',
   },
   premium: {
     label: 'Attune Premium',
     eyebrow: 'A gift for two',
-    ink: '#5A2E5C',          // deep plum
+    ink: '#5A2E5C',                                 // deep plum
+    grad: ['#5B6DF8', '#6B3FA0', '#1B5FE8'],        // blue → purple → indigo
     what: "Attune is a guided experience that helps couples understand how they communicate, where they align, and where they differ.",
     contents: [
       'The Attune Assessment',
@@ -433,51 +504,49 @@ const PACKAGES = {
       'Personalized workbook',
       'Session with a licensed therapist',
     ],
-    mark: 'seal',
   },
-  // Digital-only fallback. No physical box but render gracefully.
+  // Digital-only fallback
   core: {
     label: 'The Attune Assessment',
     eyebrow: 'A gift for two',
     ink: '#9C3D1A',
+    grad: ['#C8522E', '#6B3FA0', '#1B5FE8'],
     what: "Attune is a guided experience that helps couples understand how they communicate, where they align, and where they differ.",
     contents: [
       'Communication exercise',
       'Expectations exercise',
       'Full joint results',
     ],
-    mark: 'rings',
   },
 };
 
-// SVG marks — engraved-line style, single-color via currentColor
-const MARKS = {
-  rings: `<svg viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <circle cx="22" cy="30" r="14" stroke="currentColor" stroke-width="1.4"/>
-    <circle cx="38" cy="30" r="14" stroke="currentColor" stroke-width="1.4"/>
-  </svg>`,
-  'sun-moon': `<svg viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <circle cx="22" cy="28" r="9" stroke="currentColor" stroke-width="1.4"/>
-    <g stroke="currentColor" stroke-width="1.2" stroke-linecap="round">
-      <line x1="22" y1="13" x2="22" y2="17"/>
-      <line x1="22" y1="39" x2="22" y2="43"/>
-      <line x1="7" y1="28" x2="11" y2="28"/>
-      <line x1="33" y1="28" x2="37" y2="28"/>
-      <line x1="11.5" y1="17.5" x2="14.5" y2="20.5"/>
-      <line x1="29.5" y1="35.5" x2="32.5" y2="38.5"/>
-      <line x1="11.5" y1="38.5" x2="14.5" y2="35.5"/>
-      <line x1="29.5" y1="20.5" x2="32.5" y2="17.5"/>
-    </g>
-    <path d="M50 32 a8 8 0 1 1 -8 -8 a6 6 0 0 0 8 8 z" stroke="currentColor" stroke-width="1.4" fill="none"/>
-  </svg>`,
-  seal: `<svg viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <circle cx="30" cy="30" r="22" stroke="currentColor" stroke-width="1.4"/>
-    <circle cx="30" cy="30" r="18" stroke="currentColor" stroke-width=".6" stroke-dasharray="1 2"/>
-    <text x="30" y="37" font-family="Playfair Display, Georgia, serif"
-          font-size="20" font-style="italic" font-weight="500"
-          text-anchor="middle" fill="currentColor">A</text>
-  </svg>`,
-};
+// ─────────────────────────────────────────────────────────────────────────
+// Attune mark — the official brand logo (two speech bubbles with hearts).
+// Two color modes:
+//   ink: solid currentColor on cream — for the front of the card
+//   white: white outlines on the gradient hero — for the back of the card
+// ─────────────────────────────────────────────────────────────────────────
+function attuneMark(mode = 'ink'){
+  if (mode === 'white') {
+    // White-on-gradient version: both bubbles outlined in white,
+    // hearts filled in white. Reads as a clean monogram on dark gradient.
+    return `<svg viewBox="0 0 103 76" fill="none" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet">
+      <path d="M14,4L44,4A9,9,0,0,1,53,13L53,42A9,9,0,0,1,44,51L20,51L6,61L11,51A6,6,0,0,1,5,45L5,13A9,9,0,0,1,14,4Z" fill="white" fill-opacity=".18" stroke="white" stroke-width="1.5"/>
+      <path d="M22,11C20,8.5,16.5,5,11.5,5C5.5,5,2,9.5,2,14.5C2,23,11,30,22,40C33,30,42,23,42,14.5C42,9.5,38.5,5,32.5,5C27.5,5,24,8.5,22,11Z" fill="white" transform="translate(13.16,11.3) scale(.72)"/>
+      <path d="M89,14L59,14A9,9,0,0,0,50,23L50,52A9,9,0,0,0,59,61L83,61L97,71L92,61A6,6,0,0,0,98,55L98,23A9,9,0,0,0,89,14Z" fill="white"/>
+      <path d="M22,11C20,8.5,16.5,5,11.5,5C5.5,5,2,9.5,2,14.5C2,23,11,30,22,40C33,30,42,23,42,14.5C42,9.5,38.5,5,32.5,5C27.5,5,24,8.5,22,11Z" fill="#1B5FE8" transform="translate(58.16,21.3) scale(.72)"/>
+    </svg>`;
+  }
+  // Ink version (front of card): one bubble filled with ink color, the
+  // other outlined. Heart ornaments inverted between the two for the
+  // signature Attune mark.
+  return `<svg viewBox="0 0 103 76" fill="none" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet">
+    <path d="M14,4L44,4A9,9,0,0,1,53,13L53,42A9,9,0,0,1,44,51L20,51L6,61L11,51A6,6,0,0,1,5,45L5,13A9,9,0,0,1,14,4Z" fill="currentColor"/>
+    <path d="M22,11C20,8.5,16.5,5,11.5,5C5.5,5,2,9.5,2,14.5C2,23,11,30,22,40C33,30,42,23,42,14.5C42,9.5,38.5,5,32.5,5C27.5,5,24,8.5,22,11Z" fill="#FBF7EE" transform="translate(13.16,11.3) scale(.72)"/>
+    <path d="M89,14L59,14A9,9,0,0,0,50,23L50,52A9,9,0,0,0,59,61L83,61L97,71L92,61A6,6,0,0,0,98,55L98,23A9,9,0,0,0,89,14Z" fill="none" stroke="currentColor" stroke-width="1.6"/>
+    <path d="M22,11C20,8.5,16.5,5,11.5,5C5.5,5,2,9.5,2,14.5C2,23,11,30,22,40C33,30,42,23,42,14.5C42,9.5,38.5,5,32.5,5C27.5,5,24,8.5,22,11Z" fill="currentColor" transform="translate(58.16,21.3) scale(.72)"/>
+  </svg>`;
+}
 
 const DEFAULT_QR = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxIDEiPjxyZWN0IHdpZHRoPSIxIiBoZWlnaHQ9IjEiIGZpbGw9IiNFRUUiLz48L3N2Zz4=';
 
@@ -508,6 +577,9 @@ function frontHtml(pkgKey, opts = {}){
   const showHandwrite = mode === 'handwrite';
   const showPrintedNote = !showHandwrite && note && note.length > 0;
 
+  // Gradient CSS variables piped to .front-brand-stripe
+  const gradVars = `--grad-start:${pkg.grad[0]};--grad-mid:${pkg.grad[1]};--grad-end:${pkg.grad[2]};color:${pkg.ink}`;
+
   const printedNoteBlock = showPrintedNote ? `
     <div class="front-gift-note">
       <div class="front-gift-eye">A note for you</div>
@@ -522,7 +594,6 @@ function frontHtml(pkgKey, opts = {}){
     </div>
   ` : '';
 
-  // Always show package contents — the recipient needs to know what they got
   const contentsBlock = !showHandwrite ? `
     <div class="front-contents-eye">Inside the box</div>
     <div class="front-contents">
@@ -530,18 +601,12 @@ function frontHtml(pkgKey, opts = {}){
     </div>
   ` : '';
 
-  // Always anchor identity. On standard variant: full welcome + 2-line description.
-  // On gift-note variant: shorter 1-line context (note already takes up space).
-  // On handwrite variant: omit (the gift giver will write context personally).
+  // Identity anchor — full on standard, compact on note variants
   let identityBlock = '';
   if (!showHandwrite) {
     if (showPrintedNote) {
-      // Compact: just the welcome line
-      identityBlock = `
-        <div class="front-welcome">Welcome to Attune.</div>
-      `;
+      identityBlock = `<div class="front-welcome">Welcome to Attune.</div>`;
     } else {
-      // Full: welcome + 2-line "what this is"
       identityBlock = `
         <div class="front-welcome">Welcome to Attune.</div>
         <p class="front-what">${esc(pkg.what)}</p>
@@ -551,23 +616,26 @@ function frontHtml(pkgKey, opts = {}){
 
   return `
 <div class="page">
-  <div class="card" style="color:${pkg.ink}">
+  <div class="card" style="${gradVars}">
     <div class="front">
-      <div class="front-eye">${esc(pkg.eyebrow)}</div>
-      <div class="front-mark">${MARKS[pkg.mark] || MARKS.rings}</div>
-      <h1 class="front-names ${nm.twoLines ? 'two-lines' : ''}">${nm.html}</h1>
-      <div class="front-rule"></div>
-      ${identityBlock}
-      ${printedNoteBlock}
-      ${handwriteBlock}
-      ${contentsBlock}
-      <div class="front-foot">
-        <svg class="front-foot-arrow" viewBox="0 0 14 8" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M1 4h12m0 0L9.5 1m3.5 3l-3.5 3" stroke="currentColor" stroke-width="1" stroke-linecap="round"/>
-        </svg>
-        <div class="front-foot-text">Begin on the back</div>
+      <div class="front-brand-stripe"></div>
+      <div class="front-inner">
+        <div class="front-attune-mark">${attuneMark('ink')}</div>
+        <div class="front-eye">${esc(pkg.eyebrow)}</div>
+        <h1 class="front-names ${nm.twoLines ? 'two-lines' : ''}">${nm.html}</h1>
+        <div class="front-rule"></div>
+        ${identityBlock}
+        ${printedNoteBlock}
+        ${handwriteBlock}
+        ${contentsBlock}
+        <div class="front-foot">
+          <svg class="front-foot-arrow" viewBox="0 0 14 8" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M1 4h12m0 0L9.5 1m3.5 3l-3.5 3" stroke="currentColor" stroke-width="1" stroke-linecap="round"/>
+          </svg>
+          <div class="front-foot-text">Begin on the back</div>
+        </div>
+        ${orderId ? `<div class="front-orderid">${esc(pkg.label)} · ${esc(orderId)}</div>` : `<div class="front-orderid">${esc(pkg.label)}</div>`}
       </div>
-      ${orderId ? `<div class="front-orderid">${esc(pkg.label)} · ${esc(orderId)}</div>` : `<div class="front-orderid">${esc(pkg.label)}</div>`}
     </div>
   </div>
   <div class="page-label">${esc(pkg.label)} · Front${showPrintedNote ? ' (printed gift note)' : showHandwrite ? ' (handwritten lines)' : ''}</div>
@@ -581,46 +649,53 @@ function backHtml(pkgKey, opts = {}){
     ? `attune-relationships.com/welcome?qr=${token}`
     : 'attune-relationships.com/app';
 
+  const gradVars = `--grad-start:${pkg.grad[0]};--grad-mid:${pkg.grad[1]};--grad-end:${pkg.grad[2]};color:${pkg.ink}`;
+
   return `
 <div class="page">
-  <div class="card" style="color:${pkg.ink}">
+  <div class="card" style="${gradVars}">
     <div class="back">
-      <div class="back-eye">How to begin</div>
-      <h2 class="back-title">Three small steps to start.</h2>
-      <div class="back-steps">
-        <div class="back-step">
-          <span class="back-step-num">01</span>
-          <div class="back-step-content">
-            <h3 class="back-step-title">Scan the code below.</h3>
-            <p class="back-step-text">It opens a private welcome page just for the two of you. Use any phone camera.</p>
-          </div>
-        </div>
-        <div class="back-step">
-          <span class="back-step-num">02</span>
-          <div class="back-step-content">
-            <h3 class="back-step-title">Each take the assessment — separately.</h3>
-            <p class="back-step-text">About 15 minutes each. Honest answers work better than strategic ones. Your responses stay private until you both finish.</p>
-          </div>
-        </div>
-        <div class="back-step">
-          <span class="back-step-num">03</span>
-          <div class="back-step-content">
-            <h3 class="back-step-title">See your results together.</h3>
-            <p class="back-step-text">Your couple type, communication map, and personalized guidance unlock the moment you both submit.</p>
-          </div>
-        </div>
+      <div class="back-hero">
+        <div class="back-hero-mark">${attuneMark('white')}</div>
+        <div class="back-hero-eye">How to begin</div>
+        <h2 class="back-hero-title">Three small <em>steps to start.</em></h2>
       </div>
-      <div class="back-qr-section">
-        <div class="back-qr">
-          <img src="${DEFAULT_QR}" class="qr-img" data-token="${esc(token)}" alt="Scan to start"/>
+      <div class="back-body">
+        <div class="back-steps">
+          <div class="back-step">
+            <span class="back-step-num">01</span>
+            <div class="back-step-content">
+              <h3 class="back-step-title">Scan the code below.</h3>
+              <p class="back-step-text">It opens a private welcome page just for the two of you. Use any phone camera.</p>
+            </div>
+          </div>
+          <div class="back-step">
+            <span class="back-step-num">02</span>
+            <div class="back-step-content">
+              <h3 class="back-step-title">Each take the assessment — separately.</h3>
+              <p class="back-step-text">About 15 minutes each. Honest answers work better than strategic ones. Your responses stay private until you both finish.</p>
+            </div>
+          </div>
+          <div class="back-step">
+            <span class="back-step-num">03</span>
+            <div class="back-step-content">
+              <h3 class="back-step-title">See your results together.</h3>
+              <p class="back-step-text">Your couple type, communication map, and personalized guidance unlock the moment you both submit.</p>
+            </div>
+          </div>
         </div>
-        <div class="back-qr-text">
-          <div class="back-qr-eye">Scan to begin</div>
-          <div class="back-qr-instruct">Or visit the link below in your browser.</div>
-          <div class="back-qr-url">${esc(qrUrl)}</div>
+        <div class="back-qr-section">
+          <div class="back-qr">
+            <img src="${DEFAULT_QR}" class="qr-img" data-token="${esc(token)}" alt="Scan to start"/>
+          </div>
+          <div class="back-qr-text">
+            <div class="back-qr-eye">Scan to begin</div>
+            <div class="back-qr-instruct">Or visit the link below in your browser.</div>
+            <div class="back-qr-url">${esc(qrUrl)}</div>
+          </div>
         </div>
+        <div class="back-foot">attune-relationships.com</div>
       </div>
-      <div class="back-foot">attune-relationships.com</div>
     </div>
   </div>
   <div class="page-label">${esc(pkg.label)} · Back</div>
