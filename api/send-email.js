@@ -13,6 +13,7 @@
  *   welcome_account — { toEmail, toName, partnerName, portalUrl }
  *   partner_joined_notification — { toEmail, toName, partnerName, portalUrl }
  *   lmft_scheduled  — { toEmail, toName, partnerName, schedulingUrl, orderNum }
+ *   lmft_confirmed  — { toEmail, toName, partnerName, scheduledStart, timezone, videoUrl, rescheduleUrl, cancelUrl, therapistName, orderId }
  *   checkin_1yr     — { toEmail, toName, partnerName, retakeUrl, portalUrl }
  *   shipping_notification — { toEmail, toName, partnerName, orderNum, trackingUrl?, trackingNumber?, carrier? }
  *
@@ -341,7 +342,66 @@ function lmftScheduledEmail({ toName, partnerName, schedulingUrl, orderNum }) {
   };
 }
 
-// ── checkin_1yr email ─────────────────────────────────────────────────────────
+// ── lmft_confirmed email ─────────────────────────────────────────────────────
+// Sent after the user books their session via Calendly. Replaces Calendly's
+// default user-facing confirmation (which we turn off in the event-type config)
+// so they get our branded version with portal link + prep info.
+function lmftConfirmedEmail({ toName, partnerName, scheduledStart, timezone, videoUrl, rescheduleUrl, cancelUrl, therapistName, orderId }) {
+  const name = toName || "there";
+  const partner = partnerName ? ` and ${partnerName}` : '';
+
+  // Format the date/time in the user's timezone if we have one, else show UTC
+  let dateLine = 'Date and time will be in your calendar invite.';
+  if (scheduledStart) {
+    try {
+      const opts = { weekday: 'long', month: 'long', day: 'numeric', hour: 'numeric', minute: '2-digit', timeZoneName: 'short' };
+      if (timezone) opts.timeZone = timezone;
+      dateLine = new Date(scheduledStart).toLocaleString('en-US', opts);
+    } catch { /* fall through to default line */ }
+  }
+
+  return {
+    subject: "Your LMFT session is booked — Attune",
+    html: layout(`
+      <span class="badge badge-green">Booking confirmed</span>
+      <h1 style="margin-top:14px;">Your session is on the calendar.</h1>
+      <p>Hi ${name},</p>
+      <p>You're booked. Your therapist will review your joint Attune results before you meet — so the session starts from your actual data, not from a blank intake form.</p>
+
+      <div style="background:#F5F0EC;border-radius:12px;padding:20px;margin:24px 0;">
+        <div class="detail-row"><span>When</span><strong>${dateLine}</strong></div>
+        <div class="detail-row"><span>Therapist</span><strong>${therapistName || 'Your matched LMFT'}</strong></div>
+        <div class="detail-row"><span>Format</span><strong>50-minute video session</strong></div>
+        <div class="detail-row"><span>Participants</span><strong>${name}${partner} + therapist</strong></div>
+        ${orderId ? `<div class="detail-row"><span>Order</span><strong>#${orderId}</strong></div>` : ''}
+      </div>
+
+      ${videoUrl ? `<div class="btn-wrap"><a href="${videoUrl}" class="btn">Join the video session →</a></div>` : ''}
+      ${!videoUrl ? `<p style="font-size:0.82rem;color:#8C7A68;">A video link will arrive in a separate calendar invite shortly.</p>` : ''}
+
+      <div class="divider"></div>
+
+      <p style="font-size:0.82rem;font-weight:700;color:#0E0B07;margin-bottom:6px;">Before the session</p>
+      <p style="font-size:0.8rem;">Both partners should have completed your Attune exercises if you haven't yet — your results are what the therapist works from. The session is most useful when both of you are present.</p>
+
+      <p style="font-size:0.82rem;font-weight:700;color:#0E0B07;margin-bottom:6px;margin-top:18px;">What to expect</p>
+      <p style="font-size:0.8rem;">This is not a first therapy appointment. The therapist already knows your couple type, your biggest dimension gaps, and your expectation misalignments. The 50 minutes are about translating those into practical next steps for the two of you.</p>
+
+      <div class="divider"></div>
+
+      <p style="font-size:0.82rem;font-weight:700;color:#0E0B07;margin-bottom:6px;">Need to change something?</p>
+      <p style="font-size:0.8rem;">
+        ${rescheduleUrl ? `<a href="${rescheduleUrl}" style="color:#1B5FE8;font-weight:600;">Reschedule</a>` : 'Reply to this email to reschedule'}
+        ${rescheduleUrl && cancelUrl ? ' · ' : ''}
+        ${cancelUrl ? `<a href="${cancelUrl}" style="color:#1B5FE8;font-weight:600;">Cancel</a>` : ''}
+      </p>
+
+      <p style="font-size:0.78rem;color:#8C7A68;margin-top:16px;">A calendar invite with the video link is on its way to your inbox separately. If anything feels off, reply to this email.</p>
+    `),
+  };
+}
+
+
 function checkin1yrEmail({ toName, partnerName, retakeUrl, portalUrl }) {
   const name = toName || "there";
   const url = retakeUrl || portalUrl || "https://attune-relationships.com/app";
@@ -409,6 +469,10 @@ export default async function handler(req) {
   } else if (type === 'lmft_scheduled') {
     if (!body.toEmail) return new Response('Missing toEmail', { status: 400 });
     email = lmftScheduledEmail(body);
+    email.to = body.toEmail;
+  } else if (type === 'lmft_confirmed') {
+    if (!body.toEmail) return new Response('Missing toEmail', { status: 400 });
+    email = lmftConfirmedEmail(body);
     email.to = body.toEmail;
   } else if (type === 'checkin_1yr') {
     if (!body.toEmail) return new Response('Missing toEmail', { status: 400 });

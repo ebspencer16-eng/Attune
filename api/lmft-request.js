@@ -1,8 +1,13 @@
 /**
  * POST /api/lmft-request
- * 
- * Receives an LMFT session booking request from /lmft-booking.
- * Stores the request in Supabase and emails hello@ for manual follow-up.
+ *
+ * DEPRECATED: kept for backward compatibility. The current LMFT scheduling flow
+ * uses Calendly via /api/calendly-webhook — see LMFT_SETUP.md.
+ *
+ * This endpoint receives requests from the *old* /lmft-booking form (which has
+ * been replaced with the Calendly embed). Any request that lands here is from
+ * a stale link or external integration. We still write the row so the admin
+ * sees it as a legacy/pending request.
  */
 export const config = { runtime: 'edge' };
 

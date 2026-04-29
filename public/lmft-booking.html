@@ -8,40 +8,47 @@
 <meta property="og:image" content="https://attune-relationships.com/og-image.png"/>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,700&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+<!-- Calendly inline widget -->
+<link href="https://assets.calendly.com/assets/external/widget.css" rel="stylesheet"/>
+<script src="https://assets.calendly.com/assets/external/widget.js" type="text/javascript" async></script>
 <style>
   :root{--orange:#E8673A;--indigo:#1B5FE8;--ink:#0E0B07;--muted:#8C7A68;--warm:#FFFDF9;--stone:#E8DDD0;--cream:#F5F0EC;--hfont:'Playfair Display',Georgia,serif;--bfont:'DM Sans',system-ui,sans-serif}
   *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
   body{font-family:var(--bfont);background:var(--warm);color:var(--ink);-webkit-font-smoothing:antialiased;min-height:100vh}
   .nav{position:sticky;top:0;z-index:100;background:rgba(255,253,249,.97);backdrop-filter:blur(12px);border-bottom:1px solid var(--stone);padding:0 1.5rem;display:flex;align-items:center;justify-content:space-between;min-height:56px}
   .nav-logo{display:flex;align-items:center;gap:.5rem;font-family:var(--hfont);font-size:1rem;font-weight:700;color:var(--ink);text-decoration:none}
-  .wrap{max-width:660px;margin:0 auto;padding:4rem 1.5rem}
+  .wrap{max-width:780px;margin:0 auto;padding:3rem 1.5rem}
   .badge{display:inline-flex;align-items:center;gap:.5rem;padding:.4rem .9rem;border-radius:20px;font-size:.65rem;letter-spacing:.12em;text-transform:uppercase;font-weight:700;background:#EEF2FF;color:var(--indigo);margin-bottom:1.5rem}
   h1{font-family:var(--hfont);font-size:clamp(1.8rem,3.5vw,2.6rem);font-weight:700;line-height:1.1;color:var(--ink);margin-bottom:1rem;letter-spacing:-.02em}
-  .sub{font-size:.98rem;color:var(--muted);line-height:1.8;margin-bottom:2.5rem}
+  .sub{font-size:.98rem;color:var(--muted);line-height:1.8;margin-bottom:2.5rem;max-width:620px}
+
   .how-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.1rem;margin-bottom:2.5rem}
   .how-card{background:var(--cream);border-radius:14px;padding:1.25rem 1.1rem}
   .how-num{font-size:.6rem;letter-spacing:.2em;text-transform:uppercase;font-weight:700;color:var(--orange);margin-bottom:.5rem}
   .how-title{font-size:.9rem;font-weight:700;color:var(--ink);margin-bottom:.35rem}
   .how-body{font-size:.78rem;color:var(--muted);line-height:1.65}
-  .booking-card{background:white;border:1.5px solid var(--stone);border-radius:20px;padding:2rem}
-  .booking-card h2{font-size:1.1rem;font-weight:700;color:var(--ink);margin-bottom:.5rem}
-  .booking-card p{font-size:.85rem;color:var(--muted);line-height:1.7;margin-bottom:1.25rem}
-  .field{margin-bottom:1.1rem}
-  label{display:block;font-size:.72rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:.35rem}
-  input,select,textarea{width:100%;padding:.75rem 1rem;border:1.5px solid var(--stone);border-radius:10px;font-size:.88rem;font-family:var(--bfont);color:var(--ink);background:var(--warm);outline:none;transition:border-color .15s}
-  input:focus,select:focus,textarea:focus{border-color:var(--indigo)}
-  textarea{resize:vertical;min-height:90px}
-  .btn{display:block;width:100%;padding:.9rem;background:linear-gradient(135deg,var(--indigo),#3B3A8A);color:white;border:none;border-radius:12px;font-size:.88rem;font-weight:700;letter-spacing:.04em;cursor:pointer;transition:opacity .15s;margin-top:1.5rem}
-  .btn:hover{opacity:.88}
-  .what-expect{background:linear-gradient(135deg,#EEF2FF,#F5F7FF);border-radius:16px;padding:1.5rem;margin-top:2rem}
+
+  .booking-section{background:white;border:1.5px solid var(--stone);border-radius:20px;padding:2rem;margin-bottom:2rem}
+  .booking-section h2{font-size:1.25rem;font-weight:700;color:var(--ink);margin-bottom:.5rem;font-family:var(--hfont)}
+  .booking-section p.lead{font-size:.88rem;color:var(--muted);line-height:1.7;margin-bottom:1.5rem}
+
+  /* Calendly widget container */
+  .calendly-inline-widget{min-width:320px;height:680px}
+
+  .fallback-card{background:linear-gradient(135deg,#FFF8F4,#FFF0EB);border-radius:14px;padding:1.25rem 1.4rem;margin-top:1rem}
+  .fallback-card h3{font-size:.92rem;font-weight:700;color:var(--ink);margin-bottom:.4rem}
+  .fallback-card p{font-size:.82rem;color:var(--muted);line-height:1.65}
+  .fallback-card a{color:var(--orange);font-weight:700}
+
+  .what-expect{background:linear-gradient(135deg,#EEF2FF,#F5F7FF);border-radius:16px;padding:1.5rem;margin-top:1.5rem}
   .what-expect h3{font-size:.88rem;font-weight:700;color:var(--ink);margin-bottom:.75rem}
-  .what-expect ul{list-style:none;display:flex;flex-direction:column;gap:.5rem}
+  .what-expect ul{list-style:none;display:flex;flex-direction:column;gap:.6rem}
   .what-expect li{font-size:.82rem;color:var(--muted);display:flex;gap:.6rem;line-height:1.6}
   .check{color:var(--indigo);font-weight:700;flex-shrink:0}
-  .success{display:none;text-align:center;padding:2rem}
-  .success h2{font-family:var(--hfont);font-size:1.6rem;color:var(--ink);margin-bottom:.75rem}
-  .success p{font-size:.9rem;color:var(--muted);line-height:1.75}
-  @media(max-width:580px){.how-grid{grid-template-columns:1fr}}
+
+  .calendly-loading{display:flex;align-items:center;justify-content:center;height:680px;color:var(--muted);font-size:.85rem}
+
+  @media(max-width:580px){.how-grid{grid-template-columns:1fr}.calendly-inline-widget{height:1000px}}
 </style>
 </head>
 <body>
@@ -59,7 +66,7 @@
     LMFT Session – included in your package
   </div>
   <h1>Book your session<br>with a licensed therapist.</h1>
-  <p class="sub">Your package includes a 50-minute video session with a licensed marriage and family therapist (LMFT). They'll review your joint Attune results before you meet – so the session starts from your actual data.</p>
+  <p class="sub">Your package includes a 50-minute video session with a licensed marriage and family therapist (LMFT). They'll review your joint Attune results before you meet — so the session starts from your actual data.</p>
 
   <div class="how-grid">
     <div class="how-card">
@@ -69,8 +76,8 @@
     </div>
     <div class="how-card">
       <p class="how-num">Step 2</p>
-      <p class="how-title">Request a time below</p>
-      <p class="how-body">Share your availability. We'll match you with an available therapist and confirm within 48 hours.</p>
+      <p class="how-title">Pick a time below</p>
+      <p class="how-body">Choose any open slot. You'll get an instant confirmation with a video link.</p>
     </div>
     <div class="how-card">
       <p class="how-num">Step 3</p>
@@ -79,107 +86,74 @@
     </div>
   </div>
 
-  <div class="booking-card" id="formCard">
-    <h2>Request your session</h2>
-    <p>We'll reach out within 48 hours to confirm your time and share a video link.</p>
+  <div class="booking-section">
+    <h2>Pick a time that works for both of you</h2>
+    <p class="lead">All slots are 50 minutes. The therapist will receive your joint results in advance — so the session starts from real data, not a blank intake form.</p>
 
-    <div class="field">
-      <label>Partner 1 name</label>
-      <input type="text" id="p1name" placeholder="Your name"/>
-    </div>
-    <div class="field">
-      <label>Partner 2 name</label>
-      <input type="text" id="p2name" placeholder="Partner's name"/>
-    </div>
-    <div class="field">
-      <label>Email address</label>
-      <input type="email" id="email" placeholder="best email to reach you"/>
-    </div>
-    <div class="field">
-      <label>Your timezone</label>
-      <select id="tz">
-        <option value="">Select timezone</option>
-        <option>Eastern Time (ET)</option>
-        <option>Central Time (CT)</option>
-        <option>Mountain Time (MT)</option>
-        <option>Pacific Time (PT)</option>
-        <option>Alaska (AKT)</option>
-        <option>Hawaii (HST)</option>
-        <option>UK / GMT</option>
-        <option>CET / Central Europe</option>
-        <option>Other – I'll mention in notes</option>
-      </select>
-    </div>
-    <div class="field">
-      <label>General availability</label>
-      <textarea id="availability" placeholder="e.g. Weekday evenings after 6pm ET, or weekend mornings"></textarea>
-    </div>
-    <div class="field">
-      <label>Anything you want the therapist to know before your session? (optional)</label>
-      <textarea id="notes" placeholder="No need to go deep – just anything that feels relevant as context"></textarea>
-    </div>
-    <div class="field">
-      <label>Order number (from your confirmation email)</label>
-      <input type="text" id="orderId" placeholder="e.g. ATT-20260411-XYZ4"/>
-    </div>
-    <button class="btn" onclick="submitBooking()">Request session →</button>
+    <div id="calendly-loading" class="calendly-loading">Loading available times…</div>
+    <div id="calendly-widget" class="calendly-inline-widget" style="display:none"></div>
 
-    <div class="what-expect" style="margin-top:1.75rem">
-      <h3>What to expect in the session</h3>
-      <ul>
-        <li><span class="check">✓</span><span>The therapist reads your joint results before you meet. They come in with context, not a blank slate.</span></li>
-        <li><span class="check">✓</span><span>The session is about translating your data into practical next steps – not diagnosing you.</span></li>
-        <li><span class="check">✓</span><span>50 minutes, video call. Both partners should be present if possible.</span></li>
-        <li><span class="check">✓</span><span>Not an ongoing therapy relationship – unless you and the therapist choose to continue independently.</span></li>
-      </ul>
+    <div class="fallback-card">
+      <h3>Don't see a time that works?</h3>
+      <p>Reply to your order confirmation email or write to <a href="mailto:hello@attune-relationships.com">hello@attune-relationships.com</a> with your availability and we'll match you with another therapist within 48 hours.</p>
     </div>
   </div>
 
-  <div class="success" id="successCard">
-    <div style="font-size:2.5rem;margin-bottom:1rem">✓</div>
-    <h2>Request received.</h2>
-    <p>We'll confirm your time and therapist within 48 hours at the email you provided. Check your inbox – and your spam folder if you don't hear from us.</p>
-    <p style="margin-top:1.25rem"><a href="/app" style="color:var(--indigo);font-weight:600">Back to your results →</a></p>
+  <div class="what-expect">
+    <h3>What to expect in the session</h3>
+    <ul>
+      <li><span class="check">✓</span><span>The therapist reads your joint results before you meet. They come in with context, not a blank slate.</span></li>
+      <li><span class="check">✓</span><span>The session is about translating your data into practical next steps — not diagnosing you.</span></li>
+      <li><span class="check">✓</span><span>50 minutes, video call. Both partners should be present if possible.</span></li>
+      <li><span class="check">✓</span><span>Not an ongoing therapy relationship — unless you and the therapist choose to continue independently.</span></li>
+    </ul>
   </div>
 </div>
 
 <script>
+// ── Calendly inline widget setup ─────────────────────────────────────────────
+//
+// CONFIGURE: set CALENDLY_URL to your Calendly event-type share link.
+// Get this from Calendly → Event Types → click your LMFT event → Share → Copy link.
+// Format: https://calendly.com/USERNAME/EVENT-SLUG
+const CALENDLY_URL = 'https://calendly.com/attune-relationships/lmft-session';
+
+// Pull through query params from the order email or portal tile.
+// The link is built by stripe-webhook.js as /lmft-booking?order=ORDERNUM
+// The portal tile passes ?p1=&p2=&email= in addition to ?order=
 const params = new URLSearchParams(window.location.search);
-if (params.get('order')) document.getElementById('orderId').value = params.get('order');
-if (params.get('p1')) document.getElementById('p1name').value = params.get('p1');
-if (params.get('p2')) document.getElementById('p2name').value = params.get('p2');
+const orderId  = params.get('order') || '';
+const p1Name   = params.get('p1')    || '';
+const p2Name   = params.get('p2')    || '';
+const email    = params.get('email') || '';
 
-async function submitBooking() {
-  const p1 = document.getElementById('p1name').value.trim();
-  const email = document.getElementById('email').value.trim();
-  if (!p1 || !email) { alert('Please enter your name and email address.'); return; }
-
-  const btn = document.querySelector('.btn');
-  btn.textContent = 'Sending…';
-  btn.disabled = true;
-
-  const payload = {
-    p1name: p1,
-    p2name: document.getElementById('p2name').value.trim(),
-    email,
-    tz: document.getElementById('tz').value,
-    availability: document.getElementById('availability').value.trim(),
-    notes: document.getElementById('notes').value.trim(),
-    orderId: document.getElementById('orderId').value.trim(),
-    requestedAt: new Date().toISOString(),
-  };
-
-  try {
-    await fetch('/api/lmft-request', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
-    });
-  } catch(e) { /* silent – show success regardless to not leave user hanging */ }
-
-  document.getElementById('formCard').style.display = 'none';
-  document.getElementById('successCard').style.display = 'block';
+// Wait for Calendly script to load, then initialize the inline widget.
+// Prefill values save the user a step. The orderId rides along as utm_source
+// so /api/calendly-webhook can correlate the booking back to the order.
+function initCalendly() {
+  if (typeof Calendly === 'undefined') {
+    setTimeout(initCalendly, 100);
+    return;
+  }
+  document.getElementById('calendly-loading').style.display = 'none';
+  const widget = document.getElementById('calendly-widget');
+  widget.style.display = 'block';
+  Calendly.initInlineWidget({
+    url: CALENDLY_URL,
+    parentElement: widget,
+    prefill: {
+      name: p1Name && p2Name ? `${p1Name} & ${p2Name}` : (p1Name || ''),
+      email: email,
+      // a1 = first custom question. Configure in Calendly as "Partner's name"
+      // (see LMFT_SETUP.md). The webhook reads this back.
+      customAnswers: p2Name ? { a1: p2Name } : {},
+    },
+    // utmSource carries the order id through to the booking — webhook reads it
+    // as payload.tracking.utm_source.
+    utm: orderId ? { utmSource: orderId } : {},
+  });
 }
+initCalendly();
 </script>
 </body>
 </html>

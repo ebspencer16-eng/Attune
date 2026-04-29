@@ -5296,10 +5296,15 @@ function NotesView({ userName, partnerName, notesState, setNotesState, onBack })
 // ======================================================
 // LMFT SESSION -- Premium
 // ======================================================
-function LMFTSession({ userName, partnerName, onBack }) {
+function LMFTSession({ userName, partnerName, userEmail, orderNum, onBack }) {
   // Redirect to the real booking page — /lmft-booking handles scheduling
-  // Pass names as URL params so the form can pre-fill
-  const bookingUrl = `/lmft-booking?p1=${encodeURIComponent(userName || '')}&p2=${encodeURIComponent(partnerName || '')}`;
+  // Pass names + email + order so Calendly's embed can pre-fill them
+  const params = new URLSearchParams();
+  if (userName)  params.set('p1', userName);
+  if (partnerName) params.set('p2', partnerName);
+  if (userEmail) params.set('email', userEmail);
+  if (orderNum)  params.set('order', orderNum);
+  const bookingUrl = `/lmft-booking?${params.toString()}`;
 
   return (
     <div style={{ maxWidth: 520, margin: "0 auto" }}>
@@ -5311,7 +5316,7 @@ function LMFTSession({ userName, partnerName, onBack }) {
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "1rem", marginBottom: "2rem" }}>
         {[
           { icon: "1", label: "Finish your exercises", body: "Both partners need to complete their exercises before the session." },
-          { icon: "2", label: "Request a time", body: "Share your availability and we'll match you with an available therapist." },
+          { icon: "2", label: "Pick a time", body: "Choose any open slot. You'll get an instant confirmation with a video link." },
           { icon: "3", label: "Meet over video", body: "50 minutes. Your results are the starting point — not an intake form." },
         ].map(s => (
           <div key={s.icon} style={{ background: "#F5F7FF", borderRadius: 14, padding: "1.1rem" }}>
@@ -5324,7 +5329,7 @@ function LMFTSession({ userName, partnerName, onBack }) {
       <a href={bookingUrl} style={{ display: "block", textAlign: "center", padding: "0.95rem 2rem", background: "linear-gradient(135deg,#1B5FE8,#3B3A8A)", color: "white", borderRadius: 14, fontWeight: 700, fontSize: "0.9rem", fontFamily: font.body, textDecoration: "none", letterSpacing: "0.02em" }}>
         Book my session →
       </a>
-      <p style={{ fontSize: "0.72rem", color: C.muted, fontFamily: font.body, textAlign: "center", marginTop: "1rem", lineHeight: 1.6 }}>We'll confirm your time and therapist within 48 hours.</p>
+      <p style={{ fontSize: "0.72rem", color: C.muted, fontFamily: font.body, textAlign: "center", marginTop: "1rem", lineHeight: 1.6 }}>You'll get a calendar invite and confirmation email immediately after booking.</p>
     </div>
   );
 }
@@ -11525,7 +11530,13 @@ export default function App() {
 
         {/* ── LMFT SESSION: Premium ── */}
         {view === "lmft" && pkg.hasLMFT && (
-          <LMFTSession userName={userName} partnerName={partnerName} onBack={() => setView("home")} />
+          <LMFTSession
+            userName={userName}
+            partnerName={partnerName}
+            userEmail={account?.email || ''}
+            orderNum={(() => { try { return JSON.parse(localStorage.getItem('attune_order') || '{}').orderNum || ''; } catch { return ''; } })()}
+            onBack={() => setView("home")}
+          />
         )}
 
         {/* ── OUR NOTES ── */}
