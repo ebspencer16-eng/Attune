@@ -395,7 +395,7 @@
     .pkg-overview{grid-template-columns:repeat(2,1fr)!important}
     .packages-inner,.packages{padding-left:1rem!important;padding-right:1rem!important}
     .pkg-body{grid-template-columns:1fr!important}
-    .pkg-body.two-col{grid-template-columns:1fr 1fr!important;gap:.75rem!important}
+    /* .pkg-body.two-col override moved to later breakpoint (see ~line 457) */
     .ex-mini{padding:.75rem!important}
     .ex-title{font-size:.78rem!important}
     .ex-desc{font-size:.72rem!important}
@@ -451,8 +451,17 @@
 
     /* === PACKAGE BODY === */
     .pkg-body{padding:.9rem 1.1rem 1.25rem!important;gap:.85rem!important;grid-template-columns:1fr!important}
-    .pkg-body.two-col{grid-template-columns:1fr 1fr!important;gap:.65rem!important}
+    /* On mobile: stack the two-col layout so exercise tiles row sits ABOVE
+       What's Included. Within the exercise row, force Ex01 and Ex02 to render
+       side-by-side as a 2-up grid (reads as "the exercises you'll do"). */
+    .pkg-body.two-col{grid-template-columns:1fr!important;gap:.85rem!important}
+    .pkg-body.two-col > div:first-child{display:grid!important;grid-template-columns:1fr 1fr!important;gap:.55rem!important}
+    .pkg-body.two-col > div:first-child .ex-mini{margin-bottom:0!important;padding:.7rem!important}
     .pkg-body.two-col .ex-mini{font-size:.75rem!important}
+    /* On mobile: visually integrate exercises with included list — reduce
+       spacing between the two so the whole card reads as one. */
+    .inc-block{padding:.95rem 1rem!important}
+    .inc-block-title{font-size:.7rem!important;margin-bottom:.5rem!important}
     .three-col{grid-template-columns:1fr!important}
 
     /* === EXERCISE TILES === */
@@ -500,7 +509,7 @@
     [style*="padding:1rem 2.25rem 1.5rem"]{padding:.65rem 1.1rem 1rem!important}
 
     /* === GIFT CONTEXT BAR === */
-    [style*="Giving as a gift"]{padding:.85rem 1rem!important;margin:.75rem 0 1.25rem!important;gap:.75rem!important;flex-wrap:nowrap!important;align-items:center!important}
+    [style*="Giving as a gift"]{padding:.85rem 1rem!important;margin:.75rem 1rem 1.25rem!important;gap:.75rem!important;flex-wrap:nowrap!important;align-items:center!important}
   }
 
   .page-header{background:linear-gradient(150deg,#1c1940 0%,#282560 60%,#1e3a6e 100%);padding:calc(58px + 3.5rem) clamp(1.25rem,5vw,2.5rem) 3rem;position:relative;overflow:hidden;max-width:none;margin:0;width:100%;box-sizing:border-box}
