@@ -195,7 +195,7 @@
   .faq-q{font-weight:600;color:var(--ink);font-size:.95rem;margin-bottom:.5rem;line-height:1.4}
   .faq-a{font-size:.88rem;color:var(--text);line-height:1.65}
 
-  .cta-row{display:flex;gap:.75rem;margin:2.5rem 0 0;flex-wrap:wrap}
+  .cta-row{display:flex;gap:.85rem;margin:2.5rem 0 0;flex-wrap:wrap;align-items:center}
   .btn-primary{
     background:var(--ink);color:white;text-decoration:none;font-weight:600;
     padding:.85rem 1.4rem;border-radius:10px;font-size:.88rem;
@@ -208,6 +208,24 @@
     border:1px solid var(--stone);transition:border-color .15s;
   }
   .btn-secondary:hover{border-color:var(--clay)}
+  .btn-secondary-link{
+    font-size:.86rem;font-weight:500;color:var(--muted);text-decoration:none;
+    transition:color .15s;
+  }
+  .btn-secondary-link:hover{color:var(--orange)}
+
+  /* Standard end-of-page CTA section (matches /faq pattern) */
+  .cta-wrap{text-align:center;padding:4rem 2.5rem;background:var(--warm);border-top:1px solid var(--stone)}
+  .cta-inner{max-width:860px;margin:0 auto}
+  .cta-title{font-family:var(--hfont);font-size:clamp(2.2rem,4vw,3rem);font-weight:700;line-height:1.08;color:var(--ink);margin-bottom:1rem;letter-spacing:-.02em}
+  .cta-title em{font-style:italic;color:var(--orange)}
+  .cta-sub{font-size:.95rem;color:var(--muted);line-height:1.7;font-weight:300;margin-bottom:1.75rem}
+  .cta-actions{display:flex;gap:1.25rem;justify-content:center;flex-wrap:wrap;align-items:center}
+  .cta-link{font-size:.86rem;font-weight:500;color:var(--muted);text-decoration:none;transition:color .15s}
+  .cta-link:hover{color:var(--orange)}
+  @media(max-width:640px){
+    .cta-wrap{padding:3rem 1.25rem}
+  }
 
   .toast{
     position:fixed;bottom:24px;left:50%;transform:translateX(-50%);
@@ -290,7 +308,7 @@
   <div class="page-header-glow"></div>
   <div class="page-header-inner">
     <p class="eyebrow">Wedding registry</p>
-    <h1 class="page-title">Register for something your <em>marriage</em> will use.</h1>
+    <h1 class="page-title">Register for something that helps you start <em>on the right foot.</em></h1>
     <p class="page-sub">A wedding gift built for the start of married life. Two exercises, one shared picture of how you communicate and what you each expect.</p>
     <div class="hero-actions">
       <a href="#platforms" class="btn-hero-primary">
@@ -311,7 +329,7 @@
     <div class="product-info">
       <div class="product-badge">Wedding gift</div>
       <div class="product-name">The Starting Out Collection</div>
-      <div class="product-desc">Most registry items fill a cabinet. This one fills a gap. Two exercises, one shared picture of how you communicate and what you each expect, and the practical guides for the first few months of married life.</div>
+      <div class="product-desc">Most registry items fill a cabinet. This one fills a gap.</div>
       <div class="product-prices">
         <span>Digital · <strong>$139</strong></span>
         <span>Physical gift box · <strong>$174</strong></span>
@@ -347,7 +365,7 @@
     </div>
   </div>
   <div class="physical-extra">
-    <strong>The physical gift box</strong> ($174) adds a keepsake box with a printed welcome card and notepad. The full printed workbook is available as an optional add-on.
+    <strong>The physical gift box</strong> ($174) adds a keepsake box with a printed welcome card, a notepad, and a handmade ceramic ring tray. The full printed workbook is available as an optional add-on.
   </div>
 
   <h2 id="platforms">Add it to your registry</h2>
@@ -439,11 +457,29 @@
   </div>
 
   <div class="cta-row">
-    <a href="/offerings?pkg=newlywed" class="btn-primary">See the full package →</a>
-    <a href="/contact" class="btn-secondary">Questions? Get in touch</a>
+    <a href="#platforms" class="btn-hero-primary">
+      Add Attune to your registry
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+    </a>
+    <a href="/contact" class="btn-secondary-link">Questions? Get in touch →</a>
   </div>
 
 </main>
+
+<!-- Standard end-of-page CTA section, matches FAQ + other pages -->
+<div class="cta-wrap">
+  <div class="cta-inner">
+    <h2 class="cta-title">A gift that gets <em>used.</em></h2>
+    <p class="cta-sub">Two exercises. About 25 minutes each. The conversation it sparks is the part that lasts.</p>
+    <div class="cta-actions">
+      <a href="#platforms" class="btn-hero-primary">
+        Add Attune to your registry
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+      </a>
+      <a href="/offerings?pkg=newlywed" class="cta-link">See the full package →</a>
+    </div>
+  </div>
+</div>
 
 <div class="toast" id="toast">Link copied</div>
 
