@@ -93,3 +93,50 @@ Rule: Functional only. No text/content changes.
 
 - Issue 2.6 (duplicate emails on signup) is out-of-scope per user's "functional only, no content changes" rule. Could be improved later by deferring welcome email until first confirmed login.
 - The `/api/create-profile` endpoint is explicitly safe to retry: it checks for existing profile and returns `{ existed: true }` without overwriting. Good for idempotency on flaky networks.
+
+---
+
+## Section 3 — Exercise flow ✓
+
+**Scope:** Ex01 entry → answers → Ex02 → Ex03 (if applicable) → completion → bothDone → results unlock
+
+**Files reviewed:** `src/App.jsx` (Exercise01Flow, ExpectationsExercise, AnniversaryExercise, PartnerBExerciseFlow, calcDimScores, saveExerciseWithRetakeSnapshot), `api/partner-sync.js`
+
+### Issues found
+
+| # | Severity | Description | Status |
+|---|---|---|---|
+| 3.1 | low | Save fires fire-and-forget for Ex01/Ex02 (Ex03 awaits). Local save is the safety net. trackedSupabaseWrite shows toast on next save if last failed. Not user-blocking. | NOTED — pattern works |
+| 3.2 | low | Duplicated `useEffect` for toast wiring (lines 9915 & 9918, identical). Functional duplication only. | FIXED |
+| 3.3 | low | Inconsistency: Partner B awaits exercise saves; Partner A fire-and-forgets. Not user-facing. | NOTED |
+| 3.4 | **HIGH** | `/api/partner-sync` partner profile lookup mode (Mode B) used service role with no auth check. Anyone with a UUID could pull exercise answers + name. UUID space is 122 bits so brute force infeasible, but defense-in-depth violation. | FIXED — endpoint now requires Bearer token, validates caller is linked to requested partner |
+| 3.5 | flag | Mid-exercise progress saves (`attune_ex{N}_progress`) are NOT synced to Supabase. Cross-device resume gap if user switches devices mid-exercise. | NOTED — would require per-question writes, heavy |
+| 3.6 | none | `calcDimScores` defaults to 3 (mid-scale) when no values exist. Masks "didn't answer" from "neutral answer" but functionally correct. | OK |
+| 3.7 | flag | `PERSONALITY_QUESTIONS` array has 28 questions but `calcDimScores` `avg()` expects 5 per dim (en1-en5). Actual data is 3 per dim. `avg()` filters undefined so works. `closeness` dim has only 1 question. | NOTED — methodology, not bug |
+| 3.8 | none | Partner B exercise wrapper passes `account.name` and `account.partnerName` correctly. | OK |
+| 3.9 | flag | Dashboard falls back to "Sarah"/"James" if `account.name` is empty. With Section 2 fixes, this shouldn't occur. Pre-existing intentional design for demo. | NOTED |
+| 3.10 | low (cleanup) | Convoluted `allAnswered && (() => {...})()` pattern in Ex02 finish (2 occurrences). Functional but unreadable. | FIXED — replaced with clean `if (!allAnswered) return; ...` |
+
+### Files changed
+
+- `src/App.jsx` — removed duplicate toast wiring useEffect; cleaned up Ex02 finish onClick handlers (2 places); updated partner-sync poll caller to send auth token
+- `api/partner-sync.js` — Mode B (partner profile lookup) now requires Bearer token, validates caller's profile.partner_profile_id matches requested ID
+
+### What was confirmed working
+
+- `Exercise01Flow` mid-exercise progress save: each answer immediately persists to `attune_ex1_progress` localStorage
+- `Exercise01Flow` resume on mount: hydrates `idx` and `answers` from progress key, skips intro if any progress exists
+- `saveExerciseWithRetakeSnapshot`: detects retake via SELECT, preserves prior answers in `ex{N}_answers_prior` + `ex{N}_prior_completed_at`
+- `bothDone` flow: requires `ex1Answers && ex2Answers && (isDemo || hasRealPartner)`. Partner-joined-but-not-completed correctly does NOT unlock (fixed earlier).
+- Partner B `PartnerBExerciseFlow`: completes Ex01, Ex02, optionally Ex03, builds session, calls `onComplete(session)`, parent saves to `attune_partner_session`
+- Partner-sync poll (15s interval): looks up `partner_profile_id`, fetches partner profile, populates `partnerSession` if both ex1+ex2 exist
+- `calcDimScores` works correctly with 3-question-per-dim data (filters undefined keys)
+- Dashboard shows "Both exercises complete. Your joint results are ready" when bothDone, "Waiting on partner" when not
+
+### Security tightening (Issue 3.4)
+
+Before this audit, anyone calling `/api/partner-sync?partnerProfileId=XXX` would get exercise answers + name with no authentication. Now requires:
+1. Valid Supabase auth token in `Authorization: Bearer <token>` header
+2. Caller's profile.partner_profile_id must equal the requested partnerProfileId
+
+Returns 401 if missing/invalid token, 403 if not authorized for that partner.

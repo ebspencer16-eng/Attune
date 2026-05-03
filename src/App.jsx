@@ -593,10 +593,11 @@ function ExpectationsExercise({ partnerName, userName = "Partner A", onComplete,
               style={{ background: "transparent", border: ("1.5px solid " + C.stone), color: C.muted, padding: "0.65rem 1.25rem", fontSize: "0.7rem", letterSpacing: "0.1em", textTransform: "uppercase", cursor: "pointer", fontFamily: font.body, borderRadius: 8 }}>
               ← Back
             </button>
-            <button onClick={() => allAnswered && (() => {
+            <button onClick={() => {
+                if (!allAnswered) return;
                 try { localStorage.removeItem(progressKey); } catch {}
                 onComplete({ ...answers, childhoodStructure });
-              })()}
+              }}
               style={{ background: allAnswered ? "#4CAF50" : C.stone, color: "white", border: "none", padding: "0.75rem 2rem", fontSize: "0.72rem", letterSpacing: "0.1em", textTransform: "uppercase", cursor: allAnswered ? "pointer" : "default", fontFamily: font.body, borderRadius: 10, fontWeight: 600, transition: "background 0.2s", boxShadow: allAnswered ? "0 3px 16px rgba(76,175,80,0.45)" : "none" }}>
               {allAnswered ? "All done →" : ((totalItems - answeredItems) + " left to answer")}
             </button>
@@ -652,14 +653,15 @@ function ExpectationsExercise({ partnerName, userName = "Partner A", onComplete,
           ← Back
         </button>
         {lqIsLast
-          ? <button onClick={() => lqSel && (() => {
+          ? <button onClick={() => {
+              if (!lqSel) return;
               if (isRevisited) {
                 try { localStorage.removeItem(progressKey); } catch {}
                 onComplete({ ...answers, childhoodStructure });
               } else {
                 setPhase("childhood-setup");
               }
-            })()}
+            }}
               style={{ background: lqSel ? "#4CAF50" : C.stone, color: "white", border: "none", padding: "0.7rem 1.8rem", fontSize: "0.72rem", letterSpacing: "0.1em", textTransform: "uppercase", cursor: lqSel ? "pointer" : "default", fontFamily: font.body, borderRadius: 8, fontWeight: 600, boxShadow: lqSel ? "0 3px 16px rgba(76,175,80,0.45)" : "none" }}>
               All done →
             </button>
@@ -9910,11 +9912,9 @@ export default function App() {
     const t = setTimeout(() => setToastMsg(''), 4000);
     setToastTimer(t);
   };
-  // Expose globally so leaf components without showToast in scope (e.g. the
-  // budget tool's save handler) can surface sync errors.
-  useEffect(() => { window.__attuneShowToast = showToast; return () => { delete window.__attuneShowToast; }; }, [toastTimer]);
-  // Expose globally so helpers outside the React tree (e.g. trackedSupabaseWrite
-  // called from leaf components without toast access) can surface sync errors.
+  // Expose showToast globally so helpers outside the React tree (e.g.
+  // trackedSupabaseWrite, the budget save handler, leaf components without
+  // showToast in scope) can surface sync errors.
   useEffect(() => { window.__attuneShowToast = showToast; return () => { delete window.__attuneShowToast; }; }, [toastTimer]);
   const [pwaPrompt, setPwaPrompt] = useState(null);
   const [pwaDismissed, setPwaDismissed] = useState(false);
@@ -10694,8 +10694,13 @@ export default function App() {
         const partnerId = ownProfile?.partner_profile_id;
         if (!partnerId) return; // Partner hasn't signed up yet
 
-        // 2. Fetch partner's latest answers
-        const res = await fetch(`/api/partner-sync?partnerProfileId=${encodeURIComponent(partnerId)}`);
+        // 2. Fetch partner's latest answers. Auth token required so the
+        //    server can verify the caller is linked to this partner.
+        const { data: { session: authSession } } = await sb.auth.getSession();
+        if (!authSession?.access_token) return; // not authed yet, retry next poll
+        const res = await fetch(`/api/partner-sync?partnerProfileId=${encodeURIComponent(partnerId)}`, {
+          headers: { Authorization: `Bearer ${authSession.access_token}` },
+        });
         if (!res.ok || cancelled) return;
         const json = await res.json();
         if (json.found && json.profile?.ex1_answers && json.profile?.ex2_answers) {

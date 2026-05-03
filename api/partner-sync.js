@@ -165,6 +165,41 @@ async function handlePartnerSync(req) {
       }
       const pid = rawPartnerId.trim();
 
+      // SECURITY: caller must prove they're authorized to read this partner's
+      // data. Without this check, anyone who knows or guesses a profile UUID
+      // could pull exercise answers + name. (UUID space is 122 bits so this
+      // is computationally hard but defense-in-depth matters here.)
+      // We accept the user's auth token in the Authorization header,
+      // validate it, then confirm their profile.partner_profile_id matches
+      // the requested UUID. Only then return the data.
+      const authHeader = req.headers.get('authorization') || '';
+      const accessToken = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : '';
+      if (!accessToken) {
+        return new Response(JSON.stringify({ ok: false, error: 'Authentication required' }), { status: 401, headers: CORS });
+      }
+
+      // Verify the token by asking the auth API who it belongs to.
+      const userClient = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_ANON_KEY || process.env.SUPABASE_SERVICE_KEY, {
+        global: { headers: { Authorization: `Bearer ${accessToken}` } },
+      });
+      const { data: { user: authUser }, error: authErr } = await userClient.auth.getUser(accessToken);
+      if (authErr || !authUser) {
+        return new Response(JSON.stringify({ ok: false, error: 'Invalid auth token' }), { status: 401, headers: CORS });
+      }
+
+      // Confirm caller is linked to the requested partner.
+      const { data: callerProfile, error: callerErr } = await sb
+        .from('profiles')
+        .select('partner_profile_id')
+        .eq('id', authUser.id)
+        .maybeSingle();
+      if (callerErr) {
+        return new Response(JSON.stringify({ ok: false, error: callerErr.message }), { status: 500, headers: CORS });
+      }
+      if (!callerProfile || callerProfile.partner_profile_id !== pid) {
+        return new Response(JSON.stringify({ ok: false, error: 'Not authorized to read this partner' }), { status: 403, headers: CORS });
+      }
+
       const { data, error } = await sb
         .from('profiles')
         .select('name, ex1_answers, ex2_answers, ex3_answers, ex3_completed')
