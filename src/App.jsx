@@ -8632,10 +8632,15 @@ function AuthModal({ mode, onClose, onSuccess }) {
       // to this newly-created auth user. orderNum was passed in the URL by
       // checkout.html on success. Without this link, the user's orders are
       // only findable by buyer_email — fragile if email is changed later.
+      // Multi-item orders are written as ORDER_NUM-1, ORDER_NUM-2, etc. by
+      // the stripe webhook, so we also match the prefix to catch all rows.
       const _checkoutOrderNum = _authParams.get('orderNum');
       if (_checkoutOrderNum) {
         try {
-          await sb.from('orders').update({ user_id: authData.user.id }).eq('order_num', _checkoutOrderNum);
+          // Match either the exact order_num (single-item) or the prefixed
+          // multi-item rows. PostgREST supports `like` for pattern match.
+          await sb.from('orders').update({ user_id: authData.user.id })
+            .or(`order_num.eq.${_checkoutOrderNum},order_num.like.${_checkoutOrderNum}-%`);
         } catch (e) {
           console.warn('[Attune] order linkage failed:', e);
         }

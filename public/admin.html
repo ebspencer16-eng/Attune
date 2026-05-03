@@ -3022,7 +3022,8 @@ async function markStatus(orderId, newStatus) {
   // Persist to Supabase via orders API
   const statusMap = { pending: 'pending', packed: 'packed', shipped: 'shipped' };
   try {
-    await fetch('/api/orders', {
+    const adminSecret = new URLSearchParams(window.location.search).get('s') || '';
+    await fetch('/api/orders' + (adminSecret ? `?secret=${encodeURIComponent(adminSecret)}` : ''), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({

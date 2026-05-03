@@ -35,8 +35,13 @@ export default async function handler(req) {
   const { searchParams } = new URL(req.url);
   const secret = searchParams.get('secret');
   const adminSecret = process.env.ADMIN_SECRET;
-  
-  if (adminSecret && secret !== adminSecret) {
+
+  // Fail-closed: if ADMIN_SECRET isn't configured, refuse rather than
+  // leaving the endpoint open (matches admin-csv).
+  if (!adminSecret) {
+    return new Response('Admin endpoint not configured', { status: 503 });
+  }
+  if (secret !== adminSecret) {
     return new Response('Unauthorized', { status: 401 });
   }
 

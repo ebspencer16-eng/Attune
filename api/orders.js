@@ -25,6 +25,25 @@ function orderNum() {
 export default async function handler(req) {
   const headers = { 'Content-Type': 'application/json' };
 
+  // Admin secret gate (fail-closed). This endpoint runs as service role
+  // and can read/write any order. Only admin.html uses it (fulfillment
+  // status updates). Without this, anyone could write fake orders, mutate
+  // any order by id, or pull all orders for any UUID.
+  const adminSecret = process.env.ADMIN_SECRET;
+  if (!adminSecret) {
+    return new Response(JSON.stringify({ ok: false, error: 'Admin endpoint not configured' }), { status: 503, headers });
+  }
+  // Accept the secret either via Authorization header or as ?secret= query
+  // param so admin.html (which uses fetch with no headers historically) can
+  // be updated to pass it either way.
+  const url = new URL(req.url);
+  const authHeader = req.headers.get('authorization') || '';
+  const headerSecret = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : '';
+  const querySecret = url.searchParams.get('secret') || '';
+  if (headerSecret !== adminSecret && querySecret !== adminSecret) {
+    return new Response(JSON.stringify({ ok: false, error: 'Unauthorized' }), { status: 401, headers });
+  }
+
   if (req.method === 'POST') {
     let body;
     try { body = await req.json(); } catch { return new Response('Invalid JSON', { status: 400 }); }

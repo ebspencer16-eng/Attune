@@ -421,6 +421,25 @@ function checkin1yrEmail({ toName, partnerName, retakeUrl, portalUrl }) {
 
 // ── Handler ──────────────────────────────────────────────────────────────────
 
+// URL fields that get interpolated into email templates. Any value that goes
+// here must be on a trusted domain — otherwise this endpoint becomes a
+// phishing-email relay (attacker POSTs partner_invite with their own URL,
+// recipient sees a real-looking "Attune partner invite" email leading to a
+// credential-stealing page).
+const URL_FIELDS = ['inviteUrl', 'downloadUrl', 'portalUrl', 'surveyUrl', 'retakeUrl', 'schedulingUrl', 'videoUrl', 'rescheduleUrl', 'cancelUrl'];
+const URL_ALLOWED_HOSTS = ['attune-relationships.com', 'calendly.com'];
+function isAllowedUrl(u) {
+  if (!u || typeof u !== 'string') return true; // null/empty is fine — template will skip it
+  try {
+    const parsed = new URL(u);
+    if (parsed.protocol !== 'https:' && parsed.protocol !== 'http:') return false;
+    const host = parsed.hostname.toLowerCase();
+    return URL_ALLOWED_HOSTS.some(h => host === h || host.endsWith('.' + h));
+  } catch {
+    return false;
+  }
+}
+
 export default async function handler(req) {
   if (req.method !== 'POST') return new Response('Method not allowed', { status: 405 });
 
@@ -433,6 +452,14 @@ export default async function handler(req) {
   let body;
   try { body = await req.json(); }
   catch { return new Response('Invalid JSON', { status: 400 }); }
+
+  // Reject if any URL field points outside our trusted domains. This prevents
+  // the endpoint from being used as a phishing-email relay.
+  for (const f of URL_FIELDS) {
+    if (body[f] && !isAllowedUrl(body[f])) {
+      return new Response(JSON.stringify({ ok: false, error: `${f} must be on a trusted domain` }), { status: 400, headers: { 'Content-Type': 'application/json' } });
+    }
+  }
 
   const { type } = body;
   let email;

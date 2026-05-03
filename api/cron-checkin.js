@@ -42,9 +42,14 @@ export default async function handler(req) {
   }
 
   // ── Helper: fetch eligible users ─────────────────────────────────────────
+  // We select `pkg` rather than `has_anniversary` (which doesn't exist as
+  // a column). hasReflection is derived as: ex3_completed OR pkg in
+  // ('anniversary','premium'), OR (further down) any matching order has
+  // addon_reflection. The cron's intent is to suppress the upsell block
+  // for users who already have anniversary access.
   async function fetchUsers(sentAtField, window) {
     const res = await fetch(
-      `${supabaseUrl}/rest/v1/profiles?select=id,email,name,partner_name,created_at,ex3_completed,has_anniversary` +
+      `${supabaseUrl}/rest/v1/profiles?select=id,email,name,partner_name,created_at,ex3_completed,pkg` +
       `&email_opt_in=eq.true` +
       `&${sentAtField}=is.null` +
       `&created_at=gte.${window.start.toISOString()}` +
@@ -53,6 +58,14 @@ export default async function handler(req) {
     );
     if (!res.ok) { console.error('[cron-checkin] Query failed:', await res.text()); return []; }
     return res.json();
+  }
+
+  // True if user already has anniversary content access. Used to suppress
+  // the upsell block in the check-in email.
+  function hasReflectionAccess(user) {
+    if (user.ex3_completed) return true;
+    if (user.pkg === 'anniversary' || user.pkg === 'premium') return true;
+    return false;
   }
 
   // ── Helper: mark sent ─────────────────────────────────────────────────────
@@ -81,7 +94,7 @@ export default async function handler(req) {
   const users6mo = await fetchUsers('checkin_sent_at', windowFor(6));
   for (const user of users6mo) {
     if (!user.email) continue;
-    const hasRefl = !!(user.ex3_completed || user.has_anniversary);
+    const hasRefl = hasReflectionAccess(user);
     const ok = await sendEmail(
       user.email,
       `How are you and ${user.partner_name || 'your partner'} doing?`,
@@ -95,7 +108,7 @@ export default async function handler(req) {
   const users1yr = await fetchUsers('checkin_1yr_sent_at', windowFor(12));
   for (const user of users1yr) {
     if (!user.email) continue;
-    const hasRefl = !!(user.ex3_completed || user.has_anniversary);
+    const hasRefl = hasReflectionAccess(user);
     const ok = await sendEmail(
       user.email,
       `A year with ${user.partner_name || 'your partner'} — how things look now`,

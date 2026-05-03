@@ -51,24 +51,46 @@ export default async function handler(req) {
   const summary = { archived: false, workbooksRemoved: 0, storageRemoved: 0, ordersRemoved: 0, partnerSessionsAnonymized: 0, feedbackNulled: 0 };
 
   // ── 1. Gather non-PII research data to archive ────────────────────────────
-  // Pull from exercise_sessions (canonical) and profile (for demographic fields).
-  // Note: exercise_sessions.user_id has ON DELETE CASCADE, so this data disappears
-  // when we delete the auth user. We copy it to the archive table first.
+  // Pull from profiles (unified model — exercise answers live here directly,
+  // see migration 006). The exercise_sessions table no longer exists; an
+  // earlier version of this code referenced it and silently wrote empty
+  // archive rows because session was always null.
   try {
     const { data: profile } = await admin.from('profiles')
-      .select('pkg, pronouns, partner_pronouns, created_at, age_range, gender, relationship_status, relationship_length, children, signup_source')
+      .select('pkg, pronouns, partner_pronouns, created_at, age_range, gender, relationship_status, relationship_length, children, signup_source, ex1_answers, ex2_answers, ex3_answers')
       .eq('id', userId)
-      .maybeSingle();
-
-    const { data: session } = await admin.from('exercise_sessions')
-      .select('ex1_answers, ex2_answers, ex3_answers, couple_type, exp_gaps')
-      .eq('user_id', userId)
       .maybeSingle();
 
     // Only write the archive row if there's something worth archiving.
     // Users who signed up but never finished an exercise have no research value.
-    const hasAnswers = session && (session.ex1_answers || session.ex2_answers || session.ex3_answers);
+    const hasAnswers = profile && (profile.ex1_answers || profile.ex2_answers || profile.ex3_answers);
     if (hasAnswers) {
+      // Compute couple_type and exp_gaps from the answers if a partner profile
+      // exists with answers too. Without a partner, leave them null — the
+      // archive is per-user not per-couple.
+      let coupleType = null;
+      let expGaps = null;
+      try {
+        const { data: own } = await admin.from('profiles')
+          .select('partner_profile_id')
+          .eq('id', userId)
+          .maybeSingle();
+        if (own?.partner_profile_id) {
+          const { data: partner } = await admin.from('profiles')
+            .select('ex1_answers, ex2_answers')
+            .eq('id', own.partner_profile_id)
+            .maybeSingle();
+          if (partner?.ex1_answers && profile.ex1_answers) {
+            // We don't import the score-derivation code in the edge function;
+            // store both score blobs raw for offline analysis instead.
+            coupleType = { my_ex1: profile.ex1_answers, partner_ex1: partner.ex1_answers };
+          }
+          if (partner?.ex2_answers && profile.ex2_answers) {
+            expGaps = { my_ex2: profile.ex2_answers, partner_ex2: partner.ex2_answers };
+          }
+        }
+      } catch (e) { /* best-effort; archive proceeds without partner context */ }
+
       const { error: archiveErr } = await admin.from('deleted_user_archive').insert({
         pkg:                  profile?.pkg || null,
         signed_up_at:         profile?.created_at || null,
@@ -80,32 +102,43 @@ export default async function handler(req) {
         relationship_length:  profile?.relationship_length || null,
         children:             profile?.children || null,
         signup_source:        profile?.signup_source || null,
-        ex1_answers:          session.ex1_answers || null,
-        ex2_answers:          session.ex2_answers || null,
-        ex3_answers:          session.ex3_answers || null,
-        couple_type:          session.couple_type || null,
-        exp_gaps:             session.exp_gaps || null,
+        ex1_answers:          profile?.ex1_answers || null,
+        ex2_answers:          profile?.ex2_answers || null,
+        ex3_answers:          profile?.ex3_answers || null,
+        couple_type:          coupleType,
+        exp_gaps:             expGaps,
       });
       if (!archiveErr) summary.archived = true;
       else console.warn('[delete-account] archive insert failed:', archiveErr.message);
     }
   } catch (e) { console.warn('[delete-account] archive step failed:', e?.message); }
 
-  // ── 2. Remove personalized workbook files + rows ──────────────────────────
-  // Workbooks contain names, personalized language, and couple-specific content.
-  // They're PII even though the underlying couple_type is not.
+  // ── 2. Remove personalized workbook files from storage ────────────────────
+  // There is no `workbooks` table. Workbook files live in the `workbooks`
+  // Supabase Storage bucket, keyed by order_num. We pull the user's order
+  // numbers, then delete each `workbooks/<order_num>/...` prefix.
+  // Workbooks contain names, personalized language, and couple-specific
+  // content — they're PII even though the underlying couple_type is not.
   try {
-    const { data: books } = await admin.from('workbooks')
-      .select('id, storage_path')
+    const { data: orderRows } = await admin.from('orders')
+      .select('order_num')
       .eq('user_id', userId);
-    if (books && books.length) {
-      const paths = books.map(b => b.storage_path).filter(Boolean);
-      if (paths.length) {
-        const { error: rmErr } = await admin.storage.from('workbooks').remove(paths);
-        if (!rmErr) summary.storageRemoved = paths.length;
+    if (orderRows && orderRows.length) {
+      const pathsToRemove = [];
+      for (const row of orderRows) {
+        if (!row.order_num) continue;
+        // List files under the order_num prefix
+        const { data: files } = await admin.storage.from('workbooks').list(row.order_num);
+        if (files && files.length) {
+          files.forEach(f => pathsToRemove.push(`${row.order_num}/${f.name}`));
+        }
       }
-      await admin.from('workbooks').delete().eq('user_id', userId);
-      summary.workbooksRemoved = books.length;
+      if (pathsToRemove.length) {
+        const { error: rmErr } = await admin.storage.from('workbooks').remove(pathsToRemove);
+        if (!rmErr) summary.storageRemoved = pathsToRemove.length;
+        else console.warn('[delete-account] storage remove failed:', rmErr.message);
+      }
+      summary.workbooksRemoved = pathsToRemove.length;
     }
   } catch (e) { console.warn('[delete-account] workbook cleanup failed:', e?.message); }
 
@@ -134,11 +167,12 @@ export default async function handler(req) {
   } catch (e) { console.warn('[delete-account] partner unlink failed:', e?.message); }
 
   // ── 5. Null out feedback attribution ──────────────────────────────────────
-  // feedback.user_id is ON DELETE SET NULL per schema, so the auth delete will
-  // handle this automatically. Explicit call here is belt-and-suspenders in
-  // case feedback RLS or triggers interfere.
+  // The table is feedback_submissions (an earlier version of this code
+  // referenced 'feedback' which doesn't exist — silent failure). We null
+  // user_id rather than deleting so aggregate/anonymous feedback survives
+  // for product analysis.
   try {
-    const { count } = await admin.from('feedback')
+    const { count } = await admin.from('feedback_submissions')
       .update({ user_id: null }, { count: 'exact' })
       .eq('user_id', userId);
     summary.feedbackNulled = count || 0;

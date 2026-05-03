@@ -92,12 +92,14 @@ export default async function handler(req) {
   const url = new URL(req.url);
   const type = (url.searchParams.get('type') || '').toLowerCase();
 
-  // Optional secret gate (matches /api/get-feedback pattern)
+  // Secret gate — fail-closed. If ADMIN_SECRET isn't set in env, the endpoint
+  // refuses to serve. Previously this was "if (adminSecret) check, else allow"
+  // which exposed every customer's data via service-role queries to anyone
+  // who knew the URL whenever the env var was unset.
   const adminSecret = process.env.ADMIN_SECRET;
-  if (adminSecret) {
-    const provided = url.searchParams.get('secret') || '';
-    if (provided !== adminSecret) return errResponse(403, 'Invalid or missing secret');
-  }
+  if (!adminSecret) return errResponse(503, 'Admin endpoint not configured (ADMIN_SECRET env var missing)');
+  const provided = url.searchParams.get('secret') || '';
+  if (provided !== adminSecret) return errResponse(403, 'Invalid or missing secret');
 
   const SUPABASE_URL  = process.env.SUPABASE_URL;
   const SUPABASE_KEY  = process.env.SUPABASE_SERVICE_KEY;
