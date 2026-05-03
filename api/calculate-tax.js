@@ -42,6 +42,7 @@ const BETA_CODES = {
   'BETA-CORE': 'core', 'BETA-NEWLYWED': 'newlywed',
   'BETA-ANNIVERSARY': 'anniversary', 'BETA-PREMIUM': 'premium',
   'ATTUNE-BETA-FEEDBACK': '*',
+  'BETA-CORE-1': { pkg: 'core', mode: 'fixed', amount: 1 },
 };
 
 function itemBasePrice(it) {
@@ -58,14 +59,21 @@ function itemAddonTotal(it) {
   return a;
 }
 
-function buildTaxLines(items, promoCoversBase) {
+function buildTaxLines(items, promoCoversBase, promoFixedAmount = null) {
   const lines = [];
   items.forEach((it, idx) => {
     const base = itemBasePrice(it);
-    // Skip the package line when promo covers it
-    if (base > 0 && !promoCoversBase) {
+    // Decide what amount the package line bills at:
+    //   no promo:                 base
+    //   free-mode promo:          0 (skip the line entirely)
+    //   fixed-mode promo:         promoFixedAmount (e.g. $1 for BETA-CORE-1)
+    let pkgAmount = base;
+    if (promoCoversBase) {
+      pkgAmount = (promoFixedAmount != null) ? promoFixedAmount : 0;
+    }
+    if (pkgAmount > 0) {
       lines.push({
-        amount: base * 100,
+        amount: pkgAmount * 100,
         tax_code: it.isPhysical ? TAX_CODES.physicalPackage : TAX_CODES.digitalPackage,
         reference: `item-${idx}-pkg`,
         quantity: 1,
@@ -104,14 +112,30 @@ export default async function handler(req) {
       });
     }
 
-    // Compute subtotal (respecting promo coverage like the real payment path)
+    // Compute subtotal (respecting promo coverage like the real payment path).
+    // BETA_CODES values are either strings (free-mode, package key) or
+    // { pkg, mode: 'fixed', amount } objects (fixed-mode). Normalize first.
     const promoCode = (body.promoCode || '').toUpperCase().trim();
-    const codeUnlocks = promoCode ? BETA_CODES[promoCode] : null;
+    const codeEntry = promoCode ? BETA_CODES[promoCode] : null;
+    const codeMeta = codeEntry == null
+      ? null
+      : (typeof codeEntry === 'string'
+          ? { pkg: codeEntry, mode: 'free', amount: 0 }
+          : codeEntry);
+    const codeUnlocks = codeMeta?.pkg || null;
     // A promo covers the base if it matches EVERY item's pkg (or is wildcard)
     const promoCoversBase = !!codeUnlocks && (codeUnlocks === '*' || items.every(it => it.pkgKey === codeUnlocks));
+    // For free-mode the package becomes $0; for fixed-mode it becomes
+    // codeMeta.amount (e.g. $1 for BETA-CORE-1).
+    const promoFixedAmount = (promoCoversBase && codeMeta?.mode === 'fixed')
+      ? (Number(codeMeta.amount) || 0)
+      : null;
 
     const subtotalCents = items.reduce((sum, it) => {
-      const base = promoCoversBase ? 0 : itemBasePrice(it);
+      let base = itemBasePrice(it);
+      if (promoCoversBase) {
+        base = (promoFixedAmount != null) ? promoFixedAmount : 0;
+      }
       return sum + (base + itemAddonTotal(it)) * 100;
     }, 0);
 
@@ -132,7 +156,7 @@ export default async function handler(req) {
       }), { status: 200, headers: { 'Content-Type': 'application/json' } });
     }
 
-    const lineItems = buildTaxLines(items, promoCoversBase);
+    const lineItems = buildTaxLines(items, promoCoversBase, promoFixedAmount);
     if (lineItems.length === 0) {
       return new Response(JSON.stringify({ subtotalCents, taxCents: 0, totalCents: subtotalCents }), {
         status: 200, headers: { 'Content-Type': 'application/json' }

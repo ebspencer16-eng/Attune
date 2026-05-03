@@ -110,12 +110,19 @@ export default async function handler(req) {
 
 // ── Email HTML templates ────────────────────────────────────────────────────
 
+// Escape HTML to prevent XSS via names, package descriptions, etc.
+// Buyer-controlled fields (buyerName, partnerName, recipientName, giftNote,
+// pkgName from request body) flow into these templates and could contain
+// markup if a hostile buyer is testing the system. Email clients sanitize
+// most JavaScript but inline images / iframes / CSS can still be problematic.
+const _esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
+
 // Shared layout matching the notepad brand: navy header with logo + tagline,
 // gradient rule, cream body with serif + sans blend.
 function brandedEmail({ preheader = '', title, subtitle, bodyHtml, ctaLabel, ctaUrl, ctaColor = '#E8673A', footerNote = 'Questions? Reply to this email or reach us at hello@attune-relationships.com', userId = null }) {
   const cta = ctaLabel && ctaUrl
     ? `<tr><td style="padding:0 40px 28px;text-align:center">
-         <a href="${ctaUrl}" style="display:inline-block;background:linear-gradient(135deg,${ctaColor},#d45a2e);color:#ffffff;padding:14px 34px;border-radius:12px;font-size:14px;font-weight:700;text-decoration:none;letter-spacing:.04em;font-family:'DM Sans',Arial,sans-serif">${ctaLabel}</a>
+         <a href="${ctaUrl}" style="display:inline-block;background:linear-gradient(135deg,${ctaColor},#d45a2e);color:#ffffff;padding:14px 34px;border-radius:12px;font-size:14px;font-weight:700;text-decoration:none;letter-spacing:.04em;font-family:'DM Sans',Arial,sans-serif">${_esc(ctaLabel)}</a>
        </td></tr>`
     : '';
 
@@ -185,7 +192,7 @@ function orderConfirmationHtml({ buyerName, pkgName, orderNum, total, isGift, is
   const deliveryLine = isPhysical
     ? 'Your gift box will arrive within 3–5 business days. Setup instructions are inside.'
     : isGift
-      ? `We've sent ${recipientName}'s access link in a separate email.`
+      ? `We've sent ${_esc(recipientName)}'s access link in a separate email.`
       : 'Your access link has been sent in a separate email — check your inbox to set up your profile.';
 
   const addonRows = [
@@ -199,18 +206,18 @@ function orderConfirmationHtml({ buyerName, pkgName, orderNum, total, isGift, is
     <div style="background:#FBF8F3;border:1px solid #F3EDE6;border-radius:10px;padding:20px 22px;margin:8px 0 16px">
       <div style="font-family:'DM Sans',Helvetica,Arial,sans-serif;font-size:11px;color:#C17F47;font-weight:700;letter-spacing:.2em;text-transform:uppercase;margin-bottom:12px">Order summary</div>
       <table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="font-family:'DM Sans',Helvetica,Arial,sans-serif">
-        <tr><td style="padding:6px 0;color:#1E1610;font-size:14px;font-weight:600">${pkgName}</td><td align="right" style="padding:6px 0;color:#1E1610;font-size:14px;font-weight:600">$${total}</td></tr>
+        <tr><td style="padding:6px 0;color:#1E1610;font-size:14px;font-weight:600">${_esc(pkgName)}</td><td align="right" style="padding:6px 0;color:#1E1610;font-size:14px;font-weight:600">$${_esc(total)}</td></tr>
         ${addonRows}
-        <tr><td colspan="2" style="border-top:1px solid #E8DDD0;padding-top:10px;margin-top:10px;font-size:12px;color:#8C7A68;font-family:'Menlo','SF Mono',monospace">Order #${orderNum}</td></tr>
+        <tr><td colspan="2" style="border-top:1px solid #E8DDD0;padding-top:10px;margin-top:10px;font-size:12px;color:#8C7A68;font-family:'Menlo','SF Mono',monospace">Order #${_esc(orderNum)}</td></tr>
       </table>
     </div>
     <p style="font-family:'DM Sans',Helvetica,Arial,sans-serif;font-size:14px;color:#5C4A38;line-height:1.7;margin:0">${deliveryLine}</p>
   `;
 
   return brandedEmail({
-    preheader: `Order confirmed — ${pkgName}`,
+    preheader: `Order confirmed — ${_esc(pkgName)}`,
     title: 'Order confirmed.',
-    subtitle: `Hi ${buyerName}, thank you for your order. Here's what's coming next.`,
+    subtitle: `Hi ${_esc(buyerName)}, thank you for your order. Here's what's coming next.`,
     bodyHtml: body,
   });
 }
@@ -219,11 +226,11 @@ function getStartedBuyerHtml({ name, partnerName, accessUrl, partnerEmail }) {
   const partnerBlock = partnerEmail
     ? `<div style="background:#FBF8F3;border:1px solid #F3EDE6;border-radius:10px;padding:16px 20px;margin:16px 0 0">
          <div style="font-family:'DM Sans',Helvetica,Arial,sans-serif;font-size:11px;color:#C17F47;font-weight:700;letter-spacing:.2em;text-transform:uppercase;margin-bottom:8px">Your partner</div>
-         <p style="font-family:'DM Sans',Helvetica,Arial,sans-serif;font-size:14px;color:#5C4A38;line-height:1.65;margin:0">Once you finish setting up your profile, we'll email <strong style="color:#1E1610">${partnerEmail}</strong> their own unique invite link to get started.</p>
+         <p style="font-family:'DM Sans',Helvetica,Arial,sans-serif;font-size:14px;color:#5C4A38;line-height:1.65;margin:0">Once you finish setting up your profile, we'll email <strong style="color:#1E1610">${_esc(partnerEmail)}</strong> their own unique invite link to get started.</p>
        </div>`
     : `<div style="background:#FBF8F3;border:1px solid #F3EDE6;border-radius:10px;padding:16px 20px;margin:16px 0 0">
-         <div style="font-family:'DM Sans',Helvetica,Arial,sans-serif;font-size:11px;color:#C17F47;font-weight:700;letter-spacing:.2em;text-transform:uppercase;margin-bottom:8px">Inviting ${partnerName || 'your partner'}</div>
-         <p style="font-family:'DM Sans',Helvetica,Arial,sans-serif;font-size:14px;color:#5C4A38;line-height:1.65;margin:0">When you set up your profile, you'll be able to send ${partnerName || 'your partner'} their own unique invite link.</p>
+         <div style="font-family:'DM Sans',Helvetica,Arial,sans-serif;font-size:11px;color:#C17F47;font-weight:700;letter-spacing:.2em;text-transform:uppercase;margin-bottom:8px">Inviting ${_esc(partnerName || 'your partner')}</div>
+         <p style="font-family:'DM Sans',Helvetica,Arial,sans-serif;font-size:14px;color:#5C4A38;line-height:1.65;margin:0">When you set up your profile, you'll be able to send ${_esc(partnerName || 'your partner')} their own unique invite link.</p>
        </div>`;
 
   const body = `
@@ -233,8 +240,8 @@ function getStartedBuyerHtml({ name, partnerName, accessUrl, partnerEmail }) {
   `;
 
   return brandedEmail({
-    preheader: `Set up your Attune profile, ${name}`,
-    title: `Welcome, ${name}.`,
+    preheader: `Set up your Attune profile, ${_esc(name)}`,
+    title: `Welcome, ${_esc(name)}.`,
     subtitle: `Let's get your profile set up.`,
     bodyHtml: body,
     ctaLabel: 'Set up my profile →',
@@ -244,15 +251,15 @@ function getStartedBuyerHtml({ name, partnerName, accessUrl, partnerEmail }) {
 
 function partnerInviteHtml({ partnerName, buyerName, inviteUrl }) {
   const body = `
-    <p style="font-family:'DM Sans',Helvetica,Arial,sans-serif;font-size:15px;color:#5C4A38;line-height:1.75;margin:0 0 6px">${buyerName} set up Attune for the two of you — two short exercises mapping how you each communicate and what you each expect. Your answers stay private until you're both done.</p>
+    <p style="font-family:'DM Sans',Helvetica,Arial,sans-serif;font-size:15px;color:#5C4A38;line-height:1.75;margin:0 0 6px">${_esc(buyerName)} set up Attune for the two of you — two short exercises mapping how you each communicate and what you each expect. Your answers stay private until you're both done.</p>
     <p style="font-family:'DM Sans',Helvetica,Arial,sans-serif;font-size:14px;color:#5C4A38;line-height:1.7;margin:16px 0 0">Plan on about 25 minutes. Find a quiet moment and answer honestly — that's where the value is.</p>
     <p style="font-family:'DM Sans',Helvetica,Arial,sans-serif;font-size:13px;color:#8C7A68;line-height:1.6;margin:20px 0 0"><strong style="color:#1E1610">Heads up:</strong> this link is unique to you and works only once. Don't share it.</p>
   `;
 
   return brandedEmail({
-    preheader: `${buyerName} invited you to Attune`,
-    title: `${buyerName} invited you.`,
-    subtitle: `Hi ${partnerName}, here's how to get started.`,
+    preheader: `${_esc(buyerName)} invited you to Attune`,
+    title: `${_esc(buyerName)} invited you.`,
+    subtitle: `Hi ${_esc(partnerName)}, here's how to get started.`,
     bodyHtml: body,
     ctaLabel: 'Set up my profile →',
     ctaUrl: inviteUrl,
@@ -262,7 +269,7 @@ function partnerInviteHtml({ partnerName, buyerName, inviteUrl }) {
 
 function giftRecipientHtml({ recipientName, buyerName, pkgName, giftUrl }) {
   const body = `
-    <p style="font-family:'DM Sans',Helvetica,Arial,sans-serif;font-size:15px;color:#5C4A38;line-height:1.75;margin:0 0 6px">${buyerName} gave you <strong style="color:#1E1610">${pkgName}</strong> — an experience for you and your partner. Two exercises that map how you communicate and what you each expect. The joint results only appear once you're both done.</p>
+    <p style="font-family:'DM Sans',Helvetica,Arial,sans-serif;font-size:15px;color:#5C4A38;line-height:1.75;margin:0 0 6px">${_esc(buyerName)} gave you <strong style="color:#1E1610">${_esc(pkgName)}</strong> — an experience for you and your partner. Two exercises that map how you communicate and what you each expect. The joint results only appear once you're both done.</p>
     <div style="background:#FBF8F3;border:1px solid #F3EDE6;border-radius:10px;padding:16px 20px;margin:20px 0 0">
       <div style="font-family:'DM Sans',Helvetica,Arial,sans-serif;font-size:11px;color:#C17F47;font-weight:700;letter-spacing:.2em;text-transform:uppercase;margin-bottom:8px">When you claim it</div>
       <p style="font-family:'DM Sans',Helvetica,Arial,sans-serif;font-size:14px;color:#5C4A38;line-height:1.65;margin:0">You'll set up your profile and add your partner's email. They'll receive their own unique link. Answer independently — your results unlock together when you're both finished.</p>
@@ -270,9 +277,9 @@ function giftRecipientHtml({ recipientName, buyerName, pkgName, giftUrl }) {
   `;
 
   return brandedEmail({
-    preheader: `You've received an Attune gift from ${buyerName}`,
-    title: `A gift from ${buyerName}.`,
-    subtitle: `Hi ${recipientName}, here's how to open it.`,
+    preheader: `You've received an Attune gift from ${_esc(buyerName)}`,
+    title: `A gift from ${_esc(buyerName)}.`,
+    subtitle: `Hi ${_esc(recipientName)}, here's how to open it.`,
     bodyHtml: body,
     ctaLabel: 'Claim my gift →',
     ctaUrl: giftUrl,

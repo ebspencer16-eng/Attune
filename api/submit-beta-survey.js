@@ -38,10 +38,13 @@ export default async function handler(req) {
   // Email admin summary
   const apiKey = process.env.RESEND_API_KEY;
   const fromEmail = process.env.FROM_EMAIL || 'hello@attune-relationships.com';
+  // Escape HTML so survey values can't inject markup into the admin email
+  // (links, iframes, inline images that pull from external servers, etc).
+  const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
   if (apiKey) {
     const rows = Object.entries(body)
       .filter(([k]) => !['email','coupleType'].includes(k))
-      .map(([k, v]) => `<tr><td style="padding:.5rem .75rem;font-weight:600;background:#F5F0EC;border-bottom:1px solid #E8DDD0;font-family:Arial,sans-serif;font-size:.82rem;white-space:nowrap">${k}</td><td style="padding:.5rem .75rem;font-family:Arial,sans-serif;font-size:.82rem;border-bottom:1px solid #E8DDD0">${Array.isArray(v) ? v.join(', ') : v}</td></tr>`)
+      .map(([k, v]) => `<tr><td style="padding:.5rem .75rem;font-weight:600;background:#F5F0EC;border-bottom:1px solid #E8DDD0;font-family:Arial,sans-serif;font-size:.82rem;white-space:nowrap">${esc(k)}</td><td style="padding:.5rem .75rem;font-family:Arial,sans-serif;font-size:.82rem;border-bottom:1px solid #E8DDD0">${esc(Array.isArray(v) ? v.join(', ') : v)}</td></tr>`)
       .join('');
     await fetch('https://api.resend.com/emails', {
       method: 'POST',

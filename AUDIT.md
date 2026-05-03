@@ -342,3 +342,31 @@ Client-side callers (3 in App.jsx) all pull the token from `sb.auth.getSession()
    - Buy a package WITH workbook addon → verify download works
    - Direct GET to `/api/generate-workbook` (curl with no auth) returns 401
    - Direct GET to `/api/store-workbook` (curl with no auth) returns 401
+
+### Section 7 — additional issues (continued)
+
+| # | Severity | Description | Status |
+|---|---|---|---|
+| 7.9 | **HIGH** silent failure | `GiftSignupForm.handleCreate` referenced `account?.id` BEFORE `const account` was defined (TDZ). Throws ReferenceError, caught by `.catch(() => {})`. Welcome_account email never sent for gift recipients. | FIXED — use authData.user.id |
+| 7.10 | **HIGH** silent failure | `UnifiedResults.handleStaySubmit` referenced an undefined `account` variable that isn't a prop. Throws ReferenceError, caught silently. beta_survey email never sent when users opt to stay subscribed from results. | FIXED — read account from localStorage |
+| 7.11 | **HIGH** silent failure | `UnifiedResults` auto-fulfill workbook block had the same undefined `account` ref. workbook_ready notification email to buyer was never sent. | FIXED — read account from localStorage |
+| 7.12 | medium (XSS in admin/customer emails) | `send-order-email`, `send-feedback`, `submit-beta-survey` interpolated user-controlled values (names, package names, message text) directly into HTML email templates without escaping. Buyer-controlled XSS could land in admin's inbox or in gift recipient emails. | FIXED — `_esc()` helper applied across all templates |
+| 7.13 | medium (incorrect tax) | `calculate-tax` BETA_CODES table was missing `BETA-CORE-1`. Live tax preview during checkout would compute on full $89 package price instead of $1 fixed. Mismatch with create-payment-intent's actual charge. | FIXED — added entry + fixed-mode amount handling in buildTaxLines |
+
+### Section 7 — final summary
+
+13 issues found total. Of those, 8 were HIGH-severity bugs that were silently broken in production:
+- **3 broken email flows** (TDZ/undefined reference, swallowed by .catch)
+- **1 entire cron pipeline broken** (non-existent column query)
+- **1 silent data-loss bug** (delete-account archive step always wrote empty)
+- **3 wide-open admin/data endpoints** (auth was opt-in, not enforced)
+
+The "if env var set, check; else allow" anti-pattern was the worst class of bug. It's the kind of thing that passes manual review (looks like auth is in place) but fails the moment env var setup is incomplete. All admin/data endpoints are now fail-closed.
+
+Several of these only manifest when a specific feature is exercised:
+- 7.4 needed someone to be 6+ months past signup → would only have been noticed when someone complained "I never got the check-in"
+- 7.1 needed someone to delete their account → research data silently dropped
+- 7.9-7.11 needed feature usage that triggers the email path → emails just never arrived
+- 7.13 needed someone to use BETA-CORE-1 → tax line wrong on the preview
+
+The pattern across all of them: error swallowed by `try/catch` or `.catch(() => {})` with no observability. Recommend adding Sentry breadcrumb or console.error for any swallowed exception, even non-blocking ones, so future bugs of this shape surface in monitoring.

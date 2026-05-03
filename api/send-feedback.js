@@ -119,21 +119,24 @@ export default async function handler(req) {
 
   const ratingLabels = ['Not great', 'It was okay', 'Pretty good', 'Loved it'];
   const ratingLabel = typeof rating === 'number' ? (ratingLabels[rating] || 'N/A') : rating || 'N/A';
+  // Escape HTML so user-supplied values can't inject markup, image-beacons,
+  // or links into the admin email.
+  const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
   const subject = source === 'footer_quick'
     ? `Attune quick feedback: ${ratingLabel}${page ? ` · ${page}` : ''}`
     : `Attune experience feedback: ${ratingLabel}${pkgType ? ` · ${pkgType}` : ''}`;
 
   const contextRows = [
-    source === 'footer_quick' && page && `<tr><td>Page</td><td>${page}</td></tr>`,
-    pkgType           && `<tr><td>Package</td><td>${pkgType}</td></tr>`,
-    exercisesComplete !== undefined && `<tr><td>Exercises complete</td><td>${exercisesComplete} of 3</td></tr>`,
-    alignmentLevel    && `<tr><td>Alignment level</td><td>${alignmentLevel}</td></tr>`,
-    stage             && `<tr><td>Relationship stage</td><td>${stage}</td></tr>`,
-    howHeard          && `<tr><td>How they heard</td><td>${howHeard}</td></tr>`,
+    source === 'footer_quick' && page && `<tr><td>Page</td><td>${esc(page)}</td></tr>`,
+    pkgType           && `<tr><td>Package</td><td>${esc(pkgType)}</td></tr>`,
+    exercisesComplete !== undefined && `<tr><td>Exercises complete</td><td>${esc(exercisesComplete)} of 3</td></tr>`,
+    alignmentLevel    && `<tr><td>Alignment level</td><td>${esc(alignmentLevel)}</td></tr>`,
+    stage             && `<tr><td>Relationship stage</td><td>${esc(stage)}</td></tr>`,
+    howHeard          && `<tr><td>How they heard</td><td>${esc(howHeard)}</td></tr>`,
   ].filter(Boolean).join('');
 
   const qRows = questionAnswers
-    ? Object.entries(questionAnswers).map(([k,v]) => `<tr><td>${k}</td><td>${v}</td></tr>`).join('')
+    ? Object.entries(questionAnswers).map(([k,v]) => `<tr><td>${esc(k)}</td><td>${esc(v)}</td></tr>`).join('')
     : '';
 
   const tdStyle = 'padding:.6rem .85rem;border:1px solid #E8DDD0;';
@@ -142,9 +145,9 @@ export default async function handler(req) {
   const html = `<!DOCTYPE html><html><body style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:1.5rem;color:#1E1610">
     <h2 style="color:#E8673A;margin-bottom:1rem">Attune Feedback</h2>
     <table style="border-collapse:collapse;width:100%;margin-bottom:1.5rem">
-      <tr style="background:#FBF8F3"><td style="${thStyle}">Source</td><td style="${tdStyle}">${source}</td></tr>
-      <tr><td style="${thStyle}">Rating</td><td style="${tdStyle}">${ratingLabel}</td></tr>
-      ${message ? `<tr style="background:#FBF8F3"><td style="${thStyle}">Message</td><td style="${tdStyle}">${message}</td></tr>` : ''}
+      <tr style="background:#FBF8F3"><td style="${thStyle}">Source</td><td style="${tdStyle}">${esc(source)}</td></tr>
+      <tr><td style="${thStyle}">Rating</td><td style="${tdStyle}">${esc(ratingLabel)}</td></tr>
+      ${message ? `<tr style="background:#FBF8F3"><td style="${thStyle}">Message</td><td style="${tdStyle}">${esc(message)}</td></tr>` : ''}
     </table>
     ${contextRows ? `<h3 style="color:#8C7A68;font-size:.85rem;letter-spacing:.1em;text-transform:uppercase;margin-bottom:.75rem">Context</h3>
     <table style="border-collapse:collapse;width:100%;margin-bottom:1.5rem">

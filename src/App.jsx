@@ -1620,7 +1620,7 @@ function GiftSignupForm({ myName, theirName, theirEmail, pkg, orderId, onCreateA
         // Send welcome email
         fetch('/api/send-email', { method: 'POST', headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ type: 'welcome_account',
-            userId: account?.id || null, toEmail: email.trim().toLowerCase(), toName: myName, partnerName: theirName || '', portalUrl: `${window.location.origin}/app` }) }).catch(() => {});
+            userId: authData.user.id, toEmail: email.trim().toLowerCase(), toName: myName, partnerName: theirName || '', portalUrl: `${window.location.origin}/app` }) }).catch(() => {});
 
         const account = { id: authData.user.id, email: email.trim().toLowerCase(), name: myName, partnerName: theirName || '', partnerEmail: theirEmail || '', emailOptIn: true, inviteCode, partnerJoined: false, pkg: pkg || 'core', createdAt: Date.now(), isGiftRecipient: true };
         // Clear stale data from prior users on this browser (e.g. another
@@ -6309,11 +6309,14 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
     if (!stayEmail.trim() || !stayEmail.includes('@')) return;
     setStayLoading(true);
     try {
+      // account isn't a prop of UnifiedResults — read from localStorage
+      // (matches the same lookup pattern used elsewhere in this component).
+      const _acct = (() => { try { return JSON.parse(localStorage.getItem('attune_account') || 'null'); } catch { return null; } })();
       await fetch('/api/send-email', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ type: 'beta_survey',
-            userId: account?.id || null, toEmail: stayEmail, toName: userName, partnerName, coupleType: coupleType?.name, surveyUrl: window.location.origin + '/feedback' }),
+            userId: _acct?.id || null, toEmail: stayEmail, toName: userName, partnerName, coupleType: coupleType?.name, surveyUrl: window.location.origin + '/feedback' }),
       });
       localStorage.setItem('attune_stay_subscribed', '1');
     } catch {}
@@ -6473,11 +6476,14 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
             localStorage.setItem('attune_order', JSON.stringify(ord));
             // Notify buyer by email
             if (ord.buyerEmail) {
+              // account isn't a prop here — read from localStorage so the
+              // server-side dedup can match the right user.
+              const _acct = (() => { try { return JSON.parse(localStorage.getItem('attune_account') || 'null'); } catch { return null; } })();
               fetch('/api/send-email', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ type: 'workbook_ready',
-          userId: account?.id || null, toEmail: ord.buyerEmail, toName: ord.partner1Name || 'there', partnerName: ord.partner2Name || '', downloadUrl: window.location.origin + '/app', orderNum: ord.orderNum || '' }),
+          userId: _acct?.id || null, toEmail: ord.buyerEmail, toName: ord.partner1Name || 'there', partnerName: ord.partner2Name || '', downloadUrl: window.location.origin + '/app', orderNum: ord.orderNum || '' }),
               }).catch(() => {});
             }
           } catch {}
