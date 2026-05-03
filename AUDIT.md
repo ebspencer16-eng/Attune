@@ -251,3 +251,48 @@ This would require either:
 3. Firing the existing `results_viewed` email from `PartnerBCompletionScreen` when `partnerADone` becomes true (functional but might feel like spam-targeted-at-Partner-B)
 
 Flagging for product decision.
+
+---
+
+## Section 6 — Add-ons & post-results (in progress)
+
+**Scope:** Workbook generation/download, LMFT Calendly booking, Ex03 anniversary exercise, budget tool, starting-out checklist, notes view
+
+**Files reviewed so far:** `src/App.jsx` (workbook auto-gen, download paths, LMFTSession, AnniversaryExercise, BudgetTool, StartingOutChecklist, NotesView, view branches), `public/lmft-booking.html`, `api/calendly-webhook.js`
+
+### Issues found (partial)
+
+| # | Severity | Description | Status |
+|---|---|---|---|
+| 6.1 | low | Workbook blob localStorage size risk (handled by existing try/catch) | OK |
+| 6.2 | medium | `attune_workbook_blob` was written every successful generation but NEVER read on download. Pure dead weight, ~533KB per workbook in localStorage, increasing the chance of quota errors that wipe other state. | FIXED — removed write entirely; download path has its own multi-tier fallbacks |
+| 6.3 | low | `/lmft-booking` Calendly init polled `setTimeout(initCalendly, 100)` forever if the Calendly script never loaded (CDN issue, ad-blocker). | FIXED — caps at 150 attempts (~15s), then shows fallback message pointing to email |
+| 6.4 | medium | Ex03 completion screen unconditionally showed "See Your Results" with no `bothDone` gate. Users could land on results with `partnerEx1=null` and see misleading data computed against partner=all-3s defaults. | FIXED — gated on bothDone, falls back to "Back to Dashboard" otherwise |
+| 6.5 | **HIGH** | Newlywed Starting Out Checklist was pure React state. No localStorage, no Supabase. Every refresh wiped progress. | FIXED — added localStorage hydrate, debounced no (instant) Supabase write, cross-device hydration on sign-in. Requires migration 011 to add `checklist_data` jsonb column. |
+| 6.6 | **HIGH** | Notes view explicitly labeled "auto-saved" but state never persisted anywhere. UI was lying to users. | FIXED — same pattern as checklist (localStorage + debounced 1.5s Supabase write). Requires migration 012 to add `notes_data` jsonb column. |
+
+### Files changed (so far)
+
+- `src/App.jsx`:
+  - Removed `attune_workbook_blob` write + orphaned `reader.readAsDataURL` call
+  - Ex03 completion: `bothDone ? <See Results> : <Back to Dashboard>`
+  - `checklistState`: localStorage hydrate, wrapped setter persists to LS + Supabase
+  - `notesState`: same pattern with 1.5s debounced server writes
+  - Cross-device hydration: added `checklist_data` and `notes_data` to both sign-in restore paths
+- `public/lmft-booking.html`: Calendly polling timeout
+- `supabase/migrations/011_checklist_data.sql`: new column
+- `supabase/migrations/012_notes_data.sql`: new column
+
+### Action items for Ellie (must run BEFORE this commit goes live)
+
+1. Run migration 011 + 012 in Supabase SQL Editor
+2. Smoke-test checklist persistence: check items → refresh → still checked
+3. Smoke-test notes persistence: type → refresh → text still there
+
+### Still pending in this section
+
+- Order/payment flow audit (Stripe success → order creation → email triggers)
+- Retake flow audit (re-doing Ex01/Ex02/Ex03 → prior snapshot preservation)
+- Workbook download UI gating
+- Resources view links
+- Section 6 commit and continue from where the limit was hit

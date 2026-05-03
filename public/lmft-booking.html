@@ -130,8 +130,20 @@ const email    = params.get('email') || '';
 // Wait for Calendly script to load, then initialize the inline widget.
 // Prefill values save the user a step. The orderId rides along as utm_source
 // so /api/calendly-webhook can correlate the booking back to the order.
+let _calendlyAttempts = 0;
 function initCalendly() {
   if (typeof Calendly === 'undefined') {
+    _calendlyAttempts++;
+    // Stop polling after ~15s. The fallback card above already tells users
+    // what to do if scheduling doesn't load (email hello@). Polling forever
+    // pegs the CPU and keeps the spinner stuck.
+    if (_calendlyAttempts > 150) {
+      const loading = document.getElementById('calendly-loading');
+      if (loading) {
+        loading.textContent = "Couldn't load the scheduler. Please use the email fallback below.";
+      }
+      return;
+    }
     setTimeout(initCalendly, 100);
     return;
   }

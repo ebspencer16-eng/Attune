@@ -6448,32 +6448,26 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
         });
 
         if (resp.ok) {
-          const blob = await resp.blob();
-          // Store as base64 in localStorage so user can download any time
-          const reader = new FileReader();
-          reader.onload = () => {
-            try {
-              localStorage.setItem('attune_workbook_blob', reader.result); // base64 data URL
-              localStorage.setItem('attune_workbook_ready', 'true');
-              ord.workbookStatus = 'ready';
-              localStorage.setItem('attune_order', JSON.stringify(ord));
-              // Notify buyer by email
-              if (ord.buyerEmail) {
-                fetch('/api/send-email', {
-                  method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({ type: 'workbook_ready',
-            userId: account?.id || null, toEmail: ord.buyerEmail, toName: ord.partner1Name || 'there', partnerName: ord.partner2Name || '', downloadUrl: window.location.origin + '/app', orderNum: ord.orderNum || '' }),
-                }).catch(() => {});
-              }
-            } catch (e) {
-              // Storage full — just mark ready without caching blob
-              localStorage.setItem('attune_workbook_ready', 'true');
-              ord.workbookStatus = 'ready';
-              localStorage.setItem('attune_order', JSON.stringify(ord));
+          // Just mark it ready — the download button has its own fetch
+          // path with fallbacks (cached URL > /api/generate-workbook > PDF
+          // in-browser). Caching the blob in localStorage was 400-500KB of
+          // dead weight that the download flow never read. Removing the
+          // blob write also reduces the chance of LocalStorage quota errors
+          // on devices with other Attune state already stored.
+          try {
+            localStorage.setItem('attune_workbook_ready', 'true');
+            ord.workbookStatus = 'ready';
+            localStorage.setItem('attune_order', JSON.stringify(ord));
+            // Notify buyer by email
+            if (ord.buyerEmail) {
+              fetch('/api/send-email', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ type: 'workbook_ready',
+          userId: account?.id || null, toEmail: ord.buyerEmail, toName: ord.partner1Name || 'there', partnerName: ord.partner2Name || '', downloadUrl: window.location.origin + '/app', orderNum: ord.orderNum || '' }),
+              }).catch(() => {});
             }
-          };
-          reader.readAsDataURL(blob);
+          } catch {}
         }
       } catch (_) {}
     })();
@@ -8750,6 +8744,12 @@ function AuthModal({ mode, onClose, onSuccess }) {
       if (profile?.budget_data) {
         try { localStorage.setItem('attune_budget', JSON.stringify(profile.budget_data)); } catch {}
       }
+      if (profile?.checklist_data) {
+        try { localStorage.setItem('attune_checklist', JSON.stringify(profile.checklist_data)); } catch {}
+      }
+      if (profile?.notes_data) {
+        try { localStorage.setItem('attune_notes', JSON.stringify(profile.notes_data)); } catch {}
+      }
       // Restore partner session if partner already completed
       if (profile?.partner_profile_id) {
         try {
@@ -10079,6 +10079,14 @@ export default function App() {
     hydrate('attune_ex3_prior', setEx3Prior, setEx3PriorAt);
   }, [account?.id]);
 
+  // Keep checklist save target in sync with current logged-in user. The
+  // setChecklistState wrapper reads this ref at write time so checklist
+  // mutations land on the right profile row.
+  useEffect(() => {
+    _checklistAccountIdRef.current = account?.id || null;
+    _notesAccountIdRef.current = account?.id || null;
+  }, [account?.id]);
+
   useEffect(() => {
     if (view === 'results' && highlightsSeen) {
       document.body.style.overflow = 'hidden';
@@ -10216,6 +10224,8 @@ export default function App() {
               if (profile?.ex2_answers_prior)  localStorage.setItem('attune_ex2_prior', JSON.stringify({ answers: profile.ex2_answers_prior, at: profile.ex2_prior_completed_at }));
               if (profile?.ex3_answers_prior)  localStorage.setItem('attune_ex3_prior', JSON.stringify({ answers: profile.ex3_answers_prior, at: profile.ex3_prior_completed_at }));
               if (profile?.budget_data)        localStorage.setItem('attune_budget', JSON.stringify(profile.budget_data));
+              if (profile?.checklist_data)     localStorage.setItem('attune_checklist', JSON.stringify(profile.checklist_data));
+              if (profile?.notes_data)         localStorage.setItem('attune_notes', JSON.stringify(profile.notes_data));
               if (profile?.profile_setup_complete) localStorage.setItem('attune_profile_setup_done', '1');
             } catch {}
             // Force a reload so the state initializers re-read localStorage.
@@ -10624,7 +10634,35 @@ export default function App() {
   const [ex1PriorAt, setEx1PriorAt] = useState(null); // ISO string timestamps
   const [ex2PriorAt, setEx2PriorAt] = useState(null);
   const [ex3PriorAt, setEx3PriorAt] = useState(null);
-  const [checklistState, setChecklistState] = useState({}); // Starting Out checklist
+  const [checklistState, _setChecklistState] = useState(() => {
+    // Hydrate from localStorage. Supabase restore on login fills this in
+    // cross-device; see the Supabase hydration block further down where
+    // attune_checklist is set from profile.checklist_data.
+    try {
+      const raw = localStorage.getItem('attune_checklist');
+      return raw ? JSON.parse(raw) : {};
+    } catch {
+      return {};
+    }
+  });
+  // Wrap setter so every change persists to localStorage + Supabase. Without
+  // this, newlywed users lose their checklist on every refresh. Closure captures
+  // the latest `account` each render, so account.id is current at call time.
+  const _checklistAccountIdRef = useRef(null);
+  const setChecklistState = (next) => {
+    const value = typeof next === 'function' ? next(checklistState) : next;
+    _setChecklistState(value);
+    try { localStorage.setItem('attune_checklist', JSON.stringify(value)); } catch {}
+    const aid = _checklistAccountIdRef.current;
+    if (aid) {
+      (async () => {
+        try {
+          const { supabase: sb, hasSupabase } = await import('./supabase.js');
+          if (hasSupabase()) await trackedSupabaseWrite(sb.from('profiles').update({ checklist_data: value }).eq('id', aid));
+        } catch {}
+      })();
+    }
+  };
   const [budgetState, setBudgetState] = useState(() => {
     // Hydrate from localStorage so the budget persists across refreshes.
     // Supabase restore on login fills this in cross-device; see the Supabase
@@ -10636,7 +10674,38 @@ export default function App() {
       return null;
     }
   }); // Premium budget tool
-  const [notesState, setNotesState] = useState({ partner1: "", partner2: "", shared: "" }); // Conversation notes
+  const [notesState, _setNotesState] = useState(() => {
+    // Hydrate from localStorage. The Notes view labels this "auto-saved",
+    // so it really must persist. Without this the user's notes are lost on
+    // every refresh. Cross-device hydration happens in the sign-in flow.
+    try {
+      const raw = localStorage.getItem('attune_notes');
+      return raw ? JSON.parse(raw) : { partner1: "", partner2: "", shared: "" };
+    } catch {
+      return { partner1: "", partner2: "", shared: "" };
+    }
+  });
+  const _notesAccountIdRef = useRef(null);
+  const _notesSaveTimerRef = useRef(null);
+  const setNotesState = (next) => {
+    _setNotesState(prev => {
+      const value = typeof next === 'function' ? next(prev) : next;
+      try { localStorage.setItem('attune_notes', JSON.stringify(value)); } catch {}
+      // Debounce Supabase writes — typing 50 characters shouldn't fire 50
+      // network calls. 1.5s after the last keystroke flushes to server.
+      const aid = _notesAccountIdRef.current;
+      if (aid) {
+        if (_notesSaveTimerRef.current) clearTimeout(_notesSaveTimerRef.current);
+        _notesSaveTimerRef.current = setTimeout(async () => {
+          try {
+            const { supabase: sb, hasSupabase } = await import('./supabase.js');
+            if (hasSupabase()) await trackedSupabaseWrite(sb.from('profiles').update({ notes_data: value }).eq('id', aid));
+          } catch {}
+        }, 1500);
+      }
+      return value;
+    });
+  };
   // Auto-open auth if ?signup=1 in URL (comes from checkout success redirect)
   const _urlSignup = params.get('signup') === '1';
   const _urlSignin = params.get('signin') === '1';
@@ -11776,7 +11845,10 @@ export default function App() {
                 <p style={{ fontFamily: font.display, fontSize: "1.8rem", fontWeight: 700, color: C.ink, marginBottom: "0.5rem", lineHeight: 1.1 }}>Reflection Complete.</p>
                 <p style={{ fontSize: "0.78rem", letterSpacing: "0.1em", textTransform: "uppercase", color: "#10b981", fontWeight: 700, fontFamily: font.body, marginBottom: "1.5rem" }}>Your relationship story is captured</p>
                 <div style={{ display: "flex", gap: "0.75rem", justifyContent: "center", flexWrap: "wrap" }}>
-                  <button onClick={() => setView("results")} style={{ background: "linear-gradient(135deg, #10b981, #059669)", color: "white", border: "none", padding: "0.6rem 1.75rem", fontSize: "0.7rem", letterSpacing: "0.1em", textTransform: "uppercase", cursor: "pointer", fontFamily: font.body, borderRadius: 8, fontWeight: 600 }}>See Your Results →</button>
+                  {bothDone
+                    ? <button onClick={() => setView("results")} style={{ background: "linear-gradient(135deg, #10b981, #059669)", color: "white", border: "none", padding: "0.6rem 1.75rem", fontSize: "0.7rem", letterSpacing: "0.1em", textTransform: "uppercase", cursor: "pointer", fontFamily: font.body, borderRadius: 8, fontWeight: 600 }}>See Your Results →</button>
+                    : <button onClick={() => setView("home")} style={{ background: "#2d2250", color: "white", border: "none", padding: "0.6rem 1.5rem", fontSize: "0.7rem", letterSpacing: "0.1em", textTransform: "uppercase", cursor: "pointer", fontFamily: font.body, borderRadius: 8 }}>Back to Dashboard →</button>
+                  }
                 </div>
               </div>
             ) : (
