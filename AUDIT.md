@@ -140,3 +140,66 @@ Before this audit, anyone calling `/api/partner-sync?partnerProfileId=XXX` would
 2. Caller's profile.partner_profile_id must equal the requested partnerProfileId
 
 Returns 401 if missing/invalid token, 403 if not authorized for that partner.
+
+---
+
+## Section 4 — Partner invite flow ✓
+
+**Scope:** Partner A submits signup with partnerEmail → invite send → Partner B clicks link → PartnerLandingScreen → Partner B signup → /api/partner-sync action=link → Partner B exercise flow → notification back to Partner A
+
+**Files reviewed:** `src/App.jsx` (PartnerLandingScreen, savePartnerSession, partner-sync poll, sign-in flow, invite link generation), `api/partner-sync.js`, `api/send-email.js` (partner_invite, partner_joined_notification)
+
+### Issues found
+
+| # | Severity | Description | Status |
+|---|---|---|---|
+| 4.1 | **HIGH** (regression I introduced in §3) | Sign-in flow's partner-sync call had no auth header. After §3 added auth to that endpoint, sign-in's partner-session restore would silently 401. | FIXED — sign-in now reads session.access_token and passes Authorization header |
+| 4.2 | medium | If `/api/create-profile` failed for Partner B but auth.signUp had succeeded, the partner-sync link would update zero rows on B's side. Partner A's profile would point to a non-existent partner profile. | FIXED — retry create-profile once; fail-fast if both attempts fail |
+| 4.3 | medium | If 2 different people clicked the same invite link, the 2nd person's signup would create an auth user but link would 409. The 2nd click was treated as success → dashboard with no partner data. | FIXED — 409 surfaced as user-facing error; signup blocked |
+| 4.4 | none | Returning Partner B clicking their own invite again — routes correctly to dashboard (Cases 2/3 catch it). | OK |
+| 4.5 | none | Partner A clicking their own invite while signed-out → PartnerLandingScreen → email collision returns "account already exists". Confusing but not broken. | NOTED |
+| 4.6 | medium | `pae` (partner-A-email) URL param uniqueness check existed in AuthModal but NOT in PartnerLandingScreen. Partner B could try to use Partner A's email → got "account exists, try signing in" which would log them in AS Partner A. | FIXED — pae check added to PartnerLandingScreen |
+| 4.7 | low | partner_invite email is fire-and-forget. If first send fails Partner A doesn't know. UI has resend button as fallback. | NOTED |
+| 4.8 | **HIGH** | When email confirmation is ON, post-signup writes (exercise saves) silently fail RLS because no session. Local data is saved but never reaches server. Partner-sync poll on the OTHER partner's device never sees the exercise data. | FIXED — onAuthStateChange SIGNED_IN handler now retries syncing local exercise data to server when session becomes available (post-confirm) |
+| 4.9 | flag | partner_joined_notification email fires at exercise completion, not at signup. Email body says "joined" but trigger is "completed exercises". Content vs functional mismatch. | NOTED — would require content change |
+| 4.10 | low | Partner A's local `account.partnerJoined` flag only flipped when Partner B finished exercises, not when they signed up. Server-side `partner_joined` was set correctly, but local cache stale. UI elements gated on `partnerJoined` (e.g. "Partner has joined" indicator) never lit up during the in-between window. | FIXED — partner-sync poll now sets partnerJoined as soon as partner_profile_id link is detected |
+
+### Files changed
+
+- `src/App.jsx`:
+  - Sign-in partner-sync call: now sends Bearer auth token
+  - Partner B "is partner A done" poll: now sends Bearer auth token
+  - PartnerLandingScreen: pae check; create-profile retry-once with fail-fast; 409 handling on link; explicit user-facing error states
+  - onAuthStateChange SIGNED_IN: retry-sync local exercise data to server (closes pending-confirm RLS gap)
+  - partner-sync poll: set local partnerJoined as soon as link detected (was waiting for exercise completion)
+- `api/partner-sync.js` (already from §3): auth required for Mode B
+
+### What was confirmed working
+
+- Invite URL generation: `?invite=CODE&from=NAME&pae=EMAIL` consistent across all 4 send paths (gift recipient, AuthModal, sign-in resend, localStorage fallback)
+- Routing logic: `urlInviteCode && !account` → PartnerLandingScreen; `joinedViaInvite && !partnerSession` → exercise flow; etc.
+- partner-sync link logic: rejects self-linking, rejects different-partner re-link (409), idempotent on same-partner re-link
+- partner_joined_notification fires when partnerSession is saved (exercise completion)
+- Cross-device session restore correctly populates `partnerJoined` from profile.partner_joined
+- UI resend invite button (handleResend) calls /api/send-email with same parameters
+
+### New error strings introduced
+
+I introduced 3 new user-facing error strings in PartnerLandingScreen for previously-silent failure modes. All are functional error states, not marketing copy. Listed for review:
+
+1. `"That's your partner's email. Each of you needs your own account, so use a different email."` (Issue 4.6 — pae collision)
+2. `"This invite link has already been used by someone else. If you think this is a mistake, ask your partner to send a fresh link."` (Issue 4.3 — 409 from link)
+3. `"Something went wrong linking your accounts. Please try again in a moment."` (Issue 4.3 — non-409 link error)
+4. `"Account creation hit a snag. Please try again in a moment."` (Issue 4.2 — create-profile retries exhausted)
+
+Edit these as you see fit. They're in PartnerLandingScreen.handleSubmit.
+
+### Open architectural concern (Issue 4.8)
+
+The pending-confirm RLS gap (auth user exists, no session, RLS blocks all writes) is now mitigated by retry-on-SIGNED-IN. But a more robust fix would be to use service-role endpoints for exercise saves so they work regardless of session state. Current fix relies on:
+- User actually clicking the confirm-email link
+- The localStorage data still existing on the same browser when they confirm
+
+If the user signs up on phone, completes exercises, then opens the confirm link on laptop instead, their answers are stuck on the phone. Edge case but real.
+
+Would require a new `/api/save-exercise` service-role endpoint to fully close. Flagging for later.

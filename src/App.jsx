@@ -8753,7 +8753,14 @@ function AuthModal({ mode, onClose, onSuccess }) {
       // Restore partner session if partner already completed
       if (profile?.partner_profile_id) {
         try {
-          const psRes = await fetch(`/api/partner-sync?partnerProfileId=${encodeURIComponent(profile.partner_profile_id)}`);
+          // After signInWithPassword, the session is fresh. Pull the
+          // access token to authenticate the partner-sync call.
+          const { data: { session: authSession } } = await sb.auth.getSession();
+          const psRes = await fetch(`/api/partner-sync?partnerProfileId=${encodeURIComponent(profile.partner_profile_id)}`, {
+            headers: authSession?.access_token
+              ? { Authorization: `Bearer ${authSession.access_token}` }
+              : {},
+          });
           const ps = await psRes.json();
           if (ps.found && ps.profile?.ex1_answers && ps.profile?.ex2_answers) {
             localStorage.setItem('attune_partner_session', JSON.stringify({
@@ -9106,6 +9113,16 @@ function PartnerLandingScreen({ inviteFrom, inviteCode, onCreateAccount }) {
     if (!form.name.trim()) return setErr('Please enter your first name.');
     if (!form.email.trim() || !form.email.includes('@')) return setErr('Please enter a valid email.');
     if (!form.password || form.password.length < 6) return setErr('Password must be at least 6 characters.');
+
+    // Block using Partner A's email. Without this, Supabase says "account
+    // already exists, try signing in" — which is misleading because signing
+    // in would log them in AS Partner A, not as themselves. Each partner
+    // needs their own account.
+    const _pae = (new URLSearchParams(window.location.search).get('pae') || '').toLowerCase();
+    if (_pae && form.email.trim().toLowerCase() === _pae) {
+      return setErr("That's your partner's email. Each of you needs your own account, so use a different email.");
+    }
+
     setLoading(true);
     setErr('');
 
@@ -9152,47 +9169,84 @@ function PartnerLandingScreen({ inviteFrom, inviteCode, onCreateAccount }) {
       // Create the profile row via service-role endpoint (same reason as
       // Partner A: when email confirmation is ON, no session = RLS blocks
       // direct upsert). Partner B does NOT get an invite_code of their own.
-      try {
-        await fetch('/api/create-profile', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            userId:              authData.user.id,
-            name:                form.name.trim(),
-            pronouns:            '',
-            partnerName:         inviteFrom || '',
-            partnerPronouns:     '',
-            partnerEmail:        '',
-            emailOptIn:          true,
-            inviteCode:          '',  // Partner B has no invite of their own
-            joinedViaInvite:     true,
-            pkg:                 'core',  // Inherits package via partner link
-            ageRange:            form.ageRange || null,
-            gender:              form.gender || null,
-            relationshipStatus:  form.relationshipStatus || null,
-            relationshipLength:  form.relationshipLength || null,
-            children:            form.children || null,
-            signupSource:        form.signupSource || null,
-          }),
-        });
-      } catch (e) {
-        console.warn('[Attune] Partner B create-profile failed:', e);
+      // We retry once on failure since the partner_sync link below depends
+      // on this row existing.
+      let profileCreated = false;
+      for (let attempt = 0; attempt < 2 && !profileCreated; attempt++) {
+        try {
+          const r = await fetch('/api/create-profile', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              userId:              authData.user.id,
+              name:                form.name.trim(),
+              pronouns:            '',
+              partnerName:         inviteFrom || '',
+              partnerPronouns:     '',
+              partnerEmail:        '',
+              emailOptIn:          true,
+              inviteCode:          '',  // Partner B has no invite of their own
+              joinedViaInvite:     true,
+              pkg:                 'core',  // Inherits package via partner link
+              ageRange:            form.ageRange || null,
+              gender:              form.gender || null,
+              relationshipStatus:  form.relationshipStatus || null,
+              relationshipLength:  form.relationshipLength || null,
+              children:            form.children || null,
+              signupSource:        form.signupSource || null,
+            }),
+          });
+          if (r.ok) {
+            profileCreated = true;
+          } else if (attempt === 1) {
+            console.warn('[Attune] Partner B create-profile failed after retry:', await r.text());
+          }
+        } catch (e) {
+          if (attempt === 1) console.warn('[Attune] Partner B create-profile error:', e);
+        }
       }
 
-      // Link both partners via /api/partner-sync
-      try {
-        const linkRes = await fetch('/api/partner-sync', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ action: 'link', inviteCode, partnerBId: authData.user.id }),
-        });
-        if (!linkRes.ok) {
-          const j = await linkRes.json().catch(() => ({}));
-          console.warn('[Attune] Partner link failed:', j.error);
-          // Don't block the signup — Partner B can still do exercises; the
-          // polling endpoint will fall back to invite_code if needed.
+      // Link both partners via /api/partner-sync. Only proceed if profile
+      // was created — otherwise the link would update zero rows on Partner
+      // B's side and leave the relationship asymmetric.
+      if (profileCreated) {
+        try {
+          const linkRes = await fetch('/api/partner-sync', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'link', inviteCode, partnerBId: authData.user.id }),
+          });
+          if (!linkRes.ok) {
+            const j = await linkRes.json().catch(() => ({}));
+            // 409 = invite already used by someone else. We need to surface
+            // this to the user, otherwise they end up with a working auth
+            // account but no link to Partner A — they'd see a confusing
+            // dashboard with no partner data and no way to recover.
+            if (linkRes.status === 409) {
+              setErr('This invite link has already been used by someone else. If you think this is a mistake, ask your partner to send a fresh link.');
+              setLoading(false);
+              return;
+            }
+            // For other server errors, log + surface a generic retry message.
+            console.warn('[Attune] Partner link failed:', j.error);
+            setErr('Something went wrong linking your accounts. Please try again in a moment.');
+            setLoading(false);
+            return;
+          }
+        } catch (e) {
+          console.warn('[Attune] Partner link error:', e);
+          setErr('Something went wrong linking your accounts. Please try again in a moment.');
+          setLoading(false);
+          return;
         }
-      } catch (e) { console.warn('[Attune] Partner link error:', e); }
+      } else {
+        // Profile creation never succeeded — surface to user so they don't
+        // proceed with a broken state silently. This is the rare path
+        // where retries didn't help (server down, network broken, etc.)
+        setErr('Account creation hit a snag. Please try again in a moment.');
+        setLoading(false);
+        return;
+      }
 
       // Build the local account object in the standard shape (same as
       // Partner A). joinedViaInvite is the only marker; isPartnerB is gone.
@@ -10202,6 +10256,37 @@ export default function App() {
             try { localStorage.removeItem('attune_account'); } catch {}
             clearAllUserLocalStorage();
           }
+          // On SIGNED_IN (including post-email-confirmation), retry-sync any
+          // local exercise data that may have failed RLS during the
+          // pending-confirm window. Without this, a user who completed
+          // exercises BEFORE confirming email would have answers only on
+          // their device — the partner-sync poll would never see them.
+          if (event === 'SIGNED_IN' && sess?.user?.id) {
+            (async () => {
+              const accountId = sess.user.id;
+              const tryResync = async (exNum, key) => {
+                try {
+                  const raw = localStorage.getItem(key);
+                  if (!raw) return;
+                  const answers = JSON.parse(raw);
+                  if (!answers || typeof answers !== 'object') return;
+                  // Check if the server already has answers for this exercise.
+                  // Only push if server is missing — don't overwrite a more
+                  // recent server-side completion (rare but possible).
+                  const col = `ex${exNum}_answers`;
+                  const { data } = await sb.from('profiles').select(col).eq('id', accountId).maybeSingle();
+                  if (!data || !data[col]) {
+                    await saveExerciseWithRetakeSnapshot(sb, accountId, exNum, answers);
+                  }
+                } catch (e) {
+                  console.warn(`[Attune] post-confirm resync ex${exNum} failed:`, e);
+                }
+              };
+              await tryResync(1, 'attune_ex1');
+              await tryResync(2, 'attune_ex2');
+              await tryResync(3, 'attune_ex3');
+            })();
+          }
         });
         authSubscription = subscription;
       } catch (e) {
@@ -10694,6 +10779,15 @@ export default function App() {
         const partnerId = ownProfile?.partner_profile_id;
         if (!partnerId) return; // Partner hasn't signed up yet
 
+        // Reflect the link in local state. Without this, account.partnerJoined
+        // stays false until Partner B finishes exercises — so the dashboard's
+        // "Partner has joined" indicator never lights up during the in-between.
+        if (!account.partnerJoined) {
+          const updated = { ...account, partnerJoined: true };
+          setAccount(updated);
+          try { localStorage.setItem('attune_account', JSON.stringify(updated)); } catch {}
+        }
+
         // 2. Fetch partner's latest answers. Auth token required so the
         //    server can verify the caller is linked to this partner.
         const { data: { session: authSession } } = await sb.auth.getSession();
@@ -10824,7 +10918,11 @@ export default function App() {
         // Look up Partner A's profile id via our own partner_profile_id
         const { data: own } = await sb.from('profiles').select('partner_profile_id').eq('id', account.id).maybeSingle();
         if (!own?.partner_profile_id) return;
-        const res = await fetch(`/api/partner-sync?partnerProfileId=${encodeURIComponent(own.partner_profile_id)}`);
+        const { data: { session: authSession } } = await sb.auth.getSession();
+        if (!authSession?.access_token) return; // not authed yet, retry next tick
+        const res = await fetch(`/api/partner-sync?partnerProfileId=${encodeURIComponent(own.partner_profile_id)}`, {
+          headers: { Authorization: `Bearer ${authSession.access_token}` },
+        });
         if (!res.ok || cancelled) return;
         const d = await res.json();
         if (d.found && d.profile?.ex1_answers && d.profile?.ex2_answers) setPartnerADone(true);
