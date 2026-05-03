@@ -1570,7 +1570,7 @@ function GiftSignupForm({ myName, theirName, theirEmail, pkg, orderId, onCreateA
       const { supabase: sb, hasSupabase } = await import('./supabase.js');
       const inviteCode = genInvite();
       if (hasSupabase()) {
-        const { data: authData, error: authErr } = await sb.auth.signUp({ email: email.trim().toLowerCase(), password, options: { data: { name: myName } } });
+        const { data: authData, error: authErr } = await sb.auth.signUp({ email: email.trim().toLowerCase(), password, options: { data: { name: myName }, emailRedirectTo: `${window.location.origin}/app` } });
         if (authErr) { setLoading(false); return setErr(authErr.message); }
         await sb.from('profiles').upsert({
           id: authData.user.id, name: myName, partner_name: theirName || '',
@@ -8506,7 +8506,13 @@ function AuthModal({ mode, onClose, onSuccess }) {
       const { data: authData, error: authErr } = await sb.auth.signUp({
         email: form.email.trim().toLowerCase(),
         password: form.password,
-        options: { data: { name: form.name.trim() } },
+        options: {
+          data: { name: form.name.trim() },
+          // Where Supabase redirects after the user clicks the email
+          // confirmation link. Must match a URL in Supabase Dashboard →
+          // Authentication → URL Configuration → Redirect URLs allow list.
+          emailRedirectTo: `${window.location.origin}/app`,
+        },
       });
       if (authErr) { setLoading(false); return setErr(authErr.message); }
 
@@ -9111,7 +9117,10 @@ function PartnerLandingScreen({ inviteFrom, inviteCode, onCreateAccount }) {
       const { data: authData, error: authErr } = await sb.auth.signUp({
         email: form.email.trim().toLowerCase(),
         password: form.password,
-        options: { data: { name: form.name.trim() } },
+        options: {
+          data: { name: form.name.trim() },
+          emailRedirectTo: `${window.location.origin}/app`,
+        },
       });
       if (authErr) {
         setErr(authErr.message.includes('registered') ? 'An account with this email already exists. Try signing in.' : authErr.message);
