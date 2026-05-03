@@ -24,6 +24,30 @@ const C = {
 const font = { display: "'Playfair Display', Georgia, serif", body: "'DM Sans', system-ui, sans-serif" };
 const FONT_LINK = "https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&family=DM+Sans:wght@300;400;500;600;700&display=swap";
 
+// ── User-bound localStorage keys ─────────────────────────────────────────────
+// Single source of truth. When you add a new user-bound key elsewhere in the
+// app, register it here so signup / logout / account-change all clear it.
+// This list grew out of debugging stale-state leaks between users on the same
+// browser (e.g. Partner B inheriting Partner A's workbook flag, or a fresh
+// signup seeing demo data marked as completed).
+const USER_LOCALSTORAGE_KEYS = [
+  'attune_ex1', 'attune_ex2', 'attune_ex3',
+  'attune_ex1_progress', 'attune_ex2_progress', 'attune_ex3_progress',
+  'attune_ex1_prior', 'attune_ex2_prior', 'attune_ex3_prior',
+  'attune_partner_session', 'attune_live_session',
+  'attune_order', 'attune_portrait', 'attune_budget',
+  'attune_workbook_ready', 'attune_workbook_blob',
+  'attune_workbook_notif_seen', 'attune_workbook_print_queued',
+  'attune_profile_setup_done',
+  'attune_results_email_sent', 'attune_stay_subscribed',
+  'attune_6mo_sent',
+];
+function clearAllUserLocalStorage() {
+  for (const k of USER_LOCALSTORAGE_KEYS) {
+    try { localStorage.removeItem(k); } catch {}
+  }
+}
+
 // -- 8-DIMENSION PERSONALITY QUESTIONS (5 each = 40 total) --
 // ── INTENTIONAL COLOR SCHEMA ──────────────────────────────────────────────────
 // Purple  #9B5DE5  = Your Inner Worlds     (energy, expression, closeness)
@@ -1593,22 +1617,10 @@ function GiftSignupForm({ myName, theirName, theirEmail, pkg, orderId, onCreateA
             userId: account?.id || null, toEmail: email.trim().toLowerCase(), toName: myName, partnerName: theirName || '', portalUrl: `${window.location.origin}/app` }) }).catch(() => {});
 
         const account = { id: authData.user.id, email: email.trim().toLowerCase(), name: myName, partnerName: theirName || '', partnerEmail: theirEmail || '', emailOptIn: true, inviteCode, partnerJoined: false, pkg: pkg || 'core', createdAt: Date.now(), isGiftRecipient: true };
-        // Clear stale exercise/portrait data from prior browser sessions
-        try {
-          localStorage.removeItem('attune_ex1');
-          localStorage.removeItem('attune_ex2');
-          localStorage.removeItem('attune_ex3');
-          localStorage.removeItem('attune_ex1_progress');
-          localStorage.removeItem('attune_ex2_progress');
-          localStorage.removeItem('attune_ex3_progress');
-          localStorage.removeItem('attune_ex1_prior');
-          localStorage.removeItem('attune_ex2_prior');
-          localStorage.removeItem('attune_ex3_prior');
-          localStorage.removeItem('attune_partner_session');
-          localStorage.removeItem('attune_live_session');
-          localStorage.removeItem('attune_portrait');
-          localStorage.removeItem('attune_budget');
-        } catch {}
+        // Clear stale data from prior users on this browser (e.g. another
+        // demo session, a previous account). Single source of truth at module
+        // top; see USER_LOCALSTORAGE_KEYS.
+        clearAllUserLocalStorage();
         try { localStorage.setItem('attune_account', JSON.stringify(account)); } catch {}
         setLoading(false);
         onCreateAccount(account);
@@ -8555,24 +8567,9 @@ function AuthModal({ mode, onClose, onSuccess }) {
         pkg: new URLSearchParams(window.location.search).get("pkg") || "core",
         createdAt: Date.now(),
       };
-      // Clear any stale exercise/portrait data from prior sessions on this
-      // browser (e.g. a demo run). Partner A starts with a clean slate; ex1/
-      // ex2/ex3 are null until they actually complete the exercises.
-      try {
-        localStorage.removeItem('attune_ex1');
-        localStorage.removeItem('attune_ex2');
-        localStorage.removeItem('attune_ex3');
-        localStorage.removeItem('attune_ex1_progress');
-        localStorage.removeItem('attune_ex2_progress');
-        localStorage.removeItem('attune_ex3_progress');
-        localStorage.removeItem('attune_ex1_prior');
-        localStorage.removeItem('attune_ex2_prior');
-        localStorage.removeItem('attune_ex3_prior');
-        localStorage.removeItem('attune_partner_session');
-        localStorage.removeItem('attune_live_session');
-        localStorage.removeItem('attune_portrait');
-        localStorage.removeItem('attune_budget');
-      } catch {}
+      // Clear stale data from any prior user/demo on this browser. Single
+      // source of truth at module top; see USER_LOCALSTORAGE_KEYS.
+      clearAllUserLocalStorage();
       try { localStorage.setItem("attune_account", JSON.stringify(account)); } catch {}
 
       // Send partner invite email if partner email was provided
@@ -9186,27 +9183,10 @@ function PartnerLandingScreen({ inviteFrom, inviteCode, onCreateAccount }) {
         joinedViaInvite: true,
         createdAt: Date.now(),
       };
-      // Clear any stale exercise/portrait/order data from prior sessions on
-      // this browser. Partner B starts with a clean slate; ex1/ex2/ex3 are
-      // null until they actually complete the exercises. Without this, a
-      // browser that was previously used for a demo or by Partner A would
-      // make Partner B's dashboard incorrectly show exercises as completed.
-      try {
-        localStorage.removeItem('attune_ex1');
-        localStorage.removeItem('attune_ex2');
-        localStorage.removeItem('attune_ex3');
-        localStorage.removeItem('attune_ex1_progress');
-        localStorage.removeItem('attune_ex2_progress');
-        localStorage.removeItem('attune_ex3_progress');
-        localStorage.removeItem('attune_ex1_prior');
-        localStorage.removeItem('attune_ex2_prior');
-        localStorage.removeItem('attune_ex3_prior');
-        localStorage.removeItem('attune_partner_session');
-        localStorage.removeItem('attune_live_session');
-        localStorage.removeItem('attune_order');
-        localStorage.removeItem('attune_portrait');
-        localStorage.removeItem('attune_budget');
-      } catch {}
+      // Clear stale data from any prior user/demo on this browser. Without
+      // this, Partner B can inherit Partner A's exercises, workbook flag,
+      // partner_session, etc. Single source of truth at module top.
+      clearAllUserLocalStorage();
       try { localStorage.setItem('attune_account', JSON.stringify(acct)); } catch {}
       setLoading(false);
       onCreateAccount(acct);
@@ -9955,6 +9935,7 @@ export default function App() {
   };
   const [account, setAccount] = useState(loadAccount);
   // account shape: { email, name, partnerName, partnerEmail, pkg, inviteCode, partnerJoined, emailOptIn, createdAt }
+  // account shape: { email, name, partnerName, partnerEmail, pkg, inviteCode, partnerJoined, emailOptIn, createdAt }
 
   const isLoggedIn = !!account;
   const profileComplete = !!(account?.name && account?.partnerName);
@@ -10129,6 +10110,7 @@ export default function App() {
           if (localAcct && localAcct.id) {
             setAccount(null);
             try { localStorage.removeItem('attune_account'); } catch {}
+            clearAllUserLocalStorage();
           }
         }
 
@@ -10139,6 +10121,7 @@ export default function App() {
           if (event === 'SIGNED_OUT' || (event === 'TOKEN_REFRESHED' && !sess)) {
             setAccount(null);
             try { localStorage.removeItem('attune_account'); } catch {}
+            clearAllUserLocalStorage();
           }
         });
         authSubscription = subscription;
@@ -10859,7 +10842,11 @@ export default function App() {
                           const { supabase: sb, hasSupabase } = await import('./supabase.js');
                           if (hasSupabase()) await sb.auth.signOut();
                           setAccount(null);
+                          // Clear ALL user-bound state, not just attune_account.
+                          // Otherwise the next user on this browser inherits the
+                          // previous user's exercises, workbook flag, etc.
                           try { localStorage.removeItem("attune_account"); } catch {}
+                          clearAllUserLocalStorage();
                           setShowNavDropdown(false);
                         }, danger: true },
                     ].map((item, i) => item === null
@@ -11860,6 +11847,7 @@ export default function App() {
                           if (hasSupabase()) await sb.auth.signOut();
                           setAccount(null);
                           try { localStorage.removeItem("attune_account"); } catch {}
+                          clearAllUserLocalStorage();
                           setView("home");
                         }}
                         style={{ fontSize: "0.75rem", fontWeight: 600, color: "#ef4444", fontFamily: font.body, background: "none", border: "none", cursor: "pointer", padding: 0 }}>
