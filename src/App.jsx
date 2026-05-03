@@ -1593,6 +1593,22 @@ function GiftSignupForm({ myName, theirName, theirEmail, pkg, orderId, onCreateA
             userId: account?.id || null, toEmail: email.trim().toLowerCase(), toName: myName, partnerName: theirName || '', portalUrl: `${window.location.origin}/app` }) }).catch(() => {});
 
         const account = { id: authData.user.id, email: email.trim().toLowerCase(), name: myName, partnerName: theirName || '', partnerEmail: theirEmail || '', emailOptIn: true, inviteCode, partnerJoined: false, pkg: pkg || 'core', createdAt: Date.now(), isGiftRecipient: true };
+        // Clear stale exercise/portrait data from prior browser sessions
+        try {
+          localStorage.removeItem('attune_ex1');
+          localStorage.removeItem('attune_ex2');
+          localStorage.removeItem('attune_ex3');
+          localStorage.removeItem('attune_ex1_progress');
+          localStorage.removeItem('attune_ex2_progress');
+          localStorage.removeItem('attune_ex3_progress');
+          localStorage.removeItem('attune_ex1_prior');
+          localStorage.removeItem('attune_ex2_prior');
+          localStorage.removeItem('attune_ex3_prior');
+          localStorage.removeItem('attune_partner_session');
+          localStorage.removeItem('attune_live_session');
+          localStorage.removeItem('attune_portrait');
+          localStorage.removeItem('attune_budget');
+        } catch {}
         try { localStorage.setItem('attune_account', JSON.stringify(account)); } catch {}
         setLoading(false);
         onCreateAccount(account);
@@ -8533,6 +8549,24 @@ function AuthModal({ mode, onClose, onSuccess }) {
         pkg: new URLSearchParams(window.location.search).get("pkg") || "core",
         createdAt: Date.now(),
       };
+      // Clear any stale exercise/portrait data from prior sessions on this
+      // browser (e.g. a demo run). Partner A starts with a clean slate; ex1/
+      // ex2/ex3 are null until they actually complete the exercises.
+      try {
+        localStorage.removeItem('attune_ex1');
+        localStorage.removeItem('attune_ex2');
+        localStorage.removeItem('attune_ex3');
+        localStorage.removeItem('attune_ex1_progress');
+        localStorage.removeItem('attune_ex2_progress');
+        localStorage.removeItem('attune_ex3_progress');
+        localStorage.removeItem('attune_ex1_prior');
+        localStorage.removeItem('attune_ex2_prior');
+        localStorage.removeItem('attune_ex3_prior');
+        localStorage.removeItem('attune_partner_session');
+        localStorage.removeItem('attune_live_session');
+        localStorage.removeItem('attune_portrait');
+        localStorage.removeItem('attune_budget');
+      } catch {}
       try { localStorage.setItem("attune_account", JSON.stringify(account)); } catch {}
 
       // Send partner invite email if partner email was provided
@@ -9143,6 +9177,27 @@ function PartnerLandingScreen({ inviteFrom, inviteCode, onCreateAccount }) {
         joinedViaInvite: true,
         createdAt: Date.now(),
       };
+      // Clear any stale exercise/portrait/order data from prior sessions on
+      // this browser. Partner B starts with a clean slate; ex1/ex2/ex3 are
+      // null until they actually complete the exercises. Without this, a
+      // browser that was previously used for a demo or by Partner A would
+      // make Partner B's dashboard incorrectly show exercises as completed.
+      try {
+        localStorage.removeItem('attune_ex1');
+        localStorage.removeItem('attune_ex2');
+        localStorage.removeItem('attune_ex3');
+        localStorage.removeItem('attune_ex1_progress');
+        localStorage.removeItem('attune_ex2_progress');
+        localStorage.removeItem('attune_ex3_progress');
+        localStorage.removeItem('attune_ex1_prior');
+        localStorage.removeItem('attune_ex2_prior');
+        localStorage.removeItem('attune_ex3_prior');
+        localStorage.removeItem('attune_partner_session');
+        localStorage.removeItem('attune_live_session');
+        localStorage.removeItem('attune_order');
+        localStorage.removeItem('attune_portrait');
+        localStorage.removeItem('attune_budget');
+      } catch {}
       try { localStorage.setItem('attune_account', JSON.stringify(acct)); } catch {}
       setLoading(false);
       onCreateAccount(acct);
@@ -10357,9 +10412,29 @@ export default function App() {
   // Users can still retake the exercise from the exercise tile.
   // Fix: use _demoParam and demoPkg directly (available here) instead of isDemo/_basePkg (defined later)
   const sarahEx3Demo = _demoParam && (demoPkg === 'anniversary' || demoPkg === 'premium') ? SARAH_ANNIVERSARY_DEMO : null;
-  const [ex1Answers, setEx1State] = useState(sarahEx1Demo);
-  const [ex2Answers, setEx2State] = useState(sarahEx2Demo);
-  const [ex3Answers, setEx3State] = useState(sarahEx3Demo); // Anniversary exercise
+  // Initialize exercise answers. Logic:
+  //  - If logged in (real account): hydrate from localStorage if real answers
+  //    exist. Otherwise null (means "not yet completed" — bothDone correctly
+  //    reads false). This is what fixes Partner B seeing demo data marked
+  //    as completed.
+  //  - If unauthenticated (no account): default to demo data so the marketing
+  //    flow / sandbox demo experience still works.
+  const _hasAccount = (() => {
+    try { return !!JSON.parse(localStorage.getItem('attune_account') || 'null'); } catch { return false; }
+  })();
+  const _hydrateLS = (key) => {
+    try {
+      const raw = localStorage.getItem(key);
+      return raw ? JSON.parse(raw) : null;
+    } catch { return null; }
+  };
+  const _initEx1 = _hasAccount ? _hydrateLS('attune_ex1')             : sarahEx1Demo;
+  const _initEx2 = _hasAccount ? _hydrateLS('attune_ex2')             : sarahEx2Demo;
+  const _initEx3 = _hasAccount ? _hydrateLS('attune_ex3')             : sarahEx3Demo;
+
+  const [ex1Answers, setEx1State] = useState(_initEx1);
+  const [ex2Answers, setEx2State] = useState(_initEx2);
+  const [ex3Answers, setEx3State] = useState(_initEx3); // Anniversary exercise
   // Prior completions — populated from profile.ex{N}_answers_prior when the
   // user has retaken an exercise. Powers the RetakeComparisonCard on
   // the results page. null for first-time completions.
