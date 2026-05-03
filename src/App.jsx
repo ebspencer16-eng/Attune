@@ -8758,7 +8758,7 @@ function AuthModal({ mode, onClose, onSuccess }) {
       if (!localStorage.getItem('attune_order') && authData.user.email) {
         try {
           const { data: orderRow } = await sb.from('orders')
-            .select('pkg_key,addon_lmft,addon_reflection,addon_budget,addon_workbook,is_physical,order_num')
+            .select('id,pkg_key,addon_lmft,addon_reflection,addon_budget,addon_workbook,is_physical,order_num,user_id')
             .eq('buyer_email', authData.user.email)
             .order('created_at', { ascending: false })
             .limit(1)
@@ -8773,6 +8773,11 @@ function AuthModal({ mode, onClose, onSuccess }) {
               isPhysical:      orderRow.is_physical || false,
               orderNum:        orderRow.order_num || null,
             }));
+            // Link the order to the auth user so future cross-device logins
+            // can find it by user_id (faster + works even if email changes).
+            if (!orderRow.user_id) {
+              await sb.from('orders').update({ user_id: authData.user.id }).eq('id', orderRow.id).catch(() => {});
+            }
           }
         } catch {}
       }
@@ -10062,6 +10067,30 @@ export default function App() {
             const { data: profile } = await sb.from('profiles').select('*').eq('id', session.user.id).maybeSingle();
             if (cancelled) return;
 
+            // Try to find the user's most recent order, so cross-device login
+            // restores package + add-on context that's otherwise only in
+            // localStorage. Looks up by user_id first, then falls back to
+            // matching the session email.
+            let orderRow = null;
+            try {
+              const { data: byId } = await sb.from('orders')
+                .select('order_num,pkg_key,is_physical,addon_lmft,addon_reflection,addon_budget,addon_workbook')
+                .eq('user_id', session.user.id)
+                .order('created_at', { ascending: false })
+                .limit(1)
+                .maybeSingle();
+              if (byId) orderRow = byId;
+              else if (session.user.email) {
+                const { data: byEmail } = await sb.from('orders')
+                  .select('order_num,pkg_key,is_physical,addon_lmft,addon_reflection,addon_budget,addon_workbook')
+                  .eq('buyer_email', session.user.email.toLowerCase())
+                  .order('created_at', { ascending: false })
+                  .limit(1)
+                  .maybeSingle();
+                if (byEmail) orderRow = byEmail;
+              }
+            } catch (e) { /* non-fatal: cross-device order restore is a polish concern */ }
+
             const rebuilt = {
               id: session.user.id,
               email: session.user.email,
@@ -10074,11 +10103,34 @@ export default function App() {
               inviteCode: profile?.invite_code || '',
               partnerJoined: profile?.partner_joined || false,
               joinedViaInvite: profile?.joined_via_invite || false,
-              pkg: profile?.pkg || 'core',
+              pkg: orderRow?.pkg_key || profile?.pkg || 'core',
+              addonLmft:       !!orderRow?.addon_lmft,
+              addonReflection: !!orderRow?.addon_reflection,
+              addonBudget:     !!orderRow?.addon_budget,
+              addonWorkbook:   orderRow?.addon_workbook || '',
+              orderNum:        orderRow?.order_num || '',
               createdAt: profile?.created_at ? new Date(profile.created_at).getTime() : Date.now(),
             };
             setAccount(rebuilt);
             saveAccount(rebuilt);
+
+            // Also rebuild attune_order so consumers that read directly from
+            // localStorage (workbook generator, results page) see consistent
+            // data after a cross-device login.
+            try {
+              if (orderRow) {
+                localStorage.setItem('attune_order', JSON.stringify({
+                  orderNum: orderRow.order_num,
+                  pkgKey:   orderRow.pkg_key,
+                  pkg:      orderRow.pkg_key,
+                  isPhysical: !!orderRow.is_physical,
+                  addonLmft:       !!orderRow.addon_lmft,
+                  addonReflection: !!orderRow.addon_reflection,
+                  addonBudget:     !!orderRow.addon_budget,
+                  addonWorkbook:   orderRow.addon_workbook || '',
+                }));
+              }
+            } catch {}
 
             // Cross-device support: restore exercise answers + prior snapshots
             // + budget data to localStorage. Without this, a user logging in
@@ -10095,6 +10147,7 @@ export default function App() {
               if (profile?.ex2_answers_prior)  localStorage.setItem('attune_ex2_prior', JSON.stringify({ answers: profile.ex2_answers_prior, at: profile.ex2_prior_completed_at }));
               if (profile?.ex3_answers_prior)  localStorage.setItem('attune_ex3_prior', JSON.stringify({ answers: profile.ex3_answers_prior, at: profile.ex3_prior_completed_at }));
               if (profile?.budget_data)        localStorage.setItem('attune_budget', JSON.stringify(profile.budget_data));
+              if (profile?.profile_setup_complete) localStorage.setItem('attune_profile_setup_done', '1');
             } catch {}
             // Force a reload so the state initializers re-read localStorage.
             // Without this the dashboard renders with sarah*Demo until the
