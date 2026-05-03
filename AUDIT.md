@@ -203,3 +203,51 @@ The pending-confirm RLS gap (auth user exists, no session, RLS blocks all writes
 If the user signs up on phone, completes exercises, then opens the confirm link on laptop instead, their answers are stuck on the phone. Edge case but real.
 
 Would require a new `/api/save-exercise` service-role endpoint to fully close. Flagging for later.
+
+---
+
+## Section 5 — Results display ✓
+
+**Scope:** bothDone evaluation → "View Results" click → ResultsHighlights → couple type computed → results_viewed email → portal navigation between sections
+
+**Files reviewed:** `src/App.jsx` (UnifiedResults, ResultsHighlights, deriveNewCoupleType, computeIndividualType, view=results routing, results email trigger, workbook auto-gen), `api/generate-workbook.js` (couple type usage), `api/send-email.js` (results_viewed)
+
+### Issues found
+
+| # | Severity | Description | Status |
+|---|---|---|---|
+| 5.1 | none | `ex1Answers \|\| sarahEx1` defensive fallback in ResultsHighlights props. All `setView("results")` triggers are gated on bothDone, so demo data never rendered for real users. | OK |
+| 5.2 | flag | `computeIndividualType` boundary at exactly 3.0 → engage AND open → type W. If user defaults to all 3s (no answers), they get "The Initiator". Edge case but methodology-relevant. | NOTED |
+| 5.3 | none | Results email gating (highlightsSeen + localStorage flag + server-side dedup from §3) all working correctly. | OK |
+| 5.4 | none | `pkg.hasReflection/hasBudget/hasLMFT` correctly merged from base config + addons in order. | OK |
+| 5.5 | medium | Workbook auto-gen on Ex02 finish used STALE bothDone (closure value of ex2Answers, before setEx2State flushed). When the FINISHING partner's Ex02 made bothDone true, auto-gen failed to fire. | FIXED — recompute bothDone using just-completed answers `a` |
+| 5.6 | flag | Partner B sees PartnerBCompletionScreen instead of results, so the results_viewed effect never fires on B's device. Partner B receives NO email when results are ready. | NOTED — would require new email template/content change |
+| 5.7 | none | Line 6285 `theirs = mine ? partnerEx2 : null` — odd write but functionally correct because all consumers filter on `bothAnswered`. | OK |
+| 5.8 | flag | `getCoupleTypeNew` falls back to `NEW_COUPLE_TYPES[0]` ("WW — The ignition") if pair lookup fails. All 10 pairs are defined so fallback shouldn't trigger, but silent default is a code smell. | NOTED |
+
+### Files changed
+
+- `src/App.jsx` — workbook auto-gen now uses `_bothDoneNow` computed from just-completed `a` instead of stale `bothDone` closure value
+
+### What was confirmed working
+
+- All `setView("results")` triggers (8 places) are correctly gated on `bothDone` or already-results-viewing context
+- `deriveCoupleTypeFromExercise` returns null on exception; downstream code handles null gracefully
+- `computeIndividualType` correctly maps scores → typeCode via withdraw/open boundaries
+- All 10 couple type pairings (4 same + 6 cross) are defined in `NEW_COUPLE_TYPES`
+- Results email server-side dedup (from §3) prevents duplicate emails when both partners hit results simultaneously
+- `attune_results_email_sent` localStorage flag prevents same-device duplicates
+- `pkg` config correctly merges base package + add-on flags from order
+- Workbook generator's `coupleType` consumers all guard against null
+- Side nav within results (`activeResult` state) routes between overview/personality/expectations/anniversary/what-comes-next correctly
+
+### Open functional gap (Issue 5.6)
+
+Partner B never receives a "results are ready" email because their device shows `PartnerBCompletionScreen` instead of `ResultsHighlights`, and the email is wired to fire from the highlights component's `onDone` callback. They have to manually check Partner A's device or open the platform on their own to see results.
+
+This would require either:
+1. A separate email template like `partner_b_results_ready` (content change — out of scope)
+2. Letting Partner B see results on their own device (architectural change)
+3. Firing the existing `results_viewed` email from `PartnerBCompletionScreen` when `partnerADone` becomes true (functional but might feel like spam-targeted-at-Partner-B)
+
+Flagging for product decision.

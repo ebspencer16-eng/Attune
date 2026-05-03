@@ -11730,8 +11730,13 @@ export default function App() {
                       if (hasSupabase()) saveExerciseWithRetakeSnapshot(sb, account.id, 2, a);
                     }).catch(() => {});
                   }
-                  // Auto-trigger workbook generation if both partners are done and order includes workbook
-                  if (bothDone && hasWorkbookOrder) {
+                  // Auto-trigger workbook generation if both partners are done and order includes workbook.
+                  // Recompute bothDone using the JUST-completed answers `a` rather than the closure
+                  // value of ex2Answers (which is still null at this moment — setEx2State hasn't
+                  // flushed yet). Without this, finishing Ex02 doesn't fire workbook gen even
+                  // though both partners are now done.
+                  const _bothDoneNow = !!(ex1Answers && a && (isDemo || hasRealPartner));
+                  if (_bothDoneNow && hasWorkbookOrder) {
                     setTimeout(() => {
                       const ord = JSON.parse(localStorage.getItem('attune_order') || 'null');
                       if (!ord) return;
