@@ -10098,6 +10098,30 @@ export default function App() {
             };
             setAccount(rebuilt);
             saveAccount(rebuilt);
+
+            // Cross-device support: restore exercise answers + prior snapshots
+            // + budget data to localStorage. Without this, a user logging in
+            // on a new device defaults to Sarah's demo data even though their
+            // real answers are stored server-side.
+            try {
+              if (profile?.ex1_answers)        localStorage.setItem('attune_ex1', JSON.stringify(profile.ex1_answers));
+              else                             localStorage.removeItem('attune_ex1');
+              if (profile?.ex2_answers)        localStorage.setItem('attune_ex2', JSON.stringify(profile.ex2_answers));
+              else                             localStorage.removeItem('attune_ex2');
+              if (profile?.ex3_answers)        localStorage.setItem('attune_ex3', JSON.stringify(profile.ex3_answers));
+              else                             localStorage.removeItem('attune_ex3');
+              if (profile?.ex1_answers_prior)  localStorage.setItem('attune_ex1_prior', JSON.stringify({ answers: profile.ex1_answers_prior, at: profile.ex1_prior_completed_at }));
+              if (profile?.ex2_answers_prior)  localStorage.setItem('attune_ex2_prior', JSON.stringify({ answers: profile.ex2_answers_prior, at: profile.ex2_prior_completed_at }));
+              if (profile?.ex3_answers_prior)  localStorage.setItem('attune_ex3_prior', JSON.stringify({ answers: profile.ex3_answers_prior, at: profile.ex3_prior_completed_at }));
+              if (profile?.budget_data)        localStorage.setItem('attune_budget', JSON.stringify(profile.budget_data));
+            } catch {}
+            // Force a reload so the state initializers re-read localStorage.
+            // Without this the dashboard renders with sarah*Demo until the
+            // next page navigation.
+            if (profile?.ex1_answers || profile?.ex2_answers || profile?.ex3_answers) {
+              window.location.reload();
+              return;
+            }
           }
         } else {
           // No Supabase session. If we have a localStorage account, the
@@ -10656,9 +10680,15 @@ export default function App() {
 
   const partnerEx1 = hasRealPartner ? partnerSession.ex1 : jamesEx1;
   const partnerEx2 = hasRealPartner ? partnerSession.ex2 : jamesEx2;
-  // bothDone: local exercises complete AND partner has submitted real answers (not just joined)
+  // bothDone: BOTH partners have completed exercises with real data.
+  //   - hasRealPartner means partnerSession exists (Partner B has finished)
+  //   - We do NOT trust account.partnerJoined alone — that just means they
+  //     made an account, not that they did the exercises. Older versions
+  //     conflated these and showed results with demo partner data.
+  //   - isDemo is a separate query-param escape hatch (?demo=xxx) for the
+  //     marketing flow / showcase tour.
   const isDemo = !!_demoParam; // true when ?demo=xxx is in URL
-  const bothDone = !!(ex1Answers && ex2Answers && (isDemo || hasRealPartner || account?.partnerJoined));
+  const bothDone = !!(ex1Answers && ex2Answers && (isDemo || hasRealPartner));
   // Package config
   const pkgConfig = {
     core:        { label: "The Attune Assessment",     color: "#E8673A", hasChecklist: false, hasAnniversary: false, hasBudget: false, hasLMFT: false },
