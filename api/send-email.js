@@ -93,7 +93,7 @@ function partnerInviteEmail({ fromName, toName, inviteUrl }, userId = null) {
       <p>Your answers are private until both of you are done. Results unlock the moment you finish.</p>
       <div class="btn-wrap"><a href="${inviteUrl}" class="btn">Start my exercises →</a></div>
       <div class="divider"></div>
-      <p style="font-size:0.78rem;color:#8C7A68;">Takes about 25 minutes total. No right answers — just yours.</p>
+      <p style="font-size:0.78rem;color:#8C7A68;">Takes about 25 minutes total. No right answers. Just yours.</p>
     `),
   };
 }
@@ -109,7 +109,7 @@ function workbookReadyEmail({ toName, partnerName, downloadUrl, orderNum }) {
       <div class="btn-wrap"><a href="${downloadUrl}" class="btn">Download workbook</a></div>
       <div class="divider"></div>
       <div class="detail-row"><span>Order</span><strong>#${orderNum}</strong></div>
-      <div class="detail-row"><span>Format</span><strong>.docx — opens in Word, Pages, or Google Docs</strong></div>
+      <div class="detail-row"><span>Format</span><strong>.docx, opens in Word, Pages, or Google Docs</strong></div>
       <p style="font-size:0.78rem;color:#8C7A68;margin-top:16px;">The download link is active for 30 days. Reply to this email if you have trouble accessing your file.</p>
     `),
   };
@@ -150,7 +150,7 @@ function betaSurveyEmail({ toName, partnerName, coupleType, surveyUrl }) {
       <span class="badge badge-orange">Beta feedback</span>
       <h1 style="margin-top:14px;">How did it land?</h1>
       <p>Hi ${toName},</p>
-      <p>You and ${partnerName} completed Attune${coupleType ? ` — your couple type is <strong>${coupleType}</strong>` : ""}. We'd love to know what was useful and what wasn't.</p>
+      <p>You and ${partnerName} completed Attune${coupleType ? `. Your couple type is <strong>${coupleType}</strong>` : ""}. We'd love to know what was useful and what wasn't.</p>
       <p>It's four questions and takes under two minutes.</p>
       <div class="btn-wrap"><a href="${surveyUrl}" class="btn">Share feedback →</a></div>
       <div class="divider"></div>
@@ -161,15 +161,15 @@ function betaSurveyEmail({ toName, partnerName, coupleType, surveyUrl }) {
 
 function checkin6moEmail({ toName, partnerName, retakeUrl }) {
   return {
-    subject: "Six months with Attune — worth a look",
+    subject: "Six months with Attune. Worth a look.",
     html: layout(`
       <h1>Six months is a good time to check in.</h1>
       <p>Hi ${toName},</p>
-      <p>Six months ago, you and ${partnerName} took Attune together. Couples who retake it after 6–12 months often find their results have shifted — usually in ways that reflect real changes in how they're relating.</p>
+      <p>Six months ago, you and ${partnerName} took Attune together. Couples who retake it after 6–12 months see their results shift, usually in ways that reflect real changes in how they're relating.</p>
       <p>A lot can move in half a year: how you handle stress, what you need, how you repair. Some things get easier. New friction appears. The assessment is most useful as a check-in, not a one-time snapshot.</p>
       <div class="btn-wrap"><a href="${retakeUrl}" class="btn">Retake Attune →</a></div>
       <div class="divider"></div>
-      <p style="font-size:0.78rem;color:#8C7A68;">Your previous results are still accessible in your dashboard. Retaking creates a new session — you'll be able to compare the two.</p>
+      <p style="font-size:0.78rem;color:#8C7A68;">Your previous results are still accessible in your dashboard. Retaking creates a new session. You'll be able to compare the two.</p>
     `),
   };
 }
@@ -218,7 +218,7 @@ function resultsViewedEmail({ toName, partnerName, coupleType, portalUrl, hasRef
           <div style="width:36px;height:36px;border-radius:10px;background:#F0F0FF;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:1rem">🧠</div>
           <div>
             <div style="font-size:0.88rem;font-weight:700;color:#0E0B07;margin-bottom:3px">LMFT Session</div>
-            <div style="font-size:0.78rem;color:#8C7A68;line-height:1.6">A 50-minute video session with a licensed marriage and family therapist who reviews your joint results before you meet. Not a first appointment — a real conversation about what your results mean.</div>
+            <div style="font-size:0.78rem;color:#8C7A68;line-height:1.6">A 50-minute video session with a licensed marriage and family therapist who reviews your joint results before you meet. Not a first appointment. A real conversation about what your results mean.</div>
           </div>
           <div style="text-align:right;flex-shrink:0;padding-left:8px">
             <div style="font-size:0.92rem;font-weight:700;color:#0E0B07">+$150</div>
@@ -232,7 +232,7 @@ function resultsViewedEmail({ toName, partnerName, coupleType, portalUrl, hasRef
           <div style="width:36px;height:36px;border-radius:10px;background:#FDF8F3;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:1rem">📖</div>
           <div>
             <div style="font-size:0.88rem;font-weight:700;color:#0E0B07;margin-bottom:3px">Personalized Workbook</div>
-            <div style="font-size:0.78rem;color:#8C7A68;line-height:1.6">A 20–30 page workbook drawn entirely from your results — conversation starters, reflection activities, and exercises built for how you two are actually wired.</div>
+            <div style="font-size:0.78rem;color:#8C7A68;line-height:1.6">A 20–30 page workbook drawn entirely from your results. Conversation starters, reflection activities, and exercises built for how you two are actually wired.</div>
           </div>
           <div style="text-align:right;flex-shrink:0;padding-left:8px">
             <div style="font-size:0.92rem;font-weight:700;color:#0E0B07">from $19</div>
@@ -243,14 +243,14 @@ function resultsViewedEmail({ toName, partnerName, coupleType, portalUrl, hasRef
   ].join('');
 
   return {
-    subject: `Your Attune results are ready${coupleType ? ` — you're ${coupleType}` : ""}`,
+    subject: `Your Attune results are ready${coupleType ? `. You're ${coupleType}` : ""}`,
     html: layout(`
       <h1>Your results are ready.</h1>
-      <p>Hi ${name}, you and ${partner} just completed Attune${coupleType ? ` — your couple type is <strong>${coupleType}</strong>` : ""}. Everything you need is in your results portal.</p>
+      <p>Hi ${name}, you and ${partner} just completed Attune${coupleType ? `. Your couple type is <strong>${coupleType}</strong>` : ""}. Everything you need is in your results portal.</p>
       <div class="btn-wrap"><a href="${appUrl}" class="btn">View your results →</a></div>
       <div class="divider"></div>
       <p style="font-size:0.82rem;font-weight:700;color:#0E0B07;margin-bottom:6px">What did you think?</p>
-      <p style="font-size:0.82rem;">We'd love to hear how it landed. Reply to this email with anything — what was useful, what felt off, what surprised you. We read every response.</p>
+      <p style="font-size:0.82rem;">We'd love to hear how it landed. Reply with anything: what was useful, what felt off, what surprised you. We read every response.</p>
       <div class="divider"></div>
       <p style="font-size:0.82rem;font-weight:700;color:#0E0B07;margin-bottom:10px">Go deeper with your results</p>
       <p style="font-size:0.8rem;color:#8C7A68;margin-bottom:14px">A few things you can add from your portal, based on what you've already completed:</p>
@@ -276,17 +276,17 @@ function welcomeAccountEmail({ toName, toEmail, portalUrl, partnerName }) {
   const name = toName || "there";
   const url = portalUrl || "https://attune-relationships.com/app";
   return {
-    subject: "Welcome to Attune — let's get started",
+    subject: "Welcome to Attune. Let's get started.",
     html: layout(`
       <h1>You're in. Let's get started.</h1>
       <p>Hi ${name},</p>
-      <p>Your Attune account is set up. Both you and ${partnerName ? `<strong>${partnerName}</strong>` : "your partner"} each complete the exercises independently — your answers stay private until both of you are done.</p>
+      <p>Your Attune account is set up. Both you and ${partnerName ? `<strong>${partnerName}</strong>` : "your partner"} each complete the exercises independently. Your answers stay private until both of you are done.</p>
       <div class="btn-wrap"><a href="${url}" class="btn">Go to my dashboard →</a></div>
       <div class="divider"></div>
       <p style="font-size:0.82rem;font-weight:700;color:#0E0B07;margin-bottom:6px;">What happens next</p>
       <p style="font-size:0.8rem;">1. Complete Exercise 01: Communication (about 10 minutes).<br/>
       2. Complete Exercise 02: Expectations (about 15 minutes).<br/>
-      3. Invite your partner — or they'll receive a link if you already added their email.<br/>
+      3. Invite your partner, or they'll receive a link if you already added their email.<br/>
       4. Once both of you are done, your joint results unlock.</p>
       <div class="divider"></div>
       <p style="font-size:0.78rem;color:#8C7A68;">Your answers are never visible to your partner while you're in progress. Results unlock the moment you both finish.</p>
@@ -317,22 +317,22 @@ function lmftScheduledEmail({ toName, partnerName, schedulingUrl, orderNum }) {
   const name = toName || "there";
   const url = schedulingUrl || "https://attune-relationships.com/app";
   return {
-    subject: "Book your LMFT session — Attune",
+    subject: "Book your LMFT session. Attune",
     html: layout(`
       <span class="badge badge-blue">LMFT session included</span>
       <h1 style="margin-top:14px;">Book your session with a licensed therapist.</h1>
       <p>Hi ${name},</p>
-      <p>Your Attune package includes a 50-minute session with a licensed marriage and family therapist (LMFT). They'll review your joint results before you meet — so the session starts from your actual data, not from scratch.</p>
+      <p>Your Attune package includes a 50-minute session with a licensed marriage and family therapist (LMFT). They'll review your joint results before you meet. The session starts from your actual data, not from scratch.</p>
       <div class="btn-wrap"><a href="${url}" class="btn">Book your session →</a></div>
       <div class="divider"></div>
       <p style="font-size:0.82rem;font-weight:700;color:#0E0B07;margin-bottom:6px;">How it works</p>
       <p style="font-size:0.8rem;">1. Complete your Attune exercises if you haven't yet.<br/>
       2. Once both partners are done, click the link above to book your session.<br/>
       3. Your therapist will receive your joint results in advance.<br/>
-      4. The session is conducted over video — 50 minutes, just the two of you and the therapist.</p>
+      4. The session happens over video. 50 minutes, just the two of you and the therapist.</p>
       <div class="divider"></div>
       <p style="font-size:0.82rem;font-weight:700;color:#0E0B07;margin-bottom:6px;">What to expect</p>
-      <p style="font-size:0.8rem;">This is not a first therapy appointment. The therapist uses your Attune results as the starting point — they already know your couple type, your biggest dimension gaps, and your expectation misalignments. The session is focused on translating your data into practical next steps.</p>
+      <p style="font-size:0.8rem;">This is not a first therapy appointment. The therapist uses your Attune results as the starting point. They already know your couple type, your biggest dimension gaps, and your expectation misalignments. The session is about translating your data into practical next steps.</p>
       <div class="divider"></div>
       <div class="detail-row"><span>Order</span><strong>#${orderNum || "—"}</strong></div>
       <div class="detail-row"><span>Format</span><strong>50-minute video session</strong></div>
@@ -361,12 +361,12 @@ function lmftConfirmedEmail({ toName, partnerName, scheduledStart, timezone, vid
   }
 
   return {
-    subject: "Your LMFT session is booked — Attune",
+    subject: "Your LMFT session is booked. Attune",
     html: layout(`
       <span class="badge badge-green">Booking confirmed</span>
       <h1 style="margin-top:14px;">Your session is on the calendar.</h1>
       <p>Hi ${name},</p>
-      <p>You're booked. Your therapist will review your joint Attune results before you meet — so the session starts from your actual data, not from a blank intake form.</p>
+      <p>You're booked. Your therapist will review your joint Attune results before you meet. The session starts from your actual data, not from a blank intake form.</p>
 
       <div style="background:#F5F0EC;border-radius:12px;padding:20px;margin:24px 0;">
         <div class="detail-row"><span>When</span><strong>${dateLine}</strong></div>
@@ -382,7 +382,7 @@ function lmftConfirmedEmail({ toName, partnerName, scheduledStart, timezone, vid
       <div class="divider"></div>
 
       <p style="font-size:0.82rem;font-weight:700;color:#0E0B07;margin-bottom:6px;">Before the session</p>
-      <p style="font-size:0.8rem;">Both partners should have completed your Attune exercises if you haven't yet — your results are what the therapist works from. The session is most useful when both of you are present.</p>
+      <p style="font-size:0.8rem;">Both partners should have completed your Attune exercises before the session. Your results are what the therapist works from. The session is most useful when both of you are present.</p>
 
       <p style="font-size:0.82rem;font-weight:700;color:#0E0B07;margin-bottom:6px;margin-top:18px;">What to expect</p>
       <p style="font-size:0.8rem;">This is not a first therapy appointment. The therapist already knows your couple type, your biggest dimension gaps, and your expectation misalignments. The 50 minutes are about translating those into practical next steps for the two of you.</p>
@@ -406,15 +406,15 @@ function checkin1yrEmail({ toName, partnerName, retakeUrl, portalUrl }) {
   const name = toName || "there";
   const url = retakeUrl || portalUrl || "https://attune-relationships.com/app";
   return {
-    subject: "One year with Attune — your results are worth revisiting",
+    subject: "One year with Attune. Your results are worth revisiting.",
     html: layout(`
       <h1>A year is a meaningful unit of time.</h1>
       <p>Hi ${name},</p>
-      <p>You and ${partnerName} took Attune a year ago. In that time, you've navigated seasons, decisions, and the ordinary accumulation of a shared life. The patterns that showed up in your results may look different now.</p>
-      <p>Couples who retake the assessment after a year typically find that some dimensions have shifted significantly — often in ways they can trace to specific experiences. The comparison is usually more useful than either session on its own.</p>
+      <p>You and ${partnerName} took Attune a year ago. In that time, you've navigated seasons, decisions, and the ordinary accumulation of a shared life. The patterns that showed up in your results look different now.</p>
+      <p>Couples who retake the assessment after a year see some dimensions shift significantly, often in ways they can trace to specific experiences. The comparison is more useful than either session on its own.</p>
       <div class="btn-wrap"><a href="${url}" class="btn">Retake Attune →</a></div>
       <div class="divider"></div>
-      <p style="font-size:0.78rem;color:#8C7A68;">Your original results are still in your dashboard. Retaking creates a new session — you'll be able to see both side by side.</p>
+      <p style="font-size:0.78rem;color:#8C7A68;">Your original results are still in your dashboard. Retaking creates a new session. You'll be able to see both side by side.</p>
     `),
   };
 }
@@ -456,6 +456,38 @@ export default async function handler(req) {
     email.to = body.toEmail;
   } else if (type === 'results_viewed') {
     if (!body.toEmail) return new Response('Missing toEmail', { status: 400 });
+    // Server-side dedup: race-safe per-user flag in profiles table.
+    // Without this, both partners hitting results simultaneously each send
+    // an email (per-browser localStorage flag is per-device).
+    const supabaseUrl = process.env.SUPABASE_URL;
+    const serviceKey  = process.env.SUPABASE_SERVICE_KEY;
+    if (supabaseUrl && serviceKey && userId) {
+      try {
+        // Check + set in a single conditional update. If results_email_sent_at
+        // is null we set it to now and proceed; otherwise we short-circuit.
+        const r = await fetch(
+          `${supabaseUrl}/rest/v1/profiles?id=eq.${userId}&results_email_sent_at=is.null`,
+          {
+            method: 'PATCH',
+            headers: {
+              'Content-Type': 'application/json',
+              'apikey': serviceKey,
+              'Authorization': `Bearer ${serviceKey}`,
+              'Prefer': 'return=representation',
+            },
+            body: JSON.stringify({ results_email_sent_at: new Date().toISOString() }),
+          }
+        );
+        const rows = await r.json().catch(() => []);
+        if (!Array.isArray(rows) || rows.length === 0) {
+          // Already sent (the row had results_email_sent_at set). Skip silently.
+          return new Response(JSON.stringify({ ok: true, deduped: true }), { status: 200, headers: { 'Content-Type': 'application/json' } });
+        }
+      } catch (e) {
+        console.warn('[send-email] results_viewed dedup check failed:', e);
+        // Fall through and send. Better to occasionally double-send than block on transient DB errors.
+      }
+    }
     email = resultsViewedEmail(body);
     email.to = body.toEmail;
   } else if (type === 'welcome_account') {

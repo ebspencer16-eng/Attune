@@ -13,6 +13,13 @@
 -- Run in Supabase SQL Editor.
 -- ─────────────────────────────────────────────────────────────────────────────
 
+-- ── PROFILES: COLUMN FOR RESULTS-EMAIL DEDUP ────────────────────────────────
+-- Used by /api/send-email's results_viewed handler to prevent duplicate
+-- emails when both partners hit the results page simultaneously.
+
+alter table public.profiles
+  add column if not exists results_email_sent_at timestamptz;
+
 -- ── PROFILES ────────────────────────────────────────────────────────────────
 -- Users can read/write their own profile.
 -- Partner A can read Partner B's profile (and vice versa) ONLY if linked
