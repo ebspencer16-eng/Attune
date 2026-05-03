@@ -88,6 +88,11 @@ async function handleWebhook(req) {
     // array (or chunked items0..itemsN keys) in metadata; we parse that and
     // write one row per item. Legacy single-item orders write one row from
     // the top-level metadata fields.
+    // Track whether a fresh order was created (vs duplicate webhook delivery).
+    // If Supabase isn't configured (dev/test), default to true so emails still
+    // fire — the de-dup is purely an idempotency guard for retried webhooks.
+    let orderCreated = !(process.env.SUPABASE_URL && (process.env.SUPABASE_SERVICE_ROLE || process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_KEY));
+
     const supabaseUrl = process.env.SUPABASE_URL;
     const serviceKey  = process.env.SUPABASE_SERVICE_ROLE
                      || process.env.SUPABASE_SERVICE_ROLE_KEY
@@ -164,7 +169,7 @@ async function handleWebhook(req) {
             const suffix = items.length > 1 ? `-${i+1}` : '';
             const orderNum = `${baseOrderNum}${suffix}`;
             const qrToken = newQrToken();
-            await fetch(`${supabaseUrl}/rest/v1/orders`, {
+            const insertRes = await fetch(`${supabaseUrl}/rest/v1/orders`, {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',
@@ -202,12 +207,22 @@ async function handleWebhook(req) {
                 promo_code:              meta.promoCode || null,
               }),
             });
-            console.log(`[webhook] order ${i+1}/${items.length} created: ${orderNum} (qr ${qrToken})`);
+            if (insertRes.ok) {
+              orderCreated = true;
+              console.log(`[webhook] order ${i+1}/${items.length} created: ${orderNum} (qr ${qrToken})`);
+            } else if (insertRes.status === 409) {
+              // UNIQUE constraint hit — webhook retry of an order we already
+              // wrote. Idempotent skip; don't re-send confirmation email.
+              console.log(`[webhook] order ${i+1}/${items.length} duplicate (webhook retry): ${orderNum}`);
+            } else {
+              const txt = await insertRes.text().catch(() => '');
+              console.error(`[webhook] order ${i+1}/${items.length} insert failed:`, insertRes.status, txt);
+            }
           }
         } else {
           // Legacy single-item path
           const qrToken = newQrToken();
-          await fetch(`${supabaseUrl}/rest/v1/orders`, {
+          const insertRes = await fetch(`${supabaseUrl}/rest/v1/orders`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -239,19 +254,29 @@ async function handleWebhook(req) {
               promo_code:              meta.promoCode || null,
             }),
           });
-          console.log(`[webhook] order created: ${baseOrderNum} (qr ${qrToken})`);
+          if (insertRes.ok) {
+            orderCreated = true;
+            console.log(`[webhook] order created: ${baseOrderNum} (qr ${qrToken})`);
+          } else if (insertRes.status === 409) {
+            console.log(`[webhook] order duplicate (webhook retry): ${baseOrderNum}`);
+          } else {
+            const txt = await insertRes.text().catch(() => '');
+            console.error('[webhook] order insert failed:', insertRes.status, txt);
+          }
         }
       } catch(e) {
         console.error('[webhook] order creation failed:', e);
       }
     }
 
-    // Fire confirmation email if Resend is configured
+    // Fire confirmation email if Resend is configured. Skip on webhook retry
+    // (orderCreated=false means the order row already existed — duplicate
+    // delivery — and the customer was emailed on the first delivery).
     const apiKey    = process.env.RESEND_API_KEY;
     const fromEmail = process.env.FROM_EMAIL || 'hello@attune-relationships.com';
     const baseUrl   = process.env.SITE_URL || 'https://attune-relationships.com';
 
-    if (apiKey && intent.receipt_email) {
+    if (apiKey && intent.receipt_email && orderCreated) {
       // Order confirmation
       const subject = `Order confirmed — ${meta.pkgKey || 'Attune'}`;
       const html = `

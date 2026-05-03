@@ -19,6 +19,58 @@ export const config = { runtime: 'nodejs' };
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
+  // ── Auth + payment gate (mirrors generate-workbook) ────────────────────────
+  // This endpoint generates AND stores a workbook to Supabase Storage. Without
+  // a gate, any caller could spam-generate workbooks and exhaust storage.
+  // Two ways to satisfy:
+  //   1. X-Admin-Key matching ADMIN_API_KEY (admin tools, cron, etc.)
+  //   2. Bearer token from a logged-in user with addon_workbook on an order
+  const authSupabaseUrl = process.env.SUPABASE_URL;
+  const authServiceKey  = process.env.SUPABASE_SERVICE_KEY
+                       || process.env.SUPABASE_SERVICE_ROLE
+                       || process.env.SUPABASE_SERVICE_ROLE_KEY;
+  const adminKey    = process.env.ADMIN_API_KEY;
+  const reqAdminKey = req.headers['x-admin-key'];
+  const authHeader  = req.headers.authorization || '';
+  const accessToken = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : '';
+  const isAdminCall = !!(adminKey && reqAdminKey && reqAdminKey === adminKey);
+
+  if (!isAdminCall) {
+    if (!authSupabaseUrl || !authServiceKey) {
+      return res.status(500).json({ error: 'Server not configured for auth' });
+    }
+    if (!accessToken) {
+      return res.status(401).json({ error: 'Authentication required' });
+    }
+    try {
+      const userRes = await fetch(`${authSupabaseUrl}/auth/v1/user`, {
+        headers: { apikey: authServiceKey, Authorization: `Bearer ${accessToken}` },
+      });
+      if (!userRes.ok) return res.status(401).json({ error: 'Invalid auth token' });
+      const userJson = await userRes.json();
+      const userId = userJson?.id;
+      const userEmail = userJson?.email;
+      if (!userId) return res.status(401).json({ error: 'Invalid auth token' });
+
+      const orderQuery = userEmail
+        ? `or=(user_id.eq.${userId},buyer_email.eq.${encodeURIComponent(userEmail)})`
+        : `user_id=eq.${userId}`;
+      const ordersRes = await fetch(
+        `${authSupabaseUrl}/rest/v1/orders?${orderQuery}&select=addon_workbook&limit=10`,
+        { headers: { apikey: authServiceKey, Authorization: `Bearer ${authServiceKey}` } }
+      );
+      if (!ordersRes.ok) return res.status(500).json({ error: 'Order lookup failed' });
+      const orders = await ordersRes.json();
+      const hasWorkbook = Array.isArray(orders) && orders.some(o => !!o.addon_workbook);
+      if (!hasWorkbook) {
+        return res.status(403).json({ error: 'No workbook purchase found for this user' });
+      }
+    } catch (e) {
+      console.error('[store-workbook] payment check error:', e);
+      return res.status(500).json({ error: 'Payment verification failed' });
+    }
+  }
+
   let body;
   try { body = typeof req.body === 'string' ? JSON.parse(req.body) : req.body; }
   catch { return res.status(400).json({ error: 'Invalid JSON' }); }
@@ -26,13 +78,18 @@ export default async function handler(req, res) {
   const supabaseUrl  = process.env.SUPABASE_URL;
   const serviceKey   = process.env.SUPABASE_SERVICE_KEY;
 
-  // Generate the docx by calling the existing workbook generator
+  // Generate the docx by calling the existing workbook generator.
+  // We send the admin key so the auth/payment gate inside generate-workbook
+  // is bypassed for this server-to-server call (the user's payment was
+  // already verified before reaching this endpoint).
   let docxBuffer;
   const siteUrl = process.env.SITE_URL || 'https://attune-relationships.com';
   try {
+    const genHeaders = { 'Content-Type': 'application/json' };
+    if (process.env.ADMIN_API_KEY) genHeaders['X-Admin-Key'] = process.env.ADMIN_API_KEY;
     const genRes = await fetch(`${siteUrl}/api/generate-workbook`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: genHeaders,
       body: JSON.stringify(body),
     });
     if (!genRes.ok) throw new Error(`Workbook generation failed: ${genRes.status}`);

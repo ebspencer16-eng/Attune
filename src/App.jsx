@@ -6263,7 +6263,7 @@ function RetakeComparisonCard({ currentEx2, priorEx2, priorAt, userName }) {
   );
 }
 
-function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Answers, partnerEx3, ex2AnswersPrior = null, ex2PriorAt = null, hasAnniversary, userName, partnerName, initialSection, isMobile = false, portrait = null, hasChecklist = false, hasBudget = false, hasLMFT = false, onNavigateTool = null, userPronouns = "", partnerPronouns = "" }) {
+function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Answers, partnerEx3, ex2AnswersPrior = null, ex2PriorAt = null, hasAnniversary, userName, partnerName, initialSection, isMobile = false, portrait = null, hasChecklist = false, hasBudget = false, hasLMFT = false, hasWorkbook = false, onNavigateTool = null, userPronouns = "", partnerPronouns = "" }) {
 
   // Compute all the data we need up front
   const myS = calcDimScores(ex1Answers);
@@ -6434,9 +6434,22 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
           aligned: (ex2Answers?.life?.['lq_' + key] || null) === (partnerEx2?.life?.['lq_' + key] || null),
         }));
 
+        // Pull the user's access token so the API can verify they own a
+        // workbook addon. Without this header, generate-workbook returns 401.
+        const _wbAuth = await (async () => {
+          try {
+            const { supabase: sb, hasSupabase } = await import('./supabase.js');
+            if (!hasSupabase()) return null;
+            const { data: { session } } = await sb.auth.getSession();
+            return session?.access_token || null;
+          } catch { return null; }
+        })();
         const resp = await fetch('/api/generate-workbook', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: {
+            'Content-Type': 'application/json',
+            ...(_wbAuth ? { Authorization: `Bearer ${_wbAuth}` } : {}),
+          },
           body: JSON.stringify({
             userName, partnerName,
             scores: myS, partnerScores: partS,
@@ -7510,7 +7523,12 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
           )}
 
           {/* ── WORKBOOK CTA ── */}
-          {(() => {
+          {/* Gated on hasWorkbook (i.e. user purchased the workbook addon).
+              The workbook is a paid product. Without this gate, every user
+              with results sees the download button and can fetch the
+              workbook from /api/generate-workbook for free — which bypasses
+              the paywall entirely. */}
+          {hasWorkbook && (() => {
             // Build the payload from this couple's actual data
             const buildAndDownload = async () => {
               const myS = calcDimScores(ex1Answers);
@@ -7528,8 +7546,8 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
                 { key: 'values',    label: 'Faith & Values' },
               ];
               EXP_KEYS.forEach(({ key, label }) => {
-                const yourAns    = ex2Answers?.life?.['lq_' + key] || ex2Answers?.life?.['lq_children'] || null;
-                const partnerAns = partnerEx2?.life?.['lq_' + key] || partnerEx2?.life?.['lq_children'] || null;
+                const yourAns    = ex2Answers?.life?.['lq_' + key] || null;
+                const partnerAns = partnerEx2?.life?.['lq_' + key] || null;
                 expGaps.push({ key, label, yourAnswer: yourAns, partnerAnswer: partnerAns, aligned: yourAns === partnerAns });
               });
 
@@ -7545,6 +7563,19 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
               };
 
               try {
+                // Pull auth token so generate-workbook can verify purchase
+                const _wbAuth = await (async () => {
+                  try {
+                    const { supabase: sb, hasSupabase } = await import('./supabase.js');
+                    if (!hasSupabase()) return null;
+                    const { data: { session } } = await sb.auth.getSession();
+                    return session?.access_token || null;
+                  } catch { return null; }
+                })();
+                const _wbHeaders = {
+                  'Content-Type': 'application/json',
+                  ...(_wbAuth ? { Authorization: `Bearer ${_wbAuth}` } : {}),
+                };
                 // Use pre-generated workbook URL if available (fastest)
                 const ord = JSON.parse(localStorage.getItem('attune_order') || 'null');
                 if (ord?.workbookUrl) {
@@ -7557,7 +7588,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
                 }
                 // Always try docx API first — reliable on all browsers
                 showToast('Generating your workbook…');
-                const resp2 = await fetch('/api/generate-workbook', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+                const resp2 = await fetch('/api/generate-workbook', { method: 'POST', headers: _wbHeaders, body: JSON.stringify(payload) });
                 if (resp2.ok) {
                   const blob2 = await resp2.blob();
                   const url2 = URL.createObjectURL(blob2);
@@ -7600,9 +7631,26 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
                 document.body.removeChild(iframe);
               } catch (e) {
                 console.error('Workbook PDF generation failed:', e);
-                // Final fallback: docx
+                // Final fallback: docx (reuse _wbHeaders from outer scope —
+                // it's already constructed with auth above, so this caller
+                // doesn't need its own session lookup)
                 try {
-                  const resp = await fetch('/api/generate-workbook', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+                  const _wbAuthRetry = await (async () => {
+                    try {
+                      const { supabase: sb, hasSupabase } = await import('./supabase.js');
+                      if (!hasSupabase()) return null;
+                      const { data: { session } } = await sb.auth.getSession();
+                      return session?.access_token || null;
+                    } catch { return null; }
+                  })();
+                  const resp = await fetch('/api/generate-workbook', {
+                    method: 'POST',
+                    headers: {
+                      'Content-Type': 'application/json',
+                      ...(_wbAuthRetry ? { Authorization: `Bearer ${_wbAuthRetry}` } : {}),
+                    },
+                    body: JSON.stringify(payload),
+                  });
                   if (!resp.ok) throw new Error();
                   const blob = await resp.blob();
                   const url = URL.createObjectURL(blob);
@@ -8579,6 +8627,19 @@ function AuthModal({ mode, onClose, onSuccess }) {
       // source of truth at module top; see USER_LOCALSTORAGE_KEYS.
       clearAllUserLocalStorage();
       try { localStorage.setItem("attune_account", JSON.stringify(account)); } catch {}
+
+      // Link the order created at checkout (via stripe-webhook with no user_id)
+      // to this newly-created auth user. orderNum was passed in the URL by
+      // checkout.html on success. Without this link, the user's orders are
+      // only findable by buyer_email — fragile if email is changed later.
+      const _checkoutOrderNum = _authParams.get('orderNum');
+      if (_checkoutOrderNum) {
+        try {
+          await sb.from('orders').update({ user_id: authData.user.id }).eq('order_num', _checkoutOrderNum);
+        } catch (e) {
+          console.warn('[Attune] order linkage failed:', e);
+        }
+      }
 
       // Send partner invite email if partner email was provided
       if (form.partnerEmail.trim()) {
@@ -11806,14 +11867,26 @@ export default function App() {
                   // though both partners are now done.
                   const _bothDoneNow = !!(ex1Answers && a && (isDemo || hasRealPartner));
                   if (_bothDoneNow && hasWorkbookOrder) {
-                    setTimeout(() => {
+                    setTimeout(async () => {
                       const ord = JSON.parse(localStorage.getItem('attune_order') || 'null');
                       if (!ord) return;
                       const myS = calcDimScores(ex1Answers);
                       const partS = calcDimScores(partnerEx1);
+                      // Pull auth token so store-workbook can verify purchase
+                      let _swAuth = null;
+                      try {
+                        const { supabase: sb, hasSupabase } = await import('./supabase.js');
+                        if (hasSupabase()) {
+                          const { data: { session } } = await sb.auth.getSession();
+                          _swAuth = session?.access_token || null;
+                        }
+                      } catch {}
                       fetch('/api/store-workbook', {
                         method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
+                        headers: {
+                          'Content-Type': 'application/json',
+                          ...(_swAuth ? { Authorization: `Bearer ${_swAuth}` } : {}),
+                        },
                         body: JSON.stringify({
                           userName, partnerName,
                           scores: myS, partnerScores: partS,
@@ -12308,6 +12381,7 @@ export default function App() {
                   hasChecklist={pkg.hasChecklist}
                   hasBudget={pkg.hasBudget}
                   hasLMFT={pkg.hasLMFT}
+                  hasWorkbook={hasWorkbookOrder}
                   onNavigateTool={(tool) => { if (tool === 'lmft-upsell') { setUpsellModal({ product: 'lmft', cartAdded: false }); } else { setView(tool); } }}
                   initialSection={activeResult !== "overview" ? activeResult : undefined}
                 />

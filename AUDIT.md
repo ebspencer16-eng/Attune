@@ -296,3 +296,49 @@ Flagging for product decision.
 - Workbook download UI gating
 - Resources view links
 - Section 6 commit and continue from where the limit was hit
+
+### Section 6 — additional issues (continuing from partial commit)
+
+| # | Severity | Description | Status |
+|---|---|---|---|
+| 6.7 | medium | Stripe webhook duplicate delivery → duplicate confirmation emails. UNIQUE constraint on stripe_payment_intent_id rejected the row but the email fired anyway. | FIXED — track orderCreated flag, skip emails on duplicate webhook delivery |
+| 6.8 | flag | Ex01 retake doesn't trigger workbook regen (only Ex02 does). | NOTED |
+| 6.9 | none | Resources blog post links — all 6 verified to exist. | OK |
+| 6.10 | medium | `lq_${key}` had a fallback to `lq_children` — would corrupt the workbook by showing the children answer in place of any missing answer for any other category. | FIXED — null fallback only |
+| 6.11 | **HIGH** revenue leak | Workbook download CTA was unconditional — every results-page user could download the $19 workbook regardless of purchase. | FIXED — gated on hasWorkbook prop |
+| 6.12 | **HIGH** revenue leak | `/api/generate-workbook` had NO auth or payment check — direct API call gave free workbook to anyone. | FIXED — Bearer token required, validates against orders.addon_workbook |
+| 6.13 | **HIGH** revenue leak | `/api/store-workbook` had the same gap — generated AND stored workbook to Supabase Storage with no auth. | FIXED — same auth pattern |
+| 6.14 | medium | Order created at checkout had user_id=null. AuthModal signup didn't read URL `orderNum` to link the order to the new auth user. Linkage relied on buyer_email match on later sign-in. | FIXED — signup now does `orders.update({user_id}).eq(order_num, urlOrderNum)` |
+| 6.15 | flag | Ex01 and Ex03 retake priors are captured + stored but never surfaced anywhere. Only Ex02 has a RetakeComparisonCard. | NOTED — methodology |
+
+### Auth gate architecture (Issues 6.12 + 6.13)
+
+Both `generate-workbook` and `store-workbook` now require one of:
+1. `Authorization: Bearer <supabase-access-token>` — validates token via Supabase auth, then checks orders table for any order with `addon_workbook` set, joined by either `user_id` or `buyer_email`.
+2. `X-Admin-Key: <ADMIN_API_KEY>` — bypasses user check. Used by `store-workbook` when calling `generate-workbook` server-to-server, and available for admin tools/cron.
+
+**Action required:** Set `ADMIN_API_KEY` in Vercel env vars (any random string, e.g. 32 chars from `openssl rand -hex 16`). Without this, store-workbook → generate-workbook server-to-server calls will fail because no Bearer token is forwarded.
+
+Client-side callers (3 in App.jsx) all pull the token from `sb.auth.getSession()` and include it in the Authorization header.
+
+### Additional files changed (continued)
+
+- `src/App.jsx`:
+  - 3x generate-workbook callers now send Bearer token
+  - 1x store-workbook caller now sends Bearer token
+  - AuthModal signup now links order by URL `orderNum` to auth user
+- `api/generate-workbook.js`: auth + payment gate at top of handler
+- `api/store-workbook.js`: same gate; passes X-Admin-Key when calling generate-workbook
+- `api/stripe-webhook.js`: order idempotency tracking, email skip on duplicate
+
+### Section 6 — final action items for Ellie
+
+1. **Run migrations 011 + 012** in Supabase SQL Editor (already documented above)
+2. **Set ADMIN_API_KEY** in Vercel environment variables — any random string (e.g. `openssl rand -hex 16` output). Required for the workbook auto-gen flow to bypass the Bearer auth check on server-to-server calls.
+3. **Smoke tests:**
+   - Checklist persists across refresh
+   - Notes persist across refresh
+   - Buy a package WITHOUT workbook addon → verify the "Download workbook" CTA does NOT appear on results page
+   - Buy a package WITH workbook addon → verify download works
+   - Direct GET to `/api/generate-workbook` (curl with no auth) returns 401
+   - Direct GET to `/api/store-workbook` (curl with no auth) returns 401

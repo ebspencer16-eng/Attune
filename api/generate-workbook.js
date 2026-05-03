@@ -1884,6 +1884,85 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
+  // ── Auth + payment gate ───────────────────────────────────────────────────
+  // The workbook is a paid product ($19 digital). Without this gate, anyone
+  // who knew the endpoint URL could POST and get a free workbook. Two ways
+  // to satisfy the gate:
+  //   1. Bearer token from a logged-in user whose orders include addon_workbook
+  //   2. X-Admin-Key matching ADMIN_API_KEY env var (for admin/internal tools)
+  const supabaseUrl = process.env.SUPABASE_URL;
+  const serviceKey  = process.env.SUPABASE_SERVICE_KEY
+                   || process.env.SUPABASE_SERVICE_ROLE
+                   || process.env.SUPABASE_SERVICE_ROLE_KEY;
+  const adminKey    = process.env.ADMIN_API_KEY;
+  const reqAdminKey = req.headers['x-admin-key'];
+  const authHeader  = req.headers.authorization || '';
+  const accessToken = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : '';
+
+  // Admin path — bypass user check (used by /api/store-workbook server-side)
+  const isAdminCall = !!(adminKey && reqAdminKey && reqAdminKey === adminKey);
+
+  if (!isAdminCall) {
+    if (!supabaseUrl || !serviceKey) {
+      return res.status(500).json({ error: 'Server not configured for auth' });
+    }
+    if (!accessToken) {
+      return res.status(401).json({ error: 'Authentication required' });
+    }
+
+    // Verify the access token + look up the user
+    let userId = null;
+    try {
+      const userRes = await fetch(`${supabaseUrl}/auth/v1/user`, {
+        headers: { apikey: serviceKey, Authorization: `Bearer ${accessToken}` },
+      });
+      if (!userRes.ok) {
+        return res.status(401).json({ error: 'Invalid auth token' });
+      }
+      const userJson = await userRes.json();
+      userId = userJson?.id;
+    } catch (e) {
+      return res.status(401).json({ error: 'Auth verification failed' });
+    }
+
+    if (!userId) {
+      return res.status(401).json({ error: 'Invalid auth token' });
+    }
+
+    // Look up the user's email so we can find their orders. Orders are
+    // linked by buyer_email or by user_id (set on first sign-in if absent).
+    try {
+      const userRes2 = await fetch(`${supabaseUrl}/auth/v1/user`, {
+        headers: { apikey: serviceKey, Authorization: `Bearer ${accessToken}` },
+      });
+      const userJson2 = await userRes2.json();
+      const userEmail = userJson2?.email;
+
+      // Look for an order with addon_workbook for this user
+      // (linked either by user_id or by buyer_email)
+      const orderQuery = userEmail
+        ? `or=(user_id.eq.${userId},buyer_email.eq.${encodeURIComponent(userEmail)})`
+        : `user_id=eq.${userId}`;
+
+      const ordersRes = await fetch(
+        `${supabaseUrl}/rest/v1/orders?${orderQuery}&select=addon_workbook&limit=10`,
+        { headers: { apikey: serviceKey, Authorization: `Bearer ${serviceKey}` } }
+      );
+
+      if (!ordersRes.ok) {
+        return res.status(500).json({ error: 'Order lookup failed' });
+      }
+      const orders = await ordersRes.json();
+      const hasWorkbook = Array.isArray(orders) && orders.some(o => !!o.addon_workbook);
+      if (!hasWorkbook) {
+        return res.status(403).json({ error: 'No workbook purchase found for this user' });
+      }
+    } catch (e) {
+      console.error('[generate-workbook] payment check error:', e);
+      return res.status(500).json({ error: 'Payment verification failed' });
+    }
+  }
+
   let body;
   try {
     body = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
