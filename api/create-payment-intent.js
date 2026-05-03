@@ -414,12 +414,18 @@ export default async function handler(req) {
         try {
           const d = new Date();
           const dateStr = `${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}`;
+          // Collect generated order numbers so the client can use them in the
+          // success redirect URL — otherwise the client generates a different
+          // order_num from a synthetic payment_intent_id and the URL doesn't
+          // match what's in the DB.
+          const generatedOrderNums = [];
           for (let i = 0; i < items.length; i++) {
             const item = items[i];
             const suffix = items.length > 1 ? `-${i+1}` : '';
             const generatedOrderNum = orderNum
               ? `${orderNum}${suffix}`
               : `ATT-${dateStr}-PR${Math.random().toString(36).substring(2,5).toUpperCase()}${suffix}`;
+            generatedOrderNums.push(generatedOrderNum);
             await writeOrderRow(supabaseUrl, supabaseServiceKey, {
               order_num:         generatedOrderNum,
               buyer_name:        buyerName || item.partner1Name || null,
@@ -444,6 +450,10 @@ export default async function handler(req) {
               shipping_state:    item.shipping?.state || null,
             });
           }
+          // Stash on a request-local var the response handler can read.
+          // We can't return out of the for-loop scope cleanly so we attach
+          // it to the items[0] object as a side channel.
+          if (items[0]) items[0]._generatedOrderNums = generatedOrderNums;
         } catch (e) {
           console.warn('[promo] order writes failed (non-blocking):', e);
         }
@@ -457,6 +467,7 @@ export default async function handler(req) {
         free: true,
         promoCode: promoCode.toUpperCase().trim(),
         itemCount: items.length,
+        orderNums: items[0]?._generatedOrderNums || [],
       }), {
         status: 200, headers: { 'Content-Type': 'application/json' }
       });

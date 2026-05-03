@@ -667,7 +667,7 @@ async function refreshTax() {
       pkg:    pkgId,
       format,
       addons: {
-        workbook:         params.get('addon_workbook') || false,
+        workbook:         !!params.get('addon_workbook'),
         workbookVariant:  params.get('addon_workbook') === 'print' ? 'print' : 'digital',
         lmft:             params.get('addon_lmft') === '1',
         reflection:       params.get('addon_reflection') === '1',
@@ -1392,7 +1392,7 @@ async function handleSubmit(e) {
     });
 
     const serverResponse = await res.json();
-    const { clientSecret, error: serverErr, free: isFreePromo } = serverResponse;
+    const { clientSecret, error: serverErr, free: isFreePromo, orderNums: freeOrderNums } = serverResponse;
     if (serverErr) throw new Error(serverErr);
 
     let paymentIntent = null;
@@ -1416,10 +1416,14 @@ async function handleSubmit(e) {
       }
       paymentIntent = stripePi;
     }
-    // Generate order number from payment intent ID
-    const realOrderNum = paymentIntent?.id
-      ? 'ATT-' + new Date().toISOString().slice(0,10).replace(/-/g,'') + '-' + paymentIntent.id.slice(-4).toUpperCase()
-      : 'ATT-' + Date.now();
+    // Generate order number from payment intent ID. For free promos the
+    // server already wrote the orders and returned their order_nums; use
+    // the first one so the URL/localStorage match what's in the DB.
+    const realOrderNum = (isFreePromo && Array.isArray(freeOrderNums) && freeOrderNums.length > 0)
+      ? freeOrderNums[0]
+      : (paymentIntent?.id
+        ? 'ATT-' + new Date().toISOString().slice(0,10).replace(/-/g,'') + '-' + paymentIntent.id.slice(-4).toUpperCase()
+        : 'ATT-' + Date.now());
 
     // 3. Success — build portal link using the first item's details
     const params = new URLSearchParams({
@@ -1479,6 +1483,7 @@ async function handleSubmit(e) {
         partner2Name:  first.partner2Name,
         isPhysical:    first.format === 'physical',
         isGift:        first.intent === 'gift',
+        orderNum:      realOrderNum,
         ts:            Date.now(),
       }));
     } catch(e) {}

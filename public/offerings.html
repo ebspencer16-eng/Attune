@@ -1423,6 +1423,7 @@ function addToCart(pkg) {
   }
   renderCart();
   updateCartBadge();
+  _persistCart();
   // Show the "added to cart" confirmation modal
   const modal = document.getElementById('added-modal');
   const nameEl = document.getElementById('added-modal-name');
@@ -1456,11 +1457,19 @@ function updateCartBadge() {
   }
 }
 
+// Persist cart to sessionStorage. Called after every mutation so refreshing
+// the page or navigating away and back doesn't lose the cart. Previously
+// only saved at the moment of clicking "Proceed to Checkout."
+function _persistCart() {
+  try { sessionStorage.setItem('attune_cart', JSON.stringify(_cartItems)); } catch (e) { /* private mode, ignore */ }
+}
+
 function removeItem(id) {
   _cartItems = _cartItems.filter(i => i.id !== id);
   if (_expandedItemId === id) _expandedItemId = null;
   renderCart();
   updateCartBadge();
+  _persistCart();
 }
 
 function changeQty(id, delta) {
@@ -1469,6 +1478,7 @@ function changeQty(id, delta) {
   item.qty = Math.max(1, item.qty + delta);
   renderCart();
   updateCartBadge();
+  _persistCart();
 }
 
 function toggleItemAddon(id, addon) {
@@ -1478,6 +1488,7 @@ function toggleItemAddon(id, addon) {
   // If turning off workbook, reset variant to digital
   if (addon === 'workbook' && !item.addons.workbook) item.addons.workbookVariant = 'digital';
   renderCart();
+  _persistCart();
 }
 
 function setItemWorkbookVariant(id, variant, ev) {
@@ -1486,6 +1497,7 @@ function setItemWorkbookVariant(id, variant, ev) {
   if (!item) return;
   item.addons.workbookVariant = variant;
   renderCart();
+  _persistCart();
 }
 
 function toggleItemPanel(id) {
