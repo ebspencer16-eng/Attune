@@ -265,7 +265,93 @@ async function saveExerciseWithRetakeSnapshot(sb, accountId, exerciseNum, answer
     patch[priorAt]  = new Date().toISOString();
   }
 
-  return trackedSupabaseWrite(sb.from('profiles').update(patch).eq('id', accountId));
+  const result = await trackedSupabaseWrite(sb.from('profiles').update(patch).eq('id', accountId));
+
+  // Fallback to service-role endpoint if the direct write hit RLS.
+  // This happens during the pending-confirm window (auth user exists,
+  // no session, RLS policies block all writes). Issue 4.8.
+  if (result?.error) {
+    const errMsg = String(result.error?.message || result.error || '');
+    const looksLikeRLS = /row.level.security|permission denied|new row violates|RLS/i.test(errMsg) || result.error?.code === '42501';
+    if (looksLikeRLS) {
+      try {
+        const { data: { session } } = await sb.auth.getSession();
+        const accessToken = session?.access_token;
+        const fallbackBody = {
+          userId: accountId,
+          exercise: `ex${exerciseNum}`,
+          answers,
+          completedAt: new Date().toISOString(),
+        };
+        // If no session, include email for pending-confirm mode lookup
+        if (!accessToken) {
+          const acct = (() => { try { return JSON.parse(localStorage.getItem('attune_account') || 'null'); } catch { return null; } })();
+          if (acct?.email) fallbackBody.email = acct.email;
+        }
+        const fallbackHeaders = { 'Content-Type': 'application/json' };
+        if (accessToken) fallbackHeaders.Authorization = `Bearer ${accessToken}`;
+        const resp = await fetch('/api/save-exercise', {
+          method: 'POST',
+          headers: fallbackHeaders,
+          body: JSON.stringify(fallbackBody),
+        });
+        if (resp.ok) {
+          // Recovery toast: same UX as trackedSupabaseWrite recovery
+          if (typeof window !== 'undefined' && window.__attune_sync_failed && window.__attuneShowToast) {
+            window.__attuneShowToast('Synced.');
+            window.__attune_sync_failed = false;
+          }
+          return { data: null };
+        } else {
+          console.warn('[Attune] save-exercise fallback also failed:', await resp.text());
+        }
+      } catch (e) {
+        console.warn('[Attune] save-exercise fallback threw:', e);
+      }
+    }
+  }
+
+  return result;
+}
+
+// ─── Cross-device progress sync (Issue 3.5) ──────────────────────────────────
+// Mid-exercise progress used to live only in localStorage, so switching
+// devices mid-exercise lost everything. This helper debounces a write to
+// /api/save-exercise (which writes to profiles.ex{N}_progress jsonb columns).
+//
+// Debounce is per-exercise (1.5s) so quick-tap question navigation doesn't
+// hammer the endpoint. Calls are silent — failures are logged but never
+// surface to the user. The localStorage write is the primary mechanism;
+// this is a safety net for cross-device resume.
+const _progressSyncTimers = {};
+function syncProgressCrossDevice(exerciseNum, answers) {
+  if (typeof window === 'undefined') return;
+  if (!exerciseNum || !answers) return;
+  // Debounce by exercise so each exercise has its own pending write
+  const key = `ex${exerciseNum}`;
+  if (_progressSyncTimers[key]) clearTimeout(_progressSyncTimers[key]);
+  _progressSyncTimers[key] = setTimeout(async () => {
+    try {
+      const acct = (() => { try { return JSON.parse(localStorage.getItem('attune_account') || 'null'); } catch { return null; } })();
+      if (!acct?.id) return; // No user yet — pure localStorage mode
+      const { supabase: sb, hasSupabase } = await import('./supabase.js');
+      if (!hasSupabase()) return;
+      const { data: { session } } = await sb.auth.getSession();
+      const accessToken = session?.access_token;
+      const body = {
+        userId: acct.id,
+        exercise: key,
+        answers,
+        progress: true,
+      };
+      if (!accessToken && acct.email) body.email = acct.email;
+      const headers = { 'Content-Type': 'application/json' };
+      if (accessToken) headers.Authorization = `Bearer ${accessToken}`;
+      await fetch('/api/save-exercise', { method: 'POST', headers, body: JSON.stringify(body) });
+    } catch (e) {
+      console.warn('[Attune] progress cross-device sync failed:', e);
+    }
+  }, 1500);
 }
 
 // -- EXERCISE 2 --
@@ -295,12 +381,17 @@ function ExpectationsExercise({ partnerName, userName = "Partner A", onComplete,
 
   // Persist after every change. Cheap — state snapshot is <50KB.
   useEffect(() => {
+    const snapshot = { phase, catIndex, childhoodStructure, answers, lifeQ };
     try {
-      localStorage.setItem(progressKey, JSON.stringify({
-        phase, catIndex, childhoodStructure, answers, lifeQ,
-      }));
+      localStorage.setItem(progressKey, JSON.stringify(snapshot));
     } catch {}
-  }, [phase, catIndex, childhoodStructure, answers, lifeQ, progressKey]);
+    // Also sync core ex2 progress to server for cross-device resume.
+    // Anniversary and revisited variants stay local-only — they have
+    // their own keys and writing them all to ex2_progress would clobber.
+    if (!isAnniversary && !isRevisited && phase !== 'intro') {
+      syncProgressCrossDevice(2, snapshot);
+    }
+  }, [phase, catIndex, childhoodStructure, answers, lifeQ, progressKey, isAnniversary, isRevisited]);
 
   const setLife = (id, value) => setAnswers(a => ({ ...a, life: { ...a.life, [id]: value } }));
   const lifeAnswered = activeLifeQs.every(q => answers.life?.[q.id]);
@@ -755,11 +846,25 @@ function computeIndividualType(scores) {
   return { typeCode, withdrawScore, openScore, openCoord, engageCoord };
 }
 
-// Look up couple pairing from two type codes
+// Look up couple pairing from two type codes.
+//
+// All 10 valid type pairings are defined in NEW_COUPLE_TYPES. Falling back
+// silently to NEW_COUPLE_TYPES[0] would mask any real bug — e.g. a typo
+// in computeIndividualType producing an invalid type code, or a missing
+// entry in NEW_COUPLE_TYPES. Log loudly instead so we catch it.
 function getCoupleTypeNew(typeA, typeB) {
   // Normalize to alphabetical order
   const key = [typeA, typeB].sort().join("");
-  return NEW_COUPLE_TYPES.find(t => t.id === key) || NEW_COUPLE_TYPES[0];
+  const match = NEW_COUPLE_TYPES.find(t => t.id === key);
+  if (match) return match;
+  // Real bug if we ever reach here. Log + report. Returning the first
+  // entry as a last resort so the UI doesn't crash, but flag clearly.
+  const msg = `[Attune] getCoupleTypeNew: no pairing for typeA=${typeA} typeB=${typeB} (key=${key}). Falling back to ${NEW_COUPLE_TYPES[0]?.id}. This is a bug.`;
+  console.error(msg);
+  if (typeof window !== 'undefined' && window.Sentry?.captureMessage) {
+    try { window.Sentry.captureMessage(msg, 'error'); } catch {}
+  }
+  return NEW_COUPLE_TYPES[0];
 }
 
 // Full derivation using new engine (replaces old deriveCoupleType for couple-map page)
@@ -2349,6 +2454,8 @@ function Exercise01Flow({ userName, partnerName, onComplete, skipIntro = false }
       setIdx(nextIdx);
       // Persist after each answer so refresh resumes mid-exercise
       try { localStorage.setItem('attune_ex1_progress', JSON.stringify({ answers: updated, idx: nextIdx })); } catch {}
+      // And sync to server so resume works cross-device (debounced)
+      syncProgressCrossDevice(1, { answers: updated, idx: nextIdx });
     } else {
       // Clear progress cache — final result goes to attune_ex1 (done by onComplete)
       try { localStorage.removeItem('attune_ex1_progress'); } catch {}
@@ -4211,8 +4318,12 @@ function AnniversaryExercise({ userName, partnerName, onComplete, onBack }) {
 
   // Persist on every change
   useEffect(() => {
-    try { localStorage.setItem('attune_ex3_progress', JSON.stringify({ answers, step })); } catch {}
-  }, [answers, step]);
+    const snapshot = { answers, step };
+    try { localStorage.setItem('attune_ex3_progress', JSON.stringify(snapshot)); } catch {}
+    if (phase === 'questions') {
+      syncProgressCrossDevice(3, snapshot);
+    }
+  }, [answers, step, phase]);
 
   const total = ANNIVERSARY_QUESTIONS.length;
   const q = ANNIVERSARY_QUESTIONS[step];
@@ -8813,6 +8924,19 @@ function AuthModal({ mode, onClose, onSuccess }) {
       if (profile?.ex3_answers_prior) {
         try { localStorage.setItem('attune_ex3_prior', JSON.stringify({ answers: profile.ex3_answers_prior, at: profile.ex3_prior_completed_at })); } catch {}
       }
+      // Mid-exercise progress (Issue 3.5). Hydrate the per-exercise progress
+      // snapshots so a user who started on one device can resume on another.
+      // Only restore progress for exercises NOT yet completed (otherwise the
+      // completed answer takes precedence).
+      if (profile?.ex1_progress && !profile?.ex1_answers) {
+        try { localStorage.setItem('attune_ex1_progress', JSON.stringify(profile.ex1_progress)); } catch {}
+      }
+      if (profile?.ex2_progress && !profile?.ex2_answers) {
+        try { localStorage.setItem('attune_ex2_progress', JSON.stringify(profile.ex2_progress)); } catch {}
+      }
+      if (profile?.ex3_progress && !profile?.ex3_answers) {
+        try { localStorage.setItem('attune_ex3_progress', JSON.stringify(profile.ex3_progress)); } catch {}
+      }
       if (profile?.budget_data) {
         try { localStorage.setItem('attune_budget', JSON.stringify(profile.budget_data)); } catch {}
       }
@@ -9564,6 +9688,47 @@ function PartnerBExerciseFlow({ account, onComplete }) {
 // PARTNER B COMPLETION SCREEN — exercises done, waiting or ready
 // ─────────────────────────────────────────────────────────────────────────────
 function PartnerBCompletionScreen({ partnerAName, partnerBName, partnerADone }) {
+  // ── Fire results_viewed email to Partner B (Issue 5.6) ─────────────────
+  // The standard results-viewed email only fires for the user who SEES the
+  // results page (Partner A in the unified model). Partner B sees this
+  // completion screen instead. Without this effect Partner B never gets a
+  // notification that the results are ready.
+  React.useEffect(() => {
+    if (!partnerADone) return;
+    const fired = (() => { try { return localStorage.getItem('attune_results_email_sent'); } catch { return null; } })();
+    if (fired) return;
+    try { localStorage.setItem('attune_results_email_sent', '1'); } catch {}
+    (async () => {
+      try {
+        const acct = (() => { try { return JSON.parse(localStorage.getItem('attune_account') || 'null'); } catch { return null; } })();
+        if (!acct?.email) return;
+        // Find pkg flags from order/account so the upsell block matches
+        // what Partner B already has access to
+        const ord = (() => { try { return JSON.parse(localStorage.getItem('attune_order') || 'null'); } catch { return null; } })();
+        await fetch('/api/send-email', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            type: 'results_viewed',
+            userId: acct.id || null,
+            toEmail: acct.email,
+            toName: acct.name || partnerBName || '',
+            partnerName: acct.partnerName || partnerAName || '',
+            // Partner B can't see the couple type until they sign in on
+            // Partner A's device, so leave it out of subject line
+            coupleType: '',
+            portalUrl: window.location.origin + '/app',
+            hasReflection: !!(ord?.addon_reflection || acct?.pkg === 'anniversary' || acct?.pkg === 'premium'),
+            hasBudget: !!(ord?.addon_budget || acct?.pkg === 'newlywed' || acct?.pkg === 'premium'),
+            hasLMFT: !!(ord?.addon_lmft || acct?.pkg === 'premium'),
+          }),
+        });
+      } catch (e) {
+        console.warn('[Attune] partner-B results email failed:', e);
+      }
+    })();
+  }, [partnerADone, partnerAName, partnerBName]);
+
   return (
     <div style={{ minHeight: '100vh', background: '#1e1a35', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '2rem 1.25rem' }}>
       <link href={FONT_LINK} rel="stylesheet" />
@@ -10295,6 +10460,11 @@ export default function App() {
               if (profile?.ex1_answers_prior)  localStorage.setItem('attune_ex1_prior', JSON.stringify({ answers: profile.ex1_answers_prior, at: profile.ex1_prior_completed_at }));
               if (profile?.ex2_answers_prior)  localStorage.setItem('attune_ex2_prior', JSON.stringify({ answers: profile.ex2_answers_prior, at: profile.ex2_prior_completed_at }));
               if (profile?.ex3_answers_prior)  localStorage.setItem('attune_ex3_prior', JSON.stringify({ answers: profile.ex3_answers_prior, at: profile.ex3_prior_completed_at }));
+              // Mid-exercise progress (Issue 3.5) — only restore when the
+              // exercise isn't yet completed
+              if (profile?.ex1_progress && !profile?.ex1_answers) localStorage.setItem('attune_ex1_progress', JSON.stringify(profile.ex1_progress));
+              if (profile?.ex2_progress && !profile?.ex2_answers) localStorage.setItem('attune_ex2_progress', JSON.stringify(profile.ex2_progress));
+              if (profile?.ex3_progress && !profile?.ex3_answers) localStorage.setItem('attune_ex3_progress', JSON.stringify(profile.ex3_progress));
               if (profile?.budget_data)        localStorage.setItem('attune_budget', JSON.stringify(profile.budget_data));
               if (profile?.checklist_data)     localStorage.setItem('attune_checklist', JSON.stringify(profile.checklist_data));
               if (profile?.notes_data)         localStorage.setItem('attune_notes', JSON.stringify(profile.notes_data));
