@@ -1596,11 +1596,15 @@ function GiftSignupForm({ myName, theirName, theirEmail, pkg, orderId, onCreateA
       if (hasSupabase()) {
         const { data: authData, error: authErr } = await sb.auth.signUp({ email: email.trim().toLowerCase(), password, options: { data: { name: myName }, emailRedirectTo: `${window.location.origin}/app` } });
         if (authErr) { setLoading(false); return setErr(authErr.message); }
-        await sb.from('profiles').upsert({
-          id: authData.user.id, name: myName, partner_name: theirName || '',
-          partner_email: theirEmail || '', email_opt_in: true, invite_code: inviteCode,
-          partner_joined: false, pkg: pkg || 'core', profile_setup_complete: false,
-        });
+        await fetch('/api/create-profile', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            userId: authData.user.id, name: myName, partnerName: theirName || '',
+            partnerEmail: theirEmail || '', emailOptIn: true, inviteCode,
+            pkg: pkg || 'core',
+          }),
+        }).catch(() => {});
         // Mark order as claimed
         if (orderId) {
           await sb.from('orders').update({ claimed: true, buyer_email: email.trim().toLowerCase() }).eq('order_num', orderId).catch(() => {});
@@ -8528,30 +8532,38 @@ function AuthModal({ mode, onClose, onSuccess }) {
       });
       if (authErr) { setLoading(false); return setErr(authErr.message); }
 
-      // Write profile fields that aren't in auth metadata
+      // Write profile fields that aren't in auth metadata.
+      // Uses /api/create-profile (service role) instead of a direct
+      // supabase write because when "Confirm email" is ON in Supabase,
+      // auth.signUp() returns a user but no session — and the RLS
+      // policy on profiles requires auth.uid() = id for inserts.
+      // Without a session that check fails silently.
       const inviteCode = genInvite();
-      await sb.from('profiles').upsert({
-        id:               authData.user.id,
-        name:             form.name.trim(),
-        pronouns:         form.pronouns.trim() || "",
-        partner_name:     form.partnerName.trim() || "",
-        partner_pronouns: form.partnerPronouns.trim() || "",
-        partner_email:    form.partnerEmail.trim().toLowerCase() || "",
-        email_opt_in:     form.emailOptIn,
-        invite_code:      inviteCode,
-        partner_joined:   false,
-        pkg:              new URLSearchParams(window.location.search).get("pkg") || "core",
-        ex1_answers:      null,
-        ex2_answers:      null,
-        ex3_answers:      null,
-        // Optional demographics. Nulls preserve "prefer not to say" semantics.
-        age_range:            form.ageRange || null,
-        gender:               form.gender || null,
-        relationship_status:  form.relationshipStatus || null,
-        relationship_length:  form.relationshipLength || null,
-        children:             form.children || null,
-        signup_source:        form.signupSource || null,
-      });
+      try {
+        await fetch('/api/create-profile', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            userId:              authData.user.id,
+            name:                form.name.trim(),
+            pronouns:            form.pronouns.trim() || "",
+            partnerName:         form.partnerName.trim() || "",
+            partnerPronouns:     form.partnerPronouns.trim() || "",
+            partnerEmail:        form.partnerEmail.trim().toLowerCase() || "",
+            emailOptIn:          form.emailOptIn,
+            inviteCode,
+            pkg:                 new URLSearchParams(window.location.search).get("pkg") || "core",
+            ageRange:            form.ageRange || null,
+            gender:              form.gender || null,
+            relationshipStatus:  form.relationshipStatus || null,
+            relationshipLength:  form.relationshipLength || null,
+            children:            form.children || null,
+            signupSource:        form.signupSource || null,
+          }),
+        });
+      } catch (e) {
+        console.warn('[signup] create-profile failed (will retry on next login):', e);
+      }
 
       const account = {
         id: authData.user.id,
@@ -9135,32 +9147,35 @@ function PartnerLandingScreen({ inviteFrom, inviteCode, onCreateAccount }) {
         return;
       }
 
-      // Create the profile row. Partner B does NOT get an invite_code of
-      // their own — they joined via someone else's. partner_name is
-      // populated from the inviter's name so the UI always shows both.
-      const { error: profileErr } = await sb.from('profiles').upsert({
-        id:                   authData.user.id,
-        name:                 form.name.trim(),
-        pronouns:             '',
-        partner_name:         inviteFrom || '',
-        partner_pronouns:     '',
-        partner_email:        '',
-        email_opt_in:         true,
-        invite_code:          null,  // Partner B has no invite of their own
-        partner_joined:       true,  // They've already "joined" by signing up
-        joined_via_invite:    true,
-        pkg:                  null,  // Inherits package visibility through partner
-        ex1_answers:          null,
-        ex2_answers:          null,
-        ex3_answers:          null,
-        age_range:            form.ageRange || null,
-        gender:               form.gender || null,
-        relationship_status:  form.relationshipStatus || null,
-        relationship_length:  form.relationshipLength || null,
-        children:             form.children || null,
-        signup_source:        form.signupSource || null,
-      });
-      if (profileErr) console.warn('[Attune] Partner B profile upsert:', profileErr);
+      // Create the profile row via service-role endpoint (same reason as
+      // Partner A: when email confirmation is ON, no session = RLS blocks
+      // direct upsert). Partner B does NOT get an invite_code of their own.
+      try {
+        await fetch('/api/create-profile', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            userId:              authData.user.id,
+            name:                form.name.trim(),
+            pronouns:            '',
+            partnerName:         inviteFrom || '',
+            partnerPronouns:     '',
+            partnerEmail:        '',
+            emailOptIn:          true,
+            inviteCode:          '',  // Partner B has no invite of their own
+            joinedViaInvite:     true,
+            pkg:                 'core',  // Inherits package via partner link
+            ageRange:            form.ageRange || null,
+            gender:              form.gender || null,
+            relationshipStatus:  form.relationshipStatus || null,
+            relationshipLength:  form.relationshipLength || null,
+            children:            form.children || null,
+            signupSource:        form.signupSource || null,
+          }),
+        });
+      } catch (e) {
+        console.warn('[Attune] Partner B create-profile failed:', e);
+      }
 
       // Link both partners via /api/partner-sync
       try {
@@ -10158,12 +10173,23 @@ export default function App() {
             }
           }
         } else {
-          // No Supabase session. If we have a localStorage account, the
-          // session has expired — clear and bounce them to login.
+          // No Supabase session. Could mean:
+          //  (a) the session expired — clear and bounce to login, OR
+          //  (b) the user just signed up and hasn't confirmed email yet —
+          //      keep their local account so they can navigate around.
+          // Distinguish by account age: freshly created (<15 minutes) =
+          // pending email confirmation, leave alone. Older = expired.
           if (localAcct && localAcct.id) {
-            setAccount(null);
-            try { localStorage.removeItem('attune_account'); } catch {}
-            clearAllUserLocalStorage();
+            const PENDING_CONFIRM_GRACE_MS = 15 * 60 * 1000;
+            const accountAgeMs = Date.now() - (localAcct.createdAt || 0);
+            if (accountAgeMs > PENDING_CONFIRM_GRACE_MS) {
+              setAccount(null);
+              try { localStorage.removeItem('attune_account'); } catch {}
+              clearAllUserLocalStorage();
+            }
+            // Else: leave the account alone. The user is in pending-
+            // confirmation state. Once they click the email link, the
+            // session will appear and the next sync run will reconcile.
           }
         }
 
