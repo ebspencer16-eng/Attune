@@ -87,10 +87,10 @@ async function handlePartnerSync(req) {
     const bId = partnerBId.trim();
     const sb = supabase();
 
-    // Find Partner A by invite code
+    // Find Partner A by invite code (also pull name for the email body)
     const { data: partnerA, error: findErr } = await sb
       .from('profiles')
-      .select('id, partner_profile_id')
+      .select('id, partner_profile_id, name')
       .eq('invite_code', code)
       .maybeSingle();
 
@@ -117,6 +117,46 @@ async function handlePartnerSync(req) {
     if (linkAResult.error || linkBResult.error) {
       const msg = linkAResult.error?.message || linkBResult.error?.message;
       return new Response(JSON.stringify({ ok: false, error: msg }), { status: 500, headers: CORS });
+    }
+
+    // Notify Partner A that Partner B just signed up (Issue 4.9).
+    // Previously this fired when Partner B FINISHED their exercises, which
+    // didn't match the email body ("X just created their account").
+    // Best-effort — failure here doesn't fail the link operation.
+    try {
+      // Partner A's email lives in auth.users, not profiles. Use the admin API.
+      const { data: authA } = await sb.auth.admin.getUserById(partnerA.id);
+      const partnerAEmail = authA?.user?.email;
+      const partnerAName  = partnerA.name || authA?.user?.user_metadata?.name || 'there';
+
+      // Partner B's name comes from auth.users (set during sign-up).
+      const { data: authB } = await sb.auth.admin.getUserById(bId);
+      const partnerBName = authB?.user?.user_metadata?.name || 'Your partner';
+
+      // Respect Partner A's email_opt_in preference
+      const { data: partnerAProfile } = await sb.from('profiles')
+        .select('email_opt_in').eq('id', partnerA.id).maybeSingle();
+      const optedOut = partnerAProfile && partnerAProfile.email_opt_in === false;
+
+      if (partnerAEmail && !optedOut) {
+        // Fire-and-forget. We don't await on the response — link should
+        // return promptly so the client can navigate.
+        const siteUrl = process.env.SITE_URL || 'https://attune-relationships.com';
+        fetch(`${siteUrl}/api/send-email`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            type: 'partner_joined_notification',
+            userId: partnerA.id,
+            toEmail: partnerAEmail,
+            toName: partnerAName,
+            partnerName: partnerBName,
+            portalUrl: `${siteUrl}/app`,
+          }),
+        }).catch(e => console.warn('[partner-sync] notify partner_joined failed:', e));
+      }
+    } catch (e) {
+      console.warn('[partner-sync] partner_joined notification setup failed:', e);
     }
 
     return new Response(JSON.stringify({ ok: true, partnerAId: partnerA.id }), { status: 200, headers: CORS });

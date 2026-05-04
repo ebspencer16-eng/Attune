@@ -519,6 +519,35 @@ export default async function handler(req) {
     email.to = body.toEmail;
   } else if (type === 'welcome_account') {
     if (!body.toEmail) return new Response('Missing toEmail', { status: 400 });
+    // Server-side dedup so first-dashboard-view triggering doesn't double-fire
+    // on rapid re-renders or refreshes. Same pattern as results_viewed.
+    const supabaseUrl = process.env.SUPABASE_URL;
+    const serviceKey  = process.env.SUPABASE_SERVICE_KEY;
+    if (supabaseUrl && serviceKey && userId) {
+      try {
+        const r = await fetch(
+          `${supabaseUrl}/rest/v1/profiles?id=eq.${userId}&welcome_email_sent_at=is.null`,
+          {
+            method: 'PATCH',
+            headers: {
+              'Content-Type': 'application/json',
+              'apikey': serviceKey,
+              'Authorization': `Bearer ${serviceKey}`,
+              'Prefer': 'return=representation',
+            },
+            body: JSON.stringify({ welcome_email_sent_at: new Date().toISOString() }),
+          }
+        );
+        const rows = await r.json().catch(() => []);
+        if (!Array.isArray(rows) || rows.length === 0) {
+          // Already sent. Skip silently.
+          return new Response(JSON.stringify({ ok: true, deduped: true }), { status: 200, headers: { 'Content-Type': 'application/json' } });
+        }
+      } catch (e) {
+        console.warn('[send-email] welcome_account dedup check failed:', e);
+        // Fall through and send.
+      }
+    }
     email = welcomeAccountEmail(body);
     email.to = body.toEmail;
   } else if (type === 'partner_joined_notification') {

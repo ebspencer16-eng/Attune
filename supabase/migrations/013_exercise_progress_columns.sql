@@ -22,7 +22,11 @@ ALTER TABLE public.profiles
   ADD COLUMN IF NOT EXISTS ex2_completed     boolean DEFAULT false,
   ADD COLUMN IF NOT EXISTS ex1_completed_at  timestamptz,
   ADD COLUMN IF NOT EXISTS ex2_completed_at  timestamptz,
-  ADD COLUMN IF NOT EXISTS ex3_completed_at  timestamptz;
+  ADD COLUMN IF NOT EXISTS ex3_completed_at  timestamptz,
+  -- Issue 2.6: welcome email is now triggered on first dashboard view
+  -- (after email confirmation) instead of at signup. Server-side dedup flag
+  -- so refreshes don't double-fire — same pattern as results_email_sent_at.
+  ADD COLUMN IF NOT EXISTS welcome_email_sent_at timestamptz;
 
 -- Backfill ex1_completed / ex2_completed from existing answer data so
 -- already-completed users don't show as incomplete after this migration.

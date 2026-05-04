@@ -370,3 +370,50 @@ Several of these only manifest when a specific feature is exercised:
 - 7.13 needed someone to use BETA-CORE-1 → tax line wrong on the preview
 
 The pattern across all of them: error swallowed by `try/catch` or `.catch(() => {})` with no observability. Recommend adding Sentry breadcrumb or console.error for any swallowed exception, even non-blocking ones, so future bugs of this shape surface in monitoring.
+
+---
+
+## Resolution of flagged-only items
+
+After completing Sections 1–7 audit, all 18 flagged items reviewed and addressed.
+
+### Fixed in commit 2bac287
+
+| # | Issue | Resolution |
+|---|---|---|
+| 4.8 | Pending-confirm cross-device save gap | New `/api/save-exercise` service-role endpoint with two auth modes (Bearer or pending-confirm). `saveExerciseWithRetakeSnapshot` now falls back to this endpoint on RLS errors. |
+| 3.5 | Mid-exercise progress not synced cross-device | New `syncProgressCrossDevice` helper, debounced 1.5s, writes to `profiles.ex{N}_progress` jsonb columns. Wired into ex1, ex2, ex3 progress saves. Hydration on sign-in restores progress for incomplete exercises. |
+| 5.6 | Partner B never receives results-ready email | `PartnerBCompletionScreen` now fires `results_viewed` email when `partnerADone` becomes true. Same dedup key prevents double-fires. |
+| 5.8 | `getCoupleTypeNew` silent fallback | Now logs `console.error` + reports to Sentry when no pairing matches. Still returns the fallback so UI doesn't crash. |
+
+### Fixed in current commit (pending push)
+
+| # | Issue | Resolution |
+|---|---|---|
+| 2.6 | Welcome email fired before email confirmation | Now fires on first dashboard view (where confirmation is guaranteed). Server-side dedup via `welcome_email_sent_at` profile column matches the `results_email_sent_at` pattern. |
+| 3.7 | calcDimScores expected 5 questions per dim | Updated to actual question IDs: 3 per dim, except `closeness` (1). Question count comment + dim aggregation now match `PERSONALITY_QUESTIONS`. |
+| 5.2 | Type assignment with all-3s answers → "The Initiator" | `computeIndividualType` now also returns `lowConfidence` flag based on stdDev across dimensions + nearMidpoint check on axis scores. Threshold of 0.3 is a starting value for LMFT to tune. |
+| 2.3 | `email_opt_in \|\| false` masked actual `false` | Now `typeof === 'boolean' ? value : true` so missing field defaults to opt-in but explicit `false` is preserved. |
+| 4.5 | Confusing self-invite error | Improved message: directs user to sign in via main page, not the invite link, so they don't get logged in as their partner. |
+| 4.9 | partner_joined email body says "joined" but trigger was "completed" | Trigger moved server-side to `/api/partner-sync` link action. Fires when Partner B actually signs up + links, not when they finish exercises. Email body now matches trigger semantics. |
+| 3.9 | Sarah/James fallback for users with empty names | Demo mode (no account) keeps Sarah/James. Real users with empty names show "You" / "Your partner". |
+| 4.7 | partner_invite fire-and-forget | New `sendEmailWithRetry` helper (3 attempts, exponential backoff, 4xx skipped). Wired into all 4 auto-fire partner_invite call sites + the manual resend. |
+| 2.7 | qr-claim fire-and-forget | New `claimQrTokenWithRetry` helper. Wired into both signup-time qr-claim sites. |
+| 3.1 | Partner A fire-and-forgets exercise saves; Partner B awaits | Partner A's ex1 + ex2 save sites now use `await` to match Partner B. trackedSupabaseWrite's save-failure toast now surfaces consistently. |
+| 3.3 | Same as 3.1 (cross-listed) | Same fix. |
+
+### Acknowledged, not fixed
+
+| # | Issue | Decision |
+|---|---|---|
+| 1.4 | Multi-item cart display only shows first item | Database side fixed (multi-item order linkage). Display side punted to v2 — single-couple use is the common case. |
+| 6.8 | Ex01 retake doesn't trigger workbook regen | Moot — no UI exists for triggering a retake. Reactivate when retake feature is built. |
+| 6.15 | Ex01 + Ex03 retake priors stored but not surfaced | Punted post-launch. Storage already in place; UI cards can be added when paid retakes ship. |
+
+### Methodology TODOs for LMFT review
+
+These items are flagged in code but the final answer is methodology, not engineering:
+
+- 5.2 threshold values (`stdDev < 0.3`, `Math.abs(score - 3) < 0.3`) — placeholder defaults
+- 5.2 surface text for low-confidence results
+- 3.7 `closeness` dimension having only 1 question (cl2)

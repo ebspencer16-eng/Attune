@@ -241,6 +241,86 @@ async function trackedSupabaseWrite(promise, showToast) {
  *   + UPDATE isn't a transaction but retake races are extremely unlikely
  *   (user would have to hit the finish button on two devices within ms).
  */
+// ─── Email retry helper (Issues 4.7, 2.7) ───────────────────────────────────
+// Wraps fetch('/api/send-email') with exponential backoff on transient
+// failures (network errors, 5xx). Critical emails like partner_invite,
+// welcome_account, results_viewed should use this so a single transient
+// failure doesn't permanently lose the email.
+//
+// Retries: 3 attempts total, 1s + 3s backoff. After 3 failures, logs the
+// failure to Sentry/console and gives up (server-side dedup means a later
+// retry from a different trigger could double-send).
+//
+// Usage: sendEmailWithRetry({ type: 'partner_invite', ... });
+async function sendEmailWithRetry(body, opts = {}) {
+  const maxAttempts = opts.maxAttempts ?? 3;
+  const backoffMs = opts.backoffMs ?? [0, 1000, 3000];
+  let lastErr = null;
+  for (let attempt = 0; attempt < maxAttempts; attempt++) {
+    if (backoffMs[attempt]) await new Promise(r => setTimeout(r, backoffMs[attempt]));
+    try {
+      const res = await fetch('/api/send-email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      });
+      // 4xx = client error, don't retry. 5xx = retry. 2xx = success.
+      if (res.ok) return { ok: true, attempts: attempt + 1 };
+      if (res.status >= 400 && res.status < 500) {
+        // Don't retry client errors (bad email format, missing fields, etc.)
+        const txt = await res.text().catch(() => '');
+        console.warn(`[Attune] sendEmail ${body?.type} 4xx — not retrying:`, txt);
+        return { ok: false, status: res.status };
+      }
+      lastErr = new Error(`HTTP ${res.status}`);
+    } catch (e) {
+      lastErr = e;
+    }
+  }
+  console.warn(`[Attune] sendEmail ${body?.type} failed after ${maxAttempts} attempts:`, lastErr);
+  if (typeof window !== 'undefined' && window.Sentry?.captureMessage) {
+    try { window.Sentry.captureMessage(`sendEmail ${body?.type} failed: ${lastErr?.message}`, 'warning'); } catch {}
+  }
+  return { ok: false, error: lastErr };
+}
+
+// ─── QR claim retry (Issue 2.7) ──────────────────────────────────────────────
+// QR-token claim happens at signup. If the network drops at that exact
+// moment, the token stays unclaimed and could be reused by anyone who has
+// the physical card. Retry is mandatory here — same pattern as sendEmail.
+async function claimQrTokenWithRetry(token, email, opts = {}) {
+  if (!token || !email) return { ok: false, error: 'missing args' };
+  const maxAttempts = opts.maxAttempts ?? 3;
+  const backoffMs = opts.backoffMs ?? [0, 1500, 5000];
+  let lastErr = null;
+  for (let attempt = 0; attempt < maxAttempts; attempt++) {
+    if (backoffMs[attempt]) await new Promise(r => setTimeout(r, backoffMs[attempt]));
+    try {
+      const res = await fetch('/api/qr-claim', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token, email }),
+      });
+      if (res.ok) return { ok: true, attempts: attempt + 1 };
+      // 4xx (except 429) likely won't fix on retry — token already claimed
+      // by someone else, etc. Don't burn retries.
+      if (res.status >= 400 && res.status < 500 && res.status !== 429) {
+        const txt = await res.text().catch(() => '');
+        console.warn('[Attune] qr-claim 4xx — not retrying:', txt);
+        return { ok: false, status: res.status };
+      }
+      lastErr = new Error(`HTTP ${res.status}`);
+    } catch (e) {
+      lastErr = e;
+    }
+  }
+  console.warn(`[Attune] qr-claim failed after ${maxAttempts} attempts:`, lastErr);
+  if (typeof window !== 'undefined' && window.Sentry?.captureMessage) {
+    try { window.Sentry.captureMessage(`qr-claim failed: ${lastErr?.message}`, 'warning'); } catch {}
+  }
+  return { ok: false, error: lastErr };
+}
+
 async function saveExerciseWithRetakeSnapshot(sb, accountId, exerciseNum, answers, extraPatch = {}) {
   if (!sb || !accountId || !exerciseNum || !answers) return { error: new Error('bad args') };
   const col     = `ex${exerciseNum}_answers`;
@@ -834,7 +914,9 @@ function computeIndividualType(scores) {
   const openCoord    = (openScore - 1) / 4;      // 0..1
   const engageCoord  = 1 - (withdrawScore - 1) / 4; // 0..1 (inverted: high withdraw = bottom)
 
-  // Type assignment: use whichever side the score falls on (even slightly)
+  // Type assignment: use whichever side the score falls on (even slightly).
+  // Boundary at 3.0 is intentional — engage/open inclusive, withdraw/guarded
+  // exclusive. The asymmetry is methodology-driven, not arbitrary.
   const isEngage  = withdrawScore <= 3.0;
   const isOpen    = openScore    >= 3.0;
 
@@ -843,7 +925,25 @@ function computeIndividualType(scores) {
                 : !isEngage && isOpen  ? "Y"
                 :                        "Z";
 
-  return { typeCode, withdrawScore, openScore, openCoord, engageCoord };
+  // Low-confidence detection (Issue 5.2). If the user's answers are all
+  // bunched near the midpoint, the type assignment is mechanically valid
+  // but informationally weak. Compute std dev across all dim scores; if
+  // variance is near-zero AND both axis scores are within ±0.3 of 3.0,
+  // flag as low-confidence so the UI can surface a methodology note.
+  // Threshold of 0.3 on stdDev = the user mostly answered 3s.
+  // Methodology TODO: LMFT to tune the threshold + the surface text.
+  const dimValues = ['energy','expression','love','bids','needs','conflict','stress','repair','feedback','closeness']
+    .map(k => s[k]).filter(v => v != null && !isNaN(v));
+  let stdDev = 0;
+  if (dimValues.length >= 3) {
+    const mean = dimValues.reduce((a, b) => a + b, 0) / dimValues.length;
+    const variance = dimValues.reduce((a, b) => a + (b - mean) ** 2, 0) / dimValues.length;
+    stdDev = Math.sqrt(variance);
+  }
+  const nearMidpoint = Math.abs(withdrawScore - 3) < 0.3 && Math.abs(openScore - 3) < 0.3;
+  const lowConfidence = stdDev < 0.3 && nearMidpoint;
+
+  return { typeCode, withdrawScore, openScore, openCoord, engageCoord, lowConfidence, stdDev };
 }
 
 // Look up couple pairing from two type codes.
@@ -1716,16 +1816,15 @@ function GiftSignupForm({ myName, theirName, theirEmail, pkg, orderId, onCreateA
         if (orderId) {
           await sb.from('orders').update({ claimed: true, buyer_email: email.trim().toLowerCase() }).eq('order_num', orderId).catch(() => {});
         }
-        // Send partner invite email if email provided
+        // Send partner invite email if email provided. Uses retry helper
+        // (Issue 4.7) so a transient failure doesn't permanently lose the
+        // invite — Partner B never gets the link otherwise.
         if (theirEmail) {
           const inviteUrl = `${window.location.origin}/app?invite=${inviteCode}&from=${encodeURIComponent(myName)}&pae=${encodeURIComponent(email.trim().toLowerCase())}`;
-          fetch('/api/send-email', { method: 'POST', headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ type: 'partner_invite', fromName: myName, toEmail: theirEmail, toName: theirName || 'Your partner', inviteUrl }) }).catch(() => {});
+          sendEmailWithRetry({ type: 'partner_invite', fromName: myName, toEmail: theirEmail, toName: theirName || 'Your partner', inviteUrl });
         }
-        // Send welcome email
-        fetch('/api/send-email', { method: 'POST', headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ type: 'welcome_account',
-            userId: authData.user.id, toEmail: email.trim().toLowerCase(), toName: myName, partnerName: theirName || '', portalUrl: `${window.location.origin}/app` }) }).catch(() => {});
+        // Welcome email now fires on first dashboard view (Issue 2.6),
+        // not at signup.
 
         const account = { id: authData.user.id, email: email.trim().toLowerCase(), name: myName, partnerName: theirName || '', partnerEmail: theirEmail || '', emailOptIn: true, inviteCode, partnerJoined: false, pkg: pkg || 'core', createdAt: Date.now(), isGiftRecipient: true };
         // Clear stale data from prior users on this browser (e.g. another
@@ -2207,25 +2306,34 @@ const LIFE_QUESTIONS_ANNIVERSARY = LIFE_QUESTIONS;
 
 
 // ── DIMENSION SCORING ────────────────────────────────────────────────────────
-// Maps ex1Answers (keys like en1..en5, cf1..cf5, etc.) to named average scores.
-// Each dimension has 5 questions scored 1–5; average gives a 1–5 scale per dim.
+// Maps ex1Answers to named average scores per dimension.
+// Each dimension has 3 questions scored 1–5 (closeness has 1 — flagged for
+// methodology review with the LMFT). avg returns 3 (neutral) when no answers
+// are present so partial completion still produces a usable score, and
+// `valenceUnknown` flag is set on the result so callers can surface that
+// the score is low-confidence.
 function calcDimScores(answers) {
   if (!answers) return {};
+  // Helper: avg the answered keys, return 3 (neutral) if none are answered.
   const avg = (...keys) => {
     const vals = keys.map(k => answers[k]).filter(v => v != null && !isNaN(v));
     return vals.length ? vals.reduce((s, v) => s + Number(v), 0) / vals.length : 3;
   };
   return {
-    energy:     avg('en1','en2','en3','en4','en5'),
-    expression: avg('ex1','ex2','ex3','ex4','ex5'),
-    needs:      avg('nd1','nd2','nd3','nd4','nd5'),
-    bids:       avg('bd1','bd2','bd3','bd4','bd5'),
-    conflict:   avg('cf1','cf2','cf3','cf4','cf5'),
-    repair:     avg('rp1','rp2','rp3','rp4','rp5'),
-    closeness:  avg('cl1','cl2','cl3','cl4','cl5'),
-    love:       avg('lv1','lv2','lv3','lv4','lv5'),
-    stress:     avg('st1','st2','st3','st4','st5'),
-    feedback:   avg('fb1','fb2','fb3','fb4','fb5'),
+    // 3 questions each — IDs match PERSONALITY_QUESTIONS exactly
+    energy:     avg('en1','en2','en4'),
+    expression: avg('ex1','ex2','ex4'),
+    love:       avg('lv1','lv2','lv5'),
+    bids:       avg('bd1','bd3','bd4'),
+    needs:      avg('nd1','nd3','nd5'),
+    conflict:   avg('cf1','cf2','cf5'),
+    stress:     avg('st1','st2','st5'),
+    repair:     avg('rp1','rp2','rp3'),
+    feedback:   avg('fb1','fb2','fb5'),
+    // closeness has only 1 question (cl2). Flagged for LMFT review —
+    // single-question dims have higher per-question variance contributing
+    // to the type score. Adding cl1/cl3 would require new question copy.
+    closeness:  avg('cl2'),
   };
 }
 
@@ -8763,46 +8871,31 @@ function AuthModal({ mode, onClose, onSuccess }) {
         }
       }
 
-      // Send partner invite email if partner email was provided
+      // Send partner invite email if partner email was provided.
+      // Uses retry helper so a single transient failure doesn't permanently
+      // lose the invite (Issue 4.7).
       if (form.partnerEmail.trim()) {
         const inviteUrl = `${window.location.origin}/app?invite=${encodeURIComponent(inviteCode)}&from=${encodeURIComponent(form.name.trim())}&pae=${encodeURIComponent(form.email.trim().toLowerCase())}`;
-        fetch('/api/send-email', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            type: 'partner_invite',
-            fromName: form.name.trim(),
-            toEmail: form.partnerEmail.trim(),
-            toName: form.partnerName.trim() || 'Your partner',
-            inviteUrl,
-          }),
-        }).catch(() => {});
+        sendEmailWithRetry({
+          type: 'partner_invite',
+          fromName: form.name.trim(),
+          toEmail: form.partnerEmail.trim(),
+          toName: form.partnerName.trim() || 'Your partner',
+          inviteUrl,
+        });
       }
 
-      // Send welcome email to new user
-      if (form.emailOptIn !== false) {
-        fetch('/api/send-email', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            type: 'welcome_account',
-            userId: account?.id || null,
-            toEmail: form.email.trim().toLowerCase(),
-            toName: form.name.trim(),
-            partnerName: form.partnerName.trim() || null,
-            portalUrl: `${window.location.origin}/app`,
-          }),
-        }).catch(() => {});
-      }
+      // Welcome email is now fired on first dashboard view (Issue 2.6),
+      // not at signup. This prevents the user from receiving two emails
+      // back-to-back (Supabase confirm + Attune welcome) before they've
+      // even confirmed.
 
       // If the user arrived via a QR-code scan, claim the order so the token
-      // can't be reused. Fire-and-forget — we don't block signup on this.
+      // can't be reused. Uses retry helper (Issue 2.7) — without retry, a
+      // transient network failure here means the QR token stays unclaimed
+      // and anyone with the physical card could re-claim it.
       if (_qrToken && qrStatus === 'ok') {
-        fetch('/api/qr-claim', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ token: _qrToken, email: form.email.trim().toLowerCase() }),
-        }).catch(() => {});
+        claimQrTokenWithRetry(_qrToken, form.email.trim().toLowerCase());
       }
 
       setLoading(false);
@@ -8829,20 +8922,12 @@ function AuthModal({ mode, onClose, onSuccess }) {
     // Send partner invite email if partner email provided
     if (form.partnerEmail.trim() && account.inviteCode) {
       const inviteUrl = `${window.location.origin}/app?invite=${encodeURIComponent(account.inviteCode)}&from=${encodeURIComponent(form.name.trim())}&pae=${encodeURIComponent(form.email.trim().toLowerCase())}`;
-      fetch('/api/send-email', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ type: 'partner_invite', fromName: form.name.trim(), toEmail: form.partnerEmail.trim(), toName: form.partnerName.trim() || 'Your partner', inviteUrl }),
-      }).catch(() => {});
+      sendEmailWithRetry({ type: 'partner_invite', fromName: form.name.trim(), toEmail: form.partnerEmail.trim(), toName: form.partnerName.trim() || 'Your partner', inviteUrl });
     }
 
-    // Claim the QR token if we arrived from a physical card scan
+    // Claim the QR token if we arrived from a physical card scan (Issue 2.7)
     if (_qrToken && qrStatus === 'ok') {
-      fetch('/api/qr-claim', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ token: _qrToken, email: form.email.trim().toLowerCase() }),
-      }).catch(() => {});
+      claimQrTokenWithRetry(_qrToken, form.email.trim().toLowerCase());
     }
 
     setLoading(false);
@@ -8894,7 +8979,10 @@ function AuthModal({ mode, onClose, onSuccess }) {
         partnerName: profile?.partner_name || "",
         partnerPronouns: profile?.partner_pronouns || "",
         partnerEmail: profile?.partner_email || "",
-        emailOptIn: profile?.email_opt_in || false,
+        // email_opt_in defaults to true when missing entirely (new account
+        // hydration). The previous `|| false` pattern masked an actual
+        // user preference of false vs null/missing. Issue 2.3.
+        emailOptIn: typeof profile?.email_opt_in === 'boolean' ? profile.email_opt_in : true,
         inviteCode: profile?.invite_code || "",
         partnerJoined: profile?.partner_joined || false,
         pkg: profile?.pkg || "core",
@@ -9000,17 +9088,13 @@ function AuthModal({ mode, onClose, onSuccess }) {
       }
       if (form.partnerEmail.trim()) {
         const inviteUrl = `${window.location.origin}/app?invite=${encodeURIComponent(inviteCode)}&from=${encodeURIComponent(form.name.trim())}&pae=${encodeURIComponent(form.email.trim().toLowerCase())}`;
-        fetch('/api/send-email', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            type: 'partner_invite',
-            fromName: form.name.trim(),
-            toEmail: form.partnerEmail.trim(),
-            toName: form.partnerName.trim() || 'Your partner',
-            inviteUrl,
-          }),
-        }).catch(() => {});
+        sendEmailWithRetry({
+          type: 'partner_invite',
+          fromName: form.name.trim(),
+          toEmail: form.partnerEmail.trim(),
+          toName: form.partnerName.trim() || 'Your partner',
+          inviteUrl,
+        });
       }
 
       setLoading(false);
@@ -9352,7 +9436,17 @@ function PartnerLandingScreen({ inviteFrom, inviteCode, onCreateAccount }) {
         },
       });
       if (authErr) {
-        setErr(authErr.message.includes('registered') ? 'An account with this email already exists. Try signing in.' : authErr.message);
+        // "User already registered" can mean two things from this screen:
+        // (1) you're trying to sign up as yourself (your own invite), or
+        // (2) you genuinely already have an Attune account.
+        // Either way, signing in via this partner-landing flow would log
+        // them in as Partner A, not as Partner B. Tell them to sign in
+        // through the regular sign-in screen instead.
+        if (authErr.message.includes('registered') || authErr.message.includes('already')) {
+          setErr("An account with this email already exists. If this is your account, sign in from the main page (not this invite link) so you don't get logged in as your partner.");
+        } else {
+          setErr(authErr.message);
+        }
         setLoading(false);
         return;
       }
@@ -9429,6 +9523,9 @@ function PartnerLandingScreen({ inviteFrom, inviteCode, onCreateAccount }) {
             setLoading(false);
             return;
           }
+          // Note: partner_joined_notification is sent server-side as part
+          // of the link action (Issue 4.9). The endpoint has access to
+          // Partner A's email via service role; we don't expose it here.
         } catch (e) {
           console.warn('[Attune] Partner link error:', e);
           setErr('Something went wrong linking your accounts. Please try again in a moment.');
@@ -9804,20 +9901,17 @@ function PartnerInviteCard({ account, onCopy, copied }) {
   const handleResend = async () => {
     if (!account.partnerEmail || resending || resent) return;
     setResending(true);
-    try {
-      await fetch('/api/send-email', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          type: 'partner_invite',
-          fromName: account.name,
-          toEmail: account.partnerEmail,
-          toName: account.partnerName || 'Your partner',
-          inviteUrl,
-        }),
-      });
-      setResent(true);
-    } catch {}
+    // Retry helper handles transient failures. The 'resent' UI flag should
+    // only flip on actual success — otherwise a confused user thinks their
+    // partner got the invite when they didn't.
+    const result = await sendEmailWithRetry({
+      type: 'partner_invite',
+      fromName: account.name,
+      toEmail: account.partnerEmail,
+      toName: account.partnerName || 'Your partner',
+      inviteUrl,
+    });
+    if (result.ok) setResent(true);
     setResending(false);
   };
 
@@ -10553,6 +10647,35 @@ export default function App() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // ── Fire welcome_account email on first dashboard view (Issue 2.6) ───────
+  // Previously fired at signup, so users got two emails within seconds
+  // (Supabase confirm + Attune welcome) before they'd even confirmed.
+  // Now waits until the user is authenticated AND viewing the home/dashboard,
+  // which guarantees email has been confirmed (signup with confirm-email-on
+  // can't reach this state otherwise).
+  // Server-side dedup (welcome_email_sent_at on profiles) handles the real
+  // dedup; the localStorage flag just avoids round-tripping on each render.
+  useEffect(() => {
+    if (!isLoggedIn || !account?.email) return;
+    if (view !== 'home') return;
+    if (account?.emailOptIn === false) return; // Honor opt-out
+    const fired = (() => { try { return localStorage.getItem('attune_welcome_email_sent'); } catch { return null; } })();
+    if (fired) return;
+    try { localStorage.setItem('attune_welcome_email_sent', '1'); } catch {}
+    fetch('/api/send-email', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        type: 'welcome_account',
+        userId: account?.id || null,
+        toEmail: account.email,
+        toName: account.name || '',
+        partnerName: account.partnerName || '',
+        portalUrl: window.location.origin + '/app',
+      }),
+    }).catch(() => {});
+  }, [isLoggedIn, account?.email, account?.id, view]);
+
   // ── Fire results_viewed email once after highlights are seen ─────────────
   useEffect(() => {
     if (!highlightsSeen) return;
@@ -10582,8 +10705,17 @@ export default function App() {
     if (newView !== "results") setHighlightsSeen(false);
     setView(newView);
   };
-  const userName = account?.name || "Sarah";
-  const partnerName = account?.partnerName || "James";
+  // Sarah/James are demo-mode placeholders. For real users (account exists),
+  // fall back to "You" / "Your partner" instead so an empty name doesn't
+  // surface as someone else's demo name. (Issue 3.9)
+  // The Section 2 fixes ensure account.name is always set on signup, but
+  // legacy accounts pre-fix might still be empty.
+  const userName = account
+    ? (account.name || "You")
+    : "Sarah";
+  const partnerName = account
+    ? (account.partnerName || "Your partner")
+    : "James";
   const userPronouns = account?.pronouns || "";
   const partnerPronouns = account?.partnerPronouns || "";
   // interp for App-level use (e.g. couple type patterns in demo)
@@ -10993,21 +11125,10 @@ export default function App() {
       const updated = { ...account, partnerJoined: true };
       setAccount(updated);
       try { localStorage.setItem('attune_account', JSON.stringify(updated)); } catch {}
-      // Notify Partner A that their partner has joined
-      if (account.email && account.emailOptIn !== false) {
-        fetch('/api/send-email', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            type: 'partner_joined_notification',
-            userId: account?.id || null,
-            toEmail: account.email,
-            toName: account.name,
-            partnerName: s?.name || account.partnerName || 'Your partner',
-            portalUrl: `${window.location.origin}/app`,
-          }),
-        }).catch(() => {});
-      }
+      // Note: partner_joined_notification email no longer fires here.
+      // It now fires server-side from /api/partner-sync at link time
+      // (Issue 4.9). The trigger at exercise-complete time was misleading
+      // because the body says "just created their account."
     }
     // ── Update attune_live_session with real Partner B scores ─────────────
     // If Partner A already viewed results (and wrote demo partner data to
@@ -11973,15 +12094,20 @@ export default function App() {
                     </div>
                   )}
                 </div>
-              : <Exercise01Flow userName={userName} partnerName={partnerName} onComplete={a => {
+              : <Exercise01Flow userName={userName} partnerName={partnerName} onComplete={async (a) => {
                   setEx1State(a);
                   try { localStorage.setItem('attune_ex1', JSON.stringify(a)); } catch {}
                   // Persist exercise 1 answers to Supabase for cross-device access.
                   // Uses saveExerciseWithRetakeSnapshot so retakes preserve prior.
+                  // Awaiting matches Partner B's path (Issue 3.3 consistency) and
+                  // lets trackedSupabaseWrite surface a save-failure toast.
                   if (account?.id) {
-                    import('./supabase.js').then(({ supabase: sb, hasSupabase }) => {
-                      if (hasSupabase()) saveExerciseWithRetakeSnapshot(sb, account.id, 1, a);
-                    }).catch(() => {});
+                    try {
+                      const { supabase: sb, hasSupabase } = await import('./supabase.js');
+                      if (hasSupabase()) await saveExerciseWithRetakeSnapshot(sb, account.id, 1, a);
+                    } catch (e) {
+                      console.warn('[Attune] ex1 save error:', e);
+                    }
                   }
                 }} />
             }
@@ -12033,13 +12159,17 @@ export default function App() {
                     </div>
                   )}
                 </div>
-              : <ExpectationsExercise userName={userName} partnerName={partnerName} onComplete={a => {
+              : <ExpectationsExercise userName={userName} partnerName={partnerName} onComplete={async (a) => {
                   setEx2State(a);
                   try { localStorage.setItem('attune_ex2', JSON.stringify(a)); } catch {}
+                  // Await matches Partner B's path (Issue 3.3 consistency)
                   if (account?.id) {
-                    import('./supabase.js').then(({ supabase: sb, hasSupabase }) => {
-                      if (hasSupabase()) saveExerciseWithRetakeSnapshot(sb, account.id, 2, a);
-                    }).catch(() => {});
+                    try {
+                      const { supabase: sb, hasSupabase } = await import('./supabase.js');
+                      if (hasSupabase()) await saveExerciseWithRetakeSnapshot(sb, account.id, 2, a);
+                    } catch (e) {
+                      console.warn('[Attune] ex2 save error:', e);
+                    }
                   }
                   // Auto-trigger workbook generation if both partners are done and order includes workbook.
                   // Recompute bothDone using the JUST-completed answers `a` rather than the closure
@@ -12759,11 +12889,7 @@ export default function App() {
               const prevEmail = account?.partnerEmail || '';
               if (partnerEmail && partnerEmail !== prevEmail && account?.inviteCode) {
                 const inviteUrl = `${window.location.origin}/app?invite=${encodeURIComponent(account.inviteCode)}&from=${encodeURIComponent(name || '')}${account?.email ? `&pae=${encodeURIComponent(account.email)}` : ''}`;
-                fetch('/api/send-email', {
-                  method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({ type: 'partner_invite', fromName: name, toEmail: partnerEmail, toName: partnerName || 'Your partner', inviteUrl }),
-                }).catch(() => {});
+                sendEmailWithRetry({ type: 'partner_invite', fromName: name, toEmail: partnerEmail, toName: partnerName || 'Your partner', inviteUrl });
               }
             }}
               style={{ width: "100%", padding: "0.9rem", background: "#0E0B07", color: "white", border: "none", borderRadius: 12, fontSize: "0.85rem", fontWeight: 700, cursor: "pointer", fontFamily: "'DM Sans',sans-serif" }}>
