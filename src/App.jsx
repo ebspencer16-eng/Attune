@@ -490,7 +490,7 @@ function ExpectationsExercise({ partnerName, userName = "Partner A", onComplete,
       <style>{'@keyframes fadeIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}'}</style>
       <p style={{ fontSize: "0.62rem", letterSpacing: "0.2em", textTransform: "uppercase", color: "#1B5FE8", marginBottom: "1.25rem", fontFamily: font.body }}>Exercise 02 . What You Expect</p>
       <h2 style={{ fontFamily: font.display, fontSize: "clamp(2rem,5vw,2.8rem)", fontWeight: 700, color: C.ink, lineHeight: 1.1, marginBottom: "1.5rem" }}>
-        All frustrations in a relationship<br /><em style={{ fontStyle: "italic", color: "#1B5FE8" }}>trace back to an unmet expectation.</em>
+        Relationship frustrations frequently<br /><em style={{ fontStyle: "italic", color: "#1B5FE8" }}>trace back to an unmet expectation,</em><br />whether conscious or not.
       </h2>
       <p style={{ fontSize: "0.95rem", color: C.muted, lineHeight: 1.85, fontFamily: font.body, fontWeight: 300, marginBottom: "1.75rem" }}>
         {isRevisited
@@ -4395,7 +4395,7 @@ const ANNIVERSARY_QUESTIONS = [
   // Looking forward — priorities first, then 6mo, then honest reflection, then 5yr
   { id: "a_priority", category: "Looking Forward", type: "rank", text: "Rank these from most to least important to invest in together this year:", options: ["Quality time","Communication","Financial alignment","Physical intimacy","Shared adventures","Long-term planning"] },
   { id: "a6", category: "Looking Forward", type: "text", text: "One thing I want to work on, in the next 6 months, in how I show up for you:", placeholder: "e.g. Being more present, saying what I need directly, making more time for us..." },
-  { id: "a7", category: "Looking Forward", type: "text", text: "Something we handled less well than I'd have liked — I wish we'd approached it differently:", placeholder: "e.g. A disagreement we got stuck on, a decision we made without fully talking it through..." },
+  { id: "a7", category: "Looking Forward", type: "text", text: "Something I wish we'd approached differently:", placeholder: "e.g. A disagreement we got stuck on, a decision we made without fully talking it through..." },
   { id: "a5", category: "Looking Forward", type: "text", text: "Where I see us in 5 years, what matters most to me about that picture:", placeholder: "e.g. Financially stable and adventurous, close to family, in a home we love..." },
   // What matters — gratitude and intention, ends the exercise on a high note
   { id: "a3", category: "What Matters", type: "text", text: "The part of our relationship I'm most grateful for:", placeholder: "e.g. How you make me feel safe, the way we laugh together, the life we've built..." },
@@ -4747,8 +4747,8 @@ const CHECKLIST_AREAS = [
     id: "estate", label: "Estate Basics", icon: "📋", color: "#F59E0B",
     items: [
       {
-        text: "Create or update your wills",
-        description: "Simple wills are inexpensive and usually fine for young couples. Services like FreeWill or Trust & Will are popular; a local estate attorney is worth it if you have significant assets or complex family.",
+        text: "Create or update your will",
+        description: "Simple wills are inexpensive and usually fine for young couples. Services like FreeWill or Trust & Will are popular; a local estate attorney is worth it if you have significant assets or complex family situations.",
         links: [
           { label: "FreeWill", url: "https://www.freewill.com/" },
         ],
