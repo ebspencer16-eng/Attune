@@ -83,41 +83,49 @@ const HFONT = "'Playfair Display', Georgia, serif";
 const FONT_URL = "https://fonts.googleapis.com/css2?family=Syne:wght@700;800;900&family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600&display=swap";
 
 
+// PERSONALITY_QUESTIONS — Communication Exercise (Exercise 01)
+//
+// 28 questions across 10 dimensions. 5-point scale (Strongly A → Strongly B).
+// Order is intentional: pairs of similar questions are spaced apart, and a
+// few are framed as scenarios to break repetitive patterns. Several dims
+// use non-sequential IDs (en1/en2/en4, lv1/lv2/lv5, etc) — the gaps are
+// historical and stable. calcDimScores, retake snapshots, and the workbook
+// generator all reference these IDs by name.
 const PERSONALITY_QUESTIONS = [
-  // ── Chapter 1: How you're wired (9) — energy, expression, love, closeness ──
+  // ── Chapter 1: How You're Wired (9) — energy, expression, love, closeness ──
   { id:"en1", dimension:"energy",     text:"After a long week, you reset by:", a:"Time alone. Quiet is what restores you.", b:"Being with people you love. Connection is what recharges you." },
   { id:"ex1", dimension:"expression", text:"When you're upset, you tend to:", a:"Go quiet. You process internally before you're ready to share.", b:"Let it show. Your partner usually knows exactly how you're feeling." },
-  { id:"lv1", dimension:"love",       text:"You feel most loved when your partner:", a:"Tells you. Words — spoken or written, specific and sincere — land most deeply.", b:"Shows you. Presence, touch, acts of care, and shared time speak louder than words." },
-  { id:"en2", dimension:"energy",     text:"When you're working through something hard, you tend to:", a:"Think it through privately first, then share once you've landed somewhere.", b:"Talk it out. Saying it aloud is how you figure out what you think." },
-  { id:"ex2", dimension:"expression", text:"Emotional openness in a relationship means:", a:"Sharing thoughtfully — not everything needs to be said, just the things that matter.", b:"Your partner having access to what's going on inside you, in real time." },
+  { id:"lv1", dimension:"love",       text:"You feel most loved when your partner:", a:"Tells you. Words, spoken or written, specific and sincere, land most deeply.", b:"Shows you. Presence, touch, acts of care, and shared time speak louder than words." },
   { id:"lv2", dimension:"love",       text:"You show love primarily by:", a:"Expressing it, verbally and explicitly.", b:"Doing things. Showing up, making things easier, creating moments of closeness." },
   { id:"cl2", dimension:"closeness",  text:"When it comes to friendships and social lives, you:", a:"Need your own. Separate friendships and pursuits are part of how you stay yourself.", b:"Prefer mostly shared. Doing things together is how you want to spend your time." },
+  { id:"ex2", dimension:"expression", text:"Emotional openness in a relationship means:", a:"Sharing thoughtfully. Not everything needs to be said, just the things that matter.", b:"Your partner having access to what's going on inside you, in real time." },
+  { id:"en2", dimension:"energy",     text:"When working through something hard, you tend to:", a:"Think it through privately first, then share once you've landed somewhere.", b:"Talk it out. Saying it aloud is how you figure out what you think." },
   { id:"en4", dimension:"energy",     text:"When your partner needs alone time, your instinct is:", a:"Respect it immediately.", b:"Check in. Silence can feel like something's wrong." },
   { id:"ex4", dimension:"expression", text:"Your partner being able to read your mood:", a:"Isn't something you expect. You'd rather just say what you need directly.", b:"Matters to you. Being seen without having to explain feels like closeness." },
 
-  // ── Chapter 2: How you connect and what you need (7) — bids, needs, love ──
-  { id:"bd1", dimension:"bids",       text:"Small everyday moments of connection — a squeeze of the hand, a brief check-in, a shared look:", a:"Are nice but not something you track or depend on.", b:"Matter a lot. They're how you feel close day to day." },
-  { id:"nd1", dimension:"needs",      text:"When you need something from your partner, you expect them to:", a:"Wait to be told. You don't expect them to know unless you say so.", b:"Pick up on it. A partner who knows you well should be able to tell." },
+  // ── Chapter 2: How You Connect (7) — bids, love, needs ──
+  { id:"bd1", dimension:"bids",       text:"Small everyday moments of connection, a squeeze of the hand, a brief check-in, a shared look:", a:"Are nice but not something you track or depend on.", b:"Matter a lot. They're how you feel close day to day." },
   { id:"lv5", dimension:"love",       text:"In ordinary day-to-day life, you feel closest to your partner when:", a:"You're talking. Conversation is the thread that keeps you close.", b:"You're simply together. Shared presence, physical closeness, doing life side by side." },
-  { id:"bd3", dimension:"bids",       text:"In your relationship, you tend to:", a:"Wait for your partner to initiate small moments of connection.", b:"Reach for connection often — through small gestures, check-ins, or brief touches." },
-  { id:"nd3", dimension:"needs",      text:"Going without something you need rather than asking for it:", a:"Rarely happens. Asking feels natural to you.", b:"Is something you do more than you'd like." },
-  { id:"bd4", dimension:"bids",       text:"When you reach for a small moment of connection and your partner doesn't respond:", a:"You let it go easily. It doesn't stay with you.", b:"You notice. It can leave you feeling a little distant or unseen." },
+  { id:"bd3", dimension:"bids",       text:"In your relationship, you tend to:", a:"Wait for your partner to initiate small moments of connection.", b:"Reach for connection often, through small gestures, check-ins, or brief touches." },
   { id:"nd5", dimension:"needs",      text:"Articulating what you need from a partner feels:", a:"Straightforward. You can usually name it.", b:"Harder than it should be, even when you know something's missing." },
+  { id:"bd4", dimension:"bids",       text:"When you reach for a small moment of connection and your partner doesn't respond:", a:"You let it go easily. It doesn't stay with you.", b:"You notice. It can leave you feeling a little distant or unseen." },
+  { id:"nd3", dimension:"needs",      text:"Going without something you need rather than asking for it:", a:"Rarely happens. Asking feels natural to you.", b:"Is something you do more than you'd like." },
+  { id:"nd1", dimension:"needs",      text:"It's the end of a hard day and something feels off for you, but you haven't said anything. You expect your partner to:", a:"Wait until you bring it up. It's on you to say something when you're ready.", b:"Notice and check in. Someone who knows you well should be able to tell when something's wrong." },
 
-  // ── Chapter 3: When things get hard (6) — conflict, stress ──
+  // ── Chapter 3: When Things Get Hard (6) — conflict, stress ──
   { id:"cf1", dimension:"conflict",   text:"When something feels off between you, you:", a:"Want to address it as soon as possible. Leaving things unresolved sits heavily with you.", b:"Need time before you can engage. Space first, conversation later." },
   { id:"st1", dimension:"stress",     text:"When you're overwhelmed or under real pressure, you:", a:"Go quiet and withdraw. You need space before you can engage with anyone, including your partner.", b:"Reach outward. You become more communicative and need reassurance and contact to regulate." },
-  { id:"cf2", dimension:"conflict",   text:"Once you're in conflict, you tend to:", a:"Stay engaged, even when it's uncomfortable. You'd rather push through than step back.", b:"Need to step away. You can't access your best self when you're activated." },
-  { id:"st2", dimension:"stress",     text:"When you're stressed, what you need most from your partner is:", a:"Space and no pressure to talk. Being left alone to recover is what actually helps.", b:"Presence and acknowledgment. Knowing they're there and that they see it is what helps most." },
   { id:"cf5", dimension:"conflict",   text:"You can engage productively in conflict when:", a:"You feel emotionally safe enough to stay in it. Tone and approach matter a lot to you.", b:"The issue is on the table. You can work through discomfort to get to resolution." },
-  { id:"st5", dimension:"stress",     text:"When you're already stressed, the thing most likely to make it harder is:", a:"Being pushed to talk or engage before you're ready.", b:"Silence or distance from your partner. Feeling like they've withdrawn or stopped trying to reach you." },
+  { id:"st2", dimension:"stress",     text:"When you're stressed, what you need most from your partner is:", a:"Space and no pressure to talk. Being left alone to recover is what actually helps.", b:"Presence and acknowledgment. Knowing they're there and that they see it is what helps most." },
+  { id:"st5", dimension:"stress",     text:"Imagine you're already stretched thin, work is hard, you're behind on everything. Your partner wants to talk through something between you. You:", a:"Need to postpone it. You genuinely can't show up well right now.", b:"Find that talking it through actually helps. Connection is part of how you recover." },
+  { id:"cf2", dimension:"conflict",   text:"When you're in the middle of a difficult conversation with your partner, what matters most is:", a:"That they stay present and keep engaging, even if it's uncomfortable.", b:"That they give you room to step back if you need it, without taking it personally." },
 
-  // ── Chapter 4: Making things right (6) — repair, feedback ──
+  // ── Chapter 4: Making Things Right (6) — repair, feedback ──
   { id:"rp1", dimension:"repair",     text:"When you've upset your partner, your instinct is to:", a:"Address it explicitly. Name what happened and apologize directly.", b:"Show it through actions. Come back with warmth and let that speak." },
   { id:"fb1", dimension:"feedback",   text:"When your partner does something that bothers you, you:", a:"Tend to let it go or hint at it. Direct feedback feels risky or unkind.", b:"Usually say something. You'd rather address it than carry it." },
-  { id:"rp2", dimension:"repair",     text:"When you've been hurt, you feel ready to move forward when:", a:"Your partner has named what happened and shown they understand.", b:"The tension has lifted and things feel okay between you again." },
-  { id:"fb2", dimension:"feedback",   text:"When your partner gives you honest critical feedback, your immediate reaction is:", a:"Defensive. Even when you know they mean well, your first instinct is to push back.", b:"Relatively open. You can usually hear it without feeling attacked, at least initially." },
   { id:"rp3", dimension:"repair",     text:"After a conflict, you need repair to happen:", a:"Relatively quickly. Unresolved tension sitting overnight or longer is hard for you.", b:"When it's ready. You can hold unresolved tension without it consuming you." },
+  { id:"fb2", dimension:"feedback",   text:"When your partner gives you honest critical feedback, your immediate reaction is:", a:"Defensive. Even when you know they mean well, your first instinct is to push back.", b:"Relatively open. You can usually hear it without feeling attacked, at least initially." },
+  { id:"rp2", dimension:"repair",     text:"When you've been hurt, you feel ready to move forward when:", a:"Your partner has named what happened and shown they understand.", b:"The tension has lifted and things feel okay between you again." },
   { id:"fb5", dimension:"feedback",   text:"You can receive feedback from your partner most easily when:", a:"The tone is calm and the timing feels considered. Approach makes all the difference for you.", b:"It's direct and specific. You'd rather have it straight than carefully managed." },
 ];
 

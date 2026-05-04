@@ -26,17 +26,20 @@ export const config = { runtime: 'edge' };
 // ── Scoring helpers (ported from src/App.jsx so the server computes the
 // same values as the client). Keep in sync if scoring logic changes. ──
 
+// 28 questions, 3 per dim except closeness (1). IDs are non-sequential by
+// historical accident (en1/en2/en4 etc); these match the canonical list
+// in PERSONALITY_QUESTIONS in src/App.jsx exactly.
 const DIM_KEYS = {
-  energy:     ['en1','en2','en3','en4','en5'],
-  expression: ['ex1','ex2','ex3','ex4','ex5'],
-  needs:      ['nd1','nd2','nd3','nd4','nd5'],
-  bids:       ['bd1','bd2','bd3','bd4','bd5'],
-  conflict:   ['cf1','cf2','cf3','cf4','cf5'],
-  repair:     ['rp1','rp2','rp3','rp4','rp5'],
-  closeness:  ['cl1','cl2','cl3','cl4','cl5'],
-  love:       ['lv1','lv2','lv3','lv4','lv5'],
-  stress:     ['st1','st2','st3','st4','st5'],
-  feedback:   ['fb1','fb2','fb3','fb4','fb5'],
+  energy:     ['en1','en2','en4'],
+  expression: ['ex1','ex2','ex4'],
+  love:       ['lv1','lv2','lv5'],
+  bids:       ['bd1','bd3','bd4'],
+  needs:      ['nd1','nd3','nd5'],
+  conflict:   ['cf1','cf2','cf5'],
+  stress:     ['st1','st2','st5'],
+  repair:     ['rp1','rp2','rp3'],
+  feedback:   ['fb1','fb2','fb5'],
+  closeness:  ['cl2'],
 };
 
 function calcDimScores(answers) {
