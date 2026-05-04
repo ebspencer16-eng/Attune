@@ -1074,10 +1074,10 @@ const NEW_COUPLE_TYPES = [
     name: "The ignition",
     tagline: "Both reach. Both express. Neither has to go looking for the other.",
     description: "{U} and {P} both move toward resolution and process outward. High warmth and emotional availability in both directions. Neither partner has to coax the other into the conversation or wait for the signal that it's okay to share what's going on.",
-    nuance: "The risk isn't disconnection. It's feedback loops. When both of you are feeling something strongly, the intensity can amplify rather than settle. One of you naming that — 'I think we're feeding each other right now' — is usually enough to break the loop.",
+    nuance: "The risk isn't disconnection. It's feedback loops. When both of you are feeling something strongly, the intensity can amplify rather than settle. One of you naming that, 'I think we're feeding each other right now', is usually enough to break the loop.",
     color: "#E8673A", shade: "#FFF4F0",
     famousDuos: [
-      { names: "Monica & Chandler", show: "Friends", note: "Both put everything into the shared space. The warmth between them was real and visible — and occasionally required one of them to take the temperature down." },
+      { names: "Monica & Chandler", show: "Friends", note: "Both put everything into the shared space. The warmth between them was real and visible, and occasionally required one of them to take the temperature down." },
       { names: "Eric & Tami Taylor", show: "Friday Night Lights", note: "Two people who led with feeling, turned toward each other, and built something real by doing it out loud." },
     ],
     strengths: [
@@ -1087,25 +1087,25 @@ const NEW_COUPLE_TYPES = [
     ],
     stickingPoints: [
       "High expressiveness on both sides can create amplification. When both of you are feeling something intensely, the intensity can feed itself.",
-      "Difficult emotions can land harder than intended — because neither person is holding anything back, the impact of a hard moment is felt fully.",
+      "Difficult emotions can land harder than intended, because neither person is holding anything back, the impact of a hard moment is felt fully.",
       "Not every feeling needs to go into the shared space immediately. Sitting with something for 20 minutes before speaking it is a skill worth building.",
     ],
     patterns: [
       "{U} and {P} probably know each other's emotional state well. Often before anything is said.",
-      "The relationship has a lot of emotional aliveness — which can be wonderful and occasionally overwhelming.",
+      "The relationship has a lot of emotional aliveness, which can be wonderful and occasionally overwhelming.",
       "Arguments between you are probably not subtle. The feelings are out. The work is making sure what comes out is accurate, not just loud.",
     ],
     tips: [
-      { title: "Notice when you're amplifying each other", body: "When both of you are feeling something strongly, the loop can escalate. One person naming it — 'I think we're feeding each other right now' — can break the cycle before it needs to get bigger.", phraseTry: "I think we're feeding each other right now — can we both take a breath before we keep going?" },
+      { title: "Notice when you're amplifying each other", body: "When both of you are feeling something strongly, the loop can escalate. One person naming it, 'I think we're feeding each other right now', can break the cycle before it needs to get bigger.", phraseTry: "I think we're feeding each other right now, can we both take a breath before we keep going?" },
       { title: "Not every feeling needs an audience", body: "{U} and {P} are both expressive, but some feelings are better processed privately before being shared. Practice sitting with something for a beat before putting it into the shared space.", phraseTry: "I need a minute with this before I put it out there. Give me twenty minutes." },
-      { title: "The visibility is a gift", body: "Most couples are guessing at each other's interior. {U} and {P} don't have to. Appreciate that even when it's uncomfortable — it's the thing that makes real closeness possible.", phraseTry: "I know this is a lot right now, and I'm glad we can actually see each other in it." },
+      { title: "The visibility is a gift", body: "Most couples are guessing at each other's interior. {U} and {P} don't have to. Appreciate that even when it's uncomfortable, it's the thing that makes real closeness possible.", phraseTry: "I know this is a lot right now, and I'm glad we can actually see each other in it." },
     ],
   },
   {
     id: "XX", typeA: "X", typeB: "X",
     name: "The collaboration",
     tagline: "Both want resolution. Both process it privately. The machinery works.",
-    description: "{U} and {P} both move toward resolving things and both handle the feeling internally before it comes out. Decisions get made. Disagreements get worked through. The practical machinery of the relationship runs efficiently — and quietly.",
+    description: "{U} and {P} both move toward resolving things and both handle the feeling internally before it comes out. Decisions get made. Disagreements get worked through. The practical machinery of the relationship runs efficiently, and quietly.",
     nuance: "Efficient repair can mean closing the loop before it's actually through. Two people who both move fast toward resolution can sometimes resolve the surface without fully addressing what's underneath. The same thing comes back because the real conversation happened too quickly.",
     color: "#1B5FE8", shade: "#EFF1FF",
     famousDuos: [
@@ -1129,7 +1129,7 @@ const NEW_COUPLE_TYPES = [
     ],
     tips: [
       { title: "Check if it's resolved or just closed", body: "Fast repair is a real strength. The watch-out is closing the loop before the thing is actually through. Ask {P}: 'Are we actually okay, or are we both just ready to be done?'", phraseTry: "Are we actually okay, or are we both just ready to be done?" },
-      { title: "Ask what's going on, not just what the plan is", body: "{U} and {P} are both comfortable with the practical mode. Add a deliberate question: 'How does this feel, not just what does it mean?' It changes the quality of the conclusion.", phraseTry: "How does this actually feel for you — not just what it means, but how it sits?" },
+      { title: "Ask what's going on, not just what the plan is", body: "{U} and {P} are both comfortable with the practical mode. Add a deliberate question: 'How does this feel, not just what does it mean?' It changes the quality of the conclusion.", phraseTry: "How does this actually feel for you, not just what it means, but how it sits?" },
       { title: "Give the slower moments their time", body: "Occasionally, slow the repair down enough to make sure you've actually heard each other. The extra few minutes tends to be what prevents the same conversation coming back.", phraseTry: "I want to make sure we've actually heard each other on this before we move on." },
     ],
   },
@@ -1137,17 +1137,17 @@ const NEW_COUPLE_TYPES = [
     id: "YY", typeA: "Y", typeB: "Y",
     name: "The safe space",
     tagline: "Both need space first. Both carry it visibly when withdrawn.",
-    description: "When things get hard, {U} and {P} both pull back before coming forward. Neither of you is avoiding — you're both protecting the quality of the eventual conversation. When you do come back together, you both bring the full emotional weight of what you've been carrying.",
-    nuance: "Two people who both need space can wait for the other to come back first for a very long time. That waiting can start to feel like abandonment even when it's just process. Build an agreed-upon signal — even something small — that means 'I'm ready when you are' without requiring a full conversation to get there.",
+    description: "When things get hard, {U} and {P} both pull back before coming forward. Neither of you is avoiding, you're both protecting the quality of the eventual conversation. When you do come back together, you both bring the full emotional weight of what you've been carrying.",
+    nuance: "Two people who both need space can wait for the other to come back first for a very long time. That waiting can start to feel like abandonment even when it's just process. Build an agreed-upon signal, even something small, that means 'I'm ready when you are' without requiring a full conversation to get there.",
     color: "#7C3AED", shade: "#F5F0FF",
     famousDuos: [
       { names: "Carrie & Aidan", show: "Sex and the City", note: "Both needed time and space before they could come back. Neither was great at initiating the return, which made the distance feel longer than it needed to be." },
-      { names: "April & Andy", show: "Parks & Recreation", note: "Both withdrew into themselves when things got hard. When they did come back, it was always real — just slow." },
+      { names: "April & Andy", show: "Parks & Recreation", note: "Both withdrew into themselves when things got hard. When they did come back, it was always real, just slow." },
     ],
     strengths: [
       "Things don't escalate in the moment. {U} and {P} both have the instinct to step back before the conversation gets more heated than it needs to be.",
       "When the conversation does happen, it tends to be calmer and more emotionally substantive than it would have been in the heat of it.",
-      "Both of you understand the need for space — so you're less likely to take it personally when the other person needs it.",
+      "Both of you understand the need for space, so you're less likely to take it personally when the other person needs it.",
     ],
     stickingPoints: [
       "{U} and {P} can both wait a long time for the other person to come back first. That waiting can start to feel like abandonment, even when it's just process.",
@@ -1160,16 +1160,16 @@ const NEW_COUPLE_TYPES = [
       "When the conversation does happen, it tends to be calmer and more complete than it would have been earlier.",
     ],
     tips: [
-      { title: "Someone has to come back first", body: "Both {U} and {P} tend to wait. The good news is that whoever initiates the return usually gets a warmer reception than they expect. Take the step.", phraseTry: "I'm ready to talk when you are. No rush — just wanted you to know." },
+      { title: "Someone has to come back first", body: "Both {U} and {P} tend to wait. The good news is that whoever initiates the return usually gets a warmer reception than they expect. Take the step.", phraseTry: "I'm ready to talk when you are. No rush, just wanted you to know." },
       { title: "Bound the space with a time", body: "'I need some time' is not as useful as 'I need until tonight.' A specific return time lets the other person stop the worried waiting and trust the process.", phraseTry: "I need until tonight. I'll come find you after dinner." },
-      { title: "Build a low-key signal", body: "{U} and {P} don't need a full conversation to signal that you're okay again. A small gesture — a cup of tea, a hand on the shoulder — does most of the work.", phraseTry: "I'm okay. We're okay. Just needed a minute." },
+      { title: "Build a low-key signal", body: "{U} and {P} don't need a full conversation to signal that you're okay again. A small gesture, a cup of tea, a hand on the shoulder, does most of the work.", phraseTry: "I'm okay. We're okay. Just needed a minute." },
     ],
   },
   {
     id: "ZZ", typeA: "Z", typeB: "Z",
     name: "The depth",
     tagline: "Both withdraw. Both hold it close. Real depth running beneath a calm surface.",
-    description: "{U} and {P} both go inward when things get hard and both hold their interior life privately. The relationship tends to be stable, low-drama, and genuinely deep — but the depth doesn't surface readily. There is often more going on beneath the calm than either of you shows.",
+    description: "{U} and {P} both go inward when things get hard and both hold their interior life privately. The relationship tends to be stable, low-drama, and genuinely deep, but the depth doesn't surface readily. There is often more going on beneath the calm than either of you shows.",
     nuance: "Important things can go unsaid for a very long time. The comfort with quiet can become avoidance without either person intending it. The relationship looks more okay from the outside than it sometimes is from the inside. Creating a deliberate structure for openness is worth more here than in most pairings.",
     color: "#6B7280", shade: "#F4F5F6",
     famousDuos: [
@@ -1184,17 +1184,17 @@ const NEW_COUPLE_TYPES = [
     stickingPoints: [
       "Important things can go unsaid for a very long time. The comfort with silence can become avoidance.",
       "Neither of you naturally initiates the harder conversation. Both may be waiting for the other.",
-      "The relationship can look more okay from the outside than it actually is — because neither of you is showing what's wrong.",
+      "The relationship can look more okay from the outside than it actually is, because neither of you is showing what's wrong.",
     ],
     patterns: [
       "{U} and {P} probably don't have a lot of dramatic conversations. The emotional content of the relationship tends to go inward rather than outward.",
-      "When something is hard, it may be days before either of you brings it up — if it gets brought up at all.",
+      "When something is hard, it may be days before either of you brings it up, if it gets brought up at all.",
       "The relationship is probably more stable-looking than many. The thing to watch is what's accumulating beneath the stability.",
     ],
     tips: [
-      { title: "Build in the opening, don't wait for it to happen", body: "A weekly check-in — even 15 minutes, even structured — creates a container for the things that wouldn't come up otherwise. Schedule the opening you both won't naturally make.", phraseTry: "Can we do a quick check-in this week? Nothing heavy — I just want to know how you're actually doing." },
+      { title: "Build in the opening, don't wait for it to happen", body: "A weekly check-in, even 15 minutes, even structured, creates a container for the things that wouldn't come up otherwise. Schedule the opening you both won't naturally make.", phraseTry: "Can we do a quick check-in this week? Nothing heavy. I just want to know how you're actually doing." },
       { title: "Share the rougher draft", body: "Both {U} and {P} wait until something is fully formed before sharing it. Practice sharing it half-formed. The relationship needs the earlier version too.", phraseTry: "I'm still figuring out how I feel about this, but I wanted to say it out loud anyway." },
-      { title: "Name what you appreciate", body: "Reserved people often feel deeply — they just don't say it. Make a practice of saying specifically what you value about each other. The other person may not know unless you tell them.", phraseTry: "I don't say this enough, but I want you to know I really value the way you {something specific}." },
+      { title: "Name what you appreciate", body: "Reserved people often feel deeply, they just don't say it. Make a practice of saying specifically what you value about each other. The other person may not know unless you tell them.", phraseTry: "I don't say this enough, but I want you to know I really value the way you {something specific}." },
     ],
   },
 
@@ -1203,7 +1203,7 @@ const NEW_COUPLE_TYPES = [
     id: "WX", typeA: "W", typeB: "X",
     name: "The jumpstart",
     tagline: "Both want resolution. Different instruments, same direction.",
-    description: "{U} and {P} both move toward resolution when things get hard — you're pulling in the same direction. Where you differ is in how the internal experience travels: one processes outward, and one holds it closer. The destination is the same. The path there looks different.",
+    description: "{U} and {P} both move toward resolution when things get hard, you're pulling in the same direction. Where you differ is in how the internal experience travels: one processes outward, and one holds it closer. The destination is the same. The path there looks different.",
     nuance: "The expressive partner can feel like the guarded one isn't sharing what's actually going on. The guarded partner can feel like too much is being put into the shared space before it's ready. Neither is wrong. The registers are just different.",
     color: "#E8673A", shade: "#FFF4F0",
     famousDuos: [
@@ -1221,22 +1221,22 @@ const NEW_COUPLE_TYPES = [
       "What the expressive partner reads as withholding, the guarded partner experiences as just needing time to form it properly. Both readings feel true; neither is quite right.",
     ],
     patterns: [
-      "When something is off, {U} and {P} are usually both aware of it — but processing it at different speeds.",
+      "When something is off, {U} and {P} are usually both aware of it, but processing it at different speeds.",
       "The expressive one tends to get the conversation started. The guarded one tends to arrive fully once it's underway.",
-      "When the conversation does happen, it tends to go somewhere useful. You're not fighting about whether to have it — just when.",
+      "When the conversation does happen, it tends to go somewhere useful. You're not fighting about whether to have it, just when.",
     ],
     tips: [
-      { title: "Name which mode you're in", body: "'I need to process this out loud' vs. 'I need to think before I talk.' That one sentence tells the other person how to meet you. Use it early.", phraseTry: "I need to process this out loud — bear with me. I don't have it figured out yet." },
+      { title: "Name which mode you're in", body: "'I need to process this out loud' vs. 'I need to think before I talk.' That one sentence tells the other person how to meet you. Use it early.", phraseTry: "I need to process this out loud, bear with me. I don't have it figured out yet." },
       { title: "Guarded partner: share the half-formed version", body: "You don't have to wait until it's fully formed. 'I'm still figuring out how I feel about this' is a form of sharing, and it's usually exactly what the expressive partner needs to hear.", phraseTry: "I'm still working through it, but I think I'm bothered by {something}. Not sure why yet." },
-      { title: "Expressive partner: give the processing room", body: "Pressing for more than the guarded partner is ready to give doesn't create connection — it creates pressure. Ask once, then wait. The sharing will come in its own time.", phraseTry: "I asked. I'm going to wait. I know it's coming." },
+      { title: "Expressive partner: give the processing room", body: "Pressing for more than the guarded partner is ready to give doesn't create connection, it creates pressure. Ask once, then wait. The sharing will come in its own time.", phraseTry: "I asked. I'm going to wait. I know it's coming." },
     ],
   },
   {
     id: "WY", typeA: "W", typeB: "Y",
     name: "The orbit",
-    tagline: "You have different conflict clocks. One is ready before the other — and naming that changes everything.",
-    description: "When things get hard, {U} moves toward resolution and {P} pulls back — or vice versa, depending on your individual types. The reaching can feel like pressure. The withdrawal can feel like abandonment. Neither is true — you're just wired differently for when the conversation becomes possible.",
-    nuance: "This is one of the most common and most solvable friction patterns in relationships. The solution isn't changing your instinct — it's naming it out loud before the hard moment arrives. A simple agreement — 'I need a few hours, let's talk at 9' — short-circuits the loop that otherwise runs on its own.",
+    tagline: "You have different conflict clocks. One is ready before the other, and naming that changes everything.",
+    description: "When things get hard, {U} moves toward resolution and {P} pulls back, or vice versa, depending on your individual types. The reaching can feel like pressure. The withdrawal can feel like abandonment. Neither is true, you're just wired differently for when the conversation becomes possible.",
+    nuance: "This is one of the most common and most solvable friction patterns in relationships. The solution isn't changing your instinct, it's naming it out loud before the hard moment arrives. A simple agreement, 'I need a few hours, let's talk at 9', short-circuits the loop that otherwise runs on its own.",
     color: "#E8673A", shade: "#FCE4EC",
     famousDuos: [
       { names: "Ross & Rachel", show: "Friends", note: "One wanted to resolve everything immediately; the other needed time and space first. Without a framework for it, they kept colliding at exactly the wrong moment." },
@@ -1244,39 +1244,39 @@ const NEW_COUPLE_TYPES = [
     ],
     strengths: [
       "Once you understand each other's conflict clock, you stop misreading each other's behavior. That alone removes most of the friction.",
-      "You bring complementary instincts — one keeps things from festering, one keeps things from escalating.",
+      "You bring complementary instincts, one keeps things from festering, one keeps things from escalating.",
       "This dynamic, when named, often produces repair that works for both people rather than one.",
     ],
     stickingPoints: [
-      "Without a framework, whoever needs space reads urgency as pressure, and whoever needs resolution reads distance as avoidance. Both interpretations feel true — and both are wrong.",
+      "Without a framework, whoever needs space reads urgency as pressure, and whoever needs resolution reads distance as avoidance. Both interpretations feel true, and both are wrong.",
       "The pursuer-withdrawer loop: one presses for resolution, the other retreats further, which makes the first person press harder. It escalates without anyone wanting it to.",
       "Repair happens on one person's timeline, usually the person who initiates. The other person doesn't always feel ready when it starts.",
     ],
     patterns: [
       "When something is off, {U} and {P} are usually not in the same place at the same time. One is ready to engage; the other isn't there yet.",
       "What reads as pulling away is usually just needing space to process. What reads as pressure is usually just care. Neither meaning is the one being felt in the moment.",
-      "The conflict clock mismatch doesn't mean one person cares more. It means you're wired differently — and that's solvable.",
+      "The conflict clock mismatch doesn't mean one person cares more. It means you're wired differently, and that's solvable.",
     ],
     tips: [
-      { title: "Name the pattern before you're in it", body: "When things are calm, tell each other: 'When I'm upset, I need X first.' That one conversation changes what the next hard moment looks like.", phraseTry: "When I'm upset, I need a few minutes before I can talk. It's not avoidance — I'll come back." },
+      { title: "Name the pattern before you're in it", body: "When things are calm, tell each other: 'When I'm upset, I need X first.' That one conversation changes what the next hard moment looks like.", phraseTry: "When I'm upset, I need a few minutes before I can talk. It's not avoidance. I'll come back." },
       { title: "Make space bounded, not open-ended", body: "If one of you needs time: give a return. 'I need an hour' is different from silence. It lets the other person stop the worried waiting.", phraseTry: "I need an hour. I'll be back at eight." },
-      { title: "Urgency isn't pressure; silence isn't avoidance", body: "When {U} presses for resolution, that's care, not control. When {P} needs space, that's process, not withdrawal. Say what you mean.", phraseTry: "I know this is hard for you to sit with. I'm not gone — I'm processing. I'll be back." },
+      { title: "Urgency isn't pressure; silence isn't avoidance", body: "When {U} presses for resolution, that's care, not control. When {P} needs space, that's process, not withdrawal. Say what you mean.", phraseTry: "I know this is hard for you to sit with. I'm not gone. I'm processing. I'll be back." },
     ],
   },
   {
     id: "WZ", typeA: "W", typeB: "Z",
     name: "The opening",
     tagline: "One reaches. One holds. The gap between those instincts is the conversation.",
-    description: "One of {U} and {P} reaches toward resolution and expresses things openly; the other pulls back and holds things privately. The gap exists on both axes simultaneously — different conflict timing and different expressiveness — which means there's more translation work here than in most pairings.",
-    nuance: "The reaching partner often doesn't know what the reserved partner is feeling until long after the fact, which can feel like withholding. The reserved partner often feels pressure to perform an emotional openness they don't naturally have. Naming this as a difference — not a deficiency — is the most useful thing {U} and {P} can do.",
+    description: "One of {U} and {P} reaches toward resolution and expresses things openly; the other pulls back and holds things privately. The gap exists on both axes simultaneously, different conflict timing and different expressiveness, which means there's more translation work here than in most pairings.",
+    nuance: "The reaching partner often doesn't know what the reserved partner is feeling until long after the fact, which can feel like withholding. The reserved partner often feels pressure to perform an emotional openness they don't naturally have. Naming this as a difference, not a deficiency, is the most useful thing {U} and {P} can do.",
     color: "#E8673A", shade: "#FFF4F0",
     famousDuos: [
       { names: "Elizabeth & Philip Mountbatten (early years)", show: "The Crown", note: "Wildly different in emotional register and expression. The relationship survived not because the gaps closed, but because both parties chose it anyway." },
-      { names: "Hannah & Adam", show: "Girls", note: "One always needed more contact; the other needed to disappear first. The difficulty wasn't incompatibility — it was the gap between their stress responses." },
+      { names: "Hannah & Adam", show: "Girls", note: "One always needed more contact; the other needed to disappear first. The difficulty wasn't incompatibility, it was the gap between their stress responses." },
     ],
     strengths: [
       "The reaching partner creates space for emotional honesty in the relationship. The reserved partner creates depth beneath the surface.",
-      "When the reserved one does share, it carries real weight — and the reaching partner has usually created the safety for it to land.",
+      "When the reserved one does share, it carries real weight, and the reaching partner has usually created the safety for it to land.",
       "You've both had to stretch toward each other in ways that have probably made you more capable partners.",
     ],
     stickingPoints: [
@@ -1286,12 +1286,12 @@ const NEW_COUPLE_TYPES = [
     ],
     patterns: [
       "{U} and {P} sometimes find that you mean something the other doesn't quite receive. The signal and the interpretation don't always match.",
-      "Understanding each other has taken real effort — and usually more conversation than you'd expect.",
+      "Understanding each other has taken real effort, and usually more conversation than you'd expect.",
       "When {U} and {P} are communicating well, it's because you're both actively working to understand, not just assuming you do.",
     ],
     tips: [
-      { title: "Expressiveness isn't depth — and silence isn't emptiness", body: "The reserved partner's inner life is not less rich because it isn't expressed as often. The reaching partner's sharing isn't less valuable because it comes more easily. Name that directly.", phraseTry: "There's more going on for me than I'm showing. I just need to get it in order before I share it." },
-      { title: "Reaching partner: give the silence its room", body: "Pressing for more than the reserved partner is ready to give doesn't create connection — it creates pressure. Ask once, then wait. The sharing will come in its own time.", phraseTry: "I asked. That's enough for now. I trust you'll bring it when you're ready." },
+      { title: "Expressiveness isn't depth, and silence isn't emptiness", body: "The reserved partner's inner life is not less rich because it isn't expressed as often. The reaching partner's sharing isn't less valuable because it comes more easily. Name that directly.", phraseTry: "There's more going on for me than I'm showing. I just need to get it in order before I share it." },
+      { title: "Reaching partner: give the silence its room", body: "Pressing for more than the reserved partner is ready to give doesn't create connection, it creates pressure. Ask once, then wait. The sharing will come in its own time.", phraseTry: "I asked. That's enough for now. I trust you'll bring it when you're ready." },
       { title: "Reserved partner: share the earlier draft", body: "You don't have to wait until it's fully formed. Even 'I'm still figuring out how I feel about this' is a form of sharing, and it's usually exactly what the reaching partner needs to hear.", phraseTry: "I don't have this figured out, but something's been sitting with me and I wanted to say it before I lose it." },
     ],
   },
@@ -1299,22 +1299,22 @@ const NEW_COUPLE_TYPES = [
     id: "XY", typeA: "X", typeB: "Y",
     name: "The translators",
     tagline: "Strong instincts on both sides, pointed differently. Moving forward together takes understanding and intention.",
-    description: "{U} pushes toward resolution while processing internally; {P} needs space before the conversation is possible, and carries visible feeling in the meantime. They can read each other as simultaneously too much and not enough — the driving toward resolution can close off the space, and the visible feeling during withdrawal can look like something that needs fixing right now.",
+    description: "{U} pushes toward resolution while processing internally; {P} needs space before the conversation is possible, and carries visible feeling in the meantime. They can read each other as simultaneously too much and not enough, the driving toward resolution can close off the space, and the visible feeling during withdrawal can look like something that needs fixing right now.",
     nuance: "The driver's urgency toward resolution can feel like pressure to the feeler, who isn't ready yet. The feeler's emotional visibility during withdrawal can feel like an invitation to engage, when it's actually a signal to wait. Both readings are understandable. Both are wrong.",
     color: "#7C3AED", shade: "#F5F0FF",
     famousDuos: [
       { names: "Hermione & Ron", show: "Harry Potter", note: "She analyzed and pushed; he felt his way through and needed to breathe. They drove each other crazy in exactly the ways that made them better." },
-      { names: "Ted & Robin", show: "How I Met Your Mother", note: "He pushed toward resolution; she pulled toward distance. Neither was wrong — but they needed a way to say so." },
+      { names: "Ted & Robin", show: "How I Met Your Mother", note: "He pushed toward resolution; she pulled toward distance. Neither was wrong, but they needed a way to say so." },
     ],
     strengths: [
       "{U} and {P} have strong, complementary instincts. When named and managed, they produce repair that actually works for both people.",
-      "You cover very different emotional territory — one tracks the logic, one tracks the feeling. The relationship has range.",
+      "You cover very different emotional territory, one tracks the logic, one tracks the feeling. The relationship has range.",
       "The dynamic is highly solvable once it's named. Many couples with this pattern go on to build some of the most intentional relationships.",
     ],
     stickingPoints: [
       "The driver's move toward resolution can close off the space the feeler needs. The feeler isn't ready, and the conversation starts before they are.",
-      "The feeler's visible emotion during withdrawal can look to the anchor like something that needs fixing immediately — which makes the anchor push harder.",
-      "It can feel like one person cares more than the other — not because that's true, but because they're expressing it at different times and in different ways.",
+      "The feeler's visible emotion during withdrawal can look to the anchor like something that needs fixing immediately, which makes the anchor push harder.",
+      "It can feel like one person cares more than the other, not because that's true, but because they're expressing it at different times and in different ways.",
     ],
     patterns: [
       "When something is hard, {U} and {P} are usually not in the same place at the same time. One is ready to engage; the other needs the space.",
@@ -1322,20 +1322,20 @@ const NEW_COUPLE_TYPES = [
       "The gap between your instincts is not a character flaw. It's a wiring difference that has a well-worn solution: naming it before you're in it.",
     ],
     tips: [
-      { title: "Driver: resolution doesn't mean resolved", body: "The feeler needs the space and then the conversation. Moving fast to 'let's talk' before they're ready doesn't get to resolution faster — it delays it.", phraseTry: "I know you're not ready. I'll wait — but can you tell me when you think you will be?" },
+      { title: "Driver: resolution doesn't mean resolved", body: "The feeler needs the space and then the conversation. Moving fast to 'let's talk' before they're ready doesn't get to resolution faster, it delays it.", phraseTry: "I know you're not ready. I'll wait, but can you tell me when you think you will be?" },
       { title: "Feeler: tell the anchor when you'll be back", body: "The uncertainty is harder for them than the wait. 'I need until tonight' lets the anchor stop the worried waiting and trust the process.", phraseTry: "I need until tomorrow morning. I'll come to you then." },
-      { title: "Name the pattern out loud before you're in it", body: "When things are calm: 'When I'm upset, I need X before the conversation is possible.' That one sentence changes what the next hard moment looks like.", phraseTry: "When I go quiet, it's not over — it's processing. Give me space and I'll come back." },
+      { title: "Name the pattern out loud before you're in it", body: "When things are calm: 'When I'm upset, I need X before the conversation is possible.' That one sentence changes what the next hard moment looks like.", phraseTry: "When I go quiet, it's not over, it's processing. Give me space and I'll come back." },
     ],
   },
   {
     id: "XZ", typeA: "X", typeB: "Z",
     name: "The stethoscope",
-    tagline: "You both work things out privately before anything surfaces. The relationship runs quietly — and real depth lives beneath that.",
-    description: "{U} and {P} both hold things privately and both process what's going on before it comes out — if it comes out at all. The dynamic is low-temperature and rarely explosive. The practical machinery of the relationship runs smoothly. The emotional layer tends to stay quiet.",
+    tagline: "You both work things out privately before anything surfaces. The relationship runs quietly, and real depth lives beneath that.",
+    description: "{U} and {P} both hold things privately and both process what's going on before it comes out, if it comes out at all. The dynamic is low-temperature and rarely explosive. The practical machinery of the relationship runs smoothly. The emotional layer tends to stay quiet.",
     nuance: "Neither partner is offering a lot of emotional visibility to the other. The relationship can run on logic, shared purpose, and good-enough communication while the emotional texture goes largely unaddressed. That gap tends to show up during life transitions, when something that's been running quietly needs to be named.",
     color: "#1B5FE8", shade: "#EFF1FF",
     famousDuos: [
-      { names: "Joel & Ellie", show: "The Last of Us", note: "Both held things close. Both processed privately. What passed between them was real and deep — it just required the other person to ask rather than assume." },
+      { names: "Joel & Ellie", show: "The Last of Us", note: "Both held things close. Both processed privately. What passed between them was real and deep, it just required the other person to ask rather than assume." },
       { names: "Ron Swanson & Diane", show: "Parks & Recreation", note: "He valued his private world enormously. She had her own rich interior life. They built something that worked by not crowding each other." },
     ],
     strengths: [
@@ -1354,17 +1354,17 @@ const NEW_COUPLE_TYPES = [
       "When you do talk through something, it tends to be calmer and more considered than it would be for more expressive pairings.",
     ],
     tips: [
-      { title: "Build a practice of asking", body: "Not 'are you okay?' but 'what's actually going on for you right now?' Two people who both hold things privately need to be asked before they'll share.", phraseTry: "What's actually going on for you right now — not the plan, the feeling?" },
+      { title: "Build a practice of asking", body: "Not 'are you okay?' but 'what's actually going on for you right now?' Two people who both hold things privately need to be asked before they'll share.", phraseTry: "What's actually going on for you right now, not the plan, the feeling?" },
       { title: "Schedule the emotional check-in", body: "{U} and {P} are both capable of going long stretches without naming what's going on inside. A regular, brief check-in creates the container that neither of you will naturally generate on your own.", phraseTry: "Can we do fifteen minutes on Sunday? Just to check in properly." },
-      { title: "The quiet isn't a problem — until it is", body: "Low-drama is a real quality. The work is making sure the ease isn't covering for avoided conversations. Check in on whether the calm is genuine or whether something is sitting unspoken.", phraseTry: "Is there anything sitting unspoken between us right now? I want to make sure we're actually okay." },
+      { title: "The quiet isn't a problem, until it is", body: "Low-drama is a real quality. The work is making sure the ease isn't covering for avoided conversations. Check in on whether the calm is genuine or whether something is sitting unspoken.", phraseTry: "Is there anything sitting unspoken between us right now? I want to make sure we're actually okay." },
     ],
   },
   {
     id: "YZ", typeA: "Y", typeB: "Z",
     name: "The sanctuary",
-    tagline: "You both need space when things get hard. The difference is how much it shows — and that gap is worth understanding.",
-    description: "When things get hard, {U} and {P} both pull back — but one of you carries the emotional weight visibly while withdrawn, and the other holds everything privately. The return is slow for both. Hard moments can sit for a long time before either of you surfaces them.",
-    nuance: "Real depth runs in this pairing — often more than either partner shows. The risk is that the depth never surfaces because neither person naturally initiates the opening. The feeler, when ready, tends to be more willing to bring it back. Making that the agreed pattern gives the still-depth partner the full space they need without indefinite silence.",
+    tagline: "You both need space when things get hard. The difference is how much it shows, and that gap is worth understanding.",
+    description: "When things get hard, {U} and {P} both pull back, but one of you carries the emotional weight visibly while withdrawn, and the other holds everything privately. The return is slow for both. Hard moments can sit for a long time before either of you surfaces them.",
+    nuance: "Real depth runs in this pairing, often more than either partner shows. The risk is that the depth never surfaces because neither person naturally initiates the opening. The feeler, when ready, tends to be more willing to bring it back. Making that the agreed pattern gives the still-depth partner the full space they need without indefinite silence.",
     color: "#7C3AED", shade: "#F5F0FF",
     famousDuos: [
       { names: "Joel & Clementine", show: "Eternal Sunshine of the Spotless Mind", note: "He held everything privately; she expressed the weight of everything she was feeling. Both needed space. Both took it in different ways." },
@@ -1373,22 +1373,22 @@ const NEW_COUPLE_TYPES = [
     strengths: [
       "Things don't escalate in the moment. {U} and {P} both have the instinct to step back before the conversation gets more heated than it needs to be.",
       "When the conversation does happen, it tends to be calmer and more real than it would have been at the height of it.",
-      "Both of you understand the need for space — so you're less likely to take it personally when the other person needs it.",
+      "Both of you understand the need for space, so you're less likely to take it personally when the other person needs it.",
     ],
     stickingPoints: [
       "{U} and {P} can both wait a long time for the other to come back first. That waiting can start to feel like abandonment, even when it's just process.",
-      "The feeler's visible emotion during withdrawal can be hard for the still-depth partner to know what to do with — it's not a signal to engage, but it doesn't look like 'I'm fine.'",
+      "The feeler's visible emotion during withdrawal can be hard for the still-depth partner to know what to do with, it's not a signal to engage, but it doesn't look like 'I'm fine.'",
       "Hard things can sit for a very long time before either of you surfaces them. Without a deliberate practice, important things go unaddressed.",
     ],
     patterns: [
       "After a hard moment, {U} and {P} both need time. The space is real and usually helpful.",
       "The coming-back-together step takes longer than it needs to because neither of you naturally initiates it.",
-      "When the conversation does happen, it tends to be more complete than it would have been earlier. The depth is real — it just required the time.",
+      "When the conversation does happen, it tends to be more complete than it would have been earlier. The depth is real, it just required the time.",
     ],
     tips: [
-      { title: "Let the feeler initiate the return", body: "The feeler, when ready, tends to be more willing to bring it back. Make that the agreed pattern: {U} signals readiness, {P} gets the full space they need without indefinite silence.", phraseTry: "I'm ready when you are. Take your time — I'll be here." },
+      { title: "Let the feeler initiate the return", body: "The feeler, when ready, tends to be more willing to bring it back. Make that the agreed pattern: {U} signals readiness, {P} gets the full space they need without indefinite silence.", phraseTry: "I'm ready when you are. Take your time. I'll be here." },
       { title: "Bound the space with a time", body: "'I need some time' is not as useful as 'I need until tonight.' A specific return time lets the other person stop the worried waiting and trust the process.", phraseTry: "I need until tomorrow morning. I'll come find you then." },
-      { title: "Create a regular container for openness", body: "{U} and {P} need a deliberate structure for things to surface. A weekly check-in — even 10 minutes — creates the opening that neither of you will naturally generate on your own.", phraseTry: "Can we do ten minutes on Sunday? Not about anything specific — I just want to check in." },
+      { title: "Create a regular container for openness", body: "{U} and {P} need a deliberate structure for things to surface. A weekly check-in, even 10 minutes, creates the opening that neither of you will naturally generate on your own.", phraseTry: "Can we do ten minutes on Sunday? Not about anything specific. I just want to check in." },
     ],
   },
 ];
@@ -1640,20 +1640,46 @@ function NavButtons({ onBack, onNext, backDisabled, nextDisabled, nextLabel = "N
 // Bar showing where each partner scored on a 1–5 dimension scale.
 function DimTrackViz({ myScore = 3, theirScore = 3, color = "#9B5DE5", userName = "You", partnerName = "Partner" }) {
   const pct = v => ((v - 1) / 4) * 100;
+  // When scores are within 0.4 (10% on the bar), dots collide visually.
+  // Vertical offset keeps them both readable without changing horizontal position.
+  const myPctV = pct(myScore), theirPctV = pct(theirScore);
+  const close = Math.abs(myPctV - theirPctV) < 10;
+  // Identify which marker is on the left vs right for outward-anchoring labels.
+  const myIsLeft = myPctV <= theirPctV;
   return (
     <div style={{ margin: "1.25rem 0", paddingBottom: "1.6rem", position: "relative" }}>
-      {/* Track — dots positioned relative to this bar so they center on it exactly */}
+      {/* Track — overflow visible so vertical-offset dots and outward-anchored names don't clip */}
       <div style={{ height: 4, background: "rgba(255,255,255,0.12)", borderRadius: 2, position: "relative", overflow: "visible" }}>
         <div style={{ position: "absolute", inset: 0, borderRadius: 2, background: "linear-gradient(90deg, rgba(255,255,255,0.05), rgba(255,255,255,0.18))" }} />
-        {/* My dot — centered vertically on bar with transform: translate(-50%, -50%) */}
-        <div style={{ position: "absolute", top: "50%", left: pct(myScore) + "%", transform: "translate(-50%, -50%)", width: 14, height: 14, borderRadius: "50%", background: color, border: "2px solid " + color, boxShadow: "0 0 8px " + color + "66", zIndex: 2 }} />
-        {/* Partner dot */}
-        <div style={{ position: "absolute", top: "50%", left: pct(theirScore) + "%", transform: "translate(-50%, -50%)", width: 12, height: 12, borderRadius: "50%", background: "rgba(255,255,255,0.5)", border: "2px solid rgba(255,255,255,0.3)", zIndex: 1 }} />
+        {/* My dot — vertical offset upward when close to partner dot */}
+        <div style={{ position: "absolute", top: "50%", left: myPctV + "%", transform: `translate(-50%, calc(-50% + ${close ? (myIsLeft ? -6 : 6) : 0}px))`, width: 14, height: 14, borderRadius: "50%", background: color, border: "2px solid " + color, boxShadow: "0 0 8px " + color + "66", zIndex: 2 }} />
+        {/* Partner dot — vertical offset downward when close */}
+        <div style={{ position: "absolute", top: "50%", left: theirPctV + "%", transform: `translate(-50%, calc(-50% + ${close ? (myIsLeft ? 6 : -6) : 0}px))`, width: 12, height: 12, borderRadius: "50%", background: "rgba(255,255,255,0.5)", border: "2px solid rgba(255,255,255,0.3)", zIndex: 1 }} />
       </div>
-      {/* Name labels — below the bar */}
+      {/* Name labels below the bar.
+          Outward anchoring: leftmost name right-aligns to its dot (extends leftward);
+          rightmost name left-aligns to its dot (extends rightward).
+          Prevents collision when scores are close, even with long names.
+          Max-width caps very long names at ~110px with ellipsis. */}
       <div style={{ position: "relative", height: 20, marginTop: 8 }}>
-        {[{ score: myScore, label: userName }, { score: theirScore, label: partnerName }].map(({ score, label }) => (
-          <span key={label} style={{ position: "absolute", left: pct(score) + "%", transform: "translateX(-50%)", fontSize: "0.58rem", color: "rgba(255,255,255,0.55)", fontFamily: "'DM Sans', sans-serif", whiteSpace: "nowrap" }}>
+        {[
+          { score: myScore, label: userName, isLeft: myIsLeft },
+          { score: theirScore, label: partnerName, isLeft: !myIsLeft },
+        ].map(({ score, label, isLeft }) => (
+          <span key={label} style={{
+            position: "absolute",
+            left: isLeft ? "auto" : `calc(${pct(score)}% + 4px)`,
+            right: isLeft ? `calc(${100 - pct(score)}% + 4px)` : "auto",
+            textAlign: isLeft ? "right" : "left",
+            maxWidth: "44%",
+            fontSize: "0.58rem",
+            color: "rgba(255,255,255,0.55)",
+            fontFamily: "'DM Sans', sans-serif",
+            whiteSpace: "nowrap",
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+            display: "inline-block",
+          }}>
             {label}
           </span>
         ))}
@@ -3438,13 +3464,18 @@ function PersonalityResults({ myAnswers, partnerAnswers, userName, partnerName, 
               const myPct = Math.round(10 + (myScore - 1) * 20);
               const partPct = Math.round(10 + (partScore - 1) * 20);
               const isAligned = f.gap <= 1;
+              // 10px dots overlap when within ~5% horizontally. Vertical offset keeps both visible.
+              const close = Math.abs(myPct - partPct) < 6;
+              const myIsLeft = myPct <= partPct;
+              const myDy = close ? (myIsLeft ? -4 : 4) : 0;
+              const partDy = close ? (myIsLeft ? 4 : -4) : 0;
               return (
                 <div key={f.dim} onClick={() => go(sortedFeedback.indexOf(f) + 1)}
                   style={{ cursor: "pointer", display: "flex", alignItems: "center", gap: "0.65rem" }}>
                   <span style={{ fontSize: "0.65rem", color: "rgba(255,255,255,0.65)", fontFamily: BFONT, flexShrink: 0, width: "clamp(88px,30%,120px)", lineHeight: 1.25 }}>{m.label}</span>
-                  <div style={{ flex: 1, position: "relative", height: 6, background: "rgba(255,255,255,0.08)", borderRadius: 999 }}>
-                    <div style={{ position: "absolute", top: "50%", transform: "translateY(-50%)", left: `${myPct}%`, width: 10, height: 10, borderRadius: "50%", background: "#E8673A", border: "1.5px solid rgba(14,11,7,0.3)", marginLeft: -5 }} />
-                    <div style={{ position: "absolute", top: "50%", transform: "translateY(-50%)", left: `${partPct}%`, width: 10, height: 10, borderRadius: "50%", background: "#6C7FFF", border: "1.5px solid rgba(14,11,7,0.3)", marginLeft: -5 }} />
+                  <div style={{ flex: 1, position: "relative", height: 6, background: "rgba(255,255,255,0.08)", borderRadius: 999, overflow: "visible" }}>
+                    <div style={{ position: "absolute", top: "50%", transform: `translateY(calc(-50% + ${myDy}px))`, left: `${myPct}%`, width: 10, height: 10, borderRadius: "50%", background: "#E8673A", border: "1.5px solid rgba(14,11,7,0.3)", marginLeft: -5, zIndex: 2 }} />
+                    <div style={{ position: "absolute", top: "50%", transform: `translateY(calc(-50% + ${partDy}px))`, left: `${partPct}%`, width: 10, height: 10, borderRadius: "50%", background: "#6C7FFF", border: "1.5px solid rgba(14,11,7,0.3)", marginLeft: -5, zIndex: 1 }} />
                   </div>
                   <span style={{ fontSize: "0.55rem", color: isAligned ? "#10b981" : "#E8673A", fontFamily: BFONT, fontWeight: 600, flexShrink: 0, minWidth: "60px", textAlign: "right" }}>{isAligned ? "aligned" : "explore →"}</span>
                 </div>
@@ -8488,15 +8519,33 @@ function ResultsHighlights({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3
               <span style={{ fontSize: "0.6rem", color: "rgba(255,255,255,0.45)", fontFamily: BFONT }}>{gapMeta?.ends?.[0]}</span>
               <span style={{ fontSize: "0.6rem", color: "rgba(255,255,255,0.45)", fontFamily: BFONT }}>{gapMeta?.ends?.[1]}</span>
             </div>
-            <div style={{ height: 6, background: "rgba(255,255,255,0.12)", borderRadius: 3, position: "relative" }}>
+            <div style={{ height: 6, background: "rgba(255,255,255,0.12)", borderRadius: 3, position: "relative", overflow: "visible" }}>
               {(() => {
                 const myPct = Math.round(((myS[topGap?.dim] || 3) / 5) * 100);
                 const theirPct = Math.round(((partS[topGap?.dim] || 3) / 5) * 100);
+                // Vertical offset when dots are close enough to collide.
+                // Dots are 22px wide, so within ~10% horizontally they overlap.
+                const close = Math.abs(myPct - theirPct) < 10;
+                const myIsLeft = myPct <= theirPct;
+                const myDy = close ? (myIsLeft ? -10 : 10) : 0;
+                const theirDy = close ? (myIsLeft ? 10 : -10) : 0;
                 return (<>
-                  <div title={userName} style={{ position: "absolute", top: "50%", left: myPct + "%", transform: "translate(-50%,-50%)", width: 22, height: 22, borderRadius: "50%", background: "#E8673A", border: "2.5px solid white", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "0.5rem", color: "white", fontWeight: 700, fontFamily: BFONT }}>{userName[0]}</div>
-                  <div title={partnerName} style={{ position: "absolute", top: "50%", left: theirPct + "%", transform: "translate(-50%,-50%)", width: 22, height: 22, borderRadius: "50%", background: "#1B5FE8", border: "2.5px solid white", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "0.5rem", color: "white", fontWeight: 700, fontFamily: BFONT }}>{partnerName[0]}</div>
+                  <div title={userName} style={{ position: "absolute", top: "50%", left: myPct + "%", transform: `translate(-50%, calc(-50% + ${myDy}px))`, width: 22, height: 22, borderRadius: "50%", background: "#E8673A", border: "2.5px solid white", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "0.5rem", color: "white", fontWeight: 700, fontFamily: BFONT, zIndex: 2 }}>{userName[0]}</div>
+                  <div title={partnerName} style={{ position: "absolute", top: "50%", left: theirPct + "%", transform: `translate(-50%, calc(-50% + ${theirDy}px))`, width: 22, height: 22, borderRadius: "50%", background: "#1B5FE8", border: "2.5px solid white", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "0.5rem", color: "white", fontWeight: 700, fontFamily: BFONT, zIndex: 2 }}>{partnerName[0]}</div>
                 </>);
               })()}
+            </div>
+            {/* Legend — full names with their dot color. Solves same-initial ambiguity (e.g., Maya & Mark)
+                and tells the reader which color belongs to whom without relying on hover tooltips. */}
+            <div style={{ display: "flex", justifyContent: "center", gap: "1rem", marginTop: "1rem" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "0.35rem" }}>
+                <div style={{ width: 8, height: 8, borderRadius: "50%", background: "#E8673A", flexShrink: 0 }} />
+                <span style={{ fontSize: "0.62rem", color: "rgba(255,255,255,0.55)", fontFamily: BFONT, maxWidth: 110, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{userName}</span>
+              </div>
+              <div style={{ display: "flex", alignItems: "center", gap: "0.35rem" }}>
+                <div style={{ width: 8, height: 8, borderRadius: "50%", background: "#1B5FE8", flexShrink: 0 }} />
+                <span style={{ fontSize: "0.62rem", color: "rgba(255,255,255,0.55)", fontFamily: BFONT, maxWidth: 110, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{partnerName}</span>
+              </div>
             </div>
           </div>
           <p style={{ fontSize: "0.86rem", color: "rgba(255,230,210,0.88)", fontFamily: BFONT, fontWeight: 300, lineHeight: 1.75, margin: "0 0 1.25rem", animation: "fadeUp 0.4s 0.3s both" }}>

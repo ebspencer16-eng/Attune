@@ -130,7 +130,7 @@ function draftCard({ gap, draft, where, when, notes }) {
   // DRAFT eyebrow
   blocks.push(new Paragraph({
     spacing: { before: 0, after: 80 },
-    children: [run('DRAFT — proposed copy', { size: 14, bold: true, color, allCaps: true, characterSpacing: 80 })],
+    children: [run('DRAFT, proposed copy', { size: 14, bold: true, color, allCaps: true, characterSpacing: 80 })],
   }));
 
   // Gap description (what's missing today)
@@ -250,7 +250,7 @@ function buildIntroOutroDoc() {
       children: [
         run(step + '   ', { size: 18, bold: true, color, characterSpacing: 60 }),
         run(title + '   ', { size: 22, bold: true, color: INK }),
-        run('— ' + desc, { size: 20, italics: true, color: MUTED }),
+        run(',' + desc, { size: 20, italics: true, color: MUTED }),
       ],
     })),
 
@@ -265,18 +265,18 @@ function buildIntroOutroDoc() {
   // ── Section 1: Communication Exercise ──────────────────────────────────
   const commsSection = [
     ...secHead(1, 'Communication Exercise (Exercise 01)',
-      '30 forced-choice A/B personality questions. Users go straight into questions — there is no dedicated intro screen when Partner A launches the exercise from their dashboard.', BLUE),
+      '30 forced-choice A/B personality questions. Users go straight into questions, there is no dedicated intro screen when Partner A launches the exercise from their dashboard.', BLUE),
 
     eyebrow('Intro copy', BLUE),
     ...copyCard({
-      where: 'Both partners — combined intro for Exercise 01 and 02',
+      where: 'Both partners, combined intro for Exercise 01 and 02',
       when: 'Partner A: shown on first launch of Exercise 01 from the dashboard (skipped on resume). Partner B: shown as a full-screen intro when they first open their invite link. Both partners see the same copy.',
       text: [
-        'Header eyebrow: "Your exercises — {userName} & {partnerName}"',
+        'Header eyebrow: "Your exercises, {userName} & {partnerName}"',
         'Title: "Two exercises. Your answers are yours alone."',
-        'Body: "Exercise 01 covers how you communicate and connect. Exercise 02 maps your expectations. Both take about 15 minutes. Answer honestly — your partner won\'t see your individual answers."',
-        'Exercise 01 card label: "Communication — 30 questions · 10 dimensions"',
-        'Exercise 02 card label: "Expectations — Responsibilities & life"',
+        'Body: "Exercise 01 covers how you communicate and connect. Exercise 02 maps your expectations. Both take about 15 minutes. Answer honestly, your partner won\'t see your individual answers."',
+        'Exercise 01 card label: "Communication, 30 questions · 10 dimensions"',
+        'Exercise 02 card label: "Expectations. Responsibilities & life"',
         'Button: "Begin Exercise 01 →"',
       ],
       source: 'src/App.jsx:2131-2163 (Partner A intro inside Exercise01Flow), 8776-8805 (Partner B full-screen intro)',
@@ -286,7 +286,7 @@ function buildIntroOutroDoc() {
 
     eyebrow('Navigation copy', BLUE),
     ...copyCard({
-      where: 'Inside the exercise — question navigation',
+      where: 'Inside the exercise, question navigation',
       when: 'Shown on every question page during the exercise.',
       text: [
         'Progress label: "Question {idx + 1} of {total}"',
@@ -295,7 +295,7 @@ function buildIntroOutroDoc() {
         'Next button: "Next →"',
         'On the final question, Next becomes: "Complete Exercise →"',
       ],
-      source: 'src/App.jsx:2092-2168 — Exercise01Flow scale + nav',
+      source: 'src/App.jsx:2092-2168. Exercise01Flow scale + nav',
       color: BLUE,
     }),
 
@@ -307,15 +307,15 @@ function buildIntroOutroDoc() {
         'Title: "Exercise 1 Complete."',
         'Eyebrow: "Your communication profile is mapped"',
         '',
-        'State 1 — Exercise 02 not yet done (most common):',
+        'State 1. Exercise 02 not yet done (most common):',
         '  Body: "Next up: Exercise 2. Your expectations, about 15 minutes."',
         '  Button: "Start Exercise 2 →"',
         '',
-        'State 2 — Exercise 02 done, partner not yet done:',
+        'State 2. Exercise 02 done, partner not yet done:',
         '  Body: "When {partnerName} finishes, you\'ll unlock your couple type and learn what that means for the two of you."',
         '  Button: "Back to Dashboard →"',
         '',
-        'State 3 — both partners done:',
+        'State 3, both partners done:',
         '  Body: "Both exercises complete. Your results are ready."',
         '  Button: "See Your Results →"',
       ],
@@ -325,7 +325,7 @@ function buildIntroOutroDoc() {
     }),
 
     ...copyCard({
-      where: 'Partner B completion — "your exercises are done" (waiting state)',
+      where: 'Partner B completion, "your exercises are done" (waiting state)',
       when: 'Shown when Partner B has completed both Exercise 01 and 02 but Partner A has not finished yet.',
       text: [
         'Eyebrow: "Your exercises are done"',
@@ -343,23 +343,23 @@ function buildIntroOutroDoc() {
     ...secHead(2, 'Expectations Exercise (Exercise 02)',
       'Responsibilities + Life & Values questions. Three variants: Core (new couples), Anniversary (married), Revisiting (retake).', PURPLE),
 
-    eyebrow('Intro — Core variant', PURPLE),
+    eyebrow('Intro. Core variant', PURPLE),
     ...copyCard({
       where: 'Dedicated intro phase at the start of Exercise 02',
       when: 'Shown when isAnniversary = false AND isRevisited = false (default Core flow for new couples).',
       text: [
         'Eyebrow: "Exercise 02 . What You Expect"',
         'Title: "All frustrations in a relationship trace back to an unmet expectation."',
-        'Body: "Two parts. First, life and values questions — children, finances, where you live, how you handle conflict and repair. Then, who you expect to handle what across household, financial, career, and emotional responsibilities. You\'ll also share who did each of these in your childhood home, which helps explain why you each carry the expectations you do."',
-        'Follow-up: "Sometimes expectations go unmet because they were never said. Sometimes they were said but heard differently. Either way, seeing them side by side is the point. Answer for yourself — you\'ll see your answers alongside your partner\'s only after you\'ve both finished."',
+        'Body: "Two parts. First, life and values questions, children, finances, where you live, how you handle conflict and repair. Then, who you expect to handle what across household, financial, career, and emotional responsibilities. You\'ll also share who did each of these in your childhood home, which helps explain why you each carry the expectations you do."',
+        'Follow-up: "Sometimes expectations go unmet because they were never said. Sometimes they were said but heard differently. Either way, seeing them side by side is the point. Answer for yourself, you\'ll see your answers alongside your partner\'s only after you\'ve both finished."',
         'Duration line: "~15 minutes · 2 parts"',
         'Button: "Start →"',
       ],
-      source: 'src/App.jsx:126-157 — ExpectationsExercise intro phase',
+      source: 'src/App.jsx:126-157. ExpectationsExercise intro phase',
       color: PURPLE,
     }),
 
-    eyebrow('Intro — Anniversary variant', PURPLE),
+    eyebrow('Intro. Anniversary variant', PURPLE),
     ...copyCard({
       where: 'Dedicated intro phase, Anniversary wording',
       when: 'Shown when isAnniversary = true (Anniversary Collection package).',
@@ -369,11 +369,11 @@ function buildIntroOutroDoc() {
         'Follow-up: "Answer honestly, not how you think you should feel, but how you actually do. You\'ll see your answers alongside your partner\'s only after you\'ve both finished."',
         'Duration line: "~15 minutes · 2 parts"',
       ],
-      source: 'src/App.jsx:126-157 — ExpectationsExercise intro phase, isAnniversary branch',
+      source: 'src/App.jsx:126-157. ExpectationsExercise intro phase, isAnniversary branch',
       color: PURPLE,
     }),
 
-    eyebrow('Intro — Revisiting variant', PURPLE),
+    eyebrow('Intro. Revisiting variant', PURPLE),
     ...copyCard({
       where: 'Dedicated intro phase, Revisiting wording',
       when: 'Shown when isRevisited = true (returning user retaking).',
@@ -383,7 +383,7 @@ function buildIntroOutroDoc() {
         'Follow-up: "There\'s no right direction for things to shift. Answer honestly, not how you think you should feel, but how you actually do. You\'ll see both sets of answers together once you\'ve both finished."',
         'Duration line: "~10 minutes · life questions only"',
       ],
-      source: 'src/App.jsx:126-157 — ExpectationsExercise intro phase, isRevisited branch',
+      source: 'src/App.jsx:126-157. ExpectationsExercise intro phase, isRevisited branch',
       color: PURPLE,
     }),
 
@@ -396,7 +396,7 @@ function buildIntroOutroDoc() {
         'Title: "Who were the primary adults in your home growing up?"',
         'Body: "This shapes how you answer the next section, and helps us give you more personalized context in your results."',
       ],
-      source: 'src/App.jsx:160-181 — ExpectationsExercise childhood-setup phase',
+      source: 'src/App.jsx:160-181. ExpectationsExercise childhood-setup phase',
       color: PURPLE,
     }),
 
@@ -437,7 +437,7 @@ function buildIntroOutroDoc() {
 
     eyebrow('Intro copy', GREEN),
     ...copyCard({
-      where: 'Dedicated intro phase before Question 1 — both partners',
+      where: 'Dedicated intro phase before Question 1, both partners',
       when: 'Shown the first time the user opens Exercise 03. Skipped on resume when saved progress exists.',
       text: [
         'Eyebrow: "Exercise 03 · Our Relationship Story"',
@@ -447,7 +447,7 @@ function buildIntroOutroDoc() {
         'Duration line: "~10 minutes"',
         'Button: "Start →"',
       ],
-      source: 'src/App.jsx:4028-4050 — AnniversaryExercise intro phase',
+      source: 'src/App.jsx:4028-4050. AnniversaryExercise intro phase',
       color: GREEN,
     }),
 
@@ -465,7 +465,7 @@ function buildIntroOutroDoc() {
       color: GREEN,
     }),
 
-    eyebrow('Outro copy — completion celebration', GREEN),
+    eyebrow('Outro copy, completion celebration', GREEN),
     ...copyCard({
       where: 'Inline completion screen inside the exercise component',
       when: 'Shown after all questions are answered. Redesigned as a full celebration screen (gradient conic-ring with pulsing check, larger title, fuller acknowledgement).',
@@ -475,7 +475,7 @@ function buildIntroOutroDoc() {
         'Body: "You named the moments, the shifts, and the things you hope for. When {partnerName} finishes theirs, you\'ll see where your stories overlap and where you each saw something the other didn\'t."',
         'Button: "View My Results →"',
       ],
-      source: 'src/App.jsx:4092-4113 — AnniversaryExercise celebration outro',
+      source: 'src/App.jsx:4092-4113. AnniversaryExercise celebration outro',
       color: GREEN,
     }),
 
@@ -517,12 +517,12 @@ function buildIntroOutroDoc() {
       where: 'Above each of the 6 sections on the page',
       when: 'Static section labels.',
       text: [
-        '1. Name Change — "{n}/{total} complete"',
-        '2. Merging Finances — "{n}/{total} complete"',
-        '3. Insurance & Benefits — "{n}/{total} complete"',
-        '4. Estate Basics — "{n}/{total} complete"',
-        '5. Taxes — "{n}/{total} complete"',
-        '6. Household Setup — "{n}/{total} complete"',
+        '1. Name Change, "{n}/{total} complete"',
+        '2. Merging Finances, "{n}/{total} complete"',
+        '3. Insurance & Benefits, "{n}/{total} complete"',
+        '4. Estate Basics, "{n}/{total} complete"',
+        '5. Taxes, "{n}/{total} complete"',
+        '6. Household Setup, "{n}/{total} complete"',
         'When a section is fully done, an additional "✓ Done" label appears.',
       ],
       source: 'src/App.jsx:4297-4302',
@@ -535,7 +535,7 @@ function buildIntroOutroDoc() {
       when: 'The checklist has no completion celebration screen. When all items are checked, nothing in the UI changes beyond the progress meter showing 100% and each section showing "✓ Done".',
       text: '(No outro copy exists.)',
       source: 'src/App.jsx:4272-4330',
-      notes: 'Consider whether a "You\'re all set" celebration is worth adding. Low priority — most couples complete this over weeks, so celebrating 100% would be unusual.',
+      notes: 'Consider whether a "You\'re all set" celebration is worth adding. Low priority, most couples complete this over weeks, so celebrating 100% would be unusual.',
       color: GOLD,
     }),
   ];
@@ -552,7 +552,7 @@ function buildIntroOutroDoc() {
       text: [
         'Eyebrow: "Attune Premium"',
         'Title: "Shared Budget Tool"',
-        'Body: "Build your real shared budget together. Your numbers stay yours — Attune is a calculator, not a financial advisor."',
+        'Body: "Build your real shared budget together. Your numbers stay yours. Attune is a calculator, not a financial advisor."',
         'Secondary note: "Both of you can access and edit this tool from your dashboard. Use Save changes to sync across devices."',
       ],
       source: 'src/App.jsx:4658-4663',
@@ -564,10 +564,10 @@ function buildIntroOutroDoc() {
       where: 'Section headers as user scrolls',
       when: 'Static step labels shown above each input section.',
       text: [
-        'Step 1 · "Start with where you stand" — "Each of you enters your post-tax monthly take-home. Then pick the model that matches how you want to handle shared expenses."',
-        'Step 2 · "Essentials" — "The things you pay every month to keep life running. Include regular savings and retirement contributions here."',
-        'Step 3 · "Discretionary" — "Everything else. Personal spending at the bottom is split per partner — your walking-around money."',
-        'Step 4 · "Savings goals" — "Add a goal and Attune will show the monthly contribution needed. Compare it against your surplus above to see what\'s realistic."',
+        'Step 1 · "Start with where you stand", "Each of you enters your post-tax monthly take-home. Then pick the model that matches how you want to handle shared expenses."',
+        'Step 2 · "Essentials", "The things you pay every month to keep life running. Include regular savings and retirement contributions here."',
+        'Step 3 · "Discretionary", "Everything else. Personal spending at the bottom is split per partner, your walking-around money."',
+        'Step 4 · "Savings goals", "Add a goal and Attune will show the monthly contribution needed. Compare it against your surplus above to see what\'s realistic."',
       ],
       source: 'src/App.jsx:4700-4810',
       color: ROSE,
@@ -584,7 +584,7 @@ function buildIntroOutroDoc() {
         'Block 2 header: "What you each said"',
         'Block 2 caption: "From your Expectations Exercise answers."',
         'Block 3 header: "How the money moves"',
-        'Under fully separate: "You chose fully separate. Each of you tracks your own contribution independently — no shared split is calculated."',
+        'Under fully separate: "You chose fully separate. Each of you tracks your own contribution independently, no shared split is calculated."',
         'Under fully combined: "You chose fully combined. Combined pool of {total} covers {shared} in shared expenses and savings, leaving {surplus} unallocated from the pool."',
       ],
       source: 'src/App.jsx:4870-4990',
@@ -601,7 +601,7 @@ function buildIntroOutroDoc() {
         'Body: "Raises, new expenses, goals that shift. Come back whenever the numbers do. Use Save changes to sync updates across both of your devices."',
       ],
       source: 'src/App.jsx:5057-5070',
-      notes: 'Designed as a reassurance, not a "you\'re done" message — the budget is iterative by design.',
+      notes: 'Designed as a reassurance, not a "you\'re done" message, the budget is iterative by design.',
       color: ROSE,
     }),
   ];
@@ -673,14 +673,14 @@ function buildEdgeCaseDoc() {
       ['Section 5', 'Save + sync states',              'Budget tool save button, localStorage, Supabase sync', GREEN],
       ['Section 6', 'Privacy reassurances',            'Shown at key decision points',              ORANGE],
       ['Section 7', 'Generic fallback errors',         'Network failures and unexpected errors',    INK],
-      ['Section 8', 'Edge-case copy — shipped',       'Copy for session expiry, resume, invite reminder, sync failures, and anonymous storage', ORANGE],
+      ['Section 8', 'Edge-case copy, shipped',       'Copy for session expiry, resume, invite reminder, sync failures, and anonymous storage', ORANGE],
     ].map(([step, title, desc, color]) => new Paragraph({
       alignment: AlignmentType.CENTER,
       spacing: { after: 100 },
       children: [
         run(step + '   ', { size: 18, bold: true, color, characterSpacing: 60 }),
         run(title + '   ', { size: 22, bold: true, color: INK }),
-        run('— ' + desc, { size: 20, italics: true, color: MUTED }),
+        run(',' + desc, { size: 20, italics: true, color: MUTED }),
       ],
     })),
 
@@ -699,7 +699,7 @@ function buildEdgeCaseDoc() {
 
     eyebrow('Invite partner prompt', BLUE),
     ...copyCard({
-      where: 'Signup / checkout flow — inviting partner',
+      where: 'Signup / checkout flow, inviting partner',
       when: 'Shown when a user has entered their partner\'s name (and optionally email) during signup.',
       text: [
         'With partner name: "Let\'s invite {theirName} so you can do this together."',
@@ -735,10 +735,10 @@ function buildEdgeCaseDoc() {
 
     eyebrow('Pre-exercise reassurance (Partner B side)', BLUE),
     ...copyCard({
-      where: 'Partner B — after sign-in, before exercises',
+      where: 'Partner B, after sign-in, before exercises',
       when: 'Shown after Partner B completes their minimal account setup and is about to start exercises.',
       text: [
-        '"Attune uses your names to personalize your results. Your answers are never shared with your partner individually — only as part of your joint results."',
+        '"Attune uses your names to personalize your results. Your answers are never shared with your partner individually, only as part of your joint results."',
       ],
       source: 'src/App.jsx:8490',
       color: BLUE,
@@ -750,7 +750,7 @@ function buildEdgeCaseDoc() {
     ...secHead(2, 'Partner hasn\'t completed yet',
       'Waiting states shown when one partner has finished exercises and the other has not.', PURPLE),
 
-    eyebrow('Dashboard — waiting banner', PURPLE),
+    eyebrow('Dashboard, waiting banner', PURPLE),
     ...copyCard({
       where: 'Partner A\'s dashboard, below the exercise cards',
       when: 'Shown when the logged-in user has completed at least one exercise but results are not yet unlocked (partner hasn\'t finished).',
@@ -761,7 +761,7 @@ function buildEdgeCaseDoc() {
       color: PURPLE,
     }),
 
-    eyebrow('Exercise 1 completion — waiting message', PURPLE),
+    eyebrow('Exercise 1 completion, waiting message', PURPLE),
     ...copyCard({
       where: 'Exercise 01 completion screen',
       when: 'Shown after Partner A finishes Exercise 01 but their partner hasn\'t yet.',
@@ -772,7 +772,7 @@ function buildEdgeCaseDoc() {
       color: PURPLE,
     }),
 
-    eyebrow('Exercise 2 completion — waiting message', PURPLE),
+    eyebrow('Exercise 2 completion, waiting message', PURPLE),
     ...copyCard({
       where: 'Exercise 02 completion screen',
       when: 'Shown after Partner A finishes Exercise 02 but their partner hasn\'t finished both exercises.',
@@ -784,7 +784,7 @@ function buildEdgeCaseDoc() {
       color: PURPLE,
     }),
 
-    eyebrow('Partner B — waiting for Partner A', PURPLE),
+    eyebrow('Partner B, waiting for Partner A', PURPLE),
     ...copyCard({
       where: 'Partner B completion screen',
       when: 'Shown when Partner B has finished all exercises but Partner A has not.',
@@ -798,7 +798,7 @@ function buildEdgeCaseDoc() {
       color: PURPLE,
     }),
 
-    eyebrow('Partner B — both done', PURPLE),
+    eyebrow('Partner B, both done', PURPLE),
     ...copyCard({
       where: 'Partner B completion screen (alternate state)',
       when: 'Shown when Partner B has finished all exercises AND Partner A has also finished.',
@@ -842,13 +842,13 @@ function buildEdgeCaseDoc() {
       color: GOLD,
     }),
 
-    eyebrow('Partner B — wrong account warning', GOLD),
+    eyebrow('Partner B, wrong account warning', GOLD),
     ...copyCard({
       where: 'Partner B intro screen',
       when: 'Shown on the Partner B intro screen as a "before you start" warning, to prevent Partner A from accidentally submitting under Partner B\'s identity.',
       text: [
         'Heading: "Before you start"',
-        'Body: "If this is {account.partnerName} checking your own partner\'s view — close this tab to prevent overwriting {account.name}\'s results. Each partner uses their own account and their own link."',
+        'Body: "If this is {account.partnerName} checking your own partner\'s view, close this tab to prevent overwriting {account.name}\'s results. Each partner uses their own account and their own link."',
       ],
       source: 'src/App.jsx:8578-8583',
       color: GOLD,
@@ -880,7 +880,7 @@ function buildEdgeCaseDoc() {
     }),
 
     ...copyCard({
-      where: 'Login form — generic fallback',
+      where: 'Login form, generic fallback',
       when: 'Shown when login fails for a reason other than wrong password (network, server, etc.).',
       text: '"Login failed. Please try again."',
       source: 'src/App.jsx:8185',
@@ -888,7 +888,7 @@ function buildEdgeCaseDoc() {
     }),
 
     ...copyCard({
-      where: 'Signup form — generic fallback',
+      where: 'Signup form, generic fallback',
       when: 'Shown when signup fails for an unexpected reason.',
       text: '"Something went wrong. Please try again."',
       source: 'src/App.jsx:1430, 8382',
@@ -897,7 +897,7 @@ function buildEdgeCaseDoc() {
     }),
 
     ...copyCard({
-      where: 'Signup — Supabase auth error pass-through',
+      where: 'Signup. Supabase auth error pass-through',
       when: 'Shown when Supabase returns an error during signup (e.g. invalid email format, weak password).',
       text: '"{authErr.message}" (exact text comes from Supabase SDK, not from Attune)',
       source: 'src/App.jsx:7928',
@@ -911,7 +911,7 @@ function buildEdgeCaseDoc() {
     ...secHead(5, 'Save + sync states',
       'Budget tool sticky save bar states + workbook generation feedback.', GREEN),
 
-    eyebrow('Budget tool — save button states', GREEN),
+    eyebrow('Budget tool, save button states', GREEN),
     ...copyCard({
       where: 'Budget tool sticky footer',
       when: 'Shown as the state indicator next to the Save changes button.',
@@ -925,7 +925,7 @@ function buildEdgeCaseDoc() {
       color: GREEN,
     }),
 
-    eyebrow('Budget tool — unsaved changes indicator in summary bar', GREEN),
+    eyebrow('Budget tool, unsaved changes indicator in summary bar', GREEN),
     ...copyCard({
       where: 'Sticky summary bar at the top of the budget tool',
       when: 'Shown as a small badge when the user has unsaved changes.',
@@ -960,7 +960,7 @@ function buildEdgeCaseDoc() {
     ...copyCard({
       where: 'Before starting exercises',
       when: 'Shown before the user begins the exercise flow.',
-      text: '"Attune uses your names to personalize your results. Your answers are never shared with your partner individually — only as part of your joint results."',
+      text: '"Attune uses your names to personalize your results. Your answers are never shared with your partner individually, only as part of your joint results."',
       source: 'src/App.jsx:8490',
       color: ORANGE,
     }),
@@ -968,16 +968,16 @@ function buildEdgeCaseDoc() {
     ...copyCard({
       where: 'Partner B intro screen body',
       when: 'Shown as part of the Partner B intro.',
-      text: '"Exercise 01 covers how you communicate and connect. Exercise 02 maps your expectations. Both take about 15 minutes. Answer honestly — your partner won\'t see your individual answers."',
+      text: '"Exercise 01 covers how you communicate and connect. Exercise 02 maps your expectations. Both take about 15 minutes. Answer honestly, your partner won\'t see your individual answers."',
       source: 'src/App.jsx:8567',
-      notes: 'Overlaps with the intro/outro doc, Section 1. Included here too because the key phrase — "your partner won\'t see your individual answers" — is a privacy reassurance.',
+      notes: 'Overlaps with the intro/outro doc, Section 1. Included here too because the key phrase, "your partner won\'t see your individual answers", is a privacy reassurance.',
       color: ORANGE,
     }),
 
     ...copyCard({
       where: 'Expectations exercise intro follow-up (Core)',
       when: 'Shown in the follow-up paragraph before the user starts Exercise 02.',
-      text: '"Answer for yourself — you\'ll see your answers alongside your partner\'s only after you\'ve both finished."',
+      text: '"Answer for yourself, you\'ll see your answers alongside your partner\'s only after you\'ve both finished."',
       source: 'src/App.jsx:147',
       color: ORANGE,
     }),
@@ -993,20 +993,20 @@ function buildEdgeCaseDoc() {
       when: 'Shown as a last-resort error when a specific cause is not identifiable.',
       text: '"Something went wrong. Please try again."',
       source: 'src/App.jsx:1430, 8382',
-      notes: 'Generic — users get no information about what actually failed. Acceptable as a fallback; not acceptable as the only copy for common failure modes. Worth identifying which specific failures currently hit this fallback.',
+      notes: 'Generic, users get no information about what actually failed. Acceptable as a fallback; not acceptable as the only copy for common failure modes. Worth identifying which specific failures currently hit this fallback.',
       color: INK,
     }),
   ];
 
   // ── Section 8: Edge-case copy — shipped ────────────────────────────────
   const gapsSection = [
-    ...secHead(8, 'Edge-case copy — shipped',
+    ...secHead(8, 'Edge-case copy, shipped',
       'Copy for session expiry, resume, invite reminder, sync failures, and anonymous storage. All six drafts from the previous review are now live.', ORANGE),
 
     body('These were proposed drafts in the prior version of this document. All have since been implemented. Each card shows the shipped copy and a source reference in src/App.jsx.',
       { italics: true, color: MUTED, after: 240 }),
 
-    eyebrow('Welcome back — session expiry or normal resume', ORANGE),
+    eyebrow('Welcome back, session expiry or normal resume', ORANGE),
     ...copyCard({
       where: 'Dashboard banner at the top of the content area, above the profile setup tile',
       when: 'Shown whenever the user lands on the dashboard and has saved progress in any of ex1/ex2/ex3. Covers both session expiry (user was signed out, came back, re-authenticated) and normal resume (came back a day later). Dismissible per session.',
@@ -1016,8 +1016,8 @@ function buildEdgeCaseDoc() {
         'Primary button: "Continue {Exercise N} →"',
         'Secondary button: "Dismiss"',
       ],
-      source: 'src/App.jsx:10672-10711 — detects first in-progress exercise from localStorage ex1/ex2/ex3 progress keys',
-      notes: 'Target exercise is the first one with saved progress in order Ex1 → Ex2 → Ex3. Dismissal is session-scoped via window.__attune_welcome_back_dismissed — banner will reappear on a fresh session if progress still exists.',
+      source: 'src/App.jsx:10672-10711, detects first in-progress exercise from localStorage ex1/ex2/ex3 progress keys',
+      notes: 'Target exercise is the first one with saved progress in order Ex1 → Ex2 → Ex3. Dismissal is session-scoped via window.__attune_welcome_back_dismissed, banner will reappear on a fresh session if progress still exists.',
       color: ORANGE,
     }),
 
@@ -1030,12 +1030,12 @@ function buildEdgeCaseDoc() {
         'Ex02: "Picking up where you left off."',
         'Ex03: "Picking up where you left off."',
       ],
-      source: 'src/App.jsx:146-161 — ResumeToast component, used in Exercise01Flow, ExpectationsExercise, and AnniversaryExercise',
+      source: 'src/App.jsx:146-161. ResumeToast component, used in Exercise01Flow, ExpectationsExercise, and AnniversaryExercise',
       notes: 'Ex01 shows the specific question number because the mid-exercise state there is granular (idx + answers). Ex02 and Ex03 are phase-based so the generic copy reads better.',
       color: ORANGE,
     }),
 
-    eyebrow('Partial completion — Ex01 done, Ex02 not started', ORANGE),
+    eyebrow('Partial completion. Ex01 done, Ex02 not started', ORANGE),
     ...copyCard({
       where: 'Exercise 01 completion screen',
       when: 'The user has just finished Exercise 01 and ex2Answers is still null.',
@@ -1043,12 +1043,12 @@ function buildEdgeCaseDoc() {
         'Body: "Next up: Exercise 2. Your expectations, about 15 minutes."',
         'Button: "Start Exercise 2 →"',
       ],
-      source: 'src/App.jsx:10660-10700 — Exercise 01 completion screen (see Section 1 of the intro/outro doc for full three-state detail)',
+      source: 'src/App.jsx:10660-10700. Exercise 01 completion screen (see Section 1 of the intro/outro doc for full three-state detail)',
       notes: 'Implemented as the first of three mutually-exclusive states on the Ex01 completion screen. Covers the "next up" case without needing a separate dashboard callout.',
       color: ORANGE,
     }),
 
-    eyebrow('Partner invite — escalated reminder after 5+ days', ORANGE),
+    eyebrow('Partner invite, escalated reminder after 5+ days', ORANGE),
     ...copyCard({
       where: 'Partner invite card on the dashboard',
       when: 'Shown when partner has not joined and it has been 5+ days since the user\'s account was created.',
@@ -1059,7 +1059,7 @@ function buildEdgeCaseDoc() {
         'Body (without partnerEmail): "Share the link below to nudge them."',
         'Actions: existing Resend email button + link-copy area',
       ],
-      source: 'src/App.jsx:9143-9166 — PartnerInviteCard with daysSinceInvite >= 5 trigger',
+      source: 'src/App.jsx:9143-9166. PartnerInviteCard with daysSinceInvite >= 5 trigger',
       notes: 'Below 5 days the card shows the original "Invite your partner" copy. Above 5 days it swaps in this escalated version. Resend button logic and copy flow unchanged.',
       color: ORANGE,
     }),
@@ -1072,8 +1072,8 @@ function buildEdgeCaseDoc() {
         'On first failure: "Saved on this device. We\'ll sync when you\'re back online."',
         'On next success after a prior failure: "Synced."',
       ],
-      source: 'src/App.jsx:167-184 — trackedSupabaseWrite() helper',
-      notes: 'Wraps each save in a try/catch, sets a window-level sync-failed flag on error. LocalStorage writes happen unconditionally before the Supabase call, so no answer data is ever lost. The "Synced." toast only shows if a prior failure was recovered — successful saves are otherwise silent.',
+      source: 'src/App.jsx:167-184, trackedSupabaseWrite() helper',
+      notes: 'Wraps each save in a try/catch, sets a window-level sync-failed flag on error. LocalStorage writes happen unconditionally before the Supabase call, so no answer data is ever lost. The "Synced." toast only shows if a prior failure was recovered, successful saves are otherwise silent.',
       color: ORANGE,
     }),
 
@@ -1084,7 +1084,7 @@ function buildEdgeCaseDoc() {
       text: [
         'Banner: "Your progress saves on this device. Create an account at the end to save it permanently."',
       ],
-      source: 'src/App.jsx:132-142 — AnonymousStorageBanner component, mounted at the top of each exercise',
+      source: 'src/App.jsx:132-142. AnonymousStorageBanner component, mounted at the top of each exercise',
       notes: 'Amber-tinted, low-urgency treatment. Factual rather than alarming.',
       color: ORANGE,
     }),
@@ -1121,7 +1121,7 @@ async function buildAndSave(doc, filename) {
   const docxPath = '/tmp/' + filename + '.docx';
   writeFileSync(docxPath, buf);
   execSync('libreoffice --headless --convert-to pdf --outdir /tmp ' + docxPath, { stdio: 'pipe' });
-  console.log(`✓ ${filename} — ${buf.length} bytes`);
+  console.log(`✓ ${filename}, ${buf.length} bytes`);
 }
 
 await buildAndSave(buildIntroOutroDoc(), 'intro_outro_copy');

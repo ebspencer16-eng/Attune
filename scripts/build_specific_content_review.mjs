@@ -229,7 +229,7 @@ const coverPage = [
     children: [
       run(num + '   ', { size: 13, bold: true, color: ORANGE }),
       run(title + '   ', { size: 14, color: INK }),
-      run('— ' + info, { size: 12, italics: true, color: MUTED }),
+      run(',' + info, { size: 12, italics: true, color: MUTED }),
     ],
   })),
 ];
@@ -240,7 +240,7 @@ const section1 = [
     'Name renders on Cover, Snapshot, Part 1 intro, Reference Card, and the results site. Tagline renders in all those places except the Snapshot.', ORANGE),
 
   ...NEW_COUPLE_TYPES.flatMap((ct, i) => [
-    midSection(`1.${i + 1}`, `${ct.id} — ${ct.name}`, ORANGE, {
+    midSection(`1.${i + 1}`, `${ct.id}, ${ct.name}`, ORANGE, {
       extras: `${ct.id[0] === ct.id[1] ? 'same-type' : 'cross-type'}   ·   ${ct.color}`,
     }),
     prose(`Tagline: "${ct.tagline}"`, { italics: true }),
@@ -252,7 +252,7 @@ const section1 = [
 // right column of each dimension's hero. Couple-type-specific; all 10
 // dimensions × 10 couple types. Dim pages only render when gap >= 1.5.
 const section2 = [
-  ...bigSection(2, '"What this means for your relationship" — per couple type',
+  ...bigSection(2, '"What this means for your relationship", per couple type',
     'Grey italic text in the hero\'s right column on each dimension page. Couple-type-specific; 10 dimensions × 10 types = 100 blocks. Present-tense, second-person, 2-3 sentences. (Dim pages only render when the couple\'s gap on that dimension is ≥1.5, so there is no separate "close" text.)', PURPLE),
 
   ...DIMS.flatMap((dimKey, i) => {
@@ -273,7 +273,7 @@ const section2 = [
 
     NEW_COUPLE_TYPES.forEach((ct, j) => {
       const text = typeBlock[ct.id];
-      out.push(smallSection(`2.${i + 1}.${j + 1}`, `${ct.id} — ${ct.name}`, PURPLE, { before: 200 }));
+      out.push(smallSection(`2.${i + 1}.${j + 1}`, `${ct.id}, ${ct.name}`, PURPLE, { before: 200 }));
       if (text) {
         out.push(prose(text, { indent: INDENT_PROSE_UNDER_SMALL }));
       } else {
@@ -300,7 +300,7 @@ const section3 = [
     const out = [midSection(`3.${i + 1}`, `Moment ${moment.n}: ${moment.title}`, GREEN)];
     INDIVIDUAL_TYPES.forEach((t, j) => {
       const scene = SCENE_DRAFTS[t.letter]?.[moment.key];
-      out.push(smallSection(`3.${i + 1}.${j + 1}`, `Type ${t.letter} — ${t.label}`, GREEN, { before: 220 }));
+      out.push(smallSection(`3.${i + 1}.${j + 1}`, `Type ${t.letter}, ${t.label}`, GREEN, { before: 220 }));
       if (scene) {
         const mkLabel = (label, color) => new Paragraph({
           spacing: { before: 0, after: 50 }, indent: { left: INDENT_PROSE_UNDER_SMALL },
@@ -356,7 +356,7 @@ const section5 = [
   ...NEW_COUPLE_TYPES.flatMap((ct, i) => {
     const phrase = ct.tips?.[0]?.phraseTry;
     return [
-      midSection(`5.${i + 1}`, `${ct.id} — ${ct.name}`, 'C2410C', {
+      midSection(`5.${i + 1}`, `${ct.id}, ${ct.name}`, 'C2410C', {
         extras: phrase ? `"${phrase}"` : '(no phrase drafted)',
       }),
     ];
@@ -366,7 +366,7 @@ const section5 = [
 // ── SECTION 7 ────────────────────────────────────────────────────────────
 const section6 = [
   ...bigSection(6, 'Part epigraph options',
-    'Each of the 4 main Parts opens with an epigraph — a centered italic quote + attribution. Three candidates per Part. Mark your pick or write your own.',
+    'Each of the 4 main Parts opens with an epigraph, a centered italic quote + attribution. Three candidates per Part. Mark your pick or write your own.',
     INK),
 
   ...[1, 2, 3, 4].flatMap(partNum => {
@@ -383,7 +383,7 @@ const section6 = [
       out.push(new Paragraph({
         spacing: { before: 0, after: 100 },
         indent: { left: INDENT_PROSE_UNDER_SMALL },
-        children: [run(`— ${epi.author}`, { size: 12, color: MUTED })],
+        children: [run(`,${epi.author}`, { size: 12, color: MUTED })],
       }));
     });
     return out;
