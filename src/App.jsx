@@ -2534,7 +2534,7 @@ function Exercise01Flow({ userName, partnerName, onComplete, skipIntro = false }
         </p>
         <div style={{ display: "flex", gap: "0.85rem", marginBottom: "1.75rem", flexWrap: "wrap" }}>
           {[
-            { num: '01', title: 'Communication', color: '#E8673A', desc: '30 questions · 10 dimensions' },
+            { num: '01', title: 'Communication', color: '#E8673A', desc: '28 questions · 10 dimensions' },
             { num: '02', title: 'Expectations',  color: '#1B5FE8', desc: 'Responsibilities & life' },
           ].map(e => (
             <div key={e.num} style={{ flex: "1 1 180px", background: C.warm, border: `1.5px solid ${e.color}33`, borderRadius: 12, padding: "0.9rem 1rem" }}>
@@ -9728,7 +9728,7 @@ function PartnerBExerciseFlow({ account, onComplete }) {
           Exercise 01 covers how you communicate and connect. Exercise 02 maps your expectations. Both take about 15 minutes. Answer honestly — your partner won't see your individual answers.
         </p>
         <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', marginBottom: '2.5rem', flexWrap: 'wrap' }}>
-          {[{ num: '01', title: 'Communication', color: '#E8673A', desc: '30 questions · 10 dimensions' }, { num: '02', title: 'Expectations', color: '#1B5FE8', desc: 'Responsibilities & life' }].map(e => (
+          {[{ num: '01', title: 'Communication', color: '#E8673A', desc: '28 questions · 10 dimensions' }, { num: '02', title: 'Expectations', color: '#1B5FE8', desc: 'Responsibilities & life' }].map(e => (
             <div key={e.num} style={{ background: 'rgba(255,255,255,0.06)', border: `1px solid ${e.color}33`, borderRadius: 14, padding: '1.1rem 1.4rem', textAlign: 'left', minWidth: 160 }}>
               <div style={{ fontSize: '0.58rem', letterSpacing: '0.18em', color: e.color, fontWeight: 700, fontFamily: "'DM Sans', sans-serif", textTransform: 'uppercase', marginBottom: '0.35rem' }}>Exercise {e.num}</div>
               <div style={{ fontFamily: "'Playfair Display', Georgia, serif", fontSize: '1rem', fontWeight: 700, color: 'white', marginBottom: '0.25rem' }}>{e.title}</div>
