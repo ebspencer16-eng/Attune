@@ -618,7 +618,7 @@
     </div>
 
     <!-- Mobile: step label inline in card, swipeable -->
-    <div class="story-cards-mobile-scroll" style="display:none;overflow-x:scroll;gap:1rem;padding-bottom:.75rem;-webkit-overflow-scrolling:touch;scrollbar-width:none;margin:0 -1.25rem;padding-left:1.25rem;padding-right:.5rem;scroll-snap-type:x mandatory;">
+    <div class="story-cards-mobile-scroll" data-dot-track="hiw" style="display:none;overflow-x:scroll;gap:1rem;padding-bottom:.75rem;-webkit-overflow-scrolling:touch;scrollbar-width:none;margin:0 -1.25rem;padding-left:1.25rem;padding-right:.5rem;scroll-snap-type:x mandatory;">
       <div style="background:linear-gradient(150deg,#3D1A08,#5A2810);border-radius:20px;overflow:hidden;display:flex;flex-direction:column;min-height:340px;min-width:78vw;max-width:300px;flex-shrink:0;scroll-snap-align:start;">
         <div style="height:3px;background:#E8673A;flex-shrink:0;"></div>
         <div style="padding:1.35rem 1.25rem .6rem;display:flex;flex-direction:column;gap:.55rem;">
@@ -720,10 +720,10 @@
     </div>
 
     <!-- Mobile dots -->
-    <div class="story-cards-mobile-scroll" style="display:none;align-items:center;gap:.4rem;margin-top:.6rem;padding-left:1.25rem;">
-      <div style="width:18px;height:2px;border-radius:2px;background:var(--orange);"></div>
-      <div style="width:6px;height:2px;border-radius:2px;background:var(--stone);"></div>
-      <div style="width:6px;height:2px;border-radius:2px;background:var(--stone);"></div>
+    <div class="story-cards-mobile-scroll" data-dot-indicator="hiw" style="display:none;align-items:center;gap:.4rem;margin-top:.6rem;padding-left:1.25rem;">
+      <div class="dot" style="--active-color:var(--orange);width:18px;height:2px;border-radius:2px;background:var(--orange);transition:width .2s,background .2s;"></div>
+      <div class="dot" style="--active-color:var(--orange);width:6px;height:2px;border-radius:2px;background:var(--stone);transition:width .2s,background .2s;"></div>
+      <div class="dot" style="--active-color:var(--orange);width:6px;height:2px;border-radius:2px;background:var(--stone);transition:width .2s,background .2s;"></div>
     </div>
 
   </div>
@@ -915,6 +915,71 @@ function setUse(mode) {
     if (burger) burger.classList.remove('open');
   }
 });
+</script>
+
+<script>
+/* Auto-update carousel dot indicators on scroll. Pairs each
+   data-dot-track="<id>" container with its data-dot-indicator="<id>" dots. */
+(function(){
+  function syncDots(){
+    document.querySelectorAll('[data-dot-track]').forEach(function(track){
+      var id = track.getAttribute('data-dot-track');
+      var indicator = document.querySelector('[data-dot-indicator="'+id+'"]');
+      if(!indicator) return;
+      var dots = indicator.querySelectorAll('.dot');
+      var cards = track.children;
+      if(!dots.length || !cards.length) return;
+      // Only run logic when the track is actually scrollable (mobile breakpoint).
+      var trackRect = track.getBoundingClientRect();
+      var scrollable = track.scrollWidth > track.clientWidth + 4;
+      function activeColor(){
+        var cs = getComputedStyle(dots[0]);
+        return cs.getPropertyValue('--active-color') || '#E8673A';
+      }
+      function update(){
+        if(!scrollable){
+          // Static layout (desktop grid): show all dots inactive, hide row by parent CSS if desired.
+          return;
+        }
+        var bestIdx = 0, bestDist = Infinity;
+        var trackLeft = track.getBoundingClientRect().left + parseFloat(getComputedStyle(track).paddingLeft || '0');
+        for(var i=0;i<cards.length;i++){
+          var r = cards[i].getBoundingClientRect();
+          var d = Math.abs(r.left - trackLeft);
+          if(d < bestDist){ bestDist = d; bestIdx = i; }
+        }
+        for(var i=0;i<dots.length;i++){
+          var isActive = (i === bestIdx);
+          dots[i].style.width = isActive ? '18px' : '6px';
+          dots[i].style.background = isActive ? activeColor() : 'var(--stone, #E8DDD0)';
+        }
+      }
+      track.addEventListener('scroll', update, {passive:true});
+      window.addEventListener('resize', function(){
+        scrollable = track.scrollWidth > track.clientWidth + 4;
+        update();
+      });
+      // Tap a dot to scroll to that card
+      for(var i=0;i<dots.length;i++){
+        (function(idx){
+          dots[idx].style.cursor = 'pointer';
+          dots[idx].addEventListener('click', function(){
+            var card = cards[idx];
+            if(card){
+              track.scrollTo({left: card.offsetLeft - track.offsetLeft, behavior: 'smooth'});
+            }
+          });
+        })(i);
+      }
+      update();
+    });
+  }
+  if(document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', syncDots);
+  } else {
+    syncDots();
+  }
+})();
 </script>
 </body>
 </html>

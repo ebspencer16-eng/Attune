@@ -345,7 +345,7 @@
     <p class="s-eye">Who it's for</p>
     <h2 class="s-title">Not a rescue tool. A head-start for couples who want to understand each other more deeply.</h2>
     <p style="font-size:.8rem;color:var(--muted);font-weight:500;margin-bottom:1rem;font-family:'DM Sans',sans-serif;">Perfect for couples who are:</p>
-    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1.25rem;margin-top:.25rem;" class="purpose-who-grid">
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1.25rem;margin-top:.25rem;" class="purpose-who-grid" data-dot-track="p-who">
       <div style="background:white;border:1.5px solid var(--stone);border-radius:16px;padding:1.25rem 1rem;">
         <svg viewBox="0 0 52 52" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:44px;height:44px;margin-bottom:.85rem;display:block;">
   <rect width="52" height="52" rx="14" fill="rgba(232,103,58,.1)"/>
@@ -389,10 +389,17 @@
     </div>
   </div>
 </section>
+
+<div data-dot-indicator="p-who" style="display:none;align-items:center;gap:.4rem;margin:.85rem 1.25rem 0;justify-content:center;">
+  <div class="dot" style="--active-color:#E8673A;width:18px;height:2px;border-radius:2px;background:#E8673A;transition:width .2s,background .2s;"></div>
+  <div class="dot" style="--active-color:#E8673A;width:6px;height:2px;border-radius:2px;background:#E8DDD0;transition:width .2s,background .2s;"></div>
+  <div class="dot" style="--active-color:#E8673A;width:6px;height:2px;border-radius:2px;background:#E8DDD0;transition:width .2s,background .2s;"></div>
+</div>
 <style>@media(max-width:680px){
-    .purpose-who-grid{display:flex!important;flex-wrap:nowrap!important;overflow-x:auto!important;gap:.75rem!important;padding-bottom:.75rem!important;-webkit-overflow-scrolling:touch!important;scrollbar-width:none!important;margin-left:-1.25rem!important;margin-right:-1.25rem!important;padding-left:1.25rem!important;padding-right:1.25rem!important;}
+    [data-dot-indicator="p-who"]{display:flex!important}
+    .purpose-who-grid{display:flex!important;flex-wrap:nowrap!important;overflow-x:auto!important;gap:.75rem!important;padding-bottom:.75rem!important;-webkit-overflow-scrolling:touch!important;scrollbar-width:none!important;margin-left:-1.25rem!important;margin-right:-1.25rem!important;padding-left:1.25rem!important;padding-right:.5rem!important;scroll-snap-type:x mandatory!important;}
     .purpose-who-grid::-webkit-scrollbar{display:none}
-    .purpose-who-grid>div{min-width:72vw!important;max-width:72vw!important;flex-shrink:0!important;padding:1rem!important;}
+    .purpose-who-grid>div{min-width:78vw!important;max-width:78vw!important;flex-shrink:0!important;padding:1rem!important;scroll-snap-align:start!important;}
   }
   @media(max-width:640px){
     .page-header{padding:calc(58px + 1.75rem) 1.25rem 2rem!important}
@@ -488,6 +495,71 @@ function toggleMenu() {
     if (burger) burger.classList.remove('open');
   }
 });
+</script>
+
+<script>
+/* Auto-update carousel dot indicators on scroll. Pairs each
+   data-dot-track="<id>" container with its data-dot-indicator="<id>" dots. */
+(function(){
+  function syncDots(){
+    document.querySelectorAll('[data-dot-track]').forEach(function(track){
+      var id = track.getAttribute('data-dot-track');
+      var indicator = document.querySelector('[data-dot-indicator="'+id+'"]');
+      if(!indicator) return;
+      var dots = indicator.querySelectorAll('.dot');
+      var cards = track.children;
+      if(!dots.length || !cards.length) return;
+      // Only run logic when the track is actually scrollable (mobile breakpoint).
+      var trackRect = track.getBoundingClientRect();
+      var scrollable = track.scrollWidth > track.clientWidth + 4;
+      function activeColor(){
+        var cs = getComputedStyle(dots[0]);
+        return cs.getPropertyValue('--active-color') || '#E8673A';
+      }
+      function update(){
+        if(!scrollable){
+          // Static layout (desktop grid): show all dots inactive, hide row by parent CSS if desired.
+          return;
+        }
+        var bestIdx = 0, bestDist = Infinity;
+        var trackLeft = track.getBoundingClientRect().left + parseFloat(getComputedStyle(track).paddingLeft || '0');
+        for(var i=0;i<cards.length;i++){
+          var r = cards[i].getBoundingClientRect();
+          var d = Math.abs(r.left - trackLeft);
+          if(d < bestDist){ bestDist = d; bestIdx = i; }
+        }
+        for(var i=0;i<dots.length;i++){
+          var isActive = (i === bestIdx);
+          dots[i].style.width = isActive ? '18px' : '6px';
+          dots[i].style.background = isActive ? activeColor() : 'var(--stone, #E8DDD0)';
+        }
+      }
+      track.addEventListener('scroll', update, {passive:true});
+      window.addEventListener('resize', function(){
+        scrollable = track.scrollWidth > track.clientWidth + 4;
+        update();
+      });
+      // Tap a dot to scroll to that card
+      for(var i=0;i<dots.length;i++){
+        (function(idx){
+          dots[idx].style.cursor = 'pointer';
+          dots[idx].addEventListener('click', function(){
+            var card = cards[idx];
+            if(card){
+              track.scrollTo({left: card.offsetLeft - track.offsetLeft, behavior: 'smooth'});
+            }
+          });
+        })(i);
+      }
+      update();
+    });
+  }
+  if(document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', syncDots);
+  } else {
+    syncDots();
+  }
+})();
 </script>
 </body>
 </html>

@@ -507,8 +507,8 @@
     </div>
 
     <!-- Mobile swipe -->
-    <div class="hiw-mobile-scroll" style="display:none;overflow-x:scroll;gap:1rem;padding-bottom:.75rem;-webkit-overflow-scrolling:touch;scrollbar-width:none;margin:0 -1.25rem;padding-left:1.25rem;padding-right:1.25rem;">
-      <div style="background:linear-gradient(150deg,#3D1A08,#5A2810);border-radius:20px;overflow:hidden;display:flex;flex-direction:column;min-width:calc(85vw - 1rem);max-width:320px;flex-shrink:0;">
+    <div class="hiw-mobile-scroll" data-dot-track="m-hiw" style="display:none;overflow-x:scroll;gap:1rem;padding-bottom:.75rem;-webkit-overflow-scrolling:touch;scrollbar-width:none;margin:0 -1.25rem;padding-left:1.25rem;padding-right:.5rem;scroll-snap-type:x mandatory;">
+      <div style="background:linear-gradient(150deg,#3D1A08,#5A2810);border-radius:20px;overflow:hidden;display:flex;flex-direction:column;min-width:78vw;max-width:300px;flex-shrink:0;scroll-snap-align:start;">
         <div style="height:3px;background:#E8673A;flex-shrink:0;"></div>
         <div style="padding:1.5rem 1.5rem .75rem;flex:1;display:flex;flex-direction:column;gap:.6rem;">
           <div style="font-family:'Playfair Display',Georgia,serif;font-size:1.9rem;font-weight:700;color:white;line-height:1.05;letter-spacing:-.02em;">Answer separately.</div>
@@ -530,7 +530,7 @@
   <rect x="416" y="244" width="62" height="26" rx="8" fill="#E8673A"/>
 </svg></div>
       </div>
-      <div style="background:linear-gradient(150deg,#1E0E42,#2E1560);border-radius:20px;overflow:hidden;display:flex;flex-direction:column;min-width:calc(85vw - 1rem);max-width:320px;flex-shrink:0;">
+      <div style="background:linear-gradient(150deg,#1E0E42,#2E1560);border-radius:20px;overflow:hidden;display:flex;flex-direction:column;min-width:78vw;max-width:300px;flex-shrink:0;scroll-snap-align:start;">
         <div style="height:3px;background:#9B5DE5;flex-shrink:0;"></div>
         <div style="padding:1.5rem 1.5rem .75rem;flex:1;display:flex;flex-direction:column;gap:.6rem;">
           <div style="font-family:'Playfair Display',Georgia,serif;font-size:1.9rem;font-weight:700;color:white;line-height:1.05;letter-spacing:-.02em;">See yourselves side by side.</div>
@@ -560,7 +560,7 @@
   <circle cx="212" cy="208" r="8" fill="#E8673A" stroke="#FDF8F3" stroke-width="2.5"/><circle cx="407" cy="208" r="8" fill="#1B5FE8" stroke="#FDF8F3" stroke-width="2.5"/>
 </svg></div>
       </div>
-      <div style="background:linear-gradient(150deg,#0C1E48,#102860);border-radius:20px;overflow:hidden;display:flex;flex-direction:column;min-width:calc(85vw - 1rem);max-width:320px;flex-shrink:0;">
+      <div style="background:linear-gradient(150deg,#0C1E48,#102860);border-radius:20px;overflow:hidden;display:flex;flex-direction:column;min-width:78vw;max-width:300px;flex-shrink:0;scroll-snap-align:start;">
         <div style="height:3px;background:#1B5FE8;flex-shrink:0;"></div>
         <div style="padding:1.5rem 1.5rem .75rem;flex:1;display:flex;flex-direction:column;gap:.6rem;">
           <div style="font-family:'Playfair Display',Georgia,serif;font-size:1.9rem;font-weight:700;color:white;line-height:1.05;letter-spacing:-.02em;">Build from what you find.</div>
@@ -590,10 +590,10 @@
 </svg></div>
       </div>
     </div>
-    <div class="hiw-mobile-scroll" style="display:none;align-items:center;gap:.4rem;margin-top:.6rem;padding-left:1.25rem;">
-      <div style="width:18px;height:2px;border-radius:2px;background:#E8673A;"></div>
-      <div style="width:6px;height:2px;border-radius:2px;background:#E8DDD0;"></div>
-      <div style="width:6px;height:2px;border-radius:2px;background:#E8DDD0;"></div>
+    <div class="hiw-mobile-scroll" data-dot-indicator="m-hiw" style="display:none;align-items:center;gap:.4rem;margin-top:.6rem;padding-left:1.25rem;">
+      <div class="dot" style="--active-color:#E8673A;width:18px;height:2px;border-radius:2px;background:#E8673A;transition:width .2s,background .2s;"></div>
+      <div class="dot" style="--active-color:#E8673A;width:6px;height:2px;border-radius:2px;background:#E8DDD0;transition:width .2s,background .2s;"></div>
+      <div class="dot" style="--active-color:#E8673A;width:6px;height:2px;border-radius:2px;background:#E8DDD0;transition:width .2s,background .2s;"></div>
     </div>
   </div>
 </section>
@@ -970,8 +970,8 @@
     </div>
 
     <!-- Mobile swipe -->
-    <div class="ct-mobile-scroll" style="display:none;overflow-x:scroll;gap:1rem;padding-bottom:.75rem;-webkit-overflow-scrolling:touch;scrollbar-width:none;margin:0 -1.25rem;padding-left:1.25rem;padding-right:1.25rem;scroll-snap-type:x mandatory;">
-      <div style="background:linear-gradient(150deg,#3D1A08,#5A2810);border-radius:20px;overflow:hidden;display:flex;flex-direction:column;min-width:calc(85vw - 1rem);max-width:320px;flex-shrink:0;scroll-snap-align:start;">
+    <div class="ct-mobile-scroll" data-dot-track="m-ct" style="display:none;overflow-x:scroll;gap:1rem;padding-bottom:.75rem;-webkit-overflow-scrolling:touch;scrollbar-width:none;margin:0 -1.25rem;padding-left:1.25rem;padding-right:.5rem;scroll-snap-type:x mandatory;">
+      <div style="background:linear-gradient(150deg,#3D1A08,#5A2810);border-radius:20px;overflow:hidden;display:flex;flex-direction:column;min-width:78vw;max-width:300px;flex-shrink:0;scroll-snap-align:start;">
         <div style="height:3px;background:#E8673A;flex-shrink:0;"></div>
         <div style="padding:1.5rem 1.5rem .75rem;flex:1;display:flex;flex-direction:column;gap:.6rem;">
           <div style="font-size:.6rem;letter-spacing:.18em;text-transform:uppercase;font-weight:700;color:#E8673A;font-family:'DM Sans',sans-serif;margin-bottom:.25rem;">Step 01</div>
@@ -999,7 +999,7 @@
           </svg>
         </div>
       </div>
-      <div style="background:linear-gradient(150deg,#1E0E42,#2E1560);border-radius:20px;overflow:hidden;display:flex;flex-direction:column;min-width:calc(85vw - 1rem);max-width:320px;flex-shrink:0;scroll-snap-align:start;">
+      <div style="background:linear-gradient(150deg,#1E0E42,#2E1560);border-radius:20px;overflow:hidden;display:flex;flex-direction:column;min-width:78vw;max-width:300px;flex-shrink:0;scroll-snap-align:start;">
         <div style="height:3px;background:#9B5DE5;flex-shrink:0;"></div>
         <div style="padding:1.5rem 1.5rem .75rem;flex:1;display:flex;flex-direction:column;gap:.6rem;">
           <div style="font-size:.6rem;letter-spacing:.18em;text-transform:uppercase;font-weight:700;color:#9B5DE5;font-family:'DM Sans',sans-serif;margin-bottom:.25rem;">Step 02</div>
@@ -1028,7 +1028,7 @@
           </svg>
         </div>
       </div>
-      <div style="background:linear-gradient(150deg,#0C1E48,#102860);border-radius:20px;overflow:hidden;display:flex;flex-direction:column;min-width:calc(85vw - 1rem);max-width:320px;flex-shrink:0;scroll-snap-align:start;">
+      <div style="background:linear-gradient(150deg,#0C1E48,#102860);border-radius:20px;overflow:hidden;display:flex;flex-direction:column;min-width:78vw;max-width:300px;flex-shrink:0;scroll-snap-align:start;">
         <div style="height:3px;background:#1B5FE8;flex-shrink:0;"></div>
         <div style="padding:1.5rem 1.5rem .75rem;flex:1;display:flex;flex-direction:column;gap:.6rem;">
           <div style="font-size:.6rem;letter-spacing:.18em;text-transform:uppercase;font-weight:700;color:#1B5FE8;font-family:'DM Sans',sans-serif;margin-bottom:.25rem;">Step 03</div>
@@ -1069,10 +1069,10 @@
         </div>
       </div>
     </div>
-    <div class="ct-mobile-scroll" style="display:none;align-items:center;gap:.4rem;margin-top:.6rem;padding-left:1.25rem;">
-      <div style="width:18px;height:2px;border-radius:2px;background:#E8673A;"></div>
-      <div style="width:6px;height:2px;border-radius:2px;background:#E8DDD0;"></div>
-      <div style="width:6px;height:2px;border-radius:2px;background:#E8DDD0;"></div>
+    <div class="ct-mobile-scroll" data-dot-indicator="m-ct" style="display:none;align-items:center;gap:.4rem;margin-top:.6rem;padding-left:1.25rem;">
+      <div class="dot" style="--active-color:#E8673A;width:18px;height:2px;border-radius:2px;background:#E8673A;transition:width .2s,background .2s;"></div>
+      <div class="dot" style="--active-color:#E8673A;width:6px;height:2px;border-radius:2px;background:#E8DDD0;transition:width .2s,background .2s;"></div>
+      <div class="dot" style="--active-color:#E8673A;width:6px;height:2px;border-radius:2px;background:#E8DDD0;transition:width .2s,background .2s;"></div>
     </div>
   </div>
 </section>
@@ -1088,7 +1088,7 @@
   <div class="si">
     <p class="s-eye" style="margin-bottom:.75rem;">What comes next</p>
     <h2 class="s-title" style="margin-bottom:2rem;">Interested in more?</h2>
-    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1.25rem;margin-top:.25rem;" class="wcn-grid">
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1.25rem;margin-top:.25rem;" class="wcn-grid" data-dot-track="m-wcn">
 
       <div style="background:white;border:1.5px solid var(--stone);border-radius:16px;padding:1.25rem 1rem;">
         <svg viewBox="0 0 52 52" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:44px;height:44px;margin-bottom:.85rem;display:block;">
@@ -1143,11 +1143,20 @@
   </div>
 </section>
 
+
+    <!-- Mobile dots for "What you can do" -->
+    <div data-dot-indicator="m-wcn" style="display:none;align-items:center;gap:.4rem;margin-top:.85rem;padding-left:0;justify-content:center;">
+      <div class="dot" style="--active-color:#E8673A;width:18px;height:2px;border-radius:2px;background:#E8673A;transition:width .2s,background .2s;"></div>
+      <div class="dot" style="--active-color:#E8673A;width:6px;height:2px;border-radius:2px;background:#E8DDD0;transition:width .2s,background .2s;"></div>
+      <div class="dot" style="--active-color:#E8673A;width:6px;height:2px;border-radius:2px;background:#E8DDD0;transition:width .2s,background .2s;"></div>
+    </div>
+
 <style>
   @media(max-width:680px){
-    .wcn-grid{display:flex!important;flex-wrap:nowrap!important;overflow-x:auto!important;gap:.75rem!important;padding-bottom:.75rem!important;-webkit-overflow-scrolling:touch!important;scrollbar-width:none!important;margin-left:-1.25rem!important;margin-right:-1.25rem!important;padding-left:1.25rem!important;padding-right:1.25rem!important;}
+    [data-dot-indicator="m-wcn"]{display:flex!important}
+    .wcn-grid{display:flex!important;flex-wrap:nowrap!important;overflow-x:auto!important;gap:.75rem!important;padding-bottom:.75rem!important;-webkit-overflow-scrolling:touch!important;scrollbar-width:none!important;margin-left:-1.25rem!important;margin-right:-1.25rem!important;padding-left:1.25rem!important;padding-right:.5rem!important;scroll-snap-type:x mandatory!important;}
     .wcn-grid::-webkit-scrollbar{display:none}
-    .wcn-grid>div{min-width:72vw!important;max-width:72vw!important;flex-shrink:0!important;padding:1rem!important;}
+    .wcn-grid>div{min-width:78vw!important;max-width:78vw!important;flex-shrink:0!important;padding:1rem!important;scroll-snap-align:start!important;}
   }
 </style>
 
@@ -1240,6 +1249,71 @@ function toggleMenu() {
     if (burger) burger.classList.remove('open');
   }
 });
+</script>
+
+<script>
+/* Auto-update carousel dot indicators on scroll. Pairs each
+   data-dot-track="<id>" container with its data-dot-indicator="<id>" dots. */
+(function(){
+  function syncDots(){
+    document.querySelectorAll('[data-dot-track]').forEach(function(track){
+      var id = track.getAttribute('data-dot-track');
+      var indicator = document.querySelector('[data-dot-indicator="'+id+'"]');
+      if(!indicator) return;
+      var dots = indicator.querySelectorAll('.dot');
+      var cards = track.children;
+      if(!dots.length || !cards.length) return;
+      // Only run logic when the track is actually scrollable (mobile breakpoint).
+      var trackRect = track.getBoundingClientRect();
+      var scrollable = track.scrollWidth > track.clientWidth + 4;
+      function activeColor(){
+        var cs = getComputedStyle(dots[0]);
+        return cs.getPropertyValue('--active-color') || '#E8673A';
+      }
+      function update(){
+        if(!scrollable){
+          // Static layout (desktop grid): show all dots inactive, hide row by parent CSS if desired.
+          return;
+        }
+        var bestIdx = 0, bestDist = Infinity;
+        var trackLeft = track.getBoundingClientRect().left + parseFloat(getComputedStyle(track).paddingLeft || '0');
+        for(var i=0;i<cards.length;i++){
+          var r = cards[i].getBoundingClientRect();
+          var d = Math.abs(r.left - trackLeft);
+          if(d < bestDist){ bestDist = d; bestIdx = i; }
+        }
+        for(var i=0;i<dots.length;i++){
+          var isActive = (i === bestIdx);
+          dots[i].style.width = isActive ? '18px' : '6px';
+          dots[i].style.background = isActive ? activeColor() : 'var(--stone, #E8DDD0)';
+        }
+      }
+      track.addEventListener('scroll', update, {passive:true});
+      window.addEventListener('resize', function(){
+        scrollable = track.scrollWidth > track.clientWidth + 4;
+        update();
+      });
+      // Tap a dot to scroll to that card
+      for(var i=0;i<dots.length;i++){
+        (function(idx){
+          dots[idx].style.cursor = 'pointer';
+          dots[idx].addEventListener('click', function(){
+            var card = cards[idx];
+            if(card){
+              track.scrollTo({left: card.offsetLeft - track.offsetLeft, behavior: 'smooth'});
+            }
+          });
+        })(i);
+      }
+      update();
+    });
+  }
+  if(document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', syncDots);
+  } else {
+    syncDots();
+  }
+})();
 </script>
 </body>
 </html>
