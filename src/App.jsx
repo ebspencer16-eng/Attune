@@ -9324,7 +9324,7 @@ function AuthModal({ mode, onClose, onSuccess }) {
                 </button>
               ))}
             </div>
-            {inp("Partner's email — we'll send them an invite (optional)", "partnerEmail", "email")}
+            {inp("Partner's email — we'll send them an invite", "partnerEmail", "email")}
             <div style={{ background: "#F3EDE6", borderRadius: 10, padding: "0.75rem 1rem", marginBottom: "0.85rem", display: "flex", gap: "0.6rem", alignItems: "flex-start" }}>
               <span style={{ fontSize: "0.82rem", flexShrink: 0 }}>✦</span>
               <p style={{ fontSize: "0.72rem", color: "#8C7A68", fontFamily: "'DM Sans',sans-serif", lineHeight: 1.6, margin: 0 }}>Attune uses your names and pronouns to personalize your results — making the insights feel specific to you two, not generic.</p>
@@ -9334,13 +9334,12 @@ function AuthModal({ mode, onClose, onSuccess }) {
                 Collected anonymously for aggregate research. Used in admin
                 charts to understand who's using Attune and how to serve
                 different couple profiles better. All fields optional. */}
-            <details style={{ marginBottom: "1rem" }}>
-              <summary style={{ cursor: "pointer", fontSize: "0.78rem", fontWeight: 600, color: "#0E0B07", fontFamily: "'DM Sans',sans-serif", padding: "0.65rem 0", listStyle: "none" }}>
-                <span style={{ color: "#E8673A", marginRight: "0.4rem" }}>+</span>
-                Tell us about yourselves (optional)
-              </summary>
+            <div style={{ marginBottom: "1rem" }}>
+              <div style={{ fontSize: "0.78rem", fontWeight: 600, color: "#0E0B07", fontFamily: "'DM Sans',sans-serif", padding: "0.65rem 0 0.2rem" }}>
+                Tell us about yourselves
+              </div>
               <p style={{ fontSize: "0.7rem", color: "#8C7A68", fontFamily: "'DM Sans',sans-serif", lineHeight: 1.6, marginBottom: "0.9rem", marginTop: "0.3rem" }}>
-                Helps us understand who Attune serves. Answers are kept separately from your name and email, and only ever used in aggregate.
+                Helps us understand who Attune serves. Responses are kept separately from names and emails, and only ever used in aggregate.
               </p>
               {[
                 { k: "ageRange", label: "Your age range", opts: [["", "Prefer not to say"], ["18-24", "18–24"], ["25-34", "25–34"], ["35-44", "35–44"], ["45-54", "45–54"], ["55+", "55 or older"]] },
@@ -9358,13 +9357,13 @@ function AuthModal({ mode, onClose, onSuccess }) {
                   </select>
                 </div>
               ))}
-            </details>
+            </div>
 
             <label style={{ display: "flex", alignItems: "flex-start", gap: "0.6rem", cursor: "pointer", marginBottom: "1.25rem", marginTop: "0.25rem" }}>
               <input type="checkbox" checked={form.emailOptIn} onChange={e => upd("emailOptIn", e.target.checked)}
                 style={{ marginTop: "0.2rem", accentColor: "#E8673A", width: 15, height: 15, flexShrink: 0 }} />
               <span style={{ fontSize: "0.72rem", color: "#8C7A68", fontFamily: "'DM Sans',sans-serif", lineHeight: 1.55 }}>
-                Send me a 6-month check-in — a reminder to retake Attune when results are most meaningful, plus occasional updates.
+                Send me occasional opportunities to continue relationship growth through Attune.
               </span>
             </label>
             {err && <p style={{ color: "#ef4444", fontSize: "0.75rem", fontFamily: "'DM Sans',sans-serif", marginBottom: "0.75rem" }}>{err}</p>}
@@ -11621,7 +11620,7 @@ export default function App() {
       )}
 
       <div data-main-scroll style={{ maxWidth: view === "home" ? "unset" : 860, margin: view === "home" ? 0 : "0 auto", padding: view === "home" ? 0 : (view === "results" ? 0 : "3rem 2rem") }}>
-        {view === "home" && (
+        {view === "home" && isLoggedIn && (
           <div style={{ display: "flex", minHeight: "100vh", background: "#FBF8F3" }}>
 
             {/* ── LEFT SIDEBAR ───────────────────────────────────────────── */}

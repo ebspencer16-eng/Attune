@@ -278,7 +278,7 @@ async function handleWebhook(req) {
 
     if (apiKey && intent.receipt_email && orderCreated) {
       // Order confirmation
-      const subject = `Order confirmed — ${meta.pkgKey || 'Attune'}`;
+      const subject = `Attune Order Confirmation`;
       const html = `
         <div style="font-family:Arial,sans-serif;max-width:520px;margin:0 auto;padding:2rem;color:#1E1610;">
           <h2 style="color:#E8673A;margin-bottom:1rem;">Your order is confirmed.</h2>

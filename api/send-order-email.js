@@ -54,10 +54,12 @@ export default async function handler(req) {
   const emails = [];
 
   // ── 1. Order confirmation to buyer ─────────────────────────────────────────
+  // Pushed first; sent sequentially below so this email always arrives before
+  // the setup email.
   emails.push({
     from: `Attune <${FROM}>`,
     to: [buyerEmail],
-    subject: `Your Attune order — ${orderNum}`,
+    subject: `Attune Order Confirmation`,
     html: orderConfirmationHtml({ buyerName, pkgName, orderNum, total, isGift, isPhysical, recipientName, addonWorkbook, addonLmft, addonReflection, addonBudget }),
   });
 
@@ -87,22 +89,33 @@ export default async function handler(req) {
   }
 
   // ── Send all emails via Resend ──────────────────────────────────────────────
-  const results = await Promise.allSettled(
-    emails.map(email =>
-      fetch('https://api.resend.com/emails', {
+  // Sequential so they arrive in the pushed order: order confirmation first,
+  // then the setup email, then any gift recipient email. Resend's parallel
+  // processing was delivering them out of order on a noticeable percentage
+  // of orders.
+  const results = [];
+  let failed = 0;
+  for (const email of emails) {
+    try {
+      const r = await fetch('https://api.resend.com/emails', {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
         body: JSON.stringify(email),
-      }).then(r => r.json())
-    )
-  );
-
-  const failed = results.filter(r => r.status === 'rejected');
-  if (failed.length > 0) {
-    console.error('Some emails failed:', failed);
+      });
+      const data = await r.json();
+      results.push({ status: r.ok ? 'fulfilled' : 'rejected', value: data });
+      if (!r.ok) {
+        failed++;
+        console.error('[send-order-email] Resend rejected:', email.subject, data);
+      }
+    } catch (err) {
+      failed++;
+      console.error('[send-order-email] fetch threw:', email.subject, err);
+      results.push({ status: 'rejected', reason: String(err) });
+    }
   }
 
-  return new Response(JSON.stringify({ ok: true, sent: emails.length - failed.length }), {
+  return new Response(JSON.stringify({ ok: true, sent: emails.length - failed }), {
     status: 200,
     headers: { 'Content-Type': 'application/json' },
   });
