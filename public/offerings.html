@@ -546,7 +546,13 @@
         <a href="/faq">FAQs</a>
       </div>
     </li>
-    <li><a href="/offerings" class="active">Packages</a></li>
+    <li class="nav-dropdown">
+      <button class="nav-dropdown-toggle active">Browse <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg></button>
+      <div class="nav-dropdown-menu">
+        <a href="/offerings" class="active">Browse Packages</a>
+        <a href="/wedding-registry">Wedding Registry</a>
+      </div>
+    </li>
   </ul>
   <div class="nav-right">
     <a href="/portal" class="nav-signin">Sign in</a>
@@ -571,7 +577,11 @@
     <a href="/practice" class="mm-sub">In Practice</a>
     <a href="/faq" class="mm-sub">FAQs</a>
   </div>
-  <a href="/offerings">Packages</a>
+  <div class="mm-section">
+    <span class="mm-label">Browse</span>
+    <a href="/offerings" class="mm-sub" style="color:var(--ink);font-weight:600">Browse Packages</a>
+    <a href="/wedding-registry" class="mm-sub">Wedding Registry</a>
+  </div>
   <a href="/portal">Sign in</a>
   <a href="/start" class="mm-cta">Get started →</a>
 </div>
@@ -609,7 +619,10 @@
     <div class="pov-price">from $139</div>
     <div style="font-size:.65rem;color:var(--muted);margin-top:.2rem;line-height:1.5;">For couples just starting out – or who want to start right.</div>
     <div class="pov-desc">Everything in the Assessment plus a practical checklist for name changes, finances, and household logistics.</div>
-    <div class="pov-cta" onclick="event.stopPropagation();addToCartWithIntent('newlywed')">Add to cart →</div>
+    <div style="display:flex;gap:.85rem;align-items:center;flex-wrap:wrap;margin-top:.25rem;">
+      <span class="pov-cta" onclick="event.stopPropagation();addToCartWithIntent('newlywed')">Add to cart →</span>
+      <a href="/wedding-registry" onclick="event.stopPropagation()" class="pov-cta" style="color:var(--orange);">Add to registry →</a>
+    </div>
   </div>
   <div class="pov-tile pov-indigo" style="border-top:3px solid var(--indigo);" onclick="scrollToPkg('#pkg-anniversary')" style="cursor:pointer">
     <div class="pov-badge" style="background:#EEEFFF;color:var(--indigo);">Anniversary Gift</div>
@@ -909,7 +922,7 @@
       </a>
       <span class="pkg-note">Ships within 3–5 business days</span>
     </div>
-    <p style="font-size:.75rem;color:rgba(255,255,255,.45);margin-top:0;padding:1rem 2.25rem 1.5rem;">Looking for more? <a href="#pkg-premium" onclick="addToCartWithIntent('premium')" style="color:rgba(255,255,255,.7);font-weight:600;text-decoration:none;">Check out the premium package →</a></p>
+    <p style="font-size:.75rem;color:var(--muted);margin-top:0;padding:1rem 2.25rem 1.5rem;">Looking for more? <a href="#pkg-premium" onclick="addToCartWithIntent('premium')" style="color:var(--clay);font-weight:600;text-decoration:none;">Check out the premium package →</a></p>
   </div>
 
   <!-- ─── PACKAGE 3: Anniversary ─── -->
@@ -1013,7 +1026,7 @@
       <button onclick="addToCartWithIntent('anniversary')" class="btn-primary indigo" id="ann-cta">Add to cart →</button>
       <span class="pkg-note">Ships within 3–5 business days</span>
     </div>
-    <p style="font-size:.75rem;color:rgba(255,255,255,.45);margin-top:0;padding:1rem 2.25rem 1.5rem;">Looking for more? <a href="#pkg-premium" onclick="addToCartWithIntent('premium')" style="color:rgba(255,255,255,.7);font-weight:600;text-decoration:none;">Check out the premium package →</a></p>
+    <p style="font-size:.75rem;color:var(--muted);margin-top:0;padding:1rem 2.25rem 1.5rem;">Looking for more? <a href="#pkg-premium" onclick="addToCartWithIntent('premium')" style="color:var(--clay);font-weight:600;text-decoration:none;">Check out the premium package →</a></p>
   </div>
 
   <!-- ─── PACKAGE 4: Premium ─── -->
