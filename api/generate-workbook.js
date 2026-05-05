@@ -648,11 +648,16 @@ function buildTOC(offsets, priorities, u, p, coupleType) {
     if (sameType) {
       const momentsPage1 = firstPage + 1;
       const momentsPage2 = firstPage + 2;
+      rows.push(tocRow({
+        label: `How you two should approach specific situations`,
+        pageNum: momentsPage1,
+        indent: 280, labelSize: 20, labelColor: MUTED, italic: true,
+      }));
       MOMENTS.forEach((m, i) => {
         rows.push(tocRow({
           label: `${i + 1}. ${m.title}`,
           pageNum: i < 3 ? momentsPage1 : momentsPage2,
-          indent: 280, labelSize: 20, labelColor: MUTED,
+          indent: 560, labelSize: 18, labelColor: MUTED,
           noLeader: i === MOMENTS.length - 1,
         }));
       });
@@ -1730,6 +1735,54 @@ function buildMomentCard(moment, subjectName, otherName, typeLetter) {
   ];
 }
 
+// ─── Shared moment card for same-type couples ─────────────────────────
+// When both partners are the same individual type, the situation reads the same
+// for both. We use a single set of cards keyed to that type, with rows that
+// address the dynamic between two same-type partners rather than one-directional
+// guidance.
+function buildMomentCardShared(moment, u, p, typeLetter) {
+  const rowLabel = (label, color) => new Paragraph({
+    spacing: { before: 200, after: 80 },
+    children: [run(label, { size: 16, bold: true, color: color || MUTED, allCaps: true })],
+  });
+  const rowBody = (text, opts = {}) => new Paragraph({
+    spacing: { after: 100, line: 280, lineRule: 'atLeast' },
+    children: [run(text, { size: 18, color: opts.color || INK, italics: !!opts.italics })],
+  });
+
+  return [
+    new Paragraph({ spacing: { before: 240, after: 40 },
+      children: [
+        run(String(moment.number || '').padStart(2, '0'), { size: 14, bold: true, color: MUTED, characterSpacing: 40 }),
+        run('   ', { size: 14 }),
+        run(moment.title, { size: 26, bold: true, color: INK }),
+      ],
+    }),
+    new Paragraph({ spacing: { before: 0, after: 180 },
+      border: { bottom: { style: BorderStyle.SINGLE, size: 6, color: PURPLE, space: 4 } },
+      children: [new TextRun('')] }),
+
+    rowLabel('The moment', MUTED),
+    rowBody(PH(`1 sentence: concrete setup for "${moment.title.toLowerCase()}", framed so it could be either of you in the central role.`)),
+
+    rowLabel(`What's happening for both of you`, PURPLE),
+    rowBody(PH(`2–3 sentences keyed to Type ${typeLetter}: what's actually going on internally. Both of you tend to operate this way, so this part feels familiar to both.`)),
+
+    rowLabel('Where two same-type partners get stuck', 'C8402A'),
+    rowBody(PH(`1–2 sentences: the trap two ${typeLetter}s fall into in this moment, the way the shared wiring can mirror and amplify rather than balance.`)),
+
+    rowLabel('What works', GREEN),
+    rowBody(PH(`1–2 sentences: how to break the pattern. Often this means one of you stepping out of the shared default to give the other a different angle.`)),
+
+    rowLabel('A cue either of you can use', BLUE),
+    rowBody(PH(`literal line either ${u} or ${p} can say to break the loop in this moment`), { italics: true, color: BLUE }),
+
+    new Paragraph({ spacing: { before: 160, after: 200 },
+      border: { bottom: { style: BorderStyle.DOTTED, size: 6, color: STONE, space: 4 } },
+      children: [new TextRun('')] }),
+  ];
+}
+
 function buildWorkingKnowledge(u, p, coupleType) {
   const [typeU, typeP] = partnerTypes(coupleType);
   const sameType = typeU === typeP;
@@ -1737,10 +1790,10 @@ function buildWorkingKnowledge(u, p, coupleType) {
   if (sameType) {
     return [
       pb(),
-      new Paragraph({ heading: HeadingLevel.HEADING_2, children: [run(`Six Moments · Type ${typeU}`, { color: PURPLE })] }),
-      para(`${u} and ${p} share the same type (${typeU}). The six moments below apply to both of you — use this page as a mutual reference. When a hard moment shows up in real life, flip to the one that matches. The goal is to have the language ready before you need it.`,
+      new Paragraph({ heading: HeadingLevel.HEADING_2, children: [run(`How you two should approach specific situations`, { color: PURPLE })] }),
+      para(`${u} and ${p} share Type ${typeU}, so these moments land the same way for both of you. That's an asset and a risk: you understand each other's defaults instantly, and you can also reinforce them when a different angle would help. Use these six situations as a mutual reference. Flip to the one that matches when a hard moment shows up.`,
         { size: 20, color: MUTED, after: 240 }),
-      ...MOMENTS.flatMap((m, i) => buildMomentCard({ ...m, number: `${i + 1}` }, `${u} & ${p}`, 'each other', typeU)),
+      ...MOMENTS.flatMap((m, i) => buildMomentCardShared({ ...m, number: `${i + 1}` }, u, p, typeU)),
     ];
   }
 

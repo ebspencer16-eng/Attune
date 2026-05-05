@@ -196,7 +196,7 @@ const section1 = [
     { item: 'Couple type reveal page — all 10 types, tagline quality review' },
     { item: 'Per-dimension detail pages — one per comms dimension, final copy + visualization' },
     { item: 'Per-expectation detail pages — one per unaligned domain, final copy + visualization' },
-    { item: 'Working Knowledge section — "what you should know about each other" for all 10 couple types × 6 moments' },
+    { item: 'Working Knowledge section — cross-type: "what you should know about each other" × 6 couple types × 6 moments. Same-type: "how you two should approach specific situations" × 4 couple types × 6 moments.' },
     { item: 'Conversation Library — 5 structured situations with prompts' },
   ], ORANGE),
 
