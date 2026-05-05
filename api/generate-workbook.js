@@ -1813,7 +1813,6 @@ function buildWorkingKnowledge(u, p, coupleType) {
   ];
 }
 
-// ─── 30-day check-in (embedded at end of Workbook section) ─────────────
 function buildPriorityCheckIn(u, p, priorities) {
   const checkInPrompts = [
     { n: 1, q: `What changed (if anything) over the last 30 days?` },
@@ -1929,6 +1928,26 @@ function rankPriorities(scores, partnerScores) {
     })
     .sort((a, b) => b.score - a.score);
   return ranked.slice(0, 3).map(r => r.dim);
+}
+
+// ─── Blank notes pages (appended after reference card) ────────────────────────
+// Four blank pages with ruled lines for the couple to write on. The first page
+// has a small "Notes" eyebrow at the top so it's clear what they're for; the
+// rest are unmarked.
+function buildNotesPages(numPages = 4, linesPerPage = 22) {
+  const pages = [];
+  for (let i = 0; i < numPages; i++) {
+    pages.push(pb());
+    if (i === 0) {
+      pages.push(new Paragraph({
+        alignment: AlignmentType.LEFT,
+        spacing: { before: 0, after: 240 },
+        children: [run('Notes', { size: 12, bold: true, color: MUTED, allCaps: true, characterSpacing: 80 })],
+      }));
+    }
+    pages.push(ruledWriteIn(linesPerPage, { lineHeight: 360 }));
+  }
+  return pages;
 }
 
 // ─── HTTP handler ─────────────────────────────────────────────────────────────
@@ -2088,6 +2107,10 @@ export default async function handler(req, res) {
     ...buildPartCover(5, 'Reference Card',
       `A half-page summary. Keep it somewhere you'll see it.`, GREEN),
     ...buildReferenceCard(u, p, coupleType, priorities),
+
+    // Blank ruled pages for the couple's own notes — appended after the
+    // reference card. Four pages, the first with a small "Notes" eyebrow.
+    ...buildNotesPages(4),
   ];
 
   // Footer with page numbers and a light brand line. Page numbers are
