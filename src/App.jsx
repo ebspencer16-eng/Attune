@@ -8846,6 +8846,14 @@ function AuthModal({ mode, onClose, onSuccess }) {
 
   const genInvite = () => Math.random().toString(36).slice(2, 10).toUpperCase();
 
+  // Race a promise against a timeout. Without this, a stalled auth or fetch
+  // call leaves the signup button locked in loading state and the user
+  // sees nothing. Throws if the timeout wins.
+  const withTimeout = (promise, ms, label) => Promise.race([
+    promise,
+    new Promise((_, reject) => setTimeout(() => reject(new Error(`Timed out: ${label}`)), ms)),
+  ]);
+
   const handleSignup = async () => {
     if (!form.name.trim()) return setErr("Please enter your name.");
     if (!form.email.trim() || !form.email.includes("@")) return setErr("Please enter a valid email.");
@@ -8853,27 +8861,41 @@ function AuthModal({ mode, onClose, onSuccess }) {
     setLoading(true);
     setErr("");
 
+    try {
+
     // ── Supabase auth ────────────────────────────────────────────────────────
     // Email uniqueness check — Partner B cannot use same email as Partner A
     if (_partnerAEmail && form.email.trim().toLowerCase() === _partnerAEmail) {
-      setLoading(false);
       return setErr("This email is already linked to the other partner's account. Each partner needs their own email address.");
     }
 
     const { supabase: sb, hasSupabase } = await import('./supabase.js');
     if (hasSupabase()) {
-      const { data: authData, error: authErr } = await sb.auth.signUp({
-        email: form.email.trim().toLowerCase(),
-        password: form.password,
-        options: {
-          data: { name: form.name.trim() },
-          // Where Supabase redirects after the user clicks the email
-          // confirmation link. Must match a URL in Supabase Dashboard →
-          // Authentication → URL Configuration → Redirect URLs allow list.
-          emailRedirectTo: `${window.location.origin}/app`,
-        },
-      });
-      if (authErr) { setLoading(false); return setErr(authErr.message); }
+      let authData, authErr;
+      try {
+        const result = await withTimeout(
+          sb.auth.signUp({
+            email: form.email.trim().toLowerCase(),
+            password: form.password,
+            options: {
+              data: { name: form.name.trim() },
+              // Where Supabase redirects after the user clicks the email
+              // confirmation link. Must match a URL in Supabase Dashboard →
+              // Authentication → URL Configuration → Redirect URLs allow list.
+              emailRedirectTo: `${window.location.origin}/app`,
+            },
+          }),
+          30000,
+          'auth.signUp'
+        );
+        authData = result.data;
+        authErr = result.error;
+      } catch (e) {
+        console.warn('[signup] auth.signUp timed out or threw:', e);
+        return setErr("Sign-up is taking too long. Check your connection and try again.");
+      }
+      if (authErr) return setErr(authErr.message);
+      if (!authData?.user?.id) return setErr("Sign-up didn't complete. Please try again.");
 
       // Write profile fields that aren't in auth metadata.
       // Uses /api/create-profile (service role) instead of a direct
@@ -8883,28 +8905,34 @@ function AuthModal({ mode, onClose, onSuccess }) {
       // Without a session that check fails silently.
       const inviteCode = genInvite();
       try {
-        await fetch('/api/create-profile', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            userId:              authData.user.id,
-            name:                form.name.trim(),
-            pronouns:            form.pronouns.trim() || "",
-            partnerName:         form.partnerName.trim() || "",
-            partnerPronouns:     form.partnerPronouns.trim() || "",
-            partnerEmail:        form.partnerEmail.trim().toLowerCase() || "",
-            emailOptIn:          form.emailOptIn,
-            inviteCode,
-            pkg:                 new URLSearchParams(window.location.search).get("pkg") || "core",
-            ageRange:            form.ageRange || null,
-            gender:              form.gender || null,
-            relationshipStatus:  form.relationshipStatus || null,
-            relationshipLength:  form.relationshipLength || null,
-            children:            form.children || null,
-            signupSource:        form.signupSource || null,
+        await withTimeout(
+          fetch('/api/create-profile', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              userId:              authData.user.id,
+              name:                form.name.trim(),
+              pronouns:            form.pronouns.trim() || "",
+              partnerName:         form.partnerName.trim() || "",
+              partnerPronouns:     form.partnerPronouns.trim() || "",
+              partnerEmail:        form.partnerEmail.trim().toLowerCase() || "",
+              emailOptIn:          form.emailOptIn,
+              inviteCode,
+              pkg:                 new URLSearchParams(window.location.search).get("pkg") || "core",
+              ageRange:            form.ageRange || null,
+              gender:              form.gender || null,
+              relationshipStatus:  form.relationshipStatus || null,
+              relationshipLength:  form.relationshipLength || null,
+              children:            form.children || null,
+              signupSource:        form.signupSource || null,
+            }),
           }),
-        });
+          15000,
+          'create-profile'
+        );
       } catch (e) {
+        // Profile creation is recoverable — login flow re-syncs missing
+        // profile data. Better to let the user proceed than block them.
         console.warn('[signup] create-profile failed (will retry on next login):', e);
       }
 
@@ -8933,16 +8961,17 @@ function AuthModal({ mode, onClose, onSuccess }) {
       // only findable by buyer_email — fragile if email is changed later.
       // Multi-item orders are written as ORDER_NUM-1, ORDER_NUM-2, etc. by
       // the stripe webhook, so we also match the prefix to catch all rows.
+      //
+      // Fire-and-forget: this runs in the background after the user has
+      // already proceeded to the dashboard. A slow or stalled query here
+      // must never block account creation. Linkage falls back to
+      // buyer_email match on later sign-in if this fails.
       const _checkoutOrderNum = _authParams.get('orderNum');
       if (_checkoutOrderNum) {
-        try {
-          // Match either the exact order_num (single-item) or the prefixed
-          // multi-item rows. PostgREST supports `like` for pattern match.
-          await sb.from('orders').update({ user_id: authData.user.id })
-            .or(`order_num.eq.${_checkoutOrderNum},order_num.like.${_checkoutOrderNum}-%`);
-        } catch (e) {
-          console.warn('[Attune] order linkage failed:', e);
-        }
+        sb.from('orders').update({ user_id: authData.user.id })
+          .or(`order_num.eq.${_checkoutOrderNum},order_num.like.${_checkoutOrderNum}-%`)
+          .then(({ error }) => { if (error) console.warn('[Attune] order linkage failed:', error); })
+          .catch(e => console.warn('[Attune] order linkage error:', e));
       }
 
       // Send partner invite email if partner email was provided.
@@ -8972,7 +9001,6 @@ function AuthModal({ mode, onClose, onSuccess }) {
         claimQrTokenWithRetry(_qrToken, form.email.trim().toLowerCase());
       }
 
-      setLoading(false);
       onSuccess(account);
       return;
     }
@@ -9004,8 +9032,17 @@ function AuthModal({ mode, onClose, onSuccess }) {
       claimQrTokenWithRetry(_qrToken, form.email.trim().toLowerCase());
     }
 
-    setLoading(false);
     onSuccess(account);
+
+    } catch (e) {
+      // Catch-all: any unexpected throw should surface to the user, not
+      // silently leave the button stuck. The inner network calls already
+      // catch their own errors; this is the safety net for everything else.
+      console.warn('[signup] unexpected error:', e);
+      setErr('Something went wrong. Please try again.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleLogin = async () => {
