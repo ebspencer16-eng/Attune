@@ -8725,33 +8725,8 @@ function ResultsHighlights({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3
         ))}
       </div>}
 
-      <div style={{ flex: inline ? undefined : 1, display: "flex", alignItems: "flex-start", justifyContent: "center", padding: inline ? "0 0 3rem" : isMobile ? "0.5rem 0 4rem" : "1rem 0.5rem 5rem", overflowY: inline ? undefined : "auto", WebkitOverflowScrolling: "touch", overscrollBehavior: "contain", position: "relative" }}>
-        {/* On mobile, show a peek of the next card so users know to swipe.
-            The peek is a non-interactive preview shifted off-screen to the right;
-            tapping the visible edge advances. Skipped on desktop and inline modes. */}
-        {!inline && isMobile && cardIdx < TOTAL_CARDS - 1 && (
-          <div
-            onClick={advance}
-            aria-hidden="true"
-            style={{
-              position: "absolute",
-              top: "0.5rem",
-              left: "calc(50% + min(195px, calc(50vw - 0.5rem)) - 30px)",
-              transform: "scale(0.94)",
-              transformOrigin: "left top",
-              opacity: 0.5,
-              pointerEvents: "auto",
-              cursor: "pointer",
-              zIndex: 1,
-              filter: "brightness(0.85)",
-            }}
-          >
-            {cards[cardIdx + 1]}
-          </div>
-        )}
-        <div style={{ position: "relative", zIndex: 2 }}>
-          {cards[cardIdx]}
-        </div>
+      <div style={{ flex: inline ? undefined : 1, display: "flex", alignItems: "flex-start", justifyContent: "center", padding: inline ? "0 0 3rem" : isMobile ? "0.5rem 0 4rem" : "1rem 0.5rem 5rem", overflowY: inline ? undefined : "auto", WebkitOverflowScrolling: "touch", overscrollBehavior: "contain" }}>
+        {cards[cardIdx]}
       </div>
 
       <div style={{ position: inline ? "static" : "absolute", bottom: inline ? undefined : 0, left: inline ? undefined : 0, right: inline ? undefined : 0, padding: inline ? "0" : "0 1.5rem 1.25rem", display: "flex", alignItems: "center", justifyContent: "space-between", gap: "1rem", marginTop: inline ? "1rem" : 0 }}>
