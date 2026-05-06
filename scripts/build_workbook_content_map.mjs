@@ -193,10 +193,10 @@ const introSection = [
       notes: 'Same for every couple. Frames the workbook and how to read it together.' },
     { what: 'Your Snapshot, dimension scores table',
       source: 'Exercise responses',
-      notes: 'Each partner\'s score on all 12 communication dimensions, pulled from their exercise.' },
+      notes: 'Each partner\'s score on all 10 communication dimensions, pulled from their exercise.' },
     { what: 'Your Snapshot, expectations alignment table',
       source: 'Exercise responses',
-      notes: 'Each partner\'s answer on the 7 expectation domains, with aligned/gap flag.' },
+      notes: 'Each partner\'s alignment percentage across the 6 expectation domains. Card per domain: Household · Emotional Labor · Extended Family · Money & Career · Life Together · How We Operate.' },
     { what: 'Your Snapshot, couple type line',
       source: 'Couple-type-specific',
       notes: 'Shows the type name and tagline for one of the 10 types.' },
@@ -220,33 +220,27 @@ const part1Section = [
     { what: 'Dimension page, score bars',
       source: 'Exercise responses',
       notes: "Each partner's actual 1-5 score on this dimension." },
-    { what: 'Dimension page, gap analysis (grey italic text)',
-      source: 'Couple-type-specific',
-      notes: 'One of two versions per dimension: "gap" text (when scores differ >1.5) or "close" text (when <1.5). Not yet further customized by couple type, same gap text for everyone with a gap on this dimension.' },
+    { what: 'Dimension page, "What this means" callout (right column of hero)',
+      source: 'Calculated + Couple-type-specific',
+      notes: 'Two stacked italic paragraphs. Para 1 = gap blurb (universal, varies only by gap state: aligned / some_gap / notable_gap). Para 2 = type blurb (one of 10 versions per couple type). Total 130 blurbs across 10 dims.' },
     { what: 'Dimension page, gap label ("Worth exploring," "Significant," etc)',
       source: 'Calculated',
       notes: 'Computed from the numeric gap size between the two scores.' },
     { what: 'Dimension page, reflection prompts',
       source: 'Universal',
-      notes: 'Same 3 prompts per dimension for every couple with a gap there.' },
+      notes: 'Same 3 prompts per dimension for every couple. All 10 dimensions render in every workbook.' },
     { what: 'Dimension page, "Try this week"',
       source: 'Universal',
       notes: 'One suggestion per dimension, same for every couple.' },
-    { what: 'Dimension page, commitment write-in',
+    { what: 'Dimension page, "Our notes" write-in',
       source: 'User-written',
-      notes: 'Blank ruled lines for them to write a specific change they want to try.' },
+      notes: 'Blank ruled lines for free-form notes.' },
     { what: 'Expectations, section header + framing',
-      source: 'Their names',
-      notes: '"Where {U} and {P} have different ideas about the life you\'re building."' },
-    { what: 'Expectations, domain responses (two columns)',
-      source: 'Exercise responses',
-      notes: "Each partner's specific answer on this domain (e.g., \"split equally\" vs \"I handle more\")." },
-    { what: 'Expectations, gap analysis',
       source: 'Universal',
-      notes: 'One version per expectation domain, same for every couple with a gap there.' },
-    { what: 'Expectations, "Try this week"',
-      source: 'Universal',
-      notes: 'One suggestion per domain, same for every couple.' },
+      notes: '"Six domains of what you each assume." Subhead: "next six pages put those expectations side by side."' },
+    { what: 'Expectations, per-domain page (6 pages, one per domain)',
+      source: 'Exercise responses + Universal',
+      notes: 'Six domains: Visible Household Labor · Emotional & Invisible Labor · Extended Family · Money, Work & Career · Life Together · How We Operate. Side-by-side rows of each partner\'s actual exercise answers, alignment percentage, "Where you are" prose (3 alignment-state versions per domain), "Try this week" practice. Extended Family rows are name-substituted (e.g. "Visits with Maya\'s family").' },
   ]),
 ];
 
@@ -415,7 +409,13 @@ const doc = new Document({
 });
 
 const buf = await Packer.toBuffer(doc);
-const outPath = '/tmp/workbook_content_map.docx';
+const outPath = '/mnt/user-data/outputs/attune_workbook_content_map.docx';
 writeFileSync(outPath, buf);
-execSync('libreoffice --headless --convert-to pdf --outdir /tmp ' + outPath, { stdio: 'pipe' });
-console.log(`✓ Workbook content map: ${outPath} (${buf.length} bytes)`);
+try {
+  execSync('libreoffice --headless --convert-to pdf --outdir /mnt/user-data/outputs ' + outPath, { stdio: 'pipe' });
+  console.log(`✓ Workbook content map:     ${outPath}  (${buf.length} bytes)`);
+  console.log(`✓ PDF render:               /mnt/user-data/outputs/attune_workbook_content_map.pdf`);
+} catch (e) {
+  console.log(`✓ Workbook content map:     ${outPath}  (${buf.length} bytes)`);
+  console.log(`  PDF render skipped (libreoffice unavailable).`);
+}

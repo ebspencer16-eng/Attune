@@ -188,58 +188,33 @@ WHEN_THIS_SHOWS_UP_BY_TYPE = _load_when_this_shows_up()
 # These are the "first paragraph" in the dimension callout. The second
 # paragraph is the couple-type blurb above. Voice: declarative, no em
 # dashes, no hedging. Each blurb describes the gap mechanic itself.
-GAP_BLURBS = {
-    'energy': {
-        'aligned':     "You recharge in similar ways. Solo time and connection time tend to feel right at the same moments, which means you don't have to negotiate the rhythm.",
-        'some_gap':    "You recharge a little differently. Most of the time it's invisible, but on long weekends or after social stretches the mismatch surfaces. Worth naming the difference out loud.",
-        'notable_gap': "You recharge in opposite directions. One of you refills by going inward, the other by reaching out. The cost is real if it's not planned around.",
-    },
-    'expression': {
-        'aligned':     "You wear emotion at similar registers. Neither of you has to translate what the other is feeling. The room reads about the same to both of you.",
-        'some_gap':    "You express emotion at slightly different volumes. Mostly fine, but on hard days it can land as 'why aren't you saying anything' or 'why is this so much.'",
-        'notable_gap': "You express emotion at very different volumes. One of you wears it; the other holds it. Both are valid. The work is learning each other's signals.",
-    },
-    'needs': {
-        'aligned':     "You both ask for what you need in similar ways. Whether direct or indirect, you're operating on the same protocol, which keeps a lot of small things from accumulating.",
-        'some_gap':    "You ask for needs at slightly different directness levels. Most of the time it works. Worth checking in on whether one of you is hinting and the other is missing it.",
-        'notable_gap': "You ask for needs in very different ways. One of you names them outright; the other waits to be noticed. The mismatch is where the most needs go unmet.",
-    },
-    'bids': {
-        'aligned':     "You catch each other's bids at similar rates. The everyday gestures land. This is the quiet substrate of the relationship working.",
-        'some_gap':    "You respond to bids a little differently. One of you may be reaching more often than the other notices, or in a register the other isn't tuned to.",
-        'notable_gap': "You respond to bids at very different rates. The reaches that get missed accumulate, even when neither of you means anything by it.",
-    },
-    'conflict': {
-        'aligned':     "You handle conflict at similar speeds. Either both of you want to engage now or both of you want space first. The timing isn't the fight.",
-        'some_gap':    "You handle conflict at slightly different speeds. Workable, but the moments where one wants to address and the other wants to wait are real friction points.",
-        'notable_gap': "You handle conflict at very different speeds. One of you needs to engage now; the other needs space first. Without an agreement, conflicts compound.",
-    },
-    'repair': {
-        'aligned':     "You repair similarly. Both of you need the same kind of close, whether that's verbal or warmth. The end of a hard moment lands cleanly for both of you.",
-        'some_gap':    "You repair a little differently. Most of the time it works. The risk is one of you thinks it's done while the other is still circling.",
-        'notable_gap': "You repair very differently. One of you needs the verbal close; the other moves on once warmth returns. Without naming the difference, the same fight repeats.",
-    },
-    'closeness': {
-        'aligned':     "You want similar amounts of closeness and independence. The rhythm of together-time and alone-time feels right to both of you most of the time.",
-        'some_gap':    "You want slightly different amounts of closeness. Mostly compatible, but the small mismatches in how often you reach for each other can add up.",
-        'notable_gap': "You want notably different amounts of closeness. One of you reaches more; the other defaults to space. Without intention, one of you ends up feeling something the other doesn't.",
-    },
-    'love': {
-        'aligned':     "You give and receive love in compatible ways. What lands for one of you tends to land for the other. Less translation required.",
-        'some_gap':    "You give and receive love a little differently. Mostly fine, but in busy stretches the version that gets sent isn't always the version the other needs.",
-        'notable_gap': "You give and receive love in very different ways. One of you needs words; the other needs presence and action. Both are real. Neither replaces the other.",
-    },
-    'stress': {
-        'aligned':     "You handle stress in similar ways. Either you both reach out or you both pull in. You don't have to manage two different stress responses on top of the stress itself.",
-        'some_gap':    "You handle stress a little differently. Workable, but worth knowing the gap shows up exactly when one of you has the least bandwidth to translate.",
-        'notable_gap': "You handle stress in opposite directions. One of you needs a listener; the other needs the room cleared. The wrong answer at the wrong moment makes things worse.",
-    },
-    'feedback': {
-        'aligned':     "You give and receive feedback at similar comfort levels. Honest things get said without much warm-up.",
-        'some_gap':    "You give and receive feedback at slightly different comfort levels. Most of the time it works. The risk is one of you is holding things back the other would want to hear.",
-        'notable_gap': "You give and receive feedback at very different comfort levels. One of you brings it directly; the other softens or holds. The most useful conversations require both of you stretching.",
-    },
-}
+#
+# Source of truth: api/_workbook-content.js (GAP_BLURBS export). Loaded
+# at module init so the Python builder and the production JS endpoint
+# stay in sync.
+def _load_gap_blurbs():
+    """Parse GAP_BLURBS export from api/_workbook-content.js."""
+    js_path = _Path(__file__).parent.parent / 'api' / '_workbook-content.js'
+    text = js_path.read_text()
+    m = _re.search(r'export const GAP_BLURBS\s*=\s*\{(.+?)\n\};', text, _re.DOTALL)
+    if not m:
+        raise RuntimeError("Could not locate GAP_BLURBS in api/_workbook-content.js")
+    block = m.group(1)
+    dim_pattern = _re.compile(r'(\w+):\s*\{(.+?)\n\s{2}\}', _re.DOTALL)
+    state_pattern = _re.compile(r'(aligned|some_gap|notable_gap):\s*"((?:[^"\\]|\\.)*)"', _re.DOTALL)
+    out = {}
+    for dim_match in dim_pattern.finditer(block):
+        dim_name = dim_match.group(1)
+        body = dim_match.group(2)
+        state_dict = {}
+        for sm in state_pattern.finditer(body):
+            state_id = sm.group(1)
+            blurb = sm.group(2).encode().decode('unicode_escape')
+            state_dict[state_id] = blurb
+        out[dim_name] = state_dict
+    return out
+
+GAP_BLURBS = _load_gap_blurbs()
 
 EXP_DOMAINS = [
     {'key': 'household',  'label': 'Visible Household Labor',  'color': 'gold',
@@ -253,6 +228,11 @@ EXP_DOMAINS = [
      'discussText':      "Some of the invisible labor is being carried unevenly, and at least one of you may not fully see it. Worth surfacing before it accumulates.",
      'differentText':    "One of you is carrying significantly more of the invisible labor. This work is usually unacknowledged and unreciprocated, not from malice but from genuine unawareness.",
      'thisWeek':  "For one week, the partner who typically carries more mental load keeps a simple log, every act of invisible labor they perform. At the end of the week, share it. Don't frame it as an accusation. Just show what's there."},
+    {'key': 'extended_family',  'label': 'Extended Family',  'color': 'plum',
+     'compatibleText':   "You see the work of family across both sides as broadly shared. Visits, contact, gifts, neither of you is doing a job the other doesn't notice.",
+     'discussText':      "You see the family-side work differently in places. Some of it is quietly carried by one of you, often along the lines of whose family it is. Worth saying out loud.",
+     'differentText':    "You hold significantly different pictures of who's doing the family work. The unevenness usually surfaces as the holiday conversation that takes a year to actually have.",
+     'thisWeek':  "Pick one upcoming family event, a visit, a holiday, a check-in call. Each of you names what you'd like the other to do, before the week of arrives."},
     {'key': 'money',  'label': 'Money, Work & Career',  'color': 'indigo',
      'compatibleText':   "Your orientations on money and career are broadly compatible. You probably move through major financial decisions without much friction.",
      'discussText':      "You diverge in places on how money should be held or whose work leads. These are the questions that compound, worth talking through with specifics.",
@@ -272,11 +252,12 @@ EXP_DOMAINS = [
 
 # Domain icon glyphs (rendered in the page header).
 DOMAIN_ICONS = {
-    'household': '⌂',
-    'emotional': '∞',
-    'money':     '$',
-    'life':      '❀',
-    'operate':   '◐',
+    'household':       '⌂',
+    'emotional':       '∞',
+    'extended_family': '❦',
+    'money':           '$',
+    'life':            '❀',
+    'operate':         '◐',
 }
 
 # Universal row labels per domain. The values that appear next to
@@ -298,7 +279,18 @@ DOMAIN_ROWS = {
         'Maintaining closeness',
         'Hard conversations',
         'Repair after friction',
-        'Extended family & in-laws',
+    ],
+    # Extended Family rows are name-substituted at render time. The
+    # placeholders {U} and {P} resolve to the user/partner names. Six
+    # rows total, each tied to one of the six responsibility items in
+    # App.jsx RESPONSIBILITY_CATEGORIES.extended_family.
+    'extended_family': [
+        "Visits with {U}'s family",
+        "Visits with {P}'s family",
+        "Staying in touch with {U}'s family",
+        "Staying in touch with {P}'s family",
+        "Gifting for {U}'s family",
+        "Gifting for {P}'s family",
     ],
     'money': [
         'Day-to-day finances',
@@ -591,11 +583,12 @@ COUPLE = {
     # Expectations alignment percentages per the new 5-domain model.
     # Computed in production from each row's match credit.
     'expectations': {
-        'household':  82,
-        'emotional':  48,
-        'money':      78,
-        'life':       73,
-        'operate':    68,
+        'household':       82,
+        'emotional':       48,
+        'extended_family': 67,
+        'money':           78,
+        'life':            73,
+        'operate':         68,
     },
     # Per-domain row values. Keys MUST match DOMAIN_ROWS labels exactly.
     # Each value is what shows in the bold column on the workbook page.
@@ -607,8 +600,12 @@ COUPLE = {
             'david': [('Cooking weeknights', 'Shared'), ('Grocery & meal planning', 'Shared'), ('Day-to-day tidying', 'Maya'), ('Home repairs & maintenance', 'David'), ('Family calendar', 'Shared'), ('Hosting & holidays', 'Shared'), ('Vacation planning', 'Maya')],
         },
         'emotional': {
-            'maya':  [('Mental load', 'Maya'), ('Tracking how everyone is', 'Maya'), ('Maintaining closeness', 'Both of us'), ('Hard conversations', 'Maya'), ('Repair after friction', 'Maya'), ('Extended family & in-laws', 'Maya')],
-            'david': [('Mental load', 'Shared'), ('Tracking how everyone is', 'Shared'), ('Maintaining closeness', 'Both of us'), ('Hard conversations', 'Shared'), ('Repair after friction', 'Shared'), ('Extended family & in-laws', 'Maya')],
+            'maya':  [('Mental load', 'Maya'), ('Tracking how everyone is', 'Maya'), ('Maintaining closeness', 'Both of us'), ('Hard conversations', 'Maya'), ('Repair after friction', 'Maya')],
+            'david': [('Mental load', 'Shared'), ('Tracking how everyone is', 'Shared'), ('Maintaining closeness', 'Both of us'), ('Hard conversations', 'Shared'), ('Repair after friction', 'Shared')],
+        },
+        'extended_family': {
+            'maya':  [("Visits with Maya's family", 'Maya'), ("Visits with David's family", 'Both of us'), ("Staying in touch with Maya's family", 'Maya'), ("Staying in touch with David's family", 'David'), ("Gifting for Maya's family", 'Maya'), ("Gifting for David's family", 'Shared')],
+            'david': [("Visits with Maya's family", 'Maya'), ("Visits with David's family", 'David'), ("Staying in touch with Maya's family", 'Maya'), ("Staying in touch with David's family", 'David'), ("Gifting for Maya's family", 'Maya'), ("Gifting for David's family", 'David')],
         },
         'money': {
             'maya':  [('Day-to-day finances', 'Shared'), ('Long-term financial decisions', 'Both of us'), ('Whose career is prioritized', 'Both of us'), ('How we hold money', 'Mostly combined'), ('Saving v spending', 'Lean saving'), ('Risk tolerance', 'Comfortable')],
@@ -657,7 +654,7 @@ CSS = r"""
   --bone:#F5EFE3;
   --ink:#0E0B07; --graphite:#332A20; --slate:#5A4D3F; --muted:#8C7A68;
   --hairline:#E2D5C2; --hairline-soft:#EFE7DA;
-  --coral:#E8673A; --coral-deep:#C2410C; --coral-tint:#FFF0E6;
+  --coral:#E8673A; --coral-deep:#C2410C; --coral-tint:#FFF0E6; --coral-soft:#F08966;
   --indigo:#1B5FE8; --indigo-deep:#1E3A8A; --indigo-tint:#EBE9F8;
   --purple:#9B5DE5; --purple-deep:#6B2BB8; --purple-tint:#F3EEFF;
   --green:#10B981; --green-deep:#047857; --green-tint:#E7FAF1;
@@ -1651,11 +1648,6 @@ body{
 .refcard-names em{
   font-style:italic;font-weight:400;color:rgba(255,255,255,.55);
 }
-/* Together-line under the names, italic & muted */
-.refcard-together{
-  font-family:var(--hfont);font-style:italic;font-size:.95rem;
-  color:rgba(255,255,255,.6);font-weight:400;margin-bottom:.18in;
-}
 /* 3-tile layout: couple type · logo · goal */
 .refcard-tiles{
   display:grid;grid-template-columns:1.15fr .85fr 1.1fr;
@@ -1689,39 +1681,58 @@ body{
   font-family:var(--bfont);font-size:.7rem;line-height:1.45;
   color:rgba(255,255,255,.7);font-weight:400;font-style:italic;margin-top:8px;
 }
-/* Logo tile: SVG mark sits centered. Pure CSS mark using cursive A. */
+/* Logo tile: real Attune SVG mark + wordmark + italic tagline */
 .refcard-tile-logo{
   display:flex;align-items:center;justify-content:center;
-  padding:.2rem .2rem;
+  padding:.2rem .35rem;
 }
 .refcard-mark{
-  display:flex;flex-direction:column;align-items:center;gap:6px;
+  display:flex;flex-direction:column;align-items:center;gap:8px;
   text-align:center;
 }
-.refcard-mark-glyph{
-  font-family:var(--hfont);font-style:italic;font-weight:700;
-  font-size:2.4rem;line-height:1;color:var(--coral-soft);
-  letter-spacing:-.02em;
+.refcard-mark-svg{
+  display:block;
+  filter:drop-shadow(0 1px 0 rgba(0,0,0,.2));
+}
+.refcard-mark-wordmark{
+  display:flex;flex-direction:column;align-items:center;gap:1px;
+  margin-top:2px;
 }
 .refcard-mark-name{
-  font-family:var(--bfont);font-size:9px;letter-spacing:.32em;
-  text-transform:uppercase;font-weight:700;color:rgba(255,255,255,.7);
+  font-family:var(--hfont);font-size:1.05rem;font-weight:700;
+  color:white;letter-spacing:.01em;line-height:1;
 }
-/* Goal-for-this-week tile retains write-in lines */
-.refcard-tile-quote{
-  font-family:var(--hfont);font-size:.82rem;line-height:1.4;
-  color:white;font-weight:400;font-style:italic;letter-spacing:-.005em;
-  margin-top:6px;
+.refcard-mark-kicker{
+  font-family:var(--bfont);font-size:7.5px;letter-spacing:.32em;
+  text-transform:uppercase;font-weight:700;
+  color:rgba(255,255,255,.55);line-height:1;
 }
+/* Gradient rule under wordmark, before tagline. Same as cover stripe. */
+.refcard-mark-rule{
+  width:46px;height:1.5px;margin-top:6px;
+  background:linear-gradient(90deg,#E8673A 0%,#9B5DE5 50%,#1B5FE8 100%);
+  border-radius:1px;
+}
+.refcard-mark-tagline{
+  font-family:var(--hfont);font-style:italic;font-size:.78rem;
+  color:rgba(255,255,255,.78);font-weight:400;line-height:1.3;
+  margin-top:4px;letter-spacing:-.005em;max-width:1.6in;
+}
+/* Goal-for-this-week tile: WHITE write-in box (notepad style) */
 .refcard-tile-writein{
-  background:repeating-linear-gradient(
+  flex:1;
+  background:#FFFDF9;
+  background-image:repeating-linear-gradient(
     transparent,
-    transparent 1.35em,
-    rgba(255,255,255,.22) 1.35em,
-    rgba(255,255,255,.22) calc(1.35em + 1px)
+    transparent 1.4em,
+    rgba(45,34,80,.18) 1.4em,
+    rgba(45,34,80,.18) calc(1.4em + 1px)
   );
-  height:calc(1.35em * 4);
+  border:1px solid rgba(255,255,255,.14);
+  border-radius:2px;
   margin-top:8px;
+  min-height:1.2in;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.4),0 1px 0 rgba(0,0,0,.18);
 }
 /* Below-card content sits on page bg */
 .refcard-context{
@@ -1763,41 +1774,31 @@ body{
   font-family:var(--hfont);font-size:.8rem;line-height:1.4;
   color:var(--ink);font-weight:700;
 }
+/* "Explore Attune In Practice" callout, sits below tips */
+.refcard-inpractice{
+  margin-top:.32in;
+  padding:.2in .26in;
+  border:1px solid var(--graphite);
+  background:rgba(255,253,249,.55);
+  display:flex;flex-direction:column;gap:6px;
+  border-left:3px solid var(--coral-deep);
+}
+.refcard-inpractice-eye{
+  font-family:var(--bfont);font-size:8.5px;letter-spacing:.22em;
+  text-transform:uppercase;font-weight:700;color:var(--coral-deep);
+}
+.refcard-inpractice-text{
+  font-family:var(--hfont);font-style:italic;font-size:.88rem;
+  line-height:1.45;color:var(--ink);font-weight:400;
+}
+.refcard-inpractice-text strong{
+  font-style:normal;font-weight:700;font-family:var(--bfont);
+  letter-spacing:.04em;font-size:.78rem;color:var(--coral-deep);
+}
 .refcard-mark-foot{
   margin-top:.18in;text-align:center;
   font-family:var(--bfont);font-size:9px;letter-spacing:.18em;
   text-transform:uppercase;font-weight:700;color:var(--graphite);opacity:.7;
-}
-
-/* ── NOTES PAGES (8 lined pages after reference card) ───────── */
-.notes-page{background:var(--cream)}
-.notes-inner{
-  display:flex;flex-direction:column;
-  height:11in;padding:.85in .9in 1in;
-}
-.notes-head{margin-top:.4in}
-.notes-eye{color:var(--graphite)}
-.notes-rule{
-  height:1px;background:var(--ink);
-  margin:.18in 0 .25in;
-}
-.notes-area{
-  flex:1;
-  background:repeating-linear-gradient(
-    transparent,
-    transparent calc(.42in - 1px),
-    var(--hairline) calc(.42in - 1px),
-    var(--hairline) .42in
-  );
-  background-size:100% .42in;
-  background-position:0 0;
-  margin-bottom:.25in;
-}
-.notes-foot{
-  font-family:var(--hfont);font-style:italic;font-size:9.5pt;
-  color:var(--muted);text-align:center;font-weight:400;
-  letter-spacing:.005em;line-height:1.4;
-  margin-top:.18in;
 }
 
 /* PRINT */
@@ -1875,7 +1876,7 @@ def build_toc():
       <div class="toc-row indent"><span class="toc-row-label">Communication · 10 dimensions</span><span class="toc-row-page">007</span></div>""")
     for dim, p in dims_with_pages:
         page1_rows.append(f"""      <div class="toc-row indent2"><span class="toc-row-label">{DIM_META[dim]['label']}</span><span class="toc-row-page">{p:03d}</span></div>""")
-    page1_rows.append(f"""      <div class="toc-row indent"><span class="toc-row-label">Expectations · 5 domains</span><span class="toc-row-page">{exp_start_page:03d}</span></div>""")
+    page1_rows.append(f"""      <div class="toc-row indent"><span class="toc-row-label">Expectations · 6 domains</span><span class="toc-row-page">{exp_start_page:03d}</span></div>""")
     for e, p in exp_pages:
         page1_rows.append(f"""      <div class="toc-row indent2"><span class="toc-row-label">{e['label']}</span><span class="toc-row-page">{p:03d}</span></div>""")
     page1_rows.append("    </div>")
@@ -2036,6 +2037,7 @@ def build_snapshot(page_num):
         status_class = exp_status_for(pct)
         # short label for card
         short = {'household': 'Household', 'emotional': 'Emotional Labor',
+                 'extended_family': 'Extended Family',
                  'money': 'Money & Career', 'life': 'Life Together',
                  'operate': 'How We Operate'}[e['key']]
         exp_cards.append(f"""
@@ -2058,7 +2060,7 @@ def build_snapshot(page_num):
       </div>
       <div class="snapshot-stamp">
         <span class="snapshot-stamp-row"><strong>10</strong> dimensions</span>
-        <span class="snapshot-stamp-row"><strong>5</strong> domains</span>
+        <span class="snapshot-stamp-row"><strong>6</strong> domains</span>
         <span class="snapshot-stamp-row"><strong>{n_notable}</strong> notable gaps</span>
       </div>
     </div>
@@ -2082,7 +2084,7 @@ def build_snapshot(page_num):
       <span style="margin-left:auto;font-style:italic;font-family:var(--hfont)">Each dimension: 1 = far left pole · 5 = far right pole</span>
     </div>
 
-    <div class="snap-section-title" style="margin-top:.2in">Expectations · 5 domains</div>
+    <div class="snap-section-title" style="margin-top:.2in">Expectations · 6 domains</div>
     <div class="expectations-grid">{''.join(exp_cards)}
     </div>
   </div>
@@ -2280,8 +2282,10 @@ def build_expectation_page(domain, idx, page_num):
 
     # Render each row. The row LABEL is universal (from DOMAIN_ROWS via
     # the data tuples). The VALUE on the right is the partner's answer.
-    items_a = ''.join(f'<div class="esbs-item"><span class="esbs-item-label">{lab}</span><span class="esbs-item-value">{val}</span></div>' for lab, val in detail['maya'])
-    items_b = ''.join(f'<div class="esbs-item"><span class="esbs-item-label">{lab}</span><span class="esbs-item-value">{val}</span></div>' for lab, val in detail['david'])
+    # fill() on the label resolves {U}/{P} placeholders that show up in
+    # name-bearing domains like extended_family.
+    items_a = ''.join(f'<div class="esbs-item"><span class="esbs-item-label">{fill(lab, u, p)}</span><span class="esbs-item-value">{val}</span></div>' for lab, val in detail['maya'])
+    items_b = ''.join(f'<div class="esbs-item"><span class="esbs-item-label">{fill(lab, u, p)}</span><span class="esbs-item-value">{val}</span></div>' for lab, val in detail['david'])
 
     analysis_text = fill(alignment_text(domain, pct), u, p)
 
@@ -2291,7 +2295,7 @@ def build_expectation_page(domain, idx, page_num):
     title_rest = parts[1] if len(parts) > 1 else ''
 
     icon = DOMAIN_ICONS.get(domain['key'], '·')
-    domain_name_words = ['One', 'Two', 'Three', 'Four', 'Five']
+    domain_name_words = ['One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine', 'Ten']
 
     return f"""
 <div class="page accent-{domain['color']}">
@@ -2671,42 +2675,19 @@ def build_first_conversation_guide(page_num):
 </div>
 """
 
-def build_notes_page(page_num, idx, total):
-    """Lined notes page. Eight of these append after the reference card.
-
-    Each page has a light eyebrow ("Notes · 01 of 08"), a thin top rule,
-    a tall block of evenly spaced ruled lines, and a small italic footer
-    line directing the reader to attune-relationships.com/in-practice
-    for ongoing material.
-    """
-    return f"""
-<div class="page notes-page">
-  <div class="page-running-head">
-    <span>Notes</span>
-    <span>{idx:02d} of {total:02d}</span>
-  </div>
-  <div class="page-inner notes-inner">
-    <div class="notes-head">
-      <div class="eyebrow notes-eye">Notes</div>
-    </div>
-    <div class="notes-rule"></div>
-    <div class="notes-area"></div>
-    <p class="notes-foot">Learn more through Attune In Practice at attune-relationships.com/in-practice</p>
-  </div>
-  <div class="page-num">{page_num:03d}</div>
-</div>
-"""
-
-
 def build_reference_card(page_num):
-    """Reference card, navy card on tan page bg.
+    """Reference card, navy card on tan page bg. v2 notepad-style.
 
     Layout per Ellie's v2 spec:
-      - Navy gradient bg with thin gold border
-      - Partner names featured prominently in coral at top of card
-      - Three tiles: couple type (left) | Attune mark (center) | Goal for this week (right)
-      - "Keep this somewhere you'll see it" headline lives in the page-context
-        section below the card, not inside the card itself
+      - Navy gradient bg with thin gold border, gradient stripe at top
+      - Coral partner names (no "Together, four years" line)
+      - Three tiles:
+          left   : couple type
+          center : real Attune logo SVG + "Understanding takes intention." tagline
+          right  : white write-in box for goal-of-the-week (no pre-filled quote)
+      - Gradient rule accent (orange→purple→indigo) inside the center tile
+      - "Keep this somewhere you'll see it" + "Explore Attune In Practice"
+        live in the page-context section below the card, not on the card itself
     """
     return f"""
 <div class="page refcard-page">
@@ -2719,7 +2700,6 @@ def build_reference_card(page_num):
       </div>
 
       <h1 class="refcard-names">{COUPLE['u']} <em>&amp;</em> {COUPLE['p']}</h1>
-      <p class="refcard-together">{COUPLE['together']}</p>
 
       <div class="refcard-tiles">
         <div class="refcard-tile">
@@ -2730,13 +2710,28 @@ def build_reference_card(page_num):
         </div>
         <div class="refcard-tile refcard-tile-logo">
           <div class="refcard-mark">
-            <span class="refcard-mark-glyph">A.</span>
-            <span class="refcard-mark-name">Attune</span>
+            <svg class="refcard-mark-svg" width="58" height="42" viewBox="0 0 103 76" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <defs>
+                <linearGradient id="refcardLogoGrad" x1="0" y1="0" x2="103" y2="76" gradientUnits="userSpaceOnUse">
+                  <stop offset="0%" stop-color="#E8673A"/>
+                  <stop offset="100%" stop-color="#1B5FE8"/>
+                </linearGradient>
+              </defs>
+              <path d="M14,4 L44,4 A9,9 0 0,1 53,13 L53,42 A9,9 0 0,1 44,51 L20,51 L6,61 L11,51 A6,6 0 0,1 5,45 L5,13 A9,9 0 0,1 14,4 Z" fill="url(#refcardLogoGrad)"/>
+              <path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill="white" opacity="0.93" transform="translate(13.16,11.3) scale(0.72)"/>
+              <path d="M89,14 L59,14 A9,9 0 0,0 50,23 L50,52 A9,9 0 0,0 59,61 L83,61 L97,71 L92,61 A6,6 0 0,0 98,55 L98,23 A9,9 0 0,0 89,14 Z" fill="white" stroke="url(#refcardLogoGrad)" stroke-width="2.2" stroke-linejoin="round"/>
+              <path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill="url(#refcardLogoGrad)" transform="translate(58.16,21.3) scale(0.72)"/>
+            </svg>
+            <div class="refcard-mark-wordmark">
+              <span class="refcard-mark-name">Attune</span>
+              <span class="refcard-mark-kicker">Relationships</span>
+            </div>
+            <div class="refcard-mark-rule"></div>
+            <p class="refcard-mark-tagline">Understanding takes intention.</p>
           </div>
         </div>
         <div class="refcard-tile">
           <span class="refcard-tile-eye">Goal for this week</span>
-          <p class="refcard-tile-quote">"{COUPLE['couple_type']['phrase_that_lands']}"</p>
           <div class="refcard-tile-writein"></div>
         </div>
       </div>
@@ -2765,6 +2760,13 @@ def build_reference_card(page_num):
         <span class="refcard-ctx-tip-text">At your six-month check-in, you'll get a fresh card with what's shifted. Reorder anytime at attune-relationships.com.</span>
       </div>
     </div>
+
+    <!-- "Explore Attune In Practice" callout, lives below tips, above footer -->
+    <div class="refcard-inpractice">
+      <span class="refcard-inpractice-eye">Explore Attune In Practice</span>
+      <p class="refcard-inpractice-text">More tools, follow-ups, and conversations built around results like yours. <strong>attune-relationships.com/in-practice</strong></p>
+    </div>
+
     <p class="refcard-mark-foot">attune-relationships.com</p>
   </div>
 </div>
@@ -2836,8 +2838,8 @@ def build_full_workbook(same_type=False):
   <div class="page-inner">
     <div style="margin-top:1.5in;">
       <div class="eyebrow" style="color:var(--gold-deep);margin-bottom:14px">Section B · Expectations</div>
-      <h1 class="display-title" style="font-size:3.4rem;letter-spacing:-.026em;line-height:1">Five domains of <em style="color:var(--gold-deep)">what you each assume.</em></h1>
-      <p style="font-family:var(--hfont);font-style:italic;font-size:1.1rem;line-height:1.55;color:var(--graphite);margin-top:1.2rem;max-width:5.5in">Most friction in long-term partnerships isn't about communication style. It's about quietly mismatched assumptions, who's leading what, how money should be held, what the next five years look like. The exercise surfaced what each of you actually expects. The next five pages put those expectations side by side.</p>
+      <h1 class="display-title" style="font-size:3.4rem;letter-spacing:-.026em;line-height:1">Six domains of <em style="color:var(--gold-deep)">what you each assume.</em></h1>
+      <p style="font-family:var(--hfont);font-style:italic;font-size:1.1rem;line-height:1.55;color:var(--graphite);margin-top:1.2rem;max-width:5.5in">Most friction in long-term partnerships isn't about communication style. It's about quietly mismatched assumptions, who's leading what, how money should be held, what the next five years look like. The exercise surfaced what each of you actually expects. The next six pages put those expectations side by side.</p>
     </div>
   </div>
   <div class="page-num">{pn:03d}</div>

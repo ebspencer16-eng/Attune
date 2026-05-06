@@ -183,19 +183,19 @@ const section1 = [
   ...sectionHeader('01 · Documents', 'Copy, content flows, templates, and methodology.', ORANGE),
 
   ...checklistGroup('Exercise flows', [
-    { item: 'Final copy review on Communication exercise — all 12 dimensions, all questions, all response options' },
-    { item: 'Final copy review on Expectations exercise — all 7 domains, childhood context framing, response options',
-      notes: 'Carolina already did a first pass' },
+    { item: 'Final copy review on Communication exercise — all 10 dimensions, all questions, all response options' },
+    { item: 'Final copy review on Expectations exercise — all 6 responsibility categories (Household, Financial, Career & Work, Extended Family, Emotional Labor) + 6 life-question categories (Family, Lifestyle, Values, Money, Conflict, Connection)',
+      notes: 'Carolina already did a first pass. Phase 2 added Extended Family responsibility category and four name-substituted life questions for in-person and contact frequency with each partner\'s family.' },
     { item: 'Exercise intro/outro copy — what does each exercise accomplish, why it matters, what to expect' },
     { item: 'Ordering/flow logic — does exercise 1 come before exercise 2? Required vs optional?' },
     { item: "Edge-case copy — partner hasn't completed yet, session timeout, resume-later states" },
   ], ORANGE),
 
   ...checklistGroup('Results flow', [
-    { item: 'Snapshot page — final copy + layout for both partners shown side-by-side' },
+    { item: 'Snapshot page — final copy + layout for both partners shown side-by-side. Stamp reads 10 dimensions / 6 domains / N notable gaps.' },
     { item: 'Couple type reveal page — all 10 types, tagline quality review' },
-    { item: 'Per-dimension detail pages — one per comms dimension, final copy + visualization' },
-    { item: 'Per-expectation detail pages — one per unaligned domain, final copy + visualization' },
+    { item: 'Per-dimension detail pages — one per comms dimension (10 total). Each renders a two-paragraph callout: gap blurb (universal, varies by gap state) + type blurb (couple-type-specific). 130 blurbs total across the workbook.' },
+    { item: 'Per-expectation detail pages — one per domain (6 total). Each shows side-by-side row values, alignment %, and the alignment-state prose for that domain.' },
     { item: 'Working Knowledge section — cross-type: "what you should know about each other" × 6 couple types × 6 moments. Same-type: "how you two should approach specific situations" × 4 couple types × 6 moments.' },
     { item: 'Conversation Library — 5 structured situations with prompts' },
   ], ORANGE),
@@ -404,7 +404,13 @@ const doc = new Document({
 });
 
 const buf = await Packer.toBuffer(doc);
-const outPath = '/tmp/attune_master_review_checklist.docx';
+const outPath = '/mnt/user-data/outputs/attune_master_review_checklist.docx';
 writeFileSync(outPath, buf);
-execSync('libreoffice --headless --convert-to pdf --outdir /tmp ' + outPath, { stdio: 'pipe' });
-console.log(`✓ Master review checklist: ${outPath} (${buf.length} bytes)`);
+try {
+  execSync('libreoffice --headless --convert-to pdf --outdir /mnt/user-data/outputs ' + outPath, { stdio: 'pipe' });
+  console.log(`✓ Master review checklist:  ${outPath}  (${buf.length} bytes)`);
+  console.log(`✓ PDF render:               /mnt/user-data/outputs/attune_master_review_checklist.pdf`);
+} catch (e) {
+  console.log(`✓ Master review checklist:  ${outPath}  (${buf.length} bytes)`);
+  console.log(`  PDF render skipped (libreoffice unavailable).`);
+}

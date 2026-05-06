@@ -39,19 +39,33 @@ export const RESPONSIBILITY_CATEGORIES = [
     id: 'career', label: 'Career & Work',
     items: [
       'Being the primary income earner',
-      'Whose career shapes major family decisions — where you live, your schedule, your lifestyle',
+      'Whose career shapes major family decisions, where you live, your schedule, your lifestyle',
       'Who makes career sacrifices when the family needs it',
+    ],
+  },
+  {
+    id: 'extended_family', label: 'Extended Family',
+    // Each item uses {userName} and {partnerName} placeholders that resolve
+    // at render time from the partner names captured in the exercise. This
+    // makes each row a name-specific question (e.g. "Visits with Maya's
+    // family") rather than a generic abstract item.
+    items: [
+      "Planning visits with {userName}'s family",
+      "Gifting for {userName}'s family",
+      "Staying in touch with {userName}'s family",
+      "Planning visits with {partnerName}'s family",
+      "Gifting for {partnerName}'s family",
+      "Staying in touch with {partnerName}'s family",
     ],
   },
   {
     id: 'emotional', label: 'Emotional Labor',
     items: [
-      'Carrying the mental load — remembering, anticipating, planning ahead',
+      'Carrying the mental load, remembering, anticipating, planning ahead',
       'Tracking the emotional wellbeing of the household',
       'Maintaining closeness and emotional intimacy over time',
       'Initiating difficult conversations',
       'Being the first to reach out after conflict',
-      'Maintaining relationships with extended family and in-laws',
     ],
   },
 ];
@@ -98,11 +112,32 @@ export const LIFE_QUESTIONS = [
     options: ['Not part of my future', 'Uncertain', 'Open to it', 'Important to me, I want at least one', 'Central to my future'],
   },
   {
-    id: 'lq_parents', category: 'Family', topic: 'Aging parents and family obligations',
-    core:        'what kind of involvement do you want to have?',
-    anniversary: 'how are you handling this now, and is it sustainable?',
-    revisiting:  'how are you thinking about this these days?',
-    options: ['Help in crisis only', 'Meaningful support', 'Significantly involved', 'Part of household if needed'],
+    id: 'lq_inperson_user', category: 'Family', topic: "Time we spend in person with {userName}'s family",
+    core:        'how often do you want to see them?',
+    anniversary: 'is the current visit cadence working for you?',
+    revisiting:  'where do you want this to settle?',
+    options: ['Rarely, by design', 'A few times a year', 'Several times a year', 'Often, regular visits', 'Very often, deeply integrated'],
+  },
+  {
+    id: 'lq_contact_user', category: 'Family', topic: "Day-to-day contact and involvement with {userName}'s family",
+    core:        'what level of involvement feels right?',
+    anniversary: 'how integrated are they in your daily life now?',
+    revisiting:  'is the current level still the right one?',
+    options: ['Minimal contact', 'Occasional check-ins', 'Regular contact', 'Daily or near-daily', 'Closely involved in our lives'],
+  },
+  {
+    id: 'lq_inperson_partner', category: 'Family', topic: "Time we spend in person with {partnerName}'s family",
+    core:        'how often do you want to see them?',
+    anniversary: 'is the current visit cadence working for you?',
+    revisiting:  'where do you want this to settle?',
+    options: ['Rarely, by design', 'A few times a year', 'Several times a year', 'Often, regular visits', 'Very often, deeply integrated'],
+  },
+  {
+    id: 'lq_contact_partner', category: 'Family', topic: "Day-to-day contact and involvement with {partnerName}'s family",
+    core:        'what level of involvement feels right?',
+    anniversary: 'how integrated are they in your daily life now?',
+    revisiting:  'is the current level still the right one?',
+    options: ['Minimal contact', 'Occasional check-ins', 'Regular contact', 'Daily or near-daily', 'Closely involved in our lives'],
   },
   {
     id: 'lq_family_conf', category: 'Family', topic: 'When family and partner conflict',

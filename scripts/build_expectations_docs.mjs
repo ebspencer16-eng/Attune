@@ -163,8 +163,8 @@ function buildFlowDoc(variantKey) {
         ['Audience', variant.audience],
         ['Package(s)', variant.packages],
         ['Entry point', variant.entryPoint],
-        ['Part 1', 'Responsibilities — 20 items across 4 categories'],
-        ['Part 2', 'Life & Values — 17 questions across 6 categories'],
+        ['Part 1', 'Responsibilities — 25 items across 5 categories'],
+        ['Part 2', 'Life & Values — 20 questions across 6 categories'],
       ].map(([k, v]) => new TableRow({ cantSplit: false, children: [
         new TableCell({ borders, width: { size: w1, type: WidthType.DXA },
           shading: { fill: 'EDE6D8', type: ShadingType.CLEAR },
@@ -192,8 +192,8 @@ function buildFlowDoc(variantKey) {
     ...[
       ['Step 1', 'Profile dashboard', variant.entryPoint],
       ['Step 2', 'Childhood structure question', 'Context question before responsibilities'],
-      ['Step 3', 'Part 1 — Responsibilities', '20 items across 4 categories'],
-      ['Step 4', 'Part 2 — Life & Values', '17 questions across 6 categories'],
+      ['Step 3', 'Part 1 — Responsibilities', '25 items across 5 categories'],
+      ['Step 4', 'Part 2 — Life & Values', '20 questions across 6 categories'],
       ['Step 5', 'Waiting for partner screen', 'Until both partners complete'],
       ['Unlock', 'Results available', 'Both partners submitted'],
     ].map(([step, label, note]) => new Paragraph({
@@ -222,13 +222,13 @@ function buildFlowDoc(variantKey) {
   // ── Responsibilities ──────────────────────────────────────────────────
   const responsibilities = [
     ...sectionHeader(3, 'Part 1 — Responsibilities',
-      '20 items across 4 categories. Each partner answers independently.'),
+      '25 items across 5 categories. Each partner answers independently.'),
 
     prose('Framing question:', { bold: true, after: 80 }),
     prose('"' + RESPONSIBILITY_FRAMING[variantKey] + '"',
       { italics: true, color: MUTED, indent: 400, after: 240 }),
 
-    prose('Answer options for Household, Financial, and Emotional Labor items:', { bold: true, after: 40 }),
+    prose('Answer options for Household, Financial, Extended Family, and Emotional Labor items:', { bold: true, after: 40 }),
     prose(RESPONSIBILITY_OPTIONS, { italics: true, color: MUTED, indent: 400, after: 120 }),
     prose('Answer options for Career & Work items:', { bold: true, after: 40 }),
     prose(CAREER_OPTIONS, { italics: true, color: MUTED, indent: 400, after: 240 }),
@@ -250,7 +250,7 @@ function buildFlowDoc(variantKey) {
 
   const lifeValues = [
     ...sectionHeader(4, 'Part 2 — Life & Values',
-      '17 questions across 6 categories. Each question has a topic (bold) and a variant-specific expanding phrase.'),
+      '20 questions across 6 categories. Each question has a topic (bold) and a variant-specific expanding phrase.'),
 
     ...lqCategoryOrder.flatMap(catLabel => {
       const questions = lqByCategory[catLabel] || [];
@@ -427,9 +427,9 @@ function buildComparisonDoc() {
       ['Childhood question',
         'Same text, same options', 'Same text, same options', 'Same text, same options'],
       ['Part 1 — Responsibilities items',
-        '20 items in 4 categories', '20 items in 4 categories', '20 items in 4 categories'],
+        '25 items in 5 categories', '25 items in 5 categories', '25 items in 5 categories'],
       ['Part 2 — Life & Values questions',
-        '17 questions in 6 categories', '17 questions in 6 categories', '17 questions in 6 categories'],
+        '20 questions in 6 categories', '20 questions in 6 categories', '20 questions in 6 categories'],
     ], { labelHeader: 'Attribute' }),
   ];
 
@@ -463,7 +463,7 @@ function buildComparisonDoc() {
   // ── Part 2: Responsibilities comparison ────────────────────────────────
   const responsibilities = [
     ...bigHeader('Part 2 · Responsibilities items',
-      'All 20 items are IDENTICAL across variants. Only the framing question differs.', GREEN),
+      'All 25 items are IDENTICAL across variants. Only the framing question differs.', GREEN),
 
     prose('Framing question (this is what differs):', { bold: true }),
     comparisonTable([
@@ -650,15 +650,19 @@ function buildComparisonDoc() {
 
 async function buildAndSave(doc, filename) {
   const buf = await Packer.toBuffer(doc);
-  const docxPath = '/tmp/' + filename + '.docx';
+  const docxPath = '/mnt/user-data/outputs/' + filename + '.docx';
   writeFileSync(docxPath, buf);
-  execSync('libreoffice --headless --convert-to pdf --outdir /tmp ' + docxPath, { stdio: 'pipe' });
-  console.log(`✓ ${filename} — ${buf.length} bytes`);
+  try {
+    execSync('libreoffice --headless --convert-to pdf --outdir /mnt/user-data/outputs ' + docxPath, { stdio: 'pipe' });
+    console.log(`✓ ${filename} — ${buf.length} bytes`);
+  } catch (e) {
+    console.log(`✓ ${filename} — ${buf.length} bytes (pdf skipped)`);
+  }
 }
 
-await buildAndSave(buildFlowDoc('core'), 'expectations_flow_core');
-await buildAndSave(buildFlowDoc('anniversary'), 'expectations_flow_anniversary');
-await buildAndSave(buildFlowDoc('revisiting'), 'expectations_flow_revisiting');
-await buildAndSave(buildComparisonDoc(), 'expectations_variant_comparison');
+await buildAndSave(buildFlowDoc('core'), 'attune_expectations_flow_core');
+await buildAndSave(buildFlowDoc('anniversary'), 'attune_expectations_flow_anniversary');
+await buildAndSave(buildFlowDoc('revisiting'), 'attune_expectations_flow_revisiting');
+await buildAndSave(buildComparisonDoc(), 'attune_expectations_variant_comparison');
 
-console.log('\nDone. 4 docs built in /tmp/.');
+console.log('\nDone. 4 docs built in /mnt/user-data/outputs/.');

@@ -55,6 +55,7 @@ const DIM_META = evalExport(contentSource, 'DIM_META');
 const DIM_CONTENT = evalExport(contentSource, 'DIM_CONTENT');
 const DIMS = evalExport(contentSource, 'DIMS');
 const WHEN_THIS_SHOWS_UP = evalExport(contentSource, 'WHEN_THIS_SHOWS_UP');
+const GAP_BLURBS = evalExport(contentSource, 'GAP_BLURBS');
 
 import { SCENE_DRAFTS, PROMPT_DRAFTS } from './_shared_drafts.mjs';
 
@@ -218,7 +219,7 @@ const coverPage = [
 
   ...[
     ['1.', 'Couple type names & taglines',             '10 types'],
-    ['2.', '"What this means" analysis per type',      '10 dimensions × 10 couple types = 100 blocks'],
+    ['2.', 'Dimension callout (gap + type blurbs)',    '10 dims × (3 gap states + 10 couple types) = 130 blurbs'],
     ['3.', 'Six Moments Library',                      '6 moments × 4 individual types = 24 scenes'],
     ['4.', 'Conversation prompts',                     '5 situations × 5 prompts = 25 prompts'],
     ['5.', 'Reference Card phrase per couple type',    '10 phrases (one per type)'],
@@ -248,28 +249,74 @@ const section1 = [
 ];
 
 // ── SECTION 2 ────────────────────────────────────────────────────────────
-// "What this means for your relationship" — the grey italic prose in the
-// right column of each dimension's hero. Couple-type-specific; all 10
-// dimensions × 10 couple types. Dim pages only render when gap >= 1.5.
+// Dimension callout content. Two paragraphs render side by side on each
+// dimension page:
+//   Para 1 — Gap blurb: universal across couple types, varies by gap state
+//            (aligned / some_gap / notable_gap). 30 total.
+//   Para 2 — Type blurb: couple-type-specific advice. 100 total.
+// Total: 130 blurbs, structured per dimension.
+const GAP_STATE_LABELS = [
+  ['aligned',     'Gap state: aligned',     '0.0 to 0.7 score gap'],
+  ['some_gap',    'Gap state: some gap',    '0.8 to 1.4 score gap'],
+  ['notable_gap', 'Gap state: notable gap', '1.5+ score gap'],
+];
+
 const section2 = [
-  ...bigSection(2, '"What this means for your relationship", per couple type',
-    'Grey italic text in the hero\'s right column on each dimension page. Couple-type-specific; 10 dimensions × 10 types = 100 blocks. Present-tense, second-person, 2-3 sentences. (Dim pages only render when the couple\'s gap on that dimension is ≥1.5, so there is no separate "close" text.)', PURPLE),
+  ...bigSection(2, 'Dimension callout: gap blurbs + type blurbs',
+    'Both paragraphs render in the right column of each dimension page. 10 dimensions × (3 gap states + 10 couple types) = 130 blurbs total. Voice: short declarative, no em dashes, no hedging, neither end framed as better.', PURPLE),
 
   ...DIMS.flatMap((dimKey, i) => {
     const meta = DIM_META[dimKey] || {};
     const typeBlock = WHEN_THIS_SHOWS_UP[dimKey] || {};
+    const gapBlock = GAP_BLURBS[dimKey] || {};
     const hasAllTypes = NEW_COUPLE_TYPES.every(ct => typeBlock[ct.id]);
+    const hasAllGaps = GAP_STATE_LABELS.every(([k]) => gapBlock[k]);
 
     const out = [
       midSection(`2.${i + 1}`, `${meta.label || dimKey}`, PURPLE, {
         extras: `${meta.left} / ${meta.right}`,
       }),
-      caption(hasAllTypes
-        ? '✓ All 10 couple types drafted.'
-        : `PLACEHOLDER: needs per-type prose for remaining ${NEW_COUPLE_TYPES.length - 1}.`,
-        hasAllTypes ? GREEN : 'C8402A',
+      caption(
+        (hasAllTypes && hasAllGaps)
+          ? '✓ All 30 gap blurbs and 100 type blurbs drafted (3 gap states + 10 couple types per dimension).'
+          : 'PLACEHOLDER: some entries still need prose.',
+        (hasAllTypes && hasAllGaps) ? GREEN : 'C8402A',
         INDENT_MID),
+
+      // Sub-heading for the gap-blurb group
+      new Paragraph({
+        spacing: { before: 200, after: 80 },
+        indent: { left: INDENT_SMALL },
+        children: [
+          run('Universal gap blurbs   ', { size: 12, bold: true, color: PURPLE, allCaps: true, characterSpacing: 60 }),
+          run('· para 1 of the dimension callout · varies only by gap size', { size: 11, italics: true, color: MUTED }),
+        ],
+      }),
     ];
+
+    GAP_STATE_LABELS.forEach(([key, label, info], k) => {
+      const text = gapBlock[key];
+      out.push(smallSection(`2.${i + 1}.G${k + 1}`, label, PURPLE, {
+        before: 160,
+        inline: info,
+        italicInline: true,
+      }));
+      if (text) {
+        out.push(prose(text, { indent: INDENT_PROSE_UNDER_SMALL }));
+      } else {
+        out.push(prose('(no content drafted)', { italics: true, color: MUTED, indent: INDENT_PROSE_UNDER_SMALL }));
+      }
+    });
+
+    // Sub-heading for the type-blurb group
+    out.push(new Paragraph({
+      spacing: { before: 320, after: 80 },
+      indent: { left: INDENT_SMALL },
+      children: [
+        run('Couple-type-specific blurbs   ', { size: 12, bold: true, color: PURPLE, allCaps: true, characterSpacing: 60 }),
+        run('· para 2 of the dimension callout · 10 versions, one per couple type', { size: 11, italics: true, color: MUTED }),
+      ],
+    }));
 
     NEW_COUPLE_TYPES.forEach((ct, j) => {
       const text = typeBlock[ct.id];
@@ -418,7 +465,13 @@ const doc = new Document({
 });
 
 const buf = await Packer.toBuffer(doc);
-const outPath = '/tmp/specific_content_review.docx';
+const outPath = '/mnt/user-data/outputs/attune_specific_content_review.docx';
 writeFileSync(outPath, buf);
-execSync('libreoffice --headless --convert-to pdf --outdir /tmp ' + outPath, { stdio: 'pipe' });
-console.log(`✓ Specific content review: ${outPath} (${buf.length} bytes)`);
+try {
+  execSync('libreoffice --headless --convert-to pdf --outdir /mnt/user-data/outputs ' + outPath, { stdio: 'pipe' });
+  console.log(`✓ Specific content review:  ${outPath}  (${buf.length} bytes)`);
+  console.log(`✓ PDF render:               /mnt/user-data/outputs/attune_specific_content_review.pdf`);
+} catch (e) {
+  console.log(`✓ Specific content review:  ${outPath}  (${buf.length} bytes)`);
+  console.log(`  PDF render skipped (libreoffice unavailable).`);
+}

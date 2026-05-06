@@ -203,13 +203,13 @@ const introSection = [
       source: 'Universal',
       content: '"This workbook was built from {U} and {P}\'s actual exercise answers. Every insight, gap level, and weekly practice was selected because it reflects your specific combination of scores. The snapshot below summarizes where the two of you are aligned and where the gaps are. The rest of the workbook explores what to do about it."' },
     { what: 'Your Snapshot, dimension scores',
-      desc: "Each partner's score across all 12 comms dimensions with gap label.",
+      desc: "Each partner's score across all 10 comms dimensions plus their gap.",
       source: 'Exercise responses',
-      content: 'Row per dimension: label · {U} score · {P} score · gap · gap label. All 12 dims shown.' },
+      content: 'Row per dimension: label · {U} score · {P} score · gap. All 10 dims shown.' },
     { what: 'Your Snapshot, expectations alignment',
-      desc: "Each partner's answer on the 7 expectation domains with aligned/gap flag.",
+      desc: "Each partner's alignment percentage across the 6 expectation domains.",
       source: 'Exercise responses',
-      content: 'Row per domain: label · {U} answer · {P} answer · aligned or gap.' },
+      content: 'Card per domain: label · alignment %. 6 domains shown: Household · Emotional Labor · Extended Family · Money & Career · Life Together · How We Operate.' },
     { what: 'Your Snapshot, couple type line',
       desc: 'Type name and tagline for one of the 10 types.',
       source: 'Couple-type-specific',
@@ -238,14 +238,14 @@ const part1Section = [
       desc: 'Spectrum with axis endpoints and a dot per partner showing their 1–5 score.',
       source: 'Exercise responses',
       content: 'Axis labels show numeric endpoints: "1 [LEFT LABEL]" on far left, "[RIGHT LABEL] 5" on far right. Below, two rows, one per partner, with a thin grey line and a colored dot at the score position. Axis pairs per dim: Energy (Inward/Outward) · Emotional Expression (Guarded/Expressive) · Needs (Direct/Indirect) · Bids (Reserved/Attuned) · Conflict (Engage quickly/Needs space first) · Repair (Formal-verbal/Informal-warmth) · Closeness (Autonomous/Close-seeking) · Love (Words/Actions & Presence) · Stress (Withdraw/Seek connection) · Feedback (Guarded/Open).' },
-    { what: 'Dimension page, "What this means" column (right side of hero)',
-      desc: 'Italic grey analysis of what this gap means for this specific couple type.',
-      source: 'Couple-type-specific',
-      content: 'Varies by couple type. See 2.1–2.10 in Specific Content Review (10 dims × 10 types = 100 blocks drafted). Prose uses partner names by substitution, e.g. "the W" and "the X" in the draft become "Jordan" and "Alex" at render time.' },
+    { what: 'Dimension page, "What this means for your relationship" callout (right side of hero)',
+      desc: 'Two stacked italic paragraphs in the right column. Para 1 is the gap blurb (universal across types, varies only by gap state). Para 2 is the type blurb (one of 10 versions per couple type).',
+      source: 'Calculated + Couple-type-specific',
+      content: 'See Specific Content Review §2: 30 gap blurbs (10 dims × 3 states: aligned / some_gap / notable_gap) + 100 type blurbs (10 dims × 10 couple types) = 130 blurbs. Both render at every page; gap state determined by score gap (<0.8 aligned · 0.8–1.4 some_gap · ≥1.5 notable_gap). Names substituted at render time, e.g. "the W" becomes "Jordan" and "the X" becomes "Alex".' },
     { what: 'Dimension page, gap label',
       desc: 'Short label like "Worth exploring" in the gap eyebrow.',
       source: 'Calculated',
-      content: 'Derived from gap size: <0.8 Close alignment · 0.8–1.4 Minor gap · 1.5–2.4 Worth exploring · ≥2.5 Significant gap. Dim pages only render when gap ≥ 1.5, so "Close alignment" and "Minor gap" labels never appear in practice.' },
+      content: 'Derived from gap size: <0.8 Close alignment · 0.8–1.4 Minor gap · 1.5+ Notable gap. All 10 dimensions render in the workbook regardless of gap size; the callout text adjusts to the state.' },
     { what: 'Dimension page, reflection prompts (3)',
       desc: 'Three open-ended questions specific to this dimension.',
       source: 'Universal',
@@ -254,30 +254,18 @@ const part1Section = [
       desc: 'One specific practice for this dimension, rendered in a tinted colored box with the dim\'s accent color.',
       source: 'Universal',
       content: 'One per dimension, same for every couple. Example (Energy): "Pick one upcoming situation likely to produce different energy states, a party, a family visit, a busy week. Before it happens, name what you\'ll each need afterward. Then check in."' },
-    { what: 'Dimension page, "What we want to try" write-in',
-      desc: 'Blank ruled lines for the commitment they want to try.',
-      source: 'User-written',
-      content: 'Label "What we want to try" + italic hint (e.g., "we\'ll share one thing we\'d normally hold back, every Sunday evening.") + 4 ruled notebook-paper lines.' },
     { what: 'Dimension page, "Our notes" write-in',
-      desc: 'Additional blank ruled lines for free-form notes.',
+      desc: 'Blank ruled lines for free-form notes.',
       source: 'User-written',
-      content: 'Label "Our notes" + 5 ruled notebook-paper lines.' },
+      content: 'Label "Our notes" + 4 ruled notebook-paper lines.' },
     { what: 'Expectations, section header',
       desc: 'Opening for the expectations half of Part 1.',
-      source: 'Their names',
-      content: '"Expectations. Where {U} and {P} have different ideas about the life you\'re building."' },
-    { what: 'Expectations, domain responses',
-      desc: "Each partner's answer, shown side by side.",
-      source: 'Exercise responses',
-      content: 'Two columns per domain. 7 domains possible: Household, Financial, Career, Family / Kids, Lifestyle, Sex & Affection, Faith & Values.' },
-    { what: 'Expectations, gap analysis',
-      desc: 'Grey italic text explaining the pattern for this domain.',
       source: 'Universal',
-      content: 'One version per domain, shown when the couple has a gap. Full text in /api/_workbook-content.js → EXP_DOMAINS[].gapText.' },
-    { what: 'Expectations, "Try this week"',
-      desc: 'One specific practice per expectation domain.',
-      source: 'Universal',
-      content: 'Same for every couple per domain.' },
+      content: '"Six domains of what you each assume." + framing prose. Subhead reads "next six pages put those expectations side by side."' },
+    { what: 'Expectations, per-domain pages (6)',
+      desc: 'One page per domain. Side-by-side rows of each partner\'s exercise answers, alignment %, "Where you are" prose, "Try this week" practice.',
+      source: 'Exercise responses + Universal',
+      content: 'Six domains: Visible Household Labor · Emotional & Invisible Labor · Extended Family · Money, Work & Career · Life Together · How We Operate. Each domain has fixed universal row labels (4 to 7 rows) populated from each partner\'s actual exercise responses. Extended Family rows are name-substituted (e.g. "Visits with Maya\'s family"). Three alignment-state texts per domain (compatibleText · discussText · differentText), selected by alignment % thresholds (75+ aligned · 40–74 worth discussing · <40 different blueprints). Source: build_workbook.py → EXP_DOMAINS.' },
   ]),
 ];
 
@@ -443,7 +431,13 @@ const doc = new Document({
 });
 
 const buf = await Packer.toBuffer(doc);
-const outPath = '/tmp/workbook_content_review.docx';
+const outPath = '/mnt/user-data/outputs/attune_workbook_content_review.docx';
 writeFileSync(outPath, buf);
-execSync('libreoffice --headless --convert-to pdf --outdir /tmp ' + outPath, { stdio: 'pipe' });
-console.log(`✓ Workbook content review: ${outPath} (${buf.length} bytes)`);
+try {
+  execSync('libreoffice --headless --convert-to pdf --outdir /mnt/user-data/outputs ' + outPath, { stdio: 'pipe' });
+  console.log(`✓ Workbook content review:  ${outPath}  (${buf.length} bytes)`);
+  console.log(`✓ PDF render:               /mnt/user-data/outputs/attune_workbook_content_review.pdf`);
+} catch (e) {
+  console.log(`✓ Workbook content review:  ${outPath}  (${buf.length} bytes)`);
+  console.log(`  PDF render skipped (libreoffice unavailable).`);
+}
