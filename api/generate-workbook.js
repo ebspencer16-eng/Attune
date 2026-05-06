@@ -2049,6 +2049,12 @@ export default async function handler(req, res) {
     partnerScores = {},
     coupleType   = null,   // { name, tagline, description, nuance, color }
     expGaps      = [],     // [{ key, label, yourAnswer, partnerAnswer, aligned }]
+    // Phase 5a fields — full ex2 answer set. These are accepted now but
+    // will be consumed in Phase 5b when buildExpDomains is rewritten to
+    // render the 6-domain Volume 01 design with name-substituted rows.
+    // For now, they're available but the renderer doesn't read them.
+    responsibilities = null, // { user: {<catId>: [{item,value}]}, partner: {...} }
+    lifeQuestions    = null, // { user: {<lqId>:value}, partner: {...}, meta: {<lqId>:{category,topic}} }
   } = body;
 
   const u = userName.trim() || 'Partner A';

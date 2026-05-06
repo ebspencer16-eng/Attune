@@ -2419,6 +2419,88 @@ function calcDimScores(answers) {
   };
 }
 
+// ── WORKBOOK PAYLOAD BUILDER ────────────────────────────────────────────────
+// Builds the full payload for /api/generate-workbook. Centralizes the data
+// contract so both auto-fulfill (post-checkout) and manual-download
+// (dashboard) call sites use identical shapes. Phase 5a: adds responsibility
+// items and full life-question data alongside the existing legacy expGaps
+// for backward compatibility with older renderers.
+//
+// Inputs:
+//   userName, partnerName       - strings
+//   ex1Answers, partnerEx1      - dim score answers (raw 1-5 by question id)
+//   ex2Answers, partnerEx2      - { responsibilities: {...}, life: {...} }
+//   coupleType                  - couple type object or null
+//
+// Output: payload ready to JSON.stringify and POST.
+function buildWorkbookPayload(userName, partnerName, ex1Answers, partnerEx1, ex2Answers, partnerEx2, coupleType) {
+  const myS = calcDimScores(ex1Answers);
+  const partS = calcDimScores(partnerEx1);
+
+  // Responsibilities: per-category arrays of { item, value } per partner.
+  // Item label is name-substituted (Extended Family rows reference each
+  // partner's family by name) so the renderer doesn't need access to
+  // userName/partnerName for substitution.
+  const responsibilities = { user: {}, partner: {} };
+  RESPONSIBILITY_CATEGORIES.forEach(cat => {
+    responsibilities.user[cat.id] = [];
+    responsibilities.partner[cat.id] = [];
+    cat.items.forEach(rawItem => {
+      const key = cat.id + '__' + rawItem;
+      const itemLabel = substName(rawItem, userName, partnerName);
+      const userValue = ex2Answers?.responsibilities?.[key] || null;
+      const partnerValue = partnerEx2?.responsibilities?.[key] || null;
+      responsibilities.user[cat.id].push({ item: itemLabel, value: userValue });
+      responsibilities.partner[cat.id].push({ item: itemLabel, value: partnerValue });
+    });
+  });
+
+  // Life questions: full set, keyed by lq_id, per partner. Topic is name-
+  // substituted so the renderer can use it directly.
+  const lifeQuestions = { user: {}, partner: {}, meta: {} };
+  LIFE_QUESTIONS.forEach(q => {
+    lifeQuestions.user[q.id] = ex2Answers?.life?.[q.id] || null;
+    lifeQuestions.partner[q.id] = partnerEx2?.life?.[q.id] || null;
+    lifeQuestions.meta[q.id] = {
+      category: q.category,
+      topic: substName(q.topic || '', userName, partnerName),
+    };
+  });
+
+  // Legacy expGaps shape — kept for backward compatibility with renderers
+  // that haven't been updated to use the new fields. Built from the same
+  // life-question data so values stay consistent. Only the original 7-key
+  // legacy set is included; new family-contact questions and Extended
+  // Family responsibilities live in the new fields above.
+  const LEGACY_EXP_KEYS = [
+    { key: 'household', label: 'Visible Household Labor' },
+    { key: 'emotional', label: 'Emotional & Invisible Labor' },
+    { key: 'financial', label: 'Financial & Money' },
+    { key: 'career',    label: 'Career' },
+    { key: 'children',  label: 'Children & Family' },
+    { key: 'lifestyle', label: 'Home & Lifestyle' },
+    { key: 'values',    label: 'Faith & Values' },
+  ];
+  const expGaps = LEGACY_EXP_KEYS.map(({ key, label }) => {
+    const yourAns = ex2Answers?.life?.['lq_' + key] || null;
+    const partnerAns = partnerEx2?.life?.['lq_' + key] || null;
+    return { key, label, yourAnswer: yourAns, partnerAnswer: partnerAns, aligned: yourAns === partnerAns };
+  });
+
+  return {
+    userName,
+    partnerName,
+    scores: myS,
+    partnerScores: partS,
+    coupleType: coupleType || null,
+    // NEW Phase 5a fields — full ex2 data
+    responsibilities,
+    lifeQuestions,
+    // LEGACY field — kept for backward compatibility
+    expGaps,
+  };
+}
+
 
 // ── PERSONALITY FEEDBACK GENERATOR ──────────────────────────────────────────
 // Produces one feedback object per dimension comparing two score objects.
@@ -6666,26 +6748,23 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
     // Admin reads attune_live_session to generate a real personalized workbook.
     try {
       const account = (() => { try { return JSON.parse(localStorage.getItem('attune_account') || 'null'); } catch { return null; } })();
-      const EXP_LIFE_KEYS = [
-        { key: 'household', label: 'Visible Household Labor' },
-        { key: 'emotional', label: 'Emotional & Invisible Labor' },
-        { key: 'financial', label: 'Financial & Money' },
-        { key: 'career',    label: 'Career' },
-        { key: 'children',  label: 'Children & Family' },
-        { key: 'lifestyle', label: 'Home & Lifestyle' },
-      ];
-      const sessionExpGaps = EXP_LIFE_KEYS.map(({ key, label }) => {
-        const yourAns    = ex2Answers?.life?.['lq_' + key] || null;
-        const partnerAns = partnerEx2?.life?.['lq_' + key] || null;
-        return { key, label, yourAnswer: yourAns, partnerAnswer: partnerAns, aligned: yourAns === partnerAns };
-      });
+      // Build the full payload structure once. Phase 5a: session now stores
+      // the rich payload so admin/auto-fulfill paths can pass everything
+      // straight through to the workbook endpoint without rebuilding it.
+      const sessionPayload = buildWorkbookPayload(
+        userName || account?.name || 'Partner A',
+        partnerName || account?.partnerName || 'Partner B',
+        ex1Answers, partnerEx1,
+        ex2Answers, partnerEx2,
+        coupleType
+      );
       const session = {
         savedAt:      Date.now(),
-        userName:     userName || account?.name || 'Partner A',
-        partnerName:  partnerName || account?.partnerName || 'Partner B',
+        userName:     sessionPayload.userName,
+        partnerName:  sessionPayload.partnerName,
         pkg:          account?.pkg || 'core',
-        scores:       myS,
-        partnerScores: partS,
+        scores:       sessionPayload.scores,
+        partnerScores: sessionPayload.partnerScores,
         coupleType:   coupleType ? {
           id:          coupleType.id,
           name:        coupleType?.name,
@@ -6694,7 +6773,11 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
           nuance:      coupleType?.nuance,
           color:       coupleType?.color,
         } : null,
-        expGaps: sessionExpGaps,
+        // Phase 5a fields
+        responsibilities: sessionPayload.responsibilities,
+        lifeQuestions:    sessionPayload.lifeQuestions,
+        // Legacy field, kept for backward compatibility
+        expGaps:          sessionPayload.expGaps,
       };
       localStorage.setItem('attune_live_session', JSON.stringify(session));
     } catch (_) {}
@@ -6727,20 +6810,15 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
         ord.workbookStatus = 'generating';
         localStorage.setItem('attune_order', JSON.stringify(ord));
 
-        const EXP_KEYS_AUTO = [
-          { key:'household',label:'Visible Household Labor' },
-          { key:'emotional',label:'Emotional & Invisible Labor' },
-          { key:'financial',label:'Financial & Money' },
-          { key:'career',   label:'Career' },
-          { key:'children', label:'Children & Family' },
-          { key:'lifestyle',label:'Home & Lifestyle' },
-        ];
-        const autoExpGaps = EXP_KEYS_AUTO.map(({ key, label }) => ({
-          key, label,
-          yourAnswer:    ex2Answers?.life?.['lq_' + key] || null,
-          partnerAnswer: partnerEx2?.life?.['lq_' + key] || null,
-          aligned: (ex2Answers?.life?.['lq_' + key] || null) === (partnerEx2?.life?.['lq_' + key] || null),
-        }));
+        // Build full payload using shared helper. Phase 5a: payload now
+        // includes responsibilities + lifeQuestions for the new renderer
+        // alongside the legacy expGaps shape for backward compatibility.
+        const payload = buildWorkbookPayload(
+          userName, partnerName,
+          ex1Answers, partnerEx1,
+          ex2Answers, partnerEx2,
+          coupleType
+        );
 
         // Pull the user's access token so the API can verify they own a
         // workbook addon. Without this header, generate-workbook returns 401.
@@ -6758,14 +6836,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
             'Content-Type': 'application/json',
             ...(_wbAuth ? { Authorization: `Bearer ${_wbAuth}` } : {}),
           },
-          body: JSON.stringify({
-            userName, partnerName,
-            scores: myS, partnerScores: partS,
-            // Pass the full couple type so the workbook can render the
-            // couple-type intro page with strengths / sticking / patterns.
-            coupleType: coupleType || null,
-            expGaps: autoExpGaps,
-          }),
+          body: JSON.stringify(payload),
         });
 
         if (resp.ok) {
@@ -7842,36 +7913,15 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
           {hasWorkbook && (() => {
             // Build the payload from this couple's actual data
             const buildAndDownload = async () => {
-              const myS = calcDimScores(ex1Answers);
-              const partS = calcDimScores(partnerEx1);
-
-              // Build expectations gap summary
-              const expGaps = [];
-              const EXP_KEYS = [
-                { key: 'household', label: 'Visible Household Labor' },
-                { key: 'emotional', label: 'Emotional & Invisible Labor' },
-                { key: 'financial', label: 'Financial & Money' },
-                { key: 'career',    label: 'Career' },
-                { key: 'children',  label: 'Children & Family' },
-                { key: 'lifestyle', label: 'Home & Lifestyle' },
-                { key: 'values',    label: 'Faith & Values' },
-              ];
-              EXP_KEYS.forEach(({ key, label }) => {
-                const yourAns    = ex2Answers?.life?.['lq_' + key] || null;
-                const partnerAns = partnerEx2?.life?.['lq_' + key] || null;
-                expGaps.push({ key, label, yourAnswer: yourAns, partnerAnswer: partnerAns, aligned: yourAns === partnerAns });
-              });
-
-              const payload = {
-                userName,
-                partnerName,
-                scores: myS,
-                partnerScores: partS,
-                // Pass the full couple type object so the workbook can render
-                // the couple-type intro page with strengths / sticking points / patterns.
-                coupleType: coupleType || null,
-                expGaps,
-              };
+              // Build full payload using shared helper. Phase 5a: payload now
+              // includes responsibilities + lifeQuestions for the new
+              // renderer alongside legacy expGaps for backward compatibility.
+              const payload = buildWorkbookPayload(
+                userName, partnerName,
+                ex1Answers, partnerEx1,
+                ex2Answers, partnerEx2,
+                coupleType
+              );
 
               try {
                 // Pull auth token so generate-workbook can verify purchase
@@ -11272,13 +11322,46 @@ export default function App() {
     }
     // ── Update attune_live_session with real Partner B scores ─────────────
     // If Partner A already viewed results (and wrote demo partner data to
-    // attune_live_session), overwrite partnerScores and expGaps now that
-    // real Partner B data has arrived. This ensures admin workbook generation
-    // and auto-fulfillment both use real data even if Partner B finished late.
+    // attune_live_session), overwrite partnerScores, responsibilities,
+    // lifeQuestions, and expGaps now that real Partner B data has arrived.
+    // This ensures admin workbook generation and auto-fulfillment both use
+    // real data even if Partner B finished late.
     try {
       const existing = JSON.parse(localStorage.getItem('attune_live_session') || 'null');
       if (existing && s?.ex1 && s?.ex2) {
         const realPartnerScores = calcDimScores(s.ex1);
+
+        // Phase 5a: rebuild responsibilities and lifeQuestions partner-side
+        // from the real Partner B data. User side stays as previously
+        // captured in 'existing'.
+        const newResponsibilities = existing.responsibilities
+          ? { ...existing.responsibilities, partner: {} }
+          : { user: {}, partner: {} };
+        RESPONSIBILITY_CATEGORIES.forEach(cat => {
+          newResponsibilities.partner[cat.id] = [];
+          cat.items.forEach(rawItem => {
+            const key = cat.id + '__' + rawItem;
+            const itemLabel = substName(rawItem, existing.userName, s.name || existing.partnerName);
+            const partnerValue = s.ex2?.responsibilities?.[key] || null;
+            newResponsibilities.partner[cat.id].push({ item: itemLabel, value: partnerValue });
+          });
+        });
+
+        const newLifeQuestions = existing.lifeQuestions
+          ? { ...existing.lifeQuestions, partner: {} }
+          : { user: {}, partner: {}, meta: {} };
+        LIFE_QUESTIONS.forEach(q => {
+          newLifeQuestions.partner[q.id] = s.ex2?.life?.[q.id] || null;
+          // Update meta with new partner name in the substitution
+          if (newLifeQuestions.meta) {
+            newLifeQuestions.meta[q.id] = {
+              category: q.category,
+              topic: substName(q.topic || '', existing.userName, s.name || existing.partnerName),
+            };
+          }
+        });
+
+        // Legacy expGaps still updated for backward compatibility
         const EXP_LIFE_KEYS = [
           { key: 'household', label: 'Visible Household Labor' },
           { key: 'emotional', label: 'Emotional & Invisible Labor' },
@@ -11294,10 +11377,12 @@ export default function App() {
         });
         localStorage.setItem('attune_live_session', JSON.stringify({
           ...existing,
-          partnerScores: realPartnerScores,
-          expGaps: realExpGaps,
-          partnerName: s.name || existing.partnerName,
-          partnerDataReal: true,
+          partnerScores:    realPartnerScores,
+          responsibilities: newResponsibilities,
+          lifeQuestions:    newLifeQuestions,
+          expGaps:          realExpGaps,
+          partnerName:      s.name || existing.partnerName,
+          partnerDataReal:  true,
           partnerDataArrivedAt: Date.now(),
         }));
       }
