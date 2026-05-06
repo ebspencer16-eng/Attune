@@ -446,6 +446,10 @@ function syncProgressCrossDevice(exerciseNum, answers) {
 function ExpectationsExercise({ partnerName, userName = "Partner A", onComplete, isAnniversary = false, isRevisited = false }) {
   const activeLifeQs = isRevisited ? LIFE_QUESTIONS_REVISITED : isAnniversary ? LIFE_QUESTIONS_ANNIVERSARY : LIFE_QUESTIONS;
 
+  // Substitute partner-name placeholders in user-visible strings.
+  // Used for Extended Family questions that reference each partner's family.
+  const subst = (s) => substName(s, userName, partnerName);
+
   // Variant-specific progress key so Core / Anniversary / Revisiting don't clobber.
   const progressKey = isRevisited ? 'attune_ex2_progress_revisited' : isAnniversary ? 'attune_ex2_progress_anniv' : 'attune_ex2_progress';
 
@@ -682,7 +686,7 @@ function ExpectationsExercise({ partnerName, userName = "Partner A", onComplete,
                       <div style={{ display: "grid", gridTemplateColumns: GRID, background: futureVal ? "rgba(184,150,110,0.04)" : "white", transition: "background 0.15s" }}>
                         {/* Item label */}
                         <div style={{ padding: "0.65rem 0.85rem", borderRight: ("1px solid " + C.stone + "50"), display: "flex", alignItems: "center" }}>
-                          <p style={{ fontSize: "0.78rem", color: C.ink, fontFamily: font.body, lineHeight: 1.35, margin: 0 }}>{item}</p>
+                          <p style={{ fontSize: "0.78rem", color: C.ink, fontFamily: font.body, lineHeight: 1.35, margin: 0 }}>{subst(item)}</p>
                         </div>
                         {/* Childhood option buttons */}
                         {childCols.map((col, ci2) => {
@@ -808,7 +812,7 @@ function ExpectationsExercise({ partnerName, userName = "Partner A", onComplete,
       {/* Category + question */}
       <p style={{ fontSize: "0.6rem", letterSpacing: "0.2em", textTransform: "uppercase", color: C.clay, marginBottom: "0.25rem", fontFamily: font.body }}>Your Expectations, Part 1 of 2</p>
       <p style={{ fontSize: "0.6rem", letterSpacing: "0.12em", textTransform: "uppercase", color: C.muted, marginBottom: "0.85rem", fontFamily: font.body }}>{lq.category}</p>
-      <p style={{ fontFamily: font.display, fontSize: "1.25rem", fontWeight: 400, color: C.ink, lineHeight: 1.6, marginBottom: "1.75rem" }}>{lq.text}</p>
+      <p style={{ fontFamily: font.display, fontSize: "1.25rem", fontWeight: 400, color: C.ink, lineHeight: 1.6, marginBottom: "1.75rem" }}>{subst(lq.text)}</p>
 
       {/* Options */}
       <div style={{ display: "flex", flexDirection: "column", gap: "0.6rem", marginBottom: "2rem" }}>
@@ -2255,6 +2259,16 @@ const CHILDHOOD_STRUCTURES = [
   { id: "other",       label: "Another arrangement" },
 ];
 
+// Substitute partner-name placeholders in expectation question / item labels.
+// The Extended Family responsibility items and Life & Values per-family
+// questions both reference each partner's family using {userName} and
+// {partnerName} placeholders. Storage keys are stable (placeholders kept
+// raw); only display strings are substituted at render time.
+function substName(s, userName, partnerName) {
+  if (!s) return s;
+  return String(s).replace(/\{userName\}/g, userName || "").replace(/\{partnerName\}/g, partnerName || "");
+}
+
 const RESPONSIBILITY_CATEGORIES = [
   {
     id: "household", label: "Household",
@@ -2286,6 +2300,17 @@ const RESPONSIBILITY_CATEGORIES = [
     ],
   },
   {
+    id: "extended_family", label: "Extended Family",
+    items: [
+      "Planning visits with {userName}'s family",
+      "Gifting for {userName}'s family",
+      "Staying in touch with {userName}'s family",
+      "Planning visits with {partnerName}'s family",
+      "Gifting for {partnerName}'s family",
+      "Staying in touch with {partnerName}'s family",
+    ],
+  },
+  {
     id: "emotional", label: "Emotional Labor",
     items: [
       "Carrying the mental load, remembering, anticipating, planning ahead",
@@ -2293,7 +2318,6 @@ const RESPONSIBILITY_CATEGORIES = [
       "Maintaining closeness and emotional intimacy over time",
       "Initiating difficult conversations",
       "Being the first to reach out after conflict",
-      "Maintaining relationships with extended family and in-laws",
     ],
   },
 ];
@@ -2303,8 +2327,14 @@ const RESPONSIBILITY_CATEGORIES = [
 const LIFE_QUESTIONS = [
   { id: "lq_children",     category: "Family", text: "Children",
     options: ["Not part of my future", "Uncertain", "Open to it", "Important to me, I want at least one", "Central to my future"] },
-  { id: "lq_parents",      category: "Family", text: "Aging parents and family obligations",
-    options: ["Help in crisis only", "Meaningful support", "Significantly involved", "Part of household if needed"] },
+  { id: "lq_inperson_user", category: "Family", text: "Time we spend in person with {userName}'s family",
+    options: ["Rarely, by design", "A few times a year", "Several times a year", "Often, regular visits", "Very often, deeply integrated"] },
+  { id: "lq_contact_user",  category: "Family", text: "Day-to-day contact and involvement with {userName}'s family",
+    options: ["Minimal contact", "Occasional check-ins", "Regular contact", "Daily or near-daily", "Closely involved in our lives"] },
+  { id: "lq_inperson_partner", category: "Family", text: "Time we spend in person with {partnerName}'s family",
+    options: ["Rarely, by design", "A few times a year", "Several times a year", "Often, regular visits", "Very often, deeply integrated"] },
+  { id: "lq_contact_partner",  category: "Family", text: "Day-to-day contact and involvement with {partnerName}'s family",
+    options: ["Minimal contact", "Occasional check-ins", "Regular contact", "Daily or near-daily", "Closely involved in our lives"] },
   { id: "lq_family_conf",  category: "Family", text: "When family and partner conflict",
     options: ["Side with partner", "Mediate fairly", "Defend family if right", "Keep the peace"] },
   { id: "lq_location",     category: "Lifestyle", text: "Where we live",
@@ -2740,11 +2770,11 @@ function JointOverview({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Answ
       const mine = ex2Answers.responsibilities?.[key];
       const theirs = partnerEx2.responsibilities?.[key];
       if (!mine || !theirs) return;
-      rows.push({ category: cat.label, item, mine, theirs, aligned: mine === theirs });
+      rows.push({ category: cat.label, item: substName(item, userName, partnerName), mine, theirs, aligned: mine === theirs });
     });
   });
   const lifeRows = LIFE_QUESTIONS.map(q => ({
-    category: q.category, item: q.text,
+    category: q.category, item: substName(q.text, userName, partnerName),
     mine: ex2Answers.life?.[q.id], theirs: partnerEx2.life?.[q.id],
     aligned: ex2Answers.life?.[q.id] === partnerEx2.life?.[q.id],
   })).filter(r => r.mine && r.theirs);
@@ -3979,13 +4009,13 @@ function ExpectationsResults({ myAnswers, partnerAnswers, userName, partnerName,
       const mine = myAnswers.responsibilities?.[key];
       const theirs = partnerAnswers.responsibilities?.[key];
       if (!mine || !theirs) return;
-      rows.push({ category: cat.label, catId: cat.id, item, mine, theirs, aligned: mine === theirs });
+      rows.push({ category: cat.label, catId: cat.id, item: substName(item, userName, partnerName), mine, theirs, aligned: mine === theirs });
     });
   });
 
   // Life questions — all grouped as "Life & Values"
   const lifeRows = LIFE_QUESTIONS.map(q => ({
-    category: "Life & Values", catId: "life", item: q.text,
+    category: "Life & Values", catId: "life", item: substName(q.text, userName, partnerName),
     mine: myAnswers.life?.[q.id], theirs: partnerAnswers.life?.[q.id],
     aligned: myAnswers.life?.[q.id] === partnerAnswers.life?.[q.id],
   })).filter(r => r.mine && r.theirs);
@@ -6560,7 +6590,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
       const theirs = ex2Answers?.responsibilities?.[key] ? partnerEx2?.responsibilities?.[key] : null;
       const bothAnswered = mine && theirs;
       const aligned = mine === theirs;
-      return { item, category: cat.label, catId: cat.id, mine, theirs, aligned, bothAnswered };
+      return { item: substName(item, userName, partnerName), category: cat.label, catId: cat.id, mine, theirs, aligned, bothAnswered };
     })
   );
   const expCatSummary = RESPONSIBILITY_CATEGORIES.map(cat => {
@@ -8337,11 +8367,11 @@ function ResultsHighlights({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3
       const key = cat.id + "__" + item;
       const mine = ex2Answers?.responsibilities?.[key];
       const theirs = partnerEx2?.responsibilities?.[key];
-      return mine && theirs ? { item, category: cat.label, mine, theirs, aligned: mine === theirs } : null;
+      return mine && theirs ? { item: substName(item, userName, partnerName), category: cat.label, mine, theirs, aligned: mine === theirs } : null;
     }).filter(Boolean)
   );
   const lifeRows = LIFE_QUESTIONS.map(q => ({
-    item: q.text, category: q.category,
+    item: substName(q.text, userName, partnerName), category: q.category,
     mine: ex2Answers?.life?.[q.id], theirs: partnerEx2?.life?.[q.id],
     aligned: ex2Answers?.life?.[q.id] === partnerEx2?.life?.[q.id],
   })).filter(r => r.mine && r.theirs);

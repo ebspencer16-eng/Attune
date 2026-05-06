@@ -1,0 +1,3004 @@
+"""
+Attune Workbook Sample Generator
+=================================
+Generates a full workbook sample (cover + intro + snapshot + Part 1
+dimensions + expectations + Parts 2-5) as a single HTML file.
+Designed to mirror the page structure of api/generate-workbook.js so
+the design can be ported back to the real generator once approved.
+
+Outputs to /mnt/user-data/outputs/attune_workbook_sample.html.
+
+Run: python3 build_workbook.py
+"""
+from pathlib import Path
+
+# ═══════════════════════════════════════════════════════════════════
+# CONTENT DATA — mirrored from api/_workbook-content.js
+# ═══════════════════════════════════════════════════════════════════
+
+DIMS = ['energy','expression','needs','bids','conflict','repair','closeness','love','stress','feedback']
+
+DIM_META = {
+    'energy':     {'label': 'Energy & Recharge',           'left': 'Inward',         'right': 'Outward',          'color': 'purple'},
+    'expression': {'label': 'Emotional Expression',         'left': 'Guarded',        'right': 'Expressive',       'color': 'coral'},
+    'needs':      {'label': 'How You Ask for Needs',        'left': 'Direct',         'right': 'Indirect',         'color': 'indigo'},
+    'bids':       {'label': 'Responding to Bids',           'left': 'Reserved',       'right': 'Attuned',          'color': 'green'},
+    'conflict':   {'label': 'Conflict Style',               'left': 'Engage quickly', 'right': 'Needs space first','color': 'indigo'},
+    'repair':     {'label': 'How You Repair',               'left': 'Formal / verbal','right': 'Informal / warmth','color': 'coral'},
+    'closeness':  {'label': 'Closeness & Independence',     'left': 'Autonomous',     'right': 'Close-seeking',    'color': 'purple'},
+    'love':       {'label': 'How Love Lands',               'left': 'Words',          'right': 'Actions & Presence','color': 'green'},
+    'stress':     {'label': 'Communication Under Stress',   'left': 'Withdraw',       'right': 'Seek connection',  'color': 'indigo'},
+    'feedback':   {'label': 'Giving & Receiving Feedback',  'left': 'Guarded',        'right': 'Open',             'color': 'coral'},
+}
+
+DIM_CONTENT = {
+    'energy': {
+        'measures': "How each of you recovers, socially, emotionally, physically. Inward: solitude recharges. Outward: connection recharges. This shapes your weekend default, how you decompress, and what a good evening looks like.",
+        'closeText': "{U} and {P} recover in similar ways. This quietly removes friction, you're rarely on opposite ends after a hard week.",
+        'gapText': "One of you recharges through solitude; the other through connection. After a long week, you're in very different places. Without a framework, the inward partner's need for quiet can read as withdrawal, and the outward partner's reach for people can feel exhausting.",
+        'prompts': [
+            "After a big social event, what does each of you need in the next 24 hours?",
+            "When does one of you feel most energized, and when does the other feel most depleted?",
+            "Is your current daily rhythm giving each person the kind of recovery they need?",
+        ],
+        'thisWeek': "Pick one upcoming situation likely to produce different energy states, a party, a family visit, a busy week. Before it happens, name what you'll each need afterward. Then check in.",
+    },
+    'expression': {
+        'measures': "How freely each of you shares what's going on internally, not the content of feelings, but how naturally they surface. Expressive partners wear their emotional state; guarded partners process privately and share selectively.",
+        'closeText': "{U} and {P} are operating in the same register. Neither tends to feel overwhelmed by too much sharing or starved by too little.",
+        'gapText': "One of you shares as feelings arise; the other waits until they've processed. The expressive partner may experience the guarded one's silence as emotional unavailability. The guarded partner may experience the expressive one's openness as pressure.",
+        'prompts': [
+            "When something bothers you, at what point do you typically share it, immediately, after processing, or only when asked?",
+            "When one of you is struggling, does the other know? Or is it usually carried privately?",
+            "Is there a version of your emotional experience you share, and a version you hold back?",
+        ],
+        'thisWeek': "Each of you shares one thing you'd normally hold back or let pass, not something big, just something that's been sitting there. Notice what happens.",
+    },
+    'needs': {
+        'measures': "How directly each partner communicates needs, whether they ask outright or signal indirectly. Direct communicators state needs explicitly. Indirect communicators hint, hope to be noticed, or pull back.",
+        'closeText': "{U} and {P} communicate needs with similar directness. There are fewer unspoken expectations, and less of the resentment that builds when needs go unnamed.",
+        'gapText': "One of you asks directly; the other signals. The direct partner may feel set up to fail, they can't respond to what they can't see. The indirect partner may feel chronically unseen.",
+        'prompts': [
+            "Think of the last time you needed something and didn't get it. Did you ask directly, or did you signal?",
+            "Is there something you've needed for a while that you haven't said clearly? What's the barrier?",
+            "Do you each know what the other needs right now? Has it been said, or are you guessing?",
+        ],
+        'thisWeek': "Each of you names one thing you need from the other this week, specifically, without softening. \"I need you to ___.\" Notice what it feels like to ask that clearly.",
+    },
+    'bids': {
+        'measures': "How reliably each partner notices and responds to small, everyday bids for connection, a comment, a gesture, a look. These micro-moments are the primary currency of sustained intimacy.",
+        'closeText': "{U} and {P} both notice and respond naturally to each other's small bids. This is one of the strongest predictors of relationship satisfaction over time.",
+        'gapText': "One partner tends to miss bids, absorbed in tasks, not naturally tracking the relational current. The other tracks them instinctively. Repeated missed bids can feel like dismissal even when none is intended.",
+        'prompts': [
+            "Can you think of a recent moment when one of you reached for connection and the other wasn't available?",
+            "Are there ways either of you reaches for the other that get regularly missed, not out of rejection, but out of being absorbed?",
+            "What's the smallest thing each of you does that signals you want the other's attention?",
+        ],
+        'thisWeek': "Once a day this week, when one of you makes a small bid, says something minor, reaches out physically, checks in, the other stops what they're doing and acknowledges it specifically.",
+    },
+    'conflict': {
+        'measures': "How each partner responds when something feels wrong, whether the instinct is to engage immediately or need space first. This is about timing, not care.",
+        'closeText': "{U} and {P} move toward resolution with similar timing. This symmetry removes the most common friction point in conflict, the pursuer-withdrawer dynamic.",
+        'gapText': "One of you needs to address things immediately; the other needs space first. Without a framework, the person who needs resolution reads the other's silence as avoidance. The person who needs space reads the other's urgency as pressure.",
+        'prompts': [
+            "When something is bothering you, what does your ideal next few hours look like?",
+            "When one of you is clearly upset and pulls back, what does that feel like for the other? What does the other do?",
+            "What agreement would make the next hard moment go better than the last?",
+        ],
+        'thisWeek': "When things are calm, not during conflict, tell each other: \"When I'm upset, what I need first is ___.\" Write it down. Refer to it next time.",
+    },
+    'repair': {
+        'measures': "What each partner needs to feel genuinely repaired after conflict. One end needs explicit verbal acknowledgment. The other can move forward once the warmth is back, without needing the formal exchange.",
+        'closeText': "{U} and {P} both know what \"okay again\" feels like and reach it in similar ways. This shortens the distance between conflict and repair.",
+        'gapText': "One of you considers things resolved when warmth returns. The other isn't repaired until there's been an explicit conversation. The informal partner often considers things over before the formal partner is ready.",
+        'prompts': [
+            "After a hard argument, what does \"okay again\" actually feel like for you? How do you know when you're there?",
+            "What would a repair conversation look like that actually works for both of you?",
+            "Is there a past disagreement that never fully closed? What would it take to finish it?",
+        ],
+        'thisWeek': "After the next friction moment, however small, check in explicitly: \"Are we actually okay, or are we both just ready to be done?\" Name the difference out loud.",
+    },
+    'closeness': {
+        'measures': "How much independent structure each partner needs within the relationship. One end values deep togetherness; the other values a strong sense of self within the partnership.",
+        'closeText': "{U} and {P} want a similar balance of togetherness and independence. This prevents the slow accumulation of resentment that mismatched closeness needs create.",
+        'gapText': "One of you gravitates toward maximum togetherness. The other needs a strong independent life within the relationship. The autonomous partner may feel crowded; the close-seeking partner may feel lonely.",
+        'prompts': [
+            "On a typical week, is each of you getting the amount of alone time and together time you need?",
+            "Are there independent pursuits, hobbies, friendships, that feel important to each of you? Are they supported?",
+            "What would your ideal weekly rhythm look like if you designed it intentionally?",
+        ],
+        'thisWeek': "Each of you writes down your ideal week, how much time together, how much apart. Compare them without judgment. Look for the gap and the overlap.",
+    },
+    'love': {
+        'measures': "How each partner most naturally gives and receives affection. Specifically: does verbal expression land most deeply, or does love register more through presence, action, and shared experience?",
+        'closeText': "{U} and {P} express and receive love through compatible channels. When care is expressed in a language the other naturally receives, the signal lands without translation.",
+        'gapText': "One of you feels most loved through verbal affirmation; the other through presence, touch, or shared activity. Both may be genuinely expressing love, but in a language the other doesn't fully receive.",
+        'prompts': [
+            "When did each of you last feel genuinely loved by the other? What was happening?",
+            "What does each of you do that makes the other feel most cared for, even if it's something small?",
+            "Do you each know specifically how to make the other feel appreciated?",
+        ],
+        'thisWeek': "Each of you asks the other: \"What's one thing I do that makes you feel really loved that I might not realize has that effect?\" Then do more of it.",
+    },
+    'stress': {
+        'measures': "How each partner's communication style shifts when they're overwhelmed, anxious, or depleted. Some people shut down; others become more urgent and seek reassurance. Neither is a statement about the relationship, it's a stress response.",
+        'closeText': "{U} and {P} respond to stress in similar ways. This symmetry means neither partner is likely to be left alone in the way that matters most when pressure builds.",
+        'gapText': "Under pressure, one of you shuts down; the other becomes more urgent and reaches for closeness. Without language for this, the seeking partner reads withdrawal as rejection; the withdrawing partner reads urgency as escalation.",
+        'prompts': [
+            "When either of you is really under pressure, what do you need from the other? Does the other know?",
+            "How does each of you know when the other is struggling, even when they're not saying so?",
+            "What's the most helpful thing someone can do when you're at your worst?",
+        ],
+        'thisWeek': "Next time one of you is clearly under pressure, the other asks: \"Do you need me to help fix something, or do you just need me to be here?\" Notice which answer comes back. Do that.",
+    },
+    'feedback': {
+        'measures': "How comfortably each partner gives and receives direct, honest feedback. Guarded partners tend toward defensiveness. Open partners can engage with critical input without feeling attacked.",
+        'closeText': "{U} and {P} are in a similar place on feedback. This creates a low-friction environment for honest conversations, things that need to be said, get said.",
+        'gapText': "One of you avoids direct feedback; the other can engage with it. The open partner may feel like things go unsaid for too long. The guarded partner may feel like honest observations come as attacks, even when not intended that way.",
+        'prompts': [
+            "Is there something either of you does regularly that bothers the other that hasn't been said clearly? What's the barrier?",
+            "When one of you offers a critical observation, what's the other's first instinct?",
+            "What would make honest feedback easier in both directions?",
+        ],
+        'thisWeek': "Identify one small thing that bothered you recently that you let go without saying anything. Bring it up briefly, specifically: \"Hey, this thing last week, can I mention it?\" Notice what happens.",
+    },
+}
+
+# WHEN_THIS_SHOWS_UP. Per-couple-type prose for each dimension.
+# 10 dimensions × 10 couple types = 100 blurbs.
+# Source of truth: api/_workbook-content.js. Loaded at module init so
+# the Python builder and the production JS endpoint stay in sync.
+import re as _re
+import json as _json
+from pathlib import Path as _Path
+
+def _load_when_this_shows_up():
+    """Parse the WHEN_THIS_SHOWS_UP export from api/_workbook-content.js.
+
+    The JS file is the single source of truth. Both the Python sample
+    builder and the production JS endpoint should read from the same data.
+    Extracted via a tolerant regex parse rather than a full JS parser
+    because we only need the simple {dim: {type: "string"}} structure.
+    """
+    js_path = _Path(__file__).parent.parent / 'api' / '_workbook-content.js'
+    text = js_path.read_text()
+    m = _re.search(r'export const WHEN_THIS_SHOWS_UP\s*=\s*\{(.+?)\n\};', text, _re.DOTALL)
+    if not m:
+        raise RuntimeError("Could not locate WHEN_THIS_SHOWS_UP in api/_workbook-content.js")
+    block = m.group(1)
+    # Each top-level dim: { ...10 type entries... }
+    dim_pattern = _re.compile(r'(\w+):\s*\{(.+?)\n\s{2}\}', _re.DOTALL)
+    type_pattern = _re.compile(r'\b([WXYZ]{2}):\s*"((?:[^"\\]|\\.)*)"', _re.DOTALL)
+    out = {}
+    for dim_match in dim_pattern.finditer(block):
+        dim_name = dim_match.group(1)
+        body = dim_match.group(2)
+        type_dict = {}
+        for tm in type_pattern.finditer(body):
+            type_id = tm.group(1)
+            blurb = tm.group(2).encode().decode('unicode_escape')
+            type_dict[type_id] = blurb
+        out[dim_name] = type_dict
+    return out
+
+WHEN_THIS_SHOWS_UP_BY_TYPE = _load_when_this_shows_up()
+
+# GAP_BLURBS. Per-dimension prose for each gap state.
+# 10 dimensions × 3 gap states = 30 blurbs. Universal across couple types.
+# These are the "first paragraph" in the dimension callout. The second
+# paragraph is the couple-type blurb above. Voice: declarative, no em
+# dashes, no hedging. Each blurb describes the gap mechanic itself.
+GAP_BLURBS = {
+    'energy': {
+        'aligned':     "You recharge in similar ways. Solo time and connection time tend to feel right at the same moments, which means you don't have to negotiate the rhythm.",
+        'some_gap':    "You recharge a little differently. Most of the time it's invisible, but on long weekends or after social stretches the mismatch surfaces. Worth naming the difference out loud.",
+        'notable_gap': "You recharge in opposite directions. One of you refills by going inward, the other by reaching out. The cost is real if it's not planned around.",
+    },
+    'expression': {
+        'aligned':     "You wear emotion at similar registers. Neither of you has to translate what the other is feeling. The room reads about the same to both of you.",
+        'some_gap':    "You express emotion at slightly different volumes. Mostly fine, but on hard days it can land as 'why aren't you saying anything' or 'why is this so much.'",
+        'notable_gap': "You express emotion at very different volumes. One of you wears it; the other holds it. Both are valid. The work is learning each other's signals.",
+    },
+    'needs': {
+        'aligned':     "You both ask for what you need in similar ways. Whether direct or indirect, you're operating on the same protocol, which keeps a lot of small things from accumulating.",
+        'some_gap':    "You ask for needs at slightly different directness levels. Most of the time it works. Worth checking in on whether one of you is hinting and the other is missing it.",
+        'notable_gap': "You ask for needs in very different ways. One of you names them outright; the other waits to be noticed. The mismatch is where the most needs go unmet.",
+    },
+    'bids': {
+        'aligned':     "You catch each other's bids at similar rates. The everyday gestures land. This is the quiet substrate of the relationship working.",
+        'some_gap':    "You respond to bids a little differently. One of you may be reaching more often than the other notices, or in a register the other isn't tuned to.",
+        'notable_gap': "You respond to bids at very different rates. The reaches that get missed accumulate, even when neither of you means anything by it.",
+    },
+    'conflict': {
+        'aligned':     "You handle conflict at similar speeds. Either both of you want to engage now or both of you want space first. The timing isn't the fight.",
+        'some_gap':    "You handle conflict at slightly different speeds. Workable, but the moments where one wants to address and the other wants to wait are real friction points.",
+        'notable_gap': "You handle conflict at very different speeds. One of you needs to engage now; the other needs space first. Without an agreement, conflicts compound.",
+    },
+    'repair': {
+        'aligned':     "You repair similarly. Both of you need the same kind of close, whether that's verbal or warmth. The end of a hard moment lands cleanly for both of you.",
+        'some_gap':    "You repair a little differently. Most of the time it works. The risk is one of you thinks it's done while the other is still circling.",
+        'notable_gap': "You repair very differently. One of you needs the verbal close; the other moves on once warmth returns. Without naming the difference, the same fight repeats.",
+    },
+    'closeness': {
+        'aligned':     "You want similar amounts of closeness and independence. The rhythm of together-time and alone-time feels right to both of you most of the time.",
+        'some_gap':    "You want slightly different amounts of closeness. Mostly compatible, but the small mismatches in how often you reach for each other can add up.",
+        'notable_gap': "You want notably different amounts of closeness. One of you reaches more; the other defaults to space. Without intention, one of you ends up feeling something the other doesn't.",
+    },
+    'love': {
+        'aligned':     "You give and receive love in compatible ways. What lands for one of you tends to land for the other. Less translation required.",
+        'some_gap':    "You give and receive love a little differently. Mostly fine, but in busy stretches the version that gets sent isn't always the version the other needs.",
+        'notable_gap': "You give and receive love in very different ways. One of you needs words; the other needs presence and action. Both are real. Neither replaces the other.",
+    },
+    'stress': {
+        'aligned':     "You handle stress in similar ways. Either you both reach out or you both pull in. You don't have to manage two different stress responses on top of the stress itself.",
+        'some_gap':    "You handle stress a little differently. Workable, but worth knowing the gap shows up exactly when one of you has the least bandwidth to translate.",
+        'notable_gap': "You handle stress in opposite directions. One of you needs a listener; the other needs the room cleared. The wrong answer at the wrong moment makes things worse.",
+    },
+    'feedback': {
+        'aligned':     "You give and receive feedback at similar comfort levels. Honest things get said without much warm-up.",
+        'some_gap':    "You give and receive feedback at slightly different comfort levels. Most of the time it works. The risk is one of you is holding things back the other would want to hear.",
+        'notable_gap': "You give and receive feedback at very different comfort levels. One of you brings it directly; the other softens or holds. The most useful conversations require both of you stretching.",
+    },
+}
+
+EXP_DOMAINS = [
+    {'key': 'household',  'label': 'Visible Household Labor',  'color': 'gold',
+     # Three alignment-state blurbs (75+/40-74/0-39)
+     'compatibleText':   "Your expectations about who runs the household are broadly aligned. The division of labor probably feels chosen, not negotiated each week.",
+     'discussText':      "You see the household differently in places. Some of these gaps are probably running in the background, costing more than you realize.",
+     'differentText':    "You hold significantly different pictures of how the household runs. This is where most slow-build resentment in long relationships originates.",
+     'thisWeek':  "Separately, list the household tasks you currently own, the ones you think the other owns, and the ones falling through the cracks. Compare the lists without judgment."},
+    {'key': 'emotional',  'label': 'Emotional & Invisible Labor',  'color': 'coral',
+     'compatibleText':   "You see the invisible work of the relationship in similar terms. The mental load, the remembering, the repair, you both clock it.",
+     'discussText':      "Some of the invisible labor is being carried unevenly, and at least one of you may not fully see it. Worth surfacing before it accumulates.",
+     'differentText':    "One of you is carrying significantly more of the invisible labor. This work is usually unacknowledged and unreciprocated, not from malice but from genuine unawareness.",
+     'thisWeek':  "For one week, the partner who typically carries more mental load keeps a simple log, every act of invisible labor they perform. At the end of the week, share it. Don't frame it as an accusation. Just show what's there."},
+    {'key': 'money',  'label': 'Money, Work & Career',  'color': 'indigo',
+     'compatibleText':   "Your orientations on money and career are broadly compatible. You probably move through major financial decisions without much friction.",
+     'discussText':      "You diverge in places on how money should be held or whose work leads. These are the questions that compound, worth talking through with specifics.",
+     'differentText':    "You hold significantly different views on money or career priority. Differences here tend to surface during big decisions, often when there is least time to discuss them.",
+     'thisWeek':  "Each of you answers: \"The financial situation that would make me feel most secure is ___.\" Share them. Don't solve, just understand where each person's sense of security lives."},
+    {'key': 'life',  'label': 'Life Together',  'color': 'green',
+     'compatibleText':   "You picture the bigger questions of your life together in similar terms. Family, where you live, what matters, you are pointed in compatible directions.",
+     'discussText':      "You picture some of the foundational pieces of your shared life differently. These are the assumptions worth saying out loud before time makes them harder to revisit.",
+     'differentText':    "You hold significantly different pictures of the life you are building. Differences this large tend to compound, but only if they stay unspoken.",
+     'thisWeek':  "Write down, separately, then share, one sentence about what you want your shared life to look like in five years. Don't edit for what you think the other wants to hear."},
+    {'key': 'operate',  'label': 'How We Operate',  'color': 'purple',
+     'compatibleText':   "You have similar instincts about conflict, repair, and closeness. The mechanics of getting back to each other tend to come without much translation.",
+     'discussText':      "Your instincts on friction and closeness diverge in places. These are the differences that matter most in the moments when one of you is already at capacity.",
+     'differentText':    "You operate from significantly different defaults around conflict and connection. The translation gap is widest exactly when the relationship needs it least.",
+     'thisWeek':  "Each of you describes what you most need from the other when you are at your worst. Compare them. The mismatch is the conversation."},
+]
+
+# Domain icon glyphs (rendered in the page header).
+DOMAIN_ICONS = {
+    'household': '⌂',
+    'emotional': '∞',
+    'money':     '$',
+    'life':      '❀',
+    'operate':   '◐',
+}
+
+# Universal row labels per domain. The values that appear next to
+# each label come from each couple's actual exercise responses.
+# Pulled from the v2 expectations content review doc that Ellie approved.
+DOMAIN_ROWS = {
+    'household': [
+        'Cooking weeknights',
+        'Grocery & meal planning',
+        'Day-to-day tidying',
+        'Home repairs & maintenance',
+        'Family calendar',
+        'Hosting & holidays',
+        'Vacation planning',
+    ],
+    'emotional': [
+        'Mental load',
+        'Tracking how everyone is',
+        'Maintaining closeness',
+        'Hard conversations',
+        'Repair after friction',
+        'Extended family & in-laws',
+    ],
+    'money': [
+        'Day-to-day finances',
+        'Long-term financial decisions',
+        'Whose career is prioritized',
+        'How we hold money',
+        'Saving v spending',
+        'Risk tolerance',
+    ],
+    'life': [
+        'Children',
+        'When family & partner conflict',
+        'Where we live',
+        'Social life',
+        'Daily rhythm',
+        'Faith & spirituality',
+        'Core values & beliefs',
+    ],
+    'operate': [
+        'When to address conflict',
+        'Conflict resolution time',
+        'What repair looks like',
+        'Physical affection',
+        'Closeness during hard times',
+        'Independence',
+    ],
+}
+
+# Threshold helpers for alignment percentages.
+def alignment_state(pct):
+    """Return ('compatible'|'discuss'|'different', label) for a given percent."""
+    if pct >= 75:
+        return 'compatible', 'broadly compatible'
+    if pct >= 40:
+        return 'discuss', 'worth discussing'
+    return 'different', 'significantly different expectations'
+
+def alignment_text(domain, pct):
+    """Return the right state-prose blurb from a domain dict."""
+    state, _ = alignment_state(pct)
+    if state == 'compatible':
+        return domain['compatibleText']
+    if state == 'discuss':
+        return domain['discussText']
+    return domain['differentText']
+
+MOMENTS = [
+    {'key': 'hard_workday',     'title': 'After a hard workday'},
+    {'key': 'quiet_worry',      'title': "When they're worried but haven't said it"},
+    {'key': 'during_conflict',  'title': 'During a disagreement'},
+    {'key': 'after_conflict',   'title': 'After a disagreement'},
+    {'key': 'wanting_closeness','title': 'When they want to feel close'},
+    {'key': 'external_stress',  'title': 'When stress is coming from outside the relationship'},
+]
+
+# Working Knowledge content — 6 moments × 2 perspectives.
+# For cross-type couples (WX), each partner gets their own page.
+# Each moment has 5 rows matching the original buildMomentCard structure:
+#   moment / what's happening for them / what not to do / what works / phrase
+#
+# These are realistic-feeling sample drafts. Final content will come from
+# the master library, tagged by type letter.
+
+# Maya (W = The Initiator) — what David should know about Maya
+MOMENTS_FOR_W_MAYA = {
+    'hard_workday':      {
+        'moment':   "Maya gets home from a hard day and starts unpacking it the moment she walks in, the project, the people, the frustration.",
+        'happening':"Maya processes by talking. She's not asking David to fix it, she's making sense of the day by hearing herself say it. Once it's said, most of it's out of her system and she can move on.",
+        'not':      "Don't problem-solve, don't try to redirect, don't go quiet halfway through.",
+        'works':    "Listen actively. Reflect back what you heard. Match her energy and ask one or two follow-up questions. The relief comes from being heard, not from being fixed.",
+        'phrase':   "Tell me more, what was the worst part?",
+    },
+    'quiet_worry':       {
+        'moment':   "Maya has gone unusually quiet for half a day, no talking through her week, no debriefing the meeting.",
+        'happening':"For Maya, silence is the signal that something is heavy enough that even the talking has stopped. She's not sulking, she's carrying something she hasn't found words for yet.",
+        'not':      "Don't ask 'what's wrong' as a one-shot question, it lands like pressure to perform an answer.",
+        'works':    "Soften the entry. Sit near her without requiring conversation. Open with curiosity, not interrogation. Give her room to start when she's ready.",
+        'phrase':   "You've been quiet today. I'm here when you want to talk, no rush.",
+    },
+    'during_conflict':   {
+        'moment':   "Tension is rising. Maya is leaning in, wanting to address it now, surface the feelings, talk it through.",
+        'happening':"Maya processes conflict outward. Holding it in feels worse than the conflict itself. She wants to engage so the thing can move, not so it can escalate.",
+        'not':      "Don't go silent or ask to 'talk later' without a specific time. Open-ended pauses register as withdrawal, not space.",
+        'works':    "Stay engaged. If you genuinely need a beat, name it with a return time, 'I need 30 minutes, then let's pick this up.' Then come back on time.",
+        'phrase':   "I want to work this out with you. Give me 20 minutes to think, then I'm in.",
+    },
+    'after_conflict':    {
+        'moment':   "The hard part of the conversation is over. The room has cooled, but Maya is still circling, checking in, looking for closure.",
+        'happening':"For Maya, repair isn't done until it's named. She needs to hear that you're okay, that the two of you are okay. Warmth alone reads as 'maybe but not sure.'",
+        'not':      "Don't assume warmth equals resolved. Don't skip the verbal close.",
+        'works':    "Say it out loud, even if it feels obvious. A short, clear sentence, 'we're good', does more than another hour of warmth.",
+        'phrase':   "We're good. I love you. We worked it out.",
+    },
+    'wanting_closeness': {
+        'moment':   "Maya is reaching, sitting closer, finding excuses to be in the same room, asking what you're up to this weekend.",
+        'happening':"Closeness is one of the ways Maya feels the relationship is alive. The bids look casual; the meaning behind them isn't.",
+        'not':      "Don't half-meet the bid. A distracted nod while you keep working reads as a no.",
+        'works':    "Stop what you're doing for thirty seconds. Make eye contact. Match her energy briefly, even if you're going back to your task. The bid landing matters more than how long it lands for.",
+        'phrase':   "Hey, hi. Come here for a sec, what's going on?",
+    },
+    'external_stress':   {
+        'moment':   "Maya is dealing with something hard, a work crisis, a family thing, a deadline. She's reaching toward you for support.",
+        'happening':"Under pressure, Maya reaches outward. She's not asking you to fix it; she's asking you to be present in it. Solitude is what makes the stress worse, not better.",
+        'not':      "Don't disappear into your own work. Don't assume she'd rather be left alone.",
+        'works':    "Be visibly available. Take one logistical thing off her plate without being asked, and tell her you did. Sit with her in the evening even if neither of you talks.",
+        'phrase':   "I've got dinner tonight. You don't have to think about it.",
+    },
+}
+
+# David (X = The Anchor) — what Maya should know about David
+MOMENTS_FOR_X_DAVID = {
+    'hard_workday':      {
+        'moment':   "David gets home from a hard day, sets his bag down, and goes quiet for a while.",
+        'happening':"David is processing internally. He's not shutting Maya out, he's getting his thoughts in order before he can say anything useful about them. The quiet IS the work.",
+        'not':      "Don't pepper him with questions. Don't read the silence as withdrawal. Don't assume the quiet means something is wrong with the two of you.",
+        'works':    "Give him 15-30 minutes of low-stimulation space. Make space without requiring conversation. He'll come find you when he's ready, and what he says will be considered.",
+        'phrase':   "Take the time you need. I'm around when you want to talk.",
+    },
+    'quiet_worry':       {
+        'moment':   "Something is clearly weighing on David, but he hasn't said anything about it.",
+        'happening':"David doesn't broadcast worry. He's working through it privately first. Until he's clarified what he actually thinks, the answer to 'what's wrong' is genuinely 'I'm not sure yet.'",
+        'not':      "Don't push for an answer he doesn't have yet. Don't translate his silence into 'he's hiding something from me.'",
+        'works':    "Name the observation, not the feeling. 'You've seemed off since Tuesday' lands cleanly because it's factual. Then give him space to respond on his own clock.",
+        'phrase':   "You've been somewhere else this week. No rush. I'm just noticing.",
+    },
+    'during_conflict':   {
+        'moment':   "Tension is rising. David wants to address it, but he's pulling on logic before feeling, facts first, framing second.",
+        'happening':"David engages with conflict by getting the structure right. Once the logic is clear, the emotional layer becomes manageable. Skipping to feelings before the framing exists makes him feel ungrounded.",
+        'not':      "Don't read his focus on logic as not caring. Don't try to force the emotional layer first when he's still organizing the framing.",
+        'works':    "Match his sequence: agree on what the issue actually is, then surface the feelings. Both layers get covered, just in his order.",
+        'phrase':   "Walk me through how you're seeing it. Then I'll tell you how it lands for me.",
+    },
+    'after_conflict':    {
+        'moment':   "The conversation has ended. The logic is sorted out. David is moving forward like the thing is closed.",
+        'happening':"For David, repair happens when the problem is solved. Once the working-through is done, he experiences the thing as resolved. The verbal close-out feels redundant to him.",
+        'not':      "Don't assume his moving on means he doesn't care. Don't withhold warmth waiting for a verbal close that he doesn't realize you need.",
+        'works':    "Ask for the verbal close explicitly. He'll give it readily, he just doesn't realize it's missing. After that, trust that he means it when he says it's done.",
+        'phrase':   "Are we good? I just want to hear you say it.",
+    },
+    'wanting_closeness': {
+        'moment':   "David is in the same room with you, doing his own thing, but consciously near you. Not bidding, exactly. Just present.",
+        'happening':"For David, side-by-side presence is the closeness. He doesn't always need conversation to feel connected; the shared space is the thing. The reading you might call 'just sitting there' is, for him, an active form of being together.",
+        'not':      "Don't read his quiet presence as disengagement. Don't assume he wants to be left alone if he chose to be near you.",
+        'works':    "Receive the presence. A hand on his arm, a small acknowledgment, that's enough. Don't require a conversation to make the closeness count.",
+        'phrase':   "I like that you're here. We don't have to talk.",
+    },
+    'external_stress':   {
+        'moment':   "David is dealing with something hard. He's working it internally, not bringing it into the room, not asking for help.",
+        'happening':"Under stress, David goes inward. He's not refusing support; he's running the analysis. Once he has a plan, he'll surface what's relevant. Until then, talking about it can feel like adding load, not lifting it.",
+        'not':      "Don't push him to talk through it. Don't take the silence as exclusion or as a sign you're not trusted.",
+        'works':    "Take logistical things off his plate without asking. Be visibly available without requiring engagement. Tell him after the fact that you did the thing.",
+        'phrase':   "I picked up groceries, one less thing. Take the night.",
+    },
+}
+
+# ─── Same-type Working Knowledge content ────────────────────────────────
+# When both partners share the same individual type (e.g., WW), the moments
+# read symmetrically. No partner is the "subject" and the other the "responder".
+# The phrasing addresses the dynamic between two same-type partners and the
+# specific traps that show up when the shared wiring mirrors instead of balances.
+#
+# This block covers same-type W pairings (Initiator + Initiator). Three more
+# blocks (XX, YY, ZZ) need to be written for the other same-type pairings.
+MOMENTS_SHARED_W = {
+    'hard_workday': {
+        'moment':   "One of you walks in mid-story. The other is also full of the day. Both have something they want to land first.",
+        'happening': "Two Ws come home wanting to externalize. The talking is the processing. Neither of you has finished the day until you've said it out loud. When you both arrive full at the same time, you can talk over each other instead of taking turns.",
+        'not':      "Half-listening while waiting for your turn. The other person feels the half-attention and pushes harder, which makes you tune out more.",
+        'works':    "Whoever walks in first gets ten minutes to download. The other holds the receiving role with full attention. Then switch. The container makes the listening easier.",
+        'phrase':   "I need ten minutes to dump the day, then I'm yours.",
+    },
+    'quiet_worry': {
+        'moment':   "One of you has gone unusually quiet. For Ws, silence at home is a flag. Something is heavy enough to interrupt the normal flow of talking.",
+        'happening': "Two Ws are unusually attuned to each other's verbal patterns because both of you use words to feel okay. When one of you stops talking, the other notices fast. The risk is reading the silence wrong.",
+        'not':      "Filling the silence with theories. 'Are you upset with me? Did something happen?' That's interrogation, not listening.",
+        'works':    "Acknowledge the silence without trying to break it. Sit nearby. Make space without making demands. Let the other person come to language at their own pace.",
+        'phrase':   "I notice you're quiet. No pressure. I'm here when you're ready.",
+    },
+    'during_conflict': {
+        'moment':   "Tension is rising. Both of you are leaning in, both of you want to address it now, both of you are talking. The volume creeps up.",
+        'happening': "Ws don't want conflict to sit. You both want it surfaced and resolved. That's the strength. The risk is two engaged Ws can talk over each other, escalate together, and lose the thread of the actual fight.",
+        'not':      "Talking faster, louder, more. Neither of you stepping back because stepping back feels like losing. The argument is still happening but you've stopped hearing each other.",
+        'works':    "When the volume rises, the first one to feel it calls a 30-minute reset. Not 'we're done talking,' just a pause. Come back with the same intensity but with one specific thing to resolve.",
+        'phrase':   "I need 30 minutes. I'm not done, but I want to say this better.",
+    },
+    'after_conflict': {
+        'moment':   "The hard part is over. You've both said what needed saying. The room is quieter, but the thing isn't quite closed yet.",
+        'happening': "Both of you need verbal repair to feel done. A nod or a hug isn't enough. For Ws, the closure happens when one of you names it out loud.",
+        'not':      "Assuming the other is done because you're done. Or circling back into it because the relief hasn't landed yet.",
+        'works':    "One of you names the close. A short clear sentence. Not a recap, just a flag that you're both okay. The other confirms back.",
+        'phrase':   "We're good. I love you. We worked it out.",
+    },
+    'wanting_closeness': {
+        'moment':   "One of you is reaching. Sitting closer, asking what the other is up to, finding excuses to be in the same room.",
+        'happening': "Bids for closeness in a W-W pair often look like conversation starters. Casual questions, light topics, low-stakes ramble. The actual ask is presence, not the topic.",
+        'not':      "Half-meeting it. Answering the question while keeping your eyes on your screen. Two Ws can both be reaching at the same time and both miss the bid.",
+        'works':    "Stop what you're doing for thirty seconds. Make eye contact. Match the energy briefly. The bid landing matters more than how long it lasts.",
+        'phrase':   "Hey. What's going on with you right now?",
+    },
+    'external_stress': {
+        'moment':   "One of you is dealing with something hard. Work, family, a deadline. They're reaching toward the relationship, not retreating from it.",
+        'happening': "Under pressure, Ws reach outward. Not to be fixed. To be present in. The risk in a W-W pair is that when you're both stressed at the same time, both of you are reaching, and neither of you is anchored.",
+        'not':      "Trading stress stories. Both venting at the same time, neither actually landing. You leave the conversation more wound up than you started.",
+        'works':    "When you're both in it, one takes the anchoring role for an hour. Listen to the other's stress fully, hold it, then switch. Sequential, not parallel.",
+        'phrase':   "Yours first tonight. I want to hear it before I bring mine in.",
+    },
+}
+
+SITUATIONS = [
+    {'key': 'quiet_night',       'title': 'At dinner on a quiet night',                 'blurb': 'Low-stakes depth.'},
+    {'key': 'after_hard_week',   'title': 'After a hard week',                          'blurb': 'Mutual care.'},
+    {'key': 'one_is_off',        'title': "When one of you is off but won't say why",   'blurb': 'Gentle excavation.'},
+    {'key': 'before_hard',       'title': 'Before a difficult conversation',            'blurb': 'Setting it up.'},
+    {'key': 'tired_of_logistics','title': "When you're tired of talking about logistics",'blurb': 'Romance restoration.'},
+]
+
+# Five prompts per situation, written in the Attune voice
+SITUATION_PROMPTS = {
+    'quiet_night': [
+        "What's one thing you've been thinking about lately that you haven't told me?",
+        "What's the smallest thing I do that you find genuinely lovable?",
+        "If we could take a week off in three months, no logistics, what would we do?",
+        "What's something you've changed your mind about in the last year?",
+        "When was the last time I made you laugh, really laugh? What was happening?",
+    ],
+    'after_hard_week': [
+        "What was the hardest part of this week, the part that surprised you?",
+        "Is there anything I could have done differently, even small?",
+        "What do you most want from me this weekend?",
+        "What did you carry this week that you didn't tell me about?",
+        "What's the first thing you want to do tomorrow that has nothing to do with work?",
+    ],
+    'one_is_off': [
+        "Something feels off, is there something I'm missing?",
+        "Is this a today thing, or has it been building?",
+        "Do you want to talk about it now, or do you need a beat first?",
+        "Is this about us, or about something outside of us?",
+        "What would help right now, space, presence, or a specific thing from me?",
+    ],
+    'before_hard': [
+        "What outcome would feel best to you in this conversation?",
+        "What would help you stay open if it gets uncomfortable?",
+        "Is there anything you need from me before we start?",
+        "What's the version of this conversation you're afraid of?",
+        "How will we know if we need to pause and come back to it?",
+    ],
+    'tired_of_logistics': [
+        "When did we last have a conversation that wasn't about something we needed to do?",
+        "What do you remember loving about us in the early months?",
+        "If I could plan one perfect evening for you next week, what would it look like?",
+        "What's something we used to do that we've quietly stopped doing?",
+        "What's one small ritual we could add this month that has nothing to do with the household?",
+    ],
+}
+
+# ═══════════════════════════════════════════════════════════════════
+# DEMO DATA — Maya & David, WX couple type ("The Jumpstart")
+# ═══════════════════════════════════════════════════════════════════
+
+COUPLE = {
+    'u': 'Maya',   # user (W = The Initiator, engages, expresses)
+    'p': 'David',  # partner (X = The Anchor, engages, processes privately)
+    'together': 'Together, four years',
+    'couple_type': {
+        'id': 'WX',
+        'name': 'The Jumpstart',
+        'subtitle': 'initiator-anchor',
+        'tagline': 'Both want resolution. Different instruments, same direction.',
+        'description': "Maya and David both move toward resolution when things get hard, you're pulling in the same direction. Where you differ is in how the internal experience travels: one processes outward, and one holds it closer. The destination is the same. The path there looks different.",
+        'phrase_that_lands': "I need to process this out loud, bear with me. I don't have it figured out yet.",
+    },
+    # Edition number is no longer surfaced anywhere customer-visible per
+    # Ellie's spec. Kept here for internal versioning only.
+    'edition_internal': '0247',
+    'date': 'April 2026',
+    # WX scores. Both engage quickly (low conflict scores), but differ on
+    # expression, repair style, closeness, love, stress, feedback.
+    'scores': {
+        'energy':     (4.0, 3.4),  # both center-warm, small gap
+        'expression': (4.5, 2.3),  # W open, X guarded, notable gap
+        'needs':      (2.0, 2.2),  # both direct (low = direct), aligned
+        'bids':       (4.3, 3.6),  # W more attuned, small gap
+        'conflict':   (1.8, 2.0),  # both engage quickly, aligned
+        'repair':     (4.0, 2.4),  # W informal/warmth, X formal/verbal, notable gap
+        'closeness':  (4.5, 2.8),  # W close-seeking, X autonomous, notable gap
+        'love':       (2.0, 4.2),  # W words, X actions, notable gap
+        'stress':     (4.2, 1.8),  # W seek connection, X withdraw, notable gap
+        'feedback':   (4.2, 2.5),  # W open, X guarded, notable gap
+    },
+    # Expectations alignment percentages per the new 5-domain model.
+    # Computed in production from each row's match credit.
+    'expectations': {
+        'household':  82,
+        'emotional':  48,
+        'money':      78,
+        'life':       73,
+        'operate':    68,
+    },
+    # Per-domain row values. Keys MUST match DOMAIN_ROWS labels exactly.
+    # Each value is what shows in the bold column on the workbook page.
+    # In production: pulled from real exercise responses. For sample:
+    # representative answers that demonstrate each alignment state.
+    'expectations_detail': {
+        'household': {
+            'maya':  [('Cooking weeknights', 'Shared'), ('Grocery & meal planning', 'Maya'), ('Day-to-day tidying', 'Shared'), ('Home repairs & maintenance', 'David'), ('Family calendar', 'Maya'), ('Hosting & holidays', 'Shared'), ('Vacation planning', 'Shared')],
+            'david': [('Cooking weeknights', 'Shared'), ('Grocery & meal planning', 'Shared'), ('Day-to-day tidying', 'Maya'), ('Home repairs & maintenance', 'David'), ('Family calendar', 'Shared'), ('Hosting & holidays', 'Shared'), ('Vacation planning', 'Maya')],
+        },
+        'emotional': {
+            'maya':  [('Mental load', 'Maya'), ('Tracking how everyone is', 'Maya'), ('Maintaining closeness', 'Both of us'), ('Hard conversations', 'Maya'), ('Repair after friction', 'Maya'), ('Extended family & in-laws', 'Maya')],
+            'david': [('Mental load', 'Shared'), ('Tracking how everyone is', 'Shared'), ('Maintaining closeness', 'Both of us'), ('Hard conversations', 'Shared'), ('Repair after friction', 'Shared'), ('Extended family & in-laws', 'Maya')],
+        },
+        'money': {
+            'maya':  [('Day-to-day finances', 'Shared'), ('Long-term financial decisions', 'Both of us'), ('Whose career is prioritized', 'Both of us'), ('How we hold money', 'Mostly combined'), ('Saving v spending', 'Lean saving'), ('Risk tolerance', 'Comfortable')],
+            'david': [('Day-to-day finances', 'David'), ('Long-term financial decisions', 'Both of us'), ('Whose career is prioritized', 'Both of us'), ('How we hold money', 'Mostly combined'), ('Saving v spending', 'Lean saving'), ('Risk tolerance', 'Cautious')],
+        },
+        'life': {
+            'maya':  [('Children', 'Want at least one'), ('When family & partner conflict', 'Side with partner'), ('Where we live', 'Strong preference'), ('Social life', 'Balanced'), ('Daily rhythm', 'Loose'), ('Faith & spirituality', 'Personal'), ('Core values & beliefs', 'Closely aligned')],
+            'david': [('Children', 'Want at least one'), ('When family & partner conflict', 'Mediate'), ('Where we live', 'Wherever'), ('Social life', 'Quiet'), ('Daily rhythm', 'Loose'), ('Faith & spirituality', 'Personal'), ('Core values & beliefs', 'Closely aligned')],
+        },
+        'operate': {
+            'maya':  [('When to address conflict', 'Immediately'), ('Conflict resolution time', 'Same day'), ('What repair looks like', 'Direct apology'), ('Physical affection', 'Essential'), ('Closeness during hard times', 'More closeness'), ('Independence', 'Important')],
+            'david': [('When to address conflict', 'Right moment'), ('Conflict resolution time', 'A night or two'), ('What repair looks like', 'Warmth returns'), ('Physical affection', 'Very important'), ('Closeness during hard times', 'Pull back'), ('Independence', 'Important')],
+        },
+    },
+}
+
+# Compute the gap and alignment status for each dimension
+def gap_status(score_u, score_p):
+    gap = abs(score_u - score_p)
+    if gap < 0.8:
+        return 'aligned', gap
+    elif gap < 1.5:
+        return 'some_gap', gap
+    else:
+        return 'notable_gap', gap
+
+# ═══════════════════════════════════════════════════════════════════
+# UTILITIES
+# ═══════════════════════════════════════════════════════════════════
+
+def fill(text, u, p):
+    """Substitute {U} and {P} placeholders with names."""
+    return text.replace('{U}', u).replace('{P}', p)
+
+def percent_position(score):
+    """Map 1-5 score to 0-100% position."""
+    return (score - 1) / 4 * 100
+
+# ═══════════════════════════════════════════════════════════════════
+# CSS — single source of truth for the design system
+# ═══════════════════════════════════════════════════════════════════
+
+CSS = r"""
+:root{
+  --cream:#FFFDF9; --cream-warm:#FBF6EE; --shell:#F8EDE0; --linen:#F1E5D2;
+  --bone:#F5EFE3;
+  --ink:#0E0B07; --graphite:#332A20; --slate:#5A4D3F; --muted:#8C7A68;
+  --hairline:#E2D5C2; --hairline-soft:#EFE7DA;
+  --coral:#E8673A; --coral-deep:#C2410C; --coral-tint:#FFF0E6;
+  --indigo:#1B5FE8; --indigo-deep:#1E3A8A; --indigo-tint:#EBE9F8;
+  --purple:#9B5DE5; --purple-deep:#6B2BB8; --purple-tint:#F3EEFF;
+  --green:#10B981; --green-deep:#047857; --green-tint:#E7FAF1;
+  --plum:#6B2C5A; --plum-tint:#F8EFF4;
+  --navy:#2D2250;
+  --gold:#C17F47; --gold-deep:#9B5D2A; --gold-tint:#FBF1E3;
+  --hfont:'Playfair Display',Georgia,serif;
+  --bfont:'DM Sans',system-ui,sans-serif;
+  --mono:'DM Mono',ui-monospace,monospace;
+}
+
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{font-size:16px}
+body{
+  background:#E8DDD0;
+  font-family:var(--bfont);
+  color:var(--ink);
+  -webkit-font-smoothing:antialiased;
+  padding:48px 24px;
+}
+
+/* ── PAGE FRAME ──────────────────────────────────────────────── */
+.page{
+  width:8.5in;
+  height:11in;
+  background:var(--cream);
+  margin:0 auto 36px;
+  position:relative;
+  overflow:hidden;
+  box-shadow:0 1px 2px rgba(0,0,0,.04), 0 24px 60px rgba(60,30,10,.18);
+}
+.page-inner{padding:.85in .9in}
+.page-num{
+  position:absolute;bottom:.4in;right:.9in;
+  font-family:var(--mono);font-size:9.5px;letter-spacing:.18em;
+  color:var(--muted);text-transform:uppercase;font-weight:500;
+}
+.page-running-head{
+  position:absolute;top:.4in;left:.9in;right:.9in;
+  display:flex;justify-content:space-between;align-items:baseline;
+  font-family:var(--bfont);font-size:9.5px;letter-spacing:.22em;
+  color:var(--muted);text-transform:uppercase;font-weight:600;
+}
+
+/* Common eyebrow */
+.eyebrow{
+  display:inline-flex;align-items:center;gap:14px;
+  font-family:var(--bfont);font-size:10px;letter-spacing:.18em;
+  text-transform:uppercase;font-weight:700;
+}
+.eyebrow::before{content:"";width:36px;height:1px;background:currentColor;flex-shrink:0}
+
+.display-title{
+  font-family:var(--hfont);font-weight:700;
+  line-height:1.02;letter-spacing:-.028em;color:var(--ink);
+}
+.display-title em{font-style:italic;font-weight:700}
+
+/* ── COVER ───────────────────────────────────────────────────── */
+.cover{
+  background:linear-gradient(165deg,#1A1232 0%,#2D2250 50%,#1E3A6E 100%);
+  color:white;
+  overflow:hidden;
+  position:relative;
+}
+.cover::before{
+  content:"";position:absolute;inset:0;
+  background:
+    radial-gradient(ellipse 50% 35% at 80% 25%,rgba(232,103,58,.25),transparent 65%),
+    radial-gradient(ellipse 45% 40% at 18% 75%,rgba(155,93,229,.22),transparent 60%);
+  pointer-events:none;
+}
+.cover::after{
+  content:"";position:absolute;inset:0;opacity:.18;pointer-events:none;
+  background-image:radial-gradient(circle at 1px 1px,rgba(255,255,255,.4) 1px,transparent 0);
+  background-size:14px 14px;
+  mix-blend-mode:soft-light;
+}
+.cover-top-stripe{
+  position:absolute;top:0;left:0;right:0;height:5px;
+  background:linear-gradient(90deg,#E8673A 0%,#9B5DE5 50%,#1B5FE8 100%);
+  z-index:2;
+}
+.cover-grid{
+  position:relative;z-index:2;
+  height:11in;display:grid;
+  grid-template-rows:auto 1fr auto auto auto;
+  padding:1in .9in .85in;
+}
+.cover-mark{
+  display:flex;align-items:center;gap:14px;
+  font-family:var(--bfont);font-size:11px;letter-spacing:.2em;
+  text-transform:uppercase;font-weight:700;color:rgba(255,255,255,.85);
+}
+.cover-mark-rule{width:42px;height:1px;background:#E8673A}
+.cover-edition{
+  display:flex;justify-content:flex-end;align-items:flex-start;
+  font-family:var(--mono);font-size:9.5px;letter-spacing:.16em;
+  color:rgba(255,255,255,.5);text-transform:uppercase;
+  margin-top:auto;margin-bottom:.4in;
+}
+.cover-edition span{margin-left:18px}
+.cover-title-block{margin-top:auto}
+.cover-tagline{
+  font-family:var(--hfont);font-style:italic;font-weight:700;
+  font-size:1.55rem;line-height:1.35;
+  color:rgba(255,255,255,.85);
+  max-width:6in;margin-bottom:.7in;letter-spacing:.005em;
+}
+.cover-title{
+  font-family:var(--hfont);font-weight:700;
+  font-size:7.4rem;line-height:.92;
+  letter-spacing:-.03em;
+  color:white;
+}
+.cover-title em{font-style:italic;font-weight:700;color:#FBA67E;display:block}
+.cover-meta{
+  margin-top:.55in;
+  display:grid;grid-template-columns:1fr 1fr 1fr;gap:.3in;
+  border-top:1px solid rgba(255,255,255,.18);
+  padding-top:.35in;
+}
+.cover-meta-cell{display:flex;flex-direction:column;gap:6px}
+.cover-meta-label{
+  font-family:var(--bfont);font-size:9px;letter-spacing:.18em;
+  text-transform:uppercase;color:rgba(232,103,58,.95);font-weight:700;
+}
+.cover-meta-value{
+  font-family:var(--hfont);font-size:1.4rem;font-weight:700;
+  color:white;letter-spacing:-.012em;line-height:1.1;
+}
+.cover-meta-value em{font-style:italic;color:rgba(255,255,255,.55);font-weight:400}
+.cover-meta-sub{font-family:var(--bfont);font-size:11px;color:rgba(255,255,255,.55);margin-top:2px}
+
+/* ── TOC ──────────────────────────────────────────────────────── */
+.toc-page-header{
+  padding-bottom:.32in;border-bottom:1px solid var(--ink);
+  margin-bottom:.32in;
+  display:flex;justify-content:space-between;align-items:baseline;
+}
+.toc-page-eye{color:var(--coral-deep)}
+.toc-page-stamp{
+  font-family:var(--mono);font-size:9.5px;letter-spacing:.18em;
+  color:var(--muted);text-transform:uppercase;
+}
+.toc-page-title{
+  font-family:var(--hfont);font-size:2.6rem;font-weight:700;
+  line-height:1;letter-spacing:-.026em;color:var(--ink);
+  margin-bottom:.28in;
+}
+.toc-page-title em{font-style:italic;color:var(--coral-deep);font-weight:700}
+
+.toc-section{margin-bottom:.18in}
+.toc-section-eye{
+  display:flex;align-items:center;gap:14px;
+  font-family:var(--bfont);font-size:9.5px;letter-spacing:.18em;
+  text-transform:uppercase;font-weight:700;
+  margin-bottom:6px;
+}
+.toc-section-eye::before{content:"";width:24px;height:1px;background:currentColor;flex-shrink:0}
+.toc-section-title-row{
+  display:grid;grid-template-columns:1fr auto;align-items:baseline;
+  border-bottom:1px solid var(--ink);
+  padding-bottom:5px;margin-bottom:4px;
+}
+.toc-section-title{
+  font-family:var(--hfont);font-size:1.2rem;font-weight:700;
+  letter-spacing:-.018em;color:var(--ink);line-height:1.15;
+}
+.toc-section-title em{font-style:italic;font-weight:700}
+.toc-section-page{
+  font-family:var(--mono);font-size:.92rem;font-weight:500;color:var(--ink);
+}
+
+.toc-row{
+  display:grid;grid-template-columns:1fr auto;
+  align-items:baseline;gap:14px;
+  padding:3px 0;
+  border-bottom:1px dotted var(--hairline);
+}
+.toc-row.indent{padding-left:.3in}
+.toc-row.indent2{padding-left:.6in}
+.toc-row-label{
+  font-family:var(--hfont);font-size:.88rem;font-weight:400;
+  color:var(--graphite);letter-spacing:-.008em;
+}
+.toc-row-label.italic{font-style:italic;color:var(--muted)}
+.toc-row-page{
+  font-family:var(--mono);font-size:9px;color:var(--muted);font-weight:500;
+  letter-spacing:.04em;
+}
+
+.toc-part-eye-blue{color:var(--indigo-deep)}
+.toc-part-eye-purple{color:var(--purple-deep)}
+.toc-part-eye-orange{color:var(--coral-deep)}
+.toc-part-eye-green{color:var(--green-deep)}
+
+/* ── INTRO PAGE ──────────────────────────────────────────────── */
+.intro-grid{
+  display:grid;grid-template-columns:1.7fr 1fr;
+  gap:.5in;
+  margin-top:.4in;
+  padding-top:.35in;
+  border-top:1px solid var(--hairline);
+}
+.intro-display{
+  font-size:3.6rem;letter-spacing:-.03em;
+  margin-bottom:.32in;
+}
+.intro-display em{color:var(--coral-deep)}
+.intro-lead{
+  font-family:var(--hfont);font-style:italic;font-weight:700;
+  font-size:1.1rem;line-height:1.5;color:var(--graphite);
+  max-width:5in;margin-bottom:.3in;
+}
+.intro-body p{
+  font-size:.86rem;line-height:1.7;color:var(--slate);
+  font-weight:400;margin-bottom:.85em;
+  max-width:4.6in;
+}
+.intro-body p:last-child{margin-bottom:0}
+.intro-body strong{color:var(--ink);font-weight:600}
+.intro-aside{
+  background:var(--bone);
+  padding:1.2rem 1.25rem;
+  border-left:3px solid var(--coral-deep);
+  align-self:start;
+}
+.intro-aside-title{
+  font-family:var(--hfont);font-weight:700;font-size:1rem;
+  letter-spacing:-.014em;margin-bottom:.55em;
+}
+.intro-aside p{
+  font-size:.78rem;line-height:1.6;color:var(--slate);font-weight:400;
+  margin-bottom:.7em;
+}
+.intro-aside p:last-child{margin-bottom:0}
+.intro-aside-divider{
+  height:1px;background:var(--hairline);margin:.75rem 0;
+}
+.intro-aside-cite{
+  font-family:var(--bfont);font-size:9.5px;letter-spacing:.2em;
+  text-transform:uppercase;font-weight:600;color:var(--muted);line-height:1.7;
+}
+
+/* ── SNAPSHOT ─────────────────────────────────────────────────── */
+.snapshot-header{
+  display:flex;justify-content:space-between;align-items:flex-end;
+  padding-bottom:.18in;border-bottom:1px solid var(--hairline);
+  margin-bottom:.22in;
+}
+.snapshot-title{font-size:2.5rem;letter-spacing:-.028em;line-height:1.04}
+.snapshot-title em{color:var(--coral-deep)}
+.snapshot-stamp{
+  text-align:right;
+  font-family:var(--mono);font-size:9px;letter-spacing:.16em;
+  color:var(--muted);text-transform:uppercase;line-height:1.8;
+  white-space:nowrap;
+}
+.snapshot-stamp strong{color:var(--ink);font-weight:500}
+.snapshot-stamp-row{display:block;white-space:nowrap}
+
+.couple-capsule{
+  background:var(--bone);
+  border:1px solid var(--hairline);
+  padding:.7rem 1rem;margin-bottom:.22in;
+  display:grid;grid-template-columns:auto 1fr;gap:1rem;align-items:center;
+}
+.couple-capsule-mark{
+  width:50px;height:50px;border-radius:50%;
+  background:linear-gradient(140deg,var(--coral-deep),var(--purple-deep));
+  color:white;display:flex;align-items:center;justify-content:center;
+  font-family:var(--hfont);font-size:1.3rem;font-weight:700;font-style:italic;
+  letter-spacing:-.02em;flex-shrink:0;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.18);
+}
+.couple-capsule-text{display:flex;flex-direction:column;gap:2px}
+.couple-capsule-eye{
+  font-family:var(--bfont);font-size:8.5px;letter-spacing:.18em;
+  text-transform:uppercase;font-weight:700;color:var(--coral-deep);
+}
+.couple-capsule-name{
+  font-family:var(--hfont);font-size:1.2rem;font-weight:700;
+  letter-spacing:-.018em;color:var(--ink);
+}
+.couple-capsule-name em{font-style:italic;color:var(--muted);font-weight:400}
+.couple-capsule-sub{font-size:.78rem;color:var(--slate);line-height:1.45;font-weight:400}
+
+.snap-section-title{
+  font-family:var(--bfont);font-size:9px;letter-spacing:.18em;
+  text-transform:uppercase;font-weight:700;color:var(--muted);
+  margin-bottom:8px;
+  padding-bottom:6px;border-bottom:1px solid var(--hairline);
+}
+
+/* Dimension table, tightened to fit all 10 dimensions on one page */
+.dim-table{display:flex;flex-direction:column}
+.dim-row{
+  display:grid;grid-template-columns:1.7in 1fr;
+  gap:.22in;align-items:center;
+  padding:.08rem 0;
+}
+.dim-row-num{
+  font-family:var(--mono);font-size:9px;letter-spacing:.06em;
+  color:var(--muted);font-weight:500;
+}
+.dim-row-label{
+  font-family:var(--hfont);font-size:.86rem;font-weight:700;
+  letter-spacing:-.012em;color:var(--ink);line-height:1.15;display:block;margin-top:1px;
+}
+.dim-row-poles{
+  font-family:var(--bfont);font-size:8.5px;color:var(--muted);
+  display:flex;justify-content:space-between;line-height:1.1;
+  letter-spacing:.04em;
+}
+.dim-row-scale{
+  position:relative;height:24px;
+  background:transparent;
+}
+.dim-row-scale-track{
+  position:absolute;left:0;right:0;top:50%;height:1px;
+  background:var(--hairline);transform:translateY(-50%);
+}
+.dim-row-scale-tick{
+  position:absolute;top:50%;width:1px;height:5px;
+  background:var(--hairline);transform:translateY(-50%);
+}
+.dim-row-scale-line{
+  position:absolute;top:50%;height:1.5px;
+  transform:translateY(-50%);
+  z-index:1;
+}
+.dim-row-dot{
+  position:absolute;top:50%;width:11px;height:11px;border-radius:50%;
+  transform:translate(-50%,-50%);
+  z-index:2;
+  box-shadow:0 0 0 2px var(--cream);
+}
+.dim-row-dot.partner-a{background:var(--coral-deep)}
+.dim-row-dot.partner-b{background:var(--indigo-deep)}
+
+/* Snapshot legend */
+.snapshot-legend{
+  display:flex;gap:1.2rem;margin-top:.14in;padding-top:.1in;
+  border-top:1px solid var(--hairline);
+  font-family:var(--bfont);font-size:9px;color:var(--muted);font-weight:500;
+}
+.legend-dot{display:inline-flex;align-items:center;gap:6px}
+.legend-dot::before{content:"";width:9px;height:9px;border-radius:50%}
+.legend-sarah::before{background:var(--coral-deep)}
+.legend-james::before{background:var(--indigo-deep)}
+
+/* Expectations grid */
+.expectations-grid{
+  display:grid;grid-template-columns:repeat(7,1fr);gap:10px;
+  margin-top:.18in;
+}
+.exp-card{
+  border:1px solid var(--hairline);
+  padding:1rem .75rem 1.1rem;
+  display:grid;grid-template-rows:2.6em 1fr auto;
+  row-gap:8px;
+  background:var(--cream);
+  position:relative;
+}
+.exp-card::before{
+  content:"";position:absolute;top:0;left:0;right:0;height:3px;
+}
+.exp-card.aligned::before{background:var(--green-deep)}
+.exp-card.partial::before{background:var(--gold)}
+.exp-card.gap::before{background:var(--coral-deep)}
+.exp-pct{
+  font-family:var(--hfont);font-size:1.95rem;font-weight:700;
+  letter-spacing:-.024em;line-height:1;color:var(--ink);
+  align-self:end;
+}
+.exp-pct-suffix{font-size:1rem;color:var(--muted);font-weight:400;font-style:italic}
+.exp-label{
+  font-family:var(--bfont);font-size:9px;letter-spacing:.06em;
+  text-transform:uppercase;font-weight:700;color:var(--graphite);
+  line-height:1.3;align-self:start;
+}
+.exp-status{
+  font-family:var(--bfont);font-size:8.5px;letter-spacing:.18em;
+  text-transform:uppercase;font-weight:600;
+  align-self:end;color:var(--muted);
+}
+
+/* ── PART DIVIDER ────────────────────────────────────────────── */
+.part-divider{
+  height:11in;
+  display:flex;flex-direction:column;
+  padding:1.2in .9in 1in;
+  position:relative;
+  color:white;
+  overflow:hidden;
+}
+.part-divider.blue{
+  background:linear-gradient(165deg,#0F1A3E 0%,#1B3A6E 50%,#1E3A8A 100%);
+}
+.part-divider.purple{
+  background:linear-gradient(165deg,#2A1340 0%,#4A1F70 50%,#6B2BB8 100%);
+}
+.part-divider.orange{
+  background:linear-gradient(165deg,#3D1A0A 0%,#7A2E15 50%,#C2410C 100%);
+}
+.part-divider.green{
+  background:linear-gradient(165deg,#0A2E20 0%,#0E5240 50%,#047857 100%);
+}
+.part-divider::before{
+  content:"";position:absolute;inset:0;
+  background-image:radial-gradient(circle at 1px 1px,rgba(255,255,255,.15) 1px,transparent 0);
+  background-size:14px 14px;
+  pointer-events:none;
+}
+.part-divider::after{
+  /* Giant background numeral */
+  content:attr(data-num);
+  position:absolute;
+  bottom:-.4in;right:-.2in;
+  font-family:var(--hfont);
+  font-size:32rem;font-weight:400;
+  font-style:italic;
+  line-height:.85;
+  letter-spacing:-.05em;
+  color:rgba(255,255,255,.06);
+  pointer-events:none;
+  user-select:none;
+}
+.part-meta{
+  display:flex;justify-content:space-between;align-items:baseline;
+  padding-bottom:1.2rem;border-bottom:1px solid rgba(255,255,255,.25);
+  position:relative;z-index:1;
+}
+.part-num{
+  font-family:var(--mono);font-size:11px;letter-spacing:.18em;
+  text-transform:uppercase;font-weight:700;color:white;
+}
+.part-of{
+  font-family:var(--mono);font-size:11px;letter-spacing:.16em;color:rgba(255,255,255,.55);
+}
+.part-label{
+  font-family:var(--bfont);font-size:11px;letter-spacing:.18em;
+  text-transform:uppercase;font-weight:700;
+  margin-top:1.2in;
+  position:relative;z-index:1;
+}
+.part-divider.blue .part-label{color:#A5C4FF}
+.part-divider.purple .part-label{color:#C4A5FF}
+.part-divider.orange .part-label{color:#FFC0A5}
+.part-divider.green .part-label{color:#A5F0D5}
+.part-title{
+  font-family:var(--hfont);font-size:4.4rem;font-weight:700;
+  line-height:1.02;letter-spacing:-.026em;color:white;
+  margin-top:.45rem;max-width:7in;
+  position:relative;z-index:1;
+}
+.part-title em{font-style:italic;font-weight:700}
+.part-divider.blue .part-title em{color:#A5C4FF}
+.part-divider.purple .part-title em{color:#C4A5FF}
+.part-divider.orange .part-title em{color:#FFC0A5}
+.part-divider.green .part-title em{color:#A5F0D5}
+.part-epigraph{
+  margin-top:auto;padding-top:.85in;
+  max-width:5.5in;
+  border-top:1px solid rgba(255,255,255,.25);
+  position:relative;z-index:1;
+}
+.part-epigraph-text{
+  font-family:var(--hfont);font-style:italic;font-size:1.1rem;
+  line-height:1.5;color:rgba(255,255,255,.92);font-weight:700;
+  margin-bottom:.85rem;
+}
+.part-epigraph-cite{
+  font-family:var(--bfont);font-size:9.5px;letter-spacing:.22em;
+  text-transform:uppercase;font-weight:600;color:rgba(255,255,255,.55);
+}
+.part-divider .page-num{color:rgba(255,255,255,.4)}
+
+/* ── DIMENSION PAGE ──────────────────────────────────────────── */
+.dim-page{position:relative}
+.dim-page::before{
+  content:"";position:absolute;top:0;left:0;right:0;height:5px;
+  background:var(--accent);
+}
+.accent-purple{--accent:#9B5DE5;--accent-deep:#6B2BB8;--accent-tint:#F3EEFF}
+.accent-coral {--accent:#E8673A;--accent-deep:#C2410C;--accent-tint:#FFF0E6}
+.accent-indigo{--accent:#1B5FE8;--accent-deep:#1E3A8A;--accent-tint:#EBE9F8}
+.accent-green {--accent:#10B981;--accent-deep:#047857;--accent-tint:#E7FAF1}
+.accent-gold  {--accent:#C17F47;--accent-deep:#9B5D2A;--accent-tint:#FBF1E3}
+.accent-plum  {--accent:#6B2C5A;--accent-deep:#4A1F3F;--accent-tint:#F8EFF4}
+
+.dim-header{
+  display:grid;grid-template-columns:auto 1fr;gap:.4in;
+  padding:.18in 0 .16in;
+  border-bottom:1px solid var(--hairline);
+}
+.dim-numeral{
+  font-family:var(--hfont);font-size:3.8rem;font-weight:400;
+  line-height:.85;letter-spacing:-.04em;color:var(--accent-deep);
+  font-variant-numeric:lining-nums;
+  display:flex;align-items:flex-start;
+}
+.dim-numeral-of{
+  font-family:var(--bfont);font-size:9px;font-weight:600;color:var(--muted);
+  letter-spacing:.06em;margin-left:6px;margin-top:.55em;
+}
+.dim-meta{display:flex;flex-direction:column;justify-content:flex-end;padding-bottom:4px}
+.dim-eyebrow{color:var(--accent-deep);margin-bottom:8px}
+.dim-title{
+  font-family:var(--hfont);font-size:2.2rem;font-weight:700;
+  line-height:1;letter-spacing:-.024em;color:var(--ink);
+}
+.dim-title em{font-style:italic;color:var(--accent-deep);font-weight:700}
+
+/* Spectrum visualization */
+.spectrum{
+  margin-top:.16in;
+  background:linear-gradient(135deg,var(--accent-tint) 0%,var(--cream) 100%);
+  padding:.9rem 1.2rem 1.05rem;
+  border:1px solid var(--hairline);
+  position:relative;
+}
+.spectrum-head{
+  display:flex;justify-content:space-between;align-items:baseline;
+  margin-bottom:1.4rem;
+}
+.spectrum-pole{
+  font-family:var(--bfont);font-size:9.5px;letter-spacing:.28em;
+  text-transform:uppercase;font-weight:700;color:var(--muted);line-height:1.3;
+}
+.spectrum-pole-num{
+  font-family:var(--mono);font-size:9px;color:var(--muted);
+  font-weight:500;display:block;margin-top:2px;
+}
+.spectrum-pole.right{text-align:right}
+.spectrum-track{
+  position:relative;height:36px;margin:0 12px;
+}
+.spectrum-line{
+  position:absolute;left:0;right:0;top:50%;height:1px;
+  background:var(--ink);opacity:.18;
+}
+.spectrum-tick{
+  position:absolute;top:50%;width:1px;height:8px;
+  background:var(--ink);opacity:.18;transform:translateY(-50%);
+}
+.spectrum-tick-num{
+  position:absolute;top:calc(50% + 12px);
+  font-family:var(--mono);font-size:9px;color:var(--muted);
+  transform:translateX(-50%);font-weight:500;
+}
+.spectrum-connector{
+  position:absolute;top:50%;height:2px;
+  background:var(--accent);transform:translateY(-50%);z-index:1;
+}
+.spectrum-marker{
+  position:absolute;top:50%;
+  transform:translate(-50%,-50%);
+  z-index:2;
+}
+.spectrum-marker-dot{
+  width:16px;height:16px;border-radius:50%;
+  background:white;border:3px solid var(--accent-deep);
+  box-shadow:0 4px 10px rgba(60,30,10,.15);
+}
+.spectrum-marker-tag{
+  position:absolute;top:-22px;left:50%;transform:translateX(-50%);
+  font-family:var(--bfont);font-size:.74rem;font-weight:600;
+  color:var(--ink);white-space:nowrap;letter-spacing:0;
+  max-width:1.6in;overflow:hidden;text-overflow:ellipsis;
+}
+.spectrum-marker-score{
+  position:absolute;top:-38px;left:50%;transform:translateX(-50%);
+  font-family:var(--mono);font-size:9px;font-weight:500;
+  color:var(--muted);letter-spacing:.08em;white-space:nowrap;
+}
+/* Outward-anchored labels: prevents collision when markers are close.
+   Left marker: labels right-aligned to dot edge, extending leftward.
+   Right marker: labels left-aligned to dot edge, extending rightward. */
+.spectrum-marker.is-left .spectrum-marker-tag,
+.spectrum-marker.is-left .spectrum-marker-score{
+  left:auto;right:calc(50% + 6px);transform:none;
+}
+.spectrum-marker.is-right .spectrum-marker-tag,
+.spectrum-marker.is-right .spectrum-marker-score{
+  left:calc(50% + 6px);transform:none;
+}
+.spectrum-foot{
+  margin-top:1.1rem;display:flex;justify-content:space-between;align-items:center;
+  padding-top:.8rem;border-top:1px solid var(--hairline);
+}
+.spectrum-gap-label{
+  font-family:var(--bfont);font-size:9.5px;letter-spacing:.18em;
+  text-transform:uppercase;font-weight:700;color:var(--accent-deep);
+}
+.spectrum-gap-value{
+  font-family:var(--hfont);font-size:1.25rem;font-weight:700;
+  color:var(--ink);letter-spacing:-.012em;
+}
+.spectrum-gap-meta{font-size:.76rem;color:var(--muted);font-weight:400;font-style:italic;margin-left:6px}
+
+/* What this means + What this measures, equal width 50/50 */
+.dim-body{
+  margin-top:.18in;
+  display:grid;grid-template-columns:1fr 1fr;
+  gap:.28in;
+}
+.what-measures{
+  padding-top:.12in;border-top:1px solid var(--hairline);
+}
+.what-measures-eye{color:var(--muted);margin-bottom:8px}
+.what-measures p{
+  font-size:.8rem;line-height:1.55;color:var(--slate);font-weight:400;
+}
+
+/* "What this means for your relationship" the type-specific main analysis */
+.dim-analysis{
+  background:var(--accent-tint);
+  border-left:3px solid var(--accent-deep);
+  padding:.75rem .9rem;
+}
+.dim-analysis-eye{color:var(--accent-deep);margin-bottom:6px}
+.dim-analysis p{
+  font-family:var(--hfont);font-size:.86rem;line-height:1.5;
+  color:var(--graphite);font-weight:400;font-style:italic;letter-spacing:-.005em;
+}
+
+/* Reflection prompts */
+.prompts-block{
+  margin-top:.18in;padding-top:.14in;
+  border-top:1px solid var(--hairline);
+}
+.prompts-eye{color:var(--accent-deep);margin-bottom:10px}
+.prompts-list{
+  display:flex;flex-direction:column;gap:0;
+}
+.prompt-row{
+  display:grid;grid-template-columns:auto 1fr;gap:14px;align-items:start;
+  padding:6px 0;border-bottom:1px solid var(--hairline);
+}
+.prompt-row:last-child{border-bottom:none}
+.prompt-num{
+  font-family:var(--hfont);font-size:1.05rem;font-weight:700;
+  color:var(--accent-deep);line-height:1.1;letter-spacing:-.012em;
+  min-width:24px;
+}
+.prompt-text{
+  font-family:var(--bfont);font-size:.82rem;line-height:1.5;
+  color:var(--graphite);font-weight:400;
+}
+
+/* Try this week, tinted accent box with star icon */
+.try-this-week{
+  margin-top:.18in;
+  background:var(--accent-tint);
+  border-left:3px solid var(--accent-deep);
+  padding:.7rem 1rem;
+  display:grid;grid-template-columns:auto 1fr;gap:14px;align-items:start;
+}
+.ttw-icon{
+  font-family:var(--hfont);font-size:1.2rem;color:var(--accent-deep);
+  font-weight:700;line-height:1;
+}
+.ttw-content{display:flex;flex-direction:column;gap:4px}
+.ttw-eye{
+  color:var(--accent-deep);font-size:9.5px;
+  display:inline-block;letter-spacing:.18em;text-transform:uppercase;font-weight:700;
+}
+.ttw-eye::before{display:none}
+.ttw-text{
+  font-family:var(--bfont);font-size:.84rem;line-height:1.55;
+  color:var(--ink);font-weight:400;
+}
+
+/* Write-in sections (commitment + notes) */
+.writein-section{margin-top:.18in}
+.writein-head{
+  display:flex;justify-content:space-between;align-items:baseline;
+  margin-bottom:6px;
+}
+.writein-eye{color:var(--accent-deep)}
+.writein-hint{
+  font-family:var(--bfont);font-size:11px;font-style:italic;
+  color:var(--muted);font-weight:400;
+}
+.writein-area{
+  background:repeating-linear-gradient(
+    transparent,
+    transparent 1.55em,
+    var(--hairline) 1.55em,
+    var(--hairline) calc(1.55em + 1px)
+  );
+  height:calc(1.55em * var(--lines, 3));
+  margin-top:8px;
+}
+
+/* ── EXPECTATIONS PAGE ──────────────────────────────────────── */
+.exp-page-header{
+  display:grid;grid-template-columns:auto 1fr;gap:.4in;
+  padding-bottom:.32in;border-bottom:1px solid var(--hairline);
+}
+.exp-page-icon{
+  width:1.2in;height:1.2in;border:1px solid var(--hairline);
+  background:linear-gradient(135deg,var(--accent-tint) 0%,#FFFDF9 100%);
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--hfont);font-size:2.6rem;font-weight:400;
+  color:var(--accent-deep);
+}
+.exp-page-title{
+  font-family:var(--hfont);font-size:2.6rem;font-weight:700;
+  line-height:1;letter-spacing:-.024em;color:var(--ink);
+}
+.exp-page-title em{font-style:italic;color:var(--accent-deep);font-weight:700}
+.exp-page-eye{color:var(--accent-deep);margin-bottom:10px}
+
+.exp-side-by-side{
+  margin-top:.3in;
+  display:grid;grid-template-columns:1fr 1fr;
+  border:1px solid var(--hairline);
+  background:var(--cream);
+  overflow:hidden;
+}
+.esbs-pane{padding:1.1rem 1.3rem 1.2rem;position:relative}
+.esbs-pane.partner-a{background:linear-gradient(165deg,#FFF6EE 0%,var(--cream) 100%)}
+.esbs-pane.partner-b{background:linear-gradient(165deg,#EEF1FA 0%,var(--cream) 100%);border-left:1px solid var(--hairline)}
+.esbs-tag{
+  display:inline-flex;align-items:center;gap:8px;
+  font-family:var(--bfont);font-size:9.5px;letter-spacing:.18em;
+  text-transform:uppercase;font-weight:700;
+  margin-bottom:14px;
+}
+.esbs-tag::before{content:"";width:6px;height:6px;border-radius:50%}
+.esbs-pane.partner-a .esbs-tag{color:var(--coral-deep)}
+.esbs-pane.partner-a .esbs-tag::before{background:var(--coral-deep)}
+.esbs-pane.partner-b .esbs-tag{color:var(--indigo-deep)}
+.esbs-pane.partner-b .esbs-tag::before{background:var(--indigo-deep)}
+.esbs-name{
+  font-family:var(--hfont);font-size:1.35rem;font-weight:700;
+  letter-spacing:-.018em;color:var(--ink);margin-bottom:.7em;
+}
+.esbs-list{display:flex;flex-direction:column;gap:0}
+.esbs-item{
+  display:grid;grid-template-columns:1fr auto;gap:12px;align-items:center;
+  padding:8px 0;
+  border-bottom:1px solid var(--hairline);
+}
+.esbs-item:last-child{border-bottom:none}
+.esbs-item-label{
+  font-family:var(--bfont);font-size:.78rem;
+  color:var(--graphite);font-weight:500;
+}
+.esbs-item-value{
+  font-family:var(--hfont);font-size:.88rem;font-weight:700;
+  font-style:italic;color:var(--ink);letter-spacing:-.008em;
+}
+.exp-page-analysis{
+  margin-top:.3in;padding-top:.2in;border-top:1px solid var(--hairline);
+}
+.exp-page-analysis-eye{color:var(--accent-deep);margin-bottom:10px}
+.exp-page-analysis-title{
+  font-family:var(--hfont);font-size:1.3rem;font-weight:700;
+  letter-spacing:-.018em;color:var(--ink);margin-bottom:.55em;
+}
+.exp-page-analysis-title em{font-style:italic;color:var(--accent-deep);font-weight:700}
+.exp-page-analysis p{
+  font-family:var(--bfont);font-size:.86rem;line-height:1.65;color:var(--slate);
+  font-weight:400;max-width:6.2in;
+}
+
+/* ── PART 2: WORKING KNOWLEDGE / MOMENTS ────────────────────── */
+.wk-intro{
+  padding-bottom:.18in;border-bottom:1px solid var(--hairline);
+  margin-bottom:.2in;
+}
+.wk-eye{color:var(--purple-deep);margin-bottom:8px}
+.wk-title{
+  font-family:var(--hfont);font-size:2rem;font-weight:700;
+  line-height:1.04;letter-spacing:-.022em;color:var(--ink);
+  margin-bottom:.35em;
+}
+.wk-title em{font-style:italic;color:var(--purple-deep);font-weight:700}
+.wk-lead{
+  font-family:var(--hfont);font-style:italic;font-size:.95rem;
+  line-height:1.5;color:var(--graphite);font-weight:400;max-width:6in;
+}
+/* Moment card, tightened so 4 fit on continuation page */
+.moment-card{
+  margin-bottom:.1in;
+  padding-bottom:.08in;
+  border-bottom:1px dotted var(--hairline);
+}
+.moment-card:last-child{border-bottom:none}
+.moment-header{
+  display:grid;grid-template-columns:auto 1fr;gap:14px;align-items:baseline;
+  border-bottom:1px solid var(--purple-deep);
+  padding-bottom:5px;margin-bottom:6px;
+}
+.moment-num{
+  font-family:var(--mono);font-size:10px;letter-spacing:.06em;
+  color:var(--muted);font-weight:600;
+}
+.moment-title{
+  font-family:var(--hfont);font-size:1.1rem;font-weight:700;
+  letter-spacing:-.014em;color:var(--ink);line-height:1.2;
+}
+.moment-row{
+  display:grid;grid-template-columns:115px 1fr;gap:14px;
+  padding:2px 0;
+}
+.moment-row-label{
+  font-family:var(--bfont);font-size:8.5px;letter-spacing:.18em;
+  text-transform:uppercase;font-weight:700;
+  padding-top:2px;
+}
+.moment-row-label.muted{color:var(--muted)}
+.moment-row-label.purple{color:var(--purple-deep)}
+.moment-row-label.coral{color:var(--coral-deep)}
+.moment-row-label.green{color:var(--green-deep)}
+.moment-row-label.indigo{color:var(--indigo-deep)}
+.moment-row-text{
+  font-family:var(--bfont);font-size:.76rem;line-height:1.45;
+  color:var(--graphite);font-weight:400;
+}
+.moment-row-text.italic{font-style:italic;color:var(--indigo-deep);font-weight:500}
+
+/* ── PART 3: WORKBOOK ──────────────────────────────────────── */
+.wb-page-header{
+  padding-bottom:.3in;border-bottom:3px solid var(--coral-deep);
+  margin-bottom:.32in;
+}
+.wb-page-eye{color:var(--coral-deep);margin-bottom:10px}
+.wb-page-title{
+  font-family:var(--hfont);font-size:2.4rem;font-weight:700;
+  line-height:1.02;letter-spacing:-.022em;color:var(--ink);
+}
+.wb-page-title em{font-style:italic;color:var(--coral-deep);font-weight:700}
+.wb-page-sub{
+  font-family:var(--hfont);font-style:italic;font-size:1rem;
+  line-height:1.55;color:var(--muted);font-weight:400;margin-top:.4em;
+}
+.wb-prompt{margin-bottom:.28in}
+.wb-prompt-q{
+  display:grid;grid-template-columns:auto 1fr;gap:12px;align-items:baseline;
+  margin-bottom:6px;
+}
+.wb-prompt-num{
+  font-family:var(--hfont);font-size:1.3rem;font-weight:700;
+  color:var(--coral-deep);line-height:1;letter-spacing:-.014em;
+}
+.wb-prompt-text{
+  font-family:var(--hfont);font-size:1.02rem;font-weight:700;
+  line-height:1.3;color:var(--ink);letter-spacing:-.012em;
+}
+.wb-prompt-hint{
+  font-family:var(--bfont);font-size:11px;font-style:italic;
+  color:var(--muted);font-weight:400;margin-bottom:8px;padding-left:30px;
+}
+
+.focus-area-page-eye{
+  font-family:var(--bfont);font-size:10px;letter-spacing:.18em;
+  text-transform:uppercase;font-weight:700;color:var(--indigo-deep);
+  margin-bottom:8px;
+}
+.focus-area-title{
+  font-family:var(--hfont);font-size:2.2rem;font-weight:700;
+  line-height:1.02;letter-spacing:-.022em;color:var(--ink);
+  padding-bottom:.2in;border-bottom:3px solid var(--indigo-deep);
+  margin-bottom:.32in;
+}
+.focus-area-section{margin-top:.28in}
+.focus-area-section-eye{
+  font-family:var(--bfont);font-size:10px;letter-spacing:.28em;
+  text-transform:uppercase;font-weight:700;color:var(--indigo-deep);
+  margin-bottom:8px;
+}
+.focus-area-twocol{display:grid;grid-template-columns:1fr 1fr;gap:.32in;margin-top:.18in}
+.focus-area-col-label{
+  font-family:var(--bfont);font-size:9.5px;letter-spacing:.22em;
+  text-transform:uppercase;font-weight:700;color:var(--indigo-deep);
+  margin-bottom:8px;
+}
+
+/* ── PART 4: CONVERSATION LIBRARY ───────────────────────────── */
+.cl-page-header{
+  padding-bottom:.3in;border-bottom:1px solid var(--hairline);
+  margin-bottom:.32in;
+}
+.cl-page-eye{color:var(--purple-deep);margin-bottom:10px}
+.cl-page-title{
+  font-family:var(--hfont);font-size:2.4rem;font-weight:700;
+  line-height:1.02;letter-spacing:-.022em;color:var(--ink);
+}
+.cl-page-title em{font-style:italic;color:var(--purple-deep);font-weight:700}
+
+.situation-card{
+  margin-bottom:.28in;padding-bottom:.24in;
+  border-bottom:1px dotted var(--hairline);
+}
+.situation-card:last-child{border-bottom:none}
+.situation-title{
+  font-family:var(--hfont);font-size:1.35rem;font-weight:700;
+  letter-spacing:-.016em;color:var(--ink);line-height:1.2;
+}
+.situation-blurb{
+  font-family:var(--hfont);font-style:italic;font-size:.9rem;
+  color:var(--muted);font-weight:400;margin-top:3px;margin-bottom:12px;
+}
+.situation-prompts{display:flex;flex-direction:column;gap:7px}
+.situation-prompt{
+  display:grid;grid-template-columns:auto 1fr;gap:10px;align-items:start;
+  font-family:var(--bfont);font-size:.85rem;line-height:1.55;color:var(--graphite);
+}
+.situation-prompt::before{
+  content:"•";color:var(--purple-deep);font-weight:700;font-size:1rem;line-height:1.2;
+}
+
+/* ── REFERENCE CARD (HALF-PAGE CUTOUT) ──────────────────────── */
+/* ── REFERENCE CARD: navy card on tan page bg, partner names featured ── */
+.refcard-page{
+  background:#F0E6D6;
+  position:relative;
+  padding:0 !important;
+  display:flex;flex-direction:column;
+  align-items:center;
+  height:11in;
+}
+.refcard-page > .page-inner{padding:0;width:100%}
+/* Wrapper for the cuttable card so we can position the dashed border around it */
+.refcard-cutout{
+  position:relative;
+  margin:.55in .9in .35in;
+  padding:18px;
+}
+/* Dashed rectangle border that goes ALL FOUR SIDES of the card */
+.refcard-cutout::before{
+  content:"";
+  position:absolute;inset:0;
+  border:1.5px dashed var(--graphite);
+  pointer-events:none;
+}
+/* Scissor icon clipped onto the top-left of the dashed rectangle */
+.refcard-cutout::after{
+  content:"✂";
+  position:absolute;top:-1px;left:24px;
+  background:#F0E6D6;padding:0 8px;
+  font-size:13px;color:var(--graphite);
+  line-height:14px;transform:translateY(-50%);
+}
+.refcard-cutline-label{
+  position:absolute;top:-1px;right:24px;
+  background:#F0E6D6;padding:0 8px;
+  transform:translateY(-50%);
+  font-family:var(--bfont);font-size:8px;letter-spacing:.2em;
+  text-transform:uppercase;font-weight:600;color:var(--graphite);
+  z-index:1;
+}
+/* The actual card. Navy bg + thin gold border + featured partner names. */
+.refcard-card{
+  background:linear-gradient(170deg,#1A1232 0%,#2D2250 50%,#1E3A6E 100%);
+  padding:.45in .45in .35in;
+  position:relative;
+  border:2px solid var(--gold);
+  box-shadow:0 1px 0 rgba(0,0,0,.04);
+  width:6.6in;
+  color:white;
+}
+/* Top gradient stripe stays (matches cover) */
+.refcard-card::before{
+  content:"";position:absolute;top:0;left:0;right:0;height:3px;
+  background:linear-gradient(90deg,#E8673A 0%,#9B5DE5 50%,#1B5FE8 100%);
+}
+/* Top meta row: ATTUNE RELATIONSHIPS · REFERENCE CARD on left, no edition */
+.refcard-meta{
+  display:flex;justify-content:space-between;align-items:baseline;
+  padding-bottom:.14in;border-bottom:1px solid rgba(255,255,255,.18);
+  margin-bottom:.18in;margin-top:.04in;
+}
+.refcard-eye{
+  color:var(--coral-soft);
+  font-family:var(--bfont);font-size:9.5px;letter-spacing:.28em;
+  text-transform:uppercase;font-weight:700;
+}
+/* Partner names sit where "Keep this somewhere..." used to be */
+.refcard-names{
+  font-family:var(--hfont);font-size:2.2rem;font-weight:700;
+  line-height:1;letter-spacing:-.022em;
+  color:var(--coral-soft);
+  margin:.06in 0 .04in;
+}
+.refcard-names em{
+  font-style:italic;font-weight:400;color:rgba(255,255,255,.55);
+}
+/* Together-line under the names, italic & muted */
+.refcard-together{
+  font-family:var(--hfont);font-style:italic;font-size:.95rem;
+  color:rgba(255,255,255,.6);font-weight:400;margin-bottom:.18in;
+}
+/* 3-tile layout: couple type · logo · goal */
+.refcard-tiles{
+  display:grid;grid-template-columns:1.15fr .85fr 1.1fr;
+  gap:0;
+  margin-top:.14in;
+  border-top:1px solid rgba(255,255,255,.18);
+}
+.refcard-tile{
+  padding:.42rem .7rem .55rem;
+  border-right:1px solid rgba(255,255,255,.12);
+  display:flex;flex-direction:column;gap:6px;
+  min-height:1.55in;
+}
+.refcard-tile:last-child{border-right:none}
+.refcard-tile-eye{
+  font-family:var(--bfont);font-size:9px;letter-spacing:.22em;
+  text-transform:uppercase;font-weight:700;
+  color:var(--coral-soft);
+}
+/* Couple type tile: type name big, profile id + tagline below */
+.refcard-tile-type-name{
+  font-family:var(--hfont);font-size:1.15rem;font-weight:700;font-style:italic;
+  color:white;line-height:1.15;margin-top:2px;
+}
+.refcard-tile-type-profile{
+  font-family:var(--mono);font-size:9.5px;letter-spacing:.18em;
+  text-transform:uppercase;color:rgba(255,255,255,.55);font-weight:500;
+  margin-top:6px;
+}
+.refcard-tile-type-tagline{
+  font-family:var(--bfont);font-size:.7rem;line-height:1.45;
+  color:rgba(255,255,255,.7);font-weight:400;font-style:italic;margin-top:8px;
+}
+/* Logo tile: SVG mark sits centered. Pure CSS mark using cursive A. */
+.refcard-tile-logo{
+  display:flex;align-items:center;justify-content:center;
+  padding:.2rem .2rem;
+}
+.refcard-mark{
+  display:flex;flex-direction:column;align-items:center;gap:6px;
+  text-align:center;
+}
+.refcard-mark-glyph{
+  font-family:var(--hfont);font-style:italic;font-weight:700;
+  font-size:2.4rem;line-height:1;color:var(--coral-soft);
+  letter-spacing:-.02em;
+}
+.refcard-mark-name{
+  font-family:var(--bfont);font-size:9px;letter-spacing:.32em;
+  text-transform:uppercase;font-weight:700;color:rgba(255,255,255,.7);
+}
+/* Goal-for-this-week tile retains write-in lines */
+.refcard-tile-quote{
+  font-family:var(--hfont);font-size:.82rem;line-height:1.4;
+  color:white;font-weight:400;font-style:italic;letter-spacing:-.005em;
+  margin-top:6px;
+}
+.refcard-tile-writein{
+  background:repeating-linear-gradient(
+    transparent,
+    transparent 1.35em,
+    rgba(255,255,255,.22) 1.35em,
+    rgba(255,255,255,.22) calc(1.35em + 1px)
+  );
+  height:calc(1.35em * 4);
+  margin-top:8px;
+}
+/* Below-card content sits on page bg */
+.refcard-context{
+  padding:0 .9in .35in;
+  background:transparent;
+  display:flex;flex-direction:column;
+  width:100%;
+}
+.refcard-ctx-head{
+  display:flex;justify-content:space-between;align-items:baseline;
+  padding-bottom:.14in;border-bottom:1px solid var(--graphite);
+  margin-bottom:.22in;
+}
+.refcard-ctx-eye{color:var(--graphite)}
+.refcard-ctx-num{
+  font-family:var(--mono);font-size:9px;letter-spacing:.18em;
+  color:var(--graphite);text-transform:uppercase;
+}
+.refcard-ctx-title{
+  font-family:var(--hfont);font-size:1.4rem;font-weight:700;
+  line-height:1.1;letter-spacing:-.018em;color:var(--ink);
+  margin-bottom:.45em;max-width:6in;
+}
+.refcard-ctx-title em{font-style:italic;color:var(--coral-deep);font-weight:700}
+.refcard-ctx-body{
+  font-family:var(--bfont);font-size:.82rem;line-height:1.6;
+  color:var(--graphite);font-weight:400;max-width:5.5in;margin-bottom:.9em;
+}
+.refcard-ctx-tips{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:.3in;
+  padding-top:.18in;border-top:1px solid var(--graphite);
+}
+.refcard-ctx-tip{display:flex;flex-direction:column;gap:5px}
+.refcard-ctx-tip-label{
+  font-family:var(--bfont);font-size:8.5px;letter-spacing:.22em;
+  text-transform:uppercase;font-weight:700;color:var(--coral-deep);
+}
+.refcard-ctx-tip-text{
+  font-family:var(--hfont);font-size:.8rem;line-height:1.4;
+  color:var(--ink);font-weight:700;
+}
+.refcard-mark-foot{
+  margin-top:.18in;text-align:center;
+  font-family:var(--bfont);font-size:9px;letter-spacing:.18em;
+  text-transform:uppercase;font-weight:700;color:var(--graphite);opacity:.7;
+}
+
+/* ── NOTES PAGES (8 lined pages after reference card) ───────── */
+.notes-page{background:var(--cream)}
+.notes-inner{
+  display:flex;flex-direction:column;
+  height:11in;padding:.85in .9in 1in;
+}
+.notes-head{margin-top:.4in}
+.notes-eye{color:var(--graphite)}
+.notes-rule{
+  height:1px;background:var(--ink);
+  margin:.18in 0 .25in;
+}
+.notes-area{
+  flex:1;
+  background:repeating-linear-gradient(
+    transparent,
+    transparent calc(.42in - 1px),
+    var(--hairline) calc(.42in - 1px),
+    var(--hairline) .42in
+  );
+  background-size:100% .42in;
+  background-position:0 0;
+  margin-bottom:.25in;
+}
+.notes-foot{
+  font-family:var(--hfont);font-style:italic;font-size:9.5pt;
+  color:var(--muted);text-align:center;font-weight:400;
+  letter-spacing:.005em;line-height:1.4;
+  margin-top:.18in;
+}
+
+/* PRINT */
+@media print{
+  body{padding:0;background:white}
+  .page{margin:0;box-shadow:none;page-break-after:always}
+}
+"""
+
+# ═══════════════════════════════════════════════════════════════════
+# PAGE BUILDERS
+# ═══════════════════════════════════════════════════════════════════
+
+def build_cover():
+    return f"""
+<div class="page cover">
+  <div class="cover-top-stripe"></div>
+  <div class="cover-grid">
+    <div class="cover-mark">
+      <span class="cover-mark-rule"></span>
+      <span>Attune Relationships · Volume 01</span>
+    </div>
+    <div></div>
+    <div class="cover-title-block">
+      <p class="cover-tagline">A guided record of how the two of you actually operate, where you align, where you don't, and what to do about both.</p>
+      <h1 class="cover-title">Relationship<em>Workbook.</em></h1>
+    </div>
+    <div class="cover-meta">
+      <div class="cover-meta-cell">
+        <span class="cover-meta-label">Prepared for</span>
+        <span class="cover-meta-value">{COUPLE['u']} <em>&amp;</em> {COUPLE['p']}</span>
+        <span class="cover-meta-sub">{COUPLE['together']}</span>
+      </div>
+      <div class="cover-meta-cell">
+        <span class="cover-meta-label">Couple type</span>
+        <span class="cover-meta-value">{COUPLE['couple_type']['name']}</span>
+        <span class="cover-meta-sub">Profile {COUPLE['couple_type']['id']} · §02</span>
+      </div>
+      <div class="cover-meta-cell">
+        <span class="cover-meta-label">Date</span>
+        <span class="cover-meta-value">{COUPLE['date']}</span>
+        <span class="cover-meta-sub">Built from your answers</span>
+      </div>
+    </div>
+    <div class="cover-edition" style="margin-top:.55in">
+      attune-relationships.com<span>Built from your answers</span>
+    </div>
+  </div>
+</div>
+"""
+
+def build_toc():
+    """Detailed TOC, split across 2 pages so nothing is clipped.
+    Page 1: Introduction + Part 01 (Communication + Expectations).
+    Page 2: Parts 02-05.
+    """
+    # ── Page 1: Introduction + Part 01 (full) ──
+    page1_rows = []
+    page1_rows.append("""
+    <div class="toc-section">
+      <div class="toc-row"><span class="toc-row-label">Introduction</span><span class="toc-row-page">003</span></div>
+      <div class="toc-row indent"><span class="toc-row-label italic">Your snapshot</span><span class="toc-row-page">004</span></div>
+    </div>""")
+
+    dims_with_pages = [(d, 7+i) for i, d in enumerate(DIMS)]
+    exp_start_page = 7 + len(DIMS)
+    exp_pages = [(e, exp_start_page+i) for i, e in enumerate(EXP_DOMAINS)]
+    page1_rows.append(f"""
+    <div class="toc-section">
+      <div class="toc-section-eye toc-part-eye-blue">Part 01</div>
+      <div class="toc-section-title-row">
+        <h3 class="toc-section-title">A closer look at the dimensions that matter.</h3>
+        <span class="toc-section-page">005</span>
+      </div>
+      <div class="toc-row indent"><span class="toc-row-label">Communication · 10 dimensions</span><span class="toc-row-page">007</span></div>""")
+    for dim, p in dims_with_pages:
+        page1_rows.append(f"""      <div class="toc-row indent2"><span class="toc-row-label">{DIM_META[dim]['label']}</span><span class="toc-row-page">{p:03d}</span></div>""")
+    page1_rows.append(f"""      <div class="toc-row indent"><span class="toc-row-label">Expectations · 5 domains</span><span class="toc-row-page">{exp_start_page:03d}</span></div>""")
+    for e, p in exp_pages:
+        page1_rows.append(f"""      <div class="toc-row indent2"><span class="toc-row-label">{e['label']}</span><span class="toc-row-page">{p:03d}</span></div>""")
+    page1_rows.append("    </div>")
+
+    # ── Page 2: Parts 02-05 ──
+    page2_rows = []
+    p2_start = exp_start_page + len(EXP_DOMAINS) + 1
+    page2_rows.append(f"""
+    <div class="toc-section">
+      <div class="toc-section-eye toc-part-eye-purple">Part 02</div>
+      <div class="toc-section-title-row">
+        <h3 class="toc-section-title">Working knowledge.</h3>
+        <span class="toc-section-page">{p2_start:03d}</span>
+      </div>
+      <div class="toc-row indent"><span class="toc-row-label italic">What {COUPLE['p']} should know about {COUPLE['u']}</span><span class="toc-row-page">{p2_start+1:03d}</span></div>
+      <div class="toc-row indent"><span class="toc-row-label italic">What {COUPLE['u']} should know about {COUPLE['p']}</span><span class="toc-row-page">{p2_start+3:03d}</span></div>
+    </div>""")
+
+    p3_start = p2_start + 5
+    page2_rows.append(f"""
+    <div class="toc-section">
+      <div class="toc-section-eye toc-part-eye-orange">Part 03</div>
+      <div class="toc-section-title-row">
+        <h3 class="toc-section-title">Workbook &amp; journal.</h3>
+        <span class="toc-section-page">{p3_start:03d}</span>
+      </div>
+      <div class="toc-row indent"><span class="toc-row-label">Preparing together</span><span class="toc-row-page">{p3_start+1:03d}</span></div>
+      <div class="toc-row indent"><span class="toc-row-label">Focus area 1</span><span class="toc-row-page">{p3_start+2:03d}</span></div>
+      <div class="toc-row indent"><span class="toc-row-label">Focus area 2</span><span class="toc-row-page">{p3_start+3:03d}</span></div>
+      <div class="toc-row indent"><span class="toc-row-label">Focus area 3</span><span class="toc-row-page">{p3_start+4:03d}</span></div>
+      <div class="toc-row indent"><span class="toc-row-label italic">30-day check-in</span><span class="toc-row-page">{p3_start+5:03d}</span></div>
+    </div>""")
+
+    p4_start = p3_start + 7
+    page2_rows.append(f"""
+    <div class="toc-section">
+      <div class="toc-section-eye toc-part-eye-purple">Part 04</div>
+      <div class="toc-section-title-row">
+        <h3 class="toc-section-title">Conversation library.</h3>
+        <span class="toc-section-page">{p4_start:03d}</span>
+      </div>""")
+    for i, s in enumerate(SITUATIONS):
+        page2_rows.append(f"""      <div class="toc-row indent"><span class="toc-row-label">{s['title']}</span><span class="toc-row-page">{p4_start + 1 + i//3:03d}</span></div>""")
+    page2_rows.append(f"""      <div class="toc-row indent"><span class="toc-row-label italic">A structured first conversation</span><span class="toc-row-page">{p4_start+3:03d}</span></div>""")
+    page2_rows.append("    </div>")
+
+    p5_start = p4_start + 5
+    page2_rows.append(f"""
+    <div class="toc-section">
+      <div class="toc-section-eye toc-part-eye-green">Part 05</div>
+      <div class="toc-section-title-row">
+        <h3 class="toc-section-title">Reference card.</h3>
+        <span class="toc-section-page">{p5_start:03d}</span>
+      </div>
+    </div>""")
+
+    page1 = f"""
+<div class="page">
+  <div class="page-running-head"><span>Attune Relationships · {COUPLE['u']} &amp; {COUPLE['p']}</span><span>Contents</span></div>
+  <div class="page-inner">
+    <div style="margin-top:.3in" class="toc-page-header">
+      <div class="eyebrow toc-page-eye">Contents</div>
+      <span class="toc-page-stamp">{COUPLE['date']}</span>
+    </div>
+    <h1 class="toc-page-title">What's <em>in this workbook.</em></h1>
+    {''.join(page1_rows)}
+  </div>
+  <div class="page-num">002</div>
+</div>"""
+
+    page2 = f"""
+<div class="page">
+  <div class="page-running-head"><span>Attune Relationships · {COUPLE['u']} &amp; {COUPLE['p']}</span><span>Contents · continued</span></div>
+  <div class="page-inner">
+    <div style="margin-top:.3in" class="toc-page-header">
+      <div class="eyebrow toc-page-eye">Contents · continued</div>
+      <span class="toc-page-stamp">Parts 02 to 05</span>
+    </div>
+    <h1 class="toc-page-title">The rest <em>of the workbook.</em></h1>
+    {''.join(page2_rows)}
+  </div>
+  <div class="page-num">003</div>
+</div>"""
+
+    return page1 + page2
+
+def build_intro(page_num):
+    return f"""
+<div class="page">
+  <div class="page-running-head"><span>Attune Relationships · {COUPLE['u']} &amp; {COUPLE['p']}</span><span>Welcome</span></div>
+  <div class="page-inner">
+    <div class="eyebrow" style="color:var(--coral-deep);margin-top:.4in;">A note before you begin</div>
+    <div class="intro-grid">
+      <div>
+        <h1 class="display-title intro-display">Built from your <em>specific answers.</em></h1>
+        <div class="intro-body">
+          <p class="intro-lead">Every observation, prompt, and weekly practice was selected because it reflects the particular two of you.</p>
+          <p><strong>Part One</strong> is a closer look at the dimensions where the gap between you matters most, communication, conflict, repair, the small everyday currencies of closeness.</p>
+          <p><strong>Part Two</strong> takes the same lens to the unspoken expectations about labor, money, and the future that quietly shape every long-term partnership.</p>
+          <p><strong>Parts Three through Five</strong> are the working knowledge: a guided journal, a conversation library to flip to in real moments, and a single-page reference card you can keep somewhere you'll see it.</p>
+          <p style="margin-top:1em;color:var(--graphite);font-weight:500;">Read independently before discussing. Your reflections will be most honest when you're not reading over each other's shoulders.</p>
+        </div>
+      </div>
+      <aside class="intro-aside">
+        <h3 class="intro-aside-title">A note on the scores</h3>
+        <p>Neither end of any dimension is better. The gap between your scores is the thing worth understanding.</p>
+        <p>A larger gap means more translation is required, and more to gain from explicit conversation.</p>
+      </aside>
+    </div>
+  </div>
+  <div class="page-num">{page_num:03d}</div>
+</div>
+"""
+
+def build_snapshot(page_num):
+    """Snapshot, dimensions table + expectations grid.
+    Per feedback: removed alignment column, removed gradient bg behind scales."""
+    dim_rows = []
+    for i, dim in enumerate(DIMS, 1):
+        meta = DIM_META[dim]
+        s_u, s_p = COUPLE['scores'][dim]
+        pos_u = percent_position(s_u)
+        pos_p = percent_position(s_p)
+        # connector line spans from min to max
+        line_left = min(pos_u, pos_p)
+        line_width = abs(pos_u - pos_p)
+        accent_color_var = f"var(--{meta['color']}-deep)"
+        # determine color of the connector based on alignment
+        status, gap = gap_status(s_u, s_p)
+        opacity = '.55' if status != 'aligned' else '.45'
+        dim_rows.append(f"""
+      <div class="dim-row">
+        <div>
+          <span class="dim-row-num">{i:02d}</span>
+          <span class="dim-row-label">{meta['label']}</span>
+        </div>
+        <div>
+          <div class="dim-row-poles"><span>{meta['left']}</span><span>{meta['right']}</span></div>
+          <div class="dim-row-scale">
+            <div class="dim-row-scale-track"></div>
+            <div class="dim-row-scale-tick" style="left:0%"></div>
+            <div class="dim-row-scale-tick" style="left:25%"></div>
+            <div class="dim-row-scale-tick" style="left:50%"></div>
+            <div class="dim-row-scale-tick" style="left:75%"></div>
+            <div class="dim-row-scale-tick" style="left:100%"></div>
+            <div class="dim-row-scale-line" style="left:{line_left}%;width:{line_width}%;background:{accent_color_var};opacity:{opacity}"></div>
+            <div class="dim-row-dot partner-a" style="left:{pos_u}%"></div>
+            <div class="dim-row-dot partner-b" style="left:{pos_p}%"></div>
+          </div>
+        </div>
+      </div>""")
+
+    # Expectations cards
+    exp_status_for = lambda pct: 'aligned' if pct >= 75 else ('partial' if pct >= 40 else 'gap')
+    exp_cards = []
+    for e in EXP_DOMAINS:
+        pct = COUPLE['expectations'][e['key']]
+        status_class = exp_status_for(pct)
+        # short label for card
+        short = {'household': 'Household', 'emotional': 'Emotional Labor',
+                 'money': 'Money & Career', 'life': 'Life Together',
+                 'operate': 'How We Operate'}[e['key']]
+        exp_cards.append(f"""
+      <div class="exp-card {status_class}">
+        <span class="exp-label">{short}</span>
+        <span class="exp-pct">{pct}<span class="exp-pct-suffix">%</span></span>
+        <span class="exp-status">Aligned</span>
+      </div>""")
+
+    n_notable = sum(1 for d in DIMS if gap_status(*COUPLE['scores'][d])[0] == 'notable_gap')
+
+    return f"""
+<div class="page">
+  <div class="page-running-head"><span>Attune Relationships · {COUPLE['u']} &amp; {COUPLE['p']}</span><span>Snapshot</span></div>
+  <div class="page-inner">
+    <div class="snapshot-header" style="margin-top:.18in">
+      <div>
+        <div class="eyebrow" style="color:var(--coral-deep);margin-bottom:8px">At a glance</div>
+        <h1 class="display-title snapshot-title">Where the two of you <em>actually are.</em></h1>
+      </div>
+      <div class="snapshot-stamp">
+        <span class="snapshot-stamp-row"><strong>10</strong> dimensions</span>
+        <span class="snapshot-stamp-row"><strong>5</strong> domains</span>
+        <span class="snapshot-stamp-row"><strong>{n_notable}</strong> notable gaps</span>
+      </div>
+    </div>
+
+    <div class="couple-capsule">
+      <div class="couple-capsule-mark">{COUPLE['couple_type']['id']}</div>
+      <div class="couple-capsule-text">
+        <span class="couple-capsule-eye">Your couple type</span>
+        <span class="couple-capsule-name">{COUPLE['couple_type']['name']} <em>· {COUPLE['couple_type']['subtitle']}</em></span>
+        <span class="couple-capsule-sub">{COUPLE['couple_type']['description']}</span>
+      </div>
+    </div>
+
+    <div class="snap-section-title">Communication · 10 dimensions</div>
+    <div class="dim-table">{''.join(dim_rows)}
+    </div>
+
+    <div class="snapshot-legend">
+      <span class="legend-dot legend-sarah">{COUPLE['u']}</span>
+      <span class="legend-dot legend-james">{COUPLE['p']}</span>
+      <span style="margin-left:auto;font-style:italic;font-family:var(--hfont)">Each dimension: 1 = far left pole · 5 = far right pole</span>
+    </div>
+
+    <div class="snap-section-title" style="margin-top:.2in">Expectations · 5 domains</div>
+    <div class="expectations-grid">{''.join(exp_cards)}
+    </div>
+  </div>
+  <div class="page-num">{page_num:03d}</div>
+</div>
+"""
+
+def build_part_divider(num, label, title_html, color, epigraph, epigraph_cite, page_num):
+    return f"""
+<div class="page part-divider {color}" data-num="{num:02d}">
+  <div class="part-meta">
+    <span class="part-num">Part {num:02d}</span>
+    <span class="part-of">five parts</span>
+  </div>
+  <div class="part-label">{label}</div>
+  <h1 class="part-title">{title_html}</h1>
+  <div class="part-epigraph">
+    <p class="part-epigraph-text">"{epigraph}"</p>
+    <p class="part-epigraph-cite">· {epigraph_cite}</p>
+  </div>
+  <div class="page-num">{page_num:03d}</div>
+</div>
+"""
+
+def build_dimension_page(dim_id, dim_idx, page_num):
+    """Mirror buildOneDimension: hero (numeral+title+spectrum+analysis),
+    reflection prompts (3), try this week, what we want to try, our notes.
+
+    The "What this means for your relationship" callout now renders two
+    stacked paragraphs (Option A from the v2 spec): a gap-state paragraph
+    (universal across couples) followed by a couple-type paragraph
+    (specific to this couple). Both pulled from the data layer.
+    """
+    meta = DIM_META[dim_id]
+    content = DIM_CONTENT[dim_id]
+    u, p = COUPLE['u'], COUPLE['p']
+    s_u, s_p = COUPLE['scores'][dim_id]
+    status, gap = gap_status(s_u, s_p)
+
+    # gap label for the side-meta string
+    if status == 'aligned':
+        gap_meta = ' well aligned'
+    elif status == 'some_gap':
+        gap_meta = ' some gap, worth noticing'
+    else:
+        gap_meta = ' a notable gap, worth real attention'
+
+    # Paragraph 1: gap-state blurb. Universal across couples; describes
+    # the gap mechanic itself.
+    gap_text = GAP_BLURBS[dim_id][status]
+
+    # Paragraph 2: couple-type blurb. Specific to this couple type.
+    # Source: api/_workbook-content.js, loaded via WHEN_THIS_SHOWS_UP_BY_TYPE.
+    # The production prose uses role letters ("the W", "the X"); substitute
+    # in real partner names. The first letter in the couple-type id maps
+    # to {U} (initiating partner); the second letter maps to {P}.
+    type_id = COUPLE['couple_type']['id']
+    type_blurb = WHEN_THIS_SHOWS_UP_BY_TYPE[dim_id][type_id]
+    # Same-type couples (WW, XX, ...) use a single role letter twice.
+    # Cross-type couples have two distinct letters.
+    if type_id[0] == type_id[1]:
+        # Same type: replace "the X" (where X is the shared letter) with
+        # generic partner names. Use 'one of you' / 'the other' contextually.
+        # The production same-type prose already reads naturally without
+        # role-letter substitution, so leave it untouched.
+        type_text = fill(type_blurb, u, p)
+    else:
+        # Cross-type: substitute role letters with actual names. Handle
+        # both lowercase ("the W") and sentence-initial ("The W") forms.
+        type_text = type_blurb
+        for letter, name in [(type_id[0], u), (type_id[1], p)]:
+            type_text = type_text.replace(f'the {letter}', name)
+            type_text = type_text.replace(f'The {letter}', name)
+        type_text = fill(type_text, u, p)
+
+    # 3 prompts (filled with names)
+    prompts_html = ''
+    for i, pr in enumerate(content['prompts'][:3], 1):
+        prompts_html += f"""
+        <div class="prompt-row">
+          <span class="prompt-num">{i:02d}</span>
+          <span class="prompt-text">{fill(pr, u, p)}</span>
+        </div>"""
+
+    pos_u = percent_position(s_u)
+    pos_p = percent_position(s_p)
+    connector_left = min(pos_u, pos_p)
+    connector_width = abs(pos_u - pos_p)
+
+    # Determine which marker is on left vs right for tag positioning
+    if s_u < s_p:
+        # u (Maya) on left, p (David) on right
+        left_marker = (COUPLE['u'], s_u, pos_u)
+        right_marker = (COUPLE['p'], s_p, pos_p)
+    else:
+        left_marker = (COUPLE['p'], s_p, pos_p)
+        right_marker = (COUPLE['u'], s_u, pos_u)
+
+    return f"""
+<div class="page dim-page accent-{meta['color']}">
+  <div class="page-running-head">
+    <span>Part 01 · A closer look</span>
+    <span>Dimension {dim_idx:02d} · {meta['label']}</span>
+  </div>
+  <div class="page-inner">
+    <div class="dim-header" style="margin-top:.28in">
+      <div class="dim-numeral">{dim_idx:02d}<span class="dim-numeral-of">/ 10</span></div>
+      <div class="dim-meta">
+        <div class="eyebrow dim-eyebrow">Communication · Dimension {['One','Two','Three','Four','Five','Six','Seven','Eight','Nine','Ten'][dim_idx-1]}</div>
+        <h1 class="dim-title">{meta['label'].split(' ', 1)[0]} <em>{' '.join(meta['label'].split(' ')[1:])}</em></h1>
+      </div>
+    </div>
+
+    <!-- Spectrum -->
+    <div class="spectrum">
+      <div class="spectrum-head">
+        <div class="spectrum-pole">{meta['left']}<span class="spectrum-pole-num">1.0</span></div>
+        <div class="spectrum-pole right">{meta['right']}<span class="spectrum-pole-num">5.0</span></div>
+      </div>
+      <div class="spectrum-track">
+        <div class="spectrum-line"></div>
+        <div class="spectrum-tick" style="left:0%"></div><div class="spectrum-tick-num" style="left:0%">1</div>
+        <div class="spectrum-tick" style="left:25%"></div><div class="spectrum-tick-num" style="left:25%">2</div>
+        <div class="spectrum-tick" style="left:50%"></div><div class="spectrum-tick-num" style="left:50%">3</div>
+        <div class="spectrum-tick" style="left:75%"></div><div class="spectrum-tick-num" style="left:75%">4</div>
+        <div class="spectrum-tick" style="left:100%"></div><div class="spectrum-tick-num" style="left:100%">5</div>
+        <div class="spectrum-connector" style="left:{connector_left}%;width:{connector_width}%"></div>
+        <div class="spectrum-marker is-left" style="left:{left_marker[2]}%">
+          <span class="spectrum-marker-score">{left_marker[1]:.1f}</span>
+          <span class="spectrum-marker-tag">{left_marker[0]}</span>
+          <div class="spectrum-marker-dot"></div>
+        </div>
+        <div class="spectrum-marker is-right" style="left:{right_marker[2]}%">
+          <span class="spectrum-marker-score">{right_marker[1]:.1f}</span>
+          <span class="spectrum-marker-tag">{right_marker[0]}</span>
+          <div class="spectrum-marker-dot"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- What this measures + What this means for your relationship -->
+    <div class="dim-body">
+      <div class="what-measures">
+        <div class="eyebrow what-measures-eye">What this measures</div>
+        <p>{content['measures']}</p>
+      </div>
+      <div class="dim-analysis">
+        <div class="eyebrow dim-analysis-eye">What this means for your relationship</div>
+        <p>{gap_text}</p>
+        <p style="margin-top:.45em">{type_text}</p>
+      </div>
+    </div>
+
+    <!-- Reflection prompts (3) -->
+    <div class="prompts-block">
+      <div class="eyebrow prompts-eye">Reflection prompts</div>
+      <div class="prompts-list">{prompts_html}
+      </div>
+    </div>
+
+    <!-- Try this week -->
+    <div class="try-this-week">
+      <span class="ttw-icon">★</span>
+      <div class="ttw-content">
+        <span class="ttw-eye">Try this week</span>
+        <p class="ttw-text">{fill(content['thisWeek'], u, p)}</p>
+      </div>
+    </div>
+
+    <!-- Our notes (5 lines) -->
+    <div class="writein-section">
+      <div class="writein-head">
+        <div class="eyebrow writein-eye">Our notes</div>
+      </div>
+      <div class="writein-area" style="--lines:5"></div>
+    </div>
+  </div>
+  <div class="page-num">{page_num:03d}</div>
+</div>
+"""
+
+def build_expectation_page(domain, idx, page_num):
+    """Render one of five expectation domain pages.
+
+    Visual layout matches the v1 sample (side-by-side panes, alignment
+    block, try-this-week, our-notes). Content sourcing is now keyed off
+    the v2 domain model: universal row labels per DOMAIN_ROWS, values
+    pulled from each partner's exercise responses, alignment state
+    determined by the 75/40 thresholds in alignment_state().
+    """
+    u, p = COUPLE['u'], COUPLE['p']
+    detail = COUPLE['expectations_detail'][domain['key']]
+    pct = COUPLE['expectations'][domain['key']]
+    state, state_label = alignment_state(pct)
+
+    # Render each row. The row LABEL is universal (from DOMAIN_ROWS via
+    # the data tuples). The VALUE on the right is the partner's answer.
+    items_a = ''.join(f'<div class="esbs-item"><span class="esbs-item-label">{lab}</span><span class="esbs-item-value">{val}</span></div>' for lab, val in detail['maya'])
+    items_b = ''.join(f'<div class="esbs-item"><span class="esbs-item-label">{lab}</span><span class="esbs-item-value">{val}</span></div>' for lab, val in detail['david'])
+
+    analysis_text = fill(alignment_text(domain, pct), u, p)
+
+    # Title split, italic on the second word.
+    parts = domain['label'].split(' ', 1)
+    title_word = parts[0]
+    title_rest = parts[1] if len(parts) > 1 else ''
+
+    icon = DOMAIN_ICONS.get(domain['key'], '·')
+    domain_name_words = ['One', 'Two', 'Three', 'Four', 'Five']
+
+    return f"""
+<div class="page accent-{domain['color']}">
+  <div class="page-running-head">
+    <span>Part 01 · A closer look</span>
+    <span>Expectations · Domain {idx:02d}</span>
+  </div>
+  <div class="page-inner">
+    <div class="exp-page-header" style="margin-top:.28in">
+      <div class="exp-page-icon">{icon}</div>
+      <div style="display:flex;flex-direction:column;justify-content:flex-end;padding-bottom:6px">
+        <div class="eyebrow exp-page-eye">Expectations · Domain {domain_name_words[idx-1]}</div>
+        <h1 class="exp-page-title">{title_word} <em>{title_rest}</em></h1>
+      </div>
+    </div>
+
+    <div class="exp-side-by-side">
+      <div class="esbs-pane partner-a">
+        <span class="esbs-tag">{COUPLE['u']}'s expectations</span>
+        <div class="esbs-list">{items_a}</div>
+      </div>
+      <div class="esbs-pane partner-b">
+        <span class="esbs-tag">{COUPLE['p']}'s expectations</span>
+        <div class="esbs-list">{items_b}</div>
+      </div>
+    </div>
+
+    <div class="exp-page-analysis">
+      <div class="eyebrow exp-page-analysis-eye">Where you are</div>
+      <h2 class="exp-page-analysis-title">{pct}% aligned <em>· {state_label}</em></h2>
+      <p>{analysis_text}</p>
+    </div>
+
+    <!-- Try this week -->
+    <div class="try-this-week" style="margin-top:.28in">
+      <span class="ttw-icon">★</span>
+      <div class="ttw-content">
+        <span class="ttw-eye">Try this week</span>
+        <p class="ttw-text">{fill(domain['thisWeek'], u, p)}</p>
+      </div>
+    </div>
+
+    <div class="writein-section">
+      <div class="writein-head">
+        <div class="eyebrow writein-eye">Our notes</div>
+      </div>
+      <div class="writein-area" style="--lines:4"></div>
+    </div>
+  </div>
+  <div class="page-num">{page_num:03d}</div>
+</div>
+"""
+
+def build_working_knowledge_page(page_num, subject_name, other_name, type_letter, moments_data, page_label):
+    """Working Knowledge: cross-type couple gets TWO pages per partner
+    (3 moments each) so nothing is clipped by the 11in page constraint.
+    Returns the concatenated HTML for both pages.
+    """
+    def render_card(i, m):
+        d = moments_data.get(m['key'], {})
+        return f"""
+    <div class="moment-card">
+      <div class="moment-header">
+        <span class="moment-num">No. {i:02d}</span>
+        <h3 class="moment-title">{m['title']}</h3>
+      </div>
+      <div class="moment-row">
+        <span class="moment-row-label muted">The moment</span>
+        <span class="moment-row-text">{d.get('moment', '')}</span>
+      </div>
+      <div class="moment-row">
+        <span class="moment-row-label purple">For {subject_name}</span>
+        <span class="moment-row-text">{d.get('happening', '')}</span>
+      </div>
+      <div class="moment-row">
+        <span class="moment-row-label coral">What not to do</span>
+        <span class="moment-row-text">{d.get('not', '')}</span>
+      </div>
+      <div class="moment-row">
+        <span class="moment-row-label green">What works</span>
+        <span class="moment-row-text">{d.get('works', '')}</span>
+      </div>
+      <div class="moment-row">
+        <span class="moment-row-label indigo">Phrase that lands</span>
+        <span class="moment-row-text italic">"{d.get('phrase', '')}"</span>
+      </div>
+    </div>"""
+
+    cards_first = ''.join(render_card(i, m) for i, m in enumerate(MOMENTS[:3], 1))
+    cards_second = ''.join(render_card(i, m) for i, m in enumerate(MOMENTS[3:], 4))
+
+    page1 = f"""
+<div class="page">
+  <div class="page-running-head">
+    <span>Part 02 · Working Knowledge</span>
+    <span>{page_label}</span>
+  </div>
+  <div class="page-inner">
+    <div class="wk-intro" style="margin-top:.3in">
+      <div class="eyebrow wk-eye">Working Knowledge</div>
+      <h1 class="wk-title">What {other_name} should <em>know about {subject_name}.</em></h1>
+      <p class="wk-lead">The six moments below are situations that recur in your relationship, each one with specific guidance for {other_name} on what's actually happening for {subject_name}, what to avoid, and what works.</p>
+    </div>
+    {cards_first}
+  </div>
+  <div class="page-num">{page_num:03d}</div>
+</div>"""
+
+    page2 = f"""
+<div class="page">
+  <div class="page-running-head">
+    <span>Part 02 · Working Knowledge · continued</span>
+    <span>{page_label}</span>
+  </div>
+  <div class="page-inner">
+    <div style="margin-top:.3in;margin-bottom:.18in">
+      <div class="eyebrow wk-eye">Working Knowledge · continued</div>
+      <p class="wk-lead" style="margin-top:.16in">Three more moments where {other_name} can offer {subject_name} the right kind of presence.</p>
+    </div>
+    {cards_second}
+  </div>
+  <div class="page-num">{page_num + 1:03d}</div>
+</div>"""
+
+    return page1 + page2
+
+def build_working_knowledge_same_type_page(page_num, u, p, type_letter, moments_data):
+    """Working Knowledge — SAME TYPE variant. One shared section instead of two.
+    Both partners share the wiring, so guidance is symmetric and frames the
+    dynamic between two same-type partners rather than one-direction-to-the-other.
+    Returns concatenated HTML for two pages (3 moments each) to match the
+    cross-type page-count so the rest of the workbook layout is unchanged.
+    """
+    def render_card(i, m):
+        d = moments_data.get(m['key'], {})
+        return f"""
+    <div class="moment-card">
+      <div class="moment-header">
+        <span class="moment-num">No. {i:02d}</span>
+        <h3 class="moment-title">{m['title']}</h3>
+      </div>
+      <div class="moment-row">
+        <span class="moment-row-label muted">The moment</span>
+        <span class="moment-row-text">{d.get('moment', '')}</span>
+      </div>
+      <div class="moment-row">
+        <span class="moment-row-label purple">For both of you</span>
+        <span class="moment-row-text">{d.get('happening', '')}</span>
+      </div>
+      <div class="moment-row">
+        <span class="moment-row-label coral">Where you can get stuck</span>
+        <span class="moment-row-text">{d.get('not', '')}</span>
+      </div>
+      <div class="moment-row">
+        <span class="moment-row-label green">What works</span>
+        <span class="moment-row-text">{d.get('works', '')}</span>
+      </div>
+      <div class="moment-row">
+        <span class="moment-row-label indigo">A cue either of you can use</span>
+        <span class="moment-row-text italic">"{d.get('phrase', '')}"</span>
+      </div>
+    </div>"""
+
+    cards_first = ''.join(render_card(i, m) for i, m in enumerate(MOMENTS[:3], 1))
+    cards_second = ''.join(render_card(i, m) for i, m in enumerate(MOMENTS[3:], 4))
+
+    page_label = f"How you two should approach specific situations"
+
+    page1 = f"""
+<div class="page">
+  <div class="page-running-head">
+    <span>Part 02 · Working Knowledge</span>
+    <span>{page_label}</span>
+  </div>
+  <div class="page-inner">
+    <div class="wk-intro" style="margin-top:.3in">
+      <div class="eyebrow wk-eye">Working Knowledge</div>
+      <h1 class="wk-title">How you two should <em>approach specific situations.</em></h1>
+      <p class="wk-lead">{u} and {p} share Type {type_letter}, so these moments land the same way for both of you. That's an asset and a risk. You understand each other's defaults instantly. You can also reinforce them when a different angle would help. Use these six situations as a mutual reference.</p>
+    </div>
+    {cards_first}
+  </div>
+  <div class="page-num">{page_num:03d}</div>
+</div>"""
+
+    page2 = f"""
+<div class="page">
+  <div class="page-running-head">
+    <span>Part 02 · Working Knowledge · continued</span>
+    <span>{page_label}</span>
+  </div>
+  <div class="page-inner">
+    <div style="margin-top:.3in;margin-bottom:.18in">
+      <div class="eyebrow wk-eye">Working Knowledge · continued</div>
+      <p class="wk-lead" style="margin-top:.16in">Three more situations. Same shared wiring, different shapes.</p>
+    </div>
+    {cards_second}
+  </div>
+  <div class="page-num">{page_num + 1:03d}</div>
+</div>"""
+
+    return page1 + page2
+
+def build_workbook_preparing(page_num):
+    """Part 3 page 1: Preparing together."""
+    prompts = [
+        {'q': "What's the thing you want to say but haven't said yet?",
+         'hint': 'e.g., "I\'ve been feeling overwhelmed but haven\'t named it."'},
+        {'q': "What's been sitting with you most from this workbook?",
+         'hint': 'e.g., "I didn\'t realize how differently we handle stress."'},
+        {'q': "If one thing changed in how you two talk, what would you want it to be?",
+         'hint': 'e.g., "I want to stop defaulting to \'fine\' when I\'m not."'},
+    ]
+    prompts_html = ''
+    for i, p in enumerate(prompts, 1):
+        prompts_html += f"""
+    <div class="wb-prompt">
+      <div class="wb-prompt-q">
+        <span class="wb-prompt-num">{i}.</span>
+        <span class="wb-prompt-text">{p['q']}</span>
+      </div>
+      <p class="wb-prompt-hint">{p['hint']}</p>
+      <div class="writein-area" style="--lines:5"></div>
+    </div>"""
+
+    return f"""
+<div class="page">
+  <div class="page-running-head">
+    <span>Part 03 · Workbook</span>
+    <span>Preparing together</span>
+  </div>
+  <div class="page-inner">
+    <div class="wb-page-header" style="margin-top:.32in">
+      <div class="eyebrow wb-page-eye">Workbook · Page 01</div>
+      <h1 class="wb-page-title">Preparing <em>together.</em></h1>
+      <p class="wb-page-sub">A few questions to discuss and answer together before you pick what to focus on. No right answers. Write what comes up.</p>
+    </div>
+    {prompts_html}
+  </div>
+  <div class="page-num">{page_num:03d}</div>
+</div>
+"""
+
+def build_focus_area_page(num, page_num):
+    """Part 3 pages 2-4: focus areas."""
+    return f"""
+<div class="page">
+  <div class="page-running-head">
+    <span>Part 03 · Workbook</span>
+    <span>Focus area {num}</span>
+  </div>
+  <div class="page-inner">
+    <div style="margin-top:.32in">
+      <div class="focus-area-page-eye">Focus area {num}</div>
+      <h1 class="focus-area-title">What we're focusing on.</h1>
+    </div>
+
+    <div class="focus-area-section">
+      <div class="focus-area-section-eye">The dimension, expectation area, or pattern you want to work on</div>
+      <div class="writein-area" style="--lines:2"></div>
+    </div>
+
+    <div class="focus-area-section">
+      <div class="focus-area-section-eye">Why this matters to us</div>
+      <div class="writein-area" style="--lines:4"></div>
+    </div>
+
+    <div class="focus-area-section">
+      <div class="focus-area-section-eye">What we'll each try</div>
+      <div class="focus-area-twocol">
+        <div>
+          <div class="focus-area-col-label" style="color:var(--coral-deep)">What {COUPLE['u']} will do</div>
+          <div class="writein-area" style="--lines:5"></div>
+        </div>
+        <div>
+          <div class="focus-area-col-label" style="color:var(--indigo-deep)">What {COUPLE['p']} will do</div>
+          <div class="writein-area" style="--lines:5"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="focus-area-section">
+      <div class="focus-area-section-eye">Timeline and check-in</div>
+      <p class="wb-prompt-hint" style="padding-left:0;margin-bottom:8px">e.g., "small check-in every Sunday; revisit the whole thing in 30 days."</p>
+      <div class="writein-area" style="--lines:5"></div>
+    </div>
+  </div>
+  <div class="page-num">{page_num:03d}</div>
+</div>
+"""
+
+def build_30day_checkin(page_num):
+    prompts = [
+        "What changed (if anything) over the last 30 days?",
+        "Did the focus areas we wrote down actually get attention? What got in the way?",
+        "One small thing to try differently in the next 30 days.",
+    ]
+    prompts_html = ''
+    for i, q in enumerate(prompts, 1):
+        prompts_html += f"""
+    <div class="wb-prompt">
+      <div class="wb-prompt-q">
+        <span class="wb-prompt-num">{i}.</span>
+        <span class="wb-prompt-text">{q}</span>
+      </div>
+      <div class="writein-area" style="--lines:6"></div>
+    </div>"""
+    return f"""
+<div class="page">
+  <div class="page-running-head"><span>Part 03 · Workbook</span><span>30-day check-in</span></div>
+  <div class="page-inner">
+    <div class="wb-page-header" style="margin-top:.32in">
+      <div class="eyebrow wb-page-eye">30-day check-in</div>
+      <h1 class="wb-page-title">Come back <em>in a month.</em></h1>
+      <p class="wb-page-sub">Answer honestly. Write in the workbook, that's what it's for.</p>
+    </div>{prompts_html}
+  </div>
+  <div class="page-num">{page_num:03d}</div>
+</div>
+"""
+
+def build_conversation_library_page(page_num, situations_subset, is_first=True):
+    cards = []
+    for s in situations_subset:
+        prompts = SITUATION_PROMPTS.get(s['key'], [])
+        prompts_html = ''.join(f'<div class="situation-prompt">{pr}</div>' for pr in prompts)
+        cards.append(f"""
+    <div class="situation-card">
+      <h3 class="situation-title">{s['title']}</h3>
+      <p class="situation-blurb">{s['blurb']}</p>
+      <div class="situation-prompts">{prompts_html}</div>
+    </div>""")
+
+    intro_html = ''
+    if is_first:
+        intro_html = """
+    <div class="cl-page-header" style="margin-top:.32in">
+      <div class="eyebrow cl-page-eye">Part 04 · Conversation Library</div>
+      <h1 class="cl-page-title">Words for the situations <em>you'll actually find yourselves in.</em></h1>
+    </div>"""
+
+    return f"""
+<div class="page">
+  <div class="page-running-head"><span>Part 04 · Conversation Library</span><span>Situations</span></div>
+  <div class="page-inner">{intro_html}{''.join(cards)}
+  </div>
+  <div class="page-num">{page_num:03d}</div>
+</div>
+"""
+
+def build_first_conversation_guide(page_num):
+    phases = [
+        {'num': 1, 'title': 'Opening', 'time': '10 min', 'color': 'coral', 'body': 'Each person answers these two questions out loud. Don\'t respond to each other yet, just listen.', 'prompts': ['What\'s one thing you were curious or nervous about going into these exercises?', f'What do you most want to understand better about {COUPLE["p"]} after doing this?']},
+        {'num': 2, 'title': 'What Resonated', 'time': '15 min', 'color': 'indigo', 'body': 'Look at your Snapshot together. Each person takes a turn:', 'prompts': ['What result surprised you most?', 'What result felt most accurate?', 'Is there anything you disagree with or want to push back on?']},
+        {'num': 3, 'title': 'Your Focus Areas', 'time': '20 min', 'color': 'green', 'body': 'Together, pick one to three things you want to focus on over the next month.', 'prompts': ['Say it out loud, name what you want to change and why.', 'Each person describes a recent moment where this showed up.', 'Write your commitment in the workbook. Small and specific beats ambitious and vague.']},
+        {'num': 4, 'title': "What's Going Well", 'time': '10 min', 'color': 'purple', 'body': "It's easy to spend all the time on gaps. This phase is deliberate.", 'prompts': ['Name three specific things that have worked well, things you want to protect.', 'Each person names something the other does that they haven\'t said thank you for specifically.', 'Name one thing about how your partner is wired that you genuinely appreciate.']},
+    ]
+    phases_html = ''
+    for ph in phases:
+        prompts_html = ''.join(f'<div class="situation-prompt">{p}</div>' for p in ph['prompts'])
+        phases_html += f"""
+    <div class="situation-card">
+      <h3 class="situation-title">Phase {ph['num']}, {ph['title']}</h3>
+      <p class="situation-blurb">{ph['time']} · {ph['body']}</p>
+      <div class="situation-prompts">{prompts_html}</div>
+    </div>"""
+    return f"""
+<div class="page">
+  <div class="page-running-head"><span>Part 04 · Conversation Library</span><span>A structured first conversation</span></div>
+  <div class="page-inner">
+    <div class="cl-page-header" style="margin-top:.32in">
+      <div class="eyebrow cl-page-eye">A structured first conversation</div>
+      <h1 class="cl-page-title">A guided <em>60-minute conversation.</em></h1>
+    </div>{phases_html}
+  </div>
+  <div class="page-num">{page_num:03d}</div>
+</div>
+"""
+
+def build_notes_page(page_num, idx, total):
+    """Lined notes page. Eight of these append after the reference card.
+
+    Each page has a light eyebrow ("Notes · 01 of 08"), a thin top rule,
+    a tall block of evenly spaced ruled lines, and a small italic footer
+    line directing the reader to attune-relationships.com/in-practice
+    for ongoing material.
+    """
+    return f"""
+<div class="page notes-page">
+  <div class="page-running-head">
+    <span>Notes</span>
+    <span>{idx:02d} of {total:02d}</span>
+  </div>
+  <div class="page-inner notes-inner">
+    <div class="notes-head">
+      <div class="eyebrow notes-eye">Notes</div>
+    </div>
+    <div class="notes-rule"></div>
+    <div class="notes-area"></div>
+    <p class="notes-foot">Learn more through Attune In Practice at attune-relationships.com/in-practice</p>
+  </div>
+  <div class="page-num">{page_num:03d}</div>
+</div>
+"""
+
+
+def build_reference_card(page_num):
+    """Reference card, navy card on tan page bg.
+
+    Layout per Ellie's v2 spec:
+      - Navy gradient bg with thin gold border
+      - Partner names featured prominently in coral at top of card
+      - Three tiles: couple type (left) | Attune mark (center) | Goal for this week (right)
+      - "Keep this somewhere you'll see it" headline lives in the page-context
+        section below the card, not inside the card itself
+    """
+    return f"""
+<div class="page refcard-page">
+  <!-- Cutout wrapper: dashed border on 4 sides goes around the card -->
+  <div class="refcard-cutout">
+    <span class="refcard-cutline-label">· cut along this line ·</span>
+    <div class="refcard-card">
+      <div class="refcard-meta">
+        <div class="refcard-eye">Attune Relationships · Reference Card</div>
+      </div>
+
+      <h1 class="refcard-names">{COUPLE['u']} <em>&amp;</em> {COUPLE['p']}</h1>
+      <p class="refcard-together">{COUPLE['together']}</p>
+
+      <div class="refcard-tiles">
+        <div class="refcard-tile">
+          <span class="refcard-tile-eye">Couple type</span>
+          <h3 class="refcard-tile-type-name">{COUPLE['couple_type']['name']}</h3>
+          <p class="refcard-tile-type-profile">Profile {COUPLE['couple_type']['id']} · §02</p>
+          <p class="refcard-tile-type-tagline">{COUPLE['couple_type']['tagline']}</p>
+        </div>
+        <div class="refcard-tile refcard-tile-logo">
+          <div class="refcard-mark">
+            <span class="refcard-mark-glyph">A.</span>
+            <span class="refcard-mark-name">Attune</span>
+          </div>
+        </div>
+        <div class="refcard-tile">
+          <span class="refcard-tile-eye">Goal for this week</span>
+          <p class="refcard-tile-quote">"{COUPLE['couple_type']['phrase_that_lands']}"</p>
+          <div class="refcard-tile-writein"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Context info sits on the page bg (tan) below the card -->
+  <div class="refcard-context">
+    <div class="refcard-ctx-head">
+      <div class="eyebrow refcard-ctx-eye">How to use the card</div>
+      <span class="refcard-ctx-num">Page {page_num:03d}</span>
+    </div>
+    <h2 class="refcard-ctx-title">Keep this <em>somewhere you'll see it.</em></h2>
+    <p class="refcard-ctx-body">The reference card is built from your couple type. Cut along the dashed line above and write your weekly goal on the right tile. Replace it each week, or carry the same one forward.</p>
+    <div class="refcard-ctx-tips">
+      <div class="refcard-ctx-tip">
+        <span class="refcard-ctx-tip-label">Where to keep it</span>
+        <span class="refcard-ctx-tip-text">Inside the medicine cabinet, on the fridge, in a wallet, anywhere you pass through routinely.</span>
+      </div>
+      <div class="refcard-ctx-tip">
+        <span class="refcard-ctx-tip-label">When to look</span>
+        <span class="refcard-ctx-tip-text">Before a hard conversation. After a friction moment. When the week has felt off and you're not sure why.</span>
+      </div>
+      <div class="refcard-ctx-tip">
+        <span class="refcard-ctx-tip-label">When to update</span>
+        <span class="refcard-ctx-tip-text">At your six-month check-in, you'll get a fresh card with what's shifted. Reorder anytime at attune-relationships.com.</span>
+      </div>
+    </div>
+    <p class="refcard-mark-foot">attune-relationships.com</p>
+  </div>
+</div>
+"""
+
+# ═══════════════════════════════════════════════════════════════════
+# COMPOSE FULL WORKBOOK
+# ═══════════════════════════════════════════════════════════════════
+
+def build_full_workbook(same_type=False):
+    pages = []
+    pn = 1
+
+    # 1. Cover (no page number visible)
+    pages.append(build_cover())
+    pn = 2
+
+    # 2. TOC (page 002)
+    pages.append(build_toc())
+    pn = 3
+
+    # 3. Intro (003)
+    pages.append(build_intro(pn))
+    pn += 1
+
+    # 4. Snapshot (004)
+    pages.append(build_snapshot(pn))
+    pn += 1
+
+    # 5. Part 1 cover (005)
+    pages.append(build_part_divider(
+        1, 'A closer look',
+        'The dimensions <em>that quietly shape</em> the way you operate.',
+        'blue',
+        "Most friction in long relationships isn't incompatibility. It's two people running on different blueprints, neither of which has been said out loud.",
+        'From the Attune methodology · §03',
+        pn,
+    ))
+    pn += 1
+
+    # 6. Communication section header page (006) - light intro
+    pages.append(f"""
+<div class="page">
+  <div class="page-running-head"><span>Part 01 · A closer look</span><span>Communication</span></div>
+  <div class="page-inner">
+    <div style="margin-top:1.5in;">
+      <div class="eyebrow" style="color:var(--indigo-deep);margin-bottom:14px">Section A · Communication</div>
+      <h1 class="display-title" style="font-size:3.4rem;letter-spacing:-.026em;line-height:1">Ten dimensions of <em style="color:var(--indigo-deep)">how you talk to each other.</em></h1>
+      <p style="font-family:var(--hfont);font-style:italic;font-size:1.1rem;line-height:1.55;color:var(--graphite);margin-top:1.2rem;max-width:5.5in">Each dimension is a slice of how {COUPLE['u']} and {COUPLE['p']} actually communicate, energy, expression, conflict, repair, the small everyday currencies. Where you align, the answers come without translation. Where you don't, the gap is the conversation.</p>
+    </div>
+    <div style="margin-top:1in;padding-top:.32in;border-top:1px solid var(--hairline);max-width:5.5in">
+      <p style="font-family:var(--bfont);font-size:.86rem;line-height:1.7;color:var(--slate);">For each dimension, you'll see the spectrum, where each of you sits, what the gap means, three reflection prompts, a small experiment for the week, and space to write what you want to try together.</p>
+    </div>
+  </div>
+  <div class="page-num">{pn:03d}</div>
+</div>
+""")
+    pn += 1
+
+    # 7. Communication dimensions (10 pages)
+    for i, dim in enumerate(DIMS, 1):
+        pages.append(build_dimension_page(dim, i, pn))
+        pn += 1
+
+    # 8. Expectations section header page
+    pages.append(f"""
+<div class="page">
+  <div class="page-running-head"><span>Part 01 · A closer look</span><span>Expectations</span></div>
+  <div class="page-inner">
+    <div style="margin-top:1.5in;">
+      <div class="eyebrow" style="color:var(--gold-deep);margin-bottom:14px">Section B · Expectations</div>
+      <h1 class="display-title" style="font-size:3.4rem;letter-spacing:-.026em;line-height:1">Five domains of <em style="color:var(--gold-deep)">what you each assume.</em></h1>
+      <p style="font-family:var(--hfont);font-style:italic;font-size:1.1rem;line-height:1.55;color:var(--graphite);margin-top:1.2rem;max-width:5.5in">Most friction in long-term partnerships isn't about communication style. It's about quietly mismatched assumptions, who's leading what, how money should be held, what the next five years look like. The exercise surfaced what each of you actually expects. The next five pages put those expectations side by side.</p>
+    </div>
+  </div>
+  <div class="page-num">{pn:03d}</div>
+</div>
+""")
+    pn += 1
+
+    # 9. Expectations pages (7 pages)
+    for i, dom in enumerate(EXP_DOMAINS, 1):
+        pages.append(build_expectation_page(dom, i, pn))
+        pn += 1
+
+    # 10. Part 2 cover
+    pages.append(build_part_divider(
+        2, 'Working knowledge',
+        'Six moments. <em>Specific language</em> for each.',
+        'purple',
+        "Knowing another person isn't a single insight. It's a thousand small moments where you didn't have to ask, because you already knew.",
+        'From the Attune methodology · §05',
+        pn,
+    ))
+    pn += 1
+
+    # 11. Working Knowledge — same-type or cross-type variant
+    if same_type:
+        # Same-type (WW): one shared section. Symmetric content, no subject/responder.
+        pages.append(build_working_knowledge_same_type_page(
+            pn,
+            u=COUPLE['u'], p=COUPLE['p'],
+            type_letter='W', moments_data=MOMENTS_SHARED_W,
+        ))
+        pn += 1
+    else:
+        # Cross-type (WX): two pages, one per partner
+        pages.append(build_working_knowledge_page(
+            pn,
+            subject_name=COUPLE['u'], other_name=COUPLE['p'],
+            type_letter='W', moments_data=MOMENTS_FOR_W_MAYA,
+            page_label=f"What {COUPLE['p']} should know about {COUPLE['u']}",
+        ))
+        pn += 1
+        pages.append(build_working_knowledge_page(
+            pn,
+            subject_name=COUPLE['p'], other_name=COUPLE['u'],
+            type_letter='X', moments_data=MOMENTS_FOR_X_DAVID,
+            page_label=f"What {COUPLE['u']} should know about {COUPLE['p']}",
+        ))
+        pn += 1
+
+    # 12. Part 3 cover
+    pages.append(build_part_divider(
+        3, 'Workbook',
+        'Your <em>focus areas.</em> Your words. Your pace.',
+        'orange',
+        "Small and specific beats ambitious and vague. The thing you'll actually do is the thing you'll write down.",
+        'From the Attune methodology · §07',
+        pn,
+    ))
+    pn += 1
+
+    # 13. Workbook — Preparing together
+    pages.append(build_workbook_preparing(pn))
+    pn += 1
+
+    # 14. Focus areas 1, 2, 3
+    for i in range(1, 4):
+        pages.append(build_focus_area_page(i, pn))
+        pn += 1
+
+    # 15. 30-day check-in
+    pages.append(build_30day_checkin(pn))
+    pn += 1
+
+    # 16. Part 4 cover
+    pages.append(build_part_divider(
+        4, 'Conversation library',
+        'Words for the situations <em>you\'ll actually find yourselves in.</em>',
+        'purple',
+        "The right question, asked at the right time, does more than a hundred well-meaning statements.",
+        'From the Attune methodology · §08',
+        pn,
+    ))
+    pn += 1
+
+    # 17. Conversation library — 5 situations split across 2 pages
+    pages.append(build_conversation_library_page(pn, SITUATIONS[:3], is_first=True))
+    pn += 1
+    pages.append(build_conversation_library_page(pn, SITUATIONS[3:], is_first=False))
+    pn += 1
+
+    # 18. A structured first conversation
+    pages.append(build_first_conversation_guide(pn))
+    pn += 1
+
+    # 19. Part 5 cover
+    pages.append(build_part_divider(
+        5, 'Reference card',
+        'A <em>half-page summary.</em> Keep it somewhere you\'ll see it.',
+        'green',
+        "When something's hard and you don't have time to flip through the workbook, this is the page.",
+        'Workbook · Part 05',
+        pn,
+    ))
+    pn += 1
+
+    # 20. Reference card (half-page cutout)
+    pages.append(build_reference_card(pn))
+    pn += 1
+
+    # Compose final HTML
+    html = f"""<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Attune Workbook, {COUPLE['u']} &amp; {COUPLE['p']}</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400;1,700&family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>{CSS}
+.sample-banner{{
+  position:fixed;top:0;left:0;right:0;
+  background:var(--ink);color:white;
+  padding:10px 20px;
+  font-family:var(--bfont);font-size:11px;letter-spacing:.18em;
+  text-transform:uppercase;font-weight:600;
+  z-index:1000;display:flex;justify-content:space-between;align-items:center;
+  box-shadow:0 2px 16px rgba(0,0,0,.15);
+}}
+.sample-banner span:last-child{{color:rgba(255,255,255,.55);font-size:10px}}
+body.has-banner{{padding-top:96px}}
+@media print{{.sample-banner{{display:none}}body.has-banner{{padding-top:0}}}}
+</style>
+</head>
+<body class="has-banner">
+
+<div class="sample-banner">
+  <span>Attune Workbook · Full Sample · {COUPLE['u']} &amp; {COUPLE['p']}</span>
+  <span>Demo data · Letter trim · {len(pages)} pages</span>
+</div>
+
+{''.join(pages)}
+
+</body>
+</html>
+"""
+    return html
+
+# ═══════════════════════════════════════════════════════════════════
+# MAIN
+# ═══════════════════════════════════════════════════════════════════
+
+if __name__ == '__main__':
+    # Cross-type sample (Maya W + David X)
+    out = Path('/mnt/user-data/outputs/attune_workbook_sample.html')
+    html = build_full_workbook(same_type=False)
+    out.write_text(html)
+    print(f'Wrote {out} ({len(html):,} chars)')
+
+    # Same-type sample (Maya + David both pretending to be W, for visual review of new Working Knowledge variant)
+    out2 = Path('/mnt/user-data/outputs/attune_workbook_sample_same_type.html')
+    html2 = build_full_workbook(same_type=True)
+    out2.write_text(html2)
+    print(f'Wrote {out2} ({len(html2):,} chars)')
