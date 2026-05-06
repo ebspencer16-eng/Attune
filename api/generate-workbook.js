@@ -14,7 +14,7 @@ import {
   Header, Footer, PageNumber, TableOfContents, StyleLevel, HeightRule,
   TabStopType, TabStopPosition, LeaderType, Tab, VerticalAlign,
 } from 'docx';
-import { DIM_META, DIM_CONTENT, EXP_DOMAINS, DIMS, WHEN_THIS_SHOWS_UP } from './_workbook-content.js';
+import { DIM_META, DIM_CONTENT, EXP_DOMAINS, DIMS, WHEN_THIS_SHOWS_UP, GAP_BLURBS, DOMAIN_ROWS, alignmentState, alignmentText } from './_workbook-content.js';
 
 export const config = { runtime: 'nodejs' };
 
@@ -471,17 +471,15 @@ function answerLabel(rawValue, userName, partnerName) {
 }
 
 function gapLabel(gap) {
-  if (gap < 0.8) return 'Closely matched';
-  if (gap < 1.5) return 'Minor difference';
-  if (gap < 2.5) return 'Worth exploring';
-  return 'Significant gap';
+  if (gap < 0.8) return 'Aligned';
+  if (gap < 1.5) return 'Some gap';
+  return 'Notable gap';
 }
 
 function gapColour(gap) {
   if (gap < 0.8) return GREEN;
-  if (gap < 1.5) return BLUE;
-  if (gap < 2.5) return ORANGE;
-  return 'E53E3E';
+  if (gap < 1.5) return MUTED;
+  return ORANGE;
 }
 
 // Score bar using Unicode blocks — 5 segments
@@ -898,7 +896,7 @@ function buildSnapshot(u, p, scores, partnerScores, coupleType, expGaps) {
 // status badge. Right side has two stacked score bars — one per partner —
 // using the scoreBarRow infrastructure. Replaces the previous data-table +
 // plain-text-bar combo, which read like a word-doc form.
-function buildDimensionHero(meta, u, p, score1, score2, accentColor, gapAnalysisText) {
+function buildDimensionHero(meta, u, p, score1, score2, accentColor, gapBlurb, typeBlurb) {
   const gap = Math.abs(score1 - score2);
   const color = accentColor || meta.color || ORANGE;
   const gColor = gapColour(gap);
@@ -1014,15 +1012,18 @@ function buildDimensionHero(meta, u, p, score1, score2, accentColor, gapAnalysis
           ...spectrumBar(u, score1, ORANGE),
           ...spectrumBar(p, score2, BLUE),
         ] }),
-      // RIGHT: column title + analysis prose, top-aligned. Italic grey
-      // body — italic returns so the analysis reads as interpretive text
-      // distinct from the sections below.
+      // RIGHT: column title + analysis prose, top-aligned. Two stacked
+      // italic paragraphs: gap blurb (universal, varies by gap state) above
+      // the type blurb (couple-type-specific). Italic grey body so the
+      // analysis reads as interpretive text distinct from the sections below.
       new TableCell({ borders: noBrds, width: { size: RIGHT_W, type: WidthType.DXA },
         margins: { top: 0, bottom: 0, left: 240, right: 0 },
         children: [
           rightTitle,
+          new Paragraph({ spacing: { after: 100, line: 340, lineRule: 'atLeast' },
+            children: [run(gapBlurb || '', { size: 22, italics: true, color: MUTED })] }),
           new Paragraph({ spacing: { after: 0, line: 340, lineRule: 'atLeast' },
-            children: [run(gapAnalysisText || '', { size: 22, italics: true, color: MUTED })] }),
+            children: [run(typeBlurb || '', { size: 22, italics: true, color: MUTED })] }),
         ] }),
     ]})],
   });
@@ -1037,17 +1038,19 @@ function buildOneDimension(dim, u, p, score1, score2, coupleType) {
 
   const thisWeek = fill(content.thisWeek, u, p);
 
-  // Main analysis text — couple-type-specific prose keyed to the dim
-  // and the couple's type id. This renders in the hero's right column
-  // as "What this means for your relationship." Falls back to WW if
-  // the specific type's entry hasn't been written yet.
-  // (Gap pages only render for gap >= 1.5, so we don't need the close
-  // text branch anymore — closeText remains in _workbook-content.js for
-  // reference but is no longer rendered.)
+  // Two-paragraph callout in the hero's right column:
+  // - gap blurb (universal, varies by gap state — aligned / some_gap / notable_gap)
+  // - type blurb (couple-type-specific, falls back to WW if the specific
+  //   type's entry hasn't been written yet)
+  const gap = Math.abs(score1 - score2);
+  const gapState = gap < 0.8 ? 'aligned' : gap < 1.5 ? 'some_gap' : 'notable_gap';
+  const gapBlurbRaw = GAP_BLURBS[dim]?.[gapState] || '';
+  const gapBlurb = fill(personalizeTypeRefs(gapBlurbRaw, coupleType), u, p);
+
   const ctId = coupleType?.id || 'WW';
   const whenLookup = WHEN_THIS_SHOWS_UP[dim] || {};
-  const rawMainText = whenLookup[ctId] || whenLookup.WW || '';
-  const mainText = fill(personalizeTypeRefs(rawMainText, coupleType), u, p);
+  const rawTypeText = whenLookup[ctId] || whenLookup.WW || '';
+  const typeBlurb = fill(personalizeTypeRefs(rawTypeText, coupleType), u, p);
 
   // Standard section header — 18pt bold uppercase (was 15pt), tight
   // (not tracked), tighter spacing between header and its content.
@@ -1121,7 +1124,7 @@ function buildOneDimension(dim, u, p, score1, score2, coupleType) {
   const result = [pb()];
 
   // 1. Hero: title + gap eyebrow + two-column (spectrum / analysis)
-  result.push(...buildDimensionHero(meta, u, p, score1, score2, color, mainText));
+  result.push(...buildDimensionHero(meta, u, p, score1, score2, color, gapBlurb, typeBlurb));
 
   // 2. Thin horizontal rule separating hero from practical help.
   //    Tight `before` so the rule sits close under the hero; reflection
@@ -1214,12 +1217,10 @@ function categoryHeader(label, color) {
 // NOT dedicate a full page to couple type data (that lives in the
 // Reference Card now).
 function buildPartOneIntro(u, p, coupleType, domainsToShow) {
-  const gapCount = (domainsToShow || []).reduce((n, d) => n + (d.dims?.length || 0), 0);
+  const totalDims = (domainsToShow || []).reduce((n, d) => n + (d.dims?.length || 0), 0);
   const color = coupleType ? (coupleType.color || '#E8673A').replace('#', '') : BLUE;
 
-  const dimsLine = gapCount > 0
-    ? `The next pages walk through the ${gapCount} communication dimension${gapCount === 1 ? '' : 's'} where ${u} and ${p}'s answers diverged, followed by the expectations where you're not yet aligned.`
-    : `${u} and ${p} are aligned across every communication dimension. The rest of this part covers the expectations where you're still working out the picture.`;
+  const dimsLine = `The next pages walk through ${totalDims || 10} communication dimensions, one per page. Where ${u} and ${p}'s answers align, the gap is small. Where they diverge, the gap is the conversation.`;
 
   return [
     pb(),
@@ -1234,133 +1235,297 @@ function buildPartOneIntro(u, p, coupleType, domainsToShow) {
       border: { bottom: { style: BorderStyle.SINGLE, size: 16, color, space: 4 } },
       children: [new TextRun('')] }),
 
-    // Framing paragraphs — what this section is and isn't
+    // Framing paragraphs
     para(
-      `This section is built specifically for you. Each page focuses on one place where your alignment showed a meaningful gap, and gives you what to do about it — what the pattern looks like, questions to sit with, one thing to try this week, and space to decide what you actually want to change.`,
+      `This section is built specifically for you. Each page covers one dimension of how you communicate. You'll see the spectrum, where each of you sits, what the gap means, three reflection prompts, and one thing to try this week.`,
       { size: 20, color: INK, after: 200 }),
     para(dimsLine, { size: 20, color: INK, after: 240 }),
 
     // Soft card with "how to use this section"
     accentBox('How to use this section',
-      `Read each page in order or skip to the ones that feel most alive. You don't have to act on every one. The page-level commitment space is small by design — the bigger workbook lives in Part 3, where you'll decide what to focus on overall.`,
+      `Read each page in order or skip to the ones that feel most alive. You don't have to act on every one. The page-level commitment space is small by design. The bigger workbook lives in Part 3, where you'll decide what to focus on overall.`,
       'FBF8F2', color),
   ];
 }
 
 function buildInsights(u, p, scores, partnerScores, coupleType) {
-  // Compute per-dimension gaps. Part 1 only covers dimensions where the gap
-  // is meaningful — aligned dimensions don't need guidance, and including
-  // them would dilute the focus.
-  const GAP_THRESHOLD = 1.5;
-  const gapsByDim = {};
-  DIMS.forEach(d => {
-    gapsByDim[d] = Math.abs((scores[d] || 3) - (partnerScores[d] || 3));
-  });
-
-  const domainsToShow = DOMAIN_ORDER
-    .map(domain => ({ ...domain, dims: domain.dims.filter(d => gapsByDim[d] >= GAP_THRESHOLD) }))
-    .filter(domain => domain.dims.length > 0);
+  // Phase 3 model: every workbook renders all 10 dimension pages, regardless
+  // of gap size. The two-paragraph callout (gap blurb + type blurb) varies
+  // by gap state, so aligned dimensions still produce useful pages.
+  const domainsToShow = DOMAIN_ORDER;
 
   const result = [];
 
   // Part 1 intro page — practical framing for what's coming.
   result.push(...buildPartOneIntro(u, p, coupleType, domainsToShow));
 
-  // If no comms gaps at all, skip to expectations directly.
-  if (domainsToShow.length === 0 && coupleType) {
-    result.push(pb());
-    result.push(accentBox(
-      'A rare finding',
-      `${u} and ${p}'s answers are aligned across every communication dimension. The expectations review below is where to focus.`,
-      'F0FDF9', GREEN));
-    return result;
-  }
-
   // Dim pages flow continuously. No category grouping — every dim gets
   // its own single page (buildOneDimension starts with a pagebreak).
-  if (domainsToShow.length > 0) {
-    domainsToShow.forEach(domain => {
-      domain.dims.forEach(dim => {
-        result.push(...buildOneDimension(dim, u, p, scores[dim] || 3, partnerScores[dim] || 3, coupleType));
-      });
+  domainsToShow.forEach(domain => {
+    domain.dims.forEach(dim => {
+      result.push(...buildOneDimension(dim, u, p, scores[dim] || 3, partnerScores[dim] || 3, coupleType));
     });
-  }
+  });
 
   return result;
 }
 
-function buildExpDomains(u, p, expGaps) {
-  const byKey = Object.fromEntries(expGaps.map(eg => [eg.key, eg]));
-  const categoriesToShow = EXP_CATEGORIES.map(cat => {
-    const unaligned = cat.domainKeys.map(k => byKey[k]).filter(Boolean).filter(eg => !eg.aligned);
-    const aligned   = cat.domainKeys.map(k => byKey[k]).filter(Boolean).filter(eg => eg.aligned);
-    return { ...cat, unaligned, aligned };
-  }).filter(cat => cat.unaligned.length > 0);
+// Domain accent color (hex, no leading #) keyed off the color-name in
+// EXP_DOMAINS. Add a new entry here if a new domain key gets added.
+const DOMAIN_COLOR_MAP = {
+  gold:   'C17F47',
+  coral:  ORANGE,
+  plum:   '6B2C5A',
+  indigo: BLUE,
+  green:  GREEN,
+  purple: PURPLE,
+};
 
-  if (categoriesToShow.length === 0) return [];
+// Domain icon glyph (rendered in the page header). Match the python
+// reference build_workbook.py DOMAIN_ICONS.
+const DOMAIN_ICONS = {
+  household:       '\u2302',  // ⌂
+  emotional:       '\u221E',  // ∞
+  extended_family: '\u2766',  // ❦
+  money:           '$',
+  life:            '\u2740',  // ❀
+  operate:         '\u25D0',  // ◐
+};
+
+// Build the row data for one domain. Returns [{ label, userValue, partnerValue }].
+// Reads from the Phase 5a payload shape:
+//   responsibilities.{user,partner}.<catId> = [{item, value}, ...] in
+//     RESPONSIBILITY_CATEGORIES order
+//   lifeQuestions.{user,partner}.<lqId> = value
+function getDomainRows(domainKey, responsibilities, lifeQuestions, u, p) {
+  const r = responsibilities || {};
+  const l = lifeQuestions || {};
+  const ru = r.user || {}, rp = r.partner || {};
+  const lu = l.user || {}, lp = l.partner || {};
+
+  const respRow = (label, cat, idx) => ({
+    label,
+    userValue: ru[cat]?.[idx]?.value || '',
+    partnerValue: rp[cat]?.[idx]?.value || '',
+  });
+  const lqRow = (label, lqId) => ({
+    label,
+    userValue: lu[lqId] || '',
+    partnerValue: lp[lqId] || '',
+  });
+
+  switch (domainKey) {
+    case 'household':
+      // Display order matches RESPONSIBILITY_CATEGORIES.household order.
+      return [
+        respRow('Cooking weeknights',           'household', 0),
+        respRow('Grocery & meal planning',      'household', 1),
+        respRow('Day-to-day tidying',           'household', 2),
+        respRow('Home repairs & maintenance',   'household', 3),
+        respRow('Family calendar',              'household', 4),
+        respRow('Hosting & holidays',           'household', 5),
+        respRow('Vacation planning',            'household', 6),
+      ];
+    case 'emotional':
+      return [
+        respRow('Mental load',               'emotional', 0),
+        respRow('Tracking how everyone is',  'emotional', 1),
+        respRow('Maintaining closeness',     'emotional', 2),
+        respRow('Hard conversations',        'emotional', 3),
+        respRow('Repair after friction',     'emotional', 4),
+      ];
+    case 'extended_family':
+      // Payload order: V_U, G_U, C_U, V_P, G_P, C_P  (per RESPONSIBILITY_CATEGORIES)
+      // Display order: V_U, V_P, C_U, C_P, G_U, G_P  (visit/contact/gift, alternating sides)
+      return [
+        respRow(`Visits with ${u}'s family`,           'extended_family', 0),
+        respRow(`Visits with ${p}'s family`,           'extended_family', 3),
+        respRow(`Staying in touch with ${u}'s family`, 'extended_family', 2),
+        respRow(`Staying in touch with ${p}'s family`, 'extended_family', 5),
+        respRow(`Gifting for ${u}'s family`,           'extended_family', 1),
+        respRow(`Gifting for ${p}'s family`,           'extended_family', 4),
+      ];
+    case 'money':
+      // Mixed domain: 3 from responsibilities, 3 from life questions.
+      return [
+        respRow('Day-to-day finances',          'financial', 0),
+        respRow('Long-term financial decisions','financial', 1),
+        respRow('Whose career is prioritized',  'career',    1),
+        lqRow  ('How we hold money',            'lq_finances'),
+        lqRow  ('Saving v spending',            'lq_money_lean'),
+        lqRow  ('Risk tolerance',               'lq_money_risk'),
+      ];
+    case 'life':
+      return [
+        lqRow('Children',                      'lq_children'),
+        lqRow('When family & partner conflict','lq_family_conf'),
+        lqRow('Where we live',                 'lq_location'),
+        lqRow('Social life',                   'lq_social'),
+        lqRow('Daily rhythm',                  'lq_routine'),
+        lqRow('Faith & spirituality',          'lq_faith'),
+        lqRow('Core values & beliefs',         'lq_values'),
+      ];
+    case 'operate':
+      return [
+        lqRow('When to address conflict',     'lq_conflict_when'),
+        lqRow('Conflict resolution time',     'lq_conflict_after'),
+        lqRow('What repair looks like',       'lq_conflict_repair'),
+        lqRow('Physical affection',           'lq_affection'),
+        lqRow('Closeness during hard times',  'lq_closeness'),
+        lqRow('Independence',                 'lq_independence'),
+      ];
+    default:
+      return [];
+  }
+}
+
+// Compute alignment percentage (0-100) for a domain's rows.
+// Match logic: simple string equality. All responses are required by the
+// exercise UI, so empty values shouldn't occur in practice.
+function computeAlignmentPct(rows) {
+  if (!rows || rows.length === 0) return 0;
+  const matches = rows.filter(r => r.userValue === r.partnerValue).length;
+  return Math.round((matches / rows.length) * 100);
+}
+
+// Map an alignment state to its short display label.
+function alignmentStateLabel(state) {
+  if (state === 'compatible') return 'broadly compatible';
+  if (state === 'discuss')    return 'worth discussing';
+  return 'significantly different expectations';
+}
+
+// Render one expectations domain page. Visual reference:
+// scripts/build_workbook.py build_expectation_page.
+function buildExpDomainPage(domain, idx, u, p, responsibilities, lifeQuestions) {
+  const accent = DOMAIN_COLOR_MAP[domain.color] || ORANGE;
+  const icon = DOMAIN_ICONS[domain.key] || '·';
+  const rows = getDomainRows(domain.key, responsibilities, lifeQuestions, u, p);
+  const pct = computeAlignmentPct(rows);
+  const state = alignmentState(pct);
+  const stateLabel = alignmentStateLabel(state);
+  const analysisText = fill(alignmentText(domain, pct), u, p);
+
+  // Title — first word standard, rest italic. Mirrors the python design
+  // (e.g. "Visible Household Labor" → "Visible" / "<em>Household Labor</em>").
+  const labelParts = domain.label.split(' ');
+  const titleFirst = labelParts[0];
+  const titleRest = labelParts.slice(1).join(' ');
+
+  // Domain number as ordinal word (One, Two, ...).
+  const ORDINAL_WORDS = ['One', 'Two', 'Three', 'Four', 'Five', 'Six'];
+  const ordinal = ORDINAL_WORDS[idx - 1] || String(idx);
 
   const result = [pb()];
-  result.push(...bigSectionHeader('Expectations',
-    `Where ${u} and ${p} have different ideas about the life you're building.`, GREEN));
 
-  categoriesToShow.forEach(cat => {
-    result.push(...categoryHeader(cat.title, cat.color));
-
-    cat.unaligned.forEach(eg => {
-      const domain = EXP_DOMAINS.find(d => d.key === eg.key);
-      if (!domain) return;
-      const mainText = fill(domain.gapText, u, p);
-
-      // Domain label — plain bold header, no gap badge in the corner.
-      result.push(new Paragraph({ spacing: { before: 200, after: 160 },
-        children: [run(domain.label, { size: 22, bold: true, color: cat.color })] }));
-
-      // Prominent two-column responses. Each partner gets their own
-      // column: small-caps name label above, big italic answer below.
-      // Reads as data you actually compare, not a caption.
-      const answerCol = (name, answer, accent) => new TableCell({
-        borders: { top: noBrd, bottom: noBrd, left: noBrd, right: noBrd },
-        width: { size: W / 2, type: WidthType.DXA },
-        margins: { top: 80, bottom: 80, left: 0, right: 120 },
+  // Header: icon + eyebrow + title
+  const HEADER_ICON_W = 1200, HEADER_TEXT_W = W - HEADER_ICON_W;
+  result.push(new Table({
+    width: { size: W, type: WidthType.DXA }, columnWidths: [HEADER_ICON_W, HEADER_TEXT_W],
+    borders: noBrds,
+    rows: [new TableRow({ children: [
+      new TableCell({ borders: noBrds, width: { size: HEADER_ICON_W, type: WidthType.DXA },
+        verticalAlign: VerticalAlign.BOTTOM,
+        margins: { top: 0, bottom: 0, left: 0, right: 0 },
+        children: [new Paragraph({ spacing: { after: 0 },
+          children: [run(icon, { size: 72, color: accent })] })] }),
+      new TableCell({ borders: noBrds, width: { size: HEADER_TEXT_W, type: WidthType.DXA },
+        verticalAlign: VerticalAlign.BOTTOM,
+        margins: { top: 0, bottom: 0, left: 240, right: 0 },
         children: [
-          new Paragraph({ spacing: { after: 80 },
-            children: [run(name, { size: 11, bold: true, color: accent, allCaps: true, characterSpacing: 80 })] }),
+          new Paragraph({ spacing: { after: 60 },
+            children: [run(`Expectations · Domain ${ordinal}`, { size: 14, bold: true, color: MUTED, allCaps: true, characterSpacing: 80 })] }),
           new Paragraph({ spacing: { after: 0 },
-            children: [run(answerLabel(answer, u, p), { size: 20, italics: true, color: INK })] }),
-        ],
-      });
-      result.push(new Table({
-        width: { size: W, type: WidthType.DXA }, columnWidths: [W / 2, W / 2],
-        borders: { top: { style: BorderStyle.SINGLE, size: 6, color: STONE },
-                   bottom: { style: BorderStyle.SINGLE, size: 6, color: STONE },
-                   left: noBrd, right: noBrd, insideHorizontal: noBrd,
-                   insideVertical: { style: BorderStyle.SINGLE, size: 4, color: STONE } },
-        rows: [new TableRow({ children: [
-          answerCol(u, eg.yourAnswer, ORANGE),
-          answerCol(p, eg.partnerAnswer, BLUE),
-        ]})],
-      }));
+            children: [
+              run(titleFirst, { size: 44, bold: true, color: INK }),
+              ...(titleRest ? [run(' ', { size: 44 }), run(titleRest, { size: 44, italics: true, color: accent })] : []),
+            ] }),
+        ] }),
+    ]})],
+  }));
 
-      // Gap analysis — plain grey italic, no box, no fill.
-      result.push(new Paragraph({ spacing: { before: 200, after: 120, line: 300, lineRule: 'atLeast' },
-        children: [run(mainText, { size: 17, italics: true, color: MUTED })] }));
+  // Underline divider beneath the header.
+  result.push(new Paragraph({ spacing: { before: 160, after: 240 },
+    border: { bottom: { style: BorderStyle.SINGLE, size: 8, color: accent, space: 4 } },
+    children: [new TextRun('')] }));
 
-      // Try this week — eyebrow + plain body, no filled card.
-      result.push(new Paragraph({ spacing: { before: 160, after: 80 },
-        children: [run('Try this week', { size: 17, bold: true, color: BLUE, allCaps: true })] }));
-      result.push(new Paragraph({ spacing: { after: 280, line: 300, lineRule: 'atLeast' },
-        children: [run(fill(domain.thisWeek, u, p), { size: 17, color: INK })] }));
-    });
-
-    // Aligned domains footer
-    if (cat.aligned.length > 0) {
-      result.push(new Paragraph({ spacing: { before: 120, after: 220 },
+  // Side-by-side panes — one column per partner, with eyebrow header and rows.
+  const PANE_W = (W - 200) / 2;  // small gutter between panes
+  const pane = (name, rowKey, accentColor) => new TableCell({
+    borders: noBrds, width: { size: PANE_W, type: WidthType.DXA },
+    margins: { top: 160, bottom: 160, left: 200, right: 200 },
+    shading: { fill: 'FBF8F2', type: ShadingType.CLEAR },
+    children: [
+      new Paragraph({ spacing: { after: 160 },
+        children: [run(`${name}'s expectations`, { size: 13, bold: true, color: accentColor, allCaps: true, characterSpacing: 80 })] }),
+      ...rows.map(r => new Paragraph({
+        spacing: { after: 100, line: 280, lineRule: 'atLeast' },
         children: [
-          run('Aligned: ', { size: 12, bold: true, color: GREEN, allCaps: true, characterSpacing: 60 }),
-          run(cat.aligned.map(a => EXP_DOMAINS.find(d => d.key === a.key)?.label || a.label).join(', '), { size: 14, italics: true, color: MUTED }),
+          run(r.label + '  ', { size: 17, color: MUTED }),
+          run(String(r[rowKey] || ''), { size: 17, bold: true, color: INK }),
         ],
-      }));
-    }
+      })),
+    ],
+  });
+  result.push(new Table({
+    width: { size: W, type: WidthType.DXA }, columnWidths: [PANE_W, 200, PANE_W],
+    borders: noBrds,
+    rows: [new TableRow({ children: [
+      pane(u, 'userValue', ORANGE),
+      new TableCell({ borders: noBrds, width: { size: 200, type: WidthType.DXA },
+        margins: { top: 0, bottom: 0, left: 0, right: 0 },
+        children: [new Paragraph({ spacing: { after: 0 }, children: [new TextRun('')] })] }),
+      pane(p, 'partnerValue', BLUE),
+    ]})],
+  }));
+
+  // Where you are — alignment block.
+  result.push(new Paragraph({ spacing: { before: 320, after: 80 },
+    children: [run('Where you are', { size: 14, bold: true, color: accent, allCaps: true, characterSpacing: 80 })] }));
+  result.push(new Paragraph({ spacing: { after: 140 },
+    children: [
+      run(`${pct}% aligned `, { size: 28, bold: true, color: INK }),
+      run(`· ${stateLabel}`, { size: 22, italics: true, color: MUTED }),
+    ] }));
+  result.push(new Paragraph({ spacing: { after: 240, line: 320, lineRule: 'atLeast' },
+    children: [run(analysisText, { size: 19, color: INK })] }));
+
+  // Try this week box.
+  result.push(accentBox('Try this week', fill(domain.thisWeek, u, p), 'FFF3EB', accent));
+
+  return result;
+}
+
+// Build the full expectations section — opener page + 6 domain pages.
+// New signature: takes responsibilities and lifeQuestions instead of expGaps.
+// If responsibilities is missing (legacy caller), returns empty so the
+// document still renders rather than crashing.
+function buildExpDomains(u, p, responsibilities, lifeQuestions) {
+  if (!responsibilities) return [];
+
+  const result = [];
+
+  // Section opener page — sits between Part 1 communication pages and the
+  // expectation domain pages.
+  result.push(pb());
+  result.push(new Paragraph({ spacing: { before: 120, after: 60 },
+    children: [run('Section B · Expectations', { size: 14, bold: true, color: GREEN, allCaps: true, characterSpacing: 80 })] }));
+  result.push(new Paragraph({ spacing: { after: 40 },
+    children: [
+      run('Six domains of ', { size: 36, bold: true, color: INK }),
+      run('what you expect from each other.', { size: 36, italics: true, color: GREEN }),
+    ] }));
+  result.push(new Paragraph({ spacing: { before: 160, after: 240, line: 340, lineRule: 'atLeast' },
+    children: [run(`Each domain is one slice of the life ${u} and ${p} are building. Where you align, the assumptions hold without saying. Where you don't, the gap is the conversation.`, { size: 20, italics: true, color: MUTED })] }));
+  result.push(new Paragraph({ spacing: { before: 120, after: 0 },
+    border: { top: { style: BorderStyle.SINGLE, size: 4, color: STONE, space: 4 } },
+    children: [new TextRun('')] }));
+  result.push(new Paragraph({ spacing: { before: 240, after: 0, line: 320, lineRule: 'atLeast' },
+    children: [run(`For each domain, you'll see how each of you answered, the percent you're aligned, what that alignment level usually means, and one thing to try this week.`, { size: 17, color: INK })] }));
+
+  // Six per-domain pages.
+  EXP_DOMAINS.forEach((domain, i) => {
+    result.push(...buildExpDomainPage(domain, i + 1, u, p, responsibilities, lifeQuestions));
   });
 
   return result;
@@ -1554,66 +1719,95 @@ function buildConversationGuide(u, p, priorities) {
 
 function buildReferenceCard(u, p, coupleType, priorities) {
   const typeName = coupleType?.name || 'Your couple type';
+  const typeId   = coupleType?.id   || '';
   const typeTagline = coupleType ? fill(String(coupleType.tagline || ''), u, p) : '';
 
-  // Pull a phrase specific to this couple type if available — the first
-  // tip's phraseTry is the couple-type-calibrated line. Fall back to a
-  // generic starter if the couple type object doesn't include tips.
-  const phrase = coupleType?.tips?.[0]?.phraseTry
-    ? fill(String(coupleType.tips[0].phraseTry), u, p)
-    : 'What do you need from me right now?';
+  // V2 design (per Ellie's spec, mirrored from scripts/build_workbook.py
+  // build_reference_card):
+  //   - Coral partner names prominently displayed at top of card.
+  //   - Three tiles:
+  //       left   : couple type (name, profile id, tagline)
+  //       center : "A." letter mark, Attune wordmark, gradient rule,
+  //                "Understanding takes intention." tagline
+  //       right  : white write-in box for goal-of-the-week
+  //   - "Keep this somewhere you'll see it." moves OUT of the card and into
+  //     the page surround below.
+  //   - "Explore Attune In Practice" callout sits below the surround text.
+  //
+  // The SVG logo from the python source can't render natively in docx.
+  // Stand-in: italic "A." letter mark in Playfair (falls back to default
+  // serif if Playfair isn't available) plus the "Attune Relationships"
+  // wordmark and the orange→indigo gradient rule.
 
-  // Card geometry: ~5.5" wide × ~3.5" tall, centered on the page.
   const CARD_W = 8000;
-  const TILE_W = Math.floor((CARD_W - 240) / 3);   // 3 equal side-by-side tiles
-  const NAVY_LIGHT = 'CFC3E8';  // soft lavender for secondary text on navy
-  const NAVY_DIM   = '8F80B0';  // even softer for metadata
+  const TILE_W = Math.floor((CARD_W - 240) / 3);
+  const NAVY_LIGHT = 'CFC3E8';
 
-  // Each tile is a table cell with white fill inside the navy card.
-  // Consistent padding, colored eyebrow at top, content below.
-  const tileCell = (accentColor, eyebrow, bodyParagraphs) => new TableCell({
-    borders: { top: noBrd, bottom: noBrd, left: noBrd, right: noBrd },
+  const tileCell = (eyebrowColor, eyebrow, bodyParagraphs) => new TableCell({
+    borders: noBrds,
     width: { size: TILE_W, type: WidthType.DXA },
     shading: { fill: 'FCFAF5', type: ShadingType.CLEAR },
-    margins: { top: 180, bottom: 180, left: 200, right: 200 },
+    margins: { top: 200, bottom: 200, left: 220, right: 220 },
     children: [
-      new Paragraph({ spacing: { after: 100 },
-        children: [run(eyebrow, { size: 10, bold: true, color: accentColor, allCaps: true, characterSpacing: 80 })] }),
+      new Paragraph({ spacing: { after: 120 },
+        children: [run(eyebrow, { size: 10, bold: true, color: eyebrowColor, allCaps: true, characterSpacing: 80 })] }),
       ...bodyParagraphs,
     ],
   });
 
-  // Left tile — names (prominent) + couple type underneath
-  const leftTile = tileCell(ORANGE, 'Us', [
-    new Paragraph({ spacing: { after: 120 },
-      children: [run(`${u} & ${p}`, { size: 20, bold: true, color: INK })] }),
-    new Paragraph({ spacing: { after: 40 },
-      children: [run(typeName, { size: 13, bold: true, color: ORANGE })] }),
-    ...(typeTagline ? [new Paragraph({ spacing: { after: 0 },
-      children: [run(typeTagline, { size: 11, italics: true, color: MUTED })] })] : []),
+  // Left tile — couple type
+  const leftTile = tileCell(ORANGE, 'Couple type', [
+    new Paragraph({ spacing: { after: 80 },
+      children: [run(typeName, { size: 18, bold: true, color: INK })] }),
+    ...(typeId ? [new Paragraph({ spacing: { after: 100 },
+      children: [run(`Profile ${typeId} · §02`, { size: 10, color: MUTED, allCaps: true, characterSpacing: 60 })] })] : []),
+    ...(typeTagline ? [new Paragraph({ spacing: { after: 0, line: 260, lineRule: 'atLeast' },
+      children: [run(typeTagline, { size: 12, italics: true, color: MUTED })] })] : []),
   ]);
 
-  // Center tile — one phrase that works for this couple type
-  const centerTile = tileCell(PURPLE, 'Phrase that lands', [
-    new Paragraph({ spacing: { after: 0, line: 260, lineRule: 'atLeast' },
-      children: [run(`"${phrase}"`, { size: 15, italics: true, color: INK })] }),
-  ]);
-
-  // Right tile — "Goal for this week" with notebook-paper ruled lines
-  const rightTile = new TableCell({
-    borders: { top: noBrd, bottom: noBrd, left: noBrd, right: noBrd },
+  // Center tile — letter mark, wordmark, gradient rule, tagline.
+  // Using a TableCell with stacked paragraphs (no nested table for the rule
+  // because nested tables inside table cells get cranky in some Word versions).
+  // The gradient rule is a thin row of colored runs in a single paragraph.
+  const gradientStops = ['E8673A', 'B655A3', '7E5BD3', '4661ED', '1B5FE8'];
+  const ruleSegment = '\u2500'.repeat(8);  // ─ box-drawings light horizontal
+  const centerTile = new TableCell({
+    borders: noBrds,
     width: { size: TILE_W, type: WidthType.DXA },
     shading: { fill: 'FCFAF5', type: ShadingType.CLEAR },
-    margins: { top: 180, bottom: 180, left: 200, right: 200 },
+    margins: { top: 220, bottom: 220, left: 220, right: 220 },
     children: [
-      new Paragraph({ spacing: { after: 120 },
-        children: [run('Goal for this week', { size: 10, bold: true, color: BLUE, allCaps: true })] }),
-      // Ruled lines, tighter than other write-ins to fit the small tile
+      // Letter mark — italic "A." in serif, large
+      new Paragraph({ alignment: AlignmentType.CENTER, spacing: { after: 80 },
+        children: [run('A.', { size: 56, italics: true, bold: true, color: INK, font: 'Playfair Display' })] }),
+      // Wordmark
+      new Paragraph({ alignment: AlignmentType.CENTER, spacing: { after: 20 },
+        children: [run('Attune', { size: 18, bold: true, color: INK, characterSpacing: 20 })] }),
+      new Paragraph({ alignment: AlignmentType.CENTER, spacing: { after: 120 },
+        children: [run('Relationships', { size: 9, color: MUTED, allCaps: true, characterSpacing: 120 })] }),
+      // Gradient rule
+      new Paragraph({ alignment: AlignmentType.CENTER, spacing: { after: 120, line: 160, lineRule: 'exact' },
+        children: gradientStops.map(c => run(ruleSegment, { size: 10, color: c })) }),
+      // Tagline
+      new Paragraph({ alignment: AlignmentType.CENTER, spacing: { after: 0, line: 260, lineRule: 'atLeast' },
+        children: [run('Understanding takes intention.', { size: 11, italics: true, color: MUTED })] }),
+    ],
+  });
+
+  // Right tile — white write-in box for goal-of-the-week
+  const rightTile = new TableCell({
+    borders: noBrds,
+    width: { size: TILE_W, type: WidthType.DXA },
+    shading: { fill: 'FCFAF5', type: ShadingType.CLEAR },
+    margins: { top: 200, bottom: 200, left: 220, right: 220 },
+    children: [
+      new Paragraph({ spacing: { after: 140 },
+        children: [run('Goal for this week', { size: 10, bold: true, color: BLUE, allCaps: true, characterSpacing: 80 })] }),
       ruledWriteIn(4, { lineHeight: 240, afterEach: 60, color: 'D9CEBE' }),
     ],
   });
 
-  // The 3-column tile row
+  // Three-column tile row inside the card
   const tileRow = new Table({
     width: { size: CARD_W - 240, type: WidthType.DXA },
     columnWidths: [TILE_W, TILE_W, TILE_W],
@@ -1621,48 +1815,93 @@ function buildReferenceCard(u, p, coupleType, priorities) {
     borders: {
       top: noBrd, bottom: noBrd, left: noBrd, right: noBrd,
       insideHorizontal: noBrd,
-      insideVertical: { style: BorderStyle.SINGLE, size: 6, color: NAVY },  // navy gap visible between tiles
+      insideVertical: { style: BorderStyle.SINGLE, size: 6, color: NAVY },
     },
     rows: [new TableRow({ children: [leftTile, centerTile, rightTile] })],
   });
 
-  // The navy card itself — not full page, centered, ~5.5" × ~3.5"
+  // Navy card — gradient strip up top, eyebrow, names, tile row, footer
   const navyCard = new Table({
     width: { size: CARD_W, type: WidthType.DXA },
     columnWidths: [CARD_W],
     alignment: AlignmentType.CENTER,
-    borders: { top: noBrd, bottom: noBrd, left: noBrd, right: noBrd, insideHorizontal: noBrd, insideVertical: noBrd },
+    borders: noBrds,
     rows: [new TableRow({ children: [new TableCell({
       borders: noBrds,
       width: { size: CARD_W, type: WidthType.DXA },
       shading: { fill: NAVY, type: ShadingType.CLEAR },
-      margins: { top: 0, bottom: 200, left: 0, right: 0 },
+      margins: { top: 0, bottom: 240, left: 0, right: 0 },
       children: [
-        // Top gradient strip
-        gradientBar(ORANGE, PURPLE, { height: 100, segments: 32, width: CARD_W }),
-        // Title
-        new Paragraph({ alignment: AlignmentType.CENTER, spacing: { before: 160, after: 20 },
-          children: [run('ATTUNE  ·  REFERENCE CARD', { size: 10, bold: true, color: NAVY_LIGHT, allCaps: true, characterSpacing: 120 })] }),
-        new Paragraph({ alignment: AlignmentType.CENTER, spacing: { after: 200 },
-          children: [run('Keep this somewhere you\'ll see it.', { size: 11, italics: true, color: NAVY_DIM })] }),
+        // Top gradient strip (orange → indigo)
+        gradientBar(ORANGE, BLUE, { height: 80, segments: 32, width: CARD_W }),
+        // Eyebrow
+        new Paragraph({ alignment: AlignmentType.CENTER, spacing: { before: 220, after: 60 },
+          children: [run('Attune Relationships  ·  Reference Card', { size: 10, bold: true, color: NAVY_LIGHT, allCaps: true, characterSpacing: 120 })] }),
+        // Names — prominent, coral, italic ampersand
+        new Paragraph({ alignment: AlignmentType.CENTER, spacing: { after: 280 },
+          children: [
+            run(u, { size: 36, bold: true, color: ORANGE, font: 'Playfair Display' }),
+            run(' & ', { size: 36, italics: true, color: 'F08966', font: 'Playfair Display' }),
+            run(p, { size: 36, bold: true, color: ORANGE, font: 'Playfair Display' }),
+          ] }),
         // Tile row
         tileRow,
         // Footer
-        new Paragraph({ alignment: AlignmentType.CENTER, spacing: { before: 240, after: 0 },
+        new Paragraph({ alignment: AlignmentType.CENTER, spacing: { before: 280, after: 0 },
           children: [run('attune-relationships.com', { size: 10, color: NAVY_LIGHT, allCaps: true, characterSpacing: 80 })] }),
+      ],
+    })]})],
+  });
+
+  // Page surround — text below the card, on the page background.
+  // "How to use the card" → "Keep this somewhere you'll see it." + body.
+  // Three short tip rows, then the "Explore Attune In Practice" callout.
+  const ctxTip = (label, text) => new Paragraph({ spacing: { after: 120, line: 280, lineRule: 'atLeast' },
+    children: [
+      run(label + '   ', { size: 10, bold: true, color: MUTED, allCaps: true, characterSpacing: 80 }),
+      run(text, { size: 12, color: INK }),
+    ] });
+
+  const inPracticeCallout = new Table({
+    width: { size: W, type: WidthType.DXA }, columnWidths: [W],
+    borders: noBrds,
+    rows: [new TableRow({ children: [new TableCell({
+      borders: { top: noBrd, bottom: noBrd, right: noBrd,
+        left: { style: BorderStyle.SINGLE, size: 16, color: PURPLE, space: 6 } },
+      width: { size: W, type: WidthType.DXA },
+      shading: { fill: 'F3EEFB', type: ShadingType.CLEAR },
+      margins: { top: 160, bottom: 160, left: 240, right: 240 },
+      children: [
+        new Paragraph({ spacing: { after: 60 },
+          children: [run('Explore Attune In Practice', { size: 11, bold: true, color: PURPLE, allCaps: true, characterSpacing: 80 })] }),
+        new Paragraph({ spacing: { after: 0, line: 280, lineRule: 'atLeast' },
+          children: [
+            run('More tools, follow-ups, and conversations built around results like yours. ', { size: 13, color: INK }),
+            run('attune-relationships.com/in-practice', { size: 13, bold: true, color: INK }),
+          ] }),
       ],
     })]})],
   });
 
   return [
     pb(),
-    // Breathing room above the card
-    new Paragraph({ spacing: { before: 400, after: 200 }, children: [new TextRun('')] }),
+    new Paragraph({ spacing: { before: 200, after: 160 }, children: [new TextRun('')] }),
     navyCard,
-    // A thin guide note below the card, outside the navy area
-    new Paragraph({ alignment: AlignmentType.CENTER, spacing: { before: 200, after: 0 },
-      children: [run('Print on cardstock. Cut out and keep it somewhere you\'ll see it.',
-        { size: 12, italics: true, color: MUTED })] }),
+    // Surround context below the card
+    new Paragraph({ spacing: { before: 360, after: 60 },
+      children: [run('How to use the card', { size: 11, bold: true, color: MUTED, allCaps: true, characterSpacing: 80 })] }),
+    new Paragraph({ spacing: { after: 60 },
+      children: [
+        run('Keep this ', { size: 28, bold: true, color: INK }),
+        run('somewhere you\'ll see it.', { size: 28, italics: true, color: NAVY }),
+      ] }),
+    new Paragraph({ spacing: { after: 200, line: 320, lineRule: 'atLeast' },
+      children: [run('The reference card is built from your couple type. Cut along the edge above and write your weekly goal on the right tile. Replace it each week, or carry the same one forward.', { size: 13, color: INK })] }),
+    ctxTip('Where to keep it', 'Inside the medicine cabinet, on the fridge, in a wallet, anywhere you pass through routinely.'),
+    ctxTip('When to look',     'Before a hard conversation. After a friction moment. When the week has felt off and you\'re not sure why.'),
+    ctxTip('When to update',   'At your six-month check-in, you\'ll get a fresh card with what\'s shifted. Reorder anytime at attune-relationships.com.'),
+    new Paragraph({ spacing: { before: 200, after: 0 }, children: [new TextRun('')] }),
+    inPracticeCallout,
   ];
 }
 
@@ -2082,32 +2321,26 @@ export default async function handler(req, res) {
 
     ...buildPartCover(1, 'A closer look at the dimensions that matter',
       `The dimensions where ${u} and ${p} showed a meaningful gap, unpacked.`, BLUE),
-    ...epigraph(
-      PH('opening quote for Part 1'),
-      PH('Attribution')),
+    // TODO(Ellie): real epigraph for Part 1. Removed in Phase 5b — used to be
+    // a PH placeholder ("opening quote for Part 1"). Provide quote + author
+    // and re-add: ...epigraph('quote text', 'Author Name'),
     ...buildInsights(u, p, s1, s2, coupleType),
-    ...buildExpDomains(u, p, expGaps),
+    ...buildExpDomains(u, p, responsibilities, lifeQuestions),
 
     ...buildPartCover(2, 'Working Knowledge',
       `Six moments with each other. Specific language for each.`, PURPLE),
-    ...epigraph(
-      PH('opening quote for Part 2 — something about knowing another person'),
-      PH('Attribution')),
+    // TODO(Ellie): real epigraph for Part 2 (knowing another person)
     ...buildWorkingKnowledge(u, p, coupleType),
 
     ...buildPartCover(3, 'Workbook',
       `Your focus areas. Your words. Your pace.`, ORANGE),
-    ...epigraph(
-      PH('opening quote for Part 3 — something about focus or choosing'),
-      PH('Attribution')),
+    // TODO(Ellie): real epigraph for Part 3 (focus or choosing)
     ...buildWorkbook(u, p),
     ...buildPriorityCheckIn(u, p, priorities),
 
     ...buildPartCover(4, 'Conversation Library',
       `Words for the situations you'll actually find yourselves in.`, PURPLE),
-    ...epigraph(
-      PH('opening quote for Part 4 — something about language or talking'),
-      PH('Attribution')),
+    // TODO(Ellie): real epigraph for Part 4 (language or talking)
     ...buildConversationLibrary(u, p, coupleType, priorities),
 
     ...buildPartCover(5, 'Reference Card',

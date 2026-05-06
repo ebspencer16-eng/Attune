@@ -142,65 +142,125 @@ export const DIM_CONTENT = {
   },
 };
 
-// Expectations domain definitions
+// Expectations domain definitions — 6-domain Phase 3 model.
+// Each domain has three alignment-state texts (compatible/discuss/different),
+// keyed to a percentage threshold (75+ / 40-74 / <40), plus a "Try this week"
+// prompt. Source of truth is scripts/build_workbook.py EXP_DOMAINS.
 export const EXP_DOMAINS = [
   {
-    key: 'household',
-    label: 'Visible Household Labor',
-    left: 'Partner A handles more', right: 'Shared / Partner B handles more',
-    closeText: 'Your expectations about household responsibility are broadly aligned. You\'ve probably arrived at a division of labor that feels fair and chosen.',
-    gapText: 'Your expectations diverge on who should handle specific aspects of household life. These gaps tend to calcify into default roles, not because anyone chose them, but because one person stepped in and the other let them.',
-    thisWeek: 'Separately, list the household tasks you currently own, the ones you think the other owns, and the ones falling through the cracks. Compare the lists without judgment.',
+    key: 'household', label: 'Visible Household Labor', color: 'gold',
+    compatibleText: "Your expectations about who runs the household are broadly aligned. The division of labor probably feels chosen, not negotiated each week.",
+    discussText:    "You see the household differently in places. Some of these gaps are probably running in the background, costing more than you realize.",
+    differentText:  "You hold significantly different pictures of how the household runs. This is where most slow-build resentment in long relationships originates.",
+    thisWeek:       "Separately, list the household tasks you currently own, the ones you think the other owns, and the ones falling through the cracks. Compare the lists without judgment.",
   },
   {
-    key: 'emotional',
-    label: 'Emotional & Invisible Labor',
-    left: 'Partner A carries more', right: 'Shared / Partner B carries more',
-    closeText: 'You have a relatively balanced distribution of the invisible work, the remembering, anticipating, tracking.',
-    gapText: 'One of you is carrying significantly more of the invisible labor. This work tends to be both unacknowledged and unreciprocated, not out of malice but genuine unawareness.',
-    thisWeek: 'For one week, the partner who typically carries more mental load keeps a simple log, every act of invisible labor they perform. At the end of the week, share it. Don\'t frame it as an accusation. Just show what\'s there.',
+    key: 'emotional', label: 'Emotional & Invisible Labor', color: 'coral',
+    compatibleText: "You see the invisible work of the relationship in similar terms. The mental load, the remembering, the repair, you both clock it.",
+    discussText:    "Some of the invisible labor is being carried unevenly, and at least one of you may not fully see it. Worth surfacing before it accumulates.",
+    differentText:  "One of you is carrying significantly more of the invisible labor. This work is usually unacknowledged and unreciprocated, not from malice but from genuine unawareness.",
+    thisWeek:       "For one week, the partner who typically carries more mental load keeps a simple log, every act of invisible labor they perform. At the end of the week, share it. Don't frame it as an accusation. Just show what's there.",
   },
   {
-    key: 'financial',
-    label: 'Financial & Money',
-    left: 'Separate / save-first', right: 'Combined / spend-forward',
-    closeText: 'Your financial orientations are broadly compatible. You\'re probably aligned on the big structural questions, how money is held, how decisions get made.',
-    gapText: 'Your instincts about money, how to hold it, how to use it, how much risk to take, are in different places. Money fights are rarely about money; they\'re about values, security, freedom, and control.',
-    thisWeek: 'Each of you answers: "The financial situation that would make me feel most secure is ___." Share them. Don\'t solve, just understand where each person\'s sense of security lives.',
+    key: 'extended_family', label: 'Extended Family', color: 'plum',
+    compatibleText: "You see the work of family across both sides as broadly shared. Visits, contact, gifts, neither of you is doing a job the other doesn't notice.",
+    discussText:    "You see the family-side work differently in places. Some of it is quietly carried by one of you, often along the lines of whose family it is. Worth saying out loud.",
+    differentText:  "You hold significantly different pictures of who's doing the family work. The unevenness usually surfaces as the holiday conversation that takes a year to actually have.",
+    thisWeek:       "Pick one upcoming family event, a visit, a holiday, a check-in call. Each of you names what you'd like the other to do, before the week of arrives.",
   },
   {
-    key: 'career',
-    label: 'Career',
-    left: 'Partner A\'s career leads', right: 'Balanced / Partner B leads',
-    closeText: 'You have a broadly shared understanding of how career fits into your life together, who leads, who adjusts, what the arrangement costs each of you.',
-    gapText: 'There\'s unclarity, spoken or unspoken, about whose career leads, who absorbs sacrifice when required, and what each person has traded for the other\'s professional life.',
-    thisWeek: 'Each of you answers: "The career outcome I most want in the next five years is ___, and the cost I\'m willing to accept is ___." Share them.',
+    key: 'money', label: 'Money, Work & Career', color: 'indigo',
+    compatibleText: "Your orientations on money and career are broadly compatible. You probably move through major financial decisions without much friction.",
+    discussText:    "You diverge in places on how money should be held or whose work leads. These are the questions that compound, worth talking through with specifics.",
+    differentText:  "You hold significantly different views on money or career priority. Differences here tend to surface during big decisions, often when there is least time to discuss them.",
+    thisWeek:       "Each of you answers: \"The financial situation that would make me feel most secure is ___.\" Share them. Don't solve, just understand where each person's sense of security lives.",
   },
   {
-    key: 'children',
-    label: 'Children & Family',
-    left: 'Not central / uncertain', right: 'Important / central',
-    closeText: 'You\'re broadly aligned on the role children and family play in your picture, whether eager, settled that they\'re not part of the plan, or genuinely open.',
-    gapText: 'Your pictures diverge in some meaningful way on children or family. This can range from fundamental disagreement to meaningful difference in timing or approach. These conversations are among the most important, and most avoided.',
-    thisWeek: 'Write down, separately, then share, one sentence about what you want your family life to look like in five years. Don\'t edit for what you think the other wants to hear.',
+    key: 'life', label: 'Life Together', color: 'green',
+    compatibleText: "You picture the bigger questions of your life together in similar terms. Family, where you live, what matters, you are pointed in compatible directions.",
+    discussText:    "You picture some of the foundational pieces of your shared life differently. These are the assumptions worth saying out loud before time makes them harder to revisit.",
+    differentText:  "You hold significantly different pictures of the life you are building. Differences this large tend to compound, but only if they stay unspoken.",
+    thisWeek:       "Write down, separately, then share, one sentence about what you want your shared life to look like in five years. Don't edit for what you think the other wants to hear.",
   },
   {
-    key: 'lifestyle',
-    label: 'Home & Lifestyle',
-    left: 'Quiet / structured', right: 'Active / flexible',
-    closeText: 'Your visions of home life are broadly aligned. You probably agree naturally on social calendar density, pace of life, and what the right week looks like.',
-    gapText: 'You picture your shared life differently, how full the calendar is, how structured the day, how social the home. These differences rarely surface in early stages but accumulate once you\'re fully sharing space.',
-    thisWeek: 'Each of you describes your ideal month in terms of pace, social load, and home feeling. Compare them. Where is there a gap that\'s been going unaddressed?',
-  },
-  {
-    key: 'values',
-    label: 'Faith & Values',
-    left: 'Personal / private', right: 'Central / shared',
-    closeText: 'You\'re broadly aligned on the role faith or values play in your shared life. This creates a quiet coherence in how you make decisions and mark milestones.',
-    gapText: 'One partner\'s faith or values are more central to their daily life than the other\'s. This can surface unexpectedly: in raising children, marking milestones, what community you want around you.',
-    thisWeek: 'Each of you shares one value or belief that feels central to how you live, but that you\'re not sure the other fully knows about. Don\'t ask the other to reciprocate, just offer it.',
+    key: 'operate', label: 'How We Operate', color: 'purple',
+    compatibleText: "You have similar instincts about conflict, repair, and closeness. The mechanics of getting back to each other tend to come without much translation.",
+    discussText:    "Your instincts on friction and closeness diverge in places. These are the differences that matter most in the moments when one of you is already at capacity.",
+    differentText:  "You operate from significantly different defaults around conflict and connection. The translation gap is widest exactly when the relationship needs it least.",
+    thisWeek:       "Each of you describes what you most need from the other when you are at your worst. Compare them. The mismatch is the conversation.",
   },
 ];
+
+// Universal row labels per domain. Names get substituted in extended_family
+// at render time ({U} = user, {P} = partner). Tied to the responsibility-item
+// keys in App.jsx RESPONSIBILITY_CATEGORIES.
+export const DOMAIN_ROWS = {
+  household: [
+    'Cooking weeknights',
+    'Grocery & meal planning',
+    'Day-to-day tidying',
+    'Home repairs & maintenance',
+    'Family calendar',
+    'Hosting & holidays',
+    'Vacation planning',
+  ],
+  emotional: [
+    'Mental load',
+    'Tracking how everyone is',
+    'Maintaining closeness',
+    'Hard conversations',
+    'Repair after friction',
+  ],
+  extended_family: [
+    "Visits with {U}'s family",
+    "Visits with {P}'s family",
+    "Staying in touch with {U}'s family",
+    "Staying in touch with {P}'s family",
+    "Gifting for {U}'s family",
+    "Gifting for {P}'s family",
+  ],
+  money: [
+    'Day-to-day finances',
+    'Long-term financial decisions',
+    'Whose career is prioritized',
+    'How we hold money',
+    'Saving v spending',
+    'Risk tolerance',
+  ],
+  life: [
+    'Children',
+    'When family & partner conflict',
+    'Where we live',
+    'Social life',
+    'Daily rhythm',
+    'Faith & spirituality',
+    'Core values & beliefs',
+  ],
+  operate: [
+    'When to address conflict',
+    'Conflict resolution time',
+    'What repair looks like',
+    'Physical affection',
+    'Closeness during hard times',
+    'Independence',
+  ],
+};
+
+// Threshold helper for alignment percentages.
+// Returns 'compatible' | 'discuss' | 'different'.
+export function alignmentState(pct) {
+  if (pct >= 75) return 'compatible';
+  if (pct >= 40) return 'discuss';
+  return 'different';
+}
+
+// Returns the right state-prose blurb from a domain object given a percent.
+export function alignmentText(domain, pct) {
+  const state = alignmentState(pct);
+  if (state === 'compatible') return domain.compatibleText;
+  if (state === 'discuss')    return domain.discussText;
+  return domain.differentText;
+}
 
 // ── Gap blurbs ────────────────────────────────────────────────────────────
 // Per-dimension prose for each gap state. 10 dimensions × 3 states (aligned /
