@@ -6238,7 +6238,7 @@ function AnniversaryResultsView({ userName, partnerName, myAnswers, onBack }) {
             {[
               { label: `${insights.filter(i=>i.type==="strength").length} strengths identified`, color: "#10b981", bg: "#EDFAF5" },
               { label: `${insights.filter(i=>i.type==="explore").length} areas to explore`, color: "#F59E0B", bg: "#FEF9EE" },
-              { label: "11 questions · 2 voices", color: "#1B5FE8", bg: "#EEF0FF" },
+              { label: "14 questions · 2 voices", color: "#1B5FE8", bg: "#EEF0FF" },
             ].map(b => (
               <div key={b.label} style={{ background: b.bg, borderRadius: 8, padding: "0.3rem 0.7rem", display: "flex", alignItems: "center", gap: "0.3rem" }}>
                 <div style={{ width: 6, height: 6, borderRadius: "50%", background: b.color, flexShrink: 0 }} />
@@ -6444,7 +6444,7 @@ function BetaSurveyModal({ userName, coupleType, onClose }) {
 // categorical strings with stable keys — well-suited to string-equality
 // delta detection. A future version can extend this to Ex1 and Ex3.
 // ─────────────────────────────────────────────────────────────────────────────
-function RetakeComparisonCard({ currentEx2, priorEx2, priorAt, userName }) {
+function RetakeComparisonCard({ currentEx2, priorEx2, priorAt, userName, partnerName }) {
   const [expanded, setExpanded] = useState(false);
 
   // Flatten both answer sets into {categorizedKey: answerString} dicts so we
@@ -6510,7 +6510,11 @@ function RetakeComparisonCard({ currentEx2, priorEx2, priorAt, userName }) {
     if (scope === 'life') {
       // lq_children → Children, lq_conflict_when → Conflict timing
       const map = {
-        lq_children: 'Children', lq_parents: 'Parents / aging family',
+        lq_children: 'Children',
+        lq_inperson_user: `In-person time with ${userName || 'your'}'s family`,
+        lq_contact_user: `Day-to-day contact with ${userName || 'your'}'s family`,
+        lq_inperson_partner: `In-person time with ${partnerName || "partner's"}'s family`,
+        lq_contact_partner: `Day-to-day contact with ${partnerName || "partner's"}'s family`,
         lq_family_conf: 'Family conflict loyalty', lq_location: 'Where you live',
         lq_social: 'Social life', lq_routine: 'Routine vs spontaneity',
         lq_faith: 'Faith / spirituality', lq_values: 'Core values',
@@ -7081,6 +7085,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
             priorEx2={ex2AnswersPrior}
             priorAt={ex2PriorAt}
             userName={userName}
+            partnerName={partnerName}
           />
           <div style={{ marginBottom: "1.5rem" }}>
             <div style={{ fontFamily: HFONT, fontSize: "1.6rem", fontWeight: 700, color: C.ink, marginBottom: "0.25rem" }}>Your highlights</div>
@@ -10253,7 +10258,7 @@ const UPSELL_PRODUCTS = {
     tagline: "A third exercise about the moments that shaped your relationship.",
     description: "Each of you reflects independently on the moments that defined you, how you're feeling about the relationship right now, and where you want to go. Your answers are shown side by side, with insights drawn from where your reflections converge and where they diverge.",
     includes: [
-      "11 reflection questions per person",
+      "14 reflection questions per person",
       "Side-by-side comparison of your answers",
       "Insights on strengths and areas to explore",
       "Reflection action plan with conversation prompts",
@@ -10989,7 +10994,6 @@ export default function App() {
       "emotional__Maintaining closeness and emotional intimacy over time": "Mom",
       "emotional__Initiating difficult conversations": "Mom",
       "emotional__Being the first to reach out after conflict": "Mom",
-      "emotional__Maintaining relationships with extended family and in-laws": "Mom",
     },
     responsibilities: {
       "household__Grocery shopping and meal planning": "Sarah",
@@ -11010,11 +11014,9 @@ export default function App() {
       "emotional__Maintaining closeness and emotional intimacy over time": "Both of us",
       "emotional__Initiating difficult conversations": "Both of us",
       "emotional__Being the first to reach out after conflict": "Sarah",
-      "emotional__Maintaining relationships with extended family and in-laws": "Sarah",
     },
     life: {
       lq_children: "Important to me, I want at least one",
-      lq_parents: "I'd offer meaningful support but expect them to maintain their own lives",
       lq_family_conf: "Side with my partner, they're my primary family now",
       lq_location: "I have a preference but I'm open to discussion",
       lq_social: "A healthy balance of time together and time with others",
@@ -11107,7 +11109,6 @@ export default function App() {
       "emotional__Maintaining closeness and emotional intimacy over time": "Mom",
       "emotional__Initiating difficult conversations": "Dad",
       "emotional__Being the first to reach out after conflict": "Dad",
-      "emotional__Maintaining relationships with extended family and in-laws": "Mom",
     },
     responsibilities: {
       "household__Cooking meals": "Sarah",
@@ -11129,11 +11130,9 @@ export default function App() {
       "emotional__Maintaining closeness and emotional intimacy over time": "Both of us",
       "emotional__Initiating difficult conversations": "Both of us",
       "emotional__Being the first to reach out after conflict": "James",
-      "emotional__Maintaining relationships with extended family and in-laws": "Both of us",
     },
     life: {
       lq_children: "Important to me, I want at least one",
-      lq_parents: "They're independent, I'd help in a crisis but don't expect to be heavily involved",
       lq_family_conf: "Mediate fairly, I won't automatically take either side",
       lq_location: "I'd go wherever makes the most sense for us as a unit",
       lq_social: "Quiet by default with room for social when we choose it",

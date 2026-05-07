@@ -1683,6 +1683,15 @@ body{
 .refcard-names em{
   font-style:italic;font-weight:400;color:rgba(255,255,255,.55);
 }
+/* Per-couple-type phrase, between names and tiles. From phrase_that_lands. */
+.refcard-phrase{
+  font-family:var(--hfont);font-style:italic;font-weight:400;
+  font-size:.92rem;line-height:1.4;letter-spacing:-.005em;
+  color:rgba(255,255,255,.78);
+  text-align:center;
+  margin:.04in auto .14in;
+  max-width:4.6in;
+}
 /* 3-tile layout: couple type · logo · goal */
 .refcard-tiles{
   display:grid;grid-template-columns:1.15fr .85fr 1.1fr;
@@ -2735,6 +2744,7 @@ def build_reference_card(page_num):
       </div>
 
       <h1 class="refcard-names">{COUPLE['u']} <em>&amp;</em> {COUPLE['p']}</h1>
+      <p class="refcard-phrase">"{COUPLE['couple_type']['phrase_that_lands']}"</p>
 
       <div class="refcard-tiles">
         <div class="refcard-tile">

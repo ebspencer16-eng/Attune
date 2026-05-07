@@ -397,7 +397,7 @@ const section4 = [
 // ── SECTION 6 ────────────────────────────────────────────────────────────
 const section5 = [
   ...bigSection(5, 'Reference Card phrase',
-    'Center tile of the Reference Card. Pulls tips[0].phraseTry for the couple type.',
+    'Per-couple-type phrase that sits between the names and the tiles on the Reference Card. Pulls tips[0].phraseTry for the couple type.',
     'C2410C'),
 
   ...NEW_COUPLE_TYPES.flatMap((ct, i) => {
