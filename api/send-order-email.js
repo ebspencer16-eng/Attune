@@ -67,6 +67,10 @@ export default async function handler(req) {
   // Note: partner invite is NOT sent here — AuthModal sends the real partner
   // invite (with a proper invite code) when the buyer completes signup and
   // enters their partner's email in the profile setup step.
+  //
+  // Scheduled 30 seconds in the future so the order confirmation reliably
+  // lands first. Resend processes emails asynchronously after API accept,
+  // so sequential await alone doesn't guarantee delivery order — this does.
   if (!isGift && !isPhysical) {
     const accessUrl = `https://attune-relationships.com/app?signup=1&pkg=${pkgKey}&p1=${encodeURIComponent(buyerName||"")}`;
     emails.push({
@@ -74,6 +78,7 @@ export default async function handler(req) {
       to: [buyerEmail],
       subject: `Set up your Attune profile — ${buyerName}`,
       html: getStartedBuyerHtml({ name: buyerName, partnerName, accessUrl, partnerEmail }),
+      scheduled_at: new Date(Date.now() + 30_000).toISOString(),
     });
   }
 

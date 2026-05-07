@@ -63,8 +63,10 @@ nav{position:sticky;top:0;z-index:100;height:58px;background:rgba(255,253,249,.9
 .pkg-features li.bold-feat{color:var(--ink);font-weight:500}
 
 /* POPULAR BADGE */
-.pkg-tile.popular{border-color:var(--orange);padding-top:2.2rem}
-.popular-badge{position:absolute;top:0;left:0;right:0;background:linear-gradient(90deg,var(--orange),#d45a2e);color:white;font-size:.6rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;text-align:center;padding:.28rem .5rem;font-family:var(--bfont)}
+.pkg-tile.popular{padding-top:1.4rem}
+.pkg-cell-popular{display:flex;flex-direction:column;gap:.4rem;align-self:end;height:100%}
+.pkg-cell-popular > .pkg-tile{flex:1}
+.popular-tagline{font-family:var(--bfont);font-size:.65rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--orange);text-align:center;margin:0;padding:.1rem 0}
 
 /* ADD-ONS */
 .addons-section{max-width:1080px;margin:0 auto;padding:0 1.5rem 2rem}
@@ -176,11 +178,12 @@ nav{position:sticky;top:0;z-index:100;height:58px;background:rgba(255,253,249,.9
   </div>
 
   <!-- Starting Out -->
-  <div class="pkg-tile popular" id="tile-newlywed" onclick="selectPkg('newlywed')">
-    <div class="popular-badge">Most popular</div>
-    <div class="pkg-check">
-      <svg width="11" height="9" viewBox="0 0 11 9" fill="none"><path d="M1 4.5L4 7.5L10 1" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-    </div>
+  <div class="pkg-cell-popular">
+    <div class="popular-tagline">Most popular</div>
+    <div class="pkg-tile popular" id="tile-newlywed" onclick="selectPkg('newlywed')">
+      <div class="pkg-check">
+        <svg width="11" height="9" viewBox="0 0 11 9" fill="none"><path d="M1 4.5L4 7.5L10 1" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
     <span class="pkg-badge" style="background:#FFF0EB;color:#E8673A;">Starting Out</span>
     <div class="pkg-name">Starting Out Collection</div>
     <div class="pkg-price" id="price-newlywed">$174</div>
@@ -192,6 +195,7 @@ nav{position:sticky;top:0;z-index:100;height:58px;background:rgba(255,253,249,.9
       <li>Gift box</li>
     </ul>
     <a class="more-info-link" onclick="openSidebar('newlywed',event)">More info →</a>
+    </div>
   </div>
 
   <!-- Anniversary -->

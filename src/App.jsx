@@ -9383,7 +9383,7 @@ function AuthModal({ mode, onClose, onSuccess }) {
   );
 
   return (
-    <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.55)", zIndex: 500, display: "flex", alignItems: isMobile ? "flex-start" : "center", justifyContent: "center", padding: isMobile ? "0" : "1rem", overflowY: "auto" }}
+    <div style={{ position: "fixed", inset: 0, background: "#1e1a35", zIndex: 500, display: "flex", alignItems: isMobile ? "flex-start" : "center", justifyContent: "center", padding: isMobile ? "0" : "1rem", overflowY: "auto" }}
       onClick={e => e.target === e.currentTarget && onClose()}>
       <style>{`@keyframes authShake { 0%,100% { transform: translateX(0); } 15% { transform: translateX(-10px); } 30% { transform: translateX(10px); } 45% { transform: translateX(-8px); } 60% { transform: translateX(8px); } 75% { transform: translateX(-4px); } 90% { transform: translateX(4px); } }`}</style>
       <div style={{ background: "#FFFDF9", borderRadius: isMobile ? 0 : 22, padding: isMobile ? "1.5rem 1.25rem 1.25rem" : "2rem 2rem 1.75rem", width: "100%", minHeight: isMobile ? "100vh" : "auto", maxWidth: isMobile ? "none" : 440, boxShadow: isMobile ? "none" : "0 32px 80px rgba(0,0,0,0.28)", position: "relative", animation: shake ? "authShake 0.45s cubic-bezier(.36,.07,.19,.97)" : undefined }}>
@@ -9443,8 +9443,8 @@ function AuthModal({ mode, onClose, onSuccess }) {
             {inp("Your email", "email", "email")}
             {inp("Choose a password", "password", "password")}
             <div style={{ borderTop: "1px solid #E8DDD0", margin: "0.75rem 0 0.75rem" }} />
-            <p style={{ fontSize: "0.75rem", color: "#8C7A68", fontFamily: "'DM Sans',sans-serif", marginBottom: "0.6rem", fontWeight: 600 }}>Your partner — optional now, required before results unlock</p>
-            {inp("Partner's first name (optional)", "partnerName")}
+            <p style={{ fontSize: "0.75rem", color: "#8C7A68", fontFamily: "'DM Sans',sans-serif", marginBottom: "0.6rem", fontWeight: 600 }}>Your partner — required before results unlock</p>
+            {inp("Partner's first name", "partnerName")}
             <div style={{ display: "flex", gap: "0.5rem", marginBottom: "0rem" }}>
               {["she/her", "he/him", "they/them"].map(p => (
                 <button key={p} onClick={() => upd("partnerPronouns", form.partnerPronouns === p ? "" : p)}
@@ -9840,13 +9840,12 @@ function PartnerLandingScreen({ inviteFrom, inviteCode, onCreateAccount }) {
         {inp('Password (6+ characters)', 'password', 'password')}
 
         {/* ── Optional demographics ── same block as Partner A signup ── */}
-        <details style={{ marginBottom: "0.85rem" }}>
-          <summary style={{ cursor: "pointer", fontSize: "0.76rem", fontWeight: 600, color: "#0E0B07", fontFamily: "'DM Sans',sans-serif", padding: "0.55rem 0", listStyle: "none" }}>
-            <span style={{ color: "#E8673A", marginRight: "0.4rem" }}>+</span>
-            Tell us about yourself (optional)
-          </summary>
-          <p style={{ fontSize: "0.68rem", color: "#8C7A68", fontFamily: "'DM Sans',sans-serif", lineHeight: 1.6, marginBottom: "0.75rem", marginTop: "0.3rem" }}>
-            Aggregate research only. Kept separately from your name and email.
+        <div style={{ marginBottom: "1rem" }}>
+          <div style={{ fontSize: "0.78rem", fontWeight: 600, color: "#0E0B07", fontFamily: "'DM Sans',sans-serif", padding: "0.65rem 0 0.2rem" }}>
+            Tell us about yourself
+          </div>
+          <p style={{ fontSize: "0.7rem", color: "#8C7A68", fontFamily: "'DM Sans',sans-serif", lineHeight: 1.6, marginBottom: "0.9rem", marginTop: "0.3rem" }}>
+            Helps us understand who Attune serves. Responses are kept separately from names and emails, and only ever used in aggregate.
           </p>
           {[
             { k: "ageRange", label: "Your age range", opts: [["", "Prefer not to say"], ["18-24", "18–24"], ["25-34", "25–34"], ["35-44", "35–44"], ["45-54", "45–54"], ["55+", "55 or older"]] },
@@ -9856,15 +9855,15 @@ function PartnerLandingScreen({ inviteFrom, inviteCode, onCreateAccount }) {
             { k: "children", label: "Children", opts: [["", "Prefer not to say"], ["none", "None"], ["1", "1"], ["2", "2"], ["3+", "3 or more"], ["expecting", "Expecting"]] },
             { k: "signupSource", label: "How did you hear about Attune?", opts: [["", "Prefer not to say"], ["friend", "Friend or family"], ["social", "Social media"], ["search", "Search"], ["gift", "Received as a gift"], ["therapist", "Therapist or counselor"], ["other", "Other"]] },
           ].map(({ k, label, opts }) => (
-            <div key={k} style={{ marginBottom: "0.5rem" }}>
-              <label style={{ fontSize: "0.66rem", color: "#8C7A68", fontFamily: "'DM Sans',sans-serif", display: "block", marginBottom: "0.15rem" }}>{label}</label>
+            <div key={k} style={{ marginBottom: "0.65rem" }}>
+              <label style={{ fontSize: "0.68rem", color: "#8C7A68", fontFamily: "'DM Sans',sans-serif", display: "block", marginBottom: "0.2rem" }}>{label}</label>
               <select value={form[k]} onChange={e => upd(k, e.target.value)}
-                style={{ width: "100%", padding: "0.5rem 0.7rem", border: "1.5px solid #E8DDD0", borderRadius: 8, fontSize: "0.78rem", fontFamily: "'DM Sans',sans-serif", color: "#0E0B07", background: "#FFFDF9" }}>
+                style={{ width: "100%", padding: "0.55rem 0.75rem", border: "1.5px solid #E8DDD0", borderRadius: 8, fontSize: "0.8rem", fontFamily: "'DM Sans',sans-serif", color: "#0E0B07", background: "#FFFDF9" }}>
                 {opts.map(([v, l]) => <option key={v} value={v}>{l}</option>)}
               </select>
             </div>
           ))}
-        </details>
+        </div>
 
         {err && <p style={{ color: '#ef4444', fontSize: '0.75rem', fontFamily: "'DM Sans', sans-serif", marginBottom: '0.75rem' }}>{err}</p>}
 
@@ -13167,7 +13166,7 @@ export default function App() {
               <input type="checkbox" id="profile_emailOptIn" defaultChecked={account?.emailOptIn !== false}
                 style={{ marginTop: "0.15rem", accentColor: "#E8673A", width: 14, height: 14, flexShrink: 0 }} />
               <span style={{ fontSize: "0.68rem", color: "#8C7A68", fontFamily: "'DM Sans',sans-serif", lineHeight: 1.55 }}>
-                Send me a 6-month check-in email
+                Send me occasional opportunities to continue relationship growth through Attune.
               </span>
             </label>
           </div>
