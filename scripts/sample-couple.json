@@ -1,0 +1,399 @@
+{
+  "u": "Maya",
+  "p": "David",
+  "together": "Together, four years",
+  "couple_type": {
+    "id": "WX",
+    "name": "The Jumpstart",
+    "subtitle": "initiator-anchor",
+    "tagline": "Both want resolution. Different instruments, same direction.",
+    "description": "Maya and David both move toward resolution when things get hard, you're pulling in the same direction. Where you differ is in how the internal experience travels: one processes outward, and one holds it closer. The destination is the same. The path there looks different.",
+    "phrase_that_lands": "I need to process this out loud, bear with me. I don't have it figured out yet."
+  },
+  "edition_internal": "0247",
+  "date": "April 2026",
+  "scores": {
+    "energy": [
+      4.0,
+      3.4
+    ],
+    "expression": [
+      4.5,
+      2.3
+    ],
+    "needs": [
+      2.0,
+      2.2
+    ],
+    "bids": [
+      4.3,
+      3.6
+    ],
+    "conflict": [
+      1.8,
+      2.0
+    ],
+    "repair": [
+      4.0,
+      2.4
+    ],
+    "closeness": [
+      4.5,
+      2.8
+    ],
+    "love": [
+      2.0,
+      4.2
+    ],
+    "stress": [
+      4.2,
+      1.8
+    ],
+    "feedback": [
+      4.2,
+      2.5
+    ]
+  },
+  "expectations": {
+    "household": 82,
+    "emotional": 48,
+    "extended_family": 67,
+    "money": 78,
+    "life": 73,
+    "operate": 68
+  },
+  "expectations_detail": {
+    "household": {
+      "maya": [
+        [
+          "Cooking weeknights",
+          "Both of us"
+        ],
+        [
+          "Grocery & meal planning",
+          "Maya"
+        ],
+        [
+          "Day-to-day tidying",
+          "Both of us"
+        ],
+        [
+          "Home repairs & maintenance",
+          "David"
+        ],
+        [
+          "Family calendar",
+          "Maya"
+        ],
+        [
+          "Hosting & holidays",
+          "Both of us"
+        ],
+        [
+          "Vacation planning",
+          "Both of us"
+        ]
+      ],
+      "david": [
+        [
+          "Cooking weeknights",
+          "Both of us"
+        ],
+        [
+          "Grocery & meal planning",
+          "Both of us"
+        ],
+        [
+          "Day-to-day tidying",
+          "Maya"
+        ],
+        [
+          "Home repairs & maintenance",
+          "David"
+        ],
+        [
+          "Family calendar",
+          "Both of us"
+        ],
+        [
+          "Hosting & holidays",
+          "Both of us"
+        ],
+        [
+          "Vacation planning",
+          "Maya"
+        ]
+      ]
+    },
+    "emotional": {
+      "maya": [
+        [
+          "Mental load",
+          "Maya"
+        ],
+        [
+          "Tracking how everyone is",
+          "Maya"
+        ],
+        [
+          "Maintaining closeness",
+          "Both of us"
+        ],
+        [
+          "Hard conversations",
+          "Maya"
+        ],
+        [
+          "Repair after friction",
+          "Maya"
+        ]
+      ],
+      "david": [
+        [
+          "Mental load",
+          "Both of us"
+        ],
+        [
+          "Tracking how everyone is",
+          "Both of us"
+        ],
+        [
+          "Maintaining closeness",
+          "Both of us"
+        ],
+        [
+          "Hard conversations",
+          "Both of us"
+        ],
+        [
+          "Repair after friction",
+          "Both of us"
+        ]
+      ]
+    },
+    "extended_family": {
+      "maya": [
+        [
+          "Visits with Maya's family",
+          "Maya"
+        ],
+        [
+          "Visits with David's family",
+          "Both of us"
+        ],
+        [
+          "Staying in touch with Maya's family",
+          "Maya"
+        ],
+        [
+          "Staying in touch with David's family",
+          "David"
+        ],
+        [
+          "Gifting for Maya's family",
+          "Maya"
+        ],
+        [
+          "Gifting for David's family",
+          "Both of us"
+        ]
+      ],
+      "david": [
+        [
+          "Visits with Maya's family",
+          "Maya"
+        ],
+        [
+          "Visits with David's family",
+          "David"
+        ],
+        [
+          "Staying in touch with Maya's family",
+          "Maya"
+        ],
+        [
+          "Staying in touch with David's family",
+          "David"
+        ],
+        [
+          "Gifting for Maya's family",
+          "Maya"
+        ],
+        [
+          "Gifting for David's family",
+          "David"
+        ]
+      ]
+    },
+    "money": {
+      "maya": [
+        [
+          "Day-to-day finances",
+          "Both of us"
+        ],
+        [
+          "Long-term financial decisions",
+          "Both of us"
+        ],
+        [
+          "Whose career is prioritized",
+          "Both of us"
+        ],
+        [
+          "How we hold money",
+          "Mostly combined"
+        ],
+        [
+          "Saving v spending",
+          "Lean saving"
+        ],
+        [
+          "Risk tolerance",
+          "Comfortable"
+        ]
+      ],
+      "david": [
+        [
+          "Day-to-day finances",
+          "David"
+        ],
+        [
+          "Long-term financial decisions",
+          "Both of us"
+        ],
+        [
+          "Whose career is prioritized",
+          "Both of us"
+        ],
+        [
+          "How we hold money",
+          "Mostly combined"
+        ],
+        [
+          "Saving v spending",
+          "Lean saving"
+        ],
+        [
+          "Risk tolerance",
+          "Cautious"
+        ]
+      ]
+    },
+    "life": {
+      "maya": [
+        [
+          "Children",
+          "Want at least one"
+        ],
+        [
+          "When family & partner conflict",
+          "Side with partner"
+        ],
+        [
+          "Where we live",
+          "Strong preference"
+        ],
+        [
+          "Social life",
+          "Balanced"
+        ],
+        [
+          "Daily rhythm",
+          "Loose"
+        ],
+        [
+          "Faith & spirituality",
+          "Personal"
+        ],
+        [
+          "Core values & beliefs",
+          "Closely aligned"
+        ]
+      ],
+      "david": [
+        [
+          "Children",
+          "Want at least one"
+        ],
+        [
+          "When family & partner conflict",
+          "Mediate"
+        ],
+        [
+          "Where we live",
+          "Wherever"
+        ],
+        [
+          "Social life",
+          "Quiet"
+        ],
+        [
+          "Daily rhythm",
+          "Loose"
+        ],
+        [
+          "Faith & spirituality",
+          "Personal"
+        ],
+        [
+          "Core values & beliefs",
+          "Closely aligned"
+        ]
+      ]
+    },
+    "operate": {
+      "maya": [
+        [
+          "When to address conflict",
+          "Immediately"
+        ],
+        [
+          "Conflict resolution time",
+          "Same day"
+        ],
+        [
+          "What repair looks like",
+          "Direct apology"
+        ],
+        [
+          "Physical affection",
+          "Essential"
+        ],
+        [
+          "Closeness during hard times",
+          "More closeness"
+        ],
+        [
+          "Independence",
+          "Important"
+        ]
+      ],
+      "david": [
+        [
+          "When to address conflict",
+          "Right moment"
+        ],
+        [
+          "Conflict resolution time",
+          "A night or two"
+        ],
+        [
+          "What repair looks like",
+          "Warmth returns"
+        ],
+        [
+          "Physical affection",
+          "Very important"
+        ],
+        [
+          "Closeness during hard times",
+          "Pull back"
+        ],
+        [
+          "Independence",
+          "Important"
+        ]
+      ]
+    }
+  }
+}
