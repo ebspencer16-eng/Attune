@@ -6820,7 +6820,10 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
         }
 
         if (ord.addonWorkbook === 'print') {
-          // Flag print order for fulfillment — admin will pick this up
+          // Flag print order for fulfillment. Two paths:
+          //  1. localStorage (legacy admin-on-same-device view)
+          //  2. Supabase orders.workbook_status (server-side, visible to
+          //     any admin/fulfillment vendor regardless of device)
           ord.workbookStatus = 'print_queued';
           localStorage.setItem('attune_order', JSON.stringify(ord));
           localStorage.setItem('attune_workbook_print_queued', JSON.stringify({
@@ -6829,10 +6832,27 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
             buyerName: ord.buyerName,
             buyerEmail: ord.buyerEmail,
           }));
+          // Server-side: update the order row so admin dashboards on
+          // other devices and any external fulfillment tooling can see
+          // this order is ready to ship. Best-effort; if Supabase is
+          // unavailable, the localStorage flag still drives the local
+          // admin view.
+          try {
+            const { supabase: sb, hasSupabase } = await import('./supabase.js');
+            if (hasSupabase() && ord.orderNum) {
+              await sb.from('orders').update({
+                workbook_status: 'print_queued',
+              }).eq('order_num', ord.orderNum);
+            }
+          } catch (_) {}
           return;
         }
 
-        // Digital — auto-generate
+        // Digital — auto-generate AND persist to Supabase Storage.
+        // Calls /api/store-workbook (which internally calls
+        // /api/generate-workbook, then uploads the .docx to storage and
+        // returns a 7-day signed URL). The order row is updated server-
+        // side with workbook_url + workbook_status='ready'.
         ord.workbookStatus = 'generating';
         localStorage.setItem('attune_order', JSON.stringify(ord));
 
@@ -6845,9 +6865,11 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
           ex2Answers, partnerEx2,
           coupleType
         );
+        // Add orderId so /api/store-workbook can update the row.
+        if (ord.orderNum) payload.orderId = ord.orderNum;
 
         // Pull the user's access token so the API can verify they own a
-        // workbook addon. Without this header, generate-workbook returns 401.
+        // workbook addon. Without this header, store-workbook returns 401.
         const _wbAuth = await (async () => {
           try {
             const { supabase: sb, hasSupabase } = await import('./supabase.js');
@@ -6856,7 +6878,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
             return session?.access_token || null;
           } catch { return null; }
         })();
-        const resp = await fetch('/api/generate-workbook', {
+        const resp = await fetch('/api/store-workbook', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -6866,15 +6888,15 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
         });
 
         if (resp.ok) {
-          // Just mark it ready — the download button has its own fetch
-          // path with fallbacks (cached URL > /api/generate-workbook > PDF
-          // in-browser). Caching the blob in localStorage was 400-500KB of
-          // dead weight that the download flow never read. Removing the
-          // blob write also reduces the chance of LocalStorage quota errors
-          // on devices with other Attune state already stored.
+          // store-workbook returns { ok, url, filename } — persist the
+          // signed URL in the order so the dashboard download can pull
+          // it directly without re-generating.
           try {
+            const data = await resp.json();
             localStorage.setItem('attune_workbook_ready', 'true');
             ord.workbookStatus = 'ready';
+            if (data?.url) ord.workbookUrl = data.url;
+            if (data?.filename) ord.workbookFilename = data.filename;
             localStorage.setItem('attune_order', JSON.stringify(ord));
             // Notify buyer by email
             if (ord.buyerEmail) {

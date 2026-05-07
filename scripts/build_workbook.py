@@ -6,10 +6,24 @@ dimensions + expectations + Parts 2-5) as a single HTML file.
 Designed to mirror the page structure of api/generate-workbook.js so
 the design can be ported back to the real generator once approved.
 
-Outputs to /mnt/user-data/outputs/attune_workbook_sample.html.
+Two modes:
 
-Run: python3 build_workbook.py
+  Local sample (default):
+    python3 build_workbook.py
+    Writes /mnt/user-data/outputs/attune_workbook_sample.html using the
+    hardcoded Maya & David sample data below.
+
+  Service mode (production):
+    python3 build_workbook.py --from-stdin > out.html
+    Reads JSON from stdin matching the COUPLE shape (see sample below)
+    and writes the rendered HTML to stdout. Used by the production
+    workbook service. The caller is responsible for transforming the
+    buildWorkbookPayload shape from src/App.jsx into the COUPLE shape
+    documented below, and for converting the output HTML to PDF (the
+    sibling render_workbook.mjs Playwright script does this).
 """
+import sys
+import json
 from pathlib import Path
 
 # ═══════════════════════════════════════════════════════════════════
@@ -3037,6 +3051,33 @@ body.has-banner{{padding-top:96px}}
 # ═══════════════════════════════════════════════════════════════════
 
 if __name__ == '__main__':
+    # ── Service mode ────────────────────────────────────────────────
+    # Read a COUPLE-shaped JSON payload from stdin, render the workbook
+    # HTML, write to stdout. Used by the production workbook service.
+    # The caller is responsible for transforming src/App.jsx's
+    # buildWorkbookPayload output into the COUPLE shape (see SERVICE_INTEGRATION.md).
+    if '--from-stdin' in sys.argv:
+        try:
+            payload = json.loads(sys.stdin.read())
+        except json.JSONDecodeError as e:
+            sys.stderr.write(f'Invalid JSON on stdin: {e}\n')
+            sys.exit(1)
+        # Validate the minimum required keys before swapping COUPLE so
+        # the renderer doesn't blow up mid-page on a missing field.
+        required = ['u', 'p', 'couple_type', 'scores', 'expectations', 'expectations_detail']
+        missing = [k for k in required if k not in payload]
+        if missing:
+            sys.stderr.write(f'Payload missing required keys: {missing}\n')
+            sys.exit(2)
+        # Override the module-level COUPLE; build_full_workbook reads
+        # from this global, so all downstream renders use the new data.
+        globals()['COUPLE'] = payload
+        same_type = ('--same-type' in sys.argv)
+        html = build_full_workbook(same_type=same_type)
+        sys.stdout.write(html)
+        sys.exit(0)
+
+    # ── Local sample mode (default) ─────────────────────────────────
     # Cross-type sample (Maya W + David X)
     out = Path('/mnt/user-data/outputs/attune_workbook_sample.html')
     html = build_full_workbook(same_type=False)
