@@ -2493,6 +2493,11 @@ function buildWorkbookPayload(userName, partnerName, ex1Answers, partnerEx1, ex2
     scores: myS,
     partnerScores: partS,
     coupleType: coupleType || null,
+    // Per-couple-type phrase from tips[0].phraseTry. Surfaced separately
+    // so renderers don't need to walk the full tips array. Used by the
+    // Python workbook builder's reference card (sits between the names
+    // and the tiles). Null if coupleType is unavailable.
+    phraseThatLands: coupleType?.tips?.[0]?.phraseTry || null,
     // NEW Phase 5a fields — full ex2 data
     responsibilities,
     lifeQuestions,
@@ -6789,6 +6794,9 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
     // ── Auto-fulfil workbook if pre-ordered ─────────────────────────────────
     // If the couple ordered a digital workbook before completing exercises,
     // generate it now and mark it ready. If they ordered print, flag for fulfillment.
+    // Gates: order exists, workbook addon purchased, not already generated,
+    // and BOTH partners have completed ex1 and ex2 (partial data would
+    // produce a workbook with empty sections, which we never want to ship).
     (async () => {
       try {
         const orderRaw = localStorage.getItem('attune_order');
@@ -6796,6 +6804,20 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
         const ord = JSON.parse(orderRaw);
         if (!ord?.addonWorkbook) return;
         if (localStorage.getItem('attune_workbook_ready') === 'true') return; // already done
+
+        // Require both partners to have completed both exercises. Without
+        // this, the workbook would generate from one partner's data alone.
+        const bothEx1Done = !!(ex1Answers && partnerEx1
+          && Object.keys(ex1Answers).length > 0
+          && Object.keys(partnerEx1).length > 0);
+        const bothEx2Done = !!(ex2Answers && partnerEx2
+          && Object.keys(ex2Answers).length > 0
+          && Object.keys(partnerEx2).length > 0);
+        if (!bothEx1Done || !bothEx2Done) {
+          ord.workbookStatus = 'pending_exercises';
+          localStorage.setItem('attune_order', JSON.stringify(ord));
+          return;
+        }
 
         if (ord.addonWorkbook === 'print') {
           // Flag print order for fulfillment — admin will pick this up
