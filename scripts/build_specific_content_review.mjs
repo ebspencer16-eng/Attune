@@ -413,7 +413,7 @@ const section5 = [
 // ── SECTION 7 ────────────────────────────────────────────────────────────
 const section6 = [
   ...bigSection(6, 'Part epigraph options',
-    'Each of the 4 main Parts opens with an epigraph, a centered italic quote + attribution. Three candidates per Part. Mark your pick or write your own.',
+    'The workbook has 5 Parts. Parts 1–4 each open with an epigraph that needs your pick (Part 5\'s is already set). Three candidates per Part below. Mark your pick or write your own.',
     INK),
 
   ...[1, 2, 3, 4].flatMap(partNum => {
