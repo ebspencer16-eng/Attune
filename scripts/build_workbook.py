@@ -596,19 +596,19 @@ COUPLE = {
     # representative answers that demonstrate each alignment state.
     'expectations_detail': {
         'household': {
-            'maya':  [('Cooking weeknights', 'Shared'), ('Grocery & meal planning', 'Maya'), ('Day-to-day tidying', 'Shared'), ('Home repairs & maintenance', 'David'), ('Family calendar', 'Maya'), ('Hosting & holidays', 'Shared'), ('Vacation planning', 'Shared')],
-            'david': [('Cooking weeknights', 'Shared'), ('Grocery & meal planning', 'Shared'), ('Day-to-day tidying', 'Maya'), ('Home repairs & maintenance', 'David'), ('Family calendar', 'Shared'), ('Hosting & holidays', 'Shared'), ('Vacation planning', 'Maya')],
+            'maya':  [('Cooking weeknights', 'Both of us'), ('Grocery & meal planning', 'Maya'), ('Day-to-day tidying', 'Both of us'), ('Home repairs & maintenance', 'David'), ('Family calendar', 'Maya'), ('Hosting & holidays', 'Both of us'), ('Vacation planning', 'Both of us')],
+            'david': [('Cooking weeknights', 'Both of us'), ('Grocery & meal planning', 'Both of us'), ('Day-to-day tidying', 'Maya'), ('Home repairs & maintenance', 'David'), ('Family calendar', 'Both of us'), ('Hosting & holidays', 'Both of us'), ('Vacation planning', 'Maya')],
         },
         'emotional': {
             'maya':  [('Mental load', 'Maya'), ('Tracking how everyone is', 'Maya'), ('Maintaining closeness', 'Both of us'), ('Hard conversations', 'Maya'), ('Repair after friction', 'Maya')],
-            'david': [('Mental load', 'Shared'), ('Tracking how everyone is', 'Shared'), ('Maintaining closeness', 'Both of us'), ('Hard conversations', 'Shared'), ('Repair after friction', 'Shared')],
+            'david': [('Mental load', 'Both of us'), ('Tracking how everyone is', 'Both of us'), ('Maintaining closeness', 'Both of us'), ('Hard conversations', 'Both of us'), ('Repair after friction', 'Both of us')],
         },
         'extended_family': {
-            'maya':  [("Visits with Maya's family", 'Maya'), ("Visits with David's family", 'Both of us'), ("Staying in touch with Maya's family", 'Maya'), ("Staying in touch with David's family", 'David'), ("Gifting for Maya's family", 'Maya'), ("Gifting for David's family", 'Shared')],
+            'maya':  [("Visits with Maya's family", 'Maya'), ("Visits with David's family", 'Both of us'), ("Staying in touch with Maya's family", 'Maya'), ("Staying in touch with David's family", 'David'), ("Gifting for Maya's family", 'Maya'), ("Gifting for David's family", 'Both of us')],
             'david': [("Visits with Maya's family", 'Maya'), ("Visits with David's family", 'David'), ("Staying in touch with Maya's family", 'Maya'), ("Staying in touch with David's family", 'David'), ("Gifting for Maya's family", 'Maya'), ("Gifting for David's family", 'David')],
         },
         'money': {
-            'maya':  [('Day-to-day finances', 'Shared'), ('Long-term financial decisions', 'Both of us'), ('Whose career is prioritized', 'Both of us'), ('How we hold money', 'Mostly combined'), ('Saving v spending', 'Lean saving'), ('Risk tolerance', 'Comfortable')],
+            'maya':  [('Day-to-day finances', 'Both of us'), ('Long-term financial decisions', 'Both of us'), ('Whose career is prioritized', 'Both of us'), ('How we hold money', 'Mostly combined'), ('Saving v spending', 'Lean saving'), ('Risk tolerance', 'Comfortable')],
             'david': [('Day-to-day finances', 'David'), ('Long-term financial decisions', 'Both of us'), ('Whose career is prioritized', 'Both of us'), ('How we hold money', 'Mostly combined'), ('Saving v spending', 'Lean saving'), ('Risk tolerance', 'Cautious')],
         },
         'life': {
@@ -712,6 +712,32 @@ body{
   line-height:1.02;letter-spacing:-.028em;color:var(--ink);
 }
 .display-title em{font-style:italic;font-weight:700}
+
+/* Section intro pages (Section A, Section B, etc.): live between part covers
+   and content. Smaller heading + tighter top so they don't read as covers. */
+.section-intro{
+  margin-top:.42in;max-width:5.6in;
+}
+.section-intro-eye{margin-bottom:18px}
+.section-intro-title{
+  font-family:var(--hfont);font-weight:700;
+  font-size:2.6rem;line-height:1.04;letter-spacing:-.022em;
+  color:var(--ink);margin:0;
+}
+.section-intro-title em{font-style:italic;font-weight:700}
+.section-intro-lead{
+  font-family:var(--hfont);font-style:italic;font-size:1rem;
+  line-height:1.55;color:var(--graphite);
+  margin-top:1.1rem;
+}
+.section-intro-rule{
+  height:1px;background:var(--hairline);
+  margin:.42in 0 .26in;width:100%;
+}
+.section-intro-foot{
+  font-family:var(--bfont);font-size:.86rem;line-height:1.7;
+  color:var(--slate);margin:0;
+}
 
 /* ── COVER ───────────────────────────────────────────────────── */
 .cover{
@@ -996,11 +1022,18 @@ body{
 .dim-row-dot.partner-a{background:var(--coral-deep)}
 .dim-row-dot.partner-b{background:var(--indigo-deep)}
 
-/* Snapshot legend */
+/* Snapshot section title row: title + legend on same line */
+.snap-section-row{
+  display:flex;justify-content:space-between;align-items:baseline;
+  margin-top:.32in;padding-bottom:6px;
+  border-bottom:1px solid var(--hairline);
+}
+.snap-section-row .snap-section-title{margin:0;border:none;padding:0}
+/* Snapshot legend: dots + names, sits inline with the section title */
 .snapshot-legend{
-  display:flex;gap:1.2rem;margin-top:.14in;padding-top:.1in;
-  border-top:1px solid var(--hairline);
-  font-family:var(--bfont);font-size:9px;color:var(--muted);font-weight:500;
+  display:flex;gap:1.2rem;
+  font-family:var(--bfont);font-size:10px;color:var(--graphite);font-weight:600;
+  text-transform:uppercase;letter-spacing:.08em;
 }
 .legend-dot{display:inline-flex;align-items:center;gap:6px}
 .legend-dot::before{content:"";width:9px;height:9px;border-radius:50%}
@@ -1348,6 +1381,7 @@ body{
     var(--hairline) 1.55em,
     var(--hairline) calc(1.55em + 1px)
   );
+  background-position-y: 1.55em;
   height:calc(1.55em * var(--lines, 3));
   margin-top:8px;
 }
@@ -1627,9 +1661,9 @@ body{
   content:"";position:absolute;top:0;left:0;right:0;height:3px;
   background:linear-gradient(90deg,#E8673A 0%,#9B5DE5 50%,#1B5FE8 100%);
 }
-/* Top meta row: ATTUNE RELATIONSHIPS · REFERENCE CARD on left, no edition */
+/* Top meta row: ATTUNE RELATIONSHIPS · REFERENCE CARD centered */
 .refcard-meta{
-  display:flex;justify-content:space-between;align-items:baseline;
+  display:flex;justify-content:center;align-items:baseline;
   padding-bottom:.14in;border-bottom:1px solid rgba(255,255,255,.18);
   margin-bottom:.18in;margin-top:.04in;
 }
@@ -1640,10 +1674,11 @@ body{
 }
 /* Partner names sit where "Keep this somewhere..." used to be */
 .refcard-names{
-  font-family:var(--hfont);font-size:2.2rem;font-weight:700;
+  font-family:var(--hfont);font-size:2.6rem;font-weight:700;
   line-height:1;letter-spacing:-.022em;
   color:var(--coral-soft);
-  margin:.06in 0 .04in;
+  margin:.12in 0 .1in;
+  text-align:center;
 }
 .refcard-names em{
   font-style:italic;font-weight:400;color:rgba(255,255,255,.55);
@@ -1699,17 +1734,17 @@ body{
   margin-top:2px;
 }
 .refcard-mark-name{
-  font-family:var(--hfont);font-size:1.05rem;font-weight:700;
+  font-family:var(--hfont);font-size:1.2rem;font-weight:700;
   color:white;letter-spacing:.01em;line-height:1;
 }
 .refcard-mark-kicker{
-  font-family:var(--bfont);font-size:7.5px;letter-spacing:.32em;
+  font-family:var(--bfont);font-size:8px;letter-spacing:.32em;
   text-transform:uppercase;font-weight:700;
   color:rgba(255,255,255,.55);line-height:1;
 }
 /* Gradient rule under wordmark, before tagline. Same as cover stripe. */
 .refcard-mark-rule{
-  width:46px;height:1.5px;margin-top:6px;
+  width:54px;height:1.5px;margin-top:8px;
   background:linear-gradient(90deg,#E8673A 0%,#9B5DE5 50%,#1B5FE8 100%);
   border-radius:1px;
 }
@@ -1725,8 +1760,8 @@ body{
   background-image:repeating-linear-gradient(
     transparent,
     transparent 1.4em,
-    rgba(45,34,80,.18) 1.4em,
-    rgba(45,34,80,.18) calc(1.4em + 1px)
+    rgba(45,34,80,.22) 1.4em,
+    rgba(45,34,80,.22) calc(1.4em + 1px)
   );
   border:1px solid rgba(255,255,255,.14);
   border-radius:2px;
@@ -2074,17 +2109,17 @@ def build_snapshot(page_num):
       </div>
     </div>
 
-    <div class="snap-section-title">Communication · 10 dimensions</div>
+    <div class="snap-section-row">
+      <div class="snap-section-title">Communication · 10 dimensions</div>
+      <div class="snapshot-legend">
+        <span class="legend-dot legend-sarah">{COUPLE['u']}</span>
+        <span class="legend-dot legend-james">{COUPLE['p']}</span>
+      </div>
+    </div>
     <div class="dim-table">{''.join(dim_rows)}
     </div>
 
-    <div class="snapshot-legend">
-      <span class="legend-dot legend-sarah">{COUPLE['u']}</span>
-      <span class="legend-dot legend-james">{COUPLE['p']}</span>
-      <span style="margin-left:auto;font-style:italic;font-family:var(--hfont)">Each dimension: 1 = far left pole · 5 = far right pole</span>
-    </div>
-
-    <div class="snap-section-title" style="margin-top:.2in">Expectations · 6 domains</div>
+    <div class="snap-section-title" style="margin-top:.32in">Expectations · 6 domains</div>
     <div class="expectations-grid">{''.join(exp_cards)}
     </div>
   </div>
@@ -2710,7 +2745,7 @@ def build_reference_card(page_num):
         </div>
         <div class="refcard-tile refcard-tile-logo">
           <div class="refcard-mark">
-            <svg class="refcard-mark-svg" width="58" height="42" viewBox="0 0 103 76" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <svg class="refcard-mark-svg" width="76" height="56" viewBox="0 0 103 76" fill="none" xmlns="http://www.w3.org/2000/svg">
               <defs>
                 <linearGradient id="refcardLogoGrad" x1="0" y1="0" x2="103" y2="76" gradientUnits="userSpaceOnUse">
                   <stop offset="0%" stop-color="#E8673A"/>
@@ -2812,13 +2847,12 @@ def build_full_workbook(same_type=False):
 <div class="page">
   <div class="page-running-head"><span>Part 01 · A closer look</span><span>Communication</span></div>
   <div class="page-inner">
-    <div style="margin-top:1.5in;">
-      <div class="eyebrow" style="color:var(--indigo-deep);margin-bottom:14px">Section A · Communication</div>
-      <h1 class="display-title" style="font-size:3.4rem;letter-spacing:-.026em;line-height:1">Ten dimensions of <em style="color:var(--indigo-deep)">how you talk to each other.</em></h1>
-      <p style="font-family:var(--hfont);font-style:italic;font-size:1.1rem;line-height:1.55;color:var(--graphite);margin-top:1.2rem;max-width:5.5in">Each dimension is a slice of how {COUPLE['u']} and {COUPLE['p']} actually communicate, energy, expression, conflict, repair, the small everyday currencies. Where you align, the answers come without translation. Where you don't, the gap is the conversation.</p>
-    </div>
-    <div style="margin-top:1in;padding-top:.32in;border-top:1px solid var(--hairline);max-width:5.5in">
-      <p style="font-family:var(--bfont);font-size:.86rem;line-height:1.7;color:var(--slate);">For each dimension, you'll see the spectrum, where each of you sits, what the gap means, three reflection prompts, a small experiment for the week, and space to write what you want to try together.</p>
+    <div class="section-intro">
+      <div class="eyebrow section-intro-eye" style="color:var(--indigo-deep)">Section A · Communication</div>
+      <h1 class="section-intro-title">Ten dimensions of <em style="color:var(--indigo-deep)">how you talk to each other.</em></h1>
+      <p class="section-intro-lead">Each dimension is a slice of how {COUPLE['u']} and {COUPLE['p']} actually communicate, energy, expression, conflict, repair, the small everyday currencies. Where you align, the answers come without translation. Where you don't, the gap is the conversation.</p>
+      <div class="section-intro-rule"></div>
+      <p class="section-intro-foot">For each dimension, you'll see the spectrum, where each of you sits, what the gap means, three reflection prompts, a small experiment for the week, and space to write what you want to try together.</p>
     </div>
   </div>
   <div class="page-num">{pn:03d}</div>
@@ -2836,10 +2870,10 @@ def build_full_workbook(same_type=False):
 <div class="page">
   <div class="page-running-head"><span>Part 01 · A closer look</span><span>Expectations</span></div>
   <div class="page-inner">
-    <div style="margin-top:1.5in;">
-      <div class="eyebrow" style="color:var(--gold-deep);margin-bottom:14px">Section B · Expectations</div>
-      <h1 class="display-title" style="font-size:3.4rem;letter-spacing:-.026em;line-height:1">Six domains of <em style="color:var(--gold-deep)">what you each assume.</em></h1>
-      <p style="font-family:var(--hfont);font-style:italic;font-size:1.1rem;line-height:1.55;color:var(--graphite);margin-top:1.2rem;max-width:5.5in">Most friction in long-term partnerships isn't about communication style. It's about quietly mismatched assumptions, who's leading what, how money should be held, what the next five years look like. The exercise surfaced what each of you actually expects. The next six pages put those expectations side by side.</p>
+    <div class="section-intro">
+      <div class="eyebrow section-intro-eye" style="color:var(--gold-deep)">Section B · Expectations</div>
+      <h1 class="section-intro-title">Six domains of <em style="color:var(--gold-deep)">what you each assume.</em></h1>
+      <p class="section-intro-lead">Most friction in long-term partnerships isn't about communication style. It's about quietly mismatched assumptions, who's leading what, how money should be held, what the next five years look like. The exercise surfaced what each of you actually expects. The next six pages put those expectations side by side.</p>
     </div>
   </div>
   <div class="page-num">{pn:03d}</div>
