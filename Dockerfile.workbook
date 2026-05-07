@@ -1,0 +1,57 @@
+# Attune Workbook PDF Service
+# ===========================
+#
+# Builds a single container that runs:
+#   - Node 20 (HTTP server + Playwright PDF renderer)
+#   - Python 3 (workbook HTML builder)
+#   - Chromium via the official Playwright image
+#
+# Deploy this image to Render, Railway, Fly.io, or any container host.
+# See scripts/SERVICE_INTEGRATION.md for the end-to-end deployment steps.
+#
+# Build locally:
+#   docker build -t attune-workbook-pdf .
+#   docker run -p 8080:8080 -e WORKBOOK_SERVICE_SECRET=test attune-workbook-pdf
+#
+# Test locally:
+#   curl -X POST http://localhost:8080/render \
+#     -H 'X-Service-Secret: test' \
+#     -H 'Content-Type: application/json' \
+#     --data @sample-couple.json \
+#     -o out.pdf
+
+# Playwright base image already has Chromium + Node 20 + Linux deps
+FROM mcr.microsoft.com/playwright:v1.46.0-jammy
+
+# Add Python (the base image is Ubuntu-based)
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends python3 python3-pip \
+ && rm -rf /var/lib/apt/lists/*
+
+# Application files. We only copy what the service needs at runtime —
+# no React app, no other API routes, no doc generators.
+WORKDIR /app
+
+# Install Playwright as an app-level dependency so the import in
+# render_workbook.mjs resolves via the standard node_modules lookup.
+# The Chromium binary is already in /ms-playwright in the base image,
+# and Playwright will pick it up automatically.
+RUN npm init -y >/dev/null \
+ && npm install --no-audit --no-fund --omit=dev playwright@1.46.0
+
+COPY scripts/build_workbook.py    /app/scripts/build_workbook.py
+COPY scripts/render_workbook.mjs  /app/scripts/render_workbook.mjs
+COPY scripts/service.mjs          /app/scripts/service.mjs
+COPY api/_workbook-content.js     /app/api/_workbook-content.js
+
+# render_workbook.mjs hardcodes a Claude-environment-specific Playwright
+# path. Patch it at build time so it uses the standard import.
+RUN sed -i "s|'/home/claude/.npm-global/lib/node_modules/playwright/index.mjs'|'playwright'|g" \
+    /app/scripts/render_workbook.mjs
+
+# Switch to the non-root user the Playwright base image already created.
+# This avoids running Chromium as root, which it refuses to do.
+USER pwuser
+
+EXPOSE 8080
+CMD ["node", "/app/scripts/service.mjs"]
