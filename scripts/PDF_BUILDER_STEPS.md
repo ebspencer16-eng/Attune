@@ -42,7 +42,8 @@ On Render → Environment → Add:
 | Key | Value |
 |---|---|
 | `WORKBOOK_SERVICE_SECRET` | the random string from step 2 |
-| `PORT` | `8080` (Render usually sets this for you, but be explicit) |
+
+That's the only one you need. Render injects `PORT` automatically, and the service reads it from `process.env.PORT`.
 
 ### 4. Deploy the service
 
