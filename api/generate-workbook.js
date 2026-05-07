@@ -1717,10 +1717,12 @@ function buildConversationGuide(u, p, priorities) {
   ];
 }
 
-function buildReferenceCard(u, p, coupleType, priorities) {
+function buildReferenceCard(u, p, coupleType, priorities, phraseThatLands) {
   const typeName = coupleType?.name || 'Your couple type';
   const typeId   = coupleType?.id   || '';
   const typeTagline = coupleType ? fill(String(coupleType.tagline || ''), u, p) : '';
+  // Per-type phrase that lands. May contain {U}/{P} placeholders.
+  const phrase = phraseThatLands ? fill(String(phraseThatLands), u, p) : '';
 
   // V2 design (per Ellie's spec, mirrored from scripts/build_workbook.py
   // build_reference_card):
@@ -1838,12 +1840,19 @@ function buildReferenceCard(u, p, coupleType, priorities) {
         new Paragraph({ alignment: AlignmentType.CENTER, spacing: { before: 220, after: 60 },
           children: [run('Attune Relationships  ·  Reference Card', { size: 10, bold: true, color: NAVY_LIGHT, allCaps: true, characterSpacing: 120 })] }),
         // Names — prominent, coral, italic ampersand
-        new Paragraph({ alignment: AlignmentType.CENTER, spacing: { after: 280 },
+        new Paragraph({ alignment: AlignmentType.CENTER, spacing: { after: phrase ? 100 : 280 },
           children: [
             run(u, { size: 36, bold: true, color: ORANGE, font: 'Playfair Display' }),
             run(' & ', { size: 36, italics: true, color: 'F08966', font: 'Playfair Display' }),
             run(p, { size: 36, bold: true, color: ORANGE, font: 'Playfair Display' }),
           ] }),
+        // Per-couple-type phrase, italic centered quote between names
+        // and tiles. Skipped entirely if phraseThatLands wasn't provided.
+        ...(phrase ? [new Paragraph({
+          alignment: AlignmentType.CENTER,
+          spacing: { after: 280, line: 280, lineRule: 'atLeast' },
+          children: [run(`"${phrase}"`, { size: 14, italics: true, color: NAVY_LIGHT, font: 'Playfair Display' })],
+        })] : []),
         // Tile row
         tileRow,
         // Footer
@@ -2288,6 +2297,9 @@ export default async function handler(req, res) {
     partnerScores = {},
     coupleType   = null,   // { name, tagline, description, nuance, color }
     expGaps      = [],     // [{ key, label, yourAnswer, partnerAnswer, aligned }]
+    // Per-couple-type phrase rendered on the Reference Card. Sourced
+    // from tips[0].phraseTry by buildWorkbookPayload in src/App.jsx.
+    phraseThatLands = null,
     // Phase 5a fields — full ex2 answer set. These are accepted now but
     // will be consumed in Phase 5b when buildExpDomains is rewritten to
     // render the 6-domain Volume 01 design with name-substituted rows.
@@ -2345,7 +2357,7 @@ export default async function handler(req, res) {
 
     ...buildPartCover(5, 'Reference Card',
       `A half-page summary. Keep it somewhere you'll see it.`, GREEN),
-    ...buildReferenceCard(u, p, coupleType, priorities),
+    ...buildReferenceCard(u, p, coupleType, priorities, phraseThatLands),
 
     // Blank ruled pages for the couple's own notes — appended after the
     // reference card. Four pages, the first with a small "Notes" eyebrow.
