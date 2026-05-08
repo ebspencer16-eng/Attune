@@ -32,12 +32,20 @@ RUN apt-get update \
 # no React app, no other API routes, no doc generators.
 WORKDIR /app
 
-# Install Playwright as an app-level dependency so the import in
-# render_workbook.mjs resolves via the standard node_modules lookup.
-# The Chromium binary is already in /ms-playwright in the base image,
-# and Playwright will pick it up automatically.
+# Install runtime npm dependencies:
+#  - playwright at the app level so the import in render_workbook.mjs
+#    resolves via the standard node_modules lookup. Chromium is already
+#    in /ms-playwright in the base image and Playwright picks it up.
+#  - @fontsource packages for self-hosting Playfair Display, DM Sans,
+#    and DM Mono. build_workbook.py reads the WOFF2 files from these
+#    packages and embeds them as base64 in the rendered HTML, so the
+#    container has zero network dependency on fonts.googleapis.com.
 RUN npm init -y >/dev/null \
- && npm install --no-audit --no-fund --omit=dev playwright@1.46.0
+ && npm install --no-audit --no-fund --omit=dev \
+    playwright@1.46.0 \
+    @fontsource/playfair-display \
+    @fontsource/dm-sans \
+    @fontsource/dm-mono
 
 COPY scripts/build_workbook.py    /app/scripts/build_workbook.py
 COPY scripts/render_workbook.mjs  /app/scripts/render_workbook.mjs

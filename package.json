@@ -9,6 +9,9 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@fontsource/dm-mono": "^5.2.7",
+    "@fontsource/dm-sans": "^5.2.8",
+    "@fontsource/playfair-display": "^5.2.8",
     "@sentry/react": "^10.50.0",
     "@supabase/supabase-js": "^2.101.1",
     "docx": "^9.6.1",

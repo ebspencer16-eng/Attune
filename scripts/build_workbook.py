@@ -165,6 +165,95 @@ DIM_CONTENT = {
 import re as _re
 import json as _json
 from pathlib import Path as _Path
+import base64 as _base64
+
+
+# ─── Font embedding ─────────────────────────────────────────────────
+# Font files are loaded from the npm @fontsource packages (installed in
+# node_modules/) and embedded as base64 data URIs in @font-face rules.
+# This makes the rendered HTML self-contained: zero network dependency
+# on fonts.googleapis.com or fonts.gstatic.com. Critical for containerized
+# rendering (Render, Docker) where egress to Google's CDN can be slow,
+# blocked, or just inconsistent enough to produce inconsistent renders.
+#
+# Falls back to <link> tags if the npm packages aren't installed —
+# preserves local-dev behavior for anyone who hasn't run `npm install`.
+
+_FONT_FACES = [
+    # (family, style, weight, fontsource subpath relative to node_modules)
+    ('Playfair Display', 'normal', 400, '@fontsource/playfair-display/files/playfair-display-latin-400-normal.woff2'),
+    ('Playfair Display', 'italic', 400, '@fontsource/playfair-display/files/playfair-display-latin-400-italic.woff2'),
+    ('Playfair Display', 'normal', 700, '@fontsource/playfair-display/files/playfair-display-latin-700-normal.woff2'),
+    ('Playfair Display', 'italic', 700, '@fontsource/playfair-display/files/playfair-display-latin-700-italic.woff2'),
+    ('DM Sans', 'normal', 300, '@fontsource/dm-sans/files/dm-sans-latin-300-normal.woff2'),
+    ('DM Sans', 'normal', 400, '@fontsource/dm-sans/files/dm-sans-latin-400-normal.woff2'),
+    ('DM Sans', 'normal', 500, '@fontsource/dm-sans/files/dm-sans-latin-500-normal.woff2'),
+    ('DM Sans', 'normal', 600, '@fontsource/dm-sans/files/dm-sans-latin-600-normal.woff2'),
+    ('DM Sans', 'normal', 700, '@fontsource/dm-sans/files/dm-sans-latin-700-normal.woff2'),
+    ('DM Mono', 'normal', 400, '@fontsource/dm-mono/files/dm-mono-latin-400-normal.woff2'),
+    ('DM Mono', 'normal', 500, '@fontsource/dm-mono/files/dm-mono-latin-500-normal.woff2'),
+]
+
+
+def _build_font_face_block():
+    """Return the <head> font-loading block.
+
+    If the @fontsource npm packages are installed locally, emit @font-face
+    rules with base64-embedded WOFF2 files (self-contained, no network
+    dependency). Otherwise fall back to the original Google Fonts <link>
+    tags (lets the script run in environments without npm install).
+
+    Looks for fonts in two places, in order:
+    1. ../node_modules/@fontsource/...  (when run from scripts/ in the
+       repo root layout — local dev and the Docker /app/scripts layout)
+    2. /app/node_modules/@fontsource/... (Docker fallback)
+    """
+    candidate_roots = [
+        _Path(__file__).parent.parent / 'node_modules',
+        _Path('/app/node_modules'),
+    ]
+    fontsource_root = None
+    for root in candidate_roots:
+        if (root / '@fontsource').exists():
+            fontsource_root = root
+            break
+
+    if fontsource_root is None:
+        # Network fallback. Used in environments where node_modules isn't
+        # populated — local Python-only checkouts, etc. Production
+        # service-mode renders should always hit the inline path.
+        return (
+            '<link rel="preconnect" href="https://fonts.googleapis.com">\n'
+            '<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>\n'
+            '<link href="https://fonts.googleapis.com/css2?'
+            'family=Playfair+Display:ital,wght@0,400;0,700;1,400;1,700&'
+            'family=DM+Sans:wght@300;400;500;600;700&'
+            'family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">'
+        )
+
+    # All required files must be present, otherwise something's wrong
+    # with the install and we'd rather see the error than a half-fallback.
+    missing = []
+    for family, style, weight, subpath in _FONT_FACES:
+        if not (fontsource_root / subpath).exists():
+            missing.append(subpath)
+    if missing:
+        raise RuntimeError(f"Missing font files: {missing[:3]}... (run `npm install` to fetch @fontsource packages)")
+
+    rules = []
+    for family, style, weight, subpath in _FONT_FACES:
+        font_bytes = (fontsource_root / subpath).read_bytes()
+        b64 = _base64.b64encode(font_bytes).decode('ascii')
+        rules.append(
+            f"@font-face{{"
+            f"font-family:'{family}';"
+            f"font-style:{style};"
+            f"font-weight:{weight};"
+            f"font-display:block;"
+            f"src:url(data:font/woff2;base64,{b64}) format('woff2');"
+            f"}}"
+        )
+    return '<style>' + ''.join(rules) + '</style>'
 
 def _load_when_this_shows_up():
     """Parse the WHEN_THIS_SHOWS_UP export from api/_workbook-content.js.
@@ -3170,9 +3259,7 @@ def build_full_workbook(same_type=False, is_service=False):
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Attune Workbook, {COUPLE['u']} &amp; {COUPLE['p']}</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400;1,700&family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+{_build_font_face_block()}
 <style>{CSS}
 .sample-banner{{
   position:fixed;top:0;left:0;right:0;
