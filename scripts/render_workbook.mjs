@@ -64,6 +64,32 @@ if (isService) {
       process.stderr.write(`font-ready evaluate failed: ${e.message}\n`);
     }
 
+    // Diagnostic: how many fonts did the page declare, and how many
+    // actually loaded? If "loaded=0" but "declared>0" we know Google Fonts
+    // can't be reached from this container.
+    try {
+      const fontInfo = await page.evaluate(() => {
+        const faces = Array.from(document.fonts);
+        const summary = faces.map(f => ({
+          family: f.family, weight: f.weight, style: f.style,
+          status: f.status, // 'unloaded' | 'loading' | 'loaded' | 'error'
+        }));
+        return {
+          declared: faces.length,
+          loaded: summary.filter(s => s.status === 'loaded').length,
+          error:  summary.filter(s => s.status === 'error').length,
+          unloaded: summary.filter(s => s.status === 'unloaded').length,
+          loading: summary.filter(s => s.status === 'loading').length,
+          docHeight: document.documentElement.scrollHeight,
+          bodyText: document.body.innerText.slice(0, 100),
+        };
+      });
+      process.stderr.write(`fonts: declared=${fontInfo.declared} loaded=${fontInfo.loaded} error=${fontInfo.error} unloaded=${fontInfo.unloaded} loading=${fontInfo.loading} docHeight=${fontInfo.docHeight}\n`);
+      process.stderr.write(`bodyText preview: ${JSON.stringify(fontInfo.bodyText)}\n`);
+    } catch (e) {
+      process.stderr.write(`font-info evaluate failed: ${e.message}\n`);
+    }
+
     // Small buffer for any final layout settling (image decoding, custom
     // CSS that ran on font load events, etc).
     await page.waitForTimeout(2000);
