@@ -44,6 +44,14 @@ COPY scripts/render_workbook.mjs  /app/scripts/render_workbook.mjs
 COPY scripts/service.mjs          /app/scripts/service.mjs
 COPY api/_workbook-content.js     /app/api/_workbook-content.js
 
+# Bake the Git commit into the image at build time so the /version
+# endpoint can return it. Render exposes the deployed commit via the
+# RENDER_GIT_COMMIT env var during the build; we copy that to the
+# runtime env. Other hosts can pass --build-arg GIT_COMMIT=... or set
+# the env var directly.
+ARG RENDER_GIT_COMMIT=unknown
+ENV GIT_COMMIT=$RENDER_GIT_COMMIT
+
 # render_workbook.mjs hardcodes a Claude-environment-specific Playwright
 # path. Patch it at build time so it uses the standard import.
 RUN sed -i "s|'/home/claude/.npm-global/lib/node_modules/playwright/index.mjs'|'playwright'|g" \

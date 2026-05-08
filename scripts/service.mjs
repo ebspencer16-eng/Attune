@@ -134,6 +134,13 @@ const server = http.createServer(async (req, res) => {
     res.writeHead(200, { 'Content-Type': 'text/plain' });
     return res.end('ok');
   }
+  if (req.method === 'GET' && req.url === '/version') {
+    // Returns the Git commit baked in at Docker build time (set via env var
+    // GIT_COMMIT in the Dockerfile). Lets us verify the deployed version
+    // matches what we expect.
+    res.writeHead(200, { 'Content-Type': 'text/plain' });
+    return res.end(process.env.GIT_COMMIT || 'unknown');
+  }
   if (req.method !== 'POST' || req.url !== '/render') {
     return badRequest(res, 404, 'not found');
   }
