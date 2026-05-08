@@ -360,105 +360,232 @@ MOMENTS = [
     {'key': 'external_stress',  'title': 'When stress is coming from outside the relationship'},
 ]
 
-# Working Knowledge content — 6 moments × 2 perspectives.
-# For cross-type couples (WX), each partner gets their own page.
-# Each moment has 5 rows matching the original buildMomentCard structure:
-#   moment / what's happening for them / what not to do / what works / phrase
+# Working Knowledge content — 6 moments × 4 individual types (W/X/Y/Z).
+# For cross-type couples, each partner gets their own page, drawn from
+# the dict keyed by their individual type letter. Names are inserted
+# at render via fill() — content uses {U} for the subject (the partner
+# being described) and {P} for the other partner.
 #
-# These are realistic-feeling sample drafts. Final content will come from
-# the master library, tagged by type letter.
+# Each moment has 5 fields:
+#   moment / happening / not / works / phrase
+#
+# Voice:
+#   Short declarative sentences. No em dashes. No hedging language.
+#   "they/them/their" pronouns throughout for inclusivity. Neither end
+#   of any dimension framed as better. Couple type described as a
+#   dynamic, not a diagnosis.
+#
+# CONTENT STATUS:
+#   W and X content is the original Maya/David Volume 01 prose, now
+#   name-neutralized so any couple of those types renders correctly.
+#   Y and Z content is a first draft based on the type definitions
+#   (Y = Feeler, withdraw + open; Z = Protector, withdraw + guarded).
+#   Both Y and Z drafts are flagged for LMFT review before launch.
 
-# Maya (W = The Initiator) — what David should know about Maya
-MOMENTS_FOR_W_MAYA = {
+# W = The Initiator (engage + open). Processes by talking, reaches outward.
+MOMENTS_W = {
     'hard_workday':      {
-        'moment':   "Maya gets home from a hard day and starts unpacking it the moment she walks in, the project, the people, the frustration.",
-        'happening':"Maya processes by talking. She's not asking David to fix it, she's making sense of the day by hearing herself say it. Once it's said, most of it's out of her system and she can move on.",
+        'moment':   "{U} gets home from a hard day and starts unpacking it the moment they walk in: the project, the people, the frustration.",
+        'happening':"{U} processes by talking. They're not asking {P} to fix it; they're making sense of the day by hearing themselves say it. Once it's said, most of it's out of their system and they can move on.",
         'not':      "Don't problem-solve, don't try to redirect, don't go quiet halfway through.",
-        'works':    "Listen actively. Reflect back what you heard. Match her energy and ask one or two follow-up questions. The relief comes from being heard, not from being fixed.",
+        'works':    "Listen actively. Reflect back what you heard. Match their energy and ask one or two follow-up questions. The relief comes from being heard, not from being fixed.",
         'phrase':   "Tell me more, what was the worst part?",
     },
     'quiet_worry':       {
-        'moment':   "Maya has gone unusually quiet for half a day, no talking through her week, no debriefing the meeting.",
-        'happening':"For Maya, silence is the signal that something is heavy enough that even the talking has stopped. She's not sulking, she's carrying something she hasn't found words for yet.",
-        'not':      "Don't ask 'what's wrong' as a one-shot question, it lands like pressure to perform an answer.",
-        'works':    "Soften the entry. Sit near her without requiring conversation. Open with curiosity, not interrogation. Give her room to start when she's ready.",
+        'moment':   "{U} has gone unusually quiet for half a day: no talking through their week, no debriefing the meeting.",
+        'happening':"For {U}, silence is the signal that something is heavy enough that even the talking has stopped. They're not sulking; they're carrying something they haven't found words for yet.",
+        'not':      "Don't ask 'what's wrong' as a one-shot question. It lands like pressure to perform an answer.",
+        'works':    "Soften the entry. Sit near them without requiring conversation. Open with curiosity, not interrogation. Give them room to start when they're ready.",
         'phrase':   "You've been quiet today. I'm here when you want to talk, no rush.",
     },
     'during_conflict':   {
-        'moment':   "Tension is rising. Maya is leaning in, wanting to address it now, surface the feelings, talk it through.",
-        'happening':"Maya processes conflict outward. Holding it in feels worse than the conflict itself. She wants to engage so the thing can move, not so it can escalate.",
+        'moment':   "Tension is rising. {U} is leaning in, wanting to address it now, surface the feelings, talk it through.",
+        'happening':"{U} processes conflict outward. Holding it in feels worse than the conflict itself. They want to engage so the thing can move, not so it can escalate.",
         'not':      "Don't go silent or ask to 'talk later' without a specific time. Open-ended pauses register as withdrawal, not space.",
-        'works':    "Stay engaged. If you genuinely need a beat, name it with a return time, 'I need 30 minutes, then let's pick this up.' Then come back on time.",
+        'works':    "Stay engaged. If you genuinely need a beat, name it with a return time: 'I need 30 minutes, then let's pick this up.' Then come back on time.",
         'phrase':   "I want to work this out with you. Give me 20 minutes to think, then I'm in.",
     },
     'after_conflict':    {
-        'moment':   "The hard part of the conversation is over. The room has cooled, but Maya is still circling, checking in, looking for closure.",
-        'happening':"For Maya, repair isn't done until it's named. She needs to hear that you're okay, that the two of you are okay. Warmth alone reads as 'maybe but not sure.'",
+        'moment':   "The hard part of the conversation is over. The room has cooled, but {U} is still circling, checking in, looking for closure.",
+        'happening':"For {U}, repair isn't done until it's named. They need to hear that you're okay, that the two of you are okay. Warmth alone reads as 'maybe but not sure.'",
         'not':      "Don't assume warmth equals resolved. Don't skip the verbal close.",
-        'works':    "Say it out loud, even if it feels obvious. A short, clear sentence, 'we're good', does more than another hour of warmth.",
+        'works':    "Say it out loud, even if it feels obvious. A short, clear sentence ('we're good') does more than another hour of warmth.",
         'phrase':   "We're good. I love you. We worked it out.",
     },
     'wanting_closeness': {
-        'moment':   "Maya is reaching, sitting closer, finding excuses to be in the same room, asking what you're up to this weekend.",
-        'happening':"Closeness is one of the ways Maya feels the relationship is alive. The bids look casual; the meaning behind them isn't.",
+        'moment':   "{U} is reaching: sitting closer, finding excuses to be in the same room, asking what you're up to this weekend.",
+        'happening':"Closeness is one of the ways {U} feels the relationship is alive. The bids look casual; the meaning behind them isn't.",
         'not':      "Don't half-meet the bid. A distracted nod while you keep working reads as a no.",
-        'works':    "Stop what you're doing for thirty seconds. Make eye contact. Match her energy briefly, even if you're going back to your task. The bid landing matters more than how long it lands for.",
+        'works':    "Stop what you're doing for thirty seconds. Make eye contact. Match their energy briefly, even if you're going back to your task. The bid landing matters more than how long it lands for.",
         'phrase':   "Hey, hi. Come here for a sec, what's going on?",
     },
     'external_stress':   {
-        'moment':   "Maya is dealing with something hard, a work crisis, a family thing, a deadline. She's reaching toward you for support.",
-        'happening':"Under pressure, Maya reaches outward. She's not asking you to fix it; she's asking you to be present in it. Solitude is what makes the stress worse, not better.",
-        'not':      "Don't disappear into your own work. Don't assume she'd rather be left alone.",
-        'works':    "Be visibly available. Take one logistical thing off her plate without being asked, and tell her you did. Sit with her in the evening even if neither of you talks.",
+        'moment':   "{U} is dealing with something hard: a work crisis, a family thing, a deadline. They're reaching toward you for support.",
+        'happening':"Under pressure, {U} reaches outward. They're not asking you to fix it; they're asking you to be present in it. Solitude is what makes the stress worse, not better.",
+        'not':      "Don't disappear into your own work. Don't assume they'd rather be left alone.",
+        'works':    "Be visibly available. Take one logistical thing off their plate without being asked, and tell them you did. Sit with them in the evening even if neither of you talks.",
         'phrase':   "I've got dinner tonight. You don't have to think about it.",
     },
 }
 
-# David (X = The Anchor) — what Maya should know about David
-MOMENTS_FOR_X_DAVID = {
+# X = The Anchor (engage + guarded). Engages with conflict but processes
+# emotion privately first; surfaces things once they're clarified.
+MOMENTS_X = {
     'hard_workday':      {
-        'moment':   "David gets home from a hard day, sets his bag down, and goes quiet for a while.",
-        'happening':"David is processing internally. He's not shutting Maya out, he's getting his thoughts in order before he can say anything useful about them. The quiet IS the work.",
-        'not':      "Don't pepper him with questions. Don't read the silence as withdrawal. Don't assume the quiet means something is wrong with the two of you.",
-        'works':    "Give him 15-30 minutes of low-stimulation space. Make space without requiring conversation. He'll come find you when he's ready, and what he says will be considered.",
+        'moment':   "{U} gets home from a hard day, sets their bag down, and goes quiet for a while.",
+        'happening':"{U} is processing internally. They're not shutting {P} out; they're getting their thoughts in order before they can say anything useful about them. The quiet IS the work.",
+        'not':      "Don't pepper them with questions. Don't read the silence as withdrawal. Don't assume the quiet means something is wrong with the two of you.",
+        'works':    "Give them 15-30 minutes of low-stimulation space. Make space without requiring conversation. They'll come find you when they're ready, and what they say will be considered.",
         'phrase':   "Take the time you need. I'm around when you want to talk.",
     },
     'quiet_worry':       {
-        'moment':   "Something is clearly weighing on David, but he hasn't said anything about it.",
-        'happening':"David doesn't broadcast worry. He's working through it privately first. Until he's clarified what he actually thinks, the answer to 'what's wrong' is genuinely 'I'm not sure yet.'",
-        'not':      "Don't push for an answer he doesn't have yet. Don't translate his silence into 'he's hiding something from me.'",
-        'works':    "Name the observation, not the feeling. 'You've seemed off since Tuesday' lands cleanly because it's factual. Then give him space to respond on his own clock.",
+        'moment':   "Something is clearly weighing on {U}, but they haven't said anything about it.",
+        'happening':"{U} doesn't broadcast worry. They're working through it privately first. Until they've clarified what they actually think, the answer to 'what's wrong' is genuinely 'I'm not sure yet.'",
+        'not':      "Don't push for an answer they don't have yet. Don't translate their silence into 'they're hiding something from me.'",
+        'works':    "Name the observation, not the feeling. 'You've seemed off since Tuesday' lands cleanly because it's factual. Then give them space to respond on their own clock.",
         'phrase':   "You've been somewhere else this week. No rush. I'm just noticing.",
     },
     'during_conflict':   {
-        'moment':   "Tension is rising. David wants to address it, but he's pulling on logic before feeling, facts first, framing second.",
-        'happening':"David engages with conflict by getting the structure right. Once the logic is clear, the emotional layer becomes manageable. Skipping to feelings before the framing exists makes him feel ungrounded.",
-        'not':      "Don't read his focus on logic as not caring. Don't try to force the emotional layer first when he's still organizing the framing.",
-        'works':    "Match his sequence: agree on what the issue actually is, then surface the feelings. Both layers get covered, just in his order.",
+        'moment':   "Tension is rising. {U} wants to address it, but they're pulling on logic before feeling: facts first, framing second.",
+        'happening':"{U} engages with conflict by getting the structure right. Once the logic is clear, the emotional layer becomes manageable. Skipping to feelings before the framing exists makes them feel ungrounded.",
+        'not':      "Don't read their focus on logic as not caring. Don't try to force the emotional layer first when they're still organizing the framing.",
+        'works':    "Match their sequence: agree on what the issue actually is, then surface the feelings. Both layers get covered, just in their order.",
         'phrase':   "Walk me through how you're seeing it. Then I'll tell you how it lands for me.",
     },
     'after_conflict':    {
-        'moment':   "The conversation has ended. The logic is sorted out. David is moving forward like the thing is closed.",
-        'happening':"For David, repair happens when the problem is solved. Once the working-through is done, he experiences the thing as resolved. The verbal close-out feels redundant to him.",
-        'not':      "Don't assume his moving on means he doesn't care. Don't withhold warmth waiting for a verbal close that he doesn't realize you need.",
-        'works':    "Ask for the verbal close explicitly. He'll give it readily, he just doesn't realize it's missing. After that, trust that he means it when he says it's done.",
+        'moment':   "The conversation has ended. The logic is sorted out. {U} is moving forward like the thing is closed.",
+        'happening':"For {U}, repair happens when the problem is solved. Once the working-through is done, they experience the thing as resolved. The verbal close-out feels redundant to them.",
+        'not':      "Don't assume their moving on means they don't care. Don't withhold warmth waiting for a verbal close that they don't realize you need.",
+        'works':    "Ask for the verbal close explicitly. They'll give it readily; they just don't realize it's missing. After that, trust that they mean it when they say it's done.",
         'phrase':   "Are we good? I just want to hear you say it.",
     },
     'wanting_closeness': {
-        'moment':   "David is in the same room with you, doing his own thing, but consciously near you. Not bidding, exactly. Just present.",
-        'happening':"For David, side-by-side presence is the closeness. He doesn't always need conversation to feel connected; the shared space is the thing. The reading you might call 'just sitting there' is, for him, an active form of being together.",
-        'not':      "Don't read his quiet presence as disengagement. Don't assume he wants to be left alone if he chose to be near you.",
-        'works':    "Receive the presence. A hand on his arm, a small acknowledgment, that's enough. Don't require a conversation to make the closeness count.",
+        'moment':   "{U} is in the same room with you, doing their own thing, but consciously near you. Not bidding, exactly. Just present.",
+        'happening':"For {U}, side-by-side presence is the closeness. They don't always need conversation to feel connected; the shared space is the thing. The reading you might call 'just sitting there' is, for them, an active form of being together.",
+        'not':      "Don't read their quiet presence as disengagement. Don't assume they want to be left alone if they chose to be near you.",
+        'works':    "Receive the presence. A hand on their arm, a small acknowledgment, that's enough. Don't require a conversation to make the closeness count.",
         'phrase':   "I like that you're here. We don't have to talk.",
     },
     'external_stress':   {
-        'moment':   "David is dealing with something hard. He's working it internally, not bringing it into the room, not asking for help.",
-        'happening':"Under stress, David goes inward. He's not refusing support; he's running the analysis. Once he has a plan, he'll surface what's relevant. Until then, talking about it can feel like adding load, not lifting it.",
-        'not':      "Don't push him to talk through it. Don't take the silence as exclusion or as a sign you're not trusted.",
-        'works':    "Take logistical things off his plate without asking. Be visibly available without requiring engagement. Tell him after the fact that you did the thing.",
+        'moment':   "{U} is dealing with something hard. They're working it internally, not bringing it into the room, not asking for help.",
+        'happening':"Under stress, {U} goes inward. They're not refusing support; they're running the analysis. Once they have a plan, they'll surface what's relevant. Until then, talking about it can feel like adding load, not lifting it.",
+        'not':      "Don't push them to talk through it. Don't take the silence as exclusion or as a sign you're not trusted.",
+        'works':    "Take logistical things off their plate without asking. Be visibly available without requiring engagement. Tell them after the fact that you did the thing.",
         'phrase':   "I picked up groceries, one less thing. Take the night.",
     },
 }
+
+# Y = The Feeler (withdraw + open). Processes inwardly, but emotion shows
+# in expression: face, tone, presence. Withdraws under pressure but tells
+# you what they're feeling when there's room.
+# DRAFT — pending LMFT review.
+MOMENTS_Y = {
+    'hard_workday':      {
+        'moment':   "{U} gets home from a hard day, drops their things, and the day is on their face before any words come.",
+        'happening':"{U} is feeling the day in their body before they can articulate it. The expression is honest but the words aren't ready yet. They want to be near you, not necessarily talking.",
+        'not':      "Don't ask 'how was your day' and expect a clean answer. Don't read the heaviness as something you caused.",
+        'works':    "Acknowledge what you see, then offer presence without requiring talk. 'Rough one?' lands. So does sitting nearby with no agenda. The words come later, in pieces.",
+        'phrase':   "You look wiped. I'm here. No talking required.",
+    },
+    'quiet_worry':       {
+        'moment':   "{U} has been off all week. They haven't said much, but the heaviness is there in the room.",
+        'happening':"{U} feels things first and finds language for them slowly. The worry is real and present; they just haven't reached the words for it yet. They're not hiding it; they're still feeling it.",
+        'not':      "Don't push for specifics they don't have. Don't tell them they're being too sensitive.",
+        'works':    "Name what you're noticing gently. 'You've felt heavy this week' invites more than 'what's wrong.' Sit with whatever surfaces, even if it's tears before sentences.",
+        'phrase':   "Something's been heavy. I see it. I'm not going anywhere.",
+    },
+    'during_conflict':   {
+        'moment':   "Tension is rising. {U} is pulling back from the conversation, but their face hasn't gone neutral. The hurt is right there.",
+        'happening':"{U} feels conflict in their body before they can think through it. They withdraw to protect the feeling, not to punish you. If they push past the withdrawal too soon, the words come out raw and wrong.",
+        'not':      "Don't read the withdrawal as the silent treatment. Don't push them to articulate what they're feeling before they've named it for themselves.",
+        'works':    "Acknowledge the feeling without demanding the explanation. 'I can see this hurt. Take what you need; we'll come back to it' gives them the room to find words.",
+        'phrase':   "I see this landed hard. Let's pause. I'll be here when you're ready.",
+    },
+    'after_conflict':    {
+        'moment':   "The hard part is over. {U} has gone quiet, but the residue is still on their face.",
+        'happening':"For {U}, repair has to reach the feeling, not just the topic. Until the emotional charge has eased, they don't experience the thing as resolved, even if the issue itself is sorted.",
+        'not':      "Don't move on too fast. Don't assume topic-resolution equals emotional-resolution.",
+        'works':    "Give the feeling a name and a moment. 'That was hard for both of us' acknowledges it without re-litigating. Soft physical contact often does more than another conversation.",
+        'phrase':   "That was hard. I love you. Come here.",
+    },
+    'wanting_closeness': {
+        'moment':   "{U} is hovering: in the same room, doing nothing in particular, looking up when you look up.",
+        'happening':"{U} reaches for closeness through presence and feeling, not always through asking. The bid is in the lingering, the eye contact, the just-being-near. Saying 'come sit with me' takes more vulnerability than the gesture suggests.",
+        'not':      "Don't miss the soft bid because it's quiet. Don't make them ask out loud when they've already asked with their body.",
+        'works':    "Read the gesture. Pat the seat next to you. Make eye contact and hold it for two extra seconds. The reach was already real; you're just confirming it.",
+        'phrase':   "Come sit. I want you here.",
+    },
+    'external_stress':   {
+        'moment':   "{U} is dealing with something hard from outside the relationship. They're carrying it in their face but not bringing it into words.",
+        'happening':"Under pressure, {U} goes inward emotionally. The feelings are loud internally; the expression is half-volume. They want presence and steady ground, not problem-solving.",
+        'not':      "Don't try to fix the outside thing. Don't take the heaviness personally.",
+        'works':    "Be the steady ground. Make the meals, run the warm bath, hold the routine. Touch their shoulder when you walk past. Less talk, more presence.",
+        'phrase':   "I've got the basics tonight. You don't have to carry anything else.",
+    },
+}
+
+# Z = The Protector (withdraw + guarded). Processes inwardly, keeps the
+# emotional state private. Self-contained; expression stays steady even
+# when a lot is going on inside.
+# DRAFT — pending LMFT review.
+MOMENTS_Z = {
+    'hard_workday':      {
+        'moment':   "{U} gets home from a hard day, follows their normal routine, and reveals nothing.",
+        'happening':"{U} contains hard days. The processing happens privately and at its own pace. Performing a debrief would actually make the day worse, not better. Steady routine is how they reset.",
+        'not':      "Don't ask probing questions hoping to crack it open. Don't take the steadiness as a sign nothing's wrong.",
+        'works':    "Hold the regular rhythm. Make eye contact when they pass through the room. Trust that they'll surface what they want surfaced, on their schedule.",
+        'phrase':   "Glad you're home. Dinner's at seven.",
+    },
+    'quiet_worry':       {
+        'moment':   "Something is going on for {U}, but you'd only know it from very small cues: a shorter answer, a longer pause, a missed text.",
+        'happening':"{U} keeps worry close. They aren't hiding it from you so much as managing it themselves first. By the time they speak about something, they've usually already decided how they're handling it.",
+        'not':      "Don't translate the small cues into a story about your relationship. Don't push for the worry before they've decided how to talk about it.",
+        'works':    "Stay normal. Stay attentive. A simple 'I'm here, whenever' carries more than a probing question. When they do speak, listen without trying to solve.",
+        'phrase':   "I noticed. I'm here whenever, no pressure.",
+    },
+    'during_conflict':   {
+        'moment':   "Tension is rising. {U} has gone level: voice steady, language careful, conflict approached like a problem to manage.",
+        'happening':"{U} stays composed in conflict by design. The composure is the strategy: emotional flooding makes things worse, so they keep their own temperature down. Inside the calm, real feelings are still moving; they're just not on the surface.",
+        'not':      "Don't read the calm as not caring. Don't push for emotional volume to prove the thing matters.",
+        'works':    "Match the temperature. Stay specific. Resolve the concrete piece in front of you; the feelings can come later, in private. Trust that 'fine' said calmly is sometimes the most honest version they have.",
+        'phrase':   "Let's solve this piece. We can talk about the rest tonight.",
+    },
+    'after_conflict':    {
+        'moment':   "The conversation is done. {U} returns to their evening like nothing major happened.",
+        'happening':"For {U}, the resolution IS moving on. Re-opening the topic to confirm warmth would feel like re-running the conflict. Their normal-ness is the closure they're offering you.",
+        'not':      "Don't keep checking in on whether you're 'really okay.' Don't read their normalcy as avoidance.",
+        'works':    "Receive the normal as the close. A small physical gesture, sitting next to them, a hand on the back, lands cleanly without re-opening anything.",
+        'phrase':   "Good talk. Glad we sorted it.",
+    },
+    'wanting_closeness': {
+        'moment':   "{U} is doing something for you without making a thing of it: making coffee the way you like, fixing the thing on your car, sitting nearby while you're on a call.",
+        'happening':"{U} offers closeness through action and steady presence. The verbal version of love is harder to reach for; the doing is the saying. If you watch what they do, the love is loud.",
+        'not':      "Don't miss the offering because it isn't said. Don't push for words to confirm what the actions already proved.",
+        'works':    "Receive the action and name what it meant: 'thanks for taking care of that, it mattered.' That kind of return is how the loop closes for them.",
+        'phrase':   "I noticed you did that. Thank you.",
+    },
+    'external_stress':   {
+        'moment':   "{U} is dealing with something hard outside the relationship. They've absorbed it and kept going. The shape of the day looks normal.",
+        'happening':"Under pressure, {U} goes self-contained. Asking for help feels like adding cost, not relieving load. They'd rather hold it themselves and protect you from carrying it too.",
+        'not':      "Don't pry for the details. Don't make them perform reassurance that they're 'fine.'",
+        'works':    "Reduce ambient load without making it a transaction. Handle one normal thing without comment. Be physically present without requiring conversation. They feel supported when the friction quietly drops.",
+        'phrase':   "I've got tonight. You don't have to do anything.",
+    },
+}
+
+# Lookup table by individual type letter. Drives the cross-type code
+# path in build_full_workbook. The same-type path uses the same letters
+# but reads from MOMENTS_SHARED_* instead.
+TYPE_MOMENTS = {
+    'W': MOMENTS_W,
+    'X': MOMENTS_X,
+    'Y': MOMENTS_Y,
+    'Z': MOMENTS_Z,
+}
+
+# Backward-compat aliases so any older imports still work
+MOMENTS_FOR_W_MAYA = MOMENTS_W
+MOMENTS_FOR_X_DAVID = MOMENTS_X
 
 # ─── Same-type Working Knowledge content ────────────────────────────────
 # When both partners share the same individual type (e.g., WW), the moments
@@ -2420,6 +2547,9 @@ def build_working_knowledge_page(page_num, subject_name, other_name, type_letter
     """
     def render_card(i, m):
         d = moments_data.get(m['key'], {})
+        # The prose contains {U} (the subject — the partner being described)
+        # and {P} (the other partner, who reads the page). fill() resolves
+        # those before they hit the HTML.
         return f"""
     <div class="moment-card">
       <div class="moment-header">
@@ -2428,23 +2558,23 @@ def build_working_knowledge_page(page_num, subject_name, other_name, type_letter
       </div>
       <div class="moment-row">
         <span class="moment-row-label muted">The moment</span>
-        <span class="moment-row-text">{d.get('moment', '')}</span>
+        <span class="moment-row-text">{fill(d.get('moment', ''), subject_name, other_name)}</span>
       </div>
       <div class="moment-row">
         <span class="moment-row-label purple">For {subject_name}</span>
-        <span class="moment-row-text">{d.get('happening', '')}</span>
+        <span class="moment-row-text">{fill(d.get('happening', ''), subject_name, other_name)}</span>
       </div>
       <div class="moment-row">
         <span class="moment-row-label coral">What not to do</span>
-        <span class="moment-row-text">{d.get('not', '')}</span>
+        <span class="moment-row-text">{fill(d.get('not', ''), subject_name, other_name)}</span>
       </div>
       <div class="moment-row">
         <span class="moment-row-label green">What works</span>
-        <span class="moment-row-text">{d.get('works', '')}</span>
+        <span class="moment-row-text">{fill(d.get('works', ''), subject_name, other_name)}</span>
       </div>
       <div class="moment-row">
         <span class="moment-row-label indigo">Phrase that lands</span>
-        <span class="moment-row-text italic">"{d.get('phrase', '')}"</span>
+        <span class="moment-row-text italic">"{fill(d.get('phrase', ''), subject_name, other_name)}"</span>
       </div>
     </div>"""
 
@@ -2495,6 +2625,8 @@ def build_working_knowledge_same_type_page(page_num, u, p, type_letter, moments_
     """
     def render_card(i, m):
         d = moments_data.get(m['key'], {})
+        # Same-type prose uses {U} and {P} as the two partners interchangeably.
+        # fill() resolves them with the actual names.
         return f"""
     <div class="moment-card">
       <div class="moment-header">
@@ -2503,23 +2635,23 @@ def build_working_knowledge_same_type_page(page_num, u, p, type_letter, moments_
       </div>
       <div class="moment-row">
         <span class="moment-row-label muted">The moment</span>
-        <span class="moment-row-text">{d.get('moment', '')}</span>
+        <span class="moment-row-text">{fill(d.get('moment', ''), u, p)}</span>
       </div>
       <div class="moment-row">
         <span class="moment-row-label purple">For both of you</span>
-        <span class="moment-row-text">{d.get('happening', '')}</span>
+        <span class="moment-row-text">{fill(d.get('happening', ''), u, p)}</span>
       </div>
       <div class="moment-row">
         <span class="moment-row-label coral">Where you can get stuck</span>
-        <span class="moment-row-text">{d.get('not', '')}</span>
+        <span class="moment-row-text">{fill(d.get('not', ''), u, p)}</span>
       </div>
       <div class="moment-row">
         <span class="moment-row-label green">What works</span>
-        <span class="moment-row-text">{d.get('works', '')}</span>
+        <span class="moment-row-text">{fill(d.get('works', ''), u, p)}</span>
       </div>
       <div class="moment-row">
         <span class="moment-row-label indigo">A cue either of you can use</span>
-        <span class="moment-row-text italic">"{d.get('phrase', '')}"</span>
+        <span class="moment-row-text italic">"{fill(d.get('phrase', ''), u, p)}"</span>
       </div>
     </div>"""
 
@@ -2928,27 +3060,36 @@ def build_full_workbook(same_type=False, is_service=False):
     pn += 1
 
     # 11. Working Knowledge — same-type or cross-type variant
+    # COUPLE['couple_type']['id'] is a 2-letter string like 'WX', 'YZ', 'WW'.
+    # The first letter is the user's individual type; the second is the
+    # partner's. We drive everything off this — no hardcoded W/X.
+    type_id = COUPLE['couple_type']['id']
+    u_type = type_id[0]
+    p_type = type_id[1]
     if same_type:
-        # Same-type (WW): one shared section. Symmetric content, no subject/responder.
+        # Same-type: one shared section. We only have content for shared W
+        # right now (MOMENTS_SHARED_W). If/when MOMENTS_SHARED_X/Y/Z are
+        # written, look them up by u_type the same way as TYPE_MOMENTS.
         pages.append(build_working_knowledge_same_type_page(
             pn,
             u=COUPLE['u'], p=COUPLE['p'],
-            type_letter='W', moments_data=MOMENTS_SHARED_W,
+            type_letter=u_type, moments_data=MOMENTS_SHARED_W,
         ))
         pn += 1
     else:
-        # Cross-type (WX): two pages, one per partner
+        # Cross-type: two pages, one per partner. Each page renders the
+        # SUBJECT partner's content (the type letter that describes them).
         pages.append(build_working_knowledge_page(
             pn,
             subject_name=COUPLE['u'], other_name=COUPLE['p'],
-            type_letter='W', moments_data=MOMENTS_FOR_W_MAYA,
+            type_letter=u_type, moments_data=TYPE_MOMENTS[u_type],
             page_label=f"What {COUPLE['p']} should know about {COUPLE['u']}",
         ))
         pn += 1
         pages.append(build_working_knowledge_page(
             pn,
             subject_name=COUPLE['p'], other_name=COUPLE['u'],
-            type_letter='X', moments_data=MOMENTS_FOR_X_DAVID,
+            type_letter=p_type, moments_data=TYPE_MOMENTS[p_type],
             page_label=f"What {COUPLE['u']} should know about {COUPLE['p']}",
         ))
         pn += 1
