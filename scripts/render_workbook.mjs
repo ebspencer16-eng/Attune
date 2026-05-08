@@ -112,10 +112,21 @@ if (isService) {
   } finally {
     await browser.close();
   }
-  process.stdout.write(readFileSync(pdfPath));
+  const pdfBuf = readFileSync(pdfPath);
   // Best-effort cleanup
   try { unlinkSync(htmlPath); unlinkSync(pdfPath); rmdirSync(dir); } catch (_) {}
-  process.exit(0);
+  // CRITICAL: process.exit() does NOT wait for stdout/stderr to flush on
+  // POSIX async pipes. Writing 1.2MB to stdout and immediately calling
+  // process.exit(0) terminates before the buffer drains — only ~250KB
+  // makes it through the OS pipe and the rest is lost. We saw exactly
+  // this as a deterministic 255808-byte truncation. The fix is the
+  // callback form of write(): the cb fires when the data has been fully
+  // handed off to the destination, after which exit is safe. We also
+  // drain stderr (any diagnostic messages from earlier in the run) so
+  // they actually reach the parent's logs.
+  process.stdout.write(pdfBuf, () => {
+    process.stderr.write('', () => process.exit(0));
+  });
 }
 
 // ── Local sample mode (default) ──────────────────────────────────────────────
