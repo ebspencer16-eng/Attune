@@ -62,17 +62,28 @@ function renderPdf(jsonBuffer) {
       stdio: ['pipe', 'pipe', 'pipe'],
     });
 
-    // Wire pipes: jsonBuffer → py.stdin; py.stdout → node.stdin; node.stdout → buffer
+    // Wire pipes: jsonBuffer → py.stdin; py.stdout → node.stdin; node.stdout → buffer.
+    // Also tee py.stdout to a counter so we can log how much HTML Python produced —
+    // a too-small HTML pointing to a Python build that exited early but still 0.
     const out = [];
     const errs = [];
+    let htmlBytes = 0;
     py.stderr.on('data', d => errs.push(`[py] ${d}`));
     node.stderr.on('data', d => errs.push(`[node] ${d}`));
+    py.stdout.on('data', d => { htmlBytes += d.length; });
     py.stdout.on('error', () => {});
     node.stdin.on('error', () => {});
     py.stdout.pipe(node.stdin);
     node.stdout.on('data', d => out.push(d));
 
     let done = false;
+    let pyExit = null, nodeExit = null;
+    const dumpDiagnostics = (label) => {
+      const errStr = Buffer.concat(errs).toString();
+      console.log(`[render] ${label} pyExit=${pyExit} nodeExit=${nodeExit} htmlBytes=${htmlBytes} pdfBytes=${out.reduce((s, b) => s + b.length, 0)}`);
+      if (errStr) console.log('[render] child stderr:\n' + errStr.slice(0, 4000));
+      else console.log('[render] (no child stderr)');
+    };
     const finish = (err, buf) => {
       if (done) return;
       done = true;
@@ -85,11 +96,25 @@ function renderPdf(jsonBuffer) {
     node.on('error', e => finish(new Error('node spawn failed: ' + e.message)));
 
     py.on('close', code => {
-      if (code !== 0) finish(new Error(`build_workbook exited ${code}: ${Buffer.concat(errs).toString().slice(0, 500)}`));
+      pyExit = code;
+      if (code !== 0) {
+        dumpDiagnostics('py-failed');
+        finish(new Error(`build_workbook exited ${code}: ${Buffer.concat(errs).toString().slice(0, 500)}`));
+      }
     });
     node.on('close', code => {
-      if (code !== 0) finish(new Error(`render_workbook exited ${code}: ${Buffer.concat(errs).toString().slice(0, 500)}`));
-      else finish(null, Buffer.concat(out));
+      nodeExit = code;
+      if (code !== 0) {
+        dumpDiagnostics('node-failed');
+        finish(new Error(`render_workbook exited ${code}: ${Buffer.concat(errs).toString().slice(0, 500)}`));
+      } else {
+        // Always log diagnostics on success too — silent partial renders are
+        // the failure mode we're hunting (both processes exit 0, output is
+        // small, no stderr to see). Logging unconditionally costs a few
+        // microseconds per request.
+        dumpDiagnostics('ok');
+        finish(null, Buffer.concat(out));
+      }
     });
 
     // Timeout
