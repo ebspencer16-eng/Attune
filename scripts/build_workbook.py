@@ -2342,8 +2342,14 @@ def build_expectation_page(domain, idx, page_num):
     # the data tuples). The VALUE on the right is the partner's answer.
     # fill() on the label resolves {U}/{P} placeholders that show up in
     # name-bearing domains like extended_family.
-    items_a = ''.join(f'<div class="esbs-item"><span class="esbs-item-label">{fill(lab, u, p)}</span><span class="esbs-item-value">{val}</span></div>' for lab, val in detail['maya'])
-    items_b = ''.join(f'<div class="esbs-item"><span class="esbs-item-label">{fill(lab, u, p)}</span><span class="esbs-item-value">{val}</span></div>' for lab, val in detail['david'])
+    # Keys in expectations_detail are lowercased partner names — for the
+    # built-in sample they happen to be 'maya' and 'david', but in service
+    # mode the transformer keys them by COUPLE['u'].lower() / [p].lower(),
+    # so we look them up that way too.
+    rows_u = detail.get(u.lower()) or detail.get('maya') or []
+    rows_p = detail.get(p.lower()) or detail.get('david') or []
+    items_a = ''.join(f'<div class="esbs-item"><span class="esbs-item-label">{fill(lab, u, p)}</span><span class="esbs-item-value">{val}</span></div>' for lab, val in rows_u)
+    items_b = ''.join(f'<div class="esbs-item"><span class="esbs-item-label">{fill(lab, u, p)}</span><span class="esbs-item-value">{val}</span></div>' for lab, val in rows_p)
 
     analysis_text = fill(alignment_text(domain, pct), u, p)
 
@@ -2835,7 +2841,7 @@ def build_reference_card(page_num):
 # COMPOSE FULL WORKBOOK
 # ═══════════════════════════════════════════════════════════════════
 
-def build_full_workbook(same_type=False):
+def build_full_workbook(same_type=False, is_service=False):
     pages = []
     pn = 1
 
@@ -3007,7 +3013,16 @@ def build_full_workbook(same_type=False):
     pages.append(build_reference_card(pn))
     pn += 1
 
-    # Compose final HTML
+    # Compose final HTML. The "Demo data" banner is for design iteration
+    # and sample renders only — for real customer payloads (service mode)
+    # the body has no banner and no top padding.
+    body_class = '' if is_service else ' class="has-banner"'
+    banner_html = '' if is_service else f"""
+<div class="sample-banner">
+  <span>Attune Workbook · Full Sample · {COUPLE['u']} &amp; {COUPLE['p']}</span>
+  <span>Demo data · Letter trim · {len(pages)} pages</span>
+</div>
+"""
     html = f"""<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -3032,13 +3047,8 @@ body.has-banner{{padding-top:96px}}
 @media print{{.sample-banner{{display:none}}body.has-banner{{padding-top:0}}}}
 </style>
 </head>
-<body class="has-banner">
-
-<div class="sample-banner">
-  <span>Attune Workbook · Full Sample · {COUPLE['u']} &amp; {COUPLE['p']}</span>
-  <span>Demo data · Letter trim · {len(pages)} pages</span>
-</div>
-
+<body{body_class}>
+{banner_html}
 {''.join(pages)}
 
 </body>
@@ -3073,7 +3083,9 @@ if __name__ == '__main__':
         # from this global, so all downstream renders use the new data.
         globals()['COUPLE'] = payload
         same_type = ('--same-type' in sys.argv)
-        html = build_full_workbook(same_type=same_type)
+        # is_service=True suppresses the design-iteration "Demo data" banner
+        # that's appropriate only for local sample renders.
+        html = build_full_workbook(same_type=same_type, is_service=True)
         sys.stdout.write(html)
         sys.exit(0)
 
