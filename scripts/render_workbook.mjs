@@ -44,16 +44,44 @@ if (isService) {
   const browser = await chromium.launch();
   try {
     const page = await browser.newPage();
-    await page.goto('file://' + htmlPath, { waitUntil: 'networkidle' });
-    await page.waitForTimeout(1500);
+    // Wait for the document to fire `load` (DOM + subresources) rather than
+    // `networkidle`. networkidle requires the network to go fully quiet for
+    // 500ms, which can fail in containerized environments where Google Fonts
+    // requests stay in flight indefinitely. The 60s timeout is ample for
+    // local file:// loads; the only thing that can take real time is font
+    // fetching, which we then wait for explicitly.
+    await page.goto('file://' + htmlPath, { waitUntil: 'load', timeout: 60000 });
+
+    // Explicit web-font readiness. The CSS Font Loading API resolves
+    // document.fonts.ready once every @font-face used in the document is
+    // either downloaded and applied, OR has timed out and substituted.
+    // Either outcome is fine for us — what we DON'T want is to start
+    // page.pdf() while Chromium is still mid-fetch on a font, which is
+    // what produces the partial PDFs.
+    try {
+      await page.evaluate(() => document.fonts.ready);
+    } catch (e) {
+      process.stderr.write(`font-ready evaluate failed: ${e.message}\n`);
+    }
+
+    // Small buffer for any final layout settling (image decoding, custom
+    // CSS that ran on font load events, etc).
+    await page.waitForTimeout(2000);
+
     await page.addStyleTag({ content: '@page { size: 8.5in 11in; margin: 0; }' });
-    await page.pdf({
-      path: pdfPath,
-      format: 'Letter',
-      printBackground: true,
-      margin: { top: '0', right: '0', bottom: '0', left: '0' },
-      preferCSSPageSize: true,
-    });
+    try {
+      await page.pdf({
+        path: pdfPath,
+        format: 'Letter',
+        printBackground: true,
+        margin: { top: '0', right: '0', bottom: '0', left: '0' },
+        preferCSSPageSize: true,
+        timeout: 60000,
+      });
+    } catch (e) {
+      process.stderr.write(`page.pdf() failed: ${e.message}\n`);
+      throw e;
+    }
     await page.close();
   } finally {
     await browser.close();
