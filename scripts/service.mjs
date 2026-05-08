@@ -80,7 +80,9 @@ function renderPdf(jsonBuffer) {
     let pyExit = null, nodeExit = null;
     const dumpDiagnostics = (label) => {
       const errStr = Buffer.concat(errs).toString();
-      console.log(`[render] ${label} pyExit=${pyExit} nodeExit=${nodeExit} htmlBytes=${htmlBytes} pdfBytes=${out.reduce((s, b) => s + b.length, 0)}`);
+      const mu = process.memoryUsage();
+      const memMB = (n) => Math.round(n / 1024 / 1024);
+      console.log(`[render] ${label} pyExit=${pyExit} nodeExit=${nodeExit} htmlBytes=${htmlBytes} pdfBytes=${out.reduce((s, b) => s + b.length, 0)} mem(parent)=rss:${memMB(mu.rss)}MB heap:${memMB(mu.heapUsed)}/${memMB(mu.heapTotal)}MB`);
       if (errStr) console.log('[render] child stderr:\n' + errStr.slice(0, 4000));
       else console.log('[render] (no child stderr)');
     };
@@ -154,20 +156,31 @@ const server = http.createServer(async (req, res) => {
   try { JSON.parse(buf.toString('utf-8')); }
   catch { return badRequest(res, 400, 'body must be valid JSON'); }
 
+  const startMs = Date.now();
+  console.log(`[handler] start, body=${buf.length} bytes`);
   try {
     const pdf = await renderPdf(buf);
+    const elapsed = Date.now() - startMs;
+    console.log(`[handler] renderPdf returned ${pdf?.length ?? 0} bytes in ${elapsed}ms`);
     if (!pdf || pdf.length < 1000) {
-      return badRequest(res, 502, 'render produced empty/short PDF');
+      return badRequest(res, 502, `render produced empty/short PDF (${pdf?.length ?? 0} bytes)`);
     }
     res.writeHead(200, {
       'Content-Type': 'application/pdf',
       'Content-Length': pdf.length,
       'Cache-Control': 'no-store',
+      // Echo size in a header so the client can verify what the SERVER
+      // thought it sent vs what it actually received. If these disagree,
+      // there's a proxy in between truncating.
+      'X-Workbook-Bytes': String(pdf.length),
+      'X-Workbook-Render-Ms': String(elapsed),
     });
     res.end(pdf);
+    console.log(`[handler] done, sent ${pdf.length} bytes`);
   } catch (e) {
-    console.error('[render]', e.message);
-    badRequest(res, 502, 'render failed: ' + (e.message || 'unknown'));
+    const elapsed = Date.now() - startMs;
+    console.error(`[render] FAILED after ${elapsed}ms: ${e.message}`);
+    badRequest(res, 502, `render failed after ${elapsed}ms: ${e.message || 'unknown'}`);
   }
 });
 
