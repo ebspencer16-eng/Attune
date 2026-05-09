@@ -789,7 +789,7 @@ COUPLE = {
         'name': 'The Jumpstart',
         'subtitle': 'initiator-anchor',
         'tagline': 'Both want resolution. Different instruments, same direction.',
-        'description': "Maya and David both move toward resolution when things get hard, you're pulling in the same direction. Where you differ is in how the internal experience travels: one processes outward, and one holds it closer. The destination is the same. The path there looks different.",
+        'description': "{U} and {P} both move toward resolution when things get hard, you're pulling in the same direction. Where you differ is in how the internal experience travels: one processes outward, and one holds it closer. The destination is the same. The path there looks different.",
         'phrase_that_lands': "I need to process this out loud, bear with me. I don't have it figured out yet.",
     },
     # Edition number is no longer surfaced anywhere customer-visible per
