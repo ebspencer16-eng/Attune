@@ -859,7 +859,7 @@ function buildSnapshot(u, p, scores, partnerScores, coupleType, expGaps) {
     ...(coupleType.tagline ? [new Paragraph({
       spacing: { after: 240 },
       border: { left: { style: BorderStyle.SINGLE, size: 24, color: coupleType.color?.replace('#','') || GREEN, space: 12 } },
-      children: [run(coupleType.tagline, { size: 18, italics: true, color: MUTED })],
+      children: [run(fill(coupleType.tagline, u, p), { size: 18, italics: true, color: MUTED })],
     })] : []),
   ] : [];
 
@@ -1230,7 +1230,7 @@ function buildPartOneIntro(u, p, coupleType, domainsToShow) {
     new Paragraph({ spacing: { after: 40 },
       children: [run('Practical help, built from your answers.', { size: 36, bold: true, color: INK })] }),
     ...(coupleType?.tagline ? [new Paragraph({ spacing: { after: 240 },
-      children: [run(coupleType.tagline, { size: 18, italics: true, color: MUTED })] })] : []),
+      children: [run(fill(coupleType.tagline, u, p), { size: 18, italics: true, color: MUTED })] })] : []),
     new Paragraph({ spacing: { before: 0, after: 280 },
       border: { bottom: { style: BorderStyle.SINGLE, size: 16, color, space: 4 } },
       children: [new TextRun('')] }),
