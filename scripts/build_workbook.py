@@ -2344,7 +2344,7 @@ def build_snapshot(page_num):
       <div class="couple-capsule-text">
         <span class="couple-capsule-eye">Your couple type</span>
         <span class="couple-capsule-name">{COUPLE['couple_type']['name']} <em>· {COUPLE['couple_type']['subtitle']}</em></span>
-        <span class="couple-capsule-sub">{COUPLE['couple_type']['description']}</span>
+        <span class="couple-capsule-sub">{fill(COUPLE['couple_type']['description'], COUPLE['u'], COUPLE['p'])}</span>
       </div>
     </div>
 
