@@ -1879,137 +1879,90 @@ body{
   text-transform:uppercase;font-weight:600;color:var(--graphite);
   z-index:1;
 }
-/* The actual card. Navy bg + thin gold border + featured partner names. */
+/* The actual card. Cream paper, hairline rules, brand blue names. */
 .refcard-card{
-  background:linear-gradient(170deg,#1A1232 0%,#2D2250 50%,#1E3A6E 100%);
-  padding:.45in .45in .35in;
+  background:var(--cream);
+  padding:.35in .42in .36in;
   position:relative;
-  border:2px solid var(--gold);
+  border:1px solid var(--hairline);
   box-shadow:0 1px 0 rgba(0,0,0,.04);
   width:6.6in;
-  color:white;
+  color:var(--ink);
 }
-/* Top gradient stripe stays (matches cover) */
-.refcard-card::before{
-  content:"";position:absolute;top:0;left:0;right:0;height:3px;
-  background:linear-gradient(90deg,#E8673A 0%,#9B5DE5 50%,#1B5FE8 100%);
+/* Top row: logo + wordmark on left, partner names large on right */
+.refcard-top{
+  display:flex;align-items:center;justify-content:space-between;
+  gap:.4in;
+  padding-bottom:.18in;
+  border-bottom:1px solid var(--hairline);
 }
-/* Top meta row: ATTUNE RELATIONSHIPS · REFERENCE CARD centered */
-.refcard-meta{
-  display:flex;justify-content:center;align-items:baseline;
-  padding-bottom:.14in;border-bottom:1px solid rgba(255,255,255,.18);
-  margin-bottom:.18in;margin-top:.04in;
+.refcard-logo{
+  display:flex;align-items:center;gap:10px;flex-shrink:0;
 }
-.refcard-eye{
-  color:var(--coral-soft);
-  font-family:var(--bfont);font-size:9.5px;letter-spacing:.28em;
-  text-transform:uppercase;font-weight:700;
+.refcard-logo-svg{display:block}
+.refcard-logo-wordmark{
+  display:flex;flex-direction:column;line-height:1;
 }
-/* Partner names sit where "Keep this somewhere..." used to be */
+.refcard-logo-name{
+  font-family:var(--hfont);font-size:1.15rem;font-weight:700;
+  color:var(--ink);letter-spacing:-.01em;line-height:1;
+}
+.refcard-logo-kicker{
+  font-family:var(--bfont);font-size:8px;letter-spacing:.22em;
+  text-transform:uppercase;font-weight:700;color:var(--muted);
+  margin-top:4px;line-height:1;
+}
 .refcard-names{
-  font-family:var(--hfont);font-size:2.6rem;font-weight:700;
-  line-height:1;letter-spacing:-.022em;
-  color:var(--coral-soft);
-  margin:.12in 0 .1in;
-  text-align:center;
+  font-family:var(--hfont);font-size:2.1rem;font-weight:700;
+  line-height:1;letter-spacing:-.02em;
+  color:var(--indigo-deep);
+  margin:0;
+  text-align:right;
 }
 .refcard-names em{
-  font-style:italic;font-weight:400;color:rgba(255,255,255,.55);
+  font-style:italic;font-weight:400;color:var(--muted);
 }
-/* Per-couple-type phrase, between names and tiles. From phrase_that_lands. */
-.refcard-phrase{
-  font-family:var(--hfont);font-style:italic;font-weight:400;
-  font-size:.92rem;line-height:1.4;letter-spacing:-.005em;
-  color:rgba(255,255,255,.78);
+/* Centered intention statement between top and bottom sections */
+.refcard-middle{
+  padding:.28in 0 .26in;
+  border-bottom:1px solid var(--hairline);
   text-align:center;
-  margin:.04in auto .14in;
-  max-width:4.6in;
 }
-/* 3-tile layout: couple type · logo · goal */
-.refcard-tiles{
-  display:grid;grid-template-columns:1.15fr .85fr 1.1fr;
-  gap:0;
-  margin-top:.14in;
-  border-top:1px solid rgba(255,255,255,.18);
+.refcard-intention{
+  font-family:var(--hfont);font-size:1.55rem;font-weight:400;
+  font-style:italic;color:var(--ink);
+  line-height:1.2;letter-spacing:-.012em;
+  margin:0;
 }
-.refcard-tile{
-  padding:.42rem .7rem .55rem;
-  border-right:1px solid rgba(255,255,255,.12);
-  display:flex;flex-direction:column;gap:6px;
-  min-height:1.55in;
+/* Bottom sections: phrase + work-on area, each with its own coral eyebrow */
+.refcard-section{
+  padding:.2in 0 .2in;
+  border-bottom:1px solid var(--hairline);
 }
-.refcard-tile:last-child{border-right:none}
-.refcard-tile-eye{
+.refcard-section:last-child{border-bottom:none;padding-bottom:0}
+.refcard-section-eye{
   font-family:var(--bfont);font-size:9px;letter-spacing:.22em;
   text-transform:uppercase;font-weight:700;
-  color:var(--coral-soft);
+  color:var(--coral-deep);
+  display:block;margin-bottom:8px;
 }
-/* Couple type tile: type name big, profile id + tagline below */
-.refcard-tile-type-name{
-  font-family:var(--hfont);font-size:1.15rem;font-weight:700;font-style:italic;
-  color:white;line-height:1.15;margin-top:2px;
+.refcard-phrase-text{
+  font-family:var(--hfont);font-style:italic;font-weight:400;
+  font-size:1.02rem;line-height:1.4;letter-spacing:-.006em;
+  color:var(--graphite);
+  margin:0;
 }
-.refcard-tile-type-profile{
-  font-family:var(--mono);font-size:9.5px;letter-spacing:.18em;
-  text-transform:uppercase;color:rgba(255,255,255,.55);font-weight:500;
-  margin-top:6px;
-}
-.refcard-tile-type-tagline{
-  font-family:var(--bfont);font-size:.7rem;line-height:1.45;
-  color:rgba(255,255,255,.7);font-weight:400;font-style:italic;margin-top:8px;
-}
-/* Logo tile: real Attune SVG mark + wordmark + italic tagline */
-.refcard-tile-logo{
-  display:flex;align-items:center;justify-content:center;
-  padding:.2rem .35rem;
-}
-.refcard-mark{
-  display:flex;flex-direction:column;align-items:center;gap:8px;
-  text-align:center;
-}
-.refcard-mark-svg{
-  display:block;
-  filter:drop-shadow(0 1px 0 rgba(0,0,0,.2));
-}
-.refcard-mark-wordmark{
-  display:flex;flex-direction:column;align-items:center;gap:1px;
-  margin-top:2px;
-}
-.refcard-mark-name{
-  font-family:var(--hfont);font-size:1.2rem;font-weight:700;
-  color:white;letter-spacing:.01em;line-height:1;
-}
-.refcard-mark-kicker{
-  font-family:var(--bfont);font-size:8px;letter-spacing:.32em;
-  text-transform:uppercase;font-weight:700;
-  color:rgba(255,255,255,.55);line-height:1;
-}
-/* Gradient rule under wordmark, before tagline. Same as cover stripe. */
-.refcard-mark-rule{
-  width:54px;height:1.5px;margin-top:8px;
-  background:linear-gradient(90deg,#E8673A 0%,#9B5DE5 50%,#1B5FE8 100%);
-  border-radius:1px;
-}
-.refcard-mark-tagline{
-  font-family:var(--hfont);font-style:italic;font-size:.78rem;
-  color:rgba(255,255,255,.78);font-weight:400;line-height:1.3;
-  margin-top:4px;letter-spacing:-.005em;max-width:1.6in;
-}
-/* Goal-for-this-week tile: WHITE write-in box (notepad style) */
-.refcard-tile-writein{
-  flex:1;
-  background:#FFFDF9;
-  background-image:repeating-linear-gradient(
-    transparent,
-    transparent 1.4em,
-    rgba(45,34,80,.22) 1.4em,
-    rgba(45,34,80,.22) calc(1.4em + 1px)
+/* Lined write-in area. Same uniform-line pattern as .writein-area, sized
+   for ~3 short rows on the card. */
+.refcard-workon-area{
+  background:repeating-linear-gradient(
+    var(--hairline),
+    var(--hairline) 1px,
+    transparent 1px,
+    transparent 1.6em
   );
-  border:1px solid rgba(255,255,255,.14);
-  border-radius:2px;
-  margin-top:8px;
-  min-height:1.2in;
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.4),0 1px 0 rgba(0,0,0,.18);
+  height:calc(1.6em * 3);
+  margin-top:6px;
 }
 /* Below-card content sits on page bg */
 .refcard-context{
@@ -2964,18 +2917,17 @@ def build_first_conversation_guide(page_num):
 """
 
 def build_reference_card(page_num):
-    """Reference card, navy card on tan page bg. v2 notepad-style.
+    """Reference card, cream paper on tan page bg. v3 layout per Ellie's
+    approved mockup (May 2026).
 
-    Layout per Ellie's v2 spec:
-      - Navy gradient bg with thin gold border, gradient stripe at top
-      - Coral partner names (no "Together, four years" line)
-      - Three tiles:
-          left   : couple type
-          center : real Attune logo SVG + "Understanding takes intention." tagline
-          right  : white write-in box for goal-of-the-week (no pre-filled quote)
-      - Gradient rule accent (orange→purple→indigo) inside the center tile
-      - "Keep this somewhere you'll see it" + "Explore Attune In Practice"
-        live in the page-context section below the card, not on the card itself
+    Card layout (top to bottom):
+      - Top row: Attune logo (left) + partner names large in indigo-deep (right)
+      - Middle: "Understanding takes intention." centered italic
+      - Section 1: "Phrase for the two of you" eyebrow + phrase_that_lands
+      - Section 2: "What we're going to work on" eyebrow + lined write-in area
+
+    Below the card (stays in the workbook, not cut out): "Keep this somewhere
+    you'll see it" + tips + "Explore Attune In Practice" callout.
     """
     return f"""
 <div class="page refcard-page">
@@ -2983,47 +2935,43 @@ def build_reference_card(page_num):
   <div class="refcard-cutout">
     <span class="refcard-cutline-label">· cut along this line ·</span>
     <div class="refcard-card">
-      <div class="refcard-meta">
-        <div class="refcard-eye">Attune Relationships · Reference Card</div>
-      </div>
 
-      <h1 class="refcard-names">{COUPLE['u']} <em>&amp;</em> {COUPLE['p']}</h1>
-      <p class="refcard-phrase">"{COUPLE['couple_type']['phrase_that_lands']}"</p>
-
-      <div class="refcard-tiles">
-        <div class="refcard-tile">
-          <span class="refcard-tile-eye">Couple type</span>
-          <h3 class="refcard-tile-type-name">{COUPLE['couple_type']['name']}</h3>
-          <p class="refcard-tile-type-profile">Profile {COUPLE['couple_type']['id']} · §02</p>
-          <p class="refcard-tile-type-tagline">{COUPLE['couple_type']['tagline']}</p>
-        </div>
-        <div class="refcard-tile refcard-tile-logo">
-          <div class="refcard-mark">
-            <svg class="refcard-mark-svg" width="76" height="56" viewBox="0 0 103 76" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <defs>
-                <linearGradient id="refcardLogoGrad" x1="0" y1="0" x2="103" y2="76" gradientUnits="userSpaceOnUse">
-                  <stop offset="0%" stop-color="#E8673A"/>
-                  <stop offset="100%" stop-color="#1B5FE8"/>
-                </linearGradient>
-              </defs>
-              <path d="M14,4 L44,4 A9,9 0 0,1 53,13 L53,42 A9,9 0 0,1 44,51 L20,51 L6,61 L11,51 A6,6 0 0,1 5,45 L5,13 A9,9 0 0,1 14,4 Z" fill="url(#refcardLogoGrad)"/>
-              <path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill="white" opacity="0.93" transform="translate(13.16,11.3) scale(0.72)"/>
-              <path d="M89,14 L59,14 A9,9 0 0,0 50,23 L50,52 A9,9 0 0,0 59,61 L83,61 L97,71 L92,61 A6,6 0 0,0 98,55 L98,23 A9,9 0 0,0 89,14 Z" fill="white" stroke="url(#refcardLogoGrad)" stroke-width="2.2" stroke-linejoin="round"/>
-              <path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill="url(#refcardLogoGrad)" transform="translate(58.16,21.3) scale(0.72)"/>
-            </svg>
-            <div class="refcard-mark-wordmark">
-              <span class="refcard-mark-name">Attune</span>
-              <span class="refcard-mark-kicker">Relationships</span>
-            </div>
-            <div class="refcard-mark-rule"></div>
-            <p class="refcard-mark-tagline">Understanding takes intention.</p>
+      <div class="refcard-top">
+        <div class="refcard-logo">
+          <svg class="refcard-logo-svg" width="60" height="44" viewBox="0 0 103 76" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="refcardLogoGrad" x1="0" y1="0" x2="103" y2="76" gradientUnits="userSpaceOnUse">
+                <stop offset="0%" stop-color="#E8673A"/>
+                <stop offset="100%" stop-color="#1B5FE8"/>
+              </linearGradient>
+            </defs>
+            <path d="M14,4 L44,4 A9,9 0 0,1 53,13 L53,42 A9,9 0 0,1 44,51 L20,51 L6,61 L11,51 A6,6 0 0,1 5,45 L5,13 A9,9 0 0,1 14,4 Z" fill="url(#refcardLogoGrad)"/>
+            <path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill="white" opacity="0.93" transform="translate(13.16,11.3) scale(0.72)"/>
+            <path d="M89,14 L59,14 A9,9 0 0,0 50,23 L50,52 A9,9 0 0,0 59,61 L83,61 L97,71 L92,61 A6,6 0 0,0 98,55 L98,23 A9,9 0 0,0 89,14 Z" fill="white" stroke="url(#refcardLogoGrad)" stroke-width="2.2" stroke-linejoin="round"/>
+            <path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill="url(#refcardLogoGrad)" transform="translate(58.16,21.3) scale(0.72)"/>
+          </svg>
+          <div class="refcard-logo-wordmark">
+            <span class="refcard-logo-name">Attune</span>
+            <span class="refcard-logo-kicker">Relationships</span>
           </div>
         </div>
-        <div class="refcard-tile">
-          <span class="refcard-tile-eye">Goal for this week</span>
-          <div class="refcard-tile-writein"></div>
-        </div>
+        <h1 class="refcard-names">{COUPLE['u']} <em>&amp;</em> {COUPLE['p']}</h1>
       </div>
+
+      <div class="refcard-middle">
+        <p class="refcard-intention">Understanding takes intention.</p>
+      </div>
+
+      <div class="refcard-section">
+        <span class="refcard-section-eye">Phrase for the two of you</span>
+        <p class="refcard-phrase-text">&ldquo;{fill(COUPLE['couple_type']['phrase_that_lands'], COUPLE['u'], COUPLE['p'])}&rdquo;</p>
+      </div>
+
+      <div class="refcard-section">
+        <span class="refcard-section-eye">What we're going to work on</span>
+        <div class="refcard-workon-area"></div>
+      </div>
+
     </div>
   </div>
 
@@ -3034,7 +2982,7 @@ def build_reference_card(page_num):
       <span class="refcard-ctx-num">Page {page_num:03d}</span>
     </div>
     <h2 class="refcard-ctx-title">Keep this <em>somewhere you'll see it.</em></h2>
-    <p class="refcard-ctx-body">The reference card is built from your couple type. Cut along the dashed line above and write your weekly goal on the right tile. Replace it each week, or carry the same one forward.</p>
+    <p class="refcard-ctx-body">The reference card is built from your couple type. Cut along the dashed line above and write what the two of you want to focus on this week in the open box. Replace it each week, or carry the same one forward.</p>
     <div class="refcard-ctx-tips">
       <div class="refcard-ctx-tip">
         <span class="refcard-ctx-tip-label">Where to keep it</span>
