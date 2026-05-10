@@ -1159,15 +1159,15 @@ body{
 /* ── SNAPSHOT ─────────────────────────────────────────────────── */
 .snapshot-header{
   display:flex;justify-content:space-between;align-items:flex-end;
-  padding-bottom:.18in;border-bottom:1px solid var(--hairline);
-  margin-bottom:.22in;
+  padding-bottom:.14in;border-bottom:1px solid var(--hairline);
+  margin-bottom:.16in;
 }
-.snapshot-title{font-size:2.5rem;letter-spacing:-.028em;line-height:1.04}
+.snapshot-title{font-size:2.2rem;letter-spacing:-.028em;line-height:1.04}
 .snapshot-title em{color:var(--coral-deep)}
 .snapshot-stamp{
   text-align:right;
   font-family:var(--mono);font-size:9px;letter-spacing:.16em;
-  color:var(--muted);text-transform:uppercase;line-height:1.8;
+  color:var(--muted);text-transform:uppercase;line-height:1.7;
   white-space:nowrap;
 }
 .snapshot-stamp strong{color:var(--ink);font-weight:500}
@@ -1176,7 +1176,7 @@ body{
 .couple-capsule{
   background:var(--bone);
   border:1px solid var(--hairline);
-  padding:.7rem 1rem;margin-bottom:.22in;
+  padding:.6rem 1rem;margin-bottom:.16in;
   display:grid;grid-template-columns:auto 1fr;gap:1rem;align-items:center;
 }
 .couple-capsule-mark{
@@ -1211,7 +1211,7 @@ body{
 .dim-row{
   display:grid;grid-template-columns:1.7in 1fr;
   gap:.22in;align-items:center;
-  padding:.08rem 0;
+  padding:.04rem 0;
 }
 .dim-row-num{
   font-family:var(--mono);font-size:9px;letter-spacing:.06em;
@@ -1255,7 +1255,7 @@ body{
 /* Snapshot section title row: title + legend on same line */
 .snap-section-row{
   display:flex;justify-content:space-between;align-items:baseline;
-  margin-top:.32in;padding-bottom:6px;
+  margin-top:.18in;padding-bottom:6px;
   border-bottom:1px solid var(--hairline);
 }
 .snap-section-row .snap-section-title{margin:0;border:none;padding:0}
@@ -1270,16 +1270,16 @@ body{
 .legend-sarah::before{background:var(--coral-deep)}
 .legend-james::before{background:var(--indigo-deep)}
 
-/* Expectations grid */
+/* Expectations grid — 6 cards, one per domain */
 .expectations-grid{
-  display:grid;grid-template-columns:repeat(7,1fr);gap:10px;
-  margin-top:.18in;
+  display:grid;grid-template-columns:repeat(6,1fr);gap:10px;
+  margin-top:.12in;
 }
 .exp-card{
   border:1px solid var(--hairline);
-  padding:1rem .75rem 1.1rem;
-  display:grid;grid-template-rows:2.6em 1fr auto;
-  row-gap:8px;
+  padding:.8rem .65rem .85rem;
+  display:grid;grid-template-rows:2.4em 1fr auto;
+  row-gap:6px;
   background:var(--cream);
   position:relative;
 }
@@ -1605,15 +1605,18 @@ body{
   color:var(--muted);font-weight:400;
 }
 .writein-area{
+  /* Repeating pattern: 1px hairline, then 1.55em transparent, repeat.
+     For --lines=N, height = N*1.55em produces N evenly-spaced lines:
+     first line at top of the writein area (anchoring the first write-in
+     row), then every 1.55em down. All lines uniform 1px weight. */
   background:repeating-linear-gradient(
-    transparent,
-    transparent 1.55em,
-    var(--hairline) 1.55em,
-    var(--hairline) calc(1.55em + 1px)
+    var(--hairline),
+    var(--hairline) 1px,
+    transparent 1px,
+    transparent 1.55em
   );
-  background-position-y: 1.55em;
   height:calc(1.55em * var(--lines, 3));
-  margin-top:8px;
+  margin-top:14px;
 }
 
 /* ── EXPECTATIONS PAGE ──────────────────────────────────────── */
@@ -2358,7 +2361,7 @@ def build_snapshot(page_num):
     <div class="dim-table">{''.join(dim_rows)}
     </div>
 
-    <div class="snap-section-title" style="margin-top:.32in">Expectations · 6 domains</div>
+    <div class="snap-section-title" style="margin-top:.18in">Expectations · 6 domains</div>
     <div class="expectations-grid">{''.join(exp_cards)}
     </div>
   </div>
