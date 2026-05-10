@@ -6849,10 +6849,11 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
         }
 
         // Digital — auto-generate AND persist to Supabase Storage.
-        // Calls /api/store-workbook (which internally calls
-        // /api/generate-workbook, then uploads the .docx to storage and
-        // returns a 7-day signed URL). The order row is updated server-
-        // side with workbook_url + workbook_status='ready'.
+        // Calls /api/store-workbook-pdf (which calls the external Render
+        // Playwright service to produce the Volume 01 PDF, then uploads
+        // it to storage and returns a 7-day signed URL). The order row is
+        // updated server-side with workbook_url + workbook_status='ready'
+        // + workbook_format='pdf'.
         ord.workbookStatus = 'generating';
         localStorage.setItem('attune_order', JSON.stringify(ord));
 
@@ -6865,11 +6866,11 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
           ex2Answers, partnerEx2,
           coupleType
         );
-        // Add orderId so /api/store-workbook can update the row.
+        // Add orderId so store-workbook-pdf can update the row.
         if (ord.orderNum) payload.orderId = ord.orderNum;
 
         // Pull the user's access token so the API can verify they own a
-        // workbook addon. Without this header, store-workbook returns 401.
+        // workbook addon. Without this header, the endpoint returns 401.
         const _wbAuth = await (async () => {
           try {
             const { supabase: sb, hasSupabase } = await import('./supabase.js');
@@ -6878,7 +6879,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
             return session?.access_token || null;
           } catch { return null; }
         })();
-        const resp = await fetch('/api/store-workbook', {
+        const resp = await fetch('/api/store-workbook-pdf', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -6888,9 +6889,9 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
         });
 
         if (resp.ok) {
-          // store-workbook returns { ok, url, filename } — persist the
-          // signed URL in the order so the dashboard download can pull
-          // it directly without re-generating.
+          // store-workbook-pdf returns { ok, url, filename } — persist
+          // the signed URL in the order so the dashboard download can
+          // pull it directly without re-generating.
           try {
             const data = await resp.json();
             localStorage.setItem('attune_workbook_ready', 'true');
@@ -12450,7 +12451,7 @@ export default function App() {
                       if (!ord) return;
                       const myS = calcDimScores(ex1Answers);
                       const partS = calcDimScores(partnerEx1);
-                      // Pull auth token so store-workbook can verify purchase
+                      // Pull auth token so the endpoint can verify purchase
                       let _swAuth = null;
                       try {
                         const { supabase: sb, hasSupabase } = await import('./supabase.js');
@@ -12459,7 +12460,7 @@ export default function App() {
                           _swAuth = session?.access_token || null;
                         }
                       } catch {}
-                      fetch('/api/store-workbook', {
+                      fetch('/api/store-workbook-pdf', {
                         method: 'POST',
                         headers: {
                           'Content-Type': 'application/json',
