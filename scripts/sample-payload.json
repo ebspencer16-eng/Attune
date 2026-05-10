@@ -1,0 +1,135 @@
+{
+  "userName": "Maya",
+  "partnerName": "David",
+  "orderId": "TEST-SMOKE-001",
+  "scores": {
+    "energy": 4, "expression": 4, "needs": 3, "bids": 4,
+    "conflict": 4, "repair": 3, "closeness": 4, "love": 4,
+    "stress": 3, "feedback": 3
+  },
+  "partnerScores": {
+    "energy": 2, "expression": 2, "needs": 3, "bids": 3,
+    "conflict": 2, "repair": 4, "closeness": 3, "love": 4,
+    "stress": 4, "feedback": 4
+  },
+  "coupleType": {
+    "id": "WX",
+    "name": "The Spark & The Anchor",
+    "subtitle": "Initiator + Anchor",
+    "tagline": "One leans toward warmth out loud, the other holds the rudder.",
+    "description": "{U} processes by expressing. {P} processes by holding. Both move toward resolution — just at different speeds.",
+    "color": "#E8673A",
+    "tips": [{
+      "phraseTry": "Let me share what I'm feeling, then we can figure it out together."
+    }]
+  },
+  "phraseThatLands": "Let me share what I'm feeling, then we can figure it out together.",
+  "responsibilities": {
+    "user": {
+      "household": [
+        { "item": "Cooking weeknights", "value": "Maya" },
+        { "item": "Grocery & meal planning", "value": "Both of us" },
+        { "item": "Day-to-day tidying", "value": "Both of us" },
+        { "item": "Home repairs", "value": "David" },
+        { "item": "Family calendar", "value": "Maya" },
+        { "item": "Hosting & holidays", "value": "Both of us" },
+        { "item": "Vacation planning", "value": "Maya" }
+      ],
+      "emotional": [
+        { "item": "Mental load", "value": "Maya" },
+        { "item": "Tracking how everyone is", "value": "Maya" },
+        { "item": "Maintaining closeness", "value": "Both of us" },
+        { "item": "Hard conversations", "value": "Maya" },
+        { "item": "Repair after friction", "value": "Both of us" }
+      ],
+      "financial": [
+        { "item": "Day-to-day finances", "value": "Both of us" },
+        { "item": "Long-term financial decisions", "value": "Both of us" }
+      ],
+      "career": [
+        { "item": "Career priority A", "value": "Both equally" },
+        { "item": "Career priority B", "value": "Both equally" }
+      ],
+      "extended_family": [
+        { "item": "Maya visits", "value": "Maya" },
+        { "item": "Maya gifts", "value": "Maya" },
+        { "item": "Maya contact", "value": "Maya" },
+        { "item": "David visits", "value": "David" },
+        { "item": "David gifts", "value": "Both of us" },
+        { "item": "David contact", "value": "David" }
+      ]
+    },
+    "partner": {
+      "household": [
+        { "item": "Cooking weeknights", "value": "Maya" },
+        { "item": "Grocery & meal planning", "value": "Maya" },
+        { "item": "Day-to-day tidying", "value": "Both of us" },
+        { "item": "Home repairs", "value": "David" },
+        { "item": "Family calendar", "value": "Both of us" },
+        { "item": "Hosting & holidays", "value": "Both of us" },
+        { "item": "Vacation planning", "value": "Both of us" }
+      ],
+      "emotional": [
+        { "item": "Mental load", "value": "Both of us" },
+        { "item": "Tracking how everyone is", "value": "Maya" },
+        { "item": "Maintaining closeness", "value": "Both of us" },
+        { "item": "Hard conversations", "value": "Both of us" },
+        { "item": "Repair after friction", "value": "Both of us" }
+      ],
+      "financial": [
+        { "item": "Day-to-day finances", "value": "David" },
+        { "item": "Long-term financial decisions", "value": "Both of us" }
+      ],
+      "career": [
+        { "item": "Career priority A", "value": "Both equally" },
+        { "item": "Career priority B", "value": "David" }
+      ],
+      "extended_family": [
+        { "item": "Maya visits", "value": "Maya" },
+        { "item": "Maya gifts", "value": "Maya" },
+        { "item": "Maya contact", "value": "Maya" },
+        { "item": "David visits", "value": "Both of us" },
+        { "item": "David gifts", "value": "Both of us" },
+        { "item": "David contact", "value": "David" }
+      ]
+    }
+  },
+  "lifeQuestions": {
+    "user": {
+      "lq_children": "Yes, we want children",
+      "lq_family_conf": "Partner first, always",
+      "lq_location": "Where we are now",
+      "lq_social": "A few close friends",
+      "lq_routine": "Mostly routine with planned spontaneity",
+      "lq_faith": "Spiritual but not religious",
+      "lq_values": "Family and integrity",
+      "lq_finances": "Fully combined",
+      "lq_money_lean": "Save more than spend",
+      "lq_money_risk": "Moderate",
+      "lq_conflict_when": "Address it soon",
+      "lq_conflict_after": "Within a day",
+      "lq_conflict_repair": "Talk it through fully",
+      "lq_affection": "Daily, in small ways",
+      "lq_closeness": "Together is how we cope",
+      "lq_independence": "Important to both of us"
+    },
+    "partner": {
+      "lq_children": "Yes, we want children",
+      "lq_family_conf": "Depends on the situation",
+      "lq_location": "Where we are now",
+      "lq_social": "Wide social circle",
+      "lq_routine": "Mostly routine with planned spontaneity",
+      "lq_faith": "Spiritual but not religious",
+      "lq_values": "Family and integrity",
+      "lq_finances": "Fully combined",
+      "lq_money_lean": "Save more than spend",
+      "lq_money_risk": "Conservative",
+      "lq_conflict_when": "After we've cooled off",
+      "lq_conflict_after": "Within a day",
+      "lq_conflict_repair": "A clear agreement on what's next",
+      "lq_affection": "Daily, in small ways",
+      "lq_closeness": "Together is how we cope",
+      "lq_independence": "Important to both of us"
+    }
+  }
+}
