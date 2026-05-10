@@ -501,7 +501,7 @@ function ExpectationsExercise({ partnerName, userName = "Partner A", onComplete,
           ? "One part, no responsibilities section this time. Just the life and values questions, revisited. See what's shifted, what's stayed the same, and what that means for where you are now."
           : isAnniversary
           ? "Two parts. First, how you each feel about the things that shape your shared life, family, values, money, conflict, connection. Then, who has each been quietly assuming handles what."
-          : "Two parts. First, life and values questions — children, finances, where you live, how you handle conflict and repair. Then, who you expect to handle what across household, financial, career, and emotional responsibilities. You'll also share who did each of these in your childhood home, which helps explain why you each carry the expectations you do."
+          : "Two parts. First, life and values questions: children, finances, where you live, how you handle conflict and repair. Then, who you expect to handle what across household, financial, career, extended family, and emotional responsibilities. You'll also share who did each of these in your childhood home. That context helps explain why you each carry the expectations you do."
         }
       </p>
       <p style={{ fontSize: "0.88rem", color: C.muted, lineHeight: 1.75, fontFamily: font.body, fontWeight: 300, marginBottom: "2.5rem", borderLeft: ("3px solid " + (C.stone)), paddingLeft: "1rem" }}>
@@ -12119,9 +12119,9 @@ export default function App() {
                   </div>
                   <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "repeat(2, 1fr)", gap: "0.75rem" }}>
                     {[
-                      { num: "01", title: "Communication", done: !!ex1Answers, viewId: "exercise1", color: "#E8673A", desc: "Map your communication style across 10 dimensions — how you recharge, express, conflict, and connect." },
-                      { num: "02", title: "Expectations", done: !!ex2Answers, viewId: "exercise2", color: "#1B5FE8", desc: "Align on who handles what and what you each expect — household, finances, career, emotional labor." },
-                      ...(pkg.hasAnniversary ? [{ num: "03", title: "Reflection", done: !!ex3Answers, viewId: "exercise3", color: "#1B5FE8", desc: "Capture the moments that shaped your relationship — a third lens on your shared story." }] : []),
+                      { num: "01", title: "Communication", done: !!ex1Answers, viewId: "exercise1", color: "#E8673A", desc: "Map your communication style across 10 dimensions. How you recharge, express, conflict, and connect." },
+                      { num: "02", title: "Expectations", done: !!ex2Answers, viewId: "exercise2", color: "#1B5FE8", desc: "Align on who handles what across six domains: household, money, career, extended family, emotional labor, life together." },
+                      ...(pkg.hasAnniversary ? [{ num: "03", title: "Reflection", done: !!ex3Answers, viewId: "exercise3", color: "#1B5FE8", desc: "Capture the moments that shaped your relationship. A third lens on your shared story." }] : []),
                     ].map(item => (
                       <div key={item.num} onClick={() => setView(item.viewId)}
                         style={{ background: "white", border: `1.5px solid ${item.done ? "rgba(16,185,129,0.25)" : "#E8DDD0"}`, borderRadius: 16, padding: "1.25rem", cursor: "pointer", transition: "box-shadow .15s, border-color .15s", display: "flex", flexDirection: "column", gap: "0.6rem" }}

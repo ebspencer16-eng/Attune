@@ -3,3 +3,4 @@ node_modules/
 dist/
 *.bak
 *.bak2
+.pyc
