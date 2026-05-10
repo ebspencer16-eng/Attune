@@ -66,10 +66,10 @@ function renderPdf(jsonBuffer) {
     // Also tee py.stdout to a counter so we can log how much HTML Python produced —
     // a too-small HTML pointing to a Python build that exited early but still 0.
     const out = [];
-    const errs = [];
+    const errChunks = [];   // string chunks, not buffers
     let htmlBytes = 0;
-    py.stderr.on('data', d => errs.push(`[py] ${d}`));
-    node.stderr.on('data', d => errs.push(`[node] ${d}`));
+    py.stderr.on('data', d => errChunks.push(`[py] ${d.toString()}`));
+    node.stderr.on('data', d => errChunks.push(`[node] ${d.toString()}`));
     py.stdout.on('data', d => { htmlBytes += d.length; });
     py.stdout.on('error', () => {});
     node.stdin.on('error', () => {});
@@ -78,8 +78,9 @@ function renderPdf(jsonBuffer) {
 
     let done = false;
     let pyExit = null, nodeExit = null;
+    const errString = () => errChunks.join('');
     const dumpDiagnostics = (label) => {
-      const errStr = Buffer.concat(errs).toString();
+      const errStr = errString();
       const mu = process.memoryUsage();
       const memMB = (n) => Math.round(n / 1024 / 1024);
       console.log(`[render] ${label} pyExit=${pyExit} nodeExit=${nodeExit} htmlBytes=${htmlBytes} pdfBytes=${out.reduce((s, b) => s + b.length, 0)} mem(parent)=rss:${memMB(mu.rss)}MB heap:${memMB(mu.heapUsed)}/${memMB(mu.heapTotal)}MB`);
@@ -101,14 +102,14 @@ function renderPdf(jsonBuffer) {
       pyExit = code;
       if (code !== 0) {
         dumpDiagnostics('py-failed');
-        finish(new Error(`build_workbook exited ${code}: ${Buffer.concat(errs).toString().slice(0, 500)}`));
+        finish(new Error(`build_workbook exited ${code}: ${errString().slice(0, 500)}`));
       }
     });
     node.on('close', code => {
       nodeExit = code;
       if (code !== 0) {
         dumpDiagnostics('node-failed');
-        finish(new Error(`render_workbook exited ${code}: ${Buffer.concat(errs).toString().slice(0, 500)}`));
+        finish(new Error(`render_workbook exited ${code}: ${errString().slice(0, 500)}`));
       } else {
         // Always log diagnostics on success too — silent partial renders are
         // the failure mode we're hunting (both processes exit 0, output is
