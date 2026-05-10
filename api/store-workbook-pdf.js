@@ -19,7 +19,6 @@
  * Returns: { ok, url, filename }
  */
 
-import fetch from 'node-fetch';
 import { payloadToCouple } from './_couple-shape.js';
 
 export const config = { runtime: 'nodejs' };
