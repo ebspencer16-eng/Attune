@@ -14,7 +14,7 @@ import {
   Header, Footer, PageNumber, TableOfContents, StyleLevel, HeightRule,
   TabStopType, TabStopPosition, LeaderType, Tab, VerticalAlign,
 } from 'docx';
-import { DIM_META, DIM_CONTENT, EXP_DOMAINS, DIMS, WHEN_THIS_SHOWS_UP, GAP_BLURBS, DOMAIN_ROWS, alignmentState, alignmentText } from './_workbook-content.js';
+import { DIM_META, DIM_CONTENT, EXP_DOMAINS, DIMS, WHEN_THIS_SHOWS_UP, GAP_BLURBS, SCENE_DRAFTS, DOMAIN_ROWS, alignmentState, alignmentText } from './_workbook-content.js';
 
 export const config = { runtime: 'nodejs' };
 
@@ -424,20 +424,28 @@ function fill(template, u, p) {
     .replace(/\{P\}/g, p);
 }
 
-// Turn "the W" / "the X" style type-references into partner name markers.
-// Couple-type content is written with shorthand like "the W wants to debrief
-// the weekend and the X is done talking" — but Ellie wants these replaced
-// with actual partner names so the workbook reads personally, not clinically.
-// Mapping: first letter of coupleType.id → {U}, second letter → {P}.
-// After substitution, fill() replaces {U}/{P} with real names as usual.
-// Case-insensitive on "the" so we catch sentence-start "The W" too.
+// Turn "[W partner name]" style placeholders into {U}/{P} markers based on the
+// couple type. Content is written with bracketed placeholders so reviewers can
+// see exactly which partner is being referenced; at build time those convert to
+// the standard {U}/{P} markers and then fill() replaces them with real names.
+// Mapping: first letter of coupleType.id → {U} (user/initiator partner),
+// second letter → {P} (other partner). Same-type pairings (WW/XX/YY/ZZ) use
+// "both of you" framing in the source content and don't need substitution.
+// Possessive form: "[W partner name]'s" → "{U}'s" (the bracket portion is
+// replaced; the trailing 's stays in place).
+//
+// Backward compat: the older "the W" / "The W" shorthand is still supported in
+// case any legacy content slips through. New content uses the bracket form.
 function personalizeTypeRefs(template, coupleType) {
   if (!coupleType?.id || coupleType.id.length !== 2) return String(template || '');
   const [firstLetter, secondLetter] = [coupleType.id[0], coupleType.id[1]];
   let result = String(template || '');
-  // Match `the X` with word boundaries so we don't replace inside words.
-  // Replace with the appropriate marker, dropping the "the" (since the
-  // replacement is a proper name).
+  // New bracket syntax: [W partner name] / [X partner name] / etc.
+  result = result.replace(new RegExp(`\\[${firstLetter} partner name\\]`, 'g'), '{U}');
+  if (firstLetter !== secondLetter) {
+    result = result.replace(new RegExp(`\\[${secondLetter} partner name\\]`, 'g'), '{P}');
+  }
+  // Legacy "the W" / "The W" shorthand.
   result = result.replace(new RegExp(`\\bthe ${firstLetter}\\b`, 'g'), '{U}');
   result = result.replace(new RegExp(`\\bThe ${firstLetter}\\b`, 'g'), '{U}');
   if (firstLetter !== secondLetter) {
@@ -1947,6 +1955,19 @@ function buildMomentCard(moment, subjectName, otherName, typeLetter) {
     children: [run(text, { size: 18, color: opts.color || INK, italics: !!opts.italics })],
   });
 
+  // Pull the scene from SCENE_DRAFTS. Subject partner's individual type drives
+  // the perspective; scenes describe "they" (the subject) and address the
+  // other partner with "you". If a scene is missing, fall back to a brief
+  // placeholder rather than crashing the build.
+  const scene = SCENE_DRAFTS[typeLetter]?.[moment.key] || {};
+  // Substitute the names. Scene bodies use "they" / "them" for the subject,
+  // so we only need name substitution in the few cases the source uses them
+  // explicitly. Phrases are direct quotes the other partner can say.
+  const happeningText = scene.happening || `(scene missing for type ${typeLetter}, moment ${moment.key})`;
+  const notToText     = scene.notTo     || '';
+  const worksText     = scene.works     || '';
+  const phraseText    = scene.phrase    || '';
+
   return [
     // Moment header: big numeral + title on one line
     new Paragraph({ spacing: { before: 240, after: 40 },
@@ -1961,20 +1982,17 @@ function buildMomentCard(moment, subjectName, otherName, typeLetter) {
       border: { bottom: { style: BorderStyle.SINGLE, size: 6, color: PURPLE, space: 4 } },
       children: [new TextRun('')] }),
 
-    rowLabel('The moment', MUTED),
-    rowBody(PH(`1 sentence: concrete setup for "${moment.title.toLowerCase()}" — e.g. "${subjectName} comes home after a tough day and goes quiet."`)),
-
     rowLabel(`What's happening for ${subjectName}`, PURPLE),
-    rowBody(PH(`2–3 sentences keyed to Type ${typeLetter}: what's actually going on inside ${subjectName}, why the surface behavior looks the way it does, grounded in their specific communication style.`)),
+    rowBody(happeningText),
 
     rowLabel('What not to do', 'C8402A'),
-    rowBody(PH(`1 sentence: the natural but wrong move for ${otherName} to make in this moment.`)),
+    rowBody(notToText),
 
     rowLabel('What works', GREEN),
-    rowBody(PH(`1–2 sentences: the specific action ${otherName} should take instead.`)),
+    rowBody(worksText),
 
     rowLabel('Phrase that lands', BLUE),
-    rowBody(PH(`literal line for ${otherName} to say to ${subjectName} in this moment`), { italics: true, color: BLUE }),
+    rowBody(phraseText, { italics: true, color: BLUE }),
 
     // Dotted divider between moments — softer than the old stone hr
     new Paragraph({ spacing: { before: 160, after: 200 },

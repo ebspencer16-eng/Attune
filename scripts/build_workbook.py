@@ -788,7 +788,7 @@ COUPLE = {
         'id': 'WX',
         'name': 'The Jumpstart',
         'subtitle': 'initiator-anchor',
-        'tagline': 'Both want resolution. Different instruments, same direction.',
+        'tagline': 'Both want resolution. Different approaches heading in the same direction.',
         'description': "{U} and {P} both move toward resolution when things get hard, you're pulling in the same direction. Where you differ is in how the internal experience travels: one processes outward, and one holds it closer. The destination is the same. The path there looks different.",
         'phrase_that_lands': "I need to process this out loud, bear with me. I don't have it figured out yet.",
     },
@@ -2368,24 +2368,23 @@ def build_dimension_page(dim_id, dim_idx, page_num):
 
     # Paragraph 2: couple-type blurb. Specific to this couple type.
     # Source: api/_workbook-content.js, loaded via WHEN_THIS_SHOWS_UP_BY_TYPE.
-    # The production prose uses role letters ("the W", "the X"); substitute
-    # in real partner names. The first letter in the couple-type id maps
-    # to {U} (initiating partner); the second letter maps to {P}.
+    # Content uses bracket placeholders like "[W partner name]" so reviewers
+    # can see which partner is being referenced; substitute in real names at
+    # build time. The first letter of the couple-type id maps to {U} (user),
+    # the second letter to {P}.
+    # Backward compat: legacy "the W" / "the X" shorthand is also supported.
     type_id = COUPLE['couple_type']['id']
     type_blurb = WHEN_THIS_SHOWS_UP_BY_TYPE[dim_id][type_id]
-    # Same-type couples (WW, XX, ...) use a single role letter twice.
-    # Cross-type couples have two distinct letters.
+    # Same-type couples (WW, XX, ...) have "both of you" framing in source
+    # content and don't need substitution. Cross-type couples do.
     if type_id[0] == type_id[1]:
-        # Same type: replace "the X" (where X is the shared letter) with
-        # generic partner names. Use 'one of you' / 'the other' contextually.
-        # The production same-type prose already reads naturally without
-        # role-letter substitution, so leave it untouched.
         type_text = fill(type_blurb, u, p)
     else:
-        # Cross-type: substitute role letters with actual names. Handle
-        # both lowercase ("the W") and sentence-initial ("The W") forms.
         type_text = type_blurb
         for letter, name in [(type_id[0], u), (type_id[1], p)]:
+            # New bracket syntax.
+            type_text = type_text.replace(f'[{letter} partner name]', name)
+            # Legacy shorthand.
             type_text = type_text.replace(f'the {letter}', name)
             type_text = type_text.replace(f'The {letter}', name)
         type_text = fill(type_text, u, p)

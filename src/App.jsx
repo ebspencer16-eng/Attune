@@ -1076,7 +1076,7 @@ const NEW_COUPLE_TYPES = [
   {
     id: "WW", typeA: "W", typeB: "W",
     name: "The ignition",
-    tagline: "Both reach. Both express. Neither has to go looking for the other.",
+    tagline: "Both reach. Both express. Connection isn't something you have to chase.",
     description: "{U} and {P} both move toward resolution and process outward. High warmth and emotional availability in both directions. Neither partner has to coax the other into the conversation or wait for the signal that it's okay to share what's going on.",
     nuance: "The risk isn't disconnection. It's feedback loops. When both of you are feeling something strongly, the intensity can amplify rather than settle. One of you naming that, 'I think we're feeding each other right now', is usually enough to break the loop.",
     color: "#E8673A", shade: "#FFF4F0",
@@ -1108,7 +1108,7 @@ const NEW_COUPLE_TYPES = [
   {
     id: "XX", typeA: "X", typeB: "X",
     name: "The collaboration",
-    tagline: "Both want resolution. Both process it privately. The machinery works.",
+    tagline: "Resolution is the shared instinct. Privacy is the shared method of processing.",
     description: "{U} and {P} both move toward resolving things and both handle the feeling internally before it comes out. Decisions get made. Disagreements get worked through. The practical machinery of the relationship runs efficiently, and quietly.",
     nuance: "Efficient repair can mean closing the loop before it's actually through. Two people who both move fast toward resolution can sometimes resolve the surface without fully addressing what's underneath. The same thing comes back because the real conversation happened too quickly.",
     color: "#1B5FE8", shade: "#EFF1FF",
@@ -1172,7 +1172,7 @@ const NEW_COUPLE_TYPES = [
   {
     id: "ZZ", typeA: "Z", typeB: "Z",
     name: "The depth",
-    tagline: "Both withdraw. Both hold it close. Real depth running beneath a calm surface.",
+    tagline: "Both withdraw. Both hold it close. A lot lives under the surface.",
     description: "{U} and {P} both go inward when things get hard and both hold their interior life privately. The relationship tends to be stable, low-drama, and genuinely deep, but the depth doesn't surface readily. There is often more going on beneath the calm than either of you shows.",
     nuance: "Important things can go unsaid for a very long time. The comfort with quiet can become avoidance without either person intending it. The relationship looks more okay from the outside than it sometimes is from the inside. Creating a deliberate structure for openness is worth more here than in most pairings.",
     color: "#6B7280", shade: "#F4F5F6",
@@ -1206,7 +1206,7 @@ const NEW_COUPLE_TYPES = [
   {
     id: "WX", typeA: "W", typeB: "X",
     name: "The jumpstart",
-    tagline: "Both want resolution. Different instruments, same direction.",
+    tagline: "Both want resolution. Different approaches heading in the same direction.",
     description: "{U} and {P} both move toward resolution when things get hard, you're pulling in the same direction. Where you differ is in how the internal experience travels: one processes outward, and one holds it closer. The destination is the same. The path there looks different.",
     nuance: "The expressive partner can feel like the guarded one isn't sharing what's actually going on. The guarded partner can feel like too much is being put into the shared space before it's ready. Neither is wrong. The registers are just different.",
     color: "#E8673A", shade: "#FFF4F0",
@@ -1238,7 +1238,7 @@ const NEW_COUPLE_TYPES = [
   {
     id: "WY", typeA: "W", typeB: "Y",
     name: "The orbit",
-    tagline: "You have different conflict clocks. One is ready before the other, and naming that changes everything.",
+    tagline: "You have different conflict clocks. One is ready before the other, recognizing that changes everything.",
     description: "When things get hard, {U} moves toward resolution and {P} pulls back, or vice versa, depending on your individual types. The reaching can feel like pressure. The withdrawal can feel like abandonment. Neither is true, you're just wired differently for when the conversation becomes possible.",
     nuance: "This is one of the most common and most solvable friction patterns in relationships. The solution isn't changing your instinct, it's naming it out loud before the hard moment arrives. A simple agreement, 'I need a few hours, let's talk at 9', short-circuits the loop that otherwise runs on its own.",
     color: "#E8673A", shade: "#FCE4EC",
@@ -1270,7 +1270,7 @@ const NEW_COUPLE_TYPES = [
   {
     id: "WZ", typeA: "W", typeB: "Z",
     name: "The opening",
-    tagline: "One reaches. One holds. The gap between those instincts is the conversation.",
+    tagline: "One reaches. One holds. Understanding what you each need bridges the gap.",
     description: "One of {U} and {P} reaches toward resolution and expresses things openly; the other pulls back and holds things privately. The gap exists on both axes simultaneously, different conflict timing and different expressiveness, which means there's more translation work here than in most pairings.",
     nuance: "The reaching partner often doesn't know what the reserved partner is feeling until long after the fact, which can feel like withholding. The reserved partner often feels pressure to perform an emotional openness they don't naturally have. Naming this as a difference, not a deficiency, is the most useful thing {U} and {P} can do.",
     color: "#E8673A", shade: "#FFF4F0",
@@ -1334,7 +1334,7 @@ const NEW_COUPLE_TYPES = [
   {
     id: "XZ", typeA: "X", typeB: "Z",
     name: "The stethoscope",
-    tagline: "You both work things out privately before anything surfaces. The relationship runs quietly, and real depth lives beneath that.",
+    tagline: "Both of you think before you speak, the real work happens before the conversations begin.",
     description: "{U} and {P} both hold things privately and both process what's going on before it comes out, if it comes out at all. The dynamic is low-temperature and rarely explosive. The practical machinery of the relationship runs smoothly. The emotional layer tends to stay quiet.",
     nuance: "Neither partner is offering a lot of emotional visibility to the other. The relationship can run on logic, shared purpose, and good-enough communication while the emotional texture goes largely unaddressed. That gap tends to show up during life transitions, when something that's been running quietly needs to be named.",
     color: "#1B5FE8", shade: "#EFF1FF",
