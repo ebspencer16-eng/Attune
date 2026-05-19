@@ -14,7 +14,7 @@ import {
   Header, Footer, PageNumber, TableOfContents, StyleLevel, HeightRule,
   TabStopType, TabStopPosition, LeaderType, Tab, VerticalAlign,
 } from 'docx';
-import { DIM_META, DIM_CONTENT, EXP_DOMAINS, DIMS, WHEN_THIS_SHOWS_UP, GAP_BLURBS, SCENE_DRAFTS, DOMAIN_ROWS, alignmentState, alignmentText } from './_workbook-content.js';
+import { DIM_META, DIM_CONTENT, EXP_DOMAINS, DIMS, WHEN_THIS_SHOWS_UP, GAP_BLURBS, SCENE_DRAFTS, DOMAIN_ROWS, alignmentState, alignmentText, scoreResponsibilityPair, scoreLifeQuestionPair, LIFE_QUESTION_OPTIONS } from './_workbook-content.js';
 
 export const config = { runtime: 'nodejs' };
 
@@ -190,12 +190,11 @@ const hc = (text, width, fill) => new TableCell({
 });
 
 // Accent box: left colour bar + shaded body
-// Lined-paper write-in: N horizontal dotted lines, no outer border, no
-// fill. Renders as a borderless table where each row has a dotted
-// bottom border — more reliable than paragraphs-with-borders because
-// LibreOffice collapses empty paragraphs.
+// Write-in area: N rows of blank space, no lines, no borders. Heights are
+// preserved so the page reserves room for handwriting. Previously rendered
+// dotted "lined-paper" rules; per editorial direction, those notebook lines
+// were removed — the label above is the only affordance.
 function ruledWriteIn(numLines = 5, opts = {}) {
-  const color      = opts.color      || 'C8BEB0';
   const lineHeight = opts.lineHeight || 340;
   const width      = opts.width      || W;
   return new Table({
@@ -210,7 +209,7 @@ function ruledWriteIn(numLines = 5, opts = {}) {
       children: [new TableCell({
         borders: {
           top:    noBrd,
-          bottom: { style: BorderStyle.DOTTED, size: 4, color, space: 0 },
+          bottom: noBrd,
           left:   noBrd,
           right:  noBrd,
         },
@@ -285,13 +284,14 @@ const accentBoxRich = (label, children, fill, accent) => {
 };
 
 // Epigraph — a centered italic quote with attribution, placed at the start
-// of each Part to set tone before the content begins. One per part.
-const epigraph = (quote, author) => [
+// Part-opener epigraph. Renders the statement centered + italic at the top
+// of each Part to set tone before the content begins. One per part. These
+// are Attune statements, not borrowed quotes — no quotation marks, no
+// citation.
+const epigraph = (statement) => [
   sp(),
-  new Paragraph({ alignment: AlignmentType.CENTER, spacing: { after: 80 },
-    children: [run(`"${quote}"`, { size: 22, italics: true, color: MUTED })] }),
   new Paragraph({ alignment: AlignmentType.CENTER, spacing: { after: 240 },
-    children: [run(`— ${author}`, { size: 16, color: MUTED })] }),
+    children: [run(statement, { size: 22, italics: true, color: MUTED })] }),
 ];
 
 // Soft write-in: ghost fill + dashed border all 4 sides. Used wherever
@@ -825,7 +825,7 @@ function buildIntro(u, p) {
   ];
 }
 
-function buildSnapshot(u, p, scores, partnerScores, coupleType, expGaps) {
+function buildSnapshot(u, p, scores, partnerScores, coupleType, responsibilities, lifeQuestions) {
   const dimRows = DIMS.map(d => {
     const meta = DIM_META[d];
     const s1 = (scores[d] || 3).toFixed(1);
@@ -843,12 +843,42 @@ function buildSnapshot(u, p, scores, partnerScores, coupleType, expGaps) {
     ]});
   });
 
-  const expRows = expGaps.map(eg => new TableRow({ children: [
-    tc(eg.label, 2800, { size: 18 }),
-    tc(answerLabel(eg.yourAnswer, u, p), 2400, { size: 18 }),
-    tc(answerLabel(eg.partnerAnswer, u, p), 2400, { size: 18 }),
-    tc(eg.aligned ? '\u2713 Aligned' : '\u25CF Gap', 1760, { color: eg.aligned ? GREEN : ORANGE, bold: true, size: 18 }),
-  ]}));
+  // Expectations snapshot: 6 rows, one per domain, showing the domain's
+  // similarity-based alignment pct + qualitative tagline. Final row is the
+  // overall pct (mean of the 6 domain pcts). Per-domain pages no longer
+  // show the pct, so the Snapshot is the only place readers see numbers.
+  const expDomains = [
+    { key: 'household',       label: 'Visible household labor' },
+    { key: 'emotional',       label: 'Emotional labor' },
+    { key: 'extended_family', label: 'Extended family' },
+    { key: 'money',           label: 'Money & work' },
+    { key: 'life',            label: "The life you're building" },
+    { key: 'operate',         label: 'How you operate together' },
+  ];
+
+  const colorForState = (s) => s === 'compatible' ? GREEN : s === 'discuss' ? ORANGE : '#9B5DE5'.replace('#','');
+  const taglineFor = (s) => s === 'compatible' ? 'broadly compatible'
+                          : s === 'discuss'    ? 'worth discussing'
+                          : 'significantly different';
+
+  const expRows = expDomains.map(({ key, label }) => {
+    const rows = getDomainRows(key, responsibilities, lifeQuestions, u, p);
+    const pct = computeAlignmentPct(rows, u, p);
+    const state = alignmentState(pct);
+    return new TableRow({ children: [
+      tc(label, 3600, { size: 18 }),
+      tc(`${pct}%`, 1400, { color: colorForState(state), bold: true, size: 18 }),
+      tc(taglineFor(state), 3560, { color: colorForState(state), size: 18, italics: true }),
+    ]});
+  });
+
+  const overallPct = computeOverallExpectationsPct(responsibilities, lifeQuestions, u, p);
+  const overallState = alignmentState(overallPct);
+  const overallRow = new TableRow({ children: [
+    tc('Overall expectations alignment', 3600, { size: 18, bold: true }),
+    tc(`${overallPct}%`, 1400, { color: colorForState(overallState), bold: true, size: 18 }),
+    tc(taglineFor(overallState), 3560, { color: colorForState(overallState), size: 18, italics: true }),
+  ]});
 
   // Compact snapshot: renders on a single page after the intro.
   // Couple type appears as a single inline line (name + tagline), not a
@@ -889,10 +919,11 @@ function buildSnapshot(u, p, scores, partnerScores, coupleType, expGaps) {
     sp(),
     eyebrow('Expectations alignment', BLUE),
     new Table({
-      width: { size: W, type: WidthType.DXA }, columnWidths: [2800, 2400, 2400, 1760],
+      width: { size: W, type: WidthType.DXA }, columnWidths: [3600, 1400, 3560],
       rows: [
-        new TableRow({ children: [hc('Area', 2800, INK), hc(u, 2400, BLUE), hc(p, 2400, BLUE), hc('Result', 1760, INK)] }),
+        new TableRow({ children: [hc('Domain', 3600, INK), hc('Alignment', 1400, BLUE), hc('Read', 3560, INK)] }),
         ...expRows,
+        overallRow,
       ]
     }),
     sp(),
@@ -1305,6 +1336,10 @@ const DOMAIN_ICONS = {
 //   responsibilities.{user,partner}.<catId> = [{item, value}, ...] in
 //     RESPONSIBILITY_CATEGORIES order
 //   lifeQuestions.{user,partner}.<lqId> = value
+//
+// Each returned row has:
+//   label, userValue, partnerValue, kind ('responsibility' | 'lq'),
+//   options? (only for lq rows — the ordered options array for scoring)
 function getDomainRows(domainKey, responsibilities, lifeQuestions, u, p) {
   const r = responsibilities || {};
   const l = lifeQuestions || {};
@@ -1315,11 +1350,14 @@ function getDomainRows(domainKey, responsibilities, lifeQuestions, u, p) {
     label,
     userValue: ru[cat]?.[idx]?.value || '',
     partnerValue: rp[cat]?.[idx]?.value || '',
+    kind: 'responsibility',
   });
   const lqRow = (label, lqId) => ({
     label,
     userValue: lu[lqId] || '',
     partnerValue: lp[lqId] || '',
+    kind: 'lq',
+    options: LIFE_QUESTION_OPTIONS[lqId] || null,
   });
 
   switch (domainKey) {
@@ -1387,13 +1425,42 @@ function getDomainRows(domainKey, responsibilities, lifeQuestions, u, p) {
   }
 }
 
-// Compute alignment percentage (0-100) for a domain's rows.
-// Match logic: simple string equality. All responses are required by the
-// exercise UI, so empty values shouldn't occur in practice.
-function computeAlignmentPct(rows) {
-  if (!rows || rows.length === 0) return 0;
-  const matches = rows.filter(r => r.userValue === r.partnerValue).length;
-  return Math.round((matches / rows.length) * 100);
+// Compute alignment percentage (0-100) for a domain's rows using continuous
+// similarity scoring. Per-row score in [0, 1]; domain score is the mean of
+// rows that produced a valid score; final pct = round(mean * 100).
+//
+// Rows that the scorer can't read (missing values, unknown strings) drop
+// out — they don't pull the mean toward any extreme. If every row is bad,
+// returns 0 to match the legacy fallback.
+function computeAlignmentPct(rows, userName, partnerName) {
+  const scores = [];
+  for (const row of rows || []) {
+    let s = null;
+    if (row.kind === 'lq') {
+      s = scoreLifeQuestionPair(row.userValue, row.partnerValue, row.options);
+    } else {
+      // responsibility (default if kind is unset)
+      s = scoreResponsibilityPair(row.userValue, row.partnerValue, userName, partnerName);
+    }
+    if (s != null) scores.push(s);
+  }
+  if (scores.length === 0) return 0;
+  const mean = scores.reduce((a, b) => a + b, 0) / scores.length;
+  return Math.round(mean * 100);
+}
+
+// Compute overall expectations percentage: mean of the 6 domain percentages,
+// each weighted equally regardless of item count. Used on the Snapshot's
+// overall line and as the source-of-truth for the same number in the React
+// click-through results experience.
+function computeOverallExpectationsPct(responsibilities, lifeQuestions, u, p) {
+  const DOMAINS = ['household', 'emotional', 'extended_family', 'money', 'life', 'operate'];
+  const pcts = DOMAINS.map(key => {
+    const rows = getDomainRows(key, responsibilities, lifeQuestions, u, p);
+    return computeAlignmentPct(rows, u, p);
+  });
+  if (pcts.length === 0) return 0;
+  return Math.round(pcts.reduce((a, b) => a + b, 0) / pcts.length);
 }
 
 // Map an alignment state to its short display label.
@@ -1409,7 +1476,7 @@ function buildExpDomainPage(domain, idx, u, p, responsibilities, lifeQuestions) 
   const accent = DOMAIN_COLOR_MAP[domain.color] || ORANGE;
   const icon = DOMAIN_ICONS[domain.key] || '·';
   const rows = getDomainRows(domain.key, responsibilities, lifeQuestions, u, p);
-  const pct = computeAlignmentPct(rows);
+  const pct = computeAlignmentPct(rows, u, p);
   const state = alignmentState(pct);
   const stateLabel = alignmentStateLabel(state);
   const analysisText = fill(alignmentText(domain, pct), u, p);
@@ -1487,13 +1554,16 @@ function buildExpDomainPage(domain, idx, u, p, responsibilities, lifeQuestions) 
     ]})],
   }));
 
-  // Where you are — alignment block.
+  // Where you are — alignment tagline only. Per editorial direction, the
+  // percentage callout is intentionally suppressed on per-domain pages; the
+  // qualitative state ("broadly compatible" / "worth discussing" / "...")
+  // is what the reader sees. The pct is still computed because alignmentText
+  // branches on it; just not displayed.
   result.push(new Paragraph({ spacing: { before: 320, after: 80 },
     children: [run('Where you are', { size: 14, bold: true, color: accent, allCaps: true, characterSpacing: 80 })] }));
   result.push(new Paragraph({ spacing: { after: 140 },
     children: [
-      run(`${pct}% aligned `, { size: 28, bold: true, color: INK }),
-      run(`· ${stateLabel}`, { size: 22, italics: true, color: MUTED }),
+      run(stateLabel.charAt(0).toUpperCase() + stateLabel.slice(1), { size: 22, italics: true, color: INK }),
     ] }));
   result.push(new Paragraph({ spacing: { after: 240, line: 320, lineRule: 'atLeast' },
     children: [run(analysisText, { size: 19, color: INK })] }));
@@ -1529,7 +1599,7 @@ function buildExpDomains(u, p, responsibilities, lifeQuestions) {
     border: { top: { style: BorderStyle.SINGLE, size: 4, color: STONE, space: 4 } },
     children: [new TextRun('')] }));
   result.push(new Paragraph({ spacing: { before: 240, after: 0, line: 320, lineRule: 'atLeast' },
-    children: [run(`For each domain, you'll see how each of you answered, the percent you're aligned, what that alignment level usually means, and one thing to try this week.`, { size: 17, color: INK })] }));
+    children: [run(`For each domain, you'll see how each of you answered, what your alignment level usually means, and one thing to try this week.`, { size: 17, color: INK })] }));
 
   // Six per-domain pages.
   EXP_DOMAINS.forEach((domain, i) => {
@@ -2347,34 +2417,33 @@ export default async function handler(req, res) {
     // Introduction now includes the Snapshot directly — it's the reference
     // the rest of the workbook is built on, not a separate "part."
     ...buildIntro(u, p),
-    ...buildSnapshot(u, p, s1, s2, coupleType, expGaps),
+    ...buildSnapshot(u, p, s1, s2, coupleType, responsibilities, lifeQuestions),
 
     ...buildPartCover(1, 'A closer look at the dimensions that matter',
       `The dimensions where ${u} and ${p} showed a meaningful gap, unpacked.`, BLUE),
-    // TODO(Ellie): real epigraph for Part 1. Removed in Phase 5b — used to be
-    // a PH placeholder ("opening quote for Part 1"). Provide quote + author
-    // and re-add: ...epigraph('quote text', 'Author Name'),
+    ...epigraph("Most friction in long relationships isn't incompatibility. It's two people running on different blueprints, neither of which has been said out loud."),
     ...buildInsights(u, p, s1, s2, coupleType),
     ...buildExpDomains(u, p, responsibilities, lifeQuestions),
 
     ...buildPartCover(2, 'Working Knowledge',
       `Six moments with each other. Specific language for each.`, PURPLE),
-    // TODO(Ellie): real epigraph for Part 2 (knowing another person)
+    ...epigraph("Knowing another person isn't a single insight. It's a thousand small moments where you didn't have to ask, because you already knew."),
     ...buildWorkingKnowledge(u, p, coupleType),
 
     ...buildPartCover(3, 'Workbook',
       `Your focus areas. Your words. Your pace.`, ORANGE),
-    // TODO(Ellie): real epigraph for Part 3 (focus or choosing)
+    ...epigraph("Small and specific beats ambitious and vague. The thing you'll actually do is the thing you'll write down."),
     ...buildWorkbook(u, p),
     ...buildPriorityCheckIn(u, p, priorities),
 
     ...buildPartCover(4, 'Conversation Library',
       `Words for the situations you'll actually find yourselves in.`, PURPLE),
-    // TODO(Ellie): real epigraph for Part 4 (language or talking)
+    ...epigraph("The right question, asked at the right time, does more than a hundred well-meaning statements."),
     ...buildConversationLibrary(u, p, coupleType, priorities),
 
     ...buildPartCover(5, 'Reference Card',
       `A half-page summary. Keep it somewhere you'll see it.`, GREEN),
+    ...epigraph("When something's hard and you don't have time to flip through the workbook, this is the page."),
     ...buildReferenceCard(u, p, coupleType, priorities, phraseThatLands),
 
     // Blank ruled pages for the couple's own notes — appended after the

@@ -1605,16 +1605,10 @@ body{
   color:var(--muted);font-weight:400;
 }
 .writein-area{
-  /* Repeating pattern: 1px hairline, then 1.55em transparent, repeat.
-     For --lines=N, height = N*1.55em produces N evenly-spaced lines:
-     first line at top of the writein area (anchoring the first write-in
-     row), then every 1.55em down. All lines uniform 1px weight. */
-  background:repeating-linear-gradient(
-    var(--hairline),
-    var(--hairline) 1px,
-    transparent 1px,
-    transparent 1.55em
-  );
+  /* Per editorial direction: no notebook lines. The eyebrow label above is the
+     only affordance; the area below is reserved blank space for handwriting.
+     Sized in em-units so the page reserves room consistent with prior height
+     when --lines is set (default 3). */
   height:calc(1.55em * var(--lines, 3));
   margin-top:14px;
 }
@@ -1952,15 +1946,9 @@ body{
   color:var(--graphite);
   margin:0;
 }
-/* Lined write-in area. Same uniform-line pattern as .writein-area, sized
-   for ~3 short rows on the card. */
+/* Write-in area on the reference card. No lines per editorial direction;
+   keep height so card layout reserves the same space. */
 .refcard-workon-area{
-  background:repeating-linear-gradient(
-    var(--hairline),
-    var(--hairline) 1px,
-    transparent 1px,
-    transparent 1.6em
-  );
   height:calc(1.6em * 3);
   margin-top:6px;
 }
@@ -2089,8 +2077,8 @@ def build_toc():
     page1_rows = []
     page1_rows.append("""
     <div class="toc-section">
-      <div class="toc-row"><span class="toc-row-label">Introduction</span><span class="toc-row-page">003</span></div>
-      <div class="toc-row indent"><span class="toc-row-label italic">Your snapshot</span><span class="toc-row-page">004</span></div>
+      <div class="toc-row"><span class="toc-row-label">Introduction</span><span class="toc-row-page">3</span></div>
+      <div class="toc-row indent"><span class="toc-row-label italic">Your snapshot</span><span class="toc-row-page">4</span></div>
     </div>""")
 
     dims_with_pages = [(d, 7+i) for i, d in enumerate(DIMS)]
@@ -2101,14 +2089,14 @@ def build_toc():
       <div class="toc-section-eye toc-part-eye-blue">Part 01</div>
       <div class="toc-section-title-row">
         <h3 class="toc-section-title">A closer look at the dimensions that matter.</h3>
-        <span class="toc-section-page">005</span>
+        <span class="toc-section-page">5</span>
       </div>
-      <div class="toc-row indent"><span class="toc-row-label">Communication · 10 dimensions</span><span class="toc-row-page">007</span></div>""")
+      <div class="toc-row indent"><span class="toc-row-label">Communication · 10 dimensions</span><span class="toc-row-page">7</span></div>""")
     for dim, p in dims_with_pages:
-        page1_rows.append(f"""      <div class="toc-row indent2"><span class="toc-row-label">{DIM_META[dim]['label']}</span><span class="toc-row-page">{p:03d}</span></div>""")
-    page1_rows.append(f"""      <div class="toc-row indent"><span class="toc-row-label">Expectations · 6 domains</span><span class="toc-row-page">{exp_start_page:03d}</span></div>""")
+        page1_rows.append(f"""      <div class="toc-row indent2"><span class="toc-row-label">{DIM_META[dim]['label']}</span><span class="toc-row-page">{p}</span></div>""")
+    page1_rows.append(f"""      <div class="toc-row indent"><span class="toc-row-label">Expectations · 6 domains</span><span class="toc-row-page">{exp_start_page}</span></div>""")
     for e, p in exp_pages:
-        page1_rows.append(f"""      <div class="toc-row indent2"><span class="toc-row-label">{e['label']}</span><span class="toc-row-page">{p:03d}</span></div>""")
+        page1_rows.append(f"""      <div class="toc-row indent2"><span class="toc-row-label">{e['label']}</span><span class="toc-row-page">{p}</span></div>""")
     page1_rows.append("    </div>")
 
     # ── Page 2: Parts 02-05 ──
@@ -2119,10 +2107,10 @@ def build_toc():
       <div class="toc-section-eye toc-part-eye-purple">Part 02</div>
       <div class="toc-section-title-row">
         <h3 class="toc-section-title">Working knowledge.</h3>
-        <span class="toc-section-page">{p2_start:03d}</span>
+        <span class="toc-section-page">{p2_start}</span>
       </div>
-      <div class="toc-row indent"><span class="toc-row-label italic">What {COUPLE['p']} should know about {COUPLE['u']}</span><span class="toc-row-page">{p2_start+1:03d}</span></div>
-      <div class="toc-row indent"><span class="toc-row-label italic">What {COUPLE['u']} should know about {COUPLE['p']}</span><span class="toc-row-page">{p2_start+3:03d}</span></div>
+      <div class="toc-row indent"><span class="toc-row-label italic">What {COUPLE['p']} should know about {COUPLE['u']}</span><span class="toc-row-page">{p2_start+1}</span></div>
+      <div class="toc-row indent"><span class="toc-row-label italic">What {COUPLE['u']} should know about {COUPLE['p']}</span><span class="toc-row-page">{p2_start+3}</span></div>
     </div>""")
 
     p3_start = p2_start + 5
@@ -2131,13 +2119,13 @@ def build_toc():
       <div class="toc-section-eye toc-part-eye-orange">Part 03</div>
       <div class="toc-section-title-row">
         <h3 class="toc-section-title">Workbook &amp; journal.</h3>
-        <span class="toc-section-page">{p3_start:03d}</span>
+        <span class="toc-section-page">{p3_start}</span>
       </div>
-      <div class="toc-row indent"><span class="toc-row-label">Preparing together</span><span class="toc-row-page">{p3_start+1:03d}</span></div>
-      <div class="toc-row indent"><span class="toc-row-label">Focus area 1</span><span class="toc-row-page">{p3_start+2:03d}</span></div>
-      <div class="toc-row indent"><span class="toc-row-label">Focus area 2</span><span class="toc-row-page">{p3_start+3:03d}</span></div>
-      <div class="toc-row indent"><span class="toc-row-label">Focus area 3</span><span class="toc-row-page">{p3_start+4:03d}</span></div>
-      <div class="toc-row indent"><span class="toc-row-label italic">30-day check-in</span><span class="toc-row-page">{p3_start+5:03d}</span></div>
+      <div class="toc-row indent"><span class="toc-row-label">Preparing together</span><span class="toc-row-page">{p3_start+1}</span></div>
+      <div class="toc-row indent"><span class="toc-row-label">Focus area 1</span><span class="toc-row-page">{p3_start+2}</span></div>
+      <div class="toc-row indent"><span class="toc-row-label">Focus area 2</span><span class="toc-row-page">{p3_start+3}</span></div>
+      <div class="toc-row indent"><span class="toc-row-label">Focus area 3</span><span class="toc-row-page">{p3_start+4}</span></div>
+      <div class="toc-row indent"><span class="toc-row-label italic">30-day check-in</span><span class="toc-row-page">{p3_start+5}</span></div>
     </div>""")
 
     p4_start = p3_start + 7
@@ -2146,11 +2134,11 @@ def build_toc():
       <div class="toc-section-eye toc-part-eye-purple">Part 04</div>
       <div class="toc-section-title-row">
         <h3 class="toc-section-title">Conversation library.</h3>
-        <span class="toc-section-page">{p4_start:03d}</span>
+        <span class="toc-section-page">{p4_start}</span>
       </div>""")
     for i, s in enumerate(SITUATIONS):
-        page2_rows.append(f"""      <div class="toc-row indent"><span class="toc-row-label">{s['title']}</span><span class="toc-row-page">{p4_start + 1 + i//3:03d}</span></div>""")
-    page2_rows.append(f"""      <div class="toc-row indent"><span class="toc-row-label italic">A structured first conversation</span><span class="toc-row-page">{p4_start+3:03d}</span></div>""")
+        page2_rows.append(f"""      <div class="toc-row indent"><span class="toc-row-label">{s['title']}</span><span class="toc-row-page">{p4_start + 1 + i//3}</span></div>""")
+    page2_rows.append(f"""      <div class="toc-row indent"><span class="toc-row-label italic">A structured first conversation</span><span class="toc-row-page">{p4_start+3}</span></div>""")
     page2_rows.append("    </div>")
 
     p5_start = p4_start + 5
@@ -2159,7 +2147,7 @@ def build_toc():
       <div class="toc-section-eye toc-part-eye-green">Part 05</div>
       <div class="toc-section-title-row">
         <h3 class="toc-section-title">Reference card.</h3>
-        <span class="toc-section-page">{p5_start:03d}</span>
+        <span class="toc-section-page">{p5_start}</span>
       </div>
     </div>""")
 
@@ -2174,7 +2162,7 @@ def build_toc():
     <h1 class="toc-page-title">What's <em>in this workbook.</em></h1>
     {''.join(page1_rows)}
   </div>
-  <div class="page-num">002</div>
+  <div class="page-num">2</div>
 </div>"""
 
     page2 = f"""
@@ -2188,7 +2176,7 @@ def build_toc():
     <h1 class="toc-page-title">The rest <em>of the workbook.</em></h1>
     {''.join(page2_rows)}
   </div>
-  <div class="page-num">003</div>
+  <div class="page-num">3</div>
 </div>"""
 
     return page1 + page2
@@ -2217,7 +2205,7 @@ def build_intro(page_num):
       </aside>
     </div>
   </div>
-  <div class="page-num">{page_num:03d}</div>
+  <div class="page-num">{page_num}</div>
 </div>
 """
 
@@ -2318,11 +2306,13 @@ def build_snapshot(page_num):
     <div class="expectations-grid">{''.join(exp_cards)}
     </div>
   </div>
-  <div class="page-num">{page_num:03d}</div>
+  <div class="page-num">{page_num}</div>
 </div>
 """
 
 def build_part_divider(num, label, title_html, color, epigraph, epigraph_cite, page_num):
+    # epigraph_cite is accepted but no longer rendered. The epigraph text
+    # now stands as a plain Attune statement, not a pseudo-quote.
     return f"""
 <div class="page part-divider {color}" data-num="{num:02d}">
   <div class="part-meta">
@@ -2332,10 +2322,9 @@ def build_part_divider(num, label, title_html, color, epigraph, epigraph_cite, p
   <div class="part-label">{label}</div>
   <h1 class="part-title">{title_html}</h1>
   <div class="part-epigraph">
-    <p class="part-epigraph-text">"{epigraph}"</p>
-    <p class="part-epigraph-cite">· {epigraph_cite}</p>
+    <p class="part-epigraph-text">{epigraph}</p>
   </div>
-  <div class="page-num">{page_num:03d}</div>
+  <div class="page-num">{page_num}</div>
 </div>
 """
 
@@ -2491,7 +2480,7 @@ def build_dimension_page(dim_id, dim_idx, page_num):
       <div class="writein-area" style="--lines:5"></div>
     </div>
   </div>
-  <div class="page-num">{page_num:03d}</div>
+  <div class="page-num">{page_num}</div>
 </div>
 """
 
@@ -2580,7 +2569,7 @@ def build_expectation_page(domain, idx, page_num):
       <div class="writein-area" style="--lines:4"></div>
     </div>
   </div>
-  <div class="page-num">{page_num:03d}</div>
+  <div class="page-num">{page_num}</div>
 </div>
 """
 
@@ -2639,7 +2628,7 @@ def build_working_knowledge_page(page_num, subject_name, other_name, type_letter
     </div>
     {cards_first}
   </div>
-  <div class="page-num">{page_num:03d}</div>
+  <div class="page-num">{page_num}</div>
 </div>"""
 
     page2 = f"""
@@ -2655,7 +2644,7 @@ def build_working_knowledge_page(page_num, subject_name, other_name, type_letter
     </div>
     {cards_second}
   </div>
-  <div class="page-num">{page_num + 1:03d}</div>
+  <div class="page-num">{page_num + 1}</div>
 </div>"""
 
     return page1 + page2
@@ -2718,7 +2707,7 @@ def build_working_knowledge_same_type_page(page_num, u, p, type_letter, moments_
     </div>
     {cards_first}
   </div>
-  <div class="page-num">{page_num:03d}</div>
+  <div class="page-num">{page_num}</div>
 </div>"""
 
     page2 = f"""
@@ -2734,7 +2723,7 @@ def build_working_knowledge_same_type_page(page_num, u, p, type_letter, moments_
     </div>
     {cards_second}
   </div>
-  <div class="page-num">{page_num + 1:03d}</div>
+  <div class="page-num">{page_num + 1}</div>
 </div>"""
 
     return page1 + page2
@@ -2775,7 +2764,7 @@ def build_workbook_preparing(page_num):
     </div>
     {prompts_html}
   </div>
-  <div class="page-num">{page_num:03d}</div>
+  <div class="page-num">{page_num}</div>
 </div>
 """
 
@@ -2823,7 +2812,7 @@ def build_focus_area_page(num, page_num):
       <div class="writein-area" style="--lines:5"></div>
     </div>
   </div>
-  <div class="page-num">{page_num:03d}</div>
+  <div class="page-num">{page_num}</div>
 </div>
 """
 
@@ -2853,7 +2842,7 @@ def build_30day_checkin(page_num):
       <p class="wb-page-sub">Answer honestly. Write in the workbook, that's what it's for.</p>
     </div>{prompts_html}
   </div>
-  <div class="page-num">{page_num:03d}</div>
+  <div class="page-num">{page_num}</div>
 </div>
 """
 
@@ -2882,7 +2871,7 @@ def build_conversation_library_page(page_num, situations_subset, is_first=True):
   <div class="page-running-head"><span>Part 04 · Conversation Library</span><span>Situations</span></div>
   <div class="page-inner">{intro_html}{''.join(cards)}
   </div>
-  <div class="page-num">{page_num:03d}</div>
+  <div class="page-num">{page_num}</div>
 </div>
 """
 
@@ -2911,7 +2900,7 @@ def build_first_conversation_guide(page_num):
       <h1 class="cl-page-title">A guided <em>60-minute conversation.</em></h1>
     </div>{phases_html}
   </div>
-  <div class="page-num">{page_num:03d}</div>
+  <div class="page-num">{page_num}</div>
 </div>
 """
 
@@ -2978,7 +2967,7 @@ def build_reference_card(page_num):
   <div class="refcard-context">
     <div class="refcard-ctx-head">
       <div class="eyebrow refcard-ctx-eye">How to use the card</div>
-      <span class="refcard-ctx-num">Page {page_num:03d}</span>
+      <span class="refcard-ctx-num">Page {page_num}</span>
     </div>
     <h2 class="refcard-ctx-title">Keep this <em>somewhere you'll see it.</em></h2>
     <p class="refcard-ctx-body">The reference card is built from your couple type. Cut along the dashed line above and write what the two of you want to focus on this week in the open box. Replace it each week, or carry the same one forward.</p>
@@ -3056,7 +3045,7 @@ def build_full_workbook(same_type=False, is_service=False):
       <p class="section-intro-foot">For each dimension, you'll see the spectrum, where each of you sits, what the gap means, three reflection prompts, a small experiment for the week, and space to write what you want to try together.</p>
     </div>
   </div>
-  <div class="page-num">{pn:03d}</div>
+  <div class="page-num">{pn}</div>
 </div>
 """)
     pn += 1
@@ -3077,7 +3066,7 @@ def build_full_workbook(same_type=False, is_service=False):
       <p class="section-intro-lead">Most friction in long-term partnerships isn't about communication style. It's about quietly mismatched assumptions, who's leading what, how money should be held, what the next five years look like. The exercise surfaced what each of you actually expects. The next six pages put those expectations side by side.</p>
     </div>
   </div>
-  <div class="page-num">{pn:03d}</div>
+  <div class="page-num">{pn}</div>
 </div>
 """)
     pn += 1

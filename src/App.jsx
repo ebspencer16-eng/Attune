@@ -2433,6 +2433,96 @@ function calcDimScores(answers) {
 //   coupleType                  - couple type object or null
 //
 // Output: payload ready to JSON.stringify and POST.
+// ── Expectations similarity scoring (client mirror of api/_workbook-content.js)
+// Mirrored intentionally rather than imported across the api/src boundary so
+// the build stays simple. If logic changes, update both copies. Spec: each
+// item gets a score in [0,1] from option-position distance; domain = mean of
+// items; overall = mean of 6 domain pcts.
+const _LIFE_OPTIONS_CLIENT = {};
+LIFE_QUESTIONS.forEach(q => { _LIFE_OPTIONS_CLIENT[q.id] = q.options; });
+
+function scoreRespClient(uV, pV, userName, partnerName) {
+  const rank = (v) => {
+    if (v == null || v === '') return { r: null, o: null };
+    if (v === 'Primarily mine')           return { r: 0, o: false };
+    if (v === 'Balanced')                 return { r: 1, o: false };
+    if (v === "Primarily my partner's")   return { r: 2, o: false };
+    if (v === "Doesn't apply")            return { r: null, o: true };
+    if (v === userName)                   return { r: 0, o: false };
+    if (v === 'Both of us')               return { r: 1, o: false };
+    if (v === partnerName)                return { r: 2, o: false };
+    if (v === "Doesn't apply to us")      return { r: null, o: true };
+    return { r: null, o: null };
+  };
+  const a = rank(uV), b = rank(pV);
+  if (a.r === null && a.o === null) return null;
+  if (b.r === null && b.o === null) return null;
+  if (a.o && b.o) return 1.0;
+  if (a.o || b.o) return 0.0;
+  return (2 - Math.abs(a.r - b.r)) / 2;
+}
+function scoreLqClient(uV, pV, options) {
+  if (!options || options.length < 2) return null;
+  if (uV == null || pV == null) return null;
+  const a = options.indexOf(uV);
+  const b = options.indexOf(pV);
+  if (a === -1 || b === -1) return null;
+  const max = options.length - 1;
+  return (max - Math.abs(a - b)) / max;
+}
+
+// Domain row builder. Returns [{ score }] for each item in the domain. Used
+// to compute the domain pct via simple mean. Mirrors api/generate-workbook.js
+// getDomainRows but only needs scoring info, not labels.
+function _domainItemScores(domainKey, ex2, partnerEx2, userName, partnerName) {
+  const out = [];
+  const respScore = (catId, idx) => {
+    const cat = RESPONSIBILITY_CATEGORIES.find(c => c.id === catId);
+    if (!cat) return;
+    const item = cat.items[idx];
+    if (item === undefined) return;
+    const key = catId + '__' + item;
+    const uV = ex2?.responsibilities?.[key];
+    const pV = partnerEx2?.responsibilities?.[key];
+    const s = scoreRespClient(uV, pV, userName, partnerName);
+    if (s != null) out.push(s);
+  };
+  const lqScore = (lqId) => {
+    const uV = ex2?.life?.[lqId];
+    const pV = partnerEx2?.life?.[lqId];
+    const s = scoreLqClient(uV, pV, _LIFE_OPTIONS_CLIENT[lqId]);
+    if (s != null) out.push(s);
+  };
+  switch (domainKey) {
+    case 'household':
+      for (let i = 0; i < 7; i++) respScore('household', i); break;
+    case 'emotional':
+      for (let i = 0; i < 5; i++) respScore('emotional', i); break;
+    case 'extended_family':
+      [0, 3, 2, 5, 1, 4].forEach(i => respScore('extended_family', i)); break;
+    case 'money':
+      respScore('financial', 0); respScore('financial', 1); respScore('career', 1);
+      lqScore('lq_finances'); lqScore('lq_money_lean'); lqScore('lq_money_risk'); break;
+    case 'life':
+      ['lq_children','lq_family_conf','lq_location','lq_social','lq_routine','lq_faith','lq_values'].forEach(lqScore); break;
+    case 'operate':
+      ['lq_conflict_when','lq_conflict_after','lq_conflict_repair','lq_affection','lq_closeness','lq_independence'].forEach(lqScore); break;
+  }
+  return out;
+}
+
+function computeDomainPctClient(domainKey, ex2, partnerEx2, userName, partnerName) {
+  const scores = _domainItemScores(domainKey, ex2, partnerEx2, userName, partnerName);
+  if (scores.length === 0) return 0;
+  return Math.round((scores.reduce((a,b) => a+b, 0) / scores.length) * 100);
+}
+
+function computeOverallExpectationsPctClient(ex2, partnerEx2, userName, partnerName) {
+  const domains = ['household', 'emotional', 'extended_family', 'money', 'life', 'operate'];
+  const pcts = domains.map(d => computeDomainPctClient(d, ex2, partnerEx2, userName, partnerName));
+  return Math.round(pcts.reduce((a,b) => a+b, 0) / pcts.length);
+}
+
 function buildWorkbookPayload(userName, partnerName, ex1Answers, partnerEx1, ex2Answers, partnerEx2, coupleType) {
   const myS = calcDimScores(ex1Answers);
   const partS = calcDimScores(partnerEx1);
@@ -2868,7 +2958,9 @@ function JointOverview({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Answ
   const allRows = [...rows, ...lifeRows];
   const alignedCount = allRows.filter(r => r.aligned).length;
   const gapCount = allRows.filter(r => !r.aligned).length;
-  const alignPct = allRows.length ? Math.round((alignedCount / allRows.length) * 100) : 0;
+  // Headline expectations alignment: similarity-based overall (mean of 6
+  // domain pcts). Matches the workbook Snapshot overall row.
+  const alignPct = computeOverallExpectationsPctClient(ex2Answers, partnerEx2, userName, partnerName);
 
   const coupleType = deriveCoupleTypeFromExercise(
     myS, partS, alignPct
@@ -6691,8 +6783,9 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
   });
 
   const alignedCount = allRows.filter(r => r.aligned && r.bothAnswered).length;
-  const alignPct = allRows.filter(r => r.bothAnswered).length
-    ? Math.round((alignedCount / allRows.filter(r => r.bothAnswered).length) * 100) : 50;
+  // Headline expectations alignment: similarity-based overall (mean of 6
+  // domain pcts). Matches the workbook Snapshot overall row.
+  const alignPct = computeOverallExpectationsPctClient(ex2Answers, partnerEx2, userName, partnerName);
   const coupleType = deriveCoupleTypeFromExercise(
     myS, partS, alignPct
   );
@@ -7283,17 +7376,6 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
               {typeCopied ? "Copied to clipboard ✓" : "Share your type →"}
             </button>
             <p style={{ fontSize: "0.72rem", color: C.muted, fontFamily: BFONT, margin: 0 }}>Share on stories or send to a friend.</p>
-          </div>
-
-          {/* Methodology reference */}
-          <div style={{ marginTop: "1.5rem", paddingTop: "1.25rem", borderTop: `1px solid ${C.stone}`, display: "flex", alignItems: "center", gap: "0.65rem", flexWrap: "wrap" }}>
-            <span style={{ fontSize: "0.72rem", color: C.muted, fontFamily: BFONT }}>How we determine this:</span>
-            <a href="/attune-methodology.docx" download style={{ display: "inline-flex", alignItems: "center", gap: "0.3rem", fontSize: "0.72rem", color: C.clay, fontFamily: BFONT, fontWeight: 600, textDecoration: "none" }}>
-              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-              Methodology
-            </a>
-            <span style={{ fontSize: "0.72rem", color: C.stone, fontFamily: BFONT }}>·</span>
-            <a href="/how-it-works#methodology" style={{ fontSize: "0.72rem", color: C.clay, fontFamily: BFONT, fontWeight: 600, textDecoration: "none" }}>Read the overview →</a>
           </div>
 
         </div>
@@ -8477,7 +8559,9 @@ function ResultsHighlights({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3
   })).filter(r => r.mine && r.theirs);
   const allExpRows = [...allRows, ...lifeRows];
   const alignedCount = allExpRows.filter(r => r.aligned).length;
-  const alignPct = allExpRows.length ? Math.round((alignedCount / allExpRows.length) * 100) : 0;
+  // Headline expectations alignment: similarity-based overall (mean of 6
+  // domain pcts). Matches the workbook Snapshot overall row.
+  const alignPct = computeOverallExpectationsPctClient(ex2Answers, partnerEx2, userName, partnerName);
 
   const coupleType = deriveCoupleTypeFromExercise(
     myS, partS, alignPct
@@ -12978,8 +13062,8 @@ export default function App() {
                   </div>
                   <div style={{ display: "grid", gridTemplateColumns: isMobile ? "repeat(2, 1fr)" : "repeat(3, 1fr)", gap: "1.5rem" }}>
                     {[
-                      { title: "Product", links: [["Home", "/home"], ["How it works", "/methodology"], ["Gifts & Packages", "/offerings"], ["Get started", "/portal"]] },
-                      { title: "Learn", links: [["How it works", "/methodology"], ["Packages & pricing", "/offerings"], ["Resources", "/resources"], ["FAQs", "/faq"], ["Reviews", "/reviews"]] },
+                      { title: "Product", links: [["Home", "/home"], ["How it works", "/how-it-works"], ["Gifts & Packages", "/offerings"], ["Get started", "/portal"]] },
+                      { title: "Learn", links: [["How it works", "/how-it-works"], ["Packages & pricing", "/offerings"], ["Resources", "/resources"], ["FAQs", "/faq"], ["Reviews", "/reviews"]] },
                       { title: "Support", links: [["FAQs", "/faq"], ["Contact us", "mailto:hello@attune-relationships.com"], ["Privacy policy", "/legal"], ["Terms of service", "/legal#terms"]] },
                     ].map(({ title, links }) => (
                       <div key={title}>

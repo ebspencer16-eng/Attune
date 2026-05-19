@@ -262,6 +262,117 @@ export function alignmentText(domain, pct) {
   return domain.differentText;
 }
 
+// ── Expectations similarity scoring ──────────────────────────────────────
+// Replaces the previous binary "match / no-match" alignment with a
+// continuous similarity score per item, based on the distance between the
+// two partners' chosen options on the question's ordered scale.
+//
+// Spec (from Ellie, May 2026):
+//   - Each item gets a similarity score in [0, 1] based on option-position
+//     distance. Same answer → 1.0. Opposite ends → 0.0. In between, linear.
+//   - Domain score = mean of item scores within that domain
+//   - Overall score = mean of the 6 domain scores (each weighted equally)
+//
+// Display:
+//   - Overall % shows on the click-through results experience
+//   - 6 per-domain %s show on the workbook Snapshot
+//   - Domain pages show only the tagline (compatible / discuss / different),
+//     no percentage callout
+//
+// Caveat on linear-distance assumption: the algorithm trusts the option
+// array's order as a linear scale. For the ~3 life questions whose options
+// aren't actually linear (e.g. lq_family_conf, lq_routine, lq_conflict_repair),
+// the score is an approximation, not a true semantic similarity. If that
+// matters, reorder the options array so adjacent values are most-similar.
+
+// Responsibility option sets. The first three options are an ordered axis
+// (user-pole / middle / partner-pole) and the fourth is an off-scale "doesn't
+// apply" marker. Two flavors:
+//   - "future" set uses live names: [userName, partnerName, "Both of us", "Doesn't apply to us"]
+//   - "career" set is name-free:    ["Primarily mine", "Balanced", "Primarily my partner's", "Doesn't apply"]
+//
+// The middleValue and offscaleValue are the only strings the scorer needs to
+// identify by literal. User/partner poles are identified by the names passed
+// in at score time.
+export const RESPONSIBILITY_OPTION_SHAPES = {
+  future: { middle: 'Both of us', offscale: "Doesn't apply to us" },
+  career: { middle: 'Balanced',   offscale: 'Doesn\'t apply',
+            userPole: 'Primarily mine', partnerPole: "Primarily my partner's" },
+};
+
+// Score a single responsibility answer pair.
+// userValue / partnerValue: the saved strings (after name substitution)
+// userName / partnerName: the live names this couple sees
+// Returns: number in [0, 1] or null if the values can't be parsed.
+export function scoreResponsibilityPair(userValue, partnerValue, userName, partnerName) {
+  const rankOf = (val) => {
+    if (val == null || val === '') return { rank: null, offscale: null };
+    // Career-set
+    if (val === RESPONSIBILITY_OPTION_SHAPES.career.userPole)    return { rank: 0, offscale: false };
+    if (val === RESPONSIBILITY_OPTION_SHAPES.career.middle)      return { rank: 1, offscale: false };
+    if (val === RESPONSIBILITY_OPTION_SHAPES.career.partnerPole) return { rank: 2, offscale: false };
+    if (val === RESPONSIBILITY_OPTION_SHAPES.career.offscale)    return { rank: null, offscale: true };
+    // Future-set (name-based)
+    if (val === userName)    return { rank: 0, offscale: false };
+    if (val === RESPONSIBILITY_OPTION_SHAPES.future.middle)   return { rank: 1, offscale: false };
+    if (val === partnerName) return { rank: 2, offscale: false };
+    if (val === RESPONSIBILITY_OPTION_SHAPES.future.offscale) return { rank: null, offscale: true };
+    return { rank: null, offscale: null }; // unrecognized
+  };
+  const a = rankOf(userValue);
+  const b = rankOf(partnerValue);
+  if (a.rank === null && a.offscale === null) return null;
+  if (b.rank === null && b.offscale === null) return null;
+  // Off-scale handling: both off-scale → match (1.0); mismatched → 0.0.
+  if (a.offscale && b.offscale) return 1.0;
+  if (a.offscale || b.offscale) return 0.0;
+  // Both ranked: linear distance on 3-point scale.
+  const dist = Math.abs(a.rank - b.rank);
+  return (2 - dist) / 2; // 0 → 1.0, 1 → 0.5, 2 → 0.0
+}
+
+// Score a single life-question answer pair.
+// options: the ordered options array for this question
+// Returns: number in [0, 1] or null if either answer is missing/unknown.
+export function scoreLifeQuestionPair(userValue, partnerValue, options) {
+  if (!options || options.length < 2) return null;
+  if (userValue == null || partnerValue == null) return null;
+  const a = options.indexOf(userValue);
+  const b = options.indexOf(partnerValue);
+  if (a === -1 || b === -1) return null;
+  const max = options.length - 1;
+  const dist = Math.abs(a - b);
+  return (max - dist) / max;
+}
+
+// Ordered option lists for life-question scoring. Mirrors LIFE_QUESTIONS in
+// src/App.jsx — source of truth for the scoring scale per question. Note:
+// some questions are categorical rather than truly linear (lq_family_conf,
+// lq_routine, lq_conflict_repair, lq_closeness); for these the score is a
+// reasonable approximation but not a true semantic similarity.
+export const LIFE_QUESTION_OPTIONS = {
+  lq_children:        ['Not part of my future', 'Uncertain', 'Open to it', 'Important to me, I want at least one', 'Central to my future'],
+  lq_inperson_user:   ['Rarely, by design', 'A few times a year', 'Several times a year', 'Often, regular visits', 'Very often, deeply integrated'],
+  lq_contact_user:    ['Minimal contact', 'Occasional check-ins', 'Regular contact', 'Daily or near-daily', 'Closely involved in our lives'],
+  lq_inperson_partner:['Rarely, by design', 'A few times a year', 'Several times a year', 'Often, regular visits', 'Very often, deeply integrated'],
+  lq_contact_partner: ['Minimal contact', 'Occasional check-ins', 'Regular contact', 'Daily or near-daily', 'Closely involved in our lives'],
+  lq_family_conf:     ['Side with partner', 'Mediate fairly', 'Defend family if right', 'Keep the peace'],
+  lq_location:        ['Rooted where I am', 'Strong preference, open to discussion', 'Wherever makes sense for both', 'Genuinely open'],
+  lq_social:          ['Mostly just us', 'Quiet default', 'Healthy balance', 'Pretty social', 'Very social'],
+  lq_routine:         ['Need a lot of structure', 'Prefer loose rhythm', 'Adapt easily', 'Prefer open', 'Resist routine'],
+  lq_faith:           ['Plays no role', "Personal, wouldn't shape shared life", 'Present but not imposed', 'Meaningful role', 'Central'],
+  lq_values:          ["Simply respect each other's views", 'Share broadly similar values', 'Be closely aligned', 'Be deeply aligned'],
+  lq_finances:        ['Fully separate', 'Mostly separate, shared account for shared expenses', 'Mostly combined', 'Fully combined'],
+  lq_money_lean:      ['Strongly saving', 'Lean toward saving', 'Neither', 'Lean toward spending', 'Fully in the present'],
+  lq_money_risk:      ['Very conservative', 'Cautious but open', 'Comfortable with thought-through risk', 'Lean toward risk', 'Drawn to bold moves'],
+  lq_conflict_when:   ['Address immediately', 'Bring up soon', 'Wait for right moment', 'Take significant space', 'Let things go'],
+  lq_conflict_after:  ['Air clears quickly', 'Little space, same day', 'Need a night or two', 'Need several days', 'Varies a lot'],
+  lq_conflict_repair: ['Direct explicit apology', 'Partner understands what happened', 'Warmth returns', 'Moving forward together'],
+  lq_affection:       ['Essential', 'Very important', 'Nice but not needed consistently', 'Comfortable with less', 'Reserved'],
+  lq_closeness:       ['Need more closeness', 'Steady need', 'Pull back and need space', 'Varies a lot'],
+  lq_independence:    ['Matters enormously', 'Important but flexible', "Don't think about it much", 'Want less, prefer shared life'],
+};
+
 // ── Gap blurbs ────────────────────────────────────────────────────────────
 // Per-dimension prose for each gap state. 10 dimensions × 3 states (aligned /
 // some_gap / notable_gap) = 30 blurbs. Universal across couple types — these
