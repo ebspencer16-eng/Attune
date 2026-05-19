@@ -4188,16 +4188,22 @@ function ExpectationsResults({ myAnswers, partnerAnswers, userName, partnerName,
       const mine = myAnswers.responsibilities?.[key];
       const theirs = partnerAnswers.responsibilities?.[key];
       if (!mine || !theirs) return;
-      rows.push({ category: cat.label, catId: cat.id, item: substName(item, userName, partnerName), mine, theirs, aligned: mine === theirs });
+      const score = scoreRespClient(mine, theirs, userName, partnerName);
+      rows.push({ category: cat.label, catId: cat.id, item: substName(item, userName, partnerName), mine, theirs, aligned: mine === theirs, score });
     });
   });
 
   // Life questions — all grouped as "Life & Values"
-  const lifeRows = LIFE_QUESTIONS.map(q => ({
-    category: "Life & Values", catId: "life", item: substName(q.text, userName, partnerName),
-    mine: myAnswers.life?.[q.id], theirs: partnerAnswers.life?.[q.id],
-    aligned: myAnswers.life?.[q.id] === partnerAnswers.life?.[q.id],
-  })).filter(r => r.mine && r.theirs);
+  const lifeRows = LIFE_QUESTIONS.map(q => {
+    const mine = myAnswers.life?.[q.id];
+    const theirs = partnerAnswers.life?.[q.id];
+    return {
+      category: "Life & Values", catId: "life", item: substName(q.text, userName, partnerName),
+      mine, theirs,
+      aligned: mine === theirs,
+      score: scoreLqClient(mine, theirs, q.options),
+    };
+  }).filter(r => r.mine && r.theirs);
 
   // ── Derive couple type context for expectations overview ─────────────────────
   const expMyS = calcDimScores(myAnswers);
@@ -4304,9 +4310,16 @@ function ExpectationsResults({ myAnswers, partnerAnswers, userName, partnerName,
               </div>
               <div style={{ display: "flex", flexDirection: "column", gap: "0.55rem" }}>
                 {catData.filter(fc => fc.rows.length > 0).map(fc => {
-                  const pct = fc.rows.length > 0 ? Math.round((fc.aligned.length / fc.rows.length) * 100) : 0;
-                  const isStrong = pct >= 80;
-                  const barColor = isStrong ? "#10b981" : pct >= 50 ? "#E8673A" : "#F87171";
+                  // Similarity-based pct: mean of item scores in [0,1], rounded
+                  // to %. Matches the methodology used by the workbook Snapshot
+                  // and the headline alignPct. Rows where the scorer can't read
+                  // the values drop out of the mean rather than skewing it.
+                  const scored = fc.rows.filter(r => r.score != null);
+                  const pct = scored.length
+                    ? Math.round((scored.reduce((a, r) => a + r.score, 0) / scored.length) * 100)
+                    : 0;
+                  const isStrong = pct >= 75;
+                  const barColor = isStrong ? "#10b981" : pct >= 40 ? "#E8673A" : "#F87171";
                   return (
                     <div key={fc.id} onClick={() => go(`convo-${FIXED_CATS.indexOf(fc)}`)}
                       style={{ cursor: "pointer", display: "flex", alignItems: "center", gap: "0.55rem" }}>
@@ -6773,12 +6786,15 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
       const theirs = ex2Answers?.responsibilities?.[key] ? partnerEx2?.responsibilities?.[key] : null;
       const bothAnswered = mine && theirs;
       const aligned = mine === theirs;
-      return { item: substName(item, userName, partnerName), category: cat.label, catId: cat.id, mine, theirs, aligned, bothAnswered };
+      const score = bothAnswered ? scoreRespClient(mine, theirs, userName, partnerName) : null;
+      return { item: substName(item, userName, partnerName), category: cat.label, catId: cat.id, mine, theirs, aligned, bothAnswered, score };
     })
   );
   const expCatSummary = RESPONSIBILITY_CATEGORIES.map(cat => {
-    const rows = allRows.filter(r => r.catId === cat.id && r.bothAnswered);
-    const pct = rows.length ? Math.round((rows.filter(r => r.aligned).length / rows.length) * 100) : null;
+    const rows = allRows.filter(r => r.catId === cat.id && r.bothAnswered && r.score != null);
+    const pct = rows.length
+      ? Math.round((rows.reduce((a, r) => a + r.score, 0) / rows.length) * 100)
+      : null;
     return { ...cat, pct };
   });
 
