@@ -277,6 +277,11 @@
     nav{padding:0 1.25rem}
     .hero{grid-template-columns:1fr;padding-left:1.25rem;padding-right:1.25rem}
     .hero{display:flex!important;flex-direction:column!important;grid-template-columns:unset!important;padding-top:0!important}
+    /* Decorative hero blobs bleed -200px on every side. On mobile that pushes
+       the page layout ~200px past the right edge, shifting all content left
+       and leaving a dead gutter. Pin the blob layer to the hero box and clip
+       it so it can't extend page width. */
+    .hero-blobs{left:0!important;right:0!important;overflow:hidden}
     .hero-left{text-align:center}
     .hero-left-top{order:1;padding-top:calc(58px + 2.5rem)!important;padding-bottom:0!important}
     .hero-right{order:2;display:flex!important;padding:0.5rem 0;align-items:center;justify-content:center}

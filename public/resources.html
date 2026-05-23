@@ -48,7 +48,7 @@
   .btn-nav:hover{opacity:.82}
   .hamburger{display:none;flex-direction:column;gap:5px;cursor:pointer;background:none;border:none;padding:.3rem}
   .hamburger span{width:22px;height:2px;background:var(--ink);border-radius:2px}
-  @media(max-width:768px){.nav-center{display:none}.hamburger{display:flex}}
+  @media(max-width:768px){.nav-center{display:none}.hamburger{display:flex}.nav-signin,.btn-nav{display:none}}
   .mobile-menu{display:none;position:fixed;top:66px;right:1rem;left:auto;width:240px;background:rgba(255,253,249,.99);backdrop-filter:blur(20px);border:1.5px solid var(--stone);border-radius:14px;padding:1rem;z-index:200;flex-direction:column;gap:.15rem;box-shadow:0 12px 40px rgba(14,11,7,.14)}
   .mobile-menu.open{display:flex}
   .mobile-menu a{font-size:.85rem;font-weight:500;color:var(--muted);text-decoration:none;padding:.5rem .65rem;border-radius:8px;transition:all .15s}
@@ -83,6 +83,13 @@
 
   /* GUIDES */
   .guides-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:1.5rem;margin-top:2rem}
+  /* Phones: the book + guide grids are locked to 3 and 2 columns, which
+     overflows a 390px viewport (cards stay ~156px and run off the right
+     edge). Stack to a single column. */
+  @media(max-width:640px){
+    .books-grid{grid-template-columns:1fr}
+    .guides-grid{grid-template-columns:1fr}
+  }
   .guide-card{background:white;border:1.5px solid var(--stone);border-radius:18px;padding:2rem;position:relative;overflow:hidden;transition:transform .2s,box-shadow .2s}
   .guide-card:hover{border-color:var(--clay)}
   .guide-accent{position:absolute;top:0;left:0;bottom:0;width:4px;border-radius:2px 0 0 2px}
