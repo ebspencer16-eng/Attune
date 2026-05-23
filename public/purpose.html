@@ -10,8 +10,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <!-- attune:hscroll-lock -->
   <style>
-    html { overscroll-behavior-x: none; overflow-x: hidden; max-width: 100%; }
-    body { overflow-x: hidden; max-width: 100%; }
+    html { overscroll-behavior-x: none; overflow-x: hidden; max-width: 100%; width: 100%; }
+    body { overflow-x: hidden; max-width: 100%; width: 100%; position: relative; }
   </style>
 
 <title>Our Purpose, Attune</title>
@@ -458,7 +458,7 @@
 </div>
 <style>@media(max-width:640px){
     [data-dot-indicator="p-who"]{display:flex!important}
-    .purpose-who-grid{display:flex!important;flex-wrap:nowrap!important;overflow-x:auto!important;gap:.75rem!important;padding-bottom:.75rem!important;-webkit-overflow-scrolling:touch!important;scrollbar-width:none!important;margin-left:-1.25rem!important;margin-right:-1.25rem!important;padding-left:1.25rem!important;padding-right:.5rem!important;scroll-snap-type:x mandatory!important;}
+    .purpose-who-grid{display:flex!important;flex-wrap:nowrap!important;overflow-x:auto!important;gap:.75rem!important;padding-bottom:.75rem!important;-webkit-overflow-scrolling:touch!important;scrollbar-width:none!important;margin-left:0!important;margin-right:0!important;padding-left:0!important;padding-right:0!important;scroll-snap-type:x mandatory!important;max-width:100%!important;}
     .purpose-who-grid::-webkit-scrollbar{display:none}
     .purpose-who-grid>div{min-width:78vw!important;max-width:78vw!important;flex-shrink:0!important;padding:1rem!important;scroll-snap-align:start!important;}
   }

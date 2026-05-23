@@ -10,8 +10,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <!-- attune:hscroll-lock -->
   <style>
-    html { overscroll-behavior-x: none; overflow-x: hidden; max-width: 100%; }
-    body { overflow-x: hidden; max-width: 100%; }
+    html { overscroll-behavior-x: none; overflow-x: hidden; max-width: 100%; width: 100%; }
+    body { overflow-x: hidden; max-width: 100%; width: 100%; position: relative; }
   </style>
 
 <title>Attune, Understand each other deeply. And how to grow together.</title>
@@ -636,7 +636,7 @@
     </div>
 
     <!-- Mobile: step label inline in card, swipeable -->
-    <div class="story-cards-mobile-scroll" data-dot-track="hiw" style="display:none;overflow-x:scroll;gap:1rem;padding-bottom:.75rem;-webkit-overflow-scrolling:touch;scrollbar-width:none;margin:0 -1.25rem;padding-left:1.25rem;padding-right:.5rem;scroll-snap-type:x mandatory;">
+    <div class="story-cards-mobile-scroll" data-dot-track="hiw" style="display:none;overflow-x:auto;gap:1rem;padding-bottom:.75rem;-webkit-overflow-scrolling:touch;scrollbar-width:none;margin:0;padding-left:0;padding-right:0;scroll-snap-type:x mandatory;max-width:100%;">
       <div style="background:linear-gradient(150deg,#3D1A08,#5A2810);border-radius:20px;overflow:hidden;display:flex;flex-direction:column;min-height:340px;min-width:78vw;max-width:300px;flex-shrink:0;scroll-snap-align:start;">
         <div style="height:3px;background:#E8673A;flex-shrink:0;"></div>
         <div style="padding:1.35rem 1.25rem .6rem;display:flex;flex-direction:column;gap:.55rem;">
