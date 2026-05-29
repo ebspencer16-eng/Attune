@@ -896,6 +896,19 @@
       </div>
     </div>
 
+    <!-- Data quality -->
+    <div class="chart-card" style="margin-bottom:1.25rem;padding:.8rem 1.1rem;">
+      <div style="display:flex;gap:1.75rem;align-items:center;flex-wrap:wrap;">
+        <span style="font-size:.6rem;letter-spacing:.18em;text-transform:uppercase;color:var(--dim);font-weight:700;">Data quality</span>
+        <span style="font-size:.76rem;color:var(--muted);">Profiles <strong id="dq-total" style="color:#E8EAF0;">—</strong></span>
+        <span style="font-size:.76rem;color:var(--muted);">With answers <strong id="dq-answers" style="color:#E8EAF0;">—</strong></span>
+        <span style="font-size:.76rem;color:var(--muted);">Complete <strong id="dq-complete" style="color:#34D399;">—</strong></span>
+        <span style="font-size:.76rem;color:var(--muted);">Partial <strong id="dq-partial" style="color:#FBBF24;">—</strong></span>
+        <span style="font-size:.76rem;color:var(--muted);">Unpaired <strong id="dq-unpaired" style="color:#FBBF24;">—</strong></span>
+        <span style="font-size:.68rem;color:var(--dim);margin-left:auto;">Unfiltered totals</span>
+      </div>
+    </div>
+
     <!-- Couple type distribution -->
     <div class="chart-grid">
       <div class="chart-card" style="grid-column:1/-1;">
@@ -945,6 +958,18 @@
       </div>
     </div>
 
+    <!-- Distribution over time -->
+    <div class="chart-grid chart-grid full">
+      <div class="chart-card">
+        <div class="chart-card-header">
+          <div class="chart-card-title">Distribution over time</div>
+          <div class="chart-card-sub">Individual type mix by signup week. Watch for the mix settling as data accumulates — that's the signal there's enough to retune.</div>
+        </div>
+        <canvas id="types-time-chart" height="200"></canvas>
+        <div id="types-time-empty" style="display:none;color:var(--muted);font-size:.78rem;padding:.5rem 0;">Not enough dated responses yet.</div>
+      </div>
+    </div>
+
     <!-- Per-dimension table -->
     <div class="chart-grid chart-grid full">
       <div class="chart-card">
@@ -956,6 +981,22 @@
           <table class="response-table" id="types-dim-table">
             <thead><tr><th>Dimension</th><th>Axis</th><th>Weight</th><th>Mean (1–5)</th><th>Outlier rate</th><th>n</th></tr></thead>
             <tbody><tr><td colspan="6" style="color:var(--muted)">Loading…</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Construct validity -->
+    <div class="chart-grid chart-grid full">
+      <div class="chart-card">
+        <div class="chart-card-header">
+          <div class="chart-card-title">Construct validity</div>
+          <div class="chart-card-sub">Item-rest correlation: each dimension vs the rest of its own axis, and vs the other axis (Pearson r, spectrum-oriented). A dimension should track its own axis and not the other. Low own-axis r or a high cross-axis r flags a dimension that may be on the wrong axis or adding noise. This is the empirical check behind the weight choices.</div>
+        </div>
+        <div class="table-wrap">
+          <table class="response-table" id="types-corr-table">
+            <thead><tr><th>Dimension</th><th>Assigned axis</th><th>r · own axis</th><th>r · other axis</th><th>Read</th></tr></thead>
+            <tbody><tr><td colspan="5" style="color:var(--muted)">Loading…</td></tr></tbody>
           </table>
         </div>
       </div>
@@ -2349,6 +2390,9 @@ function syncDemoBanner() {
   const demo = !window.__attuneHasRealData;
   const pages = document.querySelectorAll('.page');
   pages.forEach(page => {
+    // The Type Analytics page computes its own real/empty state from profiles
+    // (independent of orders), so the orders-based demo banner doesn't apply.
+    if (page.id === 'page-types') return;
     let banner = page.querySelector('.demo-banner');
     if (demo) {
       if (!banner) {
@@ -3308,7 +3352,10 @@ function initCharts(page) {
       {label:'Premium',data:[12,14,15,17,18,20,21,23,22,25,27,30],backgroundColor:'#34D399'},
     ]};
     new Chart(document.getElementById('chart-pkg-stacked'),{type:'bar',data:pkgStacked,options:{plugins:{legend:{position:'bottom'}},scales:{x:{stacked:true,grid:{display:false}},y:{stacked:true,grid:{color:'#2A2E3A'}}}}});
-    new Chart(document.getElementById('chart-format'),{type:'bar',data:{labels:PKG_LABELS,datasets:[{label:'Digital',data:[185,168,162,143],backgroundColor:'#6C7FFF',borderRadius:4},{label:'Physical box',data:[0,94,75,20],backgroundColor:'#FBBF24',borderRadius:4}]},options:{plugins:{legend:{position:'bottom'}},scales:{x:{grid:{display:false}},y:{grid:{color:'#2A2E3A'}}}}});
+    const _fmtBase = ['core','newlywed','anniversary','premium'];
+    const _fmtDigital  = _fmtBase.map(k => ORDERS.filter(o => (o.pkg||'').replace('-box','') === k && !o.physical).length);
+    const _fmtPhysical = _fmtBase.map(k => ORDERS.filter(o => (o.pkg||'').replace('-box','') === k &&  o.physical).length);
+    new Chart(document.getElementById('chart-format'),{type:'bar',data:{labels:PKG_LABELS,datasets:[{label:'Digital',data:_fmtDigital,backgroundColor:'#6C7FFF',borderRadius:4},{label:'Physical box',data:_fmtPhysical,backgroundColor:'#FBBF24',borderRadius:4}]},options:{plugins:{legend:{position:'bottom'}},scales:{x:{grid:{display:false}},y:{grid:{color:'#2A2E3A'}}}}});
     new Chart(document.getElementById('chart-rev-pkg'),{type:'bar',data:{labels:MONTHS,datasets:[
       {label:'Assessment',data:[1062,1239,1121,1298,1416,1180,1357,1534,1239,1121,1298,1416],backgroundColor:'#FF6B3544',borderColor:'#FF6B35',borderWidth:1.5,borderRadius:4},
       {label:'Starting Out',data:[1975,2212,2528,2291,2765,3002,3239,3080,3397,3555,3713,3950],backgroundColor:'#FBBF2444',borderColor:'#FBBF24',borderWidth:1.5,borderRadius:4},
@@ -3514,6 +3561,9 @@ function renderTypes() {
     return `<tr><td style="color:#E8EAF0;text-transform:capitalize;">${d}</td><td style="color:#9CA3AF;">${cfg[d].axis==='withdraw'?'E/W':'O/G'}${cfg[d].invert?' ·inv':''}</td><td>${cfg[d].weight.toFixed(2)}</td><td>${mean}</td><td style="color:${outColor};font-weight:600;">${out}%</td><td style="color:#6B7280;">${st.n}</td></tr>`;
   }).join('');
 
+  renderDataQuality();
+  renderTimeChart(indiv);
+  renderCorrelation(indiv);
   refreshSandbox();
 }
 
@@ -3532,6 +3582,71 @@ function drawHist(id, bins, data, color) {
     options:{ plugins:{ legend:{display:false}, tooltip:{callbacks:{title:i=>`score ${i[0].label}`}} },
       scales:{ x:{grid:{display:false},ticks:{color:'#6B7280',font:{size:9},maxRotation:0,callback:(v,i)=>i%2===0?labels[i]:''}},
                y:{grid:{color:'#2A2E3A'},ticks:{color:'#6B7280',precision:0}} } } });
+}
+
+// ── Data quality / time / construct validity ──────────────────────────────
+function renderDataQuality() {
+  const dq = TYPES_DATA.dataQuality || {};
+  const set = (id, v) => { const e = document.getElementById(id); if (e) e.textContent = (v == null ? '—' : v); };
+  set('dq-total', dq.totalProfiles); set('dq-answers', dq.withAnswers);
+  set('dq-complete', dq.complete); set('dq-partial', dq.partial); set('dq-unpaired', dq.unpaired);
+}
+
+function pearson(xs, ys) {
+  const n = xs.length; if (n < 3) return null;
+  let sx=0, sy=0, sxx=0, syy=0, sxy=0;
+  for (let i=0;i<n;i++){ const x=xs[i], y=ys[i]; sx+=x; sy+=y; sxx+=x*x; syy+=y*y; sxy+=x*y; }
+  const cov = sxy - sx*sy/n, vx = sxx - sx*sx/n, vy = syy - sy*sy/n;
+  if (vx <= 0 || vy <= 0) return null;
+  return cov / Math.sqrt(vx*vy);
+}
+
+// Item-rest correlation: each dimension vs the rest of its own axis (excluding
+// itself, to avoid self-inflation) and vs the other axis. Spectrum-oriented.
+function renderCorrelation(indiv) {
+  const cfg = TYPES_DATA.config, dims = Object.keys(cfg);
+  const tbody = document.querySelector('#types-corr-table tbody');
+  if (indiv.length < 8) { tbody.innerHTML = '<tr><td colspan="5" style="color:var(--muted)">Need ~8+ individuals for a meaningful correlation.</td></tr>'; return; }
+  const oriented = (d, r) => { const v = r.scores[d]; return v == null ? null : (cfg[d].invert ? 6 - v : v); };
+  tbody.innerHTML = dims.sort((a,b)=>cfg[b].weight-cfg[a].weight).map(d => {
+    const ownAxis = cfg[d].axis;
+    const ownRest = dims.filter(x => cfg[x].axis === ownAxis && x !== d);
+    const otherD  = dims.filter(x => cfg[x].axis !== ownAxis);
+    const xs=[], rest=[], oth=[];
+    for (const r of indiv) {
+      const ov = oriented(d, r); if (ov == null) continue;
+      xs.push(ov);
+      rest.push(ownRest.reduce((s,x)=>{const o=oriented(x,r);return s+(o==null?0:o);},0));
+      oth.push(otherD.reduce((s,x)=>{const o=oriented(x,r);return s+(o==null?0:o);},0));
+    }
+    const rOwn = pearson(xs, rest), rOther = pearson(xs, oth);
+    const fmt = v => v==null?'—':(v>=0?'+':'')+v.toFixed(2);
+    const ownColor = rOwn==null?'#6B7280':rOwn>=0.3?'#34D399':rOwn>=0.15?'#FBBF24':'#F87171';
+    const otherColor = rOther==null?'#6B7280':Math.abs(rOther)>=0.3?'#F87171':'#9CA3AF';
+    let read='tracks its axis', rc='#34D399';
+    if (rOwn==null){read='—';rc='#6B7280';}
+    else if (rOwn<0.15){read='weak signal';rc='#F87171';}
+    else if (rOther!=null && Math.abs(rOther)>=Math.abs(rOwn)){read='cross-loaded';rc='#F87171';}
+    else if (rOwn<0.3){read='modest';rc='#FBBF24';}
+    return `<tr><td style="color:#E8EAF0;text-transform:capitalize;">${d}</td><td style="color:#9CA3AF;">${ownAxis==='withdraw'?'E/W':'O/G'}</td><td style="color:${ownColor};font-weight:600;">${fmt(rOwn)}</td><td style="color:${otherColor};">${fmt(rOther)}</td><td style="color:${rc};">${read}</td></tr>`;
+  }).join('');
+}
+
+function renderTimeChart(indiv) {
+  const canvas = document.getElementById('types-time-chart');
+  const empty = document.getElementById('types-time-empty');
+  const dated = indiv.filter(r => r.createdAt);
+  const ex = Chart.getChart(canvas); if (ex) ex.destroy();
+  if (dated.length < 4) { canvas.style.display='none'; empty.style.display='block'; return; }
+  canvas.style.display='block'; empty.style.display='none';
+  const wk = ds => { const d=new Date(ds); const j=new Date(d.getFullYear(),0,1); const w=Math.ceil((((d-j)/86400000)+j.getDay()+1)/7); return d.getFullYear()+'-W'+String(w).padStart(2,'0'); };
+  const weeks = {};
+  dated.forEach(r => { (weeks[wk(r.createdAt)] || (weeks[wk(r.createdAt)] = {W:0,X:0,Y:0,Z:0}))[r.type]++; });
+  const labels = Object.keys(weeks).sort();
+  const ds = t => ({ label:t, data:labels.map(l=>weeks[l][t]), backgroundColor:TYPE_COLORS[t] });
+  new Chart(canvas, { type:'bar', data:{ labels, datasets:['W','X','Y','Z'].map(ds) },
+    options:{ plugins:{ legend:{position:'bottom',labels:{color:'#9CA3AF',boxWidth:11,font:{size:11}}} },
+      scales:{ x:{stacked:true,grid:{display:false},ticks:{color:'#6B7280',font:{size:9}}}, y:{stacked:true,grid:{color:'#2A2E3A'},ticks:{color:'#6B7280',precision:0}} } } });
 }
 
 // ── Phase 2: weight sandbox ───────────────────────────────────────────────

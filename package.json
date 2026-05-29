@@ -5,8 +5,9 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
-    "preview": "vite preview"
+    "build": "node scripts/check-admin-html.mjs && vite build",
+    "preview": "vite preview",
+    "check": "node scripts/check-admin-html.mjs"
   },
   "dependencies": {
     "@fontsource/dm-mono": "^5.2.7",

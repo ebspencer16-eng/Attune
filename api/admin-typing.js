@@ -34,6 +34,7 @@ function profileToRecord(p) {
     gender: p.gender || null,
     relLength: p.relationship_length || null,
     relStatus: p.relationship_status || null,
+    createdAt: p.created_at || null,
   };
 }
 
@@ -54,18 +55,21 @@ export default async function handler(req) {
   try {
     const { data: profiles = [] } = await admin
       .from('profiles')
-      .select('id, invite_code, partner_profile_id, joined_via_invite, gender, relationship_status, relationship_length, ex1_answers');
+      .select('id, invite_code, partner_profile_id, joined_via_invite, gender, relationship_status, relationship_length, ex1_answers, created_at');
 
     // Individuals: every profile that has Exercise 1 answers.
-    const individuals = profiles.filter(hasAnswers).map(profileToRecord);
+    const withAnswers = profiles.filter(hasAnswers);
+    const individuals = withAnswers.map(profileToRecord);
 
     // Couples: iterate Partner A (has invite_code), join Partner B via FK.
     // Both partners must have answers to form a typed couple.
     const byId = Object.fromEntries(profiles.map(p => [p.id, p]));
     const couples = [];
+    const pairedIds = new Set();
     for (const a of profiles.filter(p => p.invite_code && !p.joined_via_invite)) {
       const b = a.partner_profile_id ? byId[a.partner_profile_id] : null;
       if (!hasAnswers(a) || !hasAnswers(b)) continue;
+      pairedIds.add(a.id); pairedIds.add(b.id);
       const ra = profileToRecord(a), rb = profileToRecord(b);
       couples.push({
         aType: ra.type, bType: rb.type,
@@ -77,11 +81,27 @@ export default async function handler(req) {
       });
     }
 
+    // Data quality (computed from raw profiles, before anonymizing).
+    const allDims = Object.keys(DIM_KEYS);
+    let complete = 0;
+    for (const p of withAnswers) {
+      const s = calcDimScores(p.ex1_answers);
+      if (allDims.every(d => s[d] != null)) complete++;
+    }
+    const dataQuality = {
+      totalProfiles: profiles.length,
+      withAnswers: withAnswers.length,
+      complete,
+      partial: withAnswers.length - complete,
+      unpaired: withAnswers.filter(p => !pairedIds.has(p.id)).length,
+    };
+
     return json({
       config: AXIS_CONFIG,
       dims: DIMS,
       generatedAt: new Date().toISOString(),
       summary: summarize(individuals, couples),
+      dataQuality,
       individuals,
       couples,
     });
