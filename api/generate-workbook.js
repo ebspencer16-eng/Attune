@@ -14,7 +14,7 @@ import {
   Header, Footer, PageNumber, TableOfContents, StyleLevel, HeightRule,
   TabStopType, TabStopPosition, LeaderType, Tab, VerticalAlign,
 } from 'docx';
-import { DIM_META, DIM_CONTENT, EXP_DOMAINS, DIMS, WHEN_THIS_SHOWS_UP, GAP_BLURBS, SCENE_DRAFTS, DOMAIN_ROWS, alignmentState, alignmentText, scoreResponsibilityPair, scoreLifeQuestionPair, LIFE_QUESTION_OPTIONS } from './_workbook-content.js';
+import { DIM_META, DIM_CONTENT, EXP_DOMAINS, DIMS, WHEN_THIS_SHOWS_UP, GAP_BLURBS, SCENE_DRAFTS, DOMAIN_ROWS, alignmentState, alignmentText, scoreResponsibilityPair, scoreLifeQuestionPair, LIFE_QUESTION_OPTIONS, computeIndividualTypeCode, perDimensionCoupleType } from './_workbook-content.js';
 
 export const config = { runtime: 'nodejs' };
 
@@ -1070,7 +1070,7 @@ function buildDimensionHero(meta, u, p, score1, score2, accentColor, gapBlurb, t
   return [...titleBlock, twoColHero];
 }
 
-function buildOneDimension(dim, u, p, score1, score2, coupleType) {
+function buildOneDimension(dim, u, p, score1, score2, coupleType, overallUserType, overallPartnerType) {
   const meta    = DIM_META[dim];
   const content = DIM_CONTENT[dim];
   const color   = meta.color || ORANGE;
@@ -1079,17 +1079,32 @@ function buildOneDimension(dim, u, p, score1, score2, coupleType) {
 
   // Two-paragraph callout in the hero's right column:
   // - gap blurb (universal, varies by gap state — aligned / some_gap / notable_gap)
-  // - type blurb (couple-type-specific, falls back to WW if the specific
-  //   type's entry hasn't been written yet)
+  // - type blurb (couple-type-specific)
   const gap = Math.abs(score1 - score2);
   const gapState = gap < 0.8 ? 'aligned' : gap < 1.5 ? 'some_gap' : 'notable_gap';
   const gapBlurbRaw = GAP_BLURBS[dim]?.[gapState] || '';
+  // Gap blurbs are universal (no [W partner name] placeholders), so the
+  // coupleType passed here is inert — left as overall for consistency.
   const gapBlurb = fill(personalizeTypeRefs(gapBlurbRaw, coupleType), u, p);
 
-  const ctId = coupleType?.id || 'WW';
+  // Type blurb: selected by the couple type AS EXPRESSED IN THIS DIMENSION,
+  // not the overall type. A WW couple with one off-type answer on this
+  // dimension may pull, e.g., a WY blurb here. Name references track the
+  // per-dimension classification: lookupKey (sorted) selects the blurb,
+  // nameMapId (user-first) maps [W partner name]/etc. to the right partner.
+  // Falls back to overall type if we don't have both overall codes.
+  let lookupId, nameMapId;
+  if (overallUserType && overallPartnerType) {
+    const pdt = perDimensionCoupleType(overallUserType, overallPartnerType, dim, score1, score2);
+    lookupId  = pdt.lookupKey;
+    nameMapId = pdt.nameMapId;
+  } else {
+    lookupId  = coupleType?.id || 'WW';
+    nameMapId = coupleType?.id || 'WW';
+  }
   const whenLookup = WHEN_THIS_SHOWS_UP[dim] || {};
-  const rawTypeText = whenLookup[ctId] || whenLookup.WW || '';
-  const typeBlurb = fill(personalizeTypeRefs(rawTypeText, coupleType), u, p);
+  const rawTypeText = whenLookup[lookupId] || whenLookup.WW || '';
+  const typeBlurb = fill(personalizeTypeRefs(rawTypeText, { id: nameMapId }), u, p);
 
   // Standard section header — 18pt bold uppercase (was 15pt), tight
   // (not tracked), tighter spacing between header and its content.
@@ -1295,6 +1310,11 @@ function buildInsights(u, p, scores, partnerScores, coupleType) {
 
   const result = [];
 
+  // Overall individual type per partner — used to hold the non-varying axis
+  // when re-deriving each dimension's couple type for blurb selection.
+  const overallUserType    = computeIndividualTypeCode(scores);
+  const overallPartnerType = computeIndividualTypeCode(partnerScores);
+
   // Part 1 intro page — practical framing for what's coming.
   result.push(...buildPartOneIntro(u, p, coupleType, domainsToShow));
 
@@ -1302,7 +1322,7 @@ function buildInsights(u, p, scores, partnerScores, coupleType) {
   // its own single page (buildOneDimension starts with a pagebreak).
   domainsToShow.forEach(domain => {
     domain.dims.forEach(dim => {
-      result.push(...buildOneDimension(dim, u, p, scores[dim] || 3, partnerScores[dim] || 3, coupleType));
+      result.push(...buildOneDimension(dim, u, p, scores[dim] || 3, partnerScores[dim] || 3, coupleType, overallUserType, overallPartnerType));
     });
   });
 

@@ -383,6 +383,107 @@ export const LIFE_QUESTION_OPTIONS = {
 //
 // Voice rules: short declarative, no em dashes, no hedging, neither end of
 // any dimension framed as better.
+// ── Per-dimension couple type selection ───────────────────────────────────
+// The dimension-page blurb (WHEN_THIS_SHOWS_UP[dim][coupleType]) is normally
+// keyed to the couple's OVERALL type. But the overall type is a composite, so
+// a couple can have a single dimension where one partner answered against
+// type. On that page, the overall-type blurb can describe a dynamic that
+// doesn't match what they actually answered there.
+//
+// Fix: for each dimension, re-derive the couple type FROM THAT DIMENSION, then
+// pull the matching blurb. Mechanic (confirmed with Ellie):
+//   - Each dimension belongs to one type axis (Engage/Withdraw or Open/Guarded).
+//   - For that dimension, recompute the partner's reading on that axis from the
+//     single dimension score (same 3.0 boundary the overall engine uses).
+//   - Hold the OTHER axis from the partner's overall type.
+//   - Recombine into a per-dimension individual type per partner, pair them.
+// Name references on the page then track the per-dimension classification.
+//
+// Axis assignment + orientation. Orientation is derived from each dimension's
+// SPECTRUM/blurb semantics (which score end the blurbs treat as engage/open),
+// NOT from the overall composite — the composite adds stress and needs in the
+// reverse direction from their spectrum meaning, so trusting it here would
+// pull the wrong blurb. Verified against blurb text per dimension.
+//   E/W engage end: conflict=low(Engage quickly), repair=low(Formal/verbal),
+//     stress=high(Seek connection), energy=high(Outward), closeness=high(Close-seeking)
+//   O/G open end: expression=high(Expressive), feedback=high(Open),
+//     bids=high(Attuned), needs=low(Direct), love=low(Words)
+export const DIM_AXIS = {
+  conflict:   { axis: 'EW', engageWhen: 'low'  },
+  repair:     { axis: 'EW', engageWhen: 'low'  },
+  stress:     { axis: 'EW', engageWhen: 'high' },
+  energy:     { axis: 'EW', engageWhen: 'high' },
+  closeness:  { axis: 'EW', engageWhen: 'high' },
+  expression: { axis: 'OG', openWhen:   'high' },
+  feedback:   { axis: 'OG', openWhen:   'high' },
+  bids:       { axis: 'OG', openWhen:   'high' },
+  needs:      { axis: 'OG', openWhen:   'low'  },
+  love:       { axis: 'OG', openWhen:   'low'  },
+};
+
+// Decompose a type letter into its two axis readings.
+//   W = engage + open · X = engage + guarded · Y = withdraw + open · Z = withdraw + guarded
+function _typeAxes(code) {
+  return {
+    engage: code === 'W' || code === 'X',
+    open:   code === 'W' || code === 'Y',
+  };
+}
+function _axesToType(engage, open) {
+  if (engage && open)  return 'W';
+  if (engage && !open) return 'X';
+  if (!engage && open) return 'Y';
+  return 'Z';
+}
+
+// Overall individual type code from full dimension scores. Server-side port of
+// computeIndividualType in src/App.jsx — must stay in sync.
+//   Engage/Withdraw = conflict(.55) + stress(.30) + repair(.15); engage if <= 3.0
+//   Open/Guarded    = expression(.45) + feedback(.30) + needs(.25); open if >= 3.0
+export function computeIndividualTypeCode(scores) {
+  const s = scores || {};
+  const withdrawScore = (s.conflict || 3) * 0.55 + (s.stress || 3) * 0.30 + (s.repair || 3) * 0.15;
+  const openScore     = (s.expression || 3) * 0.45 + (s.feedback || 3) * 0.30 + (s.needs || 3) * 0.25;
+  const isEngage = withdrawScore <= 3.0;
+  const isOpen   = openScore >= 3.0;
+  return _axesToType(isEngage, isOpen);
+}
+
+// Per-partner type code for ONE dimension: override the dimension's own axis
+// from its single score, hold the other axis from the overall type.
+function _perDimensionTypeCode(overallCode, dim, score) {
+  const cfg = DIM_AXIS[dim];
+  if (!cfg) return overallCode; // unknown dim — no change
+  const s = (score == null || isNaN(score)) ? 3 : Number(score);
+  const overall = _typeAxes(overallCode);
+  if (cfg.axis === 'EW') {
+    const engage = cfg.engageWhen === 'low' ? s <= 3.0 : s >= 3.0;
+    return _axesToType(engage, overall.open);
+  }
+  // OG axis
+  const open = cfg.openWhen === 'low' ? s <= 3.0 : s >= 3.0;
+  return _axesToType(overall.engage, open);
+}
+
+// Per-dimension couple type for blurb selection + name mapping.
+//   userType / partnerType: overall individual type codes
+//   userScore / partnerScore: this dimension's scores (user first, partner second)
+// Returns:
+//   lookupKey  — alphabetically sorted 2-letter key for WHEN_THIS_SHOWS_UP
+//   nameMapId  — user-first 2-letter id for personalizeTypeRefs (so name
+//                references resolve to the correct partner regardless of sort)
+//   userLetter / partnerLetter — per-dimension codes
+export function perDimensionCoupleType(userType, partnerType, dim, userScore, partnerScore) {
+  const userLetter    = _perDimensionTypeCode(userType,    dim, userScore);
+  const partnerLetter = _perDimensionTypeCode(partnerType, dim, partnerScore);
+  return {
+    lookupKey: [userLetter, partnerLetter].sort().join(''),
+    nameMapId: userLetter + partnerLetter,
+    userLetter,
+    partnerLetter,
+  };
+}
+
 export const GAP_BLURBS = {
   energy: {
     aligned:     "You recharge in similar ways. You move together in this sense and the rhythm feels right to both of you without negotiation.",
