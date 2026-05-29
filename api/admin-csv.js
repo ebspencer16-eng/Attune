@@ -23,46 +23,19 @@ import { createClient } from '@supabase/supabase-js';
 
 export const config = { runtime: 'edge' };
 
-// ── Scoring helpers (ported from src/App.jsx so the server computes the
-// same values as the client). Keep in sync if scoring logic changes. ──
+// ── Scoring + typing now live in the shared engine (single source of truth,
+// also used by the app, workbook, and admin typing endpoint). ──
+import { DIM_KEYS, calcDimScores, axisScores, typeCodeFromAxes, lowConfidence } from './_type-engine.js';
 
-// 28 questions, 3 per dim except closeness (1). IDs are non-sequential by
-// historical accident (en1/en2/en4 etc); these match the canonical list
-// in PERSONALITY_QUESTIONS in src/App.jsx exactly.
-const DIM_KEYS = {
-  energy:     ['en1','en2','en4'],
-  expression: ['ex1','ex2','ex4'],
-  love:       ['lv1','lv2','lv5'],
-  bids:       ['bd1','bd3','bd4'],
-  needs:      ['nd1','nd3','nd5'],
-  conflict:   ['cf1','cf2','cf5'],
-  stress:     ['st1','st2','st5'],
-  repair:     ['rp1','rp2','rp3'],
-  feedback:   ['fb1','fb2','fb5'],
-  closeness:  ['cl2'],
-};
-
-function calcDimScores(answers) {
-  if (!answers) return {};
-  const out = {};
-  for (const [dim, keys] of Object.entries(DIM_KEYS)) {
-    const vals = keys.map(k => answers[k]).filter(v => v != null && !isNaN(v));
-    out[dim] = vals.length ? vals.reduce((s, v) => s + Number(v), 0) / vals.length : null;
-  }
-  return out;
-}
-
-// Engage/Withdraw axis: Conflict (55%) + Stress (30%) + Repair (15%)
-// Open/Guarded axis: Expression (45%) + Feedback (30%) + Needs (25%)
+// Thin wrapper preserving this file's null-guard: a couple with no Exercise 1
+// answers yields null axes/type rather than a midpoint default.
 function computeAxes(scores) {
   const s = scores || {};
-  if (s.conflict == null && s.stress == null && s.expression == null) return { withdrawScore: null, openScore: null, typeCode: null };
-  const withdrawScore = (s.conflict || 3) * 0.55 + (s.stress || 3) * 0.30 + (s.repair || 3) * 0.15;
-  const openScore     = (s.expression || 3) * 0.45 + (s.feedback || 3) * 0.30 + (s.needs || 3) * 0.25;
-  const isEngage = withdrawScore <= 3.0;
-  const isOpen   = openScore    >= 3.0;
-  const typeCode = isEngage && isOpen ? 'W' : isEngage && !isOpen ? 'X' : !isEngage && isOpen ? 'Y' : 'Z';
-  return { withdrawScore, openScore, typeCode };
+  if (s.conflict == null && s.stress == null && s.expression == null) {
+    return { withdrawScore: null, openScore: null, typeCode: null };
+  }
+  const { withdrawScore, openScore } = axisScores(s);
+  return { withdrawScore, openScore, typeCode: typeCodeFromAxes(withdrawScore, openScore) };
 }
 
 // ── CSV builder ─────────────────────────────────────────────────────────
@@ -116,8 +89,9 @@ export default async function handler(req) {
     if (type === 'demographics')  return await exportDemographics(admin);
     if (type === 'engagement')    return await exportEngagement(admin);
     if (type === 'results')       return await exportResults(admin);
+    if (type === 'typing')        return await exportTyping(admin);
     if (type === 'feedback')      return await exportFeedback();
-    return errResponse(400, 'Unknown type. Use combined|combined_xlsx|orders|demographics|engagement|results|feedback');
+    return errResponse(400, 'Unknown type. Use combined|combined_xlsx|orders|demographics|engagement|results|typing|feedback');
   } catch (e) {
     console.error('[admin-csv]', type, e);
     return errResponse(500, 'Export failed: ' + (e.message || e));
@@ -672,6 +646,38 @@ async function exportResults(admin) {
     ];
   });
   return csvResponse(`attune_results_${new Date().toISOString().slice(0,10)}.csv`, toCSV(headers, rows));
+}
+
+// ── TYPING ──────────────────────────────────────────────────────────────
+// One row per INDIVIDUAL: 10 dimension scores, both axis scores, type code,
+// low-confidence flag, and demographics. For offline factor/correlation work.
+// Anonymized: an 8-char id slice, no name/email.
+async function exportTyping(admin) {
+  const { data: profiles } = await admin
+    .from('profiles')
+    .select('id, gender, relationship_status, relationship_length, ex1_answers');
+
+  const dimCols = Object.keys(DIM_KEYS).map(d => `comms_${d}`);
+  const headers = [
+    'anon_id', 'gender', 'relationship_length', 'relationship_status',
+    'engage_withdraw_score', 'open_guarded_score', 'type_code', 'low_confidence',
+    ...dimCols,
+  ];
+  const fmt = (n) => n == null ? '' : Number(n).toFixed(3);
+  const rows = (profiles || [])
+    .filter(p => p.ex1_answers && Object.keys(p.ex1_answers).length)
+    .map(p => {
+      const scores = calcDimScores(p.ex1_answers);
+      const { withdrawScore, openScore } = axisScores(scores);
+      return [
+        (p.id || '').replace(/-/g, '').slice(0, 8),
+        p.gender || '', p.relationship_length || '', p.relationship_status || '',
+        fmt(withdrawScore), fmt(openScore),
+        typeCodeFromAxes(withdrawScore, openScore), lowConfidence(scores) ? 'Y' : 'N',
+        ...Object.keys(DIM_KEYS).map(d => fmt(scores[d])),
+      ];
+    });
+  return csvResponse(`attune_typing_${new Date().toISOString().slice(0,10)}.csv`, toCSV(headers, rows));
 }
 
 // ── 5. FEEDBACK ────────────────────────────────────────────────────────

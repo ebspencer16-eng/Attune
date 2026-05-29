@@ -835,6 +835,14 @@
       </div>
       <div class="topbar-right">
         <div class="date-badge" id="types-last-updated">Loading…</div>
+        <button class="export-btn" onclick="exportAdminCSV('typing')">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Individuals CSV
+        </button>
+        <button class="export-btn" onclick="exportAdminCSV('results')">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Couples CSV
+        </button>
         <button class="export-btn" onclick="loadTypesData(true)">
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.95"/></svg>
           Refresh
@@ -844,39 +852,56 @@
 
     <div class="data-notice">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#34D399" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-      <p><strong>Zero PII.</strong> This page tracks only anonymous behavioral patterns. No names, emails, usernames, or session IDs are stored or linked. Each couple is a counter increment only.</p>
+      <p><strong>Computed live.</strong> Types are recomputed from Exercise 1 answers using the current formula on every load, not read from a stored column. Anonymous: scores and demographics only, no names or emails.</p>
+    </div>
+
+    <!-- Demographic filters -->
+    <div class="chart-card" style="margin-bottom:1.25rem;padding:.85rem 1rem;">
+      <div style="display:flex;gap:1.25rem;align-items:center;flex-wrap:wrap;">
+        <span style="font-size:.6rem;letter-spacing:.18em;text-transform:uppercase;color:var(--dim);font-weight:700;">Filter</span>
+        <label style="font-size:.72rem;color:var(--muted);">Gender
+          <select id="tf-gender" onchange="renderTypes()" style="margin-left:.4rem;background:var(--card);color:var(--text);border:1px solid var(--border);border-radius:6px;padding:.25rem .5rem;font-size:.72rem;"><option value="">All</option></select>
+        </label>
+        <label style="font-size:.72rem;color:var(--muted);">Relationship length
+          <select id="tf-rellen" onchange="renderTypes()" style="margin-left:.4rem;background:var(--card);color:var(--text);border:1px solid var(--border);border-radius:6px;padding:.25rem .5rem;font-size:.72rem;"><option value="">All</option></select>
+        </label>
+        <label style="font-size:.72rem;color:var(--muted);">Status
+          <select id="tf-relstat" onchange="renderTypes()" style="margin-left:.4rem;background:var(--card);color:var(--text);border:1px solid var(--border);border-radius:6px;padding:.25rem .5rem;font-size:.72rem;"><option value="">All</option></select>
+        </label>
+        <span id="tf-active" style="font-size:.68rem;color:var(--dim);margin-left:auto;"></span>
+      </div>
     </div>
 
     <!-- KPI row -->
     <div class="kpi-grid" style="grid-template-columns:repeat(4,1fr);">
       <div class="kpi-card orange">
-        <div class="kpi-label">Couples tracked</div>
-        <div class="kpi-val" id="types-ct-total">—</div>
-        <div class="kpi-sub">Type recorded</div>
+        <div class="kpi-label">Individuals typed</div>
+        <div class="kpi-val" id="types-n-indiv">—</div>
+        <div class="kpi-sub">With Exercise 1 answers</div>
       </div>
       <div class="kpi-card indigo">
-        <div class="kpi-label">Codes recorded</div>
-        <div class="kpi-val" id="types-code-total">—</div>
-        <div class="kpi-sub">Individual style codes</div>
-      </div>
-      <div class="kpi-card green">
-        <div class="kpi-label">With expectations</div>
-        <div class="kpi-val" id="types-ex2-complete">—</div>
-        <div class="kpi-sub">Both ex. complete</div>
+        <div class="kpi-label">Couples typed</div>
+        <div class="kpi-val" id="types-n-couples">—</div>
+        <div class="kpi-sub">Both partners answered</div>
       </div>
       <div class="kpi-card amber">
-        <div class="kpi-label">Expectations skipped</div>
-        <div class="kpi-val" id="types-ex2-skipped">—</div>
-        <div class="kpi-sub">Ex1 only</div>
+        <div class="kpi-label">Low-confidence</div>
+        <div class="kpi-val" id="types-lowconf">—</div>
+        <div class="kpi-sub">Answers near midpoint</div>
+      </div>
+      <div class="kpi-card green">
+        <div class="kpi-label">Top couple type</div>
+        <div class="kpi-val" id="types-maxshare">—</div>
+        <div class="kpi-sub" id="types-maxshare-sub">Concentration check</div>
       </div>
     </div>
 
-    <!-- Couple type + gap tier -->
+    <!-- Couple type distribution -->
     <div class="chart-grid">
       <div class="chart-card" style="grid-column:1/-1;">
         <div class="chart-card-header">
           <div class="chart-card-title">Couple type distribution</div>
-          <div class="chart-card-sub">How many couples received each type designation</div>
+          <div class="chart-card-sub">All 10 pairings, computed from both partners' answers</div>
         </div>
         <div id="types-ct-bars" style="display:flex;flex-direction:column;gap:.55rem;padding:.25rem 0;">
           <div style="color:var(--muted);font-size:.78rem;">Loading…</div>
@@ -884,39 +909,92 @@
       </div>
     </div>
 
-    <!-- Axis breakdown -->
+    <!-- Individual types + axis split -->
     <div class="chart-grid">
       <div class="chart-card">
         <div class="chart-card-header">
-          <div class="chart-card-title">Axis breakdown</div>
-          <div class="chart-card-sub">Individual-level distribution across all 4 axes</div>
+          <div class="chart-card-title">Individual type distribution</div>
+          <div class="chart-card-sub">W / X / Y / Z across all typed individuals</div>
         </div>
-        <div id="types-axis-bars" style="display:flex;flex-direction:column;gap:.85rem;padding:.25rem 0;">
-          <div style="color:var(--muted);font-size:.78rem;">Loading…</div>
-        </div>
+        <canvas id="types-indiv-chart" height="220"></canvas>
       </div>
-
       <div class="chart-card">
         <div class="chart-card-header">
-          <div class="chart-card-title">Overall alignment gap</div>
-          <div class="chart-card-sub">Communication dimension gap distribution across couples</div>
+          <div class="chart-card-title">Axis split</div>
+          <div class="chart-card-sub">Where individuals fall on each axis (3.0 boundary)</div>
         </div>
-        <canvas id="types-gap-chart" height="220"></canvas>
+        <div id="types-axis-bars" style="display:flex;flex-direction:column;gap:1rem;padding:.5rem 0;"></div>
       </div>
     </div>
 
-    <!-- Style code frequency -->
+    <!-- Axis-score histograms -->
+    <div class="chart-grid">
+      <div class="chart-card">
+        <div class="chart-card-header">
+          <div class="chart-card-title">Engage / Withdraw score</div>
+          <div class="chart-card-sub">Population spread vs the 3.0 split. Left of 3 = engage.</div>
+        </div>
+        <canvas id="types-whist-chart" height="200"></canvas>
+      </div>
+      <div class="chart-card">
+        <div class="chart-card-header">
+          <div class="chart-card-title">Open / Guarded score</div>
+          <div class="chart-card-sub">Population spread vs the 3.0 split. Right of 3 = open.</div>
+        </div>
+        <canvas id="types-ohist-chart" height="200"></canvas>
+      </div>
+    </div>
+
+    <!-- Per-dimension table -->
     <div class="chart-grid chart-grid full">
       <div class="chart-card">
         <div class="chart-card-header">
-          <div class="chart-card-title">Individual style code frequency</div>
-          <div class="chart-card-sub">All 16 possible 4-letter codes (E/I · X/G · F/S · C/A) – codes with zero occurrences hidden</div>
+          <div class="chart-card-title">Per-dimension signal</div>
+          <div class="chart-card-sub">Mean score and outlier rate — how often a dimension's own reading disagrees with the person's overall axis. High outlier % flags a dimension that fights the type.</div>
         </div>
-        <div id="types-code-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:.5rem;padding:.25rem 0;">
-          <div style="color:var(--muted);font-size:.78rem;">Loading…</div>
+        <div class="table-wrap">
+          <table class="response-table" id="types-dim-table">
+            <thead><tr><th>Dimension</th><th>Axis</th><th>Weight</th><th>Mean (1–5)</th><th>Outlier rate</th><th>n</th></tr></thead>
+            <tbody><tr><td colspan="6" style="color:var(--muted)">Loading…</td></tr></tbody>
+          </table>
         </div>
       </div>
     </div>
+
+    <!-- Phase 2: weight sandbox -->
+    <div class="chart-grid chart-grid full">
+      <div class="chart-card">
+        <div class="chart-card-header">
+          <div class="chart-card-title">Weight sandbox · what-if</div>
+          <div class="chart-card-sub">Drag weights to see how the distribution would shift. Weights are normalized per axis, so this shows relative emphasis. These are previews only — production typing uses the committed formula.</div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;padding:.5rem 0;">
+          <div>
+            <div style="font-size:.62rem;letter-spacing:.14em;text-transform:uppercase;color:#FF6B35;font-weight:700;margin-bottom:.6rem;">Engage / Withdraw</div>
+            <div id="sandbox-withdraw"></div>
+          </div>
+          <div>
+            <div style="font-size:.62rem;letter-spacing:.14em;text-transform:uppercase;color:#6C7FFF;font-weight:700;margin-bottom:.6rem;">Open / Guarded</div>
+            <div id="sandbox-open"></div>
+          </div>
+        </div>
+        <div style="display:flex;gap:.75rem;align-items:center;margin-top:.5rem;">
+          <button class="export-btn" onclick="resetSandbox()">Reset to current weights</button>
+          <span id="sandbox-status" style="font-size:.7rem;color:var(--dim);"></span>
+        </div>
+        <div style="margin-top:1rem;display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;">
+          <div>
+            <div class="chart-card-sub" style="margin-bottom:.4rem;">Individual types: current → preview</div>
+            <div id="sandbox-indiv-compare"></div>
+          </div>
+          <div>
+            <div class="chart-card-sub" style="margin-bottom:.4rem;">Movement</div>
+            <div id="sandbox-movement" style="font-size:.78rem;color:var(--muted);line-height:1.7;"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
   </div>
 
   <!-- ══ BETA CODES ══ -->
@@ -2212,6 +2290,7 @@ function generateOrders() {
     const fn2 = firstNames[Math.floor(Math.random()*firstNames.length)];
     const phones = ['2125559012','5125558234','3035557841','6155554893','2065553847'];
     const tok = genAdminToken();
+    const addon = ['workbook','reflection','budget','checklist',null][Math.floor(Math.random()*5)];
 
     const ct = COUPLE_TYPES[Math.floor(Math.random()*COUPLE_TYPES.length)];
     // Add jitter to scores so each order feels unique
@@ -2499,6 +2578,7 @@ async function loadRealFunnel(orders) {
   } catch (e) {
     console.warn('[admin] real funnel load failed:', e);
   }
+}
 
 // Real package-mix trend: groups orders by pkg_key + month, produces a
 // 12-month stacked dataset (1 series per package). Replaces the static
@@ -3272,117 +3352,231 @@ function initCharts(page) {
 // ── TYPE ANALYTICS ──────────────────────────────────────────────────────────────
 const CT_NAMES = {"WW":"The ignition","XX":"The collaboration","YY":"The safe space","ZZ":"The depth","WX":"The jumpstart","WY":"The orbit","WZ":"The opening","XY":"The translators","XZ":"The stethoscope","YZ":"The sanctuary"};
 
+// ── Type Analytics: live distribution + weight sandbox ────────────────────
+// Data comes from /api/admin-typing (computed server-side via the shared type
+// engine). The page holds the anonymized records and re-aggregates client-side
+// for demographic filters and the weight sandbox. The only formula constants
+// live in the server-sent config (TYPES_DATA.config); the reducer below is
+// generic, so nothing here can drift from production typing.
+let TYPES_DATA = null;
+const TYPE_COLORS = { W:'#FF6B35', X:'#FBBF24', Y:'#6C7FFF', Z:'#34D399' };
+let sandboxWeights = null;
+
 async function loadTypesData(force) {
   const secret = new URLSearchParams(window.location.search).get('s') || '';
-  const url = '/api/get-feedback' + (secret ? `?secret=${secret}` : '');
-  let data;
+  const stamp = document.getElementById('types-last-updated');
   try {
-    const res = await fetch(url);
-    data = await res.json();
-  } catch(e) {
-    data = null;
+    const res = await fetch('/api/admin-typing' + (secret ? `?secret=${secret}` : ''));
+    TYPES_DATA = await res.json();
+    if (TYPES_DATA.error) throw new Error(TYPES_DATA.error);
+  } catch (e) {
+    if (stamp) stamp.textContent = 'Error';
+    document.getElementById('types-ct-bars').innerHTML =
+      `<div style="color:#F87171;font-size:.78rem;">Could not load typing data: ${e.message}</div>`;
+    return;
   }
+  if (stamp) stamp.textContent = new Date(TYPES_DATA.generatedAt).toLocaleTimeString();
 
-  // Dummy fallback data — renders when real API is unavailable or empty.
-  // Lets the team see the analytics layout with realistic-looking numbers
-  // before the real data is flowing.
-  const DUMMY_TYPES = {
-    ok: true,
-    lastUpdated: Date.now(),
-    counts: { typesTracked: 312, codesTracked: 624, ex2Complete: 248, ex2Skipped: 64 },
-    coupleTypeDist: { WW: 48, XX: 41, WX: 38, WY: 34, YZ: 31, XY: 28, WZ: 25, YY: 24, XZ: 23, ZZ: 20 },
-    axisDist: {
-      energy:     { E: 342, I: 282 },
-      expression: { X: 358, G: 266 },
-      conflict:   { F: 298, S: 326 },
-      closeness:  { C: 371, A: 253 },
-    },
-    gapDist: { aligned: 58, compatible: 124, complementary: 93, distinct: 37 },
-    styleCodeDist: { EXFC: 38, EXFA: 34, EXSC: 28, IGFC: 26, IGSA: 24, EGFC: 23, IXFA: 22, EGSC: 21, IXSC: 19, EGFA: 18, IGFA: 17, EXSA: 16, IXSC2: 15, EGSA: 14, IXFC: 13, IGSC: 12 },
+  // Populate filter dropdowns from the data (once).
+  const fill = (id, vals) => {
+    const sel = document.getElementById(id);
+    if (sel.options.length > 1) return;
+    [...new Set(vals.filter(Boolean))].sort().forEach(v => {
+      const o = document.createElement('option'); o.value = v; o.textContent = v; sel.appendChild(o);
+    });
   };
+  fill('tf-gender', TYPES_DATA.individuals.map(r => r.gender));
+  fill('tf-rellen', TYPES_DATA.individuals.map(r => r.relLength));
+  fill('tf-relstat', TYPES_DATA.individuals.map(r => r.relStatus));
 
-  // Use real data if present and has actual rows; otherwise fall back to dummy.
-  const hasRealData = data && data.ok && data.counts &&
-    (data.counts.typesTracked > 0 || data.counts.codesTracked > 0);
-  if (!hasRealData) {
-    data = DUMMY_TYPES;
-    const stamp = document.getElementById('types-last-updated');
-    if (stamp) stamp.textContent = 'Demo data';
+  sandboxWeights = null;
+  buildSandbox();
+  renderTypes();
+}
+
+// Generic axis reducer driven by the server-sent config + a weights override.
+// Weights are normalized per axis so the 3.0 boundary stays meaningful.
+function axisFromScores(scores, cfg, weights) {
+  let w = 0, o = 0, wSum = 0, oSum = 0;
+  for (const dim in cfg) {
+    const c = cfg[dim], wt = weights[dim];
+    if (c.axis === 'withdraw') wSum += wt; else oSum += wt;
   }
+  for (const dim in cfg) {
+    const c = cfg[dim];
+    const v = (scores[dim] == null || isNaN(scores[dim])) ? 3 : Number(scores[dim]);
+    const oriented = c.invert ? (6 - v) : v;
+    if (c.axis === 'withdraw') w += oriented * weights[dim] / (wSum || 1);
+    else                       o += oriented * weights[dim] / (oSum || 1);
+  }
+  return { w, o };
+}
+function typeFromAxes(w, o) {
+  const e = w <= 3.0, op = o >= 3.0;
+  return e && op ? 'W' : e && !op ? 'X' : !e && op ? 'Y' : 'Z';
+}
 
-  document.getElementById('types-last-updated').textContent =
-    hasRealData && data.lastUpdated ? new Date(data.lastUpdated).toLocaleTimeString() :
-    (hasRealData ? '—' : 'Demo data');
-  document.getElementById('types-ct-total').textContent = data.counts.typesTracked ?? '—';
-  document.getElementById('types-code-total').textContent = data.counts.codesTracked ?? '—';
-  document.getElementById('types-ex2-complete').textContent = data.counts.ex2Complete ?? '—';
-  document.getElementById('types-ex2-skipped').textContent = data.counts.ex2Skipped ?? '—';
+function activeFilters() {
+  return {
+    gender: document.getElementById('tf-gender').value,
+    relLength: document.getElementById('tf-rellen').value,
+    relStatus: document.getElementById('tf-relstat').value,
+  };
+}
+function matchIndiv(r, f) {
+  return (!f.gender || r.gender === f.gender) &&
+         (!f.relLength || r.relLength === f.relLength) &&
+         (!f.relStatus || r.relStatus === f.relStatus);
+}
+function matchCouple(c, f) {
+  return (!f.gender || c.genders.includes(f.gender)) &&
+         (!f.relLength || c.relLength === f.relLength) &&
+         (!f.relStatus || c.relStatus === f.relStatus);
+}
+
+// Re-aggregate + render Phase 1 for the active filter (default weights).
+function renderTypes() {
+  if (!TYPES_DATA) return;
+  const f = activeFilters();
+  const cfg = TYPES_DATA.config;
+  const indiv = TYPES_DATA.individuals.filter(r => matchIndiv(r, f));
+  const couples = TYPES_DATA.couples.filter(c => matchCouple(c, f));
+  const anyFilter = f.gender || f.relLength || f.relStatus;
+  document.getElementById('tf-active').textContent = anyFilter
+    ? `${indiv.length} individuals · ${couples.length} couples in filter` : '';
+
+  const small = indiv.length < 8;
+  // KPIs
+  const tCounts = { W:0,X:0,Y:0,Z:0 }; let lowc = 0;
+  indiv.forEach(r => { tCounts[r.type]++; if (r.lowConf) lowc++; });
+  document.getElementById('types-n-indiv').textContent = indiv.length || '0';
+  document.getElementById('types-n-couples').textContent = couples.length || '0';
+  document.getElementById('types-lowconf').textContent = indiv.length ? Math.round(100*lowc/indiv.length)+'%' : '—';
+  const ctCounts = {}; couples.forEach(c => ctCounts[c.coupleType] = (ctCounts[c.coupleType]||0)+1);
+  const ctSorted = Object.entries(ctCounts).sort((a,b)=>b[1]-a[1]);
+  const maxShare = couples.length ? Math.round(100*(ctSorted[0]?.[1]||0)/couples.length) : 0;
+  document.getElementById('types-maxshare').textContent = ctSorted.length ? (CT_NAMES[ctSorted[0][0]]||ctSorted[0][0]) : '—';
+  document.getElementById('types-maxshare-sub').textContent = ctSorted.length ? `${maxShare}% of couples` : 'Concentration check';
 
   // Couple type bars
-  const ctDist = data.coupleTypeDist || {};
   const ctEl = document.getElementById('types-ct-bars');
-  const ctSorted = Object.entries(ctDist).sort((a,b)=>b[1]-a[1]);
-  const ctMax = ctSorted[0]?.[1] || 1;
-  const ctTotal = Object.values(ctDist).reduce((s,v)=>s+v,0) || 1;
   if (!ctSorted.length) {
-    ctEl.innerHTML = '<div style="color:var(--muted);font-size:.78rem;">No couple types recorded yet.</div>';
+    ctEl.innerHTML = `<div style="color:var(--muted);font-size:.78rem;">${small?'Not enough data yet.':'No couples in this filter.'}</div>`;
   } else {
-    ctEl.innerHTML = ctSorted.map(([id, count]) => {
-      const pct = Math.round((count/ctTotal)*100);
-      const barW = Math.round((count/ctMax)*100);
-      const name = CT_NAMES[id] || id;
-      return `<div><div style="display:flex;justify-content:space-between;margin-bottom:.2rem;"><span style="font-size:.75rem;color:#E8EAF0;">${name}</span><span style="font-size:.72rem;color:#6B7280;">${count} &nbsp;<span style="color:#4B5563;">${pct}%</span></span></div><div style="background:#2A2E3A;border-radius:999px;height:6px;"><div style="background:var(--orange);width:${barW}%;height:100%;border-radius:999px;transition:width .4s;"></div></div></div>`;
-    }).join('');
+    const ctMax = ctSorted[0][1] || 1;
+    ctEl.innerHTML = ctSorted.map(([id,count]) => {
+      const pct = Math.round(100*count/couples.length), barW = Math.round(100*count/ctMax);
+      return `<div><div style="display:flex;justify-content:space-between;margin-bottom:.2rem;"><span style="font-size:.75rem;color:#E8EAF0;">${CT_NAMES[id]||id} <span style="color:#6B7280;">${id}</span></span><span style="font-size:.72rem;color:#6B7280;">${count} <span style="color:#4B5563;">${pct}%</span></span></div><div style="background:#2A2E3A;border-radius:999px;height:6px;"><div style="background:var(--orange);width:${barW}%;height:100%;border-radius:999px;transition:width .4s;"></div></div></div>`;
+    }).join('') + (small?`<div style="color:#FBBF24;font-size:.7rem;margin-top:.4rem;">Small sample — read with caution.</div>`:'');
   }
 
-  // Axis bars
-  const axDist = data.axisDist || {};
-  const axEl = document.getElementById('types-axis-bars');
-  const axes = [
-    {key:'energy',     label:'Energy',         letters:[['E','Outward'],['I','Inward']],         color:'#FF6B35'},
-    {key:'expression', label:'Expression',      letters:[['X','Expressive'],['G','Guarded']],     color:'#6C7FFF'},
-    {key:'conflict',   label:'Conflict timing', letters:[['F','Fast-engage'],['S','Space-first']], color:'#34D399'},
-    {key:'closeness',  label:'Closeness',       letters:[['C','Close-seeking'],['A','Autonomous']], color:'#FBBF24'},
-  ];
-  axEl.innerHTML = axes.map(ax => {
-    const d = axDist[ax.key] || {};
-    const t = (d[ax.letters[0][0]]||0) + (d[ax.letters[1][0]]||0) || 1;
-    return `<div><div style="font-size:.65rem;letter-spacing:.12em;text-transform:uppercase;color:${ax.color};font-weight:700;margin-bottom:.45rem;">${ax.label}</div>${ax.letters.map(([letter,lbl]) => {
-      const n = d[letter]||0;
-      const pct = Math.round((n/t)*100);
-      return `<div style="display:flex;align-items:center;gap:.75rem;margin-bottom:.3rem;"><span style="font-size:.7rem;color:#9CA3AF;width:120px;flex-shrink:0;">${letter} – ${lbl}</span><div style="flex:1;background:#2A2E3A;border-radius:999px;height:5px;"><div style="background:${ax.color};width:${pct}%;height:100%;border-radius:999px;"></div></div><span style="font-size:.68rem;color:#6B7280;width:52px;text-align:right;">${n} (${pct}%)</span></div>`;
-    }).join('')}</div>`;
+  // Individual doughnut
+  drawDoughnut('types-indiv-chart', ['W','X','Y','Z'], ['W','X','Y','Z'].map(t=>tCounts[t]), ['W','X','Y','Z'].map(t=>TYPE_COLORS[t]));
+
+  // Axis split bars
+  let eng=0, opn=0; indiv.forEach(r=>{ if(r.w<=3)eng++; if(r.o>=3)opn++; });
+  const n = indiv.length||1;
+  const splitRow = (label,a,aLbl,b,bLbl,color) => {
+    const ap=Math.round(100*a/n), bp=100-ap;
+    return `<div><div style="font-size:.7rem;color:#9CA3AF;margin-bottom:.3rem;">${label}</div><div style="display:flex;height:22px;border-radius:6px;overflow:hidden;font-size:.62rem;font-weight:700;">
+      <div style="background:${color};width:${ap}%;display:flex;align-items:center;justify-content:center;color:#1a1a1a;">${ap>12?aLbl+' '+ap+'%':''}</div>
+      <div style="background:#2A2E3A;width:${bp}%;display:flex;align-items:center;justify-content:center;color:#9CA3AF;">${bp>12?bLbl+' '+bp+'%':''}</div></div></div>`;
+  };
+  document.getElementById('types-axis-bars').innerHTML =
+    splitRow('Engage / Withdraw', eng, 'Engage', n-eng, 'Withdraw', '#FF6B35') +
+    splitRow('Open / Guarded', opn, 'Open', n-opn, 'Guarded', '#6C7FFF');
+
+  // Histograms
+  const bins = TYPES_DATA.summary.histogramBins;
+  const wH = bins.map(()=>0), oH = bins.map(()=>0);
+  const bi = v => Math.min(bins.length-1, Math.max(0, Math.floor((v-1)/0.25)));
+  indiv.forEach(r=>{ wH[bi(r.w)]++; oH[bi(r.o)]++; });
+  drawHist('types-whist-chart', bins, wH, '#FF6B35');
+  drawHist('types-ohist-chart', bins, oH, '#6C7FFF');
+
+  // Per-dimension table (recompute outlier rate for filtered set)
+  const cfgDims = Object.keys(cfg);
+  const dimStat = {}; cfgDims.forEach(d=>dimStat[d]={sum:0,n:0,out:0});
+  indiv.forEach(r=>{
+    const oe=r.w<=3, oo=r.o>=3;
+    cfgDims.forEach(d=>{
+      const v=r.scores[d]; if(v==null)return;
+      dimStat[d].sum+=v; dimStat[d].n++;
+      const c=cfg[d], or=c.invert?(6-v):v;
+      if(c.axis==='withdraw'){ if((or<=3)!==oe) dimStat[d].out++; }
+      else { if((or>=3)!==oo) dimStat[d].out++; }
+    });
+  });
+  const tbody = document.querySelector('#types-dim-table tbody');
+  tbody.innerHTML = cfgDims.sort((a,b)=>cfg[b].weight-cfg[a].weight).map(d=>{
+    const st=dimStat[d], mean=st.n?(st.sum/st.n).toFixed(2):'—', out=st.n?Math.round(100*st.out/st.n):0;
+    const outColor = out>=40?'#F87171':out>=25?'#FBBF24':'#34D399';
+    return `<tr><td style="color:#E8EAF0;text-transform:capitalize;">${d}</td><td style="color:#9CA3AF;">${cfg[d].axis==='withdraw'?'E/W':'O/G'}${cfg[d].invert?' ·inv':''}</td><td>${cfg[d].weight.toFixed(2)}</td><td>${mean}</td><td style="color:${outColor};font-weight:600;">${out}%</td><td style="color:#6B7280;">${st.n}</td></tr>`;
   }).join('');
 
-  // Gap tier chart
-  const gapDist = data.gapDist || {};
-  const gapCanvas = document.getElementById('types-gap-chart');
-  if (gapCanvas) {
-    const existing = Chart.getChart(gapCanvas); if (existing) existing.destroy();
-    new Chart(gapCanvas, {
-      type: 'doughnut',
-      data: {
-        labels: ['Aligned','Compatible','Complementary','Distinct'],
-        datasets: [{data: ['aligned','compatible','complementary','distinct'].map(k=>gapDist[k]||0), backgroundColor:['#34D399','#6C7FFF','#FF6B35','#F87171'], borderWidth:0}]
-      },
-      options: { plugins: { legend: { position:'right', labels:{color:'#9CA3AF',font:{size:11},boxWidth:12} } } }
-    });
-  }
-
-  // Style code grid
-  const codeDist = data.styleCodeDist || {};
-  const codeEl = document.getElementById('types-code-grid');
-  const codeSorted = Object.entries(codeDist).sort((a,b)=>b[1]-a[1]);
-  const codeMax = codeSorted[0]?.[1] || 1;
-  if (!codeSorted.length) {
-    codeEl.innerHTML = '<div style="color:var(--muted);font-size:.78rem;">No codes recorded yet.</div>';
-  } else {
-    codeEl.innerHTML = codeSorted.map(([code, count]) => {
-      const intensity = Math.max(15, Math.round((count/codeMax)*100));
-      return `<div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:.75rem;text-align:center;"><div style="font-size:1rem;font-weight:800;color:#FF6B35;letter-spacing:.1em;font-family:monospace;">${code}</div><div style="font-size:1.1rem;font-weight:700;color:#E8EAF0;margin:.2rem 0;">${count}</div><div style="background:#2A2E3A;border-radius:999px;height:4px;margin-top:.35rem;"><div style="background:var(--indigo);width:${intensity}%;height:100%;border-radius:999px;"></div></div></div>`;
-    }).join('');
-  }
+  refreshSandbox();
 }
+
+function drawDoughnut(id, labels, data, colors) {
+  const el = document.getElementById(id); if(!el) return;
+  const ex = Chart.getChart(el); if(ex) ex.destroy();
+  new Chart(el, { type:'doughnut', data:{ labels, datasets:[{data, backgroundColor:colors, borderColor:'#1D2029', borderWidth:3}] },
+    options:{ plugins:{ legend:{ position:'right', labels:{color:'#9CA3AF',font:{size:12},boxWidth:12} } }, cutout:'62%' } });
+}
+function drawHist(id, bins, data, color) {
+  const el = document.getElementById(id); if(!el) return;
+  const ex = Chart.getChart(el); if(ex) ex.destroy();
+  const labels = bins.map(b=>b.toFixed(2));
+  const splitIdx = bins.findIndex(b=>b>=3) ;
+  new Chart(el, { type:'bar', data:{ labels, datasets:[{data, backgroundColor:bins.map(b=>b<3?color:color+'77'), borderRadius:3}] },
+    options:{ plugins:{ legend:{display:false}, tooltip:{callbacks:{title:i=>`score ${i[0].label}`}} },
+      scales:{ x:{grid:{display:false},ticks:{color:'#6B7280',font:{size:9},maxRotation:0,callback:(v,i)=>i%2===0?labels[i]:''}},
+               y:{grid:{color:'#2A2E3A'},ticks:{color:'#6B7280',precision:0}} } } });
+}
+
+// ── Phase 2: weight sandbox ───────────────────────────────────────────────
+function buildSandbox() {
+  if (!TYPES_DATA) return;
+  sandboxWeights = {}; for (const d in TYPES_DATA.config) sandboxWeights[d] = TYPES_DATA.config[d].weight;
+  const cfg = TYPES_DATA.config;
+  const slider = (d) => `<div style="margin-bottom:.7rem;"><div style="display:flex;justify-content:space-between;font-size:.72rem;color:#9CA3AF;margin-bottom:.2rem;"><span style="text-transform:capitalize;">${d}${cfg[d].invert?' <span style=\"color:#6B7280;\">(inv)</span>':''}</span><span id="sw-val-${d}" style="color:#E8EAF0;font-variant-numeric:tabular-nums;">${cfg[d].weight.toFixed(2)}</span></div><input type="range" id="sw-${d}" min="0" max="0.6" step="0.01" value="${cfg[d].weight}" oninput="onSandboxInput('${d}')" style="width:100%;accent-color:${cfg[d].axis==='withdraw'?'#FF6B35':'#6C7FFF'};"></div>`;
+  const wDims = Object.keys(cfg).filter(d=>cfg[d].axis==='withdraw');
+  const oDims = Object.keys(cfg).filter(d=>cfg[d].axis==='open');
+  document.getElementById('sandbox-withdraw').innerHTML = wDims.map(slider).join('');
+  document.getElementById('sandbox-open').innerHTML = oDims.map(slider).join('');
+}
+let _sbTimer = null;
+function onSandboxInput(d) {
+  sandboxWeights[d] = parseFloat(document.getElementById('sw-'+d).value);
+  document.getElementById('sw-val-'+d).textContent = sandboxWeights[d].toFixed(2);
+  clearTimeout(_sbTimer); _sbTimer = setTimeout(refreshSandbox, 180);
+}
+function resetSandbox() { buildSandbox(); refreshSandbox(); }
+
+function refreshSandbox() {
+  if (!TYPES_DATA || !sandboxWeights) return;
+  const f = activeFilters();
+  const cfg = TYPES_DATA.config;
+  const indiv = TYPES_DATA.individuals.filter(r => matchIndiv(r, f));
+  // Current (default-weight) counts
+  const cur = {W:0,X:0,Y:0,Z:0}; indiv.forEach(r=>cur[r.type]++);
+  // Preview counts under sandbox weights
+  const prev = {W:0,X:0,Y:0,Z:0}; let moved=0;
+  indiv.forEach(r=>{ const {w,o}=axisFromScores(r.scores,cfg,sandboxWeights); const t=typeFromAxes(w,o); prev[t]++; if(t!==r.type) moved++; });
+  const n = indiv.length||1;
+  const cmp = ['W','X','Y','Z'].map(t=>{
+    const cp=Math.round(100*cur[t]/n), pp=Math.round(100*prev[t]/n), delta=pp-cp;
+    const dStr = delta===0?'':(delta>0?`<span style="color:#34D399;">+${delta}</span>`:`<span style="color:#F87171;">${delta}</span>`);
+    return `<div style="display:flex;align-items:center;gap:.6rem;margin-bottom:.4rem;font-size:.78rem;"><span style="width:14px;height:14px;border-radius:3px;background:${TYPE_COLORS[t]};display:inline-block;"></span><span style="width:18px;color:#E8EAF0;font-weight:700;">${t}</span><span style="color:#9CA3AF;width:120px;">${cur[t]} (${cp}%) → ${prev[t]} (${pp}%)</span>${dStr}</div>`;
+  }).join('');
+  document.getElementById('sandbox-indiv-compare').innerHTML = cmp;
+  const movedPct = Math.round(100*moved/n);
+  document.getElementById('sandbox-movement').innerHTML =
+    `<strong style="color:#E8EAF0;">${moved}</strong> of ${indiv.length} individuals (${movedPct}%) would change type under these weights.<br>` +
+    (movedPct>30?'<span style="color:#FBBF24;">Large shift — weights are meaningfully reshaping the population.</span>':'<span style="color:#34D399;">Modest shift.</span>');
+  document.getElementById('sandbox-status').textContent = 'Preview only · not saved';
+}
+
 
 // ── BETA FEEDBACK ANALYTICS ──────────────────────────────────────────────────
 let _fbCharts = {};

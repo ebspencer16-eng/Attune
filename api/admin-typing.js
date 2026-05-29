@@ -1,0 +1,155 @@
+// /api/admin-typing?secret=...
+//
+// Live typing + distribution data for the admin dashboard. Computes individual
+// and couple types from ex1_answers using the shared type engine (single source
+// of truth) — NOT the denormalized profiles.couple_type column, which is sparse
+// and can be stale. Returns authoritative default-weight aggregates plus
+// anonymized per-individual / per-couple records so the dashboard can filter by
+// demographic and run the weight sandbox entirely client-side.
+
+import { createClient } from '@supabase/supabase-js';
+import {
+  AXIS_CONFIG, DIM_KEYS, calcDimScores, axisScores, typeCodeFromAxes, lowConfidence,
+} from './_type-engine.js';
+
+export const config = { runtime: 'edge' };
+
+const DIMS = Object.keys(DIM_KEYS);
+const TYPES = ['W', 'X', 'Y', 'Z'];
+const COUPLE_TYPES = ['WW', 'WX', 'WY', 'WZ', 'XX', 'XY', 'XZ', 'YY', 'YZ', 'ZZ'];
+
+const json = (obj, status = 200) =>
+  new Response(JSON.stringify(obj), { status, headers: { 'Content-Type': 'application/json' } });
+
+// One individual's typing payload (anonymized — scores + demographics only).
+function profileToRecord(p) {
+  const scores = calcDimScores(p.ex1_answers);
+  const { withdrawScore, openScore } = axisScores(scores);
+  return {
+    scores,
+    w: withdrawScore,
+    o: openScore,
+    type: typeCodeFromAxes(withdrawScore, openScore),
+    lowConf: lowConfidence(scores),
+    gender: p.gender || null,
+    relLength: p.relationship_length || null,
+    relStatus: p.relationship_status || null,
+  };
+}
+
+const hasAnswers = (p) => p && p.ex1_answers && Object.keys(p.ex1_answers).length > 0;
+
+export default async function handler(req) {
+  const url = new URL(req.url);
+
+  const adminSecret = process.env.ADMIN_SECRET;
+  if (!adminSecret) return json({ error: 'Admin endpoint not configured' }, 503);
+  if ((url.searchParams.get('secret') || '') !== adminSecret) return json({ error: 'Invalid or missing secret' }, 403);
+
+  const SUPABASE_URL = process.env.SUPABASE_URL;
+  const SUPABASE_KEY = process.env.SUPABASE_SERVICE_KEY;
+  if (!SUPABASE_URL || !SUPABASE_KEY) return json({ error: 'Supabase env vars missing' }, 500);
+  const admin = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+  try {
+    const { data: profiles = [] } = await admin
+      .from('profiles')
+      .select('id, invite_code, partner_profile_id, joined_via_invite, gender, relationship_status, relationship_length, ex1_answers');
+
+    // Individuals: every profile that has Exercise 1 answers.
+    const individuals = profiles.filter(hasAnswers).map(profileToRecord);
+
+    // Couples: iterate Partner A (has invite_code), join Partner B via FK.
+    // Both partners must have answers to form a typed couple.
+    const byId = Object.fromEntries(profiles.map(p => [p.id, p]));
+    const couples = [];
+    for (const a of profiles.filter(p => p.invite_code && !p.joined_via_invite)) {
+      const b = a.partner_profile_id ? byId[a.partner_profile_id] : null;
+      if (!hasAnswers(a) || !hasAnswers(b)) continue;
+      const ra = profileToRecord(a), rb = profileToRecord(b);
+      couples.push({
+        aType: ra.type, bType: rb.type,
+        coupleType: [ra.type, rb.type].sort().join(''),
+        aScores: ra.scores, bScores: rb.scores,
+        relLength: a.relationship_length || null,
+        relStatus: a.relationship_status || null,
+        genders: [a.gender || null, b.gender || null],
+      });
+    }
+
+    return json({
+      config: AXIS_CONFIG,
+      dims: DIMS,
+      generatedAt: new Date().toISOString(),
+      summary: summarize(individuals, couples),
+      individuals,
+      couples,
+    });
+  } catch (e) {
+    return json({ error: 'Typing query failed: ' + (e.message || e) }, 500);
+  }
+}
+
+// Authoritative default-weight aggregates (the dashboard re-derives these
+// client-side when a demographic filter or sandbox weight is applied).
+export function summarize(individuals, couples) {
+  const indivTypes = Object.fromEntries(TYPES.map(t => [t, 0]));
+  let lowConf = 0, engage = 0, open = 0;
+  // Axis-score histograms in 0.25-wide bins from 1 to 5.
+  const bins = [];
+  for (let x = 1; x < 5; x += 0.25) bins.push(+x.toFixed(2));
+  const wHist = bins.map(() => 0), oHist = bins.map(() => 0);
+  const binIdx = (v) => Math.min(bins.length - 1, Math.max(0, Math.floor((v - 1) / 0.25)));
+
+  // Per-dimension: mean score + "outlier rate" (share whose single-dimension
+  // classification on its own axis disagrees with their overall axis reading).
+  const dimSum = Object.fromEntries(DIMS.map(d => [d, 0]));
+  const dimN   = Object.fromEntries(DIMS.map(d => [d, 0]));
+  const dimOut = Object.fromEntries(DIMS.map(d => [d, 0]));
+
+  for (const r of individuals) {
+    indivTypes[r.type]++;
+    if (r.lowConf) lowConf++;
+    if (r.w <= 3.0) engage++;
+    if (r.o >= 3.0) open++;
+    wHist[binIdx(r.w)]++;
+    oHist[binIdx(r.o)]++;
+    const overallEngage = r.w <= 3.0, overallOpen = r.o >= 3.0;
+    for (const d of DIMS) {
+      const v = r.scores[d];
+      if (v == null) continue;
+      dimSum[d] += v; dimN[d]++;
+      const cfg = AXIS_CONFIG[d];
+      // Single-dimension reading on its own axis, spectrum-oriented.
+      const oriented = cfg.invert ? (6 - v) : v;
+      if (cfg.axis === 'withdraw') { if ((oriented <= 3.0) !== overallEngage) dimOut[d]++; }
+      else                         { if ((oriented >= 3.0) !== overallOpen)   dimOut[d]++; }
+    }
+  }
+
+  const coupleTypes = Object.fromEntries(COUPLE_TYPES.map(t => [t, 0]));
+  for (const c of couples) coupleTypes[c.coupleType] = (coupleTypes[c.coupleType] || 0) + 1;
+  const maxCoupleShare = couples.length
+    ? +(100 * Math.max(...Object.values(coupleTypes)) / couples.length).toFixed(1) : 0;
+
+  return {
+    nIndividuals: individuals.length,
+    nCouples: couples.length,
+    lowConfidence: lowConf,
+    lowConfidencePct: individuals.length ? +(100 * lowConf / individuals.length).toFixed(1) : 0,
+    individualTypes: indivTypes,
+    engagePct: individuals.length ? +(100 * engage / individuals.length).toFixed(1) : 0,
+    openPct: individuals.length ? +(100 * open / individuals.length).toFixed(1) : 0,
+    coupleTypes,
+    maxCoupleShare,
+    histogramBins: bins,
+    withdrawHist: wHist,
+    openHist: oHist,
+    perDimension: DIMS.map(d => ({
+      dim: d,
+      mean: dimN[d] ? +(dimSum[d] / dimN[d]).toFixed(2) : null,
+      n: dimN[d],
+      outlierPct: dimN[d] ? +(100 * dimOut[d] / dimN[d]).toFixed(1) : 0,
+    })),
+  };
+}
