@@ -436,18 +436,10 @@ function _axesToType(engage, open) {
   return 'Z';
 }
 
-// Overall individual type code from full dimension scores. Server-side port of
-// computeIndividualType in src/App.jsx — must stay in sync.
-//   Engage/Withdraw = conflict(.55) + stress(.30) + repair(.15); engage if <= 3.0
-//   Open/Guarded    = expression(.45) + feedback(.30) + needs(.25); open if >= 3.0
-export function computeIndividualTypeCode(scores) {
-  const s = scores || {};
-  const withdrawScore = (s.conflict || 3) * 0.55 + (s.stress || 3) * 0.30 + (s.repair || 3) * 0.15;
-  const openScore     = (s.expression || 3) * 0.45 + (s.feedback || 3) * 0.30 + (s.needs || 3) * 0.25;
-  const isEngage = withdrawScore <= 3.0;
-  const isOpen   = openScore >= 3.0;
-  return _axesToType(isEngage, isOpen);
-}
+// Overall individual type code now comes from the shared type engine (single
+// source of truth, used by the frontend too). Re-exported so existing importers
+// (generate-workbook.js) keep working unchanged.
+export { computeIndividualTypeCode } from './_type-engine.js';
 
 // Per-partner type code for ONE dimension: override the dimension's own axis
 // from its single score, hold the other axis from the overall type.

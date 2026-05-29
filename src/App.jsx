@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useLayoutEffect, useRef } from "react";
+import { axisScores } from "../api/_type-engine.js";
 
 
 // ── Mobile detection hook ─────────────────────────────────────────────────────
@@ -912,15 +913,16 @@ function getCodeLabel(code) {
 // NEW COUPLE TYPING ENGINE — 4 individual types, 10 couple pairings
 // ═══════════════════════════════════════════════════════════════════════════════
 
-// Compute individual type from dimension scores
-// Engage/Withdraw axis: Conflict (55%) + Stress (30%) + Repair (15%)
-//   High withdraw_score (≥3.4) = Withdraw; Low (≤2.6) = Engage
-// Open/Guarded axis: Expression (45%) + Feedback (30%) + Needs (25%)
-//   High open_score (≥3.4) = Open; Low (≤2.6) = Guarded
+// Compute individual type from dimension scores. Axis math lives in the shared
+// type engine (api/_type-engine.js) so the frontend and the workbook backend
+// stay in lockstep. This wrapper adds the couple-map coordinates and the
+// low-confidence flag the UI needs.
+//   Engage/Withdraw: conflict .45, stress .25, repair .15, energy .10, closeness .05
+//   Open/Guarded:    expression .40, feedback .25, needs .20, bids .10, love .05
+//   (stress/energy/closeness/needs/love oriented by spectrum via 6-score)
 function computeIndividualType(scores) {
   const s = scores || {};
-  const withdrawScore = (s.conflict || 3) * 0.55 + (s.stress || 3) * 0.30 + (s.repair || 3) * 0.15;
-  const openScore     = (s.expression || 3) * 0.45 + (s.feedback || 3) * 0.30 + (s.needs || 3) * 0.25;
+  const { withdrawScore, openScore } = axisScores(s);
 
   // Coordinates for couple map: x = open (0=Guarded,1=Open), y = engage (0=Withdraw,1=Engage)
   const openCoord    = (openScore - 1) / 4;      // 0..1
