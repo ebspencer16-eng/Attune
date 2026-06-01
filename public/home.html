@@ -428,7 +428,7 @@
     <div class="hero-blob" style="top:-60px;left:50%;transform:translateX(-50%);width:560px;height:500px;background:radial-gradient(ellipse at 50% 36%, rgba(155,93,229,0.30) 0%, rgba(155,93,229,0.12) 38%, rgba(232,103,58,0.12) 55%, transparent 70%);display:none" id="hero-blob-mobile"></div>
   </div>
   <style>
-    @media(max-width:900px){#hero-blob-mobile{display:block !important}}
+    @media(max-width:900px){#hero-blob-mobile{display:block !important;max-width:100% !important}}
     @media(max-width:900px){.hero-blobs .hero-blob:not(#hero-blob-mobile){display:none}}
   </style>
 
@@ -1001,6 +1001,74 @@ function setUse(mode) {
   } else {
     syncDots();
   }
+})();
+</script>
+<script>
+/* Horizontal-overflow guard. Some mobile WebKit overflow bugs (e.g. a
+   transformed absolutely-positioned child escaping an ancestor's overflow:hidden)
+   do not reproduce in other engines, so this measures the REAL rendered geometry
+   on the device and neutralizes any element that leaks past the viewport without
+   being inside a legitimate scroll/clip container. Conservative: only acts when
+   actual overflow exists, never touches scroll content. Add ?ofdebug=1 to the
+   URL to see an on-screen list of any offenders. */
+(function () {
+  var CLIPV = { auto: 1, scroll: 1, hidden: 1, clip: 1 };
+  function insideClipped(el) {
+    var n = el.parentElement;
+    while (n && n !== document.body) {
+      if (CLIPV[getComputedStyle(n).overflowX]) return true;
+      n = n.parentElement;
+    }
+    return false;
+  }
+  function scan(fix) {
+    var de = document.documentElement, vw = de.clientWidth || window.innerWidth;
+    de.style.overflowX = 'clip'; document.body.style.overflowX = 'clip';
+    var offenders = [];
+    var els = document.body.getElementsByTagName('*');
+    for (var i = 0; i < els.length; i++) {
+      var el = els[i], r = el.getBoundingClientRect();
+      if (r.width === 0 || r.height === 0) continue;
+      if (r.right > vw + 1 || r.left < -1) {
+        if (insideClipped(el)) continue;            // contained content — leave alone
+        var ox = getComputedStyle(el).overflowX;
+        offenders.push({ el: el, right: Math.round(r.right), width: Math.round(r.width) });
+        if (fix) {
+          el.style.maxWidth = '100%';
+          if (ox === 'visible') el.style.overflowX = 'clip';  // own box, not a scroller
+        }
+      }
+    }
+    return { vw: vw, scrollW: de.scrollWidth, offenders: offenders };
+  }
+  function run() {
+    try {
+      var res = scan(true);
+      if (location.search.indexOf('ofdebug=1') !== -1) showDebug(res);
+    } catch (e) {}
+  }
+  function showDebug(res) {
+    var id = 'of-debug-overlay', old = document.getElementById(id);
+    if (old) old.remove();
+    var box = document.createElement('div');
+    box.id = id;
+    box.style.cssText = 'position:fixed;left:0;right:0;bottom:0;z-index:99999;background:#1a1730;color:#fff;font:12px/1.5 monospace;padding:10px 12px;max-height:45vh;overflow:auto;border-top:2px solid #E8673A';
+    var lines = ['viewport=' + res.vw + '  scrollW=' + res.scrollW + (res.scrollW > res.vw + 1 ? '  OVERFLOW ' + (res.scrollW - res.vw) + 'px' : '  (no page overflow)')];
+    res.offenders.slice(0, 12).forEach(function (o) {
+      var el = o.el, c = (el.className && el.className.toString().trim().split(/\s+/).slice(0, 2).join('.')) || '';
+      lines.push('• ' + el.tagName.toLowerCase() + (el.id ? '#' + el.id : '') + (c ? '.' + c : '') + '  right=' + o.right + ' w=' + o.width);
+    });
+    if (res.offenders.length === 0) lines.push('No uncontained offenders found.');
+    box.textContent = lines.join('\n');
+    box.style.whiteSpace = 'pre';
+    document.body.appendChild(box);
+  }
+  function boot() { run(); setTimeout(run, 300); setTimeout(run, 1200); }
+  if (document.readyState === 'loading') window.addEventListener('DOMContentLoaded', boot);
+  else boot();
+  window.addEventListener('load', boot);
+  window.addEventListener('resize', run);
+  window.addEventListener('orientationchange', function () { setTimeout(run, 200); });
 })();
 </script>
 </body>
