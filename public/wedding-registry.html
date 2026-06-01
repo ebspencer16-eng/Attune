@@ -266,6 +266,30 @@
     .site-footer .sf-bottom{padding:1rem 1.25rem 0;flex-direction:column;align-items:flex-start;gap:.3rem}
     .site-footer .sf-copy,.site-footer .sf-email{font-size:.7rem}
   }
+
+/* ═══ Standardized sub-page hero — uniform size + type across all pages ═══ */
+.page-header{
+  background:linear-gradient(150deg,#1c1940 0%,#282560 60%,#1e3a6e 100%)!important;
+  padding:calc(58px + 1rem) clamp(1.25rem,5vw,2.5rem) 1rem!important;
+  min-height:410px!important;
+  display:flex!important;flex-direction:column!important;justify-content:center!important;
+  position:relative!important;overflow:hidden!important;
+  width:100%!important;max-width:none!important;margin:0!important;box-sizing:border-box!important;
+}
+.page-header-inner{max-width:780px!important;margin-left:auto!important;margin-right:auto!important;position:relative!important;z-index:1!important;text-align:center!important}
+.page-header .eyebrow{margin-bottom:1rem!important}
+.page-header .page-title,.page-header h1{
+  font-family:var(--hfont,'Playfair Display',Georgia,serif)!important;
+  font-size:clamp(2.4rem,4.5vw,3.4rem)!important;
+  line-height:1.14!important;letter-spacing:-.02em!important;
+  max-width:28ch!important;margin:0 auto .95rem!important;
+}
+.page-header .page-sub{font-size:1rem!important;line-height:1.7!important;max-width:540px!important;margin:0 auto!important}
+@media(max-width:640px){
+  .page-header{padding:calc(58px + 1rem) 1.25rem 1rem!important;min-height:485px!important}
+  .page-header .page-title,.page-header h1{font-size:clamp(2rem,8vw,2.7rem)!important;max-width:24ch!important}
+}
+
 </style>
 </head>
 <body>
@@ -323,7 +347,7 @@
   <div class="page-header-glow"></div>
   <div class="page-header-inner">
     <p class="eyebrow">Wedding registry</p>
-    <h1 class="page-title">Register for something that helps you start <em>on the right foot.</em></h1>
+    <h1 class="page-title">A registry for the marriage, <em>not just the wedding.</em></h1>
     <p class="page-sub">A wedding gift built for the start of married life. Two exercises, one shared picture of how you communicate and what you each expect.</p>
     <div class="hero-actions">
       <a href="#platforms" class="btn-hero-primary">
