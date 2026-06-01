@@ -316,6 +316,10 @@
     .story-cards-desktop{display:none!important}
     .hiw-step-labels{display:none!important}
     .story-cards-mobile-scroll{display:flex!important}
+    /* Size each card to the container minus a fixed amount so the next card
+       always peeks (~28px), signalling there's more to swipe. Overrides the
+       inline min-width:78vw, which filled the whole visible track. */
+    .story-cards-mobile-scroll > div{flex:0 0 calc(100% - 2.75rem)!important;min-width:0!important;max-width:none!important}
     .carousel-dots{display:flex!important}
     .what-grid{grid-template-columns:1fr!important}
     .proof-grid{grid-template-columns:1fr!important}
