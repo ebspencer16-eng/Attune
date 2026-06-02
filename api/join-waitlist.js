@@ -52,20 +52,32 @@ export default async function handler(req) {
     }
   }
 
-  // Also add to the Resend audience so the launch email can go out in one
-  // click. Gated on RESEND_AUDIENCE_ID (set it in Vercel once the audience
-  // exists in Resend). Soft-fails.
-  const resendKey  = process.env.RESEND_API_KEY;
-  const audienceId = process.env.RESEND_AUDIENCE_ID;
-  if (resendKey && audienceId) {
+  // Also add to a Resend segment so the launch email can go out in one click.
+  // Resend renamed "audiences" to "segments"; contacts are global now. One call
+  // creates the global contact and attaches the segment. Gated on
+  // RESEND_SEGMENT_ID (set it in Vercel once the segment exists). Soft-fails.
+  const resendKey = process.env.RESEND_API_KEY;
+  const segmentId = process.env.RESEND_SEGMENT_ID || process.env.RESEND_AUDIENCE_ID;
+  if (resendKey && segmentId) {
     try {
-      await fetch(`https://api.resend.com/audiences/${audienceId}/contacts`, {
+      const r = await fetch('https://api.resend.com/contacts', {
         method: 'POST',
         headers: { Authorization: `Bearer ${resendKey}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, unsubscribed: false, ...(name ? { first_name: name } : {}) }),
+        body: JSON.stringify({
+          email, unsubscribed: false,
+          ...(name ? { first_name: name } : {}),
+          segments: [{ id: segmentId }],
+        }),
       });
+      if (!r.ok) {
+        // Contact likely already exists — attach it to the segment by email.
+        await fetch(`https://api.resend.com/contacts/${encodeURIComponent(email)}/segments/${segmentId}`, {
+          method: 'POST',
+          headers: { Authorization: `Bearer ${resendKey}` },
+        }).catch(() => {});
+      }
     } catch (e) {
-      console.warn('[waitlist] resend audience add failed:', e);
+      console.warn('[waitlist] resend segment add failed:', e);
     }
   }
 
