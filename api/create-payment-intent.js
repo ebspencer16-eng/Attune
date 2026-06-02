@@ -329,21 +329,76 @@ export default async function handler(req) {
     'ATTUNE-BETA-FEEDBACK': '*',
     'BETA-CORE-1':          { pkg: 'core', mode: 'fixed', amount: 1 },
   };
+  for (let i = 1; i <= 12; i++) {
+    BETA_CODES[`ATTUNE-BETA-${String(i).padStart(2,'0')}`] =
+      { pkg: 'core', mode: 'free', amount: 0, includesWorkbook: true, workbookVariant: 'digital' };
+  }
 
   if (promoCode) {
     const normalizedCode = promoCode.toUpperCase().trim();
     const codeEntry = BETA_CODES[normalizedCode];
 
-    if (!codeEntry) {
+    // Resolve code metadata. Hardcoded map first (legacy named codes), then
+    // the beta_codes table, where dynamically-issued codes live: the 12 beta
+    // codes and per-couple flash-promo codes. Table columns carry the full
+    // grant (mode, included workbook) plus guard rails (max_uses, expiry, binding).
+    let dbRow = null;
+    if (supabaseUrl && supabaseServiceKey) {
+      try {
+        const r = await fetch(
+          `${supabaseUrl}/rest/v1/beta_codes?code=eq.${encodeURIComponent(normalizedCode)}&select=*`,
+          { headers: { apikey: supabaseServiceKey, Authorization: `Bearer ${supabaseServiceKey}` } }
+        );
+        const rows = await r.json();
+        if (Array.isArray(rows) && rows.length) dbRow = rows[0];
+      } catch (e) { console.warn('[promo] code lookup failed:', e); }
+    }
+
+    if (!codeEntry && !dbRow) {
       return new Response(JSON.stringify({ error: 'Invalid promo code' }), {
         status: 400, headers: { 'Content-Type': 'application/json' }
       });
     }
 
-    // Normalize to { pkg, mode, amount }
-    const codeMeta = (typeof codeEntry === 'string')
-      ? { pkg: codeEntry, mode: 'free', amount: 0 }
-      : codeEntry;
+    // Normalize to { pkg, mode, amount, ... }
+    let codeMeta;
+    if (codeEntry) {
+      codeMeta = (typeof codeEntry === 'string')
+        ? { pkg: codeEntry, mode: 'free', amount: 0 }
+        : { ...codeEntry };
+    } else {
+      codeMeta = {
+        pkg:    dbRow.package_key || '*',
+        mode:   dbRow.discount_mode || 'free',
+        amount: Number(dbRow.discount_value) || 0,
+      };
+    }
+    // Table-driven grant + guard rails (table is authoritative for these).
+    if (dbRow) {
+      codeMeta.includesWorkbook = !!dbRow.includes_workbook;
+      codeMeta.workbookVariant  = dbRow.workbook_variant || 'digital';
+      codeMeta.appliesTo        = dbRow.applies_to || 'package';
+      if (dbRow.active === false) {
+        return new Response(JSON.stringify({ error: 'This promo code has been deactivated.' }), {
+          status: 400, headers: { 'Content-Type': 'application/json' } });
+      }
+      if (dbRow.expires_at && new Date(dbRow.expires_at).getTime() < Date.now()) {
+        return new Response(JSON.stringify({ error: 'This promo code has expired.' }), {
+          status: 400, headers: { 'Content-Type': 'application/json' } });
+      }
+      if (dbRow.max_uses != null && (dbRow.uses_count ?? 0) >= dbRow.max_uses) {
+        return new Response(JSON.stringify({ error: 'This promo code has already been used.' }), {
+          status: 400, headers: { 'Content-Type': 'application/json' } });
+      }
+      if (Array.isArray(dbRow.bound_emails) && dbRow.bound_emails.length) {
+        const bemail = (buyerEmail || '').toLowerCase().trim();
+        const ok = dbRow.bound_emails.map(e => (e || '').toLowerCase().trim()).includes(bemail);
+        if (!ok) {
+          return new Response(JSON.stringify({ error: 'This code is linked to a different account. Sign in with the email it was sent to, then apply the code.' }), {
+            status: 400, headers: { 'Content-Type': 'application/json' } });
+        }
+      }
+    }
     const codeUnlocks = codeMeta.pkg;
 
     // Every item in a multi-item cart must match the code (else reject — the
@@ -366,7 +421,22 @@ export default async function handler(req) {
     // Compute the add-on-only total across all items. The promo code
     // covers the PACKAGE cost for matching items; add-ons still have to
     // be paid for. Shipping is included in base prices so isn't added here.
-    const addonsTotal = items.reduce((sum, it) => sum + itemAddonTotal(it), 0);
+    // When the code bundles the workbook free (beta), force it onto each item
+    // and exclude it from the billable add-on total so the order routes through
+    // the no-charge path.
+    if (codeMeta.includesWorkbook) {
+      items.forEach(it => {
+        it.addonWorkbook = codeMeta.workbookVariant || 'digital';
+        it._promoWorkbookFree = true;
+      });
+    }
+    const addonsTotal = items.reduce((sum, it) => {
+      let a = itemAddonTotal(it);
+      if (it._promoWorkbookFree) {
+        a -= (it.addonWorkbook === 'print' ? ADDON_PRICES.workbookPrint : ADDON_PRICES.workbookDigital);
+      }
+      return sum + Math.max(0, a);
+    }, 0);
 
     if (supabaseUrl && supabaseServiceKey) {
       // Check code is active + increment uses

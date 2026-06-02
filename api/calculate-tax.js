@@ -44,6 +44,10 @@ const BETA_CODES = {
   'ATTUNE-BETA-FEEDBACK': '*',
   'BETA-CORE-1': { pkg: 'core', mode: 'fixed', amount: 1 },
 };
+for (let i = 1; i <= 12; i++) {
+  BETA_CODES[`ATTUNE-BETA-${String(i).padStart(2,'0')}`] =
+    { pkg: 'core', mode: 'free', amount: 0, includesWorkbook: true, workbookVariant: 'digital' };
+}
 
 function itemBasePrice(it) {
   return it.isPhysical ? (PHYSICAL_PRICES[it.pkgKey] ?? 0) : (DIGITAL_PRICES[it.pkgKey] ?? 0);
@@ -59,7 +63,7 @@ function itemAddonTotal(it) {
   return a;
 }
 
-function buildTaxLines(items, promoCoversBase, promoFixedAmount = null) {
+function buildTaxLines(items, promoCoversBase, promoFixedAmount = null, includesWorkbook = false) {
   const lines = [];
   items.forEach((it, idx) => {
     const base = itemBasePrice(it);
@@ -79,8 +83,8 @@ function buildTaxLines(items, promoCoversBase, promoFixedAmount = null) {
         quantity: 1,
       });
     }
-    if (it.addonWorkbook === 'print')   lines.push({ amount: ADDON_PRICES.workbookPrint*100,   tax_code: TAX_CODES.workbookPrint,   reference: `item-${idx}-wbprint`,   quantity: 1 });
-    if (it.addonWorkbook === 'digital') lines.push({ amount: ADDON_PRICES.workbookDigital*100, tax_code: TAX_CODES.workbookDigital, reference: `item-${idx}-wbdigital`, quantity: 1 });
+    if (!includesWorkbook && it.addonWorkbook === 'print')   lines.push({ amount: ADDON_PRICES.workbookPrint*100,   tax_code: TAX_CODES.workbookPrint,   reference: `item-${idx}-wbprint`,   quantity: 1 });
+    if (!includesWorkbook && it.addonWorkbook === 'digital') lines.push({ amount: ADDON_PRICES.workbookDigital*100, tax_code: TAX_CODES.workbookDigital, reference: `item-${idx}-wbdigital`, quantity: 1 });
     if (it.addonLmft)       lines.push({ amount: ADDON_PRICES.lmft*100,       tax_code: TAX_CODES.lmft,         reference: `item-${idx}-lmft`,       quantity: 1 });
     if (it.addonReflection) lines.push({ amount: ADDON_PRICES.reflection*100, tax_code: TAX_CODES.digitalAddon, reference: `item-${idx}-reflection`, quantity: 1 });
     if (it.addonBudget)     lines.push({ amount: ADDON_PRICES.budget*100,     tax_code: TAX_CODES.digitalAddon, reference: `item-${idx}-budget`,     quantity: 1 });
@@ -125,6 +129,7 @@ export default async function handler(req) {
     const codeUnlocks = codeMeta?.pkg || null;
     // A promo covers the base if it matches EVERY item's pkg (or is wildcard)
     const promoCoversBase = !!codeUnlocks && (codeUnlocks === '*' || items.every(it => it.pkgKey === codeUnlocks));
+    const includesWorkbook = promoCoversBase && !!codeMeta?.includesWorkbook;
     // For free-mode the package becomes $0; for fixed-mode it becomes
     // codeMeta.amount (e.g. $1 for BETA-CORE-1).
     const promoFixedAmount = (promoCoversBase && codeMeta?.mode === 'fixed')
@@ -136,7 +141,11 @@ export default async function handler(req) {
       if (promoCoversBase) {
         base = (promoFixedAmount != null) ? promoFixedAmount : 0;
       }
-      return sum + (base + itemAddonTotal(it)) * 100;
+      let addons = itemAddonTotal(it);
+      if (includesWorkbook) {
+        addons -= (it.addonWorkbook === 'print' ? ADDON_PRICES.workbookPrint : ADDON_PRICES.workbookDigital);
+      }
+      return sum + (base + Math.max(0, addons)) * 100;
     }, 0);
 
     // Need address to calculate tax
@@ -156,7 +165,7 @@ export default async function handler(req) {
       }), { status: 200, headers: { 'Content-Type': 'application/json' } });
     }
 
-    const lineItems = buildTaxLines(items, promoCoversBase, promoFixedAmount);
+    const lineItems = buildTaxLines(items, promoCoversBase, promoFixedAmount, includesWorkbook);
     if (lineItems.length === 0) {
       return new Response(JSON.stringify({ subtotalCents, taxCents: 0, totalCents: subtotalCents }), {
         status: 200, headers: { 'Content-Type': 'application/json' }
