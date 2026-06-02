@@ -1075,5 +1075,79 @@ function setUse(mode) {
   window.addEventListener('orientationchange', function () { setTimeout(run, 200); });
 })();
 </script>
+
+<!-- ── Waitlist popup (pre-launch) ───────────────────────────────────────── -->
+<div id="wl-overlay" role="dialog" aria-modal="true" aria-labelledby="wl-title" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(14,11,7,.55);backdrop-filter:blur(4px);align-items:center;justify-content:center;padding:1.25rem;">
+  <div id="wl-card" style="position:relative;background:var(--cream);border-radius:20px;max-width:430px;width:100%;padding:2.4rem 2rem 2rem;box-shadow:0 32px 80px rgba(14,11,7,.32),0 0 0 1px rgba(255,255,255,.06);overflow:hidden;transform:translateY(8px);opacity:0;transition:transform .35s ease,opacity .35s ease;">
+    <div style="position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--orange),var(--indigo));"></div>
+    <button id="wl-close" aria-label="Close" style="position:absolute;top:.85rem;right:.95rem;background:none;border:none;cursor:pointer;color:var(--muted);font-size:1.4rem;line-height:1;padding:.2rem;">&times;</button>
+    <div id="wl-form-state">
+      <div style="font-size:.62rem;letter-spacing:.26em;text-transform:uppercase;color:var(--orange);font-weight:700;font-family:var(--bfont);margin-bottom:.7rem;">Before we open</div>
+      <h2 id="wl-title" style="font-family:var(--hfont);font-size:1.85rem;font-weight:700;color:var(--ink);line-height:1.1;letter-spacing:-.02em;margin:0 0 .6rem;">Be first in line.</h2>
+      <p style="font-size:.9rem;color:var(--muted);line-height:1.65;font-weight:300;font-family:var(--bfont);margin:0 0 1.3rem;">We open soon. Join the list for early access and 10% off your assessment.</p>
+      <input id="wl-email" type="email" inputmode="email" autocomplete="email" placeholder="you@email.com"
+        style="width:100%;box-sizing:border-box;padding:.85rem 1rem;border:1px solid var(--stone);border-radius:11px;font-size:.92rem;font-family:var(--bfont);color:var(--ink);background:#fff;margin-bottom:.6rem;outline:none;" />
+      <div id="wl-err" style="display:none;font-size:.75rem;color:#c0392b;font-family:var(--bfont);margin:-.2rem 0 .55rem;"></div>
+      <button id="wl-submit" style="width:100%;background:linear-gradient(135deg,var(--orange),#d45a2e);color:#fff;border:none;padding:.95rem;border-radius:11px;font-size:.78rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;font-family:var(--bfont);cursor:pointer;box-shadow:0 6px 24px rgba(232,103,58,.34);">Join the list</button>
+      <button id="wl-dismiss" style="display:block;width:100%;margin-top:.7rem;background:none;border:none;color:var(--muted);font-size:.74rem;font-family:var(--bfont);cursor:pointer;">No thanks</button>
+    </div>
+    <div id="wl-done-state" style="display:none;text-align:center;padding:.4rem 0 .2rem;">
+      <div style="width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,var(--orange),var(--indigo));display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+      </div>
+      <h2 style="font-family:var(--hfont);font-size:1.6rem;font-weight:700;color:var(--ink);line-height:1.15;letter-spacing:-.02em;margin:0 0 .5rem;">You're on the list.</h2>
+      <p style="font-size:.88rem;color:var(--muted);line-height:1.65;font-weight:300;font-family:var(--bfont);margin:0;">Your 10% code lands in your inbox the day we open.</p>
+    </div>
+  </div>
+</div>
+<script>
+(function(){
+  var KEY='attune_waitlist_v1';
+  try{ if(localStorage.getItem(KEY)) return; }catch(e){}
+  if(new URLSearchParams(location.search).has('nopopup')) return;
+  var overlay=document.getElementById('wl-overlay'),card=document.getElementById('wl-card');
+  var shown=false;
+  function open(){
+    if(shown) return; shown=true;
+    overlay.style.display='flex';
+    requestAnimationFrame(function(){ card.style.transform='translateY(0)'; card.style.opacity='1'; });
+    setTimeout(function(){ var e=document.getElementById('wl-email'); if(e) e.focus(); },360);
+  }
+  function close(remember){
+    card.style.transform='translateY(8px)'; card.style.opacity='0';
+    setTimeout(function(){ overlay.style.display='none'; },300);
+    if(remember){ try{ localStorage.setItem(KEY,'1'); }catch(e){} }
+  }
+  // Triggers: 14s on page, or scroll past 45%, whichever first.
+  var t=setTimeout(open,14000);
+  function onScroll(){
+    var h=document.documentElement;
+    var pct=(h.scrollTop)/(h.scrollHeight-h.clientHeight||1);
+    if(pct>0.45){ clearTimeout(t); open(); window.removeEventListener('scroll',onScroll); }
+  }
+  window.addEventListener('scroll',onScroll,{passive:true});
+  document.getElementById('wl-close').addEventListener('click',function(){ close(true); });
+  document.getElementById('wl-dismiss').addEventListener('click',function(){ close(true); });
+  overlay.addEventListener('click',function(e){ if(e.target===overlay) close(true); });
+  document.addEventListener('keydown',function(e){ if(e.key==='Escape'&&overlay.style.display==='flex') close(true); });
+  var submitting=false;
+  document.getElementById('wl-submit').addEventListener('click',async function(){
+    if(submitting) return;
+    var email=(document.getElementById('wl-email').value||'').trim();
+    var err=document.getElementById('wl-err');
+    if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){ err.textContent='Please enter a valid email.'; err.style.display='block'; return; }
+    err.style.display='none'; submitting=true;
+    var btn=this; btn.textContent='Joining...'; btn.style.opacity='.7';
+    try{
+      await fetch('/api/join-waitlist',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:email,source:'popup'})});
+    }catch(e){}
+    try{ localStorage.setItem(KEY,'1'); }catch(e){}
+    document.getElementById('wl-form-state').style.display='none';
+    document.getElementById('wl-done-state').style.display='block';
+    submitting=false;
+  });
+  document.getElementById('wl-email').addEventListener('keydown',function(e){ if(e.key==='Enter') document.getElementById('wl-submit').click(); });
+})();
+</script>
 </body>
 </html>
