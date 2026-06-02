@@ -128,6 +128,15 @@ async function calculateTaxWithStripe(secretKey, items, customerAddress, promoCo
           const filtered = itemLines.filter(l => !l.reference.endsWith('-pkg'));
           lineItems.push(...filtered);
         }
+      } else if (item._promoWorkbookPercent) {
+        // Flash promo: reduce only the workbook line by the percent.
+        const pct = item._promoWorkbookPercent;
+        const adjusted = itemLines.map(l => (
+          (l.reference.endsWith('-wbdigital') || l.reference.endsWith('-wbprint'))
+            ? { ...l, amount: Math.round(l.amount * (1 - pct / 100)) }
+            : l
+        ));
+        lineItems.push(...adjusted);
       } else {
         lineItems.push(...itemLines);
       }
@@ -195,7 +204,11 @@ async function calculateTaxWithStripe(secretKey, items, customerAddress, promoCo
 function itemsTotalCents(items, promoCovered) {
   return items.reduce((sum, it) => {
     let dollars;
-    if (!it._promoCoveredBase) {
+    if (it._promoWorkbookPercent) {
+      const wb = it.addonWorkbook === 'print' ? ADDON_PRICES.workbookPrint
+               : it.addonWorkbook === 'digital' ? ADDON_PRICES.workbookDigital : 0;
+      dollars = itemSubtotal(it) - (wb * it._promoWorkbookPercent / 100);
+    } else if (!it._promoCoveredBase) {
       dollars = itemSubtotal(it);
     } else if (it._promoMode === 'fixed') {
       dollars = itemAddonTotal(it) + (it._promoFixedAmount || 0);
@@ -548,11 +561,21 @@ export default async function handler(req) {
     //   free-mode + add-ons: package $0, Stripe charges add-ons only.
     //   fixed-mode: package $appliedPromoAmount/each, Stripe charges
     //     (amount * itemCount) + add-ons.
-    items.forEach(it => {
-      it._promoCoveredBase = true;
-      it._promoMode        = codeMeta.mode;
-      it._promoFixedAmount = codeMeta.amount; // 0 for free, N for fixed
-    });
+    if (codeMeta.appliesTo === 'workbook' && codeMeta.mode === 'percent') {
+      // Flash promo: discount the workbook add-on only. Package bills normally.
+      const hasWorkbook = items.some(it => it.addonWorkbook === 'digital' || it.addonWorkbook === 'print');
+      if (!hasWorkbook) {
+        return new Response(JSON.stringify({ error: 'Add the personalized workbook to your cart to use this code.' }), {
+          status: 400, headers: { 'Content-Type': 'application/json' } });
+      }
+      items.forEach(it => { it._promoWorkbookPercent = Number(codeMeta.amount) || 0; });
+    } else {
+      items.forEach(it => {
+        it._promoCoveredBase = true;
+        it._promoMode        = codeMeta.mode;
+        it._promoFixedAmount = codeMeta.amount; // 0 for free, N for fixed
+      });
+    }
     // Fall through to the Stripe path below.
   }
 
@@ -564,6 +587,11 @@ export default async function handler(req) {
   //   free-mode promo covered   → itemAddonTotal only
   //   fixed-mode promo covered  → itemAddonTotal + fixed package amount
   const subtotalDollars = items.reduce((sum, it) => {
+    if (it._promoWorkbookPercent) {
+      const wb = it.addonWorkbook === 'print' ? ADDON_PRICES.workbookPrint
+               : it.addonWorkbook === 'digital' ? ADDON_PRICES.workbookDigital : 0;
+      return sum + itemSubtotal(it) - (wb * it._promoWorkbookPercent / 100);
+    }
     if (!it._promoCoveredBase) return sum + itemSubtotal(it);
     const addons = itemAddonTotal(it);
     if (it._promoMode === 'fixed') return sum + addons + (it._promoFixedAmount || 0);

@@ -63,7 +63,7 @@ function itemAddonTotal(it) {
   return a;
 }
 
-function buildTaxLines(items, promoCoversBase, promoFixedAmount = null, includesWorkbook = false) {
+function buildTaxLines(items, promoCoversBase, promoFixedAmount = null, includesWorkbook = false, workbookPercent = 0) {
   const lines = [];
   items.forEach((it, idx) => {
     const base = itemBasePrice(it);
@@ -83,8 +83,8 @@ function buildTaxLines(items, promoCoversBase, promoFixedAmount = null, includes
         quantity: 1,
       });
     }
-    if (!includesWorkbook && it.addonWorkbook === 'print')   lines.push({ amount: ADDON_PRICES.workbookPrint*100,   tax_code: TAX_CODES.workbookPrint,   reference: `item-${idx}-wbprint`,   quantity: 1 });
-    if (!includesWorkbook && it.addonWorkbook === 'digital') lines.push({ amount: ADDON_PRICES.workbookDigital*100, tax_code: TAX_CODES.workbookDigital, reference: `item-${idx}-wbdigital`, quantity: 1 });
+    if (!includesWorkbook && it.addonWorkbook === 'print')   lines.push({ amount: Math.round(ADDON_PRICES.workbookPrint*100*(1-workbookPercent/100)),   tax_code: TAX_CODES.workbookPrint,   reference: `item-${idx}-wbprint`,   quantity: 1 });
+    if (!includesWorkbook && it.addonWorkbook === 'digital') lines.push({ amount: Math.round(ADDON_PRICES.workbookDigital*100*(1-workbookPercent/100)), tax_code: TAX_CODES.workbookDigital, reference: `item-${idx}-wbdigital`, quantity: 1 });
     if (it.addonLmft)       lines.push({ amount: ADDON_PRICES.lmft*100,       tax_code: TAX_CODES.lmft,         reference: `item-${idx}-lmft`,       quantity: 1 });
     if (it.addonReflection) lines.push({ amount: ADDON_PRICES.reflection*100, tax_code: TAX_CODES.digitalAddon, reference: `item-${idx}-reflection`, quantity: 1 });
     if (it.addonBudget)     lines.push({ amount: ADDON_PRICES.budget*100,     tax_code: TAX_CODES.digitalAddon, reference: `item-${idx}-budget`,     quantity: 1 });
@@ -121,14 +121,36 @@ export default async function handler(req) {
     // { pkg, mode: 'fixed', amount } objects (fixed-mode). Normalize first.
     const promoCode = (body.promoCode || '').toUpperCase().trim();
     const codeEntry = promoCode ? BETA_CODES[promoCode] : null;
-    const codeMeta = codeEntry == null
+    let codeMeta = codeEntry == null
       ? null
       : (typeof codeEntry === 'string'
           ? { pkg: codeEntry, mode: 'free', amount: 0 }
-          : codeEntry);
+          : { ...codeEntry });
+    // Per-couple flash codes live only in the beta_codes table. Look them up
+    // so the preview total matches what create-payment-intent will charge.
+    if (promoCode && !codeMeta) {
+      const sUrl = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
+      const sKey = process.env.SUPABASE_SERVICE_ROLE || process.env.SUPABASE_SERVICE_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY;
+      if (sUrl && sKey) {
+        try {
+          const r = await fetch(`${sUrl}/rest/v1/beta_codes?code=eq.${encodeURIComponent(promoCode)}&select=*`,
+            { headers: { apikey: sKey, Authorization: `Bearer ${sKey}` } });
+          const rows = await r.json();
+          if (Array.isArray(rows) && rows.length) {
+            const row = rows[0];
+            codeMeta = {
+              pkg: row.package_key || '*', mode: row.discount_mode || 'free',
+              amount: Number(row.discount_value) || 0, appliesTo: row.applies_to || 'package',
+              includesWorkbook: !!row.includes_workbook,
+            };
+          }
+        } catch (e) { /* preview is best-effort */ }
+      }
+    }
     const codeUnlocks = codeMeta?.pkg || null;
     // A promo covers the base if it matches EVERY item's pkg (or is wildcard)
-    const promoCoversBase = !!codeUnlocks && (codeUnlocks === '*' || items.every(it => it.pkgKey === codeUnlocks));
+    const promoCoversBase = !!codeUnlocks && codeMeta?.appliesTo !== 'workbook' && (codeUnlocks === '*' || items.every(it => it.pkgKey === codeUnlocks));
+    const workbookPercent = (codeMeta && codeMeta.appliesTo === 'workbook' && codeMeta.mode === 'percent') ? (Number(codeMeta.amount) || 0) : 0;
     const includesWorkbook = promoCoversBase && !!codeMeta?.includesWorkbook;
     // For free-mode the package becomes $0; for fixed-mode it becomes
     // codeMeta.amount (e.g. $1 for BETA-CORE-1).
@@ -144,6 +166,9 @@ export default async function handler(req) {
       let addons = itemAddonTotal(it);
       if (includesWorkbook) {
         addons -= (it.addonWorkbook === 'print' ? ADDON_PRICES.workbookPrint : ADDON_PRICES.workbookDigital);
+      } else if (workbookPercent && (it.addonWorkbook === 'print' || it.addonWorkbook === 'digital')) {
+        const wb = it.addonWorkbook === 'print' ? ADDON_PRICES.workbookPrint : ADDON_PRICES.workbookDigital;
+        addons -= wb * workbookPercent / 100;
       }
       return sum + (base + Math.max(0, addons)) * 100;
     }, 0);
@@ -165,7 +190,7 @@ export default async function handler(req) {
       }), { status: 200, headers: { 'Content-Type': 'application/json' } });
     }
 
-    const lineItems = buildTaxLines(items, promoCoversBase, promoFixedAmount, includesWorkbook);
+    const lineItems = buildTaxLines(items, promoCoversBase, promoFixedAmount, includesWorkbook, workbookPercent);
     if (lineItems.length === 0) {
       return new Response(JSON.stringify({ subtotalCents, taxCents: 0, totalCents: subtotalCents }), {
         status: 200, headers: { 'Content-Type': 'application/json' }

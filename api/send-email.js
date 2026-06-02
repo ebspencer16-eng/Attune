@@ -115,6 +115,37 @@ function workbookReadyEmail({ toName, partnerName, downloadUrl, orderNum }) {
   };
 }
 
+function workbookPromoEmail({ toName, partnerName, code, checkoutUrl, discountPercent }) {
+  const who = partnerName ? `${toName} &amp; ${partnerName}` : toName;
+  const partner = partnerName || 'your partner';
+  const pct = discountPercent || 30;
+  const url = checkoutUrl || 'https://attune-relationships.com/app';
+  return {
+    subject: `${pct}% off your Attune workbook`,
+    html: layout(`
+      <span class="badge badge-orange">${pct}% off</span>
+      <h1 style="margin-top:14px;">Your workbook, ${pct}% off.</h1>
+      <p>Hi ${toName},</p>
+      <p>You finished your assessment. The personalized workbook turns your results into a guided conversation for you and ${partner}. Built from your actual answers, not a template.</p>
+      <p style="margin-bottom:6px;"><strong>What's inside</strong></p>
+      <div class="detail-row"><span>Guided exercises</span><strong>your top gap dimensions</strong></div>
+      <div class="detail-row"><span>Conversation prompts</span><strong>specific to your pairing</strong></div>
+      <div class="detail-row"><span>Expectations guide</span><strong>from your results</strong></div>
+      <div class="divider"></div>
+      <p style="margin-bottom:6px;"><strong>Two ways to get it</strong></p>
+      <div class="detail-row"><span>Digital (.docx)</span><strong>instant download</strong></div>
+      <div class="detail-row"><span>Printed &amp; bound</span><strong>ships in 5-7 days</strong></div>
+      <div class="divider"></div>
+      <p>Use this code at checkout. It works once, for ${who}, and takes ${pct}% off the workbook.</p>
+      <div style="text-align:center;margin:18px 0;">
+        <div style="display:inline-block;border:2px dashed #E8673A;border-radius:12px;padding:13px 26px;font-family:monospace;font-size:1.2rem;font-weight:700;letter-spacing:2px;color:#0E0B07;background:#FFF7F3;">${code}</div>
+      </div>
+      <div class="btn-wrap"><a href="${url}" class="btn">Get the workbook</a></div>
+      <p style="font-size:0.78rem;color:#8C7A68;margin-top:16px;">The code expires in 30 days. One use per couple.</p>
+    `),
+  };
+}
+
 // ── shipping_notification email ──────────────────────────────────────────────
 // Sent when admin flips card_status to 'shipped'. trackingUrl is optional.
 function shippingNotificationEmail({ toName, partnerName, orderNum, trackingUrl, trackingNumber, carrier }) {
@@ -472,6 +503,10 @@ export default async function handler(req) {
   } else if (type === 'workbook_ready') {
     if (!body.toEmail) return new Response('Missing toEmail', { status: 400 });
     email = workbookReadyEmail(body);
+    email.to = body.toEmail;
+  } else if (type === 'workbook_promo') {
+    if (!body.toEmail) return new Response('Missing toEmail', { status: 400 });
+    email = workbookPromoEmail(body);
     email.to = body.toEmail;
   } else if (type === 'beta_survey') {
     if (!body.toEmail) return new Response('Missing toEmail', { status: 400 });

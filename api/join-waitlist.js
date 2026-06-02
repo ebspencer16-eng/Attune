@@ -52,6 +52,23 @@ export default async function handler(req) {
     }
   }
 
+  // Also add to the Resend audience so the launch email can go out in one
+  // click. Gated on RESEND_AUDIENCE_ID (set it in Vercel once the audience
+  // exists in Resend). Soft-fails.
+  const resendKey  = process.env.RESEND_API_KEY;
+  const audienceId = process.env.RESEND_AUDIENCE_ID;
+  if (resendKey && audienceId) {
+    try {
+      await fetch(`https://api.resend.com/audiences/${audienceId}/contacts`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${resendKey}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, unsubscribed: false, ...(name ? { first_name: name } : {}) }),
+      });
+    } catch (e) {
+      console.warn('[waitlist] resend audience add failed:', e);
+    }
+  }
+
   return new Response(JSON.stringify({ ok: true }), {
     status: 200, headers: { 'Content-Type': 'application/json' },
   });

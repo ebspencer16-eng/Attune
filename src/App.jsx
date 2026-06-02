@@ -6902,6 +6902,33 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
       localStorage.setItem('attune_live_session', JSON.stringify(session));
     } catch (_) {}
 
+    // ── Fire the 30-day workbook flash promo (once results are ready) ────────
+    // Couples who did NOT already buy the workbook get a single-use, 30%-off
+    // code emailed to both partners. The endpoint is idempotent and binds the
+    // code to the couple, so firing from either partner/device is safe.
+    (async () => {
+      try {
+        if (localStorage.getItem('attune_wb_promo_fired')) return;
+        const _ord = (() => { try { return JSON.parse(localStorage.getItem('attune_order') || 'null'); } catch { return null; } })();
+        if (_ord?.addonWorkbook) return; // already owns the workbook
+        const _acct = (() => { try { return JSON.parse(localStorage.getItem('attune_account') || 'null'); } catch { return null; } })();
+        if (!_acct?.email) return;
+        const bothEx1 = !!(ex1Answers && partnerEx1 && Object.keys(ex1Answers).length && Object.keys(partnerEx1).length);
+        const bothEx2 = !!(ex2Answers && partnerEx2 && Object.keys(ex2Answers).length && Object.keys(partnerEx2).length);
+        if (!bothEx1 || !bothEx2) return;
+        try { localStorage.setItem('attune_wb_promo_fired', '1'); } catch {}
+        await fetch('/api/generate-workbook-promo', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            accountEmail: _acct.email,
+            partnerEmail: _acct.partnerEmail || '',
+            toName:       _acct.name || '',
+            partnerName:  _acct.partnerName || '',
+          }),
+        });
+      } catch (e) { console.warn('[Attune] workbook promo trigger failed:', e); }
+    })();
+
     // ── Auto-fulfil workbook if pre-ordered ─────────────────────────────────
     // If the couple ordered a digital workbook before completing exercises,
     // generate it now and mark it ready. If they ordered print, flag for fulfillment.
@@ -10161,6 +10188,22 @@ function PartnerBCompletionScreen({ partnerAName, partnerBName, partnerADone }) 
             hasLMFT: !!(ord?.addon_lmft || acct?.pkg === 'premium'),
           }),
         });
+
+        // Also fire the workbook flash promo (idempotent on the server).
+        try {
+          if (!localStorage.getItem('attune_wb_promo_fired') && !(ord?.addonWorkbook || ord?.addon_workbook)) {
+            localStorage.setItem('attune_wb_promo_fired', '1');
+            await fetch('/api/generate-workbook-promo', {
+              method: 'POST', headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                accountEmail: acct.email,
+                partnerEmail: acct.partnerEmail || '',
+                toName:       acct.name || '',
+                partnerName:  acct.partnerName || '',
+              }),
+            });
+          }
+        } catch (e) { console.warn('[Attune] workbook promo (partner B) failed:', e); }
       } catch (e) {
         console.warn('[Attune] partner-B results email failed:', e);
       }
