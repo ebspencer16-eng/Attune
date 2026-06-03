@@ -23,14 +23,14 @@ export const PROMPT_DRAFTS = {
     { prompt: "What do you need for the rest of tonight? I'll work around it.", tags: 'ALL' },
     { prompt: "Is there anything you wish I'd noticed this week that I didn't?", tags: 'WY, YZ, XY' },
     { prompt: "What would help you feel like yourself again tomorrow?", tags: 'YY, YZ, WY' },
-    { prompt: "Do you want me to sit with it, or would distraction help more right now?", tags: 'ALL' },
+    { prompt: "Do you want to process out loud, or would distraction help more right now?", tags: 'ALL' },
   ],
   3: [ // When one of you is off but won't say why
     { prompt: "Something feels off to me, and I'm not sure what. Do you know what it is?", tags: 'ALL' },
     { prompt: "I'm not trying to fix anything. I just want to know what's there.", tags: 'XY, XZ, ZZ' },
     { prompt: "If you could name one thing that's been sitting in the background, what would it be?", tags: 'YZ, ZZ, XZ' },
     { prompt: "Is it me, or is it something else? Either answer is okay.", tags: 'WX, XY, WY' },
-    { prompt: "Do you want to talk now, or would later be easier?", tags: 'YY, YZ, WY, ZZ' },
+    { prompt: "Do you want to talk now, or would it be easier later?", tags: 'YY, YZ, WY, ZZ' },
   ],
   4: [ // Before a difficult conversation
     { prompt: "Before I say this, what do you need from me to hear it well?", tags: 'ALL' },
