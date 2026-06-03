@@ -993,20 +993,20 @@ function deriveNewCoupleType(myS, partS) {
 const INDIVIDUAL_TYPES = {
   W: { code: "W", name: "The Initiator", color: "#E8673A", fill: "#FFF4F0", axis1: "Engage", axis2: "Open",
        desc: "Moves toward resolution. Processes and expresses relatively freely.",
-       wired: "You move toward connection when things need addressing — you don't wait for an opening, you create one. You process outward, which means the people close to you usually know where you stand without having to ask. This makes you easy to know, and relatively easy to be in productive conflict with.",
-       typeDesc: "You engage quickly and express freely — which means the people close to you usually know where they stand, and they know where you stand too. You don't make them guess. Under pressure, you tend to reach toward the relationship rather than away from it, which can be genuinely stabilizing. The thing to stay aware of: your speed to engage can feel like a lot when someone else needs more time to get there." },
+       wired: "You move toward connection when things need addressing. You don't wait for an opening, you create one. You process outward, which means the people close to you usually know where you stand without having to ask. This makes you easy to know, and relatively easy to be in productive conflict with.",
+       typeDesc: "You engage quickly and express freely, which means the people close to you usually know where they stand, and they know where you stand too. You don't make them guess. Under pressure, you tend to reach toward the relationship rather than away from it, which can be genuinely stabilizing. The thing to stay aware of: your speed to engage can feel like a lot when someone else needs more time to get there." },
   X: { code: "X", name: "The Anchor", color: "#1B5FE8", fill: "#EFF1FF", axis1: "Engage", axis2: "Guarded",
        desc: "Pushes toward resolution. Processes internally, shares selectively.",
-       wired: "You move toward resolution rather than away from it — when something needs addressing, you don't avoid the conversation. You process before you speak, which means your perspective is usually considered by the time it comes out. This makes you direct and deliberate, but sometimes harder to read in the middle of something.",
-       typeDesc: "You engage with problems directly but process privately before speaking — which means you tend to arrive at conversations with something considered to say. You don't react out loud. Under pressure, you want resolution, but you need your own thinking to be in order first. The thing to stay aware of: your internal processing can look like distance to someone who expresses more freely." },
+       wired: "You move toward resolution rather than away from it. When something needs addressing, you don't avoid the conversation. You process before you speak, which means your perspective is usually considered by the time it comes out. This makes you direct and deliberate, but sometimes harder to read in the middle of something.",
+       typeDesc: "You engage with problems directly but process privately before speaking, which means you tend to arrive at conversations with something considered to say. You don't react out loud. Under pressure, you want resolution, but you need your own thinking to be in order first. The thing to stay aware of: your internal processing can look like distance to someone who expresses more freely." },
   Y: { code: "Y", name: "The Feeler", color: "#7C3AED", fill: "#F5F0FF", axis1: "Withdraw", axis2: "Open",
        desc: "Needs space first. Carries and expresses feeling when ready.",
-       wired: "You need space to process before you can fully show up to a hard conversation — this isn't avoidance, it's how you get to something honest. You're emotionally expressive when you're ready, and the people close to you get real feeling when it comes. What you bring most is depth: you don't stay on the surface.",
-       typeDesc: "You process before you can share — not because you're holding back, but because you need the space to understand what's actually true for you before you can say it. You're emotionally present and expressive when you get there. Under pressure, you need time, and pushing you before you're ready usually produces something incomplete. The thing to stay aware of: your withdrawal before sharing can read as avoidance to someone who engages more quickly." },
+       wired: "You need space to process before you can fully show up to a hard conversation. This isn't avoidance, it's how you get to something honest. You're emotionally expressive when you're ready, and the people close to you get real feeling when it comes. What you bring most is depth: you don't stay on the surface.",
+       typeDesc: "You process before you can share, not because you're holding back, but because you need the space to understand what's actually true for you before you can say it. You're emotionally present and expressive when you get there. Under pressure, you need time, and pushing you before you're ready usually produces something incomplete. The thing to stay aware of: your withdrawal before sharing can read as avoidance to someone who engages more quickly." },
   Z: { code: "Z", name: "The Protector", color: "#6B7280", fill: "#F4F5F6", axis1: "Withdraw", axis2: "Guarded",
        desc: "Withdraws and holds things close. Real depth and feeling running quiet beneath the surface.",
-       wired: "You process privately and share selectively — there's usually more going on internally than what's visible from the outside. When you do speak, it carries weight precisely because you don't offer it carelessly. What you bring is steadiness: you don't react quickly, which means you don't create unnecessary chaos.",
-       typeDesc: "You carry things privately and surface them selectively — which means there's usually more going on internally than what's visible. You don't perform your inner life, and you don't dump it on the people around you. Under pressure, you go quiet and go deep. The thing to stay aware of: the people who love you most sometimes struggle to know what you're carrying, which can make them feel shut out without you intending it." },
+       wired: "You process privately and share selectively. There's usually more going on internally than what's visible from the outside. When you do speak, it carries weight precisely because you don't offer it carelessly. What you bring is steadiness: you don't react quickly, which means you don't create unnecessary chaos.",
+       typeDesc: "You carry things privately and surface them selectively, which means there's usually more going on internally than what's visible. You don't perform your inner life, and you don't dump it on the people around you. Under pressure, you go quiet and go deep. The thing to stay aware of: the people who love you most sometimes struggle to know what you're carrying, which can make them feel shut out without you intending it." },
 };
 
 // Per-couple-type, per-person perspective for profile pages (Option B)
@@ -1094,17 +1094,17 @@ const NEW_COUPLE_TYPES = [
     stickingPoints: [
       "High expressiveness on both sides can create amplification. When both of you are feeling something intensely, the intensity can feed itself.",
       "Difficult emotions can land harder than intended, because neither person is holding anything back, the impact of a hard moment is felt fully.",
-      "Not every feeling needs to go into the shared space immediately. Sitting with something for 20 minutes before speaking it is a skill worth building.",
+      "Not every feeling needs to go into the shared space immediately. Sitting with something for 20 minutes before speaking is a skill worth building.",
     ],
     patterns: [
-      "{U} and {P} probably know each other's emotional state well. Often before anything is said.",
-      "The relationship has a lot of emotional aliveness, which can be wonderful and occasionally overwhelming.",
-      "Arguments between you are probably not subtle. The feelings are out. The work is making sure what comes out is accurate, not just loud.",
+      "{U} and {P} probably know each other's emotional state well, often before anything is said.",
+      "Both partners have a lot of emotional energy, which can be wonderful and occasionally overwhelming.",
+      "Arguments between you are probably not subtle. The work is making sure what comes out is accurate, not just loud.",
     ],
     tips: [
-      { title: "Notice when you're amplifying each other", body: "When both of you are feeling something strongly, the loop can escalate. One person naming it, 'I think we're feeding each other right now', can break the cycle before it needs to get bigger.", phraseTry: "I think we're feeding each other right now, can we both take a breath before we keep going?" },
+      { title: "Notice when you're amplifying each other", body: "When both of you are feeling something strongly, the loop can escalate. One person naming it can break the cycle before it needs to get bigger.", phraseTry: "I think we're feeding each other right now, can we both take a breath before we keep going?" },
       { title: "Not every feeling needs an audience", body: "{U} and {P} are both expressive, but some feelings are better processed privately before being shared. Practice sitting with something for a beat before putting it into the shared space.", phraseTry: "I need a minute with this before I put it out there. Give me twenty minutes." },
-      { title: "The visibility is a gift", body: "Most couples are guessing at each other's interior. {U} and {P} don't have to. Appreciate that even when it's uncomfortable, it's the thing that makes real closeness possible.", phraseTry: "I know this is a lot right now, and I'm glad we can actually see each other in it." },
+      { title: "The visibility is a gift", body: "Most couples are guessing at each other's interior. {U} and {P} don't have to. Appreciate that even when it's uncomfortable, it's the thing that makes real closeness possible.", phraseTry: "I know this is a lot right now, but I'm glad we can actually see each other in it." },
     ],
   },
   {
@@ -1134,9 +1134,9 @@ const NEW_COUPLE_TYPES = [
       "The emotional texture of hard moments can sometimes get skipped in the move toward resolution.",
     ],
     tips: [
-      { title: "Check if it's resolved or just closed", body: "Fast repair is a real strength. The watch-out is closing the loop before the thing is actually through. Ask {P}: 'Are we actually okay, or are we both just ready to be done?'", phraseTry: "Are we actually okay, or are we both just ready to be done?" },
-      { title: "Ask what's going on, not just what the plan is", body: "{U} and {P} are both comfortable with the practical mode. Add a deliberate question: 'How does this feel, not just what does it mean?' It changes the quality of the conclusion.", phraseTry: "How does this actually feel for you, not just what it means, but how it sits?" },
-      { title: "Give the slower moments their time", body: "Occasionally, slow the repair down enough to make sure you've actually heard each other. The extra few minutes tends to be what prevents the same conversation coming back.", phraseTry: "I want to make sure we've actually heard each other on this before we move on." },
+      { title: "Check if it's resolved or just closed", body: "Fast repair is a real strength. The watch-out is closing the loop before the thing is actually through.", phraseTry: "Are we actually okay, or are we both just ready to be done?" },
+      { title: "Ask what's going on, not just what the plan is", body: "{U} and {P} are both comfortable with the practical mode. Add a deliberate question to get at the emotional weight, not just the practical action. This changes the quality of the conclusion.", phraseTry: "How does this actually feel for you, not just what it means, but how it sits?" },
+      { title: "Give the slower moments their time", body: "Occasionally, slow the repair down enough to make sure you've actually heard each other. The extra few minutes tends to be what prevents the same conversation coming back.", phraseTry: "I want to make sure we've actually heard each other on this before we move on. I'm curious about your perspective." },
     ],
   },
   {
@@ -1156,14 +1156,14 @@ const NEW_COUPLE_TYPES = [
       "Both of you understand the need for space, so you're less likely to take it personally when the other person needs it.",
     ],
     stickingPoints: [
-      "{U} and {P} can both wait a long time for the other person to come back first. That waiting can start to feel like abandonment, even when it's just process.",
+      "{U} and {P} can both wait a long time for the other person to come back first. That waiting can start to feel like abandonment, even when it's just a process.",
       "Open-ended space is harder to sit with than bounded space. Without a rough return time, the waiting becomes anxious.",
       "Two people who both default to withdrawal after conflict can go long stretches without addressing things that needed to be addressed.",
     ],
     patterns: [
-      "After a hard moment, {U} and {P} both tend to need time before the conversation is possible. That space usually helps.",
+      "After a hard moment, {U} and {P} both tend to need time before the conversation is possible.",
       "The coming-back-together step can take longer than it needs to, because neither of you naturally initiates it.",
-      "When the conversation does happen, it tends to be calmer and more complete than it would have been earlier.",
+      "When the conversation does happen, it tends to be calmer and more complete than it would have been without the space.",
     ],
     tips: [
       { title: "Someone has to come back first", body: "Both {U} and {P} tend to wait. The good news is that whoever initiates the return usually gets a warmer reception than they expect. Take the step.", phraseTry: "I'm ready to talk when you are. No rush, just wanted you to know." },
@@ -1195,11 +1195,11 @@ const NEW_COUPLE_TYPES = [
     patterns: [
       "{U} and {P} probably don't have a lot of dramatic conversations. The emotional content of the relationship tends to go inward rather than outward.",
       "When something is hard, it may be days before either of you brings it up, if it gets brought up at all.",
-      "The relationship is probably more stable-looking than many. The thing to watch is what's accumulating beneath the stability.",
+      "The relationship is probably more stable-looking than many, but the thing to watch is what's accumulating beneath the stability.",
     ],
     tips: [
-      { title: "Build in the opening, don't wait for it to happen", body: "A weekly check-in, even 15 minutes, even structured, creates a container for the things that wouldn't come up otherwise. Schedule the opening you both won't naturally make.", phraseTry: "Can we do a quick check-in this week? Nothing heavy. I just want to know how you're actually doing." },
-      { title: "Share the rougher draft", body: "Both {U} and {P} wait until something is fully formed before sharing it. Practice sharing it half-formed. The relationship needs the earlier version too.", phraseTry: "I'm still figuring out how I feel about this, but I wanted to say it out loud anyway." },
+      { title: "Build in the opening, don't wait for it to happen", body: "A weekly check-in, even 15 minutes, creates a structure for the things that wouldn't come up otherwise. Schedule the opening you both won't naturally make.", phraseTry: "Can we do a quick check-in this week? Nothing heavy, I just want to know how you're actually doing." },
+      { title: "Share the rougher draft", body: "Both {U} and {P} wait until something is fully formed before sharing it. Practice sharing it half-formed.", phraseTry: "I'm still figuring out how I feel about this, but I wanted to say it out loud anyway." },
       { title: "Name what you appreciate", body: "Reserved people often feel deeply, they just don't say it. Make a practice of saying specifically what you value about each other. The other person may not know unless you tell them.", phraseTry: "I don't say this enough, but I want you to know I really value the way you {something specific}." },
     ],
   },
@@ -1217,7 +1217,7 @@ const NEW_COUPLE_TYPES = [
       { names: "Pam & Jim (later seasons)", show: "The Office", note: "Both reaching toward resolution, both committed to the relationship. The difference was how much of the working-through happened out loud versus privately." },
     ],
     strengths: [
-      "{U} and {P} are rarely stuck in standoff. You both want to resolve things, which means you're usually working in the same direction.",
+      "{U} and {P} are rarely stuck in a standoff. You both want to resolve things, which means you're usually working in the same direction.",
       "You bring complementary processing styles. One keeps the emotional temperature in the room; the other thinks before putting it in the shared space.",
       "The relationship has both warmth and steadiness. You cover different emotional territory in a way that tends to be more complete than one style alone.",
     ],
@@ -1228,13 +1228,13 @@ const NEW_COUPLE_TYPES = [
     ],
     patterns: [
       "When something is off, {U} and {P} are usually both aware of it, but processing it at different speeds.",
-      "The expressive one tends to get the conversation started. The guarded one tends to arrive fully once it's underway.",
+      "The expressive one tends to get the conversation started. The guarded one is willing to engage once the conversation begins.",
       "When the conversation does happen, it tends to go somewhere useful. You're not fighting about whether to have it, just when.",
     ],
     tips: [
-      { title: "Name which mode you're in", body: "'I need to process this out loud' vs. 'I need to think before I talk.' That one sentence tells the other person how to meet you. Use it early.", phraseTry: "I need to process this out loud, bear with me. I don't have it figured out yet." },
+      { title: "Name which mode you're in", body: "'I need to process this out loud' vs. 'I need to think before I talk.' That one sentence tells the other person how to meet you. Use it early in the process.", phraseTry: "I need to process this out loud, bear with me. I don't have it figured out yet." },
       { title: "Guarded partner: share the half-formed version", body: "You don't have to wait until it's fully formed. 'I'm still figuring out how I feel about this' is a form of sharing, and it's usually exactly what the expressive partner needs to hear.", phraseTry: "I'm still working through it, but I think I'm bothered by {something}. Not sure why yet." },
-      { title: "Expressive partner: give the processing room", body: "Pressing for more than the guarded partner is ready to give doesn't create connection, it creates pressure. Ask once, then wait. The sharing will come in its own time.", phraseTry: "I asked. I'm going to wait. I know it's coming." },
+      { title: "Expressive partner: give the processing room", body: "Pressing for more than the guarded partner is ready to give doesn't create connection, it creates pressure. Ask once, then wait. The sharing will come in its own time.", phraseTry: "I can wait until you are ready to share. Thank you for being willing to talk." },
     ],
   },
   {
@@ -1260,13 +1260,13 @@ const NEW_COUPLE_TYPES = [
     ],
     patterns: [
       "When something is off, {U} and {P} are usually not in the same place at the same time. One is ready to engage; the other isn't there yet.",
-      "What reads as pulling away is usually just needing space to process. What reads as pressure is usually just care. Neither meaning is the one being felt in the moment.",
-      "The conflict clock mismatch doesn't mean one person cares more. It means you're wired differently, and that's solvable.",
+      "What reads as pulling away is usually just needing space to process. What reads as pressure is usually just care.",
+      "The conflict clock mismatch doesn't mean one person cares more. It means you're wired differently, which requires understanding from each partner.",
     ],
     tips: [
-      { title: "Name the pattern before you're in it", body: "When things are calm, tell each other: 'When I'm upset, I need X first.' That one conversation changes what the next hard moment looks like.", phraseTry: "When I'm upset, I need a few minutes before I can talk. It's not avoidance. I'll come back." },
+      { title: "Name the pattern before you're in it", body: "When things are calm, explain what you need when things are not calm. That one conversation changes what the next hard moment looks like.", phraseTry: "When I'm upset, I need a few minutes before I can talk. It's not avoidance. I'll come back." },
       { title: "Make space bounded, not open-ended", body: "If one of you needs time: give a return. 'I need an hour' is different from silence. It lets the other person stop the worried waiting.", phraseTry: "I need an hour. I'll be back at eight." },
-      { title: "Urgency isn't pressure; silence isn't avoidance", body: "When {U} presses for resolution, that's care, not control. When {P} needs space, that's process, not withdrawal. Say what you mean.", phraseTry: "I know this is hard for you to sit with. I'm not gone. I'm processing. I'll be back." },
+      { title: "Urgency isn't pressure; silence isn't avoidance", body: "When {U} presses for resolution, that's care, not control. When {P} needs space, that's the process, not withdrawal. Say what you need in the moment, and be open to the fact that your needs are different.", phraseTry: "I know this is hard for you to sit with. I'm not gone. I'm processing. I'll be back." },
     ],
   },
   {
@@ -1296,8 +1296,8 @@ const NEW_COUPLE_TYPES = [
       "When {U} and {P} are communicating well, it's because you're both actively working to understand, not just assuming you do.",
     ],
     tips: [
-      { title: "Expressiveness isn't depth, and silence isn't emptiness", body: "The reserved partner's inner life is not less rich because it isn't expressed as often. The reaching partner's sharing isn't less valuable because it comes more easily. Name that directly.", phraseTry: "There's more going on for me than I'm showing. I just need to get it in order before I share it." },
-      { title: "Reaching partner: give the silence its room", body: "Pressing for more than the reserved partner is ready to give doesn't create connection, it creates pressure. Ask once, then wait. The sharing will come in its own time.", phraseTry: "I asked. That's enough for now. I trust you'll bring it when you're ready." },
+      { title: "Expressiveness isn't depth, and silence isn't emptiness", body: "The reserved partner's inner life is not less rich because it isn't expressed as often. The reaching partner's sharing isn't less valuable because it comes more easily. Name that dynamic directly.", phraseTry: "There's more going on for me than I'm showing. I just need to get it in order before I share it." },
+      { title: "Reaching partner: give the silence its room", body: "Pressing for more than the reserved partner is ready to give doesn't create connection, it creates pressure. Ask once, then wait. The sharing will come in its own time.", phraseTry: "I can wait until you are ready to share. Thank you for being willing to talk." },
       { title: "Reserved partner: share the earlier draft", body: "You don't have to wait until it's fully formed. Even 'I'm still figuring out how I feel about this' is a form of sharing, and it's usually exactly what the reaching partner needs to hear.", phraseTry: "I don't have this figured out, but something's been sitting with me and I wanted to say it before I lose it." },
     ],
   },
@@ -1324,13 +1324,13 @@ const NEW_COUPLE_TYPES = [
     ],
     patterns: [
       "When something is hard, {U} and {P} are usually not in the same place at the same time. One is ready to engage; the other needs the space.",
-      "What reads as pulling away is usually just needing room to process. What reads as pressure is usually just care. Neither meaning is the one being felt in the moment.",
-      "The gap between your instincts is not a character flaw. It's a wiring difference that has a well-worn solution: naming it before you're in it.",
+      "What reads as pulling away is usually just needing room to process. What reads as pressure is usually just care.",
+      "The gap between your instincts is not a character flaw. It means you're wired differently, which requires understanding from each partner.",
     ],
     tips: [
       { title: "Driver: resolution doesn't mean resolved", body: "The feeler needs the space and then the conversation. Moving fast to 'let's talk' before they're ready doesn't get to resolution faster, it delays it.", phraseTry: "I know you're not ready. I'll wait, but can you tell me when you think you will be?" },
       { title: "Feeler: tell the anchor when you'll be back", body: "The uncertainty is harder for them than the wait. 'I need until tonight' lets the anchor stop the worried waiting and trust the process.", phraseTry: "I need until tomorrow morning. I'll come to you then." },
-      { title: "Name the pattern out loud before you're in it", body: "When things are calm: 'When I'm upset, I need X before the conversation is possible.' That one sentence changes what the next hard moment looks like.", phraseTry: "When I go quiet, it's not over, it's processing. Give me space and I'll come back." },
+      { title: "Name the pattern out loud before you're in it", body: "When things are calm, explain what you need when things are not calm. That one conversation changes what the next hard moment looks like.", phraseTry: "When I go quiet, it's not over, it's processing. Give me space and I'll come back." },
     ],
   },
   {
@@ -1360,8 +1360,8 @@ const NEW_COUPLE_TYPES = [
       "When you do talk through something, it tends to be calmer and more considered than it would be for more expressive pairings.",
     ],
     tips: [
-      { title: "Build a practice of asking", body: "Not 'are you okay?' but 'what's actually going on for you right now?' Two people who both hold things privately need to be asked before they'll share.", phraseTry: "What's actually going on for you right now, not the plan, the feeling?" },
-      { title: "Schedule the emotional check-in", body: "{U} and {P} are both capable of going long stretches without naming what's going on inside. A regular, brief check-in creates the container that neither of you will naturally generate on your own.", phraseTry: "Can we do fifteen minutes on Sunday? Just to check in properly." },
+      { title: "Build a practice of asking", body: "Not 'are you okay?' but 'what's actually going on for you right now?' Two people who both hold things privately need to be asked before they'll share their feelings.", phraseTry: "What's actually going on for you right now?" },
+      { title: "Schedule the emotional check-in", body: "{U} and {P} are both capable of going long stretches without naming what's going on inside. A regular, brief check-in creates the structure that neither of you will naturally generate on your own.", phraseTry: "Can we do fifteen minutes on Sunday? Just to check in properly." },
       { title: "The quiet isn't a problem, until it is", body: "Low-drama is a real quality. The work is making sure the ease isn't covering for avoided conversations. Check in on whether the calm is genuine or whether something is sitting unspoken.", phraseTry: "Is there anything sitting unspoken between us right now? I want to make sure we're actually okay." },
     ],
   },
@@ -1382,19 +1382,19 @@ const NEW_COUPLE_TYPES = [
       "Both of you understand the need for space, so you're less likely to take it personally when the other person needs it.",
     ],
     stickingPoints: [
-      "{U} and {P} can both wait a long time for the other to come back first. That waiting can start to feel like abandonment, even when it's just process.",
+      "{U} and {P} can both wait a long time for the other to come back first. That waiting can start to feel like abandonment, even when it's just the process.",
       "The feeler's visible emotion during withdrawal can be hard for the still-depth partner to know what to do with, it's not a signal to engage, but it doesn't look like 'I'm fine.'",
       "Hard things can sit for a very long time before either of you surfaces them. Without a deliberate practice, important things go unaddressed.",
     ],
     patterns: [
-      "After a hard moment, {U} and {P} both need time. The space is real and usually helpful.",
-      "The coming-back-together step takes longer than it needs to because neither of you naturally initiates it.",
-      "When the conversation does happen, it tends to be more complete than it would have been earlier. The depth is real, it just required the time.",
+      "After a hard moment, {U} and {P} both need time, but the space is usually helpful.",
+      "The coming-back-together step sometimes takes longer than it needs to because neither of you naturally initiates it.",
+      "When the conversation does happen, it tends to be more complete than it would have been earlier. The depth just required time.",
     ],
     tips: [
       { title: "Let the feeler initiate the return", body: "The feeler, when ready, tends to be more willing to bring it back. Make that the agreed pattern: {U} signals readiness, {P} gets the full space they need without indefinite silence.", phraseTry: "I'm ready when you are. Take your time. I'll be here." },
       { title: "Bound the space with a time", body: "'I need some time' is not as useful as 'I need until tonight.' A specific return time lets the other person stop the worried waiting and trust the process.", phraseTry: "I need until tomorrow morning. I'll come find you then." },
-      { title: "Create a regular container for openness", body: "{U} and {P} need a deliberate structure for things to surface. A weekly check-in, even 10 minutes, creates the opening that neither of you will naturally generate on your own.", phraseTry: "Can we do ten minutes on Sunday? Not about anything specific. I just want to check in." },
+      { title: "Create a regular time for openness", body: "{U} and {P} need a deliberate structure for things to surface. A weekly check-in, even 10 minutes, creates the opening that neither of you will naturally generate on your own.", phraseTry: "Can we do ten minutes on Sunday? Not about anything specific. I just want to check in." },
     ],
   },
 ];
