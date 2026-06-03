@@ -16,12 +16,12 @@
 <title>Add Attune to your wedding registry</title>
 <meta name="description" content="Add the Attune Starting Out Collection to your Zola, Joy, MyRegistry, or Knot registry. A wedding gift that helps you start married life with a shared picture.">
 <meta property="og:type" content="website">
-<meta property="og:title" content="Attune Starting Out Collection — Wedding Registry">
+<meta property="og:title" content="Attune Starting Out Collection, Wedding Registry">
 <meta property="og:description" content="A wedding gift for couples starting out. Two exercises, one shared picture.">
 <meta property="og:image" content="https://attune-relationships.com/og-image.png">
 <meta property="og:url" content="https://attune-relationships.com/wedding-registry">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Attune Starting Out Collection — Wedding Registry">
+<meta name="twitter:title" content="Attune Starting Out Collection, Wedding Registry">
 <meta name="twitter:description" content="A wedding gift for couples starting out. Two exercises, one shared picture.">
 <meta name="twitter:image" content="https://attune-relationships.com/og-image.png">
 <link rel="canonical" href="https://attune-relationships.com/wedding-registry">
@@ -603,7 +603,7 @@
     const url = urls[platform];
     if (!url) return;
     const toast = document.getElementById('toast');
-    toast.textContent = 'Link copied — paste into ' + (platform === 'myregistry' ? 'MyRegistry' : platform === 'theknot' ? 'The Knot' : platform.charAt(0).toUpperCase() + platform.slice(1));
+    toast.textContent = 'Link copied, paste into ' + (platform === 'myregistry' ? 'MyRegistry' : platform === 'theknot' ? 'The Knot' : platform.charAt(0).toUpperCase() + platform.slice(1));
     toast.classList.add('visible');
     setTimeout(() => toast.classList.remove('visible'), 2400);
     window.open(url, '_blank', 'noopener');

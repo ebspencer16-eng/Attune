@@ -1034,7 +1034,7 @@ function setUse(mode) {
       var el = els[i], r = el.getBoundingClientRect();
       if (r.width === 0 || r.height === 0) continue;
       if (r.right > vw + 1 || r.left < -1) {
-        if (insideClipped(el)) continue;            // contained content — leave alone
+        if (insideClipped(el)) continue;            // contained content, leave alone
         var ox = getComputedStyle(el).overflowX;
         offenders.push({ el: el, right: Math.round(r.right), width: Math.round(r.width) });
         if (fix) {

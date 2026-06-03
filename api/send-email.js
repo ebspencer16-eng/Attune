@@ -460,7 +460,7 @@ function checkin1yrEmail({ toName, partnerName, retakeUrl, portalUrl }) {
 const URL_FIELDS = ['inviteUrl', 'downloadUrl', 'portalUrl', 'surveyUrl', 'retakeUrl', 'schedulingUrl', 'videoUrl', 'rescheduleUrl', 'cancelUrl'];
 const URL_ALLOWED_HOSTS = ['attune-relationships.com', 'calendly.com'];
 function isAllowedUrl(u) {
-  if (!u || typeof u !== 'string') return true; // null/empty is fine — template will skip it
+  if (!u || typeof u !== 'string') return true; // null/empty is fine, template will skip it
   try {
     const parsed = new URL(u);
     if (parsed.protocol !== 'https:' && parsed.protocol !== 'http:') return false;

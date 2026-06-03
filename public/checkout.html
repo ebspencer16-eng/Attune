@@ -1546,7 +1546,7 @@ function mapStripeError(err) {
     processing_error: {
       title: 'Payment processor hiccup',
       body: "Something went wrong on the payment processor's end (not your card).",
-      hint: 'Wait a few seconds and click Complete order again — nothing was charged.',
+      hint: 'Wait a few seconds and click Complete order again, nothing was charged.',
     },
     rate_limit: {
       title: 'Too many requests',
@@ -1556,7 +1556,7 @@ function mapStripeError(err) {
     authentication_required: {
       title: 'Your bank needs to verify',
       body: 'Your card issuer requires extra authentication for this purchase.',
-      hint: "Follow the prompts from your bank — we'll complete the order once you're verified.",
+      hint: "Follow the prompts from your bank. We'll complete the order once you're verified.",
     },
     generic_decline: {
       title: 'Your card was declined',

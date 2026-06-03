@@ -1531,7 +1531,7 @@ async function saveField(field) {
       if (typeof window.supabaseClient !== 'undefined' && window.supabaseClient) {
         const { error } = await window.supabaseClient.auth.updateUser({ email });
         if (error) { alert('Email update failed: ' + error.message); return; }
-        alert('Check your new inbox — Supabase sent a confirmation link. Your email changes once you confirm.');
+        alert('Check your new inbox, Supabase sent a confirmation link. Your email changes once you confirm.');
       }
     } catch (e) { alert('Email update failed. Please try again.'); return; }
 
@@ -1571,7 +1571,7 @@ async function saveField(field) {
 async function confirmDelete() {
   const msg = 'Deleting your account removes your name, email, partner info, ordered items, and generated workbooks permanently.\n\nYour anonymized exercise answers and couple type are kept for internal research, with no way to link them back to you.\n\nContinue?';
   if (!confirm(msg)) return;
-  if (!confirm('Last chance — this cannot be reversed. Continue?')) return;
+  if (!confirm('Last chance. This cannot be reversed. Continue?')) return;
 
   try {
     if (typeof window.supabaseClient === 'undefined' || !window.supabaseClient) {

@@ -445,7 +445,7 @@ export { computeIndividualTypeCode } from './_type-engine.js';
 // from its single score, hold the other axis from the overall type.
 function _perDimensionTypeCode(overallCode, dim, score) {
   const cfg = DIM_AXIS[dim];
-  if (!cfg) return overallCode; // unknown dim — no change
+  if (!cfg) return overallCode; // unknown dim, no change
   const s = (score == null || isNaN(score)) ? 3 : Number(score);
   const overall = _typeAxes(overallCode);
   if (cfg.axis === 'EW') {
@@ -566,7 +566,7 @@ export const WHEN_THIS_SHOWS_UP = {
     YZ: "Both of you need time to surface. If the quiet doesn\'t break on its own after two days, check in. Consider scheduling a specific time to check in.",
   },
   needs: {
-    WW: "Both of you tend to be expressive, then feeling let down when they don\'t. Ask directly even when it feels clunky.",
+    WW: "Both of you tend to hope the other will notice, then feel let down when they don\'t. Ask directly even when it feels clunky.",
     XX: "Both of you can tend to try to avoid adding to the other\'s load. Generous, but also how you can both end up depleted. Ask for small things before they become big things.",
     YY: "Both of you take time to understand what you want before asking, which can delay sharing your needs. Trust that \'I think I need X, not sure yet\' is a valid way to start.",
     ZZ: "Neither of you broadcasts needs openly, which means you may benefit from asking a weekly question: \'Is there anything you need that I\'m not giving you?\' The answer may take time, but ask anyway.",
