@@ -1080,7 +1080,7 @@ const NEW_COUPLE_TYPES = [
     name: "The ignition",
     tagline: "Both reach. Both express. Connection isn't something you have to chase.",
     description: "{U} and {P} both move toward resolution and process outward. High warmth and emotional availability in both directions. Neither partner has to coax the other into the conversation or wait for the signal that it's okay to share what's going on.",
-    nuance: "The risk isn't disconnection. It's feedback loops. When both of you are feeling something strongly, the intensity can amplify rather than settle. One of you naming that, 'I think we're feeding each other right now', is usually enough to break the loop.",
+    nuance: "The risk isn't disconnection. It's feedback loops. When both of you are feeling something strongly, the intensity can amplify rather than settle. One of you naming that, 'I think we're both escalating things right now', is usually enough to break the loop.",
     color: "#E8673A", shade: "#FFF4F0",
     famousDuos: [
       { names: "Monica & Chandler", show: "Friends", note: "Both put everything into the shared space. The warmth between them was real and visible, and occasionally required one of them to take the temperature down." },
