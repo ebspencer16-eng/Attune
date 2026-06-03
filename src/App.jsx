@@ -1102,7 +1102,7 @@ const NEW_COUPLE_TYPES = [
       "Arguments between you are probably not subtle. The work is making sure what comes out is accurate, not just loud.",
     ],
     tips: [
-      { title: "Notice when you're amplifying each other", body: "When both of you are feeling something strongly, the loop can escalate. One person naming it can break the cycle before it needs to get bigger.", phraseTry: "I think we're feeding each other right now, can we both take a breath before we keep going?" },
+      { title: "Notice when you're amplifying each other", body: "When both of you are feeling something strongly, the loop can escalate. One person naming it can break the cycle before it needs to get bigger.", phraseTry: "I think we're both escalating things right now, can we both take a breath before we keep going?" },
       { title: "Not every feeling needs an audience", body: "{U} and {P} are both expressive, but some feelings are better processed privately before being shared. Practice sitting with something for a beat before putting it into the shared space.", phraseTry: "I need a minute with this before I put it out there. Give me twenty minutes." },
       { title: "The visibility is a gift", body: "Most couples are guessing at each other's interior. {U} and {P} don't have to. Appreciate that even when it's uncomfortable, it's the thing that makes real closeness possible.", phraseTry: "I know this is a lot right now, but I'm glad we can actually see each other in it." },
     ],
@@ -1198,7 +1198,7 @@ const NEW_COUPLE_TYPES = [
       "The relationship is probably more stable-looking than many, but the thing to watch is what's accumulating beneath the stability.",
     ],
     tips: [
-      { title: "Build in the opening, don't wait for it to happen", body: "A weekly check-in, even 15 minutes, creates a structure for the things that wouldn't come up otherwise. Schedule the opening you both won't naturally make.", phraseTry: "Can we do a quick check-in this week? Nothing heavy, I just want to know how you're actually doing." },
+      { title: "Build in the opening, don't wait for it to happen", body: "A weekly check-in, even 15 minutes, creates a structure for the things that wouldn't come up otherwise. Schedule the opening you both won't naturally make.", phraseTry: "Can we do a quick check-in this week? Nothing heavy. I just want to know how you're actually doing." },
       { title: "Share the rougher draft", body: "Both {U} and {P} wait until something is fully formed before sharing it. Practice sharing it half-formed.", phraseTry: "I'm still figuring out how I feel about this, but I wanted to say it out loud anyway." },
       { title: "Name what you appreciate", body: "Reserved people often feel deeply, they just don't say it. Make a practice of saying specifically what you value about each other. The other person may not know unless you tell them.", phraseTry: "I don't say this enough, but I want you to know I really value the way you {something specific}." },
     ],
@@ -1360,7 +1360,7 @@ const NEW_COUPLE_TYPES = [
       "When you do talk through something, it tends to be calmer and more considered than it would be for more expressive pairings.",
     ],
     tips: [
-      { title: "Build a practice of asking", body: "Not 'are you okay?' but 'what's actually going on for you right now?' Two people who both hold things privately need to be asked before they'll share their feelings.", phraseTry: "What's actually going on for you right now?" },
+      { title: "Build a practice of asking", body: "Not 'are you okay?' but 'what's actually going on for you right now?' Two people who both hold things privately need to be asked before they'll share their feelings.", phraseTry: "What's actually going on for you right now? How are you feeling?" },
       { title: "Schedule the emotional check-in", body: "{U} and {P} are both capable of going long stretches without naming what's going on inside. A regular, brief check-in creates the structure that neither of you will naturally generate on your own.", phraseTry: "Can we do fifteen minutes on Sunday? Just to check in properly." },
       { title: "The quiet isn't a problem, until it is", body: "Low-drama is a real quality. The work is making sure the ease isn't covering for avoided conversations. Check in on whether the calm is genuine or whether something is sitting unspoken.", phraseTry: "Is there anything sitting unspoken between us right now? I want to make sure we're actually okay." },
     ],
