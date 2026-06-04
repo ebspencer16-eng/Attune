@@ -65,7 +65,7 @@
   .hamburger{display:none;flex-direction:column;gap:5px;cursor:pointer;background:none;border:none;padding:.3rem}
   .hamburger span{width:22px;height:2px;background:var(--ink);border-radius:2px}
   @media(max-width:768px){.nav-center{display:none}.hamburger{display:flex}}
-  .mobile-menu{display:none;position:fixed;top:58px;left:0;right:0;background:rgba(255,253,249,.98);backdrop-filter:blur(16px);border-bottom:1px solid var(--stone);padding:1.25rem 2rem 1.5rem;z-index:99;flex-direction:column;gap:.2rem}
+  .mobile-menu{display:none;position:fixed;top:58px;right:1rem;left:auto;width:240px;background:rgba(255,253,249,.99);backdrop-filter:blur(20px);border:1.5px solid var(--stone);border-radius:14px;padding:1rem;z-index:200;flex-direction:column;gap:.15rem;box-shadow:0 12px 40px rgba(14,11,7,.14)}
   .mobile-menu.open{display:flex}
   .mobile-menu a{font-size:.9rem;font-weight:500;color:var(--muted);text-decoration:none;padding:.6rem 0;border-bottom:1px solid var(--stone);transition:color .15s}
   .mobile-menu a:last-child{border-bottom:none}
@@ -596,6 +596,14 @@
   .page-header .page-title,.page-header h1{font-size:clamp(1.55rem,7.5vw,2.2rem)!important;max-width:none!important}
 }
 
+
+/* Mobile nav — match homepage exactly */
+.mobile-menu a{font-size:.85rem;font-weight:500;color:var(--muted);text-decoration:none;padding:.5rem .65rem;border-radius:8px;transition:all .15s;border-bottom:none}
+.mobile-menu a:hover{color:var(--ink);background:rgba(14,11,7,.04)}
+.mobile-menu .mm-cta{color:var(--orange);font-weight:700;background:none;border:none}
+.mm-section{display:flex;flex-direction:column;border-bottom:1px solid var(--stone);padding-bottom:.25rem;margin-bottom:.25rem}
+.mm-label{font-size:.58rem;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);font-weight:700;padding:.55rem 0 .2rem .75rem}
+.mm-sub{padding-left:1.25rem !important;font-size:.85rem !important;border-bottom:none !important;font-style:italic;color:var(--muted)}
 </style>
   <div class="sf-inner">
     <div class="sf-brand">
