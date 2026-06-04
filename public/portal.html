@@ -1824,6 +1824,25 @@ function shareViaTextSU() {
 }
 
 /* ── NORMAL SIGNUP PARTNER INVITE STEP ── */
+function setTab(t) {
+  const si = t === 'si';
+  document.getElementById('tab-si').classList.toggle('active', si);
+  document.getElementById('tab-su').classList.toggle('active', !si);
+  document.getElementById('form-si').style.display = si ? '' : 'none';
+  document.getElementById('form-su').style.display = si ? 'none' : '';
+}
+
+function goToStep2() {
+  const name = document.getElementById('su-name').value.trim();
+  const email = document.getElementById('su-email').value.trim();
+  const pass = document.getElementById('su-pass').value.trim();
+  if (!name) { document.getElementById('su-name').focus(); return; }
+  if (!email) { document.getElementById('su-email').focus(); return; }
+  if (!pass) { document.getElementById('su-pass').focus(); return; }
+  document.getElementById('su-step1').style.display = 'none';
+  document.getElementById('su-step2').style.display = 'block';
+}
+
 function doSignUp() {
   const name = document.getElementById('su-name').value.trim();
   const partner = document.getElementById('su-partner').value.trim() || 'Your partner';
