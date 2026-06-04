@@ -11369,9 +11369,13 @@ export default function App() {
       return raw ? JSON.parse(raw) : null;
     } catch { return null; }
   };
-  const _initEx1 = _hasAccount ? _hydrateLS('attune_ex1')             : sarahEx1Demo;
-  const _initEx2 = _hasAccount ? _hydrateLS('attune_ex2')             : sarahEx2Demo;
-  const _initEx3 = _hasAccount ? _hydrateLS('attune_ex3')             : sarahEx3Demo;
+  // Admin UX Views: ?fresh=1 forces blank exercises so reviewers see the
+  // actual questions (not the pre-filled "complete" state). Results links omit
+  // the flag, so they stay pre-populated with demo data.
+  const _previewFresh = params.get('fresh') === '1';
+  const _initEx1 = _previewFresh ? null : (_hasAccount ? _hydrateLS('attune_ex1') : sarahEx1Demo);
+  const _initEx2 = _previewFresh ? null : (_hasAccount ? _hydrateLS('attune_ex2') : sarahEx2Demo);
+  const _initEx3 = _previewFresh ? null : (_hasAccount ? _hydrateLS('attune_ex3') : sarahEx3Demo);
 
   const [ex1Answers, setEx1State] = useState(_initEx1);
   const [ex2Answers, setEx2State] = useState(_initEx2);

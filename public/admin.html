@@ -272,6 +272,11 @@
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12V7a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h10"/><path d="M7 12h2M12 12h2M17 12h1"/><circle cx="18" cy="18" r="3"/><path d="m17 18 1 1 2-2"/></svg>
       Beta Codes
     </a>
+    <div class="sb-section">Review</div>
+    <a class="sb-item" onclick="showPage('ux-views')">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg>
+      UX Views
+    </a>
   </nav>
   <div class="sb-footer">
     <div style="font-size:.6rem;color:var(--dim);margin-bottom:.5rem;font-family:var(--mono);">DATA NOTICE</div>
@@ -824,6 +829,114 @@
       <div class="section-sub">Bookings from Calendly + legacy form requests. Click any row for full details.</div>
     </div>
     <div id="lmft-requests-container" style="font-size:.8rem;color:var(--muted);padding:2rem 0">Loading requests…</div>
+  </div>
+</div>
+
+<div class="page" id="page-ux-views">
+  <style>
+    #page-ux-views .ux-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(330px,1fr));gap:1.1rem;}
+    #page-ux-views .ux-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:1.3rem 1.45rem;}
+    #page-ux-views .ux-cardhead{display:flex;align-items:center;gap:.55rem;flex-wrap:wrap;margin-bottom:.35rem;}
+    #page-ux-views .ux-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0;}
+    #page-ux-views .ux-name{font-family:var(--hfont);font-size:1.1rem;font-weight:700;color:var(--text);}
+    #page-ux-views .ux-tag{font-family:var(--mono);font-size:.56rem;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;}
+    #page-ux-views .ux-desc{font-size:.74rem;color:var(--muted);line-height:1.5;margin-bottom:.4rem;}
+    #page-ux-views .ux-cardlabel{font-family:var(--mono);font-size:.55rem;color:var(--dim);text-transform:uppercase;letter-spacing:.12em;margin:.95rem 0 .5rem;}
+    #page-ux-views .ux-row{display:flex;flex-wrap:wrap;gap:.5rem;}
+    #page-ux-views .ux-link{display:inline-flex;align-items:center;gap:.25rem;background:var(--surface);border:1px solid var(--border);color:var(--text);font-family:var(--bfont);font-size:.72rem;font-weight:600;padding:.5rem .8rem;border-radius:9px;text-decoration:none;transition:border-color .15s,color .15s,opacity .15s;}
+    #page-ux-views .ux-link:hover{border-color:var(--orange);color:#fff;}
+    #page-ux-views .ux-link-primary{background:linear-gradient(135deg,var(--orange),var(--indigo));border:1px solid transparent;color:#fff;}
+    #page-ux-views .ux-link-primary:hover{opacity:.9;color:#fff;}
+  </style>
+  <div class="topbar">
+    <div>
+      <div class="topbar-title">UX Views</div>
+      <div class="topbar-sub">Preview the live customer experience per package. Always reflects the current build. Opens in a new tab.</div>
+    </div>
+  </div>
+  <div style="font-size:.74rem;color:var(--muted);line-height:1.6;margin-bottom:1.3rem;max-width:760px;">
+    Exercise links open blank so you can review the actual questions. Results links open pre-populated with demo data (Sarah &amp; James). Everything renders from the current build, so any content change shows up here immediately.
+  </div>
+  <div class="ux-grid">
+      <div class="ux-card">
+        <div class="ux-cardhead">
+          <span class="ux-dot" style="background:#FF6B35"></span>
+          <span class="ux-name">Core</span>
+          <span class="ux-tag">Foundation Assessment</span>
+        </div>
+        <div class="ux-desc">Two exercises. No add-ons.</div>
+        <div class="ux-cardlabel">Exercises (blank, for reviewing questions)</div>
+          <div class="ux-row">
+            <a class="ux-link" href="/app?demo=core&fresh=1&view=exercise1" target="_blank" rel="noopener">Communication ↗</a>
+            <a class="ux-link" href="/app?demo=core&fresh=1&view=exercise2" target="_blank" rel="noopener">Expectations ↗</a>
+          </div>
+        <div class="ux-cardlabel">Results (pre-populated)</div>
+          <div class="ux-row">
+            <a class="ux-link ux-link-primary" href="/app?demo=core&view=results" target="_blank" rel="noopener">Results dashboard ↗</a>
+          </div>
+      </div>
+      <div class="ux-card">
+        <div class="ux-cardhead">
+          <span class="ux-dot" style="background:#34D399"></span>
+          <span class="ux-name">Newlywed</span>
+          <span class="ux-tag">Starting Out</span>
+        </div>
+        <div class="ux-desc">Adds the Starting Out checklist and shared budget.</div>
+        <div class="ux-cardlabel">Exercises (blank, for reviewing questions)</div>
+          <div class="ux-row">
+            <a class="ux-link" href="/app?demo=newlywed&fresh=1&view=exercise1" target="_blank" rel="noopener">Communication ↗</a>
+            <a class="ux-link" href="/app?demo=newlywed&fresh=1&view=exercise2" target="_blank" rel="noopener">Expectations ↗</a>
+          </div>
+        <div class="ux-cardlabel">Tools</div>
+          <div class="ux-row">
+            <a class="ux-link" href="/app?demo=newlywed&view=checklist" target="_blank" rel="noopener">Starting Out Checklist ↗</a>
+            <a class="ux-link" href="/app?demo=newlywed&view=budget" target="_blank" rel="noopener">Shared Budget ↗</a>
+          </div>
+        <div class="ux-cardlabel">Results (pre-populated)</div>
+          <div class="ux-row">
+            <a class="ux-link ux-link-primary" href="/app?demo=newlywed&view=results" target="_blank" rel="noopener">Results dashboard ↗</a>
+          </div>
+      </div>
+      <div class="ux-card">
+        <div class="ux-cardhead">
+          <span class="ux-dot" style="background:#6C7FFF"></span>
+          <span class="ux-name">Anniversary</span>
+          <span class="ux-tag">Relationship Reflection</span>
+        </div>
+        <div class="ux-desc">Adds the third reflection exercise.</div>
+        <div class="ux-cardlabel">Exercises (blank, for reviewing questions)</div>
+          <div class="ux-row">
+            <a class="ux-link" href="/app?demo=anniversary&fresh=1&view=exercise1" target="_blank" rel="noopener">Communication ↗</a>
+            <a class="ux-link" href="/app?demo=anniversary&fresh=1&view=exercise2" target="_blank" rel="noopener">Expectations ↗</a>
+            <a class="ux-link" href="/app?demo=anniversary&fresh=1&view=exercise3" target="_blank" rel="noopener">Relationship Reflection ↗</a>
+          </div>
+        <div class="ux-cardlabel">Results (pre-populated)</div>
+          <div class="ux-row">
+            <a class="ux-link ux-link-primary" href="/app?demo=anniversary&view=results" target="_blank" rel="noopener">Results dashboard ↗</a>
+          </div>
+      </div>
+      <div class="ux-card">
+        <div class="ux-cardhead">
+          <span class="ux-dot" style="background:#FBBF24"></span>
+          <span class="ux-name">Premium</span>
+          <span class="ux-tag">Premium</span>
+        </div>
+        <div class="ux-desc">Reflection exercise, shared budget, LMFT session.</div>
+        <div class="ux-cardlabel">Exercises (blank, for reviewing questions)</div>
+          <div class="ux-row">
+            <a class="ux-link" href="/app?demo=premium&fresh=1&view=exercise1" target="_blank" rel="noopener">Communication ↗</a>
+            <a class="ux-link" href="/app?demo=premium&fresh=1&view=exercise2" target="_blank" rel="noopener">Expectations ↗</a>
+            <a class="ux-link" href="/app?demo=premium&fresh=1&view=exercise3" target="_blank" rel="noopener">Relationship Reflection ↗</a>
+          </div>
+        <div class="ux-cardlabel">Tools</div>
+          <div class="ux-row">
+            <a class="ux-link" href="/app?demo=premium&view=budget" target="_blank" rel="noopener">Shared Budget ↗</a>
+          </div>
+        <div class="ux-cardlabel">Results (pre-populated)</div>
+          <div class="ux-row">
+            <a class="ux-link ux-link-primary" href="/app?demo=premium&view=results" target="_blank" rel="noopener">Results dashboard ↗</a>
+          </div>
+      </div>
   </div>
 </div>
 
@@ -1866,7 +1979,7 @@ function showPage(id) {
   if (id==='types') loadTypesData();
   if (id==='beta-codes') loadBetaCodes();
 }
-const chartsInit = {overview:false,orders:false,packages:false,demographics:false,responses:false,satisfaction:false,fulfillment:false,feedback:false,types:false,'survey-explorer':false,'lmft-requests':false};
+const chartsInit = {overview:false,orders:false,packages:false,demographics:false,responses:false,satisfaction:false,fulfillment:false,feedback:false,types:false,'survey-explorer':false,'lmft-requests':false,'ux-views':true};
 // ── Feedback tab switcher ─────────────────────────────
 function setFeedbackTab(el, targetId) {
   const card = el.closest('.chart-card');
