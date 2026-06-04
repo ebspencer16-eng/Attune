@@ -138,6 +138,18 @@ async function handlePartnerSync(req) {
       return new Response(JSON.stringify({ ok: false, error: msg }), { status: 500, headers: CORS });
     }
 
+    // Best-effort: persist Partner A's add-on flags on Partner B's profile so
+    // they survive a cross-device reload (add-ons otherwise live only on the
+    // buyer's order). Safe before migration 016 has run: a missing-column error
+    // is logged and ignored, and never blocks the link.
+    const { error: addonErr } = await sb.from('profiles').update({
+      addon_reflection: inherited.addonReflection,
+      addon_budget:     inherited.addonBudget,
+      addon_lmft:       inherited.addonLmft,
+      addon_workbook:   inherited.addonWorkbook,
+    }).eq('id', bId);
+    if (addonErr) console.warn('[partner-sync] add-on persist skipped (migration 016 not run yet?):', addonErr.message);
+
     // Notify Partner A that Partner B just signed up (Issue 4.9).
     // Previously this fired when Partner B FINISHED their exercises, which
     // didn't match the email body ("X just created their account").
