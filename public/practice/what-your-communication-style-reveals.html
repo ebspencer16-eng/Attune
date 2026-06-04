@@ -101,9 +101,11 @@
   .related-card-time{font-size:.68rem;color:var(--muted)}
 
   /* CTA */
-  .article-cta{background:var(--ink);border-radius:20px;padding:2.5rem;text-align:center;margin-top:3rem}
-  .article-cta h3{font-family:var(--hfont);font-size:1.5rem;font-weight:700;color:white;margin-bottom:.65rem}
-  .article-cta p{font-size:.88rem;color:rgba(255,255,255,.5);line-height:1.75;font-weight:300;margin-bottom:1.5rem}
+  .article-cta{background:var(--warm);border:1px solid var(--stone);border-radius:20px;padding:2.75rem 2.5rem;text-align:center;margin-top:3rem}
+  .article-cta-title{font-family:var(--hfont);font-size:clamp(1.6rem,3vw,2rem);font-weight:700;color:var(--ink);line-height:1.12;letter-spacing:-.01em;margin-bottom:.85rem}
+  .article-cta-sub{font-size:.95rem;color:var(--muted);line-height:1.7;font-weight:300;margin-bottom:1.75rem;max-width:480px;margin-left:auto;margin-right:auto}
+  .article-cta-btn{background:linear-gradient(135deg,var(--orange),#d4592f);color:white;padding:.85rem 2rem;border-radius:12px;font-size:.82rem;font-weight:700;text-decoration:none;display:inline-block;letter-spacing:.04em;box-shadow:0 6px 24px rgba(232,103,58,.3);transition:all .2s}
+  .article-cta-btn:hover{transform:translateY(-2px);box-shadow:0 10px 32px rgba(232,103,58,.4)}
   .btn-primary{background:linear-gradient(135deg,var(--orange),#d4592f);color:white;padding:.85rem 2rem;border-radius:12px;font-size:.82rem;font-weight:700;text-decoration:none;display:inline-block;letter-spacing:.04em;box-shadow:0 6px 24px rgba(232,103,58,.3);transition:all .2s}
   .btn-primary:hover{transform:translateY(-2px);box-shadow:0 10px 32px rgba(232,103,58,.4)}
 
@@ -259,7 +261,7 @@
   <div style="max-width:680px;margin:0 auto 2.5rem;padding:0 2.5rem">
     <div style="border-top:1px solid var(--stone);padding-top:1.5rem;display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap">
       <span style="font-size:.75rem;color:var(--muted);font-family:var(--bfont)">Found this useful? Share it.</span>
-      <div style="display:flex;gap:.6rem">
+      <div style="display:flex;gap:.6rem;flex-wrap:wrap">
         <button onclick="navigator.clipboard.writeText(window.location.href).then(()=>{this.textContent='Copied!';setTimeout(()=>this.textContent='Copy link',2000)})" 
           style="display:flex;align-items:center;gap:.4rem;padding:.45rem .9rem;border:1.5px solid var(--stone);background:white;border-radius:8px;font-size:.72rem;color:var(--muted);cursor:pointer;font-family:var(--bfont);font-weight:500;transition:all .15s"
           onmouseover="this.style.borderColor='var(--clay)';this.style.color='var(--ink)'" 
@@ -267,18 +269,22 @@
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
           Copy link
         </button>
-        <a href="" id="share-wa" target="_blank" rel="noopener"
-          style="display:flex;align-items:center;gap:.4rem;padding:.45rem .9rem;border:1.5px solid var(--stone);background:white;border-radius:8px;font-size:.72rem;color:var(--muted);text-decoration:none;font-family:var(--bfont);font-weight:500;transition:all .15s"
-          onmouseover="this.style.borderColor='var(--clay)';this.style.color='var(--ink)'" 
-          onmouseout="this.style.borderColor='var(--stone)';this.style.color='var(--muted)'">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 14 19.79 19.79 0 0 1 1.61 5.4 2 2 0 0 1 3.6 3.23h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 10.5a16 16 0 0 0 6 6l.94-.94a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 21.5 18z"/></svg>
-          Share
-        </a>
+        <button type="button" title="Instagram (copies link)" aria-label="Copy link to share on Instagram" onclick="shareIG()" style="display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;border:1.5px solid var(--stone);background:white;border-radius:8px;color:var(--muted);text-decoration:none;cursor:pointer;transition:all .15s" onmouseover="this.style.borderColor='var(--clay)';this.style.color='var(--ink)'" onmouseout="this.style.borderColor='var(--stone)';this.style.color='var(--muted)'"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg></button>
+        <a id="share-li" href="" target="_blank" rel="noopener" title="LinkedIn" aria-label="Share on LinkedIn" style="display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;border:1.5px solid var(--stone);background:white;border-radius:8px;color:var(--muted);text-decoration:none;cursor:pointer;transition:all .15s" onmouseover="this.style.borderColor='var(--clay)';this.style.color='var(--ink)'" onmouseout="this.style.borderColor='var(--stone)';this.style.color='var(--muted)'"><svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M4.98 3.5a2.5 2.5 0 1 1 0 5 2.5 2.5 0 0 1 0-5zM3 9h4v12H3zM9 9h3.8v1.7h.05c.53-1 1.83-2.05 3.77-2.05 4.03 0 4.78 2.65 4.78 6.1V21h-4v-5.3c0-1.27-.02-2.9-1.77-2.9-1.77 0-2.04 1.38-2.04 2.8V21H9z"/></svg></a>
+        <a id="share-x" href="" target="_blank" rel="noopener" title="X" aria-label="Share on X" style="display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;border:1.5px solid var(--stone);background:white;border-radius:8px;color:var(--muted);text-decoration:none;cursor:pointer;transition:all .15s" onmouseover="this.style.borderColor='var(--clay)';this.style.color='var(--ink)'" onmouseout="this.style.borderColor='var(--stone)';this.style.color='var(--muted)'"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24h-6.66l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></a>
+        <a id="share-fb" href="" target="_blank" rel="noopener" title="Facebook" aria-label="Share on Facebook" style="display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;border:1.5px solid var(--stone);background:white;border-radius:8px;color:var(--muted);text-decoration:none;cursor:pointer;transition:all .15s" onmouseover="this.style.borderColor='var(--clay)';this.style.color='var(--ink)'" onmouseout="this.style.borderColor='var(--stone)';this.style.color='var(--muted)'"><svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M22 12a10 10 0 1 0-11.563 9.876v-6.987H7.898V12h2.539V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.889h-2.33v6.987A10.002 10.002 0 0 0 22 12z"/></svg></a>
       </div>
     </div>
   </div>
   <script>
-    document.getElementById('share-wa').href = 'https://wa.me/?text=' + encodeURIComponent(document.title + ', ' + window.location.href);
+    (function(){
+      var u=encodeURIComponent(window.location.href), t=encodeURIComponent(document.title);
+      var li=document.getElementById('share-li'); if(li) li.href='https://www.linkedin.com/sharing/share-offsite/?url='+u;
+      var x=document.getElementById('share-x'); if(x) x.href='https://twitter.com/intent/tweet?url='+u+'&text='+t;
+      var fb=document.getElementById('share-fb'); if(fb) fb.href='https://www.facebook.com/sharer/sharer.php?u='+u;
+    })();
+    function attuneToast(msg){var d=document.createElement('div');d.textContent=msg;d.style.cssText='position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#1E1610;color:#fff;padding:.6rem 1.1rem;border-radius:9px;font-size:.78rem;font-family:var(--bfont);z-index:9999;box-shadow:0 8px 28px rgba(0,0,0,.28);opacity:0;transition:opacity .2s';document.body.appendChild(d);requestAnimationFrame(function(){d.style.opacity='1'});setTimeout(function(){d.style.opacity='0';setTimeout(function(){d.remove()},300)},2400);}
+    function shareIG(){navigator.clipboard.writeText(window.location.href).then(function(){attuneToast('Link copied \u2014 paste it into your Instagram story or bio')});}
   </script>
 
   <p class="related-label">More from In Practice</p>
