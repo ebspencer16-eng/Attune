@@ -287,6 +287,7 @@
     <p style="font-size:.65rem;color:var(--dim);line-height:1.55;">All data is anonymized. No names or emails are present in this system.</p>
     <a href="/legal" style="margin-top:.5rem;">Privacy policy →</a>
     <a href="/home">Back to site →</a>
+    <a href="#" onclick="event.preventDefault(); window.adminSignOut && window.adminSignOut();" style="margin-top:.5rem;color:var(--muted);">Sign out</a>
   </div>
 </div>
 
@@ -1795,7 +1796,8 @@ async function attemptLogin() {
     const [eHash, pHash] = await Promise.all([sha256(email), sha256(pass)]);
 
     if (eHash === ADMIN_EMAIL_HASH && pHash === ADMIN_PASSWORD_HASH) {
-      sessionStorage.setItem('attune_admin_auth', '1');
+      try { localStorage.setItem('attune_admin_auth', JSON.stringify({ ok: 1, ts: Date.now() })); }
+      catch (_) { sessionStorage.setItem('attune_admin_auth', '1'); }
       document.getElementById('admin-login-gate').classList.add('hidden');
     } else {
       const emailMatches = eHash === ADMIN_EMAIL_HASH;
@@ -1827,11 +1829,32 @@ async function attemptLogin() {
   if (passInp)  passInp.addEventListener('keydown',  e => { if (e.key === 'Enter') attemptLogin(); });
 })();
 
-// Check session on load
-if (sessionStorage.getItem('attune_admin_auth') === '1') {
-  const gate = document.getElementById('admin-login-gate');
-  if (gate) gate.classList.add('hidden');
-}
+// Restore admin login across browser sessions (30-day sliding window) so Ellie and
+// Carolina don't have to sign in every visit. Falls back to legacy sessionStorage.
+(function restoreAdminSession() {
+  const KEY = 'attune_admin_auth';
+  const TTL = 30 * 24 * 60 * 60 * 1000; // 30 days
+  let ok = false;
+  try {
+    const raw = localStorage.getItem(KEY);
+    if (raw) {
+      const o = JSON.parse(raw);
+      if (o && o.ok && (Date.now() - o.ts) < TTL) {
+        localStorage.setItem(KEY, JSON.stringify({ ok: 1, ts: Date.now() })); // refresh window
+        ok = true;
+      } else {
+        localStorage.removeItem(KEY);
+      }
+    }
+  } catch (_) {}
+  if (!ok && sessionStorage.getItem(KEY) === '1') ok = true;
+  if (ok) { const gate = document.getElementById('admin-login-gate'); if (gate) gate.classList.add('hidden'); }
+})();
+window.adminSignOut = function () {
+  try { localStorage.removeItem('attune_admin_auth'); } catch (_) {}
+  try { sessionStorage.removeItem('attune_admin_auth'); } catch (_) {}
+  location.reload();
+};
 // Make attemptLogin globally accessible for the onclick handler
 window.attemptLogin = attemptLogin;
 // ══════════════════════════════════════════════════════════════════════════════
