@@ -9867,6 +9867,7 @@ function PartnerLandingScreen({ inviteFrom, inviteCode, onCreateAccount }) {
       // Link both partners via /api/partner-sync. Only proceed if profile
       // was created — otherwise the link would update zero rows on Partner
       // B's side and leave the relationship asymmetric.
+      let inheritedEntitlements = null;
       if (profileCreated) {
         try {
           const linkRes = await fetch('/api/partner-sync', {
@@ -9891,6 +9892,9 @@ function PartnerLandingScreen({ inviteFrom, inviteCode, onCreateAccount }) {
             setLoading(false);
             return;
           }
+          // Inherit Partner A's package + add-ons so Partner B's account (and
+          // the guided exercise flow that runs next) matches their entitlements.
+          try { inheritedEntitlements = (await linkRes.json())?.inherited || null; } catch {}
           // Note: partner_joined_notification is sent server-side as part
           // of the link action (Issue 4.9). The endpoint has access to
           // Partner A's email via service role; we don't expose it here.
@@ -9918,6 +9922,11 @@ function PartnerLandingScreen({ inviteFrom, inviteCode, onCreateAccount }) {
         partnerName: inviteFrom,
         inviteCode: inviteCode,         // Retained so the dashboard can look up partner
         joinedViaInvite: true,
+        pkg:             inheritedEntitlements?.pkg || 'core',
+        addonReflection: !!inheritedEntitlements?.addonReflection,
+        addonBudget:     !!inheritedEntitlements?.addonBudget,
+        addonLmft:       !!inheritedEntitlements?.addonLmft,
+        addonWorkbook:   inheritedEntitlements?.addonWorkbook || '',
         createdAt: Date.now(),
       };
       // Clear stale data from any prior user/demo on this browser. Without
@@ -10081,13 +10090,13 @@ function PartnerBExerciseFlow({ account, onComplete }) {
           Your exercises ({account.name} &amp; {account.partnerName})
         </div>
         <div style={{ fontFamily: "'Playfair Display', Georgia, serif", fontSize: 'clamp(1.6rem, 5vw, 2.4rem)', fontWeight: 700, color: 'white', lineHeight: 1.1, marginBottom: '1.25rem' }}>
-          Two exercises.<br/>Your answers are yours alone.
+          {hasReflection ? 'Three' : 'Two'} exercises.<br/>Your answers are yours alone.
         </div>
         <p style={{ fontSize: '0.88rem', color: 'rgba(255,255,255,0.6)', fontFamily: "'DM Sans', sans-serif", lineHeight: 1.75, marginBottom: '2.5rem', maxWidth: 380, margin: '0 auto 2.5rem' }}>
-          Exercise 01 covers how you communicate and connect. Exercise 02 maps your expectations. Both take about 15 minutes. Answer honestly. Your partner won't see your individual answers.
+          {`Exercise 01 covers how you communicate and connect. Exercise 02 maps your expectations.${hasReflection ? ' Exercise 03 captures your relationship story.' : ''} ${hasReflection ? 'They take' : 'Both take'} about 15 minutes. Answer honestly. Your partner won't see your individual answers.`}
         </p>
         <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', marginBottom: '2.5rem', flexWrap: 'wrap' }}>
-          {[{ num: '01', title: 'Communication', color: '#E8673A', desc: '28 questions · 10 dimensions' }, { num: '02', title: 'Expectations', color: '#1B5FE8', desc: 'Responsibilities & life' }].map(e => (
+          {[{ num: '01', title: 'Communication', color: '#E8673A', desc: '28 questions · 10 dimensions' }, { num: '02', title: 'Expectations', color: '#1B5FE8', desc: 'Responsibilities & life' }, ...(hasReflection ? [{ num: '03', title: 'Relationship Reflection', color: '#7C3AED', desc: 'Your story together' }] : [])].map(e => (
             <div key={e.num} style={{ background: 'rgba(255,255,255,0.06)', border: `1px solid ${e.color}33`, borderRadius: 14, padding: '1.1rem 1.4rem', textAlign: 'left', minWidth: 160 }}>
               <div style={{ fontSize: '0.58rem', letterSpacing: '0.18em', color: e.color, fontWeight: 700, fontFamily: "'DM Sans', sans-serif", textTransform: 'uppercase', marginBottom: '0.35rem' }}>Exercise {e.num}</div>
               <div style={{ fontFamily: "'Playfair Display', Georgia, serif", fontSize: '1rem', fontWeight: 700, color: 'white', marginBottom: '0.25rem' }}>{e.title}</div>
@@ -10116,7 +10125,7 @@ function PartnerBExerciseFlow({ account, onComplete }) {
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '2rem' }}>
           <svg width="28" height="20" viewBox="0 0 103 76" fill="none"><defs><linearGradient id="bfg1" x1="0" y1="0" x2="103" y2="76" gradientUnits="userSpaceOnUse"><stop offset="0%" stopColor="#E8673A"/><stop offset="100%" stopColor="#1B5FE8"/></linearGradient></defs><path d="M14,4 L44,4 A9,9 0 0,1 53,13 L53,42 A9,9 0 0,1 44,51 L20,51 L6,61 L11,51 A6,6 0 0,1 5,45 L5,13 A9,9 0 0,1 14,4 Z" fill="url(#bfg1)"/><g transform="translate(13.16,11.3) scale(0.72)"><path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill="white" opacity="0.93"/></g></svg>
           <span style={{ fontFamily: "'Playfair Display', Georgia, serif", fontSize: '0.95rem', fontWeight: 700, color: C.ink }}>Attune</span>
-          <span style={{ fontSize: '0.68rem', color: C.muted, fontFamily: "'DM Sans', sans-serif", marginLeft: '0.5rem' }}>· Exercise 01 of 02</span>
+          <span style={{ fontSize: '0.68rem', color: C.muted, fontFamily: "'DM Sans', sans-serif", marginLeft: '0.5rem' }}>· Exercise 01 of {hasReflection ? '03' : '02'}</span>
         </div>
         <Exercise01Flow userName={account.name} partnerName={account.partnerName} onComplete={handleEx1Done} skipIntro={true} />
       </div>
@@ -10130,7 +10139,7 @@ function PartnerBExerciseFlow({ account, onComplete }) {
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '2rem' }}>
           <svg width="28" height="20" viewBox="0 0 103 76" fill="none"><defs><linearGradient id="bfg2" x1="0" y1="0" x2="103" y2="76" gradientUnits="userSpaceOnUse"><stop offset="0%" stopColor="#E8673A"/><stop offset="100%" stopColor="#1B5FE8"/></linearGradient></defs><path d="M14,4 L44,4 A9,9 0 0,1 53,13 L53,42 A9,9 0 0,1 44,51 L20,51 L6,61 L11,51 A6,6 0 0,1 5,45 L5,13 A9,9 0 0,1 14,4 Z" fill="url(#bfg2)"/><g transform="translate(13.16,11.3) scale(0.72)"><path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill="white" opacity="0.93"/></g></svg>
           <span style={{ fontFamily: "'Playfair Display', Georgia, serif", fontSize: '0.95rem', fontWeight: 700, color: C.ink }}>Attune</span>
-          <span style={{ fontSize: '0.68rem', color: C.muted, fontFamily: "'DM Sans', sans-serif", marginLeft: '0.5rem' }}>· Exercise 02 of 02</span>
+          <span style={{ fontSize: '0.68rem', color: C.muted, fontFamily: "'DM Sans', sans-serif", marginLeft: '0.5rem' }}>· Exercise 02 of {hasReflection ? '03' : '02'}</span>
         </div>
         <ExpectationsExercise userName={account.name} partnerName={account.partnerName} onComplete={handleEx2Done} />
       </div>

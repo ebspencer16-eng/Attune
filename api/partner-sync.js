@@ -90,7 +90,7 @@ async function handlePartnerSync(req) {
     // Find Partner A by invite code (also pull name for the email body)
     const { data: partnerA, error: findErr } = await sb
       .from('profiles')
-      .select('id, partner_profile_id, name')
+      .select('id, partner_profile_id, name, pkg')
       .eq('invite_code', code)
       .maybeSingle();
 
@@ -107,11 +107,30 @@ async function handlePartnerSync(req) {
       return new Response(JSON.stringify({ ok: false, error: 'This invite has already been used' }), { status: 409, headers: CORS });
     }
 
+    // Resolve Partner A's full entitlement so Partner B inherits the same
+    // experience. Package is copied onto Partner B's profile below; add-ons
+    // live on Partner A's order and are returned for the client to apply.
+    let inherited = { pkg: partnerA.pkg || 'core', addonReflection: false, addonBudget: false, addonLmft: false, addonWorkbook: '' };
+    try {
+      const { data: aOrder } = await sb.from('orders')
+        .select('addon_reflection, addon_budget, addon_lmft, addon_workbook')
+        .eq('user_id', partnerA.id)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      if (aOrder) {
+        inherited.addonReflection = !!aOrder.addon_reflection;
+        inherited.addonBudget     = !!aOrder.addon_budget;
+        inherited.addonLmft       = !!aOrder.addon_lmft;
+        inherited.addonWorkbook   = aOrder.addon_workbook || '';
+      }
+    } catch (e) { console.warn('[partner-sync] addon inherit lookup failed:', e); }
+
     // Link both sides, mark Partner A's partner_joined, and flag Partner B
     // as joined-via-invite for lightweight UX differentiation.
     const [linkAResult, linkBResult] = await Promise.all([
       sb.from('profiles').update({ partner_profile_id: bId, partner_joined: true }).eq('id', partnerA.id),
-      sb.from('profiles').update({ partner_profile_id: partnerA.id, joined_via_invite: true }).eq('id', bId),
+      sb.from('profiles').update({ partner_profile_id: partnerA.id, joined_via_invite: true, pkg: inherited.pkg }).eq('id', bId),
     ]);
 
     if (linkAResult.error || linkBResult.error) {
@@ -159,7 +178,7 @@ async function handlePartnerSync(req) {
       console.warn('[partner-sync] partner_joined notification setup failed:', e);
     }
 
-    return new Response(JSON.stringify({ ok: true, partnerAId: partnerA.id }), { status: 200, headers: CORS });
+    return new Response(JSON.stringify({ ok: true, partnerAId: partnerA.id, inherited }), { status: 200, headers: CORS });
   }
 
   if (req.method === 'GET') {
