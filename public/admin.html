@@ -268,6 +268,10 @@
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.22 4.22l2.12 2.12M17.66 17.66l2.12 2.12M2 12h3M19 12h3M4.22 19.78l2.12-2.12M17.66 6.34l2.12-2.12"/></svg>
       Type Analytics
     </a>
+    <a class="sb-item" onclick="showPage('explore'); window.__initExplore && window.__initExplore();">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><rect x="7" y="10" width="3" height="7"/><rect x="12" y="6" width="3" height="11"/><rect x="17" y="13" width="3" height="4"/></svg>
+      Explore
+    </a>
     <a class="sb-item" onclick="showPage('beta-codes')">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12V7a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h10"/><path d="M7 12h2M12 12h2M17 12h1"/><circle cx="18" cy="18" r="3"/><path d="m17 18 1 1 2-2"/></svg>
       Beta Codes
@@ -939,6 +943,303 @@
       </div>
   </div>
 </div>
+
+<div class="page" id="page-explore">
+  <style>
+    #page-explore .xp-controls{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:1.1rem 1.25rem;display:flex;flex-wrap:wrap;gap:1.1rem 1.4rem;align-items:flex-end;margin-bottom:1.1rem;}
+    #page-explore .xp-ctl{display:flex;flex-direction:column;gap:.35rem;}
+    #page-explore .xp-ctl label{font-family:var(--mono);font-size:.55rem;color:var(--dim);text-transform:uppercase;letter-spacing:.12em;}
+    #page-explore .xp-row2{display:flex;gap:.4rem;}
+    #page-explore select, #page-explore .xp-btn{background:var(--surface);border:1px solid var(--border);color:var(--text);font-family:var(--bfont);font-size:.78rem;padding:.45rem .6rem;border-radius:8px;max-width:300px;}
+    #page-explore select:focus{outline:none;border-color:var(--orange);}
+    #page-explore .xp-side{max-width:120px;}
+    #page-explore .xp-btn{cursor:pointer;font-weight:600;}
+    #page-explore .xp-btn:hover{border-color:var(--orange);color:#fff;}
+    #page-explore .xp-btn-primary{background:linear-gradient(135deg,var(--orange),var(--indigo));border:1px solid transparent;color:#fff;}
+    #page-explore .xp-filters{display:flex;flex-wrap:wrap;gap:.5rem;align-items:center;margin-bottom:1.1rem;}
+    #page-explore .xp-chip{display:flex;align-items:center;gap:.35rem;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:.3rem .4rem;}
+    #page-explore .xp-chip select{padding:.3rem .4rem;font-size:.72rem;}
+    #page-explore .xp-chip .xp-x{cursor:pointer;color:var(--rose);font-weight:700;padding:0 .2rem;}
+    #page-explore .xp-meta{font-size:.74rem;color:var(--muted);margin-bottom:.8rem;line-height:1.5;}
+    #page-explore .xp-title{font-family:var(--hfont);font-size:1.05rem;color:var(--text);margin-bottom:.2rem;}
+    #page-explore .xp-tablewrap{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:1rem;overflow:auto;}
+    #page-explore table{border-collapse:collapse;font-size:.74rem;width:100%;}
+    #page-explore th,#page-explore td{padding:.5rem .65rem;text-align:center;border:1px solid var(--border);white-space:nowrap;}
+    #page-explore thead th{background:var(--surface);color:var(--muted);font-family:var(--mono);font-size:.6rem;text-transform:uppercase;letter-spacing:.06em;position:sticky;top:0;}
+    #page-explore tbody th{background:var(--surface);color:var(--text);text-align:left;font-weight:600;position:sticky;left:0;}
+    #page-explore td .xp-n{display:block;font-size:.58rem;color:var(--dim);font-family:var(--mono);margin-top:.15rem;}
+    #page-explore td.xp-small{opacity:.4;}
+    #page-explore .xp-tot{background:var(--surface);font-weight:700;color:var(--text);}
+    #page-explore .xp-empty{color:var(--muted);padding:2rem;text-align:center;}
+  </style>
+  <div class="topbar">
+    <div>
+      <div class="topbar-title">Explore</div>
+      <div class="topbar-sub">Cross-tab any datapoint by any other. All respondents pooled. Anonymized.</div>
+    </div>
+  </div>
+
+  <div class="xp-controls">
+    <div class="xp-ctl">
+      <label>Rows</label>
+      <div class="xp-row2">
+        <select id="xp-row-side" class="xp-side"><option value="self">Respondent</option><option value="partner">Partner</option></select>
+        <select id="xp-row-field"></select>
+      </div>
+    </div>
+    <div class="xp-ctl">
+      <label>Columns</label>
+      <div class="xp-row2">
+        <select id="xp-col-side" class="xp-side"><option value="self">Respondent</option><option value="partner">Partner</option></select>
+        <select id="xp-col-field"></select>
+      </div>
+    </div>
+    <div class="xp-ctl">
+      <label>Cells</label>
+      <select id="xp-cell">
+        <option value="count">Count</option>
+        <option value="pctTotal">% of total</option>
+        <option value="pctRow">% of row</option>
+        <option value="pctCol">% of column</option>
+        <option value="mean">Average of…</option>
+      </select>
+    </div>
+    <div class="xp-ctl" id="xp-measure-wrap" style="display:none;">
+      <label>Average of</label>
+      <div class="xp-row2">
+        <select id="xp-measure-side" class="xp-side"><option value="self">Respondent</option><option value="partner">Partner</option></select>
+        <select id="xp-measure-field"></select>
+      </div>
+    </div>
+    <div class="xp-ctl">
+      <label>&nbsp;</label>
+      <button class="xp-btn" id="xp-add-filter">+ Filter</button>
+    </div>
+    <div class="xp-ctl">
+      <label>&nbsp;</label>
+      <button class="xp-btn xp-btn-primary" id="xp-export">Export CSV</button>
+    </div>
+  </div>
+
+  <div class="xp-filters" id="xp-filters"></div>
+  <div class="xp-title" id="xp-title"></div>
+  <div class="xp-meta" id="xp-meta">Loading…</div>
+  <div class="xp-tablewrap"><div id="xp-output"><div class="xp-empty">Loading respondent data…</div></div></div>
+</div>
+
+<script>
+(function(){
+  let CUBE = null, FIELDS = {}, loaded = false, FILTERS = [];
+  const $ = (id) => document.getElementById(id);
+  const adminSecret = () => new URLSearchParams(location.search).get('s') || '';
+
+  function fillFieldSelect(sel, includeNone){
+    const groups = {};
+    CUBE.fields.forEach(f => { (groups[f.group] = groups[f.group] || []).push(f); });
+    let html = includeNone ? '<option value="">\u2014 none \u2014</option>' : '';
+    Object.keys(groups).forEach(g => {
+      html += '<optgroup label="' + g + '">';
+      groups[g].forEach(f => { html += '<option value="' + f.key + '">' + f.label.replace(/</g,'&lt;') + '</option>'; });
+      html += '</optgroup>';
+    });
+    sel.innerHTML = html;
+  }
+  function fillScaleSelect(sel){
+    const scales = CUBE.fields.filter(f => f.kind === 'scale');
+    sel.innerHTML = scales.map(f => '<option value="' + f.key + '">' + f.label.replace(/</g,'&lt;') + '</option>').join('');
+  }
+
+  // Resolve a row's segment for a field (+ side), bucketing scale fields into 3.
+  function classify(row, fieldKey, side){
+    const f = FIELDS[fieldKey]; if (!f) return null;
+    const key = (side === 'partner' && f.partnerable) ? 'p_' + fieldKey : fieldKey;
+    let v = row[key];
+    if (v == null || v === '') return null;
+    if (f.kind === 'scale'){
+      const n = Number(v); if (isNaN(n)) return null;
+      if (n <= 2.33) return { label: f.poleLow ? 'Leans: ' + f.poleLow : 'Low (1\u20132)', sort: 0 };
+      if (n >= 3.67) return { label: f.poleHigh ? 'Leans: ' + f.poleHigh : 'High (4\u20135)', sort: 2 };
+      return { label: f.poleLow ? 'Mixed' : 'Mid (3)', sort: 1 };
+    }
+    if (f.options){ const i = f.options.findIndex(o => String(o.v) === String(v)); return { label: i >= 0 ? f.options[i].label : String(v), sort: i < 0 ? 999 : i }; }
+    return { label: String(v), sort: String(v) };
+  }
+  function numVal(row, fieldKey, side){
+    const f = FIELDS[fieldKey]; if (!f || f.kind !== 'scale') return null;
+    const key = (side === 'partner' && f.partnerable) ? 'p_' + fieldKey : fieldKey;
+    const v = row[key]; return (v == null || isNaN(v)) ? null : Number(v);
+  }
+  function passesFilters(row){
+    return FILTERS.every(flt => {
+      if (!flt.field) return true;
+      const c = classify(row, flt.field, flt.side || 'self');
+      return c && c.label === flt.value;
+    });
+  }
+
+  let LAST = null; // for CSV export
+
+  function render(){
+    if (!loaded) return;
+    const rowField = $('xp-row-field').value, rowSide = $('xp-row-side').value;
+    const colField = $('xp-col-field').value, colSide = $('xp-col-side').value;
+    const cellMode = $('xp-cell').value;
+    const measField = $('xp-measure-field').value, measSide = $('xp-measure-side').value;
+    $('xp-measure-wrap').style.display = (cellMode === 'mean') ? '' : 'none';
+
+    const rows = CUBE.rows.filter(passesFilters);
+    const matrix = {}, rowKeys = {}, colKeys = {};
+    let grand = { n: 0, sum: 0 };
+    rows.forEach(r => {
+      const rc = classify(r, rowField, rowSide); if (!rc) return;
+      const cc = colField ? classify(r, colField, colSide) : { label: 'All', sort: 0 };
+      if (!cc) return;
+      rowKeys[rc.label] = rc.sort; colKeys[cc.label] = cc.sort;
+      const k = rc.label + '\u0000' + cc.label;
+      const cell = matrix[k] || (matrix[k] = { n: 0, sum: 0 });
+      cell.n++; grand.n++;
+      if (cellMode === 'mean'){ const m = numVal(r, measField, measSide); if (m != null){ cell.sum += m; cell.sumN = (cell.sumN||0)+1; grand.sum += m; grand.sumN = (grand.sumN||0)+1; } }
+    });
+
+    const rLabels = Object.keys(rowKeys).sort((a,b)=> (rowKeys[a]>rowKeys[b]?1:rowKeys[a]<rowKeys[b]?-1:0));
+    const cLabels = Object.keys(colKeys).sort((a,b)=> (colKeys[a]>colKeys[b]?1:colKeys[a]<colKeys[b]?-1:0));
+
+    if (!rLabels.length){ $('xp-output').innerHTML = '<div class="xp-empty">No data for this cut yet.</div>'; LAST=null; updateTitle(rowField,rowSide,colField,colSide,cellMode,0); return; }
+
+    // column + row totals
+    const colTot = {}, rowTot = {};
+    cLabels.forEach(c => colTot[c] = { n:0, sum:0, sumN:0 });
+    rLabels.forEach(r => rowTot[r] = { n:0, sum:0, sumN:0 });
+    let maxCell = 0;
+    rLabels.forEach(r => cLabels.forEach(c => {
+      const cell = matrix[r+'\u0000'+c]; if (!cell) return;
+      rowTot[r].n += cell.n; colTot[c].n += cell.n;
+      rowTot[r].sum += cell.sum||0; colTot[c].sum += cell.sum||0;
+      rowTot[r].sumN += cell.sumN||0; colTot[c].sumN += cell.sumN||0;
+      if (cell.n > maxCell) maxCell = cell.n;
+    }));
+
+    const fmtVal = (cell, rLabel, cLabel) => {
+      if (!cell || !cell.n) return { txt:'', n:0, intensity:0 };
+      if (cellMode === 'mean'){ const m = cell.sumN ? cell.sum/cell.sumN : null; return { txt: m==null?'\u2013':m.toFixed(2), n:cell.n, intensity: m==null?0:(m-1)/4 }; }
+      let v = cell.n, denom = 0;
+      if (cellMode === 'pctTotal') denom = grand.n;
+      else if (cellMode === 'pctRow') denom = rowTot[rLabel].n;
+      else if (cellMode === 'pctCol') denom = colTot[cLabel].n;
+      if (cellMode === 'count') return { txt: String(cell.n), n:cell.n, intensity: maxCell?cell.n/maxCell:0 };
+      const pct = denom ? (100*cell.n/denom) : 0;
+      return { txt: pct.toFixed(1)+'%', n:cell.n, intensity: pct/100 };
+    };
+
+    // build table
+    let h = '<table><thead><tr><th></th>';
+    cLabels.forEach(c => h += '<th>' + esc(c) + '</th>');
+    h += '<th class="xp-tot">Total</th></tr></thead><tbody>';
+    const csv = [['', ...cLabels, 'Total']];
+    rLabels.forEach(r => {
+      h += '<tr><th>' + esc(r) + '</th>';
+      const csvRow = [r];
+      cLabels.forEach(c => {
+        const cell = matrix[r+'\u0000'+c];
+        const fv = fmtVal(cell, r, c);
+        const small = fv.n>0 && fv.n<5;
+        const bg = fv.intensity>0 ? 'background:rgba(232,103,58,'+(0.08+0.55*Math.min(1,fv.intensity)).toFixed(3)+');' : '';
+        h += '<td class="'+(small?'xp-small':'')+'" style="'+bg+'">' + (fv.txt||'\u2013') + (fv.n?'<span class="xp-n">n='+fv.n+'</span>':'') + '</td>';
+        csvRow.push(fv.txt || '');
+      });
+      const rt = rowTot[r];
+      const rtTxt = cellMode==='mean' ? (rt.sumN?(rt.sum/rt.sumN).toFixed(2):'\u2013') : (cellMode==='count'? rt.n : (grand.n?(100*rt.n/grand.n).toFixed(1)+'%':'0%'));
+      h += '<td class="xp-tot">'+rtTxt+'<span class="xp-n">n='+rt.n+'</span></td></tr>';
+      csvRow.push(rtTxt); csv.push(csvRow);
+    });
+    // footer totals
+    h += '<tr><th class="xp-tot">Total</th>';
+    const csvFoot = ['Total'];
+    cLabels.forEach(c => {
+      const ct = colTot[c];
+      const ctTxt = cellMode==='mean' ? (ct.sumN?(ct.sum/ct.sumN).toFixed(2):'\u2013') : (cellMode==='count'? ct.n : (grand.n?(100*ct.n/grand.n).toFixed(1)+'%':'0%'));
+      h += '<td class="xp-tot">'+ctTxt+'<span class="xp-n">n='+ct.n+'</span></td>';
+      csvFoot.push(ctTxt);
+    });
+    const gTxt = cellMode==='mean' ? (grand.sumN?(grand.sum/grand.sumN).toFixed(2):'\u2013') : (cellMode==='count'? grand.n : '100%');
+    h += '<td class="xp-tot">'+gTxt+'<span class="xp-n">n='+grand.n+'</span></td></tr>';
+    csvFoot.push(gTxt); csv.push(csvFoot);
+    h += '</tbody></table>';
+    $('xp-output').innerHTML = h;
+    LAST = csv;
+    updateTitle(rowField,rowSide,colField,colSide,cellMode,grand.n);
+  }
+
+  function labelFor(fieldKey, side){
+    const f = FIELDS[fieldKey]; if (!f) return '';
+    return (side==='partner' && f.partnerable ? 'Partner: ' : '') + f.label;
+  }
+  function updateTitle(rowField,rowSide,colField,colSide,cellMode,n){
+    const modeTxt = {count:'Count',pctTotal:'% of total',pctRow:'% of row',pctCol:'% of column',mean:'Average'}[cellMode];
+    let t = modeTxt + ' of ' + labelFor(rowField,rowSide);
+    if (colField) t += ' \u00d7 ' + labelFor(colField,colSide);
+    $('xp-title').textContent = t;
+    $('xp-meta').textContent = n + ' respondents in this cut \u00b7 ' + CUBE.count + ' total (' + CUBE.paired + ' paired). Cells with n<5 are dimmed.';
+  }
+  function esc(s){ return String(s).replace(/</g,'&lt;'); }
+
+  function renderFilters(){
+    const wrap = $('xp-filters'); wrap.innerHTML = '';
+    FILTERS.forEach((flt, i) => {
+      const chip = document.createElement('div'); chip.className = 'xp-chip';
+      const fsel = document.createElement('select');
+      fsel.innerHTML = '<option value="">filter field…</option>' + CUBE.fields.map(f=>'<option value="'+f.key+'"'+(f.key===flt.field?' selected':'')+'>'+esc(f.label)+'</option>').join('');
+      const vsel = document.createElement('select');
+      function fillVals(){
+        const vals = {};
+        CUBE.rows.forEach(r => { const c = classify(r, flt.field, 'self'); if (c) vals[c.label] = c.sort; });
+        const labels = Object.keys(vals).sort((a,b)=>(vals[a]>vals[b]?1:vals[a]<vals[b]?-1:0));
+        vsel.innerHTML = labels.map(l=>'<option value="'+esc(l)+'"'+(l===flt.value?' selected':'')+'>'+esc(l)+'</option>').join('');
+      }
+      if (flt.field) fillVals();
+      fsel.onchange = () => { flt.field = fsel.value; flt.value = ''; fillVals(); flt.value = vsel.value; render(); };
+      vsel.onchange = () => { flt.value = vsel.value; render(); };
+      const x = document.createElement('span'); x.className='xp-x'; x.textContent='\u00d7';
+      x.onclick = () => { FILTERS.splice(i,1); renderFilters(); render(); };
+      chip.appendChild(fsel); chip.appendChild(vsel); chip.appendChild(x);
+      wrap.appendChild(chip);
+    });
+  }
+
+  function exportCSV(){
+    if (!LAST) return;
+    const csv = LAST.map(row => row.map(c => '"' + String(c).replace(/"/g,'""') + '"').join(',')).join('\n');
+    const blob = new Blob([csv], { type:'text/csv' });
+    const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+    a.download = 'attune-explore.csv'; a.click(); URL.revokeObjectURL(a.href);
+  }
+
+  window.__initExplore = async function(){
+    if (loaded) return;
+    try {
+      const s = adminSecret();
+      const res = await fetch('/api/admin-explore' + (s ? '?secret=' + encodeURIComponent(s) : ''));
+      const data = await res.json();
+      if (data.error) throw new Error(data.error);
+      CUBE = data; FIELDS = {}; data.fields.forEach(f => FIELDS[f.key] = f); loaded = true;
+      fillFieldSelect($('xp-row-field'), false);
+      fillFieldSelect($('xp-col-field'), true);
+      fillScaleSelect($('xp-measure-field'));
+      // sensible defaults: ex1 first question by individual type
+      const firstQ = data.fields.find(f => f.group && f.group.indexOf('Ex1') === 0);
+      if (firstQ) $('xp-row-field').value = firstQ.key;
+      $('xp-col-field').value = 'type';
+      ['xp-row-side','xp-row-field','xp-col-side','xp-col-field','xp-cell','xp-measure-side','xp-measure-field'].forEach(id => $(id).addEventListener('change', render));
+      $('xp-add-filter').onclick = () => { FILTERS.push({ field:'', value:'', side:'self' }); renderFilters(); };
+      $('xp-export').onclick = exportCSV;
+      render();
+    } catch (e) {
+      $('xp-output').innerHTML = '<div class="xp-empty">Could not load data: ' + esc(e.message) + '</div>';
+      $('xp-meta').textContent = '';
+    }
+  };
+})();
+</script>
 
 <div class="page" id="page-types">
     <div class="topbar">
@@ -1979,7 +2280,7 @@ function showPage(id) {
   if (id==='types') loadTypesData();
   if (id==='beta-codes') loadBetaCodes();
 }
-const chartsInit = {overview:false,orders:false,packages:false,demographics:false,responses:false,satisfaction:false,fulfillment:false,feedback:false,types:false,'survey-explorer':false,'lmft-requests':false,'ux-views':true};
+const chartsInit = {overview:false,orders:false,packages:false,demographics:false,responses:false,satisfaction:false,fulfillment:false,feedback:false,types:false,'survey-explorer':false,'lmft-requests':false,'ux-views':true,'explore':true};
 // ── Feedback tab switcher ─────────────────────────────
 function setFeedbackTab(el, targetId) {
   const card = el.closest('.chart-card');
