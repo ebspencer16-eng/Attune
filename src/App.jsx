@@ -1916,9 +1916,9 @@ function ProfileSetupTile({ account, onSetup, onDismiss }) {
           <div style={{ fontSize: '0.75rem', color: '#8C7A68', marginBottom: '1rem', lineHeight: 1.55 }}>Complete your profile so your results are personalized to you.</div>
           <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginBottom: '1rem' }}>
             {steps.map((s, i) => (
-              <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', fontSize: '0.72rem', color: s.comingSoon ? '#C17F47' : s.done ? '#059669' : '#8C7A68', background: s.comingSoon ? '#FFF8EE' : s.done ? '#ECFDF5' : '#F5F0EC', borderRadius: 99, padding: '0.25rem 0.7rem' }}>
-                <span>{s.done ? '✓' : s.comingSoon ? '○' : '·'}</span>
-                <span>{s.label}{s.comingSoon ? ' (coming soon)' : ''}</span>
+              <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', fontSize: '0.72rem', color: s.done ? '#059669' : '#8C7A68', background: s.done ? '#ECFDF5' : '#F5F0EC', borderRadius: 99, padding: '0.25rem 0.7rem' }}>
+                <span>{s.done ? '✓' : '·'}</span>
+                <span>{s.label}</span>
               </div>
             ))}
           </div>
