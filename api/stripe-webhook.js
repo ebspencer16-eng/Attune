@@ -343,7 +343,7 @@ async function handleWebhook(req) {
         const cardUrl = `${baseUrl}/qr-card-v5?pkg=${pkg}&names=${encodeURIComponent(namesStr)}&token=${encodeURIComponent(appUrl)}&orderId=${orderId}&version=${encodeURIComponent(version)}`;
         // Store card URL in order record for admin fulfillment
         const supabaseUrl = process.env.SUPABASE_URL;
-        const serviceKey = process.env.SUPABASE_SERVICE_KEY;
+        const serviceKey = process.env.SUPABASE_SERVICE_ROLE || process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_KEY;
         if (supabaseUrl && serviceKey && (meta.orderNum || intent.id)) {
           await fetch(`${supabaseUrl}/rest/v1/orders?order_num=eq.${encodeURIComponent(meta.orderNum || intent.id)}`, {
             method: 'PATCH',
