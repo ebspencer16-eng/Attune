@@ -66,6 +66,7 @@
 <meta name="twitter:title" content="Legal, Attune">
 <meta name="twitter:description" content="Privacy policy, terms of service, cookie policy, refund policy, data retention, and EULA for Attune.">
 <meta name="twitter:image" content="https://attune-relationships.com/og-image.png">
+  <link rel="stylesheet" href="/cart.css">
 </head>
 <body>
 <nav>
@@ -619,5 +620,6 @@ if (validDocs.includes(hash)) showDoc(hash);
 function toggleMenu(){var m=document.getElementById('mobile-menu');if(m)m.classList.toggle('open');}
 document.addEventListener('click',function(e){var menu=document.getElementById('mobile-menu');var burger=document.getElementById('hamburger');if(menu&&menu.classList.contains('open')&&!menu.contains(e.target)&&!burger.contains(e.target)){menu.classList.remove('open');}});
 </script>
+  <script src="/cart.js"></script>
 </body>
 </html>

@@ -482,6 +482,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;height:58px;background:rgba(
 .mm-sub{padding-left:1.25rem !important;font-size:.85rem !important;border-bottom:none !important;font-style:italic;color:var(--muted)}
 @media(max-width:900px){nav{padding:0 1.25rem}.nav-center{display:none}.nav-right .btn-nav,.nav-signin{display:none}.hamburger{display:flex}}
 </style>
+  <link rel="stylesheet" href="/cart.css">
 </head>
 <body>
 <nav>
@@ -1094,5 +1095,6 @@ window.addEventListener('DOMContentLoaded', () => {
 function toggleMenu(){var m=document.getElementById('mobile-menu');if(m)m.classList.toggle('open');}
 document.addEventListener('click',function(e){var menu=document.getElementById('mobile-menu');var burger=document.getElementById('hamburger');if(menu&&menu.classList.contains('open')&&!menu.contains(e.target)&&!burger.contains(e.target)){menu.classList.remove('open');}});
 </script>
+  <script src="/cart.js"></script>
 </body>
 </html>
