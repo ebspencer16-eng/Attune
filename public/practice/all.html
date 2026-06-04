@@ -40,6 +40,7 @@
   .no-results{grid-column:1/-1;text-align:center;padding:3rem;color:var(--muted);font-size:.92rem}
   @media(max-width:640px){.articles-grid{grid-template-columns:1fr;padding:0 1.25rem 3rem}.tools-bar{padding:1.25rem 1.25rem .75rem}.cat-bar-inner{padding:0 1rem}.nav-links{display:none}.results-meta{padding:.5rem 1.25rem}}
 </style>
+  <link rel="stylesheet" href="/cart.css">
 </head>
 <body>
 <nav>
@@ -251,5 +252,6 @@ if (params.get('q')) {
 
 renderArticles();
 </script>
+  <script src="/cart.js"></script>
 </body>
 </html>
