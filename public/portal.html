@@ -697,38 +697,6 @@
         </div>
       </div>
 
-      <div class="divider"><span>or</span></div>
-      <button class="btn-demo" onclick="doDemo('core')">Continue with demo account</button>
-      <p class="auth-note" style="margin-top:.75rem;">See the full Attune experience with Sarah &amp; James</p>
-      <div style="margin-top:1.25rem;text-align:center;padding-top:1rem;border-top:1px solid var(--stone);">
-
-      </div>
-
-      <div style="margin-top:1.25rem;padding:1rem;background:#F8F5F0;border-radius:12px;border:1px solid var(--stone);">
-        <p style="font-size:.62rem;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);font-weight:700;margin-bottom:.75rem;text-align:center;">Explore demo by package</p>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:.5rem;">
-          <button class="pkg-demo-btn" onclick="doDemo('core')">
-            <span class="pkg-demo-badge" style="background:#FFF0EB;color:var(--orange);">Foundation</span>
-            <span class="pkg-demo-name">The Assessment</span>
-            <span class="pkg-demo-price">$89</span>
-          </button>
-          <button class="pkg-demo-btn" onclick="doDemo('newlywed')">
-            <span class="pkg-demo-badge" style="background:#FFE4D9;color:#c45c2a;">Starting Out</span>
-            <span class="pkg-demo-name">Starting Out Collection</span>
-            <span class="pkg-demo-price">from $109</span>
-          </button>
-          <button class="pkg-demo-btn" onclick="doDemo('anniversary')">
-            <span class="pkg-demo-badge" style="background:#EEEFFF;color:var(--indigo);">Anniversary</span>
-            <span class="pkg-demo-name">Relationship Reflection</span>
-            <span class="pkg-demo-price">from $129</span>
-          </button>
-          <button class="pkg-demo-btn" onclick="doDemo('premium')">
-            <span class="pkg-demo-badge" style="background:linear-gradient(135deg,#0f0c29,#1d1a4e);color:rgba(180,188,255,.9);">Premium</span>
-            <span class="pkg-demo-name">Attune Premium</span>
-            <span class="pkg-demo-price">$299</span>
-          </button>
-        </div>
-      </div>
       <div style="margin-top:1rem;text-align:center;">
 
       </div>
@@ -1272,12 +1240,6 @@ window._sparkFeedback = function(t) {
     } catch(e){}
   };
 
-function doDemo(pkg) {
-  const p = pkg || 'core';
-  // Clear any stale account so demo data loads cleanly
-  try { localStorage.removeItem('attune_account'); localStorage.removeItem('attune_order'); } catch(e) {}
-  window.location.href = '/app?pkg=' + p + '&demo=1';
-}
 async function doSignIn() {
   const email = document.getElementById('si-email').value.trim();
   const pwInput = document.querySelector('#form-si input[type="password"]');
@@ -1305,8 +1267,8 @@ async function doSignIn() {
     return;
   }
 
-  // Supabase not yet connected – inform user
-  errEl.textContent = 'Account sign-in is coming soon. Use the demo account below to explore Attune.';
+  // Supabase client failed to load. Inform the user.
+  errEl.textContent = 'We could not reach the server. Refresh and try again.';
   errEl.style.display = 'block';
   btn.disabled = false; btn.textContent = 'Sign in →';
 }
