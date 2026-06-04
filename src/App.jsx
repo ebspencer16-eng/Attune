@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useLayoutEffect, useRef } from "react";
 import { axisScores } from "../api/_type-engine.js";
-import { PERSONALITY_QUESTIONS } from "../api/_questions.js";
+import { PERSONALITY_QUESTIONS, RESPONSIBILITY_CATEGORIES, LIFE_QUESTIONS } from "../api/_questions.js";
 
 
 // ── Mobile detection hook ─────────────────────────────────────────────────────
@@ -2236,103 +2236,11 @@ function substName(s, userName, partnerName) {
   return String(s).replace(/\{userName\}/g, userName || "").replace(/\{partnerName\}/g, partnerName || "");
 }
 
-const RESPONSIBILITY_CATEGORIES = [
-  {
-    id: "household", label: "Household",
-    items: [
-      "Cooking meals",
-      "Grocery shopping and meal planning",
-      "Keeping the home tidy day-to-day",
-      "Managing home repairs and maintenance",
-      "Managing the family calendar",
-      "Planning and organizing social events, holidays, and gatherings",
-      "Planning and booking vacations",
-    ],
-  },
-  {
-    id: "financial", label: "Financial",
-    items: [
-      "Paying bills and managing day-to-day finances",
-      "Making major financial decisions",
-      "Managing savings and investments",
-      "Filing taxes",
-    ],
-  },
-  {
-    id: "career", label: "Career & Work",
-    items: [
-      "Being the primary income earner",
-      "Whose career shapes major family decisions, where you live, your schedule, your lifestyle",
-      "Who makes career sacrifices when the family needs it",
-    ],
-  },
-  {
-    id: "extended_family", label: "Extended Family",
-    items: [
-      "Planning visits with {userName}'s family",
-      "Gifting for {userName}'s family",
-      "Staying in touch with {userName}'s family",
-      "Planning visits with {partnerName}'s family",
-      "Gifting for {partnerName}'s family",
-      "Staying in touch with {partnerName}'s family",
-    ],
-  },
-  {
-    id: "emotional", label: "Emotional Labor",
-    items: [
-      "Carrying the mental load, remembering, anticipating, planning ahead",
-      "Tracking the emotional wellbeing of the household",
-      "Maintaining closeness and emotional intimacy over time",
-      "Initiating difficult conversations",
-      "Being the first to reach out after conflict",
-    ],
-  },
-];
+// RESPONSIBILITY_CATEGORIES now lives in api/_questions.js (single source of truth).
 
 // FIXED_CATS is the same structure — used for sidebar navigation in results
 // Options arrays mirror the source-of-truth in scripts/_expectations_variants.mjs
-const LIFE_QUESTIONS = [
-  { id: "lq_children",     category: "Family", text: "Children",
-    options: ["Not part of my future", "Uncertain", "Open to it", "Important to me, I want at least one", "Central to my future"] },
-  { id: "lq_inperson_user", category: "Family", text: "Time we spend in person with {userName}'s family",
-    options: ["Rarely, by design", "A few times a year", "Several times a year", "Often, regular visits", "Very often, deeply integrated"] },
-  { id: "lq_contact_user",  category: "Family", text: "Day-to-day contact and involvement with {userName}'s family",
-    options: ["Minimal contact", "Occasional check-ins", "Regular contact", "Daily or near-daily", "Closely involved in our lives"] },
-  { id: "lq_inperson_partner", category: "Family", text: "Time we spend in person with {partnerName}'s family",
-    options: ["Rarely, by design", "A few times a year", "Several times a year", "Often, regular visits", "Very often, deeply integrated"] },
-  { id: "lq_contact_partner",  category: "Family", text: "Day-to-day contact and involvement with {partnerName}'s family",
-    options: ["Minimal contact", "Occasional check-ins", "Regular contact", "Daily or near-daily", "Closely involved in our lives"] },
-  { id: "lq_family_conf",  category: "Family", text: "When family and partner conflict",
-    options: ["Side with partner", "Mediate fairly", "Defend family if right", "Keep the peace"] },
-  { id: "lq_location",     category: "Lifestyle", text: "Where we live",
-    options: ["Rooted where I am", "Strong preference, open to discussion", "Wherever makes sense for both", "Genuinely open"] },
-  { id: "lq_social",       category: "Lifestyle", text: "Social life and friendships",
-    options: ["Mostly just us", "Quiet default", "Healthy balance", "Pretty social", "Very social"] },
-  { id: "lq_routine",      category: "Lifestyle", text: "Day-to-day rhythms and routines",
-    options: ["Need a lot of structure", "Prefer loose rhythm", "Adapt easily", "Prefer open", "Resist routine"] },
-  { id: "lq_faith",        category: "Values", text: "Faith and spirituality",
-    options: ["Plays no role", "Personal, wouldn't shape shared life", "Present but not imposed", "Meaningful role", "Central"] },
-  { id: "lq_values",       category: "Values", text: "Core values and beliefs",
-    options: ["Simply respect each other's views", "Share broadly similar values", "Be closely aligned", "Be deeply aligned"] },
-  { id: "lq_finances",     category: "Money", text: "How we manage money",
-    options: ["Fully separate", "Mostly separate, shared account for shared expenses", "Mostly combined", "Fully combined"] },
-  { id: "lq_money_lean",   category: "Money", text: "Saving vs. spending orientation",
-    options: ["Strongly saving", "Lean toward saving", "Neither", "Lean toward spending", "Fully in the present"] },
-  { id: "lq_money_risk",   category: "Money", text: "Financial risk tolerance",
-    options: ["Very conservative", "Cautious but open", "Comfortable with thought-through risk", "Lean toward risk", "Drawn to bold moves"] },
-  { id: "lq_conflict_when",  category: "Conflict", text: "When to address conflict",
-    options: ["Address immediately", "Bring up soon", "Wait for right moment", "Take significant space", "Let things go"] },
-  { id: "lq_conflict_after", category: "Conflict", text: "How long conflict resolution takes",
-    options: ["Air clears quickly", "Little space, same day", "Need a night or two", "Need several days", "Varies a lot"] },
-  { id: "lq_conflict_repair",category: "Conflict", text: "What repair looks like",
-    options: ["Direct explicit apology", "Partner understands what happened", "Warmth returns", "Moving forward together"] },
-  { id: "lq_affection",    category: "Connection", text: "Physical affection and touch",
-    options: ["Essential", "Very important", "Nice but not needed consistently", "Comfortable with less", "Reserved"] },
-  { id: "lq_closeness",    category: "Connection", text: "Closeness during hard times",
-    options: ["Need more closeness", "Steady need", "Pull back and need space", "Varies a lot"] },
-  { id: "lq_independence", category: "Connection", text: "Individual independence",
-    options: ["Matters enormously", "Important but flexible", "Don't think about it much", "Want less, prefer shared life"] },
-];
+// LIFE_QUESTIONS now lives in api/_questions.js (single source of truth).
 
 
 // FIXED_CATS: the 5 display categories for Expectations results

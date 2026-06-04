@@ -2,18 +2,22 @@
 // Builds an anonymized, partner-linked, pooled per-respondent dataset (a "cube")
 // for the admin Explore crosstab tool. One row per respondent (every profile with
 // Exercise 1 answers), pooled across Partner A and Partner B. Each row carries the
-// respondent's own answers/scores/type/demographics. Partner attributes are
+// respondent's own answers/scores/type/demographics + Exercise 2 expectations
+// (life questions and who-does-what responsibilities). Partner attributes are
 // denormalized onto the row at request time via partner_profile_id and exposed to
 // the client as p_<field>, so any datapoint can be cut by the partner's attributes.
-// No names or emails ever leave the server. An anonymous couple_id (hash of the
-// sorted profile-id pair) lets the client pair rows for correlation without identity.
+//
+// Responsibility values are stored as the partners' actual names. They are normalized
+// server-side to Me / Partner / Both / N/A using profile.name and profile.partner_name,
+// and the names are then dropped. No names or emails ever leave the server. An
+// anonymous couple_id (hash of the sorted profile-id pair) lets the client pair rows
+// for correlation without identity.
 //
 // Auth + access mirror the other admin endpoints: ?secret=ADMIN_SECRET + service key.
 
 import { createClient } from '@supabase/supabase-js';
 import { calcDimScores, axisScores, typeCodeFromAxes, DIM_KEYS } from './_type-engine.js';
-import { PERSONALITY_QUESTIONS } from './_questions.js';
-import { LIFE_QUESTION_OPTIONS } from './_workbook-content.js';
+import { PERSONALITY_QUESTIONS, LIFE_QUESTIONS, RESPONSIBILITY_CATEGORIES } from './_questions.js';
 
 const json = (obj, status = 200) =>
   new Response(JSON.stringify(obj), {
@@ -32,13 +36,20 @@ const DEMO_LABELS = {
   relationship_length: 'Time together', children: 'Children', signup_source: 'Signup source',
 };
 const DEMO_KEYS = Object.keys(DEMO_LABELS);
-const LIFE_KEYS = Object.keys(LIFE_QUESTION_OPTIONS);
+const RESP_OPTS = ['Me', 'Partner', 'Both', 'N/A'];
 
 // First sentence / clause, trimmed — used to label the two poles of a scale question.
 const shortPole = (t) => {
   const c = String(t || '').split('.')[0].trim();
   return c.length > 30 ? c.slice(0, 28) + '…' : c;
 };
+// Strip the {userName}/{partnerName} templates to a neutral, name-free label.
+const genericLabel = (t) =>
+  String(t || '')
+    .replace(/\{userName\}'s/g, 'your')
+    .replace(/\{partnerName\}'s/g, "partner's")
+    .replace(/\{userName\}/g, 'you')
+    .replace(/\{partnerName\}/g, 'partner');
 
 // Tiny non-reversible hash of the sorted id pair → anonymous couple key.
 const coupleHash = (a, b) => {
@@ -67,8 +78,28 @@ function ownFields(p) {
     const v = p.ex1_answers ? p.ex1_answers[q.id] : null;
     r['q_' + q.id] = v != null && !isNaN(v) ? Number(v) : null;
   }
-  const lq = (p.ex2_answers && p.ex2_answers.lifeQuestions && p.ex2_answers.lifeQuestions.user) || {};
-  for (const k of LIFE_KEYS) r['lq_' + k] = lq[k] != null && lq[k] !== '' ? lq[k] : null;
+  // Ex2 life questions: stored flat under ex2_answers.life
+  const life = (p.ex2_answers && p.ex2_answers.life) || {};
+  for (const lq of LIFE_QUESTIONS) r[lq.id] = life[lq.id] != null && life[lq.id] !== '' ? life[lq.id] : null;
+  // Ex2 responsibilities: stored flat under ex2_answers.responsibilities, keyed
+  // `categoryId__item`. Values are names — normalize to Me/Partner/Both/N/A here.
+  const resp = (p.ex2_answers && p.ex2_answers.responsibilities) || {};
+  const me = (p.name || '').trim();
+  const partner = (p.partner_name || '').trim();
+  const norm = (v) => {
+    if (v == null || v === '') return null;
+    if (v === 'Both of us') return 'Both';
+    if (v === "Doesn't apply to us") return 'N/A';
+    if (me && v === me) return 'Me';
+    if (partner && v === partner) return 'Partner';
+    return 'Partner'; // any other name-like value belongs to the partner
+  };
+  for (const cat of RESPONSIBILITY_CATEGORIES) {
+    cat.items.forEach((item, i) => {
+      const realItem = item.replace(/\{userName\}/g, me).replace(/\{partnerName\}/g, partner);
+      r['resp_' + cat.id + '_' + i] = norm(resp[cat.id + '__' + realItem]);
+    });
+  }
   return r;
 }
 
@@ -77,10 +108,11 @@ const PARTNERABLE = [
   'type', 'axisEngage', 'axisOpen', ...DEMO_KEYS,
   ...Object.keys(DIM_KEYS).map((d) => 'dim_' + d),
   ...PERSONALITY_QUESTIONS.map((q) => 'q_' + q.id),
-  ...LIFE_KEYS.map((k) => 'lq_' + k),
+  ...LIFE_QUESTIONS.map((lq) => lq.id),
+  ...RESPONSIBILITY_CATEGORIES.flatMap((c) => c.items.map((_, i) => 'resp_' + c.id + '_' + i)),
 ];
 
-function buildCatalog(lifeMeta) {
+function buildCatalog() {
   const f = [];
   f.push({ key: 'type', label: 'Individual type', group: 'Type & axes', kind: 'cat',
     options: Object.entries(TYPE_LABELS).map(([v, label]) => ({ v, label })), partnerable: true });
@@ -96,10 +128,11 @@ function buildCatalog(lifeMeta) {
   for (const k of DEMO_KEYS) f.push({ key: k, label: DEMO_LABELS[k], group: 'Demographics', kind: 'cat', partnerable: true });
   for (const dim of Object.keys(DIM_KEYS)) f.push({ key: 'dim_' + dim, label: DIM_LABELS[dim] || dim, group: 'Dimensions (score 1–5)', kind: 'scale', partnerable: true });
   for (const q of PERSONALITY_QUESTIONS) f.push({ key: 'q_' + q.id, label: q.text, group: 'Ex1 · Communication (1–5)', kind: 'scale', poleLow: shortPole(q.a), poleHigh: shortPole(q.b), partnerable: true });
-  for (const k of LIFE_KEYS) {
-    const m = lifeMeta[k] || {};
-    const label = m.topic ? (m.category ? m.category + ' · ' + m.topic : m.topic) : k;
-    f.push({ key: 'lq_' + k, label, group: 'Ex2 · Expectations', kind: 'cat', options: (LIFE_QUESTION_OPTIONS[k] || []).map((v) => ({ v, label: v })), partnerable: true });
+  for (const lq of LIFE_QUESTIONS) f.push({ key: lq.id, label: (lq.category ? lq.category + ' · ' : '') + genericLabel(lq.text), group: 'Ex2 · Life & values', kind: 'cat', options: (lq.options || []).map((v) => ({ v, label: v })), partnerable: true });
+  for (const cat of RESPONSIBILITY_CATEGORIES) {
+    cat.items.forEach((item, i) => {
+      f.push({ key: 'resp_' + cat.id + '_' + i, label: cat.label + ' · ' + genericLabel(item), group: 'Ex2 · Who does what', kind: 'cat', options: RESP_OPTS.map((v) => ({ v, label: v })), partnerable: true });
+    });
   }
   return f;
 }
@@ -120,18 +153,12 @@ export default async function handler(req) {
     if (error) return json({ error: error.message }, 500);
 
     const hasEx1 = (p) => p && p.ex1_answers && Object.keys(p.ex1_answers).length > 0;
-    const byId = {};
-    for (const p of profiles) byId[p.id] = p;
 
     // Pass 1: own fields for every respondent who took Exercise 1.
     const computed = {};
-    let lifeMeta = {};
     for (const p of profiles) {
       if (!hasEx1(p)) continue;
       computed[p.id] = ownFields(p);
-      if (!Object.keys(lifeMeta).length && p.ex2_answers && p.ex2_answers.lifeQuestions && p.ex2_answers.lifeQuestions.meta) {
-        lifeMeta = p.ex2_answers.lifeQuestions.meta;
-      }
     }
 
     // Pass 2: pairing + partner denormalization.
@@ -155,7 +182,7 @@ export default async function handler(req) {
       generatedAt: new Date().toISOString(),
       count: rows.length,
       paired: rows.filter((r) => r.couple_id).length,
-      fields: buildCatalog(lifeMeta),
+      fields: buildCatalog(),
       rows,
     });
   } catch (e) {
