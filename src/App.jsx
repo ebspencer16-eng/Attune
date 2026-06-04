@@ -8175,7 +8175,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
                   <a href="/offerings#pkg-premium" style={{ display: "flex", flexDirection: "column", gap: "0.4rem", background: "rgba(91,109,248,.06)", border: "1.5px solid rgba(91,109,248,.2)", borderRadius: 14, padding: "1rem 1.1rem", textDecoration: "none" }}>
                     <div style={{ width: 18, height: 18, borderRadius: 4, background: "rgba(91,109,248,0.35)" }} />
                     <div style={{ fontSize: "0.82rem", fontWeight: 700, color: C.ink, fontFamily: BFONT }}>Premium Package</div>
-                    <p style={{ fontSize: "0.72rem", color: C.muted, fontFamily: BFONT, lineHeight: 1.55, margin: 0 }}>Includes LMFT session, budget tool, and everything in the core package.</p>
+                    <p style={{ fontSize: "0.72rem", color: C.muted, fontFamily: BFONT, lineHeight: 1.55, margin: 0 }}>Includes LMFT session, budget tool, and everything in the Attune Assessment.</p>
                     <span style={{ fontSize: "0.72rem", color: "#5B6DF8", fontWeight: 700, fontFamily: BFONT, marginTop: "0.25rem" }}>Learn more →</span>
                   </a>
                 )}
