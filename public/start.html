@@ -73,6 +73,10 @@ nav{position:sticky;top:0;z-index:100;height:58px;background:rgba(255,253,249,.9
 .pkg-cell-popular{display:flex;flex-direction:column;gap:.4rem;align-self:end;height:100%}
 .pkg-cell-popular > .pkg-tile{flex:1}
 .popular-tagline{font-family:var(--bfont);font-size:.65rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--orange);text-align:center;margin:0;padding:.1rem 0}
+.pkg-name-row{display:flex;align-items:baseline;gap:.5rem;flex-wrap:wrap;margin-bottom:.35rem}
+.pkg-name-row .pkg-name{margin-bottom:0}
+.popular-inline{display:none;font-family:var(--bfont);font-size:.58rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--orange);white-space:nowrap}
+@media(max-width:500px){.popular-tagline{display:none}.popular-inline{display:inline}}
 
 /* ADD-ONS */
 .addons-section{max-width:1080px;margin:0 auto;padding:0 1.5rem 2rem}
@@ -242,7 +246,8 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;height:58px;background:rgba(
       <li>Communication assessment</li>
       <li>Expectations comparison</li>
       <li>Couple type + map</li>
-      <li>Results portal – yours to keep</li>
+      <li>Results portal, yours to keep</li>
+      <li class="gift-feat">Gift box</li>
     </ul>
     <a class="more-info-link" onclick="openSidebar('core',event)">More info →</a>
   </div>
@@ -255,14 +260,14 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;height:58px;background:rgba(
         <svg width="11" height="9" viewBox="0 0 11 9" fill="none"><path d="M1 4.5L4 7.5L10 1" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </div>
     <span class="pkg-badge" style="background:#FFF0EB;color:#E8673A;">Starting Out</span>
-    <div class="pkg-name">Starting Out Collection</div>
+    <div class="pkg-name-row"><div class="pkg-name">Starting Out Collection</div><span class="popular-inline">Most popular</span></div>
     <div class="pkg-price" id="price-newlywed">$174</div>
     <div class="pkg-price-sub" id="pricesub-newlywed">Physical gift box · shipping included</div>
     <ul class="pkg-features">
-      <li class="bold-feat">Core exercises</li>
+      <li class="bold-feat">Attune Assessment</li>
       <li>Starting Out Checklist</li>
-      <li>Budget priorities exercise</li>
-      <li>Gift box</li>
+      <li>Build a Budget tool</li>
+      <li class="gift-feat">Gift box</li>
     </ul>
     <a class="more-info-link" onclick="openSidebar('newlywed',event)">More info →</a>
     </div>
@@ -278,9 +283,9 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;height:58px;background:rgba(
     <div class="pkg-price" id="price-anniversary">$174</div>
     <div class="pkg-price-sub" id="pricesub-anniversary">Physical gift box · shipping included</div>
     <ul class="pkg-features">
-      <li class="bold-feat">Core exercises</li>
+      <li class="bold-feat">Attune Assessment</li>
       <li>Relationship Reflection exercise</li>
-      <li>Gift box</li>
+      <li class="gift-feat">Gift box</li>
     </ul>
     <a class="more-info-link" onclick="openSidebar('anniversary',event)">More info →</a>
   </div>
@@ -295,10 +300,10 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;height:58px;background:rgba(
     <div class="pkg-price" id="price-premium">$330</div>
     <div class="pkg-price-sub" id="pricesub-premium">Physical gift box · shipping included</div>
     <ul class="pkg-features">
-      <li class="bold-feat">Core exercises</li>
+      <li class="bold-feat">Attune Assessment</li>
       <li>LMFT session included</li>
       <li>Personalized workbook</li>
-      <li>Premium gift box</li>
+      <li class="gift-feat">Gift box</li>
     </ul>
     <a class="more-info-link" onclick="openSidebar('premium',event)">More info →</a>
   </div>
@@ -320,7 +325,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;height:58px;background:rgba(
       </div>
       <div class="addon-body">
         <div class="addon-name">Personalized Workbook</div>
-        <div class="addon-desc">A custom workbook built from your results – exercises, insights, and conversation starters tailored to your couple type.</div>
+        <div class="addon-desc">A custom workbook built from your results. Exercises, insights, and conversation starters tailored to your couple type.</div>
         <div class="addon-price" id="wb-price">+$19</div>
         <div class="workbook-variants" id="wb-variants">
           <button class="wb-var active" id="wv-digital" onclick="setWbFormat('digital',event)">Digital PDF – $19</button>
@@ -335,8 +340,8 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;height:58px;background:rgba(
         <svg width="10" height="8" viewBox="0 0 11 9" fill="none"><path d="M1 4.5L4 7.5L10 1" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </div>
       <div class="addon-body">
-        <div class="addon-name">Budget Priorities Exercise</div>
-        <div class="addon-desc">Map what each of you values spending on and where your instincts differ. Included in Starting Out – add it to any other package here.</div>
+        <div class="addon-name">Build a Budget tool</div>
+        <div class="addon-desc">Map what each of you values spending on and where your instincts differ. Included in Starting Out. Add it to any other package here.</div>
         <div class="addon-price">+$20</div>
       </div>
     </div>
@@ -348,7 +353,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;height:58px;background:rgba(
       </div>
       <div class="addon-body">
         <div class="addon-name">Relationship Reflection Exercise</div>
-        <div class="addon-desc">A third exercise capturing the moments that shaped your relationship, your shared story, and where you're pointed together. Included in Relationship Reflection – add it to any other package here.</div>
+        <div class="addon-desc">A third exercise capturing the moments that shaped your relationship, your shared story, and where you're pointed together. Included in Relationship Reflection. Add it to any other package here.</div>
         <div class="addon-price">+$40</div>
       </div>
     </div>
@@ -360,7 +365,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;height:58px;background:rgba(
       </div>
       <div class="addon-body">
         <div class="addon-name">LMFT Session</div>
-        <div class="addon-desc">A 50-minute video session with a licensed marriage and family therapist to go deeper on your results.</div>
+        <div class="addon-desc">A 50-minute video session with a licensed marriage and family therapist to review and discuss your results.</div>
         <div class="addon-price">+$150</div>
       </div>
     </div>
@@ -412,6 +417,7 @@ function setFormat(f) {
     document.getElementById('price-' + id).textContent = '$' + PRICES[id][f];
     document.getElementById('pricesub-' + id).textContent = f === 'physical' ? PHYSICAL_SUB : DIGITAL_SUB;
   });
+  document.querySelectorAll('.gift-feat').forEach(function(el){ el.style.display = (f === 'physical') ? '' : 'none'; });
   updateBar();
 }
 
@@ -562,7 +568,7 @@ const PKG_DETAILS = {
         title: 'Starting Out additions',
         items: [
           { label: 'Starting Out Checklist', desc: 'A structured reference for couples merging lives – finances, wills, insurance, household decisions, and what to align on before it becomes a conflict.', dot: 'extra' },
-          { label: 'Budget priorities exercise', desc: "A guided exercise for mapping what each of you values spending on, and where your instincts differ. Most couples find at least one thing they didn't expect.", dot: 'extra' },
+          { label: 'Build a Budget tool', desc: "A guided exercise for mapping what each of you values spending on, and where your instincts differ. Most couples find at least one thing they didn't expect.", dot: 'extra' },
           { label: 'Gift box', desc: 'Beautifully designed physical box with your personalized QR card.', dot: 'extra' },
         ]
       }
@@ -612,7 +618,7 @@ const PKG_DETAILS = {
         items: [
           { label: 'LMFT session – 50 minutes', desc: "A licensed marriage and family therapist reviews your joint results before your session. This means the conversation starts from what's actually in your results – not from scratch.", dot: 'premium' },
           { label: 'Personalized workbook', desc: 'A structured PDF built from your actual results – conversation starters, reflection exercises, and growth prompts drawn from your specific couple type and dimension gaps.', dot: 'premium' },
-          { label: 'Premium gift box', desc: 'Premium packaging with your personalized QR card.', dot: 'premium' },
+          { label: 'Gift box', desc: 'Beautifully designed physical box with your personalized QR card.', dot: 'premium' },
         ]
       }
     ]

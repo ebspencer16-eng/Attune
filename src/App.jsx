@@ -12612,7 +12612,7 @@ export default function App() {
                     Keep going.
                   </h1>
                   <p style={{ fontSize: "0.9rem", color: "#8C7A68", lineHeight: 1.7, fontFamily: font.body, fontWeight: 300, maxWidth: 480 }}>
-                    Tools to go deeper with your results, and reading to help you understand each other better.
+                    Tools to work through your results, and reading to help you understand each other better.
                   </p>
                 </div>
 
@@ -12840,7 +12840,7 @@ export default function App() {
                       "Conversation starters drawn from your specific dimension gaps",
                       "Reflection activities built around your couple type and patterns",
                       "Guided exercises for the expectation areas where you diverged most",
-                      "A structured format for going deeper together, at your own pace",
+                      "A structured format to work through together, at your own pace",
                     ].map(item => (
                       <div key={item} style={{ display: "flex", alignItems: "flex-start", gap: "0.75rem" }}>
                         <div style={{ width: 18, height: 18, borderRadius: "50%", background: "linear-gradient(135deg, #E8673A, #9B5DE5)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, marginTop: 1 }}>
