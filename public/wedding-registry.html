@@ -69,8 +69,7 @@
   .mobile-menu .mm-cta{background:var(--ink);color:white;text-align:center;border-radius:8px;padding:.75rem;border:none;margin-top:.5rem}
   .mobile-menu.open{display:flex}
   @media(max-width:780px){
-    .nav-center,.btn-nav,.nav-signin{display:none}
-    .hamburger{display:flex}
+    .nav-signin{display:none}
     .nav-right{gap:.75rem}
   }
 
@@ -312,49 +311,11 @@
     <svg width="46" height="33" viewBox="0 0 103 76" fill="none" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="wrlogo" x1="0" y1="0" x2="103" y2="76" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#E8673A"/><stop offset="100%" stop-color="#1B5FE8"/></linearGradient></defs><path d="M14,4 L44,4 A9,9 0 0,1 53,13 L53,42 A9,9 0 0,1 44,51 L20,51 L6,61 L11,51 A6,6 0 0,1 5,45 L5,13 A9,9 0 0,1 14,4 Z" fill="url(#wrlogo)"/><path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill="white" opacity="0.93" transform="translate(13.16,11.3) scale(0.72)"/><path d="M89,14 L59,14 A9,9 0 0,0 50,23 L50,52 A9,9 0 0,0 59,61 L83,61 L97,71 L92,61 A6,6 0 0,0 98,55 L98,23 A9,9 0 0,0 89,14 Z" fill="white" stroke="url(#wrlogo)" stroke-width="2.2" stroke-linejoin="round"/><path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill="url(#wrlogo)" transform="translate(58.16,21.3) scale(0.72)"/></svg>
     <span class="logo-text">Attune</span>
   </a>
-  <ul class="nav-center">
-    <li><a href="/home">Home</a></li>
-    <li class="nav-dropdown">
-      <button class="nav-dropdown-toggle">Learn <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg></button>
-      <div class="nav-dropdown-menu">
-        <a href="/purpose">Our Purpose</a>
-        <div class="dd-divider"></div>
-        <a href="/practice">In Practice</a>
-        <a href="/faq">FAQs</a>
-      </div>
-    </li>
-    <li class="nav-dropdown">
-      <button class="nav-dropdown-toggle active">Browse <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg></button>
-      <div class="nav-dropdown-menu">
-        <a href="/offerings">Browse Packages</a>
-        <a href="/wedding-registry" class="active">Wedding Registry</a>
-      </div>
-    </li>
-  </ul>
   <div class="nav-right">
     <a href="/portal" class="nav-signin">Sign in</a>
     <a href="/portal" class="btn-nav">Get started</a>
-    <button class="hamburger" id="hamburger" onclick="toggleMenu()" aria-label="Menu">
-      <span></span><span></span><span></span>
-    </button>
   </div>
 </nav>
-<div class="mobile-menu" id="mobile-menu">
-  <a href="/home">Home</a>
-  <div class="mm-section">
-    <span class="mm-label">Learn</span>
-    <a href="/purpose" class="mm-sub">Our Purpose</a>
-    <a href="/practice" class="mm-sub">In Practice</a>
-    <a href="/faq" class="mm-sub">FAQs</a>
-  </div>
-  <div class="mm-section">
-    <span class="mm-label">Browse</span>
-    <a href="/offerings" class="mm-sub">Browse Packages</a>
-    <a href="/wedding-registry" class="mm-sub" style="color:var(--ink);font-weight:600">Wedding Registry</a>
-  </div>
-  <a href="/portal">Sign in</a>
-  <a href="/portal" class="mm-cta">Get started →</a>
-</div>
 
 <div class="page-header">
   <div class="page-header-glow"></div>
@@ -509,10 +470,6 @@
   </div>
 
   <div class="cta-row">
-    <a href="#platforms" class="btn-hero-primary">
-      Add Attune to your registry
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
-    </a>
     <a href="/contact" class="btn-secondary-link">Questions? Get in touch →</a>
   </div>
 
@@ -521,8 +478,8 @@
 <!-- Standard end-of-page CTA section, matches FAQ + other pages -->
 <div class="cta-wrap">
   <div class="cta-inner">
-    <h2 class="cta-title">A gift that gets <em>used.</em></h2>
-    <p class="cta-sub">Two exercises. About 25 minutes each. The conversation it sparks is the part that lasts.</p>
+    <h2 class="cta-title">Register for a gift that you'll use <em>every day.</em></h2>
+    <p class="cta-sub">Two exercises. About 25 minutes each. Spark meaningful conversations and live attuned.</p>
     <div class="cta-actions">
       <a href="#platforms" class="btn-hero-primary">
         Add Attune to your registry
