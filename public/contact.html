@@ -53,12 +53,39 @@
 </head>
 <body>
 <nav>
-  <a href="/home" class="logo">
-    <svg width="36" height="26" viewBox="0 0 103 76" fill="none" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="nav_g" x1="0" y1="0" x2="103" y2="76" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#E8673A"/><stop offset="100%" stop-color="#1B5FE8"/></linearGradient></defs><path d="M14,4 L44,4 A9,9 0 0,1 53,13 L53,42 A9,9 0 0,1 44,51 L20,51 L6,61 L11,51 A6,6 0 0,1 5,45 L5,13 A9,9 0 0,1 14,4 Z" fill="url(#nav_g)"/><path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill="white" opacity="0.93" transform="translate(13.16,11.3) scale(0.72)"/><path d="M89,14 L59,14 A9,9 0 0,0 50,23 L50,52 A9,9 0 0,0 59,61 L83,61 L97,71 L92,61 A6,6 0 0,0 98,55 L98,23 A9,9 0 0,0 89,14 Z" fill="white" stroke="url(#nav_g)" stroke-width="2.2" stroke-linejoin="round"/><path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill="url(#nav_g)" transform="translate(58.16,21.3) scale(0.72)"/></svg>
-    <span class="logo-text">Attune</span>
-  </a>
-  <a href="/offerings" class="nav-cta">Get started</a>
+  <a href="/home" class="logo"><svg width="46" height="33" viewBox="0 0 103 76" fill="none" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="spark_logo_0_2" x1="0" y1="0" x2="103" y2="76" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#E8673A"/><stop offset="100%" stop-color="#1B5FE8"/></linearGradient></defs><path d="M14,4 L44,4 A9,9 0 0,1 53,13 L53,42 A9,9 0 0,1 44,51 L20,51 L6,61 L11,51 A6,6 0 0,1 5,45 L5,13 A9,9 0 0,1 14,4 Z" fill="url(#spark_logo_0_2)"/><path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill="white" opacity="0.93" transform="translate(13.16,11.3) scale(0.72)"/><path d="M89,14 L59,14 A9,9 0 0,0 50,23 L50,52 A9,9 0 0,0 59,61 L83,61 L97,71 L92,61 A6,6 0 0,0 98,55 L98,23 A9,9 0 0,0 89,14 Z" fill="white" stroke="url(#spark_logo_0_2)" stroke-width="2.2" stroke-linejoin="round"/><path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill="url(#spark_logo_0_2)" transform="translate(58.16,21.3) scale(0.72)"/></svg><span class="logo-text">Attune</span></a>
+  <ul class="nav-center">
+    <li><a href="/home">Home</a></li>
+    <li class="nav-dropdown">
+      <button class="nav-dropdown-toggle">Learn <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg></button>
+      <div class="nav-dropdown-menu">
+        <a href="/purpose">Our Purpose</a>
+        <div class="dd-divider"></div>
+        <a href="/practice">In Practice</a>
+        <a href="/faq">FAQs</a>
+      </div>
+    </li>
+    <li class="nav-dropdown">
+      <button class="nav-dropdown-toggle">Browse <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg></button>
+      <div class="nav-dropdown-menu">
+        <a href="/offerings">Browse Packages</a>
+        <a href="/wedding-registry">Wedding Registry</a>
+      </div>
+    </li>
+  </ul>
+  <div class="nav-right">
+    <a href="/portal" class="nav-signin">Sign in</a>
+    <a href="/start" class="btn-nav">Get started</a>
+    <button class="hamburger" id="hamburger" onclick="toggleMenu()" aria-label="Menu"><span></span><span></span><span></span></button>
+  </div>
 </nav>
+<div class="mobile-menu" id="mobile-menu">
+  <a href="/home">Home</a>
+  <div class="mm-section"><span class="mm-label">Learn</span><a href="/purpose" class="mm-sub">Our Purpose</a><a href="/practice" class="mm-sub">In Practice</a><a href="/faq" class="mm-sub">FAQs</a></div>
+  <div class="mm-section"><span class="mm-label">Browse</span><a href="/offerings" class="mm-sub">Browse Packages</a><a href="/wedding-registry" class="mm-sub">Wedding Registry</a></div>
+  <a href="/portal">Sign in</a>
+  <a href="/start" class="mm-cta">Get started &#8594;</a>
+</div>
 
 <div class="wrap">
   <p style="font-size:.62rem;letter-spacing:.28em;text-transform:uppercase;color:var(--clay);font-weight:700;margin-bottom:.65rem;">Get in touch</p>
@@ -154,7 +181,44 @@ async function submitContact() {
       .site-footer .sf-bottom{padding:1rem 1.25rem 0!important;flex-direction:column!important;align-items:flex-start!important;gap:.3rem!important}
       .site-footer .sf-copy,.site-footer .sf-email{font-size:.7rem!important}
     }
-  </style>
+  
+/* === Canonical site nav (ported from home) === */
+nav{position:fixed;top:0;left:0;right:0;z-index:100;height:58px;background:rgba(255,253,249,.94);backdrop-filter:blur(16px);border-bottom:1px solid var(--stone);display:flex;align-items:center;padding:0 2.5rem;justify-content:space-between}
+.logo{display:flex;align-items:center;gap:.65rem;text-decoration:none}
+.logo-text{font-family:var(--hfont);font-size:1.15rem;font-weight:700;color:var(--ink)}
+.nav-center{display:flex;gap:2.5rem;list-style:none;position:absolute;left:50%;transform:translateX(-50%);align-items:center}
+.nav-center li{display:flex;align-items:center}
+.nav-center a{text-decoration:none;color:var(--muted);font-size:.82rem;font-weight:500;transition:color .15s}
+.nav-center a:hover{color:var(--ink)}
+.nav-dropdown{position:relative}
+.nav-dropdown-toggle{text-decoration:none;color:var(--muted);font-size:.82rem;font-weight:500;transition:color .15s;cursor:pointer;display:flex;align-items:center;gap:.28rem;background:none;border:none;padding:0;font-family:var(--bfont)}
+.nav-dropdown-toggle:hover,.nav-dropdown-toggle.active{color:var(--ink)}
+.nav-dropdown-toggle svg{transition:transform .2s}
+.nav-dropdown:hover .nav-dropdown-toggle svg{transform:rotate(180deg)}
+.nav-dropdown-menu{position:absolute;top:100%;left:50%;transform:translateX(-50%);background:rgba(255,253,249,.98);backdrop-filter:blur(16px);border:1.5px solid var(--stone);border-radius:14px;padding:.85rem .6rem .6rem;min-width:190px;opacity:0;visibility:hidden;pointer-events:none;transition:opacity .15s,visibility .15s;box-shadow:0 12px 40px rgba(14,11,7,.12);z-index:200;margin-top:.4rem}
+.nav-dropdown:hover .nav-dropdown-menu{opacity:1;visibility:visible;pointer-events:auto}
+.nav-dropdown-menu::before{content:'';position:absolute;top:-16px;left:-10px;right:-10px;height:16px;background:transparent}
+.nav-dropdown-menu a{display:block;padding:.55rem .8rem;font-size:.78rem;color:var(--muted);text-decoration:none;border-radius:8px;transition:all .15s;font-weight:500}
+.nav-dropdown-menu a:hover{background:var(--warm);color:var(--ink)}
+.nav-dropdown-menu .dd-divider{height:1px;background:var(--stone);margin:.35rem .5rem}
+.nav-center a.active{color:var(--ink);font-weight:600}
+.nav-right{display:flex;align-items:center;gap:1.25rem}
+.nav-signin{font-size:.8rem;font-weight:500;color:var(--muted);text-decoration:none;transition:color .15s}
+.nav-signin:hover{color:var(--ink)}
+.btn-nav{background:var(--ink);color:#fff;padding:.5rem 1.2rem;border-radius:10px;font-size:.78rem;font-weight:600;text-decoration:none;display:inline-block;transition:opacity .15s}
+.btn-nav:hover{opacity:.82}
+.hamburger{display:none;flex-direction:column;gap:4px;background:none;border:none;cursor:pointer;padding:6px;border-radius:6px}
+.hamburger span{display:block;width:20px;height:2px;background:var(--ink);border-radius:2px;transition:all .25s}
+.mobile-menu{display:none;position:fixed;top:58px;right:1rem;left:auto;width:240px;background:rgba(255,253,249,.99);backdrop-filter:blur(20px);border:1.5px solid var(--stone);border-radius:14px;padding:1rem;z-index:200;flex-direction:column;gap:.15rem;box-shadow:0 12px 40px rgba(14,11,7,.14)}
+.mobile-menu.open{display:flex}
+.mobile-menu a{font-size:.85rem;font-weight:500;color:var(--muted);text-decoration:none;padding:.5rem .65rem;border-radius:8px;transition:all .15s;border-bottom:none}
+.mobile-menu a:hover{color:var(--ink);background:rgba(14,11,7,.04)}
+.mobile-menu .mm-cta{color:var(--orange);font-weight:700;background:none;border:none}
+.mm-section{display:flex;flex-direction:column;border-bottom:1px solid var(--stone);padding-bottom:.25rem;margin-bottom:.25rem}
+.mm-label{font-size:.58rem;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);font-weight:700;padding:.55rem 0 .2rem .75rem}
+.mm-sub{padding-left:1.25rem !important;font-size:.85rem !important;border-bottom:none !important;font-style:italic;color:var(--muted)}
+@media(max-width:900px){nav{padding:0 1.25rem}.nav-center{display:none}.nav-right .btn-nav,.nav-signin{display:none}.hamburger{display:flex}}
+</style>
   <div class="sf-inner">
     <div class="sf-brand">
       <a href="/home" class="logo">
@@ -189,5 +253,9 @@ async function submitContact() {
   </div>
 </footer>
 
+<script>
+function toggleMenu(){var m=document.getElementById('mobile-menu');if(m)m.classList.toggle('open');}
+document.addEventListener('click',function(e){var menu=document.getElementById('mobile-menu');var burger=document.getElementById('hamburger');if(menu&&menu.classList.contains('open')&&!menu.contains(e.target)&&!burger.contains(e.target)){menu.classList.remove('open');}});
+</script>
 </body>
 </html>
