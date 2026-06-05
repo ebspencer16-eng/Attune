@@ -399,10 +399,6 @@ export default async function handler(req) {
         return new Response(JSON.stringify({ error: 'This promo code has expired.' }), {
           status: 400, headers: { 'Content-Type': 'application/json' } });
       }
-      if (dbRow.max_uses != null && (dbRow.uses_count ?? 0) >= dbRow.max_uses) {
-        return new Response(JSON.stringify({ error: 'This promo code has already been used.' }), {
-          status: 400, headers: { 'Content-Type': 'application/json' } });
-      }
       if (Array.isArray(dbRow.bound_emails) && dbRow.bound_emails.length) {
         const bemail = (buyerEmail || '').toLowerCase().trim();
         const ok = dbRow.bound_emails.map(e => (e || '').toLowerCase().trim()).includes(bemail);
@@ -412,6 +408,24 @@ export default async function handler(req) {
         }
       }
     }
+
+    // ── Single-use enforcement ────────────────────────────────────────────
+    // Every beta/promo code redeems once. A beta_codes row can raise the limit
+    // by setting max_uses explicitly; absent that, the default is single-use.
+    // This also covers the hardcoded named codes (BETA-CORE, BETA-NEWLYWED,
+    // etc.): the first redemption upserts a row with uses_count >= 1, so any
+    // later attempt is blocked here. BETA-CORE-1 ($1 Stripe-path test code)
+    // stays reusable so the payment flow can be re-run during testing.
+    const REUSABLE_CODES = new Set(['BETA-CORE-1']);
+    if (!REUSABLE_CODES.has(normalizedCode)) {
+      const usesSoFar   = dbRow?.uses_count ?? 0;
+      const allowedUses = (dbRow && dbRow.max_uses != null) ? dbRow.max_uses : 1;
+      if (usesSoFar >= allowedUses) {
+        return new Response(JSON.stringify({ error: 'This code has already been used.' }), {
+          status: 400, headers: { 'Content-Type': 'application/json' } });
+      }
+    }
+
     const codeUnlocks = codeMeta.pkg;
 
     // Every item in a multi-item cart must match the code (else reject — the
