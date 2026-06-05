@@ -57,6 +57,13 @@
   .mini-variant{flex:1;font-size:.66rem;font-weight:600;padding:.4rem .5rem;border:1px solid var(--stone);border-radius:8px;background:white;color:var(--muted);cursor:pointer;font-family:var(--bfont);transition:all .12s}
   .mini-variant.sel{border-color:var(--orange);background:#FFF0EB;color:var(--orange)}
   .cart-pkg-badge{font-size:.58rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:.25rem .65rem;border-radius:999px;margin-bottom:.4rem;display:inline-block}
+  /* Add-on rendered as its own line item, tied to the package above it */
+  .cart-addon-row{padding-left:1.9rem;box-shadow:inset 3px 0 0 #F0E1CE}
+  .cart-addon-badge{background:#ECE6DC;color:#8C7A68}
+  /* Always-visible add-on picker */
+  .cart-addon-picker{display:flex;flex-direction:column;gap:.4rem}
+  .cart-addon-picker-label{font-size:.6rem;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);margin-bottom:.1rem}
+  .mini-addon-add{width:22px;height:22px;border-radius:50%;background:var(--orange);color:#fff;display:flex;align-items:center;justify-content:center;font-size:1.05rem;font-weight:600;line-height:1;flex-shrink:0}
   .cart-pkg-name{font-family:var(--hfont);font-size:1rem;font-weight:700;color:var(--ink)}
   .cart-pkg-price{font-family:var(--hfont);font-size:1.5rem;font-weight:700;color:var(--ink);text-align:right;white-space:nowrap}
   .cart-pkg-price-label{font-size:.65rem;color:var(--muted);text-align:right}

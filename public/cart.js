@@ -38,6 +38,35 @@ const ADDON_PRICES = {
   checklist:       20,   // Starting Out Checklist
 };
 
+// Add-on display metadata (titles/descriptions shown in the cart). Prices come from ADDON_PRICES.
+const ADDON_META = {
+  workbook:   { title: 'Personalized Workbook',     desc: 'Conversation prompts drawn from your results' },
+  budget:     { title: 'Shared Budgeting Activity',  desc: 'Build a shared budget together' },
+  checklist:  { title: 'Starting Out Checklist',     desc: 'Merging lives, finances, logistics' },
+  reflection: { title: 'Relationship Reflection',    desc: 'Exercise on experiences that shaped you' },
+  lmft:       { title: 'LMFT Session',               desc: 'Licensed therapist reviews your results' },
+};
+// What each package already bundles, so it isn't offered again as a paid add-on.
+const PKG_INCLUDED = {
+  core:        { checklist:false, budget:false, reflection:false, lmft:false },
+  newlywed:    { checklist:true,  budget:true,  reflection:false, lmft:false },
+  anniversary: { checklist:false, budget:false, reflection:true,  lmft:false },
+  premium:     { checklist:false, budget:true,  reflection:true,  lmft:true  },
+};
+// Display order: workbook first (primary upsell), then cheapest → most expensive.
+const ADDON_ORDER = ['workbook','budget','checklist','reflection','lmft'];
+
+const TRASH_SVG = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/></svg>';
+
+function _packageBase(item) {
+  const p = CART_PKGS[item.pkg];
+  return item.format === 'physical' ? p.physicalPrice : p.digitalPrice;
+}
+function _addonUnitPrice(key, item) {
+  if (key === 'workbook') return item.addons.workbookVariant === 'print' ? ADDON_PRICES.workbookPrint : ADDON_PRICES.workbookDigital;
+  return ADDON_PRICES[key];
+}
+
 // ── State ──────────────────────────────────────────────────────────────────
 // Each item: { id, pkg, format, qty, addons: { workbook, workbookVariant, lmft, reflection, budget, checklist } }
 let _cartItems = [];
@@ -183,21 +212,15 @@ function renderCart() {
 
   const itemHtml = (item) => {
     const cfg = CART_PKGS[item.pkg];
-    const unitPrice = _itemPrice(item);
-    const lineTotal = unitPrice * item.qty;
-    const expanded = _expandedItemId === item.id;
+    const qty = item.qty;
+    const pkgBase = _packageBase(item);
+    const pkgLine = pkgBase * qty;
     const formatLabel = cfg.supportsPhysical
-      ? (item.format === 'physical' ? 'Physical gift box' : 'Digital · instant access')
-      : 'Digital · instant access';
-    // Addon chips summary when collapsed
-    const activeAddons = [];
-    if (item.addons.workbook)   activeAddons.push('Workbook ' + (item.addons.workbookVariant === 'print' ? '(print)' : '(digital)'));
-    if (item.addons.lmft)       activeAddons.push('LMFT');
-    if (item.addons.reflection) activeAddons.push('Reflection');
-    if (item.addons.budget)     activeAddons.push('Budget');
-    if (item.addons.checklist)  activeAddons.push('Checklist');
+      ? (item.format === 'physical' ? 'Physical gift box' : 'Digital \u00b7 instant access')
+      : 'Digital \u00b7 instant access';
 
-    return `
+    // ── Package line item ──────────────────────────────────────────────
+    const pkgCard = `
     <div class="cart-item" data-id="${item.id}">
       <div class="cart-item-top">
         <div class="cart-item-info">
@@ -208,85 +231,74 @@ function renderCart() {
             <div class="cart-item-fmt-row">
               <button class="cart-fmt-btn ${item.format==='physical'?'active':''}" onclick="setItemFormat('${item.id}','physical')">Physical</button>
               <button class="cart-fmt-btn ${item.format==='digital'?'active':''}" onclick="setItemFormat('${item.id}','digital')">Digital</button>
-            </div>
-          ` : ''}
+            </div>` : ''}
         </div>
         <div class="cart-item-right">
-          <div class="cart-item-price">$${lineTotal}</div>
-          ${item.qty > 1 ? `<div class="cart-item-price-sub">$${unitPrice} each</div>` : ''}
+          <div class="cart-item-price">$${pkgLine}</div>
+          ${qty>1?`<div class="cart-item-price-sub">$${pkgBase} each</div>`:''}
         </div>
       </div>
-
       <div class="cart-item-controls">
         <div class="qty-ctrl">
-          <button onclick="changeQty('${item.id}',-1)" aria-label="Decrease">−</button>
-          <span class="qty-val">${item.qty}</span>
+          <button onclick="changeQty('${item.id}',-1)" aria-label="Decrease">\u2212</button>
+          <span class="qty-val">${qty}</span>
           <button onclick="changeQty('${item.id}',1)" aria-label="Increase">+</button>
         </div>
-        <button class="cart-item-customize" onclick="toggleItemPanel('${item.id}')">
-          ${expanded ? 'Hide add-ons' : (activeAddons.length ? activeAddons.join(' · ') : 'Add-ons')} ${expanded ? '▾' : '▸'}
-        </button>
-        <button class="cart-item-remove" onclick="removeItem('${item.id}')" aria-label="Remove">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/></svg>
-        </button>
+        <button class="cart-item-remove" onclick="removeItem('${item.id}')" aria-label="Remove">${TRASH_SVG}</button>
       </div>
-
-      ${expanded ? `
-      <div class="cart-item-addons">
-        ${(() => {
-          // Package inclusion map — these come WITH the package, so don't
-          // show them as add-ons.
-          //   newlywed    → checklist + budget
-          //   anniversary → reflection
-          //   premium     → reflection + budget + LMFT
-          const included = {
-            core:        { checklist: false, budget: false, reflection: false, lmft: false },
-            newlywed:    { checklist: true,  budget: true,  reflection: false, lmft: false },
-            anniversary: { checklist: false, budget: false, reflection: true,  lmft: false },
-            premium:     { checklist: false, budget: true,  reflection: true,  lmft: true  },
-          }[item.pkg] || { checklist: false, budget: false, reflection: false, lmft: false };
-
-          // Ordered by cheapest → most expensive (user-requested).
-          // Workbook has a format toggle so it renders separately below; here
-          // we just pass its base (digital) price for sort purposes.
-          const addons = [
-            { key: 'workbook',   price: ADDON_PRICES.workbookDigital, title: 'Personalized Workbook',  desc: 'Conversation prompts drawn from your results',
-              // Workbook is never "included" in a package; always offered.
-              alwaysShow: true },
-            { key: 'budget',     price: ADDON_PRICES.budget,          title: 'Shared Budgeting Activity', desc: 'Build a shared budget together' },
-            { key: 'checklist',  price: ADDON_PRICES.checklist,       title: 'Starting Out Checklist',    desc: 'Merging lives, finances, logistics' },
-            { key: 'reflection', price: ADDON_PRICES.reflection,      title: 'Relationship Reflection',   desc: 'Exercise on experiences that shaped you' },
-            { key: 'lmft',       price: ADDON_PRICES.lmft,            title: 'LMFT Session',              desc: 'Licensed therapist reviews your results' },
-          ];
-
-          // Sort ascending by price, then filter out anything already included.
-          const visible = addons
-            .sort((a, b) => a.price - b.price)
-            .filter(a => a.alwaysShow || !included[a.key]);
-
-          return visible.map(a => {
-            const selected = !!item.addons[a.key];
-            // Workbook gets its own pricing display because of the digital/print toggle
-            const priceDisplay = a.key === 'workbook'
-              ? (item.addons.workbook ? '$'+(item.addons.workbookVariant==='print'?ADDON_PRICES.workbookPrint:ADDON_PRICES.workbookDigital) : '$'+ADDON_PRICES.workbookDigital)
-              : '$' + a.price;
-            // The main card
-            const card = `<div class="mini-addon ${selected?'sel':''}" onclick="toggleItemAddon('${item.id}','${a.key}')">
-              <div><div class="mini-addon-title">${a.title}</div><div class="mini-addon-desc">${a.desc}</div></div>
-              <div class="mini-addon-right"><div class="mini-addon-price">${priceDisplay}</div><div class="mini-check ${selected?'sel':''}"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div></div>
-            </div>`;
-            // Workbook has a format variant selector when selected
-            const variantSelector = (a.key === 'workbook' && item.addons.workbook) ? `
-              <div class="mini-variants">
-                <button class="mini-variant ${item.addons.workbookVariant==='digital'?'sel':''}" onclick="setItemWorkbookVariant('${item.id}','digital',event)">Digital · $${ADDON_PRICES.workbookDigital}</button>
-                <button class="mini-variant ${item.addons.workbookVariant==='print'?'sel':''}" onclick="setItemWorkbookVariant('${item.id}','print',event)">Print · $${ADDON_PRICES.workbookPrint}</button>
-              </div>` : '';
-            return card + variantSelector;
-          }).join('');
-        })()}
-      </div>
-      ` : ''}
     </div>`;
+
+    // ── Active add-ons, each as its own line item (like the package) ────
+    const activeKeys = ADDON_ORDER.filter(k => item.addons[k]);
+    const addonCards = activeKeys.map(k => {
+      const meta = ADDON_META[k];
+      const unit = _addonUnitPrice(k, item);
+      const line = unit * qty;
+      const isWb = k === 'workbook';
+      const sub = isWb
+        ? (item.addons.workbookVariant === 'print' ? 'Physical \u00b7 printed copy' : 'Digital \u00b7 instant access')
+        : meta.desc;
+      return `
+    <div class="cart-item cart-addon-row" data-id="${item.id}" data-addon="${k}">
+      <div class="cart-item-top">
+        <div class="cart-item-info">
+          <span class="cart-pkg-badge cart-addon-badge">Add-on</span>
+          <div class="cart-item-name">${meta.title}</div>
+          <div class="cart-item-sub">${sub}</div>
+          ${isWb ? `
+            <div class="cart-item-fmt-row">
+              <button class="cart-fmt-btn ${item.addons.workbookVariant==='print'?'active':''}" onclick="setItemWorkbookVariant('${item.id}','print',event)">Physical</button>
+              <button class="cart-fmt-btn ${item.addons.workbookVariant==='digital'?'active':''}" onclick="setItemWorkbookVariant('${item.id}','digital',event)">Digital</button>
+            </div>` : ''}
+        </div>
+        <div class="cart-item-right">
+          <div class="cart-item-price">$${line}</div>
+          ${qty>1?`<div class="cart-item-price-sub">$${unit} each</div>`:''}
+        </div>
+      </div>
+      <div class="cart-item-controls">
+        <button class="cart-item-remove" onclick="toggleItemAddon('${item.id}','${k}')" aria-label="Remove add-on">${TRASH_SVG}</button>
+      </div>
+    </div>`;
+    }).join('');
+
+    // ── Available add-ons, shown by default so they're easy to add ──────
+    const incl = PKG_INCLUDED[item.pkg] || {};
+    const available = ADDON_ORDER.filter(k => !item.addons[k] && !incl[k]);
+    const picker = available.length ? `
+    <div class="cart-item cart-addon-picker">
+      <div class="cart-addon-picker-label">Add to your order</div>
+      ${available.map(k => {
+        const meta = ADDON_META[k];
+        const priceLabel = k === 'workbook' ? ('from $' + ADDON_PRICES.workbookDigital) : ('$' + _addonUnitPrice(k, item));
+        return `<div class="mini-addon" onclick="toggleItemAddon('${item.id}','${k}')">
+          <div><div class="mini-addon-title">${meta.title}</div><div class="mini-addon-desc">${meta.desc}</div></div>
+          <div class="mini-addon-right"><div class="mini-addon-price">${priceLabel}</div><div class="mini-addon-add" aria-hidden="true">+</div></div>
+        </div>`;
+      }).join('')}
+    </div>` : '';
+
+    return pkgCard + addonCards + picker;
   };
 
   container.innerHTML = _cartItems.map(itemHtml).join('');
