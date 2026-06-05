@@ -1494,11 +1494,11 @@ function updateCartBadge() {
   }
 }
 
-// Persist cart to sessionStorage. Called after every mutation so refreshing
+// Persist cart to localStorage. Called after every mutation so refreshing
 // the page or navigating away and back doesn't lose the cart. Previously
 // only saved at the moment of clicking "Proceed to Checkout."
 function _persistCart() {
-  try { sessionStorage.setItem('attune_cart', JSON.stringify(_cartItems)); } catch (e) { /* private mode, ignore */ }
+  try { localStorage.setItem('attune_cart', JSON.stringify(_cartItems)); } catch (e) { /* private mode, ignore */ }
 }
 
 function removeItem(id) {
@@ -1698,14 +1698,14 @@ function addToCartWithIntent(pkgId) {
 
 // ── Checkout handoff ─────────────────────────────────────────────────────
 // Encode the full cart (items, qty, addons) and hand off to /checkout.
-// Checkout reads from sessionStorage because URL params would explode for
+// Checkout reads from localStorage because URL params would explode for
 // multi-item carts with addons.
 function goCheckout() {
   if (_cartItems.length === 0) return;
   try {
-    sessionStorage.setItem('attune_cart', JSON.stringify(_cartItems));
+    localStorage.setItem('attune_cart', JSON.stringify(_cartItems));
   } catch (e) {
-    console.warn('[cart] sessionStorage write failed:', e);
+    console.warn('[cart] localStorage write failed:', e);
   }
   // Preserve a simple URL param for the first item as fallback (so checkout
   // still works if sessionStorage is blocked, e.g. private browsing edge case)
@@ -1837,10 +1837,10 @@ function submitAnnualNotify() {
       }
     } catch {}
 
-    // Restore cart from sessionStorage so the user sees their items if they
+    // Restore cart from localStorage so the user sees their items if they
     // navigate back from checkout or open the offerings page in a new tab.
     try {
-      const raw = sessionStorage.getItem('attune_cart');
+      const raw = localStorage.getItem('attune_cart');
       if (raw) {
         const items = JSON.parse(raw);
         if (Array.isArray(items) && items.length) {
@@ -1848,7 +1848,7 @@ function submitAnnualNotify() {
           updateCartBadge();
         }
       }
-    } catch (e) { /* sessionStorage unavailable, ignore */ }
+    } catch (e) { /* localStorage unavailable, ignore */ }
   });
 
   // Close mobile menu on outside tap

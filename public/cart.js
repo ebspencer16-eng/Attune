@@ -1,4 +1,4 @@
-/* Shared Attune cart widget. Extracted verbatim from offerings.html so behaviour and rendering match. State lives in sessionStorage['attune_cart']. Do NOT include this on offerings.html (it has its own inline copy). */
+/* Shared Attune cart widget. Extracted verbatim from offerings.html so behaviour and rendering match. State lives in localStorage['attune_cart']. Do NOT include this on offerings.html (it has its own inline copy). */
 // Canonical pricing — matches the offering cards and checkout.html PACKAGES.
 // If you change prices, update checkout.html/PACKAGES too.
 const CART_PKGS = {
@@ -119,11 +119,11 @@ function updateCartBadge() {
   }
 }
 
-// Persist cart to sessionStorage. Called after every mutation so refreshing
+// Persist cart to localStorage. Called after every mutation so refreshing
 // the page or navigating away and back doesn't lose the cart. Previously
 // only saved at the moment of clicking "Proceed to Checkout."
 function _persistCart() {
-  try { sessionStorage.setItem('attune_cart', JSON.stringify(_cartItems)); } catch (e) { /* private mode, ignore */ }
+  try { localStorage.setItem('attune_cart', JSON.stringify(_cartItems)); } catch (e) { /* private mode, ignore */ }
 }
 
 function removeItem(id) {
@@ -323,14 +323,14 @@ function addToCartWithIntent(pkgId) {
 
 // ── Checkout handoff ─────────────────────────────────────────────────────
 // Encode the full cart (items, qty, addons) and hand off to /checkout.
-// Checkout reads from sessionStorage because URL params would explode for
+// Checkout reads from localStorage because URL params would explode for
 // multi-item carts with addons.
 function goCheckout() {
   if (_cartItems.length === 0) return;
   try {
-    sessionStorage.setItem('attune_cart', JSON.stringify(_cartItems));
+    localStorage.setItem('attune_cart', JSON.stringify(_cartItems));
   } catch (e) {
-    console.warn('[cart] sessionStorage write failed:', e);
+    console.warn('[cart] localStorage write failed:', e);
   }
   // Preserve a simple URL param for the first item as fallback (so checkout
   // still works if sessionStorage is blocked, e.g. private browsing edge case)
@@ -427,7 +427,7 @@ var CART_BTN_HTML = `<button class="cart-btn" id="nav-cart-btn" onclick="openCar
       if (getStarted) nr.insertBefore(el, getStarted); else nr.appendChild(el);
     }
     try {
-      var raw = sessionStorage.getItem('attune_cart');
+      var raw = localStorage.getItem('attune_cart');
       if (raw) { var arr = JSON.parse(raw); if (Array.isArray(arr)) _cartItems = arr; }
     } catch (e) { /* private mode */ }
     try { updateCartBadge(); } catch(e){}

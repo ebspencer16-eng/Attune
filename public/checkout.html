@@ -626,7 +626,7 @@ async function refreshTax() {
   }
 }
 
-// ── Init: read cart from sessionStorage or fall back to URL params ───────────
+// ── Init: read cart from localStorage or fall back to URL params ───────────
 (function init() {
   const params = new URLSearchParams(location.search);
 
@@ -640,10 +640,10 @@ async function refreshTax() {
     if (fromRegistry) sessionStorage.removeItem('attune_from_registry');
   } catch {}
 
-  // Try sessionStorage first (set by offerings cart)
+  // Try localStorage first (set by offerings cart)
   let cartItems = null;
   try {
-    const raw = sessionStorage.getItem('attune_cart');
+    const raw = localStorage.getItem('attune_cart');
     if (raw) cartItems = JSON.parse(raw);
   } catch {}
 
@@ -1284,7 +1284,7 @@ function validateForm() {
             }
 
             // Mirror post-payment UI from handleSubmit(): show success state
-            try { sessionStorage.removeItem('attune_cart'); } catch {}
+            try { localStorage.removeItem('attune_cart'); } catch {}
             const realOrderNum = paymentIntent?.id
               ? 'ATT-' + new Date().toISOString().slice(0,10).replace(/-/g,'') + '-' + paymentIntent.id.slice(-4).toUpperCase()
               : 'ATT-' + Date.now();
@@ -1475,7 +1475,7 @@ async function handleSubmit(e) {
     }
 
     // Clear the cart now that checkout is complete
-    try { sessionStorage.removeItem('attune_cart'); } catch {}
+    try { localStorage.removeItem('attune_cart'); } catch {}
 
     // Also save first-item summary to localStorage for portal
     try {
