@@ -179,7 +179,7 @@
   .item-intent-btn.active{
     border-color:#E8673A;background:#FFF0EB;color:#E8673A;
   }
-  .item-intent-ico{font-size:.95rem;line-height:1;}
+  .item-intent-ico{display:inline-flex;align-items:center;line-height:0}
 </style>
 </head>
 <body>
@@ -218,12 +218,12 @@
       <div class="co-body">
         <div class="purpose-toggle">
           <button class="pt-btn active" id="btn-self" onclick="setIntent('self')">
-            <div class="pt-icon">💑</div>
+            <div class="pt-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#E8673A" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="7" cy="6" r="2.6"/><circle cx="17" cy="6" r="2.6"/><path d="M2.8 18.6c0-2.7 1.7-4.4 4.2-4.4 1.5 0 2.7.6 3.6 1.7"/><path d="M21.2 18.6c0-2.7-1.7-4.4-4.2-4.4-1.5 0-2.7.6-3.6 1.7"/><path d="M10.2 15.9 12 17.1l1.8-1.2"/></svg></div>
             <div class="pt-label">For us</div>
             <div class="pt-sub">You and your partner each complete the exercises on your own</div>
           </button>
           <button class="pt-btn" id="btn-gift" onclick="setIntent('gift')">
-            <div class="pt-icon">🎁</div>
+            <div class="pt-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#E8673A" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5" rx="1"/><line x1="12" y1="22" x2="12" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg></div>
             <div class="pt-label">Giving as a gift</div>
             <div class="pt-sub">A gift for a couple you know – they get full access</div>
           </button>
@@ -248,17 +248,17 @@
       </div>
     </div>
 
-    <!-- LMFT Add-on (shown for non-premium packages) -->
-    <div id="lmftAddonRow" class="co-card" style="display:none">
+    <!-- Add-on upsell prompt (single-item carts). Workbook by default; LMFT if the workbook is already in the cart. -->
+    <div id="addonPromptRow" class="co-card" style="display:none">
       <div style="padding:1rem 1.5rem">
         <label style="display:flex;align-items:flex-start;gap:.85rem;cursor:pointer">
           <div style="position:relative;flex-shrink:0;margin-top:.15rem">
-            <input type="checkbox" id="lmftCheck" style="position:absolute;opacity:0;width:0;height:0"/>
-            <div id="lmftBox" style="width:20px;height:20px;border:1.5px solid #E8DDD0;border-radius:6px;background:white;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .15s"></div>
+            <input type="checkbox" id="addonPromptCheck" style="position:absolute;opacity:0;width:0;height:0"/>
+            <div id="addonPromptBox" style="width:20px;height:20px;border:1.5px solid #E8DDD0;border-radius:6px;background:white;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .15s"></div>
           </div>
           <div style="flex:1">
-            <div style="font-size:.88rem;font-weight:700;color:#0E0B07;margin-bottom:.2rem">Add LMFT Session <span style="color:#E8673A">+$150</span></div>
-            <div style="font-size:.75rem;color:#8C7A68;line-height:1.6">A 50-minute video session with a licensed marriage and family therapist who reviews your joint results before you meet. Available on any package.</div>
+            <div style="font-size:.88rem;font-weight:700;color:#0E0B07;margin-bottom:.2rem"><span id="addonPromptTitle">Add Personalized Workbook</span> <span style="color:#E8673A" id="addonPromptPrice">+$19</span></div>
+            <div style="font-size:.75rem;color:#8C7A68;line-height:1.6" id="addonPromptDesc"></div>
           </div>
         </label>
       </div>
@@ -710,29 +710,50 @@ async function refreshTax() {
     const ftEl = document.getElementById('formatToggleSection');
     if (ftEl) ftEl.style.display = 'block';
   }
-  // LMFT add-on: show for all packages except premium (which includes it)
+  // Add-on upsell prompt: single-item carts only. Prompt for the workbook by
+  // default; if the workbook is already in the cart, prompt for the LMFT
+  // session instead. Premium includes both, so it gets no prompt.
+  let _promptKey = null;
   if (_items.length === 1 && pkg.id !== 'premium') {
-    const lmftRow = document.getElementById('lmftAddonRow');
-    if (lmftRow) lmftRow.style.display = 'block';
+    const it0 = _items[0];
+    if (!it0.addons.workbook)   _promptKey = 'workbook';
+    else if (!it0.addons.lmft)  _promptKey = 'lmft';
   }
-  // Wire LMFT checkbox
-  function syncLmftBox() {
-    const chk = document.getElementById('lmftCheck');
-    const box = document.getElementById('lmftBox');
+  if (_promptKey) {
+    const meta = _promptKey === 'workbook'
+      ? { title: 'Add Personalized Workbook', price: '+$19', desc: 'Conversation prompts and guided exercises built from your joint results. Digital, delivered with your results. Switch to a printed copy in your cart.' }
+      : { title: 'Add LMFT Session', price: '+$150', desc: 'A 50-minute video session with a licensed marriage and family therapist who reviews your joint results before you meet. Available on any package.' };
+    document.getElementById('addonPromptTitle').textContent = meta.title;
+    document.getElementById('addonPromptPrice').textContent = meta.price;
+    document.getElementById('addonPromptDesc').textContent  = meta.desc;
+    const row = document.getElementById('addonPromptRow');
+    if (row) row.style.display = 'block';
+  }
+  function syncPromptBox() {
+    const chk = document.getElementById('addonPromptCheck');
+    const box = document.getElementById('addonPromptBox');
     if (!chk || !box) return;
     box.style.background = chk.checked ? '#E8673A' : 'white';
     box.style.borderColor = chk.checked ? '#E8673A' : '#E8DDD0';
     box.innerHTML = chk.checked ? '<svg width="11" height="9" viewBox="0 0 11 9" fill="none"><path d="M1 4.5L4 7.5L10 1" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>' : '';
   }
-  document.getElementById('lmftBox')?.addEventListener('click', () => {
-    const chk = document.getElementById('lmftCheck');
+  document.getElementById('addonPromptBox')?.addEventListener('click', () => {
+    if (!_promptKey) return;
+    const chk = document.getElementById('addonPromptCheck');
     chk.checked = !chk.checked;
-    addonLmft = chk.checked;
-    if (_items.length === 1) _items[0].addons.lmft = chk.checked;
-    syncLmftBox();
+    const it0 = _items[0];
+    if (_promptKey === 'workbook') {
+      it0.addons.workbook = chk.checked;
+      if (chk.checked && !it0.addons.workbookVariant) it0.addons.workbookVariant = 'digital';
+      addonWorkbook = chk.checked ? (it0.addons.workbookVariant || 'digital') : null;
+    } else {
+      it0.addons.lmft = chk.checked;
+      addonLmft = chk.checked;
+    }
+    syncPromptBox();
     renderSummary();
   });
-  syncLmftBox();
+  syncPromptBox();
 })();
 
 // ── Render per-item forms (Step 2) ───────────────────────────────────────────
@@ -781,11 +802,11 @@ function renderItemsStep() {
       <!-- Self / gift toggle per item -->
       <div class="item-intent">
         <button type="button" class="item-intent-btn ${it.intent==='self'?'active':''}" onclick="setItemIntent(${idx},'self')">
-          <span class="item-intent-ico">💑</span>
+          <span class="item-intent-ico"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#E8673A" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="7" cy="6" r="2.6"/><circle cx="17" cy="6" r="2.6"/><path d="M2.8 18.6c0-2.7 1.7-4.4 4.2-4.4 1.5 0 2.7.6 3.6 1.7"/><path d="M21.2 18.6c0-2.7-1.7-4.4-4.2-4.4-1.5 0-2.7.6-3.6 1.7"/><path d="M10.2 15.9 12 17.1l1.8-1.2"/></svg></span>
           <span>For us</span>
         </button>
         <button type="button" class="item-intent-btn ${it.intent==='gift'?'active':''}" onclick="setItemIntent(${idx},'gift')">
-          <span class="item-intent-ico">🎁</span>
+          <span class="item-intent-ico"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#E8673A" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5" rx="1"/><line x1="12" y1="22" x2="12" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg></span>
           <span>A gift</span>
         </button>
       </div>
