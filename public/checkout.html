@@ -99,8 +99,6 @@
   .total-label{font-size:.85rem;font-weight:700;color:var(--ink)}
   .total-price{font-size:1.15rem;font-weight:700;color:var(--orange);font-family:var(--hfont)}
   .badge{display:inline-block;font-size:.6rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;background:#EEF2FF;color:#4555e8;border-radius:999px;padding:.2rem .55rem;margin-left:.35rem}
-  .tag-list{display:flex;flex-wrap:wrap;gap:.35rem;margin-top:.65rem}
-  .tag{font-size:.65rem;color:var(--muted);background:var(--warm);border:1px solid var(--stone);border-radius:999px;padding:.18rem .6rem}
 
   /* SECURITY STRIP */
   .security-strip{display:flex;align-items:center;justify-content:center;gap:.6rem;padding:.85rem;font-size:.68rem;color:var(--muted);font-weight:500}
@@ -438,8 +436,6 @@
             <button type="button" onclick="removePromo()" aria-label="Remove promo code" style="background:none;border:none;color:#8C7A68;font-size:1.1rem;cursor:pointer;padding:.15rem .4rem;line-height:1">×</button>
           </div>
         </div>
-
-        <div class="tag-list" id="tagList"></div>
 
       </div>
     </div>
@@ -909,7 +905,6 @@ function setFormat(fmt) {
 function renderSummary() {
   const el = document.getElementById('pkgSummary');
   const totalEl = document.getElementById('totalPrice');
-  const tagEl   = document.getElementById('tagList');
 
   // Compute total across all items in cart
   function itemPrice(it) {
@@ -1029,12 +1024,6 @@ function renderSummary() {
   }
 
   if (totalEl) totalEl.textContent = '$' + (Number.isInteger(grandTotal) ? grandTotal : grandTotal.toFixed(2));
-
-  // Tag list uses first item's package
-  const firstPkg = PACKAGES[_items[0]?.pkg] || PACKAGES.core;
-  const firstPhys = _items[0]?.format === 'physical';
-  const activeTags = firstPhys ? (firstPkg.physicalTags || firstPkg.tags) : firstPkg.tags;
-  if (tagEl) tagEl.innerHTML = (activeTags || []).map(t => `<span class="tag">${t}</span>`).join('');
 
   const btnLabel = document.getElementById('btnLabel');
   if (btnLabel) btnLabel.textContent = `Complete order · $${Number.isInteger(grandTotal) ? grandTotal : grandTotal.toFixed(2)}`;
