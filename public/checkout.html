@@ -938,23 +938,33 @@ function renderSummary() {
     const isPhys = g.item.format === 'physical';
     total += g.subtotal;
     const qtyLabel = g.qty > 1 ? ` <span style="color:#8C7A68;font-size:.7rem">× ${g.qty}</span>` : '';
+    const pkgBase = (isPhys ? p.physicalPrice : p.digitalPrice) * g.qty;
     rows += `
       <div class="co-card-detail">
         <div>
           <div class="name">${p.name}${qtyLabel} <span class="badge">${p.badge}</span></div>
           <span class="sub">${isPhys ? 'Digital + physical gift box' : 'Digital · instant access'}</span>
         </div>
-        <div class="price">$${g.subtotal}</div>
+        <div class="price">$${pkgBase}</div>
       </div>`;
-    // Addon summary rows if any
-    const addonBits = [];
-    if (g.item.addons.workbook)   addonBits.push(`Workbook${g.item.addons.workbookVariant === 'print' ? ' (print)' : ''}${appliedPromoFreeWorkbook ? ' (free)' : ''}`);
-    if (g.item.addons.lmft)       addonBits.push('LMFT Session');
-    if (g.item.addons.reflection) addonBits.push('Reflection');
-    if (g.item.addons.budget)     addonBits.push('Budget');
-    if (g.item.addons.checklist)  addonBits.push('Checklist');
-    if (addonBits.length) {
-      rows += `<div style="font-size:.66rem;color:#8C7A68;padding:0 0 .6rem .1rem">+ ${addonBits.join(', ')}</div>`;
+    // Each add-on renders as its own line item, matching the cart drawer.
+    const addonLines = [];
+    if (g.item.addons.workbook) {
+      const wv = g.item.addons.workbookVariant === 'print' ? 'print' : 'digital';
+      addonLines.push({ label: ADDON_WORKBOOK[wv].label, price: ADDON_WORKBOOK[wv].price });
+    }
+    if (g.item.addons.lmft)       addonLines.push({ label: ADDON_LMFT.label, price: ADDON_LMFT.price });
+    if (g.item.addons.reflection) addonLines.push({ label: ADDON_REFLECTION.label, price: ADDON_REFLECTION.price });
+    if (g.item.addons.budget)     addonLines.push({ label: 'Shared Budgeting Activity', price: 20 });
+    if (g.item.addons.checklist)  addonLines.push({ label: 'Starting Out Checklist', price: 20 });
+    for (const a of addonLines) {
+      rows += `
+      <div class="co-card-detail" style="padding-left:.7rem;box-shadow:inset 3px 0 0 #F0E1CE">
+        <div>
+          <div class="name"><span class="badge" style="background:#F0E6D8;color:#8C7A68;margin-left:0;margin-right:.4rem">Add-on</span>${a.label}</div>
+        </div>
+        <div class="price">$${a.price * g.qty}</div>
+      </div>`;
     }
   }
 
