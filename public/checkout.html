@@ -1780,6 +1780,9 @@ async function applyPromo() {
     // Hide the Apple Pay / Google Pay button — no wallet needed on a free order
     const expressWrap = document.getElementById('expressCheckoutWrap');
     if (expressWrap) expressWrap.style.display = 'none';
+    // Billing address is only needed for tax and card — neither applies to a $0 order
+    const billingSection = document.getElementById('billingSection');
+    if (billingSection) billingSection.style.display = 'none';
     // Tell Stripe's card elements they're no longer required for validation
     cardComplete = true;
   }
@@ -1817,6 +1820,9 @@ function removePromo() {
   if (expressWrap && expressWrap.dataset.supported === '1') {
     expressWrap.style.display = 'block';
   }
+  // Restore billing address (hidden on $0 orders)
+  const billingSection = document.getElementById('billingSection');
+  if (billingSection) billingSection.style.display = '';
   // Revert any free workbook the promo added this session
   if (appliedPromoFreeWorkbook && Array.isArray(_promoWorkbookSnapshot)) {
     _promoWorkbookSnapshot.forEach(snap => {
