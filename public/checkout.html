@@ -126,16 +126,18 @@
   /* Payment failure card — more prominent than a single line */
   .pay-error-card{
     display:none;
-    background:rgba(239,68,68,.06);
-    border:1px solid rgba(239,68,68,.24);
+    background:rgba(239,68,68,.09);
+    border:1.5px solid #EF4444;
+    border-left:5px solid #DC2626;
     border-radius:12px;
-    padding:.9rem 1rem;
+    padding:1rem 1.1rem;
     margin-top:1rem;
+    box-shadow:0 6px 20px rgba(220,38,38,.12);
   }
   .pay-error-card.visible{display:block;animation:slideDown .2s ease}
   @keyframes slideDown{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:translateY(0)}}
   .pay-error-card .pay-error-title{
-    font-size:.82rem;font-weight:700;color:#c02f2f;margin-bottom:.25rem;
+    font-size:.92rem;font-weight:800;color:#DC2626;margin-bottom:.3rem;
     display:flex;align-items:center;gap:.4rem;
   }
   .pay-error-card .pay-error-body{
@@ -1625,6 +1627,10 @@ function mapStripeError(err) {
       body: "We couldn't reach the server. Your card hasn't been charged.",
       hint: 'Check your connection and click Complete order again.',
     };
+  }
+
+  if (/promo code|this code|the code/i.test(raw)) {
+    return { title: "This code can't be used", body: raw, hint: null };
   }
 
   return {
