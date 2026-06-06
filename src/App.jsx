@@ -9624,7 +9624,7 @@ function NewPasswordScreen({ onDone }) {
 }
 
 function PartnerLandingScreen({ inviteFrom, inviteCode, onCreateAccount }) {
-  const [form, setForm] = React.useState({ name: '', email: '', password: '', ageRange: '', gender: '', relationshipStatus: '', relationshipLength: '', children: '', signupSource: '' });
+  const [form, setForm] = React.useState({ name: '', pronouns: '', email: '', password: '', ageRange: '', gender: '', relationshipStatus: '', relationshipLength: '', children: '', signupSource: '' });
   const [loading, setLoading] = React.useState(false);
   const [err, setErr] = React.useState('');
   const upd = (k, v) => setForm(p => ({ ...p, [k]: v }));
@@ -9658,6 +9658,7 @@ function PartnerLandingScreen({ inviteFrom, inviteCode, onCreateAccount }) {
         const acct = {
           email: form.email.trim().toLowerCase(),
           name: form.name.trim(),
+          pronouns: form.pronouns || '',
           partnerName: inviteFrom,
           inviteCode: inviteCode,
           joinedViaInvite: true,
@@ -9713,7 +9714,7 @@ function PartnerLandingScreen({ inviteFrom, inviteCode, onCreateAccount }) {
             body: JSON.stringify({
               userId:              authData.user.id,
               name:                form.name.trim(),
-              pronouns:            '',
+              pronouns:            form.pronouns || '',
               partnerName:         inviteFrom || '',
               partnerPronouns:     '',
               partnerEmail:        '',
@@ -9849,6 +9850,15 @@ function PartnerLandingScreen({ inviteFrom, inviteCode, onCreateAccount }) {
         </p>
 
         {inp('Your first name', 'name')}
+        <div style={{ fontSize: '0.7rem', color: '#8C7A68', fontFamily: "'DM Sans',sans-serif", fontWeight: 600, marginBottom: '0.35rem', letterSpacing: '0.04em' }}>Your pronouns</div>
+        <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.65rem' }}>
+          {['she/her', 'he/him', 'they/them'].map(p => (
+            <button key={p} type="button" onClick={() => upd('pronouns', form.pronouns === p ? '' : p)}
+              style={{ flex: 1, padding: '0.45rem 0.3rem', borderRadius: 8, border: `1.5px solid ${form.pronouns === p ? '#E8673A' : '#E8DDD0'}`, background: form.pronouns === p ? '#FFF0EB' : 'white', color: form.pronouns === p ? '#E8673A' : '#8C7A68', fontSize: '0.72rem', fontWeight: 600, cursor: 'pointer', fontFamily: "'DM Sans',sans-serif", transition: 'all 0.12s' }}>
+              {p}
+            </button>
+          ))}
+        </div>
         {inp('Your email', 'email', 'email')}
         {inp('Password (6+ characters)', 'password', 'password')}
 
