@@ -360,10 +360,12 @@ export default async function handler(req) {
     let dbRow = null;
     if (supabaseUrl && supabaseServiceKey) {
       try {
+        const _c = new AbortController();
+        const _t = setTimeout(() => _c.abort(), 8000);
         const r = await fetch(
           `${supabaseUrl}/rest/v1/beta_codes?code=eq.${encodeURIComponent(normalizedCode)}&select=*`,
-          { headers: { apikey: supabaseServiceKey, Authorization: `Bearer ${supabaseServiceKey}` } }
-        );
+          { headers: { apikey: supabaseServiceKey, Authorization: `Bearer ${supabaseServiceKey}` }, signal: _c.signal }
+        ).finally(() => clearTimeout(_t));
         const rows = await r.json();
         if (Array.isArray(rows) && rows.length) dbRow = rows[0];
       } catch (e) { console.warn('[promo] code lookup failed:', e); }

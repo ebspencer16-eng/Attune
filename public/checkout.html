@@ -1383,10 +1383,16 @@ async function handleSubmit(e) {
   const firstPkg = PACKAGES[first.pkg] || PACKAGES.core;
 
   try {
-    // 1. Create payment intent on server
-    const res = await fetch('/api/create-payment-intent', {
+    // 1. Create payment intent on server (timeout so a hung or unreachable
+    //    server surfaces a clear error instead of an endless "Processing...").
+    const _ctrl = new AbortController();
+    const _to = setTimeout(() => _ctrl.abort(), 30000);
+    let res;
+    try {
+    res = await fetch('/api/create-payment-intent', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
+      signal: _ctrl.signal,
       body: JSON.stringify({
         // Multi-item payload (new canonical shape)
         items: _items.map(it => ({
@@ -1426,6 +1432,12 @@ async function handleSubmit(e) {
         customerAddress:  getBillingAddress(),
       }),
     });
+    } catch (netErr) {
+      if (netErr.name === 'AbortError') throw new Error('The request timed out. We could not reach the server, so your card was not charged.');
+      throw new Error('We could not reach the server. Check your connection and try again, your card was not charged.');
+    } finally {
+      clearTimeout(_to);
+    }
 
     const serverResponse = await res.json();
     const { clientSecret, error: serverErr, free: isFreePromo, orderNums: freeOrderNums } = serverResponse;
@@ -1531,7 +1543,9 @@ async function handleSubmit(e) {
   } catch(err) {
     showPaymentError(err);
     btn.disabled = false;
-    document.getElementById('btnLabel').textContent = `Complete order · $${getPkgTotal()}`;
+    // The spinner replaced the button's innerHTML (removing #btnLabel), so
+    // rebuild the label span rather than writing to the now-missing element.
+    btn.innerHTML = `<span id="btnLabel">Complete order · $${getPkgTotal()}</span>`;
   }
 }
 
@@ -1605,10 +1619,10 @@ function mapStripeError(err) {
     };
   }
 
-  if (raw.toLowerCase().includes('network') || raw.toLowerCase().includes('fetch')) {
+  if (/(network|fetch|reach|timed out|timeout|connection|server)/i.test(raw)) {
     return {
       title: 'Connection issue',
-      body: "We couldn't reach the payment processor. Your card hasn't been charged.",
+      body: "We couldn't reach the server. Your card hasn't been charged.",
       hint: 'Check your connection and click Complete order again.',
     };
   }
