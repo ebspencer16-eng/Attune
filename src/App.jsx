@@ -9431,9 +9431,10 @@ function AuthModal({ mode, onClose, onSuccess }) {
 
         {tab === "signup" ? (
           <>
-            <div style={{ fontFamily: "'Playfair Display',Georgia,serif", fontSize: "1.1rem", fontWeight: 700, color: "#0E0B07", marginBottom: "0.35rem" }}>Start with your account</div>
+            <div style={{ fontFamily: "'Playfair Display',Georgia,serif", fontSize: "1.1rem", fontWeight: 700, color: "#0E0B07", marginBottom: "0.35rem" }}>Set up your profile</div>
             <p style={{ fontSize: "0.78rem", color: "#8C7A68", fontFamily: "'DM Sans',sans-serif", marginBottom: "1.25rem", lineHeight: 1.55 }}>Your answers are private until both of you are done. We'll never show your partner what you wrote until results unlock.</p>
             {inp("Your first name", "name")}
+            <div style={{ fontSize: "0.7rem", color: "#8C7A68", fontFamily: "'DM Sans',sans-serif", fontWeight: 600, marginBottom: "0.35rem", letterSpacing: "0.04em" }}>Your pronouns</div>
             <div style={{ display: "flex", gap: "0.5rem", marginBottom: "0rem" }}>
               {["she/her", "he/him", "they/them"].map(p => (
                 <button key={p} onClick={() => upd("pronouns", form.pronouns === p ? "" : p)}
@@ -9447,6 +9448,7 @@ function AuthModal({ mode, onClose, onSuccess }) {
             <div style={{ borderTop: "1px solid #E8DDD0", margin: "0.75rem 0 0.75rem" }} />
             <p style={{ fontSize: "0.75rem", color: "#8C7A68", fontFamily: "'DM Sans',sans-serif", marginBottom: "0.6rem", fontWeight: 600 }}>Your partner, required before results unlock</p>
             {inp("Partner's first name", "partnerName")}
+            <div style={{ fontSize: "0.7rem", color: "#8C7A68", fontFamily: "'DM Sans',sans-serif", fontWeight: 600, marginBottom: "0.35rem", letterSpacing: "0.04em" }}>Partner's pronouns</div>
             <div style={{ display: "flex", gap: "0.5rem", marginBottom: "0rem" }}>
               {["she/her", "he/him", "they/them"].map(p => (
                 <button key={p} onClick={() => upd("partnerPronouns", form.partnerPronouns === p ? "" : p)}
