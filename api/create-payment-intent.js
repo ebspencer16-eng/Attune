@@ -69,11 +69,13 @@ function buildTaxLineItems(item, itemIndex) {
     });
   }
   // Each add-on as its own line item so tax categorization is clean
-  if (item.addonWorkbook === 'print') {
-    lines.push({ amount: ADDON_PRICES.workbookPrint * 100,   tax_code: TAX_CODES.workbookPrint,   reference: `item-${itemIndex}-wbprint`,   quantity: 1 });
-  }
-  if (item.addonWorkbook === 'digital') {
-    lines.push({ amount: ADDON_PRICES.workbookDigital * 100, tax_code: TAX_CODES.workbookDigital, reference: `item-${itemIndex}-wbdigital`, quantity: 1 });
+  if (!item._promoWorkbookFree) {
+    if (item.addonWorkbook === 'print') {
+      lines.push({ amount: ADDON_PRICES.workbookPrint * 100,   tax_code: TAX_CODES.workbookPrint,   reference: `item-${itemIndex}-wbprint`,   quantity: 1 });
+    }
+    if (item.addonWorkbook === 'digital') {
+      lines.push({ amount: ADDON_PRICES.workbookDigital * 100, tax_code: TAX_CODES.workbookDigital, reference: `item-${itemIndex}-wbdigital`, quantity: 1 });
+    }
   }
   if (item.addonLmft) {
     lines.push({ amount: ADDON_PRICES.lmft * 100,       tax_code: TAX_CODES.lmft,         reference: `item-${itemIndex}-lmft`,       quantity: 1 });
@@ -607,7 +609,10 @@ export default async function handler(req) {
       return sum + itemSubtotal(it) - (wb * it._promoWorkbookPercent / 100);
     }
     if (!it._promoCoveredBase) return sum + itemSubtotal(it);
-    const addons = itemAddonTotal(it);
+    let addons = itemAddonTotal(it);
+    if (it._promoWorkbookFree) {
+      addons = Math.max(0, addons - (it.addonWorkbook === 'print' ? ADDON_PRICES.workbookPrint : ADDON_PRICES.workbookDigital));
+    }
     if (it._promoMode === 'fixed') return sum + addons + (it._promoFixedAmount || 0);
     return sum + addons; // free-mode
   }, 0);

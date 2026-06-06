@@ -498,6 +498,8 @@ let cardComplete = false;
 let appliedPromoCode = null;
 let appliedPromoMode = null;     // 'free' | 'fixed'
 let appliedPromoAmount = 0;      // dollars; the package's final price under fixed mode
+let appliedPromoFreeWorkbook = false;  // code also bundles a free digital workbook
+let _promoWorkbookSnapshot = [];       // prior per-item workbook state, for removePromo
 let stripe, cardNumberElement, cardExpiryElement, cardCvcElement, paymentRequest;
 
 // Single-item legacy vars (used when cart has exactly one item, for
@@ -946,7 +948,7 @@ function renderSummary() {
       </div>`;
     // Addon summary rows if any
     const addonBits = [];
-    if (g.item.addons.workbook)   addonBits.push(`Workbook${g.item.addons.workbookVariant === 'print' ? ' (print)' : ''}`);
+    if (g.item.addons.workbook)   addonBits.push(`Workbook${g.item.addons.workbookVariant === 'print' ? ' (print)' : ''}${appliedPromoFreeWorkbook ? ' (free)' : ''}`);
     if (g.item.addons.lmft)       addonBits.push('LMFT Session');
     if (g.item.addons.reflection) addonBits.push('Reflection');
     if (g.item.addons.budget)     addonBits.push('Budget');
@@ -973,10 +975,18 @@ function renderSummary() {
     const finalPackageCost = (appliedPromoMode === 'fixed')
       ? appliedPromoAmount * _items.length
       : 0;
-    const discount = Math.max(0, baseTotal - finalPackageCost);
+    let discount = Math.max(0, baseTotal - finalPackageCost);
+    // Free-workbook codes also cover the digital workbook on each item.
+    if (appliedPromoMode === 'free' && appliedPromoFreeWorkbook) {
+      discount += _items.reduce((s, it) => s + (it.addons.workbook
+        ? (it.addons.workbookVariant === 'print' ? ADDON_WORKBOOK.print.price : ADDON_WORKBOOK.digital.price)
+        : 0), 0);
+    }
     const subLabel = (appliedPromoMode === 'fixed')
       ? `${appliedPromoCode} · package $${appliedPromoAmount}, add-ons billed normally`
-      : `${appliedPromoCode} · covers package only`;
+      : (appliedPromoFreeWorkbook
+          ? `${appliedPromoCode} · covers assessment + digital workbook`
+          : `${appliedPromoCode} · covers package only`);
     rows += `
       <div class="co-card-detail" style="border-top:1px solid #E8DDD0;margin-top:.4rem;padding-top:.5rem">
         <div>
@@ -1682,13 +1692,21 @@ async function applyPromo() {
     // $1 lets us validate the full Stripe path end-to-end with real charges.
     'BETA-CORE-1':          { pkg: 'core', mode: 'fixed', amount: 1 },
   };
-  const codeEntry = VALID_CODES[code];
+  let codeEntry = VALID_CODES[code];
+  // Numbered beta codes (ATTUNE-BETA-01, -02, …) live in the database and all
+  // grant the same thing: a free Foundation assessment plus a free digital
+  // workbook, single-use. Recognize the whole family here so issuing a new
+  // code only needs a database row, not a code change. The server is the
+  // source of truth for whether a specific number exists and is still unused.
+  if (!codeEntry && /^ATTUNE-BETA-\d{1,3}$/.test(code)) {
+    codeEntry = { pkg: 'core', mode: 'free', amount: 0, includesWorkbook: true, workbookVariant: 'digital' };
+  }
   if (!codeEntry) {
     fb.textContent = 'Invalid code.';
     fb.style.color = '#B45309';
     return;
   }
-  // Normalize into { pkg, mode, amount } regardless of the source shape
+  // Normalize into { pkg, mode, amount, includesWorkbook } regardless of shape
   const codeMeta = (typeof codeEntry === 'string')
     ? { pkg: codeEntry, mode: 'free', amount: 0 }
     : codeEntry;
@@ -1718,6 +1736,18 @@ async function applyPromo() {
   // to compute the discount line.
   appliedPromoMode = codeMeta.mode;     // 'free' | 'fixed'
   appliedPromoAmount = codeMeta.amount; // dollars; 0 for free, N for fixed
+  // If the code bundles a free digital workbook, add it to each item for this
+  // checkout session and snapshot the prior state so removePromo can revert.
+  // (Checkout doesn't persist the cart, so this stays local to this page.)
+  appliedPromoFreeWorkbook = !!codeMeta.includesWorkbook;
+  _promoWorkbookSnapshot = [];
+  if (appliedPromoFreeWorkbook) {
+    _items.forEach(it => {
+      _promoWorkbookSnapshot.push({ id: it.id, had: !!it.addons.workbook, variant: it.addons.workbookVariant || 'digital' });
+      it.addons.workbook = true;
+      it.addons.workbookVariant = 'digital';
+    });
+  }
   fb.textContent = '';
   document.getElementById('promoInputWrap').style.display = 'none';
   document.getElementById('promoToggle').style.display = 'none';
@@ -1729,7 +1759,18 @@ async function applyPromo() {
   // path detects free orders and skips Stripe.
   // For FIXED-mode codes ($1 etc.): keep the card visible — there's still
   // a charge to collect.
-  if (codeMeta.mode === 'free') {
+  // Hide the card only when nothing remains to charge: package free, workbook
+  // free (if bundled), and no other paid add-ons. If a paid add-on remains,
+  // keep the card so we can still collect for it.
+  let remainingCharge = 0;
+  _items.forEach(it => {
+    if (it.addons.lmft)       remainingCharge += ADDON_LMFT.price;
+    if (it.addons.reflection) remainingCharge += ADDON_REFLECTION.price;
+    if (it.addons.budget)     remainingCharge += 20;
+    if (it.addons.checklist)  remainingCharge += 20;
+  });
+  const fullyFree = codeMeta.mode === 'free' && remainingCharge <= 0;
+  if (fullyFree) {
     const cardBlock = document.getElementById('cardBlock');
     if (cardBlock) cardBlock.style.display = 'none';
     const paymentDivider = document.getElementById('paymentDivider');
@@ -1748,7 +1789,7 @@ async function applyPromo() {
   // Update the pay button: free codes say "Complete order (free)";
   // fixed codes use the normal pay-with-amount label that renderSummary sets.
   const btnLabel = document.getElementById('btnLabel');
-  if (btnLabel && codeMeta.mode === 'free') {
+  if (btnLabel && fullyFree) {
     btnLabel.textContent = 'Complete order (free) →';
   }
 }
@@ -1776,6 +1817,16 @@ function removePromo() {
   if (expressWrap && expressWrap.dataset.supported === '1') {
     expressWrap.style.display = 'block';
   }
+  // Revert any free workbook the promo added this session
+  if (appliedPromoFreeWorkbook && Array.isArray(_promoWorkbookSnapshot)) {
+    _promoWorkbookSnapshot.forEach(snap => {
+      const it = _items.find(i => i.id === snap.id);
+      if (it) { it.addons.workbook = snap.had; it.addons.workbookVariant = snap.variant || 'digital'; }
+    });
+  }
+  appliedPromoFreeWorkbook = false;
+  _promoWorkbookSnapshot = [];
+
   // Stripe will update cardComplete on next input change; reset here so
   // the submit button stays disabled until user re-enters a card.
   cardComplete = false;
