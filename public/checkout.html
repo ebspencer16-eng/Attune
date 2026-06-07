@@ -1495,9 +1495,22 @@ async function handleSubmit(e) {
       if (wbNote) wbNote.style.display = 'block';
     }
 
-    // Fire the order email(s) — one per item so each couple gets their own
+    // Fire the order email(s) — one per item so each couple gets their own.
+    // Build an itemized list (package + each add-on at its real price) so the
+    // confirmation email shows a correct breakdown and total.
     for (const it of _items) {
       const itPkg = PACKAGES[it.pkg] || PACKAGES.core;
+      const isPhys = it.format === 'physical';
+      const lineItems = [{ label: itPkg.name, price: isPhys ? itPkg.physicalPrice : itPkg.digitalPrice }];
+      if (it.addons.workbook) {
+        const wv = it.addons.workbookVariant === 'print' ? 'print' : 'digital';
+        lineItems.push({ label: ADDON_WORKBOOK[wv].label, price: ADDON_WORKBOOK[wv].price });
+      }
+      if (it.addons.lmft)       lineItems.push({ label: ADDON_LMFT.label, price: ADDON_LMFT.price });
+      if (it.addons.reflection) lineItems.push({ label: ADDON_REFLECTION.label, price: ADDON_REFLECTION.price });
+      if (it.addons.budget)     lineItems.push({ label: 'Shared Budgeting Activity', price: 20 });
+      if (it.addons.checklist)  lineItems.push({ label: 'Starting Out Checklist', price: 20 });
+      const itemSubtotal = lineItems.reduce((sum, l) => sum + l.price, 0);
       fetch('/api/send-order-email', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -1505,12 +1518,13 @@ async function handleSubmit(e) {
           pkgKey:        it.pkg,
           pkgName:       itPkg.name,
           isGift:        it.intent === 'gift',
-          isPhysical:    it.format === 'physical',
+          isPhysical:    isPhys,
           buyerName:     it.partner1Name,
           buyerEmail:    email,
           partnerName:   it.partner2Name,
           orderNum:      realOrderNum,
-          total:         it.format === 'physical' ? itPkg.physicalPrice : itPkg.digitalPrice,
+          lineItems:     lineItems,
+          total:         isFreePromo ? 0 : itemSubtotal,
           addonWorkbook: it.addons.workbook ? (it.addons.workbookVariant || 'digital') : null,
           addonLmft:     !!it.addons.lmft,
           giftNote:      it.giftNote || null,

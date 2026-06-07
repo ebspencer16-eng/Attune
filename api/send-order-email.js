@@ -41,7 +41,7 @@ export default async function handler(req) {
     buyerName, buyerEmail,
     partnerName, partnerEmail,       // for-self digital
     recipientName, recipientEmail,   // gift digital
-    orderNum, total,
+    orderNum, total, lineItems,
     addonWorkbook,
     addonLmft,
     addonReflection,
@@ -60,7 +60,7 @@ export default async function handler(req) {
     from: `Attune <${FROM}>`,
     to: [buyerEmail],
     subject: `Attune Order Confirmation`,
-    html: orderConfirmationHtml({ buyerName, pkgName, orderNum, total, isGift, isPhysical, recipientName, addonWorkbook, addonLmft, addonReflection, addonBudget }),
+    html: orderConfirmationHtml({ buyerName, pkgName, orderNum, total, lineItems, isGift, isPhysical, recipientName, addonWorkbook, addonLmft, addonReflection, addonBudget }),
   });
 
   // ── 2. "Get started" to buyer (digital, for-self) ──────────────────────────
@@ -206,27 +206,41 @@ function brandedEmail({ preheader = '', title, subtitle, bodyHtml, ctaLabel, cta
 </html>`;
 }
 
-function orderConfirmationHtml({ buyerName, pkgName, orderNum, total, isGift, isPhysical, recipientName, addonWorkbook, addonLmft, addonReflection, addonBudget }) {
+function orderConfirmationHtml({ buyerName, pkgName, orderNum, total, lineItems, isGift, isPhysical, recipientName, addonWorkbook, addonLmft, addonReflection, addonBudget }) {
   const deliveryLine = isPhysical
     ? 'Your gift box will arrive within 3–5 business days. Setup instructions are inside.'
     : isGift
       ? `We've sent ${_esc(recipientName)}'s access link in a separate email.`
       : 'Your access link has been sent in a separate email — check your inbox to set up your profile.';
 
-  const addonRows = [
-    addonWorkbook ? `<tr><td style="padding:6px 0;color:#8C7A68;font-size:14px">Personalized Workbook</td><td align="right" style="padding:6px 0;color:#C17F47;font-size:14px;font-weight:600">included</td></tr>` : '',
-    addonLmft ? `<tr><td style="padding:6px 0;color:#8C7A68;font-size:14px">LMFT Session</td><td align="right" style="padding:6px 0;color:#5B6DF8;font-size:14px;font-weight:600">scheduling link to follow</td></tr>` : '',
-    addonReflection ? `<tr><td style="padding:6px 0;color:#8C7A68;font-size:14px">Relationship Reflection</td><td align="right" style="padding:6px 0;color:#5B6DF8;font-size:14px;font-weight:600">included</td></tr>` : '',
-    addonBudget ? `<tr><td style="padding:6px 0;color:#8C7A68;font-size:14px">Budget Priorities Exercise</td><td align="right" style="padding:6px 0;color:#C17F47;font-size:14px;font-weight:600">included</td></tr>` : '',
-  ].filter(Boolean).join('');
+  // Prefer the explicit itemized list; fall back to package + add-on flags.
+  let items = Array.isArray(lineItems) && lineItems.length ? lineItems.slice() : null;
+  if (!items) {
+    items = [{ label: pkgName, price: Number(total) || 0 }];
+    if (addonWorkbook)   items.push({ label: 'Personalized Workbook (' + (addonWorkbook === 'print' ? 'printed' : 'digital') + ')', price: addonWorkbook === 'print' ? 39 : 19 });
+    if (addonLmft)       items.push({ label: 'LMFT Session', price: 150 });
+    if (addonReflection) items.push({ label: 'Relationship Reflection', price: 40 });
+    if (addonBudget)     items.push({ label: 'Budget Priorities Exercise', price: 20 });
+  }
+  const sub = items.reduce((acc, l) => acc + (Number(l.price) || 0), 0);
+  const grandTotal = (total != null && total !== '') ? Number(total) : sub;
+  const discount = sub - grandTotal;
+  const itemRows = items.map(l =>
+    `<tr><td style="padding:6px 0;color:#1E1610;font-size:14px">${_esc(l.label)}</td><td align="right" style="padding:6px 0;color:#1E1610;font-size:14px;font-weight:600">$${_esc(l.price)}</td></tr>`
+  ).join('');
+  const discountRow = discount > 0
+    ? `<tr><td style="padding:6px 0;color:#2F9E6F;font-size:14px">Promo applied</td><td align="right" style="padding:6px 0;color:#2F9E6F;font-size:14px;font-weight:600">-$${_esc(discount)}</td></tr>`
+    : '';
+  const totalRow = `<tr><td style="border-top:1px solid #E8DDD0;padding:10px 0 4px;color:#1E1610;font-size:15px;font-weight:700">Total</td><td align="right" style="border-top:1px solid #E8DDD0;padding:10px 0 4px;color:#1E1610;font-size:15px;font-weight:700">$${_esc(grandTotal)}</td></tr>`;
 
   const body = `
     <div style="background:#FBF8F3;border:1px solid #F3EDE6;border-radius:10px;padding:20px 22px;margin:8px 0 16px">
       <div style="font-family:'DM Sans',Helvetica,Arial,sans-serif;font-size:11px;color:#C17F47;font-weight:700;letter-spacing:.2em;text-transform:uppercase;margin-bottom:12px">Order summary</div>
       <table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="font-family:'DM Sans',Helvetica,Arial,sans-serif">
-        <tr><td style="padding:6px 0;color:#1E1610;font-size:14px;font-weight:600">${_esc(pkgName)}</td><td align="right" style="padding:6px 0;color:#1E1610;font-size:14px;font-weight:600">$${_esc(total)}</td></tr>
-        ${addonRows}
-        <tr><td colspan="2" style="border-top:1px solid #E8DDD0;padding-top:10px;margin-top:10px;font-size:12px;color:#8C7A68;font-family:'Menlo','SF Mono',monospace">Order #${_esc(orderNum)}</td></tr>
+        ${itemRows}
+        ${discountRow}
+        ${totalRow}
+        <tr><td colspan="2" style="padding-top:10px;margin-top:6px;font-size:12px;color:#8C7A68;font-family:'Menlo','SF Mono',monospace">Order #${_esc(orderNum)}</td></tr>
       </table>
     </div>
     <p style="font-family:'DM Sans',Helvetica,Arial,sans-serif;font-size:14px;color:#5C4A38;line-height:1.7;margin:0">${deliveryLine}</p>

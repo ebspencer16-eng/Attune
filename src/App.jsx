@@ -1679,6 +1679,15 @@ function CouplePortraitBubble({ portrait, size = 32, dark = false, uid, onClick,
 // ── GIFT LANDING SCREEN ──────────────────────────────────────────────────────
 // Shown when someone scans a QR card from a physical gift box.
 // ?gift=1&p1=Sarah&p2=James&pkg=X&order=ATT-xxx
+function InlineSpinner({ light = true }) {
+  return (
+    <>
+      <style>{`@keyframes attuneBtnSpin{to{transform:rotate(360deg)}}`}</style>
+      <span style={{ width: 14, height: 14, borderRadius: "50%", border: `2px solid ${light ? "rgba(255,255,255,0.45)" : "rgba(14,11,7,0.25)"}`, borderTopColor: light ? "#ffffff" : "#0E0B07", display: "inline-block", animation: "attuneBtnSpin 0.7s linear infinite" }} />
+    </>
+  );
+}
+
 function GiftLandingScreen({ p1, p2, pkg, orderId, onCreateAccount }) {
   const [step, setStep] = React.useState('who'); // 'who' | 'email' | 'signup'
   const [chosenPartner, setChosenPartner] = React.useState(null); // 'p1' | 'p2'
@@ -1854,7 +1863,7 @@ function GiftSignupForm({ myName, theirName, theirEmail, pkg, orderId, onCreateA
       {err && <p style={{ color: '#ef4444', fontSize: '0.75rem', marginBottom: '0.75rem' }}>{err}</p>}
       <button onClick={handleCreate} disabled={loading}
         style={{ width: '100%', padding: '0.9rem', background: `linear-gradient(135deg, ${C.orange}, ${C.indigo})`, color: 'white', border: 'none', borderRadius: 12, fontSize: '0.85rem', fontWeight: 700, cursor: loading ? 'default' : 'pointer', opacity: loading ? 0.7 : 1, fontFamily: "'DM Sans', sans-serif" }}>
-        {loading ? 'Creating account…' : 'Create account →'}
+        {loading ? <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '0.55rem' }}><InlineSpinner /> Creating account…</span> : 'Create account →'}
       </button>
     </>
   );
@@ -9016,7 +9025,7 @@ function AuthModal({ mode, onClose, onSuccess }) {
               emailRedirectTo: `${window.location.origin}/app`,
             },
           }),
-          30000,
+          15000,
           'auth.signUp'
         );
         authData = result.data;
@@ -9189,10 +9198,22 @@ function AuthModal({ mode, onClose, onSuccess }) {
     // ── Supabase auth ────────────────────────────────────────────────────────
     const { supabase: sb, hasSupabase } = await import('./supabase.js');
     if (hasSupabase()) {
-      const { data: authData, error: authErr } = await sb.auth.signInWithPassword({
-        email: form.email.trim().toLowerCase(),
-        password: form.password,
-      });
+      let authData, authErr;
+      try {
+        const result = await withTimeout(
+          sb.auth.signInWithPassword({
+            email: form.email.trim().toLowerCase(),
+            password: form.password,
+          }),
+          15000,
+          'auth.signInWithPassword'
+        );
+        authData = result.data;
+        authErr = result.error;
+      } catch (e) {
+        setLoading(false);
+        return setErr("Sign-in is taking too long. Check your connection and try again.");
+      }
       if (authErr) {
         setLoading(false);
         const attempts = loginAttempts + 1;
@@ -9502,7 +9523,7 @@ function AuthModal({ mode, onClose, onSuccess }) {
             {err && <p style={{ color: "#ef4444", fontSize: "0.75rem", fontFamily: "'DM Sans',sans-serif", marginBottom: "0.75rem" }}>{err}</p>}
             <button onClick={handleSignup} disabled={loading}
               style={{ width: "100%", padding: "0.9rem", background: "linear-gradient(135deg, #E8673A, #d45a2e)", color: "white", border: "none", borderRadius: 12, fontSize: "0.85rem", fontWeight: 700, cursor: loading ? "default" : "pointer", fontFamily: "'DM Sans',sans-serif", opacity: loading ? 0.7 : 1 }}>
-              {loading ? "Creating account…" : "Create account →"}
+              {loading ? <span style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", gap: "0.55rem" }}><InlineSpinner /> Creating account…</span> : "Create account →"}
             </button>
           </>
         ) : tab === "login" ? (
@@ -9513,7 +9534,7 @@ function AuthModal({ mode, onClose, onSuccess }) {
             {err && <p style={{ color: "#ef4444", fontSize: "0.75rem", fontFamily: "'DM Sans',sans-serif", marginBottom: "0.75rem" }}>{err}</p>}
             <button onClick={handleLogin} disabled={loading}
               style={{ width: "100%", padding: "0.9rem", background: "#0E0B07", color: "white", border: "none", borderRadius: 12, fontSize: "0.85rem", fontWeight: 700, cursor: loading ? "default" : "pointer", fontFamily: "'DM Sans',sans-serif", opacity: loading ? 0.7 : 1 }}>
-              {loading ? "Signing in…" : "Sign in →"}
+              {loading ? <span style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", gap: "0.55rem" }}><InlineSpinner /> Signing in…</span> : "Sign in →"}
             </button>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: "0.85rem" }}>
               <p style={{ fontSize: "0.75rem", color: "#8C7A68", fontFamily: "'DM Sans',sans-serif", margin: 0 }}>
@@ -9882,7 +9903,7 @@ function PartnerLandingScreen({ inviteFrom, inviteCode, onCreateAccount }) {
 
         <button onClick={handleSubmit} disabled={loading}
           style={{ width: '100%', padding: '0.9rem', background: 'linear-gradient(135deg, #E8673A, #1B5FE8)', color: 'white', border: 'none', borderRadius: 12, fontSize: '0.85rem', fontWeight: 700, cursor: loading ? 'default' : 'pointer', fontFamily: "'DM Sans', sans-serif", opacity: loading ? 0.7 : 1, transition: 'opacity 0.2s', marginBottom: '0.85rem' }}>
-          {loading ? 'Setting up your account…' : 'Start my exercises →'}
+          {loading ? <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '0.55rem' }}><InlineSpinner /> Setting up your account…</span> : 'Start my exercises →'}
         </button>
 
         <p style={{ fontSize: '0.68rem', color: '#C17F47', textAlign: 'center', fontFamily: "'DM Sans', sans-serif", lineHeight: 1.6 }}>
