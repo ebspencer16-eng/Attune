@@ -199,6 +199,7 @@
   <div class="success-icon">✓</div>
   <h1>You're all set.</h1>
   <p>Check your email for order confirmation and access instructions. You can set up your profile any time.</p>
+  <p id="coOrderNum" style="font-family:'Menlo','SF Mono',monospace;font-size:.72rem;color:#8C7A68;margin:0 0 1rem"></p>
   <a id="startLink" href="/app" class="btn-primary" style="display:inline-block;width:auto;padding:.85rem 2rem">Set up your profile →</a>
 </div>
 
@@ -626,6 +627,22 @@ async function refreshTax() {
   }
 }
 
+// Record a completed order and take the (now dead) checkout form out of the
+// back-button history, so returning here shows a confirmation rather than an
+// empty cart or a re-purchasable form.
+function persistOrderComplete(orderNum) {
+  try {
+    const onEl = document.getElementById('coOrderNum');
+    if (onEl && orderNum) onEl.textContent = 'Order ' + orderNum;
+    localStorage.setItem('attune_last_order', JSON.stringify({
+      orderNum: orderNum || '',
+      setupUrl: document.getElementById('startLink').href,
+      ts: Date.now(),
+    }));
+  } catch {}
+  try { history.replaceState(null, '', location.pathname + '?complete=1'); } catch {}
+}
+
 // ── Init: read cart from localStorage or fall back to URL params ───────────
 (function init() {
   const params = new URLSearchParams(location.search);
@@ -645,6 +662,24 @@ async function refreshTax() {
   try {
     const raw = localStorage.getItem('attune_cart');
     if (raw) cartItems = JSON.parse(raw);
+  } catch {}
+
+  // Returning to a completed checkout (Back, refresh, the cart was cleared on
+  // success): show the confirmation instead of an empty / re-purchasable form.
+  try {
+    const rec = JSON.parse(localStorage.getItem('attune_last_order') || 'null');
+    const recent = rec && (Date.now() - (rec.ts || 0) < 24 * 60 * 60 * 1000);
+    const cartEmpty = !(Array.isArray(cartItems) && cartItems.length > 0);
+    if (recent && (params.get('complete') === '1' || cartEmpty)) {
+      if (rec.setupUrl) document.getElementById('startLink').href = rec.setupUrl;
+      const onEl = document.getElementById('coOrderNum');
+      if (onEl && rec.orderNum) onEl.textContent = 'Order ' + rec.orderNum;
+      document.getElementById('coWrap').style.display = 'none';
+      const s = document.getElementById('coSuccess');
+      s.classList.add('visible');
+      s.style.display = 'block';
+      return;
+    }
   } catch {}
 
   if (Array.isArray(cartItems) && cartItems.length > 0) {
@@ -1331,6 +1366,7 @@ function validateForm() {
             document.getElementById('startLink').href = '/app?' + params.toString();
             document.getElementById('coWrap').style.display = 'none';
             document.getElementById('coSuccess').style.display = 'block';
+            persistOrderComplete(realOrderNum);
           } catch (err) {
             ev.complete('fail');
             alert('Payment error: ' + err.message);
@@ -1554,6 +1590,7 @@ async function handleSubmit(e) {
 
     document.getElementById('coWrap').style.display = 'none';
     document.getElementById('coSuccess').classList.add('visible');
+    persistOrderComplete(realOrderNum);
     window.scrollTo({ top: 0, behavior: 'smooth' });
 
   } catch(err) {
