@@ -8995,9 +8995,9 @@ function AuthModal({ mode, onClose, onSuccess }) {
   ]);
 
   const handleSignup = async () => {
-    if (!form.name.trim()) return setErr("Please enter your name.");
-    if (!form.email.trim() || !form.email.includes("@")) return setErr("Please enter a valid email.");
-    if (!form.password || form.password.length < 6) return setErr("Password must be at least 6 characters.");
+    if (!form.name.trim()) return setErr("Add your first name above to continue.");
+    if (!form.email.trim() || !form.email.includes("@")) return setErr("Enter a valid email above to continue.");
+    if (!form.password || form.password.length < 6) return setErr("Choose a password with at least 6 characters above.");
     setLoading(true);
     setErr("");
 
@@ -9025,14 +9025,14 @@ function AuthModal({ mode, onClose, onSuccess }) {
               emailRedirectTo: `${window.location.origin}/app`,
             },
           }),
-          15000,
+          20000,
           'auth.signUp'
         );
         authData = result.data;
         authErr = result.error;
       } catch (e) {
         console.warn('[signup] auth.signUp timed out or threw:', e);
-        return setErr("Sign-up is taking too long. Check your connection and try again.");
+        return setErr("This is taking longer than usual. Wait a moment and try again, or sign in since your account may already be set up.");
       }
       if (authErr) return setErr(authErr.message);
       if (!authData?.user?.id) return setErr("Sign-up didn't complete. Please try again.");
