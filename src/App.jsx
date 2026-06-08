@@ -9034,7 +9034,22 @@ function AuthModal({ mode, onClose, onSuccess }) {
         console.warn('[signup] auth.signUp timed out or threw:', e);
         return setErr("This is taking longer than usual. Wait a moment and try again, or sign in since your account may already be set up.");
       }
-      if (authErr) return setErr(authErr.message);
+      const ALREADY_MSG = "Looks like that email is already registered for an Attune account. Enter your password to sign in, or tap Forgot password below to reset it.";
+      if (authErr) {
+        const m = (authErr.message || '').toLowerCase();
+        if (m.includes('already registered') || m.includes('already exists') || m.includes('already been registered') || authErr.code === 'user_already_exists') {
+          setTab('login');
+          return setErr(ALREADY_MSG);
+        }
+        return setErr(authErr.message);
+      }
+      // With "Confirm email" on, Supabase returns an obfuscated user with an
+      // empty identities array (and no error) when the email already exists.
+      // Treat that as already-registered too.
+      if (authData?.user && Array.isArray(authData.user.identities) && authData.user.identities.length === 0) {
+        setTab('login');
+        return setErr(ALREADY_MSG);
+      }
       if (!authData?.user?.id) return setErr("Sign-up didn't complete. Please try again.");
 
       // Write profile fields that aren't in auth metadata.
@@ -9224,7 +9239,7 @@ function AuthModal({ mode, onClose, onSuccess }) {
         // Try to distinguish email vs password error. Supabase returns a generic message for security,
         // but we can check if the error mentions "email" specifically.
         const msg = (authErr.message || '').toLowerCase();
-        if (msg.includes('email not confirmed') || msg.includes('not confirmed')) return setErr("Please confirm your email first.");
+        if (msg.includes('email not confirmed') || msg.includes('not confirmed')) return setErr("This account hasn't been confirmed yet. Check your email for the confirmation link from Attune, then sign in.");
         if (msg.includes('user not found') || msg.includes('no user') || msg.includes('invalid email')) return setErr("Wrong email, no account found.");
         // Default: assume wrong password (most common case when email exists)
         return setErr("Wrong password. Please try again.");
