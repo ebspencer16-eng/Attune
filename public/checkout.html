@@ -512,6 +512,7 @@ let pkg = null;
 let addonWorkbook = null;
 let addonReflection = false;
 let addonBudget = false;
+let addonChecklist = false;
 let addonLmft = false;
 
 // Multi-item state: one entry per couple (qty expanded). Each entry:
@@ -741,6 +742,7 @@ function persistOrderComplete(orderNum) {
   addonLmft       = !!first.addons.lmft;
   addonReflection = !!first.addons.reflection;
   addonBudget     = !!first.addons.budget;
+  addonChecklist  = !!first.addons.checklist;
   intent          = first.intent;
 
   renderItemsStep();
@@ -1730,6 +1732,8 @@ function getPkgTotal() {
       if (addonWorkbook && ADDON_WORKBOOK[addonWorkbook]) t += ADDON_WORKBOOK[addonWorkbook].price;
       if (addonLmft) t += ADDON_LMFT.price;
       if (addonReflection) t += ADDON_REFLECTION.price;
+      if (addonBudget) t += 20;
+      if (addonChecklist) t += 20;
       return t;
     }
     return 0; // free-mode covers the whole package
@@ -1738,6 +1742,8 @@ function getPkgTotal() {
   if (addonWorkbook && ADDON_WORKBOOK[addonWorkbook]) t += ADDON_WORKBOOK[addonWorkbook].price;
   if (addonLmft) t += ADDON_LMFT.price;
   if (addonReflection) t += ADDON_REFLECTION.price;
+  if (addonBudget) t += 20;
+  if (addonChecklist) t += 20;
   return t;
 }
 
