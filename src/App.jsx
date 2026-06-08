@@ -9032,7 +9032,7 @@ function AuthModal({ mode, onClose, onSuccess }) {
         authErr = result.error;
       } catch (e) {
         console.warn('[signup] auth.signUp timed out or threw:', e);
-        return setErr("This is taking longer than usual. Wait a moment and try again, or sign in since your account may already be set up.");
+        return setErr("That took too long and didn't go through. Wait a moment and try again.");
       }
       const ALREADY_MSG = "Looks like that email is already registered for an Attune account. Enter your password to sign in, or tap Forgot password below to reset it.";
       if (authErr) {
