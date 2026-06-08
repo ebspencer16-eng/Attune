@@ -1723,6 +1723,20 @@ function clearPaymentError() {
   if (card) card.classList.remove('visible');
 }
 
+// Canonical per-item price (base + add-ons). Mirror of the cart/summary
+// itemPrice() so the order total, button label, and idempotency amount agree.
+function cartItemPrice(it) {
+  const p = PACKAGES[it.pkg] || PACKAGES.core;
+  let base = it.format === 'physical' ? p.physicalPrice : p.digitalPrice;
+  let add = 0;
+  if (it.addons.workbook)   add += (it.addons.workbookVariant === 'print') ? 39 : 19;
+  if (it.addons.lmft)       add += ADDON_LMFT.price;
+  if (it.addons.reflection) add += ADDON_REFLECTION.price;
+  if (it.addons.budget)     add += 20;
+  if (it.addons.checklist)  add += 20;
+  return base + add;
+}
+
 function getPkgTotal() {
   // With a promo: free-mode → $0; fixed-mode → the fixed amount.
   // No promo: full package + addons.
@@ -1738,13 +1752,9 @@ function getPkgTotal() {
     }
     return 0; // free-mode covers the whole package
   }
-  let t = pkg.price;
-  if (addonWorkbook && ADDON_WORKBOOK[addonWorkbook]) t += ADDON_WORKBOOK[addonWorkbook].price;
-  if (addonLmft) t += ADDON_LMFT.price;
-  if (addonReflection) t += ADDON_REFLECTION.price;
-  if (addonBudget) t += 20;
-  if (addonChecklist) t += 20;
-  return t;
+  // No promo: sum every couple in the cart (e.g. gifting multiple couples),
+  // not just the first item.
+  return _items.reduce((sum, it) => sum + cartItemPrice(it), 0);
 }
 
 // ── Promo code handlers ─────────────────────────────────────────────────────
