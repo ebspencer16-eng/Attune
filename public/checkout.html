@@ -673,10 +673,14 @@ function persistOrderComplete(orderNum) {
 
   // Returning to a completed checkout (Back, refresh, the cart was cleared on
   // success): show the confirmation instead of an empty / re-purchasable form.
+  // A fresh checkout link from the "Get started" page carries the package in
+  // the URL (?pkg=...) rather than localStorage, so that counts as an active
+  // cart and must NOT be treated as "returning to a completed order".
   try {
     const rec = JSON.parse(localStorage.getItem('attune_last_order') || 'null');
     const recent = rec && (Date.now() - (rec.ts || 0) < 24 * 60 * 60 * 1000);
-    const cartEmpty = !(Array.isArray(cartItems) && cartItems.length > 0);
+    const hasActiveCart = (Array.isArray(cartItems) && cartItems.length > 0) || !!params.get('pkg');
+    const cartEmpty = !hasActiveCart;
     if (recent && (params.get('complete') === '1' || cartEmpty)) {
       if (rec.setupUrl) document.getElementById('startLink').href = rec.setupUrl;
       const onEl = document.getElementById('coOrderNum');
