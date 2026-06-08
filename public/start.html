@@ -44,7 +44,7 @@ nav{position:sticky;top:0;z-index:100;height:58px;background:rgba(255,253,249,.9
 .fmt-btn.active{background:var(--ink);color:white}
 
 /* PACKAGE GRID */
-.pkg-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;max-width:1080px;margin:0 auto;padding:0 1.5rem 2rem}
+.pkg-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;max-width:1080px;margin:0 auto;padding:1.6rem 1.5rem 2rem}
 @media(max-width:900px){.pkg-grid{grid-template-columns:repeat(2,1fr)}}
 @media(max-width:500px){.pkg-grid{grid-template-columns:1fr}}
 
@@ -69,10 +69,8 @@ nav{position:sticky;top:0;z-index:100;height:58px;background:rgba(255,253,249,.9
 .pkg-features li.bold-feat{color:var(--ink);font-weight:500}
 
 /* POPULAR BADGE */
-.pkg-tile.popular{padding-top:1.4rem}
-.pkg-cell-popular{display:flex;flex-direction:column;gap:.4rem;align-self:end;height:100%}
-.pkg-cell-popular > .pkg-tile{flex:1}
-.popular-tagline{font-family:var(--bfont);font-size:.65rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--orange);text-align:center;margin:0;padding:.1rem 0}
+.pkg-tile.popular{overflow:visible}
+.popular-tagline{position:absolute;top:-1.45rem;left:0;right:0;font-family:var(--bfont);font-size:.65rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--orange);text-align:center;margin:0;padding:0}
 .pkg-name-row{display:flex;align-items:baseline;gap:.5rem;flex-wrap:wrap;margin-bottom:.35rem}
 .pkg-name-row .pkg-name{margin-bottom:0}
 .popular-inline{display:none;font-family:var(--bfont);font-size:.58rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--orange);white-space:nowrap}
@@ -254,12 +252,11 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;height:58px;background:rgba(
   </div>
 
   <!-- Starting Out -->
-  <div class="pkg-cell-popular">
+  <div class="pkg-tile popular" id="tile-newlywed" onclick="selectPkg('newlywed')">
     <div class="popular-tagline">Most popular</div>
-    <div class="pkg-tile popular" id="tile-newlywed" onclick="selectPkg('newlywed')">
-      <div class="pkg-check">
-        <svg width="11" height="9" viewBox="0 0 11 9" fill="none"><path d="M1 4.5L4 7.5L10 1" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-      </div>
+    <div class="pkg-check">
+      <svg width="11" height="9" viewBox="0 0 11 9" fill="none"><path d="M1 4.5L4 7.5L10 1" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </div>
     <span class="pkg-badge" style="background:#FFF0EB;color:#E8673A;">Starting Out</span>
     <div class="pkg-name-row"><div class="pkg-name">Starting Out Collection</div><span class="popular-inline">Most popular</span></div>
     <div class="pkg-price" id="price-newlywed">$174</div>
@@ -271,7 +268,6 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;height:58px;background:rgba(
       <li class="gift-feat">Gift box</li>
     </ul>
     <a class="more-info-link" onclick="openSidebar('newlywed',event)">More info →</a>
-    </div>
   </div>
 
   <!-- Anniversary -->

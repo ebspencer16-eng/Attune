@@ -1422,6 +1422,15 @@ async function handleSubmit(e) {
   // Clear any previous error card so the user isn't staring at a stale failure
   clearPaymentError();
 
+  // Guard: an empty cart used to throw here (before the try/catch), leaving the
+  // button stuck on "Processing…" with no error shown. Surface it clearly.
+  if (!_items || _items.length === 0) {
+    showPaymentError(new Error('Your cart is empty. Add a package before checking out.'));
+    btn.disabled = false;
+    btn.innerHTML = '<span id="btnLabel">Complete order · $' + getPkgTotal() + '</span>';
+    return;
+  }
+
   const email = document.getElementById('email').value.trim();
 
   // Build the items payload. If the API doesn't know about items (legacy),
@@ -1804,6 +1813,25 @@ async function applyPromo() {
   // code only needs a database row, not a code change. The server is the
   // source of truth for whether a specific number exists and is still unused.
   if (!codeEntry && /^ATTUNE-BETA-\d{1,3}$/.test(code)) {
+    // This family lives in the database and is single-use. Verify with the
+    // server BEFORE applying, so a used / unknown / expired code shows an error
+    // here in the promo field instead of only failing at "Complete order".
+    try {
+      const vr = await fetch('/api/validate-promo', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code }),
+      });
+      const vd = await vr.json();
+      if (vd && vd.valid === false) {
+        fb.textContent = vd.error || "That code isn't valid.";
+        fb.style.color = '#B45309';
+        return;
+      }
+    } catch (e) {
+      // Validation endpoint unreachable - apply optimistically; the purchase
+      // endpoint validates again before any charge or order is created.
+    }
     codeEntry = { pkg: 'core', mode: 'free', amount: 0, includesWorkbook: true, workbookVariant: 'digital' };
   }
   if (!codeEntry) {
