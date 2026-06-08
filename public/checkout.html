@@ -517,6 +517,12 @@ let addonLmft = false;
 // Multi-item state: one entry per couple (qty expanded). Each entry:
 //   { pkg, format, addons:{workbook,workbookVariant,lmft,reflection,budget,checklist},
 //     intent:'self'|'gift', partner1Name, partner2Name, giftNote, shipping:{name,address,city,state} }
+// One-time token for this checkout page load. Combined with the amount it forms
+// the Stripe idempotency key, so a resubmit (retry, double-submit, slow network)
+// reuses the same PaymentIntent instead of creating a second charge, while a
+// genuinely different cart/amount gets a fresh charge.
+const _checkoutToken = (window.crypto && crypto.randomUUID) ? crypto.randomUUID() : ('co-' + Date.now() + '-' + Math.random().toString(36).slice(2));
+function _idemKey() { return _checkoutToken + '-' + Math.round((getPkgTotal() || 0) * 100); }
 let _items = [];
 
 // ── Tax quote state ──────────────────────────────────────────────────────────
@@ -1310,6 +1316,7 @@ function validateForm() {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({
+                idempotencyKey: _idemKey(),
                 items: _items.map(it => ({
                   pkgKey: it.pkg, format: it.format,
                   isGift: it.intent === 'gift', isPhysical: it.format === 'physical',
@@ -1432,6 +1439,7 @@ async function handleSubmit(e) {
       headers: { 'Content-Type': 'application/json' },
       signal: _ctrl.signal,
       body: JSON.stringify({
+        idempotencyKey: _idemKey(),
         // Multi-item payload (new canonical shape)
         items: _items.map(it => ({
           pkgKey:           it.pkg,

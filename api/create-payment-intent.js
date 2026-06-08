@@ -709,6 +709,9 @@ export default async function handler(req) {
       headers: {
         Authorization: `Bearer ${secretKey}`,
         'Content-Type': 'application/x-www-form-urlencoded',
+        // Stripe dedupes by this key: a resubmit of the same cart reuses the
+        // original PaymentIntent instead of charging twice.
+        ...(body.idempotencyKey ? { 'Idempotency-Key': String(body.idempotencyKey).trim().slice(0, 200) } : {}),
       },
       body: payload.toString(),
     });
