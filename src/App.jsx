@@ -8951,6 +8951,8 @@ function AuthModal({ mode, onClose, onSuccess }) {
   const [form, setForm] = useState({ name: _p1, pronouns: "", partnerName: _p2, partnerPronouns: "", partnerEmail: "", email: "", password: "", emailOptIn: true, ageRange: "", gender: "", relationshipStatus: "", relationshipLength: "", children: "", signupSource: "" });
   const [qrOrder, setQrOrder] = useState(null);     // populated if a qr token resolves to a real order
   const [qrStatus, setQrStatus] = useState(_qrToken ? 'loading' : 'none'); // 'none' | 'loading' | 'ok' | 'claimed' | 'invalid'
+  const _authIsGift = _authParams.get('gift') === '1';
+  const [welcomeAck, setWelcomeAck] = useState(false); // gift/QR celebratory landing acknowledged
   const [err, setErr] = useState("");
   const [loading, setLoading] = useState(false);
   const [resetSent, setResetSent] = useState(false);
@@ -9433,6 +9435,30 @@ function AuthModal({ mode, onClose, onSuccess }) {
       {...extra}
     />
   );
+
+  // Celebratory welcome landing for gift recipients and physical-card (QR) arrivals.
+  // Shown once before the signup form. Gift-aware copy. Normal sign-in/up is unaffected.
+  const _isGiftContext = _authIsGift || !!qrOrder?.isGift;
+  const _showWelcome = !welcomeAck && (_authIsGift || (_qrToken && (qrStatus === 'loading' || qrStatus === 'ok')));
+  if (_showWelcome) {
+    return (
+      <div style={{ position: "fixed", inset: 0, background: "#1e1a35", zIndex: 500, display: "flex", alignItems: "flex-start", justifyContent: "center", padding: isMobile ? "0" : "1rem", overflowY: "auto" }}
+        onClick={e => e.target === e.currentTarget && onClose()}>
+        <div style={{ background: "#FFFDF9", borderRadius: isMobile ? 0 : 22, padding: isMobile ? "2rem 1.25rem" : "2.5rem 2rem", width: "100%", margin: isMobile ? 0 : "auto", minHeight: isMobile ? "100vh" : "auto", maxWidth: isMobile ? "none" : 440, boxShadow: isMobile ? "none" : "0 32px 80px rgba(0,0,0,0.28)", position: "relative" }}>
+          <button onClick={onClose} aria-label="Close" style={{ position: "absolute", top: "1rem", right: "1rem", background: "none", border: "none", fontSize: "1.2rem", cursor: "pointer", color: "#8C7A68", lineHeight: 1 }}>✕</button>
+          <div style={{ width: 56, height: 56, borderRadius: "50%", background: "linear-gradient(135deg, #E8673A, #1B5FE8)", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: "1.35rem", fontSize: "1.6rem", color: "white" }}>✦</div>
+          <div style={{ fontFamily: "'Playfair Display', Georgia, serif", fontSize: "1.5rem", fontWeight: 700, color: "#0E0B07", marginBottom: "0.5rem", lineHeight: 1.2 }}>Welcome to your Attune experience.</div>
+          <p style={{ fontSize: "0.85rem", color: "#8C7A68", fontFamily: "'DM Sans', sans-serif", marginBottom: "1.75rem", lineHeight: 1.7 }}>
+            {_isGiftContext ? "Someone gave you this as a gift. " : ""}Two assessments. One conversation. Built from your answers.
+          </p>
+          <button onClick={() => setWelcomeAck(true)}
+            style={{ width: "100%", padding: "0.9rem", border: "none", borderRadius: 12, background: "linear-gradient(135deg, #E8673A, #1B5FE8)", color: "white", cursor: "pointer", fontWeight: 700, fontSize: "0.9rem", fontFamily: "'DM Sans', sans-serif", letterSpacing: "0.02em" }}>
+            Set up your profile →
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div style={{ position: "fixed", inset: 0, background: "#1e1a35", zIndex: 500, display: "flex", alignItems: "flex-start", justifyContent: "center", padding: isMobile ? "0" : "1rem", overflowY: "auto" }}

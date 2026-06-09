@@ -167,7 +167,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;height:58px;background:rgba(
     </div>
   </div>
 
-  <a href="/portal" class="btn-setup" id="setup-btn">
+  <a href="/app?signup=1&gift=1" class="btn-setup" id="setup-btn">
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
     Set up your profile
   </a>
@@ -200,9 +200,16 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;height:58px;background:rgba(
     document.getElementById('wi-ex03').style.display = pkg === 'anniversary' ? 'flex' : 'none';
   }
 
-  // Pass token through to portal
+  // Route into the app. A QR/token-backed gift goes through the claim flow so
+  // the order links to the new account; otherwise a generic gift signup. Both
+  // show the celebratory welcome before account setup.
   const btn = document.getElementById('setup-btn');
-  if (token) btn.href = '/portal?token=' + token + (pkg ? '&pkg=' + pkg : '');
+  const qr = params.get('qr') || token;
+  if (qr) {
+    btn.href = '/app?qr=' + encodeURIComponent(qr);
+  } else {
+    btn.href = '/app?signup=1&gift=1' + (pkg ? '&pkg=' + encodeURIComponent(pkg) : '');
+  }
 })();
 </script>
 
