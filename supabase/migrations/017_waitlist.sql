@@ -1,4 +1,4 @@
--- 015_waitlist.sql
+-- 017_waitlist.sql
 -- Pre-launch email waitlist captured by the site popup ("10% off at launch").
 -- Writes happen server-side via /api/join-waitlist using the service role,
 -- so no anon insert policy is needed.
