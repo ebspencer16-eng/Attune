@@ -12050,8 +12050,9 @@ export default function App() {
                   );
                 })()}
 
-                {/* Profile setup tile — shown until dismissed or completed */}
-                {isLoggedIn && !profileSetupDone && (
+                {/* Profile setup tile — shown until dismissed or actually complete
+                    (name + pronouns + partner name + partner invited). */}
+                {isLoggedIn && !profileSetupDone && !(account?.name && account?.pronouns && account?.partnerName && account?.partnerEmail) && (
                   <ProfileSetupTile
                     account={account}
                     onSetup={() => setShowProfileSetup(true)}
