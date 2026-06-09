@@ -90,7 +90,7 @@ async function handlePartnerSync(req) {
     // Find Partner A by invite code (also pull name for the email body)
     const { data: partnerA, error: findErr } = await sb
       .from('profiles')
-      .select('id, partner_profile_id, name, pkg')
+      .select('id, partner_profile_id, name, pkg, pronouns')
       .eq('invite_code', code)
       .maybeSingle();
 
@@ -110,7 +110,7 @@ async function handlePartnerSync(req) {
     // Resolve Partner A's full entitlement so Partner B inherits the same
     // experience. Package is copied onto Partner B's profile below; add-ons
     // live on Partner A's order and are returned for the client to apply.
-    let inherited = { pkg: partnerA.pkg || 'core', addonReflection: false, addonBudget: false, addonLmft: false, addonWorkbook: '' };
+    let inherited = { pkg: partnerA.pkg || 'core', partnerPronouns: partnerA.pronouns || '', addonReflection: false, addonBudget: false, addonLmft: false, addonWorkbook: '' };
     try {
       const { data: aOrder } = await sb.from('orders')
         .select('addon_reflection, addon_budget, addon_lmft, addon_workbook')
@@ -149,6 +149,26 @@ async function handlePartnerSync(req) {
       addon_workbook:   inherited.addonWorkbook,
     }).eq('id', bId);
     if (addonErr) console.warn('[partner-sync] add-on persist skipped (migration 016 not run yet?):', addonErr.message);
+
+    // Exchange pronouns so each partner's profile knows the other's. Each
+    // person's own `pronouns` is the source of truth; copy it onto the other's
+    // `partner_pronouns`. The dashboard and results copy read this to refer to
+    // the partner correctly ("when Sarah finishes hers"). Guard on a non-empty
+    // source so we never blank out a value entered during setup. Best-effort:
+    // a failure here never blocks the link.
+    try {
+      const { data: bProfile } = await sb.from('profiles').select('pronouns').eq('id', bId).maybeSingle();
+      const aPronouns = (partnerA.pronouns || '').trim();
+      const bPronouns = (bProfile?.pronouns || '').trim();
+      const pronounUpdates = [];
+      if (aPronouns) pronounUpdates.push(sb.from('profiles').update({ partner_pronouns: aPronouns }).eq('id', bId));
+      if (bPronouns) pronounUpdates.push(sb.from('profiles').update({ partner_pronouns: bPronouns }).eq('id', partnerA.id));
+      if (pronounUpdates.length) {
+        const pres = await Promise.all(pronounUpdates);
+        const pErr = pres.find(r => r.error);
+        if (pErr) console.warn('[partner-sync] pronoun exchange skipped:', pErr.error.message);
+      }
+    } catch (e) { console.warn('[partner-sync] pronoun exchange failed:', e); }
 
     // Notify Partner A that Partner B just signed up (Issue 4.9).
     // Previously this fired when Partner B FINISHED their exercises, which
@@ -273,7 +293,7 @@ async function handlePartnerSync(req) {
 
       const { data, error } = await sb
         .from('profiles')
-        .select('name, ex1_answers, ex2_answers, ex3_answers, ex3_completed')
+        .select('name, pronouns, ex1_answers, ex2_answers, ex3_answers, ex3_completed')
         .eq('id', pid)
         .maybeSingle();
 

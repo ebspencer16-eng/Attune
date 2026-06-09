@@ -9875,6 +9875,7 @@ function PartnerLandingScreen({ inviteFrom, inviteCode, onCreateAccount }) {
         email: form.email.trim().toLowerCase(),
         name: form.name.trim(),
         partnerName: inviteFrom,
+        partnerPronouns: inheritedEntitlements?.partnerPronouns || '',
         inviteCode: inviteCode,         // Retained so the dashboard can look up partner
         joinedViaInvite: true,
         pkg:             inheritedEntitlements?.pkg || 'core',
