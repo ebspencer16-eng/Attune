@@ -12883,8 +12883,8 @@ export default function App() {
                   {[
                     { label: "Communication exercise", done: !!ex1Answers, who: `${userName || "You"}` },
                     { label: "Expectations exercise", done: !!ex2Answers, who: `${userName || "You"}` },
-                    { label: `${partnerName || "Partner"}'s communication`, done: !!partnerEx1, who: partnerName || "Partner" },
-                    { label: `${partnerName || "Partner"}'s expectations`, done: !!partnerEx2, who: partnerName || "Partner" },
+                    { label: `${partnerName || "Partner"}'s communication`, done: partnerSession?.inviteCode === account?.inviteCode && !!partnerSession?.ex1, who: partnerName || "Partner" },
+                    { label: `${partnerName || "Partner"}'s expectations`, done: partnerSession?.inviteCode === account?.inviteCode && !!partnerSession?.ex2, who: partnerName || "Partner" },
                   ].map((row, i, arr) => (
                     <div key={row.label} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0.75rem 1.35rem", borderBottom: i < arr.length - 1 ? "1px solid #F9F6F1" : "none", gap: "1rem" }}>
                       <span style={{ fontSize: "0.82rem", color: "#3C3C43", fontFamily: font.body }}>{row.label}</span>
