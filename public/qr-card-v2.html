@@ -677,7 +677,7 @@ function updateCard() {
   const tok = _token || randStr(32);
   _token = tok;
   const base = window.location.origin || 'https://attune.com';
-  const qrUrl = base + '/portal?token=' + tok;
+  const qrUrl = base + '/app?qr=' + tok;
 
   renderQRtoCanvas(qrUrl, cfg.qrFg, cfg.qrBg, (dataUrl) => {
     const accent = cfg.cls === 'card-anniversary' ? '#E8A83A' : '#1B5FE8';

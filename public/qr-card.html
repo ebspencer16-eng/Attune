@@ -465,7 +465,7 @@ function updateCard() {
 
   // QR URL
   const base = window.location.origin || 'https://attune.com';
-  const qrUrl = base + '/portal?token=' + tok;
+  const qrUrl = base + '/app?qr=' + tok;
   renderQR(qrUrl);
 }
 

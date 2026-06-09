@@ -4858,7 +4858,7 @@ const CHECKLIST_AREAS = [
         text: "Decide whether to combine finances, keep them separate, or do a hybrid approach",
         description: "This is the foundational decision. It shapes everything that follows, joint accounts, bill pay, savings goals, spending allowances. Attune's Build a Budget exercise walks you through this decision together.",
         links: [
-          { label: "Attune Build a Budget exercise", url: "/portal" },
+          { label: "Attune Build a Budget exercise", url: "/app" },
         ],
       },
       {
@@ -4869,7 +4869,7 @@ const CHECKLIST_AREAS = [
         text: "Review and align on a monthly budget",
         description: "Use Attune's Build a Budget exercise to set shared categories and amounts. Revisit quarterly.",
         links: [
-          { label: "Attune Build a Budget exercise", url: "/portal" },
+          { label: "Attune Build a Budget exercise", url: "/app" },
         ],
       },
       {

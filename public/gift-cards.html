@@ -1083,10 +1083,10 @@ window.addEventListener('DOMContentLoaded', () => {
   document.querySelectorAll('.pr-code').forEach(el => el.textContent = SHORT_CODES.premium);
 
   // Generate QR codes
-  genQR(BASE + '/portal?token=' + randStr(32), '#C4421A', '#FEFAF4', 'fd-qr-frame', '#E8673A', '#1B5FE8');
-  genQR(BASE + '/portal?token=' + randStr(32), '#0A1830', '#FAFCFF', 'nw-qr-frame', '#E8673A', '#1B5FE8');
-  genQR(BASE + '/portal?token=' + randStr(32), '#EDE8FF', '#0C1A4A', 'an-qr-frame', '#E8673A', '#E8A83A');
-  genQR(BASE + '/portal?token=' + randStr(32), '#F0EBE5', '#0A0806', 'pr-qr-frame', '#E8673A', '#1B5FE8');
+  genQR(BASE + '/app?qr=' + randStr(32), '#C4421A', '#FEFAF4', 'fd-qr-frame', '#E8673A', '#1B5FE8');
+  genQR(BASE + '/app?qr=' + randStr(32), '#0A1830', '#FAFCFF', 'nw-qr-frame', '#E8673A', '#1B5FE8');
+  genQR(BASE + '/app?qr=' + randStr(32), '#EDE8FF', '#0C1A4A', 'an-qr-frame', '#E8673A', '#E8A83A');
+  genQR(BASE + '/app?qr=' + randStr(32), '#F0EBE5', '#0A0806', 'pr-qr-frame', '#E8673A', '#1B5FE8');
 
   switchCard();
 });
