@@ -11871,6 +11871,7 @@ export default function App() {
                           try { localStorage.removeItem("attune_account"); } catch {}
                           clearAllUserLocalStorage();
                           setShowNavDropdown(false);
+                          window.location.href = '/app?signin=1';
                         }, danger: true },
                     ].map((item, i) => item === null
                       ? <div key={i} style={{ height: "1px", background: "#E8DDD0", margin: "0.3rem 0.4rem" }} />
@@ -12901,7 +12902,7 @@ export default function App() {
                           setAccount(null);
                           try { localStorage.removeItem("attune_account"); } catch {}
                           clearAllUserLocalStorage();
-                          setView("home");
+                          window.location.href = '/app?signin=1';
                         }}
                         style={{ fontSize: "0.75rem", fontWeight: 600, color: "#ef4444", fontFamily: font.body, background: "none", border: "none", cursor: "pointer", padding: 0 }}>
                         Sign out
@@ -13278,29 +13279,49 @@ export default function App() {
               const partnerPronouns = document.getElementById("profile_partnerPronouns_val")?.value || account?.partnerPronouns || "";
               if (!name) return;
               const emailOptIn = document.getElementById('profile_emailOptIn')?.checked ?? (account?.emailOptIn !== false);
-              const updated = { ...account, name, pronouns, partnerName, partnerPronouns, partnerEmail, emailOptIn };
+              const inviteCode = account?.inviteCode || Math.random().toString(36).slice(2, 10).toUpperCase();
+              const pkg = account?.pkg || new URLSearchParams(window.location.search).get('pkg') || 'core';
+              const updated = { ...account, name, pronouns, partnerName, partnerPronouns, partnerEmail, emailOptIn, inviteCode };
               setAccount(updated);
               saveAccount(updated);
               setShowProfileSetup(false);
-              // Persist to Supabase
+              const prevEmail = account?.partnerEmail || '';
+              // Persist to Supabase, then send the partner invite once the row is
+              // guaranteed to exist.
               (async () => {
                 const { supabase: sb, hasSupabase } = await import('./supabase.js');
                 if (!hasSupabase() || !updated.id) return;
-                await sb.from('profiles').update({
-                  name: name || null,
-                  pronouns: pronouns || '',
-                  partner_name: partnerName || '',
-                  partner_pronouns: partnerPronouns || '',
-                  partner_email: partnerEmail || '',
-                  email_opt_in: emailOptIn,
-                }).eq('id', updated.id);
+                // Ensure a profiles row exists first. Accounts created through the
+                // checkout flow (/api/account-signup) never had one created, so a
+                // bare .update() matches zero rows and the names silently never
+                // persist — they show as "You" / "Your partner" on the next
+                // sign-in. create-profile inserts the row if missing (no-op if it
+                // already exists) and sets an invite_code so partner invites work.
+                try {
+                  await fetch('/api/create-profile', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ userId: updated.id, name, pronouns, partnerName, partnerPronouns, partnerEmail, emailOptIn, inviteCode, pkg }),
+                  });
+                } catch (e) { console.warn('[profile-setup] create-profile failed:', e); }
+                // Apply edits for the case where the row already existed
+                // (create-profile no-ops then, so this update is what persists).
+                try {
+                  await sb.from('profiles').update({
+                    name: name || null,
+                    pronouns: pronouns || '',
+                    partner_name: partnerName || '',
+                    partner_pronouns: partnerPronouns || '',
+                    partner_email: partnerEmail || '',
+                    email_opt_in: emailOptIn,
+                  }).eq('id', updated.id);
+                } catch (e) { console.warn('[profile-setup] profile update failed:', e); }
+                // Send partner invite if email newly added.
+                if (partnerEmail && partnerEmail !== prevEmail && inviteCode) {
+                  const inviteUrl = `${window.location.origin}/app?invite=${encodeURIComponent(inviteCode)}&from=${encodeURIComponent(name || '')}${updated?.email ? `&pae=${encodeURIComponent(updated.email)}` : ''}`;
+                  sendEmailWithRetry({ type: 'partner_invite', fromName: name, toEmail: partnerEmail, toName: partnerName || 'Your partner', inviteUrl });
+                }
               })();
-              // Send partner invite if email newly added
-              const prevEmail = account?.partnerEmail || '';
-              if (partnerEmail && partnerEmail !== prevEmail && account?.inviteCode) {
-                const inviteUrl = `${window.location.origin}/app?invite=${encodeURIComponent(account.inviteCode)}&from=${encodeURIComponent(name || '')}${account?.email ? `&pae=${encodeURIComponent(account.email)}` : ''}`;
-                sendEmailWithRetry({ type: 'partner_invite', fromName: name, toEmail: partnerEmail, toName: partnerName || 'Your partner', inviteUrl });
-              }
             }}
               style={{ width: "100%", padding: "0.9rem", background: "#0E0B07", color: "white", border: "none", borderRadius: 12, fontSize: "0.85rem", fontWeight: 700, cursor: "pointer", fontFamily: "'DM Sans',sans-serif" }}>
               Save →
