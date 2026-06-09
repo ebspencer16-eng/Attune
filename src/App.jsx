@@ -1689,7 +1689,7 @@ function InlineSpinner({ light = true }) {
 }
 
 function GiftLandingScreen({ p1, p2, pkg, orderId, onCreateAccount }) {
-  const [step, setStep] = React.useState('who'); // 'who' | 'email' | 'signup'
+  const [step, setStep] = React.useState('welcome'); // 'welcome' | 'who' | 'email' | 'signup'
   const [chosenPartner, setChosenPartner] = React.useState(null); // 'p1' | 'p2'
   const [partnerEmail, setPartnerEmail] = React.useState('');
   const [emailErr, setEmailErr] = React.useState('');
@@ -1710,6 +1710,20 @@ function GiftLandingScreen({ p1, p2, pkg, orderId, onCreateAccount }) {
           <svg width="28" height="20" viewBox="0 0 103 76" fill="none"><defs><linearGradient id="glg" x1="0" y1="0" x2="103" y2="76" gradientUnits="userSpaceOnUse"><stop offset="0%" stopColor="#E8673A"/><stop offset="100%" stopColor="#1B5FE8"/></linearGradient></defs><path d="M14,4 L44,4 A9,9 0 0,1 53,13 L53,42 A9,9 0 0,1 44,51 L20,51 L6,61 L11,51 A6,6 0 0,1 5,45 L5,13 A9,9 0 0,1 14,4 Z" fill="url(#glg)"/><path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill="white" opacity=".93" transform="translate(13.16,11.3) scale(0.72)"/></svg>
           <span style={{ fontFamily: "'Playfair Display', Georgia, serif", fontSize: '0.95rem', fontWeight: 700, color: C.ink }}>Attune</span>
         </div>
+
+        {step === 'welcome' && (
+          <>
+            <div style={{ width: 56, height: 56, borderRadius: '50%', background: `linear-gradient(135deg, ${C.orange}, ${C.indigo})`, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '1.35rem', fontSize: '1.6rem', color: 'white' }}>✦</div>
+            <div style={{ fontFamily: "'Playfair Display', serif", fontSize: '1.5rem', fontWeight: 700, color: C.ink, marginBottom: '0.5rem', lineHeight: 1.2 }}>Welcome to your Attune experience.</div>
+            <p style={{ fontSize: '0.85rem', color: C.muted, marginBottom: '1.75rem', lineHeight: 1.7 }}>
+              Someone gave you this as a gift. Two assessments. One conversation. Built from your answers.
+            </p>
+            <button onClick={() => setStep('who')}
+              style={{ width: '100%', padding: '0.9rem', border: 'none', borderRadius: 12, background: `linear-gradient(135deg, ${C.orange}, ${C.indigo})`, color: 'white', cursor: 'pointer', fontWeight: 700, fontSize: '0.9rem', fontFamily: "'DM Sans', sans-serif", letterSpacing: '0.02em' }}>
+              Set up your profile →
+            </button>
+          </>
+        )}
 
         {step === 'who' && (
           <>
