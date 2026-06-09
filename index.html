@@ -18,6 +18,9 @@
         window.addEventListener('unhandledrejection',function(e){var r=e&&e.reason;rec({kind:'promise',msg:(r&&(r.message||String(r)))||'unhandledrejection',stack:(r&&r.stack)?String(r.stack).slice(0,1200):''});});
       }catch(e){}
     })();
+    /* Capture the Supabase email-confirmation type from the URL hash before the
+       app bundle initializes (detectSessionInUrl consumes the hash on load). */
+    try { window.__attuneConfirmType = new URLSearchParams((location.hash || '').replace(/^#/, '')).get('type') || ''; } catch (e) { window.__attuneConfirmType = ''; }
     </script>
   <!-- attune:hscroll-lock -->
   <style>

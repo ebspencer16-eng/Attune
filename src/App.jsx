@@ -10682,6 +10682,12 @@ export default function App() {
     try { localStorage.setItem("attune_account", JSON.stringify(acct)); } catch {}
   };
   const [account, setAccount] = useState(loadAccount);
+  // After clicking the email-confirmation link, Supabase redirects to /app with
+  // a `type=signup` hash (captured in index.html before the bundle consumes it).
+  // Show a celebratory landing, then guide into profile setup. (Option A flow.)
+  const [showConfirmedLanding, setShowConfirmedLanding] = useState(
+    typeof window !== 'undefined' && window.__attuneConfirmType === 'signup'
+  );
   // account shape: { email, name, partnerName, partnerEmail, pkg, inviteCode, partnerJoined, emailOptIn, createdAt }
   // account shape: { email, name, partnerName, partnerEmail, pkg, inviteCode, partnerJoined, emailOptIn, createdAt }
 
@@ -11683,6 +11689,27 @@ export default function App() {
       window.history.replaceState({}, '', '/app');
       window.location.reload();
     }} />;
+  }
+
+  // ── EMAIL CONFIRMED LANDING ───────────────────────────────────────────────
+  // Shown once after the user clicks the confirmation link (Option A). The
+  // session is established by detectSessionInUrl and the account hydrates via
+  // the reconcile effect; this step leads into profile setup, then the dashboard.
+  if (showConfirmedLanding) {
+    return (
+      <div style={{ minHeight: '100vh', background: '#F3EDE6', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem 1.25rem', fontFamily: "'DM Sans', sans-serif" }}>
+        <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+        <div style={{ background: '#FFFDF9', borderRadius: 22, padding: '2.5rem 2rem', width: '100%', maxWidth: 400, boxShadow: '0 24px 64px rgba(0,0,0,0.1)', textAlign: 'center' }}>
+          <div style={{ width: 60, height: 60, borderRadius: '50%', background: 'linear-gradient(135deg, #E8673A, #1B5FE8)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.35rem', fontSize: '1.7rem', color: 'white' }}>✓</div>
+          <div style={{ fontFamily: "'Playfair Display', Georgia, serif", fontSize: '1.5rem', fontWeight: 700, color: '#0E0B07', marginBottom: '0.5rem', lineHeight: 1.2 }}>Your email is confirmed.</div>
+          <p style={{ fontSize: '0.85rem', color: '#8C7A68', marginBottom: '1.75rem', lineHeight: 1.7 }}>You're all set. Set up your profile to get started.</p>
+          <button onClick={() => { setShowConfirmedLanding(false); setShowProfileSetup(true); try { window.__attuneConfirmType = ''; } catch {} }}
+            style={{ width: '100%', padding: '0.9rem', border: 'none', borderRadius: 12, background: 'linear-gradient(135deg, #E8673A, #1B5FE8)', color: 'white', cursor: 'pointer', fontWeight: 700, fontSize: '0.9rem', fontFamily: "'DM Sans', sans-serif", letterSpacing: '0.02em' }}>
+            Get started with account setup →
+          </button>
+        </div>
+      </div>
+    );
   }
 
   // ── GIFT BOX QR ROUTING ──────────────────────────────────────────────────

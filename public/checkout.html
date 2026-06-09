@@ -197,10 +197,22 @@
 <!-- SUCCESS STATE -->
 <div class="co-success" id="coSuccess">
   <div class="success-icon">✓</div>
-  <h1>You're all set.</h1>
-  <p>Check your email for order confirmation and access instructions. You can set up your profile any time.</p>
-  <p id="coOrderNum" style="font-family:'Menlo','SF Mono',monospace;font-size:.72rem;color:#8C7A68;margin:0 0 1rem"></p>
-  <a id="startLink" href="/app" class="btn-primary" style="display:inline-block;width:auto;padding:.85rem 2rem">Set up your profile →</a>
+  <!-- Step 1: set a password to create the account -->
+  <div id="coSetupStep">
+    <h1>You're all set.</h1>
+    <p>Create a password to finish setting up your account. We'll send a link to confirm your email.</p>
+    <p id="coOrderNum" style="font-family:'Menlo','SF Mono',monospace;font-size:.72rem;color:#8C7A68;margin:0 0 1.25rem"></p>
+    <input type="password" id="coPassword" placeholder="Create a password" autocomplete="new-password" style="width:100%;max-width:320px;padding:.8rem 1rem;border:1.5px solid #E0C9A8;border-radius:11px;font-size:1rem;font-family:var(--bfont);margin:0 auto .75rem;box-sizing:border-box;display:block;">
+    <p id="coSignupError" style="display:none;color:#ef4444;font-size:.78rem;margin:0 auto .75rem;max-width:320px;"></p>
+    <button id="coCreateBtn" class="btn-primary" style="width:auto;padding:.85rem 2rem;max-width:320px;">Create my account →</button>
+    <a id="startLink" href="/app" style="display:none"></a>
+  </div>
+  <!-- Step 2: confirm email -->
+  <div id="coCheckInbox" style="display:none;">
+    <h1>Check your inbox.</h1>
+    <p>We sent a confirmation link to <strong id="coEmailDisp"></strong>. Confirm your email to set up your account and reach your exercises. You won't be able to sign in until you confirm.</p>
+    <p style="font-size:.82rem;color:var(--muted);">Didn't get it? Check your spam folder, or email <a href="mailto:hello@attune-relationships.com" style="color:var(--orange);">hello@attune-relationships.com</a>.</p>
+  </div>
 </div>
 
 <!-- MAIN LAYOUT -->
@@ -1611,6 +1623,7 @@ async function handleSubmit(e) {
       }));
     } catch(e) {}
 
+    try { document.getElementById('coSuccess').dataset.email = email; } catch(e) {}
     document.getElementById('coWrap').style.display = 'none';
     document.getElementById('coSuccess').classList.add('visible');
     persistOrderComplete(realOrderNum);
@@ -1979,6 +1992,50 @@ function removePromo() {
   const btnLabel = document.getElementById('btnLabel');
   if (btnLabel) btnLabel.textContent = 'Complete order';
 }
+</script>
+<script>
+/* Option A — create the Supabase account from the success step. The buyer sets
+   a password right after paying; this calls /api/account-signup, which creates
+   the account and sends the confirmation email. They must confirm before they
+   can sign in. Profile setup happens after confirmation, in the app. */
+(function () {
+  var btn = document.getElementById('coCreateBtn');
+  if (!btn) return;
+  btn.addEventListener('click', async function () {
+    var errEl = document.getElementById('coSignupError');
+    var pw = (document.getElementById('coPassword').value || '');
+    var em = '';
+    try { em = document.getElementById('coSuccess').dataset.email || ''; } catch (e) {}
+    if (!em) { try { em = (document.getElementById('email').value || ''); } catch (e) {} }
+    em = em.trim().toLowerCase();
+    errEl.style.display = 'none';
+    if (pw.length < 6) { errEl.textContent = 'Use at least 6 characters.'; errEl.style.display = 'block'; return; }
+    if (!em || em.indexOf('@') < 0) { errEl.textContent = 'We could not read your email. Please contact hello@attune-relationships.com.'; errEl.style.display = 'block'; return; }
+    btn.disabled = true; btn.textContent = 'Creating your account…';
+    try {
+      var res = await fetch('/api/account-signup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: em, password: pw }),
+      });
+      var data = await res.json().catch(function () { return {}; });
+      if (!res.ok || data.error) {
+        errEl.textContent = data.error || 'Something went wrong. Please try again.';
+        errEl.style.display = 'block';
+        btn.disabled = false; btn.textContent = 'Create my account →';
+        return;
+      }
+      document.getElementById('coEmailDisp').textContent = em;
+      document.getElementById('coSetupStep').style.display = 'none';
+      document.getElementById('coCheckInbox').style.display = 'block';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } catch (e) {
+      errEl.textContent = 'Could not reach the server. Please try again.';
+      errEl.style.display = 'block';
+      btn.disabled = false; btn.textContent = 'Create my account →';
+    }
+  });
+})();
 </script>
 </body>
 </html>
