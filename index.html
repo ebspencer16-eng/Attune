@@ -3,6 +3,22 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script>
+    /* attune:err-capture — records uncaught errors + failed resource loads to
+       localStorage so intermittent blank-screen crashes can be diagnosed after
+       the fact. Installed before the app bundle so it also catches load failures. */
+    (function(){
+      try{
+        var KEY='attune_err_log';
+        function rec(o){try{var L=JSON.parse(localStorage.getItem(KEY)||'[]');L.push(Object.assign({t:new Date().toISOString(),url:location.href},o));localStorage.setItem(KEY,JSON.stringify(L.slice(-25)));}catch(e){}}
+        window.addEventListener('error',function(e){
+          if(e&&e.target&&e.target!==window&&(e.target.src||e.target.href)){rec({kind:'resource',msg:(e.target.tagName||'')+' load failed',src:e.target.src||e.target.href});}
+          else{rec({kind:'error',msg:(e&&e.message)||'unknown',stack:(e&&e.error&&e.error.stack)?String(e.error.stack).slice(0,1200):''});}
+        },true);
+        window.addEventListener('unhandledrejection',function(e){var r=e&&e.reason;rec({kind:'promise',msg:(r&&(r.message||String(r)))||'unhandledrejection',stack:(r&&r.stack)?String(r.stack).slice(0,1200):''});});
+      }catch(e){}
+    })();
+    </script>
   <!-- attune:hscroll-lock -->
   <style>
     html { overscroll-behavior-x: none; overflow-x: hidden; max-width: 100%; }
