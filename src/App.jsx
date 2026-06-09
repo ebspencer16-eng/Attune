@@ -11293,8 +11293,8 @@ export default function App() {
   // actual questions (not the pre-filled "complete" state). Results links omit
   // the flag, so they stay pre-populated with demo data.
   const _previewFresh = params.get('fresh') === '1';
-  const _initEx1 = _previewFresh ? null : (_hasAccount ? _hydrateLS('attune_ex1') : sarahEx1Demo);
-  const _initEx2 = _previewFresh ? null : (_hasAccount ? _hydrateLS('attune_ex2') : sarahEx2Demo);
+  const _initEx1 = _previewFresh ? null : (_hasAccount ? _hydrateLS('attune_ex1') : (_demoParam ? sarahEx1Demo : null));
+  const _initEx2 = _previewFresh ? null : (_hasAccount ? _hydrateLS('attune_ex2') : (_demoParam ? sarahEx2Demo : null));
   const _initEx3 = _previewFresh ? null : (_hasAccount ? _hydrateLS('attune_ex3') : sarahEx3Demo);
 
   const [ex1Answers, setEx1State] = useState(_initEx1);
@@ -12127,8 +12127,8 @@ export default function App() {
                   </div>
                 )}
 
-                {/* ── COUPLE PORTRAIT ── */}
-                {isLoggedIn && (
+                {/* ── COUPLE PORTRAIT ── (hidden from dashboard pending portrait integration) ── */}
+                {false && isLoggedIn && (
                   <div style={{ marginBottom: "2rem" }}>
                     <div
                       onClick={() => setShowPortraitSetup(true)}
