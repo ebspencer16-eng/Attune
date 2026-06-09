@@ -55,6 +55,26 @@ if (import.meta.env.PROD) {
   });
 }
 
+// Record React render crashes to the same local log the index.html handler
+// uses, so they're diagnosable even before Sentry's DSN is configured. The
+// window 'error' handler doesn't see render errors (the boundary swallows
+// them), so this is the only place they're captured locally.
+const logBoundaryError = (error, componentStack) => {
+  try {
+    const KEY = 'attune_err_log';
+    const L = JSON.parse(localStorage.getItem(KEY) || '[]');
+    L.push({
+      t: new Date().toISOString(),
+      url: location.href,
+      kind: 'react',
+      msg: (error && error.message) || String(error),
+      stack: error && error.stack ? String(error.stack).slice(0, 1200) : '',
+      componentStack: componentStack ? String(componentStack).slice(0, 800) : '',
+    });
+    localStorage.setItem(KEY, JSON.stringify(L.slice(-25)));
+  } catch (e) {}
+};
+
 // Use Sentry's ErrorBoundary so any React render error is captured AND
 // shows a user-friendly fallback instead of a blank screen.
 const FallbackUI = () => (
@@ -72,7 +92,7 @@ const FallbackUI = () => (
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
-    <Sentry.ErrorBoundary fallback={<FallbackUI />} showDialog={false}>
+    <Sentry.ErrorBoundary fallback={<FallbackUI />} showDialog={false} onError={logBoundaryError}>
       <App />
     </Sentry.ErrorBoundary>
   </StrictMode>,
