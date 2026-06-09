@@ -10955,6 +10955,14 @@ export default function App() {
             setAccount(null);
             try { localStorage.removeItem('attune_account'); } catch {}
             clearAllUserLocalStorage();
+            // A signed-out SPA state with no auth modal renders blank: showAuth
+            // is only initialized at mount, so clearing the account in place
+            // leaves nothing on screen. Force a fresh load into the sign-in
+            // form on sign-out or session expiry. The guard prevents a redirect
+            // loop once we're already on the sign-in page.
+            if (window.location.search.indexOf('signin=1') === -1) {
+              window.location.href = '/app?signin=1';
+            }
           }
           // On SIGNED_IN (including post-email-confirmation), retry-sync any
           // local exercise data that may have failed RLS during the
