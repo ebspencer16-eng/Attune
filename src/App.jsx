@@ -4571,7 +4571,11 @@ const ANNIVERSARY_QUESTIONS = [
 ];
 
 
-function AnniversaryExercise({ userName, partnerName, onComplete, onBack }) {
+function AnniversaryExercise({ userName, partnerName, onComplete, onBack, partnerPronouns = "" }) {
+  // Independent possessive for the partner ("theirs"/"hers"/"his"), used in the
+  // completion copy ("When {partnerName} finishes ___").
+  const _pPos = pronoun(partnerPronouns, "pos");
+  const partnerPossAbs = _pPos === "their" ? "theirs" : _pPos === "her" ? "hers" : _pPos;
   // Mid-exercise persistence — same pattern as Ex01 and Ex02.
   const [answers, setAnswers] = useState(() => {
     try {
@@ -4645,7 +4649,7 @@ function AnniversaryExercise({ userName, partnerName, onComplete, onBack }) {
           A mix of scale questions, short reflections, and a few rankings. Nothing to study for. Just answer.
         </p>
         <p style={{ fontSize: "0.88rem", color: C.ink, fontFamily: font.body, lineHeight: 1.7, marginBottom: "1.5rem", borderLeft: "3px solid #10b981", paddingLeft: "0.85rem", fontStyle: "italic" }}>
-          When {partnerName} finishes theirs, you'll see where your stories overlap and where you each saw something the other didn't.
+          When {partnerName} finishes {partnerPossAbs}, you'll see where your stories overlap and where you each saw something the other didn't.
         </p>
         <p style={{ fontSize: "0.72rem", color: C.muted, fontFamily: font.body, marginBottom: "1.75rem", letterSpacing: "0.05em" }}>
           ~10 minutes
@@ -4673,7 +4677,7 @@ function AnniversaryExercise({ userName, partnerName, onComplete, onBack }) {
         <p style={{ fontSize: "0.66rem", letterSpacing: "0.22em", textTransform: "uppercase", color: "#10b981", fontWeight: 700, fontFamily: font.body, marginBottom: "0.6rem" }}>Your story is captured</p>
         <p style={{ fontFamily: font.display, fontSize: "2rem", fontWeight: 700, color: C.ink, marginBottom: "0.85rem", lineHeight: 1.1 }}>Reflection Complete.</p>
         <p style={{ fontSize: "0.95rem", color: C.muted, fontFamily: font.body, marginBottom: "2rem", lineHeight: 1.7, maxWidth: 420, margin: "0 auto 2rem" }}>
-          You named the moments, the shifts, and the things you hope for. When {partnerName} finishes theirs, you'll see where your stories overlap and where you each saw something the other didn't.
+          You named the moments, the shifts, and the things you hope for. When {partnerName} finishes {partnerPossAbs}, you'll see where your stories overlap and where you each saw something the other didn't.
         </p>
         <button onClick={() => { try { localStorage.removeItem('attune_ex3_progress'); } catch {} ; onComplete(answers); }} style={{ background: "linear-gradient(135deg, #10b981, #059669)", color: "white", border: "none", padding: "0.95rem 2.5rem", fontSize: "0.78rem", letterSpacing: "0.12em", textTransform: "uppercase", cursor: "pointer", fontFamily: font.body, borderRadius: 12, fontWeight: 700, boxShadow: "0 6px 20px rgba(16,185,129,0.28)" }}>View My Results →</button>
       </div>
@@ -10100,7 +10104,7 @@ function PartnerBExerciseFlow({ account, onComplete }) {
   if (step === 'ex3') return (
     <div>
       <div>
-        <AnniversaryExercise userName={account.name} partnerName={account.partnerName} onComplete={handleEx3Done} onBack={() => setStep('ex2')} />
+        <AnniversaryExercise userName={account.name} partnerName={account.partnerName} partnerPronouns={account.partnerPronouns || ""} onComplete={handleEx3Done} onBack={() => setStep('ex2')} />
       </div>
     </div>
   );
@@ -10111,7 +10115,7 @@ function PartnerBExerciseFlow({ account, onComplete }) {
 // ─────────────────────────────────────────────────────────────────────────────
 // PARTNER B COMPLETION SCREEN — exercises done, waiting or ready
 // ─────────────────────────────────────────────────────────────────────────────
-function PartnerBCompletionScreen({ partnerAName, partnerBName, partnerADone }) {
+function PartnerBCompletionScreen({ partnerAName, partnerBName, partnerADone, partnerAPronouns = "" }) {
   // ── Fire results_viewed email to Partner B (Issue 5.6) ─────────────────
   // The standard results-viewed email only fires for the user who SEES the
   // results page (Partner A in the unified model). Partner B sees this
@@ -10196,7 +10200,7 @@ function PartnerBCompletionScreen({ partnerAName, partnerBName, partnerADone }) 
               Waiting for {partnerAName}.
             </div>
             <p style={{ fontSize: '0.88rem', color: 'rgba(255,255,255,0.6)', fontFamily: "'DM Sans', sans-serif", lineHeight: 1.75, marginBottom: '2rem' }}>
-              Your answers have been saved. Results will unlock as soon as {partnerAName} finishes their exercises. You'll both see everything at the same time.
+              Your answers have been saved. Results will unlock as soon as {partnerAName} finishes {pronoun(partnerAPronouns, "pos")} exercises. You'll both see everything at the same time.
             </p>
             <div style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 14, padding: '1rem 1.4rem', textAlign: 'left' }}>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
@@ -11773,6 +11777,7 @@ export default function App() {
       partnerAName={account.partnerName}
       partnerBName={account.name}
       partnerADone={partnerADone}
+      partnerAPronouns={account.partnerPronouns || ""}
     />;
   }
   // ── END PARTNER B ROUTING ─────────────────────────────────────────────────
@@ -12640,7 +12645,7 @@ export default function App() {
                 </div>
               </div>
             ) : (
-              <AnniversaryExercise userName={userName} partnerName={partnerName} onComplete={a => {
+              <AnniversaryExercise userName={userName} partnerName={partnerName} partnerPronouns={account?.partnerPronouns || ""} onComplete={a => {
                   setEx3State(a);
                   try { localStorage.setItem('attune_ex3', JSON.stringify(a)); } catch {}
                   // Persist ex3 answers and mark complete in Supabase.

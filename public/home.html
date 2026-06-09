@@ -1054,6 +1054,7 @@ function setUse(mode) {
     for (var i = 0; i < els.length; i++) {
       var el = els[i], r = el.getBoundingClientRect();
       if (r.width === 0 || r.height === 0) continue;
+      if (el.closest && el.closest('.hero-blobs')) continue;   // decorative full-bleed gradient — intentionally 100vw, body clips overflow
       if (r.right > vw + 1 || r.left < -1) {
         if (insideClipped(el)) continue;            // contained content, leave alone
         var ox = getComputedStyle(el).overflowX;

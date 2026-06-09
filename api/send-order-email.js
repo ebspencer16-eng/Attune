@@ -72,11 +72,11 @@ export default async function handler(req) {
   // lands first. Resend processes emails asynchronously after API accept,
   // so sequential await alone doesn't guarantee delivery order — this does.
   if (!isGift && !isPhysical) {
-    const accessUrl = `https://attune-relationships.com/app?signup=1&pkg=${pkgKey}&p1=${encodeURIComponent(buyerName||"")}`;
+    const accessUrl = `https://attune-relationships.com/app?signin=1`;
     emails.push({
       from: `Attune <${FROM}>`,
       to: [buyerEmail],
-      subject: `Set up your Attune profile — ${buyerName}`,
+      subject: `Confirm your email to get started — ${buyerName}`,
       html: getStartedBuyerHtml({ name: buyerName, partnerName, accessUrl, partnerEmail }),
       scheduled_at: new Date(Date.now() + 30_000).toISOString(),
     });
@@ -266,17 +266,18 @@ function getStartedBuyerHtml({ name, partnerName, accessUrl, partnerEmail }) {
        </div>`;
 
   const body = `
-    <p style="font-family:'DM Sans',Helvetica,Arial,sans-serif;font-size:15px;color:#5C4A38;line-height:1.75;margin:0 0 6px">Your access is ready. Two exercises, about 25 minutes total. Answer independently — your joint results unlock when both of you are done.</p>
+    <p style="font-family:'DM Sans',Helvetica,Arial,sans-serif;font-size:15px;color:#5C4A38;line-height:1.75;margin:0 0 6px">We sent a confirmation link to your inbox. Confirm your email to activate your account.</p>
+    <p style="font-family:'DM Sans',Helvetica,Arial,sans-serif;font-size:14px;color:#5C4A38;line-height:1.7;margin:16px 0 0">Next you'll set up your profile and invite ${_esc(partnerName || 'your partner')}. Then you each answer two short exercises, about 25 minutes total. Answer independently. Your joint results unlock when both of you are done.</p>
     ${partnerBlock}
     <p style="font-family:'DM Sans',Helvetica,Arial,sans-serif;font-size:13px;color:#8C7A68;line-height:1.6;margin:20px 0 0"><strong style="color:#1E1610">One note:</strong> don't compare answers until you're both finished. The value comes from answering honestly first.</p>
   `;
 
   return brandedEmail({
-    preheader: `Set up your Attune profile, ${_esc(name)}`,
+    preheader: `Confirm your email to get started, ${_esc(name)}`,
     title: `Welcome, ${_esc(name)}.`,
-    subtitle: `Let's get your profile set up.`,
+    subtitle: `Confirm your email, then sign in.`,
     bodyHtml: body,
-    ctaLabel: 'Set up my profile →',
+    ctaLabel: 'Sign in →',
     ctaUrl: accessUrl,
   });
 }
