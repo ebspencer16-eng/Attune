@@ -529,7 +529,7 @@ function ExpectationsExercise({ partnerName, userName = "Partner A", onComplete,
     const futureLabel = isAnniversary ? "In our home" : "In our future home";
     const GRID = "2fr repeat(4, 40px) repeat(4, 40px)";
     const MIN_W = 580;
-    const HEADER_PX = 72;
+    const HEADER_PX = 45;   // sticky offset for category headers — must match the column-header bar height above them, or the header overlaps the first row
 
     const setResp = (catId, item, value) => {
       const key = catId + "__" + item;
