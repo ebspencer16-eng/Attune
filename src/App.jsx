@@ -629,11 +629,13 @@ function ExpectationsExercise({ partnerName, userName = "Partner A", onComplete,
                 <div style={{ position: "sticky", top: HEADER_PX, zIndex: 10, background: "#F0EDE8", borderTop: ci > 0 ? ("1.5px solid " + C.stone) : "none", borderBottom: ("1px solid " + C.stone) }}>
                   <div style={{ padding: "0.35rem 0.85rem" }}>
                     <span style={{ fontSize: "0.58rem", letterSpacing: "0.16em", textTransform: "uppercase", color: C.clay, fontFamily: font.body, fontWeight: 700 }}>{cat.label}</span>
+                    {cat.id === "extended_family" && <span style={{ fontSize: "0.62rem", color: C.muted, fontFamily: font.body, fontWeight: 400, marginLeft: "0.6rem", textTransform: "none", letterSpacing: 0 }}>How the two of you handle this now. No growing-up column, these are your own families.</span>}
                   </div>
                 </div>
 
                 {/* Item rows */}
                 {cat.items.map((item, ii) => {
+                  const isExtFam = cat.id === "extended_family";
                   const childVal = getChild(cat.id, item);
                   const futureVal = getResp(cat.id, item);
                   const childBothDetail = getChildBothDetail(cat.id, item);
@@ -650,12 +652,12 @@ function ExpectationsExercise({ partnerName, userName = "Partner A", onComplete,
                     <div key={item} style={{ borderBottom: isLastRow ? "none" : ("1px solid " + C.stone + "60") }}>
                       {/* Main grid row */}
                       <div style={{ display: "grid", gridTemplateColumns: GRID, background: futureVal ? "rgba(184,150,110,0.04)" : "white", transition: "background 0.15s" }}>
-                        {/* Item label */}
-                        <div style={{ padding: "0.65rem 0.85rem", borderRight: ("1px solid " + C.stone + "50"), display: "flex", alignItems: "center" }}>
+                        {/* Item label (spans the growing-up area for Extended Family, which has no childhood question) */}
+                        <div style={{ gridColumn: isExtFam ? "1 / 6" : "auto", padding: "0.65rem 0.85rem", borderRight: isExtFam ? "1.5px solid #E0C9A8" : ("1px solid " + C.stone + "50"), display: "flex", alignItems: "center" }}>
                           <p style={{ fontSize: "0.78rem", color: C.ink, fontFamily: font.body, lineHeight: 1.35, margin: 0 }}>{subst(item)}</p>
                         </div>
-                        {/* Childhood option buttons */}
-                        {childCols.map((col, ci2) => {
+                        {/* Childhood option buttons (omitted for Extended Family) */}
+                        {!isExtFam && childCols.map((col, ci2) => {
                           const sel = childVal === col;
                           const isLastChild = ci2 === childCols.length - 1;
                           return (
@@ -682,7 +684,7 @@ function ExpectationsExercise({ partnerName, userName = "Partner A", onComplete,
                       </div>
 
                       {/* ── Childhood "Both" inline expansion ── */}
-                      {showChildExpand && (
+                      {!isExtFam && showChildExpand && (
                         <div style={{ background: "#FBF8F3", borderTop: ("1px solid " + C.stone + "60"), padding: "0.55rem 0.85rem 0.6rem", display: "flex", flexDirection: "column", gap: "0.3rem" }}>
                           <p style={{ fontSize: "0.6rem", letterSpacing: "0.12em", textTransform: "uppercase", color: C.clay, fontFamily: font.body, fontWeight: 700, marginBottom: "0.2rem" }}>Growing up, a bit more specifically:</p>
                           <div style={{ display: "flex", gap: "0.4rem", flexWrap: "wrap" }}>

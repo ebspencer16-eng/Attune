@@ -71,6 +71,16 @@ export const RESPONSIBILITY_CATEGORIES = [
     ],
   },
   {
+    id: "emotional", label: "Emotional Labor",
+    items: [
+      "Carrying the mental load, remembering, anticipating, planning ahead",
+      "Tracking the emotional wellbeing of the household",
+      "Maintaining closeness and emotional intimacy over time",
+      "Initiating difficult conversations",
+      "Being the first to reach out after conflict",
+    ],
+  },
+  {
     id: "extended_family", label: "Extended Family",
     items: [
       "Planning visits with {userName}'s family",
@@ -79,16 +89,6 @@ export const RESPONSIBILITY_CATEGORIES = [
       "Planning visits with {partnerName}'s family",
       "Gifting for {partnerName}'s family",
       "Staying in touch with {partnerName}'s family",
-    ],
-  },
-  {
-    id: "emotional", label: "Emotional Labor",
-    items: [
-      "Carrying the mental load, remembering, anticipating, planning ahead",
-      "Tracking the emotional wellbeing of the household",
-      "Maintaining closeness and emotional intimacy over time",
-      "Initiating difficult conversations",
-      "Being the first to reach out after conflict",
     ],
   },
 ];
