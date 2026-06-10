@@ -10733,6 +10733,7 @@ export default function App() {
   }, [view]);
   const [activeResult, setActiveResult] = useState("overview");
   const [highlightsSeen, setHighlightsSeen] = useState(false);
+  const [isBetaTester, setIsBetaTester] = useState(false);
   const isMobile = useMobile(680);
 
   // Lock body scroll when results are shown (prevents mobile page drift)
@@ -10802,6 +10803,24 @@ export default function App() {
     window.addEventListener('beforeunload', handler);
     return () => window.removeEventListener('beforeunload', handler);
   }, [view]);
+
+  // ── Detect beta testers (registered with a beta promo code) ──────────────
+  // Reads the user's own order(s) (RLS-scoped to them) and flags beta if any
+  // promo_code contains BETA (e.g. BETA-CORE-1, ATTUNE-BETA-13). Non-blocking.
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      if (!account?.id) return;
+      try {
+        const { supabase: sb, hasSupabase } = await import('./supabase.js');
+        if (!hasSupabase()) return;
+        const { data } = await sb.from('orders').select('promo_code');
+        if (cancelled || !Array.isArray(data)) return;
+        if (data.some(o => (o.promo_code || '').toUpperCase().includes('BETA'))) setIsBetaTester(true);
+      } catch { /* non-blocking — banner just stays hidden */ }
+    })();
+    return () => { cancelled = true; };
+  }, [account?.id]);
 
   // ── Supabase session sync ────────────────────────────────────────────────
   // Single source of truth for login is the Supabase session. On mount we
@@ -12102,6 +12121,18 @@ export default function App() {
 
               {/* ── CONTENT AREA ─────────────────────────────────────────── */}
               <div style={{ flex: 1, padding: isMobile ? "1.5rem 1.25rem" : "2rem 2rem", background: "#FBF8F3" }}>
+
+                {/* Beta tester thank-you — shown only when the account registered with a beta promo code */}
+                {isBetaTester && (
+                  <div style={{ background: "linear-gradient(135deg, rgba(124,58,237,0.08), rgba(27,95,232,0.06))", border: "1.5px solid rgba(124,58,237,0.3)", borderRadius: 14, padding: "1rem 1.25rem", marginBottom: "1.25rem", display: "flex", alignItems: "center", gap: "0.85rem", flexWrap: "wrap" }}>
+                    <div style={{ flex: 1, minWidth: 220 }}>
+                      <div style={{ fontSize: "0.58rem", letterSpacing: "0.2em", textTransform: "uppercase", color: "#7C3AED", fontWeight: 700, fontFamily: "'DM Sans', sans-serif", marginBottom: "0.25rem" }}>Beta tester</div>
+                      <div style={{ fontSize: "0.9rem", color: "#0E0B07", fontFamily: "'DM Sans', sans-serif", fontWeight: 600, marginBottom: "0.15rem" }}>Thank you for being one of our beta testers.</div>
+                      <div style={{ fontSize: "0.8rem", color: "#6B5C4D", fontFamily: "'DM Sans', sans-serif", fontWeight: 400, lineHeight: 1.5 }}>Once you've viewed your results, tell us about your experience.</div>
+                    </div>
+                    <a href="/feedback" style={{ background: "#7C3AED", color: "white", borderRadius: 10, padding: "0.65rem 1.25rem", fontSize: "0.78rem", fontWeight: 700, fontFamily: "'DM Sans', sans-serif", textDecoration: "none", whiteSpace: "nowrap", flexShrink: 0 }}>Share your feedback →</a>
+                  </div>
+                )}
 
                 {/* Welcome-back banner — surfaces any in-progress exercise so
                     the user can jump straight back in. Covers both session
