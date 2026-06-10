@@ -521,7 +521,7 @@ function ExpectationsExercise({ partnerName, userName = "Partner A", onComplete,
 
   if (phase === "responsibilities") {
     const structure = CHILDHOOD_STRUCTURES.find(s => s.id === childhoodStructure) || CHILDHOOD_STRUCTURES[0];
-    const childCols = structure.cols;
+    const childCols = structure.cols || ["Mom", "Dad", "Both", "N/A"];
     const futureCols = [userName, partnerName, "Both of us", "Doesn't apply to us"];
     const futureColsDisplay = [userName, partnerName, "Both", "N/A"];
     const careerCols = ["Primarily mine", "Balanced", "Primarily my partner's", "Doesn't apply"];
@@ -2239,14 +2239,14 @@ const EXP_CAT_STARTERS = {
 // ── EXPECTATIONS EXERCISE DATA CONSTANTS ────────────────────────────────────
 
 const CHILDHOOD_STRUCTURES = [
-  { id: "mom-dad",      label: "Mom and Dad (married or together)" },
-  { id: "single-mom",  label: "Primarily raised by Mom" },
-  { id: "single-dad",  label: "Primarily raised by Dad" },
-  { id: "two-moms",    label: "Two Moms" },
-  { id: "two-dads",    label: "Two Dads" },
-  { id: "grandparents",label: "Grandparents or extended family" },
-  { id: "split",       label: "Split between two households" },
-  { id: "other",       label: "Another arrangement" },
+  { id: "mom-dad",      label: "Mom and Dad (married or together)", cols: ["Mom", "Dad", "Both", "N/A"] },
+  { id: "single-mom",  label: "Primarily raised by Mom",            cols: ["Mom", "Other", "Both", "N/A"] },
+  { id: "single-dad",  label: "Primarily raised by Dad",            cols: ["Dad", "Other", "Both", "N/A"] },
+  { id: "two-moms",    label: "Two Moms",                           cols: ["Mom", "Mama", "Both", "N/A"] },
+  { id: "two-dads",    label: "Two Dads",                           cols: ["Dad", "Papa", "Both", "N/A"] },
+  { id: "grandparents",label: "Grandparents or extended family",    cols: ["Grandma", "Grandpa", "Both", "N/A"] },
+  { id: "split",       label: "Split between two households",       cols: ["Home 1", "Home 2", "Both", "N/A"] },
+  { id: "other",       label: "Another arrangement",                cols: ["Adult 1", "Adult 2", "Both", "N/A"] },
 ];
 
 // Substitute partner-name placeholders in expectation question / item labels.
