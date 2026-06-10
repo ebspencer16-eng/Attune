@@ -11677,6 +11677,15 @@ export default function App() {
   //     marketing flow / showcase tour.
   const isDemo = !!_demoParam; // true when ?demo=xxx is in URL
   const bothDone = !!(ex1Answers && ex2Answers && (isDemo || hasRealPartner));
+  // Granular completion signals for the dashboard status view and the
+  // results-pending screen. Partner signals require the linked partner session
+  // (invite-code match), never the demo fallback.
+  const _partnerLinked = partnerSession?.inviteCode === account?.inviteCode;
+  const myEx1Done = !!ex1Answers;
+  const myEx2Done = !!ex2Answers;
+  const partnerEx1Done = !!(_partnerLinked && partnerSession?.ex1);
+  const partnerEx2Done = !!(_partnerLinked && partnerSession?.ex2);
+  const allExercisesDone = myEx1Done && myEx2Done && partnerEx1Done && partnerEx2Done;
   // Package config
   const pkgConfig = {
     core:        { label: "The Attune Assessment",     color: "#E8673A", hasChecklist: false, hasAnniversary: false, hasBudget: false, hasLMFT: false },
@@ -12311,6 +12320,42 @@ export default function App() {
                       ))}
                     </div>
                   )}
+                </div>
+
+                {/* ── STATUS / PROGRESS TO RESULTS ── */}
+                <div style={{ marginBottom: "2rem" }}>
+                  <div style={{ fontSize: "0.6rem", letterSpacing: ".2em", textTransform: "uppercase", color: "#8C7A68", fontWeight: 700, marginBottom: "1rem", fontFamily: "'DM Sans', sans-serif" }}>Progress to results</div>
+                  <div style={{ background: "white", border: "1.5px solid #E8DDD0", borderRadius: 16, overflow: "hidden" }}>
+                    {[
+                      { label: "Your communication exercise", done: myEx1Done, viewId: "exercise1", you: true },
+                      { label: "Your expectations exercise", done: myEx2Done, viewId: "exercise2", you: true },
+                      { label: partnerName + "'s communication exercise", done: partnerEx1Done, you: false },
+                      { label: partnerName + "'s expectations exercise", done: partnerEx2Done, you: false },
+                    ].map((r, i, arr) => {
+                      const clickable = r.you && !r.done;
+                      return (
+                        <div key={r.label} onClick={clickable ? () => setView(r.viewId) : undefined}
+                          style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0.85rem 1.1rem", borderBottom: i < arr.length - 1 ? "1px solid #F0E9E0" : "none", cursor: clickable ? "pointer" : "default", gap: "0.75rem", transition: "background .15s" }}
+                          onMouseEnter={clickable ? (e => e.currentTarget.style.background = "#FAF7F2") : undefined}
+                          onMouseLeave={clickable ? (e => e.currentTarget.style.background = "white") : undefined}>
+                          <span style={{ display: "flex", alignItems: "center", gap: "0.65rem", fontSize: "0.83rem", color: "#0E0B07", fontFamily: "'DM Sans', sans-serif", fontWeight: 500 }}>
+                            <span style={{ width: 19, height: 19, borderRadius: "50%", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", fontSize: "0.62rem", color: "white", background: r.done ? "#059669" : "#D4C0A8", fontWeight: 700 }}>{r.done ? "✓" : ""}</span>
+                            {r.label}
+                          </span>
+                          {r.done
+                            ? <span style={{ fontSize: "0.72rem", fontWeight: 700, color: "#059669", fontFamily: "'DM Sans', sans-serif" }}>Complete</span>
+                            : (r.you
+                                ? <span style={{ fontSize: "0.72rem", fontWeight: 700, color: "#C17F47", fontFamily: "'DM Sans', sans-serif" }}>Start →</span>
+                                : <span style={{ fontSize: "0.72rem", fontWeight: 600, color: "#A8997F", fontFamily: "'DM Sans', sans-serif" }}>Pending</span>)}
+                        </div>
+                      );
+                    })}
+                  </div>
+                  <button onClick={bothDone ? () => setView("results") : undefined} disabled={!bothDone}
+                    style={{ width: "100%", marginTop: "0.85rem", padding: "0.85rem", borderRadius: 12, border: "none", fontSize: "0.85rem", fontWeight: 700, fontFamily: "'DM Sans', sans-serif", letterSpacing: ".02em", cursor: bothDone ? "pointer" : "not-allowed", background: bothDone ? "#E8673A" : "#EFE7DD", color: bothDone ? "white" : "#B3A693", transition: "all .15s" }}>
+                    {bothDone ? "View results →" : "View results"}
+                  </button>
+                  {!bothDone && <p style={{ textAlign: "center", fontSize: "0.72rem", color: "#A8997F", margin: "0.5rem 0 0", fontFamily: "'DM Sans', sans-serif" }}>Unlocks when both of you finish all exercises.</p>}
                 </div>
 
                 {/* ── WHAT'S WAITING ── shown when both complete */}
@@ -13010,7 +13055,41 @@ export default function App() {
           </div>
         )}
 
-{view === "results" && !highlightsSeen && (
+{view === "results" && !bothDone && (
+      <div style={{ minHeight: "calc(100vh - 160px)", display: "flex", alignItems: "center", justifyContent: "center", padding: "2rem 1.25rem", fontFamily: font.body }}>
+        <div style={{ maxWidth: 460, width: "100%", textAlign: "center" }}>
+          <div style={{ width: 60, height: 60, borderRadius: "50%", background: "linear-gradient(135deg, #E8673A, #1B5FE8)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 1.4rem", fontSize: "1.4rem", color: "white" }}>◴</div>
+          <h2 style={{ fontFamily: font.display, fontSize: "1.6rem", fontWeight: 700, color: C.ink, margin: "0 0 0.5rem" }}>Results pending</h2>
+          <p style={{ fontSize: "0.9rem", color: C.muted, lineHeight: 1.65, margin: "0 0 1.5rem" }}>Your results open when both of you finish all exercises. You'll both see everything at the same time.</p>
+          <div style={{ background: "white", border: ("1.5px solid " + C.stone), borderRadius: 14, overflow: "hidden", textAlign: "left", marginBottom: "1.25rem" }}>
+            {[
+              { label: "Your communication exercise", done: myEx1Done, viewId: "exercise1", you: true },
+              { label: "Your expectations exercise", done: myEx2Done, viewId: "exercise2", you: true },
+              { label: partnerName + "'s communication exercise", done: partnerEx1Done, you: false },
+              { label: partnerName + "'s expectations exercise", done: partnerEx2Done, you: false },
+            ].map((r, i, arr) => (
+              <div key={r.label} onClick={r.you && !r.done ? () => setView(r.viewId) : undefined}
+                style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0.8rem 1.1rem", borderBottom: i < arr.length - 1 ? ("1px solid " + C.stone + "60") : "none", cursor: r.you && !r.done ? "pointer" : "default", gap: "0.75rem" }}>
+                <span style={{ display: "flex", alignItems: "center", gap: "0.6rem", fontSize: "0.83rem", color: C.ink, fontFamily: font.body }}>
+                  <span style={{ width: 18, height: 18, borderRadius: "50%", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", fontSize: "0.65rem", color: "white", background: r.done ? "#059669" : "#D4C0A8" }}>{r.done ? "✓" : ""}</span>
+                  {r.label}
+                </span>
+                {r.done
+                  ? <span style={{ fontSize: "0.72rem", fontWeight: 600, color: "#059669", fontFamily: font.body }}>Complete</span>
+                  : (r.you
+                      ? <span style={{ fontSize: "0.72rem", fontWeight: 600, color: C.clay, fontFamily: font.body }}>Start →</span>
+                      : <span style={{ fontSize: "0.72rem", fontWeight: 600, color: "#C17F47", fontFamily: font.body }}>Pending</span>)}
+              </div>
+            ))}
+          </div>
+          {myEx1Done && myEx2Done && !(partnerEx1Done && partnerEx2Done) && account?.partnerEmail && (
+            <p style={{ fontSize: "0.8rem", color: C.muted, lineHeight: 1.6, margin: "0 0 1.25rem" }}>You're done. Waiting on {partnerName}. We emailed {pronoun(partnerPronouns, "obj")} an invite at {account.partnerEmail}.</p>
+          )}
+          <button onClick={() => setView("home")} style={{ background: "transparent", border: ("1.5px solid " + C.stone), color: C.ink, padding: "0.7rem 1.5rem", borderRadius: 11, fontSize: "0.82rem", fontWeight: 600, cursor: "pointer", fontFamily: font.body }}>← Back to dashboard</button>
+        </div>
+      </div>
+    )}
+    {view === "results" && bothDone && !highlightsSeen && (
       <ResultsHighlights
         ex1Answers={ex1Answers || sarahEx1} partnerEx1={partnerEx1}
         ex2Answers={ex2Answers || sarahEx2} partnerEx2={partnerEx2}
@@ -13021,7 +13100,7 @@ export default function App() {
         onDone={() => setHighlightsSeen(true)}
       />
     )}
-    {view === "results" && highlightsSeen && (
+    {view === "results" && bothDone && highlightsSeen && (
           <div style={{ position: "fixed", top: 56, left: 0, right: 0, bottom: 60, display: "flex", flexDirection: "column", overflow: "hidden", zIndex: 50, background: C.warm, paddingBottom: "env(safe-area-inset-bottom)" }}>
             <div style={{ background: "rgba(255,253,249,0.97)", backdropFilter: "blur(12px)", borderBottom: ("1px solid " + (C.stone)), padding: isMobile ? "0.75rem 1rem" : "0.9rem 1.5rem", flexShrink: 0, display: "flex", alignItems: "center", gap: "0.5rem" }}>
               <button onClick={() => setView("home")} style={{ background: "transparent", border: "none", color: C.clay, fontSize: "0.72rem", letterSpacing: "0.1em", textTransform: "uppercase", cursor: "pointer", fontFamily: font.body, padding: 0, fontWeight: 600, flexShrink: 0 }}>← {isMobile ? "" : "Dashboard"}</button>
@@ -13155,7 +13234,7 @@ export default function App() {
           </div>
         )}
         {/* Footer peek strip — visible below results pane when in results view */}
-        {view === "results" && highlightsSeen && (
+        {view === "results" && bothDone && highlightsSeen && (
           <div style={{ position: "fixed", bottom: 0, left: 0, right: 0, height: 60, background: "#2d2250", zIndex: 49, display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 2rem", gap: "1rem", overflow: "hidden" }}>
             <span style={{ fontSize: "0.72rem", color: "rgba(255,255,255,0.4)", fontFamily: BFONT, fontWeight: 300, letterSpacing: "0.04em" }}>Attune Relationships™</span>
             <div style={{ display: "flex", gap: "1.5rem", flexWrap: "nowrap" }}>
