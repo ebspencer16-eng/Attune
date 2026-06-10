@@ -6668,7 +6668,7 @@ function RetakeComparisonCard({ currentEx2, priorEx2, priorAt, userName, partner
   );
 }
 
-function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Answers, partnerEx3, ex2AnswersPrior = null, ex2PriorAt = null, hasAnniversary, userName, partnerName, initialSection, isMobile = false, portrait = null, hasChecklist = false, hasBudget = false, hasLMFT = false, hasWorkbook = false, onNavigateTool = null, userPronouns = "", partnerPronouns = "" }) {
+function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Answers, partnerEx3, ex2AnswersPrior = null, ex2PriorAt = null, hasAnniversary, userName, partnerName, initialSection, isMobile = false, portrait = null, hasChecklist = false, hasBudget = false, hasLMFT = false, hasWorkbook = false, onNavigateTool = null, userPronouns = "", partnerPronouns = "", isBetaTester = false }) {
 
   // Compute all the data we need up front
   const myS = calcDimScores(ex1Answers);
@@ -8387,15 +8387,24 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
               <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.7)" strokeWidth="1.8" strokeLinecap="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
             </div>
             <div style={{ flex: 1 }}>
-              <div style={{ fontSize: "0.85rem", fontWeight: 700, color: "white", fontFamily: BFONT, marginBottom: "0.2rem" }}>You're part of our beta.</div>
-              <div style={{ fontSize: "0.72rem", color: "rgba(255,255,255,0.5)", fontFamily: BFONT, lineHeight: 1.55 }}>Share what worked, what didn't, and what surprised you. Four questions.</div>
+              <div style={{ fontSize: "0.85rem", fontWeight: 700, color: "white", fontFamily: BFONT, marginBottom: "0.2rem" }}>{isBetaTester ? "You're part of our beta." : "Tell us how it went."}</div>
+              <div style={{ fontSize: "0.72rem", color: "rgba(255,255,255,0.5)", fontFamily: BFONT, lineHeight: 1.55 }}>{isBetaTester ? "Tell us what you actually discovered. The full survey takes about 12 minutes." : "Share what worked, what didn't, and what surprised you. Four questions."}</div>
             </div>
-            <button onClick={() => setShowSurvey(true)}
-              style={{ background: "rgba(255,255,255,0.1)", border: "1px solid rgba(255,255,255,0.18)", color: "white", borderRadius: 10, padding: "0.6rem 1.1rem", fontSize: "0.75rem", fontWeight: 700, fontFamily: BFONT, whiteSpace: "nowrap", flexShrink: 0, cursor: "pointer", transition: "background 0.15s" }}
-              onMouseEnter={e => e.currentTarget.style.background = "rgba(255,255,255,0.18)"}
-              onMouseLeave={e => e.currentTarget.style.background = "rgba(255,255,255,0.1)"}>
-              Leave feedback →
-            </button>
+            {isBetaTester ? (
+              <a href="/feedback"
+                style={{ background: "rgba(255,255,255,0.1)", border: "1px solid rgba(255,255,255,0.18)", color: "white", borderRadius: 10, padding: "0.6rem 1.1rem", fontSize: "0.75rem", fontWeight: 700, fontFamily: BFONT, whiteSpace: "nowrap", flexShrink: 0, cursor: "pointer", textDecoration: "none", transition: "background 0.15s" }}
+                onMouseEnter={e => e.currentTarget.style.background = "rgba(255,255,255,0.18)"}
+                onMouseLeave={e => e.currentTarget.style.background = "rgba(255,255,255,0.1)"}>
+                Share your feedback →
+              </a>
+            ) : (
+              <button onClick={() => setShowSurvey(true)}
+                style={{ background: "rgba(255,255,255,0.1)", border: "1px solid rgba(255,255,255,0.18)", color: "white", borderRadius: 10, padding: "0.6rem 1.1rem", fontSize: "0.75rem", fontWeight: 700, fontFamily: BFONT, whiteSpace: "nowrap", flexShrink: 0, cursor: "pointer", transition: "background 0.15s" }}
+                onMouseEnter={e => e.currentTarget.style.background = "rgba(255,255,255,0.18)"}
+                onMouseLeave={e => e.currentTarget.style.background = "rgba(255,255,255,0.1)"}>
+                Leave feedback →
+              </button>
+            )}
           </div>
           {showSurvey && <BetaSurveyModal userName={userName} coupleType={coupleType} onClose={() => setShowSurvey(false)} />}
         </div>
@@ -13149,13 +13158,7 @@ export default function App() {
                   </span>
                 </>
               )}
-              {/* Beta feedback link — right side, hidden on mobile */}
-              {!isMobile && <a href="/feedback"
-                style={{ marginLeft: "auto", fontSize: "0.62rem", letterSpacing: "0.1em", textTransform: "uppercase", color: C.clay, fontFamily: font.body, fontWeight: 600, textDecoration: "none", opacity: 0.6, display: "flex", alignItems: "center", gap: "0.3rem", transition: "opacity 0.15s" }}
-                onMouseEnter={e => e.currentTarget.style.opacity = "1"}
-                onMouseLeave={e => e.currentTarget.style.opacity = "0.6"}>
-                ✦ Beta feedback
-              </a>}
+              {/* Beta feedback entry point lives in the results-end card (branches on isBetaTester) */}
             </div>
             {/* Mobile sticky sub-section nav */}
             {isMobile && (() => {
@@ -13221,6 +13224,7 @@ export default function App() {
                   hasBudget={pkg.hasBudget}
                   hasLMFT={pkg.hasLMFT}
                   hasWorkbook={hasWorkbookOrder}
+                  isBetaTester={isBetaTester}
                   onNavigateTool={(tool) => { if (tool === 'lmft-upsell') { setUpsellModal({ product: 'lmft', cartAdded: false }); } else { setView(tool); } }}
                   initialSection={activeResult !== "overview" ? activeResult : undefined}
                 />
