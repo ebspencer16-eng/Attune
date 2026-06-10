@@ -25,7 +25,7 @@ import { reportToSentry } from './_lib/sentry-edge.js';
 
 const supabase = () => createClient(
   process.env.SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_KEY
+  process.env.SUPABASE_SERVICE_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_ROLE
 );
 
 const CORS = { 'Content-Type': 'application/json', 'X-Content-Type-Options': 'nosniff' };
