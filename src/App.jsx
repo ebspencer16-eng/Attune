@@ -8963,7 +8963,7 @@ function AuthModal({ mode, onClose, onSuccess }) {
   const _p2 = _authParams.get('p2') || '';
   const _partnerAEmail = (_authParams.get('pae') || '').toLowerCase(); // for uniqueness check on Partner B signup
   const _qrToken = _authParams.get('qr') || '';
-  const [form, setForm] = useState({ name: _p1, pronouns: "", partnerName: _p2, partnerPronouns: "", partnerEmail: "", email: "", password: "", emailOptIn: true, ageRange: "", gender: "", relationshipStatus: "", relationshipLength: "", children: "", signupSource: "" });
+  const [form, setForm] = useState({ name: _p1, pronouns: "", partnerName: _p2, partnerPronouns: "", partnerEmail: "", email: ((mode || "signup") === "login" ? (() => { try { return (JSON.parse(localStorage.getItem('attune_account') || 'null') || {}).email || ''; } catch { return ''; } })() : ""), password: "", emailOptIn: true, ageRange: "", gender: "", relationshipStatus: "", relationshipLength: "", children: "", signupSource: "" });
   const [qrOrder, setQrOrder] = useState(null);     // populated if a qr token resolves to a real order
   const [qrStatus, setQrStatus] = useState(_qrToken ? 'loading' : 'none'); // 'none' | 'loading' | 'ok' | 'claimed' | 'invalid'
   const _authIsGift = _authParams.get('gift') === '1';
@@ -11832,45 +11832,33 @@ export default function App() {
     );
   }
 
-  // ── ACCOUNT GATE — explicit signin/signup link with an active session ─────
-  // Shows who is signed in and asks before continuing, instead of silently
-  // opening the signed-in dashboard.
+  // ── EXPLICIT SIGNIN/SIGNUP LINK WITH AN ACTIVE SESSION ────────────────────
+  // Show the regular auth form instead of silently opening the signed-in
+  // dashboard. Login mode prefills the email from the stored account; clearing
+  // the field signs in as someone else. Signup links (purchase emails) show
+  // the prefilled signup form.
   if (showAccountGate && account) {
-    const _gateFirstName = (account.name || '').split(' ')[0] || 'you';
-    const _gateContinue = () => {
+    const _gateDone = () => {
       try { window.history.replaceState({}, '', '/app'); } catch {}
       setShowAccountGate(false);
     };
-    const _gateSwitch = async () => {
-      // Where to land after sign-out: signup links keep their params so the
-      // new person's setup form prefills; signin links reload into the form.
-      const dest = _urlSignup
-        ? window.location.pathname + window.location.search
-        : '/app?signin=1';
-      try { sessionStorage.setItem('attune_post_signout_url', dest); } catch {}
-      try { await sb.auth.signOut(); } catch { window.location.href = dest; }
-    };
     return (
-      <div style={{ minHeight: '100vh', background: '#F3EDE6', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem 1.25rem', fontFamily: "'DM Sans', sans-serif" }}>
-        <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
-        <div style={{ background: '#FFFDF9', borderRadius: 22, padding: '2.5rem 2rem', width: '100%', maxWidth: 400, boxShadow: '0 24px 64px rgba(0,0,0,0.1)', textAlign: 'center' }}>
-          <div style={{ width: 60, height: 60, borderRadius: '50%', background: 'linear-gradient(135deg, #E8673A, #1B5FE8)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.35rem', fontSize: '1.4rem', color: 'white', fontWeight: 700 }}>{_gateFirstName.charAt(0).toUpperCase()}</div>
-          <div style={{ fontFamily: "'Playfair Display', Georgia, serif", fontSize: '1.5rem', fontWeight: 700, color: '#0E0B07', marginBottom: '0.5rem', lineHeight: 1.2 }}>{_urlSignup ? 'You are already signed in.' : 'Welcome back.'}</div>
-          <p style={{ fontSize: '0.85rem', color: '#8C7A68', marginBottom: '1.75rem', lineHeight: 1.7 }}>
-            {_urlSignup
-              ? <>This setup link creates a new account. You are signed in as <strong style={{ color: '#0E0B07' }}>{account.email}</strong>.</>
-              : <>You are signed in as <strong style={{ color: '#0E0B07' }}>{account.email}</strong>.</>}
-          </p>
-          <button onClick={_gateContinue}
-            style={{ width: '100%', padding: '0.9rem', border: 'none', borderRadius: 12, background: 'linear-gradient(135deg, #E8673A, #1B5FE8)', color: 'white', cursor: 'pointer', fontWeight: 700, fontSize: '0.9rem', fontFamily: "'DM Sans', sans-serif", letterSpacing: '0.02em' }}>
-            Sign in as {_gateFirstName} →
-          </button>
-          <button onClick={_gateSwitch}
-            style={{ width: '100%', padding: '0.8rem', marginTop: '0.7rem', border: '1.5px solid #E0C9A8', borderRadius: 12, background: 'transparent', color: '#5C4A38', cursor: 'pointer', fontWeight: 600, fontSize: '0.82rem', fontFamily: "'DM Sans', sans-serif" }}>
-            {_urlSignup ? 'Sign out and set up the new account' : 'Use a different account'}
-          </button>
-        </div>
-      </div>
+      <AuthModal
+        mode={_urlSignup ? 'signup' : 'login'}
+        onClose={_gateDone}
+        onSuccess={(acct) => {
+          const _p1 = params.get('p1');
+          const _p2 = params.get('p2');
+          const enriched = {
+            ...acct,
+            ...((_p1 && !acct.name) ? { name: _p1 } : {}),
+            ...((_p2 && !acct.partnerName) ? { partnerName: _p2 } : {}),
+          };
+          setAccount(enriched);
+          saveAccount(enriched);
+          _gateDone();
+        }}
+      />
     );
   }
 
