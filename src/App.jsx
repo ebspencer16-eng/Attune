@@ -9136,10 +9136,21 @@ function AuthModal({ mode, onClose, onSuccess }) {
         pkg: new URLSearchParams(window.location.search).get("pkg") || "core",
         createdAt: Date.now(),
       };
+      // Preserve the order summary checkout.html just wrote. The wipe below
+      // removes attune_order, and the DB-based rebuild only runs on a later
+      // fresh sign-in — without this, package add-ons are invisible until the
+      // user signs out and back in.
+      let _checkoutOrderSnapshot = null;
+      try {
+        if (_authParams.get('orderNum')) _checkoutOrderSnapshot = localStorage.getItem('attune_order');
+      } catch {}
       // Clear stale data from any prior user/demo on this browser. Single
       // source of truth at module top; see USER_LOCALSTORAGE_KEYS.
       clearAllUserLocalStorage();
       try { localStorage.setItem("attune_account", JSON.stringify(account)); } catch {}
+      if (_checkoutOrderSnapshot) {
+        try { localStorage.setItem('attune_order', _checkoutOrderSnapshot); } catch {}
+      }
 
       // Link the order created at checkout (via stripe-webhook with no user_id)
       // to this newly-created auth user. orderNum was passed in the URL by

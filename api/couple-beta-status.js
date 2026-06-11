@@ -59,11 +59,32 @@ export default async function handler(req) {
     const ids = [self.id];
     if (self.partner_profile_id) ids.push(self.partner_profile_id);
 
+    // Resolve both partners' auth emails so orders that never got user_id
+    // linked (webhook + free-promo writes have no user_id at purchase time)
+    // still match via buyer_email.
+    const emails = [];
+    for (const id of ids) {
+      try {
+        const { data } = await sb.auth.admin.getUserById(id);
+        const em = data?.user?.email;
+        if (em) emails.push(em.toLowerCase());
+      } catch { /* non-fatal */ }
+    }
+
     // Any order belonging to either partner with a beta promo code?
-    const { data: orders } = await sb
+    const orFilter = [
+      `user_id.in.(${ids.join(',')})`,
+      ...(emails.length ? [`buyer_email.in.(${emails.map(e => `"${e}"`).join(',')})`] : []),
+    ].join(',');
+    const { data: orders, error: ordersErr } = await sb
       .from('orders')
       .select('promo_code')
-      .in('user_id', ids);
+      .or(orFilter);
+    if (ordersErr) {
+      // Surface schema/RLS problems instead of silently returning false.
+      console.error('[couple-beta-status] orders query error:', ordersErr);
+      reportToSentry(new Error('couple-beta-status orders query: ' + ordersErr.message), { route: '/api/couple-beta-status' }).catch(() => {});
+    }
 
     const isBeta = Array.isArray(orders) && orders.some(o => isBetaCode(o.promo_code));
 

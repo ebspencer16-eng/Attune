@@ -266,7 +266,7 @@ function normalizeItem(item) {
 }
 
 async function writeOrderRow(supabaseUrl, serviceKey, row) {
-  return fetch(`${supabaseUrl}/rest/v1/orders`, {
+  const res = await fetch(`${supabaseUrl}/rest/v1/orders`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -276,6 +276,19 @@ async function writeOrderRow(supabaseUrl, serviceKey, row) {
     },
     body: JSON.stringify(row),
   });
+  if (!res.ok && res.status !== 409) {
+    // 409 = webhook/promo retry of an order_num we already wrote (idempotent).
+    // Anything else means the order was LOST — a paying customer with no
+    // order row. This must never be silent (it was: missing promo_code
+    // column dropped every order insert with a 42703 for weeks).
+    const txt = await res.text().catch(() => '');
+    console.error('[orders] insert FAILED', res.status, row.order_num, txt);
+    try {
+      const { reportToSentry } = await import('./_lib/sentry-edge.js');
+      await reportToSentry(new Error(`order insert failed ${res.status}: ${txt.slice(0, 300)}`), { route: '/api/create-payment-intent', order_num: row.order_num });
+    } catch { /* sentry optional */ }
+  }
+  return res;
 }
 
 export default async function handler(req) {
