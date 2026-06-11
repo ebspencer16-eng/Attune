@@ -223,6 +223,20 @@
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
       Dashboard
     </a>
+    <div class="sb-section">Operations</div>
+    <a class="sb-item" onclick="showPage('fulfillment')">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="1" y="3" width="15" height="13" rx="1"/><path d="M16 8h4l3 5v3h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+      Fulfillment
+      <span id="sb-fulfillment-badge" style="margin-left:auto;background:var(--amber);color:#000;font-size:.55rem;font-weight:800;padding:.1rem .4rem;border-radius:20px;font-family:var(--mono);"></span>
+    </a>
+    <a class="sb-item" onclick="showPage('lmft-requests')">
+      <svg width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M10 2a8 8 0 1 0 0 16A8 8 0 0 0 10 2zm0 4v4l3 2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+      <span>LMFT Requests</span>
+    </a>
+    <a class="sb-item" onclick="showPage('beta-codes')">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12V7a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h10"/><path d="M7 12h2M12 12h2M17 12h1"/><circle cx="18" cy="18" r="3"/><path d="m17 18 1 1 2-2"/></svg>
+      Beta Codes
+    </a>
     <div class="sb-section">Revenue</div>
     <a class="sb-item" onclick="showPage('orders')">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
@@ -232,11 +246,9 @@
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
       Package Mix
     </a>
-    <div class="sb-section">Operations</div>
-    <a class="sb-item" onclick="showPage('fulfillment')">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="1" y="3" width="15" height="13" rx="1"/><path d="M16 8h4l3 5v3h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
-      Fulfillment
-      <span id="sb-fulfillment-badge" style="margin-left:auto;background:var(--amber);color:#000;font-size:.55rem;font-weight:800;padding:.1rem .4rem;border-radius:20px;font-family:var(--mono);"></span>
+    <a class="sb-item" onclick="showPage('promos')">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
+      Promo Analytics
     </a>
     <div class="sb-section">Users</div>
     <a class="sb-item" onclick="showPage('demographics')">
@@ -247,7 +259,7 @@
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
       Responses
     </a>
-    <div class="sb-section">Insights</div>
+    <div class="sb-section">Feedback</div>
     <a class="sb-item" onclick="showPage('satisfaction')">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>
       Satisfaction
@@ -260,10 +272,7 @@
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
       Survey Explorer
     </a>
-    <a class="sb-item" onclick="showPage('lmft-requests')">
-      <svg width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M10 2a8 8 0 1 0 0 16A8 8 0 0 0 10 2zm0 4v4l3 2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
-      <span>LMFT Requests</span>
-    </a>
+    <div class="sb-section">Analytics</div>
     <a class="sb-item" onclick="showPage('types')">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.22 4.22l2.12 2.12M17.66 17.66l2.12 2.12M2 12h3M19 12h3M4.22 19.78l2.12-2.12M17.66 6.34l2.12-2.12"/></svg>
       Type Analytics
@@ -271,10 +280,6 @@
     <a class="sb-item" onclick="showPage('explore'); window.__initExplore && window.__initExplore();">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><rect x="7" y="10" width="3" height="7"/><rect x="12" y="6" width="3" height="11"/><rect x="17" y="13" width="3" height="4"/></svg>
       Explore
-    </a>
-    <a class="sb-item" onclick="showPage('beta-codes')">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12V7a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h10"/><path d="M7 12h2M12 12h2M17 12h1"/><circle cx="18" cy="18" r="3"/><path d="m17 18 1 1 2-2"/></svg>
-      Beta Codes
     </a>
     <div class="sb-section">Review</div>
     <a class="sb-item" onclick="showPage('ux-views')">
@@ -1454,6 +1459,64 @@
   </div>
 
   <!-- ══ BETA CODES ══ -->
+  <div class="page" id="page-promos">
+    <div class="topbar">
+      <div>
+        <div class="topbar-title">Promo Analytics</div>
+        <div class="topbar-sub">Discount code usage, order value, and add-on attachment across real orders.</div>
+      </div>
+      <div class="topbar-right">
+        <div class="date-badge" id="promos-last-updated">—</div>
+        <button class="export-btn" onclick="renderPromosPage(true)">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.95"/></svg>
+          Refresh
+        </button>
+      </div>
+    </div>
+
+    <div class="kpi-grid" style="grid-template-columns:repeat(4,1fr);">
+      <div class="kpi-card orange">
+        <div class="kpi-label">Orders with a code</div>
+        <div class="kpi-val" id="pr-code-pct">—</div>
+        <div class="kpi-sub" id="pr-code-n">—</div>
+      </div>
+      <div class="kpi-card blue">
+        <div class="kpi-label">Avg order value</div>
+        <div class="kpi-val" id="pr-aov">—</div>
+        <div class="kpi-sub">All orders</div>
+      </div>
+      <div class="kpi-card green">
+        <div class="kpi-label">Avg full-price order</div>
+        <div class="kpi-val" id="pr-aov-full">—</div>
+        <div class="kpi-sub">Orders without a code</div>
+      </div>
+      <div class="kpi-card purple">
+        <div class="kpi-label">Revenue</div>
+        <div class="kpi-val" id="pr-revenue">—</div>
+        <div class="kpi-sub" id="pr-revenue-sub">All orders</div>
+      </div>
+    </div>
+
+    <div class="chart-row" style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-top:1rem;">
+      <div class="chart-card">
+        <div class="chart-title">Discount size distribution</div>
+        <div class="chart-sub">Count of code-redeeming orders by discount size</div>
+        <div style="height:240px;position:relative;"><canvas id="pr-discount-chart"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">Add-on attachment by package</div>
+        <div class="chart-sub">Share of orders in each package that include each add-on</div>
+        <div style="height:240px;position:relative;"><canvas id="pr-addon-chart"></canvas></div>
+      </div>
+    </div>
+
+    <div class="chart-card" style="margin-top:1rem;">
+      <div class="chart-title">Code usage</div>
+      <div class="chart-sub">Most used to least used. Orders matched joins on the order's promo code; configured uses is the counter on the code itself.</div>
+      <div id="pr-code-table" style="margin-top:.75rem;">—</div>
+    </div>
+  </div>
+
   <div class="page" id="page-beta-codes">
     <div class="topbar">
       <div>
@@ -1755,6 +1818,164 @@ async function sha256(str) {
   return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
 }
 
+// ── SHARED ADMIN DATA ─────────────────────────────────────────────────────────
+// One service-role payload (orders, beta codes, lmft requests, feedback,
+// profile aggregates) fetched via /api/admin-data with the ?s= secret.
+// Anon-key PostgREST reads stopped working when RLS was tightened (010);
+// every real-data loader below consumes this instead.
+let __adminDataPromise = null;
+function fetchAdminData(force) {
+  if (__adminDataPromise && !force) return __adminDataPromise;
+  const secret = new URLSearchParams(window.location.search).get('s') || '';
+  __adminDataPromise = fetch('/api/admin-data?secret=' + encodeURIComponent(secret))
+    .then(r => r.json())
+    .then(d => (d && d.ok) ? d : null)
+    .catch(() => null);
+  return __adminDataPromise;
+}
+async function adminAction(payload) {
+  const secret = new URLSearchParams(window.location.search).get('s') || '';
+  const r = await fetch('/api/admin-actions?secret=' + encodeURIComponent(secret), {
+    method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload),
+  });
+  return r.json().catch(() => ({ error: 'Bad response' }));
+}
+
+// ── PROMO ANALYTICS PAGE ──────────────────────────────────────────────────────
+let __prDiscountChart = null, __prAddonChart = null;
+async function renderPromosPage(force) {
+  const updatedEl = document.getElementById('promos-last-updated');
+  if (updatedEl) updatedEl.textContent = new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
+
+  const data = await fetchAdminData(force);
+  const orders = (data && data.orders) || [];
+  const codes  = (data && data.beta_codes) || [];
+  const codeByName = {};
+  codes.forEach(c => { codeByName[(c.code || '').toUpperCase()] = c; });
+
+  const withCode = orders.filter(o => o.promo_code);
+  const fullPrice = orders.filter(o => !o.promo_code);
+  const sum = arr => arr.reduce((s, o) => s + (Number(o.total) || 0), 0);
+  const fmt$ = n => '$' + (Math.round(n * 100) / 100).toLocaleString('en-US');
+
+  // KPIs
+  const el = id => document.getElementById(id);
+  if (el('pr-code-pct'))  el('pr-code-pct').textContent  = orders.length ? Math.round(withCode.length / orders.length * 100) + '%' : '—';
+  if (el('pr-code-n'))    el('pr-code-n').textContent    = withCode.length + ' of ' + orders.length + ' orders';
+  if (el('pr-aov'))       el('pr-aov').textContent       = orders.length ? fmt$(sum(orders) / orders.length) : '—';
+  if (el('pr-aov-full'))  el('pr-aov-full').textContent  = fullPrice.length ? fmt$(sum(fullPrice) / fullPrice.length) : '—';
+  if (el('pr-revenue'))   el('pr-revenue').textContent   = fmt$(sum(orders));
+
+  // Discount size distribution. Bucket each code-redeeming order by the
+  // discount its code is configured with: free => 100% off, percent => its
+  // value, fixed => its own bucket. Unknown codes (no beta_codes row) bucket
+  // as Unknown.
+  const buckets = { '100% off': 0, '75–99%': 0, '50–74%': 0, '25–49%': 0, '1–24%': 0, 'Fixed $': 0, 'Unknown': 0 };
+  withCode.forEach(o => {
+    const c = codeByName[(o.promo_code || '').toUpperCase()];
+    if (!c) { buckets['Unknown']++; return; }
+    const mode = c.discount_mode || 'free';
+    if (mode === 'free') { buckets['100% off']++; return; }
+    if (mode === 'fixed') { buckets['Fixed $']++; return; }
+    const v = Number(c.discount_value) || 0;
+    if (v >= 100) buckets['100% off']++;
+    else if (v >= 75) buckets['75–99%']++;
+    else if (v >= 50) buckets['50–74%']++;
+    else if (v >= 25) buckets['25–49%']++;
+    else buckets['1–24%']++;
+  });
+  const bLabels = Object.keys(buckets).filter(k => buckets[k] > 0);
+  const bData = bLabels.map(k => buckets[k]);
+  const discountCanvas = document.getElementById('pr-discount-chart');
+  if (discountCanvas && typeof Chart !== 'undefined') {
+    if (__prDiscountChart) __prDiscountChart.destroy();
+    __prDiscountChart = new Chart(discountCanvas, {
+      type: 'bar',
+      data: { labels: bLabels.length ? bLabels : ['No code redemptions yet'], datasets: [{ data: bData.length ? bData : [0], backgroundColor: '#FF6B35', borderRadius: 6 }] },
+      options: { plugins: { legend: { display: false } }, scales: { y: { grid: { color: '#2A2E3A' }, ticks: { precision: 0 } }, x: { grid: { display: false } } } },
+    });
+  }
+
+  // Add-on attachment by package: % of each package's orders carrying each add-on
+  const pkgs = ['core', 'newlywed', 'anniversary', 'premium'];
+  const pkgLabels = { core: 'Assessment', newlywed: 'Starting Out', anniversary: 'Anniversary', premium: 'Premium' };
+  const addons = [
+    { key: o => !!o.addon_workbook, label: 'Workbook',   color: '#6C7FFF' },
+    { key: o => !!o.addon_lmft,     label: 'LMFT',       color: '#34D399' },
+    { key: o => !!o.addon_reflection, label: 'Reflection', color: '#F4B860' },
+    { key: o => !!o.addon_budget,   label: 'Budget',     color: '#E36BAE' },
+  ];
+  const byPkg = {};
+  pkgs.forEach(k => { byPkg[k] = orders.filter(o => o.pkg_key === k); });
+  const presentPkgs = pkgs.filter(k => byPkg[k].length > 0);
+  const addonCanvas = document.getElementById('pr-addon-chart');
+  if (addonCanvas && typeof Chart !== 'undefined') {
+    if (__prAddonChart) __prAddonChart.destroy();
+    __prAddonChart = new Chart(addonCanvas, {
+      type: 'bar',
+      data: {
+        labels: presentPkgs.length ? presentPkgs.map(k => pkgLabels[k]) : ['No orders yet'],
+        datasets: addons.map(a => ({
+          label: a.label, backgroundColor: a.color, borderRadius: 4,
+          data: presentPkgs.length ? presentPkgs.map(k => Math.round(byPkg[k].filter(a.key).length / byPkg[k].length * 100)) : [0],
+        })),
+      },
+      options: { plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, padding: 12 } } }, scales: { y: { grid: { color: '#2A2E3A' }, ticks: { callback: v => v + '%' }, max: 100 }, x: { grid: { display: false } } } },
+    });
+  }
+
+  // Code usage table: most used to least used. Configured uses = beta_codes
+  // counter; orders matched = real order rows carrying the code; revenue =
+  // sum of those orders' totals.
+  const usage = {};
+  withCode.forEach(o => {
+    const k = (o.promo_code || '').toUpperCase();
+    if (!usage[k]) usage[k] = { code: k, orders: 0, revenue: 0, lastUsed: null };
+    usage[k].orders++;
+    usage[k].revenue += Number(o.total) || 0;
+    const t = new Date(o.created_at).getTime();
+    if (!usage[k].lastUsed || t > usage[k].lastUsed) usage[k].lastUsed = t;
+  });
+  // Include configured codes that have a uses_count but no surviving orders
+  codes.forEach(c => {
+    const k = (c.code || '').toUpperCase();
+    if (!usage[k] && (c.uses_count || 0) > 0) usage[k] = { code: k, orders: 0, revenue: 0, lastUsed: c.last_used_at ? new Date(c.last_used_at).getTime() : null };
+  });
+  const rows = Object.values(usage).sort((a, b) => {
+    const ua = Math.max(a.orders, (codeByName[a.code]?.uses_count) || 0);
+    const ub = Math.max(b.orders, (codeByName[b.code]?.uses_count) || 0);
+    return ub - ua;
+  });
+  const tableEl = document.getElementById('pr-code-table');
+  if (tableEl) {
+    if (rows.length === 0) {
+      tableEl.innerHTML = '<div style="color:var(--dim);font-size:.78rem;padding:.75rem 0;">No code redemptions yet.</div>';
+    } else {
+      const discountLabel = c => {
+        if (!c) return '—';
+        if ((c.discount_mode || 'free') === 'free') return '100% off';
+        if (c.discount_mode === 'fixed') return '$' + (Number(c.discount_value) || 0) + ' off';
+        return (Number(c.discount_value) || 0) + '% off';
+      };
+      tableEl.innerHTML = `<table style="width:100%;border-collapse:collapse;font-size:.75rem">
+        <thead><tr style="background:var(--surface);border-bottom:1px solid var(--border)">${['Code','Package','Discount','Configured uses','Orders matched','Revenue','Last used'].map(hd=>`<th style="text-align:left;padding:.5rem .75rem;font-size:.62rem;letter-spacing:.1em;text-transform:uppercase;color:var(--dim)">${hd}</th>`).join('')}</tr></thead>
+        <tbody>${rows.map(r => {
+          const c = codeByName[r.code];
+          return `<tr style="border-bottom:1px solid var(--border)">
+            <td style="padding:.5rem .75rem;font-family:var(--mono)">${r.code}</td>
+            <td style="padding:.5rem .75rem;color:var(--muted)">${c ? (c.package_key || '—') : '—'}</td>
+            <td style="padding:.5rem .75rem">${discountLabel(c)}</td>
+            <td style="padding:.5rem .75rem;color:var(--muted)">${c ? (c.uses_count || 0) : '—'}</td>
+            <td style="padding:.5rem .75rem">${r.orders}</td>
+            <td style="padding:.5rem .75rem">$${(Math.round(r.revenue*100)/100).toLocaleString('en-US')}</td>
+            <td style="padding:.5rem .75rem;color:var(--dim)">${r.lastUsed ? new Date(r.lastUsed).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : '—'}</td>
+          </tr>`;
+        }).join('')}</tbody>
+      </table>`;
+    }
+  }
+}
+
 async function attemptLogin() {
   const btn      = document.getElementById('login-btn');
   const errEl    = document.getElementById('login-err');
@@ -1888,16 +2109,11 @@ async function loadBetaCodes() {
   };
 
   let rows = [];
-  if (SUPABASE_URL && SUPABASE_ANON) {
-    try {
-      const res = await fetch(`${SUPABASE_URL}/rest/v1/beta_codes?select=*&order=code.asc`, {
-        headers: { apikey: SUPABASE_ANON, Authorization: `Bearer ${SUPABASE_ANON}` }
-      });
-      const data = await res.json();
-      if (Array.isArray(data)) rows = data;
-    } catch (e) {
-      console.warn('[beta codes] supabase fetch failed:', e);
-    }
+  try {
+    const adminData = await fetchAdminData();
+    if (adminData && Array.isArray(adminData.beta_codes)) rows = adminData.beta_codes;
+  } catch (e) {
+    console.warn('[beta codes] admin-data fetch failed:', e);
   }
 
   // Merge seeds with rows so all 4 beta codes always appear, even at 0 uses
@@ -1995,48 +2211,14 @@ async function loadBetaCodes() {
 }
 
 async function toggleBetaCode(code, active) {
-  const SUPABASE_URL = window.__SUPABASE_URL;
-  const SUPABASE_ANON = window.__SUPABASE_ANON;
-  if (!SUPABASE_URL || !SUPABASE_ANON) {
-    alert('Supabase credentials missing. Cannot update code status.');
-    return;
-  }
   const verb = active ? 'reactivate' : 'deactivate';
   if (!confirm(`Are you sure you want to ${verb} the code "${code}"?`)) return;
   try {
-    // Upsert with new active status
-    // First check if row exists
-    const checkRes = await fetch(
-      `${SUPABASE_URL}/rest/v1/beta_codes?code=eq.${encodeURIComponent(code)}&select=code`,
-      { headers: { apikey: SUPABASE_ANON, Authorization: `Bearer ${SUPABASE_ANON}` } }
-    );
-    const existing = await checkRes.json();
-    if (Array.isArray(existing) && existing.length > 0) {
-      // Update
-      await fetch(`${SUPABASE_URL}/rest/v1/beta_codes?code=eq.${encodeURIComponent(code)}`, {
-        method: 'PATCH',
-        headers: {
-          apikey: SUPABASE_ANON,
-          Authorization: `Bearer ${SUPABASE_ANON}`,
-          'Content-Type': 'application/json',
-          Prefer: 'return=minimal',
-        },
-        body: JSON.stringify({ active }),
-      });
-    } else {
-      // Insert fresh row (for codes that have never been redeemed)
-      const pkgMap = { 'BETA-CORE': 'core', 'BETA-NEWLYWED': 'newlywed', 'BETA-ANNIVERSARY': 'anniversary', 'BETA-PREMIUM': 'premium', 'ATTUNE-BETA-FEEDBACK': '*' };
-      await fetch(`${SUPABASE_URL}/rest/v1/beta_codes`, {
-        method: 'POST',
-        headers: {
-          apikey: SUPABASE_ANON,
-          Authorization: `Bearer ${SUPABASE_ANON}`,
-          'Content-Type': 'application/json',
-          Prefer: 'return=minimal',
-        },
-        body: JSON.stringify({ code, package_key: pkgMap[code] || '*', active, uses_count: 0 }),
-      });
-    }
+    const pkgMap = { 'BETA-CORE': 'core', 'BETA-NEWLYWED': 'newlywed', 'BETA-ANNIVERSARY': 'anniversary', 'BETA-PREMIUM': 'premium', 'ATTUNE-BETA-FEEDBACK': '*' };
+    // Upsert covers both existing rows and seeded codes never redeemed
+    const res = await adminAction({ action: 'beta_upsert', row: { code, package_key: pkgMap[code] || '*', active } });
+    if (res.error) throw new Error(res.error);
+    fetchAdminData(true); // bust the cache so the table re-reads fresh state
     loadBetaCodes();
   } catch (e) {
     console.error('[beta codes] toggle failed:', e);
@@ -2191,15 +2373,9 @@ async function loadLmftRequests() {
     </table>`;
   };
 
-  if (!SUPABASE_URL || !SUPABASE_ANON) {
-    renderRows(DEMO_LMFT, true);
-    return;
-  }
   try {
-    const res = await fetch(`${SUPABASE_URL}/rest/v1/lmft_requests?select=*&order=created_at.desc&limit=50`, {
-      headers: { 'apikey': SUPABASE_ANON, 'Authorization': `Bearer ${SUPABASE_ANON}` }
-    });
-    const rows = await res.json();
+    const adminData = await fetchAdminData();
+    const rows = adminData && adminData.lmft_requests;
     if (!Array.isArray(rows) || rows.length === 0) {
       renderRows(DEMO_LMFT, true);
       return;
@@ -2212,26 +2388,12 @@ async function loadLmftRequests() {
 
 // Update LMFT request status. Called from the per-row dropdown.
 async function updateLMFTStatus(id, newStatus) {
-  const SUPABASE_URL  = window.__SUPABASE_URL;
-  const SUPABASE_ANON = window.__SUPABASE_ANON;
-  if (!SUPABASE_URL || !SUPABASE_ANON) {
-    alert('Supabase credentials missing. Cannot update status.');
-    return;
-  }
   try {
-    const res = await fetch(`${SUPABASE_URL}/rest/v1/lmft_requests?id=eq.${encodeURIComponent(id)}`, {
-      method: 'PATCH',
-      headers: {
-        'apikey': SUPABASE_ANON,
-        'Authorization': `Bearer ${SUPABASE_ANON}`,
-        'Content-Type': 'application/json',
-        'Prefer': 'return=minimal',
-      },
-      body: JSON.stringify({ status: newStatus }),
-    });
-    if (!res.ok) {
-      const msg = await res.text().catch(() => '');
-      alert('Status update failed: ' + (msg || res.statusText));
+    const res = await adminAction({ action: 'lmft_status', id, status: newStatus });
+    if (res.error) {
+      alert('Status update failed: ' + res.error);
+    } else {
+      fetchAdminData(true); // refresh the cached payload
     }
   } catch (e) {
     alert('Status update failed: ' + (e.message || e));
@@ -2302,8 +2464,9 @@ function showPage(id) {
   if (id==='survey-explorer') initSurveyExplorer();
   if (id==='types') loadTypesData();
   if (id==='beta-codes') loadBetaCodes();
+  if (id==='promos') renderPromosPage();
 }
-const chartsInit = {overview:false,orders:false,packages:false,demographics:false,responses:false,satisfaction:false,fulfillment:false,feedback:false,types:false,'survey-explorer':false,'lmft-requests':false,'ux-views':true,'explore':true};
+const chartsInit = {overview:false,orders:false,packages:false,demographics:false,responses:false,satisfaction:false,fulfillment:false,feedback:false,types:false,'survey-explorer':false,'lmft-requests':false,'ux-views':true,'explore':true,'promos':true};
 // ── Feedback tab switcher ─────────────────────────────
 function setFeedbackTab(el, targetId) {
   const card = el.closest('.chart-card');
@@ -2352,15 +2515,11 @@ function renderQuoteCard(text, name, score, color='') {
 async function loadFeedbackData() {
   document.getElementById('fb-last-updated').textContent = new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
 
-  // Try loading real feedback_submissions from Supabase
-  const SUPABASE_URL = window.__SUPABASE_URL;
-  const SUPABASE_ANON = window.__SUPABASE_ANON;
-  if (SUPABASE_URL && SUPABASE_ANON) {
+  // Try loading real feedback_submissions via the admin endpoint
+  const __fbAdminData = await fetchAdminData().catch(() => null);
+  if (__fbAdminData && Array.isArray(__fbAdminData.feedback_submissions)) {
     try {
-      const res = await fetch(`${SUPABASE_URL}/rest/v1/feedback_submissions?select=*&order=submitted_at.desc&limit=100`, {
-        headers: { 'apikey': SUPABASE_ANON, 'Authorization': `Bearer ${SUPABASE_ANON}` }
-      });
-      const rows = await res.json();
+      const rows = __fbAdminData.feedback_submissions.slice(0, 100);
       if (rows.length > 0) {
         const container = document.getElementById('fb-real-data');
         if (container) {
@@ -2851,17 +3010,11 @@ function syncDemoBanner() {
 // When env vars are configured, fetches real orders and feedback from Supabase.
 // Falls back gracefully to synthetic data if not available.
 async function loadRealData() {
-  const SUPABASE_URL  = window.__SUPABASE_URL;
-  const SUPABASE_ANON = window.__SUPABASE_ANON;
-  if (!SUPABASE_URL || !SUPABASE_ANON) { syncDemoBanner(); return; }
-
   try {
-    // Fetch real orders
-    const ordersRes = await fetch(`${SUPABASE_URL}/rest/v1/orders?select=*&order=created_at.desc&limit=200`, {
-      headers: { 'apikey': SUPABASE_ANON, 'Authorization': `Bearer ${SUPABASE_ANON}` }
-    });
-    if (ordersRes.ok) {
-      const realOrders = await ordersRes.json();
+    // Fetch real orders via the service-role admin endpoint
+    const adminData = await fetchAdminData();
+    if (adminData && Array.isArray(adminData.orders)) {
+      const realOrders = adminData.orders;
       if (realOrders.length > 0) {
         window.__attuneHasRealData = true;
         // Clear synthetic orders and replace with real ones
@@ -2875,7 +3028,7 @@ async function loadRealData() {
             pkg: o.pkg_key + (o.is_physical ? '-box' : ''),
             price: o.total,
             physical: o.is_physical,
-            promo: false,
+            promo: o.promo_code || null,
             coupleType: null,
             partner1Name: o.partner1_name || o.buyer_name || null,
             partner2Name: o.partner2_name || null,
@@ -2937,15 +3090,9 @@ async function loadRealData() {
 // and at least one profile has answered a demographic field. Populated
 // asynchronously; charts re-render via initCharts.
 async function loadRealDemographics() {
-  const SUPABASE_URL  = window.__SUPABASE_URL;
-  const SUPABASE_ANON = window.__SUPABASE_ANON;
-  if (!SUPABASE_URL || !SUPABASE_ANON) return;
   try {
-    const res = await fetch(`${SUPABASE_URL}/rest/v1/profiles?select=age_range,gender,relationship_status,relationship_length,children,signup_source`, {
-      headers: { 'apikey': SUPABASE_ANON, 'Authorization': `Bearer ${SUPABASE_ANON}` }
-    });
-    if (!res.ok) return;
-    const rows = await res.json();
+    const adminData = await fetchAdminData();
+    const rows = adminData && adminData.profiles && adminData.profiles.demographics;
     if (!rows || rows.length === 0) return;
 
     // Count distribution. Nulls/empties skip silently.
@@ -3023,27 +3170,22 @@ function updateStatsFromRealData(orders) {
 // "Results viewed" = proxied by a `results_viewed_at` column if present, else
 // just mirrors Both completed (we don't track view events yet).
 async function loadRealFunnel(orders) {
-  const SUPABASE_URL  = window.__SUPABASE_URL;
-  const SUPABASE_ANON = window.__SUPABASE_ANON;
-  if (!SUPABASE_URL || !SUPABASE_ANON) return;
   if (!orders || orders.length === 0) return;
 
   try {
-    const headers = { 'apikey': SUPABASE_ANON, 'Authorization': `Bearer ${SUPABASE_ANON}`, 'Prefer': 'count=exact' };
-
     // Total orders = the funnel's first bar
     const ordered = orders.length;
 
-    // Started: profiles with at least one of ex1_answers or ex2_answers
-    const startedRes = await fetch(`${SUPABASE_URL}/rest/v1/profiles?select=id&or=(ex1_answers.not.is.null,ex2_answers.not.is.null)`, { headers });
-    const started = parseInt(startedRes.headers.get('content-range')?.split('/')[1] || '0', 10);
+    const adminData = await fetchAdminData();
+    const prof = adminData && adminData.profiles;
+    if (!prof) return;
 
-    // Both completed: profiles where both ex1 and ex2 are done AND the profile has a partner
-    // (proxy: both answered means the user finished their side; we also need partner done)
-    const bothRes = await fetch(`${SUPABASE_URL}/rest/v1/profiles?select=id&ex1_answers=not.is.null&ex2_answers=not.is.null&partner_profile_id=not.is.null`, { headers });
-    const bothDoneRough = parseInt(bothRes.headers.get('content-range')?.split('/')[1] || '0', 10);
-    // This counts individuals; divide by 2 to estimate couples
-    const bothDone = Math.floor(bothDoneRough / 2);
+    // Started: profiles with at least one of ex1/ex2 answered
+    const started = prof.started || 0;
+
+    // Both completed: individuals with ex1+ex2 done and a linked partner;
+    // divide by 2 to estimate couples
+    const bothDone = Math.floor((prof.both_done_individuals || 0) / 2);
 
     // Results viewed — no tracking column today, so mirror both-done
     // TODO: add results_viewed_at to profiles and query here
@@ -3130,17 +3272,11 @@ async function loadRealPackageTrend(orders) {
 //
 // Falls back to mock silently if no real surveys exist yet.
 async function loadRealAnalytics() {
-  const SUPABASE_URL  = window.__SUPABASE_URL;
-  const SUPABASE_ANON = window.__SUPABASE_ANON;
-  if (!SUPABASE_URL || !SUPABASE_ANON) return;
-
   try {
     // Pull beta_survey rows from feedback_submissions
-    const res = await fetch(`${SUPABASE_URL}/rest/v1/feedback_submissions?select=text,submitted_at,type&type=eq.beta_survey&order=submitted_at.desc&limit=2000`, {
-      headers: { 'apikey': SUPABASE_ANON, 'Authorization': `Bearer ${SUPABASE_ANON}` }
-    });
-    if (!res.ok) return;
-    const rows = await res.json();
+    const adminData = await fetchAdminData();
+    const all = (adminData && adminData.feedback_submissions) || [];
+    const rows = all.filter(r => r.type === 'beta_survey');
     if (!rows || rows.length === 0) return; // keep mock
 
     // Parse the text JSON blob for each row
@@ -3276,19 +3412,14 @@ async function loadRealAnalytics() {
 // Completion rate = (partner_sessions with completed_at) / (total profiles with invite codes)
 // Rough proxy: couples where Partner B has submitted at least ex1 + ex2.
 async function loadCompletionRate() {
-  const SUPABASE_URL  = window.__SUPABASE_URL;
-  const SUPABASE_ANON = window.__SUPABASE_ANON;
-  if (!SUPABASE_URL || !SUPABASE_ANON) return;
-
   try {
-    const headers = { 'apikey': SUPABASE_ANON, 'Authorization': `Bearer ${SUPABASE_ANON}` };
+    const adminData = await fetchAdminData();
+    const prof = adminData && adminData.profiles;
+    if (!prof) return;
     // Total couples = profiles with an invite_code
-    const tRes = await fetch(`${SUPABASE_URL}/rest/v1/profiles?select=id&invite_code=not.is.null`, { headers: { ...headers, 'Prefer': 'count=exact' } });
-    const totalCount = parseInt(tRes.headers.get('content-range')?.split('/')[1] || '0', 10);
-
+    const totalCount = prof.invited_total || 0;
     // Completed couples = partner_sessions with both ex1 and ex2 non-null
-    const cRes = await fetch(`${SUPABASE_URL}/rest/v1/partner_sessions?select=invite_code&ex1_answers=not.is.null&ex2_answers=not.is.null`, { headers: { ...headers, 'Prefer': 'count=exact' } });
-    const doneCount = parseInt(cRes.headers.get('content-range')?.split('/')[1] || '0', 10);
+    const doneCount = prof.completed_couples || 0;
 
     const el = document.getElementById('stat-completion');
     if (el && totalCount > 0) {

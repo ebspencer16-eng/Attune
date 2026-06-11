@@ -188,10 +188,6 @@
       "destination": "/practice/couple-types.html"
     },
     {
-      "source": "/app",
-      "destination": "/index.html"
-    },
-    {
       "source": "/feedback",
       "destination": "/feedback.html"
     },
@@ -256,10 +252,6 @@
       "destination": "/sitemap.xml"
     },
     {
-      "source": "/app/(.*)",
-      "destination": "/index.html"
-    },
-    {
       "source": "/api/admin-config",
       "destination": "/api/admin-config.js"
     },
@@ -268,12 +260,28 @@
       "destination": "/api/cron-checkin.js"
     },
     {
-      "source": "/(.*)",
+      "source": "/qr-card-v5",
+      "destination": "/qr-card-v5.html"
+    },
+    {
+      "source": "/api/admin-data",
+      "destination": "/api/admin-data.js"
+    },
+    {
+      "source": "/api/admin-actions",
+      "destination": "/api/admin-actions.js"
+    },
+    {
+      "source": "/app",
       "destination": "/index.html"
     },
     {
-      "source": "/qr-card-v5",
-      "destination": "/qr-card-v5.html"
+      "source": "/app/(.*)",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
     }
   ],
   "buildCommand": "node scripts/check-admin-html.mjs && npx vite build",
