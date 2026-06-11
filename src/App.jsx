@@ -10965,6 +10965,49 @@ export default function App() {
               window.location.reload();
               return;
             }
+          } else if (!localStorage.getItem('attune_order')) {
+            // Session and local account both valid, but no order context.
+            // Happens when the order row was created or linked after this
+            // browser last signed in (e.g. backfilled or repaired orders).
+            // Self-heal: fetch the most recent order and restore it.
+            try {
+              let { data: orderRow } = await sb.from('orders')
+                .select('order_num,pkg_key,is_physical,addon_lmft,addon_reflection,addon_budget,addon_workbook')
+                .eq('user_id', session.user.id)
+                .order('created_at', { ascending: false })
+                .limit(1)
+                .maybeSingle();
+              if (!orderRow && session.user.email) {
+                const { data: byEmail } = await sb.from('orders')
+                  .select('order_num,pkg_key,is_physical,addon_lmft,addon_reflection,addon_budget,addon_workbook')
+                  .eq('buyer_email', session.user.email.toLowerCase())
+                  .order('created_at', { ascending: false })
+                  .limit(1)
+                  .maybeSingle();
+                if (byEmail) orderRow = byEmail;
+              }
+              if (orderRow && !cancelled) {
+                localStorage.setItem('attune_order', JSON.stringify({
+                  orderNum: orderRow.order_num,
+                  pkgKey:   orderRow.pkg_key,
+                  pkg:      orderRow.pkg_key,
+                  isPhysical: !!orderRow.is_physical,
+                  addonLmft:       !!orderRow.addon_lmft,
+                  addonReflection: !!orderRow.addon_reflection,
+                  addonBudget:     !!orderRow.addon_budget,
+                  addonWorkbook:   orderRow.addon_workbook || '',
+                }));
+                setAccount(prev => prev ? {
+                  ...prev,
+                  pkg: orderRow.pkg_key || prev.pkg,
+                  addonLmft:       !!orderRow.addon_lmft,
+                  addonReflection: !!orderRow.addon_reflection,
+                  addonBudget:     !!orderRow.addon_budget,
+                  addonWorkbook:   orderRow.addon_workbook || prev.addonWorkbook || '',
+                  orderNum: orderRow.order_num,
+                } : prev);
+              }
+            } catch { /* non-fatal: order context restores on next sign-in */ }
           }
         } else {
           // No Supabase session. Could mean:
