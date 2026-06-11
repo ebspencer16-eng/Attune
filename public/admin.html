@@ -1034,10 +1034,28 @@
 </div>
 
 <script>
+// ── ADMIN API SECRET ──────────────────────────────────────────────────────────
+// The data endpoints are gated by ?s=ADMIN_SECRET. Carrying it in the URL on
+// every visit is easy to forget, and forgetting it silently degrades every
+// page to demo data. Persist it the first time it appears; every reader falls
+// back to the stored copy.
+(function persistAdminSecret(){
+  try {
+    const s = new URLSearchParams(location.search).get('s');
+    if (s) localStorage.setItem('attune_admin_s', s);
+  } catch(e) {}
+})();
+window.adminApiSecret = function(){
+  try {
+    return new URLSearchParams(location.search).get('s') || localStorage.getItem('attune_admin_s') || '';
+  } catch(e) { return new URLSearchParams(location.search).get('s') || ''; }
+};
+</script>
+<script>
 (function(){
   let CUBE = null, FIELDS = {}, loaded = false, FILTERS = [];
   const $ = (id) => document.getElementById(id);
-  const adminSecret = () => new URLSearchParams(location.search).get('s') || '';
+  const adminSecret = () => window.adminApiSecret();
 
   function fillFieldSelect(sel, includeNone){
     const groups = {};
@@ -1826,7 +1844,7 @@ async function sha256(str) {
 let __adminDataPromise = null;
 function fetchAdminData(force) {
   if (__adminDataPromise && !force) return __adminDataPromise;
-  const secret = new URLSearchParams(window.location.search).get('s') || '';
+  const secret = window.adminApiSecret();
   __adminDataPromise = fetch('/api/admin-data?secret=' + encodeURIComponent(secret))
     .then(r => r.json())
     .then(d => (d && d.ok) ? d : null)
@@ -1834,7 +1852,7 @@ function fetchAdminData(force) {
   return __adminDataPromise;
 }
 async function adminAction(payload) {
-  const secret = new URLSearchParams(window.location.search).get('s') || '';
+  const secret = window.adminApiSecret();
   const r = await fetch('/api/admin-actions?secret=' + encodeURIComponent(secret), {
     method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload),
   });
@@ -2421,7 +2439,7 @@ function toggleExportMenu(e) {
 // Request one of the 5 admin CSVs from /api/admin-csv. Opens in a new tab
 // so the browser handles the Content-Disposition download attachment header.
 function exportAdminCSV(type) {
-  const secret = new URLSearchParams(window.location.search).get('s') || '';
+  const secret = window.adminApiSecret();
   const qs = new URLSearchParams({ type });
   if (secret) qs.set('secret', secret);
   window.location.href = `/api/admin-csv?${qs.toString()}`;
@@ -3720,7 +3738,7 @@ async function markStatus(orderId, newStatus) {
   // Persist to Supabase via orders API
   const statusMap = { pending: 'pending', packed: 'packed', shipped: 'shipped' };
   try {
-    const adminSecret = new URLSearchParams(window.location.search).get('s') || '';
+    const adminSecret = window.adminApiSecret();
     await fetch('/api/orders' + (adminSecret ? `?secret=${encodeURIComponent(adminSecret)}` : ''), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -3978,7 +3996,7 @@ const TYPE_COLORS = { W:'#FF6B35', X:'#FBBF24', Y:'#6C7FFF', Z:'#34D399' };
 let sandboxWeights = null;
 
 async function loadTypesData(force) {
-  const secret = new URLSearchParams(window.location.search).get('s') || '';
+  const secret = window.adminApiSecret();
   const stamp = document.getElementById('types-last-updated');
   try {
     const res = await fetch('/api/admin-typing' + (secret ? `?secret=${secret}` : ''));
@@ -4266,7 +4284,7 @@ let _fbCharts = {};
 
 async function loadFeedbackData(force) {
   // Try to load from /api/get-feedback
-  const secret = new URLSearchParams(window.location.search).get('s') || '';
+  const secret = window.adminApiSecret();
   const url = '/api/get-feedback' + (secret ? `?secret=${secret}` : '');
   
   let data;
