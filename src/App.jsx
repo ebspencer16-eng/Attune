@@ -11043,7 +11043,17 @@ export default function App() {
             // leaves nothing on screen. Force a fresh load into the sign-in
             // form on sign-out or session expiry. The guard prevents a redirect
             // loop once we're already on the sign-in page.
-            if (window.location.search.indexOf('signin=1') === -1) {
+            // The account gate sets an explicit post-signout destination
+            // (sessionStorage) when switching accounts; honor it first so a
+            // signup link's params survive the sign-out reload.
+            let _postSignoutUrl = null;
+            try {
+              _postSignoutUrl = sessionStorage.getItem('attune_post_signout_url');
+              if (_postSignoutUrl) sessionStorage.removeItem('attune_post_signout_url');
+            } catch {}
+            if (_postSignoutUrl) {
+              window.location.href = _postSignoutUrl;
+            } else if (window.location.search.indexOf('signin=1') === -1) {
               window.location.href = '/app?signin=1';
             }
           }
@@ -11528,6 +11538,11 @@ export default function App() {
   const _urlSignin = params.get('signin') === '1';
   const [showAuth, setShowAuth] = useState(!isLoggedIn && (_urlSignup || _urlSignin)); // Auth modal
   const [authMode, setAuthMode] = useState(_urlSignin ? "login" : "signup"); // "signup" | "login"
+  // Explicit ?signin=1 / ?signup=1 while a session is active. Don't silently
+  // drop into the signed-in dashboard: a sign-in click should show a sign-in
+  // step (the person may want a different account, or admin), and a setup
+  // link from a purchase email may belong to someone else on a shared device.
+  const [showAccountGate, setShowAccountGate] = useState(isLoggedIn && (_urlSignup || _urlSignin));
   const [showProfileSetup, setShowProfileSetup] = useState(false);
   const [showNavDropdown, setShowNavDropdown] = useState(false); // Profile nav dropdown
   const [mobileNavOpen, setMobileNavOpen] = useState(false); // Mobile hamburger nav
@@ -11811,6 +11826,48 @@ export default function App() {
           <button onClick={() => { setShowConfirmedLanding(false); setShowProfileSetup(true); try { window.__attuneConfirmType = ''; } catch {} }}
             style={{ width: '100%', padding: '0.9rem', border: 'none', borderRadius: 12, background: 'linear-gradient(135deg, #E8673A, #1B5FE8)', color: 'white', cursor: 'pointer', fontWeight: 700, fontSize: '0.9rem', fontFamily: "'DM Sans', sans-serif", letterSpacing: '0.02em' }}>
             Get started with account setup →
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // ── ACCOUNT GATE — explicit signin/signup link with an active session ─────
+  // Shows who is signed in and asks before continuing, instead of silently
+  // opening the signed-in dashboard.
+  if (showAccountGate && account) {
+    const _gateFirstName = (account.name || '').split(' ')[0] || 'you';
+    const _gateContinue = () => {
+      try { window.history.replaceState({}, '', '/app'); } catch {}
+      setShowAccountGate(false);
+    };
+    const _gateSwitch = async () => {
+      // Where to land after sign-out: signup links keep their params so the
+      // new person's setup form prefills; signin links reload into the form.
+      const dest = _urlSignup
+        ? window.location.pathname + window.location.search
+        : '/app?signin=1';
+      try { sessionStorage.setItem('attune_post_signout_url', dest); } catch {}
+      try { await sb.auth.signOut(); } catch { window.location.href = dest; }
+    };
+    return (
+      <div style={{ minHeight: '100vh', background: '#F3EDE6', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem 1.25rem', fontFamily: "'DM Sans', sans-serif" }}>
+        <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+        <div style={{ background: '#FFFDF9', borderRadius: 22, padding: '2.5rem 2rem', width: '100%', maxWidth: 400, boxShadow: '0 24px 64px rgba(0,0,0,0.1)', textAlign: 'center' }}>
+          <div style={{ width: 60, height: 60, borderRadius: '50%', background: 'linear-gradient(135deg, #E8673A, #1B5FE8)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.35rem', fontSize: '1.4rem', color: 'white', fontWeight: 700 }}>{_gateFirstName.charAt(0).toUpperCase()}</div>
+          <div style={{ fontFamily: "'Playfair Display', Georgia, serif", fontSize: '1.5rem', fontWeight: 700, color: '#0E0B07', marginBottom: '0.5rem', lineHeight: 1.2 }}>{_urlSignup ? 'You are already signed in.' : 'Welcome back.'}</div>
+          <p style={{ fontSize: '0.85rem', color: '#8C7A68', marginBottom: '1.75rem', lineHeight: 1.7 }}>
+            {_urlSignup
+              ? <>This setup link creates a new account. You are signed in as <strong style={{ color: '#0E0B07' }}>{account.email}</strong>.</>
+              : <>You are signed in as <strong style={{ color: '#0E0B07' }}>{account.email}</strong>.</>}
+          </p>
+          <button onClick={_gateContinue}
+            style={{ width: '100%', padding: '0.9rem', border: 'none', borderRadius: 12, background: 'linear-gradient(135deg, #E8673A, #1B5FE8)', color: 'white', cursor: 'pointer', fontWeight: 700, fontSize: '0.9rem', fontFamily: "'DM Sans', sans-serif", letterSpacing: '0.02em' }}>
+            Sign in as {_gateFirstName} →
+          </button>
+          <button onClick={_gateSwitch}
+            style={{ width: '100%', padding: '0.8rem', marginTop: '0.7rem', border: '1.5px solid #E0C9A8', borderRadius: 12, background: 'transparent', color: '#5C4A38', cursor: 'pointer', fontWeight: 600, fontSize: '0.82rem', fontFamily: "'DM Sans', sans-serif" }}>
+            {_urlSignup ? 'Sign out and set up the new account' : 'Use a different account'}
           </button>
         </div>
       </div>
