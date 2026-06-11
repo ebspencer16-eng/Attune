@@ -2037,7 +2037,26 @@ async function attemptLogin() {
     if (eHash === ADMIN_EMAIL_HASH && pHash === ADMIN_PASSWORD_HASH) {
       try { localStorage.setItem('attune_admin_auth', JSON.stringify({ ok: 1, ts: Date.now() })); }
       catch (_) { sessionStorage.setItem('attune_admin_auth', '1'); }
+      // Exchange the verified credentials for the admin API token so data
+      // endpoints work without the manual ?s= URL secret. Non-fatal if it
+      // fails (an existing stored token or URL param still applies).
+      let gotToken = false;
+      try {
+        const tr = await fetch('/api/admin-login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password: pass }),
+        });
+        const td = await tr.json().catch(() => ({}));
+        if (td && td.token) {
+          localStorage.setItem('attune_admin_s', td.token);
+          gotToken = true;
+        }
+      } catch (_) {}
       document.getElementById('admin-login-gate').classList.add('hidden');
+      // Reload so every loader runs with the token in place; without this
+      // the first paint keeps whatever demo data loaded pre-login.
+      if (gotToken) { location.reload(); return; }
     } else {
       const emailMatches = eHash === ADMIN_EMAIL_HASH;
       if (!emailMatches) {
@@ -2087,10 +2106,17 @@ async function attemptLogin() {
     }
   } catch (_) {}
   if (!ok && sessionStorage.getItem(KEY) === '1') ok = true;
+  // Require the API token too. A remembered session without a stored token
+  // (sign-ins from before token exchange existed, or a cleared key) would
+  // render demo data everywhere; one fresh sign-in fetches the token.
+  let hasToken = false;
+  try { hasToken = !!(localStorage.getItem('attune_admin_s') || new URLSearchParams(location.search).get('s')); } catch (_) {}
+  if (ok && !hasToken) ok = false;
   if (ok) { const gate = document.getElementById('admin-login-gate'); if (gate) gate.classList.add('hidden'); }
 })();
 window.adminSignOut = function () {
   try { localStorage.removeItem('attune_admin_auth'); } catch (_) {}
+  try { localStorage.removeItem('attune_admin_s'); } catch (_) {}
   try { sessionStorage.removeItem('attune_admin_auth'); } catch (_) {}
   location.reload();
 };

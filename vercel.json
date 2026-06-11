@@ -272,6 +272,10 @@
       "destination": "/api/admin-actions.js"
     },
     {
+      "source": "/api/admin-login",
+      "destination": "/api/admin-login.js"
+    },
+    {
       "source": "/app",
       "destination": "/index.html"
     },
