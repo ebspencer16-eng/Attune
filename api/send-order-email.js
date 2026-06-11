@@ -46,7 +46,15 @@ export default async function handler(req) {
     addonLmft,
     addonReflection,
     addonBudget,
+    setupPath,                       // '/app?signup=1&...' built by checkout
   } = body;
+
+  // Account setup link for the setup email. Only accept a same-site /app path
+  // so a hostile caller can't aim the CTA at another domain.
+  const safeSetupPath = (typeof setupPath === 'string' && setupPath.startsWith('/app?') && !setupPath.includes('//'))
+    ? setupPath
+    : '/app?signup=1';
+  const setupUrl = `https://attune-relationships.com${safeSetupPath}`;
 
   const apiKey = process.env.RESEND_API_KEY;
   if (!apiKey) return new Response('Email service not configured', { status: 503 });
@@ -63,22 +71,22 @@ export default async function handler(req) {
     html: orderConfirmationHtml({ buyerName, pkgName, orderNum, total, lineItems, isGift, isPhysical, recipientName, addonWorkbook, addonLmft, addonReflection, addonBudget }),
   });
 
-  // ── 2. "Get started" to buyer (digital, for-self) ──────────────────────────
+  // ── 2. "Set up your account" to buyer (digital, for-self) ──────────────────
   // Note: partner invite is NOT sent here — AuthModal sends the real partner
   // invite (with a proper invite code) when the buyer completes signup and
   // enters their partner's email in the profile setup step.
   //
-  // Scheduled 30 seconds in the future so the order confirmation reliably
+  // Scheduled 10 seconds in the future so the order confirmation reliably
   // lands first. Resend processes emails asynchronously after API accept,
   // so sequential await alone doesn't guarantee delivery order — this does.
+  // Kept short: a longer gap reads as a missing email.
   if (!isGift && !isPhysical) {
-    const accessUrl = `https://attune-relationships.com/app?signin=1`;
     emails.push({
       from: `Attune <${FROM}>`,
       to: [buyerEmail],
-      subject: `Confirm your email to get started — ${buyerName}`,
-      html: getStartedBuyerHtml({ name: buyerName, partnerName, accessUrl, partnerEmail }),
-      scheduled_at: new Date(Date.now() + 30_000).toISOString(),
+      subject: `Set up your Attune account, ${buyerName}`,
+      html: getStartedBuyerHtml({ name: buyerName, partnerName, setupUrl, partnerEmail }),
+      scheduled_at: new Date(Date.now() + 10_000).toISOString(),
     });
   }
 
@@ -211,7 +219,7 @@ function orderConfirmationHtml({ buyerName, pkgName, orderNum, total, lineItems,
     ? 'Your gift box will arrive within 3–5 business days. Setup instructions are inside.'
     : isGift
       ? `We've sent ${_esc(recipientName)}'s access link in a separate email.`
-      : 'Your access link has been sent in a separate email — check your inbox to set up your profile.';
+      : 'Your account setup link is on its way in a separate email. Use it to create your account and get started.';
 
   // Prefer the explicit itemized list; fall back to package + add-on flags.
   let items = Array.isArray(lineItems) && lineItems.length ? lineItems.slice() : null;
@@ -247,14 +255,14 @@ function orderConfirmationHtml({ buyerName, pkgName, orderNum, total, lineItems,
   `;
 
   return brandedEmail({
-    preheader: `Order confirmed — ${_esc(pkgName)}`,
+    preheader: `Order confirmed: ${_esc(pkgName)}`,
     title: 'Order confirmed.',
     subtitle: `Hi ${_esc(buyerName)}, thank you for your order. Here's what's coming next.`,
     bodyHtml: body,
   });
 }
 
-function getStartedBuyerHtml({ name, partnerName, accessUrl, partnerEmail }) {
+function getStartedBuyerHtml({ name, partnerName, setupUrl, partnerEmail }) {
   const partnerBlock = partnerEmail
     ? `<div style="background:#FBF8F3;border:1px solid #F3EDE6;border-radius:10px;padding:16px 20px;margin:16px 0 0">
          <div style="font-family:'DM Sans',Helvetica,Arial,sans-serif;font-size:11px;color:#C17F47;font-weight:700;letter-spacing:.2em;text-transform:uppercase;margin-bottom:8px">Your partner</div>
@@ -266,26 +274,26 @@ function getStartedBuyerHtml({ name, partnerName, accessUrl, partnerEmail }) {
        </div>`;
 
   const body = `
-    <p style="font-family:'DM Sans',Helvetica,Arial,sans-serif;font-size:15px;color:#5C4A38;line-height:1.75;margin:0 0 6px">We sent a confirmation link to your inbox. Confirm your email to activate your account.</p>
+    <p style="font-family:'DM Sans',Helvetica,Arial,sans-serif;font-size:15px;color:#5C4A38;line-height:1.75;margin:0 0 6px">Your order is in. Use the button below to set up your account. You'll create a password and confirm your email.</p>
     <p style="font-family:'DM Sans',Helvetica,Arial,sans-serif;font-size:14px;color:#5C4A38;line-height:1.7;margin:16px 0 0">Next you'll set up your profile and invite ${_esc(partnerName || 'your partner')}. Then you each answer two short exercises, about 25 minutes total. Answer independently. Your joint results unlock when both of you are done.</p>
     ${partnerBlock}
     <p style="font-family:'DM Sans',Helvetica,Arial,sans-serif;font-size:13px;color:#8C7A68;line-height:1.6;margin:20px 0 0"><strong style="color:#1E1610">One note:</strong> don't compare answers until you're both finished. The value comes from answering honestly first.</p>
   `;
 
   return brandedEmail({
-    preheader: `Confirm your email to get started, ${_esc(name)}`,
+    preheader: `Set up your Attune account, ${_esc(name)}`,
     title: `Welcome, ${_esc(name)}.`,
-    subtitle: `Confirm your email, then sign in.`,
+    subtitle: `One step left: set up your account.`,
     bodyHtml: body,
-    ctaLabel: 'Sign in →',
-    ctaUrl: accessUrl,
+    ctaLabel: 'Set up your account →',
+    ctaUrl: setupUrl,
   });
 }
 
 function partnerInviteHtml({ partnerName, buyerName, inviteUrl }) {
   const body = `
-    <p style="font-family:'DM Sans',Helvetica,Arial,sans-serif;font-size:15px;color:#5C4A38;line-height:1.75;margin:0 0 6px">${_esc(buyerName)} set up Attune for the two of you — two short exercises mapping how you each communicate and what you each expect. Your answers stay private until you're both done.</p>
-    <p style="font-family:'DM Sans',Helvetica,Arial,sans-serif;font-size:14px;color:#5C4A38;line-height:1.7;margin:16px 0 0">Plan on about 25 minutes. Find a quiet moment and answer honestly — that's where the value is.</p>
+    <p style="font-family:'DM Sans',Helvetica,Arial,sans-serif;font-size:15px;color:#5C4A38;line-height:1.75;margin:0 0 6px">${_esc(buyerName)} set up Attune for the two of you. Two short exercises mapping how you each communicate and what you each expect. Your answers stay private until you're both done.</p>
+    <p style="font-family:'DM Sans',Helvetica,Arial,sans-serif;font-size:14px;color:#5C4A38;line-height:1.7;margin:16px 0 0">Plan on about 25 minutes. Find a quiet moment and answer honestly. That's where the value is.</p>
     <p style="font-family:'DM Sans',Helvetica,Arial,sans-serif;font-size:13px;color:#8C7A68;line-height:1.6;margin:20px 0 0"><strong style="color:#1E1610">Heads up:</strong> this link is unique to you and works only once. Don't share it.</p>
   `;
 
@@ -302,10 +310,10 @@ function partnerInviteHtml({ partnerName, buyerName, inviteUrl }) {
 
 function giftRecipientHtml({ recipientName, buyerName, pkgName, giftUrl }) {
   const body = `
-    <p style="font-family:'DM Sans',Helvetica,Arial,sans-serif;font-size:15px;color:#5C4A38;line-height:1.75;margin:0 0 6px">${_esc(buyerName)} gave you <strong style="color:#1E1610">${_esc(pkgName)}</strong> — an experience for you and your partner. Two exercises that map how you communicate and what you each expect. The joint results only appear once you're both done.</p>
+    <p style="font-family:'DM Sans',Helvetica,Arial,sans-serif;font-size:15px;color:#5C4A38;line-height:1.75;margin:0 0 6px">${_esc(buyerName)} gave you <strong style="color:#1E1610">${_esc(pkgName)}</strong>, an experience for you and your partner. Two exercises that map how you communicate and what you each expect. The joint results only appear once you're both done.</p>
     <div style="background:#FBF8F3;border:1px solid #F3EDE6;border-radius:10px;padding:16px 20px;margin:20px 0 0">
       <div style="font-family:'DM Sans',Helvetica,Arial,sans-serif;font-size:11px;color:#C17F47;font-weight:700;letter-spacing:.2em;text-transform:uppercase;margin-bottom:8px">When you claim it</div>
-      <p style="font-family:'DM Sans',Helvetica,Arial,sans-serif;font-size:14px;color:#5C4A38;line-height:1.65;margin:0">You'll set up your profile and add your partner's email. They'll receive their own unique link. Answer independently — your results unlock together when you're both finished.</p>
+      <p style="font-family:'DM Sans',Helvetica,Arial,sans-serif;font-size:14px;color:#5C4A38;line-height:1.65;margin:0">You'll set up your profile and add your partner's email. They'll receive their own unique link. Answer independently. Your results unlock together when you're both finished.</p>
     </div>
   `;
 
