@@ -63,6 +63,15 @@ export default async function handler(req) {
 
   const admin = createClient(supabaseUrl, serviceKey);
 
+  // Resolve the auth email server-side and store it on the profile.
+  // cron-checkin selects profiles.email daily; without this the check-in
+  // emails have no recipient. Server-side lookup beats trusting the client
+  // payload and covers every create-profile call site at once.
+  try {
+    const { data: authUser } = await admin.auth.admin.getUserById(userId);
+    if (authUser?.user?.email) profile.email = authUser.user.email.toLowerCase();
+  } catch { /* non-fatal: backfillable from auth.users */ }
+
   // Check if a profile already exists for this user. If yes, this is a no-op
   // (don't overwrite richer existing data with potentially-stale payload).
   const { data: existing } = await admin

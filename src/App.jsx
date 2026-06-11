@@ -3818,7 +3818,7 @@ function PersonalityResults({ myAnswers, partnerAnswers, userName, partnerName, 
         <div style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.12)", borderRadius: 14, padding: "1rem" }}>
           <div style={{ width: 20, height: 20, borderRadius: 5, background: "rgba(27,95,232,0.2)", border: "1.5px solid rgba(27,95,232,0.4)", marginBottom: "0.4rem" }} />
           <div style={{ fontSize: "0.82rem", fontWeight: 700, color: "white", marginBottom: "0.3rem", fontFamily: BFONT }}>LMFT Session</div>
-          <p style={{ fontSize: "0.72rem", color: "rgba(255,255,255,0.55)", lineHeight: 1.6, fontFamily: BFONT, margin: "0 0 0.6rem" }}>A licensed therapist reviews your results and runs a 60-min session built around exactly this.</p>
+          <p style={{ fontSize: "0.72rem", color: "rgba(255,255,255,0.55)", lineHeight: 1.6, fontFamily: BFONT, margin: "0 0 0.6rem" }}>A licensed therapist reviews your results and runs a 50-minute session built around exactly this.</p>
           <a href="/offerings#pkg-premium" style={{ fontSize: "0.7rem", color: "#1B5FE8", fontFamily: BFONT, fontWeight: 700, textDecoration: "none" }}>Learn more →</a>
         </div>
       </div>
