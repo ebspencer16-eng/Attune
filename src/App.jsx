@@ -319,14 +319,20 @@ async function saveExerciseWithRetakeSnapshot(sb, accountId, exerciseNum, answer
     patch[priorAt]  = new Date().toISOString();
   }
 
-  const result = await trackedSupabaseWrite(sb.from('profiles').update(patch).eq('id', accountId));
+  // .select('id') makes the update return the rows it touched. Without it, an
+  // update blocked by RLS (no session during the pending-confirm window)
+  // reports SUCCESS while updating zero rows, the fallback below never fires,
+  // and the user's answers silently never persist. This is exactly what
+  // happened to the first real Partner B completion.
+  const result = await trackedSupabaseWrite(sb.from('profiles').update(patch).eq('id', accountId).select('id'));
+  const zeroRows = !result?.error && (!result?.data || result.data.length === 0);
 
   // Fallback to service-role endpoint if the direct write hit RLS.
   // This happens during the pending-confirm window (auth user exists,
   // no session, RLS policies block all writes). Issue 4.8.
-  if (result?.error) {
-    const errMsg = String(result.error?.message || result.error || '');
-    const looksLikeRLS = /row.level.security|permission denied|new row violates|RLS/i.test(errMsg) || result.error?.code === '42501';
+  if (result?.error || zeroRows) {
+    const errMsg = String(result?.error?.message || result?.error || '');
+    const looksLikeRLS = zeroRows || /row.level.security|permission denied|new row violates|RLS/i.test(errMsg) || result?.error?.code === '42501';
     if (looksLikeRLS) {
       try {
         const { data: { session } } = await sb.auth.getSession();
@@ -365,6 +371,10 @@ async function saveExerciseWithRetakeSnapshot(sb, accountId, exerciseNum, answer
     }
   }
 
+  // A zero-row update that reached here means neither path persisted the
+  // answers. Return a real error so callers can react instead of treating
+  // an empty write as success.
+  if (zeroRows) return { error: new Error('Save did not persist (0 rows updated and fallback failed)') };
   return result;
 }
 
@@ -2785,13 +2795,16 @@ function Exercise01Flow({ userName, partnerName, onComplete, skipIntro = false }
           ))}
         </div>
 
-        {/* 5-point scale */}
-        <div style={{ display: "flex", gap: "0.5rem", justifyContent: "center", flexWrap: "wrap", marginBottom: "2.5rem" }}>
+        {/* 5-point scale. One row on every screen size: equal-width buttons
+            with fluid font/padding so all five fit a phone without wrapping
+            into a second, confusing row. */}
+        <div style={{ display: "flex", gap: "clamp(0.25rem, 1.2vw, 0.5rem)", justifyContent: "center", flexWrap: "nowrap", marginBottom: "2.5rem" }}>
           {SCALE.map(s => (
             <button key={s.val} onClick={() => pick(s.val)} style={{
-              padding: "0.85rem 1.1rem", borderRadius: 10, cursor: "pointer",
-              fontFamily: "'DM Sans', sans-serif", fontSize: "0.88rem", fontWeight: 500,
-              minHeight: 48,
+              flex: "1 1 0", minWidth: 0, maxWidth: 130,
+              padding: "0.85rem clamp(0.15rem, 1.5vw, 1.1rem)", borderRadius: 10, cursor: "pointer",
+              fontFamily: "'DM Sans', sans-serif", fontSize: "clamp(0.64rem, 2.7vw, 0.88rem)", fontWeight: 500,
+              minHeight: 48, lineHeight: 1.3, textAlign: "center",
               transition: "all 0.15s",
               background: chosen === s.val ? "#9B5DE5" : "white",
               color: chosen === s.val ? "white" : "#3C3C43",
@@ -10014,7 +10027,10 @@ function PartnerBExerciseFlow({ account, onComplete }) {
     try {
       const { supabase: sb, hasSupabase } = await import('./supabase.js');
       if (hasSupabase() && account?.id) {
-        await saveExerciseWithRetakeSnapshot(sb, account.id, exNum, answers, extraPatch);
+        const r = await saveExerciseWithRetakeSnapshot(sb, account.id, exNum, answers, extraPatch);
+        if (r?.error && typeof window !== 'undefined' && window.__attuneShowToast) {
+          window.__attuneShowToast("Couldn't sync your answers yet. They're saved on this device and will sync when you confirm your email and sign in here.");
+        }
       }
     } catch (e) {
       console.warn('[Attune] Partner B save failed, continuing locally:', e);
