@@ -419,7 +419,7 @@ function syncProgressCrossDevice(exerciseNum, answers) {
 }
 
 // -- EXERCISE 2 --
-function ExpectationsExercise({ partnerName, userName = "Partner A", onComplete, isAnniversary = false, isRevisited = false }) {
+export function ExpectationsExercise({ partnerName, userName = "Partner A", onComplete, isAnniversary = false, isRevisited = false }) {
   const activeLifeQs = isRevisited ? LIFE_QUESTIONS_REVISITED : isAnniversary ? LIFE_QUESTIONS_ANNIVERSARY : LIFE_QUESTIONS;
 
   // Substitute partner-name placeholders in user-visible strings.
@@ -537,9 +537,6 @@ function ExpectationsExercise({ partnerName, userName = "Partner A", onComplete,
     const careerCols = ["Primarily mine", "Balanced", "Primarily my partner's", "Doesn't apply"];
     const careerColsDisplay = ["Mine", "Balanced", "Theirs", "N/A"];
     const futureLabel = isAnniversary ? "In our home" : "In our future home";
-    const GRID = "2fr repeat(4, 40px) repeat(4, 40px)";
-    const MIN_W = 580;
-    const HEADER_PX = 45;   // sticky offset for category headers — must match the column-header bar height above them, or the header overlaps the first row
 
     const setResp = (catId, item, value) => {
       const key = catId + "__" + item;
@@ -573,175 +570,150 @@ function ExpectationsExercise({ partnerName, userName = "Partner A", onComplete,
     const allAnswered = answeredItems === totalItems;
     const pct = Math.round((answeredItems / totalItems) * 100);
 
-    const hdrTxtChild  = { fontSize: "0.54rem", letterSpacing: "0.12em", textTransform: "uppercase", fontFamily: font.body, fontWeight: 700, textAlign: "center", color: "#7C4D28" };
-    const hdrTxtFuture = { fontSize: "0.54rem", letterSpacing: "0.12em", textTransform: "uppercase", fontFamily: font.body, fontWeight: 700, textAlign: "center", color: "#1B3A8C" };
+
+    // ── Paged-by-category renderer ────────────────────────────────────────
+    // One page per category. Each item is a card with two aligned 4-column
+    // button rows (Growing up / future home) so options line up vertically.
+    // Replaces the wide grid that forced horizontal scrolling on phones.
+    const cat = RESPONSIBILITY_CATEGORIES[Math.min(catIndex, RESPONSIBILITY_CATEGORIES.length - 1)];
+    const numCats = RESPONSIBILITY_CATEGORIES.length;
+    const isExtFamCat = cat.id === "extended_family";
+    const activeFutureCols = cat.id === "career" ? careerCols : futureCols;
+    const activeFutureDisplay = cat.id === "career" ? careerColsDisplay : futureColsDisplay;
+    const futureColors = { [userName]: "#E8673A", [partnerName]: "#1B5FE8", "Both of us": "#2AB07F", "Doesn't apply to us": "#9C8E7C", "Primarily mine": "#E8673A", "Balanced": "#2AB07F", "Primarily my partner's": "#1B5FE8", "Doesn't apply": "#9C8E7C" };
+
+    const itemDone = (c, item) => {
+      const resp = getResp(c.id, item);
+      if (!resp) return false;
+      if (resp === "Both of us" && !getBothDetail(c.id, item)) return false;
+      return true;
+    };
+    const catDone = (c) => c.items.every(item => itemDone(c, item));
+    const currentCatAnswered = cat.items.filter(item => itemDone(cat, item)).length;
+    const currentCatDone = currentCatAnswered === cat.items.length;
+
+    const goCat = (nextIdx) => {
+      setCatIndex(nextIdx);
+      try { window.scrollTo({ top: 0, behavior: "instant" }) } catch { window.scrollTo(0, 0); }
+    };
+
+    const optBtn = (selected, color, key, label, onClick, fullTitle) => (
+      <button key={key} onClick={onClick} title={fullTitle || label}
+        style={{
+          minWidth: 0, width: "100%", minHeight: 42,
+          padding: "0.45rem 0.15rem", borderRadius: 9, cursor: "pointer",
+          fontFamily: font.body, fontSize: "clamp(0.6rem, 2.4vw, 0.72rem)", fontWeight: selected ? 700 : 500,
+          lineHeight: 1.2, textAlign: "center",
+          border: ("1.5px solid " + (selected ? color : "#E0D4C4")),
+          background: selected ? color : "white",
+          color: selected ? "white" : C.muted,
+          transition: "all 0.12s", WebkitTapHighlightColor: "transparent",
+          overflow: "hidden", textOverflow: "ellipsis",
+        }}>
+        {label}
+      </button>
+    );
 
     return (
       <div>
         <link href={FONT_LINK} rel="stylesheet" />
 
-        {/* Progress bar + title */}
+        {/* Gradient progress bar — same treatment as Exercise 1 */}
         <div style={{ marginBottom: "1.25rem" }}>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "0.4rem" }}>
-            <p style={{ fontSize: "0.6rem", letterSpacing: "0.2em", textTransform: "uppercase", color: C.clay, fontFamily: font.body }}>Your Expectations, Part 2 of 2</p>
-            <span style={{ fontSize: "0.65rem", color: allAnswered ? "#10b981" : C.muted, fontFamily: font.body, fontWeight: allAnswered ? 600 : 400 }}>
+            <p style={{ fontSize: "0.6rem", letterSpacing: "0.2em", textTransform: "uppercase", color: C.clay, fontFamily: font.body, margin: 0 }}>Your Expectations · {cat.label} ({catIndex + 1} of {numCats})</p>
+            <span style={{ fontSize: "0.65rem", color: allAnswered ? "#10b981" : C.muted, fontFamily: font.body, fontWeight: allAnswered ? 600 : 400, whiteSpace: "nowrap" }}>
               {allAnswered ? "✓ All answered" : (answeredItems + " / " + totalItems)}
             </span>
           </div>
-          <div style={{ height: 3, background: C.stone, borderRadius: 2 }}>
-            <div style={{ height: "100%", width: (pct + "%"), background: allAnswered ? "#10b981" : C.clay, borderRadius: 2, transition: "width 0.3s" }} />
+          <div style={{ height: 3, background: "#E5E2DC", borderRadius: 2 }}>
+            <div style={{ height: "100%", width: (pct + "%"), background: "linear-gradient(90deg,#E8673A,#1B5FE8)", borderRadius: 2, transition: "width 0.3s" }} />
           </div>
         </div>
 
-        <h2 style={{ fontFamily: font.display, fontSize: "1.45rem", fontWeight: 700, color: C.ink, marginBottom: "0.2rem", lineHeight: 1.1 }}>Who handles what?</h2>
-        <p style={{ fontSize: "0.78rem", color: C.muted, fontFamily: font.body, fontWeight: 300, marginBottom: "1rem" }}>For each responsibility, select who handled it growing up, and who you expect to handle it in your relationship.</p>
-        <div style={{ background: "#FBF8F3", border: "1px solid #E8DDD0", borderRadius: 12, padding: "0.85rem 1rem", marginBottom: "1.25rem", display: "flex", gap: "0.85rem", alignItems: "flex-start" }}>
-          <div style={{ fontSize: "0.9rem", flexShrink: 0, marginTop: "0.05rem" }}>📖</div>
-          <p style={{ fontSize: "0.73rem", color: C.muted, fontFamily: font.body, fontWeight: 300, lineHeight: 1.65, margin: 0 }}>
-            This list is representative, not exhaustive. For a deeper breakdown tailored to your results, the{" "}
-            <a href="/offerings" style={{ color: "#E8673A", fontWeight: 600, textDecoration: "none" }}>Personalized Workbook</a>
-            {" "}includes detailed breakdowns built directly from your answers.
-          </p>
-        </div>
+        <h2 style={{ fontFamily: font.display, fontSize: "1.45rem", fontWeight: 700, color: C.ink, marginBottom: "0.2rem", lineHeight: 1.1 }}>{cat.label}</h2>
+        <p style={{ fontSize: "0.78rem", color: C.muted, fontFamily: font.body, fontWeight: 300, marginBottom: "1.25rem" }}>
+          {isExtFamCat
+            ? "How the two of you handle this now. No growing-up question here, these are your own families."
+            : "For each responsibility, select who handled it growing up, and who you expect to handle it " + (isAnniversary ? "in your home." : "in your future home.")}
+        </p>
 
-        {/* Scrollable sheet */}
-        <div style={{ overflowX: "auto", overflowY: "auto", maxHeight: "calc(100vh - 260px)", border: ("1px solid " + C.stone), borderRadius: 14, boxShadow: "0 2px 16px rgba(14,11,7,0.07)" }}>
-          <div style={{ minWidth: MIN_W }}>
+        {/* Item cards */}
+        <div style={{ display: "flex", flexDirection: "column", gap: "0.85rem", maxWidth: 640 }}>
+          {cat.items.map((item) => {
+            const childVal = getChild(cat.id, item);
+            const futureVal = getResp(cat.id, item);
+            const childBothDetail = getChildBothDetail(cat.id, item);
+            const futureBothDetail = getBothDetail(cat.id, item);
+            const showChildExpand = !isExtFamCat && childVal === "Both";
+            const showFutureExpand = futureVal === "Both of us";
+            const needsDetail = showFutureExpand && !futureBothDetail;
+            const done = itemDone(cat, item);
+            const childDetailOpts = ["Genuinely 50/50", ("Usually " + childCols[0] + ", sometimes " + childCols[1]), ("Usually " + childCols[1] + ", sometimes " + childCols[0])];
+            const futureDetailOpts = ["Genuinely 50/50", ("Usually " + userName + ", sometimes " + partnerName), ("Usually " + partnerName + ", sometimes " + userName)];
+            return (
+              <div key={item} style={{ background: "white", border: ("1.5px solid " + (done ? "rgba(42,176,127,0.45)" : C.stone)), borderRadius: 14, padding: "0.9rem 0.95rem 1rem", transition: "border-color 0.15s" }}>
+                <p style={{ fontSize: "0.85rem", color: C.ink, fontFamily: font.body, fontWeight: 600, lineHeight: 1.4, margin: "0 0 0.75rem" }}>{subst(item)}</p>
 
-            {/* FROZEN COLUMN HEADERS */}
-            <div style={{ position: "sticky", top: 0, zIndex: 20, borderRadius: "13px 13px 0 0", overflow: "hidden", boxShadow: "0 2px 8px rgba(14,11,7,0.08)" }}>
-              <div style={{ display: "grid", gridTemplateColumns: GRID }}>
-                {/* Item name col header */}
-                <div style={{ background: "#F5F0EA", padding: "0.75rem 0.85rem", borderRight: "1.5px solid #E0D4C4", display: "flex", alignItems: "flex-end" }}>
-                  <span style={{ fontSize: "0.52rem", letterSpacing: "0.14em", textTransform: "uppercase", color: C.muted, fontFamily: font.body, fontWeight: 600 }}>Responsibility</span>
-                </div>
-                {/* Growing up section header — warm amber tone */}
-                <div style={{ gridColumn: "2 / 6", background: "linear-gradient(135deg, #FDF0E3, #F5E4CE)", padding: "0.55rem 0.4rem 0.45rem", borderRight: "1.5px solid #E0C9A8" }}>
-                  <div style={{ fontSize: "0.52rem", letterSpacing: "0.16em", textTransform: "uppercase", color: "#A0622A", fontFamily: font.body, marginBottom: "0.35rem", textAlign: "center", fontWeight: 700 }}>Growing up</div>
-                  <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: "0.15rem" }}>
-                    {childCols.map(c => <div key={c} style={hdrTxtChild}>{c}</div>)}
-                  </div>
-                </div>
-                {/* Future home section header — cool blue tone */}
-                <div style={{ gridColumn: "6 / 10", background: "linear-gradient(135deg, #E8EFFF, #D8E6FF)", padding: "0.55rem 0.4rem 0.45rem" }}>
-                  <div style={{ fontSize: "0.52rem", letterSpacing: "0.16em", textTransform: "uppercase", color: "#1B3A8C", fontFamily: font.body, marginBottom: "0.35rem", textAlign: "center", fontWeight: 700 }}>{futureLabel}</div>
-                  <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: "0.15rem" }}>
-                    {futureColsDisplay.map(c => <div key={c} style={hdrTxtFuture}>{c}</div>)}
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* CATEGORIES + ROWS */}
-            {RESPONSIBILITY_CATEGORIES.map((cat, ci) => (
-              <div key={cat.id}>
-                {/* Sticky category divider */}
-                <div style={{ position: "sticky", top: HEADER_PX, zIndex: 10, background: "#F0EDE8", borderTop: ci > 0 ? ("1.5px solid " + C.stone) : "none", borderBottom: ("1px solid " + C.stone) }}>
-                  <div style={{ padding: "0.35rem 0.85rem" }}>
-                    <span style={{ fontSize: "0.58rem", letterSpacing: "0.16em", textTransform: "uppercase", color: C.clay, fontFamily: font.body, fontWeight: 700 }}>{cat.label}</span>
-                    {cat.id === "extended_family" && <span style={{ fontSize: "0.62rem", color: C.muted, fontFamily: font.body, fontWeight: 400, marginLeft: "0.6rem", textTransform: "none", letterSpacing: 0 }}>How the two of you handle this now. No growing-up column, these are your own families.</span>}
-                  </div>
-                </div>
-
-                {/* Item rows */}
-                {cat.items.map((item, ii) => {
-                  const isExtFam = cat.id === "extended_family";
-                  const childVal = getChild(cat.id, item);
-                  const futureVal = getResp(cat.id, item);
-                  const childBothDetail = getChildBothDetail(cat.id, item);
-                  const futureBothDetail = getBothDetail(cat.id, item);
-                  const isLastRow = ii === cat.items.length - 1;
-                  const showChildExpand = childVal === "Both";
-                  const showFutureExpand = futureVal === "Both of us";
-                  const futureColors = { [userName]: "#E8673A", [partnerName]: "#1B5FE8", "Both of us": "#2AB07F", "Doesn't apply to us": C.stone, "Primarily mine": "#E8673A", "Balanced": "#2AB07F", "Primarily my partner's": "#1B5FE8", "Doesn't apply": C.stone };
-                  const activeFutureCols = cat.id === 'career' ? careerCols : futureCols;
-                  const childDetailOpts = ["Genuinely 50/50", ("Usually " + childCols[0] + ", sometimes " + childCols[1]), ("Usually " + childCols[1] + ", sometimes " + childCols[0])];
-                  const futureDetailOpts = ["Genuinely 50/50", ("Usually " + userName + ", sometimes " + partnerName), ("Usually " + partnerName + ", sometimes " + userName)];
-                  const needsDetail = showFutureExpand && !futureBothDetail;
-                  return (
-                    <div key={item} style={{ borderBottom: isLastRow ? "none" : ("1px solid " + C.stone + "60") }}>
-                      {/* Main grid row */}
-                      <div style={{ display: "grid", gridTemplateColumns: GRID, background: futureVal ? "rgba(184,150,110,0.04)" : "white", transition: "background 0.15s" }}>
-                        {/* Item label (spans the growing-up area for Extended Family, which has no childhood question) */}
-                        <div style={{ gridColumn: isExtFam ? "1 / 6" : "auto", padding: "0.65rem 0.85rem", borderRight: isExtFam ? "1.5px solid #E0C9A8" : ("1px solid " + C.stone + "50"), display: "flex", alignItems: "center" }}>
-                          <p style={{ fontSize: "0.78rem", color: C.ink, fontFamily: font.body, lineHeight: 1.35, margin: 0 }}>{subst(item)}</p>
+                {/* Growing up row (omitted for Extended Family) */}
+                {!isExtFamCat && (
+                  <div style={{ marginBottom: "0.65rem" }}>
+                    <p style={{ fontSize: "0.55rem", letterSpacing: "0.14em", textTransform: "uppercase", color: "#A0622A", fontFamily: font.body, fontWeight: 700, margin: "0 0 0.3rem" }}>Growing up</p>
+                    <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "0.35rem" }}>
+                      {childCols.map(col => optBtn(childVal === col, "#A0622A", col, col, () => setChild(cat.id, item, col)))}
+                    </div>
+                    {showChildExpand && (
+                      <div style={{ marginTop: "0.5rem", background: "#FBF8F3", borderRadius: 10, padding: "0.5rem 0.6rem" }}>
+                        <p style={{ fontSize: "0.55rem", letterSpacing: "0.12em", textTransform: "uppercase", color: C.clay, fontFamily: font.body, fontWeight: 700, margin: "0 0 0.35rem" }}>A bit more specifically:</p>
+                        <div style={{ display: "flex", gap: "0.35rem", flexWrap: "wrap" }}>
+                          {childDetailOpts.map(opt => {
+                            const sel = childBothDetail === opt;
+                            return (
+                              <button key={opt} onClick={() => setChildBothDetail(cat.id, item, opt)}
+                                style={{ padding: "0.3rem 0.6rem", border: ("1.5px solid " + (sel ? C.clay : C.stone)), background: sel ? "rgba(193,127,71,0.15)" : "white", color: sel ? "#6B4226" : C.muted, fontSize: "0.66rem", borderRadius: 999, cursor: "pointer", fontFamily: font.body, fontWeight: sel ? 600 : 400, transition: "all 0.12s" }}>
+                                {opt}
+                              </button>
+                            );
+                          })}
                         </div>
-                        {/* Childhood option buttons (omitted for Extended Family) */}
-                        {!isExtFam && childCols.map((col, ci2) => {
-                          const sel = childVal === col;
-                          const isLastChild = ci2 === childCols.length - 1;
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Future home row — same 4-column grid so buttons align with the row above */}
+                <div>
+                  <p style={{ fontSize: "0.55rem", letterSpacing: "0.14em", textTransform: "uppercase", color: "#1B3A8C", fontFamily: font.body, fontWeight: 700, margin: "0 0 0.3rem" }}>{futureLabel}</p>
+                  <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "0.35rem" }}>
+                    {activeFutureCols.map((col, fi) => optBtn(futureVal === col, futureColors[col] || "#9C8E7C", col, activeFutureDisplay[fi], () => setResp(cat.id, item, col), col))}
+                  </div>
+                  {showFutureExpand && (
+                    <div style={{ marginTop: "0.5rem", background: needsDetail ? "rgba(42,176,127,0.07)" : "rgba(42,176,127,0.04)", border: "1px solid rgba(42,176,127,0.25)", borderRadius: 10, padding: "0.5rem 0.6rem" }}>
+                      <p style={{ fontSize: "0.55rem", letterSpacing: "0.12em", textTransform: "uppercase", color: "#1a8a63", fontFamily: font.body, fontWeight: 700, margin: "0 0 0.35rem" }}>
+                        {needsDetail ? "A bit more specifically, required to continue:" : "A bit more specifically:"}
+                      </p>
+                      <div style={{ display: "flex", gap: "0.35rem", flexWrap: "wrap" }}>
+                        {futureDetailOpts.map(opt => {
+                          const sel = futureBothDetail === opt;
                           return (
-                            <div key={col} style={{ padding: "0.45rem 0.2rem", display: "flex", alignItems: "center", justifyContent: "center", borderRight: isLastChild ? "1.5px solid #E0C9A8" : "none" }}>
-                              <button onClick={() => setChild(cat.id, item, col)} title={col}
-                                style={{ width: 22, height: 22, borderRadius: "50%", border: ("2px solid " + (sel ? "#A0622A" : "#D4C0A8")), background: sel ? "#A0622A" : "transparent", cursor: "pointer", transition: "all 0.12s", flexShrink: 0, padding: 0 }}>
-                              </button>
-                            </div>
-                          );
-                        })}
-                        {/* Future home option buttons */}
-                        {activeFutureCols.map((col, fi) => {
-                          const sel = futureVal === col;
-                          const fc = futureColors[col] || C.stone;
-                          const disp = col === "Both of us" ? "Both" : col === "Doesn't apply to us" ? "N/A" : col;
-                          return (
-                            <div key={col} style={{ padding: "0.45rem 0.2rem", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                              <button onClick={() => setResp(cat.id, item, col)} title={col}
-                                style={{ width: 22, height: 22, borderRadius: "50%", border: ("2px solid " + (sel ? fc : "#C8D8F0")), background: sel ? fc : "transparent", cursor: "pointer", transition: "all 0.12s", flexShrink: 0, padding: 0 }}>
-                              </button>
-                            </div>
+                            <button key={opt} onClick={() => setBothDetail(cat.id, item, opt)}
+                              style={{ padding: "0.3rem 0.6rem", border: ("1.5px solid " + (sel ? "#2AB07F" : "rgba(42,176,127,0.4)")), background: sel ? "#2AB07F" : "white", color: sel ? "white" : "#1a8a63", fontSize: "0.66rem", borderRadius: 999, cursor: "pointer", fontFamily: font.body, fontWeight: sel ? 600 : 400, transition: "all 0.12s" }}>
+                              {opt}
+                            </button>
                           );
                         })}
                       </div>
-
-                      {/* ── Childhood "Both" inline expansion ── */}
-                      {!isExtFam && showChildExpand && (
-                        <div style={{ background: "#FBF8F3", borderTop: ("1px solid " + C.stone + "60"), padding: "0.55rem 0.85rem 0.6rem", display: "flex", flexDirection: "column", gap: "0.3rem" }}>
-                          <p style={{ fontSize: "0.6rem", letterSpacing: "0.12em", textTransform: "uppercase", color: C.clay, fontFamily: font.body, fontWeight: 700, marginBottom: "0.2rem" }}>Growing up, a bit more specifically:</p>
-                          <div style={{ display: "flex", gap: "0.4rem", flexWrap: "wrap" }}>
-                            {childDetailOpts.map(opt => {
-                              const sel = childBothDetail === opt;
-                              return (
-                                <button key={opt} onClick={() => setChildBothDetail(cat.id, item, opt)}
-                                  style={{ padding: "0.3rem 0.65rem", border: ("1.5px solid " + (sel ? C.clay : C.stone)), background: sel ? "rgba(193,127,71,0.15)" : "white", color: sel ? "#6B4226" : C.muted, fontSize: "0.68rem", borderRadius: 999, cursor: "pointer", fontFamily: font.body, fontWeight: sel ? 600 : 400, transition: "all 0.12s", whiteSpace: "nowrap" }}>
-                                  {opt}
-                                </button>
-                              );
-                            })}
-                          </div>
-                        </div>
-                      )}
-
-                      {/* ── Future "Both of us" inline expansion ── */}
-                      {showFutureExpand && (
-                        <div style={{ background: needsDetail ? "rgba(42,176,127,0.06)" : "rgba(42,176,127,0.03)", borderTop: ("1px solid rgba(42,176,127,0.25)"), padding: "0.55rem 0.85rem 0.6rem", display: "flex", flexDirection: "column", gap: "0.3rem" }}>
-                          <p style={{ fontSize: "0.6rem", letterSpacing: "0.12em", textTransform: "uppercase", color: "#1a8a63", fontFamily: font.body, fontWeight: 700, marginBottom: "0.2rem" }}>
-                            {needsDetail ? "A bit more specifically, required to continue:" : "In your future home, a bit more specifically:"}
-                          </p>
-                          <div style={{ display: "flex", gap: "0.4rem", flexWrap: "wrap" }}>
-                            {futureDetailOpts.map(opt => {
-                              const sel = futureBothDetail === opt;
-                              return (
-                                <button key={opt} onClick={() => setBothDetail(cat.id, item, opt)}
-                                  style={{ padding: "0.3rem 0.65rem", border: ("1.5px solid " + (sel ? "#2AB07F" : "rgba(42,176,127,0.4)")), background: sel ? "#2AB07F" : "white", color: sel ? "white" : "#1a8a63", fontSize: "0.68rem", borderRadius: 999, cursor: "pointer", fontFamily: font.body, fontWeight: sel ? 600 : 400, transition: "all 0.12s", whiteSpace: "nowrap" }}>
-                                  {opt}
-                                </button>
-                              );
-                            })}
-                          </div>
-                        </div>
-                      )}
                     </div>
-                  );
-                })}
+                  )}
+                </div>
               </div>
-            ))}
-          </div>
+            );
+          })}
         </div>
 
-        {/* Continue */}
-        <div style={{ marginTop: "1.5rem" }}>
-          {/* Exit workbook callout */}
-          <div style={{ background: "#FBF8F3", border: "1px solid #E8DDD0", borderRadius: 12, padding: "0.85rem 1rem", marginBottom: "1.25rem", display: "flex", gap: "0.85rem", alignItems: "flex-start" }}>
+        {/* Workbook callout — once, on the last category */}
+        {catIndex === numCats - 1 && (
+          <div style={{ background: "#FBF8F3", border: "1px solid #E8DDD0", borderRadius: 12, padding: "0.85rem 1rem", marginTop: "1.25rem", display: "flex", gap: "0.85rem", alignItems: "flex-start", maxWidth: 640 }}>
             <div style={{ fontSize: "0.9rem", flexShrink: 0, marginTop: "0.05rem" }}>📖</div>
             <p style={{ fontSize: "0.73rem", color: C.muted, fontFamily: font.body, fontWeight: 300, lineHeight: 1.65, margin: 0 }}>
               These categories cover the most common sources of misaligned expectations, not every possible responsibility. Where you and your partner differ most, the{" "}
@@ -749,20 +721,33 @@ function ExpectationsExercise({ partnerName, userName = "Partner A", onComplete,
               {" "}goes deeper within each category with additional topics to work through together.
             </p>
           </div>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-            <button onClick={() => setPhase("life")}
-              style={{ background: "transparent", border: ("1.5px solid " + C.stone), color: C.muted, padding: "0.65rem 1.25rem", fontSize: "0.7rem", letterSpacing: "0.1em", textTransform: "uppercase", cursor: "pointer", fontFamily: font.body, borderRadius: 8 }}>
-              ← Back
+        )}
+
+        {/* Nav */}
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: "1.5rem", maxWidth: 640 }}>
+          <button onClick={() => { if (catIndex === 0) { setPhase("life"); } else { goCat(catIndex - 1); } }}
+            style={{ background: "transparent", border: ("1.5px solid " + C.stone), color: C.muted, padding: "0.65rem 1.25rem", fontSize: "0.7rem", letterSpacing: "0.1em", textTransform: "uppercase", cursor: "pointer", fontFamily: font.body, borderRadius: 8 }}>
+            ← Back
+          </button>
+          {catIndex < numCats - 1 ? (
+            <button onClick={() => { if (currentCatDone) goCat(catIndex + 1); }}
+              style={{ background: currentCatDone ? "linear-gradient(135deg,#E8673A,#1B5FE8)" : C.stone, color: "white", border: "none", padding: "0.75rem 1.75rem", fontSize: "0.72rem", letterSpacing: "0.1em", textTransform: "uppercase", cursor: currentCatDone ? "pointer" : "default", fontFamily: font.body, borderRadius: 10, fontWeight: 600, transition: "background 0.2s" }}>
+              {currentCatDone ? ("Next: " + RESPONSIBILITY_CATEGORIES[catIndex + 1].label + " →") : ((cat.items.length - currentCatAnswered) + " left on this page")}
             </button>
+          ) : (
             <button onClick={() => {
-                if (!allAnswered) return;
+                if (!allAnswered) {
+                  const firstIncomplete = RESPONSIBILITY_CATEGORIES.findIndex(c => !catDone(c));
+                  if (firstIncomplete >= 0 && firstIncomplete !== catIndex) goCat(firstIncomplete);
+                  return;
+                }
                 try { localStorage.removeItem(progressKey); } catch {}
                 onComplete({ ...answers, childhoodStructure });
               }}
               style={{ background: allAnswered ? "#4CAF50" : C.stone, color: "white", border: "none", padding: "0.75rem 2rem", fontSize: "0.72rem", letterSpacing: "0.1em", textTransform: "uppercase", cursor: allAnswered ? "pointer" : "default", fontFamily: font.body, borderRadius: 10, fontWeight: 600, transition: "background 0.2s", boxShadow: allAnswered ? "0 3px 16px rgba(76,175,80,0.45)" : "none" }}>
               {allAnswered ? "All done →" : ((totalItems - answeredItems) + " left to answer")}
             </button>
-          </div>
+          )}
         </div>
       </div>
     );
@@ -9884,7 +9869,16 @@ function PartnerLandingScreen({ inviteFrom, inviteCode, onCreateAccount }) {
           }
           // Inherit Partner A's package + add-ons so Partner B's account (and
           // the guided exercise flow that runs next) matches their entitlements.
-          try { inheritedEntitlements = (await linkRes.json())?.inherited || null; } catch {}
+          let _linkJson = null;
+          try { _linkJson = await linkRes.json(); } catch {}
+          inheritedEntitlements = _linkJson?.inherited || null;
+          // When the signup email matches the invited address, partner-sync
+          // auto-confirms it. Establish the session right away so the
+          // exercises run fully authenticated (saves hit profiles directly).
+          if (_linkJson?.emailConfirmed) {
+            try { await sb.auth.signInWithPassword({ email: form.email.trim().toLowerCase(), password: form.password }); }
+            catch (e) { console.warn('[Attune] post-link sign-in failed, continuing pending-confirm:', e); }
+          }
           // Note: partner_joined_notification is sent server-side as part
           // of the link action (Issue 4.9). The endpoint has access to
           // Partner A's email via service role; we don't expose it here.

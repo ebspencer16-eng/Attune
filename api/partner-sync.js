@@ -90,7 +90,7 @@ async function handlePartnerSync(req) {
     // Find Partner A by invite code (also pull name for the email body)
     const { data: partnerA, error: findErr } = await sb
       .from('profiles')
-      .select('id, partner_profile_id, name, pkg, pronouns')
+      .select('id, partner_profile_id, name, pkg, pronouns, partner_email')
       .eq('invite_code', code)
       .maybeSingle();
 
@@ -210,7 +210,26 @@ async function handlePartnerSync(req) {
       console.warn('[partner-sync] partner_joined notification setup failed:', e);
     }
 
-    return new Response(JSON.stringify({ ok: true, partnerAId: partnerA.id, inherited }), { status: 200, headers: CORS });
+    // The invite email was delivered to the address Partner A entered. If
+    // Partner B signed up with that same address, following the invite link
+    // already demonstrates control of that inbox, so confirm the email now.
+    // This gives Partner B an authenticated session immediately and removes
+    // the unauthenticated-exercise window that made saves fragile.
+    let emailConfirmed = false;
+    try {
+      const { data: bAuth } = await sb.auth.admin.getUserById(bId);
+      const bEmail = (bAuth?.user?.email || '').trim().toLowerCase();
+      const invitedEmail = (partnerA.partner_email || '').trim().toLowerCase();
+      if (bAuth?.user?.email_confirmed_at) {
+        emailConfirmed = true;
+      } else if (bEmail && invitedEmail && bEmail === invitedEmail) {
+        const { error: confErr } = await sb.auth.admin.updateUserById(bId, { email_confirm: true });
+        if (confErr) console.warn('[partner-sync] auto-confirm failed:', confErr.message);
+        else emailConfirmed = true;
+      }
+    } catch (e) { console.warn('[partner-sync] auto-confirm skipped:', e); }
+
+    return new Response(JSON.stringify({ ok: true, partnerAId: partnerA.id, inherited, emailConfirmed }), { status: 200, headers: CORS });
   }
 
   if (req.method === 'GET') {
