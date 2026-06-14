@@ -1883,13 +1883,19 @@ function GiftSignupForm({ myName, theirName, theirEmail, pkg, orderId, onCreateA
 // ── PROFILE SETUP TILE ────────────────────────────────────────────────────────
 // Shown on dashboard until user completes profile setup. Per-person.
 function ProfileSetupTile({ account, onSetup, onDismiss }) {
-  const hasPortrait = false; // Placeholder until portrait integration ships
-  const steps = [
+  // Invitees (Partner B) were already invited by the purchaser, and their name
+  // and pronouns may already be set from the purchaser's setup. Only surface
+  // steps that are genuinely missing, and never ask an invitee to invite a
+  // partner.
+  const isInvitee = !!account?.joinedViaInvite;
+  const allSteps = [
     { label: "Set your name & pronouns", done: !!(account?.name && account?.pronouns) },
     { label: "Add your partner's name", done: !!(account?.partnerName) },
-    { label: account?.partnerEmail ? "Partner invited \u2713" : "Invite your partner", done: !!(account?.partnerEmail) },
+    ...(isInvitee ? [] : [{ label: account?.partnerEmail ? "Partner invited \u2713" : "Invite your partner", done: !!(account?.partnerEmail) }]),
   ];
-  const doneCount = steps.filter(s => s.done).length;
+  const steps = allSteps.filter(s => !s.done);
+  // Nothing left to do — render nothing (the dashboard gate also guards this).
+  if (steps.length === 0) return null;
 
   return (
     <div style={{ background: 'white', border: '1.5px solid #E8DDD0', borderRadius: 16, padding: '1.25rem 1.5rem', marginBottom: '1.5rem', position: 'relative' }}>
@@ -10012,6 +10018,29 @@ function PartnerBExerciseFlow({ account, onComplete }) {
   const [ex1, setEx1] = React.useState(null);
   const [ex2, setEx2] = React.useState(null);
 
+  // Browser back-button guard. Without this, pressing back from inside the
+  // flow navigates out of the SPA entirely (and the session-restore path
+  // then lands on the sign-in screen, reading as "it signed me out"). Push a
+  // history entry on mount and, on popstate, step backward within the flow
+  // (or send the user to the dashboard) instead of leaving the app.
+  React.useEffect(() => {
+    try { window.history.pushState({ attuneFlow: 'partnerB' }, ''); } catch {}
+    const onPop = () => {
+      // Re-push so a second back press is also caught while still in-flow.
+      try { window.history.pushState({ attuneFlow: 'partnerB' }, ''); } catch {}
+      setStep(s => {
+        if (s === 'ex3') return 'ex2';
+        if (s === 'ex2') return 'ex1';
+        if (s === 'ex1') return 'intro';
+        // From intro, leave the flow cleanly by going to the dashboard.
+        try { window.location.href = '/app'; } catch {}
+        return s;
+      });
+    };
+    window.addEventListener('popstate', onPop);
+    return () => window.removeEventListener('popstate', onPop);
+  }, []);
+
   // In the unified model, Partner B saves to their OWN profile row
   // exactly like Partner A. Each exercise completion calls this helper
   // which persists to localStorage + profiles, then advances state.
@@ -10967,6 +10996,21 @@ export default function App() {
               if (profile?.checklist_data)     localStorage.setItem('attune_checklist', JSON.stringify(profile.checklist_data));
               if (profile?.notes_data)         localStorage.setItem('attune_notes', JSON.stringify(profile.notes_data));
               if (profile?.profile_setup_complete) localStorage.setItem('attune_profile_setup_done', '1');
+              // Invitee (Partner B) completion marker. Routing keys off
+              // attune_partner_session; without it, an invitee who finished on
+              // another device (or after clearing local data) gets routed back
+              // into the exercise flow despite their answers being saved. If the
+              // profile shows both exercises done, reconstruct the marker.
+              if (profile?.joined_via_invite && profile?.ex1_answers && profile?.ex2_answers) {
+                localStorage.setItem('attune_partner_session', JSON.stringify({
+                  inviteCode: profile.invite_code || '',
+                  name: profile.name || '',
+                  ex1: profile.ex1_answers,
+                  ex2: profile.ex2_answers,
+                  ...(profile.ex3_answers ? { ex3: profile.ex3_answers } : {}),
+                  completedAt: Date.now(),
+                }));
+              }
             } catch {}
             // Force a reload so the state initializers re-read localStorage.
             // Without this the dashboard renders with sarah*Demo until the
@@ -11794,6 +11838,20 @@ export default function App() {
   const partnerEx1Done = !!(_partnerLinked && partnerSession?.ex1);
   const partnerEx2Done = !!(_partnerLinked && partnerSession?.ex2);
   const allExercisesDone = myEx1Done && myEx2Done && partnerEx1Done && partnerEx2Done;
+
+  // In-progress signals (Item 4). An exercise is "in progress" when it has
+  // saved partial progress but isn't yet complete. Powers the "In progress"
+  // state on the Your Exercises cards and Progress to results rows.
+  const _hasProgress = (key, predicate) => {
+    try {
+      const raw = JSON.parse(localStorage.getItem(key) || 'null');
+      return !!raw && predicate(raw);
+    } catch { return false; }
+  };
+  const ex1InProgress = !ex1Answers && _hasProgress('attune_ex1_progress', p => Object.keys(p.answers || {}).length > 0);
+  const ex2InProgress = !ex2Answers && _hasProgress('attune_ex2_progress', p => p.phase && p.phase !== 'intro');
+  const ex3InProgress = !ex3Answers && _hasProgress('attune_ex3_progress', p => Object.keys(p.answers || {}).length > 0);
+  const inProgressFor = (viewId) => viewId === 'exercise1' ? ex1InProgress : viewId === 'exercise2' ? ex2InProgress : viewId === 'exercise3' ? ex3InProgress : false;
   // Package config
   const pkgConfig = {
     core:        { label: "The Attune Assessment",     color: "#E8673A", hasChecklist: false, hasAnniversary: false, hasBudget: false, hasLMFT: false },
@@ -12045,11 +12103,11 @@ export default function App() {
           )}
           {couplePortrait ? (
             <CouplePortraitBubble portrait={couplePortrait} size={34} dark={false} uid="nav" onClick={() => setShowPortraitSetup(true)} style={{ border: "1.5px solid " + C.stone }} />
-          ) : (
+          ) : !isMobile ? (
             <button onClick={() => setShowPortraitSetup(true)} style={{ width: 34, height: 34, borderRadius: "50%", background: C.stone, border: `1.5px solid ${C.stone}`, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }} title="Create your couple portrait">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={C.muted} strokeWidth="1.8" strokeLinecap="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
             </button>
-          )}
+          ) : null}
         </div>
         {/* Mobile: ← Dashboard row below logo+auth row */}
       {isMobile && view !== "home" && view !== "results" && (
@@ -12203,26 +12261,28 @@ export default function App() {
                   )}
                 </div>
 
-                {/* Mobile hamburger dropdown nav */}
+                {/* Mobile hamburger dropdown nav — compact popup, top-right */}
                 {isMobile && mobileNavOpen && (
-                  <div style={{ background: "rgba(14,11,7,0.92)", backdropFilter: "blur(16px)", borderTop: "1px solid rgba(255,255,255,0.12)", padding: "0.75rem 1rem 1rem", display: "flex", flexDirection: "column", gap: "0.2rem" }}>
-                    {[
-                      { label: "Dashboard", viewId: "home", icon: "⊞" },
-                      { label: "Exercises", viewId: "exercises", icon: "◎" },
-                      { label: "Results", viewId: "results", icon: "≡" },
-                      { label: "Resources", viewId: "resources", icon: "◻" },
-                      { label: "Workbook", viewId: "workbook", icon: "◈" },
-                      { label: "Account", viewId: "account", icon: "○" },
-                    ].map(item => (
-                      <button key={item.viewId}
-                        onClick={() => { setView(item.viewId); setMobileNavOpen(false); }}
-                        style={{ display: "flex", alignItems: "center", gap: "0.85rem", padding: "0.75rem 0.85rem", background: view === item.viewId ? "rgba(232,103,58,0.2)" : "transparent", border: "none", borderRadius: 10, cursor: "pointer", textAlign: "left", width: "100%", transition: "background .15s" }}>
-                        <span style={{ fontSize: "0.8rem", color: view === item.viewId ? "#E8673A" : "rgba(255,255,255,0.6)", width: 16 }}>{item.icon}</span>
-                        <span style={{ fontSize: "0.88rem", fontWeight: view === item.viewId ? 700 : 400, color: view === item.viewId ? "white" : "rgba(255,255,255,0.75)", fontFamily: "'DM Sans', sans-serif" }}>{item.label}</span>
-                        {item.viewId === "results" && bothDone && <span style={{ marginLeft: "auto", fontSize: "0.65rem", background: "#E8673A", color: "white", borderRadius: 99, padding: "2px 8px", fontFamily: "'DM Sans', sans-serif", fontWeight: 700 }}>Ready</span>}
-                      </button>
-                    ))}
-                  </div>
+                  <>
+                    <div onClick={() => setMobileNavOpen(false)} style={{ position: "fixed", inset: 0, zIndex: 198 }} />
+                    <div style={{ position: "absolute", top: "3.5rem", right: "1rem", zIndex: 199, background: "#FFFDF9", border: "1px solid #E8DDD0", borderRadius: 14, padding: "0.4rem", minWidth: 190, boxShadow: "0 16px 44px rgba(14,11,7,0.22)", display: "flex", flexDirection: "column", gap: "0.1rem" }}>
+                      {[
+                        { label: "Dashboard", viewId: "home" },
+                        { label: "Exercises", viewId: "exercises" },
+                        { label: "Results", viewId: "results" },
+                        { label: "Resources", viewId: "resources" },
+                        { label: "Workbook", viewId: "workbook" },
+                        { label: "Account", viewId: "account" },
+                      ].map(item => (
+                        <button key={item.viewId}
+                          onClick={() => { setView(item.viewId); setMobileNavOpen(false); }}
+                          style={{ display: "flex", alignItems: "center", padding: "0.65rem 0.85rem", background: view === item.viewId ? "rgba(232,103,58,0.1)" : "transparent", border: "none", borderRadius: 9, cursor: "pointer", textAlign: "left", width: "100%", transition: "background .15s" }}>
+                          <span style={{ fontSize: "0.85rem", fontWeight: view === item.viewId ? 700 : 500, color: view === item.viewId ? "#B84E28" : "#3C342C", fontFamily: "'DM Sans', sans-serif" }}>{item.label}</span>
+                          {item.viewId === "results" && bothDone && <span style={{ marginLeft: "auto", fontSize: "0.6rem", background: "#E8673A", color: "white", borderRadius: 99, padding: "2px 8px", fontFamily: "'DM Sans', sans-serif", fontWeight: 700 }}>Ready</span>}
+                        </button>
+                      ))}
+                    </div>
+                  </>
                 )}
               </div>
 
@@ -12289,9 +12349,17 @@ export default function App() {
                   );
                 })()}
 
-                {/* Profile setup tile — shown until dismissed or actually complete
-                    (name + pronouns + partner name + partner invited). */}
-                {isLoggedIn && !profileSetupDone && !(account?.name && account?.pronouns && account?.partnerName && account?.partnerEmail) && (
+                {/* Profile setup tile. For the purchaser, show until name +
+                    pronouns + partner name + partner invited are all set. For
+                    an invitee, the purchaser already invited them and may have
+                    set their name/pronouns, so only show when the invitee's own
+                    name or pronouns is still missing. Either partner can edit
+                    everything later in account settings. */}
+                {isLoggedIn && !profileSetupDone && (
+                  account?.joinedViaInvite
+                    ? !(account?.name && account?.pronouns)
+                    : !(account?.name && account?.pronouns && account?.partnerName && account?.partnerEmail)
+                ) && (
                   <ProfileSetupTile
                     account={account}
                     onSetup={() => setShowProfileSetup(true)}
@@ -12427,21 +12495,23 @@ export default function App() {
                   </div>
                   <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "repeat(2, 1fr)", gap: "0.75rem" }}>
                     {[
-                      { num: "01", title: "Communication", done: !!ex1Answers, viewId: "exercise1", color: "#E8673A", desc: "Map your communication style across 10 dimensions. How you recharge, express, conflict, and connect." },
-                      { num: "02", title: "Expectations", done: !!ex2Answers, viewId: "exercise2", color: "#1B5FE8", desc: "Align on who handles what across six domains: household, money, career, extended family, emotional labor, life together." },
-                      ...(pkg.hasAnniversary ? [{ num: "03", title: "Reflection", done: !!ex3Answers, viewId: "exercise3", color: "#1B5FE8", desc: "Capture the moments that shaped your relationship. A third lens on your shared story." }] : []),
+                      { num: "01", title: "Communication", done: !!ex1Answers, inProgress: ex1InProgress, viewId: "exercise1", color: "#E8673A", desc: "Map your communication style across 10 dimensions. How you recharge, express, conflict, and connect." },
+                      { num: "02", title: "Expectations", done: !!ex2Answers, inProgress: ex2InProgress, viewId: "exercise2", color: "#1B5FE8", desc: "Align on who handles what across six domains: household, money, career, extended family, emotional labor, life together." },
+                      ...(pkg.hasAnniversary ? [{ num: "03", title: "Reflection", done: !!ex3Answers, inProgress: ex3InProgress, viewId: "exercise3", color: "#1B5FE8", desc: "Capture the moments that shaped your relationship. A third lens on your shared story." }] : []),
                     ].map(item => (
                       <div key={item.num} onClick={() => setView(item.viewId)}
-                        style={{ background: "white", border: `1.5px solid ${item.done ? "rgba(16,185,129,0.25)" : "#E8DDD0"}`, borderRadius: 16, padding: "1.25rem", cursor: "pointer", transition: "box-shadow .15s, border-color .15s", display: "flex", flexDirection: "column", gap: "0.6rem" }}
+                        style={{ background: "white", border: `1.5px solid ${item.done ? "rgba(16,185,129,0.25)" : item.inProgress ? "rgba(193,127,71,0.35)" : "#E8DDD0"}`, borderRadius: 16, padding: "1.25rem", cursor: "pointer", transition: "box-shadow .15s, border-color .15s", display: "flex", flexDirection: "column", gap: "0.6rem" }}
                         onMouseEnter={e => { e.currentTarget.style.boxShadow = "0 4px 20px rgba(0,0,0,.07)"; e.currentTarget.style.borderColor = item.done ? "rgba(16,185,129,0.4)" : "#C8B8A8"; }}
-                        onMouseLeave={e => { e.currentTarget.style.boxShadow = "none"; e.currentTarget.style.borderColor = item.done ? "rgba(16,185,129,0.25)" : "#E8DDD0"; }}>
+                        onMouseLeave={e => { e.currentTarget.style.boxShadow = "none"; e.currentTarget.style.borderColor = item.done ? "rgba(16,185,129,0.25)" : item.inProgress ? "rgba(193,127,71,0.35)" : "#E8DDD0"; }}>
                         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                           <div style={{ width: 32, height: 32, borderRadius: 8, background: item.color + "15", display: "flex", alignItems: "center", justifyContent: "center" }}>
                             <span style={{ fontSize: "0.6rem", letterSpacing: ".15em", fontWeight: 700, color: item.color, fontFamily: "'DM Sans', sans-serif" }}>{item.num}</span>
                           </div>
                           {item.done
                             ? <span style={{ background: "rgba(16,185,129,.08)", color: "#059669", fontSize: 10, fontWeight: 600, padding: "3px 9px", borderRadius: 99, fontFamily: "'DM Sans', sans-serif", border: "1px solid rgba(16,185,129,.2)" }}>Complete</span>
-                            : <span style={{ background: "#FDF8F3", color: "#C17F47", fontSize: 10, fontWeight: 600, padding: "3px 9px", borderRadius: 99, fontFamily: "'DM Sans', sans-serif" }}>Start →</span>
+                            : item.inProgress
+                              ? <span style={{ background: "rgba(193,127,71,.1)", color: "#C17F47", fontSize: 10, fontWeight: 600, padding: "3px 9px", borderRadius: 99, fontFamily: "'DM Sans', sans-serif", border: "1px solid rgba(193,127,71,.25)" }}>In progress →</span>
+                              : <span style={{ background: "#FDF8F3", color: "#C17F47", fontSize: 10, fontWeight: 600, padding: "3px 9px", borderRadius: 99, fontFamily: "'DM Sans', sans-serif" }}>Start →</span>
                           }
                         </div>
                         <div>
@@ -12475,8 +12545,8 @@ export default function App() {
                   <div style={{ fontSize: "0.6rem", letterSpacing: ".2em", textTransform: "uppercase", color: "#8C7A68", fontWeight: 700, marginBottom: "1rem", fontFamily: "'DM Sans', sans-serif" }}>Progress to results</div>
                   <div style={{ background: "white", border: "1.5px solid #E8DDD0", borderRadius: 16, overflow: "hidden" }}>
                     {[
-                      { label: "Your communication exercise", done: myEx1Done, viewId: "exercise1", you: true },
-                      { label: "Your expectations exercise", done: myEx2Done, viewId: "exercise2", you: true },
+                      { label: "Your communication exercise", done: myEx1Done, inProgress: ex1InProgress, viewId: "exercise1", you: true },
+                      { label: "Your expectations exercise", done: myEx2Done, inProgress: ex2InProgress, viewId: "exercise2", you: true },
                       { label: partnerName + "'s communication exercise", done: partnerEx1Done, you: false },
                       { label: partnerName + "'s expectations exercise", done: partnerEx2Done, you: false },
                     ].map((r, i, arr) => {
@@ -12487,13 +12557,13 @@ export default function App() {
                           onMouseEnter={clickable ? (e => e.currentTarget.style.background = "#FAF7F2") : undefined}
                           onMouseLeave={clickable ? (e => e.currentTarget.style.background = "white") : undefined}>
                           <span style={{ display: "flex", alignItems: "center", gap: "0.65rem", fontSize: "0.83rem", color: "#0E0B07", fontFamily: "'DM Sans', sans-serif", fontWeight: 500 }}>
-                            <span style={{ width: 19, height: 19, borderRadius: "50%", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", fontSize: "0.62rem", color: "white", background: r.done ? "#059669" : "#D4C0A8", fontWeight: 700 }}>{r.done ? "✓" : ""}</span>
+                            <span style={{ width: 19, height: 19, borderRadius: "50%", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", fontSize: "0.62rem", color: "white", background: r.done ? "#059669" : r.inProgress ? "#C17F47" : "#D4C0A8", fontWeight: 700 }}>{r.done ? "✓" : r.inProgress ? "·" : ""}</span>
                             {r.label}
                           </span>
                           {r.done
                             ? <span style={{ fontSize: "0.72rem", fontWeight: 700, color: "#059669", fontFamily: "'DM Sans', sans-serif" }}>Complete</span>
                             : (r.you
-                                ? <span style={{ fontSize: "0.72rem", fontWeight: 700, color: "#C17F47", fontFamily: "'DM Sans', sans-serif" }}>Start →</span>
+                                ? <span style={{ fontSize: "0.72rem", fontWeight: 700, color: "#C17F47", fontFamily: "'DM Sans', sans-serif" }}>{r.inProgress ? "In progress →" : "Start →"}</span>
                                 : <span style={{ fontSize: "0.72rem", fontWeight: 600, color: "#A8997F", fontFamily: "'DM Sans', sans-serif" }}>Pending</span>)}
                         </div>
                       );
