@@ -10591,7 +10591,7 @@ function UpsellModal({ product, cartAdded, onAddToCart, onCheckout, onClose }) {
 }
 
 // Packages modal — reused styling from UpsellModal
-function PackagesModal({ currentPkg, onClose, onPick }) {
+function PackagesModal({ currentPkg, onClose, onPick, onPickAddon }) {
   const packages = [
     {
       id: "core",
@@ -10635,6 +10635,13 @@ function PackagesModal({ currentPkg, onClose, onPick }) {
     },
   ];
 
+  const addOns = [
+    { id: "workbook", name: "The Personalized Workbook", desc: "A structured workbook built around your specific results and couple type.", price: "From $19", color: "#9B5DE5" },
+    { id: "lmft", name: "LMFT Session", desc: "A 50-minute session with a licensed therapist who has reviewed your joint results.", price: "$150", color: "#E8673A" },
+    { id: "budget", name: "Shared Budgeting Tool", desc: "A guided exercise to surface what you each expect from shared finances.", price: "$20", color: "#1B5FE8" },
+    { id: "reflection", name: "Relationship Reflection", desc: "A third exercise on the moments and meaning that shaped you as a couple.", price: "$40", color: "#3B5BDB" },
+  ];
+
   return (
     <div onClick={e => e.target === e.currentTarget && onClose()}
       style={{ position: "fixed", inset: 0, background: "rgba(14,11,7,0.55)", zIndex: 600, display: "flex", alignItems: "center", justifyContent: "center", padding: "1.25rem", backdropFilter: "blur(4px)" }}>
@@ -10642,7 +10649,7 @@ function PackagesModal({ currentPkg, onClose, onPick }) {
         {/* Header */}
         <div style={{ padding: "1.5rem 1.75rem 1rem", borderBottom: "1px solid #E8DDD0", display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: "1rem" }}>
           <div>
-            <div style={{ display: "inline-block", background: "#FFF0EB", color: "#E8673A", fontSize: "0.58rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", padding: "0.22rem 0.65rem", borderRadius: 999, marginBottom: "0.5rem", fontFamily: "'DM Sans', sans-serif" }}>Explore packages</div>
+            <div style={{ display: "inline-block", background: "#FFF0EB", color: "#E8673A", fontSize: "0.58rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", padding: "0.22rem 0.65rem", borderRadius: 999, marginBottom: "0.5rem", fontFamily: "'DM Sans', sans-serif" }}>Explore packages & add-ons</div>
             <div style={{ fontFamily: "'Playfair Display', Georgia, serif", fontSize: "1.3rem", fontWeight: 700, color: "#0E0B07", lineHeight: 1.15 }}>Upgrade your experience</div>
             <div style={{ fontSize: "0.82rem", color: "#8C7A68", fontFamily: "'DM Sans', sans-serif", marginTop: "0.2rem", fontStyle: "italic" }}>Choose the package that fits where you are.</div>
           </div>
@@ -10684,6 +10691,32 @@ function PackagesModal({ currentPkg, onClose, onPick }) {
               </div>
             );
           })}
+        </div>
+
+        {/* Add-ons */}
+        <div style={{ padding: "0.25rem 1.75rem 1.25rem" }}>
+          <div style={{ fontSize: "0.58rem", letterSpacing: "0.14em", textTransform: "uppercase", color: "#8C7A68", fontWeight: 700, fontFamily: "'DM Sans', sans-serif", marginBottom: "0.75rem" }}>Add-ons</div>
+          <div style={{ display: "flex", flexDirection: "column", gap: "0.6rem" }}>
+            {addOns.map(a => (
+              <div key={a.id}
+                style={{ border: "1.5px solid #E8DDD0", background: "white", borderRadius: 14, padding: "0.85rem 1rem", display: "flex", alignItems: "center", gap: "0.85rem" }}>
+                <div style={{ width: 32, height: 32, borderRadius: 9, background: a.color + "15", border: "1.5px solid " + a.color + "30", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                  <div style={{ width: 9, height: 9, borderRadius: "50%", background: a.color }} />
+                </div>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontSize: "0.85rem", fontWeight: 600, color: "#0E0B07", fontFamily: "'DM Sans', sans-serif", marginBottom: "0.15rem" }}>{a.name}</div>
+                  <div style={{ fontSize: "0.74rem", color: "#8C7A68", fontFamily: "'DM Sans', sans-serif", fontWeight: 300, lineHeight: 1.45 }}>{a.desc}</div>
+                </div>
+                <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "0.4rem", flexShrink: 0 }}>
+                  <div style={{ fontSize: "0.8rem", fontWeight: 700, color: "#0E0B07", fontFamily: "'DM Sans', sans-serif", whiteSpace: "nowrap" }}>{a.price}</div>
+                  <button onClick={() => onPickAddon ? onPickAddon(a.id) : (window.location.href = "/offerings")}
+                    style={{ background: "transparent", color: a.color, border: "1.5px solid " + a.color + "55", borderRadius: 9, padding: "0.4rem 0.75rem", fontSize: "0.68rem", fontWeight: 700, cursor: "pointer", fontFamily: "'DM Sans', sans-serif", letterSpacing: "0.03em", whiteSpace: "nowrap" }}>
+                    Add →
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
 
         {/* Footer link */}
@@ -12032,11 +12065,10 @@ export default function App() {
             {(isMobile && view !== "results") ? (
               /* White logo mark for gradient background */
               <svg width="28" height="20" viewBox="0 0 103 76" fill="none">
-                <defs><linearGradient id="mobileNavGrad" x1="0" y1="0" x2="103" y2="76" gradientUnits="userSpaceOnUse"><stop offset="0%" stopColor="rgba(255,255,255,.92)"/><stop offset="100%" stopColor="rgba(255,255,255,.75)"/></linearGradient></defs>
-                <path d="M14,4 L44,4 A9,9 0 0,1 53,13 L53,42 A9,9 0 0,1 44,51 L20,51 L6,61 L11,51 A6,6 0 0,1 5,45 L5,13 A9,9 0 0,1 14,4 Z" fill="url(#mobileNavGrad)"/>
-                <path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill="rgba(90,40,150,.6)" transform="translate(13.16,11.3) scale(0.72)"/>
-                <path d="M89,14 L59,14 A9,9 0 0,0 50,23 L50,52 A9,9 0 0,0 59,61 L83,61 L97,71 L92,61 A6,6 0 0,0 98,55 L98,23 A9,9 0 0,0 89,14 Z" fill="white" stroke="url(#mobileNavGrad)" strokeWidth="2.2" strokeLinejoin="round"/>
-                <path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill="url(#mobileNavGrad)" transform="translate(58.16,21.3) scale(0.72)"/>
+                <path d="M14,4 L44,4 A9,9 0 0,1 53,13 L53,42 A9,9 0 0,1 44,51 L20,51 L6,61 L11,51 A6,6 0 0,1 5,45 L5,13 A9,9 0 0,1 14,4 Z" fill="white"/>
+                <path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill="#C8522E" transform="translate(13.16,11.3) scale(0.72)"/>
+                <path d="M89,14 L59,14 A9,9 0 0,0 50,23 L50,52 A9,9 0 0,0 59,61 L83,61 L97,71 L92,61 A6,6 0 0,0 98,55 L98,23 A9,9 0 0,0 89,14 Z" fill="white"/>
+                <path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill="#1B5FE8" transform="translate(58.16,21.3) scale(0.72)"/>
               </svg>
             ) : (
               <svg width="36" height="26" viewBox="0 0 103 76" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -12221,11 +12253,10 @@ export default function App() {
                     {/* Logo — links to landing page */}
                     <div onClick={() => window.location.href = '/home'} style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer" }}>
                       <svg width="28" height="20" viewBox="0 0 103 76" fill="none" style={{ flexShrink: 0 }}>
-                        <defs><linearGradient id="mobileNavLogo" x1="0" y1="0" x2="103" y2="76" gradientUnits="userSpaceOnUse"><stop offset="0%" stopColor="rgba(255,255,255,0.95)"/><stop offset="100%" stopColor="rgba(255,255,255,0.75)"/></linearGradient></defs>
-                        <path d="M14,4 L44,4 A9,9 0 0,1 53,13 L53,42 A9,9 0 0,1 44,51 L20,51 L6,61 L11,51 A6,6 0 0,1 5,45 L5,13 A9,9 0 0,1 14,4 Z" fill="url(#mobileNavLogo)"/>
-                        <path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill="rgba(100,60,180,0.6)" transform="translate(13.16,11.3) scale(0.72)"/>
-                        <path d="M89,14 L59,14 A9,9 0 0,0 50,23 L50,52 A9,9 0 0,0 59,61 L83,61 L97,71 L92,61 A6,6 0 0,0 98,55 L98,23 A9,9 0 0,0 89,14 Z" fill="white" stroke="url(#mobileNavLogo)" strokeWidth="2.2" strokeLinejoin="round"/>
-                        <path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill="url(#mobileNavLogo)" transform="translate(58.16,21.3) scale(0.72)"/>
+                        <path d="M14,4 L44,4 A9,9 0 0,1 53,13 L53,42 A9,9 0 0,1 44,51 L20,51 L6,61 L11,51 A6,6 0 0,1 5,45 L5,13 A9,9 0 0,1 14,4 Z" fill="white"/>
+                        <path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill="#C8522E" transform="translate(13.16,11.3) scale(0.72)"/>
+                        <path d="M89,14 L59,14 A9,9 0 0,0 50,23 L50,52 A9,9 0 0,0 59,61 L83,61 L97,71 L92,61 A6,6 0 0,0 98,55 L98,23 A9,9 0 0,0 89,14 Z" fill="white"/>
+                        <path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill="#1B5FE8" transform="translate(58.16,21.3) scale(0.72)"/>
                       </svg>
                       <span style={{ fontSize: "0.95rem", fontWeight: 700, color: "white", fontFamily: "'Playfair Display', Georgia, serif", letterSpacing: "-.01em" }}>Attune</span>
                     </div>
@@ -12599,29 +12630,46 @@ export default function App() {
                   </div>
                 )}
 
-                {/* ── READING ── */}
+                {/* ── RESOURCES ── */}
                 <div>
                   <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "1rem" }}>
-                    <div style={{ fontSize: "0.6rem", letterSpacing: ".2em", textTransform: "uppercase", color: "#8C7A68", fontWeight: 700, fontFamily: "'DM Sans', sans-serif" }}>From In Practice</div>
-                    <a href="/practice" style={{ fontSize: "0.65rem", color: "#C17F47", fontWeight: 600, fontFamily: "'DM Sans', sans-serif", textDecoration: "none" }}>See all →</a>
+                    <div style={{ fontSize: "0.6rem", letterSpacing: ".2em", textTransform: "uppercase", color: "#8C7A68", fontWeight: 700, fontFamily: "'DM Sans', sans-serif" }}>Resources</div>
+                    <a href="#" onClick={(e) => { e.preventDefault(); setView("resources"); }} style={{ fontSize: "0.65rem", color: "#C17F47", fontWeight: 600, fontFamily: "'DM Sans', sans-serif", textDecoration: "none" }}>See all →</a>
                   </div>
                   <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: "0.65rem" }}>
                     {[
-                      { title: "How to review your results together", href: "/practice/how-to-review-your-results-together", tag: "Guide", color: "#9B5DE5" },
-                      { title: "Why couples fight about the same things", href: "/practice/why-couples-fight-about-the-same-things", tag: "Read", color: "#1B5FE8" },
-                      { title: "How to start a hard conversation", href: "/practice/how-to-start-a-hard-conversation", tag: "Guide", color: "#9B5DE5" },
-                      { title: "Understanding each other", href: "/practice/understanding-each-other", tag: "Read", color: "#1B5FE8" },
-                    ].map(r => (
-                      <a key={r.href} href={r.href}
+                      { kind: "addon", title: "The Personalized Workbook", sub: "Built around your results and couple type.", price: "From $19", color: "#9B5DE5", onClick: () => setView("workbook") },
+                      { kind: "addon", title: "LMFT Session", sub: "A 50-minute session with a licensed therapist who has reviewed your results.", price: "$150", color: "#E8673A", onClick: () => { window.location.href = "/offerings"; } },
+                      { kind: "article", title: "How to review your results together", tag: "Guide", color: "#9B5DE5", href: "/practice/how-to-review-your-results-together?from=app" },
+                      { kind: "article", title: "How to start a hard conversation", tag: "Guide", color: "#9B5DE5", href: "/practice/how-to-start-a-hard-conversation?from=app" },
+                    ].map(item => item.kind === "addon" ? (
+                      <div key={item.title} onClick={item.onClick}
+                        style={{ background: "white", border: `1.5px solid ${item.color}25`, borderRadius: 14, padding: "1rem 1.1rem", display: "flex", alignItems: "center", gap: "0.85rem", cursor: "pointer", transition: "border-color .15s, box-shadow .15s" }}
+                        onMouseEnter={e => { e.currentTarget.style.borderColor = `${item.color}55`; e.currentTarget.style.boxShadow = "0 4px 16px rgba(0,0,0,.05)"; }}
+                        onMouseLeave={e => { e.currentTarget.style.borderColor = `${item.color}25`; e.currentTarget.style.boxShadow = "none"; }}>
+                        <div style={{ width: 32, height: 32, borderRadius: 9, background: `${item.color}15`, border: `1.5px solid ${item.color}30`, flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                          <div style={{ width: 9, height: 9, borderRadius: "50%", background: item.color }} />
+                        </div>
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <div style={{ display: "flex", alignItems: "center", gap: "0.4rem", marginBottom: "0.25rem" }}>
+                            <span style={{ fontSize: 10, textTransform: "uppercase", letterSpacing: ".1em", color: "#8C7A68", fontFamily: "'DM Sans', sans-serif" }}>Add-on</span>
+                          </div>
+                          <div style={{ fontSize: 13, fontWeight: 600, color: "#0E0B07", lineHeight: 1.4, fontFamily: "'DM Sans', sans-serif" }}>{item.title}</div>
+                          <div style={{ fontSize: 11, color: "#8C7A68", lineHeight: 1.45, fontFamily: "'DM Sans', sans-serif", fontWeight: 300, marginTop: 2 }}>{item.sub}</div>
+                        </div>
+                        <span style={{ fontSize: 12, fontWeight: 600, color: item.color, fontFamily: "'DM Sans', sans-serif", flexShrink: 0, whiteSpace: "nowrap" }}>{item.price} →</span>
+                      </div>
+                    ) : (
+                      <a key={item.href} href={item.href}
                         style={{ background: "white", border: "1.5px solid #E8DDD0", borderRadius: 14, padding: "1rem 1.1rem", display: "flex", alignItems: "center", justifyContent: "space-between", textDecoration: "none", transition: "border-color .15s" }}
                         onMouseEnter={e => e.currentTarget.style.borderColor = "#C8B8A8"}
                         onMouseLeave={e => e.currentTarget.style.borderColor = "#E8DDD0"}>
                         <div style={{ flex: 1 }}>
                           <div style={{ display: "flex", alignItems: "center", gap: "0.4rem", marginBottom: "0.3rem" }}>
-                            <div style={{ width: 6, height: 6, borderRadius: "50%", background: r.color, flexShrink: 0, opacity: 0.7 }} />
-                            <div style={{ fontSize: 10, textTransform: "uppercase", letterSpacing: ".1em", color: "#8C7A68", fontFamily: "'DM Sans', sans-serif" }}>{r.tag}</div>
+                            <div style={{ width: 6, height: 6, borderRadius: "50%", background: item.color, flexShrink: 0, opacity: 0.7 }} />
+                            <div style={{ fontSize: 10, textTransform: "uppercase", letterSpacing: ".1em", color: "#8C7A68", fontFamily: "'DM Sans', sans-serif" }}>{item.tag}</div>
                           </div>
-                          <div style={{ fontSize: 13, fontWeight: 500, color: "#0E0B07", lineHeight: 1.45, fontFamily: "'DM Sans', sans-serif" }}>{r.title}</div>
+                          <div style={{ fontSize: 13, fontWeight: 500, color: "#0E0B07", lineHeight: 1.45, fontFamily: "'DM Sans', sans-serif" }}>{item.title}</div>
                         </div>
                         <span style={{ fontSize: 14, color: "#C8BFB4", marginLeft: 12, flexShrink: 0 }}>→</span>
                       </a>
@@ -12982,8 +13030,8 @@ export default function App() {
           ];
           const ADD_ONS = [
             { name: "The Personalized Workbook", desc: "A structured workbook built around your specific results and couple type.", price: "From $19", onClick: () => setView("workbook"), color: "#9B5DE5" },
-            { name: "Shared Budgeting Tool", desc: "A guided financial exercise to surface what you each expect from shared finances.", price: "Add-on", href: "/offerings", color: "#1B5FE8" },
-            { name: "LMFT Session", desc: "A 50-minute session with a licensed therapist who has reviewed your joint results.", price: "Add-on", href: "/offerings", color: "#E8673A" },
+            { name: "Shared Budgeting Tool", desc: "A guided financial exercise to surface what you each expect from shared finances.", price: "$20", href: "/offerings", color: "#1B5FE8" },
+            { name: "LMFT Session", desc: "A 50-minute session with a licensed therapist who has reviewed your joint results.", price: "$150", href: "/offerings", color: "#E8673A" },
           ];
           return (
             <div style={{ flex: 1, overflowY: "auto", background: "#FBF8F3" }}>
@@ -13132,7 +13180,7 @@ export default function App() {
                     </div>
                     <div style={{ marginTop: "1rem", paddingTop: "1rem", borderTop: "1px solid #F3EDE6" }}>
                       <button onClick={() => setShowPackagesModal(true)} style={{ fontSize: "0.75rem", fontWeight: 600, color: "#E8673A", fontFamily: font.body, background: "none", border: "none", cursor: "pointer", padding: 0, letterSpacing: ".02em" }}>
-                        Explore other packages →
+                        Explore other packages and add-ons →
                       </button>
                     </div>
                   </div>
@@ -13189,7 +13237,7 @@ export default function App() {
 
 
         {view === "workbook" && (
-          <div style={{ minHeight: "calc(100vh)", background: "#FBF8F3", display: "flex", flexDirection: "column" }}>
+          <div style={{ minHeight: "calc(100vh)", background: "#FBF8F3", display: "flex", flexDirection: "column", maxWidth: "100%", overflowX: "hidden" }}>
             {/* Content — no separate header; global nav handles back navigation */}
             {/* Gradient accent bar at very top */}
             <div style={{ height: 3, background: "linear-gradient(90deg, #E8673A, #9B5DE5, #1B5FE8)", flexShrink: 0 }} />
@@ -13386,7 +13434,8 @@ export default function App() {
               );
             })()}
             <div data-results-scroll style={{ flex: 1, overflowY: "auto", WebkitOverflowScrolling: "touch", overscrollBehavior: "contain", scrollPaddingBottom: "60px" }}>
-              <div style={{ maxWidth: 920, margin: "0 auto", padding: isMobile ? "1rem 1rem 0" : "1.25rem 1.5rem 0" }}>
+              <div style={{ maxWidth: 920, margin: "0 auto", padding: isMobile ? "1rem 0.5rem 0" : "1.25rem 1.5rem 0", width: "100%", minWidth: 0, boxSizing: "border-box" }}>
+                <div style={{ width: "100%", minWidth: 0, overflowX: "hidden" }}>
                 <UnifiedResults
                   isMobile={isMobile}
                   ex1Answers={ex1Answers || sarahEx1} partnerEx1={partnerEx1}
@@ -13407,6 +13456,7 @@ export default function App() {
                   onNavigateTool={(tool) => { if (tool === 'lmft-upsell') { setUpsellModal({ product: 'lmft', cartAdded: false }); } else { setView(tool); } }}
                   initialSection={activeResult !== "overview" ? activeResult : undefined}
                 />
+                </div>
               </div>
               {/* Dark footer banner — inside pane so it scrolls into view */}
               <div style={{ marginTop: "3rem", background: "#2d2250", width: "100%", paddingBottom: "3rem" }}>
@@ -13501,6 +13551,12 @@ export default function App() {
         onPick={(pkgId) => {
           setShowPackagesModal(false);
           window.location.href = `/checkout?pkg=${pkgId}`;
+        }}
+        onPickAddon={(addonId) => {
+          setShowPackagesModal(false);
+          // Route to offerings with the add-on preselected; offerings handles
+          // attaching an add-on to a purchase.
+          window.location.href = `/offerings?addon=${addonId}`;
         }}
       />
     )}

@@ -80,7 +80,7 @@
   .step-body{font-size:.88rem;color:var(--muted);line-height:1.75;font-weight:300}
 
   /* CALLOUT BOX */
-  .callout{background:linear-gradient(135deg,#FFF8F5,#F0F3FF);border:1.5px solid var(--stone);border-radius:16px;padding:1.5rem 1.75rem}
+  .callout{background:linear-gradient(135deg,#FFF8F5,#F0F3FF);border:1.5px solid var(--stone);border-radius:16px;padding:1.5rem 1.75rem;margin-top:.75rem}
   .callout-label{font-size:.58rem;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--clay);margin-bottom:.65rem}
   .callout p{font-size:.9rem;color:var(--text);line-height:1.78;font-weight:300}
   .callout a{color:var(--orange);font-weight:600;text-decoration:none}
@@ -195,6 +195,8 @@
 
   <!-- BREADCRUMB -->
   <div class="breadcrumb">
+    <a href="/app" class="bc-dash" style="display:none">Dashboard</a>
+    <span class="breadcrumb-sep bc-dash" style="display:none">›</span>
     <a href="/practice">In Practice</a>
     <span class="breadcrumb-sep">›</span>
     <span style="font-size:.72rem;color:var(--ink);font-weight:500;">Conflict & Repair</span>
@@ -299,5 +301,18 @@
     </div>
   </div>
 <script src="/cart.js"></script>
+<script>
+  // When arriving from the in-app dashboard (?from=app), prepend a Dashboard
+  // crumb so the user can navigate back to /app. The links default to hidden
+  // and are revealed only for app referrals.
+  (function(){
+    try {
+      var p = new URLSearchParams(location.search);
+      if (p.get('from') === 'app') {
+        document.querySelectorAll('.bc-dash').forEach(function(el){ el.style.display = ''; });
+      }
+    } catch(e){}
+  })();
+</script>
 </body>
 </html>
