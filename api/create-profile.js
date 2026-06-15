@@ -49,7 +49,7 @@ export default async function handler(req) {
     partner_pronouns:     typeof body.partnerPronouns === 'string'  ? body.partnerPronouns.slice(0, 30)   : '',
     partner_email:        typeof body.partnerEmail === 'string'     ? body.partnerEmail.slice(0, 200).toLowerCase() : '',
     email_opt_in:         body.emailOptIn !== false,
-    invite_code:          typeof body.inviteCode === 'string'       ? body.inviteCode.slice(0, 32)        : '',
+    invite_code:          (typeof body.inviteCode === 'string' && body.inviteCode.trim()) ? body.inviteCode.slice(0, 32) : null,
     partner_joined:       false,
     pkg:                  typeof body.pkg === 'string' && ['core','newlywed','anniversary','premium'].includes(body.pkg) ? body.pkg : 'core',
     age_range:            typeof body.ageRange === 'string'           ? body.ageRange.slice(0, 30)        : null,
