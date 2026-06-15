@@ -9730,7 +9730,12 @@ function NewPasswordScreen({ onDone }) {
 }
 
 function PartnerLandingScreen({ inviteFrom, inviteCode, onCreateAccount }) {
-  const [form, setForm] = React.useState({ name: '', email: '', password: '', ageRange: '', gender: '', relationshipStatus: '', relationshipLength: '', children: '', signupSource: '' });
+  // The invite link carries the email the inviter addressed it to (iie =
+  // invitee email). Prefill it so the invitee doesn't retype it, and so it
+  // matches the address that gets auto-confirmed. pae is the inviter's own
+  // email, kept only to block the invitee from reusing it.
+  const _iie = (new URLSearchParams(window.location.search).get('iie') || '').trim().toLowerCase();
+  const [form, setForm] = React.useState({ name: '', email: _iie, password: '', ageRange: '', gender: '', relationshipStatus: '', relationshipLength: '', children: '', signupSource: '' });
   const [loading, setLoading] = React.useState(false);
   const [err, setErr] = React.useState('');
   const upd = (k, v) => setForm(p => ({ ...p, [k]: v }));
@@ -9966,6 +9971,11 @@ function PartnerLandingScreen({ inviteFrom, inviteCode, onCreateAccount }) {
 
         {inp('Your first name', 'name')}
         {inp('Your email', 'email', 'email')}
+        {_iie && form.email.trim().toLowerCase() === _iie && (
+          <p style={{ fontSize: '0.68rem', color: '#8C7A68', fontFamily: "'DM Sans', sans-serif", margin: '-0.35rem 0 0.6rem', lineHeight: 1.4 }}>
+            From your invite. Change it if this isn't your email.
+          </p>
+        )}
         {inp('Password (6+ characters)', 'password', 'password')}
 
         {/* ── Optional demographics ── same block as Partner A signup ── */}
@@ -10290,7 +10300,7 @@ function PartnerBCompletionScreen({ partnerAName, partnerBName, partnerADone, pa
 // ─────────────────────────────────────────────────────────────────────────────
 function PartnerInviteCard({ account, onCopy, copied }) {
   if (!account) return null;
-  const inviteUrl = `${window.location.origin}/app?invite=${account.inviteCode}&from=${encodeURIComponent(account.name)}${account.email ? `&pae=${encodeURIComponent(account.email)}` : ''}`;
+  const inviteUrl = `${window.location.origin}/app?invite=${account.inviteCode}&from=${encodeURIComponent(account.name)}${account.email ? `&pae=${encodeURIComponent(account.email)}` : ''}${account.partnerEmail ? `&iie=${encodeURIComponent(account.partnerEmail)}` : ''}`;
   const [resent, setResent] = React.useState(false);
   const [resending, setResending] = React.useState(false);
   const canShare = typeof navigator !== 'undefined' && typeof navigator.share === 'function';
@@ -10765,6 +10775,7 @@ export default function App() {
   // Fall back chain: explicit demo param → order localStorage → account.pkg (cross-device) → URL param
   const demoPkg = (_demoParam && _demoParam !== '1') ? _demoParam : (_orderPkg || _accountPkg || _urlPkg);
   const urlInviteCode = params.get("invite");
+  const urlGuidedFlow = params.get("guided") === "1";
   const urlInviteFrom = params.get("from") ? decodeURIComponent(params.get("from")) : null;
   const urlIsReset = params.get("reset") === "1";
   // Gift box QR flow params
@@ -11984,8 +11995,14 @@ export default function App() {
       onCreateAccount={(acct) => { setAccount(acct); saveAccount(acct); }}
     />;
   }
-  // Case 2: Account exists, joined via invite, exercises not yet done → exercise flow
-  if (account?.joinedViaInvite && !partnerSession) {
+  // Case 2: Invitee who joined but hasn't started — previously forced
+  // straight into a dedicated exercise flow. Now they land on the dashboard
+  // (same as the purchaser), see their status and exercise cards, and launch
+  // exercises from there. The main exercise views save via the same
+  // saveExerciseWithRetakeSnapshot path, and completion sets the
+  // partner_session marker below. The dedicated PartnerBExerciseFlow is kept
+  // only as an explicit opt-in via ?guided=1 for the legacy guided path.
+  if (account?.joinedViaInvite && !partnerSession && urlGuidedFlow) {
     return <PartnerBExerciseFlow
       account={account}
       onComplete={(session) => savePartnerSession(session)}
@@ -12901,6 +12918,21 @@ export default function App() {
                       console.warn('[Attune] ex2 save error:', e);
                     }
                   }
+                  // Invitee (Partner B) completing through the dashboard route:
+                  // set the partner_session marker the same way the dedicated
+                  // guided flow's onComplete did. Only mark complete once all
+                  // required exercises are done — ex3 is required for packages
+                  // with hasAnniversary, otherwise ex1+ex2 is the full set.
+                  if (account?.joinedViaInvite && ex1Answers && a && (!pkg.hasAnniversary || ex3Answers)) {
+                    savePartnerSession({
+                      inviteCode: account.inviteCode || '',
+                      name: account.name || '',
+                      ex1: ex1Answers,
+                      ex2: a,
+                      ...(ex3Answers ? { ex3: ex3Answers } : {}),
+                      completedAt: Date.now(),
+                    });
+                  }
                   // Auto-trigger workbook generation if both partners are done and order includes workbook.
                   // Recompute bothDone using the JUST-completed answers `a` rather than the closure
                   // value of ex2Answers (which is still null at this moment — setEx2State hasn't
@@ -12977,6 +13009,18 @@ export default function App() {
                       if (!hasSupabase()) return;
                       await saveExerciseWithRetakeSnapshot(sb, account.id, 3, a, { ex3_completed: true });
                     })();
+                  }
+                  // Invitee completing ex3 (last exercise for anniversary/
+                  // premium) marks the partner session complete.
+                  if (account?.joinedViaInvite && ex1Answers && ex2Answers && a) {
+                    savePartnerSession({
+                      inviteCode: account.inviteCode || '',
+                      name: account.name || '',
+                      ex1: ex1Answers,
+                      ex2: ex2Answers,
+                      ex3: a,
+                      completedAt: Date.now(),
+                    });
                   }
                 }} onBack={() => setView("home")} />
             )}
@@ -13674,7 +13718,7 @@ export default function App() {
                 } catch (e) { console.warn('[profile-setup] profile update failed:', e); }
                 // Send partner invite if email newly added.
                 if (partnerEmail && partnerEmail !== prevEmail && inviteCode) {
-                  const inviteUrl = `${window.location.origin}/app?invite=${encodeURIComponent(inviteCode)}&from=${encodeURIComponent(name || '')}${updated?.email ? `&pae=${encodeURIComponent(updated.email)}` : ''}`;
+                  const inviteUrl = `${window.location.origin}/app?invite=${encodeURIComponent(inviteCode)}&from=${encodeURIComponent(name || '')}${updated?.email ? `&pae=${encodeURIComponent(updated.email)}` : ''}${partnerEmail ? `&iie=${encodeURIComponent(partnerEmail)}` : ''}`;
                   sendEmailWithRetry({ type: 'partner_invite', fromName: name, toEmail: partnerEmail, toName: partnerName || 'Your partner', inviteUrl });
                 }
               })();
