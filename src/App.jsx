@@ -8287,7 +8287,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
               </div>
 
               {/* LMFT Session */}
-              {pkg.hasLMFT ? (
+              {hasLMFT ? (
                 <div onClick={() => setView("lmft")} style={{ display: "flex", alignItems: "center", gap: "1rem", background: C.warm, border: `1.5px solid ${C.stone}`, borderRadius: 14, padding: "0.85rem 1.1rem", cursor: "pointer", transition: "all 0.15s" }}
                   onMouseEnter={e => { e.currentTarget.style.borderColor = "#5B6DF8"; }}
                   onMouseLeave={e => { e.currentTarget.style.borderColor = C.stone; }}>
@@ -8317,7 +8317,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
               )}
 
               {/* Relationship Reflection */}
-              {pkg.hasAnniversary ? (
+              {hasAnniversary ? (
                 <div onClick={() => setView("exercise3")} style={{ display: "flex", alignItems: "center", gap: "1rem", background: C.warm, border: `1.5px solid ${C.stone}`, borderRadius: 14, padding: "0.85rem 1.1rem", cursor: "pointer", transition: "all 0.15s" }}
                   onMouseEnter={e => { e.currentTarget.style.borderColor = "#10b981"; }}
                   onMouseLeave={e => { e.currentTarget.style.borderColor = C.stone; }}>
@@ -8346,7 +8346,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
               )}
 
               {/* Starting Out Checklist */}
-              {pkg.hasChecklist ? (
+              {hasChecklist ? (
                 <div onClick={() => setView("checklist")} style={{ display: "flex", alignItems: "center", gap: "1rem", background: C.warm, border: `1.5px solid ${C.stone}`, borderRadius: 14, padding: "0.85rem 1.1rem", cursor: "pointer", transition: "all 0.15s" }}
                   onMouseEnter={e => { e.currentTarget.style.borderColor = C.clay; }}
                   onMouseLeave={e => { e.currentTarget.style.borderColor = C.stone; }}>
@@ -8375,7 +8375,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
               )}
 
               {/* Shared Budgeting */}
-              {pkg.hasBudget ? (
+              {hasBudget ? (
                 <div onClick={() => setView("budget")} style={{ display: "flex", alignItems: "center", gap: "1rem", background: C.warm, border: `1.5px solid ${C.stone}`, borderRadius: 14, padding: "0.85rem 1.1rem", cursor: "pointer", transition: "all 0.15s" }}
                   onMouseEnter={e => { e.currentTarget.style.borderColor = "#1B5FE8"; }}
                   onMouseLeave={e => { e.currentTarget.style.borderColor = C.stone; }}>
@@ -13491,7 +13491,7 @@ export default function App() {
         ex1Answers={ex1Answers || sarahEx1} partnerEx1={partnerEx1}
         ex2Answers={ex2Answers || sarahEx2} partnerEx2={partnerEx2}
         ex3Answers={ex3Answers || (pkg.hasAnniversary ? SARAH_ANNIVERSARY_DEMO : null)}
-        partnerEx3={pkg.hasAnniversary ? (partnerSession?.ex3 || (hasRealPartner ? null : JAMES_ANNIVERSARY_DEMO)) : null}
+        partnerEx3={hasAnniversary ? (partnerSession?.ex3 || (hasRealPartner ? null : JAMES_ANNIVERSARY_DEMO)) : null}
         userName={userName} partnerName={partnerName}
         portrait={couplePortrait}
         onDone={() => setHighlightsSeen(true)}
@@ -13573,7 +13573,7 @@ export default function App() {
                   ex1Answers={ex1Answers || sarahEx1} partnerEx1={partnerEx1}
                   ex2Answers={ex2Answers || sarahEx2} partnerEx2={partnerEx2}
                   ex3Answers={ex3Answers || (pkg.hasAnniversary ? SARAH_ANNIVERSARY_DEMO : null)}
-                  partnerEx3={pkg.hasAnniversary ? (partnerSession?.ex3 || (hasRealPartner ? null : JAMES_ANNIVERSARY_DEMO)) : null}
+                  partnerEx3={hasAnniversary ? (partnerSession?.ex3 || (hasRealPartner ? null : JAMES_ANNIVERSARY_DEMO)) : null}
                   ex2AnswersPrior={ex2AnswersPrior}
                   ex2PriorAt={ex2PriorAt}
                   hasAnniversary={pkg.hasAnniversary}
