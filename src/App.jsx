@@ -1540,7 +1540,7 @@ function DashStepHeader({ num, title, sub, active = true, isMobile = false }) {
     <div style={{ display: "flex", alignItems: "center", gap: isMobile ? "0.9rem" : "1.25rem", marginBottom: "1.25rem" }}>
       <div style={{ position: "relative", flexShrink: 0 }}>
         <div style={{ width: isMobile ? 52 : 64, height: isMobile ? 52 : 64, borderRadius: "50%", background: active ? "linear-gradient(135deg, rgba(232,103,58,0.12), rgba(155,93,229,0.12), rgba(27,95,232,0.12))" : "rgba(200,191,180,0.18)", border: active ? "1.5px solid rgba(155,93,229,0.28)" : "1.5px solid rgba(200,191,180,0.5)", display: "flex", alignItems: "center", justifyContent: "center", lineHeight: 0 }}>
-          <span style={{ fontFamily: HFONT, fontWeight: 700, fontSize: isMobile ? "2.3rem" : "2.95rem", lineHeight: 1, background: active ? "linear-gradient(135deg, #E8673A, #9B5DE5, #1B5FE8)" : "linear-gradient(135deg, #C8BFB4, #B3A693)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text", display: "flex", alignItems: "center", justifyContent: "center", height: "1em", transform: "translateY(0.06em)" }}>{num}</span>
+          <span style={{ fontFamily: HFONT, fontWeight: 700, fontSize: isMobile ? "2.3rem" : "2.95rem", lineHeight: 1, background: active ? "linear-gradient(135deg, #E8673A, #9B5DE5, #1B5FE8)" : "linear-gradient(135deg, #C8BFB4, #B3A693)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text", display: "flex", alignItems: "center", justifyContent: "center", height: "1em", transform: "translateY(0.02em)" }}>{num}</span>
         </div>
       </div>
       <div style={{ flex: 1, minWidth: 0 }}>
@@ -8045,7 +8045,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
       );
     };
     return (
-      <Layout accent="#E8673A">
+      <Layout accent="#E8673A" noPrevNext={true}>
         <div style={{ maxWidth: 560, margin: "0 auto" }}>
           <div style={{ fontFamily: BFONT, fontSize: "0.62rem", letterSpacing: "0.22em", textTransform: "uppercase", color: C.clay, fontWeight: 700, marginBottom: "0.85rem" }}>What comes next</div>
           <h2 style={{ fontFamily: HFONT, fontSize: "clamp(1.8rem,3vw,2.4rem)", fontWeight: 700, color: C.ink, lineHeight: 1.1, letterSpacing: "-0.02em", marginBottom: "1.5rem" }}>What to do with all of this.</h2>
@@ -10499,6 +10499,23 @@ const UPSELL_PRODUCTS = {
     accentColor: "#5B6DF8",
     cartParam: "anniversary",
   },
+  checklist: {
+    badge: "Starting Out Collection",
+    badgeColor: "#FFF0EB",
+    badgeText: "#E8673A",
+    title: "Starting Out Checklist",
+    price: "$20",
+    tagline: "The real-world logistics of merging your lives.",
+    description: "A complete checklist covering the practical steps most couples discover too late: name changes, finances, insurance, estate basics, and the administrative setup of a shared life.",
+    includes: [
+      "Name change checklist across government and financial accounts",
+      "Merging finances and setting up joint accounts",
+      "Insurance and benefits setup",
+      "Estate basics: wills, proxies, beneficiaries, term life",
+    ],
+    accentColor: "#E8673A",
+    cartParam: "newlywed",
+  },
   budget: {
     badge: "Add-on",
     badgeColor: "#EAF1FF",
@@ -10520,8 +10537,8 @@ const UPSELL_PRODUCTS = {
 
 function UpsellModal({ product, cartAdded, onAddToCart, onCheckout, onClose }) {
   const p = UPSELL_PRODUCTS[product];
+  const [variant, setVariant] = useState(p?.variants?.[0]?.id || null);
   if (!p) return null;
-  const [variant, setVariant] = useState(p.variants?.[0]?.id || null);
   const displayPrice = variant ? (p.variants.find(v => v.id === variant)?.price || p.price) : p.price;
 
   return (
