@@ -4534,7 +4534,7 @@ function ExpectationsResults({ myAnswers, partnerAnswers, userName, partnerName,
                     </div>
                     {fc.gapItems.map((g, gi) => (
                       <div key={gi} style={{ display: "flex", alignItems: "flex-start", gap: "0.75rem", padding: "0.65rem 1rem", borderBottom: gi < fc.gapItems.length - 1 ? "1px solid rgba(255,255,255,0.05)" : "none" }}>
-                        <div style={{ width: 16, height: 16, borderRadius: 4, border: `1.5px solid ${fc.color}88`, flexShrink: 0, marginTop: 2 }} />
+                        <div style={{ width: 17, height: 17, borderRadius: 4, border: "1.5px solid rgba(255,255,255,0.5)", background: "rgba(255,255,255,0.08)", flexShrink: 0, marginTop: 1 }} />
                         <span style={{ fontSize: "0.8rem", color: "rgba(255,255,255,0.78)", fontFamily: BFONT, lineHeight: 1.45 }}>{g.item}</span>
                       </div>
                     ))}
