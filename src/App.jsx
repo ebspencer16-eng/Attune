@@ -11940,6 +11940,30 @@ export default function App() {
           };
           if (!cancelled) savePartnerSession(s);
         }
+        // Rebuild the invitee's couple-level order from the buyer's inherited
+        // addons. The invitee never placed the order, so this is the only way
+        // their device learns about the workbook / reflection / budget / lmft.
+        // Runs on every poll so it survives logout/login.
+        if (json.inherited && account?.joinedViaInvite && !cancelled) {
+          try {
+            const prev = JSON.parse(localStorage.getItem('attune_order') || 'null') || {};
+            const merged = {
+              ...prev,
+              addonReflection: json.inherited.addonReflection,
+              addonBudget:     json.inherited.addonBudget,
+              addonLmft:       json.inherited.addonLmft,
+              addonWorkbook:   json.inherited.addonWorkbook || null,
+              workbookStatus:  json.inherited.workbookStatus || prev.workbookStatus || null,
+              inheritedFromPartner: true,
+            };
+            localStorage.setItem('attune_order', JSON.stringify(merged));
+            setOrder(merged);
+            if (json.inherited.workbookStatus === 'ready') {
+              localStorage.setItem('attune_workbook_ready', 'true');
+              setWorkbookReady(true);
+            }
+          } catch (_) {}
+        }
       } catch (e) {
         console.warn('[Attune] partner poll failed:', e);
       }
@@ -11984,7 +12008,7 @@ export default function App() {
   // Granular completion signals for the dashboard status view and the
   // results-pending screen. Partner signals require the linked partner session
   // (invite-code match), never the demo fallback.
-  const _partnerLinked = partnerSession?.inviteCode === account?.inviteCode;
+  const _partnerLinked = !!(partnerSession?.partnerProfileId) || (partnerSession?.inviteCode != null && partnerSession?.inviteCode === account?.inviteCode);
   const myEx1Done = !!ex1Answers;
   const myEx2Done = !!ex2Answers;
   const partnerEx1Done = !!(_partnerLinked && partnerSession?.ex1);
@@ -13527,7 +13551,7 @@ export default function App() {
     {view === "results" && bothDone && highlightsSeen && (
           <div style={{ position: "fixed", top: 56, left: 0, right: 0, bottom: 60, display: "flex", flexDirection: "column", overflow: "hidden", zIndex: 50, background: C.warm, paddingBottom: "env(safe-area-inset-bottom)" }}>
             <div style={{ background: "rgba(255,253,249,0.97)", backdropFilter: "blur(12px)", borderBottom: ("1px solid " + (C.stone)), padding: isMobile ? "0.75rem 1rem" : "0.9rem 1.5rem", flexShrink: 0, display: "flex", alignItems: "center", gap: "0.5rem" }}>
-              <button onClick={() => setView("home")} style={{ background: "transparent", border: "none", color: C.clay, fontSize: "0.72rem", letterSpacing: "0.1em", textTransform: "uppercase", cursor: "pointer", fontFamily: font.body, padding: 0, fontWeight: 600, flexShrink: 0 }}>← {isMobile ? "" : "Dashboard"}</button>
+              <button onClick={() => setView("home")} style={{ background: "transparent", border: "none", color: C.clay, fontSize: isMobile ? "1.4rem" : "0.72rem", lineHeight: 1, letterSpacing: isMobile ? "0" : "0.1em", textTransform: "uppercase", cursor: "pointer", fontFamily: font.body, padding: isMobile ? "0.25rem 0.5rem 0.25rem 0" : 0, fontWeight: 600, flexShrink: 0, display: "flex", alignItems: "center" }} aria-label="Back to dashboard">← {isMobile ? "" : "Dashboard"}</button>
               {activeResult !== "overview" && (
                 <>
                   {!isMobile && <span style={{ color: C.clay, fontSize: "1rem", fontWeight: 700, lineHeight: 1, margin: "0 4px", opacity: 0.7 }}>›</span>}

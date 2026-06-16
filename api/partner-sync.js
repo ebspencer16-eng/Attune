@@ -319,7 +319,29 @@ async function handlePartnerSync(req) {
       if (error) return new Response(JSON.stringify({ ok: false, error: error.message }), { status: 500, headers: CORS });
       if (!data)  return new Response(JSON.stringify({ ok: true, found: false }), { status: 200, headers: CORS });
 
-      return new Response(JSON.stringify({ ok: true, found: true, profile: data }), { status: 200, headers: CORS });
+      // Inherit the buyer's order addons so the invitee's device can rebuild
+      // the couple-level order (workbook readiness, reflection, budget, lmft)
+      // on every poll. The invitee never placed the order, so without this
+      // they never see the workbook and lose order state across logout/login.
+      let inherited = { addonReflection: false, addonBudget: false, addonLmft: false, addonWorkbook: '', workbookStatus: null };
+      try {
+        const { data: aOrder } = await sb
+          .from('orders')
+          .select('addon_reflection, addon_budget, addon_lmft, addon_workbook, workbook_status')
+          .eq('user_id', pid)
+          .order('created_at', { ascending: false })
+          .limit(1)
+          .maybeSingle();
+        if (aOrder) {
+          inherited.addonReflection = !!aOrder.addon_reflection;
+          inherited.addonBudget     = !!aOrder.addon_budget;
+          inherited.addonLmft       = !!aOrder.addon_lmft;
+          inherited.addonWorkbook   = aOrder.addon_workbook || '';
+          inherited.workbookStatus  = aOrder.workbook_status || null;
+        }
+      } catch (e) { console.warn('[partner-sync] Mode B addon inherit failed:', e); }
+
+      return new Response(JSON.stringify({ ok: true, found: true, profile: data, inherited }), { status: 200, headers: CORS });
     }
 
     return new Response(JSON.stringify({ ok: false, error: 'Missing inviteCode or partnerProfileId' }), { status: 400, headers: CORS });
