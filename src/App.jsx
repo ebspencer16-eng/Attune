@@ -4504,9 +4504,7 @@ function ExpectationsResults({ myAnswers, partnerAnswers, userName, partnerName,
     const checklistItems = FIXED_CATS.map(fc => ({
       ...fc,
       gapItems: gaps.filter(r => r.catId === fc.id),
-      alignedCount: allRows.filter(r => r.catId === fc.id && r.aligned).length,
-      totalAnswered: allRows.filter(r => r.catId === fc.id).length,
-    })).filter(c => c.totalAnswered > 0);
+    })).filter(c => c.gapItems.length > 0);
 
     return (
       <MaybeNav noSideNav={noSideNav} navItems={expectationsNavItems} currentStep={navCurrentStep} onGo={go} accent="#1B5FE8">
@@ -4532,21 +4530,14 @@ function ExpectationsResults({ myAnswers, partnerAnswers, userName, partnerName,
                   <div key={fc.id} style={{ background: "rgba(255,255,255,0.05)", borderRadius: 14, overflow: "hidden", border: "1px solid rgba(255,255,255,0.08)" }}>
                     <div style={{ background: fc.color + "22", borderBottom: `1px solid ${fc.color}30`, padding: "0.55rem 1rem", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                       <span style={{ fontSize: "0.68rem", fontWeight: 700, color: fc.color, textTransform: "uppercase", letterSpacing: "0.08em", fontFamily: BFONT }}>{fc.label}</span>
-                      <span style={{ fontSize: "0.62rem", color: "rgba(255,255,255,0.4)", fontFamily: BFONT }}>{fc.gapItems.length > 0 ? `${fc.gapItems.length} topic${fc.gapItems.length !== 1 ? "s" : ""}` : "Aligned"}</span>
+                      <span style={{ fontSize: "0.62rem", color: "rgba(255,255,255,0.4)", fontFamily: BFONT }}>{fc.gapItems.length} topic{fc.gapItems.length !== 1 ? "s" : ""}</span>
                     </div>
-                    {fc.gapItems.length > 0
-                      ? fc.gapItems.map((g, gi) => (
-                        <div key={gi} style={{ display: "flex", alignItems: "flex-start", gap: "0.75rem", padding: "0.65rem 1rem", borderBottom: gi < fc.gapItems.length - 1 ? "1px solid rgba(255,255,255,0.05)" : "none" }}>
-                          <div style={{ width: 16, height: 16, borderRadius: 4, border: `1.5px solid ${fc.color}88`, flexShrink: 0, marginTop: 2 }} />
-                          <span style={{ fontSize: "0.8rem", color: "rgba(255,255,255,0.78)", fontFamily: BFONT, lineHeight: 1.45 }}>{g.item}</span>
-                        </div>
-                      ))
-                      : (
-                        <div style={{ padding: "0.7rem 1rem", fontSize: "0.76rem", color: "rgba(255,255,255,0.5)", fontFamily: BFONT, lineHeight: 1.5 }}>
-                          You and {partnerName} match on all {fc.alignedCount} item{fc.alignedCount !== 1 ? "s" : ""} here. Nothing to work through.
-                        </div>
-                      )
-                    }
+                    {fc.gapItems.map((g, gi) => (
+                      <div key={gi} style={{ display: "flex", alignItems: "flex-start", gap: "0.75rem", padding: "0.65rem 1rem", borderBottom: gi < fc.gapItems.length - 1 ? "1px solid rgba(255,255,255,0.05)" : "none" }}>
+                        <div style={{ width: 16, height: 16, borderRadius: 4, border: `1.5px solid ${fc.color}88`, flexShrink: 0, marginTop: 2 }} />
+                        <span style={{ fontSize: "0.8rem", color: "rgba(255,255,255,0.78)", fontFamily: BFONT, lineHeight: 1.45 }}>{g.item}</span>
+                      </div>
+                    ))}
                   </div>
                 ))}
               </div>
@@ -11998,6 +11989,35 @@ export default function App() {
     hasBudget:      _basePkg.hasBudget      || !!(order?.addonBudget),
   };
 
+  // Partner B "waiting/ready" poll. Declared here, BEFORE any early return,
+  // so the hook count stays constant across renders. (Previously this lived
+  // lower down after several conditional returns, which changed the number of
+  // hooks between renders on sign-in and threw React error #310.)
+  const [partnerADone, setPartnerADone] = useState(false);
+  useEffect(() => {
+    if (!account?.joinedViaInvite || !partnerSession || hasRealPartner) return;
+    let cancelled = false;
+    const check = async () => {
+      try {
+        const { supabase: sb, hasSupabase } = await import('./supabase.js');
+        if (!hasSupabase()) return;
+        const { data: own } = await sb.from('profiles').select('partner_profile_id').eq('id', account.id).maybeSingle();
+        if (!own?.partner_profile_id) return;
+        const { data: { session: authSession } } = await sb.auth.getSession();
+        if (!authSession?.access_token) return;
+        const res = await fetch(`/api/partner-sync?partnerProfileId=${encodeURIComponent(own.partner_profile_id)}`, {
+          headers: { Authorization: `Bearer ${authSession.access_token}` },
+        });
+        if (!res.ok || cancelled) return;
+        const d = await res.json();
+        if (d.found && d.profile?.ex1_answers && d.profile?.ex2_answers) setPartnerADone(true);
+      } catch {}
+    };
+    check();
+    const iv = setInterval(check, 15000);
+    return () => { cancelled = true; clearInterval(iv); };
+  }, [account?.joinedViaInvite, account?.id, partnerSession, hasRealPartner]);
+
   // ── PASSWORD RESET ROUTING ────────────────────────────────────────────────
   // Supabase sends user back to /app?reset=1 with a token in the URL hash.
   // Supabase client detects the hash and establishes a session automatically.
@@ -12094,34 +12114,9 @@ export default function App() {
       onComplete={(session) => savePartnerSession(session)}
     />;
   }
-  // Case 3: Partner B has completed exercises → waiting/ready screen
-  // Poll Partner A's profile to check if they've also completed.
-  const [partnerADone, setPartnerADone] = useState(false);
-  useEffect(() => {
-    if (!account?.joinedViaInvite || !partnerSession || hasRealPartner) return;
-    let cancelled = false;
-    const check = async () => {
-      try {
-        const { supabase: sb, hasSupabase } = await import('./supabase.js');
-        if (!hasSupabase()) return;
-        // Look up Partner A's profile id via our own partner_profile_id
-        const { data: own } = await sb.from('profiles').select('partner_profile_id').eq('id', account.id).maybeSingle();
-        if (!own?.partner_profile_id) return;
-        const { data: { session: authSession } } = await sb.auth.getSession();
-        if (!authSession?.access_token) return; // not authed yet, retry next tick
-        const res = await fetch(`/api/partner-sync?partnerProfileId=${encodeURIComponent(own.partner_profile_id)}`, {
-          headers: { Authorization: `Bearer ${authSession.access_token}` },
-        });
-        if (!res.ok || cancelled) return;
-        const d = await res.json();
-        if (d.found && d.profile?.ex1_answers && d.profile?.ex2_answers) setPartnerADone(true);
-      } catch {}
-    };
-    check();
-    const iv = setInterval(check, 15000);
-    return () => { cancelled = true; clearInterval(iv); };
-  }, [account?.joinedViaInvite, account?.id, partnerSession, hasRealPartner]);
-
+  // Case 3: Partner B has completed exercises → waiting/ready screen.
+  // (partnerADone state + poll effect are declared above, before any early
+  // return, to keep hook order stable across renders.)
   if (account?.joinedViaInvite && partnerSession && !hasRealPartner && urlGuidedFlow) {
     return <PartnerBCompletionScreen
       partnerAName={account.partnerName}
