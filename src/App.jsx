@@ -1413,7 +1413,7 @@ function CoupleMapSVG({ myS, partS, userName, partnerName, size = 480 }) {
   return (
     <div style={{ width: "100%" }}>
       {/* SVG Map */}
-      <svg viewBox={`0 0 ${VB} ${cy1 + 20}`} style={{ width: "100%", display: "block", overflow: "visible" }} aria-label="Couple map showing partner positions">
+      <svg viewBox={`0 0 ${VB} ${cy1 + 42}`} style={{ width: "100%", display: "block", overflow: "visible" }} aria-label="Couple map showing partner positions">
         <defs>
           {/* Quadrant gradients */}
           <linearGradient id={idQW} x1="0%" y1="0%" x2="100%" y2="100%">
@@ -1474,7 +1474,13 @@ function CoupleMapSVG({ myS, partS, userName, partnerName, size = 480 }) {
         <text x={cx1 - 14} y={cy1 - 24} fontSize="15" fontWeight="800" fill={QC.Z} fontFamily="Georgia,serif" textAnchor="end" opacity="0.95">Z</text>
         <text x={cx1 - 14} y={cy1 - 10} fontSize="11.5" fontWeight="700" fill={QC.Z} fontFamily="Arial" textAnchor="end" opacity="0.8">{QN.Z}</text>
 
-        {/* ── AXIS LABELS — removed per design direction ── */}
+        {/* ── AXIS LABELS ── */}
+        {/* Vertical axis: Engage (top) / Withdraw (bottom) */}
+        <text x={midX} y={cy0 - 16} textAnchor="middle" fontSize="11" fontWeight="700" fill="#8C7A68" fontFamily="Arial" letterSpacing="2">ENGAGE</text>
+        <text x={midX} y={cy1 + 30} textAnchor="middle" fontSize="11" fontWeight="700" fill="#8C7A68" fontFamily="Arial" letterSpacing="2">WITHDRAW</text>
+        {/* Horizontal axis: Open (left) / Guarded (right) — rotated to run along each side */}
+        <text x={cx0 - 14} y={midY} textAnchor="middle" fontSize="11" fontWeight="700" fill="#8C7A68" fontFamily="Arial" letterSpacing="2" transform={`rotate(-90 ${cx0 - 14} ${midY})`}>OPEN</text>
+        <text x={cx1 + 14} y={midY} textAnchor="middle" fontSize="11" fontWeight="700" fill="#8C7A68" fontFamily="Arial" letterSpacing="2" transform={`rotate(90 ${cx1 + 14} ${midY})`}>GUARDED</text>
 
 
         {/* ── CONNECTING LINE ── */}
@@ -1508,17 +1514,6 @@ function CoupleMapSVG({ myS, partS, userName, partnerName, size = 480 }) {
         {/* Tail triangle */}
         <polygon points={`${axA.x},${tagAy + tagH} ${axA.x - 5},${tagAy + tagH - 6} ${axA.x + 5},${tagAy + tagH - 6}`} fill={itA.color}/>
       </svg>
-
-      {/* ── LEGEND ── */}
-      <div style={{ display: "flex", gap: "1.25rem", padding: "0.85rem 0.25rem 0.75rem", borderTop: "1px solid #E8DDD0", flexWrap: "wrap" }}>
-        {[{ name: userName, it: itA }, { name: partnerName, it: itB }].map(({ name, it }) => (
-          <div key={name} style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-            <div style={{ width: 10, height: 10, borderRadius: "50%", background: it.color, flexShrink: 0 }}/>
-            <span style={{ fontSize: "0.72rem", fontWeight: 700, color: "#0E0B07", fontFamily: BFONT }}>{name}</span>
-            <span style={{ fontSize: "0.65rem", color: "#8C7A68", fontFamily: BFONT }}>{it.code} · {it.name}</span>
-          </div>
-        ))}
-      </div>
 
       {/* ── 50-QUESTION CALLOUT ── */}
       <div style={{ display: "flex", alignItems: "flex-start", gap: "0.65rem", background: "#FBF8F3", border: "1.5px solid #E8DDD0", borderRadius: 12, padding: "0.85rem 1rem", marginTop: "0.25rem" }}>
@@ -1587,16 +1582,9 @@ function CoupleTypeCard({ coupleType, userName, partnerName, onClick }) {
         <div style={{ fontFamily: HFONT, fontSize: "clamp(1.8rem, 4vw, 2.4rem)", fontWeight: 700, color: "white", lineHeight: 1.0, marginBottom: "0.5rem", letterSpacing: "-0.01em" }}>
           {name}
         </div>
-        <p style={{ fontSize: "0.92rem", color: color, fontFamily: BFONT, fontWeight: 500, lineHeight: 1.5, margin: "0 0 1.25rem", maxWidth: 480 }}>
+        <p style={{ fontSize: "0.92rem", color: color, fontFamily: BFONT, fontWeight: 500, lineHeight: 1.5, margin: "0", maxWidth: 480 }}>
           {interp(tagline)}
         </p>
-        <p style={{ fontSize: "0.85rem", color: "rgba(245,239,230,0.88)", fontFamily: BFONT, fontWeight: 300, lineHeight: 1.8, margin: "0 0 1.25rem", maxWidth: 520 }}>
-          {interp(description)}
-        </p>
-        <div style={{ borderLeft: `3px solid ${color}55`, paddingLeft: "1rem" }}>
-          <div style={{ fontSize: "0.58rem", letterSpacing: "0.2em", textTransform: "uppercase", color: color + "88", fontFamily: BFONT, fontWeight: 700, marginBottom: "0.3rem" }}>Worth knowing</div>
-          <p style={{ fontSize: "0.8rem", color: "rgba(245,239,230,0.75)", fontFamily: BFONT, fontWeight: 300, lineHeight: 1.75, margin: 0 }}>{interp(nuance)}</p>
-        </div>
       </div>
     </div>
   );
@@ -3549,74 +3537,31 @@ function PersonalityResults({ myAnswers, partnerAnswers, userName, partnerName, 
           <p style={{ fontSize: "0.72rem", color: "rgba(255,255,255,0.32)", fontFamily: BFONT, fontWeight: 300, lineHeight: 1.55, margin: "0.6rem 0 0" }}>Tap any dimension below to read the full picture.</p>
         </div>
 
-        {/* ── WHAT'S DRIVING YOUR GAP ── */}
-        {(() => {
-          const topGaps = sortedFeedback.filter(f => f.gap > 1.5).slice(0, 2);
-          if (topGaps.length === 0) return null;
-          return (
-            <div style={{ background: "rgba(232,103,58,0.1)", border: "1px solid rgba(232,103,58,0.25)", borderRadius: 14, padding: "1rem 1.1rem", marginBottom: "1rem" }}>
-              <div style={{ fontSize: "0.55rem", letterSpacing: "0.18em", textTransform: "uppercase", color: "#E8673A", fontFamily: BFONT, fontWeight: 700, marginBottom: "0.6rem" }}>Start here</div>
-              <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
-                {topGaps.map((f, i) => {
-                  const m = DIM_META[f.dim];
-                  const myScore = myS[f.dim] ?? 3;
-                  const partScore = partS[f.dim] ?? 3;
-                  const myEnd = myScore < 3 ? m.ends[0] : m.ends[1];
-                  const partEnd = partScore < 3 ? m.ends[0] : m.ends[1];
-                  return (
-                    <div key={f.dim} onClick={() => go(sortedFeedback.indexOf(f) + 1)}
-                      style={{ display: "flex", alignItems: "flex-start", gap: "0.65rem", cursor: "pointer" }}>
-                      <div style={{ width: 20, height: 20, borderRadius: "50%", background: "rgba(232,103,58,0.18)", border: "1px solid rgba(232,103,58,0.35)", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", marginTop: 1 }}>
-                        <span style={{ fontSize: "0.62rem", color: "#E8673A", fontWeight: 700 }}>{i + 1}</span>
-                      </div>
-                      <div>
-                        <span style={{ fontSize: "0.78rem", fontWeight: 700, color: "white", fontFamily: BFONT }}>{m.label}: </span>
-                        <span style={{ fontSize: "0.76rem", color: "rgba(255,255,255,0.72)", fontFamily: BFONT, fontWeight: 300 }}>
-                          {userName} leans {myEnd.toLowerCase()}, {partnerName} leans {partEnd.toLowerCase()}.
-                        </span>
-                        <span style={{ fontSize: "0.68rem", color: "rgba(232,103,58,0.7)", fontFamily: BFONT, marginLeft: "0.3rem" }}>Read more →</span>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          );
-        })()}
-
         {/* ── COUPLE TYPE CALLOUT ── */}
         {coupleType && (() => {
-          const interp = s => s
-            .replace(/\{U\}/g, userName).replace(/\{P\}/g, partnerName);
-          // Pick the most communication-relevant pattern (first one or the one mentioning stress/conflict/communication)
-          const commPattern = coupleType?.patterns?.find(p =>
-            /stress|conflict|tension|hard|regulate|say|talk|communicate/i.test(p)
-          ) || coupleType?.patterns?.[0];
-          const commTip = coupleType?.tips?.find(t =>
-            /communicate|conversation|say|name|ask|direct|conflict|repair/i.test(t.body || t.title)
-          ) || coupleType?.tips?.[0];
-          if (!commPattern && !commTip) return null;
+          const COMM_COUPLE_CONTEXT = {
+            WW: "Two Initiators both express openly and engage quickly. The risk isn't silence, it's two people talking before either has fully heard the other.",
+            XX: "Two Anchors process privately, then push toward resolution. Make sure the internal work gets said out loud, not just acted on.",
+            YY: "Two Feelers both feel deeply and need space first. Give each other the runway before the conversation, it lands better when you do.",
+            ZZ: "Two Protectors both hold things close. Build a deliberate habit of saying what's going on before it goes unsaid for too long.",
+            WX: "One of you expresses readily; the other processes first. The one who speaks first isn't more invested, just faster to externalize.",
+            WY: "Different clocks here. One reaches for the conversation; the other needs a moment before it's possible. Neither is pushing or avoiding.",
+            WZ: "The Initiator will open the conversation; The Protector needs time to respond. That gap is wiring, not avoidance, name it so neither misreads the other.",
+            XY: "The Anchor wants to resolve; The Feeler needs space to process. Build a return window so the conversation isn't rushed or dropped.",
+            XZ: "Both of you keep things close. What goes unspoken can accumulate quietly, say the small things before they become big ones.",
+            YZ: "Both withdraw under pressure. When something's hard, agree in advance on who comes back first so neither waits indefinitely.",
+          };
+          const ctCode = (coupleType?.typeInfoA?.typeCode || "") + (coupleType?.typeInfoB?.typeCode || "");
+          const ctPairKey = ctCode ? ctCode.split("").sort().join("") : null;
+          const ctContext = ctPairKey ? COMM_COUPLE_CONTEXT[ctPairKey] : null;
+          if (!coupleType?.name || !ctContext) return null;
           return (
-            <div style={{ background: `rgba(${coupleType?.color === '#10b981' ? '16,185,129' : coupleType?.color === '#1B5FE8' ? '27,95,232' : '232,103,58'},0.08)`, border: `1px solid ${coupleType?.color}30`, borderRadius: 14, padding: '1rem 1.1rem', marginBottom: '1rem' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '0.65rem' }}>
-                <div style={{ width: 22, height: 22, borderRadius: '50%', background: `${coupleType?.color}22`, border: `1.5px solid ${coupleType?.color}50`, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <div style={{ width: 7, height: 7, borderRadius: '50%', background: coupleType?.color }} />
-                </div>
-                <div style={{ fontSize: '0.55rem', letterSpacing: '0.18em', textTransform: 'uppercase', color: coupleType?.color, fontFamily: BFONT, fontWeight: 700 }}>
-                  {coupleType?.name} · how this plays out in communication
-                </div>
-              </div>
-              {commPattern && (
-                <p style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.75)', fontFamily: BFONT, fontWeight: 300, lineHeight: 1.72, margin: '0 0 0.65rem' }}>
-                  {interp(commPattern)}
-                </p>
-              )}
-              {commTip && (
-                <div style={{ borderTop: '1px solid rgba(255,255,255,0.08)', paddingTop: '0.65rem' }}>
-                  <span style={{ fontSize: '0.72rem', fontWeight: 700, color: 'rgba(255,255,255,0.6)', fontFamily: BFONT }}>{commTip.title}: </span>
-                  <span style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.42)', fontFamily: BFONT, fontWeight: 300 }}>{interp(commTip.body)}</span>
-                </div>
-              )}
+            <div style={{ display: "flex", alignItems: "flex-start", gap: "0.55rem", background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.12)", borderRadius: 10, padding: "0.7rem 0.85rem", marginBottom: "1rem" }}>
+              <div style={{ width: 6, height: 6, borderRadius: "50%", background: coupleType?.color, flexShrink: 0, marginTop: 5 }}/>
+              <p style={{ fontSize: "0.74rem", color: "rgba(255,255,255,0.65)", fontFamily: BFONT, fontWeight: 300, lineHeight: 1.6, margin: 0 }}>
+                <span style={{ fontWeight: 700, color: "rgba(255,255,255,0.88)" }}>{coupleType.name}: </span>
+                {ctContext}
+              </p>
             </div>
           );
         })()}
@@ -3637,14 +3582,15 @@ function PersonalityResults({ myAnswers, partnerAnswers, userName, partnerName, 
             </div>
           </div>
           <div style={{ display: "flex", flexDirection: "column", gap: "0.55rem" }}>
-            {sortedFeedback.map(f => {
+            {orderedDims.map(dim => {
+              const f = byDim[dim];
+              if (!f) return null;
               const m = DIM_META[f.dim];
               const myScore = myS[f.dim] ?? 3;
               const partScore = partS[f.dim] ?? 3;
               // Score is 1–5; normalize to 10–90% for visual range
               const myPct = Math.round(10 + (myScore - 1) * 20);
               const partPct = Math.round(10 + (partScore - 1) * 20);
-              const isAligned = f.gap <= 1;
               // 10px dots overlap when within ~5% horizontally. Vertical offset keeps both visible.
               const close = Math.abs(myPct - partPct) < 6;
               const myIsLeft = myPct <= partPct;
@@ -3658,38 +3604,15 @@ function PersonalityResults({ myAnswers, partnerAnswers, userName, partnerName, 
                     <div style={{ position: "absolute", top: "50%", transform: `translateY(calc(-50% + ${myDy}px))`, left: `${myPct}%`, width: 10, height: 10, borderRadius: "50%", background: "#E8673A", border: "1.5px solid rgba(14,11,7,0.3)", marginLeft: -5, zIndex: 2 }} />
                     <div style={{ position: "absolute", top: "50%", transform: `translateY(calc(-50% + ${partDy}px))`, left: `${partPct}%`, width: 10, height: 10, borderRadius: "50%", background: "#6C7FFF", border: "1.5px solid rgba(14,11,7,0.3)", marginLeft: -5, zIndex: 1 }} />
                   </div>
-                  <span style={{ fontSize: "0.55rem", color: isAligned ? "#10b981" : "#E8673A", fontFamily: BFONT, fontWeight: 600, flexShrink: 0, minWidth: "60px", textAlign: "right" }}>{isAligned ? "aligned" : "explore →"}</span>
                 </div>
               );
             })}
           </div>
           <div style={{ display: "flex", justifyContent: "space-between", marginTop: "0.5rem" }}>
-            <span style={{ fontSize: "0.55rem", color: "rgba(255,255,255,0.2)", fontFamily: BFONT }}>{DIM_META[sortedFeedback[0]?.dim]?.ends?.[0] ?? "A"}</span>
-            <span style={{ fontSize: "0.55rem", color: "rgba(255,255,255,0.2)", fontFamily: BFONT }}>{DIM_META[sortedFeedback[0]?.dim]?.ends?.[1] ?? "B"}</span>
+            <span style={{ fontSize: "0.55rem", color: "rgba(255,255,255,0.2)", fontFamily: BFONT }}>{DIM_META[orderedDims[0]]?.ends?.[0] ?? "A"}</span>
+            <span style={{ fontSize: "0.55rem", color: "rgba(255,255,255,0.2)", fontFamily: BFONT }}>{DIM_META[orderedDims[0]]?.ends?.[1] ?? "B"}</span>
           </div>
         </div>
-
-        {/* Strong alignment, gap ≤ 1 */}
-        {sortedFeedback.filter(f => f.gap <= 1).length > 0 && (
-          <div style={{ marginBottom: "1rem" }}>
-            <div style={{ fontSize: "0.58rem", letterSpacing: "0.18em", textTransform: "uppercase", color: "#10b981", fontFamily: BFONT, fontWeight: 700, marginBottom: "0.55rem" }}>Strong alignment</div>
-            <div style={{ display: "flex", flexDirection: "column", gap: "0.3rem" }}>
-              {sortedFeedback.filter(f => f.gap <= 1).map(f => {
-                const m = DIM_META[f.dim]; const idx = sortedFeedback.indexOf(f);
-                return (
-                  <div key={f.dim} onClick={() => go(idx + 1)}
-                    style={{ display: "flex", alignItems: "center", gap: "0.65rem", padding: "0.45rem 0.75rem", borderRadius: 8, background: "rgba(16,185,129,0.1)", border: "1px solid rgba(16,185,129,0.22)", cursor: "pointer", transition: "background 0.12s" }}
-                    onMouseEnter={e => e.currentTarget.style.background = "rgba(16,185,129,0.18)"}
-                    onMouseLeave={e => e.currentTarget.style.background = "rgba(16,185,129,0.1)"}>
-                    <div style={{ width: 7, height: 7, borderRadius: "50%", background: "#10b981", flexShrink: 0 }} />
-                    <span style={{ fontSize: "0.78rem", color: "rgba(255,255,255,0.88)", fontFamily: BFONT, flex: 1 }}>{m.label}</span>
-                    <span style={{ fontSize: "0.62rem", color: "rgba(16,185,129,0.7)", fontFamily: BFONT }}>→</span>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        )}
 
         {/* What's in this section */}
         <div style={{ borderTop: "1px solid rgba(255,255,255,0.1)", paddingTop: "0.85rem" }}>
@@ -3766,43 +3689,6 @@ function PersonalityResults({ myAnswers, partnerAnswers, userName, partnerName, 
             <p style={{ fontSize: "0.9rem", color: "white", lineHeight: 1.8, margin: 0, fontFamily: BFONT, fontWeight: f.isStrength ? 400 : 500 }}>{f.adviceText || `You two line up here. That's an easy place to take for granted. Name it out loud once in a while so the alignment stays a choice, not an assumption.`}</p>
           </div>
         )}
-
-        {/* ── TYPE-SPECIFIC DIM NOTE — shown only on gap dims for the couple's type ── */}
-        {coupleType && f.gap > 1.2 && (() => {
-          // Find a sticking point or nuance that references this dim's domain
-          const dimKeywords = {
-            conflict: /conflict|tension|disagree|fight|argue|resolve/i,
-            repair: /repair|apolog|make.*up|after.*argument|forgive/i,
-            stress: /stress|pressure|overwhelm|anxious|under pressure/i,
-            feedback: /feedback|criticism|raise.*issue|mention.*bother/i,
-            expression: /express|share|open|vulnerable|feeling/i,
-            needs: /need|ask|request|direct|hint/i,
-            energy: /recharge|energy|space|solitude|together/i,
-            closeness: /close|together|independent|distance/i,
-            love: /love|affection|care|gesture|language/i,
-            bids: /bid|notice|small|gesture|respond/i,
-          };
-          const keywords = dimKeywords[dim];
-          const relevantNote = keywords && (
-            coupleType?.stickingPoints?.find(sp => keywords.test(sp)) ||
-            coupleType?.nuance && keywords.test(coupleType?.nuance) && coupleType?.nuance
-          );
-          if (!relevantNote) return null;
-          const interp = s => s.replace(/\{U\}/g, userName).replace(/\{P\}/g, partnerName);
-          return (
-            <div style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 12, padding: '0.85rem 1.1rem', display: 'flex', gap: '0.7rem', alignItems: 'flex-start' }}>
-              <div style={{ width: 18, height: 18, borderRadius: '50%', background: `${coupleType?.color}22`, border: `1.5px solid ${coupleType?.color}50`, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', marginTop: 2 }}>
-                <div style={{ width: 5, height: 5, borderRadius: '50%', background: coupleType?.color }} />
-              </div>
-              <div>
-                <div style={{ fontSize: '0.55rem', letterSpacing: '0.16em', textTransform: 'uppercase', color: coupleType?.color, fontFamily: BFONT, fontWeight: 700, marginBottom: '0.3rem' }}>
-                  {coupleType?.name}
-                </div>
-                <p style={{ fontSize: '0.76rem', color: 'rgba(255,255,255,0.55)', fontFamily: BFONT, fontWeight: 300, lineHeight: 1.65, margin: 0 }}>{interp(relevantNote)}</p>
-              </div>
-            </div>
-          );
-        })()}
 
         <NavButtons
           onBack={() => go(step - 1)}
@@ -3926,12 +3812,6 @@ function PersonalityResults({ myAnswers, partnerAnswers, userName, partnerName, 
               <span style={{ fontSize: "0.72rem", fontWeight: 700, color: pageColor, fontFamily: BFONT, letterSpacing: "0.06em" }}>{personType.name}</span>
               <span style={{ fontSize: "0.65rem", color: "rgba(255,255,255,0.35)", fontFamily: BFONT }}>· {personType.axis1} · {personType.axis2}</span>
             </div>
-          </div>
-
-          {/* ── Section 1: How you're wired ── */}
-          <div style={{ background: "rgba(255,255,255,0.06)", borderRadius: 16, padding: "1.25rem", marginBottom: "0.85rem", border: `1px solid ${pageColor}25` }}>
-            <div style={{ fontSize: "0.6rem", textTransform: "uppercase", letterSpacing: "0.18em", color: pageColor, fontWeight: 700, marginBottom: "0.7rem", fontFamily: BFONT }}>How you're wired</div>
-            <p style={{ fontSize: "0.88rem", color: "rgba(255,255,255,0.88)", fontFamily: BFONT, fontWeight: 300, lineHeight: 1.72, margin: 0 }}>{personType.wired}</p>
           </div>
 
           {/* ── Section 2: Your type ── */}
@@ -4298,30 +4178,6 @@ function ExpectationsResults({ myAnswers, partnerAnswers, userName, partnerName,
               </div>
             </div>
 
-            {/* Strong alignment — fully aligned categories */}
-            {fullyAlignedCats.length > 0 && (
-              <div style={{ marginBottom: "1rem" }}>
-                <div style={{ fontSize: "0.58rem", letterSpacing: "0.18em", textTransform: "uppercase", color: "#10b981", fontFamily: BFONT, fontWeight: 700, marginBottom: "0.55rem" }}>Strong alignment</div>
-                <div style={{ display: "flex", flexDirection: "column", gap: "0.3rem" }}>
-                  {fullyAlignedCats.map((fc, i) => {
-                    const catAligned = aligned.filter(r => r.catId === fc.id).length;
-                    return (
-                    <div key={fc.id} onClick={() => go(`convo-${FIXED_CATS.indexOf(fc)}`)}
-                      style={{ display: "flex", alignItems: "center", gap: "0.65rem", padding: "0.45rem 0.75rem", borderRadius: 8, background: "rgba(16,185,129,0.1)", border: "1px solid rgba(16,185,129,0.22)", cursor: "pointer", transition: "background 0.12s" }}
-                      onMouseEnter={e => e.currentTarget.style.background = "rgba(16,185,129,0.18)"}
-                      onMouseLeave={e => e.currentTarget.style.background = "rgba(16,185,129,0.1)"}>
-                      <div style={{ width: 7, height: 7, borderRadius: "50%", background: "#10b981", flexShrink: 0 }} />
-                      <span style={{ fontSize: "0.78rem", color: "rgba(255,255,255,0.88)", fontFamily: BFONT, flex: 1 }}>{fc.label}</span>
-                      <span style={{ fontSize: "0.6rem", color: "rgba(16,185,129,0.65)", fontFamily: BFONT }}>{catAligned} aligned ·</span>
-                      <span style={{ fontSize: "0.62rem", color: "rgba(16,185,129,0.7)", fontFamily: BFONT }}>→</span>
-                    </div>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
-
-            
             {/* What's in this section */}
             <div style={{ borderTop: "1px solid rgba(255,255,255,0.1)", paddingTop: "0.85rem" }}>
               <div style={{ fontSize: "0.55rem", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.3)", fontFamily: BFONT, fontWeight: 700, marginBottom: "0.5rem" }}>What's in this section</div>
@@ -7442,16 +7298,6 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
     const interp = (str) => str
       ? str.replace(/\{U\}/g, userName).replace(/\{P\}/g, partnerName) : str;
 
-    // Reading guide data
-    const readingGuide = [
-      { label: "Same quadrant", meaning: "Both partners share the same dominant orientation. The dynamic tends toward amplification, the shared strengths and shared risks are both magnified." },
-      { label: "Adjacent quadrants", meaning: "Partners share one axis and diverge on the other. One area of strong agreement, one specific friction point worth naming." },
-      { label: "Diagonal quadrants", meaning: "Partners diverge on both axes. The widest contrast pairings. Both the conflict timing and the expressiveness gap need explicit attention." },
-      { label: "Dot near axis line", meaning: "That partner is closer to balanced on that dimension. Their type is accurate but less extreme. They're more flexible on that axis than their position might suggest." },
-      { label: "Dots close together", meaning: "Scores are similar. High compatibility on these axes, look to the other dimensions for where the differences live." },
-      { label: "Dots far apart", meaning: "Significant divergence. The map is making the gap visible. This is where the conversation starts." },
-    ];
-
     return (
       <Layout accent={accent}>
         <div style={{ maxWidth: 660 }}>
@@ -7599,22 +7445,6 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
             </div>
             );
           })()}
-          {/* ── HOW TO READ THE MAP ── */}
-          <div style={{ background: "white", border: `1.5px solid ${C.stone}`, borderRadius: 18, padding: "1.5rem", marginBottom: "1.25rem" }}>
-            <div style={{ fontSize: "0.6rem", letterSpacing: "0.22em", textTransform: "uppercase", color: C.muted, fontFamily: BFONT, fontWeight: 700, marginBottom: "1rem" }}>How to read the map</div>
-            <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
-              {readingGuide.map(({ label, meaning }, i) => (
-                <div key={i} style={{ display: "flex", gap: "0.85rem", alignItems: "flex-start" }}>
-                  <div style={{ flexShrink: 0, marginTop: 3 }}>
-                    <div style={{ width: 7, height: 7, borderRadius: "50%", background: accent }} />
-                  </div>
-                  <p style={{ fontSize: "0.84rem", color: C.ink, fontFamily: BFONT, lineHeight: 1.65, margin: 0 }}>
-                    <span style={{ fontWeight: 700 }}>{label}: </span>{meaning}
-                  </p>
-                </div>
-              ))}
-            </div>
-          </div>
 
           {/* ── NUANCE removed ── */}
 
