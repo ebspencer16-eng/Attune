@@ -346,11 +346,6 @@ EXP_DOMAINS = [
      'discussText':      "You picture some of the foundational pieces of your shared life differently. These are the assumptions worth saying out loud before time makes them harder to revisit.",
      'differentText':    "You hold significantly different pictures of the life you are building. Differences this large tend to compound, but only if they stay unspoken.",
      'thisWeek':  "Write down, separately, then share, one sentence about what you want your shared life to look like in five years. Don't edit for what you think the other wants to hear."},
-    {'key': 'operate',  'label': 'How We Operate',  'color': 'purple',
-     'compatibleText':   "You have similar instincts about conflict, repair, and closeness. The mechanics of getting back to each other tend to come without much translation.",
-     'discussText':      "Your instincts on friction and closeness diverge in places. These are the differences that matter most in the moments when one of you is already at capacity.",
-     'differentText':    "You operate from significantly different defaults around conflict and connection. The translation gap is widest exactly when the relationship needs it least.",
-     'thisWeek':  "Each of you describes what you most need from the other when you are at your worst. Compare them. The mismatch is the conversation."},
 ]
 
 # Domain icon glyphs (rendered in the page header).
@@ -360,7 +355,6 @@ DOMAIN_ICONS = {
     'extended_family': '❦',
     'money':           '$',
     'life':            '❀',
-    'operate':         '◐',
 }
 
 # Universal row labels per domain. The values that appear next to
@@ -384,14 +378,12 @@ DOMAIN_ROWS = {
         'Repair after friction',
     ],
     # Extended Family rows are name-substituted at render time. The
-    # placeholders {U} and {P} resolve to the user/partner names. Six
-    # rows total, each tied to one of the six responsibility items in
+    # placeholders {U} and {P} resolve to the user/partner names. Four
+    # rows total, each tied to one of the four responsibility items in
     # App.jsx RESPONSIBILITY_CATEGORIES.extended_family.
     'extended_family': [
         "Visits with {U}'s family",
         "Visits with {P}'s family",
-        "Staying in touch with {U}'s family",
-        "Staying in touch with {P}'s family",
         "Gifting for {U}'s family",
         "Gifting for {P}'s family",
     ],
@@ -411,14 +403,6 @@ DOMAIN_ROWS = {
         'Daily rhythm',
         'Faith & spirituality',
         'Core values & beliefs',
-    ],
-    'operate': [
-        'When to address conflict',
-        'Conflict resolution time',
-        'What repair looks like',
-        'Physical affection',
-        'Closeness during hard times',
-        'Independence',
     ],
 }
 
@@ -818,7 +802,6 @@ COUPLE = {
         'extended_family': 67,
         'money':           78,
         'life':            73,
-        'operate':         68,
     },
     # Per-domain row values. Keys MUST match DOMAIN_ROWS labels exactly.
     # Each value is what shows in the bold column on the workbook page.
@@ -834,8 +817,8 @@ COUPLE = {
             'david': [('Mental load', 'Both of us'), ('Tracking how everyone is', 'Both of us'), ('Maintaining closeness', 'Both of us'), ('Hard conversations', 'Both of us'), ('Repair after friction', 'Both of us')],
         },
         'extended_family': {
-            'maya':  [("Visits with Maya's family", 'Maya'), ("Visits with David's family", 'Both of us'), ("Staying in touch with Maya's family", 'Maya'), ("Staying in touch with David's family", 'David'), ("Gifting for Maya's family", 'Maya'), ("Gifting for David's family", 'Both of us')],
-            'david': [("Visits with Maya's family", 'Maya'), ("Visits with David's family", 'David'), ("Staying in touch with Maya's family", 'Maya'), ("Staying in touch with David's family", 'David'), ("Gifting for Maya's family", 'Maya'), ("Gifting for David's family", 'David')],
+            'maya':  [("Visits with Maya's family", 'Maya'), ("Visits with David's family", 'Both of us'), ("Gifting for Maya's family", 'Maya'), ("Gifting for David's family", 'Both of us')],
+            'david': [("Visits with Maya's family", 'Maya'), ("Visits with David's family", 'David'), ("Gifting for Maya's family", 'Maya'), ("Gifting for David's family", 'David')],
         },
         'money': {
             'maya':  [('Day-to-day finances', 'Both of us'), ('Long-term financial decisions', 'Both of us'), ('Whose career is prioritized', 'Both of us'), ('How we hold money', 'Mostly combined'), ('Saving v spending', 'Lean saving'), ('Risk tolerance', 'Comfortable')],
@@ -844,10 +827,6 @@ COUPLE = {
         'life': {
             'maya':  [('Children', 'Want at least one'), ('When family & partner conflict', 'Side with partner'), ('Where we live', 'Strong preference'), ('Social life', 'Balanced'), ('Daily rhythm', 'Loose'), ('Faith & spirituality', 'Personal'), ('Core values & beliefs', 'Closely aligned')],
             'david': [('Children', 'Want at least one'), ('When family & partner conflict', 'Mediate'), ('Where we live', 'Wherever'), ('Social life', 'Quiet'), ('Daily rhythm', 'Loose'), ('Faith & spirituality', 'Personal'), ('Core values & beliefs', 'Closely aligned')],
-        },
-        'operate': {
-            'maya':  [('When to address conflict', 'Immediately'), ('Conflict resolution time', 'Same day'), ('What repair looks like', 'Direct apology'), ('Physical affection', 'Essential'), ('Closeness during hard times', 'More closeness'), ('Independence', 'Important')],
-            'david': [('When to address conflict', 'Right moment'), ('Conflict resolution time', 'A night or two'), ('What repair looks like', 'Warmth returns'), ('Physical affection', 'Very important'), ('Closeness during hard times', 'Pull back'), ('Independence', 'Important')],
         },
     },
 }
@@ -2257,7 +2236,7 @@ def build_snapshot(page_num):
         short = {'household': 'Household', 'emotional': 'Emotional Labor',
                  'extended_family': 'Extended Family',
                  'money': 'Money & Career', 'life': 'Life Together',
-                 'operate': 'How We Operate'}[e['key']]
+                 }[e['key']]
         exp_cards.append(f"""
       <div class="exp-card {status_class}">
         <span class="exp-label">{short}</span>

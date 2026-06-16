@@ -182,13 +182,6 @@ export const EXP_DOMAINS = [
     differentText:  "You hold significantly different pictures of the life you are building. Differences this large tend to compound, but only if they stay unspoken.",
     thisWeek:       "Write down, separately, then share, one sentence about what you want your shared life to look like in five years. Don't edit for what you think the other wants to hear.",
   },
-  {
-    key: 'operate', label: 'How We Operate', color: 'purple',
-    compatibleText: "You have similar instincts about conflict, repair, and closeness. The mechanics of getting back to each other tend to come without much translation.",
-    discussText:    "Your instincts on friction and closeness diverge in places. These are the differences that matter most in the moments when one of you is already at capacity.",
-    differentText:  "You operate from significantly different defaults around conflict and connection. The translation gap is widest exactly when the relationship needs it least.",
-    thisWeek:       "Each of you describes what you most need from the other when you are at your worst. Compare them. The mismatch is the conversation.",
-  },
 ];
 
 // Universal row labels per domain. Names get substituted in extended_family
@@ -214,8 +207,6 @@ export const DOMAIN_ROWS = {
   extended_family: [
     "Visits with {U}'s family",
     "Visits with {P}'s family",
-    "Staying in touch with {U}'s family",
-    "Staying in touch with {P}'s family",
     "Gifting for {U}'s family",
     "Gifting for {P}'s family",
   ],
@@ -235,14 +226,6 @@ export const DOMAIN_ROWS = {
     'Daily rhythm',
     'Faith & spirituality',
     'Core values & beliefs',
-  ],
-  operate: [
-    'When to address conflict',
-    'Conflict resolution time',
-    'What repair looks like',
-    'Physical affection',
-    'Closeness during hard times',
-    'Independence',
   ],
 };
 
@@ -352,10 +335,8 @@ export function scoreLifeQuestionPair(userValue, partnerValue, options) {
 // reasonable approximation but not a true semantic similarity.
 export const LIFE_QUESTION_OPTIONS = {
   lq_children:        ['Not part of my future', 'Uncertain', 'Open to it', 'Important to me, I want at least one', 'Central to my future'],
-  lq_inperson_user:   ['Rarely, by design', 'A few times a year', 'Several times a year', 'Often, regular visits', 'Very often, deeply integrated'],
-  lq_contact_user:    ['Minimal contact', 'Occasional check-ins', 'Regular contact', 'Daily or near-daily', 'Closely involved in our lives'],
-  lq_inperson_partner:['Rarely, by design', 'A few times a year', 'Several times a year', 'Often, regular visits', 'Very often, deeply integrated'],
-  lq_contact_partner: ['Minimal contact', 'Occasional check-ins', 'Regular contact', 'Daily or near-daily', 'Closely involved in our lives'],
+  lq_involve_user:    ['Very little, if any', 'Minimal, by design', 'Casual relationship', 'Consistent contact', 'Frequent, deeply integrated'],
+  lq_involve_partner: ['Very little, if any', 'Minimal, by design', 'Casual relationship', 'Consistent contact', 'Frequent, deeply integrated'],
   lq_family_conf:     ['Side with partner', 'Mediate fairly', 'Defend family if right', 'Keep the peace'],
   lq_location:        ['Rooted where I am', 'Strong preference, open to discussion', 'Wherever makes sense for both', 'Genuinely open'],
   lq_social:          ['Mostly just us', 'Quiet default', 'Healthy balance', 'Pretty social', 'Very social'],
@@ -365,12 +346,6 @@ export const LIFE_QUESTION_OPTIONS = {
   lq_finances:        ['Fully separate', 'Mostly separate, shared account for shared expenses', 'Mostly combined', 'Fully combined'],
   lq_money_lean:      ['Strongly saving', 'Lean toward saving', 'Neither', 'Lean toward spending', 'Fully in the present'],
   lq_money_risk:      ['Very conservative', 'Cautious but open', 'Comfortable with thought-through risk', 'Lean toward risk', 'Drawn to bold moves'],
-  lq_conflict_when:   ['Address immediately', 'Bring up soon', 'Wait for right moment', 'Take significant space', 'Let things go'],
-  lq_conflict_after:  ['Air clears quickly', 'Little space, same day', 'Need a night or two', 'Need several days', 'Varies a lot'],
-  lq_conflict_repair: ['Direct explicit apology', 'Partner understands what happened', 'Warmth returns', 'Moving forward together'],
-  lq_affection:       ['Essential', 'Very important', 'Nice but not needed consistently', 'Comfortable with less', 'Reserved'],
-  lq_closeness:       ['Need more closeness', 'Steady need', 'Pull back and need space', 'Varies a lot'],
-  lq_independence:    ['Matters enormously', 'Important but flexible', "Don't think about it much", 'Want less, prefer shared life'],
 };
 
 // ── Gap blurbs ────────────────────────────────────────────────────────────

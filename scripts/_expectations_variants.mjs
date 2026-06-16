@@ -52,10 +52,8 @@ export const RESPONSIBILITY_CATEGORIES = [
     items: [
       "Planning visits with {userName}'s family",
       "Gifting for {userName}'s family",
-      "Staying in touch with {userName}'s family",
       "Planning visits with {partnerName}'s family",
       "Gifting for {partnerName}'s family",
-      "Staying in touch with {partnerName}'s family",
     ],
   },
   {
@@ -112,32 +110,18 @@ export const LIFE_QUESTIONS = [
     options: ['Not part of my future', 'Uncertain', 'Open to it', 'Important to me, I want at least one', 'Central to my future'],
   },
   {
-    id: 'lq_inperson_user', category: 'Family', topic: "Time we spend in person with {userName}'s family",
-    core:        'how often do you want to see them?',
-    anniversary: 'is the current visit cadence working for you?',
-    revisiting:  'where do you want this to settle?',
-    options: ['Rarely, by design', 'A few times a year', 'Several times a year', 'Often, regular visits', 'Very often, deeply integrated'],
-  },
-  {
-    id: 'lq_contact_user', category: 'Family', topic: "Day-to-day contact and involvement with {userName}'s family",
+    id: 'lq_involve_user', category: 'Family', topic: "When considering in-person visits and/or digital communications, what level of involvement do you expect to have with {userName}'s family",
     core:        'what level of involvement feels right?',
-    anniversary: 'how integrated are they in your daily life now?',
-    revisiting:  'is the current level still the right one?',
-    options: ['Minimal contact', 'Occasional check-ins', 'Regular contact', 'Daily or near-daily', 'Closely involved in our lives'],
-  },
-  {
-    id: 'lq_inperson_partner', category: 'Family', topic: "Time we spend in person with {partnerName}'s family",
-    core:        'how often do you want to see them?',
-    anniversary: 'is the current visit cadence working for you?',
+    anniversary: 'is the current level of involvement working for you?',
     revisiting:  'where do you want this to settle?',
-    options: ['Rarely, by design', 'A few times a year', 'Several times a year', 'Often, regular visits', 'Very often, deeply integrated'],
+    options: ['Very little, if any', 'Minimal, by design', 'Casual relationship', 'Consistent contact', 'Frequent, deeply integrated'],
   },
   {
-    id: 'lq_contact_partner', category: 'Family', topic: "Day-to-day contact and involvement with {partnerName}'s family",
+    id: 'lq_involve_partner', category: 'Family', topic: "When considering in-person visits and/or digital communications, what level of involvement do you expect to have with {partnerName}'s family",
     core:        'what level of involvement feels right?',
-    anniversary: 'how integrated are they in your daily life now?',
-    revisiting:  'is the current level still the right one?',
-    options: ['Minimal contact', 'Occasional check-ins', 'Regular contact', 'Daily or near-daily', 'Closely involved in our lives'],
+    anniversary: 'is the current level of involvement working for you?',
+    revisiting:  'where do you want this to settle?',
+    options: ['Very little, if any', 'Minimal, by design', 'Casual relationship', 'Consistent contact', 'Frequent, deeply integrated'],
   },
   {
     id: 'lq_family_conf', category: 'Family', topic: 'When family and partner conflict',
@@ -207,52 +191,6 @@ export const LIFE_QUESTIONS = [
     anniversary: 'does your approach to risk match your partner\'s?',
     revisiting:  'where are you on risk today?',
     options: ['Very conservative', 'Cautious but open', 'Comfortable with thought-through risk', 'Lean toward risk', 'Drawn to bold moves'],
-  },
-
-  // ── Conflict ─────────────────────────────────────────────────────────
-  {
-    id: 'lq_conflict_when', category: 'Conflict', topic: 'When to address conflict',
-    core:        'immediately or after time to cool down?',
-    anniversary: 'does your timing around conflict work for both of you?',
-    revisiting:  'how do you handle "something\'s wrong" now?',
-    options: ['Address immediately', 'Bring up soon', 'Wait for right moment', 'Take significant space', 'Let things go'],
-  },
-  {
-    id: 'lq_conflict_after', category: 'Conflict', topic: 'How long conflict resolution typically takes',
-    core:        'how fast do you need repair?',
-    anniversary: 'how well do you return to warmth together?',
-    revisiting:  'what does readiness to move forward look like for you now?',
-    options: ['Air clears quickly', 'Little space, same day', 'Need a night or two', 'Need several days', 'Varies a lot'],
-  },
-  {
-    id: 'lq_conflict_repair', category: 'Conflict', topic: 'What repair looks like',
-    core:        'what do you need to feel okay again?',
-    anniversary: 'what actually signals repair for you?',
-    revisiting:  'what do you need after conflict today?',
-    options: ['Direct explicit apology', 'Partner understands what happened', 'Warmth returns', 'Moving forward together'],
-  },
-
-  // ── Connection ───────────────────────────────────────────────────────
-  {
-    id: 'lq_affection', category: 'Connection', topic: 'Physical affection and touch',
-    core:        'how important is it to you?',
-    anniversary: 'does the current level feel right?',
-    revisiting:  'where is your need for affection now?',
-    options: ['Essential', 'Very important', 'Nice but not needed consistently', 'Comfortable with less', 'Reserved'],
-  },
-  {
-    id: 'lq_closeness', category: 'Connection', topic: 'Closeness during hard times',
-    core:        'do you reach toward or pull back?',
-    anniversary: 'how does difficulty affect your need for closeness with your partner?',
-    revisiting:  'how does hard stuff affect your need for closeness now?',
-    options: ['Need more closeness', 'Steady need', 'Pull back and need space', 'Varies a lot'],
-  },
-  {
-    id: 'lq_independence', category: 'Connection', topic: 'Individual independence within the relationship',
-    core:        'how much space do you need?',
-    anniversary: 'is the current level of independence working?',
-    revisiting:  'how much independent space do you want from here?',
-    options: ['Matters enormously', 'Important but flexible', 'Don\'t think about it much', 'Want less, prefer shared life'],
   },
 ];
 

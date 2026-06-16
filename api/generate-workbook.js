@@ -853,7 +853,6 @@ function buildSnapshot(u, p, scores, partnerScores, coupleType, responsibilities
     { key: 'extended_family', label: 'Extended family' },
     { key: 'money',           label: 'Money & work' },
     { key: 'life',            label: "The life you're building" },
-    { key: 'operate',         label: 'How you operate together' },
   ];
 
   const colorForState = (s) => s === 'compatible' ? GREEN : s === 'discuss' ? ORANGE : '#9B5DE5'.replace('#','');
@@ -1349,7 +1348,6 @@ const DOMAIN_ICONS = {
   extended_family: '\u2766',  // ❦
   money:           '$',
   life:            '\u2740',  // ❀
-  operate:         '\u25D0',  // ◐
 };
 
 // Build the row data for one domain. Returns [{ label, userValue, partnerValue }].
@@ -1402,15 +1400,13 @@ function getDomainRows(domainKey, responsibilities, lifeQuestions, u, p) {
         respRow('Repair after friction',     'emotional', 4),
       ];
     case 'extended_family':
-      // Payload order: V_U, G_U, C_U, V_P, G_P, C_P  (per RESPONSIBILITY_CATEGORIES)
-      // Display order: V_U, V_P, C_U, C_P, G_U, G_P  (visit/contact/gift, alternating sides)
+      // Payload order (per RESPONSIBILITY_CATEGORIES): Visits_U(0), Gift_U(1), Visits_P(2), Gift_P(3)
+      // Display order: visits then gifts, alternating sides.
       return [
-        respRow(`Visits with ${u}'s family`,           'extended_family', 0),
-        respRow(`Visits with ${p}'s family`,           'extended_family', 3),
-        respRow(`Staying in touch with ${u}'s family`, 'extended_family', 2),
-        respRow(`Staying in touch with ${p}'s family`, 'extended_family', 5),
-        respRow(`Gifting for ${u}'s family`,           'extended_family', 1),
-        respRow(`Gifting for ${p}'s family`,           'extended_family', 4),
+        respRow(`Visits with ${u}'s family`,  'extended_family', 0),
+        respRow(`Visits with ${p}'s family`,  'extended_family', 2),
+        respRow(`Gifting for ${u}'s family`,  'extended_family', 1),
+        respRow(`Gifting for ${p}'s family`,  'extended_family', 3),
       ];
     case 'money':
       // Mixed domain: 3 from responsibilities, 3 from life questions.
@@ -1431,15 +1427,6 @@ function getDomainRows(domainKey, responsibilities, lifeQuestions, u, p) {
         lqRow('Daily rhythm',                  'lq_routine'),
         lqRow('Faith & spirituality',          'lq_faith'),
         lqRow('Core values & beliefs',         'lq_values'),
-      ];
-    case 'operate':
-      return [
-        lqRow('When to address conflict',     'lq_conflict_when'),
-        lqRow('Conflict resolution time',     'lq_conflict_after'),
-        lqRow('What repair looks like',       'lq_conflict_repair'),
-        lqRow('Physical affection',           'lq_affection'),
-        lqRow('Closeness during hard times',  'lq_closeness'),
-        lqRow('Independence',                 'lq_independence'),
       ];
     default:
       return [];
@@ -1475,7 +1462,7 @@ function computeAlignmentPct(rows, userName, partnerName) {
 // overall line and as the source-of-truth for the same number in the React
 // click-through results experience.
 function computeOverallExpectationsPct(responsibilities, lifeQuestions, u, p) {
-  const DOMAINS = ['household', 'emotional', 'extended_family', 'money', 'life', 'operate'];
+  const DOMAINS = ['household', 'emotional', 'extended_family', 'money', 'life'];
   const pcts = DOMAINS.map(key => {
     const rows = getDomainRows(key, responsibilities, lifeQuestions, u, p);
     return computeAlignmentPct(rows, u, p);

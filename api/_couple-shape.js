@@ -58,15 +58,13 @@ function getDomainRows(domainKey, responsibilities, lifeQuestions, u, p) {
         respRow('Repair after friction',     'emotional', 4),
       ];
     case 'extended_family':
-      // Payload order: V_U, G_U, C_U, V_P, G_P, C_P (RESPONSIBILITY_CATEGORIES)
-      // Display order: V_U, V_P, C_U, C_P, G_U, G_P
+      // Payload order (RESPONSIBILITY_CATEGORIES): Visits_U(0), Gift_U(1), Visits_P(2), Gift_P(3)
+      // Display order: visits then gifts, alternating sides.
       return [
-        respRow(`Visits with ${u}'s family`,           'extended_family', 0),
-        respRow(`Visits with ${p}'s family`,           'extended_family', 3),
-        respRow(`Staying in touch with ${u}'s family`, 'extended_family', 2),
-        respRow(`Staying in touch with ${p}'s family`, 'extended_family', 5),
-        respRow(`Gifting for ${u}'s family`,           'extended_family', 1),
-        respRow(`Gifting for ${p}'s family`,           'extended_family', 4),
+        respRow(`Visits with ${u}'s family`,  'extended_family', 0),
+        respRow(`Visits with ${p}'s family`,  'extended_family', 2),
+        respRow(`Gifting for ${u}'s family`,  'extended_family', 1),
+        respRow(`Gifting for ${p}'s family`,  'extended_family', 3),
       ];
     case 'money':
       return [
@@ -86,15 +84,6 @@ function getDomainRows(domainKey, responsibilities, lifeQuestions, u, p) {
         lqRow('Daily rhythm',                   'lq_routine'),
         lqRow('Faith & spirituality',           'lq_faith'),
         lqRow('Core values & beliefs',          'lq_values'),
-      ];
-    case 'operate':
-      return [
-        lqRow('When to address conflict',    'lq_conflict_when'),
-        lqRow('Conflict resolution time',    'lq_conflict_after'),
-        lqRow('What repair looks like',      'lq_conflict_repair'),
-        lqRow('Physical affection',          'lq_affection'),
-        lqRow('Closeness during hard times', 'lq_closeness'),
-        lqRow('Independence',                'lq_independence'),
       ];
     default:
       return [];

@@ -2457,14 +2457,12 @@ function _domainItemScores(domainKey, ex2, partnerEx2, userName, partnerName) {
     case 'emotional':
       for (let i = 0; i < 5; i++) respScore('emotional', i); break;
     case 'extended_family':
-      [0, 3, 2, 5, 1, 4].forEach(i => respScore('extended_family', i)); break;
+      [0, 2, 1, 3].forEach(i => respScore('extended_family', i)); break;
     case 'money':
       respScore('financial', 0); respScore('financial', 1); respScore('career', 1);
       lqScore('lq_finances'); lqScore('lq_money_lean'); lqScore('lq_money_risk'); break;
     case 'life':
       ['lq_children','lq_family_conf','lq_location','lq_social','lq_routine','lq_faith','lq_values'].forEach(lqScore); break;
-    case 'operate':
-      ['lq_conflict_when','lq_conflict_after','lq_conflict_repair','lq_affection','lq_closeness','lq_independence'].forEach(lqScore); break;
   }
   return out;
 }
@@ -2476,7 +2474,7 @@ function computeDomainPctClient(domainKey, ex2, partnerEx2, userName, partnerNam
 }
 
 function computeOverallExpectationsPctClient(ex2, partnerEx2, userName, partnerName) {
-  const domains = ['household', 'emotional', 'extended_family', 'money', 'life', 'operate'];
+  const domains = ['household', 'emotional', 'extended_family', 'money', 'life'];
   const pcts = domains.map(d => computeDomainPctClient(d, ex2, partnerEx2, userName, partnerName));
   return Math.round(pcts.reduce((a,b) => a+b, 0) / pcts.length);
 }
@@ -2993,17 +2991,10 @@ function JointOverview({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Answ
     </div>
   ) : null;
 
-  // Cross-exercise conflict insight, surfaces when Ex01 conflict gap + Ex02 conflict answers both diverge
-  const conflictDimGap = (myS.conflict !== undefined && partS.conflict !== undefined)
-    ? Math.abs(myS.conflict - partS.conflict) : 0;
-  const myConflictWhen = ex2Answers?.life?.lq_conflict_when || "";
-  const theirConflictWhen = partnerEx2?.life?.lq_conflict_when || "";
-  const conflictWhenGap = myConflictWhen && theirConflictWhen && myConflictWhen !== theirConflictWhen;
-  const urgencyWords = ["immediately", "quickly"];
-  const spaceWords = ["significant space", "let things go"];
-  const oneUrgent = urgencyWords.some(w => myConflictWhen.toLowerCase().includes(w)) || urgencyWords.some(w => theirConflictWhen.toLowerCase().includes(w));
-  const oneNedsSpace = spaceWords.some(w => myConflictWhen.toLowerCase().includes(w)) || spaceWords.some(w => theirConflictWhen.toLowerCase().includes(w));
-  const showConflictCrossLink = conflictDimGap > 1.5 && conflictWhenGap && oneUrgent && oneNedsSpace;
+  // Cross-exercise conflict insight retired: the Ex02 conflict question
+  // (lq_conflict_when) was removed when the Conflict section was cut, so this
+  // card no longer has an Ex02 signal to cross-reference. Force it off.
+  const showConflictCrossLink = false;
 
   const conflictCrossLinkCard = showConflictCrossLink ? (
     <div style={{ marginTop: "1.5rem", background: "#FFF8F5", border: "1.5px solid rgba(232,103,58,0.25)", borderRadius: 18, padding: "1.5rem 1.5rem 1.25rem" }}>
@@ -6596,18 +6587,13 @@ function RetakeComparisonCard({ currentEx2, priorEx2, priorAt, userName, partner
       // lq_children → Children, lq_conflict_when → Conflict timing
       const map = {
         lq_children: 'Children',
-        lq_inperson_user: `In-person time with ${userName || 'your'}'s family`,
-        lq_contact_user: `Day-to-day contact with ${userName || 'your'}'s family`,
-        lq_inperson_partner: `In-person time with ${partnerName || "partner's"}'s family`,
-        lq_contact_partner: `Day-to-day contact with ${partnerName || "partner's"}'s family`,
+        lq_involve_user: `Involvement with ${userName || 'your'}'s family`,
+        lq_involve_partner: `Involvement with ${partnerName || "partner's"}'s family`,
         lq_family_conf: 'Family conflict loyalty', lq_location: 'Where you live',
         lq_social: 'Social life', lq_routine: 'Routine vs spontaneity',
         lq_faith: 'Faith / spirituality', lq_values: 'Core values',
         lq_finances: 'Combining finances', lq_money_lean: 'Saving vs spending',
-        lq_money_risk: 'Risk tolerance', lq_conflict_when: 'When to talk after conflict',
-        lq_conflict_after: 'How long you need', lq_conflict_repair: 'What repair feels like',
-        lq_affection: 'Physical affection', lq_closeness: 'Closeness under stress',
-        lq_independence: 'Independence',
+        lq_money_risk: 'Risk tolerance',
       };
       return map[rest] || rest;
     }
@@ -11476,12 +11462,6 @@ export default function App() {
       lq_finances: "Mostly combined with some personal spending money for each of us",
       lq_money_lean: "Toward saving, but you live well along the way",
       lq_money_risk: "I'm cautious but open to calculated risks",
-      lq_conflict_when: "Bring it up soon, but give yourself a moment to collect your thoughts first",
-      lq_conflict_after: "You've had a little space but come back together the same day",
-      lq_conflict_repair: "Feeling the warmth return, actions matter more than words to you",
-      lq_affection: "Is very important to you and you'd notice its absence",
-      lq_closeness: "Goes up significantly, difficulty makes you want more closeness",
-      lq_independence: "Is important but you're happy for it to flex around your shared life",
     }
   };
   const jamesEx1 = {
@@ -11592,12 +11572,6 @@ export default function App() {
       lq_finances: "Mostly combined with some personal spending money for each of us",
       lq_money_lean: "Neither way strongly, it depends on the situation",
       lq_money_risk: "I'm comfortable with risk if we've thought it through together",
-      lq_conflict_when: "Take significant space before you're ready to talk",
-      lq_conflict_after: "You need a night or two before you feel ready",
-      lq_conflict_repair: "Moving forward together, you don't need a formal repair, just to feel okay again",
-      lq_affection: "Is nice but not something you track or need consistently",
-      lq_closeness: "Goes down, you tend to pull inward and need space to process",
-      lq_independence: "Matters enormously to you, you need a strong sense of your own life within the relationship",
     }
   };
   // Demo: start with pre-populated answers to show results immediately.
