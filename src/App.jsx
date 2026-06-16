@@ -12167,6 +12167,7 @@ export default function App() {
             <span style={{ fontFamily: font.display, fontSize: "0.95rem", fontWeight: 700, color: (isMobile && view !== "results") ? "white" : (view === "home" ? "white" : C.ink) }}>Attune</span>
           </div>
         </div>
+        {view !== "account" && (
         <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
           {!isMobile && <button onClick={() => go("home")} style={{ width: 34, height: 34, borderRadius: "50%", background: "transparent", border: `1.5px solid ${C.stone}`, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "0.9rem", transition: "all .15s" }} title="Dashboard">⊞</button>}
           {/* Auth: show Sign In if not logged in, account dropdown if logged in */}
@@ -12226,6 +12227,7 @@ export default function App() {
             </button>
           ) : null}
         </div>
+        )}
         {/* Mobile: ← Dashboard row below logo+auth row */}
       {isMobile && view !== "home" && view !== "results" && (
         <div style={{ paddingTop: "0.45rem", marginTop: "0.35rem", borderTop: "1px solid rgba(255,255,255,0.18)", display: "flex" }}>
@@ -13060,7 +13062,7 @@ export default function App() {
           const pkg2 = PACKAGE_FEATURES[demoPkg] || PACKAGE_FEATURES.core;
           return (
             <div style={{ flex: 1, overflowY: "auto", background: "#FBF8F3" }}>
-              <div style={{ maxWidth: 620, margin: "0 auto", padding: isMobile ? "2rem 1.25rem" : "3rem 2rem" }}>
+              <div style={{ maxWidth: 620, margin: "0 auto", padding: isMobile ? "0 0 2rem" : "0 0 3rem" }}>
 
                 {/* Header */}
                 <div style={{ marginBottom: "2.5rem" }}>
