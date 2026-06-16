@@ -1527,7 +1527,7 @@ function CoupleMapSVG({ myS, partS, userName, partnerName, size = 480 }) {
         </div>
         <div>
           <div style={{ fontSize: "0.7rem", fontWeight: 700, color: "#0E0B07", marginBottom: "0.2rem", fontFamily: BFONT }}>Each dot is placed by calculation, not intuition</div>
-          <p style={{ fontSize: "0.72rem", color: "#8C7A68", lineHeight: 1.6, margin: 0, fontWeight: 300, fontFamily: BFONT }}>Where {userName} and {partnerName} sit on this map is calculated from their answers to 28 independent questions, not self-assigned. Two people who think they know their type will almost always land somewhere different than expected.</p>
+          <p style={{ fontSize: "0.72rem", color: "#8C7A68", lineHeight: 1.6, margin: 0, fontWeight: 300, fontFamily: BFONT }}>Where you each sit on this map is calculated from your answers to 28 independent questions, not self-assigned. Two people who think they know their type will almost always land somewhere different than expected.</p>
         </div>
       </div>
     </div>
@@ -7223,7 +7223,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
           {/* Extra bottom padding so last nav item doesn't sit flush at the edge */}
           <div style={{ height: "2rem" }} />
         </div>
-        <div style={{ flex: 1, minWidth: 0 }}>
+        <div style={{ flex: 1, minWidth: 0, padding: "0 1.5rem" }}>
           {children}
           {!noPrevNext && <PrevNext />}
         </div>
@@ -7275,16 +7275,38 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
     const _ctTypeB = computeIndividualType(partS);
     const _uOpen = _ctTypeA.openScore >= 3.0;
     const _pOpen = _ctTypeB.openScore >= 3.0;
+    const _uEngage = _ctTypeA.withdrawScore <= 3.0;
+    const _pEngage = _ctTypeB.withdrawScore <= 3.0;
+    // Open/Guarded axis names
     let _expressiveName = null, _guardedName = null;
     if (_uOpen !== _pOpen) {
       _expressiveName = _uOpen ? userName : partnerName;
       _guardedName = _uOpen ? partnerName : userName;
     }
+    // Engage/Withdraw axis names
+    let _reachingName = null, _withdrawingName = null;
+    if (_uEngage !== _pEngage) {
+      _reachingName = _uEngage ? userName : partnerName;
+      _withdrawingName = _uEngage ? partnerName : userName;
+    }
     const _applyRoles = (str) => {
-      if (!_expressiveName || !_guardedName) return str;
-      return str
-        .replace(/[Tt]he expressive partner/g, _expressiveName)
-        .replace(/[Tt]he guarded partner/g, _guardedName);
+      let s = str;
+      // Capitalize the replacement when the role label starts a sentence/title
+      // (e.g. "Guarded partner: ..." -> "Preston: ..."). Names are already
+      // capitalized, so a single case-insensitive replace works for both.
+      if (_expressiveName && _guardedName) {
+        s = s.replace(/\b(the )?expressive partner\b/gi, _expressiveName)
+             .replace(/\b(the )?guarded partner\b/gi, _guardedName)
+             .replace(/\b(the )?open partner\b/gi, _expressiveName)
+             .replace(/\b(the )?reserved partner\b/gi, _guardedName);
+      }
+      if (_reachingName && _withdrawingName) {
+        s = s.replace(/\b(the )?reaching partner\b/gi, _reachingName)
+             .replace(/\b(the )?engaging partner\b/gi, _reachingName)
+             .replace(/\b(the )?withdrawing partner\b/gi, _withdrawingName)
+             .replace(/\b(the )?quieter partner\b/gi, _withdrawingName);
+      }
+      return s;
     };
     const interp = (str) => _applyRoles(str
       .replace(/\{U\}/g, userName).replace(/\{P\}/g, partnerName)
@@ -7457,158 +7479,137 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
             </p>
           </div>
 
-          {/* ── THE MAP ── */}
-          <div style={{ background: "white", border: `1.5px solid ${C.stone}`, borderRadius: 20, padding: isMobile ? "1rem" : "1.5rem", marginBottom: "1.5rem", display: "flex", justifyContent: "center" }}>
-            <div style={{ width: "100%", maxWidth: isMobile ? 340 : 420 }}>
-              <CoupleMapSVG myS={myS} partS={partS} userName={userName} partnerName={partnerName} size={isMobile ? 320 : 400} />
+          {/* ── THE MAP (with axis descriptions inside the same tile) ── */}
+          <div style={{ background: "white", border: `1.5px solid ${C.stone}`, borderRadius: 20, padding: isMobile ? "1.25rem" : "1.75rem", marginBottom: "1.5rem" }}>
+            <div style={{ display: "flex", justifyContent: "center", marginBottom: "1.5rem" }}>
+              <div style={{ width: "100%", maxWidth: isMobile ? 340 : 420 }}>
+                <CoupleMapSVG myS={myS} partS={partS} userName={userName} partnerName={partnerName} size={isMobile ? 320 : 400} />
+              </div>
+            </div>
+            <div style={{ height: 1, background: C.stone, opacity: 0.6, margin: "0 0 1.25rem" }} />
+            <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: "1.1rem" }}>
+              {[
+                { label: "Engage / Withdraw", desc: "How you respond when something is hard or unresolved, do you move toward the situation or pull back from it first?", poles: ["Engage: moves toward resolution, addresses quickly", "Withdraw: needs space first, processes privately"], color: "#9B5DE5" },
+                { label: "Open / Guarded", desc: "How freely you express what's going on inside, do you share it openly or hold it privately until ready?", poles: ["Open: partner usually knows how you're feeling", "Guarded: processes internally, expressive when ready"], color: "#1B5FE8" },
+              ].map(ax => (
+                <div key={ax.label} style={{ borderLeft: `3px solid ${ax.color}`, paddingLeft: "0.9rem" }}>
+                  <div style={{ fontSize: "0.6rem", letterSpacing: "0.2em", textTransform: "uppercase", color: ax.color, fontFamily: BFONT, fontWeight: 700, marginBottom: "0.5rem" }}>{ax.label}</div>
+                  <p style={{ fontSize: "0.82rem", color: C.ink, fontFamily: BFONT, lineHeight: 1.65, margin: "0 0 0.65rem" }}>{ax.desc}</p>
+                  {ax.poles.map((p, i) => (
+                    <div key={i} style={{ fontSize: "0.72rem", color: C.muted, fontFamily: BFONT, marginBottom: "0.2rem" }}>
+                      <span style={{ fontWeight: 700, color: ax.color }}>{i === 0 ? "↑ " : "↓ "}</span>{p}
+                    </div>
+                  ))}
+                </div>
+              ))}
             </div>
           </div>
 
-          {/* ── AXIS DESCRIPTIONS ── */}
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.75rem", marginBottom: "1.25rem" }}>
-            {[
-              { label: "Engage / Withdraw", desc: "How you respond when something is hard or unresolved, do you move toward the situation or pull back from it first?", poles: ["Engage: moves toward resolution, addresses quickly", "Withdraw: needs space first, processes privately"], color: "#9B5DE5" },
-              { label: "Open / Guarded", desc: "How freely you express what's going on inside, do you share it openly or hold it privately until ready?", poles: ["Open: partner usually knows how you're feeling", "Guarded: processes internally, expressive when ready"], color: "#1B5FE8" },
-            ].map(ax => (
-              <div key={ax.label} style={{ background: "white", border: `1.5px solid ${C.stone}`, borderRadius: 16, padding: "1.25rem", borderTop: `4px solid ${ax.color}` }}>
-                <div style={{ fontSize: "0.6rem", letterSpacing: "0.2em", textTransform: "uppercase", color: ax.color, fontFamily: BFONT, fontWeight: 700, marginBottom: "0.5rem" }}>{ax.label}</div>
-                <p style={{ fontSize: "0.82rem", color: C.ink, fontFamily: BFONT, lineHeight: 1.65, margin: "0 0 0.65rem" }}>{ax.desc}</p>
-                {ax.poles.map((p, i) => (
-                  <div key={i} style={{ fontSize: "0.72rem", color: C.muted, fontFamily: BFONT, marginBottom: "0.2rem" }}>
-                    <span style={{ fontWeight: 700, color: ax.color }}>{i === 0 ? "↑ " : "↓ "}</span>{p}
-                  </div>
-                ))}
-              </div>
-            ))}
-          </div>
-
-          {/* ── PLACEMENT BLURBS ── */}
+          {/* ── INDIVIDUAL TYPES (merged: identity + placement blurb + bars) ── */}
           {(() => {
-            const getBlurb = (name, info) => {
+            const blurbFor = (name, pron, info) => {
               const { typeCode, engageCoord, openCoord } = info;
-              const eS = Math.abs(engageCoord - 0.5);
-              const oS = Math.abs(openCoord - 0.5);
+              const sub = pronoun(pron, "sub");
+              const pos = pronoun(pron, "pos");
+              const Sub = sub.charAt(0).toUpperCase() + sub.slice(1);
               const strongEngage = engageCoord > 0.8;
               const nearEngageCenter = engageCoord >= 0.35 && engageCoord <= 0.65;
               const strongWithdraw = engageCoord < 0.2;
               const nearOpenCenter = openCoord >= 0.35 && openCoord <= 0.65;
               const blurbs = {
                 W: strongEngage
-                  ? `${name} engages quickly and with full momentum, when something is unresolved, they feel it and move toward it without hesitation.`
+                  ? `${name} engages quickly and with full momentum. When something is unresolved, ${sub} feels it and moves toward it without hesitation.`
                   : nearEngageCenter
-                  ? `${name} leans toward resolution but has a slightly longer runway than a typical Initiator, there's a beat of processing before they engage fully.`
+                  ? `${name} leans toward resolution but has a slightly longer runway than a typical Initiator. There's a beat of processing before ${sub} engages fully.`
                   : nearOpenCenter
-                  ? `${name} engages readily but holds their inner experience a little closer than a typical Initiator. They show up for the conversation; they just don't put every feeling into the shared space immediately.`
-                  : `${name} moves toward resolution and expresses openly, with enough self-awareness to calibrate what they're sharing and when.`,
+                  ? `${name} engages readily but holds ${pos} inner experience a little closer than a typical Initiator. ${Sub} shows up for the conversation; ${sub} just doesn't put every feeling into the shared space immediately.`
+                  : `${name} moves toward resolution and expresses openly, with enough self-awareness to calibrate what ${sub}'s sharing and when.`,
                 X: strongEngage
-                  ? `${name} pushes hard toward resolution, once they've processed internally, they don't sit on it. The urgency toward resolution is real; it's just preceded by a private preparation phase.`
+                  ? `${name} pushes hard toward resolution. Once ${sub}'s processed internally, ${sub} doesn't sit on it. The urgency toward resolution is real; it's just preceded by a private preparation phase.`
                   : nearEngageCenter
-                  ? `${name} has a longer internal preparation phase before engaging. They push toward resolution, but the processing takes real time before anything surfaces.`
+                  ? `${name} has a longer internal preparation phase before engaging. ${Sub} pushes toward resolution, but the processing takes real time before anything surfaces.`
                   : nearOpenCenter
-                  ? `${name} is a Driver who runs slightly warmer than average. They process privately but share a bit more of the working-through than a typical Driver.`
+                  ? `${name} is a Driver who runs slightly warmer than average. ${Sub} processes privately but shares a bit more of the working-through than a typical Driver.`
                   : `${name} engages toward resolution and processes privately, with a comfortable mix of thoughtfulness and forward momentum.`,
                 Y: strongWithdraw
-                  ? `${name} needs significant space before they can show up to a hard conversation, not avoidance, just a longer processing runway. What they eventually bring is emotionally complete and worth the wait.`
+                  ? `${name} needs significant space before ${sub} can show up to a hard conversation. Not avoidance, just a longer processing runway. What ${sub} eventually brings is emotionally complete and worth the wait.`
                   : nearEngageCenter
-                  ? `${name} needs space first, but it's a shorter runway than many Feelers. They come back relatively quickly once they've landed somewhere.`
+                  ? `${name} needs space first, but it's a shorter runway than many Feelers. ${Sub} comes back relatively quickly once ${sub}'s landed somewhere.`
                   : nearOpenCenter
-                  ? `${name} processes inward and holds what's going on privately until ready, emotionally expressive when they arrive, but the arrival takes both time and internal settling.`
+                  ? `${name} processes inward and holds what's going on privately until ready. Emotionally expressive when ${sub} arrives, but the arrival takes both time and internal settling.`
                   : `${name} needs space to process before engaging, carries emotional weight visibly in the interim, and returns when ready with something real.`,
                 Z: strongWithdraw
-                  ? `${name} has the longest runway in the room. They process privately and need substantial space before anything surfaces. What comes out is considered and real; it just requires time and no pressure.`
+                  ? `${name} has the longest runway in the room. ${Sub} processes privately and needs substantial space before anything surfaces. What comes out is considered and real; it just requires time and no pressure.`
                   : nearEngageCenter
-                  ? `${name} processes privately but has a slightly stronger pull toward resolution than a typical Holder. They'll surface what's going on, they just need space and no pressure.`
+                  ? `${name} processes privately but has a slightly stronger pull toward resolution than a typical Holder. ${Sub}'ll surface what's going on, ${sub} just needs space and no pressure.`
                   : nearOpenCenter
-                  ? `${name} holds things privately but is slightly more emotionally accessible than a typical Holder, more going on internally than most Protectors show.`
+                  ? `${name} holds things privately but is slightly more emotionally accessible than a typical Holder. More going on internally than most Protectors show.`
                   : `${name} holds things close and processes privately, with a baseline steadiness and a comfortable relationship with quiet.`,
               };
               return blurbs[typeCode] || "";
             };
             return (
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.75rem", marginBottom: "1.25rem" }}>
-                {[
-                  { name: userName, info: newType.typeInfoA, it: itA },
-                  { name: partnerName, info: newType.typeInfoB, it: itB },
-                ].map(({ name, info, it }) => (
-                  <div key={name} style={{ background: "white", border: `1.5px solid ${C.stone}`, borderRadius: 16, padding: "1.25rem", borderTop: `4px solid ${it.color}` }}>
-                    <div style={{ fontSize: "0.58rem", letterSpacing: "0.2em", textTransform: "uppercase", color: it.color, fontFamily: BFONT, fontWeight: 700, marginBottom: "0.35rem" }}>{name}</div>
-                    <div style={{ fontFamily: HFONT, fontSize: "1rem", fontWeight: 700, color: C.ink, marginBottom: "0.5rem" }}>{it.name}</div>
-                    <p style={{ fontSize: "0.82rem", color: C.muted, fontFamily: BFONT, lineHeight: 1.7, margin: 0 }}>{getBlurb(name, info)}</p>
+            <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "minmax(0,1fr) minmax(0,1fr)", gap: isMobile ? "1rem" : "1rem", marginBottom: "1.5rem" }}>
+              {[
+                { name: userName, it: itA, info: newType.typeInfoA, pron: userPronouns },
+                { name: partnerName, it: itB, info: newType.typeInfoB, pron: partnerPronouns },
+              ].map(({ name, it, info, pron }) => (
+                <div key={name} style={{ background: "white", border: `1.5px solid ${C.stone}`, borderRadius: 16, padding: isMobile ? "1.1rem" : "1.4rem", borderTop: `4px solid ${it.color}` }}>
+                  <div style={{ fontSize: "0.58rem", letterSpacing: "0.2em", textTransform: "uppercase", color: it.color, fontFamily: BFONT, fontWeight: 700, marginBottom: "0.35rem" }}>{name}</div>
+                  <div style={{ fontFamily: HFONT, fontSize: isMobile ? "1.05rem" : "1.2rem", fontWeight: 700, color: C.ink, marginBottom: "0.6rem" }}>{it.name}</div>
+                  <p style={{ fontSize: "0.82rem", color: C.muted, fontFamily: BFONT, lineHeight: 1.7, margin: "0 0 1.1rem" }}>{blurbFor(name, pron, info)}</p>
+                  <div style={{ display: "flex", flexDirection: "column", gap: "0.55rem" }}>
+                    {[
+                      {
+                        label: "Engage/Withdraw",
+                        value: info.withdrawScore <= 3.0 ? "Engage-leaning" : "Withdraw-leaning",
+                        score: info.engageCoord,
+                        driver: (() => {
+                          const s = name === userName ? myS : partS;
+                          const scores = [
+                            { dim: "Conflict", w: 0.55, v: s.conflict || 3 },
+                            { dim: "Stress",   w: 0.30, v: s.stress   || 3 },
+                            { dim: "Repair",   w: 0.15, v: s.repair   || 3 },
+                          ];
+                          const dominant = scores.reduce((a, b) => Math.abs(a.v - 3) * a.w > Math.abs(b.v - 3) * b.w ? a : b);
+                          const dir = dominant.v > 3 ? (dominant.dim === "Conflict" ? "engages quickly in conflict" : dominant.dim === "Repair" ? "repairs quickly" : "externalises stress") : (dominant.dim === "Conflict" ? "needs space in conflict" : dominant.dim === "Repair" ? "takes longer to repair" : "internalises stress");
+                          return `${name} ${dir}`;
+                        })(),
+                      },
+                      {
+                        label: "Open/Guarded",
+                        value: info.openScore >= 3.0 ? "Open-leaning" : "Guarded-leaning",
+                        score: info.openCoord,
+                        driver: (() => {
+                          const s = name === userName ? myS : partS;
+                          const scores = [
+                            { dim: "Expression", w: 0.45, v: s.expression || 3 },
+                            { dim: "Feedback",   w: 0.30, v: s.feedback   || 3 },
+                            { dim: "Needs",      w: 0.25, v: s.needs      || 3 },
+                          ];
+                          const dominant = scores.reduce((a, b) => Math.abs(a.v - 3) * a.w > Math.abs(b.v - 3) * b.w ? a : b);
+                          const dir = dominant.v > 3 ? (dominant.dim === "Expression" ? "expresses feelings readily" : dominant.dim === "Feedback" ? "takes feedback openly" : "states needs directly") : (dominant.dim === "Expression" ? "processes feelings privately" : dominant.dim === "Feedback" ? "can be guarded with feedback" : "tends to signal needs indirectly");
+                          return `${name} ${dir}`;
+                        })(),
+                      },
+                    ].map(({ label, value, score, driver }) => (
+                      <div key={label}>
+                        <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "0.2rem" }}>
+                          <span style={{ fontSize: "0.6rem", color: C.muted, fontFamily: BFONT, fontWeight: 600 }}>{label}</span>
+                          <span style={{ fontSize: "0.6rem", color: it.color, fontFamily: BFONT, fontWeight: 600 }}>{value}</span>
+                        </div>
+                        <div style={{ height: 4, background: C.stone, borderRadius: 2, overflow: "hidden" }}>
+                          <div style={{ height: "100%", width: `${Math.round(score * 100)}%`, background: it.color, borderRadius: 2 }} />
+                        </div>
+                        {driver && <div style={{ fontSize: "0.6rem", color: C.muted, fontFamily: BFONT, marginTop: "0.25rem", fontStyle: "italic" }}>{driver}</div>}
+                      </div>
+                    ))}
                   </div>
-                ))}
-              </div>
+                </div>
+              ))}
+            </div>
             );
           })()}
-
-          {/* ── INDIVIDUAL TYPES ── */}
-          <div style={{ display: "grid", gridTemplateColumns: "minmax(0,1fr) minmax(0,1fr)", gap: isMobile ? "0.5rem" : "0.85rem", marginBottom: "1.5rem" }}>
-            {[
-              { name: userName, it: itA, info: newType.typeInfoA },
-              { name: partnerName, it: itB, info: newType.typeInfoB },
-            ].map(({ name, it, info }) => (
-              <div key={name} style={{ background: "white", border: `1.5px solid ${C.stone}`, borderRadius: 16, padding: isMobile ? "0.85rem 0.75rem" : "1.25rem", borderTop: `4px solid ${it.color}` }}>
-                <div style={{ fontSize: "0.58rem", letterSpacing: "0.2em", textTransform: "uppercase", color: it.color, fontFamily: BFONT, fontWeight: 700, marginBottom: "0.35rem" }}>{name}</div>
-                <div style={{ fontFamily: HFONT, fontSize: isMobile ? "0.95rem" : "1.15rem", fontWeight: 700, color: C.ink, marginBottom: "0.25rem" }}>{it.name}</div>
-                <div style={{ fontSize: isMobile ? "0.65rem" : "0.75rem", color: C.muted, fontFamily: BFONT, lineHeight: 1.5, marginBottom: isMobile ? "0.5rem" : "0.75rem" }}>{it.desc}</div>
-                <div style={{ display: "flex", flexDirection: "column", gap: "0.3rem" }}>
-                  {[
-                    {
-                      label: "Engage/Withdraw",
-                      value: info.withdrawScore <= 3.0 ? "Engage-leaning" : "Withdraw-leaning",
-                      score: info.engageCoord,
-                      driver: (() => {
-                        const s = name === userName ? myS : partS;
-                        const scores = [
-                          { dim: "Conflict", w: 0.55, v: s.conflict || 3 },
-                          { dim: "Stress",   w: 0.30, v: s.stress   || 3 },
-                          { dim: "Repair",   w: 0.15, v: s.repair   || 3 },
-                        ];
-                        const dominant = scores.reduce((a, b) => Math.abs(a.v - 3) * a.w > Math.abs(b.v - 3) * b.w ? a : b);
-                        const dir = dominant.v > 3 ? (dominant.dim === "Conflict" ? "engages quickly in conflict" : dominant.dim === "Repair" ? "repairs quickly" : "externalises stress") : (dominant.dim === "Conflict" ? "needs space in conflict" : dominant.dim === "Repair" ? "takes longer to repair" : "internalises stress");
-                        return `${name} ${dir}`;
-                      })(),
-                    },
-                    {
-                      label: "Open/Guarded",
-                      value: info.openScore >= 3.0 ? "Open-leaning" : "Guarded-leaning",
-                      score: info.openCoord,
-                      driver: (() => {
-                        const s = name === userName ? myS : partS;
-                        const scores = [
-                          { dim: "Expression", w: 0.45, v: s.expression || 3 },
-                          { dim: "Feedback",   w: 0.30, v: s.feedback   || 3 },
-                          { dim: "Needs",      w: 0.25, v: s.needs      || 3 },
-                        ];
-                        const dominant = scores.reduce((a, b) => Math.abs(a.v - 3) * a.w > Math.abs(b.v - 3) * b.w ? a : b);
-                        const dir = dominant.v > 3 ? (dominant.dim === "Expression" ? "expresses feelings readily" : dominant.dim === "Feedback" ? "takes feedback openly" : "states needs directly") : (dominant.dim === "Expression" ? "processes feelings privately" : dominant.dim === "Feedback" ? "can be guarded with feedback" : "tends to signal needs indirectly");
-                        return `${name} ${dir}`;
-                      })(),
-                    },
-                  ].map(({ label, value, score, driver }) => (
-                    <div key={label}>
-                      <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "0.2rem" }}>
-                        <span style={{ fontSize: "0.6rem", color: C.muted, fontFamily: BFONT, fontWeight: 600 }}>{label}</span>
-                        <span style={{ fontSize: "0.6rem", color: it.color, fontFamily: BFONT, fontWeight: 600 }}>{value}</span>
-                      </div>
-                      <div style={{ height: 4, background: C.stone, borderRadius: 2, overflow: "hidden" }}>
-                        <div style={{ height: "100%", width: `${Math.round(score * 100)}%`, background: it.color, borderRadius: 2 }} />
-                      </div>
-                      {driver && <div style={{ fontSize: "0.6rem", color: C.muted, fontFamily: BFONT, marginTop: "0.25rem", fontStyle: "italic" }}>{driver}</div>}
-                    </div>
-                  ))}
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {/* ── YOUR PAIRING ── */}
-          <div style={{ background: `linear-gradient(135deg, ${accent}18, ${accent}08)`, border: `1.5px solid ${accent}40`, borderRadius: 18, padding: "1.5rem", marginBottom: "1.25rem" }}>
-            <div style={{ fontSize: "0.58rem", letterSpacing: "0.22em", textTransform: "uppercase", color: accent, fontFamily: BFONT, fontWeight: 700, marginBottom: "0.5rem" }}>Your pairing</div>
-            <div style={{ fontFamily: HFONT, fontSize: "1.4rem", fontWeight: 700, color: C.ink, marginBottom: "0.3rem" }}>{newType.name}</div>
-            <p style={{ fontSize: "0.85rem", color: accent, fontFamily: BFONT, fontWeight: 600, lineHeight: 1.4, margin: "0 0 0.85rem" }}>{newType.tagline}</p>
-            <p style={{ fontSize: "0.88rem", color: "#5C4A38", fontFamily: BFONT, fontWeight: 300, lineHeight: 1.78, margin: 0 }}>{interp(newType.description)}</p>
-          </div>
-
           {/* ── HOW TO READ THE MAP ── */}
           <div style={{ background: "white", border: `1.5px solid ${C.stone}`, borderRadius: 18, padding: "1.5rem", marginBottom: "1.25rem" }}>
             <div style={{ fontSize: "0.6rem", letterSpacing: "0.22em", textTransform: "uppercase", color: C.muted, fontFamily: BFONT, fontWeight: 700, marginBottom: "1rem" }}>How to read the map</div>
@@ -7626,11 +7627,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
             </div>
           </div>
 
-          {/* ── NUANCE ── */}
-          <div style={{ background: "#FBF8F3", border: `1.5px solid ${C.stone}`, borderRadius: 14, padding: "1.25rem 1.4rem", marginBottom: "1.25rem", borderLeft: `4px solid ${accent}55` }}>
-            <div style={{ fontSize: "0.58rem", letterSpacing: "0.2em", textTransform: "uppercase", color: accent, fontFamily: BFONT, fontWeight: 700, marginBottom: "0.4rem" }}>Worth knowing</div>
-            <p style={{ fontSize: "0.84rem", color: "#5C4A38", fontFamily: BFONT, fontWeight: 400, lineHeight: 1.75, margin: 0 }}>{interp(newType.nuance)}</p>
-          </div>
+          {/* ── NUANCE removed ── */}
 
           <p style={{ fontSize: "0.72rem", color: C.muted, fontFamily: BFONT, lineHeight: 1.65, margin: 0 }}>
             The map uses your scores on Conflict, Repair, and Stress to place each of you on the Engage/Withdraw axis, and your Expression, Feedback, and Needs scores to place you on the Open/Guarded axis. Dot position is continuous, proximity to an axis line means that partner is more flexible on that dimension.
