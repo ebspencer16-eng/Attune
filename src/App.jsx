@@ -10273,7 +10273,7 @@ function PartnerBCompletionScreen({ partnerAName, partnerBName, partnerADone, pa
               Your results are ready.
             </div>
             <p style={{ fontSize: '0.88rem', color: 'rgba(255,255,255,0.6)', fontFamily: "'DM Sans', sans-serif", lineHeight: 1.75, marginBottom: '2rem' }}>
-              Both you and {partnerAName} have completed your exercises. Open Attune on {partnerAName}'s device to explore your results together.
+              Both you and {partnerAName} have completed your exercises. Your results are ready to explore on your own or together with {partnerAName}.
             </p>
             <div style={{ background: 'rgba(16,185,129,0.08)', border: '1px solid rgba(16,185,129,0.25)', borderRadius: 14, padding: '1.1rem 1.4rem', display: 'inline-flex', alignItems: 'center', gap: '0.7rem' }}>
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#10b981" strokeWidth="2" strokeLinecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
@@ -11814,15 +11814,13 @@ export default function App() {
   // means the dep-array read during render would throw if this lived after
   // the effect. The other derived constants (partnerEx1/Ex2, isDemo, bothDone)
   // stay further down where they're consumed.
-  // hasRealPartner means "this account holds the partner's completed data
-  // locally" — only ever true for Partner A (the buyer), whose partnerSession
-  // is populated with Partner B's answers. An invitee's own completion also
-  // writes a partnerSession (to mark done), but that's THEIR data, not their
-  // partner's, so an invitee is never hasRealPartner. Without this guard the
-  // invitee's own session satisfies the check, bothDone flips true, and the
-  // local results view tries to render with the wrong side's data and throws.
-  const hasRealPartner = !account?.joinedViaInvite
-    && !!(partnerSession?.inviteCode === account?.inviteCode && partnerSession?.ex1 && partnerSession?.ex2);
+  // hasRealPartner means "this account holds the PARTNER's completed data
+  // locally." Both partners can reach this state: the buyer and the invitee
+  // each fetch the other's answers from the linked profile via the poll
+  // effect below, stored in partnerSession WITH a partnerProfileId. The
+  // presence of partnerProfileId is what distinguishes real partner data from
+  // any local self-marker, so this works symmetrically for both sides.
+  const hasRealPartner = !!(partnerSession?.partnerProfileId && partnerSession?.ex1 && partnerSession?.ex2);
 
   // ── Cross-device partner sync polling ────────────────────────────────────
   // Unified model: partner data lives on the linked partner's own profile
@@ -11832,10 +11830,11 @@ export default function App() {
   // Fall-back: if partner_profile_id isn't set yet (Partner B hasn't signed
   // up), nothing to poll — we just exit and wait for the next re-run.
   useEffect(() => {
-    // Don't poll if: we're on Partner B's device (they joined via invite —
-    // they see Partner A's results on Partner A's device) or we already have
-    // real partner data.
-    if (!account?.id || hasRealPartner || account?.joinedViaInvite) return;
+    // Poll for the linked partner's answers. Runs for BOTH partners now:
+    // the buyer fetches the invitee's data and vice versa, so either side can
+    // open the merged results. Skip only if we already hold the partner's
+    // real data, or there's no account yet.
+    if (!account?.id || hasRealPartner) return;
     let cancelled = false;
     let isFirst = true;
 
@@ -12520,7 +12519,7 @@ export default function App() {
                     <div style={{ position: "relative", background: "white", borderRadius: 13, padding: "1rem 1.25rem", display: "flex", alignItems: "center", justifyContent: "space-between", gap: "1rem", flexWrap: "wrap" }}>
                       <div>
                         <div style={{ fontSize: 13, fontWeight: 600, color: "#0E0B07", marginBottom: 3, fontFamily: "'DM Sans', sans-serif" }}>You're both done with your exercises</div>
-                        <div style={{ fontSize: 11, color: "#8C7A68", fontFamily: "'DM Sans', sans-serif" }}>Your results are ready to view together.</div>
+                        <div style={{ fontSize: 11, color: "#8C7A68", fontFamily: "'DM Sans', sans-serif" }}>Your results are ready. Explore them on your own or together with {partnerName}.</div>
                       </div>
                       <button onClick={() => setView("results")}
                         style={{ background: "linear-gradient(135deg, #E8673A, #9B5DE5, #1B5FE8)", color: "white", border: "none", borderRadius: 8, padding: "0.55rem 1rem", fontSize: 11, fontWeight: 700, cursor: "pointer", whiteSpace: "nowrap", letterSpacing: ".04em", textTransform: "uppercase", fontFamily: "'DM Sans', sans-serif", flexShrink: 0 }}>
@@ -12850,7 +12849,7 @@ export default function App() {
                     !ex2Answers
                       ? ("Next up: Exercise 2. Your expectations, about 15 minutes.")
                       : bothDone
-                        ? ("Both exercises complete. Your results are ready.")
+                        ? ("Your results are ready. Explore them on your own or together with " + partnerName + ".")
                         : ("When " + partnerName + " finishes, you'll unlock your couple type and learn what that means for the two of you.")
                   }</p>
                   <div style={{ display: "flex", gap: "0.75rem", justifyContent: "center", flexWrap: "wrap" }}>
@@ -12917,12 +12916,18 @@ export default function App() {
                   <p style={{ fontFamily: font.display, fontSize: "2rem", fontWeight: 700, color: C.ink, marginBottom: "0.5rem", lineHeight: 1.1 }}>Exercise 2 Complete.</p>
                   <p style={{ fontSize: "0.78rem", letterSpacing: "0.1em", textTransform: "uppercase", color: "#1B5FE8", fontWeight: 700, fontFamily: font.body, marginBottom: "1.25rem" }}>Your expectations are recorded</p>
                   <p style={{ fontSize: "0.92rem", color: C.muted, fontFamily: font.body, fontWeight: 300, marginBottom: "0.75rem", lineHeight: 1.75 }}>That took honesty. Most couples don't have these conversations until they have to.</p>
-                  <p style={{ fontSize: "0.88rem", color: C.muted, fontFamily: font.body, fontWeight: 300, marginBottom: "2rem", lineHeight: 1.75 }}>{bothDone ? ("Both exercises complete. Your results are ready.") : ("When " + partnerName + " finishes both exercises, you'll unlock your couple type and learn what that means for the two of you.")}</p>
+                  <p style={{ fontSize: "0.88rem", color: C.muted, fontFamily: font.body, fontWeight: 300, marginBottom: "2rem", lineHeight: 1.75 }}>{bothDone ? ("Your results are ready. Explore them on your own or together with " + partnerName + ".") : ("When " + partnerName + " finishes both exercises, you'll unlock your couple type and learn what that means for the two of you.")}</p>
                   <div style={{ display: "flex", gap: "0.75rem", justifyContent: "center", flexWrap: "wrap" }}>
                     
                     {bothDone
                       ? <button onClick={() => setView("results")} style={{ background: "linear-gradient(135deg, #E8673A, #1B5FE8)", color: "white", border: "none", padding: "0.6rem 1.75rem", fontSize: "0.7rem", letterSpacing: "0.1em", textTransform: "uppercase", cursor: "pointer", fontFamily: font.body, borderRadius: 8, fontWeight: 600 }}>See Your Results →</button>
-                      : <button onClick={() => setView("home")} style={{ background: "#2d2250", color: "white", border: "none", padding: "0.6rem 1.5rem", fontSize: "0.7rem", letterSpacing: "0.1em", textTransform: "uppercase", cursor: "pointer", fontFamily: font.body, borderRadius: 8 }}>Back to Dashboard →</button>
+                      : partnerSyncing
+                        ? <div style={{ display: "flex", alignItems: "center", gap: "0.6rem", color: C.muted, fontFamily: font.body, fontSize: "0.78rem" }}>
+                            <style>{`@keyframes attuneBtnSpin{to{transform:rotate(360deg)}}`}</style>
+                            <span style={{ width: 14, height: 14, border: "2px solid " + C.stone, borderTopColor: C.clay, borderRadius: "50%", display: "inline-block", animation: "attuneBtnSpin 0.7s linear infinite" }} />
+                            Preparing your results...
+                          </div>
+                        : <button onClick={() => setView("home")} style={{ background: "#2d2250", color: "white", border: "none", padding: "0.6rem 1.5rem", fontSize: "0.7rem", letterSpacing: "0.1em", textTransform: "uppercase", cursor: "pointer", fontFamily: font.body, borderRadius: 8 }}>Back to Dashboard →</button>
                     }
                   </div>
                   {/* Workbook upsell */}
@@ -12966,21 +12971,11 @@ export default function App() {
                       console.warn('[Attune] ex2 save error:', e);
                     }
                   }
-                  // Invitee (Partner B) completing through the dashboard route:
-                  // set the partner_session marker the same way the dedicated
-                  // guided flow's onComplete did. Only mark complete once all
-                  // required exercises are done — ex3 is required for packages
-                  // with hasAnniversary, otherwise ex1+ex2 is the full set.
-                  if (account?.joinedViaInvite && ex1Answers && a && (!pkg.hasAnniversary || ex3Answers)) {
-                    savePartnerSession({
-                      inviteCode: account.inviteCode || '',
-                      name: account.name || '',
-                      ex1: ex1Answers,
-                      ex2: a,
-                      ...(ex3Answers ? { ex3: ex3Answers } : {}),
-                      completedAt: Date.now(),
-                    });
-                  }
+                  // Invitee completion: do NOT store own answers as
+                  // partnerSession. The poll effect fetches the PARTNER's data
+                  // (keyed by partnerProfileId) so hasRealPartner becomes true
+                  // for the invitee too, and both partners reach the same
+                  // merged results. Nothing to do here beyond the normal save.
                   // Auto-trigger workbook generation if both partners are done and order includes workbook.
                   // Recompute bothDone using the JUST-completed answers `a` rather than the closure
                   // value of ex2Answers (which is still null at this moment — setEx2State hasn't
@@ -13058,18 +13053,8 @@ export default function App() {
                       await saveExerciseWithRetakeSnapshot(sb, account.id, 3, a, { ex3_completed: true });
                     })();
                   }
-                  // Invitee completing ex3 (last exercise for anniversary/
-                  // premium) marks the partner session complete.
-                  if (account?.joinedViaInvite && ex1Answers && ex2Answers && a) {
-                    savePartnerSession({
-                      inviteCode: account.inviteCode || '',
-                      name: account.name || '',
-                      ex1: ex1Answers,
-                      ex2: ex2Answers,
-                      ex3: a,
-                      completedAt: Date.now(),
-                    });
-                  }
+                  // Invitee completion: poll fetches the partner's data; no
+                  // self-marker needed (see ex2 completion note).
                 }} onBack={() => setView("home")} />
             )}
           </div>
@@ -13416,10 +13401,12 @@ export default function App() {
 {view === "results" && !bothDone && account?.joinedViaInvite && myEx1Done && myEx2Done && (
       <div style={{ minHeight: "calc(100vh - 160px)", display: "flex", alignItems: "center", justifyContent: "center", padding: "2rem 1.25rem", fontFamily: font.body }}>
         <div style={{ maxWidth: 460, width: "100%", textAlign: "center" }}>
-          <div style={{ width: 60, height: 60, borderRadius: "50%", background: "linear-gradient(135deg, #10b981, #059669)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 1.4rem", fontSize: "1.5rem", color: "white" }}>✓</div>
-          <h2 style={{ fontFamily: font.display, fontSize: "1.6rem", fontWeight: 700, color: C.ink, margin: "0 0 0.5rem" }}>You're both done.</h2>
+          <div style={{ width: 60, height: 60, borderRadius: "50%", background: "linear-gradient(135deg, #E8673A, #1B5FE8)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 1.4rem", fontSize: "1.4rem", color: "white" }}>◴</div>
+          <h2 style={{ fontFamily: font.display, fontSize: "1.6rem", fontWeight: 700, color: C.ink, margin: "0 0 0.5rem" }}>{partnerEx1Done && partnerEx2Done ? "Loading your results." : "You're done."}</h2>
           <p style={{ fontSize: "0.9rem", color: C.muted, lineHeight: 1.65, margin: "0 0 1.5rem" }}>
-            You and {partnerName} have both finished your exercises. Open Attune on {partnerName}'s device to explore your full results together.
+            {partnerEx1Done && partnerEx2Done
+              ? "You and " + partnerName + " have both finished. Bringing your answers together now."
+              : "Your answers are saved. Results unlock as soon as " + partnerName + " finishes. You'll both be able to explore them on your own or together."}
           </p>
           <button onClick={() => setView("home")} style={{ background: "transparent", border: ("1.5px solid " + C.stone), color: C.ink, padding: "0.7rem 1.5rem", borderRadius: 11, fontSize: "0.82rem", fontWeight: 600, cursor: "pointer", fontFamily: font.body }}>← Back to dashboard</button>
         </div>
