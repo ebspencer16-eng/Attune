@@ -77,8 +77,11 @@ const logBoundaryError = (error, componentStack) => {
 
 // Use Sentry's ErrorBoundary so any React render error is captured AND
 // shows a user-friendly fallback instead of a blank screen.
-const FallbackUI = () => (
-  <div style={{ padding: '3rem 1.5rem', textAlign: 'center', fontFamily: 'system-ui, sans-serif', maxWidth: 480, margin: '0 auto' }}>
+const FallbackUI = ({ error }) => {
+  const msg = (error && (error.message || String(error))) || 'Unknown error';
+  const stackHead = error && error.stack ? String(error.stack).split('\n').slice(0, 4).join('\n') : '';
+  return (
+  <div style={{ padding: '3rem 1.5rem', textAlign: 'center', fontFamily: 'system-ui, sans-serif', maxWidth: 560, margin: '0 auto' }}>
     <h2 style={{ fontSize: '1.4rem', marginBottom: '0.75rem', color: '#0E0B07' }}>Something went wrong.</h2>
     <p style={{ fontSize: '0.9rem', color: '#8C7A68', marginBottom: '1.5rem', lineHeight: 1.6 }}>
       We've been notified. Try refreshing the page — your progress is saved.
@@ -87,12 +90,17 @@ const FallbackUI = () => (
       style={{ background: 'linear-gradient(135deg,#E8673A,#1B5FE8)', color: 'white', border: 'none', padding: '0.7rem 1.6rem', fontSize: '0.8rem', fontWeight: 600, borderRadius: 10, cursor: 'pointer' }}>
       Refresh the page
     </button>
+    <details style={{ marginTop: '1.75rem', textAlign: 'left' }}>
+      <summary style={{ fontSize: '0.72rem', color: '#B3A693', cursor: 'pointer', fontFamily: 'system-ui, sans-serif' }}>Technical details</summary>
+      <pre style={{ marginTop: '0.5rem', fontSize: '0.68rem', color: '#8C7A68', background: '#F7F2EA', border: '1px solid #E8DDD0', borderRadius: 8, padding: '0.75rem', whiteSpace: 'pre-wrap', wordBreak: 'break-word', overflowX: 'auto' }}>{msg}{stackHead ? '\n\n' + stackHead : ''}</pre>
+    </details>
   </div>
-);
+  );
+};
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
-    <Sentry.ErrorBoundary fallback={<FallbackUI />} showDialog={false} onError={logBoundaryError}>
+    <Sentry.ErrorBoundary fallback={({ error }) => <FallbackUI error={error} />} showDialog={false} onError={logBoundaryError}>
       <App />
     </Sentry.ErrorBoundary>
   </StrictMode>,

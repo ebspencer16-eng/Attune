@@ -1527,7 +1527,7 @@ function CoupleMapSVG({ myS, partS, userName, partnerName, size = 480 }) {
         </div>
         <div>
           <div style={{ fontSize: "0.7rem", fontWeight: 700, color: "#0E0B07", marginBottom: "0.2rem", fontFamily: BFONT }}>Each dot is placed by calculation, not intuition</div>
-          <p style={{ fontSize: "0.72rem", color: "#8C7A68", lineHeight: 1.6, margin: 0, fontWeight: 300, fontFamily: BFONT }}>Where {userName} and {partnerName} sit on this map is calculated from their answers to 50 independent questions, not self-assigned. Two people who think they know their type will almost always land somewhere different than expected.</p>
+          <p style={{ fontSize: "0.72rem", color: "#8C7A68", lineHeight: 1.6, margin: 0, fontWeight: 300, fontFamily: BFONT }}>Where {userName} and {partnerName} sit on this map is calculated from their answers to 28 independent questions, not self-assigned. Two people who think they know their type will almost always land somewhere different than expected.</p>
         </div>
       </div>
     </div>
@@ -1552,10 +1552,10 @@ function CoupleTypeCard({ coupleType, userName, partnerName, onClick }) {
           {name}
         </div>
         <p style={{ fontSize: "0.92rem", color: color, fontFamily: BFONT, fontWeight: 500, lineHeight: 1.5, margin: "0 0 1.25rem", maxWidth: 480 }}>
-          {tagline}
+          {interp(tagline)}
         </p>
         <p style={{ fontSize: "0.85rem", color: "rgba(245,239,230,0.88)", fontFamily: BFONT, fontWeight: 300, lineHeight: 1.8, margin: "0 0 1.25rem", maxWidth: 520 }}>
-          {description}
+          {interp(description)}
         </p>
         <div style={{ borderLeft: `3px solid ${color}55`, paddingLeft: "1rem" }}>
           <div style={{ fontSize: "0.58rem", letterSpacing: "0.2em", textTransform: "uppercase", color: color + "88", fontFamily: BFONT, fontWeight: 700, marginBottom: "0.3rem" }}>Worth knowing</div>
@@ -2259,7 +2259,11 @@ const CHILDHOOD_STRUCTURES = [
 // raw); only display strings are substituted at render time.
 function substName(s, userName, partnerName) {
   if (!s) return s;
-  return String(s).replace(/\{userName\}/g, userName || "").replace(/\{partnerName\}/g, partnerName || "");
+  return String(s)
+    .replace(/\{userName\}/g, userName || "")
+    .replace(/\{partnerName\}/g, partnerName || "")
+    .replace(/\{U\}/g, userName || "")
+    .replace(/\{P\}/g, partnerName || "");
 }
 
 // RESPONSIBILITY_CATEGORIES now lives in api/_questions.js (single source of truth).
@@ -7143,12 +7147,15 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
           position: "sticky",
           top: 0,
           paddingTop: "1.25rem",
-          maxHeight: "calc(100vh - 112px)",
+          maxHeight: "calc(100vh - 116px)",
           overflowY: "auto",
           overflowX: "hidden",
-          /* Thin custom scrollbar — only shows when sidebar is long enough to need it */
           scrollbarWidth: "thin",
-          scrollbarColor: "rgba(193,127,71,0.25) transparent",
+          scrollbarColor: "rgba(193,127,71,0.35) transparent",
+          /* Fade mask at top/bottom so it's visually obvious the nav scrolls
+             rather than looking like it's cut off. */
+          WebkitMaskImage: "linear-gradient(to bottom, transparent 0, #000 12px, #000 calc(100% - 16px), transparent 100%)",
+          maskImage: "linear-gradient(to bottom, transparent 0, #000 12px, #000 calc(100% - 16px), transparent 100%)",
         }}>
           <Sidebar />
           {/* Extra bottom padding so last nav item doesn't sit flush at the edge */}
