@@ -7216,10 +7216,29 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
   if (section === "couple-type") {
     const ct = coupleType;
     if (!ct) return <Layout accent="#E8673A"><p style={{fontFamily:BFONT,color:C.muted}}>Complete both exercises to see your couple type.</p></Layout>;
-    const interp = (str) => str
+    // Resolve "the expressive/guarded partner" role labels to real names when
+    // the two partners actually differ on the Open/Guarded axis. Open-leaning
+    // (openScore >= 3) reads as expressive; below that, guarded. If both sit on
+    // the same side the role label is ambiguous, so we leave it generic.
+    const _ctTypeA = computeIndividualType(myS);
+    const _ctTypeB = computeIndividualType(partS);
+    const _uOpen = _ctTypeA.openScore >= 3.0;
+    const _pOpen = _ctTypeB.openScore >= 3.0;
+    let _expressiveName = null, _guardedName = null;
+    if (_uOpen !== _pOpen) {
+      _expressiveName = _uOpen ? userName : partnerName;
+      _guardedName = _uOpen ? partnerName : userName;
+    }
+    const _applyRoles = (str) => {
+      if (!_expressiveName || !_guardedName) return str;
+      return str
+        .replace(/[Tt]he expressive partner/g, _expressiveName)
+        .replace(/[Tt]he guarded partner/g, _guardedName);
+    };
+    const interp = (str) => _applyRoles(str
       .replace(/\{U\}/g, userName).replace(/\{P\}/g, partnerName)
       .replace(/\{U_sub\}/g, pronoun(userPronouns, "sub")).replace(/\{U_obj\}/g, pronoun(userPronouns, "obj")).replace(/\{U_pos\}/g, pronoun(userPronouns, "pos"))
-      .replace(/\{P_sub\}/g, pronoun(partnerPronouns, "sub")).replace(/\{P_obj\}/g, pronoun(partnerPronouns, "obj")).replace(/\{P_pos\}/g, pronoun(partnerPronouns, "pos"));
+      .replace(/\{P_sub\}/g, pronoun(partnerPronouns, "sub")).replace(/\{P_obj\}/g, pronoun(partnerPronouns, "obj")).replace(/\{P_pos\}/g, pronoun(partnerPronouns, "pos")));
     const handleShare = () => {
       const text = `We're "${ct.name}", ${ct.tagline} Find yours at attune.com`;
       navigator.clipboard?.writeText(text).then(() => { setTypeCopied(true); setTimeout(() => setTypeCopied(false), 2500); });
