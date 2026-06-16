@@ -2346,12 +2346,29 @@ function calcDimScores(answers) {
 const _LIFE_OPTIONS_CLIENT = {};
 LIFE_QUESTIONS.forEach(q => { _LIFE_OPTIONS_CLIENT[q.id] = q.options; });
 
+// Career-category answers are stored relative to whoever answered
+// ("Primarily mine" / "Primarily my partner's"). This normalizes such a value
+// to an absolute person name. isUser=true when the value belongs to the user
+// (their "mine" = userName); isUser=false for the partner's answer (their
+// "mine" = partnerName). Non-career / absolute values pass through unchanged.
+function normRespValue(v, isUser, userName, partnerName) {
+  if (v === "Primarily mine") return isUser ? userName : partnerName;
+  if (v === "Primarily my partner's") return isUser ? partnerName : userName;
+  if (v === "Balanced") return "Both of us";
+  return v;
+}
+
 function scoreRespClient(uV, pV, userName, partnerName) {
-  const rank = (v) => {
+  // rankFor normalizes a value to an ABSOLUTE person rank: 0 = user, 2 = partner,
+  // 1 = both/balanced. The relative answers ("Primarily mine" / "Primarily my
+  // partner's") are interpreted from the perspective of whoever gave them, which
+  // is why we pass isUser: for the user's own answer "mine" means the user (0),
+  // but for the partner's answer "mine" means the partner (2).
+  const rankFor = (v, isUser) => {
     if (v == null || v === '') return { r: null, o: null };
-    if (v === 'Primarily mine')           return { r: 0, o: false };
+    if (v === 'Primarily mine')           return { r: isUser ? 0 : 2, o: false };
     if (v === 'Balanced')                 return { r: 1, o: false };
-    if (v === "Primarily my partner's")   return { r: 2, o: false };
+    if (v === "Primarily my partner's")   return { r: isUser ? 2 : 0, o: false };
     if (v === "Doesn't apply")            return { r: null, o: true };
     if (v === userName)                   return { r: 0, o: false };
     if (v === 'Both of us')               return { r: 1, o: false };
@@ -2359,7 +2376,7 @@ function scoreRespClient(uV, pV, userName, partnerName) {
     if (v === "Doesn't apply to us")      return { r: null, o: true };
     return { r: null, o: null };
   };
-  const a = rank(uV), b = rank(pV);
+  const a = rankFor(uV, true), b = rankFor(pV, false);
   if (a.r === null && a.o === null) return null;
   if (b.r === null && b.o === null) return null;
   if (a.o && b.o) return 1.0;
@@ -2443,8 +2460,8 @@ function buildWorkbookPayload(userName, partnerName, ex1Answers, partnerEx1, ex2
     cat.items.forEach(rawItem => {
       const key = cat.id + '__' + rawItem;
       const itemLabel = substName(rawItem, userName, partnerName);
-      const userValue = ex2Answers?.responsibilities?.[key] || null;
-      const partnerValue = partnerEx2?.responsibilities?.[key] || null;
+      const userValue = normRespValue(ex2Answers?.responsibilities?.[key] || null, true, userName, partnerName);
+      const partnerValue = normRespValue(partnerEx2?.responsibilities?.[key] || null, false, userName, partnerName);
       responsibilities.user[cat.id].push({ item: itemLabel, value: userValue });
       responsibilities.partner[cat.id].push({ item: itemLabel, value: partnerValue });
     });
@@ -2852,9 +2869,11 @@ function JointOverview({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Answ
   RESPONSIBILITY_CATEGORIES.forEach(cat => {
     cat.items.forEach(item => {
       const key = ((cat.id) + "__" + (item));
-      const mine = ex2Answers.responsibilities?.[key];
-      const theirs = partnerEx2.responsibilities?.[key];
-      if (!mine || !theirs) return;
+      const rawMine = ex2Answers.responsibilities?.[key];
+      const rawTheirs = partnerEx2.responsibilities?.[key];
+      if (!rawMine || !rawTheirs) return;
+      const mine = normRespValue(rawMine, true, userName, partnerName);
+      const theirs = normRespValue(rawTheirs, false, userName, partnerName);
       rows.push({ category: cat.label, item: substName(item, userName, partnerName), mine, theirs, aligned: mine === theirs });
     });
   });
@@ -4089,14 +4108,21 @@ function ExpectationsResults({ myAnswers, partnerAnswers, userName, partnerName,
   };
 
   // ── Build rows from responsibilities ─────────────────────────────────────────
+  // Career answers are relative to whoever answered ("Primarily mine" /
+  // "Primarily my partner's"). Normalize to an absolute person so the user's
+  // and partner's answers are on the same reference. mine = the user's answer,
+  // theirs = the partner's answer.
+  const normRespVal = (v, isUser) => normRespValue(v, isUser, userName, partnerName);
   const rows = [];
   RESPONSIBILITY_CATEGORIES.forEach(cat => {
     cat.items.forEach(item => {
       const key = `${cat.id}__${item}`;
-      const mine = myAnswers.responsibilities?.[key];
-      const theirs = partnerAnswers.responsibilities?.[key];
-      if (!mine || !theirs) return;
-      const score = scoreRespClient(mine, theirs, userName, partnerName);
+      const rawMine = myAnswers.responsibilities?.[key];
+      const rawTheirs = partnerAnswers.responsibilities?.[key];
+      if (!rawMine || !rawTheirs) return;
+      const score = scoreRespClient(rawMine, rawTheirs, userName, partnerName);
+      const mine = normRespVal(rawMine, true);
+      const theirs = normRespVal(rawTheirs, false);
       rows.push({ category: cat.label, catId: cat.id, item: substName(item, userName, partnerName), mine, theirs, aligned: mine === theirs, score });
     });
   });
@@ -6696,11 +6722,13 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
   const allRows = RESPONSIBILITY_CATEGORIES.flatMap(cat =>
     cat.items.map(item => {
       const key = `${cat.id}__${item}`;
-      const mine = ex2Answers?.responsibilities?.[key];
-      const theirs = ex2Answers?.responsibilities?.[key] ? partnerEx2?.responsibilities?.[key] : null;
+      const rawMine = ex2Answers?.responsibilities?.[key];
+      const rawTheirs = rawMine ? partnerEx2?.responsibilities?.[key] : null;
+      const mine = rawMine ? normRespValue(rawMine, true, userName, partnerName) : rawMine;
+      const theirs = rawTheirs ? normRespValue(rawTheirs, false, userName, partnerName) : rawTheirs;
       const bothAnswered = mine && theirs;
       const aligned = mine === theirs;
-      const score = bothAnswered ? scoreRespClient(mine, theirs, userName, partnerName) : null;
+      const score = bothAnswered ? scoreRespClient(rawMine, rawTheirs, userName, partnerName) : null;
       return { item: substName(item, userName, partnerName), category: cat.label, catId: cat.id, mine, theirs, aligned, bothAnswered, score };
     })
   );
@@ -8536,9 +8564,12 @@ function ResultsHighlights({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3
   const allRows = RESPONSIBILITY_CATEGORIES.flatMap(cat =>
     cat.items.map(item => {
       const key = cat.id + "__" + item;
-      const mine = ex2Answers?.responsibilities?.[key];
-      const theirs = partnerEx2?.responsibilities?.[key];
-      return mine && theirs ? { item: substName(item, userName, partnerName), category: cat.label, mine, theirs, aligned: mine === theirs } : null;
+      const rawMine = ex2Answers?.responsibilities?.[key];
+      const rawTheirs = partnerEx2?.responsibilities?.[key];
+      if (!rawMine || !rawTheirs) return null;
+      const mine = normRespValue(rawMine, true, userName, partnerName);
+      const theirs = normRespValue(rawTheirs, false, userName, partnerName);
+      return { item: substName(item, userName, partnerName), category: cat.label, mine, theirs, aligned: mine === theirs };
     }).filter(Boolean)
   );
   const lifeRows = LIFE_QUESTIONS.map(q => ({
