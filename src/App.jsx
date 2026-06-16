@@ -3714,10 +3714,10 @@ function PersonalityResults({ myAnswers, partnerAnswers, userName, partnerName, 
         )}
 
         {/* Try this / Keep this in mind */}
-        {f.adviceText && (
+        {(f.adviceText || f.isStrength) && (
           <div style={{ background: (m.color + (f.isStrength ? "28" : "45")), borderRadius: 14, padding: "1.25rem 1.5rem", border: ("1px solid " + (m.color) + (f.isStrength ? "50" : "80")) }}>
-            <div style={{ fontSize: "0.62rem", textTransform: "uppercase", letterSpacing: "0.12em", color: "rgba(255,255,255,0.9)", fontWeight: 700, marginBottom: "0.5rem", fontFamily: BFONT }}>{f.isStrength ? "Worth protecting" : "One shift that helps"}</div>
-            <p style={{ fontSize: "0.9rem", color: "white", lineHeight: 1.8, margin: 0, fontFamily: BFONT, fontWeight: f.isStrength ? 400 : 500 }}>{f.adviceText}</p>
+            <div style={{ fontSize: "0.62rem", textTransform: "uppercase", letterSpacing: "0.12em", color: "rgba(255,255,255,0.9)", fontWeight: 700, marginBottom: "0.5rem", fontFamily: BFONT }}>{f.isStrength ? "One thing to keep in mind" : "One shift that helps"}</div>
+            <p style={{ fontSize: "0.9rem", color: "white", lineHeight: 1.8, margin: 0, fontFamily: BFONT, fontWeight: f.isStrength ? 400 : 500 }}>{f.adviceText || `You two line up here. That's an easy place to take for granted. Name it out loud once in a while so the alignment stays a choice, not an assumption.`}</p>
           </div>
         )}
 
@@ -4443,19 +4443,21 @@ function ExpectationsResults({ myAnswers, partnerAnswers, userName, partnerName,
               const ck = `${fc.id}__${g.item}`;
               return myAnswers?.childhood?.[ck] || partnerAnswers?.childhood?.[ck];
             });
+            const gridCols = hasAnyChildhood ? "1.6fr 1fr 1fr 1fr 1fr" : "1.6fr 1fr 1fr";
+            const nameSpan = hasAnyChildhood ? "span 2" : "span 1";
             return (
               <div style={{ background: "white", borderRadius: 14, overflow: "hidden", border: `1.5px solid ${fc.color}20` }}>
                 {/* Section label */}
                 <div style={{ padding: "0.65rem 1rem", borderBottom: `1px solid ${fc.color}18`, background: fc.color + "0c" }}>
                   <span style={{ fontSize: "0.62rem", fontWeight: 800, letterSpacing: "0.2em", textTransform: "uppercase", color: fc.color, fontFamily: BFONT }}>Conversations to have</span>
                 </div>
-                {/* Column headers: names centered over their 2-column groups */}
-                <div style={{ display: "grid", gridTemplateColumns: "1.6fr 1fr 1fr 1fr 1fr", gap: 0, padding: "0.55rem 1rem 0" }}>
+                {/* Column headers: names centered over their column group(s) */}
+                <div style={{ display: "grid", gridTemplateColumns: gridCols, gap: 0, padding: "0.55rem 1rem 0" }}>
                   <div />
-                  <div style={{ gridColumn: "span 2", textAlign: "center", fontSize: "0.62rem", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: fc.color, fontFamily: BFONT, paddingBottom: "0.4rem", borderBottom: `2.5px solid ${fc.color}40` }}>{userName}</div>
-                  <div style={{ gridColumn: "span 2", textAlign: "center", fontSize: "0.62rem", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: "#777", fontFamily: BFONT, paddingBottom: "0.4rem", borderBottom: "2.5px solid rgba(0,0,0,0.12)" }}>{partnerName}</div>
+                  <div style={{ gridColumn: nameSpan, textAlign: "center", fontSize: "0.62rem", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: fc.color, fontFamily: BFONT, paddingBottom: "0.4rem", borderBottom: `2.5px solid ${fc.color}40` }}>{userName}</div>
+                  <div style={{ gridColumn: nameSpan, textAlign: "center", fontSize: "0.62rem", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: "#777", fontFamily: BFONT, paddingBottom: "0.4rem", borderBottom: "2.5px solid rgba(0,0,0,0.12)" }}>{partnerName}</div>
                 </div>
-                <div style={{ display: "grid", gridTemplateColumns: "1.6fr 1fr 1fr 1fr 1fr", gap: 0, borderBottom: `1px solid ${fc.color}15` }}>
+                <div style={{ display: "grid", gridTemplateColumns: gridCols, gap: 0, borderBottom: `1px solid ${fc.color}15` }}>
                   <div style={{ padding: "0.25rem 1rem 0.4rem" }} />
                   <div style={{ background: fc.color + "0a", padding: "0.2rem 0 0.4rem", textAlign: "center", fontSize: "0.5rem", fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase", color: fc.color, fontFamily: BFONT }}>Expects</div>
                   {hasAnyChildhood && <div style={{ background: fc.color + "06", padding: "0.2rem 0 0.4rem", textAlign: "center", fontSize: "0.5rem", fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase", color: fc.color, fontFamily: BFONT, opacity: 0.6 }}>Experienced</div>}
@@ -4469,7 +4471,7 @@ function ExpectationsResults({ myAnswers, partnerAnswers, userName, partnerName,
                   const partChild = partnerAnswers?.childhood?.[ck];
                   const isLast = gi === thisCatGaps.length - 1;
                   return (
-                    <div key={gi} style={{ display: "grid", gridTemplateColumns: "1.6fr 1fr 1fr 1fr 1fr", gap: 0, padding: "0.65rem 1rem", borderTop: `1px solid ${fc.color}10`, alignItems: "center", background: gi % 2 === 1 ? fc.color + "06" : "transparent" }}>
+                    <div key={gi} style={{ display: "grid", gridTemplateColumns: gridCols, gap: 0, padding: "0.65rem 1rem", borderTop: `1px solid ${fc.color}10`, alignItems: "center", background: gi % 2 === 1 ? fc.color + "06" : "transparent" }}>
                       {/* Responsibility name */}
                       <div style={{ fontSize: "0.78rem", fontWeight: 500, color: "#2a2848", fontFamily: BFONT, lineHeight: 1.35, paddingRight: "0.75rem" }}>{g.item}</div>
                       {/* userName expects */}
@@ -4502,7 +4504,9 @@ function ExpectationsResults({ myAnswers, partnerAnswers, userName, partnerName,
     const checklistItems = FIXED_CATS.map(fc => ({
       ...fc,
       gapItems: gaps.filter(r => r.catId === fc.id),
-    })).filter(c => c.gapItems.length > 0);
+      alignedCount: allRows.filter(r => r.catId === fc.id && r.aligned).length,
+      totalAnswered: allRows.filter(r => r.catId === fc.id).length,
+    })).filter(c => c.totalAnswered > 0);
 
     return (
       <MaybeNav noSideNav={noSideNav} navItems={expectationsNavItems} currentStep={navCurrentStep} onGo={go} accent="#1B5FE8">
@@ -4512,12 +4516,12 @@ function ExpectationsResults({ myAnswers, partnerAnswers, userName, partnerName,
             <div style={{ fontSize: "0.65rem", letterSpacing: "0.2em", textTransform: "uppercase", color: "rgba(255,255,255,0.4)", marginBottom: "0.5rem", fontFamily: BFONT }}>Expectations Action Plan</div>
             <div style={{ fontSize: "clamp(1.6rem,5vw,2.2rem)", fontWeight: 700, fontFamily: HFONT, lineHeight: 1.1, marginBottom: "0.4rem" }}>What to discuss.</div>
             <p style={{ fontSize: "0.82rem", color: "rgba(255,255,255,0.55)", fontFamily: BFONT, fontWeight: 300, lineHeight: 1.6, marginBottom: "1.5rem" }}>
-              {checklistItems.length > 0
-                ? `${gaps.length} topics across ${checklistItems.length} area${checklistItems.length !== 1 ? "s" : ""} where you have different assumptions. Work through these together.`
+              {gaps.length > 0
+                ? `${gaps.length} topic${gaps.length !== 1 ? "s" : ""} where you have different assumptions, across ${checklistItems.length} area${checklistItems.length !== 1 ? "s" : ""}. Work through these together.`
                 : "You're aligned across all areas. Nothing to work through, just keep staying current with each other."}
             </p>
 
-            {checklistItems.length === 0 ? (
+            {gaps.length === 0 ? (
               <div style={{ background: "rgba(16,185,129,0.12)", border: "1px solid rgba(16,185,129,0.25)", borderRadius: 16, padding: "1.5rem", textAlign: "center" }}>
                 <div style={{ fontSize: "2rem", marginBottom: "0.5rem" }}>✓</div>
                 <div style={{ fontSize: "0.9rem", fontWeight: 700, color: "white", fontFamily: BFONT }}>Fully aligned on all expectations.</div>
@@ -4528,14 +4532,21 @@ function ExpectationsResults({ myAnswers, partnerAnswers, userName, partnerName,
                   <div key={fc.id} style={{ background: "rgba(255,255,255,0.05)", borderRadius: 14, overflow: "hidden", border: "1px solid rgba(255,255,255,0.08)" }}>
                     <div style={{ background: fc.color + "22", borderBottom: `1px solid ${fc.color}30`, padding: "0.55rem 1rem", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                       <span style={{ fontSize: "0.68rem", fontWeight: 700, color: fc.color, textTransform: "uppercase", letterSpacing: "0.08em", fontFamily: BFONT }}>{fc.label}</span>
-                      <span style={{ fontSize: "0.62rem", color: "rgba(255,255,255,0.4)", fontFamily: BFONT }}>{fc.gapItems.length} topic{fc.gapItems.length !== 1 ? "s" : ""}</span>
+                      <span style={{ fontSize: "0.62rem", color: "rgba(255,255,255,0.4)", fontFamily: BFONT }}>{fc.gapItems.length > 0 ? `${fc.gapItems.length} topic${fc.gapItems.length !== 1 ? "s" : ""}` : "Aligned"}</span>
                     </div>
-                    {fc.gapItems.map((g, gi) => (
-                      <div key={gi} style={{ display: "flex", alignItems: "flex-start", gap: "0.75rem", padding: "0.65rem 1rem", borderBottom: gi < fc.gapItems.length - 1 ? "1px solid rgba(255,255,255,0.05)" : "none" }}>
-                        <div style={{ width: 16, height: 16, borderRadius: 4, border: `1.5px solid ${fc.color}88`, flexShrink: 0, marginTop: 2 }} />
-                        <span style={{ fontSize: "0.8rem", color: "rgba(255,255,255,0.78)", fontFamily: BFONT, lineHeight: 1.45 }}>{g.item}</span>
-                      </div>
-                    ))}
+                    {fc.gapItems.length > 0
+                      ? fc.gapItems.map((g, gi) => (
+                        <div key={gi} style={{ display: "flex", alignItems: "flex-start", gap: "0.75rem", padding: "0.65rem 1rem", borderBottom: gi < fc.gapItems.length - 1 ? "1px solid rgba(255,255,255,0.05)" : "none" }}>
+                          <div style={{ width: 16, height: 16, borderRadius: 4, border: `1.5px solid ${fc.color}88`, flexShrink: 0, marginTop: 2 }} />
+                          <span style={{ fontSize: "0.8rem", color: "rgba(255,255,255,0.78)", fontFamily: BFONT, lineHeight: 1.45 }}>{g.item}</span>
+                        </div>
+                      ))
+                      : (
+                        <div style={{ padding: "0.7rem 1rem", fontSize: "0.76rem", color: "rgba(255,255,255,0.5)", fontFamily: BFONT, lineHeight: 1.5 }}>
+                          You and {partnerName} match on all {fc.alignedCount} item{fc.alignedCount !== 1 ? "s" : ""} here. Nothing to work through.
+                        </div>
+                      )
+                    }
                   </div>
                 ))}
               </div>
@@ -7298,7 +7309,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
             </div>
             <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
               {ct.tips?.map((tip, i) => {
-                const tipColors = [ct.color, ct.shade || "#1B5FE8", "#10b981"];
+                const tipColors = [ct.color, "#1B5FE8", "#10b981"];
                 const tipColor = tipColors[i % 3];
                 return (<div key={i} style={{ background: "white", border: `1.5px solid ${C.stone}`, borderRadius: 14, padding: "1.25rem 1.4rem", borderLeft: `4px solid ${tipColor}` }}>
                   <div style={{ fontSize: "0.8rem", fontWeight: 700, color: C.ink, fontFamily: BFONT, marginBottom: "0.4rem" }}>{interp(tip.title)}</div>
@@ -7377,8 +7388,10 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
           </div>
 
           {/* ── THE MAP ── */}
-          <div style={{ background: "white", border: `1.5px solid ${C.stone}`, borderRadius: 20, padding: "1.5rem", marginBottom: "1.5rem" }}>
-            <CoupleMapSVG myS={myS} partS={partS} userName={userName} partnerName={partnerName} size={480} />
+          <div style={{ background: "white", border: `1.5px solid ${C.stone}`, borderRadius: 20, padding: isMobile ? "1rem" : "1.5rem", marginBottom: "1.5rem", display: "flex", justifyContent: "center" }}>
+            <div style={{ width: "100%", maxWidth: isMobile ? 340 : 420 }}>
+              <CoupleMapSVG myS={myS} partS={partS} userName={userName} partnerName={partnerName} size={isMobile ? 320 : 400} />
+            </div>
           </div>
 
           {/* ── AXIS DESCRIPTIONS ── */}
