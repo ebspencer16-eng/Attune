@@ -1540,7 +1540,7 @@ function DashStepHeader({ num, title, sub, active = true, isMobile = false }) {
     <div style={{ display: "flex", alignItems: "center", gap: isMobile ? "0.9rem" : "1.25rem", marginBottom: "1.25rem" }}>
       <div style={{ position: "relative", flexShrink: 0 }}>
         <div style={{ width: isMobile ? 52 : 64, height: isMobile ? 52 : 64, borderRadius: "50%", background: active ? "linear-gradient(135deg, rgba(232,103,58,0.12), rgba(155,93,229,0.12), rgba(27,95,232,0.12))" : "rgba(200,191,180,0.18)", border: active ? "1.5px solid rgba(155,93,229,0.28)" : "1.5px solid rgba(200,191,180,0.5)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-          <span style={{ fontFamily: HFONT, fontWeight: 700, fontSize: isMobile ? "1.9rem" : "2.4rem", lineHeight: 1, background: active ? "linear-gradient(135deg, #E8673A, #9B5DE5, #1B5FE8)" : "linear-gradient(135deg, #C8BFB4, #B3A693)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text", display: "inline-block", padding: "0.08em 0.04em" }}>{num}</span>
+          <span style={{ fontFamily: HFONT, fontWeight: 700, fontSize: isMobile ? "1.9rem" : "2.4rem", lineHeight: 1, background: active ? "linear-gradient(135deg, #E8673A, #9B5DE5, #1B5FE8)" : "linear-gradient(135deg, #C8BFB4, #B3A693)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text", display: "block", textAlign: "center", transform: "translateY(0.04em)" }}>{num}</span>
         </div>
       </div>
       <div style={{ flex: 1, minWidth: 0 }}>
@@ -8023,6 +8023,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
     const NavActionLink = ({ onClick, bg, border, icon, title, sub, accentColor }) => {
       const iconSvgs = {
         "💬": <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={accentColor} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/><line x1="8" y1="9" x2="16" y2="9"/><line x1="8" y1="13" x2="13" y2="13"/></svg>,
+        "comm": <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={accentColor} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/><line x1="8" y1="9" x2="16" y2="9"/><line x1="8" y1="13" x2="13" y2="13"/></svg>,
         "📋": <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={accentColor} strokeWidth="2" strokeLinecap="round"><rect x="9" y="2" width="6" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><line x1="9" y1="12" x2="15" y2="12"/><line x1="9" y1="16" x2="13" y2="16"/></svg>,
         "💚": <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={accentColor} strokeWidth="2" strokeLinecap="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>,
         "✅": <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={accentColor} strokeWidth="2" strokeLinecap="round"><polyline points="20 6 9 17 4 12"/></svg>,
@@ -8053,7 +8054,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
           <div style={{ marginBottom: "1.5rem" }}>
             <div style={{ fontSize: "0.62rem", letterSpacing: "0.22em", textTransform: "uppercase", color: C.clay, fontFamily: BFONT, fontWeight: 700, marginBottom: "0.85rem" }}>Your action plans</div>
             <div style={{ display: "flex", flexDirection: "column", gap: "0.65rem" }}>
-              <NavActionLink onClick={() => go("comm-plan")} bg="linear-gradient(135deg,#FFF5F2,#FFE8E0)" border={`1.5px solid rgba(232,103,58,0.25)`} icon="💬" title="Communication Action Plan" sub="Practices drawn from your communication results" accentColor={C.orange} />
+              <NavActionLink onClick={() => go("comm-plan")} bg="linear-gradient(135deg,#FFF5F2,#FFE8E0)" border={`1.5px solid rgba(232,103,58,0.25)`} icon="comm" title="Communication Action Plan" sub="Practices drawn from your communication results" accentColor={C.orange} />
               <NavActionLink onClick={() => go("exp-action-plan")} bg="linear-gradient(135deg,#F5F7FF,#E8EDFF)" border={`1.5px solid rgba(27,95,232,0.2)`} icon="📋" title="Expectations Action Plan" sub="Topics to discuss, organized by area" accentColor="#1B5FE8" />
               {hasAnniversary && (
                 <NavActionLink onClick={() => go("reflection-plan")} bg="linear-gradient(135deg,#F0F4FF,#E8EDFF)" border={`1.5px solid rgba(27,95,232,0.25)`} icon="♡" title="Reflection Action Plan" sub="Conversations from your relationship reflection" accentColor="#1B5FE8" />
@@ -8394,32 +8395,10 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
           </div>
 
 
-          <PrevNext />
-
-          {/* ── BETA FEEDBACK ── */}
-          <div style={{ marginTop: "2.5rem", background: "linear-gradient(135deg, #1C1A16 0%, #2d2a22 100%)", borderRadius: 18, padding: "1.5rem 1.75rem", display: "flex", alignItems: "center", gap: "1.25rem" }}>
-            <div style={{ width: 40, height: 40, borderRadius: 12, background: "rgba(255,255,255,0.08)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.7)" strokeWidth="1.8" strokeLinecap="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-            </div>
-            <div style={{ flex: 1 }}>
-              <div style={{ fontSize: "0.85rem", fontWeight: 700, color: "white", fontFamily: BFONT, marginBottom: "0.2rem" }}>{isBetaTester ? "You're part of our beta." : "Tell us how it went."}</div>
-              <div style={{ fontSize: "0.72rem", color: "rgba(255,255,255,0.5)", fontFamily: BFONT, lineHeight: 1.55 }}>{isBetaTester ? "Tell us what you actually discovered. The full survey takes about 12 minutes." : "Share what worked, what didn't, and what surprised you. Four questions."}</div>
-            </div>
-            {isBetaTester ? (
-              <a href="/feedback"
-                style={{ background: "rgba(255,255,255,0.1)", border: "1px solid rgba(255,255,255,0.18)", color: "white", borderRadius: 10, padding: "0.6rem 1.1rem", fontSize: "0.75rem", fontWeight: 700, fontFamily: BFONT, whiteSpace: "nowrap", flexShrink: 0, cursor: "pointer", textDecoration: "none", transition: "background 0.15s" }}
-                onMouseEnter={e => e.currentTarget.style.background = "rgba(255,255,255,0.18)"}
-                onMouseLeave={e => e.currentTarget.style.background = "rgba(255,255,255,0.1)"}>
-                Share your feedback →
-              </a>
-            ) : (
-              <button onClick={() => setShowSurvey(true)}
-                style={{ background: "rgba(255,255,255,0.1)", border: "1px solid rgba(255,255,255,0.18)", color: "white", borderRadius: 10, padding: "0.6rem 1.1rem", fontSize: "0.75rem", fontWeight: 700, fontFamily: BFONT, whiteSpace: "nowrap", flexShrink: 0, cursor: "pointer", transition: "background 0.15s" }}
-                onMouseEnter={e => e.currentTarget.style.background = "rgba(255,255,255,0.18)"}
-                onMouseLeave={e => e.currentTarget.style.background = "rgba(255,255,255,0.1)"}>
-                Leave feedback →
-              </button>
-            )}
+          <div style={{ display: "flex", justifyContent: "flex-end", marginTop: "2.5rem", paddingTop: "1.5rem", borderTop: `1px solid ${C.stone}` }}>
+            <button onClick={() => onNavigateTool && onNavigateTool("home")} style={{ background: "#2d2250", border: "none", borderRadius: 10, padding: "0.7rem 1.5rem", fontSize: "0.78rem", color: "white", cursor: "pointer", fontFamily: BFONT, fontWeight: 700, letterSpacing: ".02em" }}>
+              Back to dashboard →
+            </button>
           </div>
           {showSurvey && <BetaSurveyModal userName={userName} coupleType={coupleType} onClose={() => setShowSurvey(false)} />}
         </div>
@@ -10508,7 +10487,7 @@ const UPSELL_PRODUCTS = {
     badgeColor: "#EEEFFF",
     badgeText: "#5B6DF8",
     title: "Relationship Reflection",
-    price: "$139",
+    price: "$40",
     tagline: "A third exercise about the moments that shaped your relationship.",
     description: "Each of you reflects independently on the moments that defined you, how you're feeling about the relationship right now, and where you want to go. Your answers are shown side by side, with insights drawn from where your reflections converge and where they diverge.",
     includes: [
@@ -12167,7 +12146,7 @@ export default function App() {
       <div style={{ position: "sticky", top: 0, zIndex: 100, background: (isMobile && view !== "home" && view !== "results") ? "linear-gradient(120deg, #C8522E 0%, #6B3FA0 52%, #1B5FE8 100%)" : view === "home" ? "rgba(30,26,53,0.97)" : "rgba(255,253,249,0.97)", backdropFilter: (isMobile && view !== "home" && view !== "results") ? "none" : "blur(12px)", borderBottom: ("1px solid " + (view === "home" ? "rgba(255,255,255,0.1)" : (isMobile && view !== "results") ? "transparent" : C.stone)), padding: (isMobile && view !== "home" && view !== "results") ? "0.7rem 1.25rem 0.6rem" : "0 1.5rem", display: view === "home" ? "none" : "flex", flexDirection: (isMobile && view !== "results") ? "column" : "row", alignItems: (isMobile && view !== "results") ? "stretch" : "center", justifyContent: "space-between", minHeight: 56 }}>
         {/* Single row: logo left + auth right */}
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-          <div onClick={() => setView('home')} style={{ display: "flex", alignItems: "center", gap: "0.5rem", cursor: "pointer" }}>
+          <div onClick={() => { if (isLoggedIn) { setView('home'); } else { window.location.href = '/home'; } }} style={{ display: "flex", alignItems: "center", gap: "0.5rem", cursor: "pointer" }}>
             {(isMobile && view !== "results") ? (
               /* White logo mark for gradient background */
               <svg width="28" height="20" viewBox="0 0 103 76" fill="none">
@@ -12321,28 +12300,14 @@ export default function App() {
                       </div>
                     </div>
                   </div>
-                  {/* Desktop only: View Results + account/settings icons in banner */}
+                  {/* Desktop only: account icon in banner */}
                   {!isMobile && (
                     <div style={{ display: "flex", alignItems: "center", gap: "0.6rem", flexShrink: 0 }}>
-                      {bothDone && (
-                        <button onClick={() => setView("results")}
-                          style={{ background: "rgba(255,255,255,0.18)", backdropFilter: "blur(8px)", color: "white", border: "1px solid rgba(255,255,255,0.3)", borderRadius: 10, padding: "0.65rem 1.25rem", fontSize: "0.75rem", fontWeight: 600, cursor: "pointer", whiteSpace: "nowrap", letterSpacing: ".04em", textTransform: "uppercase", fontFamily: "'DM Sans', sans-serif", transition: "background .15s" }}
-                          onMouseEnter={e => e.currentTarget.style.background = "rgba(255,255,255,0.26)"}
-                          onMouseLeave={e => e.currentTarget.style.background = "rgba(255,255,255,0.18)"}>
-                          View results →
-                        </button>
-                      )}
                       <button onClick={() => setView("account")} aria-label="Account" title="Account"
                         style={{ width: 38, height: 38, borderRadius: "50%", background: "rgba(255,255,255,0.16)", border: "1px solid rgba(255,255,255,0.3)", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", flexShrink: 0, transition: "background .15s" }}
                         onMouseEnter={e => e.currentTarget.style.background = "rgba(255,255,255,0.28)"}
                         onMouseLeave={e => e.currentTarget.style.background = "rgba(255,255,255,0.16)"}>
                         <svg width="17" height="17" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="7" r="3.5" stroke="white" strokeWidth="1.6"/><path d="M3 17c0-3.314 3.134-6 7-6s7 2.686 7 6" stroke="white" strokeWidth="1.6" strokeLinecap="round"/></svg>
-                      </button>
-                      <button onClick={() => setShowProfileSetup(true)} aria-label="Settings" title="Settings"
-                        style={{ width: 38, height: 38, borderRadius: "50%", background: "rgba(255,255,255,0.16)", border: "1px solid rgba(255,255,255,0.3)", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", flexShrink: 0, transition: "background .15s" }}
-                        onMouseEnter={e => e.currentTarget.style.background = "rgba(255,255,255,0.28)"}
-                        onMouseLeave={e => e.currentTarget.style.background = "rgba(255,255,255,0.16)"}>
-                        <svg width="17" height="17" viewBox="0 0 20 20" fill="none"><path d="M10 3v2M10 15v2M3 10H1M19 10h-2M5.05 5.05L3.636 3.636M16.364 16.364l-1.414-1.414M5.05 14.95l-1.414 1.414M16.364 3.636l-1.414 1.414" stroke="white" strokeWidth="1.6" strokeLinecap="round"/><circle cx="10" cy="10" r="3" stroke="white" strokeWidth="1.6"/></svg>
                       </button>
                     </div>
                   )}
