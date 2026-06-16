@@ -8489,7 +8489,7 @@ function WrappedCard({ children, bg, onDownload, cardIndex, cardRef, inline, por
   );
 }
 
-function ResultsHighlights({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Answers, partnerEx3, userName, partnerName, portrait, onDone, inline = false }) {
+function ResultsHighlights({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Answers, partnerEx3, userName, partnerName, portrait, onDone, onExit = null, inline = false }) {
   const [cardIdx, setCardIdx] = useState(0);
   const cardRef = useRef(null);
   const isMobile = useMobile(640);
@@ -8950,6 +8950,15 @@ function ResultsHighlights({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3
     <div style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, background: "#120f22", display: "flex", flexDirection: "column", zIndex: 200, overflow: "hidden", paddingBottom: "env(safe-area-inset-bottom)", alignItems: isMobile ? "center" : undefined }}>
       {/* Subtle side gradient panels on desktop */}
       <div style={{ position: "absolute", inset: 0, background: "radial-gradient(ellipse at 15% 50%, rgba(232,103,58,0.06) 0%, transparent 60%), radial-gradient(ellipse at 85% 50%, rgba(27,95,232,0.06) 0%, transparent 60%)", pointerEvents: "none" }} />
+      {/* Exit to dashboard — without this the only way out of the storycards
+          is to tap through every card, which left users stuck when they
+          entered from the dashboard "see results" tile. */}
+      {onExit && (
+        <button onClick={(e) => { e.stopPropagation(); onExit(); }}
+          style={{ position: "absolute", top: "max(1rem, env(safe-area-inset-top))", left: "1rem", zIndex: 210, background: "rgba(255,255,255,0.12)", border: "1px solid rgba(255,255,255,0.22)", color: "rgba(255,255,255,0.85)", borderRadius: 9, padding: "0.45rem 0.85rem", fontSize: "0.68rem", letterSpacing: "0.08em", textTransform: "uppercase", fontWeight: 600, cursor: "pointer", fontFamily: "'DM Sans', sans-serif", backdropFilter: "blur(8px)" }}>
+          ← Dashboard
+        </button>
+      )}
       {content}
     </div>
   );
@@ -11805,7 +11814,15 @@ export default function App() {
   // means the dep-array read during render would throw if this lived after
   // the effect. The other derived constants (partnerEx1/Ex2, isDemo, bothDone)
   // stay further down where they're consumed.
-  const hasRealPartner = !!(partnerSession?.inviteCode === account?.inviteCode && partnerSession?.ex1 && partnerSession?.ex2);
+  // hasRealPartner means "this account holds the partner's completed data
+  // locally" — only ever true for Partner A (the buyer), whose partnerSession
+  // is populated with Partner B's answers. An invitee's own completion also
+  // writes a partnerSession (to mark done), but that's THEIR data, not their
+  // partner's, so an invitee is never hasRealPartner. Without this guard the
+  // invitee's own session satisfies the check, bothDone flips true, and the
+  // local results view tries to render with the wrong side's data and throws.
+  const hasRealPartner = !account?.joinedViaInvite
+    && !!(partnerSession?.inviteCode === account?.inviteCode && partnerSession?.ex1 && partnerSession?.ex2);
 
   // ── Cross-device partner sync polling ────────────────────────────────────
   // Unified model: partner data lives on the linked partner's own profile
@@ -12067,7 +12084,7 @@ export default function App() {
     return () => { cancelled = true; clearInterval(iv); };
   }, [account?.joinedViaInvite, account?.id, partnerSession, hasRealPartner]);
 
-  if (account?.joinedViaInvite && partnerSession && !hasRealPartner) {
+  if (account?.joinedViaInvite && partnerSession && !hasRealPartner && urlGuidedFlow) {
     return <PartnerBCompletionScreen
       partnerAName={account.partnerName}
       partnerBName={account.name}
@@ -12502,7 +12519,7 @@ export default function App() {
                     <div style={{ position: "absolute", inset: 0, borderRadius: 14, background: "linear-gradient(135deg, #E8673A, #9B5DE5, #1B5FE8)" }} />
                     <div style={{ position: "relative", background: "white", borderRadius: 13, padding: "1rem 1.25rem", display: "flex", alignItems: "center", justifyContent: "space-between", gap: "1rem", flexWrap: "wrap" }}>
                       <div>
-                        <div style={{ fontSize: 13, fontWeight: 600, color: "#0E0B07", marginBottom: 3, fontFamily: "'DM Sans', sans-serif" }}>{partnerName} has completed both exercises</div>
+                        <div style={{ fontSize: 13, fontWeight: 600, color: "#0E0B07", marginBottom: 3, fontFamily: "'DM Sans', sans-serif" }}>You're both done with your exercises</div>
                         <div style={{ fontSize: 11, color: "#8C7A68", fontFamily: "'DM Sans', sans-serif" }}>Your results are ready to view together.</div>
                       </div>
                       <button onClick={() => setView("results")}
@@ -13396,7 +13413,20 @@ export default function App() {
           </div>
         )}
 
-{view === "results" && !bothDone && (
+{view === "results" && !bothDone && account?.joinedViaInvite && myEx1Done && myEx2Done && (
+      <div style={{ minHeight: "calc(100vh - 160px)", display: "flex", alignItems: "center", justifyContent: "center", padding: "2rem 1.25rem", fontFamily: font.body }}>
+        <div style={{ maxWidth: 460, width: "100%", textAlign: "center" }}>
+          <div style={{ width: 60, height: 60, borderRadius: "50%", background: "linear-gradient(135deg, #10b981, #059669)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 1.4rem", fontSize: "1.5rem", color: "white" }}>✓</div>
+          <h2 style={{ fontFamily: font.display, fontSize: "1.6rem", fontWeight: 700, color: C.ink, margin: "0 0 0.5rem" }}>You're both done.</h2>
+          <p style={{ fontSize: "0.9rem", color: C.muted, lineHeight: 1.65, margin: "0 0 1.5rem" }}>
+            You and {partnerName} have both finished your exercises. Open Attune on {partnerName}'s device to explore your full results together.
+          </p>
+          <button onClick={() => setView("home")} style={{ background: "transparent", border: ("1.5px solid " + C.stone), color: C.ink, padding: "0.7rem 1.5rem", borderRadius: 11, fontSize: "0.82rem", fontWeight: 600, cursor: "pointer", fontFamily: font.body }}>← Back to dashboard</button>
+        </div>
+      </div>
+    )}
+
+{view === "results" && !bothDone && !(account?.joinedViaInvite && myEx1Done && myEx2Done) && (
       <div style={{ minHeight: "calc(100vh - 160px)", display: "flex", alignItems: "center", justifyContent: "center", padding: "2rem 1.25rem", fontFamily: font.body }}>
         <div style={{ maxWidth: 460, width: "100%", textAlign: "center" }}>
           <div style={{ width: 60, height: 60, borderRadius: "50%", background: "linear-gradient(135deg, #E8673A, #1B5FE8)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 1.4rem", fontSize: "1.4rem", color: "white" }}>◴</div>
@@ -13439,6 +13469,7 @@ export default function App() {
         userName={userName} partnerName={partnerName}
         portrait={couplePortrait}
         onDone={() => setHighlightsSeen(true)}
+        onExit={() => setView("home")}
       />
     )}
     {view === "results" && bothDone && highlightsSeen && (
