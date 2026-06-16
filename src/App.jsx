@@ -1537,10 +1537,14 @@ function CoupleMapSVG({ myS, partS, userName, partnerName, size = 480 }) {
 // ── Dashboard step header: large gradient step number + title/sub ──────────
 function DashStepHeader({ num, title, sub, active = true, isMobile = false }) {
   return (
-    <div style={{ display: "flex", alignItems: "flex-start", gap: isMobile ? "0.85rem" : "1.1rem", marginBottom: "1.1rem" }}>
-      <div style={{ fontFamily: HFONT, fontWeight: 700, fontSize: isMobile ? "2.4rem" : "3.1rem", lineHeight: 0.85, letterSpacing: "-0.03em", background: active ? "linear-gradient(135deg, #E8673A, #9B5DE5, #1B5FE8)" : "linear-gradient(135deg, #D8CDBF, #C8BFB4)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text", flexShrink: 0, paddingTop: "0.1rem" }}>{num}</div>
+    <div style={{ display: "flex", alignItems: "center", gap: isMobile ? "0.9rem" : "1.25rem", marginBottom: "1.25rem" }}>
+      <div style={{ position: "relative", flexShrink: 0 }}>
+        <div style={{ width: isMobile ? 52 : 64, height: isMobile ? 52 : 64, borderRadius: "50%", background: active ? "linear-gradient(135deg, rgba(232,103,58,0.12), rgba(155,93,229,0.12), rgba(27,95,232,0.12))" : "rgba(200,191,180,0.18)", border: active ? "1.5px solid rgba(155,93,229,0.28)" : "1.5px solid rgba(200,191,180,0.5)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+          <span style={{ fontFamily: HFONT, fontWeight: 700, fontSize: isMobile ? "1.9rem" : "2.4rem", lineHeight: 1, background: active ? "linear-gradient(135deg, #E8673A, #9B5DE5, #1B5FE8)" : "linear-gradient(135deg, #C8BFB4, #B3A693)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text", display: "inline-block", padding: "0.08em 0.04em" }}>{num}</span>
+        </div>
+      </div>
       <div style={{ flex: 1, minWidth: 0 }}>
-        <h2 style={{ fontFamily: HFONT, fontSize: isMobile ? "1.3rem" : "1.55rem", fontWeight: 700, color: "#0E0B07", lineHeight: 1.1, letterSpacing: "-0.02em", margin: "0 0 0.25rem" }}>{title}</h2>
+        <h2 style={{ fontFamily: HFONT, fontSize: isMobile ? "1.35rem" : "1.65rem", fontWeight: 700, color: "#0E0B07", lineHeight: 1.1, letterSpacing: "-0.02em", margin: "0 0 0.25rem" }}>{title}</h2>
         <p style={{ fontSize: "0.83rem", color: "#8C7A68", fontFamily: BFONT, fontWeight: 300, lineHeight: 1.55, margin: 0 }}>{sub}</p>
       </div>
     </div>
@@ -12270,80 +12274,14 @@ export default function App() {
         {view === "home" && isLoggedIn && (
           <div style={{ display: "flex", minHeight: "100vh", background: "#FBF8F3" }}>
 
-            {/* ── LEFT SIDEBAR ───────────────────────────────────────────── */}
-            {!isMobile && (
-            <div style={{ width: 210, flexShrink: 0, background: "#FAF7F2", display: "flex", flexDirection: "column", position: "sticky", top: 0, height: "100vh", overflowY: "auto", borderRight: "1px solid #E8DDD0" }}>
-
-              {/* Logo */}
-              <div style={{ padding: "1.1rem 1.25rem 0.9rem", display: "flex", alignItems: "center", gap: 9, borderBottom: "1px solid #E8DDD0" }}>
-                <div onClick={() => window.location.href = '/home'} style={{ display: "flex", alignItems: "center", gap: 9, cursor: "pointer" }}>
-                  <svg width="28" height="20" viewBox="0 0 103 76" fill="none">
-                    <defs><linearGradient id="sidebarLogoGrad" x1="0" y1="0" x2="103" y2="76" gradientUnits="userSpaceOnUse"><stop offset="0%" stopColor="#E8673A"/><stop offset="100%" stopColor="#1B5FE8"/></linearGradient></defs>
-                    <path d="M14,4 L44,4 A9,9 0 0,1 53,13 L53,42 A9,9 0 0,1 44,51 L20,51 L6,61 L11,51 A6,6 0 0,1 5,45 L5,13 A9,9 0 0,1 14,4 Z" fill="url(#sidebarLogoGrad)"/>
-                    <path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill="white" opacity=".93" transform="translate(13.16,11.3) scale(0.72)"/>
-                    <path d="M89,14 L59,14 A9,9 0 0,0 50,23 L50,52 A9,9 0 0,0 59,61 L83,61 L97,71 L92,61 A6,6 0 0,0 98,55 L98,23 A9,9 0 0,0 89,14 Z" fill="white" stroke="url(#sidebarLogoGrad)" strokeWidth="2.2" strokeLinejoin="round"/>
-                    <path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill="url(#sidebarLogoGrad)" transform="translate(58.16,21.3) scale(0.72)"/>
-                  </svg>
-                  <span style={{ fontSize: "1rem", fontWeight: 700, color: "#0E0B07", fontFamily: "'Playfair Display', Georgia, serif", letterSpacing: "-.01em" }}>Attune</span>
-                </div>
-              </div>
-
-              {/* Profile pill */}
-              <div style={{ margin: "0.85rem 0.9rem 0.5rem", background: "white", border: "1px solid #E8DDD0", borderRadius: 10, padding: "0.6rem 0.85rem", display: "flex", alignItems: "center", gap: 9 }}>
-                <div style={{ width: 30, height: 30, borderRadius: "50%", background: "linear-gradient(135deg,#E8673A,#1B5FE8)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, fontWeight: 700, color: "white", flexShrink: 0 }}>
-                  {userName ? userName[0].toUpperCase() : "?"}
-                </div>
-                <div>
-                  <div style={{ fontSize: 12, fontWeight: 600, color: "#0E0B07", lineHeight: 1.2 }}>{userName || "You"}</div>
-                  {partnerName && <div style={{ fontSize: 10, color: "#8C7A68" }}>& {partnerName}</div>}
-                </div>
-              </div>
-
-              {/* Nav items */}
-              <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 1, padding: "0.25rem 0.7rem 0" }}>
-                {[
-                  { label: "Dashboard", viewId: "home", icon: <svg width="15" height="15" viewBox="0 0 20 20" fill="none"><rect x="2" y="2" width="7" height="7" rx="1.5" stroke="currentColor" strokeWidth="1.5"/><rect x="11" y="2" width="7" height="7" rx="1.5" stroke="currentColor" strokeWidth="1.5"/><rect x="2" y="11" width="7" height="7" rx="1.5" stroke="currentColor" strokeWidth="1.5"/><rect x="11" y="11" width="7" height="7" rx="1.5" stroke="currentColor" strokeWidth="1.5"/></svg> },
-                ].map(item => {
-                  const isActive = item.viewId === view;
-                  const handleNavClick = () => { setView(item.viewId); };
-                  return (
-                    <div key={item.viewId} onClick={handleNavClick}
-                      style={{ display: "flex", alignItems: "center", gap: 10, padding: "0.6rem 0.75rem", borderRadius: 8, background: isActive ? "#E8673A14" : "transparent", cursor: "pointer", color: isActive ? "#B84E28" : "#5C4F45" }}
-                      onMouseEnter={e => { if (!isActive) e.currentTarget.style.background = "#F3EDE6"; }}
-                      onMouseLeave={e => { if (!isActive) e.currentTarget.style.background = "transparent"; }}>
-                      {item.icon}
-                      <span style={{ fontSize: 12, fontWeight: isActive ? 600 : 400 }}>{item.label}</span>
-                    </div>
-                  );
-                })}
-              </div>
-
-              {/* Bottom: Account + Settings */}
-              <div style={{ padding: "0.85rem 1rem", borderTop: "1px solid #E8DDD0", marginTop: "auto", display: "flex", flexDirection: "column", gap: 2 }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "0.45rem 0.75rem", borderRadius: 7, cursor: "pointer", color: "#5C4F45" }}
-                  onClick={() => setView("account")}
-                  onMouseEnter={e => e.currentTarget.style.background = "#F3EDE6"}
-                  onMouseLeave={e => e.currentTarget.style.background = "transparent"}>
-                  <svg width="13" height="13" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="7" r="3.5" stroke="currentColor" strokeWidth="1.5"/><path d="M3 17c0-3.314 3.134-6 7-6s7 2.686 7 6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/></svg>
-                  <span style={{ fontSize: 11, fontWeight: 400 }}>Account</span>
-                </div>
-                <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "0.45rem 0.75rem", borderRadius: 7, cursor: "pointer", color: "#5C4F45" }}
-                  onClick={() => setShowProfileSetup(true)}
-                  onMouseEnter={e => e.currentTarget.style.background = "#F3EDE6"}
-                  onMouseLeave={e => e.currentTarget.style.background = "transparent"}>
-                  <svg width="13" height="13" viewBox="0 0 20 20" fill="none"><path d="M10 3v2M10 15v2M3 10H1M19 10h-2M5.05 5.05L3.636 3.636M16.364 16.364l-1.414-1.414M5.05 14.95l-1.414 1.414M16.364 3.636l-1.414 1.414" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/><circle cx="10" cy="10" r="3" stroke="currentColor" strokeWidth="1.5"/></svg>
-                  <span style={{ fontSize: 11, fontWeight: 400 }}>Settings</span>
-                </div>
-              </div>
-            </div>
-            )}
-
             {/* ── MAIN CONTENT ───────────────────────────────────────────── */}
             <div style={{ flex: 1, display: "flex", flexDirection: "column", overflowY: "auto", minWidth: 0 }}>
 
               {/* ── GRADIENT BANNER (mobile: full nav bar; desktop: banner only) ── */}
               <div style={{ background: "linear-gradient(120deg, #C8522E 0%, #6B3FA0 52%, #1B5FE8 100%)", flexShrink: 0, position: "relative", overflow: "hidden" }}>
                 <div style={{ position: "absolute", inset: 0, background: "linear-gradient(180deg, rgba(255,255,255,0.04) 0%, transparent 100%)", pointerEvents: "none" }} />
+                <div style={{ position: "absolute", top: "-30%", right: "8%", width: 260, height: 260, borderRadius: "50%", background: "radial-gradient(circle, rgba(255,255,255,0.16), transparent 70%)", pointerEvents: "none" }} />
+                <div style={{ position: "absolute", bottom: "-40%", left: "20%", width: 200, height: 200, borderRadius: "50%", background: "radial-gradient(circle, rgba(255,200,120,0.14), transparent 70%)", pointerEvents: "none" }} />
 
                 {/* Mobile: logo row + hamburger at top */}
                 {isMobile && (
@@ -12369,24 +12307,44 @@ export default function App() {
                 )}
 
                 {/* Names + optional View Results CTA */}
-                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", position: "relative", gap: "1rem", padding: isMobile ? "0.85rem 1.25rem 1.25rem" : "1.5rem 2rem" }}>
+                <div style={{ display: "flex", alignItems: isMobile ? "flex-start" : "center", justifyContent: "space-between", position: "relative", gap: "1rem", padding: isMobile ? "0.85rem 1.25rem 1.75rem" : "2.75rem 2.5rem 2.5rem" }}>
                   <div style={{ display: "flex", alignItems: "center", gap: isMobile ? "0.75rem" : "1.25rem" }}>
                     <div>
-                      <div style={{ display: "flex", alignItems: "baseline", gap: "0.35rem", flexWrap: "wrap" }}>
-                        <span style={{ fontFamily: "'Playfair Display', Georgia, serif", fontSize: isMobile ? "1.3rem" : "1.75rem", fontWeight: 700, lineHeight: 1, letterSpacing: "-.02em", color: "white" }}>{userName || "You"}</span>
-                        <span style={{ fontFamily: "'Playfair Display', Georgia, serif", fontSize: isMobile ? "0.95rem" : "1.3rem", fontWeight: 400, fontStyle: "italic", color: "rgba(255,255,255,0.5)", lineHeight: 1 }}>&</span>
-                        <span style={{ fontFamily: "'Playfair Display', Georgia, serif", fontSize: isMobile ? "1.3rem" : "1.75rem", fontWeight: 700, lineHeight: 1, letterSpacing: "-.02em", color: "white" }}>{partnerName || "Partner"}</span>
+                      <div style={{ fontSize: isMobile ? "0.55rem" : "0.62rem", letterSpacing: "0.24em", textTransform: "uppercase", color: "rgba(255,255,255,0.7)", fontFamily: BFONT, fontWeight: 700, marginBottom: isMobile ? "0.4rem" : "0.6rem" }}>Your Attune dashboard</div>
+                      <div style={{ display: "flex", alignItems: "baseline", gap: "0.4rem", flexWrap: "wrap" }}>
+                        <span style={{ fontFamily: "'Playfair Display', Georgia, serif", fontSize: isMobile ? "1.6rem" : "2.5rem", fontWeight: 700, lineHeight: 1, letterSpacing: "-.02em", color: "white" }}>{userName || "You"}</span>
+                        <span style={{ fontFamily: "'Playfair Display', Georgia, serif", fontSize: isMobile ? "1.1rem" : "1.7rem", fontWeight: 400, fontStyle: "italic", color: "rgba(255,255,255,0.6)", lineHeight: 1 }}>&</span>
+                        <span style={{ fontFamily: "'Playfair Display', Georgia, serif", fontSize: isMobile ? "1.6rem" : "2.5rem", fontWeight: 700, lineHeight: 1, letterSpacing: "-.02em", color: "white" }}>{partnerName || "Partner"}</span>
+                      </div>
+                      <div style={{ fontSize: isMobile ? "0.78rem" : "0.92rem", color: "rgba(255,255,255,0.75)", fontFamily: BFONT, fontWeight: 300, marginTop: "0.6rem", lineHeight: 1.5 }}>
+                        {bothDone ? "Your results are ready. Take it one step at a time." : "Three steps. Built from your actual answers."}
                       </div>
                     </div>
                   </div>
-                  {/* Desktop only: View Results in banner */}
-                  {!isMobile && bothDone && (
-                    <button onClick={() => setView("results")}
-                      style={{ background: "rgba(255,255,255,0.18)", backdropFilter: "blur(8px)", color: "white", border: "1px solid rgba(255,255,255,0.3)", borderRadius: 10, padding: "0.65rem 1.25rem", fontSize: "0.75rem", fontWeight: 600, cursor: "pointer", whiteSpace: "nowrap", letterSpacing: ".04em", textTransform: "uppercase", fontFamily: "'DM Sans', sans-serif", flexShrink: 0, transition: "background .15s" }}
-                      onMouseEnter={e => e.currentTarget.style.background = "rgba(255,255,255,0.26)"}
-                      onMouseLeave={e => e.currentTarget.style.background = "rgba(255,255,255,0.18)"}>
-                      View results →
-                    </button>
+                  {/* Desktop only: View Results + account/settings icons in banner */}
+                  {!isMobile && (
+                    <div style={{ display: "flex", alignItems: "center", gap: "0.6rem", flexShrink: 0 }}>
+                      {bothDone && (
+                        <button onClick={() => setView("results")}
+                          style={{ background: "rgba(255,255,255,0.18)", backdropFilter: "blur(8px)", color: "white", border: "1px solid rgba(255,255,255,0.3)", borderRadius: 10, padding: "0.65rem 1.25rem", fontSize: "0.75rem", fontWeight: 600, cursor: "pointer", whiteSpace: "nowrap", letterSpacing: ".04em", textTransform: "uppercase", fontFamily: "'DM Sans', sans-serif", transition: "background .15s" }}
+                          onMouseEnter={e => e.currentTarget.style.background = "rgba(255,255,255,0.26)"}
+                          onMouseLeave={e => e.currentTarget.style.background = "rgba(255,255,255,0.18)"}>
+                          View results →
+                        </button>
+                      )}
+                      <button onClick={() => setView("account")} aria-label="Account" title="Account"
+                        style={{ width: 38, height: 38, borderRadius: "50%", background: "rgba(255,255,255,0.16)", border: "1px solid rgba(255,255,255,0.3)", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", flexShrink: 0, transition: "background .15s" }}
+                        onMouseEnter={e => e.currentTarget.style.background = "rgba(255,255,255,0.28)"}
+                        onMouseLeave={e => e.currentTarget.style.background = "rgba(255,255,255,0.16)"}>
+                        <svg width="17" height="17" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="7" r="3.5" stroke="white" strokeWidth="1.6"/><path d="M3 17c0-3.314 3.134-6 7-6s7 2.686 7 6" stroke="white" strokeWidth="1.6" strokeLinecap="round"/></svg>
+                      </button>
+                      <button onClick={() => setShowProfileSetup(true)} aria-label="Settings" title="Settings"
+                        style={{ width: 38, height: 38, borderRadius: "50%", background: "rgba(255,255,255,0.16)", border: "1px solid rgba(255,255,255,0.3)", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", flexShrink: 0, transition: "background .15s" }}
+                        onMouseEnter={e => e.currentTarget.style.background = "rgba(255,255,255,0.28)"}
+                        onMouseLeave={e => e.currentTarget.style.background = "rgba(255,255,255,0.16)"}>
+                        <svg width="17" height="17" viewBox="0 0 20 20" fill="none"><path d="M10 3v2M10 15v2M3 10H1M19 10h-2M5.05 5.05L3.636 3.636M16.364 16.364l-1.414-1.414M5.05 14.95l-1.414 1.414M16.364 3.636l-1.414 1.414" stroke="white" strokeWidth="1.6" strokeLinecap="round"/><circle cx="10" cy="10" r="3" stroke="white" strokeWidth="1.6"/></svg>
+                      </button>
+                    </div>
                   )}
                 </div>
 
@@ -12398,9 +12356,10 @@ export default function App() {
                       {[
                         { label: "Dashboard", viewId: "home" },
                         { label: "Account", viewId: "account" },
+                        { label: "Settings", viewId: "__settings" },
                       ].map(item => (
                         <button key={item.viewId}
-                          onClick={() => { setView(item.viewId); setMobileNavOpen(false); }}
+                          onClick={() => { if (item.viewId === "__settings") { setShowProfileSetup(true); } else { setView(item.viewId); } setMobileNavOpen(false); }}
                           style={{ display: "flex", alignItems: "center", padding: "0.65rem 0.85rem", background: view === item.viewId ? "rgba(232,103,58,0.1)" : "transparent", border: "none", borderRadius: 9, cursor: "pointer", textAlign: "left", width: "100%", transition: "background .15s" }}>
                           <span style={{ fontSize: "0.85rem", fontWeight: view === item.viewId ? 700 : 500, color: view === item.viewId ? "#B84E28" : "#3C342C", fontFamily: "'DM Sans', sans-serif" }}>{item.label}</span>
                           {item.viewId === "results" && bothDone && <span style={{ marginLeft: "auto", fontSize: "0.6rem", background: "#E8673A", color: "white", borderRadius: 99, padding: "2px 8px", fontFamily: "'DM Sans', sans-serif", fontWeight: 700 }}>Ready</span>}
@@ -12422,7 +12381,8 @@ export default function App() {
               )}
 
               {/* ── CONTENT AREA ─────────────────────────────────────────── */}
-              <div style={{ flex: 1, padding: isMobile ? "1.5rem 1.25rem" : "2rem 2rem", background: "#FBF8F3" }}>
+              <div style={{ flex: 1, padding: isMobile ? "1.5rem 1.25rem 3rem" : "2.5rem 2rem 4rem", background: "#FBF8F3" }}>
+                <div style={{ maxWidth: 680, margin: "0 auto" }}>
 
                 {/* Beta tester thank-you tile — shown for both partners when the couple registered with a beta promo code */}
                 {isBetaTester && (
@@ -12492,20 +12452,6 @@ export default function App() {
                   />
                 )}
 
-                {/* Workbook ready notification — shown when workbook is generated and not yet seen */}
-                {isLoggedIn && hasWorkbookOrder && workbookReady && !workbookNotifSeen && (
-                  <div style={{ background: 'linear-gradient(135deg,#ECFDF5,#D1FAE5)', border: '1.5px solid rgba(16,185,129,0.35)', borderRadius: 16, padding: '1.1rem 1.4rem', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem', flexWrap: 'wrap' }}>
-                    <div>
-                      <div style={{ fontSize: '0.85rem', fontWeight: 700, color: '#065F46', fontFamily: "'DM Sans',sans-serif", marginBottom: 3 }}>Your personalized workbook is ready.</div>
-                      <div style={{ fontSize: '0.75rem', color: '#059669', fontFamily: "'DM Sans',sans-serif" }}>Go to Workbook in the sidebar to download your PDF.</div>
-                    </div>
-                    <div style={{ display: 'flex', gap: '0.6rem', flexShrink: 0 }}>
-                      <button onClick={() => setView('workbook')} style={{ background: '#059669', color: 'white', border: 'none', borderRadius: 9, padding: '0.5rem 1rem', fontSize: '0.75rem', fontWeight: 700, cursor: 'pointer', fontFamily: "'DM Sans',sans-serif" }}>Download →</button>
-                      <button onClick={() => { setWorkbookNotifSeen(true); try { localStorage.setItem('attune_workbook_notif_seen','1'); } catch {} }} style={{ background: 'transparent', border: '1px solid rgba(16,185,129,0.4)', borderRadius: 9, padding: '0.5rem 0.75rem', fontSize: '0.72rem', color: '#059669', cursor: 'pointer', fontFamily: "'DM Sans',sans-serif" }}>Dismiss</button>
-                    </div>
-                  </div>
-                )}
-
                 {/* Partner invite card (when partner hasn't joined yet) */}
                 {isLoggedIn && !hasRealPartner && !account?.partnerJoined && (
                   <div style={{ marginBottom: "1.75rem" }}>
@@ -12538,23 +12484,6 @@ export default function App() {
                     <div>
                       <div style={{ fontSize: "0.85rem", fontWeight: 700, color: "#0E0B07", fontFamily: "'DM Sans',sans-serif", marginBottom: 2 }}>{account.partnerName || "Your partner"} has joined.</div>
                       <div style={{ fontSize: "0.75rem", color: "#8C7A68", fontFamily: "'DM Sans',sans-serif", lineHeight: 1.5 }}>Once both of you complete your exercises, your results will unlock.</div>
-                    </div>
-                  </div>
-                )}
-
-                {/* Partner done — gradient border card */}
-                {hasRealPartner && bothDone && (
-                  <div style={{ borderRadius: 14, marginBottom: "1.75rem", position: "relative", padding: "1.5px" }}>
-                    <div style={{ position: "absolute", inset: 0, borderRadius: 14, background: "linear-gradient(135deg, #E8673A, #9B5DE5, #1B5FE8)" }} />
-                    <div style={{ position: "relative", background: "white", borderRadius: 13, padding: "1rem 1.25rem", display: "flex", alignItems: "center", justifyContent: "space-between", gap: "1rem", flexWrap: "wrap" }}>
-                      <div>
-                        <div style={{ fontSize: 13, fontWeight: 600, color: "#0E0B07", marginBottom: 3, fontFamily: "'DM Sans', sans-serif" }}>You're both done with your exercises</div>
-                        <div style={{ fontSize: 11, color: "#8C7A68", fontFamily: "'DM Sans', sans-serif" }}>Your results are ready. Explore them on your own or together with {partnerName}.</div>
-                      </div>
-                      <button onClick={() => setView("results")}
-                        style={{ background: "linear-gradient(135deg, #E8673A, #9B5DE5, #1B5FE8)", color: "white", border: "none", borderRadius: 8, padding: "0.55rem 1rem", fontSize: 11, fontWeight: 700, cursor: "pointer", whiteSpace: "nowrap", letterSpacing: ".04em", textTransform: "uppercase", fontFamily: "'DM Sans', sans-serif", flexShrink: 0 }}>
-                        See results
-                      </button>
                     </div>
                   </div>
                 )}
@@ -12696,9 +12625,15 @@ export default function App() {
                       : <DashTile color="#5B6DF8" eyebrow="Add-on" title="LMFT Session" sub="A 50-minute session with a licensed therapist who reviews your results first. $150." cta="Add →" onClick={() => setUpsellModal({ product: 'lmft', cartAdded: false })} />}
                     <DashTile color="#9B5DE5" eyebrow="Guide" title="How to review your results together" sub="A simple structure for the first conversation." cta="Read →" href="/practice/how-to-review-your-results-together?from=app" />
                     <DashTile color="#9B5DE5" eyebrow="Guide" title="How to start a hard conversation" sub="Opening lines for the topics that matter most." cta="Read →" href="/practice/how-to-start-a-hard-conversation?from=app" />
+                    <a href="/practice?from=app" style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "0.4rem", marginTop: "0.35rem", padding: "0.85rem", borderRadius: 12, border: "1.5px dashed rgba(193,127,71,0.4)", background: "transparent", textDecoration: "none", fontSize: "0.8rem", fontWeight: 700, color: "#C17F47", fontFamily: BFONT, transition: "background .15s" }}
+                      onMouseEnter={e => e.currentTarget.style.background = "rgba(193,127,71,0.06)"}
+                      onMouseLeave={e => e.currentTarget.style.background = "transparent"}>
+                      Explore all of In Practice →
+                    </a>
                   </div>
                 </div>
 
+                </div>
               </div>
             </div>
           </div>
