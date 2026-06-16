@@ -4110,7 +4110,7 @@ const CAT_WEIGHT = {
 function buildOriginNote(g, userName, partnerName, gapIdx) {
   return null; // Origin tracking removed from simplified exercise
 }
-function ExpectationsResults({ myAnswers, partnerAnswers, userName, partnerName, forcedSection, noSideNav = false, onGoWhatComesNext, onExternalGo }) {
+function ExpectationsResults({ myAnswers, partnerAnswers, userName, partnerName, forcedSection, noSideNav = false, onGoWhatComesNext, onExternalGo, coupleTypeCode = null, coupleTypeName = null, coupleTypeColor = "#1B5FE8" }) {
   // ── Fixed 5 display categories ──────────────────────────────────────────────
   // ── Step system: 0=overview, 1=common-ground, 2=convos-landing,
   //                "convo-0".."convo-4"=individual cats, "action-plan"=plan, "summary"=summary
@@ -4171,13 +4171,11 @@ function ExpectationsResults({ myAnswers, partnerAnswers, userName, partnerName,
     };
   }).filter(r => r.mine && r.theirs);
 
-  // ── Derive couple type context for expectations overview ─────────────────────
-  const expMyS = calcDimScores(myAnswers);
-  const expPartS = calcDimScores(partnerAnswers);
-  const expNewType = (expMyS && expPartS && Object.keys(expMyS).length > 0 && Object.keys(expPartS).length > 0)
-    ? deriveNewCoupleType(expMyS, expPartS) : null;
-  const coupleTypeName = expNewType?.name || null;
-  const coupleTypeColor = expNewType?.color || "#E8673A";
+  // ── Couple type context for expectations overview ────────────────────────────
+  // The couple type is defined by communication scores and is passed in from the
+  // parent (coupleTypeCode/Name/Color). Previously this recomputed the type from
+  // ex2 expectations answers via calcDimScores, which produced a DIFFERENT type
+  // than the rest of the results (e.g. "ignition" here vs "jumpstart" elsewhere).
   const EXP_COUPLE_CONTEXT = {
     WW: "Two Initiators both lean toward open expression. When expectations differ, you'll likely name it, the work is making sure you've actually heard each other before resolving.",
     XX: "The collaboration tend to move through disagreement efficiently. Watch that practical resolution doesn't skip the emotional weight of what's actually at stake.",
@@ -4190,8 +4188,9 @@ function ExpectationsResults({ myAnswers, partnerAnswers, userName, partnerName,
     XZ: "Both of you hold things close. Expectation gaps that go unnamed can accumulate quietly, schedule the conversation, don't wait for it to happen organically.",
     YZ: "Both withdraw under pressure. When an expectation surfaces, one of you will need to come back first, let that be the agreed pattern.",
   };
-  const pairKey = expNewType ? [expNewType.typeInfoA.typeCode, expNewType.typeInfoB.typeCode].sort().join("") : null;
+  const pairKey = coupleTypeCode ? coupleTypeCode.split("").sort().join("") : null;
   const coupleTypeExpContext = pairKey ? EXP_COUPLE_CONTEXT[pairKey] || null : null;
+
 
   const allRows = [...rows, ...lifeRows];
   const aligned = allRows.filter(r => r.aligned);
@@ -7696,6 +7695,9 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
       <Layout accent="#1B5FE8" noPrevNext={true}>
         <ExpectationsResultsPage
           myAnswers={ex2Answers} partnerAnswers={partnerEx2}
+          coupleTypeCode={(() => { try { const t = deriveNewCoupleType(myS, partS); return (t?.typeInfoA?.typeCode || "") + (t?.typeInfoB?.typeCode || ""); } catch { return null; } })()}
+          coupleTypeName={(() => { try { return deriveNewCoupleType(myS, partS)?.name || null; } catch { return null; } })()}
+          coupleTypeColor={(() => { try { return deriveNewCoupleType(myS, partS)?.color || "#1B5FE8"; } catch { return "#1B5FE8"; } })()}
           userName={userName} partnerName={partnerName}
           forcedSection={expSection}
           onGoWhatComesNext={() => go("what-comes-next")}
@@ -8016,7 +8018,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
   if (section === "what-comes-next") {
     const NavActionLink = ({ onClick, bg, border, icon, title, sub, accentColor }) => {
       const iconSvgs = {
-        "💬": <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={accentColor} strokeWidth="2" strokeLinecap="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>,
+        "💬": <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={accentColor} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/><line x1="8" y1="9" x2="16" y2="9"/><line x1="8" y1="13" x2="13" y2="13"/></svg>,
         "📋": <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={accentColor} strokeWidth="2" strokeLinecap="round"><rect x="9" y="2" width="6" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><line x1="9" y1="12" x2="15" y2="12"/><line x1="9" y1="16" x2="13" y2="16"/></svg>,
         "💚": <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={accentColor} strokeWidth="2" strokeLinecap="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>,
         "✅": <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={accentColor} strokeWidth="2" strokeLinecap="round"><polyline points="20 6 9 17 4 12"/></svg>,
@@ -8055,23 +8057,8 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
             </div>
           </div>
 
-          {/* ── PACKAGE-SPECIFIC RESOURCES ── */}
-          {(hasChecklist || hasBudget || hasLMFT) && (
-            <div style={{ marginBottom: "1.5rem" }}>
-              <div style={{ fontSize: "0.62rem", letterSpacing: "0.22em", textTransform: "uppercase", color: C.clay, fontFamily: BFONT, fontWeight: 700, marginBottom: "0.85rem" }}>Included with your package</div>
-              <div style={{ display: "flex", flexDirection: "column", gap: "0.65rem" }}>
-                {hasChecklist && (
-                  <NavActionLink onClick={() => onNavigateTool && onNavigateTool("checklist")} bg={C.warm} border={`1.5px solid ${C.stone}`} icon="✅" title="Starting Out Checklist" sub="A practical guide to starting your life together" accentColor={C.clay} />
-                )}
-                {hasBudget && (
-                  <NavActionLink onClick={() => onNavigateTool && onNavigateTool("budget")} bg={C.warm} border={`1.5px solid ${C.stone}`} icon="💰" title="Shared Budget Builder" sub="Build a financial plan together from your results" accentColor={C.clay} />
-                )}
-                {hasLMFT && (
-                  <NavActionLink onClick={() => onNavigateTool && onNavigateTool("lmft")} bg="linear-gradient(135deg,#F5F6FF,#EEEEFF)" border={`1.5px solid rgba(91,109,248,0.25)`} icon="🧠" title="Schedule Your LMFT Session" sub="Your therapist has your results and comes prepared" accentColor="#5B6DF8" />
-                )}
-              </div>
-            </div>
-          )}
+          {/* ── KEEP GROWING (workbook tile + in-practice list) ── */}
+          <div style={{ fontSize: "0.62rem", letterSpacing: "0.22em", textTransform: "uppercase", color: C.clay, fontFamily: BFONT, fontWeight: 700, marginBottom: "0.85rem" }}>Keep growing</div>
 
           {/* ── WORKBOOK CTA ── */}
           {/* Gated on hasWorkbook (i.e. user purchased the workbook addon).
@@ -8194,7 +8181,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
 
             return (
               <div style={{ background: "#2d2250", borderRadius: 18, padding: "1.75rem 2rem", marginBottom: "1.5rem" }}>
-                <div style={{ fontSize: "0.58rem", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(232,103,58,0.85)", fontFamily: BFONT, fontWeight: 700, marginBottom: "0.6rem" }}>Keep growing</div>
+                <div style={{ fontSize: "0.58rem", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(232,103,58,0.85)", fontFamily: BFONT, fontWeight: 700, marginBottom: "0.6rem" }}>Personalized workbook</div>
                 <div style={{ fontFamily: HFONT, fontSize: "1.2rem", fontWeight: 700, color: "white", lineHeight: 1.2, marginBottom: "0.6rem" }}>Download your personalized workbook.</div>
                 <p style={{ fontSize: "0.82rem", color: "rgba(255,255,255,0.65)", fontFamily: BFONT, fontWeight: 300, lineHeight: 1.65, marginBottom: "0.75rem" }}>
                   Built from {userName} and {partnerName}'s actual scores and calibrated to your results. Generated instantly as a .docx.
@@ -8232,107 +8219,9 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
             );
           })()}
 
-          {/* ── LMFT VIRTUAL SESSION (for packages without LMFT) ── */}
-          {!hasLMFT && (
-            <div style={{ background: "white", border: `1.5px solid ${C.stone}`, borderRadius: 18, padding: "1.5rem 1.75rem", marginBottom: "1.5rem" }}>
-              <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", marginBottom: "0.85rem" }}>
-                <div style={{ width: 42, height: 42, borderRadius: 12, background: "rgba(91,109,248,0.1)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                  <div style={{ width: 18, height: 18, borderRadius: 4, background: "rgba(91,109,248,0.35)" }} />
-                </div>
-                <div>
-                  <div style={{ fontSize: "0.85rem", fontWeight: 700, color: C.ink, fontFamily: BFONT }}>Review your results with a licensed therapist</div>
-                  <div style={{ fontSize: "0.72rem", color: C.muted, fontFamily: BFONT }}>One-time · Virtual · 50 minutes</div>
-                </div>
-              </div>
-              <p style={{ fontSize: "0.82rem", color: C.muted, fontFamily: BFONT, fontWeight: 300, lineHeight: 1.7, marginBottom: "1rem" }}>
-                A licensed LMFT receives your joint results before your session and comes prepared with context specific to your pairing. One focused conversation, no ongoing commitment.
-              </p>
-              <button onClick={() => onNavigateTool && onNavigateTool('lmft-upsell')} style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", background: "rgba(91,109,248,0.08)", border: "1.5px solid rgba(91,109,248,0.25)", color: "#5B6DF8", borderRadius: 10, padding: "0.6rem 1.25rem", textDecoration: "none", fontSize: "0.78rem", fontWeight: 700, fontFamily: BFONT, cursor: "pointer" }}>
-                Add LMFT session · $150 →
-              </button>
-            </div>
-          )}
-
-          {/* ── STAY CONNECTED ── */}
-          <div style={{ background: C.warm, border: `1.5px solid ${C.stone}`, borderRadius: 16, padding: "1.4rem 1.6rem", marginBottom: "1.5rem" }}>
-            <div style={{ fontSize: "0.62rem", letterSpacing: "0.2em", textTransform: "uppercase", color: C.clay, fontFamily: BFONT, fontWeight: 700, marginBottom: "0.6rem" }}>Stay connected to your results</div>
-            {stayDone ? (
-              <div style={{ display: "flex", alignItems: "center", gap: "0.65rem" }}>
-                <div style={{ width: 28, height: 28, borderRadius: "50%", background: "#ECFDF5", border: "1.5px solid rgba(16,185,129,0.3)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, fontSize: "0.75rem" }}>✓</div>
-                <p style={{ fontSize: "0.82rem", color: C.muted, fontFamily: BFONT, margin: 0, lineHeight: 1.55 }}>Done. We'll check in at 6 months with an option to retake and compare.</p>
-              </div>
-            ) : (
-              <>
-                <p style={{ fontSize: "0.85rem", color: C.muted, fontFamily: BFONT, fontWeight: 300, lineHeight: 1.72, marginBottom: "1rem" }}>
-                  We'll check in at 6 months with an option to retake and compare. Results shift more than most couples expect.
-                </p>
-                <div style={{ display: "flex", gap: "0.65rem", alignItems: "center", flexWrap: "wrap" }}>
-                  <input type="email" placeholder="your@email.com" value={stayEmail} onChange={e => setStayEmail(e.target.value)}
-                    style={{ flex: 1, minWidth: 180, border: `1.5px solid ${C.stone}`, borderRadius: 10, padding: "0.6rem 0.9rem", fontSize: "0.82rem", fontFamily: BFONT, outline: "none", background: "white", color: C.ink }} />
-                  <button disabled={stayLoading} onClick={handleStaySubmit}
-                    style={{ background: C.ink, color: "white", border: "none", borderRadius: 10, padding: "0.6rem 1.2rem", fontSize: "0.78rem", fontWeight: 700, cursor: "pointer", fontFamily: BFONT, whiteSpace: "nowrap", opacity: stayLoading ? 0.6 : 1 }}>
-                    {stayLoading ? "…" : "Stay in touch"}
-                  </button>
-                </div>
-              </>
-            )}
-          </div>
-
-          {/* ── TAKE IT FURTHER ── */}
-          {(!hasAnniversary || !hasLMFT) && (
-            <div style={{ marginBottom: "1.5rem", paddingTop: "1.5rem", borderTop: `1px solid ${C.stone}` }}>
-              <div style={{ fontSize: "0.62rem", letterSpacing: "0.22em", textTransform: "uppercase", color: C.clay, fontFamily: BFONT, fontWeight: 700, marginBottom: "1.25rem" }}>Take it further</div>
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.65rem" }}>
-                {!hasAnniversary && (
-                  <a href="/offerings#pkg-anniversary" style={{ display: "flex", flexDirection: "column", gap: "0.4rem", background: "#F0FDF9", border: "1.5px solid rgba(16,185,129,.25)", borderRadius: 14, padding: "1rem 1.1rem", textDecoration: "none" }}>
-                    <div style={{ fontSize: "1.1rem" }}>✦</div>
-                    <div style={{ fontSize: "0.82rem", fontWeight: 700, color: C.ink, fontFamily: BFONT }}>Relationship Reflection</div>
-                    <p style={{ fontSize: "0.72rem", color: C.muted, fontFamily: BFONT, lineHeight: 1.55, margin: 0 }}>A third exercise about the moments that shaped your relationship.</p>
-                    <span style={{ fontSize: "0.72rem", color: "#10b981", fontWeight: 700, fontFamily: BFONT, marginTop: "0.25rem" }}>See packages →</span>
-                  </a>
-                )}
-                {!hasLMFT && (
-                  <a href="/offerings#pkg-premium" style={{ display: "flex", flexDirection: "column", gap: "0.4rem", background: "rgba(91,109,248,.06)", border: "1.5px solid rgba(91,109,248,.2)", borderRadius: 14, padding: "1rem 1.1rem", textDecoration: "none" }}>
-                    <div style={{ width: 18, height: 18, borderRadius: 4, background: "rgba(91,109,248,0.35)" }} />
-                    <div style={{ fontSize: "0.82rem", fontWeight: 700, color: C.ink, fontFamily: BFONT }}>Premium Package</div>
-                    <p style={{ fontSize: "0.72rem", color: C.muted, fontFamily: BFONT, lineHeight: 1.55, margin: 0 }}>Includes LMFT session, budget tool, and everything in the Attune Assessment.</p>
-                    <span style={{ fontSize: "0.72rem", color: "#5B6DF8", fontWeight: 700, fontFamily: BFONT, marginTop: "0.25rem" }}>Learn more →</span>
-                  </a>
-                )}
-              </div>
-            </div>
-          )}
-
-          {/* ── HOW TO USE YOUR RESULTS ── */}
-          <a href="/practice/how-to-use-your-results" style={{ display: "flex", alignItems: "center", gap: "1rem", background: C.warm, border: `1.5px solid ${C.stone}`, borderRadius: 16, padding: "1.1rem 1.4rem", textDecoration: "none", marginBottom: "0.65rem" }}>
-            <div style={{ width: 38, height: 38, borderRadius: 10, background: C.orange + "18", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={C.orange} strokeWidth="2" strokeLinecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
-            </div>
-            <div>
-              <div style={{ fontSize: "0.82rem", fontWeight: 700, color: C.ink, fontFamily: BFONT, marginBottom: "0.15rem" }}>How to use your results</div>
-              <div style={{ fontSize: "0.72rem", color: C.muted, fontFamily: BFONT }}>A guide to getting the most out of what you've learned</div>
-            </div>
-            <div style={{ marginLeft: "auto", color: C.muted, fontSize: "1rem" }}>→</div>
-          </a>
-
-          {/* ── ADD-ONS / IN PRACTICE ── */}
+          {/* ── KEEP GROWING: in-practice list (workbook covered by CTA above) ── */}
           <div style={{ marginTop: "0.5rem", marginBottom: "0.5rem" }}>
-            <div style={{ fontSize: "0.6rem", letterSpacing: ".2em", textTransform: "uppercase", color: "#8C7A68", fontWeight: 700, fontFamily: BFONT, marginBottom: "0.75rem" }}>In Practice</div>
             <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
-
-              {/* Workbook */}
-              <div onClick={() => setView("workbook")} style={{ display: "flex", alignItems: "center", gap: "1rem", background: C.warm, border: `1.5px solid ${C.stone}`, borderRadius: 14, padding: "0.85rem 1.1rem", cursor: "pointer", transition: "all 0.15s" }}
-                onMouseEnter={e => { e.currentTarget.style.borderColor = "#9B5DE5"; }}
-                onMouseLeave={e => { e.currentTarget.style.borderColor = C.stone; }}>
-                <div style={{ width: 34, height: 34, borderRadius: 10, background: "rgba(155,93,229,0.12)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9B5DE5" strokeWidth="1.8" strokeLinecap="round"><rect x="3" y="2" width="14" height="17" rx="2"/><path d="M7 6h7M7 9h5M13 13l1.5 1.5L17 12"/></svg>
-                </div>
-                <div style={{ flex: 1 }}>
-                  <div style={{ fontSize: "0.8rem", fontWeight: 700, color: C.ink, fontFamily: BFONT, marginBottom: "0.1rem" }}>Personalized Workbook</div>
-                  <div style={{ fontSize: "0.68rem", color: C.muted, fontFamily: BFONT }}>Exercises and prompts built from your results</div>
-                </div>
-                <div style={{ color: C.muted, fontSize: "0.9rem" }}>→</div>
-              </div>
 
               {/* LMFT Session */}
               {hasLMFT ? (
@@ -8380,6 +8269,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
                 </div>
               ) : (
                 <a href="/offerings" style={{ display: "flex", alignItems: "center", gap: "1rem", background: C.warm, border: `1.5px solid ${C.stone}`, borderRadius: 14, padding: "0.85rem 1.1rem", textDecoration: "none", transition: "all 0.15s" }}
+                  onClick={(e) => { e.preventDefault(); onNavigateTool && onNavigateTool('reflection-upsell'); }}
                   onMouseEnter={e => { e.currentTarget.style.borderColor = "#10b981"; }}
                   onMouseLeave={e => { e.currentTarget.style.borderColor = C.stone; }}>
                   <div style={{ width: 34, height: 34, borderRadius: 10, background: "rgba(16,185,129,0.08)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
@@ -8409,6 +8299,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
                 </div>
               ) : (
                 <a href="/offerings" style={{ display: "flex", alignItems: "center", gap: "1rem", background: C.warm, border: `1.5px solid ${C.stone}`, borderRadius: 14, padding: "0.85rem 1.1rem", textDecoration: "none", transition: "all 0.15s" }}
+                  onClick={(e) => { e.preventDefault(); onNavigateTool && onNavigateTool('checklist-upsell'); }}
                   onMouseEnter={e => { e.currentTarget.style.borderColor = C.clay; }}
                   onMouseLeave={e => { e.currentTarget.style.borderColor = C.stone; }}>
                   <div style={{ width: 34, height: 34, borderRadius: 10, background: "rgba(193,127,71,0.08)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
@@ -8438,6 +8329,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
                 </div>
               ) : (
                 <a href="/offerings" style={{ display: "flex", alignItems: "center", gap: "1rem", background: C.warm, border: `1.5px solid ${C.stone}`, borderRadius: 14, padding: "0.85rem 1.1rem", textDecoration: "none", transition: "all 0.15s" }}
+                  onClick={(e) => { e.preventDefault(); onNavigateTool && onNavigateTool('budget-upsell'); }}
                   onMouseEnter={e => { e.currentTarget.style.borderColor = "#1B5FE8"; }}
                   onMouseLeave={e => { e.currentTarget.style.borderColor = C.stone; }}>
                   <div style={{ width: 34, height: 34, borderRadius: 10, background: "rgba(27,95,232,0.08)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
@@ -8452,7 +8344,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
               )}
 
               {/* In Practice resource library */}
-              <a href="/practice" style={{ display: "flex", alignItems: "center", gap: "1rem", background: C.warm, border: `1.5px solid ${C.stone}`, borderRadius: 14, padding: "0.85rem 1.1rem", textDecoration: "none", transition: "all 0.15s" }}
+              <a href="/practice?from=app" style={{ display: "flex", alignItems: "center", gap: "1rem", background: C.warm, border: `1.5px solid ${C.stone}`, borderRadius: 14, padding: "0.85rem 1.1rem", textDecoration: "none", transition: "all 0.15s" }}
                 onMouseEnter={e => { e.currentTarget.style.borderColor = C.clay; }}
                 onMouseLeave={e => { e.currentTarget.style.borderColor = C.stone; }}>
                 <div style={{ width: 34, height: 34, borderRadius: 10, background: "rgba(193,127,71,0.1)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
@@ -8468,6 +8360,34 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
             </div>
           </div>
 
+
+
+
+          {/* ── CONTINUE LIVING ATTUNED ── */}
+          <div style={{ fontSize: "0.62rem", letterSpacing: "0.22em", textTransform: "uppercase", color: C.clay, fontFamily: BFONT, fontWeight: 700, marginTop: "2rem", marginBottom: "0.85rem" }}>Continue living attuned</div>
+          <div style={{ background: C.warm, border: `1.5px solid ${C.stone}`, borderRadius: 16, padding: "1.4rem 1.6rem", marginBottom: "1.5rem" }}>
+            <div style={{ fontSize: "0.62rem", letterSpacing: "0.2em", textTransform: "uppercase", color: C.clay, fontFamily: BFONT, fontWeight: 700, marginBottom: "0.6rem" }}>Stay connected to your results</div>
+            {stayDone ? (
+              <div style={{ display: "flex", alignItems: "center", gap: "0.65rem" }}>
+                <div style={{ width: 28, height: 28, borderRadius: "50%", background: "#ECFDF5", border: "1.5px solid rgba(16,185,129,0.3)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, fontSize: "0.75rem" }}>✓</div>
+                <p style={{ fontSize: "0.82rem", color: C.muted, fontFamily: BFONT, margin: 0, lineHeight: 1.55 }}>Done. We'll check in at 6 months with an option to retake and compare.</p>
+              </div>
+            ) : (
+              <>
+                <p style={{ fontSize: "0.85rem", color: C.muted, fontFamily: BFONT, fontWeight: 300, lineHeight: 1.72, marginBottom: "1rem" }}>
+                  We'll check in at 6 months with an option to retake and compare. Results shift more than most couples expect.
+                </p>
+                <div style={{ display: "flex", gap: "0.65rem", alignItems: "center", flexWrap: "wrap" }}>
+                  <input type="email" placeholder="your@email.com" value={stayEmail} onChange={e => setStayEmail(e.target.value)}
+                    style={{ flex: 1, minWidth: 180, border: `1.5px solid ${C.stone}`, borderRadius: 10, padding: "0.6rem 0.9rem", fontSize: "0.82rem", fontFamily: BFONT, outline: "none", background: "white", color: C.ink }} />
+                  <button disabled={stayLoading} onClick={handleStaySubmit}
+                    style={{ background: C.ink, color: "white", border: "none", borderRadius: 10, padding: "0.6rem 1.2rem", fontSize: "0.78rem", fontWeight: 700, cursor: "pointer", fontFamily: BFONT, whiteSpace: "nowrap", opacity: stayLoading ? 0.6 : 1 }}>
+                    {stayLoading ? "…" : "Stay in touch"}
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
 
 
           <PrevNext />
@@ -8511,8 +8431,8 @@ function PersonalityResultsPage({ myAnswers, partnerAnswers, userName, partnerNa
   const go = s => { if (onStepChange) onStepChange(s); };
   return <PersonalityResults myAnswers={myAnswers} partnerAnswers={partnerAnswers} userName={userName} partnerName={partnerName} coupleType={coupleType} externalStep={forcedStep ?? 0} onExternalGo={go} noSideNav={true} onGoExpectations={onGoExpectations} />;
 }
-function ExpectationsResultsPage({ myAnswers, partnerAnswers, userName, partnerName, forcedSection, onGoWhatComesNext, onExternalGo }) {
-  return <ExpectationsResults myAnswers={myAnswers} partnerAnswers={partnerAnswers} userName={userName} partnerName={partnerName} forcedSection={forcedSection} noSideNav={true} onGoWhatComesNext={onGoWhatComesNext} onExternalGo={onExternalGo} />;
+function ExpectationsResultsPage({ myAnswers, partnerAnswers, userName, partnerName, forcedSection, onGoWhatComesNext, onExternalGo, coupleTypeCode = null, coupleTypeName = null, coupleTypeColor = "#1B5FE8" }) {
+  return <ExpectationsResults myAnswers={myAnswers} partnerAnswers={partnerAnswers} userName={userName} partnerName={partnerName} forcedSection={forcedSection} noSideNav={true} onGoWhatComesNext={onGoWhatComesNext} onExternalGo={onExternalGo} coupleTypeCode={coupleTypeCode} coupleTypeName={coupleTypeName} coupleTypeColor={coupleTypeColor} />;
 }
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -10596,22 +10516,22 @@ const UPSELL_PRODUCTS = {
     accentColor: "#5B6DF8",
     cartParam: "anniversary",
   },
-  checklist: {
-    badge: "Starting Out Collection",
-    badgeColor: "#FFF0EB",
-    badgeText: "#E8673A",
-    title: "Starting Out Checklist",
-    price: "$139",
-    tagline: "The real-world logistics of merging your lives.",
-    description: "A comprehensive checklist covering the practical steps most couples discover too late: name changes, finances, insurance, estate basics, and the administrative setup of a shared life. Included as part of the Starting Out Collection.",
+  budget: {
+    badge: "Add-on",
+    badgeColor: "#EAF1FF",
+    badgeText: "#1B5FE8",
+    title: "Shared Budgeting Activity",
+    price: "$20",
+    tagline: "Build a shared financial picture from your results.",
+    description: "A guided activity that turns your expectations comparison into a concrete financial plan. Surface what you each assume about money, spot where your expectations diverge, and build a shared budget you both actually agree on.",
     includes: [
-      "Name change checklist across government and financial accounts",
-      "Merging finances and setting up joint accounts",
-      "Insurance and benefits setup",
-      "Estate basics: wills, proxies, beneficiaries, term life",
+      "Guided prompts drawn from your expectations results",
+      "Surfaces money assumptions you each hold",
+      "A shared budget you build together",
+      "Yours to keep and revisit",
     ],
-    accentColor: "#E8673A",
-    cartParam: "newlywed",
+    accentColor: "#1B5FE8",
+    cartParam: "budget",
   },
 };
 
@@ -13584,7 +13504,11 @@ export default function App() {
                   hasLMFT={pkg.hasLMFT}
                   hasWorkbook={hasWorkbookOrder}
                   isBetaTester={isBetaTester}
-                  onNavigateTool={(tool) => { if (tool === 'lmft-upsell') { setUpsellModal({ product: 'lmft', cartAdded: false }); } else { setView(tool); } }}
+                  onNavigateTool={(tool) => {
+                    if (typeof tool === 'string' && tool.endsWith('-upsell')) {
+                      setUpsellModal({ product: tool.replace('-upsell', ''), cartAdded: false });
+                    } else { setView(tool); }
+                  }}
                   initialSection={activeResult !== "overview" ? activeResult : undefined}
                 />
                 </div>
