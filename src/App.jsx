@@ -12386,7 +12386,7 @@ export default function App() {
 
                 {/* Beta tester thank-you tile — shown for both partners when the couple registered with a beta promo code */}
                 {isBetaTester && (
-                  <div style={{ maxWidth: 400, background: "linear-gradient(135deg, rgba(124,58,237,0.08), rgba(27,95,232,0.06))", border: "1.5px solid rgba(124,58,237,0.3)", borderRadius: 14, padding: "1.1rem 1.25rem", marginBottom: "1.5rem" }}>
+                  <div style={{ background: "linear-gradient(135deg, rgba(124,58,237,0.08), rgba(27,95,232,0.06))", border: "1.5px solid rgba(124,58,237,0.3)", borderRadius: 14, padding: "1.1rem 1.4rem", marginBottom: "2rem" }}>
                     <div style={{ fontSize: "0.56rem", letterSpacing: "0.2em", textTransform: "uppercase", color: "#7C3AED", fontWeight: 700, fontFamily: "'DM Sans', sans-serif", marginBottom: "0.4rem" }}>Beta tester</div>
                     <div style={{ fontSize: "0.92rem", color: "#0E0B07", fontFamily: "'DM Sans', sans-serif", fontWeight: 600, marginBottom: "0.3rem", lineHeight: 1.3 }}>Thank you for being one of our beta testers.</div>
                     <div style={{ fontSize: "0.8rem", color: "#6B5C4D", fontFamily: "'DM Sans', sans-serif", fontWeight: 400, lineHeight: 1.5, marginBottom: "0.9rem" }}>Once you've viewed your results, tell us about your experience.</div>
@@ -12544,7 +12544,7 @@ export default function App() {
                 {/* ════ STEP 1 · COMPLETE YOUR EXERCISES ════ */}
                 <div style={{ marginBottom: "2.5rem" }}>
                   <DashStepHeader num="1" title="Complete your exercises" sub="Answer on your own. Results unlock when both of you finish." isMobile={isMobile} />
-                  <div style={{ background: "white", border: "1.5px solid #E8DDD0", borderRadius: 16, overflow: "hidden" }}>
+                  <div style={{ background: "white", border: "1.5px solid #E8DDD0", borderTop: "3px solid #E8673A", borderRadius: 16, overflow: "hidden", boxShadow: "0 2px 14px rgba(14,11,7,0.04)" }}>
                     {[
                       { label: "Your communication exercise", done: myEx1Done, inProgress: ex1InProgress, viewId: "exercise1", you: true },
                       { label: "Your expectations exercise", done: myEx2Done, inProgress: ex2InProgress, viewId: "exercise2", you: true },
@@ -12577,7 +12577,7 @@ export default function App() {
                 {/* ════ STEP 2 · REVIEW YOUR RESULTS ════ */}
                 <div style={{ marginBottom: "2.5rem" }}>
                   <DashStepHeader num="2" title="Review your results" sub={bothDone ? "Your results are ready. Start with the highlights or jump to any section." : "Visible once both of you finish all exercises."} active={bothDone} isMobile={isMobile} />
-                  <div style={{ background: "white", border: "1.5px solid #E8DDD0", borderRadius: 16, overflow: "hidden", opacity: bothDone ? 1 : 0.6 }}>
+                  <div style={{ background: "white", border: "1.5px solid #E8DDD0", borderTop: `3px solid ${bothDone ? "#1B5FE8" : "#D4C0A8"}`, borderRadius: 16, overflow: "hidden", opacity: bothDone ? 1 : 0.6, boxShadow: "0 2px 14px rgba(14,11,7,0.04)" }}>
                     {[
                       { label: "Storycard highlights", section: "highlights", color: "#E8673A" },
                       { label: "Your couple type", section: "couple-type", color: "#9B5DE5" },
