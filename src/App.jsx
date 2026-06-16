@@ -9446,8 +9446,15 @@ function AuthModal({ mode, onClose, onSuccess }) {
 
     const { supabase: sb, hasSupabase } = await import('./supabase.js');
     if (hasSupabase()) {
+      // Use the canonical production origin rather than window.location.origin.
+      // If the user is on a non-canonical host (apex vs www, a preview URL),
+      // an origin-derived redirect can miss the allow-list and Supabase falls
+      // back to the Site URL (the marketing homepage), dropping ?reset=1.
+      const _canonicalOrigin = /attune-relationships\.com$/.test(window.location.hostname)
+        ? 'https://www.attune-relationships.com'
+        : window.location.origin;
       await sb.auth.resetPasswordForEmail(form.email.trim().toLowerCase(), {
-        redirectTo: `${window.location.origin}/app?reset=1`,
+        redirectTo: `${_canonicalOrigin}/app?reset=1`,
       });
       // Always show success (don't reveal whether the email exists)
     }
@@ -10777,7 +10784,31 @@ export default function App() {
   const urlInviteCode = params.get("invite");
   const urlGuidedFlow = params.get("guided") === "1";
   const urlInviteFrom = params.get("from") ? decodeURIComponent(params.get("from")) : null;
-  const urlIsReset = params.get("reset") === "1";
+  // Password recovery can arrive three ways, and we must catch all of them
+  // because the ?reset=1 query param can be dropped if Supabase falls back to
+  // the Site URL (e.g. redirect_to host not matching the allow-list). Detect:
+  //   1. ?reset=1 query param (our redirectTo)
+  //   2. a recovery token in the URL hash (#...type=recovery) that Supabase
+  //      appends and detectSessionInUrl consumes
+  //   3. the PASSWORD_RECOVERY auth event (set on window by the listener below)
+  const _hash = typeof window !== 'undefined' ? window.location.hash : '';
+  const _hashIsRecovery = /type=recovery/.test(_hash) || /[?&]type=recovery/.test(_hash);
+  const [recoveryEvent, setRecoveryEvent] = useState(false);
+  useEffect(() => {
+    let sub = null;
+    (async () => {
+      try {
+        const { supabase: sb, hasSupabase } = await import('./supabase.js');
+        if (!hasSupabase()) return;
+        const { data } = sb.auth.onAuthStateChange((event) => {
+          if (event === 'PASSWORD_RECOVERY') setRecoveryEvent(true);
+        });
+        sub = data?.subscription || null;
+      } catch {}
+    })();
+    return () => { try { sub?.unsubscribe(); } catch {} };
+  }, []);
+  const urlIsReset = params.get("reset") === "1" || _hashIsRecovery || recoveryEvent;
   // Gift box QR flow params
   const urlIsGift = params.get("gift") === "1";
   const urlGiftP1 = params.get("p1") ? decodeURIComponent(params.get("p1")) : null;
