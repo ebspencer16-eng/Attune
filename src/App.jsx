@@ -1539,8 +1539,8 @@ function DashStepHeader({ num, title, sub, active = true, isMobile = false }) {
   return (
     <div style={{ display: "flex", alignItems: "center", gap: isMobile ? "0.9rem" : "1.25rem", marginBottom: "1.25rem" }}>
       <div style={{ position: "relative", flexShrink: 0 }}>
-        <div style={{ width: isMobile ? 52 : 64, height: isMobile ? 52 : 64, borderRadius: "50%", background: active ? "linear-gradient(135deg, rgba(232,103,58,0.12), rgba(155,93,229,0.12), rgba(27,95,232,0.12))" : "rgba(200,191,180,0.18)", border: active ? "1.5px solid rgba(155,93,229,0.28)" : "1.5px solid rgba(200,191,180,0.5)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-          <span style={{ fontFamily: HFONT, fontWeight: 700, fontSize: isMobile ? "1.9rem" : "2.4rem", lineHeight: 1, background: active ? "linear-gradient(135deg, #E8673A, #9B5DE5, #1B5FE8)" : "linear-gradient(135deg, #C8BFB4, #B3A693)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text", display: "block", textAlign: "center", transform: "translateY(0.04em)" }}>{num}</span>
+        <div style={{ width: isMobile ? 52 : 64, height: isMobile ? 52 : 64, borderRadius: "50%", background: active ? "linear-gradient(135deg, rgba(232,103,58,0.12), rgba(155,93,229,0.12), rgba(27,95,232,0.12))" : "rgba(200,191,180,0.18)", border: active ? "1.5px solid rgba(155,93,229,0.28)" : "1.5px solid rgba(200,191,180,0.5)", display: "flex", alignItems: "center", justifyContent: "center", lineHeight: 0 }}>
+          <span style={{ fontFamily: HFONT, fontWeight: 700, fontSize: isMobile ? "2.3rem" : "2.95rem", lineHeight: 1, background: active ? "linear-gradient(135deg, #E8673A, #9B5DE5, #1B5FE8)" : "linear-gradient(135deg, #C8BFB4, #B3A693)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text", display: "flex", alignItems: "center", justifyContent: "center", height: "1em", transform: "translateY(0.06em)" }}>{num}</span>
         </div>
       </div>
       <div style={{ flex: 1, minWidth: 0 }}>
@@ -4406,7 +4406,7 @@ function ExpectationsResults({ myAnswers, partnerAnswers, userName, partnerName,
             <div style={{ fontSize: "clamp(2rem,7vw,3rem)", fontWeight: 700, fontFamily: HFONT, lineHeight: 1.0, marginBottom: "0.85rem" }}>Conversations<br />Worth Having.</div>
             <p style={{ fontSize: "0.85rem", color: "rgba(255,255,255,0.65)", fontFamily: BFONT, fontWeight: 300, lineHeight: 1.65, marginBottom: "1.25rem" }}>
               {gaps.length > 0
-                ? `${gaps.length} topic${gaps.length !== 1 ? "s" : ""} across ${FIXED_CATS.filter(fc => gaps.some(r => r.catId === fc.id)).length} of 5 areas. These aren't warning signs, they're openings.`
+                ? `${gaps.length} topic${gaps.length !== 1 ? "s" : ""} across ${FIXED_CATS.filter(fc => gaps.some(r => r.catId === fc.id)).length} of 6 areas. These aren't warning signs, they're openings.`
                 : "You're aligned across every area. Review each category below."}
             </p>
             <div style={{ display: "flex", flexDirection: "column", gap: "0.6rem" }}>
@@ -8045,7 +8045,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
       );
     };
     return (
-      <Layout accent={C.orange}>
+      <Layout accent="#E8673A">
         <div style={{ maxWidth: 560, margin: "0 auto" }}>
           <div style={{ fontFamily: BFONT, fontSize: "0.62rem", letterSpacing: "0.22em", textTransform: "uppercase", color: C.clay, fontWeight: 700, marginBottom: "0.85rem" }}>What comes next</div>
           <h2 style={{ fontFamily: HFONT, fontSize: "clamp(1.8rem,3vw,2.4rem)", fontWeight: 700, color: C.ink, lineHeight: 1.1, letterSpacing: "-0.02em", marginBottom: "1.5rem" }}>What to do with all of this.</h2>
@@ -8054,7 +8054,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
           <div style={{ marginBottom: "1.5rem" }}>
             <div style={{ fontSize: "0.62rem", letterSpacing: "0.22em", textTransform: "uppercase", color: C.clay, fontFamily: BFONT, fontWeight: 700, marginBottom: "0.85rem" }}>Your action plans</div>
             <div style={{ display: "flex", flexDirection: "column", gap: "0.65rem" }}>
-              <NavActionLink onClick={() => go("comm-plan")} bg="linear-gradient(135deg,#FFF5F2,#FFE8E0)" border={`1.5px solid rgba(232,103,58,0.25)`} icon="comm" title="Communication Action Plan" sub="Practices drawn from your communication results" accentColor={C.orange} />
+              <NavActionLink onClick={() => go("comm-plan")} bg="linear-gradient(135deg,#FFF5F2,#FFE8E0)" border={`1.5px solid rgba(232,103,58,0.25)`} icon="comm" title="Communication Action Plan" sub="Practices drawn from your communication results" accentColor="#E8673A" />
               <NavActionLink onClick={() => go("exp-action-plan")} bg="linear-gradient(135deg,#F5F7FF,#E8EDFF)" border={`1.5px solid rgba(27,95,232,0.2)`} icon="📋" title="Expectations Action Plan" sub="Topics to discuss, organized by area" accentColor="#1B5FE8" />
               {hasAnniversary && (
                 <NavActionLink onClick={() => go("reflection-plan")} bg="linear-gradient(135deg,#F0F4FF,#E8EDFF)" border={`1.5px solid rgba(27,95,232,0.25)`} icon="♡" title="Reflection Action Plan" sub="Conversations from your relationship reflection" accentColor="#1B5FE8" />

@@ -1222,15 +1222,16 @@ const DOMAIN_ORDER = [
   { title: 'When Things Get Hard', color: BLUE,   dims: ['conflict','stress','repair','feedback'] },
 ];
 
-// Expectations groupings that match the 5 categories used in the
+// Expectations groupings that match the 6 categories used in the
 // expectations exercise: Household / Financial / Career & Work / Emotional
-// Labor / Life & Values. The workbook's existing 7 content domains (in
-// EXP_DOMAINS) are mapped into these 5 exercise categories for display.
+// Labor / Extended Family / Life & Values. The workbook's existing content
+// domains (in EXP_DOMAINS) are mapped into these 6 exercise categories for display.
 const EXP_CATEGORIES = [
   { id: 'household', title: 'Household',       color: ORANGE, domainKeys: ['household'] },
   { id: 'financial', title: 'Financial',       color: BLUE,   domainKeys: ['financial'] },
   { id: 'career',    title: 'Career & Work',   color: PURPLE, domainKeys: ['career'] },
   { id: 'emotional', title: 'Emotional Labor', color: GREEN,  domainKeys: ['emotional'] },
+  { id: 'extended_family', title: 'Extended Family', color: ORANGE, domainKeys: ['extended_family'] },
   { id: 'life',      title: 'Life & Values',   color: PURPLE, domainKeys: ['children', 'lifestyle', 'values'] },
 ];
 
