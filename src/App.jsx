@@ -1534,6 +1534,38 @@ function CoupleMapSVG({ myS, partS, userName, partnerName, size = 480 }) {
   );
 }
 
+// ── Dashboard step header: large gradient step number + title/sub ──────────
+function DashStepHeader({ num, title, sub, active = true, isMobile = false }) {
+  return (
+    <div style={{ display: "flex", alignItems: "flex-start", gap: isMobile ? "0.85rem" : "1.1rem", marginBottom: "1.1rem" }}>
+      <div style={{ fontFamily: HFONT, fontWeight: 700, fontSize: isMobile ? "2.4rem" : "3.1rem", lineHeight: 0.85, letterSpacing: "-0.03em", background: active ? "linear-gradient(135deg, #E8673A, #9B5DE5, #1B5FE8)" : "linear-gradient(135deg, #D8CDBF, #C8BFB4)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text", flexShrink: 0, paddingTop: "0.1rem" }}>{num}</div>
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <h2 style={{ fontFamily: HFONT, fontSize: isMobile ? "1.3rem" : "1.55rem", fontWeight: 700, color: "#0E0B07", lineHeight: 1.1, letterSpacing: "-0.02em", margin: "0 0 0.25rem" }}>{title}</h2>
+        <p style={{ fontSize: "0.83rem", color: "#8C7A68", fontFamily: BFONT, fontWeight: 300, lineHeight: 1.55, margin: 0 }}>{sub}</p>
+      </div>
+    </div>
+  );
+}
+
+// ── Dashboard Step-3 tile: owned tool, add-on, or article ──────────────────
+function DashTile({ color, eyebrow, title, sub, cta, onClick, href, disabled = false }) {
+  const inner = (
+    <>
+      <div style={{ flex: 1, minWidth: 0 }}>
+        {eyebrow && <div style={{ fontSize: "0.55rem", letterSpacing: "0.18em", textTransform: "uppercase", color: color, fontWeight: 700, fontFamily: BFONT, marginBottom: "0.3rem" }}>{eyebrow}</div>}
+        <div style={{ fontSize: "0.92rem", fontWeight: 700, color: "#0E0B07", fontFamily: BFONT, lineHeight: 1.25, marginBottom: "0.2rem" }}>{title}</div>
+        <div style={{ fontSize: "0.78rem", color: "#8C7A68", fontFamily: BFONT, fontWeight: 300, lineHeight: 1.5 }}>{sub}</div>
+      </div>
+      {cta && <span style={{ fontSize: "0.78rem", fontWeight: 700, color: disabled ? "#B3A693" : color, fontFamily: BFONT, flexShrink: 0, marginLeft: "1rem", whiteSpace: "nowrap" }}>{cta}</span>}
+    </>
+  );
+  const style = { display: "flex", alignItems: "center", background: "white", border: "1.5px solid " + (disabled ? "#EFE7DD" : "#E8DDD0"), borderLeft: "4px solid " + (disabled ? "#E0D6C8" : color), borderRadius: 14, padding: "1rem 1.25rem", cursor: disabled ? "default" : "pointer", textDecoration: "none", transition: "box-shadow .15s", opacity: disabled ? 0.75 : 1 };
+  const onEnter = disabled ? undefined : (e) => { e.currentTarget.style.boxShadow = "0 4px 18px rgba(0,0,0,.06)"; };
+  const onLeave = disabled ? undefined : (e) => { e.currentTarget.style.boxShadow = "none"; };
+  if (href) return <a href={href} style={style} onMouseEnter={onEnter} onMouseLeave={onLeave}>{inner}</a>;
+  return <div onClick={disabled ? undefined : onClick} style={style} onMouseEnter={onEnter} onMouseLeave={onLeave}>{inner}</div>;
+}
+
 function CoupleTypeCard({ coupleType, userName, partnerName, onClick }) {
   if (!coupleType) return null;
   const { name, tagline, description, nuance, color } = coupleType;
@@ -12354,10 +12386,6 @@ export default function App() {
               <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 1, padding: "0.25rem 0.7rem 0" }}>
                 {[
                   { label: "Dashboard", viewId: "home", icon: <svg width="15" height="15" viewBox="0 0 20 20" fill="none"><rect x="2" y="2" width="7" height="7" rx="1.5" stroke="currentColor" strokeWidth="1.5"/><rect x="11" y="2" width="7" height="7" rx="1.5" stroke="currentColor" strokeWidth="1.5"/><rect x="2" y="11" width="7" height="7" rx="1.5" stroke="currentColor" strokeWidth="1.5"/><rect x="11" y="11" width="7" height="7" rx="1.5" stroke="currentColor" strokeWidth="1.5"/></svg> },
-                  { label: "Exercises", viewId: "exercises", icon: <svg width="15" height="15" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="7.5" stroke="currentColor" strokeWidth="1.5"/><path d="M7 10l2 2 4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg> },
-                  { label: "Results", viewId: "results", icon: <svg width="15" height="15" viewBox="0 0 20 20" fill="none"><path d="M3 5h14M3 9h14M3 13h9" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/></svg> },
-                  { label: "Resources", viewId: "resources", icon: <svg width="15" height="15" viewBox="0 0 20 20" fill="none"><rect x="3" y="2" width="14" height="16" rx="2" stroke="currentColor" strokeWidth="1.5"/><path d="M7 7h6M7 10h6M7 13h3" stroke="currentColor" strokeWidth="1.25" strokeLinecap="round"/></svg> },
-                  { label: "Workbook", viewId: "workbook", icon: <svg width="15" height="15" viewBox="0 0 20 20" fill="none"><rect x="3" y="2" width="14" height="16" rx="2" stroke="currentColor" strokeWidth="1.5"/><path d="M7 6h6M7 9h4M13 13l1.5 1.5L17 12" stroke="currentColor" strokeWidth="1.25" strokeLinecap="round" strokeLinejoin="round"/></svg> },
                 ].map(item => {
                   const isActive = item.viewId === view;
                   const handleNavClick = () => { setView(item.viewId); };
@@ -12452,10 +12480,6 @@ export default function App() {
                     <div style={{ position: "absolute", top: "3.5rem", right: "1rem", zIndex: 199, background: "#FFFDF9", border: "1px solid #E8DDD0", borderRadius: 14, padding: "0.4rem", minWidth: 190, boxShadow: "0 16px 44px rgba(14,11,7,0.22)", display: "flex", flexDirection: "column", gap: "0.1rem" }}>
                       {[
                         { label: "Dashboard", viewId: "home" },
-                        { label: "Exercises", viewId: "exercises" },
-                        { label: "Results", viewId: "results" },
-                        { label: "Resources", viewId: "resources" },
-                        { label: "Workbook", viewId: "workbook" },
                         { label: "Account", viewId: "account" },
                       ].map(item => (
                         <button key={item.viewId}
@@ -12671,162 +12695,90 @@ export default function App() {
                   </div>
                 )}
 
-                {/* ── EXERCISES ── */}
-                <div style={{ marginBottom: "2rem" }}>
-                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "1rem" }}>
-                    <div style={{ fontSize: "0.6rem", letterSpacing: ".2em", textTransform: "uppercase", color: "#8C7A68", fontWeight: 700, fontFamily: "'DM Sans', sans-serif" }}>Your exercises</div>
-                    {bothDone && <div style={{ fontSize: "0.6rem", color: "#059669", fontWeight: 700, background: "rgba(16,185,129,0.1)", border: "1px solid rgba(16,185,129,0.25)", borderRadius: 999, padding: "0.15rem 0.65rem", fontFamily: "'DM Sans', sans-serif", letterSpacing: "0.02em" }}>Both complete</div>}
-                  </div>
-                  <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "repeat(2, 1fr)", gap: "0.75rem" }}>
-                    {[
-                      { num: "01", title: "Communication", done: !!ex1Answers, inProgress: ex1InProgress, viewId: "exercise1", color: "#E8673A", desc: "Map your communication style across 10 dimensions. How you recharge, express, conflict, and connect." },
-                      { num: "02", title: "Expectations", done: !!ex2Answers, inProgress: ex2InProgress, viewId: "exercise2", color: "#1B5FE8", desc: "Align on who handles what across six domains: household, money, career, extended family, emotional labor, life together." },
-                      ...(pkg.hasAnniversary ? [{ num: "03", title: "Reflection", done: !!ex3Answers, inProgress: ex3InProgress, viewId: "exercise3", color: "#1B5FE8", desc: "Capture the moments that shaped your relationship. A third lens on your shared story." }] : []),
-                    ].map(item => (
-                      <div key={item.num} onClick={() => setView(item.viewId)}
-                        style={{ background: "white", border: `1.5px solid ${item.done ? "rgba(16,185,129,0.25)" : item.inProgress ? "rgba(193,127,71,0.35)" : "#E8DDD0"}`, borderRadius: 16, padding: "1.25rem", cursor: "pointer", transition: "box-shadow .15s, border-color .15s", display: "flex", flexDirection: "column", gap: "0.6rem" }}
-                        onMouseEnter={e => { e.currentTarget.style.boxShadow = "0 4px 20px rgba(0,0,0,.07)"; e.currentTarget.style.borderColor = item.done ? "rgba(16,185,129,0.4)" : "#C8B8A8"; }}
-                        onMouseLeave={e => { e.currentTarget.style.boxShadow = "none"; e.currentTarget.style.borderColor = item.done ? "rgba(16,185,129,0.25)" : item.inProgress ? "rgba(193,127,71,0.35)" : "#E8DDD0"; }}>
-                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                          <div style={{ width: 32, height: 32, borderRadius: 8, background: item.color + "15", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                            <span style={{ fontSize: "0.6rem", letterSpacing: ".15em", fontWeight: 700, color: item.color, fontFamily: "'DM Sans', sans-serif" }}>{item.num}</span>
-                          </div>
-                          {item.done
-                            ? <span style={{ background: "rgba(16,185,129,.08)", color: "#059669", fontSize: 10, fontWeight: 600, padding: "3px 9px", borderRadius: 99, fontFamily: "'DM Sans', sans-serif", border: "1px solid rgba(16,185,129,.2)" }}>Complete</span>
-                            : item.inProgress
-                              ? <span style={{ background: "rgba(193,127,71,.1)", color: "#C17F47", fontSize: 10, fontWeight: 600, padding: "3px 9px", borderRadius: 99, fontFamily: "'DM Sans', sans-serif", border: "1px solid rgba(193,127,71,.25)" }}>In progress →</span>
-                              : <span style={{ background: "#FDF8F3", color: "#C17F47", fontSize: 10, fontWeight: 600, padding: "3px 9px", borderRadius: 99, fontFamily: "'DM Sans', sans-serif" }}>Start →</span>
-                          }
-                        </div>
-                        <div>
-                          <div style={{ fontSize: 15, fontWeight: 700, color: "#0E0B07", marginBottom: 4, fontFamily: "'DM Sans', sans-serif" }}>{item.title}</div>
-                          <div style={{ fontSize: 12, color: "#8C7A68", lineHeight: 1.55, fontFamily: "'DM Sans', sans-serif", fontWeight: 300 }}>{item.desc}</div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                  {/* Side-by-side responses link */}
-                  {bothDone && (
-                    <div style={{ display: "flex", gap: "0.5rem", marginTop: "0.85rem", flexWrap: "wrap" }}>
-                      {[
-                        { label: "Communication responses →", section: "personality", color: "#E8673A" },
-                        { label: "Expectations responses →", section: "expectations", color: "#1B5FE8" },
-                        ...(pkg.hasAnniversary && ex3Answers ? [{ label: "Reflection responses →", section: "anniversary", color: "#1B5FE8" }] : []),
-                      ].map(({ label, section, color }) => (
-                        <button key={section} onClick={() => { setActiveResult(section); setView("results"); setHighlightsSeen(true); }}
-                          style={{ background: "transparent", border: "1.5px solid #E8DDD0", borderRadius: 8, padding: "0.45rem 0.85rem", fontSize: 11, fontWeight: 600, color: "#8C7A68", cursor: "pointer", fontFamily: "'DM Sans', sans-serif", letterSpacing: ".03em", transition: "all .15s" }}
-                          onMouseEnter={e => { e.currentTarget.style.borderColor = color; e.currentTarget.style.color = color; }}
-                          onMouseLeave={e => { e.currentTarget.style.borderColor = "#E8DDD0"; e.currentTarget.style.color = "#8C7A68"; }}>
-                          {label}
-                        </button>
-                      ))}
-                    </div>
-                  )}
-                </div>
-
-                {/* ── STATUS / PROGRESS TO RESULTS ── */}
-                <div style={{ marginBottom: "2rem" }}>
-                  <div style={{ fontSize: "0.6rem", letterSpacing: ".2em", textTransform: "uppercase", color: "#8C7A68", fontWeight: 700, marginBottom: "1rem", fontFamily: "'DM Sans', sans-serif" }}>Progress to results</div>
+                {/* ════ STEP 1 · COMPLETE YOUR EXERCISES ════ */}
+                <div style={{ marginBottom: "2.5rem" }}>
+                  <DashStepHeader num="1" title="Complete your exercises" sub="Answer on your own. Results unlock when both of you finish." isMobile={isMobile} />
                   <div style={{ background: "white", border: "1.5px solid #E8DDD0", borderRadius: 16, overflow: "hidden" }}>
                     {[
                       { label: "Your communication exercise", done: myEx1Done, inProgress: ex1InProgress, viewId: "exercise1", you: true },
                       { label: "Your expectations exercise", done: myEx2Done, inProgress: ex2InProgress, viewId: "exercise2", you: true },
-                      { label: partnerName + "'s communication exercise", done: partnerEx1Done, you: false },
-                      { label: partnerName + "'s expectations exercise", done: partnerEx2Done, you: false },
+                      ...(pkg.hasAnniversary ? [{ label: "Your reflection exercise", done: !!ex3Answers, inProgress: ex3InProgress, viewId: "exercise3", you: true }] : []),
+                      { label: (partnerName || "Your partner") + "'s communication exercise", done: partnerEx1Done, you: false },
+                      { label: (partnerName || "Your partner") + "'s expectations exercise", done: partnerEx2Done, you: false },
+                      ...(pkg.hasAnniversary ? [{ label: (partnerName || "Your partner") + "'s reflection exercise", done: !!(partnerSession && partnerSession.ex3), you: false }] : []),
                     ].map((r, i, arr) => {
                       const clickable = r.you && !r.done;
                       return (
                         <div key={r.label} onClick={clickable ? () => setView(r.viewId) : undefined}
-                          style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0.85rem 1.1rem", borderBottom: i < arr.length - 1 ? "1px solid #F0E9E0" : "none", cursor: clickable ? "pointer" : "default", gap: "0.75rem", transition: "background .15s" }}
+                          style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0.9rem 1.1rem", borderBottom: i < arr.length - 1 ? "1px solid #F0E9E0" : "none", cursor: clickable ? "pointer" : "default", gap: "0.75rem", transition: "background .15s" }}
                           onMouseEnter={clickable ? (e => e.currentTarget.style.background = "#FAF7F2") : undefined}
                           onMouseLeave={clickable ? (e => e.currentTarget.style.background = "white") : undefined}>
-                          <span style={{ display: "flex", alignItems: "center", gap: "0.65rem", fontSize: "0.83rem", color: "#0E0B07", fontFamily: "'DM Sans', sans-serif", fontWeight: 500 }}>
+                          <span style={{ display: "flex", alignItems: "center", gap: "0.65rem", fontSize: "0.84rem", color: "#0E0B07", fontFamily: BFONT, fontWeight: 500 }}>
                             <span style={{ width: 19, height: 19, borderRadius: "50%", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", fontSize: "0.62rem", color: "white", background: r.done ? "#059669" : r.inProgress ? "#C17F47" : "#D4C0A8", fontWeight: 700 }}>{r.done ? "✓" : r.inProgress ? "·" : ""}</span>
                             {r.label}
                           </span>
                           {r.done
-                            ? <span style={{ fontSize: "0.72rem", fontWeight: 700, color: "#059669", fontFamily: "'DM Sans', sans-serif" }}>Complete</span>
+                            ? <span style={{ fontSize: "0.72rem", fontWeight: 700, color: "#059669", fontFamily: BFONT }}>Complete</span>
                             : (r.you
-                                ? <span style={{ fontSize: "0.72rem", fontWeight: 700, color: "#C17F47", fontFamily: "'DM Sans', sans-serif" }}>{r.inProgress ? "In progress →" : "Start →"}</span>
-                                : <span style={{ fontSize: "0.72rem", fontWeight: 600, color: "#A8997F", fontFamily: "'DM Sans', sans-serif" }}>Pending</span>)}
+                                ? <span style={{ fontSize: "0.72rem", fontWeight: 700, color: "#C17F47", fontFamily: BFONT }}>{r.inProgress ? "In progress →" : "Start →"}</span>
+                                : <span style={{ fontSize: "0.72rem", fontWeight: 600, color: "#A8997F", fontFamily: BFONT }}>Pending</span>)}
                         </div>
                       );
                     })}
                   </div>
-                  <button onClick={bothDone ? () => setView("results") : undefined} disabled={!bothDone}
-                    style={{ width: "100%", marginTop: "0.85rem", padding: "0.85rem", borderRadius: 12, border: "none", fontSize: "0.85rem", fontWeight: 700, fontFamily: "'DM Sans', sans-serif", letterSpacing: ".02em", cursor: bothDone ? "pointer" : "not-allowed", background: bothDone ? "#E8673A" : "#EFE7DD", color: bothDone ? "white" : "#B3A693", transition: "all .15s" }}>
-                    {bothDone ? "View results →" : "View results"}
-                  </button>
-                  {!bothDone && <p style={{ textAlign: "center", fontSize: "0.72rem", color: "#A8997F", margin: "0.5rem 0 0", fontFamily: "'DM Sans', sans-serif" }}>Unlocks when both of you finish all exercises.</p>}
                 </div>
 
-                {/* ── WHAT'S WAITING ── shown when both complete */}
-                {bothDone && (
-                  <div style={{ marginBottom: "2rem" }}>
-                    <div style={{ fontSize: "0.6rem", letterSpacing: ".2em", textTransform: "uppercase", color: "#8C7A68", fontWeight: 700, marginBottom: "1rem", fontFamily: "'DM Sans', sans-serif" }}>What's waiting in your results</div>
-                    <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "repeat(3, 1fr)", gap: "0.65rem" }}>
-                      {[
-                        { label: "Your couple type", desc: "The pairing that defines how you navigate tension and connection.", icon: "◎" },
-                        { label: "Communication profile", desc: "10 dimensions mapped, how you two actually work.", icon: "⊞" },
-                        { label: "Expectations map", desc: "Where you're aligned and where the gaps are.", icon: "◫" },
-                      ].map(w => (
-                        <div key={w.label} onClick={() => setView("results")}
-                          style={{ background: "white", border: "1.5px solid #E8DDD0", borderRadius: 14, padding: "1rem 1.1rem", cursor: "pointer", transition: "box-shadow .15s" }}
-                          onMouseEnter={e => e.currentTarget.style.boxShadow = "0 4px 16px rgba(0,0,0,.06)"}
-                          onMouseLeave={e => e.currentTarget.style.boxShadow = "none"}>
-                          <div style={{ fontSize: "1.1rem", marginBottom: "0.5rem", color: "#9B5DE5", opacity: 0.7 }}>{w.icon}</div>
-                          <div style={{ fontSize: 13, fontWeight: 600, color: "#0E0B07", marginBottom: 4, fontFamily: "'DM Sans', sans-serif" }}>{w.label}</div>
-                          <div style={{ fontSize: 11, color: "#8C7A68", lineHeight: 1.5, fontFamily: "'DM Sans', sans-serif", fontWeight: 300 }}>{w.desc}</div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {/* ── RESOURCES ── */}
-                <div>
-                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "1rem" }}>
-                    <div style={{ fontSize: "0.6rem", letterSpacing: ".2em", textTransform: "uppercase", color: "#8C7A68", fontWeight: 700, fontFamily: "'DM Sans', sans-serif" }}>Resources</div>
-                    <a href="#" onClick={(e) => { e.preventDefault(); setView("resources"); }} style={{ fontSize: "0.65rem", color: "#C17F47", fontWeight: 600, fontFamily: "'DM Sans', sans-serif", textDecoration: "none" }}>See all →</a>
-                  </div>
-                  <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: "0.65rem" }}>
+                {/* ════ STEP 2 · REVIEW YOUR RESULTS ════ */}
+                <div style={{ marginBottom: "2.5rem" }}>
+                  <DashStepHeader num="2" title="Review your results" sub={bothDone ? "Your results are ready. Start with the highlights or jump to any section." : "Visible once both of you finish all exercises."} active={bothDone} isMobile={isMobile} />
+                  <div style={{ background: "white", border: "1.5px solid #E8DDD0", borderRadius: 16, overflow: "hidden", opacity: bothDone ? 1 : 0.6 }}>
                     {[
-                      { kind: "addon", title: "The Personalized Workbook", sub: "Built around your results and couple type.", price: "From $19", color: "#9B5DE5", onClick: () => setView("workbook") },
-                      { kind: "addon", title: "LMFT Session", sub: "A 50-minute session with a licensed therapist who has reviewed your results.", price: "$150", color: "#E8673A", onClick: () => { window.location.href = "/offerings"; } },
-                      { kind: "article", title: "How to review your results together", tag: "Guide", color: "#9B5DE5", href: "/practice/how-to-review-your-results-together?from=app" },
-                      { kind: "article", title: "How to start a hard conversation", tag: "Guide", color: "#9B5DE5", href: "/practice/how-to-start-a-hard-conversation?from=app" },
-                    ].map(item => item.kind === "addon" ? (
-                      <div key={item.title} onClick={item.onClick}
-                        style={{ background: "white", border: `1.5px solid ${item.color}25`, borderRadius: 14, padding: "1rem 1.1rem", display: "flex", alignItems: "center", gap: "0.85rem", cursor: "pointer", transition: "border-color .15s, box-shadow .15s" }}
-                        onMouseEnter={e => { e.currentTarget.style.borderColor = `${item.color}55`; e.currentTarget.style.boxShadow = "0 4px 16px rgba(0,0,0,.05)"; }}
-                        onMouseLeave={e => { e.currentTarget.style.borderColor = `${item.color}25`; e.currentTarget.style.boxShadow = "none"; }}>
-                        <div style={{ width: 32, height: 32, borderRadius: 9, background: `${item.color}15`, border: `1.5px solid ${item.color}30`, flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                          <div style={{ width: 9, height: 9, borderRadius: "50%", background: item.color }} />
-                        </div>
-                        <div style={{ flex: 1, minWidth: 0 }}>
-                          <div style={{ display: "flex", alignItems: "center", gap: "0.4rem", marginBottom: "0.25rem" }}>
-                            <span style={{ fontSize: 10, textTransform: "uppercase", letterSpacing: ".1em", color: "#8C7A68", fontFamily: "'DM Sans', sans-serif" }}>Add-on</span>
-                          </div>
-                          <div style={{ fontSize: 13, fontWeight: 600, color: "#0E0B07", lineHeight: 1.4, fontFamily: "'DM Sans', sans-serif" }}>{item.title}</div>
-                          <div style={{ fontSize: 11, color: "#8C7A68", lineHeight: 1.45, fontFamily: "'DM Sans', sans-serif", fontWeight: 300, marginTop: 2 }}>{item.sub}</div>
-                        </div>
-                        <span style={{ fontSize: 12, fontWeight: 600, color: item.color, fontFamily: "'DM Sans', sans-serif", flexShrink: 0, whiteSpace: "nowrap" }}>{item.price} →</span>
+                      { label: "Storycard highlights", section: "highlights", color: "#E8673A" },
+                      { label: "Your couple type", section: "couple-type", color: "#9B5DE5" },
+                      { label: "Your couple map", section: "couple-map", color: "#1B5FE8" },
+                      { label: "Full summary", section: "summary", color: "#8C7A68" },
+                      { label: "Communication results", section: "comm-overview", color: "#E8673A" },
+                      { label: "Expectations results", section: "exp-overview", color: "#1B5FE8" },
+                      { label: "Action plan", section: "exp-action-plan", color: "#1B5FE8" },
+                    ].map((r, i, arr) => (
+                      <div key={r.section} onClick={bothDone ? () => { setActiveResult(r.section); setHighlightsSeen(true); setView("results"); } : undefined}
+                        style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0.85rem 1.1rem", borderBottom: i < arr.length - 1 ? "1px solid #F0E9E0" : "none", cursor: bothDone ? "pointer" : "default", gap: "0.75rem", transition: "background .15s" }}
+                        onMouseEnter={bothDone ? (e => e.currentTarget.style.background = "#FAF7F2") : undefined}
+                        onMouseLeave={bothDone ? (e => e.currentTarget.style.background = "white") : undefined}>
+                        <span style={{ display: "flex", alignItems: "center", gap: "0.7rem", fontSize: "0.84rem", color: bothDone ? "#0E0B07" : "#A8997F", fontFamily: BFONT, fontWeight: 500 }}>
+                          <span style={{ width: 7, height: 7, borderRadius: "50%", flexShrink: 0, background: bothDone ? r.color : "#D4C0A8" }} />
+                          {r.label}
+                        </span>
+                        <span style={{ fontSize: "0.85rem", color: bothDone ? "#C8BFB4" : "#D4C0A8", flexShrink: 0 }}>{bothDone ? "→" : ""}</span>
                       </div>
-                    ) : (
-                      <a key={item.href} href={item.href}
-                        style={{ background: "white", border: "1.5px solid #E8DDD0", borderRadius: 14, padding: "1rem 1.1rem", display: "flex", alignItems: "center", justifyContent: "space-between", textDecoration: "none", transition: "border-color .15s" }}
-                        onMouseEnter={e => e.currentTarget.style.borderColor = "#C8B8A8"}
-                        onMouseLeave={e => e.currentTarget.style.borderColor = "#E8DDD0"}>
-                        <div style={{ flex: 1 }}>
-                          <div style={{ display: "flex", alignItems: "center", gap: "0.4rem", marginBottom: "0.3rem" }}>
-                            <div style={{ width: 6, height: 6, borderRadius: "50%", background: item.color, flexShrink: 0, opacity: 0.7 }} />
-                            <div style={{ fontSize: 10, textTransform: "uppercase", letterSpacing: ".1em", color: "#8C7A68", fontFamily: "'DM Sans', sans-serif" }}>{item.tag}</div>
-                          </div>
-                          <div style={{ fontSize: 13, fontWeight: 500, color: "#0E0B07", lineHeight: 1.45, fontFamily: "'DM Sans', sans-serif" }}>{item.title}</div>
-                        </div>
-                        <span style={{ fontSize: 14, color: "#C8BFB4", marginLeft: 12, flexShrink: 0 }}>→</span>
-                      </a>
                     ))}
+                  </div>
+                  <button onClick={bothDone ? () => { setActiveResult("overview"); setHighlightsSeen(false); setView("results"); } : undefined} disabled={!bothDone}
+                    style={{ width: "100%", marginTop: "0.85rem", padding: "0.85rem", borderRadius: 12, border: "none", fontSize: "0.85rem", fontWeight: 700, fontFamily: BFONT, letterSpacing: ".02em", cursor: bothDone ? "pointer" : "not-allowed", background: bothDone ? "#E8673A" : "#EFE7DD", color: bothDone ? "white" : "#B3A693", transition: "all .15s" }}>
+                    {bothDone ? "Review results →" : "Review results"}
+                  </button>
+                  {!bothDone && <p style={{ textAlign: "center", fontSize: "0.72rem", color: "#A8997F", margin: "0.5rem 0 0", fontFamily: BFONT }}>Unlocks when both of you finish all exercises.</p>}
+                </div>
+
+                {/* ════ STEP 3 · CONTINUE GROWING TOGETHER ════ */}
+                <div style={{ marginBottom: "2rem" }}>
+                  <DashStepHeader num="3" title="Continue growing together" sub="Tools, sessions, and reading to take this further." isMobile={isMobile} />
+                  <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
+                    {pkg.hasBudget && <DashTile color="#C17F47" eyebrow="Included" title="Shared Budget Builder" sub="Build a financial plan together from your results." cta="Open →" onClick={() => setView("budget")} />}
+                    {pkg.hasChecklist && <DashTile color="#C17F47" eyebrow="Included" title="Starting Out Checklist" sub="A practical guide to starting your life together." cta="Open →" onClick={() => setView("checklist")} />}
+                    {hasWorkbookOrder
+                      ? <DashTile color="#9B5DE5" eyebrow="Included"
+                          title={workbookReady ? "Your personalized workbook is ready" : "Your personalized workbook"}
+                          sub={workbookReady ? "Download your PDF, built from your answers." : (bothDone ? "Generating now. We'll email you when it's ready." : "Available once both of you complete your exercises.")}
+                          cta={workbookReady ? "Download →" : null}
+                          onClick={workbookReady ? () => setView("workbook") : undefined}
+                          disabled={!workbookReady} />
+                      : <DashTile color="#9B5DE5" eyebrow="Add-on" title="The Personalized Workbook" sub="A printable workbook built around your results and couple type. From $19." cta="Add →" onClick={() => setView("workbook")} />}
+                    {pkg.hasLMFT
+                      ? <DashTile color="#5B6DF8" eyebrow="Included" title="Your LMFT session" sub="A 50-minute session with a licensed therapist who has reviewed your results." cta="Schedule →" onClick={() => setView("lmft")} />
+                      : <DashTile color="#5B6DF8" eyebrow="Add-on" title="LMFT Session" sub="A 50-minute session with a licensed therapist who reviews your results first. $150." cta="Add →" onClick={() => setUpsellModal({ product: 'lmft', cartAdded: false })} />}
+                    <DashTile color="#9B5DE5" eyebrow="Guide" title="How to review your results together" sub="A simple structure for the first conversation." cta="Read →" href="/practice/how-to-review-your-results-together?from=app" />
+                    <DashTile color="#9B5DE5" eyebrow="Guide" title="How to start a hard conversation" sub="Opening lines for the topics that matter most." cta="Read →" href="/practice/how-to-start-a-hard-conversation?from=app" />
                   </div>
                 </div>
 
