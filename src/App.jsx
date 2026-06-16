@@ -13491,7 +13491,7 @@ export default function App() {
         ex1Answers={ex1Answers || sarahEx1} partnerEx1={partnerEx1}
         ex2Answers={ex2Answers || sarahEx2} partnerEx2={partnerEx2}
         ex3Answers={ex3Answers || (pkg.hasAnniversary ? SARAH_ANNIVERSARY_DEMO : null)}
-        partnerEx3={hasAnniversary ? (partnerSession?.ex3 || (hasRealPartner ? null : JAMES_ANNIVERSARY_DEMO)) : null}
+        partnerEx3={pkg.hasAnniversary ? (partnerSession?.ex3 || (hasRealPartner ? null : JAMES_ANNIVERSARY_DEMO)) : null}
         userName={userName} partnerName={partnerName}
         portrait={couplePortrait}
         onDone={() => setHighlightsSeen(true)}
@@ -13573,7 +13573,7 @@ export default function App() {
                   ex1Answers={ex1Answers || sarahEx1} partnerEx1={partnerEx1}
                   ex2Answers={ex2Answers || sarahEx2} partnerEx2={partnerEx2}
                   ex3Answers={ex3Answers || (pkg.hasAnniversary ? SARAH_ANNIVERSARY_DEMO : null)}
-                  partnerEx3={hasAnniversary ? (partnerSession?.ex3 || (hasRealPartner ? null : JAMES_ANNIVERSARY_DEMO)) : null}
+                  partnerEx3={pkg.hasAnniversary ? (partnerSession?.ex3 || (hasRealPartner ? null : JAMES_ANNIVERSARY_DEMO)) : null}
                   ex2AnswersPrior={ex2AnswersPrior}
                   ex2PriorAt={ex2PriorAt}
                   hasAnniversary={pkg.hasAnniversary}
