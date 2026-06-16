@@ -19,7 +19,6 @@ import {
   RESPONSIBILITY_CATEGORIES,
   RESPONSIBILITY_FRAMING,
   RESPONSIBILITY_OPTIONS,
-  CAREER_OPTIONS,
   CHILDHOOD_QUESTION,
   LIFE_QUESTIONS,
   VARIANTS,
@@ -233,13 +232,6 @@ function responsibilitiesSection(variantKey, includeChildhood) {
       children: [
         new TextRun({ text: 'Standard answer options: ', bold: true, size: 20, color: MUTED }),
         new TextRun({ text: RESPONSIBILITY_OPTIONS, size: 20, color: MUTED }),
-      ],
-      spacing: { after: 60 },
-    }),
-    new Paragraph({
-      children: [
-        new TextRun({ text: 'Career category options: ', bold: true, size: 20, color: MUTED }),
-        new TextRun({ text: CAREER_OPTIONS, size: 20, color: MUTED }),
       ],
       spacing: { after: 60 },
     }),

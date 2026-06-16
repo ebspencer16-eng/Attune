@@ -373,9 +373,6 @@ DOMAIN_ROWS = {
     'emotional': [
         'Mental load',
         'Tracking how everyone is',
-        'Maintaining closeness',
-        'Hard conversations',
-        'Repair after friction',
     ],
     # Extended Family rows are name-substituted at render time. The
     # placeholders {U} and {P} resolve to the user/partner names. Four
@@ -813,8 +810,8 @@ COUPLE = {
             'david': [('Cooking weeknights', 'Both of us'), ('Grocery & meal planning', 'Both of us'), ('Day-to-day tidying', 'Maya'), ('Home repairs & maintenance', 'David'), ('Family calendar', 'Both of us'), ('Hosting & holidays', 'Both of us'), ('Vacation planning', 'Maya')],
         },
         'emotional': {
-            'maya':  [('Mental load', 'Maya'), ('Tracking how everyone is', 'Maya'), ('Maintaining closeness', 'Both of us'), ('Hard conversations', 'Maya'), ('Repair after friction', 'Maya')],
-            'david': [('Mental load', 'Both of us'), ('Tracking how everyone is', 'Both of us'), ('Maintaining closeness', 'Both of us'), ('Hard conversations', 'Both of us'), ('Repair after friction', 'Both of us')],
+            'maya':  [('Mental load', 'Maya'), ('Tracking how everyone is', 'Maya')],
+            'david': [('Mental load', 'Both of us'), ('Tracking how everyone is', 'Both of us')],
         },
         'extended_family': {
             'maya':  [("Visits with Maya's family", 'Maya'), ("Visits with David's family", 'Both of us'), ("Gifting for Maya's family", 'Maya'), ("Gifting for David's family", 'Both of us')],

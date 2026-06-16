@@ -61,9 +61,6 @@ export const RESPONSIBILITY_CATEGORIES = [
     items: [
       'Carrying the mental load, remembering, anticipating, planning ahead',
       'Tracking the emotional wellbeing of the household',
-      'Maintaining closeness and emotional intimacy over time',
-      'Initiating difficult conversations',
-      'Being the first to reach out after conflict',
     ],
   },
 ];
@@ -76,9 +73,8 @@ export const RESPONSIBILITY_FRAMING = {
   revisiting: 'Looking at your life today, who handles each of these now?',
 };
 
-// Answer options for responsibility items (same across variants)
+// Answer options for responsibility items (same across all categories, including Career)
 export const RESPONSIBILITY_OPTIONS = '[Partner A name] · [Partner B name] · Both of us · Doesn\'t apply to us';
-export const CAREER_OPTIONS = 'Primarily mine · Balanced · Primarily my partner\'s · Doesn\'t apply';
 
 // Childhood structure question (identical across variants)
 export const CHILDHOOD_QUESTION = {
@@ -104,92 +100,92 @@ export const LIFE_QUESTIONS = [
   // ── Family ───────────────────────────────────────────────────────────
   {
     id: 'lq_children', category: 'Family', topic: 'Children',
-    core:        'do you want them, and how many?',
-    anniversary: 'how do your plans and feelings align now?',
-    revisiting:  'where are you on this today?',
+    core:        'Do you want them, and how many?',
+    anniversary: 'How do your plans and feelings align now?',
+    revisiting:  'Where are you on this today?',
     options: ['Not part of my future', 'Uncertain', 'Open to it', 'Important to me, I want at least one', 'Central to my future'],
   },
   {
-    id: 'lq_involve_user', category: 'Family', topic: "When considering in-person visits and/or digital communications, what level of involvement do you expect to have with {userName}'s family",
-    core:        'what level of involvement feels right?',
-    anniversary: 'is the current level of involvement working for you?',
-    revisiting:  'where do you want this to settle?',
+    id: 'lq_involve_user', category: 'Family', topic: "Involvement with {userName}'s family",
+    core:        'Thinking about in-person visits and digital contact, what level of involvement feels right?',
+    anniversary: 'Is the current level of involvement working for you?',
+    revisiting:  'Where do you want this to settle?',
     options: ['Very little, if any', 'Minimal, by design', 'Casual relationship', 'Consistent contact', 'Frequent, deeply integrated'],
   },
   {
-    id: 'lq_involve_partner', category: 'Family', topic: "When considering in-person visits and/or digital communications, what level of involvement do you expect to have with {partnerName}'s family",
-    core:        'what level of involvement feels right?',
-    anniversary: 'is the current level of involvement working for you?',
-    revisiting:  'where do you want this to settle?',
+    id: 'lq_involve_partner', category: 'Family', topic: "Involvement with {partnerName}'s family",
+    core:        'Thinking about in-person visits and digital contact, what level of involvement feels right?',
+    anniversary: 'Is the current level of involvement working for you?',
+    revisiting:  'Where do you want this to settle?',
     options: ['Very little, if any', 'Minimal, by design', 'Casual relationship', 'Consistent contact', 'Frequent, deeply integrated'],
   },
   {
     id: 'lq_family_conf', category: 'Family', topic: 'When family and partner conflict',
-    core:        'whose needs take priority for you?',
-    anniversary: 'how do you tend to navigate this now?',
-    revisiting:  'how do you handle this tension today?',
+    core:        'Whose needs take priority for you?',
+    anniversary: 'How do you tend to navigate this now?',
+    revisiting:  'How do you handle this tension today?',
     options: ['Side with partner', 'Mediate fairly', 'Defend family if right', 'Keep the peace'],
   },
 
   // ── Lifestyle ────────────────────────────────────────────────────────
   {
     id: 'lq_location', category: 'Lifestyle', topic: 'Where we live',
-    core:        'city, suburb, or rural?',
-    anniversary: 'are you where you want to be long-term?',
-    revisiting:  'where do you want to be from here?',
+    core:        'City, suburb, or rural?',
+    anniversary: 'Are you where you want to be long-term?',
+    revisiting:  'Where do you want to be from here?',
     options: ['Rooted where I am', 'Strong preference, open to discussion', 'Wherever makes sense for both', 'Genuinely open'],
   },
   {
     id: 'lq_social', category: 'Lifestyle', topic: 'Social life and friendships',
-    core:        'how important is your own social world?',
-    anniversary: 'does your shared social rhythm work for you?',
-    revisiting:  'what do you want your social life to look like now?',
+    core:        'How important is your own social world?',
+    anniversary: 'Does your shared social rhythm work for you?',
+    revisiting:  'What do you want your social life to look like now?',
     options: ['Mostly just us', 'Quiet default', 'Healthy balance', 'Pretty social', 'Very social'],
   },
   {
     id: 'lq_routine', category: 'Lifestyle', topic: 'Day-to-day rhythms and routines',
-    core:        'how much structure do you need?',
-    anniversary: 'is your current rhythm working for you?',
-    revisiting:  'what balance of structure and flexibility fits you now?',
+    core:        'Structured or spontaneous?',
+    anniversary: 'Does your daily rhythm work for both of you?',
+    revisiting:  'What rhythm do you want from here?',
     options: ['Need a lot of structure', 'Prefer loose rhythm', 'Adapt easily', 'Prefer open', 'Resist routine'],
   },
 
   // ── Values ───────────────────────────────────────────────────────────
   {
     id: 'lq_faith', category: 'Values', topic: 'Faith and spirituality',
-    core:        'how central is it to your life?',
-    anniversary: 'how present is it in your life together?',
-    revisiting:  'where does faith sit in your life currently?',
+    core:        'What role does it play for you?',
+    anniversary: 'How does it shape your shared life now?',
+    revisiting:  'Where does it sit for you today?',
     options: ['Plays no role', 'Personal, wouldn\'t shape shared life', 'Present but not imposed', 'Meaningful role', 'Central'],
   },
   {
     id: 'lq_values', category: 'Values', topic: 'Core values and beliefs',
-    core:        'how much alignment matters to you?',
-    anniversary: 'are you aligned where it matters most?',
-    revisiting:  'what do you need from your partner on values now?',
+    core:        'How aligned do you need to be?',
+    anniversary: 'How aligned do you find you are now?',
+    revisiting:  'How aligned do you want to be from here?',
     options: ['Simply respect each other\'s views', 'Share broadly similar values', 'Be closely aligned', 'Be deeply aligned'],
   },
 
   // ── Money ────────────────────────────────────────────────────────────
   {
     id: 'lq_finances', category: 'Money', topic: 'How we manage money',
-    core:        'joint, separate, or hybrid?',
-    anniversary: 'is your current setup working for both of you?',
-    revisiting:  'how would you structure finances going forward?',
+    core:        'Separate, combined, or somewhere between?',
+    anniversary: 'Is your current setup working for you?',
+    revisiting:  'How do you want to handle money from here?',
     options: ['Fully separate', 'Mostly separate, shared account for shared expenses', 'Mostly combined', 'Fully combined'],
   },
   {
     id: 'lq_money_lean', category: 'Money', topic: 'Saving vs. spending orientation',
-    core:        'where do you naturally land?',
-    anniversary: 'how does your instinct show up day-to-day?',
-    revisiting:  'where does your money instinct sit right now?',
+    core:        'Where do you naturally lean?',
+    anniversary: "How does your approach compare to your partner's now?",
+    revisiting:  'Where do you lean today?',
     options: ['Strongly saving', 'Lean toward saving', 'Neither', 'Lean toward spending', 'Fully in the present'],
   },
   {
     id: 'lq_money_risk', category: 'Money', topic: 'Financial risk tolerance',
-    core:        'conservative or growth-oriented?',
-    anniversary: 'does your approach to risk match your partner\'s?',
-    revisiting:  'where are you on risk today?',
+    core:        'Conservative or growth-oriented?',
+    anniversary: "Does your approach to risk match your partner's?",
+    revisiting:  'Where are you on risk today?',
     options: ['Very conservative', 'Cautious but open', 'Comfortable with thought-through risk', 'Lean toward risk', 'Drawn to bold moves'],
   },
 ];

@@ -200,9 +200,6 @@ export const DOMAIN_ROWS = {
   emotional: [
     'Mental load',
     'Tracking how everyone is',
-    'Maintaining closeness',
-    'Hard conversations',
-    'Repair after friction',
   ],
   extended_family: [
     "Visits with {U}'s family",

@@ -14,7 +14,7 @@ import {
 
 import {
   RESPONSIBILITY_CATEGORIES, RESPONSIBILITY_FRAMING,
-  RESPONSIBILITY_OPTIONS, CAREER_OPTIONS, CHILDHOOD_QUESTION,
+  RESPONSIBILITY_OPTIONS, CHILDHOOD_QUESTION,
   LIFE_QUESTIONS, VARIANTS, PENDING_NOTE,
 } from './_expectations_variants.mjs';
 
@@ -228,10 +228,8 @@ function buildFlowDoc(variantKey) {
     prose('"' + RESPONSIBILITY_FRAMING[variantKey] + '"',
       { italics: true, color: MUTED, indent: 400, after: 240 }),
 
-    prose('Answer options for Household, Financial, Extended Family, and Emotional Labor items:', { bold: true, after: 40 }),
-    prose(RESPONSIBILITY_OPTIONS, { italics: true, color: MUTED, indent: 400, after: 120 }),
-    prose('Answer options for Career & Work items:', { bold: true, after: 40 }),
-    prose(CAREER_OPTIONS, { italics: true, color: MUTED, indent: 400, after: 240 }),
+    prose('Answer options for all responsibility items (Household, Financial, Career & Work, Extended Family, Emotional Labor):', { bold: true, after: 40 }),
+    prose(RESPONSIBILITY_OPTIONS, { italics: true, color: MUTED, indent: 400, after: 240 }),
 
     ...RESPONSIBILITY_CATEGORIES.flatMap(cat => [
       eyebrow(cat.label + '  (' + cat.items.length + ' items)'),
@@ -491,10 +489,8 @@ function buildComparisonDoc() {
         RESPONSIBILITY_CATEGORIES[4].items.length + ' items',
         RESPONSIBILITY_CATEGORIES[4].items.length + ' items',
         RESPONSIBILITY_CATEGORIES[4].items.length + ' items'],
-      ['Answer options (Household / Financial / Extended Family / Emotional)',
+      ['Answer options (all categories)',
         RESPONSIBILITY_OPTIONS, RESPONSIBILITY_OPTIONS, RESPONSIBILITY_OPTIONS],
-      ['Answer options (Career)',
-        CAREER_OPTIONS, CAREER_OPTIONS, CAREER_OPTIONS],
     ], { labelHeader: 'Aspect' }),
 
     ...sp(1),

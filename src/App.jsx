@@ -534,8 +534,6 @@ export function ExpectationsExercise({ partnerName, userName = "Partner A", onCo
     const childCols = structure.cols || ["Mom", "Dad", "Both", "N/A"];
     const futureCols = [userName, partnerName, "Both of us", "Doesn't apply to us"];
     const futureColsDisplay = [userName, partnerName, "Both", "N/A"];
-    const careerCols = ["Primarily mine", "Balanced", "Primarily my partner's", "Doesn't apply"];
-    const careerColsDisplay = ["Mine", "Balanced", "Theirs", "N/A"];
     const futureLabel = isAnniversary ? "In our home" : "In our future home";
 
     const setResp = (catId, item, value) => {
@@ -578,8 +576,8 @@ export function ExpectationsExercise({ partnerName, userName = "Partner A", onCo
     const cat = RESPONSIBILITY_CATEGORIES[Math.min(catIndex, RESPONSIBILITY_CATEGORIES.length - 1)];
     const numCats = RESPONSIBILITY_CATEGORIES.length;
     const isExtFamCat = cat.id === "extended_family";
-    const activeFutureCols = cat.id === "career" ? careerCols : futureCols;
-    const activeFutureDisplay = cat.id === "career" ? careerColsDisplay : futureColsDisplay;
+    const activeFutureCols = futureCols;
+    const activeFutureDisplay = futureColsDisplay;
     const futureColors = { [userName]: "#E8673A", [partnerName]: "#1B5FE8", "Both of us": "#2AB07F", "Doesn't apply to us": "#9C8E7C", "Primarily mine": "#E8673A", "Balanced": "#2AB07F", "Primarily my partner's": "#1B5FE8", "Doesn't apply": "#9C8E7C" };
 
     const itemDone = (c, item) => {
@@ -758,6 +756,9 @@ export function ExpectationsExercise({ partnerName, userName = "Partner A", onCo
   const lqSel = answers.life?.[lq?.id];
   const lqIsLast = lifeQ === activeLifeQs.length - 1;
   const lqProgress = (lifeQ + 1) / activeLifeQs.length;
+  // Framing phrase shifts by variant: revisiting > anniversary (married) > core (future).
+  const variant = isRevisited ? "revisiting" : isAnniversary ? "anniversary" : "core";
+  const lqFraming = lq ? lq[variant] : null;
 
   return (
     <div>
@@ -775,7 +776,8 @@ export function ExpectationsExercise({ partnerName, userName = "Partner A", onCo
       {/* Category + question */}
       <p style={{ fontSize: "0.6rem", letterSpacing: "0.2em", textTransform: "uppercase", color: C.clay, marginBottom: "0.25rem", fontFamily: font.body }}>Your Expectations, Part 1 of 2</p>
       <p style={{ fontSize: "0.6rem", letterSpacing: "0.12em", textTransform: "uppercase", color: C.muted, marginBottom: "0.85rem", fontFamily: font.body }}>{lq.category}</p>
-      <p style={{ fontFamily: font.display, fontSize: "1.25rem", fontWeight: 400, color: C.ink, lineHeight: 1.6, marginBottom: "1.75rem" }}>{subst(lq.text)}</p>
+      <p style={{ fontFamily: font.display, fontSize: "1.25rem", fontWeight: 400, color: C.ink, lineHeight: 1.5, marginBottom: lqFraming ? "0.4rem" : "1.75rem" }}>{subst(lq.topic || lq.text)}</p>
+      {lqFraming && <p style={{ fontSize: "0.95rem", color: C.muted, fontFamily: font.body, fontWeight: 300, lineHeight: 1.55, marginBottom: "1.75rem" }}>{subst(lqFraming)}</p>}
 
       {/* Options */}
       <div style={{ display: "flex", flexDirection: "column", gap: "0.6rem", marginBottom: "2rem" }}>
@@ -2470,7 +2472,7 @@ function _domainItemScores(domainKey, ex2, partnerEx2, userName, partnerName) {
     case 'household':
       for (let i = 0; i < 7; i++) respScore('household', i); break;
     case 'emotional':
-      for (let i = 0; i < 5; i++) respScore('emotional', i); break;
+      for (let i = 0; i < 2; i++) respScore('emotional', i); break;
     case 'extended_family':
       [0, 2, 1, 3].forEach(i => respScore('extended_family', i)); break;
     case 'money':
@@ -9222,6 +9224,12 @@ function AuthModal({ mode, onClose, onSuccess }) {
         emailOptIn: typeof profile?.email_opt_in === 'boolean' ? profile.email_opt_in : true,
         inviteCode: profile?.invite_code || "",
         partnerJoined: profile?.partner_joined || false,
+        joinedViaInvite: profile?.joined_via_invite || false,
+        relationshipStatus: profile?.relationship_status || null,
+        // Buyer's status drives the Ex2 variant for both partners. For the
+        // buyer (Partner A, not joined via invite) it's their own status; for
+        // the invitee it's resolved from the partner-sync fetch below.
+        buyerRelationshipStatus: profile?.joined_via_invite ? null : (profile?.relationship_status || null),
         pkg: profile?.pkg || "core",
         createdAt: profile?.created_at ? new Date(profile.created_at).getTime() : Date.now(),
       };
@@ -9283,6 +9291,14 @@ function AuthModal({ mode, onClose, onSuccess }) {
               : {},
           });
           const ps = await psRes.json();
+          if (ps.found && ps.profile) {
+            // The invitee inherits the buyer's (Partner A's) relationship
+            // status so both partners get the same Ex2 variant.
+            if (profile?.joined_via_invite && ps.profile.relationship_status) {
+              account.buyerRelationshipStatus = ps.profile.relationship_status;
+              try { localStorage.setItem("attune_account", JSON.stringify(account)); } catch {}
+            }
+          }
           if (ps.found && ps.profile?.ex1_answers && ps.profile?.ex2_answers) {
             localStorage.setItem('attune_partner_session', JSON.stringify({
               name: ps.profile.name,
@@ -10088,7 +10104,7 @@ function PartnerBExerciseFlow({ account, onComplete }) {
           <span style={{ fontFamily: "'Playfair Display', Georgia, serif", fontSize: '0.95rem', fontWeight: 700, color: C.ink }}>Attune</span>
           <span style={{ fontSize: '0.68rem', color: C.muted, fontFamily: "'DM Sans', sans-serif", marginLeft: '0.5rem' }}>· Exercise 02 of {hasReflection ? '03' : '02'}</span>
         </div>
-        <ExpectationsExercise userName={account.name} partnerName={account.partnerName} onComplete={handleEx2Done} />
+        <ExpectationsExercise userName={account.name} partnerName={account.partnerName} onComplete={handleEx2Done} isAnniversary={["married","remarried"].includes(account.buyerRelationshipStatus || account.relationshipStatus)} />
       </div>
     </div>
   );
@@ -10991,6 +11007,8 @@ export default function App() {
               inviteCode: profile?.invite_code || '',
               partnerJoined: profile?.partner_joined || false,
               joinedViaInvite: profile?.joined_via_invite || false,
+              relationshipStatus: profile?.relationship_status || null,
+              buyerRelationshipStatus: profile?.joined_via_invite ? null : (profile?.relationship_status || null),
               pkg: orderRow?.pkg_key || profile?.pkg || 'core',
               addonLmft:       !!(orderRow?.addon_lmft ?? profile?.addon_lmft),
               addonReflection: !!(orderRow?.addon_reflection ?? profile?.addon_reflection),
@@ -11002,6 +11020,18 @@ export default function App() {
             setAccount(rebuilt);
             saveAccount(rebuilt);
 
+            // Invitee inherits the buyer's relationship status (drives Ex2
+            // variant). Resolve Partner A's status from the linked profile.
+            if (profile?.joined_via_invite && profile?.partner_profile_id) {
+              try {
+                const { data: aProf } = await sb.from('profiles').select('relationship_status').eq('id', profile.partner_profile_id).maybeSingle();
+                if (aProf?.relationship_status) {
+                  rebuilt.buyerRelationshipStatus = aProf.relationship_status;
+                  setAccount({ ...rebuilt });
+                  saveAccount(rebuilt);
+                }
+              } catch {}
+            }
             // Also rebuild attune_order so consumers that read directly from
             // localStorage (workbook generator, results page) see consistent
             // data after a cross-device login.

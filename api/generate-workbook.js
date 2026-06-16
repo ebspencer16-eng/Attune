@@ -1395,9 +1395,6 @@ function getDomainRows(domainKey, responsibilities, lifeQuestions, u, p) {
       return [
         respRow('Mental load',               'emotional', 0),
         respRow('Tracking how everyone is',  'emotional', 1),
-        respRow('Maintaining closeness',     'emotional', 2),
-        respRow('Hard conversations',        'emotional', 3),
-        respRow('Repair after friction',     'emotional', 4),
       ];
     case 'extended_family':
       // Payload order (per RESPONSIBILITY_CATEGORIES): Visits_U(0), Gift_U(1), Visits_P(2), Gift_P(3)
