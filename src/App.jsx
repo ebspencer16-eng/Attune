@@ -971,6 +971,33 @@ const INDIVIDUAL_TYPES = {
        typeDesc: "You carry things privately and surface them selectively, which means there's usually more going on internally than what's visible. You don't perform your inner life, and you don't dump it on the people around you. Under pressure, you go quiet and go deep. The thing to stay aware of: the people who love you most sometimes struggle to know what you're carrying, which can make them feel shut out without you intending it." },
 };
 
+// Same-type couples share an individual type, so two separate profile pages
+// would read almost identically. Instead we show one combined "Communication
+// Profile" page framed for both partners. One version per type.
+// {U} and {P} are substituted with the two partner names at render time.
+const SAME_TYPE_PROFILE = {
+  W: {
+    hook: "You're both Initiators. Let's look at what that means for the two of you.",
+    shared: "You both move toward connection. When something needs addressing, neither of you waits for an opening, you create one. You both process outward, so you rarely have to guess where the other stands. That makes you easy to know and quick to engage. Most couples spend years learning to say things out loud that the two of you say by default.",
+    tricky: "When two people both engage fast and express freely, conversations can escalate before either of you has slowed down. The risk isn't silence, it's two people reacting in real time. Your work is the pause: deciding, together, when to let something sit for an hour before you both pile in.",
+  },
+  X: {
+    hook: "You're both Anchors. Let's look at what that means for the two of you.",
+    shared: "You both move toward resolution and you both process privately before you speak. Neither of you avoids the hard conversation, and neither of you reacts out loud. When you each arrive, you arrive with something considered. That makes you a steady, deliberate pair, the kind that works through hard things without much drama.",
+    tricky: "Two people who both process internally can leave a lot unsaid in the meantime. You each assume the other knows what you're working through, because you're doing the same quiet work. Your task is to narrate more than feels necessary: say the thinking out loud, not just the conclusion.",
+  },
+  Y: {
+    hook: "You're both Feelers. Let's look at what that means for the two of you.",
+    shared: "You both feel things deeply and you both need space before you can show up to a hard conversation. Neither of you mistakes the other's need for time as avoidance, because you both know it's how you get to something honest. When you each arrive, you bring real feeling. There's a depth here most couples have to work to reach.",
+    tricky: "When both of you need space first, a hard moment can stall, with each waiting for the other to come back. Without a plan, the gap stretches. Your work is agreeing, in advance, on who reaches first and how long the space lasts, so the pause is deliberate rather than indefinite.",
+  },
+  Z: {
+    hook: "You're both Protectors. Let's look at what that means for the two of you.",
+    shared: "You both process privately and share selectively. There's more going on inside each of you than shows on the surface, and you both respect that the other doesn't perform their inner life. When either of you does speak, it carries weight. You give each other room, and you don't manufacture conflict that isn't there.",
+    tricky: "Two people who both hold things close can let a lot go unspoken. What's unsaid accumulates quietly, and neither of you is wired to force it into the open. Your work is the deliberate habit of saying the small thing before it becomes a big one, since neither of you will reach for it on instinct.",
+  },
+};
+
 // Per-couple-type, per-person perspective for profile pages (Option B)
 // Keys: coupleTypeId -> [personA_perspective, personB_perspective]
 // typeA is always alphabetically first in the pairing ID.
@@ -3471,6 +3498,12 @@ function PersonalityResults({ myAnswers, partnerAnswers, userName, partnerName, 
   const DOMAIN_ORDER = ["energy","expression","closeness","love","needs","bids","conflict","stress","repair","feedback"];
   const orderedDims = DOMAIN_ORDER.filter(d => feedback.some(f => f.dim === d));
   const TOTAL = orderedDims.length + 4; // overview + N dims + action plan + 2 individual + summary
+  // Same-type couples (both partners the same individual type) collapse to a
+  // single combined "Communication Profile" page instead of two near-identical
+  // individual pages.
+  const _myTypeCode = computeIndividualType(myS).typeCode;
+  const _partTypeCode = computeIndividualType(partS).typeCode;
+  const sameType = _myTypeCode === _partTypeCode;
 
   const go = s => { setStep(s); if (onExternalGo) onExternalGo(s); const sc = document.querySelector("[data-results-scroll]"); if (sc) sc.scrollTop = 0; else window.scrollTo({ top: 0, behavior: "smooth" }); };
 
@@ -3511,8 +3544,12 @@ function PersonalityResults({ myAnswers, partnerAnswers, userName, partnerName, 
       ];
     }),
     { label: "Profiles & Plan", step: "profiles-section", isSection: true },
-    { label: userName + "'s Profile", step: orderedDims.length + 1, isChild: true },
-    { label: partnerName + "'s Profile", step: orderedDims.length + 2, isChild: true },
+    ...(sameType
+      ? [{ label: "Communication Profile", step: orderedDims.length + 1, isChild: true }]
+      : [
+          { label: userName + "'s Profile", step: orderedDims.length + 1, isChild: true },
+          { label: partnerName + "'s Profile", step: orderedDims.length + 2, isChild: true },
+        ]),
     { label: "Comm. Action Plan", step: orderedDims.length + 3, isChild: true },
   ];
 
@@ -3620,8 +3657,12 @@ function PersonalityResults({ myAnswers, partnerAnswers, userName, partnerName, 
           <div style={{ display: "flex", flexDirection: "column", gap: "0.3rem" }}>
             {[
               { label: "Detailed pages", sub: "One page per dimension", onClick: () => go(1) },
-              { label: userName + "'s profile", sub: "How " + userName + " is wired", onClick: () => go(orderedDims.length + 1) },
-              { label: partnerName + "'s profile", sub: "How " + partnerName + " is wired", onClick: () => go(orderedDims.length + 2) },
+              ...(sameType
+                ? [{ label: "Communication Profile", sub: "What you share as the same type", onClick: () => go(orderedDims.length + 1) }]
+                : [
+                    { label: userName + "'s profile", sub: userName + "'s communication type", onClick: () => go(orderedDims.length + 1) },
+                    { label: partnerName + "'s profile", sub: partnerName + "'s communication type", onClick: () => go(orderedDims.length + 2) },
+                  ]),
               { label: "Communication Action Plan", sub: "Practices built from your results", onClick: () => go(orderedDims.length + 3) },
             ].map(({ label, sub, onClick }, idx) => (
               <div key={idx} onClick={onClick}
@@ -3693,7 +3734,7 @@ function PersonalityResults({ myAnswers, partnerAnswers, userName, partnerName, 
         <NavButtons
           onBack={() => go(step - 1)}
           onNext={() => go(step + 1)}
-          nextLabel={isLast ? ((userName) + "'s Profile ->") : ((DIM_META[nextDim]?.label) + " →")}
+          nextLabel={isLast ? (sameType ? "Communication Profile →" : ((userName) + "'s Profile ->")) : ((DIM_META[nextDim]?.label) + " →")}
         />
       </ResultsSlide>
     </MaybeNav>
@@ -3768,6 +3809,57 @@ function PersonalityResults({ myAnswers, partnerAnswers, userName, partnerName, 
 
   // -- INDIVIDUAL PAGES (now steps N+1 and N+2) --
   if (step === orderedDims.length + 1 || step === orderedDims.length + 2) {
+    // ── SAME-TYPE COUPLES: one combined Communication Profile page ──
+    if (sameType) {
+      const profile = SAME_TYPE_PROFILE[_myTypeCode];
+      const it = INDIVIDUAL_TYPES[_myTypeCode];
+      const pageColor = it.color;
+      const pageBg = {
+        W: "linear-gradient(145deg, #1c0e06, #2e1a0e, #1c0e06)",
+        X: "linear-gradient(145deg, #060d2a, #0f1c48, #060d2a)",
+        Y: "linear-gradient(145deg, #100720, #1e0d3a, #100720)",
+        Z: "linear-gradient(145deg, #0d0d0d, #1a1a1a, #0d0d0d)",
+      }[_myTypeCode] || "linear-gradient(145deg, #0f0c29, #302b63, #24243e)";
+      const interp = s => (s || "").replace(/\{U\}/g, userName).replace(/\{P\}/g, partnerName);
+      return (
+      <MaybeNav noSideNav={noSideNav} navItems={personalityNavItems} currentStep={step} onGo={go} accent={pageColor}>
+        <ResultsSlide bg={pageBg}>
+          <link href={FONT_URL} rel="stylesheet" />
+          <div style={{ color: "white" }}>
+            {/* ── Header ── */}
+            <div style={{ marginBottom: "1.75rem" }}>
+              <div style={{ fontSize: "0.65rem", textTransform: "uppercase", letterSpacing: "0.2em", color: "rgba(255,255,255,0.38)", marginBottom: "0.55rem", fontFamily: BFONT }}>Communication Profile</div>
+              <div style={{ fontSize: "clamp(1.7rem,5.5vw,2.5rem)", fontWeight: 700, fontFamily: HFONT, lineHeight: 1.05, marginBottom: "0.65rem" }}>{interp(profile?.hook) || `You're both ${it.name}.`}</div>
+              <div style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", background: pageColor + "22", border: `1px solid ${pageColor}50`, borderRadius: 999, padding: "0.3rem 0.85rem" }}>
+                <div style={{ width: 7, height: 7, borderRadius: "50%", background: pageColor, flexShrink: 0 }} />
+                <span style={{ fontSize: "0.72rem", fontWeight: 700, color: pageColor, fontFamily: BFONT, letterSpacing: "0.06em" }}>Both {it.name}</span>
+                <span style={{ fontSize: "0.65rem", color: "rgba(255,255,255,0.35)", fontFamily: BFONT }}>· {it.axis1} · {it.axis2}</span>
+              </div>
+            </div>
+
+            {/* ── What you share ── */}
+            <div style={{ background: "rgba(255,255,255,0.04)", borderRadius: 16, padding: "1.25rem", marginBottom: "0.85rem", borderLeft: `3px solid ${pageColor}80` }}>
+              <div style={{ fontSize: "0.6rem", textTransform: "uppercase", letterSpacing: "0.18em", color: pageColor, fontWeight: 700, marginBottom: "0.6rem", fontFamily: BFONT }}>What you share</div>
+              <p style={{ fontSize: "0.88rem", color: "rgba(255,255,255,0.86)", fontFamily: BFONT, fontWeight: 300, lineHeight: 1.72, margin: 0 }}>{interp(profile?.shared)}</p>
+            </div>
+
+            {/* ── Where it can get tricky ── */}
+            <div style={{ background: `${pageColor}18`, borderRadius: 16, padding: "1.25rem", border: `1px solid ${pageColor}45` }}>
+              <div style={{ fontSize: "0.6rem", textTransform: "uppercase", letterSpacing: "0.18em", color: pageColor, fontWeight: 700, marginBottom: "0.55rem", fontFamily: BFONT }}>Where it can get tricky</div>
+              <p style={{ fontSize: "0.88rem", color: "rgba(255,255,255,0.88)", fontFamily: BFONT, fontWeight: 400, lineHeight: 1.75, margin: 0 }}>{interp(profile?.tricky)}</p>
+            </div>
+          </div>
+
+          <NavButtons
+            onBack={() => go(orderedDims.length)}
+            onNext={() => go(orderedDims.length + 3)}
+            nextLabel={"Communication Action Plan →"}
+          />
+        </ResultsSlide>
+      </MaybeNav>
+      );
+    }
+
     const isMyPage = step === orderedDims.length + 1;
     const personName  = isMyPage ? userName    : partnerName;
     const partnerDisplayName = isMyPage ? partnerName : userName;
@@ -6586,6 +6678,9 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
   // Compute all the data we need up front
   const myS = calcDimScores(ex1Answers);
   const partS = calcDimScores(partnerEx1);
+  // Same-type couples get a single combined "Communication Profile" page; the
+  // comms sub-nav label reflects that.
+  const urSameType = computeIndividualType(myS).typeCode === computeIndividualType(partS).typeCode;
   const personalityFeedback = generatePersonalityFeedback(myS, partS, userName, partnerName);
   const sortedFeedback = [...personalityFeedback].sort((a, b) => a.gap - b.gap);
   // Domain order — matches PersonalityResults navigation
@@ -6900,7 +6995,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
         // Hard moments — blue
         { id: "comm-domain-hard", label: "When Things Get Hard", isDomainHeader: true, color: "#1B5FE8" },
         ...orderedDims.filter(d => ["conflict","stress","repair","feedback"].includes(d)).map(d => ({ id: `comm-${d}`, label: DIM_META[d].label, isDeepChild: true, color: "#1B5FE8" })),
-        { id: "comm-profiles", label: "Individual profiles" },
+        { id: "comm-profiles", label: urSameType ? "Communication Profile" : "Individual profiles" },
         { id: "comm-plan", label: "Communication Action Plan" },
       ]
     },
@@ -7027,7 +7122,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
     if (id === "summary") return "Full Summary";
     if (id === "comm-overview") return "Communication Overview";
     if (id.startsWith("comm-") && id !== "comm-profiles" && id !== "comm-plan") return DIM_META[id.replace("comm-","")]?.label || id;
-    if (id === "comm-profiles") return "Individual Profiles";
+    if (id === "comm-profiles") return urSameType ? "Communication Profile" : "Individual Profiles";
     if (id === "comm-plan") return "Communication Action Plan";
     if (id === "exp-overview") return "Expectations Overview";
     if (id === "exp-common-ground") return "Common Ground";
