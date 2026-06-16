@@ -10900,12 +10900,54 @@ export default function App() {
     return () => { document.documentElement.style.overflow = ''; };
   }, [view, highlightsSeen]);
 
-  // ── Hydrate retake-prior state from localStorage ────────────────────────
-  // The prior answers are written to localStorage on profile load (see
-  // loadAccountFromSession). This effect pulls them into component state
-  // so the RetakeComparisonCard can render. Runs once on mount + any time
-  // the account ID changes (covers sign-in after mount).
+  // ── Hydrate exercise + retake-prior state from localStorage ─────────────
+  // On sign-in, the login flow (loadAccountFromSession / AuthModal) writes the
+  // profile's exN_answers to localStorage but does NOT push them into React
+  // state, and onSuccess only calls setAccount (no reload). So a returning user
+  // whose component state initialized empty (fresh browser/session, localStorage
+  // not yet populated at mount) would see completed exercises as incomplete.
+  // This effect re-reads the main answers + prior snapshots from localStorage
+  // whenever the account id changes (covers sign-in after mount) and on mount.
   useEffect(() => {
+    // Only rehydrate for a real logged-in account. Without this guard we could
+    // clobber the unauthenticated demo/sandbox state.
+    if (!account?.id) return;
+    const hydrateAnswers = (key, setAns) => {
+      try {
+        const raw = localStorage.getItem(key);
+        if (!raw) return;
+        const parsed = JSON.parse(raw);
+        // Only set when there's real answer data — never overwrite live state
+        // with an empty object.
+        if (parsed && typeof parsed === 'object' && Object.keys(parsed).length > 0) {
+          setAns(prev => {
+            // Don't clobber answers already present in state (e.g. just completed
+            // in-session). Only fill in when state is empty/null.
+            if (prev && Object.keys(prev).length > 0) return prev;
+            return parsed;
+          });
+        }
+      } catch {}
+    };
+    hydrateAnswers('attune_ex1', setEx1State);
+    hydrateAnswers('attune_ex2', setEx2State);
+    hydrateAnswers('attune_ex3', setEx3State);
+
+    // Rehydrate the linked partner's session too. The login flow writes
+    // attune_partner_session to localStorage but doesn't call setPartnerSession,
+    // so without this the partner's completion looks missing until the async
+    // poll catches up. Only fill in when state is empty (don't clobber a live
+    // session already in memory).
+    try {
+      const rawPS = localStorage.getItem('attune_partner_session');
+      if (rawPS) {
+        const ps = JSON.parse(rawPS);
+        if (ps && ps.ex1 && ps.ex2) {
+          setPartnerSession(prev => (prev && prev.ex1 && prev.ex2) ? prev : ps);
+        }
+      }
+    } catch {}
+
     const hydrate = (key, setAns, setAt) => {
       try {
         const raw = localStorage.getItem(key);
