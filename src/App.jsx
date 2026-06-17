@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useLayoutEffect, useRef } from "react";
 import { axisScores } from "../api/_type-engine.js";
 import { PERSONALITY_QUESTIONS, RESPONSIBILITY_CATEGORIES, LIFE_QUESTIONS } from "../api/_questions.js";
-import { INTIMACY_QUESTIONS, INTIMACY_DIMENSIONS, summarizeIntimacy, intimacyDimensionPositions } from "../api/_intimacy-questions.js";
+import { INTIMACY_QUESTIONS, INTIMACY_DIMENSIONS, summarizeIntimacy, intimacyDimensionPositions, intimacyDimensionSkips } from "../api/_intimacy-questions.js";
 import { INTIMACY_RESULTS_PROSE } from "../api/_intimacy-results-prose.js";
 
 
@@ -8163,6 +8163,15 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
     const sub = (s) => (s || "").replace(/\{U\}/g, userName).replace(/\{P\}/g, partnerName);
     const dims = intimacySummary.dimSummary;
     const positions = intimacyDimensionPositions(intimacyAnswers, partnerIntimacy.answers);
+    const skips = intimacyDimensionSkips(intimacyAnswers, partnerIntimacy.answers);
+    // One-sided skip: exactly one partner skipped the whole dimension. Returns
+    // the skipper's name, or null. (Both-skipped is handled by the 'unspoken' state.)
+    const oneSidedSkip = (dimId) => {
+      const sk = skips[dimId] || {};
+      if (sk.mineSkipped && !sk.theirsSkipped) return userName;
+      if (sk.theirsSkipped && !sk.mineSkipped) return partnerName;
+      return null;
+    };
     const proseFor = (dimId, state) => sub(INTIMACY_RESULTS_PROSE[dimId]?.[state] || INTIMACY_RESULTS_PROSE[dimId]?.discuss || "");
     const alignedCount = dims.filter(d => d.state === "aligned").length;
     const exploreCount = dims.filter(d => d.state === "discuss" || d.state === "different").length;
@@ -8242,6 +8251,8 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
       const idx = dimIds.indexOf(dimMatch);
       const nextId = idx < dimIds.length - 1 ? `intimacy-${dimIds[idx + 1]}` : "intimacy-plan";
       const prevId = idx > 0 ? `intimacy-${dimIds[idx - 1]}` : "intimacy-overview";
+      const skipper = oneSidedSkip(dimMatch);
+      const osk = INTIMACY_RESULTS_PROSE[dimMatch]?.oneSkipped;
       return (
         <Layout accent={ROSE}>
           <div style={{ maxWidth: 660 }}>
@@ -8270,17 +8281,25 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
               </div>
             </div>
 
-            {/* What this means */}
-            <div style={{ background: "white", border: `1.5px solid ${C.stone}`, borderRadius: 14, padding: "1.25rem 1.5rem", marginBottom: "1rem" }}>
-              <div style={{ fontSize: "0.58rem", letterSpacing: "0.2em", textTransform: "uppercase", color: C.muted, fontFamily: BFONT, fontWeight: 700, marginBottom: "0.6rem" }}>What this means</div>
-              <p style={{ fontSize: "0.9rem", color: C.text, lineHeight: 1.75, margin: 0, fontFamily: BFONT, fontWeight: 300 }}>{proseFor(dimMatch, st)}</p>
-            </div>
-
-            {/* Talk about it */}
-            <div style={{ background: `${ROSE}14`, borderRadius: 14, padding: "1.25rem 1.5rem", border: `1px solid ${ROSE}40` }}>
-              <div style={{ fontSize: "0.62rem", textTransform: "uppercase", letterSpacing: "0.12em", color: ROSE, fontWeight: 700, marginBottom: "0.5rem", fontFamily: BFONT }}>Talk about it</div>
-              <p style={{ fontSize: "0.9rem", color: C.ink, lineHeight: 1.75, margin: 0, fontFamily: BFONT, fontWeight: 400 }}>{sub(INTIMACY_RESULTS_PROSE[dimMatch]?.prompt)}</p>
-            </div>
+            {/* What this means / one-partner-skipped */}
+            {skipper && osk ? (
+              <div style={{ background: `${ROSE}14`, borderRadius: 14, padding: "1.25rem 1.5rem", border: `1px solid ${ROSE}40` }}>
+                <p style={{ fontSize: "0.9rem", color: C.text, lineHeight: 1.75, margin: "0 0 1rem", fontFamily: BFONT, fontWeight: 300 }}>{osk.lead.replace(/\{SKIPPER\}/g, skipper)}</p>
+                <div style={{ fontSize: "0.62rem", textTransform: "uppercase", letterSpacing: "0.12em", color: ROSE, fontWeight: 700, marginBottom: "0.5rem", fontFamily: BFONT }}>Talk about it</div>
+                <p style={{ fontSize: "0.9rem", color: C.ink, lineHeight: 1.75, margin: 0, fontFamily: BFONT, fontWeight: 400 }}>{sub(osk.question)}</p>
+              </div>
+            ) : (
+              <>
+                <div style={{ background: "white", border: `1.5px solid ${C.stone}`, borderRadius: 14, padding: "1.25rem 1.5rem", marginBottom: "1rem" }}>
+                  <div style={{ fontSize: "0.58rem", letterSpacing: "0.2em", textTransform: "uppercase", color: C.muted, fontFamily: BFONT, fontWeight: 700, marginBottom: "0.6rem" }}>What this means</div>
+                  <p style={{ fontSize: "0.9rem", color: C.text, lineHeight: 1.75, margin: 0, fontFamily: BFONT, fontWeight: 300 }}>{proseFor(dimMatch, st)}</p>
+                </div>
+                <div style={{ background: `${ROSE}14`, borderRadius: 14, padding: "1.25rem 1.5rem", border: `1px solid ${ROSE}40` }}>
+                  <div style={{ fontSize: "0.62rem", textTransform: "uppercase", letterSpacing: "0.12em", color: ROSE, fontWeight: 700, marginBottom: "0.5rem", fontFamily: BFONT }}>Talk about it</div>
+                  <p style={{ fontSize: "0.9rem", color: C.ink, lineHeight: 1.75, margin: 0, fontFamily: BFONT, fontWeight: 400 }}>{sub(INTIMACY_RESULTS_PROSE[dimMatch]?.prompt)}</p>
+                </div>
+              </>
+            )}
 
             <div style={{ display: "flex", justifyContent: "space-between", marginTop: "1.5rem" }}>
               <button onClick={() => go(prevId)} style={{ background: "transparent", border: `1.5px solid ${C.stone}`, borderRadius: 10, padding: "0.6rem 1.25rem", fontSize: "0.72rem", color: C.muted, cursor: "pointer", fontFamily: BFONT, fontWeight: 600 }}>← Back</button>

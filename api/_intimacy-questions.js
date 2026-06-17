@@ -304,6 +304,30 @@ export const INTIMACY_QUESTIONS = [
 ];
 
 // Look up an option object by question id + stored label.
+// Per-dimension full-skip detection. A partner "skipped the whole dimension"
+// when every question in it is unanswered or "prefer not to say". Returns
+// { [dimId]: { mineSkipped, theirsSkipped } }. Used to show the
+// one-partner-skipped results variant (only when exactly one side skipped all).
+export function intimacyDimensionSkips(mineAnswers, theirsAnswers) {
+  const isSkip = (q, raw) => {
+    if (q.kind === 'multi') {
+      if (!Array.isArray(raw)) return true;               // unanswered
+      const real = raw.filter(v => v !== null);
+      return real.length === 0;                            // empty or [null] = skipped
+    }
+    if (raw == null) return true;                          // unanswered
+    const o = optByLabel(q, raw);
+    return !o || o.value == null;                          // "prefer not to say"
+  };
+  const out = {};
+  for (const d of INTIMACY_DIMENSIONS) {
+    const qs = INTIMACY_QUESTIONS.filter(q => q.dimension === d.id);
+    const allSkipped = (answers) => qs.every(q => isSkip(q, answers?.[q.id]));
+    out[d.id] = { mineSkipped: allSkipped(mineAnswers), theirsSkipped: allSkipped(theirsAnswers) };
+  }
+  return out;
+}
+
 function optByLabel(q, label) {
   return q.options.find(o => o.label === label) || null;
 }
