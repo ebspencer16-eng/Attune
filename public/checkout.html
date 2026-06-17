@@ -515,6 +515,7 @@ let pkg = null;
 let addonWorkbook = null;
 let addonReflection = false;
 let addonBudget = false;
+let addonIntimacy = false;
 let addonChecklist = false;
 let addonLmft = false;
 
@@ -620,6 +621,7 @@ async function refreshTax() {
           addonLmft:       !!it.addons.lmft,
           addonReflection: !!it.addons.reflection,
           addonBudget:     !!it.addons.budget,
+          addonIntimacy:   !!it.addons.intimacy,
           addonChecklist:  !!it.addons.checklist,
         })),
         customerAddress: addr,
@@ -729,6 +731,7 @@ function persistOrderComplete(orderNum) {
         lmft:             params.get('addon_lmft') === '1',
         reflection:       params.get('addon_reflection') === '1',
         budget:           params.get('addon_budget') === '1',
+        intimacy:         params.get('addon_intimacy') === '1',
         checklist:        false,
       },
       intent: (fromRegistry || params.get('gift') === '1') ? 'gift' : 'self',
@@ -751,6 +754,7 @@ function persistOrderComplete(orderNum) {
   addonLmft       = !!first.addons.lmft;
   addonReflection = !!first.addons.reflection;
   addonBudget     = !!first.addons.budget;
+  addonIntimacy   = !!first.addons.intimacy;
   addonChecklist  = !!first.addons.checklist;
   intent          = first.intent;
 
@@ -768,13 +772,16 @@ function persistOrderComplete(orderNum) {
   let _promptKey = null;
   if (_items.length === 1 && pkg.id !== 'premium') {
     const it0 = _items[0];
-    if (!it0.addons.workbook)   _promptKey = 'workbook';
-    else if (!it0.addons.lmft)  _promptKey = 'lmft';
+    if (!it0.addons.workbook)        _promptKey = 'workbook';
+    else if (!it0.addons.lmft)       _promptKey = 'lmft';
+    else if (!it0.addons.intimacy)   _promptKey = 'intimacy';
   }
   if (_promptKey) {
     const meta = _promptKey === 'workbook'
       ? { title: 'Add Personalized Workbook', price: '+$19', desc: 'Conversation prompts and guided exercises built from your joint results. Digital, delivered with your results. Switch to a printed copy in your cart.' }
-      : { title: 'Add LMFT Session', price: '+$150', desc: 'A 50-minute video session with a licensed marriage and family therapist who reviews your joint results before you meet. Available on any package.' };
+      : _promptKey === 'lmft'
+      ? { title: 'Add LMFT Session', price: '+$150', desc: 'A 50-minute video session with a licensed marriage and family therapist who reviews your joint results before you meet. Available on any package.' }
+      : { title: 'Add Intimacy Expectations', price: '+$20', desc: 'A private set of questions about physical intimacy, answered independently and compared side by side. Covers frequency, initiating, comfort, communication, and more. Premarital and already-married versions.' };
     document.getElementById('addonPromptTitle').textContent = meta.title;
     document.getElementById('addonPromptPrice').textContent = meta.price;
     document.getElementById('addonPromptDesc').textContent  = meta.desc;
@@ -798,6 +805,9 @@ function persistOrderComplete(orderNum) {
       it0.addons.workbook = chk.checked;
       if (chk.checked && !it0.addons.workbookVariant) it0.addons.workbookVariant = 'digital';
       addonWorkbook = chk.checked ? (it0.addons.workbookVariant || 'digital') : null;
+    } else if (_promptKey === 'intimacy') {
+      it0.addons.intimacy = chk.checked;
+      addonIntimacy = chk.checked;
     } else {
       it0.addons.lmft = chk.checked;
       addonLmft = chk.checked;
@@ -971,6 +981,7 @@ function renderSummary() {
     if (it.addons.lmft)       add += ADDON_LMFT.price;
     if (it.addons.reflection) add += ADDON_REFLECTION.price;
     if (it.addons.budget)     add += 20;
+    if (it.addons.intimacy)   add += 20;
     if (it.addons.checklist)  add += 20;
     return base + add;
   }
@@ -1010,6 +1021,7 @@ function renderSummary() {
     if (g.item.addons.lmft)       addonLines.push({ label: ADDON_LMFT.label, price: ADDON_LMFT.price });
     if (g.item.addons.reflection) addonLines.push({ label: ADDON_REFLECTION.label, price: ADDON_REFLECTION.price });
     if (g.item.addons.budget)     addonLines.push({ label: 'Shared Budgeting Activity', price: 20 });
+    if (g.item.addons.intimacy)   addonLines.push({ label: 'Intimacy Expectations', price: 20 });
     if (g.item.addons.checklist)  addonLines.push({ label: 'Starting Out Checklist', price: 20 });
     for (const a of addonLines) {
       rows += `
@@ -1200,6 +1212,7 @@ function validateForm() {
         if (it.addons.lmft)       add += 150;
         if (it.addons.reflection) add += 40;
         if (it.addons.budget)     add += 20;
+        if (it.addons.intimacy)     add += 20;
         if (it.addons.checklist)  add += 20;
         return sum + (base + add);
       }, 0);
@@ -1335,7 +1348,7 @@ function validateForm() {
                   giftNote: it.giftNote || null,
                   addonWorkbook: it.addons.workbook ? (it.addons.workbookVariant || 'digital') : null,
                   addonLmft: !!it.addons.lmft, addonReflection: !!it.addons.reflection,
-                  addonBudget: !!it.addons.budget, addonChecklist: !!it.addons.checklist,
+                  addonBudget: !!it.addons.budget, addonIntimacy: !!it.addons.intimacy, addonChecklist: !!it.addons.checklist,
                   shipping: it.format === 'physical' ? it.shipping : null,
                 })),
                 pkgKey: first.pkg, buyerEmail: email, buyerName: first.partner1Name,
@@ -1410,6 +1423,7 @@ function updatePaymentRequestTotal() {
     if (it.addons.lmft)       add += 150;
     if (it.addons.reflection) add += 40;
     if (it.addons.budget)     add += 20;
+    if (it.addons.intimacy)   add += 20;
     if (it.addons.checklist)  add += 20;
     return sum + (base + add);
   }, 0);
@@ -1473,6 +1487,7 @@ async function handleSubmit(e) {
           addonLmft:        !!it.addons.lmft,
           addonReflection:  !!it.addons.reflection,
           addonBudget:      !!it.addons.budget,
+          addonIntimacy:    !!it.addons.intimacy,
           addonChecklist:   !!it.addons.checklist,
           shipping:         it.format === 'physical' ? it.shipping : null,
         })),
@@ -1483,6 +1498,7 @@ async function handleSubmit(e) {
         addonLmft:        !!first.addons.lmft,
         addonReflection:  !!first.addons.reflection,
         addonBudget:      !!first.addons.budget,
+        addonIntimacy:    !!first.addons.intimacy,
         isGift:           first.intent === 'gift',
         isPhysical:       first.format === 'physical',
         partner1Name:     first.partner1Name,
@@ -1550,6 +1566,7 @@ async function handleSubmit(e) {
     if (first.addons.reflection) params.set('addon_reflection', '1');
     if (first.addons.workbook)   params.set('addon_workbook', first.addons.workbookVariant || 'digital');
     if (first.addons.budget)     params.set('addon_budget', '1');
+    if (first.addons.intimacy)   params.set('addon_intimacy', '1');
     if (first.intent === 'gift') params.set('gift', '1');
     params.set('orderNum', realOrderNum);
     document.getElementById('startLink').href = '/app?' + params.toString();
@@ -1573,6 +1590,7 @@ async function handleSubmit(e) {
       if (it.addons.lmft)       lineItems.push({ label: ADDON_LMFT.label, price: ADDON_LMFT.price });
       if (it.addons.reflection) lineItems.push({ label: ADDON_REFLECTION.label, price: ADDON_REFLECTION.price });
       if (it.addons.budget)     lineItems.push({ label: 'Shared Budgeting Activity', price: 20 });
+      if (it.addons.intimacy)   lineItems.push({ label: 'Intimacy Expectations', price: 20 });
       if (it.addons.checklist)  lineItems.push({ label: 'Starting Out Checklist', price: 20 });
       const itemSubtotal = lineItems.reduce((sum, l) => sum + l.price, 0);
       fetch('/api/send-order-email', {
@@ -1608,6 +1626,7 @@ async function handleSubmit(e) {
         addonReflection: !!first.addons.reflection,
         addonWorkbook: first.addons.workbook ? (first.addons.workbookVariant || 'digital') : null,
         addonBudget:   !!first.addons.budget,
+        addonIntimacy: !!first.addons.intimacy,
         partner1Name:  first.partner1Name,
         partner2Name:  first.partner2Name,
         isPhysical:    first.format === 'physical',
@@ -1754,6 +1773,7 @@ function cartItemPrice(it) {
   if (it.addons.lmft)       add += ADDON_LMFT.price;
   if (it.addons.reflection) add += ADDON_REFLECTION.price;
   if (it.addons.budget)     add += 20;
+  if (it.addons.intimacy)     add += 20;
   if (it.addons.checklist)  add += 20;
   return base + add;
 }
@@ -1768,6 +1788,7 @@ function getPkgTotal() {
       if (addonLmft) t += ADDON_LMFT.price;
       if (addonReflection) t += ADDON_REFLECTION.price;
       if (addonBudget) t += 20;
+      if (addonIntimacy) t += 20;
       if (addonChecklist) t += 20;
       return t;
     }

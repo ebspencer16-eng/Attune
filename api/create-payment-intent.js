@@ -28,6 +28,7 @@ const ADDON_PRICES = {
   reflection:      40,
   budget:          20,
   checklist:       20,
+  intimacy:        20,
 };
 
 // ── Stripe Tax product codes ─────────────────────────────────────────────
@@ -88,6 +89,9 @@ function buildTaxLineItems(item, itemIndex) {
   }
   if (item.addonChecklist) {
     lines.push({ amount: ADDON_PRICES.checklist * 100,  tax_code: TAX_CODES.digitalAddon, reference: `item-${itemIndex}-checklist`,  quantity: 1 });
+  }
+  if (item.addonIntimacy) {
+    lines.push({ amount: ADDON_PRICES.intimacy * 100,   tax_code: TAX_CODES.digitalAddon, reference: `item-${itemIndex}-intimacy`,   quantity: 1 });
   }
   return lines;
 }
@@ -241,6 +245,7 @@ function itemAddonTotal(item) {
   if (item.addonReflection) addons += ADDON_PRICES.reflection;
   if (item.addonBudget)     addons += ADDON_PRICES.budget;
   if (item.addonChecklist)  addons += ADDON_PRICES.checklist;
+  if (item.addonIntimacy)   addons += ADDON_PRICES.intimacy;
   return addons;
 }
 
@@ -261,6 +266,7 @@ function normalizeItem(item) {
     addonReflection: !!item.addonReflection,
     addonBudget:     !!item.addonBudget,
     addonChecklist:  !!item.addonChecklist,
+    addonIntimacy:   !!item.addonIntimacy,
     shipping:        item.shipping || null,
   };
 }
@@ -322,6 +328,7 @@ export default async function handler(req) {
         addonLmft:       body.addonLmft,
         addonReflection: body.addonReflection,
         addonBudget:     body.addonBudget,
+        addonIntimacy:   body.addonIntimacy,
         addonChecklist:  body.addonChecklist,
         shipping:        body.shipping,
       }];
@@ -554,6 +561,7 @@ export default async function handler(req) {
               addon_lmft:        item.addonLmft,
               addon_reflection:  item.addonReflection,
               addon_budget:      item.addonBudget,
+              addon_intimacy:    item.addonIntimacy,
               gift_note:         item.giftNote || null,
               stripe_payment_intent_id: `promo_${normalizedCode}_${Date.now()}_${i}`,
               promo_code:        normalizedCode,
@@ -663,6 +671,7 @@ export default async function handler(req) {
     l:   it.addonLmft ? 1 : 0,
     r:   it.addonReflection ? 1 : 0,
     b:   it.addonBudget ? 1 : 0,
+    i:   it.addonIntimacy ? 1 : 0,
     c:   it.addonChecklist ? 1 : 0,
     s:   it.shipping ? [it.shipping.name, it.shipping.address, it.shipping.city, it.shipping.state].join('|').slice(0, 200) : '',
   }));
@@ -686,6 +695,7 @@ export default async function handler(req) {
     'metadata[addonLmft]':    items[0].addonLmft ? '1' : '',
     'metadata[addonReflection]':items[0].addonReflection ? '1' : '',
     'metadata[addonBudget]':  items[0].addonBudget ? '1' : '',
+    'metadata[addonIntimacy]': items[0].addonIntimacy ? '1' : '',
     'metadata[giftNote]':     (items[0].giftNote || '').slice(0, 500),
     // When a promo covers the package base, pass it through so the webhook
     // tags the resulting order rows with promo_code + adjusts accounting.
