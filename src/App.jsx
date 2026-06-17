@@ -9504,6 +9504,7 @@ function AuthModal({ mode, onClose, onSuccess }) {
               ex1: ps.profile.ex1_answers,
               ex2: ps.profile.ex2_answers,
               ex3: ps.profile.ex3_answers,
+              ...(ps.profile.intimacy_data ? { intimacy: ps.profile.intimacy_data } : {}),
               partnerProfileId: profile.partner_profile_id,
               inviteCode: profile.invite_code,
             }));
@@ -11271,6 +11272,7 @@ export default function App() {
               if (profile?.budget_data)        localStorage.setItem('attune_budget', JSON.stringify(profile.budget_data));
               if (profile?.checklist_data)     localStorage.setItem('attune_checklist', JSON.stringify(profile.checklist_data));
               if (profile?.notes_data)         localStorage.setItem('attune_notes', JSON.stringify(profile.notes_data));
+              if (profile?.intimacy_data)      localStorage.setItem('attune_intimacy', JSON.stringify(profile.intimacy_data));
               if (profile?.profile_setup_complete) localStorage.setItem('attune_profile_setup_done', '1');
               // Invitee (Partner B) completion marker. Routing keys off
               // attune_partner_session; without it, an invitee who finished on
@@ -12062,6 +12064,7 @@ export default function App() {
             ex1: json.profile.ex1_answers,
             ex2: json.profile.ex2_answers,
             ...(json.profile.ex3_answers ? { ex3: json.profile.ex3_answers } : {}),
+            ...(json.profile.intimacy_data ? { intimacy: json.profile.intimacy_data } : {}),
             completedAt: Date.now(),
           };
           if (!cancelled) savePartnerSession(s);

@@ -312,7 +312,7 @@ async function handlePartnerSync(req) {
 
       const { data, error } = await sb
         .from('profiles')
-        .select('name, pronouns, ex1_answers, ex2_answers, ex3_answers, ex3_completed, relationship_status, joined_via_invite')
+        .select('name, pronouns, ex1_answers, ex2_answers, ex3_answers, ex3_completed, relationship_status, joined_via_invite, intimacy_data')
         .eq('id', pid)
         .maybeSingle();
 
