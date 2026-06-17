@@ -11819,6 +11819,13 @@ export default function App() {
       return null;
     }
   }); // Premium budget tool
+  // Intimacy add-on: own answers + the variant the couple is locked into.
+  const [intimacyData, setIntimacyData] = useState(() => {
+    try {
+      const raw = localStorage.getItem('attune_intimacy');
+      return raw ? JSON.parse(raw) : null; // { variant, answers, completedAt }
+    } catch { return null; }
+  });
   const [notesState, _setNotesState] = useState(() => {
     // Hydrate from localStorage. The Notes view labels this "auto-saved",
     // so it really must persist. Without this the user's notes are lost on
@@ -12775,6 +12782,16 @@ export default function App() {
                           onClick={workbookReady ? () => setView("workbook") : undefined}
                           disabled={!workbookReady} />
                       : <DashTile color="#9B5DE5" eyebrow="Add-on" title="The Personalized Workbook" sub="A printable workbook built around your results and couple type. From $19." cta="Add →" onClick={() => setView("workbook")} />}
+                    {pkg.hasIntimacy && (() => {
+                      const done = !!(intimacyData?.completedAt);
+                      const needsSetup = !profileSetupDone;
+                      return <DashTile color="#B5546E" eyebrow="Add-on"
+                        title="Intimacy Expectations"
+                        sub={needsSetup ? "Complete your profile setup first, then begin." : (done ? "You're done. Your comparison unlocks when your partner finishes too." : "A private set of questions about what you each expect. About 10 minutes.")}
+                        cta={needsSetup ? null : (done ? "Review →" : "Begin →")}
+                        onClick={needsSetup ? undefined : () => setView("intimacy")}
+                        disabled={needsSetup} />;
+                    })()}
                     {pkg.hasLMFT
                       ? <DashTile color="#5B6DF8" eyebrow="Included" title="Your LMFT session" sub="A 50-minute session with a licensed therapist who has reviewed your results." cta="Schedule →" onClick={() => setView("lmft")} />
                       : <DashTile color="#5B6DF8" eyebrow="Add-on" title="LMFT Session" sub="A 50-minute session with a licensed therapist who reviews your results first. $150." cta="Add →" onClick={() => setUpsellModal({ product: 'lmft', cartAdded: false })} />}
@@ -13126,6 +13143,55 @@ export default function App() {
             accountId={account?.id}
           />
         )}
+
+        {/* ── INTIMACY EXPECTATIONS: add-on ── */}
+        {view === "intimacy" && pkg.hasIntimacy && (() => {
+          const myAns = intimacyData?.answers || null;
+          const myDone = !!(intimacyData?.completedAt);
+          const partnerIntimacy = hasRealPartner ? partnerSession?.intimacy : null;
+          const partnerDone = !!(partnerIntimacy?.answers && partnerIntimacy?.completedAt);
+          // First partner to start sets the variant for both.
+          const lockedVariant = partnerIntimacy?.variant || intimacyData?.variant || null;
+
+          const persist = (payload) => {
+            const record = { ...payload, completedAt: Date.now() };
+            setIntimacyData(record);
+            try { localStorage.setItem('attune_intimacy', JSON.stringify(record)); } catch {}
+            (async () => {
+              try {
+                const { supabase: sb, hasSupabase } = await import('./supabase.js');
+                if (hasSupabase() && account?.id) {
+                  await sb.from('profiles').update({ intimacy_data: record }).eq('id', account.id);
+                }
+              } catch (e) { console.warn('[intimacy] persist failed', e); }
+            })();
+          };
+
+          if (myDone && partnerDone) {
+            return <IntimacyResults
+              myAnswers={myAns} partnerAnswers={partnerIntimacy.answers}
+              userName={userName} partnerName={partnerName}
+              variant={lockedVariant || 'premarital'}
+              onBack={() => setView("home")} />;
+          }
+          if (myDone && !partnerDone) {
+            return (
+              <div style={{ maxWidth: 480, margin: "0 auto", padding: "3rem 1rem", textAlign: "center" }}>
+                <div style={{ fontSize: "0.6rem", letterSpacing: "0.2em", textTransform: "uppercase", color: "#B5546E", fontFamily: BFONT, fontWeight: 700, marginBottom: "0.75rem" }}>Intimacy Expectations</div>
+                <h2 style={{ fontFamily: HFONT, fontSize: "1.6rem", fontWeight: 700, color: C.ink, marginBottom: "0.75rem" }}>You're done.</h2>
+                <p style={{ fontSize: "0.9rem", color: C.muted, fontFamily: BFONT, fontWeight: 300, lineHeight: 1.65, marginBottom: "2rem" }}>
+                  Your comparison with {partnerName} unlocks here once they finish their answers too.
+                </p>
+                <button onClick={() => setView("home")} style={{ background: "#B5546E", color: "white", border: "none", borderRadius: 12, padding: "0.9rem 1.75rem", fontSize: "0.9rem", fontWeight: 600, fontFamily: BFONT, cursor: "pointer" }}>Back to dashboard</button>
+              </div>
+            );
+          }
+          return <IntimacyExercise
+            userName={userName} partnerName={partnerName}
+            lockedVariant={lockedVariant}
+            onComplete={(payload) => { persist(payload); try { localStorage.removeItem('attune_intimacy_progress'); } catch {}; setView("home"); }}
+            onChooseVariant={() => {}} />;
+        })()}
 
         {/* ── LMFT SESSION: Premium ── */}
         {view === "lmft" && pkg.hasLMFT && (
