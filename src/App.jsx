@@ -2,6 +2,7 @@ import React, { useState, useEffect, useLayoutEffect, useRef } from "react";
 import { axisScores } from "../api/_type-engine.js";
 import { PERSONALITY_QUESTIONS, RESPONSIBILITY_CATEGORIES, LIFE_QUESTIONS } from "../api/_questions.js";
 import { INTIMACY_QUESTIONS, INTIMACY_DIMENSIONS, summarizeIntimacy } from "../api/_intimacy-questions.js";
+import { INTIMACY_RESULTS_PROSE } from "../api/_intimacy-results-prose.js";
 
 
 // ── Mobile detection hook ─────────────────────────────────────────────────────
@@ -6874,7 +6875,7 @@ function RetakeComparisonCard({ currentEx2, priorEx2, priorAt, userName, partner
   );
 }
 
-function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Answers, partnerEx3, ex2AnswersPrior = null, ex2PriorAt = null, hasAnniversary, userName, partnerName, initialSection, isMobile = false, portrait = null, hasChecklist = false, hasBudget = false, hasLMFT = false, hasWorkbook = false, onNavigateTool = null, userPronouns = "", partnerPronouns = "", isBetaTester = false }) {
+function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Answers, partnerEx3, ex2AnswersPrior = null, ex2PriorAt = null, hasAnniversary, userName, partnerName, initialSection, isMobile = false, portrait = null, hasChecklist = false, hasBudget = false, hasLMFT = false, hasWorkbook = false, hasIntimacy = false, intimacyAnswers = null, partnerIntimacy = null, intimacyVariant = 'premarital', onNavigateTool = null, userPronouns = "", partnerPronouns = "", isBetaTester = false }) {
 
   // Compute all the data we need up front
   const myS = calcDimScores(ex1Answers);
@@ -6956,6 +6957,11 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
   const [commExpanded, setCommExpanded] = useState(section.startsWith("comm"));
   const [expExpanded, setExpExpanded] = useState(section.startsWith("exp"));
   const [reflExpanded, setReflExpanded] = useState(section.startsWith("reflection"));
+  const [intimExpanded, setIntimExpanded] = useState(section.startsWith("intimacy"));
+  // Intimacy results: only present when the couple owns the add-on AND both
+  // partners have finished. summarizeIntimacy is imported at module top.
+  const intimacyBothDone = hasIntimacy && !!(intimacyAnswers) && !!(partnerIntimacy?.answers);
+  const intimacySummary = intimacyBothDone ? summarizeIntimacy(intimacyAnswers, partnerIntimacy.answers) : null;
 
   // ── ANONYMOUS TYPE TRACKING ─────────────────────────────────────────────────
   // Fires once per results session. No PII — only type IDs and 4-letter style codes.
@@ -7173,6 +7179,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
     if (sec.startsWith("comm")) setCommExpanded(true);
     if (sec.startsWith("exp")) setExpExpanded(true);
     if (sec.startsWith("reflection")) setReflExpanded(true);
+    if (sec.startsWith("intimacy")) setIntimExpanded(true);
     const sc = document.querySelector("[data-results-scroll]");
     if (sc) sc.scrollTop = 0; else window.scrollTo({ top: 0 });
   };
@@ -7220,6 +7227,14 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
         { id: "reflection-plan", label: "Action Plan" },
       ]
     }] : []),
+    ...(intimacyBothDone ? [{
+      id: "intimacy", label: "Physical Intimacy", shortLabel: "Intimacy", icon: "♥", color: "#B5546E",
+      children: [
+        { id: "intimacy-overview", label: "Overview" },
+        { id: "intimacy-dimensions", label: "Where You Each Land" },
+        { id: "intimacy-plan", label: "Conversations Worth Having" },
+      ]
+    }] : []),
     { id: "what-comes-next", label: "What Comes Next", icon: "→", color: "#E8673A" },
   ];
 
@@ -7228,7 +7243,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
     <div style={{ width: 200, flexShrink: 0, paddingRight: "1.5rem", display: "flex", flexDirection: "column", gap: "0.15rem" }}>
       {sidebarSections.map(sec => {
         const isActive = section === sec.id || (sec.children && section.startsWith(sec.id + "-") || section === `comm-profiles` && sec.id === "comm" || section === `comm-plan` && sec.id === "comm");
-        const isExpanded = sec.id === "comm" ? commExpanded : sec.id === "exp" ? expExpanded : sec.id === "reflection" ? reflExpanded : false;
+        const isExpanded = sec.id === "comm" ? commExpanded : sec.id === "exp" ? expExpanded : sec.id === "reflection" ? reflExpanded : sec.id === "intimacy" ? intimExpanded : false;
         const color = sec.color || "#8C7A68";
         return (
           <div key={sec.id}>
@@ -7237,6 +7252,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
                 if (sec.id === "comm") { setCommExpanded(e => !e); if (!commExpanded) go("comm-overview"); }
                 else if (sec.id === "exp") { setExpExpanded(e => !e); if (!expExpanded) go("exp-overview"); }
                 else if (sec.id === "reflection") { setReflExpanded(e => !e); if (!reflExpanded) go("reflection-overview"); }
+                else if (sec.id === "intimacy") { setIntimExpanded(e => !e); if (!intimExpanded) go("intimacy-overview"); }
               } else { go(sec.id); }
             }} style={{ width: "100%", background: (section === sec.id) ? color + "15" : "transparent", border: "none", borderRadius: 8, padding: "0.5rem 0.65rem", display: "flex", alignItems: "center", justifyContent: "space-between", cursor: "pointer", fontFamily: BFONT, transition: "background .15s" }}>
               <span style={{ fontSize: "0.75rem", fontWeight: isActive ? 700 : 500, color: isActive ? color : "#8C7A68" }}>{sec.icon && <span style={{ marginRight: "0.4rem", fontSize: "0.65rem", opacity: 0.7 }}>{sec.icon}</span>}{sec.label}</span>
@@ -7276,6 +7292,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
         { id: "comm-overview", label: "Comms", color: "#9B5DE5" },
         { id: "exp-overview", label: "Expectations", color: "#1B5FE8" },
         ...(hasAnniversary ? [{ id: "reflection", label: "Refl.", color: "#1B5FE8" }] : []),
+        ...(intimacyBothDone ? [{ id: "intimacy", label: "Intimacy", color: "#B5546E" }] : []),
       ].map(t => (
         <button key={t.id} onClick={() => go(t.id)} style={{ background: section.startsWith(t.id.replace("-overview","")) ? t.color + "15" : "transparent", border: `1.5px solid ${section.startsWith(t.id.replace("-overview","")) ? t.color : C.stone}`, borderRadius: 999, padding: "0.3rem 0.75rem", fontSize: "0.7rem", fontWeight: 600, color: section.startsWith(t.id.replace("-overview","")) ? t.color : C.muted, cursor: "pointer", fontFamily: BFONT, whiteSpace: "nowrap", flexShrink: 0 }}>
           {t.label}
@@ -7302,6 +7319,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
     ...FIXED_CATS.map((_, ci) => `exp-convo-${ci}`),
     "exp-action-plan",
     ...(hasAnniversary ? ["reflection-overview", "reflection-insights", "reflection-story", "reflection-plan"] : []),
+    ...(intimacyBothDone ? ["intimacy-overview", "intimacy-dimensions", "intimacy-plan"] : []),
     "what-comes-next",
   ];
   const curIdx = allPages.indexOf(section);
@@ -7334,6 +7352,9 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
     if (id === "reflection-insights") return "Reflection Insights";
     if (id === "reflection-story") return "Side by Side";
     if (id === "reflection-plan") return "Reflection Action Plan";
+    if (id === "intimacy-overview") return "Physical Intimacy";
+    if (id === "intimacy-dimensions") return "Where You Each Land";
+    if (id === "intimacy-plan") return "Conversations Worth Having";
     if (id === "what-comes-next") return "What Comes Next";
     return id;
   }
@@ -8122,6 +8143,125 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
               <ActionPlanList explores={insights.filter(i => i.type === "explore")} />
             )}
             <PrevNext />
+          </div>
+        </Layout>
+      );
+    }
+
+    return null;
+  }
+
+  // ── PAGE: PHYSICAL INTIMACY (add-on results section) ──────────────────────────
+  if (section.startsWith("intimacy") && intimacyBothDone) {
+    const ROSE = "#B5546E";
+    const stateColor = { aligned: "#10b981", discuss: "#E8673A", different: "#B5546E", unspoken: "#8C7A68", incomplete: "#8C7A68" };
+    const stateLabel = { aligned: "Aligned", discuss: "Worth discussing", different: "Different expectations", unspoken: "Left unspoken", incomplete: "Incomplete" };
+    const sub = (s) => (s || "").replace(/\{U\}/g, userName).replace(/\{P\}/g, partnerName);
+    const dims = intimacySummary.dimSummary;
+    const proseFor = (dimId, state) => {
+      const pr = INTIMACY_RESULTS_PROSE[dimId];
+      if (!pr) return "";
+      return sub(pr[state] || pr.discuss);
+    };
+    const alignedCount = dims.filter(d => d.state === "aligned").length;
+    const exploreCount = dims.filter(d => d.state === "discuss" || d.state === "different").length;
+
+    // ── OVERVIEW ──
+    if (section === "intimacy-overview" || section === "intimacy") {
+      return (
+        <Layout accent={ROSE}>
+          <div style={{ maxWidth: 660 }}>
+            <div style={{ background: "linear-gradient(145deg, #2a0f1a, #4a1c30, #2a0f1a)", borderRadius: 20, padding: "2rem 2rem 1.75rem", marginBottom: "1.25rem", color: "white", position: "relative", overflow: "hidden" }}>
+              <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 3, background: "linear-gradient(90deg, #B5546E, #E08DA6)" }} />
+              <div style={{ position: "absolute", top: "50%", right: -40, transform: "translateY(-50%)", fontSize: "9rem", opacity: 0.05, fontFamily: HFONT, userSelect: "none", lineHeight: 1, pointerEvents: "none" }}>♥</div>
+              <div style={{ fontSize: "0.58rem", letterSpacing: "0.24em", textTransform: "uppercase", color: "rgba(224,141,166,0.9)", marginBottom: "0.6rem", fontFamily: BFONT, fontWeight: 700 }}>Physical Intimacy Expectations</div>
+              <div style={{ fontSize: "clamp(1.6rem,4vw,2.2rem)", fontWeight: 700, fontFamily: HFONT, lineHeight: 1.1, marginBottom: "0.5rem" }}>Where you each land.</div>
+              <div style={{ fontSize: "0.82rem", color: "rgba(255,255,255,0.6)", fontFamily: BFONT, fontWeight: 300, lineHeight: 1.6, marginBottom: "1rem" }}>
+                {intimacyVariant === "married" ? "Based on how things are now." : "Based on what you each expect."} The gap is the conversation, not a verdict.
+              </div>
+              <div style={{ display: "flex", gap: "1rem" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: "0.4rem" }}>
+                  <div style={{ width: 7, height: 7, borderRadius: "50%", background: "#10b981" }} />
+                  <span style={{ fontSize: "0.75rem", color: "rgba(255,255,255,0.8)", fontFamily: BFONT }}>{alignedCount} aligned</span>
+                </div>
+                <div style={{ display: "flex", alignItems: "center", gap: "0.4rem" }}>
+                  <div style={{ width: 7, height: 7, borderRadius: "50%", background: "#E8673A" }} />
+                  <span style={{ fontSize: "0.75rem", color: "rgba(255,255,255,0.8)", fontFamily: BFONT }}>{exploreCount} worth discussing</span>
+                </div>
+              </div>
+            </div>
+            <div style={{ background: "white", border: `1.5px solid ${C.stone}`, borderRadius: 16, padding: "1.25rem 1.25rem 0.85rem", marginBottom: "1.25rem" }}>
+              <div style={{ fontSize: "0.55rem", letterSpacing: "0.18em", textTransform: "uppercase", color: ROSE, fontFamily: BFONT, fontWeight: 700, marginBottom: "0.75rem" }}>What's in this section</div>
+              <div style={{ display: "flex", flexDirection: "column", gap: "0.35rem" }}>
+                {[
+                  { label: "Where You Each Land", sub: "All six areas, compared side by side", id: "intimacy-dimensions" },
+                  { label: "Conversations Worth Having", sub: `${exploreCount || "The"} conversation${exploreCount === 1 ? "" : "s"} drawn from your answers`, id: "intimacy-plan" },
+                ].map(item => (
+                  <div key={item.id} onClick={() => go(item.id)}
+                    style={{ display: "flex", alignItems: "center", gap: "0.75rem", padding: "0.55rem 0.75rem", borderRadius: 10, background: "rgba(181,84,110,0.04)", cursor: "pointer", border: "1px solid rgba(181,84,110,0.08)" }}>
+                    <div style={{ flex: 1 }}>
+                      <div style={{ fontSize: "0.8rem", fontWeight: 700, color: C.ink, fontFamily: BFONT }}>{item.label}</div>
+                      <div style={{ fontSize: "0.65rem", color: C.muted, fontFamily: BFONT, marginTop: "0.1rem" }}>{item.sub}</div>
+                    </div>
+                    <span style={{ color: ROSE, fontSize: "0.85rem", fontFamily: BFONT, flexShrink: 0 }}>→</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <PrevNext />
+          </div>
+        </Layout>
+      );
+    }
+
+    // ── DIMENSIONS ──
+    if (section === "intimacy-dimensions") {
+      return (
+        <Layout accent={ROSE}>
+          <div style={{ maxWidth: 660 }}>
+            <div style={{ fontSize: "0.62rem", letterSpacing: "0.22em", textTransform: "uppercase", color: ROSE, fontWeight: 700, fontFamily: BFONT, marginBottom: "0.5rem" }}>Physical Intimacy</div>
+            <div style={{ fontSize: "clamp(1.5rem,4vw,2rem)", fontWeight: 700, fontFamily: HFONT, color: C.ink, lineHeight: 1.1, marginBottom: "1.5rem" }}>Where you each land</div>
+            <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+              {INTIMACY_DIMENSIONS.map(d => {
+                const ds = dims.find(x => x.id === d.id);
+                const st = ds?.state || "incomplete";
+                return (
+                  <div key={d.id} style={{ border: `1px solid ${C.stone}`, borderRadius: 14, padding: "1.25rem", background: "white" }}>
+                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "0.5rem" }}>
+                      <div style={{ fontSize: "1rem", fontWeight: 700, color: C.ink, fontFamily: HFONT }}>{d.label}</div>
+                      <div style={{ fontSize: "0.6rem", fontWeight: 700, color: stateColor[st], fontFamily: BFONT, textTransform: "uppercase", letterSpacing: "0.08em" }}>{stateLabel[st]}</div>
+                    </div>
+                    <div style={{ fontSize: "0.7rem", color: C.muted, fontFamily: BFONT, fontStyle: "italic", marginBottom: "0.75rem" }}>{sub(INTIMACY_RESULTS_PROSE[d.id]?.intro)}</div>
+                    <p style={{ fontSize: "0.85rem", color: C.text, fontFamily: BFONT, fontWeight: 300, lineHeight: 1.7, margin: 0 }}>{proseFor(d.id, st)}</p>
+                  </div>
+                );
+              })}
+            </div>
+            <div style={{ marginTop: "1.5rem" }}><PrevNext /></div>
+          </div>
+        </Layout>
+      );
+    }
+
+    // ── PLAN ──
+    if (section === "intimacy-plan") {
+      const convos = dims.filter(d => d.state === "discuss" || d.state === "different" || d.state === "unspoken");
+      const list = convos.length ? convos : dims;
+      return (
+        <Layout accent={ROSE}>
+          <div style={{ maxWidth: 660 }}>
+            <div style={{ fontSize: "0.62rem", letterSpacing: "0.22em", textTransform: "uppercase", color: ROSE, fontWeight: 700, fontFamily: BFONT, marginBottom: "0.5rem" }}>Physical Intimacy</div>
+            <div style={{ fontSize: "clamp(1.5rem,4vw,2rem)", fontWeight: 700, fontFamily: HFONT, color: C.ink, lineHeight: 1.1, marginBottom: "0.5rem" }}>Conversations worth having</div>
+            <p style={{ fontSize: "0.85rem", color: C.muted, fontFamily: BFONT, fontWeight: 300, lineHeight: 1.6, marginBottom: "1.5rem" }}>Drawn from where your answers diverge most. Start with one.</p>
+            <div style={{ display: "flex", flexDirection: "column", gap: "0.85rem" }}>
+              {list.map(d => (
+                <div key={d.id} style={{ borderLeft: `3px solid ${ROSE}`, background: "rgba(181,84,110,0.05)", borderRadius: "0 12px 12px 0", padding: "1rem 1.25rem" }}>
+                  <div style={{ fontSize: "0.7rem", fontWeight: 700, color: ROSE, fontFamily: BFONT, textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: "0.35rem" }}>{d.label}</div>
+                  <p style={{ fontSize: "0.85rem", color: C.text, fontFamily: BFONT, fontWeight: 300, lineHeight: 1.65, margin: 0 }}>{sub(INTIMACY_RESULTS_PROSE[d.id]?.prompt)}</p>
+                </div>
+              ))}
+            </div>
+            <div style={{ marginTop: "1.5rem" }}><PrevNext /></div>
           </div>
         </Layout>
       );
@@ -13196,11 +13336,20 @@ export default function App() {
           };
 
           if (myDone && partnerDone) {
-            return <IntimacyResults
-              myAnswers={myAns} partnerAnswers={partnerIntimacy.answers}
-              userName={userName} partnerName={partnerName}
-              variant={lockedVariant || 'premarital'}
-              onBack={() => setView("home")} />;
+            // Results live as a section in the unified results experience.
+            return (
+              <div style={{ maxWidth: 480, margin: "0 auto", padding: "3rem 1rem", textAlign: "center" }}>
+                <div style={{ fontSize: "0.6rem", letterSpacing: "0.2em", textTransform: "uppercase", color: "#B5546E", fontFamily: BFONT, fontWeight: 700, marginBottom: "0.75rem" }}>Physical Intimacy</div>
+                <h2 style={{ fontFamily: HFONT, fontSize: "1.6rem", fontWeight: 700, color: C.ink, marginBottom: "0.75rem" }}>Your comparison is ready.</h2>
+                <p style={{ fontSize: "0.9rem", color: C.muted, fontFamily: BFONT, fontWeight: 300, lineHeight: 1.65, marginBottom: "2rem" }}>
+                  It lives with the rest of your results.
+                </p>
+                <button onClick={() => { setActiveResult("intimacy-overview"); setHighlightsSeen(true); setView("results"); }}
+                  style={{ background: "#B5546E", color: "white", border: "none", borderRadius: 12, padding: "0.9rem 1.75rem", fontSize: "0.9rem", fontWeight: 600, fontFamily: BFONT, cursor: "pointer" }}>
+                  View intimacy results →
+                </button>
+              </div>
+            );
           }
           if (myDone && !partnerDone) {
             return (
@@ -13687,6 +13836,10 @@ export default function App() {
                   hasBudget={pkg.hasBudget}
                   hasLMFT={pkg.hasLMFT}
                   hasWorkbook={hasWorkbookOrder}
+                  hasIntimacy={pkg.hasIntimacy}
+                  intimacyAnswers={intimacyData?.answers || null}
+                  partnerIntimacy={hasRealPartner ? (partnerSession?.intimacy || null) : null}
+                  intimacyVariant={(hasRealPartner ? partnerSession?.intimacy?.variant : null) || intimacyData?.variant || 'premarital'}
                   isBetaTester={isBetaTester}
                   onNavigateTool={(tool) => {
                     if (typeof tool === 'string' && tool.endsWith('-upsell')) {
