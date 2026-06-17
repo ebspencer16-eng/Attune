@@ -5,63 +5,63 @@
 // Carolina review.
 //
 // For each dimension:
-//   intro    — one line on what this dimension is about (neutral)
-//   aligned  — shown when partners' answers are close
-//   discuss  — shown when there's a moderate gap worth a conversation
-//   different— shown when answers diverge meaningfully
-//   unspoken — shown when both chose "prefer not to say" across the dimension
-//   prompt   — the conversation this dimension points to (always shown in the action plan)
+//   intro    — one line on what this dimension covers (neutral)
+//   aligned  — "what this means" when partners' answers are close
+//   discuss  — "what this means" when there's a moderate gap
+//   different— "what this means" when answers diverge
+//   unspoken — "what this means" when both chose "prefer not to say"
+//   prompt   — the "Talk about it:" conversation prompt for this dimension
 //
-// {U} = current user's name, {P} = partner's name. No end of any dimension is
-// framed as better. The gap is the conversation, not a verdict.
+// {U} = current user's name, {P} = partner's name. Neither end of any
+// dimension is better. The gap is the conversation.
 
 export const INTIMACY_RESULTS_PROSE = {
   frequency: {
-    intro: "How often each of you wants physical intimacy, and what that frequency means to you.",
-    aligned: "You want intimacy at a similar rhythm. That removes a friction point a lot of couples never resolve. The thing to protect is what you already have: keep naming it out loud, because a shared rhythm drifts when it goes unspoken.",
-    discuss: "Your ideal frequencies are somewhat apart. This is the most common gap there is, and the size of it matters less than how you talk about it. The couple who names the gap early does better than the couple who waits for it to become a grievance.",
-    different: "You want intimacy at noticeably different rates. Neither rate is the right one. The work is not meeting in some mathematical middle, it's understanding what frequency means to each of you, because for one of you it may be about connection and for the other about release or reassurance.",
-    unspoken: "Neither of you put a number to this. That is allowed. When you're ready, frequency is the easiest of these to talk about because it's concrete, and naming it tends to lower the pressure rather than raise it.",
-    prompt: "Talk about what frequency means to each of you, not just the number. One of you may read it as a measure of closeness. Decide what a normal week looks like, and what you each do when you want different things.",
+    intro: "How often each of you wants physical intimacy.",
+    aligned: "You want intimacy about as often as each other. That is one less thing to negotiate. Keep saying it out loud anyway. Frequency that goes unspoken tends to drift.",
+    discuss: "Your ideal frequencies sit a little apart. This is the most common gap there is. What matters is naming it early, before it turns into a tally.",
+    different: "You want intimacy at different rates. Neither rate is the correct one. The point is not to land on a number. It is to understand what intimacy gives each of you.",
+    unspoken: "Neither of you put a number to this. That is fine. Frequency is the easiest of these to talk about, because it is concrete.",
+    prompt: "Say out loud how often feels right to each of you. Then decide what you each do on the nights you want different things.",
   },
   initiating: {
-    intro: "Who tends to initiate, and how each of you feels about that balance.",
-    aligned: "You see initiating the same way. You either both expect a shared role or you agree on who leads, and you're both comfortable with it. That agreement is worth more than it looks, because mismatched initiating expectations quietly wear couples down.",
-    discuss: "Your expectations about initiating are somewhat apart. Often one person assumes a balance the other doesn't. Worth surfacing before it becomes a pattern where one of you always reaches and the other never has to.",
-    different: "You expect initiating to work differently. If you both expect to be pursued, or you both expect to lead, that collision shows up fast. Name it directly: decide what initiating looks like for you, and what a no feels like to give and to receive.",
-    unspoken: "Neither of you named who initiates. When you're ready, this one is worth it, because the person who initiates and the person who waits often carry very different feelings about the same moments.",
-    prompt: "Talk about who reaches for who, and how that feels from both sides. The one who initiates more may feel exposed. The one who initiates less may not know they're being waited on.",
+    intro: "Who reaches for who, and how that sits with each of you.",
+    aligned: "You agree on how initiating works between you. That agreement does quiet, steady good. Mismatched initiating is one of the things that wears couples down without either of them noticing.",
+    discuss: "Your expectations about initiating sit a little apart. Usually one person assumes a balance the other does not. Name it before it becomes a pattern.",
+    different: "You see initiating differently. If you both expect to be pursued, or you both expect to lead, that shows up fast. Talk about who reaches, and what a no feels like to give and to get.",
+    unspoken: "Neither of you said who initiates. The person who reaches and the person who waits often carry very different feelings about the same moment. Worth getting to when you can.",
+    prompt: "Talk about who tends to reach for who, and how that feels from both sides. Say what a no should sound like so it does not land as rejection.",
   },
   comfort: {
-    intro: "How safe and at ease each of you feels being physically vulnerable.",
-    aligned: "You're at similar levels of comfort being vulnerable, and you ask for similar things to feel safe. That shared baseline is the foundation everything else sits on. Keep checking in, because comfort isn't fixed, it moves with stress and season.",
-    discuss: "Your comfort levels are somewhat apart. One of you may need more to feel safe than the other expects to give. This isn't a problem to fix, it's information: knowing what helps each of you feel safe is most of the work.",
-    different: "You approach physical vulnerability differently. One of you is at ease quickly, the other needs time or specific conditions. Neither is more or less capable of closeness. The gap is about pace and what safety requires, and it's worth real conversation.",
-    unspoken: "Neither of you spoke to this. That's understandable, it's the most personal of the six. When you're ready, start with what helps each of you feel safe rather than what doesn't.",
-    prompt: "Talk about what each of you needs to feel safe enough to be open, and what makes you pull back. Name the conditions, not just the feelings.",
+    intro: "How safe and at ease each of you feels being physically close.",
+    aligned: "You are at a similar place with feeling safe, and you ask for similar things to get there. That shared baseline holds everything else up. Keep checking in. Comfort moves with stress and time.",
+    discuss: "Your comfort levels sit a little apart. One of you may need more to feel safe than the other expects. That is not a problem to fix. It is information to use.",
+    different: "You get comfortable at different speeds. One of you settles fast. The other needs time or the right conditions. Both reach the same closeness. Talk about what each of you needs to get there.",
+    unspoken: "Neither of you spoke to this. It is the most personal of the six. When you are ready, start with what helps each of you feel safe, not what does not.",
+    prompt: "Tell each other what helps you feel safe enough to be open, and what makes you pull back. Name the conditions, not just the feelings.",
   },
   communication: {
-    intro: "How openly you can talk about intimacy, in the moment and afterward.",
-    aligned: "You communicate about intimacy in compatible ways. Whether you both prefer words or both prefer to show rather than tell, you're not leaving the other guessing. That's rarer than it sounds, and it's a real asset.",
-    discuss: "Your styles for talking about intimacy are somewhat apart. One of you may want to talk it through while the other would rather not analyze it. Both are workable, but the gap can leave one of you feeling unheard if it goes unnamed.",
-    different: "You talk about intimacy very differently. If one of you needs to say it and the other needs to not, you can end up missing each other entirely. The fix is not making one of you change, it's agreeing on how you'll signal what you want when words are hard.",
-    unspoken: "Neither of you answered here, which is its own quiet answer. When you're ready, the lowest-stakes start is agreeing on how you'll let each other know something is or isn't working, without it having to be a whole conversation.",
-    prompt: "Talk about how you each prefer to communicate about intimacy. Decide on a low-pressure way to say what you want in the moment, and whether talking afterward helps or feels like a performance review.",
+    intro: "How openly you can talk about intimacy, during and after.",
+    aligned: "You talk about intimacy in ways that fit together. Neither of you is left guessing. That is rarer than it sounds, and it is worth protecting.",
+    discuss: "Your styles sit a little apart. One of you wants to talk it through. The other would rather not pick it apart. Both work. The gap only hurts if it stays unnamed.",
+    different: "You talk about intimacy in different ways. If one of you needs to say it and the other needs to not, you can miss each other completely. Agree on how you will signal what you want when words are hard.",
+    unspoken: "Neither of you answered here. That is its own quiet answer. Start small: agree on how you will tell each other when something is or is not working.",
+    prompt: "Decide on a low-key way to say what you want in the moment. Then settle whether talking afterward helps you or feels like a review.",
   },
   adventure: {
-    intro: "How much each of you wants novelty versus the comfort of the familiar.",
-    aligned: "You want a similar balance of novelty and routine. Whether you both crave variety or both prefer what works, you're pulling in the same direction, which means less negotiation and less of one of you feeling pushed or held back.",
-    discuss: "Your appetites for novelty are somewhat apart. One of you leans toward trying new things, the other toward the familiar. This is easy to navigate once it's named, and easy to misread as rejection when it isn't.",
-    different: "You want very different amounts of novelty. The adventurous one can read the other's caution as disinterest. The one who prefers the familiar can read the other's appetite as pressure. Both readings are usually wrong. Talk about the why under the preference.",
-    unspoken: "Neither of you spoke to this. When you're ready, it's a lighter conversation than it seems: it's less about specific things and more about how much either of you wants to be asked.",
-    prompt: "Talk about how much novelty each of you actually wants, and how a new idea should be raised so it lands as an invitation rather than a demand or a verdict.",
+    intro: "How much each of you wants novelty versus the familiar.",
+    aligned: "You want a similar mix of new and familiar. You are pulling the same direction, so neither of you feels pushed or held back.",
+    discuss: "Your appetites for novelty sit a little apart. One of you leans toward trying things. The other leans toward what already works. Easy to handle once it is named. Easy to misread as rejection when it is not.",
+    different: "You want very different amounts of novelty. The adventurous one can read caution as disinterest. The one who likes the familiar can read appetite as pressure. Both readings are usually wrong. Talk about the why under it.",
+    unspoken: "Neither of you spoke to this. It is lighter than it looks. Most of it is about how much each of you wants to be asked.",
+    prompt: "Talk about how much novelty each of you actually wants. Agree on how a new idea gets raised so it sounds like an invitation, not a demand.",
   },
   meaning: {
-    intro: "What physical intimacy is primarily for, for each of you.",
-    aligned: "Intimacy means similar things to both of you. When you reach for each other, you're reaching for the same thing, which means you tend to leave those moments feeling met rather than missing each other. That alignment is quietly powerful.",
-    discuss: "What intimacy is for differs somewhat between you. One of you may lean toward emotional closeness, the other toward play or release. Neither is the right reason. Knowing the difference keeps you from misreading each other in the moments that matter most.",
-    different: "Intimacy means notably different things to each of you. This is the gap that drives the most quiet friction, because you can be physically close and still feel like you missed each other. It's also the most worth talking about, since naming it changes how those moments land.",
-    unspoken: "Neither of you named what intimacy is for you. When you're ready, this is the deepest of the six and often the most clarifying, because the answer is rarely what either partner assumes.",
-    prompt: "Talk about what intimacy is mainly about for each of you, and what each of you wants it to mean in your marriage. Pay attention to where your two answers differ, that's where the real conversation is.",
+    intro: "What physical intimacy is mostly about for each of you.",
+    aligned: "Intimacy means close to the same thing to both of you. You reach for each other for the same reasons, so you tend to walk away feeling met. That is quietly powerful.",
+    discuss: "What intimacy is for sits a little apart between you. One of you leans toward closeness. The other toward play or release. Neither is the right reason. Knowing the difference keeps you from misreading each other.",
+    different: "Intimacy means different things to each of you. This is the gap that drives the most quiet friction. You can be close and still feel like you missed each other. Naming it changes how those moments land.",
+    unspoken: "Neither of you named what intimacy is for you. It is the deepest of the six, and often the most clarifying. The answer is rarely what either partner assumes.",
+    prompt: "Tell each other what intimacy is mostly about for you, and what you want it to mean. Pay attention to where your two answers differ. That is the real conversation.",
   },
 };

@@ -21,12 +21,12 @@
 // so answers persist across copy edits.
 
 export const INTIMACY_DIMENSIONS = [
-  { id: 'frequency',   label: 'Frequency' },
-  { id: 'initiating',  label: 'Initiating' },
-  { id: 'comfort',     label: 'Comfort & Safety' },
-  { id: 'communication', label: 'Communication' },
-  { id: 'adventure',   label: 'Adventurousness' },
-  { id: 'meaning',     label: 'What It Is For' },
+  { id: 'frequency',   label: 'Frequency',        poles: ['Less often', 'More often'] },
+  { id: 'initiating',  label: 'Initiating',       poles: ['Waits to be asked', 'Likes to initiate'] },
+  { id: 'comfort',     label: 'Comfort & Safety', poles: ['Needs time', 'At ease quickly'] },
+  { id: 'communication', label: 'Communication',  poles: ['Would rather show', 'Likes to talk it through'] },
+  { id: 'adventure',   label: 'Adventurousness',  poles: ['Prefers the familiar', 'Wants novelty'] },
+  { id: 'meaning',     label: 'What It Is For',   poles: ['Release and play', 'Closeness and connection'] },
 ];
 
 // value: 0..1 directional position; null = prefer not to say
@@ -306,6 +306,28 @@ export const INTIMACY_QUESTIONS = [
 // Look up an option object by question id + stored label.
 function optByLabel(q, label) {
   return q.options.find(o => o.label === label) || null;
+}
+
+// Per-dimension slider positions (0..1) for each partner, for the results
+// dimension pages. Averages the scalar (scale + selfref) question values a
+// partner gave within each dimension. Multi-select questions have no scalar
+// position, so they're skipped. Returns { [dimId]: { mine, theirs } } where
+// each is a 0..1 number or null if that partner gave no scalar answers.
+export function intimacyDimensionPositions(mineAnswers, theirsAnswers) {
+  const out = {};
+  for (const d of INTIMACY_DIMENSIONS) {
+    const qs = INTIMACY_QUESTIONS.filter(q => q.dimension === d.id && q.kind !== 'multi');
+    const avg = (answers) => {
+      const vals = [];
+      for (const q of qs) {
+        const o = answers?.[q.id] != null ? optByLabel(q, answers[q.id]) : null;
+        if (o && o.value != null) vals.push(o.value);
+      }
+      return vals.length ? vals.reduce((a, b) => a + b, 0) / vals.length : null;
+    };
+    out[d.id] = { mine: avg(mineAnswers), theirs: avg(theirsAnswers) };
+  }
+  return out;
 }
 
 // Compute the gap (0 = aligned, 1 = maximal divergence) for one question.
