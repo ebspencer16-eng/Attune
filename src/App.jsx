@@ -12819,6 +12819,7 @@ export default function App() {
                         onClick={needsSetup ? undefined : () => setView("intimacy")}
                         disabled={needsSetup} />;
                     })()}
+                    {!pkg.hasIntimacy && <DashTile color="#B5546E" eyebrow="Add-on" title="Intimacy Expectations" sub="A private set of questions about what you each expect about physical intimacy. Answered independently, compared side by side. $20." cta="Add →" onClick={() => setUpsellModal({ product: 'intimacy', cartAdded: false })} />}
                     {pkg.hasLMFT
                       ? <DashTile color="#5B6DF8" eyebrow="Included" title="Your LMFT session" sub="A 50-minute session with a licensed therapist who has reviewed your results." cta="Schedule →" onClick={() => setView("lmft")} />
                       : <DashTile color="#5B6DF8" eyebrow="Add-on" title="LMFT Session" sub="A 50-minute session with a licensed therapist who reviews your results first. $150." cta="Add →" onClick={() => setUpsellModal({ product: 'lmft', cartAdded: false })} />}
@@ -13773,6 +13774,10 @@ export default function App() {
             // LMFT is an add-on purchasable on any package — go to checkout with current pkg + lmft
             const currentPkg = Object.keys({ core: 1, newlywed: 1, anniversary: 1, premium: 1 }).includes(demoPkg) ? demoPkg : 'core';
             window.location.href = `/checkout?pkg=${currentPkg}&addon_lmft=1`;
+          } else if (prod === 'intimacy') {
+            // Intimacy is an add-on purchasable on any package — checkout with current pkg + intimacy
+            const currentPkg = Object.keys({ core: 1, newlywed: 1, anniversary: 1, premium: 1 }).includes(demoPkg) ? demoPkg : 'core';
+            window.location.href = `/checkout?pkg=${currentPkg}&addon_intimacy=1`;
           } else {
             window.location.href = "/offerings#pkg-" + (UPSELL_PRODUCTS[prod]?.cartParam || "core");
           }
