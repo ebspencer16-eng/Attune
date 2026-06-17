@@ -36,11 +36,13 @@ const ADDON_PRICES = {
   reflection:      40,   // The Relationship Reflection exercise
   budget:          20,   // Build a Budget / Budgeting Activity
   checklist:       20,   // Starting Out Checklist
+  intimacy:        20,   // Physical Intimacy Expectations exercise
 };
 
 // Add-on display metadata (titles/descriptions shown in the cart). Prices come from ADDON_PRICES.
 const ADDON_META = {
   workbook:   { title: 'Personalized Workbook',     desc: 'Conversation prompts drawn from your results' },
+  intimacy:   { title: 'Physical Intimacy Expectations', desc: 'A private exercise on what you each expect' },
   budget:     { title: 'Shared Budgeting Activity',  desc: 'Build a shared budget together' },
   checklist:  { title: 'Starting Out Checklist',     desc: 'Merging lives, finances, logistics' },
   reflection: { title: 'Relationship Reflection',    desc: 'Exercise on experiences that shaped you' },
@@ -48,13 +50,13 @@ const ADDON_META = {
 };
 // What each package already bundles, so it isn't offered again as a paid add-on.
 const PKG_INCLUDED = {
-  core:        { checklist:false, budget:false, reflection:false, lmft:false },
-  newlywed:    { checklist:true,  budget:true,  reflection:false, lmft:false },
-  anniversary: { checklist:false, budget:false, reflection:true,  lmft:false },
-  premium:     { checklist:false, budget:true,  reflection:true,  lmft:true  },
+  core:        { checklist:false, budget:false, reflection:false, lmft:false, intimacy:false },
+  newlywed:    { checklist:true,  budget:true,  reflection:false, lmft:false, intimacy:false },
+  anniversary: { checklist:false, budget:false, reflection:true,  lmft:false, intimacy:false },
+  premium:     { checklist:false, budget:true,  reflection:true,  lmft:true,  intimacy:false },
 };
 // Display order: workbook first (primary upsell), then cheapest → most expensive.
-const ADDON_ORDER = ['workbook','budget','checklist','reflection','lmft'];
+const ADDON_ORDER = ['workbook','intimacy','budget','checklist','reflection','lmft'];
 
 const TRASH_SVG = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/></svg>';
 
@@ -78,7 +80,7 @@ let _expandedItemId = null;
 function _newItemId() { return 'i' + Date.now().toString(36) + Math.random().toString(36).slice(2,6); }
 
 function _defaultAddons() {
-  return { workbook:false, workbookVariant:'digital', lmft:false, reflection:false, budget:false, checklist:false };
+  return { workbook:false, workbookVariant:'digital', lmft:false, reflection:false, budget:false, checklist:false, intimacy:false };
 }
 
 function _itemPrice(item) {
@@ -90,6 +92,7 @@ function _itemPrice(item) {
   if (item.addons.reflection) add += ADDON_PRICES.reflection;
   if (item.addons.budget)     add += ADDON_PRICES.budget;
   if (item.addons.checklist)  add += ADDON_PRICES.checklist;
+  if (item.addons.intimacy)   add += ADDON_PRICES.intimacy;
   return base + add;
 }
 
@@ -353,6 +356,7 @@ function goCheckout() {
   if (first.addons.lmft) params.set('addon_lmft', '1');
   if (first.addons.reflection) params.set('addon_reflection', '1');
   if (first.addons.budget) params.set('addon_budget', '1');
+  if (first.addons.intimacy) params.set('addon_intimacy', '1');
   if (_cartItems.length > 1 || _cartItems[0].qty > 1) params.set('multi', '1');
   window.location.href = '/checkout?' + params.toString();
 }
