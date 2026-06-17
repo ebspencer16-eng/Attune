@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useLayoutEffect, useRef } from "react";
 import { axisScores } from "../api/_type-engine.js";
 import { PERSONALITY_QUESTIONS, RESPONSIBILITY_CATEGORIES, LIFE_QUESTIONS } from "../api/_questions.js";
+import { INTIMACY_QUESTIONS, INTIMACY_DIMENSIONS, summarizeIntimacy } from "../api/_intimacy-questions.js";
 
 
 // ── Mobile detection hook ─────────────────────────────────────────────────────
@@ -823,6 +824,204 @@ export function ExpectationsExercise({ partnerName, userName = "Partner A", onCo
   );
 }
 
+
+// -- INTIMACY EXPECTATIONS ADD-ON EXERCISE --
+// Variant (premarital | married) is chosen by the FIRST partner to start, via
+// the entry question "are you regularly physically intimate?". That choice is
+// passed in as lockedVariant for the second partner so both answer the same set.
+export function IntimacyExercise({ userName = "You", partnerName = "your partner", lockedVariant = null, onComplete, onChooseVariant }) {
+  const PROGRESS_KEY = 'attune_intimacy_progress';
+  const hydrate = () => { try { return JSON.parse(localStorage.getItem(PROGRESS_KEY) || 'null'); } catch { return null; } };
+  const saved = hydrate();
+
+  const [phase, setPhase]   = useState(saved?.phase || (lockedVariant ? 'questions' : 'intro'));
+  const [variant, setVariant] = useState(lockedVariant || saved?.variant || null);
+  const [qIdx, setQIdx]     = useState(saved?.qIdx ?? 0);
+  const [answers, setAnswers] = useState(saved?.answers || {});
+
+  useEffect(() => {
+    try { localStorage.setItem(PROGRESS_KEY, JSON.stringify({ phase, variant, qIdx, answers })); } catch {}
+  }, [phase, variant, qIdx, answers]);
+
+  const accent = "#B5546E"; // muted rose — distinct from the orange/blue exercise accents
+  const q = INTIMACY_QUESTIONS[qIdx];
+  const dimMeta = INTIMACY_DIMENSIONS.find(d => d.id === q?.dimension);
+  const total = INTIMACY_QUESTIONS.length;
+  const framing = q ? q[variant] || q.premarital : null;
+
+  const setAns = (id, value) => setAnswers(a => ({ ...a, [id]: value }));
+  const allAnswered = INTIMACY_QUESTIONS.every(x => {
+    const v = answers[x.id];
+    if (x.kind === 'multi') return Array.isArray(v) && v.length > 0;
+    return v != null && v !== '';
+  });
+
+  // ── INTRO ──
+  if (phase === 'intro') return (
+    <div style={{ maxWidth: 480, margin: "0 auto", padding: "3rem 1rem 2rem" }}>
+      <link href={FONT_LINK} rel="stylesheet" />
+      <div style={{ fontSize: "0.6rem", letterSpacing: "0.2em", textTransform: "uppercase", color: accent, fontFamily: BFONT, fontWeight: 700, marginBottom: "0.75rem" }}>Intimacy Expectations</div>
+      <h2 style={{ fontFamily: HFONT, fontSize: "1.8rem", fontWeight: 700, color: C.ink, lineHeight: 1.15, marginBottom: "1.25rem" }}>What you each expect.</h2>
+      <p style={{ fontSize: "0.92rem", color: C.text, fontFamily: BFONT, fontWeight: 300, lineHeight: 1.7, marginBottom: "1rem" }}>
+        Physical intimacy is one of the biggest things couples assume they are aligned on, and one of the least talked about. This is a private set of questions about what you each expect.
+      </p>
+      <p style={{ fontSize: "0.92rem", color: C.text, fontFamily: BFONT, fontWeight: 300, lineHeight: 1.7, marginBottom: "1rem" }}>
+        You answer on your own. Neither of you sees the other's answers until you have both finished. There are no right answers, and no answer here is better than another.
+      </p>
+      <p style={{ fontSize: "0.82rem", color: C.muted, fontFamily: BFONT, fontWeight: 300, lineHeight: 1.65, marginBottom: "2rem" }}>
+        This is an expectations tool, not therapy. If anything here brings up something heavier, that is worth talking through with someone qualified.
+      </p>
+      <button onClick={() => setPhase(lockedVariant ? 'questions' : 'branch')}
+        style={{ background: accent, color: "white", border: "none", borderRadius: 12, padding: "0.9rem 1.75rem", fontSize: "0.9rem", fontWeight: 600, fontFamily: BFONT, cursor: "pointer" }}>
+        Begin →
+      </button>
+    </div>
+  );
+
+  // ── BRANCH QUESTION (first partner only) ──
+  if (phase === 'branch') return (
+    <div style={{ maxWidth: 480, margin: "0 auto", padding: "3rem 1rem 2rem" }}>
+      <link href={FONT_LINK} rel="stylesheet" />
+      <div style={{ fontSize: "0.6rem", letterSpacing: "0.2em", textTransform: "uppercase", color: accent, fontFamily: BFONT, fontWeight: 700, marginBottom: "0.75rem" }}>One question first</div>
+      <h2 style={{ fontFamily: HFONT, fontSize: "1.5rem", fontWeight: 700, color: C.ink, lineHeight: 1.25, marginBottom: "1rem" }}>Are you and {partnerName} regularly physically intimate?</h2>
+      <p style={{ fontSize: "0.82rem", color: C.muted, fontFamily: BFONT, fontWeight: 300, lineHeight: 1.6, marginBottom: "1.75rem" }}>
+        This sets the framing for both of you. Whoever starts first decides it for the couple.
+      </p>
+      <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
+        {[{ v: 'married', label: 'Yes', sub: 'Questions about how things are now' },
+          { v: 'premarital', label: 'No', sub: 'Questions about what you expect' }].map(o => (
+          <button key={o.v} onClick={() => { setVariant(o.v); onChooseVariant?.(o.v); setPhase('questions'); }}
+            style={{ textAlign: "left", background: "white", border: `1.5px solid ${C.stone}`, borderRadius: 14, padding: "1rem 1.25rem", cursor: "pointer", fontFamily: BFONT }}>
+            <div style={{ fontSize: "1rem", fontWeight: 700, color: C.ink }}>{o.label}</div>
+            <div style={{ fontSize: "0.78rem", color: C.muted, fontWeight: 300, marginTop: 2 }}>{o.sub}</div>
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+
+  // ── COMPLETE ──
+  if (phase === 'done') return (
+    <div style={{ maxWidth: 480, margin: "0 auto", padding: "3rem 1rem", textAlign: "center" }}>
+      <link href={FONT_LINK} rel="stylesheet" />
+      <div style={{ fontSize: "2rem", marginBottom: "1rem" }}>✓</div>
+      <h2 style={{ fontFamily: HFONT, fontSize: "1.6rem", fontWeight: 700, color: C.ink, marginBottom: "0.75rem" }}>Done.</h2>
+      <p style={{ fontSize: "0.9rem", color: C.muted, fontFamily: BFONT, fontWeight: 300, lineHeight: 1.65, marginBottom: "2rem" }}>
+        Your answers are saved. When {partnerName} finishes too, your comparison unlocks on your dashboard.
+      </p>
+      <button onClick={() => onComplete?.({ variant, answers })}
+        style={{ background: accent, color: "white", border: "none", borderRadius: 12, padding: "0.9rem 1.75rem", fontSize: "0.9rem", fontWeight: 600, fontFamily: BFONT, cursor: "pointer" }}>
+        Back to dashboard
+      </button>
+    </div>
+  );
+
+  // ── QUESTIONS ──
+  const sel = answers[q.id];
+  const isMulti = q.kind === 'multi';
+  const multiSel = Array.isArray(sel) ? sel : [];
+  const toggleMulti = (val) => {
+    setAnswers(a => {
+      const cur = Array.isArray(a[q.id]) ? a[q.id] : [];
+      if (val === null) return { ...a, [q.id]: cur.includes(null) ? [] : [null] }; // PNS clears others
+      const without = cur.filter(x => x !== null);
+      let next = without.includes(val) ? without.filter(x => x !== val) : [...without, val];
+      if (q.maxSelect && next.length > q.maxSelect) next = next.slice(1);
+      return { ...a, [q.id]: next };
+    });
+  };
+  const canAdvance = isMulti ? multiSel.length > 0 : (sel != null && sel !== '');
+
+  return (
+    <div style={{ maxWidth: 560, margin: "0 auto", padding: "2.5rem 1rem 2rem" }}>
+      <link href={FONT_LINK} rel="stylesheet" />
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "1.5rem" }}>
+        <div style={{ height: 4, flex: 1, background: C.stone, borderRadius: 999, marginRight: "1rem", overflow: "hidden" }}>
+          <div style={{ height: "100%", width: `${((qIdx + 1) / total) * 100}%`, background: accent, transition: "width 0.2s" }} />
+        </div>
+        <span style={{ fontSize: "0.7rem", color: C.muted, fontFamily: BFONT, whiteSpace: "nowrap" }}>{qIdx + 1} / {total}</span>
+      </div>
+
+      <p style={{ fontSize: "0.6rem", letterSpacing: "0.2em", textTransform: "uppercase", color: accent, marginBottom: "0.25rem", fontFamily: BFONT }}>Intimacy Expectations</p>
+      <p style={{ fontSize: "0.6rem", letterSpacing: "0.12em", textTransform: "uppercase", color: C.muted, marginBottom: "0.85rem", fontFamily: BFONT }}>{dimMeta?.label}</p>
+      <p style={{ fontFamily: HFONT, fontSize: "1.3rem", fontWeight: 400, color: C.ink, lineHeight: 1.45, marginBottom: "0.4rem" }}>{q.topic}</p>
+      <p style={{ fontSize: "0.95rem", color: C.muted, fontFamily: BFONT, fontWeight: 300, lineHeight: 1.55, marginBottom: "1.5rem" }}>{framing}</p>
+
+      <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+        {q.options.map(o => {
+          const chosen = isMulti ? multiSel.includes(o.value) : sel === o.label;
+          return (
+            <button key={o.label} onClick={() => isMulti ? toggleMulti(o.value) : setAns(q.id, o.label)}
+              style={{ textAlign: "left", padding: "0.8rem 1.1rem", border: `2px solid ${chosen ? accent : C.stone}`, background: chosen ? "rgba(181,84,110,0.08)" : "white", color: chosen ? C.ink : C.text, fontSize: "0.85rem", fontWeight: chosen ? 500 : 400, borderRadius: 12, cursor: "pointer", fontFamily: BFONT, transition: "all 0.12s" }}>
+              {o.label}
+            </button>
+          );
+        })}
+      </div>
+
+      <div style={{ display: "flex", justifyContent: "space-between", marginTop: "1.75rem" }}>
+        <button onClick={() => qIdx > 0 ? setQIdx(qIdx - 1) : setPhase(lockedVariant ? 'intro' : 'branch')}
+          style={{ background: "transparent", border: "none", color: C.muted, fontSize: "0.85rem", fontFamily: BFONT, cursor: "pointer" }}>← Back</button>
+        <button disabled={!canAdvance}
+          onClick={() => { if (qIdx < total - 1) setQIdx(qIdx + 1); else setPhase('done'); }}
+          style={{ background: canAdvance ? accent : C.stone, color: "white", border: "none", borderRadius: 12, padding: "0.7rem 1.5rem", fontSize: "0.85rem", fontWeight: 600, fontFamily: BFONT, cursor: canAdvance ? "pointer" : "default" }}>
+          {qIdx < total - 1 ? "Next →" : "Finish"}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// -- INTIMACY RESULTS -- per-dimension comparison --
+function IntimacyResults({ myAnswers, partnerAnswers, userName = "You", partnerName = "Partner", variant = "premarital", onBack }) {
+  const accent = "#B5546E";
+  const { rows, dimSummary, overall, overallState } = summarizeIntimacy(myAnswers, partnerAnswers);
+  const stateLabel = { aligned: "Aligned", discuss: "Worth discussing", different: "Different expectations", unspoken: "Left unspoken", incomplete: "Incomplete" };
+  const stateColor = { aligned: "#10b981", discuss: "#E8673A", different: "#B5546E", unspoken: "#8C7A68", incomplete: "#8C7A68" };
+  const byDimRows = (dimId) => rows.filter(r => r.dimension === dimId);
+
+  return (
+    <div style={{ maxWidth: 640, margin: "0 auto", padding: "2.5rem 1rem" }}>
+      <link href={FONT_LINK} rel="stylesheet" />
+      <div style={{ fontSize: "0.6rem", letterSpacing: "0.2em", textTransform: "uppercase", color: accent, fontFamily: BFONT, fontWeight: 700, marginBottom: "0.6rem" }}>Intimacy Expectations · {userName} & {partnerName}</div>
+      <h2 style={{ fontFamily: HFONT, fontSize: "1.9rem", fontWeight: 700, color: C.ink, lineHeight: 1.1, marginBottom: "0.5rem" }}>Where you each land.</h2>
+      <p style={{ fontSize: "0.85rem", color: C.muted, fontFamily: BFONT, fontWeight: 300, lineHeight: 1.6, marginBottom: "2rem" }}>
+        {variant === 'married' ? "Based on how things are now." : "Based on what you each expect."} The gap is the conversation, not a verdict.
+      </p>
+
+      <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+        {INTIMACY_DIMENSIONS.map(d => {
+          const ds = dimSummary.find(x => x.id === d.id);
+          const drows = byDimRows(d.id);
+          return (
+            <div key={d.id} style={{ border: `1px solid ${C.stone}`, borderRadius: 14, padding: "1.1rem 1.25rem", background: "white" }}>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "0.75rem" }}>
+                <div style={{ fontSize: "0.95rem", fontWeight: 700, color: C.ink, fontFamily: BFONT }}>{d.label}</div>
+                <div style={{ fontSize: "0.62rem", fontWeight: 700, color: stateColor[ds?.state] || C.muted, fontFamily: BFONT, textTransform: "uppercase", letterSpacing: "0.08em" }}>{stateLabel[ds?.state] || ""}</div>
+              </div>
+              <div style={{ display: "flex", flexDirection: "column", gap: "0.4rem" }}>
+                {drows.map(r => {
+                  const q = INTIMACY_QUESTIONS.find(x => x.id === r.id);
+                  return (
+                    <div key={r.id} style={{ display: "flex", alignItems: "center", gap: "0.6rem" }}>
+                      <div style={{ width: 7, height: 7, borderRadius: "50%", background: stateColor[r.state] || C.muted, flexShrink: 0 }} />
+                      <span style={{ fontSize: "0.78rem", color: C.text, fontFamily: BFONT, flex: 1 }}>{q?.topic}</span>
+                      <span style={{ fontSize: "0.62rem", color: stateColor[r.state] || C.muted, fontFamily: BFONT }}>{stateLabel[r.state]}</span>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {onBack && (
+        <button onClick={onBack} style={{ marginTop: "2rem", background: "transparent", border: `1.5px solid ${C.stone}`, color: C.muted, borderRadius: 12, padding: "0.7rem 1.5rem", fontSize: "0.85rem", fontFamily: BFONT, cursor: "pointer" }}>← Back to dashboard</button>
+      )}
+    </div>
+  );
+}
 
 // -- JOINT OVERVIEW -- unified landing page for both exercises --
 
@@ -11962,6 +12161,7 @@ export default function App() {
     hasLMFT:        _basePkg.hasLMFT        || !!(order?.addonLmft),
     hasAnniversary: _basePkg.hasAnniversary || !!(order?.addonReflection),
     hasBudget:      _basePkg.hasBudget      || !!(order?.addonBudget),
+    hasIntimacy:    !!(order?.addonIntimacy),
   };
 
   // Partner B "waiting/ready" poll. Declared here, BEFORE any early return,
