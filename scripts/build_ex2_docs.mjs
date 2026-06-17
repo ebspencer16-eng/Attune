@@ -263,7 +263,7 @@ function responsibilitiesSection(variantKey, includeChildhood) {
 function buildVariantDoc(variantKey) {
   const v = VARIANTS[variantKey];
   const hasLife = true;
-  const hasChildhood = variantKey === 'core';
+  const hasChildhood = variantKey === 'core' || variantKey === 'anniversary';
   const hasResp = variantKey === 'core' || variantKey === 'anniversary';
 
   const children = [
@@ -280,7 +280,8 @@ function buildVariantDoc(variantKey) {
     ] : variantKey === 'anniversary' ? [
       bullet('Intro screen'),
       bullet('Part 1 — Life & Values questions (20 questions)'),
-      bullet('Part 2 — Responsibility allocation (25 items, present-tense, answered once)'),
+      bullet('Part 1.5 — Childhood home structure (1 question)'),
+      bullet('Part 2 — Responsibility allocation (25 items, answered twice: childhood + present-tense "in our home")'),
       bullet('Done screen'),
     ] : [
       bullet('Intro screen'),
@@ -430,12 +431,12 @@ function buildLMFTContextDoc() {
     p('Exercise 02 is the Expectations exercise. The hypothesis behind it is that a meaningful share of long-term relationship friction comes from expectations one or both partners hold but have not made explicit. The exercise surfaces these in two parts:'),
     bullet('Life & Values — 20 questions across Family, Lifestyle, Values, Money, Conflict, and Connection. Each partner answers independently. The results experience shows both sets of answers side by side, highlighting alignments and gaps.'),
     bullet('Responsibility allocation — 25 items across Household, Financial, Career, Extended Family, and Emotional Labor. Each partner names who they expect (or, in the Anniversary variant, observe) to handle each item.'),
-    p('The Core variant adds a third element: each partner first reports the household structure they grew up in (Mom + Dad, single parent, two moms, two dads, grandparents, split, other), then answers each responsibility item twice — once for who handled it in their childhood home, and once for who they expect to handle it in their own future home. This produces a generational layer in the results: where current expectations track childhood patterns, and where they diverge.'),
+    p('Both Core and Anniversary include a childhood layer: each partner first reports the household structure they grew up in (Mom + Dad, single parent, two moms, two dads, grandparents, split, other), then answers each responsibility item twice — once for who handled it in their childhood home, and once for who handles it now (Anniversary) or who they expect to handle it going forward (Core). This produces a generational layer in the results: where current expectations or arrangements track childhood patterns, and where they diverge. The childhood structure also drives the answer-option labels (e.g. the childhood column headers) used to link each responsibility item. The Extended Family category is the one exception and drops the growing-up column, since those are the partners\' own families.'),
 
     h2('Three variants exist'),
     p('See the three companion documents (ex2-flow-core.docx, ex2-flow-anniversary.docx, ex2-flow-revisiting.docx) for the full question flow of each. Summary:'),
     bullet('Core — future-facing. New, dating, or engaged couples. Includes childhood section. ~15 minutes.'),
-    bullet('Anniversary — present-tense. Established couples reviewing how things actually are now. No childhood section. ~15 minutes.'),
+    bullet('Anniversary — present-tense. Established couples reviewing how things actually are now. Includes childhood section. ~15 minutes.'),
     bullet('Revisiting — reflective present. Returning users retaking the exercise to see what has shifted. Life & Values questions only. ~10 minutes.'),
 
     new Paragraph({ children: [new PageBreak()] }),
