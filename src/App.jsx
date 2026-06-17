@@ -12297,7 +12297,12 @@ export default function App() {
   //   - isDemo is a separate query-param escape hatch (?demo=xxx) for the
   //     marketing flow / showcase tour.
   const isDemo = !!_demoParam; // true when ?demo=xxx is in URL
-  const bothDone = !!(ex1Answers && ex2Answers && (isDemo || hasRealPartner));
+  // Intimacy is an add-on exercise. For couples who bought it, results gate on
+  // both partners finishing it too. For everyone else it's a no-op.
+  // Use `order` directly (pkg is declared later); mirror its hasIntimacy logic.
+  const _ownsIntimacy = !!(order?.addonIntimacy) || (() => { try { return localStorage.getItem('attune_dev_intimacy') === '1'; } catch { return false; } })();
+  const _intimacyGateOk = !_ownsIntimacy || (!!(intimacyData?.completedAt) && !!(partnerSession?.intimacy?.completedAt));
+  const bothDone = !!(ex1Answers && ex2Answers && (isDemo || hasRealPartner)) && _intimacyGateOk;
   // Granular completion signals for the dashboard status view and the
   // results-pending screen. Partner signals require the linked partner session
   // (invite-code match), never the demo fallback.
@@ -12878,11 +12883,13 @@ export default function App() {
                       { label: "Your communication exercise", done: myEx1Done, inProgress: ex1InProgress, viewId: "exercise1", you: true },
                       { label: "Your expectations exercise", done: myEx2Done, inProgress: ex2InProgress, viewId: "exercise2", you: true },
                       ...(pkg.hasAnniversary ? [{ label: "Your reflection exercise", done: !!ex3Answers, inProgress: ex3InProgress, viewId: "exercise3", you: true }] : []),
+                      ...(pkg.hasIntimacy ? [{ label: "Your physical intimacy exercise", done: !!(intimacyData?.completedAt), viewId: "intimacy", you: true, needsSetup: !profileSetupDone }] : []),
                       { label: (partnerName || "Your partner") + "'s communication exercise", done: partnerEx1Done, you: false },
                       { label: (partnerName || "Your partner") + "'s expectations exercise", done: partnerEx2Done, you: false },
                       ...(pkg.hasAnniversary ? [{ label: (partnerName || "Your partner") + "'s reflection exercise", done: !!(partnerSession && partnerSession.ex3), you: false }] : []),
+                      ...(pkg.hasIntimacy ? [{ label: (partnerName || "Your partner") + "'s physical intimacy exercise", done: !!(partnerSession && partnerSession.intimacy && partnerSession.intimacy.completedAt), you: false }] : []),
                     ].map((r, i, arr) => {
-                      const clickable = r.you && !r.done;
+                      const clickable = r.you && !r.done && !r.needsSetup;
                       return (
                         <div key={r.label} onClick={clickable ? () => setView(r.viewId) : undefined}
                           style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0.9rem 1.1rem", borderBottom: i < arr.length - 1 ? "1px solid #F0E9E0" : "none", cursor: clickable ? "pointer" : "default", gap: "0.75rem", transition: "background .15s" }}
@@ -12895,7 +12902,9 @@ export default function App() {
                           {r.done
                             ? <span style={{ fontSize: "0.72rem", fontWeight: 700, color: "#059669", fontFamily: BFONT }}>Complete</span>
                             : (r.you
-                                ? <span style={{ fontSize: "0.72rem", fontWeight: 700, color: "#C17F47", fontFamily: BFONT }}>{r.inProgress ? "In progress →" : "Start →"}</span>
+                                ? (r.needsSetup
+                                    ? <span style={{ fontSize: "0.72rem", fontWeight: 600, color: "#A8997F", fontFamily: BFONT }}>Setup required</span>
+                                    : <span style={{ fontSize: "0.72rem", fontWeight: 700, color: "#C17F47", fontFamily: BFONT }}>{r.inProgress ? "In progress →" : "Start →"}</span>)
                                 : <span style={{ fontSize: "0.72rem", fontWeight: 600, color: "#A8997F", fontFamily: BFONT }}>Pending</span>)}
                         </div>
                       );
@@ -12914,6 +12923,7 @@ export default function App() {
                       { label: "Full summary", section: "summary", color: "#8C7A68" },
                       { label: "Communication results", section: "comm-overview", color: "#E8673A" },
                       { label: "Expectations results", section: "exp-overview", color: "#1B5FE8" },
+                      ...(pkg.hasIntimacy && !!(intimacyData?.completedAt) && !!(partnerSession?.intimacy?.completedAt) ? [{ label: "Physical intimacy results", section: "intimacy-overview", color: "#B5546E" }] : []),
                       { label: "Action plan", section: "exp-action-plan", color: "#1B5FE8" },
                     ].map((r, i, arr) => (
                       <div key={r.section} onClick={bothDone ? () => { setActiveResult(r.section); setHighlightsSeen(true); setView("results"); } : undefined}
