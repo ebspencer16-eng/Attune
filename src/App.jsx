@@ -7417,6 +7417,9 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
             ex3Answers={ex3Answers} partnerEx3={partnerEx3}
             userName={userName} partnerName={partnerName}
             portrait={portrait}
+            intimacyAnswers={intimacyBothDone ? intimacyAnswers : null}
+            partnerIntimacy={intimacyBothDone ? partnerIntimacy : null}
+            intimacyVariant={intimacyVariant}
             onDone={() => go("summary")}
             inline={true}
           />
@@ -8731,7 +8734,7 @@ function WrappedCard({ children, bg, onDownload, cardIndex, cardRef, inline, por
   );
 }
 
-function ResultsHighlights({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Answers, partnerEx3, userName, partnerName, portrait, onDone, onExit = null, inline = false }) {
+function ResultsHighlights({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Answers, partnerEx3, userName, partnerName, portrait, onDone, onExit = null, inline = false, intimacyAnswers = null, partnerIntimacy = null, intimacyVariant = "premarital" }) {
   const [cardIdx, setCardIdx] = useState(0);
   const cardRef = useRef(null);
   const isMobile = useMobile(640);
@@ -8744,6 +8747,13 @@ function ResultsHighlights({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3
   const topGap = [...feedback].sort((a, b) => b.gap - a.gap)[0];
   const avgGap = feedback.reduce((s, f) => s + f.gap, 0) / feedback.length;
   const pairing = overallPairingLabel(avgGap);
+
+  // Intimacy highlight: only when the couple owns the add-on and both finished.
+  const intimacyShow = !!(intimacyAnswers && partnerIntimacy?.answers);
+  const intimacySum = intimacyShow ? summarizeIntimacy(intimacyAnswers, partnerIntimacy.answers) : null;
+  const intimacyTopAligned = intimacySum ? [...intimacySum.dimSummary].filter(d => d.state === "aligned").sort((a, b) => (a.avgGap ?? 1) - (b.avgGap ?? 1))[0] : null;
+  const intimacyTopGap = intimacySum ? [...intimacySum.dimSummary].filter(d => d.avgGap != null).sort((a, b) => (b.avgGap ?? 0) - (a.avgGap ?? 0))[0] : null;
+  const intimacyHighlight = intimacyTopAligned || intimacyTopGap;
 
   const allRows = RESPONSIBILITY_CATEGORIES.flatMap(cat =>
     cat.items.map(item => {
@@ -9113,6 +9123,44 @@ function ResultsHighlights({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3
         </div>
       </div>
     </WrappedCard>,
+
+    // ── INTIMACY HIGHLIGHT — one card when the add-on is owned + both done ──────
+    ...(intimacyHighlight ? [
+    <WrappedCard key="intimacy-card" bg="linear-gradient(145deg, #2a0f1a 0%, #4a1c30 50%, #2a0f1a 100%)" onDownload={handleDl} cardIndex={99} cardRef={cardRef} inline={inline} isMobile={isMobile} portraitCorner={portrait}>
+      <style>{cardAnim}</style>
+      <div onClick={advance} style={{ flex: 1, display: "flex", flexDirection: "column", cursor: "pointer", position: "relative", overflow: "hidden" }}>
+        {watermark}
+        <div style={{ height: 4, background: "linear-gradient(90deg, #B5546E, #E08DA6)", flexShrink: 0 }} />
+        <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center", padding: "2.5rem 2.5rem 2.5rem", position: "relative" }}>
+          <div style={{ fontSize: "0.52rem", letterSpacing: "0.28em", textTransform: "uppercase", color: "rgba(224,141,166,0.85)", fontFamily: BFONT, fontWeight: 700, marginBottom: "1.5rem", animation: "fadeUp 0.4s 0.05s both" }}>
+            Physical Intimacy
+          </div>
+          {intimacyTopAligned ? (
+            <>
+              <div style={{ fontFamily: HFONT, fontSize: "clamp(1.6rem,4.5vw,2.2rem)", fontWeight: 700, color: "white", lineHeight: 1.15, marginBottom: "1rem", animation: "fadeUp 0.5s 0.12s both" }}>
+                You're aligned on {intimacyTopAligned.label.toLowerCase()}.
+              </div>
+              <p style={{ fontSize: "0.85rem", color: "rgba(255,255,255,0.6)", fontFamily: BFONT, fontWeight: 300, lineHeight: 1.7, maxWidth: 300, margin: 0, animation: "fadeUp 0.4s 0.2s both" }}>
+                Of everything you each expect about physical intimacy, this is where you most naturally agree.
+              </p>
+            </>
+          ) : (
+            <>
+              <div style={{ fontFamily: HFONT, fontSize: "clamp(1.6rem,4.5vw,2.2rem)", fontWeight: 700, color: "white", lineHeight: 1.15, marginBottom: "1rem", animation: "fadeUp 0.5s 0.12s both" }}>
+                Talk about {intimacyTopGap?.label.toLowerCase()}.
+              </div>
+              <p style={{ fontSize: "0.85rem", color: "rgba(255,255,255,0.6)", fontFamily: BFONT, fontWeight: 300, lineHeight: 1.7, maxWidth: 300, margin: 0, animation: "fadeUp 0.4s 0.2s both" }}>
+                It's where your expectations differ most. The gap is the conversation, not a verdict.
+              </p>
+            </>
+          )}
+          <div style={{ marginTop: "1.75rem", fontSize: "0.7rem", color: "rgba(255,255,255,0.4)", fontFamily: BFONT, animation: "fadeUp 0.4s 0.3s both" }}>
+            Full breakdown in your results.
+          </div>
+        </div>
+      </div>
+    </WrappedCard>
+    ] : []),
 
     // ── 8. FINALE — View results + download ───────────────────────────────────
     <WrappedCard key={hasReflData ? 7 : 6} bg="linear-gradient(145deg, #0e0b1e 0%, #1a1040 50%, #0e0b1e 100%)" onDownload={handleDl} cardIndex={hasReflData ? 7 : 6} cardRef={cardRef} inline={inline} isMobile={isMobile} portraitCorner={portrait}>
