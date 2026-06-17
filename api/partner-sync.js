@@ -110,10 +110,10 @@ async function handlePartnerSync(req) {
     // Resolve Partner A's full entitlement so Partner B inherits the same
     // experience. Package is copied onto Partner B's profile below; add-ons
     // live on Partner A's order and are returned for the client to apply.
-    let inherited = { pkg: partnerA.pkg || 'core', partnerPronouns: partnerA.pronouns || '', addonReflection: false, addonBudget: false, addonLmft: false, addonWorkbook: '' };
+    let inherited = { pkg: partnerA.pkg || 'core', partnerPronouns: partnerA.pronouns || '', addonReflection: false, addonBudget: false, addonLmft: false, addonWorkbook: '', addonIntimacy: false };
     try {
       const { data: aOrder } = await sb.from('orders')
-        .select('addon_reflection, addon_budget, addon_lmft, addon_workbook')
+        .select('addon_reflection, addon_budget, addon_lmft, addon_workbook, addon_intimacy')
         .eq('user_id', partnerA.id)
         .order('created_at', { ascending: false })
         .limit(1)
@@ -122,6 +122,7 @@ async function handlePartnerSync(req) {
         inherited.addonReflection = !!aOrder.addon_reflection;
         inherited.addonBudget     = !!aOrder.addon_budget;
         inherited.addonLmft       = !!aOrder.addon_lmft;
+        inherited.addonIntimacy   = !!aOrder.addon_intimacy;
         inherited.addonWorkbook   = aOrder.addon_workbook || '';
       }
     } catch (e) { console.warn('[partner-sync] addon inherit lookup failed:', e); }
@@ -146,6 +147,7 @@ async function handlePartnerSync(req) {
       addon_reflection: inherited.addonReflection,
       addon_budget:     inherited.addonBudget,
       addon_lmft:       inherited.addonLmft,
+      addon_intimacy:   inherited.addonIntimacy,
       addon_workbook:   inherited.addonWorkbook,
     }).eq('id', bId);
     if (addonErr) console.warn('[partner-sync] add-on persist skipped (migration 016 not run yet?):', addonErr.message);
@@ -323,11 +325,11 @@ async function handlePartnerSync(req) {
       // the couple-level order (workbook readiness, reflection, budget, lmft)
       // on every poll. The invitee never placed the order, so without this
       // they never see the workbook and lose order state across logout/login.
-      let inherited = { addonReflection: false, addonBudget: false, addonLmft: false, addonWorkbook: '', workbookStatus: null };
+      let inherited = { addonReflection: false, addonBudget: false, addonLmft: false, addonWorkbook: '', addonIntimacy: false, workbookStatus: null };
       try {
         const { data: aOrder } = await sb
           .from('orders')
-          .select('addon_reflection, addon_budget, addon_lmft, addon_workbook, workbook_status')
+          .select('addon_reflection, addon_budget, addon_lmft, addon_workbook, addon_intimacy, workbook_status')
           .eq('user_id', pid)
           .order('created_at', { ascending: false })
           .limit(1)
@@ -336,6 +338,7 @@ async function handlePartnerSync(req) {
           inherited.addonReflection = !!aOrder.addon_reflection;
           inherited.addonBudget     = !!aOrder.addon_budget;
           inherited.addonLmft       = !!aOrder.addon_lmft;
+          inherited.addonIntimacy   = !!aOrder.addon_intimacy;
           inherited.addonWorkbook   = aOrder.addon_workbook || '';
           inherited.workbookStatus  = aOrder.workbook_status || null;
         }

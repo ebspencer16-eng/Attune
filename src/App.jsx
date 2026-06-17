@@ -9516,7 +9516,7 @@ function AuthModal({ mode, onClose, onSuccess }) {
       if (!localStorage.getItem('attune_order') && authData.user.email) {
         try {
           const { data: orderRow } = await sb.from('orders')
-            .select('id,pkg_key,addon_lmft,addon_reflection,addon_budget,addon_workbook,is_physical,order_num,user_id')
+            .select('id,pkg_key,addon_lmft,addon_reflection,addon_budget,addon_intimacy,addon_workbook,is_physical,order_num,user_id')
             .eq('buyer_email', authData.user.email)
             .order('created_at', { ascending: false })
             .limit(1)
@@ -9527,6 +9527,7 @@ function AuthModal({ mode, onClose, onSuccess }) {
               addonLmft:       orderRow.addon_lmft || false,
               addonReflection: orderRow.addon_reflection || false,
               addonBudget:     orderRow.addon_budget || false,
+              addonIntimacy:     orderRow.addon_intimacy || false,
               addonWorkbook:   orderRow.addon_workbook || null,
               isPhysical:      orderRow.is_physical || false,
               orderNum:        orderRow.order_num || null,
@@ -10057,6 +10058,7 @@ function PartnerLandingScreen({ inviteFrom, inviteCode, onCreateAccount }) {
         pkg:             inheritedEntitlements?.pkg || 'core',
         addonReflection: !!inheritedEntitlements?.addonReflection,
         addonBudget:     !!inheritedEntitlements?.addonBudget,
+        addonIntimacy:     !!inheritedEntitlements?.addonIntimacy,
         addonLmft:       !!inheritedEntitlements?.addonLmft,
         addonWorkbook:   inheritedEntitlements?.addonWorkbook || '',
         createdAt: Date.now(),
@@ -10660,6 +10662,23 @@ const UPSELL_PRODUCTS = {
     accentColor: "#1B5FE8",
     cartParam: "budget",
   },
+  intimacy: {
+    badge: "Add-on",
+    badgeColor: "#FBEAF0",
+    badgeText: "#B5546E",
+    title: "Intimacy Expectations",
+    price: "$20",
+    tagline: "What you each expect about physical intimacy.",
+    description: "A private set of questions about physical intimacy, answered independently. You each respond on your own, then see where your expectations match and where they are worth a conversation. Covers frequency, initiating, comfort, communication, adventurousness, and what intimacy means to each of you.",
+    includes: [
+      "Answered independently, compared side by side",
+      "Premarital and already-married versions",
+      "Six areas most couples never put into words",
+      "Private, and yours to retake later",
+    ],
+    accentColor: "#B5546E",
+    cartParam: "intimacy",
+  },
 };
 
 function UpsellModal({ product, cartAdded, onAddToCart, onCheckout, onClose }) {
@@ -11178,7 +11197,7 @@ export default function App() {
             let orderRow = null;
             try {
               const { data: byId } = await sb.from('orders')
-                .select('order_num,pkg_key,is_physical,addon_lmft,addon_reflection,addon_budget,addon_workbook')
+                .select('order_num,pkg_key,is_physical,addon_lmft,addon_reflection,addon_budget,addon_intimacy,addon_workbook')
                 .eq('user_id', session.user.id)
                 .order('created_at', { ascending: false })
                 .limit(1)
@@ -11186,7 +11205,7 @@ export default function App() {
               if (byId) orderRow = byId;
               else if (session.user.email) {
                 const { data: byEmail } = await sb.from('orders')
-                  .select('order_num,pkg_key,is_physical,addon_lmft,addon_reflection,addon_budget,addon_workbook')
+                  .select('order_num,pkg_key,is_physical,addon_lmft,addon_reflection,addon_budget,addon_intimacy,addon_workbook')
                   .eq('buyer_email', session.user.email.toLowerCase())
                   .order('created_at', { ascending: false })
                   .limit(1)
@@ -11213,6 +11232,7 @@ export default function App() {
               addonLmft:       !!(orderRow?.addon_lmft ?? profile?.addon_lmft),
               addonReflection: !!(orderRow?.addon_reflection ?? profile?.addon_reflection),
               addonBudget:     !!(orderRow?.addon_budget ?? profile?.addon_budget),
+              addonIntimacy:     !!(orderRow?.addon_intimacy ?? profile?.addon_intimacy),
               addonWorkbook:   orderRow?.addon_workbook || profile?.addon_workbook || '',
               orderNum:        orderRow?.order_num || '',
               createdAt: profile?.created_at ? new Date(profile.created_at).getTime() : Date.now(),
@@ -11245,6 +11265,7 @@ export default function App() {
                   addonLmft:       !!orderRow.addon_lmft,
                   addonReflection: !!orderRow.addon_reflection,
                   addonBudget:     !!orderRow.addon_budget,
+                  addonIntimacy:     !!orderRow.addon_intimacy,
                   addonWorkbook:   orderRow.addon_workbook || '',
                 }));
               }
@@ -11304,14 +11325,14 @@ export default function App() {
             // Self-heal: fetch the most recent order and restore it.
             try {
               let { data: orderRow } = await sb.from('orders')
-                .select('order_num,pkg_key,is_physical,addon_lmft,addon_reflection,addon_budget,addon_workbook')
+                .select('order_num,pkg_key,is_physical,addon_lmft,addon_reflection,addon_budget,addon_intimacy,addon_workbook')
                 .eq('user_id', session.user.id)
                 .order('created_at', { ascending: false })
                 .limit(1)
                 .maybeSingle();
               if (!orderRow && session.user.email) {
                 const { data: byEmail } = await sb.from('orders')
-                  .select('order_num,pkg_key,is_physical,addon_lmft,addon_reflection,addon_budget,addon_workbook')
+                  .select('order_num,pkg_key,is_physical,addon_lmft,addon_reflection,addon_budget,addon_intimacy,addon_workbook')
                   .eq('buyer_email', session.user.email.toLowerCase())
                   .order('created_at', { ascending: false })
                   .limit(1)
@@ -11327,6 +11348,7 @@ export default function App() {
                   addonLmft:       !!orderRow.addon_lmft,
                   addonReflection: !!orderRow.addon_reflection,
                   addonBudget:     !!orderRow.addon_budget,
+                  addonIntimacy:     !!orderRow.addon_intimacy,
                   addonWorkbook:   orderRow.addon_workbook || '',
                 }));
                 setAccount(prev => prev ? {
@@ -11335,6 +11357,7 @@ export default function App() {
                   addonLmft:       !!orderRow.addon_lmft,
                   addonReflection: !!orderRow.addon_reflection,
                   addonBudget:     !!orderRow.addon_budget,
+                  addonIntimacy:     !!orderRow.addon_intimacy,
                   addonWorkbook:   orderRow.addon_workbook || prev.addonWorkbook || '',
                   orderNum: orderRow.order_num,
                 } : prev);
@@ -12080,6 +12103,7 @@ export default function App() {
               ...prev,
               addonReflection: json.inherited.addonReflection,
               addonBudget:     json.inherited.addonBudget,
+              addonIntimacy:     json.inherited.addonIntimacy,
               addonLmft:       json.inherited.addonLmft,
               addonWorkbook:   json.inherited.addonWorkbook || null,
               workbookStatus:  json.inherited.workbookStatus || prev.workbookStatus || null,
