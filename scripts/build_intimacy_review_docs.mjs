@@ -98,6 +98,9 @@ INTIMACY_DIMENSIONS.forEach((dim, di) => {
   rc.push(eyebrow('If worth discussing')); rc.push(p(pr.discuss));
   rc.push(eyebrow('If different')); rc.push(p(pr.different));
   rc.push(eyebrow('If left unspoken (both prefer not to say)')); rc.push(p(pr.unspoken));
+  rc.push(eyebrow('If one partner skipped the whole dimension', 'B5546E'));
+  rc.push(p(pr.oneSkipped.lead.replace('{SKIPPER}', '[partner]'), { italics: true }));
+  rc.push(p(pr.oneSkipped.question, { bold: true }));
   rc.push(eyebrow('Conversation prompt (action plan)', '1B5FE8')); rc.push(p(pr.prompt));
   rc.push(rule());
 });
