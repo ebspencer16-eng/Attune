@@ -17,7 +17,7 @@
 
 import { EXP_DOMAINS, alignmentText } from './_workbook-content.js';
 
-const DIMS = ['energy','expression','needs','bids','conflict','repair','closeness','love','stress','feedback'];
+const DIMS = ['energy','expression','needs','bids','listening','conflict','repair','love','stress','feedback'];
 
 // Build per-domain rows of {label, userValue, partnerValue} from the
 // payload's responsibilities + lifeQuestions blocks.

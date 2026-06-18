@@ -26,7 +26,7 @@ const json = (obj, status = 200) =>
   });
 
 const DIM_LABELS = {
-  energy: 'Energy', expression: 'Expression', love: 'Love', closeness: 'Closeness',
+  energy: 'Energy', expression: 'Expression', love: 'Love', listening: 'Listening',
   bids: 'Bids', needs: 'Needs', conflict: 'Conflict', stress: 'Stress',
   repair: 'Repair', feedback: 'Feedback',
 };

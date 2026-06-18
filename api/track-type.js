@@ -94,7 +94,7 @@ export default async function handler(req) {
     ops.push(kvIncr(`attune:axis:energy:${e}`,     kvUrl, kvToken));
     ops.push(kvIncr(`attune:axis:expression:${x}`, kvUrl, kvToken));
     ops.push(kvIncr(`attune:axis:conflict:${f}`,   kvUrl, kvToken));
-    ops.push(kvIncr(`attune:axis:closeness:${c}`,  kvUrl, kvToken));
+    ops.push(kvIncr(`attune:axis:listening:${c}`,  kvUrl, kvToken));
   }
 
   // Gap tier distribution

@@ -88,8 +88,8 @@ export default async function handler(req) {
       kvCount('attune:axis:expression:G', kvUrl, kvToken),
       kvCount('attune:axis:conflict:F', kvUrl, kvToken),
       kvCount('attune:axis:conflict:S', kvUrl, kvToken),
-      kvCount('attune:axis:closeness:C', kvUrl, kvToken),
-      kvCount('attune:axis:closeness:A', kvUrl, kvToken),
+      kvCount('attune:axis:listening:R', kvUrl, kvToken),
+      kvCount('attune:axis:listening:L', kvUrl, kvToken),
       kvCount('attune:ct:total', kvUrl, kvToken),
       kvCount('attune:code:total', kvUrl, kvToken),
       kvCount('attune:ex2:complete', kvUrl, kvToken),
@@ -171,7 +171,7 @@ export default async function handler(req) {
       energy:     { E: axisCounts[0], I: axisCounts[1] },
       expression: { X: axisCounts[2], G: axisCounts[3] },
       conflict:   { F: axisCounts[4], S: axisCounts[5] },
-      closeness:  { C: axisCounts[6], A: axisCounts[7] },
+      listening:  { R: axisCounts[6], L: axisCounts[7] },
     };
 
     // Gap tier distribution
