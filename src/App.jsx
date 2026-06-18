@@ -89,7 +89,7 @@ const FONT_URL = "https://fonts.googleapis.com/css2?family=Syne:wght@700;800;900
 
 // PERSONALITY_QUESTIONS — Communication Exercise (Exercise 01)
 //
-// 28 questions across 10 dimensions. 5-point scale (Strongly A → Strongly B).
+// 24 questions across 10 dimensions. 5-point scale (Strongly A -> Strongly B).
 // Order is intentional: pairs of similar questions are spaced apart, and a
 // few are framed as scenarios to break repetitive patterns. Several dims
 // use non-sequential IDs (en1/en2/en4, lv1/lv2/lv5, etc) — the gaps are
@@ -1110,7 +1110,7 @@ function computeIndividualType(scores) {
   // flag as low-confidence so the UI can surface a methodology note.
   // Threshold of 0.3 on stdDev = the user mostly answered 3s.
   // Methodology TODO: LMFT to tune the threshold + the surface text.
-  const dimValues = ['energy','expression','love','bids','needs','conflict','stress','repair','feedback','closeness']
+  const dimValues = ['energy','expression','love','bids','needs','conflict','stress','repair','feedback','listening']
     .map(k => s[k]).filter(v => v != null && !isNaN(v));
   let stdDev = 0;
   if (dimValues.length >= 3) {
@@ -1751,7 +1751,7 @@ function CoupleMapSVG({ myS, partS, userName, partnerName, size = 480 }) {
         </div>
         <div>
           <div style={{ fontSize: "0.7rem", fontWeight: 700, color: "#0E0B07", marginBottom: "0.2rem", fontFamily: BFONT }}>Each dot is placed by calculation, not intuition</div>
-          <p style={{ fontSize: "0.72rem", color: "#8C7A68", lineHeight: 1.6, margin: 0, fontWeight: 300, fontFamily: BFONT }}>Where you each sit on this map is calculated from your answers to 28 independent questions, not self-assigned. Two people who think they know their type will almost always land somewhere different than expected.</p>
+          <p style={{ fontSize: "0.72rem", color: "#8C7A68", lineHeight: 1.6, margin: 0, fontWeight: 300, fontFamily: BFONT }}>Where you each sit on this map is calculated from your answers to 24 independent questions, not self-assigned. Two people who think they know their type will almost always land somewhere different than expected.</p>
         </div>
       </div>
     </div>
@@ -2560,20 +2560,18 @@ function calcDimScores(answers) {
     return vals.length ? vals.reduce((s, v) => s + Number(v), 0) / vals.length : 3;
   };
   return {
-    // 3 questions each — IDs match PERSONALITY_QUESTIONS exactly
-    energy:     avg('en1','en2','en4'),
-    expression: avg('ex1','ex2','ex4'),
+    // IDs match PERSONALITY_QUESTIONS (api/_questions.js). Mirrors DIM_KEYS in
+    // api/_type-engine.js — keep the two in sync. Counts are uneven post-restructure.
+    energy:     avg('en4','en6'),
+    expression: avg('ex6','ex7','ex8','ex9','ex10'),
     love:       avg('lv1','lv2','lv5'),
     bids:       avg('bd1','bd3','bd4'),
-    needs:      avg('nd1','nd3','nd5'),
-    conflict:   avg('cf1','cf2','cf5'),
-    stress:     avg('st1','st2','st5'),
-    repair:     avg('rp1','rp2','rp3'),
-    feedback:   avg('fb1','fb2','fb5'),
-    // closeness has only 1 question (cl2). Flagged for LMFT review —
-    // single-question dims have higher per-question variance contributing
-    // to the type score. Adding cl1/cl3 would require new question copy.
-    closeness:  avg('cl2'),
+    needs:      avg('nd1','nd5'),
+    conflict:   avg('cf1','cf2','cf6'),
+    stress:     avg('st1'),
+    repair:     avg('rp2','rp3','rp6'),
+    feedback:   avg('fb5'),
+    listening:  avg('ls1'),
   };
 }
 
@@ -2958,7 +2956,7 @@ function Exercise01Flow({ userName, partnerName, onComplete, skipIntro = false }
         </p>
         <div style={{ display: "flex", gap: "0.85rem", marginBottom: "1.75rem", flexWrap: "wrap" }}>
           {[
-            { num: '01', title: 'Communication', color: '#E8673A', desc: '28 questions · 10 dimensions' },
+            { num: '01', title: 'Communication', color: '#E8673A', desc: '24 questions · 10 dimensions' },
             { num: '02', title: 'Expectations',  color: '#1B5FE8', desc: 'Responsibilities & life' },
           ].map(e => (
             <div key={e.num} style={{ flex: "1 1 180px", background: C.warm, border: `1.5px solid ${e.color}33`, borderRadius: 12, padding: "0.9rem 1rem" }}>
@@ -10518,7 +10516,7 @@ function PartnerBExerciseFlow({ account, onComplete }) {
           {`Exercise 01 covers how you communicate and connect. Exercise 02 maps your expectations.${hasReflection ? ' Exercise 03 captures your relationship story.' : ''} ${hasReflection ? 'They take' : 'Both take'} about 15 minutes. Answer honestly. Your partner won't see your individual answers.`}
         </p>
         <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', marginBottom: '2.5rem', flexWrap: 'wrap' }}>
-          {[{ num: '01', title: 'Communication', color: '#E8673A', desc: '28 questions · 10 dimensions' }, { num: '02', title: 'Expectations', color: '#1B5FE8', desc: 'Responsibilities & life' }, ...(hasReflection ? [{ num: '03', title: 'Relationship Reflection', color: '#7C3AED', desc: 'Your story together' }] : [])].map(e => (
+          {[{ num: '01', title: 'Communication', color: '#E8673A', desc: '24 questions · 10 dimensions' }, { num: '02', title: 'Expectations', color: '#1B5FE8', desc: 'Responsibilities & life' }, ...(hasReflection ? [{ num: '03', title: 'Relationship Reflection', color: '#7C3AED', desc: 'Your story together' }] : [])].map(e => (
             <div key={e.num} style={{ background: 'rgba(255,255,255,0.06)', border: `1px solid ${e.color}33`, borderRadius: 14, padding: '1.1rem 1.4rem', textAlign: 'left', minWidth: 160 }}>
               <div style={{ fontSize: '0.58rem', letterSpacing: '0.18em', color: e.color, fontWeight: 700, fontFamily: "'DM Sans', sans-serif", textTransform: 'uppercase', marginBottom: '0.35rem' }}>Exercise {e.num}</div>
               <div style={{ fontFamily: "'Playfair Display', Georgia, serif", fontSize: '1rem', fontWeight: 700, color: 'white', marginBottom: '0.25rem' }}>{e.title}</div>
