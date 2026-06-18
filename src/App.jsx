@@ -54,8 +54,8 @@ function clearAllUserLocalStorage() {
 
 // -- 8-DIMENSION PERSONALITY QUESTIONS (5 each = 40 total) --
 // ── INTENTIONAL COLOR SCHEMA ──────────────────────────────────────────────────
-// Purple  #9B5DE5  = Your Inner Worlds     (energy, expression, closeness)
-// Orange  #E8673A  = How You Connect       (love, needs, bids)
+// Purple  #9B5DE5  = Your Inner Worlds     (energy, expression)
+// Orange  #E8673A  = How You Connect       (love, needs, bids, listening)
 // Blue    #1B5FE8  = When Things Get Hard  (conflict, stress, repair, feedback)
 // Green   #10B981  = The Life You're Building (expectations domains)
 // ─────────────────────────────────────────────────────────────────────────────
@@ -63,11 +63,11 @@ const DIM_META = {
   // INNER WORLDS — purple
   energy:      { label: "Energy & Recharge",              emoji: "", ends: ["Inward","Outward"],            color: "#9B5DE5", bg: "#F3EEFF", dark: "#5B21B6", domain: "inner" },
   expression:  { label: "Emotional Expression",           emoji: "", ends: ["Internal","External"],         color: "#9B5DE5", bg: "#F3EEFF", dark: "#5B21B6", domain: "inner" },
-  closeness:   { label: "Closeness & Independence",       emoji: "", ends: ["Autonomous","Enmeshed"],       color: "#9B5DE5", bg: "#F3EEFF", dark: "#5B21B6", domain: "inner" },
   // CONNECTION — orange
   love:        { label: "How Love Lands",                 emoji: "", ends: ["Words","Actions"],             color: "#E8673A", bg: "#FFF3EE", dark: "#C2410C", domain: "connection" },
   needs:       { label: "How You Ask For What You Need",  emoji: "", ends: ["Direct","Indirect"],           color: "#E8673A", bg: "#FFF3EE", dark: "#C2410C", domain: "connection" },
   bids:        { label: "Responding to Bids",             emoji: "", ends: ["Reserved","Attuned"],          color: "#E8673A", bg: "#FFF3EE", dark: "#C2410C", domain: "connection" },
+  listening:   { label: "How You Listen",                 emoji: "", ends: ["Reflective","Responsive"],     color: "#E8673A", bg: "#FFF3EE", dark: "#C2410C", domain: "connection" },
   // HARD MOMENTS — blue
   conflict:    { label: "Conflict Style",                 emoji: "", ends: ["Engage","Withdraw"],           color: "#1B5FE8", bg: "#EEF3FF", dark: "#1E3A8A", domain: "hard" },
   stress:      { label: "Communication Under Stress",     emoji: "", ends: ["Withdraw","Seek"],             color: "#1B5FE8", bg: "#EEF3FF", dark: "#1E3A8A", domain: "hard" },
@@ -75,7 +75,7 @@ const DIM_META = {
   feedback:    { label: "Giving & Receiving Feedback",    emoji: "", ends: ["Guarded","Open"],              color: "#1B5FE8", bg: "#EEF3FF", dark: "#1E3A8A", domain: "hard" },
 };
 
-const DIMS = ["energy","expression","needs","bids","conflict","repair","closeness","love","stress","feedback"];
+const DIMS = ["energy","expression","needs","bids","listening","conflict","repair","love","stress","feedback"];
 
 // Gap -> label system (playful/warm/direct mix by degree)
 // Dimension-aware label pool -- each dimension has its own voice
@@ -1044,7 +1044,7 @@ function getStyleCode(scores) {
   const e = (scores.energy      || 3) > 3.0  ? 'E' : 'I';  // Outward / Inward
   const x = ((scores.expression || 3) + (scores.feedback || 3)) / 2 > 3.0 ? 'X' : 'G'; // Expressive / Guarded
   const f = (scores.conflict    || 3) < 3.0  ? 'F' : 'S';  // Fast-engage / Space-first
-  const c = (scores.closeness   || 3) > 3.0  ? 'C' : 'A';  // Close-seeking / Autonomous
+  const c = (scores.listening   || 3) > 3.0  ? 'R' : 'L';  // Responsive / Reflective
   const d = (scores.needs       || 3) > 3.0  ? 'D' : 'H';  // Direct / Hint (needs directness)
   const q = (scores.repair      || 3) < 3.0  ? 'Q' : 'T';  // Quick-gesture / Talk-through (repair style)
   return e + x + f + c + d + q;
@@ -1055,7 +1055,7 @@ function getCodeLabel(code) {
     E: 'Outward', I: 'Inward',
     X: 'Expressive', G: 'Guarded',
     F: 'Fast to resolve', S: 'Needs space first',
-    C: 'Close-seeking', A: 'Independent',
+    R: 'Responsive', L: 'Reflective',
     D: 'Direct', H: 'Indirect',
     Q: 'Gesture-led repair', T: 'Talk-through repair',
   };
@@ -1063,7 +1063,7 @@ function getCodeLabel(code) {
     { axis: 'Energy',     letter: code[0], label: labels[code[0]] },
     { axis: 'Expression', letter: code[1], label: labels[code[1]] },
     { axis: 'Conflict',   letter: code[2], label: labels[code[2]] },
-    { axis: 'Closeness',  letter: code[3], label: labels[code[3]] },
+    { axis: 'Listening',  letter: code[3], label: labels[code[3]] },
     { axis: 'Needs',      letter: code[4], label: labels[code[4]] },
     { axis: 'Repair',     letter: code[5], label: labels[code[5]] },
   ];
@@ -1081,9 +1081,9 @@ function getCodeLabel(code) {
 // type engine (api/_type-engine.js) so the frontend and the workbook backend
 // stay in lockstep. This wrapper adds the couple-map coordinates and the
 // low-confidence flag the UI needs.
-//   Engage/Withdraw: conflict .45, stress .25, repair .15, energy .10, closeness .05
+//   Engage/Withdraw: conflict .45, stress .25, repair .15, energy .10, listening .05
 //   Open/Guarded:    expression .40, feedback .25, needs .20, bids .10, love .05
-//   (stress/energy/closeness/needs/love oriented by spectrum via 6-score)
+//   (stress/energy/listening/needs/love oriented by spectrum via 6-score)
 function computeIndividualType(scores) {
   const s = scores || {};
   const { withdrawScore, openScore } = axisScores(s);
@@ -2341,23 +2341,23 @@ function getDimShift(dim, myScore, partScore, U, P) {
       '5_5': `You both repair quickly and informally. The relationship is probably resilient. Watch for: moving on so fast that something occasionally gets left slightly unresolved. "That felt resolved to me, how about you?" is worth asking sometimes.`,
     },
 
-    // ── CLOSENESS & INDEPENDENCE (A=Autonomous, B=Enmeshed) ─────────────────────────────────────────────────────────────────────────────────────────────────────────
-    closeness: {
-      '1_1': `You both value strong independence within the relationship. The risk is connection getting deprioritized without either of you flagging it. Schedule togetherness the way you protect solo time. It won't happen on its own when both people are comfortable apart.`,
-      '1_2': `${loName} strongly values independence; ${hiName} leans similar. Close match. Just make sure the ease of being separate doesn't quietly turn into less closeness than you actually want. One shared ritual holds the thread.`,
-      '1_3': `${loName} values autonomy strongly; ${hiName} is flexible. Make sure ${hiName}'s flexibility doesn't always defer to ${loName}'s preference for more space. Check in occasionally: "what do you actually want tonight?"`,
-      '1_4': `${loName} values independence; ${hiName} leans toward closeness. A real daily-life difference. When ${loName} needs space, name it as a preference, not a rejection. That changes how ${hiName} receives it.`,
-      '1_5': `${loName} values strong independence; ${hiName} strongly needs closeness. A significant gap. Design your week intentionally: some time is explicitly together, some is explicitly separate. Both named in advance, neither assumed.`,
-      '2_2': `You both lean toward valuing your own space. Good match. Watch for: both of you being comfortable with distance making reconnection feel less urgent than it should. Put togetherness on the calendar the way you'd protect anything else that matters.`,
-      '2_3': `${loName} leans toward independence; ${hiName} is neutral. Ask ${hiName} what they actually want, neutral doesn't mean indifferent. Do they want more closeness? They may not say unless asked directly.`,
-      '2_4': `${loName} leans toward autonomy; ${hiName} leans toward closeness. Moderate daily-life difference. Agree on two or three things that are always "together" and leave everything else flexible. Gives ${hiName} certainty without crowding ${loName}.`,
-      '2_5': `${loName} values independence; ${hiName} wants significant closeness. A meaningful gap. Design an explicit rhythm together, not as a compromise, but as a plan. Removes the daily negotiation.`,
-      '3_3': `You're both in the middle, not strongly independent, not strongly togetherness-oriented. That's flexible, but it means connection can get left to chance. Make a habit of it. One consistent shared thing, rather than leaving it to circumstance.`,
-      '3_4': `${hiName} leans more toward closeness than ${loName}. Small gap. ${loName} can initiate connection sometimes rather than waiting for ${hiName} to reach. It changes the dynamic when both people create the space.`,
-      '3_5': `${loName} is neutral; ${hiName} genuinely needs closeness. ${hiName}'s need for connection isn't neediness. It's a real preference. ${loName} can build in deliberate connection moments even when they'd otherwise be fine either way.`,
-      '4_4': `You both lean toward closeness. Warm match. Give each other permission to want a quiet night sometimes, "I need a solo evening" should never feel like a confession.`,
-      '4_5': `Both of you lean toward togetherness, ${hiName} more strongly. Close match. When one of you is low and doesn't have energy for connection, build in an easy way to signal it: "I'm tired tonight but I'm still yours."`,
-      '5_5': `You both strongly value closeness and togetherness. Beautiful match. The one thing to protect: make sure it doesn't crowd out individual identity. Separate friendships, interests, and time, even within a strong preference for togetherness, keeps the relationship healthy long-term.`,
+    // ── HOW YOU LISTEN (A=Reflective, B=Responsive) ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+    listening: {
+      '1_1': `You both listen by going quiet and staying with it. Neither of you rushes to respond. That makes you calm to talk to. The risk: silence can read as absence. A small signal, a nod, a short "I'm with you," tells the other you're still there.`,
+      '1_2': `${loName} listens quietly and stays with it; ${hiName} leans the same way, a little more active. Close match. Just check that neither of you reads the other's quiet as checking out. A word now and then confirms you're tracking.`,
+      '1_3': `${loName} listens by sitting with it; ${hiName} shifts between quiet and active. The shift: ${hiName} can name when they're just receiving versus ready to engage, so ${loName} isn't guessing which one is happening.`,
+      '1_4': `${loName} takes things in quietly; ${hiName} responds, asks, reflects back. A real difference in how you each show you're listening. ${hiName}'s questions are care, not pressure. ${loName}'s quiet is attention, not distance.`,
+      '1_5': `${loName} listens in silence and stays there; ${hiName} listens by engaging and drawing it out. A wide gap, and an easy one to misread. ${hiName}'s questions aren't interruption. ${loName}'s quiet isn't disinterest. Name what each of you is doing so neither has to assume.`,
+      '2_2': `You both lean toward quiet listening. Low pressure, easy to talk near. The gap: when one of you wants a response and not just presence, neither offers it by instinct. Ask directly when you want to be answered, not only heard.`,
+      '2_3': `${loName} leans toward quiet listening; ${hiName} moves between modes. Small gap. ${hiName} can match ${loName}'s pace when something is tender, and step in with questions when ${loName} wants to be drawn out.`,
+      '2_4': `${loName} listens more quietly; ${hiName} engages more actively. When ${hiName} reflects back or asks, that's how they show care. When ${loName} stays quiet, that's how they stay present. Say which one you need in the moment.`,
+      '2_5': `${loName} tends to receive quietly; ${hiName} engages hard, asks, fills the space. The shift: ${hiName} can leave room before jumping in, and ${loName} can offer a word so ${hiName} knows the silence is full, not empty.`,
+      '3_3': `You both adjust how you listen depending on the day. That's adaptive. Watch for: in a hard moment, you each default to a mode the other didn't expect. When it matters, say what you need, presence or engagement.`,
+      '3_4': `${hiName} leans more toward active listening than ${loName}. Small but real. ${hiName} can carry the engagement. ${loName} can ask a question sometimes, even a small one, so the drawing-out runs both directions.`,
+      '3_5': `${loName} is flexible; ${hiName} listens by engaging, reflecting, asking. ${hiName}'s questions are how they connect, not a demand for more than you have. ${loName} can meet it with a short answer rather than retreating into quiet.`,
+      '4_4': `You both listen by engaging, asking, reflecting back. Conversations move. Watch for: two people responding at once crowds out the actual listening. Let one person finish and sit with it before the other steps in.`,
+      '4_5': `Both of you listen actively, ${hiName} more so. You draw each other out, which keeps you current. When one of you wants to be heard and not questioned, say so. Active listening tips into problem-solving when the other just wanted presence.`,
+      '5_5': `You both listen by engaging fully, asking, responding. Nothing sits unaddressed for long. The watch-out: sometimes a person needs silence and room, not questions. Build a way to say "I just want you to listen for a minute" without it landing as criticism.`,
     },
 
     // ── HOW LOVE LANDS (A=Words, B=Actions) ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
@@ -2547,7 +2547,7 @@ const LIFE_QUESTIONS_ANNIVERSARY = LIFE_QUESTIONS;
 
 // ── DIMENSION SCORING ────────────────────────────────────────────────────────
 // Maps ex1Answers to named average scores per dimension.
-// Each dimension has 3 questions scored 1–5 (closeness has 1 — flagged for
+// Question counts per dimension are uneven; stress/feedback/listening have 1 (flagged for
 // methodology review with the LMFT). avg returns 3 (neutral) when no answers
 // are present so partial completion still produces a usable score, and
 // `valenceUnknown` flag is set on the result so callers can surface that
@@ -2771,7 +2771,7 @@ function buildWorkbookPayload(userName, partnerName, ex1Answers, partnerEx1, ex2
 // ── PERSONALITY FEEDBACK GENERATOR ──────────────────────────────────────────
 // Produces one feedback object per dimension comparing two score objects.
 function generatePersonalityFeedback(myS, partS, userName, partnerName) {
-  const dims = ["energy","expression","needs","bids","conflict","repair","closeness","love","stress","feedback"];
+  const dims = ["energy","expression","needs","bids","conflict","repair","listening","love","stress","feedback"];
   return dims.map(dim => {
     const myScore   = myS[dim]   ?? 3;
     const partScore = partS[dim] ?? 3;
@@ -3695,7 +3695,7 @@ function PersonalityResults({ myAnswers, partnerAnswers, userName, partnerName, 
   // Ordered dims follow sorted order for step navigation (item 1)
   // Domain order drives navigation — keeps dims in a consistent,
   // logical reading sequence matching the sidebar.
-  const DOMAIN_ORDER = ["energy","expression","closeness","love","needs","bids","conflict","stress","repair","feedback"];
+  const DOMAIN_ORDER = ["energy","expression","love","needs","bids","listening","conflict","stress","repair","feedback"];
   const orderedDims = DOMAIN_ORDER.filter(d => feedback.some(f => f.dim === d));
   const TOTAL = orderedDims.length + 4; // overview + N dims + action plan + 2 individual + summary
   // Same-type couples (both partners the same individual type) collapse to a
@@ -3713,13 +3713,13 @@ function PersonalityResults({ myAnswers, partnerAnswers, userName, partnerName, 
   if (byDim.energy?.isOpportunity || byDim.energy?.isNote) protocols.push({ title: "Name your recharge needs", body: byDim.energy.adviceText, thisWeek: "This week, tell each other in advance when you need recharge time, before you're depleted. Try: 'I need a quiet evening Thursday.' That's it." });
   if (byDim.needs?.isOpportunity || byDim.needs?.isNote) protocols.push({ title: "Practice the direct ask", body: byDim.needs.adviceText, thisWeek: "Once this week, ask directly for something you'd normally hint at or leave unsaid. Just the request, no preamble, no apology." });
   if (byDim.bids?.isOpportunity || byDim.bids?.isNote) protocols.push({ title: "Stay tuned to small moments", body: byDim.bids.adviceText, thisWeek: "Once a day this week, when the other person does something small for you, makes you coffee, sends you something, acknowledge it specifically. Not just 'thanks,' but 'I noticed that.'" });
-  if (byDim.closeness?.isOpportunity || byDim.closeness?.isNote) protocols.push({ title: "Design your together-apart rhythm", body: byDim.closeness.adviceText, thisWeek: "This week, set one evening or morning that belongs to just the two of you, no plans, no phones, nothing to accomplish. Calendar it like a real commitment." });
+  if (byDim.listening?.isOpportunity || byDim.listening?.isNote) protocols.push({ title: "Match presence to what's needed", body: byDim.listening.adviceText, thisWeek: "This week, when one of you brings something up, ask first: 'do you want me to just listen, or do you want me to weigh in?' Then do that one thing." });
   if (byDim.expression?.isOpportunity || byDim.expression?.isNote) protocols.push({ title: "Build toward more openness", body: byDim.expression.adviceText, thisWeek: "This week, each of you says one thing out loud that you'd normally hold back or let pass. Not something big, just something that's been sitting there." });
   if (byDim.stress?.isOpportunity || byDim.stress?.isNote) protocols.push({ title: "Name your stress mode in advance", body: byDim.stress.adviceText, thisWeek: "Next time one of you is clearly under pressure, instead of asking 'what's wrong?' try asking 'do you need me to help fix something, or do you just need me to be here?' Notice what they say." });
   if (byDim.feedback?.isOpportunity || byDim.feedback?.isNote) protocols.push({ title: "Practice the small direct mention", body: byDim.feedback.adviceText, thisWeek: "This week, when something bothers you, name it within the same day, not to fight, just to say it. 'Hey, that landed a little off for me.' See what happens." });
   if (byDim.love?.isOpportunity || byDim.love?.isNote) protocols.push({ title: "Learn each other's language", body: byDim.love.adviceText, thisWeek: "Ask your partner: 'What's one thing I do that makes you feel really cared for that I might not realize has that effect?' Then listen without commenting." });
   if (protocols.length === 0) {
-    protocols.push({ emoji: "", title: "Keep checking in", body: ((userName) + " and " + (partnerName) + " are closely aligned across all eight dimensions. The work here isn't about catching up. It's about staying connected. Couples who stay curious about each other's inner experience, even when things feel stable, tend to stay that way longer.") });
+    protocols.push({ emoji: "", title: "Keep checking in", body: ((userName) + " and " + (partnerName) + " are closely aligned across all ten dimensions. The work here isn't about catching up. It's about staying connected. Couples who stay curious about each other's inner experience, even when things feel stable, tend to stay that way longer.") });
     protocols.push({ emoji: "", title: "Stay curious as things change", body: "When two people are this in sync, it's easy to assume the picture stays the same. But what each of you needs, values, and envisions can shift gradually. A brief check-in every few months keeps you current with each other." });
     protocols.push({ emoji: "", title: "Name what's working", body: ("Most couples only talk about their relationship when something feels off. " + (userName) + " and " + (partnerName) + " have something worth naming explicitly: real alignment. Talking about what you're doing well, not just what feels hard, reinforces it.") });
   }
@@ -3729,8 +3729,8 @@ function PersonalityResults({ myAnswers, partnerAnswers, userName, partnerName, 
   // -- SIDE NAV ITEMS --
   // Group ordered dims by domain for sidebar display
   const domainGroups = [
-    { id: "inner",      label: "Your Inner Worlds",    color: "#9B5DE5", dims: ["energy","expression","closeness"] },
-    { id: "connection", label: "How You Connect",      color: "#E8673A", dims: ["love","needs","bids"] },
+    { id: "inner",      label: "Your Inner Worlds",    color: "#9B5DE5", dims: ["energy","expression"] },
+    { id: "connection", label: "How You Connect",      color: "#E8673A", dims: ["love","needs","bids","listening"] },
     { id: "hard",       label: "When Things Get Hard", color: "#1B5FE8", dims: ["conflict","stress","repair","feedback"] },
   ];
   const personalityNavItems = [
@@ -6884,7 +6884,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
   const personalityFeedback = generatePersonalityFeedback(myS, partS, userName, partnerName);
   const sortedFeedback = [...personalityFeedback].sort((a, b) => a.gap - b.gap);
   // Domain order — matches PersonalityResults navigation
-  const UR_DOMAIN_ORDER = ["energy","expression","closeness","love","needs","bids","conflict","stress","repair","feedback"];
+  const UR_DOMAIN_ORDER = ["energy","expression","love","needs","bids","listening","conflict","stress","repair","feedback"];
   const orderedDims = UR_DOMAIN_ORDER.filter(d => personalityFeedback.some(f => f.dim === d));
   const byDim = Object.fromEntries(personalityFeedback.map(f => [f.dim, f]));
   const avgGap = personalityFeedback.reduce((s, f) => s + f.gap, 0) / personalityFeedback.length;
@@ -7194,10 +7194,10 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
         { id: "comm-overview", label: "Overview" },
         // Inner Worlds — purple
         { id: "comm-domain-inner", label: "Your Inner Worlds", isDomainHeader: true, color: "#9B5DE5" },
-        ...orderedDims.filter(d => ["energy","expression","closeness"].includes(d)).map(d => ({ id: `comm-${d}`, label: DIM_META[d].label, isDeepChild: true, color: "#9B5DE5" })),
+        ...orderedDims.filter(d => ["energy","expression"].includes(d)).map(d => ({ id: `comm-${d}`, label: DIM_META[d].label, isDeepChild: true, color: "#9B5DE5" })),
         // Connection — orange
         { id: "comm-domain-connection", label: "How You Connect", isDomainHeader: true, color: "#E8673A" },
-        ...orderedDims.filter(d => ["love","needs","bids"].includes(d)).map(d => ({ id: `comm-${d}`, label: DIM_META[d].label, isDeepChild: true, color: "#E8673A" })),
+        ...orderedDims.filter(d => ["love","needs","bids","listening"].includes(d)).map(d => ({ id: `comm-${d}`, label: DIM_META[d].label, isDeepChild: true, color: "#E8673A" })),
         // Hard moments — blue
         { id: "comm-domain-hard", label: "When Things Get Hard", isDomainHeader: true, color: "#1B5FE8" },
         ...orderedDims.filter(d => ["conflict","stress","repair","feedback"].includes(d)).map(d => ({ id: `comm-${d}`, label: DIM_META[d].label, isDeepChild: true, color: "#1B5FE8" })),
@@ -7302,7 +7302,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
   // Prev/Next navigation
   // allPages must exactly match sidebar order so Prev/Next stays in sync with the nav
   // Domain order matches sidebar exactly
-  const PAGE_DOMAIN_ORDER = ["energy","expression","closeness","values","love","needs","bids","conflict","stress","repair","feedback"];
+  const PAGE_DOMAIN_ORDER = ["energy","expression","values","love","needs","bids","listening","conflict","stress","repair","feedback"];
   const domainOrderedDims = [
     ...PAGE_DOMAIN_ORDER.filter(d => orderedDims.includes(d)),
   ];
@@ -8868,7 +8868,7 @@ function ResultsHighlights({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3
     bids: "What's something small I do that makes you feel noticed?",
     conflict: "After a disagreement, what does 'okay again' actually feel like for you?",
     repair: "What do you need from me in the hours after a hard conversation?",
-    closeness: "What's your ideal ratio of together time to time on your own?",
+    listening: "When you bring something to me, do you want me to listen, or do you want me to respond and ask questions?",
     love: "What's something I do that makes you feel genuinely loved?",
     stress: "When you're at your worst, what does the most helpful version of me look like?",
     feedback: "Is there something I do that bothers you that you haven't found the right way to bring up?",
