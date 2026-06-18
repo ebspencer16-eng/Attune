@@ -139,9 +139,9 @@ export const INTIMACY_QUESTIONS = [
   },
   {
     id: 'iq_comfort_safe', dimension: 'comfort', kind: 'multi',
-    topic: 'What helps you feel safe',
-    premarital: 'What helps you feel safe enough to be open? (select all that are true)',
-    married: 'What helps you feel safe enough to be open? (select all that are true)',
+    topic: 'What helps you feel comfortable',
+    premarital: 'What might help you feel most comfortable? (select all that are true)',
+    married: 'What might help you feel most comfortable? (select all that are true)',
     multi: true,
     options: [
       { label: 'Emotional closeness beforehand', value: 'emo' },
@@ -243,15 +243,15 @@ export const INTIMACY_QUESTIONS = [
   },
   {
     id: 'iq_adv_balance', dimension: 'adventure', kind: 'scale',
-    topic: 'Novelty vs comfort',
+    topic: 'Novelty vs routine',
     premarital: 'How do you expect novelty and routine to balance over a long marriage?',
     married: 'How do novelty and routine balance for you now?',
     options: [
       { label: 'Keeping it fresh matters a lot to me', value: 1.0 },
       { label: 'It matters somewhat', value: 0.75 },
       { label: 'Neutral', value: 0.5 },
-      { label: 'Comfort matters more to me', value: 0.25 },
-      { label: 'I value the familiar strongly', value: 0.0 },
+      { label: 'Routine matters more to me', value: 0.25 },
+      { label: 'I value the tried and true strongly', value: 0.0 },
       PNS,
     ],
   },
