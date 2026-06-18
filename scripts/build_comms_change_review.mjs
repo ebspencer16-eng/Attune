@@ -77,25 +77,26 @@ const DIM_LABEL = { love: 'Love', expression: 'Expression', energy: 'Energy', bi
 const byId = Object.fromEntries(PERSONALITY_QUESTIONS.map(q => [q.id, q]));
 
 // ─── listening RESULTS content (mirrors src/App.jsx as committed) ────────────
-// A = the partner leaning more Reflective; B = the partner leaning more Responsive.
+// The live results substitute each partner's real name. Shown here with the
+// example names Maya (leaning more Reflective) and David (leaning more Responsive).
 const LISTEN_RESULTS_BLURBS = {
   '1_1': `You both listen by going quiet and staying with it. Neither of you rushes to respond. That makes you calm to talk to. The risk: silence can read as absence. A small signal, a nod, a short "I'm with you," tells the other you're still there.`,
-  '1_2': `A listens quietly and stays with it; B leans the same way, a little more active. Close match. Just check that neither of you reads the other's quiet as checking out. A word now and then confirms you're tracking.`,
-  '1_3': `A listens by sitting with it; B shifts between quiet and active. The shift: B can name when they're just receiving versus ready to engage, so A isn't guessing which one is happening.`,
-  '1_4': `A takes things in quietly; B responds, asks, reflects back. A real difference in how you each show you're listening. B's questions are care, not pressure. A's quiet is attention, not distance.`,
-  '1_5': `A listens in silence and stays there; B listens by engaging and drawing it out. A wide gap, and an easy one to misread. B's questions aren't interruption. A's quiet isn't disinterest. Name what each of you is doing so neither has to assume.`,
+  '1_2': `Maya listens quietly and stays with it; David leans the same way, a little more active. Close match. Just check that neither of you reads the other's quiet as checking out. A word now and then confirms you're tracking.`,
+  '1_3': `Maya listens by sitting with it; David shifts between quiet and active. The shift: David can name when he's just receiving versus ready to engage, so Maya isn't guessing which one is happening.`,
+  '1_4': `Maya takes things in quietly; David responds, asks, reflects back. A real difference in how you each show you're listening. David's questions are care, not pressure. Maya's quiet is attention, not distance.`,
+  '1_5': `Maya listens in silence and stays there; David listens by engaging and drawing it out. A wide gap, and an easy one to misread. David's questions aren't interruption. Maya's quiet isn't disinterest. Name what each of you is doing so neither has to assume.`,
   '2_2': `You both lean toward quiet listening. Low pressure, easy to talk near. The gap: when one of you wants a response and not just presence, neither offers it by instinct. Ask directly when you want to be answered, not only heard.`,
-  '2_3': `A leans toward quiet listening; B moves between modes. Small gap. B can match A's pace when something is tender, and step in with questions when A wants to be drawn out.`,
-  '2_4': `A listens more quietly; B engages more actively. When B reflects back or asks, that's how they show care. When A stays quiet, that's how they stay present. Say which one you need in the moment.`,
-  '2_5': `A tends to receive quietly; B engages hard, asks, fills the space. The shift: B can leave room before jumping in, and A can offer a word so B knows the silence is full, not empty.`,
+  '2_3': `Maya leans toward quiet listening; David moves between modes. Small gap. David can match Maya's pace when something is tender, and step in with questions when Maya wants to be drawn out.`,
+  '2_4': `Maya listens more quietly; David engages more actively. When David reflects back or asks, that's how he shows care. When Maya stays quiet, that's how she stays present. Say which one you need in the moment.`,
+  '2_5': `Maya tends to receive quietly; David engages hard, asks, fills the space. The shift: David can leave room before jumping in, and Maya can offer a word so David knows the silence is full, not empty.`,
   '3_3': `You both adjust how you listen depending on the day. That's adaptive. Watch for: in a hard moment, you each default to a mode the other didn't expect. When it matters, say what you need, presence or engagement.`,
-  '3_4': `B leans more toward active listening than A. Small but real. B can carry the engagement. A can ask a question sometimes, even a small one, so the drawing-out runs both directions.`,
-  '3_5': `A is flexible; B listens by engaging, reflecting, asking. B's questions are how they connect, not a demand for more than you have. A can meet it with a short answer rather than retreating into quiet.`,
+  '3_4': `David leans more toward active listening than Maya. Small but real. David can carry the engagement. Maya can ask a question sometimes, even a small one, so the drawing-out runs both directions.`,
+  '3_5': `Maya is flexible; David listens by engaging, reflecting, asking. David's questions are how he connects, not a demand for more than you have. Maya can meet it with a short answer rather than retreating into quiet.`,
   '4_4': `You both listen by engaging, asking, reflecting back. Conversations move. Watch for: two people responding at once crowds out the actual listening. Let one person finish and sit with it before the other steps in.`,
-  '4_5': `Both of you listen actively, B more so. You draw each other out, which keeps you current. When one of you wants to be heard and not questioned, say so. Active listening tips into problem-solving when the other just wanted presence.`,
+  '4_5': `Both of you listen actively, David more so. You draw each other out, which keeps you current. When one of you wants to be heard and not questioned, say so. Active listening tips into problem-solving when the other just wanted presence.`,
   '5_5': `You both listen by engaging fully, asking, responding. Nothing sits unaddressed for long. The watch-out: sometimes a person needs silence and room, not questions. Build a way to say "I just want you to listen for a minute" without it landing as criticism.`,
 };
-const GAPLABEL = { '1_1':'Both strongly A','1_2':'A strong / B lean A','1_3':'A strong / B middle','1_4':'A strong / B lean B','1_5':'A strong / B strong (widest gap)','2_2':'Both lean A','2_3':'A lean A / B middle','2_4':'A lean A / B lean B','2_5':'A lean A / B strong','3_3':'Both middle','3_4':'A middle / B lean B','3_5':'A middle / B strong','4_4':'Both lean B','4_5':'B lean / B strong','5_5':'Both strongly B' };
+const GAPLABEL = { '1_1':'Both strongly Reflective','1_2':'One strongly Reflective / other leans Reflective','1_3':'One strongly Reflective / other middle','1_4':'One strongly Reflective / other leans Responsive','1_5':'Opposite ends (widest gap)','2_2':'Both lean Reflective','2_3':'One leans Reflective / other middle','2_4':'One leans Reflective / other leans Responsive','2_5':'One leans Reflective / other strongly Responsive','3_3':'Both middle','3_4':'One middle / other leans Responsive','3_5':'One middle / other strongly Responsive','4_4':'Both lean Responsive','4_5':'Both Responsive (one stronger)','5_5':'Both strongly Responsive' };
 const LISTEN_ACTION = {
   title: "Match presence to what's needed",
   thisWeek: "This week, when one of you brings something up, ask first: 'do you want me to just listen, or do you want me to weigh in?' Then do that one thing.",
@@ -170,7 +171,7 @@ CHAPTERS.forEach(ch => {
 
 // 3. LISTENING — RESULTS CONTENT
 c.push(h1('3. Listening — results content'));
-c.push(p('This is live in the results experience now. A = the partner leaning more Reflective, B = more Responsive.', { italics: true, color: MUTED, after: 80 }));
+c.push(p('This is live in the results experience now. The live copy uses each partner\'s real name. Shown here with the example names Maya (leaning more Reflective) and David (leaning more Responsive).', { italics: true, color: MUTED, after: 80 }));
 c.push(p(`Dimension label: "${LISTEN_WB.meta.label}"   ·   Poles: ${LISTEN_WB.meta.left} (A) — ${LISTEN_WB.meta.right} (B)`, { after: 120 }));
 c.push(eyebrow('Per-gap interpretation (shown on the dimension page, by how far apart you scored)'));
 Object.entries(LISTEN_RESULTS_BLURBS).forEach(([k, text]) => {
@@ -210,8 +211,31 @@ Object.entries(LISTEN_WB.whenShowsUp).forEach(([type, text]) => {
 c.push(eyebrow('Scoring orientation (for reference, not customer-facing)', MUTED));
 c.push(p(LISTEN_WB.axis, { color: MUTED, after: 80 }));
 
-// 5. RETIRED: CLOSENESS
-c.push(h1('5. Retired: closeness'));
+// 5. MARKETING COPY
+c.push(h1('5. Marketing copy'));
+c.push(p('Public pages affected by the restructure. The numeric fixes are already shipped. The closeness-naming spots are not changed yet and need your call.', { italics: true, color: MUTED, after: 100 }));
+
+c.push(eyebrow('Changed and shipped (numbers only)'));
+c.push(bullet('Offerings page, exercise meta: "28 questions" is now "24 questions."'));
+c.push(bullet('Start / onboarding page, four spots: "28 questions" is now "24 questions."'));
+c.push(bullet('How It Works page: "28 questions calibrated to surface your style" is now "24 questions."'));
+c.push(bullet('Admin dashboard: chart subtitle "8 dimensions" is now "10 dimensions" (was already stale); demo chart data re-keyed from closeness to listening. Internal, not customer-facing.'));
+c.push(p('No dimension was renamed in these. "10 dimensions" stays accurate.', { italics: true, color: MUTED, after: 80 }));
+
+c.push(eyebrow('Needs your review (still names closeness)', BLUE));
+c.push(p('How It Works page — sample dimension chart row label.', { bold: true, after: 20 }));
+c.push(p('Now: "Closeness & Indep."', { after: 16 }));
+c.push(p('Suggested: "How You Listen" (poles Reflective / Responsive).', { color: MUTED, after: 60 }));
+c.push(p('Couple Types page — meta description.', { bold: true, after: 20 }));
+c.push(p('Now: "Every couple is one of 10 types, based on how each partner responds under tension and closeness. Discover what your pairing means for how you grow together."', { after: 16 }));
+c.push(p('Suggested: replace "closeness" since it is no longer a dimension. For example, "...under tension and connection."', { color: MUTED, after: 60 }));
+c.push(p('Resources page — book recommendation note.', { bold: true, after: 20 }));
+c.push(p('Now: "Helps explain a lot of the patterns Attune\'s Communication exercise surfaces, especially around closeness and independence."', { after: 16 }));
+c.push(p('Suggested: update to reflect the current dimensions (the closeness dimension is gone). The book description above it, about attachment theory, can stay as is.', { color: MUTED, after: 60 }));
+c.push(p('Checked and fine as written (no closeness named, "10 dimensions" still correct): offerings package descriptions, the welcome page exercise summary, FAQ, the practice articles. Practice articles use the word closeness in ordinary prose, not as the dimension name.', { italics: true, color: MUTED, after: 80 }));
+
+// 6. RETIRED: CLOSENESS
+c.push(h1('6. Retired: closeness'));
 c.push(p('Coming out of the exercise, results, and workbook. Listed so nothing is missed in the rebuild.', { italics: true, color: MUTED, after: 80 }));
 c.push(bullet('Dimension "Closeness & Independence" (poles Autonomous / Close-seeking) and its single question.'));
 c.push(bullet('Its results gap blurbs, action plan ("Design your together-apart rhythm"), and conversation prompt.'));
