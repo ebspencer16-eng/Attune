@@ -414,6 +414,7 @@ export default async function handler(req) {
     if (dbRow) {
       codeMeta.includesWorkbook = !!dbRow.includes_workbook;
       codeMeta.workbookVariant  = dbRow.workbook_variant || 'digital';
+      codeMeta.includesIntimacy = !!dbRow.includes_intimacy;
       codeMeta.appliesTo        = dbRow.applies_to || 'package';
       if (dbRow.active === false) {
         return new Response(JSON.stringify({ error: 'This promo code has been deactivated.' }), {
@@ -481,10 +482,22 @@ export default async function handler(req) {
         it._promoWorkbookFree = true;
       });
     }
+    // Same pattern for a bundled intimacy add-on (e.g. ATTUNE-BETA-1/2): force it
+    // onto each matching item and exclude its price from the billable add-on
+    // total so the order still routes through the no-charge path.
+    if (codeMeta.includesIntimacy) {
+      items.forEach(it => {
+        it.addonIntimacy = true;
+        it._promoIntimacyFree = true;
+      });
+    }
     const addonsTotal = items.reduce((sum, it) => {
       let a = itemAddonTotal(it);
       if (it._promoWorkbookFree) {
         a -= (it.addonWorkbook === 'print' ? ADDON_PRICES.workbookPrint : ADDON_PRICES.workbookDigital);
+      }
+      if (it._promoIntimacyFree) {
+        a -= ADDON_PRICES.intimacy;
       }
       return sum + Math.max(0, a);
     }, 0);
