@@ -945,7 +945,7 @@ function buildDimensionHero(meta, u, p, score1, score2, accentColor, gapBlurb, t
   const titleBlock = [
     new Paragraph({ alignment: AlignmentType.CENTER, spacing: { before: 200, after: 100 },
       children: [run(meta.label, { size: 52, bold: true, color })] }),
-    new Paragraph({ alignment: AlignmentType.CENTER, spacing: { after: 520 },
+    new Paragraph({ alignment: AlignmentType.CENTER, spacing: { after: 300 },
       children: [
         run('GAP ', { size: 16, bold: true, color: MUTED, allCaps: true }),
         run(`${gap.toFixed(1)}  ·  `, { size: 18, bold: true, color: gColor }),
@@ -1058,9 +1058,9 @@ function buildDimensionHero(meta, u, p, score1, score2, accentColor, gapBlurb, t
         margins: { top: 0, bottom: 0, left: 240, right: 0 },
         children: [
           rightTitle,
-          new Paragraph({ spacing: { after: 100, line: 340, lineRule: 'atLeast' },
+          new Paragraph({ spacing: { after: 80, line: 300, lineRule: 'atLeast' },
             children: [run(gapBlurb || '', { size: 22, italics: true, color: MUTED })] }),
-          new Paragraph({ spacing: { after: 0, line: 340, lineRule: 'atLeast' },
+          new Paragraph({ spacing: { after: 0, line: 300, lineRule: 'atLeast' },
             children: [run(typeBlurb || '', { size: 22, italics: true, color: MUTED })] }),
         ] }),
     ]})],
