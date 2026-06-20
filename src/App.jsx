@@ -1227,27 +1227,27 @@ const PARTNER_PERSPECTIVE = {
   ],
   WX: [
     // W's perspective (with X)
-    "You're with someone who, like you, moves toward things, but who processes before speaking rather than out loud. They'll usually get to the same place you do, just not as quickly, and not as visibly. You don't have to drag them to the conversation. They want to be there. What you're adjusting to: they're not being cagey when they go quiet before responding. They're thinking. Giving them the pause usually produces something more real than pushing for it.",
+    "You're with someone who, like you, moves toward things, but who processes before speaking rather than out loud. They'll usually get to the same place you do, just not as quickly, and not as visibly. You don't have to drag them to the conversation. They want to be there. What you're adjusting to: they're not being cagey when they go quiet before responding. They're thinking, and giving them that pause usually produces something more real than pushing for it.",
     // X's perspective (with W)
     "You're with someone who, like you, moves toward resolution, but who processes outwardly rather than privately. They'll often have a response available while you're still forming yours. They simply process faster than you do. The feeling underneath runs just as deep. What you're adjusting to: when they raise something quickly, it's not impulsive. They've felt it and they want to address it. Meeting them partway, even with 'I need a few minutes, and then I'm ready', goes a long way.",
   ],
   WY: [
     // W's perspective (with Y)
-    "You're with someone who expresses freely when ready, but who needs space to get there. They're not avoiding the conversation. They're getting ready for it. Your instinct when something needs addressing is to get into it; theirs is to step back and find solid ground first. What you're adjusting to: reaching for the conversation before they're ready usually produces something incomplete. The patience is worth it, what comes when they're ready is usually real.",
+    "You're with someone who expresses freely when ready, but who needs space to get there. They need that space to get ready for the conversation. Your instinct when something needs addressing is to get into it; theirs is to step back and find solid ground first. What you're adjusting to: reaching for the conversation before they're ready usually produces something incomplete. The patience is worth it, what comes when they're ready is usually real.",
     // Y's perspective (with W)
-    "You're with someone who wants to address things directly and who processes out loud, which can feel fast when you're still figuring out what's true for you. They're not trying to pressure you. They're expressing because that's how they process. What you're adjusting to: when they raise something before you're ready, saying 'I need a little time and then I want to talk about this' is enough. It tells them the conversation is coming without making them wait in silence.",
+    "You're with someone who wants to address things directly and who processes out loud, which can feel fast when you're still figuring out what's true for you. They express out loud because that's how they process, not to pressure you. What you're adjusting to: when they raise something before you're ready, saying 'I need a little time and then I want to talk about this' is enough. It tells them the conversation is coming without making them wait in silence.",
   ],
   WZ: [
     // W's perspective (with Z)
     "You're with someone who processes privately, shares selectively, and doesn't move toward hard things quickly. You'll often feel the pull to address things first. That's simply the shape of this pairing. What you're adjusting to: their quietness is rarely indifference. There's usually more going on internally than is visible. Asking directly, 'is there something you're carrying right now?', is more useful than waiting for a signal.",
     // Z's perspective (with W)
-    "You're with someone who moves toward things quickly and expresses freely, which can feel like a lot when you're still deciding whether something is worth naming. They're not attacking you when they raise something. They're doing what comes naturally to them. What you're adjusting to: their pace can feel overwhelming, but silence from you often reads to them as something being wrong. Even a brief 'I'm processing, give me a bit' prevents them from filling the quiet with their own interpretation.",
+    "You're with someone who moves toward things quickly and expresses freely, which can feel like a lot when you're still deciding whether something is worth naming. When they raise something quickly, it's their natural pace, not an attack. What you're adjusting to: their pace can feel overwhelming, but silence from you often reads to them as something being wrong. Even a brief 'I'm processing, give me a bit' prevents them from filling the quiet with their own interpretation.",
   ],
   XY: [
     // X's perspective (with Y)
     "You're with someone who feels things deeply and expresses them openly, but who needs space to get there. They're not avoiding the conversation; they're building toward it. Your instinct is to engage and resolve. Theirs is to process and then share. What you're adjusting to: pushing for resolution before they've had space usually gets you something incomplete. Naming that you want to address it, 'I want to talk about this when you're ready', keeps things moving without forcing the timeline.",
     // Y's perspective (with X)
-    "You're with someone who wants to address things directly and thinks privately before speaking. They're not cold. They're processing. And they'll usually have something real to say when they get there. What you're adjusting to: they can seem impatient for resolution in a way that feels pressuring when you're still getting clear. Telling them you need time and that you're not avoiding is usually enough. They want resolution, and your getting there at your pace is still resolution.",
+    "You're with someone who wants to address things directly and thinks privately before speaking. The quiet is processing, not coldness, and they'll usually have something real to say once they get there. What you're adjusting to: they can seem impatient for resolution in a way that feels pressuring when you're still getting clear. Telling them you need time and that you're not avoiding is usually enough. They want resolution, and your getting there at your pace is still resolution.",
   ],
   XZ: [
     // X's perspective (with Z)
@@ -1302,7 +1302,7 @@ const NEW_COUPLE_TYPES = [
     id: "XX", typeA: "X", typeB: "X",
     name: "The collaboration",
     tagline: "Resolution is the shared instinct. Privacy is the shared method of processing.",
-    description: "{U} and {P} both move toward resolving things and both handle the feeling internally before it comes out. Decisions get made. Disagreements get worked through. The practical machinery of the relationship runs efficiently, and quietly.",
+    description: "{U} and {P} both move toward resolving things and both handle the feeling internally before it comes out. Decisions get made and disagreements get worked through. The practical machinery of the relationship runs efficiently, and quietly.",
     nuance: "Efficient repair can mean closing the loop before it's actually through. Two people who both move fast toward resolution can sometimes resolve the surface without fully addressing what's underneath. The same thing comes back because the real conversation happened too quickly.",
     color: "#1B5FE8", shade: "#EFF1FF",
     famousDuos: [
