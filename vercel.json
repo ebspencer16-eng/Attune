@@ -288,7 +288,7 @@
       "destination": "/index.html"
     }
   ],
-  "buildCommand": "node scripts/check-admin-html.mjs && npx vite build",
+  "buildCommand": "node scripts/check-admin-html.mjs && node scripts/check-workbook-budget.mjs && npx vite build",
   "outputDirectory": "dist",
   "installCommand": "npm install",
   "crons": [
