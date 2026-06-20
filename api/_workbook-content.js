@@ -95,7 +95,7 @@ export const DIM_CONTENT = {
   listening: {
     measures: "How each partner shows they're listening when the other brings something up. One end receives quietly and sits with it. The other engages actively, reflecting back, asking, responding. Both are real listening. They land differently.",
     closeText: "{U} and {P} listen in compatible ways. When you bring something to each other, the response tends to match what the speaker wanted, so neither has to translate being heard.",
-    gapText: "One of you listens by going quiet and staying with it. The other listens by responding, asking, reflecting back. The quiet listener can read questions as pressure. The active listener can read silence as distance. Neither is failing to listen. You're showing it in different languages.",
+    gapText: "One of you listens by going quiet and staying with it. The other listens by responding, asking, reflecting back. The quiet listener can read questions as pressure. The active listener can read silence as distance. You're both listening, just showing it in different languages.",
     prompts: [
       "When you bring something to each other, do you want to be heard, or do you want a response?",
       "Has either of you ever read the other's quiet as not caring, or the other's questions as pushing?",
@@ -117,7 +117,7 @@ export const DIM_CONTENT = {
     thisWeek: 'Each of you asks the other: "What\'s one thing I do that makes you feel really loved that I might not realize has that effect?" Then do more of it.',
   },
   stress: {
-    measures: 'How each partner\'s communication style shifts when they\'re overwhelmed, anxious, or depleted. Some people shut down; others become more urgent and seek reassurance. Neither is a statement about the relationship, it\'s a stress response.',
+    measures: 'How each partner\'s communication style shifts when they\'re overwhelmed, anxious, or depleted. Some people shut down; others become more urgent and seek reassurance. That shift is a stress response, not a statement about the relationship.',
     closeText: '{U} and {P} respond to stress in similar ways. This symmetry means neither partner is likely to be left alone in the way that matters most when pressure builds.',
     gapText: 'Under pressure, one of you shuts down; the other becomes more urgent and reaches for closeness. Without language for this, the seeking partner reads withdrawal as rejection; the withdrawing partner reads urgency as escalation. Both are in stress response, and making each other worse.',
     prompts: [
@@ -605,7 +605,7 @@ export const WHEN_THIS_SHOWS_UP = {
     WX: "[W partner name] tends to express love verbally, while [X partner name] expresses it through care and effort. Both are real. [W partner name] needs to hear it, and [X partner name] needs to see it. Say it out loud and show up consistently.",
     WY: "[W partner name] tends to be expressive, while [Y partner name] returns it more softly. Not less, just softly. [W partner name] can match [Y partner name]\'s pace sometimes, and [Y partner name] can push past the quieter default once in a while.",
     WZ: "[W partner name] is openly loving, while [Z partner name] tends to show love through presence and reliability. [W partner name] may feel that [Z partner name] holds back, while [Z partner name] may feel that [W partner name] performs. Try matching the other\'s method once a week.",
-    XY: "[X partner name] tends to love practically, while [Y partner name] loves emotionally. [X partner name] can add a word about the feeling, not just the task. [Y partner name] can acknowledge the task, not just the feeling. Both stretch a little.",
+    XY: "[X partner name] tends to love practically, while [Y partner name] loves emotionally. [X partner name] can add a word about the feeling, alongside the task. [Y partner name] can acknowledge the task, alongside the feeling. Both stretch a little.",
     XZ: "Both of you tend to prefer love expressed through reliable action, and may miss the words. Add them occasionally, without ceremony. \'I\'m glad it\'s you.\' That\'s enough.",
     YZ: "Love is quiet and steady, and both of you may sometimes wonder if it\'s still there. It is. Once in a while, mark it explicitly. A Tuesday text, a specific sentence. Unnecessary by design, and worth it.",
   },

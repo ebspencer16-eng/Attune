@@ -1166,7 +1166,7 @@ const INDIVIDUAL_TYPES = {
   Y: { code: "Y", name: "The Feeler", color: "#7C3AED", fill: "#F5F0FF", axis1: "Withdraw", axis2: "Open",
        desc: "Needs space first. Carries and expresses feeling when ready.",
        wired: "You need space to process before you can fully show up to a hard conversation. This isn't avoidance, it's how you get to something honest. You're emotionally expressive when you're ready, and the people close to you get real feeling when it comes. What you bring most is depth: you don't stay on the surface.",
-       typeDesc: "You process before you can share, not because you're holding back, but because you need the space to understand what's actually true for you before you can say it. You're emotionally present and expressive when you get there. Under pressure, you need time, and pushing you before you're ready usually produces something incomplete. The thing to stay aware of: your withdrawal before sharing can read as avoidance to someone who engages more quickly." },
+       typeDesc: "You process before you can share, taking the time you need to understand what's actually true for you before you say it. You're emotionally present and expressive when you get there. Under pressure, you need time, and pushing you before you're ready usually produces something incomplete. The thing to stay aware of: your withdrawal before sharing can read as avoidance to someone who engages more quickly." },
   Z: { code: "Z", name: "The Protector", color: "#6B7280", fill: "#F4F5F6", axis1: "Withdraw", axis2: "Guarded",
        desc: "Withdraws and holds things close. Real depth and feeling running quiet beneath the surface.",
        wired: "You process privately and share selectively. There's usually more going on internally than what's visible from the outside. When you do speak, it carries weight precisely because you don't offer it carelessly. What you bring is steadiness: you don't react quickly, which means you don't create unnecessary chaos.",
@@ -1186,7 +1186,7 @@ const SAME_TYPE_PROFILE = {
   X: {
     hook: "You're both Anchors. Let's look at what that means for the two of you.",
     shared: "You both move toward resolution and you both process privately before you speak. Neither of you avoids the hard conversation, and neither of you reacts out loud. When you each arrive, you arrive with something considered. That makes you a steady, deliberate pair, the kind that works through hard things without much drama.",
-    tricky: "Two people who both process internally can leave a lot unsaid in the meantime. You each assume the other knows what you're working through, because you're doing the same quiet work. Your task is to narrate more than feels necessary: say the thinking out loud, not just the conclusion.",
+    tricky: "Two people who both process internally can leave a lot unsaid in the meantime. You each assume the other knows what you're working through, because you're doing the same quiet work. Your task is to narrate more than feels necessary: say the thinking out loud, including how you got there.",
   },
   Y: {
     hook: "You're both Feelers. Let's look at what that means for the two of you.",
@@ -1229,7 +1229,7 @@ const PARTNER_PERSPECTIVE = {
     // W's perspective (with X)
     "You're with someone who, like you, moves toward things, but who processes before speaking rather than out loud. They'll usually get to the same place you do, just not as quickly, and not as visibly. You don't have to drag them to the conversation. They want to be there. What you're adjusting to: they're not being cagey when they go quiet before responding. They're thinking. Giving them the pause usually produces something more real than pushing for it.",
     // X's perspective (with W)
-    "You're with someone who, like you, moves toward resolution, but who processes outwardly rather than privately. They'll often have a response available while you're still forming yours. This isn't them being more emotional than you. It's a different processing speed. What you're adjusting to: when they raise something quickly, it's not impulsive. They've felt it and they want to address it. Meeting them partway, even with 'I need a few minutes, and then I'm ready', goes a long way.",
+    "You're with someone who, like you, moves toward resolution, but who processes outwardly rather than privately. They'll often have a response available while you're still forming yours. They simply process faster than you do. The feeling underneath runs just as deep. What you're adjusting to: when they raise something quickly, it's not impulsive. They've felt it and they want to address it. Meeting them partway, even with 'I need a few minutes, and then I'm ready', goes a long way.",
   ],
   WY: [
     // W's perspective (with Y)
@@ -1239,7 +1239,7 @@ const PARTNER_PERSPECTIVE = {
   ],
   WZ: [
     // W's perspective (with Z)
-    "You're with someone who processes privately, shares selectively, and doesn't move toward hard things quickly. You'll often feel the pull to address things first. That's not a flaw in either of you. It's the shape of this pairing. What you're adjusting to: their quietness is rarely indifference. There's usually more going on internally than is visible. Asking directly, 'is there something you're carrying right now?', is more useful than waiting for a signal.",
+    "You're with someone who processes privately, shares selectively, and doesn't move toward hard things quickly. You'll often feel the pull to address things first. That's simply the shape of this pairing. What you're adjusting to: their quietness is rarely indifference. There's usually more going on internally than is visible. Asking directly, 'is there something you're carrying right now?', is more useful than waiting for a signal.",
     // Z's perspective (with W)
     "You're with someone who moves toward things quickly and expresses freely, which can feel like a lot when you're still deciding whether something is worth naming. They're not attacking you when they raise something. They're doing what comes naturally to them. What you're adjusting to: their pace can feel overwhelming, but silence from you often reads to them as something being wrong. Even a brief 'I'm processing, give me a bit' prevents them from filling the quiet with their own interpretation.",
   ],
@@ -1271,7 +1271,7 @@ const NEW_COUPLE_TYPES = [
     name: "The ignition",
     tagline: "Both reach. Both express. Connection isn't something you have to chase.",
     description: "{U} and {P} both move toward resolution and process outward. High warmth and emotional availability in both directions. Neither partner has to coax the other into the conversation or wait for the signal that it's okay to share what's going on.",
-    nuance: "The risk isn't disconnection. It's feedback loops. When both of you are feeling something strongly, the intensity can amplify rather than settle. One of you naming that, 'I think we're both escalating things right now', is usually enough to break the loop.",
+    nuance: "The risk here is feedback loops rather than disconnection. When both of you are feeling something strongly, the intensity can amplify rather than settle. One of you naming that, 'I think we're both escalating things right now', is usually enough to break the loop.",
     color: "#E8673A", shade: "#FFF4F0",
     famousDuos: [
       { names: "Monica & Chandler", show: "Friends", note: "Both put everything into the shared space. The warmth between them was real and visible, and occasionally required one of them to take the temperature down." },
@@ -1326,7 +1326,7 @@ const NEW_COUPLE_TYPES = [
     ],
     tips: [
       { title: "Check if it's resolved or just closed", body: "Fast repair is a real strength. The watch-out is closing the loop before the thing is actually through.", phraseTry: "Are we actually okay, or are we both just ready to be done?" },
-      { title: "Ask what's going on, not just what the plan is", body: "{U} and {P} are both comfortable with the practical mode. Add a deliberate question to get at the emotional weight, not just the practical action. This changes the quality of the conclusion.", phraseTry: "How does this actually feel for you, not just what it means, but how it sits?" },
+      { title: "Ask what's going on underneath the plan", body: "{U} and {P} are both comfortable with the practical mode. Add a deliberate question to get at the emotional weight underneath the practical action. This changes the quality of the conclusion.", phraseTry: "How does this actually feel for you, beyond what it means?" },
       { title: "Give the slower moments their time", body: "Occasionally, slow the repair down enough to make sure you've actually heard each other. The extra few minutes tends to be what prevents the same conversation coming back.", phraseTry: "I want to make sure we've actually heard each other on this before we move on. I'm curious about your perspective." },
     ],
   },
@@ -1468,7 +1468,7 @@ const NEW_COUPLE_TYPES = [
     nuance: "The reaching partner often doesn't know what the reserved partner is feeling until long after the fact, which can feel like withholding. The reserved partner often feels pressure to perform an emotional openness they don't naturally have. Naming this as a difference, not a deficiency, is the most useful thing {U} and {P} can do.",
     color: "#E8673A", shade: "#FFF4F0",
     famousDuos: [
-      { names: "Elizabeth & Philip Mountbatten (early years)", show: "The Crown", note: "Wildly different in emotional register and expression. The relationship survived not because the gaps closed, but because both parties chose it anyway." },
+      { names: "Elizabeth & Philip Mountbatten (early years)", show: "The Crown", note: "Wildly different in emotional register and expression. The relationship survived because both parties kept choosing it, gaps and all." },
       { names: "Hannah & Adam", show: "Girls", note: "One always needed more contact; the other needed to disappear first. The difficulty wasn't incompatibility, it was the gap between their stress responses." },
     ],
     strengths: [
@@ -1484,7 +1484,7 @@ const NEW_COUPLE_TYPES = [
     patterns: [
       "{U} and {P} sometimes find that you mean something the other doesn't quite receive. The signal and the interpretation don't always match.",
       "Understanding each other has taken real effort, and usually more conversation than you'd expect.",
-      "When {U} and {P} are communicating well, it's because you're both actively working to understand, not just assuming you do.",
+      "When {U} and {P} are communicating well, it's because you're both actively working to understand each other, rather than assuming you already do.",
     ],
     tips: [
       { title: "Expressiveness isn't depth, and silence isn't emptiness", body: "The reserved partner's inner life is not less rich because it isn't expressed as often. The reaching partner's sharing isn't less valuable because it comes more easily. Name that dynamic directly.", phraseTry: "There's more going on for me than I'm showing. I just need to get it in order before I share it." },
@@ -1511,7 +1511,7 @@ const NEW_COUPLE_TYPES = [
     stickingPoints: [
       "The driver's move toward resolution can close off the space the feeler needs. The feeler isn't ready, and the conversation starts before they are.",
       "The feeler's visible emotion during withdrawal can look to the anchor like something that needs fixing immediately, which makes the anchor push harder.",
-      "It can feel like one person cares more than the other, not because that's true, but because they're expressing it at different times and in different ways.",
+      "It can feel like one person cares more than the other, even though you're simply expressing it at different times and in different ways.",
     ],
     patterns: [
       "When something is hard, {U} and {P} are usually not in the same place at the same time. One is ready to engage; the other needs the space.",
@@ -2240,7 +2240,7 @@ function getDimShift(dim, myScore, partScore, U, P) {
       '2_5': `${loName} tends toward quiet; ${hiName} genuinely energizes from togetherness. The shift: ${hiName} shouldn't read ${loName}'s quiet time as withdrawal, and ${loName} should flag when they're recharged and ready to reconnect. Both need to become signals.`,
       '3_3': `You're both genuinely flexible about how you restore. That's adaptive, but it can mean connection gets left to chance. When stress hits, each of you may default to a mode the other doesn't know about. Check in when things are hard.`,
       '3_4': `${hiName} leans more toward needing togetherness than ${loName} does. Small but real. ${hiName} can name when they want company rather than hoping ${loName} picks it up. ${loName} tends to assume everyone's preferences match their own.`,
-      '3_5': `${loName} is neutral; ${hiName} genuinely energizes from people and connection. ${hiName}'s need isn't needy. It's a preference worth designing around. Build in deliberate closeness even when ${loName} would otherwise be fine either way.`,
+      '3_5': `${loName} is neutral; ${hiName} genuinely energizes from people and connection. ${hiName}'s need is a real preference worth designing around. Build in deliberate closeness even when ${loName} would otherwise be fine either way.`,
       '4_4': `You both restore through connection and togetherness. Warm match. Give each other explicit permission to want a quiet night sometimes. It shouldn't feel like a confession when one of you needs to be alone for a bit.`,
       '4_5': `Both of you lean toward connection, ${hiName} more strongly. When one of you is genuinely depleted and doesn't have energy for togetherness, build in an easy way to signal it: "I'm low tonight but I'm not going anywhere."`,
       '5_5': `You both restore through people and being together. Strong match in daily energy needs. The watch-out: when you're both depleted at the same time, neither of you may feel like being "on" for the other. Name it when it happens rather than both performing okay-ness.`,
@@ -2254,7 +2254,7 @@ function getDimShift(dim, myScore, partScore, U, P) {
       '1_4': `${loName} goes internal; ${hiName} tends toward sharing. A real difference. ${loName} can offer an interim signal, "I'm processing something, I'll bring it up when I have words", so ${hiName} doesn't fill the silence with their own interpretation.`,
       '1_5': `${loName} is very private in processing; ${hiName} processes by talking it through. One of the most common expression mismatches. The shift: agree that ${hiName} gets to think out loud without it being a finished position, and ${loName} gets time before being expected to respond.`,
       '2_2': `You both tend to work through things privately. That creates low-drama, but it means significant things can sit unspoken too long. Make it easy to say "I've been sitting with something" without needing to be fully ready to explain.`,
-      '2_3': `${loName} leans private; ${hiName} is flexible. Don't let ${hiName}'s flexibility become the default that always gives way. Check in on what ${hiName} actually wants to share, not just what they're willing to hold.`,
+      '2_3': `${loName} leans private; ${hiName} is flexible. Don't let ${hiName}'s flexibility become the default that always gives way. Check in on what ${hiName} actually wants to share, rather than only what they're willing to hold.`,
       '2_4': `${loName} leans internal; ${hiName} leans toward sharing. ${loName} may often appear fine when they're not. Agree that "I need to think about this" means "I'll come back to you", not "nothing's wrong."`,
       '2_5': `${loName} tends inward; ${hiName} processes externally. The shift: ${hiName} may share unfinished thoughts, which can feel like oversharing to ${loName}. Agree that thinking out loud is allowed and doesn't require an immediate response.`,
       '3_3': `You're both flexible on expression, can hold or share depending on the day. That's adaptive. Watch for: when something actually needs saying, the flexibility can become avoidance. Make it easy for either person to say "I need to talk about something."`,
@@ -2291,14 +2291,14 @@ function getDimShift(dim, myScore, partScore, U, P) {
       '1_3': `${loName} is reserved; ${hiName} is in the middle. ${hiName} can start noticing and naming when ${loName} makes a small bid, "you seemed like you wanted to say something earlier", making it easier for ${loName} to reach again.`,
       '1_4': `${loName} tends quiet in reaching for connection; ${hiName} is more responsive and attuned. The shift: ${loName} can practice making the smallest version of a bid, sending a link, sharing an observation, without expecting more than a nod.`,
       '1_5': `${loName} rarely bids for connection; ${hiName} is very attuned and responsive. A real gap. The shift: ${loName} can start with the simplest thing, showing ${hiName} something, sharing a minor thought. Bids don't need to be meaningful to matter.`,
-      '2_2': `You both lean quieter in how you reach for each other. Warm but not loudly expressive. Agree to initiate at least one small connection moment per day, a specific question, a brief check-in. Habitual, not just spontaneous.`,
+      '2_2': `You both lean quieter in how you reach for each other. Warm but not loudly expressive. Agree to initiate at least one small connection moment per day, a specific question, a brief check-in. Build it into the routine rather than leaving it to chance.`,
       '2_3': `${loName} leans reserved; ${hiName} is flexible. ${hiName} can make it easier to respond to ${loName}'s bids by acknowledging them explicitly, "you mentioned X earlier, tell me more", signals that ${loName}'s reaching is always welcome.`,
       '2_4': `${loName} tends quieter; ${hiName} is more attuned to small moments. Moderate gap. ${loName} can become more aware of what ${hiName} does to reach for connection, and make a deliberate effort to turn toward it, even when it's a small thing.`,
       '2_5': `${loName} leans reserved; ${hiName} is highly responsive. ${hiName} may feel like they're always the one reaching. The shift: ${loName} can pick one type of bid and practice it consistently, asking about ${hiName}'s day, noticing something they did. It doesn't have to be grand.`,
       '3_3': `You're both somewhere in the middle. Workable, but "somewhere in the middle" can mean neither reaches reliably. Build in deliberate connection moments rather than leaving it to feel.`,
       '3_4': `${hiName} is more tuned to small moments than ${loName}. Small gap. ${loName} can practice responding explicitly when ${hiName} bids, even a "I noticed that", makes ${hiName} feel seen.`,
       '3_5': `${loName} is neutral; ${hiName} is very attuned and responsive. ${hiName} genuinely values these small moments, and ${loName} can create more of them even when they'd otherwise not think about it. Low effort, high return.`,
-      '4_4': `You're both fairly responsive to each other. That builds a warm, attentive dynamic. Watch for: when one of you is distracted or checked out, the other can feel it acutely. Agree to name it: "I feel like I haven't had your attention today."`,
+      '4_4': `You're both responsive to each other. That builds a warm, attentive dynamic. Watch for: when one of you is distracted or checked out, the other can feel it acutely. Agree to name it: "I feel like I haven't had your attention today."`,
       '4_5': `Both of you lean toward presence and responsiveness, ${hiName} slightly more. Good match. When ${loName} is genuinely depleted and doesn't feel like connecting, build in an easy signal: "I need 20 minutes", not rejection, just recharge.`,
       '5_5': `You're both highly attuned and responsive. The relationship probably feels warm and connected. Watch for: because both of you reach for connection readily, check in about whether the volume feels right. Too many bids can occasionally feel like pressure rather than warmth.`,
     },
@@ -2348,7 +2348,7 @@ function getDimShift(dim, myScore, partScore, U, P) {
       '1_3': `${loName} listens by sitting with it; ${hiName} shifts between quiet and active. The shift: ${hiName} can name when they're just receiving versus ready to engage, so ${loName} isn't guessing which one is happening.`,
       '1_4': `${loName} takes things in quietly; ${hiName} responds, asks, reflects back. A real difference in how you each show you're listening. ${hiName}'s questions are care, not pressure. ${loName}'s quiet is attention, not distance.`,
       '1_5': `${loName} listens in silence and stays there; ${hiName} listens by engaging and drawing it out. A wide gap, and an easy one to misread. ${hiName}'s questions aren't interruption. ${loName}'s quiet isn't disinterest. Name what each of you is doing so neither has to assume.`,
-      '2_2': `You both lean toward quiet listening. Low pressure, easy to talk near. The gap: when one of you wants a response and not just presence, neither offers it by instinct. Ask directly when you want to be answered, not only heard.`,
+      '2_2': `You both lean toward quiet listening. Low pressure, easy to talk near. The gap: when one of you wants a response rather than quiet presence, neither offers it by instinct. Ask directly when you want to be answered, not only heard.`,
       '2_3': `${loName} leans toward quiet listening; ${hiName} moves between modes. Small gap. ${hiName} can match ${loName}'s pace when something is tender, and step in with questions when ${loName} wants to be drawn out.`,
       '2_4': `${loName} listens more quietly; ${hiName} engages more actively. When ${hiName} reflects back or asks, that's how they show care. When ${loName} stays quiet, that's how they stay present. Say which one you need in the moment.`,
       '2_5': `${loName} tends to receive quietly; ${hiName} engages hard, asks, fills the space. The shift: ${hiName} can leave room before jumping in, and ${loName} can offer a word so ${hiName} knows the silence is full, not empty.`,
@@ -2404,7 +2404,7 @@ function getDimShift(dim, myScore, partScore, U, P) {
       '1_2': `${loName} is very guarded around feedback; ${hiName} leans similar, slightly more open. A close match. Both of you being cautious means important things can go unnamed. Build a "low-stakes feedback" norm, short, specific, non-critical, so it doesn't feel like a big event every time.`,
       '1_3': `${loName} is guarded; ${hiName} is flexible. When ${hiName} wants to raise something, framing it as an observation helps ${loName} receive it, "I noticed X" lands better than "you did X."`,
       '1_4': `${loName} is guarded; ${hiName} is more open to giving and receiving feedback. A real difference. ${hiName} can give feedback in very small doses. One thing at a time, specifically framed, and wait. ${loName} will need time, not more information.`,
-      '1_5': `${loName} is very guarded; ${hiName} is very open with feedback. A significant difference. ${hiName} can create safety by asking how ${loName} prefers to receive feedback, timing, tone, framing. People who are guarded usually have a reason; understanding it unlocks the conversation.`,
+      '1_5': `${loName} is very guarded; ${hiName} is very open with feedback. A significant difference. ${hiName} can create safety by asking how ${loName} prefers to receive feedback, timing, tone, framing. People who are guarded usually have a reason; understanding it opens the conversation.`,
       '2_2': `You both lean a bit guarded. That means the relationship stays relatively conflict-free, but things that should be named sometimes don't get named. Practice low-stakes feedback on small things so that raising something doesn't always feel like a production.`,
       '2_3': `${loName} leans guarded; ${hiName} is flexible. ${hiName} can be explicit about intent, "I want to mention something, and it's not a big deal", which removes the anticipatory dread ${loName} may feel when feedback is incoming.`,
       '2_4': `${loName} leans guarded; ${hiName} leans more open. Moderate difference. ${hiName} can work on timing, feedback lands better when the temperature is low. Ask if it's a good time before starting.`,
@@ -2412,7 +2412,7 @@ function getDimShift(dim, myScore, partScore, U, P) {
       '3_3': `You're both in the middle. Watch for: feedback needing to happen but neither person reaching for it. A norm: one thing each month that each person wants to mention, raised gently. Small volume, regular cadence.`,
       '3_4': `${hiName} is a bit more open to feedback. Small gap. ${loName} can practice receiving ${hiName}'s feedback without responding immediately, "thanks for saying that, let me think about it" is a complete response.`,
       '3_5': `${loName} is neutral; ${hiName} is very open to feedback. ${loName} can communicate what format works best, "I'd rather you bring it up in the moment" or the opposite. Giving ${hiName} the protocol makes it easier.`,
-      '4_4': `You're both fairly open to feedback. A healthy dynamic. You can raise things without it being a production. Watch for: the openness being one-directional. Make sure both of you feel equally safe to bring something up, not just receive it.`,
+      '4_4': `You're both open to feedback. A healthy dynamic. You can raise things without it being a production. Watch for: the openness being one-directional. Make sure raising something feels as safe as receiving it, for both of you.`,
       '4_5': `Both of you lean open, ${hiName} more so. Good match. Watch for: ${hiName}'s comfort with feedback occasionally meaning ${loName} hears more than expected. A norm around frequency and timing keeps feedback constructive rather than relentless.`,
       '5_5': `You're both very open to feedback. You can raise things and take them in without much defensiveness. Rare and genuinely valuable. The one thing to stay aware of: openness can occasionally tip into over-analyzing the relationship. Not everything needs to be examined.`,
     },
@@ -2438,7 +2438,7 @@ const EXP_CAT_STARTERS = {
     WY: "One of you addresses things quickly; the other needs time first. Household friction rarely feels urgent enough to raise, until it is. Set a regular rhythm for reviewing who's doing what, so it doesn't only get named when someone is already frustrated.",
     WZ: "One of you reaches out when something needs addressing; the other holds things close. Domestic imbalances tend to accumulate silently in couples like yours. Build a habit of naming household roles explicitly rather than letting them form by default.",
     XY: "One of you wants to solve quickly; the other needs space first. Household logistics decisions can stall if one person isn't ready and the other is impatient. Pick a weekly moment, 15 minutes, to review and decide together.",
-    XZ: "You both tend to hold things internally. Domestic resentment is particularly likely to stay quiet in a pairing like yours, until it isn't. Make a habit of naming the load each person is carrying, not just when something breaks.",
+    XZ: "You both tend to hold things internally. Domestic resentment is particularly likely to stay quiet in a pairing like yours, until it isn't. Make a habit of naming the load each person is carrying, before something breaks.",
     YZ: "You both need space before engaging with conflict. Household imbalances are easy to defer. Make a habit of reviewing roles at a set time so the conversation doesn't require someone to work up to it.",
   },
   financial: {
@@ -2446,11 +2446,11 @@ const EXP_CAT_STARTERS = {
     XX: "You both tend to process privately and move efficiently. Financial decisions are one area where that efficiency can skip important alignment. Slow down enough to make sure both of you actually agree, not just that both of you accept.",
     YY: "You're both feeling-forward, financial conversations can carry emotional weight that makes them harder to start. Know that it's okay for this to be uncomfortable. The discomfort doesn't mean you're financially incompatible.",
     ZZ: "You both tend to carry things quietly. Financial misalignments in a pairing like yours can go unnamed for a long time. Set a quarterly money conversation, not to review budgets, but to check: are we still aligned on what money is for?",
-    WX: "One of you surfaces things quickly; the other needs time. Financial decisions benefit from the person who needs more time actually getting it, not just conceding. Make sure financial conversations include a built-in pause for reflection before deciding.",
+    WX: "One of you surfaces things quickly; the other needs time. Financial decisions benefit from the person who needs more time actually getting it, rather than quietly conceding. Make sure financial conversations include a built-in pause for reflection before deciding.",
     WY: "You have different engagement clocks. Financial conversations should happen when both of you are actually ready, not when one person pushes and the other complies. Pick a time for it when neither of you is stressed.",
-    WZ: "One of you names things openly; the other holds them close. Financial alignment is hard if one person is doing all the raising. Build an expectation that both people bring concerns, not just one.",
+    WZ: "One of you names things openly; the other holds them close. Financial alignment is hard if one person is doing all the raising. Build an expectation that both people bring concerns.",
     XY: "One of you wants to resolve quickly; the other needs time. Financial decisions made under time pressure rarely hold. Make sure the person who needs space gets it, even if it delays the decision.",
-    XZ: "You're both private processors. Financial transparency requires deliberate effort in a pairing like yours, not because you're secretive, but because neither of you naturally pushes the other to open up. Schedule it.",
+    XZ: "You're both private processors. Financial transparency requires deliberate effort in a pairing like yours, since neither of you naturally pushes the other to open up. Schedule it.",
     YZ: "You both need space before engaging. Money conversations can easily get deferred indefinitely. Set a regular, calm moment for financial check-ins, not after a tension-filled moment, but on a neutral calendar day.",
   },
   career: {
@@ -2467,8 +2467,8 @@ const EXP_CAT_STARTERS = {
   },
   emotional: {
     WW: "You're both emotionally expressive and attuned, which means invisible labor is actually more visible in your relationship than most. The risk is that naming it starts to feel like scorekeeping. Frame it as awareness, not accounting.",
-    XX: "You both tend toward efficiency and private processing. Emotional labor in a pairing like yours can go entirely unremarked, not because it's not happening, but because neither of you points to it. Name it. The person carrying more needs it acknowledged.",
-    YY: "You're both deeply feeling and emotionally present. The invisible labor in your relationship is probably significant on both sides. The work is not just carrying the emotional load. It's making sure the other person sees it too.",
+    XX: "You both tend toward efficiency and private processing. Emotional labor in a pairing like yours can go entirely unremarked, since neither of you naturally points to it. Name it. The person carrying more needs it acknowledged.",
+    YY: "You're both deeply feeling and emotionally present. The invisible labor in your relationship is probably significant on both sides. The work is both carrying the emotional load and making sure the other person sees it too.",
     ZZ: "You're both quiet carriers. Emotional labor is probably distributed in your relationship in ways that neither of you has fully mapped. It can accumulate invisibly. Make a habit of asking: 'what are you managing right now that I might not know about?'",
     WX: "One of you names things directly; the other holds them. Emotional labor that goes unspoken is still labor. The quieter partner may be carrying more than they say. Build a norm where both of you name what you're managing.",
     WY: "You have different timelines. Emotional labor conversations can feel premature for one partner and overdue for the other. Pick a neutral time, not when one person is already drained, to check in about what each of you is carrying.",
@@ -2479,12 +2479,12 @@ const EXP_CAT_STARTERS = {
   },
   life: {
     WW: "You're both expressive and emotionally present. Life and values conversations can feel natural, but they can also go long without reaching resolution. For big questions, agree in advance that you'll end with each person's actual current position, even if it's unresolved.",
-    XX: "You both tend to process privately. You may each have more formed views on life and values questions than the other knows about. Make space to share not just your position, but the reasoning underneath it. It changes the conversation.",
+    XX: "You both tend to process privately. You may each have more formed views on life and values questions than the other knows about. Make space to share your position and the reasoning underneath it. It changes the conversation.",
     YY: "You're both emotionally attuned and values-driven. Life and values disagreements can carry real weight. Know that diverging on some of these questions is normal, and not a sign you're wrong for each other. What matters is how you hold the difference.",
     ZZ: "You're both private processors. Big-picture questions about life and values can stay entirely internalized in a pairing like yours. Make a deliberate practice of sharing your current thinking on these topics, not to resolve them, but to stay current with each other.",
     WX: "One of you surfaces things readily; the other processes first. Life and values conversations benefit from both people having time to think before sharing. Don't let the faster processor carry more of the conversation than the other person is ready for.",
     WY: "You have different timelines for readiness. Life questions, children, location, faith, shouldn't be decided when one person isn't fully ready to engage. Wait for both.",
-    WZ: "One of you speaks up; the other holds things close. Life and values conversations require both people to actually share their real positions, not just the safe ones. Build an expectation that both of you bring your actual views.",
+    WZ: "One of you speaks up; the other holds things close. Life and values conversations require both people to actually share their real positions, including the ones that don't feel safe. Build an expectation that both of you bring your actual views.",
     XY: "One of you wants to decide; the other needs time. For life questions with real implications, the person who processes more slowly needs time, even if it delays the decision. A premature decision on big things tends to create pressure later.",
     XZ: "You're both private. Life and values alignment can be assumed rather than actively explored in pairings like yours. Don't let the stability of your relationship mean you stop checking in on where each of you is with the big questions.",
     YZ: "You both need space before engaging. Life and values conversations can be deferred indefinitely when both of you are comfortable waiting. Set a specific, recurring time to revisit where you each are, not when something forces the conversation.",
@@ -3708,7 +3708,7 @@ function PersonalityResults({ myAnswers, partnerAnswers, userName, partnerName, 
   const go = s => { setStep(s); if (onExternalGo) onExternalGo(s); const sc = document.querySelector("[data-results-scroll]"); if (sc) sc.scrollTop = 0; else window.scrollTo({ top: 0, behavior: "smooth" }); };
 
   const protocols = [];
-  if (byDim.conflict?.isOpportunity || byDim.conflict?.isNote) protocols.push({ title: "Create a pause protocol", body: byDim.conflict.adviceText, thisWeek: "Next time something feels off between you, before trying to resolve it, one of you says: 'I need [time amount] before we talk about this.' Practice naming the time, not just asking for space." });
+  if (byDim.conflict?.isOpportunity || byDim.conflict?.isNote) protocols.push({ title: "Create a pause protocol", body: byDim.conflict.adviceText, thisWeek: "Next time something feels off between you, before trying to resolve it, one of you says: 'I need [time amount] before we talk about this.' Practice naming the specific time you need, rather than only asking for space." });
   if (byDim.repair?.isOpportunity || byDim.repair?.isNote) protocols.push({ title: "Agree on what repaired looks like", body: byDim.repair.adviceText, thisWeek: "Within 24 hours of your next disagreement, one of you takes a small step to come back, not to relitigate it, just to signal you're okay. Notice how the other responds." });
   if (byDim.energy?.isOpportunity || byDim.energy?.isNote) protocols.push({ title: "Name your recharge needs", body: byDim.energy.adviceText, thisWeek: "This week, tell each other in advance when you need recharge time, before you're depleted. Try: 'I need a quiet evening Thursday.' That's it." });
   if (byDim.needs?.isOpportunity || byDim.needs?.isNote) protocols.push({ title: "Practice the direct ask", body: byDim.needs.adviceText, thisWeek: "Once this week, ask directly for something you'd normally hint at or leave unsaid. Just the request, no preamble, no apology." });
@@ -3719,9 +3719,9 @@ function PersonalityResults({ myAnswers, partnerAnswers, userName, partnerName, 
   if (byDim.feedback?.isOpportunity || byDim.feedback?.isNote) protocols.push({ title: "Practice the small direct mention", body: byDim.feedback.adviceText, thisWeek: "This week, when something bothers you, name it within the same day, not to fight, just to say it. 'Hey, that landed a little off for me.' See what happens." });
   if (byDim.love?.isOpportunity || byDim.love?.isNote) protocols.push({ title: "Learn each other's language", body: byDim.love.adviceText, thisWeek: "Ask your partner: 'What's one thing I do that makes you feel really cared for that I might not realize has that effect?' Then listen without commenting." });
   if (protocols.length === 0) {
-    protocols.push({ emoji: "", title: "Keep checking in", body: ((userName) + " and " + (partnerName) + " are closely aligned across all ten dimensions. The work here isn't about catching up. It's about staying connected. Couples who stay curious about each other's inner experience, even when things feel stable, tend to stay that way longer.") });
+    protocols.push({ emoji: "", title: "Keep checking in", body: ((userName) + " and " + (partnerName) + " are closely aligned across all ten dimensions. The work here is about staying connected rather than catching up. Couples who stay curious about each other's inner experience, even when things feel stable, tend to stay that way longer.") });
     protocols.push({ emoji: "", title: "Stay curious as things change", body: "When two people are this in sync, it's easy to assume the picture stays the same. But what each of you needs, values, and envisions can shift gradually. A brief check-in every few months keeps you current with each other." });
-    protocols.push({ emoji: "", title: "Name what's working", body: ("Most couples only talk about their relationship when something feels off. " + (userName) + " and " + (partnerName) + " have something worth naming explicitly: real alignment. Talking about what you're doing well, not just what feels hard, reinforces it.") });
+    protocols.push({ emoji: "", title: "Name what's working", body: ("Most couples only talk about their relationship when something feels off. " + (userName) + " and " + (partnerName) + " have something worth naming explicitly: real alignment. Talking about what you're doing well, alongside what feels hard, reinforces it.") });
   }
 
   const scaleLabels = ["Strongly A","Lean A","Neutral","Lean B","Strongly B"];
@@ -3778,7 +3778,7 @@ function PersonalityResults({ myAnswers, partnerAnswers, userName, partnerName, 
         {coupleType && (() => {
           const COMM_COUPLE_CONTEXT = {
             WW: "Two Initiators both express openly and engage quickly. The risk isn't silence, it's two people talking before either has fully heard the other.",
-            XX: "Two Anchors process privately, then push toward resolution. Make sure the internal work gets said out loud, not just acted on.",
+            XX: "Two Anchors process privately, then push toward resolution. Make sure the internal work gets said out loud rather than only acted on.",
             YY: "Two Feelers both feel deeply and need space first. Give each other the runway before the conversation, it lands better when you do.",
             ZZ: "Two Protectors both hold things close. Build a deliberate habit of saying what's going on before it goes unsaid for too long.",
             WX: "One of you expresses readily; the other processes first. The one who speaks first isn't more invested, just faster to externalize.",
@@ -6187,7 +6187,7 @@ function deriveAnniversaryInsights(mine, theirs, userName, partnerName, coupleTy
       body: `${presencePerson} is working on being more present. ${expressionPerson} is working on saying what they need directly. Notice what's happening: each of you independently identified the thing that would most benefit the other person. That's rare.`,
       priority: "Make this mutual",
       action: `Tell each other. ${presencePerson}: "I know I disappear sometimes. I'm working on it, and I want you to tell me when it's happening." ${expressionPerson}: "I'm going to try to say what I actually need instead of waiting for you to notice." Saying it out loud creates accountability and removes the guesswork.`,
-      coupleTypeNote: coupleType ? `${ctNote}this complementary dynamic is characteristic of your pairing, lean into naming it explicitly rather than hoping the other person notices.` : "",
+      coupleTypeNote: coupleType ? `${ctNote}this complementary dynamic is characteristic of your pairing, name it explicitly rather than hoping the other person notices.` : "",
     });
   }
 
@@ -6197,7 +6197,7 @@ function deriveAnniversaryInsights(mine, theirs, userName, partnerName, coupleTy
       insights.push({
         type: "strength",
         title: `You both admire the same thing in each other`,
-        body: `Both of you independently named "${mine.a8}" as the quality you most admire in your partner right now. When two people independently land on the same word to describe what they value in the other, it usually means that quality is genuinely visible in daily life, not just something they say.`,
+        body: `Both of you independently named "${mine.a8}" as the quality you most admire in your partner right now. When two people independently land on the same word to describe what they value in the other, it usually means that quality is genuinely visible in daily life, not only in words.`,
         priority: "Say it out loud",
         action: `Tell each other directly. "The thing I most admire about you right now is ${mine.a8.toLowerCase()}." Hearing it said plainly lands differently than assuming the other person knows.`,
         coupleTypeNote: coupleType ? `${ctNote}shared admiration for the same quality is a meaningful signal of mutual recognition in your dynamic.` : "",
@@ -6271,8 +6271,8 @@ function deriveAnniversaryInsights(mine, theirs, userName, partnerName, coupleTy
         title: `Your top priorities for this year are different`,
         body: `${userName}'s top priority: "${myTop}." ${partnerName}'s top priority: "${theirTop}." Neither is wrong, but without naming it, this difference quietly shapes decisions, energy allocation, and what each of you feels is being neglected.`,
         priority: "Negotiate, not compromise",
-        action: `Both priorities deserve to be real. The question isn't which one wins. It's how to protect both. What would it look like to honor "${myTop}" and "${theirTop}" in the same month? Start with something small and specific.`,
-        coupleTypeNote: coupleType ? `${ctNote}different investment priorities are common in your pairing, naming them explicitly tends to unlock a lot of unspoken frustration.` : "",
+        action: `Both priorities deserve to be real. The question is how to protect both, not which one wins. What would it look like to honor "${myTop}" and "${theirTop}" in the same month? Start with something small and specific.`,
+        coupleTypeNote: coupleType ? `${ctNote}different investment priorities are common in your pairing, naming them explicitly tends to clear a lot of unspoken frustration.` : "",
       });
     }
 
@@ -6478,7 +6478,7 @@ function AnniversaryResultsView({ userName, partnerName, myAnswers, onBack }) {
           <div style={{ background: "linear-gradient(145deg, #071a10, #0d3320)", borderRadius: 16, padding: "2rem", color: "white", textAlign: "center", marginTop: "0.5rem" }}>
             <div style={{ width: 24, height: 24, borderRadius: "50%", background: "#10b981", marginBottom: "0.75rem" }} />
             <p style={{ fontFamily: font.display, fontSize: "1.15rem", fontWeight: 700, color: "white", marginBottom: "0.75rem", lineHeight: 1.3 }}>You're not starting from scratch. You're building on something real.</p>
-            <p style={{ fontSize: "0.8rem", color: "rgba(255,255,255,0.65)", fontFamily: BFONT, fontWeight: 300, lineHeight: 1.75, maxWidth: 420, margin: "0 auto" }}>These reflections are yours to keep. Come back to them. The conversations they point to are the ones that matter, not because they're hard, but because they're about choosing each other with more intention.</p>
+            <p style={{ fontSize: "0.8rem", color: "rgba(255,255,255,0.65)", fontFamily: BFONT, fontWeight: 300, lineHeight: 1.75, maxWidth: 420, margin: "0 auto" }}>These reflections are yours to keep. Come back to them. The conversations they point to are the ones that matter, the ones about choosing each other with more intention.</p>
           </div>
         </div>
       )}
@@ -9005,7 +9005,7 @@ function ResultsHighlights({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3
           <div style={{ background: "rgba(16,185,129,0.12)", border: "1px solid rgba(16,185,129,0.22)", borderRadius: 12, padding: "0.85rem 1.1rem", animation: "fadeUp 0.4s 0.34s both" }}>
             <div style={{ fontSize: "0.48rem", letterSpacing: "0.18em", textTransform: "uppercase", color: "#10b981", fontFamily: BFONT, fontWeight: 700, marginBottom: "0.35rem" }}>For two who think alike</div>
             <p style={{ fontSize: "0.78rem", color: "#6ee7b7", fontFamily: BFONT, fontWeight: 400, lineHeight: 1.65, margin: 0 }}>
-              {topStrength?.adviceText || "This alignment removes an entire category of slow-burn friction. Lean into it. It's rarer than it looks."}
+              {topStrength?.adviceText || "This alignment removes an entire category of slow-burn friction. Make the most of it, because this kind of alignment is rarer than it looks."}
             </p>
           </div>
         </div>
