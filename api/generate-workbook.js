@@ -1113,7 +1113,7 @@ function buildOneDimension(dim, u, p, score1, score2, coupleType, overallUserTyp
     const headerColor = opts.color || color;
     if (opts.icon) {
       return new Paragraph({
-        spacing: { before: opts.before ?? 380, after: opts.after ?? 140 },
+        spacing: { before: opts.before ?? 240, after: opts.after ?? 140 },
         indent: { left: HANG_INDENT, hanging: HANG_INDENT },
         children: [
           run(opts.icon + '  ', { size: 18, bold: true, color: headerColor }),
@@ -1122,7 +1122,7 @@ function buildOneDimension(dim, u, p, score1, score2, coupleType, overallUserTyp
       });
     }
     return new Paragraph({
-      spacing: { before: opts.before ?? 380, after: opts.after ?? 140 },
+      spacing: { before: opts.before ?? 240, after: opts.after ?? 140 },
       children: [run(text, { size: 18, bold: true, color: headerColor, allCaps: true })],
     });
   };
@@ -1201,13 +1201,13 @@ function buildOneDimension(dim, u, p, score1, score2, coupleType, overallUserTyp
   result.push(new Paragraph({ spacing: { after: 100 },
     children: [run(`e.g., "we'll share one thing we'd normally hold back, every Sunday evening."`,
       { size: 14, italics: true, color: MUTED })] }));
-  result.push(ruledWriteIn(4, { lineHeight: 400 }));
+  result.push(ruledWriteIn(2, { lineHeight: 340 }));
 
   // 6. Our notes — 5 ruled lines for free-form notes. Slightly tighter
   //    `before` since the preceding ruled write-in provides natural
   //    visual separation already.
-  result.push(standardEyebrow('Our notes', { before: 280 }));
-  result.push(ruledWriteIn(5, { lineHeight: 400 }));
+  result.push(standardEyebrow('Our notes', { before: 160 }));
+  result.push(ruledWriteIn(3, { lineHeight: 340 }));
 
   return result;
 }
