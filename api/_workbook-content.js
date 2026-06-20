@@ -2,7 +2,7 @@
 // Shared content for the personalized workbook generator.
 // Underscore prefix = not an API route (Vercel ignores it).
 
-export const DIMS = ['energy','expression','needs','bids','conflict','repair','closeness','love','stress','feedback'];
+export const DIMS = ['energy','expression','needs','bids','conflict','repair','listening','love','stress','feedback'];
 
 export const DIM_META = {
   energy:     { label: 'Energy & Recharge',           left: 'Inward',         right: 'Outward',          color: '9B5DE5' },
@@ -11,7 +11,7 @@ export const DIM_META = {
   bids:       { label: 'Responding to Bids',           left: 'Reserved',       right: 'Attuned',          color: '10B981' },
   conflict:   { label: 'Conflict Style',               left: 'Engage quickly', right: 'Needs space first', color: '1B5FE8' },
   repair:     { label: 'How You Repair',               left: 'Formal / verbal', right: 'Informal / warmth', color: 'E8673A' },
-  closeness:  { label: 'Closeness & Independence',     left: 'Autonomous',     right: 'Close-seeking',    color: '9B5DE5' },
+  listening:  { label: 'How You Listen',              left: 'Reflective',     right: 'Responsive',      color: 'E8673A' },
   love:       { label: 'How Love Lands',               left: 'Words',          right: 'Actions & Presence', color: '10B981' },
   stress:     { label: 'Communication Under Stress',   left: 'Withdraw',       right: 'Seek connection',  color: '1B5FE8' },
   feedback:   { label: 'Giving & Receiving Feedback',  left: 'Guarded',        right: 'Open',             color: 'E8673A' },
@@ -92,17 +92,17 @@ export const DIM_CONTENT = {
     ],
     thisWeek: 'After the next friction moment, however small, check in explicitly: "Are we actually okay, or are we both just ready to be done?" Name the difference out loud.',
   },
-  closeness: {
-    measures: 'How much independent structure each partner needs within the relationship, separate pursuits, solo time, individual social lives. One end values deep togetherness; the other values a strong sense of self within the partnership.',
-    closeText: '{U} and {P} want a similar balance of togetherness and independence. This prevents the slow accumulation of resentment that mismatched closeness needs create.',
-    gapText: 'One of you gravitates toward maximum togetherness as the foundation of closeness. The other needs a strong independent life within the relationship. The autonomous partner may feel crowded; the close-seeking partner may feel lonely. Neither is making a statement about the relationship, they\'re operating from different blueprints for what closeness looks like.',
+  listening: {
+    measures: "How each partner shows they're listening when the other brings something up. One end receives quietly and sits with it. The other engages actively, reflecting back, asking, responding. Both are real listening. They land differently.",
+    closeText: "{U} and {P} listen in compatible ways. When you bring something to each other, the response tends to match what the speaker wanted, so neither has to translate being heard.",
+    gapText: "One of you listens by going quiet and staying with it. The other listens by responding, asking, reflecting back. The quiet listener can read questions as pressure. The active listener can read silence as distance. Neither is failing to listen. You're showing it in different languages.",
     prompts: [
-      'On a typical week, is each of you getting the amount of alone time and together time you need?',
-      'Are there independent pursuits, hobbies, friendships, routines, that feel important to each of you? Are they supported?',
-      'When one of you wants more space, how do you navigate that without it feeling like rejection?',
-      'What would your ideal weekly rhythm look like if you designed it intentionally?',
+      "When you bring something to each other, do you want to be heard, or do you want a response?",
+      "Has either of you ever read the other's quiet as not caring, or the other's questions as pushing?",
+      "In a hard moment, which do you need first: room to be heard, or active engagement?",
+      "How can each of you signal which kind of listening you need in the moment?",
     ],
-    thisWeek: 'Each of you writes down your ideal week, how much time together, how much apart. Compare them without judgment. Look for the gap and the overlap.',
+    thisWeek: "This week, before responding when your partner brings something up, ask once: 'do you want me to just listen, or do you want me to weigh in?' Then do that.",
   },
   love: {
     measures: 'How each partner most naturally gives and receives affection. Specifically: does verbal expression land most deeply, or does love register more through presence, action, and shared experience?',
@@ -377,7 +377,7 @@ export const LIFE_QUESTION_OPTIONS = {
 // reverse direction from their spectrum meaning, so trusting it here would
 // pull the wrong blurb. Verified against blurb text per dimension.
 //   E/W engage end: conflict=low(Engage quickly), repair=low(Formal/verbal),
-//     stress=high(Seek connection), energy=high(Outward), closeness=high(Close-seeking)
+//     stress=high(Seek connection), energy=high(Outward), listening=high(Responsive)
 //   O/G open end: expression=high(Expressive), feedback=high(Open),
 //     bids=high(Attuned), needs=low(Direct), love=low(Words)
 export const DIM_AXIS = {
@@ -385,7 +385,7 @@ export const DIM_AXIS = {
   repair:     { axis: 'EW', engageWhen: 'low'  },
   stress:     { axis: 'EW', engageWhen: 'high' },
   energy:     { axis: 'EW', engageWhen: 'high' },
-  closeness:  { axis: 'EW', engageWhen: 'high' },
+  listening:  { axis: 'EW', engageWhen: 'high' },
   expression: { axis: 'OG', openWhen:   'high' },
   feedback:   { axis: 'OG', openWhen:   'high' },
   bids:       { axis: 'OG', openWhen:   'high' },
@@ -479,10 +479,10 @@ export const GAP_BLURBS = {
     some_gap:    "You repair slightly differently. The risk is that one of you may consider a situation resolved while the other is still processing.",
     notable_gap: "You repair in very different ways. One needs verbal closure while the other tends to move on once warmth returns. If feelings go unshared, the same conflict can repeat.",
   },
-  closeness: {
-    aligned:     "You want similar amounts of closeness and independence. The balance of together-time and alone-time tends to feel right to both of you.",
-    some_gap:    "You want slightly different amounts of closeness. Small mismatches in how often you reach for each other can add up.",
-    notable_gap: "You want notably different amounts of closeness. One tends to reach more, while the other defaults to space. Intentional communication can keep this balance in check.",
+  listening: {
+    aligned:     "You listen in similar ways. When one of you brings something up, the attention the other offers tends to match what the speaker wanted.",
+    some_gap:    "You listen a little differently. One of you leans toward quiet receiving, the other toward active response. Small mismatches in what being heard looks like can add up.",
+    notable_gap: "You listen in notably different ways. One receives in silence; the other engages, asks, reflects back. Name which one you need in a given moment, so quiet doesn't read as distance and questions don't read as pressure.",
   },
   love: {
     aligned:     "You tend to give and receive love in compatible ways. What works for one tends to work for the other. Less translation needed.",
@@ -585,17 +585,17 @@ export const WHEN_THIS_SHOWS_UP = {
     XZ: "Both of you move on quietly, which works for most things. For the bigger ones, one of you should say out loud: \'I want to make sure we\'re actually repaired here.\'",
     YZ: "Both of you need time, and may leave the final check unspoken. A one-liner 48 hours later can be enough: \'Are we good after Monday?\'",
   },
-  closeness: {
-    WW: "Both of you want closeness, and both may also expect it to happen on its own. It can help to build one small ritual that doesn\'t require organizing, like a ten-minute talk or a shared morning routine.",
-    XX: "Both of you tend to value shared activity over shared conversation, which can make closeness feel procedural. Schedule one casual thing that isn\'t about logistics: a walk, a show, dinner without phones.",
-    YY: "Both of you value independence, which can sometimes tip into parallel lives. One small weekly overlap, a meal or a walk, can anchor the closeness.",
-    ZZ: "Both of you default to independent rhythms. It can help to build a specific shared time, not optional, not moveable, where the expectation is being together without needing to produce anything.",
-    WX: "[W partner name] tends to want a lot of connection, while [X partner name] wants side-by-side presence. Both are valid forms of closeness, they simply look different. Try alternating: one night [W partner name]\'s way, one [X partner name]\'s. Both count.",
-    WY: "[W partner name] tends to want a bigger version of closeness, while [Y partner name] needs it quieter. [W partner name] can turn the volume down without turning the signal off, and [Y partner name] can turn it up slightly on purpose.",
-    WZ: "[W partner name] tends to bid frequently, while [Z partner name] may respond rarely but deeply. [W partner name] can feel unmet, and [Z partner name] can feel crowded. Lower the frequency, while raising the intention. Try for one thing a week with [Z partner name]\'s full attention.",
-    XY: "[X partner name] tends to offer closeness practically, while [Y partner name] offers it emotionally. Name the dynamic. Shared logistics can be closeness for [X partner name], and being seen can be closeness for [Y partner name]. Both can happen in the same week.",
-    XZ: "Both of you are comfortable with independence, and may also drift over time. Anchor with a ritual that isn\'t about talking: cooking, a show, a walk. Closeness doesn\'t always require conversation.",
-    YZ: "Both of you may wait the other out. Decide in advance what \'too much space\' looks like (a week, three days, whatever you agree on) and reengage before that threshold.",
+  listening: {
+    WW: "Both of you listen by engaging, asking, responding. Conversations move fast. Build in a beat where one of you just receives before the other jumps in, so the listening doesn't get crowded out by the responding.",
+    XX: "Both of you respond and stay in it, but you process before you say much back. Say the small acknowledgment out loud, an 'I hear you,' so the other knows they've landed while you're still thinking.",
+    YY: "Both of you take things in quietly before you respond. That's deep listening, but in a hard moment two quiet listeners can each wait for the other to engage. Agree on who reflects back first.",
+    ZZ: "Both of you listen by going quiet and sitting with it. Real attention, easy to miss. Build a small signal, a word or a touch, so the other knows the silence is full, not empty.",
+    WX: "[W partner name] responds quickly and out loud, while [X partner name] takes it in before answering. [W partner name] can leave a beat after [X partner name] speaks. [X partner name] can offer a quick 'still with you' so the quiet doesn't read as distance.",
+    WY: "[W partner name] listens by engaging and asking, while [Y partner name] needs to receive quietly first. [W partner name] can hold the questions a moment. [Y partner name] can name 'I'm taking this in' so the quiet isn't mistaken for pulling away.",
+    WZ: "[W partner name] responds and asks; [Z partner name] receives quietly and says little back. [W partner name] can read the quiet as attention, not absence. [Z partner name] can offer one small signal so [W partner name] knows it landed.",
+    XY: "[X partner name] responds once they've processed; [Y partner name] takes it in and surfaces it later. Both of you listen deeply, neither shows it in the moment. Say the small acknowledgment out loud so each of you knows the other is there.",
+    XZ: "Both of you receive quietly and respond sparingly. Genuine attention, low signal. Build a habit of one verbal acknowledgment when the other brings something, so being heard is visible.",
+    YZ: "Both of you go quiet to listen, and both surface things slowly. In a hard moment, decide who reflects back first so a real exchange doesn't stall in two kinds of silence.",
   },
   love: {
     WW: "Both of you tend to be actively loving, which can make the misses feel especially strange. Tell each other plainly: \'this is what works for me.\' Specific and concrete, not abstract.",

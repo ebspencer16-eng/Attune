@@ -1216,8 +1216,8 @@ function buildOneDimension(dim, u, p, score1, score2, coupleType, overallUserTyp
 // categories used in the comms exercise on the website, so the workbook
 // feels like a direct extension of what the couple just did.
 const DOMAIN_ORDER = [
-  { title: 'Your Inner Worlds',    color: PURPLE, dims: ['energy','expression','closeness'] },
-  { title: 'How You Connect',      color: ORANGE, dims: ['love','needs','bids'] },
+  { title: 'Your Inner Worlds',    color: PURPLE, dims: ['energy','expression'] },
+  { title: 'How You Connect',      color: ORANGE, dims: ['love','needs','bids','listening'] },
   { title: 'When Things Get Hard', color: BLUE,   dims: ['conflict','stress','repair','feedback'] },
 ];
 
