@@ -12455,7 +12455,7 @@ export default function App() {
     hasLMFT:        _basePkg.hasLMFT        || !!(order?.addonLmft),
     hasAnniversary: _basePkg.hasAnniversary || !!(order?.addonReflection),
     hasBudget:      _basePkg.hasBudget      || !!(order?.addonBudget),
-    hasIntimacy:    !!(order?.addonIntimacy) || (() => { try { return localStorage.getItem('attune_dev_intimacy') === '1'; } catch { return false; } })(),
+    hasIntimacy:    !!(order?.addonIntimacy) || (() => { try { return localStorage.getItem('attune_dev_intimacy') === '1'; } catch { return false; } })() || (() => { try { const q = new URLSearchParams(window.location.search); return !!q.get('demo') && q.get('intimacy') === '1'; } catch { return false; } })(),
   };
 
   // Partner B "waiting/ready" poll. Declared here, BEFORE any early return,

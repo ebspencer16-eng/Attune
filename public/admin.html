@@ -937,6 +937,7 @@
             <a class="ux-link" href="/app?demo=premium&fresh=1&view=exercise1" target="_blank" rel="noopener">Communication ↗</a>
             <a class="ux-link" href="/app?demo=premium&fresh=1&view=exercise2" target="_blank" rel="noopener">Expectations ↗</a>
             <a class="ux-link" href="/app?demo=premium&fresh=1&view=exercise3" target="_blank" rel="noopener">Relationship Reflection ↗</a>
+            <a class="ux-link" href="/app?demo=premium&fresh=1&view=intimacy&intimacy=1" target="_blank" rel="noopener">Physical Intimacy ↗</a>
           </div>
         <div class="ux-cardlabel">Tools</div>
           <div class="ux-row">
@@ -1922,6 +1923,7 @@ async function renderPromosPage(force) {
     { key: o => !!o.addon_lmft,     label: 'LMFT',       color: '#34D399' },
     { key: o => !!o.addon_reflection, label: 'Reflection', color: '#F4B860' },
     { key: o => !!o.addon_budget,   label: 'Budget',     color: '#E36BAE' },
+    { key: o => !!o.addon_intimacy, label: 'Intimacy',   color: '#B5546E' },
   ];
   const byPkg = {};
   pkgs.forEach(k => { byPkg[k] = orders.filter(o => o.pkg_key === k); });
@@ -2634,6 +2636,7 @@ async function loadFeedbackData() {
       {label:'Couple type system', scores:[4.4,3.9,4.1]},
       {label:'Detailed feedback pages', scores:[4.0,3.7,3.9]},
       {label:'Workbook', scores:[4.1,3.6,3.9]},
+      {label:'Intimacy add-on', scores:[4.2,3.8,4.0]},
       {label:'Overall flow / UX', scores:[4.4,null,4.3]},
       {label:'Time it took', scores:[4.0,null,4.1]},
     ],
@@ -2798,7 +2801,7 @@ const ageData = {labels:['18–24','25–34','35–44','45–54','55+'],data:[8,
 const genderData = {labels:['Woman','Man','Non-binary','Other'],data:[51,43,4,2]};
 const relStatusData = {labels:['Dating','Engaged','Married','Remarried','Partnership'],data:[18,26,44,7,5]};
 const childrenData = {labels:['None','1','2','3+','Expecting'],data:[38,19,28,10,5]};
-const dimScores = {labels:['Energy','Thinking','Expression','Conflict','Decision','Boundaries','Intimacy','Future'],data:[72,68,55,61,74,79,63,70]};
+const dimScores = {labels:['Energy','Expression','Needs','Bids','Listening','Conflict','Repair','Love','Stress','Feedback'],data:[74,62,58,71,65,61,68,70,55,64]};
 const commTypes = [{l:'Balanced pair',v:24},{l:'Expressive + Reserved',v:19},{l:'Both expressive',v:17},{l:'Thinker + Feeler',v:14},{l:'Planner + Spontaneous',v:12},{l:'Other',v:14}];
 const expAlign = {labels:['Finances','Household','Social life','Career','Family','Intimacy','Faith/values','Recreation'],data:[48,72,65,56,61,43,78,69]};
 const expGaps = [{l:'Intimacy expectations',v:57},{l:'Financial approach',v:52},{l:'Career priorities',v:44},{l:'Extended family',v:38},{l:'Social time',v:35}];
