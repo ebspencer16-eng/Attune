@@ -283,6 +283,20 @@ async function handleWebhook(req) {
     if (apiKey && intent.receipt_email && orderCreated) {
       // Order confirmation
       const subject = `Attune Order Confirmation`;
+      // Itemize what the order actually includes (premium bundles workbook + LMFT).
+      const PKG_LABELS = { core: 'The Attune Assessment', newlywed: 'Starting Out Collection', anniversary: 'Relationship Reflection', premium: 'Attune Premium' };
+      const includedItems = [];
+      if (meta.addonWorkbook)          includedItems.push(`Personalized Workbook (${meta.addonWorkbook === 'print' ? 'printed' : 'digital'})`);
+      if (meta.addonIntimacy === '1')  includedItems.push('Intimacy Expectations');
+      if (meta.addonReflection === '1') includedItems.push('Relationship Reflection');
+      if (meta.addonBudget === '1')    includedItems.push('Build a Budget tool');
+      if (meta.addonChecklist === '1') includedItems.push('Starting Out Checklist');
+      if (meta.pkgKey === 'premium' || meta.addonLmft === '1') includedItems.push('LMFT Session');
+      const includedRow = includedItems.length ? `
+            <tr>
+              <td style="padding:.65rem 1rem;font-weight:700;border-top:1px solid #E8DDD0;vertical-align:top;">Included</td>
+              <td style="padding:.65rem 1rem;border-top:1px solid #E8DDD0;">${includedItems.join('<br>')}</td>
+            </tr>` : '';
       const html = `
         <div style="font-family:Arial,sans-serif;max-width:520px;margin:0 auto;padding:2rem;color:#1E1610;">
           <h2 style="color:#E8673A;margin-bottom:1rem;">Your order is confirmed.</h2>
@@ -295,8 +309,9 @@ async function handleWebhook(req) {
             </tr>
             <tr>
               <td style="padding:.65rem 1rem;font-weight:700;">Package</td>
-              <td style="padding:.65rem 1rem;">${meta.pkgKey || '—'}</td>
+              <td style="padding:.65rem 1rem;">${PKG_LABELS[meta.pkgKey] || meta.pkgKey || '—'}</td>
             </tr>
+            ${includedRow}
             <tr style="background:#FBF8F3;">
               <td style="padding:.65rem 1rem;font-weight:700;">Total</td>
               <td style="padding:.65rem 1rem;">$${(intent.amount / 100).toFixed(2)}</td>
