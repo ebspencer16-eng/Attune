@@ -10615,6 +10615,9 @@ function PartnerBCompletionScreen({ partnerAName, partnerBName, partnerADone, pa
             hasReflection: !!(ord?.addon_reflection || acct?.pkg === 'anniversary'),
             hasBudget: !!(ord?.addon_budget || acct?.pkg === 'newlywed'),
             hasLMFT: !!(ord?.addon_lmft || acct?.pkg === 'premium'),
+            hasWorkbook: !!(ord?.addon_workbook),
+            hasIntimacy: !!(ord?.addon_intimacy),
+            hasChecklist: !!(ord?.addon_checklist || acct?.pkg === 'newlywed'),
           }),
         });
 
@@ -11766,6 +11769,9 @@ export default function App() {
         hasReflection: pkg.hasAnniversary,
         hasBudget: pkg.hasBudget,
         hasLMFT: pkg.hasLMFT,
+        hasWorkbook: !!(order?.addonWorkbook),
+        hasIntimacy: pkg.hasIntimacy,
+        hasChecklist: pkg.hasChecklist,
       }),
     }).catch(() => {});
   }, [highlightsSeen]);

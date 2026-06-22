@@ -9,7 +9,7 @@
  *   workbook_ready  — { toEmail, toName, partnerName, downloadUrl, orderNum }
  *   beta_survey     — { toEmail, toName, partnerName, coupleType, surveyUrl }
  *   checkin_6mo     — { toEmail, toName, partnerName, retakeUrl }
- *   results_viewed  — { toEmail, toName, partnerName, coupleType, portalUrl, hasReflection, hasBudget, hasLMFT }
+ *   results_viewed  — { toEmail, toName, partnerName, coupleType, portalUrl, hasReflection, hasBudget, hasLMFT, hasWorkbook, hasIntimacy, hasChecklist }
  *   welcome_account — { toEmail, toName, partnerName, portalUrl }
  *   partner_joined_notification — { toEmail, toName, partnerName, portalUrl }
  *   lmft_scheduled  — { toEmail, toName, partnerName, schedulingUrl, orderNum }
@@ -206,72 +206,52 @@ function checkin6moEmail({ toName, partnerName, retakeUrl }) {
 }
 
 // ── results_viewed email ─────────────────────────────────────────────────────
-function resultsViewedEmail({ toName, partnerName, coupleType, portalUrl, hasReflection, hasBudget, hasLMFT }) {
+function resultsViewedEmail({ toName, partnerName, coupleType, portalUrl, hasReflection, hasBudget, hasLMFT, hasWorkbook, hasIntimacy, hasChecklist }) {
   const name = toName || "there";
   const partner = partnerName || "your partner";
   const appUrl = portalUrl || "https://attune-relationships.com/app";
 
-  const addonRows = [
-    ...(!hasReflection ? [`
+  // Full add-on catalog. owned -> listed under "what's included"; not owned ->
+  // shown as a "go deeper" upsell. Order matches the offering.
+  const CATALOG = [
+    { owned: !!hasWorkbook,   name: 'Personalized Workbook',   icon: '📖', price: 'from $19', bg: '#FDF8F3',
+      desc: 'A 20 to 30 page workbook built from your results. Conversation starters and exercises for how you two are wired.' },
+    { owned: !!hasIntimacy,   name: 'Intimacy Expectations',   icon: '♡', price: '+$20', bg: '#EEF2FF',
+      desc: 'A private set of questions about physical intimacy. Scored for gaps and conversation, like the rest of your results.' },
+    { owned: !!hasReflection, name: 'Relationship Reflection', icon: '♡', price: '+$40', bg: '#EEF2FF',
+      desc: 'A third exercise. Shared history, the moments that shaped you, and where you are pointed. Side-by-side insights and an action plan.' },
+    { owned: !!hasBudget,     name: 'Build a Budget tool',     icon: '💰', price: '+$20', bg: '#FFF8F5',
+      desc: 'Map what each of you values spending on and where your instincts differ. Adds context to your expectations results.' },
+    { owned: !!hasChecklist,  name: 'Starting Out Checklist',  icon: '✓', price: '+$20', bg: '#FDF8F3',
+      desc: 'A practical guide to starting your life together. Names, finances, household logistics.' },
+    { owned: !!hasLMFT,       name: 'LMFT Session',            icon: '🧠', price: '+$150', bg: '#F0F0FF',
+      desc: 'A 50-minute video session with a licensed marriage and family therapist. They review your results before you meet.' },
+  ];
+
+  const card = (a, showPrice) => `
     <tr>
       <td style="padding:12px 0;border-bottom:1px solid #F3EDE6;vertical-align:top">
         <div style="display:flex;align-items:flex-start;gap:12px">
-          <div style="width:36px;height:36px;border-radius:10px;background:#EEF2FF;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:1rem">♡</div>
+          <div style="width:36px;height:36px;border-radius:10px;background:${a.bg};display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:1rem">${a.icon}</div>
           <div>
-            <div style="font-size:0.88rem;font-weight:700;color:#0E0B07;margin-bottom:3px">Relationship Reflection</div>
-            <div style="font-size:0.78rem;color:#8C7A68;line-height:1.6">A third exercise: shared history, meaningful moments, priorities, and what you admire in each other. Includes side-by-side insights and action plan.</div>
+            <div style="font-size:0.88rem;font-weight:700;color:#0E0B07;margin-bottom:3px">${a.name}</div>
+            <div style="font-size:0.78rem;color:#8C7A68;line-height:1.6">${a.desc}</div>
           </div>
-          <div style="text-align:right;flex-shrink:0;padding-left:8px">
-            <div style="font-size:0.92rem;font-weight:700;color:#0E0B07">+$40</div>
-          </div>
+          ${showPrice ? `<div style="text-align:right;flex-shrink:0;padding-left:8px"><div style="font-size:0.92rem;font-weight:700;color:#0E0B07">${a.price}</div></div>` : ''}
         </div>
       </td>
-    </tr>`] : []),
-    ...(!hasBudget ? [`
-    <tr>
-      <td style="padding:12px 0;border-bottom:1px solid #F3EDE6;vertical-align:top">
-        <div style="display:flex;align-items:flex-start;gap:12px">
-          <div style="width:36px;height:36px;border-radius:10px;background:#FFF8F5;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:1rem">💰</div>
-          <div>
-            <div style="font-size:0.88rem;font-weight:700;color:#0E0B07;margin-bottom:3px">Budget Priorities Exercise</div>
-            <div style="font-size:0.78rem;color:#8C7A68;line-height:1.6">Map what each of you values spending on and where your instincts differ. Adds context to your expectations results.</div>
-          </div>
-          <div style="text-align:right;flex-shrink:0;padding-left:8px">
-            <div style="font-size:0.92rem;font-weight:700;color:#0E0B07">+$20</div>
-          </div>
-        </div>
-      </td>
-    </tr>`] : []),
-    ...(!hasLMFT ? [`
-    <tr>
-      <td style="padding:12px 0;border-bottom:1px solid #F3EDE6;vertical-align:top">
-        <div style="display:flex;align-items:flex-start;gap:12px">
-          <div style="width:36px;height:36px;border-radius:10px;background:#F0F0FF;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:1rem">🧠</div>
-          <div>
-            <div style="font-size:0.88rem;font-weight:700;color:#0E0B07;margin-bottom:3px">LMFT Session</div>
-            <div style="font-size:0.78rem;color:#8C7A68;line-height:1.6">A 50-minute video session with a licensed marriage and family therapist who reviews your joint results before you meet. Not a first appointment. A real conversation about what your results mean.</div>
-          </div>
-          <div style="text-align:right;flex-shrink:0;padding-left:8px">
-            <div style="font-size:0.92rem;font-weight:700;color:#0E0B07">+$150</div>
-          </div>
-        </div>
-      </td>
-    </tr>`] : []),
-    `<tr>
-      <td style="padding:12px 0;vertical-align:top">
-        <div style="display:flex;align-items:flex-start;gap:12px">
-          <div style="width:36px;height:36px;border-radius:10px;background:#FDF8F3;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:1rem">📖</div>
-          <div>
-            <div style="font-size:0.88rem;font-weight:700;color:#0E0B07;margin-bottom:3px">Personalized Workbook</div>
-            <div style="font-size:0.78rem;color:#8C7A68;line-height:1.6">A 20–30 page workbook drawn entirely from your results. Conversation starters, reflection activities, and exercises built for how you two are actually wired.</div>
-          </div>
-          <div style="text-align:right;flex-shrink:0;padding-left:8px">
-            <div style="font-size:0.92rem;font-weight:700;color:#0E0B07">from $19</div>
-          </div>
-        </div>
-      </td>
-    </tr>`,
-  ].join('');
+    </tr>`;
+
+  // Base elements every order includes, plus owned add-ons.
+  const includedNames = ['Communication assessment', 'Expectations assessment', 'Couple type + map',
+    ...CATALOG.filter(a => a.owned).map(a => a.name)];
+  const includedRows = includedNames.map(n => `
+    <tr><td style="padding:7px 0;font-size:0.84rem;color:#0E0B07">
+      <span style="color:#E8673A;font-weight:700;margin-right:8px">&#10003;</span>${n}
+    </td></tr>`).join('');
+
+  const upsell = CATALOG.filter(a => !a.owned);
+  const upsellRows = upsell.map(a => card(a, true)).join('');
 
   return {
     subject: `Your Attune results are ready${coupleType ? `. You're ${coupleType}` : ""}`,
@@ -280,15 +260,21 @@ function resultsViewedEmail({ toName, partnerName, coupleType, portalUrl, hasRef
       <p>Hi ${name}, you and ${partner} just completed Attune${coupleType ? `. Your couple type is <strong>${coupleType}</strong>` : ""}. Everything you need is in your results portal.</p>
       <div class="btn-wrap"><a href="${appUrl}" class="btn">View your results →</a></div>
       <div class="divider"></div>
+      <p style="font-size:0.82rem;font-weight:700;color:#0E0B07;margin-bottom:10px">Your results include</p>
+      <table style="width:100%;border-collapse:collapse;margin-bottom:4px">
+        ${includedRows}
+      </table>
+      <div class="divider"></div>
       <p style="font-size:0.82rem;font-weight:700;color:#0E0B07;margin-bottom:6px">What did you think?</p>
       <p style="font-size:0.82rem;">We'd love to hear how it landed. Reply with anything: what was useful, what felt off, what surprised you. We read every response.</p>
+      ${upsell.length ? `
       <div class="divider"></div>
       <p style="font-size:0.82rem;font-weight:700;color:#0E0B07;margin-bottom:10px">Go deeper with your results</p>
       <p style="font-size:0.8rem;color:#8C7A68;margin-bottom:14px">A few things you can add from your portal, based on what you've already completed:</p>
       <table style="width:100%;border-collapse:collapse">
-        ${addonRows}
+        ${upsellRows}
       </table>
-      <div class="btn-wrap" style="margin-top:20px"><a href="${appUrl}" class="btn" style="background:linear-gradient(135deg,#0E0B07,#2D2250)">Add to your package →</a></div>
+      <div class="btn-wrap" style="margin-top:20px"><a href="${appUrl}" class="btn" style="background:linear-gradient(135deg,#0E0B07,#2D2250)">Add to your package →</a></div>` : ''}
       <div class="divider"></div>
       <p style="font-size:0.82rem;font-weight:700;color:#0E0B07;margin-bottom:6px">In Practice</p>
       <p style="font-size:0.8rem;color:#8C7A68;margin-bottom:14px">A few things worth reading while your results are fresh:</p>
