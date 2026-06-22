@@ -415,6 +415,9 @@ export default async function handler(req) {
       codeMeta.includesWorkbook = !!dbRow.includes_workbook;
       codeMeta.workbookVariant  = dbRow.workbook_variant || 'digital';
       codeMeta.includesIntimacy = !!dbRow.includes_intimacy;
+      codeMeta.includesReflection = !!dbRow.includes_reflection;
+      codeMeta.includesBudget     = !!dbRow.includes_budget;
+      codeMeta.includesChecklist  = !!dbRow.includes_checklist;
       codeMeta.appliesTo        = dbRow.applies_to || 'package';
       if (dbRow.active === false) {
         return new Response(JSON.stringify({ error: 'This promo code has been deactivated.' }), {
@@ -491,14 +494,26 @@ export default async function handler(req) {
         it._promoIntimacyFree = true;
       });
     }
+    // Bundled reflection / budget / checklist (e.g. ATTUNE-BETA-1/2). Same pattern:
+    // force onto each item, mark free so it routes through the no-charge path.
+    if (codeMeta.includesReflection) {
+      items.forEach(it => { it.addonReflection = true; it._promoReflectionFree = true; });
+    }
+    if (codeMeta.includesBudget) {
+      items.forEach(it => { it.addonBudget = true; it._promoBudgetFree = true; });
+    }
+    if (codeMeta.includesChecklist) {
+      items.forEach(it => { it.addonChecklist = true; it._promoChecklistFree = true; });
+    }
     const addonsTotal = items.reduce((sum, it) => {
       let a = itemAddonTotal(it);
       if (it._promoWorkbookFree) {
         a -= (it.addonWorkbook === 'print' ? ADDON_PRICES.workbookPrint : ADDON_PRICES.workbookDigital);
       }
-      if (it._promoIntimacyFree) {
-        a -= ADDON_PRICES.intimacy;
-      }
+      if (it._promoIntimacyFree)   a -= ADDON_PRICES.intimacy;
+      if (it._promoReflectionFree) a -= ADDON_PRICES.reflection;
+      if (it._promoBudgetFree)     a -= ADDON_PRICES.budget;
+      if (it._promoChecklistFree)  a -= ADDON_PRICES.checklist;
       return sum + Math.max(0, a);
     }, 0);
 
@@ -574,6 +589,7 @@ export default async function handler(req) {
               addon_lmft:        item.addonLmft,
               addon_reflection:  item.addonReflection,
               addon_budget:      item.addonBudget,
+              addon_checklist:   item.addonChecklist,
               addon_intimacy:    item.addonIntimacy,
               gift_note:         item.giftNote || null,
               stripe_payment_intent_id: `promo_${normalizedCode}_${Date.now()}_${i}`,

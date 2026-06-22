@@ -9771,7 +9771,7 @@ function AuthModal({ mode, onClose, onSuccess }) {
       if (!localStorage.getItem('attune_order') && authData.user.email) {
         try {
           const { data: orderRow } = await sb.from('orders')
-            .select('id,pkg_key,addon_lmft,addon_reflection,addon_budget,addon_intimacy,addon_workbook,is_physical,order_num,user_id')
+            .select('id,pkg_key,addon_lmft,addon_reflection,addon_budget,addon_checklist,addon_intimacy,addon_workbook,is_physical,order_num,user_id')
             .eq('buyer_email', authData.user.email)
             .order('created_at', { ascending: false })
             .limit(1)
@@ -9782,6 +9782,7 @@ function AuthModal({ mode, onClose, onSuccess }) {
               addonLmft:       orderRow.addon_lmft || false,
               addonReflection: orderRow.addon_reflection || false,
               addonBudget:     orderRow.addon_budget || false,
+              addonChecklist:  orderRow.addon_checklist || false,
               addonIntimacy:     orderRow.addon_intimacy || false,
               addonWorkbook:   orderRow.addon_workbook || null,
               isPhysical:      orderRow.is_physical || false,
@@ -11452,7 +11453,7 @@ export default function App() {
             let orderRow = null;
             try {
               const { data: byId } = await sb.from('orders')
-                .select('order_num,pkg_key,is_physical,addon_lmft,addon_reflection,addon_budget,addon_intimacy,addon_workbook')
+                .select('order_num,pkg_key,is_physical,addon_lmft,addon_reflection,addon_budget,addon_checklist,addon_intimacy,addon_workbook')
                 .eq('user_id', session.user.id)
                 .order('created_at', { ascending: false })
                 .limit(1)
@@ -11460,7 +11461,7 @@ export default function App() {
               if (byId) orderRow = byId;
               else if (session.user.email) {
                 const { data: byEmail } = await sb.from('orders')
-                  .select('order_num,pkg_key,is_physical,addon_lmft,addon_reflection,addon_budget,addon_intimacy,addon_workbook')
+                  .select('order_num,pkg_key,is_physical,addon_lmft,addon_reflection,addon_budget,addon_checklist,addon_intimacy,addon_workbook')
                   .eq('buyer_email', session.user.email.toLowerCase())
                   .order('created_at', { ascending: false })
                   .limit(1)
@@ -11520,6 +11521,7 @@ export default function App() {
                   addonLmft:       !!orderRow.addon_lmft,
                   addonReflection: !!orderRow.addon_reflection,
                   addonBudget:     !!orderRow.addon_budget,
+                  addonChecklist:  !!orderRow.addon_checklist,
                   addonIntimacy:     !!orderRow.addon_intimacy,
                   addonWorkbook:   orderRow.addon_workbook || '',
                 }));
@@ -11580,14 +11582,14 @@ export default function App() {
             // Self-heal: fetch the most recent order and restore it.
             try {
               let { data: orderRow } = await sb.from('orders')
-                .select('order_num,pkg_key,is_physical,addon_lmft,addon_reflection,addon_budget,addon_intimacy,addon_workbook')
+                .select('order_num,pkg_key,is_physical,addon_lmft,addon_reflection,addon_budget,addon_checklist,addon_intimacy,addon_workbook')
                 .eq('user_id', session.user.id)
                 .order('created_at', { ascending: false })
                 .limit(1)
                 .maybeSingle();
               if (!orderRow && session.user.email) {
                 const { data: byEmail } = await sb.from('orders')
-                  .select('order_num,pkg_key,is_physical,addon_lmft,addon_reflection,addon_budget,addon_intimacy,addon_workbook')
+                  .select('order_num,pkg_key,is_physical,addon_lmft,addon_reflection,addon_budget,addon_checklist,addon_intimacy,addon_workbook')
                   .eq('buyer_email', session.user.email.toLowerCase())
                   .order('created_at', { ascending: false })
                   .limit(1)
@@ -11603,6 +11605,7 @@ export default function App() {
                   addonLmft:       !!orderRow.addon_lmft,
                   addonReflection: !!orderRow.addon_reflection,
                   addonBudget:     !!orderRow.addon_budget,
+                  addonChecklist:  !!orderRow.addon_checklist,
                   addonIntimacy:     !!orderRow.addon_intimacy,
                   addonWorkbook:   orderRow.addon_workbook || '',
                 }));
@@ -11612,6 +11615,7 @@ export default function App() {
                   addonLmft:       !!orderRow.addon_lmft,
                   addonReflection: !!orderRow.addon_reflection,
                   addonBudget:     !!orderRow.addon_budget,
+                  addonChecklist:  !!orderRow.addon_checklist,
                   addonIntimacy:     !!orderRow.addon_intimacy,
                   addonWorkbook:   orderRow.addon_workbook || prev.addonWorkbook || '',
                   orderNum: orderRow.order_num,
@@ -12452,6 +12456,7 @@ export default function App() {
   const _basePkg = pkgConfig[demoPkg] || pkgConfig.core;
   const pkg = {
     ..._basePkg,
+    hasChecklist:   _basePkg.hasChecklist   || !!(order?.addonChecklist),
     hasLMFT:        _basePkg.hasLMFT        || !!(order?.addonLmft),
     hasAnniversary: _basePkg.hasAnniversary || !!(order?.addonReflection),
     hasBudget:      _basePkg.hasBudget      || !!(order?.addonBudget),
