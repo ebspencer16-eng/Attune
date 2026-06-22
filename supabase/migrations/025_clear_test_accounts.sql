@@ -1,32 +1,33 @@
 -- Migration 025: clear test accounts (Ellie + Preston) for a clean repurchase
 -- ============================================================================
 -- One-off data reset. Removes both test accounts and every row tied to them so
--- the same two emails can repurchase with the new code and redo the experience
--- from scratch.
+-- the same two emails can repurchase with the new code and redo from scratch.
 --
 -- HOW TO RUN
 --   1. Replace the two placeholder emails below with the real ones.
 --   2. Run the whole file in the Supabase SQL Editor (one execution).
 --   3. The NOTICE at the end prints how many rows were removed per table.
 --
--- WHAT IT TOUCHES (per-user data, in FK-safe order)
+-- Uses only columns the live base schema guarantees. User ids are resolved from
+-- auth.users by email (the reliable source); profiles/orders are matched off
+-- that plus the emails directly. lmft_requests has no user_id in the live DB, so
+-- it is matched by email and by order_id; feedback_submissions by email.
+--
+-- WHAT IT TOUCHES (per-user data)
 --   orders               (purchase records; carries qr_token + shipping)
---   lmft_requests        (LMFT bookings)
---   feedback_submissions (their feedback)
---   partner_sessions     (Partner B answers, keyed by invite_code)
+--   lmft_requests        (LMFT bookings; matched by email + order_id)
+--   feedback_submissions (their feedback; matched by email)
+--   partner_sessions     (Partner B answers; matched by invite_code + partner_b_id)
 --   profiles             (account + all answers + budget/checklist/notes/intimacy)
 --   auth.users           (the login; cascades any remaining profile + auth rows)
 --
--- NOT TOUCHED
---   beta_codes           (the new code must survive so they can repurchase)
---   deleted_user_archive (this is a test reset, not a research deletion; nothing archived)
---   workbooks storage    (SQL cannot delete Storage files; old workbook files under
---                         the deleted order_nums are orphaned and harmless. Clear the
---                         `workbooks` bucket manually if you want them gone.)
+-- NOT TOUCHED: beta_codes (new code must survive), deleted_user_archive (test
+-- reset, nothing archived), workbooks storage (SQL cannot delete Storage files;
+-- clear the `workbooks` bucket manually if you want the old files gone).
 --
--- After running: re-signup with the same emails, then repurchase with the new code.
--- If you would rather KEEP the logins and only wipe progress + orders, delete the
--- final `delete from auth.users` block before running.
+-- After running: re-signup with the same emails, then repurchase with the new
+-- code. To KEEP the logins and only wipe progress + orders, delete the final
+-- `delete from auth.users` block before running.
 -- ============================================================================
 
 do $$
@@ -40,31 +41,34 @@ declare
 
   uids uuid[];
   inv  text[];
+  ords text[];
   n_orders int; n_lmft int; n_fb int; n_ps int; n_prof int; n_auth int;
 begin
-  -- Guard: refuse to run while the placeholders are still in place.
   if exists (select 1 from unnest(emails) e where e like '%email_here%') then
     raise exception 'Replace the placeholder emails at the top of this migration before running.';
   end if;
 
-  -- Resolve target user ids (from profiles and auth.users) and invite codes
-  -- BEFORE deleting anything, so later steps still have them.
-  select coalesce(array_agg(distinct id) filter (where id is not null), '{}')
+  -- Target auth user ids (auth.users.email is the reliable source).
+  select coalesce(array_agg(id), '{}')
     into uids
-  from (
-    select id from public.profiles
-      where lower(email) = any(emails) or lower(partner_email) = any(emails)
-    union
-    select id from auth.users where lower(email) = any(emails)
-  ) t;
+  from auth.users
+  where lower(email) = any(emails);
 
+  -- Invite codes for their profiles (drives partner_sessions cleanup).
   select coalesce(array_agg(distinct invite_code) filter (where invite_code is not null), '{}')
     into inv
   from public.profiles
-  where lower(email) = any(emails) or id = any(uids);
+  where id = any(uids);
 
-  -- orders: user_id is ON DELETE SET NULL, so delete explicitly. Matches by
-  -- linked user, buyer email, or partner email. (qr_token lives on this row.)
+  -- Order numbers for their orders (drives lmft_requests.order_id cleanup).
+  select coalesce(array_agg(distinct order_num) filter (where order_num is not null), '{}')
+    into ords
+  from public.orders
+  where user_id = any(uids)
+     or lower(buyer_email)   = any(emails)
+     or lower(partner_email) = any(emails);
+
+  -- orders (user_id is ON DELETE SET NULL, so delete explicitly; qr_token is here)
   with d as (
     delete from public.orders
      where user_id = any(uids)
@@ -73,34 +77,32 @@ begin
     returning 1
   ) select count(*) into n_orders from d;
 
+  -- lmft_requests: no user_id column in the live DB. Match by booking email and
+  -- by order_id (which stores the order_num of the linked order).
   with d as (
     delete from public.lmft_requests
-     where user_id = any(uids) or lower(email) = any(emails)
+     where lower(email) = any(emails)
+        or order_id = any(ords)
     returning 1
   ) select count(*) into n_lmft from d;
 
+  -- feedback_submissions: no user_id column. Match by email.
   with d as (
     delete from public.feedback_submissions
-     where user_id = any(uids) or lower(email) = any(emails)
+     where lower(email) = any(emails)
     returning 1
   ) select count(*) into n_fb from d;
 
-  -- partner_sessions: keyed by the inviter's invite_code; also catch rows where
-  -- one of these users was Partner B.
   with d as (
     delete from public.partner_sessions
-     where invite_code = any(inv) or partner_b_id = any(uids)
+     where invite_code = any(inv)
+        or partner_b_id = any(uids)
     returning 1
   ) select count(*) into n_ps from d;
 
-  -- profiles: explicit delete handles any profile whose email matches but whose
-  -- id is not in auth.users. partner_profile_id is ON DELETE SET NULL, so the
-  -- partner link drops on its own.
   with d as (
     delete from public.profiles
      where id = any(uids)
-        or lower(email)         = any(emails)
-        or lower(partner_email) = any(emails)
     returning 1
   ) select count(*) into n_prof from d;
 
