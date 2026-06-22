@@ -87,7 +87,7 @@ while (true) {
   const before = fn.slice(0, idx);
   const cmts = [...before.matchAll(/\/\/\s*(.+)/g)];
   let ctx = cmts.length ? cmts[cmts.length - 1][1].trim() : '';
-  ctx = ctx.replace(/^-+\s*|\s*-+$/g, '').replace(/\(.*?\)/g, '').trim();
+  ctx = ctx.replace(/^-+\s*|\s*-+$/g, '').replace(/\(.*?\)/g, '').replace(/\s*[\u2014\u2013]\s*/g, ', ').trim();
   insights.push({
     ctx,
     type: fieldValue(obj, 'type'),
