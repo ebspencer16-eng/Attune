@@ -71,11 +71,10 @@ function buildTaxLineItems(item, itemIndex) {
   }
   // Each add-on as its own line item so tax categorization is clean
   if (!item._promoWorkbookFree) {
-    if (item.addonWorkbook === 'print') {
-      lines.push({ amount: ADDON_PRICES.workbookPrint * 100,   tax_code: TAX_CODES.workbookPrint,   reference: `item-${itemIndex}-wbprint`,   quantity: 1 });
-    }
-    if (item.addonWorkbook === 'digital') {
-      lines.push({ amount: ADDON_PRICES.workbookDigital * 100, tax_code: TAX_CODES.workbookDigital, reference: `item-${itemIndex}-wbdigital`, quantity: 1 });
+    const wbAmt = wbAmount(item);
+    if (wbAmt > 0) {
+      const tax = item.addonWorkbook === 'print' ? TAX_CODES.workbookPrint : TAX_CODES.workbookDigital;
+      lines.push({ amount: wbAmt * 100, tax_code: tax, reference: `item-${itemIndex}-wb`, quantity: 1 });
     }
   }
   if (item.addonLmft) {
@@ -237,10 +236,18 @@ function itemBasePrice(item) {
     : (DIGITAL_PRICES[item.pkgKey]  ?? 0);
 }
 
+// Workbook charge in dollars for an item. Premium includes the workbook
+// (digital is free); a printed copy is the digital->print upgrade ($20).
+function wbAmount(item) {
+  if (!item.addonWorkbook) return 0;
+  const print = item.addonWorkbook === 'print';
+  if (item.pkgKey === 'premium') return print ? 20 : 0;
+  return print ? ADDON_PRICES.workbookPrint : ADDON_PRICES.workbookDigital;
+}
+
 function itemAddonTotal(item) {
   let addons = 0;
-  if (item.addonWorkbook === 'print')   addons += ADDON_PRICES.workbookPrint;
-  if (item.addonWorkbook === 'digital') addons += ADDON_PRICES.workbookDigital;
+  addons += wbAmount(item);
   if (item.addonLmft)       addons += ADDON_PRICES.lmft;
   if (item.addonReflection) addons += ADDON_PRICES.reflection;
   if (item.addonBudget)     addons += ADDON_PRICES.budget;
@@ -508,7 +515,7 @@ export default async function handler(req) {
     const addonsTotal = items.reduce((sum, it) => {
       let a = itemAddonTotal(it);
       if (it._promoWorkbookFree) {
-        a -= (it.addonWorkbook === 'print' ? ADDON_PRICES.workbookPrint : ADDON_PRICES.workbookDigital);
+        a -= wbAmount(it);
       }
       if (it._promoIntimacyFree)   a -= ADDON_PRICES.intimacy;
       if (it._promoReflectionFree) a -= ADDON_PRICES.reflection;

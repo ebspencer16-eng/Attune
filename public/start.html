@@ -319,8 +319,8 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;height:58px;background:rgba(
     <div class="addon-name" style="margin-bottom:.2rem;">Your included workbook</div>
     <div class="addon-desc" style="margin-bottom:.6rem;">Premium includes the personalized workbook. Choose how you'd like it.</div>
     <div class="workbook-variants show" style="display:flex;">
-      <button class="wb-var active" id="pwb-digital" onclick="setPremiumWb('digital',event)">Digital PDF</button>
-      <button class="wb-var" id="pwb-print" onclick="setPremiumWb('print',event)">Printed</button>
+      <button class="wb-var active" id="pwb-digital" onclick="setPremiumWb('digital',event)">Digital PDF · included</button>
+      <button class="wb-var" id="pwb-print" onclick="setPremiumWb('print',event)">Printed · +$20</button>
     </div>
   </div>
 
@@ -537,6 +537,8 @@ function updateBar() {
   if (addonBudget) total += 20;
   if (addonReflection) total += 40;
   if (addonIntimacy) total += 20;
+  // Premium includes the workbook (digital); printed is the +$20 upgrade.
+  if (selectedPkg === 'premium' && premiumWbFormat === 'print') total += 20;
   document.getElementById('bar-pkg-name').textContent = PKG_NAMES[selectedPkg] + ' · ' + (format === 'physical' ? 'Physical' : 'Digital');
   document.getElementById('bar-total').textContent = '$' + total;
 }

@@ -498,6 +498,24 @@ const ADDON_WORKBOOK = {
   print:   { label: 'Personalized Workbook (printed)', price: 39 },
 };
 
+// Workbook charge for an item. Premium includes the workbook (digital is free);
+// a printed copy is the digital->print upgrade ($39 - $19 = $20). Other packages
+// pay the standard add-on price.
+function wbCharge(it) {
+  if (!it.addons || !it.addons.workbook) return 0;
+  const print = it.addons.workbookVariant === 'print';
+  if (it.pkg === 'premium') return print ? 20 : 0;
+  return print ? ADDON_WORKBOOK.print.price : ADDON_WORKBOOK.digital.price;
+}
+// Display label + price for the workbook line on an item.
+function wbLine(it) {
+  const print = it.addons.workbookVariant === 'print';
+  if (it.pkg === 'premium') {
+    return { label: print ? 'Personalized Workbook (printed)' : 'Personalized Workbook (included)', price: wbCharge(it) };
+  }
+  return { label: ADDON_WORKBOOK[print ? 'print' : 'digital'].label, price: wbCharge(it) };
+}
+
 // ── State ────────────────────────────────────────────────────────────────────
 // Stripe state (declared here so validateForm() can reference before setupStripe runs)
 let cardComplete = false;
@@ -726,7 +744,9 @@ function persistOrderComplete(orderNum) {
       pkg:    pkgId,
       format,
       addons: {
-        workbook:         !!params.get('addon_workbook'),
+        // Premium includes the workbook; mark it present so it lands on the
+        // order (and generates). Its format comes from wb_format below.
+        workbook:         !!params.get('addon_workbook') || pkgId === 'premium',
         // Premium includes the workbook; capture its chosen format from wb_format
         // (not billed as an add-on). Otherwise use the add-on's own variant.
         workbookVariant:  (pkgId === 'premium' && params.get('wb_format') === 'print') ? 'print'
@@ -985,7 +1005,7 @@ function renderSummary() {
     const p = PACKAGES[it.pkg] || PACKAGES.core;
     let base = it.format === 'physical' ? p.physicalPrice : p.digitalPrice;
     let add = 0;
-    if (it.addons.workbook) add += (it.addons.workbookVariant === 'print') ? 39 : 19;
+    add += wbCharge(it);
     if (it.addons.lmft)       add += ADDON_LMFT.price;
     if (it.addons.reflection) add += ADDON_REFLECTION.price;
     if (it.addons.budget)     add += 20;
@@ -1023,8 +1043,7 @@ function renderSummary() {
     // Each add-on renders as its own line item, matching the cart drawer.
     const addonLines = [];
     if (g.item.addons.workbook) {
-      const wv = g.item.addons.workbookVariant === 'print' ? 'print' : 'digital';
-      addonLines.push({ label: ADDON_WORKBOOK[wv].label, price: ADDON_WORKBOOK[wv].price });
+      addonLines.push(wbLine(g.item));
     }
     if (g.item.addons.lmft)       addonLines.push({ label: ADDON_LMFT.label, price: ADDON_LMFT.price });
     if (g.item.addons.reflection) addonLines.push({ label: ADDON_REFLECTION.label, price: ADDON_REFLECTION.price });
@@ -1216,7 +1235,7 @@ function validateForm() {
         const p = PACKAGES[it.pkg] || PACKAGES.core;
         const base = it.format === 'physical' ? p.physicalPrice : p.digitalPrice;
         let add = 0;
-        if (it.addons.workbook) add += (it.addons.workbookVariant === 'print') ? 39 : 19;
+        add += wbCharge(it);
         if (it.addons.lmft)       add += 150;
         if (it.addons.reflection) add += 40;
         if (it.addons.budget)     add += 20;
@@ -1427,7 +1446,7 @@ function updatePaymentRequestTotal() {
     const p = PACKAGES[it.pkg] || PACKAGES.core;
     const base = it.format === 'physical' ? p.physicalPrice : p.digitalPrice;
     let add = 0;
-    if (it.addons.workbook) add += (it.addons.workbookVariant === 'print') ? 39 : 19;
+    add += wbCharge(it);
     if (it.addons.lmft)       add += 150;
     if (it.addons.reflection) add += 40;
     if (it.addons.budget)     add += 20;
@@ -1592,8 +1611,7 @@ async function handleSubmit(e) {
       const isPhys = it.format === 'physical';
       const lineItems = [{ label: itPkg.name, price: isPhys ? itPkg.physicalPrice : itPkg.digitalPrice }];
       if (it.addons.workbook) {
-        const wv = it.addons.workbookVariant === 'print' ? 'print' : 'digital';
-        lineItems.push({ label: ADDON_WORKBOOK[wv].label, price: ADDON_WORKBOOK[wv].price });
+        lineItems.push(wbLine(it));
       }
       if (it.addons.lmft)       lineItems.push({ label: ADDON_LMFT.label, price: ADDON_LMFT.price });
       if (it.addons.reflection) lineItems.push({ label: ADDON_REFLECTION.label, price: ADDON_REFLECTION.price });
@@ -1777,7 +1795,7 @@ function cartItemPrice(it) {
   const p = PACKAGES[it.pkg] || PACKAGES.core;
   let base = it.format === 'physical' ? p.physicalPrice : p.digitalPrice;
   let add = 0;
-  if (it.addons.workbook)   add += (it.addons.workbookVariant === 'print') ? 39 : 19;
+  if (it.addons.workbook)   add += wbCharge(it);
   if (it.addons.lmft)       add += ADDON_LMFT.price;
   if (it.addons.reflection) add += ADDON_REFLECTION.price;
   if (it.addons.budget)     add += 20;
