@@ -155,11 +155,11 @@ const comms = [
 const expectations = [
   ...sectionHeader('Expectations', 'Expandable section: overview, common ground, conversations, the life you\u2019re building, action plan.', 'F59E0B'),
   sectionTable([
-    { what: 'Overview', desc: 'Alignment read across mapped expectations.', source: CA, content: 'see RS 6.1' },
+    { what: 'Overview', desc: 'Alignment read across mapped expectations.', source: CA, content: 'see RS 6.1-6.3' },
     { what: 'Common Ground', desc: 'Where the two agree.', source: EX, content: 'Their matching answers. Framing see RS 6.1' },
     { what: 'Conversations Worth Having', desc: 'Where the two differ, with starters.', source: EX, content: 'Their differing answers + starters (expectations content)' },
     { what: 'The Life You\u2019re Building', desc: 'The bigger-picture life questions.', source: EX, content: 'Their life-question answers' },
-    { what: 'Action plan', desc: 'Top misalignments with couple-type context.', source: CA, content: 'see RS 6.2; couple-type context generated' },
+    { what: 'Action plan', desc: 'Top misalignments with couple-type context.', source: CA, content: 'see RS 6.4; couple-type context generated' },
   ]),
 ];
 
@@ -178,7 +178,7 @@ const whatNext = [
   sectionTable([
     { what: 'Heading + subhead', desc: 'Closing framing.', source: U, content: '"What comes next." / "What to do with all of this."' },
     { what: 'Your action plans', desc: 'The action plans gathered in one place.', source: CA, content: 'see RS 5.x, 6.2 (generated)' },
-    { what: 'Next-step links', desc: 'Share, download workbook, book LMFT.', source: U, content: 'Shown by what the couple owns. see RS 8.1' },
+    { what: 'Next-step links', desc: 'Share, download workbook, book LMFT.', source: U, content: 'Shown by what the couple owns. see RS 8.3' },
     { what: 'Upgrade prompt', desc: 'Shown where applicable.', source: CA, content: 'Universal upsell copy, shown by ownership' },
   ]),
 ];
