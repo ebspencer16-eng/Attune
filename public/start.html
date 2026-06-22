@@ -313,9 +313,20 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;height:58px;background:rgba(
     <span class="addons-title">Add-ons</span>
     <span class="addons-sub">Optional · available on any package</span>
   </div>
+
+  <!-- Premium: format for the included workbook (shown only when Premium is selected) -->
+  <div id="premium-wb" style="display:none;background:#FFF8F5;border:2px solid var(--orange);border-radius:14px;padding:1rem 1.2rem;margin-bottom:1rem;">
+    <div class="addon-name" style="margin-bottom:.2rem;">Your included workbook</div>
+    <div class="addon-desc" style="margin-bottom:.6rem;">Premium includes the personalized workbook. Choose how you'd like it.</div>
+    <div class="workbook-variants show" style="display:flex;">
+      <button class="wb-var active" id="pwb-digital" onclick="setPremiumWb('digital',event)">Digital PDF</button>
+      <button class="wb-var" id="pwb-print" onclick="setPremiumWb('print',event)">Printed</button>
+    </div>
+  </div>
+
   <div class="addon-grid">
 
-    <!-- Workbook — $19/$39 — least expensive first -->
+    <!-- Workbook — $19/$39 -->
     <div class="addon-card" id="addon-workbook" onclick="toggleWorkbook()">
       <div class="addon-check" id="wb-check">
         <svg width="10" height="8" viewBox="0 0 11 9" fill="none"><path d="M1 4.5L4 7.5L10 1" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -331,14 +342,14 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;height:58px;background:rgba(
       </div>
     </div>
 
-    <!-- Budget priorities exercise — $20 -->
-    <div class="addon-card" id="addon-budget" onclick="toggleBudget()">
-      <div class="addon-check" id="budget-check">
+    <!-- Intimacy Expectations exercise — $20 -->
+    <div class="addon-card" id="addon-intimacy" onclick="toggleIntimacy()">
+      <div class="addon-check" id="intimacy-check">
         <svg width="10" height="8" viewBox="0 0 11 9" fill="none"><path d="M1 4.5L4 7.5L10 1" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </div>
       <div class="addon-body">
-        <div class="addon-name">Build a Budget tool</div>
-        <div class="addon-desc">Map what each of you values spending on and where your instincts differ. Included in Starting Out. Add it to any other package here.</div>
+        <div class="addon-name">Intimacy Expectations Exercise</div>
+        <div class="addon-desc">A private set of questions about what you each expect around physical intimacy, scored for gaps and conversation, like the rest of your results.</div>
         <div class="addon-price">+$20</div>
       </div>
     </div>
@@ -352,6 +363,18 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;height:58px;background:rgba(
         <div class="addon-name">Relationship Reflection Exercise</div>
         <div class="addon-desc">A third exercise capturing the moments that shaped your relationship, your shared story, and where you're pointed together. Included in Relationship Reflection. Add it to any other package here.</div>
         <div class="addon-price">+$40</div>
+      </div>
+    </div>
+
+    <!-- Budget priorities exercise — $20 -->
+    <div class="addon-card" id="addon-budget" onclick="toggleBudget()">
+      <div class="addon-check" id="budget-check">
+        <svg width="10" height="8" viewBox="0 0 11 9" fill="none"><path d="M1 4.5L4 7.5L10 1" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      <div class="addon-body">
+        <div class="addon-name">Build a Budget tool</div>
+        <div class="addon-desc">Map what each of you values spending on and where your instincts differ. Included in Starting Out. Add it to any other package here.</div>
+        <div class="addon-price">+$20</div>
       </div>
     </div>
 
@@ -404,6 +427,8 @@ let addonWorkbook = false;
 let wbFormat = 'digital';
 let addonBudget = false;
 let addonReflection = false;
+let addonIntimacy = false;
+let premiumWbFormat = 'digital';  // format of the workbook included with Premium
 
 function setFormat(f) {
   format = f;
@@ -427,13 +452,23 @@ function selectPkg(id) {
   const tile = document.getElementById('tile-' + id);
   tile.classList.add(id === 'anniversary' || id === 'premium' ? 'selected-indigo' : 'selected');
   document.getElementById('btn-next').disabled = false;
-  // Dim add-ons that are already included in this package
+  // Hide add-ons already included in this package, and clear any prior selection
+  // so an included add-on is never also billed.
   const budgetIncluded = id === 'newlywed';
   const reflectionIncluded = id === 'anniversary';
   const lmftIncluded = id === 'premium';
+  const workbookIncluded = id === 'premium';   // Premium includes the workbook
+  if (budgetIncluded)     addonBudget = false;
+  if (reflectionIncluded) addonReflection = false;
+  if (lmftIncluded)       addonLmft = false;
+  if (workbookIncluded) { addonWorkbook = false; document.getElementById('wb-variants').classList.remove('show'); }
+  ['addon-budget','addon-reflection','addon-lmft','addon-workbook'].forEach(a => document.getElementById(a).classList.remove('selected'));
   setAddonIncluded('addon-budget', budgetIncluded);
   setAddonIncluded('addon-reflection', reflectionIncluded);
   setAddonIncluded('addon-lmft', lmftIncluded);
+  setAddonIncluded('addon-workbook', workbookIncluded);
+  // Premium: choose the format of the included workbook (digital or printed).
+  document.getElementById('premium-wb').style.display = (id === 'premium') ? '' : 'none';
   updateBar();
 }
 
@@ -480,13 +515,28 @@ function toggleReflection() {
   updateBar();
 }
 
+function toggleIntimacy() {
+  addonIntimacy = !addonIntimacy;
+  document.getElementById('addon-intimacy').classList.toggle('selected', addonIntimacy);
+  updateBar();
+}
+
+function setPremiumWb(f, e) {
+  if (e) e.stopPropagation();
+  premiumWbFormat = f;
+  document.getElementById('pwb-digital').classList.toggle('active', f === 'digital');
+  document.getElementById('pwb-print').classList.toggle('active', f === 'print');
+  updateBar();
+}
+
 function updateBar() {
   if (!selectedPkg) return;
   let total = PRICES[selectedPkg][format];
   if (addonLmft) total += 150;
   if (addonWorkbook) total += wbFormat === 'print' ? 39 : 19;
   if (addonBudget) total += 20;
-  if (addonReflection) total += 20;
+  if (addonReflection) total += 40;
+  if (addonIntimacy) total += 20;
   document.getElementById('bar-pkg-name').textContent = PKG_NAMES[selectedPkg] + ' · ' + (format === 'physical' ? 'Physical' : 'Digital');
   document.getElementById('bar-total').textContent = '$' + total;
 }
@@ -498,6 +548,9 @@ function goNext() {
   if (addonWorkbook) params.set('addon_workbook', wbFormat);
   if (addonBudget) params.set('addon_budget', '1');
   if (addonReflection) params.set('addon_reflection', '1');
+  if (addonIntimacy) params.set('addon_intimacy', '1');
+  // Premium includes the workbook; pass its chosen format (not billed as an add-on).
+  if (selectedPkg === 'premium') params.set('wb_format', premiumWbFormat);
   window.location.href = '/checkout?' + params.toString();
 }
 </script>

@@ -727,7 +727,10 @@ function persistOrderComplete(orderNum) {
       format,
       addons: {
         workbook:         !!params.get('addon_workbook'),
-        workbookVariant:  params.get('addon_workbook') === 'print' ? 'print' : 'digital',
+        // Premium includes the workbook; capture its chosen format from wb_format
+        // (not billed as an add-on). Otherwise use the add-on's own variant.
+        workbookVariant:  (pkgId === 'premium' && params.get('wb_format') === 'print') ? 'print'
+                          : params.get('addon_workbook') === 'print' ? 'print' : 'digital',
         lmft:             params.get('addon_lmft') === '1',
         reflection:       params.get('addon_reflection') === '1',
         budget:           params.get('addon_budget') === '1',

@@ -10416,7 +10416,7 @@ function PartnerLandingScreen({ inviteFrom, inviteCode, onCreateAccount }) {
 // PARTNER B EXERCISE FLOW — clean exercise wrapper for invited partner
 // ─────────────────────────────────────────────────────────────────────────────
 function PartnerBExerciseFlow({ account, onComplete }) {
-  const hasReflection = !!(account?.pkg === 'anniversary' || account?.pkg === 'premium' || account?.addonReflection);
+  const hasReflection = !!(account?.pkg === 'anniversary' || account?.addonReflection);
   const [step, setStep] = React.useState('intro'); // 'intro' | 'ex1' | 'ex2' | 'ex3' | 'done'
   const [ex1, setEx1] = React.useState(null);
   const [ex2, setEx2] = React.useState(null);
@@ -10611,8 +10611,8 @@ function PartnerBCompletionScreen({ partnerAName, partnerBName, partnerADone, pa
             // Partner A's device, so leave it out of subject line
             coupleType: '',
             portalUrl: window.location.origin + '/app',
-            hasReflection: !!(ord?.addon_reflection || acct?.pkg === 'anniversary' || acct?.pkg === 'premium'),
-            hasBudget: !!(ord?.addon_budget || acct?.pkg === 'newlywed' || acct?.pkg === 'premium'),
+            hasReflection: !!(ord?.addon_reflection || acct?.pkg === 'anniversary'),
+            hasBudget: !!(ord?.addon_budget || acct?.pkg === 'newlywed'),
             hasLMFT: !!(ord?.addon_lmft || acct?.pkg === 'premium'),
           }),
         });
@@ -12446,7 +12446,7 @@ export default function App() {
     core:        { label: "The Attune Assessment",     color: "#E8673A", hasChecklist: false, hasAnniversary: false, hasBudget: false, hasLMFT: false },
     newlywed:    { label: "Starting Out Collection",   color: "#E8673A", hasChecklist: true,  hasAnniversary: false, hasBudget: true,  hasLMFT: false },
     anniversary: { label: "Relationship Reflection",    color: "#1B5FE8", hasChecklist: false, hasAnniversary: true,  hasBudget: false, hasLMFT: false },
-    premium:     { label: "Attune Premium",            color: "#3B5BDB", hasChecklist: false, hasAnniversary: true,  hasBudget: true,  hasLMFT: true  },
+    premium:     { label: "Attune Premium",            color: "#3B5BDB", hasChecklist: false, hasAnniversary: false, hasBudget: false, hasLMFT: true  },
   };
   // Merge add-on flags from stored order (e.g. LMFT add-on on non-premium packages)
   const _basePkg = pkgConfig[demoPkg] || pkgConfig.core;
