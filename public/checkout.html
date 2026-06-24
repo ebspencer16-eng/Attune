@@ -738,8 +738,9 @@ function persistOrderComplete(orderNum) {
   } else {
     // Fallback: single-item from URL params (legacy link-in or gift link)
     const pkgId  = params.get('pkg') || 'core';
-    const format = params.get('format') === 'physical' ? 'physical' :
-                   (PACKAGES[pkgId]?.format || 'digital');
+    const _fmtParam = params.get('format');
+    const format = (_fmtParam === 'physical' || _fmtParam === 'digital') ? _fmtParam
+                 : (PACKAGES[pkgId]?.format || 'digital');
     _items = [{
       pkg:    pkgId,
       format,
