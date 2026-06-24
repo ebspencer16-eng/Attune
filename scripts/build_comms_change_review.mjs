@@ -1,5 +1,5 @@
 // What changed — the Communication exercise change review, in the same format
-// as the other results documents. Content is read live: the 24 questions, the
+// as the other results documents. Content is read live: the 23 questions, the
 // listening results blurbs, and the listening workbook content all come from
 // source, so this reflects what is shipped now (no more "draft, not yet in code").
 
@@ -34,7 +34,7 @@ const CHANGE = {
   ex6: 'NEW', ex7: 'NEW', ex8: 'MOVED FROM APPRECIATION', ex9: 'NEW', ex10: 'NEW',
   bd1: 'CARRIED OVER', bd3: 'CARRIED OVER', bd4: 'CARRIED OVER',
   nd5: 'TEXT UPDATED', nd1: 'CARRIED OVER',
-  st1: 'TEXT UPDATED', cf1: 'CARRIED OVER', cf6: 'NEW', cf2: 'CARRIED OVER',
+  st1: 'TEXT UPDATED', cf1: 'CARRIED OVER', cf2: 'CARRIED OVER',
   ls1: 'NEW DIMENSION',
   rp3: 'CARRIED OVER', rp2: 'CARRIED OVER', rp6: 'NEW', fb5: 'CARRIED OVER',
 };
@@ -42,7 +42,7 @@ const TAGCOLOR = { 'NEW': BLUE, 'NEW DIMENSION': PURPLE, 'MOVED FROM APPRECIATIO
 const CHAPTERS = [
   { title: "Chapter 1: How You're Wired", ids: ['lv1', 'lv2', 'ex6', 'en4', 'ex7'] },
   { title: 'Chapter 2: How You Connect', ids: ['lv5', 'bd1', 'bd3', 'bd4', 'nd5', 'nd1'] },
-  { title: 'Chapter 3: When Things Get Hard', ids: ['st1', 'cf1', 'cf6', 'cf2', 'ls1'] },
+  { title: 'Chapter 3: When Things Get Hard', ids: ['st1', 'cf1', 'cf2', 'ls1'] },
   { title: 'Chapter 4: Making Things Right', ids: ['rp3', 'rp2', 'rp6', 'fb5'] },
   { title: 'Chapter 5: Everyday Life Together', ids: ['en6', 'ex8', 'ex9', 'ex10'] },
 ];
@@ -55,7 +55,7 @@ const bulletProse = (t) => prose('•  ' + t, { indent: INDENT_SMALL, after: 60 
 // ── cover ─────────────────────────────────────────────────────────────────────
 const cover = buildCover({
   title: 'What changed',
-  subtitle: 'The Communication exercise change review: 28 questions to 24, closeness to listening.',
+  subtitle: 'The Communication exercise change review: 28 questions to 23, closeness to listening.',
   howToUse: 'The question set, listening results, and listening workbook content are read live from the code, so this reflects what is shipped now. The summary, change tags, retired list, and marketing checklist describe the migration itself.',
   indexRows: [
     ['1.', 'Summary of changes', ''],
@@ -71,15 +71,17 @@ const cover = buildCover({
 const section1 = [
   ...bigSection(1, 'Summary of changes',
     'What moved when the Communication exercise was restructured. Still 10 dimensions.', ORANGE),
-  bulletProse('Question count: 28 down to 24.'),
+  bulletProse('Question count: 28 down to 23.'),
+  bulletProse('The conflict timing question (the one that asked whether you bring things up or wait) is removed. Conflict now has two questions.'),
+  bulletProse('The daily-closeness question reorders its options so the together pole reads first. Scoring is unchanged: its value is flipped so love stays oriented the same way.'),
   bulletProse('Closeness and Independence is retired as a dimension. Its shared-vs-independent idea now lives as one Energy question (social calendars).'),
   bulletProse('Listening is the one new dimension. Poles: Reflective (sit with it) and Responsive (respond, ask, reflect back). Neither is framed as better.'),
   bulletProse('Appreciation is folded into Expression. It is about how you voice feelings, so it sits with the other expression questions.'),
   bulletProse('One Expression question (feel most understood) is stored with its poles ordered so it scores consistently with the other expression items.'),
-  bulletProse('Question counts per dimension are now uneven: expression 5; love, bids, conflict, repair 3; energy, needs 2; stress, feedback, listening 1. Averaging keeps the type math sound.'),
+  bulletProse('Question counts per dimension are now uneven: expression 5; love, bids, repair 3; energy, needs, conflict 2; stress, feedback, listening 1. Averaging keeps the type math sound.'),
 ];
 
-// ── SECTION 2 — the 24 questions (live) ─────────────────────────────────────
+// ── SECTION 2 — the 23 questions (live) ─────────────────────────────────────
 const section2 = [
   ...bigSection(2, 'The new question set',
     'Read live from the exercise. The tag on each shows what changed. A is the left pole, B the right.', PURPLE),
@@ -150,9 +152,9 @@ const section5 = [
   ...bigSection(5, 'Marketing copy',
     'Public pages affected by the restructure. The numeric fixes shipped with the migration. The closeness-naming spots were flagged for your call.', BLUE),
   groupLabel('Changed and shipped (numbers only)', BLUE),
-  bulletProse('Offerings page exercise meta: 28 questions is now 24.'),
-  bulletProse('Start / onboarding page, four spots: 28 questions is now 24.'),
-  bulletProse('How It Works page: 24 questions calibrated to surface your style.'),
+  bulletProse('Offerings page exercise meta: 28 questions is now 23.'),
+  bulletProse('Start / onboarding page, four spots: 28 questions is now 23.'),
+  bulletProse('How It Works page: 23 questions calibrated to surface your style.'),
   bulletProse('Admin dashboard: chart subtitle now reads 10 dimensions; demo chart re-keyed from closeness to listening. Internal, not customer-facing.'),
   groupLabel('Flagged for review (named closeness at migration time)', RED),
   bulletProse('How It Works sample dimension chart row label, and the Couple Types meta description, both named closeness. Confirm these now read against the current dimensions.'),

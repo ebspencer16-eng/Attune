@@ -29,7 +29,7 @@ export const DIM_KEYS = {
   love:       ['lv1', 'lv2', 'lv5'],
   bids:       ['bd1', 'bd3', 'bd4'],
   needs:      ['nd1', 'nd5'],
-  conflict:   ['cf1', 'cf2', 'cf6'],
+  conflict:   ['cf1', 'cf2'],
   stress:     ['st1'],
   repair:     ['rp2', 'rp3', 'rp6'],
   feedback:   ['fb5'],
@@ -53,13 +53,25 @@ export const AXIS_CONFIG = {
   love:       { axis: 'open',     weight: 0.05, invert: true  },
 };
 
+// Questions whose displayed a/b order is reversed relative to their dimension's
+// scoring orientation. Their raw 1-5 value is flipped (6 - v) before averaging
+// so the dimension stays consistently oriented. lv5: poles display
+// physical(a)->verbal(b), but love is oriented verbal->physical (lv1/lv2).
+export const FLIPPED_QUESTIONS = new Set(['lv5']);
+
 // Average the answered question values for each dimension. Returns null for a
 // dimension with no answers (callers / axisScores treat missing as neutral 3).
 export function calcDimScores(answers) {
   if (!answers) return {};
   const out = {};
   for (const [dim, keys] of Object.entries(DIM_KEYS)) {
-    const vals = keys.map(k => answers[k]).filter(v => v != null && !isNaN(v));
+    const vals = keys
+      .map(k => {
+        const raw = answers[k];
+        if (raw == null || isNaN(raw)) return null;
+        return FLIPPED_QUESTIONS.has(k) ? (6 - Number(raw)) : Number(raw);
+      })
+      .filter(v => v != null && !isNaN(v));
     out[dim] = vals.length ? vals.reduce((s, v) => s + Number(v), 0) / vals.length : null;
   }
   return out;

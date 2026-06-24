@@ -11,17 +11,19 @@ export const PERSONALITY_QUESTIONS = [
   { id:"ex7", dimension:"expression", text:"You feel most understood by your partner when:", a:"They pick up on something without you having to say it.", b:"You've been able to explain yourself clearly." },
 
   // ── Chapter 2: How You Connect (6) — love, bids, needs ──
-  { id:"lv5", dimension:"love",       text:"In ordinary day-to-day life, you feel closest to your partner when:", a:"You're talking. Conversation is the thread that keeps you close.", b:"You're simply together. Shared presence, physical closeness, doing life side by side." },
+  // lv5 poles ordered physical(a)->verbal(b) for display; scoring inverts lv5
+  // (see FLIPPED_QUESTIONS) so the love dimension stays oriented verbal->physical
+  // consistent with lv1/lv2.
+  { id:"lv5", dimension:"love",       text:"In ordinary day-to-day life, you feel closest to your partner when:", a:"You're simply together. Shared presence, physical closeness, doing life side by side.", b:"You're talking. Conversation keeps you close." },
   { id:"bd1", dimension:"bids",       text:"Small everyday moments of connection, a squeeze of the hand, a brief check-in, a shared look:", a:"Are nice but not something you track or depend on.", b:"Matter a lot. They're how you feel close day to day." },
   { id:"bd3", dimension:"bids",       text:"In your relationship, you tend to:", a:"Wait for your partner to initiate small moments of connection.", b:"Reach for connection often, through small gestures, check-ins, or brief touches." },
   { id:"bd4", dimension:"bids",       text:"When you reach for a small moment of connection and your partner doesn't respond:", a:"You let it go easily. It doesn't stay with you.", b:"You notice. It can leave you feeling a little distant or unseen." },
   { id:"nd5", dimension:"needs",      text:"Articulating what you need from a partner feels:", a:"Straightforward. You can usually name it.", b:"Hard to name, even when you know something is missing." },
   { id:"nd1", dimension:"needs",      text:"It's the end of a hard day and something feels off for you, but you haven't said anything. You expect your partner to:", a:"Wait until you bring it up. It's on you to say something when you're ready.", b:"Notice and check in. Someone who knows you well should be able to tell when something's wrong." },
 
-  // ── Chapter 3: When Things Get Hard (5) — stress, conflict, listening ──
+  // ── Chapter 3: When Things Get Hard (4) — stress, conflict, listening ──
   { id:"st1", dimension:"stress",     text:"When you're going through a hard stretch, you tend to:", a:"Pull inward. You need to get through it yourself before you can really be present with your partner.", b:"Lean in. Being close to your partner is part of how you get through hard things." },
   { id:"cf1", dimension:"conflict",   text:"When something feels off between you, you:", a:"Want to address it as soon as possible. Leaving things unresolved sits heavily with you.", b:"Need time before you can engage. Space first, conversation later." },
-  { id:"cf6", dimension:"conflict",   text:"When there's something unaddressed between you, you tend to be:", a:"The one who brings it up. You'd rather name it than wait.", b:"The one who waits. You're more comfortable letting your partner open the door." },
   { id:"cf2", dimension:"conflict",   text:"When you're in the middle of a difficult conversation with your partner, what matters most is:", a:"That they stay present and keep engaging, even if it's uncomfortable.", b:"That they give you room to step back if you need it, without taking it personally." },
   { id:"ls1", dimension:"listening",  text:"When your partner is talking through something that matters to them, you tend to:", a:"Listen and sit with it. You don't need to fix it or fill the silence.", b:"Respond, reflect back, ask questions. Engagement is how you show you care." },
 
@@ -89,7 +91,7 @@ export const RESPONSIBILITY_CATEGORIES = [
 
 export const LIFE_QUESTIONS = [
   { id: "lq_children", category: "Family", topic: "Children", text: "Children",
-    core: "Do you want them, and how many?", anniversary: "How do your plans and feelings align now?", revisiting: "Where are you on this today?",
+    core: "Do you want them?", anniversary: "How do your plans and feelings align now?", revisiting: "Where are you on this today?",
     options: ["Not part of my future", "Uncertain", "Open to it", "Important to me, I want at least one", "Central to my future"] },
   { id: "lq_involve_user", category: "Family", topic: "Involvement with {userName}'s family", text: "Involvement with {userName}'s family",
     core: "Thinking about in-person visits and digital contact, what level of involvement feels right?", anniversary: "Is the current level of involvement working for you?", revisiting: "Where do you want this to settle?",

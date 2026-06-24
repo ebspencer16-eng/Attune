@@ -89,7 +89,7 @@ const FONT_URL = "https://fonts.googleapis.com/css2?family=Syne:wght@700;800;900
 
 // PERSONALITY_QUESTIONS — Communication Exercise (Exercise 01)
 //
-// 24 questions across 10 dimensions. 5-point scale (Strongly A -> Strongly B).
+// 23 questions across 10 dimensions. 5-point scale (Strongly A -> Strongly B).
 // Order is intentional: pairs of similar questions are spaced apart, and a
 // few are framed as scenarios to break repetitive patterns. Several dims
 // use non-sequential IDs (en1/en2/en4, lv1/lv2/lv5, etc) — the gaps are
@@ -487,7 +487,7 @@ export function ExpectationsExercise({ partnerName, userName = "Partner A", onCo
           ? "There's no right direction for things to shift. Answer honestly, not how you think you should feel, but how you actually do. You'll see both sets of answers together once you've both finished."
           : isAnniversary
           ? "Answer honestly, not how you think you should feel, but how you actually do. You'll see your answers alongside your partner's only after you've both finished."
-          : "Sometimes expectations go unmet because they were never said. Sometimes they were said but heard differently. Either way, seeing them side by side is the point. Answer for yourself. You'll see your answers alongside your partner's only after you've both finished."
+          : "Sometimes expectations go unmet because they were never said. Sometimes they were said but heard differently. Either way, seeing them side by side is the point. Answer for yourself, you'll see your answers alongside your partner's only after you've both finished."
         }
       </p>
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", borderTop: ("1px solid " + (C.stone)), paddingTop: "1.5rem" }}>
@@ -519,7 +519,7 @@ export function ExpectationsExercise({ partnerName, userName = "Partner A", onCo
       <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
           {CHILDHOOD_STRUCTURES.map(s => (
             <button key={s.id}
-              onClick={() => { setChildhoodStructure(s.id); setPhase("responsibilities"); }}
+              onClick={() => { setChildhoodStructure(s.id); setPhase("responsibilities"); try { window.scrollTo({ top: 0, behavior: "instant" }); } catch { window.scrollTo(0, 0); } }}
               style={{ background: "white", border: ("1.5px solid " + C.stone), borderRadius: 12, padding: "0.85rem 1.25rem", textAlign: "left", cursor: "pointer", fontFamily: font.body, fontSize: "0.88rem", color: C.ink, transition: "all 0.15s" }}
               onMouseEnter={e => { e.currentTarget.style.borderColor = C.clay; e.currentTarget.style.background = "rgba(184,150,110,0.05)"; }}
               onMouseLeave={e => { e.currentTarget.style.borderColor = C.stone; e.currentTarget.style.background = "white"; }}>
@@ -778,8 +778,9 @@ export function ExpectationsExercise({ partnerName, userName = "Partner A", onCo
       {/* Category + question */}
       <p style={{ fontSize: "0.6rem", letterSpacing: "0.2em", textTransform: "uppercase", color: C.clay, marginBottom: "0.25rem", fontFamily: font.body }}>Your Expectations, Part 1 of 2</p>
       <p style={{ fontSize: "0.6rem", letterSpacing: "0.12em", textTransform: "uppercase", color: C.muted, marginBottom: "0.85rem", fontFamily: font.body }}>{lq.category}</p>
-      <p style={{ fontFamily: font.display, fontSize: "1.25rem", fontWeight: 400, color: C.ink, lineHeight: 1.5, marginBottom: lqFraming ? "0.4rem" : "1.75rem" }}>{subst(lq.topic || lq.text)}</p>
-      {lqFraming && <p style={{ fontSize: "0.95rem", color: C.muted, fontFamily: font.body, fontWeight: 300, lineHeight: 1.55, marginBottom: "1.75rem" }}>{subst(lqFraming)}</p>}
+      <p style={{ fontFamily: font.display, fontSize: "1.25rem", fontWeight: 400, color: C.ink, lineHeight: 1.5, marginBottom: "1.75rem" }}>
+        {subst(lq.topic || lq.text)}{lqFraming ? (() => { const f = subst(lqFraming); return ", " + f.charAt(0).toLowerCase() + f.slice(1); })() : ""}
+      </p>
 
       {/* Options */}
       <div style={{ display: "flex", flexDirection: "column", gap: "0.6rem", marginBottom: "2rem" }}>
@@ -1763,8 +1764,19 @@ function DashStepHeader({ num, title, sub, active = true, isMobile = false }) {
   return (
     <div style={{ display: "flex", alignItems: "center", gap: isMobile ? "0.9rem" : "1.25rem", marginBottom: "1.25rem" }}>
       <div style={{ position: "relative", flexShrink: 0 }}>
-        <div style={{ width: isMobile ? 52 : 64, height: isMobile ? 52 : 64, borderRadius: "50%", background: active ? "linear-gradient(135deg, rgba(232,103,58,0.12), rgba(155,93,229,0.12), rgba(27,95,232,0.12))" : "rgba(200,191,180,0.18)", border: active ? "1.5px solid rgba(155,93,229,0.28)" : "1.5px solid rgba(200,191,180,0.5)", display: "flex", alignItems: "center", justifyContent: "center", lineHeight: 0 }}>
-          <span style={{ fontFamily: HFONT, fontWeight: 700, fontSize: isMobile ? "2.3rem" : "2.95rem", lineHeight: 1, background: active ? "linear-gradient(135deg, #E8673A, #9B5DE5, #1B5FE8)" : "linear-gradient(135deg, #C8BFB4, #B3A693)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text", display: "block", transform: "translateY(-0.08em)" }}>{num}</span>
+        <div style={{ width: isMobile ? 52 : 64, height: isMobile ? 52 : 64, borderRadius: "50%", background: active ? "linear-gradient(135deg, rgba(232,103,58,0.12), rgba(155,93,229,0.12), rgba(27,95,232,0.12))" : "rgba(200,191,180,0.18)", border: active ? "1.5px solid rgba(155,93,229,0.28)" : "1.5px solid rgba(200,191,180,0.5)" }}>
+          <svg viewBox="0 0 100 100" width="100%" height="100%" style={{ display: "block" }}>
+            <defs>
+              <linearGradient id={`dashStepGrad-${num}-${active ? "on" : "off"}`} x1="0" y1="0" x2="1" y2="1">
+                {active
+                  ? (<><stop offset="0%" stopColor="#E8673A" /><stop offset="50%" stopColor="#9B5DE5" /><stop offset="100%" stopColor="#1B5FE8" /></>)
+                  : (<><stop offset="0%" stopColor="#C8BFB4" /><stop offset="100%" stopColor="#B3A693" /></>)}
+              </linearGradient>
+            </defs>
+            <text x="50" y="50" textAnchor="middle" dominantBaseline="central"
+              fontFamily={HFONT} fontWeight="700" fontSize={isMobile ? 46 : 50}
+              fill={`url(#dashStepGrad-${num}-${active ? "on" : "off"})`}>{num}</text>
+          </svg>
         </div>
       </div>
       <div style={{ flex: 1, minWidth: 0 }}>
@@ -2555,8 +2567,17 @@ const LIFE_QUESTIONS_ANNIVERSARY = LIFE_QUESTIONS;
 function calcDimScores(answers) {
   if (!answers) return {};
   // Helper: avg the answered keys, return 3 (neutral) if none are answered.
+  // lv5's a/b display order is reversed vs its dimension orientation, so its
+  // raw value is flipped (6 - v) to keep love oriented verbal->physical.
+  const FLIPPED = new Set(['lv5']);
   const avg = (...keys) => {
-    const vals = keys.map(k => answers[k]).filter(v => v != null && !isNaN(v));
+    const vals = keys
+      .map(k => {
+        const raw = answers[k];
+        if (raw == null || isNaN(raw)) return null;
+        return FLIPPED.has(k) ? (6 - Number(raw)) : Number(raw);
+      })
+      .filter(v => v != null && !isNaN(v));
     return vals.length ? vals.reduce((s, v) => s + Number(v), 0) / vals.length : 3;
   };
   return {
@@ -2567,7 +2588,7 @@ function calcDimScores(answers) {
     love:       avg('lv1','lv2','lv5'),
     bids:       avg('bd1','bd3','bd4'),
     needs:      avg('nd1','nd5'),
-    conflict:   avg('cf1','cf2','cf6'),
+    conflict:   avg('cf1','cf2'),
     stress:     avg('st1'),
     repair:     avg('rp2','rp3','rp6'),
     feedback:   avg('fb5'),
@@ -2956,7 +2977,7 @@ function Exercise01Flow({ userName, partnerName, onComplete, skipIntro = false }
         </p>
         <div style={{ display: "flex", gap: "0.85rem", marginBottom: "1.75rem", flexWrap: "wrap" }}>
           {[
-            { num: '01', title: 'Communication', color: '#E8673A', desc: '24 questions · 10 dimensions' },
+            { num: '01', title: 'Communication', color: '#E8673A', desc: '23 questions · 10 dimensions' },
             { num: '02', title: 'Expectations',  color: '#1B5FE8', desc: 'Responsibilities & life' },
           ].map(e => (
             <div key={e.num} style={{ flex: "1 1 180px", background: C.warm, border: `1.5px solid ${e.color}33`, borderRadius: 12, padding: "0.9rem 1rem" }}>
@@ -5623,8 +5644,8 @@ function BudgetTool({ userName, partnerName, onBack, budgetState, setBudgetState
         {/* Personal spending — per partner */}
         <div style={{ background: "white", border: "1.5px solid " + C.stone, borderRadius: 14, padding: "0.85rem 1.15rem", marginTop: "0.6rem" }}>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0.55rem 0 0.85rem", borderBottom: "1px solid " + C.stone + "60" }}>
-            <div>
-              <span style={{ fontSize: "1.05rem", marginRight: "0.5rem" }}>👤</span>
+            <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+              <BudgetIcon id="personal" color="#E8673A" />
               <span style={{ fontSize: "0.95rem", fontWeight: 700, color: C.ink, fontFamily: font.display }}>Personal spending</span>
             </div>
           </div>
@@ -5710,13 +5731,35 @@ function BudgetTool({ userName, partnerName, onBack, budgetState, setBudgetState
 }
 
 // ── Helper: one category block with its line items ────────────────────────
+// Stylized line icons for the budget category headers, matching the site's
+// lucide-style stroke set. Replaces the emoji glyphs so the tool reads
+// consistent with the rest of Attune.
+function BudgetIcon({ id, color = "#8C7A68", size = 18 }) {
+  const p = {
+    housing:   <><path d="M3 9.5 12 3l9 6.5"/><path d="M5 9v11a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V9"/><path d="M9 21v-6h6v6"/></>,
+    transport: <><path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 2 12v4c0 .6.4 1 1 1h2"/><circle cx="7" cy="17" r="2"/><circle cx="17" cy="17" r="2"/></>,
+    food:      <><path d="M3 2v7c0 1.1.9 2 2 2a2 2 0 0 0 2-2V2"/><path d="M7 2v20"/><path d="M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7"/></>,
+    health:    <><path d="m10.5 20.5 10-10a4.95 4.95 0 1 0-7-7l-10 10a4.95 4.95 0 1 0 7 7Z"/><path d="m8.5 8.5 7 7"/></>,
+    debt:      <><line x1="12" y1="20" x2="12" y2="10"/><line x1="18" y1="20" x2="18" y2="4"/><line x1="6" y1="20" x2="6" y2="16"/></>,
+    savings:   <><line x1="12" y1="2" x2="12" y2="22"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></>,
+    lifestyle: <><path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3z"/><path d="M5 3v4"/><path d="M3 5h4"/></>,
+    giving:    <><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.29 1.49 4.04 3 5.5l7 7Z"/></>,
+    personal:  <><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></>,
+  };
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ verticalAlign: "middle", flexShrink: 0 }}>
+      {p[id] || <circle cx="12" cy="12" r="9" />}
+    </svg>
+  );
+}
+
 function BudgetCategoryBlock({ cat, expenses, setExpense, numInput, font }) {
   const catTotal = cat.items.reduce((s, item) => s + bNum(expenses[cat.id + '__' + item]), 0);
   return (
     <div style={{ background: "white", border: "1.5px solid " + C.stone, borderRadius: 14, padding: "0.85rem 1.15rem", marginBottom: "0.6rem" }}>
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0.55rem 0 0.85rem", borderBottom: "1px solid " + C.stone + "60" }}>
-        <div>
-          <span style={{ fontSize: "1.05rem", marginRight: "0.5rem" }}>{cat.icon}</span>
+        <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+          <BudgetIcon id={cat.id} color={cat.group === "essentials" ? "#10b981" : "#E8673A"} />
           <span style={{ fontSize: "0.95rem", fontWeight: 700, color: C.ink, fontFamily: font.display }}>{cat.label}</span>
         </div>
         {catTotal > 0 && <span style={{ fontSize: "0.8rem", color: C.muted, fontFamily: font.body, fontWeight: 500 }}>{bFmt(catTotal)}</span>}
@@ -10523,7 +10566,7 @@ function PartnerBExerciseFlow({ account, onComplete }) {
           {`Exercise 01 covers how you communicate and connect. Exercise 02 maps your expectations.${hasReflection ? ' Exercise 03 captures your relationship story.' : ''} ${hasReflection ? 'They take' : 'Both take'} about 15 minutes. Answer honestly. Your partner won't see your individual answers.`}
         </p>
         <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', marginBottom: '2.5rem', flexWrap: 'wrap' }}>
-          {[{ num: '01', title: 'Communication', color: '#E8673A', desc: '24 questions · 10 dimensions' }, { num: '02', title: 'Expectations', color: '#1B5FE8', desc: 'Responsibilities & life' }, ...(hasReflection ? [{ num: '03', title: 'Relationship Reflection', color: '#7C3AED', desc: 'Your story together' }] : [])].map(e => (
+          {[{ num: '01', title: 'Communication', color: '#E8673A', desc: '23 questions · 10 dimensions' }, { num: '02', title: 'Expectations', color: '#1B5FE8', desc: 'Responsibilities & life' }, ...(hasReflection ? [{ num: '03', title: 'Relationship Reflection', color: '#7C3AED', desc: 'Your story together' }] : [])].map(e => (
             <div key={e.num} style={{ background: 'rgba(255,255,255,0.06)', border: `1px solid ${e.color}33`, borderRadius: 14, padding: '1.1rem 1.4rem', textAlign: 'left', minWidth: 160 }}>
               <div style={{ fontSize: '0.58rem', letterSpacing: '0.18em', color: e.color, fontWeight: 700, fontFamily: "'DM Sans', sans-serif", textTransform: 'uppercase', marginBottom: '0.35rem' }}>Exercise {e.num}</div>
               <div style={{ fontFamily: "'Playfair Display', Georgia, serif", fontSize: '1rem', fontWeight: 700, color: 'white', marginBottom: '0.25rem' }}>{e.title}</div>
@@ -11585,11 +11628,14 @@ export default function App() {
               window.location.reload();
               return;
             }
-          } else if (!localStorage.getItem('attune_order')) {
-            // Session and local account both valid, but no order context.
-            // Happens when the order row was created or linked after this
-            // browser last signed in (e.g. backfilled or repaired orders).
-            // Self-heal: fetch the most recent order and restore it.
+          } else {
+            // Session and local account both valid. Re-sync package + add-on
+            // context from the authoritative DB order on every load. Without
+            // this, a package recorded wrong at signup (e.g. account created
+            // before purchase, or a setup link missing ?pkg=) stays stale
+            // forever, because nothing else corrects localStorage afterward.
+            // Invitees have no matching order row, so their inherited package
+            // is left alone.
             try {
               let { data: orderRow } = await sb.from('orders')
                 .select('order_num,pkg_key,is_physical,addon_lmft,addon_reflection,addon_budget,addon_checklist,addon_intimacy,addon_workbook')
@@ -11831,7 +11877,7 @@ export default function App() {
     lv2:1,
     lv3:1,
     lv4:1,
-    lv5:1,
+    lv5:5,
     st1:5,
     st2:5,
     st3:5,
@@ -11939,7 +11985,7 @@ export default function App() {
     lv2:5,
     lv3:5,
     lv4:5,
-    lv5:5,
+    lv5:1,
     st1:1,
     st2:1,
     st3:1,
@@ -12459,6 +12505,7 @@ export default function App() {
     hasLMFT:        _basePkg.hasLMFT        || !!(order?.addonLmft),
     hasAnniversary: _basePkg.hasAnniversary || !!(order?.addonReflection),
     hasBudget:      _basePkg.hasBudget      || !!(order?.addonBudget),
+    hasWorkbook:    demoPkg === 'premium'   || !!(order?.addonWorkbook),
     hasIntimacy:    !!(order?.addonIntimacy) || (() => { try { return localStorage.getItem('attune_dev_intimacy') === '1'; } catch { return false; } })() || (() => { try { const q = new URLSearchParams(window.location.search); return !!q.get('demo') && q.get('intimacy') === '1'; } catch { return false; } })(),
   };
 
@@ -13219,7 +13266,8 @@ export default function App() {
                         : <button onClick={() => setView("home")} style={{ background: "#2d2250", color: "white", border: "none", padding: "0.6rem 1.5rem", fontSize: "0.7rem", letterSpacing: "0.1em", textTransform: "uppercase", cursor: "pointer", fontFamily: font.body, borderRadius: 8 }}>Back to Dashboard →</button>
                     }
                   </div>
-                  {/* Workbook upsell */}
+                  {/* Workbook upsell — hidden if they already own it */}
+                  {!pkg.hasWorkbook && (
                   <div onClick={() => setUpsellModal({ product: "workbook", cartAdded: false })}
                     style={{ marginTop: "2rem", textAlign: "left", background: "#FFFBF0", border: "1.5px solid rgba(232,103,58,.3)", borderRadius: 14, padding: "1rem 1.25rem", display: "flex", gap: "0.85rem", alignItems: "flex-start", cursor: "pointer", transition: "border-color 0.15s" }}
                     onMouseEnter={e => e.currentTarget.style.borderColor = "rgba(232,103,58,.6)"}
@@ -13233,7 +13281,8 @@ export default function App() {
                       <span style={{ fontSize: "0.7rem", color: "#E8673A", fontWeight: 700, fontFamily: font.body }}>See details + add to cart →</span>
                     </div>
                   </div>
-                  {demoPkg !== "anniversary" && demoPkg !== "premium" && (
+                  )}
+                  {!pkg.hasAnniversary && (
                     <div onClick={() => setUpsellModal({ product: "reflection", cartAdded: false })}
                       style={{ marginTop: "1rem", textAlign: "left", background: "#F0FDF4", border: "1.5px solid rgba(16,185,129,.25)", borderRadius: 14, padding: "1rem 1.25rem", display: "flex", gap: "0.85rem", alignItems: "flex-start", cursor: "pointer", transition: "border-color 0.15s" }}
                       onMouseEnter={e => e.currentTarget.style.borderColor = "rgba(16,185,129,.55)"}
@@ -13289,7 +13338,8 @@ export default function App() {
                         : <button onClick={() => setView("home")} style={{ background: "#2d2250", color: "white", border: "none", padding: "0.6rem 1.5rem", fontSize: "0.7rem", letterSpacing: "0.1em", textTransform: "uppercase", cursor: "pointer", fontFamily: font.body, borderRadius: 8 }}>Back to Dashboard →</button>
                     }
                   </div>
-                  {/* Workbook upsell */}
+                  {/* Workbook upsell — hidden if they already own it */}
+                  {!pkg.hasWorkbook && (
                   <div onClick={() => setUpsellModal({ product: "workbook", cartAdded: false })}
                     style={{ marginTop: "2rem", textAlign: "left", background: "#FFFBF0", border: "1.5px solid rgba(232,103,58,.3)", borderRadius: 14, padding: "1rem 1.25rem", display: "flex", gap: "0.85rem", alignItems: "flex-start", cursor: "pointer", transition: "border-color 0.15s" }}
                     onMouseEnter={e => e.currentTarget.style.borderColor = "rgba(232,103,58,.6)"}
@@ -13303,9 +13353,10 @@ export default function App() {
                       <span style={{ fontSize: "0.7rem", color: "#E8673A", fontWeight: 700, fontFamily: font.body }}>See details + add to cart →</span>
                     </div>
                   </div>
-                  {/* Starting Out / Reflection upsell */}
-                  {demoPkg !== "newlywed" && (
-                    <div onClick={() => setUpsellModal({ product: demoPkg === "anniversary" || demoPkg === "premium" ? "workbook" : "checklist", cartAdded: false })}
+                  )}
+                  {/* Starting Out checklist upsell — hidden if they already own it */}
+                  {!pkg.hasChecklist && (
+                    <div onClick={() => setUpsellModal({ product: "checklist", cartAdded: false })}
                       style={{ marginTop: "1rem", textAlign: "left", background: "#FFF8F5", border: "1.5px solid rgba(232,103,58,.25)", borderRadius: 14, padding: "1rem 1.25rem", display: "flex", gap: "0.85rem", alignItems: "flex-start", cursor: "pointer", transition: "border-color 0.15s" }}
                       onMouseEnter={e => e.currentTarget.style.borderColor = "rgba(232,103,58,.55)"}
                       onMouseLeave={e => e.currentTarget.style.borderColor = "rgba(232,103,58,.25)"}>
