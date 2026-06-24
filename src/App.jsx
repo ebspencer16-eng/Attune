@@ -11640,6 +11640,13 @@ export default function App() {
               setAccount(null);
               try { localStorage.removeItem('attune_account'); } catch {}
               clearAllUserLocalStorage();
+              // Clearing the account in place renders a blank screen (no auth
+              // modal is open on a fresh load). Bounce to the sign-in form
+              // instead, matching the SIGNED_OUT handler. The guard prevents a
+              // redirect loop once we're already on the sign-in page.
+              if (!cancelled && window.location.search.indexOf('signin=1') === -1) {
+                window.location.href = '/app?signin=1';
+              }
             }
             // Else: leave the account alone. The user is in pending-
             // confirmation state. Once they click the email link, the
