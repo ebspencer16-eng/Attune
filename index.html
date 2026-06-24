@@ -22,6 +22,86 @@
        app bundle initializes (detectSessionInUrl consumes the hash on load). */
     try { window.__attuneConfirmType = new URLSearchParams((location.hash || '').replace(/^#/, '')).get('type') || ''; } catch (e) { window.__attuneConfirmType = ''; }
     </script>
+    <script>
+    /* attune:blank-guard — last-resort recovery so a failed load never leaves a
+       blank page. Runs independently of the app bundle, so it works even when
+       the bundle itself fails to load (the React error boundary can't, because
+       React never started).
+
+       Layer 1 — chunk/module recovery: right after a deploy, an already-loaded
+       page can reference an asset hash the new build replaced. The failed import
+       triggers ONE automatic reload to fetch the current build. A sessionStorage
+       guard prevents a reload loop; the guard is cleared the moment the app
+       mounts, so a future deploy can recover again.
+
+       Layer 2 — blank fallback: if nothing has mounted into #root after a grace
+       period, show an on-brand card with a Reload button instead of a white
+       screen. */
+    (function () {
+      var RELOAD_KEY = 'attune_blank_reloaded';
+      function isChunkError(msg) {
+        return /dynamically imported module|Importing a module script failed|error loading dynamically imported|Failed to fetch dynamically|ChunkLoadError|Loading chunk|Loading CSS chunk/i.test(String(msg || ''));
+      }
+      function mounted() {
+        var r = document.getElementById('root');
+        return !!(r && r.childElementCount > 0);
+      }
+      function reloadOnce() {
+        try {
+          if (sessionStorage.getItem(RELOAD_KEY)) return; // already tried — don't loop
+          sessionStorage.setItem(RELOAD_KEY, '1');
+          location.reload();
+        } catch (e) {}
+      }
+      // Layer 1: auto-recover from a JS/CSS chunk that failed to load.
+      window.addEventListener('error', function (e) {
+        var t = e && e.target;
+        if (t && t !== window && (t.tagName === 'SCRIPT' || t.tagName === 'LINK')) {
+          var url = t.src || t.href || '';
+          if (/\/assets\/|\.m?js(\?|$)|\.css(\?|$)/i.test(url)) reloadOnce();
+        } else if (e && isChunkError(e.message)) {
+          reloadOnce();
+        }
+      }, true);
+      window.addEventListener('unhandledrejection', function (e) {
+        var r = e && e.reason;
+        if (isChunkError(r && (r.message || r))) reloadOnce();
+      });
+      // Layer 2: show a fallback if the app never paints.
+      function showFallback() {
+        if (mounted() || document.getElementById('attune-blank-fallback')) return;
+        var d = document.createElement('div');
+        d.id = 'attune-blank-fallback';
+        d.style.cssText = 'position:fixed;inset:0;z-index:99999;display:flex;align-items:center;justify-content:center;padding:2rem 1.25rem;background:#F3EDE6;font-family:system-ui,-apple-system,sans-serif;';
+        d.innerHTML = '<div style="background:#FFFDF9;border-radius:20px;padding:2.5rem 2rem;max-width:400px;width:100%;text-align:center;box-shadow:0 12px 40px rgba(14,11,7,0.1);">'
+          + '<div style="font-size:1.2rem;font-weight:700;color:#0E0B07;margin-bottom:0.5rem;line-height:1.3;">This is taking longer than it should.</div>'
+          + '<p style="font-size:0.88rem;color:#8C7A68;line-height:1.6;margin:0 0 1.5rem;">A new version may have just shipped. Reload to get the latest. Your progress is saved.</p>'
+          + '<button id="attune-blank-reload" style="background:linear-gradient(135deg,#E8673A,#1B5FE8);color:#fff;border:none;padding:0.75rem 1.6rem;font-size:0.85rem;font-weight:700;border-radius:10px;cursor:pointer;font-family:inherit;">Reload</button>'
+          + '</div>';
+        document.body.appendChild(d);
+        var btn = document.getElementById('attune-blank-reload');
+        if (btn) btn.onclick = function () { try { sessionStorage.removeItem(RELOAD_KEY); } catch (e) {} location.reload(); };
+      }
+      function onReady() {
+        // The moment React paints into #root: clear the reload guard (so future
+        // deploys can recover) and remove any fallback already shown.
+        try {
+          var mo = new MutationObserver(function () {
+            if (mounted()) {
+              try { sessionStorage.removeItem(RELOAD_KEY); } catch (e) {}
+              var fb = document.getElementById('attune-blank-fallback'); if (fb) fb.remove();
+              mo.disconnect();
+            }
+          });
+          mo.observe(document.getElementById('root'), { childList: true });
+        } catch (e) {}
+        // If still blank after the grace period, paint the fallback.
+        setTimeout(showFallback, 9000);
+      }
+      if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', onReady);
+      else onReady();
+    })();
+    </script>
   <!-- attune:hscroll-lock -->
   <style>
     html { overscroll-behavior-x: none; overflow-x: hidden; max-width: 100%; }
