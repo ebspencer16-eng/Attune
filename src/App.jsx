@@ -9921,7 +9921,14 @@ function AuthModal({ mode, onClose, onSuccess }) {
         {/* Tab switcher */}
         <div style={{ display: "flex", background: "#F3EDE6", borderRadius: 10, padding: "0.22rem", marginBottom: "1.5rem" }}>
           {["signup", "login"].map(t => (
-            <button key={t} onClick={() => { setTab(t); setErr(""); }}
+            <button key={t} onClick={() => {
+              // On the sign-in page (login context), creating an account means
+              // choosing a package first, so send them to the in-page get-started
+              // flow. The in-modal signup form is only for post-purchase setup,
+              // where the person already has a package (mode === "signup").
+              if (t === "signup" && mode !== "signup") { window.location.href = "/start"; return; }
+              setTab(t); setErr("");
+            }}
               style={{ flex: 1, padding: "0.5rem", borderRadius: 8, border: "none", cursor: "pointer", fontFamily: "'DM Sans', sans-serif", fontSize: "0.82rem", fontWeight: 600, background: tab === t ? "white" : "transparent", color: tab === t ? "#0E0B07" : "#8C7A68", boxShadow: tab === t ? "0 1px 4px rgba(0,0,0,0.1)" : "none", transition: "all 0.15s" }}>
               {t === "signup" ? "Create account" : "Sign in"}
             </button>
@@ -10016,7 +10023,7 @@ function AuthModal({ mode, onClose, onSuccess }) {
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: "0.85rem" }}>
               <p style={{ fontSize: "0.75rem", color: "#8C7A68", fontFamily: "'DM Sans',sans-serif", margin: 0 }}>
                 No account yet?{" "}
-                <button onClick={() => setTab("signup")} style={{ background: "none", border: "none", color: "#E8673A", fontWeight: 700, cursor: "pointer", fontSize: "0.75rem", fontFamily: "'DM Sans',sans-serif" }}>Create one →</button>
+                <button onClick={() => { if (mode !== "signup") { window.location.href = "/start"; } else { setTab("signup"); } }} style={{ background: "none", border: "none", color: "#E8673A", fontWeight: 700, cursor: "pointer", fontSize: "0.75rem", fontFamily: "'DM Sans',sans-serif" }}>Get started →</button>
               </p>
               <button onClick={() => { setTab("reset"); setErr(""); setResetSent(false); }} style={{ background: "none", border: "none", color: "#8C7A68", fontSize: "0.72rem", cursor: "pointer", fontFamily: "'DM Sans',sans-serif", textDecoration: "underline" }}>Forgot password?</button>
             </div>
