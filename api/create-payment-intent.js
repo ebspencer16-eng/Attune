@@ -241,7 +241,9 @@ function itemBasePrice(item) {
 function wbAmount(item) {
   if (!item.addonWorkbook) return 0;
   const print = item.addonWorkbook === 'print';
-  if (item.pkgKey === 'premium') return print ? 20 : 0;
+  // Premium physical includes the printed workbook; only a digital package pays
+  // the $20 to upgrade its workbook to printed.
+  if (item.pkgKey === 'premium') return (!item.isPhysical && print) ? 20 : 0;
   return print ? ADDON_PRICES.workbookPrint : ADDON_PRICES.workbookDigital;
 }
 

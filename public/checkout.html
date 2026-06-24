@@ -504,7 +504,9 @@ const ADDON_WORKBOOK = {
 function wbCharge(it) {
   if (!it.addons || !it.addons.workbook) return 0;
   const print = it.addons.workbookVariant === 'print';
-  if (it.pkg === 'premium') return print ? 20 : 0;
+  // Premium: physical package already includes the printed workbook in its price.
+  // Only a digital package upgrading to a printed workbook pays the $20 difference.
+  if (it.pkg === 'premium') return (it.format === 'digital' && print) ? 20 : 0;
   return print ? ADDON_WORKBOOK.print.price : ADDON_WORKBOOK.digital.price;
 }
 // Display label + price for the workbook line on an item.
