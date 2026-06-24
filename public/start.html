@@ -378,6 +378,18 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;height:58px;background:rgba(
       </div>
     </div>
 
+    <!-- Starting Out checklist — $20 -->
+    <div class="addon-card" id="addon-checklist" onclick="toggleChecklist()">
+      <div class="addon-check" id="checklist-check">
+        <svg width="10" height="8" viewBox="0 0 11 9" fill="none"><path d="M1 4.5L4 7.5L10 1" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      <div class="addon-body">
+        <div class="addon-name">Starting Out Checklist</div>
+        <div class="addon-desc">A practical guide to starting your life together. Names, finances, household logistics. Included in Starting Out. Add it to any other package here.</div>
+        <div class="addon-price">+$20</div>
+      </div>
+    </div>
+
     <!-- LMFT — $150 — most expensive -->
     <div class="addon-card" id="addon-lmft" onclick="toggleLmft()">
       <div class="addon-check" id="lmft-check">
@@ -428,6 +440,7 @@ let wbFormat = 'digital';
 let addonBudget = false;
 let addonReflection = false;
 let addonIntimacy = false;
+let addonChecklist = false;
 let premiumWbFormat = 'digital';  // format of the workbook included with Premium
 
 function syncPremiumWb() {
@@ -464,15 +477,18 @@ function selectPkg(id) {
   // Hide add-ons already included in this package, and clear any prior selection
   // so an included add-on is never also billed.
   const budgetIncluded = id === 'newlywed';
+  const checklistIncluded = id === 'newlywed';
   const reflectionIncluded = id === 'anniversary';
   const lmftIncluded = id === 'premium';
   const workbookIncluded = id === 'premium';   // Premium includes the workbook
   if (budgetIncluded)     addonBudget = false;
+  if (checklistIncluded)  addonChecklist = false;
   if (reflectionIncluded) addonReflection = false;
   if (lmftIncluded)       addonLmft = false;
   if (workbookIncluded) { addonWorkbook = false; document.getElementById('wb-variants').classList.remove('show'); }
-  ['addon-budget','addon-reflection','addon-lmft','addon-workbook'].forEach(a => document.getElementById(a).classList.remove('selected'));
+  ['addon-budget','addon-checklist','addon-reflection','addon-lmft','addon-workbook'].forEach(a => document.getElementById(a).classList.remove('selected'));
   setAddonIncluded('addon-budget', budgetIncluded);
+  setAddonIncluded('addon-checklist', checklistIncluded);
   setAddonIncluded('addon-reflection', reflectionIncluded);
   setAddonIncluded('addon-lmft', lmftIncluded);
   setAddonIncluded('addon-workbook', workbookIncluded);
@@ -531,6 +547,12 @@ function toggleIntimacy() {
   updateBar();
 }
 
+function toggleChecklist() {
+  addonChecklist = !addonChecklist;
+  document.getElementById('addon-checklist').classList.toggle('selected', addonChecklist);
+  updateBar();
+}
+
 function setPremiumWb(f, e) {
   if (e) e.stopPropagation();
   premiumWbFormat = f;
@@ -547,6 +569,7 @@ function updateBar() {
   if (addonBudget) total += 20;
   if (addonReflection) total += 40;
   if (addonIntimacy) total += 20;
+  if (addonChecklist) total += 20;
   // Physical premium includes the printed workbook in its price. The +$20 upgrade
   // only applies if someone keeps the digital package but wants a printed workbook.
   if (selectedPkg === 'premium' && format === 'digital' && premiumWbFormat === 'print') total += 20;
@@ -562,6 +585,7 @@ function goNext() {
   if (addonBudget) params.set('addon_budget', '1');
   if (addonReflection) params.set('addon_reflection', '1');
   if (addonIntimacy) params.set('addon_intimacy', '1');
+  if (addonChecklist) params.set('addon_checklist', '1');
   // Premium includes the workbook; pass its chosen format (not billed as an add-on).
   if (selectedPkg === 'premium') params.set('wb_format', premiumWbFormat);
   window.location.href = '/checkout?' + params.toString();

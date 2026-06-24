@@ -524,8 +524,9 @@ let cardComplete = false;
 let appliedPromoCode = null;
 let appliedPromoMode = null;     // 'free' | 'fixed'
 let appliedPromoAmount = 0;      // dollars; the package's final price under fixed mode
-let appliedPromoFreeWorkbook = false;  // code also bundles a free digital workbook
-let _promoWorkbookSnapshot = [];       // prior per-item workbook state, for removePromo
+let appliedPromoFreeWorkbook = false;  // code also bundles a free workbook
+let appliedPromoCovers = {};           // { intimacy, reflection, budget, checklist } the code makes free
+let _promoWorkbookSnapshot = [];       // prior per-item add-on state, for removePromo
 let stripe, cardNumberElement, cardExpiryElement, cardCvcElement, paymentRequest;
 
 // Single-item legacy vars (used when cart has exactly one item, for
@@ -758,7 +759,7 @@ function persistOrderComplete(orderNum) {
         reflection:       params.get('addon_reflection') === '1',
         budget:           params.get('addon_budget') === '1',
         intimacy:         params.get('addon_intimacy') === '1',
-        checklist:        false,
+        checklist:        params.get('addon_checklist') === '1',
       },
       intent: (fromRegistry || params.get('gift') === '1') ? 'gift' : 'self',
       partner1Name: '', partner2Name: '', giftNote: '',
@@ -1082,16 +1083,23 @@ function renderSummary() {
       ? appliedPromoAmount * _items.length
       : 0;
     let discount = Math.max(0, baseTotal - finalPackageCost);
-    // Free-workbook codes also cover the digital workbook on each item.
-    if (appliedPromoMode === 'free' && appliedPromoFreeWorkbook) {
-      discount += _items.reduce((s, it) => s + (it.addons.workbook
-        ? (it.addons.workbookVariant === 'print' ? ADDON_WORKBOOK.print.price : ADDON_WORKBOOK.digital.price)
-        : 0), 0);
+    // Free-mode codes also cover whatever add-ons the bundle includes, at their
+    // actual cart price (so premium's already-included workbook adds $0, not $19).
+    if (appliedPromoMode === 'free') {
+      _items.forEach(it => {
+        if (appliedPromoFreeWorkbook && it.addons.workbook)        discount += wbCharge(it);
+        if (appliedPromoCovers.intimacy && it.addons.intimacy)     discount += 20;
+        if (appliedPromoCovers.reflection && it.addons.reflection) discount += ADDON_REFLECTION.price;
+        if (appliedPromoCovers.budget && it.addons.budget)         discount += 20;
+        if (appliedPromoCovers.checklist && it.addons.checklist)   discount += 20;
+      });
     }
+    const _coversAddons = appliedPromoFreeWorkbook || appliedPromoCovers.intimacy ||
+      appliedPromoCovers.reflection || appliedPromoCovers.budget || appliedPromoCovers.checklist;
     const subLabel = (appliedPromoMode === 'fixed')
       ? `${appliedPromoCode} · package $${appliedPromoAmount}, add-ons billed normally`
-      : (appliedPromoFreeWorkbook
-          ? `${appliedPromoCode} · covers assessment + digital workbook`
+      : (_coversAddons
+          ? `${appliedPromoCode} · covers package + included add-ons`
           : `${appliedPromoCode} · covers package only`);
     rows += `
       <div class="co-card-detail" style="border-top:1px solid #E8DDD0;margin-top:.4rem;padding-top:.5rem">
@@ -1899,6 +1907,10 @@ async function applyPromo() {
           amount: vd.amount || 0,
           includesWorkbook: !!vd.includesWorkbook,
           workbookVariant: vd.workbookVariant || 'digital',
+          includesIntimacy:   !!vd.includesIntimacy,
+          includesReflection: !!vd.includesReflection,
+          includesBudget:     !!vd.includesBudget,
+          includesChecklist:  !!vd.includesChecklist,
         };
       }
     } catch (e) {
@@ -1950,14 +1962,26 @@ async function applyPromo() {
   // checkout session and snapshot the prior state so removePromo can revert.
   // (Checkout doesn't persist the cart, so this stays local to this page.)
   appliedPromoFreeWorkbook = !!codeMeta.includesWorkbook;
+  appliedPromoCovers = {
+    intimacy:   !!codeMeta.includesIntimacy,
+    reflection: !!codeMeta.includesReflection,
+    budget:     !!codeMeta.includesBudget,
+    checklist:  !!codeMeta.includesChecklist,
+  };
   _promoWorkbookSnapshot = [];
-  if (appliedPromoFreeWorkbook) {
-    _items.forEach(it => {
-      _promoWorkbookSnapshot.push({ id: it.id, had: !!it.addons.workbook, variant: it.addons.workbookVariant || 'digital' });
-      it.addons.workbook = true;
-      it.addons.workbookVariant = codeMeta.workbookVariant || 'digital';
+  _items.forEach(it => {
+    _promoWorkbookSnapshot.push({
+      id: it.id,
+      workbook: !!it.addons.workbook, variant: it.addons.workbookVariant || 'digital',
+      intimacy: !!it.addons.intimacy, reflection: !!it.addons.reflection,
+      budget: !!it.addons.budget, checklist: !!it.addons.checklist,
     });
-  }
+    if (appliedPromoFreeWorkbook) { it.addons.workbook = true; it.addons.workbookVariant = codeMeta.workbookVariant || 'digital'; }
+    if (appliedPromoCovers.intimacy)   it.addons.intimacy = true;
+    if (appliedPromoCovers.reflection) it.addons.reflection = true;
+    if (appliedPromoCovers.budget)     it.addons.budget = true;
+    if (appliedPromoCovers.checklist)  it.addons.checklist = true;
+  });
   fb.textContent = '';
   document.getElementById('promoInputWrap').style.display = 'none';
   document.getElementById('promoToggle').style.display = 'none';
@@ -1974,10 +1998,12 @@ async function applyPromo() {
   // keep the card so we can still collect for it.
   let remainingCharge = 0;
   _items.forEach(it => {
-    if (it.addons.lmft)       remainingCharge += ADDON_LMFT.price;
-    if (it.addons.reflection) remainingCharge += ADDON_REFLECTION.price;
-    if (it.addons.budget)     remainingCharge += 20;
-    if (it.addons.checklist)  remainingCharge += 20;
+    if (it.addons.lmft)                                            remainingCharge += ADDON_LMFT.price;
+    if (it.addons.reflection && !appliedPromoCovers.reflection)    remainingCharge += ADDON_REFLECTION.price;
+    if (it.addons.budget     && !appliedPromoCovers.budget)        remainingCharge += 20;
+    if (it.addons.checklist  && !appliedPromoCovers.checklist)     remainingCharge += 20;
+    if (it.addons.intimacy   && !appliedPromoCovers.intimacy)      remainingCharge += 20;
+    if (it.addons.workbook   && !appliedPromoFreeWorkbook)         remainingCharge += wbCharge(it);
   });
   const fullyFree = codeMeta.mode === 'free' && remainingCharge <= 0;
   if (fullyFree) {
@@ -2033,14 +2059,19 @@ function removePromo() {
   // Restore billing address (hidden on $0 orders)
   const billingSection = document.getElementById('billingSection');
   if (billingSection) billingSection.style.display = '';
-  // Revert any free workbook the promo added this session
-  if (appliedPromoFreeWorkbook && Array.isArray(_promoWorkbookSnapshot)) {
+  // Revert any add-ons the promo added this session
+  if (Array.isArray(_promoWorkbookSnapshot)) {
     _promoWorkbookSnapshot.forEach(snap => {
       const it = _items.find(i => i.id === snap.id);
-      if (it) { it.addons.workbook = snap.had; it.addons.workbookVariant = snap.variant || 'digital'; }
+      if (it) {
+        it.addons.workbook = snap.workbook; it.addons.workbookVariant = snap.variant || 'digital';
+        it.addons.intimacy = snap.intimacy; it.addons.reflection = snap.reflection;
+        it.addons.budget = snap.budget; it.addons.checklist = snap.checklist;
+      }
     });
   }
   appliedPromoFreeWorkbook = false;
+  appliedPromoCovers = {};
   _promoWorkbookSnapshot = [];
 
   // Stripe will update cardComplete on next input change; reset here so
