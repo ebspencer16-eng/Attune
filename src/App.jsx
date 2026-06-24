@@ -1773,7 +1773,7 @@ function DashStepHeader({ num, title, sub, active = true, isMobile = false }) {
                   : (<><stop offset="0%" stopColor="#C8BFB4" /><stop offset="100%" stopColor="#B3A693" /></>)}
               </linearGradient>
             </defs>
-            <text x="50" y="50" textAnchor="middle" dominantBaseline="central"
+            <text x="50" y={isMobile ? 62 : 64} textAnchor="middle"
               fontFamily={HFONT} fontWeight="700" fontSize={isMobile ? 46 : 50}
               fill={`url(#dashStepGrad-${num}-${active ? "on" : "off"})`}>{num}</text>
           </svg>
@@ -11566,7 +11566,7 @@ export default function App() {
             // data after a cross-device login.
             try {
               if (orderRow) {
-                localStorage.setItem('attune_order', JSON.stringify({
+                const _rebuiltOrder = {
                   orderNum: orderRow.order_num,
                   pkgKey:   orderRow.pkg_key,
                   pkg:      orderRow.pkg_key,
@@ -11577,7 +11577,9 @@ export default function App() {
                   addonChecklist:  !!orderRow.addon_checklist,
                   addonIntimacy:     !!orderRow.addon_intimacy,
                   addonWorkbook:   orderRow.addon_workbook || '',
-                }));
+                };
+                localStorage.setItem('attune_order', JSON.stringify(_rebuiltOrder));
+                setOrder(_rebuiltOrder);
               }
             } catch {}
 
@@ -11653,7 +11655,7 @@ export default function App() {
                 if (byEmail) orderRow = byEmail;
               }
               if (orderRow && !cancelled) {
-                localStorage.setItem('attune_order', JSON.stringify({
+                const _syncedOrder = {
                   orderNum: orderRow.order_num,
                   pkgKey:   orderRow.pkg_key,
                   pkg:      orderRow.pkg_key,
@@ -11664,7 +11666,12 @@ export default function App() {
                   addonChecklist:  !!orderRow.addon_checklist,
                   addonIntimacy:     !!orderRow.addon_intimacy,
                   addonWorkbook:   orderRow.addon_workbook || '',
-                }));
+                };
+                localStorage.setItem('attune_order', JSON.stringify(_syncedOrder));
+                // Update the live `order` state too. pkg.hasChecklist and the
+                // other pkg.* flags read from `order`, so without this the
+                // checklist/budget rows don't appear until a full page reload.
+                setOrder(_syncedOrder);
                 setAccount(prev => prev ? {
                   ...prev,
                   pkg: orderRow.pkg_key || prev.pkg,
