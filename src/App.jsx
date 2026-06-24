@@ -10313,6 +10313,7 @@ function PartnerLandingScreen({ inviteFrom, inviteCode, onCreateAccount }) {
         pkg:             inheritedEntitlements?.pkg || 'core',
         addonReflection: !!inheritedEntitlements?.addonReflection,
         addonBudget:     !!inheritedEntitlements?.addonBudget,
+        addonChecklist:  !!inheritedEntitlements?.addonChecklist,
         addonIntimacy:     !!inheritedEntitlements?.addonIntimacy,
         addonLmft:       !!inheritedEntitlements?.addonLmft,
         addonWorkbook:   inheritedEntitlements?.addonWorkbook || '',
@@ -11489,6 +11490,7 @@ export default function App() {
               addonLmft:       !!(orderRow?.addon_lmft ?? profile?.addon_lmft),
               addonReflection: !!(orderRow?.addon_reflection ?? profile?.addon_reflection),
               addonBudget:     !!(orderRow?.addon_budget ?? profile?.addon_budget),
+              addonChecklist:  !!(orderRow?.addon_checklist ?? profile?.addon_checklist),
               addonIntimacy:     !!(orderRow?.addon_intimacy ?? profile?.addon_intimacy),
               addonWorkbook:   orderRow?.addon_workbook || profile?.addon_workbook || '',
               orderNum:        orderRow?.order_num || '',
@@ -12344,6 +12346,7 @@ export default function App() {
               ...prev,
               addonReflection: json.inherited.addonReflection,
               addonBudget:     json.inherited.addonBudget,
+              addonChecklist:  json.inherited.addonChecklist,
               addonIntimacy:     json.inherited.addonIntimacy,
               addonLmft:       json.inherited.addonLmft,
               addonWorkbook:   json.inherited.addonWorkbook || null,
@@ -12970,36 +12973,52 @@ export default function App() {
                 <div style={{ marginBottom: "2.5rem" }}>
                   <DashStepHeader num="1" title="Complete your exercises" sub="Answer on your own. Results unlock when both of you finish." isMobile={isMobile} />
                   <div style={{ background: "white", border: "1.5px solid #E8DDD0", borderTop: "3px solid #E8673A", borderRadius: 16, overflow: "hidden", boxShadow: "0 2px 14px rgba(14,11,7,0.04)" }}>
-                    {[
-                      { label: "Your communication exercise", done: myEx1Done, inProgress: ex1InProgress, viewId: "exercise1", you: true },
-                      { label: "Your expectations exercise", done: myEx2Done, inProgress: ex2InProgress, viewId: "exercise2", you: true },
-                      ...(pkg.hasAnniversary ? [{ label: "Your reflection exercise", done: !!ex3Answers, inProgress: ex3InProgress, viewId: "exercise3", you: true }] : []),
-                      ...(pkg.hasIntimacy ? [{ label: "Your physical intimacy exercise", done: !!(intimacyData?.completedAt), viewId: "intimacy", you: true }] : []),
-                      { label: (partnerName || "Your partner") + "'s communication exercise", done: partnerEx1Done, you: false },
-                      { label: (partnerName || "Your partner") + "'s expectations exercise", done: partnerEx2Done, you: false },
-                      ...(pkg.hasAnniversary ? [{ label: (partnerName || "Your partner") + "'s reflection exercise", done: !!(partnerSession && partnerSession.ex3), you: false }] : []),
-                      ...(pkg.hasIntimacy ? [{ label: (partnerName || "Your partner") + "'s physical intimacy exercise", done: !!(partnerSession && partnerSession.intimacy && partnerSession.intimacy.completedAt), you: false }] : []),
-                    ].map((r, i, arr) => {
-                      const clickable = r.you && !r.done && !r.needsSetup;
-                      return (
-                        <div key={r.label} onClick={clickable ? () => setView(r.viewId) : undefined}
-                          style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0.9rem 1.1rem", borderBottom: i < arr.length - 1 ? "1px solid #F0E9E0" : "none", cursor: clickable ? "pointer" : "default", gap: "0.75rem", transition: "background .15s" }}
-                          onMouseEnter={clickable ? (e => e.currentTarget.style.background = "#FAF7F2") : undefined}
-                          onMouseLeave={clickable ? (e => e.currentTarget.style.background = "white") : undefined}>
-                          <span style={{ display: "flex", alignItems: "center", gap: "0.65rem", fontSize: "0.84rem", color: "#0E0B07", fontFamily: BFONT, fontWeight: 500 }}>
-                            <span style={{ width: 19, height: 19, borderRadius: "50%", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", fontSize: "0.62rem", color: "white", background: r.done ? "#059669" : r.inProgress ? "#C17F47" : "#D4C0A8", fontWeight: 700 }}>{r.done ? "✓" : r.inProgress ? "·" : ""}</span>
-                            {r.label}
-                          </span>
-                          {r.done
-                            ? <span style={{ fontSize: "0.72rem", fontWeight: 700, color: "#059669", fontFamily: BFONT }}>Complete</span>
-                            : (r.you
-                                ? (r.needsSetup
-                                    ? <span style={{ fontSize: "0.72rem", fontWeight: 600, color: "#A8997F", fontFamily: BFONT }}>Setup required</span>
-                                    : <span style={{ fontSize: "0.72rem", fontWeight: 700, color: "#C17F47", fontFamily: BFONT }}>{r.inProgress ? "In progress →" : "Start →"}</span>)
-                                : <span style={{ fontSize: "0.72rem", fontWeight: 600, color: "#A8997F", fontFamily: BFONT }}>Pending</span>)}
-                        </div>
+                    {(() => {
+                      const rows = [
+                        { key: "comm", label: "Communication", viewId: "exercise1", myDone: myEx1Done, myInProgress: ex1InProgress, partnerDone: partnerEx1Done },
+                        { key: "exp", label: "Expectations", viewId: "exercise2", myDone: myEx2Done, myInProgress: ex2InProgress, partnerDone: partnerEx2Done },
+                        ...(pkg.hasAnniversary ? [{ key: "refl", label: "Reflection", viewId: "exercise3", myDone: !!ex3Answers, myInProgress: ex3InProgress, partnerDone: !!(partnerSession && partnerSession.ex3) }] : []),
+                        ...(pkg.hasIntimacy ? [{ key: "intim", label: "Physical intimacy", viewId: "intimacy", myDone: !!(intimacyData?.completedAt), myInProgress: false, partnerDone: !!(partnerSession && partnerSession.intimacy && partnerSession.intimacy.completedAt) }] : []),
+                      ];
+                      const COLS = "minmax(0,1.15fr) minmax(0,1fr) minmax(0,1fr)";
+                      const dot = (done, inProgress) => (
+                        <span style={{ width: 17, height: 17, borderRadius: "50%", flexShrink: 0, display: "inline-flex", alignItems: "center", justifyContent: "center", fontSize: "0.56rem", color: "white", background: done ? "#059669" : inProgress ? "#C17F47" : "#D4C0A8", fontWeight: 700 }}>{done ? "✓" : inProgress ? "·" : ""}</span>
                       );
-                    })}
+                      const hCell = { padding: isMobile ? "0.55rem 0.5rem" : "0.6rem 0.8rem", fontSize: isMobile ? "0.74rem" : "0.8rem", color: "#0E0B07", fontFamily: BFONT, fontWeight: 700, borderLeft: "1px solid #F0E9E0", textAlign: "center", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" };
+                      const stCell = { padding: isMobile ? "0.8rem 0.4rem" : "0.85rem 0.7rem", display: "flex", alignItems: "center", justifyContent: "center", gap: "0.35rem", borderLeft: "1px solid #F0E9E0" };
+                      return (
+                        <>
+                          {/* Header row: blank | Ellie | Preston */}
+                          <div style={{ display: "grid", gridTemplateColumns: COLS, alignItems: "center", background: "#FAF7F2", borderBottom: "1px solid #F0E9E0" }}>
+                            <div />
+                            <div style={hCell} title={userName || "You"}>{userName || "You"}</div>
+                            <div style={hCell} title={partnerName || "Partner"}>{partnerName || "Partner"}</div>
+                          </div>
+                          {rows.map((r, i) => {
+                            const clickable = !r.myDone;
+                            return (
+                              <div key={r.key} style={{ display: "grid", gridTemplateColumns: COLS, alignItems: "stretch", borderBottom: i < rows.length - 1 ? "1px solid #F0E9E0" : "none" }}>
+                                {/* Exercise label (row identifier) */}
+                                <div style={{ padding: isMobile ? "0.8rem 0.6rem" : "0.85rem 0.9rem", display: "flex", alignItems: "center", fontSize: isMobile ? "0.78rem" : "0.82rem", color: "#0E0B07", fontFamily: BFONT, fontWeight: 500, lineHeight: 1.25 }}>{r.label}</div>
+                                {/* My column — clickable until done */}
+                                <div onClick={clickable ? () => setView(r.viewId) : undefined}
+                                  style={{ ...stCell, cursor: clickable ? "pointer" : "default", transition: "background .15s" }}
+                                  onMouseEnter={clickable ? (e => e.currentTarget.style.background = "#FAF7F2") : undefined}
+                                  onMouseLeave={clickable ? (e => e.currentTarget.style.background = "transparent") : undefined}>
+                                  {dot(r.myDone, r.myInProgress)}
+                                  <span style={{ fontSize: isMobile ? "0.68rem" : "0.72rem", fontWeight: 700, fontFamily: BFONT, color: r.myDone ? "#059669" : "#C17F47", whiteSpace: "nowrap" }}>{r.myDone ? "Done" : r.myInProgress ? "Resume" : "Start"}</span>
+                                </div>
+                                {/* Partner column — status only */}
+                                <div style={stCell}>
+                                  {dot(r.partnerDone, false)}
+                                  <span style={{ fontSize: isMobile ? "0.68rem" : "0.72rem", fontWeight: 600, fontFamily: BFONT, color: r.partnerDone ? "#059669" : "#A8997F", whiteSpace: "nowrap" }}>{r.partnerDone ? "Done" : "Pending"}</span>
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </>
+                      );
+                    })()}
                   </div>
                 </div>
 
@@ -13015,7 +13034,7 @@ export default function App() {
                       { label: "Communication results", section: "comm-overview", color: "#E8673A" },
                       { label: "Expectations results", section: "exp-overview", color: "#1B5FE8" },
                       ...(pkg.hasAnniversary ? [{ label: "Relationship reflection results", section: "reflection-overview", color: "#10B981" }] : []),
-                      ...(pkg.hasIntimacy && !!(intimacyData?.completedAt) && !!(partnerSession?.intimacy?.completedAt) ? [{ label: "Physical intimacy results", section: "intimacy-overview", color: "#B5546E" }] : []),
+                      ...(pkg.hasIntimacy ? [{ label: "Physical intimacy results", section: "intimacy-overview", color: "#B5546E" }] : []),
                       { label: "Action plan", section: "exp-action-plan", color: "#1B5FE8" },
                     ].map((r, i, arr) => (
                       <div key={r.section} onClick={bothDone ? () => { setActiveResult(r.section); setHighlightsSeen(true); setView("results"); } : undefined}

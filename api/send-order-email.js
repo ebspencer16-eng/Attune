@@ -46,6 +46,7 @@ export default async function handler(req) {
     addonLmft,
     addonReflection,
     addonBudget,
+    addonIntimacy,
     setupPath,                       // '/app?signup=1&...' built by checkout
   } = body;
 
@@ -85,7 +86,7 @@ export default async function handler(req) {
       from: `Attune <${FROM}>`,
       to: [buyerEmail],
       subject: `Set up your Attune account, ${buyerName}`,
-      html: getStartedBuyerHtml({ name: buyerName, partnerName, setupUrl, partnerEmail }),
+      html: getStartedBuyerHtml({ name: buyerName, partnerName, setupUrl, partnerEmail, hasReflection: addonReflection, hasIntimacy: addonIntimacy }),
       scheduled_at: new Date(Date.now() + 10_000).toISOString(),
     });
   }
@@ -262,7 +263,21 @@ function orderConfirmationHtml({ buyerName, pkgName, orderNum, total, lineItems,
   });
 }
 
-function getStartedBuyerHtml({ name, partnerName, setupUrl, partnerEmail }) {
+function getStartedBuyerHtml({ name, partnerName, setupUrl, partnerEmail, hasReflection, hasIntimacy }) {
+  // Exercises this order actually includes, so the email count matches the
+  // dashboard. Communication + Expectations are always present.
+  const exercises = [
+    "Communication",
+    "Expectations",
+    ...(hasReflection ? ["Relationship Reflection"] : []),
+    ...(hasIntimacy ? ["Physical Intimacy"] : []),
+  ];
+  const exCount = exercises.length;
+  const exWord = exCount === 1 ? "exercise" : "exercises";
+  const exList = exCount === 2
+    ? exercises.join(" and ")
+    : exercises.slice(0, -1).join(", ") + ", and " + exercises[exCount - 1];
+  const exMins = 25 + Math.max(0, exCount - 2) * 10; // ~25 min for two, +10 each
   const partnerBlock = partnerEmail
     ? `<div style="background:#FBF8F3;border:1px solid #F3EDE6;border-radius:10px;padding:16px 20px;margin:16px 0 0">
          <div style="font-family:'DM Sans',Helvetica,Arial,sans-serif;font-size:11px;color:#C17F47;font-weight:700;letter-spacing:.2em;text-transform:uppercase;margin-bottom:8px">Your partner</div>
@@ -274,8 +289,8 @@ function getStartedBuyerHtml({ name, partnerName, setupUrl, partnerEmail }) {
        </div>`;
 
   const body = `
-    <p style="font-family:'DM Sans',Helvetica,Arial,sans-serif;font-size:15px;color:#5C4A38;line-height:1.75;margin:0 0 6px">Your order is in. Use the button below to set up your account. You'll create a password and confirm your email.</p>
-    <p style="font-family:'DM Sans',Helvetica,Arial,sans-serif;font-size:14px;color:#5C4A38;line-height:1.7;margin:16px 0 0">Next you'll set up your profile and invite ${_esc(partnerName || 'your partner')}. Then you each answer two short exercises, about 25 minutes total. Answer independently. Your joint results unlock when both of you are done.</p>
+    <p style="font-family:'DM Sans',Helvetica,Arial,sans-serif;font-size:15px;color:#5C4A38;line-height:1.75;margin:0 0 6px">Your order is in. Use the button below to set up your account and create a password.</p>
+    <p style="font-family:'DM Sans',Helvetica,Arial,sans-serif;font-size:14px;color:#5C4A38;line-height:1.7;margin:16px 0 0">Next you'll set up your profile and invite ${_esc(partnerName || 'your partner')}. Then you each answer ${exCount} short ${exWord}: ${exList}. Plan on about ${exMins} minutes. Answer independently. Your joint results unlock when both of you are done.</p>
     ${partnerBlock}
     <p style="font-family:'DM Sans',Helvetica,Arial,sans-serif;font-size:13px;color:#8C7A68;line-height:1.6;margin:20px 0 0"><strong style="color:#1E1610">One note:</strong> don't compare answers until you're both finished. The value comes from answering honestly first.</p>
   `;
