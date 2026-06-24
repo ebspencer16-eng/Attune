@@ -1764,7 +1764,7 @@ function DashStepHeader({ num, title, sub, active = true, isMobile = false }) {
     <div style={{ display: "flex", alignItems: "center", gap: isMobile ? "0.9rem" : "1.25rem", marginBottom: "1.25rem" }}>
       <div style={{ position: "relative", flexShrink: 0 }}>
         <div style={{ width: isMobile ? 52 : 64, height: isMobile ? 52 : 64, borderRadius: "50%", background: active ? "linear-gradient(135deg, rgba(232,103,58,0.12), rgba(155,93,229,0.12), rgba(27,95,232,0.12))" : "rgba(200,191,180,0.18)", border: active ? "1.5px solid rgba(155,93,229,0.28)" : "1.5px solid rgba(200,191,180,0.5)", display: "flex", alignItems: "center", justifyContent: "center", lineHeight: 0 }}>
-          <span style={{ fontFamily: HFONT, fontWeight: 700, fontSize: isMobile ? "2.3rem" : "2.95rem", lineHeight: 1, background: active ? "linear-gradient(135deg, #E8673A, #9B5DE5, #1B5FE8)" : "linear-gradient(135deg, #C8BFB4, #B3A693)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text", display: "flex", alignItems: "center", justifyContent: "center", height: "1em", transform: "translateY(0.02em)" }}>{num}</span>
+          <span style={{ fontFamily: HFONT, fontWeight: 700, fontSize: isMobile ? "2.3rem" : "2.95rem", lineHeight: 1, background: active ? "linear-gradient(135deg, #E8673A, #9B5DE5, #1B5FE8)" : "linear-gradient(135deg, #C8BFB4, #B3A693)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text", display: "block", transform: "translateY(-0.08em)" }}>{num}</span>
         </div>
       </div>
       <div style={{ flex: 1, minWidth: 0 }}>
@@ -9975,7 +9975,6 @@ function AuthModal({ mode, onClose, onSuccess }) {
               </p>
               {[
                 { k: "ageRange", label: "Your age range", opts: [["", "Prefer not to say"], ["18-24", "18–24"], ["25-34", "25–34"], ["35-44", "35–44"], ["45-54", "45–54"], ["55+", "55 or older"]] },
-                { k: "gender", label: "Your gender", opts: [["", "Prefer not to say"], ["woman", "Woman"], ["man", "Man"], ["nonbinary", "Non-binary"], ["other", "Other / self-describe"]] },
                 { k: "relationshipStatus", label: "Relationship status", opts: [["", "Prefer not to say"], ["dating", "Dating / together"], ["engaged", "Engaged"], ["married", "Married"], ["remarried", "Remarried"], ["partnership", "Domestic partnership"]] },
                 { k: "relationshipLength", label: "How long together", opts: [["", "Prefer not to say"], ["<1", "Less than 1 year"], ["1-2", "1–2 years"], ["3-5", "3–5 years"], ["6-10", "6–10 years"], ["11-20", "11–20 years"], ["20+", "20+ years"]] },
                 { k: "children", label: "Children", opts: [["", "Prefer not to say"], ["none", "None"], ["1", "1"], ["2", "2"], ["3+", "3 or more"], ["expecting", "Expecting"]] },
@@ -10382,7 +10381,6 @@ function PartnerLandingScreen({ inviteFrom, inviteCode, onCreateAccount }) {
           </p>
           {[
             { k: "ageRange", label: "Your age range", opts: [["", "Prefer not to say"], ["18-24", "18–24"], ["25-34", "25–34"], ["35-44", "35–44"], ["45-54", "45–54"], ["55+", "55 or older"]] },
-            { k: "gender", label: "Your gender", opts: [["", "Prefer not to say"], ["woman", "Woman"], ["man", "Man"], ["nonbinary", "Non-binary"], ["other", "Other / self-describe"]] },
             { k: "relationshipStatus", label: "Relationship status", opts: [["", "Prefer not to say"], ["dating", "Dating / together"], ["engaged", "Engaged"], ["married", "Married"], ["remarried", "Remarried"], ["partnership", "Domestic partnership"]] },
             { k: "relationshipLength", label: "How long together", opts: [["", "Prefer not to say"], ["<1", "Less than 1 year"], ["1-2", "1–2 years"], ["3-5", "3–5 years"], ["6-10", "6–10 years"], ["11-20", "11–20 years"], ["20+", "20+ years"]] },
             { k: "children", label: "Children", opts: [["", "Prefer not to say"], ["none", "None"], ["1", "1"], ["2", "2"], ["3+", "3 or more"], ["expecting", "Expecting"]] },
@@ -11744,6 +11742,8 @@ export default function App() {
         toName: account.name || '',
         partnerName: account.partnerName || '',
         portalUrl: window.location.origin + '/app',
+        hasReflection: pkg.hasAnniversary,
+        hasIntimacy: pkg.hasIntimacy,
       }),
     }).catch(() => {});
   }, [isLoggedIn, account?.email, account?.id, view]);
@@ -12162,6 +12162,7 @@ export default function App() {
   const [showNavDropdown, setShowNavDropdown] = useState(false); // Profile nav dropdown
   const [mobileNavOpen, setMobileNavOpen] = useState(false); // Mobile hamburger nav
   const [inviteCopied, setInviteCopied] = useState(false);
+  const [inviteResent, setInviteResent] = useState(false);
   const [upsellModal, setUpsellModal] = useState(null); // { product: 'workbook'|'reflection'|'checklist', cartAdded: false }
   const [showPackagesModal, setShowPackagesModal] = useState(false); // "Explore other packages" modal
   // Load order record from localStorage (written by checkout on purchase)
@@ -12791,7 +12792,7 @@ export default function App() {
                         <span style={{ fontFamily: "'Playfair Display', Georgia, serif", fontSize: isMobile ? "1.6rem" : "2.5rem", fontWeight: 700, lineHeight: 1, letterSpacing: "-.02em", color: "white" }}>{partnerName || "Partner"}</span>
                       </div>
                       <div style={{ fontSize: isMobile ? "0.78rem" : "0.92rem", color: "rgba(255,255,255,0.75)", fontFamily: BFONT, fontWeight: 300, marginTop: "0.6rem", lineHeight: 1.5 }}>
-                        {bothDone ? "Your results are ready. Take it one step at a time." : "Three steps. Built from your actual answers."}
+                        {bothDone ? "Your results are ready. Take it one step at a time." : "Understanding takes intention. Get started together."}
                       </div>
                     </div>
                   </div>
@@ -12912,20 +12913,9 @@ export default function App() {
                   />
                 )}
 
-                {/* Partner invite card (when partner hasn't joined yet) */}
-                {isLoggedIn && !hasRealPartner && !account?.partnerJoined && (
-                  <div style={{ marginBottom: "1.75rem" }}>
-                    <PartnerInviteCard
-                      account={account}
-                      copied={inviteCopied}
-                      onCopy={(url) => {
-                        navigator.clipboard?.writeText(url).catch(() => {});
-                        setInviteCopied(true);
-                        setTimeout(() => setInviteCopied(false), 2000);
-                      }}
-                    />
-                  </div>
-                )}
+                {/* Partner invite is handled on the Account page (resend there).
+                    The dashboard no longer shows an invite card, which read as if
+                    the invite hadn't been sent yet. */}
 
                 {/* Partner joined — spinner during initial sync, then static waiting card */}
                 {isLoggedIn && !hasRealPartner && account?.partnerJoined && partnerSyncing && (
@@ -13009,7 +12999,7 @@ export default function App() {
                       { label: "Your communication exercise", done: myEx1Done, inProgress: ex1InProgress, viewId: "exercise1", you: true },
                       { label: "Your expectations exercise", done: myEx2Done, inProgress: ex2InProgress, viewId: "exercise2", you: true },
                       ...(pkg.hasAnniversary ? [{ label: "Your reflection exercise", done: !!ex3Answers, inProgress: ex3InProgress, viewId: "exercise3", you: true }] : []),
-                      ...(pkg.hasIntimacy ? [{ label: "Your physical intimacy exercise", done: !!(intimacyData?.completedAt), viewId: "intimacy", you: true, needsSetup: !profileSetupDone }] : []),
+                      ...(pkg.hasIntimacy ? [{ label: "Your physical intimacy exercise", done: !!(intimacyData?.completedAt), viewId: "intimacy", you: true }] : []),
                       { label: (partnerName || "Your partner") + "'s communication exercise", done: partnerEx1Done, you: false },
                       { label: (partnerName || "Your partner") + "'s expectations exercise", done: partnerEx2Done, you: false },
                       ...(pkg.hasAnniversary ? [{ label: (partnerName || "Your partner") + "'s reflection exercise", done: !!(partnerSession && partnerSession.ex3), you: false }] : []),
@@ -13049,6 +13039,7 @@ export default function App() {
                       { label: "Full summary", section: "summary", color: "#8C7A68" },
                       { label: "Communication results", section: "comm-overview", color: "#E8673A" },
                       { label: "Expectations results", section: "exp-overview", color: "#1B5FE8" },
+                      ...(pkg.hasAnniversary ? [{ label: "Relationship reflection results", section: "reflection-overview", color: "#10B981" }] : []),
                       ...(pkg.hasIntimacy && !!(intimacyData?.completedAt) && !!(partnerSession?.intimacy?.completedAt) ? [{ label: "Physical intimacy results", section: "intimacy-overview", color: "#B5546E" }] : []),
                       { label: "Action plan", section: "exp-action-plan", color: "#1B5FE8" },
                     ].map((r, i, arr) => (
@@ -13085,16 +13076,7 @@ export default function App() {
                           onClick={workbookReady ? () => setView("workbook") : undefined}
                           disabled={!workbookReady} />
                       : <DashTile color="#9B5DE5" eyebrow="Add-on" title="The Personalized Workbook" sub="A printable workbook built around your results and couple type. From $19." cta="Add →" onClick={() => setView("workbook")} />}
-                    {pkg.hasIntimacy && (() => {
-                      const done = !!(intimacyData?.completedAt);
-                      const needsSetup = !profileSetupDone;
-                      return <DashTile color="#B5546E" eyebrow="Add-on"
-                        title="Intimacy Expectations"
-                        sub={needsSetup ? "Complete your profile setup first, then begin." : (done ? "You're done. Your comparison unlocks when your partner finishes too." : "A private set of questions about what you each expect. About 10 minutes.")}
-                        cta={needsSetup ? null : (done ? "Review →" : "Begin →")}
-                        onClick={needsSetup ? undefined : () => setView("intimacy")}
-                        disabled={needsSetup} />;
-                    })()}
+                    {/* Intimacy is now a full exercise (Step 1); only show the upsell here for non-owners. */}
                     {!pkg.hasIntimacy && <DashTile color="#B5546E" eyebrow="Add-on" title="Intimacy Expectations" sub="A private set of questions about what you each expect about physical intimacy. Answered independently, compared side by side. $20." cta="Add →" onClick={() => setUpsellModal({ product: 'intimacy', cartAdded: false })} />}
                     {pkg.hasLMFT
                       ? <DashTile color="#5B6DF8" eyebrow="Included" title="Your LMFT session" sub="A 50-minute session with a licensed therapist who has reviewed your results." cta="Schedule →" onClick={() => setView("lmft")} />
@@ -13663,6 +13645,30 @@ export default function App() {
                     </button>
                   </div>
                 </div>
+
+                {/* Partner invite — resend (purchaser only, until partner joins) */}
+                {isLoggedIn && !account?.joinedViaInvite && account?.partnerEmail && !account?.partnerJoined && (
+                  <div style={{ background: "white", border: "1.5px solid #E8DDD0", borderRadius: 16, marginBottom: "1.25rem", overflow: "hidden" }}>
+                    <div style={{ padding: "1rem 1.35rem", borderBottom: "1px solid #F3EDE6" }}>
+                      <div style={{ fontSize: "0.6rem", letterSpacing: ".18em", textTransform: "uppercase", color: "#8C7A68", fontWeight: 700, fontFamily: font.body }}>Partner invite</div>
+                    </div>
+                    <div style={{ padding: "1.1rem 1.35rem" }}>
+                      <div style={{ fontSize: "0.82rem", color: "#3C3C43", fontFamily: font.body, lineHeight: 1.5, marginBottom: "0.85rem" }}>
+                        We sent an invite to <strong>{account.partnerEmail}</strong>. {partnerName || "Your partner"} hasn't joined yet. You can send it again.
+                      </div>
+                      <button
+                        onClick={() => {
+                          const inviteUrl = `${window.location.origin}/app?invite=${encodeURIComponent(account.inviteCode || "")}&from=${encodeURIComponent(userName || "")}&pae=${encodeURIComponent((account.partnerEmail || "").toLowerCase())}`;
+                          sendEmailWithRetry({ type: 'partner_invite', fromName: userName || '', toEmail: account.partnerEmail, toName: partnerName || 'Your partner', inviteUrl });
+                          setInviteResent(true);
+                          setTimeout(() => setInviteResent(false), 4000);
+                        }}
+                        style={{ background: inviteResent ? "#059669" : "#E8673A", color: "white", border: "none", borderRadius: 10, padding: "0.6rem 1.25rem", fontSize: "0.8rem", fontWeight: 700, cursor: "pointer", fontFamily: font.body, transition: "background .15s" }}>
+                        {inviteResent ? "Invite sent ✓" : "Resend invite"}
+                      </button>
+                    </div>
+                  </div>
+                )}
 
                 {/* Package */}
                 <div style={{ background: "white", border: "1.5px solid #E8DDD0", borderRadius: 16, marginBottom: "1.25rem", overflow: "hidden" }}>

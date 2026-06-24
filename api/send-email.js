@@ -289,22 +289,34 @@ function resultsViewedEmail({ toName, partnerName, coupleType, portalUrl, hasRef
 
 
 // ── welcome_account email ────────────────────────────────────────────────────
-function welcomeAccountEmail({ toName, toEmail, portalUrl, partnerName }) {
+function welcomeAccountEmail({ toName, toEmail, portalUrl, partnerName, hasReflection, hasIntimacy }) {
   const name = toName || "there";
   const url = portalUrl || "https://attune-relationships.com/app";
+  // List the exercises this order actually includes, so the email matches what
+  // the person sees on their dashboard.
+  const exercises = [
+    "Exercise 01: Communication (about 10 minutes).",
+    "Exercise 02: Expectations (about 15 minutes).",
+    ...(hasReflection ? ["Exercise 03: Relationship Reflection (about 10 minutes)."] : []),
+    ...(hasIntimacy ? ["Physical Intimacy: a private set of questions (about 10 minutes)."] : []),
+  ];
+  const steps = [
+    ...exercises,
+    "Invite your partner, or they'll receive a link if you already added their email.",
+    "Once both of you are done, your joint results unlock.",
+  ];
+  const stepsHtml = steps.map((s, i) => `${i + 1}. ${s}`).join("<br/>");
+  const exerciseWord = exercises.length === 1 ? "exercise" : "exercises";
   return {
     subject: "Welcome to Attune. Let's get started.",
     html: layout(`
       <h1>You're in. Let's get started.</h1>
       <p>Hi ${name},</p>
-      <p>Your Attune account is set up. Both you and ${partnerName ? `<strong>${partnerName}</strong>` : "your partner"} each complete the exercises independently. Your answers stay private until both of you are done.</p>
+      <p>Your Attune account is set up. You have ${exercises.length} ${exerciseWord} to complete. Both you and ${partnerName ? `<strong>${partnerName}</strong>` : "your partner"} answer independently. Your answers stay private until both of you are done.</p>
       <div class="btn-wrap"><a href="${url}" class="btn">Go to my dashboard →</a></div>
       <div class="divider"></div>
       <p style="font-size:0.82rem;font-weight:700;color:#0E0B07;margin-bottom:6px;">What happens next</p>
-      <p style="font-size:0.8rem;">1. Complete Exercise 01: Communication (about 10 minutes).<br/>
-      2. Complete Exercise 02: Expectations (about 15 minutes).<br/>
-      3. Invite your partner, or they'll receive a link if you already added their email.<br/>
-      4. Once both of you are done, your joint results unlock.</p>
+      <p style="font-size:0.8rem;">${stepsHtml}</p>
       <div class="divider"></div>
       <p style="font-size:0.78rem;color:#8C7A68;">Your answers are never visible to your partner while you're in progress. Results unlock the moment you both finish.</p>
     `),
