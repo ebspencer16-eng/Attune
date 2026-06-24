@@ -13006,7 +13006,7 @@ export default function App() {
                                   onMouseEnter={clickable ? (e => e.currentTarget.style.background = "#FAF7F2") : undefined}
                                   onMouseLeave={clickable ? (e => e.currentTarget.style.background = "transparent") : undefined}>
                                   {dot(r.myDone, r.myInProgress)}
-                                  <span style={{ fontSize: isMobile ? "0.68rem" : "0.72rem", fontWeight: 700, fontFamily: BFONT, color: r.myDone ? "#059669" : "#C17F47", whiteSpace: "nowrap" }}>{r.myDone ? "Done" : r.myInProgress ? "Resume" : "Start"}</span>
+                                  <span style={{ fontSize: isMobile ? "0.68rem" : "0.72rem", fontWeight: 700, fontFamily: BFONT, color: r.myDone ? "#059669" : "#C17F47", whiteSpace: "nowrap" }}>{r.myDone ? "Done" : r.myInProgress ? "Resume →" : "Start →"}</span>
                                 </div>
                                 {/* Partner column — status only */}
                                 <div style={stCell}>
