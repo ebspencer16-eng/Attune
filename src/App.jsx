@@ -11717,36 +11717,11 @@ export default function App() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // ── Fire welcome_account email on first dashboard view (Issue 2.6) ───────
-  // Previously fired at signup, so users got two emails within seconds
-  // (Supabase confirm + Attune welcome) before they'd even confirmed.
-  // Now waits until the user is authenticated AND viewing the home/dashboard,
-  // which guarantees email has been confirmed (signup with confirm-email-on
-  // can't reach this state otherwise).
-  // Server-side dedup (welcome_email_sent_at on profiles) handles the real
-  // dedup; the localStorage flag just avoids round-tripping on each render.
-  useEffect(() => {
-    if (!isLoggedIn || !account?.email) return;
-    if (view !== 'home') return;
-    if (account?.emailOptIn === false) return; // Honor opt-out
-    const fired = (() => { try { return localStorage.getItem('attune_welcome_email_sent'); } catch { return null; } })();
-    if (fired) return;
-    try { localStorage.setItem('attune_welcome_email_sent', '1'); } catch {}
-    fetch('/api/send-email', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        type: 'welcome_account',
-        userId: account?.id || null,
-        toEmail: account.email,
-        toName: account.name || '',
-        partnerName: account.partnerName || '',
-        portalUrl: window.location.origin + '/app',
-        hasReflection: pkg.hasAnniversary,
-        hasIntimacy: pkg.hasIntimacy,
-      }),
-    }).catch(() => {});
-  }, [isLoggedIn, account?.email, account?.id, view]);
+  // ── Account-setup / welcome email ────────────────────────────────────────
+  // Consolidated into the Supabase "Confirm signup" email so a new user gets a
+  // single branded email that both confirms their account and welcomes them.
+  // (The standalone Attune welcome email was removed to avoid a second message.)
+  // The Supabase template is configured in the Supabase dashboard, not here.
 
   // ── Fire results_viewed email once after highlights are seen ─────────────
   useEffect(() => {
