@@ -1890,11 +1890,26 @@ async function applyPromo() {
         fb.style.color = '#B45309';
         return;
       }
+      if (vd && vd.valid && vd.pkg) {
+        // DB is the source of truth: use the code's actual package + bundle so
+        // a premium beta code applies to a premium cart (not just Foundation).
+        codeEntry = {
+          pkg: vd.pkg,
+          mode: vd.mode || 'free',
+          amount: vd.amount || 0,
+          includesWorkbook: !!vd.includesWorkbook,
+          workbookVariant: vd.workbookVariant || 'digital',
+        };
+      }
     } catch (e) {
       // Validation endpoint unreachable - apply optimistically; the purchase
       // endpoint validates again before any charge or order is created.
     }
-    codeEntry = { pkg: 'core', mode: 'free', amount: 0, includesWorkbook: true, workbookVariant: 'digital' };
+    // Fallback when the endpoint couldn't return a definition (unverified /
+    // unreachable). Server stays the source of truth at purchase time.
+    if (!codeEntry) {
+      codeEntry = { pkg: 'core', mode: 'free', amount: 0, includesWorkbook: true, workbookVariant: 'digital' };
+    }
   }
   if (!codeEntry) {
     fb.textContent = 'Invalid code.';
@@ -1940,7 +1955,7 @@ async function applyPromo() {
     _items.forEach(it => {
       _promoWorkbookSnapshot.push({ id: it.id, had: !!it.addons.workbook, variant: it.addons.workbookVariant || 'digital' });
       it.addons.workbook = true;
-      it.addons.workbookVariant = 'digital';
+      it.addons.workbookVariant = codeMeta.workbookVariant || 'digital';
     });
   }
   fb.textContent = '';

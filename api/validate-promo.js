@@ -84,5 +84,16 @@ export default async function handler(req) {
     }
   }
 
-  return json({ valid: true });
+  return json({
+    valid: true,
+    pkg:               row.package_key || 'core',
+    mode:              row.discount_mode || 'free',
+    amount:            row.discount_value || 0,
+    includesWorkbook:  !!row.includes_workbook,
+    workbookVariant:   row.workbook_variant || 'digital',
+    includesIntimacy:  !!row.includes_intimacy,
+    includesReflection:!!row.includes_reflection,
+    includesBudget:    !!row.includes_budget,
+    includesChecklist: !!row.includes_checklist,
+  });
 }
