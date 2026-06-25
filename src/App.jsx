@@ -5286,7 +5286,6 @@ function StartingOutChecklist({ userName, partnerName, onBack, checklistState, s
 
   return (
     <div style={{ maxWidth: 620, margin: "0 auto" }}>
-      <button onClick={onBack} style={{ background: "transparent", border: "none", color: C.muted, fontSize: "0.72rem", letterSpacing: "0.1em", textTransform: "uppercase", cursor: "pointer", fontFamily: font.body, padding: 0, marginBottom: "1.5rem", display: "block" }}>← Back to Dashboard</button>
       <div style={{ marginBottom: "1.75rem" }}>
         <div style={{ fontSize: "0.6rem", letterSpacing: "0.22em", textTransform: "uppercase", color: "#E8673A", fontWeight: 700, fontFamily: font.body, marginBottom: "0.35rem" }}>Starting Out Collection</div>
         <h1 style={{ fontFamily: font.display, fontSize: "1.8rem", fontWeight: 700, color: C.ink, lineHeight: 1.1, marginBottom: "0.6rem" }}>Starting Out Checklist</h1>
@@ -5576,7 +5575,6 @@ function BudgetTool({ userName, partnerName, onBack, budgetState, setBudgetState
   return (
     <div style={{ maxWidth: 720, margin: "0 auto", paddingBottom: "6rem" }}>
       {/* ── Back + title ───────────────────────────────────────────── */}
-      <button onClick={onBack} style={{ background: "transparent", border: "none", color: C.muted, fontSize: "0.72rem", letterSpacing: "0.1em", textTransform: "uppercase", cursor: "pointer", fontFamily: font.body, padding: 0, marginBottom: "1.5rem", display: "block" }}>← Back to Dashboard</button>
       <div style={{ fontSize: "0.6rem", letterSpacing: "0.22em", textTransform: "uppercase", color: "#1B5FE8", fontWeight: 700, fontFamily: font.body, marginBottom: "0.35rem" }}>Attune Premium</div>
       <h1 style={{ fontFamily: font.display, fontSize: "1.9rem", fontWeight: 700, color: C.ink, lineHeight: 1.1, marginBottom: "0.5rem" }}>Shared Budget Tool</h1>
       <p style={{ fontSize: "0.92rem", color: C.muted, fontFamily: font.body, fontWeight: 300, lineHeight: 1.65, marginBottom: "0.4rem" }}>
@@ -6020,7 +6018,6 @@ function LMFTSession({ userName, partnerName, userEmail, orderNum, onBack }) {
 
   return (
     <div style={{ maxWidth: 520, margin: "0 auto" }}>
-      <button onClick={onBack} style={{ background: "transparent", border: "none", color: C.muted, fontSize: "0.72rem", letterSpacing: "0.1em", textTransform: "uppercase", cursor: "pointer", fontFamily: font.body, padding: 0, marginBottom: "1.5rem", display: "block" }}>← Back to Dashboard</button>
       <div style={{ fontSize: "0.6rem", letterSpacing: "0.22em", textTransform: "uppercase", color: "#3B5BDB", fontWeight: 700, fontFamily: font.body, marginBottom: "0.35rem" }}>Attune Premium</div>
       <h1 style={{ fontFamily: font.display, fontSize: "1.8rem", fontWeight: 700, color: C.ink, lineHeight: 1.1, marginBottom: "0.75rem" }}>Schedule Your LMFT Session</h1>
       <p style={{ fontSize: "0.88rem", color: C.muted, fontFamily: font.body, fontWeight: 300, lineHeight: 1.7, marginBottom: "0.5rem" }}>Your therapist will review your joint results before the session, so the conversation starts from your actual data, not from scratch.</p>
@@ -11349,6 +11346,24 @@ export default function App() {
   // ── VIEW STATE ────────────────────────────────────────────────────────────
   const [view, setView] = useState(initialView);
 
+  // Keep browser Back inside the app for tool views. Without this, Back from a
+  // tool (e.g. the budget builder) leaves /app and renders a blank page. Entering
+  // a tool view pushes one history entry; Back pops it back to the dashboard.
+  const _toolViews = ['budget', 'checklist', 'notes', 'lmft', 'intimacy', 'account', 'workbook'];
+  const _pushedToolHist = useRef(false);
+  useEffect(() => {
+    if (_toolViews.includes(view)) {
+      if (!_pushedToolHist.current) {
+        try { window.history.pushState({ attuneTool: true }, ''); _pushedToolHist.current = true; } catch {}
+      }
+    } else { _pushedToolHist.current = false; }
+  }, [view]);
+  useEffect(() => {
+    const onPop = () => setView(v => _toolViews.includes(v) ? 'home' : v);
+    window.addEventListener('popstate', onPop);
+    return () => window.removeEventListener('popstate', onPop);
+  }, []);
+
   // ── SCROLL TO TOP ON VIEW CHANGE ─────────────────────────────────────────
   useLayoutEffect(() => {
     if (view === "results") return;
@@ -11629,7 +11644,7 @@ export default function App() {
               if (profile?.budget_data)        localStorage.setItem('attune_budget', JSON.stringify(profile.budget_data));
               if (profile?.checklist_data)     localStorage.setItem('attune_checklist', JSON.stringify(profile.checklist_data));
               if (profile?.notes_data)         localStorage.setItem('attune_notes', JSON.stringify(profile.notes_data));
-              if (profile?.intimacy_data)      localStorage.setItem('attune_intimacy', JSON.stringify(profile.intimacy_data));
+              if (profile?.intimacy_data)      { localStorage.setItem('attune_intimacy', JSON.stringify(profile.intimacy_data)); setIntimacyData(profile.intimacy_data); }
               if (profile?.profile_setup_complete) localStorage.setItem('attune_profile_setup_done', '1');
               // Invitee (Partner B) completion marker. Routing keys off
               // attune_partner_session; without it, an invitee who finished on
@@ -12708,16 +12723,24 @@ export default function App() {
       `}</style>
       {/* Top Nav — on mobile non-home/non-results: full gradient banner with ← Dashboard folded in */}
       <div style={{ position: "sticky", top: 0, zIndex: 100, background: (isMobile && view !== "home" && view !== "results") ? "linear-gradient(120deg, #C8522E 0%, #6B3FA0 52%, #1B5FE8 100%)" : view === "home" ? "rgba(30,26,53,0.97)" : "rgba(255,253,249,0.97)", backdropFilter: (isMobile && view !== "home" && view !== "results") ? "none" : "blur(12px)", borderBottom: ("1px solid " + (view === "home" ? "rgba(255,255,255,0.1)" : (isMobile && view !== "results") ? "transparent" : C.stone)), padding: (isMobile && view !== "home" && view !== "results") ? "0.7rem 1.25rem 0.6rem" : "0 1.5rem", display: view === "home" ? "none" : "flex", flexDirection: (isMobile && view !== "results") ? "column" : "row", alignItems: (isMobile && view !== "results") ? "stretch" : "center", justifyContent: "space-between", minHeight: 56 }}>
-        {/* Single row: logo left + auth right */}
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+        {/* Logo + auth on one row at every breakpoint (mobile parent is a column) */}
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%" }}>
           <div onClick={() => { if (isLoggedIn) { setView('home'); } else { window.location.href = '/home'; } }} style={{ display: "flex", alignItems: "center", gap: "0.5rem", cursor: "pointer" }}>
             {(isMobile && view !== "results") ? (
               /* White logo mark for gradient background */
               <svg width="28" height="20" viewBox="0 0 103 76" fill="none">
-                <path d="M14,4 L44,4 A9,9 0 0,1 53,13 L53,42 A9,9 0 0,1 44,51 L20,51 L6,61 L11,51 A6,6 0 0,1 5,45 L5,13 A9,9 0 0,1 14,4 Z" fill="white"/>
-                <path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill="#C8522E" transform="translate(13.16,11.3) scale(0.72)"/>
-                <path d="M89,14 L59,14 A9,9 0 0,0 50,23 L50,52 A9,9 0 0,0 59,61 L83,61 L97,71 L92,61 A6,6 0 0,0 98,55 L98,23 A9,9 0 0,0 89,14 Z" fill="white"/>
-                <path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill="#1B5FE8" transform="translate(58.16,21.3) scale(0.72)"/>
+                <defs>
+                  <mask id="navGhostL">
+                    <path d="M14,4 L44,4 A9,9 0 0,1 53,13 L53,42 A9,9 0 0,1 44,51 L20,51 L6,61 L11,51 A6,6 0 0,1 5,45 L5,13 A9,9 0 0,1 14,4 Z" fill="white"/>
+                    <path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill="black" transform="translate(13.16,11.3) scale(0.72)"/>
+                  </mask>
+                  <mask id="navGhostR">
+                    <path d="M89,14 L59,14 A9,9 0 0,0 50,23 L50,52 A9,9 0 0,0 59,61 L83,61 L97,71 L92,61 A6,6 0 0,0 98,55 L98,23 A9,9 0 0,0 89,14 Z" fill="white"/>
+                    <path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill="black" transform="translate(58.16,21.3) scale(0.72)"/>
+                  </mask>
+                </defs>
+                <path d="M14,4 L44,4 A9,9 0 0,1 53,13 L53,42 A9,9 0 0,1 44,51 L20,51 L6,61 L11,51 A6,6 0 0,1 5,45 L5,13 A9,9 0 0,1 14,4 Z" fill="white" mask="url(#navGhostL)"/>
+                <path d="M89,14 L59,14 A9,9 0 0,0 50,23 L50,52 A9,9 0 0,0 59,61 L83,61 L97,71 L92,61 A6,6 0 0,0 98,55 L98,23 A9,9 0 0,0 89,14 Z" fill="white" mask="url(#navGhostR)"/>
               </svg>
             ) : (
               <svg width="36" height="26" viewBox="0 0 103 76" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -12730,9 +12753,8 @@ export default function App() {
             )}
             <span style={{ fontFamily: font.display, fontSize: "0.95rem", fontWeight: 700, color: (isMobile && view !== "results") ? "white" : (view === "home" ? "white" : C.ink) }}>Attune</span>
           </div>
-        </div>
-        {view !== "account" && (
-        <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
+          {view !== "account" && (
+          <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
           {!isMobile && <button onClick={() => go("home")} style={{ width: 34, height: 34, borderRadius: "50%", background: "transparent", border: `1.5px solid ${C.stone}`, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "0.9rem", transition: "all .15s" }} title="Dashboard">⊞</button>}
           {/* Auth: show Sign In if not logged in, account dropdown if logged in */}
           {!isLoggedIn ? (
@@ -12792,6 +12814,7 @@ export default function App() {
           ) : null}
         </div>
         )}
+        </div>
         {/* Mobile: ← Dashboard row below logo+auth row */}
       {isMobile && view !== "home" && view !== "results" && (
         <div style={{ paddingTop: "0.45rem", marginTop: "0.35rem", borderTop: "1px solid rgba(255,255,255,0.18)", display: "flex" }}>
