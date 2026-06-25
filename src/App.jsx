@@ -5287,7 +5287,6 @@ function StartingOutChecklist({ userName, partnerName, onBack, checklistState, s
   return (
     <div style={{ maxWidth: 620, margin: "0 auto" }}>
       <div style={{ marginBottom: "1.75rem" }}>
-        <div style={{ fontSize: "0.6rem", letterSpacing: "0.22em", textTransform: "uppercase", color: "#E8673A", fontWeight: 700, fontFamily: font.body, marginBottom: "0.35rem" }}>Starting Out Collection</div>
         <h1 style={{ fontFamily: font.display, fontSize: "1.8rem", fontWeight: 700, color: C.ink, lineHeight: 1.1, marginBottom: "0.6rem" }}>Starting Out Checklist</h1>
         <p style={{ fontSize: "0.85rem", color: C.muted, fontFamily: font.body, fontWeight: 300, lineHeight: 1.65, marginBottom: "1.25rem" }}>The real-world logistics of merging your lives. Tap the arrow next to each item for a bit more context. Check things off as you go, no rush, just a clear picture of what's done and what's next.</p>
         <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
@@ -5574,8 +5573,7 @@ function BudgetTool({ userName, partnerName, onBack, budgetState, setBudgetState
 
   return (
     <div style={{ maxWidth: 720, margin: "0 auto", paddingBottom: "6rem" }}>
-      {/* ── Back + title ───────────────────────────────────────────── */}
-      <div style={{ fontSize: "0.6rem", letterSpacing: "0.22em", textTransform: "uppercase", color: "#1B5FE8", fontWeight: 700, fontFamily: font.body, marginBottom: "0.35rem" }}>Attune Premium</div>
+      {/* ── Title ───────────────────────────────────────────── */}
       <h1 style={{ fontFamily: font.display, fontSize: "1.9rem", fontWeight: 700, color: C.ink, lineHeight: 1.1, marginBottom: "0.5rem" }}>Shared Budget Tool</h1>
       <p style={{ fontSize: "0.92rem", color: C.muted, fontFamily: font.body, fontWeight: 300, lineHeight: 1.65, marginBottom: "0.4rem" }}>
         Build your real shared budget together. Your numbers stay yours, Attune is a calculator, not a financial advisor.
@@ -12854,7 +12852,7 @@ export default function App() {
         </div>
       )}
 
-      <div data-main-scroll style={{ maxWidth: view === "home" ? "unset" : 860, margin: view === "home" ? 0 : "0 auto", padding: view === "home" ? 0 : (view === "results" ? 0 : "3rem 2rem") }}>
+      <div data-main-scroll style={{ maxWidth: view === "home" ? "unset" : 860, margin: view === "home" ? 0 : "0 auto", padding: view === "home" ? 0 : (view === "results" ? 0 : (isMobile ? "1rem 1.25rem" : "3rem 2rem")) }}>
         {view === "home" && isLoggedIn && (
           <div style={{ display: "flex", minHeight: "100vh", background: "#FBF8F3" }}>
 
