@@ -4802,6 +4802,11 @@ const ANNIVERSARY_QUESTIONS = [
   { id: "a4", category: "What Matters", type: "text", text: "Something I want to do more of together in the next year:", placeholder: "e.g. Travel, slow weekends, have the big conversations, invest in our friendship..." },
 ];
 
+// Bump this whenever the reflection question set changes (add, remove, or
+// reword). Stored on each completion as profiles.ex3_version, so responses can
+// be segmented later by which version of the questions they answered.
+const ANNIVERSARY_VERSION = 1;
+
 
 function AnniversaryExercise({ userName, partnerName, onComplete, onBack, partnerPronouns = "" }) {
   // Independent possessive for the partner ("theirs"/"hers"/"his"), used in the
@@ -10552,7 +10557,7 @@ function PartnerBExerciseFlow({ account, onComplete }) {
 
   const handleEx3Done = async (answers) => {
     try { localStorage.setItem('attune_ex3', JSON.stringify(answers)); } catch {}
-    await saveExercise(3, answers, { ex3_completed: true });
+    await saveExercise(3, answers, { ex3_completed: true, ex3_completed_at: new Date().toISOString(), ex3_version: ANNIVERSARY_VERSION });
     finishSession(ex1, ex2, answers);
   };
 
@@ -13486,7 +13491,7 @@ export default function App() {
                     (async () => {
                       const { supabase: sb, hasSupabase } = await import('./supabase.js');
                       if (!hasSupabase()) return;
-                      await saveExerciseWithRetakeSnapshot(sb, account.id, 3, a, { ex3_completed: true });
+                      await saveExerciseWithRetakeSnapshot(sb, account.id, 3, a, { ex3_completed: true, ex3_completed_at: new Date().toISOString(), ex3_version: ANNIVERSARY_VERSION });
                     })();
                   }
                   // Invitee completion: poll fetches the partner's data; no
