@@ -11527,8 +11527,19 @@ export default function App() {
         if (!hasSupabase() || cancelled) return;
 
         // Pull the current session from Supabase storage.
-        const { data: { session } } = await sb.auth.getSession();
+        let { data: { session } } = await sb.auth.getSession();
         const localAcct = loadAccount();
+
+        // Cold-start race: getSession can briefly return null before the SDK
+        // rehydrates the persisted session from storage. If we have a local
+        // account but no session yet, retry once before treating it as a real
+        // sign-out. Without this, a transient null bounces a logged-in user to
+        // the sign-in page on load.
+        if (!session?.user && localAcct?.id) {
+          await new Promise(r => setTimeout(r, 600));
+          if (cancelled) return;
+          ({ data: { session } } = await sb.auth.getSession());
+        }
 
         if (session?.user) {
           // Session is valid. If localStorage account is missing OR belongs to
@@ -11724,6 +11735,18 @@ export default function App() {
                 } : prev);
               }
             } catch { /* non-fatal: order context restores on next sign-in */ }
+
+            // Returning device: re-pull intimacy completion so an intimacy
+            // exercise finished on another device since this device's last
+            // login shows here. The order re-sync above does not cover it, and
+            // intimacyData only reads localStorage once on mount.
+            try {
+              const { data: prof } = await sb.from('profiles').select('intimacy_data').eq('id', session.user.id).maybeSingle();
+              if (prof?.intimacy_data && !cancelled) {
+                localStorage.setItem('attune_intimacy', JSON.stringify(prof.intimacy_data));
+                setIntimacyData(prof.intimacy_data);
+              }
+            } catch {}
           }
         } else {
           // No Supabase session. Could mean:
@@ -12728,19 +12751,12 @@ export default function App() {
           <div onClick={() => { if (isLoggedIn) { setView('home'); } else { window.location.href = '/home'; } }} style={{ display: "flex", alignItems: "center", gap: "0.5rem", cursor: "pointer" }}>
             {(isMobile && view !== "results") ? (
               /* White logo mark for gradient background */
-              <svg width="28" height="20" viewBox="0 0 103 76" fill="none">
-                <defs>
-                  <mask id="navGhostL">
-                    <path d="M14,4 L44,4 A9,9 0 0,1 53,13 L53,42 A9,9 0 0,1 44,51 L20,51 L6,61 L11,51 A6,6 0 0,1 5,45 L5,13 A9,9 0 0,1 14,4 Z" fill="white"/>
-                    <path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill="black" transform="translate(13.16,11.3) scale(0.72)"/>
-                  </mask>
-                  <mask id="navGhostR">
-                    <path d="M89,14 L59,14 A9,9 0 0,0 50,23 L50,52 A9,9 0 0,0 59,61 L83,61 L97,71 L92,61 A6,6 0 0,0 98,55 L98,23 A9,9 0 0,0 89,14 Z" fill="white"/>
-                    <path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill="black" transform="translate(58.16,21.3) scale(0.72)"/>
-                  </mask>
-                </defs>
-                <path d="M14,4 L44,4 A9,9 0 0,1 53,13 L53,42 A9,9 0 0,1 44,51 L20,51 L6,61 L11,51 A6,6 0 0,1 5,45 L5,13 A9,9 0 0,1 14,4 Z" fill="white" mask="url(#navGhostL)"/>
-                <path d="M89,14 L59,14 A9,9 0 0,0 50,23 L50,52 A9,9 0 0,0 59,61 L83,61 L97,71 L92,61 A6,6 0 0,0 98,55 L98,23 A9,9 0 0,0 89,14 Z" fill="white" mask="url(#navGhostR)"/>
+              <svg width="28" height="20" viewBox="0 0 103 76" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <defs><linearGradient id="mktNavGradM" x1="0" y1="0" x2="103" y2="76" gradientUnits="userSpaceOnUse"><stop offset="0%" stopColor="#E8673A"/><stop offset="100%" stopColor="#1B5FE8"/></linearGradient></defs>
+                <path d="M14,4 L44,4 A9,9 0 0,1 53,13 L53,42 A9,9 0 0,1 44,51 L20,51 L6,61 L11,51 A6,6 0 0,1 5,45 L5,13 A9,9 0 0,1 14,4 Z" fill="url(#mktNavGradM)"/>
+                <path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill="white" opacity="0.93" transform="translate(13.16,11.3) scale(0.72)"/>
+                <path d="M89,14 L59,14 A9,9 0 0,0 50,23 L50,52 A9,9 0 0,0 59,61 L83,61 L97,71 L92,61 A6,6 0 0,0 98,55 L98,23 A9,9 0 0,0 89,14 Z" fill="white" stroke="url(#mktNavGradM)" strokeWidth="2.2" strokeLinejoin="round"/>
+                <path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill="url(#mktNavGradM)" transform="translate(58.16,21.3) scale(0.72)"/>
               </svg>
             ) : (
               <svg width="36" height="26" viewBox="0 0 103 76" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -12856,11 +12872,12 @@ export default function App() {
                   <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0.85rem 1.25rem 0", position: "relative" }}>
                     {/* Logo — links to landing page */}
                     <div onClick={() => window.location.href = '/home'} style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer" }}>
-                      <svg width="28" height="20" viewBox="0 0 103 76" fill="none" style={{ flexShrink: 0 }}>
-                        <path d="M14,4 L44,4 A9,9 0 0,1 53,13 L53,42 A9,9 0 0,1 44,51 L20,51 L6,61 L11,51 A6,6 0 0,1 5,45 L5,13 A9,9 0 0,1 14,4 Z" fill="white"/>
-                        <path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill="#C8522E" transform="translate(13.16,11.3) scale(0.72)"/>
-                        <path d="M89,14 L59,14 A9,9 0 0,0 50,23 L50,52 A9,9 0 0,0 59,61 L83,61 L97,71 L92,61 A6,6 0 0,0 98,55 L98,23 A9,9 0 0,0 89,14 Z" fill="white"/>
-                        <path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill="#1B5FE8" transform="translate(58.16,21.3) scale(0.72)"/>
+                      <svg width="28" height="20" viewBox="0 0 103 76" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ flexShrink: 0 }}>
+                        <defs><linearGradient id="mktNavGradH" x1="0" y1="0" x2="103" y2="76" gradientUnits="userSpaceOnUse"><stop offset="0%" stopColor="#E8673A"/><stop offset="100%" stopColor="#1B5FE8"/></linearGradient></defs>
+                        <path d="M14,4 L44,4 A9,9 0 0,1 53,13 L53,42 A9,9 0 0,1 44,51 L20,51 L6,61 L11,51 A6,6 0 0,1 5,45 L5,13 A9,9 0 0,1 14,4 Z" fill="url(#mktNavGradH)"/>
+                        <path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill="white" opacity="0.93" transform="translate(13.16,11.3) scale(0.72)"/>
+                        <path d="M89,14 L59,14 A9,9 0 0,0 50,23 L50,52 A9,9 0 0,0 59,61 L83,61 L97,71 L92,61 A6,6 0 0,0 98,55 L98,23 A9,9 0 0,0 89,14 Z" fill="white" stroke="url(#mktNavGradH)" strokeWidth="2.2" strokeLinejoin="round"/>
+                        <path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill="url(#mktNavGradH)" transform="translate(58.16,21.3) scale(0.72)"/>
                       </svg>
                       <span style={{ fontSize: "0.95rem", fontWeight: 700, color: "white", fontFamily: "'Playfair Display', Georgia, serif", letterSpacing: "-.01em" }}>Attune</span>
                     </div>
@@ -12906,7 +12923,7 @@ export default function App() {
                 {isMobile && mobileNavOpen && (
                   <>
                     <div onClick={() => setMobileNavOpen(false)} style={{ position: "fixed", inset: 0, zIndex: 198 }} />
-                    <div style={{ position: "absolute", top: "3.5rem", right: "1rem", zIndex: 199, background: "#FFFDF9", border: "1px solid #E8DDD0", borderRadius: 14, padding: "0.4rem", minWidth: 190, boxShadow: "0 16px 44px rgba(14,11,7,0.22)", display: "flex", flexDirection: "column", gap: "0.1rem" }}>
+                    <div style={{ position: "fixed", top: "3.5rem", right: "1rem", zIndex: 199, background: "#FFFDF9", border: "1px solid #E8DDD0", borderRadius: 14, padding: "0.4rem", minWidth: 190, boxShadow: "0 16px 44px rgba(14,11,7,0.22)", display: "flex", flexDirection: "column", gap: "0.1rem" }}>
                       {[
                         { label: "Dashboard", viewId: "home" },
                         { label: "Account", viewId: "account" },
