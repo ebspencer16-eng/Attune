@@ -946,8 +946,7 @@ export function IntimacyExercise({ userName = "You", partnerName = "your partner
 
       <p style={{ fontSize: "0.6rem", letterSpacing: "0.2em", textTransform: "uppercase", color: accent, marginBottom: "0.25rem", fontFamily: BFONT }}>Intimacy Expectations</p>
       <p style={{ fontSize: "0.6rem", letterSpacing: "0.12em", textTransform: "uppercase", color: C.muted, marginBottom: "0.85rem", fontFamily: BFONT }}>{dimMeta?.label}</p>
-      <p style={{ fontFamily: HFONT, fontSize: "1.3rem", fontWeight: 400, color: C.ink, lineHeight: 1.45, marginBottom: "0.4rem" }}>{q.topic}</p>
-      <p style={{ fontSize: "0.95rem", color: C.muted, fontFamily: BFONT, fontWeight: 300, lineHeight: 1.55, marginBottom: "1.5rem" }}>{framing}</p>
+      <p style={{ fontFamily: HFONT, fontSize: "1.3rem", fontWeight: 400, color: C.ink, lineHeight: 1.45, marginBottom: "1.5rem" }}>{(() => { const t = (framing || "").trim(); return /[?.!:]$/.test(t) ? t : t + ":"; })()}</p>
 
       <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
         {q.options.map(o => {
