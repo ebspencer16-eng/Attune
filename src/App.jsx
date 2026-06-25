@@ -6016,7 +6016,6 @@ function LMFTSession({ userName, partnerName, userEmail, orderNum, onBack }) {
 
   return (
     <div style={{ maxWidth: 520, margin: "0 auto" }}>
-      <div style={{ fontSize: "0.6rem", letterSpacing: "0.22em", textTransform: "uppercase", color: "#3B5BDB", fontWeight: 700, fontFamily: font.body, marginBottom: "0.35rem" }}>Attune Premium</div>
       <h1 style={{ fontFamily: font.display, fontSize: "1.8rem", fontWeight: 700, color: C.ink, lineHeight: 1.1, marginBottom: "0.75rem" }}>Schedule Your LMFT Session</h1>
       <p style={{ fontSize: "0.88rem", color: C.muted, fontFamily: font.body, fontWeight: 300, lineHeight: 1.7, marginBottom: "0.5rem" }}>Your therapist will review your joint results before the session, so the conversation starts from your actual data, not from scratch.</p>
       <p style={{ fontSize: "0.82rem", color: C.muted, fontFamily: font.body, fontWeight: 300, lineHeight: 1.65, marginBottom: "2rem" }}>Both {userName} and {partnerName} attend together. 50 minutes, virtual.</p>
