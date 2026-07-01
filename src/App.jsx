@@ -11689,6 +11689,22 @@ export default function App() {
                   .maybeSingle();
                 if (byEmail) orderRow = byEmail;
               }
+              // Invitee (Partner B) has no order of their own — their package
+              // and add-ons live on Partner A's order. Resolve it through the
+              // partner link so a fresh-device login inherits the right
+              // entitlements (including the checklist) instead of defaulting
+              // to core. Reading Partner A's order directly is authoritative,
+              // so it also covers add-ons that were never persisted onto
+              // Partner B's profile.
+              if (!orderRow && profile?.joined_via_invite && profile?.partner_profile_id) {
+                const { data: aOrder } = await sb.from('orders')
+                  .select('order_num,pkg_key,is_physical,addon_lmft,addon_reflection,addon_budget,addon_checklist,addon_intimacy,addon_workbook')
+                  .eq('user_id', profile.partner_profile_id)
+                  .order('created_at', { ascending: false })
+                  .limit(1)
+                  .maybeSingle();
+                if (aOrder) orderRow = aOrder;
+              }
             } catch (e) { /* non-fatal: cross-device order restore is a polish concern */ }
 
             const rebuilt = {
