@@ -10198,6 +10198,11 @@ function PartnerLandingScreen({ inviteFrom, inviteCode, onCreateAccount }) {
   const [form, setForm] = React.useState({ name: '', email: _iie, password: '', ageRange: '', gender: '', relationshipStatus: '', relationshipLength: '', children: '', signupSource: '' });
   const [loading, setLoading] = React.useState(false);
   const [err, setErr] = React.useState('');
+  // When signup reports the email already has an account, flip this screen
+  // into an inline sign-in (still inside the invite flow) instead of bouncing
+  // the invitee to the main sign-in page, where they'd land disconnected from
+  // the invite.
+  const [existing, setExisting] = React.useState(false);
   const upd = (k, v) => setForm(p => ({ ...p, [k]: v }));
 
   // Unified signup: creates a real Supabase auth user + profiles row for
@@ -10257,7 +10262,14 @@ function PartnerLandingScreen({ inviteFrom, inviteCode, onCreateAccount }) {
         // them in as Partner A, not as Partner B. Tell them to sign in
         // through the regular sign-in screen instead.
         if (authErr.message.includes('registered') || authErr.message.includes('already')) {
-          setErr("An account with this email already exists. If this is your account, sign in from the main page (not this invite link) so you don't get logged in as your partner.");
+          // This email already has an account. Flip to inline sign-in on this
+          // same screen so they attach to the invite, instead of sending them
+          // to the main sign-in page. Partner A's email is already blocked
+          // above, so this can only be the invitee's own account.
+          setExisting(true);
+          setErr('');
+          setLoading(false);
+          return;
         } else {
           setErr(authErr.message);
         }
@@ -10401,6 +10413,77 @@ function PartnerLandingScreen({ inviteFrom, inviteCode, onCreateAccount }) {
     }
   };
 
+  // Inline sign-in for an invitee whose email already has an account. Signs
+  // them in, then attaches them to Partner A via the same link step signup
+  // uses. Idempotent for the same person; a 409 means a different account
+  // already claimed this invite.
+  const handleSignIn = async () => {
+    if (!form.email.trim() || !form.email.includes('@')) return setErr('Please enter a valid email.');
+    if (!form.password) return setErr('Please enter your password.');
+    setLoading(true);
+    setErr('');
+    try {
+      const { supabase: sb, hasSupabase } = await import('./supabase.js');
+      if (!hasSupabase()) { setErr('Sign-in is unavailable right now. Please try again in a moment.'); setLoading(false); return; }
+      const { data: si, error: siErr } = await sb.auth.signInWithPassword({ email: form.email.trim().toLowerCase(), password: form.password });
+      if (siErr || !si?.user) {
+        setErr("That password doesn't match this email. Try again, or reset it from the sign-in page.");
+        setLoading(false);
+        return;
+      }
+      let inherited = null;
+      try {
+        const linkRes = await fetch('/api/partner-sync', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'link', inviteCode, partnerBId: si.user.id }),
+        });
+        if (!linkRes.ok) {
+          if (linkRes.status === 409) {
+            setErr('This invite link has already been used by someone else. Ask your partner to send a fresh link.');
+            setLoading(false);
+            return;
+          }
+          console.warn('[Attune] invite sign-in link failed:', linkRes.status);
+          setErr('Something went wrong joining your partner. Please try again in a moment.');
+          setLoading(false);
+          return;
+        }
+        try { inherited = (await linkRes.json())?.inherited || null; } catch {}
+      } catch (e) {
+        console.warn('[Attune] invite sign-in link error:', e);
+        setErr('Something went wrong joining your partner. Please try again in a moment.');
+        setLoading(false);
+        return;
+      }
+      const acct = {
+        id: si.user.id,
+        email: form.email.trim().toLowerCase(),
+        name: si.user.user_metadata?.name || form.name.trim() || '',
+        partnerName: inviteFrom,
+        partnerPronouns: inherited?.partnerPronouns || '',
+        inviteCode,
+        joinedViaInvite: true,
+        pkg: inherited?.pkg || 'core',
+        addonReflection: !!inherited?.addonReflection,
+        addonBudget: !!inherited?.addonBudget,
+        addonChecklist: !!inherited?.addonChecklist,
+        addonIntimacy: !!inherited?.addonIntimacy,
+        addonLmft: !!inherited?.addonLmft,
+        addonWorkbook: inherited?.addonWorkbook || '',
+        createdAt: Date.now(),
+      };
+      clearAllUserLocalStorage();
+      try { localStorage.setItem('attune_account', JSON.stringify(acct)); } catch {}
+      setLoading(false);
+      onCreateAccount(acct);
+    } catch (e) {
+      console.error('[Attune] invite sign-in error:', e);
+      setErr('Sign-in failed. Please try again.');
+      setLoading(false);
+    }
+  };
+
   const inp = (placeholder, key, type = 'text') => (
     <input type={type} placeholder={placeholder} value={form[key]}
       onChange={e => { upd(key, e.target.value); setErr(''); }}
@@ -10428,10 +10511,12 @@ function PartnerLandingScreen({ inviteFrom, inviteCode, onCreateAccount }) {
         </div>
 
         <p style={{ fontSize: '0.8rem', color: '#8C7A68', fontFamily: "'DM Sans', sans-serif", lineHeight: 1.7, marginBottom: '1.5rem' }}>
-          Create your account to get started. Your answers stay private until both of you are done, then your results unlock together.
+          {existing
+            ? `You already have an Attune account with this email. Sign in to join ${inviteFrom}. Your answers stay private until you're both done, then your results unlock together.`
+            : 'Create your account to get started. Your answers stay private until both of you are done, then your results unlock together.'}
         </p>
 
-        {inp('Your first name', 'name')}
+        {!existing && inp('Your first name', 'name')}
         {inp('Your email', 'email', 'email')}
         {_iie && form.email.trim().toLowerCase() === _iie && (
           <p style={{ fontSize: '0.68rem', color: '#8C7A68', fontFamily: "'DM Sans', sans-serif", margin: '-0.35rem 0 0.6rem', lineHeight: 1.4 }}>
@@ -10440,7 +10525,7 @@ function PartnerLandingScreen({ inviteFrom, inviteCode, onCreateAccount }) {
         )}
         {inp('Password (6+ characters)', 'password', 'password')}
 
-        {/* ── Optional demographics ── same block as Partner A signup ── */}
+        {!existing && (
         <div style={{ marginBottom: "1rem" }}>
           <div style={{ fontSize: "0.78rem", fontWeight: 600, color: "#0E0B07", fontFamily: "'DM Sans',sans-serif", padding: "0.65rem 0 0.2rem" }}>
             Tell us about yourself
@@ -10464,13 +10549,22 @@ function PartnerLandingScreen({ inviteFrom, inviteCode, onCreateAccount }) {
             </div>
           ))}
         </div>
+        )}
 
         {err && <p style={{ color: '#ef4444', fontSize: '0.75rem', fontFamily: "'DM Sans', sans-serif", marginBottom: '0.75rem' }}>{err}</p>}
 
-        <button onClick={handleSubmit} disabled={loading}
+        <button onClick={existing ? handleSignIn : handleSubmit} disabled={loading}
           style={{ width: '100%', padding: '0.9rem', background: 'linear-gradient(135deg, #E8673A, #1B5FE8)', color: 'white', border: 'none', borderRadius: 12, fontSize: '0.85rem', fontWeight: 700, cursor: loading ? 'default' : 'pointer', fontFamily: "'DM Sans', sans-serif", opacity: loading ? 0.7 : 1, transition: 'opacity 0.2s', marginBottom: '0.85rem' }}>
-          {loading ? <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '0.55rem' }}><InlineSpinner /> Setting up your account…</span> : 'Start my exercises →'}
+          {loading
+            ? <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '0.55rem' }}><InlineSpinner /> {existing ? 'Signing you in…' : 'Setting up your account…'}</span>
+            : (existing ? 'Sign in and continue →' : 'Start my exercises →')}
         </button>
+        {existing && (
+          <p onClick={() => { setExisting(false); setErr(''); }}
+            style={{ fontSize: '0.72rem', color: '#1B5FE8', textAlign: 'center', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", marginBottom: '0.85rem', fontWeight: 600 }}>
+            Not your account? Create a new one
+          </p>
+        )}
 
         <p style={{ fontSize: '0.68rem', color: '#C17F47', textAlign: 'center', fontFamily: "'DM Sans', sans-serif", lineHeight: 1.6 }}>
           Attune uses your names to personalize your results. Your answers are never shared with your partner individually, only as part of your joint results.
@@ -11542,8 +11636,36 @@ export default function App() {
           // Session is valid. If localStorage account is missing OR belongs to
           // a different user, rebuild it from the profile.
           if (!localAcct || localAcct.id !== session.user.id) {
-            const { data: profile } = await sb.from('profiles').select('*').eq('id', session.user.id).maybeSingle();
+            let { data: profile } = await sb.from('profiles').select('*').eq('id', session.user.id).maybeSingle();
             if (cancelled) return;
+
+            // A valid session with no profile row is an orphaned/cleared
+            // account: the profile + order were wiped but the auth user was
+            // not. Retry once to rule out read-after-write lag, then, if the
+            // profile is still missing, do NOT fabricate a default 'core'
+            // account. That path renders a phantom dashboard disconnected from
+            // any real order (the exact bug a cleared tester hit). Sign the
+            // orphan session out and route to a clean entry point instead.
+            if (!profile) {
+              await new Promise(r => setTimeout(r, 800));
+              if (cancelled) return;
+              ({ data: profile } = await sb.from('profiles').select('*').eq('id', session.user.id).maybeSingle());
+              if (cancelled) return;
+            }
+            if (!profile) {
+              try { await sb.auth.signOut(); } catch {}
+              try { localStorage.removeItem('attune_account'); } catch {}
+              clearAllUserLocalStorage();
+              if (cancelled) return;
+              if (urlInviteCode) {
+                // Leave account null so the invite landing (Case 1) renders and
+                // they can start clean via create-account / inline sign-in.
+                setAccount(null);
+              } else if (window.location.search.indexOf('signin=1') === -1) {
+                window.location.href = '/app?signin=1';
+              }
+              return;
+            }
 
             // Try to find the user's most recent order, so cross-device login
             // restores package + add-on context that's otherwise only in
