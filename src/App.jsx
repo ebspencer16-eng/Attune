@@ -11640,6 +11640,64 @@ export default function App() {
     return () => { cancelled = true; };
   }, [account?.id]);
 
+  // ── Entitlement resync on account change (covers sign-in) ────────────────
+  // The mount reconcile below only runs once, so a logout→login within the
+  // same page (no full reload) never recomputes package + add-ons and the
+  // dashboard falls back to no add-ons. This effect fires whenever a
+  // logged-in account id appears and syncs the grant-only union (orders +
+  // profile + comp + stored blob) into account + order state.
+  useEffect(() => {
+    if (!account?.id) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const { supabase: sb, hasSupabase } = await import('./supabase.js');
+        if (!hasSupabase()) return;
+        const { data: { session } } = await sb.auth.getSession();
+        if (cancelled || !session?.user?.id || session.user.id !== account.id) return;
+        let prof = null;
+        {
+          const _r = await sb.from('profiles')
+            .select('is_comp, entitlements, pkg, addon_lmft, addon_reflection, addon_budget, addon_checklist, addon_intimacy, addon_workbook, joined_via_invite, partner_profile_id')
+            .eq('id', account.id)
+            .maybeSingle();
+          prof = _r.error ? null : _r.data;
+        }
+        if (cancelled || !prof) return;
+        let ent = await fetchOrderEntitlements(sb, {
+          userId: account.id,
+          email: account.email,
+          partnerAId: (prof.joined_via_invite && prof.partner_profile_id) ? prof.partner_profile_id : null,
+        }, prof);
+        if (cancelled) return;
+        if (prof.entitlements) { try { ent = mergeEntitlementsGrantOnly(ent, prof.entitlements); } catch {} }
+        if (session.access_token && (!prof.entitlements || !sameEntitlements(ent, prof.entitlements))) {
+          fetch('/api/recompute-entitlements', { method: 'POST', headers: { Authorization: `Bearer ${session.access_token}` } }).catch(() => {});
+        }
+        if (cancelled) return;
+        const _order = {
+          orderNum: ent.orderNum, pkgKey: ent.pkg, pkg: ent.pkg, isPhysical: ent.isPhysical,
+          addonLmft: ent.addonLmft, addonReflection: ent.addonReflection, addonBudget: ent.addonBudget,
+          addonChecklist: ent.addonChecklist, addonIntimacy: ent.addonIntimacy, addonWorkbook: ent.addonWorkbook,
+        };
+        try { localStorage.setItem('attune_order', JSON.stringify(_order)); } catch {}
+        setOrder(_order);
+        setAccount(prev => prev ? {
+          ...prev,
+          pkg: (PKG_CAPS[ent.pkg]?.rank ?? 0) >= (PKG_CAPS[prev.pkg]?.rank ?? 0) ? ent.pkg : prev.pkg,
+          addonLmft:       prev.addonLmft       || ent.addonLmft,
+          addonReflection: prev.addonReflection || ent.addonReflection,
+          addonBudget:     prev.addonBudget     || ent.addonBudget,
+          addonChecklist:  prev.addonChecklist  || ent.addonChecklist,
+          addonIntimacy:   prev.addonIntimacy   || ent.addonIntimacy,
+          addonWorkbook:   (prev.addonWorkbook === 'printed' || ent.addonWorkbook === 'printed') ? 'printed' : (ent.addonWorkbook || prev.addonWorkbook || ''),
+          orderNum:        prev.orderNum || ent.orderNum,
+        } : prev);
+      } catch (e) { /* non-fatal: mount reconcile also covers this */ }
+    })();
+    return () => { cancelled = true; };
+  }, [account?.id]);
+
   // ── Supabase session sync ────────────────────────────────────────────────
   // Single source of truth for login is the Supabase session. On mount we
   // reconcile `attune_account` localStorage against `supabase.auth.getSession()`
