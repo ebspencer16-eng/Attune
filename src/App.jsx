@@ -3,6 +3,7 @@ import { axisScores } from "../api/_type-engine.js";
 import { PERSONALITY_QUESTIONS, RESPONSIBILITY_CATEGORIES, LIFE_QUESTIONS } from "../api/_questions.js";
 import { INTIMACY_QUESTIONS, INTIMACY_DIMENSIONS, summarizeIntimacy, intimacyDimensionPositions, intimacyDimensionSkips } from "../api/_intimacy-questions.js";
 import { INTIMACY_RESULTS_PROSE } from "../api/_intimacy-results-prose.js";
+import { PKG_CAPS, ORDER_SELECT, computeEntitlements, mergeEntitlementsGrantOnly } from "../api/_lib/entitlements.js";
 
 
 // ── Mobile detection hook ─────────────────────────────────────────────────────
@@ -53,65 +54,10 @@ function clearAllUserLocalStorage() {
 }
 
 // ── ENTITLEMENTS ──────────────────────────────────────────────────────────────
-// Capability flags per package key. MUST stay in sync with pkgConfig in the
-// dashboard component. core grants nothing on its own; add-ons fill the rest.
-const PKG_CAPS = {
-  core:        { rank: 0, hasChecklist: false, hasReflection: false, hasBudget: false, hasLmft: false },
-  newlywed:    { rank: 1, hasChecklist: true,  hasReflection: false, hasBudget: true,  hasLmft: false },
-  anniversary: { rank: 1, hasChecklist: false, hasReflection: true,  hasBudget: false, hasLmft: false },
-  premium:     { rank: 2, hasChecklist: false, hasReflection: true,  hasBudget: true,  hasLmft: true  },
-};
-
-const ORDER_SELECT = 'order_num,pkg_key,is_physical,addon_lmft,addon_reflection,addon_budget,addon_checklist,addon_intimacy,addon_workbook,created_at';
-
-// Entitlements are cumulative, never chronological. Union every order the
-// account owns (plus its profile columns, plus any comp grant) so a newer or
-// partial order can only ADD access, never strip it. This replaces the old
-// "newest order wins" lookup that let a test purchase silently downgrade a
-// real one. A row with { pkg_key, addon_*, order_num, created_at } is the
-// shape both real orders and the profile pseudo-row use.
-function computeEntitlements(rows, profile) {
-  // Comp accounts (founder, staff, some beta testers) get full access without
-  // depending on any order row.
-  if (profile?.is_comp) {
-    return {
-      comp: true, hasGrant: true,
-      pkg: 'premium', orderNum: '', isPhysical: false,
-      addonLmft: true, addonReflection: true, addonBudget: true,
-      addonChecklist: true, addonIntimacy: true, addonWorkbook: 'digital',
-    };
-  }
-  const list = (Array.isArray(rows) ? rows : []).filter(Boolean);
-  let pkg = 'core', bestRank = -1, orderNum = '', newestAt = -1, isPhysical = false;
-  let addonLmft = false, addonReflection = false, addonBudget = false;
-  let addonChecklist = false, addonIntimacy = false, addonWorkbook = '';
-  let hasGrant = false;
-  for (const o of list) {
-    const key = o.pkg_key || 'core';
-    const cap = PKG_CAPS[key] || PKG_CAPS.core;
-    if (cap.rank > bestRank) { bestRank = cap.rank; pkg = key; }
-    // Track the newest real order number for display.
-    if (o.order_num) {
-      const at = o.created_at ? new Date(o.created_at).getTime() : 0;
-      if (at >= newestAt) { newestAt = at; orderNum = o.order_num; }
-      hasGrant = true;
-    }
-    if (o.is_physical) isPhysical = true;
-    // Capability = package-inherent OR the add-on flag. Folding pkg-inherent
-    // capabilities into the add-on booleans lets the single pkg label stay a
-    // label while the flags carry the full union.
-    addonLmft       = addonLmft       || cap.hasLmft       || !!o.addon_lmft;
-    addonReflection = addonReflection || cap.hasReflection || !!o.addon_reflection;
-    addonBudget     = addonBudget     || cap.hasBudget     || !!o.addon_budget;
-    addonChecklist  = addonChecklist  || cap.hasChecklist  || !!o.addon_checklist;
-    addonIntimacy   = addonIntimacy   || !!o.addon_intimacy;
-    if (o.addon_workbook === 'printed') addonWorkbook = 'printed';
-    else if (!addonWorkbook && o.addon_workbook) addonWorkbook = o.addon_workbook;
-    if (cap.rank > 0 || o.addon_lmft || o.addon_reflection || o.addon_budget || o.addon_checklist || o.addon_intimacy || o.addon_workbook) hasGrant = true;
-  }
-  return { comp: false, hasGrant, pkg, orderNum, isPhysical,
-    addonLmft, addonReflection, addonBudget, addonChecklist, addonIntimacy, addonWorkbook };
-}
+// PKG_CAPS, ORDER_SELECT, computeEntitlements, and mergeEntitlementsGrantOnly
+// are imported from ../api/_lib/entitlements.js so the client and the server
+// writers share one implementation. fetchOrderEntitlements below is the
+// client-side wrapper that queries via the browser Supabase client.
 
 // Fetch every order the account (or, for an invitee, Partner A) owns and fold
 // in the profile's own entitlement columns, then union them. Grant-only by
@@ -144,26 +90,6 @@ async function fetchOrderEntitlements(sb, { userId, email, partnerAId } = {}, pr
     if (partnerAId) { const { data } = await sb.from('orders').select(ORDER_SELECT).eq('user_id', partnerAId); add(data); }
   } catch (e) { /* non-fatal: entitlements fall back to profile columns / comp */ }
   return computeEntitlements(rows, profile);
-}
-
-// Merge two entitlement objects grant-only (OR the capabilities). Used on the
-// returning-device path so a resync can never strip what the account already
-// had locally, on top of the union across orders.
-function mergeEntitlementsGrantOnly(a, b) {
-  const rankOf = (p) => (PKG_CAPS[p]?.rank ?? 0);
-  return {
-    comp: !!(a?.comp || b?.comp),
-    hasGrant: !!(a?.hasGrant || b?.hasGrant),
-    pkg: rankOf(b?.pkg) >= rankOf(a?.pkg) ? (b?.pkg || a?.pkg || 'core') : (a?.pkg || 'core'),
-    orderNum: b?.orderNum || a?.orderNum || '',
-    isPhysical: !!(a?.isPhysical || b?.isPhysical),
-    addonLmft: !!(a?.addonLmft || b?.addonLmft),
-    addonReflection: !!(a?.addonReflection || b?.addonReflection),
-    addonBudget: !!(a?.addonBudget || b?.addonBudget),
-    addonChecklist: !!(a?.addonChecklist || b?.addonChecklist),
-    addonIntimacy: !!(a?.addonIntimacy || b?.addonIntimacy),
-    addonWorkbook: (a?.addonWorkbook === 'printed' || b?.addonWorkbook === 'printed') ? 'printed' : (b?.addonWorkbook || a?.addonWorkbook || ''),
-  };
 }
 
 // -- 8-DIMENSION PERSONALITY QUESTIONS (5 each = 40 total) --

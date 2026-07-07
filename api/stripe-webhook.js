@@ -15,6 +15,7 @@
 export const config = { runtime: 'edge' };
 
 import { reportToSentry } from './_lib/sentry-edge.js';
+import { writeEntitlements } from './_lib/entitlements.js';
 
 async function verifyStripeSignature(body, signature, secret) {
   // Stripe webhook signature format: t=timestamp,v1=hash
@@ -271,6 +272,26 @@ async function handleWebhook(req) {
       } catch(e) {
         console.error('[webhook] order creation failed:', e);
       }
+    }
+
+    // Recompute stored entitlements for the buyer if they already have an
+    // account. Orders are guest-created here (no user_id yet), so this only
+    // fires for existing accounts (e.g. an add-on purchase by someone already
+    // signed up). New buyers get entitlements computed when their order links
+    // at account setup.
+    if (orderCreated && intent.receipt_email && supabaseUrl && serviceKey) {
+      try {
+        const em = intent.receipt_email.toLowerCase();
+        const profRes = await fetch(`${supabaseUrl}/rest/v1/profiles?email=eq.${encodeURIComponent(em)}&select=id&limit=1`, {
+          headers: { apikey: serviceKey, Authorization: `Bearer ${serviceKey}` },
+        });
+        const profs = profRes.ok ? await profRes.json().catch(() => []) : [];
+        if (Array.isArray(profs) && profs[0]?.id) {
+          const _ent = await writeEntitlements({ supabaseUrl, serviceKey, userId: profs[0].id, email: em });
+          if (!_ent.ok) console.warn('[webhook] entitlements recompute failed:', _ent.error);
+          else console.log('[webhook] entitlements recomputed for', profs[0].id);
+        }
+      } catch (e) { console.warn('[webhook] entitlements recompute error:', e); }
     }
 
     // Fire confirmation email if Resend is configured. Skip on webhook retry
