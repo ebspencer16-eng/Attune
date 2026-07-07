@@ -52,6 +52,120 @@ function clearAllUserLocalStorage() {
   }
 }
 
+// ── ENTITLEMENTS ──────────────────────────────────────────────────────────────
+// Capability flags per package key. MUST stay in sync with pkgConfig in the
+// dashboard component. core grants nothing on its own; add-ons fill the rest.
+const PKG_CAPS = {
+  core:        { rank: 0, hasChecklist: false, hasReflection: false, hasBudget: false, hasLmft: false },
+  newlywed:    { rank: 1, hasChecklist: true,  hasReflection: false, hasBudget: true,  hasLmft: false },
+  anniversary: { rank: 1, hasChecklist: false, hasReflection: true,  hasBudget: false, hasLmft: false },
+  premium:     { rank: 2, hasChecklist: false, hasReflection: true,  hasBudget: true,  hasLmft: true  },
+};
+
+const ORDER_SELECT = 'order_num,pkg_key,is_physical,addon_lmft,addon_reflection,addon_budget,addon_checklist,addon_intimacy,addon_workbook,created_at';
+
+// Entitlements are cumulative, never chronological. Union every order the
+// account owns (plus its profile columns, plus any comp grant) so a newer or
+// partial order can only ADD access, never strip it. This replaces the old
+// "newest order wins" lookup that let a test purchase silently downgrade a
+// real one. A row with { pkg_key, addon_*, order_num, created_at } is the
+// shape both real orders and the profile pseudo-row use.
+function computeEntitlements(rows, profile) {
+  // Comp accounts (founder, staff, some beta testers) get full access without
+  // depending on any order row.
+  if (profile?.is_comp) {
+    return {
+      comp: true, hasGrant: true,
+      pkg: 'premium', orderNum: '', isPhysical: false,
+      addonLmft: true, addonReflection: true, addonBudget: true,
+      addonChecklist: true, addonIntimacy: true, addonWorkbook: 'digital',
+    };
+  }
+  const list = (Array.isArray(rows) ? rows : []).filter(Boolean);
+  let pkg = 'core', bestRank = -1, orderNum = '', newestAt = -1, isPhysical = false;
+  let addonLmft = false, addonReflection = false, addonBudget = false;
+  let addonChecklist = false, addonIntimacy = false, addonWorkbook = '';
+  let hasGrant = false;
+  for (const o of list) {
+    const key = o.pkg_key || 'core';
+    const cap = PKG_CAPS[key] || PKG_CAPS.core;
+    if (cap.rank > bestRank) { bestRank = cap.rank; pkg = key; }
+    // Track the newest real order number for display.
+    if (o.order_num) {
+      const at = o.created_at ? new Date(o.created_at).getTime() : 0;
+      if (at >= newestAt) { newestAt = at; orderNum = o.order_num; }
+      hasGrant = true;
+    }
+    if (o.is_physical) isPhysical = true;
+    // Capability = package-inherent OR the add-on flag. Folding pkg-inherent
+    // capabilities into the add-on booleans lets the single pkg label stay a
+    // label while the flags carry the full union.
+    addonLmft       = addonLmft       || cap.hasLmft       || !!o.addon_lmft;
+    addonReflection = addonReflection || cap.hasReflection || !!o.addon_reflection;
+    addonBudget     = addonBudget     || cap.hasBudget     || !!o.addon_budget;
+    addonChecklist  = addonChecklist  || cap.hasChecklist  || !!o.addon_checklist;
+    addonIntimacy   = addonIntimacy   || !!o.addon_intimacy;
+    if (o.addon_workbook === 'printed') addonWorkbook = 'printed';
+    else if (!addonWorkbook && o.addon_workbook) addonWorkbook = o.addon_workbook;
+    if (cap.rank > 0 || o.addon_lmft || o.addon_reflection || o.addon_budget || o.addon_checklist || o.addon_intimacy || o.addon_workbook) hasGrant = true;
+  }
+  return { comp: false, hasGrant, pkg, orderNum, isPhysical,
+    addonLmft, addonReflection, addonBudget, addonChecklist, addonIntimacy, addonWorkbook };
+}
+
+// Fetch every order the account (or, for an invitee, Partner A) owns and fold
+// in the profile's own entitlement columns, then union them. Grant-only by
+// construction. `partnerAId` is set only for invitees, so they inherit the
+// buyer's full package on any device.
+async function fetchOrderEntitlements(sb, { userId, email, partnerAId } = {}, profile) {
+  if (profile?.is_comp) return computeEntitlements([], profile);
+  const rows = [];
+  const seen = new Set();
+  const add = (data) => {
+    for (const r of (data || [])) {
+      const k = r.order_num || `${r.pkg_key}:${r.created_at}`;
+      if (!seen.has(k)) { seen.add(k); rows.push(r); }
+    }
+  };
+  // The profile's own columns act as an extra grant source (covers accounts
+  // whose entitlements were only ever written to the profile, e.g. invitees).
+  if (profile) {
+    rows.push({
+      order_num: null, pkg_key: profile.pkg || null, is_physical: false,
+      addon_lmft: profile.addon_lmft, addon_reflection: profile.addon_reflection,
+      addon_budget: profile.addon_budget, addon_checklist: profile.addon_checklist,
+      addon_intimacy: profile.addon_intimacy, addon_workbook: profile.addon_workbook,
+      created_at: null,
+    });
+  }
+  try {
+    if (userId) { const { data } = await sb.from('orders').select(ORDER_SELECT).eq('user_id', userId); add(data); }
+    if (email)  { const { data } = await sb.from('orders').select(ORDER_SELECT).eq('buyer_email', email.toLowerCase()); add(data); }
+    if (partnerAId) { const { data } = await sb.from('orders').select(ORDER_SELECT).eq('user_id', partnerAId); add(data); }
+  } catch (e) { /* non-fatal: entitlements fall back to profile columns / comp */ }
+  return computeEntitlements(rows, profile);
+}
+
+// Merge two entitlement objects grant-only (OR the capabilities). Used on the
+// returning-device path so a resync can never strip what the account already
+// had locally, on top of the union across orders.
+function mergeEntitlementsGrantOnly(a, b) {
+  const rankOf = (p) => (PKG_CAPS[p]?.rank ?? 0);
+  return {
+    comp: !!(a?.comp || b?.comp),
+    hasGrant: !!(a?.hasGrant || b?.hasGrant),
+    pkg: rankOf(b?.pkg) >= rankOf(a?.pkg) ? (b?.pkg || a?.pkg || 'core') : (a?.pkg || 'core'),
+    orderNum: b?.orderNum || a?.orderNum || '',
+    isPhysical: !!(a?.isPhysical || b?.isPhysical),
+    addonLmft: !!(a?.addonLmft || b?.addonLmft),
+    addonReflection: !!(a?.addonReflection || b?.addonReflection),
+    addonBudget: !!(a?.addonBudget || b?.addonBudget),
+    addonChecklist: !!(a?.addonChecklist || b?.addonChecklist),
+    addonIntimacy: !!(a?.addonIntimacy || b?.addonIntimacy),
+    addonWorkbook: (a?.addonWorkbook === 'printed' || b?.addonWorkbook === 'printed') ? 'printed' : (b?.addonWorkbook || a?.addonWorkbook || ''),
+  };
+}
+
 // -- 8-DIMENSION PERSONALITY QUESTIONS (5 each = 40 total) --
 // ── INTENTIONAL COLOR SCHEMA ──────────────────────────────────────────────────
 // Purple  #9B5DE5  = Your Inner Worlds     (energy, expression)
@@ -11667,45 +11781,16 @@ export default function App() {
               return;
             }
 
-            // Try to find the user's most recent order, so cross-device login
-            // restores package + add-on context that's otherwise only in
-            // localStorage. Looks up by user_id first, then falls back to
-            // matching the session email.
-            let orderRow = null;
-            try {
-              const { data: byId } = await sb.from('orders')
-                .select('order_num,pkg_key,is_physical,addon_lmft,addon_reflection,addon_budget,addon_checklist,addon_intimacy,addon_workbook')
-                .eq('user_id', session.user.id)
-                .order('created_at', { ascending: false })
-                .limit(1)
-                .maybeSingle();
-              if (byId) orderRow = byId;
-              else if (session.user.email) {
-                const { data: byEmail } = await sb.from('orders')
-                  .select('order_num,pkg_key,is_physical,addon_lmft,addon_reflection,addon_budget,addon_checklist,addon_intimacy,addon_workbook')
-                  .eq('buyer_email', session.user.email.toLowerCase())
-                  .order('created_at', { ascending: false })
-                  .limit(1)
-                  .maybeSingle();
-                if (byEmail) orderRow = byEmail;
-              }
-              // Invitee (Partner B) has no order of their own — their package
-              // and add-ons live on Partner A's order. Resolve it through the
-              // partner link so a fresh-device login inherits the right
-              // entitlements (including the checklist) instead of defaulting
-              // to core. Reading Partner A's order directly is authoritative,
-              // so it also covers add-ons that were never persisted onto
-              // Partner B's profile.
-              if (!orderRow && profile?.joined_via_invite && profile?.partner_profile_id) {
-                const { data: aOrder } = await sb.from('orders')
-                  .select('order_num,pkg_key,is_physical,addon_lmft,addon_reflection,addon_budget,addon_checklist,addon_intimacy,addon_workbook')
-                  .eq('user_id', profile.partner_profile_id)
-                  .order('created_at', { ascending: false })
-                  .limit(1)
-                  .maybeSingle();
-                if (aOrder) orderRow = aOrder;
-              }
-            } catch (e) { /* non-fatal: cross-device order restore is a polish concern */ }
+            // Resolve entitlements as the grant-only union of every order this
+            // account owns (or, for an invitee, Partner A's orders) plus the
+            // profile columns plus any comp grant. Never "newest order wins":
+            // a partial or test order can only add access, never strip it.
+            const ent = await fetchOrderEntitlements(sb, {
+              userId: session.user.id,
+              email: session.user.email,
+              partnerAId: (profile?.joined_via_invite && profile?.partner_profile_id) ? profile.partner_profile_id : null,
+            }, profile);
+            if (cancelled) return;
 
             const rebuilt = {
               id: session.user.id,
@@ -11721,14 +11806,14 @@ export default function App() {
               joinedViaInvite: profile?.joined_via_invite || false,
               relationshipStatus: profile?.relationship_status || null,
               buyerRelationshipStatus: profile?.joined_via_invite ? null : (profile?.relationship_status || null),
-              pkg: orderRow?.pkg_key || profile?.pkg || 'core',
-              addonLmft:       !!(orderRow?.addon_lmft ?? profile?.addon_lmft),
-              addonReflection: !!(orderRow?.addon_reflection ?? profile?.addon_reflection),
-              addonBudget:     !!(orderRow?.addon_budget ?? profile?.addon_budget),
-              addonChecklist:  !!(orderRow?.addon_checklist ?? profile?.addon_checklist),
-              addonIntimacy:     !!(orderRow?.addon_intimacy ?? profile?.addon_intimacy),
-              addonWorkbook:   orderRow?.addon_workbook || profile?.addon_workbook || '',
-              orderNum:        orderRow?.order_num || '',
+              pkg: ent.pkg,
+              addonLmft:       ent.addonLmft,
+              addonReflection: ent.addonReflection,
+              addonBudget:     ent.addonBudget,
+              addonChecklist:  ent.addonChecklist,
+              addonIntimacy:   ent.addonIntimacy,
+              addonWorkbook:   ent.addonWorkbook,
+              orderNum:        ent.orderNum,
               createdAt: profile?.created_at ? new Date(profile.created_at).getTime() : Date.now(),
             };
             setAccount(rebuilt);
@@ -11750,18 +11835,18 @@ export default function App() {
             // localStorage (workbook generator, results page) see consistent
             // data after a cross-device login.
             try {
-              if (orderRow) {
+              if (ent.hasGrant || ent.comp) {
                 const _rebuiltOrder = {
-                  orderNum: orderRow.order_num,
-                  pkgKey:   orderRow.pkg_key,
-                  pkg:      orderRow.pkg_key,
-                  isPhysical: !!orderRow.is_physical,
-                  addonLmft:       !!orderRow.addon_lmft,
-                  addonReflection: !!orderRow.addon_reflection,
-                  addonBudget:     !!orderRow.addon_budget,
-                  addonChecklist:  !!orderRow.addon_checklist,
-                  addonIntimacy:     !!orderRow.addon_intimacy,
-                  addonWorkbook:   orderRow.addon_workbook || '',
+                  orderNum: ent.orderNum,
+                  pkgKey:   ent.pkg,
+                  pkg:      ent.pkg,
+                  isPhysical: ent.isPhysical,
+                  addonLmft:       ent.addonLmft,
+                  addonReflection: ent.addonReflection,
+                  addonBudget:     ent.addonBudget,
+                  addonChecklist:  ent.addonChecklist,
+                  addonIntimacy:   ent.addonIntimacy,
+                  addonWorkbook:   ent.addonWorkbook,
                 };
                 localStorage.setItem('attune_order', JSON.stringify(_rebuiltOrder));
                 setOrder(_rebuiltOrder);
@@ -11816,41 +11901,41 @@ export default function App() {
               return;
             }
           } else {
-            // Session and local account both valid. Re-sync package + add-on
-            // context from the authoritative DB order on every load. Without
-            // this, a package recorded wrong at signup (e.g. account created
-            // before purchase, or a setup link missing ?pkg=) stays stale
-            // forever, because nothing else corrects localStorage afterward.
-            // Invitees have no matching order row, so their inherited package
-            // is left alone.
+            // Session and local account both valid. Re-sync entitlements from
+            // the authoritative DB on every load, grant-only: the union of
+            // every order (plus the profile columns, plus any comp grant),
+            // then unioned again with whatever the account already had locally.
+            // A resync can add access but never strip it, so a partial or test
+            // order can no longer downgrade a real one. Invitees inherit
+            // Partner A's orders through the partner link.
             try {
-              let { data: orderRow } = await sb.from('orders')
-                .select('order_num,pkg_key,is_physical,addon_lmft,addon_reflection,addon_budget,addon_checklist,addon_intimacy,addon_workbook')
-                .eq('user_id', session.user.id)
-                .order('created_at', { ascending: false })
-                .limit(1)
+              const { data: prof } = await sb.from('profiles')
+                .select('is_comp, pkg, addon_lmft, addon_reflection, addon_budget, addon_checklist, addon_intimacy, addon_workbook, joined_via_invite, partner_profile_id')
+                .eq('id', session.user.id)
                 .maybeSingle();
-              if (!orderRow && session.user.email) {
-                const { data: byEmail } = await sb.from('orders')
-                  .select('order_num,pkg_key,is_physical,addon_lmft,addon_reflection,addon_budget,addon_checklist,addon_intimacy,addon_workbook')
-                  .eq('buyer_email', session.user.email.toLowerCase())
-                  .order('created_at', { ascending: false })
-                  .limit(1)
-                  .maybeSingle();
-                if (byEmail) orderRow = byEmail;
-              }
-              if (orderRow && !cancelled) {
+              if (cancelled) return;
+              const ent = await fetchOrderEntitlements(sb, {
+                userId: session.user.id,
+                email: session.user.email,
+                partnerAId: (prof?.joined_via_invite && prof?.partner_profile_id) ? prof.partner_profile_id : null,
+              }, prof);
+              if (cancelled) return;
+              const merged = mergeEntitlementsGrantOnly(localAcct, ent);
+              const anyEntitlement = merged.comp || merged.hasGrant ||
+                merged.addonLmft || merged.addonReflection || merged.addonBudget ||
+                merged.addonChecklist || merged.addonIntimacy || ((PKG_CAPS[merged.pkg]?.rank || 0) > 0);
+              if (anyEntitlement) {
                 const _syncedOrder = {
-                  orderNum: orderRow.order_num,
-                  pkgKey:   orderRow.pkg_key,
-                  pkg:      orderRow.pkg_key,
-                  isPhysical: !!orderRow.is_physical,
-                  addonLmft:       !!orderRow.addon_lmft,
-                  addonReflection: !!orderRow.addon_reflection,
-                  addonBudget:     !!orderRow.addon_budget,
-                  addonChecklist:  !!orderRow.addon_checklist,
-                  addonIntimacy:     !!orderRow.addon_intimacy,
-                  addonWorkbook:   orderRow.addon_workbook || '',
+                  orderNum: merged.orderNum,
+                  pkgKey:   merged.pkg,
+                  pkg:      merged.pkg,
+                  isPhysical: merged.isPhysical,
+                  addonLmft:       merged.addonLmft,
+                  addonReflection: merged.addonReflection,
+                  addonBudget:     merged.addonBudget,
+                  addonChecklist:  merged.addonChecklist,
+                  addonIntimacy:   merged.addonIntimacy,
+                  addonWorkbook:   merged.addonWorkbook,
                 };
                 localStorage.setItem('attune_order', JSON.stringify(_syncedOrder));
                 // Update the live `order` state too. pkg.hasChecklist and the
@@ -11859,17 +11944,17 @@ export default function App() {
                 setOrder(_syncedOrder);
                 setAccount(prev => prev ? {
                   ...prev,
-                  pkg: orderRow.pkg_key || prev.pkg,
-                  addonLmft:       !!orderRow.addon_lmft,
-                  addonReflection: !!orderRow.addon_reflection,
-                  addonBudget:     !!orderRow.addon_budget,
-                  addonChecklist:  !!orderRow.addon_checklist,
-                  addonIntimacy:     !!orderRow.addon_intimacy,
-                  addonWorkbook:   orderRow.addon_workbook || prev.addonWorkbook || '',
-                  orderNum: orderRow.order_num,
+                  pkg: merged.pkg,
+                  addonLmft:       merged.addonLmft,
+                  addonReflection: merged.addonReflection,
+                  addonBudget:     merged.addonBudget,
+                  addonChecklist:  merged.addonChecklist,
+                  addonIntimacy:   merged.addonIntimacy,
+                  addonWorkbook:   merged.addonWorkbook,
+                  orderNum: merged.orderNum || prev.orderNum,
                 } : prev);
               }
-            } catch { /* non-fatal: order context restores on next sign-in */ }
+            } catch { /* non-fatal: entitlements restore on next sign-in */ }
 
             // Returning device: re-pull intimacy completion so an intimacy
             // exercise finished on another device since this device's last
