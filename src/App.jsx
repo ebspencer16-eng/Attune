@@ -11909,10 +11909,25 @@ export default function App() {
             // order can no longer downgrade a real one. Invitees inherit
             // Partner A's orders through the partner link.
             try {
-              const { data: prof } = await sb.from('profiles')
-                .select('is_comp, pkg, addon_lmft, addon_reflection, addon_budget, addon_checklist, addon_intimacy, addon_workbook, joined_via_invite, partner_profile_id')
-                .eq('id', session.user.id)
-                .maybeSingle();
+              // Tolerant fetch: is_comp may not exist until migration 028 is
+              // run. If selecting it errors, fall back to the columns that do
+              // exist so the resync still works (comp just stays inactive).
+              let prof = null;
+              {
+                const _r = await sb.from('profiles')
+                  .select('is_comp, pkg, addon_lmft, addon_reflection, addon_budget, addon_checklist, addon_intimacy, addon_workbook, joined_via_invite, partner_profile_id')
+                  .eq('id', session.user.id)
+                  .maybeSingle();
+                if (_r.error) {
+                  const _r2 = await sb.from('profiles')
+                    .select('pkg, addon_lmft, addon_reflection, addon_budget, addon_checklist, addon_intimacy, addon_workbook, joined_via_invite, partner_profile_id')
+                    .eq('id', session.user.id)
+                    .maybeSingle();
+                  prof = _r2.data;
+                } else {
+                  prof = _r.data;
+                }
+              }
               if (cancelled) return;
               const ent = await fetchOrderEntitlements(sb, {
                 userId: session.user.id,
