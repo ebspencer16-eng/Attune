@@ -35,6 +35,7 @@ import { createClient } from '@supabase/supabase-js';
 export const config = { runtime: 'edge' };
 
 import { reportToSentry } from './_lib/sentry-edge.js';
+import { writeEntitlements } from './_lib/entitlements.js';
 
 const supabase = () => createClient(
   process.env.SUPABASE_URL,
@@ -152,6 +153,16 @@ async function handlePartnerSync(req) {
       addon_workbook:   inherited.addonWorkbook,
     }).eq('id', bId);
     if (addonErr) console.warn('[partner-sync] add-on persist skipped (migration 016 not run yet?):', addonErr.message);
+
+    // Store the invitee's authoritative entitlements now that they're linked
+    // and their profile carries the inherited package. writeEntitlements unions
+    // Partner A's orders (via the partner link) into the invitee's stored blob.
+    // Best-effort: never blocks the link.
+    try {
+      const svcKey = process.env.SUPABASE_SERVICE_ROLE || process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_KEY;
+      const entRes = await writeEntitlements({ supabaseUrl: process.env.SUPABASE_URL, serviceKey: svcKey, userId: bId });
+      if (!entRes.ok) console.warn('[partner-sync] entitlements write skipped:', entRes.error);
+    } catch (e) { console.warn('[partner-sync] entitlements write failed:', e); }
 
     // Exchange pronouns so each partner's profile knows the other's. Each
     // person's own `pronouns` is the source of truth; copy it onto the other's

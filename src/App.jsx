@@ -3,7 +3,7 @@ import { axisScores } from "../api/_type-engine.js";
 import { PERSONALITY_QUESTIONS, RESPONSIBILITY_CATEGORIES, LIFE_QUESTIONS } from "../api/_questions.js";
 import { INTIMACY_QUESTIONS, INTIMACY_DIMENSIONS, summarizeIntimacy, intimacyDimensionPositions, intimacyDimensionSkips } from "../api/_intimacy-questions.js";
 import { INTIMACY_RESULTS_PROSE } from "../api/_intimacy-results-prose.js";
-import { PKG_CAPS, ORDER_SELECT, computeEntitlements, mergeEntitlementsGrantOnly } from "../api/_lib/entitlements.js";
+import { PKG_CAPS, ORDER_SELECT, computeEntitlements, mergeEntitlementsGrantOnly, sameEntitlements } from "../api/_lib/entitlements.js";
 
 
 // ── Mobile detection hook ─────────────────────────────────────────────────────
@@ -11711,12 +11711,23 @@ export default function App() {
             // account owns (or, for an invitee, Partner A's orders) plus the
             // profile columns plus any comp grant. Never "newest order wins":
             // a partial or test order can only add access, never strip it.
-            const ent = await fetchOrderEntitlements(sb, {
+            let ent = await fetchOrderEntitlements(sb, {
               userId: session.user.id,
               email: session.user.email,
               partnerAId: (profile?.joined_via_invite && profile?.partner_profile_id) ? profile.partner_profile_id : null,
             }, profile);
             if (cancelled) return;
+
+            // Prefer the server-authoritative blob when present, grant-only
+            // merged with the live union so the display is never less than
+            // either. If the blob is missing or has drifted, fire a recompute
+            // (fire-and-forget) so it's authoritative next time.
+            if (profile?.entitlements) {
+              try { ent = mergeEntitlementsGrantOnly(ent, profile.entitlements); } catch {}
+            }
+            if (session?.access_token && (!profile?.entitlements || !sameEntitlements(ent, profile.entitlements))) {
+              fetch('/api/recompute-entitlements', { method: 'POST', headers: { Authorization: `Bearer ${session.access_token}` } }).catch(() => {});
+            }
 
             const rebuilt = {
               id: session.user.id,
@@ -11841,7 +11852,7 @@ export default function App() {
               let prof = null;
               {
                 const _r = await sb.from('profiles')
-                  .select('is_comp, pkg, addon_lmft, addon_reflection, addon_budget, addon_checklist, addon_intimacy, addon_workbook, joined_via_invite, partner_profile_id')
+                  .select('is_comp, entitlements, pkg, addon_lmft, addon_reflection, addon_budget, addon_checklist, addon_intimacy, addon_workbook, joined_via_invite, partner_profile_id')
                   .eq('id', session.user.id)
                   .maybeSingle();
                 if (_r.error) {
@@ -11855,12 +11866,20 @@ export default function App() {
                 }
               }
               if (cancelled) return;
-              const ent = await fetchOrderEntitlements(sb, {
+              let ent = await fetchOrderEntitlements(sb, {
                 userId: session.user.id,
                 email: session.user.email,
                 partnerAId: (prof?.joined_via_invite && prof?.partner_profile_id) ? prof.partner_profile_id : null,
               }, prof);
               if (cancelled) return;
+              // Prefer the server-authoritative blob when present, grant-only
+              // merged with the live union. Refresh it if missing or drifted.
+              if (prof?.entitlements) {
+                try { ent = mergeEntitlementsGrantOnly(ent, prof.entitlements); } catch {}
+              }
+              if (session?.access_token && (!prof?.entitlements || !sameEntitlements(ent, prof.entitlements))) {
+                fetch('/api/recompute-entitlements', { method: 'POST', headers: { Authorization: `Bearer ${session.access_token}` } }).catch(() => {});
+              }
               const merged = mergeEntitlementsGrantOnly(localAcct, ent);
               const anyEntitlement = merged.comp || merged.hasGrant ||
                 merged.addonLmft || merged.addonReflection || merged.addonBudget ||

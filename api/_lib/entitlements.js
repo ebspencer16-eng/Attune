@@ -87,6 +87,20 @@ export function mergeEntitlementsGrantOnly(a, b) {
   };
 }
 
+// Cheap equality check on the capability-bearing fields. The client uses this
+// to decide whether the stored blob is stale and a recompute should be fired.
+export function sameEntitlements(a, b) {
+  if (!a || !b) return false;
+  return a.pkg === b.pkg
+    && !!a.addonReflection === !!b.addonReflection
+    && !!a.addonBudget === !!b.addonBudget
+    && !!a.addonChecklist === !!b.addonChecklist
+    && !!a.addonLmft === !!b.addonLmft
+    && !!a.addonIntimacy === !!b.addonIntimacy
+    && (a.addonWorkbook || '') === (b.addonWorkbook || '')
+    && !!a.comp === !!b.comp;
+}
+
 // ── SERVER WRITER ─────────────────────────────────────────────────────────────
 
 async function restGet(url, serviceKey, path) {
