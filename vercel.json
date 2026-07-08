@@ -295,6 +295,14 @@
     {
       "path": "/api/cron-checkin",
       "schedule": "0 9 * * *"
+    },
+    {
+      "path": "/api/cron-beta-digest",
+      "schedule": "0 9 * * 1"
+    },
+    {
+      "path": "/api/cron-feedback-synthesis",
+      "schedule": "15 9 * * 1"
     }
   ]
 }
