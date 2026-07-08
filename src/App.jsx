@@ -14244,6 +14244,29 @@ export default function App() {
         </button>
       );
     })}
+    <button
+      onClick={() => {
+        try {
+          const mineEx1 = ARCHETYPE_EX1[demoType[0]];
+          const partEx1 = ARCHETYPE_EX1[demoType[1]];
+          const _my = calcDimScores(mineEx1);
+          const _part = calcDimScores(partEx1);
+          const _ex2 = ex2Answers || sarahEx2;
+          const _align = computeOverallExpectationsPctClient(_ex2, partnerEx2, userName, partnerName);
+          const _ct = deriveCoupleTypeFromExercise(_my, _part, _align);
+          const _pl = buildWorkbookPayload(userName, partnerName, mineEx1, partEx1, _ex2, partnerEx2, _ct);
+          const _data = encodeURIComponent(JSON.stringify({
+            p1: userName, p2: partnerName,
+            ct: _ct?.name || '', ctTagline: _ct?.tagline || '', ctColor: _ct?.color || '#E8673A',
+            scores: _pl.scores, partnerScores: _pl.partnerScores, expGaps: _pl.expGaps,
+          }));
+          window.open(`/workbook-render?data=${_data}`, '_blank', 'noopener');
+        } catch (e) { console.warn('[demo] workbook preview failed', e); }
+      }}
+      title="Open this couple type's workbook in a new tab"
+      style={{ fontSize: '11px', fontWeight: 700, padding: '4px 11px', borderRadius: '7px', cursor: 'pointer', border: '1px solid #9B5DE5', background: 'rgba(155,93,229,.25)', color: '#fff', marginLeft: '6px' }}>
+      Preview workbook ↗
+    </button>
   </div>
 )}
 
