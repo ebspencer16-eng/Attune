@@ -149,6 +149,33 @@ async function postRecompute(accessToken) {
   }
 }
 
+// The stored `attune_order` is itself a record of granted entitlements. Fold it
+// into any resync so a merge can never write back fewer grants than the device
+// already had. Without this, a resync that resolved to `core` (RLS filtering an
+// invitee's view of Partner A's order, or a failed server recompute) would
+// overwrite a correct stored order and strip paid features.
+function entFromStoredOrder(o) {
+  if (!o) return null;
+  return {
+    comp: false,
+    hasGrant: !!(o.orderNum || o.pkgKey || o.pkg),
+    pkg: o.pkgKey || o.pkg || 'core',
+    orderNum: o.orderNum || '',
+    isPhysical: !!o.isPhysical,
+    addonLmft: !!o.addonLmft,
+    addonReflection: !!o.addonReflection,
+    addonBudget: !!o.addonBudget,
+    addonChecklist: !!o.addonChecklist,
+    addonIntimacy: !!o.addonIntimacy,
+    addonWorkbook: o.addonWorkbook || '',
+  };
+}
+
+function loadStoredOrderEnt() {
+  try { return entFromStoredOrder(JSON.parse(localStorage.getItem('attune_order') || 'null')); }
+  catch { return null; }
+}
+
 async function resolveEntitlements(sb, session, profile) {
   let ent = await fetchOrderEntitlements(sb, {
     userId: session?.user?.id,
@@ -11759,8 +11786,11 @@ export default function App() {
           prof = _r.error ? null : _r.data;
         }
         if (cancelled || !prof) return;
-        const ent = await resolveEntitlements(sb, session, prof);
+        const _ent = await resolveEntitlements(sb, session, prof);
         if (cancelled) return;
+        // Grant-only against the stored order so a login can never strip
+        // features this device already had.
+        const ent = mergeEntitlementsGrantOnly(loadStoredOrderEnt(), _ent);
         const _order = {
           orderNum: ent.orderNum, pkgKey: ent.pkg, pkg: ent.pkg, isPhysical: ent.isPhysical,
           addonLmft: ent.addonLmft, addonReflection: ent.addonReflection, addonBudget: ent.addonBudget,
@@ -12021,7 +12051,13 @@ export default function App() {
               if (cancelled) return;
               const ent = await resolveEntitlements(sb, session, prof);
               if (cancelled) return;
-              const merged = mergeEntitlementsGrantOnly(localAcct, ent);
+              // Union with BOTH the local account and the stored order. The
+              // stored order is the grant record; omitting it let a resync
+              // overwrite it with fewer grants.
+              const merged = mergeEntitlementsGrantOnly(
+                mergeEntitlementsGrantOnly(localAcct, loadStoredOrderEnt()),
+                ent,
+              );
               const anyEntitlement = merged.comp || merged.hasGrant ||
                 merged.addonLmft || merged.addonReflection || merged.addonBudget ||
                 merged.addonChecklist || merged.addonIntimacy || ((PKG_CAPS[merged.pkg]?.rank || 0) > 0);
@@ -12902,7 +12938,7 @@ export default function App() {
     hasLMFT:        _basePkg.hasLMFT        || !!(order?.addonLmft),
     hasAnniversary: _basePkg.hasAnniversary || !!(order?.addonReflection),
     hasBudget:      _basePkg.hasBudget      || !!(order?.addonBudget),
-    hasWorkbook:    demoPkg === 'premium'   || !!(order?.addonWorkbook),
+    hasWorkbook:    _effectivePkgKey === 'premium' || !!(order?.addonWorkbook),
     hasIntimacy:    !!(order?.addonIntimacy) || (() => { try { return localStorage.getItem('attune_dev_intimacy') === '1'; } catch { return false; } })() || (() => { try { const q = new URLSearchParams(window.location.search); return !!q.get('demo') && q.get('intimacy') === '1'; } catch { return false; } })(),
   };
 

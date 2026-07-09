@@ -131,6 +131,44 @@ check('local premium+addons vs DB core → keeps grants',
   gates(toOrder(mergeEntitlementsGrantOnly(localAcct, dbSaysCore))),
   { ...F, reflection:true, budget:true, checklist:true, lmft:true, workbook:true });
 
+console.log('\n— A resync must never write back fewer grants than the device already had —');
+
+// The stored attune_order is a grant record. Mirrors entFromStoredOrder().
+const entFromStoredOrder = (o) => ({
+  comp:false, hasGrant:!!(o.orderNum||o.pkgKey), pkg:o.pkgKey||'core', orderNum:o.orderNum||'',
+  isPhysical:!!o.isPhysical, addonLmft:!!o.addonLmft, addonReflection:!!o.addonReflection,
+  addonBudget:!!o.addonBudget, addonChecklist:!!o.addonChecklist, addonIntimacy:!!o.addonIntimacy,
+  addonWorkbook:o.addonWorkbook||'',
+});
+
+// Real customer, non-comp. attune_account carries no add-on fields (this is the
+// real shape observed in production). Stored order holds the grants.
+const localAcctNoAddons = { id:'u1', email:'a@b.com', pkg:'premium' };
+const storedOrder = { pkgKey:'premium', orderNum:'ATT-1', addonReflection:true, addonBudget:true, addonChecklist:true, addonLmft:true, addonIntimacy:true, addonWorkbook:'digital' };
+
+// Invitee case: RLS filters Partner A's order rows, so the client read returns
+// [] (not an error) → union resolves to core. Server recompute then fails.
+const clientSawNothing = computeEntitlements([], {});
+
+check('invitee: empty client read + failed recompute must not strip stored grants',
+  gates(toOrder(mergeEntitlementsGrantOnly(
+    mergeEntitlementsGrantOnly(localAcctNoAddons, entFromStoredOrder(storedOrder)),
+    clientSawNothing,
+  ))),
+  { ...F, reflection:true, budget:true, checklist:true, lmft:true, intimacy:true, workbook:true });
+
+check('WITHOUT the stored-order merge the same case strips everything (regression guard)',
+  gates(toOrder(mergeEntitlementsGrantOnly(localAcctNoAddons, clientSawNothing))),
+  { ...F, workbook:true, lmft:true }); // only package-inherent caps survive; every add-on lost
+
+// A newly purchased add-on still upgrades.
+check('resync still ADDS newly purchased grants',
+  gates(toOrder(mergeEntitlementsGrantOnly(
+    entFromStoredOrder({ pkgKey:'core', orderNum:'O1' }),
+    computeEntitlements([{ order_num:'O2', pkg_key:'core', addon_budget:true, created_at:'2026-07-01' }], {}),
+  ))),
+  { ...F, budget:true });
+
 console.log('\n— PKG_CAPS must mirror pkgConfig —');
 for (const key of Object.keys(pkgConfig)) {
   const c = PKG_CAPS[key], p = pkgConfig[key];
