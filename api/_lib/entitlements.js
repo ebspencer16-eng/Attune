@@ -12,13 +12,16 @@
  * Edge-safe: no Node-only APIs, fetch only.
  */
 
-// Capability flags per package key. MUST stay in sync with pkgConfig in the
-// dashboard component (src/App.jsx). core grants nothing on its own.
+// Capability flags per package key. These MUST mirror pkgConfig in the
+// dashboard component (src/App.jsx). Verified against it: premium grants LMFT
+// only; reflection/budget/checklist come from explicit add-on flags. Claiming
+// a package grants more than it does inflates entitlements; claiming less
+// strips them.
 export const PKG_CAPS = {
   core:        { rank: 0, hasChecklist: false, hasReflection: false, hasBudget: false, hasLmft: false },
   newlywed:    { rank: 1, hasChecklist: true,  hasReflection: false, hasBudget: true,  hasLmft: false },
   anniversary: { rank: 1, hasChecklist: false, hasReflection: true,  hasBudget: false, hasLmft: false },
-  premium:     { rank: 2, hasChecklist: false, hasReflection: true,  hasBudget: true,  hasLmft: true  },
+  premium:     { rank: 2, hasChecklist: false, hasReflection: false, hasBudget: false, hasLmft: true  },
 };
 
 export const ORDER_SELECT = 'order_num,pkg_key,is_physical,addon_lmft,addon_reflection,addon_budget,addon_checklist,addon_intimacy,addon_workbook,created_at';

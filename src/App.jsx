@@ -136,8 +136,17 @@ async function resolveEntitlements(sb, session, profile) {
     partnerAId: (profile?.joined_via_invite && profile?.partner_profile_id) ? profile.partner_profile_id : null,
   }, profile);
   const blob = profile?.entitlements || null;
-  // Comp is authoritative on its own. Don't block rendering on a server call.
-  if (ent.comp) return ent;
+  // Comp is authoritative on its own: render immediately, never block on the
+  // server. Still refresh the stored blob in the background so the DB stays
+  // truthful (an early return here is why comp accounts never wrote one).
+  if (ent.comp) {
+    if (session?.access_token && !blob) {
+      fetch('/api/recompute-entitlements', {
+        method: 'POST', headers: { Authorization: `Bearer ${session.access_token}` },
+      }).catch(() => {});
+    }
+    return ent;
+  }
   if (blob) { try { ent = mergeEntitlementsGrantOnly(ent, blob); } catch {} }
   if (!session?.access_token) return ent;
   const mustAwait = !blob || ent.readFailed;
@@ -11730,7 +11739,7 @@ export default function App() {
         let prof = null;
         {
           const _r = await sb.from('profiles')
-            .select('is_comp, entitlements, pkg, addon_lmft, addon_reflection, addon_budget, addon_checklist, addon_intimacy, addon_workbook, joined_via_invite, partner_profile_id')
+            .select('*')
             .eq('id', account.id)
             .maybeSingle();
           prof = _r.error ? null : _r.data;
@@ -11985,15 +11994,12 @@ export default function App() {
               let prof = null;
               {
                 const _r = await sb.from('profiles')
-                  .select('is_comp, entitlements, pkg, addon_lmft, addon_reflection, addon_budget, addon_checklist, addon_intimacy, addon_workbook, joined_via_invite, partner_profile_id')
+                  .select('*')
                   .eq('id', session.user.id)
                   .maybeSingle();
                 if (_r.error) {
-                  const _r2 = await sb.from('profiles')
-                    .select('pkg, addon_lmft, addon_reflection, addon_budget, addon_checklist, addon_intimacy, addon_workbook, joined_via_invite, partner_profile_id')
-                    .eq('id', session.user.id)
-                    .maybeSingle();
-                  prof = _r2.data;
+                  console.warn('[Attune] profile read failed during entitlement resync:', _r.error.message);
+                  prof = null;
                 } else {
                   prof = _r.data;
                 }
@@ -12871,7 +12877,11 @@ export default function App() {
     premium:     { label: "Attune Premium",            color: "#3B5BDB", hasChecklist: false, hasAnniversary: false, hasBudget: false, hasLMFT: true  },
   };
   // Merge add-on flags from stored order (e.g. LMFT add-on on non-premium packages)
-  const _basePkg = pkgConfig[demoPkg] || pkgConfig.core;
+  // Outside demo mode the reconciled `order` state is authoritative for the
+  // package key. demoPkg reads a localStorage snapshot, which can lag behind
+  // the entitlement resync and silently drop package-inherent features.
+  const _effectivePkgKey = _demoParam ? demoPkg : (order?.pkgKey || order?.pkg || demoPkg);
+  const _basePkg = pkgConfig[_effectivePkgKey] || pkgConfig.core;
   const pkg = {
     ..._basePkg,
     hasChecklist:   _basePkg.hasChecklist   || !!(order?.addonChecklist),
