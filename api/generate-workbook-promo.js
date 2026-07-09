@@ -41,6 +41,33 @@ export default async function handler(req) {
   }
 
   const sUrl = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
+  const sAnon = process.env.SUPABASE_ANON_KEY || process.env.VITE_SUPABASE_ANON_KEY;
+
+  // Require the caller to prove they own accountEmail. Without this, anyone
+  // could POST an arbitrary address and have us email it (from our verified
+  // sending domain) and mint a promo code bound to it.
+  {
+    const authHeader = req.headers.get('authorization') || '';
+    const token = authHeader.replace(/^Bearer\s+/i, '').trim();
+    if (!token) {
+      return new Response(JSON.stringify({ error: 'Authentication required' }), {
+        status: 401, headers: { 'Content-Type': 'application/json' } });
+    }
+    try {
+      const ur = await fetch(`${sUrl}/auth/v1/user`, {
+        headers: { apikey: sAnon || process.env.SUPABASE_SERVICE_KEY || '', Authorization: `Bearer ${token}` },
+      });
+      const u = ur.ok ? await ur.json().catch(() => null) : null;
+      if (!u?.email || u.email.toLowerCase().trim() !== accountEmail) {
+        return new Response(JSON.stringify({ error: 'Not authorized for this account' }), {
+          status: 403, headers: { 'Content-Type': 'application/json' } });
+      }
+    } catch {
+      return new Response(JSON.stringify({ error: 'Authentication failed' }), {
+        status: 401, headers: { 'Content-Type': 'application/json' } });
+    }
+  }
+
   const sKey = process.env.SUPABASE_SERVICE_ROLE
             || process.env.SUPABASE_SERVICE_KEY
             || process.env.SUPABASE_SERVICE_ROLE_KEY;

@@ -57,16 +57,18 @@ export default async function handler(req) {
   const signature = req.headers.get('calendly-webhook-signature');
   const signingKey = process.env.CALENDLY_WEBHOOK_SECRET;
 
-  // In dev (no signing key set) we accept all requests so the endpoint is testable.
-  // In prod the signing key is required.
-  if (signingKey) {
+  // Fail closed. Accepting unsigned requests when the key is unset let anyone
+  // forge bookings (creating lmft_requests rows and triggering emails).
+  if (!signingKey) {
+    console.error('[calendly-webhook] CALENDLY_WEBHOOK_SECRET is not set — refusing to process');
+    return new Response('Webhook not configured', { status: 500 });
+  }
+  {
     const ok = await verifyCalendlySignature(rawBody, signature, signingKey);
     if (!ok) {
       console.warn('[calendly-webhook] invalid signature');
       return new Response('Invalid signature', { status: 401 });
     }
-  } else {
-    console.warn('[calendly-webhook] CALENDLY_WEBHOOK_SECRET not set — accepting unsigned request');
   }
 
   let event;

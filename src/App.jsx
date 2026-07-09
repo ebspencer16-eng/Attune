@@ -7247,8 +7247,10 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
         const bothEx2 = !!(ex2Answers && partnerEx2 && Object.keys(ex2Answers).length && Object.keys(partnerEx2).length);
         if (!bothEx1 || !bothEx2) return;
         try { localStorage.setItem('attune_wb_promo_fired', '1'); } catch {}
+        const { supabase: _sbp } = await import('./supabase.js');
+        const { data: { session: _sp } } = await _sbp.auth.getSession();
         await fetch('/api/generate-workbook-promo', {
-          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          method: 'POST', headers: { 'Content-Type': 'application/json', ...(_sp?.access_token ? { Authorization: `Bearer ${_sp.access_token}` } : {}) },
           body: JSON.stringify({
             accountEmail: _acct.email,
             partnerEmail: _acct.partnerEmail || '',
@@ -10946,8 +10948,10 @@ function PartnerBCompletionScreen({ partnerAName, partnerBName, partnerADone, pa
         try {
           if (!localStorage.getItem('attune_wb_promo_fired') && !(ord?.addonWorkbook || ord?.addon_workbook)) {
             localStorage.setItem('attune_wb_promo_fired', '1');
+            const { supabase: _sbp2 } = await import('./supabase.js');
+            const { data: { session: _sp2 } } = await _sbp2.auth.getSession();
             await fetch('/api/generate-workbook-promo', {
-              method: 'POST', headers: { 'Content-Type': 'application/json' },
+              method: 'POST', headers: { 'Content-Type': 'application/json', ...(_sp2?.access_token ? { Authorization: `Bearer ${_sp2.access_token}` } : {}) },
               body: JSON.stringify({
                 accountEmail: acct.email,
                 partnerEmail: acct.partnerEmail || '',

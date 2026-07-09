@@ -45,7 +45,11 @@ async function verifyStripeSignature(body, signature, secret) {
   const computed = Array.from(new Uint8Array(sig))
     .map(b => b.toString(16).padStart(2, '0')).join('');
 
-  return computed === v1;
+  // Constant-time compare (matches calendly-webhook). A plain === leaks timing.
+  if (computed.length !== v1.length) return false;
+  let mismatch = 0;
+  for (let i = 0; i < computed.length; i++) mismatch |= computed.charCodeAt(i) ^ v1.charCodeAt(i);
+  return mismatch === 0;
 }
 
 export default async function handler(req) {
