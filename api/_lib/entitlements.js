@@ -103,12 +103,21 @@ export function sameEntitlements(a, b) {
 
 // ── SERVER WRITER ─────────────────────────────────────────────────────────────
 
+// Returns { data, error }. Never collapses a failed request into an empty
+// list: a 400 (e.g. selecting a column that doesn't exist) previously looked
+// identical to "no rows", which silently produced wrong entitlements.
 async function restGet(url, serviceKey, path) {
   const res = await fetch(`${url}/rest/v1/${path}`, {
     headers: { apikey: serviceKey, Authorization: `Bearer ${serviceKey}` },
   });
-  if (!res.ok) return [];
-  try { return await res.json(); } catch { return []; }
+  if (!res.ok) {
+    const detail = await res.text().catch(() => '');
+    const error = `${res.status} ${detail}`.trim();
+    console.error('[entitlements] REST read failed:', path.split('?')[0], error);
+    return { data: null, error };
+  }
+  try { return { data: await res.json(), error: null }; }
+  catch (e) { return { data: null, error: `bad json: ${e}` }; }
 }
 
 /**
@@ -125,8 +134,11 @@ export async function writeEntitlements({ supabaseUrl, serviceKey, userId, email
     return { ok: false, error: 'missing supabaseUrl/serviceKey/userId' };
   }
   try {
-    const profileSelect = 'id,email,is_comp,pkg,addon_lmft,addon_reflection,addon_budget,addon_checklist,addon_intimacy,addon_workbook,joined_via_invite,partner_profile_id';
-    const profiles = await restGet(supabaseUrl, serviceKey, `profiles?id=eq.${encodeURIComponent(userId)}&select=${profileSelect}`);
+    // Select * : profiles has drifted from the migrations (no `pkg`, no
+    // `addon_checklist`), and naming a nonexistent column makes PostgREST
+    // return 400 for the whole row. `*` is resilient to that drift.
+    const { data: profiles, error: profErr } = await restGet(supabaseUrl, serviceKey, `profiles?id=eq.${encodeURIComponent(userId)}&select=*`);
+    if (profErr) return { ok: false, error: `profile read failed: ${profErr}` };
     const profile = Array.isArray(profiles) ? profiles[0] : null;
     if (!profile) return { ok: false, error: 'profile not found' };
 
@@ -138,7 +150,8 @@ export async function writeEntitlements({ supabaseUrl, serviceKey, userId, email
         if (!seen.has(k)) { seen.add(k); rows.push(r); }
       }
     };
-    // Profile's own columns as a grant source.
+    // Profile's own columns as a grant source. Missing columns read as
+    // undefined, which computeEntitlements treats as "no grant".
     rows.push({
       order_num: null, pkg_key: profile.pkg || null, is_physical: false,
       addon_lmft: profile.addon_lmft, addon_reflection: profile.addon_reflection,
@@ -148,13 +161,20 @@ export async function writeEntitlements({ supabaseUrl, serviceKey, userId, email
     });
 
     if (!profile.is_comp) {
-      add(await restGet(supabaseUrl, serviceKey, `orders?user_id=eq.${encodeURIComponent(userId)}&select=${ORDER_SELECT}`));
+      const reads = [
+        restGet(supabaseUrl, serviceKey, `orders?user_id=eq.${encodeURIComponent(userId)}&select=${ORDER_SELECT}`),
+      ];
       const em = (email || profile.email || '').toLowerCase();
-      if (em) add(await restGet(supabaseUrl, serviceKey, `orders?buyer_email=eq.${encodeURIComponent(em)}&select=${ORDER_SELECT}`));
-      // Invitee inherits Partner A's orders through the partner link.
+      if (em) reads.push(restGet(supabaseUrl, serviceKey, `orders?buyer_email=eq.${encodeURIComponent(em)}&select=${ORDER_SELECT}`));
       if (profile.joined_via_invite && profile.partner_profile_id) {
-        add(await restGet(supabaseUrl, serviceKey, `orders?user_id=eq.${encodeURIComponent(profile.partner_profile_id)}&select=${ORDER_SELECT}`));
+        reads.push(restGet(supabaseUrl, serviceKey, `orders?user_id=eq.${encodeURIComponent(profile.partner_profile_id)}&select=${ORDER_SELECT}`));
       }
+      const results = await Promise.all(reads);
+      // If ANY orders read failed we cannot know what the account owns.
+      // Writing a blob now would persist a downgrade. Abort instead.
+      const failed = results.find(r => r.error);
+      if (failed) return { ok: false, error: `orders read failed: ${failed.error}` };
+      for (const r of results) add(r.data);
     }
 
     const ent = computeEntitlements(rows, profile);
