@@ -1,0 +1,43 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      # Entitlements are the highest-risk logic in the app: a regression here
+      # silently strips features a customer paid for. This matrix asserts every
+      # package x add-on x device scenario, and fails if PKG_CAPS ever drifts
+      # from the dashboard's pkgConfig.
+      - name: Entitlement matrix
+        run: npm run test:entitlements
+
+      - name: Static checks (admin html, workbook budget)
+        run: |
+          node scripts/check-admin-html.mjs
+          node scripts/check-workbook-budget.mjs
+
+      # Catches JSX/syntax errors that would otherwise break the Vercel deploy.
+      - name: Build
+        run: npx vite build
+
+      - name: Syntax-check edge functions
+        run: |
+          for f in api/*.js api/_lib/*.js; do
+            node --check "$f" || exit 1
+          done
