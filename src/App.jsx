@@ -10480,9 +10480,14 @@ function PartnerLandingScreen({ inviteFrom, inviteCode, onCreateAccount }) {
       let inheritedEntitlements = null;
       if (profileCreated) {
         try {
+          // Send the access token when we have one (auto-confirmed signup).
+          // partner-sync prefers a verified token; it falls back to matching
+          // the invited email for the pending-confirm window.
+          const _linkHeaders = { 'Content-Type': 'application/json' };
+          if (authData?.session?.access_token) _linkHeaders.Authorization = `Bearer ${authData.session.access_token}`;
           const linkRes = await fetch('/api/partner-sync', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: _linkHeaders,
             body: JSON.stringify({ action: 'link', inviteCode, partnerBId: authData.user.id }),
           });
           if (!linkRes.ok) {
@@ -10587,7 +10592,10 @@ function PartnerLandingScreen({ inviteFrom, inviteCode, onCreateAccount }) {
       try {
         const linkRes = await fetch('/api/partner-sync', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: {
+            'Content-Type': 'application/json',
+            ...(si.session?.access_token ? { Authorization: `Bearer ${si.session.access_token}` } : {}),
+          },
           body: JSON.stringify({ action: 'link', inviteCode, partnerBId: si.user.id }),
         });
         if (!linkRes.ok) {

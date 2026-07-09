@@ -35,7 +35,7 @@ import { createClient } from '@supabase/supabase-js';
 export const config = { runtime: 'edge' };
 
 import { reportToSentry } from './_lib/sentry-edge.js';
-import { writeEntitlements } from './_lib/entitlements.js';
+import { writeEntitlements, computeEntitlements, ORDER_SELECT, PKG_CAPS } from './_lib/entitlements.js';
 
 const supabase = () => createClient(
   process.env.SUPABASE_URL,
@@ -108,24 +108,72 @@ async function handlePartnerSync(req) {
       return new Response(JSON.stringify({ ok: false, error: 'This invite has already been used' }), { status: 409, headers: CORS });
     }
 
+    // ── Authorize the link ────────────────────────────────────────────────
+    // partnerBId arrives in the body and this handler writes with the service
+    // role, so without a check ANY caller who knows an invite code could link
+    // an arbitrary profile and inherit the couple's entitlements and answers.
+    //
+    // Two accepted proofs, because an invitee in the pending-confirm window
+    // (signed up, email not yet confirmed) has no session yet:
+    //   1. A valid access token whose user id is partnerBId, or
+    //   2. Partner B's profile email matches the address the invite was sent
+    //      to (profiles.partner_email on Partner A).
+    // Neither → refuse.
+    {
+      const { data: partnerBProfile } = await sb
+        .from('profiles').select('id, email').eq('id', bId).maybeSingle();
+      if (!partnerBProfile) {
+        return new Response(JSON.stringify({ ok: false, error: 'Partner profile not found' }), { status: 404, headers: CORS });
+      }
+
+      let authorized = false;
+      const authHeader = req.headers.get('authorization') || '';
+      const token = authHeader.replace(/^Bearer\s+/i, '').trim();
+      if (token) {
+        try {
+          const { data: { user } } = await sb.auth.getUser(token);
+          if (user?.id === bId) authorized = true;
+        } catch { /* fall through to the email check */ }
+      }
+      if (!authorized) {
+        const invited = (partnerA.partner_email || '').toLowerCase().trim();
+        const actual  = (partnerBProfile.email || '').toLowerCase().trim();
+        if (invited && actual && invited === actual) authorized = true;
+      }
+      if (!authorized) {
+        console.warn('[partner-sync] refused unauthorized link attempt for invite', code);
+        return new Response(JSON.stringify({ ok: false, error: 'Not authorized to join this invite' }), { status: 403, headers: CORS });
+      }
+    }
+
     // Resolve Partner A's full entitlement so Partner B inherits the same
     // experience. Package is copied onto Partner B's profile below; add-ons
     // live on Partner A's order and are returned for the client to apply.
     let inherited = { pkg: partnerA.pkg || 'core', partnerPronouns: partnerA.pronouns || '', addonReflection: false, addonBudget: false, addonChecklist: false, addonLmft: false, addonWorkbook: '', addonIntimacy: false };
     try {
-      const { data: aOrder } = await sb.from('orders')
-        .select('addon_reflection, addon_budget, addon_checklist, addon_lmft, addon_workbook, addon_intimacy')
-        .eq('user_id', partnerA.id)
-        .order('created_at', { ascending: false })
-        .limit(1)
-        .maybeSingle();
-      if (aOrder) {
-        inherited.addonReflection = !!aOrder.addon_reflection;
-        inherited.addonBudget     = !!aOrder.addon_budget;
-        inherited.addonChecklist  = !!aOrder.addon_checklist;
-        inherited.addonLmft       = !!aOrder.addon_lmft;
-        inherited.addonIntimacy   = !!aOrder.addon_intimacy;
-        inherited.addonWorkbook   = aOrder.addon_workbook || '';
+      // Union ALL of Partner A's orders (never newest-wins) and match on
+      // buyer_email too, since guest-checkout orders can have a null user_id.
+      const rows = [];
+      const seen = new Set();
+      const add = (list) => { for (const r of (list || [])) { const k = r.order_num || JSON.stringify(r); if (!seen.has(k)) { seen.add(k); rows.push(r); } } };
+      const { data: byId, error: e1 } = await sb.from('orders').select(ORDER_SELECT).eq('user_id', partnerA.id);
+      if (e1) throw e1;
+      add(byId);
+      const { data: aProf } = await sb.from('profiles').select('email').eq('id', partnerA.id).maybeSingle();
+      if (aProf?.email) {
+        const { data: byEmail, error: e2 } = await sb.from('orders').select(ORDER_SELECT).eq('buyer_email', aProf.email.toLowerCase());
+        if (e2) throw e2;
+        add(byEmail);
+      }
+      if (rows.length) {
+        const ent = computeEntitlements(rows, null);
+        if ((PKG_CAPS[ent.pkg]?.rank ?? 0) >= (PKG_CAPS[inherited.pkg]?.rank ?? 0)) inherited.pkg = ent.pkg;
+        inherited.addonReflection = ent.addonReflection;
+        inherited.addonBudget     = ent.addonBudget;
+        inherited.addonChecklist  = ent.addonChecklist;
+        inherited.addonLmft       = ent.addonLmft;
+        inherited.addonIntimacy   = ent.addonIntimacy;
+        inherited.addonWorkbook   = ent.addonWorkbook || '';
       }
     } catch (e) { console.warn('[partner-sync] addon inherit lookup failed:', e); }
 
@@ -340,21 +388,35 @@ async function handlePartnerSync(req) {
       // they never see the workbook and lose order state across logout/login.
       let inherited = { addonReflection: false, addonBudget: false, addonChecklist: false, addonLmft: false, addonWorkbook: '', addonIntimacy: false, workbookStatus: null };
       try {
-        const { data: aOrder } = await sb
-          .from('orders')
-          .select('addon_reflection, addon_budget, addon_checklist, addon_lmft, addon_workbook, addon_intimacy, workbook_status')
-          .eq('user_id', pid)
-          .order('created_at', { ascending: false })
-          .limit(1)
-          .maybeSingle();
-        if (aOrder) {
-          inherited.addonReflection = !!aOrder.addon_reflection;
-          inherited.addonBudget     = !!aOrder.addon_budget;
-          inherited.addonChecklist  = !!aOrder.addon_checklist;
-          inherited.addonLmft       = !!aOrder.addon_lmft;
-          inherited.addonIntimacy   = !!aOrder.addon_intimacy;
-          inherited.addonWorkbook   = aOrder.addon_workbook || '';
-          inherited.workbookStatus  = aOrder.workbook_status || null;
+        // Union ALL of Partner A's orders, never newest-wins. A newer partial
+        // order (a test purchase, a single add-on) would otherwise strip the
+        // invitee's inherited add-ons on every poll. Also match by buyer_email
+        // because guest-checkout orders can have a null user_id.
+        const { data: aProf } = await sb.from('profiles').select('email').eq('id', pid).maybeSingle();
+        const rows = [];
+        const seen = new Set();
+        const add = (list) => { for (const r of (list || [])) { const k = r.order_num || JSON.stringify(r); if (!seen.has(k)) { seen.add(k); rows.push(r); } } };
+        const sel = ORDER_SELECT + ',workbook_status';
+        const { data: byId, error: e1 } = await sb.from('orders').select(sel).eq('user_id', pid);
+        if (e1) throw e1;
+        add(byId);
+        if (aProf?.email) {
+          const { data: byEmail, error: e2 } = await sb.from('orders').select(sel).eq('buyer_email', aProf.email.toLowerCase());
+          if (e2) throw e2;
+          add(byEmail);
+        }
+        if (rows.length) {
+          const ent = computeEntitlements(rows, null);
+          inherited.addonReflection = ent.addonReflection;
+          inherited.addonBudget     = ent.addonBudget;
+          inherited.addonChecklist  = ent.addonChecklist;
+          inherited.addonLmft       = ent.addonLmft;
+          inherited.addonIntimacy   = ent.addonIntimacy;
+          inherited.addonWorkbook   = ent.addonWorkbook || '';
+          // Newest non-null workbook_status wins for display.
+          const withStatus = rows.filter(r => r.workbook_status)
+            .sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0));
+          inherited.workbookStatus = withStatus[0]?.workbook_status || null;
         }
       } catch (e) { console.warn('[partner-sync] Mode B addon inherit failed:', e); }
 
