@@ -23,8 +23,6 @@ const CORS = { 'Content-Type': 'application/json', 'X-Content-Type-Options': 'no
 const json = (body, status) => new Response(JSON.stringify(body), { status, headers: CORS });
 
 export default async function handler(req) {
-  if (req.method !== 'POST') return json({ ok: false, error: 'POST only' }, 405);
-
   // Env resolution mirrors the rest of api/: SUPABASE_URL is not reliably set,
   // so fall back to VITE_SUPABASE_URL the way the other functions do.
   const supabaseUrl = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
@@ -32,6 +30,27 @@ export default async function handler(req) {
                   || process.env.SUPABASE_SERVICE_ROLE_KEY
                   || process.env.SUPABASE_SERVICE_ROLE;
   const anonKey = process.env.SUPABASE_ANON_KEY || process.env.VITE_SUPABASE_ANON_KEY || serviceKey;
+
+  // GET = diagnostic. Reports which env vars are PRESENT as booleans. Never
+  // returns a value. Temporary: remove once entitlements are confirmed writing.
+  if (req.method === 'GET') {
+    return json({
+      ok: true,
+      diagnostic: true,
+      env: {
+        SUPABASE_URL: !!process.env.SUPABASE_URL,
+        VITE_SUPABASE_URL: !!process.env.VITE_SUPABASE_URL,
+        SUPABASE_SERVICE_KEY: !!process.env.SUPABASE_SERVICE_KEY,
+        SUPABASE_SERVICE_ROLE_KEY: !!process.env.SUPABASE_SERVICE_ROLE_KEY,
+        SUPABASE_SERVICE_ROLE: !!process.env.SUPABASE_SERVICE_ROLE,
+        SUPABASE_ANON_KEY: !!process.env.SUPABASE_ANON_KEY,
+        VITE_SUPABASE_ANON_KEY: !!process.env.VITE_SUPABASE_ANON_KEY,
+      },
+      resolved: { url: !!supabaseUrl, serviceKey: !!serviceKey, anonKey: !!anonKey },
+    }, 200);
+  }
+
+  if (req.method !== 'POST') return json({ ok: false, error: 'POST only' }, 405);
 
   const missing = [];
   if (!supabaseUrl) missing.push('SUPABASE_URL (or VITE_SUPABASE_URL)');
