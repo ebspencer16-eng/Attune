@@ -1845,8 +1845,11 @@ window.adminApiSecret = function(){
 // ADMIN LOGIN GATE — initialized FIRST so it works even if the rest of the
 // script fails (e.g. if an external CDN like Chart.js hasn't loaded)
 // ══════════════════════════════════════════════════════════════════════════════
-const ADMIN_EMAIL_HASH    = '761c28fe9802521c2cb3dac1150d1603263cff76501934488936216bcd09e5e7';
-const ADMIN_PASSWORD_HASH = '2add3de7e0e78e353d5973686114f3e198ae4982eda80a3f4bfb4d515e3f05e5';
+// Credentials are verified server-side by /api/admin-login, which compares
+// against ADMIN_EMAIL_HASH / ADMIN_PASSWORD_HASH env vars and returns the admin
+// API token on success. Nothing about the credentials ships in this page: the
+// hashes used to live here, which meant anyone could download admin.html and
+// brute-force an unsalted SHA-256 offline to obtain the admin token.
 
 async function sha256(str) {
   const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
@@ -2047,43 +2050,29 @@ async function attemptLogin() {
   errEl.textContent = '';
 
   try {
-    if (!window.crypto || !window.crypto.subtle) {
-      throw new Error('Browser crypto unavailable. Ensure you are on HTTPS.');
-    }
-    const [eHash, pHash] = await Promise.all([sha256(email), sha256(pass)]);
+    // The server is the only authority. It returns the admin API token on
+    // success and a generic error otherwise (no email/password enumeration).
+    const tr = await fetch('/api/admin-login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password: pass }),
+    });
+    const td = await tr.json().catch(() => ({}));
 
-    if (eHash === ADMIN_EMAIL_HASH && pHash === ADMIN_PASSWORD_HASH) {
+    if (tr.ok && td && td.token) {
       try { localStorage.setItem('attune_admin_auth', JSON.stringify({ ok: 1, ts: Date.now() })); }
       catch (_) { sessionStorage.setItem('attune_admin_auth', '1'); }
-      // Exchange the verified credentials for the admin API token so data
-      // endpoints work without the manual ?s= URL secret. Non-fatal if it
-      // fails (an existing stored token or URL param still applies).
-      let gotToken = false;
-      try {
-        const tr = await fetch('/api/admin-login', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email, password: pass }),
-        });
-        const td = await tr.json().catch(() => ({}));
-        if (td && td.token) {
-          localStorage.setItem('attune_admin_s', td.token);
-          gotToken = true;
-        }
-      } catch (_) {}
+      localStorage.setItem('attune_admin_s', td.token);
       document.getElementById('admin-login-gate').classList.add('hidden');
-      // Reload so every loader runs with the token in place; without this
-      // the first paint keeps whatever demo data loaded pre-login.
-      if (gotToken) { location.reload(); return; }
+      // Reload so every loader runs with the token in place.
+      location.reload();
+      return;
     } else {
-      const emailMatches = eHash === ADMIN_EMAIL_HASH;
-      if (!emailMatches) {
-        errEl.textContent = 'Wrong email';
-        emailInp.classList.add('err');
-      } else {
-        errEl.textContent = 'Wrong password';
-        passInp.classList.add('err');
-      }
+      errEl.textContent = (td && td.error === 'Admin endpoint not configured')
+        ? 'Admin login is not configured. Set ADMIN_SECRET, ADMIN_EMAIL_HASH and ADMIN_PASSWORD_HASH.'
+        : 'Invalid credentials';
+      emailInp.classList.add('err');
+      passInp.classList.add('err');
       void card.offsetWidth;
       card.classList.add('shake');
       btn.disabled = false;
