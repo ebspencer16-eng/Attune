@@ -129,6 +129,26 @@ async function fetchOrderEntitlements(sb, { userId, email, partnerAId } = {}, pr
 // the client cannot be trusted to know what the account owns. In that case ask
 // the server, which computes with the service role and bypasses RLS, and wait
 // for the answer before rendering. Otherwise refresh the blob in the background.
+// POST the recompute and surface whatever went wrong. Previously both call
+// sites did `.catch(() => {})` / `r.ok ? r.json() : null`, so a 500 from the
+// endpoint disappeared without a trace and the blob silently stayed null.
+async function postRecompute(accessToken) {
+  try {
+    const r = await fetch('/api/recompute-entitlements', {
+      method: 'POST', headers: { Authorization: `Bearer ${accessToken}` },
+    });
+    const body = await r.json().catch(() => null);
+    if (!r.ok || !body?.ok) {
+      console.error('[Attune] recompute-entitlements failed:', r.status, body?.error || '(no body)');
+      return null;
+    }
+    return body;
+  } catch (e) {
+    console.error('[Attune] recompute-entitlements threw:', e);
+    return null;
+  }
+}
+
 async function resolveEntitlements(sb, session, profile) {
   let ent = await fetchOrderEntitlements(sb, {
     userId: session?.user?.id,
@@ -140,11 +160,7 @@ async function resolveEntitlements(sb, session, profile) {
   // server. Still refresh the stored blob in the background so the DB stays
   // truthful (an early return here is why comp accounts never wrote one).
   if (ent.comp) {
-    if (session?.access_token && !blob) {
-      fetch('/api/recompute-entitlements', {
-        method: 'POST', headers: { Authorization: `Bearer ${session.access_token}` },
-      }).catch(() => {});
-    }
+    if (session?.access_token && !blob) postRecompute(session.access_token);
     return ent;
   }
   if (blob) { try { ent = mergeEntitlementsGrantOnly(ent, blob); } catch {} }
@@ -152,9 +168,7 @@ async function resolveEntitlements(sb, session, profile) {
   const mustAwait = !blob || ent.readFailed;
   const drifted = !blob || !sameEntitlements(ent, blob);
   if (!mustAwait && !drifted) return ent;
-  const req = fetch('/api/recompute-entitlements', {
-    method: 'POST', headers: { Authorization: `Bearer ${session.access_token}` },
-  }).then(r => (r.ok ? r.json() : null)).catch(() => null);
+  const req = postRecompute(session.access_token);
   if (!mustAwait) return ent; // background refresh only
   const res = await req;
   if (res?.ok && res.entitlements) {
