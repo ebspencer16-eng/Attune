@@ -14058,7 +14058,12 @@ export default function App() {
                       </div>
                       <button
                         onClick={() => {
-                          const inviteUrl = `${window.location.origin}/app?invite=${encodeURIComponent(account.inviteCode || "")}&from=${encodeURIComponent(userName || "")}&pae=${encodeURIComponent((account.partnerEmail || "").toLowerCase())}`;
+                          // pae = Partner A's own email (used to block the
+                          // invitee from reusing it). iie = the invitee's email,
+                          // prefilled on the landing screen. Passing the
+                          // invitee's address as pae made the guard fire
+                          // against the invitee's own email.
+                          const inviteUrl = `${window.location.origin}/app?invite=${encodeURIComponent(account.inviteCode || "")}&from=${encodeURIComponent(userName || "")}${account.email ? `&pae=${encodeURIComponent(account.email.toLowerCase())}` : ""}${account.partnerEmail ? `&iie=${encodeURIComponent(account.partnerEmail.toLowerCase())}` : ""}`;
                           sendEmailWithRetry({ type: 'partner_invite', fromName: userName || '', toEmail: account.partnerEmail, toName: partnerName || 'Your partner', inviteUrl });
                           setInviteResent(true);
                           setTimeout(() => setInviteResent(false), 4000);
