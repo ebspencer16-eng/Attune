@@ -469,6 +469,38 @@ function isAllowedUrl(u) {
   }
 }
 
+// Fields whose value is a URL: validated by isAllowedUrl, never HTML-escaped
+// (escaping would corrupt the href). Everything else that is a string gets
+// escaped before it reaches a template.
+const NO_ESCAPE_FIELDS = new Set([...URL_FIELDS, 'toEmail', 'type', 'userId']);
+
+// Templates interpolate body fields straight into HTML. Without escaping, a
+// caller could pass fromName='<a href="https://evil.com">Reset password</a>'
+// and have a phishing link delivered from our verified sending domain,
+// bypassing the URL allowlist entirely.
+function escapeHtml(s) {
+  return String(s)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+function sanitizeBody(body) {
+  const out = {};
+  for (const [k, v] of Object.entries(body || {})) {
+    if (typeof v === 'string' && !NO_ESCAPE_FIELDS.has(k)) {
+      out[k] = escapeHtml(v.slice(0, 500)); // cap length; names aren't essays
+    } else {
+      out[k] = v;
+    }
+  }
+  return out;
+}
+
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
 export default async function handler(req) {
   if (req.method !== 'POST') return new Response('Method not allowed', { status: 405 });
 
@@ -489,6 +521,12 @@ export default async function handler(req) {
       return new Response(JSON.stringify({ ok: false, error: `${f} must be on a trusted domain` }), { status: 400, headers: { 'Content-Type': 'application/json' } });
     }
   }
+
+  if (body.toEmail && !EMAIL_RE.test(String(body.toEmail).trim())) {
+    return new Response(JSON.stringify({ ok: false, error: 'Invalid toEmail' }), { status: 400, headers: { 'Content-Type': 'application/json' } });
+  }
+
+  body = sanitizeBody(body);
 
   const { type } = body;
   let email;

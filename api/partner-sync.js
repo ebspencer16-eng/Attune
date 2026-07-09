@@ -137,7 +137,12 @@ async function handlePartnerSync(req) {
       }
       if (!authorized) {
         const invited = (partnerA.partner_email || '').toLowerCase().trim();
-        const actual  = (partnerBProfile.email || '').toLowerCase().trim();
+        // Prefer the auth record's email (authoritative) over the profile row.
+        let actual = (partnerBProfile.email || '').toLowerCase().trim();
+        try {
+          const { data: authB } = await sb.auth.admin.getUserById(bId);
+          if (authB?.user?.email) actual = authB.user.email.toLowerCase().trim();
+        } catch { /* fall back to the profile email */ }
         if (invited && actual && invited === actual) authorized = true;
       }
       if (!authorized) {

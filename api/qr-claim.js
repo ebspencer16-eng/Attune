@@ -115,16 +115,19 @@ export default async function handler(req) {
       });
     }
 
-    // Stamp the claim
+    // Stamp the claim atomically. The check above is a fast path for good
+    // error messages, but two simultaneous requests can both pass it. Filter
+    // the PATCH on qr_claimed_at IS NULL and ask for the updated rows back:
+    // whoever updates zero rows lost the race and gets 409.
     const patchRes = await fetch(
-      `${SUPABASE_URL}/rest/v1/orders?qr_token=eq.${encodeURIComponent(token)}`,
+      `${SUPABASE_URL}/rest/v1/orders?qr_token=eq.${encodeURIComponent(token)}&qr_claimed_at=is.null`,
       {
         method: 'PATCH',
         headers: {
           apikey: SERVICE_KEY,
           Authorization: `Bearer ${SERVICE_KEY}`,
           'Content-Type': 'application/json',
-          Prefer: 'return=minimal',
+          Prefer: 'return=representation',
         },
         body: JSON.stringify({
           qr_claimed_at: new Date().toISOString(),
@@ -132,6 +135,22 @@ export default async function handler(req) {
         }),
       }
     );
+
+    if (patchRes.ok) {
+      const updated = await patchRes.json().catch(() => []);
+      if (!Array.isArray(updated) || updated.length === 0) {
+        // Someone claimed it between our read and our write.
+        const fresh = await fetchOrder(token);
+        if (fresh?.qr_claimed_by === email) {
+          return new Response(JSON.stringify({ ok: true, alreadyClaimed: true }), {
+            status: 200, headers: { 'Content-Type': 'application/json' }
+          });
+        }
+        return new Response(JSON.stringify({ error: 'already-claimed', claimedAt: fresh?.qr_claimed_at || null }), {
+          status: 409, headers: { 'Content-Type': 'application/json' }
+        });
+      }
+    }
 
     if (!patchRes.ok) {
       console.error('[qr-claim] PATCH failed:', await patchRes.text());
