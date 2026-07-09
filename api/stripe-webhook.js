@@ -24,6 +24,15 @@ async function verifyStripeSignature(body, signature, secret) {
   const v1    = parts.find(p => p.startsWith('v1='))?.slice(3);
   if (!t || !v1) return false;
 
+  // Reject replays. Without a tolerance check a captured request stays valid
+  // forever. Stripe signs every delivery (including retries) at send time, so
+  // a 5-minute window is safe.
+  const ageSec = Math.abs(Math.floor(Date.now() / 1000) - Number(t));
+  if (!Number.isFinite(ageSec) || ageSec > 300) {
+    console.error('[webhook] signature timestamp outside tolerance:', ageSec);
+    return false;
+  }
+
   const signedPayload = `${t}.${body}`;
   const key = await crypto.subtle.importKey(
     'raw',
@@ -65,13 +74,23 @@ async function handleWebhook(req) {
   const rawBody  = await req.text();
   const sig      = req.headers.get('stripe-signature');
 
-  // Verify signature if we have the secret
-  if (webhookSecret && sig) {
-    const valid = await verifyStripeSignature(rawBody, sig, webhookSecret);
-    if (!valid) {
-      console.error('Invalid Stripe webhook signature');
-      return new Response('Invalid signature', { status: 400 });
-    }
+  // Fail CLOSED. Previously this was `if (webhookSecret && sig)`, so a missing
+  // env var or a request that simply omitted the signature header skipped
+  // verification entirely — anyone could POST a forged payment_intent.succeeded
+  // and mint a paid order with full entitlements. Never trust an unsigned
+  // webhook.
+  if (!webhookSecret) {
+    console.error('[webhook] STRIPE_WEBHOOK_SECRET is not set — refusing to process');
+    return new Response('Webhook not configured', { status: 500 });
+  }
+  if (!sig) {
+    console.error('[webhook] missing stripe-signature header');
+    return new Response('Missing signature', { status: 400 });
+  }
+  const valid = await verifyStripeSignature(rawBody, sig, webhookSecret);
+  if (!valid) {
+    console.error('[webhook] invalid Stripe signature');
+    return new Response('Invalid signature', { status: 400 });
   }
 
   let event;

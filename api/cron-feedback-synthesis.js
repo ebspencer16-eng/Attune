@@ -37,7 +37,9 @@ function extractText(row) {
 export default async function handler(req) {
   const auth = req.headers.get('authorization');
   const secret = process.env.CRON_SECRET;
-  if (secret && auth !== `Bearer ${secret}`) return new Response('Unauthorized', { status: 401 });
+  // Fail closed (see cron-beta-digest).
+  if (!secret) return new Response('Cron not configured', { status: 500 });
+  if (auth !== `Bearer ${secret}`) return new Response('Unauthorized', { status: 401 });
 
   const SUPABASE_URL = process.env.SUPABASE_URL;
   const SUPABASE_KEY = process.env.SUPABASE_SERVICE_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_ROLE;

@@ -2261,7 +2261,7 @@ function GiftSignupForm({ myName, theirName, theirEmail, pkg, orderId, onCreateA
         // (Issue 4.7) so a transient failure doesn't permanently lose the
         // invite — Partner B never gets the link otherwise.
         if (theirEmail) {
-          const inviteUrl = `${window.location.origin}/app?invite=${inviteCode}&from=${encodeURIComponent(myName)}&pae=${encodeURIComponent(email.trim().toLowerCase())}`;
+          const inviteUrl = `${window.location.origin}/app?invite=${inviteCode}&from=${encodeURIComponent(myName)}&pae=${encodeURIComponent(email.trim().toLowerCase())}${theirEmail ? `&iie=${encodeURIComponent(theirEmail.trim().toLowerCase())}` : ''}`;
           sendEmailWithRetry({ type: 'partner_invite', fromName: myName, toEmail: theirEmail, toName: theirName || 'Your partner', inviteUrl });
         }
         // Welcome email now fires on first dashboard view (Issue 2.6),
@@ -9761,7 +9761,7 @@ function AuthModal({ mode, onClose, onSuccess }) {
       // Uses retry helper so a single transient failure doesn't permanently
       // lose the invite (Issue 4.7).
       if (form.partnerEmail.trim()) {
-        const inviteUrl = `${window.location.origin}/app?invite=${encodeURIComponent(inviteCode)}&from=${encodeURIComponent(form.name.trim())}&pae=${encodeURIComponent(form.email.trim().toLowerCase())}`;
+        const inviteUrl = `${window.location.origin}/app?invite=${encodeURIComponent(inviteCode)}&from=${encodeURIComponent(form.name.trim())}&pae=${encodeURIComponent(form.email.trim().toLowerCase())}${form.partnerEmail?.trim() ? `&iie=${encodeURIComponent(form.partnerEmail.trim().toLowerCase())}` : ''}`;
         sendEmailWithRetry({
           type: 'partner_invite',
           fromName: form.name.trim(),
@@ -9806,7 +9806,7 @@ function AuthModal({ mode, onClose, onSuccess }) {
 
     // Send partner invite email if partner email provided
     if (form.partnerEmail.trim() && account.inviteCode) {
-      const inviteUrl = `${window.location.origin}/app?invite=${encodeURIComponent(account.inviteCode)}&from=${encodeURIComponent(form.name.trim())}&pae=${encodeURIComponent(form.email.trim().toLowerCase())}`;
+      const inviteUrl = `${window.location.origin}/app?invite=${encodeURIComponent(account.inviteCode)}&from=${encodeURIComponent(form.name.trim())}&pae=${encodeURIComponent(form.email.trim().toLowerCase())}${form.partnerEmail?.trim() ? `&iie=${encodeURIComponent(form.partnerEmail.trim().toLowerCase())}` : ''}`;
       sendEmailWithRetry({ type: 'partner_invite', fromName: form.name.trim(), toEmail: form.partnerEmail.trim(), toName: form.partnerName.trim() || 'Your partner', inviteUrl });
     }
 
@@ -10010,7 +10010,7 @@ function AuthModal({ mode, onClose, onSuccess }) {
         } catch {}
       }
       if (form.partnerEmail.trim()) {
-        const inviteUrl = `${window.location.origin}/app?invite=${encodeURIComponent(inviteCode)}&from=${encodeURIComponent(form.name.trim())}&pae=${encodeURIComponent(form.email.trim().toLowerCase())}`;
+        const inviteUrl = `${window.location.origin}/app?invite=${encodeURIComponent(inviteCode)}&from=${encodeURIComponent(form.name.trim())}&pae=${encodeURIComponent(form.email.trim().toLowerCase())}${form.partnerEmail?.trim() ? `&iie=${encodeURIComponent(form.partnerEmail.trim().toLowerCase())}` : ''}`;
         sendEmailWithRetry({
           type: 'partner_invite',
           fromName: form.name.trim(),
@@ -13940,8 +13940,24 @@ export default function App() {
             (async () => {
               try {
                 const { supabase: sb, hasSupabase } = await import('./supabase.js');
-                if (hasSupabase() && account?.id) {
-                  await sb.from('profiles').update({ intimacy_data: record }).eq('id', account.id);
+                if (!hasSupabase() || !account?.id) return;
+                // .select('id') is required: an update blocked by RLS reports
+                // success while touching zero rows. Without this the answers
+                // never reach the DB, the partner never sees them, and results
+                // never unlock. Same failure the exercise writes already guard.
+                const res = await trackedSupabaseWrite(
+                  sb.from('profiles').update({ intimacy_data: record }).eq('id', account.id).select('id')
+                );
+                const zeroRows = !res?.error && (!res?.data || res.data.length === 0);
+                if (res?.error || zeroRows) {
+                  console.warn('[intimacy] direct write blocked, falling back to service role');
+                  const { data: { session } } = await sb.auth.getSession();
+                  const headers = { 'Content-Type': 'application/json' };
+                  if (session?.access_token) headers.Authorization = `Bearer ${session.access_token}`;
+                  const body = { userId: account.id, exercise: 'intimacy', answers: record, completedAt: new Date().toISOString() };
+                  if (!session?.access_token && account?.email) body.email = account.email;
+                  const resp = await fetch('/api/save-exercise', { method: 'POST', headers, body: JSON.stringify(body) });
+                  if (!resp.ok) console.error('[intimacy] persist failed:', resp.status, await resp.text().catch(() => ''));
                 }
               } catch (e) { console.warn('[intimacy] persist failed', e); }
             })();

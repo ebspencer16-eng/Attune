@@ -16,7 +16,13 @@ export const config = { runtime: 'edge' };
 export default async function handler(req) {
   const auth = req.headers.get('authorization');
   const secret = process.env.CRON_SECRET;
-  if (secret && auth !== `Bearer ${secret}`) {
+  // Fail closed. This endpoint sends email to real users; without CRON_SECRET
+  // set, anyone could trigger a check-in email blast by hitting the URL.
+  if (!secret) {
+    console.error('[cron-checkin] CRON_SECRET is not set — refusing to run');
+    return new Response('Cron not configured', { status: 500 });
+  }
+  if (auth !== `Bearer ${secret}`) {
     return new Response('Unauthorized', { status: 401 });
   }
 
