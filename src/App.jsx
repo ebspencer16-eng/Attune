@@ -136,6 +136,8 @@ async function resolveEntitlements(sb, session, profile) {
     partnerAId: (profile?.joined_via_invite && profile?.partner_profile_id) ? profile.partner_profile_id : null,
   }, profile);
   const blob = profile?.entitlements || null;
+  // Comp is authoritative on its own. Don't block rendering on a server call.
+  if (ent.comp) return ent;
   if (blob) { try { ent = mergeEntitlementsGrantOnly(ent, blob); } catch {} }
   if (!session?.access_token) return ent;
   const mustAwait = !blob || ent.readFailed;
@@ -11782,13 +11784,29 @@ export default function App() {
 
         // Cold-start race: getSession can briefly return null before the SDK
         // rehydrates the persisted session from storage. If we have a local
-        // account but no session yet, retry once before treating it as a real
-        // sign-out. Without this, a transient null bounces a logged-in user to
-        // the sign-in page on load.
+        // account but no session yet, retry with backoff before treating it as
+        // a real sign-out. A single short retry wasn't enough on slower
+        // devices/networks, and a transient null bounces a logged-in user to
+        // the sign-in page on every refresh.
         if (!session?.user && localAcct?.id) {
-          await new Promise(r => setTimeout(r, 600));
-          if (cancelled) return;
-          ({ data: { session } } = await sb.auth.getSession());
+          const delays = [250, 500, 1000, 1500];
+          for (const d of delays) {
+            await new Promise(r => setTimeout(r, d));
+            if (cancelled) return;
+            ({ data: { session } } = await sb.auth.getSession());
+            if (cancelled) return;
+            if (session?.user) break;
+          }
+          // Last resort: getUser() hits the network and will surface a valid
+          // session the local SDK hasn't rehydrated yet.
+          if (!session?.user) {
+            try {
+              const { data: { user: _u } } = await sb.auth.getUser();
+              if (cancelled) return;
+              if (_u?.id) { ({ data: { session } } = await sb.auth.getSession()); }
+              if (cancelled) return;
+            } catch {}
+          }
         }
 
         if (session?.user) {
