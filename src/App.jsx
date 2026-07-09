@@ -103,12 +103,53 @@ async function fetchOrderEntitlements(sb, { userId, email, partnerAId } = {}, pr
       created_at: null,
     });
   }
+  let readFailed = false;
   try {
-    if (userId) { const { data } = await sb.from('orders').select(ORDER_SELECT).eq('user_id', userId); add(data); }
-    if (email)  { const { data } = await sb.from('orders').select(ORDER_SELECT).eq('buyer_email', email.toLowerCase()); add(data); }
-    if (partnerAId) { const { data } = await sb.from('orders').select(ORDER_SELECT).eq('user_id', partnerAId); add(data); }
-  } catch (e) { /* non-fatal: entitlements fall back to profile columns / comp */ }
-  return computeEntitlements(rows, profile);
+    if (userId) {
+      const { data, error } = await sb.from('orders').select(ORDER_SELECT).eq('user_id', userId);
+      if (error) { readFailed = true; console.warn('[Attune] orders read (user_id) failed:', error.message); } else add(data);
+    }
+    if (email) {
+      const { data, error } = await sb.from('orders').select(ORDER_SELECT).eq('buyer_email', email.toLowerCase());
+      if (error) { readFailed = true; console.warn('[Attune] orders read (buyer_email) failed:', error.message); } else add(data);
+    }
+    if (partnerAId) {
+      const { data, error } = await sb.from('orders').select(ORDER_SELECT).eq('user_id', partnerAId);
+      if (error) { readFailed = true; console.warn('[Attune] orders read (partner) failed:', error.message); } else add(data);
+    }
+  } catch (e) { readFailed = true; console.warn('[Attune] orders read threw:', e); }
+  // A failed read must never look like "no grants". Supabase returns
+  // { data: null, error } rather than throwing, so swallowing the error here
+  // silently downgraded real accounts to core.
+  return { ...computeEntitlements(rows, profile), readFailed };
+}
+
+// Resolve the account's entitlements, preferring the server-authoritative blob.
+// When there's no blob, or the client's own orders read failed (RLS, network),
+// the client cannot be trusted to know what the account owns. In that case ask
+// the server, which computes with the service role and bypasses RLS, and wait
+// for the answer before rendering. Otherwise refresh the blob in the background.
+async function resolveEntitlements(sb, session, profile) {
+  let ent = await fetchOrderEntitlements(sb, {
+    userId: session?.user?.id,
+    email: session?.user?.email,
+    partnerAId: (profile?.joined_via_invite && profile?.partner_profile_id) ? profile.partner_profile_id : null,
+  }, profile);
+  const blob = profile?.entitlements || null;
+  if (blob) { try { ent = mergeEntitlementsGrantOnly(ent, blob); } catch {} }
+  if (!session?.access_token) return ent;
+  const mustAwait = !blob || ent.readFailed;
+  const drifted = !blob || !sameEntitlements(ent, blob);
+  if (!mustAwait && !drifted) return ent;
+  const req = fetch('/api/recompute-entitlements', {
+    method: 'POST', headers: { Authorization: `Bearer ${session.access_token}` },
+  }).then(r => (r.ok ? r.json() : null)).catch(() => null);
+  if (!mustAwait) return ent; // background refresh only
+  const res = await req;
+  if (res?.ok && res.entitlements) {
+    try { ent = mergeEntitlementsGrantOnly(ent, res.entitlements); } catch {}
+  }
+  return ent;
 }
 
 // -- 8-DIMENSION PERSONALITY QUESTIONS (5 each = 40 total) --
@@ -11693,16 +11734,7 @@ export default function App() {
           prof = _r.error ? null : _r.data;
         }
         if (cancelled || !prof) return;
-        let ent = await fetchOrderEntitlements(sb, {
-          userId: account.id,
-          email: account.email,
-          partnerAId: (prof.joined_via_invite && prof.partner_profile_id) ? prof.partner_profile_id : null,
-        }, prof);
-        if (cancelled) return;
-        if (prof.entitlements) { try { ent = mergeEntitlementsGrantOnly(ent, prof.entitlements); } catch {} }
-        if (session.access_token && (!prof.entitlements || !sameEntitlements(ent, prof.entitlements))) {
-          fetch('/api/recompute-entitlements', { method: 'POST', headers: { Authorization: `Bearer ${session.access_token}` } }).catch(() => {});
-        }
+        const ent = await resolveEntitlements(sb, session, prof);
         if (cancelled) return;
         const _order = {
           orderNum: ent.orderNum, pkgKey: ent.pkg, pkg: ent.pkg, isPhysical: ent.isPhysical,
@@ -11809,23 +11841,8 @@ export default function App() {
             // account owns (or, for an invitee, Partner A's orders) plus the
             // profile columns plus any comp grant. Never "newest order wins":
             // a partial or test order can only add access, never strip it.
-            let ent = await fetchOrderEntitlements(sb, {
-              userId: session.user.id,
-              email: session.user.email,
-              partnerAId: (profile?.joined_via_invite && profile?.partner_profile_id) ? profile.partner_profile_id : null,
-            }, profile);
+            const ent = await resolveEntitlements(sb, session, profile);
             if (cancelled) return;
-
-            // Prefer the server-authoritative blob when present, grant-only
-            // merged with the live union so the display is never less than
-            // either. If the blob is missing or has drifted, fire a recompute
-            // (fire-and-forget) so it's authoritative next time.
-            if (profile?.entitlements) {
-              try { ent = mergeEntitlementsGrantOnly(ent, profile.entitlements); } catch {}
-            }
-            if (session?.access_token && (!profile?.entitlements || !sameEntitlements(ent, profile.entitlements))) {
-              fetch('/api/recompute-entitlements', { method: 'POST', headers: { Authorization: `Bearer ${session.access_token}` } }).catch(() => {});
-            }
 
             const rebuilt = {
               id: session.user.id,
@@ -11964,20 +11981,8 @@ export default function App() {
                 }
               }
               if (cancelled) return;
-              let ent = await fetchOrderEntitlements(sb, {
-                userId: session.user.id,
-                email: session.user.email,
-                partnerAId: (prof?.joined_via_invite && prof?.partner_profile_id) ? prof.partner_profile_id : null,
-              }, prof);
+              const ent = await resolveEntitlements(sb, session, prof);
               if (cancelled) return;
-              // Prefer the server-authoritative blob when present, grant-only
-              // merged with the live union. Refresh it if missing or drifted.
-              if (prof?.entitlements) {
-                try { ent = mergeEntitlementsGrantOnly(ent, prof.entitlements); } catch {}
-              }
-              if (session?.access_token && (!prof?.entitlements || !sameEntitlements(ent, prof.entitlements))) {
-                fetch('/api/recompute-entitlements', { method: 'POST', headers: { Authorization: `Bearer ${session.access_token}` } }).catch(() => {});
-              }
               const merged = mergeEntitlementsGrantOnly(localAcct, ent);
               const anyEntitlement = merged.comp || merged.hasGrant ||
                 merged.addonLmft || merged.addonReflection || merged.addonBudget ||
