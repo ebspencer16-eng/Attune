@@ -11763,7 +11763,7 @@ export default function App() {
           // Session is valid. If localStorage account is missing OR belongs to
           // a different user, rebuild it from the profile.
           if (!localAcct || localAcct.id !== session.user.id) {
-            let { data: profile } = await sb.from('profiles').select('*').eq('id', session.user.id).maybeSingle();
+            let { data: profile, error: profErr } = await sb.from('profiles').select('*').eq('id', session.user.id).maybeSingle();
             if (cancelled) return;
 
             // A valid session with no profile row is an orphaned/cleared
@@ -11773,11 +11773,22 @@ export default function App() {
             // account. That path renders a phantom dashboard disconnected from
             // any real order (the exact bug a cleared tester hit). Sign the
             // orphan session out and route to a clean entry point instead.
+            //
+            // Critical: only treat this as "orphaned" when the query SUCCEEDED
+            // and returned no row. A failed query (network flake on a mobile
+            // cold start, transient RLS/auth hiccup) also yields data === null,
+            // and signing the user out on that is a false kick-out.
             if (!profile) {
               await new Promise(r => setTimeout(r, 800));
               if (cancelled) return;
-              ({ data: profile } = await sb.from('profiles').select('*').eq('id', session.user.id).maybeSingle());
+              ({ data: profile, error: profErr } = await sb.from('profiles').select('*').eq('id', session.user.id).maybeSingle());
               if (cancelled) return;
+            }
+            if (profErr) {
+              // Couldn't read the profile. Leave the session and any existing
+              // account state alone; the next load reconciles.
+              console.warn('[Attune] profile read failed during reconcile:', profErr.message);
+              return;
             }
             if (!profile) {
               try { await sb.auth.signOut(); } catch {}
