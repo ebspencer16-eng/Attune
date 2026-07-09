@@ -617,7 +617,10 @@ export default async function handler(req) {
   const res = await fetch('https://api.resend.com/emails', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
-    body: JSON.stringify({ from: FROM, to: email.to, subject: email.subject, html: email.html }),
+    // Wrap the address in a display name. A bare address makes mail clients
+    // show the local part ("hello") as the sender. Every other sender in api/
+    // uses this form. If FROM_EMAIL is already "Name <addr>", leave it alone.
+    body: JSON.stringify({ from: FROM.includes('<') ? FROM : `Attune <${FROM}>`, to: email.to, subject: email.subject, html: email.html }),
   });
 
   const data = await res.json().catch(() => ({}));
