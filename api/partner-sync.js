@@ -160,7 +160,8 @@ async function handlePartnerSync(req) {
     // Best-effort: never blocks the link.
     try {
       const svcKey = process.env.SUPABASE_SERVICE_ROLE || process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_KEY;
-      const entRes = await writeEntitlements({ supabaseUrl: process.env.SUPABASE_URL, serviceKey: svcKey, userId: bId });
+      const svcUrl = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
+      const entRes = await writeEntitlements({ supabaseUrl: svcUrl, serviceKey: svcKey, userId: bId });
       if (!entRes.ok) console.warn('[partner-sync] entitlements write skipped:', entRes.error);
     } catch (e) { console.warn('[partner-sync] entitlements write failed:', e); }
 
