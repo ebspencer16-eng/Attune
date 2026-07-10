@@ -456,12 +456,30 @@ function checkin1yrEmail({ toName, partnerName, retakeUrl, portalUrl }) {
 // recipient sees a real-looking "Attune partner invite" email leading to a
 // credential-stealing page).
 const URL_FIELDS = ['inviteUrl', 'downloadUrl', 'portalUrl', 'surveyUrl', 'retakeUrl', 'schedulingUrl', 'videoUrl', 'rescheduleUrl', 'cancelUrl'];
-const URL_ALLOWED_HOSTS = ['attune-relationships.com', 'calendly.com'];
+// Hosts permitted in email URL fields. Beyond our own domain and Calendly,
+// LMFT confirmation emails carry a video link (videoUrl) and Calendly redirect
+// links (rescheduleUrl, cancelUrl) that legitimately live on the major
+// video-conferencing providers. Omitting these silently 400'd every booking
+// confirmation. All are HTTPS-only, checked below.
+const URL_ALLOWED_HOSTS = [
+  'attune-relationships.com',
+  'calendly.com',
+  'zoom.us',
+  'zoom.com',
+  'meet.google.com',
+  'teams.microsoft.com',
+  'teams.live.com',
+  'whereby.com',
+  'meet.jit.si',
+  'app.calendly.com',
+];
 function isAllowedUrl(u) {
   if (!u || typeof u !== 'string') return true; // null/empty is fine, template will skip it
   try {
     const parsed = new URL(u);
-    if (parsed.protocol !== 'https:' && parsed.protocol !== 'http:') return false;
+    // HTTPS only. Every host below serves HTTPS; an http link in a customer
+    // email is either a downgrade attack or a misconfiguration.
+    if (parsed.protocol !== 'https:') return false;
     const host = parsed.hostname.toLowerCase();
     return URL_ALLOWED_HOSTS.some(h => host === h || host.endsWith('.' + h));
   } catch {
