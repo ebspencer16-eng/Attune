@@ -695,6 +695,25 @@ export default async function handler(req) {
   const taxCents   = taxResult.taxAmount   || 0;
   const subtotalCents = subtotalDollars * 100;
 
+  // Stripe rejects payment intents under 50 cents (USD) with a cryptic
+  // amount_too_small error at the worst possible moment. A promo can legally
+  // land a total in the 1–49c range (fixed-mode, or a percent discount on a
+  // cheap add-on). Fully-free carts are already short-circuited above; anything
+  // that survives to here and is still under the floor is a misconfigured promo
+  // or an unsupported combination, so fail with a clear message instead.
+  if (totalCents > 0 && totalCents < 50) {
+    console.error('[create-payment-intent] total below Stripe minimum:', totalCents, 'cents');
+    return new Response(JSON.stringify({
+      error: 'This order total is below the minimum we can process. Please review the promo code, or contact support.',
+    }), { status: 400, headers: { 'Content-Type': 'application/json' } });
+  }
+  if (totalCents <= 0) {
+    console.error('[create-payment-intent] non-positive total reached Stripe path:', totalCents);
+    return new Response(JSON.stringify({
+      error: 'This order has no amount to charge. If you used a code that makes it free, please refresh and try again.',
+    }), { status: 400, headers: { 'Content-Type': 'application/json' } });
+  }
+
   // Compact items metadata for the webhook. Each item is serialized as a
   // short object. Stripe caps metadata values at 500 chars per key, so we
   // chunk long payloads across numbered keys (items0, items1, ...).

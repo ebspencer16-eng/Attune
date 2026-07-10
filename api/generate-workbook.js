@@ -2312,8 +2312,13 @@ export default async function handler(req, res) {
   const authHeader  = req.headers.authorization || '';
   const accessToken = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : '';
 
-  // Admin path — bypass user check (used by /api/store-workbook server-side)
-  const isAdminCall = !!(adminKey && reqAdminKey && reqAdminKey === adminKey);
+  // Admin path — bypass user check (used by /api/store-workbook server-side).
+  // Constant-time compare so the key can't be recovered by timing.
+  const timingSafeEqual = (a, b) => {
+    if (typeof a !== 'string' || typeof b !== 'string' || a.length !== b.length) return false;
+    let m = 0; for (let i = 0; i < a.length; i++) m |= a.charCodeAt(i) ^ b.charCodeAt(i); return m === 0;
+  };
+  const isAdminCall = !!(adminKey && reqAdminKey && timingSafeEqual(String(reqAdminKey), adminKey));
 
   if (!isAdminCall) {
     if (!supabaseUrl || !serviceKey) {
