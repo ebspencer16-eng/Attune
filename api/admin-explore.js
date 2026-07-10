@@ -16,6 +16,7 @@
 // Auth + access mirror the other admin endpoints: ?secret=ADMIN_SECRET + service key.
 
 import { createClient } from '@supabase/supabase-js';
+import { checkAdminAuth } from './_lib/admin-auth.js';
 import { calcDimScores, axisScores, typeCodeFromAxes, DIM_KEYS } from './_type-engine.js';
 import { PERSONALITY_QUESTIONS, LIFE_QUESTIONS, RESPONSIBILITY_CATEGORIES } from './_questions.js';
 
@@ -139,9 +140,8 @@ function buildCatalog() {
 
 export default async function handler(req) {
   const url = new URL(req.url);
-  const adminSecret = process.env.ADMIN_SECRET;
-  if (!adminSecret) return json({ error: 'Admin endpoint not configured' }, 503);
-  if ((url.searchParams.get('secret') || '') !== adminSecret) return json({ error: 'Invalid or missing secret' }, 403);
+  const _auth = checkAdminAuth(req);
+  if (!_auth.ok) return json({ error: _auth.error }, _auth.status);
 
   const SUPABASE_URL = process.env.SUPABASE_URL;
   const SUPABASE_KEY = process.env.SUPABASE_SERVICE_KEY;

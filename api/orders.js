@@ -7,6 +7,7 @@
  */
 
 import { createClient } from '@supabase/supabase-js';
+import { checkAdminAuth } from './_lib/admin-auth.js';
 
 export const config = { runtime: 'edge' };
 
@@ -29,20 +30,9 @@ export default async function handler(req) {
   // and can read/write any order. Only admin.html uses it (fulfillment
   // status updates). Without this, anyone could write fake orders, mutate
   // any order by id, or pull all orders for any UUID.
-  const adminSecret = process.env.ADMIN_SECRET;
-  if (!adminSecret) {
-    return new Response(JSON.stringify({ ok: false, error: 'Admin endpoint not configured' }), { status: 503, headers });
-  }
-  // Accept the secret either via Authorization header or as ?secret= query
-  // param so admin.html (which uses fetch with no headers historically) can
-  // be updated to pass it either way.
+  const _auth = checkAdminAuth(req);
+  if (!_auth.ok) return new Response(_auth.body, { status: _auth.status, headers });
   const url = new URL(req.url);
-  const authHeader = req.headers.get('authorization') || '';
-  const headerSecret = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : '';
-  const querySecret = url.searchParams.get('secret') || '';
-  if (headerSecret !== adminSecret && querySecret !== adminSecret) {
-    return new Response(JSON.stringify({ ok: false, error: 'Unauthorized' }), { status: 401, headers });
-  }
 
   if (req.method === 'POST') {
     let body;

@@ -9,6 +9,7 @@
  */
 
 export const config = { runtime: 'edge' };
+import { checkAdminAuth } from './_lib/admin-auth.js';
 
 async function kvGet(key, url, token) {
   const res = await fetch(`${url}/lrange/${key}/0/-1`, {
@@ -32,18 +33,8 @@ async function kvCount(key, url, token) {
 }
 
 export default async function handler(req) {
-  const { searchParams } = new URL(req.url);
-  const secret = searchParams.get('secret');
-  const adminSecret = process.env.ADMIN_SECRET;
-
-  // Fail-closed: if ADMIN_SECRET isn't configured, refuse rather than
-  // leaving the endpoint open (matches admin-csv).
-  if (!adminSecret) {
-    return new Response('Admin endpoint not configured', { status: 503 });
-  }
-  if (secret !== adminSecret) {
-    return new Response('Unauthorized', { status: 401 });
-  }
+  const _auth = checkAdminAuth(req);
+  if (!_auth.ok) return new Response(_auth.error, { status: _auth.status });
 
   const kvUrl = process.env.KV_REST_API_URL;
   const kvToken = process.env.KV_REST_API_TOKEN;

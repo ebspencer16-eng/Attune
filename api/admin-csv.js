@@ -20,6 +20,7 @@
  */
 
 import { createClient } from '@supabase/supabase-js';
+import { checkAdminAuth } from './_lib/admin-auth.js';
 
 export const config = { runtime: 'edge' };
 
@@ -72,10 +73,8 @@ export default async function handler(req) {
   // refuses to serve. Previously this was "if (adminSecret) check, else allow"
   // which exposed every customer's data via service-role queries to anyone
   // who knew the URL whenever the env var was unset.
-  const adminSecret = process.env.ADMIN_SECRET;
-  if (!adminSecret) return errResponse(503, 'Admin endpoint not configured (ADMIN_SECRET env var missing)');
-  const provided = url.searchParams.get('secret') || '';
-  if (provided !== adminSecret) return errResponse(403, 'Invalid or missing secret');
+  const _auth = checkAdminAuth(req);
+  if (!_auth.ok) return errResponse(_auth.status, _auth.error);
 
   const SUPABASE_URL  = process.env.SUPABASE_URL;
   const SUPABASE_KEY  = process.env.SUPABASE_SERVICE_KEY;

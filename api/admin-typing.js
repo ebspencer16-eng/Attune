@@ -8,6 +8,7 @@
 // demographic and run the weight sandbox entirely client-side.
 
 import { createClient } from '@supabase/supabase-js';
+import { checkAdminAuth } from './_lib/admin-auth.js';
 import {
   AXIS_CONFIG, DIM_KEYS, calcDimScores, axisScores, typeCodeFromAxes, lowConfidence,
 } from './_type-engine.js';
@@ -43,9 +44,8 @@ const hasAnswers = (p) => p && p.ex1_answers && Object.keys(p.ex1_answers).lengt
 export default async function handler(req) {
   const url = new URL(req.url);
 
-  const adminSecret = process.env.ADMIN_SECRET;
-  if (!adminSecret) return json({ error: 'Admin endpoint not configured' }, 503);
-  if ((url.searchParams.get('secret') || '') !== adminSecret) return json({ error: 'Invalid or missing secret' }, 403);
+  const _auth = checkAdminAuth(req);
+  if (!_auth.ok) return json({ error: _auth.error }, _auth.status);
 
   const SUPABASE_URL = process.env.SUPABASE_URL;
   const SUPABASE_KEY = process.env.SUPABASE_SERVICE_KEY;

@@ -31,6 +31,7 @@
 export const config = { runtime: 'edge' };
 
 import { createClient } from '@supabase/supabase-js';
+import { checkAdminAuth } from './_lib/admin-auth.js';
 
 function json(obj, status = 200) {
   return new Response(JSON.stringify(obj), {
@@ -43,9 +44,8 @@ export default async function handler(req) {
   if (req.method !== 'GET') return json({ error: 'Method not allowed' }, 405);
 
   const url = new URL(req.url);
-  const adminSecret = process.env.ADMIN_SECRET;
-  if (!adminSecret) return json({ error: 'Admin endpoint not configured' }, 503);
-  if ((url.searchParams.get('secret') || '') !== adminSecret) return json({ error: 'Invalid or missing secret' }, 403);
+  const _auth = checkAdminAuth(req);
+  if (!_auth.ok) return json({ error: _auth.error }, _auth.status);
 
   const SUPABASE_URL = process.env.SUPABASE_URL;
   const SUPABASE_KEY = process.env.SUPABASE_SERVICE_KEY

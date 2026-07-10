@@ -1067,6 +1067,13 @@ window.adminApiSecret = function(){
     return new URLSearchParams(location.search).get('s') || localStorage.getItem('attune_admin_s') || '';
   } catch(e) { return new URLSearchParams(location.search).get('s') || ''; }
 };
+// Authorization header for admin API calls. Prefer this over ?secret= so the
+// token no longer lands in URLs, Vercel access logs, browser history, or
+// referrer headers. Merge into any fetch's headers option.
+window.adminAuthHeaders = function(extra){
+  const s = window.adminApiSecret();
+  return Object.assign({}, extra || {}, s ? { Authorization: 'Bearer ' + s } : {});
+};
 </script>
 <script>
 (function(){
@@ -1259,7 +1266,7 @@ window.adminApiSecret = function(){
     if (loaded) return;
     try {
       const s = adminSecret();
-      const res = await fetch('/api/admin-explore' + (s ? '?secret=' + encodeURIComponent(s) : ''));
+      const res = await fetch('/api/admin-explore', { headers: window.adminAuthHeaders() });
       const data = await res.json();
       if (data.error) throw new Error(data.error);
       CUBE = data; FIELDS = {}; data.fields.forEach(f => FIELDS[f.key] = f); loaded = true;
@@ -1865,7 +1872,7 @@ let __adminDataPromise = null;
 function fetchAdminData(force) {
   if (__adminDataPromise && !force) return __adminDataPromise;
   const secret = window.adminApiSecret();
-  __adminDataPromise = fetch('/api/admin-data?secret=' + encodeURIComponent(secret))
+  __adminDataPromise = fetch('/api/admin-data', { headers: window.adminAuthHeaders() })
     .then(r => r.json())
     .then(d => (d && d.ok) ? d : null)
     .catch(() => null);
@@ -1873,8 +1880,8 @@ function fetchAdminData(force) {
 }
 async function adminAction(payload) {
   const secret = window.adminApiSecret();
-  const r = await fetch('/api/admin-actions?secret=' + encodeURIComponent(secret), {
-    method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload),
+  const r = await fetch('/api/admin-actions', {
+    method: 'POST', headers: window.adminAuthHeaders({ 'Content-Type': 'application/json' }), body: JSON.stringify(payload),
   });
   return r.json().catch(() => ({ error: 'Bad response' }));
 }
@@ -3772,10 +3779,9 @@ async function markStatus(orderId, newStatus) {
   // Persist to Supabase via orders API
   const statusMap = { pending: 'pending', packed: 'packed', shipped: 'shipped' };
   try {
-    const adminSecret = window.adminApiSecret();
-    await fetch('/api/orders' + (adminSecret ? `?secret=${encodeURIComponent(adminSecret)}` : ''), {
+    await fetch('/api/orders', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: window.adminAuthHeaders({ 'Content-Type': 'application/json' }),
       body: JSON.stringify({
         action: 'update',
         orderId: order.dbId || order.id,
@@ -4033,7 +4039,7 @@ async function loadTypesData(force) {
   const secret = window.adminApiSecret();
   const stamp = document.getElementById('types-last-updated');
   try {
-    const res = await fetch('/api/admin-typing' + (secret ? `?secret=${secret}` : ''));
+    const res = await fetch('/api/admin-typing', { headers: window.adminAuthHeaders() });
     TYPES_DATA = await res.json();
     if (TYPES_DATA.error) throw new Error(TYPES_DATA.error);
   } catch (e) {
@@ -4318,12 +4324,11 @@ let _fbCharts = {};
 
 async function loadFeedbackData(force) {
   // Try to load from /api/get-feedback
-  const secret = window.adminApiSecret();
-  const url = '/api/get-feedback' + (secret ? `?secret=${secret}` : '');
+  const url = '/api/get-feedback';
   
   let data;
   try {
-    const res = await fetch(url);
+    const res = await fetch(url, { headers: window.adminAuthHeaders() });
     data = await res.json();
   } catch(e) {
     showFeedbackError('Could not reach /api/get-feedback. Make sure Vercel KV env vars are set.');
