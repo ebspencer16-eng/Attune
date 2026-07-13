@@ -2041,10 +2041,11 @@ function NavButtons({ onBack, onNext, backDisabled, nextDisabled, nextLabel = "N
 // Bar showing where each partner scored on a 1–5 dimension scale.
 function DimTrackViz({ myScore = 3, theirScore = 3, color = "#9B5DE5", userName = "You", partnerName = "Partner" }) {
   const pct = v => ((v - 1) / 4) * 100;
-  // When scores are within 0.4 (10% on the bar), dots collide visually.
-  // Vertical offset keeps them both readable without changing horizontal position.
+  // Dots (14px) only overlap when they sit within ~4% of each other on the
+  // track. Wider gaps stay on the line. Vertical offset keeps overlapping dots
+  // readable without changing horizontal position.
   const myPctV = pct(myScore), theirPctV = pct(theirScore);
-  const close = Math.abs(myPctV - theirPctV) < 10;
+  const close = Math.abs(myPctV - theirPctV) < 4;
   // Identify which marker is on the left vs right for outward-anchoring labels.
   const myIsLeft = myPctV <= theirPctV;
   return (
@@ -3929,8 +3930,8 @@ function PersonalityResults({ myAnswers, partnerAnswers, userName, partnerName, 
               // Score is 1–5; normalize to 10–90% for visual range
               const myPct = Math.round(10 + (myScore - 1) * 20);
               const partPct = Math.round(10 + (partScore - 1) * 20);
-              // 10px dots overlap when within ~5% horizontally. Vertical offset keeps both visible.
-              const close = Math.abs(myPct - partPct) < 6;
+              // 10px dots only overlap when within ~3% horizontally. Wider gaps stay on the line.
+              const close = Math.abs(myPct - partPct) < 3;
               const myIsLeft = myPct <= partPct;
               const myDy = close ? (myIsLeft ? -4 : 4) : 0;
               const partDy = close ? (myIsLeft ? 4 : -4) : 0;
@@ -4879,6 +4880,18 @@ const ANNIVERSARY_QUESTIONS = [
 // reword). Stored on each completion as profiles.ex3_version, so responses can
 // be segmented later by which version of the questions they answered.
 const ANNIVERSARY_VERSION = 1;
+
+// ── ADMIRED QUALITY: adjective (as answered) → noun (as displayed) ───────────
+// The exercise asks for an adjective. Results read better as a quality:
+// "Ellie is admired for steadiness", not "for steady". The question itself is
+// unchanged; this only affects how the answer is referenced.
+const ADMIRED_NOUN = {
+  Patient: "Patience", Funny: "Humor", Supportive: "Support", Ambitious: "Ambition",
+  Kind: "Kindness", Curious: "Curiosity", Steady: "Steadiness", Adventurous: "Adventurousness",
+  Honest: "Honesty", Thoughtful: "Thoughtfulness",
+};
+const admiredNoun = v => (v ? (ADMIRED_NOUN[v] || v) : v);
+const admiredNounLower = v => { const n = admiredNoun(v); return n ? n.toLowerCase() : n; };
 
 
 function AnniversaryExercise({ userName, partnerName, onComplete, onBack, partnerPronouns = "" }) {
@@ -6331,18 +6344,18 @@ function deriveAnniversaryInsights(mine, theirs, userName, partnerName, coupleTy
       insights.push({
         type: "strength",
         title: `You both admire the same thing in each other`,
-        body: `Both of you independently named "${mine.a8}" as the quality you most admire in your partner right now. When two people independently land on the same word to describe what they value in the other, it usually means that quality is genuinely visible in daily life, not only in words.`,
+        body: `Both of you independently named "${admiredNoun(mine.a8)}" as the quality you most admire in your partner right now. When two people independently land on the same word to describe what they value in the other, it usually means that quality is genuinely visible in daily life, not only in words.`,
         priority: "Say it out loud",
-        action: `Tell each other directly. "The thing I most admire about you right now is ${mine.a8.toLowerCase()}." Hearing it said plainly lands differently than assuming the other person knows.`,
+        action: `Tell each other directly. "The thing I most admire about you right now is your ${admiredNounLower(mine.a8)}." Hearing it said plainly lands differently than assuming the other person knows.`,
         coupleTypeNote: coupleType ? `${ctNote}shared admiration for the same quality is a meaningful signal of mutual recognition in your dynamic.` : "",
       });
     } else {
       insights.push({
         type: "strength",
         title: `You admire different things in each other, both real`,
-        body: `${userName} most admires ${partnerName}'s ${theirs.a8.toLowerCase()}. ${partnerName} most admires ${userName}'s ${mine.a8.toLowerCase()}. Different qualities, both freely given. This suggests each of you is genuinely being seen for something specific rather than getting generic praise.`,
+        body: `${userName} most admires ${partnerName}'s ${admiredNounLower(theirs.a8)}. ${partnerName} most admires ${userName}'s ${admiredNounLower(mine.a8)}. Different qualities, both freely given. This suggests each of you is genuinely being seen for something specific rather than getting generic praise.`,
         priority: "Make it direct",
-        action: `Say it to each other: "${userName}, I most admire your ${mine.a8.toLowerCase()} right now." It takes about eight seconds and lands better than you'd think.`,
+        action: `Say it to each other: "${userName}, I most admire your ${admiredNounLower(mine.a8)} right now." It takes about eight seconds and lands better than you'd think.`,
         coupleTypeNote: coupleType ? `${ctNote}the ability to name specific admiration rather than general appreciation is a sign of real attunement.` : "",
       });
     }
@@ -8063,7 +8076,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
                   {[[userName, theirAdmire], [partnerName, myAdmire]].map(([name, admires]) => (
                     <div key={name} style={{ background: "rgba(255,255,255,0.07)", borderRadius: 10, padding: "0.75rem 0.9rem", border: "1px solid rgba(255,255,255,0.08)" }}>
                       <div style={{ fontSize: "0.52rem", letterSpacing: "0.16em", textTransform: "uppercase", color: "rgba(255,255,255,0.4)", fontFamily: BFONT, marginBottom: "0.3rem" }}>{name} is admired for</div>
-                      <div style={{ fontSize: "0.9rem", fontWeight: 700, color: "white", fontFamily: HFONT }}>{admires}</div>
+                      <div style={{ fontSize: "0.9rem", fontWeight: 700, color: "white", fontFamily: HFONT }}>{admiredNoun(admires)}</div>
                     </div>
                   ))}
                 </div>
@@ -8226,7 +8239,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
                     {[[userName, theirs.a8, "#E8673A"], [partnerName, mine.a8, "#1B5FE8"]].map(([name, admires, col], i) => (
                       <div key={name} style={{ padding: "1rem 1.1rem", borderRight: i === 0 ? `1px solid ${C.stone}40` : "none" }}>
                         <div style={{ fontSize: "0.55rem", letterSpacing: "0.14em", textTransform: "uppercase", color: C.muted, fontFamily: BFONT, marginBottom: "0.35rem" }}>{name} is admired for</div>
-                        <div style={{ fontSize: "1.1rem", fontWeight: 700, color: col, fontFamily: HFONT }}>{admires}</div>
+                        <div style={{ fontSize: "1.1rem", fontWeight: 700, color: col, fontFamily: HFONT }}>{admiredNoun(admires)}</div>
                       </div>
                     ))}
                   </div>
@@ -8930,7 +8943,7 @@ function WrappedCard({ children, bg, onDownload, cardIndex, cardRef, inline, por
   return (
     <div style={{ position: "relative", userSelect: "none", width: inline ? "100%" : isMobile ? "min(390px, calc(100vw - 1rem))" : CARD_W }}>
       <div ref={cardRef}
-        style={{ width: inline ? "100%" : isMobile ? "min(390px, calc(100vw - 1rem))" : CARD_W, height: inline ? "min(72vw, 560px)" : isMobile ? "min(660px, calc(100vh - 130px))" : CARD_H, background: bg || "#2d2250", borderRadius: 20, overflow: "hidden", position: "relative", flexShrink: 0, display: "flex", flexDirection: "column" }}>
+        style={{ width: inline ? "100%" : isMobile ? "min(390px, calc(100vw - 1rem))" : CARD_W, height: inline ? "min(72vw, 560px)" : isMobile ? "min(660px, calc(100vh - 130px))" : `min(${CARD_H}px, calc(100vh - 150px))`, background: bg || "#2d2250", borderRadius: 20, overflow: "hidden", position: "relative", flexShrink: 0, display: "flex", flexDirection: "column" }}>
         {/* Attune watermark */}
         <div style={{ position: "absolute", bottom: 16, left: 20, display: "flex", alignItems: "center", gap: 6, opacity: 0.45 }}>
           <svg width="22" height="16" viewBox="0 0 103 76" fill="none"><defs><linearGradient id={"wg"+cardIndex} x1="0" y1="0" x2="103" y2="76" gradientUnits="userSpaceOnUse"><stop offset="0%" stopColor="#E8673A"/><stop offset="100%" stopColor="#1B5FE8"/></linearGradient></defs><path d="M14,4 L44,4 A9,9 0 0,1 53,13 L53,42 A9,9 0 0,1 44,51 L20,51 L6,61 L11,51 A6,6 0 0,1 5,45 L5,13 A9,9 0 0,1 14,4 Z" fill={"url(#wg"+cardIndex+")"}/><path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill="white" opacity="0.9" transform="translate(13.16,11.3) scale(0.72)"/><path d="M89,14 L59,14 A9,9 0 0,0 50,23 L50,52 A9,9 0 0,0 59,61 L83,61 L97,71 L92,61 A6,6 0 0,0 98,55 L98,23 A9,9 0 0,0 89,14 Z" fill="white" stroke={"url(#wg"+cardIndex+")"} strokeWidth="2.2" strokeLinejoin="round"/><path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill={"url(#wg"+cardIndex+")"} transform="translate(58.16,21.3) scale(0.72)"/></svg>
@@ -9075,6 +9088,46 @@ function ResultsHighlights({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3
     @keyframes numCount { from { opacity:0; transform:scale(0.7); } to { opacity:1; transform:scale(1); } }
   `;
 
+  // ── Shared dimension slider (aligned + diverge cards) ─────────────────────
+  // Dots carry each partner's first initial. The name key underneath only
+  // appears when both first initials match (the letters resolve it otherwise),
+  // and it is ordered to match the chart: whoever sits further left is listed
+  // first. Dots only shift vertically when they actually overlap.
+  const sameInitial = (userName?.[0] || "").toUpperCase() === (partnerName?.[0] || "").toUpperCase();
+  const DimSlider = ({ dim, meta }) => {
+    const myPct = Math.round(((myS[dim] || 3) / 5) * 100);
+    const theirPct = Math.round(((partS[dim] || 3) / 5) * 100);
+    const overlap = Math.abs(myPct - theirPct) < 6;
+    const myIsLeft = myPct <= theirPct;
+    const myDy = overlap ? (myIsLeft ? -10 : 10) : 0;
+    const theirDy = overlap ? (myIsLeft ? 10 : -10) : 0;
+    const legend = myIsLeft
+      ? [{ name: userName, color: "#E8673A" }, { name: partnerName, color: "#1B5FE8" }]
+      : [{ name: partnerName, color: "#1B5FE8" }, { name: userName, color: "#E8673A" }];
+    return (
+      <div style={{ marginBottom: "1.5rem", animation: "fadeUp 0.4s 0.24s both" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "0.5rem" }}>
+          <span style={{ fontSize: "0.6rem", color: "rgba(255,255,255,0.45)", fontFamily: BFONT }}>{meta?.ends?.[0]}</span>
+          <span style={{ fontSize: "0.6rem", color: "rgba(255,255,255,0.45)", fontFamily: BFONT }}>{meta?.ends?.[1]}</span>
+        </div>
+        <div style={{ height: 6, background: "rgba(255,255,255,0.12)", borderRadius: 3, position: "relative", overflow: "visible" }}>
+          <div title={userName} style={{ position: "absolute", top: "50%", left: myPct + "%", transform: `translate(-50%, calc(-50% + ${myDy}px))`, width: 22, height: 22, borderRadius: "50%", background: "#E8673A", border: "2.5px solid white", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "0.5rem", color: "white", fontWeight: 700, fontFamily: BFONT, zIndex: 2 }}>{userName[0]}</div>
+          <div title={partnerName} style={{ position: "absolute", top: "50%", left: theirPct + "%", transform: `translate(-50%, calc(-50% + ${theirDy}px))`, width: 22, height: 22, borderRadius: "50%", background: "#1B5FE8", border: "2.5px solid white", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "0.5rem", color: "white", fontWeight: 700, fontFamily: BFONT, zIndex: 2 }}>{partnerName[0]}</div>
+        </div>
+        {sameInitial && (
+          <div style={{ display: "flex", justifyContent: "center", gap: "1rem", marginTop: "1rem" }}>
+            {legend.map(k => (
+              <div key={k.name} style={{ display: "flex", alignItems: "center", gap: "0.35rem" }}>
+                <div style={{ width: 8, height: 8, borderRadius: "50%", background: k.color, flexShrink: 0 }} />
+                <span style={{ fontSize: "0.62rem", color: "rgba(255,255,255,0.55)", fontFamily: BFONT, maxWidth: 110, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{k.name}</span>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    );
+  };
+
   const cards = [
     // ── 1. OPENER ──────────────────────────────────────────────────────────────
     <WrappedCard key={0} bg="linear-gradient(145deg, #0e0b1e 0%, #1a1040 50%, #0e0b1e 100%)" onDownload={handleDl} cardIndex={0} cardRef={cardRef} inline={inline} isMobile={isMobile}>
@@ -9149,12 +9202,10 @@ function ResultsHighlights({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3
             <span style={{ fontSize: "0.55rem", letterSpacing: "0.22em", textTransform: "uppercase", color: "#10b981", fontFamily: BFONT, fontWeight: 700 }}>Naturally in tune</span>
           </div>
           <div style={{ fontSize: "0.78rem", color: "rgba(255,255,255,0.42)", fontFamily: BFONT, fontWeight: 300, marginBottom: "0.5rem", animation: "fadeUp 0.4s 0.12s both" }}>Where you don't have to work for it</div>
-          <div style={{ fontFamily: HFONT, fontSize: "clamp(2.4rem,6vw,3.2rem)", fontWeight: 700, color: "#10b981", lineHeight: 0.95, letterSpacing: "-0.02em", marginBottom: "1.5rem", animation: "fadeUp 0.5s 0.18s cubic-bezier(0.22,1,0.36,1) both" }}>
+          <div style={{ fontFamily: HFONT, fontSize: "clamp(2.4rem,6vw,3.2rem)", fontWeight: 700, color: "#10b981", lineHeight: 0.95, letterSpacing: "-0.02em", marginBottom: "1.25rem", animation: "fadeUp 0.5s 0.18s cubic-bezier(0.22,1,0.36,1) both" }}>
             {strengthMeta?.label || "Emotional Expression"}
           </div>
-          <p style={{ fontSize: "0.88rem", color: "rgba(255,255,255,0.82)", fontFamily: BFONT, fontWeight: 300, lineHeight: 1.75, margin: "0 0 1.5rem", animation: "fadeUp 0.4s 0.26s both" }}>
-            {topStrength?.strengthText || "You share a similar orientation here. It shows up as natural ease between you."}
-          </p>
+          <DimSlider dim={topStrength?.dim} meta={strengthMeta} />
           {/* Reframed: for two like minds */}
           <div style={{ background: "rgba(16,185,129,0.12)", border: "1px solid rgba(16,185,129,0.22)", borderRadius: 12, padding: "0.85rem 1.1rem", animation: "fadeUp 0.4s 0.34s both" }}>
             <div style={{ fontSize: "0.48rem", letterSpacing: "0.18em", textTransform: "uppercase", color: "#10b981", fontFamily: BFONT, fontWeight: 700, marginBottom: "0.35rem" }}>For two who think alike</div>
@@ -9180,43 +9231,7 @@ function ResultsHighlights({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3
           <div style={{ fontFamily: HFONT, fontSize: "clamp(2.4rem,6vw,3.2rem)", fontWeight: 700, color: "#ff8c5a", lineHeight: 0.95, letterSpacing: "-0.02em", marginBottom: "1rem", animation: "fadeUp 0.5s 0.18s cubic-bezier(0.22,1,0.36,1) both" }}>
             {gapMeta?.label || "Conflict Style"}
           </div>
-          <div style={{ marginBottom: "1.5rem", animation: "fadeUp 0.4s 0.24s both" }}>
-            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "0.5rem" }}>
-              <span style={{ fontSize: "0.6rem", color: "rgba(255,255,255,0.45)", fontFamily: BFONT }}>{gapMeta?.ends?.[0]}</span>
-              <span style={{ fontSize: "0.6rem", color: "rgba(255,255,255,0.45)", fontFamily: BFONT }}>{gapMeta?.ends?.[1]}</span>
-            </div>
-            <div style={{ height: 6, background: "rgba(255,255,255,0.12)", borderRadius: 3, position: "relative", overflow: "visible" }}>
-              {(() => {
-                const myPct = Math.round(((myS[topGap?.dim] || 3) / 5) * 100);
-                const theirPct = Math.round(((partS[topGap?.dim] || 3) / 5) * 100);
-                // Vertical offset when dots are close enough to collide.
-                // Dots are 22px wide, so within ~10% horizontally they overlap.
-                const close = Math.abs(myPct - theirPct) < 10;
-                const myIsLeft = myPct <= theirPct;
-                const myDy = close ? (myIsLeft ? -10 : 10) : 0;
-                const theirDy = close ? (myIsLeft ? 10 : -10) : 0;
-                return (<>
-                  <div title={userName} style={{ position: "absolute", top: "50%", left: myPct + "%", transform: `translate(-50%, calc(-50% + ${myDy}px))`, width: 22, height: 22, borderRadius: "50%", background: "#E8673A", border: "2.5px solid white", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "0.5rem", color: "white", fontWeight: 700, fontFamily: BFONT, zIndex: 2 }}>{userName[0]}</div>
-                  <div title={partnerName} style={{ position: "absolute", top: "50%", left: theirPct + "%", transform: `translate(-50%, calc(-50% + ${theirDy}px))`, width: 22, height: 22, borderRadius: "50%", background: "#1B5FE8", border: "2.5px solid white", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "0.5rem", color: "white", fontWeight: 700, fontFamily: BFONT, zIndex: 2 }}>{partnerName[0]}</div>
-                </>);
-              })()}
-            </div>
-            {/* Legend — full names with their dot color. Solves same-initial ambiguity (e.g., Maya & Mark)
-                and tells the reader which color belongs to whom without relying on hover tooltips. */}
-            <div style={{ display: "flex", justifyContent: "center", gap: "1rem", marginTop: "1rem" }}>
-              <div style={{ display: "flex", alignItems: "center", gap: "0.35rem" }}>
-                <div style={{ width: 8, height: 8, borderRadius: "50%", background: "#E8673A", flexShrink: 0 }} />
-                <span style={{ fontSize: "0.62rem", color: "rgba(255,255,255,0.55)", fontFamily: BFONT, maxWidth: 110, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{userName}</span>
-              </div>
-              <div style={{ display: "flex", alignItems: "center", gap: "0.35rem" }}>
-                <div style={{ width: 8, height: 8, borderRadius: "50%", background: "#1B5FE8", flexShrink: 0 }} />
-                <span style={{ fontSize: "0.62rem", color: "rgba(255,255,255,0.55)", fontFamily: BFONT, maxWidth: 110, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{partnerName}</span>
-              </div>
-            </div>
-          </div>
-          <p style={{ fontSize: "0.86rem", color: "rgba(255,230,210,0.88)", fontFamily: BFONT, fontWeight: 300, lineHeight: 1.75, margin: "0 0 1.25rem", animation: "fadeUp 0.4s 0.3s both" }}>
-            {topGap?.insightText || "This shows up in recurring moments. One of you naturally leans one way, the other another."}
-          </p>
+          <DimSlider dim={topGap?.dim} meta={gapMeta} />
           <div style={{ background: "rgba(232,103,58,0.15)", border: "1px solid rgba(232,103,58,0.25)", borderRadius: 12, padding: "0.85rem 1.1rem", animation: "fadeUp 0.4s 0.38s both" }}>
             <div style={{ fontSize: "0.48rem", letterSpacing: "0.18em", textTransform: "uppercase", color: "#ff8c5a", fontFamily: BFONT, fontWeight: 700, marginBottom: "0.35rem" }}>One thing to try</div>
             <p style={{ fontSize: "0.78rem", color: "rgba(255,210,180,0.92)", fontFamily: BFONT, fontWeight: 400, lineHeight: 1.6, margin: 0 }}>
@@ -9270,15 +9285,13 @@ function ResultsHighlights({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3
             Relationship Reflection
           </div>
           {/* Overall feel */}
-          <div style={{ fontFamily: HFONT, fontSize: "clamp(1.4rem,5vw,2rem)", fontWeight: 700, color: "white", lineHeight: 1.05, letterSpacing: "-0.02em", marginBottom: "0.4rem", animation: "fadeUp 0.5s 0.12s cubic-bezier(0.22,1,0.36,1) both" }}>
+          <div style={{ fontFamily: HFONT, fontSize: "clamp(1.4rem,5vw,2rem)", fontWeight: 700, color: "white", lineHeight: 1.05, letterSpacing: "-0.02em", marginBottom: "1.35rem", animation: "fadeUp 0.5s 0.12s cubic-bezier(0.22,1,0.36,1) both" }}>
             {reflOverallAligned
               ? `You're both feeling ${reflOverallLabel.toLowerCase()}.`
               : `Different reads on the same relationship.`}
           </div>
-          <p style={{ fontSize: "0.75rem", color: "rgba(255,255,255,0.5)", fontFamily: BFONT, fontWeight: 300, marginBottom: "1.25rem", animation: "fadeUp 0.4s 0.2s both" }}>
-            {reflOverallAligned ? "Shared perception of where you are right now." : "Both perspectives are worth understanding."}
-          </p>
-          {/* Scale bars */}
+          {/* Scale bars — scale ends sit in the left and right margins, once per
+              category, centered between the two data rows. */}
           {[
             { id: "a_sat_conn", label: "Day-to-day connection", q: ANNIVERSARY_QUESTIONS.find(q=>q.id==="a_sat_conn") },
             { id: "a_sat_comm", label: "Communication", q: ANNIVERSARY_QUESTIONS.find(q=>q.id==="a_sat_comm") },
@@ -9286,33 +9299,44 @@ function ResultsHighlights({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3
           ].filter(({q}) => q).map(({id, label, q}) => {
             const myVal = ex3Answers[id] ?? 2;
             const theirVal = partnerEx3[id] ?? 2;
-            const total = q.scaleLabels.length - 1;
+            const endLow = q.scaleLabels[0];
+            const endHigh = q.scaleLabels[q.scaleLabels.length - 1];
             return (
-              <div key={id} style={{ marginBottom: "0.6rem", animation: "fadeUp 0.4s 0.28s both" }}>
-                <div style={{ fontSize: "0.52rem", color: "rgba(255,255,255,0.45)", fontFamily: BFONT, marginBottom: "0.2rem", letterSpacing: "0.08em" }}>{label}</div>
-                {[[userName, myVal, "#E8673A"], [partnerName, theirVal, "#5B6DF8"]].map(([name, val, color]) => (
-                  <div key={name} style={{ display: "flex", alignItems: "center", gap: "0.4rem", marginBottom: "0.15rem" }}>
-                    <span style={{ fontSize: "0.5rem", color: "rgba(255,255,255,0.4)", width: 36, flexShrink: 0, fontFamily: BFONT }}>{name.split(" ")[0]}</span>
-                    <div style={{ display: "flex", gap: 2, flex: 1 }}>
-                      {q.scaleLabels.map((_, i) => (
-                        <div key={i} style={{ flex: 1, height: 5, borderRadius: 2, background: i <= val ? color : color + "22" }} />
-                      ))}
-                    </div>
-                    <span style={{ fontSize: "0.48rem", color: "rgba(255,255,255,0.35)", fontFamily: BFONT, width: 56, textAlign: "right", flexShrink: 0 }}>{q.scaleLabels[val]}</span>
+              <div key={id} style={{ marginBottom: "0.9rem", animation: "fadeUp 0.4s 0.28s both" }}>
+                <div style={{ fontSize: "0.6rem", color: "rgba(255,255,255,0.62)", fontFamily: BFONT, fontWeight: 500, marginBottom: "0.35rem", letterSpacing: "0.06em" }}>{label}</div>
+                <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                  <span style={{ fontSize: "0.5rem", color: "rgba(255,255,255,0.35)", fontFamily: BFONT, width: 52, flexShrink: 0, lineHeight: 1.25, textAlign: "right" }}>{endLow}</span>
+                  <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 4 }}>
+                    {[[userName, myVal, "#E8673A"], [partnerName, theirVal, "#5B6DF8"]].map(([name, val, color]) => (
+                      <div key={name} style={{ display: "flex", gap: 3 }}>
+                        {q.scaleLabels.map((_, i) => (
+                          <div key={i} style={{ flex: 1, height: 7, borderRadius: 2, background: i <= val ? color : color + "22" }} />
+                        ))}
+                      </div>
+                    ))}
                   </div>
-                ))}
+                  <span style={{ fontSize: "0.5rem", color: "rgba(255,255,255,0.35)", fontFamily: BFONT, width: 52, flexShrink: 0, lineHeight: 1.25 }}>{endHigh}</span>
+                </div>
               </div>
             );
           })}
+          {/* Colour key for the three metrics above */}
+          <div style={{ display: "flex", justifyContent: "center", gap: "1.1rem", marginTop: "0.35rem", marginBottom: "0.9rem", animation: "fadeUp 0.4s 0.34s both" }}>
+            {[[userName, "#E8673A"], [partnerName, "#5B6DF8"]].map(([name, color]) => (
+              <div key={name} style={{ display: "flex", alignItems: "center", gap: "0.35rem" }}>
+                <div style={{ width: 8, height: 8, borderRadius: "50%", background: color, flexShrink: 0 }} />
+                <span style={{ fontSize: "0.6rem", color: "rgba(255,255,255,0.55)", fontFamily: BFONT, maxWidth: 110, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{name}</span>
+              </div>
+            ))}
+          </div>
           {/* Appreciation reveal */}
           {reflMyAdmire && reflTheirAdmire && (
-            <div style={{ marginTop: "0.75rem", background: "rgba(255,255,255,0.07)", borderRadius: 12, padding: "0.85rem 1rem", border: "1px solid rgba(255,255,255,0.1)", animation: "fadeUp 0.4s 0.38s both" }}>
-              <div style={{ fontSize: "0.46rem", letterSpacing: "0.2em", textTransform: "uppercase", color: "rgba(91,109,248,0.7)", fontFamily: BFONT, marginBottom: "0.45rem" }}>What you admire in each other</div>
+            <div style={{ marginTop: "auto", background: "rgba(255,255,255,0.07)", borderRadius: 12, padding: "1rem 1.1rem", border: "1px solid rgba(255,255,255,0.1)", animation: "fadeUp 0.4s 0.38s both" }}>
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.75rem" }}>
                 {[[userName, reflTheirAdmire, "#E8673A"], [partnerName, reflMyAdmire, "#5B6DF8"]].map(([name, admires, color]) => (
                   <div key={name}>
-                    <div style={{ fontSize: "0.46rem", color: "rgba(255,255,255,0.35)", fontFamily: BFONT, marginBottom: "0.2rem" }}>{name} is admired for</div>
-                    <div style={{ fontSize: "0.88rem", fontWeight: 700, color, fontFamily: HFONT }}>{admires}</div>
+                    <div style={{ fontSize: "0.58rem", color: "rgba(255,255,255,0.6)", fontFamily: BFONT, marginBottom: "0.3rem" }}>{name} is admired for</div>
+                    <div style={{ fontSize: "1.05rem", fontWeight: 700, color, fontFamily: HFONT, lineHeight: 1.2 }}>{admiredNoun(admires)}</div>
                   </div>
                 ))}
               </div>
@@ -9330,17 +9354,14 @@ function ResultsHighlights({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3
         {watermark}
         <div style={{ height: 4, background: "linear-gradient(90deg, #9B5DE5, #1B5FE8)", flexShrink: 0 }} />
         <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "2.25rem 2.25rem 2.25rem", textAlign: "center" }}>
-          <div style={{ fontSize: "0.52rem", letterSpacing: "0.28em", textTransform: "uppercase", color: "rgba(255,255,255,0.5)", fontFamily: BFONT, fontWeight: 700, marginBottom: "1.5rem", animation: "fadeUp 0.4s 0.05s both" }}>
-            One conversation worth having
+          <div style={{ fontSize: "0.52rem", letterSpacing: "0.2em", textTransform: "uppercase", color: "rgba(255,255,255,0.5)", fontFamily: BFONT, fontWeight: 700, lineHeight: 1.8, maxWidth: 290, marginBottom: "1.5rem", animation: "fadeUp 0.4s 0.05s both" }}>
+            One conversation worth having based on where you two diverge most
           </div>
-          <div style={{ background: "rgba(255,255,255,0.1)", border: "1px solid rgba(255,255,255,0.22)", borderRadius: 20, padding: "1.75rem 1.75rem 1.5rem", marginBottom: "1.75rem", maxWidth: 320, width: "100%", animation: "popIn 0.55s 0.12s cubic-bezier(0.34,1.56,0.64,1) both", boxShadow: "0 8px 40px rgba(0,0,0,0.3)" }}>
+          <div style={{ background: "rgba(255,255,255,0.1)", border: "1px solid rgba(255,255,255,0.22)", borderRadius: 20, padding: "1.75rem 1.75rem 1.5rem", maxWidth: 320, width: "100%", animation: "popIn 0.55s 0.12s cubic-bezier(0.34,1.56,0.64,1) both", boxShadow: "0 8px 40px rgba(0,0,0,0.3)" }}>
             <p style={{ fontFamily: HFONT, fontSize: "clamp(1.1rem,3.2vw,1.3rem)", fontWeight: 400, color: "white", lineHeight: 1.55, fontStyle: "italic", margin: 0 }}>
               {convoPrompt}
             </p>
           </div>
-          <p style={{ fontSize: "0.75rem", color: "rgba(255,255,255,0.45)", fontFamily: BFONT, fontWeight: 300, lineHeight: 1.65, maxWidth: 240, margin: 0, animation: "fadeUp 0.4s 0.35s both" }}>
-            Based on where {userName} and {partnerName} diverge most.
-          </p>
         </div>
       </div>
     </WrappedCard>,
