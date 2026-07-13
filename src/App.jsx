@@ -8021,7 +8021,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
       const myAdmire = mine.a8;
       const theirAdmire = theirs.a8;
       return (
-        <Layout accent="#1B5FE8">
+        <Layout accent="#1B5FE8" noPrevNext={true}>
           <div style={{ maxWidth: 660 }}>
             {/* Hero card */}
             <div style={{ background: "linear-gradient(145deg, #0f0c29, #1d1a4e, #0f0c29)", borderRadius: 20, padding: "2rem 2rem 1.75rem", marginBottom: "1.25rem", color: "white", position: "relative", overflow: "hidden" }}>
@@ -8092,7 +8092,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
     // ── REFLECTION INSIGHTS ───────────────────────────────────────────────────
     if (section === "reflection-insights") {
       return (
-        <Layout accent="#10b981">
+        <Layout accent="#10b981" noPrevNext={true}>
           <div style={{ maxWidth: 660 }}>
             <div style={{ fontSize: "0.62rem", letterSpacing: "0.22em", textTransform: "uppercase", color: "#1B5FE8", fontWeight: 700, fontFamily: BFONT, marginBottom: "0.5rem" }}>Relationship Reflection</div>
             <h2 style={{ fontFamily: HFONT, fontSize: "clamp(1.6rem,3vw,2.2rem)", fontWeight: 700, color: C.ink, lineHeight: 1.1, marginBottom: "0.75rem" }}>How you're feeling right now</h2>
@@ -8157,7 +8157,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
       const synthColors = { resonance: { bg:"#EEF2FF", text:"#1B5FE8" }, complement: { bg:"#FFF8F5", text:"#E8673A" }, discuss: { bg:"#FFFBF0", text:"#D97706" } };
 
       return (
-        <Layout accent="#1B5FE8">
+        <Layout accent="#1B5FE8" noPrevNext={true}>
           <div style={{ maxWidth: 660 }}>
             <div style={{ fontSize: "0.62rem", letterSpacing: "0.22em", textTransform: "uppercase", color: "#1B5FE8", fontWeight: 700, fontFamily: BFONT, marginBottom: "0.5rem" }}>Relationship Reflection</div>
             <h2 style={{ fontFamily: HFONT, fontSize: "clamp(1.6rem,3vw,2.2rem)", fontWeight: 700, color: C.ink, lineHeight: 1.1, marginBottom: "0.5rem" }}>Side by Side</h2>
@@ -8264,7 +8264,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
     // ── REFLECTION ACTION PLAN ────────────────────────────────────────────────
     if (section === "reflection-plan") {
       return (
-        <Layout accent="#1B5FE8">
+        <Layout accent="#1B5FE8" noPrevNext={true}>
           <div style={{ maxWidth: 560 }}>
             <div style={{ fontSize: "0.62rem", letterSpacing: "0.22em", textTransform: "uppercase", color: "#1B5FE8", fontWeight: 700, fontFamily: BFONT, marginBottom: "0.5rem" }}>Reflection Action Plan</div>
             <h2 style={{ fontFamily: HFONT, fontSize: "clamp(1.6rem,3vw,2.2rem)", fontWeight: 700, color: C.ink, lineHeight: 1.1, marginBottom: "0.5rem" }}>Conversations worth having.</h2>
@@ -8318,7 +8318,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
     // ── OVERVIEW ──
     if (section === "intimacy-overview" || section === "intimacy") {
       return (
-        <Layout accent={ROSE}>
+        <Layout accent={ROSE} noPrevNext={true}>
           <div style={{ maxWidth: 660 }}>
             <div style={{ background: `linear-gradient(145deg, #2a0f1a, ${ROSE_DARK}, #2a0f1a)`, borderRadius: 20, padding: "2rem 2rem 1.75rem", marginBottom: "1.25rem", color: "white", position: "relative", overflow: "hidden" }}>
               <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 3, background: "linear-gradient(90deg, #B5546E, #E08DA6)" }} />
@@ -8392,7 +8392,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
       const skipper = oneSidedSkip(dimMatch);
       const osk = INTIMACY_RESULTS_PROSE[dimMatch]?.oneSkipped;
       return (
-        <Layout accent={ROSE}>
+        <Layout accent={ROSE} noPrevNext={true}>
           <div style={{ maxWidth: 660 }}>
             <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", marginBottom: "0.75rem" }}>
               <div style={{ width: 10, height: 10, borderRadius: "50%", background: ROSE, flexShrink: 0 }} />
@@ -8449,7 +8449,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
       const misaligned = dims.filter(d => d.state === "discuss" || d.state === "different");
       const list = misaligned.length ? misaligned : dims;
       return (
-        <Layout accent={ROSE}>
+        <Layout accent={ROSE} noPrevNext={true}>
           <div style={{ maxWidth: 660 }}>
             <div style={{ fontSize: "0.62rem", letterSpacing: "0.22em", textTransform: "uppercase", color: ROSE, fontWeight: 700, fontFamily: BFONT, marginBottom: "0.5rem" }}>Physical Intimacy</div>
             <div style={{ fontSize: "clamp(1.5rem,4vw,2rem)", fontWeight: 700, fontFamily: HFONT, color: C.ink, lineHeight: 1.1, marginBottom: "0.5rem" }}>Conversations worth having</div>
