@@ -9331,7 +9331,7 @@ function ResultsHighlights({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3
           </div>
           {/* Appreciation reveal */}
           {reflMyAdmire && reflTheirAdmire && (
-            <div style={{ marginTop: "auto", background: "rgba(255,255,255,0.07)", borderRadius: 12, padding: "1rem 1.1rem", border: "1px solid rgba(255,255,255,0.1)", animation: "fadeUp 0.4s 0.38s both" }}>
+            <div style={{ marginTop: "0.25rem", background: "rgba(255,255,255,0.07)", borderRadius: 12, padding: "1rem 1.1rem", border: "1px solid rgba(255,255,255,0.1)", animation: "fadeUp 0.4s 0.38s both" }}>
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.75rem" }}>
                 {[[userName, reflTheirAdmire, "#E8673A"], [partnerName, reflMyAdmire, "#5B6DF8"]].map(([name, admires, color]) => (
                   <div key={name}>
