@@ -2009,6 +2009,9 @@ function CoupleTypeCard({ coupleType, userName, partnerName, onClick }) {
         <div style={{ fontFamily: HFONT, fontSize: "clamp(1.8rem, 4vw, 2.4rem)", fontWeight: 700, color: "white", lineHeight: 1.0, marginBottom: "0.5rem", letterSpacing: "-0.01em" }}>
           {name}
         </div>
+        <div style={{ fontSize: "0.55rem", letterSpacing: "0.2em", textTransform: "uppercase", color: "rgba(255,255,255,0.42)", fontFamily: BFONT, fontWeight: 700, marginBottom: "0.35rem" }}>
+          What this means
+        </div>
         <p style={{ fontSize: "0.92rem", color: color, fontFamily: BFONT, fontWeight: 500, lineHeight: 1.5, margin: "0", maxWidth: 480 }}>
           {interp(tagline)}
         </p>
@@ -3311,7 +3314,7 @@ function Exercise01Flow({ userName, partnerName, onComplete, skipIntro = false }
 }
 
 
-function JointOverview({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Answers, partnerEx3, hasAnniversary, userName, partnerName, onGoPersonality, onGoExpectations, onGoAnniversary }) {
+function JointOverview({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Answers, partnerEx3, hasAnniversary, userName, partnerName, onGoPersonality, onGoExpectations, onGoAnniversary, intimacySummary = null, onGoIntimacy = null }) {
   const myS = calcDimScores(ex1Answers);
   const partS = calcDimScores(partnerEx1);
   const feedback = generatePersonalityFeedback(myS, partS, userName, partnerName);
@@ -3465,16 +3468,29 @@ function JointOverview({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Answ
             {scaleQs.filter(q => q.id !== "a0").map(q => {
               const myVal = ex3Answers[q.id] ?? 2;
               const theirVal = partnerEx3[q.id] ?? 2;
-              const qGap = Math.abs(myVal - theirVal);
               const shortLabel = q.text.replace(/How (well |much |connected )?(do I feel |do we )?/i,"").split("?")[0];
               return (
-                <div key={q.id} style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.35rem" }}>
-                  <div style={{ width: 6, height: 6, borderRadius: "50%", background: qGap >= 2 ? "#F59E0B" : "#10b981", flexShrink: 0 }} />
-                  <div style={{ fontSize: "0.7rem", color: "var(--text)", fontFamily: BFONT, flex: 1 }}>{shortLabel}</div>
-                  <div style={{ fontSize: "0.65rem", color: qGap >= 2 ? "#F59E0B" : "#10b981", fontFamily: BFONT, fontWeight: 600 }}>{qGap >= 2 ? "Gap" : "Aligned"}</div>
+                <div key={q.id} style={{ marginBottom: "0.5rem" }}>
+                  <div style={{ fontSize: "0.68rem", color: "#8C7A68", fontFamily: BFONT, marginBottom: "0.2rem" }}>{shortLabel}</div>
+                  <div style={{ display: "flex", flexDirection: "column", gap: 3 }}>
+                    {[[userName, myVal, "#E8673A"], [partnerName, theirVal, "#1B5FE8"]].map(([nm, val, col]) => (
+                      <div key={nm} style={{ display: "flex", gap: 3 }}>
+                        {q.scaleLabels.map((_, i) => (
+                          <div key={i} style={{ flex: 1, height: 5, borderRadius: 2, background: i <= val ? col : col + "1f" }} />
+                        ))}
+                      </div>
+                    ))}
+                  </div>
                 </div>
               );
             })}
+            <div style={{ display: "flex", gap: "0.75rem", marginTop: "0.5rem" }}>
+              {[[userName, "#E8673A"], [partnerName, "#1B5FE8"]].map(([nm, col]) => (
+                <span key={nm} style={{ display: "flex", alignItems: "center", gap: "0.3rem", fontSize: "0.62rem", color: "#8C7A68", fontFamily: BFONT }}>
+                  <span style={{ width: 7, height: 7, borderRadius: "50%", background: col }} />{nm}
+                </span>
+              ))}
+            </div>
           </div>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
             <div style={{ fontSize: "0.7rem", color: "#8C7A68", fontFamily: BFONT }}>{annGap >= 1 ? "Different perspectives on how things feel" : "Shared sense of where you are"}</div>
@@ -3491,6 +3507,9 @@ function JointOverview({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Answ
       <link href={FONT_URL} rel="stylesheet" />
 
       {/* ── COUPLE TYPE HERO ── */}
+      <p style={{ fontSize: "0.85rem", color: C.muted, fontFamily: BFONT, fontWeight: 300, lineHeight: 1.7, margin: "0 0 1rem", maxWidth: 560 }}>
+        You'll learn more about what you see here as you explore your detailed results.
+      </p>
       <div style={{ marginBottom: "1.25rem" }}>
         <CoupleTypeCard coupleType={coupleType} userName={userName} partnerName={partnerName} />
       </div>
@@ -3602,6 +3621,51 @@ function JointOverview({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Answ
 
       {/* Anniversary card, shown when pkg.hasAnniversary */}
       {anniversaryCard}
+
+      {/* Intimacy card (Exercise 04) — shown when the add-on is owned and both finished (3.6) */}
+      {intimacySummary && (() => {
+        const idims = intimacySummary.dimSummary.filter(d => d.avgGap != null);
+        const ialigned = idims.filter(d => d.state === "aligned").length;
+        const itop = [...idims].sort((a, b) => (b.avgGap ?? 0) - (a.avgGap ?? 0))[0];
+        const ilabel = itop ? (INTIMACY_DIMENSIONS.find(x => x.id === itop.id)?.label || itop.id) : null;
+        return (
+          <div onClick={onGoIntimacy || undefined}
+            style={{ background: "white", borderRadius: 18, overflow: "hidden", border: "1.5px solid #E8DDD0", cursor: onGoIntimacy ? "pointer" : "default", transition: "all 0.18s", boxShadow: "0 2px 12px rgba(0,0,0,0.06)", marginTop: "1rem" }}
+            onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-3px)"; e.currentTarget.style.boxShadow = "0 8px 32px rgba(181,84,110,0.18)"; e.currentTarget.style.borderColor = "#B5546E66"; }}
+            onMouseLeave={e => { e.currentTarget.style.transform = ""; e.currentTarget.style.boxShadow = "0 2px 12px rgba(0,0,0,0.06)"; e.currentTarget.style.borderColor = "#E8DDD0"; }}>
+            <div style={{ background: "linear-gradient(135deg, #B5546E, #E08DA6)", padding: "1.1rem 1.25rem", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <div>
+                <div style={{ fontSize: "0.6rem", letterSpacing: "0.15em", textTransform: "uppercase", color: "rgba(255,255,255,0.75)", fontFamily: BFONT, marginBottom: "0.25rem" }}>Exercise 0{hasAnniversary ? 4 : 3}</div>
+                <div style={{ fontSize: "1.1rem", fontWeight: 700, color: "white", fontFamily: HFONT }}>Physical Intimacy</div>
+              </div>
+              <div style={{ background: "rgba(255,255,255,0.15)", borderRadius: 10, padding: "0.5rem 0.75rem", textAlign: "center" }}>
+                <div style={{ fontSize: "0.6rem", color: "rgba(255,255,255,0.65)", fontFamily: BFONT, marginBottom: "0.15rem" }}>Closely matched</div>
+                <div style={{ fontSize: "0.82rem", fontWeight: 700, color: "white", fontFamily: BFONT }}>{ialigned} of {idims.length}</div>
+              </div>
+            </div>
+            <div style={{ padding: "1rem 1.25rem" }}>
+              <div style={{ display: "flex", flexDirection: "column", gap: "0.4rem", marginBottom: "0.75rem" }}>
+                {idims.map(d => {
+                  const meta = INTIMACY_DIMENSIONS.find(x => x.id === d.id);
+                  const pct = Math.max(0, Math.min(100, Math.round((1 - (d.avgGap ?? 0)) * 100)));
+                  return (
+                    <div key={d.id} style={{ display: "flex", alignItems: "center", gap: "0.6rem" }}>
+                      <span style={{ fontSize: "0.68rem", color: "#8C7A68", fontFamily: BFONT, width: "clamp(90px,32%,130px)", flexShrink: 0 }}>{meta?.label || d.id}</span>
+                      <div style={{ flex: 1, height: 6, background: "#EFE7DD", borderRadius: 999 }}>
+                        <div style={{ height: "100%", width: pct + "%", background: d.state === "aligned" ? "#10b981" : "#E8673A", borderRadius: 999 }} />
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <div style={{ fontSize: "0.7rem", color: "#8C7A68", fontFamily: BFONT }}>{ilabel ? `Furthest apart on ${ilabel.toLowerCase()}` : "You line up across the board"}</div>
+                <span style={{ fontSize: "0.7rem", color: "#B5546E", fontWeight: 700, fontFamily: BFONT }}>Explore results →</span>
+              </div>
+            </div>
+          </div>
+        );
+      })()}
 
       {/* ── CONVERSATION STARTERS, drawn from their biggest gaps ── */}
       {conversationStarters}
@@ -7923,10 +7987,12 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
           ex2Answers={ex2Answers} partnerEx2={partnerEx2}
           ex3Answers={ex3Answers} partnerEx3={partnerEx3}
           hasAnniversary={hasAnniversary}
+          intimacySummary={intimacySummary}
           userName={userName} partnerName={partnerName}
           onGoPersonality={() => go("comm-overview")}
           onGoExpectations={() => go("exp-overview")}
           onGoAnniversary={() => go("reflection")}
+          onGoIntimacy={() => go("intimacy-overview")}
         />
       </Layout>
     );
@@ -9348,25 +9414,6 @@ function ResultsHighlights({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3
     </WrappedCard>
     ] : []),
 
-    // ── 7. ONE CONVERSATION — Quote is the star ────────────────────────────────
-    <WrappedCard key={hasReflData ? 6 : 5} bg="linear-gradient(145deg, #120d2e 0%, #2a1a5e 50%, #120d2e 100%)" onDownload={handleDl} cardIndex={hasReflData ? 6 : 5} cardRef={cardRef} inline={inline} isMobile={isMobile} portraitCorner={portrait}>
-      <style>{cardAnim}</style>
-      <div onClick={advance} style={{ flex: 1, display: "flex", flexDirection: "column", cursor: "pointer", position: "relative", overflow: "hidden" }}>
-        {watermark}
-        <div style={{ height: 4, background: "linear-gradient(90deg, #9B5DE5, #1B5FE8)", flexShrink: 0 }} />
-        <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "2.25rem 2.25rem 2.25rem", textAlign: "center" }}>
-          <div style={{ fontSize: "0.52rem", letterSpacing: "0.2em", textTransform: "uppercase", color: "rgba(255,255,255,0.5)", fontFamily: BFONT, fontWeight: 700, lineHeight: 1.8, maxWidth: 290, marginBottom: "1.5rem", animation: "fadeUp 0.4s 0.05s both" }}>
-            One conversation worth having based on where you two diverge most
-          </div>
-          <div style={{ background: "rgba(255,255,255,0.1)", border: "1px solid rgba(255,255,255,0.22)", borderRadius: 20, padding: "1.75rem 1.75rem 1.5rem", maxWidth: 320, width: "100%", animation: "popIn 0.55s 0.12s cubic-bezier(0.34,1.56,0.64,1) both", boxShadow: "0 8px 40px rgba(0,0,0,0.3)" }}>
-            <p style={{ fontFamily: HFONT, fontSize: "clamp(1.1rem,3.2vw,1.3rem)", fontWeight: 400, color: "white", lineHeight: 1.55, fontStyle: "italic", margin: 0 }}>
-              {convoPrompt}
-            </p>
-          </div>
-        </div>
-      </div>
-    </WrappedCard>,
-
     // ── INTIMACY HIGHLIGHT — one card when the add-on is owned + both done ──────
     ...(intimacyHighlight ? [
     <WrappedCard key="intimacy-card" bg="linear-gradient(145deg, #2a0f1a 0%, #4a1c30 50%, #2a0f1a 100%)" onDownload={handleDl} cardIndex={99} cardRef={cardRef} inline={inline} isMobile={isMobile} portraitCorner={portrait}>
@@ -9404,6 +9451,26 @@ function ResultsHighlights({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3
       </div>
     </WrappedCard>
     ] : []),
+
+    // ── 7. ONE CONVERSATION — Quote is the star ────────────────────────────────
+    <WrappedCard key={hasReflData ? 6 : 5} bg="linear-gradient(145deg, #120d2e 0%, #2a1a5e 50%, #120d2e 100%)" onDownload={handleDl} cardIndex={hasReflData ? 6 : 5} cardRef={cardRef} inline={inline} isMobile={isMobile} portraitCorner={portrait}>
+      <style>{cardAnim}</style>
+      <div onClick={advance} style={{ flex: 1, display: "flex", flexDirection: "column", cursor: "pointer", position: "relative", overflow: "hidden" }}>
+        {watermark}
+        <div style={{ height: 4, background: "linear-gradient(90deg, #9B5DE5, #1B5FE8)", flexShrink: 0 }} />
+        <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "2.25rem 2.25rem 2.25rem", textAlign: "center" }}>
+          <div style={{ fontSize: "0.52rem", letterSpacing: "0.2em", textTransform: "uppercase", color: "rgba(255,255,255,0.5)", fontFamily: BFONT, fontWeight: 700, lineHeight: 1.8, maxWidth: 290, marginBottom: "1.5rem", animation: "fadeUp 0.4s 0.05s both" }}>
+            One conversation worth having based on where you two diverge most
+          </div>
+          <div style={{ background: "rgba(255,255,255,0.1)", border: "1px solid rgba(255,255,255,0.22)", borderRadius: 20, padding: "1.75rem 1.75rem 1.5rem", maxWidth: 320, width: "100%", animation: "popIn 0.55s 0.12s cubic-bezier(0.34,1.56,0.64,1) both", boxShadow: "0 8px 40px rgba(0,0,0,0.3)" }}>
+            <p style={{ fontFamily: HFONT, fontSize: "clamp(1.1rem,3.2vw,1.3rem)", fontWeight: 400, color: "white", lineHeight: 1.55, fontStyle: "italic", margin: 0 }}>
+              {convoPrompt}
+            </p>
+          </div>
+        </div>
+      </div>
+    </WrappedCard>,
+
 
     // ── 8. FINALE — View results + download ───────────────────────────────────
     <WrappedCard key={hasReflData ? 7 : 6} bg="linear-gradient(145deg, #0e0b1e 0%, #1a1040 50%, #0e0b1e 100%)" onDownload={handleDl} cardIndex={hasReflData ? 7 : 6} cardRef={cardRef} inline={inline} isMobile={isMobile} portraitCorner={portrait}>
