@@ -4028,14 +4028,6 @@ function PersonalityResults({ myAnswers, partnerAnswers, userName, partnerName, 
           <DimTrackViz myScore={myS[dim]} theirScore={partS[dim]} color={m.color} userName={userName} partnerName={partnerName} />
         </div>
 
-        {/* What this means */}
-        {(f.strengthText || f.insightText) && (
-          <div style={{ background: "rgba(255,255,255,0.11)", borderRadius: 14, padding: "1.25rem 1.5rem", marginBottom: "1rem", border: "1px solid rgba(255,255,255,0.18)" }}>
-            <div style={{ fontSize: "0.58rem", letterSpacing: "0.2em", textTransform: "uppercase", color: "rgba(255,255,255,0.5)", fontFamily: BFONT, fontWeight: 700, marginBottom: "0.6rem" }}>What this means</div>
-            <p style={{ fontSize: "0.9rem", color: "rgba(255,255,255,0.92)", lineHeight: 1.8, margin: 0, fontFamily: BFONT, fontWeight: 300 }}>{f.strengthText || f.insightText}</p>
-          </div>
-        )}
-
         {/* Try this / Keep this in mind */}
         {(f.adviceText || f.isStrength) && (
           <div style={{ background: (m.color + (f.isStrength ? "28" : "45")), borderRadius: 14, padding: "1.25rem 1.5rem", border: ("1px solid " + (m.color) + (f.isStrength ? "50" : "80")) }}>
@@ -8465,10 +8457,6 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
               </div>
             ) : (
               <>
-                <div style={{ background: "white", border: `1.5px solid ${C.stone}`, borderRadius: 14, padding: "1.25rem 1.5rem", marginBottom: "1rem" }}>
-                  <div style={{ fontSize: "0.58rem", letterSpacing: "0.2em", textTransform: "uppercase", color: C.muted, fontFamily: BFONT, fontWeight: 700, marginBottom: "0.6rem" }}>What this means</div>
-                  <p style={{ fontSize: "0.9rem", color: C.text, lineHeight: 1.75, margin: 0, fontFamily: BFONT, fontWeight: 300 }}>{proseFor(dimMatch, st)}</p>
-                </div>
                 <div style={{ background: `${ROSE}14`, borderRadius: 14, padding: "1.25rem 1.5rem", border: `1px solid ${ROSE}40` }}>
                   <div style={{ fontSize: "0.62rem", textTransform: "uppercase", letterSpacing: "0.12em", color: ROSE, fontWeight: 700, marginBottom: "0.5rem", fontFamily: BFONT }}>Talk about it</div>
                   <p style={{ fontSize: "0.9rem", color: C.ink, lineHeight: 1.75, margin: 0, fontFamily: BFONT, fontWeight: 400 }}>{sub(INTIMACY_RESULTS_PROSE[dimMatch]?.prompt)}</p>
