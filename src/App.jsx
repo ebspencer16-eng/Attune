@@ -4362,12 +4362,13 @@ function buildOriginNote(g, userName, partnerName, gapIdx) {
 }
 function ExpectationsResults({ myAnswers, partnerAnswers, userName, partnerName, forcedSection, noSideNav = false, onGoWhatComesNext, onExternalGo, coupleTypeCode = null, coupleTypeName = null, coupleTypeColor = "#1B5FE8" }) {
   // ── Fixed 5 display categories ──────────────────────────────────────────────
-  // ── Step system: 0=overview, 1=common-ground, 2=convos-landing,
-  //                "convo-0".."convo-4"=individual cats, "action-plan"=plan, "summary"=summary
+  // ── Step system: 0=overview, "convo-0".."convo-4"=individual cats,
+  //                "action-plan"=plan, "summary"=summary.
+  // The old standalone Common Ground / Conversations pages are gone (7.3);
+  // their content lives on each category page. Legacy links land on overview.
   const sectionToStep = (s) => {
     if (!s || s === "overview") return 0;
-    if (s === "common-ground") return 1;
-    if (s === "conversations") return 2;
+    if (s === "common-ground" || s === "conversations") return 0;
     if (s === "action-plan") return "action-plan";
     if (s === "summary") return "summary";
     // "convo-N" comes in directly from UnifiedResults routing — pass through as-is
@@ -4469,8 +4470,6 @@ function ExpectationsResults({ myAnswers, partnerAnswers, userName, partnerName,
   // ── Nav items ─────────────────────────────────────────────────────────────────
   const expectationsNavItems = [
     { label: "Overview", step: 0 },
-    { label: "Common Ground", step: 1 },
-    { label: "Conversations Worth Having", step: 2 },
     ...FIXED_CATS.map((fc, i) => ({
       label: fc.label, step: `convo-${i}`, isChild: true,
       onClick: () => go(`convo-${i}`),
@@ -4547,10 +4546,6 @@ function ExpectationsResults({ myAnswers, partnerAnswers, userName, partnerName,
                   );
                 })}
               </div>
-              <div style={{ display: "flex", justifyContent: "space-between", marginTop: "0.5rem" }}>
-                <span style={{ fontSize: "0.55rem", color: "rgba(255,255,255,0.2)", fontFamily: BFONT }}>0%</span>
-                <span style={{ fontSize: "0.55rem", color: "rgba(255,255,255,0.2)", fontFamily: BFONT }}>100% aligned</span>
-              </div>
             </div>
 
             {/* What's in this section */}
@@ -4558,8 +4553,11 @@ function ExpectationsResults({ myAnswers, partnerAnswers, userName, partnerName,
               <div style={{ fontSize: "0.55rem", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.3)", fontFamily: BFONT, fontWeight: 700, marginBottom: "0.5rem" }}>What's in this section</div>
               <div style={{ display: "flex", flexDirection: "column", gap: "0.3rem" }}>
                 {[
-                  { label: "Common ground", sub: `${aligned.length} areas you already agree on`, s: 1 },
-                  { label: "Conversations worth having", sub: `${gaps.length} topics to discuss together`, s: 2 },
+                  ...FIXED_CATS.map((fc, i) => {
+                    const cg = gaps.filter(r => r.catId === fc.id).length;
+                    const ca = aligned.filter(r => r.catId === fc.id).length;
+                    return { label: fc.label, sub: cg === 0 ? `Fully aligned across ${ca} items` : `${cg} to discuss, ${ca} already aligned`, s: `convo-${i}` };
+                  }),
                   { label: "Expectations Action Plan", sub: "Your discussion guide", s: "action-plan" },
                 ].map(({ label, sub, s }) => (
                   <div key={label} onClick={() => typeof s === "string" ? go(s) : go(s)}
@@ -4576,90 +4574,18 @@ function ExpectationsResults({ myAnswers, partnerAnswers, userName, partnerName,
               </div>
             </div>
           </div>
-          <NavButtons onBack={() => {}} backDisabled onNext={() => go(1)} nextLabel="Common Ground →" />
+          <NavButtons onBack={() => {}} backDisabled onNext={() => go("convo-0")} nextLabel={`${FIXED_CATS[0].label} →`} />
         </ResultsSlide>
       </MaybeNav>
     );
   }
 
-  // ── STEP 1: COMMON GROUND ─────────────────────────────────────────────────────
-  if (step === 1) {
-    const byCat = FIXED_CATS.map(fc => ({
-      ...fc,
-      items: aligned.filter(r => r.catId === fc.id),
-    })).filter(c => c.items.length > 0);
-    return (
-      <MaybeNav noSideNav={noSideNav} navItems={expectationsNavItems} currentStep={navCurrentStep} onGo={go} accent="#1B5FE8">
-        <ResultsSlide bg="linear-gradient(135deg, #f0fff4, #e8f5e9)">
-          <link href={FONT_URL} rel="stylesheet" />
-          <div style={{ fontSize: "0.68rem", textTransform: "uppercase", letterSpacing: "0.15em", color: "#4CAF50", fontWeight: 700, marginBottom: "0.4rem", fontFamily: BFONT }}>Common Ground</div>
-          <div style={{ fontSize: "clamp(1.6rem,5vw,2.2rem)", fontWeight: 700, color: "#2a2848", lineHeight: 1.1, marginBottom: "0.5rem", fontFamily: HFONT }}>{aligned.length} things you already agree on.</div>
-          <p style={{ fontSize: "0.85rem", color: "#555", marginBottom: "1.75rem", lineHeight: 1.72, fontFamily: BFONT, fontWeight: 300 }}>These are the expectations you already hold in common, no negotiation needed. This is your foundation.</p>
-          <div style={{ display: "flex", flexDirection: "column", gap: "0.85rem", marginBottom: "0.5rem" }}>
-            {byCat.map(({ label, color, items }) => (
-              <div key={label} style={{ background: "white", borderRadius: 16, overflow: "hidden", boxShadow: "0 2px 12px rgba(0,0,0,0.06)" }}>
-                <div style={{ background: color, padding: "0.55rem 1.25rem", display: "flex", justifyContent: "space-between" }}>
-                  <span style={{ fontSize: "0.72rem", fontWeight: 700, color: "white", textTransform: "uppercase", letterSpacing: "0.08em", fontFamily: BFONT }}>{label}</span>
-                  <span style={{ fontSize: "0.72rem", color: "rgba(255,255,255,0.85)", fontFamily: BFONT }}>{items.length} aligned</span>
-                </div>
-                {items.map((r, i) => (
-                  <div key={r.item} style={{ display: "grid", gridTemplateColumns: "1fr 1fr", alignItems: "start", padding: "0.62rem 1.25rem", borderBottom: i < items.length - 1 ? "1px solid #f5f5f5" : "none", gap: "0.75rem" }}>
-                    <span style={{ fontSize: "0.78rem", color: "#888", fontFamily: BFONT, fontWeight: 400, paddingTop: "0.1rem" }}>{r.item}</span>
-                    <span style={{ fontSize: "0.82rem", color: "#333", fontWeight: 600, fontFamily: BFONT, lineHeight: 1.4 }}>{resolveLabel(r.mine)}</span>
-                  </div>
-                ))}
-              </div>
-            ))}
-          </div>
-          <NavButtons onBack={() => go(0)} onNext={() => go(2)} nextLabel="Conversations Worth Having →" />
-        </ResultsSlide>
-      </MaybeNav>
-    );
-  }
+  // ── STEP 1 / 2 (Common Ground, Conversations Worth Having) removed (7.3).
+  // Both are now folded into the per-category pages: each one lists the
+  // conversations to have and the responsibilities already agreed on. Any
+  // stale link to those steps lands on the overview.
+  if (step === 1 || step === 2) { setTimeout(() => go(0), 0); return null; }
 
-  // ── STEP 2: CONVERSATIONS LANDING ─────────────────────────────────────────────
-  if (step === 2) {
-    return (
-      <MaybeNav noSideNav={noSideNav} navItems={expectationsNavItems} currentStep={navCurrentStep} onGo={go} accent="#1B5FE8">
-        <ResultsSlide bg="linear-gradient(145deg, #1a0a2e, #2d1b4e, #1e1535)">
-          <link href={FONT_URL} rel="stylesheet" />
-          <div style={{ color: "white" }}>
-            <div style={{ fontSize: "0.68rem", textTransform: "uppercase", letterSpacing: "0.2em", color: "rgba(255,255,255,0.72)", marginBottom: "1rem", fontFamily: BFONT }}>Time to talk</div>
-            <div style={{ fontSize: "clamp(2rem,7vw,3rem)", fontWeight: 700, fontFamily: HFONT, lineHeight: 1.0, marginBottom: "0.85rem" }}>Conversations<br />Worth Having.</div>
-            <p style={{ fontSize: "0.85rem", color: "rgba(255,255,255,0.65)", fontFamily: BFONT, fontWeight: 300, lineHeight: 1.65, marginBottom: "1.25rem" }}>
-              {gaps.length > 0
-                ? `${gaps.length} topic${gaps.length !== 1 ? "s" : ""} across ${FIXED_CATS.filter(fc => gaps.some(r => r.catId === fc.id)).length} of 6 areas. These aren't warning signs, they're openings.`
-                : "You're aligned across every area. Review each category below."}
-            </p>
-            <div style={{ display: "flex", flexDirection: "column", gap: "0.6rem" }}>
-              {FIXED_CATS.map((fc, i) => {
-                const catGaps = gaps.filter(r => r.catId === fc.id);
-                const hasGap = catGaps.length > 0;
-                return (
-                  <div key={fc.id} onClick={() => go(`convo-${i}`)}
-                    style={{ display: "flex", alignItems: "center", gap: "1rem", background: hasGap ? "rgba(255,255,255,0.08)" : "rgba(255,255,255,0.04)", borderRadius: 14, padding: "0.85rem 1.25rem", cursor: "pointer", transition: "background 0.15s", border: hasGap ? "1px solid rgba(255,255,255,0.1)" : "1px solid rgba(255,255,255,0.04)" }}
-                    onMouseEnter={e => e.currentTarget.style.background = "rgba(255,255,255,0.13)"}
-                    onMouseLeave={e => e.currentTarget.style.background = hasGap ? "rgba(255,255,255,0.08)" : "rgba(255,255,255,0.04)"}>
-                    <div style={{ width: 10, height: 10, borderRadius: "50%", background: hasGap ? (fc.color || "#E8673A") : "#10b981", flexShrink: 0 }} />
-                    <div style={{ flex: 1 }}>
-                      <div style={{ fontSize: "0.85rem", fontWeight: 700, color: "white", fontFamily: BFONT }}>{fc.label}</div>
-                      <div style={{ fontSize: "0.68rem", color: "rgba(255,255,255,0.55)", fontFamily: BFONT }}>
-                        {hasGap ? `${catGaps.length} topic${catGaps.length !== 1 ? "s" : ""} to discuss` : "Fully aligned ✓"}
-                      </div>
-                    </div>
-                    <span style={{ fontSize: "1.1rem", color: hasGap ? fc.color : "rgba(16,185,129,0.6)", lineHeight: 1 }}>→</span>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-          <NavButtons onBack={() => go(1)} onNext={() => go("convo-0")} nextLabel={`Start: ${FIXED_CATS[0].label} →`} />
-        </ResultsSlide>
-      </MaybeNav>
-    );
-  }
-
-  // ── CONVO-N: INDIVIDUAL CATEGORY PAGES ───────────────────────────────────────
   const convoMatch = typeof step === "string" && step.startsWith("convo-");
   if (convoMatch) {
     const catIdx = parseInt(step.split("-")[1]);
@@ -4772,8 +4698,30 @@ function ExpectationsResults({ myAnswers, partnerAnswers, userName, partnerName,
             );
           })()}
 
+          {/* ── Already aligned in this category (7.3) ── */}
+          {thisCatGaps.length > 0 && thisCatAligned.length > 0 && (
+            <div style={{ marginTop: "1rem", background: "rgba(16,185,129,0.07)", border: "1.5px solid rgba(16,185,129,0.3)", borderRadius: 14, overflow: "hidden" }}>
+              <div style={{ padding: "0.65rem 1rem", borderBottom: "1px solid rgba(16,185,129,0.2)", background: "rgba(16,185,129,0.1)", display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#10B981" strokeWidth="3" strokeLinecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+                <span style={{ fontSize: "0.62rem", fontWeight: 800, letterSpacing: "0.2em", textTransform: "uppercase", color: "#10B981", fontFamily: BFONT }}>Already aligned</span>
+                <span style={{ fontSize: "0.62rem", color: "rgba(255,255,255,0.4)", fontFamily: BFONT, marginLeft: "auto" }}>{thisCatAligned.length} item{thisCatAligned.length !== 1 ? "s" : ""}</span>
+              </div>
+              <div>
+                {thisCatAligned.map((a, ai) => (
+                  <div key={ai} style={{ display: "grid", gridTemplateColumns: "1.6fr 1fr", gap: 0, padding: "0.55rem 1rem", borderTop: ai === 0 ? "none" : "1px solid rgba(16,185,129,0.12)", alignItems: "center" }}>
+                    <div style={{ fontSize: "0.76rem", color: "rgba(255,255,255,0.6)", fontFamily: BFONT, lineHeight: 1.35, paddingRight: "0.75rem" }}>{a.item}</div>
+                    <div style={{ fontSize: "0.76rem", fontWeight: 600, color: "rgba(255,255,255,0.75)", fontFamily: BFONT, textAlign: "center", background: "rgba(255,255,255,0.06)", borderRadius: 6, padding: "0.2rem 0.4rem" }}>{resolveLabel(a.mine) || "—"}</div>
+                  </div>
+                ))}
+              </div>
+              <div style={{ padding: "0.5rem 1rem", borderTop: "1px solid rgba(16,185,129,0.15)" }}>
+                <span style={{ fontSize: "0.7rem", color: "rgba(16,185,129,0.85)", fontFamily: BFONT, fontWeight: 300 }}>You both expect the same thing here. Nothing to work out.</span>
+              </div>
+            </div>
+          )}
+
           <NavButtons
-            onBack={() => catIdx > 0 ? go(`convo-${catIdx - 1}`) : go(2)}
+            onBack={() => catIdx > 0 ? go(`convo-${catIdx - 1}`) : go(0)}
             onNext={() => isLastCat ? go("action-plan") : go(`convo-${catIdx + 1}`)}
             nextLabel={isLastCat ? "Action Plan →" : `Next: ${FIXED_CATS[catIdx + 1].label} →`}
           />
@@ -7347,8 +7295,6 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
       id: "exp", label: "Expectations", icon: "◉", color: "#1B5FE8",
       children: [
         { id: "exp-overview", label: "Overview" },
-        { id: "exp-common-ground", label: "Common Ground" },
-        { id: "exp-conversations", label: "Conversations Worth Having" },
         { id: "exp-life-header", label: "The Life You're Building", isDomainHeader: true, color: "#10B981" },
         ...FIXED_CATS.map((fc, ci) => ({ id: `exp-convo-${ci}`, label: fc.label, isDeepChild: true, color: "#10B981" })),
         { id: "exp-action-plan", label: "Expectations Action Plan" },
@@ -7451,7 +7397,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
     "comm-overview",
     ...domainOrderedDims.map(d => `comm-${d}`),
     "comm-profiles", "comm-plan",
-    "exp-overview", "exp-common-ground", "exp-conversations",
+    "exp-overview",
     ...FIXED_CATS.map((_, ci) => `exp-convo-${ci}`),
     "exp-action-plan",
     ...(hasAnniversary ? ["reflection-overview", "reflection-insights", "reflection-story", "reflection-plan"] : []),
@@ -7480,8 +7426,6 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
     if (id === "comm-profiles") return urSameType ? "Communication Profile" : "Individual Profiles";
     if (id === "comm-plan") return "Communication Action Plan";
     if (id === "exp-overview") return "Expectations Overview";
-    if (id === "exp-common-ground") return "Common Ground";
-    if (id === "exp-conversations") return "Conversations Worth Having";
     if (id === "exp-action-plan") return "Expectations Action Plan";
     if (id.startsWith("exp-convo-")) { const ci = parseInt(id.replace("exp-convo-","")); return FIXED_CATS[ci]?.label || id; }
     if (id === "reflection-overview") return "Reflection Overview";
@@ -7984,8 +7928,6 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
   // ── EXP PAGES: delegate to ExpectationsResults with section override ────────
   if (section.startsWith("exp")) {
     const expSection = section === "exp-overview" ? "overview"
-      : section === "exp-common-ground" ? "common-ground"
-      : section === "exp-conversations" ? "conversations"
       : section === "exp-action-plan" ? "action-plan"
       : section.startsWith("exp-convo-") ? `convo-${section.replace("exp-convo-", "")}`
       : "overview";
@@ -8001,8 +7943,6 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
           onGoWhatComesNext={() => go(hasAnniversary ? "reflection-overview" : intimacyBothDone ? "intimacy-overview" : "what-comes-next")}
           onExternalGo={s => {
             if (s === 0) go("exp-overview");
-            else if (s === 1) go("exp-common-ground");
-            else if (s === 2) go("exp-conversations");
             else if (s === "action-plan") go("exp-action-plan");
             else if (typeof s === "string" && s.startsWith("convo-")) go("exp-" + s);
           }}
