@@ -14373,7 +14373,7 @@ export default function App() {
         partnerEx3={pkg.hasAnniversary ? (partnerSession?.ex3 || (hasRealPartner ? null : JAMES_ANNIVERSARY_DEMO)) : null}
         userName={userName} partnerName={partnerName}
         portrait={couplePortrait}
-        onDone={() => setHighlightsSeen(true)}
+        onDone={() => { setActiveResult("summary"); setHighlightsSeen(true); }}
         onExit={() => setView("home")}
       />
     )}
