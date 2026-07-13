@@ -1566,7 +1566,7 @@ const NEW_COUPLE_TYPES = [
     ],
     stickingPoints: [
       "{EXP} can feel like {EXP_isC} always the one initiating depth, always doing the emotional work, always making the first move.",
-      "The guarded partner can feel pressure to match an emotional expressiveness they don't naturally have, which sometimes makes them pull back further.",
+      "{GRD} can feel pressure to match an emotional expressiveness that doesn't come naturally, which sometimes makes {GRD_obj} pull back further.",
       "What the expressive partner reads as withholding, the guarded partner experiences as just needing time to form it properly. Both readings feel true; neither is quite right.",
     ],
     patterns: [
@@ -3359,7 +3359,7 @@ function JointOverview({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Answ
         <div style={{ flex: 1, height: 1, background: "#E8DDD0" }} />
       </div>
       <div style={{ fontFamily: HFONT, fontSize: "1.05rem", fontWeight: 700, color: "#0E0B07", marginBottom: "0.35rem", lineHeight: 1.2 }}>{Math.min(3, startersList.length)} conversation{Math.min(3, startersList.length) !== 1 ? "s" : ""} worth having</div>
-      <p style={{ fontSize: "0.8rem", color: "#8C7A68", fontFamily: BFONT, fontWeight: 300, marginBottom: "1.25rem", lineHeight: 1.65 }}>Based on where your answers differed most.</p>
+      <p style={{ fontSize: "0.8rem", color: "#8C7A68", fontFamily: BFONT, fontWeight: 300, marginBottom: "1.25rem", lineHeight: 1.65 }}>Based on where your expectations differed most.</p>
       <div style={{ display: "flex", flexDirection: "column", gap: "0.85rem" }}>
         {startersList.slice(0, 3).map((s, i) => (
           <div key={i} style={{ background: "white", border: "1.5px solid #E8DDD0", borderRadius: 14, padding: "1rem 1.1rem", borderLeft: `3px solid ${s.color}` }}>
@@ -4024,7 +4024,7 @@ function PersonalityResults({ myAnswers, partnerAnswers, userName, partnerName, 
       <link href={FONT_URL} rel="stylesheet" />
       <div style={{ fontSize: "0.65rem", textTransform: "uppercase", letterSpacing: "0.18em", color: "rgba(232,103,58,0.8)", fontWeight: 700, marginBottom: "0.4rem", fontFamily: BFONT }}>Communication Action Plan</div>
       <div style={{ fontSize: "clamp(1.6rem,5vw,2.2rem)", fontWeight: 700, color: "white", lineHeight: 1.1, marginBottom: "0.6rem", fontFamily: HFONT }}>{protocols[0]?.title === "Keep checking in" ? "Remarkably well matched." : "Built from your answers."}</div>
-      <p style={{ fontSize: "0.85rem", color: "rgba(255,255,255,0.65)", marginBottom: "1.75rem", lineHeight: 1.7, fontFamily: BFONT, fontWeight: 300 }}>{protocols[0]?.title === "Keep checking in" ? (userName + " and " + partnerName + " are closely aligned across all " + DIMS.length + " communication dimensions. That's genuinely rare, and worth knowing.") : ("Three practices for " + userName + " and " + partnerName + ", drawn from where your answers diverged most.")}</p>
+      <p style={{ fontSize: "0.85rem", color: "rgba(255,255,255,0.65)", marginBottom: "1.75rem", lineHeight: 1.7, fontFamily: BFONT, fontWeight: 300 }}>{protocols[0]?.title === "Keep checking in" ? (userName + " and " + partnerName + " are closely aligned across all " + DIMS.length + " communication dimensions. That's genuinely rare, and worth knowing.") : ("Three practices for " + userName + " and " + partnerName + ", drawn from where you differ most.")}</p>
       <div style={{ display: "flex", flexDirection: "column", gap: "0.85rem", marginBottom: "0.5rem" }}>
         {protocols.slice(0, 3).map((p, i) => (
           <div key={i} style={{ background: "rgba(255,255,255,0.06)", borderRadius: 16, padding: "1.1rem 1.4rem", border: "1px solid rgba(255,255,255,0.1)" }}>
@@ -8455,7 +8455,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
             <div style={{ fontSize: "0.62rem", letterSpacing: "0.22em", textTransform: "uppercase", color: ROSE, fontWeight: 700, fontFamily: BFONT, marginBottom: "0.5rem" }}>Physical Intimacy</div>
             <div style={{ fontSize: "clamp(1.5rem,4vw,2rem)", fontWeight: 700, fontFamily: HFONT, color: C.ink, lineHeight: 1.1, marginBottom: "0.5rem" }}>Conversations worth having</div>
             <p style={{ fontSize: "0.85rem", color: C.muted, fontFamily: BFONT, fontWeight: 300, lineHeight: 1.6, marginBottom: "1.5rem" }}>
-              {misaligned.length ? "Drawn from where your answers differ most. Start with one." : "You line up across the board. These are still worth saying out loud."}
+              {misaligned.length ? "Drawn from where you differ most. Start with one." : "You line up across the board. These are still worth saying out loud."}
             </p>
             <div style={{ display: "flex", flexDirection: "column", gap: "0.85rem" }}>
               {list.map(d => (
