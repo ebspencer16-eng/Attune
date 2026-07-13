@@ -234,16 +234,16 @@ const DIMS = ["energy","expression","needs","bids","listening","conflict","repai
 // dimension. Pole-neutral on purpose: an aligned couple sits on the same pole,
 // but which pole is data-dependent, so each line works for either.
 const ALIGNED_ADVICE = {
-  energy:     "You recharge the same way. That makes it easy to assume the other always wants what you want. Check before you plan the weekend around it.",
-  expression: "You process emotion at the same pace. The risk here isn't friction. It's that neither of you pushes the other toward the part that's harder to say.",
-  needs:      "You ask for things the same way. When you both hint, the hint gets missed by both of you. Say the direct version sometimes anyway.",
+  energy:     "You recharge in similar ways. That makes it easy to assume the other always wants what you want. Check before you plan the weekend around it.",
+  expression: "You process emotion at a similar pace. The risk here isn't friction. It's that neither of you pushes the other toward the part that's harder to say.",
+  needs:      "You ask for things in similar ways. When you both hint, the hint gets missed by both of you. Say the direct version sometimes anyway.",
   bids:       "You both catch the small reaches for connection. Keep catching them out loud. The acknowledgment is what makes a bid land, not just the noticing.",
-  listening:  "You listen the same way. That works until one of you needs the other mode. Ask which one is wanted before you give it.",
-  conflict:   "You handle conflict the same way. If you both engage, it can escalate fast. If you both step back, things go unsaid. Watch for whichever one is yours.",
-  repair:     "You repair the same way. Because it comes naturally to both of you, it's easy to skip naming that a repair happened at all. Say it landed.",
-  love:       "Love lands the same way for both of you. That's rare. Keep giving it in that form on purpose, not just by default.",
-  stress:     "You respond to stress the same way. If you both pull inward, no one reaches first. If you both seek, you can crowd each other. Name which is yours before the next hard week.",
-  feedback:   "You handle feedback the same way. When you're both open, keep it kind. When you're both guarded, small things pile up. Say the small thing early.",
+  listening:  "You listen in similar ways. That works until one of you needs the other mode. Ask which one is wanted before you give it.",
+  conflict:   "You handle conflict in similar ways. If you both engage, it can escalate fast. If you both step back, things go unsaid. Watch for whichever one is yours.",
+  repair:     "You repair in similar ways. Because it comes naturally to both of you, it's easy to skip naming that a repair happened at all. Say it landed.",
+  love:       "Love lands in similar ways for both of you. That's rare. Keep giving it in that form on purpose, not just by default.",
+  stress:     "You respond to stress in similar ways. If you both pull inward, no one reaches first. If you both seek, you can crowd each other. Name which is yours before the next hard week.",
+  feedback:   "You handle feedback in similar ways. When you're both open, keep it kind. When you're both guarded, small things pile up. Say the small thing early.",
 };
 
 // Gap -> label system (playful/warm/direct mix by degree)
@@ -3875,12 +3875,7 @@ function PersonalityResults({ myAnswers, partnerAnswers, userName, partnerName, 
       ];
     }),
     { label: "Profiles & Plan", step: "profiles-section", isSection: true },
-    ...(sameType
-      ? [{ label: "Communication Profile", step: orderedDims.length + 1, isChild: true }]
-      : [
-          { label: userName + "'s Profile", step: orderedDims.length + 1, isChild: true },
-          { label: partnerName + "'s Profile", step: orderedDims.length + 2, isChild: true },
-        ]),
+    { label: sameType ? "Communication Profile" : "Individual Profiles", step: orderedDims.length + 1, isChild: true },
     { label: "Comm. Action Plan", step: orderedDims.length + 3, isChild: true },
   ];
 
@@ -3959,12 +3954,9 @@ function PersonalityResults({ myAnswers, partnerAnswers, userName, partnerName, 
           <div style={{ display: "flex", flexDirection: "column", gap: "0.3rem" }}>
             {[
               { label: "Detailed pages", sub: "One page per dimension", onClick: () => go(1) },
-              ...(sameType
-                ? [{ label: "Communication Profile", sub: "What you share as the same type", onClick: () => go(orderedDims.length + 1) }]
-                : [
-                    { label: userName + "'s profile", sub: userName + "'s communication type", onClick: () => go(orderedDims.length + 1) },
-                    { label: partnerName + "'s profile", sub: partnerName + "'s communication type", onClick: () => go(orderedDims.length + 2) },
-                  ]),
+              sameType
+                ? { label: "Communication Profile", sub: "What you share as the same type", onClick: () => go(orderedDims.length + 1) }
+                : { label: "Individual communication profiles", sub: "Each of your types, and how they meet", onClick: () => go(orderedDims.length + 1) },
               { label: "Communication Action Plan", sub: "Practices built from your results", onClick: () => go(orderedDims.length + 3) },
             ].map(({ label, sub, onClick }, idx) => (
               <div key={idx} onClick={onClick}
@@ -4154,73 +4146,70 @@ function PersonalityResults({ myAnswers, partnerAnswers, userName, partnerName, 
       );
     }
 
-    const isMyPage = step === orderedDims.length + 1;
-    const personName  = isMyPage ? userName    : partnerName;
-    const partnerDisplayName = isMyPage ? partnerName : userName;
-    const personScores  = isMyPage ? myS  : partS;
-
-    // ── Individual type for this person ──────────────────────────────────────
-    const personTypeInfo = computeIndividualType(personScores);
-    const personType = INDIVIDUAL_TYPES[personTypeInfo.typeCode];
-    const pageColor = personType.color;
-    const pageBg = {
-      W: "linear-gradient(145deg, #1c0e06, #2e1a0e, #1c0e06)",
-      X: "linear-gradient(145deg, #060d2a, #0f1c48, #060d2a)",
-      Y: "linear-gradient(145deg, #100720, #1e0d3a, #100720)",
-      Z: "linear-gradient(145deg, #0d0d0d, #1a1a1a, #0d0d0d)",
-    }[personTypeInfo.typeCode] || "linear-gradient(145deg, #0f0c29, #302b63, #24243e)";
-
-    // ── Partner perspective lookup ────────────────────────────────────────────
-    // Determine which index to use: typeA is alphabetically first in coupleType.id
+    // ── CROSS-TYPE COUPLES: one page, a tile per person, then one tile on how
+    //    the two types meet. (6.4 — was two near-identical pages.)
     const myTypeCode   = computeIndividualType(myS).typeCode;
     const partTypeCode = computeIndividualType(partS).typeCode;
     const coupleId = coupleType?.id || [myTypeCode, partTypeCode].sort().join("");
     const perspectives = PARTNER_PERSPECTIVE[coupleId];
-    // Figure out which perspective index applies to this person
-    // typeA = alphabetically first code in the sorted coupleId
     const sortedCodes = [myTypeCode, partTypeCode].sort();
-    const thisCode = isMyPage ? myTypeCode : partTypeCode;
-    const perspIdx = (thisCode === sortedCodes[0] && coupleId[0] === sortedCodes[0]) ? 0 : 1;
-    const partnerPerspective = perspectives ? perspectives[perspIdx] : "Your partner processes and responds differently than you do, understanding that difference is what makes this pairing interesting.";
+    const perspFor = code => {
+      const idx = (code === sortedCodes[0] && coupleId[0] === sortedCodes[0]) ? 0 : 1;
+      return perspectives ? perspectives[idx] : "Your partner processes and responds differently than you do. Understanding that difference is what makes this pairing interesting.";
+    };
+
+    const people = [
+      { name: userName, partner: partnerName, code: myTypeCode, type: INDIVIDUAL_TYPES[myTypeCode], perspective: perspFor(myTypeCode) },
+      { name: partnerName, partner: userName, code: partTypeCode, type: INDIVIDUAL_TYPES[partTypeCode], perspective: perspFor(partTypeCode) },
+    ];
+    const pageColor = "#E8673A";
 
     return (
     <MaybeNav noSideNav={noSideNav} navItems={personalityNavItems} currentStep={step} onGo={go} accent={pageColor}>
-      <ResultsSlide bg={pageBg}>
+      <ResultsSlide bg="linear-gradient(145deg, #0f0c29, #302b63, #24243e)">
         <link href={FONT_URL} rel="stylesheet" />
         <div style={{ color: "white" }}>
 
-          {/* ── Header: name + type badge ── */}
-          <div style={{ marginBottom: "1.75rem" }}>
-            <div style={{ fontSize: "0.65rem", textTransform: "uppercase", letterSpacing: "0.2em", color: "rgba(255,255,255,0.38)", marginBottom: "0.55rem", fontFamily: BFONT }}>Communication Profile</div>
-            <div style={{ fontSize: "clamp(1.8rem,6vw,2.8rem)", fontWeight: 700, fontFamily: HFONT, lineHeight: 1.0, marginBottom: "0.65rem" }}>{personName}</div>
-            <div style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", background: pageColor + "22", border: `1px solid ${pageColor}50`, borderRadius: 999, padding: "0.3rem 0.85rem" }}>
-              <div style={{ width: 7, height: 7, borderRadius: "50%", background: pageColor, flexShrink: 0 }} />
-              <span style={{ fontSize: "0.72rem", fontWeight: 700, color: pageColor, fontFamily: BFONT, letterSpacing: "0.06em" }}>{personType.name}</span>
-              <span style={{ fontSize: "0.65rem", color: "rgba(255,255,255,0.35)", fontFamily: BFONT }}>· {personType.axis1} · {personType.axis2}</span>
-            </div>
+          {/* ── Header ── */}
+          <div style={{ marginBottom: "1.5rem" }}>
+            <div style={{ fontSize: "0.65rem", textTransform: "uppercase", letterSpacing: "0.2em", color: "rgba(255,255,255,0.38)", marginBottom: "0.55rem", fontFamily: BFONT }}>Individual communication profiles</div>
+            <div style={{ fontSize: "clamp(1.7rem,5.5vw,2.5rem)", fontWeight: 700, fontFamily: HFONT, lineHeight: 1.05 }}>Two types, one conversation.</div>
           </div>
 
-          {/* ── Section 2: Your type ── */}
-          <div style={{ background: "rgba(255,255,255,0.04)", borderRadius: 16, padding: "1.1rem 1.25rem", marginBottom: "0.85rem", borderLeft: `3px solid ${pageColor}80` }}>
-            <div style={{ display: "flex", alignItems: "center", gap: "0.6rem", marginBottom: "0.6rem" }}>
-              <div style={{ fontSize: "0.6rem", textTransform: "uppercase", letterSpacing: "0.18em", color: pageColor, fontWeight: 700, fontFamily: BFONT }}>Your type</div>
-              <div style={{ fontSize: "0.75rem", fontWeight: 700, color: "rgba(255,255,255,0.9)", fontFamily: HFONT }}>Type {personTypeInfo.typeCode} · {personType.name}</div>
-            </div>
-            <p style={{ fontSize: "0.86rem", color: "rgba(255,255,255,0.82)", fontFamily: BFONT, fontWeight: 300, lineHeight: 1.72, margin: 0 }}>{personType.typeDesc}</p>
+          {/* ── A tile per person ── */}
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: "0.85rem", marginBottom: "0.85rem" }}>
+            {people.map(pp => (
+              <div key={pp.name} style={{ background: "rgba(255,255,255,0.04)", borderRadius: 16, padding: "1.1rem 1.25rem", borderLeft: `3px solid ${pp.type.color}` }}>
+                <div style={{ fontSize: "1.25rem", fontWeight: 700, fontFamily: HFONT, marginBottom: "0.5rem" }}>{pp.name}</div>
+                <div style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", background: pp.type.color + "22", border: `1px solid ${pp.type.color}50`, borderRadius: 999, padding: "0.28rem 0.8rem", marginBottom: "0.7rem" }}>
+                  <div style={{ width: 7, height: 7, borderRadius: "50%", background: pp.type.color, flexShrink: 0 }} />
+                  <span style={{ fontSize: "0.7rem", fontWeight: 700, color: pp.type.color, fontFamily: BFONT, letterSpacing: "0.06em" }}>{pp.type.name}</span>
+                  <span style={{ fontSize: "0.62rem", color: "rgba(255,255,255,0.35)", fontFamily: BFONT }}>· {pp.type.axis1} · {pp.type.axis2}</span>
+                </div>
+                <p style={{ fontSize: "0.85rem", color: "rgba(255,255,255,0.82)", fontFamily: BFONT, fontWeight: 300, lineHeight: 1.7, margin: 0 }}>{pp.type.typeDesc}</p>
+              </div>
+            ))}
           </div>
 
-          {/* ── Section 3: With [partner] specifically ── */}
+          {/* ── One tile on how the two types meet ── */}
           <div style={{ background: `${pageColor}18`, borderRadius: 16, padding: "1.25rem", border: `1px solid ${pageColor}45` }}>
-            <div style={{ fontSize: "0.6rem", textTransform: "uppercase", letterSpacing: "0.18em", color: pageColor, fontWeight: 700, marginBottom: "0.55rem", fontFamily: BFONT }}>With {partnerDisplayName} specifically</div>
-            <p style={{ fontSize: "0.88rem", color: "rgba(255,255,255,0.88)", fontFamily: BFONT, fontWeight: 400, lineHeight: 1.75, margin: 0 }}>{partnerPerspective}</p>
+            <div style={{ fontSize: "0.6rem", textTransform: "uppercase", letterSpacing: "0.18em", color: pageColor, fontWeight: 700, marginBottom: "0.85rem", fontFamily: BFONT }}>Communicating with each other</div>
+            <div style={{ display: "flex", flexDirection: "column", gap: "0.9rem" }}>
+              {people.map(pp => (
+                <div key={pp.name}>
+                  <div style={{ fontSize: "0.72rem", fontWeight: 700, color: pp.type.color, fontFamily: BFONT, marginBottom: "0.25rem" }}>{pp.name} with {pp.partner}</div>
+                  <p style={{ fontSize: "0.88rem", color: "rgba(255,255,255,0.88)", fontFamily: BFONT, fontWeight: 400, lineHeight: 1.75, margin: 0 }}>{pp.perspective}</p>
+                </div>
+              ))}
+            </div>
           </div>
 
         </div>
 
         <NavButtons
-          onBack={() => go(step - 1)}
-          onNext={() => go(step + 1)}
-          nextLabel={isMyPage ? (partnerName + "'s Profile →") : "Communication Action Plan →"}
+          onBack={() => go(orderedDims.length)}
+          onNext={() => go(orderedDims.length + 3)}
+          nextLabel={"Communication Action Plan →"}
         />
       </ResultsSlide>
     </MaybeNav>
