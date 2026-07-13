@@ -3321,11 +3321,11 @@ function JointOverview({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Answ
     if (!m1) return { tag: "A distinctive communication style." };
     const end1 = scores[d1] < 3 ? m1.ends[0] : m1.ends[1];
     const end2 = d2 && m2 ? (scores[d2] < 3 ? m2.ends[0] : m2.ends[1]) : null;
-    // Natural-language descriptions instead of "X in Y" construction
-    const desc1 = scores[d1] < 3
-      ? ("Tends toward " + end1.toLowerCase() + " when it comes to " + m1.label.toLowerCase())
-      : ("Tends toward " + end1.toLowerCase() + " when it comes to " + m1.label.toLowerCase());
-    const desc2 = end2 ? (". " + (scores[d2] < 3 ? "More " : "More ") + end2.toLowerCase() + " around " + m2.label.toLowerCase()) : "";
+    const cap = s => s ? s.charAt(0).toUpperCase() + s.slice(1) : s;
+    // Declarative, no "tends toward" hedge (reads as an AI tell, and both
+    // partners carrying it made it worse).
+    const desc1 = cap(end1.toLowerCase()) + " when it comes to " + m1.label.toLowerCase();
+    const desc2 = end2 ? (". More " + end2.toLowerCase() + " around " + m2.label.toLowerCase()) : "";
     return { tag: desc1 + desc2 + "." };
   };
   const myProfile = makeProfile(myS, userName);
@@ -7722,14 +7722,15 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
 
 
 
-          {/* ── WORKBOOK CTA ── */}
+          {/* ── WORKBOOK CTA ── copy branches on ownership (10.1) ── */}
           <div style={{ background: `${ct.color}0d`, border: `1px solid ${ct.color}25`, borderRadius: 14, padding: "1rem 1.25rem", marginBottom: "1.25rem", display: "flex", alignItems: "center", justifyContent: "space-between", gap: "1rem", flexWrap: "wrap" }}>
             <p style={{ fontSize: "0.82rem", color: C.ink, fontFamily: BFONT, lineHeight: 1.55, margin: 0 }}>
-              Like what you're seeing? Explore more curated, practical guidance in your{" "}
-              <span style={{ fontWeight: 600 }}>personalized workbook.</span>
+              {hasWorkbook
+                ? <>Your <span style={{ fontWeight: 600 }}>personalized workbook</span> is available in your dashboard.</>
+                : <>Like what you're seeing? There's more practical guidance built from your answers in your{" "}<span style={{ fontWeight: 600 }}>personalized workbook.</span></>}
             </p>
-            <a href="/offerings#workbook" style={{ fontSize: "0.78rem", fontWeight: 700, color: ct.color, fontFamily: BFONT, textDecoration: "none", whiteSpace: "nowrap", display: "flex", alignItems: "center", gap: "0.3rem" }}>
-              See workbook details →
+            <a href={hasWorkbook ? "/app" : "/offerings#workbook"} style={{ fontSize: "0.78rem", fontWeight: 700, color: ct.color, fontFamily: BFONT, textDecoration: "none", whiteSpace: "nowrap", display: "flex", alignItems: "center", gap: "0.3rem" }}>
+              {hasWorkbook ? "Go to dashboard →" : "Purchase your personalized workbook →"}
             </a>
           </div>
 
