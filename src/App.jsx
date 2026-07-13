@@ -1625,7 +1625,7 @@ const NEW_COUPLE_TYPES = [
     ],
     strengths: [
       "The reaching partner creates space for emotional honesty in the relationship. The reserved partner creates depth beneath the surface.",
-      "When the reserved one does share, it carries real weight, and the reaching partner has usually created the safety for it to land.",
+      "When {WDR} does share, it carries real weight, and {RCH} has usually created the safety for it to land.",
       "You've both had to stretch toward each other in ways that have probably made you more capable partners.",
     ],
     stickingPoints: [
@@ -3559,65 +3559,6 @@ function JointOverview({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Answ
             </div>
             <div style={{ display: "flex", justifyContent: "flex-end" }}>
               <span style={{ fontSize: "0.7rem", color: "#1B5FE8", fontWeight: 700, fontFamily: BFONT }}>Explore →</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* 3 key insights */}
-      <div style={{ background: "#FFFDF9", border: "1px solid #E8DDD0", borderRadius: 18, padding: "1.5rem", marginBottom: "1.25rem" }}>
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "1.25rem" }}><div style={{ fontSize: "0.62rem", textTransform: "uppercase", letterSpacing: "0.15em", color: C.clay, fontWeight: 700, fontFamily: BFONT }}>Four things to know about you two</div><div style={{ fontSize: "0.6rem", color: C.muted, fontFamily: BFONT }}>Based on your answers</div></div>
-        <div style={{ display: "flex", flexDirection: "column", gap: "1.1rem" }}>
-          {/* Insight 1 */}
-          <div style={{ paddingLeft: "0.85rem", borderLeft: "2.5px solid #9B5DE5" }}>
-            <div style={{ fontSize: "0.85rem", fontWeight: 700, color: C.ink, marginBottom: "0.3rem", fontFamily: BFONT, lineHeight: 1.3 }}>
-              {topStrengths.length > 0
-                ? (userName + " and " + partnerName + " are naturally in sync on " + topStrengths.slice(0,2).map(f => DIM_META[f.dim].label.toLowerCase()).join(" and "))
-                : (userName + " and " + partnerName + " share a compatible emotional register")}
-            </div>
-            <div style={{ fontSize: "0.78rem", color: C.muted, fontFamily: BFONT, lineHeight: 1.6, fontWeight: 300 }}>
-              {topStrengths.length > 0
-                ? "That shared orientation reduces a whole category of quiet friction that other couples navigate without realising."
-                : "That foundation makes hard moments easier to recover from."}
-            </div>
-          </div>
-          {/* Insight 2 */}
-          <div style={{ paddingLeft: "0.85rem", borderLeft: "2.5px solid #E8673A" }}>
-            <div style={{ fontSize: "0.85rem", fontWeight: 700, color: C.ink, marginBottom: "0.3rem", fontFamily: BFONT, lineHeight: 1.3 }}>
-              {topOpportunities.length > 0
-                ? (userName + " and " + partnerName + " are furthest apart on " + DIM_META[topOpportunities[0].dim].label.toLowerCase())
-                : (userName + " and " + partnerName + " are closely matched across all dimensions")}
-            </div>
-            <div style={{ fontSize: "0.78rem", color: C.muted, fontFamily: BFONT, lineHeight: 1.6, fontWeight: 300 }}>
-              {topOpportunities.length > 0
-                ? ("This difference shapes how each of you reads situations. Understanding it, not resolving it, is what changes things.")
-                : ("The work now is staying curious rather than assuming you already know how the other person is wired.")}
-            </div>
-          </div>
-          {/* Insight 3 */}
-          <div style={{ paddingLeft: "0.85rem", borderLeft: "2.5px solid #1B5FE8" }}>
-            <div style={{ fontSize: "0.85rem", fontWeight: 700, color: C.ink, marginBottom: "0.3rem", fontFamily: BFONT, lineHeight: 1.3 }}>
-              {gapCount === 0
-                ? (userName + " and " + partnerName + " are aligned on every expectation mapped")
-                : (userName + " and " + partnerName + " share " + alignedCount + " of " + allRows.length + " expectations already")}
-            </div>
-            <div style={{ fontSize: "0.78rem", color: C.muted, fontFamily: BFONT, lineHeight: 1.6, fontWeight: 300 }}>
-              {gapCount === 0
-                ? "That's a genuinely strong foundation, and now it's documented."
-                : "That's the common ground the conversations below build on."}
-            </div>
-          </div>
-          {/* Insight 4 */}
-          <div style={{ paddingLeft: "0.85rem", borderLeft: "2.5px solid #10b981" }}>
-            <div style={{ fontSize: "0.85rem", fontWeight: 700, color: C.ink, marginBottom: "0.3rem", fontFamily: BFONT, lineHeight: 1.3 }}>
-              {gapCount === 0
-                ? "No unspoken assumptions surfaced"
-                : (gapCount + " place" + (gapCount === 1 ? "" : "s") + " where " + userName + " and " + partnerName + " have different assumptions")}
-            </div>
-            <div style={{ fontSize: "0.78rem", color: C.muted, fontFamily: BFONT, lineHeight: 1.6, fontWeight: 300 }}>
-              {gapCount === 0
-                ? "Worth revisiting as life changes, what feels aligned today can quietly drift."
-                : "These aren't red flags. They're exactly the conversations most couples never have in advance."}
             </div>
           </div>
         </div>
@@ -9488,9 +9429,6 @@ function ResultsHighlights({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3
             style={{ background: "rgba(255,255,255,0.07)", color: "rgba(255,255,255,0.75)", border: "1px solid rgba(255,255,255,0.15)", borderRadius: 14, padding: "0.85rem 2.25rem", fontSize: "0.78rem", fontWeight: 600, cursor: "pointer", fontFamily: BFONT, letterSpacing: "0.04em", marginBottom: "1.75rem", width: "100%", maxWidth: 300, animation: "popIn 0.5s 0.32s cubic-bezier(0.34,1.56,0.64,1) both" }}>
             Download this overview ↓
           </button>
-          <div style={{ fontSize: "0.65rem", color: "rgba(255,255,255,0.28)", fontFamily: BFONT, lineHeight: 1.65, maxWidth: 230, animation: "fadeUp 0.4s 0.42s both" }}>
-            10 dimensions · side-by-side expectations · your couple type
-          </div>
         </div>
       </div>
     </WrappedCard>,
