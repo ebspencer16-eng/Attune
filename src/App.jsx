@@ -3887,35 +3887,6 @@ function PersonalityResults({ myAnswers, partnerAnswers, userName, partnerName, 
           <p style={{ fontSize: "0.72rem", color: "rgba(255,255,255,0.32)", fontFamily: BFONT, fontWeight: 300, lineHeight: 1.55, margin: "0.6rem 0 0" }}>Tap any dimension below to read the full picture.</p>
         </div>
 
-        {/* ── COUPLE TYPE CALLOUT ── */}
-        {coupleType && (() => {
-          const COMM_COUPLE_CONTEXT = {
-            WW: "Two Initiators both express openly and engage quickly. The risk isn't silence, it's two people talking before either has fully heard the other.",
-            XX: "Two Anchors process privately, then push toward resolution. Make sure the internal work gets said out loud rather than only acted on.",
-            YY: "Two Feelers both feel deeply and need space first. Give each other the runway before the conversation, it lands better when you do.",
-            ZZ: "Two Protectors both hold things close. Build a deliberate habit of saying what's going on before it goes unsaid for too long.",
-            WX: "One of you expresses readily; the other processes first. The one who speaks first isn't more invested, just faster to externalize.",
-            WY: "Different clocks here. One reaches for the conversation; the other needs a moment before it's possible. Neither is pushing or avoiding.",
-            WZ: "The Initiator will open the conversation; The Protector needs time to respond. That gap is wiring, not avoidance, name it so neither misreads the other.",
-            XY: "The Anchor wants to resolve; The Feeler needs space to process. Build a return window so the conversation isn't rushed or dropped.",
-            XZ: "Both of you keep things close. What goes unspoken can accumulate quietly, say the small things before they become big ones.",
-            YZ: "Both withdraw under pressure. When something's hard, agree in advance on who comes back first so neither waits indefinitely.",
-          };
-          const ctCode = (coupleType?.typeInfoA?.typeCode || "") + (coupleType?.typeInfoB?.typeCode || "");
-          const ctPairKey = ctCode ? ctCode.split("").sort().join("") : null;
-          const ctContext = ctPairKey ? COMM_COUPLE_CONTEXT[ctPairKey] : null;
-          if (!coupleType?.name || !ctContext) return null;
-          return (
-            <div style={{ display: "flex", alignItems: "flex-start", gap: "0.55rem", background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.12)", borderRadius: 10, padding: "0.7rem 0.85rem", marginBottom: "1rem" }}>
-              <div style={{ width: 6, height: 6, borderRadius: "50%", background: coupleType?.color, flexShrink: 0, marginTop: 5 }}/>
-              <p style={{ fontSize: "0.74rem", color: "rgba(255,255,255,0.65)", fontFamily: BFONT, fontWeight: 300, lineHeight: 1.6, margin: 0 }}>
-                <span style={{ fontWeight: 700, color: "rgba(255,255,255,0.88)" }}>{coupleType.name}: </span>
-                {ctContext}
-              </p>
-            </div>
-          );
-        })()}
-
         {/* ── COMPARISON BARS GRAPHIC ── */}
         <div style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 14, padding: "1rem 1.1rem", marginBottom: "1rem" }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.7rem" }}>
@@ -13515,8 +13486,6 @@ export default function App() {
                 <div style={{ marginBottom: "2rem" }}>
                   <DashStepHeader num="3" title="Continue growing together" sub="Tools, sessions, and reading to take this further." isMobile={isMobile} />
                   <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
-                    {pkg.hasBudget && <DashTile color="#C17F47" eyebrow="Included" title="Shared Budget Builder" sub="Build a financial plan together from your results." cta="Open →" onClick={() => setView("budget")} />}
-                    {pkg.hasChecklist && <DashTile color="#C17F47" eyebrow="Included" title="Starting Out Checklist" sub="A practical guide to starting your life together." cta="Open →" onClick={() => setView("checklist")} />}
                     {hasWorkbookOrder
                       ? <DashTile color="#9B5DE5" eyebrow="Included"
                           title={workbookReady ? "Your personalized workbook is ready" : "Your personalized workbook"}
@@ -13525,6 +13494,8 @@ export default function App() {
                           onClick={workbookReady ? () => setView("workbook") : undefined}
                           disabled={!workbookReady} />
                       : <DashTile color="#9B5DE5" eyebrow="Add-on" title="The Personalized Workbook" sub="A printable workbook built around your results and couple type. From $19." cta="Add →" onClick={() => setView("workbook")} />}
+                    {pkg.hasBudget && <DashTile color="#C17F47" eyebrow="Included" title="Shared Budget Builder" sub="Build a financial plan together from your results." cta="Open →" onClick={() => setView("budget")} />}
+                    {pkg.hasChecklist && <DashTile color="#C17F47" eyebrow="Included" title="Starting Out Checklist" sub="A practical guide to starting your life together." cta="Open →" onClick={() => setView("checklist")} />}
                     {/* Intimacy is now a full exercise (Step 1); only show the upsell here for non-owners. */}
                     {!pkg.hasIntimacy && <DashTile color="#B5546E" eyebrow="Add-on" title="Intimacy Expectations" sub="A private set of questions about what you each expect about physical intimacy. Answered independently, compared side by side. $20." cta="Add →" onClick={() => setUpsellModal({ product: 'intimacy', cartAdded: false })} />}
                     {pkg.hasLMFT
