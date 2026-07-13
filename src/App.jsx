@@ -7978,7 +7978,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
           coupleTypeColor={(() => { try { return deriveNewCoupleType(myS, partS)?.color || "#1B5FE8"; } catch { return "#1B5FE8"; } })()}
           userName={userName} partnerName={partnerName}
           forcedSection={expSection}
-          onGoWhatComesNext={() => go("what-comes-next")}
+          onGoWhatComesNext={() => go(hasAnniversary ? "reflection-overview" : intimacyBothDone ? "intimacy-overview" : "what-comes-next")}
           onExternalGo={s => {
             if (s === 0) go("exp-overview");
             else if (s === 1) go("exp-common-ground");
@@ -14380,21 +14380,6 @@ export default function App() {
           <div style={{ position: "fixed", top: 56, left: 0, right: 0, bottom: 60, display: "flex", flexDirection: "column", overflow: "hidden", zIndex: 50, background: C.warm, paddingBottom: "env(safe-area-inset-bottom)" }}>
             <div style={{ background: "rgba(255,253,249,0.97)", backdropFilter: "blur(12px)", borderBottom: ("1px solid " + (C.stone)), padding: isMobile ? "0.75rem 1rem" : "0.9rem 1.5rem", flexShrink: 0, display: "flex", alignItems: "center", gap: "0.5rem" }}>
               <button onClick={() => setView("home")} style={{ background: "transparent", border: "none", color: C.clay, fontSize: isMobile ? "1.4rem" : "0.72rem", lineHeight: 1, letterSpacing: isMobile ? "0" : "0.1em", textTransform: "uppercase", cursor: "pointer", fontFamily: font.body, padding: isMobile ? "0.25rem 0.5rem 0.25rem 0" : 0, fontWeight: 600, flexShrink: 0, display: "flex", alignItems: "center" }} aria-label="Back to dashboard">← {isMobile ? "" : "Dashboard"}</button>
-              {activeResult !== "overview" && (
-                <>
-                  {!isMobile && <span style={{ color: C.clay, fontSize: "1rem", fontWeight: 700, lineHeight: 1, margin: "0 4px", opacity: 0.7 }}>›</span>}
-                  {!isMobile && <button onClick={() => { setActiveResult("overview"); document.querySelector("[data-results-scroll]") && (document.querySelector("[data-results-scroll]").scrollTop = 0); }}
-                    style={{ background: "transparent", border: "none", color: C.clay, fontSize: "0.72rem", letterSpacing: "0.1em", textTransform: "uppercase", cursor: "pointer", fontFamily: font.body, padding: 0, fontWeight: 600 }}>Overview</button>}
-                  <span style={{ color: C.clay, fontSize: isMobile ? "0.9rem" : "1rem", fontWeight: 700, lineHeight: 1, margin: "0 4px", opacity: 0.7 }}>›</span>
-                  <span style={{ fontSize: "0.72rem", letterSpacing: "0.1em", textTransform: "uppercase", color: C.ink, fontFamily: font.body, fontWeight: 700, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                    {activeResult === "personality" || activeResult?.startsWith("comm") ? "Comms"
-                      : activeResult === "expectations" || activeResult?.startsWith("exp") ? "Expectations"
-                      : activeResult?.startsWith("reflection") ? "Reflection"
-                      : activeResult === "what-comes-next" ? "What's Next"
-                      : activeResult || "Results"}
-                  </span>
-                </>
-              )}
               {/* Beta feedback entry point lives in the results-end card (branches on isBetaTester) */}
             </div>
             {/* Mobile sticky sub-section nav */}
