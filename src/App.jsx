@@ -1974,6 +1974,24 @@ function DashTile({ color, eyebrow, title, sub, cta, onClick, href, disabled = f
   return <div onClick={disabled ? undefined : onClick} style={style} onMouseEnter={onEnter} onMouseLeave={onLeave}>{inner}</div>;
 }
 
+// 10.8 — In Practice guides render as square icon tiles in a grid, not as
+// another horizontal row in the stacked list above them.
+function GuideSquare({ color = "#9B5DE5", icon, title, sub, href }) {
+  return (
+    <a href={href}
+      style={{ display: "flex", flexDirection: "column", aspectRatio: "1 / 1", background: "white", border: "1.5px solid #E8DDD0", borderRadius: 16, padding: "1.1rem", textDecoration: "none", transition: "box-shadow .15s, border-color .15s" }}
+      onMouseEnter={e => { e.currentTarget.style.boxShadow = "0 4px 18px rgba(0,0,0,.06)"; e.currentTarget.style.borderColor = color; }}
+      onMouseLeave={e => { e.currentTarget.style.boxShadow = "none"; e.currentTarget.style.borderColor = "#E8DDD0"; }}>
+      <div style={{ width: 38, height: 38, borderRadius: 11, background: color + "1f", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, marginBottom: "0.75rem" }}>
+        {icon}
+      </div>
+      <div style={{ fontSize: "0.85rem", fontWeight: 700, color: "#0E0B07", fontFamily: BFONT, lineHeight: 1.3, marginBottom: "0.3rem" }}>{title}</div>
+      <div style={{ fontSize: "0.72rem", color: "#8C7A68", fontFamily: BFONT, fontWeight: 300, lineHeight: 1.5 }}>{sub}</div>
+      <div style={{ marginTop: "auto", fontSize: "0.75rem", fontWeight: 700, color, fontFamily: BFONT }}>Read →</div>
+    </a>
+  );
+}
+
 function CoupleTypeCard({ coupleType, userName, partnerName, onClick }) {
   if (!coupleType) return null;
   const { name, tagline, description, nuance, color } = coupleType;
@@ -7249,6 +7267,32 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
     })();
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
+  // 10.2 / 10.3 — the left nav keeps its scroll position when the page changes,
+  // and the active item scrolls into view only when it sits outside the visible
+  // part of the nav.
+  const sidebarRef = useRef(null);
+  const sidebarScroll = useRef(0);
+  useEffect(() => {
+    const el = sidebarRef.current;
+    if (!el) return;
+    const onScroll = () => { sidebarScroll.current = el.scrollTop; };
+    el.addEventListener("scroll", onScroll, { passive: true });
+    return () => el.removeEventListener("scroll", onScroll);
+  }, []);
+  useLayoutEffect(() => {
+    const el = sidebarRef.current;
+    if (!el) return;
+    if (el.scrollTop !== sidebarScroll.current) el.scrollTop = sidebarScroll.current;
+    const active = el.querySelector('[data-nav-active="true"]');
+    if (!active) return;
+    const itemTop = active.offsetTop;
+    const itemBottom = itemTop + active.offsetHeight;
+    if (itemTop < el.scrollTop + 8 || itemBottom > el.scrollTop + el.clientHeight - 8) {
+      active.scrollIntoView({ block: "nearest" });
+      sidebarScroll.current = el.scrollTop;
+    }
+  });
+
   const go = (sec) => {
     setSection(sec);
     if (sec.startsWith("comm")) setCommExpanded(true);
@@ -7327,7 +7371,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
                 else if (sec.id === "reflection") { setReflExpanded(e => !e); if (!reflExpanded) go("reflection-overview"); }
                 else if (sec.id === "intimacy") { setIntimExpanded(e => !e); if (!intimExpanded) go("intimacy-overview"); }
               } else { go(sec.id); }
-            }} style={{ width: "100%", background: (section === sec.id) ? color + "15" : "transparent", border: "none", borderRadius: 8, padding: "0.5rem 0.65rem", display: "flex", alignItems: "center", justifyContent: "space-between", cursor: "pointer", fontFamily: BFONT, transition: "background .15s" }}>
+            }} data-nav-active={section === sec.id ? "true" : undefined} style={{ width: "100%", background: (section === sec.id) ? color + "15" : "transparent", border: "none", borderRadius: 8, padding: "0.5rem 0.65rem", display: "flex", alignItems: "center", justifyContent: "space-between", cursor: "pointer", fontFamily: BFONT, transition: "background .15s" }}>
               <span style={{ fontSize: "0.75rem", fontWeight: isActive ? 700 : 500, color: isActive ? color : "#8C7A68" }}>{sec.icon && <span style={{ marginRight: "0.4rem", fontSize: "0.65rem", opacity: 0.7 }}>{sec.icon}</span>}{sec.label}</span>
               {sec.children && <span style={{ fontSize: "0.65rem", color: "#8C7A68", opacity: 0.6 }}>{isExpanded ? "▾" : "▸"}</span>}
             </button>
@@ -7344,7 +7388,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
                   }
                   const childColor = child.color || color;
                   return (
-                    <button key={child.id} onClick={() => go(child.id)} style={{ background: section === child.id ? childColor + "12" : "transparent", border: "none", borderLeft: section === child.id ? `2px solid ${childColor}` : "2px solid transparent", borderRadius: "0 6px 6px 0", padding: child.isDeepChild ? "0.25rem 0.6rem 0.25rem 1.25rem" : "0.35rem 0.6rem", textAlign: "left", cursor: "pointer", fontFamily: BFONT, transition: "all .12s" }}>
+                    <button key={child.id} data-nav-active={section === child.id ? "true" : undefined} onClick={() => go(child.id)} style={{ background: section === child.id ? childColor + "12" : "transparent", border: "none", borderLeft: section === child.id ? `2px solid ${childColor}` : "2px solid transparent", borderRadius: "0 6px 6px 0", padding: child.isDeepChild ? "0.25rem 0.6rem 0.25rem 1.25rem" : "0.35rem 0.6rem", textAlign: "left", cursor: "pointer", fontFamily: BFONT, transition: "all .12s" }}>
                       <span style={{ fontSize: child.isDeepChild ? "0.65rem" : "0.7rem", fontWeight: section === child.id ? 700 : 400, color: section === child.id ? childColor : child.isDeepChild ? "#AAA098" : "#8C7A68" }}>{child.label}</span>
                     </button>
                   );
@@ -7438,7 +7482,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
       <style>{`@media(max-width:680px){.mobile-tabs{display:block!important}.desktop-sidebar{display:none!important}}`}</style>
       <div style={{ display: "flex", gap: "0", alignItems: "flex-start" }}>
         {/* Sidebar: sticky + its own scroll context so wheel events stay in the nav */}
-        <div className="desktop-sidebar" style={{
+        <div className="desktop-sidebar" ref={sidebarRef} style={{
           position: "sticky",
           top: 0,
           paddingTop: "1.25rem",
@@ -8642,40 +8686,29 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
             };
 
             return (
-              <div style={{ background: "#2d2250", borderRadius: 18, padding: "1.75rem 2rem", marginBottom: "1.5rem" }}>
-                <div style={{ fontSize: "0.58rem", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(232,103,58,0.85)", fontFamily: BFONT, fontWeight: 700, marginBottom: "0.6rem" }}>Personalized workbook</div>
-                <div style={{ fontFamily: HFONT, fontSize: "1.2rem", fontWeight: 700, color: "white", lineHeight: 1.2, marginBottom: "0.6rem" }}>Download your personalized workbook.</div>
-                <p style={{ fontSize: "0.82rem", color: "rgba(255,255,255,0.65)", fontFamily: BFONT, fontWeight: 300, lineHeight: 1.65, marginBottom: "0.75rem" }}>
-                  Built from {userName} and {partnerName}'s actual scores and calibrated to your results. Generated instantly as a .docx.
-                </p>
-                <div style={{ display: "flex", flexDirection: "column", gap: "0.35rem", marginBottom: "1.1rem" }}>
-                  {[
-                    { icon: "◈", label: "Guided exercises", desc: "Structured activities drawn from your top gap dimensions" },
-                    { icon: "✦",  label: "Conversation prompts", desc: "Questions specific to where you and " + partnerName + " diverge most" },
-                    { icon: "📋", label: "Expectations discussion guide", desc: "Topics to work through from your expectations comparison" },
-                  ].map(({ icon, label, desc }) => (
-                    <div key={label} style={{ display: "flex", gap: "0.65rem", alignItems: "flex-start" }}>
-                      <div style={{ width: 22, height: 22, borderRadius: 6, background: "rgba(232,103,58,0.2)", border: "1px solid rgba(232,103,58,0.35)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, marginTop: "0.05rem" }}>
-                        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="rgba(232,103,58,0.9)" strokeWidth="2.5" strokeLinecap="round"><polyline points="20 6 9 17 4 12"/></svg>
-                      </div>
-                      <div>
-                        <span style={{ fontSize: "0.78rem", fontWeight: 600, color: "rgba(255,255,255,0.88)", fontFamily: BFONT }}>{label}</span>
-                        <span style={{ fontSize: "0.72rem", color: "rgba(255,255,255,0.45)", fontFamily: BFONT }}> · {desc}</span>
-                      </div>
-                    </div>
-                  ))}
+              // 10.1 — owned workbook reads as one of the "keep growing" tools,
+              // not as a navy add-on pitch.
+              <div style={{ background: C.warm, border: `1.5px solid ${C.stone}`, borderRadius: 16, padding: "1.25rem 1.4rem", marginBottom: "1.25rem", transition: "all 0.15s" }}
+                onMouseEnter={e => { e.currentTarget.style.borderColor = C.clay; }}
+                onMouseLeave={e => { e.currentTarget.style.borderColor = C.stone; }}>
+                <div style={{ display: "flex", alignItems: "center", gap: "1rem", marginBottom: "0.85rem" }}>
+                  <div style={{ width: 34, height: 34, borderRadius: 10, background: "rgba(155,93,229,0.12)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9B5DE5" strokeWidth="1.8" strokeLinecap="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+                  </div>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontSize: "0.8rem", fontWeight: 700, color: C.ink, fontFamily: BFONT, marginBottom: "0.1rem" }}>Your personalized workbook</div>
+                    <div style={{ fontSize: "0.68rem", color: C.muted, fontFamily: BFONT }}>Exercises, prompts, and a discussion guide built from your answers</div>
+                  </div>
                 </div>
                 <div style={{ display: "flex", gap: "0.65rem", flexWrap: "wrap", alignItems: "center" }}>
                   <button onClick={buildAndDownload}
-                    style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", background: "linear-gradient(135deg, #E8673A, #1B5FE8)", color: "white", borderRadius: 10, padding: "0.65rem 1.4rem", border: "none", cursor: "pointer", fontSize: "0.8rem", fontWeight: 700, fontFamily: BFONT }}>
-                    ↓ Download workbook (.docx)
+                    style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", background: "#9B5DE5", color: "white", borderRadius: 10, padding: "0.6rem 1.25rem", border: "none", cursor: "pointer", fontSize: "0.78rem", fontWeight: 700, fontFamily: BFONT }}>
+                    ↓ Download (.docx)
                   </button>
-                  <a href="/offerings#pkg-workbook" style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", background: "rgba(255,255,255,0.07)", border: "1px solid rgba(255,255,255,0.18)", color: "rgba(255,255,255,0.75)", borderRadius: 10, padding: "0.65rem 1.25rem", textDecoration: "none", fontSize: "0.8rem", fontWeight: 600, fontFamily: BFONT }}>
-                    Order workbook (bound) →
+                  <a href="/offerings#pkg-workbook" style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", background: "white", border: `1.5px solid ${C.stone}`, color: C.ink, borderRadius: 10, padding: "0.6rem 1.15rem", textDecoration: "none", fontSize: "0.78rem", fontWeight: 600, fontFamily: BFONT }}>
+                    Order a bound copy →
                   </a>
-                </div>
-                <div style={{ fontSize: "0.66rem", color: "rgba(255,255,255,0.3)", fontFamily: BFONT, marginTop: "0.65rem" }}>
-                  .docx opens in Word, Google Docs, or Pages · Printable
+                  <span style={{ fontSize: "0.66rem", color: C.muted, fontFamily: BFONT }}>Opens in Word, Google Docs, or Pages</span>
                 </div>
               </div>
             );
@@ -13517,8 +13550,18 @@ export default function App() {
                     {pkg.hasLMFT
                       ? <DashTile color="#5B6DF8" eyebrow="Included" title="Your LMFT session" sub="A 50-minute session with a licensed therapist who has reviewed your results." cta="Schedule →" onClick={() => setView("lmft")} />
                       : <DashTile color="#5B6DF8" eyebrow="Add-on" title="LMFT Session" sub="A 50-minute session with a licensed therapist who reviews your results first. $150." cta="Add →" onClick={() => setUpsellModal({ product: 'lmft', cartAdded: false })} />}
-                    <DashTile color="#9B5DE5" eyebrow="Guide" title="How to review your results together" sub="A simple structure for the first conversation." cta="Read →" href="/practice/how-to-review-your-results-together?from=app" />
-                    <DashTile color="#9B5DE5" eyebrow="Guide" title="How to start a hard conversation" sub="Opening lines for the topics that matter most." cta="Read →" href="/practice/how-to-start-a-hard-conversation?from=app" />
+                    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))", gap: "0.75rem", marginTop: "0.25rem" }}>
+                      <GuideSquare color="#9B5DE5"
+                        icon={<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#9B5DE5" strokeWidth="1.8" strokeLinecap="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>}
+                        title="How to review your results together"
+                        sub="A simple structure for the first conversation."
+                        href="/practice/how-to-review-your-results-together?from=app" />
+                      <GuideSquare color="#E8673A"
+                        icon={<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#E8673A" strokeWidth="1.8" strokeLinecap="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>}
+                        title="How to start a hard conversation"
+                        sub="Opening lines for the topics that matter most."
+                        href="/practice/how-to-start-a-hard-conversation?from=app" />
+                    </div>
                     <a href="/practice?from=app" style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "0.4rem", marginTop: "0.35rem", padding: "0.85rem", borderRadius: 12, border: "1.5px dashed rgba(193,127,71,0.4)", background: "transparent", textDecoration: "none", fontSize: "0.8rem", fontWeight: 700, color: "#C17F47", fontFamily: BFONT, transition: "background .15s" }}
                       onMouseEnter={e => e.currentTarget.style.background = "rgba(193,127,71,0.06)"}
                       onMouseLeave={e => e.currentTarget.style.background = "transparent"}>
