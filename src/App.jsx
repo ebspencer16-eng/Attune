@@ -6381,14 +6381,11 @@ const INSIGHT_COLORS = {
 };
 
 // ── Reusable insight card list with show-more ─────────────────────────────────
+// Every insight renders. No show-more, no expand-to-read (8.2).
 function InsightCardList({ insights = [] }) {
-  const [showAll, setShowAll] = useState(false);
-  const SHOW_INIT = 3;
-  const visible = showAll ? insights : insights.slice(0, SHOW_INIT);
-  const hidden = insights.length - SHOW_INIT;
   return (
     <>
-      {visible.map((ins, i) => {
+      {insights.map((ins, i) => {
         const col = INSIGHT_COLORS[ins.type] || INSIGHT_COLORS.explore;
         return (
           <div key={i} style={{ background: "white", border: `1.5px solid ${C.stone}`, borderRadius: 16, marginBottom: "1rem", overflow: "hidden" }}>
@@ -6419,12 +6416,6 @@ function InsightCardList({ insights = [] }) {
           </div>
         );
       })}
-      {!showAll && hidden > 0 && (
-        <button onClick={() => setShowAll(true)}
-          style={{ width: "100%", background: "white", border: `1.5px solid ${C.stone}`, borderRadius: 12, padding: "0.85rem 1rem", fontSize: "0.78rem", fontWeight: 600, color: C.clay, cursor: "pointer", fontFamily: BFONT, marginBottom: "1rem", display: "flex", alignItems: "center", justifyContent: "center", gap: "0.4rem" }}>
-          Show {hidden} more insight{hidden !== 1 ? "s" : ""} ↓
-        </button>
-      )}
     </>
   );
 }
@@ -8021,6 +8012,43 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
                 </div>
               </div>
             </div>
+            {/* How you feel right now — scale questions live on the overview (8.2) */}
+            <div style={{ background: "white", border: `1.5px solid ${C.stone}`, borderRadius: 16, padding: "1.35rem 1.35rem 1rem", marginBottom: "1.25rem" }}>
+              <div style={{ fontSize: "0.55rem", letterSpacing: "0.18em", textTransform: "uppercase", color: "#1B5FE8", fontFamily: BFONT, fontWeight: 700, marginBottom: "1rem" }}>How you feel right now</div>
+              {scaleQs.filter(q => q.id !== "a0").map(q => {
+                const myVal = mine[q.id] ?? 2;
+                const theirVal = theirs[q.id] ?? 2;
+                const endLow = q.scaleLabels[0];
+                const endHigh = q.scaleLabels[q.scaleLabels.length - 1];
+                return (
+                  <div key={q.id} style={{ marginBottom: "1.1rem" }}>
+                    <div style={{ fontSize: "0.78rem", color: C.ink, fontWeight: 600, fontFamily: BFONT, marginBottom: "0.5rem" }}>{q.text}</div>
+                    <div style={{ display: "flex", alignItems: "center", gap: "0.6rem" }}>
+                      <span style={{ fontSize: "0.58rem", color: C.muted, fontFamily: BFONT, width: 70, flexShrink: 0, textAlign: "right", lineHeight: 1.25 }}>{endLow}</span>
+                      <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 4 }}>
+                        {[[userName, myVal, "#E8673A"], [partnerName, theirVal, "#1B5FE8"]].map(([name, val, color]) => (
+                          <div key={name} style={{ display: "flex", gap: 3 }}>
+                            {q.scaleLabels.map((_, i) => (
+                              <div key={i} style={{ flex: 1, height: 8, borderRadius: 3, background: i <= val ? color : color + "1f" }} />
+                            ))}
+                          </div>
+                        ))}
+                      </div>
+                      <span style={{ fontSize: "0.58rem", color: C.muted, fontFamily: BFONT, width: 70, flexShrink: 0, lineHeight: 1.25 }}>{endHigh}</span>
+                    </div>
+                  </div>
+                );
+              })}
+              <div style={{ display: "flex", justifyContent: "center", gap: "1.1rem", paddingTop: "0.35rem" }}>
+                {[[userName, "#E8673A"], [partnerName, "#1B5FE8"]].map(([name, color]) => (
+                  <div key={name} style={{ display: "flex", alignItems: "center", gap: "0.35rem" }}>
+                    <div style={{ width: 8, height: 8, borderRadius: "50%", background: color, flexShrink: 0 }} />
+                    <span style={{ fontSize: "0.68rem", color: C.muted, fontFamily: BFONT }}>{name}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
             {/* What's in this section */}
             <div style={{ background: "white", border: `1.5px solid ${C.stone}`, borderRadius: 16, padding: "1.25rem 1.25rem 0.85rem", marginBottom: "1.25rem" }}>
               <div style={{ fontSize: "0.55rem", letterSpacing: "0.18em", textTransform: "uppercase", color: "#1B5FE8", fontFamily: BFONT, fontWeight: 700, marginBottom: "0.75rem" }}>What's in this section</div>
@@ -8055,32 +8083,8 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
         <Layout accent="#10b981" noPrevNext={true}>
           <div style={{ maxWidth: 660 }}>
             <div style={{ fontSize: "0.62rem", letterSpacing: "0.22em", textTransform: "uppercase", color: "#1B5FE8", fontWeight: 700, fontFamily: BFONT, marginBottom: "0.5rem" }}>Relationship Reflection</div>
-            <h2 style={{ fontFamily: HFONT, fontSize: "clamp(1.6rem,3vw,2.2rem)", fontWeight: 700, color: C.ink, lineHeight: 1.1, marginBottom: "0.75rem" }}>How you're feeling right now</h2>
-            {/* Scale snapshot */}
-            <div style={{ background: "white", border: `1.5px solid ${C.stone}`, borderRadius: 16, padding: "1.25rem", marginBottom: "1.25rem" }}>
-              <div style={{ fontSize: "0.6rem", fontWeight: 700, color: "#1B5FE8", textTransform: "uppercase", letterSpacing: "0.18em", fontFamily: BFONT, marginBottom: "1rem" }}>Scale questions</div>
-              {scaleQs.map(q => {
-                const myVal = mine[q.id] ?? 2;
-                const theirVal = theirs[q.id] ?? 2;
-                return (
-                  <div key={q.id} style={{ marginBottom: "1rem" }}>
-                    <div style={{ fontSize: "0.78rem", color: C.ink, fontWeight: 500, fontFamily: BFONT, marginBottom: "0.45rem" }}>{q.text}</div>
-                    {[[userName, myVal, "#E8673A"], [partnerName, theirVal, "#1B5FE8"]].map(([name, val, color]) => (
-                      <div key={name} style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.2rem" }}>
-                        <span style={{ fontSize: "0.62rem", fontWeight: 700, color, width: 52, flexShrink: 0, fontFamily: BFONT }}>{name}</span>
-                        <div style={{ display: "flex", gap: 3, flex: 1 }}>
-                          {q.scaleLabels.map((_, i) => (
-                            <div key={i} style={{ flex: 1, height: 8, borderRadius: 3, background: i <= val ? color : color + "22" }} />
-                          ))}
-                        </div>
-                        <span style={{ fontSize: "0.62rem", color: C.muted, fontFamily: BFONT, width: 90, flexShrink: 0, textAlign: "right" }}>{q.scaleLabels[val]}</span>
-                      </div>
-                    ))}
-                  </div>
-                );
-              })}
-            </div>
-            {/* Insight cards with show-more */}
+            <h2 style={{ fontFamily: HFONT, fontSize: "clamp(1.6rem,3vw,2.2rem)", fontWeight: 700, color: C.ink, lineHeight: 1.1, marginBottom: "1.25rem" }}>What your answers show.</h2>
+            {/* Insight cards */}
             <InsightCardList insights={insights} />
             <PrevNext />
           </div>
@@ -8185,33 +8189,66 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
             {Array.isArray(mine.a_priority) && mine.a_priority.length > 0 && Array.isArray(theirs.a_priority) && theirs.a_priority.length > 0 && (
               <div style={{ marginBottom: "1.75rem" }}>
                 <div style={{ fontSize: "0.6rem", letterSpacing: "0.2em", textTransform: "uppercase", color: "#1B5FE8", fontWeight: 700, fontFamily: BFONT, marginBottom: "0.6rem" }}>Priority ranking</div>
+                {(() => {
+                  // 8.3 — the same topic on both sides is joined by a line, so a
+                  // topic one of you ranks high and the other ranks low reads as a
+                  // steep diagonal. Flat lines are agreement.
+                  const ROW = 30, PAD = 8;
+                  const H = mine.a_priority.length * ROW;
+                  const lineFor = gap => gap === 0 ? "#10b981" : gap >= 3 ? "#F59E0B" : "rgba(0,0,0,0.18)";
+                  return (
                 <div style={{ background: "white", border: `1.5px solid ${C.stone}`, borderRadius: 14, overflow: "hidden" }}>
                   <div style={{ padding: "0.7rem 1.1rem", borderBottom: `1px solid ${C.stone}50`, background: "#FAFAF8" }}>
                     <span style={{ fontFamily: HFONT, fontSize: "0.82rem", fontWeight: 700, color: C.ink }}>What to invest in together this year</span>
                   </div>
-                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr" }}>
-                    {[[userName, mine.a_priority, "#E8673A"], [partnerName, theirs.a_priority, "#1B5FE8"]].map(([name, ranked, col], gi) => (
-                      <div key={name} style={{ padding: "0.85rem 1.1rem", borderRight: gi === 0 ? `1px solid ${C.stone}40` : "none" }}>
-                        <div style={{ fontSize: "0.55rem", letterSpacing: "0.14em", textTransform: "uppercase", color: col, fontWeight: 700, fontFamily: BFONT, marginBottom: "0.5rem" }}>{name}</div>
-                        {ranked.map((item, ri) => {
-                          const otherRank = (gi === 0 ? theirs.a_priority : mine.a_priority).indexOf(item);
-                          const gap = Math.abs(ri - otherRank);
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 72px 1fr", padding: "0.85rem 1.1rem" }}>
+                    {/* Left: user's ranking */}
+                    <div>
+                      <div style={{ fontSize: "0.55rem", letterSpacing: "0.14em", textTransform: "uppercase", color: "#E8673A", fontWeight: 700, fontFamily: BFONT, marginBottom: "0.5rem", height: PAD + 10 }}>{userName}</div>
+                      {mine.a_priority.map((item, ri) => (
+                        <div key={item} style={{ height: ROW, display: "flex", alignItems: "center", gap: "0.4rem", justifyContent: "flex-end", textAlign: "right" }}>
+                          <span style={{ fontSize: "0.75rem", color: C.ink, fontFamily: BFONT }}>{item}</span>
+                          <span style={{ fontSize: "0.62rem", fontWeight: 700, color: "#E8673A", fontFamily: BFONT, flexShrink: 0 }}>#{ri + 1}</span>
+                        </div>
+                      ))}
+                    </div>
+                    {/* Middle: connectors */}
+                    <div>
+                      <div style={{ height: PAD + 10 }} />
+                      <svg width="100%" height={H} viewBox={`0 0 100 ${H}`} preserveAspectRatio="none" style={{ display: "block" }}>
+                        {mine.a_priority.map((item, ri) => {
+                          const rj = theirs.a_priority.indexOf(item);
+                          if (rj < 0) return null;
+                          const gap = Math.abs(ri - rj);
                           return (
-                            <div key={item} style={{ display: "flex", alignItems: "center", gap: "0.4rem", marginBottom: "0.25rem" }}>
-                              <span style={{ fontSize: "0.62rem", fontWeight: 700, color: col, width: 16, flexShrink: 0, fontFamily: BFONT }}>#{ri+1}</span>
-                              <span style={{ fontSize: "0.75rem", color: C.ink, fontFamily: BFONT, flex: 1 }}>{item}</span>
-                              {gap >= 3 && <span style={{ fontSize: "0.55rem", color: "#F59E0B", fontFamily: BFONT, fontWeight: 700 }}>↕</span>}
-                              {gap === 0 && ri <= 1 && <span style={{ fontSize: "0.55rem", color: "#10b981", fontFamily: BFONT, fontWeight: 700 }}>✓</span>}
-                            </div>
+                            <line key={item} x1="0" y1={ri * ROW + ROW / 2} x2="100" y2={rj * ROW + ROW / 2}
+                              stroke={lineFor(gap)} strokeWidth={gap === 0 ? 2 : 1.5} vectorEffect="non-scaling-stroke" />
                           );
                         })}
-                      </div>
-                    ))}
+                      </svg>
+                    </div>
+                    {/* Right: partner's ranking */}
+                    <div>
+                      <div style={{ fontSize: "0.55rem", letterSpacing: "0.14em", textTransform: "uppercase", color: "#1B5FE8", fontWeight: 700, fontFamily: BFONT, marginBottom: "0.5rem", height: PAD + 10, textAlign: "right" }}>{partnerName}</div>
+                      {theirs.a_priority.map((item, ri) => (
+                        <div key={item} style={{ height: ROW, display: "flex", alignItems: "center", gap: "0.4rem" }}>
+                          <span style={{ fontSize: "0.62rem", fontWeight: 700, color: "#1B5FE8", fontFamily: BFONT, flexShrink: 0 }}>#{ri + 1}</span>
+                          <span style={{ fontSize: "0.75rem", color: C.ink, fontFamily: BFONT }}>{item}</span>
+                        </div>
+                      ))}
+                    </div>
                   </div>
-                  <div style={{ padding: "0.55rem 1.1rem", background: "#FAFAF8", borderTop: `1px solid ${C.stone}30` }}>
-                    <span style={{ fontSize: "0.68rem", color: C.muted, fontFamily: BFONT }}>✓ Shared top priority &nbsp;&nbsp; ↕ More than 3 positions apart</span>
+                  <div style={{ padding: "0.55rem 1.1rem", background: "#FAFAF8", borderTop: `1px solid ${C.stone}30`, display: "flex", gap: "1rem", flexWrap: "wrap" }}>
+                    <span style={{ fontSize: "0.68rem", color: C.muted, fontFamily: BFONT, display: "flex", alignItems: "center", gap: "0.35rem" }}>
+                      <svg width="16" height="4"><line x1="0" y1="2" x2="16" y2="2" stroke="#10b981" strokeWidth="2" /></svg> Same rank
+                    </span>
+                    <span style={{ fontSize: "0.68rem", color: C.muted, fontFamily: BFONT, display: "flex", alignItems: "center", gap: "0.35rem" }}>
+                      <svg width="16" height="4"><line x1="0" y1="2" x2="16" y2="2" stroke="#F59E0B" strokeWidth="2" /></svg> Three or more positions apart
+                    </span>
                   </div>
                 </div>
+                  );
+                })()}
               </div>
             )}
 
@@ -8300,35 +8337,38 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
               </div>
             </div>
 
-            {/* Where you each land — quick bars, click into a dimension */}
+            {/* Where you each land — label left, bar right, key top-right (9.1) */}
             <div style={{ background: "white", border: `1.5px solid ${C.stone}`, borderRadius: 16, padding: "1.25rem", marginBottom: "1.25rem" }}>
-              <div style={{ fontSize: "0.55rem", letterSpacing: "0.18em", textTransform: "uppercase", color: ROSE, fontFamily: BFONT, fontWeight: 700, marginBottom: "1rem" }}>Where you each land</div>
-              <div style={{ display: "flex", flexDirection: "column", gap: "0.85rem" }}>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "1rem", gap: "1rem", flexWrap: "wrap" }}>
+                <div style={{ fontSize: "0.55rem", letterSpacing: "0.18em", textTransform: "uppercase", color: ROSE, fontFamily: BFONT, fontWeight: 700 }}>Where you each land</div>
+                <div style={{ display: "flex", gap: "0.85rem" }}>
+                  <span style={{ display: "flex", alignItems: "center", gap: "0.35rem", fontSize: "0.65rem", color: C.muted, fontFamily: BFONT }}><span style={{ width: 8, height: 8, borderRadius: "50%", background: "#E8673A" }} />{userName}</span>
+                  <span style={{ display: "flex", alignItems: "center", gap: "0.35rem", fontSize: "0.65rem", color: C.muted, fontFamily: BFONT }}><span style={{ width: 8, height: 8, borderRadius: "50%", background: "#6C7FFF" }} />{partnerName}</span>
+                </div>
+              </div>
+              <div style={{ display: "flex", flexDirection: "column", gap: "0.55rem" }}>
                 {INTIMACY_DIMENSIONS.map(d => {
-                  const ds = dims.find(x => x.id === d.id);
-                  const st = ds?.state || "incomplete";
                   const pos = positions[d.id] || {};
                   const myPct = pos.mine == null ? null : Math.round(8 + pos.mine * 84);
                   const partPct = pos.theirs == null ? null : Math.round(8 + pos.theirs * 84);
+                  // Dots only offset vertically when they actually overlap.
+                  const overlap = myPct != null && partPct != null && Math.abs(myPct - partPct) < 3;
+                  const myIsLeft = (myPct ?? 0) <= (partPct ?? 0);
+                  const myDy = overlap ? (myIsLeft ? -4 : 4) : 0;
+                  const partDy = overlap ? (myIsLeft ? 4 : -4) : 0;
                   return (
-                    <div key={d.id} onClick={() => go(`intimacy-${d.id}`)} style={{ cursor: "pointer", padding: "0.5rem 0.25rem", borderRadius: 8 }}
+                    <div key={d.id} onClick={() => go(`intimacy-${d.id}`)}
+                      style={{ cursor: "pointer", display: "flex", alignItems: "center", gap: "0.75rem", padding: "0.4rem 0.25rem", borderRadius: 8 }}
                       onMouseEnter={e => e.currentTarget.style.background = "rgba(181,84,110,0.04)"}
                       onMouseLeave={e => e.currentTarget.style.background = "transparent"}>
-                      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "0.4rem" }}>
-                        <span style={{ fontSize: "0.78rem", fontWeight: 600, color: C.ink, fontFamily: BFONT }}>{d.label}</span>
-                        <span style={{ fontSize: "0.6rem", fontWeight: 700, color: stateColor[st], fontFamily: BFONT, textTransform: "uppercase", letterSpacing: "0.06em" }}>{stateLabel[st]}</span>
-                      </div>
-                      <div style={{ position: "relative", height: 8, background: C.stone, borderRadius: 999 }}>
-                        {myPct != null && <div style={{ position: "absolute", top: "50%", transform: "translateY(-50%)", left: `${myPct}%`, width: 10, height: 10, borderRadius: "50%", background: "#E8673A", border: "1.5px solid white", marginLeft: -5, zIndex: 2 }} />}
-                        {partPct != null && <div style={{ position: "absolute", top: "50%", transform: "translateY(-50%)", left: `${partPct}%`, width: 10, height: 10, borderRadius: "50%", background: "#6C7FFF", border: "1.5px solid white", marginLeft: -5, zIndex: 1 }} />}
+                      <span style={{ fontSize: "0.76rem", fontWeight: 600, color: C.ink, fontFamily: BFONT, flexShrink: 0, width: "clamp(110px,34%,170px)", lineHeight: 1.25 }}>{d.label}</span>
+                      <div style={{ flex: 1, position: "relative", height: 8, background: C.stone, borderRadius: 999, overflow: "visible" }}>
+                        {myPct != null && <div style={{ position: "absolute", top: "50%", transform: `translateY(calc(-50% + ${myDy}px))`, left: `${myPct}%`, width: 10, height: 10, borderRadius: "50%", background: "#E8673A", border: "1.5px solid white", marginLeft: -5, zIndex: 2 }} />}
+                        {partPct != null && <div style={{ position: "absolute", top: "50%", transform: `translateY(calc(-50% + ${partDy}px))`, left: `${partPct}%`, width: 10, height: 10, borderRadius: "50%", background: "#6C7FFF", border: "1.5px solid white", marginLeft: -5, zIndex: 1 }} />}
                       </div>
                     </div>
                   );
                 })}
-              </div>
-              <div style={{ display: "flex", gap: "1rem", marginTop: "0.85rem", paddingTop: "0.75rem", borderTop: `1px solid ${C.stone}` }}>
-                <span style={{ display: "flex", alignItems: "center", gap: "0.35rem", fontSize: "0.65rem", color: C.muted, fontFamily: BFONT }}><span style={{ width: 8, height: 8, borderRadius: "50%", background: "#E8673A" }} />{userName}</span>
-                <span style={{ display: "flex", alignItems: "center", gap: "0.35rem", fontSize: "0.65rem", color: C.muted, fontFamily: BFONT }}><span style={{ width: 8, height: 8, borderRadius: "50%", background: "#6C7FFF" }} />{partnerName}</span>
               </div>
             </div>
             <PrevNext />
@@ -8364,6 +8404,10 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
 
             {/* Track */}
             <div style={{ background: "white", border: `1.5px solid ${C.stone}`, borderRadius: 14, padding: "1.25rem 1.5rem", marginBottom: "1rem" }}>
+              <div style={{ display: "flex", justifyContent: "flex-end", gap: "0.85rem", marginBottom: "0.85rem" }}>
+                <span style={{ display: "flex", alignItems: "center", gap: "0.35rem", fontSize: "0.68rem", color: C.muted, fontFamily: BFONT }}><span style={{ width: 9, height: 9, borderRadius: "50%", background: "#E8673A" }} />{userName}</span>
+                <span style={{ display: "flex", alignItems: "center", gap: "0.35rem", fontSize: "0.68rem", color: C.muted, fontFamily: BFONT }}><span style={{ width: 9, height: 9, borderRadius: "50%", background: "#6C7FFF" }} />{partnerName}</span>
+              </div>
               <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "0.85rem" }}>
                 <span style={{ fontSize: "0.7rem", fontWeight: 600, color: C.muted, fontFamily: BFONT }}>{d.poles?.[0]}</span>
                 <span style={{ fontSize: "0.7rem", fontWeight: 600, color: C.muted, fontFamily: BFONT }}>{d.poles?.[1]}</span>
@@ -8371,11 +8415,6 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
               <div style={{ position: "relative", height: 10, background: C.stone, borderRadius: 999, marginBottom: "0.85rem" }}>
                 {myPct != null && <div style={{ position: "absolute", top: "50%", transform: "translateY(-50%)", left: `${myPct}%`, width: 14, height: 14, borderRadius: "50%", background: "#E8673A", border: "2px solid white", boxShadow: "0 1px 4px rgba(0,0,0,0.2)", marginLeft: -7, zIndex: 2 }} />}
                 {partPct != null && <div style={{ position: "absolute", top: "50%", transform: "translateY(-50%)", left: `${partPct}%`, width: 14, height: 14, borderRadius: "50%", background: "#6C7FFF", border: "2px solid white", boxShadow: "0 1px 4px rgba(0,0,0,0.2)", marginLeft: -7, zIndex: 1 }} />}
-              </div>
-              <div style={{ display: "flex", gap: "1rem" }}>
-                <span style={{ display: "flex", alignItems: "center", gap: "0.35rem", fontSize: "0.68rem", color: C.muted, fontFamily: BFONT }}><span style={{ width: 9, height: 9, borderRadius: "50%", background: "#E8673A" }} />{userName}</span>
-                <span style={{ display: "flex", alignItems: "center", gap: "0.35rem", fontSize: "0.68rem", color: C.muted, fontFamily: BFONT }}><span style={{ width: 9, height: 9, borderRadius: "50%", background: "#6C7FFF" }} />{partnerName}</span>
-                <span style={{ marginLeft: "auto", fontSize: "0.62rem", fontWeight: 700, color: stateColor[st], fontFamily: BFONT, textTransform: "uppercase", letterSpacing: "0.06em" }}>{stateLabel[st]}</span>
               </div>
             </div>
 
