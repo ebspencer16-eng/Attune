@@ -983,7 +983,7 @@ export function ExpectationsExercise({ partnerName, userName = "Partner A", onCo
 // Variant (premarital | married) is chosen by the FIRST partner to start, via
 // the entry question "are you regularly physically intimate?". That choice is
 // passed in as lockedVariant for the second partner so both answer the same set.
-export function IntimacyExercise({ userName = "You", partnerName = "your partner", lockedVariant = null, onComplete, onChooseVariant }) {
+export function IntimacyExercise({ userName = "You", partnerName = "your partner", lockedVariant = null, exerciseNumber = null, onComplete, onChooseVariant }) {
   const PROGRESS_KEY = 'attune_intimacy_progress';
   const hydrate = () => { try { return JSON.parse(localStorage.getItem(PROGRESS_KEY) || 'null'); } catch { return null; } };
   const saved = hydrate();
@@ -1014,7 +1014,7 @@ export function IntimacyExercise({ userName = "You", partnerName = "your partner
   if (phase === 'intro') return (
     <div style={{ maxWidth: 480, margin: "0 auto", padding: "3rem 1rem 2rem" }}>
       <link href={FONT_LINK} rel="stylesheet" />
-      <div style={{ fontSize: "0.6rem", letterSpacing: "0.2em", textTransform: "uppercase", color: accent, fontFamily: BFONT, fontWeight: 700, marginBottom: "0.75rem" }}>Intimacy Expectations</div>
+      <div style={{ fontSize: "0.6rem", letterSpacing: "0.2em", textTransform: "uppercase", color: accent, fontFamily: BFONT, fontWeight: 700, marginBottom: "0.75rem" }}>{exerciseNumber ? `Exercise 0${exerciseNumber} · ` : ""}Intimacy Expectations</div>
       <h2 style={{ fontFamily: HFONT, fontSize: "1.8rem", fontWeight: 700, color: C.ink, lineHeight: 1.15, marginBottom: "1.25rem" }}>What you each expect.</h2>
       <p style={{ fontSize: "0.92rem", color: C.text, fontFamily: BFONT, fontWeight: 300, lineHeight: 1.7, marginBottom: "1rem" }}>
         Physical intimacy is one of the biggest things couples assume they are aligned on, and one of the least talked about. This is a private set of questions about what you each expect.
@@ -13924,6 +13924,7 @@ export default function App() {
           return <IntimacyExercise
             userName={userName} partnerName={partnerName}
             lockedVariant={lockedVariant}
+            exerciseNumber={pkg.hasAnniversary ? 4 : 3}
             onComplete={(payload) => { persist(payload); try { localStorage.removeItem('attune_intimacy_progress'); } catch {}; setView("home"); }}
             onChooseVariant={() => {}} />;
         })()}
