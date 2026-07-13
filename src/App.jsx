@@ -229,6 +229,23 @@ const DIM_META = {
 
 const DIMS = ["energy","expression","needs","bids","listening","conflict","repair","love","stress","feedback"];
 
+// 6.3 — "One thing to keep in mind" prose for ALIGNED dimensions. Previously
+// every aligned dimension fell back to one generic line. These are per-
+// dimension. Pole-neutral on purpose: an aligned couple sits on the same pole,
+// but which pole is data-dependent, so each line works for either.
+const ALIGNED_ADVICE = {
+  energy:     "You recharge the same way. That makes it easy to assume the other always wants what you want. Check before you plan the weekend around it.",
+  expression: "You process emotion at the same pace. The risk here isn't friction. It's that neither of you pushes the other toward the part that's harder to say.",
+  needs:      "You ask for things the same way. When you both hint, the hint gets missed by both of you. Say the direct version sometimes anyway.",
+  bids:       "You both catch the small reaches for connection. Keep catching them out loud. The acknowledgment is what makes a bid land, not just the noticing.",
+  listening:  "You listen the same way. That works until one of you needs the other mode. Ask which one is wanted before you give it.",
+  conflict:   "You handle conflict the same way. If you both engage, it can escalate fast. If you both step back, things go unsaid. Watch for whichever one is yours.",
+  repair:     "You repair the same way. Because it comes naturally to both of you, it's easy to skip naming that a repair happened at all. Say it landed.",
+  love:       "Love lands the same way for both of you. That's rare. Keep giving it in that form on purpose, not just by default.",
+  stress:     "You respond to stress the same way. If you both pull inward, no one reaches first. If you both seek, you can crowd each other. Name which is yours before the next hard week.",
+  feedback:   "You handle feedback the same way. When you're both open, keep it kind. When you're both guarded, small things pile up. Say the small thing early.",
+};
+
 // Gap -> label system (playful/warm/direct mix by degree)
 // Dimension-aware label pool -- each dimension has its own voice
 
@@ -4003,7 +4020,7 @@ function PersonalityResults({ myAnswers, partnerAnswers, userName, partnerName, 
         {(f.adviceText || f.isStrength) && (
           <div style={{ background: (m.color + (f.isStrength ? "28" : "45")), borderRadius: 14, padding: "1.25rem 1.5rem", border: ("1px solid " + (m.color) + (f.isStrength ? "50" : "80")) }}>
             <div style={{ fontSize: "0.62rem", textTransform: "uppercase", letterSpacing: "0.12em", color: "rgba(255,255,255,0.9)", fontWeight: 700, marginBottom: "0.5rem", fontFamily: BFONT }}>{f.isStrength ? "One thing to keep in mind" : "One shift that helps"}</div>
-            <p style={{ fontSize: "0.9rem", color: "white", lineHeight: 1.8, margin: 0, fontFamily: BFONT, fontWeight: f.isStrength ? 400 : 500 }}>{f.adviceText || `You two line up here. That's an easy place to take for granted. Name it out loud once in a while so the alignment stays a choice, not an assumption.`}</p>
+            <p style={{ fontSize: "0.9rem", color: "white", lineHeight: 1.8, margin: 0, fontFamily: BFONT, fontWeight: f.isStrength ? 400 : 500 }}>{f.adviceText || (f.isStrength ? ALIGNED_ADVICE[f.dim] : null) || `You two line up here. That's an easy place to take for granted. Name it out loud once in a while so the alignment stays a choice, not an assumption.`}</p>
           </div>
         )}
 
