@@ -13469,7 +13469,16 @@ export default function App() {
                       ...(pkg.hasIntimacy ? [{ label: "Physical intimacy results", section: "intimacy-overview", color: "#B5546E" }] : []),
                       { label: "Action plan", section: "exp-action-plan", color: "#1B5FE8" },
                     ].map((r, i, arr) => (
-                      <div key={r.section} onClick={bothDone ? () => { setActiveResult(r.section); setHighlightsSeen(true); setView("results"); } : undefined}
+                      <div key={r.section} onClick={bothDone ? () => {
+                          if (r.section === "highlights") {
+                            // Open the full standalone storycard swipe experience
+                            // (highlightsSeen=false), not the degraded inline version.
+                            setActiveResult("overview"); setHighlightsSeen(false);
+                          } else {
+                            setActiveResult(r.section); setHighlightsSeen(true);
+                          }
+                          setView("results");
+                        } : undefined}
                         style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0.85rem 1.1rem", borderBottom: i < arr.length - 1 ? "1px solid #F0E9E0" : "none", cursor: bothDone ? "pointer" : "default", gap: "0.75rem", transition: "background .15s" }}
                         onMouseEnter={bothDone ? (e => e.currentTarget.style.background = "#FAF7F2") : undefined}
                         onMouseLeave={bothDone ? (e => e.currentTarget.style.background = "white") : undefined}>
