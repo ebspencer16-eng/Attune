@@ -3468,7 +3468,7 @@ function JointOverview({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Answ
             {scaleQs.filter(q => q.id !== "a0").map(q => {
               const myVal = ex3Answers[q.id] ?? 2;
               const theirVal = partnerEx3[q.id] ?? 2;
-              const shortLabel = q.text.replace(/How (well |much |connected )?(do I feel |do we )?/i,"").split("?")[0];
+              const shortLabel = { a_sat_conn: "Day-to-day connection", a_sat_comm: "Communication", a_sat_fun: "Fun & lightness" }[q.id] || q.text.split("?")[0];
               return (
                 <div key={q.id} style={{ marginBottom: "0.5rem" }}>
                   <div style={{ fontSize: "0.68rem", color: "#8C7A68", fontFamily: BFONT, marginBottom: "0.2rem" }}>{shortLabel}</div>
