@@ -1186,7 +1186,7 @@ function IntimacyResults({ myAnswers, partnerAnswers, userName = "You", partnerN
 
 // Pronoun helper — module-level so all components can use it
 const pronoun = (p, form) => {
-  const map = { "she/her": { sub: "she", obj: "her", pos: "her", ref: "herself" }, "he/him": { sub: "he", obj: "him", pos: "his", ref: "himself" }, "they/them": { sub: "they", obj: "them", pos: "their", ref: "themselves" } };
+  const map = { "she/her": { sub: "she", obj: "her", pos: "her", ref: "herself", isC: "she's" }, "he/him": { sub: "he", obj: "him", pos: "his", ref: "himself", isC: "he's" }, "they/them": { sub: "they", obj: "them", pos: "their", ref: "themselves", isC: "they're" } };
   return (map[p] || map["they/them"])[form] || "they";
 };
 
@@ -1565,19 +1565,19 @@ const NEW_COUPLE_TYPES = [
       "The relationship has both warmth and steadiness. You cover different emotional territory in a way that tends to be more complete than one style alone.",
     ],
     stickingPoints: [
-      "The expressive partner can feel like they're always the one initiating depth, always doing the emotional work, always making the first move.",
+      "{EXP} can feel like {EXP_isC} always the one initiating depth, always doing the emotional work, always making the first move.",
       "The guarded partner can feel pressure to match an emotional expressiveness they don't naturally have, which sometimes makes them pull back further.",
       "What the expressive partner reads as withholding, the guarded partner experiences as just needing time to form it properly. Both readings feel true; neither is quite right.",
     ],
     patterns: [
       "When something is off, {U} and {P} are usually both aware of it, but processing it at different speeds.",
-      "The expressive one tends to get the conversation started. The guarded one is willing to engage once the conversation begins.",
+      "{EXP} is the expressive one and tends to get the conversation started. {GRD} is more guarded and is willing to engage once the conversation begins.",
       "When the conversation does happen, it tends to go somewhere useful. You're not fighting about whether to have it, just when.",
     ],
     tips: [
       { title: "Name which mode you're in", body: "'I need to process this out loud' vs. 'I need to think before I talk.' That one sentence tells the other person how to meet you. Use it early in the process.", phraseTry: "I need to process this out loud, bear with me. I don't have it figured out yet." },
       { title: "Guarded partner: share the half-formed version", body: "You don't have to wait until it's fully formed. 'I'm still figuring out how I feel about this' is a form of sharing, and it's usually exactly what the expressive partner needs to hear.", phraseTry: "I'm still working through it, but I think I'm bothered by {something}. Not sure why yet." },
-      { title: "Expressive partner: give the processing room", body: "Pressing for more than the guarded partner is ready to give doesn't create connection, it creates pressure. Ask once, then wait. The sharing will come in its own time.", phraseTry: "I can wait until you are ready to share. Thank you for being willing to talk." },
+      { title: "Expressive partner: give the guarded partner room to process", body: "Pressing for more than the guarded partner is ready to give doesn't create connection, it creates pressure. Ask once, then wait. The sharing will come in its own time.", phraseTry: "I can wait until you are ready to share. Thank you for being willing to talk." },
     ],
   },
   {
@@ -1629,7 +1629,7 @@ const NEW_COUPLE_TYPES = [
       "You've both had to stretch toward each other in ways that have probably made you more capable partners.",
     ],
     stickingPoints: [
-      "The reaching partner can feel like they're always the one initiating emotional depth, always doing the emotional work, always making the first move.",
+      "{RCH} can feel like {RCH_isC} always the one initiating emotional depth, always doing the emotional work, always making the first move.",
       "The reserved partner can feel pressure to match an emotional expressiveness they don't naturally have, which can make them withdraw further.",
       "The translation gap is real. What {U} means and what {P} hears aren't always the same thing, and the assumption that you've understood each other can lead to confusion downstream.",
     ],
@@ -1640,7 +1640,7 @@ const NEW_COUPLE_TYPES = [
     ],
     tips: [
       { title: "Expressiveness isn't depth, and silence isn't emptiness", body: "The reserved partner's inner life is not less rich because it isn't expressed as often. The reaching partner's sharing isn't less valuable because it comes more easily. Name that dynamic directly.", phraseTry: "There's more going on for me than I'm showing. I just need to get it in order before I share it." },
-      { title: "Reaching partner: give the silence its room", body: "Pressing for more than the reserved partner is ready to give doesn't create connection, it creates pressure. Ask once, then wait. The sharing will come in its own time.", phraseTry: "I can wait until you are ready to share. Thank you for being willing to talk." },
+      { title: "Reaching partner: give the withdrawing partner room to process", body: "Pressing for more than the reserved partner is ready to give doesn't create connection, it creates pressure. Ask once, then wait. The sharing will come in its own time.", phraseTry: "I can wait until you are ready to share. Thank you for being willing to talk." },
       { title: "Reserved partner: share the earlier draft", body: "You don't have to wait until it's fully formed. Even 'I'm still figuring out how I feel about this' is a form of sharing, and it's usually exactly what the reaching partner needs to hear.", phraseTry: "I don't have this figured out, but something's been sitting with me and I wanted to say it before I lose it." },
     ],
   },
@@ -3350,7 +3350,7 @@ function JointOverview({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Answ
   });
   const topExpGap = allRows.filter(r => !r.aligned)[0];
   if (topExpGap) {
-    startersList.push({ dim: topExpGap.category, prompt: `We had different answers on "${topExpGap.item}", what's the thinking behind yours? I want to understand where you're coming from.`, color: "#1B5FE8" });
+    startersList.push({ dim: topExpGap.category, prompt: `We have different expectations about who handles "${topExpGap.item}". What's the thinking behind yours? I want to understand where you're coming from.`, color: "#1B5FE8" });
   }
   const conversationStarters = startersList.length > 0 ? (
     <div style={{ marginTop: "2rem", background: "#FBF8F3", border: "1.5px solid #E8DDD0", borderRadius: 18, padding: "1.5rem 1.5rem 1.25rem" }}>
@@ -7657,18 +7657,39 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
     const _pEngage = _ctTypeB.withdrawScore <= 3.0;
     // Open/Guarded axis names
     let _expressiveName = null, _guardedName = null;
+    let _expressivePron = null, _guardedPron = null;
     if (_uOpen !== _pOpen) {
       _expressiveName = _uOpen ? userName : partnerName;
       _guardedName = _uOpen ? partnerName : userName;
+      _expressivePron = _uOpen ? userPronouns : partnerPronouns;
+      _guardedPron = _uOpen ? partnerPronouns : userPronouns;
     }
     // Engage/Withdraw axis names
     let _reachingName = null, _withdrawingName = null;
+    let _reachingPron = null, _withdrawingPron = null;
     if (_uEngage !== _pEngage) {
       _reachingName = _uEngage ? userName : partnerName;
       _withdrawingName = _uEngage ? partnerName : userName;
+      _reachingPron = _uEngage ? userPronouns : partnerPronouns;
+      _withdrawingPron = _uEngage ? partnerPronouns : userPronouns;
     }
     const _applyRoles = (str) => {
       let s = str;
+      // Role-name and role-pronoun tokens. These let prose say things like
+      // "{EXP} is the expressive one and {EXP_sub} tends to..." and get the
+      // correct partner's name AND matching pronoun, instead of a generic
+      // "they". Tokens only fill when the two partners actually differ on that
+      // axis; otherwise they're stripped so a fallback clause can carry.
+      if (_expressiveName && _guardedName) {
+        s = s.replace(/\{EXP\}/g, _expressiveName).replace(/\{GRD\}/g, _guardedName)
+             .replace(/\{EXP_sub\}/g, pronoun(_expressivePron, "sub")).replace(/\{EXP_obj\}/g, pronoun(_expressivePron, "obj")).replace(/\{EXP_pos\}/g, pronoun(_expressivePron, "pos")).replace(/\{EXP_isC\}/g, pronoun(_expressivePron, "isC"))
+             .replace(/\{GRD_sub\}/g, pronoun(_guardedPron, "sub")).replace(/\{GRD_obj\}/g, pronoun(_guardedPron, "obj")).replace(/\{GRD_pos\}/g, pronoun(_guardedPron, "pos")).replace(/\{GRD_isC\}/g, pronoun(_guardedPron, "isC"));
+      }
+      if (_reachingName && _withdrawingName) {
+        s = s.replace(/\{RCH\}/g, _reachingName).replace(/\{WDR\}/g, _withdrawingName)
+             .replace(/\{RCH_sub\}/g, pronoun(_reachingPron, "sub")).replace(/\{RCH_obj\}/g, pronoun(_reachingPron, "obj")).replace(/\{RCH_pos\}/g, pronoun(_reachingPron, "pos")).replace(/\{RCH_isC\}/g, pronoun(_reachingPron, "isC"))
+             .replace(/\{WDR_sub\}/g, pronoun(_withdrawingPron, "sub")).replace(/\{WDR_obj\}/g, pronoun(_withdrawingPron, "obj")).replace(/\{WDR_pos\}/g, pronoun(_withdrawingPron, "pos")).replace(/\{WDR_isC\}/g, pronoun(_withdrawingPron, "isC"));
+      }
       // Capitalize the replacement when the role label starts a sentence/title
       // (e.g. "Guarded partner: ..." -> "Preston: ..."). Names are already
       // capitalized, so a single case-insensitive replace works for both.
@@ -7688,8 +7709,8 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
     };
     const interp = (str) => _applyRoles(str
       .replace(/\{U\}/g, userName).replace(/\{P\}/g, partnerName)
-      .replace(/\{U_sub\}/g, pronoun(userPronouns, "sub")).replace(/\{U_obj\}/g, pronoun(userPronouns, "obj")).replace(/\{U_pos\}/g, pronoun(userPronouns, "pos"))
-      .replace(/\{P_sub\}/g, pronoun(partnerPronouns, "sub")).replace(/\{P_obj\}/g, pronoun(partnerPronouns, "obj")).replace(/\{P_pos\}/g, pronoun(partnerPronouns, "pos")));
+      .replace(/\{U_sub\}/g, pronoun(userPronouns, "sub")).replace(/\{U_obj\}/g, pronoun(userPronouns, "obj")).replace(/\{U_pos\}/g, pronoun(userPronouns, "pos")).replace(/\{U_isC\}/g, pronoun(userPronouns, "isC"))
+      .replace(/\{P_sub\}/g, pronoun(partnerPronouns, "sub")).replace(/\{P_obj\}/g, pronoun(partnerPronouns, "obj")).replace(/\{P_pos\}/g, pronoun(partnerPronouns, "pos")).replace(/\{P_isC\}/g, pronoun(partnerPronouns, "isC")));
     const handleShare = () => {
       const text = `We're "${ct.name}", ${ct.tagline} Find yours at attune.com`;
       navigator.clipboard?.writeText(text).then(() => { setTypeCopied(true); setTimeout(() => setTypeCopied(false), 2500); });
@@ -7843,7 +7864,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
               Where you each sit
             </div>
             <p style={{ fontSize: "0.88rem", color: C.muted, fontFamily: BFONT, fontWeight: 300, lineHeight: 1.75, margin: 0 }}>
-              Two dots. Two axes. The distance, the quadrants, and the proximity to the lines between them all carry meaning.
+              Two dots. Two axes. The distance, the quadrants, and the proximity to the lines between them all help you understand your unique relationship.
             </p>
           </div>
 
