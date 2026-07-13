@@ -13451,6 +13451,11 @@ export default function App() {
                 {/* ════ STEP 2 · REVIEW YOUR RESULTS ════ */}
                 <div style={{ marginBottom: "2.5rem" }}>
                   <DashStepHeader num="2" title="Review your results" sub={bothDone ? "Your results are ready. Start with the highlights or jump to any section." : "Visible once both of you finish all exercises."} active={bothDone} isMobile={isMobile} />
+                  <button onClick={bothDone ? () => { setActiveResult("overview"); setHighlightsSeen(false); setView("results"); } : undefined} disabled={!bothDone}
+                    style={{ width: "100%", marginBottom: "0.85rem", padding: "0.85rem", borderRadius: 12, border: "none", fontSize: "0.85rem", fontWeight: 700, fontFamily: BFONT, letterSpacing: ".02em", cursor: bothDone ? "pointer" : "not-allowed", background: bothDone ? "#E8673A" : "#EFE7DD", color: bothDone ? "white" : "#B3A693", transition: "all .15s" }}>
+                    {bothDone ? "Review results →" : "Review results"}
+                  </button>
+                  {!bothDone && <p style={{ textAlign: "center", fontSize: "0.72rem", color: "#A8997F", margin: "0 0 0.85rem", fontFamily: BFONT }}>Unlocks when both of you finish all exercises.</p>}
                   <div style={{ background: "white", border: "1.5px solid #E8DDD0", borderTop: `3px solid ${bothDone ? "#1B5FE8" : "#D4C0A8"}`, borderRadius: 16, overflow: "hidden", opacity: bothDone ? 1 : 0.6, boxShadow: "0 2px 14px rgba(14,11,7,0.04)" }}>
                     {[
                       { label: "Storycard highlights", section: "highlights", color: "#E8673A" },
@@ -13475,11 +13480,6 @@ export default function App() {
                       </div>
                     ))}
                   </div>
-                  <button onClick={bothDone ? () => { setActiveResult("overview"); setHighlightsSeen(false); setView("results"); } : undefined} disabled={!bothDone}
-                    style={{ width: "100%", marginTop: "0.85rem", padding: "0.85rem", borderRadius: 12, border: "none", fontSize: "0.85rem", fontWeight: 700, fontFamily: BFONT, letterSpacing: ".02em", cursor: bothDone ? "pointer" : "not-allowed", background: bothDone ? "#E8673A" : "#EFE7DD", color: bothDone ? "white" : "#B3A693", transition: "all .15s" }}>
-                    {bothDone ? "Review results →" : "Review results"}
-                  </button>
-                  {!bothDone && <p style={{ textAlign: "center", fontSize: "0.72rem", color: "#A8997F", margin: "0.5rem 0 0", fontFamily: BFONT }}>Unlocks when both of you finish all exercises.</p>}
                 </div>
 
                 {/* ════ STEP 3 · CONTINUE GROWING TOGETHER ════ */}
