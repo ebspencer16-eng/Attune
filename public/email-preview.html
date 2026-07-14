@@ -30,7 +30,6 @@
   <div class="tab" onclick="show('checkin_6mo',this)">6-month check-in</div>
   <div class="tab" onclick="show('welcome_account',this)">Welcome</div>
   <div class="tab" onclick="show('partner_joined',this)">Partner joined</div>
-  <div class="tab" onclick="show('lmft_scheduled',this)">LMFT scheduled</div>
   <div class="tab" onclick="show('checkin_1yr',this)">1-year check-in</div>
   <div class="tab" onclick="show('order_confirm',this)">Order confirm</div>
 </div>
@@ -139,20 +138,6 @@ const templates = {
       <p>Hi Maya,</p>
       <p>Alex has joined Attune. Once both of you have completed your exercises, your joint results will unlock. Your answers stay private until then.</p>
       <div class="btn-wrap"><a href="#" class="btn">Go to my dashboard →</a></div>
-    `)
-  },
-  lmft_scheduled: {
-    subject: "Book your LMFT session – Attune",
-    preview: "To: maya@example.com",
-    html: wrap(`
-      <span class="badge badge-blue">LMFT session included</span>
-      <h1 style="margin-top:14px;">Book your session with a licensed therapist.</h1>
-      <p>Hi Maya,</p>
-      <p>Your Attune package includes a 50-minute session with a licensed marriage and family therapist (LMFT). They'll review your joint results before you meet – so the session starts from your actual data, not from scratch.</p>
-      <div class="btn-wrap"><a href="#" class="btn">Book your session →</a></div>
-      <div class="divider"></div>
-      <div class="detail-row"><span>Order</span><strong>#ATT-20260401-DEMO</strong></div>
-      <div class="detail-row"><span>Format</span><strong>50-minute video session</strong></div>
     `)
   },
   checkin_6mo: {
