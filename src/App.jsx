@@ -11725,8 +11725,34 @@ export default function App() {
     // rAF backup for browsers with scroll anchoring
     requestAnimationFrame(() => { window.scrollTo(0, 0); });
   }, [view]);
-  const [activeResult, setActiveResult] = useState("overview");
-  const [highlightsSeen, setHighlightsSeen] = useState(false);
+  // A refresh should land where you were, not back at the start of the
+  // storycards. The URL carries the view; localStorage carries the section and
+  // whether the storycards have already been watched.
+  const _savedResults = (() => {
+    try { return JSON.parse(localStorage.getItem('attune_results_state') || 'null'); } catch { return null; }
+  })();
+  const [activeResult, setActiveResult] = useState(
+    initialView === 'results' && _savedResults?.activeResult ? _savedResults.activeResult : "overview"
+  );
+  const [highlightsSeen, setHighlightsSeen] = useState(
+    initialView === 'results' ? !!_savedResults?.highlightsSeen : false
+  );
+  useEffect(() => {
+    if (view !== 'results') return;
+    try { localStorage.setItem('attune_results_state', JSON.stringify({ activeResult, highlightsSeen })); } catch {}
+  }, [view, activeResult, highlightsSeen]);
+
+  // Keep the URL honest about which view is showing. Without this, leaving
+  // results for the dashboard left ?view=results in the address bar, so a
+  // refresh dropped you back into the storycards.
+  useEffect(() => {
+    try {
+      const url = new URL(window.location.href);
+      if (view === 'results') url.searchParams.set('view', 'results');
+      else url.searchParams.delete('view');
+      window.history.replaceState(window.history.state, '', url.pathname + (url.search || '') + url.hash);
+    } catch {}
+  }, [view]);
   const [isBetaTester, setIsBetaTester] = useState(false);
   const isMobile = useMobile(680);
 
