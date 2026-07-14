@@ -171,6 +171,20 @@ function entFromStoredOrder(o) {
   };
 }
 
+// Workbook state (URL + status) is not an entitlement, so every path that
+// rebuilds attune_order from entitlements silently dropped it, and the
+// dashboard fell back to "Generating now". Carry it through.
+function carryWorkbook(order) {
+  try {
+    const prev = JSON.parse(localStorage.getItem('attune_order') || 'null') || {};
+    return {
+      ...order,
+      workbookUrl:    order.workbookUrl    || prev.workbookUrl    || null,
+      workbookStatus: order.workbookStatus || prev.workbookStatus || null,
+    };
+  } catch { return order; }
+}
+
 function loadStoredOrderEnt() {
   try { return entFromStoredOrder(JSON.parse(localStorage.getItem('attune_order') || 'null')); }
   catch { return null; }
@@ -12182,8 +12196,9 @@ export default function App() {
                   addonIntimacy:   ent.addonIntimacy,
                   addonWorkbook:   ent.addonWorkbook,
                 };
-                localStorage.setItem('attune_order', JSON.stringify(_rebuiltOrder));
-                setOrder(_rebuiltOrder);
+                const _rebuiltWB = carryWorkbook(_rebuiltOrder);
+                localStorage.setItem('attune_order', JSON.stringify(_rebuiltWB));
+                setOrder(_rebuiltWB);
               }
             } catch {}
 
@@ -12285,11 +12300,12 @@ export default function App() {
                   addonIntimacy:   merged.addonIntimacy,
                   addonWorkbook:   merged.addonWorkbook,
                 };
-                localStorage.setItem('attune_order', JSON.stringify(_syncedOrder));
+                const _syncedWB = carryWorkbook(_syncedOrder);
+                localStorage.setItem('attune_order', JSON.stringify(_syncedWB));
                 // Update the live `order` state too. pkg.hasChecklist and the
                 // other pkg.* flags read from `order`, so without this the
                 // checklist/budget rows don't appear until a full page reload.
-                setOrder(_syncedOrder);
+                setOrder(_syncedWB);
                 setAccount(prev => prev ? {
                   ...prev,
                   pkg: merged.pkg,
@@ -13126,8 +13142,9 @@ export default function App() {
               workbookStatus:  json.inherited.workbookStatus || prev.workbookStatus || null,
               inheritedFromPartner: true,
             };
-            localStorage.setItem('attune_order', JSON.stringify(merged));
-            setOrder(merged);
+            const mergedWB = carryWorkbook(merged);
+            localStorage.setItem('attune_order', JSON.stringify(mergedWB));
+            setOrder(mergedWB);
             if (json.inherited.workbookStatus === 'ready') {
               localStorage.setItem('attune_workbook_ready', 'true');
               setWorkbookReady(true);
