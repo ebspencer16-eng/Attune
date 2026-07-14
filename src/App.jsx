@@ -10088,6 +10088,20 @@ function AuthModal({ mode, onClose, onSuccess }) {
       if (profile?.notes_data) {
         try { localStorage.setItem('attune_notes', JSON.stringify(profile.notes_data)); } catch {}
       }
+      // The workbook is persisted on the profile as well as the order, so comp
+      // accounts (which have no order row) restore it on any device exactly like
+      // paid ones. Whichever source has it wins; the order is checked first.
+      if (profile?.workbook_url || profile?.workbook_status === 'ready') {
+        try {
+          const _o = JSON.parse(localStorage.getItem('attune_order') || 'null') || {};
+          if (!_o.workbookUrl) {
+            _o.workbookUrl = profile.workbook_url || null;
+            _o.workbookStatus = profile.workbook_status || 'ready';
+            localStorage.setItem('attune_order', JSON.stringify(_o));
+          }
+          localStorage.setItem('attune_workbook_ready', 'true');
+        } catch {}
+      }
       // Restore partner session if partner already completed
       if (profile?.partner_profile_id) {
         try {
@@ -10126,7 +10140,7 @@ function AuthModal({ mode, onClose, onSuccess }) {
       if (!localStorage.getItem('attune_order') && authData.user.email) {
         try {
           const { data: orderRow } = await sb.from('orders')
-            .select('id,pkg_key,addon_lmft,addon_reflection,addon_budget,addon_checklist,addon_intimacy,addon_workbook,is_physical,order_num,user_id')
+            .select('id,pkg_key,addon_lmft,addon_reflection,addon_budget,addon_checklist,addon_intimacy,addon_workbook,is_physical,order_num,user_id,workbook_url,workbook_status')
             .eq('buyer_email', authData.user.email)
             .order('created_at', { ascending: false })
             .limit(1)

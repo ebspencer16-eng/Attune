@@ -37,6 +37,10 @@ export default async function handler(req, res) {
   const accessToken = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : '';
   const isAdminCall = !!(adminKey && reqAdminKey && reqAdminKey === adminKey);
 
+  // Set once the caller is authenticated. Used to persist the finished workbook
+  // onto the profile, which is the only row a comp account has.
+  let authedUserId = null;
+
   if (!isAdminCall) {
     if (!authSupabaseUrl || !authServiceKey) {
       return res.status(500).json({ error: 'Server not configured for auth' });
@@ -53,6 +57,7 @@ export default async function handler(req, res) {
       const userId = userJson?.id;
       const userEmail = userJson?.email;
       if (!userId) return res.status(401).json({ error: 'Invalid auth token' });
+      authedUserId = userId;
 
       const orderQuery = userEmail
         ? `or=(user_id.eq.${userId},buyer_email.eq.${encodeURIComponent(userEmail)})`
@@ -191,6 +196,41 @@ export default async function handler(req, res) {
     const downloadUrl = signedData.signedURL
       ? `${supabaseUrl}/storage/v1${signedData.signedURL}`
       : null;
+
+    // Persist onto the profile — both partners', so either can download from any
+    // device. This is what makes comp accounts (which have no order row) behave
+    // like paid ones. Best-effort: a failure here still returns the URL to the
+    // caller, who downloads it directly.
+    if (authedUserId && downloadUrl) {
+      try {
+        const profRes = await fetch(
+          `${supabaseUrl}/rest/v1/profiles?id=eq.${authedUserId}&select=partner_profile_id`,
+          { headers: { apikey: serviceKey, Authorization: `Bearer ${serviceKey}` } }
+        );
+        const profRows = profRes.ok ? await profRes.json() : [];
+        const partnerId = Array.isArray(profRows) ? profRows[0]?.partner_profile_id : null;
+        const ids = [authedUserId, partnerId].filter(Boolean);
+        const idFilter = ids.length > 1
+          ? `id=in.(${ids.join(',')})`
+          : `id=eq.${authedUserId}`;
+        await fetch(`${supabaseUrl}/rest/v1/profiles?${idFilter}`, {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+            'apikey': serviceKey,
+            'Authorization': `Bearer ${serviceKey}`,
+            'Prefer': 'return=minimal',
+          },
+          body: JSON.stringify({
+            workbook_url: downloadUrl,
+            workbook_status: 'ready',
+            workbook_generated_at: new Date().toISOString(),
+          }),
+        });
+      } catch (e) {
+        console.warn('[store-workbook-pdf] profile persist failed:', e?.message || e);
+      }
+    }
 
     // Update the order row with the workbook URL + status. Best-effort.
     if (body.orderId) {
