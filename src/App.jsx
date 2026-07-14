@@ -7249,7 +7249,12 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
         const orderRaw = localStorage.getItem('attune_order');
         if (!orderRaw) return;
         const ord = JSON.parse(orderRaw);
-        if (!ord?.addonWorkbook) return;
+        // 10.6 — ownership is not the same as the add-on flag. Premium (and comp
+        // premium) accounts include the workbook while addonWorkbook stays ''.
+        // Guarding on addonWorkbook alone meant generation never fired for them
+        // and the dashboard sat on "Generating now" forever.
+        const _ownsWorkbook = !!ord?.addonWorkbook || (ord?.pkgKey || ord?.pkg) === 'premium';
+        if (!_ownsWorkbook) return;
         if (localStorage.getItem('attune_workbook_ready') === 'true') return; // already done
 
         // Require both partners to have completed both exercises. Without
@@ -12710,7 +12715,8 @@ export default function App() {
   const [order, setOrder] = useState(() => {
     try { return JSON.parse(localStorage.getItem('attune_order') || 'null'); } catch { return null; }
   });
-  const hasWorkbookOrder = order?.addonWorkbook != null; // 'digital' | 'print'
+  // 'digital' | 'print' | '' (premium includes it without an explicit add-on)
+  const hasWorkbookOrder = !!order?.addonWorkbook || (order?.pkgKey || order?.pkg) === 'premium';
   const isWorkbookPrint  = order?.addonWorkbook === 'print';
   // Workbook notification: show prominent tile when workbook is generated
   const [workbookNotifSeen, setWorkbookNotifSeen] = useState(() => {
