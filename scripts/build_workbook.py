@@ -2881,6 +2881,16 @@ def build_first_conversation_guide(page_num):
 """
 
 def build_reference_card(page_num):
+    # The phrase comes from the couple type's first tip. If it's missing for any
+    # reason, drop the whole section rather than printing an empty quote.
+    _phrase = (COUPLE.get('couple_type', {}) or {}).get('phrase_that_lands') or ''
+    _phrase = fill(_phrase, COUPLE['u'], COUPLE['p']).strip() if _phrase else ''
+    phrase_block = (
+        '<div class="refcard-section">'
+        '<span class="refcard-section-eye">Phrase for the two of you</span>'
+        f'<p class="refcard-phrase-text">&ldquo;{_phrase}&rdquo;</p>'
+        '</div>'
+    ) if _phrase else ''
     """Reference card, cream paper on tan page bg. v3 layout per Ellie's
     approved mockup (May 2026).
 
@@ -2926,10 +2936,7 @@ def build_reference_card(page_num):
         <p class="refcard-intention">Understanding takes intention.</p>
       </div>
 
-      <div class="refcard-section">
-        <span class="refcard-section-eye">Phrase for the two of you</span>
-        <p class="refcard-phrase-text">&ldquo;{fill(COUPLE['couple_type']['phrase_that_lands'], COUPLE['u'], COUPLE['p'])}&rdquo;</p>
-      </div>
+      {phrase_block}
 
       <div class="refcard-section">
         <span class="refcard-section-eye">What we're going to work on</span>

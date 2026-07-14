@@ -7279,6 +7279,21 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
           nuance:      coupleType?.nuance,
           color:       coupleType?.color,
         } : null,
+        // The workbook's reference card opens with "Phrase for the two of you".
+        // It reads phrase_that_lands, which payloadToCouple takes from
+        // phraseThatLands (or coupleType.tips[0].phraseTry). This session object
+        // strips tips and never carried the phrase, so the card rendered blank.
+        // Resolve the name and role tokens here — the builder only substitutes
+        // {U}/{P}, so an unresolved {EXP}/{GRD} would print raw.
+        phraseThatLands: (() => {
+          const raw = coupleType?.tips?.[0]?.phraseTry;
+          if (!raw) return null;
+          const named = raw
+            .replace(/\{U\}/g, userName || 'Partner A')
+            .replace(/\{P\}/g, partnerName || 'Partner B');
+          try { return resolveRoleTokens(named, myS, partS, userName, partnerName); }
+          catch { return named; }
+        })(),
         // Phase 5a fields
         responsibilities: sessionPayload.responsibilities,
         lifeQuestions:    sessionPayload.lifeQuestions,
