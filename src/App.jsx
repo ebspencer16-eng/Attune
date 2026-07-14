@@ -2030,13 +2030,13 @@ function GrowSquare({ color = "#9B5DE5", icon, title, sub, cta, onClick, href, d
 const GrowIcons = {
   workbook: c => (
     <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
-      {/* open book */}
-      <path d="M2 5.5c2.6-1.1 5.1-1.1 7.6 0V19c-2.5-1.1-5-1.1-7.6 0z"/>
-      <path d="M22 5.5c-2.6-1.1-5.1-1.1-7.6 0V19c2.5-1.1 5-1.1 7.6 0z"/>
-      <path d="M9.6 5.5c.8-.3 1.6-.5 2.4-.5s1.6.2 2.4.5"/>
-      {/* pencil writing on the right-hand page */}
-      <path d="M20.4 9.6l1.5 1.5-4.6 4.6-1.9.4.4-1.9z"/>
-      <path d="M18.9 11.1l1.5 1.5"/>
+      {/* sheet of paper with written lines */}
+      <path d="M14.5 2.5H6a1.5 1.5 0 0 0-1.5 1.5v16A1.5 1.5 0 0 0 6 21.5h9a1.5 1.5 0 0 0 1.5-1.5v-6"/>
+      <path d="M8 7.5h5"/>
+      <path d="M8 11h3.5"/>
+      <path d="M8 14.5h2.5"/>
+      {/* pen writing on it */}
+      <path d="M20.6 4.1a1.6 1.6 0 0 1 2.3 2.3l-6 6-3 .7.7-3z"/>
     </svg>
   ),
   budget: c => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.8" strokeLinecap="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>,
