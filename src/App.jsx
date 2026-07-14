@@ -5,6 +5,22 @@ import { INTIMACY_QUESTIONS, INTIMACY_DIMENSIONS, summarizeIntimacy, intimacyDim
 import { INTIMACY_RESULTS_PROSE } from "../api/_intimacy-results-prose.js";
 import { PKG_CAPS, ORDER_SELECT, computeEntitlements, mergeEntitlementsGrantOnly, sameEntitlements } from "../api/_lib/entitlements.js";
 
+// ═══════════════════════════════════════════════════════════════════════════
+// LAUNCH FLAGS — flip these to change what the product offers. Nothing below is
+// deleted, so re-enabling is a one-line change per flag.
+//
+//   LMFT_ENABLED    — the licensed-therapist session offering. Discontinued.
+//                     Off hides every LMFT surface (dashboard tile, add-on
+//                     prompts, offerings, results reference, booking).
+//   PHYSICAL_ENABLED — physical (printed/shipped) package variants. Phase 1
+//                     launches digital-only. Off hides the digital/physical
+//                     toggle, shipping, and physical pricing everywhere, and
+//                     forces every order to the digital variant. Phase 2:
+//                     set true (and the matching flag in public/_flags.js).
+// ═══════════════════════════════════════════════════════════════════════════
+const LMFT_ENABLED = false;
+const PHYSICAL_ENABLED = false;
+
 // ── Demo couple-type archetypes ───────────────────────────────────────────────
 // Ex1 answer sets that reliably place a partner in each quadrant of the type
 // engine (verified against api/_type-engine.js: W/X/Y/Z each land exactly).
@@ -4284,19 +4300,21 @@ function PersonalityResults({ myAnswers, partnerAnswers, userName, partnerName, 
       <NavButtons onBack={() => go(step - 1)} onNext={onGoExpectations || (() => {})} nextLabel={onGoExpectations ? "Expectations →" : "Done"} nextDisabled={!onGoExpectations} />
 
       {/* Add-ons row */}
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.75rem", marginTop: "1.25rem" }}>
+      <div style={{ display: "grid", gridTemplateColumns: LMFT_ENABLED ? "1fr 1fr" : "1fr", gap: "0.75rem", marginTop: "1.25rem" }}>
         <div style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.12)", borderRadius: 14, padding: "1rem" }}>
           <div style={{ width: 20, height: 20, borderRadius: 5, background: "rgba(232,103,58,0.25)", border: "1.5px solid rgba(232,103,58,0.45)", marginBottom: "0.4rem" }} />
           <div style={{ fontSize: "0.82rem", fontWeight: 700, color: "white", marginBottom: "0.3rem", fontFamily: BFONT }}>Personalized Workbook</div>
           <p style={{ fontSize: "0.72rem", color: "rgba(255,255,255,0.55)", lineHeight: 1.6, fontFamily: BFONT, margin: "0 0 0.6rem" }}>Guided exercises and conversation prompts built directly from these action items.</p>
           <a href="/offerings" style={{ fontSize: "0.7rem", color: "#E8673A", fontFamily: BFONT, fontWeight: 700, textDecoration: "none" }}>Get the workbook →</a>
         </div>
+        {LMFT_ENABLED && (
         <div style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.12)", borderRadius: 14, padding: "1rem" }}>
           <div style={{ width: 20, height: 20, borderRadius: 5, background: "rgba(27,95,232,0.2)", border: "1.5px solid rgba(27,95,232,0.4)", marginBottom: "0.4rem" }} />
           <div style={{ fontSize: "0.82rem", fontWeight: 700, color: "white", marginBottom: "0.3rem", fontFamily: BFONT }}>LMFT Session</div>
           <p style={{ fontSize: "0.72rem", color: "rgba(255,255,255,0.55)", lineHeight: 1.6, fontFamily: BFONT, margin: "0 0 0.6rem" }}>A licensed therapist reviews your results and runs a 50-minute session built around exactly this.</p>
           <a href="/offerings#pkg-premium" style={{ fontSize: "0.7rem", color: "#1B5FE8", fontFamily: BFONT, fontWeight: 700, textDecoration: "none" }}>Learn more →</a>
         </div>
+        )}
       </div>
     </ResultsSlide>
     </MaybeNav>
@@ -8995,8 +9013,8 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
           <div style={{ marginTop: "0.5rem", marginBottom: "0.5rem" }}>
             <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
 
-              {/* LMFT Session */}
-              {hasLMFT ? (
+              {/* LMFT Session (offering discontinued — gated by LMFT_ENABLED) */}
+              {LMFT_ENABLED && (hasLMFT ? (
                 <div onClick={() => setView("lmft")} style={{ display: "flex", alignItems: "center", gap: "1rem", background: C.warm, border: `1.5px solid ${C.stone}`, borderRadius: 14, padding: "0.85rem 1.1rem", cursor: "pointer", transition: "all 0.15s" }}
                   onMouseEnter={e => { e.currentTarget.style.borderColor = "#5B6DF8"; }}
                   onMouseLeave={e => { e.currentTarget.style.borderColor = C.stone; }}>
@@ -9023,7 +9041,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
                   </div>
                   <div style={{ color: C.muted, fontSize: "0.9rem" }}>→</div>
                 </a>
-              )}
+              ))}
 
               {/* Relationship Reflection */}
               {hasAnniversary ? (
@@ -11652,16 +11670,15 @@ function PackagesModal({ currentPkg, onClose, onPick, onPickAddon }) {
       name: "Attune Premium",
       badge: "The complete experience",
       price: "$295",
-      tagline: "Everything, plus a therapist session built around your results.",
-      description: "All three exercises, the budget worksheet, the personalized workbook, and a 50-minute session with a licensed therapist.",
+      tagline: "Everything, in one place.",
+      description: "All three exercises, the budget worksheet, and the personalized workbook built around your results.",
       color: "#3B5BDB",
-      features: ["Everything in Assessment", "Both bonus exercises", "LMFT session included", "Personalized workbook"],
+      features: ["Everything in Assessment", "Both bonus exercises", "Personalized workbook"],
     },
   ];
 
   const addOns = [
     { id: "workbook", name: "The Personalized Workbook", desc: "A structured workbook built around your specific results and couple type.", price: "From $19", color: "#9B5DE5" },
-    { id: "lmft", name: "LMFT Session", desc: "A 50-minute session with a licensed therapist who has reviewed your joint results.", price: "$150", color: "#E8673A" },
     { id: "budget", name: "Shared Budgeting Tool", desc: "A guided exercise to surface what you each expect from shared finances.", price: "$20", color: "#1B5FE8" },
     { id: "reflection", name: "Relationship Reflection", desc: "A third exercise on the moments and meaning that shaped you as a couple.", price: "$40", color: "#3B5BDB" },
   ];
@@ -13322,7 +13339,7 @@ export default function App() {
   const pkg = {
     ..._basePkg,
     hasChecklist:   _basePkg.hasChecklist   || !!(order?.addonChecklist),
-    hasLMFT:        _basePkg.hasLMFT        || !!(order?.addonLmft),
+    hasLMFT:        LMFT_ENABLED && (_basePkg.hasLMFT || !!(order?.addonLmft)),
     hasAnniversary: _basePkg.hasAnniversary || !!(order?.addonReflection),
     hasBudget:      _basePkg.hasBudget      || !!(order?.addonBudget),
     hasWorkbook:    _effectivePkgKey === 'premium' || !!(order?.addonWorkbook),
@@ -14003,7 +14020,7 @@ export default function App() {
                   </div>
 
                   {/* Add-ons — separate, quieter, never mixed with what you own */}
-                  {(!hasWorkbookOrder || !pkg.hasIntimacy || !pkg.hasLMFT) && (
+                  {(!hasWorkbookOrder || !pkg.hasIntimacy || (LMFT_ENABLED && !pkg.hasLMFT)) && (
                     <div style={{ marginTop: "1.5rem" }}>
                       <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", marginBottom: "0.85rem" }}>
                         <span style={{ fontSize: "0.58rem", letterSpacing: "0.2em", textTransform: "uppercase", fontWeight: 700, fontFamily: BFONT, color: "#A89C8C" }}>Add to your package</span>
@@ -14022,7 +14039,7 @@ export default function App() {
                             sub="Answered independently, compared side by side."
                             cta="$20 →" onClick={() => setUpsellModal({ product: 'intimacy', cartAdded: false })} />
                         )}
-                        {!pkg.hasLMFT && (
+                        {LMFT_ENABLED && !pkg.hasLMFT && (
                           <GrowSquare color="#5B6DF8" muted icon={GrowIcons.lmft("#5B6DF8")}
                             title="LMFT Session"
                             sub="50 minutes with a therapist who reviews your results first."
@@ -14480,7 +14497,6 @@ export default function App() {
           const ADD_ONS = [
             { name: "The Personalized Workbook", desc: "A structured workbook built around your specific results and couple type.", price: "From $19", onClick: () => setView("workbook"), color: "#9B5DE5" },
             { name: "Shared Budgeting Tool", desc: "A guided financial exercise to surface what you each expect from shared finances.", price: "$20", href: "/offerings", color: "#1B5FE8" },
-            { name: "LMFT Session", desc: "A 50-minute session with a licensed therapist who has reviewed your joint results.", price: "$150", href: "/offerings", color: "#E8673A" },
           ];
           return (
             <div style={{ flex: 1, overflowY: "auto", background: "#FBF8F3" }}>
@@ -14569,7 +14585,7 @@ export default function App() {
             core:        { name: "The Attune Assessment", color: "#E8673A", features: ["Communication exercise", "Expectations exercise", "Full joint results", "Couple type profile"] },
             newlywed:    { name: "Starting Out Collection", color: "#E8673A", features: ["Everything in Assessment", "Starting Out checklist", "Partner comparison deep-dives"] },
             anniversary: { name: "Relationship Reflection", color: "#1B5FE8", features: ["Everything in Assessment", "Relationship reflection exercise", "Anniversary-specific prompts"] },
-            premium:     { name: "Attune Premium", color: "#3B5BDB", features: ["Everything in Assessment", "Shared budgeting tool", "LMFT session included", "Personalized workbook"] },
+            premium:     { name: "Attune Premium", color: "#3B5BDB", features: ["Everything in Assessment", "Shared budgeting tool", "Personalized workbook"] },
           };
           const pkg2 = PACKAGE_FEATURES[demoPkg] || PACKAGE_FEATURES.core;
           return (
