@@ -699,6 +699,7 @@ export function ExpectationsExercise({ partnerName, userName = "Partner A", onCo
           : "Sometimes expectations go unmet because they were never said. Sometimes they were said but heard differently. Either way, seeing them side by side is the point. Answer for yourself, you'll see your answers alongside your partner's only after you've both finished."
         }
       </p>
+      <p style={{ fontSize: "0.8rem", color: C.muted, fontFamily: font.body, fontWeight: 400, lineHeight: 1.6, marginBottom: "1.5rem" }}>Built on relationship research and shaped with licensed therapists.</p>
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", borderTop: ("1px solid " + (C.stone)), paddingTop: "1.5rem" }}>
         <p style={{ fontSize: "0.72rem", color: C.muted, fontFamily: font.body }}>{isRevisited ? "~10 minutes · life questions only" : "~15 minutes · 2 parts"}</p>
         <button onClick={() => setPhase("life")}
@@ -1079,9 +1080,10 @@ export function IntimacyExercise({ userName = "You", partnerName = "your partner
       <p style={{ fontSize: "0.92rem", color: C.text, fontFamily: BFONT, fontWeight: 300, lineHeight: 1.7, marginBottom: "1rem" }}>
         You answer on your own. Neither of you sees the other's answers until you have both finished. There are no right answers, and no answer here is better than another.
       </p>
-      <p style={{ fontSize: "0.82rem", color: C.muted, fontFamily: BFONT, fontWeight: 300, lineHeight: 1.65, marginBottom: "2rem" }}>
+      <p style={{ fontSize: "0.82rem", color: C.muted, fontFamily: BFONT, fontWeight: 300, lineHeight: 1.65, marginBottom: "0.85rem" }}>
         This is an expectations tool, not therapy. If anything here brings up something heavier, that is worth talking through with someone qualified.
       </p>
+      <p style={{ fontSize: "0.78rem", color: C.muted, fontFamily: BFONT, fontWeight: 400, lineHeight: 1.6, marginBottom: "2rem" }}>Built on relationship research and shaped with licensed therapists.</p>
       <button onClick={() => setPhase(lockedVariant ? 'questions' : 'branch')}
         style={{ background: accent, color: "white", border: "none", borderRadius: 12, padding: "0.9rem 1.75rem", fontSize: "0.9rem", fontWeight: 600, fontFamily: BFONT, cursor: "pointer" }}>
         Begin →
@@ -3273,6 +3275,7 @@ function Exercise01Flow({ userName, partnerName, onComplete, skipIntro = false }
         <p style={{ fontSize: "0.92rem", color: C.muted, fontFamily: font.body, lineHeight: 1.75, marginBottom: "1.75rem" }}>
           This is the communication exercise. It looks at how you connect, handle conflict, and show up day to day. Exercise 02 comes next and maps what you each expect. Both take about 15 minutes. Answer honestly. Your partner never sees your individual answers.
         </p>
+        <p style={{ fontSize: "0.78rem", color: C.muted, fontFamily: font.body, fontWeight: 400, lineHeight: 1.6, marginBottom: "1.75rem" }}>Built on relationship research and shaped with licensed therapists.</p>
         <div style={{ display: "flex", gap: "0.85rem", marginBottom: "1.75rem", flexWrap: "wrap" }}>
           {[
             { num: '01', title: 'Communication', color: '#E8673A', desc: '23 questions · 10 dimensions' },
@@ -5138,6 +5141,7 @@ function AnniversaryExercise({ userName, partnerName, onComplete, onBack, partne
         <p style={{ fontSize: "0.88rem", color: C.ink, fontFamily: font.body, lineHeight: 1.7, marginBottom: "1.5rem", borderLeft: "3px solid #10b981", paddingLeft: "0.85rem", fontStyle: "italic" }}>
           When {partnerName} finishes {partnerPossAbs}, you'll see where your stories overlap and where you each saw something the other didn't.
         </p>
+        <p style={{ fontSize: "0.78rem", color: C.muted, fontFamily: font.body, fontWeight: 400, lineHeight: 1.6, marginBottom: "1rem" }}>Built on relationship research and shaped with licensed therapists.</p>
         <p style={{ fontSize: "0.72rem", color: C.muted, fontFamily: font.body, marginBottom: "1.75rem", letterSpacing: "0.05em" }}>
           ~10 minutes
         </p>
