@@ -1995,25 +1995,20 @@ function GuideSquare({ color = "#9B5DE5", icon, title, sub, href }) {
 // Step 3 tile. One shape for everything the couple can pick up next: an icon,
 // a title, a line, and an action. Owned tools carry their product colour; add-ons
 // are quieter and show the price on the action.
-function GrowSquare({ color = "#9B5DE5", icon, eyebrow, title, sub, cta, onClick, href, disabled = false, muted = false }) {
+function GrowSquare({ color = "#9B5DE5", icon, title, sub, cta, onClick, href, disabled = false, muted = false }) {
   const inner = (
     <>
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "0.85rem" }}>
-        <div style={{ width: 40, height: 40, borderRadius: 12, background: disabled ? "#F1EBE3" : color + "1f", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-          {icon}
-        </div>
-        {eyebrow && (
-          <span style={{ fontSize: "0.52rem", letterSpacing: "0.16em", textTransform: "uppercase", fontWeight: 700, fontFamily: BFONT, color: muted ? "#A89C8C" : color, background: muted ? "#F5F1EA" : color + "14", borderRadius: 999, padding: "0.25rem 0.55rem" }}>{eyebrow}</span>
-        )}
+      <div style={{ width: 36, height: 36, borderRadius: 11, background: disabled ? "#F1EBE3" : color + "1f", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, marginBottom: "0.65rem" }}>
+        {icon}
       </div>
-      <div style={{ fontSize: "0.92rem", fontWeight: 700, color: "#0E0B07", fontFamily: BFONT, lineHeight: 1.3, marginBottom: "0.3rem" }}>{title}</div>
-      <div style={{ fontSize: "0.75rem", color: "#8C7A68", fontFamily: BFONT, fontWeight: 300, lineHeight: 1.55 }}>{sub}</div>
-      <div style={{ marginTop: "auto", paddingTop: "0.85rem", fontSize: "0.78rem", fontWeight: 700, fontFamily: BFONT, color: disabled ? "#B3A693" : color }}>{cta}</div>
+      <div style={{ fontSize: "0.88rem", fontWeight: 700, color: "#0E0B07", fontFamily: BFONT, lineHeight: 1.3, marginBottom: "0.25rem" }}>{title}</div>
+      <div style={{ fontSize: "0.73rem", color: "#8C7A68", fontFamily: BFONT, fontWeight: 300, lineHeight: 1.5 }}>{sub}</div>
+      <div style={{ marginTop: "auto", paddingTop: "0.7rem", fontSize: "0.76rem", fontWeight: 700, fontFamily: BFONT, color: disabled ? "#B3A693" : color }}>{cta}</div>
     </>
   );
   const style = {
-    display: "flex", flexDirection: "column", aspectRatio: "1 / 1", background: "white",
-    border: "1.5px solid " + (disabled ? "#EFE7DD" : "#E8DDD0"), borderRadius: 18, padding: "1.15rem",
+    display: "flex", flexDirection: "column", minHeight: 152, background: "white",
+    border: "1.5px solid " + (disabled ? "#EFE7DD" : "#E8DDD0"), borderRadius: 16, padding: "0.95rem 1rem",
     textDecoration: "none", cursor: disabled ? "default" : "pointer",
     transition: "box-shadow .15s, border-color .15s, transform .15s", opacity: disabled ? 0.8 : 1,
   };
@@ -2033,10 +2028,29 @@ function GrowSquare({ color = "#9B5DE5", icon, eyebrow, title, sub, cta, onClick
 
 // Icons for the Step 3 squares.
 const GrowIcons = {
-  workbook: c => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.8" strokeLinecap="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>,
+  workbook: c => (
+    <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
+      {/* open book */}
+      <path d="M2 5.5c2.6-1.1 5.1-1.1 7.6 0V19c-2.5-1.1-5-1.1-7.6 0z"/>
+      <path d="M22 5.5c-2.6-1.1-5.1-1.1-7.6 0V19c2.5-1.1 5-1.1 7.6 0z"/>
+      <path d="M9.6 5.5c.8-.3 1.6-.5 2.4-.5s1.6.2 2.4.5"/>
+      {/* pencil writing on the right-hand page */}
+      <path d="M20.4 9.6l1.5 1.5-4.6 4.6-1.9.4.4-1.9z"/>
+      <path d="M18.9 11.1l1.5 1.5"/>
+    </svg>
+  ),
   budget: c => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.8" strokeLinecap="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>,
   checklist: c => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.8" strokeLinecap="round"><polyline points="9 11 12 14 20 6"/><path d="M20 12v7a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h9"/></svg>,
-  lmft: c => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.8" strokeLinecap="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>,
+  lmft: c => (
+    <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
+      {/* monitor */}
+      <rect x="2.5" y="3.5" width="19" height="13" rx="2"/>
+      <path d="M9 20.5h6"/><path d="M12 16.5v4"/>
+      {/* person on the call */}
+      <circle cx="12" cy="8.4" r="2.1"/>
+      <path d="M8.3 14c.5-1.9 2-2.9 3.7-2.9s3.2 1 3.7 2.9"/>
+    </svg>
+  ),
   intimacy: c => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.8" strokeLinecap="round"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8l8.8 8.8 8.8-8.8a5.5 5.5 0 0 0 0-7.8z"/></svg>,
   guide: c => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.8" strokeLinecap="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>,
   talk: c => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.8" strokeLinecap="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>,
@@ -13658,12 +13672,15 @@ export default function App() {
                   <DashStepHeader num="1" title="Complete your exercises" sub="Answer on your own. Results unlock when both of you finish." isMobile={isMobile} />
                   <div style={{ background: "white", border: "1.5px solid #E8DDD0", borderTop: "3px solid #E8673A", borderRadius: 16, overflow: "hidden", boxShadow: "0 2px 14px rgba(14,11,7,0.04)" }}>
                     {(() => {
+                      // Exercises are numbered in sequence, so the intimacy
+                      // exercise reads as 04 (or 03 when there's no reflection),
+                      // matching the number on its intro screen (10.5).
                       const rows = [
                         { key: "comm", label: "Communication", viewId: "exercise1", myDone: myEx1Done, myInProgress: ex1InProgress, partnerDone: partnerEx1Done },
                         { key: "exp", label: "Expectations", viewId: "exercise2", myDone: myEx2Done, myInProgress: ex2InProgress, partnerDone: partnerEx2Done },
                         ...(pkg.hasAnniversary ? [{ key: "refl", label: "Reflection", viewId: "exercise3", myDone: !!ex3Answers, myInProgress: ex3InProgress, partnerDone: !!(partnerSession && partnerSession.ex3) }] : []),
                         ...(pkg.hasIntimacy ? [{ key: "intim", label: "Physical intimacy", viewId: "intimacy", myDone: !!(intimacyData?.completedAt), myInProgress: false, partnerDone: !!(partnerSession && partnerSession.intimacy && partnerSession.intimacy.completedAt) }] : []),
-                      ];
+                      ].map((r, i) => ({ ...r, num: String(i + 1).padStart(2, "0") }));
                       const COLS = "minmax(0,1.15fr) minmax(0,1fr) minmax(0,1fr)";
                       const dot = (done, inProgress) => (
                         <span style={{ width: 17, height: 17, borderRadius: "50%", flexShrink: 0, display: "inline-flex", alignItems: "center", justifyContent: "center", fontSize: "0.56rem", color: "white", background: done ? "#059669" : inProgress ? "#C17F47" : "#D4C0A8", fontWeight: 700 }}>{done ? "✓" : inProgress ? "·" : ""}</span>
@@ -13683,7 +13700,10 @@ export default function App() {
                             return (
                               <div key={r.key} style={{ display: "grid", gridTemplateColumns: COLS, alignItems: "stretch", borderBottom: i < rows.length - 1 ? "1px solid #F0E9E0" : "none" }}>
                                 {/* Exercise label (row identifier) */}
-                                <div style={{ padding: isMobile ? "0.8rem 0.6rem" : "0.85rem 0.9rem", display: "flex", alignItems: "center", fontSize: isMobile ? "0.78rem" : "0.82rem", color: "#0E0B07", fontFamily: BFONT, fontWeight: 500, lineHeight: 1.25 }}>{r.label}</div>
+                                <div style={{ padding: isMobile ? "0.8rem 0.6rem" : "0.85rem 0.9rem", display: "flex", alignItems: "center", gap: "0.55rem", fontSize: isMobile ? "0.78rem" : "0.82rem", color: "#0E0B07", fontFamily: BFONT, fontWeight: 500, lineHeight: 1.25 }}>
+                                  <span style={{ fontSize: isMobile ? "0.62rem" : "0.66rem", fontWeight: 700, color: "#B3A693", fontFamily: BFONT, flexShrink: 0 }}>{r.num}</span>
+                                  <span>{r.label}</span>
+                                </div>
                                 {/* My column — clickable until done */}
                                 <div onClick={clickable ? () => setView(r.viewId) : undefined}
                                   style={{ ...stCell, cursor: clickable ? "pointer" : "default", transition: "background .15s" }}
@@ -13759,7 +13779,6 @@ export default function App() {
                   <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(168px, 1fr))", gap: "0.85rem" }}>
                     {hasWorkbookOrder && (
                       <GrowSquare color="#9B5DE5" icon={GrowIcons.workbook(workbookReady ? "#9B5DE5" : "#B3A693")}
-                        eyebrow="Included"
                         title={workbookReady ? "Your workbook is ready" : "Your personalized workbook"}
                         sub={workbookReady ? "Exercises and prompts built from your answers." : (bothDone ? "Generating now. We'll email you when it's ready." : "Unlocks once both of you finish.")}
                         cta={workbookReady ? "Download →" : (bothDone ? "Generating…" : "Locked")}
@@ -13767,32 +13786,32 @@ export default function App() {
                         disabled={!workbookReady} />
                     )}
                     {pkg.hasBudget && (
-                      <GrowSquare color="#C17F47" icon={GrowIcons.budget("#C17F47")} eyebrow="Included"
+                      <GrowSquare color="#C17F47" icon={GrowIcons.budget("#C17F47")}
                         title="Shared Budget Builder"
                         sub="Build a financial plan together from your results."
                         cta="Open →" onClick={() => setView("budget")} />
                     )}
                     {pkg.hasChecklist && (
-                      <GrowSquare color="#C17F47" icon={GrowIcons.checklist("#C17F47")} eyebrow="Included"
+                      <GrowSquare color="#C17F47" icon={GrowIcons.checklist("#C17F47")}
                         title="Starting Out Checklist"
                         sub="A practical guide to starting your life together."
                         cta="Open →" onClick={() => setView("checklist")} />
                     )}
                     {pkg.hasLMFT && (
-                      <GrowSquare color="#5B6DF8" icon={GrowIcons.lmft("#5B6DF8")} eyebrow="Included"
+                      <GrowSquare color="#5B6DF8" icon={GrowIcons.lmft("#5B6DF8")}
                         title="Your LMFT session"
                         sub="50 minutes with a therapist who has read your results."
                         cta="Schedule →" onClick={() => setView("lmft")} />
                     )}
-                    <GrowSquare color="#9B5DE5" icon={GrowIcons.guide("#9B5DE5")} eyebrow="Guide"
+                    <GrowSquare color="#9B5DE5" icon={GrowIcons.guide("#9B5DE5")}
                       title="How to review your results together"
                       sub="A simple structure for the first conversation."
                       cta="Read →" href="/practice/how-to-review-your-results-together?from=app" />
-                    <GrowSquare color="#E8673A" icon={GrowIcons.talk("#E8673A")} eyebrow="Guide"
+                    <GrowSquare color="#E8673A" icon={GrowIcons.talk("#E8673A")}
                       title="How to start a hard conversation"
                       sub="Opening lines for the topics that matter most."
                       cta="Read →" href="/practice/how-to-start-a-hard-conversation?from=app" />
-                    <GrowSquare color="#C17F47" icon={GrowIcons.library("#C17F47")} eyebrow="In Practice"
+                    <GrowSquare color="#C17F47" icon={GrowIcons.library("#C17F47")}
                       title="The full library"
                       sub="Guides on communication, conflict, and growing together."
                       cta="Explore →" href="/practice?from=app" />
@@ -13807,19 +13826,19 @@ export default function App() {
                       </div>
                       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(168px, 1fr))", gap: "0.85rem" }}>
                         {!hasWorkbookOrder && (
-                          <GrowSquare color="#9B5DE5" muted icon={GrowIcons.workbook("#9B5DE5")} eyebrow="Add-on"
+                          <GrowSquare color="#9B5DE5" muted icon={GrowIcons.workbook("#9B5DE5")}
                             title="The Personalized Workbook"
                             sub="A printable workbook built around your results and couple type."
                             cta="From $19 →" onClick={() => setView("workbook")} />
                         )}
                         {!pkg.hasIntimacy && (
-                          <GrowSquare color="#B5546E" muted icon={GrowIcons.intimacy("#B5546E")} eyebrow="Add-on"
+                          <GrowSquare color="#B5546E" muted icon={GrowIcons.intimacy("#B5546E")}
                             title="Intimacy Expectations"
                             sub="Answered independently, compared side by side."
                             cta="$20 →" onClick={() => setUpsellModal({ product: 'intimacy', cartAdded: false })} />
                         )}
                         {!pkg.hasLMFT && (
-                          <GrowSquare color="#5B6DF8" muted icon={GrowIcons.lmft("#5B6DF8")} eyebrow="Add-on"
+                          <GrowSquare color="#5B6DF8" muted icon={GrowIcons.lmft("#5B6DF8")}
                             title="LMFT Session"
                             sub="50 minutes with a therapist who reviews your results first."
                             cta="$150 →" onClick={() => setUpsellModal({ product: 'lmft', cartAdded: false })} />
@@ -14601,7 +14620,7 @@ export default function App() {
     {DEMO_COUPLE_TYPES.map(t => {
       const active = t === demoType;
       return (
-        <button key={t} onClick={() => { setDemoType(t); try { const u = new URL(window.location.href); u.searchParams.set('type', t); window.history.replaceState({}, '', u); } catch {} }}
+        <button key={t} onClick={() => setDemoType(t)}
           title={`${TYPE_LABEL[t[0]]} + ${TYPE_LABEL[t[1]]}`}
           style={{ fontSize: '11px', fontWeight: 700, padding: '4px 9px', borderRadius: '7px', cursor: 'pointer', border: '1px solid ' + (active ? '#E8673A' : 'rgba(255,255,255,.25)'), background: active ? 'linear-gradient(135deg,#E8673A,#1B5FE8)' : 'transparent', color: '#fff' }}>
           {t}
