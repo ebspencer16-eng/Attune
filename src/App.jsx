@@ -1992,6 +1992,57 @@ function GuideSquare({ color = "#9B5DE5", icon, title, sub, href }) {
   );
 }
 
+// Step 3 tile. One shape for everything the couple can pick up next: an icon,
+// a title, a line, and an action. Owned tools carry their product colour; add-ons
+// are quieter and show the price on the action.
+function GrowSquare({ color = "#9B5DE5", icon, eyebrow, title, sub, cta, onClick, href, disabled = false, muted = false }) {
+  const inner = (
+    <>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "0.85rem" }}>
+        <div style={{ width: 40, height: 40, borderRadius: 12, background: disabled ? "#F1EBE3" : color + "1f", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+          {icon}
+        </div>
+        {eyebrow && (
+          <span style={{ fontSize: "0.52rem", letterSpacing: "0.16em", textTransform: "uppercase", fontWeight: 700, fontFamily: BFONT, color: muted ? "#A89C8C" : color, background: muted ? "#F5F1EA" : color + "14", borderRadius: 999, padding: "0.25rem 0.55rem" }}>{eyebrow}</span>
+        )}
+      </div>
+      <div style={{ fontSize: "0.92rem", fontWeight: 700, color: "#0E0B07", fontFamily: BFONT, lineHeight: 1.3, marginBottom: "0.3rem" }}>{title}</div>
+      <div style={{ fontSize: "0.75rem", color: "#8C7A68", fontFamily: BFONT, fontWeight: 300, lineHeight: 1.55 }}>{sub}</div>
+      <div style={{ marginTop: "auto", paddingTop: "0.85rem", fontSize: "0.78rem", fontWeight: 700, fontFamily: BFONT, color: disabled ? "#B3A693" : color }}>{cta}</div>
+    </>
+  );
+  const style = {
+    display: "flex", flexDirection: "column", aspectRatio: "1 / 1", background: "white",
+    border: "1.5px solid " + (disabled ? "#EFE7DD" : "#E8DDD0"), borderRadius: 18, padding: "1.15rem",
+    textDecoration: "none", cursor: disabled ? "default" : "pointer",
+    transition: "box-shadow .15s, border-color .15s, transform .15s", opacity: disabled ? 0.8 : 1,
+  };
+  const onEnter = disabled ? undefined : (e) => {
+    e.currentTarget.style.boxShadow = "0 8px 26px rgba(0,0,0,.07)";
+    e.currentTarget.style.borderColor = color;
+    e.currentTarget.style.transform = "translateY(-2px)";
+  };
+  const onLeave = disabled ? undefined : (e) => {
+    e.currentTarget.style.boxShadow = "none";
+    e.currentTarget.style.borderColor = "#E8DDD0";
+    e.currentTarget.style.transform = "";
+  };
+  if (href) return <a href={href} style={style} onMouseEnter={onEnter} onMouseLeave={onLeave}>{inner}</a>;
+  return <div onClick={disabled ? undefined : onClick} style={style} onMouseEnter={onEnter} onMouseLeave={onLeave}>{inner}</div>;
+}
+
+// Icons for the Step 3 squares.
+const GrowIcons = {
+  workbook: c => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.8" strokeLinecap="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>,
+  budget: c => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.8" strokeLinecap="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>,
+  checklist: c => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.8" strokeLinecap="round"><polyline points="9 11 12 14 20 6"/><path d="M20 12v7a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h9"/></svg>,
+  lmft: c => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.8" strokeLinecap="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>,
+  intimacy: c => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.8" strokeLinecap="round"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8l8.8 8.8 8.8-8.8a5.5 5.5 0 0 0 0-7.8z"/></svg>,
+  guide: c => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.8" strokeLinecap="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>,
+  talk: c => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.8" strokeLinecap="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>,
+  library: c => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.8" strokeLinecap="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>,
+};
+
 function CoupleTypeCard({ coupleType, userName, partnerName, onClick }) {
   if (!coupleType) return null;
   const { name, tagline, description, nuance, color } = coupleType;
@@ -13699,42 +13750,83 @@ export default function App() {
                 </div>
 
                 {/* ════ STEP 3 · CONTINUE GROWING TOGETHER ════ */}
+                {/* Uniform square cards. Owned tools first; add-ons in their own
+                    block underneath so people who own everything never see an
+                    upsell mixed into the things they can actually open. */}
                 <div style={{ marginBottom: "2rem" }}>
                   <DashStepHeader num="3" title="Continue growing together" sub="Tools, sessions, and reading to take this further." isMobile={isMobile} />
-                  <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
-                    {hasWorkbookOrder
-                      ? <DashTile color="#9B5DE5" eyebrow="Included"
-                          title={workbookReady ? "Your personalized workbook is ready" : "Your personalized workbook"}
-                          sub={workbookReady ? "Download your PDF, built from your answers." : (bothDone ? "Generating now. We'll email you when it's ready." : "Available once both of you complete your exercises.")}
-                          cta={workbookReady ? "Download →" : null}
-                          onClick={workbookReady ? () => setView("workbook") : undefined}
-                          disabled={!workbookReady} />
-                      : <DashTile color="#9B5DE5" eyebrow="Add-on" title="The Personalized Workbook" sub="A printable workbook built around your results and couple type. From $19." cta="Add →" onClick={() => setView("workbook")} />}
-                    {pkg.hasBudget && <DashTile color="#C17F47" eyebrow="Included" title="Shared Budget Builder" sub="Build a financial plan together from your results." cta="Open →" onClick={() => setView("budget")} />}
-                    {pkg.hasChecklist && <DashTile color="#C17F47" eyebrow="Included" title="Starting Out Checklist" sub="A practical guide to starting your life together." cta="Open →" onClick={() => setView("checklist")} />}
-                    {/* Intimacy is now a full exercise (Step 1); only show the upsell here for non-owners. */}
-                    {!pkg.hasIntimacy && <DashTile color="#B5546E" eyebrow="Add-on" title="Intimacy Expectations" sub="A private set of questions about what you each expect about physical intimacy. Answered independently, compared side by side. $20." cta="Add →" onClick={() => setUpsellModal({ product: 'intimacy', cartAdded: false })} />}
-                    {pkg.hasLMFT
-                      ? <DashTile color="#5B6DF8" eyebrow="Included" title="Your LMFT session" sub="A 50-minute session with a licensed therapist who has reviewed your results." cta="Schedule →" onClick={() => setView("lmft")} />
-                      : <DashTile color="#5B6DF8" eyebrow="Add-on" title="LMFT Session" sub="A 50-minute session with a licensed therapist who reviews your results first. $150." cta="Add →" onClick={() => setUpsellModal({ product: 'lmft', cartAdded: false })} />}
-                    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))", gap: "0.75rem", marginTop: "0.25rem" }}>
-                      <GuideSquare color="#9B5DE5"
-                        icon={<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#9B5DE5" strokeWidth="1.8" strokeLinecap="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>}
-                        title="How to review your results together"
-                        sub="A simple structure for the first conversation."
-                        href="/practice/how-to-review-your-results-together?from=app" />
-                      <GuideSquare color="#E8673A"
-                        icon={<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#E8673A" strokeWidth="1.8" strokeLinecap="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>}
-                        title="How to start a hard conversation"
-                        sub="Opening lines for the topics that matter most."
-                        href="/practice/how-to-start-a-hard-conversation?from=app" />
-                    </div>
-                    <a href="/practice?from=app" style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "0.4rem", marginTop: "0.35rem", padding: "0.85rem", borderRadius: 12, border: "1.5px dashed rgba(193,127,71,0.4)", background: "transparent", textDecoration: "none", fontSize: "0.8rem", fontWeight: 700, color: "#C17F47", fontFamily: BFONT, transition: "background .15s" }}
-                      onMouseEnter={e => e.currentTarget.style.background = "rgba(193,127,71,0.06)"}
-                      onMouseLeave={e => e.currentTarget.style.background = "transparent"}>
-                      Explore all of In Practice →
-                    </a>
+
+                  <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(168px, 1fr))", gap: "0.85rem" }}>
+                    {hasWorkbookOrder && (
+                      <GrowSquare color="#9B5DE5" icon={GrowIcons.workbook(workbookReady ? "#9B5DE5" : "#B3A693")}
+                        eyebrow="Included"
+                        title={workbookReady ? "Your workbook is ready" : "Your personalized workbook"}
+                        sub={workbookReady ? "Exercises and prompts built from your answers." : (bothDone ? "Generating now. We'll email you when it's ready." : "Unlocks once both of you finish.")}
+                        cta={workbookReady ? "Download →" : (bothDone ? "Generating…" : "Locked")}
+                        onClick={workbookReady ? () => setView("workbook") : undefined}
+                        disabled={!workbookReady} />
+                    )}
+                    {pkg.hasBudget && (
+                      <GrowSquare color="#C17F47" icon={GrowIcons.budget("#C17F47")} eyebrow="Included"
+                        title="Shared Budget Builder"
+                        sub="Build a financial plan together from your results."
+                        cta="Open →" onClick={() => setView("budget")} />
+                    )}
+                    {pkg.hasChecklist && (
+                      <GrowSquare color="#C17F47" icon={GrowIcons.checklist("#C17F47")} eyebrow="Included"
+                        title="Starting Out Checklist"
+                        sub="A practical guide to starting your life together."
+                        cta="Open →" onClick={() => setView("checklist")} />
+                    )}
+                    {pkg.hasLMFT && (
+                      <GrowSquare color="#5B6DF8" icon={GrowIcons.lmft("#5B6DF8")} eyebrow="Included"
+                        title="Your LMFT session"
+                        sub="50 minutes with a therapist who has read your results."
+                        cta="Schedule →" onClick={() => setView("lmft")} />
+                    )}
+                    <GrowSquare color="#9B5DE5" icon={GrowIcons.guide("#9B5DE5")} eyebrow="Guide"
+                      title="How to review your results together"
+                      sub="A simple structure for the first conversation."
+                      cta="Read →" href="/practice/how-to-review-your-results-together?from=app" />
+                    <GrowSquare color="#E8673A" icon={GrowIcons.talk("#E8673A")} eyebrow="Guide"
+                      title="How to start a hard conversation"
+                      sub="Opening lines for the topics that matter most."
+                      cta="Read →" href="/practice/how-to-start-a-hard-conversation?from=app" />
+                    <GrowSquare color="#C17F47" icon={GrowIcons.library("#C17F47")} eyebrow="In Practice"
+                      title="The full library"
+                      sub="Guides on communication, conflict, and growing together."
+                      cta="Explore →" href="/practice?from=app" />
                   </div>
+
+                  {/* Add-ons — separate, quieter, never mixed with what you own */}
+                  {(!hasWorkbookOrder || !pkg.hasIntimacy || !pkg.hasLMFT) && (
+                    <div style={{ marginTop: "1.5rem" }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", marginBottom: "0.85rem" }}>
+                        <span style={{ fontSize: "0.58rem", letterSpacing: "0.2em", textTransform: "uppercase", fontWeight: 700, fontFamily: BFONT, color: "#A89C8C" }}>Add to your package</span>
+                        <div style={{ flex: 1, height: 1, background: "#EFE7DD" }} />
+                      </div>
+                      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(168px, 1fr))", gap: "0.85rem" }}>
+                        {!hasWorkbookOrder && (
+                          <GrowSquare color="#9B5DE5" muted icon={GrowIcons.workbook("#9B5DE5")} eyebrow="Add-on"
+                            title="The Personalized Workbook"
+                            sub="A printable workbook built around your results and couple type."
+                            cta="From $19 →" onClick={() => setView("workbook")} />
+                        )}
+                        {!pkg.hasIntimacy && (
+                          <GrowSquare color="#B5546E" muted icon={GrowIcons.intimacy("#B5546E")} eyebrow="Add-on"
+                            title="Intimacy Expectations"
+                            sub="Answered independently, compared side by side."
+                            cta="$20 →" onClick={() => setUpsellModal({ product: 'intimacy', cartAdded: false })} />
+                        )}
+                        {!pkg.hasLMFT && (
+                          <GrowSquare color="#5B6DF8" muted icon={GrowIcons.lmft("#5B6DF8")} eyebrow="Add-on"
+                            title="LMFT Session"
+                            sub="50 minutes with a therapist who reviews your results first."
+                            cta="$150 →" onClick={() => setUpsellModal({ product: 'lmft', cartAdded: false })} />
+                        )}
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 </div>
