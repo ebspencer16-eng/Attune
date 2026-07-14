@@ -10060,7 +10060,15 @@ function AuthModal({ mode, onClose, onSuccess }) {
               addonWorkbook:   orderRow.addon_workbook || null,
               isPhysical:      orderRow.is_physical || false,
               orderNum:        orderRow.order_num || null,
+              // 10.6 — the workbook's real state lives on the order row. Without
+              // these, a login on any other device shows "Generating now" forever,
+              // because readiness was only ever a localStorage flag.
+              workbookUrl:     orderRow.workbook_url || null,
+              workbookStatus:  orderRow.workbook_status || null,
             }));
+            if (orderRow.workbook_url || orderRow.workbook_status === 'ready') {
+              try { localStorage.setItem('attune_workbook_ready', 'true'); } catch {}
+            }
             // Link the order to the auth user so future cross-device logins
             // can find it by user_id (faster + works even if email changes).
             if (!orderRow.user_id) {
@@ -12709,9 +12717,24 @@ export default function App() {
     try { return localStorage.getItem('attune_workbook_notif_seen') === '1'; } catch { return false; }
   });
   const [workbookReady,  setWorkbookReady]  = useState(() => {
-    try { return localStorage.getItem('attune_workbook_ready') === 'true'; } catch { return false; }
+    try {
+      if (localStorage.getItem('attune_workbook_ready') === 'true') return true;
+      // 10.6 — a workbook generated on another device is ready here too. The
+      // order row carries workbook_url / workbook_status; trust it.
+      const o = JSON.parse(localStorage.getItem('attune_order') || 'null');
+      return !!(o?.workbookUrl || o?.workbookStatus === 'ready');
+    } catch { return false; }
   });
   const [workbookBuilding, setWorkbookBuilding] = useState(false);
+  // 10.6 — the order hydrates from Supabase after mount, so flip readiness when
+  // it arrives carrying a workbook URL or a ready status.
+  useEffect(() => {
+    if (order?.workbookUrl || order?.workbookStatus === 'ready') {
+      setWorkbookReady(true);
+      try { localStorage.setItem('attune_workbook_ready', 'true'); } catch {}
+    }
+  }, [order?.workbookUrl, order?.workbookStatus]);
+
 
   const [couplePortrait, setCouplePortrait] = useState(() => {
     try { const s = localStorage.getItem("attune_portrait"); return s ? JSON.parse(s) : null; } catch { return null; }
