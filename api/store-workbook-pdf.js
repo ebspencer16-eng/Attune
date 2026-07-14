@@ -58,12 +58,27 @@ export default async function handler(req, res) {
         ? `or=(user_id.eq.${userId},buyer_email.eq.${encodeURIComponent(userEmail)})`
         : `user_id=eq.${userId}`;
       const ordersRes = await fetch(
-        `${authSupabaseUrl}/rest/v1/orders?${orderQuery}&select=addon_workbook&limit=10`,
+        `${authSupabaseUrl}/rest/v1/orders?${orderQuery}&select=addon_workbook,pkg_key&limit=10`,
         { headers: { apikey: authServiceKey, Authorization: `Bearer ${authServiceKey}` } }
       );
       if (!ordersRes.ok) return res.status(500).json({ error: 'Order lookup failed' });
       const orders = await ordersRes.json();
-      const hasWorkbook = Array.isArray(orders) && orders.some(o => !!o.addon_workbook);
+      // Ownership is broader than the add-on flag (10.6). Premium includes the
+      // workbook with addon_workbook left empty, and comp accounts have no
+      // order row at all. Gating on addon_workbook alone 403'd both, which the
+      // client swallowed, leaving the dashboard stuck on "Generating now".
+      let hasWorkbook = Array.isArray(orders)
+        && orders.some(o => !!o.addon_workbook || o.pkg_key === 'premium');
+      if (!hasWorkbook) {
+        const profRes = await fetch(
+          `${authSupabaseUrl}/rest/v1/profiles?id=eq.${userId}&select=is_comp&limit=1`,
+          { headers: { apikey: authServiceKey, Authorization: `Bearer ${authServiceKey}` } }
+        );
+        if (profRes.ok) {
+          const profs = await profRes.json();
+          hasWorkbook = Array.isArray(profs) && profs.some(pr => pr.is_comp === true);
+        }
+      }
       if (!hasWorkbook) {
         return res.status(403).json({ error: 'No workbook purchase found for this user' });
       }

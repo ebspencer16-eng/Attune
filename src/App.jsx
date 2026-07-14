@@ -7340,6 +7340,15 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
           body: JSON.stringify(payload),
         });
 
+        if (!resp.ok) {
+          // Don't fail silently. A swallowed 403/500 here is what left the
+          // dashboard sitting on "Generating now" with nothing to debug (10.6).
+          let _body = '';
+          try { _body = await resp.text(); } catch {}
+          console.warn('[Attune] workbook generation failed:', resp.status, _body.slice(0, 200));
+          ord.workbookStatus = 'failed';
+          try { localStorage.setItem('attune_order', JSON.stringify(ord)); } catch {}
+        }
         if (resp.ok) {
           // store-workbook-pdf returns { ok, url, filename } — persist
           // the signed URL in the order so the dashboard download can
@@ -7365,7 +7374,9 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
             }
           } catch {}
         }
-      } catch (_) {}
+      } catch (e) {
+        console.warn('[Attune] workbook auto-generation threw:', e);
+      }
     })();
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
