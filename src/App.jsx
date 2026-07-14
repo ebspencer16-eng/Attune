@@ -174,6 +174,11 @@ function entFromStoredOrder(o) {
 // Workbook state (URL + status) is not an entitlement, so every path that
 // rebuilds attune_order from entitlements silently dropped it, and the
 // dashboard fell back to "Generating now". Carry it through.
+// Bump when the workbook's CONTENT changes (builder or payload), so a cached PDF
+// from before the change is re-rendered instead of served stale. v2: reference
+// card "Phrase for the two of you" was rendering blank.
+const WORKBOOK_CONTENT_VERSION = 2;
+
 function carryWorkbook(order) {
   try {
     const prev = JSON.parse(localStorage.getItem('attune_order') || 'null') || {};
@@ -181,6 +186,7 @@ function carryWorkbook(order) {
       ...order,
       workbookUrl:    order.workbookUrl    || prev.workbookUrl    || null,
       workbookStatus: order.workbookStatus || prev.workbookStatus || null,
+      workbookVersion: order.workbookVersion || prev.workbookVersion || null,
     };
   } catch { return order; }
 }
@@ -12916,7 +12922,8 @@ export default function App() {
       document.body.appendChild(a); a.click(); document.body.removeChild(a);
     };
     const stored = order?.workbookUrl;
-    if (stored) {
+    const currentVersion = order?.workbookVersion === WORKBOOK_CONTENT_VERSION;
+    if (stored && currentVersion) {
       try {
         const head = await fetch(stored, { method: 'HEAD' });
         if (head.ok) { grab(stored); return; }
@@ -12948,7 +12955,7 @@ export default function App() {
         return;
       }
       setOrder(prev => {
-        const next = { ...(prev || {}), workbookUrl: data.url, workbookStatus: 'ready' };
+        const next = { ...(prev || {}), workbookUrl: data.url, workbookStatus: 'ready', workbookVersion: WORKBOOK_CONTENT_VERSION };
         try { localStorage.setItem('attune_order', JSON.stringify(next)); } catch {}
         return next;
       });
