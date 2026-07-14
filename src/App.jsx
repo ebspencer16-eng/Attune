@@ -12844,6 +12844,66 @@ export default function App() {
     }
   }, [order?.workbookUrl, order?.workbookStatus]);
 
+  // Download the finished workbook. The Step 3 tile used to call
+  // setView("workbook"), which is the ADD-ON PURCHASE page, so owners who
+  // already had a generated workbook were being pitched the thing they owned.
+  // Use the stored signed URL, and regenerate a fresh one if it has expired
+  // (Supabase signs these for 7 days) or was never persisted on this device.
+  const downloadWorkbook = async () => {
+    if (workbookBuilding) return;
+    const grab = (url) => {
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `Attune_Workbook_${userName || 'Attune'}_and_${partnerName || 'Partner'}.pdf`;
+      a.target = '_blank';
+      a.rel = 'noopener';
+      document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    };
+    const stored = order?.workbookUrl;
+    if (stored) {
+      try {
+        const head = await fetch(stored, { method: 'HEAD' });
+        if (head.ok) { grab(stored); return; }
+      } catch {}
+    }
+    // No usable URL — ask the API for one. This re-renders the PDF and
+    // re-signs it, then persists the URL back onto the order.
+    setWorkbookBuilding(true);
+    try {
+      const live = JSON.parse(localStorage.getItem('attune_live_session') || 'null');
+      if (!live) { showToast('Your workbook is still being prepared. Try again in a moment.'); return; }
+      const token = await (async () => {
+        try {
+          const { supabase: sb, hasSupabase } = await import('./supabase.js');
+          if (!hasSupabase()) return null;
+          const { data: { session } } = await sb.auth.getSession();
+          return session?.access_token || null;
+        } catch { return null; }
+      })();
+      const resp = await fetch('/api/store-workbook-pdf', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+        body: JSON.stringify(live),
+      });
+      const data = await resp.json().catch(() => null);
+      if (!resp.ok || !data?.url) {
+        console.warn('[Attune] workbook download failed:', resp.status, data);
+        showToast('Workbook download failed. Please try again.');
+        return;
+      }
+      setOrder(prev => {
+        const next = { ...(prev || {}), workbookUrl: data.url, workbookStatus: 'ready' };
+        try { localStorage.setItem('attune_order', JSON.stringify(next)); } catch {}
+        return next;
+      });
+      grab(data.url);
+    } catch (e) {
+      console.warn('[Attune] workbook download error:', e);
+      showToast('Workbook download failed. Please try again.');
+    } finally {
+      setWorkbookBuilding(false);
+    }
+  };
 
   const [couplePortrait, setCouplePortrait] = useState(() => {
     try { const s = localStorage.getItem("attune_portrait"); return s ? JSON.parse(s) : null; } catch { return null; }
@@ -13781,8 +13841,8 @@ export default function App() {
                       <GrowSquare color="#9B5DE5" icon={GrowIcons.workbook(workbookReady ? "#9B5DE5" : "#B3A693")}
                         title={workbookReady ? "Your workbook is ready" : "Your personalized workbook"}
                         sub={workbookReady ? "Exercises and prompts built from your answers." : (bothDone ? "Generating now. We'll email you when it's ready." : "Unlocks once both of you finish.")}
-                        cta={workbookReady ? "Download →" : (bothDone ? "Generating…" : "Locked")}
-                        onClick={workbookReady ? () => setView("workbook") : undefined}
+                        cta={workbookBuilding ? "Preparing…" : (workbookReady ? "Download →" : (bothDone ? "Generating…" : "Locked"))}
+                        onClick={workbookReady ? downloadWorkbook : undefined}
                         disabled={!workbookReady} />
                     )}
                     {pkg.hasBudget && (
