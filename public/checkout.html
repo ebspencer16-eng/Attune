@@ -488,10 +488,10 @@ const PACKAGES = {
   },
   premium: {
     id: 'premium', name: 'Attune Premium', badge: 'Most Complete',
-    digitalPrice: 295, physicalPrice: 330,
-    price: 295, priceLabel: '$295', format: 'physical',
-    tags: ['Everything in Assessment', 'LMFT session included', 'Personalized workbook', 'Couple type + map'],
-    physicalTags: ['Everything included', 'LMFT session included', 'Personalized workbook', 'Gift box'],
+    digitalPrice: 198, physicalPrice: 233,
+    price: 198, priceLabel: '$198', format: 'digital',
+    tags: ['Everything in Assessment', 'Relationship Reflection', 'Shared budget + intimacy exercises', 'Personalized workbook'],
+    physicalTags: ['Everything included', 'Relationship Reflection', 'Shared budget + intimacy', 'Personalized workbook', 'Gift box'],
   },
 };
 
@@ -823,8 +823,9 @@ function persistOrderComplete(orderNum) {
   if (_items.length === 1) {
     const it0 = _items[0];
     if (pkg.id === 'premium') {
-      // Premium bundles workbook + LMFT but not intimacy.
-      if (!it0.addons.intimacy) _promptKey = 'intimacy';
+      // Premium bundles workbook + reflection + budget + intimacy. The Starting
+      // Out Checklist is its one optional add-on.
+      if (!it0.addons.checklist) _promptKey = 'checklist';
     } else {
       if (!it0.addons.workbook)        _promptKey = 'workbook';
       else if (!it0.addons.intimacy)   _promptKey = 'intimacy';
@@ -834,8 +835,8 @@ function persistOrderComplete(orderNum) {
   if (_promptKey) {
     const meta = _promptKey === 'workbook'
       ? { title: 'Add Personalized Workbook', price: '+$19', desc: 'Conversation prompts and guided exercises built from your joint results. Digital, delivered with your results. Switch to a printed copy in your cart.' }
-      : _promptKey === 'lmft'
-      ? { title: 'Add LMFT Session', price: '+$150', desc: 'A 50-minute video session with a licensed marriage and family therapist who reviews your joint results before you meet. Available on any package.' }
+      : _promptKey === 'checklist'
+      ? { title: 'Add Starting Out Checklist', price: '+$20', desc: 'Finances, name changes, insurance, estate basics. Seven categories of real-world logistics to work through together.' }
       : { title: 'Add Intimacy Expectations', price: '+$20', desc: 'A private set of questions about physical intimacy, answered independently and compared side by side. Covers frequency, initiating, comfort, communication, and more. Premarital and already-married versions.' };
     document.getElementById('addonPromptTitle').textContent = meta.title;
     document.getElementById('addonPromptPrice').textContent = meta.price;
@@ -863,9 +864,9 @@ function persistOrderComplete(orderNum) {
     } else if (_promptKey === 'intimacy') {
       it0.addons.intimacy = chk.checked;
       addonIntimacy = chk.checked;
-    } else {
-      it0.addons.lmft = chk.checked;
-      addonLmft = chk.checked;
+    } else if (_promptKey === 'checklist') {
+      it0.addons.checklist = chk.checked;
+      addonChecklist = chk.checked;
     }
     syncPromptBox();
     renderSummary();

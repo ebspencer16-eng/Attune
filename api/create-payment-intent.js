@@ -18,8 +18,8 @@ import { reportToSentry } from './_lib/sentry-edge.js';
 export const config = { runtime: 'edge' };
 
 // Canonical pricing — kept in sync with checkout.html PACKAGES.
-const DIGITAL_PRICES  = { core: 89,  newlywed: 139, anniversary: 139, premium: 295 };
-const PHYSICAL_PRICES = { core: 124, newlywed: 174, anniversary: 174, premium: 330 };
+const DIGITAL_PRICES  = { core: 89,  newlywed: 139, anniversary: 139, premium: 198 };
+const PHYSICAL_PRICES = { core: 124, newlywed: 174, anniversary: 174, premium: 233 };
 
 // Launch flags — server-side enforcement so a crafted or stale request can
 // never bill for a disabled offering. Keep in sync with /_flags.js + App.jsx.
@@ -279,10 +279,13 @@ function normalizeItem(item) {
     // Phase-1: LMFT discontinued, digital-only. Never bill for either even if
     // the request asks for it.
     addonLmft:       LMFT_ENABLED && !!item.addonLmft,
-    addonReflection: !!item.addonReflection,
-    addonBudget:     !!item.addonBudget,
+    // Premium bundles reflection, budget, and intimacy into its base price, so
+    // they are never billed again as add-ons on a premium item.
+    _premiumBundled: (item.pkgKey || item.pkg) === 'premium',
+    addonReflection: (item.pkgKey||item.pkg)==='premium' ? false : !!item.addonReflection,
+    addonBudget:     (item.pkgKey||item.pkg)==='premium' ? false : !!item.addonBudget,
     addonChecklist:  !!item.addonChecklist,
-    addonIntimacy:   !!item.addonIntimacy,
+    addonIntimacy:   (item.pkgKey||item.pkg)==='premium' ? false : !!item.addonIntimacy,
     shipping:        item.shipping || null,
   };
 }

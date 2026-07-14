@@ -15,7 +15,7 @@ const pkgConfig = {
   core:        { hasChecklist: false, hasAnniversary: false, hasBudget: false, hasLMFT: false },
   newlywed:    { hasChecklist: true,  hasAnniversary: false, hasBudget: true,  hasLMFT: false },
   anniversary: { hasChecklist: false, hasAnniversary: true,  hasBudget: false, hasLMFT: false },
-  premium:     { hasChecklist: false, hasAnniversary: false, hasBudget: false, hasLMFT: true  },
+  premium:     { hasChecklist: false, hasAnniversary: true,  hasBudget: true,  hasLMFT: false },
 };
 
 // Mirror of the dashboard's `pkg` object construction.
@@ -27,7 +27,7 @@ function gates(order) {
     reflection:  base.hasAnniversary || !!order.addonReflection,
     budget:      base.hasBudget      || !!order.addonBudget,
     workbook:    order.pkgKey === 'premium' || !!order.addonWorkbook,
-    intimacy:    !!order.addonIntimacy,
+    intimacy:    order.pkgKey === 'premium' || !!order.addonIntimacy,
   };
 }
 
@@ -54,11 +54,11 @@ const F = { checklist:false, lmft:false, reflection:false, budget:false, workboo
 console.log('\n— Fresh device (no localStorage): entitlements from DB only —');
 
 // 1. Ellie's real row.
-check('premium + refl/budget/checklist add-ons',
+check('premium + checklist add-on',
   gates(toOrder(computeEntitlements([
-    { order_num:'ATT-1', pkg_key:'premium', addon_reflection:true, addon_budget:true, addon_checklist:true, created_at:'2026-06-24' },
+    { order_num:'ATT-1', pkg_key:'premium', addon_checklist:true, created_at:'2026-06-24' },
   ], {}))),
-  { ...F, reflection:true, budget:true, checklist:true, lmft:true, workbook:true });
+  { ...F, reflection:true, budget:true, intimacy:true, checklist:true, workbook:true });
 
 // 2. Bare core.
 check('core, no add-ons',
@@ -74,9 +74,9 @@ check('anniversary (reflection inherent)',
   gates(toOrder(computeEntitlements([{ order_num:'A1', pkg_key:'anniversary', created_at:'2026-01-01' }], {}))),
   { ...F, reflection:true });
 
-check('premium alone (lmft + workbook only)',
+check('premium alone (reflection+budget+intimacy+workbook)',
   gates(toOrder(computeEntitlements([{ order_num:'P1', pkg_key:'premium', created_at:'2026-01-01' }], {}))),
-  { ...F, lmft:true, workbook:true });
+  { ...F, reflection:true, budget:true, intimacy:true, workbook:true });
 
 // 4. Every single add-on on top of core.
 for (const [flag, gate] of [
@@ -94,12 +94,12 @@ check('core + workbook add-on',
 
 console.log('\n— Multiple orders: union, never newest-wins —');
 
-check('premium+addons (old) + core test order (new)',
+check('premium+checklist (old) + core test order (new)',
   gates(toOrder(computeEntitlements([
-    { order_num:'REAL', pkg_key:'premium', addon_reflection:true, addon_budget:true, addon_checklist:true, created_at:'2026-05-01' },
+    { order_num:'REAL', pkg_key:'premium', addon_checklist:true, created_at:'2026-05-01' },
     { order_num:'TEST', pkg_key:'core', created_at:'2026-06-30' },
   ], {}))),
-  { ...F, reflection:true, budget:true, checklist:true, lmft:true, workbook:true });
+  { ...F, reflection:true, budget:true, intimacy:true, checklist:true, workbook:true });
 
 check('two separate add-on purchases accumulate',
   gates(toOrder(computeEntitlements([
@@ -119,17 +119,17 @@ console.log('\n— Invitee (Partner B) inherits Partner A\'s orders —');
 check('invitee inherits premium + add-ons via partner link',
   gates(toOrder(computeEntitlements([
     { order_num:null, pkg_key:null, created_at:null },                       // invitee profile row: no grants
-    { order_num:'ATT-1', pkg_key:'premium', addon_reflection:true, addon_budget:true, addon_checklist:true, created_at:'2026-06-24' }, // Partner A's order
+    { order_num:'ATT-1', pkg_key:'premium', addon_checklist:true, created_at:'2026-06-24' }, // Partner A's order
   ], {}))),
-  { ...F, reflection:true, budget:true, checklist:true, lmft:true, workbook:true });
+  { ...F, reflection:true, budget:true, intimacy:true, checklist:true, workbook:true });
 
 console.log('\n— Returning device: resync must never strip local grants —');
 
-const localAcct = { pkg:'premium', addonReflection:true, addonBudget:true, addonChecklist:true, addonLmft:true };
+const localAcct = { pkg:'premium', addonReflection:true, addonBudget:true, addonChecklist:true };
 const dbSaysCore = computeEntitlements([{ order_num:'C1', pkg_key:'core', created_at:'2026-06-01' }], {});
 check('local premium+addons vs DB core → keeps grants',
   gates(toOrder(mergeEntitlementsGrantOnly(localAcct, dbSaysCore))),
-  { ...F, reflection:true, budget:true, checklist:true, lmft:true, workbook:true });
+  { ...F, reflection:true, budget:true, intimacy:true, checklist:true, workbook:true });
 
 console.log('\n— A resync must never write back fewer grants than the device already had —');
 
@@ -144,7 +144,7 @@ const entFromStoredOrder = (o) => ({
 // Real customer, non-comp. attune_account carries no add-on fields (this is the
 // real shape observed in production). Stored order holds the grants.
 const localAcctNoAddons = { id:'u1', email:'a@b.com', pkg:'premium' };
-const storedOrder = { pkgKey:'premium', orderNum:'ATT-1', addonReflection:true, addonBudget:true, addonChecklist:true, addonLmft:true, addonIntimacy:true, addonWorkbook:'digital' };
+const storedOrder = { pkgKey:'premium', orderNum:'ATT-1', addonReflection:true, addonBudget:true, addonChecklist:true, addonIntimacy:true, addonWorkbook:'digital' };
 
 // Invitee case: RLS filters Partner A's order rows, so the client read returns
 // [] (not an error) → union resolves to core. Server recompute then fails.
@@ -155,11 +155,11 @@ check('invitee: empty client read + failed recompute must not strip stored grant
     mergeEntitlementsGrantOnly(localAcctNoAddons, entFromStoredOrder(storedOrder)),
     clientSawNothing,
   ))),
-  { ...F, reflection:true, budget:true, checklist:true, lmft:true, intimacy:true, workbook:true });
+  { ...F, reflection:true, budget:true, checklist:true, intimacy:true, workbook:true });
 
 check('WITHOUT the stored-order merge the same case strips everything (regression guard)',
   gates(toOrder(mergeEntitlementsGrantOnly(localAcctNoAddons, clientSawNothing))),
-  { ...F, workbook:true, lmft:true }); // only package-inherent caps survive; every add-on lost
+  { ...F, reflection:true, budget:true, intimacy:true, workbook:true }); // only package-inherent caps survive; add-on (checklist) lost
 
 // A newly purchased add-on still upgrades.
 check('resync still ADDS newly purchased grants',

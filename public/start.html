@@ -294,10 +294,12 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;height:58px;background:rgba(
     </div>
     <span class="pkg-badge" style="background:rgba(91,109,248,.1);color:#5B6DF8;">Most Complete</span>
     <div class="pkg-name">Attune Premium</div>
-    <div class="pkg-price" id="price-premium">$330</div>
+    <div class="pkg-price" id="price-premium">$198</div>
     <div class="pkg-price-sub" id="pricesub-premium">Physical gift box · shipping included</div>
     <ul class="pkg-features">
-      <li class="bold-feat">Attune Assessment</li>
+      <li class="bold-feat">Everything in the Assessment</li>
+      <li>Relationship Reflection</li>
+      <li>Budget + intimacy exercises</li>
       <li>Personalized workbook</li>
       <li class="gift-feat">Gift box</li>
     </ul>
@@ -420,7 +422,7 @@ const PRICES = {
   core:        { physical: 124, digital: 89 },
   newlywed:    { physical: 174, digital: 139 },
   anniversary: { physical: 174, digital: 139 },
-  premium:     { physical: 330, digital: 295 },
+  premium:     { physical: 233, digital: 198 },
 };
 const PKG_NAMES = {
   core: 'The Attune Assessment',
@@ -479,20 +481,25 @@ function selectPkg(id) {
   document.getElementById('btn-next').disabled = false;
   // Hide add-ons already included in this package, and clear any prior selection
   // so an included add-on is never also billed.
-  const budgetIncluded = id === 'newlywed';
+  // Premium now bundles budget + reflection + intimacy + workbook. Its one
+  // optional add-on is the Starting Out Checklist.
+  const budgetIncluded = id === 'newlywed' || id === 'premium';
   const checklistIncluded = id === 'newlywed';
-  const reflectionIncluded = id === 'anniversary';
+  const reflectionIncluded = id === 'anniversary' || id === 'premium';
+  const intimacyIncluded = id === 'premium';
   const lmftIncluded = START_LMFT_ENABLED && id === 'premium';
   const workbookIncluded = id === 'premium';   // Premium includes the workbook
   if (budgetIncluded)     addonBudget = false;
   if (checklistIncluded)  addonChecklist = false;
   if (reflectionIncluded) addonReflection = false;
+  if (intimacyIncluded)   addonIntimacy = false;
   if (lmftIncluded)       addonLmft = false;
   if (workbookIncluded) { addonWorkbook = false; document.getElementById('wb-variants').classList.remove('show'); }
-  ['addon-budget','addon-checklist','addon-reflection','addon-lmft','addon-workbook'].forEach(a => document.getElementById(a).classList.remove('selected'));
+  ['addon-budget','addon-checklist','addon-reflection','addon-intimacy','addon-lmft','addon-workbook'].forEach(a => { const el = document.getElementById(a); if (el) el.classList.remove('selected'); });
   setAddonIncluded('addon-budget', budgetIncluded);
   setAddonIncluded('addon-checklist', checklistIncluded);
   setAddonIncluded('addon-reflection', reflectionIncluded);
+  setAddonIncluded('addon-intimacy', intimacyIncluded);
   setAddonIncluded('addon-lmft', lmftIncluded);
   setAddonIncluded('addon-workbook', workbookIncluded);
   // Premium: the included workbook tracks the package format (digital/printed).
@@ -692,7 +699,7 @@ const PKG_DETAILS = {
     eyebrow: 'Most Complete',
     name: 'Attune Premium',
     tagline: 'Everything in the Assessment, plus both bonus exercises and the personalized workbook, in one place.',
-    priceDigital: 295, pricePhysical: 330,
+    priceDigital: 198, pricePhysical: 233,
     sections: [
       {
         title: 'Core exercises (same as Assessment)',
@@ -706,7 +713,9 @@ const PKG_DETAILS = {
       {
         title: 'Premium additions',
         items: [
-          { label: 'LMFT session – 50 minutes', desc: "A licensed marriage and family therapist reviews your joint results before your session. This means the conversation starts from what's actually in your results – not from scratch.", dot: 'premium' },
+          { label: 'Relationship Reflection', desc: 'The third exercise: shared history, meaningful moments, what you each prioritize, and what you admire in each other.', dot: 'premium' },
+          { label: 'Shared budget exercise', desc: 'A guided worksheet for building a real shared budget together, using context from your expectations results.', dot: 'premium' },
+          { label: 'Physical intimacy expectations', desc: 'A private set of questions about what you each expect around physical intimacy, scored for gaps and conversation.', dot: 'premium' },
           { label: 'Personalized workbook', desc: 'A structured PDF built from your actual results – conversation starters, reflection exercises, and growth prompts drawn from your specific couple type and dimension gaps.', dot: 'premium' },
           { label: 'Gift box', desc: 'Beautifully designed physical box with your personalized QR card.', dot: 'premium' },
         ]

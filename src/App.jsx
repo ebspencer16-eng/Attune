@@ -11669,11 +11669,11 @@ function PackagesModal({ currentPkg, onClose, onPick, onPickAddon }) {
       id: "premium",
       name: "Attune Premium",
       badge: "The complete experience",
-      price: "$295",
+      price: "$198",
       tagline: "Everything, in one place.",
-      description: "All three exercises, the budget worksheet, and the personalized workbook built around your results.",
+      description: "The Assessment, Relationship Reflection, the shared budget exercise, physical intimacy expectations, and the personalized workbook, all bundled.",
       color: "#3B5BDB",
-      features: ["Everything in Assessment", "Both bonus exercises", "Personalized workbook"],
+      features: ["Everything in Assessment", "Relationship Reflection", "Shared budget exercise", "Physical intimacy expectations", "Personalized workbook"],
     },
   ];
 
@@ -13328,7 +13328,7 @@ export default function App() {
     core:        { label: "The Attune Assessment",     color: "#E8673A", hasChecklist: false, hasAnniversary: false, hasBudget: false, hasLMFT: false },
     newlywed:    { label: "Starting Out Collection",   color: "#E8673A", hasChecklist: true,  hasAnniversary: false, hasBudget: true,  hasLMFT: false },
     anniversary: { label: "Relationship Reflection",    color: "#1B5FE8", hasChecklist: false, hasAnniversary: true,  hasBudget: false, hasLMFT: false },
-    premium:     { label: "Attune Premium",            color: "#3B5BDB", hasChecklist: false, hasAnniversary: false, hasBudget: false, hasLMFT: true  },
+    premium:     { label: "Attune Premium",            color: "#3B5BDB", hasChecklist: false, hasAnniversary: true,  hasBudget: true,  hasLMFT: false },
   };
   // Merge add-on flags from stored order (e.g. LMFT add-on on non-premium packages)
   // Outside demo mode the reconciled `order` state is authoritative for the
@@ -13343,7 +13343,7 @@ export default function App() {
     hasAnniversary: _basePkg.hasAnniversary || !!(order?.addonReflection),
     hasBudget:      _basePkg.hasBudget      || !!(order?.addonBudget),
     hasWorkbook:    _effectivePkgKey === 'premium' || !!(order?.addonWorkbook),
-    hasIntimacy:    !!(order?.addonIntimacy) || (() => { try { return localStorage.getItem('attune_dev_intimacy') === '1'; } catch { return false; } })() || (() => { try { const q = new URLSearchParams(window.location.search); return !!q.get('demo') && q.get('intimacy') === '1'; } catch { return false; } })(),
+    hasIntimacy:    _effectivePkgKey === 'premium' || !!(order?.addonIntimacy) || (() => { try { return localStorage.getItem('attune_dev_intimacy') === '1'; } catch { return false; } })() || (() => { try { const q = new URLSearchParams(window.location.search); return !!q.get('demo') && q.get('intimacy') === '1'; } catch { return false; } })(),
   };
 
   // Partner B "waiting/ready" poll. Declared here, BEFORE any early return,
@@ -14585,7 +14585,7 @@ export default function App() {
             core:        { name: "The Attune Assessment", color: "#E8673A", features: ["Communication exercise", "Expectations exercise", "Full joint results", "Couple type profile"] },
             newlywed:    { name: "Starting Out Collection", color: "#E8673A", features: ["Everything in Assessment", "Starting Out checklist", "Partner comparison deep-dives"] },
             anniversary: { name: "Relationship Reflection", color: "#1B5FE8", features: ["Everything in Assessment", "Relationship reflection exercise", "Anniversary-specific prompts"] },
-            premium:     { name: "Attune Premium", color: "#3B5BDB", features: ["Everything in Assessment", "Shared budgeting tool", "Personalized workbook"] },
+            premium:     { name: "Attune Premium", color: "#3B5BDB", features: ["Everything in Assessment", "Relationship Reflection", "Shared budget", "Physical intimacy", "Personalized workbook"] },
           };
           const pkg2 = PACKAGE_FEATURES[demoPkg] || PACKAGE_FEATURES.core;
           return (

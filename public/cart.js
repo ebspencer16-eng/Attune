@@ -26,7 +26,7 @@ const CART_PKGS = {
   premium: {
     name: 'Attune Premium', badge: 'Most Complete',
     badgeColor: 'rgba(91,109,248,.12)', badgeText: '#7b8fff',
-    digitalPrice: 295, physicalPrice: 330,
+    digitalPrice: 198, physicalPrice: 233,
     supportsPhysical: true,
   },
 };
@@ -56,7 +56,7 @@ const PKG_INCLUDED = {
   core:        { checklist:false, budget:false, reflection:false, lmft:false, intimacy:false },
   newlywed:    { checklist:true,  budget:true,  reflection:false, lmft:false, intimacy:false },
   anniversary: { checklist:false, budget:false, reflection:true,  lmft:false, intimacy:false },
-  premium:     { checklist:false, budget:true,  reflection:true,  lmft:true,  intimacy:false },
+  premium:     { checklist:false, budget:true,  reflection:true,  lmft:false, intimacy:true  },
 };
 // Display order: workbook first (primary upsell), then cheapest → most expensive.
 const ADDON_ORDER = (function(){
