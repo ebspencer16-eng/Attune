@@ -8,7 +8,7 @@ export const PERSONALITY_QUESTIONS = [
   { id:"ex6", dimension:"expression", text:"When you're going through something, you tend to:", a:"Keep it mostly to yourself until you've worked through it.", b:"Let your partner in as it's happening, even before you have answers." },
   { id:"en4", dimension:"energy",     text:"When your partner needs alone time, your instinct is:", a:"Respect it immediately.", b:"Check in. Silence can feel like something's wrong." },
   // ex7 poles ordered guarded→external for scoring consistency with the other expression items (see handoff note).
-  { id:"ex7", dimension:"expression", text:"You feel most understood by your partner when:", a:"They pick up on something without you having to say it.", b:"You've been able to explain yourself clearly." },
+  { id:"ex7", dimension:"expression", text:"You feel most understood by your partner when:", a:"They pick up on something without you having to say it.", b:"You're able to explain yourself clearly." },
 
   // ── Chapter 2: How You Connect (6) — love, bids, needs ──
   // lv5 poles ordered physical(a)->verbal(b) for display; scoring inverts lv5
@@ -35,7 +35,7 @@ export const PERSONALITY_QUESTIONS = [
 
   // ── Chapter 5: Everyday Life Together (4) — energy, expression ──
   { id:"en6", dimension:"energy",     text:"When it comes to your social lives, you lean toward:", a:"Independent. Your own friendships and plans are part of how you stay yourself.", b:"Shared. Doing things together is how you most want to spend your time." },
-  { id:"ex8", dimension:"expression", text:"When your partner does something you appreciate, you tend to:", a:"Feel it more than say it. They probably know, even if you don't always voice it.", b:"Say it. You name the small things, not just the big ones." },
+  { id:"ex8", dimension:"expression", text:"When your partner does something you appreciate, you tend to:", a:"Feel it more than say it.", b:"Say it. You name the small things, not just the big ones." },
   { id:"ex9", dimension:"expression", text:"When something good happens to you, your first instinct is:", a:"Sit with it for a bit before sharing.", b:"Tell your partner immediately. Sharing it is part of enjoying it." },
   { id:"ex10", dimension:"expression", text:"When your partner shares exciting news, you tend to:", a:"Respond genuinely but quietly. You're present without necessarily amplifying.", b:"Match their energy. You light up with them." },
 ];

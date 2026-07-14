@@ -230,14 +230,17 @@ export const INTIMACY_QUESTIONS = [
   {
     id: 'iq_adv_suggest', dimension: 'adventure', kind: 'scale',
     topic: 'When a new idea comes up',
-    premarital: 'When your partner suggests something new, you expect to',
+    premarital: 'When your partner suggests something new, you',
     married: 'When your partner suggests something new, you',
+    // label stays canonical (used for storage + scoring). premarital/married give
+    // the display string so the option reads grammatically after the bare "you":
+    // "you would be eager" (expectation) vs "you are eager" (reality).
     options: [
-      { label: 'Be eager', value: 1.0 },
-      { label: 'Be open', value: 0.75 },
-      { label: 'Depend on what it is', value: 0.5 },
-      { label: 'Be cautious', value: 0.25 },
-      { label: 'Need real reassurance first', value: 0.0 },
+      { label: 'Be eager', value: 1.0, premarital: 'Would be eager', married: 'Are eager' },
+      { label: 'Be open', value: 0.75, premarital: 'Would be open', married: 'Are open' },
+      { label: 'Depend on what it is', value: 0.5, premarital: 'Would weigh what it is', married: 'Weigh what it is' },
+      { label: 'Be cautious', value: 0.25, premarital: 'Would be cautious', married: 'Are cautious' },
+      { label: 'Need real reassurance first', value: 0.0, premarital: 'Would need real reassurance first', married: 'Need real reassurance first' },
       PNS,
     ],
   },

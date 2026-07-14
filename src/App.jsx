@@ -883,7 +883,7 @@ export function ExpectationsExercise({ partnerName, userName = "Partner A", onCo
                   {showFutureExpand && (
                     <div style={{ marginTop: "0.5rem", background: needsDetail ? "rgba(42,176,127,0.07)" : "rgba(42,176,127,0.04)", border: "1px solid rgba(42,176,127,0.25)", borderRadius: 10, padding: "0.5rem 0.6rem" }}>
                       <p style={{ fontSize: "0.55rem", letterSpacing: "0.12em", textTransform: "uppercase", color: "#1a8a63", fontFamily: font.body, fontWeight: 700, margin: "0 0 0.35rem" }}>
-                        {needsDetail ? "A bit more specifically, required to continue:" : "A bit more specifically:"}
+                        {needsDetail ? "A bit more specificity required to continue:" : "A bit more specifically:"}
                       </p>
                       <div style={{ display: "flex", gap: "0.35rem", flexWrap: "wrap" }}>
                         {futureDetailOpts.map(opt => {
@@ -1144,10 +1144,13 @@ export function IntimacyExercise({ userName = "You", partnerName = "your partner
       <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
         {q.options.map(o => {
           const chosen = isMulti ? multiSel.includes(o.value) : sel === o.label;
+          // Answers store/score by o.label; a variant-specific display string
+          // (o[variant]) keeps the option grammatical under each framing.
+          const displayLabel = o[variant] || o.label;
           return (
             <button key={o.label} onClick={() => isMulti ? toggleMulti(o.value) : setAns(q.id, o.label)}
               style={{ textAlign: "left", padding: "0.8rem 1.1rem", border: `2px solid ${chosen ? accent : C.stone}`, background: chosen ? "rgba(181,84,110,0.08)" : "white", color: chosen ? C.ink : C.text, fontSize: "0.85rem", fontWeight: chosen ? 500 : 400, borderRadius: 12, cursor: "pointer", fontFamily: BFONT, transition: "all 0.12s" }}>
-              {o.label}
+              {displayLabel}
             </button>
           );
         })}
@@ -3246,13 +3249,13 @@ function Exercise01Flow({ userName, partnerName, onComplete, skipIntro = false }
         <link href={FONT_LINK} rel="stylesheet" />
         <style>{'@keyframes fadeIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}'}</style>
         <p style={{ fontSize: "0.62rem", letterSpacing: "0.22em", textTransform: "uppercase", color: "#E8673A", fontWeight: 700, fontFamily: font.body, marginBottom: "1rem" }}>
-          Your exercises ({userName} &amp; {partnerName})
+          Exercise 01 of 02 &middot; {userName} &amp; {partnerName}
         </p>
         <p style={{ fontFamily: font.display, fontSize: "clamp(1.6rem, 5vw, 2.2rem)", fontWeight: 700, color: C.ink, lineHeight: 1.1, marginBottom: "1.25rem" }}>
-          Two exercises.<br/>Your answers are yours alone.
+          First, how you communicate.
         </p>
         <p style={{ fontSize: "0.92rem", color: C.muted, fontFamily: font.body, lineHeight: 1.75, marginBottom: "1.75rem" }}>
-          Exercise 01 covers how you communicate and connect. Exercise 02 maps your expectations. Both take about 15 minutes. Answer honestly. Your partner won't see your individual answers.
+          This is the communication exercise. It looks at how you connect, handle conflict, and show up day to day. Exercise 02 comes next and maps what you each expect. Both take about 15 minutes. Answer honestly. Your partner never sees your individual answers.
         </p>
         <div style={{ display: "flex", gap: "0.85rem", marginBottom: "1.75rem", flexWrap: "wrap" }}>
           {[
@@ -5523,6 +5526,13 @@ function StartingOutChecklist({ userName, partnerName, onBack, checklistState, s
             <div style={{ background: "linear-gradient(90deg, #E8673A, #1B5FE8)", height: 6, borderRadius: 999, width: pct + "%", transition: "width 0.3s" }} />
           </div>
           <span style={{ fontSize: "0.72rem", color: C.muted, fontFamily: font.body, flexShrink: 0 }}>{checkedCount}/{totalItems} complete</span>
+        </div>
+        {/* How the checkbox works — not obvious that a second tap marks N/A. */}
+        <div style={{ display: "flex", alignItems: "flex-start", gap: "0.6rem", background: C.warm, border: "1px solid " + C.stone, borderRadius: 10, padding: "0.7rem 0.9rem", marginTop: "0.9rem" }}>
+          <div style={{ width: 18, height: 18, borderRadius: 6, border: "2px solid " + C.clay, flexShrink: 0, marginTop: "0.05rem" }} />
+          <p style={{ fontSize: "0.75rem", color: C.muted, fontFamily: font.body, lineHeight: 1.55, margin: 0 }}>
+            Tap a box once to mark it done. Tap again to mark it not applicable. Tap a third time to clear it.
+          </p>
         </div>
       </div>
       {CHECKLIST_AREAS.map(area => {
