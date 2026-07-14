@@ -12,6 +12,10 @@
 export const config = { runtime: 'edge' };
 
 export default async function handler(req) {
+  // LMFT sessions are discontinued (phase 1). Re-enable with ATTUNE_LMFT_ENABLED=1.
+  if (process.env.ATTUNE_LMFT_ENABLED !== '1') {
+    return new Response(JSON.stringify({ ok: false, disabled: true }), { status: 410, headers: { 'Content-Type': 'application/json' } });
+  }
   if (req.method !== 'POST') return new Response('Method not allowed', { status: 405 });
   
   let body;

@@ -21,6 +21,11 @@ export const config = { runtime: 'edge' };
 const DIGITAL_PRICES  = { core: 89,  newlywed: 139, anniversary: 139, premium: 295 };
 const PHYSICAL_PRICES = { core: 124, newlywed: 174, anniversary: 174, premium: 330 };
 
+// Launch flags — server-side enforcement so a crafted or stale request can
+// never bill for a disabled offering. Keep in sync with /_flags.js + App.jsx.
+const PHYSICAL_ENABLED = process.env.ATTUNE_PHYSICAL_ENABLED === '1';
+const LMFT_ENABLED     = process.env.ATTUNE_LMFT_ENABLED === '1';
+
 const ADDON_PRICES = {
   workbookDigital: 19,
   workbookPrint:   39,
@@ -265,13 +270,15 @@ function itemSubtotal(item) {
 function normalizeItem(item) {
   return {
     pkgKey:          item.pkgKey || item.pkg,
-    isPhysical:      !!item.isPhysical || item.format === 'physical',
+    isPhysical:      PHYSICAL_ENABLED && (!!item.isPhysical || item.format === 'physical'),
     isGift:          !!item.isGift,
     partner1Name:    item.partner1Name || null,
     partner2Name:    item.partner2Name || null,
     giftNote:        item.giftNote || null,
     addonWorkbook:   item.addonWorkbook || null,     // 'digital' | 'print' | null
-    addonLmft:       !!item.addonLmft,
+    // Phase-1: LMFT discontinued, digital-only. Never bill for either even if
+    // the request asks for it.
+    addonLmft:       LMFT_ENABLED && !!item.addonLmft,
     addonReflection: !!item.addonReflection,
     addonBudget:     !!item.addonBudget,
     addonChecklist:  !!item.addonChecklist,

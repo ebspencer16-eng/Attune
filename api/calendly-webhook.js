@@ -51,6 +51,12 @@ async function verifyCalendlySignature(rawBody, signatureHeader, signingKey) {
 }
 
 export default async function handler(req) {
+  // LMFT / Calendly scheduling is discontinued (phase 1). Endpoint disabled so
+  // any lingering Calendly webhook config is a harmless no-op. Re-enable by
+  // setting ATTUNE_LMFT_ENABLED=1. Also remove the webhook in Calendly itself.
+  if (process.env.ATTUNE_LMFT_ENABLED !== '1') {
+    return new Response(JSON.stringify({ ok: true, disabled: true }), { status: 200, headers: { 'Content-Type': 'application/json' } });
+  }
   if (req.method !== 'POST') return new Response('Method not allowed', { status: 405 });
 
   const rawBody = await req.text();
