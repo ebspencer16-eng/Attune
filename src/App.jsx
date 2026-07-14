@@ -3305,11 +3305,14 @@ function Exercise01Flow({ userName, partnerName, onComplete, skipIntro = false }
 
   const back = () => {
     if (idx === 0) return;
-    setIdx(idx - 1);
-    setChosen(answers[questions[idx - 1].id] ?? null);
-    const prev = { ...answers };
-    delete prev[q.id];
-    setAnswers(prev);
+    // Going back never erases an answer. This used to delete the CURRENT
+    // question's answer on the way back, so stepping 4 → 3 → 2 wiped question 3
+    // (it was "current" on the second press) and the selection was gone when you
+    // walked forward again. Just move, and re-select what's already stored.
+    const prevIdx = idx - 1;
+    setIdx(prevIdx);
+    setChosen(answers[questions[prevIdx].id] ?? null);
+    try { localStorage.setItem('attune_ex1_progress', JSON.stringify({ answers, idx: prevIdx })); } catch {}
   };
 
   const SCALE = [
