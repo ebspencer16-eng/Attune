@@ -14834,6 +14834,9 @@ export default function App() {
         partnerEx3={pkg.hasAnniversary ? (partnerSession?.ex3 || (hasRealPartner ? null : JAMES_ANNIVERSARY_DEMO)) : null}
         userName={userName} partnerName={partnerName}
         portrait={couplePortrait}
+        intimacyAnswers={pkg.hasIntimacy ? (intimacyData?.answers || null) : null}
+        partnerIntimacy={pkg.hasIntimacy && hasRealPartner ? (partnerSession?.intimacy || null) : null}
+        intimacyVariant={(hasRealPartner ? partnerSession?.intimacy?.variant : null) || intimacyData?.variant || 'premarital'}
         onDone={() => { setActiveResult("summary"); setHighlightsSeen(true); }}
         onExit={() => setView("home")}
       />
