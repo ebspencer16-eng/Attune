@@ -270,6 +270,10 @@ const ALIGNED_ADVICE = {
 // Dimension-aware label pool -- each dimension has its own voice
 
 // -- Results font constants --
+// Left-nav scroll position. Module scope so it survives the nav unmounting when
+// the results view swaps components — a component ref would reset to 0 (10.2).
+let _navScrollTop = 0;
+
 const RFONT = "'Syne', sans-serif";
 const BFONT = "'DM Sans', sans-serif";
 const HFONT = "'Playfair Display', Georgia, serif";
@@ -3711,8 +3715,6 @@ function JointOverview({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Answ
       {intimacySummary && (() => {
         const idims = intimacySummary.dimSummary.filter(d => d.avgGap != null);
         const ialigned = idims.filter(d => d.state === "aligned").length;
-        const itop = [...idims].sort((a, b) => (b.avgGap ?? 0) - (a.avgGap ?? 0))[0];
-        const ilabel = itop ? (INTIMACY_DIMENSIONS.find(x => x.id === itop.id)?.label || itop.id) : null;
         return (
           <div onClick={onGoIntimacy || undefined}
             style={{ background: "white", borderRadius: 18, overflow: "hidden", border: "1.5px solid #E8DDD0", cursor: onGoIntimacy ? "pointer" : "default", transition: "all 0.18s", boxShadow: "0 2px 12px rgba(0,0,0,0.06)", marginTop: "1rem" }}
@@ -3729,22 +3731,23 @@ function JointOverview({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Answ
               </div>
             </div>
             <div style={{ padding: "1rem 1.25rem" }}>
-              <div style={{ display: "flex", flexDirection: "column", gap: "0.4rem", marginBottom: "0.75rem" }}>
+              <div style={{ display: "flex", flexDirection: "column", gap: "0.45rem", marginBottom: "0.75rem" }}>
                 {idims.map(d => {
                   const meta = INTIMACY_DIMENSIONS.find(x => x.id === d.id);
                   const pct = Math.max(0, Math.min(100, Math.round((1 - (d.avgGap ?? 0)) * 100)));
+                  const barColor = d.state === "aligned" ? "#10b981" : "#E8673A";
                   return (
-                    <div key={d.id} style={{ display: "flex", alignItems: "center", gap: "0.6rem" }}>
-                      <span style={{ fontSize: "0.68rem", color: "#8C7A68", fontFamily: BFONT, width: "clamp(90px,32%,130px)", flexShrink: 0 }}>{meta?.label || d.id}</span>
+                    <div key={d.id} style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                      <span style={{ fontSize: "0.68rem", color: "#8C7A68", fontFamily: BFONT, width: "clamp(88px,30%,120px)", flexShrink: 0, lineHeight: 1.25 }}>{meta?.label || d.id}</span>
                       <div style={{ flex: 1, height: 6, background: "#EFE7DD", borderRadius: 999 }}>
-                        <div style={{ height: "100%", width: pct + "%", background: d.state === "aligned" ? "#10b981" : "#E8673A", borderRadius: 999 }} />
+                        <div style={{ height: "100%", width: pct + "%", background: barColor, borderRadius: 999 }} />
                       </div>
+                      <span style={{ fontSize: "0.62rem", color: barColor, fontFamily: BFONT, fontWeight: 700, flexShrink: 0, minWidth: 32, textAlign: "right" }}>{pct}%</span>
                     </div>
                   );
                 })}
               </div>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                <div style={{ fontSize: "0.7rem", color: "#8C7A68", fontFamily: BFONT }}>{ilabel ? `Furthest apart on ${ilabel.toLowerCase()}` : "You line up across the board"}</div>
+              <div style={{ display: "flex", justifyContent: "flex-end" }}>
                 <span style={{ fontSize: "0.7rem", color: "#B5546E", fontWeight: 700, fontFamily: BFONT }}>Explore results →</span>
               </div>
             </div>
@@ -7481,30 +7484,41 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
     })();
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // 10.2 / 10.3 — the left nav keeps its scroll position when the page changes,
-  // and the active item scrolls into view only when it sits outside the visible
-  // part of the nav.
+  // 10.2 — the left nav holds exactly where you scrolled it. Clicking a page
+  // does not move it, and neither does the page changing under it. The position
+  // lives at module scope (_navScrollTop) so it also survives the nav being
+  // unmounted and remounted between views, which a ref would not.
+  //
+  // The active item is only scrolled into view on FIRST mount (so a deep link or
+  // a fresh entry into results shows you where you are). After that the nav is
+  // yours: it stays put.
   const sidebarRef = useRef(null);
-  const sidebarScroll = useRef(0);
+  const navFirstMount = useRef(true);
   useEffect(() => {
     const el = sidebarRef.current;
     if (!el) return;
-    const onScroll = () => { sidebarScroll.current = el.scrollTop; };
+    const onScroll = () => { _navScrollTop = el.scrollTop; };
     el.addEventListener("scroll", onScroll, { passive: true });
     return () => el.removeEventListener("scroll", onScroll);
   }, []);
   useLayoutEffect(() => {
     const el = sidebarRef.current;
     if (!el) return;
-    if (el.scrollTop !== sidebarScroll.current) el.scrollTop = sidebarScroll.current;
-    const active = el.querySelector('[data-nav-active="true"]');
-    if (!active) return;
-    const itemTop = active.offsetTop;
-    const itemBottom = itemTop + active.offsetHeight;
-    if (itemTop < el.scrollTop + 8 || itemBottom > el.scrollTop + el.clientHeight - 8) {
-      active.scrollIntoView({ block: "nearest" });
-      sidebarScroll.current = el.scrollTop;
+    if (navFirstMount.current) {
+      navFirstMount.current = false;
+      const active = el.querySelector('[data-nav-active="true"]');
+      if (active) {
+        const itemTop = active.offsetTop;
+        const itemBottom = itemTop + active.offsetHeight;
+        if (itemTop < el.scrollTop + 8 || itemBottom > el.scrollTop + el.clientHeight - 8) {
+          active.scrollIntoView({ block: "nearest" });
+          _navScrollTop = el.scrollTop;
+          return;
+        }
+      }
     }
+    // Restore, and never fight the user's position afterwards.
+    if (el.scrollTop !== _navScrollTop) el.scrollTop = _navScrollTop;
   });
 
   const go = (sec) => {
@@ -8233,35 +8247,18 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
       const theirAdmire = theirs.a8;
       return (
         <Layout accent="#1B5FE8" noPrevNext={true}>
-          <div style={{ maxWidth: 660 }}>
-            {/* Hero card */}
-            <div style={{ background: "linear-gradient(145deg, #0f0c29, #1d1a4e, #0f0c29)", borderRadius: 20, padding: "2rem 2rem 1.75rem", marginBottom: "1.25rem", color: "white", position: "relative", overflow: "hidden" }}>
-              <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 3, background: "linear-gradient(90deg, #1B5FE8, #5B6DF8)" }} />
-              <div style={{ position: "absolute", top: "50%", right: -40, transform: "translateY(-50%)", fontSize: "9rem", opacity: 0.04, fontFamily: HFONT, userSelect: "none", lineHeight: 1, pointerEvents: "none" }}>♡</div>
-              <div style={{ fontSize: "0.58rem", letterSpacing: "0.24em", textTransform: "uppercase", color: "rgba(91,109,248,0.85)", marginBottom: "0.6rem", fontFamily: BFONT, fontWeight: 700 }}>Relationship Reflection</div>
-              <div style={{ fontSize: "clamp(1.6rem,4vw,2.2rem)", fontWeight: 700, fontFamily: HFONT, lineHeight: 1.1, marginBottom: "0.75rem" }}>{userName} & {partnerName}</div>
-              {/* How you're both feeling */}
-              <div style={{ background: "rgba(255,255,255,0.08)", borderRadius: 12, padding: "0.9rem 1.1rem", marginBottom: "1rem", border: "1px solid rgba(255,255,255,0.1)" }}>
-                <div style={{ fontSize: "0.55rem", letterSpacing: "0.2em", textTransform: "uppercase", color: "rgba(91,109,248,0.7)", fontFamily: BFONT, fontWeight: 700, marginBottom: "0.35rem" }}>How you're both feeling right now</div>
-                <div style={{ fontSize: "1.05rem", fontWeight: 700, color: "white", fontFamily: HFONT, marginBottom: "0.2rem" }}>
-                  {overallAligned ? `You're both feeling ${overallLabel.toLowerCase()}.` : `${userName} says ${(overallQ?.scaleLabels[myOverall] || "really good").toLowerCase()}. ${partnerName} says ${(overallQ?.scaleLabels[theirOverall] || "better than ever").toLowerCase()}.`}
-                </div>
-                <div style={{ fontSize: "0.75rem", color: "rgba(255,255,255,0.5)", fontFamily: BFONT, fontWeight: 300 }}>
-                  {overallAligned ? "A shared read on where you are. That's a meaningful starting point." : "Different vantage points on the same relationship. Both worth understanding."}
-                </div>
-              </div>
-              {/* Appreciation reveal if available */}
-              {myAdmire && theirAdmire && (
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.65rem", marginBottom: "1rem" }}>
-                  {[[userName, theirAdmire], [partnerName, myAdmire]].map(([name, admires]) => (
-                    <div key={name} style={{ background: "rgba(255,255,255,0.07)", borderRadius: 10, padding: "0.75rem 0.9rem", border: "1px solid rgba(255,255,255,0.08)" }}>
-                      <div style={{ fontSize: "0.52rem", letterSpacing: "0.16em", textTransform: "uppercase", color: "rgba(255,255,255,0.4)", fontFamily: BFONT, marginBottom: "0.3rem" }}>{name} is admired for</div>
-                      <div style={{ fontSize: "0.9rem", fontWeight: 700, color: "white", fontFamily: HFONT }}>{admiredNoun(admires)}</div>
-                    </div>
-                  ))}
-                </div>
-              )}
-              <div style={{ display: "flex", gap: "1rem" }}>
+          <ResultsSlide bg="linear-gradient(145deg, #0f0c29, #302b63, #24243e)">
+            <link href={FONT_URL} rel="stylesheet" />
+            <div style={{ color: "white" }}>
+              {/* Header — matches the comms + expectations overviews */}
+              <div style={{ fontSize: "0.65rem", textTransform: "uppercase", letterSpacing: "0.2em", color: "rgba(255,255,255,0.38)", marginBottom: "0.5rem", fontFamily: BFONT }}>Relationship Reflection</div>
+              <div style={{ fontSize: "clamp(1.8rem,6vw,2.8rem)", fontWeight: 700, fontFamily: HFONT, lineHeight: 1.05, marginBottom: "0.6rem" }}>{userName} &amp; {partnerName}</div>
+              <p style={{ fontSize: "0.9rem", color: "rgba(255,255,255,0.6)", fontFamily: BFONT, fontWeight: 300, lineHeight: 1.6, marginBottom: "1rem" }}>
+                {overallAligned
+                  ? `You're both feeling ${overallLabel.toLowerCase()}. A shared read on where you are.`
+                  : `${userName} says ${(overallQ?.scaleLabels[myOverall] || "really good").toLowerCase()}. ${partnerName} says ${(overallQ?.scaleLabels[theirOverall] || "better than ever").toLowerCase()}. Both worth understanding.`}
+              </p>
+              <div style={{ display: "flex", gap: "1rem", marginBottom: "1.25rem" }}>
                 <div style={{ display: "flex", alignItems: "center", gap: "0.4rem" }}>
                   <div style={{ width: 7, height: 7, borderRadius: "50%", background: "#10b981" }} />
                   <span style={{ fontSize: "0.75rem", color: "rgba(255,255,255,0.8)", fontFamily: BFONT }}>{strengths} strength{strengths !== 1 ? "s" : ""}</span>
@@ -8271,68 +8268,82 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
                   <span style={{ fontSize: "0.75rem", color: "rgba(255,255,255,0.8)", fontFamily: BFONT }}>{explores} area{explores !== 1 ? "s" : ""} to explore</span>
                 </div>
               </div>
-            </div>
-            {/* How you feel right now — scale questions live on the overview (8.2) */}
-            <div style={{ background: "white", border: `1.5px solid ${C.stone}`, borderRadius: 16, padding: "1.35rem 1.35rem 1rem", marginBottom: "1.25rem" }}>
-              <div style={{ fontSize: "0.55rem", letterSpacing: "0.18em", textTransform: "uppercase", color: "#1B5FE8", fontFamily: BFONT, fontWeight: 700, marginBottom: "1rem" }}>How you feel right now</div>
-              {scaleQs.filter(q => q.id !== "a0").map(q => {
-                const myVal = mine[q.id] ?? 2;
-                const theirVal = theirs[q.id] ?? 2;
-                const endLow = q.scaleLabels[0];
-                const endHigh = q.scaleLabels[q.scaleLabels.length - 1];
-                return (
-                  <div key={q.id} style={{ marginBottom: "1.1rem" }}>
-                    <div style={{ fontSize: "0.78rem", color: C.ink, fontWeight: 600, fontFamily: BFONT, marginBottom: "0.5rem" }}>{q.text}</div>
-                    <div style={{ display: "flex", alignItems: "center", gap: "0.6rem" }}>
-                      <span style={{ fontSize: "0.58rem", color: C.muted, fontFamily: BFONT, width: 70, flexShrink: 0, textAlign: "right", lineHeight: 1.25 }}>{endLow}</span>
-                      <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 4 }}>
-                        {[[userName, myVal, "#E8673A"], [partnerName, theirVal, "#1B5FE8"]].map(([name, val, color]) => (
-                          <div key={name} style={{ display: "flex", gap: 3 }}>
-                            {q.scaleLabels.map((_, i) => (
-                              <div key={i} style={{ flex: 1, height: 8, borderRadius: 3, background: i <= val ? color : color + "1f" }} />
-                            ))}
-                          </div>
-                        ))}
-                      </div>
-                      <span style={{ fontSize: "0.58rem", color: C.muted, fontFamily: BFONT, width: 70, flexShrink: 0, lineHeight: 1.25 }}>{endHigh}</span>
-                    </div>
-                  </div>
-                );
-              })}
-              <div style={{ display: "flex", justifyContent: "center", gap: "1.1rem", paddingTop: "0.35rem" }}>
-                {[[userName, "#E8673A"], [partnerName, "#1B5FE8"]].map(([name, color]) => (
-                  <div key={name} style={{ display: "flex", alignItems: "center", gap: "0.35rem" }}>
-                    <div style={{ width: 8, height: 8, borderRadius: "50%", background: color, flexShrink: 0 }} />
-                    <span style={{ fontSize: "0.68rem", color: C.muted, fontFamily: BFONT }}>{name}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
 
-            {/* What's in this section */}
-            <div style={{ background: "white", border: `1.5px solid ${C.stone}`, borderRadius: 16, padding: "1.25rem 1.25rem 0.85rem", marginBottom: "1.25rem" }}>
-              <div style={{ fontSize: "0.55rem", letterSpacing: "0.18em", textTransform: "uppercase", color: "#1B5FE8", fontFamily: BFONT, fontWeight: 700, marginBottom: "0.75rem" }}>What's in this section</div>
-              <div style={{ display: "flex", flexDirection: "column", gap: "0.35rem" }}>
-                {[
-                  { label: "Insights", sub: `${insights.length} insights drawn from your answers`, id: "reflection-insights" },
-                  { label: "Side by Side", sub: "Your answers shown together with synthesis", id: "reflection-story" },
-                  { label: "Action Plan", sub: `${explores} conversation${explores !== 1 ? "s" : ""} worth having`, id: "reflection-plan" },
-                ].map(item => (
-                  <div key={item.id} onClick={() => go(item.id)}
-                    style={{ display: "flex", alignItems: "center", gap: "0.75rem", padding: "0.55rem 0.75rem", borderRadius: 10, background: "rgba(27,95,232,0.04)", cursor: "pointer", transition: "all 0.12s", border: "1px solid rgba(27,95,232,0.08)" }}
-                    onMouseEnter={e => e.currentTarget.style.background = "rgba(27,95,232,0.09)"}
-                    onMouseLeave={e => e.currentTarget.style.background = "rgba(27,95,232,0.04)"}>
-                    <div style={{ flex: 1 }}>
-                      <div style={{ fontSize: "0.8rem", fontWeight: 700, color: C.ink, fontFamily: BFONT }}>{item.label}</div>
-                      <div style={{ fontSize: "0.65rem", color: C.muted, fontFamily: BFONT, marginTop: "0.1rem" }}>{item.sub}</div>
+              {/* Appreciation */}
+              {myAdmire && theirAdmire && (
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.75rem", marginBottom: "1rem" }}>
+                  {[[userName, theirAdmire, "#E8673A"], [partnerName, myAdmire, "#5B6DF8"]].map(([name, admires, col]) => (
+                    <div key={name} style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 14, padding: "0.9rem 1.1rem" }}>
+                      <div style={{ fontSize: "0.55rem", letterSpacing: "0.16em", textTransform: "uppercase", color: "rgba(255,255,255,0.4)", fontFamily: BFONT, marginBottom: "0.3rem" }}>{name} is admired for</div>
+                      <div style={{ fontSize: "1rem", fontWeight: 700, color: col, fontFamily: HFONT }}>{admiredNoun(admires)}</div>
                     </div>
-                    <span style={{ color: "#1B5FE8", fontSize: "0.85rem", fontFamily: BFONT, flexShrink: 0 }}>→</span>
-                  </div>
-                ))}
+                  ))}
+                </div>
+              )}
+
+              {/* How you feel right now — scale questions (8.2) */}
+              <div style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 14, padding: "1.1rem 1.25rem", marginBottom: "1rem" }}>
+                <div style={{ fontSize: "0.55rem", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.35)", fontFamily: BFONT, fontWeight: 700, marginBottom: "1rem" }}>How you feel right now</div>
+                {scaleQs.filter(q => q.id !== "a0").map(q => {
+                  const myVal = mine[q.id] ?? 2;
+                  const theirVal = theirs[q.id] ?? 2;
+                  const endLow = q.scaleLabels[0];
+                  const endHigh = q.scaleLabels[q.scaleLabels.length - 1];
+                  const short = { a_sat_conn: "Day-to-day connection", a_sat_comm: "Communication", a_sat_fun: "Fun & lightness" }[q.id] || q.text.split("?")[0];
+                  return (
+                    <div key={q.id} style={{ marginBottom: "0.9rem" }}>
+                      <div style={{ fontSize: "0.7rem", color: "rgba(255,255,255,0.7)", fontWeight: 500, fontFamily: BFONT, marginBottom: "0.4rem" }}>{short}</div>
+                      <div style={{ display: "flex", alignItems: "center", gap: "0.55rem" }}>
+                        <span style={{ fontSize: "0.55rem", color: "rgba(255,255,255,0.32)", fontFamily: BFONT, width: 62, flexShrink: 0, textAlign: "right", lineHeight: 1.25 }}>{endLow}</span>
+                        <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 4 }}>
+                          {[[userName, myVal, "#E8673A"], [partnerName, theirVal, "#5B6DF8"]].map(([name, val, color]) => (
+                            <div key={name} style={{ display: "flex", gap: 3 }}>
+                              {q.scaleLabels.map((_, i) => (
+                                <div key={i} style={{ flex: 1, height: 7, borderRadius: 2, background: i <= val ? color : "rgba(255,255,255,0.1)" }} />
+                              ))}
+                            </div>
+                          ))}
+                        </div>
+                        <span style={{ fontSize: "0.55rem", color: "rgba(255,255,255,0.32)", fontFamily: BFONT, width: 62, flexShrink: 0, lineHeight: 1.25 }}>{endHigh}</span>
+                      </div>
+                    </div>
+                  );
+                })}
+                <div style={{ display: "flex", justifyContent: "center", gap: "1.1rem", paddingTop: "0.25rem" }}>
+                  {[[userName, "#E8673A"], [partnerName, "#5B6DF8"]].map(([name, color]) => (
+                    <div key={name} style={{ display: "flex", alignItems: "center", gap: "0.35rem" }}>
+                      <div style={{ width: 8, height: 8, borderRadius: "50%", background: color, flexShrink: 0 }} />
+                      <span style={{ fontSize: "0.65rem", color: "rgba(255,255,255,0.5)", fontFamily: BFONT }}>{name}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* What's in this section */}
+              <div style={{ borderTop: "1px solid rgba(255,255,255,0.1)", paddingTop: "0.85rem" }}>
+                <div style={{ fontSize: "0.55rem", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.3)", fontFamily: BFONT, fontWeight: 700, marginBottom: "0.5rem" }}>What's in this section</div>
+                <div style={{ display: "flex", flexDirection: "column", gap: "0.3rem" }}>
+                  {[
+                    { label: "Insights", sub: `${insights.length} insights drawn from your answers`, id: "reflection-insights" },
+                    { label: "Side by Side", sub: "Your answers shown together with synthesis", id: "reflection-story" },
+                    { label: "Action Plan", sub: `${explores} conversation${explores !== 1 ? "s" : ""} worth having`, id: "reflection-plan" },
+                  ].map(item => (
+                    <div key={item.id} onClick={() => go(item.id)}
+                      style={{ display: "flex", alignItems: "center", gap: "0.75rem", padding: "0.45rem 0.75rem", borderRadius: 8, background: "rgba(255,255,255,0.04)", cursor: "pointer", transition: "all 0.12s", border: "1px solid rgba(255,255,255,0.06)" }}
+                      onMouseEnter={e => e.currentTarget.style.background = "rgba(255,255,255,0.09)"}
+                      onMouseLeave={e => e.currentTarget.style.background = "rgba(255,255,255,0.04)"}>
+                      <div style={{ flex: 1 }}>
+                        <div style={{ fontSize: "0.76rem", color: "rgba(255,255,255,0.72)", fontFamily: BFONT }}>{item.label}</div>
+                        <div style={{ fontSize: "0.6rem", color: "rgba(255,255,255,0.35)", fontFamily: BFONT, marginTop: "0.1rem" }}>{item.sub}</div>
+                      </div>
+                      <span style={{ fontSize: "0.85rem", color: "rgba(255,255,255,0.25)", fontFamily: BFONT, flexShrink: 0 }}>→</span>
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
             <PrevNext />
-          </div>
+          </ResultsSlide>
         </Layout>
       );
     }
@@ -8576,16 +8587,16 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
     if (section === "intimacy-overview" || section === "intimacy") {
       return (
         <Layout accent={ROSE} noPrevNext={true}>
-          <div style={{ maxWidth: 660 }}>
-            <div style={{ background: `linear-gradient(145deg, #2a0f1a, ${ROSE_DARK}, #2a0f1a)`, borderRadius: 20, padding: "2rem 2rem 1.75rem", marginBottom: "1.25rem", color: "white", position: "relative", overflow: "hidden" }}>
-              <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 3, background: "linear-gradient(90deg, #B5546E, #E08DA6)" }} />
-              <div style={{ position: "absolute", top: "50%", right: -40, transform: "translateY(-50%)", fontSize: "9rem", opacity: 0.05, fontFamily: HFONT, userSelect: "none", lineHeight: 1, pointerEvents: "none" }}>♥</div>
-              <div style={{ fontSize: "0.58rem", letterSpacing: "0.24em", textTransform: "uppercase", color: "rgba(224,141,166,0.9)", marginBottom: "0.6rem", fontFamily: BFONT, fontWeight: 700 }}>Physical Intimacy Expectations</div>
-              <div style={{ fontSize: "clamp(1.6rem,4vw,2.2rem)", fontWeight: 700, fontFamily: HFONT, lineHeight: 1.1, marginBottom: "0.5rem" }}>{userName} & {partnerName}</div>
-              <div style={{ fontSize: "0.82rem", color: "rgba(255,255,255,0.6)", fontFamily: BFONT, fontWeight: 300, lineHeight: 1.6, marginBottom: "1rem" }}>
+          <ResultsSlide bg="linear-gradient(145deg, #2a0f1a, #4a1c30, #22204a)">
+            <link href={FONT_URL} rel="stylesheet" />
+            <div style={{ color: "white" }}>
+              {/* Header — same shape as the comms + expectations overviews */}
+              <div style={{ fontSize: "0.65rem", textTransform: "uppercase", letterSpacing: "0.2em", color: "rgba(255,255,255,0.38)", marginBottom: "0.5rem", fontFamily: BFONT }}>Physical Intimacy Expectations</div>
+              <div style={{ fontSize: "clamp(1.8rem,6vw,2.8rem)", fontWeight: 700, fontFamily: HFONT, lineHeight: 1.05, marginBottom: "0.6rem" }}>{userName} &amp; {partnerName}</div>
+              <p style={{ fontSize: "0.9rem", color: "rgba(255,255,255,0.6)", fontFamily: BFONT, fontWeight: 300, lineHeight: 1.6, marginBottom: "1rem" }}>
                 {intimacyVariant === "married" ? "Based on how things are now." : "Based on what you each expect."} {exploreCount === 0 ? "You line up across the board." : `${alignedCount} of ${dims.length} closely matched.`} The gap is the conversation.
-              </div>
-              <div style={{ display: "flex", gap: "1rem" }}>
+              </p>
+              <div style={{ display: "flex", gap: "1rem", marginBottom: "1.25rem" }}>
                 <div style={{ display: "flex", alignItems: "center", gap: "0.4rem" }}>
                   <div style={{ width: 7, height: 7, borderRadius: "50%", background: "#10b981" }} />
                   <span style={{ fontSize: "0.75rem", color: "rgba(255,255,255,0.8)", fontFamily: BFONT }}>{alignedCount} aligned</span>
@@ -8595,44 +8606,70 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
                   <span style={{ fontSize: "0.75rem", color: "rgba(255,255,255,0.8)", fontFamily: BFONT }}>{exploreCount} worth discussing</span>
                 </div>
               </div>
-            </div>
 
-            {/* Where you each land — label left, bar right, key top-right (9.1) */}
-            <div style={{ background: "white", border: `1.5px solid ${C.stone}`, borderRadius: 16, padding: "1.25rem", marginBottom: "1.25rem" }}>
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "1rem", gap: "1rem", flexWrap: "wrap" }}>
-                <div style={{ fontSize: "0.55rem", letterSpacing: "0.18em", textTransform: "uppercase", color: ROSE, fontFamily: BFONT, fontWeight: 700 }}>Where you each land</div>
-                <div style={{ display: "flex", gap: "0.85rem" }}>
-                  <span style={{ display: "flex", alignItems: "center", gap: "0.35rem", fontSize: "0.65rem", color: C.muted, fontFamily: BFONT }}><span style={{ width: 8, height: 8, borderRadius: "50%", background: "#E8673A" }} />{userName}</span>
-                  <span style={{ display: "flex", alignItems: "center", gap: "0.35rem", fontSize: "0.65rem", color: C.muted, fontFamily: BFONT }}><span style={{ width: 8, height: 8, borderRadius: "50%", background: "#6C7FFF" }} />{partnerName}</span>
+              {/* Where you each land — label left, bar right, key top-right (9.1) */}
+              <div style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 14, padding: "1rem 1.1rem", marginBottom: "1rem" }}>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "0.7rem", gap: "1rem", flexWrap: "wrap" }}>
+                  <div style={{ fontSize: "0.55rem", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.3)", fontFamily: BFONT, fontWeight: 700 }}>Where you each land</div>
+                  <div style={{ display: "flex", gap: "0.85rem" }}>
+                    <span style={{ display: "flex", alignItems: "center", gap: "0.35rem", fontSize: "0.62rem", color: "rgba(255,255,255,0.5)", fontFamily: BFONT }}><span style={{ width: 8, height: 8, borderRadius: "50%", background: "#E8673A" }} />{userName}</span>
+                    <span style={{ display: "flex", alignItems: "center", gap: "0.35rem", fontSize: "0.62rem", color: "rgba(255,255,255,0.5)", fontFamily: BFONT }}><span style={{ width: 8, height: 8, borderRadius: "50%", background: "#6C7FFF" }} />{partnerName}</span>
+                  </div>
+                </div>
+                <div style={{ display: "flex", flexDirection: "column", gap: "0.55rem" }}>
+                  {INTIMACY_DIMENSIONS.map(d => {
+                    const pos = positions[d.id] || {};
+                    const myPct = pos.mine == null ? null : Math.round(8 + pos.mine * 84);
+                    const partPct = pos.theirs == null ? null : Math.round(8 + pos.theirs * 84);
+                    const overlap = myPct != null && partPct != null && Math.abs(myPct - partPct) < 3;
+                    const myIsLeft = (myPct ?? 0) <= (partPct ?? 0);
+                    const myDy = overlap ? (myIsLeft ? -4 : 4) : 0;
+                    const partDy = overlap ? (myIsLeft ? 4 : -4) : 0;
+                    return (
+                      <div key={d.id} onClick={() => go(`intimacy-${d.id}`)}
+                        style={{ cursor: "pointer", display: "flex", alignItems: "center", gap: "0.65rem" }}>
+                        <span style={{ fontSize: "0.65rem", color: "rgba(255,255,255,0.65)", fontFamily: BFONT, flexShrink: 0, width: "clamp(88px,30%,120px)", lineHeight: 1.25 }}>{d.label}</span>
+                        <div style={{ flex: 1, position: "relative", height: 6, background: "rgba(255,255,255,0.08)", borderRadius: 999, overflow: "visible" }}>
+                          {myPct != null && <div style={{ position: "absolute", top: "50%", transform: `translateY(calc(-50% + ${myDy}px))`, left: `${myPct}%`, width: 10, height: 10, borderRadius: "50%", background: "#E8673A", border: "1.5px solid rgba(14,11,7,0.3)", marginLeft: -5, zIndex: 2 }} />}
+                          {partPct != null && <div style={{ position: "absolute", top: "50%", transform: `translateY(calc(-50% + ${partDy}px))`, left: `${partPct}%`, width: 10, height: 10, borderRadius: "50%", background: "#6C7FFF", border: "1.5px solid rgba(14,11,7,0.3)", marginLeft: -5, zIndex: 1 }} />}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+                <div style={{ display: "flex", justifyContent: "space-between", marginTop: "0.6rem" }}>
+                  <span style={{ fontSize: "0.55rem", color: "rgba(255,255,255,0.2)", fontFamily: BFONT }}>{INTIMACY_DIMENSIONS[0]?.poles?.[0]}</span>
+                  <span style={{ fontSize: "0.55rem", color: "rgba(255,255,255,0.2)", fontFamily: BFONT }}>{INTIMACY_DIMENSIONS[0]?.poles?.[1]}</span>
                 </div>
               </div>
-              <div style={{ display: "flex", flexDirection: "column", gap: "0.55rem" }}>
-                {INTIMACY_DIMENSIONS.map(d => {
-                  const pos = positions[d.id] || {};
-                  const myPct = pos.mine == null ? null : Math.round(8 + pos.mine * 84);
-                  const partPct = pos.theirs == null ? null : Math.round(8 + pos.theirs * 84);
-                  // Dots only offset vertically when they actually overlap.
-                  const overlap = myPct != null && partPct != null && Math.abs(myPct - partPct) < 3;
-                  const myIsLeft = (myPct ?? 0) <= (partPct ?? 0);
-                  const myDy = overlap ? (myIsLeft ? -4 : 4) : 0;
-                  const partDy = overlap ? (myIsLeft ? 4 : -4) : 0;
-                  return (
-                    <div key={d.id} onClick={() => go(`intimacy-${d.id}`)}
-                      style={{ cursor: "pointer", display: "flex", alignItems: "center", gap: "0.75rem", padding: "0.4rem 0.25rem", borderRadius: 8 }}
-                      onMouseEnter={e => e.currentTarget.style.background = "rgba(181,84,110,0.04)"}
-                      onMouseLeave={e => e.currentTarget.style.background = "transparent"}>
-                      <span style={{ fontSize: "0.76rem", fontWeight: 600, color: C.ink, fontFamily: BFONT, flexShrink: 0, width: "clamp(110px,34%,170px)", lineHeight: 1.25 }}>{d.label}</span>
-                      <div style={{ flex: 1, position: "relative", height: 8, background: C.stone, borderRadius: 999, overflow: "visible" }}>
-                        {myPct != null && <div style={{ position: "absolute", top: "50%", transform: `translateY(calc(-50% + ${myDy}px))`, left: `${myPct}%`, width: 10, height: 10, borderRadius: "50%", background: "#E8673A", border: "1.5px solid white", marginLeft: -5, zIndex: 2 }} />}
-                        {partPct != null && <div style={{ position: "absolute", top: "50%", transform: `translateY(calc(-50% + ${partDy}px))`, left: `${partPct}%`, width: 10, height: 10, borderRadius: "50%", background: "#6C7FFF", border: "1.5px solid white", marginLeft: -5, zIndex: 1 }} />}
+
+              {/* What's in this section */}
+              <div style={{ borderTop: "1px solid rgba(255,255,255,0.1)", paddingTop: "0.85rem" }}>
+                <div style={{ fontSize: "0.55rem", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.3)", fontFamily: BFONT, fontWeight: 700, marginBottom: "0.5rem" }}>What's in this section</div>
+                <div style={{ display: "flex", flexDirection: "column", gap: "0.3rem" }}>
+                  {[
+                    ...INTIMACY_DIMENSIONS.map(d => {
+                      const ds = dims.find(x => x.id === d.id);
+                      return { label: d.label, sub: ds?.state === "aligned" ? "Closely matched" : "Worth discussing", id: `intimacy-${d.id}` };
+                    }),
+                    { label: "Conversations Worth Having", sub: "Drawn from where you differ most", id: "intimacy-plan" },
+                  ].map(item => (
+                    <div key={item.id} onClick={() => go(item.id)}
+                      style={{ display: "flex", alignItems: "center", gap: "0.75rem", padding: "0.45rem 0.75rem", borderRadius: 8, background: "rgba(255,255,255,0.04)", cursor: "pointer", transition: "all 0.12s", border: "1px solid rgba(255,255,255,0.06)" }}
+                      onMouseEnter={e => e.currentTarget.style.background = "rgba(255,255,255,0.09)"}
+                      onMouseLeave={e => e.currentTarget.style.background = "rgba(255,255,255,0.04)"}>
+                      <div style={{ flex: 1 }}>
+                        <div style={{ fontSize: "0.76rem", color: "rgba(255,255,255,0.72)", fontFamily: BFONT }}>{item.label}</div>
+                        <div style={{ fontSize: "0.6rem", color: "rgba(255,255,255,0.35)", fontFamily: BFONT, marginTop: "0.1rem" }}>{item.sub}</div>
                       </div>
+                      <span style={{ fontSize: "0.85rem", color: "rgba(255,255,255,0.25)", fontFamily: BFONT, flexShrink: 0 }}>→</span>
                     </div>
-                  );
-                })}
+                  ))}
+                </div>
               </div>
             </div>
             <PrevNext />
-          </div>
+          </ResultsSlide>
         </Layout>
       );
     }
@@ -8651,54 +8688,65 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
       const prevId = idx > 0 ? `intimacy-${dimIds[idx - 1]}` : "intimacy-overview";
       const skipper = oneSidedSkip(dimMatch);
       const osk = INTIMACY_RESULTS_PROSE[dimMatch]?.oneSkipped;
+      // Per-dimension gradient, so each page has its own tone the way the comms
+      // dimension pages do (they key off DIM_META.dark).
+      const DIM_TINT = {
+        frequency:     "#7A2540",
+        initiating:    "#8A3350",
+        comfort:       "#6E2A48",
+        communication: "#5E2E52",
+        adventure:     "#8A3A3A",
+        meaning:       "#4E2A55",
+      };
+      const tint = DIM_TINT[dimMatch] || "#7A2540";
       return (
         <Layout accent={ROSE} noPrevNext={true}>
-          <div style={{ maxWidth: 660 }}>
+          <ResultsSlide bg={`linear-gradient(145deg, ${tint}dd, ${tint}99, #22204a)`}>
+            <link href={FONT_URL} rel="stylesheet" />
             <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", marginBottom: "0.75rem" }}>
-              <div style={{ width: 10, height: 10, borderRadius: "50%", background: ROSE, flexShrink: 0 }} />
-              <div style={{ fontSize: "0.62rem", textTransform: "uppercase", letterSpacing: "0.15em", color: ROSE, fontWeight: 700, fontFamily: BFONT }}>Physical Intimacy</div>
-              <div style={{ marginLeft: "auto", fontSize: "0.68rem", color: C.muted, fontFamily: BFONT }}>{idx + 1} of {dimIds.length}</div>
+              <div style={{ width: 10, height: 10, borderRadius: "50%", background: "#E08DA6", flexShrink: 0 }} />
+              <div style={{ fontSize: "0.62rem", textTransform: "uppercase", letterSpacing: "0.15em", color: "rgba(255,255,255,0.82)", fontWeight: 700, fontFamily: BFONT }}>Physical Intimacy</div>
+              <div style={{ marginLeft: "auto", fontSize: "0.68rem", color: "rgba(255,255,255,0.3)", fontFamily: BFONT }}>{idx + 1} of {dimIds.length}</div>
             </div>
-            <div style={{ fontSize: "clamp(1.5rem,5vw,2rem)", fontWeight: 700, color: C.ink, lineHeight: 1.1, marginBottom: "0.4rem", fontFamily: HFONT }}>{d.label}</div>
-            <p style={{ fontSize: "0.8rem", color: C.muted, fontFamily: BFONT, fontWeight: 300, marginBottom: "1.5rem" }}>{sub(INTIMACY_RESULTS_PROSE[dimMatch]?.intro)}</p>
+            <div style={{ fontSize: "clamp(1.5rem,5vw,2rem)", fontWeight: 700, color: "white", lineHeight: 1.1, marginBottom: "0.4rem", fontFamily: HFONT }}>{d.label}</div>
+            <p style={{ fontSize: "0.85rem", color: "rgba(255,255,255,0.6)", fontFamily: BFONT, fontWeight: 300, lineHeight: 1.6, marginBottom: "1.25rem" }}>{sub(INTIMACY_RESULTS_PROSE[dimMatch]?.intro)}</p>
 
             {/* Track */}
-            <div style={{ background: "white", border: `1.5px solid ${C.stone}`, borderRadius: 14, padding: "1.25rem 1.5rem", marginBottom: "1rem" }}>
+            <div style={{ background: "rgba(255,255,255,0.12)", borderRadius: 14, padding: "1.25rem 1.5rem", marginBottom: "1rem", border: "1px solid rgba(255,255,255,0.2)" }}>
               <div style={{ display: "flex", justifyContent: "flex-end", gap: "0.85rem", marginBottom: "0.85rem" }}>
-                <span style={{ display: "flex", alignItems: "center", gap: "0.35rem", fontSize: "0.68rem", color: C.muted, fontFamily: BFONT }}><span style={{ width: 9, height: 9, borderRadius: "50%", background: "#E8673A" }} />{userName}</span>
-                <span style={{ display: "flex", alignItems: "center", gap: "0.35rem", fontSize: "0.68rem", color: C.muted, fontFamily: BFONT }}><span style={{ width: 9, height: 9, borderRadius: "50%", background: "#6C7FFF" }} />{partnerName}</span>
+                <span style={{ display: "flex", alignItems: "center", gap: "0.35rem", fontSize: "0.68rem", color: "rgba(255,255,255,0.6)", fontFamily: BFONT }}><span style={{ width: 9, height: 9, borderRadius: "50%", background: "#E8673A" }} />{userName}</span>
+                <span style={{ display: "flex", alignItems: "center", gap: "0.35rem", fontSize: "0.68rem", color: "rgba(255,255,255,0.6)", fontFamily: BFONT }}><span style={{ width: 9, height: 9, borderRadius: "50%", background: "#6C7FFF" }} />{partnerName}</span>
               </div>
               <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "0.85rem" }}>
-                <span style={{ fontSize: "0.7rem", fontWeight: 600, color: C.muted, fontFamily: BFONT }}>{d.poles?.[0]}</span>
-                <span style={{ fontSize: "0.7rem", fontWeight: 600, color: C.muted, fontFamily: BFONT }}>{d.poles?.[1]}</span>
+                <span style={{ fontSize: "0.7rem", fontWeight: 600, color: "rgba(255,255,255,0.85)", fontFamily: BFONT }}>{d.poles?.[0]}</span>
+                <span style={{ fontSize: "0.7rem", fontWeight: 600, color: "rgba(255,255,255,0.85)", fontFamily: BFONT }}>{d.poles?.[1]}</span>
               </div>
-              <div style={{ position: "relative", height: 10, background: C.stone, borderRadius: 999, marginBottom: "0.85rem" }}>
-                {myPct != null && <div style={{ position: "absolute", top: "50%", transform: "translateY(-50%)", left: `${myPct}%`, width: 14, height: 14, borderRadius: "50%", background: "#E8673A", border: "2px solid white", boxShadow: "0 1px 4px rgba(0,0,0,0.2)", marginLeft: -7, zIndex: 2 }} />}
-                {partPct != null && <div style={{ position: "absolute", top: "50%", transform: "translateY(-50%)", left: `${partPct}%`, width: 14, height: 14, borderRadius: "50%", background: "#6C7FFF", border: "2px solid white", boxShadow: "0 1px 4px rgba(0,0,0,0.2)", marginLeft: -7, zIndex: 1 }} />}
+              <div style={{ position: "relative", height: 10, background: "rgba(255,255,255,0.18)", borderRadius: 999, marginBottom: "0.25rem", overflow: "visible" }}>
+                {myPct != null && <div style={{ position: "absolute", top: "50%", transform: "translateY(-50%)", left: `${myPct}%`, width: 14, height: 14, borderRadius: "50%", background: "#E8673A", border: "2px solid white", boxShadow: "0 1px 4px rgba(0,0,0,0.25)", marginLeft: -7, zIndex: 2 }} />}
+                {partPct != null && <div style={{ position: "absolute", top: "50%", transform: "translateY(-50%)", left: `${partPct}%`, width: 14, height: 14, borderRadius: "50%", background: "#6C7FFF", border: "2px solid white", boxShadow: "0 1px 4px rgba(0,0,0,0.25)", marginLeft: -7, zIndex: 1 }} />}
               </div>
             </div>
 
-            {/* What this means / one-partner-skipped */}
+            {/* Talk about it / one-partner-skipped (the skip variant stays intact) */}
             {skipper && osk ? (
-              <div style={{ background: `${ROSE}14`, borderRadius: 14, padding: "1.25rem 1.5rem", border: `1px solid ${ROSE}40` }}>
-                <p style={{ fontSize: "0.9rem", color: C.text, lineHeight: 1.75, margin: "0 0 1rem", fontFamily: BFONT, fontWeight: 300 }}>{osk.lead.replace(/\{SKIPPER\}/g, skipper)}</p>
-                <div style={{ fontSize: "0.62rem", textTransform: "uppercase", letterSpacing: "0.12em", color: ROSE, fontWeight: 700, marginBottom: "0.5rem", fontFamily: BFONT }}>Talk about it</div>
-                <p style={{ fontSize: "0.9rem", color: C.ink, lineHeight: 1.75, margin: 0, fontFamily: BFONT, fontWeight: 400 }}>{sub(osk.question)}</p>
+              <div style={{ background: "rgba(255,255,255,0.08)", borderRadius: 14, padding: "1.25rem 1.5rem", border: "1px solid rgba(255,255,255,0.18)" }}>
+                <p style={{ fontSize: "0.9rem", color: "rgba(255,255,255,0.8)", lineHeight: 1.75, margin: "0 0 1rem", fontFamily: BFONT, fontWeight: 300 }}>{osk.lead.replace(/\{SKIPPER\}/g, skipper)}</p>
+                <div style={{ fontSize: "0.62rem", textTransform: "uppercase", letterSpacing: "0.12em", color: "#E08DA6", fontWeight: 700, marginBottom: "0.5rem", fontFamily: BFONT }}>Talk about it</div>
+                <p style={{ fontSize: "0.9rem", color: "white", lineHeight: 1.75, margin: 0, fontFamily: BFONT, fontWeight: 400 }}>{sub(osk.question)}</p>
               </div>
             ) : (
-              <>
-                <div style={{ background: `${ROSE}14`, borderRadius: 14, padding: "1.25rem 1.5rem", border: `1px solid ${ROSE}40` }}>
-                  <div style={{ fontSize: "0.62rem", textTransform: "uppercase", letterSpacing: "0.12em", color: ROSE, fontWeight: 700, marginBottom: "0.5rem", fontFamily: BFONT }}>Talk about it</div>
-                  <p style={{ fontSize: "0.9rem", color: C.ink, lineHeight: 1.75, margin: 0, fontFamily: BFONT, fontWeight: 400 }}>{sub(INTIMACY_RESULTS_PROSE[dimMatch]?.prompt)}</p>
-                </div>
-              </>
+              <div style={{ background: "rgba(255,255,255,0.08)", borderRadius: 14, padding: "1.25rem 1.5rem", border: "1px solid rgba(255,255,255,0.18)" }}>
+                <div style={{ fontSize: "0.62rem", textTransform: "uppercase", letterSpacing: "0.12em", color: "#E08DA6", fontWeight: 700, marginBottom: "0.5rem", fontFamily: BFONT }}>Talk about it</div>
+                <p style={{ fontSize: "0.9rem", color: "white", lineHeight: 1.75, margin: 0, fontFamily: BFONT, fontWeight: 400 }}>{sub(INTIMACY_RESULTS_PROSE[dimMatch]?.prompt)}</p>
+              </div>
             )}
 
-            <div style={{ display: "flex", justifyContent: "space-between", marginTop: "1.5rem" }}>
-              <button onClick={() => go(prevId)} style={{ background: "transparent", border: `1.5px solid ${C.stone}`, borderRadius: 10, padding: "0.6rem 1.25rem", fontSize: "0.72rem", color: C.muted, cursor: "pointer", fontFamily: BFONT, fontWeight: 600 }}>← Back</button>
-              <button onClick={() => go(nextId)} style={{ background: "#2d2250", border: "none", borderRadius: 10, padding: "0.6rem 1.25rem", fontSize: "0.72rem", color: "white", cursor: "pointer", fontFamily: BFONT, fontWeight: 600 }}>{idx < dimIds.length - 1 ? INTIMACY_DIMENSIONS[idx + 1].label : "Conversations Worth Having"} →</button>
-            </div>
-          </div>
+            <NavButtons
+              onBack={() => go(prevId)}
+              onNext={() => go(nextId)}
+              nextLabel={(idx < dimIds.length - 1 ? INTIMACY_DIMENSIONS[idx + 1].label : "Conversations Worth Having") + " →"}
+            />
+          </ResultsSlide>
         </Layout>
       );
     }
