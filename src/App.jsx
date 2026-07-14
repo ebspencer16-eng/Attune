@@ -7254,16 +7254,9 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
         // Guarding on addonWorkbook alone meant generation never fired for them
         // and the dashboard sat on "Generating now" forever.
         const _ownsWorkbook = !!ord?.addonWorkbook || (ord?.pkgKey || ord?.pkg) === 'premium';
-        console.info('[Attune] workbook gate:', {
-          owns: _ownsWorkbook,
-          ready: localStorage.getItem('attune_workbook_ready'),
-          ex1: !!ex1Answers && Object.keys(ex1Answers || {}).length,
-          pEx1: !!partnerEx1 && Object.keys(partnerEx1 || {}).length,
-          ex2: !!ex2Answers && Object.keys(ex2Answers || {}).length,
-          pEx2: !!partnerEx2 && Object.keys(partnerEx2 || {}).length,
-        });
         if (!_ownsWorkbook) return;
         if (localStorage.getItem('attune_workbook_ready') === 'true') return; // already done
+        if (ord?.workbookUrl) return; // generated on another device
 
         // Require both partners to have completed both exercises. Without
         // this, the workbook would generate from one partner's data alone.
