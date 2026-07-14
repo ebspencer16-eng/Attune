@@ -30,7 +30,7 @@ from pathlib import Path
 # CONTENT DATA — mirrored from api/_workbook-content.js
 # ═══════════════════════════════════════════════════════════════════
 
-DIMS = ['energy','expression','needs','bids','conflict','repair','closeness','love','stress','feedback']
+DIMS = ['energy','expression','needs','bids','conflict','repair','listening','love','stress','feedback']
 
 DIM_META = {
     'energy':     {'label': 'Energy & Recharge',           'left': 'Inward',         'right': 'Outward',          'color': 'purple'},
@@ -39,7 +39,7 @@ DIM_META = {
     'bids':       {'label': 'Responding to Bids',           'left': 'Reserved',       'right': 'Attuned',          'color': 'green'},
     'conflict':   {'label': 'Conflict Style',               'left': 'Engage quickly', 'right': 'Needs space first','color': 'indigo'},
     'repair':     {'label': 'How You Repair',               'left': 'Formal / verbal','right': 'Informal / warmth','color': 'coral'},
-    'closeness':  {'label': 'Closeness & Independence',     'left': 'Autonomous',     'right': 'Close-seeking',    'color': 'purple'},
+    'listening':  {'label': 'How You Listen',               'left': 'Reflective',     'right': 'Responsive',       'color': 'purple'},
     'love':       {'label': 'How Love Lands',               'left': 'Words',          'right': 'Actions & Presence','color': 'green'},
     'stress':     {'label': 'Communication Under Stress',   'left': 'Withdraw',       'right': 'Seek connection',  'color': 'indigo'},
     'feedback':   {'label': 'Giving & Receiving Feedback',  'left': 'Guarded',        'right': 'Open',             'color': 'coral'},
@@ -112,16 +112,16 @@ DIM_CONTENT = {
         ],
         'thisWeek': "After the next friction moment, however small, check in explicitly: \"Are we actually okay, or are we both just ready to be done?\" Name the difference out loud.",
     },
-    'closeness': {
-        'measures': "How much independent structure each partner needs within the relationship. One end values deep togetherness; the other values a strong sense of self within the partnership.",
-        'closeText': "{U} and {P} want a similar balance of togetherness and independence. This prevents the slow accumulation of resentment that mismatched closeness needs create.",
-        'gapText': "One of you gravitates toward maximum togetherness. The other needs a strong independent life within the relationship. The autonomous partner may feel crowded; the close-seeking partner may feel lonely.",
+    'listening': {
+        'measures': "How each of you shows you are listening. Reflective: you go quiet and stay with it. Responsive: you engage, ask, reflect back. Both are attention. They just look nothing alike from the outside.",
+        'closeText': "{U} and {P} listen in similar ways. That works until one of you needs the other mode. Ask which one is wanted before you give it.",
+        'gapText': "One of you listens by going quiet. The other listens by engaging and drawing it out. The quiet can read as absence. The questions can read as pressure. Neither is what is happening.",
         'prompts': [
-            "On a typical week, is each of you getting the amount of alone time and together time you need?",
-            "Are there independent pursuits, hobbies, friendships, that feel important to each of you? Are they supported?",
-            "What would your ideal weekly rhythm look like if you designed it intentionally?",
+            "When you are upset, do you want to be heard quietly or drawn out with questions?",
+            "Has one of you ever read the other's quiet as checking out? What was actually going on?",
+            "What is a small signal you could give that says 'I'm still with you' without breaking the silence?",
         ],
-        'thisWeek': "Each of you writes down your ideal week, how much time together, how much apart. Compare them without judgment. Look for the gap and the overlap.",
+        'thisWeek': "Before the next hard conversation, say which one you want: presence or engagement. One sentence, before you start.",
     },
     'love': {
         'measures': "How each partner most naturally gives and receives affection. Specifically: does verbal expression land most deeply, or does love register more through presence, action, and shared experience?",
@@ -778,7 +778,7 @@ COUPLE = {
     'edition_internal': '0247',
     'date': 'April 2026',
     # WX scores. Both engage quickly (low conflict scores), but differ on
-    # expression, repair style, closeness, love, stress, feedback.
+    # expression, repair style, listening, love, stress, feedback.
     'scores': {
         'energy':     (4.0, 3.4),  # both center-warm, small gap
         'expression': (4.5, 2.3),  # W open, X guarded, notable gap
@@ -786,7 +786,7 @@ COUPLE = {
         'bids':       (4.3, 3.6),  # W more attuned, small gap
         'conflict':   (1.8, 2.0),  # both engage quickly, aligned
         'repair':     (4.0, 2.4),  # W informal/warmth, X formal/verbal, notable gap
-        'closeness':  (4.5, 2.8),  # W close-seeking, X autonomous, notable gap
+        'listening':  (4.5, 2.8),  # W responsive, X reflective, notable gap
         'love':       (2.0, 4.2),  # W words, X actions, notable gap
         'stress':     (4.2, 1.8),  # W seek connection, X withdraw, notable gap
         'feedback':   (4.2, 2.5),  # W open, X guarded, notable gap
