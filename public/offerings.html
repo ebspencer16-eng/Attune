@@ -1295,6 +1295,9 @@ function toggleFaq(item){
 }
 
 function setFormat(pkg,format){
+  // Phase-1: force digital when physical is disabled (flag in /_flags.js), so the
+  // DOMContentLoaded defaults and any toggle both resolve to digital.
+  if (!(window.ATTUNE_FLAGS && window.ATTUNE_FLAGS.PHYSICAL_ENABLED)) format = 'digital';
   // Map offerings-card pkg id to cart pkg id (the card uses 'ann' but cart uses 'anniversary')
   const cartKey = pkg === 'ann' ? 'anniversary' : pkg;
   const isDigital = format === 'virtual' || format === 'digital';
