@@ -1570,7 +1570,7 @@ const NEW_COUPLE_TYPES = [
     name: "The jumpstart",
     tagline: "Both want resolution. Different approaches heading in the same direction.",
     description: "{U} and {P} both move toward resolution when things get hard, you're pulling in the same direction. Where you differ is in how the internal experience travels: one processes outward, and one holds it closer. The destination is the same. The path there looks different.",
-    nuance: "The expressive partner can feel like the guarded one isn't sharing what's actually going on. The guarded partner can feel like too much is being put into the shared space before it's ready. Neither is wrong. The registers are just different.",
+    nuance: "The expressive partner can feel like the guarded partner isn't sharing what's actually going on. The guarded partner can feel like too much is being put into the shared space before it's ready. Neither is wrong. The registers are just different.",
     color: "#E8673A", shade: "#FFF4F0",
     famousDuos: [
       { names: "Leslie & Ben", show: "Parks & Recreation", note: "Both wanted to get things done. One led with passion and feeling; one led with spreadsheets and caution. Together they made things actually happen." },
@@ -1619,13 +1619,13 @@ const NEW_COUPLE_TYPES = [
       "Repair happens on one person's timeline, usually the person who initiates. The other person doesn't always feel ready when it starts.",
     ],
     patterns: [
-      "When something is off, {U} and {P} are usually not in the same place at the same time. One is ready to engage; the other isn't there yet.",
+      "When something is off, {U} and {P} are usually not in the same place at the same time. {RCH} is ready to engage. {WDR} isn't there yet.",
       "What reads as pulling away is usually just needing space to process. What reads as pressure is usually just care.",
       "The conflict clock mismatch doesn't mean one person cares more. It means you're wired differently, which requires understanding from each partner.",
     ],
     tips: [
       { title: "Name the pattern before you're in it", body: "When things are calm, explain what you need when things are not calm. That one conversation changes what the next hard moment looks like.", phraseTry: "When I'm upset, I need a few minutes before I can talk. It's not avoidance. I'll come back." },
-      { title: "Make space bounded, not open-ended", body: "If one of you needs time: give a return. 'I need an hour' is different from silence. It lets the other person stop the worried waiting.", phraseTry: "I need an hour. I'll be back at eight." },
+      { title: "Make space bounded, not open-ended", body: "When {WDR} needs time, give a return. 'I need an hour' is different from silence. It lets {RCH} stop the worried waiting.", phraseTry: "I need an hour. I'll be back at eight." },
       { title: "Urgency isn't pressure; silence isn't avoidance", body: "When {U} presses for resolution, that's care, not control. When {P} needs space, that's the process, not withdrawal. Say what you need in the moment, and be open to the fact that your needs are different.", phraseTry: "I know this is hard for you to sit with. I'm not gone. I'm processing. I'll be back." },
     ],
   },
@@ -1634,7 +1634,7 @@ const NEW_COUPLE_TYPES = [
     name: "The opening",
     tagline: "One reaches. One holds. Understanding what you each need bridges the gap.",
     description: "One of {U} and {P} reaches toward resolution and expresses things openly; the other pulls back and holds things privately. The gap exists on both axes simultaneously, different conflict timing and different expressiveness, which means there's more translation work here than in most pairings.",
-    nuance: "The reaching partner often doesn't know what the reserved partner is feeling until long after the fact, which can feel like withholding. The reserved partner often feels pressure to perform an emotional openness they don't naturally have. Naming this as a difference, not a deficiency, is the most useful thing {U} and {P} can do.",
+    nuance: "The reaching partner often doesn't know what the reserved partner is feeling until long after the fact, which can feel like withholding. The reserved partner often feels pressure to perform an emotional openness that isn't natural to {GRD}. Naming this as a difference, not a deficiency, is the most useful thing {U} and {P} can do.",
     color: "#E8673A", shade: "#FFF4F0",
     famousDuos: [
       { names: "Elizabeth & Philip Mountbatten (early years)", show: "The Crown", note: "Wildly different in emotional register and expression. The relationship survived because both parties kept choosing it, gaps and all." },
@@ -1647,7 +1647,7 @@ const NEW_COUPLE_TYPES = [
     ],
     stickingPoints: [
       "{RCH} can feel like {RCH_isC} always the one initiating emotional depth, always doing the emotional work, always making the first move.",
-      "The reserved partner can feel pressure to match an emotional expressiveness they don't naturally have, which can make them withdraw further.",
+      "The reserved partner can feel pressure to match an emotional expressiveness that isn't natural to {GRD}, which can push {GRD_obj} further into withdrawal.",
       "The translation gap is real. What {U} means and what {P} hears aren't always the same thing, and the assumption that you've understood each other can lead to confusion downstream.",
     ],
     patterns: [
@@ -1666,7 +1666,7 @@ const NEW_COUPLE_TYPES = [
     name: "The translators",
     tagline: "Strong instincts on both sides, pointed differently. Moving forward together takes understanding and intention.",
     description: "{U} pushes toward resolution while processing internally; {P} needs space before the conversation is possible, and carries visible feeling in the meantime. They can read each other as simultaneously too much and not enough, the driving toward resolution can close off the space, and the visible feeling during withdrawal can look like something that needs fixing right now.",
-    nuance: "The driver's urgency toward resolution can feel like pressure to the feeler, who isn't ready yet. The feeler's emotional visibility during withdrawal can feel like an invitation to engage, when it's actually a signal to wait. Both readings are understandable. Both are wrong.",
+    nuance: "{RCH_pos} urgency toward resolution can feel like pressure to {WDR}, who isn't ready yet. {WDR_pos} emotional visibility during withdrawal can look like an invitation to engage, when it's actually a signal to wait. Both readings are understandable. Both are wrong.",
     color: "#7C3AED", shade: "#F5F0FF",
     famousDuos: [
       { names: "Hermione & Ron", show: "Harry Potter", note: "She analyzed and pushed; he felt his way through and needed to breathe. They drove each other crazy in exactly the ways that made them better." },
@@ -1678,18 +1678,18 @@ const NEW_COUPLE_TYPES = [
       "The dynamic is highly solvable once it's named. Many couples with this pattern go on to build some of the most intentional relationships.",
     ],
     stickingPoints: [
-      "The driver's move toward resolution can close off the space the feeler needs. The feeler isn't ready, and the conversation starts before they are.",
-      "The feeler's visible emotion during withdrawal can look to the anchor like something that needs fixing immediately, which makes the anchor push harder.",
+      "{RCH_pos} move toward resolution can close off the space {WDR} needs. The conversation starts before {WDR} is ready.",
+      "{WDR_pos} visible emotion during withdrawal can look to {RCH} like something that needs fixing immediately, which makes {RCH} push harder.",
       "It can feel like one person cares more than the other, even though you're simply expressing it at different times and in different ways.",
     ],
     patterns: [
-      "When something is hard, {U} and {P} are usually not in the same place at the same time. One is ready to engage; the other needs the space.",
+      "When something is hard, {U} and {P} are usually not in the same place at the same time. {RCH} is ready to engage. {WDR} needs the space.",
       "What reads as pulling away is usually just needing room to process. What reads as pressure is usually just care.",
       "The gap between your instincts is not a character flaw. It means you're wired differently, which requires understanding from each partner.",
     ],
     tips: [
-      { title: "Driver: resolution doesn't mean resolved", body: "The feeler needs the space and then the conversation. Moving fast to 'let's talk' before they're ready doesn't get to resolution faster, it delays it.", phraseTry: "I know you're not ready. I'll wait, but can you tell me when you think you will be?" },
-      { title: "Feeler: tell the anchor when you'll be back", body: "The uncertainty is harder for them than the wait. 'I need until tonight' lets the anchor stop the worried waiting and trust the process.", phraseTry: "I need until tomorrow morning. I'll come to you then." },
+      { title: "{RCH}: resolution doesn't mean resolved", body: "{WDR} needs the space first, and then the conversation. Moving fast to 'let's talk' before {WDR_sub} is ready doesn't get to resolution faster. It delays it.", phraseTry: "I know you're not ready. I'll wait, but can you tell me when you think you will be?" },
+      { title: "{WDR}: say when you'll be back", body: "The uncertainty is harder for {RCH} than the wait. 'I need until tonight' lets {RCH} stop the worried waiting and trust the process.", phraseTry: "I need until tomorrow morning. I'll come to you then." },
       { title: "Name the pattern out loud before you're in it", body: "When things are calm, explain what you need when things are not calm. That one conversation changes what the next hard moment looks like.", phraseTry: "When I go quiet, it's not over, it's processing. Give me space and I'll come back." },
     ],
   },
@@ -1716,7 +1716,7 @@ const NEW_COUPLE_TYPES = [
     ],
     patterns: [
       "{U} and {P} probably have fewer dramatic conversations than most couples. The emotional content of the relationship tends to go inward.",
-      "The driver has a low-level push toward getting things resolved; the reserved partner tends to need more time before the conversation is fully possible.",
+      "{RCH} has a low-level push toward getting things resolved. {WDR} tends to need more time before the conversation is fully possible.",
       "When you do talk through something, it tends to be calmer and more considered than it would be for more expressive pairings.",
     ],
     tips: [
@@ -1729,8 +1729,8 @@ const NEW_COUPLE_TYPES = [
     id: "YZ", typeA: "Y", typeB: "Z",
     name: "The sanctuary",
     tagline: "You both need space when things get hard. The difference is how much it shows, and that gap is worth understanding.",
-    description: "When things get hard, {U} and {P} both pull back, but one of you carries the emotional weight visibly while withdrawn, and the other holds everything privately. The return is slow for both. Hard moments can sit for a long time before either of you surfaces them.",
-    nuance: "Real depth runs in this pairing, often more than either partner shows. The risk is that the depth never surfaces because neither person naturally initiates the opening. The feeler, when ready, tends to be more willing to bring it back. Making that the agreed pattern gives the still-depth partner the full space they need without indefinite silence.",
+    description: "When things get hard, {U} and {P} both pull back. {EXP} carries the emotional weight visibly while withdrawn. {GRD} holds everything privately. The return is slow for both. Hard moments can sit for a long time before either of you surfaces them.",
+    nuance: "Real depth runs in this pairing, often more than either partner shows. The risk is that the depth never surfaces, because neither of you naturally initiates the opening. {EXP}, once ready, tends to be more willing to bring it back. Making that the agreed pattern gives {GRD} the full space {GRD_sub} needs without indefinite silence.",
     color: "#7C3AED", shade: "#F5F0FF",
     famousDuos: [
       { names: "Joel & Clementine", show: "Eternal Sunshine of the Spotless Mind", note: "He held everything privately; she expressed the weight of everything she was feeling. Both needed space. Both took it in different ways." },
@@ -1743,7 +1743,7 @@ const NEW_COUPLE_TYPES = [
     ],
     stickingPoints: [
       "{U} and {P} can both wait a long time for the other to come back first. That waiting can start to feel like abandonment, even when it's just the process.",
-      "The feeler's visible emotion during withdrawal can be hard for the still-depth partner to know what to do with, it's not a signal to engage, but it doesn't look like 'I'm fine.'",
+      "{EXP_pos} visible emotion during withdrawal can be hard for {GRD} to know what to do with. It isn't a signal to engage, but it doesn't look like 'I'm fine' either.",
       "Hard things can sit for a very long time before either of you surfaces them. Without a deliberate practice, important things go unaddressed.",
     ],
     patterns: [
@@ -1752,7 +1752,7 @@ const NEW_COUPLE_TYPES = [
       "When the conversation does happen, it tends to be more complete than it would have been earlier. The depth just required time.",
     ],
     tips: [
-      { title: "Let the feeler initiate the return", body: "The feeler, when ready, tends to be more willing to bring it back. Make that the agreed pattern: {U} signals readiness, {P} gets the full space they need without indefinite silence.", phraseTry: "I'm ready when you are. Take your time. I'll be here." },
+      { title: "Let {EXP} initiate the return", body: "{EXP}, once ready, tends to be more willing to bring it back. Make that the agreed pattern. {EXP} signals readiness, and {GRD} gets the full space {GRD_sub} needs without indefinite silence.", phraseTry: "I'm ready when you are. Take your time. I'll be here." },
       { title: "Bound the space with a time", body: "'I need some time' is not as useful as 'I need until tonight.' A specific return time lets the other person stop the worried waiting and trust the process.", phraseTry: "I need until tomorrow morning. I'll come find you then." },
       { title: "Create a regular time for openness", body: "{U} and {P} need a deliberate structure for things to surface. A weekly check-in, even 10 minutes, creates the opening that neither of you will naturally generate on your own.", phraseTry: "Can we do ten minutes on Sunday? Not about anything specific. I just want to check in." },
     ],
@@ -3890,6 +3890,39 @@ function MaybeNav({ noSideNav, navItems, currentStep, onGo, accent, children }) 
   return <WithSideNav navItems={navItems} currentStep={currentStep} onGo={onGo} accent={accent}>{children}</WithSideNav>;
 }
 
+// ── ROLE TOKEN RESOLVER (module level) ───────────────────────────────────────
+// Couple-type prose uses {EXP}/{GRD} (open axis) and {RCH}/{WDR} (engage axis)
+// plus their _sub/_obj/_pos/_isC pronoun forms. Tokens only resolve when the
+// two partners actually differ on that axis. Anything unresolved is stripped
+// back to a generic phrase so a raw token never reaches the page.
+function resolveRoleTokens(str, myS, partS, userName, partnerName, userPronouns = "", partnerPronouns = "") {
+  if (!str) return str;
+  let out = str;
+  const a = computeIndividualType(myS), b = computeIndividualType(partS);
+  const uOpen = a.openScore >= 3.0, pOpen = b.openScore >= 3.0;
+  const uEngage = a.withdrawScore <= 3.0, pEngage = b.withdrawScore <= 3.0;
+  const fill = (nameA, nameB, pronA, pronB, A, B) => {
+    out = out.replace(new RegExp(`\\{${A}\\}`, "g"), nameA).replace(new RegExp(`\\{${B}\\}`, "g"), nameB);
+    ["sub", "obj", "pos", "isC"].forEach(f => {
+      out = out.replace(new RegExp(`\\{${A}_${f}\\}`, "g"), pronoun(pronA, f))
+               .replace(new RegExp(`\\{${B}_${f}\\}`, "g"), pronoun(pronB, f));
+    });
+  };
+  if (uOpen !== pOpen) {
+    const expName = uOpen ? userName : partnerName, grdName = uOpen ? partnerName : userName;
+    const expPron = uOpen ? userPronouns : partnerPronouns, grdPron = uOpen ? partnerPronouns : userPronouns;
+    fill(expName, grdName, expPron, grdPron, "EXP", "GRD");
+    out = out.replace(/\b(the )?(expressive|open) partner\b/gi, expName).replace(/\b(the )?(guarded|reserved) partner\b/gi, grdName);
+  }
+  if (uEngage !== pEngage) {
+    const rchName = uEngage ? userName : partnerName, wdrName = uEngage ? partnerName : userName;
+    const rchPron = uEngage ? userPronouns : partnerPronouns, wdrPron = uEngage ? partnerPronouns : userPronouns;
+    fill(rchName, wdrName, rchPron, wdrPron, "RCH", "WDR");
+    out = out.replace(/\b(the )?(reaching|engaging) partner\b/gi, rchName).replace(/\b(the )?(withdrawing|quieter) partner\b/gi, wdrName);
+  }
+  return out;
+}
+
 function PersonalityResults({ myAnswers, partnerAnswers, userName, partnerName, coupleType, noSideNav = false, externalStep, onExternalGo, onGoExpectations }) {
   const [step, setStep] = useState(externalStep ?? 0);
   const [showRaw, setShowRaw] = useState(false);
@@ -4133,14 +4166,14 @@ function PersonalityResults({ myAnswers, partnerAnswers, userName, partnerName, 
       </div>
       {/* ── TYPE-SPECIFIC PRACTICE ── */}
       {coupleType?.tips?.length > 0 && (() => {
-        const interp = s => s.replace(/\{U\}/g, userName).replace(/\{P\}/g, partnerName);
+        const interp = s => resolveRoleTokens(String(s || "").replace(/\{U\}/g, userName).replace(/\{P\}/g, partnerName), myS, partS, userName, partnerName);
         const practiceTip = coupleType?.tips[coupleType?.tips.length - 1];
         return (
           <div style={{ background: `${coupleType?.color}12`, border: `1px solid ${coupleType?.color}35`, borderRadius: 14, padding: '1rem 1.25rem', marginTop: '0.85rem' }}>
             <div style={{ fontSize: '0.55rem', letterSpacing: '0.18em', textTransform: 'uppercase', color: coupleType?.color, fontFamily: BFONT, fontWeight: 700, marginBottom: '0.4rem' }}>
               For a {coupleType?.name.replace('The ', '').toLowerCase()} dynamic
             </div>
-            <div style={{ fontSize: '0.8rem', fontWeight: 700, color: 'white', fontFamily: BFONT, marginBottom: '0.3rem' }}>{practiceTip.title}</div>
+            <div style={{ fontSize: '0.8rem', fontWeight: 700, color: 'white', fontFamily: BFONT, marginBottom: '0.3rem' }}>{interp(practiceTip.title)}</div>
             <div style={{ fontSize: '0.76rem', color: 'rgba(255,255,255,0.6)', fontFamily: BFONT, fontWeight: 300, lineHeight: 1.7 }}>{interp(practiceTip.body)}</div>
           </div>
         );
