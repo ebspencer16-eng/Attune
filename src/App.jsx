@@ -11991,12 +11991,23 @@ export default function App() {
         // Grant-only against the stored order so a login can never strip
         // features this device already had.
         const ent = mergeEntitlementsGrantOnly(loadStoredOrderEnt(), _ent);
+        // Workbook state is NOT an entitlement, so it isn't in `ent`. This
+        // rebuild used to drop it on every load, wiping the URL the download
+        // had just cached. Carry it through: the profile is authoritative (it's
+        // the only row a comp account has), then whatever this device stored.
+        const _stored = (() => { try { return JSON.parse(localStorage.getItem('attune_order') || 'null') || {}; } catch { return {}; } })();
+        const _wbUrl = prof?.workbook_url || _stored.workbookUrl || null;
+        const _wbStatus = prof?.workbook_status || _stored.workbookStatus || null;
         const _order = {
           orderNum: ent.orderNum, pkgKey: ent.pkg, pkg: ent.pkg, isPhysical: ent.isPhysical,
           addonLmft: ent.addonLmft, addonReflection: ent.addonReflection, addonBudget: ent.addonBudget,
           addonChecklist: ent.addonChecklist, addonIntimacy: ent.addonIntimacy, addonWorkbook: ent.addonWorkbook,
+          workbookUrl: _wbUrl, workbookStatus: _wbStatus,
         };
         try { localStorage.setItem('attune_order', JSON.stringify(_order)); } catch {}
+        if (_wbUrl || _wbStatus === 'ready') {
+          try { localStorage.setItem('attune_workbook_ready', 'true'); } catch {}
+        }
         setOrder(_order);
         setAccount(prev => prev ? {
           ...prev,
