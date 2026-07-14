@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <script src="/_flags.js"></script>
 <meta charset="UTF-8">
 <meta name="robots" content="noindex,nofollow">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -459,6 +460,10 @@ if(new URLSearchParams(location.search).get('test')==='1' || location.hostname==
 </script>
 <script>
 // ── Package definitions ──────────────────────────────────────────────────────
+// ── Launch flags (mirror src/App.jsx) ────────────────────────────────────────
+const PHYSICAL_ENABLED = !!(window.ATTUNE_FLAGS && window.ATTUNE_FLAGS.PHYSICAL_ENABLED);
+const LMFT_ENABLED     = !!(window.ATTUNE_FLAGS && window.ATTUNE_FLAGS.LMFT_ENABLED);
+
 const PACKAGES = {
   core: {
     id: 'core', name: 'The Attune Assessment', badge: 'Foundation',
@@ -489,6 +494,20 @@ const PACKAGES = {
     physicalTags: ['Everything included', 'LMFT session included', 'Personalized workbook', 'Gift box'],
   },
 };
+
+// Phase-1 normalization: digital-only, no LMFT. Physical data (physicalPrice,
+// physicalTags) stays on each package so phase 2 is a flag flip.
+if (!PHYSICAL_ENABLED) {
+  Object.values(PACKAGES).forEach(p => { p.format = 'digital'; p.price = p.digitalPrice; p.priceLabel = '$' + p.digitalPrice; });
+}
+if (!LMFT_ENABLED) {
+  Object.values(PACKAGES).forEach(p => {
+    if (Array.isArray(p.tags)) p.tags = p.tags.filter(t => !/LMFT/i.test(t));
+    if (Array.isArray(p.physicalTags)) p.physicalTags = p.physicalTags.filter(t => !/LMFT/i.test(t));
+  });
+}
+// forceFmt: honours the physical flag. Every format read routes through this.
+function forceFmt(f) { return PHYSICAL_ENABLED ? (f || 'digital') : 'digital'; }
 
 const ADDON_LMFT = { label: 'LMFT Session (50 min · licensed therapist)', price: 150 };
 const ADDON_REFLECTION = { label: "Relationship Reflection exercise", price: 40 };
@@ -728,7 +747,7 @@ function persistOrderComplete(orderNum) {
       for (let i = 0; i < (ci.qty || 1); i++) {
         _items.push({
           pkg:    ci.pkg,
-          format: ci.format || 'digital',
+          format: forceFmt(ci.format),
           addons: { ...ci.addons },
           intent: fromRegistry ? 'gift' : 'self',
           partner1Name: '',
@@ -742,8 +761,8 @@ function persistOrderComplete(orderNum) {
     // Fallback: single-item from URL params (legacy link-in or gift link)
     const pkgId  = params.get('pkg') || 'core';
     const _fmtParam = params.get('format');
-    const format = (_fmtParam === 'physical' || _fmtParam === 'digital') ? _fmtParam
-                 : (PACKAGES[pkgId]?.format || 'digital');
+    const format = forceFmt((_fmtParam === 'physical' || _fmtParam === 'digital') ? _fmtParam
+                 : (PACKAGES[pkgId]?.format || 'digital'));
     _items = [{
       pkg:    pkgId,
       format,
@@ -773,6 +792,10 @@ function persistOrderComplete(orderNum) {
     window.__attuneFromRegistry = true;
   }
 
+  // Phase-1 safety: strip any LMFT add-on that arrived via URL param or saved
+  // cart, so a stale /checkout?addon_lmft=1 link can never bill for it.
+  if (!LMFT_ENABLED) _items.forEach(it => { if (it.addons) it.addons.lmft = false; });
+
   // Mirror first item into legacy vars (for summary code that still uses them)
   const first = _items[0];
   pkg = PACKAGES[first.pkg] || PACKAGES.core;
@@ -789,7 +812,7 @@ function persistOrderComplete(orderNum) {
   renderSummary();
 
   // Show format toggle for assessment (core) package when single-item legacy flow
-  if (_items.length === 1 && pkg.id === 'core') {
+  if (PHYSICAL_ENABLED && _items.length === 1 && pkg.id === 'core') {
     const ftEl = document.getElementById('formatToggleSection');
     if (ftEl) ftEl.style.display = 'block';
   }
@@ -805,7 +828,7 @@ function persistOrderComplete(orderNum) {
     } else {
       if (!it0.addons.workbook)        _promptKey = 'workbook';
       else if (!it0.addons.intimacy)   _promptKey = 'intimacy';
-      else if (!it0.addons.lmft)       _promptKey = 'lmft';
+      else if (LMFT_ENABLED && !it0.addons.lmft) _promptKey = 'lmft';
     }
   }
   if (_promptKey) {
@@ -982,6 +1005,7 @@ function onItemInput(el) {
 
 // ── Format toggle (core package only) ────────────────────────────────────────
 function setFormat(fmt) {
+  if (!PHYSICAL_ENABLED) fmt = 'digital';
   pkg.format = fmt;
   document.querySelectorAll('.fmt-btn').forEach(b => b.classList.toggle('active', b.dataset.fmt === fmt));
   document.getElementById('shippingSection').style.display = fmt === 'physical' ? 'block' : 'none';

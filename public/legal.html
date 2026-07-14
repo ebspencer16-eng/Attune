@@ -596,6 +596,7 @@ if (validDocs.includes(hash)) showDoc(hash);
 function toggleMenu(){var m=document.getElementById('mobile-menu');if(m)m.classList.toggle('open');}
 document.addEventListener('click',function(e){var menu=document.getElementById('mobile-menu');var burger=document.getElementById('hamburger');if(menu&&menu.classList.contains('open')&&!menu.contains(e.target)&&!burger.contains(e.target)){menu.classList.remove('open');}});
 </script>
-  <script src="/cart.js"></script>
+  <script src="/_flags.js"></script>
+<script src="/cart.js"></script>
 </body>
 </html>

@@ -298,7 +298,6 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;height:58px;background:rgba(
     <div class="pkg-price-sub" id="pricesub-premium">Physical gift box · shipping included</div>
     <ul class="pkg-features">
       <li class="bold-feat">Attune Assessment</li>
-      <li>LMFT session included</li>
       <li>Personalized workbook</li>
       <li class="gift-feat">Gift box</li>
     </ul>
@@ -391,7 +390,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;height:58px;background:rgba(
     </div>
 
     <!-- LMFT — $150 — most expensive -->
-    <div class="addon-card" id="addon-lmft" onclick="toggleLmft()">
+    <div class="addon-card" id="addon-lmft" onclick="toggleLmft()" style="display:none">
       <div class="addon-check" id="lmft-check">
         <svg width="10" height="8" viewBox="0 0 11 9" fill="none"><path d="M1 4.5L4 7.5L10 1" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </div>
@@ -433,7 +432,10 @@ const PHYSICAL_SUB = 'Physical gift box · shipping included';
 const DIGITAL_SUB  = 'Digital · instant access · yours to keep';
 
 let selectedPkg = null;
-let format = 'physical';
+// Launch flags (from /_flags.js, loaded before this script).
+const START_PHYSICAL_ENABLED = !!(window.ATTUNE_FLAGS && window.ATTUNE_FLAGS.PHYSICAL_ENABLED);
+const START_LMFT_ENABLED     = !!(window.ATTUNE_FLAGS && window.ATTUNE_FLAGS.LMFT_ENABLED);
+let format = START_PHYSICAL_ENABLED ? 'physical' : 'digital';
 let addonLmft = false;
 let addonWorkbook = false;
 let wbFormat = 'digital';
@@ -452,6 +454,7 @@ function syncPremiumWb() {
 }
 
 function setFormat(f) {
+  if (!START_PHYSICAL_ENABLED) f = 'digital';
   format = f;
   document.getElementById('btn-physical').classList.toggle('active', f === 'physical');
   document.getElementById('btn-digital').classList.toggle('active', f === 'digital');
@@ -479,7 +482,7 @@ function selectPkg(id) {
   const budgetIncluded = id === 'newlywed';
   const checklistIncluded = id === 'newlywed';
   const reflectionIncluded = id === 'anniversary';
-  const lmftIncluded = id === 'premium';
+  const lmftIncluded = START_LMFT_ENABLED && id === 'premium';
   const workbookIncluded = id === 'premium';   // Premium includes the workbook
   if (budgetIncluded)     addonBudget = false;
   if (checklistIncluded)  addonChecklist = false;
@@ -688,7 +691,7 @@ const PKG_DETAILS = {
   premium: {
     eyebrow: 'Most Complete',
     name: 'Attune Premium',
-    tagline: 'The full Assessment plus a 50-minute session with a licensed marriage and family therapist who reviews your joint results before you meet. The most direct path from insight to real conversation.',
+    tagline: 'Everything in the Assessment, plus both bonus exercises and the personalized workbook, in one place.',
     priceDigital: 295, pricePhysical: 330,
     sections: [
       {
@@ -733,7 +736,7 @@ function openSidebar(pkg, e) {
   let html = '';
   d.sections.forEach(sec => {
     html += `<div class="sidebar-section"><div class="sidebar-section-title">${sec.title}</div>`;
-    sec.items.forEach(item => {
+    sec.items.filter(item => START_LMFT_ENABLED || !/LMFT/i.test(item.label)).forEach(item => {
       html += `<div class="sidebar-item">
         <div class="sidebar-item-dot ${item.dot}">✦</div>
         <div class="sidebar-item-body">
@@ -776,6 +779,22 @@ document.addEventListener('keydown', e => { if (e.key === 'Escape') closeSidebar
 function toggleMenu(){var m=document.getElementById('mobile-menu');if(m)m.classList.toggle('open');}
 document.addEventListener('click',function(e){var menu=document.getElementById('mobile-menu');var burger=document.getElementById('hamburger');if(menu&&menu.classList.contains('open')&&!menu.contains(e.target)&&!burger.contains(e.target)){menu.classList.remove('open');}});
 </script>
-  <script src="/cart.js"></script>
+  <script src="/_flags.js"></script>
+<script src="/cart.js"></script>
+
+<script>
+/* Phase-1 start-page gate. Physical + LMFT markup preserved; hidden by flags. */
+(function(){
+  var F = window.ATTUNE_FLAGS || {};
+  if (!F.PHYSICAL_ENABLED) {
+    document.querySelectorAll('.format-toggle').forEach(function(e){ e.style.display='none'; });
+    document.querySelectorAll('.gift-feat').forEach(function(e){ e.style.display='none'; });
+    document.querySelectorAll('[id^="pricesub-"]').forEach(function(e){ e.textContent = 'Digital · instant access · yours to keep'; });
+  }
+  if (F.LMFT_ENABLED) {
+    var l = document.getElementById('addon-lmft'); if (l) l.style.display='';
+  }
+})();
+</script>
 </body>
 </html>

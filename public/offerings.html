@@ -446,7 +446,8 @@
   .gift-link:hover{color:var(--orange)}
   @media(max-width:780px){input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]),textarea,select{font-size:16px!important}}</style>
   <link rel="stylesheet" href="/cart.css">
-  <script src="/cart.js"></script>
+  <script src="/_flags.js"></script>
+<script src="/cart.js"></script>
 </head>
 <body>
 
@@ -950,14 +951,13 @@
         <div class="pkg-left">
           <div class="pkg-badge" style="background:rgba(91,109,248,.2);color:rgba(180,188,255,.9);">Most Complete · Premium</div>
           <h2 class="pkg-title">Attune Premium</h2>
-          <p class="pkg-sub">The full Assessment plus a 50-minute LMFT session where a licensed therapist reviews your joint results before you meet. For couples who want real expertise alongside the data.</p>
+          <p class="pkg-sub">Everything in the Assessment, plus both bonus exercises and the personalized workbook, in one place.</p>
         </div>
         <div class="pkg-price">
           <div class="pkg-price-row"><span class="price-main" id="premium-price">$295</span><span class="price-label">per couple</span></div>
           <div class="price-alt" id="premium-price-sub">Digital · instant access · yours to keep</div>
           <div class="price-alt" style="margin-top:.35rem;">Physical gift box · <strong>$330</strong> · shipping included · ships in 5-7 days</div>
-          <div class="price-alt" style="margin-top:.25rem;font-size:.7rem;color:rgba(255,255,255,.28);">Includes LMFT session value</div>
-        </div>
+                  </div>
       </div>
     </div>
     <div class="format-toggle">
@@ -991,9 +991,6 @@
         <div class="inc-list">
           <div class="inc-item"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#1B5FE8" stroke-width="2" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg><span>Everything in the Attune Assessment</span></div>
           
-          <div class="inc-item"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#1B5FE8" stroke-width="2" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg><span>50-minute LMFT virtual results review (both partners, together)</span></div>
-          <div class="inc-item"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#1B5FE8" stroke-width="2" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg><span>Therapist reviews your results before the session, comes prepared</span></div>
-          <div class="inc-item"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#1B5FE8" stroke-width="2" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg><span>Post-session notes and personalized next steps</span></div>
           <div class="inc-item"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#1B5FE8" stroke-width="2" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg><span>Lifetime digital access to all results</span></div>
         </div>
 
@@ -1026,12 +1023,12 @@
       </div>
       <div id="premium-lmft-col" class="lmft-callout">
         <div class="lmft-icon">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#8b9fff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#8b9fff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
         </div>
         <div class="lmft-text">
-          <h4>Your LMFT session</h4>
-          <p>A licensed marriage and family therapist reviews your joint results before your session, so the hour is focused, meaningful, and specific to you. Not a first appointment. A real conversation about what your results mean.</p>
-          <p class="lmft-value">Session value: $150 · Scheduling handled after purchase</p>
+          <h4>Your personalized workbook</h4>
+          <p>A workbook built from your joint results: guided exercises and conversation prompts specific to your couple type and where you differ most. Yours to keep and work through together.</p>
+          <p class="lmft-value">Included with Premium</p>
         </div>
       </div>
       <div id="premium-physical-col" style="display:none;">
@@ -1072,13 +1069,13 @@
         </div>
         <div class="inc-block" style="margin-top:.75rem;">
           <div class="inc-block-title">Also included</div>
-          <div style="font-size:.78rem;color:rgba(255,255,255,.55);line-height:1.65;">LMFT session access and all results are delivered digitally. Scheduling link provided after purchase.</div>
+          <div style="font-size:.78rem;color:rgba(255,255,255,.55);line-height:1.65;">All results and the workbook are delivered digitally, ready the moment both partners finish.</div>
         </div>
       </div>
     </div>
     <div class="pkg-actions">
       <button onclick="addToCartWithIntent('premium')" class="btn-primary" id="premium-cta" style="background:linear-gradient(135deg,var(--indigo),#4555e8);box-shadow:0 6px 22px rgba(91,109,248,.4);">Add to cart →</button>
-      <span class="pkg-note" id="premium-note" style="color:rgba(255,255,255,.35);">Includes scheduling link for your LMFT session after purchase</span>
+      <span class="pkg-note" id="premium-note" style="color:rgba(255,255,255,.35);">Digital · access delivered by email immediately</span>
     </div>
   </div>
 
@@ -1349,7 +1346,7 @@ function setFormat(pkg,format){
     document.querySelectorAll('#pkg-premium .fmt-btn').forEach((b,i)=>{
       b.className='fmt-btn'+(i===(physical?1:0)?' active':'');
     });
-    document.getElementById('premium-note').textContent=physical?'Ships within 3-5 business days · LMFT scheduling link included':'Includes scheduling link for your LMFT session after purchase';
+    document.getElementById('premium-note').textContent=physical?'Ships within 3-5 business days':'Digital · access delivered by email immediately';
   }
 }
 function submitAnnualNotify() {
@@ -1470,5 +1467,24 @@ document.addEventListener('click', function(e) {
 
 
 
+
+<script>
+/* Phase-1 offerings display gate. Physical + LMFT markup is preserved in the
+   page; this hides it when the flags are off (see /_flags.js). */
+(function(){
+  var F = window.ATTUNE_FLAGS || {};
+  if (!F.PHYSICAL_ENABLED) {
+    document.querySelectorAll('.format-toggle').forEach(function(e){ e.style.display='none'; });
+    document.querySelectorAll('[id$="-physical-col"]').forEach(function(e){ e.style.display='none'; });
+    // Physical price-alt lines and shipping notes.
+    document.querySelectorAll('.price-alt').forEach(function(e){
+      if (/physical|gift box|ships in/i.test(e.textContent)) e.style.display='none';
+    });
+    document.querySelectorAll('.pkg-note').forEach(function(e){
+      if (/ships|shipping/i.test(e.textContent)) e.textContent = 'Digital · access delivered by email immediately';
+    });
+  }
+})();
+</script>
 </body>
 </html>

@@ -829,7 +829,6 @@
   var quotes = [
     { text: "“I thought I knew James pretty well after four years. Attune showed me there were things we'd just never thought to ask each other. The expectations comparison alone was worth it.”", name: "Sarah M.", detail: "Together 4 years · Anniversary package" },
     { text: "“We're getting married in three months and this was the best pre-wedding thing we did. Way more useful than premarital counseling worksheets. We actually learned something new.”", name: "Alex & Jordan T.", detail: "Engaged · Starting Out package" },
-    { text: "“The LMFT session was what made it. She'd read our results beforehand and came prepared with actual observations about us specifically. Not generic advice, our stuff.”", name: "Maya & Chris R.", detail: "Married 7 years · Premium package" },
   ];
   var cur = 0;
   window.showQuote = function(i) {
@@ -1171,6 +1170,7 @@ function setUse(mode) {
   document.getElementById('wl-email').addEventListener('keydown',function(e){ if(e.key==='Enter') document.getElementById('wl-submit').click(); });
 })();
 </script>
-  <script src="/cart.js"></script>
+  <script src="/_flags.js"></script>
+<script src="/cart.js"></script>
 </body>
 </html>

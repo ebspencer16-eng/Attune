@@ -1,4 +1,7 @@
 /* Shared Attune cart widget. Extracted verbatim from offerings.html so behaviour and rendering match. State lives in localStorage['attune_cart']. Do NOT include this on offerings.html (it has its own inline copy). */
+// Launch flags (defined in /_flags.js, which must load before this file).
+const CART_PHYSICAL_ENABLED = !!(window.ATTUNE_FLAGS && window.ATTUNE_FLAGS.PHYSICAL_ENABLED);
+const CART_LMFT_ENABLED     = !!(window.ATTUNE_FLAGS && window.ATTUNE_FLAGS.LMFT_ENABLED);
 // Canonical pricing — matches the offering cards and checkout.html PACKAGES.
 // If you change prices, update checkout.html/PACKAGES too.
 const CART_PKGS = {
@@ -56,7 +59,17 @@ const PKG_INCLUDED = {
   premium:     { checklist:false, budget:true,  reflection:true,  lmft:true,  intimacy:false },
 };
 // Display order: workbook first (primary upsell), then cheapest → most expensive.
-const ADDON_ORDER = ['workbook','intimacy','budget','checklist','reflection','lmft'];
+const ADDON_ORDER = (function(){
+  var order = ['workbook','intimacy','budget','checklist','reflection','lmft'];
+  // Phase 1: physical off, LMFT discontinued. Physical prices stay on CART_PKGS
+  // so phase 2 is a flag flip.
+  if (!CART_PHYSICAL_ENABLED) Object.values(CART_PKGS).forEach(function(p){ p.supportsPhysical = false; });
+  if (!CART_LMFT_ENABLED) {
+    order = order.filter(function(a){ return a !== 'lmft'; });
+    if (PKG_INCLUDED.premium) PKG_INCLUDED.premium.lmft = false;
+  }
+  return order;
+})();
 
 const TRASH_SVG = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/></svg>';
 
@@ -73,7 +86,9 @@ function _addonUnitPrice(key, item) {
 // Each item: { id, pkg, format, qty, addons: { workbook, workbookVariant, lmft, reflection, budget, checklist } }
 let _cartItems = [];
 // Track which format is currently selected on each offering card
-let _currentFormats = { core:'digital', newlywed:'physical', anniversary:'physical', premium:'digital' };
+let _currentFormats = CART_PHYSICAL_ENABLED
+  ? { core:'digital', newlywed:'physical', anniversary:'physical', premium:'digital' }
+  : { core:'digital', newlywed:'digital', anniversary:'digital', premium:'digital' };
 // Which item's add-on panel is currently expanded (null = none)
 let _expandedItemId = null;
 
