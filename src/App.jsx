@@ -7569,9 +7569,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
   // Sidebar items
   const sidebarSections = [
     { id: "highlights", label: "Highlights", icon: "✦", color: coupleType?.color || "#E8673A" },
-    { id: "summary", label: "Full Summary", icon: "◈" },
-    { id: "couple-type", label: "Couple Type", icon: "◈", color: coupleType?.color || "#E8673A" },
-    { id: "couple-map", label: "Your Couple Map", icon: "⊕", color: coupleType?.color || "#E8673A" },
+    { id: "couple-type", label: "Couple Type & Map", icon: "◈", color: coupleType?.color || "#E8673A" },
     {
       id: "comm", label: "Communication", icon: "◉", color: "#9B5DE5",
       children: [
@@ -7599,20 +7597,22 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
       ]
     },
     ...(hasAnniversary ? [{
-      id: "reflection", label: "Relationship Reflection", shortLabel: "Refl.", icon: "♡", color: "#1B5FE8",
+      id: "reflection", label: "Relationship Reflection", shortLabel: "Refl.", icon: "◉", color: "#1B5FE8",
       children: [
         { id: "reflection-overview", label: "Overview" },
-        { id: "reflection-insights", label: "Insights" },
-        { id: "reflection-story", label: "Side by Side" },
-        { id: "reflection-plan", label: "Action Plan" },
+        { id: "reflection-domain", label: "The Reflection", isDomainHeader: true, color: "#1B5FE8" },
+        { id: "reflection-insights", label: "Insights", isDeepChild: true, color: "#1B5FE8" },
+        { id: "reflection-story", label: "Side by Side", isDeepChild: true, color: "#1B5FE8" },
+        { id: "reflection-plan", label: "Action Plan", isDeepChild: true, color: "#1B5FE8" },
       ]
     }] : []),
     ...(intimacyBothDone ? [{
-      id: "intimacy", label: "Physical Intimacy", shortLabel: "Intimacy", icon: "♥", color: "#B5546E",
+      id: "intimacy", label: "Physical Intimacy", shortLabel: "Intimacy", icon: "◉", color: "#B5546E",
       children: [
         { id: "intimacy-overview", label: "Overview" },
+        { id: "intimacy-domain", label: "Where You Land", isDomainHeader: true, color: "#B5546E" },
         ...INTIMACY_DIMENSIONS.map(d => ({ id: `intimacy-${d.id}`, label: d.label, isDeepChild: true, color: "#B5546E" })),
-        { id: "intimacy-plan", label: "Conversations Worth Having" },
+        { id: "intimacy-plan", label: "Conversations Worth Having", isDeepChild: true, color: "#B5546E" },
       ]
     }] : []),
     { id: "what-comes-next", label: "What Comes Next", icon: "→", color: "#E8673A" },
@@ -7668,7 +7668,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
   const MobileTabBar = () => (
     <div style={{ display: "flex", gap: "0.4rem", overflowX: "auto", paddingBottom: "0.5rem", marginBottom: "1.25rem", borderBottom: `1px solid ${C.stone}` }}>
       {[
-        { id: "summary", label: "Summary", color: "#8C7A68" },
+        { id: "couple-type", label: "Type & Map", color: "#9B5DE5" },
         { id: "comm-overview", label: "Comms", color: "#9B5DE5" },
         { id: "exp-overview", label: "Expectations", color: "#1B5FE8" },
         ...(hasAnniversary ? [{ id: "reflection", label: "Refl.", color: "#1B5FE8" }] : []),
@@ -7690,8 +7690,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
   ];
   const allPages = [
     "highlights",
-    "summary",
-    "couple-type", "couple-map",
+    "couple-type",
     "comm-overview",
     ...domainOrderedDims.map(d => `comm-${d}`),
     "comm-profiles", "comm-plan",
@@ -7716,9 +7715,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
 
   function getPageLabel(id) {
     if (id === "highlights") return "Highlights";
-    if (id === "couple-type") return "Your Couple Type";
-    if (id === "couple-map") return "Your Couple Map";
-    if (id === "summary") return "Full Summary";
+    if (id === "couple-type") return "Couple Type & Map";
     if (id === "comm-overview") return "Communication Overview";
     if (id.startsWith("comm-") && id !== "comm-profiles" && id !== "comm-plan") return DIM_META[id.replace("comm-","")]?.label || id;
     if (id === "comm-profiles") return urSameType ? "Communication Profile" : "Individual Profiles";
@@ -7798,7 +7795,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
             intimacyAnswers={intimacyBothDone ? intimacyAnswers : null}
             partnerIntimacy={intimacyBothDone ? partnerIntimacy : null}
             intimacyVariant={intimacyVariant}
-            onDone={() => go("summary")}
+            onDone={() => go("couple-type")}
             inline={true}
           />
         </div>
@@ -7880,160 +7877,71 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
       const text = `We're "${ct.name}", ${ct.tagline} Find yours at attune.com`;
       navigator.clipboard?.writeText(text).then(() => { setTypeCopied(true); setTimeout(() => setTypeCopied(false), 2500); });
     };
+    // ── Couple-map derivation (merged in from the former Couple Map page) ──
+    const newType = deriveNewCoupleType(myS, partS);
+    const itA = INDIVIDUAL_TYPES[newType.typeInfoA.typeCode];
+    const itB = INDIVIDUAL_TYPES[newType.typeInfoB.typeCode];
+    const blurbFor = (name, pron, info) => {
+              const { typeCode, engageCoord, openCoord } = info;
+              const sub = pronoun(pron, "sub");
+              const pos = pronoun(pron, "pos");
+              const Sub = sub.charAt(0).toUpperCase() + sub.slice(1);
+              const strongEngage = engageCoord > 0.8;
+              const nearEngageCenter = engageCoord >= 0.35 && engageCoord <= 0.65;
+              const strongWithdraw = engageCoord < 0.2;
+              const nearOpenCenter = openCoord >= 0.35 && openCoord <= 0.65;
+              const blurbs = {
+                W: strongEngage
+                  ? `${name} engages quickly and with full momentum. When something is unresolved, ${sub} feels it and moves toward it without hesitation.`
+                  : nearEngageCenter
+                  ? `${name} leans toward resolution but has a slightly longer runway than a typical Initiator. There's a beat of processing before ${sub} engages fully.`
+                  : nearOpenCenter
+                  ? `${name} engages readily but holds ${pos} inner experience a little closer than a typical Initiator. ${Sub} shows up for the conversation; ${sub} just doesn't put every feeling into the shared space immediately.`
+                  : `${name} moves toward resolution and expresses openly, with enough self-awareness to calibrate what ${sub}'s sharing and when.`,
+                X: strongEngage
+                  ? `${name} pushes hard toward resolution. Once ${sub}'s processed internally, ${sub} doesn't sit on it. The urgency toward resolution is real; it's just preceded by a private preparation phase.`
+                  : nearEngageCenter
+                  ? `${name} has a longer internal preparation phase before engaging. ${Sub} pushes toward resolution, but the processing takes real time before anything surfaces.`
+                  : nearOpenCenter
+                  ? `${name} is a Driver who runs slightly warmer than average. ${Sub} processes privately but shares a bit more of the working-through than a typical Driver.`
+                  : `${name} engages toward resolution and processes privately, with a comfortable mix of thoughtfulness and forward momentum.`,
+                Y: strongWithdraw
+                  ? `${name} needs significant space before ${sub} can show up to a hard conversation. Not avoidance, just a longer processing runway. What ${sub} eventually brings is emotionally complete and worth the wait.`
+                  : nearEngageCenter
+                  ? `${name} needs space first, but it's a shorter runway than many Feelers. ${Sub} comes back relatively quickly once ${sub}'s landed somewhere.`
+                  : nearOpenCenter
+                  ? `${name} processes inward and holds what's going on privately until ready. Emotionally expressive when ${sub} arrives, but the arrival takes both time and internal settling.`
+                  : `${name} needs space to process before engaging, carries emotional weight visibly in the interim, and returns when ready with something real.`,
+                Z: strongWithdraw
+                  ? `${name} has the longest runway in the room. ${Sub} processes privately and needs substantial space before anything surfaces. What comes out is considered and real; it just requires time and no pressure.`
+                  : nearEngageCenter
+                  ? `${name} processes privately but has a slightly stronger pull toward resolution than a typical Holder. ${Sub}'ll surface what's going on, ${sub} just needs space and no pressure.`
+                  : nearOpenCenter
+                  ? `${name} holds things privately but is slightly more emotionally accessible than a typical Holder. More going on internally than most Protectors show.`
+                  : `${name} holds things close and processes privately, with a baseline steadiness and a comfortable relationship with quiet.`,
+              };
+              return blurbs[typeCode] || "";
+            };
     return (
       <Layout accent={ct.color}>
         <div style={{ maxWidth: 660 }}>
 
-          {/* ── REVEAL ZONE ── */}
-          <div style={{ borderRadius: 24, overflow: "hidden", marginBottom: "1.5rem", position: "relative" }}>
-            {/* Full-color hero */}
-            <div style={{ background: `linear-gradient(145deg, ${ct.color}ee, ${ct.color}99)`, padding: "2.75rem 2.5rem 2.25rem", position: "relative" }}>
-              {/* Large decorative type name watermark */}
-              <div style={{ position: "absolute", bottom: -20, right: -10, fontFamily: HFONT, fontSize: "7rem", fontWeight: 700, color: "rgba(255,255,255,0.08)", lineHeight: 1, pointerEvents: "none", userSelect: "none", letterSpacing: "-0.04em", whiteSpace: "nowrap" }}>
-                {ct.name.replace("The ", "")}
-              </div>
-              {/* Eyebrow */}
-              <div style={{ fontSize: "0.58rem", letterSpacing: "0.28em", textTransform: "uppercase", color: "rgba(255,255,255,0.7)", fontFamily: BFONT, fontWeight: 700, marginBottom: "1.25rem" }}>
-                {userName} & {partnerName} · your couple type
-              </div>
-              {/* Type name */}
-              <div style={{ fontFamily: HFONT, fontSize: "clamp(2.8rem, 7vw, 4.5rem)", fontWeight: 700, color: "white", lineHeight: 0.92, marginBottom: "1rem", letterSpacing: "-0.03em" }}>
-                {ct.name}
-              </div>
-              {/* Tagline */}
-              <p style={{ fontSize: "1.05rem", color: "rgba(255,255,255,0.88)", fontFamily: BFONT, fontWeight: 500, lineHeight: 1.45, margin: 0, maxWidth: 440 }}>
-                {ct.tagline}
-              </p>
-            </div>
-
-          </div>
-
-          {/* ── WHAT THIS LOOKS LIKE for names ── */}
-          <div style={{ background: "white", border: `1.5px solid ${C.stone}`, borderRadius: 18, padding: "1.75rem", marginBottom: "1.25rem" }}>
-            <div style={{ fontSize: "0.6rem", letterSpacing: "0.22em", textTransform: "uppercase", color: ct.color, fontFamily: BFONT, fontWeight: 700, marginBottom: "1rem" }}>
-              What this looks like for {userName} &amp; {partnerName}
-            </div>
-            <p style={{ fontSize: "0.88rem", color: C.ink, fontFamily: BFONT, lineHeight: 1.75, margin: 0, fontWeight: 400 }}>
-              {ct.patterns?.map(p => interp(p)).join(" ")}
-            </p>
-          </div>
-
-
-
-          {/* ── STRENGTHS ── */}
-          {ct.strengths?.length > 0 && (
-            <div style={{ background: "white", border: `1.5px solid ${C.stone}`, borderRadius: 18, padding: "1.75rem", marginBottom: "1.25rem" }}>
-              <div style={{ fontSize: "0.6rem", letterSpacing: "0.22em", textTransform: "uppercase", color: "#10b981", fontFamily: BFONT, fontWeight: 700, marginBottom: "1rem" }}>
-                What comes naturally to {userName} &amp; {partnerName}
-              </div>
-              <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
-                {ct.strengths.slice(0,2).map((s, i) => (
-                  <div key={i} style={{ display: "flex", gap: "0.85rem", alignItems: "flex-start" }}>
-                    <div style={{ width: 20, height: 20, borderRadius: "50%", background: "rgba(16,185,129,0.12)", border: "1.5px solid rgba(16,185,129,0.3)", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", marginTop: 2 }}>
-                      <span style={{ fontSize: "0.6rem", color: "#10b981", fontWeight: 700 }}>✓</span>
-                    </div>
-                    <p style={{ fontSize: "0.86rem", color: C.ink, fontFamily: BFONT, lineHeight: 1.7, margin: 0 }}>{interp(s)}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* ── STICKING POINTS ── */}
-          {ct.stickingPoints?.length > 0 && (
-            <div style={{ background: "white", border: `1.5px solid ${C.stone}`, borderRadius: 18, padding: "1.75rem", marginBottom: "1.25rem" }}>
-              <div style={{ fontSize: "0.6rem", letterSpacing: "0.22em", textTransform: "uppercase", color: "#E8673A", fontFamily: BFONT, fontWeight: 700, marginBottom: "1rem" }}>
-                Worth watching for
-              </div>
-              <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
-                {ct.stickingPoints.slice(0,2).map((s, i) => (
-                  <div key={i} style={{ display: "flex", gap: "0.85rem", alignItems: "flex-start" }}>
-                    <div style={{ width: 20, height: 20, borderRadius: "50%", background: "rgba(232,103,58,0.1)", border: "1.5px solid rgba(232,103,58,0.28)", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", marginTop: 2 }}>
-                      <span style={{ fontSize: "0.65rem", color: "#E8673A", fontWeight: 700 }}>!</span>
-                    </div>
-                    <p style={{ fontSize: "0.86rem", color: C.ink, fontFamily: BFONT, lineHeight: 1.7, margin: 0 }}>{interp(s)}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* ── TIPS for this type ── */}
+          {/* 1. HEADER */}
           <div style={{ marginBottom: "1.25rem" }}>
-            <div style={{ fontSize: "0.6rem", letterSpacing: "0.22em", textTransform: "uppercase", color: C.muted, fontFamily: BFONT, fontWeight: 700, marginBottom: "1rem" }}>
-              Actionable next steps
+            <div style={{ fontSize: "0.58rem", letterSpacing: "0.28em", textTransform: "uppercase", color: ct.color, fontFamily: BFONT, fontWeight: 700, marginBottom: "0.5rem" }}>
+              {userName} & {partnerName}
             </div>
-            <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
-              {ct.tips?.map((tip, i) => {
-                const tipColors = [ct.color, "#1B5FE8", "#10b981"];
-                const tipColor = tipColors[i % 3];
-                return (<div key={i} style={{ background: "white", border: `1.5px solid ${C.stone}`, borderRadius: 14, padding: "1.25rem 1.4rem", borderLeft: `4px solid ${tipColor}` }}>
-                  <div style={{ fontSize: "0.8rem", fontWeight: 700, color: C.ink, fontFamily: BFONT, marginBottom: "0.4rem" }}>{interp(tip.title)}</div>
-                  <p style={{ fontSize: "0.82rem", color: C.muted, fontFamily: BFONT, lineHeight: 1.72, margin: "0 0 0.75rem", fontWeight: 300 }}>{interp(tip.body)}</p>
-                  {tip.phraseTry && (
-                    <div style={{ background: `${tipColor}0d`, border: `1px solid ${tipColor}30`, borderRadius: 8, padding: "0.55rem 0.8rem", display: "flex", gap: "0.5rem", alignItems: "flex-start" }}>
-                      <span style={{ fontSize: "0.58rem", letterSpacing: "0.16em", textTransform: "uppercase", color: tipColor, fontFamily: BFONT, fontWeight: 700, whiteSpace: "nowrap", marginTop: "0.1rem" }}>Phrase to try</span>
-                      <span style={{ fontSize: "0.78rem", color: C.ink, fontFamily: BFONT, fontStyle: "italic", lineHeight: 1.55 }}>"{interp(tip.phraseTry)}"</span>
-                    </div>
-                  )}
-                </div>);
-              })}
+            <div style={{ fontFamily: HFONT, fontSize: "clamp(1.7rem,4vw,2.3rem)", fontWeight: 700, color: C.ink, lineHeight: 1.08, letterSpacing: "-0.02em" }}>
+              What your responses uncover about your unique relationship dynamic
             </div>
           </div>
 
+          {/* 2. DESCRIPTION */}
+          <p style={{ fontSize: "0.88rem", color: C.muted, fontFamily: BFONT, fontWeight: 300, lineHeight: 1.75, margin: "0 0 1.5rem" }}>
+            Two dots. Two axes. The distance, the quadrants, and the proximity to the lines between them all help you understand your unique relationship.
+          </p>
 
-
-          {/* ── WORKBOOK CTA ── copy branches on ownership (10.1) ── */}
-          <div style={{ background: `${ct.color}0d`, border: `1px solid ${ct.color}25`, borderRadius: 14, padding: "1rem 1.25rem", marginBottom: "1.25rem", display: "flex", alignItems: "center", justifyContent: "space-between", gap: "1rem", flexWrap: "wrap" }}>
-            <p style={{ fontSize: "0.82rem", color: C.ink, fontFamily: BFONT, lineHeight: 1.55, margin: 0 }}>
-              {hasWorkbook
-                ? <>Your <span style={{ fontWeight: 600 }}>personalized workbook</span> is available in your dashboard.</>
-                : <>Like what you're seeing? There's more practical guidance built from your answers in your{" "}<span style={{ fontWeight: 600 }}>personalized workbook.</span></>}
-            </p>
-            <a href={hasWorkbook ? "/app" : "/offerings#workbook"} style={{ fontSize: "0.78rem", fontWeight: 700, color: ct.color, fontFamily: BFONT, textDecoration: "none", whiteSpace: "nowrap", display: "flex", alignItems: "center", gap: "0.3rem" }}>
-              {hasWorkbook ? "Go to dashboard →" : "Purchase your personalized workbook →"}
-            </a>
-          </div>
-
-          {/* ── SHARE ── */}
-          <div style={{ display: "flex", gap: "0.75rem", alignItems: "center", flexWrap: "wrap" }}>
-            <button onClick={handleShare}
-              style={{ background: typeCopied ? "#10b981" : C.ink, color: "white", border: "none", borderRadius: 10, padding: "0.65rem 1.5rem", fontSize: "0.75rem", fontWeight: 700, cursor: "pointer", fontFamily: BFONT, letterSpacing: "0.04em", transition: "background 0.2s" }}>
-              {typeCopied ? "Copied to clipboard ✓" : "Share your type →"}
-            </button>
-            <p style={{ fontSize: "0.72rem", color: C.muted, fontFamily: BFONT, margin: 0 }}>Share on stories or send to a friend.</p>
-          </div>
-
-        </div>
-      </Layout>
-    );
-  }
-
-  // ── PAGE: COUPLE MAP ──────────────────────────────────────────────────────────
-  if (section === "couple-map") {
-    const newType = deriveNewCoupleType(myS, partS);
-    const itA = INDIVIDUAL_TYPES[newType.typeInfoA.typeCode];
-    const itB = INDIVIDUAL_TYPES[newType.typeInfoB.typeCode];
-    const accent = newType?.color || "#E8673A";
-    const interp = (str) => str
-      ? str.replace(/\{U\}/g, userName).replace(/\{P\}/g, partnerName) : str;
-
-    return (
-      <Layout accent={accent}>
-        <div style={{ maxWidth: 660 }}>
-          {/* ── HEADER ── */}
-          <div style={{ marginBottom: "1.75rem" }}>
-            <div style={{ fontSize: "0.58rem", letterSpacing: "0.28em", textTransform: "uppercase", color: accent, fontFamily: BFONT, fontWeight: 700, marginBottom: "0.5rem" }}>
-              {userName} & {partnerName} · Your Couple Map
-            </div>
-            <div style={{ fontFamily: HFONT, fontSize: "clamp(1.8rem,4vw,2.4rem)", fontWeight: 700, color: C.ink, lineHeight: 1.0, marginBottom: "0.5rem", letterSpacing: "-0.02em" }}>
-              Where you each sit
-            </div>
-            <p style={{ fontSize: "0.88rem", color: C.muted, fontFamily: BFONT, fontWeight: 300, lineHeight: 1.75, margin: 0 }}>
-              Two dots. Two axes. The distance, the quadrants, and the proximity to the lines between them all help you understand your unique relationship.
-            </p>
-          </div>
-
+          {/* 3. COUPLE MAP TILE */}
           {/* ── THE MAP (with axis descriptions inside the same tile) ── */}
           <div style={{ background: "white", border: `1.5px solid ${C.stone}`, borderRadius: 20, padding: isMobile ? "1.25rem" : "1.75rem", marginBottom: "1.5rem" }}>
             <div style={{ display: "flex", justifyContent: "center", marginBottom: "1.5rem" }}>
@@ -8060,6 +7968,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
             </div>
           </div>
 
+          {/* 4. INDIVIDUAL TILES */}
           {/* ── INDIVIDUAL TYPES (merged: identity + placement blurb + bars) ── */}
           {(() => {
             const blurbFor = (name, pron, info) => {
@@ -8166,33 +8075,118 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
             );
           })()}
 
-          {/* ── NUANCE removed ── */}
-
+          {/* 5. MAP-USES DESCRIPTION */}
           <p style={{ fontSize: "0.72rem", color: C.muted, fontFamily: BFONT, lineHeight: 1.65, margin: 0 }}>
             The map uses your scores on Conflict, Repair, and Stress to place each of you on the Engage/Withdraw axis, and your Expression, Feedback, and Needs scores to place you on the Open/Guarded axis. Dot position is continuous, proximity to an axis line means that partner is more flexible on that dimension.
           </p>
-        </div>
-      </Layout>
-    );
-  }
 
-  // ── PAGE: SUMMARY ───────────────────────────────────────────────────────────
-  if (section === "summary") {
-    // Reuse JointOverview content but inside unified layout
-    return (
-      <Layout accent="#8C7A68">
-        <JointOverview
-          ex1Answers={ex1Answers} partnerEx1={partnerEx1}
-          ex2Answers={ex2Answers} partnerEx2={partnerEx2}
-          ex3Answers={ex3Answers} partnerEx3={partnerEx3}
-          hasAnniversary={hasAnniversary}
-          intimacySummary={intimacySummary}
-          userName={userName} partnerName={partnerName}
-          onGoPersonality={() => go("comm-overview")}
-          onGoExpectations={() => go("exp-overview")}
-          onGoAnniversary={() => go("reflection")}
-          onGoIntimacy={() => go("intimacy-overview")}
-        />
+          {/* 6. CELEBRATORY TYPE REVEAL */}
+          <div style={{ borderRadius: 20, overflow: "hidden", margin: "1.75rem 0 1.25rem", position: "relative" }}>
+            <div style={{ background: `linear-gradient(145deg, ${ct.color}ee, ${ct.color}99)`, padding: "2.25rem 2.25rem 2rem", position: "relative", overflow: "hidden" }}>
+              <div style={{ position: "absolute", bottom: -20, right: -10, fontFamily: HFONT, fontSize: "6rem", fontWeight: 700, color: "rgba(255,255,255,0.08)", lineHeight: 1, pointerEvents: "none", userSelect: "none", letterSpacing: "-0.04em", whiteSpace: "nowrap" }}>
+                {ct.name.replace("The ", "")}
+              </div>
+              <div style={{ fontSize: "0.58rem", letterSpacing: "0.28em", textTransform: "uppercase", color: "rgba(255,255,255,0.7)", fontFamily: BFONT, fontWeight: 700, marginBottom: "0.85rem" }}>
+                Your couple type is
+              </div>
+              <div style={{ fontFamily: HFONT, fontSize: "clamp(2.4rem, 6vw, 3.6rem)", fontWeight: 700, color: "white", lineHeight: 0.95, marginBottom: "0.85rem", letterSpacing: "-0.03em" }}>
+                {ct.name}
+              </div>
+              <p style={{ fontSize: "1rem", color: "rgba(255,255,255,0.9)", fontFamily: BFONT, fontWeight: 500, lineHeight: 1.45, margin: 0, maxWidth: 440 }}>
+                {ct.tagline}
+              </p>
+            </div>
+          </div>
+
+          {/* 7. WHAT THIS LOOKS LIKE IN YOUR RELATIONSHIP */}
+          <div style={{ background: "white", border: `1.5px solid ${C.stone}`, borderRadius: 18, padding: "1.75rem", marginBottom: "1.25rem" }}>
+            <div style={{ fontSize: "0.6rem", letterSpacing: "0.22em", textTransform: "uppercase", color: ct.color, fontFamily: BFONT, fontWeight: 700, marginBottom: "1rem" }}>
+              What this looks like in your relationship
+            </div>
+            <p style={{ fontSize: "0.88rem", color: C.ink, fontFamily: BFONT, lineHeight: 1.75, margin: 0, fontWeight: 400 }}>
+              {ct.patterns?.map(pp => interp(pp)).join(" ")}
+            </p>
+          </div>
+
+          {/* 8. SIDE-BY-SIDE: WHAT COMES NATURALLY | WHAT'S WORTH BEING AWARE OF */}
+          <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: "1rem", marginBottom: "1.25rem" }}>
+            {ct.strengths?.length > 0 && (
+              <div style={{ background: "white", border: `1.5px solid ${C.stone}`, borderRadius: 18, padding: "1.5rem" }}>
+                <div style={{ fontSize: "0.6rem", letterSpacing: "0.2em", textTransform: "uppercase", color: "#10b981", fontFamily: BFONT, fontWeight: 700, marginBottom: "1rem" }}>What comes naturally</div>
+                <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
+                  {ct.strengths.slice(0,2).map((sx, i) => (
+                    <div key={i} style={{ display: "flex", gap: "0.7rem", alignItems: "flex-start" }}>
+                      <div style={{ width: 20, height: 20, borderRadius: "50%", background: "rgba(16,185,129,0.12)", border: "1.5px solid rgba(16,185,129,0.3)", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", marginTop: 2 }}>
+                        <span style={{ fontSize: "0.6rem", color: "#10b981", fontWeight: 700 }}>✓</span>
+                      </div>
+                      <p style={{ fontSize: "0.84rem", color: C.ink, fontFamily: BFONT, lineHeight: 1.65, margin: 0 }}>{interp(sx)}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+            {ct.stickingPoints?.length > 0 && (
+              <div style={{ background: "white", border: `1.5px solid ${C.stone}`, borderRadius: 18, padding: "1.5rem" }}>
+                <div style={{ fontSize: "0.6rem", letterSpacing: "0.2em", textTransform: "uppercase", color: "#E8673A", fontFamily: BFONT, fontWeight: 700, marginBottom: "1rem" }}>What's worth being aware of</div>
+                <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
+                  {ct.stickingPoints.slice(0,2).map((sx, i) => (
+                    <div key={i} style={{ display: "flex", gap: "0.7rem", alignItems: "flex-start" }}>
+                      <div style={{ width: 20, height: 20, borderRadius: "50%", background: "rgba(232,103,58,0.1)", border: "1.5px solid rgba(232,103,58,0.28)", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", marginTop: 2 }}>
+                        <span style={{ fontSize: "0.65rem", color: "#E8673A", fontWeight: 700 }}>!</span>
+                      </div>
+                      <p style={{ fontSize: "0.84rem", color: C.ink, fontFamily: BFONT, lineHeight: 1.65, margin: 0 }}>{interp(sx)}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* 9. WHAT TO DO WITH THIS INFORMATION */}
+          <div style={{ marginBottom: "1.25rem" }}>
+            <div style={{ fontSize: "0.6rem", letterSpacing: "0.22em", textTransform: "uppercase", color: C.muted, fontFamily: BFONT, fontWeight: 700, marginBottom: "1rem" }}>
+              What to do with this information
+            </div>
+            <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
+              {ct.tips?.map((tip, i) => {
+                const tipColors = [ct.color, "#1B5FE8", "#10b981"];
+                const tipColor = tipColors[i % 3];
+                return (<div key={i} style={{ background: "white", border: `1.5px solid ${C.stone}`, borderRadius: 14, padding: "1.25rem 1.4rem", borderLeft: `4px solid ${tipColor}` }}>
+                  <div style={{ fontSize: "0.8rem", fontWeight: 700, color: C.ink, fontFamily: BFONT, marginBottom: "0.4rem" }}>{interp(tip.title)}</div>
+                  <p style={{ fontSize: "0.82rem", color: C.muted, fontFamily: BFONT, lineHeight: 1.72, margin: "0 0 0.75rem", fontWeight: 300 }}>{interp(tip.body)}</p>
+                  {tip.phraseTry && (
+                    <div style={{ background: `${tipColor}0d`, border: `1px solid ${tipColor}30`, borderRadius: 8, padding: "0.55rem 0.8rem", display: "flex", gap: "0.5rem", alignItems: "flex-start" }}>
+                      <span style={{ fontSize: "0.58rem", letterSpacing: "0.16em", textTransform: "uppercase", color: tipColor, fontFamily: BFONT, fontWeight: 700, whiteSpace: "nowrap", marginTop: "0.1rem" }}>Phrase to try</span>
+                      <span style={{ fontSize: "0.78rem", color: C.ink, fontFamily: BFONT, fontStyle: "italic", lineHeight: 1.55 }}>"{interp(tip.phraseTry)}"</span>
+                    </div>
+                  )}
+                </div>);
+              })}
+            </div>
+          </div>
+
+          {/* WORKBOOK CTA */}
+          <div style={{ background: `${ct.color}0d`, border: `1px solid ${ct.color}25`, borderRadius: 14, padding: "1rem 1.25rem", marginBottom: "1.25rem", display: "flex", alignItems: "center", justifyContent: "space-between", gap: "1rem", flexWrap: "wrap" }}>
+            <p style={{ fontSize: "0.82rem", color: C.ink, fontFamily: BFONT, lineHeight: 1.55, margin: 0 }}>
+              {hasWorkbook
+                ? <>Your <span style={{ fontWeight: 600 }}>personalized workbook</span> is available in your dashboard.</>
+                : <>Like what you're seeing? There's more practical guidance built from your answers in your{" "}<span style={{ fontWeight: 600 }}>personalized workbook.</span></>}
+            </p>
+            <a href={hasWorkbook ? "/app" : "/offerings#workbook"} style={{ fontSize: "0.78rem", fontWeight: 700, color: ct.color, fontFamily: BFONT, textDecoration: "none", whiteSpace: "nowrap", display: "flex", alignItems: "center", gap: "0.3rem" }}>
+              {hasWorkbook ? "Go to dashboard →" : "Purchase your personalized workbook →"}
+            </a>
+          </div>
+
+          {/* SHARE */}
+          <div style={{ display: "flex", gap: "0.75rem", alignItems: "center", flexWrap: "wrap" }}>
+            <button onClick={handleShare}
+              style={{ background: typeCopied ? "#10b981" : C.ink, color: "white", border: "none", borderRadius: 10, padding: "0.65rem 1.5rem", fontSize: "0.75rem", fontWeight: 700, cursor: "pointer", fontFamily: BFONT, letterSpacing: "0.04em", transition: "background 0.2s" }}>
+              {typeCopied ? "Copied to clipboard ✓" : "Share your type →"}
+            </button>
+            <p style={{ fontSize: "0.72rem", color: C.muted, fontFamily: BFONT, margin: 0 }}>Share on stories or send to a friend.</p>
+          </div>
+
+        </div>
       </Layout>
     );
   }
@@ -13943,9 +13937,7 @@ export default function App() {
                   <div style={{ background: "white", border: "1.5px solid #E8DDD0", borderTop: `3px solid ${bothDone ? "#1B5FE8" : "#D4C0A8"}`, borderRadius: 16, overflow: "hidden", opacity: bothDone ? 1 : 0.6, boxShadow: "0 2px 14px rgba(14,11,7,0.04)" }}>
                     {[
                       { label: "Storycard highlights", section: "highlights", color: "#E8673A" },
-                      { label: "Your couple type", section: "couple-type", color: "#9B5DE5" },
-                      { label: "Your couple map", section: "couple-map", color: "#1B5FE8" },
-                      { label: "Full summary", section: "summary", color: "#8C7A68" },
+                      { label: "Your couple type & map", section: "couple-type", color: "#9B5DE5" },
                       { label: "Communication results", section: "comm-overview", color: "#E8673A" },
                       { label: "Expectations results", section: "exp-overview", color: "#1B5FE8" },
                       ...(pkg.hasAnniversary ? [{ label: "Relationship reflection results", section: "reflection-overview", color: "#10B981" }] : []),
@@ -14918,7 +14910,7 @@ export default function App() {
         intimacyAnswers={pkg.hasIntimacy ? (intimacyData?.answers || null) : null}
         partnerIntimacy={pkg.hasIntimacy && hasRealPartner ? (partnerSession?.intimacy || null) : null}
         intimacyVariant={(hasRealPartner ? partnerSession?.intimacy?.variant : null) || intimacyData?.variant || 'premarital'}
-        onDone={() => { setActiveResult("summary"); setHighlightsSeen(true); }}
+        onDone={() => { setActiveResult("couple-type"); setHighlightsSeen(true); }}
         onExit={() => setView("home")}
       />
     )}
