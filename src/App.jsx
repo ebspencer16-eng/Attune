@@ -11952,11 +11952,17 @@ export default function App() {
   const _savedResults = (() => {
     try { return JSON.parse(localStorage.getItem('attune_results_state') || 'null'); } catch { return null; }
   })();
+  // Demo deep-link: ?sec=comm|exp|reflection|intimacy jumps results straight to
+  // that exercise's section (used by the admin Demo page).
+  const _demoSec = params.get('sec');
+  const _secMap = { comm: 'overview', exp: 'exp-overview', reflection: 'reflection-overview', intimacy: 'intimacy-overview' };
   const [activeResult, setActiveResult] = useState(
-    initialView === 'results' && _savedResults?.activeResult ? _savedResults.activeResult : "overview"
+    (initialView === 'results' && _demoSec && _secMap[_demoSec]) ? _secMap[_demoSec]
+      : (initialView === 'results' && _savedResults?.activeResult ? _savedResults.activeResult : "overview")
   );
   const [highlightsSeen, setHighlightsSeen] = useState(
-    initialView === 'results' ? !!_savedResults?.highlightsSeen : false
+    (initialView === 'results' && _demoSec && _secMap[_demoSec]) ? true
+      : (initialView === 'results' ? !!_savedResults?.highlightsSeen : false)
   );
   useEffect(() => {
     if (view !== 'results') return;
