@@ -60,7 +60,7 @@ export default async function handler(req) {
       admin.from('beta_codes').select('*').order('code', { ascending: true }),
       admin.from('lmft_requests').select('*').order('created_at', { ascending: false }).limit(200),
       admin.from('feedback_submissions').select('*').order('submitted_at', { ascending: false }).limit(2000),
-      admin.from('profiles').select('id, partner_profile_id, invite_code, age_range, gender, relationship_status, relationship_length, children, signup_source, ex1_answers, ex2_answers'),
+      admin.from('profiles').select('id, partner_profile_id, invite_code, age_range, gender, pronouns, relationship_status, relationship_length, children, signup_source, ex1_answers, ex2_answers'),
       admin.from('partner_sessions').select('invite_code, ex1_answers, ex2_answers'),
     ]);
 
@@ -68,6 +68,20 @@ export default async function handler(req) {
     if (firstErr) return json({ error: firstErr.error.message }, 500);
 
     const profiles = profQ.data || [];
+
+    // Relationship-level demographics (status, length, children) describe the
+    // couple, not the individual. If one partner answered and the other left it
+    // blank, share the answer across both linked profiles so couple-level facts
+    // aren't undercounted. Individual fields (age, gender/pronouns) stay per-person.
+    const byId = {};
+    profiles.forEach(p => { byId[p.id] = p; });
+    const sharedFields = ['relationship_status', 'relationship_length', 'children'];
+    profiles.forEach(p => {
+      const partner = p.partner_profile_id ? byId[p.partner_profile_id] : null;
+      if (!partner) return;
+      sharedFields.forEach(f => { if (!p[f] && partner[f]) p[f] = partner[f]; });
+    });
+
     const hasAnswers = v => v && typeof v === 'object' && Object.keys(v).length > 0;
     const started = profiles.filter(p => hasAnswers(p.ex1_answers) || hasAnswers(p.ex2_answers)).length;
     const bothDoneIndividuals = profiles.filter(p => hasAnswers(p.ex1_answers) && hasAnswers(p.ex2_answers) && p.partner_profile_id).length;
@@ -82,7 +96,7 @@ export default async function handler(req) {
       feedback_submissions: fbQ.data || [],
       profiles: {
         demographics: profiles.map(p => ({
-          age_range: p.age_range, gender: p.gender,
+          age_range: p.age_range, gender: p.gender, pronouns: p.pronouns,
           relationship_status: p.relationship_status,
           relationship_length: p.relationship_length,
           children: p.children, signup_source: p.signup_source,
