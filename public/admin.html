@@ -63,14 +63,14 @@
 
   /* DATA NOTICE */
   .data-notice{background:rgba(52,211,153,.07);border:1px solid rgba(52,211,153,.2);border-radius:12px;padding:.85rem 1.1rem;margin-bottom:1.75rem;display:flex;gap:.75rem;align-items:flex-start}
-  .data-notice p{font-size:.74rem;color:#6EE7B7;line-height:1.65}
-  .data-notice strong{color:var(--green)}
+  .data-notice p{font-size:.74rem;color:#0F7A54;line-height:1.65}
+  .data-notice strong{color:#0B6B48}
 
   /* DEMO-DATA BANNER — shown on every page when no real orders exist yet */
   .demo-banner{background:rgba(251,191,36,.1);border:1px solid rgba(251,191,36,.35);border-radius:10px;padding:.7rem .95rem;margin-bottom:1.25rem;display:flex;gap:.6rem;align-items:flex-start}
   .demo-banner svg{flex-shrink:0;margin-top:1px;color:var(--amber)}
-  .demo-banner p{font-size:.72rem;color:#F2C563;line-height:1.55;margin:0}
-  .demo-banner strong{color:#FBBF24;font-weight:700}
+  .demo-banner p{font-size:.72rem;color:#8A6512;line-height:1.55;margin:0}
+  .demo-banner strong{color:#7A5A0F;font-weight:700}
 
   /* EMPTY STATE — for tables/charts without real data */
   .empty-state{text-align:center;padding:3rem 1rem;color:var(--dim);font-size:.82rem;font-family:var(--bfont);background:var(--surface);border:1px dashed var(--border);border-radius:10px}
@@ -86,7 +86,8 @@
   .kpi-card.amber::before{background:var(--amber)}
   .kpi-card.rose::before{background:var(--rose)}
   .kpi-label{font-size:.62rem;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);font-weight:700;font-family:var(--mono);margin-bottom:.5rem}
-  .kpi-val{font-size:2rem;font-weight:700;color:var(--text);font-family:var(--hfont);line-height:1}
+  .kpi-val{font-size:2rem;font-weight:700;color:var(--text);font-family:var(--hfont);line-height:1.05;overflow-wrap:anywhere}
+  #types-maxshare{font-size:1.4rem;line-height:1.14;overflow-wrap:normal}
   .kpi-sub{font-size:.7rem;color:var(--muted);margin-top:.4rem}
   .kpi-trend{display:inline-flex;align-items:center;gap:.25rem;font-size:.68rem;font-weight:600;margin-top:.35rem}
   .kpi-trend.up{color:var(--green)}
@@ -408,11 +409,6 @@
         <option value="anniversary">Anniversary</option>
         <option value="premium">Premium</option>
       </select>
-      <select class="filter-select" id="orders-format-filter" onchange="applyOrderFilters()">
-        <option value="">Digital &amp; physical</option>
-        <option value="digital">Digital only</option>
-        <option value="physical">Physical only</option>
-      </select>
       <select class="filter-select" id="orders-date-filter" onchange="applyOrderFilters()">
         <option value="">All time</option>
         <option value="7">Last 7 days</option>
@@ -441,7 +437,6 @@
               <th>Order ID</th>
               <th>Date</th>
               <th>Package</th>
-              <th>Format</th>
               <th>Amount</th>
               <th>Couple type</th>
               <th>Promo</th>
@@ -451,6 +446,11 @@
           <tbody id="orders-tbody"></tbody>
         </table>
       </div>
+    </div>
+
+    <div class="chart-card" style="margin-top:1.25rem">
+      <div class="chart-head"><div><div class="chart-title">Order volume by geography</div><div class="chart-subtitle">By US state, from order location. Orders outside the US are grouped as one segment.</div></div></div>
+      <div class="chart-body"><div id="geo-breakdown"></div></div>
     </div>
   </div>
 
@@ -2926,6 +2926,8 @@ async function loadRealData() {
             cardStatus: o.card_status || 'pending',
             cardUrl: o.card_url || null,
             token: o.qr_token || null,
+            state: o.shipping_state || null,
+            country: o.shipping_country || o.billing_country || (o.shipping_state ? 'US' : null),
             _raw: o,
           });
         });
@@ -3446,7 +3448,6 @@ function updateDashboardFulfillmentKPIs() {
 
 function applyOrderFilters() {
   const pkg    = document.getElementById('orders-pkg-filter')?.value || '';
-  const format = document.getElementById('orders-format-filter')?.value || '';
   const days   = parseInt(document.getElementById('orders-date-filter')?.value || '0');
   const type   = document.getElementById('orders-type-filter')?.value || '';
   const search = (document.getElementById('orders-search')?.value || '').toLowerCase().trim();
@@ -3455,8 +3456,6 @@ function applyOrderFilters() {
 
   let rows = ORDERS.filter(o => {
     if (pkg && !o.pkg.startsWith(pkg)) return false;
-    if (format === 'digital' && o.physical) return false;
-    if (format === 'physical' && !o.physical) return false;
     if (cutoff && o.date < cutoff) return false;
     if (type && !(o.coupleType?.id || '').startsWith(type)) return false;
     if (search && !o.id.toLowerCase().includes(search) && !(o.name||'').toLowerCase().includes(search)) return false;
@@ -3487,14 +3486,48 @@ function renderOrdersTable(rows) {
       <td><span style="font-family:var(--mono);font-size:.7rem;color:var(--muted)">${o.id}</span></td>
       <td>${o.dateStr}</td>
       <td><span class="pkg-tag" style="background:${pkgColors[o.pkg]}22;color:${pkgColors[o.pkg]}">${pkgNames[o.pkg]}</span></td>
-      <td><span class="pill ${o.physical?'amber':'indigo'}">${o.physical?'📦 Box':'💻 Digital'}</span></td>
       <td style="font-family:var(--mono);color:var(--text)">$${o.price}</td>
-      <td>${o.coupleType ? `<span style="font-family:var(--mono);font-size:.7rem;background:rgba(255,255,255,0.06);padding:.15rem .45rem;border-radius:4px" title="${o.coupleType.name||''}">${o.coupleType.id||'—'}</span>` : '<span style="color:var(--muted)">—</span>'}</td>
+      <td>${o.coupleType ? `<span style="font-family:var(--mono);font-size:.7rem;background:rgba(27,37,71,0.06);padding:.15rem .45rem;border-radius:4px" title="${o.coupleType.name||''}">${o.coupleType.id||'—'}</span>` : '<span style="color:var(--muted)">—</span>'}</td>
       <td>${o.promo?'<span class="pill green">10% off</span>':'-'}</td>
       <td><span class="pill green">Complete</span></td>
     </tr>`).join('');
 }
 function filterOrders(sel) { applyOrderFilters(); }
+
+// ── Geography breakdown: order volume by US state; non-US grouped ──────
+// Reads real order location (o.state / o.country). No fabricated data:
+// when location isn't captured, it shows an honest empty state.
+function renderGeography() {
+  const el = document.getElementById('geo-breakdown');
+  if (!el) return;
+  const stateCounts = {};
+  let outsideUS = 0, unknown = 0, total = 0;
+  ORDERS.forEach(o => {
+    total++;
+    const st = (o.state || '').toString().trim();
+    const country = (o.country || '').toString().trim().toUpperCase();
+    const isUS = country ? ['US','USA','UNITED STATES'].includes(country) : !!st;
+    if (isUS && st) { const k = st.length <= 3 ? st.toUpperCase() : st; stateCounts[k] = (stateCounts[k] || 0) + 1; }
+    else if (country && !isUS) { outsideUS++; }
+    else { unknown++; }
+  });
+  const stateRows = Object.entries(stateCounts).sort((a, b) => b[1] - a[1]);
+  if (stateRows.length === 0 && outsideUS === 0) {
+    el.innerHTML = '<div style="color:var(--dim);font-size:.8rem;padding:1rem 0;line-height:1.6">No location data captured yet.<br><span style="font-size:.72rem">Geography populates from order billing location. Digital orders will appear here once billing country and state are captured at checkout.</span></div>';
+    return;
+  }
+  const max = Math.max(...stateRows.map(r => r[1]), outsideUS, 1);
+  const bar = (label, n, color) => {
+    const pct = Math.round((n / max) * 100);
+    return `<div class="insight-row"><div class="insight-label">${label}</div><div class="insight-bar-wrap"><div class="insight-bar" style="width:${pct}%;background:${color}"></div></div><div class="insight-pct">${n}</div></div>`;
+  };
+  let html = '<div class="insight-list">';
+  stateRows.forEach(([st, n]) => { html += bar(st, n, '#6C7FFF'); });
+  if (outsideUS > 0) html += bar('Outside US', outsideUS, '#34D399');
+  html += '</div>';
+  if (unknown > 0) html += `<div style="font-size:.68rem;color:var(--dim);margin-top:.65rem">${unknown} order${unknown === 1 ? '' : 's'} without captured location.</div>`;
+  el.innerHTML = html;
+}
 
 // ── Fulfillment table ─────────────────────────────────
 function renderFulfillmentTable() {
