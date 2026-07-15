@@ -20,6 +20,11 @@ import { checkAdminAuth } from './_lib/admin-auth.js';
 import { calcDimScores, axisScores, typeCodeFromAxes, DIM_KEYS } from './_type-engine.js';
 import { PERSONALITY_QUESTIONS, LIFE_QUESTIONS, RESPONSIBILITY_CATEGORIES } from './_questions.js';
 
+// Runs on the edge runtime (Web-style (req)=>Response handler), matching the
+// other admin endpoints. Without this, Vercel's Node runtime can't invoke it
+// and every request fails with FUNCTION_INVOCATION_FAILED.
+export const config = { runtime: 'edge' };
+
 const json = (obj, status = 200) =>
   new Response(JSON.stringify(obj), {
     status,
