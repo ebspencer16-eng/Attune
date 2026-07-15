@@ -877,6 +877,14 @@
     </div>
   </div>
 
+  <p style="font-size:.76rem;color:var(--muted);margin:0 0 .75rem;line-height:1.55;max-width:760px;">Compare any two things about respondents. Each cell is the number of people who match that row <em>and</em> column. Start from a preset, then adjust the dropdowns.</p>
+  <div style="display:flex;flex-wrap:wrap;gap:.5rem;margin-bottom:1rem;">
+    <span style="font-family:var(--mono);font-size:.55rem;letter-spacing:.12em;text-transform:uppercase;color:var(--dim);align-self:center;margin-right:.15rem;">Presets</span>
+    <button class="xp-btn" onclick="window.__xpPreset&&window.__xpPreset('couple_type','relationship_length')">Couple type × Time together</button>
+    <button class="xp-btn" onclick="window.__xpPreset&&window.__xpPreset('type','gender')">Individual type × Gender</button>
+    <button class="xp-btn" onclick="window.__xpPreset&&window.__xpPreset('pkg','couple_type')">Package × Couple type</button>
+    <button class="xp-btn" onclick="window.__xpPreset&&window.__xpPreset('age_range','type')">Age × Individual type</button>
+  </div>
   <div class="xp-controls">
     <div class="xp-ctl">
       <label>Rows</label>
@@ -1155,6 +1163,14 @@ window.adminAuthHeaders = function(extra){
       ['xp-row-side','xp-row-field','xp-col-side','xp-col-field','xp-cell','xp-measure-side','xp-measure-field'].forEach(id => $(id).addEventListener('change', render));
       $('xp-add-filter').onclick = () => { FILTERS.push({ field:'', value:'', side:'self' }); renderFilters(); };
       $('xp-export').onclick = exportCSV;
+      // One-click preset crosstabs for common questions.
+      window.__xpPreset = (r, c) => {
+        const R=$('xp-row-field'), C=$('xp-col-field'), rs=$('xp-row-side'), cs=$('xp-col-side'), cell=$('xp-cell');
+        if(!R||!C) return;
+        R.value=r; C.value=c; if(rs) rs.value='self'; if(cs) cs.value='self'; if(cell) cell.value='count';
+        const mw=$('xp-measure-wrap'); if(mw) mw.style.display='none';
+        render();
+      };
       render();
     } catch (e) {
       $('xp-output').innerHTML = '<div class="xp-empty">Could not load data: ' + esc(e.message) + '</div>';
