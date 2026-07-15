@@ -8834,7 +8834,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
 
           {/* ── PRACTICAL GUIDANCE — every exercise's tips + phrases in one table ── */}
           {(() => {
-            const gInterp = (str) => resolveRoleTokens(String(str || "").replace(/\{U\}/g, userName).replace(/\{P\}/g, partnerName), myS, partS, userName, partnerName);
+            const gInterp = (str) => resolveRoleTokens(String(str || "").replace(/\{U\}/g, userName).replace(/\{P\}/g, partnerName), myS, partS, userName, partnerName).replace(/\{something[^}]*\}/g, "something specific");
             const rows = [];
             // Communication — the couple-type tips (title + phrase to try)
             (coupleType?.tips || []).slice(0, 3).forEach(t => {
