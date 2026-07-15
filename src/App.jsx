@@ -8298,18 +8298,6 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
                 </div>
               </div>
 
-              {/* Appreciation */}
-              {myAdmire && theirAdmire && (
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.75rem", marginBottom: "1rem" }}>
-                  {[[userName, theirAdmire, "#E8673A"], [partnerName, myAdmire, "#5B6DF8"]].map(([name, admires, col]) => (
-                    <div key={name} style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 14, padding: "0.9rem 1.1rem" }}>
-                      <div style={{ fontSize: "0.55rem", letterSpacing: "0.16em", textTransform: "uppercase", color: "rgba(255,255,255,0.4)", fontFamily: BFONT, marginBottom: "0.3rem" }}>{name} is admired for</div>
-                      <div style={{ fontSize: "1rem", fontWeight: 700, color: col, fontFamily: HFONT }}>{admiredNoun(admires)}</div>
-                    </div>
-                  ))}
-                </div>
-              )}
-
               {/* How you feel right now — scale questions (8.2) */}
               <div style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 14, padding: "1.1rem 1.25rem", marginBottom: "1rem" }}>
                 <div style={{ fontSize: "0.55rem", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.35)", fontFamily: BFONT, fontWeight: 700, marginBottom: "1rem" }}>How you feel right now</div>
@@ -8843,6 +8831,61 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
         <div style={{ maxWidth: 560, margin: "0 auto" }}>
           <div style={{ fontFamily: BFONT, fontSize: "0.62rem", letterSpacing: "0.22em", textTransform: "uppercase", color: C.clay, fontWeight: 700, marginBottom: "0.85rem" }}>What comes next</div>
           <h2 style={{ fontFamily: HFONT, fontSize: "clamp(1.8rem,3vw,2.4rem)", fontWeight: 700, color: C.ink, lineHeight: 1.1, letterSpacing: "-0.02em", marginBottom: "1.5rem" }}>What to do with all of this.</h2>
+
+          {/* ── PRACTICAL GUIDANCE — every exercise's tips + phrases in one table ── */}
+          {(() => {
+            const gInterp = (str) => resolveRoleTokens(String(str || "").replace(/\{U\}/g, userName).replace(/\{P\}/g, partnerName), myS, partS, userName, partnerName);
+            const rows = [];
+            // Communication — the couple-type tips (title + phrase to try)
+            (coupleType?.tips || []).slice(0, 3).forEach(t => {
+              if (t?.title) rows.push({ ex: "Communication", color: "#9B5DE5", tip: gInterp(t.title), phrase: t.phraseTry ? gInterp(t.phraseTry) : "" });
+            });
+            // Expectations — the two domains, with a conversation to open each
+            rows.push({ ex: "Expectations", color: "#1B5FE8", tip: "Get explicit about who handles what", phrase: "Where did we each assume the other would take the lead, without ever saying it out loud?" });
+            rows.push({ ex: "Expectations", color: "#1B5FE8", tip: "Compare your life-and-values expectations", phrase: "On the big questions, family, money, where we live, where do our answers line up, and where did we differ?" });
+            // Relationship Reflection — the explore insights (action doubles as the phrase)
+            if (hasAnniversary && ex3Answers && partnerEx3) {
+              try {
+                deriveAnniversaryInsights(ex3Answers, partnerEx3, userName, partnerName, coupleType)
+                  .filter(i => i.type === "explore").slice(0, 2)
+                  .forEach(i => rows.push({ ex: "Relationship Reflection", color: "#10b981", tip: i.title, phrase: i.action || "" }));
+              } catch {}
+            }
+            // Physical Intimacy — the non-aligned dimensions and their prompts
+            if (intimacyBothDone && intimacySummary) {
+              intimacySummary.dimSummary.filter(d => d.state !== "aligned" && d.avgGap != null).slice(0, 2).forEach(d => {
+                const meta = INTIMACY_DIMENSIONS.find(x => x.id === d.id);
+                const prompt = (INTIMACY_RESULTS_PROSE[d.id]?.prompt || "").replace(/\{U\}/g, userName).replace(/\{P\}/g, partnerName);
+                rows.push({ ex: "Physical Intimacy", color: "#B5546E", tip: `Talk about ${(meta?.label || d.id).toLowerCase()}`, phrase: prompt });
+              });
+            }
+            if (!rows.length) return null;
+            return (
+              <div style={{ marginBottom: "1.75rem" }}>
+                <div style={{ fontSize: "0.62rem", letterSpacing: "0.22em", textTransform: "uppercase", color: C.clay, fontFamily: BFONT, fontWeight: 700, marginBottom: "0.35rem" }}>Practical guidance</div>
+                <p style={{ fontSize: "0.8rem", color: C.muted, fontFamily: BFONT, fontWeight: 300, lineHeight: 1.6, margin: "0 0 0.85rem" }}>Every practical takeaway from your results, in one place. The exercise it came from, what to do, and a phrase to start the conversation.</p>
+                <div style={{ background: "white", border: `1.5px solid ${C.stone}`, borderRadius: 14, overflow: "hidden" }}>
+                  {rows.map((r, i) => (
+                    <div key={i} style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "128px 1fr", gap: isMobile ? "0.35rem" : "0.9rem", padding: "0.9rem 1rem", borderTop: i === 0 ? "none" : `1px solid ${C.stone}80`, alignItems: "start" }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: "0.4rem" }}>
+                        <span style={{ width: 7, height: 7, borderRadius: "50%", background: r.color, flexShrink: 0 }} />
+                        <span style={{ fontSize: "0.6rem", letterSpacing: "0.06em", textTransform: "uppercase", fontWeight: 700, color: r.color, fontFamily: BFONT, lineHeight: 1.3 }}>{r.ex}</span>
+                      </div>
+                      <div>
+                        <div style={{ fontSize: "0.82rem", fontWeight: 700, color: C.ink, fontFamily: BFONT, marginBottom: r.phrase ? "0.3rem" : 0, lineHeight: 1.35 }}>{r.tip}</div>
+                        {r.phrase && (
+                          <div style={{ display: "flex", gap: "0.45rem", alignItems: "flex-start" }}>
+                            <span style={{ fontSize: "0.55rem", letterSpacing: "0.12em", textTransform: "uppercase", color: r.color, fontFamily: BFONT, fontWeight: 700, whiteSpace: "nowrap", marginTop: "0.15rem" }}>Try</span>
+                            <span style={{ fontSize: "0.78rem", color: C.muted, fontFamily: BFONT, fontStyle: "italic", lineHeight: 1.55 }}>"{r.phrase}"</span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            );
+          })()}
 
           {/* ── ACTION PLANS ── */}
           <div style={{ marginBottom: "1.5rem" }}>
