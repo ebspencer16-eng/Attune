@@ -464,20 +464,14 @@
       </div>
     </div>
     <div class="kpi-grid">
-      <div class="kpi-card orange"><div class="kpi-label">Assessment</div><div class="kpi-val">22%</div><div class="kpi-sub">$89 · 185 orders</div></div>
-      <div class="kpi-card orange"><div class="kpi-label">Starting Out</div><div class="kpi-val">31%</div><div class="kpi-sub">$109–$129 · 262 orders</div></div>
-      <div class="kpi-card indigo"><div class="kpi-label">Anniversary</div><div class="kpi-val">28%</div><div class="kpi-sub">$129–$119 · 237 orders</div></div>
-      <div class="kpi-card green"><div class="kpi-label">Premium</div><div class="kpi-val">19%</div><div class="kpi-sub">$299–$289 · 163 orders</div></div>
+      <div class="kpi-card orange"><div class="kpi-label">Assessment</div><div class="kpi-val" id="pkgkpi-core">—</div><div class="kpi-sub" id="pkgkpi-core-sub">Share of orders</div></div>
+      <div class="kpi-card orange"><div class="kpi-label">Starting Out</div><div class="kpi-val" id="pkgkpi-newlywed">—</div><div class="kpi-sub" id="pkgkpi-newlywed-sub">Share of orders</div></div>
+      <div class="kpi-card indigo"><div class="kpi-label">Anniversary</div><div class="kpi-val" id="pkgkpi-anniversary">—</div><div class="kpi-sub" id="pkgkpi-anniversary-sub">Share of orders</div></div>
+      <div class="kpi-card green"><div class="kpi-label">Premium</div><div class="kpi-val" id="pkgkpi-premium">—</div><div class="kpi-sub" id="pkgkpi-premium-sub">Share of orders</div></div>
     </div>
-    <div class="chart-grid">
-      <div class="chart-card">
-        <div class="chart-head"><div><div class="chart-title">Package split over time</div><div class="chart-subtitle">Stacked by month</div></div></div>
-        <div class="chart-body"><canvas id="chart-pkg-stacked"></canvas></div>
-      </div>
-      <div class="chart-card">
-        <div class="chart-head"><div><div class="chart-title">Digital vs. physical box</div><div class="chart-subtitle">By package tier</div></div></div>
-        <div class="chart-body"><canvas id="chart-format"></canvas></div>
-      </div>
+    <div class="chart-card">
+      <div class="chart-head"><div><div class="chart-title">Package split over time</div><div class="chart-subtitle">Stacked by month</div></div></div>
+      <div class="chart-body"><canvas id="chart-pkg-stacked"></canvas></div>
     </div>
     <div class="chart-card" style="margin-top:1.25rem">
       <div class="chart-head"><div><div class="chart-title">Revenue contribution by package</div><div class="chart-subtitle">Last 12 months</div></div></div>
@@ -499,15 +493,15 @@
     </div>
     <div class="chart-grid three">
       <div class="chart-card">
-        <div class="chart-head"><div><div class="chart-title">Age range</div><div class="chart-subtitle">n=714 (84% response rate)</div></div></div>
+        <div class="chart-head"><div><div class="chart-title">Age range</div><div class="chart-subtitle">n=—</div></div></div>
         <div class="chart-body"><canvas id="chart-age"></canvas></div>
       </div>
       <div class="chart-card">
-        <div class="chart-head"><div><div class="chart-title">Gender</div><div class="chart-subtitle">n=698</div></div></div>
+        <div class="chart-head"><div><div class="chart-title">Gender</div><div class="chart-subtitle">n=—</div></div></div>
         <div class="chart-body"><canvas id="chart-gender"></canvas></div>
       </div>
       <div class="chart-card">
-        <div class="chart-head"><div><div class="chart-title">Relationship status</div><div class="chart-subtitle">n=731</div></div></div>
+        <div class="chart-head"><div><div class="chart-title">Relationship status</div><div class="chart-subtitle">n=—</div></div></div>
         <div class="chart-body"><canvas id="chart-relstatus"></canvas></div>
       </div>
     </div>
@@ -519,14 +513,11 @@
         </div>
       </div>
       <div class="chart-card">
-        <div class="chart-head"><div><div class="chart-title">Children together</div><div class="chart-subtitle">n=689</div></div></div>
+        <div class="chart-head"><div><div class="chart-title">Children together</div><div class="chart-subtitle">n=—</div></div></div>
         <div class="chart-body"><canvas id="chart-children"></canvas></div>
       </div>
     </div>
-    <div class="chart-card" style="margin-top:1.25rem">
-      <div class="chart-head"><div><div class="chart-title">Package preference by age group</div><div class="chart-subtitle">Which packages each age cohort chooses</div></div></div>
-      <div class="chart-body"><canvas id="chart-age-pkg"></canvas></div>
-    </div>
+
   </div>
 
   <!-- ══ RESPONSES ══ -->
@@ -582,7 +573,7 @@
       </div>
       <div class="chart-grid">
         <div class="chart-card">
-          <div class="chart-head"><div><div class="chart-title">Overall relationship feel distribution</div><div class="chart-subtitle">Combined avg score per couple · n=237</div></div></div>
+          <div class="chart-head"><div><div class="chart-title">Overall relationship feel distribution</div><div class="chart-subtitle">Combined avg score per couple</div></div></div>
           <div class="chart-body"><canvas id="chart-story-feel"></canvas></div>
         </div>
         <div class="chart-card">
@@ -604,10 +595,10 @@
       </div>
     </div>
     <div class="kpi-grid">
-      <div class="kpi-card green"><div class="kpi-label">NPS score</div><div class="kpi-val">71</div><div class="kpi-sub">World-class benchmark: 50+</div><div class="kpi-trend up">↑ 4 pts this quarter</div></div>
-      <div class="kpi-card green"><div class="kpi-label">Avg rating</div><div class="kpi-val">4.6<span style="font-size:1rem;color:var(--muted)">/5</span></div><div class="kpi-sub">n=512 ratings</div></div>
-      <div class="kpi-card indigo"><div class="kpi-label">Completion rate</div><div class="kpi-val">73%</div><div class="kpi-sub">Both partners finish all exercises</div></div>
-      <div class="kpi-card amber"><div class="kpi-label">Drop-off point</div><div class="kpi-val">Ex 02</div><div class="kpi-sub">Most incomplete at Exercise 2</div></div>
+      <div class="kpi-card green"><div class="kpi-label">NPS score</div><div class="kpi-val">—</div><div class="kpi-sub">World-class benchmark: 50+</div></div>
+      <div class="kpi-card green"><div class="kpi-label">Avg rating</div><div class="kpi-val">—</div><div class="kpi-sub">Post-completion survey</div></div>
+      <div class="kpi-card indigo"><div class="kpi-label">Completion rate</div><div class="kpi-val" id="sat-completion">—</div><div class="kpi-sub">Both partners finish all exercises</div></div>
+      <div class="kpi-card amber"><div class="kpi-label">Drop-off point</div><div class="kpi-val">—</div><div class="kpi-sub">Most common incomplete step</div></div>
     </div>
     <div class="chart-grid">
       <div class="chart-card">
@@ -2997,10 +2988,21 @@ async function loadRealDemographics() {
     if (childrenDist) { childrenData.labels = childrenDist.map(x => x.label); childrenData.data = childrenDist.map(x => x.pct); }
     if (source)    { sourceData.labels = source.map(x => x.label); sourceData.data = source.map(x => x.pct); }
 
-    // Update n= captions
-    const setN = (sel, n) => { document.querySelectorAll(sel).forEach(el => el.textContent = `n=${n}`); };
-    const total = rows.length;
-    setN('#page-demographics .chart-subtitle', total);
+    // Update n= captions per field (actual response counts, not total profiles).
+    // A field left blank by a user is not counted — so gender with no answers reads n=0.
+    const fieldByTitle = {
+      'Age range':'age_range', 'Gender':'gender', 'Relationship status':'relationship_status',
+      'Length of relationship':'relationship_length', 'Children together':'children'
+    };
+    document.querySelectorAll('#page-demographics .chart-card').forEach(card => {
+      const title = card.querySelector('.chart-title')?.textContent?.trim();
+      const field = fieldByTitle[title];
+      if (!field) return;
+      const n = rows.filter(r => r[field]).length;
+      let sub = card.querySelector('.chart-subtitle');
+      if (!sub) { sub = document.createElement('div'); sub.className = 'chart-subtitle'; card.querySelector('.chart-head > div')?.appendChild(sub); }
+      sub.textContent = 'n=' + n;
+    });
 
     // If the demographics page was already rendered, force re-init so charts pick up new data
     if (chartsInit.demographics) {
@@ -3124,6 +3126,13 @@ async function loadRealPackageTrend(orders) {
   const mixCounts = { core: 0, newlywed: 0, anniversary: 0, premium: 0 };
   orders.forEach(o => { if (o.pkg_key && mixCounts[o.pkg_key] != null) mixCounts[o.pkg_key]++; });
   pkgMix = [mixCounts.core, mixCounts.newlywed, mixCounts.anniversary, mixCounts.premium];
+
+  // Fill Package Mix KPI cards with real share-of-orders
+  (function(){
+    const totalMix = pkgMix.reduce((a,b)=>a+b,0);
+    const set = (id, n) => { const el = document.getElementById('pkgkpi-'+id); if (el) el.textContent = totalMix ? Math.round(100*n/totalMix)+'%' : '—'; const sub = document.getElementById('pkgkpi-'+id+'-sub'); if (sub) sub.textContent = n + (n===1?' order':' orders'); };
+    set('core', mixCounts.core); set('newlywed', mixCounts.newlywed); set('anniversary', mixCounts.anniversary); set('premium', mixCounts.premium);
+  })();
 
   // Force re-render if the packages page is currently open
   if (chartsInit.packages) {
@@ -3822,21 +3831,17 @@ function initCharts(page) {
         {label:'Premium',     data: realTrend.Premium,     backgroundColor:'#34D399'},
       ]
     } : {labels:MONTHS,datasets:[
-      {label:'Assessment',data:[18,21,19,22,24,20,23,26,21,19,22,24],backgroundColor:'#FF6B35'},
-      {label:'Starting Out',data:[25,28,32,29,35,38,41,39,43,45,47,50],backgroundColor:'#FBBF24'},
-      {label:'Anniversary',data:[22,25,27,31,30,33,36,34,38,40,42,44],backgroundColor:'#6C7FFF'},
-      {label:'Premium',data:[12,14,15,17,18,20,21,23,22,25,27,30],backgroundColor:'#34D399'},
+      {label:'Assessment',data:Array(12).fill(0),backgroundColor:'#FF6B35'},
+      {label:'Starting Out',data:Array(12).fill(0),backgroundColor:'#FBBF24'},
+      {label:'Anniversary',data:Array(12).fill(0),backgroundColor:'#6C7FFF'},
+      {label:'Premium',data:Array(12).fill(0),backgroundColor:'#34D399'},
     ]};
     new Chart(document.getElementById('chart-pkg-stacked'),{type:'bar',data:pkgStacked,options:{plugins:{legend:{position:'bottom'}},scales:{x:{stacked:true,grid:{display:false}},y:{stacked:true,grid:{color:'#E6ECF6'}}}}});
-    const _fmtBase = ['core','newlywed','anniversary','premium'];
-    const _fmtDigital  = _fmtBase.map(k => ORDERS.filter(o => (o.pkg||'').replace('-box','') === k && !o.physical).length);
-    const _fmtPhysical = _fmtBase.map(k => ORDERS.filter(o => (o.pkg||'').replace('-box','') === k &&  o.physical).length);
-    new Chart(document.getElementById('chart-format'),{type:'bar',data:{labels:PKG_LABELS,datasets:[{label:'Digital',data:_fmtDigital,backgroundColor:'#6C7FFF',borderRadius:4},{label:'Physical box',data:_fmtPhysical,backgroundColor:'#FBBF24',borderRadius:4}]},options:{plugins:{legend:{position:'bottom'}},scales:{x:{grid:{display:false}},y:{grid:{color:'#E6ECF6'}}}}});
     new Chart(document.getElementById('chart-rev-pkg'),{type:'bar',data:{labels:MONTHS,datasets:[
-      {label:'Assessment',data:[1062,1239,1121,1298,1416,1180,1357,1534,1239,1121,1298,1416],backgroundColor:'#FF6B3544',borderColor:'#FF6B35',borderWidth:1.5,borderRadius:4},
-      {label:'Starting Out',data:[1975,2212,2528,2291,2765,3002,3239,3080,3397,3555,3713,3950],backgroundColor:'#FBBF2444',borderColor:'#FBBF24',borderWidth:1.5,borderRadius:4},
-      {label:'Anniversary',data:[2178,2475,2673,3069,2970,3267,3564,3366,3762,3960,4158,4356],backgroundColor:'#6C7FFF44',borderColor:'#6C7FFF',borderWidth:1.5,borderRadius:4},
-      {label:'Premium',data:[2988,3486,3735,4233,4482,4980,5229,5727,5478,6225,6723,7470],backgroundColor:'#34D39944',borderColor:'#34D399',borderWidth:1.5,borderRadius:4},
+      {label:'Assessment',data:Array(12).fill(0),backgroundColor:'#FF6B3544',borderColor:'#FF6B35',borderWidth:1.5,borderRadius:4},
+      {label:'Starting Out',data:Array(12).fill(0),backgroundColor:'#FBBF2444',borderColor:'#FBBF24',borderWidth:1.5,borderRadius:4},
+      {label:'Anniversary',data:Array(12).fill(0),backgroundColor:'#6C7FFF44',borderColor:'#6C7FFF',borderWidth:1.5,borderRadius:4},
+      {label:'Premium',data:Array(12).fill(0),backgroundColor:'#34D39944',borderColor:'#34D399',borderWidth:1.5,borderRadius:4},
     ]},options:{plugins:{legend:{position:'bottom'}},scales:{x:{stacked:true,grid:{display:false}},y:{stacked:true,grid:{color:'#E6ECF6'},ticks:{callback:v=>'$'+Math.round(v/1000)+'k'}}}}});
   }
   else if (page==='demographics') {
@@ -3845,19 +3850,13 @@ function initCharts(page) {
     new Chart(document.getElementById('chart-relstatus'),{type:'doughnut',data:{labels:relStatusData.labels,datasets:[{data:relStatusData.data,backgroundColor:['#6C7FFF','#FF6B35','#34D399','#FBBF24','#F87171'],borderColor:'#FFFFFF',borderWidth:3}]},options:{plugins:{legend:{position:'bottom',labels:{padding:14,boxWidth:11}}},cutout:'60%'}});
     renderBars('demo-rellength-bars',relLengths,'#6C7FFF');
     new Chart(document.getElementById('chart-children'),{type:'bar',data:{labels:childrenData.labels,datasets:[{data:childrenData.data,backgroundColor:'#34D399',borderRadius:6}]},options:{plugins:{legend:{display:false}},scales:{x:{grid:{display:false}},y:{grid:{color:'#E6ECF6'},ticks:{callback:v=>v+'%'}}}}});
-    new Chart(document.getElementById('chart-age-pkg'),{type:'bar',data:{labels:ageData.labels,datasets:[
-      {label:'Assessment',data:[35,18,20,24,29],backgroundColor:'#FF6B35',borderRadius:3},
-      {label:'Starting Out',data:[41,38,28,22,18],backgroundColor:'#FBBF24',borderRadius:3},
-      {label:'Anniversary',data:[16,27,31,34,28],backgroundColor:'#6C7FFF',borderRadius:3},
-      {label:'Premium',data:[8,17,21,20,25],backgroundColor:'#34D399',borderRadius:3},
-    ]},options:{plugins:{legend:{position:'bottom'}},scales:{x:{grid:{display:false}},y:{grid:{color:'#E6ECF6'},ticks:{callback:v=>v+'%'}}}}});
   }
   else if (page==='responses') {
     new Chart(document.getElementById('chart-dim-scores'),{type:'radar',data:{labels:dimScores.labels,datasets:[{label:'Avg alignment',data:dimScores.data,borderColor:'#6C7FFF',backgroundColor:'rgba(108,127,255,.15)',borderWidth:2,pointRadius:3,pointBackgroundColor:'#6C7FFF'}]},options:{scales:{r:{grid:{color:'#E6ECF6'},angleLines:{color:'#E6ECF6'},ticks:{display:false},min:0,max:100}},plugins:{legend:{display:false}}}});
     renderBars('comm-type-bars',commTypes,'#FF6B35');
     new Chart(document.getElementById('chart-exp-align'),{type:'bar',data:{labels:expAlign.labels,datasets:[{label:'% aligned',data:expAlign.data,backgroundColor:expAlign.data.map(v=>v<50?'#F87171':v<65?'#FBBF24':'#34D399'),borderRadius:6}]},options:{plugins:{legend:{display:false}},scales:{x:{grid:{display:false}},y:{grid:{color:'#E6ECF6'},ticks:{callback:v=>v+'%'},min:0,max:100}}}});
     renderBars('exp-gap-bars',expGaps,'#F87171');
-    new Chart(document.getElementById('chart-story-feel'),{type:'bar',data:{labels:['Needs work (0)','Rough patch (1)','Solid (2)','Really good (3)','Better than ever (4)'],datasets:[{data:[12,31,78,89,27],backgroundColor:['#F87171','#FBBF24','#6C7FFF','#34D399','#10b981'],borderRadius:6}]},options:{plugins:{legend:{display:false}},scales:{x:{grid:{display:false}},y:{grid:{color:'#E6ECF6'}}}}});
+    new Chart(document.getElementById('chart-story-feel'),{type:'bar',data:{labels:['Needs work (0)','Rough patch (1)','Solid (2)','Really good (3)','Better than ever (4)'],datasets:[{data:[0,0,0,0,0],backgroundColor:['#F87171','#FBBF24','#6C7FFF','#34D399','#10b981'],borderRadius:6}]},options:{plugins:{legend:{display:false}},scales:{x:{grid:{display:false}},y:{grid:{color:'#E6ECF6'}}}}});
     renderBars('story-gap-bars',storyGaps,'#FBBF24');
   }
   else if (page==='satisfaction') {
