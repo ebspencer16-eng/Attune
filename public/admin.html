@@ -330,11 +330,6 @@
         <div class="kpi-val" id="stat-revenue">—</div>
         <div class="kpi-trend up" id="stat-revenue-trend"></div>
       </div>
-      <div class="kpi-card indigo">
-        <div class="kpi-label">Completion rate</div>
-        <div class="kpi-val" id="stat-completion">—</div>
-        <div class="kpi-sub">Both partners complete</div>
-      </div>
       <div class="kpi-card amber">
         <div class="kpi-label">Avg order value</div>
         <div class="kpi-val" id="stat-aov">—</div>
@@ -360,9 +355,6 @@
         </div>
         <div class="chart-body"><canvas id="chart-pkg-mix"></canvas></div>
       </div>
-    </div>
-
-    <div class="chart-grid">
       <div class="chart-card">
         <div class="chart-head">
           <div>
@@ -463,7 +455,7 @@
         <div class="topbar-sub">How customers choose packages over time</div>
       </div>
     </div>
-    <div class="kpi-grid">
+    <div class="kpi-grid" style="grid-template-columns:repeat(4,1fr);">
       <div class="kpi-card orange"><div class="kpi-label">Assessment</div><div class="kpi-val" id="pkgkpi-core">—</div><div class="kpi-sub" id="pkgkpi-core-sub">Share of orders</div></div>
       <div class="kpi-card orange"><div class="kpi-label">Starting Out</div><div class="kpi-val" id="pkgkpi-newlywed">—</div><div class="kpi-sub" id="pkgkpi-newlywed-sub">Share of orders</div></div>
       <div class="kpi-card indigo"><div class="kpi-label">Anniversary</div><div class="kpi-val" id="pkgkpi-anniversary">—</div><div class="kpi-sub" id="pkgkpi-anniversary-sub">Share of orders</div></div>
@@ -1375,6 +1367,7 @@ window.adminAuthHeaders = function(extra){
   </div>
 
   <div class="page" id="page-promos">
+    <style>#page-promos .chart-card{padding:1.1rem 1.25rem 1.25rem;}#page-promos .chart-title{font-size:.8rem;font-weight:700;color:var(--text);}#page-promos .chart-sub{font-size:.68rem;color:var(--muted);margin-top:.15rem;line-height:1.5;}</style>
     <div class="topbar">
       <div>
         <div class="topbar-title">Promo Analytics</div>
@@ -3619,20 +3612,40 @@ async function renderQuestionExplorer(containerId, groupPrefixes) {
   document.getElementById(containerId + '-xcol').onchange = renderX;
   renderX();
   const distEl = document.getElementById(containerId + '-dist');
-  distEl.innerHTML = qFields.map(f => {
-    const counts = {}; let n = 0;
-    rows.forEach(r => { let v = r[f.key]; if (v === null || v === undefined || v === '') return; if (f.kind === 'scale') v = String(Math.round(v)); counts[v] = (counts[v] || 0) + 1; n++; });
-    const cats = f.kind === 'scale' ? ['1','2','3','4','5'] : (f.options ? f.options.map(o => o.v) : Object.keys(counts));
-    const segs = cats.map((c, idx) => {
-      const cnt = counts[c] || 0; if (!cnt) return '';
-      const w = n ? Math.round(cnt / n * 100) : 0;
-      const color = f.kind === 'scale' ? QX_SCALE_COLORS[idx] : QX_CAT_COLORS[idx % QX_CAT_COLORS.length];
-      return '<div title="' + QX_ESC(qxCatLabel(f, c)) + ': ' + cnt + '" style="width:' + w + '%;background:' + color + ';height:100%;"></div>';
+  // Group questions that share the same option set so each group shows one color
+  // key at the top (segment colors follow the option order).
+  const groups = [];
+  const bySig = {};
+  qFields.forEach(f => {
+    const sig = f.kind === 'scale' ? '__scale__' : ((f.options || []).map(o => o.v).join('||') || '__free__');
+    if (!bySig[sig]) { bySig[sig] = { kind: f.kind, options: f.options || [], fields: [] }; groups.push(bySig[sig]); }
+    bySig[sig].fields.push(f);
+  });
+  const swatch = (color, label) => '<span style="display:inline-flex;align-items:center;gap:.3rem;font-size:.66rem;color:var(--text);"><span style="width:10px;height:10px;border-radius:3px;background:' + color + ';flex-shrink:0;"></span>' + label + '</span>';
+  const keyBar = (inner) => '<div style="display:flex;flex-wrap:wrap;gap:.4rem .85rem;align-items:center;margin:0 0 .8rem;padding:.5rem .7rem;background:var(--surface);border:1px solid var(--border);border-radius:8px;"><span style="font-family:var(--mono);font-size:.54rem;letter-spacing:.12em;text-transform:uppercase;color:var(--dim);">Key</span>' + inner + '</div>';
+  distEl.innerHTML = groups.map(g => {
+    let key = '';
+    if (g.kind === 'scale') {
+      key = keyBar(['1','2','3','4','5'].map((nlab, i) => swatch(QX_SCALE_COLORS[i], nlab)).join('') + '<span style="color:var(--dim);font-size:.62rem;">lower&nbsp;&#10230;&nbsp;higher</span>');
+    } else if (g.options && g.options.length) {
+      key = keyBar(g.options.map((o, i) => swatch(QX_CAT_COLORS[i % QX_CAT_COLORS.length], QX_ESC(o.label))).join(''));
+    }
+    const bars = g.fields.map(f => {
+      const counts = {}; let n = 0;
+      rows.forEach(r => { let v = r[f.key]; if (v === null || v === undefined || v === '') return; if (f.kind === 'scale') v = String(Math.round(v)); counts[v] = (counts[v] || 0) + 1; n++; });
+      const cats = f.kind === 'scale' ? ['1','2','3','4','5'] : (f.options ? f.options.map(o => o.v) : Object.keys(counts));
+      const segs = cats.map((c, idx) => {
+        const cnt = counts[c] || 0; if (!cnt) return '';
+        const w = n ? Math.round(cnt / n * 100) : 0;
+        const color = f.kind === 'scale' ? QX_SCALE_COLORS[idx] : QX_CAT_COLORS[idx % QX_CAT_COLORS.length];
+        return '<div title="' + QX_ESC(qxCatLabel(f, c)) + ': ' + cnt + '" style="width:' + w + '%;background:' + color + ';height:100%;"></div>';
+      }).join('');
+      return '<div style="margin-bottom:.85rem;">' +
+        '<div style="font-size:.74rem;color:var(--text);margin-bottom:.3rem;line-height:1.35;">' + QX_ESC(f.label) + ' <span style="color:var(--dim);font-family:var(--mono);font-size:.66rem;">n=' + n + '</span></div>' +
+        '<div style="display:flex;height:14px;border-radius:5px;overflow:hidden;background:var(--surface);">' + segs + '</div>' +
+      '</div>';
     }).join('');
-    return '<div style="margin-bottom:.85rem;">' +
-      '<div style="font-size:.74rem;color:var(--text);margin-bottom:.3rem;line-height:1.35;">' + QX_ESC(f.label) + ' <span style="color:var(--dim);font-family:var(--mono);font-size:.66rem;">n=' + n + '</span></div>' +
-      '<div style="display:flex;height:14px;border-radius:5px;overflow:hidden;background:var(--surface);">' + segs + '</div>' +
-    '</div>';
+    return '<div style="margin-bottom:1.1rem;">' + key + bars + '</div>';
   }).join('');
 }
 
