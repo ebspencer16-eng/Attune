@@ -553,11 +553,11 @@
     <div id="resp-exp" style="display:none">
       <div class="chart-grid">
         <div class="chart-card">
-          <div class="chart-head"><div><div class="chart-title">Expectations alignment by category</div><div class="chart-subtitle">% of couples fully aligned per category</div></div></div>
+          <div class="chart-head"><div><div class="chart-title">Responsibilities</div><div class="chart-subtitle">Who handles what · % of couples aligned per area</div></div></div>
           <div class="chart-body"><canvas id="chart-exp-align"></canvas></div>
         </div>
         <div class="chart-card">
-          <div class="chart-head"><div><div class="chart-title">Most common expectation gaps</div><div class="chart-subtitle">Where couples most often differ</div></div></div>
+          <div class="chart-head"><div><div class="chart-title">Life &amp; Values</div><div class="chart-subtitle">The big questions · where couples most often differ</div></div></div>
           <div class="chart-body">
             <div class="insight-list" id="exp-gap-bars" style="margin-top:.5rem;"></div>
           </div>
@@ -2636,8 +2636,8 @@ const relStatusData = {labels:['Dating','Engaged','Married','Remarried','Partner
 const childrenData = {labels:['None','1','2','3+','Expecting'],data:[0,0,0,0,0]};
 const dimScores = {labels:['Energy','Expression','Needs','Bids','Listening','Conflict','Repair','Love','Stress','Feedback'],data:[0,0,0,0,0,0,0,0,0,0]};
 const commTypes = [{l:'Balanced pair',v:0},{l:'Expressive + Reserved',v:0},{l:'Both expressive',v:0},{l:'Thinker + Feeler',v:0},{l:'Planner + Spontaneous',v:0},{l:'Other',v:0}];
-const expAlign = {labels:['Finances','Household','Social life','Career','Family','Intimacy','Faith/values','Recreation'],data:[0,0,0,0,0,0,0,0]};
-const expGaps = [{l:'Intimacy expectations',v:0},{l:'Financial approach',v:0},{l:'Career priorities',v:0},{l:'Extended family',v:0},{l:'Social time',v:0}];
+const expAlign = {labels:['Household','Financial','Career','Extended family','Emotional'],data:[0,0,0,0,0]};
+const expGaps = [{l:'Children',v:0},{l:'Finances',v:0},{l:'Where you live',v:0},{l:'Conflict',v:0},{l:'Repair',v:0}];
 const storyGaps = [{l:'Fun & lightness',v:0},{l:'Communication ease',v:0},{l:'Day-to-day connection',v:0},{l:'Overall feel',v:0}];
 let funnelData = [0,0,0,0];
 let ratingsData = {labels:['5 ★','4 ★','3 ★','2 ★','1 ★'],data:[0,0,0,0,0]};

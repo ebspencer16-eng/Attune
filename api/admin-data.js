@@ -60,7 +60,7 @@ export default async function handler(req) {
       admin.from('beta_codes').select('*').order('code', { ascending: true }),
       admin.from('lmft_requests').select('*').order('created_at', { ascending: false }).limit(200),
       admin.from('feedback_submissions').select('*').order('submitted_at', { ascending: false }).limit(2000),
-      admin.from('profiles').select('id, partner_profile_id, invite_code, age_range, gender, pronouns, relationship_status, relationship_length, children, signup_source, ex1_answers, ex2_answers'),
+      admin.from('profiles').select('id, partner_profile_id, invite_code, age_range, gender, pronouns, partner_pronouns, relationship_status, relationship_length, children, signup_source, ex1_answers, ex2_answers'),
       admin.from('partner_sessions').select('invite_code, ex1_answers, ex2_answers'),
     ]);
 
@@ -80,6 +80,9 @@ export default async function handler(req) {
       const partner = p.partner_profile_id ? byId[p.partner_profile_id] : null;
       if (!partner) return;
       sharedFields.forEach(f => { if (!p[f] && partner[f]) p[f] = partner[f]; });
+      // Each partner records the other's pronouns. If someone never set their
+      // own, recover it from what their partner recorded for them.
+      if (!p.pronouns && partner.partner_pronouns) p.pronouns = partner.partner_pronouns;
     });
 
     const hasAnswers = v => v && typeof v === 'object' && Object.keys(v).length > 0;
