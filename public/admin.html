@@ -20,8 +20,8 @@
 <style>
   *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
   :root{
-    --bg:#0D0F14;--surface:#161920;--card:#1D2029;--border:#2A2E3A;
-    --text:#E8EAF0;--muted:#6B7280;--dim:#4B5563;
+    --bg:#EDF1FA;--surface:#E6ECF7;--card:#FFFFFF;--border:#D3DCEC;
+    --text:#1B2547;--muted:#586187;--dim:#8892A9;
     --orange:#FF6B35;--indigo:#6C7FFF;--green:#34D399;--amber:#FBBF24;--rose:#F87171;
     --hfont:'Playfair Display',Georgia,serif;
     --bfont:'DM Sans',sans-serif;
@@ -40,7 +40,7 @@
   .sb-nav{padding:1rem 0;flex:1}
   .sb-section{font-size:.55rem;letter-spacing:.2em;text-transform:uppercase;color:var(--dim);font-weight:700;padding:.5rem 1.25rem .35rem;font-family:var(--mono)}
   .sb-item{display:flex;align-items:center;gap:.65rem;padding:.6rem 1.25rem;font-size:.8rem;color:var(--muted);cursor:pointer;transition:all .15s;border-left:2px solid transparent;text-decoration:none}
-  .sb-item:hover{color:var(--text);background:rgba(255,255,255,.03)}
+  .sb-item:hover{color:var(--text);background:rgba(27,37,71,.05)}
   .sb-item.active{color:var(--text);border-left-color:var(--orange);background:rgba(255,107,53,.06);font-weight:600}
   .sb-item svg{flex-shrink:0}
   .sb-footer{padding:.85rem 1.25rem;border-top:1px solid var(--border);font-size:.68rem;color:var(--dim)}
@@ -115,8 +115,8 @@
   /* RESPONSE TABLE */
   .response-table{width:100%;border-collapse:collapse;font-size:.78rem}
   .response-table th{text-align:left;font-size:.6rem;letter-spacing:.18em;text-transform:uppercase;color:var(--dim);font-weight:700;padding:.65rem 1rem;border-bottom:1px solid var(--border);font-family:var(--mono)}
-  .response-table td{padding:.75rem 1rem;border-bottom:1px solid rgba(255,255,255,.04);color:var(--muted);vertical-align:middle}
-  .response-table tr:hover td{background:rgba(255,255,255,.02);color:var(--text)}
+  .response-table td{padding:.75rem 1rem;border-bottom:1px solid rgba(27,37,71,.08);color:var(--muted);vertical-align:middle}
+  .response-table tr:hover td{background:rgba(27,37,71,.03);color:var(--text)}
   .pkg-tag{display:inline-block;padding:.2rem .55rem;border-radius:5px;font-size:.62rem;font-weight:700;font-family:var(--mono)}
   .score-bar{height:5px;border-radius:3px;background:var(--border);overflow:hidden;width:60px;display:inline-block;vertical-align:middle;margin-left:.4rem}
   .score-fill{height:100%;border-radius:3px}
@@ -223,20 +223,6 @@
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
       Dashboard
     </a>
-    <div class="sb-section">Operations</div>
-    <a class="sb-item" onclick="showPage('fulfillment')">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="1" y="3" width="15" height="13" rx="1"/><path d="M16 8h4l3 5v3h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
-      Fulfillment
-      <span id="sb-fulfillment-badge" style="margin-left:auto;background:var(--amber);color:#000;font-size:.55rem;font-weight:800;padding:.1rem .4rem;border-radius:20px;font-family:var(--mono);"></span>
-    </a>
-    <a class="sb-item" onclick="showPage('lmft-requests')">
-      <svg width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M10 2a8 8 0 1 0 0 16A8 8 0 0 0 10 2zm0 4v4l3 2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
-      <span>LMFT Requests</span>
-    </a>
-    <a class="sb-item" onclick="showPage('beta-codes')">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12V7a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h10"/><path d="M7 12h2M12 12h2M17 12h1"/><circle cx="18" cy="18" r="3"/><path d="m17 18 1 1 2-2"/></svg>
-      Beta Codes
-    </a>
     <div class="sb-section">Revenue</div>
     <a class="sb-item" onclick="showPage('orders')">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
@@ -281,7 +267,7 @@
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><rect x="7" y="10" width="3" height="7"/><rect x="12" y="6" width="3" height="11"/><rect x="17" y="13" width="3" height="4"/></svg>
       Explore
     </a>
-    <div class="sb-section">Review</div>
+    <div class="sb-section">Demo</div>
     <a class="sb-item" onclick="showPage('ux-views')">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg>
       UX Views
@@ -351,18 +337,6 @@
       <div class="kpi-card amber">
         <div class="kpi-label">Avg order value</div>
         <div class="kpi-val" id="stat-aov">—</div>
-      </div>
-      <div class="kpi-card amber" style="cursor:pointer;" onclick="document.querySelector('[onclick*=fulfillment]').click()">
-        <div class="kpi-label">📦 Pending shipments</div>
-        <div class="kpi-val" id="dash-pending-count">-</div>
-        <div class="kpi-sub">Physical orders to fulfill</div>
-        <div style="font-size:.65rem;color:var(--amber);margin-top:.4rem;font-weight:600;">View fulfillment →</div>
-      </div>
-      <div class="kpi-card rose">
-        <div class="kpi-label">Avg fulfillment time</div>
-        <div class="kpi-val" id="dash-avg-ship">-</div>
-        <div class="kpi-sub" id="dash-avg-ship-sub">Days order → shipped</div>
-        <div class="kpi-trend up" id="dash-ship-trend"></div>
       </div>
     </div>
 
@@ -480,100 +454,6 @@
     </div>
   </div>
 
-  <!-- ══ FULFILLMENT ══ -->
-  <div class="page" id="page-fulfillment">
-    <div class="topbar">
-      <div>
-        <div class="topbar-title">Fulfillment</div>
-        <div class="topbar-sub">Physical gift box orders, shipping queue and status tracking</div>
-      </div>
-      <div class="topbar-right">
-        <button class="export-btn" onclick="exportFulfillmentCSV()">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-          Export packing list
-        </button>
-      </div>
-    </div>
-
-    <div class="kpi-grid" style="grid-template-columns:repeat(4,1fr)">
-      <div class="kpi-card amber">
-        <div class="kpi-label">🟡 Pending</div>
-        <div class="kpi-val" id="fk-pending">-</div>
-        <div class="kpi-sub">Awaiting packing</div>
-      </div>
-      <div class="kpi-card indigo">
-        <div class="kpi-label">🔵 Packed</div>
-        <div class="kpi-val" id="fk-packed">-</div>
-        <div class="kpi-sub">Ready to ship</div>
-      </div>
-      <div class="kpi-card green">
-        <div class="kpi-label">🟢 Shipped</div>
-        <div class="kpi-val" id="fk-shipped">-</div>
-        <div class="kpi-sub">Last 90 days</div>
-      </div>
-      <div class="kpi-card rose">
-        <div class="kpi-label">⏱ Avg days to ship</div>
-        <div class="kpi-val" id="fk-avgdays">-</div>
-        <div class="kpi-sub">Order placed → shipped</div>
-      </div>
-    </div>
-
-    <!-- Fulfillment time chart -->
-    <div class="chart-grid" style="margin-bottom:1.25rem">
-      <div class="chart-card">
-        <div class="chart-head"><div><div class="chart-title">Fulfillment time distribution</div><div class="chart-subtitle">Days from order to shipped, shipped orders only</div></div></div>
-        <div class="chart-body"><canvas id="chart-fulfill-dist"></canvas></div>
-      </div>
-      <div class="chart-card">
-        <div class="chart-head"><div><div class="chart-title">Weekly shipments</div><div class="chart-subtitle">Boxes shipped per week · last 12 weeks</div></div></div>
-        <div class="chart-body"><canvas id="chart-weekly-ship"></canvas></div>
-      </div>
-    </div>
-
-    <!-- Filter bar -->
-    <div class="filter-bar">
-      <span class="filter-label">Show:</span>
-      <select class="filter-select" id="fulfill-filter" onchange="renderFulfillmentTable()">
-        <option value="pending">Pending only</option>
-        <option value="packed">Packed only</option>
-        <option value="all">All physical orders</option>
-        <option value="shipped">Shipped</option>
-      </select>
-      <select class="filter-select" id="fulfill-pkg-filter" onchange="renderFulfillmentTable()">
-        <option value="">All packages</option>
-        <option value="newlywed-box">Starting Out Box</option>
-        <option value="anniversary-box">Anniversary Box</option>
-        <option value="premium-box">Premium Box</option>
-      </select>
-      <span id="fulfill-count-label" style="font-size:.72rem;color:var(--muted);margin-left:auto;font-family:var(--mono);"></span>
-    </div>
-
-    <!-- Orders table -->
-    <div class="chart-card">
-      <div class="table-wrap">
-        <table class="response-table" id="fulfillment-table">
-          <thead>
-            <tr>
-              <th>Order ID</th>
-              <th>Order date</th>
-              <th>Package</th>
-              <th>Ship to</th>
-              <th>Address</th>
-              <th>Gift message</th>
-              <th>Recipient phone</th>
-              <th>Shipping</th>
-              <th>Status</th>
-              <th>Days elapsed</th>
-              <th>QR Card</th>
-              <th>Workbook</th>
-              <th>Action</th>
-            </tr>
-          </thead>
-          <tbody id="fulfillment-tbody"></tbody>
-        </table>
-      </div>
-    </div>
-  </div>
 
   <!-- ══ PACKAGE MIX ══ -->
   <div class="page" id="page-packages">
@@ -832,16 +712,6 @@
   </div>
 
 
-  <div class="page" id="page-lmft-requests">
-  <div style="max-width:900px">
-    <div class="section-header">
-      <div class="section-title">LMFT Session Requests</div>
-      <div class="section-sub">Bookings from Calendly + legacy form requests. Click any row for full details.</div>
-    </div>
-    <div id="lmft-requests-container" style="font-size:.8rem;color:var(--muted);padding:2rem 0">Loading requests…</div>
-  </div>
-</div>
-
 <div class="page" id="page-ux-views">
   <style>
     #page-ux-views .ux-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(330px,1fr));gap:1.1rem;}
@@ -854,7 +724,7 @@
     #page-ux-views .ux-cardlabel{font-family:var(--mono);font-size:.55rem;color:var(--dim);text-transform:uppercase;letter-spacing:.12em;margin:.95rem 0 .5rem;}
     #page-ux-views .ux-row{display:flex;flex-wrap:wrap;gap:.5rem;}
     #page-ux-views .ux-link{display:inline-flex;align-items:center;gap:.25rem;background:var(--surface);border:1px solid var(--border);color:var(--text);font-family:var(--bfont);font-size:.72rem;font-weight:600;padding:.5rem .8rem;border-radius:9px;text-decoration:none;transition:border-color .15s,color .15s,opacity .15s;}
-    #page-ux-views .ux-link:hover{border-color:var(--orange);color:#fff;}
+    #page-ux-views .ux-link:hover{border-color:var(--orange);color:var(--orange);background:rgba(255,107,53,.06);}
     #page-ux-views .ux-link-primary{background:linear-gradient(135deg,var(--orange),var(--indigo));border:1px solid transparent;color:#fff;}
     #page-ux-views .ux-link-primary:hover{opacity:.9;color:#fff;}
   </style>
@@ -977,7 +847,7 @@
     #page-explore select:focus{outline:none;border-color:var(--orange);}
     #page-explore .xp-side{max-width:120px;}
     #page-explore .xp-btn{cursor:pointer;font-weight:600;}
-    #page-explore .xp-btn:hover{border-color:var(--orange);color:#fff;}
+    #page-explore .xp-btn:hover{border-color:var(--orange);color:var(--orange);background:rgba(255,107,53,.06);}
     #page-explore .xp-btn-primary{background:linear-gradient(135deg,var(--orange),var(--indigo));border:1px solid transparent;color:#fff;}
     #page-explore .xp-filters{display:flex;flex-wrap:wrap;gap:.5rem;align-items:center;margin-bottom:1.1rem;}
     #page-explore .xp-chip{display:flex;align-items:center;gap:.35rem;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:.3rem .4rem;}
@@ -1362,8 +1232,8 @@ window.adminAuthHeaders = function(extra){
     <div class="chart-card" style="margin-bottom:1.25rem;padding:.8rem 1.1rem;">
       <div style="display:flex;gap:1.75rem;align-items:center;flex-wrap:wrap;">
         <span style="font-size:.6rem;letter-spacing:.18em;text-transform:uppercase;color:var(--dim);font-weight:700;">Data quality</span>
-        <span style="font-size:.76rem;color:var(--muted);">Profiles <strong id="dq-total" style="color:#E8EAF0;">—</strong></span>
-        <span style="font-size:.76rem;color:var(--muted);">With answers <strong id="dq-answers" style="color:#E8EAF0;">—</strong></span>
+        <span style="font-size:.76rem;color:var(--muted);">Profiles <strong id="dq-total" style="color:#1B2547;">—</strong></span>
+        <span style="font-size:.76rem;color:var(--muted);">With answers <strong id="dq-answers" style="color:#1B2547;">—</strong></span>
         <span style="font-size:.76rem;color:var(--muted);">Complete <strong id="dq-complete" style="color:#34D399;">—</strong></span>
         <span style="font-size:.76rem;color:var(--muted);">Partial <strong id="dq-partial" style="color:#FBBF24;">—</strong></span>
         <span style="font-size:.76rem;color:var(--muted);">Unpaired <strong id="dq-unpaired" style="color:#FBBF24;">—</strong></span>
@@ -1500,7 +1370,6 @@ window.adminAuthHeaders = function(extra){
 
   </div>
 
-  <!-- ══ BETA CODES ══ -->
   <div class="page" id="page-promos">
     <div class="topbar">
       <div>
@@ -1559,60 +1428,6 @@ window.adminAuthHeaders = function(extra){
     </div>
   </div>
 
-  <div class="page" id="page-beta-codes">
-    <div class="topbar">
-      <div>
-        <div class="topbar-title">Beta Codes</div>
-        <div class="topbar-sub">Per-package promo codes for beta testers. One code per package. Codes unlock the package for free at checkout.</div>
-      </div>
-      <div class="topbar-right">
-        <div class="date-badge" id="beta-codes-last-updated">—</div>
-        <button class="export-btn" onclick="loadBetaCodes()">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.95"/></svg>
-          Refresh
-        </button>
-      </div>
-    </div>
-
-    <div class="data-notice" style="background:rgba(108,127,255,.08);border-color:rgba(108,127,255,.25);">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6C7FFF" stroke-width="2" stroke-linecap="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M7 10h2M12 10h5"/></svg>
-      <p><strong>How codes work.</strong> Beta codes make the package free at checkout. Each code is tied to a specific package — testers must pick the matching package. Each code works once, then it's spent (set max_uses higher in the beta_codes table for a reusable code). Deactivate a code to stop it from working without deleting the record.</p>
-    </div>
-
-    <div class="kpi-grid" style="grid-template-columns:repeat(4,1fr);">
-      <div class="kpi-card orange">
-        <div class="kpi-label">Total redemptions</div>
-        <div class="kpi-val" id="bc-total-uses">—</div>
-        <div class="kpi-sub">Across all codes</div>
-      </div>
-      <div class="kpi-card indigo">
-        <div class="kpi-label">Active codes</div>
-        <div class="kpi-val" id="bc-active-count">—</div>
-        <div class="kpi-sub">Of total codes</div>
-      </div>
-      <div class="kpi-card green">
-        <div class="kpi-label">Last redemption</div>
-        <div class="kpi-val" id="bc-last-used" style="font-size:1.2rem;">—</div>
-        <div class="kpi-sub">Most recent</div>
-      </div>
-      <div class="kpi-card amber">
-        <div class="kpi-label">Most-used code</div>
-        <div class="kpi-val" id="bc-top-code" style="font-size:1.05rem;">—</div>
-        <div class="kpi-sub">By redemption count</div>
-      </div>
-    </div>
-
-    <div class="chart-card" style="grid-column:1/-1;overflow:hidden;">
-      <div class="chart-card-header">
-        <div class="chart-card-title">All codes</div>
-        <div class="chart-card-sub">Tap "Deactivate" to stop a code from working without deleting the usage history</div>
-      </div>
-      <div id="bc-table" style="overflow-x:auto">
-        <p style="color:var(--muted);font-size:.82rem;padding:.5rem 0;">Loading…</p>
-      </div>
-    </div>
-  </div>
-  <!-- ══ END BETA CODES ══ -->
 
   <div class="page" id="page-feedback">
     <div id="fb-real-data" style="display:none;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:1.25rem 1.5rem;margin-bottom:1.5rem;overflow-x:auto"></div>
@@ -1937,7 +1752,7 @@ async function renderPromosPage(force) {
     __prDiscountChart = new Chart(discountCanvas, {
       type: 'bar',
       data: { labels: bLabels.length ? bLabels : ['No code redemptions yet'], datasets: [{ data: bData.length ? bData : [0], backgroundColor: '#FF6B35', borderRadius: 6 }] },
-      options: { plugins: { legend: { display: false } }, scales: { y: { grid: { color: '#2A2E3A' }, ticks: { precision: 0 } }, x: { grid: { display: false } } } },
+      options: { plugins: { legend: { display: false } }, scales: { y: { grid: { color: '#E6ECF6' }, ticks: { precision: 0 } }, x: { grid: { display: false } } } },
     });
   }
 
@@ -1966,7 +1781,7 @@ async function renderPromosPage(force) {
           data: presentPkgs.length ? presentPkgs.map(k => Math.round(byPkg[k].filter(a.key).length / byPkg[k].length * 100)) : [0],
         })),
       },
-      options: { plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, padding: 12 } } }, scales: { y: { grid: { color: '#2A2E3A' }, ticks: { callback: v => v + '%' }, max: 100 }, x: { grid: { display: false } } } },
+      options: { plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, padding: 12 } } }, scales: { y: { grid: { color: '#E6ECF6' }, ticks: { callback: v => v + '%' }, max: 100 }, x: { grid: { display: false } } } },
     });
   }
 
@@ -1984,10 +1799,11 @@ async function renderPromosPage(force) {
   });
   // Include configured codes that have a uses_count but no surviving orders
   codes.forEach(c => {
+    if (c.active === false) return; // inactive codes are excluded from analytics
     const k = (c.code || '').toUpperCase();
     if (!usage[k] && (c.uses_count || 0) > 0) usage[k] = { code: k, orders: 0, revenue: 0, lastUsed: c.last_used_at ? new Date(c.last_used_at).getTime() : null };
   });
-  const rows = Object.values(usage).sort((a, b) => {
+  const rows = Object.values(usage).filter(r => (codeByName[r.code]?.active) !== false).sort((a, b) => {
     const ua = Math.max(a.orders, (codeByName[a.code]?.uses_count) || 0);
     const ub = Math.max(b.orders, (codeByName[b.code]?.uses_count) || 0);
     return ub - ua;
@@ -2790,7 +2606,7 @@ function exportCSV() {
 }
 if (typeof Chart !== 'undefined') {
   Chart.defaults.color = '#6B7280';
-  Chart.defaults.borderColor = '#2A2E3A';
+  Chart.defaults.borderColor = '#E6ECF6';
   Chart.defaults.font.family = "'DM Sans',sans-serif";
 }
 
@@ -2803,25 +2619,25 @@ const PKG_LABELS = ['Assessment','Starting Out','Anniversary','Premium'];
 // can overwrite them with real data from Supabase feedback_submissions and
 // orders tables when real data exists. The synthetic defaults below render
 // while the real-data fetches are in flight or when no data exists yet.
-const revenueData = [4200,5800,6100,7300,8800,9200,9800,10200,11400,13100,14200,15800];
-let pkgMix = [185,262,237,163];
+const revenueData = [0,0,0,0,0,0,0,0,0,0,0,0];
+let pkgMix = [0,0,0,0];
 let pkgTrendMonths = [...MONTHS];
 let pkgTrendStacked = null; // {Assessment:[...12], StartingOut:[...], Anniversary:[...], Premium:[...]} — null means use mock
-const sourceData = {labels:['Friend/family','Social media','Search','Received as gift','Therapist/counselor','Other'],data:[31,24,18,14,8,5]};
-const relLengths = [{l:'Less than 1 year',v:14},{l:'1–2 years',v:22},{l:'3–5 years',v:28},{l:'6–10 years',v:19},{l:'11–20 years',v:11},{l:'20+ years',v:6}];
-const ageData = {labels:['18–24','25–34','35–44','45–54','55+'],data:[8,42,29,14,7]};
-const genderData = {labels:['Woman','Man','Non-binary','Other'],data:[51,43,4,2]};
-const relStatusData = {labels:['Dating','Engaged','Married','Remarried','Partnership'],data:[18,26,44,7,5]};
-const childrenData = {labels:['None','1','2','3+','Expecting'],data:[38,19,28,10,5]};
-const dimScores = {labels:['Energy','Expression','Needs','Bids','Listening','Conflict','Repair','Love','Stress','Feedback'],data:[74,62,58,71,65,61,68,70,55,64]};
-const commTypes = [{l:'Balanced pair',v:24},{l:'Expressive + Reserved',v:19},{l:'Both expressive',v:17},{l:'Thinker + Feeler',v:14},{l:'Planner + Spontaneous',v:12},{l:'Other',v:14}];
-const expAlign = {labels:['Finances','Household','Social life','Career','Family','Intimacy','Faith/values','Recreation'],data:[48,72,65,56,61,43,78,69]};
-const expGaps = [{l:'Intimacy expectations',v:57},{l:'Financial approach',v:52},{l:'Career priorities',v:44},{l:'Extended family',v:38},{l:'Social time',v:35}];
-const storyGaps = [{l:'Fun & lightness',v:44},{l:'Communication ease',v:38},{l:'Day-to-day connection',v:31},{l:'Overall feel',v:22}];
-let funnelData = [847,731,618,541];
-let ratingsData = {labels:['5 ★','4 ★','3 ★','2 ★','1 ★'],data:[312,148,39,10,3]};
+const sourceData = {labels:['Friend/family','Social media','Search','Received as gift','Therapist/counselor','Other'],data:[0,0,0,0,0,0]};
+const relLengths = [{l:'Less than 1 year',v:0},{l:'1–2 years',v:0},{l:'3–5 years',v:0},{l:'6–10 years',v:0},{l:'11–20 years',v:0},{l:'20+ years',v:0}];
+const ageData = {labels:['18–24','25–34','35–44','45–54','55+'],data:[0,0,0,0,0]};
+const genderData = {labels:['Woman','Man','Non-binary','Other'],data:[0,0,0,0]};
+const relStatusData = {labels:['Dating','Engaged','Married','Remarried','Partnership'],data:[0,0,0,0,0]};
+const childrenData = {labels:['None','1','2','3+','Expecting'],data:[0,0,0,0,0]};
+const dimScores = {labels:['Energy','Expression','Needs','Bids','Listening','Conflict','Repair','Love','Stress','Feedback'],data:[0,0,0,0,0,0,0,0,0,0]};
+const commTypes = [{l:'Balanced pair',v:0},{l:'Expressive + Reserved',v:0},{l:'Both expressive',v:0},{l:'Thinker + Feeler',v:0},{l:'Planner + Spontaneous',v:0},{l:'Other',v:0}];
+const expAlign = {labels:['Finances','Household','Social life','Career','Family','Intimacy','Faith/values','Recreation'],data:[0,0,0,0,0,0,0,0]};
+const expGaps = [{l:'Intimacy expectations',v:0},{l:'Financial approach',v:0},{l:'Career priorities',v:0},{l:'Extended family',v:0},{l:'Social time',v:0}];
+const storyGaps = [{l:'Fun & lightness',v:0},{l:'Communication ease',v:0},{l:'Day-to-day connection',v:0},{l:'Overall feel',v:0}];
+let funnelData = [0,0,0,0];
+let ratingsData = {labels:['5 ★','4 ★','3 ★','2 ★','1 ★'],data:[0,0,0,0,0]};
 // npsData: monthly NPS score. Real NPS = %promoters(9-10) - %detractors(0-6), range -100..100
-let npsData = [52,55,58,60,63,61,65,67,68,67,70,71];
+let npsData = [0,0,0,0,0,0,0,0,0,0,0,0];
 // Real analytics overrides — populated by loadRealAnalytics when real feedback exists
 let realNpsScore = null;      // null when no data yet
 let realAvgRating = null;     // null when no data yet
@@ -2831,7 +2647,7 @@ let realDropoffExercise = null; // "Ex 01" | "Ex 02" | null
 
 // ── Bar renderer ──────────────────────────────────────
 function renderBars(containerId, items, color='#6C7FFF') {
-  const max = Math.max(...items.map(i=>i.v));
+  const max = Math.max(...items.map(i=>i.v)) || 1;
   const el = document.getElementById(containerId);
   if (!el) return;
   el.innerHTML = '';
@@ -3941,10 +3757,10 @@ function exportFulfillmentCSV() {
 // ── Chart initializers ────────────────────────────────
 function initCharts(page) {
   if (page==='overview') {
-    new Chart(document.getElementById('chart-revenue'),{type:'line',data:{labels:MONTHS,datasets:[{label:'Revenue',data:revenueData,borderColor:'#FF6B35',backgroundColor:'rgba(255,107,53,.1)',tension:.4,fill:true,borderWidth:2.5,pointRadius:0,pointHoverRadius:4}]},options:{plugins:{legend:{display:false}},scales:{y:{grid:{color:'#2A2E3A'},ticks:{callback:v=>'$'+Math.round(v/1000)+'k'}},x:{grid:{display:false}}},animation:{duration:800}}});
-    new Chart(document.getElementById('chart-pkg-mix'),{type:'doughnut',data:{labels:PKG_LABELS,datasets:[{data:pkgMix,backgroundColor:PKG_COLORS,borderColor:['#1D2029'],borderWidth:3,hoverOffset:6}]},options:{plugins:{legend:{position:'bottom',labels:{padding:16,boxWidth:12}}},cutout:'65%'}});
+    new Chart(document.getElementById('chart-revenue'),{type:'line',data:{labels:MONTHS,datasets:[{label:'Revenue',data:revenueData,borderColor:'#FF6B35',backgroundColor:'rgba(255,107,53,.1)',tension:.4,fill:true,borderWidth:2.5,pointRadius:0,pointHoverRadius:4}]},options:{plugins:{legend:{display:false}},scales:{y:{grid:{color:'#E6ECF6'},ticks:{callback:v=>'$'+Math.round(v/1000)+'k'}},x:{grid:{display:false}}},animation:{duration:800}}});
+    new Chart(document.getElementById('chart-pkg-mix'),{type:'doughnut',data:{labels:PKG_LABELS,datasets:[{data:pkgMix,backgroundColor:PKG_COLORS,borderColor:['#FFFFFF'],borderWidth:3,hoverOffset:6}]},options:{plugins:{legend:{position:'bottom',labels:{padding:16,boxWidth:12}}},cutout:'65%'}});
     renderBars('rellength-bars',relLengths,'#6C7FFF');
-    new Chart(document.getElementById('chart-source'),{type:'bar',data:{labels:sourceData.labels,datasets:[{data:sourceData.data,backgroundColor:'#34D399',borderRadius:6}]},options:{indexAxis:'y',plugins:{legend:{display:false}},scales:{x:{grid:{color:'#2A2E3A'},ticks:{callback:v=>v+'%'}},y:{grid:{display:false}}}}});
+    new Chart(document.getElementById('chart-source'),{type:'bar',data:{labels:sourceData.labels,datasets:[{data:sourceData.data,backgroundColor:'#34D399',borderRadius:6}]},options:{indexAxis:'y',plugins:{legend:{display:false}},scales:{x:{grid:{color:'#E6ECF6'},ticks:{callback:v=>v+'%'}},y:{grid:{display:false}}}}});
   }
   else if (page==='orders') { applyOrderFilters(); }
   else if (page==='fulfillment') {
@@ -3953,12 +3769,12 @@ function initCharts(page) {
     // Fulfillment time distribution
     const distBuckets = [0,0,0,0,0,0]; // 0-1, 1-2, 2-3, 3-4, 4-5, 5+
     stats.shipped.forEach(o=>{ const d=o.daysToShip; const i=Math.min(Math.floor(d),5); distBuckets[i]++; });
-    new Chart(document.getElementById('chart-fulfill-dist'),{type:'bar',data:{labels:['0–1 days','1–2 days','2–3 days','3–4 days','4–5 days','5+ days'],datasets:[{data:distBuckets,backgroundColor:distBuckets.map((_,i)=>i<=2?'#34D399':i<=3?'#FBBF24':'#F87171'),borderRadius:6}]},options:{plugins:{legend:{display:false}},scales:{x:{grid:{display:false}},y:{grid:{color:'#2A2E3A'},ticks:{precision:0}}}}});
+    new Chart(document.getElementById('chart-fulfill-dist'),{type:'bar',data:{labels:['0–1 days','1–2 days','2–3 days','3–4 days','4–5 days','5+ days'],datasets:[{data:distBuckets,backgroundColor:distBuckets.map((_,i)=>i<=2?'#34D399':i<=3?'#FBBF24':'#F87171'),borderRadius:6}]},options:{plugins:{legend:{display:false}},scales:{x:{grid:{display:false}},y:{grid:{color:'#E6ECF6'},ticks:{precision:0}}}}});
     // Weekly shipments
     const weeks = Array(12).fill(0);
     stats.shipped.forEach(o=>{ const w=Math.floor((Date.now()-o.date)/604800000); if(w<12) weeks[11-w]++; });
     const weekLabels = Array.from({length:12},(_,i)=>{ const d=new Date(Date.now()-(11-i)*7*86400000); return d.toLocaleDateString('en-US',{month:'short',day:'numeric'}); });
-    new Chart(document.getElementById('chart-weekly-ship'),{type:'bar',data:{labels:weekLabels,datasets:[{label:'Shipped',data:weeks,backgroundColor:'#6C7FFF',borderRadius:4}]},options:{plugins:{legend:{display:false}},scales:{x:{grid:{display:false},ticks:{maxRotation:45}},y:{grid:{color:'#2A2E3A'},ticks:{precision:0}}}}});
+    new Chart(document.getElementById('chart-weekly-ship'),{type:'bar',data:{labels:weekLabels,datasets:[{label:'Shipped',data:weeks,backgroundColor:'#6C7FFF',borderRadius:4}]},options:{plugins:{legend:{display:false}},scales:{x:{grid:{display:false},ticks:{maxRotation:45}},y:{grid:{color:'#E6ECF6'},ticks:{precision:0}}}}});
   }
   else if (page==='packages') {
     // Use real package-trend data when loadRealPackageTrend has populated it
@@ -3977,45 +3793,45 @@ function initCharts(page) {
       {label:'Anniversary',data:[22,25,27,31,30,33,36,34,38,40,42,44],backgroundColor:'#6C7FFF'},
       {label:'Premium',data:[12,14,15,17,18,20,21,23,22,25,27,30],backgroundColor:'#34D399'},
     ]};
-    new Chart(document.getElementById('chart-pkg-stacked'),{type:'bar',data:pkgStacked,options:{plugins:{legend:{position:'bottom'}},scales:{x:{stacked:true,grid:{display:false}},y:{stacked:true,grid:{color:'#2A2E3A'}}}}});
+    new Chart(document.getElementById('chart-pkg-stacked'),{type:'bar',data:pkgStacked,options:{plugins:{legend:{position:'bottom'}},scales:{x:{stacked:true,grid:{display:false}},y:{stacked:true,grid:{color:'#E6ECF6'}}}}});
     const _fmtBase = ['core','newlywed','anniversary','premium'];
     const _fmtDigital  = _fmtBase.map(k => ORDERS.filter(o => (o.pkg||'').replace('-box','') === k && !o.physical).length);
     const _fmtPhysical = _fmtBase.map(k => ORDERS.filter(o => (o.pkg||'').replace('-box','') === k &&  o.physical).length);
-    new Chart(document.getElementById('chart-format'),{type:'bar',data:{labels:PKG_LABELS,datasets:[{label:'Digital',data:_fmtDigital,backgroundColor:'#6C7FFF',borderRadius:4},{label:'Physical box',data:_fmtPhysical,backgroundColor:'#FBBF24',borderRadius:4}]},options:{plugins:{legend:{position:'bottom'}},scales:{x:{grid:{display:false}},y:{grid:{color:'#2A2E3A'}}}}});
+    new Chart(document.getElementById('chart-format'),{type:'bar',data:{labels:PKG_LABELS,datasets:[{label:'Digital',data:_fmtDigital,backgroundColor:'#6C7FFF',borderRadius:4},{label:'Physical box',data:_fmtPhysical,backgroundColor:'#FBBF24',borderRadius:4}]},options:{plugins:{legend:{position:'bottom'}},scales:{x:{grid:{display:false}},y:{grid:{color:'#E6ECF6'}}}}});
     new Chart(document.getElementById('chart-rev-pkg'),{type:'bar',data:{labels:MONTHS,datasets:[
       {label:'Assessment',data:[1062,1239,1121,1298,1416,1180,1357,1534,1239,1121,1298,1416],backgroundColor:'#FF6B3544',borderColor:'#FF6B35',borderWidth:1.5,borderRadius:4},
       {label:'Starting Out',data:[1975,2212,2528,2291,2765,3002,3239,3080,3397,3555,3713,3950],backgroundColor:'#FBBF2444',borderColor:'#FBBF24',borderWidth:1.5,borderRadius:4},
       {label:'Anniversary',data:[2178,2475,2673,3069,2970,3267,3564,3366,3762,3960,4158,4356],backgroundColor:'#6C7FFF44',borderColor:'#6C7FFF',borderWidth:1.5,borderRadius:4},
       {label:'Premium',data:[2988,3486,3735,4233,4482,4980,5229,5727,5478,6225,6723,7470],backgroundColor:'#34D39944',borderColor:'#34D399',borderWidth:1.5,borderRadius:4},
-    ]},options:{plugins:{legend:{position:'bottom'}},scales:{x:{stacked:true,grid:{display:false}},y:{stacked:true,grid:{color:'#2A2E3A'},ticks:{callback:v=>'$'+Math.round(v/1000)+'k'}}}}});
+    ]},options:{plugins:{legend:{position:'bottom'}},scales:{x:{stacked:true,grid:{display:false}},y:{stacked:true,grid:{color:'#E6ECF6'},ticks:{callback:v=>'$'+Math.round(v/1000)+'k'}}}}});
   }
   else if (page==='demographics') {
-    new Chart(document.getElementById('chart-age'),{type:'bar',data:{labels:ageData.labels,datasets:[{data:ageData.data,backgroundColor:'#FF6B35',borderRadius:6}]},options:{plugins:{legend:{display:false}},scales:{x:{grid:{display:false}},y:{grid:{color:'#2A2E3A'},ticks:{callback:v=>v+'%'}}}}});
-    new Chart(document.getElementById('chart-gender'),{type:'doughnut',data:{labels:genderData.labels,datasets:[{data:genderData.data,backgroundColor:['#F87171','#6C7FFF','#34D399','#FBBF24'],borderColor:'#1D2029',borderWidth:3}]},options:{plugins:{legend:{position:'bottom',labels:{padding:14,boxWidth:11}}},cutout:'60%'}});
-    new Chart(document.getElementById('chart-relstatus'),{type:'doughnut',data:{labels:relStatusData.labels,datasets:[{data:relStatusData.data,backgroundColor:['#6C7FFF','#FF6B35','#34D399','#FBBF24','#F87171'],borderColor:'#1D2029',borderWidth:3}]},options:{plugins:{legend:{position:'bottom',labels:{padding:14,boxWidth:11}}},cutout:'60%'}});
+    new Chart(document.getElementById('chart-age'),{type:'bar',data:{labels:ageData.labels,datasets:[{data:ageData.data,backgroundColor:'#FF6B35',borderRadius:6}]},options:{plugins:{legend:{display:false}},scales:{x:{grid:{display:false}},y:{grid:{color:'#E6ECF6'},ticks:{callback:v=>v+'%'}}}}});
+    new Chart(document.getElementById('chart-gender'),{type:'doughnut',data:{labels:genderData.labels,datasets:[{data:genderData.data,backgroundColor:['#F87171','#6C7FFF','#34D399','#FBBF24'],borderColor:'#FFFFFF',borderWidth:3}]},options:{plugins:{legend:{position:'bottom',labels:{padding:14,boxWidth:11}}},cutout:'60%'}});
+    new Chart(document.getElementById('chart-relstatus'),{type:'doughnut',data:{labels:relStatusData.labels,datasets:[{data:relStatusData.data,backgroundColor:['#6C7FFF','#FF6B35','#34D399','#FBBF24','#F87171'],borderColor:'#FFFFFF',borderWidth:3}]},options:{plugins:{legend:{position:'bottom',labels:{padding:14,boxWidth:11}}},cutout:'60%'}});
     renderBars('demo-rellength-bars',relLengths,'#6C7FFF');
-    new Chart(document.getElementById('chart-children'),{type:'bar',data:{labels:childrenData.labels,datasets:[{data:childrenData.data,backgroundColor:'#34D399',borderRadius:6}]},options:{plugins:{legend:{display:false}},scales:{x:{grid:{display:false}},y:{grid:{color:'#2A2E3A'},ticks:{callback:v=>v+'%'}}}}});
+    new Chart(document.getElementById('chart-children'),{type:'bar',data:{labels:childrenData.labels,datasets:[{data:childrenData.data,backgroundColor:'#34D399',borderRadius:6}]},options:{plugins:{legend:{display:false}},scales:{x:{grid:{display:false}},y:{grid:{color:'#E6ECF6'},ticks:{callback:v=>v+'%'}}}}});
     new Chart(document.getElementById('chart-age-pkg'),{type:'bar',data:{labels:ageData.labels,datasets:[
       {label:'Assessment',data:[35,18,20,24,29],backgroundColor:'#FF6B35',borderRadius:3},
       {label:'Starting Out',data:[41,38,28,22,18],backgroundColor:'#FBBF24',borderRadius:3},
       {label:'Anniversary',data:[16,27,31,34,28],backgroundColor:'#6C7FFF',borderRadius:3},
       {label:'Premium',data:[8,17,21,20,25],backgroundColor:'#34D399',borderRadius:3},
-    ]},options:{plugins:{legend:{position:'bottom'}},scales:{x:{grid:{display:false}},y:{grid:{color:'#2A2E3A'},ticks:{callback:v=>v+'%'}}}}});
+    ]},options:{plugins:{legend:{position:'bottom'}},scales:{x:{grid:{display:false}},y:{grid:{color:'#E6ECF6'},ticks:{callback:v=>v+'%'}}}}});
   }
   else if (page==='responses') {
-    new Chart(document.getElementById('chart-dim-scores'),{type:'radar',data:{labels:dimScores.labels,datasets:[{label:'Avg alignment',data:dimScores.data,borderColor:'#6C7FFF',backgroundColor:'rgba(108,127,255,.15)',borderWidth:2,pointRadius:3,pointBackgroundColor:'#6C7FFF'}]},options:{scales:{r:{grid:{color:'#2A2E3A'},angleLines:{color:'#2A2E3A'},ticks:{display:false},min:0,max:100}},plugins:{legend:{display:false}}}});
+    new Chart(document.getElementById('chart-dim-scores'),{type:'radar',data:{labels:dimScores.labels,datasets:[{label:'Avg alignment',data:dimScores.data,borderColor:'#6C7FFF',backgroundColor:'rgba(108,127,255,.15)',borderWidth:2,pointRadius:3,pointBackgroundColor:'#6C7FFF'}]},options:{scales:{r:{grid:{color:'#E6ECF6'},angleLines:{color:'#E6ECF6'},ticks:{display:false},min:0,max:100}},plugins:{legend:{display:false}}}});
     renderBars('comm-type-bars',commTypes,'#FF6B35');
-    new Chart(document.getElementById('chart-exp-align'),{type:'bar',data:{labels:expAlign.labels,datasets:[{label:'% aligned',data:expAlign.data,backgroundColor:expAlign.data.map(v=>v<50?'#F87171':v<65?'#FBBF24':'#34D399'),borderRadius:6}]},options:{plugins:{legend:{display:false}},scales:{x:{grid:{display:false}},y:{grid:{color:'#2A2E3A'},ticks:{callback:v=>v+'%'},min:0,max:100}}}});
+    new Chart(document.getElementById('chart-exp-align'),{type:'bar',data:{labels:expAlign.labels,datasets:[{label:'% aligned',data:expAlign.data,backgroundColor:expAlign.data.map(v=>v<50?'#F87171':v<65?'#FBBF24':'#34D399'),borderRadius:6}]},options:{plugins:{legend:{display:false}},scales:{x:{grid:{display:false}},y:{grid:{color:'#E6ECF6'},ticks:{callback:v=>v+'%'},min:0,max:100}}}});
     renderBars('exp-gap-bars',expGaps,'#F87171');
-    new Chart(document.getElementById('chart-story-feel'),{type:'bar',data:{labels:['Needs work (0)','Rough patch (1)','Solid (2)','Really good (3)','Better than ever (4)'],datasets:[{data:[12,31,78,89,27],backgroundColor:['#F87171','#FBBF24','#6C7FFF','#34D399','#10b981'],borderRadius:6}]},options:{plugins:{legend:{display:false}},scales:{x:{grid:{display:false}},y:{grid:{color:'#2A2E3A'}}}}});
+    new Chart(document.getElementById('chart-story-feel'),{type:'bar',data:{labels:['Needs work (0)','Rough patch (1)','Solid (2)','Really good (3)','Better than ever (4)'],datasets:[{data:[12,31,78,89,27],backgroundColor:['#F87171','#FBBF24','#6C7FFF','#34D399','#10b981'],borderRadius:6}]},options:{plugins:{legend:{display:false}},scales:{x:{grid:{display:false}},y:{grid:{color:'#E6ECF6'}}}}});
     renderBars('story-gap-bars',storyGaps,'#FBBF24');
   }
   else if (page==='satisfaction') {
-    new Chart(document.getElementById('chart-funnel'),{type:'bar',data:{labels:['Ordered','Started exercises','Both completed','Results viewed'],datasets:[{data:funnelData,backgroundColor:['#FF6B35','#FBBF24','#6C7FFF','#34D399'],borderRadius:6}]},options:{plugins:{legend:{display:false}},scales:{x:{grid:{display:false}},y:{grid:{color:'#2A2E3A'}}}}});
-    new Chart(document.getElementById('chart-ratings'),{type:'bar',data:{labels:ratingsData.labels,datasets:[{data:ratingsData.data,backgroundColor:ratingsData.data.map((_,i)=>['#34D399','#6C7FFF','#FBBF24','#F87171','#EF4444'][i]),borderRadius:6}]},options:{plugins:{legend:{display:false}},scales:{x:{grid:{display:false}},y:{grid:{color:'#2A2E3A'}}}}});
+    new Chart(document.getElementById('chart-funnel'),{type:'bar',data:{labels:['Ordered','Started exercises','Both completed','Results viewed'],datasets:[{data:funnelData,backgroundColor:['#FF6B35','#FBBF24','#6C7FFF','#34D399'],borderRadius:6}]},options:{plugins:{legend:{display:false}},scales:{x:{grid:{display:false}},y:{grid:{color:'#E6ECF6'}}}}});
+    new Chart(document.getElementById('chart-ratings'),{type:'bar',data:{labels:ratingsData.labels,datasets:[{data:ratingsData.data,backgroundColor:ratingsData.data.map((_,i)=>['#34D399','#6C7FFF','#FBBF24','#F87171','#EF4444'][i]),borderRadius:6}]},options:{plugins:{legend:{display:false}},scales:{x:{grid:{display:false}},y:{grid:{color:'#E6ECF6'}}}}});
     // NPS trend — use real-data month labels when available, fall back to rolling 12-month default
     const npsLabels = (pkgTrendStacked && pkgTrendMonths.length === npsData.length) ? pkgTrendMonths : MONTHS;
-    new Chart(document.getElementById('chart-nps'),{type:'line',data:{labels:npsLabels,datasets:[{label:'NPS',data:npsData,borderColor:'#34D399',backgroundColor:'rgba(52,211,153,.1)',tension:.4,fill:true,borderWidth:2.5,pointRadius:3,pointBackgroundColor:'#34D399'},{label:'Benchmark (50)',data:Array(12).fill(50),borderColor:'#4B5563',borderDash:[5,5],borderWidth:1.5,pointRadius:0}]},options:{plugins:{legend:{position:'bottom'}},scales:{y:{grid:{color:'#2A2E3A'},min:-20,max:100},x:{grid:{display:false}}}}});
+    new Chart(document.getElementById('chart-nps'),{type:'line',data:{labels:npsLabels,datasets:[{label:'NPS',data:npsData,borderColor:'#34D399',backgroundColor:'rgba(52,211,153,.1)',tension:.4,fill:true,borderWidth:2.5,pointRadius:3,pointBackgroundColor:'#34D399'},{label:'Benchmark (50)',data:Array(12).fill(50),borderColor:'#4B5563',borderDash:[5,5],borderWidth:1.5,pointRadius:0}]},options:{plugins:{legend:{position:'bottom'}},scales:{y:{grid:{color:'#E6ECF6'},min:-20,max:100},x:{grid:{display:false}}}}});
   }
 }
 
@@ -4139,7 +3955,7 @@ function renderTypes() {
     const ctMax = ctSorted[0][1] || 1;
     ctEl.innerHTML = ctSorted.map(([id,count]) => {
       const pct = Math.round(100*count/couples.length), barW = Math.round(100*count/ctMax);
-      return `<div><div style="display:flex;justify-content:space-between;margin-bottom:.2rem;"><span style="font-size:.75rem;color:#E8EAF0;">${CT_NAMES[id]||id} <span style="color:#6B7280;">${id}</span></span><span style="font-size:.72rem;color:#6B7280;">${count} <span style="color:#4B5563;">${pct}%</span></span></div><div style="background:#2A2E3A;border-radius:999px;height:6px;"><div style="background:var(--orange);width:${barW}%;height:100%;border-radius:999px;transition:width .4s;"></div></div></div>`;
+      return `<div><div style="display:flex;justify-content:space-between;margin-bottom:.2rem;"><span style="font-size:.75rem;color:#1B2547;">${CT_NAMES[id]||id} <span style="color:#6B7280;">${id}</span></span><span style="font-size:.72rem;color:#6B7280;">${count} <span style="color:#4B5563;">${pct}%</span></span></div><div style="background:#E6ECF6;border-radius:999px;height:6px;"><div style="background:var(--orange);width:${barW}%;height:100%;border-radius:999px;transition:width .4s;"></div></div></div>`;
     }).join('') + (small?`<div style="color:#FBBF24;font-size:.7rem;margin-top:.4rem;">Small sample — read with caution.</div>`:'');
   }
 
@@ -4151,9 +3967,9 @@ function renderTypes() {
   const n = indiv.length||1;
   const splitRow = (label,a,aLbl,b,bLbl,color) => {
     const ap=Math.round(100*a/n), bp=100-ap;
-    return `<div><div style="font-size:.7rem;color:#9CA3AF;margin-bottom:.3rem;">${label}</div><div style="display:flex;height:22px;border-radius:6px;overflow:hidden;font-size:.62rem;font-weight:700;">
+    return `<div><div style="font-size:.7rem;color:#586187;margin-bottom:.3rem;">${label}</div><div style="display:flex;height:22px;border-radius:6px;overflow:hidden;font-size:.62rem;font-weight:700;">
       <div style="background:${color};width:${ap}%;display:flex;align-items:center;justify-content:center;color:#1a1a1a;">${ap>12?aLbl+' '+ap+'%':''}</div>
-      <div style="background:#2A2E3A;width:${bp}%;display:flex;align-items:center;justify-content:center;color:#9CA3AF;">${bp>12?bLbl+' '+bp+'%':''}</div></div></div>`;
+      <div style="background:#E6ECF6;width:${bp}%;display:flex;align-items:center;justify-content:center;color:#586187;">${bp>12?bLbl+' '+bp+'%':''}</div></div></div>`;
   };
   document.getElementById('types-axis-bars').innerHTML =
     splitRow('Engage / Withdraw', eng, 'Engage', n-eng, 'Withdraw', '#FF6B35') +
@@ -4184,7 +4000,7 @@ function renderTypes() {
   tbody.innerHTML = cfgDims.sort((a,b)=>cfg[b].weight-cfg[a].weight).map(d=>{
     const st=dimStat[d], mean=st.n?(st.sum/st.n).toFixed(2):'—', out=st.n?Math.round(100*st.out/st.n):0;
     const outColor = out>=40?'#F87171':out>=25?'#FBBF24':'#34D399';
-    return `<tr><td style="color:#E8EAF0;text-transform:capitalize;">${d}</td><td style="color:#9CA3AF;">${cfg[d].axis==='withdraw'?'E/W':'O/G'}${cfg[d].invert?' ·inv':''}</td><td>${cfg[d].weight.toFixed(2)}</td><td>${mean}</td><td style="color:${outColor};font-weight:600;">${out}%</td><td style="color:#6B7280;">${st.n}</td></tr>`;
+    return `<tr><td style="color:#1B2547;text-transform:capitalize;">${d}</td><td style="color:#586187;">${cfg[d].axis==='withdraw'?'E/W':'O/G'}${cfg[d].invert?' ·inv':''}</td><td>${cfg[d].weight.toFixed(2)}</td><td>${mean}</td><td style="color:${outColor};font-weight:600;">${out}%</td><td style="color:#6B7280;">${st.n}</td></tr>`;
   }).join('');
 
   renderDataQuality();
@@ -4196,8 +4012,8 @@ function renderTypes() {
 function drawDoughnut(id, labels, data, colors) {
   const el = document.getElementById(id); if(!el) return;
   const ex = Chart.getChart(el); if(ex) ex.destroy();
-  new Chart(el, { type:'doughnut', data:{ labels, datasets:[{data, backgroundColor:colors, borderColor:'#1D2029', borderWidth:3}] },
-    options:{ plugins:{ legend:{ position:'right', labels:{color:'#9CA3AF',font:{size:12},boxWidth:12} } }, cutout:'62%' } });
+  new Chart(el, { type:'doughnut', data:{ labels, datasets:[{data, backgroundColor:colors, borderColor:'#FFFFFF', borderWidth:3}] },
+    options:{ plugins:{ legend:{ position:'right', labels:{color:'#586187',font:{size:12},boxWidth:12} } }, cutout:'62%' } });
 }
 function drawHist(id, bins, data, color) {
   const el = document.getElementById(id); if(!el) return;
@@ -4207,7 +4023,7 @@ function drawHist(id, bins, data, color) {
   new Chart(el, { type:'bar', data:{ labels, datasets:[{data, backgroundColor:bins.map(b=>b<3?color:color+'77'), borderRadius:3}] },
     options:{ plugins:{ legend:{display:false}, tooltip:{callbacks:{title:i=>`score ${i[0].label}`}} },
       scales:{ x:{grid:{display:false},ticks:{color:'#6B7280',font:{size:9},maxRotation:0,callback:(v,i)=>i%2===0?labels[i]:''}},
-               y:{grid:{color:'#2A2E3A'},ticks:{color:'#6B7280',precision:0}} } } });
+               y:{grid:{color:'#E6ECF6'},ticks:{color:'#6B7280',precision:0}} } } });
 }
 
 // ── Data quality / time / construct validity ──────────────────────────────
@@ -4248,13 +4064,13 @@ function renderCorrelation(indiv) {
     const rOwn = pearson(xs, rest), rOther = pearson(xs, oth);
     const fmt = v => v==null?'—':(v>=0?'+':'')+v.toFixed(2);
     const ownColor = rOwn==null?'#6B7280':rOwn>=0.3?'#34D399':rOwn>=0.15?'#FBBF24':'#F87171';
-    const otherColor = rOther==null?'#6B7280':Math.abs(rOther)>=0.3?'#F87171':'#9CA3AF';
+    const otherColor = rOther==null?'#6B7280':Math.abs(rOther)>=0.3?'#F87171':'#586187';
     let read='tracks its axis', rc='#34D399';
     if (rOwn==null){read='—';rc='#6B7280';}
     else if (rOwn<0.15){read='weak signal';rc='#F87171';}
     else if (rOther!=null && Math.abs(rOther)>=Math.abs(rOwn)){read='cross-loaded';rc='#F87171';}
     else if (rOwn<0.3){read='modest';rc='#FBBF24';}
-    return `<tr><td style="color:#E8EAF0;text-transform:capitalize;">${d}</td><td style="color:#9CA3AF;">${ownAxis==='withdraw'?'E/W':'O/G'}</td><td style="color:${ownColor};font-weight:600;">${fmt(rOwn)}</td><td style="color:${otherColor};">${fmt(rOther)}</td><td style="color:${rc};">${read}</td></tr>`;
+    return `<tr><td style="color:#1B2547;text-transform:capitalize;">${d}</td><td style="color:#586187;">${ownAxis==='withdraw'?'E/W':'O/G'}</td><td style="color:${ownColor};font-weight:600;">${fmt(rOwn)}</td><td style="color:${otherColor};">${fmt(rOther)}</td><td style="color:${rc};">${read}</td></tr>`;
   }).join('');
 }
 
@@ -4271,8 +4087,8 @@ function renderTimeChart(indiv) {
   const labels = Object.keys(weeks).sort();
   const ds = t => ({ label:t, data:labels.map(l=>weeks[l][t]), backgroundColor:TYPE_COLORS[t] });
   new Chart(canvas, { type:'bar', data:{ labels, datasets:['W','X','Y','Z'].map(ds) },
-    options:{ plugins:{ legend:{position:'bottom',labels:{color:'#9CA3AF',boxWidth:11,font:{size:11}}} },
-      scales:{ x:{stacked:true,grid:{display:false},ticks:{color:'#6B7280',font:{size:9}}}, y:{stacked:true,grid:{color:'#2A2E3A'},ticks:{color:'#6B7280',precision:0}} } } });
+    options:{ plugins:{ legend:{position:'bottom',labels:{color:'#586187',boxWidth:11,font:{size:11}}} },
+      scales:{ x:{stacked:true,grid:{display:false},ticks:{color:'#6B7280',font:{size:9}}}, y:{stacked:true,grid:{color:'#E6ECF6'},ticks:{color:'#6B7280',precision:0}} } } });
 }
 
 // ── Phase 2: weight sandbox ───────────────────────────────────────────────
@@ -4280,7 +4096,7 @@ function buildSandbox() {
   if (!TYPES_DATA) return;
   sandboxWeights = {}; for (const d in TYPES_DATA.config) sandboxWeights[d] = TYPES_DATA.config[d].weight;
   const cfg = TYPES_DATA.config;
-  const slider = (d) => `<div style="margin-bottom:.7rem;"><div style="display:flex;justify-content:space-between;font-size:.72rem;color:#9CA3AF;margin-bottom:.2rem;"><span style="text-transform:capitalize;">${d}${cfg[d].invert?' <span style=\"color:#6B7280;\">(inv)</span>':''}</span><span id="sw-val-${d}" style="color:#E8EAF0;font-variant-numeric:tabular-nums;">${cfg[d].weight.toFixed(2)}</span></div><input type="range" id="sw-${d}" min="0" max="0.6" step="0.01" value="${cfg[d].weight}" oninput="onSandboxInput('${d}')" style="width:100%;accent-color:${cfg[d].axis==='withdraw'?'#FF6B35':'#6C7FFF'};"></div>`;
+  const slider = (d) => `<div style="margin-bottom:.7rem;"><div style="display:flex;justify-content:space-between;font-size:.72rem;color:#586187;margin-bottom:.2rem;"><span style="text-transform:capitalize;">${d}${cfg[d].invert?' <span style=\"color:#6B7280;\">(inv)</span>':''}</span><span id="sw-val-${d}" style="color:#1B2547;font-variant-numeric:tabular-nums;">${cfg[d].weight.toFixed(2)}</span></div><input type="range" id="sw-${d}" min="0" max="0.6" step="0.01" value="${cfg[d].weight}" oninput="onSandboxInput('${d}')" style="width:100%;accent-color:${cfg[d].axis==='withdraw'?'#FF6B35':'#6C7FFF'};"></div>`;
   const wDims = Object.keys(cfg).filter(d=>cfg[d].axis==='withdraw');
   const oDims = Object.keys(cfg).filter(d=>cfg[d].axis==='open');
   document.getElementById('sandbox-withdraw').innerHTML = wDims.map(slider).join('');
@@ -4308,12 +4124,12 @@ function refreshSandbox() {
   const cmp = ['W','X','Y','Z'].map(t=>{
     const cp=Math.round(100*cur[t]/n), pp=Math.round(100*prev[t]/n), delta=pp-cp;
     const dStr = delta===0?'':(delta>0?`<span style="color:#34D399;">+${delta}</span>`:`<span style="color:#F87171;">${delta}</span>`);
-    return `<div style="display:flex;align-items:center;gap:.6rem;margin-bottom:.4rem;font-size:.78rem;"><span style="width:14px;height:14px;border-radius:3px;background:${TYPE_COLORS[t]};display:inline-block;"></span><span style="width:18px;color:#E8EAF0;font-weight:700;">${t}</span><span style="color:#9CA3AF;width:120px;">${cur[t]} (${cp}%) → ${prev[t]} (${pp}%)</span>${dStr}</div>`;
+    return `<div style="display:flex;align-items:center;gap:.6rem;margin-bottom:.4rem;font-size:.78rem;"><span style="width:14px;height:14px;border-radius:3px;background:${TYPE_COLORS[t]};display:inline-block;"></span><span style="width:18px;color:#1B2547;font-weight:700;">${t}</span><span style="color:#586187;width:120px;">${cur[t]} (${cp}%) → ${prev[t]} (${pp}%)</span>${dStr}</div>`;
   }).join('');
   document.getElementById('sandbox-indiv-compare').innerHTML = cmp;
   const movedPct = Math.round(100*moved/n);
   document.getElementById('sandbox-movement').innerHTML =
-    `<strong style="color:#E8EAF0;">${moved}</strong> of ${indiv.length} individuals (${movedPct}%) would change type under these weights.<br>` +
+    `<strong style="color:#1B2547;">${moved}</strong> of ${indiv.length} individuals (${movedPct}%) would change type under these weights.<br>` +
     (movedPct>30?'<span style="color:#FBBF24;">Large shift — weights are meaningfully reshaping the population.</span>':'<span style="color:#34D399;">Modest shift.</span>');
   document.getElementById('sandbox-status').textContent = 'Preview only · not saved';
 }
@@ -4357,7 +4173,7 @@ async function loadFeedbackData(force) {
         labels,
         datasets: [{ data: vals, backgroundColor: ['#F87171','#FBBF24','#34D399','#6C7FFF'], borderRadius: 6, borderSkipped: false }]
       },
-      options: { plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, grid: { color: '#2A2E3A' }, ticks: { color: '#6B7280', stepSize: 1 } }, x: { grid: { display: false }, ticks: { color: '#9CA3AF' } } } }
+      options: { plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, grid: { color: '#E6ECF6' }, ticks: { color: '#6B7280', stepSize: 1 } }, x: { grid: { display: false }, ticks: { color: '#586187' } } } }
     });
   });
 
@@ -4377,10 +4193,10 @@ async function loadFeedbackData(force) {
     scaleEl.innerHTML += `
       <div>
         <div style="display:flex;justify-content:space-between;margin-bottom:.3rem;">
-          <span style="font-size:.75rem;color:#9CA3AF;">${scaleLabels[key] || key}</span>
+          <span style="font-size:.75rem;color:#586187;">${scaleLabels[key] || key}</span>
           <span style="font-size:.75rem;color:${color};font-weight:700;">${avgDisplay} <span style="color:#4B5563;font-weight:400;">(n=${agg.n})</span></span>
         </div>
-        <div style="background:#2A2E3A;border-radius:999px;height:6px;">
+        <div style="background:#E6ECF6;border-radius:999px;height:6px;">
           <div style="background:${color};width:${pct}%;height:100%;border-radius:999px;transition:width .4s;"></div>
         </div>
       </div>`;
@@ -4397,7 +4213,7 @@ async function loadFeedbackData(force) {
         labels: Object.keys(stageDist),
         datasets: [{ data: Object.values(stageDist), backgroundColor: ['#FF6B35','#6C7FFF','#34D399','#FBBF24','#F87171'], borderWidth: 0 }]
       },
-      options: { plugins: { legend: { position: 'right', labels: { color: '#9CA3AF', font: { size: 11 }, boxWidth: 12 } } } }
+      options: { plugins: { legend: { position: 'right', labels: { color: '#586187', font: { size: 11 }, boxWidth: 12 } } } }
     });
   });
 
@@ -4411,7 +4227,7 @@ async function loadFeedbackData(force) {
         labels: Object.keys(heardDist),
         datasets: [{ data: Object.values(heardDist), backgroundColor: ['#6C7FFF','#FF6B35','#34D399','#FBBF24','#F87171'], borderWidth: 0 }]
       },
-      options: { plugins: { legend: { position: 'right', labels: { color: '#9CA3AF', font: { size: 11 }, boxWidth: 12 } } } }
+      options: { plugins: { legend: { position: 'right', labels: { color: '#586187', font: { size: 11 }, boxWidth: 12 } } } }
     });
   });
 
