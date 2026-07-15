@@ -8838,7 +8838,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
             const rows = [];
             // Communication — the couple-type tips (title + phrase to try)
             (coupleType?.tips || []).slice(0, 3).forEach(t => {
-              if (t?.title) rows.push({ ex: "Communication", color: "#9B5DE5", tip: gInterp(t.title), phrase: t.phraseTry ? gInterp(t.phraseTry) : "" });
+              if (t?.title) rows.push({ ex: "Couple Type", color: coupleType?.color || "#9B5DE5", tip: gInterp(t.title), phrase: t.phraseTry ? gInterp(t.phraseTry) : "" });
             });
             // Expectations — the two domains, with a conversation to open each
             rows.push({ ex: "Expectations", color: "#1B5FE8", tip: "Get explicit about who handles what", phrase: "Where did we each assume the other would take the lead, without ever saying it out loud?" });
@@ -8886,18 +8886,6 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
               </div>
             );
           })()}
-
-          {/* ── ACTION PLANS ── */}
-          <div style={{ marginBottom: "1.5rem" }}>
-            <div style={{ fontSize: "0.62rem", letterSpacing: "0.22em", textTransform: "uppercase", color: C.clay, fontFamily: BFONT, fontWeight: 700, marginBottom: "0.85rem" }}>Your action plans</div>
-            <div style={{ display: "flex", flexDirection: "column", gap: "0.65rem" }}>
-              <NavActionLink onClick={() => go("comm-plan")} bg="linear-gradient(135deg,#FFF5F2,#FFE8E0)" border={`1.5px solid rgba(232,103,58,0.25)`} icon="comm" title="Communication Action Plan" sub="Practices drawn from your communication results" accentColor="#E8673A" />
-              <NavActionLink onClick={() => go("exp-action-plan")} bg="linear-gradient(135deg,#F5F7FF,#E8EDFF)" border={`1.5px solid rgba(27,95,232,0.2)`} icon="📋" title="Expectations Action Plan" sub="Topics to discuss, organized by area" accentColor="#1B5FE8" />
-              {hasAnniversary && (
-                <NavActionLink onClick={() => go("reflection-plan")} bg="linear-gradient(135deg,#F0F4FF,#E8EDFF)" border={`1.5px solid rgba(27,95,232,0.25)`} icon="♡" title="Reflection Action Plan" sub="Conversations from your relationship reflection" accentColor="#1B5FE8" />
-              )}
-            </div>
-          </div>
 
           {/* ── KEEP GROWING (workbook tile + in-practice list) ── */}
           <div style={{ fontSize: "0.62rem", letterSpacing: "0.22em", textTransform: "uppercase", color: C.clay, fontFamily: BFONT, fontWeight: 700, marginBottom: "0.85rem" }}>Keep growing</div>
