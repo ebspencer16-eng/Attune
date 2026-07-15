@@ -586,6 +586,7 @@
           </div>
         </div>
       </div>
+      <div class="qx-section" id="qx-story" style="margin-top:1.25rem"></div>
     </div>
 
     <div id="resp-intimacy" style="display:none">
@@ -599,6 +600,7 @@
           <div class="chart-body"><div class="insight-list" id="intimacy-gap-bars" style="margin-top:.5rem;"></div></div>
         </div>
       </div>
+      <div class="qx-section" id="qx-intimacy" style="margin-top:1.25rem"></div>
     </div>
   </div>
 
@@ -4012,6 +4014,8 @@ function initCharts(page) {
     renderIntimacyResponses();
     renderQuestionExplorer('qx-comm', ['Ex1 · Communication']);
     renderQuestionExplorer('qx-exp', ['Ex2 · Life & values', 'Ex2 · Who does what']);
+    renderQuestionExplorer('qx-story', ['Ex3 · Relationship Reflection']);
+    renderQuestionExplorer('qx-intimacy', ['Physical Intimacy']);
   }
   else if (page==='satisfaction') {
     new Chart(document.getElementById('chart-funnel'),{type:'bar',data:{labels:['Ordered','Started exercises','Both completed','Results viewed'],datasets:[{data:funnelData,backgroundColor:['#FF6B35','#FBBF24','#6C7FFF','#34D399'],borderRadius:6}]},options:{plugins:{legend:{display:false}},scales:{x:{grid:{display:false}},y:{grid:{color:'#E6ECF6'}}}}});

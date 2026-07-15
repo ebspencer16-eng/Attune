@@ -19,6 +19,8 @@ import { createClient } from '@supabase/supabase-js';
 import { checkAdminAuth } from './_lib/admin-auth.js';
 import { calcDimScores, axisScores, typeCodeFromAxes, DIM_KEYS } from './_type-engine.js';
 import { PERSONALITY_QUESTIONS, LIFE_QUESTIONS, RESPONSIBILITY_CATEGORIES } from './_questions.js';
+import { REFLECTION_QUESTIONS } from './_anniversary-questions.js';
+import { INTIMACY_QUESTIONS } from './_intimacy-questions.js';
 
 // Runs on the edge runtime (Web-style (req)=>Response handler), matching the
 // other admin endpoints. Without this, Vercel's Node runtime can't invoke it
@@ -106,6 +108,22 @@ function ownFields(p) {
       r['resp_' + cat.id + '_' + i] = norm(resp[cat.id + '__' + realItem]);
     });
   }
+  // Ex3 Relationship Reflection: scale answers stored as option index (0-4),
+  // pick answers as the chosen string. Free-text/ranking omitted.
+  const ex3 = p.ex3_answers || {};
+  for (const q of REFLECTION_QUESTIONS) {
+    const v = ex3[q.id];
+    if (q.kind === 'pick') r['ref_' + q.id] = (typeof v === 'string' && v) ? v : null;
+    else r['ref_' + q.id] = (typeof v === 'number' && q.labels[v] != null) ? q.labels[v] : null;
+  }
+  // Physical Intimacy: single-select answers stored as the option label string.
+  // Multi-select questions (arrays) are skipped for distribution.
+  const intim = (p.intimacy_data && p.intimacy_data.answers) || {};
+  for (const q of INTIMACY_QUESTIONS) {
+    if (q.kind === 'multi') continue;
+    const raw = intim[q.id];
+    r['iq_' + q.id] = (typeof raw === 'string' && raw) ? raw : null;
+  }
   return r;
 }
 
@@ -116,6 +134,8 @@ const PARTNERABLE = [
   ...PERSONALITY_QUESTIONS.map((q) => 'q_' + q.id),
   ...LIFE_QUESTIONS.map((lq) => lq.id),
   ...RESPONSIBILITY_CATEGORIES.flatMap((c) => c.items.map((_, i) => 'resp_' + c.id + '_' + i)),
+  ...REFLECTION_QUESTIONS.map((q) => 'ref_' + q.id),
+  ...INTIMACY_QUESTIONS.filter((q) => q.kind !== 'multi').map((q) => 'iq_' + q.id),
 ];
 
 function buildCatalog() {
@@ -139,6 +159,15 @@ function buildCatalog() {
     cat.items.forEach((item, i) => {
       f.push({ key: 'resp_' + cat.id + '_' + i, label: cat.label + ' · ' + genericLabel(item), group: 'Ex2 · Who does what', kind: 'cat', options: RESP_OPTS.map((v) => ({ v, label: v })), partnerable: true });
     });
+  }
+  for (const q of REFLECTION_QUESTIONS) {
+    const opts = (q.kind === 'pick' ? q.options : q.labels) || [];
+    f.push({ key: 'ref_' + q.id, label: (q.topic ? q.topic + ' · ' : '') + q.text, group: 'Ex3 · Relationship Reflection', kind: 'cat', options: opts.map((v) => ({ v, label: v })), partnerable: true });
+  }
+  for (const q of INTIMACY_QUESTIONS) {
+    if (q.kind === 'multi') continue;
+    const opts = (q.options || []).map((o) => o.label);
+    f.push({ key: 'iq_' + q.id, label: (q.topic ? q.topic + ' · ' : '') + (q.premarital || q.married || q.id), group: 'Physical Intimacy', kind: 'cat', options: opts.map((v) => ({ v, label: v })), partnerable: true });
   }
   return f;
 }
