@@ -548,6 +548,7 @@
           </div>
         </div>
       </div>
+      <div class="qx-section" id="qx-comm" style="margin-top:1.25rem"></div>
     </div>
 
     <div id="resp-exp" style="display:none">
@@ -563,14 +564,15 @@
           </div>
         </div>
       </div>
+      <div class="qx-section" id="qx-exp" style="margin-top:1.25rem"></div>
     </div>
 
     <div id="resp-story" style="display:none">
       <div class="kpi-grid">
-        <div class="kpi-card indigo"><div class="kpi-label">Avg overall feel</div><div class="kpi-val">3.6<span style="font-size:1rem;color:var(--muted)">/4</span></div><div class="kpi-sub">Scale: needs work → better than ever</div></div>
-        <div class="kpi-card green"><div class="kpi-label">Connection aligned</div><div class="kpi-val">61%</div><div class="kpi-sub">Partners within 1 step of each other</div></div>
-        <div class="kpi-card amber"><div class="kpi-label">Fun gap flagged</div><div class="kpi-val">44%</div><div class="kpi-sub">≥2 step gap on fun/lightness</div></div>
-        <div class="kpi-card orange"><div class="kpi-label">Comm gap flagged</div><div class="kpi-val">38%</div><div class="kpi-sub">≥2 step gap on communication ease</div></div>
+        <div class="kpi-card indigo"><div class="kpi-label">Avg overall feel</div><div class="kpi-val">—</div><div class="kpi-sub">Scale: needs work → better than ever</div></div>
+        <div class="kpi-card green"><div class="kpi-label">Connection aligned</div><div class="kpi-val">—</div><div class="kpi-sub">Partners within 1 step of each other</div></div>
+        <div class="kpi-card amber"><div class="kpi-label">Fun gap flagged</div><div class="kpi-val">—</div><div class="kpi-sub">≥2 step gap on fun/lightness</div></div>
+        <div class="kpi-card orange"><div class="kpi-label">Comm gap flagged</div><div class="kpi-val">—</div><div class="kpi-sub">≥2 step gap on communication ease</div></div>
       </div>
       <div class="chart-grid">
         <div class="chart-card">
@@ -3555,6 +3557,104 @@ function renderIntimacyResponses() {
   if (gaps.length) renderBars('intimacy-gap-bars', gaps, '#B5546E');
 }
 
+// ── Per-exercise Question Explorer (crosstab + a visual for every question) ──
+// Powered by the same anonymized respondent cube as the Explore page. Renders a
+// crosstab picker plus a distribution bar for every question in the exercise.
+let __cubeCache = null;
+async function ensureCube() {
+  if (__cubeCache) return __cubeCache;
+  const res = await fetch('/api/admin-explore', { headers: window.adminAuthHeaders() });
+  const j = await res.json();
+  if (j.error) throw new Error(j.error);
+  __cubeCache = j;
+  return j;
+}
+const QX_ESC = (x) => String(x == null ? '' : x).replace(/[&<>"]/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;' }[c]));
+const QX_CROSS = [
+  { key: 'type', label: 'Individual type' }, { key: 'couple_type', label: 'Couple type' },
+  { key: 'gender', label: 'Gender' }, { key: 'relationship_length', label: 'Time together' },
+  { key: 'age_range', label: 'Age range' }, { key: 'pkg', label: 'Package' },
+];
+const QX_SCALE_COLORS = ['#F87171', '#FBBF24', '#B9C0CF', '#7DD3A8', '#34D399'];
+const QX_CAT_COLORS = ['#6C7FFF', '#FF6B35', '#34D399', '#FBBF24', '#B5546E', '#9B5DE5', '#22A5C4'];
+function qxCatLabel(f, v) {
+  if (f && f.kind === 'scale') { if (v === '1') return '1 · ' + (f.poleLow || 'low'); if (v === '5') return '5 · ' + (f.poleHigh || 'high'); return v; }
+  return v;
+}
+function qxColCats(rows, key) {
+  const set = {}; rows.forEach(r => { const c = r[key]; if (c !== null && c !== undefined && c !== '') set[c] = 1; });
+  return Object.keys(set).sort();
+}
+async function renderQuestionExplorer(containerId, groupPrefixes) {
+  const el = document.getElementById(containerId);
+  if (!el || el.dataset.rendered) return;
+  el.innerHTML = '<div style="color:var(--dim);font-size:.78rem;padding:1rem 0;">Loading question-level data…</div>';
+  let cube;
+  try { cube = await ensureCube(); } catch (e) { el.innerHTML = '<div style="color:var(--dim);font-size:.78rem;padding:1rem 0;">Question-level data unavailable right now.</div>'; return; }
+  const rows = cube.rows || [];
+  const qFields = cube.fields.filter(f => groupPrefixes.some(g => (f.group || '').indexOf(g) === 0));
+  if (!qFields.length) { el.innerHTML = ''; return; }
+  el.dataset.rendered = '1';
+  const fieldByKey = {}; cube.fields.forEach(f => fieldByKey[f.key] = f);
+  const rowOpts = qFields.map(f => '<option value="' + f.key + '">' + QX_ESC(f.label) + '</option>').join('');
+  const colOpts = QX_CROSS.map(c => '<option value="' + c.key + '">' + QX_ESC(c.label) + '</option>').join('');
+  el.innerHTML =
+    '<div style="font-size:.62rem;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);font-weight:700;font-family:var(--mono);margin:0 0 .75rem;">Question by question</div>' +
+    '<div class="chart-card" style="padding:1.1rem 1.25rem;margin-bottom:1rem;">' +
+      '<div style="font-size:.7rem;color:var(--muted);margin-bottom:.6rem;">Cross any question in this exercise against a segment. Cells show respondent counts.</div>' +
+      '<div style="display:flex;flex-wrap:wrap;gap:.6rem;align-items:center;">' +
+        '<select id="' + containerId + '-xrow" style="background:var(--surface);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:.4rem .55rem;font-size:.75rem;max-width:340px;">' + rowOpts + '</select>' +
+        '<span style="color:var(--dim);">×</span>' +
+        '<select id="' + containerId + '-xcol" style="background:var(--surface);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:.4rem .55rem;font-size:.75rem;">' + colOpts + '</select>' +
+      '</div>' +
+      '<div id="' + containerId + '-xout" style="margin-top:.85rem;overflow:auto;"></div>' +
+    '</div>' +
+    '<div class="chart-card" style="padding:1.1rem 1.25rem;">' +
+      '<div style="font-size:.7rem;color:var(--muted);margin-bottom:.9rem;">Distribution for every question (' + qFields.length + ' questions · n=' + rows.length + ').</div>' +
+      '<div id="' + containerId + '-dist"></div>' +
+    '</div>';
+  const renderX = () => {
+    const rk = document.getElementById(containerId + '-xrow').value;
+    const ck = document.getElementById(containerId + '-xcol').value;
+    const rf = fieldByKey[rk], cf = fieldByKey[ck];
+    const rowCats = rf.kind === 'scale' ? ['1','2','3','4','5'] : (rf.options ? rf.options.map(o => o.v) : qxColCats(rows, rk));
+    const colCats = qxColCats(rows, ck);
+    const cell = {};
+    rows.forEach(r => {
+      let rv = r[rk]; if (rv === null || rv === undefined || rv === '') return; if (rf.kind === 'scale') rv = String(Math.round(rv));
+      const cv = r[ck]; if (cv === null || cv === undefined || cv === '') return;
+      if (!cell[rv]) cell[rv] = {}; cell[rv][cv] = (cell[rv][cv] || 0) + 1;
+    });
+    let html = '<table style="width:100%;border-collapse:collapse;font-size:.72rem;"><thead><tr><th style="text-align:left;padding:.4rem .6rem;color:var(--dim);"></th>' +
+      colCats.map(c => '<th style="padding:.4rem .6rem;color:var(--dim);text-align:center;">' + QX_ESC(qxCatLabel(cf, c)) + '</th>').join('') + '</tr></thead><tbody>';
+    rowCats.forEach(rc => {
+      html += '<tr style="border-top:1px solid var(--border);"><td style="padding:.4rem .6rem;color:var(--text);white-space:nowrap;">' + QX_ESC(qxCatLabel(rf, rc)) + '</td>' +
+        colCats.map(c => { const v = (cell[rc] && cell[rc][c]) || 0; return '<td style="padding:.4rem .6rem;text-align:center;' + (v ? '' : 'opacity:.35;') + '">' + (v || '–') + '</td>'; }).join('') + '</tr>';
+    });
+    html += '</tbody></table>';
+    document.getElementById(containerId + '-xout').innerHTML = html;
+  };
+  document.getElementById(containerId + '-xrow').onchange = renderX;
+  document.getElementById(containerId + '-xcol').onchange = renderX;
+  renderX();
+  const distEl = document.getElementById(containerId + '-dist');
+  distEl.innerHTML = qFields.map(f => {
+    const counts = {}; let n = 0;
+    rows.forEach(r => { let v = r[f.key]; if (v === null || v === undefined || v === '') return; if (f.kind === 'scale') v = String(Math.round(v)); counts[v] = (counts[v] || 0) + 1; n++; });
+    const cats = f.kind === 'scale' ? ['1','2','3','4','5'] : (f.options ? f.options.map(o => o.v) : Object.keys(counts));
+    const segs = cats.map((c, idx) => {
+      const cnt = counts[c] || 0; if (!cnt) return '';
+      const w = n ? Math.round(cnt / n * 100) : 0;
+      const color = f.kind === 'scale' ? QX_SCALE_COLORS[idx] : QX_CAT_COLORS[idx % QX_CAT_COLORS.length];
+      return '<div title="' + QX_ESC(qxCatLabel(f, c)) + ': ' + cnt + '" style="width:' + w + '%;background:' + color + ';height:100%;"></div>';
+    }).join('');
+    return '<div style="margin-bottom:.85rem;">' +
+      '<div style="font-size:.74rem;color:var(--text);margin-bottom:.3rem;line-height:1.35;">' + QX_ESC(f.label) + ' <span style="color:var(--dim);font-family:var(--mono);font-size:.66rem;">n=' + n + '</span></div>' +
+      '<div style="display:flex;height:14px;border-radius:5px;overflow:hidden;background:var(--surface);">' + segs + '</div>' +
+    '</div>';
+  }).join('');
+}
+
 // ── Couple type distribution (MECE): counts of each of the 10 couple types ──
 // Replaces the old ad-hoc "communication type" buckets with the real type
 // system so the distribution maps to what we actually track.
@@ -3931,6 +4031,8 @@ function initCharts(page) {
     new Chart(document.getElementById('chart-story-feel'),{type:'bar',data:{labels:['Needs work (0)','Rough patch (1)','Solid (2)','Really good (3)','Better than ever (4)'],datasets:[{data:[0,0,0,0,0],backgroundColor:['#F87171','#FBBF24','#6C7FFF','#34D399','#10b981'],borderRadius:6}]},options:{plugins:{legend:{display:false}},scales:{x:{grid:{display:false}},y:{grid:{color:'#E6ECF6'}}}}});
     renderBars('story-gap-bars',storyGaps,'#FBBF24');
     renderIntimacyResponses();
+    renderQuestionExplorer('qx-comm', ['Ex1 · Communication']);
+    renderQuestionExplorer('qx-exp', ['Ex2 · Life & values', 'Ex2 · Who does what']);
   }
   else if (page==='satisfaction') {
     new Chart(document.getElementById('chart-funnel'),{type:'bar',data:{labels:['Ordered','Started exercises','Both completed','Results viewed'],datasets:[{data:funnelData,backgroundColor:['#FF6B35','#FBBF24','#6C7FFF','#34D399'],borderRadius:6}]},options:{plugins:{legend:{display:false}},scales:{x:{grid:{display:false}},y:{grid:{color:'#E6ECF6'}}}}});
