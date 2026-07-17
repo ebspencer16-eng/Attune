@@ -7261,6 +7261,10 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
     if (initialSection === "personality") return "comm-overview";
     if (initialSection === "expectations") return "exp-overview";
     if (initialSection === "anniversary") return "reflection";
+    // Migrate saved section ids that were removed/renamed, so returning users
+    // whose stored state points at an old page don't land on a blank section.
+    if (initialSection === "couple-map") return "couple-type";
+    if (initialSection === "summary" || initialSection === "full-summary") return "couple-type";
     if (initialSection) return initialSection;
     return "highlights";
   };
@@ -11956,9 +11960,14 @@ export default function App() {
   // that exercise's section (used by the admin Demo page).
   const _demoSec = params.get('sec');
   const _secMap = { comm: 'overview', exp: 'exp-overview', reflection: 'reflection-overview', intimacy: 'intimacy-overview' };
+  // Migrate old/removed saved sections so returning users don't restore a
+  // section that no longer renders (couple-map was merged into couple-type;
+  // summary was removed).
+  const _migrateResult = (r) => r === 'couple-map' ? 'couple-type'
+    : (r === 'summary' || r === 'full-summary') ? 'overview' : r;
   const [activeResult, setActiveResult] = useState(
     (initialView === 'results' && _demoSec && _secMap[_demoSec]) ? _secMap[_demoSec]
-      : (initialView === 'results' && _savedResults?.activeResult ? _savedResults.activeResult : "overview")
+      : (initialView === 'results' && _savedResults?.activeResult ? _migrateResult(_savedResults.activeResult) : "overview")
   );
   const [highlightsSeen, setHighlightsSeen] = useState(
     (initialView === 'results' && _demoSec && _secMap[_demoSec]) ? true
