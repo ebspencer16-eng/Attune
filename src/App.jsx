@@ -6385,8 +6385,27 @@ const JAMES_ANNIVERSARY_DEMO = {
 };
 
 // Derive insights from anniversary answers
+// ── Insight evidence contract ────────────────────────────────────────────────
+// Every insight declares what it is built from:
+//   tier 1  structured  scales, picks, rankings. Exact comparison, may claim
+//                       things about both partners.
+//   tier 2  quoted      free text surfaced verbatim. Presents, does not interpret.
+// Tier 3 (keyword inference about what free text *means*) was retired: it made
+// claims the evidence could not support. Anything whose copy says "both",
+// "each" or "you two" must be gated on BOTH partners having a real answer.
 function deriveAnniversaryInsights(mine, theirs, userName, partnerName, coupleType) {
   const insights = [];
+  // Dev-only guard so a future "both" claim cannot ship on one-sided evidence.
+  const push = (ins) => {
+    if (import.meta.env?.DEV) {
+      const claimsBoth = /\b(both|you each|you two)\b/i.test(`${ins.title} ${ins.body}`);
+      if (claimsBoth && !(ins.evidence?.length >= 2)) {
+        console.warn("[Attune] insight claims both partners on <2 pieces of evidence:", ins.title);
+      }
+      if (!ins.tier) console.warn("[Attune] insight is missing its evidence tier:", ins.title);
+    }
+    insights.push(ins);
+  };
   const scaleQ = ANNIVERSARY_QUESTIONS.filter(q => q.type === "scale");
   const ctNote = coupleType ? `As a ${coupleType.name} couple, ` : "";
 
@@ -6398,8 +6417,6 @@ function deriveAnniversaryInsights(mine, theirs, userName, partnerName, coupleTy
     gap: Math.abs((mine[q.id] ?? 2) - (theirs[q.id] ?? 2)),
     avgVal: ((mine[q.id] ?? 2) + (theirs[q.id] ?? 2)) / 2,
   }));
-  const overallGap = scaleGaps.filter(s=>s.q.id!=='a0').reduce((sum,s)=>sum+s.gap,0) / Math.max(scaleGaps.filter(s=>s.q.id!=='a0').length, 1);
-  const biggestGap = scaleGaps.filter(s=>s.q.id!=='a0').sort((a,b)=>b.gap-a.gap)[0];
   const overallFeelGap = Math.abs((mine.a0 ?? 2) - (theirs.a0 ?? 2));
   const overallQ = ANNIVERSARY_QUESTIONS.find(q=>q.id==='a0');
 
@@ -6407,8 +6424,10 @@ function deriveAnniversaryInsights(mine, theirs, userName, partnerName, coupleTy
   if (overallFeelGap >= 1 && overallQ) {
     const myLabel = overallQ.scaleLabels[mine.a0 ?? 2];
     const theirLabel = overallQ.scaleLabels[theirs.a0 ?? 2];
-    insights.push({
+    push({
       type: "explore",
+      tier: 1,
+      evidence: ["a0:mine","a0:theirs"],
       title: "You're experiencing this relationship from different vantage points",
       body: `${userName} describes the overall feel as "${myLabel}", ${partnerName} says "${theirLabel}." Neither is wrong, and the gap doesn't mean one of you isn't paying attention. But it's worth understanding what's shaping each perspective.`,
       priority: "Have this conversation gently",
@@ -6416,8 +6435,10 @@ function deriveAnniversaryInsights(mine, theirs, userName, partnerName, coupleTy
     });
   } else if (overallQ) {
     const sharedLabel = overallQ.scaleLabels[Math.round(((mine.a0 ?? 2) + (theirs.a0 ?? 2)) / 2)];
-    insights.push({
+    push({
       type: "strength",
+      tier: 1,
+      evidence: ["a0:mine","a0:theirs"],
       title: "You're on the same page about how the relationship feels",
       body: `Both of you independently described the relationship as something close to "${sharedLabel}." Shared perception of where you are is a meaningful starting point, it means you're reading the same room.`,
       priority: "Build on this",
@@ -6429,16 +6450,20 @@ function deriveAnniversaryInsights(mine, theirs, userName, partnerName, coupleTy
   const funQ = scaleGaps.find(s=>s.q.id==='a_sat_fun');
   if (funQ && funQ.gap >= 2) {
     const wantMoreFun = (mine.a_sat_fun ?? 2) < (theirs.a_sat_fun ?? 2) ? userName : partnerName;
-    insights.push({
+    push({
       type: "explore",
+      tier: 1,
+      evidence: ["a_sat_fun:mine","a_sat_fun:theirs"],
       title: "You're not aligned on how much lightness and fun you're getting",
       body: `${wantMoreFun} feels like you could be having more fun together than you currently are. This isn't a complaint about the relationship, it's a signal about what's been deprioritized.`,
       priority: "Easy win to act on",
       action: `Block something deliberately fun in the next two weeks, not a big trip, just something that has no productive purpose whatsoever. Fun doesn't usually happen by accident when life gets full.`,
     });
   } else if (funQ && funQ.avgVal >= 3) {
-    insights.push({
+    push({
       type: "strength",
+      tier: 1,
+      evidence: ["a_sat_fun:mine","a_sat_fun:theirs"],
       title: "You both feel like there's real lightness in what you have",
       body: `Both of you rate the fun and levity in your relationship positively. That matters more than it sounds, couples who laugh together regularly tend to weather hard periods better than those who save fun for vacations.`,
       priority: "Keep prioritizing it",
@@ -6450,8 +6475,10 @@ function deriveAnniversaryInsights(mine, theirs, userName, partnerName, coupleTy
   const commQ = scaleGaps.find(s=>s.q.id==='a_sat_comm');
   if (commQ && commQ.gap >= 2) {
     const lowPerson = (mine.a_sat_comm ?? 2) < (theirs.a_sat_comm ?? 2) ? userName : partnerName;
-    insights.push({
+    push({
       type: "explore",
+      tier: 1,
+      evidence: ["a_sat_comm:mine","a_sat_comm:theirs"],
       title: "One of you finds hard conversations easier than the other does",
       body: `${lowPerson} rates how well you handle difficult conversations more cautiously than their partner does. This asymmetry is common, usually it means one person absorbs more friction before raising something, while the other thinks things resolve smoothly.`,
       priority: "Worth naming explicitly",
@@ -6459,22 +6486,6 @@ function deriveAnniversaryInsights(mine, theirs, userName, partnerName, coupleTy
     });
   }
 
-  // --- SHARED FOUNDATION ---
-  const bothMentionHome = (mine.a1 + mine.a2 + theirs.a1 + theirs.a2).toLowerCase();
-  const homeWords = ["home","together","team","cabin","cook","cooked","space","belong","real"];
-  const homeCount = homeWords.filter(w => bothMentionHome.includes(w)).length;
-  if (homeCount >= 3) {
-    insights.push({
-      type: "strength",
-      title: "You both anchor to the same thing",
-      body: `Your defining moments both center on a felt sense of home, not a place, but a feeling you create together. That's harder to build than most couples realize, and you've already got it.`,
-      priority: "Foundation to build from",
-      action: "Name it explicitly. The next time one of you feels it, that this-is-home feeling, say it out loud. Making it visible keeps it alive.",
-    });
-  }
-
-  // --- GRATITUDE RECIPROCITY ---
-  // Unified keyword set — same check applied to both partners
   const myGrateful = (mine.a3 || "").toLowerCase();
   const theirGrateful = (theirs.a3 || "").toLowerCase();
   const seenWords = ["notice","see","understand","get me","gets me","knows","space","pull","curiosity","curious","interest","interested","make me","laugh","appreciat","pay attention","attentiv","present","remember"];
@@ -6483,8 +6494,10 @@ function deriveAnniversaryInsights(mine, theirs, userName, partnerName, coupleTy
   // Both quotes have to be real answers before we say "you each".
   const myA3ok = isSubstantive(mine.a3), theirA3ok = isSubstantive(theirs.a3);
   if (myFeelsSeen && theirFeelsSeen && myA3ok && theirA3ok) {
-    insights.push({
+    push({
       type: "strength",
+      tier: 2,
+      evidence: ["a3:mine","a3:theirs"],
       title: "You each feel genuinely seen",
       body: `What each of you is most grateful for right now speaks to being known, not just liked. ${userName}: ${quoted(mine.a3)}. ${partnerName}: ${quoted(theirs.a3)}. These are descriptions of how you're actually showing up for each other.`,
       priority: "Preserve intentionally",
@@ -6493,8 +6506,10 @@ function deriveAnniversaryInsights(mine, theirs, userName, partnerName, coupleTy
   } else if ((myFeelsSeen && myA3ok) || (theirFeelsSeen && theirA3ok)) {
     const who = (myFeelsSeen && myA3ok) ? userName : partnerName;
     const text = (myFeelsSeen && myA3ok) ? mine.a3 : theirs.a3;
-    insights.push({
+    push({
       type: "strength",
+      tier: 2,
+      evidence: ["a3:one"],
       title: `${who} named being known, not just liked`,
       body: `${who} is most grateful for ${quoted(text)}. That is a description of being understood rather than simply appreciated, and it is worth knowing that it lands that way.`,
       priority: "Keep doing it",
@@ -6502,55 +6517,79 @@ function deriveAnniversaryInsights(mine, theirs, userName, partnerName, coupleTy
     });
   }
 
-  // --- WHAT THEY WANT NEXT ---
-  const myNext = (mine.a4 || "").toLowerCase();
-  const theirNext = (theirs.a4 || "").toLowerCase();
-  const adventureWords = ["adventure","spontaneous","trip","travel","explore","new","something different"];
-  const ritualWords = ["ritual","routine","regular","weekly","walk","dinner","consistent","monthly","carve","time"];
-  const myWantsAdventure = adventureWords.some(w => myNext.includes(w));
-  const myWantsRitual = ritualWords.some(w => myNext.includes(w));
-  const theirWantsAdventure = adventureWords.some(w => theirNext.includes(w));
-  const theirWantsRitual = ritualWords.some(w => theirNext.includes(w));
-
-  if ((myWantsAdventure && theirWantsRitual) || (myWantsRitual && theirWantsAdventure)) {
-    const adventurePerson = myWantsAdventure ? userName : partnerName;
-    const ritualPerson = myWantsRitual ? userName : partnerName;
-    insights.push({
-      type: "explore",
-      title: "You want the same closeness through different things",
-      body: `${adventurePerson} is reaching for spontaneity and new experiences together. ${ritualPerson} is reaching for consistency and ritual. These aren't opposites. They're two different answers to the same underlying need: more intentional time that feels like you.`,
-      priority: "Resolve this together",
-      action: `Try this: pick one small weekly ritual (${ritualPerson}'s instinct) and one slightly bigger spontaneous thing per month (${adventurePerson}'s instinct). You're not compromising, you're combining. Start with what's easier to plan.`,
+  // --- RECENT MEMORY (a_memory) --- collected but previously never surfaced
+  if (isSubstantive(mine.a_memory) && isSubstantive(theirs.a_memory)) {
+    push({
+      type: "strength",
+      tier: 2,
+      evidence: ["a_memory:mine", "a_memory:theirs"],
+      title: "You each had something recent that made you smile",
+      body: `${userName} wrote ${quoted(mine.a_memory)}. ${partnerName} wrote ${quoted(theirs.a_memory)}. Neither of you knew what the other would say.`,
+      priority: "Say these out loud",
+      action: `Read each other's answer, then say why that one. The moments people pick are rarely the obvious ones, and the reason behind the choice is usually the part the other person has never heard.`,
     });
   }
 
-  // --- FIVE-YEAR PICTURE ---
-  const myFive = (mine.a5 || "").toLowerCase();
-  const theirFive = (theirs.a5 || "").toLowerCase();
-  const financialWords = ["stable","financial","money","save","security","secure","trapped"];
-  const spaceWords = ["space","home","house","somewhere","live","room","intentional"];
-  const myFinancial = financialWords.some(w => myFive.includes(w));
-  const theirFinancial = financialWords.some(w => theirFive.includes(w));
-  const mySpace = spaceWords.some(w => myFive.includes(w));
-  const theirSpace = spaceWords.some(w => theirFive.includes(w));
+  // --- DAY-TO-DAY CONNECTION (a_sat_conn) --- collected but previously unused
+  const connQ = scaleGaps.find(s => s.q.id === "a_sat_conn");
+  if (connQ && mine.a_sat_conn != null && theirs.a_sat_conn != null) {
+    const qDef = ANNIVERSARY_QUESTIONS.find(q => q.id === "a_sat_conn");
+    if (connQ.gap >= 2) {
+      push({
+        type: "explore",
+        tier: 1,
+        evidence: ["a_sat_conn:mine", "a_sat_conn:theirs"],
+        title: "You are not feeling equally connected day to day",
+        body: `${userName} rates day-to-day connection as "${qDef.scaleLabels[mine.a_sat_conn]}". ${partnerName} rates it as "${qDef.scaleLabels[theirs.a_sat_conn]}". Same weeks, same house, different read. That gap usually means the things that create closeness for one of you are not the same things that create it for the other.`,
+        priority: "Name what closeness looks like",
+        action: `Each of you finish this sentence out loud: "I feel closest to you when we..." Do not negotiate the answers, just hear them. The point is finding out whether you have been aiming at different targets.`,
+        coupleTypeNote: coupleType ? `${ctNote}a difference in felt connection is worth surfacing early rather than letting it accumulate.` : "",
+      });
+    } else if (connQ.avgVal >= 3) {
+      push({
+        type: "strength",
+        tier: 1,
+        evidence: ["a_sat_conn:mine", "a_sat_conn:theirs"],
+        title: "You both feel connected day to day",
+        body: `${userName} says "${qDef.scaleLabels[mine.a_sat_conn]}" and ${partnerName} says "${qDef.scaleLabels[theirs.a_sat_conn]}". Landing in the same place on day-to-day closeness, independently, is a real signal. It is also the first thing to slip when a season gets busy.`,
+        priority: "Protect what is working",
+        action: `Work out what is actually producing this. It is almost never the big things. Name the small repeated one, and guard it when the calendar fills up.`,
+      });
+    }
+  }
 
-  if ((myFinancial && theirSpace) || (mySpace && theirFinancial)) {
-    const financialPerson = myFinancial ? userName : partnerName;
-    const spacePerson = theirSpace ? partnerName : userName;
-    insights.push({
+  // --- WHAT THEY WANT NEXT (a4) ---
+  // Previously classified each answer as "adventure" or "ritual" and assigned
+  // roles from that. When one answer matched both word sets, both roles landed
+  // on the same person. The contrast is legible without being labelled, so the
+  // answers are shown side by side instead.
+  if (isSubstantive(mine.a4) && isSubstantive(theirs.a4)) {
+    push({
       type: "explore",
-      title: "Your 5-year pictures share a theme, with different textures",
-      body: `${financialPerson} pictures financial stability, security that leaves room for the future you both want. ${spacePerson} pictures a home and space that feel genuinely intentional. These visions are compatible but haven't been reconciled into a shared plan yet.`,
+      tier: 2,
+      evidence: ["a4:mine", "a4:theirs"],
+      title: "You each named what you want more of",
+      body: `${userName} wants ${quoted(mine.a4)}. ${partnerName} wants ${quoted(theirs.a4)}. Read those next to each other before deciding whether they are the same wish or two different ones.`,
+      priority: "Compare directly",
+      action: `Put both answers side by side and find the overlap. Most couples discover these are two routes to the same thing: more intentional time that actually feels like you. Pick one concrete version of each and try both this month.`,
+    });
+  }
+
+  // --- FIVE YEAR VISION (a5) ---
+  // Same reasoning as a4: the old version inferred who wanted "financial
+  // stability" and who wanted "space", and could attribute both to one person.
+  if (isSubstantive(mine.a5) && isSubstantive(theirs.a5)) {
+    push({
+      type: "explore",
+      tier: 2,
+      evidence: ["a5:mine", "a5:theirs"],
+      title: "Your five-year pictures, in your own words",
+      body: `${userName} pictures ${quoted(mine.a5)}. ${partnerName} pictures ${quoted(theirs.a5)}. These do not have to match. What matters is whether you have said them out loud to each other in this much detail.`,
       priority: "Build a shared map",
-      action: `Block an evening to talk about this specifically: what does financial stability look like in actual numbers and choices? What does the right space mean in terms of location and timeline? These answers shape a lot of smaller decisions you're probably already making independently.`,
+      action: `Block an evening for this one specifically. Where these two pictures overlap is your shared plan. Where they differ is not a problem to solve tonight, it is the thing to keep talking about. Get concrete: numbers, places, timelines.`,
     });
   }
 
-  // --- GROWTH EDGES ---
-  const myGrowth = (mine.a6 || "").toLowerCase();
-  const theirGrowth = (theirs.a6 || "").toLowerCase();
-  const presenceWords = ["present","here","in the room","phone","distracted","somewhere else","half"];
-  const expressionWords = ["say","tell","hint","communicate","speak","need","express","directly"];
   const myWorksOnPresence = presenceWords.some(w => myGrowth.includes(w));
   const myWorksOnExpression = expressionWords.some(w => myGrowth.includes(w));
   const theirWorksOnPresence = presenceWords.some(w => theirGrowth.includes(w));
@@ -6559,9 +6598,11 @@ function deriveAnniversaryInsights(mine, theirs, userName, partnerName, coupleTy
   const presencePerson = myWorksOnPresence ? userName : (theirWorksOnPresence ? partnerName : null);
   const expressionPerson = myWorksOnExpression ? userName : (theirWorksOnExpression ? partnerName : null);
 
-  if (presencePerson && expressionPerson && presencePerson !== expressionPerson) {
-    insights.push({
+  if (isSubstantive(mine.a6) && isSubstantive(theirs.a6) && presencePerson && expressionPerson && presencePerson !== expressionPerson) {
+    push({
       type: "strength",
+      tier: 2,
+      evidence: ["a6:mine","a6:theirs"],
       title: "Where you each struggle is exactly what the other one offers",
       body: `${presencePerson} is working on being more present. ${expressionPerson} is working on saying what they need directly. Notice what's happening: each of you independently identified the thing that would most benefit the other person. That's rare.`,
       priority: "Make this mutual",
@@ -6573,8 +6614,10 @@ function deriveAnniversaryInsights(mine, theirs, userName, partnerName, coupleTy
   // --- APPRECIATION (a8) ---
   if (mine.a8 && theirs.a8) {
     if (mine.a8 === theirs.a8) {
-      insights.push({
+      push({
         type: "strength",
+        tier: 1,
+        evidence: ["a8:mine","a8:theirs"],
         title: `You both admire the same thing in each other`,
         body: `Both of you independently named "${admiredNoun(mine.a8)}" as the quality you most admire in your partner right now. When two people independently land on the same word to describe what they value in the other, it usually means that quality is genuinely visible in daily life, not only in words.`,
         priority: "Say it out loud",
@@ -6582,8 +6625,10 @@ function deriveAnniversaryInsights(mine, theirs, userName, partnerName, coupleTy
         coupleTypeNote: coupleType ? `${ctNote}shared admiration for the same quality is a meaningful signal of mutual recognition in your dynamic.` : "",
       });
     } else {
-      insights.push({
+      push({
         type: "strength",
+        tier: 1,
+        evidence: ["a8:mine","a8:theirs"],
         title: `You admire different things in each other, both real`,
         body: `${userName} most admires ${partnerName}'s ${admiredNounLower(mine.a8)}. ${partnerName} most admires ${userName}'s ${admiredNounLower(theirs.a8)}. Different qualities, both freely given. This suggests each of you is genuinely being seen for something specific rather than getting generic praise.`,
         priority: "Make it direct",
@@ -6608,8 +6653,10 @@ function deriveAnniversaryInsights(mine, theirs, userName, partnerName, coupleTy
     };
     if (mineA7 && theirsA7) {
       const bothOnTheme = hits(mineA7) && hits(theirsA7);
-      insights.push(bothOnTheme ? {
+      push(bothOnTheme ? {
         type: "explore",
+        tier: 2,
+        evidence: ["a7:mine","a7:theirs"],
         title: "You both identified a moment where communication broke down under pressure",
         body: `${userName} named ${quoted(mineA7)} and ${partnerName} named ${quoted(theirsA7)}. Both point at something not fully said or heard. Landing there independently, without coordinating, suggests it is a real pattern rather than a one-off.`,
         quotes: [{ name: userName, text: mineA7 }, { name: partnerName, text: theirsA7 }],
@@ -6618,6 +6665,8 @@ function deriveAnniversaryInsights(mine, theirs, userName, partnerName, coupleTy
         coupleTypeNote: coupleType ? `${ctNote}understanding your default stress responses is one of the highest-leverage things you can do together.` : "",
       } : {
         type: "explore",
+        tier: 2,
+        evidence: ["a7:mine","a7:theirs"],
         title: "You each identified something you wish had gone differently",
         body: `${userName} named ${quoted(mineA7)} and ${partnerName} named ${quoted(theirsA7)}. These don't have to match to be useful. The fact that both of you can identify something shows self-awareness, which is the first requirement for handling it better next time.`,
         quotes: [{ name: userName, text: mineA7 }, { name: partnerName, text: theirsA7 }],
@@ -6631,8 +6680,10 @@ function deriveAnniversaryInsights(mine, theirs, userName, partnerName, coupleTy
       const who = mineA7 ? userName : partnerName;
       const other = mineA7 ? partnerName : userName;
       const text = mineA7 || theirsA7;
-      insights.push({
+      push({
         type: "explore",
+        tier: 2,
+        evidence: ["a7:one"],
         title: `Only one of you had a moment in mind`,
         body: `${who} named ${quoted(text)}. ${other} didn't have something that came to mind. That difference is worth noticing on its own: it can mean the moment landed harder for one of you, or simply that you were tracking different things. It does not mean either answer is wrong.`,
         quotes: [{ name: who, text }],
@@ -6647,20 +6698,25 @@ function deriveAnniversaryInsights(mine, theirs, userName, partnerName, coupleTy
   if (Array.isArray(mine.a_priority) && Array.isArray(theirs.a_priority) && mine.a_priority.length > 0 && theirs.a_priority.length > 0) {
     const myTop = mine.a_priority[0];
     const theirTop = theirs.a_priority[0];
-    const myBottom = mine.a_priority[mine.a_priority.length - 1];
-    const theirBottom = theirs.a_priority[theirs.a_priority.length - 1];
     // Find biggest rank gap
-    const rankGaps = mine.a_priority.map(item => ({
-      item,
-      myRank: mine.a_priority.indexOf(item),
-      theirRank: theirs.a_priority.indexOf(item),
-      gap: Math.abs(mine.a_priority.indexOf(item) - theirs.a_priority.indexOf(item)),
-    })).sort((a, b) => b.gap - a.gap);
+    // indexOf returns -1 for anything the partner never ranked, which used to
+    // inflate the gap past the threshold and render as "#0". Only items present
+    // in both rankings are comparable.
+    const rankGaps = mine.a_priority
+      .filter(item => theirs.a_priority.indexOf(item) !== -1)
+      .map(item => ({
+        item,
+        myRank: mine.a_priority.indexOf(item),
+        theirRank: theirs.a_priority.indexOf(item),
+        gap: Math.abs(mine.a_priority.indexOf(item) - theirs.a_priority.indexOf(item)),
+      })).sort((a, b) => b.gap - a.gap);
     const biggestRankGap = rankGaps[0];
 
     if (myTop === theirTop) {
-      insights.push({
+      push({
         type: "strength",
+        tier: 1,
+        evidence: ["a_priority:mine","a_priority:theirs"],
         title: `You agree on what matters most this year`,
         body: `Both of you independently ranked "${myTop}" as your top priority for the year ahead. When two people rank the same thing first without discussing it, that alignment is real, and it makes it much easier to act on.`,
         priority: "Turn it into a plan",
@@ -6668,8 +6724,10 @@ function deriveAnniversaryInsights(mine, theirs, userName, partnerName, coupleTy
         coupleTypeNote: coupleType ? `${ctNote}shared priority alignment reduces the invisible negotiation that often drains energy between partners.` : "",
       });
     } else {
-      insights.push({
+      push({
         type: "explore",
+        tier: 1,
+        evidence: ["a_priority:mine","a_priority:theirs"],
         title: `Your top priorities for this year are different`,
         body: `${userName}'s top priority: "${myTop}." ${partnerName}'s top priority: "${theirTop}." Neither is wrong, but without naming it, this difference quietly shapes decisions, energy allocation, and what each of you feels is being neglected.`,
         priority: "Negotiate, not compromise",
@@ -6679,8 +6737,10 @@ function deriveAnniversaryInsights(mine, theirs, userName, partnerName, coupleTy
     }
 
     if (biggestRankGap && biggestRankGap.gap >= 3) {
-      insights.push({
+      push({
         type: "explore",
+        tier: 1,
+        evidence: ["a_priority:mine","a_priority:theirs"],
         title: `You see "${biggestRankGap.item}" very differently`,
         body: `${userName} ranked "${biggestRankGap.item}" #${biggestRankGap.myRank + 1}. ${partnerName} ranked it #${biggestRankGap.theirRank + 1}. That's a significant gap on the same item, and the kind of thing that creates friction without either person fully understanding why.`,
         priority: "Worth one honest conversation",
