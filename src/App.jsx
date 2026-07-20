@@ -2175,8 +2175,8 @@ function PctTrackViz({ myPct, partPct, userName = "You", partnerName = "Partner"
   const close = myPct != null && partPct != null && Math.abs(myPct - partPct) < 6;
   const myIsLeft = (myPct ?? 0) <= (partPct ?? 0);
   const dots = [
-    { pct: myPct, label: userName, color: "#E8673A", isLeft: myIsLeft, z: 2, dy: close ? (myIsLeft ? -6 : 6) : 0 },
-    { pct: partPct, label: partnerName, color: "#6C7FFF", isLeft: !myIsLeft, z: 1, dy: close ? (myIsLeft ? 6 : -6) : 0 },
+    { pct: myPct, label: userName, color: "#E8673A", ink: "#FFC0AC", isLeft: myIsLeft, z: 2, dy: close ? (myIsLeft ? -6 : 6) : 0 },
+    { pct: partPct, label: partnerName, color: "#6C7FFF", ink: "#C3CBFF", isLeft: !myIsLeft, z: 1, dy: close ? (myIsLeft ? 6 : -6) : 0 },
   ].filter(d => d.pct != null);
   return (
     <div style={{ margin: "1.25rem 0 0", paddingBottom: "0.25rem", position: "relative" }}>
@@ -2192,7 +2192,7 @@ function PctTrackViz({ myPct, partPct, userName = "You", partnerName = "Partner"
             position: "absolute", left: `${d.pct}%`,
             transform: d.isLeft ? "translateX(-100%)" : "translateX(0)",
             paddingLeft: d.isLeft ? 0 : 4, paddingRight: d.isLeft ? 4 : 0,
-            fontSize: "0.68rem", fontWeight: 600, color: d.color, fontFamily: BFONT,
+            fontSize: "0.7rem", fontWeight: 700, color: d.ink, fontFamily: BFONT,
             maxWidth: 110, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
           }}>{d.label}</span>
         ))}
@@ -8697,17 +8697,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
               <p style={{ fontSize: "0.9rem", color: "rgba(255,255,255,0.6)", fontFamily: BFONT, fontWeight: 300, lineHeight: 1.6, marginBottom: "1rem" }}>
                 {intimacyVariant === "married" ? "Based on how things are now." : "Based on what you each expect."} {exploreCount === 0 ? "You line up across the board." : `${alignedCount} of ${dims.length} closely matched.`} The gap is the conversation.
               </p>
-              <div style={{ display: "flex", gap: "1rem", marginBottom: "1.25rem" }}>
-                <div style={{ display: "flex", alignItems: "center", gap: "0.4rem" }}>
-                  <div style={{ width: 7, height: 7, borderRadius: "50%", background: "#10b981" }} />
-                  <span style={{ fontSize: "0.75rem", color: "rgba(255,255,255,0.8)", fontFamily: BFONT }}>{alignedCount} aligned</span>
-                </div>
-                <div style={{ display: "flex", alignItems: "center", gap: "0.4rem" }}>
-                  <div style={{ width: 7, height: 7, borderRadius: "50%", background: "#E8673A" }} />
-                  <span style={{ fontSize: "0.75rem", color: "rgba(255,255,255,0.8)", fontFamily: BFONT }}>{exploreCount} worth discussing</span>
-                </div>
-              </div>
-
+              
               {/* Where you each land — label left, bar right, key top-right (9.1) */}
               <div style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 14, padding: "1rem 1.1rem", marginBottom: "1rem" }}>
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "0.7rem", gap: "1rem", flexWrap: "wrap" }}>
