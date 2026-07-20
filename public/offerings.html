@@ -12,7 +12,16 @@
   <style>
     html { overscroll-behavior-x: none; overflow-x: hidden; max-width: 100%; width: 100%; }
     body { overflow-x: hidden; max-width: 100%; width: 100%; position: relative; }
-  </style>
+    .addon-tiles{display:grid;grid-template-columns:repeat(5,1fr);gap:1rem;margin-top:2.5rem}
+  .addon-tile{background:rgba(255,255,255,.05);border:1.5px solid rgba(255,255,255,.12);border-radius:16px;padding:1.4rem 1.15rem;display:flex;flex-direction:column;gap:.45rem}
+  .addon-tile-name{font-family:'Playfair Display',Georgia,serif;font-size:1rem;font-weight:700;color:white;line-height:1.28}
+  .addon-tile-price{font-family:'Playfair Display',Georgia,serif;font-size:1.5rem;font-weight:700;color:#E8673A;line-height:1}
+  .addon-tile-desc{font-size:.72rem;color:rgba(255,255,255,.5);line-height:1.6;flex:1;margin:0}
+  .addon-tile-inc{font-size:.58rem;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.35);font-weight:700;border-top:1px solid rgba(255,255,255,.1);padding-top:.65rem;margin-top:.35rem}
+  @media(max-width:1040px){.addon-tiles{grid-template-columns:repeat(3,1fr)}}
+  @media(max-width:720px){.addon-tiles{grid-template-columns:repeat(2,1fr)}}
+  @media(max-width:460px){.addon-tiles{grid-template-columns:1fr}}
+</style>
 
 <title>Packages, Attune</title>
   <meta name="description" content="Four packages built around the same core insight: the couples who thrive are the ones who really know each other. Digital and physical options available.">
@@ -420,8 +429,7 @@
 
     /* === WORKBOOK DARK SECTION === */
     .packages{padding-bottom:2.5rem!important}
-    .workbook-dark-section{padding:2rem 1.1rem!important}
-    .workbook-section-grid{grid-template-columns:1fr!important}
+    .addons-dark-section{padding:2rem 1.1rem!important}
     .workbook-option-grid{grid-template-columns:1fr 1fr!important;gap:.75rem!important}
     section[style*="linear-gradient(150deg,#1c1940"]{padding:2rem 1.1rem!important}
 
@@ -1079,92 +1087,47 @@
 
 <!-- GIFT CALLOUT -->
 
-<!-- PERSONALIZED WORKBOOK -->
-<section style="background:linear-gradient(150deg,#1c1940,#282560);padding:5rem 2.5rem;" class="workbook-dark-section">
+<!-- ADD-ONS -->
+<section id="workbook" style="background:linear-gradient(150deg,#1c1940,#282560);padding:5rem 2.5rem;" class="addons-dark-section">
   <div class="si">
     <p class="s-eye" style="color:rgba(232,103,58,.7);">Take it further</p>
-    <h2 class="s-title" style="color:white;">The Personalized Workbook.</h2>
-    <p class="s-sub" style="color:rgba(255,255,255,.45);max-width:600px;">Built from your results. Every prompt, activity, and exercise drawn from what you two actually discovered. Not generic. Yours.</p>
+    <h2 class="s-title" style="color:white;">Add-ons.</h2>
+    <p class="s-sub" style="color:rgba(255,255,255,.45);max-width:640px;">Optional extras that work with any package. Each one is built from your own answers, not a generic template.</p>
 
-    <div class="workbook-section-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:2rem;margin-top:3rem;">
-
-      <!-- Workbook options -->
-      <div class="workbook-option-container" style="display:flex;flex-direction:column;gap:1rem;">
-        <!-- Digital -->
-        <div style="background:rgba(255,255,255,.05);border:1.5px solid rgba(232,103,58,.35);border-radius:18px;padding:1.75rem;position:relative;overflow:hidden;">
-          <div style="position:absolute;top:0;left:0;right:0;height:2.5px;background:linear-gradient(90deg,#E8673A,#f59e0b)"></div>
-          <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:1rem;flex-wrap:wrap;margin-bottom:1rem;">
-            <div>
-              <p style="font-size:.62rem;font-weight:800;letter-spacing:.18em;text-transform:uppercase;color:rgba(232,103,58,.7);margin-bottom:.3rem;">Digital download</p>
-              <h3 style="font-family:'Playfair Display',Georgia,serif;font-size:1.2rem;font-weight:700;color:white;">Your Workbook, PDF</h3>
-            </div>
-            <div style="font-family:'Playfair Display',Georgia,serif;font-size:1.8rem;font-weight:700;color:white;line-height:1;">$19</div>
-          </div>
-          <p style="font-size:.82rem;color:rgba(255,255,255,.5);line-height:1.65;margin-bottom:1.25rem;">Delivered instantly after purchase. Print it at home or work through it on screen together.</p>
-          <a href="/app?signin=1" style="display:block;text-align:center;background:rgba(232,103,58,.85);color:white;border:none;border-radius:10px;padding:.7rem 1rem;font-size:.78rem;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;text-decoration:none;transition:background .15s;" onmouseover="this.style.background='#E8673A'" onmouseout="this.style.background='rgba(232,103,58,.85)'">Add to my package →</a>
-          <p style="font-size:.68rem;color:rgba(255,255,255,.25);text-align:center;margin-top:.6rem;">Available after completing both exercises</p>
-        </div>
-        <!-- Printed -->
-        <div class="phys-only" style="background:rgba(255,255,255,.04);border:1.5px solid rgba(255,255,255,.1);border-radius:18px;padding:1.75rem;position:relative;">
-          <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:1rem;flex-wrap:wrap;margin-bottom:1rem;">
-            <div>
-              <p style="font-size:.62rem;font-weight:800;letter-spacing:.18em;text-transform:uppercase;color:rgba(255,255,255,.4);margin-bottom:.3rem;">Printed &amp; shipped</p>
-              <h3 style="font-family:'Playfair Display',Georgia,serif;font-size:1.2rem;font-weight:700;color:white;">Your Workbook, Bound</h3>
-            </div>
-            <div style="font-family:'Playfair Display',Georgia,serif;font-size:1.8rem;font-weight:700;color:white;line-height:1;">$39</div>
-          </div>
-          <p style="font-size:.82rem;color:rgba(255,255,255,.45);line-height:1.65;margin-bottom:1.25rem;">Softcover, lay-flat bound. Printed with your names and results. Ships within 5-7 business days.</p>
-          <a href="/app?signin=1" style="display:block;text-align:center;background:rgba(255,255,255,.08);color:rgba(255,255,255,.7);border:1px solid rgba(255,255,255,.15);border-radius:10px;padding:.7rem 1rem;font-size:.78rem;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;text-decoration:none;transition:all .15s;" onmouseover="this.style.background='rgba(255,255,255,.12)'" onmouseout="this.style.background='rgba(255,255,255,.08)'">Add to my package →</a>
-          <p style="font-size:.68rem;color:rgba(255,255,255,.2);text-align:center;margin-top:.6rem;">Available after completing both exercises</p>
-        </div>
+    <div class="addon-tiles">
+      <div class="addon-tile">
+        <div class="addon-tile-name">Personalized Workbook</div>
+        <div class="addon-tile-price">$19</div>
+        <p class="addon-tile-desc">Conversation prompts, activities, and exercises generated from your own results.</p>
+        <div class="addon-tile-inc">Included in Premium</div>
       </div>
-
-      <!-- What's inside -->
-      <div style="padding:.5rem 0;">
-        <p style="font-size:.68rem;letter-spacing:.2em;text-transform:uppercase;font-weight:700;color:rgba(232,103,58,.6);margin-bottom:1.5rem;">What's inside your workbook</p>
-        <div style="display:flex;flex-direction:column;gap:1.25rem;">
-          <div style="display:flex;gap:.85rem;align-items:flex-start;">
-            <div style="width:32px;height:32px;border-radius:8px;background:rgba(232,103,58,.12);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#E8673A" stroke-width="2" stroke-linecap="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-            </div>
-            <div>
-              <p style="font-size:.85rem;font-weight:600;color:white;margin-bottom:.2rem;">Conversation starters from your gaps</p>
-              <p style="font-size:.78rem;color:rgba(255,255,255,.42);line-height:1.6;">Questions written around the specific topics where your answers reveal something worth exploring, framed to open a conversation, not start an argument.</p>
-            </div>
-          </div>
-          <div style="display:flex;gap:.85rem;align-items:flex-start;">
-            <div style="width:32px;height:32px;border-radius:8px;background:rgba(91,109,248,.12);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6C7FFF" stroke-width="2" stroke-linecap="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
-            </div>
-            <div>
-              <p style="font-size:.85rem;font-weight:600;color:white;margin-bottom:.2rem;">Reflection activities for each dimension</p>
-              <p style="font-size:.78rem;color:rgba(255,255,255,.42);line-height:1.6;">Short, structured exercises for each communication dimension, individual reflection first, then a joint discussion format.</p>
-            </div>
-          </div>
-          <div style="display:flex;gap:.85rem;align-items:flex-start;">
-            <div style="width:32px;height:32px;border-radius:8px;background:rgba(16,185,129,.12);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2" stroke-linecap="round"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
-            </div>
-            <div>
-              <p style="font-size:.85rem;font-weight:600;color:white;margin-bottom:.2rem;">Expectation deep-dives</p>
-              <p style="font-size:.78rem;color:rgba(255,255,255,.42);line-height:1.6;">For each expectations gap, a guided walkthrough: what each of you said, why it matters, and a suggested way to work through it.</p>
-            </div>
-          </div>
-          <div style="display:flex;gap:.85rem;align-items:flex-start;">
-            <div style="width:32px;height:32px;border-radius:8px;background:rgba(245,158,11,.12);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" stroke-width="2" stroke-linecap="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
-            </div>
-            <div>
-              <p style="font-size:.85rem;font-weight:600;color:white;margin-bottom:.2rem;">Notes pages throughout</p>
-              <p style="font-size:.78rem;color:rgba(255,255,255,.42);line-height:1.6;">Space to write as you go, observations, things you want to remember, things you want to come back to. It's yours to keep.</p>
-            </div>
-          </div>
-        </div>
-        <div style="margin-top:2rem;padding:1rem;background:rgba(255,255,255,.04);border-radius:10px;border-left:2px solid rgba(232,103,58,.5);">
-          <p style="font-size:.78rem;color:rgba(255,255,255,.45);line-height:1.65;font-style:italic;">"Add it when you're ready." The workbook is an optional add-on generated from your completed exercises, available to purchase from your portal any time after you get your results. Not included in the base price.</p>
-        </div>
+      <div class="addon-tile">
+        <div class="addon-tile-name">Physical Intimacy Expectations</div>
+        <div class="addon-tile-price">$20</div>
+        <p class="addon-tile-desc">A private exercise on what you each expect, scored for gaps like the rest of your results.</p>
+        <div class="addon-tile-inc">Included in Premium</div>
+      </div>
+      <div class="addon-tile">
+        <div class="addon-tile-name">Relationship Reflection</div>
+        <div class="addon-tile-price">$40</div>
+        <p class="addon-tile-desc">A third exercise on the moments that shaped you, and where you're pointed next.</p>
+        <div class="addon-tile-inc">Included in Reflection &amp; Premium</div>
+      </div>
+      <div class="addon-tile">
+        <div class="addon-tile-name">Starting Out Checklist</div>
+        <div class="addon-tile-price">$20</div>
+        <p class="addon-tile-desc">A practical guide to merging lives: names, finances, household logistics.</p>
+        <div class="addon-tile-inc">Included in Starting Out</div>
+      </div>
+      <div class="addon-tile">
+        <div class="addon-tile-name">Shared Budgeting Activity</div>
+        <div class="addon-tile-price">$20</div>
+        <p class="addon-tile-desc">Map what you each value spending on, and where your instincts differ.</p>
+        <div class="addon-tile-inc">Included in Starting Out &amp; Premium</div>
       </div>
     </div>
+
+    <p style="font-size:.78rem;color:rgba(255,255,255,.4);line-height:1.7;margin-top:2rem;max-width:640px;">Add any of these at checkout, or from your portal once your results unlock. Where an add-on is already part of a package, you won't be charged for it twice.</p>
   </div>
 </section>
 
