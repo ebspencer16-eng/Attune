@@ -624,9 +624,10 @@ function renderGridLows(gridId) {
     const key = `${gridId}_r${l.ri}_c${l.ci}`;
     const rowName = def.rows[l.ri];
     const colName = def.cols[l.ci].label.toLowerCase();
+    const article = /^[aeiou]/.test(colName) ? 'an' : 'a';
     const val = LOW_ANSWERS[key] ? LOW_ANSWERS[key].replace(/"/g, '&quot;') : '';
     return `<div class="low-item">
-      <div class="q-text">You gave <strong>${rowName}</strong> a ${colName} score of ${l.v}. Can you tell us more about that?</div>
+      <div class="q-text">You gave <strong>${rowName}</strong> ${article} ${colName} score of ${l.v}. Can you tell us more about that?</div>
       <textarea data-lowkey="${key}" oninput="LOW_ANSWERS[this.dataset.lowkey]=this.value;updateProgress();" placeholder="What specifically didn't work...">${val}</textarea>
     </div>`;
   }).join('');
