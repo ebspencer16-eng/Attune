@@ -7763,7 +7763,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
       children: [
         { id: "reflection-overview", label: "Overview" },
         { id: "reflection-domain", label: "The Reflection", isDomainHeader: true, color: "#1B5FE8" },
-        { id: "reflection-insights", label: "Insights", isDeepChild: true, color: "#1B5FE8" },
+        { id: "reflection-ratings", label: "How You Each Rated", isDeepChild: true, color: "#1B5FE8" },
         { id: "reflection-story", label: "Side by Side", isDeepChild: true, color: "#1B5FE8" },
         { id: "reflection-plan", label: "Action Plan", isDeepChild: true, color: "#1B5FE8" },
       ]
@@ -7859,7 +7859,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
     "exp-overview",
     ...FIXED_CATS.map((_, ci) => `exp-convo-${ci}`),
     "exp-action-plan",
-    ...(hasAnniversary ? ["reflection-overview", "reflection-insights", "reflection-story", "reflection-plan"] : []),
+    ...(hasAnniversary ? ["reflection-overview", "reflection-ratings", "reflection-story", "reflection-plan"] : []),
     ...(intimacyBothDone ? ["intimacy-overview", ...INTIMACY_DIMENSIONS.map(d => `intimacy-${d.id}`), "intimacy-plan"] : []),
     "what-comes-next",
   ];
@@ -7886,7 +7886,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
     if (id === "exp-action-plan") return "Expectations Action Plan";
     if (id.startsWith("exp-convo-")) { const ci = parseInt(id.replace("exp-convo-","")); return FIXED_CATS[ci]?.label || id; }
     if (id === "reflection-overview") return "Reflection Overview";
-    if (id === "reflection-insights") return "Reflection Insights";
+    if (id === "reflection-ratings") return "How You Each Rated";
     if (id === "reflection-story") return "Side by Side";
     if (id === "reflection-plan") return "Reflection Action Plan";
     if (id === "intimacy-overview") return "Physical Intimacy";
@@ -8424,7 +8424,6 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
 
     // ── REFLECTION OVERVIEW ───────────────────────────────────────────────────
     if (section === "reflection-overview" || section === "reflection") {
-      const strengths = insights.filter(i => i.type === "strength").length;
       const explores = insights.filter(i => i.type === "explore").length;
       const overallQ = ANNIVERSARY_QUESTIONS.find(q => q.id === "a0");
       const myOverall = mine.a0 ?? 3;
@@ -8491,8 +8490,8 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
                 <div style={{ fontSize: "0.55rem", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.3)", fontFamily: BFONT, fontWeight: 700, marginBottom: "0.5rem" }}>What's in this section</div>
                 <div style={{ display: "flex", flexDirection: "column", gap: "0.3rem" }}>
                   {[
-                    { label: "Insights", sub: `${insights.length} insights drawn from your answers`, id: "reflection-insights" },
-                    { label: "Side by Side", sub: "Your answers shown together with synthesis", id: "reflection-story" },
+                    { label: "How You Each Rated", sub: "Your scores and rankings, compared", id: "reflection-ratings" },
+                    { label: "Side by Side", sub: "Everything you each wrote, in your own words", id: "reflection-story" },
                     { label: "Action Plan", sub: `${explores} conversation${explores !== 1 ? "s" : ""} worth having`, id: "reflection-plan" },
                   ].map(item => (
                     <div key={item.id} onClick={() => go(item.id)}
@@ -8516,15 +8515,135 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
     }
 
     // ── REFLECTION INSIGHTS ───────────────────────────────────────────────────
-    if (section === "reflection-insights") {
+    // ── HOW YOU EACH RATED ────────────────────────────────────────────────────
+    // Everything with a fixed answer: the scales, the admiration pick, the
+    // priority ranking. Shown as comparisons rather than described in prose.
+    // Free-text answers live on Side by Side, in the couple's own words.
+    if (section === "reflection-ratings" || section === "reflection-insights") {
+      const overallQ = ANNIVERSARY_QUESTIONS.find(q => q.id === "a0");
+      const ratedScales = scaleQs.filter(q => mine[q.id] != null && theirs[q.id] != null);
+      const pct = v => (v / 4) * 100;
+
+      const ScaleRow = ({ q }) => {
+        const mv = mine[q.id], tv = theirs[q.id];
+        const gap = Math.abs(mv - tv);
+        const tone = gap === 0 ? "#10b981" : gap === 1 ? "#1B5FE8" : "#E8673A";
+        return (
+          <div style={{ background: "white", border: `1.5px solid ${C.stone}`, borderRadius: 14, padding: "1.1rem 1.25rem 0.9rem", marginBottom: "0.75rem" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: "1rem", marginBottom: "1rem" }}>
+              <span style={{ fontFamily: HFONT, fontSize: "0.86rem", fontWeight: 700, color: C.ink }}>{q.text}</span>
+              <span style={{ fontSize: "0.6rem", letterSpacing: "0.1em", textTransform: "uppercase", fontWeight: 700, color: tone, whiteSpace: "nowrap", flexShrink: 0 }}>
+                {gap === 0 ? "Same read" : gap === 1 ? "Close" : `${gap} apart`}
+              </span>
+            </div>
+            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "0.5rem" }}>
+              <span style={{ fontSize: "0.66rem", color: C.muted, fontFamily: BFONT }}>{q.scaleLabels[0]}</span>
+              <span style={{ fontSize: "0.66rem", color: C.muted, fontFamily: BFONT }}>{q.scaleLabels[q.scaleLabels.length - 1]}</span>
+            </div>
+            <div style={{ position: "relative", height: 6, background: C.stone, borderRadius: 999, marginBottom: "0.15rem" }}>
+              {gap > 0 && (
+                <div style={{ position: "absolute", top: 0, bottom: 0, left: `${Math.min(pct(mv), pct(tv))}%`, width: `${Math.abs(pct(mv) - pct(tv))}%`, background: tone, opacity: 0.22, borderRadius: 999 }} />
+              )}
+              {[[mv, userName, "#E8673A", 2], [tv, partnerName, "#1B5FE8", 1]].map(([v, name, col, z]) => (
+                <div key={name} style={{ position: "absolute", top: "50%", left: `${pct(v)}%`, transform: "translate(-50%,-50%)", width: 14, height: 14, borderRadius: "50%", background: col, border: "2.5px solid white", boxShadow: "0 1px 4px rgba(0,0,0,0.18)", zIndex: z }} />
+              ))}
+            </div>
+            <div style={{ position: "relative", height: 18, marginTop: 6 }}>
+              {[[mv, userName, "#E8673A"], [tv, partnerName, "#1B5FE8"]].map(([v, name, col], idx) => {
+                const isLeft = pct(v) <= pct(idx === 0 ? tv : mv);
+                return (
+                  <span key={name} style={{ position: "absolute", left: `${pct(v)}%`, transform: isLeft ? "translateX(-100%)" : "translateX(0)", paddingRight: isLeft ? 5 : 0, paddingLeft: isLeft ? 0 : 5, fontSize: "0.66rem", fontWeight: 700, color: col, fontFamily: BFONT, whiteSpace: "nowrap" }}>
+                    {name} · {q.scaleLabels[v]}
+                  </span>
+                );
+              })}
+            </div>
+          </div>
+        );
+      };
+
       return (
-        <Layout accent="#10b981" noPrevNext={true}>
+        <Layout accent="#1B5FE8" noPrevNext={true}>
           <div style={{ maxWidth: 660 }}>
             <div style={{ fontSize: "0.62rem", letterSpacing: "0.22em", textTransform: "uppercase", color: "#1B5FE8", fontWeight: 700, fontFamily: BFONT, marginBottom: "0.5rem" }}>Relationship Reflection</div>
-            <h2 style={{ fontFamily: HFONT, fontSize: "clamp(1.6rem,3vw,2.2rem)", fontWeight: 700, color: C.ink, lineHeight: 1.1, marginBottom: "1.25rem" }}>What your answers show.</h2>
-            {/* Insight cards */}
-            <InsightCardList insights={insights} />
-            <PrevNext />
+            <h2 style={{ fontFamily: HFONT, fontSize: "clamp(1.6rem,3vw,2.2rem)", fontWeight: 700, color: C.ink, lineHeight: 1.1, marginBottom: "0.5rem" }}>How you each rated it.</h2>
+            <p style={{ fontSize: "0.82rem", color: C.muted, fontFamily: BFONT, fontWeight: 300, marginBottom: "1.5rem", lineHeight: 1.65 }}>
+              Every question with a fixed answer, shown together. The distance between the two dots is the whole point.
+            </p>
+
+            {overallQ && mine.a0 != null && theirs.a0 != null && (
+              <div style={{ marginBottom: "1.5rem" }}>
+                <div style={{ fontSize: "0.6rem", letterSpacing: "0.2em", textTransform: "uppercase", color: "#1B5FE8", fontWeight: 700, fontFamily: BFONT, marginBottom: "0.6rem" }}>Overall</div>
+                <ScaleRow q={overallQ} />
+              </div>
+            )}
+
+            {ratedScales.filter(q => q.id !== "a0").length > 0 && (
+              <div style={{ marginBottom: "1.5rem" }}>
+                <div style={{ fontSize: "0.6rem", letterSpacing: "0.2em", textTransform: "uppercase", color: "#1B5FE8", fontWeight: 700, fontFamily: BFONT, marginBottom: "0.6rem" }}>How things feel right now</div>
+                {ratedScales.filter(q => q.id !== "a0").map(q => <ScaleRow key={q.id} q={q} />)}
+              </div>
+            )}
+
+            {/* Admiration pick */}
+            {mine.a8 && theirs.a8 && (
+              <div style={{ marginBottom: "1.5rem" }}>
+                <div style={{ fontSize: "0.6rem", letterSpacing: "0.2em", textTransform: "uppercase", color: "#1B5FE8", fontWeight: 700, fontFamily: BFONT, marginBottom: "0.6rem" }}>What you each admire</div>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.75rem" }}>
+                  {[[userName, partnerName, mine.a8, "#E8673A"], [partnerName, userName, theirs.a8, "#1B5FE8"]].map(([from, about, val, col]) => (
+                    <div key={from} style={{ background: "white", border: `1.5px solid ${col}30`, borderRadius: 14, padding: "1.1rem 1.25rem", borderTop: `3px solid ${col}` }}>
+                      <div style={{ fontSize: "0.58rem", letterSpacing: "0.14em", textTransform: "uppercase", color: col, fontWeight: 700, fontFamily: BFONT, marginBottom: "0.5rem" }}>{from} admires</div>
+                      <div style={{ fontFamily: HFONT, fontSize: "1.35rem", fontWeight: 700, color: C.ink, lineHeight: 1.1 }}>{admiredNoun(val)}</div>
+                      <div style={{ fontSize: "0.7rem", color: C.muted, fontFamily: BFONT, marginTop: "0.3rem" }}>in {about}</div>
+                    </div>
+                  ))}
+                </div>
+                {mine.a8 === theirs.a8 && (
+                  <div style={{ marginTop: "0.6rem", background: "#EDFAF5", border: "1px solid #10b98130", borderRadius: 10, padding: "0.6rem 0.9rem", fontSize: "0.76rem", color: "#047857", fontFamily: BFONT, fontWeight: 600 }}>
+                    You picked the same quality, without conferring.
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Priority ranking */}
+            {Array.isArray(mine.a_priority) && Array.isArray(theirs.a_priority) && mine.a_priority.length > 0 && theirs.a_priority.length > 0 && (
+              <div style={{ marginBottom: "1.5rem" }}>
+                <div style={{ fontSize: "0.6rem", letterSpacing: "0.2em", textTransform: "uppercase", color: "#1B5FE8", fontWeight: 700, fontFamily: BFONT, marginBottom: "0.6rem" }}>What matters most this year</div>
+                <div style={{ background: "white", border: `1.5px solid ${C.stone}`, borderRadius: 14, overflow: "hidden" }}>
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 40px 1fr", background: "#FAFAF8", borderBottom: `1px solid ${C.stone}50`, padding: "0.6rem 1.1rem" }}>
+                    <div style={{ fontSize: "0.58rem", letterSpacing: "0.14em", textTransform: "uppercase", color: "#E8673A", fontWeight: 700, fontFamily: BFONT }}>{userName}</div>
+                    <div />
+                    <div style={{ fontSize: "0.58rem", letterSpacing: "0.14em", textTransform: "uppercase", color: "#1B5FE8", fontWeight: 700, fontFamily: BFONT, textAlign: "right" }}>{partnerName}</div>
+                  </div>
+                  {mine.a_priority.map((item, idx) => {
+                    const theirIdx = theirs.a_priority.indexOf(item);
+                    const shift = theirIdx === -1 ? null : theirIdx - idx;
+                    const theirItem = theirs.a_priority[idx];
+                    return (
+                      <div key={idx} style={{ display: "grid", gridTemplateColumns: "1fr 40px 1fr", alignItems: "center", padding: "0.6rem 1.1rem", borderTop: idx === 0 ? "none" : `1px solid ${C.stone}40`, background: idx % 2 ? "#FCFCFB" : "white" }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: "0.55rem" }}>
+                          <span style={{ fontFamily: HFONT, fontSize: "0.9rem", fontWeight: 700, color: "#E8673A", opacity: 0.5, width: 14 }}>{idx + 1}</span>
+                          <span style={{ fontSize: "0.79rem", color: C.text, fontFamily: BFONT }}>{item}</span>
+                        </div>
+                        <div style={{ textAlign: "center", fontSize: "0.62rem", fontWeight: 700, fontFamily: BFONT, color: shift === null ? C.stone : shift === 0 ? "#10b981" : Math.abs(shift) >= 3 ? "#E8673A" : C.muted }}>
+                          {shift === null ? "–" : shift === 0 ? "=" : (shift > 0 ? `▼${shift}` : `▲${Math.abs(shift)}`)}
+                        </div>
+                        <div style={{ display: "flex", alignItems: "center", gap: "0.55rem", justifyContent: "flex-end" }}>
+                          <span style={{ fontSize: "0.79rem", color: C.text, fontFamily: BFONT, textAlign: "right" }}>{theirItem || "–"}</span>
+                          <span style={{ fontFamily: HFONT, fontSize: "0.9rem", fontWeight: 700, color: "#1B5FE8", opacity: 0.5, width: 14, textAlign: "right" }}>{theirItem ? idx + 1 : ""}</span>
+                        </div>
+                      </div>
+                    );
+                  })}
+                  <div style={{ padding: "0.6rem 1.1rem", borderTop: `1px solid ${C.stone}40`, background: "#FAFAF8" }}>
+                    <span style={{ fontSize: "0.7rem", color: C.muted, fontFamily: BFONT, fontWeight: 300 }}>
+                      The centre column shows how far each of {userName}'s items moved on {partnerName}'s list.
+                    </span>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         </Layout>
       );
@@ -8532,46 +8651,34 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
 
     // ── REFLECTION STORY (SIDE BY SIDE) ──────────────────────────────────────
     if (section === "reflection-story") {
-      // Simple keyword-bucket synthesis for text questions
-      const synthesize = (myAns, theirAns) => {
-        if (!myAns || !theirAns) return null;
-        const buckets = {
-          time: ["time","together","weekly","ritual","consistent","routine","slow","moment","daily"],
-          future: ["future","years","someday","eventually","plan","goal","stable","adventurous","home","space"],
-          emotional: ["feel","felt","feeling","safe","scared","anxious","proud","grateful","love","hard","afraid"],
-          relational: ["us","we","team","together","each other","partner","choose","choosing","support"],
-          effort: ["work","working","try","trying","better","improve","grow","change","different","effort"],
-          joy: ["laugh","fun","spontaneous","adventure","joy","happy","light","easy","playful"],
-        };
-        const score = (ans, bucket) => bucket.filter(w => ans.toLowerCase().includes(w)).length;
-        const topBucket = (ans) => Object.entries(buckets).sort((a,b) => score(ans,b[1]) - score(ans,a[1]))[0][0];
-        const myTop = topBucket(myAns);
-        const theirTop = topBucket(theirAns);
-        if (myTop === theirTop) {
-          const labels = { time:"a shared sense of time and presence", future:"the same kind of future", emotional:"similar emotional territory", relational:"the same relational instinct", effort:"a commitment to growth", joy:"a shared pull toward joy and lightness" };
-          return { type: "resonance", text: `You both pointed to ${labels[myTop] || "similar things"}.` };
-        }
-        const compatible = [["time","relational"],["future","effort"],["joy","time"],["emotional","relational"],["effort","relational"]];
-        const isCompat = compatible.some(([a,b]) => (myTop===a&&theirTop===b)||(myTop===b&&theirTop===a));
-        if (isCompat) return { type: "complement", text: "Different angles on the same underlying thing, worth comparing." };
-        return { type: "discuss", text: "You're coming at this from different places. Worth talking about." };
+      // The previous synthesis note guessed a theme from keywords and could
+      // claim "you both pointed to..." on two answers that matched nothing at
+      // all. Two answers side by side do not need a verdict. They need a
+      // question, so each pair carries a fixed prompt tied to that question.
+      const PROMPTS = {
+        a1: "Read each other's answer, then say why that moment and not another one.",
+        a2: "Ask what it was like from the inside. You were both there, but not in the same way.",
+        a6: "Ask what would help. The person working on it rarely wants to be fixed, they want to be noticed trying.",
+        a7: "Talk about the pattern, not the incident. What does each of you need in the first hour when it gets hard?",
+        a5: "Find the overlap first. Then get concrete about the parts that differ: numbers, places, timelines.",
+        a3: "Say it out loud to each other. Gratitude that stays unspoken does none of the work.",
+        a4: "Pick one small version of each answer and try both this month.",
       };
-      const synthColors = { resonance: { bg:"#EEF2FF", text:"#1B5FE8" }, complement: { bg:"#FFF8F5", text:"#E8673A" }, discuss: { bg:"#FFFBF0", text:"#D97706" } };
 
       return (
         <Layout accent="#1B5FE8" noPrevNext={true}>
           <div style={{ maxWidth: 660 }}>
             <div style={{ fontSize: "0.62rem", letterSpacing: "0.22em", textTransform: "uppercase", color: "#1B5FE8", fontWeight: 700, fontFamily: BFONT, marginBottom: "0.5rem" }}>Relationship Reflection</div>
             <h2 style={{ fontFamily: HFONT, fontSize: "clamp(1.6rem,3vw,2.2rem)", fontWeight: 700, color: C.ink, lineHeight: 1.1, marginBottom: "0.5rem" }}>Side by Side</h2>
-            <p style={{ fontSize: "0.82rem", color: C.muted, fontFamily: BFONT, fontWeight: 300, marginBottom: "1.5rem", lineHeight: 1.65 }}>Your answers shown together. Each synthesis note is generated from what you actually wrote.</p>
+            <p style={{ fontSize: "0.82rem", color: C.muted, fontFamily: BFONT, fontWeight: 300, marginBottom: "1.5rem", lineHeight: 1.65 }}>Everything you each wrote, unedited, next to each other. Read them together.</p>
             {["Milestones", "How We're Doing", "Looking Forward", "What Matters"].map(cat => {
               const catQs = textQs.filter(q => q.category === cat);
               return (
                 <div key={cat} style={{ marginBottom: "1.75rem" }}>
                   <div style={{ fontSize: "0.6rem", letterSpacing: "0.2em", textTransform: "uppercase", color: "#1B5FE8", fontWeight: 700, fontFamily: BFONT, marginBottom: "0.6rem" }}>{cat}</div>
                   {catQs.map(q => {
-                    const synth = synthesize(mine[q.id], theirs[q.id]);
-                    const sc = synth ? synthColors[synth.type] : null;
+                    const prompt = PROMPTS[q.id];
+                    const answered = mine[q.id] && theirs[q.id];
                     return (
                       <div key={q.id} style={{ background: "white", border: `1.5px solid ${C.stone}`, borderRadius: 14, marginBottom: "0.75rem", overflow: "hidden" }}>
                         <div style={{ padding: "0.7rem 1.1rem", borderBottom: `1px solid ${C.stone}50`, background: "#FAFAF8" }}>
@@ -8585,10 +8692,10 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
                             </div>
                           ))}
                         </div>
-                        {synth && sc && (
-                          <div style={{ padding: "0.7rem 1.1rem", background: sc.bg, borderTop: `1px solid ${C.stone}30`, display: "flex", alignItems: "center", gap: "0.5rem" }}>
-                            <div style={{ width: 6, height: 6, borderRadius: "50%", background: sc.text, opacity: 0.7, flexShrink: 0 }} />
-                            <span style={{ fontSize: "0.78rem", color: sc.text, fontFamily: BFONT, fontWeight: 600 }}>{synth.text}</span>
+                        {prompt && answered && (
+                          <div style={{ padding: "0.7rem 1.1rem", background: "#FBF8F3", borderTop: `1px solid ${C.stone}30`, display: "flex", alignItems: "flex-start", gap: "0.55rem" }}>
+                            <span style={{ fontSize: "0.55rem", letterSpacing: "0.14em", textTransform: "uppercase", color: "#E8673A", fontWeight: 700, fontFamily: BFONT, whiteSpace: "nowrap", marginTop: "0.15rem" }}>Talk about it</span>
+                            <span style={{ fontSize: "0.77rem", color: C.text, fontFamily: BFONT, fontWeight: 300, lineHeight: 1.6 }}>{prompt}</span>
                           </div>
                         )}
                       </div>
@@ -15145,7 +15252,7 @@ export default function App() {
               if (inRefl) {
                 subnav = [
                   { label: "Overview", id: "reflection-overview" },
-                  { label: "Insights", id: "reflection-insights" },
+                  { label: "How You Each Rated", id: "reflection-ratings" },
                   { label: "Side by Side", id: "reflection-story" },
                   { label: "Action Plan", id: "reflection-plan" },
                 ];
