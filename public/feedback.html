@@ -176,7 +176,7 @@ hr{border:none;border-top:1px solid var(--border-soft);margin:2rem 0}
   <div class="section-label">01 · Context & expectations</div>
 
   <div class="question">
-    <div class="q-text">What do you expect to get out of Attune? <span class="q-sub" style="display:inline;font-style:italic">Pick all that apply</span></div>
+    <div class="q-text">What did you expect to get out of Attune? <span class="q-sub" style="display:inline;font-style:italic">Pick all that apply</span></div>
     <div class="chips" id="expectations">
       <button class="chip" data-g="expectations">Confirmation that my partner and I are a good match</button>
       <button class="chip" data-g="expectations">Specific things to work on together</button>
@@ -793,7 +793,7 @@ function bandFilled(g) {
 }
 
 const REQUIRED = [
-  ['What you expect to get out of Attune',       () => selCount('expectations') > 0],
+  ['What you expected to get out of Attune',     () => selCount('expectations') > 0],
   ['How well Attune delivered',                  () => bandFilled('expectationMatch')],
   ['Concerns before starting',                   () => selCount('concerns') > 0],
   ['Communication – overall rating',             () => bandFilled('commsOverall')],
