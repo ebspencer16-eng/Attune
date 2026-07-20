@@ -672,16 +672,7 @@
           <option value="no">Not really</option>
         </select>
       </div>
-      <div style="flex:1;min-width:180px;">
-        <div style="font-size:.6rem;letter-spacing:.12em;text-transform:uppercase;color:var(--dim);font-weight:600;margin-bottom:.4rem;">Filter by prior experience</div>
-        <select id="filter-prior" onchange="applyFilters()" style="width:100%;padding:.45rem .65rem;border:1px solid var(--border);border-radius:7px;background:var(--bg);color:var(--text);font-size:.82rem;font-family:var(--sans);">
-          <option value="all">All</option>
-          <option value="nothing">Nothing structured before</option>
-          <option value="therapy">Couples therapy</option>
-          <option value="book">Relationship book</option>
-          <option value="other">Other tool / retreat</option>
-        </select>
-      </div>
+      
       <div>
         <div style="font-size:.6rem;letter-spacing:.12em;text-transform:uppercase;color:var(--dim);font-weight:600;margin-bottom:.4rem;">&nbsp;</div>
         <button onclick="clearFilters()" style="padding:.45rem .9rem;border:1px solid var(--border);border-radius:7px;background:transparent;color:var(--text);font-size:.82rem;cursor:pointer;font-family:var(--sans);">Clear filters</button>
@@ -1571,10 +1562,10 @@ window.adminAuthHeaders = function(extra){
       </div>
       <div class="chart-card">
         <div class="chart-card-header">
-          <div class="chart-card-title">What would bring them back</div>
-          <div class="chart-card-sub">Return / re-engagement signal</div>
+          <div class="chart-card-title">Interest in other experiences</div>
+          <div class="chart-card-sub">Avg 1–5 interest per add-on experience</div>
         </div>
-        <div id="fb-return-bars" style="display:flex;flex-direction:column;gap:.55rem;padding:.5rem 0;">
+        <div id="fb-interest-bars" style="display:flex;flex-direction:column;gap:.55rem;padding:.5rem 0;">
           <div style="color:var(--muted);font-size:.78rem;">Loading…</div>
         </div>
       </div>
@@ -1593,10 +1584,10 @@ window.adminAuthHeaders = function(extra){
       </div>
       <div class="chart-card">
         <div class="chart-card-header">
-          <div class="chart-card-title">Prior experience</div>
-          <div class="chart-card-sub">Segmentation – what they've tried before</div>
+          <div class="chart-card-title">Concerns before starting</div>
+          <div class="chart-card-sub">What held people back going in</div>
         </div>
-        <div id="fb-prior-bars" style="display:flex;flex-direction:column;gap:.55rem;padding:.5rem 0;">
+        <div id="fb-concerns-bars" style="display:flex;flex-direction:column;gap:.55rem;padding:.5rem 0;">
           <div style="color:var(--muted);font-size:.78rem;">Loading…</div>
         </div>
       </div>
@@ -2468,17 +2459,17 @@ async function loadFeedbackData() {
       {l:'Expectations gaps',v:32},{l:'Seeing scores side by side',v:28},{l:'Couple type',v:18},
       {l:'Conversation afterward',v:12},{l:'Detailed feedback pages',v:6},{l:'No clear moment',v:4},
     ],
-    returnReasons: [
-      {l:'Significant life change',v:38},{l:'Anniversary/milestone',v:26},{l:'Something feeling off',v:19},
-      {l:'Sharing with another couple',v:9},{l:'Regular check-in',v:5},{l:"Probably won't return",v:3},
+    interestAvg: [
+      {l:'Relationship Reflection exercise',v:0},{l:'Physical Intimacy Expectations',v:0},
+      {l:'Starting Out Checklist',v:0},{l:'Build a Budget experience',v:0},
     ],
     completion: [
       {l:'Yes, both finished',v:71},{l:'I finished, partner pending',v:14},
       {l:"Partner finished, I'm pending",v:8},{l:'Neither fully finished',v:7},
     ],
-    priorExp: [
-      {l:'Nothing structured before',v:44},{l:'A relationship book together',v:28},
-      {l:'Couples therapy',v:18},{l:'Another tool or assessment',v:8},{l:'Retreat or workshop',v:2},
+    concerns: [
+      {l:"Questions wouldn't feel real",v:0},{l:"Partner wouldn't engage seriously",v:0},
+      {l:"Results wouldn't say anything useful",v:0},{l:"Wouldn't surface anything new",v:0},{l:'No concerns',v:0},
     ],
     discovered: [
       {text:"We've been together six years and I had no idea we had such different assumptions about who should initiate hard conversations. It was uncomfortable and completely worth it.",name:"Sarah M.",nps:9},
@@ -2566,9 +2557,9 @@ async function loadFeedbackData() {
   // Chip distributions
   const max = (arr) => Math.max(...arr.map(i => i.v));
   document.getElementById('fb-aha-bars').innerHTML = SIM.aha.map(i => renderBar(i.l, i.v, max(SIM.aha), '#E8673A', i.v + '%')).join('');
-  document.getElementById('fb-return-bars').innerHTML = SIM.returnReasons.map(i => renderBar(i.l, i.v, max(SIM.returnReasons), '#1B5FE8', i.v + '%')).join('');
+  document.getElementById('fb-interest-bars').innerHTML = SIM.interestAvg.map(i => renderBar(i.l, i.v, max(SIM.interestAvg), '#1B5FE8', i.v + '%')).join('');
   document.getElementById('fb-completion-bars').innerHTML = SIM.completion.map(i => renderBar(i.l, i.v, max(SIM.completion), '#10B981', i.v + '%')).join('');
-  document.getElementById('fb-prior-bars').innerHTML = SIM.priorExp.map(i => renderBar(i.l, i.v, max(SIM.priorExp), '#9B5DE5', i.v + '%')).join('');
+  document.getElementById('fb-concerns-bars').innerHTML = SIM.concerns.map(i => renderBar(i.l, i.v, max(SIM.concerns), '#9B5DE5', i.v + '%')).join('');
 
   // Open text feeds
   const renderFeed = (items) => items.map(i => renderQuoteCard(i.text, i.name, i.nps)).join('');
@@ -4486,28 +4477,22 @@ window.addEventListener('load',()=>{chartsInit.overview=true;initCharts('overvie
 
 // All survey questions with their type and response options
 const SURVEY_QUESTIONS = [
-  { id: 'priorExp',         label: 'Prior experience',                   type: 'multi-chip' },
   { id: 'completionStyle',  label: 'How they completed the exercises',   type: 'chip' },
   { id: 'expectations',     label: 'What they hoped to get out of Attune', type: 'multi-chip' },
   { id: 'expectationMatch', label: 'How well Attune delivered (1–5)',    type: 'scale', min: 1, max: 5 },
-  { id: 'skepticism',       label: 'What they were skeptical about',     type: 'chip' },
+  { id: 'concerns',         label: 'Concerns before starting',           type: 'multi-chip' },
   { id: 'commsOverall',     label: 'Comms exercise – overall rating (1–5)', type: 'scale', min: 1, max: 5 },
   { id: 'commsImpact',      label: 'Comms exercise – impact (1–5)',      type: 'scale', min: 1, max: 5 },
   { id: 'commsHonesty',     label: 'Comms exercise – honesty (1–5)',     type: 'scale', min: 1, max: 5 },
-  { id: 'commsSafety',      label: 'Comms exercise – emotional safety (1–5)', type: 'scale', min: 1, max: 5 },
-  { id: 'commsIndependent', label: 'How independent answering felt',     type: 'chip' },
   { id: 'expOverall',       label: 'Expectations exercise – overall rating (1–5)', type: 'scale', min: 1, max: 5 },
   { id: 'expImpact',        label: 'Expectations exercise – impact (1–5)', type: 'scale', min: 1, max: 5 },
   { id: 'expHonesty',       label: 'Expectations exercise – honesty (1–5)', type: 'scale', min: 1, max: 5 },
-  { id: 'expSafety',        label: 'Expectations exercise – emotional safety (1–5)', type: 'scale', min: 1, max: 5 },
   { id: 'ahaMarker',        label: 'Biggest moment of recognition',      type: 'chip' },
   { id: 'convoHappened',    label: 'Did it lead to a new conversation',  type: 'chip' },
   { id: 'shiftCouple',      label: 'Shift in understanding couple dynamic (1–5)', type: 'scale', min: 1, max: 5 },
   { id: 'shiftSelf',        label: 'Shift in self-understanding (1–5)', type: 'scale', min: 1, max: 5 },
   { id: 'returnLikelihood', label: 'Likelihood to review results in 6 months (1–5)', type: 'scale', min: 1, max: 5 },
-  { id: 'returnReason',     label: 'What would bring them back',         type: 'chip' },
   { id: 'valuePct',         label: 'Value vs other relationship offerings (1–5)', type: 'scale', min: 1, max: 5 },
-  { id: 'ease',             label: 'Ease of overall experience (1–5)',   type: 'scale', min: 1, max: 5 },
   { id: 'timeTaken',        label: 'Time taken',                         type: 'chip' },
   { id: 'testimonialConsent', label: 'Testimonial consent',             type: 'chip' },
   { id: 'nps',              label: 'NPS (0–10)',                         type: 'scale', min: 0, max: 10 },
@@ -4524,10 +4509,8 @@ function generateSimResponses(n = 47) {
   const responses = [];
   const convoOpts = ['Yes, a significant one', 'Yes, a smaller one', 'It surfaced something, not yet', 'Not really'];
   const ahaOpts = ['The expectations gaps', 'Seeing scores side by side', 'Our couple type', 'Conversation afterward', 'Detailed feedback pages', 'No clear moment'];
-  const priorOpts = ['Nothing structured before', 'A relationship book together', 'Couples therapy', 'Another tool or assessment'];
   const completionOpts = ['Together in the same room', 'Separately, on own schedule', 'Separately but same time', 'Mix of both'];
-  const returnOpts = ['Significant life change', 'Anniversary or milestone', 'Something feeling off', 'Regular check-in', 'Sharing with another couple', "Probably won't return"];
-  const skepticOpts = ['Whether questions would feel real', 'Whether partner would engage', 'Whether results would say anything', 'Whether it would surface anything new', "I wasn't skeptical"];
+  const concernOpts = ["I didn't think the questions would feel real", "I didn't think my partner would engage seriously", "I didn't think the results would say anything useful", "I didn't think it would surface anything new", "I didn't have any concerns"];
   const timeOpts = ['Under 20 minutes', '20–30 minutes', '30–45 minutes', '45–60 minutes', 'Over an hour'];
   const consentOpts = ['Yes – use my words and first name on the reviews section', 'Yes – initials only', 'Yes – keep it anonymous', 'No, internal use only'];
   const rand = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
@@ -4556,22 +4539,17 @@ function generateSimResponses(n = 47) {
       commsOverall,
       commsImpact: skew(3.8, 0.8),
       commsHonesty: skew(4.3, 0.6),
-      commsSafety: skew(4.4, 0.5),
       expOverall: skew(3.9, 0.7),
       expImpact: skew(3.7, 0.8),
       expHonesty: skew(4.0, 0.6),
-      expSafety: skew(4.2, 0.5),
       shiftCouple: skew(3.8, 0.9),
       shiftSelf: skew(3.6, 0.9),
       returnLikelihood: skew(4.1, 0.7),
       valuePct: skew(4.2, 0.6),
-      ease: skew(4.4, 0.5),
       convoHappened: pick(convoOpts),
       ahaMarker: pick(ahaOpts),
-      priorExp: pick(priorOpts),
       completionStyle: pick(completionOpts),
-      returnReason: pick(returnOpts),
-      skepticism: pick(skepticOpts),
+      concerns: pick(concernOpts),
       timeTaken: pick(timeOpts),
       testimonialConsent: pick(consentOpts),
       whatDiscovered: pick(discoveries),
@@ -4613,7 +4591,7 @@ function applyFilters() {
   const npsFilter = document.getElementById('filter-nps').value;
   const expFilter = document.getElementById('filter-exp-match').value;
   const convoFilter = document.getElementById('filter-convo').value;
-  const priorFilter = document.getElementById('filter-prior').value;
+
 
   FILTERED_RESPONSES = ALL_RESPONSES.filter(r => {
     if (npsFilter === 'promoter' && r.nps < 9) return false;
@@ -4626,10 +4604,7 @@ function applyFilters() {
     if (convoFilter === 'yes-smaller' && r.convoHappened !== 'Yes, a smaller one') return false;
     if (convoFilter === 'surfaced' && !r.convoHappened.includes('surfaced')) return false;
     if (convoFilter === 'no' && r.convoHappened !== 'Not really') return false;
-    if (priorFilter === 'nothing' && !r.priorExp.includes('Nothing')) return false;
-    if (priorFilter === 'therapy' && !r.priorExp.includes('therapy')) return false;
-    if (priorFilter === 'book' && !r.priorExp.includes('book')) return false;
-    if (priorFilter === 'other' && !r.priorExp.includes('tool')) return false;
+
     return true;
   });
 
@@ -4639,7 +4614,7 @@ function applyFilters() {
 }
 
 function clearFilters() {
-  ['filter-nps','filter-exp-match','filter-convo','filter-prior'].forEach(id => {
+  ['filter-nps','filter-exp-match','filter-convo'].forEach(id => {
     document.getElementById(id).value = 'all';
   });
   applyFilters();
