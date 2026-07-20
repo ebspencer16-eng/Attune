@@ -8,7 +8,22 @@
   <style>
     html { overscroll-behavior-x: none; overflow-x: hidden; max-width: 100%; width: 100%; }
     body { overflow-x: hidden; max-width: 100%; width: 100%; position: relative; }
-  </style>
+  /* Matrix column headings: label + italic description */
+.grid-head-cell{display:flex;flex-direction:column;gap:.15rem;justify-content:flex-start;text-align:center;padding:.5rem .35rem}
+.gh-label{font-weight:700}
+.gh-desc{font-size:.6rem;font-style:italic;font-weight:400;color:var(--faint);line-height:1.3}
+/* Per-cell low-score follow-ups */
+.low-follow{margin-top:1rem}
+.low-item{margin-top:.9rem;padding-left:.85rem;border-left:2px solid var(--orange)}
+.low-item .q-text{font-size:.85rem;margin-bottom:.4rem}
+/* Inline consent inputs */
+.consent-chips{flex-direction:column;align-items:flex-start;gap:.5rem}
+.consent-row{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;width:100%}
+.inline-input{width:auto;min-width:120px;max-width:180px;margin:0;padding:.45rem .65rem;font-size:.82rem}
+/* Required warning */
+.req-warn{display:none;background:rgba(232,103,58,.08);border:1px solid rgba(232,103,58,.35);color:var(--ink);border-radius:10px;padding:.8rem 1rem;font-size:.82rem;line-height:1.5;margin-bottom:.9rem}
+.req-warn.show{display:block}
+</style>
 
 <title>Attune – Beta Feedback</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,300&display=swap" rel="stylesheet">
@@ -156,49 +171,6 @@ hr{border:none;border-top:1px solid var(--border-soft);margin:2rem 0}
   <div class="section-label">01 · Context & expectations</div>
 
   <div class="question">
-    <div class="q-text">Have you tried anything similar before?</div>
-    <div class="chips" id="priorExp">
-      <button class="chip" data-g="priorExp" data-s="1">Couples therapy</button>
-      <button class="chip" data-g="priorExp" data-s="1">A relationship book together</button>
-      <button class="chip" data-g="priorExp" data-s="1">Another tool or assessment</button>
-      <button class="chip" data-g="priorExp" data-s="1">A retreat or workshop</button>
-      <button class="chip" data-g="priorExp" data-s="1">Nothing structured before</button>
-    </div>
-    <div class="conditional" id="comms-overall-low">
-      <div class="q-text">What made it fall short?</div>
-      <textarea id="comms_overall_low_txt" placeholder="Be as specific as you can..."></textarea>
-    </div>
-    <div class="conditional" id="comms-impact-low">
-      <div class="q-text">What held back the impact for you?</div>
-      <textarea id="comms_impact_low_txt" placeholder="Be as specific as you can..."></textarea>
-    </div>
-    <div class="conditional" id="comms-honesty-low">
-      <div class="q-text">What made it difficult to answer fully honestly?</div>
-      <textarea id="comms_honesty_low_txt" placeholder="Be as specific as you can..."></textarea>
-    </div>
-    <div class="conditional" id="comms-safety-low">
-      <div class="q-text">What made it feel less safe?</div>
-      <textarea id="comms_safety_low_txt" placeholder="Be as specific as you can..."></textarea>
-    </div>
-    <div class="conditional" id="exp-overall-low">
-      <div class="q-text">What made it fall short?</div>
-      <textarea id="exp_overall_low_txt" placeholder="Be as specific as you can..."></textarea>
-    </div>
-    <div class="conditional" id="exp-impact-low">
-      <div class="q-text">What held back the impact for you?</div>
-      <textarea id="exp_impact_low_txt" placeholder="Be as specific as you can..."></textarea>
-    </div>
-    <div class="conditional" id="exp-honesty-low">
-      <div class="q-text">What made it difficult to answer fully honestly?</div>
-      <textarea id="exp_honesty_low_txt" placeholder="Be as specific as you can..."></textarea>
-    </div>
-    <div class="conditional" id="exp-safety-low">
-      <div class="q-text">What made it feel less safe?</div>
-      <textarea id="exp_safety_low_txt" placeholder="Be as specific as you can..."></textarea>
-    </div>
-  </div>
-
-  <div class="question">
     <div class="q-text">How did you complete the exercises?</div>
     <div class="chips" id="completionStyle">
       <button class="chip" data-g="completionStyle" data-s="1">Together in the same room, at the same time</button>
@@ -211,7 +183,7 @@ hr{border:none;border-top:1px solid var(--border-soft);margin:2rem 0}
   <div class="question">
     <div class="q-text">What were you hoping to get out of Attune? <span class="q-sub" style="display:inline;font-style:italic">Pick all that apply</span></div>
     <div class="chips" id="expectations">
-      <button class="chip" data-g="expectations">Confirmation we're more aligned than I feared</button>
+      <button class="chip" data-g="expectations">Confirmation we're a good match</button>
       <button class="chip" data-g="expectations">Specific gaps to address together</button>
       <button class="chip" data-g="expectations">A shared language for how we operate</button>
       <button class="chip" data-g="expectations">To learn something new about my partner</button>
@@ -224,27 +196,27 @@ hr{border:none;border-top:1px solid var(--border-soft);margin:2rem 0}
   <div class="question">
     <div class="q-text">How well did Attune deliver on what you were hoping for?</div>
     <div class="rating-row" id="expectationMatch">
-      <button class="rating-btn" data-g="expectationMatch" data-s="1" data-v="1" onclick="checkExpMatch(this)"><span class="num">1</span>Fell short</button>
-      <button class="rating-btn" data-g="expectationMatch" data-s="1" data-v="2" onclick="checkExpMatch(this)"><span class="num">2</span></button>
-      <button class="rating-btn" data-g="expectationMatch" data-s="1" data-v="3" onclick="checkExpMatch(this)"><span class="num">3</span>About right</button>
-      <button class="rating-btn" data-g="expectationMatch" data-s="1" data-v="4" onclick="checkExpMatch(this)"><span class="num">4</span></button>
-      <button class="rating-btn" data-g="expectationMatch" data-s="1" data-v="5" onclick="checkExpMatch(this)"><span class="num">5</span>Exceeded it</button>
+      <button class="rating-btn" data-g="expectationMatch" data-s="1"><span class="num">1</span>Fell short</button>
+      <button class="rating-btn" data-g="expectationMatch" data-s="1"><span class="num">2</span></button>
+      <button class="rating-btn" data-g="expectationMatch" data-s="1"><span class="num">3</span>About right</button>
+      <button class="rating-btn" data-g="expectationMatch" data-s="1"><span class="num">4</span></button>
+      <button class="rating-btn" data-g="expectationMatch" data-s="1"><span class="num">5</span>Exceeded it</button>
     </div>
-    <div class="conditional" id="expMatchCond">
-      <div class="q-text">What was missing or fell short of what you expected?</div>
-      <textarea id="expMatchWhy" placeholder="Be as specific as you can..."></textarea>
+    <div class="conditional" id="fu-expectationMatch">
+      <div class="q-text" id="fuq-expectationMatch"></div>
+      <textarea id="fu_expectationMatch" placeholder="Be as specific as you can..."></textarea>
     </div>
   </div>
 
   <div class="question">
-    <div class="q-text">What were you most uncertain or skeptical about going in?</div>
-    <div class="chips" id="skepticism">
-      <button class="chip" data-g="skepticism" data-s="1">Whether the questions would feel real</button>
-      <button class="chip" data-g="skepticism" data-s="1">Whether my partner would engage seriously</button>
-      <button class="chip" data-g="skepticism" data-s="1">Whether the results would say anything useful</button>
-      <button class="chip" data-g="skepticism" data-s="1">Whether it would surface anything we didn't already know</button>
-      <button class="chip" data-g="skepticism" data-s="1">I wasn't skeptical</button>
-      <button class="chip" data-g="skepticism" data-s="1">Something else</button>
+    <div class="q-text">Which of the following concerns applied to you prior to completing Attune? <span class="q-sub" style="display:inline;font-style:italic">Pick all that apply</span></div>
+    <div class="chips" id="concerns">
+      <button class="chip" data-g="concerns">I didn't think the questions would feel real</button>
+      <button class="chip" data-g="concerns">I didn't think my partner would engage seriously</button>
+      <button class="chip" data-g="concerns">I didn't think the results would say anything useful</button>
+      <button class="chip" data-g="concerns">I didn't think it would surface anything we didn't already know</button>
+      <button class="chip" data-g="concerns">I didn't have any concerns</button>
+      <button class="chip" data-g="concerns">Something else</button>
     </div>
   </div>
 </div>
@@ -255,75 +227,61 @@ hr{border:none;border-top:1px solid var(--border-soft);margin:2rem 0}
 <div class="section">
   <div class="section-label">02 · The communication exercise</div>
 
-  <div class="lead-block">
-    <div class="question">
-      <div class="q-text">Overall, how would you rate the communication exercise?</div>
-      <div class="rating-row" id="commsOverall">
-        <button class="rating-btn" data-g="commsOverall" data-s="1"><span class="num">1</span>Poor</button>
-        <button class="rating-btn" data-g="commsOverall" data-s="1"><span class="num">2</span></button>
-        <button class="rating-btn" data-g="commsOverall" data-s="1"><span class="num">3</span>Good</button>
-        <button class="rating-btn" data-g="commsOverall" data-s="1"><span class="num">4</span></button>
-        <button class="rating-btn" data-g="commsOverall" data-s="1"><span class="num">5</span>Excellent</button>
-      </div>
+  <div class="question">
+    <div class="q-text">Overall, how would you rate the communication exercise?</div>
+    <div class="rating-row" id="commsOverall">
+      <button class="rating-btn" data-g="commsOverall" data-s="1"><span class="num">1</span>Poor</button>
+      <button class="rating-btn" data-g="commsOverall" data-s="1"><span class="num">2</span></button>
+      <button class="rating-btn" data-g="commsOverall" data-s="1"><span class="num">3</span>Good</button>
+      <button class="rating-btn" data-g="commsOverall" data-s="1"><span class="num">4</span></button>
+      <button class="rating-btn" data-g="commsOverall" data-s="1"><span class="num">5</span>Excellent</button>
     </div>
-    <div class="question">
-      <div class="q-text">How impactful did it feel overall?</div>
-      <div class="rating-row" id="commsImpact">
-        <button class="rating-btn" data-g="commsImpact" data-s="1"><span class="num">1</span>Didn't move me</button>
-        <button class="rating-btn" data-g="commsImpact" data-s="1"><span class="num">2</span></button>
-        <button class="rating-btn" data-g="commsImpact" data-s="1"><span class="num">3</span>Somewhat</button>
-        <button class="rating-btn" data-g="commsImpact" data-s="1"><span class="num">4</span></button>
-        <button class="rating-btn" data-g="commsImpact" data-s="1"><span class="num">5</span>Genuinely shifted something</button>
-      </div>
+    <div class="conditional" id="fu-commsOverall">
+      <div class="q-text" id="fuq-commsOverall"></div>
+      <textarea id="fu_commsOverall" placeholder="Be as specific as you can..."></textarea>
     </div>
-    <div class="question">
-      <div class="q-text">How honestly were you able to answer?</div>
-      <div class="rating-row" id="commsHonesty">
-        <button class="rating-btn" data-g="commsHonesty" data-s="1"><span class="num">1</span>Held back a lot</button>
-        <button class="rating-btn" data-g="commsHonesty" data-s="1"><span class="num">2</span></button>
-        <button class="rating-btn" data-g="commsHonesty" data-s="1"><span class="num">3</span>Somewhat</button>
-        <button class="rating-btn" data-g="commsHonesty" data-s="1"><span class="num">4</span></button>
-        <button class="rating-btn" data-g="commsHonesty" data-s="1"><span class="num">5</span>Completely honest</button>
-      </div>
+  </div>
+
+  <div class="question">
+    <div class="q-text">How impactful did it feel overall?</div>
+    <div class="rating-row" id="commsImpact">
+      <button class="rating-btn" data-g="commsImpact" data-s="1"><span class="num">1</span>Didn't move me</button>
+      <button class="rating-btn" data-g="commsImpact" data-s="1"><span class="num">2</span></button>
+      <button class="rating-btn" data-g="commsImpact" data-s="1"><span class="num">3</span>Somewhat</button>
+      <button class="rating-btn" data-g="commsImpact" data-s="1"><span class="num">4</span></button>
+      <button class="rating-btn" data-g="commsImpact" data-s="1"><span class="num">5</span>Genuinely shifted something</button>
     </div>
-    <div class="question" style="margin-bottom:0">
-      <div class="q-text">Did it feel emotionally safe to answer honestly?</div>
-      <div class="rating-row" id="commsSafety">
-        <button class="rating-btn" data-g="commsSafety" data-s="1"><span class="num">1</span>Not at all</button>
-        <button class="rating-btn" data-g="commsSafety" data-s="1"><span class="num">2</span></button>
-        <button class="rating-btn" data-g="commsSafety" data-s="1"><span class="num">3</span>Mostly</button>
-        <button class="rating-btn" data-g="commsSafety" data-s="1"><span class="num">4</span></button>
-        <button class="rating-btn" data-g="commsSafety" data-s="1"><span class="num">5</span>Completely</button>
-      </div>
+    <div class="conditional" id="fu-commsImpact">
+      <div class="q-text" id="fuq-commsImpact"></div>
+      <textarea id="fu_commsImpact" placeholder="Be as specific as you can..."></textarea>
+    </div>
+  </div>
+
+  <div class="question">
+    <div class="q-text">How honestly were you able to answer?</div>
+    <div class="rating-row" id="commsHonesty">
+      <button class="rating-btn" data-g="commsHonesty" data-s="1"><span class="num">1</span>Held back a lot</button>
+      <button class="rating-btn" data-g="commsHonesty" data-s="1"><span class="num">2</span></button>
+      <button class="rating-btn" data-g="commsHonesty" data-s="1"><span class="num">3</span>Somewhat</button>
+      <button class="rating-btn" data-g="commsHonesty" data-s="1"><span class="num">4</span></button>
+      <button class="rating-btn" data-g="commsHonesty" data-s="1"><span class="num">5</span>Completely honest</button>
+    </div>
+    <div class="conditional" id="fu-commsHonesty">
+      <div class="q-text" id="fuq-commsHonesty"></div>
+      <textarea id="fu_commsHonesty" placeholder="Be as specific as you can..."></textarea>
     </div>
   </div>
 
   <div class="question">
     <div class="q-text">Rate each aspect of the communication exercise</div>
     <div class="q-sub">1 = poor · 5 = excellent</div>
-    <div class="grid-wrap" id="commsGrid">
-      <!-- built by JS -->
-    </div>
-    <div class="conditional" id="commsLowCond">
-      <div class="q-text">You gave something in the communication exercise a low score – what didn't work or land?</div>
-      <textarea id="commsLowWhy" placeholder="Be as specific as you can..."></textarea>
-    </div>
+    <div class="grid-wrap" id="commsGrid"></div>
+    <div id="commsGridLows" class="low-follow"></div>
   </div>
 
   <div class="question">
-    <div class="q-text">Answering before seeing your partner's results felt:</div>
-    <div class="chips" id="commsIndependent">
-      <button class="chip" data-g="commsIndependent" data-s="1">Important – I was more honest</button>
-      <button class="chip" data-g="commsIndependent" data-s="1">Natural either way</button>
-      <button class="chip" data-g="commsIndependent" data-s="1">Slightly awkward</button>
-      <button class="chip" data-g="commsIndependent" data-s="1">I wanted to compare as we went</button>
-    </div>
-  </div>
-
-  <div class="question">
-    <div class="q-text">Were there questions that felt off, too clinical, or beside the point?</div>
-    <div class="q-sub">Optional</div>
-    <textarea id="commsQuestionsFeedback" placeholder="Which ones, and why?"></textarea>
+    <div class="q-text">Did you notice questions that felt off, too clinical, or beside the point? If so, please share your thoughts.</div>
+    <textarea id="commsQuestionsFeedback" placeholder="Which ones, and why? If nothing stood out, say so."></textarea>
   </div>
 </div>
 
@@ -333,46 +291,48 @@ hr{border:none;border-top:1px solid var(--border-soft);margin:2rem 0}
 <div class="section">
   <div class="section-label">03 · The expectations exercise</div>
 
-  <div class="lead-block">
-    <div class="question">
-      <div class="q-text">Overall, how would you rate the expectations exercise?</div>
-      <div class="rating-row" id="expOverall">
-        <button class="rating-btn" data-g="expOverall" data-s="1"><span class="num">1</span>Poor</button>
-        <button class="rating-btn" data-g="expOverall" data-s="1"><span class="num">2</span></button>
-        <button class="rating-btn" data-g="expOverall" data-s="1"><span class="num">3</span>Good</button>
-        <button class="rating-btn" data-g="expOverall" data-s="1"><span class="num">4</span></button>
-        <button class="rating-btn" data-g="expOverall" data-s="1"><span class="num">5</span>Excellent</button>
-      </div>
+  <div class="question">
+    <div class="q-text">Overall, how would you rate the expectations exercise?</div>
+    <div class="rating-row" id="expOverall">
+      <button class="rating-btn" data-g="expOverall" data-s="1"><span class="num">1</span>Poor</button>
+      <button class="rating-btn" data-g="expOverall" data-s="1"><span class="num">2</span></button>
+      <button class="rating-btn" data-g="expOverall" data-s="1"><span class="num">3</span>Good</button>
+      <button class="rating-btn" data-g="expOverall" data-s="1"><span class="num">4</span></button>
+      <button class="rating-btn" data-g="expOverall" data-s="1"><span class="num">5</span>Excellent</button>
     </div>
-    <div class="question">
-      <div class="q-text">How impactful did it feel overall?</div>
-      <div class="rating-row" id="expImpact">
-        <button class="rating-btn" data-g="expImpact" data-s="1"><span class="num">1</span>Didn't move me</button>
-        <button class="rating-btn" data-g="expImpact" data-s="1"><span class="num">2</span></button>
-        <button class="rating-btn" data-g="expImpact" data-s="1"><span class="num">3</span>Somewhat</button>
-        <button class="rating-btn" data-g="expImpact" data-s="1"><span class="num">4</span></button>
-        <button class="rating-btn" data-g="expImpact" data-s="1"><span class="num">5</span>Genuinely shifted something</button>
-      </div>
+    <div class="conditional" id="fu-expOverall">
+      <div class="q-text" id="fuq-expOverall"></div>
+      <textarea id="fu_expOverall" placeholder="Be as specific as you can..."></textarea>
     </div>
-    <div class="question">
-      <div class="q-text">How honestly were you able to answer?</div>
-      <div class="rating-row" id="expHonesty">
-        <button class="rating-btn" data-g="expHonesty" data-s="1"><span class="num">1</span>Held back a lot</button>
-        <button class="rating-btn" data-g="expHonesty" data-s="1"><span class="num">2</span></button>
-        <button class="rating-btn" data-g="expHonesty" data-s="1"><span class="num">3</span>Somewhat</button>
-        <button class="rating-btn" data-g="expHonesty" data-s="1"><span class="num">4</span></button>
-        <button class="rating-btn" data-g="expHonesty" data-s="1"><span class="num">5</span>Completely honest</button>
-      </div>
+  </div>
+
+  <div class="question">
+    <div class="q-text">How impactful did it feel overall?</div>
+    <div class="rating-row" id="expImpact">
+      <button class="rating-btn" data-g="expImpact" data-s="1"><span class="num">1</span>Didn't move me</button>
+      <button class="rating-btn" data-g="expImpact" data-s="1"><span class="num">2</span></button>
+      <button class="rating-btn" data-g="expImpact" data-s="1"><span class="num">3</span>Somewhat</button>
+      <button class="rating-btn" data-g="expImpact" data-s="1"><span class="num">4</span></button>
+      <button class="rating-btn" data-g="expImpact" data-s="1"><span class="num">5</span>Genuinely shifted something</button>
     </div>
-    <div class="question" style="margin-bottom:0">
-      <div class="q-text">Did it feel emotionally safe to answer honestly?</div>
-      <div class="rating-row" id="expSafety">
-        <button class="rating-btn" data-g="expSafety" data-s="1"><span class="num">1</span>Not at all</button>
-        <button class="rating-btn" data-g="expSafety" data-s="1"><span class="num">2</span></button>
-        <button class="rating-btn" data-g="expSafety" data-s="1"><span class="num">3</span>Mostly</button>
-        <button class="rating-btn" data-g="expSafety" data-s="1"><span class="num">4</span></button>
-        <button class="rating-btn" data-g="expSafety" data-s="1"><span class="num">5</span>Completely</button>
-      </div>
+    <div class="conditional" id="fu-expImpact">
+      <div class="q-text" id="fuq-expImpact"></div>
+      <textarea id="fu_expImpact" placeholder="Be as specific as you can..."></textarea>
+    </div>
+  </div>
+
+  <div class="question">
+    <div class="q-text">How honestly were you able to answer?</div>
+    <div class="rating-row" id="expHonesty">
+      <button class="rating-btn" data-g="expHonesty" data-s="1"><span class="num">1</span>Held back a lot</button>
+      <button class="rating-btn" data-g="expHonesty" data-s="1"><span class="num">2</span></button>
+      <button class="rating-btn" data-g="expHonesty" data-s="1"><span class="num">3</span>Somewhat</button>
+      <button class="rating-btn" data-g="expHonesty" data-s="1"><span class="num">4</span></button>
+      <button class="rating-btn" data-g="expHonesty" data-s="1"><span class="num">5</span>Completely honest</button>
+    </div>
+    <div class="conditional" id="fu-expHonesty">
+      <div class="q-text" id="fuq-expHonesty"></div>
+      <textarea id="fu_expHonesty" placeholder="Be as specific as you can..."></textarea>
     </div>
   </div>
 
@@ -380,16 +340,12 @@ hr{border:none;border-top:1px solid var(--border-soft);margin:2rem 0}
     <div class="q-text">Rate each aspect of the expectations exercise</div>
     <div class="q-sub">1 = poor · 5 = excellent</div>
     <div class="grid-wrap" id="expGrid"></div>
-    <div class="conditional" id="expLowCond">
-      <div class="q-text">You gave something in the expectations exercise a low score – what didn't work?</div>
-      <textarea id="expLowWhy" placeholder="Be as specific as you can..."></textarea>
-    </div>
+    <div id="expGridLows" class="low-follow"></div>
   </div>
 
   <div class="question">
-    <div class="q-text">Were there responsibilities missing that matter to your relationship?</div>
-    <div class="q-sub">Optional</div>
-    <textarea id="expMissing" placeholder="Anything specific that should have been included..."></textarea>
+    <div class="q-text">Were there responsibilities not mentioned in this exercise that matter to your relationship?</div>
+    <textarea id="expMissing" placeholder="Anything specific that should have been included. If nothing, say so."></textarea>
   </div>
 </div>
 
@@ -400,13 +356,21 @@ hr{border:none;border-top:1px solid var(--border-soft);margin:2rem 0}
   <div class="section-label">04 · Overall experience & impact</div>
 
   <div class="question">
+    <div class="q-text">Approximately how long did both exercises take you?</div>
+    <div class="chips" id="timeTaken">
+      <button class="chip" data-g="timeTaken" data-s="1">Under 20 minutes</button>
+      <button class="chip" data-g="timeTaken" data-s="1">20–30 minutes</button>
+      <button class="chip" data-g="timeTaken" data-s="1">30–45 minutes</button>
+      <button class="chip" data-g="timeTaken" data-s="1">45–60 minutes</button>
+      <button class="chip" data-g="timeTaken" data-s="1">Over an hour</button>
+    </div>
+  </div>
+
+  <div class="question">
     <div class="q-text">Rate each part of the Attune experience</div>
     <div class="q-sub">1 = poor · 5 = excellent &nbsp;·&nbsp; – = didn't receive or use</div>
     <div class="grid-wrap" id="overallGrid"></div>
-    <div class="conditional" id="overallLowCond">
-      <div class="q-text">You gave something a low score – what was the issue?</div>
-      <textarea id="overallLowWhy" placeholder="Which element, and what specifically didn't work..."></textarea>
-    </div>
+    <div id="overallGridLows" class="low-follow"></div>
   </div>
 
   <div class="question">
@@ -441,6 +405,10 @@ hr{border:none;border-top:1px solid var(--border-soft);margin:2rem 0}
       <button class="rating-btn" data-g="shiftCouple" data-s="1"><span class="num">4</span></button>
       <button class="rating-btn" data-g="shiftCouple" data-s="1"><span class="num">5</span>Significant shift</button>
     </div>
+    <div class="conditional" id="fu-shiftCouple">
+      <div class="q-text" id="fuq-shiftCouple"></div>
+      <textarea id="fu_shiftCouple" placeholder="Be as specific as you can..."></textarea>
+    </div>
   </div>
 
   <div class="question">
@@ -451,6 +419,10 @@ hr{border:none;border-top:1px solid var(--border-soft);margin:2rem 0}
       <button class="rating-btn" data-g="shiftSelf" data-s="1"><span class="num">3</span>Some shift</button>
       <button class="rating-btn" data-g="shiftSelf" data-s="1"><span class="num">4</span></button>
       <button class="rating-btn" data-g="shiftSelf" data-s="1"><span class="num">5</span>Significant shift</button>
+    </div>
+    <div class="conditional" id="fu-shiftSelf">
+      <div class="q-text" id="fuq-shiftSelf"></div>
+      <textarea id="fu_shiftSelf" placeholder="Be as specific as you can..."></textarea>
     </div>
   </div>
 
@@ -463,17 +435,9 @@ hr{border:none;border-top:1px solid var(--border-soft);margin:2rem 0}
       <button class="rating-btn" data-g="returnLikelihood" data-s="1"><span class="num">4</span></button>
       <button class="rating-btn" data-g="returnLikelihood" data-s="1"><span class="num">5</span>Very likely</button>
     </div>
-  </div>
-
-  <div class="question">
-    <div class="q-text">What would bring you back to Attune specifically?</div>
-    <div class="chips" id="returnReason">
-      <button class="chip" data-g="returnReason" data-s="1">A significant life change</button>
-      <button class="chip" data-g="returnReason" data-s="1">An anniversary or milestone</button>
-      <button class="chip" data-g="returnReason" data-s="1">If something felt off in the relationship</button>
-      <button class="chip" data-g="returnReason" data-s="1">As a regular check-in</button>
-      <button class="chip" data-g="returnReason" data-s="1">To share it with another couple</button>
-      <button class="chip" data-g="returnReason" data-s="1">I probably won't return</button>
+    <div class="conditional" id="fu-returnLikelihood">
+      <div class="q-text" id="fuq-returnLikelihood"></div>
+      <textarea id="fu_returnLikelihood" placeholder="Be as specific as you can..."></textarea>
     </div>
   </div>
 
@@ -496,30 +460,8 @@ hr{border:none;border-top:1px solid var(--border-soft);margin:2rem 0}
 
   <div class="question">
     <div class="q-text">What's behind that rating?</div>
-    <div class="q-sub">Optional – what makes it feel more or less valuable compared to other options?</div>
+    <div class="q-sub">What makes it feel more or less valuable compared to other options?</div>
     <textarea id="valueWhy" placeholder="What shapes how you think about what Attune is worth..."></textarea>
-  </div>
-
-  <div class="question">
-    <div class="q-text">How easy was the overall experience?</div>
-    <div class="rating-row" id="ease">
-      <button class="rating-btn" data-g="ease" data-s="1"><span class="num">1</span>A lot of friction</button>
-      <button class="rating-btn" data-g="ease" data-s="1"><span class="num">2</span></button>
-      <button class="rating-btn" data-g="ease" data-s="1"><span class="num">3</span>Some friction</button>
-      <button class="rating-btn" data-g="ease" data-s="1"><span class="num">4</span></button>
-      <button class="rating-btn" data-g="ease" data-s="1"><span class="num">5</span>Seamless</button>
-    </div>
-  </div>
-
-  <div class="question">
-    <div class="q-text">Approximately how long did both exercises take you?</div>
-    <div class="chips" id="timeTaken">
-      <button class="chip" data-g="timeTaken" data-s="1">Under 20 minutes</button>
-      <button class="chip" data-g="timeTaken" data-s="1">20–30 minutes</button>
-      <button class="chip" data-g="timeTaken" data-s="1">30–45 minutes</button>
-      <button class="chip" data-g="timeTaken" data-s="1">45–60 minutes</button>
-      <button class="chip" data-g="timeTaken" data-s="1">Over an hour</button>
-    </div>
   </div>
 </div>
 
@@ -531,31 +473,29 @@ hr{border:none;border-top:1px solid var(--border-soft);margin:2rem 0}
 
   <div class="question">
     <div class="q-text">In your own words – what did you actually discover or notice?</div>
-    <div class="q-sub">This is the most valuable thing you can share with us. Required.</div>
-    <textarea id="whatDiscovered" placeholder="Anything, big or small. What stuck?" style="min-height:110px" required></textarea>
+    <div class="q-sub">This is the most valuable thing you can share with us.</div>
+    <textarea id="whatDiscovered" placeholder="Anything, big or small. What stuck?" style="min-height:110px"></textarea>
   </div>
 
   <div class="question">
     <div class="q-text">Was there anything about the experience that felt negative or fell flat?</div>
-    <div class="q-sub">Optional – be as honest as you want</div>
+    <div class="q-sub">Be as honest as you want. If nothing, say so.</div>
     <textarea id="negative" placeholder="Anything that didn't work, felt off, or disappointed you..."></textarea>
   </div>
 
   <div class="question">
     <div class="q-text">Was there anything that stood out as particularly good?</div>
-    <div class="q-sub">Optional</div>
     <textarea id="positive" placeholder="What worked really well, what surprised you in a good way..."></textarea>
   </div>
 
   <div class="question">
     <div class="q-text">Is there anything you wish you'd known before doing Attune – to be more prepared, or more excited?</div>
-    <div class="q-sub">Optional – this helps us with how we explain Attune to new couples</div>
+    <div class="q-sub">This helps us with how we explain Attune to new couples.</div>
     <textarea id="wishKnew" placeholder="Something about the process, the format, what to expect..."></textarea>
   </div>
 
   <div class="question">
     <div class="q-text">Anything else you want us to know?</div>
-    <div class="q-sub">Optional – anything at all</div>
     <textarea id="anythingElse" placeholder="Open floor..."></textarea>
   </div>
 </div>
@@ -568,15 +508,21 @@ hr{border:none;border-top:1px solid var(--border-soft);margin:2rem 0}
 
   <div class="question">
     <div class="q-text">If you were telling a close friend about Attune, what would you say?</div>
-    <div class="q-sub">Optional – write it how you'd actually say it, not a review</div>
+    <div class="q-sub">Write it how you'd actually say it, not a review.</div>
     <textarea id="testimonial" placeholder="e.g. 'We've been together four years and I still learned something I didn't expect...'" style="min-height:110px"></textarea>
   </div>
 
   <div class="question">
     <div class="q-text">May we use your words and first name on our website's reviews section?</div>
-    <div class="chips" id="testimonialConsent">
-      <button class="chip" data-g="testimonialConsent" data-s="1">Yes – use my words and first name on the reviews section</button>
-      <button class="chip" data-g="testimonialConsent" data-s="1">Yes – initials only</button>
+    <div class="chips consent-chips" id="testimonialConsent">
+      <div class="consent-row">
+        <button class="chip" data-g="testimonialConsent" data-s="1">Yes – use my words and my first name,</button>
+        <input type="text" class="inline-input" id="consentFirstName" placeholder="first name">
+      </div>
+      <div class="consent-row">
+        <button class="chip" data-g="testimonialConsent" data-s="1">Yes – initials only, my initials are</button>
+        <input type="text" class="inline-input" id="consentInitials" placeholder="initials" maxlength="5">
+      </div>
       <button class="chip" data-g="testimonialConsent" data-s="1">Yes – keep it anonymous</button>
       <button class="chip" data-g="testimonialConsent" data-s="1">No, internal use only</button>
     </div>
@@ -595,16 +541,10 @@ hr{border:none;border-top:1px solid var(--border-soft);margin:2rem 0}
     </div>
   </div>
 
-  <div class="question">
-    <div class="q-text">Your name and email <span style="font-weight:300;color:var(--faint)">(optional – only for follow-up)</span></div>
-    <input type="text" id="nameField" placeholder="First name">
-    <input type="email" id="emailField" placeholder="Email address">
-  </div>
-
+  <div class="req-warn" id="reqWarn"></div>
   <button class="submit-btn" id="submitBtn" onclick="submitForm()">Submit feedback →</button>
-  <p style="font-size:.72rem;color:var(--faint);text-align:center;margin-top:.75rem">Your responses are confidential and used only to improve Attune.</p>
+  <p style="font-size:.72rem;color:var(--faint);text-align:center;margin-top:.75rem">Every question is required. Your responses are confidential and used only to improve Attune.</p>
 </div>
-
 </div><!-- /page -->
 
 <div class="success-state" id="successState">
@@ -617,26 +557,25 @@ hr{border:none;border-top:1px solid var(--border-soft);margin:2rem 0}
 
 <script>
 // ── Grid builder ──────────────────────────────────────────────────────────────
+// cols: [{ label, desc }]. skipMap: { rowIndex: [colIndex, ...] } for cells that
+// don't apply (rendered as an em dash, not answerable).
 function buildGrid(containerId, rows, cols, skipMap = {}) {
   const wrap = document.getElementById(containerId);
   if (!wrap) return;
-
-  // Header row
-  const colCount = 1 + cols.length;
   const headStyle = `grid-template-columns: 2fr ${cols.map(() => '1fr').join(' ')}`;
   let html = `<div class="grid-head" style="${headStyle}">
     <div class="grid-head-cell"></div>
-    ${cols.map(c => `<div class="grid-head-cell">${c}</div>`).join('')}
+    ${cols.map(c => `<div class="grid-head-cell"><span class="gh-label">${c.label}</span>${c.desc ? `<span class="gh-desc">${c.desc}</span>` : ''}</div>`).join('')}
   </div>`;
 
   rows.forEach((row, ri) => {
     html += `<div class="grid-row" style="${headStyle}">
       <div class="grid-row-label">${row}</div>
       ${cols.map((col, ci) => {
-        const key = `${containerId}_r${ri}_c${ci}`;
-        const skip = skipMap[ri]?.includes(ci);
-        if (skip) return `<div class="grid-cell skip"><div class="dots"><div class="dot" style="opacity:0;pointer-events:none">—</div></div></div>`;
-        return `<div class="grid-cell" id="cell_${key}">
+        if ((skipMap[ri] || []).includes(ci)) {
+          return `<div class="grid-cell skip"><div class="dots"><div class="dot" style="opacity:.25;pointer-events:none">—</div></div></div>`;
+        }
+        return `<div class="grid-cell">
           <div class="dots">
             ${[1,2,3,4,5].map(v => `<div class="dot" data-grid="${containerId}" data-ri="${ri}" data-ci="${ci}" data-v="${v}" onclick="gridClick(this)">${v}</div>`).join('')}
           </div>
@@ -644,7 +583,6 @@ function buildGrid(containerId, rows, cols, skipMap = {}) {
       }).join('')}
     </div>`;
   });
-
   wrap.innerHTML = html;
 }
 
@@ -652,19 +590,8 @@ function gridClick(dot) {
   const {grid, ri, ci} = dot.dataset;
   document.querySelectorAll(`.dot[data-grid="${grid}"][data-ri="${ri}"][data-ci="${ci}"]`).forEach(d => d.classList.remove('sel'));
   dot.classList.add('sel');
-  checkGridLow(grid);
+  renderGridLows(grid);
   updateProgress();
-}
-
-function checkGridLow(gridId) {
-  const lowDots = document.querySelectorAll(`.dot[data-grid="${gridId}"].sel`);
-  let hasLow = false;
-  lowDots.forEach(d => { if (parseInt(d.dataset.v) <= 2) hasLow = true; });
-  // Interest ratings aren't a quality score, so a low value has no follow-up.
-  if (gridId === 'interestGrid') return;
-  const condId = gridId === 'commsGrid' ? 'commsLowCond' : gridId === 'expGrid' ? 'expLowCond' : 'overallLowCond';
-  const cond = document.getElementById(condId);
-  if (cond) cond.classList.toggle('show', hasLow);
 }
 
 function getGridData(gridId) {
@@ -673,6 +600,101 @@ function getGridData(gridId) {
     result[`r${d.dataset.ri}_c${d.dataset.ci}`] = parseInt(d.dataset.v);
   });
   return result;
+}
+
+// ── Per-cell low-score follow-ups ─────────────────────────────────────────────
+// Any cell scored 1 or 2 gets its own named question + text box, all inline.
+// Answers are kept in a map so re-rendering never wipes what someone typed.
+const GRID_DEFS = {};   // gridId -> { rows, cols }
+const LOW_ANSWERS = {}; // "gridId_r#_c#" -> text
+
+function renderGridLows(gridId) {
+  const host = document.getElementById(gridId + 'Lows');
+  const def = GRID_DEFS[gridId];
+  if (!host || !def) return;
+
+  const lows = [...document.querySelectorAll(`.dot[data-grid="${gridId}"].sel`)]
+    .filter(d => parseInt(d.dataset.v) <= 2)
+    .map(d => ({ ri: +d.dataset.ri, ci: +d.dataset.ci, v: +d.dataset.v }))
+    .sort((a, b) => a.ri - b.ri || a.ci - b.ci);
+
+  if (!lows.length) { host.innerHTML = ''; return; }
+
+  host.innerHTML = lows.map(l => {
+    const key = `${gridId}_r${l.ri}_c${l.ci}`;
+    const rowName = def.rows[l.ri];
+    const colName = def.cols[l.ci].label.toLowerCase();
+    const val = LOW_ANSWERS[key] ? LOW_ANSWERS[key].replace(/"/g, '&quot;') : '';
+    return `<div class="low-item">
+      <div class="q-text">You gave <strong>${rowName}</strong> a ${colName} score of ${l.v}. Can you tell us more about that?</div>
+      <textarea data-lowkey="${key}" oninput="LOW_ANSWERS[this.dataset.lowkey]=this.value;updateProgress();" placeholder="What specifically didn't work...">${val}</textarea>
+    </div>`;
+  }).join('');
+}
+
+function getLowAnswers(gridId) {
+  const out = {};
+  const def = GRID_DEFS[gridId];
+  [...document.querySelectorAll(`.dot[data-grid="${gridId}"].sel`)]
+    .filter(d => parseInt(d.dataset.v) <= 2)
+    .forEach(d => {
+      const key = `${gridId}_r${d.dataset.ri}_c${d.dataset.ci}`;
+      out[`${def.rows[d.dataset.ri]} · ${def.cols[d.dataset.ci].label}`] = LOW_ANSWERS[key] || '';
+    });
+  return out;
+}
+
+// Every low-score box that's currently on screen must be filled.
+function lowsComplete(gridId) {
+  return [...document.querySelectorAll(`#${gridId}Lows textarea`)].every(t => t.value.trim().length > 0);
+}
+
+// ── Banded follow-ups (1–2 / 3 / 4–5) ─────────────────────────────────────────
+const BANDS = {
+  expectationMatch: ['What was missing or fell short of what you expected?',
+                     'What would have made this a better match for what you were hoping for?',
+                     'What exceeded what you were hoping for?'],
+  commsOverall:     ['What made it fall short?',
+                     'How could the communication exercise have been better?',
+                     'What made it great?'],
+  commsImpact:      ['What held back the impact for you?',
+                     'What would have made it more impactful?',
+                     'What made it impactful for you?'],
+  commsHonesty:     ['What made it difficult to answer fully honestly?',
+                     'What would have helped you answer more openly?',
+                     'What made it easy to answer honestly?'],
+  expOverall:       ['What made it fall short?',
+                     'How could the expectations exercise have been better?',
+                     'What made it great?'],
+  expImpact:        ['What held back the impact for you?',
+                     'What would have made it more impactful?',
+                     'What made it impactful for you?'],
+  expHonesty:       ['What made it difficult to answer fully honestly?',
+                     'What would have helped you answer more openly?',
+                     'What made it easy to answer honestly?'],
+  shiftCouple:      ['Why not? What could be done differently to provide more insight into how you operate as a couple?',
+                     'What could be done differently to create more impact for you?',
+                     'Tell us more – what in particular shifted your understanding?'],
+  shiftSelf:        ['Why not? What could be done differently to provide more insight about yourself?',
+                     'What could be done differently to create more impact for you?',
+                     'Tell us more – what in particular shifted how you see yourself?'],
+  returnLikelihood: ['Why not? What could be done differently to make your results worth returning to?',
+                     'What could be done differently to make you more likely to revisit?',
+                     'Tell us more – what makes you want to revisit your results?'],
+};
+
+function bandIndex(v) { return v <= 2 ? 0 : (v === 3 ? 1 : 2); }
+
+function checkBand(groupId) {
+  if (!BANDS[groupId]) return;
+  const sel = document.querySelector(`[data-g="${groupId}"].sel`);
+  const cond = document.getElementById('fu-' + groupId);
+  const qEl  = document.getElementById('fuq-' + groupId);
+  if (!cond || !qEl) return;
+  if (!sel) { cond.classList.remove('show'); return; }
+  const v = parseInt(sel.querySelector('.num')?.textContent || sel.textContent);
+  qEl.textContent = BANDS[groupId][bandIndex(v)];
+  cond.classList.add('show');
 }
 
 // ── Build NPS ─────────────────────────────────────────────────────────────────
@@ -692,24 +714,51 @@ for (let i = 0; i <= 10; i++) {
 }
 
 // ── Build grids ───────────────────────────────────────────────────────────────
+const ASPECT_COLS = [
+  { label: 'Design',     desc: 'How was the look and feel?' },
+  { label: 'Accuracy',   desc: 'Was this a good representation of your relationship?' },
+  { label: 'Importance', desc: 'Is this content interesting to you?' },
+];
+
 const COMMS_ROWS = ['The questions themselves', 'Seeing scores side by side', 'Dimension breakdowns', 'Your couple type', 'Detailed feedback pages'];
-const COMMS_COLS = ['Design', 'Accuracy', 'Relevance', 'Likely to apply'];
+// "The questions themselves" isn't a representation of the relationship, so no accuracy rating.
+const COMMS_SKIP = { 0: [1] };
 
 const EXP_ROWS = ['The responsibility questions', 'Including childhood context', 'Category breakdowns', 'Detailed feedback pages'];
-const EXP_COLS = ['Design', 'Accuracy', 'Relevance', 'Likely to apply'];
+// Same reasoning for the two input-style rows.
+const EXP_SKIP = { 0: [1], 1: [1] };
 
 const OVERALL_ROWS = ['Exercise questions', 'Results presentation', 'Couple type experience', 'Detailed feedback pages', 'Workbook', 'Overall flow / UX', 'Time it took'];
-const OVERALL_COLS = ['Execution', 'Impact', 'Satisfaction'];
-// Skip "impact" (col 1) for UX and time rows
+const OVERALL_COLS = [
+  { label: 'Clarity',              desc: 'How easy was this to navigate?' },
+  { label: 'Impact',               desc: 'How much will you think about this going forward in your relationship?' },
+  { label: 'Overall Satisfaction', desc: 'How would you rate your feelings toward this aspect of the Attune experience?' },
+];
 const OVERALL_SKIP = { 5: [1], 6: [1] };
 
-buildGrid('commsGrid', COMMS_ROWS, COMMS_COLS);
-buildGrid('expGrid', EXP_ROWS, EXP_COLS);
 const INTEREST_ROWS = ['Relationship Reflection exercise', 'Physical Intimacy Expectations exercise', 'Starting Out Checklist', 'Build a Budget experience'];
-const INTEREST_COLS = ['Interest'];
+const INTEREST_COLS = [{ label: 'Interest', desc: '' }];
 
-buildGrid('overallGrid', OVERALL_ROWS, OVERALL_COLS, OVERALL_SKIP);
+GRID_DEFS.commsGrid   = { rows: COMMS_ROWS,    cols: ASPECT_COLS,   skip: COMMS_SKIP };
+GRID_DEFS.expGrid     = { rows: EXP_ROWS,      cols: ASPECT_COLS,   skip: EXP_SKIP };
+GRID_DEFS.overallGrid = { rows: OVERALL_ROWS,  cols: OVERALL_COLS,  skip: OVERALL_SKIP };
+GRID_DEFS.interestGrid= { rows: INTEREST_ROWS, cols: INTEREST_COLS, skip: {} };
+
+buildGrid('commsGrid',    COMMS_ROWS,    ASPECT_COLS,  COMMS_SKIP);
+buildGrid('expGrid',      EXP_ROWS,      ASPECT_COLS,  EXP_SKIP);
+buildGrid('overallGrid',  OVERALL_ROWS,  OVERALL_COLS, OVERALL_SKIP);
 buildGrid('interestGrid', INTEREST_ROWS, INTEREST_COLS);
+
+// How many answerable cells each grid has — used for "every question required".
+function gridCellCount(gridId) {
+  const d = GRID_DEFS[gridId];
+  let n = 0;
+  d.rows.forEach((_, ri) => d.cols.forEach((__, ci) => { if (!(d.skip[ri] || []).includes(ci)) n++; }));
+  return n;
+}
+function gridComplete(gridId) {
+  return document.querySelectorAll(`.dot[data-grid="${gridId}"].sel`).length >= gridCellCount(gridId);
+}
 
 // ── Chip / rating wiring ───────────────────────────────────────────────────────
 document.querySelectorAll('.chip, .rating-btn').forEach(btn => {
@@ -722,78 +771,87 @@ document.querySelectorAll('.chip, .rating-btn').forEach(btn => {
     } else {
       btn.classList.toggle('sel');
     }
-    if (LEAD_LOW_MAP[g]) checkLeadLow(g);
-    if (g === 'expectationMatch') checkExpMatch(btn);
+    if (BANDS[g]) checkBand(g);
     updateProgress();
   });
 });
 
-// ── Conditional helpers ───────────────────────────────────────────────────────
-function checkExpMatch(btn) {
-  const v = parseInt(btn.dataset.v);
-  document.getElementById('expMatchCond').classList.toggle('show', v <= 2);
+// ── Required questions ────────────────────────────────────────────────────────
+// Every question must be answered. Each entry: [label, isComplete()].
+const TEXT_REQUIRED = ['commsQuestionsFeedback','expMissing','valueWhy','whatDiscovered','negative','positive','wishKnew','anythingElse','testimonial'];
+
+function selCount(g) { return document.querySelectorAll(`[data-g="${g}"].sel`).length; }
+function txtFilled(id) { const e = document.getElementById(id); return !!(e && e.value.trim().length); }
+function bandFilled(g) {
+  if (!selCount(g)) return false;
+  return txtFilled('fu_' + g);
 }
 
-// Lead question low-score conditionals (show if <= 2)
-const LEAD_LOW_MAP = {
-  commsOverall: 'comms-overall-low',
-  commsImpact:  'comms-impact-low',
-  commsHonesty: 'comms-honesty-low',
-  commsSafety:  'comms-safety-low',
-  expOverall:   'exp-overall-low',
-  expImpact:    'exp-impact-low',
-  expHonesty:   'exp-honesty-low',
-  expSafety:    'exp-safety-low',
-};
+const REQUIRED = [
+  ['How you completed the exercises',            () => selCount('completionStyle') > 0],
+  ['What you were hoping to get out of Attune',  () => selCount('expectations') > 0],
+  ['How well Attune delivered',                  () => bandFilled('expectationMatch')],
+  ['Concerns before starting',                   () => selCount('concerns') > 0],
+  ['Communication – overall rating',             () => bandFilled('commsOverall')],
+  ['Communication – impact',                     () => bandFilled('commsImpact')],
+  ['Communication – honesty',                    () => bandFilled('commsHonesty')],
+  ['Communication – rate each aspect',           () => gridComplete('commsGrid') && lowsComplete('commsGrid')],
+  ['Questions that felt off',                    () => txtFilled('commsQuestionsFeedback')],
+  ['Expectations – overall rating',              () => bandFilled('expOverall')],
+  ['Expectations – impact',                      () => bandFilled('expImpact')],
+  ['Expectations – honesty',                     () => bandFilled('expHonesty')],
+  ['Expectations – rate each aspect',            () => gridComplete('expGrid') && lowsComplete('expGrid')],
+  ['Responsibilities not mentioned',             () => txtFilled('expMissing')],
+  ['How long the exercises took',                () => selCount('timeTaken') > 0],
+  ['Rate each part of the Attune experience',    () => gridComplete('overallGrid') && lowsComplete('overallGrid')],
+  ['Biggest moment of recognition',              () => selCount('ahaMarker') > 0],
+  ['Whether it led to a conversation',           () => selCount('convoHappened') > 0],
+  ['Shift in understanding as a couple',         () => bandFilled('shiftCouple')],
+  ['Shift in understanding of yourself',         () => bandFilled('shiftSelf')],
+  ['Likelihood of reviewing your results',       () => bandFilled('returnLikelihood')],
+  ['Interest in other Attune experiences',       () => gridComplete('interestGrid')],
+  ['How Attune’s value compares',           () => selCount('valuePct') > 0],
+  ['What’s behind that rating',             () => txtFilled('valueWhy')],
+  ['What you discovered',                        () => txtFilled('whatDiscovered')],
+  ['Anything negative or flat',                  () => txtFilled('negative')],
+  ['Anything particularly good',                 () => txtFilled('positive')],
+  ['Anything you wish you’d known',         () => txtFilled('wishKnew')],
+  ['Anything else',                              () => txtFilled('anythingElse')],
+  ['What you’d tell a close friend',        () => txtFilled('testimonial')],
+  ['Permission to use your words',               () => consentComplete()],
+  ['How likely you are to recommend Attune',     () => selCount('nps') > 0 && npsFollowOk()],
+];
 
-function checkLeadLow(groupId) {
-  const sel = document.querySelector(`[data-g="${groupId}"].sel`);
-  const v = sel ? parseInt(sel.querySelector('.num')?.textContent) : null;
-  const condId = LEAD_LOW_MAP[groupId];
-  if (condId) document.getElementById(condId)?.classList.toggle('show', v !== null && v <= 2);
+function npsFollowOk() {
+  const cond = document.getElementById('npsCond');
+  return !cond.classList.contains('show') || txtFilled('npsWhy');
+}
+// If they pick the named or initials option, that inline box has to be filled.
+function consentComplete() {
+  if (!selCount('testimonialConsent')) return false;
+  const sel = document.querySelector('[data-g="testimonialConsent"].sel');
+  const label = sel ? sel.textContent : '';
+  if (/first name/i.test(label))  return txtFilled('consentFirstName');
+  if (/initials/i.test(label))    return txtFilled('consentInitials');
+  return true;
 }
 
 // ── Progress ──────────────────────────────────────────────────────────────────
-const PROGRESS_CHECKS = [
-  () => document.querySelectorAll('[data-g="priorExp"].sel').length > 0,
-  () => document.querySelectorAll('[data-g="expectations"].sel').length > 0,
-  () => document.querySelectorAll('[data-g="expectationMatch"].sel').length > 0,
-  () => document.querySelectorAll('[data-g="commsOverall"].sel').length > 0,
-  () => document.querySelectorAll('[data-g="commsImpact"].sel').length > 0,
-  () => document.querySelectorAll('[data-g="commsHonesty"].sel').length > 0,
-  () => document.querySelectorAll('.dot[data-grid="commsGrid"].sel').length >= 3,
-  () => document.querySelectorAll('[data-g="expOverall"].sel').length > 0,
-  () => document.querySelectorAll('[data-g="expImpact"].sel').length > 0,
-  () => document.querySelectorAll('[data-g="expHonesty"].sel').length > 0,
-  () => document.querySelectorAll('.dot[data-grid="expGrid"].sel').length >= 2,
-  () => document.querySelectorAll('.dot[data-grid="overallGrid"].sel').length >= 3,
-  () => document.querySelectorAll('[data-g="ahaMarker"].sel').length > 0,
-  () => document.querySelectorAll('[data-g="convoHappened"].sel').length > 0,
-  () => document.querySelectorAll('[data-g="shiftCouple"].sel').length > 0,
-  () => document.querySelectorAll('[data-g="shiftSelf"].sel').length > 0,
-  () => document.querySelectorAll('[data-g="returnLikelihood"].sel').length > 0,
-  () => document.querySelector('#whatDiscovered')?.value.trim().length > 10,
-  () => document.querySelectorAll('[data-g="nps"].sel').length > 0,
-];
-
 function updateProgress() {
-  const done = PROGRESS_CHECKS.filter(fn => fn()).length;
-  const pct = Math.round((done / PROGRESS_CHECKS.length) * 100);
+  const done = REQUIRED.filter(r => { try { return r[1](); } catch (e) { return false; } }).length;
+  const pct = Math.round((done / REQUIRED.length) * 100);
   document.getElementById('progFill').style.width = pct + '%';
   document.getElementById('progPct').textContent = pct + '%';
-  const next = PROGRESS_CHECKS.findIndex(fn => !fn());
-  document.getElementById('progText').textContent = next >= 0 ? `${done} of ${PROGRESS_CHECKS.length} complete` : 'Ready to submit';
+  document.getElementById('progText').textContent =
+    done === REQUIRED.length ? 'Ready to submit' : `${done} of ${REQUIRED.length} complete`;
 }
 
-// Wire textareas to progress
-document.querySelectorAll('textarea, input[type=text], input[type=email]').forEach(el => {
-  el.addEventListener('input', updateProgress);
+document.addEventListener('input', function (e) {
+  if (e.target.matches('textarea, input[type=text], input[type=email]')) updateProgress();
 });
 
 // ── Collect all data ──────────────────────────────────────────────────────────
-// Null-safe field read: returns '' when the element isn't on the page.
 function valOf(id) { const el = document.getElementById(id); return el ? el.value : ''; }
-
 function getSelVals(g, single = false) {
   const sels = [...document.querySelectorAll(`[data-g="${g}"].sel`)].map(b => b.textContent.trim());
   return single ? (sels[0] || null) : sels;
@@ -808,78 +866,78 @@ function getNPS() {
 }
 
 function submitForm() {
-  const required = document.querySelector('#whatDiscovered').value.trim();
-  if (!required) {
-    document.querySelector('#whatDiscovered').focus();
-    document.querySelector('#whatDiscovered').style.borderColor = 'var(--orange)';
+  const missing = REQUIRED.filter(r => { try { return !r[1](); } catch (e) { return true; } });
+  const warn = document.getElementById('reqWarn');
+  if (missing.length) {
+    warn.textContent = missing.length === 1
+      ? `One question still needs an answer: ${missing[0][0]}.`
+      : `${missing.length} questions still need an answer. First one: ${missing[0][0]}.`;
+    warn.classList.add('show');
+    updateProgress();
+    warn.scrollIntoView({ behavior: 'smooth', block: 'center' });
     return;
   }
+  warn.classList.remove('show');
+
   const data = {
     submitted: new Date().toISOString(),
-    survey_version: 'beta_v3',
+    survey_version: 'beta_v4',
     // Context
-    priorExp: getSelVals('priorExp'),
-    howReceived: getSelVals('howReceived', true),
-    // These two questions were removed from the form but stayed in the payload.
-    // Reading .value on a missing element threw a TypeError and killed the whole
-    // submit, so every response was silently lost. Read them defensively.
-    giftFeedback: valOf('giftFeedback'),
-    bothDone: getSelVals('bothDone', true),
-    notBothDoneWhy: valOf('notBothDoneWhy'),
     completionStyle: getSelVals('completionStyle', true),
     expectations: getSelVals('expectations'),
     expectationMatch: getRatingVal('expectationMatch'),
-    expMatchWhy: document.getElementById('expMatchWhy').value,
-    skepticism: getSelVals('skepticism', true),
-    // Comms lead
+    expectationMatchWhy: valOf('fu_expectationMatch'),
+    concerns: getSelVals('concerns'),
+    // Communication
     commsOverall: getRatingVal('commsOverall'),
+    commsOverallWhy: valOf('fu_commsOverall'),
     commsImpact: getRatingVal('commsImpact'),
+    commsImpactWhy: valOf('fu_commsImpact'),
     commsHonesty: getRatingVal('commsHonesty'),
-    commsSafety: getRatingVal('commsSafety'),
+    commsHonestyWhy: valOf('fu_commsHonesty'),
     commsGrid: getGridData('commsGrid'),
-    commsLowWhy: document.getElementById('commsLowWhy').value,
-    commsIndependent: getSelVals('commsIndependent', true),
-    commsQuestionsFeedback: document.getElementById('commsQuestionsFeedback').value,
-    // Exp lead
+    commsGridLows: getLowAnswers('commsGrid'),
+    commsQuestionsFeedback: valOf('commsQuestionsFeedback'),
+    // Expectations
     expOverall: getRatingVal('expOverall'),
+    expOverallWhy: valOf('fu_expOverall'),
     expImpact: getRatingVal('expImpact'),
+    expImpactWhy: valOf('fu_expImpact'),
     expHonesty: getRatingVal('expHonesty'),
-    expSafety: getRatingVal('expSafety'),
+    expHonestyWhy: valOf('fu_expHonesty'),
     expGrid: getGridData('expGrid'),
-    expLowWhy: document.getElementById('expLowWhy').value,
-    expMissing: document.getElementById('expMissing').value,
+    expGridLows: getLowAnswers('expGrid'),
+    expMissing: valOf('expMissing'),
     // Overall
+    timeTaken: getSelVals('timeTaken', true),
     overallGrid: getGridData('overallGrid'),
-    interestGrid: getGridData('interestGrid'),
-    overallLowWhy: document.getElementById('overallLowWhy').value,
+    overallGridLows: getLowAnswers('overallGrid'),
     ahaMarker: getSelVals('ahaMarker', true),
     convoHappened: getSelVals('convoHappened', true),
     shiftCouple: getRatingVal('shiftCouple'),
+    shiftCoupleWhy: valOf('fu_shiftCouple'),
     shiftSelf: getRatingVal('shiftSelf'),
+    shiftSelfWhy: valOf('fu_shiftSelf'),
     returnLikelihood: getRatingVal('returnLikelihood'),
-    returnReason: getSelVals('returnReason', true),
+    returnLikelihoodWhy: valOf('fu_returnLikelihood'),
+    interestGrid: getGridData('interestGrid'),
     valuePct: getRatingVal('valuePct'),
-    valueWhy: document.getElementById('valueWhy')?.value || '',
-    ease: getRatingVal('ease'),
-    timeTaken: getSelVals('timeTaken', true),
+    valueWhy: valOf('valueWhy'),
     // Open
-    whatDiscovered: document.getElementById('whatDiscovered').value,
-    negative: document.getElementById('negative').value,
-    positive: document.getElementById('positive').value,
-    wishKnew: document.getElementById('wishKnew').value,
-    anythingElse: document.getElementById('anythingElse').value,
+    whatDiscovered: valOf('whatDiscovered'),
+    negative: valOf('negative'),
+    positive: valOf('positive'),
+    wishKnew: valOf('wishKnew'),
+    anythingElse: valOf('anythingElse'),
     // Word + NPS
-    testimonial: document.getElementById('testimonial').value,
+    testimonial: valOf('testimonial'),
     testimonialConsent: getSelVals('testimonialConsent', true),
+    consentFirstName: valOf('consentFirstName'),
+    consentInitials: valOf('consentInitials'),
     nps: getNPS(),
-    npsWhy: document.getElementById('npsWhy').value,
-    name: document.getElementById('nameField').value,
-    email: document.getElementById('emailField').value,
+    npsWhy: valOf('npsWhy'),
   };
 
-  console.log('Attune Beta Survey v3:', JSON.stringify(data, null, 2));
-
-  // POST to API
   fetch('/api/submit-beta-survey', {
     method: 'POST',
     headers: {'Content-Type':'application/json'},
