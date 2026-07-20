@@ -321,7 +321,7 @@ hr{border:none;border-top:1px solid var(--border-soft);margin:2rem 0}
 
   <div class="question">
     <div class="q-text">About how long did you spend on each of the following aspects of the Attune experience?</div>
-    <div class="q-sub">Pick one time range per column</div>
+    <div class="q-sub">Pick one time range per row</div>
     <div class="grid-wrap" id="timeGrid"></div>
   </div>
   </div>
@@ -695,15 +695,15 @@ const OVERALL_COLS = [
 const OVERALL_SKIP = { 0: [1], 1: [1], 7: [1], 8: [0, 1] };
 
 // ── Time-spent grid ───────────────────────────────────────────────────────────
-// Unlike the rating grids, this one is a single pick per column: each aspect of
+// Unlike the rating grids, this one is a single pick per row: each aspect of
 // the experience gets exactly one duration.
-const TIME_ROWS = ['Less than 10 minutes', '10–20 minutes', '20–45 minutes', '45–60 minutes', 'Over 1 hour'];
-const TIME_COLS = ['Package selection, checkout, account creation', 'Completing communication exercise', 'Completing expectations exercise', 'Reviewing your results', 'Exploring the workbook'];
+const TIME_ROWS = ['Package selection, checkout, account creation', 'Completing communication exercise', 'Completing expectations exercise', 'Reviewing your results', 'Exploring the workbook'];
+const TIME_COLS = ['Less than 10 minutes', '10–20 minutes', '20–45 minutes', '45–60 minutes', 'Over 1 hour'];
 
 function buildChoiceGrid(containerId, rows, cols) {
   const wrap = document.getElementById(containerId);
   if (!wrap) return;
-  const gt = `grid-template-columns: 1.6fr ${cols.map(() => '1fr').join(' ')}`;
+  const gt = `grid-template-columns: 2fr ${cols.map(() => '1fr').join(' ')}`;
   let html = `<div class="grid-head" style="${gt}">
     <div class="grid-head-cell"></div>
     ${cols.map(c => `<div class="grid-head-cell"><span class="gh-label">${c}</span></div>`).join('')}
@@ -719,21 +719,21 @@ function buildChoiceGrid(containerId, rows, cols) {
   wrap.innerHTML = html;
 }
 
-// One selection per COLUMN, so picking a new cell clears the rest of that column.
+// One selection per ROW, so picking a new cell clears the rest of that row.
 function choiceClick(dot) {
-  const { grid, ci } = dot.dataset;
-  document.querySelectorAll(`.dot[data-grid="${grid}"][data-ci="${ci}"]`).forEach(d => d.classList.remove('sel'));
+  const { grid, ri } = dot.dataset;
+  document.querySelectorAll(`.dot[data-grid="${grid}"][data-ri="${ri}"]`).forEach(d => d.classList.remove('sel'));
   dot.classList.add('sel');
   updateProgress();
 }
-function choiceGridComplete(gridId, cols) {
-  return cols.every((_, ci) => document.querySelector(`.dot[data-grid="${gridId}"][data-ci="${ci}"].sel`));
+function choiceGridComplete(gridId, rows) {
+  return rows.every((_, ri) => document.querySelector(`.dot[data-grid="${gridId}"][data-ri="${ri}"].sel`));
 }
 function getChoiceGridData(gridId, rows, cols) {
   const out = {};
-  cols.forEach((c, ci) => {
-    const sel = document.querySelector(`.dot[data-grid="${gridId}"][data-ci="${ci}"].sel`);
-    out[c] = sel ? rows[parseInt(sel.dataset.ri)] : null;
+  rows.forEach((r, ri) => {
+    const sel = document.querySelector(`.dot[data-grid="${gridId}"][data-ri="${ri}"].sel`);
+    out[r] = sel ? cols[parseInt(sel.dataset.ci)] : null;
   });
   return out;
 }
@@ -804,7 +804,7 @@ const REQUIRED = [
   ['Expectations – honesty',                     () => bandFilled('expHonesty')],
   ['Expectations – rate each aspect',            () => gridComplete('expGrid') && lowsComplete('expGrid')],
   ['Responsibilities not mentioned',             () => txtFilled('expMissing')],
-  ['Time spent on each part of Attune',          () => choiceGridComplete('timeGrid', TIME_COLS)],
+  ['Time spent on each part of Attune',          () => choiceGridComplete('timeGrid', TIME_ROWS)],
   ['Rate each part of the Attune experience',    () => gridComplete('overallGrid') && lowsComplete('overallGrid')],
   ['Interest in other Attune experiences',       () => gridComplete('interestGrid')],
   ['Biggest moment of recognition',              () => selCount('ahaMarker') > 0],
