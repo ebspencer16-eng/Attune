@@ -18,6 +18,9 @@
   .addon-tile-price{font-family:'Playfair Display',Georgia,serif;font-size:1.5rem;font-weight:700;color:#E8673A;line-height:1}
   .addon-tile-desc{font-size:.72rem;color:rgba(255,255,255,.5);line-height:1.6;flex:1;margin:0}
   .addon-tile-inc{font-size:.58rem;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.35);font-weight:700;border-top:1px solid rgba(255,255,255,.1);padding-top:.65rem;margin-top:.35rem}
+  .addon-tile-btn{margin-top:.7rem;width:100%;background:rgba(232,103,58,.9);color:#fff;border:none;border-radius:10px;padding:.6rem .5rem;font-family:'DM Sans',sans-serif;font-size:.72rem;font-weight:700;cursor:pointer;transition:background .15s,opacity .15s;line-height:1.25}
+  .addon-tile-btn:hover{background:#E8673A}
+  .addon-tile-btn.is-ok{background:rgba(16,185,129,.9)}
   @media(max-width:900px){.addon-tiles{grid-template-columns:repeat(3,1fr)}}
   @media(max-width:640px){.addon-tiles{grid-template-columns:repeat(2,1fr)}}
   @media(max-width:430px){.addon-tiles{grid-template-columns:1fr}}
@@ -1100,30 +1103,35 @@
         <div class="addon-tile-price">$19</div>
         <p class="addon-tile-desc">Conversation prompts, activities, and exercises generated from your own results.</p>
         <div class="addon-tile-inc">Included in Premium</div>
+        <button class="addon-tile-btn" onclick="addAddonToCart('workbook', event)">Add to cart →</button>
       </div>
       <div class="addon-tile">
         <div class="addon-tile-name">Physical Intimacy Expectations</div>
         <div class="addon-tile-price">$20</div>
         <p class="addon-tile-desc">A private exercise on what you each expect, scored for gaps like the rest of your results.</p>
         <div class="addon-tile-inc">Included in Premium</div>
+        <button class="addon-tile-btn" onclick="addAddonToCart('intimacy', event)">Add to cart →</button>
       </div>
       <div class="addon-tile">
         <div class="addon-tile-name">Relationship Reflection</div>
         <div class="addon-tile-price">$40</div>
         <p class="addon-tile-desc">A third exercise on the moments that shaped you, and where you're pointed next.</p>
         <div class="addon-tile-inc">Included in Reflection &amp; Premium</div>
+        <button class="addon-tile-btn" onclick="addAddonToCart('reflection', event)">Add to cart →</button>
       </div>
       <div class="addon-tile">
         <div class="addon-tile-name">Starting Out Checklist</div>
         <div class="addon-tile-price">$20</div>
         <p class="addon-tile-desc">A practical guide to merging lives: names, finances, household logistics.</p>
         <div class="addon-tile-inc">Included in Starting Out</div>
+        <button class="addon-tile-btn" onclick="addAddonToCart('checklist', event)">Add to cart →</button>
       </div>
       <div class="addon-tile">
         <div class="addon-tile-name">Shared Budgeting Activity</div>
         <div class="addon-tile-price">$20</div>
         <p class="addon-tile-desc">Map what you each value spending on, and where your instincts differ.</p>
         <div class="addon-tile-inc">Included in Starting Out &amp; Premium</div>
+        <button class="addon-tile-btn" onclick="addAddonToCart('budget', event)">Add to cart →</button>
       </div>
     </div>
 

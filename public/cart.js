@@ -360,6 +360,59 @@ function addToCartWithIntent(pkgId) {
   addToCart(pkgId);
 }
 
+// ── Add-on → cart ─────────────────────────────────────────────────────────
+// Add-ons aren't standalone line items; they attach to a package already in the
+// cart. So this finds the first package that doesn't already have (or include)
+// the add-on and switches it on. Used by the add-on tiles on /offerings.
+function _addonIncludedInPkg(pkg, key) {
+  if (key === 'workbook') return pkg === 'premium'; // premium bundles the workbook
+  var inc = PKG_INCLUDED[pkg];
+  return !!(inc && inc[key]);
+}
+
+function _addonBtnFlash(btn, msg, ok) {
+  if (!btn) return;
+  if (btn.dataset.busy) return;
+  var original = btn.dataset.label || btn.textContent;
+  btn.dataset.label = original;
+  btn.dataset.busy = '1';
+  btn.textContent = msg;
+  btn.classList.toggle('is-ok', !!ok);
+  setTimeout(function () {
+    btn.textContent = btn.dataset.label;
+    btn.classList.remove('is-ok');
+    delete btn.dataset.busy;
+  }, 1900);
+}
+
+function addAddonToCart(key, ev) {
+  var btn = ev && ev.currentTarget ? ev.currentTarget : null;
+  if (ev) ev.stopPropagation();
+
+  if (!_cartItems.length) {
+    _addonBtnFlash(btn, 'Pick a package first', false);
+    var target = document.querySelector('.pkg-overview') || document.getElementById('pkg-core');
+    if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    return;
+  }
+
+  var open = _cartItems.filter(function (it) {
+    return !_addonIncludedInPkg(it.pkg, key) && !it.addons[key];
+  });
+
+  if (!open.length) {
+    var bundled = _cartItems.some(function (it) { return _addonIncludedInPkg(it.pkg, key); });
+    _addonBtnFlash(btn, bundled ? 'Already included' : 'Already in cart', true);
+    return;
+  }
+
+  open[0].addons[key] = true;
+  renderCart();
+  updateCartBadge();
+  _persistCart();
+  _addonBtnFlash(btn, 'Added ✓', true);
+}
+
 // ── Checkout handoff ─────────────────────────────────────────────────────
 // Encode the full cart (items, qty, addons) and hand off to /checkout.
 // Checkout reads from localStorage because URL params would explode for
