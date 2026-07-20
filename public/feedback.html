@@ -791,6 +791,9 @@ document.querySelectorAll('textarea, input[type=text], input[type=email]').forEa
 });
 
 // ── Collect all data ──────────────────────────────────────────────────────────
+// Null-safe field read: returns '' when the element isn't on the page.
+function valOf(id) { const el = document.getElementById(id); return el ? el.value : ''; }
+
 function getSelVals(g, single = false) {
   const sels = [...document.querySelectorAll(`[data-g="${g}"].sel`)].map(b => b.textContent.trim());
   return single ? (sels[0] || null) : sels;
@@ -817,9 +820,12 @@ function submitForm() {
     // Context
     priorExp: getSelVals('priorExp'),
     howReceived: getSelVals('howReceived', true),
-    giftFeedback: document.getElementById('giftFeedback').value,
+    // These two questions were removed from the form but stayed in the payload.
+    // Reading .value on a missing element threw a TypeError and killed the whole
+    // submit, so every response was silently lost. Read them defensively.
+    giftFeedback: valOf('giftFeedback'),
     bothDone: getSelVals('bothDone', true),
-    notBothDoneWhy: document.getElementById('notBothDoneWhy').value,
+    notBothDoneWhy: valOf('notBothDoneWhy'),
     completionStyle: getSelVals('completionStyle', true),
     expectations: getSelVals('expectations'),
     expectationMatch: getRatingVal('expectationMatch'),
