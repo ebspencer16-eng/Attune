@@ -6421,7 +6421,8 @@ function deriveAnniversaryInsights(mine, theirs, userName, partnerName, coupleTy
   const overallQ = ANNIVERSARY_QUESTIONS.find(q=>q.id==='a0');
 
   // Overall feel perception gap
-  if (overallFeelGap >= 1 && overallQ) {
+  const bothRatedOverall = mine.a0 != null && theirs.a0 != null;
+  if (bothRatedOverall && overallFeelGap >= 1 && overallQ) {
     const myLabel = overallQ.scaleLabels[mine.a0 ?? 2];
     const theirLabel = overallQ.scaleLabels[theirs.a0 ?? 2];
     push({
@@ -6433,7 +6434,7 @@ function deriveAnniversaryInsights(mine, theirs, userName, partnerName, coupleTy
       priority: "Have this conversation gently",
       action: `Ask each other: what would make this feel even better from where you're standing right now? Don't defend your own rating, get curious about theirs first.`,
     });
-  } else if (overallQ) {
+  } else if (bothRatedOverall && overallQ) {
     const sharedLabel = overallQ.scaleLabels[Math.round(((mine.a0 ?? 2) + (theirs.a0 ?? 2)) / 2)];
     push({
       type: "strength",
@@ -6448,7 +6449,7 @@ function deriveAnniversaryInsights(mine, theirs, userName, partnerName, coupleTy
 
   // Fun gap
   const funQ = scaleGaps.find(s=>s.q.id==='a_sat_fun');
-  if (funQ && funQ.gap >= 2) {
+  if (funQ && mine.a_sat_fun != null && theirs.a_sat_fun != null && funQ.gap >= 2) {
     const wantMoreFun = (mine.a_sat_fun ?? 2) < (theirs.a_sat_fun ?? 2) ? userName : partnerName;
     push({
       type: "explore",
@@ -6459,7 +6460,7 @@ function deriveAnniversaryInsights(mine, theirs, userName, partnerName, coupleTy
       priority: "Easy win to act on",
       action: `Block something deliberately fun in the next two weeks, not a big trip, just something that has no productive purpose whatsoever. Fun doesn't usually happen by accident when life gets full.`,
     });
-  } else if (funQ && funQ.avgVal >= 3) {
+  } else if (funQ && mine.a_sat_fun != null && theirs.a_sat_fun != null && funQ.avgVal >= 3) {
     push({
       type: "strength",
       tier: 1,
@@ -6473,7 +6474,7 @@ function deriveAnniversaryInsights(mine, theirs, userName, partnerName, coupleTy
 
   // Communication gap
   const commQ = scaleGaps.find(s=>s.q.id==='a_sat_comm');
-  if (commQ && commQ.gap >= 2) {
+  if (commQ && mine.a_sat_comm != null && theirs.a_sat_comm != null && commQ.gap >= 2) {
     const lowPerson = (mine.a_sat_comm ?? 2) < (theirs.a_sat_comm ?? 2) ? userName : partnerName;
     push({
       type: "explore",
@@ -6590,6 +6591,11 @@ function deriveAnniversaryInsights(mine, theirs, userName, partnerName, coupleTy
     });
   }
 
+  // --- GROWTH EDGES (a6) ---
+  const myGrowth = (mine.a6 || "").toLowerCase();
+  const theirGrowth = (theirs.a6 || "").toLowerCase();
+  const presenceWords = ["present","here","in the room","phone","distracted","somewhere else","half"];
+  const expressionWords = ["say","tell","hint","communicate","speak","need","express","directly"];
   const myWorksOnPresence = presenceWords.some(w => myGrowth.includes(w));
   const myWorksOnExpression = expressionWords.some(w => myGrowth.includes(w));
   const theirWorksOnPresence = presenceWords.some(w => theirGrowth.includes(w));
