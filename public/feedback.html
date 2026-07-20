@@ -478,6 +478,12 @@ hr{border:none;border-top:1px solid var(--border-soft);margin:2rem 0}
   </div>
 
   <div class="question">
+    <div class="q-text">You completed the core Attune experience. How interested would you be in the following Attune experiences?</div>
+    <div class="q-sub">1 = not at all interested &nbsp;·&nbsp; 5 = very interested</div>
+    <div class="grid-wrap" id="interestGrid"></div>
+  </div>
+
+  <div class="question">
     <div class="q-text">How would you say Attune's value compares to other relationship-building offerings – therapy, books, retreats, etc.?</div>
     <div class="rating-row" id="valuePct">
       <button class="rating-btn" data-g="valuePct" data-s="1"><span class="num">1</span>Much less value</button>
@@ -654,6 +660,8 @@ function checkGridLow(gridId) {
   const lowDots = document.querySelectorAll(`.dot[data-grid="${gridId}"].sel`);
   let hasLow = false;
   lowDots.forEach(d => { if (parseInt(d.dataset.v) <= 2) hasLow = true; });
+  // Interest ratings aren't a quality score, so a low value has no follow-up.
+  if (gridId === 'interestGrid') return;
   const condId = gridId === 'commsGrid' ? 'commsLowCond' : gridId === 'expGrid' ? 'expLowCond' : 'overallLowCond';
   const cond = document.getElementById(condId);
   if (cond) cond.classList.toggle('show', hasLow);
@@ -697,7 +705,11 @@ const OVERALL_SKIP = { 5: [1], 6: [1] };
 
 buildGrid('commsGrid', COMMS_ROWS, COMMS_COLS);
 buildGrid('expGrid', EXP_ROWS, EXP_COLS);
+const INTEREST_ROWS = ['Relationship Reflection exercise', 'Physical Intimacy Expectations exercise', 'Starting Out Checklist', 'Build a Budget experience'];
+const INTEREST_COLS = ['Interest'];
+
 buildGrid('overallGrid', OVERALL_ROWS, OVERALL_COLS, OVERALL_SKIP);
+buildGrid('interestGrid', INTEREST_ROWS, INTEREST_COLS);
 
 // ── Chip / rating wiring ───────────────────────────────────────────────────────
 document.querySelectorAll('.chip, .rating-btn').forEach(btn => {
@@ -832,6 +844,7 @@ function submitForm() {
     expMissing: document.getElementById('expMissing').value,
     // Overall
     overallGrid: getGridData('overallGrid'),
+    interestGrid: getGridData('interestGrid'),
     overallLowWhy: document.getElementById('overallLowWhy').value,
     ahaMarker: getSelVals('ahaMarker', true),
     convoHappened: getSelVals('convoHappened', true),
