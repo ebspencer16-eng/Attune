@@ -1613,7 +1613,7 @@ const NEW_COUPLE_TYPES = [
   {
     id: "WX", typeA: "W", typeB: "X",
     name: "The jumpstart",
-    tagline: "Both want resolution. Different approaches heading in the same direction.",
+    tagline: "Different approaches to resolution, both heading in the same direction.",
     description: "{U} and {P} both move toward resolution when things get hard, you're pulling in the same direction. Where you differ is in how the internal experience travels: one processes outward, and one holds it closer. The destination is the same. The path there looks different.",
     nuance: "The expressive partner can feel like the guarded partner isn't sharing what's actually going on. The guarded partner can feel like too much is being put into the shared space before it's ready. Neither is wrong. The registers are just different.",
     color: "#E8673A", shade: "#FFF4F0",
@@ -1958,15 +1958,14 @@ function CoupleMapSVG({ myS, partS, userName, partnerName, size = 480 }) {
         <polygon points={`${axA.x},${tagAy + tagH} ${axA.x - 5},${tagAy + tagH - 6} ${axA.x + 5},${tagAy + tagH - 6}`} fill={itA.color}/>
       </svg>
 
-      {/* ── 50-QUESTION CALLOUT ── */}
-      <div style={{ display: "flex", alignItems: "flex-start", gap: "0.65rem", background: "#FBF8F3", border: "1.5px solid #E8DDD0", borderRadius: 12, padding: "0.85rem 1rem", marginTop: "0.25rem" }}>
-        <div style={{ width: 28, height: 28, borderRadius: "50%", background: "linear-gradient(135deg,#E8673A,#1B5FE8)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, marginTop: 1 }}>
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round"><circle cx="12" cy="12" r="9"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-        </div>
-        <div>
-          <div style={{ fontSize: "0.7rem", fontWeight: 700, color: "#0E0B07", marginBottom: "0.2rem", fontFamily: BFONT }}>Each dot is placed by calculation, not intuition</div>
-          <p style={{ fontSize: "0.72rem", color: "#8C7A68", lineHeight: 1.6, margin: 0, fontWeight: 300, fontFamily: BFONT }}>Where you each sit on this map is calculated from your answers to 24 independent questions, not self-assigned. Two people who think they know their type will almost always land somewhere different than expected.</p>
-        </div>
+      {/* ── HOW PLACEMENT IS CALCULATED (footnote, not a tile) ── */}
+      <div style={{ marginTop: "0.75rem" }}>
+        <p style={{ fontSize: "0.72rem", color: "#8C7A68", lineHeight: 1.65, margin: "0 0 0.5rem", fontWeight: 300, fontFamily: BFONT }}>
+          Two people who think they know their type will almost always land somewhere different than expected.
+        </p>
+        <p style={{ fontSize: "0.7rem", color: "#8C7A68", lineHeight: 1.65, margin: 0, fontWeight: 300, fontStyle: "italic", fontFamily: BFONT }}>
+          Where you each sit on this map is calculated from your responses. Scores for Conflict, Repair, and Stress determine placement on the Engage/Withdraw axis, and Expression, Feedback, and Needs scores determine placement on the Open/Guarded axis. Dot position is continuous, proximity to an axis line means that partner is more flexible on that dimension.
+        </p>
       </div>
     </div>
   );
@@ -7233,6 +7232,9 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
     myS, partS, alignPct
   );
   const [typeCopied, setTypeCopied] = useState(false);
+  const [typeShared, setTypeShared] = useState(false);
+  const shareCardRef = useRef(null);
+  const [shareBusy, setShareBusy] = useState(false);
   const [showSurvey, setShowSurvey] = useState(false);
   const [stayEmail, setStayEmail] = useState('');
   const [stayDone, setStayDone] = useState(() => { try { return !!localStorage.getItem('attune_stay_subscribed'); } catch { return false; } });
@@ -7573,7 +7575,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
   // Sidebar items
   const sidebarSections = [
     { id: "highlights", label: "Highlights", icon: "✦", color: coupleType?.color || "#E8673A" },
-    { id: "couple-type", label: "Couple Type & Map", icon: "◈", color: coupleType?.color || "#E8673A" },
+    { id: "couple-type", label: "Couple Type", icon: "◈", color: coupleType?.color || "#E8673A" },
     {
       id: "comm", label: "Communication", icon: "◉", color: "#9B5DE5",
       children: [
@@ -7719,7 +7721,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
 
   function getPageLabel(id) {
     if (id === "highlights") return "Highlights";
-    if (id === "couple-type") return "Couple Type & Map";
+    if (id === "couple-type") return "Couple Type";
     if (id === "comm-overview") return "Communication Overview";
     if (id.startsWith("comm-") && id !== "comm-profiles" && id !== "comm-plan") return DIM_META[id.replace("comm-","")]?.label || id;
     if (id === "comm-profiles") return urSameType ? "Communication Profile" : "Individual Profiles";
@@ -7877,9 +7879,15 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
       .replace(/\{U\}/g, userName).replace(/\{P\}/g, partnerName)
       .replace(/\{U_sub\}/g, pronoun(userPronouns, "sub")).replace(/\{U_obj\}/g, pronoun(userPronouns, "obj")).replace(/\{U_pos\}/g, pronoun(userPronouns, "pos")).replace(/\{U_isC\}/g, pronoun(userPronouns, "isC"))
       .replace(/\{P_sub\}/g, pronoun(partnerPronouns, "sub")).replace(/\{P_obj\}/g, pronoun(partnerPronouns, "obj")).replace(/\{P_pos\}/g, pronoun(partnerPronouns, "pos")).replace(/\{P_isC\}/g, pronoun(partnerPronouns, "isC")));
+    // The share card sits mounted off-screen at storycard dimensions, so this
+    // just screenshots it with the same html2canvas path the highlights reel uses.
     const handleShare = () => {
-      const text = `We're "${ct.name}", ${ct.tagline} Find yours at attune.com`;
-      navigator.clipboard?.writeText(text).then(() => { setTypeCopied(true); setTimeout(() => setTypeCopied(false), 2500); });
+      if (shareBusy || !shareCardRef.current) return;
+      setShareBusy(true);
+      const file = `attune-couple-type-${userName.toLowerCase()}-${partnerName.toLowerCase()}.png`;
+      try { downloadCard(shareCardRef.current, file); } catch { showToast("Download not available. Take a screenshot instead."); }
+      setTypeShared(true);
+      setTimeout(() => { setTypeShared(false); setShareBusy(false); }, 2800);
     };
     // ── Couple-map derivation (merged in from the former Couple Map page) ──
     const newType = deriveNewCoupleType(myS, partS);
@@ -7940,11 +7948,9 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
             </div>
           </div>
 
-          {/* 2. DESCRIPTION */}
-          <p style={{ fontSize: "0.88rem", color: C.muted, fontFamily: BFONT, fontWeight: 300, lineHeight: 1.75, margin: "0 0 1.5rem" }}>
-            Two dots. Two axes. The distance, the quadrants, and the proximity to the lines between them all help you understand your unique relationship.
-          </p>
-
+          <div style={{ fontSize: "0.6rem", letterSpacing: "0.22em", textTransform: "uppercase", color: C.muted, fontFamily: BFONT, fontWeight: 700, marginBottom: "1rem" }}>
+            Your couple map
+          </div>
           {/* 3. COUPLE MAP TILE */}
           {/* ── THE MAP (with axis descriptions inside the same tile) ── */}
           <div style={{ background: "white", border: `1.5px solid ${C.stone}`, borderRadius: 20, padding: isMobile ? "1.25rem" : "1.75rem", marginBottom: "1.5rem" }}>
@@ -7972,6 +7978,9 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
             </div>
           </div>
 
+          <div style={{ fontSize: "0.6rem", letterSpacing: "0.22em", textTransform: "uppercase", color: C.muted, fontFamily: BFONT, fontWeight: 700, marginTop: "1.75rem", marginBottom: "1rem" }}>
+            Your individual types
+          </div>
           {/* 4. INDIVIDUAL TILES */}
           {/* ── INDIVIDUAL TYPES (merged: identity + placement blurb + bars) ── */}
           {(() => {
@@ -8079,19 +8088,14 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
             );
           })()}
 
-          {/* 5. MAP-USES DESCRIPTION */}
-          <p style={{ fontSize: "0.72rem", color: C.muted, fontFamily: BFONT, lineHeight: 1.65, margin: 0 }}>
-            The map uses your scores on Conflict, Repair, and Stress to place each of you on the Engage/Withdraw axis, and your Expression, Feedback, and Needs scores to place you on the Open/Guarded axis. Dot position is continuous, proximity to an axis line means that partner is more flexible on that dimension.
-          </p>
-
+          <div style={{ fontSize: "0.6rem", letterSpacing: "0.22em", textTransform: "uppercase", color: C.muted, fontFamily: BFONT, fontWeight: 700, marginTop: "1.75rem", marginBottom: "1rem" }}>
+            Your couple type
+          </div>
           {/* 6. CELEBRATORY TYPE REVEAL */}
           <div style={{ borderRadius: 20, overflow: "hidden", margin: "1.75rem 0 1.25rem", position: "relative" }}>
             <div style={{ background: `linear-gradient(145deg, ${ct.color}ee, ${ct.color}99)`, padding: "2.25rem 2.25rem 2rem", position: "relative", overflow: "hidden" }}>
               <div style={{ position: "absolute", bottom: -20, right: -10, fontFamily: HFONT, fontSize: "6rem", fontWeight: 700, color: "rgba(255,255,255,0.08)", lineHeight: 1, pointerEvents: "none", userSelect: "none", letterSpacing: "-0.04em", whiteSpace: "nowrap" }}>
                 {ct.name.replace("The ", "")}
-              </div>
-              <div style={{ fontSize: "0.58rem", letterSpacing: "0.28em", textTransform: "uppercase", color: "rgba(255,255,255,0.7)", fontFamily: BFONT, fontWeight: 700, marginBottom: "0.85rem" }}>
-                Your couple type is
               </div>
               <div style={{ fontFamily: HFONT, fontSize: "clamp(2.4rem, 6vw, 3.6rem)", fontWeight: 700, color: "white", lineHeight: 0.95, marginBottom: "0.85rem", letterSpacing: "-0.03em" }}>
                 {ct.name}
@@ -8169,25 +8173,21 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
             </div>
           </div>
 
-          {/* WORKBOOK CTA */}
-          <div style={{ background: `${ct.color}0d`, border: `1px solid ${ct.color}25`, borderRadius: 14, padding: "1rem 1.25rem", marginBottom: "1.25rem", display: "flex", alignItems: "center", justifyContent: "space-between", gap: "1rem", flexWrap: "wrap" }}>
-            <p style={{ fontSize: "0.82rem", color: C.ink, fontFamily: BFONT, lineHeight: 1.55, margin: 0 }}>
-              {hasWorkbook
-                ? <>Your <span style={{ fontWeight: 600 }}>personalized workbook</span> is available in your dashboard.</>
-                : <>Like what you're seeing? There's more practical guidance built from your answers in your{" "}<span style={{ fontWeight: 600 }}>personalized workbook.</span></>}
-            </p>
-            <a href={hasWorkbook ? "/app" : "/offerings#workbook"} style={{ fontSize: "0.78rem", fontWeight: 700, color: ct.color, fontFamily: BFONT, textDecoration: "none", whiteSpace: "nowrap", display: "flex", alignItems: "center", gap: "0.3rem" }}>
-              {hasWorkbook ? "Go to dashboard →" : "Purchase your personalized workbook →"}
-            </a>
-          </div>
-
           {/* SHARE */}
+          {/* Off-screen at full storycard size so the downloaded PNG is crisp
+              regardless of viewport. Never visible to the user. */}
+          <div aria-hidden="true" style={{ position: "fixed", left: -9999, top: 0, width: CARD_W, height: CARD_H, pointerEvents: "none" }}>
+            <div ref={shareCardRef}>
+              <CoupleTypeShareCard ct={ct} userName={userName} partnerName={partnerName} tagline={interp(ct.tagline)} />
+            </div>
+          </div>
           <div style={{ display: "flex", gap: "0.75rem", alignItems: "center", flexWrap: "wrap" }}>
             <button onClick={handleShare}
-              style={{ background: typeCopied ? "#10b981" : C.ink, color: "white", border: "none", borderRadius: 10, padding: "0.65rem 1.5rem", fontSize: "0.75rem", fontWeight: 700, cursor: "pointer", fontFamily: BFONT, letterSpacing: "0.04em", transition: "background 0.2s" }}>
-              {typeCopied ? "Copied to clipboard ✓" : "Share your type →"}
+              disabled={shareBusy}
+              style={{ background: typeShared ? "#10b981" : C.ink, color: "white", border: "none", borderRadius: 10, padding: "0.65rem 1.5rem", fontSize: "0.75rem", fontWeight: 700, cursor: shareBusy ? "wait" : "pointer", fontFamily: BFONT, letterSpacing: "0.04em", transition: "background 0.2s", opacity: shareBusy ? 0.7 : 1 }}>
+              {typeShared ? "Image downloaded ✓" : shareBusy ? "Creating image…" : "Download your share image ↓"}
             </button>
-            <p style={{ fontSize: "0.72rem", color: C.muted, fontFamily: BFONT, margin: 0 }}>Share on stories or send to a friend.</p>
+            <p style={{ fontSize: "0.72rem", color: C.muted, fontFamily: BFONT, margin: 0 }}>Post it to your stories or send it to a friend.</p>
           </div>
 
         </div>
@@ -9265,6 +9265,41 @@ function downloadCard(cardRef, filename) {
   };
   script.onerror = () => showToast("Download not available. Take a screenshot instead.");
   document.head.appendChild(script);
+}
+
+// Shareable couple-type card, storycard dimensions, built for stories.
+function CoupleTypeShareCard({ ct, userName, partnerName, tagline }) {
+  const color = ct?.color || "#E8673A";
+  return (
+    <div style={{ width: CARD_W, height: CARD_H, background: `linear-gradient(160deg, #120d2e 0%, ${color}55 45%, #120d2e 100%)`, position: "relative", overflow: "hidden", display: "flex", flexDirection: "column", boxSizing: "border-box" }}>
+      <div style={{ height: 5, background: `linear-gradient(90deg, #E8673A, ${color}, #1B5FE8)`, flexShrink: 0 }} />
+      {/* Oversized ghost word, same treatment as the type reveal tile */}
+      <div style={{ position: "absolute", bottom: 78, right: -18, fontFamily: HFONT, fontSize: "5.5rem", fontWeight: 700, color: "rgba(255,255,255,0.07)", lineHeight: 1, letterSpacing: "-0.04em", whiteSpace: "nowrap", pointerEvents: "none" }}>
+        {(ct?.name || "").replace("The ", "")}
+      </div>
+      <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center", padding: "2.5rem 2.25rem", position: "relative" }}>
+        <div style={{ fontSize: "0.55rem", letterSpacing: "0.28em", textTransform: "uppercase", color: "rgba(255,255,255,0.6)", fontFamily: BFONT, fontWeight: 700, marginBottom: "0.6rem" }}>
+          {userName} &amp; {partnerName}
+        </div>
+        <div style={{ fontSize: "0.6rem", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.45)", fontFamily: BFONT, fontWeight: 700, marginBottom: "1.1rem" }}>
+          Our couple type
+        </div>
+        <div style={{ fontFamily: HFONT, fontSize: "2.9rem", fontWeight: 700, color: "white", lineHeight: 0.98, letterSpacing: "-0.03em", marginBottom: "1.1rem" }}>
+          {ct?.name}
+        </div>
+        <div style={{ width: 52, height: 3, background: color, borderRadius: 2, marginBottom: "1.1rem" }} />
+        <p style={{ fontSize: "1rem", color: "rgba(255,255,255,0.88)", fontFamily: BFONT, fontWeight: 400, lineHeight: 1.5, margin: 0 }}>
+          {tagline}
+        </p>
+      </div>
+      <div style={{ flexShrink: 0, padding: "0 2.25rem 2rem", position: "relative" }}>
+        <div style={{ height: 1, background: "rgba(255,255,255,0.15)", marginBottom: "1rem" }} />
+        <div style={{ fontSize: "0.72rem", color: "rgba(255,255,255,0.75)", fontFamily: BFONT, fontWeight: 600, letterSpacing: "0.04em" }}>
+          Find yours at attune-relationships.com
+        </div>
+      </div>
+    </div>
+  );
 }
 
 // Individual card wrapper with download affordance
