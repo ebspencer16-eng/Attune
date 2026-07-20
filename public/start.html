@@ -239,8 +239,8 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;height:58px;background:rgba(
     </div>
     <span class="pkg-badge" style="background:#FFF0EB;color:#E8673A;">The Foundation</span>
     <div class="pkg-name">The Attune Assessment</div>
-    <div class="pkg-price" id="price-core">$124</div>
-    <div class="pkg-price-sub" id="pricesub-core">Physical gift box · shipping included</div>
+    <div class="pkg-price" id="price-core">$89</div>
+    <div class="pkg-price-sub" id="pricesub-core">Digital · instant access · yours to keep</div>
     <ul class="pkg-features">
       <li>Communication assessment</li>
       <li>Expectations comparison</li>
@@ -259,8 +259,8 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;height:58px;background:rgba(
     </div>
     <span class="pkg-badge" style="background:#FFF0EB;color:#E8673A;">Starting Out</span>
     <div class="pkg-name-row"><div class="pkg-name">Starting Out Collection</div><span class="popular-inline">Most popular</span></div>
-    <div class="pkg-price" id="price-newlywed">$174</div>
-    <div class="pkg-price-sub" id="pricesub-newlywed">Physical gift box · shipping included</div>
+    <div class="pkg-price" id="price-newlywed">$139</div>
+    <div class="pkg-price-sub" id="pricesub-newlywed">Digital · instant access · yours to keep</div>
     <ul class="pkg-features">
       <li class="bold-feat">Attune Assessment</li>
       <li>Starting Out Checklist</li>
@@ -277,8 +277,8 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;height:58px;background:rgba(
     </div>
     <span class="pkg-badge" style="background:#EEEFFF;color:#5B6DF8;">Anniversary</span>
     <div class="pkg-name">Relationship Reflection</div>
-    <div class="pkg-price" id="price-anniversary">$174</div>
-    <div class="pkg-price-sub" id="pricesub-anniversary">Physical gift box · shipping included</div>
+    <div class="pkg-price" id="price-anniversary">$139</div>
+    <div class="pkg-price-sub" id="pricesub-anniversary">Digital · instant access · yours to keep</div>
     <ul class="pkg-features">
       <li class="bold-feat">Attune Assessment</li>
       <li>Relationship Reflection exercise</li>
@@ -295,7 +295,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;height:58px;background:rgba(
     <span class="pkg-badge" style="background:rgba(91,109,248,.1);color:#5B6DF8;">Most Complete</span>
     <div class="pkg-name">Attune Premium</div>
     <div class="pkg-price" id="price-premium">$198</div>
-    <div class="pkg-price-sub" id="pricesub-premium">Physical gift box · shipping included</div>
+    <div class="pkg-price-sub" id="pricesub-premium">Digital · instant access · yours to keep</div>
     <ul class="pkg-features">
       <li class="bold-feat">Everything in the Assessment</li>
       <li>Relationship Reflection</li>
@@ -800,8 +800,11 @@ document.addEventListener('click',function(e){var menu=document.getElementById('
   if (!F.PHYSICAL_ENABLED) {
     document.querySelectorAll('.format-toggle').forEach(function(e){ e.style.display='none'; });
     document.querySelectorAll('.gift-feat').forEach(function(e){ e.style.display='none'; });
-    document.querySelectorAll('[id^="pricesub-"]').forEach(function(e){ e.textContent = 'Digital · instant access · yours to keep'; });
   }
+  // Sync the displayed prices to the active format on load. Without this the
+  // hardcoded markup prices stick, which is how physical pricing survived the
+  // digital-only switch.
+  if (typeof setFormat === 'function') setFormat(F.PHYSICAL_ENABLED ? 'physical' : 'digital');
   if (F.LMFT_ENABLED) {
     var l = document.getElementById('addon-lmft'); if (l) l.style.display='';
   }

@@ -378,7 +378,7 @@
       <div class="product-desc">Most registry items fill a cabinet. This one fills a gap.</div>
       <div class="product-prices">
         <span>Digital · <strong>$139</strong></span>
-        <span>Physical gift box · <strong>$174</strong></span>
+        <span class="phys-only">Physical gift box · <strong>$174</strong></span>
       </div>
     </div>
   </div>
@@ -410,7 +410,7 @@
       <span><strong>Personalized action plan</strong> for the conversations worth having early</span>
     </div>
   </div>
-  <div class="physical-extra">
+  <div class="physical-extra phys-only">
     <strong>The physical gift box</strong> ($174) adds a keepsake box with a printed welcome card, a notepad, and a handmade ceramic ring tray. The full printed workbook is available as an optional add-on.
   </div>
 
@@ -479,7 +479,7 @@
 
   <div class="faq-item">
     <div class="faq-q">Is this a real gift, or just an online thing?</div>
-    <div class="faq-a">Both. The digital version ($139) gives instant access the moment your guest buys it. The physical gift box ($174) adds a keepsake box with welcome card and notepad. Some couples prefer the box for the unboxing moment.</div>
+    <div class="faq-a">It's a real gift. The digital version ($139) gives your guest instant access the moment they buy it, and you receive a personal note from them.<span class="phys-only"> The physical gift box ($174) adds a keepsake box with welcome card and notepad. Some couples prefer the box for the unboxing moment.</span></div>
   </div>
 
   <div class="faq-item">
@@ -612,5 +612,14 @@
 
   <script src="/_flags.js"></script>
 <script src="/cart.js"></script>
+<script>
+/* Phase-1 registry gate. Physical markup is preserved; hidden by the flag. */
+(function(){
+  var F = window.ATTUNE_FLAGS || {};
+  if (!F.PHYSICAL_ENABLED) {
+    document.querySelectorAll('.phys-only').forEach(function(e){ e.style.display='none'; });
+  }
+})();
+</script>
 </body>
 </html>
