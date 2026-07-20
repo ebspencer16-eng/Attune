@@ -9280,8 +9280,11 @@ function downloadCard(cardRef, filename) {
 function CoupleTypeShareCard({ ct, userName, partnerName, tagline }) {
   const color = ct?.color || "#E8673A";
   return (
-    <div style={{ width: CARD_W, height: CARD_H, background: `linear-gradient(160deg, #120d2e 0%, ${color}55 45%, #120d2e 100%)`, position: "relative", overflow: "hidden", display: "flex", flexDirection: "column", boxSizing: "border-box" }}>
-      <div style={{ height: 5, background: `linear-gradient(90deg, #E8673A, ${color}, #1B5FE8)`, flexShrink: 0 }} />
+    // Solid base under the gradient: the mid stop is translucent, and without an
+    // opaque layer beneath it the exported PNG washes out.
+    <div style={{ width: CARD_W, height: CARD_H, background: "#120d2e", position: "relative", overflow: "hidden", display: "flex", flexDirection: "column", boxSizing: "border-box" }}>
+      <div style={{ position: "absolute", inset: 0, background: `linear-gradient(160deg, #120d2e 0%, ${color}55 45%, #120d2e 100%)`, pointerEvents: "none" }} />
+      <div style={{ height: 5, background: `linear-gradient(90deg, #E8673A, ${color}, #1B5FE8)`, flexShrink: 0, position: "relative" }} />
       {/* Oversized ghost word, same treatment as the type reveal tile */}
       <div style={{ position: "absolute", bottom: 78, right: -18, fontFamily: HFONT, fontSize: "5.5rem", fontWeight: 700, color: "rgba(255,255,255,0.07)", lineHeight: 1, letterSpacing: "-0.04em", whiteSpace: "nowrap", pointerEvents: "none" }}>
         {(ct?.name || "").replace("The ", "")}
