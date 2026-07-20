@@ -1497,7 +1497,7 @@ window.adminAuthHeaders = function(extra){
       <div class="chart-card">
         <div class="chart-card-header">
           <div class="chart-card-title">Communication exercise – grid averages</div>
-          <div class="chart-card-sub">Design · Accuracy · Relevance · Likely to apply</div>
+          <div class="chart-card-sub">Design · Accuracy · Importance</div>
         </div>
         <div id="fb-comms-grid-bars" style="display:flex;flex-direction:column;gap:.6rem;padding:.5rem 0;">
           <div style="color:var(--muted);font-size:.78rem;">Loading…</div>
@@ -1506,7 +1506,7 @@ window.adminAuthHeaders = function(extra){
       <div class="chart-card">
         <div class="chart-card-header">
           <div class="chart-card-title">Expectations exercise – grid averages</div>
-          <div class="chart-card-sub">Design · Accuracy · Relevance · Likely to apply</div>
+          <div class="chart-card-sub">Design · Accuracy · Importance</div>
         </div>
         <div id="fb-exp-grid-bars" style="display:flex;flex-direction:column;gap:.6rem;padding:.5rem 0;">
           <div style="color:var(--muted);font-size:.78rem;">Loading…</div>
@@ -1518,7 +1518,7 @@ window.adminAuthHeaders = function(extra){
     <div class="chart-grid chart-grid full">
       <div class="chart-card">
         <div class="chart-card-header">
-          <div class="chart-card-title">Overall experience – execution · impact · satisfaction</div>
+          <div class="chart-card-title">Overall experience – clarity · impact · satisfaction</div>
           <div class="chart-card-sub">Per product element · avg 1–5</div>
         </div>
         <div id="fb-overall-grid-bars" style="display:flex;flex-direction:column;gap:.6rem;padding:.5rem 0;">
@@ -2430,7 +2430,7 @@ async function loadFeedbackData() {
     expLead: [
       {label:'Overall rating',val:3.9},{label:'Impact',val:3.7},{label:'Honesty',val:4.0},{label:'Emotional safety',val:4.2},
     ],
-    // Comms grid rows (Design · Accuracy · Relevance · Likely to apply)
+    // Comms grid rows (Design · Accuracy · Importance)
     commsGrid: [
       {label:'The questions themselves', scores:[4.2,4.0,4.3,3.9]},
       {label:'Seeing scores side by side', scores:[4.5,4.1,4.2,4.0]},
@@ -2444,7 +2444,7 @@ async function loadFeedbackData() {
       {label:'Category breakdowns', scores:[4.0,3.8,3.9,3.8]},
       {label:'Detailed feedback pages', scores:[3.9,3.6,3.8,3.7]},
     ],
-    // Overall grid (Execution · Impact · Satisfaction)
+    // Overall grid (Clarity · Impact · Overall Satisfaction)
     overallGrid: [
       {label:'Exercise questions', scores:[4.2,3.8,4.1]},
       {label:'Results presentation', scores:[4.3,4.0,4.2]},
@@ -2529,7 +2529,7 @@ async function loadFeedbackData() {
   document.getElementById('fb-exp-lead-bars').innerHTML = SIM.expLead.map(m => renderScoreBar(m.label, m.val, '#1B5FE8')).join('');
 
   // Comms grid bars (grouped by row, show avg per column)
-  const GRID_COLS = ['Design','Accuracy','Relevance','Likely to apply'];
+  const GRID_COLS = ['Design','Accuracy','Importance'];
   const GRID_COLORS = ['#E8673A','#9B5DE5','#1B5FE8','#10B981'];
   const commsEl = document.getElementById('fb-comms-grid-bars');
   commsEl.innerHTML = SIM.commsGrid.map(row =>
@@ -2544,7 +2544,7 @@ async function loadFeedbackData() {
   ).join('');
 
   // Overall grid bars
-  const OV_COLS = ['Execution','Impact','Satisfaction'];
+  const OV_COLS = ['Clarity','Impact','Overall Satisfaction'];
   const OV_COLORS = ['#6C7FFF','#E8673A','#10B981'];
   const ovEl = document.getElementById('fb-overall-grid-bars');
   ovEl.innerHTML = SIM.overallGrid.map(row =>
