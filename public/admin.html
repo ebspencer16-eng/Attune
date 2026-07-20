@@ -1575,6 +1575,15 @@ window.adminAuthHeaders = function(extra){
     <div class="chart-grid">
       <div class="chart-card">
         <div class="chart-card-header">
+          <div class="chart-card-title">Time spent by stage</div>
+          <div class="chart-card-sub">Most common answer per stage</div>
+        </div>
+        <div id="fb-timestage-bars" style="display:flex;flex-direction:column;gap:.55rem;padding:.5rem 0;">
+          <div style="color:var(--muted);font-size:.78rem;">Loading…</div>
+        </div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-card-header">
           <div class="chart-card-title">Both partners completed</div>
           <div class="chart-card-sub">Completion rate signal</div>
         </div>
@@ -2446,6 +2455,8 @@ async function loadFeedbackData() {
     ],
     // Overall grid (Clarity · Impact · Overall Satisfaction)
     overallGrid: [
+      {label:'Package selection & checkout', scores:[4.3,null,4.2]},
+      {label:'Account creation', scores:[4.1,null,4.0]},
       {label:'Exercise questions', scores:[4.2,3.8,4.1]},
       {label:'Results presentation', scores:[4.3,4.0,4.2]},
       {label:'Couple type system', scores:[4.4,3.9,4.1]},
@@ -2453,7 +2464,7 @@ async function loadFeedbackData() {
       {label:'Workbook', scores:[4.1,3.6,3.9]},
       {label:'Intimacy add-on', scores:[4.2,3.8,4.0]},
       {label:'Overall flow / UX', scores:[4.4,null,4.3]},
-      {label:'Time it took', scores:[4.0,null,4.1]},
+      {label:'Time it took', scores:[null,null,4.1]},
     ],
     aha: [
       {l:'Expectations gaps',v:32},{l:'Seeing scores side by side',v:28},{l:'Couple type',v:18},
@@ -2462,6 +2473,13 @@ async function loadFeedbackData() {
     interestAvg: [
       {l:'Relationship Reflection exercise',v:0},{l:'Physical Intimacy Expectations',v:0},
       {l:'Starting Out Checklist',v:0},{l:'Build a Budget experience',v:0},
+    ],
+    timeByStage: [
+      {l:'Package selection, checkout, account creation', v:'Less than 10 minutes'},
+      {l:'Completing communication exercise', v:'10–20 minutes'},
+      {l:'Completing expectations exercise', v:'20–45 minutes'},
+      {l:'Reviewing your results', v:'10–20 minutes'},
+      {l:'Exploring the workbook', v:'20–45 minutes'},
     ],
     completion: [
       {l:'Yes, both finished',v:71},{l:'I finished, partner pending',v:14},
@@ -2558,6 +2576,11 @@ async function loadFeedbackData() {
   const max = (arr) => Math.max(...arr.map(i => i.v));
   document.getElementById('fb-aha-bars').innerHTML = SIM.aha.map(i => renderBar(i.l, i.v, max(SIM.aha), '#E8673A', i.v + '%')).join('');
   document.getElementById('fb-interest-bars').innerHTML = SIM.interestAvg.map(i => renderBar(i.l, i.v, max(SIM.interestAvg), '#1B5FE8', i.v + '%')).join('');
+  document.getElementById('fb-timestage-bars').innerHTML = SIM.timeByStage.map(i =>
+    `<div style="display:grid;grid-template-columns:1fr auto;gap:.75rem;align-items:center;padding:.3rem 0">
+      <div style="font-size:.72rem;color:var(--text)">${i.l}</div>
+      <div style="font-size:.7rem;font-weight:700;color:var(--accent, #E8673A);white-space:nowrap">${i.v}</div>
+    </div>`).join('');
   document.getElementById('fb-completion-bars').innerHTML = SIM.completion.map(i => renderBar(i.l, i.v, max(SIM.completion), '#10B981', i.v + '%')).join('');
   document.getElementById('fb-concerns-bars').innerHTML = SIM.concerns.map(i => renderBar(i.l, i.v, max(SIM.concerns), '#9B5DE5', i.v + '%')).join('');
 
@@ -4477,15 +4500,12 @@ window.addEventListener('load',()=>{chartsInit.overview=true;initCharts('overvie
 
 // All survey questions with their type and response options
 const SURVEY_QUESTIONS = [
-  { id: 'completionStyle',  label: 'How they completed the exercises',   type: 'chip' },
-  { id: 'expectations',     label: 'What they hoped to get out of Attune', type: 'multi-chip' },
+  { id: 'expectations',     label: 'What they expect to get out of Attune', type: 'multi-chip' },
   { id: 'expectationMatch', label: 'How well Attune delivered (1–5)',    type: 'scale', min: 1, max: 5 },
   { id: 'concerns',         label: 'Concerns before starting',           type: 'multi-chip' },
   { id: 'commsOverall',     label: 'Comms exercise – overall rating (1–5)', type: 'scale', min: 1, max: 5 },
-  { id: 'commsImpact',      label: 'Comms exercise – impact (1–5)',      type: 'scale', min: 1, max: 5 },
   { id: 'commsHonesty',     label: 'Comms exercise – honesty (1–5)',     type: 'scale', min: 1, max: 5 },
   { id: 'expOverall',       label: 'Expectations exercise – overall rating (1–5)', type: 'scale', min: 1, max: 5 },
-  { id: 'expImpact',        label: 'Expectations exercise – impact (1–5)', type: 'scale', min: 1, max: 5 },
   { id: 'expHonesty',       label: 'Expectations exercise – honesty (1–5)', type: 'scale', min: 1, max: 5 },
   { id: 'ahaMarker',        label: 'Biggest moment of recognition',      type: 'chip' },
   { id: 'convoHappened',    label: 'Did it lead to a new conversation',  type: 'chip' },
@@ -4493,7 +4513,6 @@ const SURVEY_QUESTIONS = [
   { id: 'shiftSelf',        label: 'Shift in self-understanding (1–5)', type: 'scale', min: 1, max: 5 },
   { id: 'returnLikelihood', label: 'Likelihood to review results in 6 months (1–5)', type: 'scale', min: 1, max: 5 },
   { id: 'valuePct',         label: 'Value vs other relationship offerings (1–5)', type: 'scale', min: 1, max: 5 },
-  { id: 'timeTaken',        label: 'Time taken',                         type: 'chip' },
   { id: 'testimonialConsent', label: 'Testimonial consent',             type: 'chip' },
   { id: 'nps',              label: 'NPS (0–10)',                         type: 'scale', min: 0, max: 10 },
   // Free text (summary stats only)
@@ -4509,9 +4528,7 @@ function generateSimResponses(n = 47) {
   const responses = [];
   const convoOpts = ['Yes, a significant one', 'Yes, a smaller one', 'It surfaced something, not yet', 'Not really'];
   const ahaOpts = ['The expectations gaps', 'Seeing scores side by side', 'Our couple type', 'Conversation afterward', 'Detailed feedback pages', 'No clear moment'];
-  const completionOpts = ['Together in the same room', 'Separately, on own schedule', 'Separately but same time', 'Mix of both'];
   const concernOpts = ["I didn't think the questions would feel real", "I didn't think my partner would engage seriously", "I didn't think the results would say anything useful", "I didn't think it would surface anything new", "I didn't have any concerns"];
-  const timeOpts = ['Under 20 minutes', '20–30 minutes', '30–45 minutes', '45–60 minutes', 'Over an hour'];
   const consentOpts = ['Yes – use my words and first name on the reviews section', 'Yes – initials only', 'Yes – keep it anonymous', 'No, internal use only'];
   const rand = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
   const pick = (arr) => arr[Math.floor(Math.random() * arr.length)];
@@ -4537,10 +4554,8 @@ function generateSimResponses(n = 47) {
       nps,
       expectationMatch: expMatch,
       commsOverall,
-      commsImpact: skew(3.8, 0.8),
       commsHonesty: skew(4.3, 0.6),
       expOverall: skew(3.9, 0.7),
-      expImpact: skew(3.7, 0.8),
       expHonesty: skew(4.0, 0.6),
       shiftCouple: skew(3.8, 0.9),
       shiftSelf: skew(3.6, 0.9),
@@ -4548,9 +4563,7 @@ function generateSimResponses(n = 47) {
       valuePct: skew(4.2, 0.6),
       convoHappened: pick(convoOpts),
       ahaMarker: pick(ahaOpts),
-      completionStyle: pick(completionOpts),
       concerns: pick(concernOpts),
-      timeTaken: pick(timeOpts),
       testimonialConsent: pick(consentOpts),
       whatDiscovered: pick(discoveries),
       negative: Math.random() > 0.5 ? 'Some friction in the expectations section.' : '',

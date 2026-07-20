@@ -101,6 +101,11 @@ body{background:var(--cream);color:var(--ink);font-family:'DM Sans',sans-serif;f
 .dot{width:26px;height:26px;border:1px solid var(--border);border-radius:50%;background:var(--warm);font-size:.72rem;font-family:'DM Sans',sans-serif;color:var(--faint);cursor:pointer;transition:all .15s;display:flex;align-items:center;justify-content:center}
 .dot:hover{border-color:var(--orange);color:var(--orange)}
 .dot.sel{background:var(--orange);border-color:var(--orange);color:white;font-weight:600}
+/* Single-pick cells (time grid): an empty circle that fills in when chosen. */
+.dot.pick::after{content:'';width:9px;height:9px;border-radius:50%;background:transparent;transition:background .15s}
+.dot.pick.sel::after{background:white}
+/* Long aspect names need room to wrap in the time grid header. */
+#timeGrid .grid-head-cell{text-transform:none;letter-spacing:.02em;font-size:.6rem;line-height:1.25}
 .grid-cell.skip{opacity:.18;pointer-events:none}
 
 /* Textarea */
@@ -171,30 +176,19 @@ hr{border:none;border-top:1px solid var(--border-soft);margin:2rem 0}
   <div class="section-label">01 · Context & expectations</div>
 
   <div class="question">
-    <div class="q-text">How did you complete the exercises?</div>
-    <div class="chips" id="completionStyle">
-      <button class="chip" data-g="completionStyle" data-s="1">Together in the same room, at the same time</button>
-      <button class="chip" data-g="completionStyle" data-s="1">Separately, on our own schedule</button>
-      <button class="chip" data-g="completionStyle" data-s="1">Separately but at the same time</button>
-      <button class="chip" data-g="completionStyle" data-s="1">Mix of both</button>
-    </div>
-  </div>
-
-  <div class="question">
-    <div class="q-text">What were you hoping to get out of Attune? <span class="q-sub" style="display:inline;font-style:italic">Pick all that apply</span></div>
+    <div class="q-text">What do you expect to get out of Attune? <span class="q-sub" style="display:inline;font-style:italic">Pick all that apply</span></div>
     <div class="chips" id="expectations">
-      <button class="chip" data-g="expectations">Confirmation we're a good match</button>
-      <button class="chip" data-g="expectations">Specific gaps to address together</button>
-      <button class="chip" data-g="expectations">A shared language for how we operate</button>
+      <button class="chip" data-g="expectations">Confirmation that my partner and I are a good match</button>
+      <button class="chip" data-g="expectations">Specific things to work on together</button>
+      <button class="chip" data-g="expectations">A framework for future conversations</button>
       <button class="chip" data-g="expectations">To learn something new about my partner</button>
       <button class="chip" data-g="expectations">To learn something new about myself</button>
-      <button class="chip" data-g="expectations">A framework for future conversations</button>
       <button class="chip" data-g="expectations">Wasn't sure what to expect</button>
     </div>
   </div>
 
   <div class="question">
-    <div class="q-text">How well did Attune deliver on what you were hoping for?</div>
+    <div class="q-text">How well did Attune deliver on what you were expecting?</div>
     <div class="rating-row" id="expectationMatch">
       <button class="rating-btn" data-g="expectationMatch" data-s="1"><span class="num">1</span>Fell short</button>
       <button class="rating-btn" data-g="expectationMatch" data-s="1"><span class="num">2</span></button>
@@ -211,7 +205,7 @@ hr{border:none;border-top:1px solid var(--border-soft);margin:2rem 0}
   <div class="question">
     <div class="q-text">Which of the following concerns applied to you prior to completing Attune? <span class="q-sub" style="display:inline;font-style:italic">Pick all that apply</span></div>
     <div class="chips" id="concerns">
-      <button class="chip" data-g="concerns">I didn't think the questions would feel real</button>
+      <button class="chip" data-g="concerns">I didn't think the questions would feel important or relevant to us</button>
       <button class="chip" data-g="concerns">I didn't think my partner would engage seriously</button>
       <button class="chip" data-g="concerns">I didn't think the results would say anything useful</button>
       <button class="chip" data-g="concerns">I didn't think it would surface anything we didn't already know</button>
@@ -239,21 +233,6 @@ hr{border:none;border-top:1px solid var(--border-soft);margin:2rem 0}
     <div class="conditional" id="fu-commsOverall">
       <div class="q-text" id="fuq-commsOverall"></div>
       <textarea id="fu_commsOverall" placeholder="Be as specific as you can..."></textarea>
-    </div>
-  </div>
-
-  <div class="question">
-    <div class="q-text">How impactful did it feel overall?</div>
-    <div class="rating-row" id="commsImpact">
-      <button class="rating-btn" data-g="commsImpact" data-s="1"><span class="num">1</span>Didn't move me</button>
-      <button class="rating-btn" data-g="commsImpact" data-s="1"><span class="num">2</span></button>
-      <button class="rating-btn" data-g="commsImpact" data-s="1"><span class="num">3</span>Somewhat</button>
-      <button class="rating-btn" data-g="commsImpact" data-s="1"><span class="num">4</span></button>
-      <button class="rating-btn" data-g="commsImpact" data-s="1"><span class="num">5</span>Genuinely shifted something</button>
-    </div>
-    <div class="conditional" id="fu-commsImpact">
-      <div class="q-text" id="fuq-commsImpact"></div>
-      <textarea id="fu_commsImpact" placeholder="Be as specific as you can..."></textarea>
     </div>
   </div>
 
@@ -307,21 +286,6 @@ hr{border:none;border-top:1px solid var(--border-soft);margin:2rem 0}
   </div>
 
   <div class="question">
-    <div class="q-text">How impactful did it feel overall?</div>
-    <div class="rating-row" id="expImpact">
-      <button class="rating-btn" data-g="expImpact" data-s="1"><span class="num">1</span>Didn't move me</button>
-      <button class="rating-btn" data-g="expImpact" data-s="1"><span class="num">2</span></button>
-      <button class="rating-btn" data-g="expImpact" data-s="1"><span class="num">3</span>Somewhat</button>
-      <button class="rating-btn" data-g="expImpact" data-s="1"><span class="num">4</span></button>
-      <button class="rating-btn" data-g="expImpact" data-s="1"><span class="num">5</span>Genuinely shifted something</button>
-    </div>
-    <div class="conditional" id="fu-expImpact">
-      <div class="q-text" id="fuq-expImpact"></div>
-      <textarea id="fu_expImpact" placeholder="Be as specific as you can..."></textarea>
-    </div>
-  </div>
-
-  <div class="question">
     <div class="q-text">How honestly were you able to answer?</div>
     <div class="rating-row" id="expHonesty">
       <button class="rating-btn" data-g="expHonesty" data-s="1"><span class="num">1</span>Held back a lot</button>
@@ -356,14 +320,10 @@ hr{border:none;border-top:1px solid var(--border-soft);margin:2rem 0}
   <div class="section-label">04 · Overall experience & impact</div>
 
   <div class="question">
-    <div class="q-text">Approximately how long did both exercises take you?</div>
-    <div class="chips" id="timeTaken">
-      <button class="chip" data-g="timeTaken" data-s="1">Under 20 minutes</button>
-      <button class="chip" data-g="timeTaken" data-s="1">20–30 minutes</button>
-      <button class="chip" data-g="timeTaken" data-s="1">30–45 minutes</button>
-      <button class="chip" data-g="timeTaken" data-s="1">45–60 minutes</button>
-      <button class="chip" data-g="timeTaken" data-s="1">Over an hour</button>
-    </div>
+    <div class="q-text">About how long did you spend on each of the following aspects of the Attune experience?</div>
+    <div class="q-sub">Pick one time range per column</div>
+    <div class="grid-wrap" id="timeGrid"></div>
+  </div>
   </div>
 
   <div class="question">
@@ -371,6 +331,12 @@ hr{border:none;border-top:1px solid var(--border-soft);margin:2rem 0}
     <div class="q-sub">1 = poor · 5 = excellent &nbsp;·&nbsp; – = didn't receive or use</div>
     <div class="grid-wrap" id="overallGrid"></div>
     <div id="overallGridLows" class="low-follow"></div>
+  </div>
+
+  <div class="question">
+    <div class="q-text">You completed the core Attune experience. How interested would you be in the following Attune experiences?</div>
+    <div class="q-sub">1 = not at all interested &nbsp;·&nbsp; 5 = very interested</div>
+    <div class="grid-wrap" id="interestGrid"></div>
   </div>
 
   <div class="question">
@@ -441,11 +407,6 @@ hr{border:none;border-top:1px solid var(--border-soft);margin:2rem 0}
     </div>
   </div>
 
-  <div class="question">
-    <div class="q-text">You completed the core Attune experience. How interested would you be in the following Attune experiences?</div>
-    <div class="q-sub">1 = not at all interested &nbsp;·&nbsp; 5 = very interested</div>
-    <div class="grid-wrap" id="interestGrid"></div>
-  </div>
 
   <div class="question">
     <div class="q-text">How would you say Attune's value compares to other relationship-building offerings – therapy, books, retreats, etc.?</div>
@@ -653,26 +614,20 @@ function lowsComplete(gridId) {
 // ── Banded follow-ups (1–2 / 3 / 4–5) ─────────────────────────────────────────
 const BANDS = {
   expectationMatch: ['What was missing or fell short of what you expected?',
-                     'What would have made this a better match for what you were hoping for?',
-                     'What exceeded what you were hoping for?'],
+                     'What would have made this a better match for what you were expecting?',
+                     'What exceeded what you were expecting?'],
   commsOverall:     ['What made it fall short?',
                      'How could the communication exercise have been better?',
                      'What made it great?'],
-  commsImpact:      ['What held back the impact for you?',
-                     'What would have made it more impactful?',
-                     'What made it impactful for you?'],
   commsHonesty:     ['What made it difficult to answer fully honestly?',
                      'What would have helped you answer more openly?',
-                     'What made it easy to answer honestly?'],
+                     null],   // 4-5 gets no follow-up
   expOverall:       ['What made it fall short?',
                      'How could the expectations exercise have been better?',
                      'What made it great?'],
-  expImpact:        ['What held back the impact for you?',
-                     'What would have made it more impactful?',
-                     'What made it impactful for you?'],
   expHonesty:       ['What made it difficult to answer fully honestly?',
                      'What would have helped you answer more openly?',
-                     'What made it easy to answer honestly?'],
+                     null],   // 4-5 gets no follow-up
   shiftCouple:      ['Why not? What could be done differently to provide more insight into how you operate as a couple?',
                      'What could be done differently to create more impact for you?',
                      'Tell us more – what in particular shifted your understanding?'],
@@ -694,7 +649,9 @@ function checkBand(groupId) {
   if (!cond || !qEl) return;
   if (!sel) { cond.classList.remove('show'); return; }
   const v = parseInt(sel.querySelector('.num')?.textContent || sel.textContent);
-  qEl.textContent = BANDS[groupId][bandIndex(v)];
+  const q = BANDS[groupId][bandIndex(v)];
+  if (!q) { cond.classList.remove('show'); return; }   // this band asks nothing
+  qEl.textContent = q;
   cond.classList.add('show');
 }
 
@@ -729,13 +686,57 @@ const EXP_ROWS = ['The responsibility questions', 'Including childhood context',
 // Same reasoning for the two input-style rows.
 const EXP_SKIP = { 0: [1], 1: [1] };
 
-const OVERALL_ROWS = ['Exercise questions', 'Results presentation', 'Couple type experience', 'Detailed feedback pages', 'Workbook', 'Overall flow / UX', 'Time it took'];
+const OVERALL_ROWS = ['Package selection and checkout process', 'Account creation process', 'Exercise questions', 'Results presentation', 'Couple type experience', 'Detailed feedback pages', 'Workbook', 'Overall flow / UX', 'Time it took'];
 const OVERALL_COLS = [
   { label: 'Clarity',              desc: 'How easy was this to navigate?' },
   { label: 'Impact',               desc: 'How much will you think about this going forward in your relationship?' },
   { label: 'Overall Satisfaction', desc: 'How would you rate your feelings toward this aspect of the Attune experience?' },
 ];
-const OVERALL_SKIP = { 5: [1], 6: [1] };
+const OVERALL_SKIP = { 0: [1], 1: [1], 7: [1], 8: [0, 1] };
+
+// ── Time-spent grid ───────────────────────────────────────────────────────────
+// Unlike the rating grids, this one is a single pick per column: each aspect of
+// the experience gets exactly one duration.
+const TIME_ROWS = ['Less than 10 minutes', '10–20 minutes', '20–45 minutes', '45–60 minutes', 'Over 1 hour'];
+const TIME_COLS = ['Package selection, checkout, account creation', 'Completing communication exercise', 'Completing expectations exercise', 'Reviewing your results', 'Exploring the workbook'];
+
+function buildChoiceGrid(containerId, rows, cols) {
+  const wrap = document.getElementById(containerId);
+  if (!wrap) return;
+  const gt = `grid-template-columns: 1.6fr ${cols.map(() => '1fr').join(' ')}`;
+  let html = `<div class="grid-head" style="${gt}">
+    <div class="grid-head-cell"></div>
+    ${cols.map(c => `<div class="grid-head-cell"><span class="gh-label">${c}</span></div>`).join('')}
+  </div>`;
+  rows.forEach((row, ri) => {
+    html += `<div class="grid-row" style="${gt}">
+      <div class="grid-row-label">${row}</div>
+      ${cols.map((_, ci) => `<div class="grid-cell"><div class="dots">
+        <div class="dot pick" data-grid="${containerId}" data-ri="${ri}" data-ci="${ci}" onclick="choiceClick(this)"></div>
+      </div></div>`).join('')}
+    </div>`;
+  });
+  wrap.innerHTML = html;
+}
+
+// One selection per COLUMN, so picking a new cell clears the rest of that column.
+function choiceClick(dot) {
+  const { grid, ci } = dot.dataset;
+  document.querySelectorAll(`.dot[data-grid="${grid}"][data-ci="${ci}"]`).forEach(d => d.classList.remove('sel'));
+  dot.classList.add('sel');
+  updateProgress();
+}
+function choiceGridComplete(gridId, cols) {
+  return cols.every((_, ci) => document.querySelector(`.dot[data-grid="${gridId}"][data-ci="${ci}"].sel`));
+}
+function getChoiceGridData(gridId, rows, cols) {
+  const out = {};
+  cols.forEach((c, ci) => {
+    const sel = document.querySelector(`.dot[data-grid="${gridId}"][data-ci="${ci}"].sel`);
+    out[c] = sel ? rows[parseInt(sel.dataset.ri)] : null;
+  });
+  return out;
+}
 
 const INTEREST_ROWS = ['Relationship Reflection exercise', 'Physical Intimacy Expectations exercise', 'Starting Out Checklist', 'Build a Budget experience'];
 const INTEREST_COLS = [{ label: 'Interest', desc: '' }];
@@ -749,6 +750,7 @@ buildGrid('commsGrid',    COMMS_ROWS,    ASPECT_COLS,  COMMS_SKIP);
 buildGrid('expGrid',      EXP_ROWS,      ASPECT_COLS,  EXP_SKIP);
 buildGrid('overallGrid',  OVERALL_ROWS,  OVERALL_COLS, OVERALL_SKIP);
 buildGrid('interestGrid', INTEREST_ROWS, INTEREST_COLS);
+buildChoiceGrid('timeGrid', TIME_ROWS, TIME_COLS);
 
 // How many answerable cells each grid has — used for "every question required".
 function gridCellCount(gridId) {
@@ -785,32 +787,31 @@ function selCount(g) { return document.querySelectorAll(`[data-g="${g}"].sel`).l
 function txtFilled(id) { const e = document.getElementById(id); return !!(e && e.value.trim().length); }
 function bandFilled(g) {
   if (!selCount(g)) return false;
+  const cond = document.getElementById('fu-' + g);
+  if (cond && !cond.classList.contains('show')) return true;   // this band asks nothing
   return txtFilled('fu_' + g);
 }
 
 const REQUIRED = [
-  ['How you completed the exercises',            () => selCount('completionStyle') > 0],
-  ['What you were hoping to get out of Attune',  () => selCount('expectations') > 0],
+  ['What you expect to get out of Attune',       () => selCount('expectations') > 0],
   ['How well Attune delivered',                  () => bandFilled('expectationMatch')],
   ['Concerns before starting',                   () => selCount('concerns') > 0],
   ['Communication – overall rating',             () => bandFilled('commsOverall')],
-  ['Communication – impact',                     () => bandFilled('commsImpact')],
   ['Communication – honesty',                    () => bandFilled('commsHonesty')],
   ['Communication – rate each aspect',           () => gridComplete('commsGrid') && lowsComplete('commsGrid')],
   ['Questions that felt off',                    () => txtFilled('commsQuestionsFeedback')],
   ['Expectations – overall rating',              () => bandFilled('expOverall')],
-  ['Expectations – impact',                      () => bandFilled('expImpact')],
   ['Expectations – honesty',                     () => bandFilled('expHonesty')],
   ['Expectations – rate each aspect',            () => gridComplete('expGrid') && lowsComplete('expGrid')],
   ['Responsibilities not mentioned',             () => txtFilled('expMissing')],
-  ['How long the exercises took',                () => selCount('timeTaken') > 0],
+  ['Time spent on each part of Attune',          () => choiceGridComplete('timeGrid', TIME_COLS)],
   ['Rate each part of the Attune experience',    () => gridComplete('overallGrid') && lowsComplete('overallGrid')],
+  ['Interest in other Attune experiences',       () => gridComplete('interestGrid')],
   ['Biggest moment of recognition',              () => selCount('ahaMarker') > 0],
   ['Whether it led to a conversation',           () => selCount('convoHappened') > 0],
   ['Shift in understanding as a couple',         () => bandFilled('shiftCouple')],
   ['Shift in understanding of yourself',         () => bandFilled('shiftSelf')],
   ['Likelihood of reviewing your results',       () => bandFilled('returnLikelihood')],
-  ['Interest in other Attune experiences',       () => gridComplete('interestGrid')],
   ['How Attune’s value compares',           () => selCount('valuePct') > 0],
   ['What’s behind that rating',             () => txtFilled('valueWhy')],
   ['What you discovered',                        () => txtFilled('whatDiscovered')],
@@ -882,9 +883,8 @@ function submitForm() {
 
   const data = {
     submitted: new Date().toISOString(),
-    survey_version: 'beta_v4',
+    survey_version: 'beta_v5',
     // Context
-    completionStyle: getSelVals('completionStyle', true),
     expectations: getSelVals('expectations'),
     expectationMatch: getRatingVal('expectationMatch'),
     expectationMatchWhy: valOf('fu_expectationMatch'),
@@ -892,8 +892,6 @@ function submitForm() {
     // Communication
     commsOverall: getRatingVal('commsOverall'),
     commsOverallWhy: valOf('fu_commsOverall'),
-    commsImpact: getRatingVal('commsImpact'),
-    commsImpactWhy: valOf('fu_commsImpact'),
     commsHonesty: getRatingVal('commsHonesty'),
     commsHonestyWhy: valOf('fu_commsHonesty'),
     commsGrid: getGridData('commsGrid'),
@@ -902,15 +900,13 @@ function submitForm() {
     // Expectations
     expOverall: getRatingVal('expOverall'),
     expOverallWhy: valOf('fu_expOverall'),
-    expImpact: getRatingVal('expImpact'),
-    expImpactWhy: valOf('fu_expImpact'),
     expHonesty: getRatingVal('expHonesty'),
     expHonestyWhy: valOf('fu_expHonesty'),
     expGrid: getGridData('expGrid'),
     expGridLows: getLowAnswers('expGrid'),
     expMissing: valOf('expMissing'),
     // Overall
-    timeTaken: getSelVals('timeTaken', true),
+    timeGrid: getChoiceGridData('timeGrid', TIME_ROWS, TIME_COLS),
     overallGrid: getGridData('overallGrid'),
     overallGridLows: getLowAnswers('overallGrid'),
     ahaMarker: getSelVals('ahaMarker', true),
