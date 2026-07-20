@@ -11490,7 +11490,7 @@ const UPSELL_PRODUCTS = {
     price: "$19",
     pricePrint: "$39",
     tagline: "Built from your actual results.",
-    description: "A guided workbook generated from your specific scores, pre-filled with your gap levels, your three communication priorities, and conversation prompts calibrated to where you and your partner diverge most. Comes as a .docx you can fill in together, or as a printed bound copy shipped to you.",
+    description: "A guided workbook generated from your specific scores, pre-filled with your gap levels, your three communication priorities, and conversation prompts calibrated to where you and your partner diverge most. Comes as a .docx you can fill in together, print at home, or read on screen.",
     includes: [
       "Guided exercises for your top gap dimensions",
       "Conversation prompts specific to your pairing",
@@ -11500,7 +11500,8 @@ const UPSELL_PRODUCTS = {
     accentColor: "#E8673A",
     variants: [
       { id: "digital", label: "Digital (.docx)", price: "$19" },
-      { id: "print", label: "Printed & bound", price: "$39" },
+      // Printed & bound is a shipped item — phase 2 only.
+      ...(PHYSICAL_ENABLED ? [{ id: "print", label: "Printed & bound", price: "$39" }] : []),
     ],
     cartParam: "workbook",
   },
@@ -14825,10 +14826,10 @@ export default function App() {
               </div>
 
               {/* Pricing options */}
-              <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: "1rem", marginBottom: "1.75rem" }}>
+              <div style={{ display: "grid", gridTemplateColumns: (isMobile || !PHYSICAL_ENABLED) ? "1fr" : "1fr 1fr", gap: "1rem", marginBottom: "1.75rem" }}>
                 {[
                   { format: "Digital PDF", price: "$19", detail: "Instant delivery · print or read on screen" },
-                  { format: "Printed & Bound", price: "$39", detail: "Ships within 5–7 business days" },
+                  ...(PHYSICAL_ENABLED ? [{ format: "Printed & Bound", price: "$39", detail: "Ships within 5–7 business days" }] : []),
                 ].map(opt => (
                   <div key={opt.format} style={{ background: "white", border: "1.5px solid #E8DDD0", borderRadius: 14, padding: "1.25rem" }}>
                     <div style={{ fontSize: "0.88rem", fontWeight: 600, color: "#0E0B07", marginBottom: "0.35rem", fontFamily: "'DM Sans', sans-serif" }}>{opt.format}</div>

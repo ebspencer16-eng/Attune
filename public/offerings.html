@@ -574,7 +574,7 @@
     <div style="text-align:right;flex-shrink:0;">
       <div style="font-size:.72rem;color:#8C7A68;margin-bottom:.2rem;">Digital PDF</div>
       <div style="font-size:1.2rem;font-weight:800;color:#0E0B07;">$19</div>
-      <div style="font-size:.7rem;color:#8C7A68;margin-top:.5rem;">Printed &amp; bound edition available<br><span style="font-weight:600;color:#0E0B07;">$39 shipped</span></div>
+      <div class="phys-only" style="font-size:.7rem;color:#8C7A68;margin-top:.5rem;">Printed &amp; bound edition available<br><span style="font-weight:600;color:#0E0B07;">$39 shipped</span></div>
     </div>
   </div>
 
@@ -608,7 +608,7 @@
           <p style="font-family:'Playfair Display',Georgia,serif;font-size:1.8rem;font-weight:700;color:var(--ink);line-height:1;">$19</p>
           <p style="font-size:.72rem;color:var(--muted);margin-top:.3rem;font-family:'DM Sans',sans-serif;">Instant delivery · print or read on screen</p>
         </div>
-        <div style="border:1.5px solid var(--stone);border-radius:14px;padding:1.1rem;text-align:center;">
+        <div class="phys-only" style="border:1.5px solid var(--stone);border-radius:14px;padding:1.1rem;text-align:center;">
           <p style="font-size:.6rem;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);font-weight:700;margin-bottom:.35rem;font-family:'DM Sans',sans-serif;">Printed &amp; Bound</p>
           <p style="font-family:'Playfair Display',Georgia,serif;font-size:1.8rem;font-weight:700;color:var(--ink);line-height:1;">$39</p>
           <p style="font-size:.72rem;color:var(--muted);margin-top:.3rem;font-family:'DM Sans',sans-serif;">Ships within 5-7 business days</p>
@@ -1481,6 +1481,8 @@ document.addEventListener('click', function(e) {
     document.querySelectorAll('.pkg-note').forEach(function(e){
       if (/ships|shipping/i.test(e.textContent)) e.textContent = 'Digital · access delivered by email immediately';
     });
+    // Printed workbook is a shipped item — phase 2 only.
+    document.querySelectorAll('.phys-only').forEach(function(e){ e.style.display='none'; });
   }
 })();
 </script>

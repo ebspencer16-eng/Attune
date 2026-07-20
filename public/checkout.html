@@ -508,6 +508,9 @@ if (!LMFT_ENABLED) {
 }
 // forceFmt: honours the physical flag. Every format read routes through this.
 function forceFmt(f) { return PHYSICAL_ENABLED ? (f || 'digital') : 'digital'; }
+// Same for the workbook: a printed copy is a shipped item, so when physical is
+// off any stored 'print' variant is treated (and charged) as digital.
+function forceWbVariant(v) { return PHYSICAL_ENABLED ? (v || 'digital') : 'digital'; }
 
 const ADDON_LMFT = { label: 'LMFT Session (50 min · licensed therapist)', price: 150 };
 const ADDON_REFLECTION = { label: "Relationship Reflection exercise", price: 40 };
@@ -522,7 +525,7 @@ const ADDON_WORKBOOK = {
 // pay the standard add-on price.
 function wbCharge(it) {
   if (!it.addons || !it.addons.workbook) return 0;
-  const print = it.addons.workbookVariant === 'print';
+  const print = forceWbVariant(it.addons.workbookVariant) === 'print';
   // Premium: physical package already includes the printed workbook in its price.
   // Only a digital package upgrading to a printed workbook pays the $20 difference.
   if (it.pkg === 'premium') return (it.format === 'digital' && print) ? 20 : 0;
@@ -530,7 +533,7 @@ function wbCharge(it) {
 }
 // Display label + price for the workbook line on an item.
 function wbLine(it) {
-  const print = it.addons.workbookVariant === 'print';
+  const print = forceWbVariant(it.addons.workbookVariant) === 'print';
   if (it.pkg === 'premium') {
     return { label: print ? 'Personalized Workbook (printed)' : 'Personalized Workbook (included)', price: wbCharge(it) };
   }
@@ -657,7 +660,7 @@ async function refreshTax() {
         items: _items.map(it => ({
           pkgKey:          it.pkg,
           isPhysical:      it.format === 'physical',
-          addonWorkbook:   it.addons.workbook ? (it.addons.workbookVariant || 'digital') : null,
+          addonWorkbook:   it.addons.workbook ? forceWbVariant(it.addons.workbookVariant) : null,
           addonLmft:       !!it.addons.lmft,
           addonReflection: !!it.addons.reflection,
           addonBudget:     !!it.addons.budget,

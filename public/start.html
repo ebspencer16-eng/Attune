@@ -323,7 +323,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;height:58px;background:rgba(
     <div class="addon-desc" style="margin-bottom:.6rem;">Premium includes the personalized workbook. Choose how you'd like it.</div>
     <div class="workbook-variants show" style="display:flex;">
       <button class="wb-var active" id="pwb-digital" onclick="setPremiumWb('digital',event)">Digital PDF</button>
-      <button class="wb-var" id="pwb-print" onclick="setPremiumWb('print',event)">Printed</button>
+      <button class="wb-var phys-only" id="pwb-print" onclick="setPremiumWb('print',event)">Printed</button>
     </div>
   </div>
 
@@ -340,7 +340,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;height:58px;background:rgba(
         <div class="addon-price" id="wb-price">+$19</div>
         <div class="workbook-variants" id="wb-variants">
           <button class="wb-var active" id="wv-digital" onclick="setWbFormat('digital',event)">Digital PDF – $19</button>
-          <button class="wb-var" id="wv-print" onclick="setWbFormat('print',event)">Printed – $39</button>
+          <button class="wb-var phys-only" id="wv-print" onclick="setWbFormat('print',event)">Printed – $39</button>
         </div>
       </div>
     </div>
@@ -803,6 +803,15 @@ document.addEventListener('click',function(e){var menu=document.getElementById('
   if (!F.PHYSICAL_ENABLED) {
     document.querySelectorAll('.format-toggle').forEach(function(e){ e.style.display='none'; });
     document.querySelectorAll('.gift-feat').forEach(function(e){ e.style.display='none'; });
+    // Printed workbook is a shipped item — hide it and lock both workbook
+    // selections to digital so nothing can be added as print.
+    document.querySelectorAll('.phys-only').forEach(function(e){ e.style.display='none'; });
+    if (typeof setWbFormat === 'function') setWbFormat('digital');
+    if (typeof setPremiumWb === 'function') setPremiumWb('digital');
+    var wbv = document.getElementById('wb-variants'); if (wbv) wbv.style.display='none';
+    var pwb = document.querySelector('#premium-wb .workbook-variants'); if (pwb) pwb.style.display='none';
+    var pwbDesc = document.querySelector('#premium-wb .addon-desc');
+    if (pwbDesc) pwbDesc.textContent = 'Premium includes the personalized workbook, delivered digitally.';
   }
   // Sync the displayed prices to the active format on load. Without this the
   // hardcoded markup prices stick, which is how physical pricing survived the

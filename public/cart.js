@@ -78,7 +78,7 @@ function _packageBase(item) {
   return item.format === 'physical' ? p.physicalPrice : p.digitalPrice;
 }
 function _addonUnitPrice(key, item) {
-  if (key === 'workbook') return item.addons.workbookVariant === 'print' ? ADDON_PRICES.workbookPrint : ADDON_PRICES.workbookDigital;
+  if (key === 'workbook') return wbVariant(item) === 'print' ? ADDON_PRICES.workbookPrint : ADDON_PRICES.workbookDigital;
   return ADDON_PRICES[key];
 }
 
@@ -96,13 +96,22 @@ function _newItemId() { return 'i' + Date.now().toString(36) + Math.random().toS
 
 function _defaultAddons() {
   return { workbook:false, workbookVariant:'digital', lmft:false, reflection:false, budget:false, checklist:false, intimacy:false };
+
+// A printed workbook is a shipped item. When physical is off, any stored
+// 'print' variant is treated as digital so nobody is charged $39 for
+// something that can't ship.
+function wbVariant(item) {
+  var v = (item && item.addons && item.addons.workbookVariant) || 'digital';
+  var physical = !!(window.ATTUNE_FLAGS && window.ATTUNE_FLAGS.PHYSICAL_ENABLED);
+  return physical ? v : 'digital';
+}
 }
 
 function _itemPrice(item) {
   const p = CART_PKGS[item.pkg];
   const base = item.format === 'physical' ? p.physicalPrice : p.digitalPrice;
   let add = 0;
-  if (item.addons.workbook)   add += item.addons.workbookVariant === 'print' ? ADDON_PRICES.workbookPrint : ADDON_PRICES.workbookDigital;
+  if (item.addons.workbook)   add += wbVariant(item) === 'print' ? ADDON_PRICES.workbookPrint : ADDON_PRICES.workbookDigital;
   if (item.addons.lmft)       add += ADDON_PRICES.lmft;
   if (item.addons.reflection) add += ADDON_PRICES.reflection;
   if (item.addons.budget)     add += ADDON_PRICES.budget;
@@ -274,7 +283,7 @@ function renderCart() {
       const line = unit * qty;
       const isWb = k === 'workbook';
       const sub = isWb
-        ? (item.addons.workbookVariant === 'print' ? 'Physical \u00b7 printed copy' : 'Digital \u00b7 instant access')
+        ? (wbVariant(item) === 'print' ? 'Physical \u00b7 printed copy' : 'Digital \u00b7 instant access')
         : meta.desc;
       return `
     <div class="cart-item cart-addon-row" data-id="${item.id}" data-addon="${k}">
@@ -283,7 +292,7 @@ function renderCart() {
           <span class="cart-pkg-badge cart-addon-badge">Add-on</span>
           <div class="cart-item-name">${meta.title}</div>
           <div class="cart-item-sub">${sub}</div>
-          ${isWb ? `
+          ${isWb && (window.ATTUNE_FLAGS && window.ATTUNE_FLAGS.PHYSICAL_ENABLED) ? `
             <div class="cart-item-fmt-row">
               <button class="cart-fmt-btn ${item.addons.workbookVariant==='print'?'active':''}" onclick="setItemWorkbookVariant('${item.id}','print',event)">Physical</button>
               <button class="cart-fmt-btn ${item.addons.workbookVariant==='digital'?'active':''}" onclick="setItemWorkbookVariant('${item.id}','digital',event)">Digital</button>
@@ -367,7 +376,7 @@ function goCheckout() {
   const first = _cartItems[0];
   const params = new URLSearchParams({ pkg: first.pkg });
   if (first.format === 'physical') params.set('format', 'physical');
-  if (first.addons.workbook) params.set('addon_workbook', first.addons.workbookVariant);
+  if (first.addons.workbook) params.set('addon_workbook', wbVariant(first));
   if (first.addons.lmft) params.set('addon_lmft', '1');
   if (first.addons.reflection) params.set('addon_reflection', '1');
   if (first.addons.budget) params.set('addon_budget', '1');
