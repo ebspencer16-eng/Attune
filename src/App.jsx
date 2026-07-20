@@ -7535,13 +7535,13 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
   // yours: it stays put.
   const sidebarRef = useRef(null);
   const navFirstMount = useRef(true);
-  useEffect(() => {
-    const el = sidebarRef.current;
-    if (!el) return;
-    const onScroll = () => { _navScrollTop = el.scrollTop; };
-    el.addEventListener("scroll", onScroll, { passive: true });
-    return () => el.removeEventListener("scroll", onScroll);
-  }, []);
+  // True while we are writing scrollTop ourselves, so the resulting scroll
+  // event does not overwrite the very position we are restoring.
+  const navRestoring = useRef(false);
+  // Tracked via the onScroll prop rather than addEventListener: changing pages
+  // can hand us a brand new sidebar node, and a listener bound once on mount
+  // would be left attached to the old one, silently losing the position.
+  const onNavScroll = (e) => { if (!navRestoring.current) _navScrollTop = e.currentTarget.scrollTop; };
   useLayoutEffect(() => {
     const el = sidebarRef.current;
     if (!el) return;
@@ -7558,8 +7558,17 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
         }
       }
     }
-    // Restore, and never fight the user's position afterwards.
-    if (el.scrollTop !== _navScrollTop) el.scrollTop = _navScrollTop;
+    // Restore, and never fight the user's position afterwards. The second pass
+    // runs after paint because on the first pass the new page's nav items may
+    // not have their final height yet, which would clamp scrollTop to 0.
+    const apply = () => {
+      if (!sidebarRef.current) return;
+      navRestoring.current = true;
+      if (sidebarRef.current.scrollTop !== _navScrollTop) sidebarRef.current.scrollTop = _navScrollTop;
+    };
+    apply();
+    const raf = requestAnimationFrame(() => { apply(); navRestoring.current = false; });
+    return () => { cancelAnimationFrame(raf); navRestoring.current = false; };
   });
 
   const go = (sec) => {
@@ -7748,7 +7757,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
       <style>{`@media(max-width:680px){.mobile-tabs{display:block!important}.desktop-sidebar{display:none!important}}`}</style>
       <div style={{ display: "flex", gap: "0", alignItems: "flex-start" }}>
         {/* Sidebar: sticky + its own scroll context so wheel events stay in the nav */}
-        <div className="desktop-sidebar" ref={sidebarRef} style={{
+        <div className="desktop-sidebar" ref={sidebarRef} onScroll={onNavScroll} style={{
           position: "sticky",
           top: 0,
           paddingTop: "1.25rem",
