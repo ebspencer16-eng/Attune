@@ -2169,6 +2169,38 @@ function NavButtons({ onBack, onNext, backDisabled, nextDisabled, nextLabel = "N
 
 // ── DIM TRACK VISUALIZATION ──────────────────────────────────────────────────
 // Bar showing where each partner scored on a 1–5 dimension scale.
+// Same visual language as DimTrackViz, but for tracks whose positions are
+// already percentages (physical intimacy) rather than 1-5 scores.
+function PctTrackViz({ myPct, partPct, userName = "You", partnerName = "Partner" }) {
+  const close = myPct != null && partPct != null && Math.abs(myPct - partPct) < 6;
+  const myIsLeft = (myPct ?? 0) <= (partPct ?? 0);
+  const dots = [
+    { pct: myPct, label: userName, color: "#E8673A", isLeft: myIsLeft, z: 2, dy: close ? (myIsLeft ? -6 : 6) : 0 },
+    { pct: partPct, label: partnerName, color: "#6C7FFF", isLeft: !myIsLeft, z: 1, dy: close ? (myIsLeft ? 6 : -6) : 0 },
+  ].filter(d => d.pct != null);
+  return (
+    <div style={{ margin: "1.25rem 0 0", paddingBottom: "0.25rem", position: "relative" }}>
+      <div style={{ height: 10, background: "rgba(255,255,255,0.18)", borderRadius: 999, position: "relative", overflow: "visible" }}>
+        {dots.map(d => (
+          <div key={d.label} style={{ position: "absolute", top: "50%", left: `${d.pct}%`, transform: `translate(-50%, calc(-50% + ${d.dy}px))`, width: 14, height: 14, borderRadius: "50%", background: d.color, border: "2px solid white", boxShadow: "0 1px 4px rgba(0,0,0,0.25)", zIndex: d.z }} />
+        ))}
+      </div>
+      {/* Outward anchoring keeps long names from colliding when the dots are close. */}
+      <div style={{ position: "relative", height: 20, marginTop: 10 }}>
+        {dots.map(d => (
+          <span key={d.label} style={{
+            position: "absolute", left: `${d.pct}%`,
+            transform: d.isLeft ? "translateX(-100%)" : "translateX(0)",
+            paddingLeft: d.isLeft ? 0 : 4, paddingRight: d.isLeft ? 4 : 0,
+            fontSize: "0.68rem", fontWeight: 600, color: d.color, fontFamily: BFONT,
+            maxWidth: 110, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+          }}>{d.label}</span>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 function DimTrackViz({ myScore = 3, theirScore = 3, color = "#9B5DE5", userName = "You", partnerName = "Partner" }) {
   const pct = v => ((v - 1) / 4) * 100;
   // Dots (14px) only overlap when they sit within ~4% of each other on the
@@ -4586,6 +4618,10 @@ const CAT_WEIGHT = {
 };
 
 // Unique origin context per gap -- avoids repeated phrases (item 12)
+// Expectations pages share one background. The previous values read near-black:
+// the category pages had no bg at all and fell through to the flat #0f0c29.
+const EXP_BG = "linear-gradient(145deg, #211d4d, #413a85, #2e295c)";
+
 function buildOriginNote(g, userName, partnerName, gapIdx) {
   return null; // Origin tracking removed from simplified exercise
 }
@@ -4713,7 +4749,7 @@ function ExpectationsResults({ myAnswers, partnerAnswers, userName, partnerName,
   if (step === 0) {
     return (
       <MaybeNav noSideNav={noSideNav} navItems={expectationsNavItems} currentStep={navCurrentStep} onGo={go} accent="#1B5FE8">
-        <ResultsSlide bg="linear-gradient(145deg, #0f0c29, #302b63, #24243e)">
+        <ResultsSlide bg={EXP_BG}>
           <link href={FONT_URL} rel="stylesheet" />
           <div style={{ color: "white" }}>
             {/* Header */}
@@ -4782,12 +4818,8 @@ function ExpectationsResults({ myAnswers, partnerAnswers, userName, partnerName,
               <div style={{ fontSize: "0.55rem", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.3)", fontFamily: BFONT, fontWeight: 700, marginBottom: "0.5rem" }}>What's in this section</div>
               <div style={{ display: "flex", flexDirection: "column", gap: "0.3rem" }}>
                 {[
-                  ...FIXED_CATS.map((fc, i) => {
-                    const cg = gaps.filter(r => r.catId === fc.id).length;
-                    const ca = aligned.filter(r => r.catId === fc.id).length;
-                    return { label: fc.label, sub: cg === 0 ? `Fully aligned across ${ca} items` : `${cg} to discuss, ${ca} already aligned`, s: `convo-${i}` };
-                  }),
-                  { label: "Expectations Action Plan", sub: "Your discussion guide", s: "action-plan" },
+                  { label: "Detailed category pages", sub: `${FIXED_CATS.length} categories, item by item`, s: "convo-0" },
+                  { label: "Action Plan", sub: "Your discussion guide", s: "action-plan" },
                 ].map(({ label, sub, s }) => (
                   <div key={label} onClick={() => typeof s === "string" ? go(s) : go(s)}
                     style={{ display: "flex", alignItems: "center", gap: "0.75rem", padding: "0.45rem 0.75rem", borderRadius: 8, background: "rgba(255,255,255,0.04)", cursor: "pointer", transition: "all 0.12s", border: "1px solid rgba(255,255,255,0.06)" }}
@@ -4833,7 +4865,7 @@ function ExpectationsResults({ myAnswers, partnerAnswers, userName, partnerName,
 
     return (
       <MaybeNav noSideNav={noSideNav} navItems={expectationsNavItems} currentStep={navCurrentStep} onGo={go} accent="#1B5FE8">
-        <ResultsSlide bg={fc.bg}>
+        <ResultsSlide bg={fc.bg || EXP_BG}>
           <link href={FONT_URL} rel="stylesheet" />
 
           {/* Header */}
@@ -4861,17 +4893,7 @@ function ExpectationsResults({ myAnswers, partnerAnswers, userName, partnerName,
             </p>
           </div>
 
-          {thisCatGaps.length === 0 ? (
-            <div style={{ background: "rgba(16,185,129,0.1)", border: "1.5px solid rgba(16,185,129,0.25)", borderRadius: 14, padding: "1.25rem 1.5rem", display: "flex", alignItems: "center", gap: "0.75rem" }}>
-              <div style={{ width: 28, height: 28, borderRadius: "50%", background: "rgba(16,185,129,0.18)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#10B981" strokeWidth="2.5" strokeLinecap="round"><polyline points="20 6 9 17 4 12"/></svg>
-              </div>
-              <div>
-                <div style={{ fontSize: "0.85rem", fontWeight: 700, color: "#065F46", fontFamily: BFONT }}>Fully aligned here.</div>
-                <div style={{ fontSize: "0.78rem", color: "#047857", fontFamily: BFONT, fontWeight: 300, lineHeight: 1.5 }}>You and {partnerName} are on the same page across all {thisCatAligned.length} items.</div>
-              </div>
-            </div>
-          ) : (() => {
+          {thisCatGaps.length === 0 ? null : (() => {
             const childLabel = (val) => {
               if (!val) return "—";
               if (val === "N/A" || val === "Didn't apply") return "—";
@@ -4928,8 +4950,8 @@ function ExpectationsResults({ myAnswers, partnerAnswers, userName, partnerName,
           })()}
 
           {/* ── Already aligned in this category (7.3) ── */}
-          {thisCatGaps.length > 0 && thisCatAligned.length > 0 && (
-            <div style={{ marginTop: "1rem", background: "rgba(16,185,129,0.07)", border: "1.5px solid rgba(16,185,129,0.3)", borderRadius: 14, overflow: "hidden" }}>
+          {thisCatAligned.length > 0 && (
+            <div style={{ marginTop: thisCatGaps.length > 0 ? "1rem" : 0, background: "rgba(16,185,129,0.07)", border: "1.5px solid rgba(16,185,129,0.3)", borderRadius: 14, overflow: "hidden" }}>
               <div style={{ padding: "0.65rem 1rem", borderBottom: "1px solid rgba(16,185,129,0.2)", background: "rgba(16,185,129,0.1)", display: "flex", alignItems: "center", gap: "0.5rem" }}>
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#10B981" strokeWidth="3" strokeLinecap="round"><polyline points="20 6 9 17 4 12"/></svg>
                 <span style={{ fontSize: "0.62rem", fontWeight: 800, letterSpacing: "0.2em", textTransform: "uppercase", color: "#10B981", fontFamily: BFONT }}>Already aligned</span>
@@ -4944,7 +4966,7 @@ function ExpectationsResults({ myAnswers, partnerAnswers, userName, partnerName,
                 ))}
               </div>
               <div style={{ padding: "0.5rem 1rem", borderTop: "1px solid rgba(16,185,129,0.15)" }}>
-                <span style={{ fontSize: "0.7rem", color: "rgba(16,185,129,0.85)", fontFamily: BFONT, fontWeight: 300 }}>You both expect the same thing here. Nothing to work out.</span>
+                <span style={{ fontSize: "0.7rem", color: "rgba(16,185,129,0.85)", fontFamily: BFONT, fontWeight: 300 }}>{thisCatGaps.length === 0 ? `Fully aligned here. You and ${partnerName} are on the same page across all ${thisCatAligned.length} item${thisCatAligned.length !== 1 ? "s" : ""}.` : "You both expect the same thing here. Nothing to work out."}</span>
               </div>
             </div>
           )}
@@ -4968,7 +4990,7 @@ function ExpectationsResults({ myAnswers, partnerAnswers, userName, partnerName,
 
     return (
       <MaybeNav noSideNav={noSideNav} navItems={expectationsNavItems} currentStep={navCurrentStep} onGo={go} accent="#1B5FE8">
-        <ResultsSlide bg="linear-gradient(145deg, #0f0c29, #302b63, #24243e)">
+        <ResultsSlide bg={EXP_BG}>
           <link href={FONT_URL} rel="stylesheet" />
           <div style={{ color: "white" }}>
             <div style={{ fontSize: "0.65rem", letterSpacing: "0.2em", textTransform: "uppercase", color: "rgba(255,255,255,0.4)", marginBottom: "0.5rem", fontFamily: BFONT }}>Expectations Action Plan</div>
@@ -5058,6 +5080,32 @@ const ADMIRED_NOUN = {
 };
 const admiredNoun = v => (v ? (ADMIRED_NOUN[v] || v) : v);
 const admiredNounLower = v => { const n = admiredNoun(v); return n ? n.toLowerCase() : n; };
+
+// Free-text answers are frequently non-answers: "nothing", "n/a", "nothing
+// comes to mind". Treating those as content produced insights that asserted a
+// problem the person never described. Anything that reads as a non-answer, or
+// is too short to carry meaning, is treated as "not provided".
+const NON_ANSWER = /^(n\/?a|none|nothing|no|nope|idk|i don'?t know|not sure|nothing really|nothing comes to mind|nothing much|can'?t think of (one|any|anything)|nothing i can think of|-+|\.+)$/i;
+// Quoted user words render in italics so they read as the person's own voice
+// rather than as our copy. Splits on the curly quotes that quoted() emits.
+function renderWithQuotes(text) {
+  const parts = String(text || "").split(/(\u201C[^\u201D]*\u201D)/g);
+  return parts.map((part, i) =>
+    part.startsWith("\u201C") && part.endsWith("\u201D")
+      ? <em key={i} style={{ fontStyle: "italic" }}>{part}</em>
+      : <React.Fragment key={i}>{part}</React.Fragment>
+  );
+}
+
+function isSubstantive(v) {
+  if (typeof v !== "string") return false;
+  const t = v.trim().replace(/[.!?]+$/, "");
+  if (t.length < 8) return false;
+  if (NON_ANSWER.test(t)) return false;
+  return true;
+}
+// Quoting a person's own words needs to read as a quote, not as our prose.
+function quoted(v) { return `\u201C${String(v || "").trim().replace(/\s+/g, " ")}\u201D`; }
 
 
 function AnniversaryExercise({ userName, partnerName, onComplete, onBack, partnerPronouns = "" }) {
@@ -6432,15 +6480,25 @@ function deriveAnniversaryInsights(mine, theirs, userName, partnerName, coupleTy
   const seenWords = ["notice","see","understand","get me","gets me","knows","space","pull","curiosity","curious","interest","interested","make me","laugh","appreciat","pay attention","attentiv","present","remember"];
   const myFeelsSeen = seenWords.some(w => myGrateful.includes(w));
   const theirFeelsSeen = seenWords.some(w => theirGrateful.includes(w));
-  if (myFeelsSeen || theirFeelsSeen) {
-    const myQ = mine.a3 ? `"${mine.a3.trim()}"` : "something specific";
-    const theirQ = theirs.a3 ? `"${theirs.a3.trim()}"` : "something specific";
+  // Both quotes have to be real answers before we say "you each".
+  const myA3ok = isSubstantive(mine.a3), theirA3ok = isSubstantive(theirs.a3);
+  if (myFeelsSeen && theirFeelsSeen && myA3ok && theirA3ok) {
     insights.push({
       type: "strength",
       title: "You each feel genuinely seen",
-      body: `What each of you is most grateful for right now speaks to being known, not just liked. ${userName}: ${myQ}. ${partnerName}: ${theirQ}. These are descriptions of how you're actually showing up for each other.`,
+      body: `What each of you is most grateful for right now speaks to being known, not just liked. ${userName}: ${quoted(mine.a3)}. ${partnerName}: ${quoted(theirs.a3)}. These are descriptions of how you're actually showing up for each other.`,
       priority: "Preserve intentionally",
       action: `The things you're each most grateful for are the things most worth protecting. Whatever you're each doing that makes the other feel known, keep doing it deliberately. These are the first things to quietly erode when life gets full.`,
+    });
+  } else if ((myFeelsSeen && myA3ok) || (theirFeelsSeen && theirA3ok)) {
+    const who = (myFeelsSeen && myA3ok) ? userName : partnerName;
+    const text = (myFeelsSeen && myA3ok) ? mine.a3 : theirs.a3;
+    insights.push({
+      type: "strength",
+      title: `${who} named being known, not just liked`,
+      body: `${who} is most grateful for ${quoted(text)}. That is a description of being understood rather than simply appreciated, and it is worth knowing that it lands that way.`,
+      priority: "Keep doing it",
+      action: `Whatever produces that feeling, it is probably something small and repeated rather than grand. Identify it and protect it, because these are the first things to erode when life gets full.`,
     });
   }
 
@@ -6527,37 +6585,60 @@ function deriveAnniversaryInsights(mine, theirs, userName, partnerName, coupleTy
       insights.push({
         type: "strength",
         title: `You admire different things in each other, both real`,
-        body: `${userName} most admires ${partnerName}'s ${admiredNounLower(theirs.a8)}. ${partnerName} most admires ${userName}'s ${admiredNounLower(mine.a8)}. Different qualities, both freely given. This suggests each of you is genuinely being seen for something specific rather than getting generic praise.`,
+        body: `${userName} most admires ${partnerName}'s ${admiredNounLower(mine.a8)}. ${partnerName} most admires ${userName}'s ${admiredNounLower(theirs.a8)}. Different qualities, both freely given. This suggests each of you is genuinely being seen for something specific rather than getting generic praise.`,
         priority: "Make it direct",
-        action: `Say it to each other: "${userName}, I most admire your ${admiredNounLower(mine.a8)} right now." It takes about eight seconds and lands better than you'd think.`,
+        action: `Say it to each other: "${partnerName}, I most admire your ${admiredNounLower(mine.a8)} right now." It takes about eight seconds and lands better than you'd think.`,
         coupleTypeNote: coupleType ? `${ctNote}the ability to name specific admiration rather than general appreciation is a sign of real attunement.` : "",
       });
     }
   }
 
   // --- WHAT SHOULD HAVE GONE DIFFERENTLY (a7) ---
-  if (mine.a7 && theirs.a7) {
-    const stressWords = ["stress","stressed","scared","anxious","worry","worried","pressure"];
-    const communicationWords = ["said","listen","talk","told","quiet","silent","hint","assume"];
-    const bothStress = stressWords.some(w => mine.a7.toLowerCase().includes(w)) || stressWords.some(w => theirs.a7.toLowerCase().includes(w));
-    const bothComm = communicationWords.some(w => mine.a7.toLowerCase().includes(w)) || communicationWords.some(w => theirs.a7.toLowerCase().includes(w));
-    if (bothStress || bothComm) {
-      insights.push({
+  // Only speak for both people when both actually described something. A
+  // non-answer from one partner used to be quoted back as if it were a problem
+  // they had raised.
+  {
+    const mineA7 = isSubstantive(mine.a7) ? mine.a7.trim() : null;
+    const theirsA7 = isSubstantive(theirs.a7) ? theirs.a7.trim() : null;
+    const hits = (t) => {
+      const stressWords = ["stress","stressed","scared","anxious","worry","worried","pressure"];
+      const communicationWords = ["said","listen","talk","told","quiet","silent","hint","assume"];
+      const l = t.toLowerCase();
+      return stressWords.some(w => l.includes(w)) || communicationWords.some(w => l.includes(w));
+    };
+    if (mineA7 && theirsA7) {
+      const bothOnTheme = hits(mineA7) && hits(theirsA7);
+      insights.push(bothOnTheme ? {
         type: "explore",
         title: "You both identified a moment where communication broke down under pressure",
-        body: `You each named a situation where something wasn't fully said or heard, ${mine.a7.split(".")[0].toLowerCase().trim()} (${userName}), and ${theirs.a7.split(".")[0].toLowerCase().trim()} (${partnerName}). Naming these independently, without coordinating, suggests this is a real pattern worth looking at directly.`,
+        body: `${userName} named ${quoted(mineA7)} and ${partnerName} named ${quoted(theirsA7)}. Both point at something not fully said or heard. Landing there independently, without coordinating, suggests it is a real pattern rather than a one-off.`,
+        quotes: [{ name: userName, text: mineA7 }, { name: partnerName, text: theirsA7 }],
         priority: "Have the meta-conversation",
         action: `Don't relitigate the specific situation, instead, talk about the pattern. "When things get hard between us, what does each of us actually need in the first hour?" Getting to that agreement before the next hard moment changes how it plays out.`,
         coupleTypeNote: coupleType ? `${ctNote}understanding your default stress responses is one of the highest-leverage things you can do together.` : "",
-      });
-    } else {
-      insights.push({
+      } : {
         type: "explore",
         title: "You each identified something you wish had gone differently",
-        body: `${userName} named: "${mine.a7.trim()}" ${partnerName} named: "${theirs.a7.trim()}" These don't have to match to be useful. The fact that both of you can identify something shows self-awareness, which is the first requirement for handling it better next time.`,
+        body: `${userName} named ${quoted(mineA7)} and ${partnerName} named ${quoted(theirsA7)}. These don't have to match to be useful. The fact that both of you can identify something shows self-awareness, which is the first requirement for handling it better next time.`,
+        quotes: [{ name: userName, text: mineA7 }, { name: partnerName, text: theirsA7 }],
         priority: "Talk about it directly",
         action: `Pick one of these to talk about. Not to assign blame, to understand what each person was feeling in that moment that the other person didn't know. "When that happened, I was feeling X and I didn't say it because Y." That's the whole conversation.`,
         coupleTypeNote: coupleType ? `${ctNote}naming what should have gone differently is more useful than relitigating what actually happened.` : "",
+      });
+    } else if (mineA7 || theirsA7) {
+      // One person had something in mind and the other didn't. That asymmetry is
+      // the finding, and it is stated as such rather than invented into a shared pattern.
+      const who = mineA7 ? userName : partnerName;
+      const other = mineA7 ? partnerName : userName;
+      const text = mineA7 || theirsA7;
+      insights.push({
+        type: "explore",
+        title: `Only one of you had a moment in mind`,
+        body: `${who} named ${quoted(text)}. ${other} didn't have something that came to mind. That difference is worth noticing on its own: it can mean the moment landed harder for one of you, or simply that you were tracking different things. It does not mean either answer is wrong.`,
+        quotes: [{ name: who, text }],
+        priority: "Compare notes",
+        action: `${other}, ask ${who} to walk through it, not to defend anything, just to hear what it was like from the inside. "Tell me what that was like for you" is the whole opener.`,
+        coupleTypeNote: coupleType ? `${ctNote}one partner carrying a moment the other didn't register is common, and worth surfacing rather than assuming.` : "",
       });
     }
   }
@@ -6638,7 +6719,7 @@ function InsightCardList({ insights = [] }) {
               </div>
             </div>
             <div style={{ padding: "1.1rem 1.25rem" }}>
-              <p style={{ fontSize: "0.84rem", color: C.text, fontFamily: BFONT, fontWeight: 300, lineHeight: 1.75, marginBottom: "1rem" }}>{ins.body}</p>
+              <p style={{ fontSize: "0.84rem", color: C.text, fontFamily: BFONT, fontWeight: 300, lineHeight: 1.75, marginBottom: "1rem" }}>{renderWithQuotes(ins.body)}</p>
               <div style={{ background: "#F9F7F4", borderRadius: 10, padding: "0.85rem 1rem", borderLeft: `3px solid ${col.dot}` }}>
                 <div style={{ fontSize: "0.58rem", fontWeight: 700, color: col.label, textTransform: "uppercase", letterSpacing: "0.1em", fontFamily: BFONT, marginBottom: "0.4rem" }}>{ins.priority}</div>
                 <p style={{ fontSize: "0.8rem", color: C.text, fontFamily: BFONT, fontWeight: 400, lineHeight: 1.7, margin: 0 }}>{ins.action}</p>
@@ -7651,7 +7732,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
               } else { go(sec.id); }
             }} data-nav-active={section === sec.id ? "true" : undefined} style={{ width: "100%", background: (section === sec.id) ? color + "15" : "transparent", border: "none", borderRadius: 8, padding: "0.5rem 0.65rem", display: "flex", alignItems: "center", justifyContent: "space-between", cursor: "pointer", fontFamily: BFONT, transition: "background .15s" }}>
               <span style={{ fontSize: "0.75rem", fontWeight: isActive ? 700 : 500, color: isActive ? color : "#8C7A68" }}>{sec.icon && <span style={{ marginRight: "0.4rem", fontSize: "0.65rem", opacity: 0.7 }}>{sec.icon}</span>}{sec.label}</span>
-              {sec.children && <span style={{ fontSize: "0.65rem", color: "#8C7A68", opacity: 0.6 }}>{isExpanded ? "▾" : "▸"}</span>}
+              {sec.children && <span style={{ fontSize: "0.95rem", lineHeight: 1, color: "#8C7A68", opacity: 0.85 }}>{isExpanded ? "▾" : "▸"}</span>}
             </button>
             {sec.children && isExpanded && (
               <div style={{ paddingLeft: "0.75rem", display: "flex", flexDirection: "column", gap: "0.08rem", marginBottom: "0.25rem" }}>
@@ -8300,16 +8381,6 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
                   ? `You're both feeling ${overallLabel.toLowerCase()}. A shared read on where you are.`
                   : `${userName} says ${(overallQ?.scaleLabels[myOverall] || "really good").toLowerCase()}. ${partnerName} says ${(overallQ?.scaleLabels[theirOverall] || "better than ever").toLowerCase()}. Both worth understanding.`}
               </p>
-              <div style={{ display: "flex", gap: "1rem", marginBottom: "1.25rem" }}>
-                <div style={{ display: "flex", alignItems: "center", gap: "0.4rem" }}>
-                  <div style={{ width: 7, height: 7, borderRadius: "50%", background: "#10b981" }} />
-                  <span style={{ fontSize: "0.75rem", color: "rgba(255,255,255,0.8)", fontFamily: BFONT }}>{strengths} strength{strengths !== 1 ? "s" : ""}</span>
-                </div>
-                <div style={{ display: "flex", alignItems: "center", gap: "0.4rem" }}>
-                  <div style={{ width: 7, height: 7, borderRadius: "50%", background: "#F59E0B" }} />
-                  <span style={{ fontSize: "0.75rem", color: "rgba(255,255,255,0.8)", fontFamily: BFONT }}>{explores} area{explores !== 1 ? "s" : ""} to explore</span>
-                </div>
-              </div>
 
               {/* How you feel right now — scale questions (8.2) */}
               <div style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 14, padding: "1.1rem 1.25rem", marginBottom: "1rem" }}>
@@ -8743,18 +8814,13 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
 
             {/* Track */}
             <div style={{ background: "rgba(255,255,255,0.12)", borderRadius: 14, padding: "1.25rem 1.5rem", marginBottom: "1rem", border: "1px solid rgba(255,255,255,0.2)" }}>
-              <div style={{ display: "flex", justifyContent: "flex-end", gap: "0.85rem", marginBottom: "0.85rem" }}>
-                <span style={{ display: "flex", alignItems: "center", gap: "0.35rem", fontSize: "0.68rem", color: "rgba(255,255,255,0.6)", fontFamily: BFONT }}><span style={{ width: 9, height: 9, borderRadius: "50%", background: "#E8673A" }} />{userName}</span>
-                <span style={{ display: "flex", alignItems: "center", gap: "0.35rem", fontSize: "0.68rem", color: "rgba(255,255,255,0.6)", fontFamily: BFONT }}><span style={{ width: 9, height: 9, borderRadius: "50%", background: "#6C7FFF" }} />{partnerName}</span>
-              </div>
-              <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "0.85rem" }}>
+              {/* Names sit under their own dot, same as the communication pages,
+                  so there is no key to cross-reference. */}
+              <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "0.1rem" }}>
                 <span style={{ fontSize: "0.7rem", fontWeight: 600, color: "rgba(255,255,255,0.85)", fontFamily: BFONT }}>{d.poles?.[0]}</span>
                 <span style={{ fontSize: "0.7rem", fontWeight: 600, color: "rgba(255,255,255,0.85)", fontFamily: BFONT }}>{d.poles?.[1]}</span>
               </div>
-              <div style={{ position: "relative", height: 10, background: "rgba(255,255,255,0.18)", borderRadius: 999, marginBottom: "0.25rem", overflow: "visible" }}>
-                {myPct != null && <div style={{ position: "absolute", top: "50%", transform: "translateY(-50%)", left: `${myPct}%`, width: 14, height: 14, borderRadius: "50%", background: "#E8673A", border: "2px solid white", boxShadow: "0 1px 4px rgba(0,0,0,0.25)", marginLeft: -7, zIndex: 2 }} />}
-                {partPct != null && <div style={{ position: "absolute", top: "50%", transform: "translateY(-50%)", left: `${partPct}%`, width: 14, height: 14, borderRadius: "50%", background: "#6C7FFF", border: "2px solid white", boxShadow: "0 1px 4px rgba(0,0,0,0.25)", marginLeft: -7, zIndex: 1 }} />}
-              </div>
+              <PctTrackViz myPct={myPct} partPct={partPct} userName={userName} partnerName={partnerName} />
             </div>
 
             {/* Talk about it / one-partner-skipped (the skip variant stays intact) */}
