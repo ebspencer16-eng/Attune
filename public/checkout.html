@@ -884,6 +884,10 @@ function renderItemsStep() {
   // Hide the global Step 1 (self/gift toggle) when we have per-item intent
   const step1 = document.getElementById('step1Card');
   if (step1) step1.style.display = 'none';
+  // Step 1 is hidden here, so renumber the remaining steps to 1 and 2 rather
+  // than leaving the customer looking at a checkout that starts at "2".
+  const _n2 = document.getElementById('num2'); if (_n2) _n2.textContent = '1';
+  const _n3 = document.getElementById('num3'); if (_n3) _n3.textContent = '2';
 
   // Title based on cart shape
   const titleEl = document.getElementById('namesTitle');

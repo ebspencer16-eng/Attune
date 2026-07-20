@@ -513,6 +513,9 @@ function selectPkg(id) {
 function setAddonIncluded(id, included) {
   const el = document.getElementById(id);
   if (!el) return;
+  // Never re-show a surface that a launch flag has switched off. Without this,
+  // selecting a package un-hides the LMFT add-on even when LMFT_ENABLED=false.
+  if (id === 'addon-lmft' && !START_LMFT_ENABLED) { el.style.display = 'none'; el.classList.remove('selected'); return; }
   // Fully hide add-ons already included in the package rather than dimming.
   // The user can still see what's in the package via the package tile itself.
   el.style.display = included ? 'none' : '';
