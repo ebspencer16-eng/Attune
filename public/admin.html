@@ -1620,8 +1620,6 @@ window.adminAuthHeaders = function(extra){
           <div class="chart-card-sub">Free text · required question · most valuable signal</div>
           <div style="display:flex;gap:.5rem;margin-top:.5rem;">
             <button class="tab active" onclick="setFeedbackTab(this,'fb-discovered')" style="font-size:.72rem;padding:.3rem .8rem;border:1px solid var(--border);border-radius:6px;background:var(--surface);cursor:pointer;">All</button>
-            <button class="tab" onclick="setFeedbackTab(this,'fb-negative')" style="font-size:.72rem;padding:.3rem .8rem;border:1px solid var(--border);border-radius:6px;background:transparent;cursor:pointer;">Negative</button>
-            <button class="tab" onclick="setFeedbackTab(this,'fb-positive')" style="font-size:.72rem;padding:.3rem .8rem;border:1px solid var(--border);border-radius:6px;background:transparent;cursor:pointer;">Positive</button>
             <button class="tab" onclick="setFeedbackTab(this,'fb-testimonials')" style="font-size:.72rem;padding:.3rem .8rem;border:1px solid var(--border);border-radius:6px;background:transparent;cursor:pointer;">Testimonials</button>
             <button class="tab" onclick="setFeedbackTab(this,'fb-detractors')" style="font-size:.72rem;padding:.3rem .8rem;border:1px solid var(--border);border-radius:6px;background:transparent;cursor:pointer;">Detractor why</button>
           </div>
@@ -1629,8 +1627,6 @@ window.adminAuthHeaders = function(extra){
         <div id="fb-discovered" style="display:flex;flex-direction:column;gap:.75rem;">
           <div style="color:var(--muted);font-size:.78rem;">Loading…</div>
         </div>
-        <div id="fb-negative" style="display:none;flex-direction:column;gap:.75rem;"></div>
-        <div id="fb-positive" style="display:none;flex-direction:column;gap:.75rem;"></div>
         <div id="fb-testimonials" style="display:none;flex-direction:column;gap:.75rem;"></div>
         <div id="fb-detractors" style="display:none;flex-direction:column;gap:.75rem;"></div>
       </div>
@@ -2350,7 +2346,7 @@ function setFeedbackTab(el, targetId) {
   const card = el.closest('.chart-card');
   card.querySelectorAll('.tab').forEach(t => { t.style.background='transparent'; t.style.fontWeight='400'; });
   el.style.background = 'var(--surface)'; el.style.fontWeight = '600';
-  ['fb-discovered','fb-negative','fb-positive','fb-testimonials','fb-detractors'].forEach(id => {
+  ['fb-discovered','fb-testimonials','fb-detractors'].forEach(id => {
     const el2 = document.getElementById(id);
     if (el2) el2.style.display = id === targetId ? 'flex' : 'none';
   });
@@ -2503,14 +2499,6 @@ async function loadFeedbackData() {
       {text:"I thought we were pretty well-aligned. Turns out we had completely different expectations about career sacrifice. Neither of us had ever said it out loud.",name:"Marcus T.",nps:8},
       {text:"Honestly the childhood context piece caught me off guard. I hadn't connected my expectations about household labor to how I grew up until I saw it laid out.",name:"Anonymous",nps:7},
     ],
-    negative: [
-      {text:"The expectations section felt repetitive in places. A few of the responsibilities categories overlapped and I wasn't sure which to put things in.",name:"Beta tester",nps:6},
-      {text:"The workbook arrived slightly damaged – packaging could be better. The content inside was really good though.",name:"Anonymous",nps:7},
-    ],
-    positive: [
-      {text:"The independence piece was the thing I was most skeptical about and it turned out to be the most important. Answering honestly without knowing what my partner said changed everything.",name:"Chris R.",nps:10},
-      {text:"The results are beautiful. I was expecting something clinical and it felt more like a real document about us.",name:"Leila A.",nps:9},
-    ],
     testimonials: [
       {text:"I'd tell them: do it before a major decision. We did it three months before our wedding and I genuinely think we're going into it more clear-eyed than most couples.",name:"Rachel & Tom",nps:10,consent:"Yes – use my words and first name on the reviews section"},
       {text:"It's like getting a translation of your partner. Not fixing anything, just finally being able to read each other.",name:"Dev M.",nps:9,consent:"Yes – use my words and first name on the reviews section"},
@@ -2627,8 +2615,6 @@ async function loadFeedbackData() {
   // Open text feeds
   const renderFeed = (items) => items.map(i => renderQuoteCard(i.text, i.name, i.nps)).join('');
   document.getElementById('fb-discovered').innerHTML = renderFeed(SIM.discovered);
-  document.getElementById('fb-negative').innerHTML = renderFeed(SIM.negative);
-  document.getElementById('fb-positive').innerHTML = renderFeed(SIM.positive);
   document.getElementById('fb-testimonials').innerHTML = SIM.testimonials.map(i =>
     renderQuoteCard(i.text, i.name + ' · ' + i.consent, i.nps, '#10B981')
   ).join('');
@@ -4488,8 +4474,6 @@ const SURVEY_QUESTIONS = [
   { id: 'nps',              label: 'NPS (0–10)',                         type: 'scale', min: 0, max: 10 },
   // Free text (summary stats only)
   { id: 'whatDiscovered',   label: 'What they discovered',              type: 'text' },
-  { id: 'negative',         label: 'Negative / fell flat',              type: 'text' },
-  { id: 'positive',         label: 'Particularly good',                 type: 'text' },
   { id: 'wishKnew',         label: "Wish they'd known before",         type: 'text' },
   { id: 'testimonial',      label: 'Testimonial text',                  type: 'text' },
 ];
@@ -4537,8 +4521,6 @@ function generateSimResponses(n = 47) {
       concerns: pick(concernOpts),
       testimonialConsent: pick(consentOpts),
       whatDiscovered: pick(discoveries),
-      negative: Math.random() > 0.5 ? 'Some friction in the expectations section.' : '',
-      positive: Math.random() > 0.4 ? 'The results presentation was beautiful and clear.' : '',
       wishKnew: Math.random() > 0.6 ? 'That it would take more than 30 minutes.' : '',
       testimonial: Math.random() > 0.5 ? "I'd tell any couple to do this before a major decision." : '',
     });

@@ -439,26 +439,11 @@ hr{border:none;border-top:1px solid var(--border-soft);margin:2rem 0}
   </div>
 
   <div class="question">
-    <div class="q-text">Was there anything about the experience that felt negative or fell flat?</div>
-    <div class="q-sub">Be as honest as you want. If nothing, say so.</div>
-    <textarea id="negative" placeholder="Anything that didn't work, felt off, or disappointed you..."></textarea>
-  </div>
-
-  <div class="question">
-    <div class="q-text">Was there anything that stood out as particularly good?</div>
-    <textarea id="positive" placeholder="What worked really well, what surprised you in a good way..."></textarea>
-  </div>
-
-  <div class="question">
     <div class="q-text">Is there anything you wish you'd known before doing Attune – to be more prepared, or more excited?</div>
     <div class="q-sub">This helps us with how we explain Attune to new couples.</div>
     <textarea id="wishKnew" placeholder="Something about the process, the format, what to expect..."></textarea>
   </div>
 
-  <div class="question">
-    <div class="q-text">Anything else you want us to know?</div>
-    <textarea id="anythingElse" placeholder="Open floor..."></textarea>
-  </div>
 </div>
 
 <!-- ─────────────────────────────────────────────────────
@@ -781,7 +766,7 @@ document.querySelectorAll('.chip, .rating-btn').forEach(btn => {
 
 // ── Required questions ────────────────────────────────────────────────────────
 // Every question must be answered. Each entry: [label, isComplete()].
-const TEXT_REQUIRED = ['commsQuestionsFeedback','expMissing','valueWhy','whatDiscovered','negative','positive','wishKnew','anythingElse','testimonial'];
+const TEXT_REQUIRED = ['commsQuestionsFeedback','expMissing','valueWhy','whatDiscovered','wishKnew','testimonial'];
 
 function selCount(g) { return document.querySelectorAll(`[data-g="${g}"].sel`).length; }
 function txtFilled(id) { const e = document.getElementById(id); return !!(e && e.value.trim().length); }
@@ -815,10 +800,7 @@ const REQUIRED = [
   ['How Attune’s value compares',           () => selCount('valuePct') > 0],
   ['What’s behind that rating',             () => txtFilled('valueWhy')],
   ['What you discovered',                        () => txtFilled('whatDiscovered')],
-  ['Anything negative or flat',                  () => txtFilled('negative')],
-  ['Anything particularly good',                 () => txtFilled('positive')],
   ['Anything you wish you’d known',         () => txtFilled('wishKnew')],
-  ['Anything else',                              () => txtFilled('anythingElse')],
   ['What you’d tell a close friend',        () => txtFilled('testimonial')],
   ['Permission to use your words',               () => consentComplete()],
   ['How likely you are to recommend Attune',     () => selCount('nps') > 0 && npsFollowOk()],
@@ -922,10 +904,7 @@ function submitForm() {
     valueWhy: valOf('valueWhy'),
     // Open
     whatDiscovered: valOf('whatDiscovered'),
-    negative: valOf('negative'),
-    positive: valOf('positive'),
     wishKnew: valOf('wishKnew'),
-    anythingElse: valOf('anythingElse'),
     // Word + NPS
     testimonial: valOf('testimonial'),
     testimonialConsent: getSelVals('testimonialConsent', true),
