@@ -1422,7 +1422,7 @@ window.adminAuthHeaders = function(extra){
     <div class="topbar">
       <div>
         <div class="topbar-title">Beta Feedback</div>
-        <div class="topbar-sub">Beta survey v3 responses – benchmarkable metrics, grid scores, and open text</div>
+        <div class="topbar-sub">Beta survey v5 responses – benchmarkable metrics, grid scores, and open text</div>
       </div>
       <div class="topbar-right">
         <div class="date-badge" id="fb-last-updated">Loading…</div>
@@ -1439,7 +1439,7 @@ window.adminAuthHeaders = function(extra){
 
     <div class="data-notice">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#34D399" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-      <p><strong>Beta survey v3.</strong> Requires <code>KV_REST_API_URL</code> + <code>KV_REST_API_TOKEN</code> env vars. Without them, responses are email-only and this page shows simulated data.</p>
+      <p><strong>Beta survey v5.</strong> Real responses are read from Supabase <code>feedback_submissions</code>. Charts below fall back to simulated data until responses arrive, and switch over automatically once they do. The response table at the top always shows real submissions only.</p>
     </div>
 
     <!-- Top KPIs: benchmarkable metrics -->
@@ -2420,7 +2420,7 @@ async function loadFeedbackData() {
     } catch(e) { console.warn('[admin] feedback load failed:', e); }
   }
 
-  // ── Simulated data matching beta survey v3 ────────
+  // ── Simulated data, replaced by real responses once any exist ────────
   const SIM = {
     surveys: 47,
     nps: 72,
