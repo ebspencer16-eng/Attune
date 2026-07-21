@@ -32,6 +32,121 @@ export const config = { runtime: 'edge' };
 
 import { createClient } from '@supabase/supabase-js';
 import { checkAdminAuth } from './_lib/admin-auth.js';
+import { RESPONSIBILITY_CATEGORIES } from './_questions.js';
+
+// ── Response aggregates ──────────────────────────────────────────────────────
+// The Responses page charts used to be hardcoded zero arrays: the raw answers
+// were fetched here purely to count them, then discarded. These helpers turn
+// them into aggregates. Raw answers never leave the server, which keeps the
+// "anonymized, UUID only" guarantee on the dashboard intact.
+
+// Mirrors calcDimScores in src/App.jsx. lv5's a/b display order is reversed
+// relative to its dimension orientation, so its raw value is flipped.
+const DIM_ITEMS = {
+  energy:     ['en4','en6'],
+  expression: ['ex6','ex7','ex8','ex9','ex10'],
+  love:       ['lv1','lv2','lv5'],
+  bids:       ['bd1','bd3','bd4'],
+  needs:      ['nd1','nd5'],
+  conflict:   ['cf1','cf2'],
+  stress:     ['st1'],
+  repair:     ['rp2','rp3','rp6'],
+  feedback:   ['fb5'],
+  listening:  ['ls1'],
+};
+const FLIPPED = new Set(['lv5']);
+
+function calcDimScores(answers) {
+  if (!answers || typeof answers !== 'object') return null;
+  const out = {};
+  let answeredAny = false;
+  for (const [dim, keys] of Object.entries(DIM_ITEMS)) {
+    const vals = keys.map(k => {
+      const raw = answers[k];
+      if (raw == null || isNaN(raw)) return null;
+      return FLIPPED.has(k) ? (6 - Number(raw)) : Number(raw);
+    }).filter(v => v != null);
+    if (vals.length) answeredAny = true;
+    out[dim] = vals.length ? vals.reduce((a, b) => a + b, 0) / vals.length : null;
+  }
+  return answeredAny ? out : null;
+}
+
+// Alignment = how close two partners sit on a 1-5 dimension, as a percentage.
+// A 0 gap is 100%, the maximum 4-point gap is 0%.
+const alignPct = (a, b) => Math.round((1 - Math.abs(a - b) / 4) * 100);
+
+function buildResponseAggregates(profiles, sessions) {
+  // Pair each profile with its partner. partner_sessions rows are keyed by
+  // invite_code, which is how an invited partner's answers are stored.
+  const byInvite = new Map();
+  (sessions || []).forEach(s => { if (s.invite_code) byInvite.set(s.invite_code, s); });
+  const byId = new Map();
+  (profiles || []).forEach(p => byId.set(p.id, p));
+
+  const seen = new Set();
+  const pairs = [];
+  (profiles || []).forEach(p => {
+    if (seen.has(p.id)) return;
+    let partner = null;
+    if (p.partner_profile_id && byId.has(p.partner_profile_id)) partner = byId.get(p.partner_profile_id);
+    else if (p.invite_code && byInvite.has(p.invite_code)) partner = byInvite.get(p.invite_code);
+    if (!partner) return;
+    seen.add(p.id);
+    if (partner.id) seen.add(partner.id);
+    pairs.push([p, partner]);
+  });
+
+  // ── Communication: average alignment per dimension ──
+  const dimKeys = Object.keys(DIM_ITEMS);
+  const dimTotals = Object.fromEntries(dimKeys.map(d => [d, []]));
+  pairs.forEach(([a, b]) => {
+    const sa = calcDimScores(a.ex1_answers), sb = calcDimScores(b.ex1_answers);
+    if (!sa || !sb) return;
+    dimKeys.forEach(d => {
+      if (sa[d] == null || sb[d] == null) return;
+      dimTotals[d].push(alignPct(sa[d], sb[d]));
+    });
+  });
+  const dimScores = dimKeys.map(d => {
+    const v = dimTotals[d];
+    return v.length ? Math.round(v.reduce((x, y) => x + y, 0) / v.length) : 0;
+  });
+
+  // ── Expectations: percent of items both partners answered identically ──
+  const catAgree = {}, catTotal = {};
+  RESPONSIBILITY_CATEGORIES.forEach(c => { catAgree[c.id] = 0; catTotal[c.id] = 0; });
+  pairs.forEach(([a, b]) => {
+    const ra = a.ex2_answers?.responsibilities, rb = b.ex2_answers?.responsibilities;
+    if (!ra || !rb) return;
+    RESPONSIBILITY_CATEGORIES.forEach(cat => {
+      cat.items.forEach(item => {
+        const k = cat.id + '__' + item;
+        if (ra[k] == null || rb[k] == null) return;
+        catTotal[cat.id]++;
+        if (ra[k] === rb[k]) catAgree[cat.id]++;
+      });
+    });
+  });
+  const expAlign = RESPONSIBILITY_CATEGORIES.map(c =>
+    catTotal[c.id] ? Math.round(100 * catAgree[c.id] / catTotal[c.id]) : 0);
+
+  // ── Relationship feel: distribution of the reflection a0 answer (index 0-4) ──
+  const feel = [0, 0, 0, 0, 0];
+  (profiles || []).forEach(p => {
+    const v = p.ex3_answers?.a0;
+    if (Number.isInteger(v) && v >= 0 && v <= 4) feel[v]++;
+  });
+
+  return {
+    dimLabels: dimKeys,
+    dimScores,
+    expLabels: RESPONSIBILITY_CATEGORIES.map(c => c.label),
+    expAlign,
+    relationshipFeel: feel,
+    pairs: pairs.length,
+  };
+}
 
 function json(obj, status = 200) {
   return new Response(JSON.stringify(obj), {
@@ -60,7 +175,7 @@ export default async function handler(req) {
       admin.from('beta_codes').select('*').order('code', { ascending: true }),
       admin.from('lmft_requests').select('*').order('created_at', { ascending: false }).limit(200),
       admin.from('feedback_submissions').select('*').order('submitted_at', { ascending: false }).limit(2000),
-      admin.from('profiles').select('id, partner_profile_id, invite_code, age_range, gender, pronouns, partner_pronouns, relationship_status, relationship_length, children, signup_source, ex1_answers, ex2_answers'),
+      admin.from('profiles').select('id, partner_profile_id, invite_code, age_range, gender, pronouns, partner_pronouns, relationship_status, relationship_length, children, signup_source, ex1_answers, ex2_answers, ex3_answers'),
       admin.from('partner_sessions').select('invite_code, ex1_answers, ex2_answers'),
     ]);
 
@@ -91,8 +206,11 @@ export default async function handler(req) {
     const invitedTotal = profiles.filter(p => p.invite_code).length;
     const completedCouples = (psQ.data || []).filter(s => hasAnswers(s.ex1_answers) && hasAnswers(s.ex2_answers)).length;
 
+    const responses = buildResponseAggregates(profiles, psQ.data || []);
+
     return json({
       ok: true,
+      responses,
       orders: ordersQ.data || [],
       beta_codes: codesQ.data || [],
       lmft_requests: lmftQ.data || [],

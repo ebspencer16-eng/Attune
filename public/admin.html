@@ -519,6 +519,7 @@
         <div class="topbar-title">Responses</div>
         <div class="topbar-sub">Exercise completion and alignment patterns, no individual responses shown</div>
       </div>
+      <div id="responses-sample-note" style="font-size:.72rem;color:var(--muted);white-space:nowrap">No completed couples yet</div>
     </div>
     <div class="tabs">
       <div class="tab active" onclick="setTab(this,'resp-comm')">Communication</div>
@@ -2678,9 +2679,11 @@ const ageData = {labels:['18–24','25–34','35–44','45–54','55+'],data:[0,
 const genderData = {labels:['Woman','Man','Non-binary','Other'],data:[0,0,0,0]};
 const relStatusData = {labels:['Dating','Engaged','Married','Remarried','Partnership'],data:[0,0,0,0,0]};
 const childrenData = {labels:['None','1','2','3+','Expecting'],data:[0,0,0,0,0]};
-const dimScores = {labels:['Energy','Expression','Needs','Bids','Listening','Conflict','Repair','Love','Stress','Feedback'],data:[0,0,0,0,0,0,0,0,0,0]};
+let dimScores = {labels:['Energy','Expression','Needs','Bids','Listening','Conflict','Repair','Love','Stress','Feedback'],data:[0,0,0,0,0,0,0,0,0,0]};
 const commTypes = [{l:'Balanced pair',v:0},{l:'Expressive + Reserved',v:0},{l:'Both expressive',v:0},{l:'Thinker + Feeler',v:0},{l:'Planner + Spontaneous',v:0},{l:'Other',v:0}];
-const expAlign = {labels:['Household','Financial','Career','Extended family','Emotional'],data:[0,0,0,0,0]};
+let expAlign = {labels:['Household','Financial','Career','Extended family','Emotional'],data:[0,0,0,0,0]};
+let relFeel = [0,0,0,0,0];
+let responsePairs = 0;
 const expGaps = [{l:'Children',v:0},{l:'Finances',v:0},{l:'Where you live',v:0},{l:'Conflict',v:0},{l:'Repair',v:0}];
 const storyGaps = [{l:'Fun & lightness',v:0},{l:'Communication ease',v:0},{l:'Day-to-day connection',v:0},{l:'Overall feel',v:0}];
 let funnelData = [0,0,0,0];
@@ -3101,6 +3104,7 @@ function updateStatsFromRealData(orders) {
   loadRealDemographics().catch(() => {});
   // Real package-mix trend from orders table, grouped by pkg_key + month
   loadRealPackageTrend(orders).catch(() => {});
+  loadRealResponses().catch(() => {});
   // Real satisfaction analytics from feedback_submissions (NPS + ratings)
   loadRealAnalytics().catch(() => {});
   // Real funnel data from orders + exercise completion on profiles
@@ -3143,6 +3147,33 @@ async function loadRealFunnel(orders) {
     }
   } catch (e) {
     console.warn('[admin] real funnel load failed:', e);
+  }
+}
+
+// Real Responses-page data. The aggregates are computed server-side in
+// /api/admin-data (raw answers never reach the browser) and simply mapped onto
+// the existing chart shapes here.
+async function loadRealResponses() {
+  const d = await fetchAdminData();
+  const r = d && d.responses;
+  if (!r || !r.pairs) return; // no completed couples yet, leave the empty state
+
+  const DIM_ORDER = ['energy','expression','needs','bids','listening','conflict','repair','love','stress','feedback'];
+  const idx = Object.fromEntries((r.dimLabels || []).map((k, i) => [k, i]));
+  dimScores = {
+    labels: ['Energy','Expression','Needs','Bids','Listening','Conflict','Repair','Love','Stress','Feedback'],
+    data: DIM_ORDER.map(k => (idx[k] != null ? r.dimScores[idx[k]] : 0)),
+  };
+  expAlign = { labels: r.expLabels || expAlign.labels, data: r.expAlign || expAlign.data };
+  relFeel = r.relationshipFeel || relFeel;
+  responsePairs = r.pairs;
+
+  const note = document.getElementById('responses-sample-note');
+  if (note) note.textContent = r.pairs + (r.pairs === 1 ? ' couple' : ' couples') + ' with both partners complete';
+
+  if (chartsInit.responses) {
+    chartsInit.responses = false;
+    if (document.getElementById('page-responses')?.classList.contains('active')) initCharts('responses');
   }
 }
 
@@ -4087,7 +4118,7 @@ function initCharts(page) {
     renderCoupleTypeDist('comm-type-bars');
     mkChart(document.getElementById('chart-exp-align'),{type:'bar',data:{labels:expAlign.labels,datasets:[{label:'% aligned',data:expAlign.data,backgroundColor:expAlign.data.map(v=>v<50?'#F87171':v<65?'#FBBF24':'#34D399'),borderRadius:6}]},options:{plugins:{legend:{display:false}},scales:{x:{grid:{display:false}},y:{grid:{color:'#E6ECF6'},ticks:{callback:v=>v+'%'},min:0,max:100}}}});
     renderBars('exp-gap-bars',expGaps,'#F87171');
-    mkChart(document.getElementById('chart-story-feel'),{type:'bar',data:{labels:['Needs work (0)','Rough patch (1)','Solid (2)','Really good (3)','Better than ever (4)'],datasets:[{data:[0,0,0,0,0],backgroundColor:['#F87171','#FBBF24','#6C7FFF','#34D399','#10b981'],borderRadius:6}]},options:{plugins:{legend:{display:false}},scales:{x:{grid:{display:false}},y:{grid:{color:'#E6ECF6'}}}}});
+    mkChart(document.getElementById('chart-story-feel'),{type:'bar',data:{labels:['Needs work (0)','Rough patch (1)','Solid (2)','Really good (3)','Better than ever (4)'],datasets:[{data:relFeel,backgroundColor:['#F87171','#FBBF24','#6C7FFF','#34D399','#10b981'],borderRadius:6}]},options:{plugins:{legend:{display:false}},scales:{x:{grid:{display:false}},y:{grid:{color:'#E6ECF6'}}}}});
     renderBars('story-gap-bars',storyGaps,'#FBBF24');
     renderIntimacyResponses();
     renderQuestionExplorer('qx-comm', ['Ex1 · Communication']);
