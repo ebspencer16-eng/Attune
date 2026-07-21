@@ -1754,8 +1754,7 @@ async function renderPromosPage(force) {
   const bData = bLabels.map(k => buckets[k]);
   const discountCanvas = document.getElementById('pr-discount-chart');
   if (discountCanvas && typeof Chart !== 'undefined') {
-    if (__prDiscountChart) __prDiscountChart.destroy();
-    __prDiscountChart = new Chart(discountCanvas, {
+    __prDiscountChart = mkChart(discountCanvas, {
       type: 'bar',
       data: { labels: bLabels.length ? bLabels : ['No code redemptions yet'], datasets: [{ data: bData.length ? bData : [0], backgroundColor: '#FF6B35', borderRadius: 6 }] },
       options: { plugins: { legend: { display: false } }, scales: { y: { grid: { color: '#E6ECF6' }, ticks: { precision: 0 } }, x: { grid: { display: false } } } },
@@ -1776,8 +1775,7 @@ async function renderPromosPage(force) {
   const presentPkgs = pkgs.filter(k => byPkg[k].length > 0);
   const addonCanvas = document.getElementById('pr-addon-chart');
   if (addonCanvas && typeof Chart !== 'undefined') {
-    if (__prAddonChart) __prAddonChart.destroy();
-    __prAddonChart = new Chart(addonCanvas, {
+    __prAddonChart = mkChart(addonCanvas, {
       type: 'bar',
       data: {
         labels: presentPkgs.length ? presentPkgs.map(k => pkgLabels[k]) : ['No orders yet'],
@@ -2537,10 +2535,9 @@ async function loadFeedbackData() {
   const bEl = document.getElementById('fb-benchmark-bars');
   bEl.innerHTML = SIM.benchmarks.map(m => renderScoreBar(m.label, m.val, m.color)).join('');
 
-  // NPS chart
-  if (!chartsInit.feedback) {
-    chartsInit.feedback = true;
-    new Chart(document.getElementById('fb-nps-chart'), {
+  // NPS chart — rebuilt on every load so real responses replace the mock.
+  {
+    mkChart(document.getElementById('fb-nps-chart'), {
       type:'doughnut',
       data:{
         labels:['Promoters (9–10)','Passives (7–8)','Detractors (0–6)'],
@@ -4022,12 +4019,22 @@ function exportFulfillmentCSV() {
 }
 
 // ── Chart initializers ────────────────────────────────
+// Build a chart, replacing whatever was on that canvas. Chart.js throws
+// "Canvas is already in use" if an existing chart is not destroyed first, and
+// because initCharts builds many charts in sequence, one throw silently killed
+// every chart after it — leaving real data unrendered behind mock values.
+function mkChart(el, cfg) {
+  if (!el) return null;
+  try { const ex = Chart.getChart(el); if (ex) ex.destroy(); } catch (e) {}
+  return new Chart(el, cfg);
+}
+
 function initCharts(page) {
   if (page==='overview') {
-    new Chart(document.getElementById('chart-revenue'),{type:'line',data:{labels:MONTHS,datasets:[{label:'Revenue',data:revenueData,borderColor:'#FF6B35',backgroundColor:'rgba(255,107,53,.1)',tension:.4,fill:true,borderWidth:2.5,pointRadius:0,pointHoverRadius:4}]},options:{plugins:{legend:{display:false}},scales:{y:{grid:{color:'#E6ECF6'},ticks:{callback:v=>'$'+Math.round(v/1000)+'k'}},x:{grid:{display:false}}},animation:{duration:800}}});
-    new Chart(document.getElementById('chart-pkg-mix'),{type:'doughnut',data:{labels:PKG_LABELS,datasets:[{data:pkgMix,backgroundColor:PKG_COLORS,borderColor:['#FFFFFF'],borderWidth:3,hoverOffset:6}]},options:{plugins:{legend:{position:'bottom',labels:{padding:16,boxWidth:12}}},cutout:'65%'}});
+    mkChart(document.getElementById('chart-revenue'),{type:'line',data:{labels:MONTHS,datasets:[{label:'Revenue',data:revenueData,borderColor:'#FF6B35',backgroundColor:'rgba(255,107,53,.1)',tension:.4,fill:true,borderWidth:2.5,pointRadius:0,pointHoverRadius:4}]},options:{plugins:{legend:{display:false}},scales:{y:{grid:{color:'#E6ECF6'},ticks:{callback:v=>'$'+Math.round(v/1000)+'k'}},x:{grid:{display:false}}},animation:{duration:800}}});
+    mkChart(document.getElementById('chart-pkg-mix'),{type:'doughnut',data:{labels:PKG_LABELS,datasets:[{data:pkgMix,backgroundColor:PKG_COLORS,borderColor:['#FFFFFF'],borderWidth:3,hoverOffset:6}]},options:{plugins:{legend:{position:'bottom',labels:{padding:16,boxWidth:12}}},cutout:'65%'}});
     renderBars('rellength-bars',relLengths,'#6C7FFF');
-    new Chart(document.getElementById('chart-source'),{type:'bar',data:{labels:sourceData.labels,datasets:[{data:sourceData.data,backgroundColor:'#34D399',borderRadius:6}]},options:{indexAxis:'y',plugins:{legend:{display:false}},scales:{x:{grid:{color:'#E6ECF6'},ticks:{callback:v=>v+'%'}},y:{grid:{display:false}}}}});
+    mkChart(document.getElementById('chart-source'),{type:'bar',data:{labels:sourceData.labels,datasets:[{data:sourceData.data,backgroundColor:'#34D399',borderRadius:6}]},options:{indexAxis:'y',plugins:{legend:{display:false}},scales:{x:{grid:{color:'#E6ECF6'},ticks:{callback:v=>v+'%'}},y:{grid:{display:false}}}}});
   }
   else if (page==='orders') { applyOrderFilters(); }
   else if (page==='fulfillment') {
@@ -4036,12 +4043,12 @@ function initCharts(page) {
     // Fulfillment time distribution
     const distBuckets = [0,0,0,0,0,0]; // 0-1, 1-2, 2-3, 3-4, 4-5, 5+
     stats.shipped.forEach(o=>{ const d=o.daysToShip; const i=Math.min(Math.floor(d),5); distBuckets[i]++; });
-    new Chart(document.getElementById('chart-fulfill-dist'),{type:'bar',data:{labels:['0–1 days','1–2 days','2–3 days','3–4 days','4–5 days','5+ days'],datasets:[{data:distBuckets,backgroundColor:distBuckets.map((_,i)=>i<=2?'#34D399':i<=3?'#FBBF24':'#F87171'),borderRadius:6}]},options:{plugins:{legend:{display:false}},scales:{x:{grid:{display:false}},y:{grid:{color:'#E6ECF6'},ticks:{precision:0}}}}});
+    mkChart(document.getElementById('chart-fulfill-dist'),{type:'bar',data:{labels:['0–1 days','1–2 days','2–3 days','3–4 days','4–5 days','5+ days'],datasets:[{data:distBuckets,backgroundColor:distBuckets.map((_,i)=>i<=2?'#34D399':i<=3?'#FBBF24':'#F87171'),borderRadius:6}]},options:{plugins:{legend:{display:false}},scales:{x:{grid:{display:false}},y:{grid:{color:'#E6ECF6'},ticks:{precision:0}}}}});
     // Weekly shipments
     const weeks = Array(12).fill(0);
     stats.shipped.forEach(o=>{ const w=Math.floor((Date.now()-o.date)/604800000); if(w<12) weeks[11-w]++; });
     const weekLabels = Array.from({length:12},(_,i)=>{ const d=new Date(Date.now()-(11-i)*7*86400000); return d.toLocaleDateString('en-US',{month:'short',day:'numeric'}); });
-    new Chart(document.getElementById('chart-weekly-ship'),{type:'bar',data:{labels:weekLabels,datasets:[{label:'Shipped',data:weeks,backgroundColor:'#6C7FFF',borderRadius:4}]},options:{plugins:{legend:{display:false}},scales:{x:{grid:{display:false},ticks:{maxRotation:45}},y:{grid:{color:'#E6ECF6'},ticks:{precision:0}}}}});
+    mkChart(document.getElementById('chart-weekly-ship'),{type:'bar',data:{labels:weekLabels,datasets:[{label:'Shipped',data:weeks,backgroundColor:'#6C7FFF',borderRadius:4}]},options:{plugins:{legend:{display:false}},scales:{x:{grid:{display:false},ticks:{maxRotation:45}},y:{grid:{color:'#E6ECF6'},ticks:{precision:0}}}}});
   }
   else if (page==='packages') {
     // Use real package-trend data when loadRealPackageTrend has populated it
@@ -4060,8 +4067,8 @@ function initCharts(page) {
       {label:'Anniversary',data:Array(12).fill(0),backgroundColor:'#6C7FFF'},
       {label:'Premium',data:Array(12).fill(0),backgroundColor:'#34D399'},
     ]};
-    new Chart(document.getElementById('chart-pkg-stacked'),{type:'bar',data:pkgStacked,options:{plugins:{legend:{position:'bottom'}},scales:{x:{stacked:true,grid:{display:false}},y:{stacked:true,grid:{color:'#E6ECF6'}}}}});
-    new Chart(document.getElementById('chart-rev-pkg'),{type:'bar',data:{labels:MONTHS,datasets:[
+    mkChart(document.getElementById('chart-pkg-stacked'),{type:'bar',data:pkgStacked,options:{plugins:{legend:{position:'bottom'}},scales:{x:{stacked:true,grid:{display:false}},y:{stacked:true,grid:{color:'#E6ECF6'}}}}});
+    mkChart(document.getElementById('chart-rev-pkg'),{type:'bar',data:{labels:MONTHS,datasets:[
       {label:'Assessment',data:Array(12).fill(0),backgroundColor:'#FF6B3544',borderColor:'#FF6B35',borderWidth:1.5,borderRadius:4},
       {label:'Starting Out',data:Array(12).fill(0),backgroundColor:'#FBBF2444',borderColor:'#FBBF24',borderWidth:1.5,borderRadius:4},
       {label:'Anniversary',data:Array(12).fill(0),backgroundColor:'#6C7FFF44',borderColor:'#6C7FFF',borderWidth:1.5,borderRadius:4},
@@ -4069,18 +4076,18 @@ function initCharts(page) {
     ]},options:{plugins:{legend:{position:'bottom'}},scales:{x:{stacked:true,grid:{display:false}},y:{stacked:true,grid:{color:'#E6ECF6'},ticks:{callback:v=>'$'+Math.round(v/1000)+'k'}}}}});
   }
   else if (page==='demographics') {
-    new Chart(document.getElementById('chart-age'),{type:'bar',data:{labels:ageData.labels,datasets:[{data:ageData.data,backgroundColor:'#FF6B35',borderRadius:6}]},options:{plugins:{legend:{display:false}},scales:{x:{grid:{display:false}},y:{grid:{color:'#E6ECF6'},ticks:{callback:v=>v+'%'}}}}});
-    new Chart(document.getElementById('chart-gender'),{type:'doughnut',data:{labels:genderData.labels,datasets:[{data:genderData.data,backgroundColor:['#F87171','#6C7FFF','#34D399','#FBBF24'],borderColor:'#FFFFFF',borderWidth:3}]},options:{plugins:{legend:{position:'bottom',labels:{padding:14,boxWidth:11}}},cutout:'60%'}});
-    new Chart(document.getElementById('chart-relstatus'),{type:'doughnut',data:{labels:relStatusData.labels,datasets:[{data:relStatusData.data,backgroundColor:['#6C7FFF','#FF6B35','#34D399','#FBBF24','#F87171'],borderColor:'#FFFFFF',borderWidth:3}]},options:{plugins:{legend:{position:'bottom',labels:{padding:14,boxWidth:11}}},cutout:'60%'}});
+    mkChart(document.getElementById('chart-age'),{type:'bar',data:{labels:ageData.labels,datasets:[{data:ageData.data,backgroundColor:'#FF6B35',borderRadius:6}]},options:{plugins:{legend:{display:false}},scales:{x:{grid:{display:false}},y:{grid:{color:'#E6ECF6'},ticks:{callback:v=>v+'%'}}}}});
+    mkChart(document.getElementById('chart-gender'),{type:'doughnut',data:{labels:genderData.labels,datasets:[{data:genderData.data,backgroundColor:['#F87171','#6C7FFF','#34D399','#FBBF24'],borderColor:'#FFFFFF',borderWidth:3}]},options:{plugins:{legend:{position:'bottom',labels:{padding:14,boxWidth:11}}},cutout:'60%'}});
+    mkChart(document.getElementById('chart-relstatus'),{type:'doughnut',data:{labels:relStatusData.labels,datasets:[{data:relStatusData.data,backgroundColor:['#6C7FFF','#FF6B35','#34D399','#FBBF24','#F87171'],borderColor:'#FFFFFF',borderWidth:3}]},options:{plugins:{legend:{position:'bottom',labels:{padding:14,boxWidth:11}}},cutout:'60%'}});
     renderBars('demo-rellength-bars',relLengths,'#6C7FFF');
-    new Chart(document.getElementById('chart-children'),{type:'bar',data:{labels:childrenData.labels,datasets:[{data:childrenData.data,backgroundColor:'#34D399',borderRadius:6}]},options:{plugins:{legend:{display:false}},scales:{x:{grid:{display:false}},y:{grid:{color:'#E6ECF6'},ticks:{callback:v=>v+'%'}}}}});
+    mkChart(document.getElementById('chart-children'),{type:'bar',data:{labels:childrenData.labels,datasets:[{data:childrenData.data,backgroundColor:'#34D399',borderRadius:6}]},options:{plugins:{legend:{display:false}},scales:{x:{grid:{display:false}},y:{grid:{color:'#E6ECF6'},ticks:{callback:v=>v+'%'}}}}});
   }
   else if (page==='responses') {
-    new Chart(document.getElementById('chart-dim-scores'),{type:'radar',data:{labels:dimScores.labels,datasets:[{label:'Avg alignment',data:dimScores.data,borderColor:'#6C7FFF',backgroundColor:'rgba(108,127,255,.15)',borderWidth:2,pointRadius:3,pointBackgroundColor:'#6C7FFF'}]},options:{scales:{r:{grid:{color:'#E6ECF6'},angleLines:{color:'#E6ECF6'},ticks:{display:false},min:0,max:100}},plugins:{legend:{display:false}}}});
+    mkChart(document.getElementById('chart-dim-scores'),{type:'radar',data:{labels:dimScores.labels,datasets:[{label:'Avg alignment',data:dimScores.data,borderColor:'#6C7FFF',backgroundColor:'rgba(108,127,255,.15)',borderWidth:2,pointRadius:3,pointBackgroundColor:'#6C7FFF'}]},options:{scales:{r:{grid:{color:'#E6ECF6'},angleLines:{color:'#E6ECF6'},ticks:{display:false},min:0,max:100}},plugins:{legend:{display:false}}}});
     renderCoupleTypeDist('comm-type-bars');
-    new Chart(document.getElementById('chart-exp-align'),{type:'bar',data:{labels:expAlign.labels,datasets:[{label:'% aligned',data:expAlign.data,backgroundColor:expAlign.data.map(v=>v<50?'#F87171':v<65?'#FBBF24':'#34D399'),borderRadius:6}]},options:{plugins:{legend:{display:false}},scales:{x:{grid:{display:false}},y:{grid:{color:'#E6ECF6'},ticks:{callback:v=>v+'%'},min:0,max:100}}}});
+    mkChart(document.getElementById('chart-exp-align'),{type:'bar',data:{labels:expAlign.labels,datasets:[{label:'% aligned',data:expAlign.data,backgroundColor:expAlign.data.map(v=>v<50?'#F87171':v<65?'#FBBF24':'#34D399'),borderRadius:6}]},options:{plugins:{legend:{display:false}},scales:{x:{grid:{display:false}},y:{grid:{color:'#E6ECF6'},ticks:{callback:v=>v+'%'},min:0,max:100}}}});
     renderBars('exp-gap-bars',expGaps,'#F87171');
-    new Chart(document.getElementById('chart-story-feel'),{type:'bar',data:{labels:['Needs work (0)','Rough patch (1)','Solid (2)','Really good (3)','Better than ever (4)'],datasets:[{data:[0,0,0,0,0],backgroundColor:['#F87171','#FBBF24','#6C7FFF','#34D399','#10b981'],borderRadius:6}]},options:{plugins:{legend:{display:false}},scales:{x:{grid:{display:false}},y:{grid:{color:'#E6ECF6'}}}}});
+    mkChart(document.getElementById('chart-story-feel'),{type:'bar',data:{labels:['Needs work (0)','Rough patch (1)','Solid (2)','Really good (3)','Better than ever (4)'],datasets:[{data:[0,0,0,0,0],backgroundColor:['#F87171','#FBBF24','#6C7FFF','#34D399','#10b981'],borderRadius:6}]},options:{plugins:{legend:{display:false}},scales:{x:{grid:{display:false}},y:{grid:{color:'#E6ECF6'}}}}});
     renderBars('story-gap-bars',storyGaps,'#FBBF24');
     renderIntimacyResponses();
     renderQuestionExplorer('qx-comm', ['Ex1 · Communication']);
@@ -4089,11 +4096,11 @@ function initCharts(page) {
     renderQuestionExplorer('qx-intimacy', ['Physical Intimacy']);
   }
   else if (page==='satisfaction') {
-    new Chart(document.getElementById('chart-funnel'),{type:'bar',data:{labels:['Ordered','Started exercises','Both completed','Results viewed'],datasets:[{data:funnelData,backgroundColor:['#FF6B35','#FBBF24','#6C7FFF','#34D399'],borderRadius:6}]},options:{plugins:{legend:{display:false}},scales:{x:{grid:{display:false}},y:{grid:{color:'#E6ECF6'}}}}});
-    new Chart(document.getElementById('chart-ratings'),{type:'bar',data:{labels:ratingsData.labels,datasets:[{data:ratingsData.data,backgroundColor:ratingsData.data.map((_,i)=>['#34D399','#6C7FFF','#FBBF24','#F87171','#EF4444'][i]),borderRadius:6}]},options:{plugins:{legend:{display:false}},scales:{x:{grid:{display:false}},y:{grid:{color:'#E6ECF6'}}}}});
+    mkChart(document.getElementById('chart-funnel'),{type:'bar',data:{labels:['Ordered','Started exercises','Both completed','Results viewed'],datasets:[{data:funnelData,backgroundColor:['#FF6B35','#FBBF24','#6C7FFF','#34D399'],borderRadius:6}]},options:{plugins:{legend:{display:false}},scales:{x:{grid:{display:false}},y:{grid:{color:'#E6ECF6'}}}}});
+    mkChart(document.getElementById('chart-ratings'),{type:'bar',data:{labels:ratingsData.labels,datasets:[{data:ratingsData.data,backgroundColor:ratingsData.data.map((_,i)=>['#34D399','#6C7FFF','#FBBF24','#F87171','#EF4444'][i]),borderRadius:6}]},options:{plugins:{legend:{display:false}},scales:{x:{grid:{display:false}},y:{grid:{color:'#E6ECF6'}}}}});
     // NPS trend — use real-data month labels when available, fall back to rolling 12-month default
     const npsLabels = (pkgTrendStacked && pkgTrendMonths.length === npsData.length) ? pkgTrendMonths : MONTHS;
-    new Chart(document.getElementById('chart-nps'),{type:'line',data:{labels:npsLabels,datasets:[{label:'NPS',data:npsData,borderColor:'#34D399',backgroundColor:'rgba(52,211,153,.1)',tension:.4,fill:true,borderWidth:2.5,pointRadius:3,pointBackgroundColor:'#34D399'},{label:'Benchmark (50)',data:Array(12).fill(50),borderColor:'#4B5563',borderDash:[5,5],borderWidth:1.5,pointRadius:0}]},options:{plugins:{legend:{position:'bottom'}},scales:{y:{grid:{color:'#E6ECF6'},min:-20,max:100},x:{grid:{display:false}}}}});
+    mkChart(document.getElementById('chart-nps'),{type:'line',data:{labels:npsLabels,datasets:[{label:'NPS',data:npsData,borderColor:'#34D399',backgroundColor:'rgba(52,211,153,.1)',tension:.4,fill:true,borderWidth:2.5,pointRadius:3,pointBackgroundColor:'#34D399'},{label:'Benchmark (50)',data:Array(12).fill(50),borderColor:'#4B5563',borderDash:[5,5],borderWidth:1.5,pointRadius:0}]},options:{plugins:{legend:{position:'bottom'}},scales:{y:{grid:{color:'#E6ECF6'},min:-20,max:100},x:{grid:{display:false}}}}});
   }
 }
 
@@ -4274,7 +4281,7 @@ function renderTypes() {
 function drawDoughnut(id, labels, data, colors) {
   const el = document.getElementById(id); if(!el) return;
   const ex = Chart.getChart(el); if(ex) ex.destroy();
-  new Chart(el, { type:'doughnut', data:{ labels, datasets:[{data, backgroundColor:colors, borderColor:'#FFFFFF', borderWidth:3}] },
+  mkChart(el, { type:'doughnut', data:{ labels, datasets:[{data, backgroundColor:colors, borderColor:'#FFFFFF', borderWidth:3}] },
     options:{ plugins:{ legend:{ position:'right', labels:{color:'#586187',font:{size:12},boxWidth:12} } }, cutout:'62%' } });
 }
 function drawHist(id, bins, data, color) {
@@ -4282,7 +4289,7 @@ function drawHist(id, bins, data, color) {
   const ex = Chart.getChart(el); if(ex) ex.destroy();
   const labels = bins.map(b=>b.toFixed(2));
   const splitIdx = bins.findIndex(b=>b>=3) ;
-  new Chart(el, { type:'bar', data:{ labels, datasets:[{data, backgroundColor:bins.map(b=>b<3?color:color+'77'), borderRadius:3}] },
+  mkChart(el, { type:'bar', data:{ labels, datasets:[{data, backgroundColor:bins.map(b=>b<3?color:color+'77'), borderRadius:3}] },
     options:{ plugins:{ legend:{display:false}, tooltip:{callbacks:{title:i=>`score ${i[0].label}`}} },
       scales:{ x:{grid:{display:false},ticks:{color:'#6B7280',font:{size:9},maxRotation:0,callback:(v,i)=>i%2===0?labels[i]:''}},
                y:{grid:{color:'#E6ECF6'},ticks:{color:'#6B7280',precision:0}} } } });
@@ -4348,7 +4355,7 @@ function renderTimeChart(indiv) {
   dated.forEach(r => { (weeks[wk(r.createdAt)] || (weeks[wk(r.createdAt)] = {W:0,X:0,Y:0,Z:0}))[r.type]++; });
   const labels = Object.keys(weeks).sort();
   const ds = t => ({ label:t, data:labels.map(l=>weeks[l][t]), backgroundColor:TYPE_COLORS[t] });
-  new Chart(canvas, { type:'bar', data:{ labels, datasets:['W','X','Y','Z'].map(ds) },
+  mkChart(canvas, { type:'bar', data:{ labels, datasets:['W','X','Y','Z'].map(ds) },
     options:{ plugins:{ legend:{position:'bottom',labels:{color:'#586187',boxWidth:11,font:{size:11}}} },
       scales:{ x:{stacked:true,grid:{display:false},ticks:{color:'#6B7280',font:{size:9}}}, y:{stacked:true,grid:{color:'#E6ECF6'},ticks:{color:'#6B7280',precision:0}} } } });
 }
