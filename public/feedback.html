@@ -935,6 +935,17 @@ function submitForm() {
     npsWhy: valOf('npsWhy'),
   };
 
+  // Written by the app when the beta tile is clicked. Absent if the survey was
+  // opened directly or on another device, in which case the response is simply
+  // ungrouped rather than blocked.
+  try {
+    const ctx = JSON.parse(localStorage.getItem('attune_feedback_ctx') || 'null');
+    if (ctx && ctx.respondentId) {
+      data.respondentId = ctx.respondentId;
+      if (ctx.coupleType) data.coupleType = ctx.coupleType;
+    }
+  } catch {}
+
   fetch('/api/submit-beta-survey', {
     method: 'POST',
     headers: {'Content-Type':'application/json'},

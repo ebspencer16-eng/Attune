@@ -14050,7 +14050,21 @@ export default function App() {
                     <div style={{ fontSize: "0.56rem", letterSpacing: "0.2em", textTransform: "uppercase", color: "#7C3AED", fontWeight: 700, fontFamily: "'DM Sans', sans-serif", marginBottom: "0.4rem" }}>Beta tester</div>
                     <div style={{ fontSize: "0.92rem", color: "#0E0B07", fontFamily: "'DM Sans', sans-serif", fontWeight: 600, marginBottom: "0.3rem", lineHeight: 1.3 }}>Thank you for being one of our beta testers.</div>
                     <div style={{ fontSize: "0.8rem", color: "#6B5C4D", fontFamily: "'DM Sans', sans-serif", fontWeight: 400, lineHeight: 1.5, marginBottom: "0.9rem" }}>Once you've viewed your results, tell us about your experience.</div>
-                    <a href="/feedback" style={{ display: "inline-block", background: "#7C3AED", color: "white", borderRadius: 10, padding: "0.6rem 1.1rem", fontSize: "0.78rem", fontWeight: 700, fontFamily: "'DM Sans', sans-serif", textDecoration: "none" }}>Share your feedback →</a>
+                    <a href="/feedback"
+                       onClick={() => {
+                         // Hand the survey a respondent id and couple type via same-origin
+                         // storage rather than the URL, so nothing identifying ends up in a
+                         // link that can be copied or leak through a referrer. The id is the
+                         // profile UUID, which is how every other record here is keyed.
+                         try {
+                           localStorage.setItem('attune_feedback_ctx', JSON.stringify({
+                             respondentId: account?.id || null,
+                             coupleType: coupleType?.name || null,
+                             at: Date.now(),
+                           }));
+                         } catch {}
+                       }}
+                       style={{ display: "inline-block", background: "#7C3AED", color: "white", borderRadius: 10, padding: "0.6rem 1.1rem", fontSize: "0.78rem", fontWeight: 700, fontFamily: "'DM Sans', sans-serif", textDecoration: "none" }}>Share your feedback →</a>
                   </div>
                 )}
 

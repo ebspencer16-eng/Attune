@@ -15,6 +15,30 @@ export default async function handler(req) {
   // Store in Supabase
   const supabaseUrl = process.env.SUPABASE_URL;
   const serviceKey = process.env.SUPABASE_SERVICE_KEY;
+
+  // Resolve the couple from the respondent so responses can be grouped without
+  // collecting any personal identifier. Both partners resolve to the same
+  // coupleId (the sorted pair), so "did both halves respond" is answerable.
+  // Purely additive: if this fails the submission still stores, just ungrouped.
+  const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  let coupleId = null;
+  if (supabaseUrl && serviceKey && UUID_RE.test(String(body.respondentId || ''))) {
+    try {
+      const r = await fetch(
+        `${supabaseUrl}/rest/v1/profiles?id=eq.${encodeURIComponent(body.respondentId)}&select=id,partner_profile_id`,
+        { headers: { apikey: serviceKey, Authorization: `Bearer ${serviceKey}` } }
+      );
+      const rows = await r.json();
+      const self = Array.isArray(rows) ? rows[0] : null;
+      if (self) {
+        coupleId = self.partner_profile_id
+          ? [self.id, self.partner_profile_id].sort().join(':')
+          : self.id;
+      }
+    } catch (e) { console.warn('[survey] couple resolve failed:', e); }
+  }
+  body = { ...body, coupleId };
+
   if (supabaseUrl && serviceKey) {
     await fetch(`${supabaseUrl}/rest/v1/feedback_submissions`, {
       method: 'POST',

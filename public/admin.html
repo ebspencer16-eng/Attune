@@ -1575,6 +1575,15 @@ window.adminAuthHeaders = function(extra){
     <div class="chart-grid">
       <div class="chart-card">
         <div class="chart-card-header">
+          <div class="chart-card-title">Response coverage</div>
+          <div class="chart-card-sub">Who has actually replied</div>
+        </div>
+        <div id="fb-coverage" style="display:flex;flex-direction:column;gap:.55rem;padding:.5rem 0;">
+          <div style="color:var(--muted);font-size:.78rem;">Loading…</div>
+        </div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-card-header">
           <div class="chart-card-title">Time spent by stage</div>
           <div class="chart-card-sub">Most common answer per stage</div>
         </div>
@@ -2576,6 +2585,39 @@ async function loadFeedbackData() {
   const max = (arr) => Math.max(...arr.map(i => i.v));
   document.getElementById('fb-aha-bars').innerHTML = SIM.aha.map(i => renderBar(i.l, i.v, max(SIM.aha), '#E8673A', i.v + '%')).join('');
   document.getElementById('fb-interest-bars').innerHTML = SIM.interestAvg.map(i => renderBar(i.l, i.v, max(SIM.interestAvg), '#1B5FE8', i.v + '%')).join('');
+  // Coverage is only meaningful once responses carry a coupleId. Older rows
+  // predate that and are counted separately rather than silently dropped.
+  window.renderFbCoverage = function renderCoverage() {
+    const el = document.getElementById('fb-coverage');
+    if (!el) return;
+    const rows = (window.__fbSurveys || []);
+    if (!rows.length) {
+      el.innerHTML = '<div style="color:var(--muted);font-size:.78rem;">No responses yet.</div>';
+      return;
+    }
+    const byCouple = {};
+    let unlinked = 0;
+    rows.forEach(r => {
+      if (!r.coupleId) { unlinked++; return; }
+      byCouple[r.coupleId] = (byCouple[r.coupleId] || 0) + 1;
+    });
+    const couples = Object.keys(byCouple).length;
+    const bothReplied = Object.values(byCouple).filter(n => n >= 2).length;
+    const oneReplied = couples - bothReplied;
+    const stat = (label, value, colour) =>
+      `<div style="display:grid;grid-template-columns:1fr auto;gap:.75rem;align-items:center;padding:.35rem 0">
+         <div style="font-size:.74rem;color:var(--text)">${label}</div>
+         <div style="font-size:.85rem;font-weight:700;color:${colour};white-space:nowrap">${value}</div>
+       </div>`;
+    el.innerHTML =
+      stat('Total responses', rows.length, '#1B5FE8') +
+      stat('Couples represented', couples, '#1B5FE8') +
+      stat('Both partners replied', bothReplied, '#10B981') +
+      stat('Only one partner replied', oneReplied, '#E8673A') +
+      (unlinked ? stat('Not linked to a couple', unlinked, '#8C7A68') : '');
+  };
+  window.renderFbCoverage();
+
   document.getElementById('fb-timestage-bars').innerHTML = SIM.timeByStage.map(i =>
     `<div style="display:grid;grid-template-columns:1fr auto;gap:.75rem;align-items:center;padding:.3rem 0">
       <div style="font-size:.72rem;color:var(--text)">${i.l}</div>
@@ -3196,6 +3238,9 @@ async function loadRealAnalytics() {
       catch { return null; }
     }).filter(Boolean);
     if (surveys.length === 0) return;
+    // Coverage card reads these; re-render now that the real rows are in.
+    window.__fbSurveys = surveys;
+    if (typeof window.renderFbCoverage === 'function') window.renderFbCoverage();
 
     // ── NPS trend by month ──────────────────────────────────────────────
     // Build 12 month buckets ending at current month. For each, compute NPS:
