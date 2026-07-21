@@ -2353,14 +2353,56 @@ function setFeedbackTab(el, targetId) {
 }
 
 // ── Export feedback CSV ───────────────────────────────
-function exportFeedbackCSV() {
-  const rows = [['Submitted','Name','Email','NPS','ExpectationMatch','CommsOverall','CommsImpact','CommsHonesty','ExpOverall','ExpImpact','ExpHonesty','ShiftCouple','ShiftSelf','ReturnLikelihood','ValuePerception','Ease','ConvoHappened','WhatDiscovered','Negative','Positive','WishKnew','Testimonial','TestimonialConsent']];
-  // In production, map real responses
-  const csv = rows.map(r => r.join(',')).join('\n');
+// Real beta_survey export. Pulls the stored rows, flattens the v5 payload into
+// one row each, and downloads a CSV. Column order tracks the current survey;
+// grids and multi-selects are serialised into single cells so the file stays
+// one-row-per-response and openable in any spreadsheet.
+async function exportFeedbackCSV() {
+  const d = await fetchAdminData().catch(() => null);
+  const all = (d && d.feedback_submissions) || [];
+  const surveys = all.filter(r => r.type === 'beta_survey').map(r => {
+    let p = {}; try { p = typeof r.text === 'string' ? JSON.parse(r.text) : (r.text || {}); } catch {}
+    return { ...p, _submitted_at: r.submitted_at, _couple_type_col: r.couple_type };
+  });
+
+  // Scalars and free text, in survey order. Grids/arrays handled separately.
+  const COLS = [
+    '_submitted_at','survey_version','respondentId','coupleId','coupleType',
+    'expectations','expectationMatch','expectationMatchWhy','concerns',
+    'commsOverall','commsOverallWhy','commsHonesty','commsHonestyWhy','commsQuestionsFeedback',
+    'expOverall','expOverallWhy','expHonesty','expHonestyWhy','expMissing',
+    'ahaMarker','convoHappened',
+    'shiftCouple','shiftCoupleWhy','shiftSelf','shiftSelfWhy','returnLikelihood','returnLikelihoodWhy',
+    'valuePct','valueWhy','whatDiscovered','wishKnew',
+    'testimonial','testimonialConsent','consentFirstName','consentInitials','nps','npsWhy',
+    // Serialised structures (JSON in a single cell)
+    'commsGrid','commsGridLows','expGrid','expGridLows','timeGrid','overallGrid','overallGridLows','interestGrid',
+  ];
+
+  const cell = (v) => {
+    if (v == null) return '';
+    if (Array.isArray(v)) return v.join('; ');
+    if (typeof v === 'object') return JSON.stringify(v);
+    return String(v);
+  };
+  const esc = (v) => {
+    const t = cell(v);
+    return /[",\n]/.test(t) ? '"' + t.replace(/"/g, '""') + '"' : t;
+  };
+
+  const header = COLS.map(c => c.replace(/^_/, ''));
+  const lines = [header.join(',')];
+  surveys.forEach(s => lines.push(COLS.map(c => esc(s[c])).join(',')));
+
+  // BOM so Excel reads UTF-8 (curly quotes, en dashes) correctly.
+  const blob = new Blob(['\uFEFF' + lines.join('\r\n')], { type: 'text/csv;charset=utf-8' });
   const a = document.createElement('a');
-  a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv);
+  a.href = URL.createObjectURL(blob);
   a.download = 'attune-beta-survey-' + new Date().toISOString().slice(0,10) + '.csv';
   a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+
+  if (surveys.length === 0 && typeof showToast === 'function') showToast('No responses yet — exported header only.');
 }
 
 // ── Render a horizontal bar row ───────────────────────
