@@ -946,17 +946,63 @@ function submitForm() {
     }
   } catch {}
 
-  fetch('/api/submit-beta-survey', {
+  sendSurvey(data);
+}
+
+// Submission used to fire and forget: it swallowed every error and showed the
+// success screen without waiting for a reply, so a dropped request looked
+// identical to a saved one and the response was gone. Now the payload is
+// stashed first, the send is awaited, and the success screen only appears on a
+// confirmed write. Anything unsent is retried on the next page load.
+const PENDING_KEY = 'attune_feedback_pending';
+
+async function postSurvey(data) {
+  const res = await fetch('/api/submit-beta-survey', {
     method: 'POST',
     headers: {'Content-Type':'application/json'},
     body: JSON.stringify(data)
-  }).catch(() => {});
+  });
+  if (!res.ok) throw new Error('Server returned ' + res.status);
+  return true;
+}
 
+function showSuccess() {
+  try { localStorage.removeItem(PENDING_KEY); } catch {}
   document.getElementById('formPage').style.display = 'none';
   const s = document.getElementById('successState');
   s.classList.add('show');
   window.scrollTo({top: 0, behavior: 'smooth'});
 }
+
+async function sendSurvey(data) {
+  // Stash before sending, so the answers survive a failure or a closed tab.
+  try { localStorage.setItem(PENDING_KEY, JSON.stringify(data)); } catch {}
+  const btn = document.getElementById('submitBtn');
+  const warn = document.getElementById('reqWarn');
+  if (btn) { btn.disabled = true; btn.dataset.label = btn.textContent; btn.textContent = 'Sending…'; }
+  try {
+    await postSurvey(data);
+    showSuccess();
+  } catch (err) {
+    if (btn) { btn.disabled = false; btn.textContent = btn.dataset.label || 'Submit'; }
+    if (warn) {
+      warn.textContent = "That didn't send. Your answers are saved on this device, so nothing is lost. Check your connection and press submit again.";
+      warn.classList.add('show');
+      warn.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+    console.warn('[survey] submit failed:', err);
+  }
+}
+
+// A response stashed by a failed attempt is resent quietly on the next visit.
+(function retryPending() {
+  let pending = null;
+  try { pending = JSON.parse(localStorage.getItem(PENDING_KEY) || 'null'); } catch {}
+  if (!pending) return;
+  postSurvey(pending)
+    .then(() => { try { localStorage.removeItem(PENDING_KEY); } catch {} })
+    .catch(() => { /* stays stashed for the next attempt */ });
+})();
 
 updateProgress();
 </script>
