@@ -14260,7 +14260,7 @@ export default function App() {
                   <div style={{ background: "white", border: "1.5px solid #E8DDD0", borderTop: `3px solid ${bothDone ? "#1B5FE8" : "#D4C0A8"}`, borderRadius: 16, overflow: "hidden", opacity: bothDone ? 1 : 0.6, boxShadow: "0 2px 14px rgba(14,11,7,0.04)" }}>
                     {[
                       { label: "Storycard highlights", section: "highlights", color: "#E8673A" },
-                      { label: "Your couple type & map", section: "couple-type", color: "#9B5DE5" },
+                      { label: "Your couple type", section: "couple-type", color: "#9B5DE5" },
                       { label: "Communication results", section: "comm-overview", color: "#E8673A" },
                       { label: "Expectations results", section: "exp-overview", color: "#1B5FE8" },
                       ...(pkg.hasAnniversary ? [{ label: "Relationship reflection results", section: "reflection-overview", color: "#10B981" }] : []),
