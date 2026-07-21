@@ -12205,10 +12205,11 @@ export default function App() {
   // ── VIEW STATE ────────────────────────────────────────────────────────────
   const [view, setView] = useState(initialView);
 
-  // Keep browser Back inside the app for tool views. Without this, Back from a
-  // tool (e.g. the budget builder) leaves /app and renders a blank page. Entering
-  // a tool view pushes one history entry; Back pops it back to the dashboard.
-  const _toolViews = ['budget', 'checklist', 'notes', 'lmft', 'intimacy', 'account', 'workbook'];
+  // Keep browser Back inside the app. Without this, Back from a tool (e.g. the
+  // budget builder) or from results leaves /app entirely and lands on the
+  // marketing site. Entering one of these views pushes a single history entry;
+  // Back pops it and returns to the dashboard.
+  const _toolViews = ['budget', 'checklist', 'notes', 'lmft', 'intimacy', 'account', 'workbook', 'results'];
   const _pushedToolHist = useRef(false);
   useEffect(() => {
     if (_toolViews.includes(view)) {
@@ -14038,16 +14039,6 @@ export default function App() {
                   </>
                 )}
               </div>
-
-              {/* Mobile: View Results button below banner (centered) */}
-              {isMobile && bothDone && (
-                <div style={{ background: "#FBF8F3", padding: "1rem 1.25rem 0", display: "flex", justifyContent: "center" }}>
-                  <button onClick={() => setView("results")}
-                    style={{ background: "linear-gradient(135deg,#E8673A,#1B5FE8)", color: "white", border: "none", borderRadius: 12, padding: "0.75rem 2rem", fontSize: "0.82rem", fontWeight: 700, cursor: "pointer", fontFamily: "'DM Sans', sans-serif", letterSpacing: ".04em", textTransform: "uppercase", boxShadow: "0 4px 16px rgba(232,103,58,0.3)" }}>
-                    View Results →
-                  </button>
-                </div>
-              )}
 
               {/* ── CONTENT AREA ─────────────────────────────────────────── */}
               <div style={{ flex: 1, padding: isMobile ? "1.5rem 1.25rem 3rem" : "2.5rem 2rem 4rem", background: "#FBF8F3" }}>
