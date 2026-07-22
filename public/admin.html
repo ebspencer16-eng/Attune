@@ -441,7 +441,7 @@
     </div>
 
     <div class="chart-card" style="margin-top:1.25rem">
-      <div class="chart-head"><div><div class="chart-title">Order volume by geography</div><div class="chart-subtitle">By US state, from order location. Orders outside the US are grouped as one segment.</div></div></div>
+      <div class="chart-head"><div><div class="chart-title">Order volume by geography</div><div class="chart-subtitle">By US state, from shipping or billing location. Orders outside the US are grouped as one segment.</div></div></div>
       <div class="chart-body"><div id="geo-breakdown"></div></div>
     </div>
   </div>
@@ -3006,8 +3006,8 @@ async function loadRealData() {
             cardStatus: o.card_status || 'pending',
             cardUrl: o.card_url || null,
             token: o.qr_token || null,
-            state: o.shipping_state || null,
-            country: o.shipping_country || o.billing_country || (o.shipping_state ? 'US' : null),
+            state: normStateCode(o.shipping_state || o.billing_state),
+            country: o.shipping_country || o.billing_country || ((o.shipping_state || o.billing_state) ? 'US' : null),
             _raw: o,
           });
         });
@@ -3784,6 +3784,15 @@ async function renderCoupleTypeDist(containerId) {
     </div>`).join('');
 }
 
+// "NY 10025" or "New York 10025" -> "NY" / "New York". The checkout State/ZIP
+// field is a single input, so older rows stored the ZIP alongside the state.
+function normStateCode(raw) {
+  const t = (raw || '').toString().trim();
+  if (!t) return null;
+  const m = t.match(/^(.*?)[\s,]+\d{5}(?:-\d{4})?$/);
+  return (m ? m[1].trim() : t) || null;
+}
+
 // ── Geography breakdown: order volume by US state; non-US grouped ──────
 // Reads real order location (o.state / o.country). No fabricated data:
 // when location isn't captured, it shows an honest empty state.
@@ -3803,7 +3812,7 @@ function renderGeography() {
   });
   const stateRows = Object.entries(stateCounts).sort((a, b) => b[1] - a[1]);
   if (stateRows.length === 0 && outsideUS === 0) {
-    el.innerHTML = '<div style="color:var(--dim);font-size:.8rem;padding:1rem 0;line-height:1.6">No location data captured yet.<br><span style="font-size:.72rem">Geography populates from order billing location. Digital orders will appear here once billing country and state are captured at checkout.</span></div>';
+    el.innerHTML = '<div style="color:var(--dim);font-size:.8rem;padding:1rem 0;line-height:1.6">No location data captured yet.<br><span style="font-size:.72rem">Geography populates from shipping or billing location. Free promo orders skip payment, so they carry no address; paid orders will appear here.</span></div>';
     return;
   }
   const max = Math.max(...stateRows.map(r => r[1]), outsideUS, 1);

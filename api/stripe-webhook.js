@@ -104,6 +104,16 @@ async function handleWebhook(req) {
   const intent = event.data?.object;
   const meta   = intent?.metadata || {};
 
+  // "NY 10025" (state + ZIP typed into one field) -> { state: "NY", zip: "10025" }.
+  // A bare 2-letter state or a full state name is returned unchanged.
+  const splitStateZip = (raw) => {
+    const t = (raw || '').toString().trim();
+    if (!t) return { state: null, zip: null };
+    const m = t.match(/^(.*?)[\s,]+(\d{5}(?:-\d{4})?)$/);
+    if (m) return { state: m[1].trim() || null, zip: m[2] };
+    return { state: t, zip: null };
+  };
+
   // ── payment_intent.succeeded ───────────────────────────────────────────────
   if (event.type === 'payment_intent.succeeded') {
     console.log(`Payment succeeded: ${intent.id} — ${intent.amount / 100} ${intent.currency.toUpperCase()} — ${meta.pkgKey || '?'} — itemCount: ${meta.itemCount || 1}`);
@@ -182,6 +192,31 @@ async function handleWebhook(req) {
       const taxAmount   = parseInt(meta.taxAmount   || '0', 10) / 100;
       const subtotalAmt = parseInt(meta.subtotal    || '0', 10) / 100;
 
+      // ── Billing location ────────────────────────────────────────────────
+      // Digital orders collect no shipping address, so geography had nothing to
+      // read. Stripe attaches the billing address to the charge. It is not on
+      // the PaymentIntent payload by default, so fetch the latest charge (the
+      // secret key is already loaded above for tax). Best-effort: a failure
+      // just leaves billing null, exactly as before.
+      let billingState = null, billingCountry = null;
+      try {
+        const chargeAddr = intent.charges?.data?.[0]?.billing_details?.address
+          || (intent.latest_charge && stripeSecret ? await (async () => {
+            const cr = await fetch('https://api.stripe.com/v1/charges/' + intent.latest_charge, {
+              headers: { Authorization: `Bearer ${stripeSecret}` },
+            });
+            if (!cr.ok) return null;
+            const charge = await cr.json();
+            return charge?.billing_details?.address || null;
+          })() : null);
+        if (chargeAddr) {
+          billingState   = chargeAddr.state   || null;
+          billingCountry = chargeAddr.country || null;
+        }
+      } catch (e) {
+        console.warn('[webhook] billing address lookup failed:', e);
+      }
+
       try {
         if (Array.isArray(items) && items.length > 0) {
           // Multi-item: one row per item
@@ -189,7 +224,10 @@ async function handleWebhook(req) {
             const it = items[i];
             // Shipping is packed as "name|address|city|state" in metadata
             const shipParts = (it.s || '').split('|');
-            const [shipName, shipAddr, shipCity, shipState] = shipParts;
+            const [shipName, shipAddr, shipCity, shipStateRaw] = shipParts;
+            // The checkout State/ZIP field is one input, so shipStateRaw can be
+            // "NY 10025". Keep just the leading state token for the state column.
+            const shipState = splitStateZip(shipStateRaw).state;
             const suffix = items.length > 1 ? `-${i+1}` : '';
             const orderNum = `${baseOrderNum}${suffix}`;
             const qrToken = newQrToken();
@@ -225,6 +263,8 @@ async function handleWebhook(req) {
                 shipping_address:        shipAddr || null,
                 shipping_city:           shipCity || null,
                 shipping_state:          shipState || null,
+                billing_state:           billingState || null,
+                billing_country:         billingCountry || null,
                 // Tax (proportional share for multi-item; null for the single-item
                 // case since the PaymentIntent's total already includes tax).
                 tax_amount:              items.length > 1 ? null : (taxAmount || null),
@@ -276,6 +316,8 @@ async function handleWebhook(req) {
               stripe_payment_intent_id: intent.id,
               workbook_status:         'pending',
               qr_token:                qrToken,
+              billing_state:           billingState || null,
+              billing_country:         billingCountry || null,
               tax_amount:              taxAmount || null,
               subtotal:                subtotalAmt || null,
               tax_calculation_id:      taxCalcId || null,
