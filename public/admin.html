@@ -99,6 +99,15 @@
   .chart-grid.full{grid-template-columns:1fr}
   @media(max-width:1100px){.chart-grid,.chart-grid.three{grid-template-columns:1fr}}
   .chart-card{background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden}
+  .chart-card-header{padding:1.25rem 1.4rem 0.35rem}
+  .chart-card-title{font-size:.82rem;font-weight:700;color:var(--text);line-height:1.3}
+  .chart-card-sub{font-size:.68rem;color:var(--muted);margin-top:.15rem;line-height:1.5}
+  /* Bar/list containers that sit directly in a card (no .chart-body wrapper)
+     get side padding so their content doesn't touch the tile edge. */
+  .chart-card > div[id]:not(.chart-body){padding-left:1.4rem;padding-right:1.4rem}
+  /* A canvas placed directly in a card needs a bounded, padded box. Without a
+     height cap Chart.js grows the doughnut to the full card width. */
+  .chart-card > canvas{max-height:220px!important;padding:0.5rem 1.4rem 1.25rem;box-sizing:border-box}
   .chart-head{padding:1.1rem 1.35rem .85rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
   .chart-title{font-size:.8rem;font-weight:700;color:var(--text)}
   .chart-subtitle{font-size:.68rem;color:var(--muted);margin-top:.15rem}
@@ -469,6 +478,10 @@
       <div class="chart-head"><div><div class="chart-title">Revenue contribution by package</div><div class="chart-subtitle">Last 12 months</div></div></div>
       <div class="chart-body"><canvas id="chart-rev-pkg"></canvas></div>
     </div>
+    <div class="chart-card" style="margin-top:1.25rem">
+      <div class="chart-head"><div><div class="chart-title">Add-on attachment by package</div><div class="chart-subtitle">Share of orders in each package that include each add-on</div></div></div>
+      <div class="chart-body"><div style="height:260px;position:relative;"><canvas id="chart-pkg-addons"></canvas></div></div>
+    </div>
   </div>
 
   <!-- ══ DEMOGRAPHICS ══ -->
@@ -476,7 +489,7 @@
     <div class="topbar">
       <div>
         <div class="topbar-title">Demographics</div>
-        <div class="topbar-sub">Anonymized, collected at signup, stored without PII linkage</div>
+        <div class="topbar-sub">Per individual · anonymized, collected at signup, stored without PII linkage</div>
       </div>
     </div>
     <div class="data-notice">
@@ -1236,7 +1249,7 @@ window.adminAuthHeaders = function(extra){
           <div class="chart-card-title">Couple type distribution</div>
           <div class="chart-card-sub">All 10 pairings, computed from both partners' answers</div>
         </div>
-        <div id="types-ct-bars" style="display:flex;flex-direction:column;gap:.55rem;padding:.25rem 0;">
+        <div id="types-ct-bars" style="display:flex;flex-direction:column;gap:.55rem;padding:.25rem 1.4rem;">
           <div style="color:var(--muted);font-size:.78rem;">Loading…</div>
         </div>
       </div>
@@ -1256,7 +1269,7 @@ window.adminAuthHeaders = function(extra){
           <div class="chart-card-title">Axis split</div>
           <div class="chart-card-sub">Where individuals fall on each axis (3.0 boundary)</div>
         </div>
-        <div id="types-axis-bars" style="display:flex;flex-direction:column;gap:1rem;padding:.5rem 0;"></div>
+        <div id="types-axis-bars" style="display:flex;flex-direction:column;gap:1rem;padding:.5rem 1.4rem;"></div>
       </div>
     </div>
 
@@ -1286,7 +1299,7 @@ window.adminAuthHeaders = function(extra){
           <div class="chart-card-sub">Individual type mix by signup week. Watch for the mix settling as data accumulates — that's the signal there's enough to retune.</div>
         </div>
         <canvas id="types-time-chart" height="200"></canvas>
-        <div id="types-time-empty" style="display:none;color:var(--muted);font-size:.78rem;padding:.5rem 0;">Not enough dated responses yet.</div>
+        <div id="types-time-empty" style="display:none;color:var(--muted);font-size:.78rem;padding:.5rem 1.4rem;">Not enough dated responses yet.</div>
       </div>
     </div>
 
@@ -1329,7 +1342,7 @@ window.adminAuthHeaders = function(extra){
           <div class="chart-card-title">Weight sandbox · what-if</div>
           <div class="chart-card-sub">Drag weights to see how the distribution would shift. Weights are normalized per axis, so this shows relative emphasis. These are previews only — production typing uses the committed formula.</div>
         </div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;padding:.5rem 0;">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;padding:.5rem 1.4rem;">
           <div>
             <div style="font-size:.62rem;letter-spacing:.14em;text-transform:uppercase;color:#FF6B35;font-weight:700;margin-bottom:.6rem;">Engage / Withdraw</div>
             <div id="sandbox-withdraw"></div>
@@ -1397,22 +1410,15 @@ window.adminAuthHeaders = function(extra){
       </div>
     </div>
 
-    <div class="chart-row" style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-top:1rem;">
-      <div class="chart-card">
-        <div class="chart-title">Discount size distribution</div>
-        <div class="chart-sub">Count of code-redeeming orders by discount size</div>
-        <div style="height:240px;position:relative;"><canvas id="pr-discount-chart"></canvas></div>
-      </div>
-      <div class="chart-card">
-        <div class="chart-title">Add-on attachment by package</div>
-        <div class="chart-sub">Share of orders in each package that include each add-on</div>
-        <div style="height:240px;position:relative;"><canvas id="pr-addon-chart"></canvas></div>
-      </div>
+    <div class="chart-card" style="margin-top:1rem;">
+      <div class="chart-title">Discount size distribution</div>
+      <div class="chart-sub">Count of code-redeeming orders by discount size</div>
+      <div style="height:240px;position:relative;"><canvas id="pr-discount-chart"></canvas></div>
     </div>
 
     <div class="chart-card" style="margin-top:1rem;">
       <div class="chart-title">Code usage</div>
-      <div class="chart-sub">Most used to least used. Orders matched joins on the order's promo code; configured uses is the counter on the code itself.</div>
+      <div class="chart-sub">Most recently used at the top. Orders matched joins on the order's promo code; configured uses is the counter on the code itself.</div>
       <div id="pr-code-table" style="margin-top:.75rem;">—</div>
     </div>
   </div>
@@ -1480,7 +1486,7 @@ window.adminAuthHeaders = function(extra){
           <div class="chart-card-title">Benchmarkable metrics</div>
           <div class="chart-card-sub">Average 1–5 · will compare beta vs general survey at launch</div>
         </div>
-        <div id="fb-benchmark-bars" style="display:flex;flex-direction:column;gap:.65rem;padding:.5rem 0;">
+        <div id="fb-benchmark-bars" style="display:flex;flex-direction:column;gap:.65rem;padding:.5rem 1.4rem;">
           <div style="color:var(--muted);font-size:.78rem;">Loading…</div>
         </div>
       </div>
@@ -1500,7 +1506,7 @@ window.adminAuthHeaders = function(extra){
           <div class="chart-card-title">Communication exercise – grid averages</div>
           <div class="chart-card-sub">Design · Accuracy · Importance</div>
         </div>
-        <div id="fb-comms-grid-bars" style="display:flex;flex-direction:column;gap:.6rem;padding:.5rem 0;">
+        <div id="fb-comms-grid-bars" style="display:flex;flex-direction:column;gap:.6rem;padding:.5rem 1.4rem;">
           <div style="color:var(--muted);font-size:.78rem;">Loading…</div>
         </div>
       </div>
@@ -1509,7 +1515,7 @@ window.adminAuthHeaders = function(extra){
           <div class="chart-card-title">Expectations exercise – grid averages</div>
           <div class="chart-card-sub">Design · Accuracy · Importance</div>
         </div>
-        <div id="fb-exp-grid-bars" style="display:flex;flex-direction:column;gap:.6rem;padding:.5rem 0;">
+        <div id="fb-exp-grid-bars" style="display:flex;flex-direction:column;gap:.6rem;padding:.5rem 1.4rem;">
           <div style="color:var(--muted);font-size:.78rem;">Loading…</div>
         </div>
       </div>
@@ -1522,7 +1528,7 @@ window.adminAuthHeaders = function(extra){
           <div class="chart-card-title">Overall experience – clarity · impact · satisfaction</div>
           <div class="chart-card-sub">Per product element · avg 1–5</div>
         </div>
-        <div id="fb-overall-grid-bars" style="display:flex;flex-direction:column;gap:.6rem;padding:.5rem 0;">
+        <div id="fb-overall-grid-bars" style="display:flex;flex-direction:column;gap:.6rem;padding:.5rem 1.4rem;">
           <div style="color:var(--muted);font-size:.78rem;">Loading…</div>
         </div>
       </div>
@@ -1535,7 +1541,7 @@ window.adminAuthHeaders = function(extra){
           <div class="chart-card-title">Comms exercise – lead questions</div>
           <div class="chart-card-sub">Overall · Impact · Honesty · Safety</div>
         </div>
-        <div id="fb-comms-lead-bars" style="display:flex;flex-direction:column;gap:.6rem;padding:.5rem 0;">
+        <div id="fb-comms-lead-bars" style="display:flex;flex-direction:column;gap:.6rem;padding:.5rem 1.4rem;">
           <div style="color:var(--muted);font-size:.78rem;">Loading…</div>
         </div>
       </div>
@@ -1544,7 +1550,7 @@ window.adminAuthHeaders = function(extra){
           <div class="chart-card-title">Expectations exercise – lead questions</div>
           <div class="chart-card-sub">Overall · Impact · Honesty · Safety</div>
         </div>
-        <div id="fb-exp-lead-bars" style="display:flex;flex-direction:column;gap:.6rem;padding:.5rem 0;">
+        <div id="fb-exp-lead-bars" style="display:flex;flex-direction:column;gap:.6rem;padding:.5rem 1.4rem;">
           <div style="color:var(--muted);font-size:.78rem;">Loading…</div>
         </div>
       </div>
@@ -1557,7 +1563,7 @@ window.adminAuthHeaders = function(extra){
           <div class="chart-card-title">Aha moment – biggest recognition</div>
           <div class="chart-card-sub">Which part of Attune produced the biggest moment</div>
         </div>
-        <div id="fb-aha-bars" style="display:flex;flex-direction:column;gap:.55rem;padding:.5rem 0;">
+        <div id="fb-aha-bars" style="display:flex;flex-direction:column;gap:.55rem;padding:.5rem 1.4rem;">
           <div style="color:var(--muted);font-size:.78rem;">Loading…</div>
         </div>
       </div>
@@ -1566,7 +1572,7 @@ window.adminAuthHeaders = function(extra){
           <div class="chart-card-title">Interest in other experiences</div>
           <div class="chart-card-sub">Avg 1–5 interest per add-on experience</div>
         </div>
-        <div id="fb-interest-bars" style="display:flex;flex-direction:column;gap:.55rem;padding:.5rem 0;">
+        <div id="fb-interest-bars" style="display:flex;flex-direction:column;gap:.55rem;padding:.5rem 1.4rem;">
           <div style="color:var(--muted);font-size:.78rem;">Loading…</div>
         </div>
       </div>
@@ -1579,7 +1585,7 @@ window.adminAuthHeaders = function(extra){
           <div class="chart-card-title">Response coverage</div>
           <div class="chart-card-sub">Who has actually replied</div>
         </div>
-        <div id="fb-coverage" style="display:flex;flex-direction:column;gap:.55rem;padding:.5rem 0;">
+        <div id="fb-coverage" style="display:flex;flex-direction:column;gap:.55rem;padding:.5rem 1.4rem;">
           <div style="color:var(--muted);font-size:.78rem;">Loading…</div>
         </div>
       </div>
@@ -1588,7 +1594,7 @@ window.adminAuthHeaders = function(extra){
           <div class="chart-card-title">Time spent by stage</div>
           <div class="chart-card-sub">Most common answer per stage</div>
         </div>
-        <div id="fb-timestage-bars" style="display:flex;flex-direction:column;gap:.55rem;padding:.5rem 0;">
+        <div id="fb-timestage-bars" style="display:flex;flex-direction:column;gap:.55rem;padding:.5rem 1.4rem;">
           <div style="color:var(--muted);font-size:.78rem;">Loading…</div>
         </div>
       </div>
@@ -1597,7 +1603,7 @@ window.adminAuthHeaders = function(extra){
           <div class="chart-card-title">Both partners completed</div>
           <div class="chart-card-sub">Completion rate signal</div>
         </div>
-        <div id="fb-completion-bars" style="display:flex;flex-direction:column;gap:.55rem;padding:.5rem 0;">
+        <div id="fb-completion-bars" style="display:flex;flex-direction:column;gap:.55rem;padding:.5rem 1.4rem;">
           <div style="color:var(--muted);font-size:.78rem;">Loading…</div>
         </div>
       </div>
@@ -1606,7 +1612,7 @@ window.adminAuthHeaders = function(extra){
           <div class="chart-card-title">Concerns before starting</div>
           <div class="chart-card-sub">What held people back going in</div>
         </div>
-        <div id="fb-concerns-bars" style="display:flex;flex-direction:column;gap:.55rem;padding:.5rem 0;">
+        <div id="fb-concerns-bars" style="display:flex;flex-direction:column;gap:.55rem;padding:.5rem 1.4rem;">
           <div style="color:var(--muted);font-size:.78rem;">Loading…</div>
         </div>
       </div>
@@ -1770,21 +1776,6 @@ async function renderPromosPage(force) {
   const byPkg = {};
   pkgs.forEach(k => { byPkg[k] = orders.filter(o => o.pkg_key === k); });
   const presentPkgs = pkgs.filter(k => byPkg[k].length > 0);
-  const addonCanvas = document.getElementById('pr-addon-chart');
-  if (addonCanvas && typeof Chart !== 'undefined') {
-    __prAddonChart = mkChart(addonCanvas, {
-      type: 'bar',
-      data: {
-        labels: presentPkgs.length ? presentPkgs.map(k => pkgLabels[k]) : ['No orders yet'],
-        datasets: addons.map(a => ({
-          label: a.label, backgroundColor: a.color, borderRadius: 4,
-          data: presentPkgs.length ? presentPkgs.map(k => Math.round(byPkg[k].filter(a.key).length / byPkg[k].length * 100)) : [0],
-        })),
-      },
-      options: { plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, padding: 12 } } }, scales: { y: { grid: { color: '#E6ECF6' }, ticks: { callback: v => v + '%' }, max: 100 }, x: { grid: { display: false } } } },
-    });
-  }
-
   // Code usage table: most used to least used. Configured uses = beta_codes
   // counter; orders matched = real order rows carrying the code; revenue =
   // sum of those orders' totals.
@@ -1803,9 +1794,14 @@ async function renderPromosPage(force) {
     const k = (c.code || '').toUpperCase();
     if (!usage[k] && (c.uses_count || 0) > 0) usage[k] = { code: k, orders: 0, revenue: 0, lastUsed: c.last_used_at ? new Date(c.last_used_at).getTime() : null };
   });
+  // Ordered by most recently used (newest at top). Codes never used fall to the
+  // bottom, themselves ordered by configured usage so active-but-unused codes
+  // don't bury the ones with activity.
   const rows = Object.values(usage).filter(r => (codeByName[r.code]?.active) !== false).sort((a, b) => {
-    const ua = Math.max(a.orders, (codeByName[a.code]?.uses_count) || 0);
-    const ub = Math.max(b.orders, (codeByName[b.code]?.uses_count) || 0);
+    if (a.lastUsed && b.lastUsed) return b.lastUsed - a.lastUsed;
+    if (a.lastUsed) return -1;
+    if (b.lastUsed) return 1;
+    const ua = (codeByName[a.code]?.uses_count) || 0, ub = (codeByName[b.code]?.uses_count) || 0;
     return ub - ua;
   });
   const tableEl = document.getElementById('pr-code-table');
@@ -2574,7 +2570,7 @@ async function loadFeedbackData() {
         labels:['Promoters (9–10)','Passives (7–8)','Detractors (0–6)'],
         datasets:[{data:[SIM.npsPromoters,SIM.npsPassives,SIM.npsDetractors],backgroundColor:['#10B981','#F59E0B','#F87171'],borderWidth:0}]
       },
-      options:{plugins:{legend:{position:'bottom',labels:{boxWidth:12,font:{size:11}}}},cutout:'65%'}
+      options:{maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{boxWidth:10,padding:10,font:{size:10}}}},cutout:'62%'}
     });
   }
 
@@ -3205,6 +3201,37 @@ async function loadRealResponses() {
   }
 }
 
+// Add-on attachment by package, moved here from Promo Analytics. Share of each
+// package's orders that include each add-on. Reads the global ORDERS set.
+let __pkgAddonChart = null;
+function renderAddonAttachment() {
+  const canvas = document.getElementById('chart-pkg-addons');
+  if (!canvas || typeof Chart === 'undefined') return;
+  const pkgs = ['core', 'newlywed', 'anniversary', 'premium'];
+  const pkgLabels = { core: 'Assessment', newlywed: 'Starting Out', anniversary: 'Anniversary', premium: 'Premium' };
+  const addons = [
+    { key: o => !!o.addon_workbook,   label: 'Workbook',   color: '#6C7FFF' },
+    { key: o => !!o.addon_reflection, label: 'Reflection', color: '#F4B860' },
+    { key: o => !!o.addon_budget,     label: 'Budget',     color: '#E36BAE' },
+    { key: o => !!o.addon_intimacy,   label: 'Intimacy',   color: '#B5546E' },
+  ];
+  const src = (typeof ORDERS !== 'undefined' ? ORDERS : []);
+  const byPkg = {}; pkgs.forEach(k => { byPkg[k] = src.filter(o => (o._raw?.pkg_key || o.pkgKey) === k); });
+  const present = pkgs.filter(k => byPkg[k].length > 0);
+  __pkgAddonChart = mkChart(canvas, {
+    type: 'bar',
+    data: {
+      labels: present.length ? present.map(k => pkgLabels[k]) : ['No orders yet'],
+      datasets: addons.map(a => ({
+        label: a.label, backgroundColor: a.color, borderRadius: 4,
+        data: present.length ? present.map(k => Math.round(byPkg[k].filter(a.key).length / byPkg[k].length * 100)) : [0],
+      })),
+    },
+    // Compact one-row legend: small swatch + small font keeps four items inline.
+    options: { maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { boxWidth: 8, padding: 10, font: { size: 10 } } } }, scales: { y: { grid: { color: '#E6ECF6' }, ticks: { callback: v => v + '%' }, max: 100 }, x: { grid: { display: false } } } },
+  });
+}
+
 // Real package-mix trend: groups orders by pkg_key + month, produces a
 // 12-month stacked dataset (1 series per package). Replaces the static
 // `pkgTrendStacked` mock so the /packages page chart renders real data.
@@ -3262,6 +3289,7 @@ async function loadRealPackageTrend(orders) {
     chartsInit.packages = false;
     if (document.getElementById('page-packages')?.classList.contains('active')) initCharts('packages');
   }
+  renderAddonAttachment();
   // Overview donut also depends on pkgMix
   if (chartsInit.overview) {
     chartsInit.overview = false;
@@ -4142,6 +4170,7 @@ function initCharts(page) {
       {label:'Anniversary',data:Array(12).fill(0),backgroundColor:'#6C7FFF44',borderColor:'#6C7FFF',borderWidth:1.5,borderRadius:4},
       {label:'Premium',data:Array(12).fill(0),backgroundColor:'#34D39944',borderColor:'#34D399',borderWidth:1.5,borderRadius:4},
     ]},options:{plugins:{legend:{position:'bottom'}},scales:{x:{stacked:true,grid:{display:false}},y:{stacked:true,grid:{color:'#E6ECF6'},ticks:{callback:v=>'$'+Math.round(v/1000)+'k'}}}}});
+    if (typeof renderAddonAttachment === 'function') renderAddonAttachment();
   }
   else if (page==='demographics') {
     mkChart(document.getElementById('chart-age'),{type:'bar',data:{labels:ageData.labels,datasets:[{data:ageData.data,backgroundColor:'#FF6B35',borderRadius:6}]},options:{plugins:{legend:{display:false}},scales:{x:{grid:{display:false}},y:{grid:{color:'#E6ECF6'},ticks:{callback:v=>v+'%'}}}}});
@@ -4292,7 +4321,7 @@ function renderTypes() {
     const ctMax = ctSorted[0][1] || 1;
     ctEl.innerHTML = ctSorted.map(([id,count]) => {
       const pct = Math.round(100*count/couples.length), barW = Math.round(100*count/ctMax);
-      return `<div><div style="display:flex;justify-content:space-between;margin-bottom:.2rem;"><span style="font-size:.75rem;color:#1B2547;">${CT_NAMES[id]||id} <span style="color:#6B7280;">${id}</span></span><span style="font-size:.72rem;color:#6B7280;">${count} <span style="color:#4B5563;">${pct}%</span></span></div><div style="background:#E6ECF6;border-radius:999px;height:6px;"><div style="background:var(--orange);width:${barW}%;height:100%;border-radius:999px;transition:width .4s;"></div></div></div>`;
+      return `<div><div style="display:flex;justify-content:space-between;margin-bottom:.2rem;"><span style="font-size:.75rem;color:#1B2547;">${CT_NAMES[id]||id} <span style="color:#6B7280;">${id}</span></span><span style="font-size:.72rem;color:#6B7280;">${count} couple${count===1?'':'s'} <span style="color:#C7CBD3;">·</span> <span style="color:#4B5563;">${pct}%</span></span></div><div style="background:#E6ECF6;border-radius:999px;height:6px;"><div style="background:var(--orange);width:${barW}%;height:100%;border-radius:999px;transition:width .4s;"></div></div></div>`;
     }).join('') + (small?`<div style="color:#FBBF24;font-size:.7rem;margin-top:.4rem;">Small sample — read with caution.</div>`:'');
   }
 
