@@ -78,6 +78,12 @@ function calcDimScores(answers) {
 const alignPct = (a, b) => Math.round((1 - Math.abs(a - b) / 4) * 100);
 
 function buildResponseAggregates(profiles, sessions) {
+  // Extended-family items and the two involvement life questions are person-
+  // relative: a partner's answer about "my family" is stored under their
+  // {partnerName} key, so mirror the placeholders when reading partner b.
+  const mirrorRespKey = (key) => (!key || (key.indexOf('{userName}') < 0 && key.indexOf('{partnerName}') < 0)) ? key
+    : String(key).replace(/\{userName\}/g, '\u0001').replace(/\{partnerName\}/g, '{userName}').replace(/\u0001/g, '{partnerName}');
+  const mirrorLifeId = (id) => id === 'lq_involve_user' ? 'lq_involve_partner' : id === 'lq_involve_partner' ? 'lq_involve_user' : id;
   const famLabel = (t) => String(t || '')
     .replace(/\{userName\}'s family/g, "one's own family")
     .replace(/\{partnerName\}'s family/g, "other partner's family")
@@ -130,9 +136,10 @@ function buildResponseAggregates(profiles, sessions) {
     RESPONSIBILITY_CATEGORIES.forEach(cat => {
       cat.items.forEach(item => {
         const k = cat.id + '__' + item;
-        if (ra[k] == null || rb[k] == null) return;
+        const bv = rb[mirrorRespKey(k)];
+        if (ra[k] == null || bv == null) return;
         catTotal[cat.id]++;
-        if (ra[k] === rb[k]) catAgree[cat.id]++;
+        if (ra[k] === bv) catAgree[cat.id]++;
       });
     });
   });
@@ -148,7 +155,7 @@ function buildResponseAggregates(profiles, sessions) {
     const la = a.ex2_answers?.life, lb = b.ex2_answers?.life;
     if (!la || !lb) return;
     LIFE_QUESTIONS.forEach(q => {
-      const va = la[q.id], vb = lb[q.id];
+      const va = la[q.id], vb = lb[mirrorLifeId(q.id)];
       if (va == null || va === '' || vb == null || vb === '') return;
       lifeTotal[q.id]++;
       if (va === vb) lifeAgree[q.id]++;
