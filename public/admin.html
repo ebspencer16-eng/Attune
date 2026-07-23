@@ -1371,8 +1371,7 @@ window.adminAuthHeaders = function(extra){
     </div>
 
     <div class="chart-card" style="margin-top:1rem;">
-      <div class="chart-title">Discount size distribution</div>
-      <div class="chart-sub">Count of code-redeeming orders by discount size</div>
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:.75rem"><div><div class="chart-title">Discount size distribution</div><div class="chart-sub">Count of code-redeeming orders by discount size</div></div><select class="tile-slicer" id="slz-pdisc" title="Cut this tile by a segment"></select></div>
       <div style="height:240px;position:relative;"><canvas id="pr-discount-chart"></canvas></div>
     </div>
 
@@ -1717,14 +1716,9 @@ async function renderPromosPage(force) {
   });
   const bLabels = Object.keys(buckets).filter(k => buckets[k] > 0);
   const bData = bLabels.map(k => buckets[k]);
-  const discountCanvas = document.getElementById('pr-discount-chart');
-  if (discountCanvas && typeof Chart !== 'undefined') {
-    __prDiscountChart = mkChart(discountCanvas, {
-      type: 'bar',
-      data: { labels: bLabels.length ? bLabels : ['No code redemptions yet'], datasets: [{ data: bData.length ? bData : [0], backgroundColor: '#FF6B35', borderRadius: 6 }] },
-      options: { plugins: { legend: { display: false } }, scales: { y: { grid: { color: '#E6ECF6' }, ticks: { precision: 0 } }, x: { grid: { display: false } } } },
-    });
-  }
+  // Discount distribution is now cube-backed + sliceable (see renderPromoDiscount).
+  window.__codeByName = codeByName;
+  if (typeof renderPromoDiscount === 'function') renderPromoDiscount('slz-pdisc');
 
   // Add-on attachment by package: % of each package's orders carrying each add-on
   const pkgs = ['core', 'newlywed', 'anniversary', 'premium'];
@@ -3826,7 +3820,7 @@ function sliceFilter(rows, val){
 }
 function setTileN(el, n){
   const card=el.closest('.chart-card'); if(!card) return;
-  let sub=card.querySelector('.chart-subtitle, .chart-card-sub');
+  let sub=card.querySelector('.chart-subtitle, .chart-card-sub, .chart-sub');
   if(!sub){ const head=card.querySelector('.chart-head > div, .chart-card-header'); if(head){ sub=document.createElement('div'); sub.className=card.querySelector('.chart-card-header')?'chart-card-sub':'chart-subtitle'; head.appendChild(sub); } }
   if(!sub) return;
   if(sub.dataset.base==null) sub.dataset.base=/n=/.test(sub.textContent)?'':sub.textContent;
@@ -3916,6 +3910,25 @@ function wireOrderChart(opts){
   const sel=document.getElementById(opts.selId);
   if(sel&&!sel.dataset.wired){ sel.dataset.wired='1'; sel.onchange=()=>renderOrderChart(opts); }
   return renderOrderChart(opts);
+}
+async function renderPromoDiscount(selId){
+  const el=document.getElementById('pr-discount-chart'); if(!el) return;
+  let cube; try{ cube=await ensureCube(); }catch(e){ return; }
+  const sel=document.getElementById(selId);
+  if(sel){ populateSlicer(sel,null,cube.rows||[]); sel.classList.toggle('on',!!sel.value);
+    if(!sel.dataset.wired){ sel.dataset.wired='1'; sel.onchange=()=>renderPromoDiscount(selId); } }
+  const orders=sliceFilter(cube.orders||[], sel?sel.value:'').filter(o=>o.promo_code);
+  setTileN(el, orders.length);
+  const cbn=window.__codeByName||{};
+  const order=['100% off','75–99%','50–74%','25–49%','1–24%','Fixed $','Unknown'];
+  const buckets={}; order.forEach(k=>buckets[k]=0);
+  orders.forEach(o=>{ const c=cbn[(o.promo_code||'').toUpperCase()]; if(!c){ buckets['Unknown']++; return; }
+    const mode=c.discount_mode||'free';
+    if(mode==='free'){ buckets['100% off']++; return; } if(mode==='fixed'){ buckets['Fixed $']++; return; }
+    const v=Number(c.discount_value)||0;
+    if(v>=100)buckets['100% off']++; else if(v>=75)buckets['75–99%']++; else if(v>=50)buckets['50–74%']++; else if(v>=25)buckets['25–49%']++; else buckets['1–24%']++; });
+  const labels=order.filter(k=>buckets[k]>0); const data=labels.map(k=>buckets[k]);
+  mkChart(el,{type:'bar',data:{labels:labels.length?labels:['No code redemptions in this cut'],datasets:[{data:data.length?data:[0],backgroundColor:'#FF6B35',borderRadius:6}]},options:{plugins:{legend:{display:false}},scales:{y:{grid:{color:'#E6ECF6'},ticks:{precision:0}},x:{grid:{display:false}}}}});
 }
 // ── Type Analytics tiles, cube-backed + per-tile sliceable ───────────────────
 async function renderTypeCouple(selId){
