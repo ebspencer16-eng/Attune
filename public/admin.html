@@ -556,7 +556,7 @@
           <div class="chart-body"><canvas id="chart-dim-scores"></canvas></div>
         </div>
         <div class="chart-card">
-          <div class="chart-head"><div><div class="chart-title">Couple type distribution</div><div class="chart-subtitle">Across all typed couples</div></div></div>
+          <div class="chart-head"><div><div class="chart-title">Couple type distribution</div><div class="chart-subtitle">Across all typed couples</div></div><select class="tile-slicer" id="slz-rcouple" title="Cut this tile by a segment"><option value="">Everyone</option></select></div>
           <div class="chart-body">
             <div class="insight-list" id="comm-type-bars" style="margin-top:.5rem;"></div>
           </div>
@@ -3829,7 +3829,7 @@ const SLICER_CFG={
   'slz-children':{ex:'children'},'slz-demorellen':{ex:'relationship_length'},'slz-ovrellen':{ex:'relationship_length'},
   'slz-source':{ex:'signup_source'},'slz-revenue':{},'slz-pkgmix':{},'slz-pkgtrend':{},'slz-revpkg':{},
   'slz-addons':{},'slz-geo':{},'slz-pdisc':{},
-  'slz-tcouple':{ex:'couple_type'},'slz-tindiv':{ex:'type'},'slz-teng':{ex:'axisEngage'},'slz-topen':{ex:'axisOpen'},
+  'slz-tcouple':{ex:'couple_type'},'slz-rcouple':{ex:'couple_type'},'slz-tindiv':{ex:'type'},'slz-teng':{ex:'axisEngage'},'slz-topen':{ex:'axisOpen'},
   'slz-rdim':{only:COUPLE_LEVEL_DIMS},'slz-rexp':{only:COUPLE_LEVEL_DIMS},'slz-rgap':{only:COUPLE_LEVEL_DIMS},'slz-rfeel':{only:COUPLE_LEVEL_DIMS},
   'slz-sfunnel':{only:COUPLE_LEVEL_DIMS},'slz-srate':{},'slz-snps':{},
 };
@@ -3991,12 +3991,12 @@ async function renderPromoDiscount(selId){
   mkChart(el,{type:'bar',data:{labels:labels.length?labels:['No code redemptions in this cut'],datasets:[{data:data.length?data:[0],backgroundColor:'#FF6B35',borderRadius:6}]},options:{plugins:{legend:{display:false}},scales:{y:{grid:{color:'#E6ECF6'},ticks:{precision:0}},x:{grid:{display:false}}}}});
 }
 // ── Type Analytics tiles, cube-backed + per-tile sliceable ───────────────────
-async function renderTypeCouple(selId){
-  const el=document.getElementById('types-ct-bars'); if(!el) return;
+async function renderTypeCouple(containerId, selId){
+  const el=document.getElementById(containerId); if(!el) return;
   let cube; try{ cube=await ensureCube(); }catch(e){ return; }
   const sel=document.getElementById(selId);
   if(sel){ populateSlicer(sel,'couple_type',cube.rows||[]); sel.classList.toggle('on',!!sel.value);
-    if(!sel.dataset.wired){ sel.dataset.wired='1'; sel.onchange=()=>renderTypeCouple(selId); } }
+    if(!sel.dataset.wired){ sel.dataset.wired='1'; sel.onchange=()=>renderTypeCouple(containerId, selId); } }
   const rows=sliceFilter(cube.rows||[], sel?sel.value:'');
   const seen={}, cnt={}; let nc=0;
   rows.forEach(r=>{ if(!r.couple_id||!r.couple_type||seen[r.couple_id]) return; seen[r.couple_id]=1; cnt[r.couple_type]=(cnt[r.couple_type]||0)+1; nc++; });
@@ -4546,7 +4546,7 @@ function initCharts(page) {
   }
   else if (page==='responses') {
     wireResponseTile({target:'chart-dim-scores',kind:'radar',selId:'slz-rdim'});
-    renderCoupleTypeDist('comm-type-bars');
+    renderTypeCouple('comm-type-bars','slz-rcouple');
     wireResponseTile({target:'chart-exp-align',kind:'expalign',selId:'slz-rexp'});
     wireResponseTile({target:'exp-gap-bars',kind:'expgaps',selId:'slz-rgap'});
     wireResponseTile({target:'chart-story-feel',kind:'relfeel',selId:'slz-rfeel'});
@@ -4674,7 +4674,7 @@ function renderTypes() {
   document.getElementById('types-maxshare-sub').textContent = ctSorted.length ? `${maxShare}% of couples` : 'Concentration check';
 
   // Couple type distribution (cube-backed + sliceable)
-  renderTypeCouple('slz-tcouple');
+  renderTypeCouple('types-ct-bars','slz-tcouple');
 
   // Individual doughnut
   wireCubeTile({target:'types-indiv-chart',field:'type',mode:'doughnut',selId:'slz-tindiv',palette:['W','X','Y','Z'].map(t=>TYPE_COLORS[t])});
