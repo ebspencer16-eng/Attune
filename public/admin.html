@@ -277,6 +277,10 @@
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
       Beta Feedback
     </a>
+    <a class="sb-item" onclick="showPage('testimonials')">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l2.4 6.9H22l-6 4.6 2.3 7L12 16.9 5.7 20.5 8 13.5 2 8.9h7.6z"/></svg>
+      Testimonials
+    </a>
     <a class="sb-item" onclick="showPage('survey-explorer')">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
       Survey Explorer
@@ -1627,17 +1631,24 @@ window.adminAuthHeaders = function(extra){
       </div>
     </div>
 
-    <!-- Testimonials review: post-results survey responses, search + feature -->
-    <div class="chart-card" style="margin-top:1.5rem">
-      <div class="chart-card-header"><div class="chart-card-title">Testimonials review</div><div class="chart-card-sub">Post-results survey responses · search, then feature the ones to publish on the homepage</div></div>
-      <div style="padding:.5rem 1.4rem 1.2rem;">
+    <!-- Survey question explorer: distributions + crosstab + full segmentation -->
+    <div class="qx-section" id="qx-feedback" style="margin-top:1.5rem"></div>
+  </div>
+
+  <div class="page" id="page-testimonials">
+    <div class="topbar">
+      <div>
+        <div class="topbar-title">Testimonials</div>
+        <div class="topbar-sub">Post-results survey testimonials · search, then feature the ones to publish on the homepage</div>
+      </div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-card-header"><div class="chart-card-title">Testimonials review</div><div class="chart-card-sub">Star + NPS attached; “★ Feature” publishes a testimonial to the homepage</div></div>
+      <div style="padding:.5rem 1.4rem 1.4rem;">
         <input id="testi-search" type="text" placeholder="Search testimonials or names…" oninput="renderTestimonialsReview()" style="width:100%;background:var(--surface);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:.5rem .7rem;font-size:.8rem;margin-bottom:.9rem;box-sizing:border-box;">
         <div id="testi-list"></div>
       </div>
     </div>
-
-    <!-- Survey question explorer: distributions + crosstab + full segmentation -->
-    <div class="qx-section" id="qx-feedback" style="margin-top:1.5rem"></div>
   </div>
 
 <script>
@@ -2305,6 +2316,7 @@ function showPage(id) {
   // Lazy-init charts
   if (!chartsInit[id]) { chartsInit[id]=true; initCharts(id); }
   if (id==='feedback') loadFeedbackData();
+  if (id==='testimonials') loadFeedbackData();
   // Demographics charts depend on async data; redraw on every open so they
   // never sit blank from a data-less initial render.
   if (id==='demographics') { chartsInit.demographics = false; initCharts('demographics'); }
