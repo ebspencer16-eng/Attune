@@ -49,11 +49,11 @@ export default async function handler(req) {
         'Prefer': 'return=minimal',
       },
       body: JSON.stringify({
-        type: 'beta_survey',
+        type: body.surveyType === 'post_results' ? 'post_results' : 'beta_survey',
         text: JSON.stringify(body),
         email: body.email || null,
         couple_type: body.coupleType || null,
-        source: 'feedback_page',
+        source: body.surveyType === 'post_results' ? 'dashboard' : 'feedback_page',
         submitted_at: new Date().toISOString(),
       }),
     }).catch(e => console.warn('[survey] supabase write failed:', e));

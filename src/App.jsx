@@ -7350,6 +7350,122 @@ function RetakeComparisonCard({ currentEx2, priorEx2, priorAt, userName, partner
   );
 }
 
+// ── Post-results survey (all couples). Mirrors the beta survey's key metrics
+// in a shorter form so beta + general responses land on the same admin charts.
+const POST_Qs = [
+  { id: "rating",      q: "How would you rate your Attune experience?", type: "stars" },
+  { id: "convo",       q: "Did it lead to a real conversation with your partner?", type: "choice", options: ["Yes", "Not yet"] },
+  { id: "nps",         q: "How likely are you to recommend Attune to a friend?", type: "nps" },
+  { id: "expectation", q: "How did it compare to what you expected?", type: "scale", labels: ["Fell short", "About right", "Exceeded"] },
+  { id: "testimonial", q: "Anything you'd like to share about your experience?", sub: "Optional. We may feature your words as a testimonial on our site.", type: "text", optional: true, placeholder: "What stood out, what it opened up…" },
+  { id: "improve",     q: "Anything you'd change?", type: "text", optional: true, placeholder: "Optional" },
+];
+
+function PostResultsSurvey({ respondentId = null, userName, coupleType, onClose, onDone }) {
+  const [step, setStep] = React.useState(0);
+  const [answers, setAnswers] = React.useState({});
+  const [submitted, setSubmitted] = React.useState(false);
+  const [submitting, setSubmitting] = React.useState(false);
+  const q = POST_Qs[step];
+  const total = POST_Qs.length;
+  const ans = answers[q?.id];
+  const canNext = q?.optional ? true : (q?.type === "text" ? true : (ans !== undefined && ans !== null && ans !== ""));
+
+  const send = async (completed) => {
+    try {
+      await fetch('/api/submit-beta-survey', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ surveyType: 'post_results', respondentId, userName, coupleType: coupleType?.name || null, answers, completed }),
+      });
+    } catch {}
+  };
+  const finish = async () => { setSubmitting(true); await send(true); setSubmitted(true); setSubmitting(false); };
+  const next = () => { if (step < total - 1) setStep(s => s + 1); else finish(); };
+  // Incomplete capture: if they close with anything answered but not submitted,
+  // still persist what we have.
+  const close = () => { if (!submitted && Object.keys(answers).length > 0) { send(false); } onClose && onClose(); };
+
+  if (submitted) return (
+    <div style={{ position: "fixed", inset: 0, background: "rgba(14,11,7,0.6)", zIndex: 500, display: "flex", alignItems: "center", justifyContent: "center", padding: "1rem" }} onClick={() => { onDone && onDone(); }}>
+      <div onClick={e => e.stopPropagation()} style={{ background: C.cream, borderRadius: 22, padding: "2.25rem 2rem", width: "100%", maxWidth: 400, textAlign: "center", boxShadow: "0 24px 64px rgba(0,0,0,0.25)" }}>
+        <div style={{ width: 52, height: 52, borderRadius: "50%", background: "linear-gradient(135deg, #10b981, #059669)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 1.25rem", fontSize: "1.3rem", color: "white" }}>✓</div>
+        <div style={{ fontFamily: font.display, fontSize: "1.3rem", fontWeight: 700, color: C.ink, marginBottom: "0.6rem" }}>Thank you{userName ? `, ${userName}` : ""}.</div>
+        <p style={{ fontSize: "0.85rem", color: C.muted, fontFamily: font.body, lineHeight: 1.7, marginBottom: "1.5rem" }}>This helps us understand Attune's impact and shape what comes next.</p>
+        <button onClick={() => { onDone && onDone(); }} style={{ background: C.ink, color: "white", border: "none", borderRadius: 11, padding: "0.7rem 2rem", fontSize: "0.82rem", fontWeight: 700, cursor: "pointer", fontFamily: font.body }}>Done</button>
+      </div>
+    </div>
+  );
+
+  return (
+    <div style={{ position: "fixed", inset: 0, background: "rgba(14,11,7,0.6)", zIndex: 500, display: "flex", alignItems: "center", justifyContent: "center", padding: "1rem" }} onClick={close}>
+      <div onClick={e => e.stopPropagation()} style={{ background: C.cream, borderRadius: 22, padding: "2.25rem 2rem", width: "100%", maxWidth: 440, boxShadow: "0 24px 64px rgba(0,0,0,0.25)" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1.5rem" }}>
+          <div>
+            <div style={{ fontSize: "0.55rem", letterSpacing: "0.22em", textTransform: "uppercase", color: "#E8673A", fontFamily: font.body, fontWeight: 700, marginBottom: "0.2rem" }}>Your experience</div>
+            <div style={{ fontSize: "0.7rem", color: C.muted, fontFamily: font.body }}>{step + 1} of {total}</div>
+          </div>
+          <button onClick={close} aria-label="Close" style={{ background: "transparent", border: "none", fontSize: "1.1rem", cursor: "pointer", color: C.muted }}>✕</button>
+        </div>
+        <div style={{ height: 3, background: C.stone, borderRadius: 2, marginBottom: "1.6rem", overflow: "hidden" }}>
+          <div style={{ height: "100%", width: `${((step + 1) / total) * 100}%`, background: "linear-gradient(90deg,#E8673A,#1B5FE8)", borderRadius: 2, transition: "width 0.3s ease" }} />
+        </div>
+        <div style={{ fontFamily: font.display, fontSize: "1.1rem", fontWeight: 700, color: C.ink, lineHeight: 1.3, marginBottom: q.sub ? "0.4rem" : "1.4rem" }}>{q.q}</div>
+        {q.sub && <div style={{ fontSize: "0.72rem", color: C.muted, fontFamily: font.body, marginBottom: "1.2rem", lineHeight: 1.5 }}>{q.sub}</div>}
+
+        {q.type === "stars" && (
+          <div style={{ display: "flex", gap: "0.4rem", justifyContent: "center", marginBottom: "1.6rem" }}>
+            {[1,2,3,4,5].map(v => (
+              <button key={v} onClick={() => setAnswers(a => ({ ...a, [q.id]: v }))} aria-label={`${v} star`}
+                style={{ background: "transparent", border: "none", cursor: "pointer", fontSize: "2rem", lineHeight: 1, color: (ans >= v) ? "#E8673A" : "#D9CFC2", transition: "color .1s" }}>{ans >= v ? "★" : "☆"}</button>
+            ))}
+          </div>
+        )}
+        {q.type === "nps" && (
+          <div style={{ marginBottom: "1.6rem" }}>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(11,1fr)", gap: "0.25rem" }}>
+              {Array.from({ length: 11 }, (_, v) => (
+                <button key={v} onClick={() => setAnswers(a => ({ ...a, [q.id]: v }))}
+                  style={{ aspectRatio: "1", borderRadius: 8, border: `1.5px solid ${ans === v ? "#E8673A" : C.stone}`, background: ans === v ? "#FFF0EB" : "white", color: ans === v ? "#E8673A" : C.muted, fontWeight: ans === v ? 700 : 400, fontSize: "0.72rem", cursor: "pointer", fontFamily: font.body }}>{v}</button>
+              ))}
+            </div>
+            <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.6rem", color: C.muted, fontFamily: font.body, marginTop: "0.4rem" }}><span>Not likely</span><span>Very likely</span></div>
+          </div>
+        )}
+        {q.type === "scale" && (<>
+          <div style={{ display: "flex", gap: "0.5rem", marginBottom: "0.5rem" }}>
+            {[1,2,3,4,5].map(v => (
+              <button key={v} onClick={() => setAnswers(a => ({ ...a, [q.id]: v }))}
+                style={{ flex: 1, aspectRatio: "1", borderRadius: 10, border: `1.5px solid ${ans === v ? "#E8673A" : C.stone}`, background: ans === v ? "#FFF0EB" : "white", color: ans === v ? "#E8673A" : C.muted, fontWeight: ans === v ? 700 : 400, fontSize: "0.85rem", cursor: "pointer", fontFamily: font.body }}>{v}</button>
+            ))}
+          </div>
+          <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.62rem", color: C.muted, fontFamily: font.body, marginBottom: "1.5rem" }}>{q.labels.map((l,i)=><span key={i}>{l}</span>)}</div>
+        </>)}
+        {q.type === "choice" && (
+          <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem", marginBottom: "1.5rem" }}>
+            {q.options.map((o,i) => (
+              <button key={i} onClick={() => setAnswers(a => ({ ...a, [q.id]: o }))}
+                style={{ padding: "0.75rem 1rem", borderRadius: 11, border: `1.5px solid ${ans === o ? "#E8673A" : C.stone}`, background: ans === o ? "#FFF0EB" : "white", color: ans === o ? "#E8673A" : C.ink, fontWeight: ans === o ? 600 : 400, fontSize: "0.82rem", cursor: "pointer", textAlign: "left", fontFamily: font.body }}>{o}</button>
+            ))}
+          </div>
+        )}
+        {q.type === "text" && (
+          <textarea placeholder={q.placeholder} value={ans || ""} onChange={e => setAnswers(a => ({ ...a, [q.id]: e.target.value }))}
+            style={{ width: "100%", minHeight: 90, borderRadius: 11, border: `1.5px solid ${C.stone}`, padding: "0.75rem", fontSize: "0.82rem", fontFamily: font.body, color: C.ink, resize: "vertical", marginBottom: "1.5rem", boxSizing: "border-box" }} />
+        )}
+
+        <div style={{ display: "flex", gap: "0.6rem", alignItems: "center" }}>
+          {step > 0 && <button onClick={() => setStep(s => s - 1)} style={{ background: "transparent", border: `1.5px solid ${C.stone}`, borderRadius: 11, padding: "0.7rem 1.1rem", fontSize: "0.8rem", fontWeight: 600, cursor: "pointer", color: C.muted, fontFamily: font.body }}>Back</button>}
+          <button onClick={next} disabled={!canNext || submitting}
+            style={{ flex: 1, background: (canNext && !submitting) ? C.ink : C.stone, color: "white", border: "none", borderRadius: 11, padding: "0.75rem", fontSize: "0.82rem", fontWeight: 700, cursor: (canNext && !submitting) ? "pointer" : "default", fontFamily: font.body }}>
+            {submitting ? "Sending…" : (step < total - 1 ? "Next" : "Submit")}
+          </button>
+        </div>
+        <div style={{ fontSize: "0.6rem", color: C.muted, fontStyle: "italic", fontFamily: font.body, textAlign: "center", marginTop: "1rem", lineHeight: 1.5 }}>Responses are used in aggregate to assess the impact of the Attune experience.</div>
+      </div>
+    </div>
+  );
+}
+
 function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Answers, partnerEx3, ex2AnswersPrior = null, ex2PriorAt = null, hasAnniversary, userName, partnerName, initialSection, isMobile = false, portrait = null, hasChecklist = false, hasBudget = false, hasLMFT = false, hasWorkbook = false, hasIntimacy = false, intimacyAnswers = null, partnerIntimacy = null, intimacyVariant = 'premarital', onNavigateTool = null, userPronouns = "", partnerPronouns = "", isBetaTester = false }) {
 
   // Compute all the data we need up front
@@ -12295,6 +12411,8 @@ export default function App() {
     } catch {}
   }, [view]);
   const [isBetaTester, setIsBetaTester] = useState(false);
+  const [showPostSurvey, setShowPostSurvey] = useState(false);
+  const [postSurveyDone, setPostSurveyDone] = useState(() => { try { return !!localStorage.getItem('attune_post_survey_done'); } catch { return false; } });
   const isMobile = useMobile(680);
 
   // Lock body scroll when results are shown (prevents mobile page drift)
@@ -14085,6 +14203,18 @@ export default function App() {
                        style={{ display: "inline-block", background: "#7C3AED", color: "white", borderRadius: 10, padding: "0.6rem 1.1rem", fontSize: "0.78rem", fontWeight: 700, fontFamily: "'DM Sans', sans-serif", textDecoration: "none" }}>Share your feedback →</a>
                   </div>
                 )}
+
+                {/* Post-results survey prompt — non-beta couples, once results seen, until submitted */}
+                {!isBetaTester && highlightsSeen && !postSurveyDone && (
+                  <div style={{ background: "linear-gradient(135deg, rgba(232,103,58,0.08), rgba(27,95,232,0.05))", border: "1.5px solid rgba(232,103,58,0.30)", borderRadius: 14, padding: "1.1rem 1.4rem", marginBottom: "2rem", display: "flex", alignItems: "center", gap: "0.85rem", flexWrap: "wrap" }}>
+                    <div style={{ flex: 1, minWidth: 200 }}>
+                      <div style={{ fontSize: "0.56rem", letterSpacing: "0.2em", textTransform: "uppercase", color: "#E8673A", fontWeight: 700, fontFamily: "'DM Sans', sans-serif", marginBottom: "0.35rem" }}>Two minutes?</div>
+                      <div style={{ fontSize: "0.9rem", color: "#0E0B07", fontFamily: "'DM Sans', sans-serif", fontWeight: 600, lineHeight: 1.35 }}>Congrats on finishing. Tell us how your Attune experience was.</div>
+                    </div>
+                    <button onClick={() => setShowPostSurvey(true)} style={{ background: "#E8673A", color: "white", border: "none", borderRadius: 10, padding: "0.6rem 1.1rem", fontSize: "0.78rem", fontWeight: 700, fontFamily: "'DM Sans', sans-serif", cursor: "pointer", whiteSpace: "nowrap" }}>Share your experience →</button>
+                  </div>
+                )}
+                {showPostSurvey && <PostResultsSurvey respondentId={account?.id || null} userName={userName} coupleType={coupleType} onClose={() => setShowPostSurvey(false)} onDone={() => { setPostSurveyDone(true); try { localStorage.setItem('attune_post_survey_done', '1'); } catch {} setShowPostSurvey(false); }} />}
 
                 {/* Welcome-back banner — surfaces any in-progress exercise so
                     the user can jump straight back in. Covers both session
