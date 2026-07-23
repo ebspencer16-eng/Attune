@@ -276,6 +276,10 @@
       "destination": "/api/admin-login.js"
     },
     {
+      "source": "/api/featured-testimonials",
+      "destination": "/api/featured-testimonials.js"
+    },
+    {
       "source": "/app",
       "destination": "/index.html"
     },

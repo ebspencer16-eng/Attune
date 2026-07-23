@@ -849,6 +849,22 @@
     }, 420);
   };
   showQuote(0);
+  // Swap in real featured testimonials from the post-results survey when present.
+  fetch('/api/featured-testimonials').then(function(r){ return r.json(); }).then(function(list){
+    if(!Array.isArray(list) || !list.length) return;
+    quotes = list;
+    var wrap = document.getElementById('quote-dots');
+    if(wrap){
+      wrap.innerHTML = '';
+      for(var k=0;k<quotes.length;k++){
+        var dot = document.createElement('div');
+        dot.style.cssText = 'width:6px;height:3px;border-radius:2px;background:var(--stone);cursor:pointer;transition:all .3s;';
+        (function(idx){ dot.onclick = function(){ showQuote(idx); }; })(k);
+        wrap.appendChild(dot);
+      }
+    }
+    cur = 0; showQuote(0);
+  }).catch(function(){});
   setInterval(function(){ showQuote((cur+1)%quotes.length); }, 6000);
 })();
 </script>

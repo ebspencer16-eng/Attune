@@ -4025,7 +4025,7 @@ async function renderSatRatings(selId){
   const surveys=sliceFilter(cube.surveys||[], sel?sel.value:'').filter(x=>typeof x.returnLikelihood==='number');
   setTileN(el, surveys.length);
   const c={1:0,2:0,3:0,4:0,5:0}; surveys.forEach(x=>{ c[x.returnLikelihood]=(c[x.returnLikelihood]||0)+1; });
-  mkChart(el,{type:'bar',data:{labels:['5 ★','4 ★','3 ★','2 ★','1 ★'],datasets:[{data:[c[5],c[4],c[3],c[2],c[1]],backgroundColor:hexRamp(MONEY_CLR,5).slice().reverse(),borderRadius:6}]},options:{plugins:{legend:{display:false}},scales:{x:{grid:{display:false}},y:{grid:{color:'#E6ECF6'}}}}});
+  mkChart(el,{type:'bar',data:{labels:['1 ★','2 ★','3 ★','4 ★','5 ★'],datasets:[{data:[c[1],c[2],c[3],c[4],c[5]],backgroundColor:hexRamp(MONEY_CLR,5),borderRadius:6}]},options:{plugins:{legend:{display:false}},scales:{x:{grid:{display:false}},y:{grid:{color:'#E6ECF6'}}}}});
 }
 async function renderSatNps(selId){
   const el=document.getElementById('chart-nps'); if(!el) return;
