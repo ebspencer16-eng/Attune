@@ -3118,7 +3118,7 @@ async function loadRealDemographics() {
     // being active) since renderBars/mkChart work on off-screen elements too.
     // Cube-backed + sliceable — keep consistent with initCharts('overview').
     wireCubeTile({target:'rellength-bars',field:'relationship_length',mode:'insightbars',selId:'slz-ovrellen',color:'#6C7FFF'});
-    wireCubeTile({target:'chart-source',field:'signup_source',mode:'hbar',selId:'slz-source',color:'#34D399'});
+    wireCubeTile({target:'chart-source',field:'signup_source',mode:'hbar',selId:'slz-source',color:DEMO_HUE});
     wireOrderChart({target:'chart-revenue',kind:'revenue',selId:'slz-revenue'});
     wireOrderChart({target:'chart-pkg-mix',kind:'pkgmix',selId:'slz-pkgmix'});
   } catch (e) {
@@ -3224,7 +3224,7 @@ async function renderResponseTile(opts){
   if(opts.kind==='radar'){
     mkChart(el,{type:'radar',data:{labels:a.dimScores.labels,datasets:[{label:'Avg alignment',data:a.dimScores.data,borderColor:'#6C7FFF',backgroundColor:'rgba(108,127,255,.15)',borderWidth:2,pointRadius:3,pointBackgroundColor:'#6C7FFF'}]},options:{scales:{r:{grid:{color:'#E6ECF6'},angleLines:{color:'#E6ECF6'},ticks:{display:false},min:0,max:100}},plugins:{legend:{display:false}}}});
   } else if(opts.kind==='expalign'){
-    mkChart(el,{type:'bar',data:{labels:a.expAlign.labels,datasets:[{label:'% aligned',data:a.expAlign.data,backgroundColor:a.expAlign.data.map(v=>v<50?'#F87171':v<65?'#FBBF24':'#34D399'),borderRadius:6}]},options:{plugins:{legend:{display:false}},scales:{x:{grid:{display:false}},y:{grid:{color:'#E6ECF6'},ticks:{callback:v=>v+'%'},min:0,max:100}}}});
+    mkChart(el,{type:'bar',data:{labels:a.expAlign.labels,datasets:[{label:'% aligned',data:a.expAlign.data,backgroundColor:'#FF6B35',borderRadius:6}]},options:{plugins:{legend:{display:false}},scales:{x:{grid:{display:false}},y:{grid:{color:'#E6ECF6'},ticks:{callback:v=>v+'%'},min:0,max:100}}}});
   } else if(opts.kind==='relfeel'){
     mkChart(el,{type:'bar',data:{labels:['Needs work (0)','Rough patch (1)','Solid (2)','Really good (3)','Better than ever (4)'],datasets:[{data:a.relFeel,backgroundColor:hexRamp('#E5578C',5),borderRadius:6}]},options:{plugins:{legend:{display:false}},scales:{x:{grid:{display:false}},y:{grid:{color:'#E6ECF6'}}}}});
   } else if(opts.kind==='expgaps'){
@@ -3766,6 +3766,13 @@ function _rgbToHex(r,g,b){ const c=x=>('0'+Math.max(0,Math.min(255,Math.round(x)
 function hexShade(base, frac){ const {r,g,b}=_hexToRgb(base); const t=0.22+0.78*frac; return _rgbToHex(255+(r-255)*t,255+(g-255)*t,255+(b-255)*t); }
 function hexRamp(base, n){ n=n||5; const out=[]; for(let i=0;i<n;i++) out.push(hexShade(base, n===1?1:i/(n-1))); return out; }
 const QX_THEME = { 'qx-comm':'#6C7FFF', 'qx-exp':'#FF6B35', 'qx-story':'#E5578C', 'qx-intimacy':'#B5546E', 'qx-feedback':'#22A5C4' };
+// Semantic colour system used across the admin. Money=green. Each demographic
+// breakdown uses one brand hue (the bar height carries the value, not colour).
+// Nominal slices (gender, status) use a fixed palette so a category keeps the
+// same colour everywhere. Ordinal scales use monochrome gradients (hexRamp).
+const MONEY_CLR = '#34D399';
+const DEMO_HUE  = '#6C7FFF';
+const CAT_PALETTE = ['#6C7FFF','#22A5C4','#9B5DE5','#E5578C','#FBBF24','#FF6B35','#34D399'];
 // Human-readable labels for raw stored segment values, plus a title-case
 // fallback so nothing shows as a bare lowercase code (e.g. "married").
 const QX_VAL_LABELS = {
@@ -3903,7 +3910,7 @@ async function renderOrderChart(opts){
     const months=_last12Months(); const sum={};
     orders.forEach(o=>{ if(o.month) sum[o.month]=(sum[o.month]||0)+(Number(o.amount)||0); });
     const data=months.map(m=>Math.round(sum[m.key]||0));
-    mkChart(el,{type:'line',data:{labels:months.map(m=>m.label),datasets:[{label:'Revenue',data,borderColor:'#FF6B35',backgroundColor:'rgba(255,107,53,.1)',tension:.4,fill:true,borderWidth:2.5,pointRadius:0,pointHoverRadius:4}]},options:{plugins:{legend:{display:false}},scales:{y:{grid:{color:'#E6ECF6'},ticks:{callback:v=>'$'+Math.round(v/1000)+'k'}},x:{grid:{display:false}}},animation:{duration:600}}});
+    mkChart(el,{type:'line',data:{labels:months.map(m=>m.label),datasets:[{label:'Revenue',data,borderColor:MONEY_CLR,backgroundColor:'rgba(52,211,153,.12)',tension:.4,fill:true,borderWidth:2.5,pointRadius:0,pointHoverRadius:4}]},options:{plugins:{legend:{display:false}},scales:{y:{grid:{color:'#E6ECF6'},ticks:{callback:v=>'$'+Math.round(v/1000)+'k'}},x:{grid:{display:false}}},animation:{duration:600}}});
   } else if(opts.kind==='pkgmix'){
     const PK=[['core','Assessment','#FF6B35'],['newlywed','Starting Out','#FBBF24'],['anniversary','Anniversary','#6C7FFF'],['premium','Premium','#34D399']];
     const cnt={}; orders.forEach(o=>{ const k=o.order_pkg; if(k) cnt[k]=(cnt[k]||0)+1; });
@@ -3953,7 +3960,7 @@ async function renderSatFunnel(selId){
   const ordered=orders.length, started=rows.length;
   const bothDone=Math.floor(rows.filter(r=>r.has_ex2&&r.couple_id).length/2), viewed=bothDone;
   setTileN(el, started);
-  mkChart(el,{type:'bar',data:{labels:['Ordered','Started exercises','Both completed','Results viewed'],datasets:[{data:[ordered,started,bothDone,viewed],backgroundColor:['#FF6B35','#FBBF24','#6C7FFF','#34D399'],borderRadius:6}]},options:{plugins:{legend:{display:false}},scales:{x:{grid:{display:false}},y:{grid:{color:'#E6ECF6'}}}}});
+  mkChart(el,{type:'bar',data:{labels:['Ordered','Started exercises','Both completed','Results viewed'],datasets:[{data:[ordered,started,bothDone,viewed],backgroundColor:hexRamp(DEMO_HUE,4).reverse(),borderRadius:6}]},options:{plugins:{legend:{display:false}},scales:{x:{grid:{display:false}},y:{grid:{color:'#E6ECF6'}}}}});
 }
 async function renderSatRatings(selId){
   const el=document.getElementById('chart-ratings'); if(!el) return;
@@ -3964,7 +3971,7 @@ async function renderSatRatings(selId){
   const surveys=sliceFilter(cube.surveys||[], sel?sel.value:'').filter(x=>typeof x.returnLikelihood==='number');
   setTileN(el, surveys.length);
   const c={1:0,2:0,3:0,4:0,5:0}; surveys.forEach(x=>{ c[x.returnLikelihood]=(c[x.returnLikelihood]||0)+1; });
-  mkChart(el,{type:'bar',data:{labels:['5 ★','4 ★','3 ★','2 ★','1 ★'],datasets:[{data:[c[5],c[4],c[3],c[2],c[1]],backgroundColor:['#34D399','#6C7FFF','#FBBF24','#F87171','#EF4444'],borderRadius:6}]},options:{plugins:{legend:{display:false}},scales:{x:{grid:{display:false}},y:{grid:{color:'#E6ECF6'}}}}});
+  mkChart(el,{type:'bar',data:{labels:['5 ★','4 ★','3 ★','2 ★','1 ★'],datasets:[{data:[c[5],c[4],c[3],c[2],c[1]],backgroundColor:hexRamp(MONEY_CLR,5).slice().reverse(),borderRadius:6}]},options:{plugins:{legend:{display:false}},scales:{x:{grid:{display:false}},y:{grid:{color:'#E6ECF6'}}}}});
 }
 async function renderSatNps(selId){
   const el=document.getElementById('chart-nps'); if(!el) return;
@@ -4519,7 +4526,7 @@ function initCharts(page) {
     wireOrderChart({target:'chart-revenue',kind:'revenue',selId:'slz-revenue'});
     wireOrderChart({target:'chart-pkg-mix',kind:'pkgmix',selId:'slz-pkgmix'});
     wireCubeTile({target:'rellength-bars',field:'relationship_length',mode:'insightbars',selId:'slz-ovrellen',color:'#6C7FFF'});
-    wireCubeTile({target:'chart-source',field:'signup_source',mode:'hbar',selId:'slz-source',color:'#34D399'});
+    wireCubeTile({target:'chart-source',field:'signup_source',mode:'hbar',selId:'slz-source',color:DEMO_HUE});
   }
   else if (page==='orders') { applyOrderFilters(); }
   else if (page==='fulfillment') {
@@ -4557,11 +4564,11 @@ function initCharts(page) {
     wireOrderChart({target:'chart-pkg-addons',kind:'addons',selId:'slz-addons'});
   }
   else if (page==='demographics') {
-    wireCubeTile({target:'chart-age',field:'age_range',mode:'bar',selId:'slz-age',color:'#FF6B35'});
-    wireCubeTile({target:'chart-gender',field:'gender',mode:'doughnut',selId:'slz-gender',palette:['#F87171','#6C7FFF','#34D399','#FBBF24']});
-    wireCubeTile({target:'chart-relstatus',field:'relationship_status',mode:'doughnut',selId:'slz-relstatus',palette:['#6C7FFF','#FF6B35','#34D399','#FBBF24','#F87171']});
+    wireCubeTile({target:'chart-age',field:'age_range',mode:'bar',selId:'slz-age',color:DEMO_HUE});
+    wireCubeTile({target:'chart-gender',field:'gender',mode:'doughnut',selId:'slz-gender',palette:CAT_PALETTE});
+    wireCubeTile({target:'chart-relstatus',field:'relationship_status',mode:'doughnut',selId:'slz-relstatus',palette:CAT_PALETTE});
     wireCubeTile({target:'demo-rellength-bars',field:'relationship_length',mode:'insightbars',selId:'slz-demorellen',color:'#6C7FFF'});
-    wireCubeTile({target:'chart-children',field:'children',mode:'bar',selId:'slz-children',color:'#34D399'});
+    wireCubeTile({target:'chart-children',field:'children',mode:'bar',selId:'slz-children',color:DEMO_HUE});
   }
   else if (page==='responses') {
     wireResponseTile({target:'chart-dim-scores',kind:'radar',selId:'slz-rdim'});
