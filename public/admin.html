@@ -4047,7 +4047,18 @@ function qxColCats(rows, key) {
   const set = {}; rows.forEach(r => { const c = r[key]; if (c !== null && c !== undefined && c !== '') set[c] = 1; });
   return Object.keys(set).sort();
 }
+function ensureQxTooltip(){
+  if(window.__qxTipInit) return; window.__qxTipInit=true;
+  const tip=document.createElement('div'); tip.id='qx-tooltip';
+  tip.style.cssText='position:fixed;z-index:9999;pointer-events:none;background:#1B2547;color:#fff;font-size:.66rem;padding:.35rem .55rem;border-radius:6px;box-shadow:0 6px 18px rgba(0,0,0,.20);max-width:280px;line-height:1.35;opacity:0;transition:opacity .08s;';
+  document.body.appendChild(tip);
+  const pos=(x,y)=>{ const r=tip.getBoundingClientRect(); let nx=x+14,ny=y+14; if(nx+r.width>window.innerWidth-8)nx=x-r.width-14; if(ny+r.height>window.innerHeight-8)ny=y-r.height-14; tip.style.left=nx+'px'; tip.style.top=ny+'px'; };
+  document.addEventListener('mouseover',e=>{ const el=e.target.closest&&e.target.closest('[data-tip]'); if(el){ tip.textContent=el.getAttribute('data-tip'); tip.style.opacity='1'; pos(e.clientX,e.clientY);} });
+  document.addEventListener('mousemove',e=>{ if(tip.style.opacity!=='1')return; const el=e.target.closest&&e.target.closest('[data-tip]'); if(el)pos(e.clientX,e.clientY); else tip.style.opacity='0'; });
+  document.addEventListener('mouseout',e=>{ const el=e.target.closest&&e.target.closest('[data-tip]'); if(el)tip.style.opacity='0'; });
+}
 async function renderQuestionExplorer(containerId, groupPrefixes, highPrefixes) {
+  ensureQxTooltip();
   const el = document.getElementById(containerId);
   if (!el || el.dataset.rendered) return;
   el.innerHTML = '<div style="color:var(--dim);font-size:.78rem;padding:1rem 0;">Loading question-level data…</div>';
@@ -4141,9 +4152,9 @@ async function renderQuestionExplorer(containerId, groupPrefixes, highPrefixes) 
       const color = f.kind === 'scale' ? SCALE_RAMP[idx] : CAT_RAMP[idx];
       const lbl = f.kind === 'scale' ? qxCatLabel(f, c) : (optLabel[c] || c);
       const tip = f.kind === 'scale'
-        ? ('Score ' + c + ' · ' + w + '% of respondents (' + cnt + ' of ' + n + ')')
-        : ((optLabel[c] || c) + ' · ' + w + '% of respondents (' + cnt + ' of ' + n + ')');
-      return '<div title="' + QX_ESC(tip) + '" style="width:' + w + '%;background:' + color + ';height:100%;"></div>';
+        ? ('Score ' + c + (f.poleLow && (c==='1'||c==='5') ? '' : '') + ' — ' + w + '% of responses (' + cnt + ' of ' + n + ')')
+        : ((optLabel[c] || c) + ' — ' + w + '% of responses (' + cnt + ' of ' + n + ')');
+      return '<div data-tip="' + QX_ESC(tip) + '" style="width:' + w + '%;background:' + color + ';height:100%;cursor:default;"></div>';
     }).join('');
 
     const header = '<div style="font-size:.74rem;color:var(--text);margin-bottom:.3rem;line-height:1.35;">' + QX_ESC(f.label) + ' <span style="color:var(--dim);font-family:var(--mono);font-size:.66rem;">n=' + n + '</span></div>';
@@ -4166,7 +4177,9 @@ async function renderQuestionExplorer(containerId, groupPrefixes, highPrefixes) 
     const keyInline = present.map((c) => {
       const idx = cats.indexOf(c);
       const color = CAT_RAMP[idx];
-      return '<span style="display:inline-flex;align-items:center;gap:.25rem;flex:0 0 auto;">' +
+      const kcnt = counts[c] || 0, kw = n ? Math.round(kcnt / n * 100) : 0;
+      const ktip = (optLabel[c] || c) + ' — ' + kw + '% of responses (' + kcnt + ' of ' + n + ')';
+      return '<span data-tip="' + QX_ESC(ktip) + '" style="display:inline-flex;align-items:center;gap:.25rem;flex:0 0 auto;cursor:default;">' +
         '<span style="width:8px;height:8px;border-radius:2px;background:' + color + ';flex:0 0 auto;"></span>' +
         TRUNC(QX_ESC(optLabel[c] || c), 22) + '</span>';
     }).join('<span style="color:var(--border);margin:0 .1rem;">·</span>');
