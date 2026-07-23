@@ -280,6 +280,10 @@
       "destination": "/api/featured-testimonials.js"
     },
     {
+      "source": "/api/cron-survey-nudge",
+      "destination": "/api/cron-survey-nudge.js"
+    },
+    {
       "source": "/app",
       "destination": "/index.html"
     },
@@ -307,6 +311,10 @@
     {
       "path": "/api/cron-feedback-synthesis",
       "schedule": "15 9 * * 1"
+    },
+    {
+      "path": "/api/cron-survey-nudge",
+      "schedule": "0 10 * * *"
     }
   ]
 }
