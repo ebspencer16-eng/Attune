@@ -3914,7 +3914,7 @@ async function renderOrderChart(opts){
     const ADD=[['addon_workbook','Workbook','#6C7FFF'],['addon_reflection','Reflection','#F4B860'],['addon_budget','Budget','#E36BAE'],['addon_intimacy','Intimacy','#B5546E']];
     const byPkg={}; PK.forEach(p=>byPkg[p[0]]=orders.filter(o=>o.order_pkg===p[0]));
     const present=PK.filter(p=>byPkg[p[0]].length);
-    mkChart(el,{type:'bar',data:{labels:present.length?present.map(p=>p[1]):['No orders yet'],datasets:ADD.map(a=>({label:a[1],backgroundColor:a[2],borderRadius:4,data:present.length?present.map(p=>Math.round(byPkg[p[0]].filter(o=>o[a[0]]).length/byPkg[p[0]].length*100)):[0]}))},options:{maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{boxWidth:8,padding:10,font:{size:10}}}},scales:{y:{grid:{color:'#E6ECF6'},ticks:{callback:v=>v+'%'},max:100},x:{grid:{display:false}}}});
+    mkChart(el,{type:'bar',data:{labels:present.length?present.map(p=>p[1]):['No orders yet'],datasets:ADD.map(a=>({label:a[1],backgroundColor:a[2],borderRadius:4,data:present.length?present.map(p=>Math.round(byPkg[p[0]].filter(o=>o[a[0]]).length/byPkg[p[0]].length*100)):[0]}))},options:{maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{boxWidth:8,padding:10,font:{size:10}}}},scales:{y:{grid:{color:'#E6ECF6'},ticks:{callback:v=>v+'%'},max:100},x:{grid:{display:false}}}}});
   } else if(opts.kind==='geo'){
     const stateCounts={}; let outsideUS=0, unknown=0;
     orders.forEach(o=>{ const st=normStateCode(o.state)||''; const country=(o.country||'').toString().trim().toUpperCase();
