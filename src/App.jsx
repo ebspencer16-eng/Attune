@@ -4800,7 +4800,7 @@ function ExpectationsResults({ myAnswers, partnerAnswers, userName, partnerName,
                   const isStrong = pct >= 75;
                   const barColor = isStrong ? "#10b981" : pct >= 40 ? "#E8673A" : "#F87171";
                   return (
-                    <div key={fc.id} onClick={() => go(`convo-${FIXED_CATS.indexOf(fc)}`)}
+                    <div key={fc.id} onClick={() => go(`convo-${FIXED_CATS.findIndex(c => c.id === fc.id)}`)}
                       style={{ cursor: "pointer", display: "flex", alignItems: "center", gap: "0.55rem" }}>
                       <span style={{ fontSize: "0.63rem", color: "rgba(255,255,255,0.65)", fontFamily: BFONT, flexShrink: 0, width: "clamp(96px,32%,130px)", lineHeight: 1.25 }}>{fc.label}</span>
                       <div style={{ flex: 1, position: "relative", height: 6, background: "rgba(255,255,255,0.08)", borderRadius: 999 }}>
@@ -4851,6 +4851,9 @@ function ExpectationsResults({ myAnswers, partnerAnswers, userName, partnerName,
   if (convoMatch) {
     const catIdx = parseInt(step.split("-")[1]);
     const fc = FIXED_CATS[catIdx];
+    // A bad index (NaN, -1, out of range) used to crash on fc.id below. Send
+    // stray links back to the overview instead of the error boundary.
+    if (!fc) { setTimeout(() => go(0), 0); return null; }
     const thisCatGaps = gaps.filter(r => r.catId === fc.id);
     const thisCatAligned = aligned.filter(r => r.catId === fc.id);
     const isLastCat = catIdx === FIXED_CATS.length - 1;
