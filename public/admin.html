@@ -3107,6 +3107,19 @@ async function loadRealDemographics() {
       chartsInit.demographics = false;
       if (document.getElementById('page-demographics')?.classList.contains('active')) initCharts('demographics');
     }
+
+    // The dashboard also shows two demographic-derived visuals — relationship
+    // length and "how couples found Attune". Those render once at page load,
+    // before this data arrives, so they came up empty. Re-render them here now
+    // that relLengths/sourceData are populated. Targeted (not gated on the page
+    // being active) since renderBars/mkChart work on off-screen elements too.
+    renderBars('rellength-bars', relLengths, '#6C7FFF');
+    const _srcCanvas = document.getElementById('chart-source');
+    if (_srcCanvas && typeof Chart !== 'undefined') {
+      mkChart(_srcCanvas, { type:'bar',
+        data:{ labels: sourceData.labels, datasets:[{ data: sourceData.data, backgroundColor:'#34D399', borderRadius:6 }] },
+        options:{ indexAxis:'y', plugins:{ legend:{ display:false } }, scales:{ x:{ grid:{ color:'#E6ECF6' }, ticks:{ callback:v=>v+'%' } }, y:{ grid:{ display:false } } } } });
+    }
   } catch (e) {
     console.warn('[admin] real demographics load failed:', e);
   }
