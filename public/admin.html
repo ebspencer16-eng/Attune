@@ -3212,7 +3212,7 @@ function shapeResponses(r){
     pairs:(r&&r.pairs)||0,
   };
 }
-const RESP_SLICE_DIMS=['relationship_status','relationship_length','children'];
+const RESP_SLICE_DIMS=['relationship_status','relationship_length','children','couple_type'];
 async function renderResponseTile(opts){
   const el=document.getElementById(opts.target); if(!el) return;
   const sel=document.getElementById(opts.selId);
@@ -3823,7 +3823,7 @@ function sliceFilter(rows, val){
 // as the cube is available so no tile shows an empty (collapsed) dropdown while
 // waiting for its own chart to render. Couple-level tiles only offer couple-level
 // segments; distribution tiles exclude their own dimension.
-const COUPLE_LEVEL_DIMS=['relationship_status','relationship_length','children'];
+const COUPLE_LEVEL_DIMS=['relationship_status','relationship_length','children','couple_type'];
 const SLICER_CFG={
   'slz-age':{ex:'age_range'},'slz-gender':{ex:'gender'},'slz-relstatus':{ex:'relationship_status'},
   'slz-children':{ex:'children'},'slz-demorellen':{ex:'relationship_length'},'slz-ovrellen':{ex:'relationship_length'},

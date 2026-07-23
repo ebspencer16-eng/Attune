@@ -33,6 +33,7 @@ export const config = { runtime: 'edge' };
 import { createClient } from '@supabase/supabase-js';
 import { checkAdminAuth } from './_lib/admin-auth.js';
 import { RESPONSIBILITY_CATEGORIES, LIFE_QUESTIONS } from './_questions.js';
+import { axisScores, typeCodeFromAxes } from './_type-engine.js';
 
 // ── Response aggregates ──────────────────────────────────────────────────────
 // The Responses page charts used to be hardcoded zero arrays: the raw answers
@@ -233,7 +234,27 @@ export default async function handler(req) {
     // (shared by both partners) are sliced — individual fields like gender/age
     // don't have a single value for a couple, so slicing couple metrics by them
     // would be ambiguous.
-    const COUPLE_SEG = ['relationship_status', 'relationship_length', 'children'];
+    // Annotate each profile with its couple type (sorted pair of both partners'
+    // individual types) so the aggregates can be sliced by couple type. Uses the
+    // same type engine as the cube so values match the slicer's dropdown.
+    const _typeOf = (ans) => {
+      const sc = calcDimScores(ans);
+      if (!sc || !Object.keys(sc).length) return null;
+      const { withdrawScore, openScore } = axisScores(sc);
+      return typeCodeFromAxes(withdrawScore, openScore);
+    };
+    {
+      const byIdT = {}; profiles.forEach(p => { byIdT[p.id] = p; });
+      const byInviteT = new Map(); (psQ.data || []).forEach(s => { if (s.invite_code) byInviteT.set(s.invite_code, s); });
+      profiles.forEach(p => {
+        const myType = _typeOf(p.ex1_answers);
+        if (!myType) return;
+        const partner = (p.partner_profile_id && byIdT[p.partner_profile_id]) || (p.invite_code && byInviteT.get(p.invite_code)) || null;
+        const partnerType = partner ? _typeOf(partner.ex1_answers) : null;
+        if (myType && partnerType) p.couple_type = [myType, partnerType].sort().join('');
+      });
+    }
+    const COUPLE_SEG = ['relationship_status', 'relationship_length', 'children', 'couple_type'];
     const responsesBySegment = { '': responses };
     for (const fld of COUPLE_SEG) {
       const vals = [...new Set(profiles.map(p => p[fld]).filter(v => v != null && v !== ''))];
