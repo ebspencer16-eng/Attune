@@ -3741,8 +3741,11 @@ async function ensureCube() {
 const QX_ESC = (x) => String(x == null ? '' : x).replace(/[&<>"]/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;' }[c]));
 const QX_CROSS = [
   { key: 'type', label: 'Individual type' }, { key: 'couple_type', label: 'Couple type' },
-  { key: 'gender', label: 'Gender' }, { key: 'relationship_length', label: 'Time together' },
-  { key: 'age_range', label: 'Age range' }, { key: 'pkg', label: 'Package' },
+  { key: 'axisEngage', label: 'Engage / Withdraw' }, { key: 'axisOpen', label: 'Open / Guarded' },
+  { key: 'gender', label: 'Gender' }, { key: 'age_range', label: 'Age range' },
+  { key: 'relationship_status', label: 'Relationship status' }, { key: 'relationship_length', label: 'Time together' },
+  { key: 'children', label: 'Children' }, { key: 'signup_source', label: 'How they found us' },
+  { key: 'pkg', label: 'Package' },
 ];
 const QX_SCALE_COLORS = ['#F87171', '#FBBF24', '#B9C0CF', '#7DD3A8', '#34D399'];
 const QX_CAT_COLORS = ['#6C7FFF', '#FF6B35', '#34D399', '#FBBF24', '#B5546E', '#9B5DE5', '#22A5C4'];
@@ -3771,11 +3774,15 @@ async function renderQuestionExplorer(containerId, groupPrefixes, highPrefixes) 
   const rowOpts = highFields.length
     ? '<optgroup label="High-level views">' + optsFor(highFields) + '</optgroup><optgroup label="All questions">' + optsFor(detailFields) + '</optgroup>'
     : optsFor(detailFields);
-  const colOpts = QX_CROSS.map(c => '<option value="' + c.key + '">' + QX_ESC(c.label) + '</option>').join('');
+  // Column can be a segment OR any question in this exercise (question × question).
+  const colSegOpts = QX_CROSS.map(c => '<option value="' + c.key + '">' + QX_ESC(c.label) + '</option>').join('');
+  const colOpts = '<optgroup label="Segments">' + colSegOpts + '</optgroup>'
+    + (highFields.length ? '<optgroup label="High-level views">' + optsFor(highFields) + '</optgroup>' : '')
+    + '<optgroup label="All questions">' + optsFor(detailFields) + '</optgroup>';
   el.innerHTML =
     '<div style="font-size:.62rem;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);font-weight:700;font-family:var(--mono);margin:0 0 .75rem;">Question by question</div>' +
     '<div class="chart-card" style="padding:1.1rem 1.25rem;margin-bottom:1rem;">' +
-      '<div style="font-size:.7rem;color:var(--muted);margin-bottom:.6rem;">Cross any question in this exercise against a segment. Cells show respondent counts.</div>' +
+      '<div style="font-size:.7rem;color:var(--muted);margin-bottom:.6rem;">Cross any question against a segment or another question. Cells show respondent counts.</div>' +
       '<div style="display:flex;flex-wrap:wrap;gap:.6rem;align-items:center;">' +
         '<select id="' + containerId + '-xrow" style="background:var(--surface);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:.4rem .55rem;font-size:.75rem;max-width:340px;">' + rowOpts + '</select>' +
         '<span style="color:var(--dim);">×</span>' +
@@ -3792,11 +3799,11 @@ async function renderQuestionExplorer(containerId, groupPrefixes, highPrefixes) 
     const ck = document.getElementById(containerId + '-xcol').value;
     const rf = fieldByKey[rk], cf = fieldByKey[ck];
     const rowCats = rf.kind === 'scale' ? ['1','2','3','4','5'] : (rf.options ? rf.options.map(o => o.v) : qxColCats(rows, rk));
-    const colCats = qxColCats(rows, ck);
+    const colCats = cf && cf.kind === 'scale' ? ['1','2','3','4','5'] : (cf && cf.options ? cf.options.map(o => o.v).filter(v => rows.some(r => (cf.kind==='scale'?String(Math.round(r[ck])):r[ck]) === v)) : qxColCats(rows, ck));
     const cell = {};
     rows.forEach(r => {
       let rv = r[rk]; if (rv === null || rv === undefined || rv === '') return; if (rf.kind === 'scale') rv = String(Math.round(rv));
-      const cv = r[ck]; if (cv === null || cv === undefined || cv === '') return;
+      let cv = r[ck]; if (cv === null || cv === undefined || cv === '') return; if (cf && cf.kind === 'scale') cv = String(Math.round(cv));
       if (!cell[rv]) cell[rv] = {}; cell[rv][cv] = (cell[rv][cv] || 0) + 1;
     });
     let html = '<table style="width:100%;border-collapse:collapse;font-size:.72rem;"><thead><tr><th style="text-align:left;padding:.4rem .6rem;color:var(--dim);"></th>' +
