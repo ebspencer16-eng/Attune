@@ -79,6 +79,12 @@ function ownFields(p) {
     pkg: p.pkg || 'core',
   };
   for (const k of DEMO_KEYS) r[k] = p[k] != null && p[k] !== '' ? p[k] : null;
+  // Gender isn't collected directly; derive it from pronouns when absent.
+  // he/him -> man, she/her -> woman, they/them -> non-binary.
+  if (!r.gender && p.pronouns) {
+    const pr = String(p.pronouns).toLowerCase();
+    r.gender = pr === 'he/him' ? 'man' : pr === 'she/her' ? 'woman' : pr === 'they/them' ? 'nonbinary' : r.gender;
+  }
   for (const dim of Object.keys(DIM_KEYS)) {
     r['dim_' + dim] = scores[dim] != null ? Number(Number(scores[dim]).toFixed(3)) : null;
   }
@@ -142,7 +148,20 @@ const PARTNERABLE = [
   ...INTIMACY_QUESTIONS.filter((q) => q.kind !== 'multi').map((q) => 'iq_' + q.id),
 ];
 
-function buildCatalog() {
+// Beta-survey fields joined onto the respondent by their profile id, so survey
+// answers are segmentable by every demographic/type field already in the cube.
+const FB_SCALE = {
+  fb_expectationMatch: 'Feedback · Expectation match', fb_commsOverall: 'Feedback · Communication overall',
+  fb_commsHonesty: 'Feedback · Communication honesty', fb_expOverall: 'Feedback · Expectations overall',
+  fb_expHonesty: 'Feedback · Expectations honesty', fb_shiftCouple: 'Feedback · Shift as a couple',
+  fb_shiftSelf: 'Feedback · Shift in yourself', fb_returnLikelihood: 'Feedback · Likely to revisit',
+  fb_valuePct: 'Feedback · Value vs other spend',
+};
+const FB_SCALE_SRC = { fb_expectationMatch:'expectationMatch', fb_commsOverall:'commsOverall', fb_commsHonesty:'commsHonesty', fb_expOverall:'expOverall', fb_expHonesty:'expHonesty', fb_shiftCouple:'shiftCouple', fb_shiftSelf:'shiftSelf', fb_returnLikelihood:'returnLikelihood', fb_valuePct:'valuePct' };
+const FB_CAT = { fb_ahaMarker: 'Feedback · Biggest recognition moment', fb_convoHappened: 'Feedback · Led to a conversation' };
+const FB_CAT_SRC = { fb_ahaMarker:'ahaMarker', fb_convoHappened:'convoHappened' };
+
+function buildCatalog(fbCatOptions) {
   const f = [];
   f.push({ key: 'type', label: 'Individual type', group: 'Type & axes', kind: 'cat',
     options: Object.entries(TYPE_LABELS).map(([v, label]) => ({ v, label })), partnerable: true });
@@ -171,6 +190,8 @@ function buildCatalog() {
     const opts = (q.options || []).map((o) => o.label);
     f.push({ key: 'iq_' + q.id, label: (q.topic ? q.topic + ' · ' : '') + (q.premarital || q.married || q.id), group: 'Physical Intimacy', kind: 'cat', options: opts.map((v) => ({ v, label: v })), partnerable: true });
   }
+  for (const k of Object.keys(FB_SCALE)) f.push({ key: k, label: FB_SCALE[k], group: 'Beta feedback survey', kind: 'scale' });
+  for (const k of Object.keys(FB_CAT)) f.push({ key: k, label: FB_CAT[k], group: 'Beta feedback survey', kind: 'cat', options: ((fbCatOptions && fbCatOptions[k]) || []).map((v) => ({ v, label: v })) });
   return f;
 }
 
@@ -187,6 +208,22 @@ export default async function handler(req) {
   try {
     const { data: profiles = [], error } = await admin.from('profiles').select('*');
     if (error) return json({ error: error.message }, 500);
+
+    // Beta survey responses, keyed by respondent profile id, for the join below.
+    const surveyByRespondent = {};
+    const fbCatOptions = { fb_ahaMarker: new Set(), fb_convoHappened: new Set() };
+    try {
+      const { data: fbRows = [] } = await admin.from('feedback_submissions').select('type, text').eq('type', 'beta_survey');
+      for (const r of fbRows) {
+        let payload = null;
+        try { payload = typeof r.text === 'string' ? JSON.parse(r.text) : r.text; } catch {}
+        if (payload && payload.respondentId) {
+          surveyByRespondent[payload.respondentId] = payload;
+          for (const [fk, src] of Object.entries(FB_CAT_SRC)) { const v = payload[src]; if (v) fbCatOptions[fk].add(v); }
+        }
+      }
+    } catch {}
+    const fbCatOpts = Object.fromEntries(Object.entries(fbCatOptions).map(([k, set]) => [k, [...set]]));
 
     const hasEx1 = (p) => p && p.ex1_answers && Object.keys(p.ex1_answers).length > 0;
 
@@ -211,6 +248,11 @@ export default async function handler(req) {
         couple_type: partner ? [own.type, partner.type].sort().join('') : null,
       };
       if (partner) for (const k of PARTNERABLE) row['p_' + k] = partner[k];
+      const survey = surveyByRespondent[p.id];
+      if (survey) {
+        for (const [fk, src] of Object.entries(FB_SCALE_SRC)) { const v = Number(survey[src]); row[fk] = Number.isFinite(v) ? v : null; }
+        for (const [fk, src] of Object.entries(FB_CAT_SRC)) { row[fk] = survey[src] != null && survey[src] !== '' ? survey[src] : null; }
+      }
       rows.push(row);
     }
 
@@ -218,7 +260,7 @@ export default async function handler(req) {
       generatedAt: new Date().toISOString(),
       count: rows.length,
       paired: rows.filter((r) => r.couple_id).length,
-      fields: buildCatalog(),
+      fields: buildCatalog(fbCatOpts),
       rows,
     });
   } catch (e) {

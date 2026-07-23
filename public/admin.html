@@ -1649,6 +1649,9 @@ window.adminAuthHeaders = function(extra){
         <div class="kpi-sub">With message sent</div>
       </div>
     </div>
+
+    <!-- Survey question explorer: distributions + crosstab + full segmentation -->
+    <div class="qx-section" id="qx-feedback" style="margin-top:1.5rem"></div>
   </div>
 
 <script>
@@ -2680,6 +2683,7 @@ async function loadFeedbackData() {
   window.renderFbCoverage();
 
   renderTimeByStage();
+  if (typeof renderQuestionExplorer === 'function') renderQuestionExplorer('qx-feedback', ['Beta feedback survey']);
   document.getElementById('fb-completion-bars').innerHTML = SIM.completion.map(i => renderBar(i.l, i.v, max(SIM.completion), '#10B981', i.v + '%')).join('');
   document.getElementById('fb-concerns-bars').innerHTML = SIM.concerns.map(i => renderBar(i.l, i.v, max(SIM.concerns), '#9B5DE5', i.v + '%')).join('');
 
@@ -3749,9 +3753,26 @@ const QX_CROSS = [
 ];
 const QX_SCALE_COLORS = ['#F87171', '#FBBF24', '#B9C0CF', '#7DD3A8', '#34D399'];
 const QX_CAT_COLORS = ['#6C7FFF', '#FF6B35', '#34D399', '#FBBF24', '#B5546E', '#9B5DE5', '#22A5C4'];
+// Human-readable labels for raw stored segment values, plus a title-case
+// fallback so nothing shows as a bare lowercase code (e.g. "married").
+const QX_VAL_LABELS = {
+  gender: { man: 'Man', woman: 'Woman', nonbinary: 'Non-binary', other: 'Other' },
+  relationship_status: { dating: 'Dating', engaged: 'Engaged', married: 'Married', remarried: 'Remarried', partnership: 'Partnership' },
+  children: { none: 'None', '1': '1', '2': '2', '3+': '3+', expecting: 'Expecting' },
+  signup_source: { friend: 'Friend/family', social: 'Social media', search: 'Search', gift: 'Received as gift', therapist: 'Therapist', other: 'Other' },
+  pkg: { core: 'Assessment', newlywed: 'Starting Out', anniversary: 'Anniversary', premium: 'Premium' },
+  relationship_length: { '<1': '<1 year', '1-2': '1–2 yrs', '3-5': '3–5 yrs', '6-10': '6–10 yrs', '11-20': '11–20 yrs', '20+': '20+ yrs' },
+};
+function qxPretty(key, v) {
+  if (v == null) return v;
+  const m = QX_VAL_LABELS[key];
+  if (m && m[v] != null) return m[v];
+  if (typeof v === 'string' && /^[a-z][a-z ]*$/.test(v)) return v.charAt(0).toUpperCase() + v.slice(1);
+  return v;
+}
 function qxCatLabel(f, v) {
   if (f && f.kind === 'scale') { if (v === '1') return '1 · ' + (f.poleLow || 'low'); if (v === '5') return '5 · ' + (f.poleHigh || 'high'); return v; }
-  return v;
+  return qxPretty(f && f.key, v);
 }
 function qxColCats(rows, key) {
   const set = {}; rows.forEach(r => { const c = r[key]; if (c !== null && c !== undefined && c !== '') set[c] = 1; });
