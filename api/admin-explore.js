@@ -158,6 +158,13 @@ const FB_SCALE = {
   fb_valuePct: 'Feedback · Value vs other spend',
 };
 const FB_SCALE_SRC = { fb_expectationMatch:'expectationMatch', fb_commsOverall:'commsOverall', fb_commsHonesty:'commsHonesty', fb_expOverall:'expOverall', fb_expHonesty:'expHonesty', fb_shiftCouple:'shiftCouple', fb_shiftSelf:'shiftSelf', fb_returnLikelihood:'returnLikelihood', fb_valuePct:'valuePct' };
+const FB_POLES = {
+  fb_expectationMatch:['Fell short','Exceeded it'], fb_commsOverall:['Poor','Excellent'],
+  fb_commsHonesty:['Held back a lot','Completely honest'], fb_expOverall:['Poor','Excellent'],
+  fb_expHonesty:['Held back a lot','Completely honest'], fb_shiftCouple:['No shift','Significant shift'],
+  fb_shiftSelf:['No shift','Significant shift'], fb_returnLikelihood:['Very unlikely','Very likely'],
+  fb_valuePct:['Much less value','Much more value'],
+};
 const FB_CAT = { fb_ahaMarker: 'Feedback · Biggest recognition moment', fb_convoHappened: 'Feedback · Led to a conversation' };
 const FB_CAT_SRC = { fb_ahaMarker:'ahaMarker', fb_convoHappened:'convoHappened' };
 
@@ -190,7 +197,7 @@ function buildCatalog(fbCatOptions) {
     const opts = (q.options || []).map((o) => o.label);
     f.push({ key: 'iq_' + q.id, label: (q.topic ? q.topic + ' · ' : '') + (q.premarital || q.married || q.id), group: 'Physical Intimacy', kind: 'cat', options: opts.map((v) => ({ v, label: v })), partnerable: true });
   }
-  for (const k of Object.keys(FB_SCALE)) f.push({ key: k, label: FB_SCALE[k], group: 'Beta feedback survey', kind: 'scale' });
+  for (const k of Object.keys(FB_SCALE)) f.push({ key: k, label: FB_SCALE[k], group: 'Beta feedback survey', kind: 'scale', poleLow: (FB_POLES[k]||[])[0], poleHigh: (FB_POLES[k]||[])[1] });
   for (const k of Object.keys(FB_CAT)) f.push({ key: k, label: FB_CAT[k], group: 'Beta feedback survey', kind: 'cat', options: ((fbCatOptions && fbCatOptions[k]) || []).map((v) => ({ v, label: v })) });
   return f;
 }

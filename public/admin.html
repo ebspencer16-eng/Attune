@@ -113,6 +113,9 @@
   .chart-head{padding:1.1rem 1.35rem .85rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
   .chart-title{font-size:.8rem;font-weight:700;color:var(--text)}
   .chart-subtitle{font-size:.68rem;color:var(--muted);margin-top:.15rem}
+  .tile-slicer{align-self:flex-start;max-width:160px;background:var(--surface);color:var(--muted);border:1px solid var(--border);border-radius:7px;font-size:.66rem;padding:.28rem .5rem;cursor:pointer;opacity:.7;font-family:inherit;transition:opacity .15s}
+  .tile-slicer:hover,.tile-slicer:focus{opacity:1;color:var(--text);outline:none}
+  .tile-slicer.on{opacity:1;color:var(--accent,#6C7FFF);border-color:var(--accent,#6C7FFF)}
   .chart-body{padding:1.25rem}
   .chart-body canvas{max-height:220px}
 
@@ -372,6 +375,7 @@
             <div class="chart-title">Relationship length distribution</div>
             <div class="chart-subtitle">Anonymous demographic breakdown</div>
           </div>
+          <select class="tile-slicer" id="slz-ovrellen" title="Cut this tile by a segment"></select>
         </div>
         <div class="chart-body">
           <div class="insight-list" id="rellength-bars" style="margin-top:.5rem;"></div>
@@ -383,6 +387,7 @@
             <div class="chart-title">How couples found Attune</div>
             <div class="chart-subtitle">Acquisition source</div>
           </div>
+          <select class="tile-slicer" id="slz-source" title="Cut this tile by a segment"></select>
         </div>
         <div class="chart-body"><canvas id="chart-source"></canvas></div>
       </div>
@@ -500,27 +505,27 @@
     </div>
     <div class="chart-grid three">
       <div class="chart-card">
-        <div class="chart-head"><div><div class="chart-title">Age range</div><div class="chart-subtitle">n=—</div></div></div>
+        <div class="chart-head"><div><div class="chart-title">Age range</div><div class="chart-subtitle">n=—</div></div><select class="tile-slicer" id="slz-age" title="Cut this tile by a segment"></select></div>
         <div class="chart-body"><canvas id="chart-age"></canvas></div>
       </div>
       <div class="chart-card">
-        <div class="chart-head"><div><div class="chart-title">Gender</div><div class="chart-subtitle">n=—</div></div></div>
+        <div class="chart-head"><div><div class="chart-title">Gender</div><div class="chart-subtitle">n=—</div></div><select class="tile-slicer" id="slz-gender" title="Cut this tile by a segment"></select></div>
         <div class="chart-body"><canvas id="chart-gender"></canvas></div>
       </div>
       <div class="chart-card">
-        <div class="chart-head"><div><div class="chart-title">Relationship status</div><div class="chart-subtitle">n=—</div></div></div>
+        <div class="chart-head"><div><div class="chart-title">Relationship status</div><div class="chart-subtitle">n=—</div></div><select class="tile-slicer" id="slz-relstatus" title="Cut this tile by a segment"></select></div>
         <div class="chart-body"><canvas id="chart-relstatus"></canvas></div>
       </div>
     </div>
     <div class="chart-grid">
       <div class="chart-card">
-        <div class="chart-head"><div><div class="chart-title">Length of relationship</div></div></div>
+        <div class="chart-head"><div><div class="chart-title">Length of relationship</div></div><select class="tile-slicer" id="slz-demorellen" title="Cut this tile by a segment"></select></div>
         <div class="chart-body">
           <div class="insight-list" id="demo-rellength-bars" style="margin-top:.5rem;"></div>
         </div>
       </div>
       <div class="chart-card">
-        <div class="chart-head"><div><div class="chart-title">Children together</div><div class="chart-subtitle">n=—</div></div></div>
+        <div class="chart-head"><div><div class="chart-title">Children together</div><div class="chart-subtitle">n=—</div></div><select class="tile-slicer" id="slz-children" title="Cut this tile by a segment"></select></div>
         <div class="chart-body"><canvas id="chart-children"></canvas></div>
       </div>
     </div>
@@ -3770,6 +3775,85 @@ function qxPretty(key, v) {
   if (typeof v === 'string' && /^[a-z][a-z ]*$/.test(v)) return v.charAt(0).toUpperCase() + v.slice(1);
   return v;
 }
+// ── Per-tile segment slicer (cube-backed distribution tiles) ─────────────────
+// A greyed dropdown in each tile header. Default "Everyone". Pick a segment
+// value to re-cut that tile's population. All powered by the anonymized cube.
+const SLICE_DIMS = [
+  { key:'gender', label:'Gender' }, { key:'age_range', label:'Age range' },
+  { key:'relationship_status', label:'Relationship status' }, { key:'relationship_length', label:'Time together' },
+  { key:'children', label:'Children' }, { key:'signup_source', label:'How they found us' },
+  { key:'type', label:'Individual type' }, { key:'axisEngage', label:'Engage / Withdraw' },
+  { key:'axisOpen', label:'Open / Guarded' }, { key:'pkg', label:'Package' },
+];
+const SLICE_ORDER = {
+  gender:['man','woman','nonbinary','other'],
+  relationship_status:['dating','engaged','married','remarried','partnership'],
+  relationship_length:['<1','1-2','3-5','6-10','11-20','20+'],
+  children:['none','1','2','3+','expecting'],
+  signup_source:['friend','social','search','gift','therapist','other'],
+  type:['W','X','Y','Z'], axisEngage:['Engage','Withdraw'], axisOpen:['Open','Guarded'],
+  pkg:['core','newlywed','anniversary','premium'],
+};
+const TYPE_SLICE_LABELS = { W:'W · Initiator', X:'X · Anchor', Y:'Y · Feeler', Z:'Z · Protector' };
+function sliceLabel(key, v){ return key==='type' ? (TYPE_SLICE_LABELS[v]||v) : qxPretty(key, v); }
+function orderedCats(key, rows){
+  const present={}; rows.forEach(r=>{ const v=r[key]; if(v!=null&&v!=='') present[v]=1; });
+  const base = SLICE_ORDER[key] ? SLICE_ORDER[key].filter(v=>present[v]) : [];
+  Object.keys(present).forEach(v=>{ if(base.indexOf(v)<0) base.push(v); });
+  return base;
+}
+function populateSlicer(sel, excludeKey, rows){
+  if (!sel || sel.dataset.pop) return;
+  let html='<option value="">Everyone</option>';
+  SLICE_DIMS.forEach(d=>{
+    if (d.key===excludeKey) return;
+    const cats=orderedCats(d.key, rows); if(!cats.length) return;
+    html+='<optgroup label="'+QX_ESC(d.label)+'">'+cats.map(v=>'<option value="'+d.key+'::'+QX_ESC(v)+'">'+QX_ESC(sliceLabel(d.key,v))+'</option>').join('')+'</optgroup>';
+  });
+  sel.innerHTML=html; sel.dataset.pop='1';
+}
+function sliceFilter(rows, val){
+  if (!val) return rows;
+  const i=val.indexOf('::'); const k=val.slice(0,i), v=val.slice(i+2);
+  return rows.filter(r=>String(r[k])===v);
+}
+function setTileN(el, n){
+  const card=el.closest('.chart-card'); if(!card) return;
+  let sub=card.querySelector('.chart-subtitle'); const head=card.querySelector('.chart-head > div');
+  if(!sub&&head){ sub=document.createElement('div'); sub.className='chart-subtitle'; head.appendChild(sub); }
+  if(!sub) return;
+  if(sub.dataset.base==null) sub.dataset.base=/n=/.test(sub.textContent)?'':sub.textContent;
+  const base=sub.dataset.base; sub.textContent=(base?base+' · ':'')+'n='+n;
+}
+async function renderCubeDist(opts){
+  const el=document.getElementById(opts.target); if(!el) return;
+  let cube; try{ cube=await ensureCube(); }catch(e){ return; }
+  const sel=opts.selId?document.getElementById(opts.selId):null;
+  if(sel){ populateSlicer(sel, opts.field, cube.rows||[]); sel.classList.toggle('on', !!sel.value); }
+  const rows=sliceFilter(cube.rows||[], sel?sel.value:'');
+  const cats=orderedCats(opts.field, rows);
+  const counts={}; let n=0;
+  rows.forEach(r=>{ const v=r[opts.field]; if(v==null||v==='') return; counts[v]=(counts[v]||0)+1; n++; });
+  const labels=cats.map(v=>sliceLabel(opts.field,v));
+  const dataCounts=cats.map(v=>counts[v]||0);
+  const dataPct=dataCounts.map(c=> n?Math.round(c/n*100):0);
+  setTileN(el, n);
+  if(opts.mode==='insightbars'){ renderBars(opts.target, cats.map((v,i)=>({l:labels[i],v:dataPct[i]})), opts.color||'#6C7FFF'); return; }
+  if(!n){ mkChart(el,{type:'bar',data:{labels:['No data'],datasets:[{data:[0],backgroundColor:'#E6ECF6'}]},options:{plugins:{legend:{display:false}},scales:{x:{grid:{display:false}},y:{display:false}}}}); return; }
+  const pal=opts.palette||['#6C7FFF','#FF6B35','#34D399','#FBBF24','#F87171','#9B5DE5','#22A5C4'];
+  if(opts.mode==='doughnut'){
+    mkChart(el,{type:'doughnut',data:{labels,datasets:[{data:dataCounts,backgroundColor:pal,borderColor:'#FFFFFF',borderWidth:3}]},options:{plugins:{legend:{position:'bottom',labels:{padding:14,boxWidth:11}}},cutout:'60%'}});
+  } else if(opts.mode==='hbar'){
+    mkChart(el,{type:'bar',data:{labels,datasets:[{data:dataPct,backgroundColor:opts.color||'#34D399',borderRadius:6}]},options:{indexAxis:'y',plugins:{legend:{display:false}},scales:{x:{grid:{color:'#E6ECF6'},ticks:{callback:v=>v+'%'}},y:{grid:{display:false}}}}});
+  } else {
+    mkChart(el,{type:'bar',data:{labels,datasets:[{data:dataPct,backgroundColor:opts.color||'#FF6B35',borderRadius:6}]},options:{plugins:{legend:{display:false}},scales:{x:{grid:{display:false}},y:{grid:{color:'#E6ECF6'},ticks:{callback:v=>v+'%'}}}}});
+  }
+}
+function wireCubeTile(opts){
+  const sel=document.getElementById(opts.selId);
+  if(sel&&!sel.dataset.wired){ sel.dataset.wired='1'; sel.onchange=()=>renderCubeDist(opts); }
+  return renderCubeDist(opts);
+}
 function qxCatLabel(f, v) {
   if (f && f.kind === 'scale') { if (v === '1') return '1 · ' + (f.poleLow || 'low'); if (v === '5') return '5 · ' + (f.poleHigh || 'high'); return v; }
   return qxPretty(f && f.key, v);
@@ -3804,10 +3888,10 @@ async function renderQuestionExplorer(containerId, groupPrefixes, highPrefixes) 
     '<div style="font-size:.62rem;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);font-weight:700;font-family:var(--mono);margin:0 0 .75rem;">Question by question</div>' +
     '<div class="chart-card" style="padding:1.1rem 1.25rem;margin-bottom:1rem;">' +
       '<div style="font-size:.7rem;color:var(--muted);margin-bottom:.6rem;">Cross any question against a segment or another question. Cells show respondent counts.</div>' +
-      '<div style="display:flex;flex-wrap:wrap;gap:.6rem;align-items:center;">' +
-        '<select id="' + containerId + '-xrow" style="background:var(--surface);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:.4rem .55rem;font-size:.75rem;max-width:340px;">' + rowOpts + '</select>' +
+      '<div style="display:flex;flex-wrap:nowrap;gap:.6rem;align-items:center;">' +
+        '<select id="' + containerId + '-xrow" style="flex:1 1 0;min-width:0;background:var(--surface);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:.4rem .55rem;font-size:.75rem;">' + rowOpts + '</select>' +
         '<span style="color:var(--dim);">×</span>' +
-        '<select id="' + containerId + '-xcol" style="background:var(--surface);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:.4rem .55rem;font-size:.75rem;">' + colOpts + '</select>' +
+        '<select id="' + containerId + '-xcol" style="flex:1 1 0;min-width:0;background:var(--surface);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:.4rem .55rem;font-size:.75rem;">' + colOpts + '</select>' +
       '</div>' +
       '<div id="' + containerId + '-xout" style="margin-top:.85rem;overflow:auto;"></div>' +
     '</div>' +
@@ -4241,8 +4325,8 @@ function initCharts(page) {
   if (page==='overview') {
     mkChart(document.getElementById('chart-revenue'),{type:'line',data:{labels:MONTHS,datasets:[{label:'Revenue',data:revenueData,borderColor:'#FF6B35',backgroundColor:'rgba(255,107,53,.1)',tension:.4,fill:true,borderWidth:2.5,pointRadius:0,pointHoverRadius:4}]},options:{plugins:{legend:{display:false}},scales:{y:{grid:{color:'#E6ECF6'},ticks:{callback:v=>'$'+Math.round(v/1000)+'k'}},x:{grid:{display:false}}},animation:{duration:800}}});
     mkChart(document.getElementById('chart-pkg-mix'),{type:'doughnut',data:{labels:PKG_LABELS,datasets:[{data:pkgMix,backgroundColor:PKG_COLORS,borderColor:['#FFFFFF'],borderWidth:3,hoverOffset:6}]},options:{plugins:{legend:{position:'bottom',labels:{padding:16,boxWidth:12}}},cutout:'65%'}});
-    renderBars('rellength-bars',relLengths,'#6C7FFF');
-    mkChart(document.getElementById('chart-source'),{type:'bar',data:{labels:sourceData.labels,datasets:[{data:sourceData.data,backgroundColor:'#34D399',borderRadius:6}]},options:{indexAxis:'y',plugins:{legend:{display:false}},scales:{x:{grid:{color:'#E6ECF6'},ticks:{callback:v=>v+'%'}},y:{grid:{display:false}}}}});
+    wireCubeTile({target:'rellength-bars',field:'relationship_length',mode:'insightbars',selId:'slz-ovrellen',color:'#6C7FFF'});
+    wireCubeTile({target:'chart-source',field:'signup_source',mode:'hbar',selId:'slz-source',color:'#34D399'});
   }
   else if (page==='orders') { applyOrderFilters(); }
   else if (page==='fulfillment') {
@@ -4285,11 +4369,11 @@ function initCharts(page) {
     if (typeof renderAddonAttachment === 'function') renderAddonAttachment();
   }
   else if (page==='demographics') {
-    mkChart(document.getElementById('chart-age'),{type:'bar',data:{labels:ageData.labels,datasets:[{data:ageData.data,backgroundColor:'#FF6B35',borderRadius:6}]},options:{plugins:{legend:{display:false}},scales:{x:{grid:{display:false}},y:{grid:{color:'#E6ECF6'},ticks:{callback:v=>v+'%'}}}}});
-    mkChart(document.getElementById('chart-gender'),{type:'doughnut',data:{labels:genderData.labels,datasets:[{data:genderData.data,backgroundColor:['#F87171','#6C7FFF','#34D399','#FBBF24'],borderColor:'#FFFFFF',borderWidth:3}]},options:{plugins:{legend:{position:'bottom',labels:{padding:14,boxWidth:11}}},cutout:'60%'}});
-    mkChart(document.getElementById('chart-relstatus'),{type:'doughnut',data:{labels:relStatusData.labels,datasets:[{data:relStatusData.data,backgroundColor:['#6C7FFF','#FF6B35','#34D399','#FBBF24','#F87171'],borderColor:'#FFFFFF',borderWidth:3}]},options:{plugins:{legend:{position:'bottom',labels:{padding:14,boxWidth:11}}},cutout:'60%'}});
-    renderBars('demo-rellength-bars',relLengths,'#6C7FFF');
-    mkChart(document.getElementById('chart-children'),{type:'bar',data:{labels:childrenData.labels,datasets:[{data:childrenData.data,backgroundColor:'#34D399',borderRadius:6}]},options:{plugins:{legend:{display:false}},scales:{x:{grid:{display:false}},y:{grid:{color:'#E6ECF6'},ticks:{callback:v=>v+'%'}}}}});
+    wireCubeTile({target:'chart-age',field:'age_range',mode:'bar',selId:'slz-age',color:'#FF6B35'});
+    wireCubeTile({target:'chart-gender',field:'gender',mode:'doughnut',selId:'slz-gender',palette:['#F87171','#6C7FFF','#34D399','#FBBF24']});
+    wireCubeTile({target:'chart-relstatus',field:'relationship_status',mode:'doughnut',selId:'slz-relstatus',palette:['#6C7FFF','#FF6B35','#34D399','#FBBF24','#F87171']});
+    wireCubeTile({target:'demo-rellength-bars',field:'relationship_length',mode:'insightbars',selId:'slz-demorellen',color:'#6C7FFF'});
+    wireCubeTile({target:'chart-children',field:'children',mode:'bar',selId:'slz-children',color:'#34D399'});
   }
   else if (page==='responses') {
     mkChart(document.getElementById('chart-dim-scores'),{type:'radar',data:{labels:dimScores.labels,datasets:[{label:'Avg alignment',data:dimScores.data,borderColor:'#6C7FFF',backgroundColor:'rgba(108,127,255,.15)',borderWidth:2,pointRadius:3,pointBackgroundColor:'#6C7FFF'}]},options:{scales:{r:{grid:{color:'#E6ECF6'},angleLines:{color:'#E6ECF6'},ticks:{display:false},min:0,max:100}},plugins:{legend:{display:false}}}});
