@@ -243,6 +243,11 @@ export default async function handler(req) {
     }
 
     // Pass 2: pairing + partner denormalization.
+    // Segment lookups so orders can be joined to a purchaser's demographics
+    // server-side (by user_id or email) without ever exposing PII to the client.
+    const SEG_KEYS = ['gender','age_range','relationship_status','relationship_length','children','signup_source','type','axisEngage','axisOpen','couple_type','pkg'];
+    const RETRO_COUPLE_TYPE = { 'ATTUNE-BETA-1':'WZ', 'ATTUNE-BETA-2':'WX', 'ATTUNE-BETA-5':'WY' };
+    const segById = {}, segByEmail = {};
     const rows = [];
     for (const p of profiles) {
       const own = computed[p.id];
@@ -268,7 +273,44 @@ export default async function handler(req) {
         for (const [fk, src] of Object.entries(FB_CAT_SRC)) { row[fk] = survey[src] != null && survey[src] !== '' ? survey[src] : null; }
       }
       rows.push(row);
+      // Anonymized segment snapshot for order joins (keyed by id + email; no PII emitted).
+      const _seg = {}; for (const k of SEG_KEYS) _seg[k] = row[k] !== undefined ? row[k] : null;
+      segById[p.id] = _seg;
+      if (p.email) segByEmail[String(p.email).toLowerCase()] = _seg;
     }
+
+    // ── Orders, joined to purchaser demographics, fully anonymized ───────────
+    let orderRows = [];
+    try {
+      const { data: ords = [] } = await admin.from('orders').select('*').limit(2000);
+      const monthOf = (d) => { const t = new Date(d); return isNaN(t) ? null : t.getFullYear() + '-' + String(t.getMonth() + 1).padStart(2, '0'); };
+      orderRows = (ords || []).map((o) => {
+        const email = o.buyer_email ? String(o.buyer_email).toLowerCase() : null;
+        const seg = (o.user_id && segById[o.user_id]) || (email && segByEmail[email]) || {};
+        const merged = {};
+        for (const k of SEG_KEYS) merged[k] = seg[k] != null ? seg[k] : null;
+        // Retroactive beta-code couple-type tagging when the profile join is absent.
+        const retro = RETRO_COUPLE_TYPE[o.promo_code];
+        if (retro && !merged.couple_type) merged.couple_type = retro;
+        if (retro && !merged.pkg) merged.pkg = 'premium';
+        return {
+          month: monthOf(o.created_at),
+          ts: o.created_at || null,
+          amount: Number(o.total) || 0,
+          order_pkg: o.pkg_key || null,
+          is_physical: !!o.is_physical,
+          promo_code: o.promo_code || null,
+          addon_lmft: !!o.addon_lmft,
+          addon_workbook: o.addon_workbook || null,
+          addon_reflection: !!o.addon_reflection,
+          addon_budget: !!o.addon_budget,
+          state: o.shipping_state || o.billing_state || null,
+          country: o.shipping_country || o.billing_country || null,
+          matched: !!(seg && Object.keys(seg).length),
+          ...merged,
+        };
+      });
+    } catch (e) { orderRows = []; }
 
     return json({
       generatedAt: new Date().toISOString(),
@@ -276,6 +318,7 @@ export default async function handler(req) {
       paired: rows.filter((r) => r.couple_id).length,
       fields: buildCatalog(fbCatOpts),
       rows,
+      orders: orderRows,
     });
   } catch (e) {
     return json({ error: String(e && e.message ? e.message : e) }, 500);

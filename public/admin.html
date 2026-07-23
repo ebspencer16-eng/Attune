@@ -357,6 +357,7 @@
             <div class="chart-title">Revenue over time</div>
             <div class="chart-subtitle">Last 12 months</div>
           </div>
+          <select class="tile-slicer" id="slz-revenue" title="Cut this tile by a segment"></select>
         </div>
         <div class="chart-body"><canvas id="chart-revenue"></canvas></div>
       </div>
@@ -366,6 +367,7 @@
             <div class="chart-title">Package mix</div>
             <div class="chart-subtitle">Orders by package type</div>
           </div>
+          <select class="tile-slicer" id="slz-pkgmix" title="Cut this tile by a segment"></select>
         </div>
         <div class="chart-body"><canvas id="chart-pkg-mix"></canvas></div>
       </div>
@@ -3148,13 +3150,11 @@ async function loadRealDemographics() {
     // before this data arrives, so they came up empty. Re-render them here now
     // that relLengths/sourceData are populated. Targeted (not gated on the page
     // being active) since renderBars/mkChart work on off-screen elements too.
-    renderBars('rellength-bars', relLengths, '#6C7FFF');
-    const _srcCanvas = document.getElementById('chart-source');
-    if (_srcCanvas && typeof Chart !== 'undefined') {
-      mkChart(_srcCanvas, { type:'bar',
-        data:{ labels: sourceData.labels, datasets:[{ data: sourceData.data, backgroundColor:'#34D399', borderRadius:6 }] },
-        options:{ indexAxis:'y', plugins:{ legend:{ display:false } }, scales:{ x:{ grid:{ color:'#E6ECF6' }, ticks:{ callback:v=>v+'%' } }, y:{ grid:{ display:false } } } } });
-    }
+    // Cube-backed + sliceable — keep consistent with initCharts('overview').
+    wireCubeTile({target:'rellength-bars',field:'relationship_length',mode:'insightbars',selId:'slz-ovrellen',color:'#6C7FFF'});
+    wireCubeTile({target:'chart-source',field:'signup_source',mode:'hbar',selId:'slz-source',color:'#34D399'});
+    wireOrderChart({target:'chart-revenue',kind:'revenue',selId:'slz-revenue'});
+    wireOrderChart({target:'chart-pkg-mix',kind:'pkgmix',selId:'slz-pkgmix'});
   } catch (e) {
     console.warn('[admin] real demographics load failed:', e);
   }
@@ -3783,7 +3783,7 @@ const SLICE_DIMS = [
   { key:'relationship_status', label:'Relationship status' }, { key:'relationship_length', label:'Time together' },
   { key:'children', label:'Children' }, { key:'signup_source', label:'How they found us' },
   { key:'type', label:'Individual type' }, { key:'axisEngage', label:'Engage / Withdraw' },
-  { key:'axisOpen', label:'Open / Guarded' }, { key:'pkg', label:'Package' },
+  { key:'axisOpen', label:'Open / Guarded' }, { key:'couple_type', label:'Couple type' }, { key:'pkg', label:'Package' },
 ];
 const SLICE_ORDER = {
   gender:['man','woman','nonbinary','other'],
@@ -3792,10 +3792,11 @@ const SLICE_ORDER = {
   children:['none','1','2','3+','expecting'],
   signup_source:['friend','social','search','gift','therapist','other'],
   type:['W','X','Y','Z'], axisEngage:['Engage','Withdraw'], axisOpen:['Open','Guarded'],
+  couple_type:['WW','XX','YY','ZZ','WX','WY','WZ','XY','XZ','YZ'],
   pkg:['core','newlywed','anniversary','premium'],
 };
 const TYPE_SLICE_LABELS = { W:'W · Initiator', X:'X · Anchor', Y:'Y · Feeler', Z:'Z · Protector' };
-function sliceLabel(key, v){ return key==='type' ? (TYPE_SLICE_LABELS[v]||v) : qxPretty(key, v); }
+function sliceLabel(key, v){ if(key==='type') return TYPE_SLICE_LABELS[v]||v; if(key==='couple_type') return (typeof CT_NAMES!=='undefined'&&CT_NAMES[v])?CT_NAMES[v]:v; return qxPretty(key, v); }
 function orderedCats(key, rows){
   const present={}; rows.forEach(r=>{ const v=r[key]; if(v!=null&&v!=='') present[v]=1; });
   const base = SLICE_ORDER[key] ? SLICE_ORDER[key].filter(v=>present[v]) : [];
@@ -3853,6 +3854,37 @@ function wireCubeTile(opts){
   const sel=document.getElementById(opts.selId);
   if(sel&&!sel.dataset.wired){ sel.dataset.wired='1'; sel.onchange=()=>renderCubeDist(opts); }
   return renderCubeDist(opts);
+}
+// ── Order-cube renderers (revenue / package mix), sliceable by the same segments.
+function _last12Months(){
+  const out=[]; const now=new Date();
+  for(let i=11;i>=0;i--){ const m=new Date(now.getFullYear(),now.getMonth()-i,1); out.push({key:m.getFullYear()+'-'+String(m.getMonth()+1).padStart(2,'0'),label:m.toLocaleDateString('en-US',{month:'short'})}); }
+  return out;
+}
+async function renderOrderChart(opts){
+  const el=document.getElementById(opts.target); if(!el) return;
+  let cube; try{ cube=await ensureCube(); }catch(e){ return; }
+  const sel=opts.selId?document.getElementById(opts.selId):null;
+  if(sel){ populateSlicer(sel, null, cube.rows||[]); sel.classList.toggle('on', !!sel.value); }
+  const orders=sliceFilter(cube.orders||[], sel?sel.value:'');
+  setTileN(el, orders.length);
+  if(opts.kind==='revenue'){
+    const months=_last12Months(); const sum={};
+    orders.forEach(o=>{ if(o.month) sum[o.month]=(sum[o.month]||0)+(Number(o.amount)||0); });
+    const data=months.map(m=>Math.round(sum[m.key]||0));
+    mkChart(el,{type:'line',data:{labels:months.map(m=>m.label),datasets:[{label:'Revenue',data,borderColor:'#FF6B35',backgroundColor:'rgba(255,107,53,.1)',tension:.4,fill:true,borderWidth:2.5,pointRadius:0,pointHoverRadius:4}]},options:{plugins:{legend:{display:false}},scales:{y:{grid:{color:'#E6ECF6'},ticks:{callback:v=>'$'+Math.round(v/1000)+'k'}},x:{grid:{display:false}}},animation:{duration:600}}});
+  } else if(opts.kind==='pkgmix'){
+    const PK=[['core','Assessment','#FF6B35'],['newlywed','Starting Out','#FBBF24'],['anniversary','Anniversary','#6C7FFF'],['premium','Premium','#34D399']];
+    const cnt={}; orders.forEach(o=>{ const k=o.order_pkg; if(k) cnt[k]=(cnt[k]||0)+1; });
+    const present=PK.filter(p=>cnt[p[0]]);
+    if(!present.length){ mkChart(el,{type:'doughnut',data:{labels:['No orders'],datasets:[{data:[1],backgroundColor:['#E6ECF6'],borderColor:'#FFFFFF',borderWidth:3}]},options:{plugins:{legend:{display:false}},cutout:'65%'}}); return; }
+    mkChart(el,{type:'doughnut',data:{labels:present.map(p=>p[1]),datasets:[{data:present.map(p=>cnt[p[0]]),backgroundColor:present.map(p=>p[2]),borderColor:'#FFFFFF',borderWidth:3,hoverOffset:6}]},options:{plugins:{legend:{position:'bottom',labels:{padding:16,boxWidth:12}}},cutout:'65%'}});
+  }
+}
+function wireOrderChart(opts){
+  const sel=document.getElementById(opts.selId);
+  if(sel&&!sel.dataset.wired){ sel.dataset.wired='1'; sel.onchange=()=>renderOrderChart(opts); }
+  return renderOrderChart(opts);
 }
 function qxCatLabel(f, v) {
   if (f && f.kind === 'scale') { if (v === '1') return '1 · ' + (f.poleLow || 'low'); if (v === '5') return '5 · ' + (f.poleHigh || 'high'); return v; }
@@ -4323,8 +4355,8 @@ function mkChart(el, cfg) {
 
 function initCharts(page) {
   if (page==='overview') {
-    mkChart(document.getElementById('chart-revenue'),{type:'line',data:{labels:MONTHS,datasets:[{label:'Revenue',data:revenueData,borderColor:'#FF6B35',backgroundColor:'rgba(255,107,53,.1)',tension:.4,fill:true,borderWidth:2.5,pointRadius:0,pointHoverRadius:4}]},options:{plugins:{legend:{display:false}},scales:{y:{grid:{color:'#E6ECF6'},ticks:{callback:v=>'$'+Math.round(v/1000)+'k'}},x:{grid:{display:false}}},animation:{duration:800}}});
-    mkChart(document.getElementById('chart-pkg-mix'),{type:'doughnut',data:{labels:PKG_LABELS,datasets:[{data:pkgMix,backgroundColor:PKG_COLORS,borderColor:['#FFFFFF'],borderWidth:3,hoverOffset:6}]},options:{plugins:{legend:{position:'bottom',labels:{padding:16,boxWidth:12}}},cutout:'65%'}});
+    wireOrderChart({target:'chart-revenue',kind:'revenue',selId:'slz-revenue'});
+    wireOrderChart({target:'chart-pkg-mix',kind:'pkgmix',selId:'slz-pkgmix'});
     wireCubeTile({target:'rellength-bars',field:'relationship_length',mode:'insightbars',selId:'slz-ovrellen',color:'#6C7FFF'});
     wireCubeTile({target:'chart-source',field:'signup_source',mode:'hbar',selId:'slz-source',color:'#34D399'});
   }
