@@ -1188,22 +1188,6 @@ window.adminAuthHeaders = function(extra){
       <p><strong>Computed live.</strong> Types are recomputed from Exercise 1 answers using the current formula on every load, not read from a stored column. Anonymous: scores and demographics only, no names or emails.</p>
     </div>
 
-    <!-- Demographic filters -->
-    <div class="chart-card" style="margin-bottom:1.25rem;padding:.85rem 1rem;">
-      <div style="display:flex;gap:1.25rem;align-items:center;flex-wrap:wrap;">
-        <span style="font-size:.6rem;letter-spacing:.18em;text-transform:uppercase;color:var(--dim);font-weight:700;">Filter</span>
-        <label style="font-size:.72rem;color:var(--muted);">Gender
-          <select id="tf-gender" onchange="renderTypes()" style="margin-left:.4rem;background:var(--card);color:var(--text);border:1px solid var(--border);border-radius:6px;padding:.25rem .5rem;font-size:.72rem;"><option value="">All</option></select>
-        </label>
-        <label style="font-size:.72rem;color:var(--muted);">Relationship length
-          <select id="tf-rellen" onchange="renderTypes()" style="margin-left:.4rem;background:var(--card);color:var(--text);border:1px solid var(--border);border-radius:6px;padding:.25rem .5rem;font-size:.72rem;"><option value="">All</option></select>
-        </label>
-        <label style="font-size:.72rem;color:var(--muted);">Status
-          <select id="tf-relstat" onchange="renderTypes()" style="margin-left:.4rem;background:var(--card);color:var(--text);border:1px solid var(--border);border-radius:6px;padding:.25rem .5rem;font-size:.72rem;"><option value="">All</option></select>
-        </label>
-        <span id="tf-active" style="font-size:.68rem;color:var(--dim);margin-left:auto;"></span>
-      </div>
-    </div>
 
     <!-- KPI row -->
     <div class="kpi-grid" style="grid-template-columns:repeat(4,1fr);">
@@ -1245,19 +1229,13 @@ window.adminAuthHeaders = function(extra){
     <!-- Couple type distribution -->
     <div class="chart-grid">
       <div class="chart-card">
-        <div class="chart-card-header">
-          <div class="chart-card-title">Couple type distribution</div>
-          <div class="chart-card-sub">All 10 pairings, computed from both partners' answers</div>
-        </div>
+        <div class="chart-card-header" style="display:flex;justify-content:space-between;align-items:flex-start;gap:.75rem"><div><div class="chart-card-title">Couple type distribution</div><div class="chart-card-sub">All 10 pairings, computed from both partners' answers</div></div><select class="tile-slicer" id="slz-tcouple" title="Cut this tile by a segment"></select></div>
         <div id="types-ct-bars" style="display:flex;flex-direction:column;gap:.55rem;padding:.25rem 1.4rem 1rem;">
           <div style="color:var(--muted);font-size:.78rem;">Loading…</div>
         </div>
       </div>
       <div class="chart-card">
-        <div class="chart-card-header">
-          <div class="chart-card-title">Individual type distribution</div>
-          <div class="chart-card-sub">W / X / Y / Z across all typed individuals</div>
-        </div>
+        <div class="chart-card-header" style="display:flex;justify-content:space-between;align-items:flex-start;gap:.75rem"><div><div class="chart-card-title">Individual type distribution</div><div class="chart-card-sub">W / X / Y / Z across all typed individuals</div></div><select class="tile-slicer" id="slz-tindiv" title="Cut this tile by a segment"></select></div>
         <canvas id="types-indiv-chart" height="220"></canvas>
       </div>
     </div>
@@ -1265,18 +1243,12 @@ window.adminAuthHeaders = function(extra){
     <!-- Axis distributions: split summary + score histogram per axis -->
     <div class="chart-grid">
       <div class="chart-card">
-        <div class="chart-card-header">
-          <div class="chart-card-title">Engage / Withdraw</div>
-          <div class="chart-card-sub">Top bar: share of individuals on each side of the 3.0 line. Chart: how individual scores spread across the 1–5 axis (left = engage, right = withdraw).</div>
-        </div>
+        <div class="chart-card-header" style="display:flex;justify-content:space-between;align-items:flex-start;gap:.75rem"><div><div class="chart-card-title">Engage / Withdraw</div><div class="chart-card-sub">Top bar: share of individuals on each side of the 3.0 line. Chart: how individual scores spread across the 1–5 axis (left = engage, right = withdraw).</div></div><select class="tile-slicer" id="slz-teng" title="Cut this tile by a segment"></select></div>
         <div id="types-w-split" style="padding:.6rem 1.4rem 0;"></div>
         <div style="padding:.5rem 1.4rem 1rem;"><canvas id="types-whist-chart" height="180"></canvas></div>
       </div>
       <div class="chart-card">
-        <div class="chart-card-header">
-          <div class="chart-card-title">Open / Guarded</div>
-          <div class="chart-card-sub">Top bar: share of individuals on each side of the 3.0 line. Chart: how individual scores spread across the 1–5 axis (left = guarded, right = open).</div>
-        </div>
+        <div class="chart-card-header" style="display:flex;justify-content:space-between;align-items:flex-start;gap:.75rem"><div><div class="chart-card-title">Open / Guarded</div><div class="chart-card-sub">Top bar: share of individuals on each side of the 3.0 line. Chart: how individual scores spread across the 1–5 axis (left = guarded, right = open).</div></div><select class="tile-slicer" id="slz-topen" title="Cut this tile by a segment"></select></div>
         <div id="types-o-split" style="padding:.6rem 1.4rem 0;"></div>
         <div style="padding:.5rem 1.4rem 1rem;"><canvas id="types-ohist-chart" height="180"></canvas></div>
       </div>
@@ -3820,8 +3792,8 @@ function sliceFilter(rows, val){
 }
 function setTileN(el, n){
   const card=el.closest('.chart-card'); if(!card) return;
-  let sub=card.querySelector('.chart-subtitle'); const head=card.querySelector('.chart-head > div');
-  if(!sub&&head){ sub=document.createElement('div'); sub.className='chart-subtitle'; head.appendChild(sub); }
+  let sub=card.querySelector('.chart-subtitle, .chart-card-sub');
+  if(!sub){ const head=card.querySelector('.chart-head > div, .chart-card-header'); if(head){ sub=document.createElement('div'); sub.className=card.querySelector('.chart-card-header')?'chart-card-sub':'chart-subtitle'; head.appendChild(sub); } }
   if(!sub) return;
   if(sub.dataset.base==null) sub.dataset.base=/n=/.test(sub.textContent)?'':sub.textContent;
   const base=sub.dataset.base; sub.textContent=(base?base+' · ':'')+'n='+n;
@@ -3910,6 +3882,40 @@ function wireOrderChart(opts){
   const sel=document.getElementById(opts.selId);
   if(sel&&!sel.dataset.wired){ sel.dataset.wired='1'; sel.onchange=()=>renderOrderChart(opts); }
   return renderOrderChart(opts);
+}
+// ── Type Analytics tiles, cube-backed + per-tile sliceable ───────────────────
+async function renderTypeCouple(selId){
+  const el=document.getElementById('types-ct-bars'); if(!el) return;
+  let cube; try{ cube=await ensureCube(); }catch(e){ return; }
+  const sel=document.getElementById(selId);
+  if(sel){ populateSlicer(sel,'couple_type',cube.rows||[]); sel.classList.toggle('on',!!sel.value);
+    if(!sel.dataset.wired){ sel.dataset.wired='1'; sel.onchange=()=>renderTypeCouple(selId); } }
+  const rows=sliceFilter(cube.rows||[], sel?sel.value:'');
+  const seen={}, cnt={}; let nc=0;
+  rows.forEach(r=>{ if(!r.couple_id||!r.couple_type||seen[r.couple_id]) return; seen[r.couple_id]=1; cnt[r.couple_type]=(cnt[r.couple_type]||0)+1; nc++; });
+  setTileN(el, nc);
+  const sorted=Object.entries(cnt).sort((a,b)=>b[1]-a[1]);
+  if(!sorted.length){ el.innerHTML='<div style="color:var(--muted);font-size:.78rem;">No couples in this cut.</div>'; return; }
+  const max=sorted[0][1]||1;
+  el.innerHTML=sorted.map(([id,c])=>{ const pct=Math.round(100*c/nc), bw=Math.round(100*c/max);
+    return '<div><div style="display:flex;justify-content:space-between;margin-bottom:.2rem;"><span style="font-size:.75rem;color:#1B2547;">'+((typeof CT_NAMES!=='undefined'&&CT_NAMES[id])||id)+' <span style="color:#6B7280;">'+id+'</span></span><span style="font-size:.72rem;color:#6B7280;">'+c+' couple'+(c===1?'':'s')+' <span style="color:#C7CBD3;">·</span> <span style="color:#4B5563;">'+pct+'%</span></span></div><div style="background:#E6ECF6;border-radius:999px;height:6px;"><div style="background:var(--orange);width:'+bw+'%;height:100%;border-radius:999px;transition:width .4s;"></div></div></div>';
+  }).join('');
+}
+async function renderTypeAxis(opts){
+  const splitEl=document.getElementById(opts.splitId), histEl=document.getElementById(opts.histId);
+  let cube; try{ cube=await ensureCube(); }catch(e){ return; }
+  const sel=document.getElementById(opts.selId);
+  if(sel){ populateSlicer(sel, opts.field==='axis_w'?'axisEngage':'axisOpen', cube.rows||[]); sel.classList.toggle('on',!!sel.value);
+    if(!sel.dataset.wired){ sel.dataset.wired='1'; sel.onchange=()=>renderTypeAxis(opts); } }
+  const rows=sliceFilter(cube.rows||[], sel?sel.value:'').filter(r=>typeof r[opts.field]==='number');
+  const n=rows.length; if(histEl) setTileN(histEl,n);
+  let a=0; rows.forEach(r=>{ if(opts.side==='w'? r[opts.field]<=3 : r[opts.field]>=3) a++; });
+  const ap=n?Math.round(100*a/n):0, bp=100-ap;
+  if(splitEl) splitEl.innerHTML='<div><div style="display:flex;height:22px;border-radius:6px;overflow:hidden;font-size:.62rem;font-weight:700;"><div style="background:'+opts.color+';width:'+ap+'%;display:flex;align-items:center;justify-content:center;color:#1a1a1a;">'+(ap>12?opts.aLbl+' '+ap+'%':'')+'</div><div style="background:#E6ECF6;width:'+bp+'%;display:flex;align-items:center;justify-content:center;color:#586187;">'+(bp>12?opts.bLbl+' '+bp+'%':'')+'</div></div></div>';
+  const bins=[]; for(let b=1;b<5;b+=0.25) bins.push(Number(b.toFixed(2)));
+  const H=bins.map(()=>0); const bi=v=>Math.min(bins.length-1,Math.max(0,Math.floor((v-1)/0.25)));
+  rows.forEach(r=>{ H[bi(r[opts.field])]++; });
+  if(typeof drawHist==='function') drawHist(opts.histId, bins, H, opts.color);
 }
 function qxCatLabel(f, v) {
   if (f && f.kind === 'scale') { if (v === '1') return '1 · ' + (f.poleLow || 'low'); if (v === '5') return '5 · ' + (f.poleHigh || 'high'); return v; }
@@ -4484,7 +4490,7 @@ async function loadTypesData(force) {
   // Populate filter dropdowns from the data (once).
   const fill = (id, vals) => {
     const sel = document.getElementById(id);
-    if (sel.options.length > 1) return;
+    if (!sel || sel.options.length > 1) return;
     [...new Set(vals.filter(Boolean))].sort().forEach(v => {
       const o = document.createElement('option'); o.value = v; o.textContent = v; sel.appendChild(o);
     });
@@ -4521,11 +4527,8 @@ function typeFromAxes(w, o) {
 }
 
 function activeFilters() {
-  return {
-    gender: document.getElementById('tf-gender').value,
-    relLength: document.getElementById('tf-rellen').value,
-    relStatus: document.getElementById('tf-relstat').value,
-  };
+  const g=document.getElementById('tf-gender'), rl=document.getElementById('tf-rellen'), rs=document.getElementById('tf-relstat');
+  return { gender: g?g.value:'', relLength: rl?rl.value:'', relStatus: rs?rs.value:'' };
 }
 function matchIndiv(r, f) {
   return (!f.gender || r.gender === f.gender) &&
@@ -4546,8 +4549,7 @@ function renderTypes() {
   const indiv = TYPES_DATA.individuals.filter(r => matchIndiv(r, f));
   const couples = TYPES_DATA.couples.filter(c => matchCouple(c, f));
   const anyFilter = f.gender || f.relLength || f.relStatus;
-  document.getElementById('tf-active').textContent = anyFilter
-    ? `${indiv.length} individuals · ${couples.length} couples in filter` : '';
+  { const _ta=document.getElementById('tf-active'); if(_ta) _ta.textContent = anyFilter ? `${indiv.length} individuals · ${couples.length} couples in filter` : ''; }
 
   const small = indiv.length < 8;
   // KPIs
@@ -4562,40 +4564,15 @@ function renderTypes() {
   document.getElementById('types-maxshare').textContent = ctSorted.length ? (CT_NAMES[ctSorted[0][0]]||ctSorted[0][0]) : '—';
   document.getElementById('types-maxshare-sub').textContent = ctSorted.length ? `${maxShare}% of couples` : 'Concentration check';
 
-  // Couple type bars
-  const ctEl = document.getElementById('types-ct-bars');
-  if (!ctSorted.length) {
-    ctEl.innerHTML = `<div style="color:var(--muted);font-size:.78rem;">${small?'Not enough data yet.':'No couples in this filter.'}</div>`;
-  } else {
-    const ctMax = ctSorted[0][1] || 1;
-    ctEl.innerHTML = ctSorted.map(([id,count]) => {
-      const pct = Math.round(100*count/couples.length), barW = Math.round(100*count/ctMax);
-      return `<div><div style="display:flex;justify-content:space-between;margin-bottom:.2rem;"><span style="font-size:.75rem;color:#1B2547;">${CT_NAMES[id]||id} <span style="color:#6B7280;">${id}</span></span><span style="font-size:.72rem;color:#6B7280;">${count} couple${count===1?'':'s'} <span style="color:#C7CBD3;">·</span> <span style="color:#4B5563;">${pct}%</span></span></div><div style="background:#E6ECF6;border-radius:999px;height:6px;"><div style="background:var(--orange);width:${barW}%;height:100%;border-radius:999px;transition:width .4s;"></div></div></div>`;
-    }).join('') + (small?`<div style="color:#FBBF24;font-size:.7rem;margin-top:.4rem;">Small sample — read with caution.</div>`:'');
-  }
+  // Couple type distribution (cube-backed + sliceable)
+  renderTypeCouple('slz-tcouple');
 
   // Individual doughnut
-  drawDoughnut('types-indiv-chart', ['W','X','Y','Z'], ['W','X','Y','Z'].map(t=>tCounts[t]), ['W','X','Y','Z'].map(t=>TYPE_COLORS[t]));
+  wireCubeTile({target:'types-indiv-chart',field:'type',mode:'doughnut',selId:'slz-tindiv',palette:['W','X','Y','Z'].map(t=>TYPE_COLORS[t])});
 
-  // Axis split bars
-  let eng=0, opn=0; indiv.forEach(r=>{ if(r.w<=3)eng++; if(r.o>=3)opn++; });
-  const n = indiv.length||1;
-  const splitRow = (label,a,aLbl,b,bLbl,color) => {
-    const ap=Math.round(100*a/n), bp=100-ap;
-    return `<div><div style="font-size:.7rem;color:#586187;margin-bottom:.3rem;">${label}</div><div style="display:flex;height:22px;border-radius:6px;overflow:hidden;font-size:.62rem;font-weight:700;">
-      <div style="background:${color};width:${ap}%;display:flex;align-items:center;justify-content:center;color:#1a1a1a;">${ap>12?aLbl+' '+ap+'%':''}</div>
-      <div style="background:#E6ECF6;width:${bp}%;display:flex;align-items:center;justify-content:center;color:#586187;">${bp>12?bLbl+' '+bp+'%':''}</div></div></div>`;
-  };
-  { const w=document.getElementById('types-w-split'); if(w) w.innerHTML = splitRow('', eng, 'Engage', n-eng, 'Withdraw', '#FF6B35'); }
-  { const o=document.getElementById('types-o-split'); if(o) o.innerHTML = splitRow('', opn, 'Open', n-opn, 'Guarded', '#6C7FFF'); }
-
-  // Histograms
-  const bins = TYPES_DATA.summary.histogramBins;
-  const wH = bins.map(()=>0), oH = bins.map(()=>0);
-  const bi = v => Math.min(bins.length-1, Math.max(0, Math.floor((v-1)/0.25)));
-  indiv.forEach(r=>{ wH[bi(r.w)]++; oH[bi(r.o)]++; });
-  drawHist('types-whist-chart', bins, wH, '#FF6B35');
-  drawHist('types-ohist-chart', bins, oH, '#6C7FFF');
+  // Axis distributions (cube-backed + sliceable): split bar + score histogram
+  renderTypeAxis({selId:'slz-teng', field:'axis_w', side:'w', splitId:'types-w-split', histId:'types-whist-chart', aLbl:'Engage', bLbl:'Withdraw', color:'#FF6B35'});
+  renderTypeAxis({selId:'slz-topen', field:'axis_o', side:'o', splitId:'types-o-split', histId:'types-ohist-chart', aLbl:'Open', bLbl:'Guarded', color:'#6C7FFF'});
 
   // Per-dimension table (recompute outlier rate for filtered set)
   const cfgDims = Object.keys(cfg);

@@ -76,11 +76,15 @@ function ownFields(p) {
   const scores = calcDimScores(p.ex1_answers);
   const { withdrawScore, openScore } = axisScores(scores);
   const type = typeCodeFromAxes(withdrawScore, openScore);
+  const _axisW = Number.isFinite(withdrawScore) ? Number(withdrawScore.toFixed(3)) : null;
+  const _axisO = Number.isFinite(openScore) ? Number(openScore.toFixed(3)) : null;
   const r = {
     type,
     axisEngage: type === 'W' || type === 'X' ? 'Engage' : 'Withdraw',
     axisOpen: type === 'W' || type === 'Y' ? 'Open' : 'Guarded',
     pkg: p.pkg || 'core',
+    axis_w: _axisW,
+    axis_o: _axisO,
   };
   for (const k of DEMO_KEYS) r[k] = p[k] != null && p[k] !== '' ? p[k] : null;
   // Gender isn't collected directly; derive it from the person's own pronouns.
