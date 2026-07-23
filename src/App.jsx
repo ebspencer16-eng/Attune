@@ -2862,6 +2862,21 @@ function substName(s, userName, partnerName) {
     .replace(/\{P\}/g, partnerName || "");
 }
 
+// Extended-family responsibility items and the two "involvement" life questions
+// are person-relative: each partner answers about THEIR OWN family under the
+// {userName} key and the OTHER partner's family under the {partnerName} key. So a
+// partner's answer about "my family" is stored under their {partnerName} key.
+// When reading the PARTNER's answer we swap the placeholders so both align to the
+// same real family. Identity for every non-family key / id (they have no
+// placeholders), so this is safe to apply to every partner-answer read.
+function mirrorRespKey(key) {
+  if (!key || (key.indexOf('{userName}') < 0 && key.indexOf('{partnerName}') < 0)) return key;
+  return String(key).replace(/\{userName\}/g, '\u0001').replace(/\{partnerName\}/g, '{userName}').replace(/\u0001/g, '{partnerName}');
+}
+function mirrorLifeId(id) {
+  return id === 'lq_involve_user' ? 'lq_involve_partner' : id === 'lq_involve_partner' ? 'lq_involve_user' : id;
+}
+
 // RESPONSIBILITY_CATEGORIES now lives in api/_questions.js (single source of truth).
 
 // FIXED_CATS is the same structure — used for sidebar navigation in results
@@ -3008,13 +3023,13 @@ function _domainItemScores(domainKey, ex2, partnerEx2, userName, partnerName) {
     if (item === undefined) return;
     const key = catId + '__' + item;
     const uV = ex2?.responsibilities?.[key];
-    const pV = partnerEx2?.responsibilities?.[key];
+    const pV = partnerEx2?.responsibilities?.[mirrorRespKey(key)];
     const s = scoreRespClient(uV, pV, userName, partnerName);
     if (s != null) out.push(s);
   };
   const lqScore = (lqId) => {
     const uV = ex2?.life?.[lqId];
-    const pV = partnerEx2?.life?.[lqId];
+    const pV = partnerEx2?.life?.[mirrorLifeId(lqId)];
     const s = scoreLqClient(uV, pV, _LIFE_OPTIONS_CLIENT[lqId]);
     if (s != null) out.push(s);
   };
@@ -3062,7 +3077,7 @@ function buildWorkbookPayload(userName, partnerName, ex1Answers, partnerEx1, ex2
       const key = cat.id + '__' + rawItem;
       const itemLabel = substName(rawItem, userName, partnerName);
       const userValue = normRespValue(ex2Answers?.responsibilities?.[key] || null, true, userName, partnerName);
-      const partnerValue = normRespValue(partnerEx2?.responsibilities?.[key] || null, false, userName, partnerName);
+      const partnerValue = normRespValue(partnerEx2?.responsibilities?.[mirrorRespKey(key)] || null, false, userName, partnerName);
       responsibilities.user[cat.id].push({ item: itemLabel, value: userValue });
       responsibilities.partner[cat.id].push({ item: itemLabel, value: partnerValue });
     });
@@ -3073,7 +3088,7 @@ function buildWorkbookPayload(userName, partnerName, ex1Answers, partnerEx1, ex2
   const lifeQuestions = { user: {}, partner: {}, meta: {} };
   LIFE_QUESTIONS.forEach(q => {
     lifeQuestions.user[q.id] = ex2Answers?.life?.[q.id] || null;
-    lifeQuestions.partner[q.id] = partnerEx2?.life?.[q.id] || null;
+    lifeQuestions.partner[q.id] = partnerEx2?.life?.[mirrorLifeId(q.id)] || null;
     lifeQuestions.meta[q.id] = {
       category: q.category,
       topic: substName(q.topic || '', userName, partnerName),
@@ -3096,7 +3111,7 @@ function buildWorkbookPayload(userName, partnerName, ex1Answers, partnerEx1, ex2
   ];
   const expGaps = LEGACY_EXP_KEYS.map(({ key, label }) => {
     const yourAns = ex2Answers?.life?.['lq_' + key] || null;
-    const partnerAns = partnerEx2?.life?.['lq_' + key] || null;
+    const partnerAns = partnerEx2?.life?.[mirrorLifeId('lq_' + key)] || null;
     return { key, label, yourAnswer: yourAns, partnerAnswer: partnerAns, aligned: yourAns === partnerAns };
   });
 
@@ -3475,7 +3490,7 @@ function JointOverview({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Answ
     cat.items.forEach(item => {
       const key = ((cat.id) + "__" + (item));
       const rawMine = ex2Answers.responsibilities?.[key];
-      const rawTheirs = partnerEx2.responsibilities?.[key];
+      const rawTheirs = partnerEx2.responsibilities?.[mirrorRespKey(key)];
       if (!rawMine || !rawTheirs) return;
       const mine = normRespValue(rawMine, true, userName, partnerName);
       const theirs = normRespValue(rawTheirs, false, userName, partnerName);
@@ -3484,8 +3499,8 @@ function JointOverview({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Answ
   });
   const lifeRows = LIFE_QUESTIONS.map(q => ({
     category: q.category, item: substName(q.text, userName, partnerName),
-    mine: ex2Answers.life?.[q.id], theirs: partnerEx2.life?.[q.id],
-    aligned: ex2Answers.life?.[q.id] === partnerEx2.life?.[q.id],
+    mine: ex2Answers.life?.[q.id], theirs: partnerEx2.life?.[mirrorLifeId(q.id)],
+    aligned: ex2Answers.life?.[q.id] === partnerEx2.life?.[mirrorLifeId(q.id)],
   })).filter(r => r.mine && r.theirs);
   const allRows = [...rows, ...lifeRows];
   const alignedCount = allRows.filter(r => r.aligned).length;
@@ -4666,7 +4681,7 @@ function ExpectationsResults({ myAnswers, partnerAnswers, userName, partnerName,
     cat.items.forEach(item => {
       const key = `${cat.id}__${item}`;
       const rawMine = myAnswers.responsibilities?.[key];
-      const rawTheirs = partnerAnswers.responsibilities?.[key];
+      const rawTheirs = partnerAnswers.responsibilities?.[mirrorRespKey(key)];
       if (!rawMine || !rawTheirs) return;
       const score = scoreRespClient(rawMine, rawTheirs, userName, partnerName);
       const mine = normRespVal(rawMine, true);
@@ -4678,7 +4693,7 @@ function ExpectationsResults({ myAnswers, partnerAnswers, userName, partnerName,
   // Life questions — all grouped as "Life & Values"
   const lifeRows = LIFE_QUESTIONS.map(q => {
     const mine = myAnswers.life?.[q.id];
-    const theirs = partnerAnswers.life?.[q.id];
+    const theirs = partnerAnswers.life?.[mirrorLifeId(q.id)];
     return {
       category: "Life & Values", catId: "life", item: substName(q.text, userName, partnerName),
       mine, theirs,
@@ -6157,7 +6172,7 @@ function BudgetReveal({ rev, userName, partnerName, ex2Answers, partnerEx2, font
           </div>
           {echoQs.map((q, i) => {
             const mine = myLife[q.id];
-            const theirs = parLife[q.id];
+            const theirs = parLife[mirrorLifeId(q.id)];
             if (!mine && !theirs) return null;
             return (
               <div key={q.id} style={{ padding: "0.7rem 0", borderTop: i === 0 ? "none" : "1px solid " + C.stone + "60" }}>
@@ -7357,7 +7372,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
     cat.items.map(item => {
       const key = `${cat.id}__${item}`;
       const rawMine = ex2Answers?.responsibilities?.[key];
-      const rawTheirs = rawMine ? partnerEx2?.responsibilities?.[key] : null;
+      const rawTheirs = rawMine ? partnerEx2?.responsibilities?.[mirrorRespKey(key)] : null;
       const mine = rawMine ? normRespValue(rawMine, true, userName, partnerName) : rawMine;
       const theirs = rawTheirs ? normRespValue(rawTheirs, false, userName, partnerName) : rawTheirs;
       const bothAnswered = mine && theirs;
@@ -9610,7 +9625,7 @@ function ResultsHighlights({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3
     cat.items.map(item => {
       const key = cat.id + "__" + item;
       const rawMine = ex2Answers?.responsibilities?.[key];
-      const rawTheirs = partnerEx2?.responsibilities?.[key];
+      const rawTheirs = partnerEx2?.responsibilities?.[mirrorRespKey(key)];
       if (!rawMine || !rawTheirs) return null;
       const mine = normRespValue(rawMine, true, userName, partnerName);
       const theirs = normRespValue(rawTheirs, false, userName, partnerName);
@@ -9619,8 +9634,8 @@ function ResultsHighlights({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3
   );
   const lifeRows = LIFE_QUESTIONS.map(q => ({
     item: substName(q.text, userName, partnerName), category: q.category,
-    mine: ex2Answers?.life?.[q.id], theirs: partnerEx2?.life?.[q.id],
-    aligned: ex2Answers?.life?.[q.id] === partnerEx2?.life?.[q.id],
+    mine: ex2Answers?.life?.[q.id], theirs: partnerEx2?.life?.[mirrorLifeId(q.id)],
+    aligned: ex2Answers?.life?.[q.id] === partnerEx2?.life?.[mirrorLifeId(q.id)],
   })).filter(r => r.mine && r.theirs);
   const allExpRows = [...allRows, ...lifeRows];
   const alignedCount = allExpRows.filter(r => r.aligned).length;
