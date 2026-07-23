@@ -104,8 +104,12 @@ function ownFields(p) {
   };
   for (const cat of RESPONSIBILITY_CATEGORIES) {
     cat.items.forEach((item, i) => {
+      // The app stores responsibility keys with the RAW {userName}/{partnerName}
+      // template (not the substituted name), so the raw item is the real key.
+      // Fall back to the name-substituted form for any legacy data.
       const realItem = item.replace(/\{userName\}/g, me).replace(/\{partnerName\}/g, partner);
-      r['resp_' + cat.id + '_' + i] = norm(resp[cat.id + '__' + realItem]);
+      const raw = resp[cat.id + '__' + item];
+      r['resp_' + cat.id + '_' + i] = norm(raw != null ? raw : resp[cat.id + '__' + realItem]);
     });
   }
   // Ex3 Relationship Reflection: scale answers stored as option index (0-4),
