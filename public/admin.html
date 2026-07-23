@@ -1255,32 +1255,23 @@ window.adminAuthHeaders = function(extra){
       </div>
     </div>
 
-    <!-- Axis split -->
-    <div class="chart-grid chart-grid full">
-      <div class="chart-card">
-        <div class="chart-card-header">
-          <div class="chart-card-title">Axis split</div>
-          <div class="chart-card-sub">Where individuals fall on each axis (3.0 boundary)</div>
-        </div>
-        <div id="types-axis-bars" style="display:flex;flex-direction:column;gap:1rem;padding:.5rem 1.4rem 1.25rem;"></div>
-      </div>
-    </div>
-
-    <!-- Axis-score histograms -->
+    <!-- Axis distributions: split summary + score histogram per axis -->
     <div class="chart-grid">
       <div class="chart-card">
         <div class="chart-card-header">
-          <div class="chart-card-title">Engage / Withdraw score</div>
-          <div class="chart-card-sub">Population spread vs the 3.0 split. Left of 3 = engage.</div>
+          <div class="chart-card-title">Engage / Withdraw</div>
+          <div class="chart-card-sub">Top bar: share of individuals on each side of the 3.0 line. Chart: how individual scores spread across the 1–5 axis (left = engage, right = withdraw).</div>
         </div>
-        <canvas id="types-whist-chart" height="200"></canvas>
+        <div id="types-w-split" style="padding:.6rem 1.4rem 0;"></div>
+        <div style="padding:.5rem 1.4rem 1rem;"><canvas id="types-whist-chart" height="180"></canvas></div>
       </div>
       <div class="chart-card">
         <div class="chart-card-header">
-          <div class="chart-card-title">Open / Guarded score</div>
-          <div class="chart-card-sub">Population spread vs the 3.0 split. Right of 3 = open.</div>
+          <div class="chart-card-title">Open / Guarded</div>
+          <div class="chart-card-sub">Top bar: share of individuals on each side of the 3.0 line. Chart: how individual scores spread across the 1–5 axis (left = guarded, right = open).</div>
         </div>
-        <canvas id="types-ohist-chart" height="200"></canvas>
+        <div id="types-o-split" style="padding:.6rem 1.4rem 0;"></div>
+        <div style="padding:.5rem 1.4rem 1rem;"><canvas id="types-ohist-chart" height="180"></canvas></div>
       </div>
     </div>
 
@@ -1436,7 +1427,7 @@ window.adminAuthHeaders = function(extra){
 
     <div class="data-notice">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#34D399" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-      <p><strong>Beta survey v5.</strong> Real responses are read from Supabase <code>feedback_submissions</code>. Charts below fall back to simulated data until responses arrive, and switch over automatically once they do. The response table at the top always shows real submissions only.</p>
+      <p><strong>Beta survey v5.</strong> <span id="fb-realnote" style="font-weight:700">Loading…</span> Aggregates below (KPIs, benchmarks, grids, distributions) are computed from real responses when any exist, otherwise a simulated preview is shown. The response table at the top is always real.</p>
     </div>
 
     <!-- Top KPIs: benchmarkable metrics -->
@@ -2330,6 +2321,9 @@ function showPage(id) {
   // Lazy-init charts
   if (!chartsInit[id]) { chartsInit[id]=true; initCharts(id); }
   if (id==='feedback') loadFeedbackData();
+  // Demographics charts depend on async data; redraw on every open so they
+  // never sit blank from a data-less initial render.
+  if (id==='demographics') { chartsInit.demographics = false; initCharts('demographics'); }
   if (id==='survey-explorer') initSurveyExplorer();
   if (id==='types') loadTypesData();
   if (id==='beta-codes') loadBetaCodes();
@@ -2555,6 +2549,61 @@ async function loadFeedbackData() {
       {text:"That answering separately wasn't just a suggestion – it's the whole point. I almost texted my partner mid-exercise to compare notes.",name:"Sam L."},
     ],
   };
+
+  // ── Real data override ──────────────────────────────────────────────
+  // The SIM object above is design scaffolding. As soon as any real beta
+  // responses exist, compute the real aggregates and overwrite SIM's fields so
+  // every chart below renders real numbers (with the sample size shown), not
+  // mock. Charts with no real field yet fall back to an honest empty array.
+  (function applyRealBeta() {
+    let realRows = [];
+    try {
+      const all = (__fbAdminData && __fbAdminData.feedback_submissions) || [];
+      realRows = all.filter(r => r.type === 'beta_survey')
+        .map(r => { try { return typeof r.text === 'string' ? JSON.parse(r.text) : r.text; } catch { return null; } })
+        .filter(Boolean);
+    } catch {}
+    const noteEl = document.getElementById('fb-realnote');
+    if (!realRows.length) { if (noteEl) noteEl.textContent = 'No responses yet — showing simulated preview data.'; return; }
+    if (noteEl) noteEl.textContent = 'Showing ' + realRows.length + ' real response' + (realRows.length !== 1 ? 's' : '') + '. Small samples read with caution.';
+
+    const R = realRows, n = R.length;
+    const avg = (f) => { const v = R.map(s => +s[f]).filter(Number.isFinite); return v.length ? Math.round(v.reduce((a,b)=>a+b,0)/v.length*10)/10 : null; };
+    const npsVals = R.map(s => parseInt(s.nps,10)).filter(v => Number.isFinite(v) && v>=0 && v<=10);
+    const prom = npsVals.filter(v=>v>=9).length, pas = npsVals.filter(v=>v>=7&&v<=8).length, det = npsVals.filter(v=>v<=6).length;
+    SIM.surveys = n;
+    SIM.nps = npsVals.length ? Math.round((prom-det)/npsVals.length*100) : 0;
+    SIM.npsPromoters = npsVals.length ? Math.round(prom/npsVals.length*100) : 0;
+    SIM.npsPassives  = npsVals.length ? Math.round(pas/npsVals.length*100) : 0;
+    SIM.npsDetractors= npsVals.length ? Math.round(det/npsVals.length*100) : 0;
+    SIM.expectationMatch = avg('expectationMatch') ?? 0;
+    SIM.convoRate = Math.round(R.filter(s => /^yes/i.test(String(s.convoHappened||''))).length / n * 100);
+    { const v=[...R.map(s=>+s.shiftCouple),...R.map(s=>+s.shiftSelf)].filter(Number.isFinite); SIM.outcomeShift = v.length ? Math.round(v.reduce((a,b)=>a+b)/v.length*10)/10 : 0; }
+    SIM.benchmarks = [['Expectation match','expectationMatch','#E8673A'],['Communication overall','commsOverall','#9B5DE5'],['Expectations overall','expOverall','#9B5DE5'],['Outcome shift (couple)','shiftCouple','#10B981'],['Outcome shift (self)','shiftSelf','#10B981'],['Return likelihood','returnLikelihood','#10B981'],['Value vs other spend','valuePct','#F59E0B']]
+      .map(([label,f,color]) => ({ label, val: avg(f), color })).filter(b => b.val != null);
+    // Real grids: average each r#_c# cell across responses. Row/col labels kept from SIM.
+    const gridReal = (key, simRows, colCount) => simRows.map((row, ri) => ({ label: row.label,
+      scores: Array.from({length: colCount}, (_, ci) => { const vals = R.map(s => s[key] && s[key]['r'+ri+'_c'+ci]).filter(Number.isFinite); return vals.length ? Math.round(vals.reduce((a,b)=>a+b)/vals.length*10)/10 : null; }) }));
+    SIM.commsGrid   = gridReal('commsGrid',   SIM.commsGrid,   3);
+    SIM.expGrid     = gridReal('expGrid',     SIM.expGrid,     3);
+    SIM.overallGrid = gridReal('overallGrid', SIM.overallGrid, 3);
+    // Distributions
+    const distPct = (f) => { const c={}; R.forEach(s => { const v=s[f]; if (v) c[v]=(c[v]||0)+1; }); return Object.entries(c).map(([l,cnt]) => ({ l, v: Math.round(cnt/n*100) })).sort((a,b)=>b.v-a.v); };
+    const multiPct = (f) => { const c={}; R.forEach(s => { (Array.isArray(s[f])?s[f]:[]).forEach(v => c[v]=(c[v]||0)+1); }); return Object.entries(c).map(([l,cnt]) => ({ l, v: Math.round(cnt/n*100) })).sort((a,b)=>b.v-a.v); };
+    SIM.aha = distPct('ahaMarker');
+    SIM.concerns = multiPct('concerns');
+    // Interest grid: one column (interest 1-5) per row; show avg as a 0-100 bar.
+    const INTEREST_ROWS = ['Relationship Reflection exercise','Physical Intimacy Expectations','Starting Out Checklist','Build a Budget experience'];
+    SIM.interestAvg = INTEREST_ROWS.map((l, ri) => { const vals = R.map(s => s.interestGrid && s.interestGrid['r'+ri+'_c0']).filter(Number.isFinite); const a = vals.length ? vals.reduce((x,y)=>x+y,0)/vals.length : 0; return { l, v: Math.round(a/5*100) }; });
+    // Open-text feeds from real answers.
+    const feed = (f, extra) => R.filter(s => s[f] && String(s[f]).trim()).map(s => ({ text: String(s[f]).trim(), name: 'Anonymous', ...(extra ? extra(s) : {}) }));
+    SIM.discovered  = feed('whatDiscovered');
+    SIM.wishKnew    = feed('wishKnew');
+    SIM.testimonials= R.filter(s => s.testimonial && String(s.testimonial).trim()).map(s => ({ text: String(s.testimonial).trim(), name: s.consentFirstName || s.consentInitials || 'Anonymous', consent: s.testimonialConsent || '' }));
+    SIM.detractors  = R.filter(s => parseInt(s.nps,10) <= 6 && s.npsWhy).map(s => ({ text: String(s.npsWhy).trim(), name: 'Anonymous', nps: parseInt(s.nps,10) }));
+    // Completion signal from the coverage of finished exercises isn't in the
+    // survey payload, so leave that card on its coverage-derived render.
+  })();
 
   // Render KPIs
   document.getElementById('fb-nps').textContent = SIM.nps;
@@ -3792,6 +3841,17 @@ async function renderQuestionExplorer(containerId, groupPrefixes) {
       html += '<tr style="border-top:1px solid var(--border);"><td style="padding:.4rem .6rem;color:var(--text);white-space:nowrap;">' + QX_ESC(qxCatLabel(rf, rc)) + '</td>' +
         colCats.map(c => { const v = (cell[rc] && cell[rc][c]) || 0; return '<td style="padding:.4rem .6rem;text-align:center;' + (v ? '' : 'opacity:.35;') + '">' + (v || '–') + '</td>'; }).join('') + '</tr>';
     });
+    // Mean row (scale questions only): per column, the average score weighted by
+    // how many people in that column gave each score.
+    if (rf.kind === 'scale') {
+      html += '<tr style="border-top:2px solid var(--border);background:var(--surface);"><td style="padding:.45rem .6rem;color:var(--text);font-weight:700;white-space:nowrap;">Mean</td>' +
+        colCats.map(c => {
+          let sum = 0, cnt = 0;
+          ['1','2','3','4','5'].forEach(sc => { const v = (cell[sc] && cell[sc][c]) || 0; sum += Number(sc) * v; cnt += v; });
+          const mean = cnt ? (sum / cnt).toFixed(1) : null;
+          return '<td style="padding:.45rem .6rem;text-align:center;font-weight:700;' + (mean == null ? 'opacity:.35;' : 'color:var(--text);') + '">' + (mean == null ? '–' : mean) + '</td>';
+        }).join('') + '</tr>';
+    }
     html += '</tbody></table>';
     document.getElementById(containerId + '-xout').innerHTML = html;
   };
@@ -4393,9 +4453,8 @@ function renderTypes() {
       <div style="background:${color};width:${ap}%;display:flex;align-items:center;justify-content:center;color:#1a1a1a;">${ap>12?aLbl+' '+ap+'%':''}</div>
       <div style="background:#E6ECF6;width:${bp}%;display:flex;align-items:center;justify-content:center;color:#586187;">${bp>12?bLbl+' '+bp+'%':''}</div></div></div>`;
   };
-  document.getElementById('types-axis-bars').innerHTML =
-    splitRow('Engage / Withdraw', eng, 'Engage', n-eng, 'Withdraw', '#FF6B35') +
-    splitRow('Open / Guarded', opn, 'Open', n-opn, 'Guarded', '#6C7FFF');
+  { const w=document.getElementById('types-w-split'); if(w) w.innerHTML = splitRow('', eng, 'Engage', n-eng, 'Withdraw', '#FF6B35'); }
+  { const o=document.getElementById('types-o-split'); if(o) o.innerHTML = splitRow('', opn, 'Open', n-opn, 'Guarded', '#6C7FFF'); }
 
   // Histograms
   const bins = TYPES_DATA.summary.histogramBins;
@@ -4439,7 +4498,7 @@ function drawDoughnut(id, labels, data, colors) {
 function drawHist(id, bins, data, color) {
   const el = document.getElementById(id); if(!el) return;
   const ex = Chart.getChart(el); if(ex) ex.destroy();
-  const labels = bins.map(b=>b.toFixed(2));
+  const labels = bins.map(b=>b.toFixed(1));
   const splitIdx = bins.findIndex(b=>b>=3) ;
   mkChart(el, { type:'bar', data:{ labels, datasets:[{data, backgroundColor:bins.map(b=>b<3?color:color+'77'), borderRadius:3}] },
     options:{ plugins:{ legend:{display:false}, tooltip:{callbacks:{title:i=>`score ${i[0].label}`}} },
