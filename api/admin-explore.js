@@ -346,6 +346,24 @@ export default async function handler(req) {
       const rl = parseInt(payload.returnLikelihood, 10); row.returnLikelihood = Number.isFinite(rl) ? rl : null;
       surveysAnon.push(row);
     }
+    // Post-results survey (general couples) — same shape so NPS/ratings charts
+    // combine both cohorts. Its star rating maps onto the 1-5 rating axis.
+    try {
+      const { data: prRows = [] } = await admin.from('feedback_submissions').select('text, submitted_at').eq('type', 'post_results');
+      for (const r of prRows) {
+        let payload = null; try { payload = typeof r.text === 'string' ? JSON.parse(r.text) : r.text; } catch {}
+        if (!payload) continue;
+        const a = payload.answers || {};
+        const seg = (payload.respondentId && segById[payload.respondentId]) || {};
+        const row = {};
+        for (const k of SEG_KEYS) row[k] = seg[k] != null ? seg[k] : null;
+        row.month = monthOfTs(r.submitted_at);
+        row.ts = r.submitted_at || null;
+        const nps = parseInt(a.nps, 10); row.nps = Number.isFinite(nps) ? nps : null;
+        const rl = parseInt(a.rating, 10); row.returnLikelihood = Number.isFinite(rl) ? rl : null;
+        surveysAnon.push(row);
+      }
+    } catch (e) {}
 
     return json({
       generatedAt: new Date().toISOString(),
