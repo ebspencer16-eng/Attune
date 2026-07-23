@@ -3150,6 +3150,7 @@ function updateStatsFromRealData(orders) {
   // Real package-mix trend from orders table, grouped by pkg_key + month
   loadRealPackageTrend(orders).catch(() => {});
   loadRealResponses().catch(() => {});
+  if (typeof initAllSlicers === 'function') initAllSlicers();
   // Real satisfaction analytics from feedback_submissions (NPS + ratings)
   loadRealAnalytics().catch(() => {});
   // Real funnel data from orders + exercise completion on profiles
@@ -3817,6 +3818,28 @@ function sliceFilter(rows, val){
   if (!val) return rows;
   const i=val.indexOf('::'); const k=val.slice(0,i), v=val.slice(i+2);
   return rows.filter(r=>String(r[k])===v);
+}
+// Every slicer on the page, with its option-set rule. Populated up-front as soon
+// as the cube is available so no tile shows an empty (collapsed) dropdown while
+// waiting for its own chart to render. Couple-level tiles only offer couple-level
+// segments; distribution tiles exclude their own dimension.
+const COUPLE_LEVEL_DIMS=['relationship_status','relationship_length','children'];
+const SLICER_CFG={
+  'slz-age':{ex:'age_range'},'slz-gender':{ex:'gender'},'slz-relstatus':{ex:'relationship_status'},
+  'slz-children':{ex:'children'},'slz-demorellen':{ex:'relationship_length'},'slz-ovrellen':{ex:'relationship_length'},
+  'slz-source':{ex:'signup_source'},'slz-revenue':{},'slz-pkgmix':{},'slz-pkgtrend':{},'slz-revpkg':{},
+  'slz-addons':{},'slz-geo':{},'slz-pdisc':{},
+  'slz-tcouple':{ex:'couple_type'},'slz-tindiv':{ex:'type'},'slz-teng':{ex:'axisEngage'},'slz-topen':{ex:'axisOpen'},
+  'slz-rdim':{only:COUPLE_LEVEL_DIMS},'slz-rexp':{only:COUPLE_LEVEL_DIMS},'slz-rgap':{only:COUPLE_LEVEL_DIMS},'slz-rfeel':{only:COUPLE_LEVEL_DIMS},
+  'slz-sfunnel':{only:COUPLE_LEVEL_DIMS},'slz-srate':{},'slz-snps':{},
+};
+async function initAllSlicers(){
+  let cube; try{ cube=await ensureCube(); }catch(e){ return; }
+  Object.keys(SLICER_CFG).forEach(id=>{
+    const sel=document.getElementById(id); if(!sel) return;
+    const cfg=SLICER_CFG[id];
+    populateSlicer(sel, cfg.ex||null, cube.rows||[], cfg.only);
+  });
 }
 function setTileN(el, n){
   const card=el.closest('.chart-card'); if(!card) return;
@@ -4821,7 +4844,7 @@ function escHtml(str) {
   return str ? str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;') : '';
 }
 
-window.addEventListener('load',()=>{chartsInit.overview=true;initCharts('overview');updateDashboardFulfillmentKPIs();restorePageFromHash();});
+window.addEventListener('load',()=>{chartsInit.overview=true;initCharts('overview');updateDashboardFulfillmentKPIs();restorePageFromHash();if(typeof initAllSlicers==='function')initAllSlicers();});
 
 // ── Survey Explorer ───────────────────────────────────────────────────────────
 
