@@ -28,10 +28,10 @@
     --mono:'DM Mono',monospace;
   }
   html{scroll-behavior:smooth}
-  body{background:var(--bg);color:var(--text);font-family:var(--bfont);-webkit-font-smoothing:antialiased;height:100vh;overflow:hidden;display:flex}
+  body{background:var(--bg);color:var(--text);font-family:var(--bfont);-webkit-font-smoothing:antialiased;min-height:100vh;display:block;padding-left:220px}
 
   /* SIDEBAR */
-  .sidebar{width:220px;flex-shrink:0;background:var(--surface);border-right:1px solid var(--border);min-height:100vh;position:sticky;top:0;height:100vh;overflow-y:auto;display:flex;flex-direction:column}
+  .sidebar{width:220px;background:var(--surface);border-right:1px solid var(--border);position:fixed;top:0;left:0;height:100vh;overflow-y:auto;display:flex;flex-direction:column;z-index:50}
   .sb-brand{padding:1.5rem 1.25rem 1rem;border-bottom:1px solid var(--border)}
   .sb-logo{display:flex;align-items:center;gap:.6rem;text-decoration:none}
   .sb-logo-mark{display:flex;align-items:center;justify-content:center}
@@ -48,7 +48,7 @@
   .sb-footer a:hover{color:var(--muted)}
 
   /* MAIN */
-  .main{flex:1;height:100vh;overflow-y:auto;overflow-x:hidden}
+  .main{overflow-x:hidden}
   .page{display:none;padding:2rem 2.5rem;min-height:100vh}
   .page.active{display:block}
 
