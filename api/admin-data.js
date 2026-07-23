@@ -228,10 +228,24 @@ export default async function handler(req) {
     const completedCouples = (psQ.data || []).filter(s => hasAnswers(s.ex1_answers) && hasAnswers(s.ex2_answers)).length;
 
     const responses = buildResponseAggregates(profiles, psQ.data || []);
+    // Precompute the same aggregates for each couple-level segment value, reusing
+    // the exact formulas on a filtered profile set. Only couple-level fields
+    // (shared by both partners) are sliced — individual fields like gender/age
+    // don't have a single value for a couple, so slicing couple metrics by them
+    // would be ambiguous.
+    const COUPLE_SEG = ['relationship_status', 'relationship_length', 'children'];
+    const responsesBySegment = { '': responses };
+    for (const fld of COUPLE_SEG) {
+      const vals = [...new Set(profiles.map(p => p[fld]).filter(v => v != null && v !== ''))];
+      for (const v of vals) {
+        responsesBySegment[fld + '::' + v] = buildResponseAggregates(profiles.filter(p => p[fld] === v), psQ.data || []);
+      }
+    }
 
     return json({
       ok: true,
       responses,
+      responsesBySegment,
       orders: ordersQ.data || [],
       beta_codes: codesQ.data || [],
       lmft_requests: lmftQ.data || [],

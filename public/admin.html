@@ -553,7 +553,7 @@
     <div id="resp-comm">
       <div class="chart-grid">
         <div class="chart-card">
-          <div class="chart-head"><div><div class="chart-title">Avg alignment score by dimension</div><div class="chart-subtitle">Communication exercise · 10 dimensions</div></div></div>
+          <div class="chart-head"><div><div class="chart-title">Avg alignment score by dimension</div><div class="chart-subtitle">Communication exercise · 10 dimensions</div></div><select class="tile-slicer" id="slz-rdim" title="Cut this tile by a couple-level segment"></select></div>
           <div class="chart-body"><canvas id="chart-dim-scores"></canvas></div>
         </div>
         <div class="chart-card">
@@ -569,11 +569,11 @@
     <div id="resp-exp" style="display:none">
       <div class="chart-grid">
         <div class="chart-card">
-          <div class="chart-head"><div><div class="chart-title">Responsibilities</div><div class="chart-subtitle">Who handles what · % of couples aligned per area</div></div></div>
+          <div class="chart-head"><div><div class="chart-title">Responsibilities</div><div class="chart-subtitle">Who handles what · % of couples aligned per area</div></div><select class="tile-slicer" id="slz-rexp" title="Cut this tile by a couple-level segment"></select></div>
           <div class="chart-body"><canvas id="chart-exp-align"></canvas></div>
         </div>
         <div class="chart-card">
-          <div class="chart-head"><div><div class="chart-title">Life &amp; Values</div><div class="chart-subtitle">The big questions · where couples most often differ</div></div></div>
+          <div class="chart-head"><div><div class="chart-title">Life &amp; Values</div><div class="chart-subtitle">The big questions · where couples most often differ</div></div><select class="tile-slicer" id="slz-rgap" title="Cut this tile by a couple-level segment"></select></div>
           <div class="chart-body">
             <div class="insight-list" id="exp-gap-bars" style="margin-top:.5rem;"></div>
           </div>
@@ -591,7 +591,7 @@
       </div>
       <div class="chart-grid">
         <div class="chart-card">
-          <div class="chart-head"><div><div class="chart-title">Overall relationship feel distribution</div><div class="chart-subtitle">Combined avg score per couple</div></div></div>
+          <div class="chart-head"><div><div class="chart-title">Overall relationship feel distribution</div><div class="chart-subtitle">Combined avg score per couple</div></div><select class="tile-slicer" id="slz-rfeel" title="Cut this tile by a couple-level segment"></select></div>
           <div class="chart-body"><canvas id="chart-story-feel"></canvas></div>
         </div>
         <div class="chart-card">
@@ -3204,23 +3204,56 @@ async function loadRealFunnel(orders) {
 // Real Responses-page data. The aggregates are computed server-side in
 // /api/admin-data (raw answers never reach the browser) and simply mapped onto
 // the existing chart shapes here.
+// Shape a raw responses aggregate into the client chart structures.
+function shapeResponses(r){
+  const DIM_ORDER=['energy','expression','needs','bids','listening','conflict','repair','love','stress','feedback'];
+  const idx=Object.fromEntries((r&&r.dimLabels||[]).map((k,i)=>[k,i]));
+  return {
+    dimScores:{ labels:['Energy','Expression','Needs','Bids','Listening','Conflict','Repair','Love','Stress','Feedback'],
+      data: DIM_ORDER.map(k=> (r&&idx[k]!=null)? r.dimScores[idx[k]] : 0) },
+    expAlign:{ labels:(r&&r.expLabels)||['Household','Financial','Career','Extended family','Emotional'], data:(r&&r.expAlign)||[0,0,0,0,0] },
+    relFeel:(r&&r.relationshipFeel)||[0,0,0,0,0],
+    expGaps:(r&&Array.isArray(r.lifeGaps))? r.lifeGaps.map(g=>({l:g.label,v:g.pct})) : [],
+    pairs:(r&&r.pairs)||0,
+  };
+}
+const RESP_SLICE_DIMS=['relationship_status','relationship_length','children'];
+async function renderResponseTile(opts){
+  const el=document.getElementById(opts.target); if(!el) return;
+  const sel=document.getElementById(opts.selId);
+  if(sel){ try{ const cube=await ensureCube(); populateSlicer(sel,null,cube.rows||[],RESP_SLICE_DIMS); }catch(e){} sel.classList.toggle('on',!!sel.value);
+    if(!sel.dataset.wired){ sel.dataset.wired='1'; sel.onchange=()=>renderResponseTile(opts); } }
+  const seg=(window.__responsesBySeg||{});
+  const a=seg[sel?sel.value:'']||seg['']||null; if(!a) return;
+  setTileN(el, a.pairs);
+  if(opts.kind==='radar'){
+    mkChart(el,{type:'radar',data:{labels:a.dimScores.labels,datasets:[{label:'Avg alignment',data:a.dimScores.data,borderColor:'#6C7FFF',backgroundColor:'rgba(108,127,255,.15)',borderWidth:2,pointRadius:3,pointBackgroundColor:'#6C7FFF'}]},options:{scales:{r:{grid:{color:'#E6ECF6'},angleLines:{color:'#E6ECF6'},ticks:{display:false},min:0,max:100}},plugins:{legend:{display:false}}}});
+  } else if(opts.kind==='expalign'){
+    mkChart(el,{type:'bar',data:{labels:a.expAlign.labels,datasets:[{label:'% aligned',data:a.expAlign.data,backgroundColor:a.expAlign.data.map(v=>v<50?'#F87171':v<65?'#FBBF24':'#34D399'),borderRadius:6}]},options:{plugins:{legend:{display:false}},scales:{x:{grid:{display:false}},y:{grid:{color:'#E6ECF6'},ticks:{callback:v=>v+'%'},min:0,max:100}}}});
+  } else if(opts.kind==='relfeel'){
+    mkChart(el,{type:'bar',data:{labels:['Needs work (0)','Rough patch (1)','Solid (2)','Really good (3)','Better than ever (4)'],datasets:[{data:a.relFeel,backgroundColor:['#F87171','#FBBF24','#6C7FFF','#34D399','#10b981'],borderRadius:6}]},options:{plugins:{legend:{display:false}},scales:{x:{grid:{display:false}},y:{grid:{color:'#E6ECF6'}}}}});
+  } else if(opts.kind==='expgaps'){
+    renderBars(opts.target, a.expGaps.length?a.expGaps:[{l:'—',v:0}], '#F87171');
+  }
+}
+function wireResponseTile(opts){
+  const sel=document.getElementById(opts.selId);
+  if(sel&&!sel.dataset.wired){ sel.dataset.wired='1'; sel.onchange=()=>renderResponseTile(opts); }
+  return renderResponseTile(opts);
+}
 async function loadRealResponses() {
   const d = await fetchAdminData();
   const r = d && d.responses;
   if (!r || !r.pairs) return; // no completed couples yet, leave the empty state
 
-  const DIM_ORDER = ['energy','expression','needs','bids','listening','conflict','repair','love','stress','feedback'];
-  const idx = Object.fromEntries((r.dimLabels || []).map((k, i) => [k, i]));
-  dimScores = {
-    labels: ['Energy','Expression','Needs','Bids','Listening','Conflict','Repair','Love','Stress','Feedback'],
-    data: DIM_ORDER.map(k => (idx[k] != null ? r.dimScores[idx[k]] : 0)),
-  };
-  expAlign = { labels: r.expLabels || expAlign.labels, data: r.expAlign || expAlign.data };
-  relFeel = r.relationshipFeel || relFeel;
-  responsePairs = r.pairs;
-  // Life & Values gap rates (was previously fed only by demo-session data).
-  if (Array.isArray(r.lifeGaps) && r.lifeGaps.length) {
-    expGaps = r.lifeGaps.map(g => ({ l: g.label, v: g.pct }));
+  const shaped = shapeResponses(r);
+  dimScores = shaped.dimScores; expAlign = shaped.expAlign; relFeel = shaped.relFeel; responsePairs = r.pairs;
+  // Per-segment shaped aggregates for the tile slicers (couple-level cuts).
+  window.__responsesBySeg = {};
+  const bySeg = (d && d.responsesBySegment) || { '': r };
+  Object.keys(bySeg).forEach(k => { window.__responsesBySeg[k] = shapeResponses(bySeg[k]); });
+  if (shaped.expGaps.length) {
+    expGaps = shaped.expGaps;
     const gapEl = document.getElementById('exp-gap-bars');
     if (gapEl) renderBars('exp-gap-bars', expGaps, '#F87171');
   }
@@ -3775,11 +3808,12 @@ function orderedCats(key, rows){
   Object.keys(present).forEach(v=>{ if(base.indexOf(v)<0) base.push(v); });
   return base;
 }
-function populateSlicer(sel, excludeKey, rows){
+function populateSlicer(sel, excludeKey, rows, onlyKeys){
   if (!sel || sel.dataset.pop) return;
   let html='<option value="">Everyone</option>';
   SLICE_DIMS.forEach(d=>{
     if (d.key===excludeKey) return;
+    if (onlyKeys && onlyKeys.indexOf(d.key)<0) return;
     const cats=orderedCats(d.key, rows); if(!cats.length) return;
     html+='<optgroup label="'+QX_ESC(d.label)+'">'+cats.map(v=>'<option value="'+d.key+'::'+QX_ESC(v)+'">'+QX_ESC(sliceLabel(d.key,v))+'</option>').join('')+'</optgroup>';
   });
@@ -4435,11 +4469,11 @@ function initCharts(page) {
     wireCubeTile({target:'chart-children',field:'children',mode:'bar',selId:'slz-children',color:'#34D399'});
   }
   else if (page==='responses') {
-    mkChart(document.getElementById('chart-dim-scores'),{type:'radar',data:{labels:dimScores.labels,datasets:[{label:'Avg alignment',data:dimScores.data,borderColor:'#6C7FFF',backgroundColor:'rgba(108,127,255,.15)',borderWidth:2,pointRadius:3,pointBackgroundColor:'#6C7FFF'}]},options:{scales:{r:{grid:{color:'#E6ECF6'},angleLines:{color:'#E6ECF6'},ticks:{display:false},min:0,max:100}},plugins:{legend:{display:false}}}});
+    wireResponseTile({target:'chart-dim-scores',kind:'radar',selId:'slz-rdim'});
     renderCoupleTypeDist('comm-type-bars');
-    mkChart(document.getElementById('chart-exp-align'),{type:'bar',data:{labels:expAlign.labels,datasets:[{label:'% aligned',data:expAlign.data,backgroundColor:expAlign.data.map(v=>v<50?'#F87171':v<65?'#FBBF24':'#34D399'),borderRadius:6}]},options:{plugins:{legend:{display:false}},scales:{x:{grid:{display:false}},y:{grid:{color:'#E6ECF6'},ticks:{callback:v=>v+'%'},min:0,max:100}}}});
-    renderBars('exp-gap-bars',expGaps,'#F87171');
-    mkChart(document.getElementById('chart-story-feel'),{type:'bar',data:{labels:['Needs work (0)','Rough patch (1)','Solid (2)','Really good (3)','Better than ever (4)'],datasets:[{data:relFeel,backgroundColor:['#F87171','#FBBF24','#6C7FFF','#34D399','#10b981'],borderRadius:6}]},options:{plugins:{legend:{display:false}},scales:{x:{grid:{display:false}},y:{grid:{color:'#E6ECF6'}}}}});
+    wireResponseTile({target:'chart-exp-align',kind:'expalign',selId:'slz-rexp'});
+    wireResponseTile({target:'exp-gap-bars',kind:'expgaps',selId:'slz-rgap'});
+    wireResponseTile({target:'chart-story-feel',kind:'relfeel',selId:'slz-rfeel'});
     renderBars('story-gap-bars',storyGaps,'#FBBF24');
     renderIntimacyResponses();
     renderQuestionExplorer('qx-comm', ['Ex1 · Communication'], ['Dimensions (score']);
