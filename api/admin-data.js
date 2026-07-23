@@ -78,6 +78,13 @@ function calcDimScores(answers) {
 const alignPct = (a, b) => Math.round((1 - Math.abs(a - b) / 4) * 100);
 
 function buildResponseAggregates(profiles, sessions) {
+  const famLabel = (t) => String(t || '')
+    .replace(/\{userName\}'s family/g, "one's own family")
+    .replace(/\{partnerName\}'s family/g, "other partner's family")
+    .replace(/\{userName\}'s/g, "one's own")
+    .replace(/\{partnerName\}'s/g, "the other partner's")
+    .replace(/\{userName\}/g, 'one')
+    .replace(/\{partnerName\}/g, 'the partner');
   // Pair each profile with its partner. partner_sessions rows are keyed by
   // invite_code, which is how an invited partner's answers are stored.
   const byInvite = new Map();
@@ -148,7 +155,9 @@ function buildResponseAggregates(profiles, sessions) {
     });
   });
   const lifeGaps = LIFE_QUESTIONS
-    .map(q => ({ label: q.topic || q.text, pct: lifeTotal[q.id] ? Math.round(100 * (lifeTotal[q.id] - lifeAgree[q.id]) / lifeTotal[q.id]) : 0, n: lifeTotal[q.id] }))
+    // Neutral, name-free phrasing for the family questions (and any other
+    // {userName}/{partnerName} templates) so the overview reads clearly.
+    .map(q => ({ label: famLabel(q.topic || q.text), pct: lifeTotal[q.id] ? Math.round(100 * (lifeTotal[q.id] - lifeAgree[q.id]) / lifeTotal[q.id]) : 0, n: lifeTotal[q.id] }))
     .filter(g => g.n > 0)
     .sort((x, y) => y.pct - x.pct);
 

@@ -3226,7 +3226,7 @@ async function renderResponseTile(opts){
   } else if(opts.kind==='expalign'){
     mkChart(el,{type:'bar',data:{labels:a.expAlign.labels,datasets:[{label:'% aligned',data:a.expAlign.data,backgroundColor:a.expAlign.data.map(v=>v<50?'#F87171':v<65?'#FBBF24':'#34D399'),borderRadius:6}]},options:{plugins:{legend:{display:false}},scales:{x:{grid:{display:false}},y:{grid:{color:'#E6ECF6'},ticks:{callback:v=>v+'%'},min:0,max:100}}}});
   } else if(opts.kind==='relfeel'){
-    mkChart(el,{type:'bar',data:{labels:['Needs work (0)','Rough patch (1)','Solid (2)','Really good (3)','Better than ever (4)'],datasets:[{data:a.relFeel,backgroundColor:['#F87171','#FBBF24','#6C7FFF','#34D399','#10b981'],borderRadius:6}]},options:{plugins:{legend:{display:false}},scales:{x:{grid:{display:false}},y:{grid:{color:'#E6ECF6'}}}}});
+    mkChart(el,{type:'bar',data:{labels:['Needs work (0)','Rough patch (1)','Solid (2)','Really good (3)','Better than ever (4)'],datasets:[{data:a.relFeel,backgroundColor:hexRamp('#E5578C',5),borderRadius:6}]},options:{plugins:{legend:{display:false}},scales:{x:{grid:{display:false}},y:{grid:{color:'#E6ECF6'}}}}});
   } else if(opts.kind==='expgaps'){
     renderBars(opts.target, a.expGaps.length?a.expGaps:[{l:'—',v:0}], '#F87171');
   }
@@ -3758,6 +3758,14 @@ const QX_CROSS = [
 ];
 const QX_SCALE_COLORS = ['#F87171', '#FBBF24', '#B9C0CF', '#7DD3A8', '#34D399'];
 const QX_CAT_COLORS = ['#6C7FFF', '#FF6B35', '#34D399', '#FBBF24', '#B5546E', '#9B5DE5', '#22A5C4'];
+// Monochrome gradient helpers so distributions read as a neutral spectrum
+// (light = low end, dark = high end) instead of red/yellow/green (which implies
+// good/bad). Each exercise gets its own hue.
+function _hexToRgb(h){ h=String(h).replace('#',''); return { r:parseInt(h.slice(0,2),16), g:parseInt(h.slice(2,4),16), b:parseInt(h.slice(4,6),16) }; }
+function _rgbToHex(r,g,b){ const c=x=>('0'+Math.max(0,Math.min(255,Math.round(x))).toString(16)).slice(-2); return '#'+c(r)+c(g)+c(b); }
+function hexShade(base, frac){ const {r,g,b}=_hexToRgb(base); const t=0.22+0.78*frac; return _rgbToHex(255+(r-255)*t,255+(g-255)*t,255+(b-255)*t); }
+function hexRamp(base, n){ n=n||5; const out=[]; for(let i=0;i<n;i++) out.push(hexShade(base, n===1?1:i/(n-1))); return out; }
+const QX_THEME = { 'qx-comm':'#6C7FFF', 'qx-exp':'#FF6B35', 'qx-story':'#E5578C', 'qx-intimacy':'#B5546E', 'qx-feedback':'#22A5C4' };
 // Human-readable labels for raw stored segment values, plus a title-case
 // fallback so nothing shows as a bare lowercase code (e.g. "married").
 const QX_VAL_LABELS = {
@@ -4111,6 +4119,7 @@ async function renderQuestionExplorer(containerId, groupPrefixes, highPrefixes) 
   // questions (expectations, reflection) get a compact colour key on one line
   // directly below the bar — grey, italic, truncated with a full-text tooltip.
   const TRUNC = (t, n) => (t && t.length > n) ? t.slice(0, n - 1) + '…' : (t || '');
+  const SCALE_RAMP = hexRamp(QX_THEME[containerId] || '#6C7FFF', 5);
   const barFor = (f) => {
     const counts = {}; let n = 0;
     rows.forEach(r => { let v = r[f.key]; if (v === null || v === undefined || v === '') return; if (f.kind === 'scale') v = String(Math.round(v)); counts[v] = (counts[v] || 0) + 1; n++; });
@@ -4119,7 +4128,7 @@ async function renderQuestionExplorer(containerId, groupPrefixes, highPrefixes) 
     const segs = cats.map((c, idx) => {
       const cnt = counts[c] || 0; if (!cnt) return '';
       const w = n ? Math.round(cnt / n * 100) : 0;
-      const color = f.kind === 'scale' ? QX_SCALE_COLORS[idx] : QX_CAT_COLORS[idx % QX_CAT_COLORS.length];
+      const color = f.kind === 'scale' ? SCALE_RAMP[idx] : QX_CAT_COLORS[idx % QX_CAT_COLORS.length];
       const lbl = f.kind === 'scale' ? qxCatLabel(f, c) : (optLabel[c] || c);
       const tip = f.kind === 'scale'
         ? ('Score ' + c + ' · ' + w + '% of respondents (' + cnt + ' of ' + n + ')')
@@ -4155,7 +4164,17 @@ async function renderQuestionExplorer(containerId, groupPrefixes, highPrefixes) 
     return '<div style="margin-bottom:.95rem;">' + header + barRow + keyRow + '</div>';
   };
   const sectionHead = (t) => '<div style="font-family:var(--mono);font-size:.56rem;letter-spacing:.14em;text-transform:uppercase;color:var(--dim);font-weight:700;margin:0 0 .7rem;padding-bottom:.35rem;border-bottom:1px solid var(--border);">' + t + '</div>';
+  const _hasScale = [...highFields, ...detailFields].some(f => f.kind === 'scale');
+  const scaleLegend = _hasScale
+    ? '<div style="display:flex;align-items:center;gap:.5rem;margin:0 0 .9rem;font-size:.6rem;color:var(--dim);flex-wrap:wrap;">' +
+        '<span style="font-style:italic;">Scale response:</span><span>1</span>' +
+        '<div style="display:flex;height:10px;width:120px;border-radius:3px;overflow:hidden;border:1px solid var(--border);">' +
+          SCALE_RAMP.map((c, i) => '<div title="value ' + (i + 1) + '" style="flex:1;background:' + c + ';"></div>').join('') +
+        '</div><span>5</span>' +
+        '<span style="font-style:italic;">lighter = lower end, darker = higher end (poles labeled on each bar)</span></div>'
+    : '';
   distEl.innerHTML =
+    scaleLegend +
     (highFields.length ? sectionHead('High-level views') + highFields.map(barFor).join('') + '<div style="height:1.1rem;"></div>' : '') +
     (highFields.length ? sectionHead('All questions') : '') + detailFields.map(barFor).join('');
 }
@@ -4719,7 +4738,7 @@ function drawHist(id, bins, data, color) {
   const ex = Chart.getChart(el); if(ex) ex.destroy();
   const labels = bins.map(b=>b.toFixed(1));
   const splitIdx = bins.findIndex(b=>b>=3) ;
-  mkChart(el, { type:'bar', data:{ labels, datasets:[{data, backgroundColor:bins.map(b=>b<3?color:color+'77'), borderRadius:3}] },
+  mkChart(el, { type:'bar', data:{ labels, datasets:[{data, backgroundColor:bins.map(b=>hexShade(color,(b-1)/4)), borderRadius:3}] },
     options:{ plugins:{ legend:{display:false}, tooltip:{callbacks:{title:i=>`score ${i[0].label}`}} },
       scales:{ x:{grid:{display:false},ticks:{color:'#6B7280',font:{size:9},maxRotation:0,callback:(v,i)=>i%2===0?labels[i]:''}},
                y:{grid:{color:'#E6ECF6'},ticks:{color:'#6B7280',precision:0}} } } });

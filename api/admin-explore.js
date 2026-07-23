@@ -70,6 +70,8 @@ const shortPole = (t) => {
 // Strip the {userName}/{partnerName} templates to a neutral, name-free label.
 const genericLabel = (t) =>
   String(t || '')
+    .replace(/\{userName\}'s family/g, "one's own family")
+    .replace(/\{partnerName\}'s family/g, "other partner's family")
     .replace(/\{userName\}'s/g, 'your')
     .replace(/\{partnerName\}'s/g, "partner's")
     .replace(/\{userName\}/g, 'you')
