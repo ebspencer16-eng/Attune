@@ -1645,7 +1645,25 @@ window.adminAuthHeaders = function(extra){
     <div class="chart-card">
       <div class="chart-card-header"><div class="chart-card-title">Testimonials review</div><div class="chart-card-sub">Star + NPS attached; “★ Feature” publishes a testimonial to the homepage</div></div>
       <div style="padding:.5rem 1.4rem 1.4rem;">
-        <input id="testi-search" type="text" placeholder="Search testimonials or names…" oninput="renderTestimonialsReview()" style="width:100%;background:var(--surface);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:.5rem .7rem;font-size:.8rem;margin-bottom:.9rem;box-sizing:border-box;">
+        <input id="testi-search" type="text" placeholder="Search testimonials or names…" oninput="renderTestimonialsReview()" style="width:100%;background:var(--surface);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:.5rem .7rem;font-size:.8rem;margin-bottom:.7rem;box-sizing:border-box;">
+        <div style="display:flex;flex-wrap:wrap;gap:.4rem;align-items:center;margin-bottom:1rem;">
+          <span style="font-size:.6rem;letter-spacing:.14em;text-transform:uppercase;color:var(--dim);font-weight:700;">Filter</span>
+          <label style="display:inline-flex;align-items:center;gap:.3rem;font-size:.72rem;color:var(--muted);background:var(--surface);border:1px solid var(--border);border-radius:7px;padding:.28rem .5rem;cursor:pointer;"><input type="checkbox" id="tf-featured" onchange="renderTestimonialsReview()" style="margin:0;">★ Featured</label>
+          <label style="display:inline-flex;align-items:center;gap:.3rem;font-size:.72rem;color:var(--muted);background:var(--surface);border:1px solid var(--border);border-radius:7px;padding:.28rem .5rem;cursor:pointer;"><input type="checkbox" id="tf-hastext" onchange="renderTestimonialsReview()" style="margin:0;">Has testimonial</label>
+          <span style="font-size:.66rem;color:var(--muted);margin-left:.25rem;">Rating</span>
+          <label style="display:inline-flex;align-items:center;gap:.3rem;font-size:.72rem;color:var(--muted);background:var(--surface);border:1px solid var(--border);border-radius:7px;padding:.28rem .5rem;cursor:pointer;"><input type="checkbox" class="tf-rating" value="5" onchange="renderTestimonialsReview()" style="margin:0;">5★</label>
+          <label style="display:inline-flex;align-items:center;gap:.3rem;font-size:.72rem;color:var(--muted);background:var(--surface);border:1px solid var(--border);border-radius:7px;padding:.28rem .5rem;cursor:pointer;"><input type="checkbox" class="tf-rating" value="4" onchange="renderTestimonialsReview()" style="margin:0;">4★</label>
+          <label style="display:inline-flex;align-items:center;gap:.3rem;font-size:.72rem;color:var(--muted);background:var(--surface);border:1px solid var(--border);border-radius:7px;padding:.28rem .5rem;cursor:pointer;"><input type="checkbox" class="tf-rating" value="3" onchange="renderTestimonialsReview()" style="margin:0;">3★</label>
+          <label style="display:inline-flex;align-items:center;gap:.3rem;font-size:.72rem;color:var(--muted);background:var(--surface);border:1px solid var(--border);border-radius:7px;padding:.28rem .5rem;cursor:pointer;"><input type="checkbox" class="tf-rating" value="2" onchange="renderTestimonialsReview()" style="margin:0;">2★</label>
+          <label style="display:inline-flex;align-items:center;gap:.3rem;font-size:.72rem;color:var(--muted);background:var(--surface);border:1px solid var(--border);border-radius:7px;padding:.28rem .5rem;cursor:pointer;"><input type="checkbox" class="tf-rating" value="1" onchange="renderTestimonialsReview()" style="margin:0;">1★</label>
+          <span style="margin-left:auto;font-size:.66rem;color:var(--muted);">Sort</span>
+          <select id="tf-sort" onchange="renderTestimonialsReview()" style="background:var(--surface);border:1px solid var(--border);color:var(--text);border-radius:7px;padding:.28rem .45rem;font-size:.72rem;cursor:pointer;">
+            <option value="new">Newest first</option>
+            <option value="old">Oldest first</option>
+            <option value="high">Highest rated</option>
+            <option value="low">Lowest rated</option>
+          </select>
+        </div>
         <div id="testi-list"></div>
       </div>
     </div>
@@ -2425,17 +2443,34 @@ function renderQuoteCard(text, name, score, color='') {
 function renderTestimonialsReview(){
   const list=document.getElementById('testi-list'); if(!list) return;
   const q=((document.getElementById('testi-search')||{}).value||'').trim().toLowerCase();
+  const featOnly=(document.getElementById('tf-featured')||{}).checked;
+  const hasTextOnly=(document.getElementById('tf-hastext')||{}).checked;
+  const ratingChecks=[].slice.call(document.querySelectorAll('.tf-rating:checked')).map(function(el){return Number(el.value);});
+  const sortMode=((document.getElementById('tf-sort')||{}).value)||'new';
   const subs=(window.__fbSubmissions||[]).filter(r=>r.type==='post_results');
-  const items=subs.map(r=>{ let p={}; try{ p=typeof r.text==='string'?JSON.parse(r.text):(r.text||{}); }catch(e){}
+  const total=subs.length;
+  let items=subs.map(r=>{ let p={}; try{ p=typeof r.text==='string'?JSON.parse(r.text):(r.text||{}); }catch(e){}
     const a=p.answers||{}; const rating=Math.max(0,Math.min(5,Number(a.rating)||0));
     return { id:r.id, featured:!!r.featured, name:p.userName||'', coupleType:r.couple_type||p.coupleType||'',
       rating, nps:(a.nps==null?null:Number(a.nps)), testimonial:String(a.testimonial||'').trim(),
       at:r.submitted_at?new Date(r.submitted_at):null }; })
-    .filter(t=>t.testimonial || t.rating)
-    .sort((x,y)=>(y.at?y.at.getTime():0)-(x.at?x.at.getTime():0));
-  const filtered=q?items.filter(t=>(t.testimonial+' '+t.name).toLowerCase().indexOf(q)>=0):items;
-  if(!filtered.length){ list.innerHTML='<div style="color:var(--dim);font-size:.8rem;padding:1rem 0;line-height:1.6;">No testimonials yet. They appear here as couples complete the post-results survey.</div>'; return; }
-  list.innerHTML=filtered.map(t=>{
+    .filter(t=>t.testimonial || t.rating);
+  items=items.filter(t=>{
+    if(featOnly && !t.featured) return false;
+    if(hasTextOnly && !t.testimonial) return false;
+    if(ratingChecks.length && ratingChecks.indexOf(t.rating)<0) return false;
+    if(q && (t.testimonial+' '+t.name).toLowerCase().indexOf(q)<0) return false;
+    return true;
+  });
+  items.sort(function(x,y){
+    const tx=x.at?x.at.getTime():0, ty=y.at?y.at.getTime():0;
+    if(sortMode==='old') return tx-ty;
+    if(sortMode==='high') return (y.rating-x.rating)||(ty-tx);
+    if(sortMode==='low') return (x.rating-y.rating)||(ty-tx);
+    return ty-tx;
+  });
+  if(!items.length){ list.innerHTML='<div style="color:var(--dim);font-size:.8rem;padding:1rem 0;line-height:1.6;">'+(total?'No testimonials match these filters.':'No testimonials yet. They appear here as couples complete the post-results survey.')+'</div>'; return; }
+  list.innerHTML=items.map(t=>{
     const starStr='★'.repeat(t.rating)+'☆'.repeat(5-t.rating);
     const date=t.at?t.at.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}):'';
     return '<div style="border:1px solid '+(t.featured?'#6C7FFF':'var(--border)')+';border-radius:10px;padding:.8rem 1rem;margin-bottom:.7rem;background:'+(t.featured?'rgba(108,127,255,.06)':'var(--card)')+';">'
