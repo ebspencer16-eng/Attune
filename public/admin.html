@@ -1627,6 +1627,15 @@ window.adminAuthHeaders = function(extra){
       </div>
     </div>
 
+    <!-- Testimonials review: post-results survey responses, search + feature -->
+    <div class="chart-card" style="margin-top:1.5rem">
+      <div class="chart-card-header"><div class="chart-card-title">Testimonials review</div><div class="chart-card-sub">Post-results survey responses · search, then feature the ones to publish on the homepage</div></div>
+      <div style="padding:.5rem 1.4rem 1.2rem;">
+        <input id="testi-search" type="text" placeholder="Search testimonials or names…" oninput="renderTestimonialsReview()" style="width:100%;background:var(--surface);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:.5rem .7rem;font-size:.8rem;margin-bottom:.9rem;box-sizing:border-box;">
+        <div id="testi-list"></div>
+      </div>
+    </div>
+
     <!-- Survey question explorer: distributions + crosstab + full segmentation -->
     <div class="qx-section" id="qx-feedback" style="margin-top:1.5rem"></div>
   </div>
@@ -2401,11 +2410,45 @@ function renderQuoteCard(text, name, score, color='') {
 }
 
 // ── Load feedback data ────────────────────────────────
+function renderTestimonialsReview(){
+  const list=document.getElementById('testi-list'); if(!list) return;
+  const q=((document.getElementById('testi-search')||{}).value||'').trim().toLowerCase();
+  const subs=(window.__fbSubmissions||[]).filter(r=>r.type==='post_results');
+  const items=subs.map(r=>{ let p={}; try{ p=typeof r.text==='string'?JSON.parse(r.text):(r.text||{}); }catch(e){}
+    const a=p.answers||{}; const rating=Math.max(0,Math.min(5,Number(a.rating)||0));
+    return { id:r.id, featured:!!r.featured, name:p.userName||'', coupleType:r.couple_type||p.coupleType||'',
+      rating, nps:(a.nps==null?null:Number(a.nps)), testimonial:String(a.testimonial||'').trim(),
+      at:r.submitted_at?new Date(r.submitted_at):null }; })
+    .filter(t=>t.testimonial || t.rating)
+    .sort((x,y)=>(y.at?y.at.getTime():0)-(x.at?x.at.getTime():0));
+  const filtered=q?items.filter(t=>(t.testimonial+' '+t.name).toLowerCase().indexOf(q)>=0):items;
+  if(!filtered.length){ list.innerHTML='<div style="color:var(--dim);font-size:.8rem;padding:1rem 0;line-height:1.6;">No testimonials yet. They appear here as couples complete the post-results survey.</div>'; return; }
+  list.innerHTML=filtered.map(t=>{
+    const starStr='★'.repeat(t.rating)+'☆'.repeat(5-t.rating);
+    const date=t.at?t.at.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}):'';
+    return '<div style="border:1px solid '+(t.featured?'#6C7FFF':'var(--border)')+';border-radius:10px;padding:.8rem 1rem;margin-bottom:.7rem;background:'+(t.featured?'rgba(108,127,255,.06)':'var(--card)')+';">'
+      +'<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:.8rem;">'
+        +'<div style="flex:1;min-width:0;">'
+          +'<div style="font-size:.85rem;color:#F5A623;letter-spacing:.05em;">'+starStr+(t.nps!=null?' <span style="color:var(--dim);font-size:.66rem;font-family:var(--mono);">NPS '+t.nps+'</span>':'')+'</div>'
+          +(t.testimonial?'<div style="font-size:.82rem;color:var(--text);line-height:1.5;margin:.35rem 0;font-style:italic;">“'+QX_ESC(t.testimonial)+'”</div>':'<div style="font-size:.74rem;color:var(--dim);margin:.35rem 0;">(rating only, no written testimonial)</div>')
+          +'<div style="font-size:.68rem;color:var(--muted);">'+QX_ESC(t.name||'Anonymous')+(t.coupleType?' · '+QX_ESC(t.coupleType):'')+(date?' · '+date:'')+'</div>'
+        +'</div>'
+        +'<button onclick="toggleFeatured(\''+String(t.id).replace(/'/g,"")+'\','+(t.featured?'false':'true')+')" style="flex:0 0 auto;background:'+(t.featured?'#6C7FFF':'transparent')+';color:'+(t.featured?'#fff':'var(--muted)')+';border:1px solid '+(t.featured?'#6C7FFF':'var(--border)')+';border-radius:8px;padding:.35rem .6rem;font-size:.7rem;font-weight:700;cursor:pointer;white-space:nowrap;">'+(t.featured?'★ Featured':'☆ Feature')+'</button>'
+      +'</div></div>';
+  }).join('');
+}
+async function toggleFeatured(id, featured){
+  const res=await adminAction({action:'feature_testimonial', id, featured});
+  if(res&&res.ok){ const r=(window.__fbSubmissions||[]).find(x=>String(x.id)===String(id)); if(r) r.featured=featured; renderTestimonialsReview(); }
+  else alert('Could not update testimonial: '+((res&&res.error)||'unknown error'));
+}
 async function loadFeedbackData() {
   document.getElementById('fb-last-updated').textContent = new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
 
   // Try loading real feedback_submissions via the admin endpoint
   const __fbAdminData = await fetchAdminData().catch(() => null);
+  window.__fbSubmissions = (__fbAdminData && __fbAdminData.feedback_submissions) || window.__fbSubmissions || [];
+  if (typeof renderTestimonialsReview === 'function') renderTestimonialsReview();
   if (__fbAdminData && Array.isArray(__fbAdminData.feedback_submissions)) {
     try {
       const rows = __fbAdminData.feedback_submissions.slice(0, 100);

@@ -85,6 +85,14 @@ export default async function handler(req) {
       return json({ ok: true });
     }
 
+    if (body.action === 'feature_testimonial') {
+      const id = body.id;
+      if (!id) return json({ error: 'Missing id' }, 400);
+      const { error } = await admin.from('feedback_submissions').update({ featured: !!body.featured }).eq('id', id);
+      if (error) return json({ error: error.message }, 500);
+      return json({ ok: true });
+    }
+
     return json({ error: 'Unknown action' }, 400);
   } catch (e) {
     return json({ error: String(e?.message || e) }, 500);
