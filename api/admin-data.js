@@ -143,8 +143,51 @@ function buildResponseAggregates(profiles, sessions) {
       });
     });
   });
-  const expAlign = RESPONSIBILITY_CATEGORIES.map(c =>
+  let expAlign = RESPONSIBILITY_CATEGORIES.map(c =>
     catTotal[c.id] ? Math.round(100 * catAgree[c.id] / catTotal[c.id]) : 0);
+
+  // ── Per-question couple agreement (directional "who does X" items) ──────────
+  // Two answers AGREE when they point to the SAME person: one "Me" + one
+  // "Partner" is agreement (both name the same person), which plain string
+  // equality misses. Resolve each answer perspective-aware to a couple side
+  // (A/B) using names. A session partner (b) has no name columns, so derive them
+  // from a (a.partner_name is b's name).
+  const resolveSide = (v, selfName, partnerName, selfTok, partnerTok) => {
+    if (v == null || v === '') return null;
+    if (v === 'Both of us' || v === 'Balanced') return 'both';
+    if (v === "Doesn't apply to us" || v === "Doesn't apply") return 'na';
+    if (v === 'Primarily mine' || (selfName && v === selfName)) return selfTok;
+    if (v === "Primarily my partner's" || (partnerName && v === partnerName)) return partnerTok;
+    return null;
+  };
+  const raCount = {}, raTotal = {};
+  RESPONSIBILITY_CATEGORIES.forEach(c => c.items.forEach(item => { const k = c.id + '__' + item; raCount[k] = 0; raTotal[k] = 0; }));
+  pairs.forEach(([a, b]) => {
+    const ra = a.ex2_answers?.responsibilities, rb = b.ex2_answers?.responsibilities;
+    if (!ra || !rb) return;
+    const aName = (a.name || '').trim(), aPartner = (a.partner_name || '').trim();
+    const bName = (b.name || '').trim() || aPartner, bPartner = (b.partner_name || '').trim() || aName;
+    RESPONSIBILITY_CATEGORIES.forEach(cat => cat.items.forEach(item => {
+      const key = cat.id + '__' + item;
+      const ares = resolveSide(ra[key], aName, aPartner, 'A', 'B');
+      const bres = resolveSide(rb[mirrorRespKey(key)], bName, bPartner, 'B', 'A');
+      if (ares == null || bres == null || ares === 'na' || bres === 'na') return;
+      raTotal[key]++;
+      if (ares === bres) raCount[key]++;
+    }));
+  });
+  const respAgreement = [];
+  RESPONSIBILITY_CATEGORIES.forEach(c => c.items.forEach(item => {
+    const key = c.id + '__' + item;
+    if (raTotal[key] > 0) respAgreement.push({ category: c.label, label: famLabel(item), pct: Math.round(100 * raCount[key] / raTotal[key]), n: raTotal[key] });
+  }));
+  // Category radar uses the same perspective-aware agreement (naive string
+  // equality undercounts complementary "Me"/"Partner" answers).
+  expAlign = RESPONSIBILITY_CATEGORIES.map(c => {
+    let ac = 0, tt = 0;
+    c.items.forEach(item => { const k = c.id + '__' + item; ac += raCount[k]; tt += raTotal[k]; });
+    return tt ? Math.round(100 * ac / tt) : 0;
+  });
 
   // ── Life & Values: % of couples whose answers differ, per life question ──
   // Life answers are stored as plain option strings under ex2_answers.life, so
@@ -182,6 +225,7 @@ function buildResponseAggregates(profiles, sessions) {
     expAlign,
     relationshipFeel: feel,
     lifeGaps,
+    respAgreement,
     pairs: pairs.length,
   };
 }
@@ -213,7 +257,7 @@ export default async function handler(req) {
       admin.from('beta_codes').select('*').order('code', { ascending: true }),
       admin.from('lmft_requests').select('*').order('created_at', { ascending: false }).limit(200),
       admin.from('feedback_submissions').select('*').order('submitted_at', { ascending: false }).limit(2000),
-      admin.from('profiles').select('id, partner_profile_id, invite_code, age_range, gender, pronouns, partner_pronouns, relationship_status, relationship_length, children, signup_source, ex1_answers, ex2_answers, ex3_answers'),
+      admin.from('profiles').select('id, partner_profile_id, invite_code, name, partner_name, age_range, gender, pronouns, partner_pronouns, relationship_status, relationship_length, children, signup_source, ex1_answers, ex2_answers, ex3_answers'),
       admin.from('partner_sessions').select('invite_code, ex1_answers, ex2_answers'),
     ]);
 
