@@ -1645,19 +1645,13 @@ window.adminAuthHeaders = function(extra){
     <div class="chart-card">
       <div class="chart-card-header"><div class="chart-card-title">Testimonials review</div><div class="chart-card-sub">Star + NPS attached; “★ Feature” publishes a testimonial to the homepage</div></div>
       <div style="padding:.5rem 1.4rem 1.4rem;">
-        <input id="testi-search" type="text" placeholder="Search testimonials or names…" oninput="renderTestimonialsReview()" style="width:100%;background:var(--surface);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:.5rem .7rem;font-size:.8rem;margin-bottom:.7rem;box-sizing:border-box;">
-        <div style="display:flex;flex-wrap:wrap;gap:.4rem;align-items:center;margin-bottom:1rem;">
-          <span style="font-size:.6rem;letter-spacing:.14em;text-transform:uppercase;color:var(--dim);font-weight:700;">Filter</span>
-          <label style="display:inline-flex;align-items:center;gap:.3rem;font-size:.72rem;color:var(--muted);background:var(--surface);border:1px solid var(--border);border-radius:7px;padding:.28rem .5rem;cursor:pointer;"><input type="checkbox" id="tf-featured" onchange="renderTestimonialsReview()" style="margin:0;">★ Featured</label>
-          <label style="display:inline-flex;align-items:center;gap:.3rem;font-size:.72rem;color:var(--muted);background:var(--surface);border:1px solid var(--border);border-radius:7px;padding:.28rem .5rem;cursor:pointer;"><input type="checkbox" id="tf-hastext" onchange="renderTestimonialsReview()" style="margin:0;">Has testimonial</label>
-          <span style="font-size:.66rem;color:var(--muted);margin-left:.25rem;">Rating</span>
-          <label style="display:inline-flex;align-items:center;gap:.3rem;font-size:.72rem;color:var(--muted);background:var(--surface);border:1px solid var(--border);border-radius:7px;padding:.28rem .5rem;cursor:pointer;"><input type="checkbox" class="tf-rating" value="5" onchange="renderTestimonialsReview()" style="margin:0;">5★</label>
-          <label style="display:inline-flex;align-items:center;gap:.3rem;font-size:.72rem;color:var(--muted);background:var(--surface);border:1px solid var(--border);border-radius:7px;padding:.28rem .5rem;cursor:pointer;"><input type="checkbox" class="tf-rating" value="4" onchange="renderTestimonialsReview()" style="margin:0;">4★</label>
-          <label style="display:inline-flex;align-items:center;gap:.3rem;font-size:.72rem;color:var(--muted);background:var(--surface);border:1px solid var(--border);border-radius:7px;padding:.28rem .5rem;cursor:pointer;"><input type="checkbox" class="tf-rating" value="3" onchange="renderTestimonialsReview()" style="margin:0;">3★</label>
-          <label style="display:inline-flex;align-items:center;gap:.3rem;font-size:.72rem;color:var(--muted);background:var(--surface);border:1px solid var(--border);border-radius:7px;padding:.28rem .5rem;cursor:pointer;"><input type="checkbox" class="tf-rating" value="2" onchange="renderTestimonialsReview()" style="margin:0;">2★</label>
-          <label style="display:inline-flex;align-items:center;gap:.3rem;font-size:.72rem;color:var(--muted);background:var(--surface);border:1px solid var(--border);border-radius:7px;padding:.28rem .5rem;cursor:pointer;"><input type="checkbox" class="tf-rating" value="1" onchange="renderTestimonialsReview()" style="margin:0;">1★</label>
-          <span style="margin-left:auto;font-size:.66rem;color:var(--muted);">Sort</span>
-          <select id="tf-sort" onchange="renderTestimonialsReview()" style="background:var(--surface);border:1px solid var(--border);color:var(--text);border-radius:7px;padding:.28rem .45rem;font-size:.72rem;cursor:pointer;">
+        <div style="display:flex;flex-wrap:wrap;gap:.5rem;align-items:center;margin-bottom:1rem;">
+          <input id="testi-search" type="text" placeholder="Search testimonials or names…" oninput="renderTestimonialsReview()" style="flex:1;min-width:180px;background:var(--surface);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:.5rem .7rem;font-size:.8rem;box-sizing:border-box;">
+          <details id="testi-filter-dd" style="position:relative;">
+            <summary style="list-style:none;cursor:pointer;display:inline-flex;align-items:center;gap:.3rem;font-size:.74rem;color:var(--muted);background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:.5rem .7rem;white-space:nowrap;">Filter<span id="testi-filter-n" style="color:var(--dim);font-family:var(--mono);font-size:.66rem;"></span> ▾</summary>
+            <div id="testi-filter-panel" style="position:absolute;z-index:30;top:100%;right:0;margin-top:.35rem;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:.7rem .85rem;box-shadow:0 12px 34px rgba(0,0,0,.18);max-height:360px;overflow:auto;min-width:230px;"></div>
+          </details>
+          <select id="tf-sort" onchange="renderTestimonialsReview()" style="background:var(--surface);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:.5rem .6rem;font-size:.74rem;cursor:pointer;">
             <option value="new">Newest first</option>
             <option value="old">Oldest first</option>
             <option value="high">Highest rated</option>
@@ -2440,45 +2434,56 @@ function renderQuoteCard(text, name, score, color='') {
 }
 
 // ── Load feedback data ────────────────────────────────
-function renderTestimonialsReview(){
+let __testiBuilt=false;
+function __testiToggleFeatured(on){ (window.__testiFilter=window.__testiFilter||{featured:false,sel:{}}).featured=on; renderTestimonialsReview(); }
+function __testiToggleSeg(dim,val,on){ const st=window.__testiFilter=window.__testiFilter||{featured:false,sel:{}}; (st.sel[dim]=st.sel[dim]||new Set()); if(on) st.sel[dim].add(val); else st.sel[dim].delete(val); renderTestimonialsReview(); }
+function buildTestiFilterPanel(all){
+  const panel=document.getElementById('testi-filter-panel'); if(!panel) return;
+  window.__testiFilter={featured:false,sel:{}};
+  let html='<label style="display:flex;align-items:center;gap:.45rem;font-size:.74rem;color:var(--text);padding:.15rem 0;cursor:pointer;font-weight:600;"><input type="checkbox" onchange="__testiToggleFeatured(this.checked)"> ★ Featured only</label><div style="height:1px;background:var(--border);margin:.45rem 0;"></div>';
+  (typeof SLICE_DIMS!=='undefined'?SLICE_DIMS:[]).forEach(function(d){
+    const seen={}, vals=[];
+    all.forEach(function(t){ const v=t[d.key]; if(v!=null&&v!==''&&!seen[v]){ seen[v]=1; vals.push(String(v)); } });
+    if(!vals.length) return;
+    const ord=(SLICE_ORDER[d.key]?SLICE_ORDER[d.key].filter(function(v){return seen[v];}):[]);
+    vals.forEach(function(v){ if(ord.indexOf(v)<0) ord.push(v); });
+    html+='<div style="font-size:.58rem;letter-spacing:.12em;text-transform:uppercase;color:var(--dim);font-weight:700;margin:.55rem 0 .25rem;">'+QX_ESC(d.label)+'</div>';
+    ord.forEach(function(v){ html+='<label style="display:flex;align-items:center;gap:.45rem;font-size:.72rem;color:var(--muted);padding:.1rem 0;cursor:pointer;"><input type="checkbox" onchange="__testiToggleSeg(\''+d.key+'\',\''+String(v).replace(/'/g,"")+'\',this.checked)"> '+QX_ESC(sliceLabel(d.key,v))+'</label>'; });
+  });
+  panel.innerHTML=html;
+}
+async function renderTestimonialsReview(){
   const list=document.getElementById('testi-list'); if(!list) return;
+  let cube; try{ cube=await ensureCube(); }catch(e){ list.innerHTML='<div style="color:var(--dim);font-size:.8rem;padding:1rem 0;">Testimonial data unavailable right now.</div>'; return; }
+  const all=(cube.testimonials||[]).filter(function(t){ return t.testimonial; });
+  if(!__testiBuilt){ buildTestiFilterPanel(all); __testiBuilt=true; }
+  const st=window.__testiFilter||(window.__testiFilter={featured:false,sel:{}});
   const q=((document.getElementById('testi-search')||{}).value||'').trim().toLowerCase();
-  const featOnly=(document.getElementById('tf-featured')||{}).checked;
-  const hasTextOnly=(document.getElementById('tf-hastext')||{}).checked;
-  const ratingChecks=[].slice.call(document.querySelectorAll('.tf-rating:checked')).map(function(el){return Number(el.value);});
   const sortMode=((document.getElementById('tf-sort')||{}).value)||'new';
-  const subs=(window.__fbSubmissions||[]).filter(r=>r.type==='post_results');
-  const total=subs.length;
-  let items=subs.map(r=>{ let p={}; try{ p=typeof r.text==='string'?JSON.parse(r.text):(r.text||{}); }catch(e){}
-    const a=p.answers||{}; const rating=Math.max(0,Math.min(5,Number(a.rating)||0));
-    return { id:r.id, featured:!!r.featured, name:p.userName||'', coupleType:r.couple_type||p.coupleType||'',
-      rating, nps:(a.nps==null?null:Number(a.nps)), testimonial:String(a.testimonial||'').trim(),
-      at:r.submitted_at?new Date(r.submitted_at):null }; })
-    .filter(t=>t.testimonial || t.rating);
-  items=items.filter(t=>{
-    if(featOnly && !t.featured) return false;
-    if(hasTextOnly && !t.testimonial) return false;
-    if(ratingChecks.length && ratingChecks.indexOf(t.rating)<0) return false;
-    if(q && (t.testimonial+' '+t.name).toLowerCase().indexOf(q)<0) return false;
+  let items=all.filter(function(t){
+    if(st.featured && !t.featured) return false;
+    for(const dim in st.sel){ const set=st.sel[dim]; if(set&&set.size){ const v=t[dim]; if(v==null||!set.has(String(v))) return false; } }
+    if(q && (t.testimonial+' '+(t.name||'')).toLowerCase().indexOf(q)<0) return false;
     return true;
   });
-  items.sort(function(x,y){
-    const tx=x.at?x.at.getTime():0, ty=y.at?y.at.getTime():0;
+  items.sort(function(x,y){ const tx=x.ts?new Date(x.ts).getTime():0, ty=y.ts?new Date(y.ts).getTime():0;
     if(sortMode==='old') return tx-ty;
-    if(sortMode==='high') return (y.rating-x.rating)||(ty-tx);
-    if(sortMode==='low') return (x.rating-y.rating)||(ty-tx);
-    return ty-tx;
-  });
-  if(!items.length){ list.innerHTML='<div style="color:var(--dim);font-size:.8rem;padding:1rem 0;line-height:1.6;">'+(total?'No testimonials match these filters.':'No testimonials yet. They appear here as couples complete the post-results survey.')+'</div>'; return; }
-  list.innerHTML=items.map(t=>{
-    const starStr='★'.repeat(t.rating)+'☆'.repeat(5-t.rating);
-    const date=t.at?t.at.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}):'';
+    if(sortMode==='high') return ((y.rating||0)-(x.rating||0))||(ty-tx);
+    if(sortMode==='low') return ((x.rating||0)-(y.rating||0))||(ty-tx);
+    return ty-tx; });
+  const nEl=document.getElementById('testi-filter-n'); if(nEl) nEl.textContent=' · n='+items.length;
+  if(!items.length){ list.innerHTML='<div style="color:var(--dim);font-size:.8rem;padding:1rem 0;line-height:1.6;">'+(all.length?'No testimonials match these filters.':'No testimonials yet. They appear here as couples complete the post-results survey.')+'</div>'; return; }
+  list.innerHTML=items.map(function(t){
+    const rating=Math.max(0,Math.min(5,Number(t.rating)||0));
+    const starStr='★'.repeat(rating)+'☆'.repeat(5-rating);
+    const date=t.ts?new Date(t.ts).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}):'';
+    const ctName=t.coupleTypeName||(t.couple_type&&typeof CT_NAMES!=='undefined'&&CT_NAMES[t.couple_type])||t.couple_type||'';
     return '<div style="border:1px solid '+(t.featured?'#6C7FFF':'var(--border)')+';border-radius:10px;padding:.8rem 1rem;margin-bottom:.7rem;background:'+(t.featured?'rgba(108,127,255,.06)':'var(--card)')+';">'
       +'<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:.8rem;">'
         +'<div style="flex:1;min-width:0;">'
           +'<div style="font-size:.85rem;color:#F5A623;letter-spacing:.05em;">'+starStr+(t.nps!=null?' <span style="color:var(--dim);font-size:.66rem;font-family:var(--mono);">NPS '+t.nps+'</span>':'')+'</div>'
-          +(t.testimonial?'<div style="font-size:.82rem;color:var(--text);line-height:1.5;margin:.35rem 0;font-style:italic;">“'+QX_ESC(t.testimonial)+'”</div>':'<div style="font-size:.74rem;color:var(--dim);margin:.35rem 0;">(rating only, no written testimonial)</div>')
-          +'<div style="font-size:.68rem;color:var(--muted);">'+QX_ESC(t.name||'Anonymous')+(t.coupleType?' · '+QX_ESC(t.coupleType):'')+(date?' · '+date:'')+'</div>'
+          +'<div style="font-size:.82rem;color:var(--text);line-height:1.5;margin:.35rem 0;font-style:italic;">“'+QX_ESC(t.testimonial)+'”</div>'
+          +'<div style="font-size:.68rem;color:var(--muted);">'+QX_ESC(t.name||'Anonymous')+(ctName?' · '+QX_ESC(ctName):'')+(date?' · '+date:'')+'</div>'
         +'</div>'
         +'<button onclick="toggleFeatured(\''+String(t.id).replace(/'/g,"")+'\','+(t.featured?'false':'true')+')" style="flex:0 0 auto;background:'+(t.featured?'#6C7FFF':'transparent')+';color:'+(t.featured?'#fff':'var(--muted)')+';border:1px solid '+(t.featured?'#6C7FFF':'var(--border)')+';border-radius:8px;padding:.35rem .6rem;font-size:.7rem;font-weight:700;cursor:pointer;white-space:nowrap;">'+(t.featured?'★ Featured':'☆ Feature')+'</button>'
       +'</div></div>';
@@ -2486,7 +2491,7 @@ function renderTestimonialsReview(){
 }
 async function toggleFeatured(id, featured){
   const res=await adminAction({action:'feature_testimonial', id, featured});
-  if(res&&res.ok){ const r=(window.__fbSubmissions||[]).find(x=>String(x.id)===String(id)); if(r) r.featured=featured; renderTestimonialsReview(); }
+  if(res&&res.ok){ try{ const c=await ensureCube(); const t=(c.testimonials||[]).find(function(x){return String(x.id)===String(id);}); if(t) t.featured=featured; }catch(e){} renderTestimonialsReview(); }
   else alert('Could not update testimonial: '+((res&&res.error)||'unknown error'));
 }
 async function loadFeedbackData() {

@@ -336,6 +336,7 @@ export default async function handler(req) {
     // ── Survey responses, anonymized + segment-tagged (NPS / ratings slicing) ──
     const monthOfTs = (d) => { const t = new Date(d); return isNaN(t) ? null : t.getFullYear() + '-' + String(t.getMonth() + 1).padStart(2, '0'); };
     const surveysAnon = [];
+    const testimonialsAnon = [];
     for (const [rid, payload] of Object.entries(surveyByRespondent)) {
       const seg = segById[rid] || {};
       const row = {};
@@ -349,7 +350,7 @@ export default async function handler(req) {
     // Post-results survey (general couples) — same shape so NPS/ratings charts
     // combine both cohorts. Its star rating maps onto the 1-5 rating axis.
     try {
-      const { data: prRows = [] } = await admin.from('feedback_submissions').select('text, submitted_at').eq('type', 'post_results');
+      const { data: prRows = [] } = await admin.from('feedback_submissions').select('id, text, submitted_at, featured').eq('type', 'post_results');
       for (const r of prRows) {
         let payload = null; try { payload = typeof r.text === 'string' ? JSON.parse(r.text) : r.text; } catch {}
         if (!payload) continue;
@@ -362,6 +363,12 @@ export default async function handler(req) {
         const nps = parseInt(a.nps, 10); row.nps = Number.isFinite(nps) ? nps : null;
         const rl = parseInt(a.rating, 10); row.returnLikelihood = Number.isFinite(rl) ? rl : null;
         surveysAnon.push(row);
+        // Testimonial entry (segment-tagged) for the admin Testimonials page.
+        const t = { id: r.id, featured: !!r.featured, name: payload.userName || '', ts: r.submitted_at || null,
+          rating: Number.isFinite(rl) ? rl : null, nps: Number.isFinite(nps) ? nps : null,
+          testimonial: String(a.testimonial || '').trim(), coupleTypeName: payload.coupleType || null };
+        for (const k of SEG_KEYS) t[k] = seg[k] != null ? seg[k] : null;
+        testimonialsAnon.push(t);
       }
     } catch (e) {}
 
@@ -373,6 +380,7 @@ export default async function handler(req) {
       rows,
       orders: orderRows,
       surveys: surveysAnon,
+      testimonials: testimonialsAnon,
     });
   } catch (e) {
     return json({ error: String(e && e.message ? e.message : e) }, 500);
