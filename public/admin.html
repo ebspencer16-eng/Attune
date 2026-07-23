@@ -459,7 +459,7 @@
     </div>
 
     <div class="chart-card" style="margin-top:1.25rem">
-      <div class="chart-head"><div><div class="chart-title">Order volume by geography</div><div class="chart-subtitle">By US state, from shipping or billing location. Orders outside the US are grouped as one segment.</div></div></div>
+      <div class="chart-head"><div><div class="chart-title">Order volume by geography</div><div class="chart-subtitle">By US state, from shipping or billing location. Orders outside the US are grouped as one segment.</div></div><select class="tile-slicer" id="slz-geo" title="Cut this tile by a segment"></select></div>
       <div class="chart-body"><div id="geo-breakdown"></div></div>
     </div>
   </div>
@@ -480,15 +480,15 @@
       <div class="kpi-card green"><div class="kpi-label">Premium</div><div class="kpi-val" id="pkgkpi-premium">—</div><div class="kpi-sub" id="pkgkpi-premium-sub">Share of orders</div></div>
     </div>
     <div class="chart-card">
-      <div class="chart-head"><div><div class="chart-title">Package split over time</div><div class="chart-subtitle">Stacked by month</div></div></div>
+      <div class="chart-head"><div><div class="chart-title">Package split over time</div><div class="chart-subtitle">Stacked by month</div></div><select class="tile-slicer" id="slz-pkgtrend" title="Cut this tile by a segment"></select></div>
       <div class="chart-body"><canvas id="chart-pkg-stacked"></canvas></div>
     </div>
     <div class="chart-card" style="margin-top:1.25rem">
-      <div class="chart-head"><div><div class="chart-title">Revenue contribution by package</div><div class="chart-subtitle">Last 12 months</div></div></div>
+      <div class="chart-head"><div><div class="chart-title">Revenue contribution by package</div><div class="chart-subtitle">Last 12 months</div></div><select class="tile-slicer" id="slz-revpkg" title="Cut this tile by a segment"></select></div>
       <div class="chart-body"><canvas id="chart-rev-pkg"></canvas></div>
     </div>
     <div class="chart-card" style="margin-top:1.25rem">
-      <div class="chart-head"><div><div class="chart-title">Add-on attachment by package</div><div class="chart-subtitle">Share of orders in each package that include each add-on</div></div></div>
+      <div class="chart-head"><div><div class="chart-title">Add-on attachment by package</div><div class="chart-subtitle">Share of orders in each package that include each add-on</div></div><select class="tile-slicer" id="slz-addons" title="Cut this tile by a segment"></select></div>
       <div class="chart-body"><div style="height:260px;position:relative;"><canvas id="chart-pkg-addons"></canvas></div></div>
     </div>
   </div>
@@ -3879,6 +3879,31 @@ async function renderOrderChart(opts){
     const present=PK.filter(p=>cnt[p[0]]);
     if(!present.length){ mkChart(el,{type:'doughnut',data:{labels:['No orders'],datasets:[{data:[1],backgroundColor:['#E6ECF6'],borderColor:'#FFFFFF',borderWidth:3}]},options:{plugins:{legend:{display:false}},cutout:'65%'}}); return; }
     mkChart(el,{type:'doughnut',data:{labels:present.map(p=>p[1]),datasets:[{data:present.map(p=>cnt[p[0]]),backgroundColor:present.map(p=>p[2]),borderColor:'#FFFFFF',borderWidth:3,hoverOffset:6}]},options:{plugins:{legend:{position:'bottom',labels:{padding:16,boxWidth:12}}},cutout:'65%'}});
+  } else if(opts.kind==='pkgtrend'||opts.kind==='revpkg'){
+    const PK=[['core','Assessment','#FF6B35'],['newlywed','Starting Out','#FBBF24'],['anniversary','Anniversary','#6C7FFF'],['premium','Premium','#34D399']];
+    const months=_last12Months();
+    const rev=opts.kind==='revpkg';
+    const ds=PK.map(p=>{ const acc={}; orders.forEach(o=>{ if(o.order_pkg===p[0]&&o.month) acc[o.month]=(acc[o.month]||0)+(rev?(Number(o.amount)||0):1); });
+      return {label:p[1],data:months.map(m=>Math.round(acc[m.key]||0)),backgroundColor:rev?p[2]+'AA':p[2],borderRadius:4}; });
+    mkChart(el,{type:'bar',data:{labels:months.map(m=>m.label),datasets:ds},options:{plugins:{legend:{position:'bottom'}},scales:{x:{stacked:true,grid:{display:false}},y:{stacked:true,grid:{color:'#E6ECF6'},ticks:rev?{callback:v=>'$'+Math.round(v/1000)+'k'}:{precision:0}}}}});
+  } else if(opts.kind==='addons'){
+    const PK=[['core','Assessment'],['newlywed','Starting Out'],['anniversary','Anniversary'],['premium','Premium']];
+    const ADD=[['addon_workbook','Workbook','#6C7FFF'],['addon_reflection','Reflection','#F4B860'],['addon_budget','Budget','#E36BAE'],['addon_intimacy','Intimacy','#B5546E']];
+    const byPkg={}; PK.forEach(p=>byPkg[p[0]]=orders.filter(o=>o.order_pkg===p[0]));
+    const present=PK.filter(p=>byPkg[p[0]].length);
+    mkChart(el,{type:'bar',data:{labels:present.length?present.map(p=>p[1]):['No orders yet'],datasets:ADD.map(a=>({label:a[1],backgroundColor:a[2],borderRadius:4,data:present.length?present.map(p=>Math.round(byPkg[p[0]].filter(o=>o[a[0]]).length/byPkg[p[0]].length*100)):[0]}))},options:{maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{boxWidth:8,padding:10,font:{size:10}}}},scales:{y:{grid:{color:'#E6ECF6'},ticks:{callback:v=>v+'%'},max:100},x:{grid:{display:false}}}});
+  } else if(opts.kind==='geo'){
+    const stateCounts={}; let outsideUS=0, unknown=0;
+    orders.forEach(o=>{ const st=normStateCode(o.state)||''; const country=(o.country||'').toString().trim().toUpperCase();
+      const isUS=country?['US','USA','UNITED STATES'].includes(country):!!st;
+      if(isUS&&st){ stateCounts[st]=(stateCounts[st]||0)+1; } else if(country&&!isUS){ outsideUS++; } else { unknown++; } });
+    const rowsG=Object.entries(stateCounts).sort((a,b)=>b[1]-a[1]);
+    if(!rowsG.length&&!outsideUS){ el.innerHTML='<div style="color:var(--dim);font-size:.8rem;padding:1rem 0;line-height:1.6">No location data for this cut.<br><span style="font-size:.72rem">Free promo orders skip payment, so they carry no address; paid orders appear here.</span></div>'; return; }
+    const maxG=Math.max(...rowsG.map(r=>r[1]),outsideUS,1);
+    const barG=(label,nn,color)=>{ const pct=Math.round(nn/maxG*100); return '<div class="insight-row"><div class="insight-label">'+label+'</div><div class="insight-bar-wrap"><div class="insight-bar" style="width:'+pct+'%;background:'+color+'"></div></div><div class="insight-pct">'+nn+'</div></div>'; };
+    let h='<div class="insight-list">'; rowsG.forEach(([st,nn])=>h+=barG(st,nn,'#6C7FFF')); if(outsideUS>0) h+=barG('Outside US',outsideUS,'#34D399'); h+='</div>';
+    if(unknown>0) h+='<div style="font-size:.68rem;color:var(--dim);margin-top:.65rem">'+unknown+' order'+(unknown===1?'':'s')+' without captured location.</div>';
+    el.innerHTML=h;
   }
 }
 function wireOrderChart(opts){
@@ -4055,6 +4080,7 @@ function normStateCode(raw) {
 function renderGeography() {
   const el = document.getElementById('geo-breakdown');
   if (!el) return;
+  if (typeof wireOrderChart === 'function') { wireOrderChart({target:'geo-breakdown',kind:'geo',selId:'slz-geo'}); return; }
   const stateCounts = {};
   let outsideUS = 0, unknown = 0, total = 0;
   ORDERS.forEach(o => {
@@ -4391,14 +4417,9 @@ function initCharts(page) {
       {label:'Anniversary',data:Array(12).fill(0),backgroundColor:'#6C7FFF'},
       {label:'Premium',data:Array(12).fill(0),backgroundColor:'#34D399'},
     ]};
-    mkChart(document.getElementById('chart-pkg-stacked'),{type:'bar',data:pkgStacked,options:{plugins:{legend:{position:'bottom'}},scales:{x:{stacked:true,grid:{display:false}},y:{stacked:true,grid:{color:'#E6ECF6'}}}}});
-    mkChart(document.getElementById('chart-rev-pkg'),{type:'bar',data:{labels:MONTHS,datasets:[
-      {label:'Assessment',data:Array(12).fill(0),backgroundColor:'#FF6B3544',borderColor:'#FF6B35',borderWidth:1.5,borderRadius:4},
-      {label:'Starting Out',data:Array(12).fill(0),backgroundColor:'#FBBF2444',borderColor:'#FBBF24',borderWidth:1.5,borderRadius:4},
-      {label:'Anniversary',data:Array(12).fill(0),backgroundColor:'#6C7FFF44',borderColor:'#6C7FFF',borderWidth:1.5,borderRadius:4},
-      {label:'Premium',data:Array(12).fill(0),backgroundColor:'#34D39944',borderColor:'#34D399',borderWidth:1.5,borderRadius:4},
-    ]},options:{plugins:{legend:{position:'bottom'}},scales:{x:{stacked:true,grid:{display:false}},y:{stacked:true,grid:{color:'#E6ECF6'},ticks:{callback:v=>'$'+Math.round(v/1000)+'k'}}}}});
-    if (typeof renderAddonAttachment === 'function') renderAddonAttachment();
+    wireOrderChart({target:'chart-pkg-stacked',kind:'pkgtrend',selId:'slz-pkgtrend'});
+    wireOrderChart({target:'chart-rev-pkg',kind:'revpkg',selId:'slz-revpkg'});
+    wireOrderChart({target:'chart-pkg-addons',kind:'addons',selId:'slz-addons'});
   }
   else if (page==='demographics') {
     wireCubeTile({target:'chart-age',field:'age_range',mode:'bar',selId:'slz-age',color:'#FF6B35'});

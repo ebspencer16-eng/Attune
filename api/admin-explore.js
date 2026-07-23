@@ -304,6 +304,7 @@ export default async function handler(req) {
           addon_workbook: o.addon_workbook || null,
           addon_reflection: !!o.addon_reflection,
           addon_budget: !!o.addon_budget,
+          addon_intimacy: !!o.addon_intimacy,
           state: o.shipping_state || o.billing_state || null,
           country: o.shipping_country || o.billing_country || null,
           matched: !!(seg && Object.keys(seg).length),
