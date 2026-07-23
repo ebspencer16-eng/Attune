@@ -635,16 +635,16 @@
     </div>
     <div class="chart-grid">
       <div class="chart-card">
-        <div class="chart-head"><div><div class="chart-title">Completion funnel</div><div class="chart-subtitle">Ordered → Started → Both done → Results viewed</div></div></div>
+        <div class="chart-head"><div><div class="chart-title">Completion funnel</div><div class="chart-subtitle">Ordered → Started → Both done → Results viewed</div></div><select class="tile-slicer" id="slz-sfunnel" title="Cut this tile by a couple-level segment"></select></div>
         <div class="chart-body"><canvas id="chart-funnel"></canvas></div>
       </div>
       <div class="chart-card">
-        <div class="chart-head"><div><div class="chart-title">Rating distribution</div><div class="chart-subtitle">Post-completion survey</div></div></div>
+        <div class="chart-head"><div><div class="chart-title">Rating distribution</div><div class="chart-subtitle">Post-completion survey</div></div><select class="tile-slicer" id="slz-srate" title="Cut this tile by a segment"></select></div>
         <div class="chart-body"><canvas id="chart-ratings"></canvas></div>
       </div>
     </div>
     <div class="chart-card" style="margin-top:1.25rem">
-      <div class="chart-head"><div><div class="chart-title">NPS trend</div><div class="chart-subtitle">Monthly Net Promoter Score</div></div></div>
+      <div class="chart-head"><div><div class="chart-title">NPS trend</div><div class="chart-subtitle">Monthly Net Promoter Score</div></div><select class="tile-slicer" id="slz-snps" title="Cut this tile by a segment"></select></div>
       <div class="chart-body"><canvas id="chart-nps"></canvas></div>
     </div>
   </div>
@@ -3911,6 +3911,43 @@ function wireOrderChart(opts){
   if(sel&&!sel.dataset.wired){ sel.dataset.wired='1'; sel.onchange=()=>renderOrderChart(opts); }
   return renderOrderChart(opts);
 }
+async function renderSatFunnel(selId){
+  const el=document.getElementById('chart-funnel'); if(!el) return;
+  let cube; try{ cube=await ensureCube(); }catch(e){ return; }
+  const sel=document.getElementById(selId);
+  if(sel){ populateSlicer(sel,null,cube.rows||[],RESP_SLICE_DIMS); sel.classList.toggle('on',!!sel.value);
+    if(!sel.dataset.wired){ sel.dataset.wired='1'; sel.onchange=()=>renderSatFunnel(selId); } }
+  const val=sel?sel.value:'';
+  const rows=sliceFilter(cube.rows||[], val), orders=sliceFilter(cube.orders||[], val);
+  const ordered=orders.length, started=rows.length;
+  const bothDone=Math.floor(rows.filter(r=>r.has_ex2&&r.couple_id).length/2), viewed=bothDone;
+  setTileN(el, started);
+  mkChart(el,{type:'bar',data:{labels:['Ordered','Started exercises','Both completed','Results viewed'],datasets:[{data:[ordered,started,bothDone,viewed],backgroundColor:['#FF6B35','#FBBF24','#6C7FFF','#34D399'],borderRadius:6}]},options:{plugins:{legend:{display:false}},scales:{x:{grid:{display:false}},y:{grid:{color:'#E6ECF6'}}}}});
+}
+async function renderSatRatings(selId){
+  const el=document.getElementById('chart-ratings'); if(!el) return;
+  let cube; try{ cube=await ensureCube(); }catch(e){ return; }
+  const sel=document.getElementById(selId);
+  if(sel){ populateSlicer(sel,null,cube.rows||[]); sel.classList.toggle('on',!!sel.value);
+    if(!sel.dataset.wired){ sel.dataset.wired='1'; sel.onchange=()=>renderSatRatings(selId); } }
+  const surveys=sliceFilter(cube.surveys||[], sel?sel.value:'').filter(x=>typeof x.returnLikelihood==='number');
+  setTileN(el, surveys.length);
+  const c={1:0,2:0,3:0,4:0,5:0}; surveys.forEach(x=>{ c[x.returnLikelihood]=(c[x.returnLikelihood]||0)+1; });
+  mkChart(el,{type:'bar',data:{labels:['5 ★','4 ★','3 ★','2 ★','1 ★'],datasets:[{data:[c[5],c[4],c[3],c[2],c[1]],backgroundColor:['#34D399','#6C7FFF','#FBBF24','#F87171','#EF4444'],borderRadius:6}]},options:{plugins:{legend:{display:false}},scales:{x:{grid:{display:false}},y:{grid:{color:'#E6ECF6'}}}}});
+}
+async function renderSatNps(selId){
+  const el=document.getElementById('chart-nps'); if(!el) return;
+  let cube; try{ cube=await ensureCube(); }catch(e){ return; }
+  const sel=document.getElementById(selId);
+  if(sel){ populateSlicer(sel,null,cube.rows||[]); sel.classList.toggle('on',!!sel.value);
+    if(!sel.dataset.wired){ sel.dataset.wired='1'; sel.onchange=()=>renderSatNps(selId); } }
+  const surveys=sliceFilter(cube.surveys||[], sel?sel.value:'').filter(x=>typeof x.nps==='number');
+  setTileN(el, surveys.length);
+  const months=_last12Months(); const buckets=months.map(m=>({key:m.key,scores:[]}));
+  surveys.forEach(x=>{ const b=buckets.find(y=>y.key===x.month); if(b) b.scores.push(x.nps); });
+  let last=0; const data=buckets.map(b=>{ if(!b.scores.length) return last; const p=b.scores.filter(v=>v>=9).length, d=b.scores.filter(v=>v<=6).length; last=Math.round((p-d)/b.scores.length*100); return last; });
+  mkChart(el,{type:'line',data:{labels:months.map(m=>m.label),datasets:[{label:'NPS',data,borderColor:'#34D399',backgroundColor:'rgba(52,211,153,.1)',tension:.4,fill:true,borderWidth:2.5,pointRadius:3,pointBackgroundColor:'#34D399'},{label:'Benchmark (50)',data:Array(12).fill(50),borderColor:'#4B5563',borderDash:[5,5],borderWidth:1.5,pointRadius:0}]},options:{plugins:{legend:{position:'bottom'}},scales:{y:{grid:{color:'#E6ECF6'},min:-20,max:100},x:{grid:{display:false}}}}});
+}
 async function renderPromoDiscount(selId){
   const el=document.getElementById('pr-discount-chart'); if(!el) return;
   let cube; try{ cube=await ensureCube(); }catch(e){ return; }
@@ -4495,11 +4532,10 @@ function initCharts(page) {
     renderQuestionExplorer('qx-intimacy', ['Physical Intimacy']);
   }
   else if (page==='satisfaction') {
-    mkChart(document.getElementById('chart-funnel'),{type:'bar',data:{labels:['Ordered','Started exercises','Both completed','Results viewed'],datasets:[{data:funnelData,backgroundColor:['#FF6B35','#FBBF24','#6C7FFF','#34D399'],borderRadius:6}]},options:{plugins:{legend:{display:false}},scales:{x:{grid:{display:false}},y:{grid:{color:'#E6ECF6'}}}}});
-    mkChart(document.getElementById('chart-ratings'),{type:'bar',data:{labels:ratingsData.labels,datasets:[{data:ratingsData.data,backgroundColor:ratingsData.data.map((_,i)=>['#34D399','#6C7FFF','#FBBF24','#F87171','#EF4444'][i]),borderRadius:6}]},options:{plugins:{legend:{display:false}},scales:{x:{grid:{display:false}},y:{grid:{color:'#E6ECF6'}}}}});
+    renderSatFunnel('slz-sfunnel');
+    renderSatRatings('slz-srate');
     // NPS trend — use real-data month labels when available, fall back to rolling 12-month default
-    const npsLabels = (pkgTrendStacked && pkgTrendMonths.length === npsData.length) ? pkgTrendMonths : MONTHS;
-    mkChart(document.getElementById('chart-nps'),{type:'line',data:{labels:npsLabels,datasets:[{label:'NPS',data:npsData,borderColor:'#34D399',backgroundColor:'rgba(52,211,153,.1)',tension:.4,fill:true,borderWidth:2.5,pointRadius:3,pointBackgroundColor:'#34D399'},{label:'Benchmark (50)',data:Array(12).fill(50),borderColor:'#4B5563',borderDash:[5,5],borderWidth:1.5,pointRadius:0}]},options:{plugins:{legend:{position:'bottom'}},scales:{y:{grid:{color:'#E6ECF6'},min:-20,max:100},x:{grid:{display:false}}}}});
+    renderSatNps('slz-snps');
   }
 }
 

@@ -85,6 +85,7 @@ function ownFields(p) {
     pkg: p.pkg || 'core',
     axis_w: _axisW,
     axis_o: _axisO,
+    has_ex2: !!(p.ex2_answers && Object.keys(p.ex2_answers).length > 0),
   };
   for (const k of DEMO_KEYS) r[k] = p[k] != null && p[k] !== '' ? p[k] : null;
   // Gender isn't collected directly; derive it from the person's own pronouns.
@@ -225,11 +226,12 @@ export default async function handler(req) {
     const surveyByRespondent = {};
     const fbCatOptions = { fb_ahaMarker: new Set(), fb_convoHappened: new Set() };
     try {
-      const { data: fbRows = [] } = await admin.from('feedback_submissions').select('type, text').eq('type', 'beta_survey');
+      const { data: fbRows = [] } = await admin.from('feedback_submissions').select('type, text, submitted_at').eq('type', 'beta_survey');
       for (const r of fbRows) {
         let payload = null;
         try { payload = typeof r.text === 'string' ? JSON.parse(r.text) : r.text; } catch {}
         if (payload && payload.respondentId) {
+          payload._ts = r.submitted_at || payload._ts || null;
           surveyByRespondent[payload.respondentId] = payload;
           for (const [fk, src] of Object.entries(FB_CAT_SRC)) { const v = payload[src]; if (v) fbCatOptions[fk].add(v); }
         }
@@ -317,6 +319,20 @@ export default async function handler(req) {
       });
     } catch (e) { orderRows = []; }
 
+    // ── Survey responses, anonymized + segment-tagged (NPS / ratings slicing) ──
+    const monthOfTs = (d) => { const t = new Date(d); return isNaN(t) ? null : t.getFullYear() + '-' + String(t.getMonth() + 1).padStart(2, '0'); };
+    const surveysAnon = [];
+    for (const [rid, payload] of Object.entries(surveyByRespondent)) {
+      const seg = segById[rid] || {};
+      const row = {};
+      for (const k of SEG_KEYS) row[k] = seg[k] != null ? seg[k] : null;
+      row.month = monthOfTs(payload._ts);
+      row.ts = payload._ts || null;
+      const nps = parseInt(payload.nps, 10); row.nps = Number.isFinite(nps) ? nps : null;
+      const rl = parseInt(payload.returnLikelihood, 10); row.returnLikelihood = Number.isFinite(rl) ? rl : null;
+      surveysAnon.push(row);
+    }
+
     return json({
       generatedAt: new Date().toISOString(),
       count: rows.length,
@@ -324,6 +340,7 @@ export default async function handler(req) {
       fields: buildCatalog(fbCatOpts),
       rows,
       orders: orderRows,
+      surveys: surveysAnon,
     });
   } catch (e) {
     return json({ error: String(e && e.message ? e.message : e) }, 500);
