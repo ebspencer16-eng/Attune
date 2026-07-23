@@ -44,6 +44,10 @@ const DEMO_LABELS = {
   relationship_length: 'Time together', children: 'Children', signup_source: 'Signup source',
 };
 const DEMO_KEYS = Object.keys(DEMO_LABELS);
+function genderFromPronoun(pr) {
+  const v = String(pr || '').toLowerCase();
+  return v === 'he/him' ? 'man' : v === 'she/her' ? 'woman' : v === 'they/them' ? 'nonbinary' : null;
+}
 const RESP_OPTS = ['Me', 'Partner', 'Both', 'N/A'];
 
 // First sentence / clause, trimmed — used to label the two poles of a scale question.
@@ -79,12 +83,8 @@ function ownFields(p) {
     pkg: p.pkg || 'core',
   };
   for (const k of DEMO_KEYS) r[k] = p[k] != null && p[k] !== '' ? p[k] : null;
-  // Gender isn't collected directly; derive it from pronouns when absent.
-  // he/him -> man, she/her -> woman, they/them -> non-binary.
-  if (!r.gender && p.pronouns) {
-    const pr = String(p.pronouns).toLowerCase();
-    r.gender = pr === 'he/him' ? 'man' : pr === 'she/her' ? 'woman' : pr === 'they/them' ? 'nonbinary' : r.gender;
-  }
+  // Gender isn't collected directly; derive it from the person's own pronouns.
+  if (!r.gender && p.pronouns) r.gender = genderFromPronoun(p.pronouns);
   for (const dim of Object.keys(DIM_KEYS)) {
     r['dim_' + dim] = scores[dim] != null ? Number(Number(scores[dim]).toFixed(3)) : null;
   }
@@ -208,6 +208,7 @@ export default async function handler(req) {
   try {
     const { data: profiles = [], error } = await admin.from('profiles').select('*');
     if (error) return json({ error: error.message }, 500);
+    const profileById = {}; for (const p of profiles) profileById[p.id] = p;
 
     // Beta survey responses, keyed by respondent profile id, for the join below.
     const surveyByRespondent = {};
@@ -248,6 +249,12 @@ export default async function handler(req) {
         couple_type: partner ? [own.type, partner.type].sort().join('') : null,
       };
       if (partner) for (const k of PARTNERABLE) row['p_' + k] = partner[k];
+      // Gender fallback: each partner records the other's pronouns, so a person
+      // who never set their own can still be filled from their partner's record.
+      if (!row.gender && partnerId && profileById[partnerId]?.partner_pronouns) {
+        const g = genderFromPronoun(profileById[partnerId].partner_pronouns);
+        if (g) row.gender = g;
+      }
       const survey = surveyByRespondent[p.id];
       if (survey) {
         for (const [fk, src] of Object.entries(FB_SCALE_SRC)) { const v = Number(survey[src]); row[fk] = Number.isFinite(v) ? v : null; }
