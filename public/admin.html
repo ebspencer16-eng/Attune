@@ -2514,7 +2514,7 @@ async function loadFeedbackData() {
         .filter(Boolean);
     } catch {}
     const noteEl = document.getElementById('fb-realnote');
-    if (!realRows.length) { if (noteEl) noteEl.textContent = 'No responses yet — showing simulated preview data.'; return; }
+    if (!realRows.length) { if (noteEl) noteEl.textContent = 'No responses yet. Charts populate automatically once beta testers submit.'; return; }
     if (noteEl) noteEl.textContent = 'Showing ' + realRows.length + ' real response' + (realRows.length !== 1 ? 's' : '') + '. Small samples read with caution.';
 
     const R = realRows, n = R.length;
