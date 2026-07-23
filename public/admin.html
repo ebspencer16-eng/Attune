@@ -330,7 +330,7 @@
       <p><strong>Data separation active.</strong> This dashboard operates on fully anonymized records. No names, email addresses, or personally identifiable information are present in any dataset shown here. Records are identified by random UUID only. This system has no access to the authentication system that holds PII.</p>
     </div>
 
-    <div class="kpi-grid">
+    <div class="kpi-grid" style="grid-template-columns:repeat(3,1fr);">
       <div class="kpi-card orange">
         <div class="kpi-label">Total orders</div>
         <div class="kpi-val" id="stat-orders">—</div>
@@ -576,7 +576,7 @@
     </div>
 
     <div id="resp-story" style="display:none">
-      <div class="kpi-grid">
+      <div class="kpi-grid" style="grid-template-columns:repeat(4,1fr);">
         <div class="kpi-card indigo"><div class="kpi-label">Avg overall feel</div><div class="kpi-val">—</div><div class="kpi-sub">Scale: needs work → better than ever</div></div>
         <div class="kpi-card green"><div class="kpi-label">Connection aligned</div><div class="kpi-val">—</div><div class="kpi-sub">Partners within 1 step of each other</div></div>
         <div class="kpi-card amber"><div class="kpi-label">Fun gap flagged</div><div class="kpi-val">—</div><div class="kpi-sub">≥2 step gap on fun/lightness</div></div>
@@ -620,7 +620,7 @@
         <div class="topbar-sub">Post-completion feedback and completion funnel</div>
       </div>
     </div>
-    <div class="kpi-grid">
+    <div class="kpi-grid" style="grid-template-columns:repeat(4,1fr);">
       <div class="kpi-card green"><div class="kpi-label">NPS score</div><div class="kpi-val">—</div><div class="kpi-sub">World-class benchmark: 50+</div></div>
       <div class="kpi-card green"><div class="kpi-label">Avg rating</div><div class="kpi-val">—</div><div class="kpi-sub">Post-completion survey</div></div>
       <div class="kpi-card indigo"><div class="kpi-label">Completion rate</div><div class="kpi-val" id="sat-completion">—</div><div class="kpi-sub">Both partners finish all exercises</div></div>
@@ -1512,7 +1512,7 @@ window.adminAuthHeaders = function(extra){
     </div>
 
     <!-- Overall experience grid -->
-    <div class="chart-grid chart-grid full">
+    <div class="chart-grid" style="grid-template-columns:minmax(0,680px);">
       <div class="chart-card">
         <div class="chart-card-header">
           <div class="chart-card-title">Overall experience – clarity · impact · satisfaction</div>
@@ -1582,11 +1582,10 @@ window.adminAuthHeaders = function(extra){
       <div class="chart-card">
         <div class="chart-card-header">
           <div class="chart-card-title">Time spent by stage</div>
-          <div class="chart-card-sub">Most common answer per stage</div>
+          <div class="chart-card-sub">How long each stage took · count of responses per bucket</div>
         </div>
-        <div id="fb-timestage-bars" style="display:flex;flex-direction:column;gap:.55rem;padding:.5rem 1.4rem;">
-          <div style="color:var(--muted);font-size:.78rem;">Loading…</div>
-        </div>
+        <div style="padding:.5rem 1.4rem 1rem;"><div style="height:230px;position:relative;"><canvas id="fb-timestage-chart"></canvas></div>
+          <div id="fb-timestage-empty" style="display:none;color:var(--muted);font-size:.78rem;padding:1rem 0;">No responses yet.</div></div>
       </div>
       <div class="chart-card">
         <div class="chart-card-header">
@@ -2616,6 +2615,35 @@ async function loadFeedbackData() {
   const max = (arr) => Math.max(...arr.map(i => i.v));
   document.getElementById('fb-aha-bars').innerHTML = SIM.aha.map(i => renderBar(i.l, i.v, max(SIM.aha), '#E8673A', i.v + '%')).join('');
   document.getElementById('fb-interest-bars').innerHTML = SIM.interestAvg.map(i => renderBar(i.l, i.v, max(SIM.interestAvg), '#1B5FE8', i.v + '%')).join('');
+  // Time-by-stage as a clustered column chart: one column group per stage,
+  // one bar per duration bucket, height = count of responses. Real data only.
+  window.renderTimeByStage = function renderTimeByStage() {
+    const canvas = document.getElementById('fb-timestage-chart');
+    const empty = document.getElementById('fb-timestage-empty');
+    if (!canvas) return;
+    const STAGES = ['Package selection, checkout, account creation','Completing communication exercise','Completing expectations exercise','Reviewing your results','Exploring the workbook'];
+    const SHORT = ['Checkout/setup','Communication','Expectations','Results','Workbook'];
+    const DUR = ['Less than 10 minutes','10\u201320 minutes','20\u201345 minutes','45\u201360 minutes','Over 1 hour'];
+    const DUR_SHORT = ['<10m','10\u201320m','20\u201345m','45\u201360m','1h+'];
+    const DUR_COLORS = ['#34D399','#6C7FFF','#FBBF24','#FF6B35','#F87171'];
+    const rows = (window.__fbSurveys || []);
+    if (!rows.length) { canvas.style.display='none'; if (empty) empty.style.display='block'; return; }
+    canvas.style.display='block'; if (empty) empty.style.display='none';
+    // counts[stageIdx][durIdx]
+    const counts = STAGES.map(() => DUR.map(() => 0));
+    rows.forEach(r => {
+      const tg = r.timeGrid || {};
+      STAGES.forEach((st, si) => { const d = tg[st]; const di = DUR.indexOf(d); if (di >= 0) counts[si][di]++; });
+    });
+    const datasets = DUR.map((d, di) => ({ label: DUR_SHORT[di], backgroundColor: DUR_COLORS[di], borderRadius: 3,
+      data: STAGES.map((_, si) => counts[si][di]) }));
+    mkChart(canvas, { type:'bar', data:{ labels: SHORT, datasets },
+      options:{ maintainAspectRatio:false,
+        plugins:{ legend:{ position:'bottom', labels:{ boxWidth:10, padding:8, font:{ size:10 } } },
+          tooltip:{ callbacks:{ title:(items)=> STAGES[items[0].dataIndex] } } },
+        scales:{ x:{ grid:{ display:false }, ticks:{ font:{ size:10 } } }, y:{ grid:{ color:'#E6ECF6' }, ticks:{ precision:0 }, title:{ display:true, text:'responses', font:{ size:9 } } } } } });
+  };
+
   // Coverage is only meaningful once responses carry a coupleId. Older rows
   // predate that and are counted separately rather than silently dropped.
   window.renderFbCoverage = function renderCoverage() {
@@ -2649,11 +2677,7 @@ async function loadFeedbackData() {
   };
   window.renderFbCoverage();
 
-  document.getElementById('fb-timestage-bars').innerHTML = SIM.timeByStage.map(i =>
-    `<div style="display:grid;grid-template-columns:1fr auto;gap:.75rem;align-items:center;padding:.3rem 0">
-      <div style="font-size:.72rem;color:var(--text)">${i.l}</div>
-      <div style="font-size:.7rem;font-weight:700;color:var(--accent, #E8673A);white-space:nowrap">${i.v}</div>
-    </div>`).join('');
+  renderTimeByStage();
   document.getElementById('fb-completion-bars').innerHTML = SIM.completion.map(i => renderBar(i.l, i.v, max(SIM.completion), '#10B981', i.v + '%')).join('');
   document.getElementById('fb-concerns-bars').innerHTML = SIM.concerns.map(i => renderBar(i.l, i.v, max(SIM.concerns), '#9B5DE5', i.v + '%')).join('');
 
@@ -3345,6 +3369,7 @@ async function loadRealAnalytics() {
     // Coverage card reads these; re-render now that the real rows are in.
     window.__fbSurveys = surveys;
     if (typeof window.renderFbCoverage === 'function') window.renderFbCoverage();
+    if (typeof window.renderTimeByStage === 'function') window.renderTimeByStage();
 
     // ── NPS trend by month ──────────────────────────────────────────────
     // Build 12 month buckets ending at current month. For each, compute NPS:
@@ -3774,40 +3799,51 @@ async function renderQuestionExplorer(containerId, groupPrefixes) {
   document.getElementById(containerId + '-xcol').onchange = renderX;
   renderX();
   const distEl = document.getElementById(containerId + '-dist');
-  // Group questions that share the same option set so each group shows one color
-  // key at the top (segment colors follow the option order).
-  const groups = [];
-  const bySig = {};
-  qFields.forEach(f => {
-    const sig = f.kind === 'scale' ? '__scale__' : ((f.options || []).map(o => o.v).join('||') || '__free__');
-    if (!bySig[sig]) { bySig[sig] = { kind: f.kind, options: f.options || [], fields: [] }; groups.push(bySig[sig]); }
-    bySig[sig].fields.push(f);
-  });
-  const swatch = (color, label) => '<span style="display:inline-flex;align-items:center;gap:.3rem;font-size:.66rem;color:var(--text);"><span style="width:10px;height:10px;border-radius:3px;background:' + color + ';flex-shrink:0;"></span>' + label + '</span>';
-  const keyBar = (inner) => '<div style="display:flex;flex-wrap:wrap;gap:.4rem .85rem;align-items:center;margin:0 0 .8rem;padding:.5rem .7rem;background:var(--surface);border:1px solid var(--border);border-radius:8px;"><span style="font-family:var(--mono);font-size:.54rem;letter-spacing:.12em;text-transform:uppercase;color:var(--dim);">Key</span>' + inner + '</div>';
-  distEl.innerHTML = groups.map(g => {
-    let key = '';
-    if (g.kind === 'scale') {
-      key = keyBar(['1','2','3','4','5'].map((nlab, i) => swatch(QX_SCALE_COLORS[i], nlab)).join('') + '<span style="color:var(--dim);font-size:.62rem;">lower&nbsp;&#10230;&nbsp;higher</span>');
-    } else if (g.options && g.options.length) {
-      key = keyBar(g.options.map((o, i) => swatch(QX_CAT_COLORS[i % QX_CAT_COLORS.length], QX_ESC(o.label))).join(''));
-    }
-    const bars = g.fields.map(f => {
-      const counts = {}; let n = 0;
-      rows.forEach(r => { let v = r[f.key]; if (v === null || v === undefined || v === '') return; if (f.kind === 'scale') v = String(Math.round(v)); counts[v] = (counts[v] || 0) + 1; n++; });
-      const cats = f.kind === 'scale' ? ['1','2','3','4','5'] : (f.options ? f.options.map(o => o.v) : Object.keys(counts));
-      const segs = cats.map((c, idx) => {
-        const cnt = counts[c] || 0; if (!cnt) return '';
-        const w = n ? Math.round(cnt / n * 100) : 0;
-        const color = f.kind === 'scale' ? QX_SCALE_COLORS[idx] : QX_CAT_COLORS[idx % QX_CAT_COLORS.length];
-        return '<div title="' + QX_ESC(qxCatLabel(f, c)) + ': ' + cnt + '" style="width:' + w + '%;background:' + color + ';height:100%;"></div>';
-      }).join('');
-      return '<div style="margin-bottom:.85rem;">' +
-        '<div style="font-size:.74rem;color:var(--text);margin-bottom:.3rem;line-height:1.35;">' + QX_ESC(f.label) + ' <span style="color:var(--dim);font-family:var(--mono);font-size:.66rem;">n=' + n + '</span></div>' +
-        '<div style="display:flex;height:14px;border-radius:5px;overflow:hidden;background:var(--surface);">' + segs + '</div>' +
-      '</div>';
+
+  // One block per question. Scale questions (communication) get their two pole
+  // labels flanking the bar so "1" and "5" are self-explanatory. Categorical
+  // questions (expectations, reflection) get a compact colour key on one line
+  // directly below the bar — grey, italic, truncated with a full-text tooltip.
+  const TRUNC = (t, n) => (t && t.length > n) ? t.slice(0, n - 1) + '…' : (t || '');
+  distEl.innerHTML = qFields.map(f => {
+    const counts = {}; let n = 0;
+    rows.forEach(r => { let v = r[f.key]; if (v === null || v === undefined || v === '') return; if (f.kind === 'scale') v = String(Math.round(v)); counts[v] = (counts[v] || 0) + 1; n++; });
+    const cats = f.kind === 'scale' ? ['1','2','3','4','5'] : (f.options ? f.options.map(o => o.v) : Object.keys(counts));
+    const optLabel = {}; (f.options || []).forEach(o => optLabel[o.v] = o.label);
+    const segs = cats.map((c, idx) => {
+      const cnt = counts[c] || 0; if (!cnt) return '';
+      const w = n ? Math.round(cnt / n * 100) : 0;
+      const color = f.kind === 'scale' ? QX_SCALE_COLORS[idx] : QX_CAT_COLORS[idx % QX_CAT_COLORS.length];
+      const lbl = f.kind === 'scale' ? qxCatLabel(f, c) : (optLabel[c] || c);
+      return '<div title="' + QX_ESC(lbl) + ': ' + cnt + '" style="width:' + w + '%;background:' + color + ';height:100%;"></div>';
     }).join('');
-    return '<div style="margin-bottom:1.1rem;">' + key + bars + '</div>';
+
+    const header = '<div style="font-size:.74rem;color:var(--text);margin-bottom:.3rem;line-height:1.35;">' + QX_ESC(f.label) + ' <span style="color:var(--dim);font-family:var(--mono);font-size:.66rem;">n=' + n + '</span></div>';
+    const barRow = '<div style="display:flex;height:14px;border-radius:5px;overflow:hidden;background:var(--surface);">' + segs + '</div>';
+
+    if (f.kind === 'scale') {
+      // Pole labels either side of the bar (what 1 and 5 mean for THIS question).
+      const lo = QX_ESC(f.poleLow || 'low'), hi = QX_ESC(f.poleHigh || 'high');
+      return '<div style="margin-bottom:.95rem;">' + header +
+        '<div style="display:flex;align-items:center;gap:.5rem;">' +
+          '<span style="flex:0 0 auto;max-width:34%;font-size:.62rem;font-style:italic;color:var(--dim);text-align:right;line-height:1.2;">1 · ' + lo + '</span>' +
+          '<div style="flex:1;">' + barRow + '</div>' +
+          '<span style="flex:0 0 auto;max-width:34%;font-size:.62rem;font-style:italic;color:var(--dim);line-height:1.2;">5 · ' + hi + '</span>' +
+        '</div></div>';
+    }
+
+    // Categorical: inline key on one line just under the bar. Full text on hover.
+    const present = cats.filter(c => counts[c]);
+    const fullKey = present.map((c, i) => (optLabel[c] || c)).join('   ·   ');
+    const keyInline = present.map((c) => {
+      const idx = cats.indexOf(c);
+      const color = QX_CAT_COLORS[idx % QX_CAT_COLORS.length];
+      return '<span style="display:inline-flex;align-items:center;gap:.25rem;flex:0 0 auto;">' +
+        '<span style="width:8px;height:8px;border-radius:2px;background:' + color + ';flex:0 0 auto;"></span>' +
+        TRUNC(QX_ESC(optLabel[c] || c), 22) + '</span>';
+    }).join('<span style="color:var(--border);margin:0 .1rem;">·</span>');
+    const keyRow = '<div title="' + QX_ESC(fullKey) + '" style="display:flex;gap:.35rem;align-items:center;margin-top:.18rem;font-size:.62rem;font-style:italic;color:var(--dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + keyInline + '</div>';
+    return '<div style="margin-bottom:.95rem;">' + header + barRow + keyRow + '</div>';
   }).join('');
 }
 
