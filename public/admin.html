@@ -1132,7 +1132,7 @@ window.adminAuthHeaders = function(extra){
       const data = await res.json();
       if (data.error) throw new Error(data.error);
       CUBE = data; FIELDS = {}; data.fields.forEach(f => FIELDS[f.key] = f); loaded = true;
-      fillFieldSelect($('xp-row-field'), false);
+      fillFieldSelect($('xp-row-field'), true);
       fillFieldSelect($('xp-col-field'), true);
       fillScaleSelect($('xp-measure-field'));
       // sensible defaults: ex1 first question by individual type
@@ -3224,7 +3224,7 @@ async function renderResponseTile(opts){
   if(opts.kind==='radar'){
     mkChart(el,{type:'radar',data:{labels:a.dimScores.labels,datasets:[{label:'Avg alignment',data:a.dimScores.data,borderColor:'#6C7FFF',backgroundColor:'rgba(108,127,255,.15)',borderWidth:2,pointRadius:3,pointBackgroundColor:'#6C7FFF'}]},options:{scales:{r:{grid:{color:'#E6ECF6'},angleLines:{color:'#E6ECF6'},ticks:{display:false},min:0,max:100}},plugins:{legend:{display:false}}}});
   } else if(opts.kind==='expalign'){
-    mkChart(el,{type:'bar',data:{labels:a.expAlign.labels,datasets:[{label:'% aligned',data:a.expAlign.data,backgroundColor:'#FF6B35',borderRadius:6}]},options:{plugins:{legend:{display:false}},scales:{x:{grid:{display:false}},y:{grid:{color:'#E6ECF6'},ticks:{callback:v=>v+'%'},min:0,max:100}}}});
+    mkChart(el,{type:'radar',data:{labels:a.expAlign.labels,datasets:[{label:'% aligned',data:a.expAlign.data,borderColor:'#FF6B35',backgroundColor:'rgba(255,107,53,.15)',borderWidth:2,pointRadius:3,pointBackgroundColor:'#FF6B35'}]},options:{scales:{r:{grid:{color:'#E6ECF6'},angleLines:{color:'#E6ECF6'},ticks:{display:false},min:0,max:100}},plugins:{legend:{display:false}}}});
   } else if(opts.kind==='relfeel'){
     mkChart(el,{type:'bar',data:{labels:['Needs work (0)','Rough patch (1)','Solid (2)','Really good (3)','Better than ever (4)'],datasets:[{data:a.relFeel,backgroundColor:hexRamp('#E5578C',5),borderRadius:6}]},options:{plugins:{legend:{display:false}},scales:{x:{grid:{display:false}},y:{grid:{color:'#E6ECF6'}}}}});
   } else if(opts.kind==='expgaps'){
@@ -3801,6 +3801,7 @@ const SLICE_DIMS = [
   { key:'axisOpen', label:'Open / Guarded' }, { key:'couple_type', label:'Couple type' }, { key:'pkg', label:'Package' },
 ];
 const SLICE_ORDER = {
+  age_range:['18-24','25-34','35-44','45-54','55+'],
   gender:['man','woman','nonbinary','other'],
   relationship_status:['dating','engaged','married','remarried','partnership'],
   relationship_length:['<1','1-2','3-5','6-10','11-20','20+'],
@@ -3957,8 +3958,14 @@ async function renderSatFunnel(selId){
     if(!sel.dataset.wired){ sel.dataset.wired='1'; sel.onchange=()=>renderSatFunnel(selId); } }
   const val=sel?sel.value:'';
   const rows=sliceFilter(cube.rows||[], val), orders=sliceFilter(cube.orders||[], val);
-  const ordered=orders.length, started=rows.length;
-  const bothDone=Math.floor(rows.filter(r=>r.has_ex2&&r.couple_id).length/2), viewed=bothDone;
+  // Count in COUPLES throughout so the funnel is one consistent unit (mixing
+  // orders/couples with individuals is what made 'started' exceed 'ordered').
+  const byCouple={}; let solo=0;
+  rows.forEach(r=>{ if(r.couple_id){ (byCouple[r.couple_id]=byCouple[r.couple_id]||[]).push(r); } else solo++; });
+  const ordered=orders.length;
+  const started=Object.keys(byCouple).length + solo;
+  const bothDone=Object.values(byCouple).filter(g=>g.length>=2 && g.every(r=>r.has_ex2)).length;
+  const viewed=bothDone;
   setTileN(el, started);
   mkChart(el,{type:'bar',data:{labels:['Ordered','Started exercises','Both completed','Results viewed'],datasets:[{data:[ordered,started,bothDone,viewed],backgroundColor:hexRamp(DEMO_HUE,4).reverse(),borderRadius:6}]},options:{plugins:{legend:{display:false}},scales:{x:{grid:{display:false}},y:{grid:{color:'#E6ECF6'}}}}});
 }
@@ -4092,7 +4099,10 @@ async function renderQuestionExplorer(containerId, groupPrefixes, highPrefixes) 
       '<div id="' + containerId + '-xout" style="margin-top:.85rem;overflow:auto;"></div>' +
     '</div>' +
     '<div class="chart-card" style="padding:1.1rem 1.25rem;">' +
-      '<div style="font-size:.7rem;color:var(--muted);margin-bottom:.9rem;">Distribution for every measure (n=' + rows.length + ').</div>' +
+      '<div style="display:flex;justify-content:space-between;align-items:center;gap:.6rem;margin-bottom:.9rem;">' +
+        '<div style="font-size:.7rem;color:var(--muted);">Distribution for every measure (<span id="' + containerId + '-distn">n=' + rows.length + '</span>).</div>' +
+        '<select class="tile-slicer" id="' + containerId + '-distslz" title="Cut these distributions by a segment"><option value="">Everyone</option></select>' +
+      '</div>' +
       '<div id="' + containerId + '-dist"></div>' +
     '</div>';
   const renderX = () => {
@@ -4138,9 +4148,9 @@ async function renderQuestionExplorer(containerId, groupPrefixes, highPrefixes) 
   // directly below the bar — grey, italic, truncated with a full-text tooltip.
   const TRUNC = (t, n) => (t && t.length > n) ? t.slice(0, n - 1) + '…' : (t || '');
   const SCALE_RAMP = hexRamp(QX_THEME[containerId] || '#6C7FFF', 5);
-  const barFor = (f) => {
+  const barFor = (f, drows) => {
     const counts = {}; let n = 0;
-    rows.forEach(r => { let v = r[f.key]; if (v === null || v === undefined || v === '') return; if (f.kind === 'scale') v = String(Math.round(v)); counts[v] = (counts[v] || 0) + 1; n++; });
+    drows.forEach(r => { let v = r[f.key]; if (v === null || v === undefined || v === '') return; if (f.kind === 'scale') v = String(Math.round(v)); counts[v] = (counts[v] || 0) + 1; n++; });
     const cats = f.kind === 'scale' ? ['1','2','3','4','5'] : (f.options ? f.options.map(o => o.v) : Object.keys(counts));
     // Categorical options also use a monochrome gradient of the exercise hue
     // (light->dark across the options); the colour key below maps shade->label.
@@ -4196,10 +4206,23 @@ async function renderQuestionExplorer(containerId, groupPrefixes, highPrefixes) 
         '</div><span>5</span>' +
         '<span style="font-style:italic;">lighter = lower end, darker = higher end (poles labeled on each bar)</span></div>'
     : '';
-  distEl.innerHTML =
-    scaleLegend +
-    (highFields.length ? sectionHead('High-level views') + highFields.map(barFor).join('') + '<div style="height:1.1rem;"></div>' : '') +
-    (highFields.length ? sectionHead('All questions') : '') + detailFields.map(barFor).join('');
+  const renderDist = (drows) => {
+    distEl.innerHTML =
+      scaleLegend +
+      (highFields.length ? sectionHead('High-level views') + highFields.map(f => barFor(f, drows)).join('') + '<div style="height:1.1rem;"></div>' : '') +
+      (highFields.length ? sectionHead('All questions') : '') + detailFields.map(f => barFor(f, drows)).join('');
+  };
+  renderDist(rows);
+  const distSlz = document.getElementById(containerId + '-distslz');
+  if (distSlz) {
+    populateSlicer(distSlz, null, rows);
+    distSlz.onchange = () => {
+      const fr = sliceFilter(rows, distSlz.value);
+      distSlz.classList.toggle('on', !!distSlz.value);
+      const nEl = document.getElementById(containerId + '-distn'); if (nEl) nEl.textContent = 'n=' + fr.length;
+      renderDist(fr);
+    };
+  }
 }
 
 // ── Couple type distribution (MECE): counts of each of the 10 couple types ──
@@ -4761,7 +4784,7 @@ function drawHist(id, bins, data, color) {
   const ex = Chart.getChart(el); if(ex) ex.destroy();
   const labels = bins.map(b=>b.toFixed(1));
   const splitIdx = bins.findIndex(b=>b>=3) ;
-  mkChart(el, { type:'bar', data:{ labels, datasets:[{data, backgroundColor:bins.map(b=>hexShade(color,(b-1)/4)), borderRadius:3}] },
+  mkChart(el, { type:'bar', data:{ labels, datasets:[{data, backgroundColor:color, borderRadius:3}] },
     options:{ plugins:{ legend:{display:false}, tooltip:{callbacks:{title:i=>`score ${i[0].label}`}} },
       scales:{ x:{grid:{display:false},ticks:{color:'#6B7280',font:{size:9},maxRotation:0,callback:(v,i)=>i%2===0?labels[i]:''}},
                y:{grid:{color:'#E6ECF6'},ticks:{color:'#6B7280',precision:0}} } } });
