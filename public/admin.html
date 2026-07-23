@@ -2412,6 +2412,7 @@ function renderBar(label, val, max, color, subLabel='') {
 }
 
 function renderScoreBar(label, score, color='#6C7FFF') {
+  if (score == null) return renderBar(label, 0, 5, color, '—');
   return renderBar(label, score, 5, color, score.toFixed(1));
 }
 
@@ -2454,100 +2455,49 @@ async function loadFeedbackData() {
   }
 
   // ── Simulated data, replaced by real responses once any exist ────────
+  // Empty scaffold. Real values are filled by applyRealBeta() below when any
+  // responses exist; with zero responses everything stays empty/'—' rather than
+  // showing simulated numbers. Grid/interest labels are structural (the product
+  // elements being rated), so they stay; their scores are null until real data.
   const SIM = {
-    surveys: 47,
-    nps: 72,
-    npsPromoters: 64, npsPassives: 18, npsDetractors: 18,
-    expectationMatch: 4.2,
-    convoRate: 76,
-    outcomeShift: 3.9,
-    // Benchmarkable metrics
-    benchmarks: [
-      {label:'Expectation match',val:4.2,color:'#E8673A'},
-      {label:'Communications overall',val:4.1,color:'#9B5DE5'},
-      {label:'Expectations overall',val:3.9,color:'#9B5DE5'},
-      {label:'Results clarity',val:4.3,color:'#1B5FE8'},
-      {label:'Couple type accuracy',val:4.0,color:'#1B5FE8'},
-      {label:'Outcome shift (couple)',val:3.8,color:'#10B981'},
-      {label:'Outcome shift (self)',val:3.6,color:'#10B981'},
-      {label:'Return likelihood',val:4.1,color:'#10B981'},
-      {label:'Value vs other spend',val:4.2,color:'#F59E0B'},
-      {label:'Ease',val:4.4,color:'#F59E0B'},
-    ],
-    // Comms lead
-    commsLead: [
-      {label:'Overall rating',val:4.1},{label:'Impact',val:3.8},{label:'Honesty',val:4.3},{label:'Emotional safety',val:4.4},
-    ],
-    expLead: [
-      {label:'Overall rating',val:3.9},{label:'Impact',val:3.7},{label:'Honesty',val:4.0},{label:'Emotional safety',val:4.2},
-    ],
-    // Comms grid rows (Design · Accuracy · Importance)
+    surveys: 0,
+    nps: '—', npsPromoters: 0, npsPassives: 0, npsDetractors: 0,
+    expectationMatch: null, convoRate: null, outcomeShift: null,
+    benchmarks: [],
+    commsLead: [], expLead: [],
     commsGrid: [
-      {label:'The questions themselves', scores:[4.2,4.0,4.3,3.9]},
-      {label:'Seeing scores side by side', scores:[4.5,4.1,4.2,4.0]},
-      {label:'Dimension breakdowns', scores:[4.1,3.9,4.0,3.8]},
-      {label:'Your couple type', scores:[4.4,3.8,4.1,3.9]},
-      {label:'Detailed feedback pages', scores:[4.0,3.7,3.9,3.8]},
+      {label:'The questions themselves', scores:[null,null,null]},
+      {label:'Seeing scores side by side', scores:[null,null,null]},
+      {label:'Dimension breakdowns', scores:[null,null,null]},
+      {label:'Your couple type', scores:[null,null,null]},
+      {label:'Detailed feedback pages', scores:[null,null,null]},
     ],
     expGrid: [
-      {label:'The responsibility questions', scores:[4.1,3.8,4.3,4.0]},
-      {label:'Including childhood context', scores:[4.3,3.9,4.0,3.7]},
-      {label:'Category breakdowns', scores:[4.0,3.8,3.9,3.8]},
-      {label:'Detailed feedback pages', scores:[3.9,3.6,3.8,3.7]},
+      {label:'The responsibility questions', scores:[null,null,null]},
+      {label:'Including childhood context', scores:[null,null,null]},
+      {label:'Category breakdowns', scores:[null,null,null]},
+      {label:'Detailed feedback pages', scores:[null,null,null]},
     ],
-    // Overall grid (Clarity · Impact · Overall Satisfaction)
     overallGrid: [
-      {label:'Package selection & checkout', scores:[4.3,null,4.2]},
-      {label:'Account creation', scores:[4.1,null,4.0]},
-      {label:'Exercise questions', scores:[4.2,3.8,4.1]},
-      {label:'Results presentation', scores:[4.3,4.0,4.2]},
-      {label:'Couple type system', scores:[4.4,3.9,4.1]},
-      {label:'Detailed feedback pages', scores:[4.0,3.7,3.9]},
-      {label:'Workbook', scores:[4.1,3.6,3.9]},
-      {label:'Intimacy add-on', scores:[4.2,3.8,4.0]},
-      {label:'Overall flow / UX', scores:[4.4,null,4.3]},
-      {label:'Time it took', scores:[null,null,4.1]},
+      {label:'Package selection & checkout', scores:[null,null,null]},
+      {label:'Account creation', scores:[null,null,null]},
+      {label:'Exercise questions', scores:[null,null,null]},
+      {label:'Results presentation', scores:[null,null,null]},
+      {label:'Couple type system', scores:[null,null,null]},
+      {label:'Detailed feedback pages', scores:[null,null,null]},
+      {label:'Workbook', scores:[null,null,null]},
+      {label:'Intimacy add-on', scores:[null,null,null]},
+      {label:'Overall flow / UX', scores:[null,null,null]},
+      {label:'Time it took', scores:[null,null,null]},
     ],
-    aha: [
-      {l:'Expectations gaps',v:32},{l:'Seeing scores side by side',v:28},{l:'Couple type',v:18},
-      {l:'Conversation afterward',v:12},{l:'Detailed feedback pages',v:6},{l:'No clear moment',v:4},
-    ],
+    aha: [],
     interestAvg: [
       {l:'Relationship Reflection exercise',v:0},{l:'Physical Intimacy Expectations',v:0},
       {l:'Starting Out Checklist',v:0},{l:'Build a Budget experience',v:0},
     ],
-    timeByStage: [
-      {l:'Package selection, checkout, account creation', v:'Less than 10 minutes'},
-      {l:'Completing communication exercise', v:'10–20 minutes'},
-      {l:'Completing expectations exercise', v:'20–45 minutes'},
-      {l:'Reviewing your results', v:'10–20 minutes'},
-      {l:'Exploring the workbook', v:'20–45 minutes'},
-    ],
-    completion: [
-      {l:'Yes, both finished',v:71},{l:'I finished, partner pending',v:14},
-      {l:"Partner finished, I'm pending",v:8},{l:'Neither fully finished',v:7},
-    ],
-    concerns: [
-      {l:"Questions wouldn't feel real",v:0},{l:"Partner wouldn't engage seriously",v:0},
-      {l:"Results wouldn't say anything useful",v:0},{l:"Wouldn't surface anything new",v:0},{l:'No concerns',v:0},
-    ],
-    discovered: [
-      {text:"We've been together six years and I had no idea we had such different assumptions about who should initiate hard conversations. It was uncomfortable and completely worth it.",name:"Sarah M.",nps:9},
-      {text:"The couple type was almost unsettlingly accurate. We're a WY pairing and the description of 'different conflict clocks' is literally us. We've been calling it that ever since.",name:"Jamie & Priya",nps:10},
-      {text:"I thought we were pretty well-aligned. Turns out we had completely different expectations about career sacrifice. Neither of us had ever said it out loud.",name:"Marcus T.",nps:8},
-      {text:"Honestly the childhood context piece caught me off guard. I hadn't connected my expectations about household labor to how I grew up until I saw it laid out.",name:"Anonymous",nps:7},
-    ],
-    testimonials: [
-      {text:"I'd tell them: do it before a major decision. We did it three months before our wedding and I genuinely think we're going into it more clear-eyed than most couples.",name:"Rachel & Tom",nps:10,consent:"Yes – use my words and first name on the reviews section"},
-      {text:"It's like getting a translation of your partner. Not fixing anything, just finally being able to read each other.",name:"Dev M.",nps:9,consent:"Yes – use my words and first name on the reviews section"},
-    ],
-    detractors: [
-      {text:"I think the questions are a little too abstract for people who aren't already into this kind of thing. My partner found some of them confusing.",name:"Anonymous",nps:5},
-    ],
-    wishKnew: [
-      {text:"I wish I'd known it would take more than 30 minutes. We started it on a weeknight and ran out of time, which broke the flow.",name:"Anonymous"},
-      {text:"That answering separately wasn't just a suggestion – it's the whole point. I almost texted my partner mid-exercise to compare notes.",name:"Sam L."},
-    ],
+    completion: [],
+    concerns: [],
+    discovered: [], testimonials: [], detractors: [], wishKnew: [],
   };
 
   // ── Real data override ──────────────────────────────────────────────
@@ -2581,6 +2531,8 @@ async function loadFeedbackData() {
     { const v=[...R.map(s=>+s.shiftCouple),...R.map(s=>+s.shiftSelf)].filter(Number.isFinite); SIM.outcomeShift = v.length ? Math.round(v.reduce((a,b)=>a+b)/v.length*10)/10 : 0; }
     SIM.benchmarks = [['Expectation match','expectationMatch','#E8673A'],['Communication overall','commsOverall','#9B5DE5'],['Expectations overall','expOverall','#9B5DE5'],['Outcome shift (couple)','shiftCouple','#10B981'],['Outcome shift (self)','shiftSelf','#10B981'],['Return likelihood','returnLikelihood','#10B981'],['Value vs other spend','valuePct','#F59E0B']]
       .map(([label,f,color]) => ({ label, val: avg(f), color })).filter(b => b.val != null);
+    SIM.commsLead = [['Overall rating','commsOverall'],['Honesty','commsHonesty']].map(([label,f]) => ({ label, val: avg(f) })).filter(m => m.val != null);
+    SIM.expLead   = [['Overall rating','expOverall'],['Honesty','expHonesty']].map(([label,f]) => ({ label, val: avg(f) })).filter(m => m.val != null);
     // Real grids: average each r#_c# cell across responses. Row/col labels kept from SIM.
     const gridReal = (key, simRows, colCount) => simRows.map((row, ri) => ({ label: row.label,
       scores: Array.from({length: colCount}, (_, ci) => { const vals = R.map(s => s[key] && s[key]['r'+ri+'_c'+ci]).filter(Number.isFinite); return vals.length ? Math.round(vals.reduce((a,b)=>a+b)/vals.length*10)/10 : null; }) }));
@@ -2605,12 +2557,13 @@ async function loadFeedbackData() {
     // survey payload, so leave that card on its coverage-derived render.
   })();
 
-  // Render KPIs
+  // Render KPIs. '—' when there is no real data behind the metric.
+  const _score5 = (v) => v == null ? '—' : v + '<span style="font-size:.9rem">/5</span>';
   document.getElementById('fb-nps').textContent = SIM.nps;
-  document.getElementById('fb-nps-dist').textContent = `P: ${SIM.npsPromoters}% · N: ${SIM.npsPassives}% · D: ${SIM.npsDetractors}%`;
-  document.getElementById('fb-exp-match').innerHTML = SIM.expectationMatch + '<span style="font-size:.9rem">/5</span>';
-  document.getElementById('fb-convo-rate').textContent = SIM.convoRate + '%';
-  document.getElementById('fb-outcome-shift').innerHTML = SIM.outcomeShift + '<span style="font-size:.9rem">/5</span>';
+  document.getElementById('fb-nps-dist').textContent = SIM.surveys ? `P: ${SIM.npsPromoters}% · N: ${SIM.npsPassives}% · D: ${SIM.npsDetractors}%` : '';
+  document.getElementById('fb-exp-match').innerHTML = _score5(SIM.expectationMatch);
+  document.getElementById('fb-convo-rate').textContent = SIM.convoRate == null ? '—' : SIM.convoRate + '%';
+  document.getElementById('fb-outcome-shift').innerHTML = _score5(SIM.outcomeShift);
   document.getElementById('fb-count-surveys').textContent = SIM.surveys;
 
   // Benchmarkable metrics bars
@@ -2640,13 +2593,13 @@ async function loadFeedbackData() {
   const commsEl = document.getElementById('fb-comms-grid-bars');
   commsEl.innerHTML = SIM.commsGrid.map(row =>
     `<div style="margin-bottom:.35rem"><div style="font-size:.68rem;font-weight:600;color:var(--text);margin-bottom:.35rem">${row.label}</div>` +
-    row.scores.map((s,i) => renderScoreBar(GRID_COLS[i], s, GRID_COLORS[i])).join('') + '</div>'
+    row.scores.map((s,i) => s != null ? renderScoreBar(GRID_COLS[i], s, GRID_COLORS[i]) : '').join('') + '</div>'
   ).join('');
 
   const expEl = document.getElementById('fb-exp-grid-bars');
   expEl.innerHTML = SIM.expGrid.map(row =>
     `<div style="margin-bottom:.35rem"><div style="font-size:.68rem;font-weight:600;color:var(--text);margin-bottom:.35rem">${row.label}</div>` +
-    row.scores.map((s,i) => renderScoreBar(GRID_COLS[i], s, GRID_COLORS[i])).join('') + '</div>'
+    row.scores.map((s,i) => s != null ? renderScoreBar(GRID_COLS[i], s, GRID_COLORS[i]) : '').join('') + '</div>'
   ).join('');
 
   // Overall grid bars
@@ -2788,7 +2741,7 @@ const commTypes = [{l:'Balanced pair',v:0},{l:'Expressive + Reserved',v:0},{l:'B
 let expAlign = {labels:['Household','Financial','Career','Extended family','Emotional'],data:[0,0,0,0,0]};
 let relFeel = [0,0,0,0,0];
 let responsePairs = 0;
-const expGaps = [{l:'Children',v:0},{l:'Finances',v:0},{l:'Where you live',v:0},{l:'Conflict',v:0},{l:'Repair',v:0}];
+let expGaps = [{l:'Children',v:0},{l:'Finances',v:0},{l:'Where you live',v:0},{l:'Conflict',v:0},{l:'Repair',v:0}];
 const storyGaps = [{l:'Fun & lightness',v:0},{l:'Communication ease',v:0},{l:'Day-to-day connection',v:0},{l:'Overall feel',v:0}];
 let funnelData = [0,0,0,0];
 let ratingsData = {labels:['5 ★','4 ★','3 ★','2 ★','1 ★'],data:[0,0,0,0,0]};
@@ -3284,6 +3237,12 @@ async function loadRealResponses() {
   expAlign = { labels: r.expLabels || expAlign.labels, data: r.expAlign || expAlign.data };
   relFeel = r.relationshipFeel || relFeel;
   responsePairs = r.pairs;
+  // Life & Values gap rates (was previously fed only by demo-session data).
+  if (Array.isArray(r.lifeGaps) && r.lifeGaps.length) {
+    expGaps = r.lifeGaps.map(g => ({ l: g.label, v: g.pct }));
+    const gapEl = document.getElementById('exp-gap-bars');
+    if (gapEl) renderBars('exp-gap-bars', expGaps, '#F87171');
+  }
 
   const note = document.getElementById('responses-sample-note');
   if (note) note.textContent = r.pairs + (r.pairs === 1 ? ' couple' : ' couples') + ' with both partners complete';

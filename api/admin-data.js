@@ -32,7 +32,7 @@ export const config = { runtime: 'edge' };
 
 import { createClient } from '@supabase/supabase-js';
 import { checkAdminAuth } from './_lib/admin-auth.js';
-import { RESPONSIBILITY_CATEGORIES } from './_questions.js';
+import { RESPONSIBILITY_CATEGORIES, LIFE_QUESTIONS } from './_questions.js';
 
 // ── Response aggregates ──────────────────────────────────────────────────────
 // The Responses page charts used to be hardcoded zero arrays: the raw answers
@@ -131,6 +131,26 @@ function buildResponseAggregates(profiles, sessions) {
   const expAlign = RESPONSIBILITY_CATEGORIES.map(c =>
     catTotal[c.id] ? Math.round(100 * catAgree[c.id] / catTotal[c.id]) : 0);
 
+  // ── Life & Values: % of couples whose answers differ, per life question ──
+  // Life answers are stored as plain option strings under ex2_answers.life, so
+  // no name resolution is needed (unlike the responsibility items).
+  const lifeAgree = {}, lifeTotal = {};
+  LIFE_QUESTIONS.forEach(q => { lifeAgree[q.id] = 0; lifeTotal[q.id] = 0; });
+  pairs.forEach(([a, b]) => {
+    const la = a.ex2_answers?.life, lb = b.ex2_answers?.life;
+    if (!la || !lb) return;
+    LIFE_QUESTIONS.forEach(q => {
+      const va = la[q.id], vb = lb[q.id];
+      if (va == null || va === '' || vb == null || vb === '') return;
+      lifeTotal[q.id]++;
+      if (va === vb) lifeAgree[q.id]++;
+    });
+  });
+  const lifeGaps = LIFE_QUESTIONS
+    .map(q => ({ label: q.topic || q.text, pct: lifeTotal[q.id] ? Math.round(100 * (lifeTotal[q.id] - lifeAgree[q.id]) / lifeTotal[q.id]) : 0, n: lifeTotal[q.id] }))
+    .filter(g => g.n > 0)
+    .sort((x, y) => y.pct - x.pct);
+
   // ── Relationship feel: distribution of the reflection a0 answer (index 0-4) ──
   const feel = [0, 0, 0, 0, 0];
   (profiles || []).forEach(p => {
@@ -144,6 +164,7 @@ function buildResponseAggregates(profiles, sessions) {
     expLabels: RESPONSIBILITY_CATEGORIES.map(c => c.label),
     expAlign,
     relationshipFeel: feel,
+    lifeGaps,
     pairs: pairs.length,
   };
 }
