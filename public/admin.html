@@ -113,7 +113,7 @@
   .chart-head{padding:1.1rem 1.35rem .85rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
   .chart-title{font-size:.8rem;font-weight:700;color:var(--text)}
   .chart-subtitle{font-size:.68rem;color:var(--muted);margin-top:.15rem}
-  .tile-slicer{align-self:flex-start;max-width:160px;background:var(--surface);color:var(--muted);border:1px solid var(--border);border-radius:7px;font-size:.66rem;padding:.28rem .5rem;cursor:pointer;opacity:.7;font-family:inherit;transition:opacity .15s}
+  .tile-slicer{align-self:flex-start;min-width:74px;max-width:160px;background:var(--surface);color:var(--muted);border:1px solid var(--border);border-radius:7px;font-size:.66rem;padding:.28rem .5rem;cursor:pointer;opacity:.7;font-family:inherit;transition:opacity .15s}
   .tile-slicer:hover,.tile-slicer:focus{opacity:1;color:var(--text);outline:none}
   .tile-slicer.on{opacity:1;color:var(--accent,#6C7FFF);border-color:var(--accent,#6C7FFF)}
   .chart-body{padding:1.25rem}
@@ -239,10 +239,6 @@
       Dashboard
     </a>
     <div class="sb-section">Revenue</div>
-    <a class="sb-item" onclick="showPage('orders')">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
-      Orders
-    </a>
     <a class="sb-item" onclick="showPage('packages')">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
       Package Mix
@@ -251,14 +247,26 @@
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
       Promo Analytics
     </a>
-    <div class="sb-section">Users</div>
-    <a class="sb-item" onclick="showPage('demographics')">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-      Demographics
+    <a class="sb-item" onclick="showPage('orders')">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+      Orders
     </a>
+    <div class="sb-section">Analytics</div>
     <a class="sb-item" onclick="showPage('responses')">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
       Responses
+    </a>
+    <a class="sb-item" onclick="showPage('types')">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.22 4.22l2.12 2.12M17.66 17.66l2.12 2.12M2 12h3M19 12h3M4.22 19.78l2.12-2.12M17.66 6.34l2.12-2.12"/></svg>
+      Type Analytics
+    </a>
+    <a class="sb-item" onclick="showPage('explore'); window.__initExplore && window.__initExplore();">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><rect x="7" y="10" width="3" height="7"/><rect x="12" y="6" width="3" height="11"/><rect x="17" y="13" width="3" height="4"/></svg>
+      Explore
+    </a>
+    <a class="sb-item" onclick="showPage('demographics')">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      Demographics
     </a>
     <div class="sb-section">Feedback</div>
     <a class="sb-item" onclick="showPage('satisfaction')">
@@ -272,15 +280,6 @@
     <a class="sb-item" onclick="showPage('survey-explorer')">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
       Survey Explorer
-    </a>
-    <div class="sb-section">Analytics</div>
-    <a class="sb-item" onclick="showPage('types')">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.22 4.22l2.12 2.12M17.66 17.66l2.12 2.12M2 12h3M19 12h3M4.22 19.78l2.12-2.12M17.66 6.34l2.12-2.12"/></svg>
-      Type Analytics
-    </a>
-    <a class="sb-item" onclick="showPage('explore'); window.__initExplore && window.__initExplore();">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><rect x="7" y="10" width="3" height="7"/><rect x="12" y="6" width="3" height="11"/><rect x="17" y="13" width="3" height="4"/></svg>
-      Explore
     </a>
     <div class="sb-section">Demo</div>
     <a class="sb-item" onclick="showPage('ux-views')">
@@ -357,7 +356,7 @@
             <div class="chart-title">Revenue over time</div>
             <div class="chart-subtitle">Last 12 months</div>
           </div>
-          <select class="tile-slicer" id="slz-revenue" title="Cut this tile by a segment"></select>
+          <select class="tile-slicer" id="slz-revenue" title="Cut this tile by a segment"><option value="">Everyone</option></select>
         </div>
         <div class="chart-body"><canvas id="chart-revenue"></canvas></div>
       </div>
@@ -367,7 +366,7 @@
             <div class="chart-title">Package mix</div>
             <div class="chart-subtitle">Orders by package type</div>
           </div>
-          <select class="tile-slicer" id="slz-pkgmix" title="Cut this tile by a segment"></select>
+          <select class="tile-slicer" id="slz-pkgmix" title="Cut this tile by a segment"><option value="">Everyone</option></select>
         </div>
         <div class="chart-body"><canvas id="chart-pkg-mix"></canvas></div>
       </div>
@@ -377,7 +376,7 @@
             <div class="chart-title">Relationship length distribution</div>
             <div class="chart-subtitle">Anonymous demographic breakdown</div>
           </div>
-          <select class="tile-slicer" id="slz-ovrellen" title="Cut this tile by a segment"></select>
+          <select class="tile-slicer" id="slz-ovrellen" title="Cut this tile by a segment"><option value="">Everyone</option></select>
         </div>
         <div class="chart-body">
           <div class="insight-list" id="rellength-bars" style="margin-top:.5rem;"></div>
@@ -389,7 +388,7 @@
             <div class="chart-title">How couples found Attune</div>
             <div class="chart-subtitle">Acquisition source</div>
           </div>
-          <select class="tile-slicer" id="slz-source" title="Cut this tile by a segment"></select>
+          <select class="tile-slicer" id="slz-source" title="Cut this tile by a segment"><option value="">Everyone</option></select>
         </div>
         <div class="chart-body"><canvas id="chart-source"></canvas></div>
       </div>
@@ -459,7 +458,7 @@
     </div>
 
     <div class="chart-card" style="margin-top:1.25rem">
-      <div class="chart-head"><div><div class="chart-title">Order volume by geography</div><div class="chart-subtitle">By US state, from shipping or billing location. Orders outside the US are grouped as one segment.</div></div><select class="tile-slicer" id="slz-geo" title="Cut this tile by a segment"></select></div>
+      <div class="chart-head"><div><div class="chart-title">Order volume by geography</div><div class="chart-subtitle">By US state, from shipping or billing location. Orders outside the US are grouped as one segment.</div></div><select class="tile-slicer" id="slz-geo" title="Cut this tile by a segment"><option value="">Everyone</option></select></div>
       <div class="chart-body"><div id="geo-breakdown"></div></div>
     </div>
   </div>
@@ -480,15 +479,15 @@
       <div class="kpi-card green"><div class="kpi-label">Premium</div><div class="kpi-val" id="pkgkpi-premium">—</div><div class="kpi-sub" id="pkgkpi-premium-sub">Share of orders</div></div>
     </div>
     <div class="chart-card">
-      <div class="chart-head"><div><div class="chart-title">Package split over time</div><div class="chart-subtitle">Stacked by month</div></div><select class="tile-slicer" id="slz-pkgtrend" title="Cut this tile by a segment"></select></div>
+      <div class="chart-head"><div><div class="chart-title">Package split over time</div><div class="chart-subtitle">Stacked by month</div></div><select class="tile-slicer" id="slz-pkgtrend" title="Cut this tile by a segment"><option value="">Everyone</option></select></div>
       <div class="chart-body"><canvas id="chart-pkg-stacked"></canvas></div>
     </div>
     <div class="chart-card" style="margin-top:1.25rem">
-      <div class="chart-head"><div><div class="chart-title">Revenue contribution by package</div><div class="chart-subtitle">Last 12 months</div></div><select class="tile-slicer" id="slz-revpkg" title="Cut this tile by a segment"></select></div>
+      <div class="chart-head"><div><div class="chart-title">Revenue contribution by package</div><div class="chart-subtitle">Last 12 months</div></div><select class="tile-slicer" id="slz-revpkg" title="Cut this tile by a segment"><option value="">Everyone</option></select></div>
       <div class="chart-body"><canvas id="chart-rev-pkg"></canvas></div>
     </div>
     <div class="chart-card" style="margin-top:1.25rem">
-      <div class="chart-head"><div><div class="chart-title">Add-on attachment by package</div><div class="chart-subtitle">Share of orders in each package that include each add-on</div></div><select class="tile-slicer" id="slz-addons" title="Cut this tile by a segment"></select></div>
+      <div class="chart-head"><div><div class="chart-title">Add-on attachment by package</div><div class="chart-subtitle">Share of orders in each package that include each add-on</div></div><select class="tile-slicer" id="slz-addons" title="Cut this tile by a segment"><option value="">Everyone</option></select></div>
       <div class="chart-body"><div style="height:260px;position:relative;"><canvas id="chart-pkg-addons"></canvas></div></div>
     </div>
   </div>
@@ -507,27 +506,27 @@
     </div>
     <div class="chart-grid three">
       <div class="chart-card">
-        <div class="chart-head"><div><div class="chart-title">Age range</div><div class="chart-subtitle">n=—</div></div><select class="tile-slicer" id="slz-age" title="Cut this tile by a segment"></select></div>
+        <div class="chart-head"><div><div class="chart-title">Age range</div><div class="chart-subtitle">n=—</div></div><select class="tile-slicer" id="slz-age" title="Cut this tile by a segment"><option value="">Everyone</option></select></div>
         <div class="chart-body"><canvas id="chart-age"></canvas></div>
       </div>
       <div class="chart-card">
-        <div class="chart-head"><div><div class="chart-title">Gender</div><div class="chart-subtitle">n=—</div></div><select class="tile-slicer" id="slz-gender" title="Cut this tile by a segment"></select></div>
+        <div class="chart-head"><div><div class="chart-title">Gender</div><div class="chart-subtitle">n=—</div></div><select class="tile-slicer" id="slz-gender" title="Cut this tile by a segment"><option value="">Everyone</option></select></div>
         <div class="chart-body"><canvas id="chart-gender"></canvas></div>
       </div>
       <div class="chart-card">
-        <div class="chart-head"><div><div class="chart-title">Relationship status</div><div class="chart-subtitle">n=—</div></div><select class="tile-slicer" id="slz-relstatus" title="Cut this tile by a segment"></select></div>
+        <div class="chart-head"><div><div class="chart-title">Relationship status</div><div class="chart-subtitle">n=—</div></div><select class="tile-slicer" id="slz-relstatus" title="Cut this tile by a segment"><option value="">Everyone</option></select></div>
         <div class="chart-body"><canvas id="chart-relstatus"></canvas></div>
       </div>
     </div>
     <div class="chart-grid">
       <div class="chart-card">
-        <div class="chart-head"><div><div class="chart-title">Length of relationship</div></div><select class="tile-slicer" id="slz-demorellen" title="Cut this tile by a segment"></select></div>
+        <div class="chart-head"><div><div class="chart-title">Length of relationship</div></div><select class="tile-slicer" id="slz-demorellen" title="Cut this tile by a segment"><option value="">Everyone</option></select></div>
         <div class="chart-body">
           <div class="insight-list" id="demo-rellength-bars" style="margin-top:.5rem;"></div>
         </div>
       </div>
       <div class="chart-card">
-        <div class="chart-head"><div><div class="chart-title">Children together</div><div class="chart-subtitle">n=—</div></div><select class="tile-slicer" id="slz-children" title="Cut this tile by a segment"></select></div>
+        <div class="chart-head"><div><div class="chart-title">Children together</div><div class="chart-subtitle">n=—</div></div><select class="tile-slicer" id="slz-children" title="Cut this tile by a segment"><option value="">Everyone</option></select></div>
         <div class="chart-body"><canvas id="chart-children"></canvas></div>
       </div>
     </div>
@@ -553,7 +552,7 @@
     <div id="resp-comm">
       <div class="chart-grid">
         <div class="chart-card">
-          <div class="chart-head"><div><div class="chart-title">Avg alignment score by dimension</div><div class="chart-subtitle">Communication exercise · 10 dimensions</div></div><select class="tile-slicer" id="slz-rdim" title="Cut this tile by a couple-level segment"></select></div>
+          <div class="chart-head"><div><div class="chart-title">Avg alignment score by dimension</div><div class="chart-subtitle">Communication exercise · 10 dimensions</div></div><select class="tile-slicer" id="slz-rdim" title="Cut this tile by a couple-level segment"><option value="">Everyone</option></select></div>
           <div class="chart-body"><canvas id="chart-dim-scores"></canvas></div>
         </div>
         <div class="chart-card">
@@ -569,11 +568,11 @@
     <div id="resp-exp" style="display:none">
       <div class="chart-grid">
         <div class="chart-card">
-          <div class="chart-head"><div><div class="chart-title">Responsibilities</div><div class="chart-subtitle">Who handles what · % of couples aligned per area</div></div><select class="tile-slicer" id="slz-rexp" title="Cut this tile by a couple-level segment"></select></div>
+          <div class="chart-head"><div><div class="chart-title">Responsibilities</div><div class="chart-subtitle">Who handles what · % of couples aligned per area</div></div><select class="tile-slicer" id="slz-rexp" title="Cut this tile by a couple-level segment"><option value="">Everyone</option></select></div>
           <div class="chart-body"><canvas id="chart-exp-align"></canvas></div>
         </div>
         <div class="chart-card">
-          <div class="chart-head"><div><div class="chart-title">Life &amp; Values</div><div class="chart-subtitle">The big questions · where couples most often differ</div></div><select class="tile-slicer" id="slz-rgap" title="Cut this tile by a couple-level segment"></select></div>
+          <div class="chart-head"><div><div class="chart-title">Life &amp; Values</div><div class="chart-subtitle">The big questions · where couples most often differ</div></div><select class="tile-slicer" id="slz-rgap" title="Cut this tile by a couple-level segment"><option value="">Everyone</option></select></div>
           <div class="chart-body">
             <div class="insight-list" id="exp-gap-bars" style="margin-top:.5rem;"></div>
           </div>
@@ -591,7 +590,7 @@
       </div>
       <div class="chart-grid">
         <div class="chart-card">
-          <div class="chart-head"><div><div class="chart-title">Overall relationship feel distribution</div><div class="chart-subtitle">Combined avg score per couple</div></div><select class="tile-slicer" id="slz-rfeel" title="Cut this tile by a couple-level segment"></select></div>
+          <div class="chart-head"><div><div class="chart-title">Overall relationship feel distribution</div><div class="chart-subtitle">Combined avg score per couple</div></div><select class="tile-slicer" id="slz-rfeel" title="Cut this tile by a couple-level segment"><option value="">Everyone</option></select></div>
           <div class="chart-body"><canvas id="chart-story-feel"></canvas></div>
         </div>
         <div class="chart-card">
@@ -635,16 +634,16 @@
     </div>
     <div class="chart-grid">
       <div class="chart-card">
-        <div class="chart-head"><div><div class="chart-title">Completion funnel</div><div class="chart-subtitle">Ordered → Started → Both done → Results viewed</div></div><select class="tile-slicer" id="slz-sfunnel" title="Cut this tile by a couple-level segment"></select></div>
+        <div class="chart-head"><div><div class="chart-title">Completion funnel</div><div class="chart-subtitle">Ordered → Started → Both done → Results viewed</div></div><select class="tile-slicer" id="slz-sfunnel" title="Cut this tile by a couple-level segment"><option value="">Everyone</option></select></div>
         <div class="chart-body"><canvas id="chart-funnel"></canvas></div>
       </div>
       <div class="chart-card">
-        <div class="chart-head"><div><div class="chart-title">Rating distribution</div><div class="chart-subtitle">Post-completion survey</div></div><select class="tile-slicer" id="slz-srate" title="Cut this tile by a segment"></select></div>
+        <div class="chart-head"><div><div class="chart-title">Rating distribution</div><div class="chart-subtitle">Post-completion survey</div></div><select class="tile-slicer" id="slz-srate" title="Cut this tile by a segment"><option value="">Everyone</option></select></div>
         <div class="chart-body"><canvas id="chart-ratings"></canvas></div>
       </div>
     </div>
     <div class="chart-card" style="margin-top:1.25rem">
-      <div class="chart-head"><div><div class="chart-title">NPS trend</div><div class="chart-subtitle">Monthly Net Promoter Score</div></div><select class="tile-slicer" id="slz-snps" title="Cut this tile by a segment"></select></div>
+      <div class="chart-head"><div><div class="chart-title">NPS trend</div><div class="chart-subtitle">Monthly Net Promoter Score</div></div><select class="tile-slicer" id="slz-snps" title="Cut this tile by a segment"><option value="">Everyone</option></select></div>
       <div class="chart-body"><canvas id="chart-nps"></canvas></div>
     </div>
   </div>
@@ -1229,13 +1228,13 @@ window.adminAuthHeaders = function(extra){
     <!-- Couple type distribution -->
     <div class="chart-grid">
       <div class="chart-card">
-        <div class="chart-card-header" style="display:flex;justify-content:space-between;align-items:flex-start;gap:.75rem"><div><div class="chart-card-title">Couple type distribution</div><div class="chart-card-sub">All 10 pairings, computed from both partners' answers</div></div><select class="tile-slicer" id="slz-tcouple" title="Cut this tile by a segment"></select></div>
+        <div class="chart-card-header" style="display:flex;justify-content:space-between;align-items:flex-start;gap:.75rem"><div><div class="chart-card-title">Couple type distribution</div><div class="chart-card-sub">All 10 pairings, computed from both partners' answers</div></div><select class="tile-slicer" id="slz-tcouple" title="Cut this tile by a segment"><option value="">Everyone</option></select></div>
         <div id="types-ct-bars" style="display:flex;flex-direction:column;gap:.55rem;padding:.25rem 1.4rem 1rem;">
           <div style="color:var(--muted);font-size:.78rem;">Loading…</div>
         </div>
       </div>
       <div class="chart-card">
-        <div class="chart-card-header" style="display:flex;justify-content:space-between;align-items:flex-start;gap:.75rem"><div><div class="chart-card-title">Individual type distribution</div><div class="chart-card-sub">W / X / Y / Z across all typed individuals</div></div><select class="tile-slicer" id="slz-tindiv" title="Cut this tile by a segment"></select></div>
+        <div class="chart-card-header" style="display:flex;justify-content:space-between;align-items:flex-start;gap:.75rem"><div><div class="chart-card-title">Individual type distribution</div><div class="chart-card-sub">W / X / Y / Z across all typed individuals</div></div><select class="tile-slicer" id="slz-tindiv" title="Cut this tile by a segment"><option value="">Everyone</option></select></div>
         <canvas id="types-indiv-chart" height="220"></canvas>
       </div>
     </div>
@@ -1243,12 +1242,12 @@ window.adminAuthHeaders = function(extra){
     <!-- Axis distributions: split summary + score histogram per axis -->
     <div class="chart-grid">
       <div class="chart-card">
-        <div class="chart-card-header" style="display:flex;justify-content:space-between;align-items:flex-start;gap:.75rem"><div><div class="chart-card-title">Engage / Withdraw</div><div class="chart-card-sub">Top bar: share of individuals on each side of the 3.0 line. Chart: how individual scores spread across the 1–5 axis (left = engage, right = withdraw).</div></div><select class="tile-slicer" id="slz-teng" title="Cut this tile by a segment"></select></div>
+        <div class="chart-card-header" style="display:flex;justify-content:space-between;align-items:flex-start;gap:.75rem"><div><div class="chart-card-title">Engage / Withdraw</div><div class="chart-card-sub">Top bar: share of individuals on each side of the 3.0 line. Chart: how individual scores spread across the 1–5 axis (left = engage, right = withdraw).</div></div><select class="tile-slicer" id="slz-teng" title="Cut this tile by a segment"><option value="">Everyone</option></select></div>
         <div id="types-w-split" style="padding:.6rem 1.4rem 0;"></div>
         <div style="padding:.5rem 1.4rem 1rem;"><canvas id="types-whist-chart" height="180"></canvas></div>
       </div>
       <div class="chart-card">
-        <div class="chart-card-header" style="display:flex;justify-content:space-between;align-items:flex-start;gap:.75rem"><div><div class="chart-card-title">Open / Guarded</div><div class="chart-card-sub">Top bar: share of individuals on each side of the 3.0 line. Chart: how individual scores spread across the 1–5 axis (left = guarded, right = open).</div></div><select class="tile-slicer" id="slz-topen" title="Cut this tile by a segment"></select></div>
+        <div class="chart-card-header" style="display:flex;justify-content:space-between;align-items:flex-start;gap:.75rem"><div><div class="chart-card-title">Open / Guarded</div><div class="chart-card-sub">Top bar: share of individuals on each side of the 3.0 line. Chart: how individual scores spread across the 1–5 axis (left = guarded, right = open).</div></div><select class="tile-slicer" id="slz-topen" title="Cut this tile by a segment"><option value="">Everyone</option></select></div>
         <div id="types-o-split" style="padding:.6rem 1.4rem 0;"></div>
         <div style="padding:.5rem 1.4rem 1rem;"><canvas id="types-ohist-chart" height="180"></canvas></div>
       </div>
@@ -1371,7 +1370,7 @@ window.adminAuthHeaders = function(extra){
     </div>
 
     <div class="chart-card" style="margin-top:1rem;">
-      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:.75rem"><div><div class="chart-title">Discount size distribution</div><div class="chart-sub">Count of code-redeeming orders by discount size</div></div><select class="tile-slicer" id="slz-pdisc" title="Cut this tile by a segment"></select></div>
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:.75rem"><div><div class="chart-title">Discount size distribution</div><div class="chart-sub">Count of code-redeeming orders by discount size</div></div><select class="tile-slicer" id="slz-pdisc" title="Cut this tile by a segment"><option value="">Everyone</option></select></div>
       <div style="height:240px;position:relative;"><canvas id="pr-discount-chart"></canvas></div>
     </div>
 
@@ -2305,6 +2304,7 @@ function showPage(id) {
   if (id==='beta-codes') loadBetaCodes();
   if (id==='promos') renderPromosPage();
   if (id==='explore' && window.__initExplore) window.__initExplore();
+  if (typeof initAllSlicers === 'function') initAllSlicers();
 }
 
 // Restore the page named in the URL hash on load, so a refresh stays put.
@@ -3838,7 +3838,7 @@ async function initAllSlicers(){
   Object.keys(SLICER_CFG).forEach(id=>{
     const sel=document.getElementById(id); if(!sel) return;
     const cfg=SLICER_CFG[id];
-    populateSlicer(sel, cfg.ex||null, cube.rows||[], cfg.only);
+    try { populateSlicer(sel, cfg.ex||null, cube.rows||[], cfg.only); } catch(e){}
   });
 }
 function setTileN(el, n){
@@ -4121,7 +4121,10 @@ async function renderQuestionExplorer(containerId, groupPrefixes, highPrefixes) 
       const w = n ? Math.round(cnt / n * 100) : 0;
       const color = f.kind === 'scale' ? QX_SCALE_COLORS[idx] : QX_CAT_COLORS[idx % QX_CAT_COLORS.length];
       const lbl = f.kind === 'scale' ? qxCatLabel(f, c) : (optLabel[c] || c);
-      return '<div title="' + QX_ESC(lbl) + ': ' + cnt + '" style="width:' + w + '%;background:' + color + ';height:100%;"></div>';
+      const tip = f.kind === 'scale'
+        ? ('Score ' + c + ' · ' + w + '% of respondents (' + cnt + ' of ' + n + ')')
+        : ((optLabel[c] || c) + ' · ' + w + '% of respondents (' + cnt + ' of ' + n + ')');
+      return '<div title="' + QX_ESC(tip) + '" style="width:' + w + '%;background:' + color + ';height:100%;"></div>';
     }).join('');
 
     const header = '<div style="font-size:.74rem;color:var(--text);margin-bottom:.3rem;line-height:1.35;">' + QX_ESC(f.label) + ' <span style="color:var(--dim);font-family:var(--mono);font-size:.66rem;">n=' + n + '</span></div>';
@@ -4131,10 +4134,10 @@ async function renderQuestionExplorer(containerId, groupPrefixes, highPrefixes) 
       // Pole labels either side of the bar (what 1 and 5 mean for THIS question).
       const lo = QX_ESC(f.poleLow || 'low'), hi = QX_ESC(f.poleHigh || 'high');
       return '<div style="margin-bottom:.95rem;">' + header +
-        '<div style="display:flex;align-items:center;gap:.5rem;">' +
-          '<span style="flex:0 0 auto;max-width:34%;font-size:.62rem;font-style:italic;color:var(--dim);text-align:right;line-height:1.2;">1 · ' + lo + '</span>' +
-          '<div style="flex:1;">' + barRow + '</div>' +
-          '<span style="flex:0 0 auto;max-width:34%;font-size:.62rem;font-style:italic;color:var(--dim);line-height:1.2;">5 · ' + hi + '</span>' +
+        '<div style="display:flex;align-items:center;gap:.6rem;">' +
+          '<span style="flex:0 0 122px;font-size:.62rem;font-style:italic;color:var(--dim);text-align:right;line-height:1.2;">1 · ' + lo + '</span>' +
+          '<div style="flex:1 1 auto;min-width:0;">' + barRow + '</div>' +
+          '<span style="flex:0 0 122px;font-size:.62rem;font-style:italic;color:var(--dim);text-align:left;line-height:1.2;">5 · ' + hi + '</span>' +
         '</div></div>';
     }
 

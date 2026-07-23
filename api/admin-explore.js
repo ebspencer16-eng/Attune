@@ -33,6 +33,18 @@ const json = (obj, status = 200) =>
     headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
   });
 
+const DIM_POLES = {
+  energy:     ['Independent', 'Togetherness'],
+  expression: ['Keeps it in', 'Shares openly'],
+  love:       ['Words', 'Acts & presence'],
+  listening:  ['Sits with it', 'Engages & reflects'],
+  bids:       ["Doesn't track bids", 'Small moments matter'],
+  needs:      ['Names needs directly', 'Wants to be noticed'],
+  conflict:   ['Address right away', 'Needs space first'],
+  stress:     ['Pulls inward', 'Leans on partner'],
+  repair:     ['Repairs quickly', 'Repairs when ready'],
+  feedback:   ['Gentle approach', 'Direct & specific'],
+};
 const DIM_LABELS = {
   energy: 'Energy', expression: 'Expression', love: 'Love', listening: 'Listening',
   bids: 'Bids', needs: 'Needs', conflict: 'Conflict', stress: 'Stress',
@@ -185,7 +197,7 @@ function buildCatalog(fbCatOptions) {
   f.push({ key: 'pkg', label: 'Package', group: 'Package & cohort', kind: 'cat',
     options: [['core', 'Core'], ['newlywed', 'Newlywed'], ['anniversary', 'Anniversary'], ['premium', 'Premium']].map(([v, label]) => ({ v, label })) });
   for (const k of DEMO_KEYS) f.push({ key: k, label: DEMO_LABELS[k], group: 'Demographics', kind: 'cat', partnerable: true });
-  for (const dim of Object.keys(DIM_KEYS)) f.push({ key: 'dim_' + dim, label: DIM_LABELS[dim] || dim, group: 'Dimensions (score 1–5)', kind: 'scale', partnerable: true });
+  for (const dim of Object.keys(DIM_KEYS)) f.push({ key: 'dim_' + dim, label: DIM_LABELS[dim] || dim, group: 'Dimensions (score 1–5)', kind: 'scale', poleLow: (DIM_POLES[dim]||[])[0], poleHigh: (DIM_POLES[dim]||[])[1], partnerable: true });
   for (const q of PERSONALITY_QUESTIONS) f.push({ key: 'q_' + q.id, label: q.text, group: 'Ex1 · Communication (1–5)', kind: 'scale', poleLow: shortPole(q.a), poleHigh: shortPole(q.b), partnerable: true });
   for (const lq of LIFE_QUESTIONS) f.push({ key: lq.id, label: (lq.category ? lq.category + ' · ' : '') + genericLabel(lq.text), group: 'Ex2 · Life & values', kind: 'cat', options: (lq.options || []).map((v) => ({ v, label: v })), partnerable: true });
   for (const cat of RESPONSIBILITY_CATEGORIES) {
