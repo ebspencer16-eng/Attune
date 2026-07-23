@@ -149,8 +149,6 @@ function buildCatalog() {
   f.push({ key: 'couple_type', label: 'Couple type', group: 'Type & axes', kind: 'cat' });
   f.push({ key: 'pkg', label: 'Package', group: 'Package & cohort', kind: 'cat',
     options: [['core', 'Core'], ['newlywed', 'Newlywed'], ['anniversary', 'Anniversary'], ['premium', 'Premium']].map(([v, label]) => ({ v, label })) });
-  f.push({ key: 'role', label: 'Partner A / B (acquisition)', group: 'Package & cohort', kind: 'cat',
-    options: [{ v: 'A', label: 'A (purchaser)' }, { v: 'B', label: 'B (invited)' }] });
   for (const k of DEMO_KEYS) f.push({ key: k, label: DEMO_LABELS[k], group: 'Demographics', kind: 'cat', partnerable: true });
   for (const dim of Object.keys(DIM_KEYS)) f.push({ key: 'dim_' + dim, label: DIM_LABELS[dim] || dim, group: 'Dimensions (score 1–5)', kind: 'scale', partnerable: true });
   for (const q of PERSONALITY_QUESTIONS) f.push({ key: 'q_' + q.id, label: q.text, group: 'Ex1 · Communication (1–5)', kind: 'scale', poleLow: shortPole(q.a), poleHigh: shortPole(q.b), partnerable: true });
