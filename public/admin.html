@@ -4131,11 +4131,14 @@ async function renderQuestionExplorer(containerId, groupPrefixes, highPrefixes) 
     const counts = {}; let n = 0;
     rows.forEach(r => { let v = r[f.key]; if (v === null || v === undefined || v === '') return; if (f.kind === 'scale') v = String(Math.round(v)); counts[v] = (counts[v] || 0) + 1; n++; });
     const cats = f.kind === 'scale' ? ['1','2','3','4','5'] : (f.options ? f.options.map(o => o.v) : Object.keys(counts));
+    // Categorical options also use a monochrome gradient of the exercise hue
+    // (light->dark across the options); the colour key below maps shade->label.
+    const CAT_RAMP = hexRamp(QX_THEME[containerId] || '#6C7FFF', Math.max(cats.length, 2));
     const optLabel = {}; (f.options || []).forEach(o => optLabel[o.v] = o.label);
     const segs = cats.map((c, idx) => {
       const cnt = counts[c] || 0; if (!cnt) return '';
       const w = n ? Math.round(cnt / n * 100) : 0;
-      const color = f.kind === 'scale' ? SCALE_RAMP[idx] : QX_CAT_COLORS[idx % QX_CAT_COLORS.length];
+      const color = f.kind === 'scale' ? SCALE_RAMP[idx] : CAT_RAMP[idx];
       const lbl = f.kind === 'scale' ? qxCatLabel(f, c) : (optLabel[c] || c);
       const tip = f.kind === 'scale'
         ? ('Score ' + c + ' · ' + w + '% of respondents (' + cnt + ' of ' + n + ')')
@@ -4162,7 +4165,7 @@ async function renderQuestionExplorer(containerId, groupPrefixes, highPrefixes) 
     const fullKey = present.map((c, i) => (optLabel[c] || c)).join('   ·   ');
     const keyInline = present.map((c) => {
       const idx = cats.indexOf(c);
-      const color = QX_CAT_COLORS[idx % QX_CAT_COLORS.length];
+      const color = CAT_RAMP[idx];
       return '<span style="display:inline-flex;align-items:center;gap:.25rem;flex:0 0 auto;">' +
         '<span style="width:8px;height:8px;border-radius:2px;background:' + color + ';flex:0 0 auto;"></span>' +
         TRUNC(QX_ESC(optLabel[c] || c), 22) + '</span>';
