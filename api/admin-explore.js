@@ -18,6 +18,14 @@
 import { createClient } from '@supabase/supabase-js';
 import { checkAdminAuth } from './_lib/admin-auth.js';
 import { calcDimScores, axisScores, typeCodeFromAxes, DIM_KEYS } from './_type-engine.js';
+// Individual type from raw ex1 answers (for invited partners who answered via a
+// partner_session and never created a full profile).
+function typeFromEx1(ans){
+  const sc = calcDimScores(ans);
+  if (!sc || !Object.keys(sc).length) return null;
+  const { withdrawScore, openScore } = axisScores(sc);
+  return typeCodeFromAxes(withdrawScore, openScore);
+}
 import { PERSONALITY_QUESTIONS, LIFE_QUESTIONS, RESPONSIBILITY_CATEGORIES } from './_questions.js';
 import { REFLECTION_QUESTIONS } from './_anniversary-questions.js';
 import { INTIMACY_QUESTIONS } from './_intimacy-questions.js';
@@ -235,6 +243,13 @@ export default async function handler(req) {
     const { data: profiles = [], error } = await admin.from('profiles').select('*');
     if (error) return json({ error: error.message }, 500);
     const profileById = {}; for (const p of profiles) profileById[p.id] = p;
+    // Invited partners answer via partner_sessions (keyed by invite_code) and may
+    // never create a full profile. Pull them so a couple isn't shown as unpaired
+    // just because one half came in through an invite.
+    let partnerSessions = [];
+    try { const _ps = await admin.from('partner_sessions').select('invite_code, ex1_answers'); partnerSessions = _ps.data || []; } catch (e) {}
+    const sessByInvite = new Map();
+    for (const sx of partnerSessions) { if (sx && sx.invite_code && sx.ex1_answers) sessByInvite.set(sx.invite_code, sx); }
 
     // Beta survey responses, keyed by respondent profile id, for the join below.
     const surveyByRespondent = {};
@@ -274,11 +289,19 @@ export default async function handler(req) {
       if (!own) continue;
       const partnerId = p.partner_profile_id || null;
       const partner = partnerId ? computed[partnerId] : null;
+      // Fall back to the invited partner's session answers when there's no
+      // profile-to-profile link, so the couple is still paired and typed.
+      let partnerType = partner ? partner.type : null;
+      let coupleKey = partnerId;
+      if (!partner && p.invite_code && sessByInvite.has(p.invite_code)) {
+        const st = typeFromEx1(sessByInvite.get(p.invite_code).ex1_answers);
+        if (st) { partnerType = st; coupleKey = 'inv:' + p.invite_code; }
+      }
       const row = {
         ...own,
         role: p.joined_via_invite ? 'B' : 'A',
-        couple_id: partner ? coupleHash(p.id, partnerId) : null,
-        couple_type: partner ? [own.type, partner.type].sort().join('') : null,
+        couple_id: partnerType ? coupleHash(p.id, coupleKey) : null,
+        couple_type: partnerType ? [own.type, partnerType].sort().join('') : null,
       };
       if (partner) for (const k of PARTNERABLE) row['p_' + k] = partner[k];
       // Gender fallback: each partner records the other's pronouns, so a person
