@@ -3074,6 +3074,7 @@ async function loadRealData() {
   try {
     // Fetch real orders via the service-role admin endpoint
     const adminData = await fetchAdminData();
+    try { if (adminData && Array.isArray(adminData.beta_codes)) { const _m={}; adminData.beta_codes.forEach(c=>{ _m[(c.code||'').toUpperCase()]=c; }); window.__codeByName = _m; } } catch {}
     if (adminData && Array.isArray(adminData.orders)) {
       const realOrders = adminData.orders;
       if (realOrders.length > 0) {
@@ -3820,9 +3821,18 @@ function renderOrdersTable(rows) {
       <td><span class="pkg-tag" style="background:${pkgColors[o.pkg]}22;color:${pkgColors[o.pkg]}">${pkgNames[o.pkg]}</span></td>
       <td style="font-family:var(--mono);color:var(--text)">$${o.price}</td>
       <td>${o.coupleType ? `<span style="font-family:var(--mono);font-size:.7rem;background:rgba(27,37,71,0.06);padding:.15rem .45rem;border-radius:4px" title="${o.coupleType.name||''}">${o.coupleType.id||'—'}</span>` : '<span style="color:var(--muted)">—</span>'}</td>
-      <td>${o.promo?'<span class="pill green">10% off</span>':'-'}</td>
+      <td>${promoCell(o)}</td>
       <td><span class="pill green">Complete</span></td>
     </tr>`).join('');
+}
+function promoCell(o){
+  if(!o.promo) return '-';
+  const code=String(o.promo);
+  const c=(window.__codeByName||{})[code.toUpperCase()];
+  let disc='';
+  if(c){ const m=c.discount_mode||'free'; disc = m==='free' ? '100% off' : (m==='fixed' ? ('$'+(Number(c.discount_value)||0)+' off') : ((Number(c.discount_value)||0)+'% off')); }
+  else if((Number(o.price)||0)===0) disc='100% off';
+  return '<span class="pill green">'+QX_ESC(code)+'</span>'+(disc?' <span style="color:var(--muted);font-size:.66rem;">'+disc+'</span>':'');
 }
 function filterOrders(sel) { applyOrderFilters(); }
 
