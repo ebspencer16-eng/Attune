@@ -13675,12 +13675,17 @@ export default function App() {
     // the buyer fetches the invitee's data and vice versa, so either side can
     // open the merged results. Skip only if we already hold the partner's
     // real data, or there's no account yet.
-    if (!account?.id || hasRealPartner) return;
+    // Keep polling past hasRealPartner when the couple owns the intimacy add-on
+    // but the partner's intimacy hasn't synced yet. Intimacy is completed AFTER
+    // ex1/ex2, so exiting at hasRealPartner strands the gate on the partner-
+    // intimacy check until a manual reload.
+    const _needPartnerIntimacy = !!(order?.addonIntimacy) && !(partnerSession?.intimacy?.completedAt);
+    if (!account?.id || (hasRealPartner && !_needPartnerIntimacy)) return;
     let cancelled = false;
     let isFirst = true;
 
     const poll = async () => {
-      if (isFirst) setPartnerSyncing(true);
+      if (isFirst && !hasRealPartner) setPartnerSyncing(true);
       try {
         const { supabase: sb, hasSupabase } = await import('./supabase.js');
         if (!hasSupabase()) return;
@@ -13759,7 +13764,7 @@ export default function App() {
     poll(); // immediate check on mount
     const interval = setInterval(poll, 15000); // then every 15s
     return () => { cancelled = true; clearInterval(interval); };
-  }, [account?.id, account?.joinedViaInvite, hasRealPartner]);
+  }, [account?.id, account?.joinedViaInvite, hasRealPartner, order?.addonIntimacy, partnerSession?.intimacy?.completedAt]);
 
   // ── 6-month check-in email ───────────────────────────────────────────────
   // Fires once, client-side, when the user returns 6+ months after signup.
