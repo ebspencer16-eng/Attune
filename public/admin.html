@@ -442,7 +442,17 @@
         onfocus="this.style.borderColor='var(--orange)'" onblur="this.style.borderColor='var(--border)'"/>
       <span id="orders-count-label" style="font-size:.72rem;color:var(--muted);margin-left:auto;font-family:var(--mono);"></span>
     </div>
-    <div class="chart-card">
+    <div class="chart-grid">
+      <div class="chart-card">
+        <div class="chart-head"><div><div class="chart-title">Completion funnel</div><div class="chart-subtitle">Ordered → Started → Both done → Results viewed · drop-off: <span id="orders-dropoff">—</span></div></div><select class="tile-slicer" id="slz-sfunnel" title="Cut this tile by a couple-level segment"><option value="">Everyone</option></select></div>
+        <div class="chart-body"><canvas id="chart-funnel"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-head"><div><div class="chart-title">Order volume by geography</div><div class="chart-subtitle">By US state, from shipping or billing location. Orders outside the US are grouped as one segment.</div></div><select class="tile-slicer" id="slz-geo" title="Cut this tile by a segment"><option value="">Everyone</option></select></div>
+        <div class="chart-body"><div id="geo-breakdown"></div></div>
+      </div>
+    </div>
+    <div class="chart-card" style="margin-top:1.25rem">
       <div class="table-wrap">
         <table class="response-table" id="orders-table">
           <thead>
@@ -459,11 +469,6 @@
           <tbody id="orders-tbody"></tbody>
         </table>
       </div>
-    </div>
-
-    <div class="chart-card" style="margin-top:1.25rem">
-      <div class="chart-head"><div><div class="chart-title">Order volume by geography</div><div class="chart-subtitle">By US state, from shipping or billing location. Orders outside the US are grouped as one segment.</div></div><select class="tile-slicer" id="slz-geo" title="Cut this tile by a segment"><option value="">Everyone</option></select></div>
-      <div class="chart-body"><div id="geo-breakdown"></div></div>
     </div>
   </div>
 
@@ -627,19 +632,19 @@
     <div class="topbar">
       <div>
         <div class="topbar-title">Satisfaction</div>
-        <div class="topbar-sub">Post-completion feedback and completion funnel</div>
+        <div class="topbar-sub">Post-completion feedback: NPS, ratings, and impact</div>
       </div>
     </div>
     <div class="kpi-grid" style="grid-template-columns:repeat(4,1fr);">
       <div class="kpi-card green"><div class="kpi-label">NPS score</div><div class="kpi-val">—</div><div class="kpi-sub">World-class benchmark: 50+</div></div>
       <div class="kpi-card green"><div class="kpi-label">Avg rating</div><div class="kpi-val">—</div><div class="kpi-sub">Post-completion survey</div></div>
       <div class="kpi-card indigo"><div class="kpi-label">Completion rate</div><div class="kpi-val" id="sat-completion">—</div><div class="kpi-sub">Both partners finish all exercises</div></div>
-      <div class="kpi-card amber"><div class="kpi-label">Drop-off point</div><div class="kpi-val">—</div><div class="kpi-sub">Most common incomplete step</div></div>
+      <div class="kpi-card green"><div class="kpi-label">Would recommend</div><div class="kpi-val" id="sat-recommend">—</div><div class="kpi-sub">Promoters (9–10 on NPS)</div></div>
     </div>
     <div class="chart-grid">
       <div class="chart-card">
-        <div class="chart-head"><div><div class="chart-title">Completion funnel</div><div class="chart-subtitle">Ordered → Started → Both done → Results viewed</div></div><select class="tile-slicer" id="slz-sfunnel" title="Cut this tile by a couple-level segment"><option value="">Everyone</option></select></div>
-        <div class="chart-body"><canvas id="chart-funnel"></canvas></div>
+        <div class="chart-head"><div><div class="chart-title">Led to a real conversation</div><div class="chart-subtitle">Did Attune spark a conversation between partners</div></div><select class="tile-slicer" id="slz-sconvo" title="Cut this tile by a segment"><option value="">Everyone</option></select></div>
+        <div class="chart-body"><canvas id="chart-convo"></canvas></div>
       </div>
       <div class="chart-card">
         <div class="chart-head"><div><div class="chart-title">Rating distribution</div><div class="chart-subtitle">Post-completion survey</div></div><select class="tile-slicer" id="slz-srate" title="Cut this tile by a segment"><option value="">Everyone</option></select></div>
@@ -3594,11 +3599,13 @@ async function loadRealAnalytics() {
         val.innerHTML = realAvgRating + '<span style="font-size:1rem;color:var(--muted)">/5</span>';
         if (sub) sub.textContent = 'n=' + realRatingN + ' returnLikelihood';
       }
-      if (label === 'Drop-off point' && realDropoffExercise && val) {
-        val.textContent = realDropoffExercise;
-        if (sub) sub.textContent = realDropoffExercise === 'None' ? 'Most couples completing' : 'Most incomplete at Exercise 2';
+      if (label === 'Would recommend' && realNpsDist && val) {
+        val.innerHTML = realNpsDist.promoters + '<span style="font-size:1rem;color:var(--muted)">%</span>';
+        if (sub) sub.textContent = 'Promoters · n=' + recentNps.length;
       }
     });
+    // Drop-off point now lives on the Orders page next to the completion funnel.
+    { const _de = document.getElementById('orders-dropoff'); if (_de) _de.textContent = realDropoffExercise ? (realDropoffExercise === 'None' ? 'none' : realDropoffExercise) : '—'; }
 
     // Force re-render if satisfaction page is currently open
     if (chartsInit.satisfaction) {
@@ -3946,7 +3953,7 @@ const SLICER_CFG={
   'slz-addons':{},'slz-geo':{},'slz-pdisc':{},
   'slz-tcouple':{ex:'couple_type'},'slz-rcouple':{ex:'couple_type'},'slz-tindiv':{ex:'type'},'slz-teng':{ex:'axisEngage'},'slz-topen':{ex:'axisOpen'},
   'slz-rdim':{only:COUPLE_LEVEL_DIMS},'slz-rexp':{only:COUPLE_LEVEL_DIMS},'slz-rgap':{only:COUPLE_LEVEL_DIMS},'slz-rfeel':{only:COUPLE_LEVEL_DIMS},'slz-ragree':{only:COUPLE_LEVEL_DIMS},
-  'slz-sfunnel':{only:COUPLE_LEVEL_DIMS},'slz-srate':{},'slz-snps':{},
+  'slz-sfunnel':{only:COUPLE_LEVEL_DIMS},'slz-srate':{},'slz-snps':{},'slz-sconvo':{},
 };
 async function initAllSlicers(){
   let cube; try{ cube=await ensureCube(); }catch(e){ return; }
@@ -4067,6 +4074,20 @@ async function renderSatFunnel(selId){
   const viewed=bothDone;
   setTileN(el, started);
   mkChart(el,{type:'bar',data:{labels:['Ordered','Started exercises','Both completed','Results viewed'],datasets:[{data:[ordered,started,bothDone,viewed],backgroundColor:hexRamp(DEMO_HUE,4).reverse(),borderRadius:6}]},options:{plugins:{legend:{display:false}},scales:{x:{grid:{display:false}},y:{grid:{color:'#E6ECF6'}}}}});
+}
+async function renderSatConvo(selId){
+  const el=document.getElementById('chart-convo'); if(!el) return;
+  let cube; try{ cube=await ensureCube(); }catch(e){ return; }
+  const sel=document.getElementById(selId);
+  if(sel){ populateSlicer(sel,null,cube.rows||[]); sel.classList.toggle('on',!!sel.value);
+    if(!sel.dataset.wired){ sel.dataset.wired='1'; sel.onchange=()=>renderSatConvo(selId); } }
+  const surveys=sliceFilter(cube.surveys||[], sel?sel.value:'').filter(x=>x.convo!=null && x.convo!=='');
+  setTileN(el, surveys.length);
+  const counts={}; surveys.forEach(x=>{ const v=String(x.convo); counts[v]=(counts[v]||0)+1; });
+  const labels=Object.keys(counts);
+  if(!labels.length){ mkChart(el,{type:'doughnut',data:{labels:['No responses yet'],datasets:[{data:[1],backgroundColor:['#E6ECF6'],borderColor:'#FFFFFF',borderWidth:3}]},options:{plugins:{legend:{display:false}},cutout:'62%'}}); return; }
+  const ramp=hexRamp('#22A5C4',Math.max(labels.length,2));
+  mkChart(el,{type:'doughnut',data:{labels,datasets:[{data:labels.map(l=>counts[l]),backgroundColor:labels.map((l,i)=>ramp[i]),borderColor:'#FFFFFF',borderWidth:3}]},options:{plugins:{legend:{position:'bottom',labels:{padding:12,boxWidth:11}}},cutout:'62%'}});
 }
 async function renderSatRatings(selId){
   const el=document.getElementById('chart-ratings'); if(!el) return;
@@ -4666,7 +4687,7 @@ function initCharts(page) {
     wireCubeTile({target:'rellength-bars',field:'relationship_length',mode:'insightbars',selId:'slz-ovrellen',color:'#6C7FFF'});
     wireCubeTile({target:'chart-source',field:'signup_source',mode:'hbar',selId:'slz-source',color:DEMO_HUE});
   }
-  else if (page==='orders') { applyOrderFilters(); }
+  else if (page==='orders') { applyOrderFilters(); renderSatFunnel('slz-sfunnel'); if (typeof renderGeography === 'function') renderGeography(); }
   else if (page==='fulfillment') {
     renderFulfillmentTable();
     const stats = getFulfillmentStats();
@@ -4723,7 +4744,7 @@ function initCharts(page) {
     renderQuestionExplorer('qx-intimacy', ['Physical Intimacy']);
   }
   else if (page==='satisfaction') {
-    renderSatFunnel('slz-sfunnel');
+    renderSatConvo('slz-sconvo');
     renderSatRatings('slz-srate');
     // NPS trend — use real-data month labels when available, fall back to rolling 12-month default
     renderSatNps('slz-snps');

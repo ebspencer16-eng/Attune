@@ -345,6 +345,7 @@ export default async function handler(req) {
       row.ts = payload._ts || null;
       const nps = parseInt(payload.nps, 10); row.nps = Number.isFinite(nps) ? nps : null;
       const rl = parseInt(payload.returnLikelihood, 10); row.returnLikelihood = Number.isFinite(rl) ? rl : null;
+      row.convo = payload.convoHappened != null && payload.convoHappened !== '' ? String(payload.convoHappened) : null;
       surveysAnon.push(row);
     }
     // Post-results survey (general couples) — same shape so NPS/ratings charts
@@ -362,6 +363,7 @@ export default async function handler(req) {
         row.ts = r.submitted_at || null;
         const nps = parseInt(a.nps, 10); row.nps = Number.isFinite(nps) ? nps : null;
         const rl = parseInt(a.rating, 10); row.returnLikelihood = Number.isFinite(rl) ? rl : null;
+        row.convo = a.convo != null && a.convo !== '' ? String(a.convo) : null;
         surveysAnon.push(row);
         // Testimonial entry (segment-tagged) for the admin Testimonials page.
         const t = { id: r.id, featured: !!r.featured, name: payload.userName || '', ts: r.submitted_at || null,
