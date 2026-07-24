@@ -413,6 +413,16 @@
         </button>
       </div>
     </div>
+    <div class="chart-grid">
+      <div class="chart-card">
+        <div class="chart-head"><div><div class="chart-title">Completion funnel</div><div class="chart-subtitle">Ordered → Started → Both done → Results viewed · drop-off: <span id="orders-dropoff">—</span></div></div><select class="tile-slicer" id="slz-sfunnel" title="Cut this tile by a couple-level segment"><option value="">Everyone</option></select></div>
+        <div class="chart-body"><canvas id="chart-funnel"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-head"><div><div class="chart-title">Order volume by geography</div><div class="chart-subtitle">By US state, from shipping or billing location. Orders outside the US are grouped as one segment.</div></div><select class="tile-slicer" id="slz-geo" title="Cut this tile by a segment"><option value="">Everyone</option></select></div>
+        <div class="chart-body"><div id="geo-breakdown"></div></div>
+      </div>
+    </div>
     <div class="filter-bar">
       <span class="filter-label">Filter:</span>
       <select class="filter-select" id="orders-pkg-filter" onchange="applyOrderFilters()">
@@ -441,16 +451,6 @@
         style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:.45rem .85rem;font-size:.75rem;color:var(--text);font-family:var(--bfont);outline:none;min-width:200px;transition:border-color .15s"
         onfocus="this.style.borderColor='var(--orange)'" onblur="this.style.borderColor='var(--border)'"/>
       <span id="orders-count-label" style="font-size:.72rem;color:var(--muted);margin-left:auto;font-family:var(--mono);"></span>
-    </div>
-    <div class="chart-grid">
-      <div class="chart-card">
-        <div class="chart-head"><div><div class="chart-title">Completion funnel</div><div class="chart-subtitle">Ordered → Started → Both done → Results viewed · drop-off: <span id="orders-dropoff">—</span></div></div><select class="tile-slicer" id="slz-sfunnel" title="Cut this tile by a couple-level segment"><option value="">Everyone</option></select></div>
-        <div class="chart-body"><canvas id="chart-funnel"></canvas></div>
-      </div>
-      <div class="chart-card">
-        <div class="chart-head"><div><div class="chart-title">Order volume by geography</div><div class="chart-subtitle">By US state, from shipping or billing location. Orders outside the US are grouped as one segment.</div></div><select class="tile-slicer" id="slz-geo" title="Cut this tile by a segment"><option value="">Everyone</option></select></div>
-        <div class="chart-body"><div id="geo-breakdown"></div></div>
-      </div>
     </div>
     <div class="chart-card" style="margin-top:1.25rem">
       <div class="table-wrap">
