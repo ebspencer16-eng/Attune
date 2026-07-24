@@ -13451,6 +13451,36 @@ export default function App() {
     }
   }, [order?.workbookUrl, order?.workbookStatus]);
 
+  // Intimacy self-heal (stale-tab / cross-device). If this couple owns the
+  // intimacy add-on but our local intimacy record is missing or incomplete,
+  // re-pull it from the server on mount AND whenever the tab regains focus.
+  // Without this, a tab left open across a deploy — or a device where intimacy
+  // was completed elsewhere — can sit on the "results locked" state until the
+  // user manually reloads. The server row is authoritative.
+  useEffect(() => {
+    if (!(order?.addonIntimacy) || !account?.id) return;
+    let cancelled = false;
+    const repull = async () => {
+      if (intimacyData?.completedAt) return; // already satisfied locally
+      try {
+        const { supabase: sb, hasSupabase } = await import('./supabase.js');
+        if (!hasSupabase()) return;
+        const { data: { session } } = await sb.auth.getSession();
+        if (!session) return;
+        const { data: prof } = await sb.from('profiles').select('intimacy_data').eq('id', account.id).maybeSingle();
+        if (!cancelled && prof?.intimacy_data?.completedAt) {
+          try { localStorage.setItem('attune_intimacy', JSON.stringify(prof.intimacy_data)); } catch {}
+          setIntimacyData(prof.intimacy_data);
+        }
+      } catch {}
+    };
+    repull();
+    const onVis = () => { if (document.visibilityState === 'visible') repull(); };
+    document.addEventListener('visibilitychange', onVis);
+    window.addEventListener('focus', onVis);
+    return () => { cancelled = true; document.removeEventListener('visibilitychange', onVis); window.removeEventListener('focus', onVis); };
+  }, [order?.addonIntimacy, account?.id, intimacyData?.completedAt]);
+
   // Download the finished workbook. The Step 3 tile used to call
   // setView("workbook"), which is the ADD-ON PURCHASE page, so owners who
   // already had a generated workbook were being pitched the thing they owned.
