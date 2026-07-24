@@ -947,6 +947,8 @@ async function postSurvey(data) {
 
 function showSuccess() {
   try { localStorage.removeItem(PENDING_KEY); } catch {}
+  // Clear the dashboard survey prompt (shared same-origin flag).
+  try { localStorage.setItem('attune_survey_done', '1'); } catch {}
   document.getElementById('formPage').style.display = 'none';
   const s = document.getElementById('successState');
   s.classList.add('show');

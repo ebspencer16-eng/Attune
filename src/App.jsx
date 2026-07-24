@@ -12412,7 +12412,7 @@ export default function App() {
   }, [view]);
   const [isBetaTester, setIsBetaTester] = useState(false);
   const [showPostSurvey, setShowPostSurvey] = useState(false);
-  const [postSurveyDone, setPostSurveyDone] = useState(() => { try { return !!localStorage.getItem('attune_post_survey_done'); } catch { return false; } });
+  const [postSurveyDone, setPostSurveyDone] = useState(() => { try { return !!(localStorage.getItem('attune_survey_done') || localStorage.getItem('attune_post_survey_done')); } catch { return false; } });
   const isMobile = useMobile(680);
 
   // Lock body scroll when results are shown (prevents mobile page drift)
@@ -14185,36 +14185,21 @@ export default function App() {
                   <div style={{ background: "linear-gradient(135deg, rgba(124,58,237,0.08), rgba(27,95,232,0.06))", border: "1.5px solid rgba(124,58,237,0.3)", borderRadius: 14, padding: "1.1rem 1.4rem", marginBottom: "2rem" }}>
                     <div style={{ fontSize: "0.56rem", letterSpacing: "0.2em", textTransform: "uppercase", color: "#7C3AED", fontWeight: 700, fontFamily: "'DM Sans', sans-serif", marginBottom: "0.4rem" }}>Beta tester</div>
                     <div style={{ fontSize: "0.92rem", color: "#0E0B07", fontFamily: "'DM Sans', sans-serif", fontWeight: 600, marginBottom: "0.3rem", lineHeight: 1.3 }}>Thank you for being one of our beta testers.</div>
-                    <div style={{ fontSize: "0.8rem", color: "#6B5C4D", fontFamily: "'DM Sans', sans-serif", fontWeight: 400, lineHeight: 1.5, marginBottom: "0.9rem" }}>Once you've viewed your results, tell us about your experience.</div>
-                    <a href="/feedback"
-                       onClick={() => {
-                         // Hand the survey a respondent id and couple type via same-origin
-                         // storage rather than the URL, so nothing identifying ends up in a
-                         // link that can be copied or leak through a referrer. The id is the
-                         // profile UUID, which is how every other record here is keyed.
-                         try {
-                           localStorage.setItem('attune_feedback_ctx', JSON.stringify({
-                             respondentId: account?.id || null,
-                             coupleType: coupleType?.name || null,
-                             at: Date.now(),
-                           }));
-                         } catch {}
-                       }}
-                       style={{ display: "inline-block", background: "#7C3AED", color: "white", borderRadius: 10, padding: "0.6rem 1.1rem", fontSize: "0.78rem", fontWeight: 700, fontFamily: "'DM Sans', sans-serif", textDecoration: "none" }}>Share your feedback →</a>
+                    <div style={{ fontSize: "0.8rem", color: "#6B5C4D", fontFamily: "'DM Sans', sans-serif", fontWeight: 400, lineHeight: 1.5 }}>Your feedback shapes what we build next.</div>
                   </div>
                 )}
 
-                {/* Post-results survey prompt — non-beta couples, once results seen, until submitted */}
-                {!isBetaTester && highlightsSeen && !postSurveyDone && (
+                {/* Survey prompt — everyone, once results seen, until submitted (not dismissible) */}
+                {highlightsSeen && !postSurveyDone && (
                   <div style={{ background: "linear-gradient(135deg, rgba(232,103,58,0.08), rgba(27,95,232,0.05))", border: "1.5px solid rgba(232,103,58,0.30)", borderRadius: 14, padding: "1.1rem 1.4rem", marginBottom: "2rem", display: "flex", alignItems: "center", gap: "0.85rem", flexWrap: "wrap" }}>
                     <div style={{ flex: 1, minWidth: 200 }}>
-                      <div style={{ fontSize: "0.56rem", letterSpacing: "0.2em", textTransform: "uppercase", color: "#E8673A", fontWeight: 700, fontFamily: "'DM Sans', sans-serif", marginBottom: "0.35rem" }}>Two minutes?</div>
-                      <div style={{ fontSize: "0.9rem", color: "#0E0B07", fontFamily: "'DM Sans', sans-serif", fontWeight: 600, lineHeight: 1.35 }}>Congrats on finishing. Tell us how your Attune experience was.</div>
+                      <div style={{ fontSize: "0.56rem", letterSpacing: "0.2em", textTransform: "uppercase", color: "#E8673A", fontWeight: 700, fontFamily: "'DM Sans', sans-serif", marginBottom: "0.35rem" }}>One last thing</div>
+                      <div style={{ fontSize: "0.9rem", color: "#0E0B07", fontFamily: "'DM Sans', sans-serif", fontWeight: 600, lineHeight: 1.35 }}>When you're done reviewing your results and workbook, we'd love to hear what you think.</div>
                     </div>
-                    <button onClick={() => setShowPostSurvey(true)} style={{ background: "#E8673A", color: "white", border: "none", borderRadius: 10, padding: "0.6rem 1.1rem", fontSize: "0.78rem", fontWeight: 700, fontFamily: "'DM Sans', sans-serif", cursor: "pointer", whiteSpace: "nowrap" }}>Share your experience →</button>
+                    <button onClick={() => { if (isBetaTester) { try { localStorage.setItem('attune_feedback_ctx', JSON.stringify({ respondentId: account?.id || null, coupleType: coupleType?.name || null, at: Date.now() })); } catch {} window.location.href = '/feedback'; } else { setShowPostSurvey(true); } }} style={{ background: "#E8673A", color: "white", border: "none", borderRadius: 10, padding: "0.6rem 1.1rem", fontSize: "0.78rem", fontWeight: 700, fontFamily: "'DM Sans', sans-serif", cursor: "pointer", whiteSpace: "nowrap" }}>Share your experience →</button>
                   </div>
                 )}
-                {showPostSurvey && <PostResultsSurvey respondentId={account?.id || null} userName={userName} coupleType={coupleType} onClose={() => setShowPostSurvey(false)} onDone={() => { setPostSurveyDone(true); try { localStorage.setItem('attune_post_survey_done', '1'); } catch {} setShowPostSurvey(false); }} />}
+                {showPostSurvey && <PostResultsSurvey respondentId={account?.id || null} userName={userName} coupleType={coupleType} onClose={() => setShowPostSurvey(false)} onDone={() => { setPostSurveyDone(true); try { localStorage.setItem('attune_survey_done', '1'); localStorage.setItem('attune_post_survey_done', '1'); } catch {} setShowPostSurvey(false); }} />}
 
                 {/* Welcome-back banner — surfaces any in-progress exercise so
                     the user can jump straight back in. Covers both session
