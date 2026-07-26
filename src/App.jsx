@@ -14071,7 +14071,7 @@ export default function App() {
       {!isMobile && view !== "home" && view !== "results" && (
         <div style={{ background: "rgba(255,253,249,0.97)", backdropFilter: "blur(12px)", borderBottom: `1px solid ${C.stone}`, padding: "0.6rem 1.5rem", display: "flex", alignItems: "center", flexShrink: 0, position: "sticky", top: 56, zIndex: 90 }}>
           <button onClick={() => setView("home")}
-            style={{ background: "transparent", border: "none", cursor: "pointer", fontSize: "0.68rem", color: C.clay, fontFamily: font.body, padding: 0, fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase", transition: "color .15s", display: "flex", alignItems: "center", gap: "0.35rem" }}
+            style={{ background: "transparent", border: "none", cursor: "pointer", fontSize: "0.68rem", color: C.clay, fontFamily: font.body, padding: 0, fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase", transition: "color .15s", display: "flex", alignItems: "center", lineHeight: 1, gap: "0.35rem" }}
             onMouseEnter={e => e.currentTarget.style.color = C.ink}
             onMouseLeave={e => e.currentTarget.style.color = C.clay}>
             ← Dashboard
@@ -15434,7 +15434,7 @@ export default function App() {
             })()}
             <div data-results-scroll style={{ flex: 1, overflowY: "auto", WebkitOverflowScrolling: "touch", overscrollBehavior: "contain", scrollPaddingBottom: "60px" }}>
               <div style={{ maxWidth: 920, margin: "0 auto", padding: isMobile ? "1rem 0.5rem 0" : "1.25rem 1.5rem 0", width: "100%", minWidth: 0, boxSizing: "border-box" }}>
-                <div style={{ width: "100%", minWidth: 0, overflowX: "hidden" }}>
+                <div style={{ width: "100%", minWidth: 0, overflowX: "clip" }}>
                 <UnifiedResults
                   isMobile={isMobile}
                   ex1Answers={_demoMineEx1 || ex1Answers || sarahEx1} partnerEx1={partnerEx1}
