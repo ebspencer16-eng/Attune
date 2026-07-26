@@ -13802,6 +13802,24 @@ export default function App() {
   const _ownsIntimacy = !!(order?.addonIntimacy) || (() => { try { return localStorage.getItem('attune_dev_intimacy') === '1'; } catch { return false; } })();
   const _intimacyGateOk = !_ownsIntimacy || (!!(intimacyData?.completedAt) && !!(partnerSession?.intimacy?.completedAt));
   const bothDone = !!(ex1Answers && ex2Answers && (isDemo || hasRealPartner)) && _intimacyGateOk;
+
+  // Couple type, derived once at the App level. Several App-scope consumers
+  // reference `coupleType` — the results-viewed email effect, the feedback
+  // handoff + PostResultsSurvey, and the workbook payload — but the variable
+  // only ever existed inside UnifiedResults. That made `coupleType` an undefined
+  // free variable in App scope: the results-viewed email effect threw
+  // "coupleType is not defined" the first time it ran (on first results view),
+  // tripping the error boundary ("Something went wrong"). Define it here, once,
+  // guarded so it can never throw; null until we hold both partners' data.
+  const coupleType = (() => {
+    try {
+      if (!ex1Answers || !partnerEx1) return null;
+      const _my = calcDimScores(ex1Answers);
+      const _part = calcDimScores(partnerEx1);
+      const _align = computeOverallExpectationsPctClient(ex2Answers, partnerEx2, userName, partnerName);
+      return deriveCoupleTypeFromExercise(_my, _part, _align);
+    } catch { return null; }
+  })();
   // Granular completion signals for the dashboard status view and the
   // results-pending screen. Partner signals require the linked partner session
   // (invite-code match), never the demo fallback.
