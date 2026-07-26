@@ -137,10 +137,10 @@ export const LIFE_QUESTIONS = [
   },
   {
     id: 'lq_social', category: 'Lifestyle', topic: 'Social life and friendships',
-    core:        'How important is your own social world?',
-    anniversary: 'Does your shared social rhythm work for you?',
+    core:        'What do you expect from your joint social world?',
+    anniversary: 'What do you expect from your joint social world?',
     revisiting:  'What do you want your social life to look like now?',
-    options: ['Mostly just us', 'Quiet default', 'Healthy balance', 'Pretty social', 'Very social'],
+    options: ['Mostly just us', 'Pretty quiet', 'Healthy balance', 'Pretty social', 'Very social'],
   },
   {
     id: 'lq_routine', category: 'Lifestyle', topic: 'Day-to-day rhythms and routines',

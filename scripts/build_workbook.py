@@ -36,7 +36,7 @@ DIM_META = {
     'energy':     {'label': 'Energy & Recharge',           'left': 'Inward',         'right': 'Outward',          'color': 'purple'},
     'expression': {'label': 'Emotional Expression',         'left': 'Guarded',        'right': 'Expressive',       'color': 'coral'},
     'needs':      {'label': 'How You Ask for Needs',        'left': 'Direct',         'right': 'Indirect',         'color': 'indigo'},
-    'bids':       {'label': 'Responding to Bids',           'left': 'Reserved',       'right': 'Attuned',          'color': 'green'},
+    'bids':       {'label': 'Bids for Connection',           'left': 'Reserved',       'right': 'Attuned',          'color': 'green'},
     'conflict':   {'label': 'Conflict Style',               'left': 'Engage quickly', 'right': 'Needs space first','color': 'indigo'},
     'repair':     {'label': 'How You Repair',               'left': 'Formal / verbal','right': 'Informal / warmth','color': 'coral'},
     'listening':  {'label': 'How You Listen',               'left': 'Reflective',     'right': 'Responsive',       'color': 'purple'},

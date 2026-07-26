@@ -233,7 +233,7 @@ const part1Section = [
     { what: 'Dimension page, title + gap eyebrow',
       desc: 'Big centered dimension title + small gap eyebrow below it.',
       source: 'Calculated',
-      content: '10 possible dimensions (Energy, Emotional Expression, How You Ask for Needs, Responding to Bids, Conflict Style, How You Repair, Closeness & Independence, How Love Lands, Communication Under Stress, Giving & Receiving Feedback). Gap eyebrow: "GAP X.X · [label]" where label is derived from gap size.' },
+      content: '10 possible dimensions (Energy, Emotional Expression, How You Ask for Needs, Bids for Connection, Conflict Style, How You Repair, Closeness & Independence, How Love Lands, Communication Under Stress, Giving & Receiving Feedback). Gap eyebrow: "GAP X.X · [label]" where label is derived from gap size.' },
     { what: 'Dimension page, "Your scores" column (left side of hero)',
       desc: 'Spectrum with axis endpoints and a dot per partner showing their 1–5 score.',
       source: 'Exercise responses',
