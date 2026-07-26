@@ -970,7 +970,9 @@ export function ExpectationsExercise({ partnerName, userName = "Partner A", onCo
   const lqProgress = (lifeQ + 1) / activeLifeQs.length;
   // Framing phrase shifts by variant: revisiting > anniversary (married) > core (future).
   const variant = isRevisited ? "revisiting" : isAnniversary ? "anniversary" : "core";
-  const lqFraming = lq ? lq[variant] : null;
+  // #11: the anniversary framing of the life & values section reads oddly.
+  // Mirror the core offering; only "revisiting" keeps its own phrasing.
+  const lqFraming = lq ? lq[isRevisited ? "revisiting" : "core"] : null;
 
   return (
     <div>
@@ -4205,7 +4207,7 @@ function PersonalityResults({ myAnswers, partnerAnswers, userName, partnerName, 
               const myDy = close ? (myIsLeft ? -4 : 4) : 0;
               const partDy = close ? (myIsLeft ? 4 : -4) : 0;
               return (
-                <div key={f.dim} onClick={() => go(sortedFeedback.indexOf(f) + 1)}
+                <div key={f.dim} onClick={() => go(orderedDims.indexOf(f.dim) + 1)}
                   style={{ cursor: "pointer", display: "flex", alignItems: "center", gap: "0.65rem" }}>
                   <span style={{ fontSize: "0.65rem", color: "rgba(255,255,255,0.65)", fontFamily: BFONT, flexShrink: 0, width: "clamp(88px,30%,120px)", lineHeight: 1.25 }}>{m.label}</span>
                   <div style={{ flex: 1, position: "relative", height: 6, background: "rgba(255,255,255,0.08)", borderRadius: 999, overflow: "visible" }}>
@@ -4523,7 +4525,7 @@ function PersonalityResults({ myAnswers, partnerAnswers, userName, partnerName, 
               {coupleStrengths.map(f => {
                 const m = DIM_META[f.dim];
                 return (
-                  <div key={f.dim} onClick={() => go(sortedFeedback.indexOf(f) + 1)}
+                  <div key={f.dim} onClick={() => go(orderedDims.indexOf(f.dim) + 1)}
                     style={{ background: "rgba(255,255,255,0.07)", borderRadius: 10, padding: "0.75rem 0.85rem", cursor: "pointer", transition: "background 0.15s" }}
                     onMouseEnter={e => e.currentTarget.style.background = "rgba(255,255,255,0.14)"}
                     onMouseLeave={e => e.currentTarget.style.background = "rgba(255,255,255,0.07)"}>
@@ -4544,7 +4546,7 @@ function PersonalityResults({ myAnswers, partnerAnswers, userName, partnerName, 
               {coupleGrowth.map(f => {
                 const m = DIM_META[f.dim];
                 return (
-                  <div key={f.dim} onClick={() => go(sortedFeedback.indexOf(f) + 1)}
+                  <div key={f.dim} onClick={() => go(orderedDims.indexOf(f.dim) + 1)}
                     style={{ background: "rgba(255,255,255,0.07)", borderRadius: 10, padding: "0.75rem 0.85rem", cursor: "pointer", transition: "background 0.15s" }}
                     onMouseEnter={e => e.currentTarget.style.background = "rgba(255,255,255,0.14)"}
                     onMouseLeave={e => e.currentTarget.style.background = "rgba(255,255,255,0.07)"}>
@@ -6826,7 +6828,7 @@ function InsightCardList({ insights = [] }) {
 function ActionPlanList({ explores = [] }) {
   const [showAll, setShowAll] = useState(false);
   const SHOW_INIT = 3;
-  const visible = showAll ? explores : explores.slice(0, SHOW_INIT);
+  const visible = explores; // #5: always show all; no reveal dropdown
   const hidden = explores.length - SHOW_INIT;
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem", marginBottom: "1.5rem" }}>
@@ -6847,12 +6849,6 @@ function ActionPlanList({ explores = [] }) {
           </div>
         </div>
       ))}
-      {!showAll && hidden > 0 && (
-        <button onClick={() => setShowAll(true)}
-          style={{ background: "white", border: `1.5px solid ${C.stone}`, borderRadius: 12, padding: "0.8rem 1rem", fontSize: "0.78rem", fontWeight: 600, color: C.clay, cursor: "pointer", fontFamily: BFONT, display: "flex", alignItems: "center", justifyContent: "center", gap: "0.4rem" }}>
-          Show {hidden} more {hidden === 1 ? "item" : "items"} ↓
-        </button>
-      )}
     </div>
   );
 }
@@ -8749,44 +8745,77 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
               </div>
             )}
 
-            {/* Priority ranking */}
-            {Array.isArray(mine.a_priority) && Array.isArray(theirs.a_priority) && mine.a_priority.length > 0 && theirs.a_priority.length > 0 && (
+            {/* Priority ranking — curved gradient lines connect the same item on each list */}
+            {Array.isArray(mine.a_priority) && Array.isArray(theirs.a_priority) && mine.a_priority.length > 0 && theirs.a_priority.length > 0 && (() => {
+              const ROW = 42, HEAD = 24;
+              const n = mine.a_priority.length;
+              const H = n * ROW;
+              return (
               <div style={{ marginBottom: "1.5rem" }}>
                 <div style={{ fontSize: "0.6rem", letterSpacing: "0.2em", textTransform: "uppercase", color: "#1B5FE8", fontWeight: 700, fontFamily: BFONT, marginBottom: "0.6rem" }}>What matters most this year</div>
                 <div style={{ background: "white", border: `1.5px solid ${C.stone}`, borderRadius: 14, overflow: "hidden" }}>
-                  <div style={{ display: "grid", gridTemplateColumns: "1fr 40px 1fr", background: "#FAFAF8", borderBottom: `1px solid ${C.stone}50`, padding: "0.6rem 1.1rem" }}>
-                    <div style={{ fontSize: "0.58rem", letterSpacing: "0.14em", textTransform: "uppercase", color: "#E8673A", fontWeight: 700, fontFamily: BFONT }}>{userName}</div>
-                    <div />
-                    <div style={{ fontSize: "0.58rem", letterSpacing: "0.14em", textTransform: "uppercase", color: "#1B5FE8", fontWeight: 700, fontFamily: BFONT, textAlign: "right" }}>{partnerName}</div>
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 92px 1fr", padding: "0.95rem 1.15rem 1.1rem" }}>
+                    {/* Left: user's ranking, aligned toward the connectors */}
+                    <div>
+                      <div style={{ height: HEAD, display: "flex", alignItems: "center", justifyContent: "flex-end", fontSize: "0.56rem", letterSpacing: "0.14em", textTransform: "uppercase", color: "#E8673A", fontWeight: 700, fontFamily: BFONT }}>{userName}</div>
+                      {mine.a_priority.map((item, ri) => (
+                        <div key={item} style={{ height: ROW, display: "flex", alignItems: "center", gap: "0.4rem", justifyContent: "flex-end", textAlign: "right" }}>
+                          <span style={{ fontSize: "0.78rem", color: C.ink, fontFamily: BFONT, whiteSpace: "nowrap" }}>{item}</span>
+                          <span style={{ fontSize: "0.6rem", fontWeight: 700, color: "#E8673A", opacity: 0.6, fontFamily: BFONT, flexShrink: 0 }}>#{ri + 1}</span>
+                        </div>
+                      ))}
+                    </div>
+                    {/* Middle: curved, gradient-coloured connectors */}
+                    <div>
+                      <div style={{ height: HEAD }} />
+                      <svg width="100%" height={H} viewBox={`0 0 100 ${H}`} preserveAspectRatio="none" style={{ display: "block", overflow: "visible" }}>
+                        <defs>
+                          {mine.a_priority.map((item, ri) => {
+                            const rj = theirs.a_priority.indexOf(item);
+                            if (rj < 0) return null;
+                            return (
+                              <linearGradient key={item} id={`plg-${ri}`} x1="0" y1="0" x2="1" y2="0">
+                                <stop offset="0%" stopColor="#E8673A" />
+                                <stop offset="100%" stopColor="#1B5FE8" />
+                              </linearGradient>
+                            );
+                          })}
+                        </defs>
+                        {mine.a_priority.map((item, ri) => {
+                          const rj = theirs.a_priority.indexOf(item);
+                          if (rj < 0) return null;
+                          const y1 = ri * ROW + ROW / 2, y2 = rj * ROW + ROW / 2;
+                          const gap = Math.abs(ri - rj);
+                          return (
+                            <path key={item} d={`M 0 ${y1} C 44 ${y1}, 56 ${y2}, 100 ${y2}`} fill="none"
+                              stroke={`url(#plg-${ri})`} strokeWidth={gap === 0 ? 3 : 2}
+                              strokeOpacity={gap === 0 ? 0.95 : 0.5} strokeLinecap="round"
+                              vectorEffect="non-scaling-stroke" />
+                          );
+                        })}
+                      </svg>
+                    </div>
+                    {/* Right: partner's ranking, aligned toward the connectors */}
+                    <div>
+                      <div style={{ height: HEAD, display: "flex", alignItems: "center", fontSize: "0.56rem", letterSpacing: "0.14em", textTransform: "uppercase", color: "#1B5FE8", fontWeight: 700, fontFamily: BFONT }}>{partnerName}</div>
+                      {theirs.a_priority.map((item, ri) => (
+                        <div key={item} style={{ height: ROW, display: "flex", alignItems: "center", gap: "0.4rem" }}>
+                          <span style={{ fontSize: "0.6rem", fontWeight: 700, color: "#1B5FE8", opacity: 0.6, fontFamily: BFONT, flexShrink: 0 }}>#{ri + 1}</span>
+                          <span style={{ fontSize: "0.78rem", color: C.ink, fontFamily: BFONT, whiteSpace: "nowrap" }}>{item}</span>
+                        </div>
+                      ))}
+                    </div>
                   </div>
-                  {mine.a_priority.map((item, idx) => {
-                    const theirIdx = theirs.a_priority.indexOf(item);
-                    const shift = theirIdx === -1 ? null : theirIdx - idx;
-                    const theirItem = theirs.a_priority[idx];
-                    return (
-                      <div key={idx} style={{ display: "grid", gridTemplateColumns: "1fr 40px 1fr", alignItems: "center", padding: "0.6rem 1.1rem", borderTop: idx === 0 ? "none" : `1px solid ${C.stone}40`, background: idx % 2 ? "#FCFCFB" : "white" }}>
-                        <div style={{ display: "flex", alignItems: "center", gap: "0.55rem" }}>
-                          <span style={{ fontFamily: HFONT, fontSize: "0.9rem", fontWeight: 700, color: "#E8673A", opacity: 0.5, width: 14 }}>{idx + 1}</span>
-                          <span style={{ fontSize: "0.79rem", color: C.text, fontFamily: BFONT }}>{item}</span>
-                        </div>
-                        <div style={{ textAlign: "center", fontSize: "0.62rem", fontWeight: 700, fontFamily: BFONT, color: shift === null ? C.stone : shift === 0 ? "#10b981" : Math.abs(shift) >= 3 ? "#E8673A" : C.muted }}>
-                          {shift === null ? "–" : shift === 0 ? "=" : (shift > 0 ? `▼${shift}` : `▲${Math.abs(shift)}`)}
-                        </div>
-                        <div style={{ display: "flex", alignItems: "center", gap: "0.55rem", justifyContent: "flex-end" }}>
-                          <span style={{ fontSize: "0.79rem", color: C.text, fontFamily: BFONT, textAlign: "right" }}>{theirItem || "–"}</span>
-                          <span style={{ fontFamily: HFONT, fontSize: "0.9rem", fontWeight: 700, color: "#1B5FE8", opacity: 0.5, width: 14, textAlign: "right" }}>{theirItem ? idx + 1 : ""}</span>
-                        </div>
-                      </div>
-                    );
-                  })}
-                  <div style={{ padding: "0.6rem 1.1rem", borderTop: `1px solid ${C.stone}40`, background: "#FAFAF8" }}>
+                  <div style={{ padding: "0.6rem 1.15rem", borderTop: `1px solid ${C.stone}40`, background: "#FAFAF8" }}>
                     <span style={{ fontSize: "0.7rem", color: C.muted, fontFamily: BFONT, fontWeight: 300 }}>
-                      The centre column shows how far each of {userName}'s items moved on {partnerName}'s list.
+                      Each line links the same priority on both lists. The flatter the line, the closer you ranked it.
                     </span>
                   </div>
                 </div>
               </div>
-            )}
+              );
+            })()}
+            <PrevNext />
           </div>
         </Layout>
       );
@@ -8847,98 +8876,6 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
                 </div>
               );
             })}
-
-            {/* Appreciation picks side by side */}
-            {mine.a8 && theirs.a8 && (
-              <div style={{ marginBottom: "1.75rem" }}>
-                <div style={{ fontSize: "0.6rem", letterSpacing: "0.2em", textTransform: "uppercase", color: "#1B5FE8", fontWeight: 700, fontFamily: BFONT, marginBottom: "0.6rem" }}>What you admire</div>
-                <div style={{ background: "white", border: `1.5px solid ${C.stone}`, borderRadius: 14, overflow: "hidden" }}>
-                  <div style={{ padding: "0.7rem 1.1rem", borderBottom: `1px solid ${C.stone}50`, background: "#FAFAF8" }}>
-                    <span style={{ fontFamily: HFONT, fontSize: "0.82rem", fontWeight: 700, color: C.ink }}>The quality I most admire in my partner right now</span>
-                  </div>
-                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr" }}>
-                    {[[userName, theirs.a8, "#E8673A"], [partnerName, mine.a8, "#1B5FE8"]].map(([name, admires, col], i) => (
-                      <div key={name} style={{ padding: "1rem 1.1rem", borderRight: i === 0 ? `1px solid ${C.stone}40` : "none" }}>
-                        <div style={{ fontSize: "0.55rem", letterSpacing: "0.14em", textTransform: "uppercase", color: C.muted, fontFamily: BFONT, marginBottom: "0.35rem" }}>{name} is admired for</div>
-                        <div style={{ fontSize: "1.1rem", fontWeight: 700, color: col, fontFamily: HFONT }}>{admiredNoun(admires)}</div>
-                      </div>
-                    ))}
-                  </div>
-                  {mine.a8 === theirs.a8 && (
-                    <div style={{ padding: "0.55rem 1.1rem", background: "#EEF2FF", borderTop: `1px solid ${C.stone}30` }}>
-                      <span style={{ fontSize: "0.7rem", color: "#1B5FE8", fontFamily: BFONT, fontWeight: 500 }}>You both named the same quality. That level of resonance is real.</span>
-                    </div>
-                  )}
-                </div>
-              </div>
-            )}
-
-            {/* Priority ranking side by side */}
-            {Array.isArray(mine.a_priority) && mine.a_priority.length > 0 && Array.isArray(theirs.a_priority) && theirs.a_priority.length > 0 && (
-              <div style={{ marginBottom: "1.75rem" }}>
-                <div style={{ fontSize: "0.6rem", letterSpacing: "0.2em", textTransform: "uppercase", color: "#1B5FE8", fontWeight: 700, fontFamily: BFONT, marginBottom: "0.6rem" }}>Priority ranking</div>
-                {(() => {
-                  // 8.3 — the same topic on both sides is joined by a line, so a
-                  // topic one of you ranks high and the other ranks low reads as a
-                  // steep diagonal. Flat lines are agreement.
-                  const ROW = 30, PAD = 8;
-                  const H = mine.a_priority.length * ROW;
-                  const lineFor = gap => gap === 0 ? "#10b981" : gap >= 3 ? "#F59E0B" : "rgba(0,0,0,0.18)";
-                  return (
-                <div style={{ background: "white", border: `1.5px solid ${C.stone}`, borderRadius: 14, overflow: "hidden" }}>
-                  <div style={{ padding: "0.7rem 1.1rem", borderBottom: `1px solid ${C.stone}50`, background: "#FAFAF8" }}>
-                    <span style={{ fontFamily: HFONT, fontSize: "0.82rem", fontWeight: 700, color: C.ink }}>What to invest in together this year</span>
-                  </div>
-                  <div style={{ display: "grid", gridTemplateColumns: "1fr 72px 1fr", padding: "0.85rem 1.1rem" }}>
-                    {/* Left: user's ranking */}
-                    <div>
-                      <div style={{ fontSize: "0.55rem", letterSpacing: "0.14em", textTransform: "uppercase", color: "#E8673A", fontWeight: 700, fontFamily: BFONT, marginBottom: "0.5rem", height: PAD + 10 }}>{userName}</div>
-                      {mine.a_priority.map((item, ri) => (
-                        <div key={item} style={{ height: ROW, display: "flex", alignItems: "center", gap: "0.4rem", justifyContent: "flex-end", textAlign: "right" }}>
-                          <span style={{ fontSize: "0.75rem", color: C.ink, fontFamily: BFONT }}>{item}</span>
-                          <span style={{ fontSize: "0.62rem", fontWeight: 700, color: "#E8673A", fontFamily: BFONT, flexShrink: 0 }}>#{ri + 1}</span>
-                        </div>
-                      ))}
-                    </div>
-                    {/* Middle: connectors */}
-                    <div>
-                      <div style={{ height: PAD + 10 }} />
-                      <svg width="100%" height={H} viewBox={`0 0 100 ${H}`} preserveAspectRatio="none" style={{ display: "block" }}>
-                        {mine.a_priority.map((item, ri) => {
-                          const rj = theirs.a_priority.indexOf(item);
-                          if (rj < 0) return null;
-                          const gap = Math.abs(ri - rj);
-                          return (
-                            <line key={item} x1="0" y1={ri * ROW + ROW / 2} x2="100" y2={rj * ROW + ROW / 2}
-                              stroke={lineFor(gap)} strokeWidth={gap === 0 ? 2 : 1.5} vectorEffect="non-scaling-stroke" />
-                          );
-                        })}
-                      </svg>
-                    </div>
-                    {/* Right: partner's ranking */}
-                    <div>
-                      <div style={{ fontSize: "0.55rem", letterSpacing: "0.14em", textTransform: "uppercase", color: "#1B5FE8", fontWeight: 700, fontFamily: BFONT, marginBottom: "0.5rem", height: PAD + 10, textAlign: "right" }}>{partnerName}</div>
-                      {theirs.a_priority.map((item, ri) => (
-                        <div key={item} style={{ height: ROW, display: "flex", alignItems: "center", gap: "0.4rem" }}>
-                          <span style={{ fontSize: "0.62rem", fontWeight: 700, color: "#1B5FE8", fontFamily: BFONT, flexShrink: 0 }}>#{ri + 1}</span>
-                          <span style={{ fontSize: "0.75rem", color: C.ink, fontFamily: BFONT }}>{item}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                  <div style={{ padding: "0.55rem 1.1rem", background: "#FAFAF8", borderTop: `1px solid ${C.stone}30`, display: "flex", gap: "1rem", flexWrap: "wrap" }}>
-                    <span style={{ fontSize: "0.68rem", color: C.muted, fontFamily: BFONT, display: "flex", alignItems: "center", gap: "0.35rem" }}>
-                      <svg width="16" height="4"><line x1="0" y1="2" x2="16" y2="2" stroke="#10b981" strokeWidth="2" /></svg> Same rank
-                    </span>
-                    <span style={{ fontSize: "0.68rem", color: C.muted, fontFamily: BFONT, display: "flex", alignItems: "center", gap: "0.35rem" }}>
-                      <svg width="16" height="4"><line x1="0" y1="2" x2="16" y2="2" stroke="#F59E0B" strokeWidth="2" /></svg> Three or more positions apart
-                    </span>
-                  </div>
-                </div>
-                  );
-                })()}
-              </div>
-            )}
 
             <PrevNext />
           </div>
@@ -14233,17 +14170,23 @@ export default function App() {
               <div style={{ flex: 1, padding: isMobile ? "1.5rem 1.25rem 3rem" : "2.5rem 2rem 4rem", background: "#FBF8F3" }}>
                 <div style={{ maxWidth: 680, margin: "0 auto" }}>
 
-                {/* Beta tester thank-you tile — shown for both partners when the couple registered with a beta promo code */}
+                {/* Beta tester tile — thank-you + feedback survey CTA (merged; replaces the separate survey prompt for beta testers) */}
                 {isBetaTester && (
                   <div style={{ background: "linear-gradient(135deg, rgba(124,58,237,0.08), rgba(27,95,232,0.06))", border: "1.5px solid rgba(124,58,237,0.3)", borderRadius: 14, padding: "1.1rem 1.4rem", marginBottom: "2rem" }}>
                     <div style={{ fontSize: "0.56rem", letterSpacing: "0.2em", textTransform: "uppercase", color: "#7C3AED", fontWeight: 700, fontFamily: "'DM Sans', sans-serif", marginBottom: "0.4rem" }}>Beta tester</div>
                     <div style={{ fontSize: "0.92rem", color: "#0E0B07", fontFamily: "'DM Sans', sans-serif", fontWeight: 600, marginBottom: "0.3rem", lineHeight: 1.3 }}>Thank you for being one of our beta testers.</div>
-                    <div style={{ fontSize: "0.8rem", color: "#6B5C4D", fontFamily: "'DM Sans', sans-serif", fontWeight: 400, lineHeight: 1.5 }}>Your feedback shapes what we build next.</div>
+                    <div style={{ fontSize: "0.8rem", color: "#6B5C4D", fontFamily: "'DM Sans', sans-serif", fontWeight: 400, lineHeight: 1.55, marginBottom: postSurveyDone ? 0 : "0.95rem" }}>Your feedback shapes what we build next. When you're done reviewing your results and workbook, we'd ask you to let us know what you think about your Attune experience.</div>
+                    {postSurveyDone ? (
+                      <div style={{ fontSize: "0.76rem", color: "#7C3AED", fontFamily: "'DM Sans', sans-serif", fontWeight: 600 }}>Thank you for sharing your feedback.</div>
+                    ) : (
+                      <button onClick={() => { try { localStorage.setItem('attune_feedback_ctx', JSON.stringify({ respondentId: account?.id || null, coupleType: coupleType?.name || null, at: Date.now() })); } catch {} window.location.href = '/feedback'; }}
+                        style={{ background: "#7C3AED", color: "white", border: "none", borderRadius: 10, padding: "0.6rem 1.2rem", fontSize: "0.78rem", fontWeight: 700, fontFamily: "'DM Sans', sans-serif", cursor: "pointer" }}>Feedback survey →</button>
+                    )}
                   </div>
                 )}
 
-                {/* Survey prompt — everyone, once results seen, until submitted (not dismissible) */}
-                {highlightsSeen && !postSurveyDone && (
+                {/* Survey prompt — NON-beta only (beta testers get the merged beta tile above); once results seen, until submitted */}
+                {highlightsSeen && !postSurveyDone && !isBetaTester && (
                   <div style={{ background: "linear-gradient(135deg, rgba(232,103,58,0.08), rgba(27,95,232,0.05))", border: "1.5px solid rgba(232,103,58,0.30)", borderRadius: 14, padding: "1.1rem 1.4rem", marginBottom: "2rem", display: "flex", alignItems: "center", gap: "0.85rem", flexWrap: "wrap" }}>
                     <div style={{ flex: 1, minWidth: 200 }}>
                       <div style={{ fontSize: "0.56rem", letterSpacing: "0.2em", textTransform: "uppercase", color: "#E8673A", fontWeight: 700, fontFamily: "'DM Sans', sans-serif", marginBottom: "0.35rem" }}>One last thing</div>
