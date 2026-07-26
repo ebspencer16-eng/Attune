@@ -254,7 +254,7 @@ const DIM_META = {
   // CONNECTION — orange
   love:        { label: "How Love Lands",                 emoji: "", ends: ["Words","Actions"],             color: "#E8673A", bg: "#FFF3EE", dark: "#C2410C", domain: "connection" },
   needs:       { label: "How You Ask For What You Need",  emoji: "", ends: ["Direct","Indirect"],           color: "#E8673A", bg: "#FFF3EE", dark: "#C2410C", domain: "connection" },
-  bids:        { label: "Responding to Bids",             emoji: "", ends: ["Reserved","Attuned"],          color: "#E8673A", bg: "#FFF3EE", dark: "#C2410C", domain: "connection" },
+  bids:        { label: "Bids for Connection",             emoji: "", ends: ["Reserved","Attuned"],          color: "#E8673A", bg: "#FFF3EE", dark: "#C2410C", domain: "connection" },
   listening:   { label: "How You Listen",                 emoji: "", ends: ["Reflective","Responsive"],     color: "#E8673A", bg: "#FFF3EE", dark: "#C2410C", domain: "connection" },
   // HARD MOMENTS — blue
   conflict:    { label: "Conflict Style",                 emoji: "", ends: ["Engage","Withdraw"],           color: "#1B5FE8", bg: "#EEF3FF", dark: "#1E3A8A", domain: "hard" },
@@ -8787,7 +8787,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
                           const y1 = ri * ROW + ROW / 2, y2 = rj * ROW + ROW / 2;
                           const gap = Math.abs(ri - rj);
                           return (
-                            <path key={item} d={`M 0 ${y1} C 44 ${y1}, 56 ${y2}, 100 ${y2}`} fill="none"
+                            <path key={item} d={`M 8 ${y1} C 46 ${y1}, 54 ${y2}, 92 ${y2}`} fill="none"
                               stroke={`url(#plg-${ri})`} strokeWidth={gap === 0 ? 3 : 2}
                               strokeOpacity={gap === 0 ? 0.95 : 0.5} strokeLinecap="round"
                               vectorEffect="non-scaling-stroke" />
@@ -14071,7 +14071,7 @@ export default function App() {
       {!isMobile && view !== "home" && view !== "results" && (
         <div style={{ background: "rgba(255,253,249,0.97)", backdropFilter: "blur(12px)", borderBottom: `1px solid ${C.stone}`, padding: "0.6rem 1.5rem", display: "flex", alignItems: "center", flexShrink: 0, position: "sticky", top: 56, zIndex: 90 }}>
           <button onClick={() => setView("home")}
-            style={{ background: "transparent", border: "none", cursor: "pointer", fontSize: "0.68rem", color: C.clay, fontFamily: font.body, padding: 0, fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase", transition: "color .15s", display: "flex", alignItems: "center", lineHeight: 1, gap: "0.35rem" }}
+            style={{ background: "transparent", border: "none", cursor: "pointer", fontSize: "0.68rem", color: C.clay, fontFamily: font.body, padding: 0, fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase", transition: "color .15s", display: "flex", alignItems: "center", lineHeight: 1, position: "relative", top: "2px", gap: "0.35rem" }}
             onMouseEnter={e => e.currentTarget.style.color = C.ink}
             onMouseLeave={e => e.currentTarget.style.color = C.clay}>
             ← Dashboard
@@ -14175,7 +14175,7 @@ export default function App() {
                   <div style={{ background: "linear-gradient(135deg, rgba(124,58,237,0.08), rgba(27,95,232,0.06))", border: "1.5px solid rgba(124,58,237,0.3)", borderRadius: 14, padding: "1.1rem 1.4rem", marginBottom: "2rem" }}>
                     <div style={{ fontSize: "0.56rem", letterSpacing: "0.2em", textTransform: "uppercase", color: "#7C3AED", fontWeight: 700, fontFamily: "'DM Sans', sans-serif", marginBottom: "0.4rem" }}>Beta tester</div>
                     <div style={{ fontSize: "0.92rem", color: "#0E0B07", fontFamily: "'DM Sans', sans-serif", fontWeight: 600, marginBottom: "0.3rem", lineHeight: 1.3 }}>Thank you for being one of our beta testers.</div>
-                    <div style={{ fontSize: "0.8rem", color: "#6B5C4D", fontFamily: "'DM Sans', sans-serif", fontWeight: 400, lineHeight: 1.55, marginBottom: postSurveyDone ? 0 : "0.95rem" }}>Your feedback shapes what we build next. When you're done reviewing your results and workbook, we'd ask you to let us know what you think about your Attune experience.</div>
+                    <div style={{ fontSize: "0.8rem", color: "#6B5C4D", fontFamily: "'DM Sans', sans-serif", fontWeight: 400, lineHeight: 1.55, marginBottom: postSurveyDone ? 0 : "0.95rem" }}>Your feedback shapes what we build next. When you're done reviewing your results and workbook, please let us know what you think about your Attune experience.</div>
                     {postSurveyDone ? (
                       <div style={{ fontSize: "0.76rem", color: "#7C3AED", fontFamily: "'DM Sans', sans-serif", fontWeight: 600 }}>Thank you for sharing your feedback.</div>
                     ) : (
@@ -15383,7 +15383,7 @@ export default function App() {
     {view === "results" && bothDone && highlightsSeen && (
           <div style={{ position: "fixed", top: 56, left: 0, right: 0, bottom: 60, display: "flex", flexDirection: "column", overflow: "hidden", zIndex: 50, background: C.warm, paddingBottom: "env(safe-area-inset-bottom)" }}>
             <div style={{ background: "rgba(255,253,249,0.97)", backdropFilter: "blur(12px)", borderBottom: ("1px solid " + (C.stone)), padding: isMobile ? "0.75rem 1rem" : "0.9rem 1.5rem", flexShrink: 0, display: "flex", alignItems: "center", gap: "0.5rem" }}>
-              <button onClick={() => setView("home")} style={{ background: "transparent", border: "none", color: C.clay, fontSize: isMobile ? "1.4rem" : "0.72rem", lineHeight: 1, letterSpacing: isMobile ? "0" : "0.1em", textTransform: "uppercase", cursor: "pointer", fontFamily: font.body, padding: isMobile ? "0.25rem 0.5rem 0.25rem 0" : 0, fontWeight: 600, flexShrink: 0, display: "flex", alignItems: "center" }} aria-label="Back to dashboard">← {isMobile ? "" : "Dashboard"}</button>
+              <button onClick={() => setView("home")} style={{ background: "transparent", border: "none", color: C.clay, fontSize: isMobile ? "1.4rem" : "0.72rem", lineHeight: 1, letterSpacing: isMobile ? "0" : "0.1em", textTransform: "uppercase", cursor: "pointer", fontFamily: font.body, padding: isMobile ? "0.25rem 0.5rem 0.25rem 0" : 0, fontWeight: 600, flexShrink: 0, display: "flex", alignItems: "center", position: "relative", top: "2px" }} aria-label="Back to dashboard">← {isMobile ? "" : "Dashboard"}</button>
               {/* Beta feedback entry point lives in the results-end card (branches on isBetaTester) */}
             </div>
             {/* Mobile sticky sub-section nav */}

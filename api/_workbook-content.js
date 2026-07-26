@@ -8,7 +8,7 @@ export const DIM_META = {
   energy:     { label: 'Energy & Recharge',           left: 'Inward',         right: 'Outward',          color: '9B5DE5' },
   expression: { label: 'Emotional Expression',         left: 'Guarded',        right: 'Expressive',       color: 'E8673A' },
   needs:      { label: 'How You Ask for Needs',        left: 'Direct',         right: 'Indirect',         color: '1B5FE8' },
-  bids:       { label: 'Responding to Bids',           left: 'Reserved',       right: 'Attuned',          color: '10B981' },
+  bids:       { label: 'Bids for Connection',           left: 'Reserved',       right: 'Attuned',          color: '10B981' },
   conflict:   { label: 'Conflict Style',               left: 'Engage quickly', right: 'Needs space first', color: '1B5FE8' },
   repair:     { label: 'How You Repair',               left: 'Formal / verbal', right: 'Informal / warmth', color: 'E8673A' },
   listening:  { label: 'How You Listen',              left: 'Reflective',     right: 'Responsive',      color: 'E8673A' },

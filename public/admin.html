@@ -1251,14 +1251,12 @@ window.adminAuthHeaders = function(extra){
     <!-- Axis distributions: split summary + score histogram per axis -->
     <div class="chart-grid">
       <div class="chart-card">
-        <div class="chart-card-header" style="display:flex;justify-content:space-between;align-items:flex-start;gap:.75rem"><div><div class="chart-card-title">Engage / Withdraw</div><div class="chart-card-sub">Top bar: share of individuals on each side of the 3.0 line. Chart: how individual scores spread across the 1–5 axis (left = engage, right = withdraw).</div></div><select class="tile-slicer" id="slz-teng" title="Cut this tile by a segment"><option value="">Everyone</option></select></div>
-        <div id="types-w-split" style="padding:.6rem 1.4rem 0;"></div>
-        <div style="padding:.5rem 1.4rem 1rem;"><canvas id="types-whist-chart" height="180"></canvas></div>
+        <div class="chart-card-header" style="display:flex;justify-content:space-between;align-items:flex-start;gap:.75rem"><div><div class="chart-card-title">Engage / Withdraw</div><div class="chart-card-sub"></div></div><select class="tile-slicer" id="slz-teng" title="Cut this tile by a segment"><option value="">Everyone</option></select></div>
+        <div id="types-w-axis" style="padding:.7rem 1.4rem 1.3rem;"></div>
       </div>
       <div class="chart-card">
-        <div class="chart-card-header" style="display:flex;justify-content:space-between;align-items:flex-start;gap:.75rem"><div><div class="chart-card-title">Open / Guarded</div><div class="chart-card-sub">Top bar: share of individuals on each side of the 3.0 line. Chart: how individual scores spread across the 1–5 axis (left = guarded, right = open).</div></div><select class="tile-slicer" id="slz-topen" title="Cut this tile by a segment"><option value="">Everyone</option></select></div>
-        <div id="types-o-split" style="padding:.6rem 1.4rem 0;"></div>
-        <div style="padding:.5rem 1.4rem 1rem;"><canvas id="types-ohist-chart" height="180"></canvas></div>
+        <div class="chart-card-header" style="display:flex;justify-content:space-between;align-items:flex-start;gap:.75rem"><div><div class="chart-card-title">Guarded / Open</div><div class="chart-card-sub"></div></div><select class="tile-slicer" id="slz-topen" title="Cut this tile by a segment"><option value="">Everyone</option></select></div>
+        <div id="types-o-axis" style="padding:.7rem 1.4rem 1.3rem;"></div>
       </div>
     </div>
 
@@ -4161,20 +4159,29 @@ async function renderTypeCouple(containerId, selId){
   }).join('');
 }
 async function renderTypeAxis(opts){
-  const splitEl=document.getElementById(opts.splitId), histEl=document.getElementById(opts.histId);
+  ensureQxTooltip();
+  const el=document.getElementById(opts.containerId); if(!el) return;
   let cube; try{ cube=await ensureCube(); }catch(e){ return; }
   const sel=document.getElementById(opts.selId);
   if(sel){ populateSlicer(sel, opts.field==='axis_w'?'axisEngage':'axisOpen', cube.rows||[]); sel.classList.toggle('on',!!sel.value);
     if(!sel.dataset.wired){ sel.dataset.wired='1'; sel.onchange=()=>renderTypeAxis(opts); } }
   const rows=sliceFilter(cube.rows||[], sel?sel.value:'').filter(r=>typeof r[opts.field]==='number');
-  const n=rows.length; if(histEl) setTileN(histEl,n);
-  let a=0; rows.forEach(r=>{ if(opts.side==='w'? r[opts.field]<=3 : r[opts.field]>=3) a++; });
-  const ap=n?Math.round(100*a/n):0, bp=100-ap;
-  if(splitEl) splitEl.innerHTML='<div><div style="display:flex;height:22px;border-radius:6px;overflow:hidden;font-size:.62rem;font-weight:700;"><div style="background:'+opts.color+';width:'+ap+'%;display:flex;align-items:center;justify-content:center;color:#1a1a1a;">'+(ap>12?opts.aLbl+' '+ap+'%':'')+'</div><div style="background:#E6ECF6;width:'+bp+'%;display:flex;align-items:center;justify-content:center;color:#586187;">'+(bp>12?opts.bLbl+' '+bp+'%':'')+'</div></div></div>';
+  const n=rows.length; setTileN(el,n);
+  // Poles sit at the true ends of the 1–5 axis: leftLbl = score 1 end, rightLbl = score 5 end.
+  const leftN=rows.filter(r=>r[opts.field]<3).length;
+  const leftPct=n?Math.round(100*leftN/n):0, rightPct=n?100-leftPct:0;
   const bins=[]; for(let b=1;b<5;b+=0.25) bins.push(Number(b.toFixed(2)));
   const H=bins.map(()=>0); const bi=v=>Math.min(bins.length-1,Math.max(0,Math.floor((v-1)/0.25)));
   rows.forEach(r=>{ H[bi(r[opts.field])]++; });
-  if(typeof drawHist==='function') drawHist(opts.histId, bins, H, opts.color);
+  const maxH=Math.max(1,...H);
+  const bars=bins.map((b,i)=>{ const h=H[i]; const pct=n?Math.round(100*h/n):0; const hh=h>0?Math.max(3,Math.round((h/maxH)*76)):0;
+    const lo=b.toFixed(2), hi=(b+0.25).toFixed(2);
+    return '<div data-tip="Score '+lo+'–'+hi+' · '+h+' '+(h===1?'person':'people')+' ('+pct+'%)" style="flex:1 1 0;height:80px;display:flex;align-items:flex-end;justify-content:center;cursor:default;"><div style="width:100%;height:'+hh+'px;background:'+opts.color+';opacity:.85;border-radius:3px 3px 0 0;"></div></div>';
+  }).join('');
+  const pole=(lbl,pct)=>'<div style="text-align:center;min-width:64px;flex-shrink:0;"><div style="font-size:.72rem;font-weight:700;color:'+opts.color+';letter-spacing:.01em;">'+lbl+'</div><div style="font-size:1.15rem;font-weight:800;color:var(--text);line-height:1.05;margin-top:3px;">'+pct+'%</div></div>';
+  el.innerHTML = n
+    ? '<div style="display:flex;align-items:center;gap:1rem;">'+pole(opts.leftLbl,leftPct)+'<div style="flex:1 1 0;min-width:0;display:flex;align-items:flex-end;gap:2px;">'+bars+'</div>'+pole(opts.rightLbl,rightPct)+'</div>'
+    : '<div style="color:var(--dim);font-size:.78rem;padding:1rem 0;text-align:center;">No data yet.</div>';
 }
 function qxCatLabel(f, v) {
   if (f && f.kind === 'scale') { if (v === '1') return '1 · ' + (f.poleLow || 'low'); if (v === '5') return '5 · ' + (f.poleHigh || 'high'); return v; }
@@ -4876,8 +4883,8 @@ function renderTypes() {
   wireCubeTile({target:'types-indiv-chart',field:'type',mode:'doughnut',selId:'slz-tindiv',palette:['W','X','Y','Z'].map(t=>TYPE_COLORS[t])});
 
   // Axis distributions (cube-backed + sliceable): split bar + score histogram
-  renderTypeAxis({selId:'slz-teng', field:'axis_w', side:'w', splitId:'types-w-split', histId:'types-whist-chart', aLbl:'Engage', bLbl:'Withdraw', color:'#FF6B35'});
-  renderTypeAxis({selId:'slz-topen', field:'axis_o', side:'o', splitId:'types-o-split', histId:'types-ohist-chart', aLbl:'Open', bLbl:'Guarded', color:'#6C7FFF'});
+  renderTypeAxis({selId:'slz-teng', field:'axis_w', containerId:'types-w-axis', leftLbl:'Engage', rightLbl:'Withdraw', color:'#FF6B35'});
+  renderTypeAxis({selId:'slz-topen', field:'axis_o', containerId:'types-o-axis', leftLbl:'Guarded', rightLbl:'Open', color:'#6C7FFF'});
 
   // Per-dimension table (recompute outlier rate for filtered set)
   const cfgDims = Object.keys(cfg);
