@@ -7050,7 +7050,7 @@ function BetaSurveyModal({ userName, coupleType, onClose }) {
 
   if (submitted) return (
     <div style={{ position: "fixed", inset: 0, background: "rgba(14,11,7,0.6)", zIndex: 500, display: "flex", alignItems: "center", justifyContent: "center", padding: "1rem" }} onClick={onClose}>
-      <div onClick={e => e.stopPropagation()} style={{ background: C.cream, borderRadius: 22, padding: "2.25rem 2rem", width: "100%", maxWidth: 400, textAlign: "center", boxShadow: "0 24px 64px rgba(0,0,0,0.25)" }}>
+      <div onClick={e => e.stopPropagation()} style={{ background: C.cream, borderRadius: 22, padding: "2.25rem 2rem", width: "100%", maxWidth: 400, textAlign: "center", maxHeight: "88dvh", overflowY: "auto", WebkitOverflowScrolling: "touch", boxShadow: "0 24px 64px rgba(0,0,0,0.25)" }}>
         <div style={{ width: 52, height: 52, borderRadius: "50%", background: "linear-gradient(135deg, #10b981, #059669)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 1.25rem", fontSize: "1.3rem" }}>✓</div>
         <div style={{ fontFamily: font.display, fontSize: "1.3rem", fontWeight: 700, color: C.ink, marginBottom: "0.6rem" }}>Thank you.</div>
         <p style={{ fontSize: "0.85rem", color: C.muted, fontFamily: font.body, lineHeight: 1.7, marginBottom: "1.5rem" }}>Your feedback goes directly to the people building Attune. It shapes what we change.</p>
@@ -7061,7 +7061,7 @@ function BetaSurveyModal({ userName, coupleType, onClose }) {
 
   return (
     <div style={{ position: "fixed", inset: 0, background: "rgba(14,11,7,0.6)", zIndex: 500, display: "flex", alignItems: "center", justifyContent: "center", padding: "1rem" }} onClick={onClose}>
-      <div onClick={e => e.stopPropagation()} style={{ background: C.cream, borderRadius: 22, padding: "2.25rem 2rem", width: "100%", maxWidth: 420, boxShadow: "0 24px 64px rgba(0,0,0,0.25)" }}>
+      <div onClick={e => e.stopPropagation()} style={{ background: C.cream, borderRadius: 22, padding: "2.25rem 2rem", width: "100%", maxWidth: 420, maxHeight: "88dvh", overflowY: "auto", WebkitOverflowScrolling: "touch", boxShadow: "0 24px 64px rgba(0,0,0,0.25)" }}>
         {/* Header */}
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1.75rem" }}>
           <div>
@@ -7383,7 +7383,7 @@ function PostResultsSurvey({ respondentId = null, userName, coupleType, onClose,
 
   if (submitted) return (
     <div style={{ position: "fixed", inset: 0, background: "rgba(14,11,7,0.6)", zIndex: 500, display: "flex", alignItems: "center", justifyContent: "center", padding: "1rem" }} onClick={() => { onDone && onDone(); }}>
-      <div onClick={e => e.stopPropagation()} style={{ background: C.cream, borderRadius: 22, padding: "2.25rem 2rem", width: "100%", maxWidth: 400, textAlign: "center", boxShadow: "0 24px 64px rgba(0,0,0,0.25)" }}>
+      <div onClick={e => e.stopPropagation()} style={{ background: C.cream, borderRadius: 22, padding: "2.25rem 2rem", width: "100%", maxWidth: 400, textAlign: "center", maxHeight: "88dvh", overflowY: "auto", WebkitOverflowScrolling: "touch", boxShadow: "0 24px 64px rgba(0,0,0,0.25)" }}>
         <div style={{ width: 52, height: 52, borderRadius: "50%", background: "linear-gradient(135deg, #10b981, #059669)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 1.25rem", fontSize: "1.3rem", color: "white" }}>✓</div>
         <div style={{ fontFamily: font.display, fontSize: "1.3rem", fontWeight: 700, color: C.ink, marginBottom: "0.6rem" }}>Thank you{userName ? `, ${userName}` : ""}.</div>
         <p style={{ fontSize: "0.85rem", color: C.muted, fontFamily: font.body, lineHeight: 1.7, marginBottom: "1.5rem" }}>This helps us understand Attune's impact and shape what comes next.</p>
@@ -7394,7 +7394,7 @@ function PostResultsSurvey({ respondentId = null, userName, coupleType, onClose,
 
   return (
     <div style={{ position: "fixed", inset: 0, background: "rgba(14,11,7,0.6)", zIndex: 500, display: "flex", alignItems: "center", justifyContent: "center", padding: "1rem" }} onClick={close}>
-      <div onClick={e => e.stopPropagation()} style={{ background: C.cream, borderRadius: 22, padding: "2.25rem 2rem", width: "100%", maxWidth: 440, boxShadow: "0 24px 64px rgba(0,0,0,0.25)" }}>
+      <div onClick={e => e.stopPropagation()} style={{ background: C.cream, borderRadius: 22, padding: "2.25rem 2rem", width: "100%", maxWidth: 440, maxHeight: "88dvh", overflowY: "auto", WebkitOverflowScrolling: "touch", boxShadow: "0 24px 64px rgba(0,0,0,0.25)" }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1.5rem" }}>
           <div>
             <div style={{ fontSize: "0.55rem", letterSpacing: "0.22em", textTransform: "uppercase", color: "#E8673A", fontFamily: font.body, fontWeight: 700, marginBottom: "0.2rem" }}>Your experience</div>
