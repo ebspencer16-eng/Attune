@@ -2529,10 +2529,24 @@ async function loadFeedbackData() {
   }
 
   // ── Simulated data, replaced by real responses once any exist ────────
-  // Empty scaffold. Real values are filled by applyRealBeta() below when any
+  // Beta feedback: responses -> computeBetaSIM(R) -> paintBetaTile(); per-tile slicers below.
   // responses exist; with zero responses everything stays empty/'—' rather than
   // showing simulated numbers. Grid/interest labels are structural (the product
   // elements being rated), so they stay; their scores are null until real data.
+  // ── Per-tile segment slicers: segment-tagged responses power every chart ──
+  window.__betaR = [];
+  try { const _cube = await ensureCube(); if (_cube && Array.isArray(_cube.betaResponses)) window.__betaR = _cube.betaResponses; } catch (e) {}
+  if (!window.__betaR.length) {
+    try { window.__betaR = ((__fbAdminData && __fbAdminData.feedback_submissions) || []).filter(r => r.type === 'beta_survey').map(r => { try { return typeof r.text === 'string' ? JSON.parse(r.text) : r.text; } catch { return null; } }).filter(Boolean); } catch (e) {}
+  }
+  { const _note = document.getElementById('fb-realnote'); const _n = window.__betaR.length;
+    if (_note) _note.textContent = _n ? ('Showing ' + _n + ' real response' + (_n !== 1 ? 's' : '') + '. Small samples read with caution.') : 'No responses yet. Charts populate automatically once beta testers submit.'; }
+  renderBetaTiles();
+}
+
+// Compute the beta-feedback aggregates from a (possibly segment-filtered) set of
+// responses R. Pure: builds a fresh scaffold each call so per-tile slicing is safe.
+window.computeBetaSIM = function(R){
   const SIM = {
     surveys: 0,
     nps: '—', npsPromoters: 0, npsPassives: 0, npsDetractors: 0,
@@ -2573,25 +2587,8 @@ async function loadFeedbackData() {
     concerns: [],
     discovered: [], testimonials: [], detractors: [], wishKnew: [],
   };
-
-  // ── Real data override ──────────────────────────────────────────────
-  // The SIM object above is design scaffolding. As soon as any real beta
-  // responses exist, compute the real aggregates and overwrite SIM's fields so
-  // every chart below renders real numbers (with the sample size shown), not
-  // mock. Charts with no real field yet fall back to an honest empty array.
-  (function applyRealBeta() {
-    let realRows = [];
-    try {
-      const all = (__fbAdminData && __fbAdminData.feedback_submissions) || [];
-      realRows = all.filter(r => r.type === 'beta_survey')
-        .map(r => { try { return typeof r.text === 'string' ? JSON.parse(r.text) : r.text; } catch { return null; } })
-        .filter(Boolean);
-    } catch {}
-    const noteEl = document.getElementById('fb-realnote');
-    if (!realRows.length) { if (noteEl) noteEl.textContent = 'No responses yet. Charts populate automatically once beta testers submit.'; return; }
-    if (noteEl) noteEl.textContent = 'Showing ' + realRows.length + ' real response' + (realRows.length !== 1 ? 's' : '') + '. Small samples read with caution.';
-
-    const R = realRows, n = R.length;
+  const n = R.length;
+  if (!n) return SIM;
     const avg = (f) => { const v = R.map(s => +s[f]).filter(Number.isFinite); return v.length ? Math.round(v.reduce((a,b)=>a+b,0)/v.length*10)/10 : null; };
     const npsVals = R.map(s => parseInt(s.nps,10)).filter(v => Number.isFinite(v) && v>=0 && v<=10);
     const prom = npsVals.filter(v=>v>=9).length, pas = npsVals.filter(v=>v>=7&&v<=8).length, det = npsVals.filter(v=>v<=6).length;
@@ -2629,143 +2626,115 @@ async function loadFeedbackData() {
     SIM.detractors  = R.filter(s => parseInt(s.nps,10) <= 6 && s.npsWhy).map(s => ({ text: String(s.npsWhy).trim(), name: 'Anonymous', nps: parseInt(s.nps,10) }));
     // Completion signal from the coverage of finished exercises isn't in the
     // survey payload, so leave that card on its coverage-derived render.
-  })();
 
-  // Render KPIs. '—' when there is no real data behind the metric.
-  const _score5 = (v) => v == null ? '—' : v + '<span style="font-size:.9rem">/5</span>';
-  document.getElementById('fb-nps').textContent = SIM.nps;
-  document.getElementById('fb-nps-dist').textContent = SIM.surveys ? `P: ${SIM.npsPromoters}% · N: ${SIM.npsPassives}% · D: ${SIM.npsDetractors}%` : '';
-  document.getElementById('fb-exp-match').innerHTML = _score5(SIM.expectationMatch);
-  document.getElementById('fb-convo-rate').textContent = SIM.convoRate == null ? '—' : SIM.convoRate + '%';
-  document.getElementById('fb-outcome-shift').innerHTML = _score5(SIM.outcomeShift);
-  document.getElementById('fb-count-surveys').textContent = SIM.surveys;
+  return SIM;
+};
 
-  // Benchmarkable metrics bars
-  const bEl = document.getElementById('fb-benchmark-bars');
-  bEl.innerHTML = SIM.benchmarks.map(m => renderScoreBar(m.label, m.val, m.color)).join('');
-
-  // NPS chart — rebuilt on every load so real responses replace the mock.
-  {
-    mkChart(document.getElementById('fb-nps-chart'), {
-      type:'doughnut',
-      data:{
-        labels:['Promoters (9–10)','Passives (7–8)','Detractors (0–6)'],
-        datasets:[{data:[SIM.npsPromoters,SIM.npsPassives,SIM.npsDetractors],backgroundColor:['#10B981','#F59E0B','#F87171'],borderWidth:0}]
-      },
-      options:{maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{boxWidth:10,padding:10,font:{size:10}}}},cutout:'62%'}
-    });
+// Paint one tile's DOM from a computed SIM.
+function paintBetaTile(key, SIM){
+  const $ = (id)=>document.getElementById(id);
+  const _score5 = (v)=> v==null ? '\u2014' : v+'<span style="font-size:.9rem">/5</span>';
+  const GRID_COLS=['Design','Accuracy','Importance'], GRID_COLORS=['#E8673A','#9B5DE5','#1B5FE8','#10B981'];
+  const OV_COLS=['Clarity','Impact','Overall Satisfaction'], OV_COLORS=['#6C7FFF','#E8673A','#10B981'];
+  const mx=(arr)=>Math.max(1,...arr.map(i=>i.v));
+  const gridHTML=(rows)=>rows.map(row=>`<div style="margin-bottom:.35rem"><div style="font-size:.68rem;font-weight:600;color:var(--text);margin-bottom:.35rem">${row.label}</div>`+row.scores.map((sv,i)=>sv!=null?renderScoreBar(GRID_COLS[i],sv,GRID_COLORS[i]):'').join('')+'</div>').join('');
+  switch(key){
+    case 'kpi':
+      $('fb-nps').textContent=SIM.nps; $('fb-nps-dist').textContent=SIM.surveys?`P: ${SIM.npsPromoters}% \u00b7 N: ${SIM.npsPassives}% \u00b7 D: ${SIM.npsDetractors}%`:'';
+      $('fb-exp-match').innerHTML=_score5(SIM.expectationMatch); $('fb-convo-rate').textContent=SIM.convoRate==null?'\u2014':SIM.convoRate+'%';
+      $('fb-outcome-shift').innerHTML=_score5(SIM.outcomeShift); $('fb-count-surveys').textContent=SIM.surveys; break;
+    case 'benchmark': $('fb-benchmark-bars').innerHTML=SIM.benchmarks.map(m=>renderScoreBar(m.label,m.val,m.color)).join(''); break;
+    case 'nps': mkChart($('fb-nps-chart'),{type:'doughnut',data:{labels:['Promoters (9\u201310)','Passives (7\u20138)','Detractors (0\u20136)'],datasets:[{data:[SIM.npsPromoters,SIM.npsPassives,SIM.npsDetractors],backgroundColor:['#10B981','#F59E0B','#F87171'],borderWidth:0}]},options:{maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{boxWidth:10,padding:10,font:{size:10}}}},cutout:'62%'}}); break;
+    case 'commsLead': $('fb-comms-lead-bars').innerHTML=SIM.commsLead.map(m=>renderScoreBar(m.label,m.val,'#9B5DE5')).join(''); break;
+    case 'expLead': $('fb-exp-lead-bars').innerHTML=SIM.expLead.map(m=>renderScoreBar(m.label,m.val,'#1B5FE8')).join(''); break;
+    case 'commsGrid': $('fb-comms-grid-bars').innerHTML=gridHTML(SIM.commsGrid); break;
+    case 'expGrid': $('fb-exp-grid-bars').innerHTML=gridHTML(SIM.expGrid); break;
+    case 'overallGrid': $('fb-overall-grid-bars').innerHTML=SIM.overallGrid.map(row=>`<div style="margin-bottom:.35rem;display:grid;grid-template-columns:160px 1fr;gap:0 1rem;align-items:start"><div style="font-size:.75rem;font-weight:600;color:var(--text);padding-top:.5rem">${row.label}</div><div>${row.scores.map((sv,i)=>sv!==null?renderScoreBar(OV_COLS[i],sv,OV_COLORS[i]):'').join('')}</div></div>`).join(''); break;
+    case 'aha': $('fb-aha-bars').innerHTML=SIM.aha.map(i=>renderBar(i.l,i.v,mx(SIM.aha),'#E8673A',i.v+'%')).join(''); break;
+    case 'interest': $('fb-interest-bars').innerHTML=SIM.interestAvg.map(i=>renderBar(i.l,i.v,mx(SIM.interestAvg),'#1B5FE8',i.v+'%')).join(''); break;
+    case 'completion': $('fb-completion-bars').innerHTML=SIM.completion.map(i=>renderBar(i.l,i.v,mx(SIM.completion),'#10B981',i.v+'%')).join(''); break;
+    case 'concerns': $('fb-concerns-bars').innerHTML=SIM.concerns.map(i=>renderBar(i.l,i.v,mx(SIM.concerns),'#9B5DE5',i.v+'%')).join(''); break;
+    case 'discovered': { const rf=(items)=>items.map(i=>renderQuoteCard(i.text,i.name,i.nps)).join('');
+      $('fb-discovered').innerHTML=rf(SIM.discovered);
+      $('fb-testimonials').innerHTML=SIM.testimonials.map(i=>renderQuoteCard(i.text,i.name+' \u00b7 '+i.consent,i.nps,'#10B981')).join('');
+      $('fb-detractors').innerHTML=rf(SIM.detractors); break; }
+    case 'wishKnew': $('fb-wish-knew').innerHTML=SIM.wishKnew.map(i=>renderQuoteCard(i.text,i.name,3,'#F59E0B')).join(''); break;
   }
+}
 
-  // Comms lead bars
-  const LEAD_COLOR = '#9B5DE5';
-  document.getElementById('fb-comms-lead-bars').innerHTML = SIM.commsLead.map(m => renderScoreBar(m.label, m.val, LEAD_COLOR)).join('');
-  document.getElementById('fb-exp-lead-bars').innerHTML = SIM.expLead.map(m => renderScoreBar(m.label, m.val, '#1B5FE8')).join('');
+// Inject (once) a segment slicer into a tile's card header and keep it populated.
+function _fbEnsureSlicer(anchorId, key, rows, onchange){
+  const el=document.getElementById(anchorId); if(!el) return null;
+  const card=el.closest('.chart-card')||el.parentElement; if(!card) return null;
+  let sel=card.querySelector('select.tile-slicer[data-fb="'+key+'"]');
+  if(!sel){
+    sel=document.createElement('select'); sel.className='tile-slicer'; sel.setAttribute('data-fb',key); sel.title='Cut this tile by a segment';
+    const titleEl=card.querySelector('.chart-card-title');
+    if(titleEl){ let h=titleEl.parentElement;
+      if(!h.dataset.fbhdr){ const nh=document.createElement('div'); nh.dataset.fbhdr='1'; nh.style.cssText='display:flex;justify-content:space-between;align-items:flex-start;gap:.6rem;flex-wrap:wrap'; titleEl.parentNode.insertBefore(nh,titleEl); nh.appendChild(titleEl); h=nh; }
+      h.appendChild(sel);
+    } else { card.insertBefore(sel, card.firstChild); }
+    sel.onchange=onchange;
+  }
+  if(sel.dataset.popN!==String(rows.length)){ const cur=sel.value; delete sel.dataset.pop; populateSlicer(sel,null,rows); sel.dataset.popN=String(rows.length); if(cur){ try{ sel.value=cur; }catch(e){} } }  // populate even at 0 rows so 'Everyone' always shows
+  return sel;
+}
 
-  // Comms grid bars (grouped by row, show avg per column)
-  const GRID_COLS = ['Design','Accuracy','Importance'];
-  const GRID_COLORS = ['#E8673A','#9B5DE5','#1B5FE8','#10B981'];
-  const commsEl = document.getElementById('fb-comms-grid-bars');
-  commsEl.innerHTML = SIM.commsGrid.map(row =>
-    `<div style="margin-bottom:.35rem"><div style="font-size:.68rem;font-weight:600;color:var(--text);margin-bottom:.35rem">${row.label}</div>` +
-    row.scores.map((s,i) => s != null ? renderScoreBar(GRID_COLS[i], s, GRID_COLORS[i]) : '').join('') + '</div>'
-  ).join('');
+// Time-by-stage clustered column chart (accepts an optional filtered row set).
+window.renderTimeByStage = function renderTimeByStage(rowsArg) {
+  const canvas = document.getElementById('fb-timestage-chart');
+  const empty = document.getElementById('fb-timestage-empty');
+  if (!canvas) return;
+  const STAGES = ['Package selection, checkout, account creation','Completing communication exercise','Completing expectations exercise','Reviewing your results','Exploring the workbook'];
+  const SHORT = ['Checkout/setup','Communication','Expectations','Results','Workbook'];
+  const DUR = ['Less than 10 minutes','10–20 minutes','20–45 minutes','45–60 minutes','Over 1 hour'];
+  const DUR_SHORT = ['<10m','10–20m','20–45m','45–60m','1h+'];
+  const DUR_COLORS = ['#34D399','#6C7FFF','#FBBF24','#FF6B35','#F87171'];
+  const rows = (rowsArg || window.__fbSurveys || []);
+  if (!rows.length) { canvas.style.display='none'; if (empty) empty.style.display='block'; return; }
+  canvas.style.display='block'; if (empty) empty.style.display='none';
+  const counts = STAGES.map(() => DUR.map(() => 0));
+  rows.forEach(r => { const tg = r.timeGrid || {}; STAGES.forEach((st, si) => { const d = tg[st]; const di = DUR.indexOf(d); if (di >= 0) counts[si][di]++; }); });
+  const datasets = DUR.map((d, di) => ({ label: DUR_SHORT[di], backgroundColor: DUR_COLORS[di], borderRadius: 3, data: STAGES.map((_, si) => counts[si][di]) }));
+  mkChart(canvas, { type:'bar', data:{ labels: SHORT, datasets },
+    options:{ maintainAspectRatio:false,
+      plugins:{ legend:{ position:'bottom', labels:{ boxWidth:10, padding:8, font:{ size:10 } } }, tooltip:{ callbacks:{ title:(items)=> STAGES[items[0].dataIndex] } } },
+      scales:{ x:{ grid:{ display:false }, ticks:{ font:{ size:10 } } }, y:{ grid:{ color:'#E6ECF6' }, ticks:{ precision:0 }, title:{ display:true, text:'responses', font:{ size:9 } } } } } });
+};
 
-  const expEl = document.getElementById('fb-exp-grid-bars');
-  expEl.innerHTML = SIM.expGrid.map(row =>
-    `<div style="margin-bottom:.35rem"><div style="font-size:.68rem;font-weight:600;color:var(--text);margin-bottom:.35rem">${row.label}</div>` +
-    row.scores.map((s,i) => s != null ? renderScoreBar(GRID_COLS[i], s, GRID_COLORS[i]) : '').join('') + '</div>'
-  ).join('');
+// Response coverage summary (accepts an optional filtered row set).
+window.renderFbCoverage = function renderCoverage(rowsArg) {
+  const el = document.getElementById('fb-coverage');
+  if (!el) return;
+  const rows = (rowsArg || window.__fbSurveys || []);
+  if (!rows.length) { el.innerHTML = '<div style="color:var(--muted);font-size:.78rem;">No responses yet.</div>'; return; }
+  const byCouple = {}; let unlinked = 0;
+  rows.forEach(r => { if (!r.coupleId) { unlinked++; return; } byCouple[r.coupleId] = (byCouple[r.coupleId] || 0) + 1; });
+  const couples = Object.keys(byCouple).length;
+  const bothReplied = Object.values(byCouple).filter(nn => nn >= 2).length;
+  const oneReplied = couples - bothReplied;
+  const stat = (label, value, colour) => `<div style="display:grid;grid-template-columns:1fr auto;gap:.75rem;align-items:center;padding:.35rem 0"><div style="font-size:.74rem;color:var(--text)">${label}</div><div style="font-size:.85rem;font-weight:700;color:${colour};white-space:nowrap">${value}</div></div>`;
+  el.innerHTML = stat('Total responses', rows.length, '#1B5FE8') + stat('Couples represented', couples, '#1B5FE8') + stat('Both partners replied', bothReplied, '#10B981') + stat('Only one partner replied', oneReplied, '#E8673A') + (unlinked ? stat('Not linked to a couple', unlinked, '#8C7A68') : '');
+};
 
-  // Overall grid bars
-  const OV_COLS = ['Clarity','Impact','Overall Satisfaction'];
-  const OV_COLORS = ['#6C7FFF','#E8673A','#10B981'];
-  const ovEl = document.getElementById('fb-overall-grid-bars');
-  ovEl.innerHTML = SIM.overallGrid.map(row =>
-    `<div style="margin-bottom:.35rem;display:grid;grid-template-columns:160px 1fr;gap:0 1rem;align-items:start">
-      <div style="font-size:.75rem;font-weight:600;color:var(--text);padding-top:.5rem">${row.label}</div>
-      <div>${row.scores.map((s,i) => s !== null ? renderScoreBar(OV_COLS[i], s, OV_COLORS[i]) : '').join('')}</div>
-    </div>`
-  ).join('');
-
-  // Chip distributions
-  const max = (arr) => Math.max(...arr.map(i => i.v));
-  document.getElementById('fb-aha-bars').innerHTML = SIM.aha.map(i => renderBar(i.l, i.v, max(SIM.aha), '#E8673A', i.v + '%')).join('');
-  document.getElementById('fb-interest-bars').innerHTML = SIM.interestAvg.map(i => renderBar(i.l, i.v, max(SIM.interestAvg), '#1B5FE8', i.v + '%')).join('');
-  // Time-by-stage as a clustered column chart: one column group per stage,
-  // one bar per duration bucket, height = count of responses. Real data only.
-  window.renderTimeByStage = function renderTimeByStage() {
-    const canvas = document.getElementById('fb-timestage-chart');
-    const empty = document.getElementById('fb-timestage-empty');
-    if (!canvas) return;
-    const STAGES = ['Package selection, checkout, account creation','Completing communication exercise','Completing expectations exercise','Reviewing your results','Exploring the workbook'];
-    const SHORT = ['Checkout/setup','Communication','Expectations','Results','Workbook'];
-    const DUR = ['Less than 10 minutes','10\u201320 minutes','20\u201345 minutes','45\u201360 minutes','Over 1 hour'];
-    const DUR_SHORT = ['<10m','10\u201320m','20\u201345m','45\u201360m','1h+'];
-    const DUR_COLORS = ['#34D399','#6C7FFF','#FBBF24','#FF6B35','#F87171'];
-    const rows = (window.__fbSurveys || []);
-    if (!rows.length) { canvas.style.display='none'; if (empty) empty.style.display='block'; return; }
-    canvas.style.display='block'; if (empty) empty.style.display='none';
-    // counts[stageIdx][durIdx]
-    const counts = STAGES.map(() => DUR.map(() => 0));
-    rows.forEach(r => {
-      const tg = r.timeGrid || {};
-      STAGES.forEach((st, si) => { const d = tg[st]; const di = DUR.indexOf(d); if (di >= 0) counts[si][di]++; });
-    });
-    const datasets = DUR.map((d, di) => ({ label: DUR_SHORT[di], backgroundColor: DUR_COLORS[di], borderRadius: 3,
-      data: STAGES.map((_, si) => counts[si][di]) }));
-    mkChart(canvas, { type:'bar', data:{ labels: SHORT, datasets },
-      options:{ maintainAspectRatio:false,
-        plugins:{ legend:{ position:'bottom', labels:{ boxWidth:10, padding:8, font:{ size:10 } } },
-          tooltip:{ callbacks:{ title:(items)=> STAGES[items[0].dataIndex] } } },
-        scales:{ x:{ grid:{ display:false }, ticks:{ font:{ size:10 } } }, y:{ grid:{ color:'#E6ECF6' }, ticks:{ precision:0 }, title:{ display:true, text:'responses', font:{ size:9 } } } } } });
-  };
-
-  // Coverage is only meaningful once responses carry a coupleId. Older rows
-  // predate that and are counted separately rather than silently dropped.
-  window.renderFbCoverage = function renderCoverage() {
-    const el = document.getElementById('fb-coverage');
-    if (!el) return;
-    const rows = (window.__fbSurveys || []);
-    if (!rows.length) {
-      el.innerHTML = '<div style="color:var(--muted);font-size:.78rem;">No responses yet.</div>';
-      return;
-    }
-    const byCouple = {};
-    let unlinked = 0;
-    rows.forEach(r => {
-      if (!r.coupleId) { unlinked++; return; }
-      byCouple[r.coupleId] = (byCouple[r.coupleId] || 0) + 1;
-    });
-    const couples = Object.keys(byCouple).length;
-    const bothReplied = Object.values(byCouple).filter(n => n >= 2).length;
-    const oneReplied = couples - bothReplied;
-    const stat = (label, value, colour) =>
-      `<div style="display:grid;grid-template-columns:1fr auto;gap:.75rem;align-items:center;padding:.35rem 0">
-         <div style="font-size:.74rem;color:var(--text)">${label}</div>
-         <div style="font-size:.85rem;font-weight:700;color:${colour};white-space:nowrap">${value}</div>
-       </div>`;
-    el.innerHTML =
-      stat('Total responses', rows.length, '#1B5FE8') +
-      stat('Couples represented', couples, '#1B5FE8') +
-      stat('Both partners replied', bothReplied, '#10B981') +
-      stat('Only one partner replied', oneReplied, '#E8673A') +
-      (unlinked ? stat('Not linked to a couple', unlinked, '#8C7A68') : '');
-  };
-  window.renderFbCoverage();
-
-  renderTimeByStage();
+// Render every beta-feedback tile, each honoring its own slicer.
+function renderBetaTiles(){
+  const R0 = window.__betaR || [];
+  paintBetaTile('kpi', window.computeBetaSIM(R0)); // KPIs read the whole cohort
+  [['benchmark','fb-benchmark-bars'],['nps','fb-nps-chart'],['commsLead','fb-comms-lead-bars'],['expLead','fb-exp-lead-bars'],
+   ['commsGrid','fb-comms-grid-bars'],['expGrid','fb-exp-grid-bars'],['overallGrid','fb-overall-grid-bars'],
+   ['aha','fb-aha-bars'],['interest','fb-interest-bars'],['completion','fb-completion-bars'],['concerns','fb-concerns-bars'],
+   ['discovered','fb-discovered'],['wishKnew','fb-wish-knew']].forEach(([key,anchor])=>{
+    const sel=_fbEnsureSlicer(anchor,key,R0,()=>paintBetaTile(key, window.computeBetaSIM(sliceFilter(window.__betaR||[], sel.value))));
+    paintBetaTile(key, window.computeBetaSIM(sel?sliceFilter(R0,sel.value):R0));
+  });
+  // Time-by-stage reads response.timeGrid (present on betaR); coverage needs coupleId (only on __fbSurveys).
+  const tsSel=_fbEnsureSlicer('fb-timestage-chart','timestage',R0,()=>window.renderTimeByStage(sliceFilter(window.__betaR||[],tsSel.value)));
+  window.renderTimeByStage(tsSel?sliceFilter(R0,tsSel.value):R0);
+  const cvRows=window.__fbSurveys||[];
+  const cvSel=_fbEnsureSlicer('fb-coverage','coverage',cvRows,()=>window.renderFbCoverage(sliceFilter(window.__fbSurveys||[],cvSel.value)));
+  window.renderFbCoverage(cvSel?sliceFilter(cvRows,cvSel.value):cvRows);
   if (typeof renderQuestionExplorer === 'function') renderQuestionExplorer('qx-feedback', ['Beta feedback survey']);
-  document.getElementById('fb-completion-bars').innerHTML = SIM.completion.map(i => renderBar(i.l, i.v, max(SIM.completion), '#10B981', i.v + '%')).join('');
-  document.getElementById('fb-concerns-bars').innerHTML = SIM.concerns.map(i => renderBar(i.l, i.v, max(SIM.concerns), '#9B5DE5', i.v + '%')).join('');
-
-  // Open text feeds
-  const renderFeed = (items) => items.map(i => renderQuoteCard(i.text, i.name, i.nps)).join('');
-  document.getElementById('fb-discovered').innerHTML = renderFeed(SIM.discovered);
-  document.getElementById('fb-testimonials').innerHTML = SIM.testimonials.map(i =>
-    renderQuoteCard(i.text, i.name + ' · ' + i.consent, i.nps, '#10B981')
-  ).join('');
-  document.getElementById('fb-detractors').innerHTML = renderFeed(SIM.detractors);
-  document.getElementById('fb-wish-knew').innerHTML = SIM.wishKnew.map(i => renderQuoteCard(i.text, i.name, 3, '#F59E0B')).join('');
 }
 
 
