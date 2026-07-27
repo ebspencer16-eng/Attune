@@ -2602,7 +2602,7 @@ async function loadFeedbackData() {
     SIM.npsDetractors= npsVals.length ? Math.round(det/npsVals.length*100) : 0;
     SIM.expectationMatch = avg('expectationMatch') ?? 0;
     SIM.convoRate = Math.round(R.filter(s => /^yes/i.test(String(s.convoHappened||''))).length / n * 100);
-    { const v=[...R.map(s=>+s.shiftCouple),...R.map(s=>+s.shiftSelf)].filter(Number.isFinite); SIM.outcomeShift = v.length ? Math.round(v.reduce((a,b)=>a+b)/v.length*10)/10 : 0; }
+    { const v=R.map(s=>+s.shiftCouple).filter(Number.isFinite); SIM.outcomeShift = v.length ? Math.round(v.reduce((a,b)=>a+b)/v.length*10)/10 : 0; }  // outcome shift = couple shift only (not avg of couple + self)
     SIM.benchmarks = [['Expectation match','expectationMatch','#E8673A'],['Communication overall','commsOverall','#9B5DE5'],['Expectations overall','expOverall','#9B5DE5'],['Outcome shift (couple)','shiftCouple','#10B981'],['Outcome shift (self)','shiftSelf','#10B981'],['Return likelihood','returnLikelihood','#10B981'],['Value vs other spend','valuePct','#F59E0B']]
       .map(([label,f,color]) => ({ label, val: avg(f), color })).filter(b => b.val != null);
     SIM.commsLead = [['Overall rating','commsOverall'],['Honesty','commsHonesty']].map(([label,f]) => ({ label, val: avg(f) })).filter(m => m.val != null);

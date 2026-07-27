@@ -255,12 +255,13 @@ export default async function handler(req) {
     const surveyByRespondent = {};
     const fbCatOptions = { fb_ahaMarker: new Set(), fb_convoHappened: new Set() };
     try {
-      const { data: fbRows = [] } = await admin.from('feedback_submissions').select('type, text, submitted_at').eq('type', 'beta_survey');
+      const { data: fbRows = [] } = await admin.from('feedback_submissions').select('id, type, text, submitted_at, featured').eq('type', 'beta_survey');
       for (const r of fbRows) {
         let payload = null;
         try { payload = typeof r.text === 'string' ? JSON.parse(r.text) : r.text; } catch {}
         if (payload && payload.respondentId) {
           payload._ts = r.submitted_at || payload._ts || null;
+          payload._rowId = r.id; payload._featured = !!r.featured;
           surveyByRespondent[payload.respondentId] = payload;
           for (const [fk, src] of Object.entries(FB_CAT_SRC)) { const v = payload[src]; if (v) fbCatOptions[fk].add(v); }
         }
@@ -370,6 +371,15 @@ export default async function handler(req) {
       const rl = parseInt(payload.returnLikelihood, 10); row.returnLikelihood = Number.isFinite(rl) ? rl : null;
       row.convo = payload.convoHappened != null && payload.convoHappened !== '' ? String(payload.convoHappened) : null;
       surveysAnon.push(row);
+      // Beta-survey testimonial (from the survey's last section) -> Testimonials page.
+      const _btxt = String(payload.testimonial || '').trim();
+      if (_btxt) {
+        const bt = { id: payload._rowId != null ? payload._rowId : ('beta-' + rid), featured: !!payload._featured,
+          name: payload.consentFirstName || payload.consentInitials || payload.userName || '', ts: payload._ts || null,
+          rating: null, nps: row.nps, testimonial: _btxt, coupleTypeName: payload.coupleType || null, source: 'beta' };
+        for (const k of SEG_KEYS) bt[k] = seg[k] != null ? seg[k] : null;
+        testimonialsAnon.push(bt);
+      }
     }
     // Post-results survey (general couples) — same shape so NPS/ratings charts
     // combine both cohorts. Its star rating maps onto the 1-5 rating axis.
