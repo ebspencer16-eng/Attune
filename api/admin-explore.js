@@ -361,6 +361,7 @@ export default async function handler(req) {
     const monthOfTs = (d) => { const t = new Date(d); return isNaN(t) ? null : t.getFullYear() + '-' + String(t.getMonth() + 1).padStart(2, '0'); };
     const surveysAnon = [];
     const testimonialsAnon = [];
+    const betaResponsesAnon = [];
     for (const [rid, payload] of Object.entries(surveyByRespondent)) {
       const seg = segById[rid] || {};
       const row = {};
@@ -371,6 +372,13 @@ export default async function handler(req) {
       const rl = parseInt(payload.returnLikelihood, 10); row.returnLikelihood = Number.isFinite(rl) ? rl : null;
       row.convo = payload.convoHappened != null && payload.convoHappened !== '' ? String(payload.convoHappened) : null;
       surveysAnon.push(row);
+      // Full beta response (all answer fields) + segments, PII stripped, for the
+      // segment-sliceable beta feedback charts.
+      { const br = {};
+        for (const k of Object.keys(payload)) { if (['respondentId','userName','email','_ts','_rowId','_featured'].includes(k)) continue; br[k] = payload[k]; }
+        for (const k of SEG_KEYS) br[k] = seg[k] != null ? seg[k] : null;
+        br._ts = payload._ts || null;
+        betaResponsesAnon.push(br); }
       // Beta-survey testimonial (from the survey's last section) -> Testimonials page.
       const _btxt = String(payload.testimonial || '').trim();
       if (_btxt) {
@@ -416,6 +424,7 @@ export default async function handler(req) {
       orders: orderRows,
       surveys: surveysAnon,
       testimonials: testimonialsAnon,
+      betaResponses: betaResponsesAnon,
     });
   } catch (e) {
     return json({ error: String(e && e.message ? e.message : e) }, 500);
