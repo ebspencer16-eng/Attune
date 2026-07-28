@@ -709,7 +709,7 @@
         <button onclick="clearFilters()" style="padding:.45rem .9rem;border:1px solid var(--border);border-radius:7px;background:transparent;color:var(--text);font-size:.82rem;cursor:pointer;font-family:var(--sans);">Clear filters</button>
       </div>
       <div style="font-size:.72rem;color:var(--dim);align-self:center;white-space:nowrap;padding-bottom:.1rem;">
-        Showing <strong id="explorer-count">47</strong> of 47 responses
+        Showing <strong id="explorer-count">0</strong> of <strong id="explorer-total">0</strong> responses
       </div>
     </div>
 
@@ -5100,11 +5100,16 @@ let ALL_RESPONSES = [];
 let FILTERED_RESPONSES = [];
 let explorerInited = false;
 
-function initSurveyExplorer() {
+async function initSurveyExplorer() {
   if (explorerInited) return;
   explorerInited = true;
-  ALL_RESPONSES = generateSimResponses(47);
+  // Real responses only (no simulated data). betaResponses carry the full survey
+  // answers + segment tags; empty until beta testers submit.
+  try { const _cube = await ensureCube(); ALL_RESPONSES = Array.isArray(_cube.betaResponses) ? _cube.betaResponses.slice() : []; }
+  catch (e) { ALL_RESPONSES = []; }
   FILTERED_RESPONSES = [...ALL_RESPONSES];
+  { const _t = document.getElementById('explorer-total'); if (_t) _t.textContent = ALL_RESPONSES.length;
+    const _c = document.getElementById('explorer-count'); if (_c) _c.textContent = FILTERED_RESPONSES.length; }
 
   // Populate crosstab selectors
   const scaleQuestions = SURVEY_QUESTIONS.filter(q => q.type === 'scale');

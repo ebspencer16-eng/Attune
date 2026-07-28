@@ -226,6 +226,7 @@ function buildCatalog(fbCatOptions) {
   }
   for (const k of Object.keys(FB_SCALE)) f.push({ key: k, label: FB_SCALE[k], group: 'Beta feedback survey', kind: 'scale', poleLow: (FB_POLES[k]||[])[0], poleHigh: (FB_POLES[k]||[])[1] });
   for (const k of Object.keys(FB_CAT)) f.push({ key: k, label: FB_CAT[k], group: 'Beta feedback survey', kind: 'cat', options: ((fbCatOptions && fbCatOptions[k]) || []).map((v) => ({ v, label: v })) });
+  f.push({ key: 'fb_nps', label: 'Feedback \u00b7 NPS (raw 0\u201310)', group: 'Beta feedback survey', kind: 'cat', options: Array.from({ length: 11 }, (_, i) => ({ v: String(i), label: String(i) })) });
   return f;
 }
 
@@ -315,6 +316,7 @@ export default async function handler(req) {
       if (survey) {
         for (const [fk, src] of Object.entries(FB_SCALE_SRC)) { const v = Number(survey[src]); row[fk] = Number.isFinite(v) ? v : null; }
         for (const [fk, src] of Object.entries(FB_CAT_SRC)) { row[fk] = survey[src] != null && survey[src] !== '' ? survey[src] : null; }
+        { const _nv = parseInt(survey.nps, 10); row.fb_nps = Number.isFinite(_nv) ? String(_nv) : null; }
       }
       rows.push(row);
       // Anonymized segment snapshot for order joins (keyed by id + email; no PII emitted).
