@@ -498,7 +498,7 @@ hr{border:none;border-top:1px solid var(--border-soft);margin:2rem 0}
     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
   </div>
   <h2>Thank you, genuinely.</h2>
-  <p>Your feedback is exactly what we need to make Attune better.<br>We'll be in touch before we launch.</p>
+  <p>Your responses have been recorded. Your feedback is exactly what we need to make Attune better.<br>We'll be in touch before we launch.</p>
 </div>
 
 <script>
@@ -947,6 +947,7 @@ async function postSurvey(data) {
 
 function showSuccess() {
   try { localStorage.removeItem(PENDING_KEY); } catch {}
+  try { localStorage.setItem('attune_feedback_submitted', '1'); } catch {}
   // Clear the dashboard survey prompt (shared same-origin flag).
   try { localStorage.setItem('attune_survey_done', '1'); } catch {}
   document.getElementById('formPage').style.display = 'none';
@@ -976,16 +977,39 @@ async function sendSurvey(data) {
 }
 
 // A response stashed by a failed attempt is resent quietly on the next visit.
-(function retryPending() {
+// On load: if this device already submitted, show the thanks page (not a blank
+// form). If a prior submission was stashed but never confirmed (e.g. the page
+// was reloaded mid-send), finish it now and show 'saving… -> thanks' rather than
+// dropping the tester back onto an empty form.
+(function initFeedbackState() {
+  const successEl = document.getElementById('successState');
+  const formEl = document.getElementById('formPage');
+  const setThanks = () => {
+    try { successEl.querySelector('h2').textContent = 'Thank you, genuinely.';
+      successEl.querySelector('p').innerHTML = "Your responses have been recorded. Your feedback is exactly what we need to make Attune better.<br>We'll be in touch before we launch."; } catch {}
+  };
+  try { if (localStorage.getItem('attune_feedback_submitted') === '1') { setThanks(); showSuccess(); return; } } catch {}
   let pending = null;
   try { pending = JSON.parse(localStorage.getItem(PENDING_KEY) || 'null'); } catch {}
-  if (!pending) return;
-  postSurvey(pending)
-    .then(() => { try { localStorage.removeItem(PENDING_KEY); } catch {} })
-    .catch(() => { /* stays stashed for the next attempt */ });
+  if (pending) {
+    if (formEl) formEl.style.display = 'none';
+    try { successEl.querySelector('h2').textContent = 'Saving your feedback\u2026';
+      successEl.querySelector('p').textContent = 'One moment. Please keep this page open.'; } catch {}
+    successEl.classList.add('show');
+    window.scrollTo({ top: 0 });
+    postSurvey(pending)
+      .then(() => { try { localStorage.removeItem(PENDING_KEY); } catch {} setThanks(); showSuccess(); })
+      .catch(() => {
+        successEl.classList.remove('show');
+        if (formEl) formEl.style.display = '';
+        const w = document.getElementById('reqWarn');
+        if (w) { w.textContent = "We couldn't finish saving your last submission. Your answers are still saved on this device \u2014 press submit to try again."; w.classList.add('show'); }
+        updateProgress();
+      });
+    return;
+  }
+  updateProgress();
 })();
-
-updateProgress();
 </script>
 </body>
 </html>
