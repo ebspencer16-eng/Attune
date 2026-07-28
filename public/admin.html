@@ -5115,10 +5115,16 @@ let explorerInited = false;
 async function initSurveyExplorer() {
   if (explorerInited) return;
   explorerInited = true;
-  // Real responses only (no simulated data). betaResponses carry the full survey
-  // answers + segment tags; empty until beta testers submit.
-  try { const _cube = await ensureCube(); ALL_RESPONSES = Array.isArray(_cube.betaResponses) ? _cube.betaResponses.slice() : []; }
-  catch (e) { ALL_RESPONSES = []; }
+  // Real responses only (no simulated data). Use the raw beta-survey submissions
+  // so every real response shows even when it isn't matched to a profile; the
+  // question-by-question crosstab needs the answer fields, not segment tags.
+  try {
+    const _ad = await fetchAdminData();
+    ALL_RESPONSES = ((_ad && _ad.feedback_submissions) || [])
+      .filter(r => r.type === 'beta_survey')
+      .map(r => { try { return typeof r.text === 'string' ? JSON.parse(r.text) : r.text; } catch { return null; } })
+      .filter(Boolean);
+  } catch (e) { ALL_RESPONSES = []; }
   FILTERED_RESPONSES = [...ALL_RESPONSES];
   { const _t = document.getElementById('explorer-total'); if (_t) _t.textContent = ALL_RESPONSES.length;
     const _c = document.getElementById('explorer-count'); if (_c) _c.textContent = FILTERED_RESPONSES.length; }
