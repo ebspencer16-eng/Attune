@@ -3592,6 +3592,8 @@ async function loadRealAnalytics() {
       chartsInit.satisfaction = false;
       if (document.getElementById('page-satisfaction')?.classList.contains('active')) initCharts('satisfaction');
     }
+    // Explorer may have inited empty at page load; refresh it now that data is in.
+    if (typeof initSurveyExplorer === 'function' && document.getElementById('page-survey-explorer')?.classList.contains('active')) { try { initSurveyExplorer(); } catch (e) {} }
   } catch (e) {
     console.warn('[admin] real analytics load failed:', e);
   }
@@ -5112,12 +5114,11 @@ let ALL_RESPONSES = [];
 let FILTERED_RESPONSES = [];
 let explorerInited = false;
 
+let _explorerSelectorsBuilt = false;
 async function initSurveyExplorer() {
-  if (explorerInited) return;
-  explorerInited = true;
-  // Real responses only (no simulated data). Use the raw beta-survey submissions
-  // so every real response shows even when it isn't matched to a profile; the
-  // question-by-question crosstab needs the answer fields, not segment tags.
+  // Reload data on every call. The first call at page load can race the admin
+  // data fetch, so we never lock on an empty result (real responses use the raw
+  // beta-survey submissions; the crosstab needs answer fields, not segment tags).
   try {
     const _ad = await fetchAdminData();
     ALL_RESPONSES = ((_ad && _ad.feedback_submissions) || [])
@@ -5129,17 +5130,18 @@ async function initSurveyExplorer() {
   { const _t = document.getElementById('explorer-total'); if (_t) _t.textContent = ALL_RESPONSES.length;
     const _c = document.getElementById('explorer-count'); if (_c) _c.textContent = FILTERED_RESPONSES.length; }
 
-  // Populate crosstab selectors
-  const scaleQuestions = SURVEY_QUESTIONS.filter(q => q.type === 'scale');
-  const catQuestions = SURVEY_QUESTIONS.filter(q => q.type === 'chip' || q.type === 'multi-chip');
-
-  const rowSel = document.getElementById('crosstab-row');
-  const colSel = document.getElementById('crosstab-col');
-  catQuestions.forEach(q => { rowSel.innerHTML += `<option value="${q.id}">${q.label}</option>`; });
-  scaleQuestions.forEach(q => { colSel.innerHTML += `<option value="${q.id}">${q.label}</option>`; });
-  rowSel.value = 'convoHappened';
-  colSel.value = 'nps';
-
+  if (!_explorerSelectorsBuilt) {
+    _explorerSelectorsBuilt = true;
+    const scaleQuestions = SURVEY_QUESTIONS.filter(q => q.type === 'scale');
+    const catQuestions = SURVEY_QUESTIONS.filter(q => q.type === 'chip' || q.type === 'multi-chip');
+    const rowSel = document.getElementById('crosstab-row');
+    const colSel = document.getElementById('crosstab-col');
+    if (rowSel) catQuestions.forEach(q => { rowSel.innerHTML += `<option value="${q.id}">${q.label}</option>`; });
+    if (colSel) scaleQuestions.forEach(q => { colSel.innerHTML += `<option value="${q.id}">${q.label}</option>`; });
+    if (rowSel) rowSel.value = 'convoHappened';
+    if (colSel) colSel.value = 'nps';
+  }
+  explorerInited = true;
   renderAllQuestions();
   runCrosstab();
 }
