@@ -273,6 +273,10 @@
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>
       Feedback Overview
     </a>
+    <a class="sb-item" onclick="showPage('feedback-survey')">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="12" y2="17"/></svg>
+      Feedback Survey
+    </a>
     <a class="sb-item" onclick="showPage('feedback')">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
       Beta Feedback
@@ -656,6 +660,23 @@
     <div class="chart-card" style="margin-top:1.25rem">
       <div class="chart-head"><div><div class="chart-title">NPS trend</div><div class="chart-subtitle">Monthly Net Promoter Score</div></div><select class="tile-slicer" id="slz-snps" title="Cut this tile by a segment"><option value="">Everyone</option></select></div>
       <div class="chart-body"><canvas id="chart-nps"></canvas></div>
+    </div>
+  </div>
+
+  <div class="page" id="page-feedback-survey">
+    <div class="topbar">
+      <div>
+        <div class="topbar-title">Feedback Survey</div>
+        <div class="topbar-sub">The shorter post-results survey · one tile per question (<span id="fbs-count">0</span> responses)</div>
+      </div>
+    </div>
+    <div id="fbs-tiles" class="chart-grid" style="grid-template-columns:1fr 1fr;"></div>
+    <div class="chart-card" id="fbs-xwrap" style="margin-top:1.25rem;display:none;">
+      <div class="chart-card-header"><div class="chart-card-title">Question by question</div><div class="chart-card-sub">Cross any two questions · cells show respondent counts</div></div>
+      <div style="display:flex;gap:.6rem;align-items:center;padding:.5rem 1.25rem;flex-wrap:wrap;">
+        <select id="fbs-xrow" class="tile-slicer"></select><span style="color:var(--dim);">×</span><select id="fbs-xcol" class="tile-slicer"></select>
+      </div>
+      <div id="fbs-xout" style="padding:0 1.25rem 1.1rem;overflow:auto;"></div>
     </div>
   </div>
 
@@ -2338,6 +2359,7 @@ function showPage(id) {
   // never sit blank from a data-less initial render.
   if (id==='demographics') { chartsInit.demographics = false; initCharts('demographics'); }
   if (id==='survey-explorer') initSurveyExplorer();
+  if (id==='feedback-survey') renderFeedbackSurvey();
   if (id==='types') loadTypesData();
   if (id==='beta-codes') loadBetaCodes();
   if (id==='promos') renderPromosPage();
@@ -2416,6 +2438,62 @@ async function exportFeedbackCSV() {
 }
 
 // ── Render a horizontal bar row ───────────────────────
+// ── Feedback Survey (shorter post-results survey) — tile per question ──────────
+async function renderFeedbackSurvey(){
+  let rows=[];
+  try {
+    const ad = await fetchAdminData();
+    rows = ((ad && ad.feedback_submissions)||[])
+      .filter(r=>r.type==='post_results')
+      .map(r=>{ try{ const pp=typeof r.text==='string'?JSON.parse(r.text):r.text; return (pp&&pp.answers)?pp.answers:(pp||{}); }catch{return null;} })
+      .filter(Boolean);
+  } catch(e){}
+  const n=rows.length;
+  const cEl=document.getElementById('fbs-count'); if(cEl) cEl.textContent=n;
+  const tiles=document.getElementById('fbs-tiles'); const xwrap=document.getElementById('fbs-xwrap');
+  if(!tiles) return;
+  if(!n){
+    tiles.innerHTML='<div class="chart-card" style="grid-column:1/-1;padding:2rem;text-align:center;color:var(--muted);font-size:.85rem;">No post-results survey responses yet. Each question gets its own tile here as couples complete the shorter feedback survey.</div>';
+    if(xwrap) xwrap.style.display='none';
+    return;
+  }
+  if(xwrap) xwrap.style.display='';
+  const countBy=(id, norm)=>{ const c={}; rows.forEach(r=>{ let v=r[id]; if(v==null||v==='')return; if(norm)v=norm(v); c[v]=(c[v]||0)+1; }); return c; };
+  const card=(title, inner)=>'<div class="chart-card"><div class="chart-card-header"><div class="chart-card-title">'+title+'</div></div><div style="padding:.6rem 1.25rem 1.1rem;">'+inner+'</div></div>';
+  const barsHTML=(counts, order, color)=>{ const keys=order||Object.keys(counts); const mx=Math.max(1,...keys.map(k=>counts[k]||0)); return keys.map(k=>renderBar(String(k),(counts[k]||0),mx,color,(counts[k]||0)+' ('+Math.round((counts[k]||0)/n*100)+'%)')).join(''); };
+  const feed=(id,col,empty)=>{ const t=rows.map(r=>String(r[id]||'').trim()).filter(Boolean); return { count:t.length, html: t.length? t.map(x=>renderQuoteCard(x,'Anonymous',col==='#10B981'?5:3,col)).join('') : '<div style="color:var(--muted);font-size:.8rem;">'+empty+'</div>' }; };
+  let html='';
+  { const c=countBy('rating', v=>String(parseInt(v,10))); const vals=rows.map(r=>parseInt(r.rating,10)).filter(Number.isFinite); const avg=vals.length?(vals.reduce((a,b)=>a+b,0)/vals.length).toFixed(1):'—';
+    html+=card('Experience rating <span style="color:var(--dim);font-weight:400;font-size:.7rem">avg '+avg+'/5</span>', barsHTML(c,['5','4','3','2','1'],'#10B981')); }
+  { const c=countBy('convo'); html+=card('Led to a real conversation', barsHTML(c,['Yes','Not yet'],'#1B5FE8')); }
+  { const vals=rows.map(r=>parseInt(r.nps,10)).filter(v=>Number.isFinite(v)&&v>=0&&v<=10); const prom=vals.filter(v=>v>=9).length,det=vals.filter(v=>v<=6).length; const score=vals.length?Math.round((prom-det)/vals.length*100):'—'; const c={}; vals.forEach(v=>c[v]=(c[v]||0)+1);
+    html+=card('NPS <span style="color:var(--dim);font-weight:400;font-size:.7rem">score '+score+'</span>', barsHTML(c,Array.from({length:11},(_,i)=>String(i)),'#F59E0B')); }
+  { const c=countBy('expectation'); html+=card('Compared to expectations', barsHTML(c,null,'#9B5DE5')); }
+  { const f=feed('testimonial','#10B981','No testimonials yet.'); html+=card('Testimonials <span style="color:var(--dim);font-weight:400;font-size:.7rem">'+f.count+'</span>', f.html); }
+  { const f=feed('improve','#F59E0B','Nothing submitted yet.'); html+=card('Anything they would change <span style="color:var(--dim);font-weight:400;font-size:.7rem">'+f.count+'</span>', f.html); }
+  tiles.innerHTML=html;
+  renderFbsCrosstab(rows);
+}
+
+function renderFbsCrosstab(rows){
+  const rowSel=document.getElementById('fbs-xrow'), colSel=document.getElementById('fbs-xcol'), out=document.getElementById('fbs-xout');
+  if(!rowSel||!colSel||!out) return;
+  window.__fbsRows=rows;
+  const FIELDS={ rating:{label:'Experience rating',cats:['5','4','3','2','1'],get:r=>{const v=parseInt(r.rating,10);return Number.isFinite(v)?String(v):'';}},
+    convo:{label:'Led to conversation',cats:['Yes','Not yet'],get:r=>r.convo||''},
+    nps:{label:'NPS (0-10)',cats:Array.from({length:11},(_,i)=>String(i)),get:r=>{const v=parseInt(r.nps,10);return Number.isFinite(v)?String(v):'';}},
+    expectation:{label:'Vs expectations',cats:null,get:r=>r.expectation||''} };
+  if(!rowSel.dataset.built){ rowSel.dataset.built='1'; const o=Object.entries(FIELDS).map(([k,f])=>'<option value="'+k+'">'+f.label+'</option>').join(''); rowSel.innerHTML=o; colSel.innerHTML=o; rowSel.value='convo'; colSel.value='rating'; rowSel.onchange=()=>renderFbsCrosstab(window.__fbsRows||[]); colSel.onchange=()=>renderFbsCrosstab(window.__fbsRows||[]); }
+  const rf=FIELDS[rowSel.value], cf=FIELDS[colSel.value];
+  const rcats=rf.cats||[...new Set(rows.map(rf.get).filter(Boolean))];
+  const ccats=cf.cats||[...new Set(rows.map(cf.get).filter(Boolean))];
+  const cell={}; rows.forEach(r=>{ const rv=rf.get(r), cv=cf.get(r); if(!rv||!cv)return; cell[rv]=cell[rv]||{}; cell[rv][cv]=(cell[rv][cv]||0)+1; });
+  let h='<table style="border-collapse:collapse;font-size:.75rem;min-width:200px;"><thead><tr><th style="padding:.35rem .6rem;"></th>'+ccats.map(c=>'<th style="padding:.35rem .6rem;color:var(--dim);font-weight:600;">'+c+'</th>').join('')+'</tr></thead><tbody>';
+  rcats.forEach(rv=>{ h+='<tr><td style="padding:.35rem .6rem;font-weight:600;color:var(--text);white-space:nowrap;">'+rv+'</td>'+ccats.map(cv=>{ const v=(cell[rv]&&cell[rv][cv])||0; return '<td style="padding:.35rem .6rem;text-align:center;color:'+(v?'var(--text)':'var(--dim)')+';">'+(v||'·')+'</td>'; }).join('')+'</tr>'; });
+  h+='</tbody></table>';
+  out.innerHTML=h;
+}
+
 function renderBar(label, val, max, color, subLabel='') {
   const pct = Math.round((val / max) * 100);
   return `<div class="insight-row">
