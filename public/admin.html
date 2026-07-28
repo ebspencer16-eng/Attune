@@ -271,7 +271,7 @@
     <div class="sb-section">Feedback</div>
     <a class="sb-item" onclick="showPage('satisfaction')">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>
-      Satisfaction
+      Feedback Overview
     </a>
     <a class="sb-item" onclick="showPage('feedback')">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
@@ -631,15 +631,17 @@
   <div class="page" id="page-satisfaction">
     <div class="topbar">
       <div>
-        <div class="topbar-title">Satisfaction</div>
-        <div class="topbar-sub">Post-completion feedback: NPS, ratings, and impact</div>
+        <div class="topbar-title">Feedback Overview</div>
+        <div class="topbar-sub">Key metrics across the feedback survey and beta testers</div>
       </div>
     </div>
-    <div class="kpi-grid" style="grid-template-columns:repeat(4,1fr);">
+    <div class="kpi-grid" style="grid-template-columns:repeat(3,1fr);">
       <div class="kpi-card green"><div class="kpi-label">NPS score</div><div class="kpi-val">—</div><div class="kpi-sub">World-class benchmark: 50+</div></div>
-      <div class="kpi-card green"><div class="kpi-label">Avg rating</div><div class="kpi-val">—</div><div class="kpi-sub">Post-completion survey</div></div>
-      <div class="kpi-card indigo"><div class="kpi-label">Completion rate</div><div class="kpi-val" id="sat-completion">—</div><div class="kpi-sub">Both partners finish all exercises</div></div>
+      <div class="kpi-card green"><div class="kpi-label">Avg rating</div><div class="kpi-val">—</div><div class="kpi-sub">Overall satisfaction</div></div>
+      <div class="kpi-card indigo"><div class="kpi-label">Expectation match</div><div class="kpi-val" id="sat-expmatch">—</div><div class="kpi-sub">Did it meet expectations</div></div>
       <div class="kpi-card green"><div class="kpi-label">Would recommend</div><div class="kpi-val" id="sat-recommend">—</div><div class="kpi-sub">Promoters (9–10 on NPS)</div></div>
+      <div class="kpi-card indigo"><div class="kpi-label">Conversation rate</div><div class="kpi-val" id="sat-convo">—</div><div class="kpi-sub">Led to a real conversation</div></div>
+      <div class="kpi-card"><div class="kpi-label">Responses</div><div class="kpi-val" id="sat-responses">—</div><div class="kpi-sub">Completed feedback surveys</div></div>
     </div>
     <div class="chart-grid">
       <div class="chart-card">
@@ -3532,6 +3534,13 @@ async function loadRealAnalytics() {
       realRatingN = ratings.length;
     }
 
+    // ── Feedback Overview extra metrics ─────────────────────────────────
+    window.__fbResponseCount = surveys.length;
+    { const cy = surveys.filter(s => /^yes/i.test(String(s.convoHappened || ''))).length;
+      window.__fbConvoRate = surveys.length ? Math.round(cy / surveys.length * 100) : null; }
+    { const em = surveys.map(s => parseFloat(s.expectationMatch)).filter(v => Number.isFinite(v));
+      window.__fbExpMatch = em.length ? Math.round(em.reduce((a, b) => a + b, 0) / em.length * 10) / 10 : null; }
+
     // ── Drop-off point (most common stopping exercise) ──────────────────
     // bothDone responses indicate where things stalled. "Not done" often
     // correlates with getting stuck at Ex 02 (expectations is longer).
@@ -3571,6 +3580,9 @@ async function loadRealAnalytics() {
         val.innerHTML = realNpsDist.promoters + '<span style="font-size:1rem;color:var(--muted)">%</span>';
         if (sub) sub.textContent = 'Promoters · n=' + recentNps.length;
       }
+      if (label === 'Conversation rate' && window.__fbConvoRate != null && val) { val.innerHTML = window.__fbConvoRate + '<span style="font-size:1rem;color:var(--muted)">%</span>'; if (sub) sub.textContent = 'n=' + (window.__fbResponseCount||0); }
+      if (label === 'Expectation match' && window.__fbExpMatch != null && val) { val.innerHTML = window.__fbExpMatch + '<span style="font-size:1rem;color:var(--muted)">/5</span>'; }
+      if (label === 'Responses' && val) { val.textContent = window.__fbResponseCount || 0; }
     });
     // Drop-off point now lives on the Orders page next to the completion funnel.
     { const _de = document.getElementById('orders-dropoff'); if (_de) _de.textContent = realDropoffExercise ? (realDropoffExercise === 'None' ? 'none' : realDropoffExercise) : '—'; }
