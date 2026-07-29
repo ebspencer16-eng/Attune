@@ -671,13 +671,6 @@
       </div>
     </div>
     <div id="fbs-tiles" class="chart-grid" style="grid-template-columns:1fr 1fr;"></div>
-    <div class="chart-card" id="fbs-xwrap" style="margin-top:1.25rem;display:none;">
-      <div class="chart-card-header"><div class="chart-card-title">Question by question</div><div class="chart-card-sub">Cross any two questions · cells show respondent counts</div></div>
-      <div style="display:flex;gap:.6rem;align-items:center;padding:.5rem 1.25rem;flex-wrap:wrap;">
-        <select id="fbs-xrow" class="tile-slicer"></select><span style="color:var(--dim);">×</span><select id="fbs-xcol" class="tile-slicer"></select>
-      </div>
-      <div id="fbs-xout" style="padding:0 1.25rem 1.1rem;overflow:auto;"></div>
-    </div>
   </div>
 
 </div><!-- end main -->
@@ -1413,7 +1406,6 @@ window.adminAuthHeaders = function(extra){
 
 
   <div class="page" id="page-feedback">
-    <div id="fb-real-data" style="display:none;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:1.25rem 1.5rem;margin-bottom:1.5rem;overflow-x:auto"></div>
     <div class="topbar">
       <div>
         <div class="topbar-title">Beta Feedback</div>
@@ -1570,29 +1562,11 @@ window.adminAuthHeaders = function(extra){
     <div class="chart-grid">
       <div class="chart-card">
         <div class="chart-card-header">
-          <div class="chart-card-title">Response coverage</div>
-          <div class="chart-card-sub">Who has actually replied</div>
-        </div>
-        <div id="fb-coverage" style="display:flex;flex-direction:column;gap:.55rem;padding:.5rem 1.4rem;">
-          <div style="color:var(--muted);font-size:.78rem;">Loading…</div>
-        </div>
-      </div>
-      <div class="chart-card">
-        <div class="chart-card-header">
           <div class="chart-card-title">Time spent by stage</div>
           <div class="chart-card-sub">How long each stage took · count of responses per bucket</div>
         </div>
         <div style="padding:.5rem 1.4rem 1rem;"><div style="height:230px;position:relative;"><canvas id="fb-timestage-chart"></canvas></div>
           <div id="fb-timestage-empty" style="display:none;color:var(--muted);font-size:.78rem;padding:1rem 0;">No responses yet.</div></div>
-      </div>
-      <div class="chart-card">
-        <div class="chart-card-header">
-          <div class="chart-card-title">Both partners completed</div>
-          <div class="chart-card-sub">Completion rate signal</div>
-        </div>
-        <div id="fb-completion-bars" style="display:flex;flex-direction:column;gap:.55rem;padding:.5rem 1.4rem;">
-          <div style="color:var(--muted);font-size:.78rem;">Loading…</div>
-        </div>
       </div>
       <div class="chart-card">
         <div class="chart-card-header">
@@ -2450,14 +2424,12 @@ async function renderFeedbackSurvey(){
   } catch(e){}
   const n=rows.length;
   const cEl=document.getElementById('fbs-count'); if(cEl) cEl.textContent=n;
-  const tiles=document.getElementById('fbs-tiles'); const xwrap=document.getElementById('fbs-xwrap');
+  const tiles=document.getElementById('fbs-tiles');
   if(!tiles) return;
   if(!n){
     tiles.innerHTML='<div class="chart-card" style="grid-column:1/-1;padding:2rem;text-align:center;color:var(--muted);font-size:.85rem;">No post-results survey responses yet. Each question gets its own tile here as couples complete the shorter feedback survey.</div>';
-    if(xwrap) xwrap.style.display='none';
     return;
   }
-  if(xwrap) xwrap.style.display='';
   const countBy=(id, norm)=>{ const c={}; rows.forEach(r=>{ let v=r[id]; if(v==null||v==='')return; if(norm)v=norm(v); c[v]=(c[v]||0)+1; }); return c; };
   const card=(title, inner)=>'<div class="chart-card"><div class="chart-card-header"><div class="chart-card-title">'+title+'</div></div><div style="padding:.6rem 1.25rem 1.1rem;">'+inner+'</div></div>';
   const barsHTML=(counts, order, color)=>{ const keys=order||Object.keys(counts); const mx=Math.max(1,...keys.map(k=>counts[k]||0)); return keys.map(k=>renderBar(String(k),(counts[k]||0),mx,color,(counts[k]||0)+' ('+Math.round((counts[k]||0)/n*100)+'%)')).join(''); };
@@ -2472,7 +2444,6 @@ async function renderFeedbackSurvey(){
   { const f=feed('testimonial','#10B981','No testimonials yet.'); html+=card('Testimonials <span style="color:var(--dim);font-weight:400;font-size:.7rem">'+f.count+'</span>', f.html); }
   { const f=feed('improve','#F59E0B','Nothing submitted yet.'); html+=card('Anything they would change <span style="color:var(--dim);font-weight:400;font-size:.7rem">'+f.count+'</span>', f.html); }
   tiles.innerHTML=html;
-  renderFbsCrosstab(rows);
 }
 
 function renderFbsCrosstab(rows){
@@ -2654,7 +2625,6 @@ window.computeBetaSIM = function(R){
       {label:'Couple type system', scores:[null,null,null]},
       {label:'Detailed feedback pages', scores:[null,null,null]},
       {label:'Workbook', scores:[null,null,null]},
-      {label:'Intimacy add-on', scores:[null,null,null]},
       {label:'Overall flow / UX', scores:[null,null,null]},
       {label:'Time it took', scores:[null,null,null]},
     ],
@@ -2803,7 +2773,7 @@ function renderBetaTiles(){
   paintBetaTile('kpi', window.computeBetaSIM(R0)); // KPIs read the whole cohort
   [['benchmark','fb-benchmark-bars'],['nps','fb-nps-chart'],['commsLead','fb-comms-lead-bars'],['expLead','fb-exp-lead-bars'],
    ['commsGrid','fb-comms-grid-bars'],['expGrid','fb-exp-grid-bars'],['overallGrid','fb-overall-grid-bars'],
-   ['aha','fb-aha-bars'],['interest','fb-interest-bars'],['completion','fb-completion-bars'],['concerns','fb-concerns-bars'],
+   ['aha','fb-aha-bars'],['interest','fb-interest-bars'],['concerns','fb-concerns-bars'],
    ['discovered','fb-discovered'],['wishKnew','fb-wish-knew']].forEach(([key,anchor])=>{
     const sel=_fbEnsureSlicer(anchor,key,R0,()=>paintBetaTile(key, window.computeBetaSIM(sliceFilter(window.__betaR||[], sel.value))));
     paintBetaTile(key, window.computeBetaSIM(sel?sliceFilter(R0,sel.value):R0));
@@ -2811,9 +2781,6 @@ function renderBetaTiles(){
   // Time-by-stage reads response.timeGrid (present on betaR); coverage needs coupleId (only on __fbSurveys).
   const tsSel=_fbEnsureSlicer('fb-timestage-chart','timestage',R0,()=>window.renderTimeByStage(sliceFilter(window.__betaR||[],tsSel.value)));
   window.renderTimeByStage(tsSel?sliceFilter(R0,tsSel.value):R0);
-  const cvRows=window.__fbSurveys||[];
-  const cvSel=_fbEnsureSlicer('fb-coverage','coverage',cvRows,()=>window.renderFbCoverage(sliceFilter(window.__fbSurveys||[],cvSel.value)));
-  window.renderFbCoverage(cvSel?sliceFilter(cvRows,cvSel.value):cvRows);
   if (typeof renderQuestionExplorer === 'function') renderQuestionExplorer('qx-feedback', ['Beta feedback survey']);
 }
 
@@ -3652,7 +3619,7 @@ async function loadRealAnalytics() {
       }
       if (label === 'Avg rating' && realAvgRating != null && val) {
         val.innerHTML = realAvgRating + '<span style="font-size:1rem;color:var(--muted)">/5</span>';
-        if (sub) sub.textContent = 'n=' + realRatingN + ' returnLikelihood';
+        if (sub) sub.textContent = 'n=' + realRatingN + ' responses';
       }
       if (label === 'Would recommend' && realNpsDist && val) {
         val.innerHTML = realNpsDist.promoters + '<span style="font-size:1rem;color:var(--muted)">%</span>';
