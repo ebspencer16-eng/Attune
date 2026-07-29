@@ -661,6 +661,16 @@
       <div class="chart-head"><div><div class="chart-title">NPS trend</div><div class="chart-subtitle">Monthly Net Promoter Score</div></div><select class="tile-slicer" id="slz-snps" title="Cut this tile by a segment"><option value="">Everyone</option></select></div>
       <div class="chart-body"><canvas id="chart-nps"></canvas></div>
     </div>
+    <div style="font-size:.62rem;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);font-weight:700;font-family:var(--mono);margin:1.75rem 0 .75rem;">Footer feedback · site-wide reaction strip</div>
+    <div class="kpi-grid" style="grid-template-columns:repeat(3,1fr);">
+      <div class="kpi-card green"><div class="kpi-label">Love it clicks</div><div class="kpi-val" id="ff-love">—</div><div class="kpi-sub">Footer reaction strip</div></div>
+      <div class="kpi-card indigo"><div class="kpi-label">Pretty good clicks</div><div class="kpi-val" id="ff-good">—</div><div class="kpi-sub">Footer reaction strip</div></div>
+      <div class="kpi-card amber"><div class="kpi-label">Suggestions</div><div class="kpi-val" id="ff-suggest">—</div><div class="kpi-sub">With a written message</div></div>
+    </div>
+    <div class="chart-card" style="margin-top:1.25rem">
+      <div class="chart-card-header"><div class="chart-card-title">Suggestions</div><div class="chart-card-sub">Messages sent via the footer strip · also emailed to hello@attune-relationships.com</div></div>
+      <div id="ff-suggestions" style="display:flex;flex-direction:column;gap:.6rem;padding:.6rem 1.4rem 1.2rem;"><div style="color:var(--muted);font-size:.78rem;">Loading…</div></div>
+    </div>
   </div>
 
   <div class="page" id="page-feedback-survey">
@@ -1592,25 +1602,6 @@ window.adminAuthHeaders = function(extra){
       </div>
     </div>
 
-    <!-- Footer strip clicks -->
-    <div class="kpi-grid" style="grid-template-columns:repeat(3,1fr);margin-top:1.5rem;">
-      <div class="kpi-card green">
-        <div class="kpi-label">Love it clicks</div>
-        <div class="kpi-val" id="fb-count-love">—</div>
-        <div class="kpi-sub">Footer strip</div>
-      </div>
-      <div class="kpi-card indigo">
-        <div class="kpi-label">Pretty good clicks</div>
-        <div class="kpi-val" id="fb-count-good">—</div>
-        <div class="kpi-sub">Footer strip</div>
-      </div>
-      <div class="kpi-card amber">
-        <div class="kpi-label">Suggest something</div>
-        <div class="kpi-val" id="fb-count-suggest">—</div>
-        <div class="kpi-sub">With message sent</div>
-      </div>
-    </div>
-
     <!-- Survey question explorer: distributions + crosstab + full segmentation -->
     <div class="qx-section" id="qx-feedback" style="margin-top:1.5rem"></div>
   </div>
@@ -2314,6 +2305,7 @@ function showPage(id) {
   if (id==='demographics') { chartsInit.demographics = false; initCharts('demographics'); }
   if (id==='survey-explorer') initSurveyExplorer();
   if (id==='feedback-survey') renderFeedbackSurvey();
+  if (id==='satisfaction') renderFooterFeedback();
   if (id==='types') loadTypesData();
   if (id==='beta-codes') loadBetaCodes();
   if (id==='promos') renderPromosPage();
@@ -2392,6 +2384,20 @@ async function exportFeedbackCSV() {
 }
 
 // ── Render a horizontal bar row ───────────────────────
+// ── Footer feedback (site-wide reaction strip) -> Feedback Overview ────────────
+async function renderFooterFeedback(){
+  let rows=[];
+  try { const ad=await fetchAdminData(); rows=((ad&&ad.feedback_submissions)||[]).filter(r=>r.type==='quick'); } catch(e){}
+  const norm=r=>String(r.rating==null?'':r.rating).toLowerCase();
+  const love=rows.filter(r=>norm(r).includes('love')||String(r.rating)==='3').length;
+  const good=rows.filter(r=>norm(r).includes('good')||String(r.rating)==='2').length;
+  const sugg=rows.filter(r=>String(r.text||'').trim());
+  const set=(id,v)=>{ const el=document.getElementById(id); if(el) el.textContent=v; };
+  set('ff-love',love); set('ff-good',good); set('ff-suggest',sugg.length);
+  const el=document.getElementById('ff-suggestions');
+  if(el) el.innerHTML = sugg.length ? sugg.map(r=>renderQuoteCard(String(r.text).trim(), r.source||'Anonymous', 3, '#F59E0B')).join('') : '<div style="color:var(--muted);font-size:.8rem;">No suggestions yet.</div>';
+}
+
 // ── Feedback Survey (shorter post-results survey) — tile per question ──────────
 async function renderFeedbackSurvey(){
   let rows=[];
