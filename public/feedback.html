@@ -923,6 +923,12 @@ function submitForm() {
       data.respondentId = ctx.respondentId;
       if (ctx.coupleType) data.coupleType = ctx.coupleType;
     }
+    // Fallback: if the survey was opened directly (no beta-tile context), link it
+    // to the logged-in account so it still ties to demographics for slicing.
+    if (!data.respondentId) {
+      try { const acct = JSON.parse(localStorage.getItem('attune_account') || 'null');
+        if (acct) { if (acct.id) data.respondentId = acct.id; if (!data.email && acct.email) data.email = acct.email; } } catch {}
+    }
   } catch {}
 
   sendSurvey(data);
