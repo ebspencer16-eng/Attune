@@ -1583,32 +1583,12 @@ window.adminAuthHeaders = function(extra){
     <div class="chart-grid chart-grid full">
       <div class="chart-card">
         <div class="chart-card-header">
-          <div class="chart-card-title">What they discovered</div>
-          <div class="chart-card-sub">Free text · required question · most valuable signal</div>
-          <div style="display:flex;gap:.5rem;margin-top:.5rem;">
-            <button class="tab active" onclick="setFeedbackTab(this,'fb-discovered')" style="font-size:.72rem;padding:.3rem .8rem;border:1px solid var(--border);border-radius:6px;background:var(--surface);cursor:pointer;">All</button>
-            <button class="tab" onclick="setFeedbackTab(this,'fb-testimonials')" style="font-size:.72rem;padding:.3rem .8rem;border:1px solid var(--border);border-radius:6px;background:transparent;cursor:pointer;">Testimonials</button>
-            <button class="tab" onclick="setFeedbackTab(this,'fb-detractors')" style="font-size:.72rem;padding:.3rem .8rem;border:1px solid var(--border);border-radius:6px;background:transparent;cursor:pointer;">Detractor why</button>
-          </div>
+          <div class="chart-card-title">Concluding remarks</div>
+          <div class="chart-card-sub">Every write-in response · pick a question, then filter by sentiment</div>
         </div>
-        <div id="fb-discovered" style="display:flex;flex-direction:column;gap:.75rem;">
-          <div style="color:var(--muted);font-size:.78rem;">Loading…</div>
-        </div>
-        <div id="fb-testimonials" style="display:none;flex-direction:column;gap:.75rem;"></div>
-        <div id="fb-detractors" style="display:none;flex-direction:column;gap:.75rem;"></div>
-      </div>
-    </div>
-
-    <!-- Pre-purchase messaging signals -->
-    <div class="chart-grid chart-grid full">
-      <div class="chart-card">
-        <div class="chart-card-header">
-          <div class="chart-card-title">What they wish they'd known</div>
-          <div class="chart-card-sub">Pre-purchase messaging + onboarding signal</div>
-        </div>
-        <div id="fb-wish-knew" style="display:flex;flex-direction:column;gap:.75rem;">
-          <div style="color:var(--muted);font-size:.78rem;">Loading…</div>
-        </div>
+        <div id="fb-remarks-pills" style="display:flex;flex-wrap:wrap;gap:.4rem;padding:.6rem 1.4rem .2rem;"></div>
+        <div id="fb-remarks-score" style="display:none;flex-wrap:wrap;gap:.4rem;padding:.15rem 1.4rem;"></div>
+        <div id="fb-remarks-body" style="display:flex;flex-direction:column;gap:.6rem;padding:.6rem 1.4rem 1.2rem;"><div style="color:var(--muted);font-size:.78rem;">Loading…</div></div>
       </div>
     </div>
 
@@ -2767,6 +2747,42 @@ window.renderFbCoverage = function renderCoverage(rowsArg) {
   el.innerHTML = stat('Total responses', rows.length, '#1B5FE8') + stat('Couples represented', couples, '#1B5FE8') + stat('Both partners replied', bothReplied, '#10B981') + stat('Only one partner replied', oneReplied, '#E8673A') + (unlinked ? stat('Not linked to a couple', unlinked, '#8C7A68') : '');
 };
 
+// Concluding remarks: one pill per write-in question; score-linked ones add a
+// negative / neutral / positive sentiment filter (#3/#4).
+const FB_REMARK_QS = [
+  { key:'whatDiscovered', label:'What they discovered' },
+  { key:'testimonial',    label:'Testimonial' },
+  { key:'wishKnew',       label:'What they wish they knew' },
+  { key:'expMissing',     label:'Missing from expectations' },
+  { key:'npsWhy',              label:'NPS reason',                score:'nps',              scoreType:'nps' },
+  { key:'expectationMatchWhy', label:'Expectation match reason',  score:'expectationMatch' },
+  { key:'commsOverallWhy',     label:'Comms rating reason',       score:'commsOverall' },
+  { key:'expOverallWhy',       label:'Expectations rating reason',score:'expOverall' },
+  { key:'shiftCoupleWhy',      label:'Couple shift reason',       score:'shiftCouple' },
+  { key:'returnLikelihoodWhy', label:'Return likelihood reason',  score:'returnLikelihood' },
+  { key:'valueWhy',            label:'Value reason',              score:'valuePct' },
+];
+function _fbSentOf(r, q){ if(!q.score) return null; const v=parseInt(r[q.score],10); if(!Number.isFinite(v)) return null; if(q.scoreType==='nps') return v>=9?'pos':(v<=6?'neg':'neu'); return v>=4?'pos':(v<=2?'neg':'neu'); }
+function renderConcludingRemarks(R){
+  const pills=document.getElementById('fb-remarks-pills'), scoreEl=document.getElementById('fb-remarks-score'), body=document.getElementById('fb-remarks-body');
+  if(!pills||!scoreEl||!body) return;
+  const withResp = FB_REMARK_QS.filter(q => (R||[]).some(r => String(r[q.key]||'').trim()));
+  if(!withResp.length){ pills.innerHTML=''; scoreEl.style.display='none'; body.innerHTML='<div style="color:var(--muted);font-size:.8rem;">No written responses yet.</div>'; return; }
+  const st = window.__remarksState = window.__remarksState || { q: withResp[0].key, sent:'all' };
+  if(!withResp.some(q=>q.key===st.q)){ st.q=withResp[0].key; st.sent='all'; }
+  const pill=(active,label,onclick,color)=>'<button onclick="'+onclick+'" style="font-size:.72rem;padding:.32rem .8rem;border-radius:999px;border:1px solid '+(active?(color||'#6C7FFF'):'var(--border)')+';background:'+(active?(color||'#6C7FFF')+'22':'transparent')+';color:'+(active?'var(--text)':'var(--muted)')+';cursor:pointer;font-family:var(--sans);">'+label+'</button>';
+  pills.innerHTML = withResp.map(q=>{ const cnt=R.filter(r=>String(r[q.key]||'').trim()).length; return pill(st.q===q.key, q.label+' ('+cnt+')', "__setRemarkQ('"+q.key+"')"); }).join('');
+  const cur = withResp.find(q=>q.key===st.q);
+  if(cur.score){ scoreEl.style.display='flex';
+    scoreEl.innerHTML=[['all','All','#6C7FFF'],['neg','Negative','#F87171'],['neu','Neutral','#F59E0B'],['pos','Positive','#10B981']].map(([k,l,c])=>pill(st.sent===k,l,"__setRemarkSent('"+k+"')",c)).join('');
+  } else { scoreEl.style.display='none'; scoreEl.innerHTML=''; }
+  let rows=R.filter(r=>String(r[cur.key]||'').trim());
+  if(cur.score && st.sent!=='all') rows=rows.filter(r=>_fbSentOf(r,cur)===st.sent);
+  body.innerHTML = rows.length ? rows.map(r=>{ const txt=String(r[cur.key]).trim(); const sent=_fbSentOf(r,cur); const col = cur.score ? (sent==='pos'?'#10B981':sent==='neg'?'#F87171':'#F59E0B') : '#6C7FFF'; const sc = cur.score ? (sent==='pos'?5:sent==='neg'?1:3) : 3; return renderQuoteCard(txt,'Anonymous',sc,col); }).join('') : '<div style="color:var(--muted);font-size:.8rem;">No responses in this filter.</div>';
+}
+window.__setRemarkQ=function(k){ const st=window.__remarksState=window.__remarksState||{}; st.q=k; st.sent='all'; renderConcludingRemarks(window.__betaR||[]); };
+window.__setRemarkSent=function(k){ const st=window.__remarksState=window.__remarksState||{}; st.sent=k; renderConcludingRemarks(window.__betaR||[]); };
+
 // Render every beta-feedback tile, each honoring its own slicer.
 function renderBetaTiles(){
   const R0 = window.__betaR || [];
@@ -2774,7 +2790,7 @@ function renderBetaTiles(){
   [['benchmark','fb-benchmark-bars'],['nps','fb-nps-chart'],['commsLead','fb-comms-lead-bars'],['expLead','fb-exp-lead-bars'],
    ['commsGrid','fb-comms-grid-bars'],['expGrid','fb-exp-grid-bars'],['overallGrid','fb-overall-grid-bars'],
    ['aha','fb-aha-bars'],['interest','fb-interest-bars'],['concerns','fb-concerns-bars'],
-   ['discovered','fb-discovered'],['wishKnew','fb-wish-knew']].forEach(([key,anchor])=>{
+   ].forEach(([key,anchor])=>{
     const sel=_fbEnsureSlicer(anchor,key,R0,()=>paintBetaTile(key, window.computeBetaSIM(sliceFilter(window.__betaR||[], sel.value))));
     paintBetaTile(key, window.computeBetaSIM(sel?sliceFilter(R0,sel.value):R0));
   });
@@ -2782,6 +2798,7 @@ function renderBetaTiles(){
   const tsSel=_fbEnsureSlicer('fb-timestage-chart','timestage',R0,()=>window.renderTimeByStage(sliceFilter(window.__betaR||[],tsSel.value)));
   window.renderTimeByStage(tsSel?sliceFilter(R0,tsSel.value):R0);
   if (typeof renderQuestionExplorer === 'function') renderQuestionExplorer('qx-feedback', ['Beta feedback survey']);
+  renderConcludingRemarks(R0);
 }
 
 
