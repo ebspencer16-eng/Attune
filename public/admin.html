@@ -639,9 +639,13 @@
         <div class="topbar-sub">Key metrics across the feedback survey and beta testers</div>
       </div>
     </div>
+    <div style="display:flex;justify-content:flex-end;align-items:center;gap:.5rem;margin-bottom:.6rem;">
+      <span style="font-size:.66rem;color:var(--muted);font-family:var(--mono);text-transform:uppercase;letter-spacing:.12em;">Slice all metrics</span>
+      <select id="sat-kpi-slicer" class="tile-slicer" title="Cut every metric below by a segment"></select>
+    </div>
     <div class="kpi-grid" style="grid-template-columns:repeat(3,1fr);">
-      <div class="kpi-card green"><div class="kpi-label">NPS score</div><div class="kpi-val">—</div><div class="kpi-sub">World-class benchmark: 50+</div></div>
-      <div class="kpi-card green"><div class="kpi-label">Avg rating</div><div class="kpi-val">—</div><div class="kpi-sub">Overall satisfaction</div></div>
+      <div class="kpi-card green"><div class="kpi-label">NPS score</div><div class="kpi-val" id="sat-nps">—</div><div class="kpi-sub">World-class benchmark: 50+</div></div>
+      <div class="kpi-card green"><div class="kpi-label">Avg rating</div><div class="kpi-val" id="sat-avg">—</div><div class="kpi-sub">Overall satisfaction</div></div>
       <div class="kpi-card indigo"><div class="kpi-label">Expectation match</div><div class="kpi-val" id="sat-expmatch">—</div><div class="kpi-sub">Did it meet expectations</div></div>
       <div class="kpi-card green"><div class="kpi-label">Would recommend</div><div class="kpi-val" id="sat-recommend">—</div><div class="kpi-sub">Promoters (9–10 on NPS)</div></div>
       <div class="kpi-card indigo"><div class="kpi-label">Conversation rate</div><div class="kpi-val" id="sat-convo">—</div><div class="kpi-sub">Led to a real conversation</div></div>
@@ -2306,6 +2310,7 @@ function showPage(id) {
   if (id==='survey-explorer') initSurveyExplorer();
   if (id==='feedback-survey') renderFeedbackSurvey();
   if (id==='satisfaction') renderFooterFeedback();
+  if (id==='satisfaction') renderOverviewKPIs();
   if (id==='types') loadTypesData();
   if (id==='beta-codes') loadBetaCodes();
   if (id==='promos') renderPromosPage();
@@ -2384,6 +2389,36 @@ async function exportFeedbackCSV() {
 }
 
 // ── Render a horizontal bar row ───────────────────────
+// ── Feedback Overview high-level metrics, sliceable by any segment ─────────────
+async function renderOverviewKPIs(){
+  let cube; try{ cube=await ensureCube(); }catch(e){ return; }
+  const all=(cube.betaResponses||[]);
+  const sel=document.getElementById('sat-kpi-slicer');
+  if(sel && sel.dataset.popN!==String(all.length)){ const cur=sel.value; delete sel.dataset.pop; populateSlicer(sel,null,all); sel.dataset.popN=String(all.length); if(cur){try{sel.value=cur;}catch(e){}} if(!sel.dataset.wired){ sel.dataset.wired='1'; sel.onchange=renderOverviewKPIs; } }
+  const R=sliceFilter(all, sel?sel.value:'');
+  const n=R.length;
+  const npsVals=R.map(s=>parseInt(s.nps,10)).filter(v=>Number.isFinite(v)&&v>=0&&v<=10);
+  let nps=null, promPct=null;
+  if(npsVals.length){ const prom=npsVals.filter(v=>v>=9).length, det=npsVals.filter(v=>v<=6).length; nps=Math.round(((prom-det)/npsVals.length)*100); promPct=Math.round(prom/npsVals.length*100); }
+  const rl=R.map(s=>parseInt(s.returnLikelihood,10)).filter(v=>Number.isFinite(v)&&v>=1&&v<=5);
+  const avg=rl.length?Math.round(rl.reduce((a,b)=>a+b,0)/rl.length*10)/10:null;
+  const em=R.map(s=>parseFloat(s.expectationMatch)).filter(v=>Number.isFinite(v));
+  const emAvg=em.length?Math.round(em.reduce((a,b)=>a+b,0)/em.length*10)/10:null;
+  const cyN=R.filter(s=>/^yes/i.test(String(s.convoHappened||s.convo||''))).length;
+  const convo=n?Math.round(cyN/n*100):null;
+  const g=id=>document.getElementById(id);
+  const setVal=(id,html,dash)=>{ const e=g(id); if(e) e.innerHTML=(html==null?'<span style="color:var(--muted)">'+(dash||'—')+'</span>':html); };
+  const mut='<span style="font-size:1rem;color:var(--muted)">';
+  setVal('sat-nps', nps==null?null:String(nps));
+  setVal('sat-avg', avg==null?null:(avg+mut+'/5</span>'));
+  setVal('sat-expmatch', emAvg==null?null:(emAvg+mut+'/5</span>'));
+  setVal('sat-recommend', promPct==null?null:(promPct+mut+'%</span>'));
+  setVal('sat-convo', convo==null?null:(convo+mut+'%</span>'));
+  setVal('sat-responses', String(n));
+  const subs={ 'sat-nps':(npsVals.length?'n='+npsVals.length+' responses':'no data'), 'sat-avg':(rl.length?'n='+rl.length+' responses':'no data'), 'sat-expmatch':(em.length?'n='+em.length+' responses':'no data'), 'sat-recommend':(npsVals.length?'Promoters · n='+npsVals.length:'no data'), 'sat-convo':'n='+n, 'sat-responses':'Completed feedback surveys' };
+  Object.entries(subs).forEach(([id,txt])=>{ const e=g(id); const sub=e&&e.parentElement&&e.parentElement.querySelector('.kpi-sub'); if(sub&&id!=='sat-nps'&&id!=='sat-responses') sub.textContent=txt; });
+}
+
 // ── Footer feedback (site-wide reaction strip) -> Feedback Overview ────────────
 async function renderFooterFeedback(){
   let rows=[];
