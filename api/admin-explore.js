@@ -28,7 +28,7 @@ function typeFromEx1(ans){
 }
 import { PERSONALITY_QUESTIONS, LIFE_QUESTIONS, RESPONSIBILITY_CATEGORIES } from './_questions.js';
 import { REFLECTION_QUESTIONS } from './_anniversary-questions.js';
-import { INTIMACY_QUESTIONS } from './_intimacy-questions.js';
+import { INTIMACY_QUESTIONS, INTIMACY_DIMENSIONS } from './_intimacy-questions.js';
 
 // Runs on the edge runtime (Web-style (req)=>Response handler), matching the
 // other admin endpoints. Without this, Vercel's Node runtime can't invoke it
@@ -69,6 +69,7 @@ function genderFromPronoun(pr) {
   return v === 'he/him' ? 'man' : v === 'she/her' ? 'woman' : v === 'they/them' ? 'nonbinary' : null;
 }
 const RESP_OPTS = ['Me', 'Both', 'Partner', 'N/A'];
+const IDIM_LABEL = Object.fromEntries((INTIMACY_DIMENSIONS || []).map((d) => [d.id, d.label]));
 
 // First sentence / clause, trimmed — used to label the two poles of a scale question.
 const shortPole = (t) => {
@@ -225,7 +226,7 @@ function buildCatalog(fbCatOptions) {
   for (const q of INTIMACY_QUESTIONS) {
     if (q.kind === 'multi') continue;
     const valid = (q.options || []).filter((o) => o.value != null);
-    const fld = { key: 'iq_' + q.id, label: (q.topic ? q.topic + ' · ' : '') + (q.premarital || q.married || q.id), group: 'Physical Intimacy', kind: 'cat', options: valid.map((o) => ({ v: o.label, label: o.label, val: o.value })), partnerable: true };
+    const fld = { key: 'iq_' + q.id, label: (q.topic ? q.topic + ' · ' : '') + (q.premarital || q.married || q.id), group: 'Physical Intimacy', kind: 'cat', options: valid.map((o) => ({ v: o.label, label: o.label, val: o.value })), partnerable: true, dim: q.dimension, dimLabel: IDIM_LABEL[q.dimension] || q.dimension };
     if (valid.length >= 2) {
       const lo = valid.reduce((a, b) => (b.value < a.value ? b : a));
       const hi = valid.reduce((a, b) => (b.value > a.value ? b : a));

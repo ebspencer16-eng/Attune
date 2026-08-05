@@ -596,10 +596,10 @@
 
     <div id="resp-story" style="display:none">
       <div class="kpi-grid" style="grid-template-columns:repeat(4,1fr);">
-        <div class="kpi-card indigo"><div class="kpi-label">Avg overall feel</div><div class="kpi-val">—</div><div class="kpi-sub">Scale: needs work → better than ever</div></div>
-        <div class="kpi-card green"><div class="kpi-label">Connection aligned</div><div class="kpi-val">—</div><div class="kpi-sub">Partners within 1 step of each other</div></div>
-        <div class="kpi-card amber"><div class="kpi-label">Fun gap flagged</div><div class="kpi-val">—</div><div class="kpi-sub">≥2 step gap on fun/lightness</div></div>
-        <div class="kpi-card orange"><div class="kpi-label">Comm gap flagged</div><div class="kpi-val">—</div><div class="kpi-sub">≥2 step gap on communication ease</div></div>
+        <div class="kpi-card indigo"><div class="kpi-label">Avg overall feel</div><div class="kpi-val" id="kpi-story-feel">—</div><div class="kpi-sub">Mean overall-feel score (1–5)</div></div>
+        <div class="kpi-card green"><div class="kpi-label">Connection aligned</div><div class="kpi-val" id="kpi-story-conn">—</div><div class="kpi-sub">Partners within 1 step of each other</div></div>
+        <div class="kpi-card amber"><div class="kpi-label">Fun gap flagged</div><div class="kpi-val" id="kpi-story-fun">—</div><div class="kpi-sub">≥2 step gap on fun/lightness</div></div>
+        <div class="kpi-card orange"><div class="kpi-label">Comm gap flagged</div><div class="kpi-val" id="kpi-story-comm">—</div><div class="kpi-sub">≥2 step gap on communication ease</div></div>
       </div>
       <div class="chart-grid">
         <div class="chart-card">
@@ -3970,16 +3970,49 @@ function filterOrders(sel) { applyOrderFilters(); }
 // ── Physical Intimacy responses aggregation ──────────────────────────────────
 // Reads real intimacy alignment from the analytics feed. No fabricated numbers:
 // shows an honest empty state until intimacy responses are wired into admin-data.
-function renderIntimacyResponses() {
-  const dims = (window.__attuneIntimacy && window.__attuneIntimacy.dims) || [];
-  const gaps = (window.__attuneIntimacy && window.__attuneIntimacy.gaps) || [];
-  const empty = 'No physical intimacy responses aggregated yet.';
-  const dimEl = document.getElementById('intimacy-dim-bars');
-  const gapEl = document.getElementById('intimacy-gap-bars');
-  if (dimEl) dimEl.innerHTML = dims.length ? '' : `<div style="color:var(--dim);font-size:.78rem;padding:.75rem 0;line-height:1.6">${empty}</div>`;
-  if (gapEl) gapEl.innerHTML = gaps.length ? '' : `<div style="color:var(--dim);font-size:.78rem;padding:.75rem 0;line-height:1.6">${empty}</div>`;
-  if (dims.length) renderBars('intimacy-dim-bars', dims, '#B5546E');
-  if (gaps.length) renderBars('intimacy-gap-bars', gaps, '#B5546E');
+// Rel-Reflection top tiles: overall-feel mean + couple-level alignment/gap rates.
+async function renderRelReflTiles(){
+  let cube; try{ cube=await ensureCube(); }catch(e){ return; }
+  const rows=cube.rows||[];
+  const byKey={}; (cube.fields||[]).forEach(f=>byKey[f.key]=f);
+  const setKpi=(id,txt)=>{ const el=document.getElementById(id); if(el) el.textContent=txt; };
+  const feelF=byKey['ref_a0'];
+  if(feelF){ const vals=rows.map(r=>qxPosOf(feelF,r['ref_a0'])).filter(v=>v!=null); const m=vals.length?vals.reduce((a,b)=>a+b,0)/vals.length:null; setKpi('kpi-story-feel', m==null?'—':(m+1).toFixed(1)); }
+  // Couple gap rate for a reflection question (self vs partner; steps = index units).
+  const pairPct=(key,test)=>{ const f=byKey[key]; if(!f) return null; let n=0,hit=0;
+    rows.forEach(r=>{ const sv=qxPosOf(f,r[key]), pv=qxPosOf(f,r['p_'+key]); if(sv==null||pv==null) return; n++; if(test(Math.abs(sv-pv))) hit++; });
+    return n? Math.round(100*hit/n) : null; };
+  const conn=pairPct('ref_a_sat_conn', d=>d<=1), fun=pairPct('ref_a_sat_fun', d=>d>=2), comm=pairPct('ref_a_sat_comm', d=>d>=2);
+  setKpi('kpi-story-conn', conn==null?'—':conn+'%');
+  setKpi('kpi-story-fun',  fun==null?'—':fun+'%');
+  setKpi('kpi-story-comm', comm==null?'—':comm+'%');
+  // "Scale question gap rates" chart: % of couples with a >=2 step gap per question.
+  const gm={'Fun & lightness':'ref_a_sat_fun','Communication ease':'ref_a_sat_comm','Day-to-day connection':'ref_a_sat_conn','Overall feel':'ref_a0'};
+  storyGaps.forEach(g=>{ const k=gm[g.l]; const v=k?pairPct(k,d=>d>=2):null; g.v=(v==null?0:v); });
+  renderBars('story-gap-bars', storyGaps, '#FBBF24');
+}
+
+// Physical Intimacy: per-dimension alignment vs gap, computed from the cube.
+async function renderIntimacyResponses(){
+  const dimEl=document.getElementById('intimacy-dim-bars');
+  const gapEl=document.getElementById('intimacy-gap-bars');
+  const empty='No physical intimacy responses aggregated yet.';
+  let cube; try{ cube=await ensureCube(); }catch(e){ return; }
+  const rows=cube.rows||[];
+  const iqFields=(cube.fields||[]).filter(f=>f.key.indexOf('iq_')===0 && f.dim);
+  const byDim={};
+  iqFields.forEach(f=>{ (byDim[f.dim]=byDim[f.dim]||{label:f.dimLabel||f.dim,fields:[]}).fields.push(f); });
+  const STEP=0.25;  // one option step on the intimacy 0..1 scale
+  const stats=Object.keys(byDim).map(d=>{
+    const info=byDim[d]; let alignSum=0,gapSum=0,qN=0;
+    info.fields.forEach(f=>{ let n=0,al=0,gp=0;
+      rows.forEach(r=>{ const sv=qxPosOf(f,r[f.key]), pv=qxPosOf(f,r['p_'+f.key]); if(sv==null||pv==null) return; n++; const dd=Math.abs(sv-pv); if(dd<=STEP) al++; if(dd>=2*STEP) gp++; });
+      if(n){ alignSum+=100*al/n; gapSum+=100*gp/n; qN++; } });
+    return qN? {l:info.label, align:Math.round(alignSum/qN), gap:Math.round(gapSum/qN)} : null;
+  }).filter(Boolean);
+  const emptyHtml='<div style="color:var(--dim);font-size:.78rem;padding:.75rem 0;line-height:1.6">'+empty+'</div>';
+  if(dimEl){ if(!stats.length) dimEl.innerHTML=emptyHtml; else renderBars('intimacy-dim-bars', stats.map(d=>({l:d.l,v:d.align})), '#10B981'); }
+  if(gapEl){ if(!stats.length) gapEl.innerHTML=emptyHtml; else renderBars('intimacy-gap-bars', stats.slice().sort((a,b)=>b.gap-a.gap).map(d=>({l:d.l,v:d.gap})), '#B5546E'); }
 }
 
 // ── Per-exercise Question Explorer (crosstab + a visual for every question) ──
@@ -4014,6 +4047,13 @@ function hexShade(base, frac){ const {r,g,b}=_hexToRgb(base); const t=0.22+0.78*
 function hexRamp(base, n){ n=n||5; const out=[]; for(let i=0;i<n;i++) out.push(hexShade(base, n===1?1:i/(n-1))); return out; }
 const QX_THEME = { 'qx-comm':'#6C7FFF', 'qx-exp':'#FF6B35', 'qx-story':'#E5578C', 'qx-intimacy':'#B5546E', 'qx-feedback':'#22A5C4' };
 const QX_MODE = {}; const QX_REPAINT = {};  // per-section 'mean'|'breakdown' + repaint fn (mean/breakdown toggle)
+// Numeric position of a cube answer: scale -> 1..5; intimacy -> option value 0..1; reflection Likert -> option index 0..n.
+function qxPosOf(f, raw){
+  if(raw==null||raw==='') return null;
+  if(f.kind==='scale'){ const v=Number(raw); return isNaN(v)?null:v; }
+  const opts=f.options||[]; const i=opts.findIndex(o=>String(o.v)===String(raw)); if(i<0) return null;
+  return opts.some(o=>typeof o.val==='number') ? opts[i].val : i;
+}
 // Semantic colour system used across the admin. Money=green. Each demographic
 // breakdown uses one brand hue (the bar height carries the value, not colour).
 // Nominal slices (gender, status) use a fixed palette so a category keeps the
@@ -5001,7 +5041,7 @@ function initCharts(page) {
     wireResponseTile({target:'exp-gap-bars',kind:'expgaps',selId:'slz-rgap'});
     wireResponseTile({target:'resp-agree-bars',kind:'respagree',selId:'slz-ragree'});
     wireResponseTile({target:'chart-story-feel',kind:'relfeel',selId:'slz-rfeel'});
-    renderBars('story-gap-bars',storyGaps,'#FBBF24');
+    renderRelReflTiles();
     renderIntimacyResponses();
     renderQuestionExplorer('qx-comm', ['Ex1 · Communication'], ['Dimensions (score'], true);
     renderQuestionExplorer('qx-exp', ['Ex2 · Life & values', 'Ex2 · Who does what'], undefined, true);
