@@ -4388,15 +4388,26 @@ async function renderQuestionExplorer(containerId, groupPrefixes, highPrefixes, 
       const cnt = counts[c] || 0; if (!cnt) return '';
       const w = n ? Math.round(cnt / n * 100) : 0;
       const color = f.kind === 'scale' ? SCALE_RAMP[idx] : CAT_RAMP[idx];
-      const lbl = f.kind === 'scale' ? qxCatLabel(f, c) : (optLabel[c] || c);
       const tip = f.kind === 'scale'
-        ? ('Score ' + c + (f.poleLow && (c==='1'||c==='5') ? '' : '') + ' — ' + w + '% of responses (' + cnt + ' of ' + n + ')')
+        ? ('Score ' + c + ' — ' + w + '% of responses (' + cnt + ' of ' + n + ')')
         : ((optLabel[c] || c) + ' — ' + w + '% of responses (' + cnt + ' of ' + n + ')');
-      return '<div data-tip="' + QX_ESC(tip) + '" style="width:' + w + '%;background:' + color + ';height:100%;cursor:default;"></div>';
+      // Scale bars keep fixed widths (pole-aligned); categorical bars fill proportionally so rounding never leaves a bare grey track.
+      const sizeStyle = f.kind === 'scale' ? ('width:' + w + '%') : ('flex:' + cnt + ' 0 0');
+      return '<div data-tip="' + QX_ESC(tip) + '" style="' + sizeStyle + ';background:' + color + ';height:100%;cursor:default;"></div>';
     }).join('');
+    // Explicit, hoverable grey segment for no-answer / uncategorized responses (categorical only). No more silent grey.
+    let naSeg = '';
+    if (f.kind !== 'scale') {
+      const counted = cats.reduce((a, c) => a + (counts[c] || 0), 0);
+      const rem = n - counted;
+      if (rem > 0) {
+        const rw = n ? Math.round(rem / n * 100) : 0;
+        naSeg = '<div data-tip="' + QX_ESC('N/A · no answer — ' + rw + '% of responses (' + rem + ' of ' + n + ')') + '" style="flex:' + rem + ' 0 0;background:#C4CBD8;height:100%;cursor:default;"></div>';
+      }
+    }
 
     const header = '<div style="font-size:.74rem;color:var(--text);margin-bottom:.3rem;line-height:1.35;">' + QX_ESC(f.label) + '</div>';
-    const barRow = '<div style="display:flex;height:14px;border-radius:5px;overflow:hidden;background:var(--surface);">' + segs + '</div>';
+    const barRow = '<div style="display:flex;height:14px;border-radius:5px;overflow:hidden;background:var(--surface);">' + segs + naSeg + '</div>';
 
     if (f.kind === 'scale') {
       // Pole labels either side of the bar (what 1 and 5 mean for THIS question).
