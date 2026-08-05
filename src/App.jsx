@@ -1335,9 +1335,13 @@ function computeIndividualType(scores) {
     stdDev = Math.sqrt(variance);
   }
   const nearMidpoint = Math.abs(withdrawScore - 3) < 0.3 && Math.abs(openScore - 3) < 0.3;
-  const lowConfidence = stdDev < 0.3 && nearMidpoint;
+  // Near-line (within 0.35 of a boundary): the categorical type is a lean, not a fixed position.
+  const nearEngageLine = Math.abs(withdrawScore - 3) < 0.35;
+  const nearOpenLine   = Math.abs(openScore    - 3) < 0.35;
+  // Broadened low-confidence: flat-answers-near-midpoint OR sitting near either axis line.
+  const lowConfidence = (stdDev < 0.3 && nearMidpoint) || nearEngageLine || nearOpenLine;
 
-  return { typeCode, withdrawScore, openScore, openCoord, engageCoord, lowConfidence, stdDev };
+  return { typeCode, withdrawScore, openScore, openCoord, engageCoord, lowConfidence, nearEngageLine, nearOpenLine, stdDev };
 }
 
 // Look up couple pairing from two type codes.
@@ -8248,8 +8252,8 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
             <div style={{ height: 1, background: C.stone, opacity: 0.6, margin: "0 0 1.25rem" }} />
             <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: "1.1rem" }}>
               {[
-                { label: "Engage / Withdraw", desc: "How you respond when something is hard or unresolved, do you move toward the situation or pull back from it first?", poles: ["Engage: moves toward resolution, addresses quickly", "Withdraw: needs space first, processes privately"], color: "#9B5DE5" },
-                { label: "Open / Guarded", desc: "How freely you express what's going on inside, do you share it openly or hold it privately until ready?", poles: ["Open: partner usually knows how you're feeling", "Guarded: processes internally, expressive when ready"], color: "#1B5FE8" },
+                { label: "Engage / Withdraw", desc: "How you respond when something is hard or unresolved, do you move toward the situation or pull back from it first?", poles: ["Engage: moves toward resolution, addresses quickly", "Withdraw: needs space first, processes privately"], color: "#9B5DE5", bothNear: Math.abs(newType.typeInfoA.withdrawScore - 3) < 0.35 && Math.abs(newType.typeInfoB.withdrawScore - 3) < 0.35 },
+                { label: "Open / Guarded", desc: "How freely you express what's going on inside, do you share it openly or hold it privately until ready?", poles: ["Open: partner usually knows how you're feeling", "Guarded: processes internally, expressive when ready"], color: "#1B5FE8", bothNear: Math.abs(newType.typeInfoA.openScore - 3) < 0.35 && Math.abs(newType.typeInfoB.openScore - 3) < 0.35 },
               ].map(ax => (
                 <div key={ax.label} style={{ borderLeft: `3px solid ${ax.color}`, paddingLeft: "0.9rem" }}>
                   <div style={{ fontSize: "0.6rem", letterSpacing: "0.2em", textTransform: "uppercase", color: ax.color, fontFamily: BFONT, fontWeight: 700, marginBottom: "0.5rem" }}>{ax.label}</div>
@@ -8259,6 +8263,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
                       <span style={{ fontWeight: 700, color: ax.color }}>{i === 0 ? "↑ " : "↓ "}</span>{p}
                     </div>
                   ))}
+                  {ax.bothNear && <p style={{ fontSize: "0.72rem", color: C.ink, fontFamily: BFONT, fontStyle: "italic", lineHeight: 1.6, margin: "0.55rem 0 0" }}>Because you two share very similar perspectives here, who plays which role may shift depending on the situation.</p>}
                 </div>
               ))}
             </div>
@@ -8327,6 +8332,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
                         label: "Engage/Withdraw",
                         value: info.withdrawScore <= 3.0 ? "Engage-leaning" : "Withdraw-leaning",
                         score: info.engageCoord,
+                        near: Math.abs(info.withdrawScore - 3) < 0.35,
                         driver: (() => {
                           const s = name === userName ? myS : partS;
                           const scores = [
@@ -8343,6 +8349,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
                         label: "Open/Guarded",
                         value: info.openScore >= 3.0 ? "Open-leaning" : "Guarded-leaning",
                         score: info.openCoord,
+                        near: Math.abs(info.openScore - 3) < 0.35,
                         driver: (() => {
                           const s = name === userName ? myS : partS;
                           const scores = [
@@ -8355,7 +8362,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
                           return `${name} ${dir}`;
                         })(),
                       },
-                    ].map(({ label, value, score, driver }) => (
+                    ].map(({ label, value, score, driver, near }) => (
                       <div key={label}>
                         <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "0.2rem" }}>
                           <span style={{ fontSize: "0.6rem", color: C.muted, fontFamily: BFONT, fontWeight: 600 }}>{label}</span>
@@ -8365,6 +8372,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
                           <div style={{ height: "100%", width: `${Math.round(score * 100)}%`, background: it.color, borderRadius: 2 }} />
                         </div>
                         {driver && <div style={{ fontSize: "0.6rem", color: C.muted, fontFamily: BFONT, marginTop: "0.25rem", fontStyle: "italic" }}>{driver}</div>}
+                        {near && <div style={{ fontSize: "0.6rem", color: C.muted, fontFamily: BFONT, marginTop: "0.2rem", fontStyle: "italic" }}>{name} sits close to the line here. Interpret this as 'leaning' toward one orientation rather than being fixed in that mindset.</div>}
                       </div>
                     ))}
                   </div>
