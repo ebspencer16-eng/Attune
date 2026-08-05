@@ -1629,13 +1629,13 @@ const NEW_COUPLE_TYPES = [
       "The relationship has both warmth and steadiness. You cover different emotional territory in a way that tends to be more complete than one style alone.",
     ],
     stickingPoints: [
-      "{EXP} can feel like {EXP_isC} always the one initiating depth, always doing the emotional work, always making the first move.",
+      "{EXP} can feel like {EXP_isC} always the one initiating depth, always doing the emotional work, always the one putting words to it first.",
       "{GRD} can feel pressure to match an emotional expressiveness that doesn't come naturally, which sometimes makes {GRD_obj} pull back further.",
       "What the expressive partner reads as withholding, the guarded partner experiences as just needing time to form it properly. Both readings feel true; neither is quite right.",
     ],
     patterns: [
       "When something is off, {U} and {P} are usually both aware of it, but processing it at different speeds.",
-      "{EXP} is the expressive one and tends to get the conversation started. {GRD} is more guarded and is willing to engage once the conversation begins.",
+      "{EXP} tends to process out loud. {GRD} needs to think it through first, then bring it. Same conversation, different way in.",
       "When the conversation does happen, it tends to go somewhere useful. You're not fighting about whether to have it, just when.",
     ],
     tips: [
@@ -1777,7 +1777,7 @@ const NEW_COUPLE_TYPES = [
     name: "The sanctuary",
     tagline: "You both need space when things get hard. The difference is how much it shows, and that gap is worth understanding.",
     description: "When things get hard, {U} and {P} both pull back. {EXP} carries the emotional weight visibly while withdrawn. {GRD} holds everything privately. The return is slow for both. Hard moments can sit for a long time before either of you surfaces them.",
-    nuance: "Real depth runs in this pairing, often more than either partner shows. The risk is that the depth never surfaces, because neither of you naturally initiates the opening. {EXP}, once ready, tends to be more willing to bring it back. Making that the agreed pattern gives {GRD} the full space, without indefinite silence.",
+    nuance: "Real depth runs in this pairing, often more than either partner shows. The risk is that the depth never surfaces, because neither of you naturally initiates the opening. Agree on who brings it back, and when. A named pattern gives you both the full space, without indefinite silence.",
     color: "#7C3AED", shade: "#F5F0FF",
     famousDuos: [
       { names: "Joel & Clementine", show: "Eternal Sunshine of the Spotless Mind", note: "He held everything privately; she expressed the weight of everything she was feeling. Both needed space. Both took it in different ways." },
@@ -1799,7 +1799,7 @@ const NEW_COUPLE_TYPES = [
       "When the conversation does happen, it tends to be more complete than it would have been earlier. The depth just required time.",
     ],
     tips: [
-      { title: "Let {EXP} initiate the return", body: "{EXP}, once ready, tends to be more willing to bring it back. Make that the agreed pattern. {EXP} signals readiness, and {GRD} gets the full space, without indefinite silence.", phraseTry: "I'm ready when you are. Take your time. I'll be here." },
+      { title: "Agree on who brings it back", body: "Neither of you moves to reopen things quickly, so the silence can stretch. Decide the pattern in advance. Whoever tends to settle first signals when they are ready, and the other gets the full space until then.", phraseTry: "I'm ready when you are. Take your time. I'll be here." },
       { title: "Bound the space with a time", body: "'I need some time' is not as useful as 'I need until tonight.' A specific return time lets the other person stop the worried waiting and trust the process.", phraseTry: "I need until tomorrow morning. I'll come find you then." },
       { title: "Create a regular time for openness", body: "{U} and {P} need a deliberate structure for things to surface. A weekly check-in, even 10 minutes, creates the opening that neither of you will naturally generate on your own.", phraseTry: "Can we do ten minutes on Sunday? Not about anything specific. I just want to check in." },
     ],
