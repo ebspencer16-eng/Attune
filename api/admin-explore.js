@@ -68,7 +68,7 @@ function genderFromPronoun(pr) {
   const v = String(pr || '').toLowerCase();
   return v === 'he/him' ? 'man' : v === 'she/her' ? 'woman' : v === 'they/them' ? 'nonbinary' : null;
 }
-const RESP_OPTS = ['Me', 'Partner', 'Both', 'N/A'];
+const RESP_OPTS = ['Me', 'Both', 'Partner', 'N/A'];
 
 // First sentence / clause, trimmed — used to label the two poles of a scale question.
 const shortPole = (t) => {

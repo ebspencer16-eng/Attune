@@ -4480,7 +4480,8 @@ async function renderQuestionExplorer(containerId, groupPrefixes, highPrefixes, 
     const segs = cats.map((c, idx) => {
       const cnt = counts[c] || 0; if (!cnt) return '';
       const w = n ? Math.round(cnt / n * 100) : 0;
-      const color = f.kind === 'scale' ? SCALE_RAMP[idx] : CAT_RAMP[idx];
+      const _lbl = f.kind === 'scale' ? c : (optLabel[c] || c);
+      const color = f.kind === 'scale' ? SCALE_RAMP[idx] : (String(_lbl).trim() === 'N/A' ? '#C4CBD8' : CAT_RAMP[idx]);
       const tip = f.kind === 'scale'
         ? ('Score ' + c + ' — ' + w + '% of responses (' + cnt + ' of ' + n + ')')
         : ((optLabel[c] || c) + ' — ' + w + '% of responses (' + cnt + ' of ' + n + ')');
@@ -4499,7 +4500,10 @@ async function renderQuestionExplorer(containerId, groupPrefixes, highPrefixes, 
       }
     }
 
-    const header = '<div style="font-size:.74rem;color:var(--text);margin-bottom:.3rem;line-height:1.35;">' + QX_ESC(f.label) + '</div>';
+    const header = (containerId === 'qx-exp' && f.label.indexOf(' · ') > -1)
+      ? (function(){ const parts = f.label.split(' · '); const cat = parts.shift(); const q = parts.join(' · ');
+          return '<div style="margin-bottom:.3rem;line-height:1.3;"><div style="font-family:var(--mono);font-size:.52rem;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);margin-bottom:.08rem;">' + QX_ESC(cat) + '</div><div style="font-size:.74rem;color:var(--text);">' + QX_ESC(q) + '</div></div>'; })()
+      : '<div style="font-size:.74rem;color:var(--text);margin-bottom:.3rem;line-height:1.35;">' + QX_ESC(f.label) + '</div>';
     const barRow = '<div style="display:flex;height:14px;border-radius:5px;overflow:hidden;background:var(--surface);">' + segs + naSeg + '</div>';
 
     if (f.kind === 'scale') {
@@ -4518,7 +4522,7 @@ async function renderQuestionExplorer(containerId, groupPrefixes, highPrefixes, 
     const fullKey = present.map((c, i) => (optLabel[c] || c)).join('   ·   ');
     const keyInline = present.map((c) => {
       const idx = cats.indexOf(c);
-      const color = CAT_RAMP[idx];
+      const color = (String(optLabel[c] || c).trim() === 'N/A') ? '#C4CBD8' : CAT_RAMP[idx];
       const kcnt = counts[c] || 0, kw = n ? Math.round(kcnt / n * 100) : 0;
       const ktip = (optLabel[c] || c) + ' — ' + kw + '% of responses (' + kcnt + ' of ' + n + ')';
       return '<span data-tip="' + QX_ESC(ktip) + '" style="display:inline-flex;align-items:center;gap:.25rem;flex:0 0 auto;cursor:default;">' +
