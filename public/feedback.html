@@ -150,6 +150,26 @@ hr{border:none;border-top:1px solid var(--border-soft);margin:2rem 0}
   .dot{width:22px;height:22px;font-size:.65rem}
   .grid-head-cell,.grid-row-label{font-size:.72rem;padding-left:.75rem}
 }
+/* Per-cell aspect labels exist only for the mobile stacked layout */
+.cell-aspect{display:none}
+/* Mobile: matrices stack into labeled rating blocks so every option is reachable without horizontal scroll */
+@media(max-width:560px){
+  .grid-wrap{overflow:visible}
+  .grid-head{display:none}
+  .grid-row{display:block !important;padding:.2rem 0 .8rem}
+  .grid-row:not(:last-child){border-bottom:1px solid var(--border)}
+  .grid-row-label{display:block;font-weight:600;font-size:.92rem;color:var(--ink);padding:1rem 1rem .3rem}
+  .grid-cell{display:flex;flex-direction:column;align-items:flex-start;gap:.5rem;padding:.5rem 1rem;justify-content:flex-start}
+  .grid-cell.skip{display:none}
+  .cell-aspect{display:block}
+  .cell-aspect .ca-label{font-weight:600;color:var(--ink);font-size:.74rem;letter-spacing:.03em;text-transform:uppercase}
+  .cell-aspect .ca-desc{display:block;font-style:italic;color:var(--faint);font-size:.7rem;margin-top:.12rem;line-height:1.35}
+  .grid-cell .dots{gap:9px}
+  .dot{width:34px;height:34px;font-size:.82rem}
+  #timeGrid .grid-cell{flex-direction:row;align-items:center;gap:.65rem}
+  #timeGrid .cell-aspect{order:2}
+  #timeGrid .dot.pick{width:28px;height:28px}
+}
 </style>
 </head>
 <body>
@@ -522,6 +542,7 @@ function buildGrid(containerId, rows, cols, skipMap = {}) {
           return `<div class="grid-cell skip"><div class="dots"><div class="dot" style="opacity:.25;pointer-events:none">—</div></div></div>`;
         }
         return `<div class="grid-cell">
+          <span class="cell-aspect"><span class="ca-label">${col.label}</span>${col.desc ? `<span class="ca-desc">${col.desc}</span>` : ''}</span>
           <div class="dots">
             ${[1,2,3,4,5].map(v => `<div class="dot" data-grid="${containerId}" data-ri="${ri}" data-ci="${ci}" data-v="${v}" onclick="gridClick(this)">${v}</div>`).join('')}
           </div>
@@ -696,7 +717,7 @@ function buildChoiceGrid(containerId, rows, cols) {
   rows.forEach((row, ri) => {
     html += `<div class="grid-row" style="${gt}">
       <div class="grid-row-label">${row}</div>
-      ${cols.map((_, ci) => `<div class="grid-cell"><div class="dots">
+      ${cols.map((col, ci) => `<div class="grid-cell"><span class="cell-aspect"><span class="ca-label">${col}</span></span><div class="dots">
         <div class="dot pick" data-grid="${containerId}" data-ri="${ri}" data-ci="${ci}" onclick="choiceClick(this)"></div>
       </div></div>`).join('')}
     </div>`;
@@ -1009,7 +1030,7 @@ async function sendSurvey(data) {
         successEl.classList.remove('show');
         if (formEl) formEl.style.display = '';
         const w = document.getElementById('reqWarn');
-        if (w) { w.textContent = "We couldn't finish saving your last submission. Your answers are still saved on this device \u2014 press submit to try again."; w.classList.add('show'); }
+        if (w) { w.textContent = "We couldn't finish saving your last submission. Your answers are still saved on this device. Press submit to try again."; w.classList.add('show'); }
         updateProgress();
       });
     return;
