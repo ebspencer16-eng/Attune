@@ -216,13 +216,22 @@ function buildCatalog(fbCatOptions) {
     });
   }
   for (const q of REFLECTION_QUESTIONS) {
-    const opts = (q.kind === 'pick' ? q.options : q.labels) || [];
-    f.push({ key: 'ref_' + q.id, label: (q.topic ? q.topic + ' · ' : '') + q.text, group: 'Ex3 · Relationship Reflection', kind: 'cat', options: opts.map((v) => ({ v, label: v })), partnerable: true });
+    const isPick = q.kind === 'pick';
+    const opts = (isPick ? q.options : q.labels) || [];
+    const fld = { key: 'ref_' + q.id, label: (q.topic ? q.topic + ' · ' : '') + q.text, group: 'Ex3 · Relationship Reflection', kind: 'cat', options: opts.map((v) => ({ v, label: v })), partnerable: true };
+    if (!isPick && opts.length >= 2) { fld.ordinal = true; fld.poleLow = opts[0]; fld.poleHigh = opts[opts.length - 1]; }
+    f.push(fld);
   }
   for (const q of INTIMACY_QUESTIONS) {
     if (q.kind === 'multi') continue;
-    const opts = (q.options || []).map((o) => o.label);
-    f.push({ key: 'iq_' + q.id, label: (q.topic ? q.topic + ' · ' : '') + (q.premarital || q.married || q.id), group: 'Physical Intimacy', kind: 'cat', options: opts.map((v) => ({ v, label: v })), partnerable: true });
+    const valid = (q.options || []).filter((o) => o.value != null);
+    const fld = { key: 'iq_' + q.id, label: (q.topic ? q.topic + ' · ' : '') + (q.premarital || q.married || q.id), group: 'Physical Intimacy', kind: 'cat', options: valid.map((o) => ({ v: o.label, label: o.label, val: o.value })), partnerable: true };
+    if (valid.length >= 2) {
+      const lo = valid.reduce((a, b) => (b.value < a.value ? b : a));
+      const hi = valid.reduce((a, b) => (b.value > a.value ? b : a));
+      fld.ordinal = true; fld.poleLow = lo.label; fld.poleHigh = hi.label;
+    }
+    f.push(fld);
   }
   for (const k of Object.keys(FB_SCALE)) f.push({ key: k, label: FB_SCALE[k], group: 'Beta feedback survey', kind: 'scale', poleLow: (FB_POLES[k]||[])[0], poleHigh: (FB_POLES[k]||[])[1] });
   for (const k of Object.keys(FB_CAT)) f.push({ key: k, label: FB_CAT[k], group: 'Beta feedback survey', kind: 'cat', options: ((fbCatOptions && fbCatOptions[k]) || []).map((v) => ({ v, label: v })) });
