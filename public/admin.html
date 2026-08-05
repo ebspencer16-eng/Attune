@@ -4288,7 +4288,7 @@ function ensureQxTooltip(){
   document.addEventListener('mousemove',e=>{ if(tip.style.opacity!=='1')return; const el=e.target.closest&&e.target.closest('[data-tip]'); if(el)pos(e.clientX,e.clientY); else tip.style.opacity='0'; });
   document.addEventListener('mouseout',e=>{ const el=e.target.closest&&e.target.closest('[data-tip]'); if(el)tip.style.opacity='0'; });
 }
-async function renderQuestionExplorer(containerId, groupPrefixes, highPrefixes) {
+async function renderQuestionExplorer(containerId, groupPrefixes, highPrefixes, hideCrosstab) {
   ensureQxTooltip();
   const el = document.getElementById(containerId);
   if (!el || el.dataset.rendered) return;
@@ -4312,16 +4312,17 @@ async function renderQuestionExplorer(containerId, groupPrefixes, highPrefixes) 
     + (highFields.length ? '<optgroup label="High-level views">' + optsFor(highFields) + '</optgroup>' : '')
     + '<optgroup label="All questions">' + optsFor(detailFields) + '</optgroup>';
   el.innerHTML =
+    (hideCrosstab ? '' :
     '<div style="font-size:.62rem;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);font-weight:700;font-family:var(--mono);margin:0 0 .75rem;">Question by question</div>' +
     '<div class="chart-card" style="padding:1.1rem 1.25rem;margin-bottom:1rem;">' +
       '<div style="font-size:.7rem;color:var(--muted);margin-bottom:.6rem;">Cross any question against a segment or another question. Cells show respondent counts.</div>' +
       '<div style="display:flex;flex-wrap:nowrap;gap:.6rem;align-items:center;">' +
-        '<select id="' + containerId + '-xrow" style="flex:1 1 0;min-width:0;background:var(--surface);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:.4rem .55rem;font-size:.75rem;">' + rowOpts + '</select>' +
+        '<select id="' + containerId + '-xrow" style="flex:1 1 0;min-width:0;background:var(--surface);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:.4rem .55rem;font-size:.75rem;">' + rowOpts + '<option value="">— none —</option></select>' +
         '<span style="color:var(--dim);">×</span>' +
-        '<select id="' + containerId + '-xcol" style="flex:1 1 0;min-width:0;background:var(--surface);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:.4rem .55rem;font-size:.75rem;">' + colOpts + '</select>' +
+        '<select id="' + containerId + '-xcol" style="flex:1 1 0;min-width:0;background:var(--surface);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:.4rem .55rem;font-size:.75rem;">' + colOpts + '<option value="">— none —</option></select>' +
       '</div>' +
       '<div id="' + containerId + '-xout" style="margin-top:.85rem;overflow:auto;"></div>' +
-    '</div>' +
+    '</div>') +
     '<div class="chart-card" style="padding:1.1rem 1.25rem;">' +
       '<div style="display:flex;justify-content:space-between;align-items:center;gap:.6rem;margin-bottom:.9rem;">' +
         '<div style="font-size:.7rem;color:var(--muted);">Distribution for every measure (<span id="' + containerId + '-distn">n=' + rows.length + '</span>).</div>' +
@@ -4332,6 +4333,7 @@ async function renderQuestionExplorer(containerId, groupPrefixes, highPrefixes) 
   const renderX = () => {
     const rk = document.getElementById(containerId + '-xrow').value;
     const ck = document.getElementById(containerId + '-xcol').value;
+    if (!rk || !ck) { const _o = document.getElementById(containerId + '-xout'); if (_o) _o.innerHTML = '<div style="color:var(--dim);font-size:.72rem;padding:.4rem 0;">Pick a row and a column, or set either to “— none —” to clear this view.</div>'; return; }
     const rf = fieldByKey[rk], cf = fieldByKey[ck];
     const rowCats = rf.kind === 'scale' ? ['1','2','3','4','5'] : (rf.options ? rf.options.map(o => o.v) : qxColCats(rows, rk));
     const colCats = cf && cf.kind === 'scale' ? ['1','2','3','4','5'] : (cf && cf.options ? cf.options.map(o => o.v).filter(v => rows.some(r => (cf.kind==='scale'?String(Math.round(r[ck])):r[ck]) === v)) : qxColCats(rows, ck));
@@ -4361,9 +4363,11 @@ async function renderQuestionExplorer(containerId, groupPrefixes, highPrefixes) 
     html += '</tbody></table>';
     document.getElementById(containerId + '-xout').innerHTML = html;
   };
-  document.getElementById(containerId + '-xrow').onchange = renderX;
-  document.getElementById(containerId + '-xcol').onchange = renderX;
-  renderX();
+  if (!hideCrosstab) {
+    document.getElementById(containerId + '-xrow').onchange = renderX;
+    document.getElementById(containerId + '-xcol').onchange = renderX;
+    renderX();
+  }
   const distEl = document.getElementById(containerId + '-dist');
 
   // One block per question. Scale questions (communication) get their two pole
@@ -4391,7 +4395,7 @@ async function renderQuestionExplorer(containerId, groupPrefixes, highPrefixes) 
       return '<div data-tip="' + QX_ESC(tip) + '" style="width:' + w + '%;background:' + color + ';height:100%;cursor:default;"></div>';
     }).join('');
 
-    const header = '<div style="font-size:.74rem;color:var(--text);margin-bottom:.3rem;line-height:1.35;">' + QX_ESC(f.label) + ' <span style="color:var(--dim);font-family:var(--mono);font-size:.66rem;">n=' + n + '</span></div>';
+    const header = '<div style="font-size:.74rem;color:var(--text);margin-bottom:.3rem;line-height:1.35;">' + QX_ESC(f.label) + '</div>';
     const barRow = '<div style="display:flex;height:14px;border-radius:5px;overflow:hidden;background:var(--surface);">' + segs + '</div>';
 
     if (f.kind === 'scale') {
@@ -4842,10 +4846,10 @@ function initCharts(page) {
     wireResponseTile({target:'chart-story-feel',kind:'relfeel',selId:'slz-rfeel'});
     renderBars('story-gap-bars',storyGaps,'#FBBF24');
     renderIntimacyResponses();
-    renderQuestionExplorer('qx-comm', ['Ex1 · Communication'], ['Dimensions (score']);
-    renderQuestionExplorer('qx-exp', ['Ex2 · Life & values', 'Ex2 · Who does what']);
-    renderQuestionExplorer('qx-story', ['Ex3 · Relationship Reflection']);
-    renderQuestionExplorer('qx-intimacy', ['Physical Intimacy']);
+    renderQuestionExplorer('qx-comm', ['Ex1 · Communication'], ['Dimensions (score'], true);
+    renderQuestionExplorer('qx-exp', ['Ex2 · Life & values', 'Ex2 · Who does what'], undefined, true);
+    renderQuestionExplorer('qx-story', ['Ex3 · Relationship Reflection'], undefined, true);
+    renderQuestionExplorer('qx-intimacy', ['Physical Intimacy'], undefined, true);
   }
   else if (page==='satisfaction') {
     renderSatConvo('slz-sconvo');
