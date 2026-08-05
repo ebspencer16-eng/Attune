@@ -905,12 +905,10 @@
   </div>
 
   <p style="font-size:.76rem;color:var(--muted);margin:0 0 .75rem;line-height:1.55;max-width:760px;">Compare any two things about the people who took Attune. Each cell is the number of individuals who match that row <em>and</em> column. Start from a preset, then adjust the dropdowns.</p>
-  <div style="display:flex;flex-wrap:wrap;gap:.5rem;margin-bottom:1rem;">
+  <div style="display:flex;flex-wrap:wrap;gap:.5rem;margin-bottom:1rem;align-items:center;">
     <span style="font-family:var(--mono);font-size:.55rem;letter-spacing:.12em;text-transform:uppercase;color:var(--dim);align-self:center;margin-right:.15rem;">Presets</span>
-    <button class="xp-btn" onclick="window.__xpPreset&&window.__xpPreset('couple_type','relationship_length')">Couple type × Time together</button>
-    <button class="xp-btn" onclick="window.__xpPreset&&window.__xpPreset('type','gender')">Individual type × Gender</button>
-    <button class="xp-btn" onclick="window.__xpPreset&&window.__xpPreset('pkg','couple_type')">Package × Couple type</button>
-    <button class="xp-btn" onclick="window.__xpPreset&&window.__xpPreset('age_range','type')">Age × Individual type</button>
+    <span id="xp-presets" style="display:contents;"></span>
+    <button class="xp-btn" id="xp-save-preset" title="Save the current rows × columns × cells × filters as a shared preset" style="border-style:dashed;">+ Save this view</button>
   </div>
   <div class="xp-controls">
     <div class="xp-ctl">
@@ -1181,15 +1179,57 @@ window.adminAuthHeaders = function(extra){
       ['xp-row-field','xp-col-field','xp-cell','xp-measure-field'].forEach(id => { const el = $(id); if (el) el.addEventListener('change', render); });
       $('xp-add-filter').onclick = () => { FILTERS.push({ field:'', value:'', side:'self' }); renderFilters(); };
       $('xp-export').onclick = exportCSV;
-      // One-click preset crosstabs for common questions.
-      window.__xpPreset = (r, c) => {
-        const R=$('xp-row-field'), C=$('xp-col-field'), cell=$('xp-cell');
-        if(!R||!C) return;
-        R.value=r; C.value=c; if(cell) cell.value='count';
-        const mw=$('xp-measure-wrap'); if(mw) mw.style.display='none';
+      // Shared Explore presets (via /api/admin-presets). Apply restores the full
+      // view (row, col, cell, measure, filters); save writes the current view;
+      // right-click a preset to remove it.
+      function applyPreset(cfg){
+        if(!cfg) return;
+        const R=$('xp-row-field'), C=$('xp-col-field'), cell=$('xp-cell'), meas=$('xp-measure-field');
+        if(R && cfg.row!=null) R.value=cfg.row;
+        if(C && cfg.col!=null) C.value=cfg.col;
+        if(cell && cfg.cell) cell.value=cfg.cell;
+        if(meas && cfg.measure) meas.value=cfg.measure;
+        FILTERS = Array.isArray(cfg.filters) ? cfg.filters.map(f=>({field:f.field||'',value:f.value||'',side:f.side||'self'})) : [];
+        renderFilters();
         render();
-      };
+      }
+      window.__xpPreset = (r,c) => applyPreset({row:r,col:c,cell:'count'});
+      async function loadPresets(){
+        const box=$('xp-presets'); if(!box) return;
+        try{
+          const res=await fetch('/api/admin-presets',{headers:window.adminAuthHeaders()});
+          const data=await res.json();
+          const list=(data && data.presets)||[];
+          box.innerHTML='';
+          if(!list.length){ box.innerHTML='<span style="font-size:.68rem;color:var(--dim);align-self:center;">none yet \u2014 build a view and save it</span>'; return; }
+          list.forEach(pr=>{
+            const b=document.createElement('button');
+            b.className='xp-btn'; b.textContent=pr.name; b.title='Click to apply \u00b7 right-click to remove';
+            b.onclick=()=>applyPreset(pr.config);
+            b.oncontextmenu=(e)=>{ e.preventDefault(); if(confirm('Remove preset "'+pr.name+'"?')) removePreset(pr.id); };
+            box.appendChild(b);
+          });
+        }catch(e){ box.innerHTML='<span style="font-size:.68rem;color:var(--dim);align-self:center;">presets unavailable</span>'; }
+      }
+      async function savePreset(){
+        const name=(prompt('Name this preset:')||'').trim(); if(!name) return;
+        const cfg={ row:$('xp-row-field').value, col:$('xp-col-field').value, cell:$('xp-cell').value, measure:$('xp-measure-field').value, filters:FILTERS };
+        try{
+          const res=await fetch('/api/admin-presets',{method:'POST',headers:window.adminAuthHeaders({'Content-Type':'application/json'}),body:JSON.stringify({name,config:cfg})});
+          const data=await res.json(); if(!data.ok) throw new Error(data.error||'save failed');
+          loadPresets();
+        }catch(e){ alert('Could not save preset: '+e.message); }
+      }
+      async function removePreset(id){
+        try{
+          const res=await fetch('/api/admin-presets?id='+encodeURIComponent(id),{method:'DELETE',headers:window.adminAuthHeaders()});
+          const data=await res.json(); if(!data.ok) throw new Error(data.error||'delete failed');
+          loadPresets();
+        }catch(e){ alert('Could not remove preset: '+e.message); }
+      }
+      const _saveBtn=$('xp-save-preset'); if(_saveBtn) _saveBtn.onclick=savePreset;
       render();
+      loadPresets();
     } catch (e) {
       $('xp-output').innerHTML = '<div class="xp-empty">Could not load data: ' + esc(e.message) + '</div>';
       $('xp-meta').textContent = '';
