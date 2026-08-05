@@ -4077,16 +4077,17 @@ async function renderCubeDist(opts){
   const labels=cats.map(v=>sliceLabel(opts.field,v));
   const dataCounts=cats.map(v=>counts[v]||0);
   const dataPct=dataCounts.map(c=> n?Math.round(c/n*100):0);
+  const tipLabel=(ctx)=>' '+dataCounts[ctx.dataIndex]+' ('+dataPct[ctx.dataIndex]+'%)';
   setTileN(el, n);
   if(opts.mode==='insightbars'){ renderBars(opts.target, cats.map((v,i)=>({l:labels[i],v:dataPct[i]})), opts.color||'#6C7FFF'); return; }
   if(!n){ mkChart(el,{type:'bar',data:{labels:['No data'],datasets:[{data:[0],backgroundColor:'#E6ECF6'}]},options:{plugins:{legend:{display:false}},scales:{x:{grid:{display:false}},y:{display:false}}}}); return; }
   const pal=opts.palette||['#6C7FFF','#FF6B35','#34D399','#FBBF24','#F87171','#9B5DE5','#22A5C4'];
   if(opts.mode==='doughnut'){
-    mkChart(el,{type:'doughnut',data:{labels,datasets:[{data:dataCounts,backgroundColor:pal,borderColor:'#FFFFFF',borderWidth:3}]},options:{plugins:{legend:{position:'bottom',labels:{padding:14,boxWidth:11}}},cutout:'60%'}});
+    mkChart(el,{type:'doughnut',data:{labels,datasets:[{data:dataCounts,backgroundColor:pal,borderColor:'#FFFFFF',borderWidth:3}]},options:{plugins:{legend:{position:'bottom',labels:{padding:14,boxWidth:11}},tooltip:{callbacks:{label:tipLabel}}},cutout:'60%'}});
   } else if(opts.mode==='hbar'){
-    mkChart(el,{type:'bar',data:{labels,datasets:[{data:dataPct,backgroundColor:opts.color||'#34D399',borderRadius:6}]},options:{indexAxis:'y',plugins:{legend:{display:false}},scales:{x:{grid:{color:'#E6ECF6'},ticks:{callback:v=>v+'%'}},y:{grid:{display:false}}}}});
+    mkChart(el,{type:'bar',data:{labels,datasets:[{data:dataPct,backgroundColor:opts.color||'#34D399',borderRadius:6}]},options:{indexAxis:'y',plugins:{legend:{display:false},tooltip:{callbacks:{label:tipLabel}}},scales:{x:{grid:{color:'#E6ECF6'},ticks:{callback:v=>v+'%'}},y:{grid:{display:false}}}}});
   } else {
-    mkChart(el,{type:'bar',data:{labels,datasets:[{data:dataPct,backgroundColor:opts.color||'#FF6B35',borderRadius:6}]},options:{plugins:{legend:{display:false}},scales:{x:{grid:{display:false}},y:{grid:{color:'#E6ECF6'},ticks:{callback:v=>v+'%'}}}}});
+    mkChart(el,{type:'bar',data:{labels,datasets:[{data:dataPct,backgroundColor:opts.color||'#FF6B35',borderRadius:6}]},options:{plugins:{legend:{display:false},tooltip:{callbacks:{label:tipLabel}}},scales:{x:{grid:{display:false}},y:{grid:{color:'#E6ECF6'},ticks:{callback:v=>v+'%'}}}}});
   }
 }
 function wireCubeTile(opts){
