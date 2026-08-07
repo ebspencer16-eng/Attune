@@ -7493,6 +7493,64 @@ function PostResultsSurvey({ respondentId = null, userName, coupleType, onClose,
   );
 }
 
+function SelfVsPartnerSection({ ex1Answers, partnerEx1, userName, partnerName }) {
+  if (!ex1Answers || !partnerEx1) return null;
+  const selfA = calcDimScores(ex1Answers), selfB = calcDimScores(partnerEx1);
+  const DIMS = [
+    { pv: "pv_conflict",   dim: "conflict",   label: "Conflict",     lo: "Engages quickly",     hi: "Needs space first" },
+    { pv: "pv_stress",     dim: "stress",     label: "Under stress", lo: "Pulls inward",        hi: "Leans on you" },
+    { pv: "pv_repair",     dim: "repair",     label: "Repair",       lo: "Reaches out first",   hi: "Waits it out" },
+    { pv: "pv_expression", dim: "expression", label: "Expression",   lo: "Holds it in",         hi: "Shares openly" },
+    { pv: "pv_feedback",   dim: "feedback",   label: "Feedback",     lo: "Wants a soft approach", hi: "Wants it direct" },
+  ];
+  const num = v => (v == null || isNaN(v)) ? null : Number(v);
+  const people = [
+    { name: userName,    self: selfA, view: partnerEx1 }, // how partner sees userName
+    { name: partnerName, self: selfB, view: ex1Answers }, // how userName sees partner
+  ];
+  let top = null;
+  DIMS.forEach(d => people.forEach(pp => {
+    const sv = pp.self[d.dim], pv = num(pp.view[d.pv]);
+    if (sv == null || pv == null) return;
+    const gap = Math.abs(sv - pv);
+    if (gap >= 1 && (!top || gap > top.gap)) top = { ...d, name: pp.name, gap };
+  }));
+  const pct = v => Math.max(4, Math.min(96, (v - 1) / 4 * 100));
+  const track = (selfV, pvV) => (
+    <div style={{ position: "relative", height: 6, background: C.stone, borderRadius: 999, margin: "0.35rem 0 0.2rem" }}>
+      {pvV != null && <div title="How your partner sees you" style={{ position: "absolute", top: "50%", left: pct(pvV) + "%", transform: "translate(-50%,-50%)", width: 12, height: 12, borderRadius: "50%", background: "white", border: `2px solid ${C.muted}` }} />}
+      {selfV != null && <div title="How you see yourself" style={{ position: "absolute", top: "50%", left: pct(selfV) + "%", transform: "translate(-50%,-50%)", width: 12, height: 12, borderRadius: "50%", background: "#1B5FE8", border: "2px solid white", boxShadow: "0 1px 3px rgba(0,0,0,.2)" }} />}
+    </div>
+  );
+  return (
+    <div style={{ marginTop: "1.75rem" }}>
+      <div style={{ fontSize: "0.6rem", letterSpacing: "0.22em", textTransform: "uppercase", color: C.muted, fontFamily: BFONT, fontWeight: 700, marginBottom: "0.5rem" }}>How you see each other</div>
+      <p style={{ fontSize: "0.82rem", color: C.muted, fontFamily: BFONT, lineHeight: 1.6, margin: "0 0 1rem", maxWidth: 560 }}>The filled dot is how you see yourself. The outline dot is how your partner sees you. Where they sit apart is worth talking about.</p>
+      {top && (
+        <div style={{ background: "#FBF8F3", border: "1px solid #E8DDD0", borderRadius: 12, padding: "0.85rem 1rem", marginBottom: "1.25rem", maxWidth: 560 }}>
+          <span style={{ fontFamily: BFONT, fontSize: "0.82rem", color: C.ink, lineHeight: 1.6 }}>Your biggest difference in perception is <strong>{top.label.toLowerCase()}</strong>. {top.name} reads this differently than their partner does. Start there.</span>
+        </div>
+      )}
+      <div style={{ display: "flex", flexDirection: "column", gap: "1.1rem", maxWidth: 640 }}>
+        {DIMS.map(d => (
+          <div key={d.dim}>
+            <div style={{ fontSize: "0.72rem", fontWeight: 700, color: C.ink, fontFamily: BFONT, marginBottom: "0.35rem" }}>{d.label}</div>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1.1rem" }}>
+              {people.map(pp => (
+                <div key={pp.name}>
+                  <div style={{ fontSize: "0.62rem", color: C.muted, fontFamily: BFONT }}>{pp.name}</div>
+                  {track(pp.self[d.dim], num(pp.view[d.pv]))}
+                  <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.55rem", color: "#9C9890", fontFamily: BFONT }}><span>{d.lo}</span><span>{d.hi}</span></div>
+                </div>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Answers, partnerEx3, ex2AnswersPrior = null, ex2PriorAt = null, hasAnniversary, userName, partnerName, initialSection, isMobile = false, portrait = null, hasChecklist = false, hasBudget = false, hasLMFT = false, hasWorkbook = false, hasIntimacy = false, intimacyAnswers = null, partnerIntimacy = null, intimacyVariant = 'premarital', onNavigateTool = null, userPronouns = "", partnerPronouns = "", isBetaTester = false }) {
 
   // Compute all the data we need up front
@@ -8258,6 +8316,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
             </div>
           </div>
 
+{PARTNER_VIEW_ENABLED && <SelfVsPartnerSection ex1Answers={ex1Answers} partnerEx1={partnerEx1} userName={userName} partnerName={partnerName} />}
           <div style={{ fontSize: "0.6rem", letterSpacing: "0.22em", textTransform: "uppercase", color: C.muted, fontFamily: BFONT, fontWeight: 700, marginTop: "1.75rem", marginBottom: "1rem" }}>
             Your individual types
           </div>
