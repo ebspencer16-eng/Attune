@@ -5,7 +5,7 @@ import { INTIMACY_QUESTIONS, INTIMACY_DIMENSIONS, summarizeIntimacy, intimacyDim
 
 // Proposal B master switch. Off = comms exercise, scoring, and results are unchanged.
 // Flip to true only after the full partner-view flow is verified end-to-end.
-const PARTNER_VIEW_ENABLED = false;
+const PARTNER_VIEW_ENABLED = true;
 // Dimension scores for TYPE derivation: blended with the partner's view when the
 // feature is on, self-only otherwise. Self-report displays keep calcDimScores.
 function typingDimScores(selfAnswers, partnerAnswers) {
@@ -46,6 +46,20 @@ const ARCHETYPE_EX1 = {
   Z: { ..._WITHDRAW, ..._GUARDED },  // Protector: withdraw + guarded
 };
 const TYPE_LABEL = { W: 'Initiator', X: 'Anchor', Y: 'Feeler', Z: 'Protector' };
+// Demo only: give each archetype a partner-view of the OTHER archetype so demo mode
+// exercises the Proposal B blend + self-vs-partner view. Perception is modeled as
+// a slightly muted read of the partner's real orientation (compressed toward center).
+const _PV_DEMO_KEYS = { pv_conflict: 'conflict', pv_stress: 'stress', pv_repair: 'repair', pv_expression: 'expression', pv_feedback: 'feedback' };
+function demoWithPartnerView(selfArch, otherArch) {
+  if (!PARTNER_VIEW_ENABLED || !selfArch || !otherArch) return selfArch;
+  const other = calcDimScores(otherArch);
+  const out = { ...selfArch };
+  for (const [pv, dim] of Object.entries(_PV_DEMO_KEYS)) {
+    const d = other[dim];
+    if (d != null && !isNaN(d)) out[pv] = 3 + (d - 3) * 0.6;
+  }
+  return out;
+}
 // The 10 canonical couple pairings (match COUPLE_TYPE_DATA keys).
 const DEMO_COUPLE_TYPES = ['WW', 'WX', 'WY', 'WZ', 'XX', 'XY', 'XZ', 'YY', 'YZ', 'ZZ'];
 
@@ -3349,7 +3363,7 @@ function Exercise01Flow({ userName, partnerName, onComplete, skipIntro = false }
         <p style={{ fontSize: "0.78rem", color: C.muted, fontFamily: font.body, fontWeight: 400, lineHeight: 1.6, marginBottom: "1.75rem" }}>Built on relationship research and shaped with licensed therapists.</p>
         <div style={{ display: "flex", gap: "0.85rem", marginBottom: "1.75rem", flexWrap: "wrap" }}>
           {[
-            { num: '01', title: 'Communication', color: '#E8673A', desc: '23 questions · 10 dimensions' },
+            { num: '01', title: 'Communication', color: '#E8673A', desc: (PARTNER_VIEW_ENABLED ? INTERLEAVED_EX1.length : PERSONALITY_QUESTIONS.length) + ' questions · 10 dimensions' },
             { num: '02', title: 'Expectations',  color: '#1B5FE8', desc: 'Responsibilities & life' },
           ].map(e => (
             <div key={e.num} style={{ flex: "1 1 180px", background: C.warm, border: `1.5px solid ${e.color}33`, borderRadius: 12, padding: "0.9rem 1rem" }}>
@@ -11579,7 +11593,7 @@ function PartnerBExerciseFlow({ account, onComplete }) {
           {`Exercise 01 covers how you communicate and connect. Exercise 02 maps your expectations.${hasReflection ? ' Exercise 03 captures your relationship story.' : ''} ${hasReflection ? 'They take' : 'Both take'} about 15 minutes. Answer honestly. Your partner won't see your individual answers.`}
         </p>
         <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', marginBottom: '2.5rem', flexWrap: 'wrap' }}>
-          {[{ num: '01', title: 'Communication', color: '#E8673A', desc: '23 questions · 10 dimensions' }, { num: '02', title: 'Expectations', color: '#1B5FE8', desc: 'Responsibilities & life' }, ...(hasReflection ? [{ num: '03', title: 'Relationship Reflection', color: '#7C3AED', desc: 'Your story together' }] : [])].map(e => (
+          {[{ num: '01', title: 'Communication', color: '#E8673A', desc: (PARTNER_VIEW_ENABLED ? INTERLEAVED_EX1.length : PERSONALITY_QUESTIONS.length) + ' questions · 10 dimensions' }, { num: '02', title: 'Expectations', color: '#1B5FE8', desc: 'Responsibilities & life' }, ...(hasReflection ? [{ num: '03', title: 'Relationship Reflection', color: '#7C3AED', desc: 'Your story together' }] : [])].map(e => (
             <div key={e.num} style={{ background: 'rgba(255,255,255,0.06)', border: `1px solid ${e.color}33`, borderRadius: 14, padding: '1.1rem 1.4rem', textAlign: 'left', minWidth: 160 }}>
               <div style={{ fontSize: '0.58rem', letterSpacing: '0.18em', color: e.color, fontWeight: 700, fontFamily: "'DM Sans', sans-serif", textTransform: 'uppercase', marginBottom: '0.35rem' }}>Exercise {e.num}</div>
               <div style={{ fontFamily: "'Playfair Display', Georgia, serif", fontSize: '1rem', fontWeight: 700, color: 'white', marginBottom: '0.25rem' }}>{e.title}</div>
@@ -13795,8 +13809,8 @@ export default function App() {
   }, [account?.email]);
 
   // In demo mode the picker drives both partners' Ex1 via type archetypes.
-  const _demoMineEx1    = _demoParam ? ARCHETYPE_EX1[demoType[0]] : null;
-  const _demoPartnerEx1 = _demoParam ? ARCHETYPE_EX1[demoType[1]] : null;
+  const _demoMineEx1    = _demoParam ? demoWithPartnerView(ARCHETYPE_EX1[demoType[0]], ARCHETYPE_EX1[demoType[1]]) : null;
+  const _demoPartnerEx1 = _demoParam ? demoWithPartnerView(ARCHETYPE_EX1[demoType[1]], ARCHETYPE_EX1[demoType[0]]) : null;
   const partnerEx1 = hasRealPartner ? partnerSession.ex1 : (_demoPartnerEx1 || jamesEx1);
   const partnerEx2 = hasRealPartner ? partnerSession.ex2 : jamesEx2;
   // bothDone: BOTH partners have completed exercises with real data.
