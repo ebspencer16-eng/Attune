@@ -1336,8 +1336,8 @@ function computeIndividualType(scores) {
   }
   const nearMidpoint = Math.abs(withdrawScore - 3) < 0.3 && Math.abs(openScore - 3) < 0.3;
   // Near-line (within 0.35 of a boundary): the categorical type is a lean, not a fixed position.
-  const nearEngageLine = Math.abs(withdrawScore - 3) < 0.35;
-  const nearOpenLine   = Math.abs(openScore    - 3) < 0.35;
+  const nearEngageLine = Math.abs(withdrawScore - 3) < 0.6;
+  const nearOpenLine   = Math.abs(openScore    - 3) < 0.6;
   // Broadened low-confidence: flat-answers-near-midpoint OR sitting near either axis line.
   const lowConfidence = (stdDev < 0.3 && nearMidpoint) || nearEngageLine || nearOpenLine;
 
@@ -8183,47 +8183,6 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
     const newType = deriveNewCoupleType(myS, partS);
     const itA = INDIVIDUAL_TYPES[newType.typeInfoA.typeCode];
     const itB = INDIVIDUAL_TYPES[newType.typeInfoB.typeCode];
-    const blurbFor = (name, pron, info) => {
-              const { typeCode, engageCoord, openCoord } = info;
-              const sub = pronoun(pron, "sub");
-              const pos = pronoun(pron, "pos");
-              const Sub = sub.charAt(0).toUpperCase() + sub.slice(1);
-              const strongEngage = engageCoord > 0.8;
-              const nearEngageCenter = engageCoord >= 0.35 && engageCoord <= 0.65;
-              const strongWithdraw = engageCoord < 0.2;
-              const nearOpenCenter = openCoord >= 0.35 && openCoord <= 0.65;
-              const blurbs = {
-                W: strongEngage
-                  ? `${name} engages quickly and with full momentum. When something is unresolved, ${sub} feels it and moves toward it without hesitation.`
-                  : nearEngageCenter
-                  ? `${name} leans toward resolution but has a slightly longer runway than a typical Initiator. There's a beat of processing before ${sub} engages fully.`
-                  : nearOpenCenter
-                  ? `${name} engages readily but holds ${pos} inner experience a little closer than a typical Initiator. ${Sub} shows up for the conversation; ${sub} just doesn't put every feeling into the shared space immediately.`
-                  : `${name} moves toward resolution and expresses openly, with enough self-awareness to calibrate what ${sub}'s sharing and when.`,
-                X: strongEngage
-                  ? `${name} pushes hard toward resolution. Once ${sub}'s processed internally, ${sub} doesn't sit on it. The urgency toward resolution is real; it's just preceded by a private preparation phase.`
-                  : nearEngageCenter
-                  ? `${name} has a longer internal preparation phase before engaging. ${Sub} pushes toward resolution, but the processing takes real time before anything surfaces.`
-                  : nearOpenCenter
-                  ? `${name} is a Driver who runs slightly warmer than average. ${Sub} processes privately but shares a bit more of the working-through than a typical Driver.`
-                  : `${name} engages toward resolution and processes privately, with a comfortable mix of thoughtfulness and forward momentum.`,
-                Y: strongWithdraw
-                  ? `${name} needs significant space before ${sub} can show up to a hard conversation. Not avoidance, just a longer processing runway. What ${sub} eventually brings is emotionally complete and worth the wait.`
-                  : nearEngageCenter
-                  ? `${name} needs space first, but it's a shorter runway than many Feelers. ${Sub} comes back relatively quickly once ${sub}'s landed somewhere.`
-                  : nearOpenCenter
-                  ? `${name} processes inward and holds what's going on privately until ready. Emotionally expressive when ${sub} arrives, but the arrival takes both time and internal settling.`
-                  : `${name} needs space to process before engaging, carries emotional weight visibly in the interim, and returns when ready with something real.`,
-                Z: strongWithdraw
-                  ? `${name} has the longest runway in the room. ${Sub} processes privately and needs substantial space before anything surfaces. What comes out is considered and real; it just requires time and no pressure.`
-                  : nearEngageCenter
-                  ? `${name} processes privately but has a slightly stronger pull toward resolution than a typical Holder. ${Sub}'ll surface what's going on, ${sub} just needs space and no pressure.`
-                  : nearOpenCenter
-                  ? `${name} holds things privately but is slightly more emotionally accessible than a typical Holder. More going on internally than most Protectors show.`
-                  : `${name} holds things close and processes privately, with a baseline steadiness and a comfortable relationship with quiet.`,
-              };
-              return blurbs[typeCode] || "";
-            };
     return (
       <Layout accent={ct.color}>
         <div style={{ maxWidth: 660 }}>
@@ -8252,8 +8211,8 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
             <div style={{ height: 1, background: C.stone, opacity: 0.6, margin: "0 0 1.25rem" }} />
             <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: "1.1rem" }}>
               {[
-                { label: "Engage / Withdraw", desc: "How you respond when something is hard or unresolved, do you move toward the situation or pull back from it first?", poles: ["Engage: moves toward resolution, addresses quickly", "Withdraw: needs space first, processes privately"], color: "#9B5DE5", bothNear: Math.abs(newType.typeInfoA.withdrawScore - 3) < 0.35 && Math.abs(newType.typeInfoB.withdrawScore - 3) < 0.35 },
-                { label: "Open / Guarded", desc: "How freely you express what's going on inside, do you share it openly or hold it privately until ready?", poles: ["Open: partner usually knows how you're feeling", "Guarded: processes internally, expressive when ready"], color: "#1B5FE8", bothNear: Math.abs(newType.typeInfoA.openScore - 3) < 0.35 && Math.abs(newType.typeInfoB.openScore - 3) < 0.35 },
+                { label: "Engage / Withdraw", desc: "How you respond when something is hard or unresolved, do you move toward the situation or pull back from it first?", poles: ["Engage: moves toward resolution, addresses quickly", "Withdraw: needs space first, processes privately"], color: "#9B5DE5", bothNear: Math.abs(newType.typeInfoA.withdrawScore - 3) < 0.6 && Math.abs(newType.typeInfoB.withdrawScore - 3) < 0.6 },
+                { label: "Open / Guarded", desc: "How freely you express what's going on inside, do you share it openly or hold it privately until ready?", poles: ["Open: partner usually knows how you're feeling", "Guarded: processes internally, expressive when ready"], color: "#1B5FE8", bothNear: Math.abs(newType.typeInfoA.openScore - 3) < 0.6 && Math.abs(newType.typeInfoB.openScore - 3) < 0.6 },
               ].map(ax => (
                 <div key={ax.label} style={{ borderLeft: `3px solid ${ax.color}`, paddingLeft: "0.9rem" }}>
                   <div style={{ fontSize: "0.6rem", letterSpacing: "0.2em", textTransform: "uppercase", color: ax.color, fontFamily: BFONT, fontWeight: 700, marginBottom: "0.5rem" }}>{ax.label}</div>
@@ -8332,7 +8291,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
                         label: "Engage/Withdraw",
                         value: info.withdrawScore <= 3.0 ? "Engage-leaning" : "Withdraw-leaning",
                         score: info.engageCoord,
-                        near: Math.abs(info.withdrawScore - 3) < 0.35,
+                        near: Math.abs(info.withdrawScore - 3) < 0.6,
                         driver: (() => {
                           const s = name === userName ? myS : partS;
                           const scores = [
@@ -8352,7 +8311,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
                         label: "Open/Guarded",
                         value: info.openScore >= 3.0 ? "Open-leaning" : "Guarded-leaning",
                         score: info.openCoord,
-                        near: Math.abs(info.openScore - 3) < 0.35,
+                        near: Math.abs(info.openScore - 3) < 0.6,
                         driver: (() => {
                           const s = name === userName ? myS : partS;
                           const scores = [
