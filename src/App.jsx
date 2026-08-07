@@ -6,6 +6,11 @@ import { INTIMACY_QUESTIONS, INTIMACY_DIMENSIONS, summarizeIntimacy, intimacyDim
 // Proposal B master switch. Off = comms exercise, scoring, and results are unchanged.
 // Flip to true only after the full partner-view flow is verified end-to-end.
 const PARTNER_VIEW_ENABLED = false;
+// Dimension scores for TYPE derivation: blended with the partner's view when the
+// feature is on, self-only otherwise. Self-report displays keep calcDimScores.
+function typingDimScores(selfAnswers, partnerAnswers) {
+  return PARTNER_VIEW_ENABLED ? blendedDimScores(selfAnswers, partnerAnswers) : calcDimScores(selfAnswers);
+}
 import { INTIMACY_RESULTS_PROSE } from "../api/_intimacy-results-prose.js";
 import { PKG_CAPS, ORDER_SELECT, computeEntitlements, mergeEntitlementsGrantOnly, sameEntitlements } from "../api/_lib/entitlements.js";
 
@@ -4114,6 +4119,9 @@ function PersonalityResults({ myAnswers, partnerAnswers, userName, partnerName, 
 
   const myS = calcDimScores(myAnswers);
   const partS = calcDimScores(partnerAnswers);
+  // Type/placement/role prose use the partner-view blend; the dimension bars below stay self-reported.
+  const myB = typingDimScores(myAnswers, partnerAnswers);
+  const partB = typingDimScores(partnerAnswers, myAnswers);
   const feedback = generatePersonalityFeedback(myS, partS, userName, partnerName);
 
   // Sort by gap ascending -- most similar first (items 1 & 4, 6 & 7 use this order)
@@ -4131,8 +4139,8 @@ function PersonalityResults({ myAnswers, partnerAnswers, userName, partnerName, 
   // Same-type couples (both partners the same individual type) collapse to a
   // single combined "Communication Profile" page instead of two near-identical
   // individual pages.
-  const _myTypeCode = computeIndividualType(myS).typeCode;
-  const _partTypeCode = computeIndividualType(partS).typeCode;
+  const _myTypeCode = computeIndividualType(myB).typeCode;
+  const _partTypeCode = computeIndividualType(partB).typeCode;
   const sameType = _myTypeCode === _partTypeCode;
 
   const go = s => { setStep(s); if (onExternalGo) onExternalGo(s); const sc = document.querySelector("[data-results-scroll]"); if (sc) sc.scrollTop = 0; else window.scrollTo({ top: 0, behavior: "smooth" }); };
@@ -4350,7 +4358,7 @@ function PersonalityResults({ myAnswers, partnerAnswers, userName, partnerName, 
       </div>
       {/* ── TYPE-SPECIFIC PRACTICE ── */}
       {coupleType?.tips?.length > 0 && (() => {
-        const interp = s => resolveRoleTokens(String(s || "").replace(/\{U\}/g, userName).replace(/\{P\}/g, partnerName), myS, partS, userName, partnerName);
+        const interp = s => resolveRoleTokens(String(s || "").replace(/\{U\}/g, userName).replace(/\{P\}/g, partnerName), myB, partB, userName, partnerName);
         const practiceTip = coupleType?.tips[coupleType?.tips.length - 1];
         return (
           <div style={{ background: `${coupleType?.color}12`, border: `1px solid ${coupleType?.color}35`, borderRadius: 14, padding: '1rem 1.25rem', marginTop: '0.85rem' }}>
@@ -4449,8 +4457,8 @@ function PersonalityResults({ myAnswers, partnerAnswers, userName, partnerName, 
 
     // ── CROSS-TYPE COUPLES: one page, a tile per person, then one tile on how
     //    the two types meet. (6.4 — was two near-identical pages.)
-    const myTypeCode   = computeIndividualType(myS).typeCode;
-    const partTypeCode = computeIndividualType(partS).typeCode;
+    const myTypeCode   = computeIndividualType(myB).typeCode;
+    const partTypeCode = computeIndividualType(partB).typeCode;
     const coupleId = coupleType?.id || [myTypeCode, partTypeCode].sort().join("");
     const perspectives = PARTNER_PERSPECTIVE[coupleId];
     const sortedCodes = [myTypeCode, partTypeCode].sort();
@@ -7488,12 +7496,15 @@ function PostResultsSurvey({ respondentId = null, userName, coupleType, onClose,
 function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Answers, partnerEx3, ex2AnswersPrior = null, ex2PriorAt = null, hasAnniversary, userName, partnerName, initialSection, isMobile = false, portrait = null, hasChecklist = false, hasBudget = false, hasLMFT = false, hasWorkbook = false, hasIntimacy = false, intimacyAnswers = null, partnerIntimacy = null, intimacyVariant = 'premarital', onNavigateTool = null, userPronouns = "", partnerPronouns = "", isBetaTester = false }) {
 
   // Compute all the data we need up front
-  const myS = calcDimScores(ex1Answers);
-  const partS = calcDimScores(partnerEx1);
+  const myS = typingDimScores(ex1Answers, partnerEx1);
+  const partS = typingDimScores(partnerEx1, ex1Answers);
+  // Self-report scores for the dimension GAP feedback (bars/gaps stay self; only type & placement blend).
+  const mySelf = calcDimScores(ex1Answers);
+  const partSelf = calcDimScores(partnerEx1);
   // Same-type couples get a single combined "Communication Profile" page; the
   // comms sub-nav label reflects that.
   const urSameType = computeIndividualType(myS).typeCode === computeIndividualType(partS).typeCode;
-  const personalityFeedback = generatePersonalityFeedback(myS, partS, userName, partnerName);
+  const personalityFeedback = generatePersonalityFeedback(mySelf, partSelf, userName, partnerName);
   const sortedFeedback = [...personalityFeedback].sort((a, b) => a.gap - b.gap);
   // Domain order — matches PersonalityResults navigation
   const UR_DOMAIN_ORDER = ["energy","expression","love","needs","bids","listening","conflict","stress","repair","feedback"];
@@ -9652,6 +9663,9 @@ function ResultsHighlights({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3
 
   const myS = calcDimScores(ex1Answers);
   const partS = calcDimScores(partnerEx1);
+  // Share-card couple type uses the blend; the gap feedback below stays self.
+  const myB = typingDimScores(ex1Answers, partnerEx1);
+  const partB = typingDimScores(partnerEx1, ex1Answers);
   const feedback = generatePersonalityFeedback(myS, partS, userName, partnerName);
   const sortedFeedback = [...feedback].sort((a, b) => a.gap - b.gap);
   const topStrength = sortedFeedback[0];
@@ -9689,7 +9703,7 @@ function ResultsHighlights({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3
   const alignPct = computeOverallExpectationsPctClient(ex2Answers, partnerEx2, userName, partnerName);
 
   const coupleType = deriveCoupleTypeFromExercise(
-    myS, partS, alignPct
+    myB, partB, alignPct
   );
 
   const myStress = myS.stress || 3;
@@ -13743,8 +13757,8 @@ export default function App() {
   const coupleType = (() => {
     try {
       if (!ex1Answers || !partnerEx1) return null;
-      const _my = calcDimScores(ex1Answers);
-      const _part = calcDimScores(partnerEx1);
+      const _my = typingDimScores(ex1Answers, partnerEx1);
+      const _part = typingDimScores(partnerEx1, ex1Answers);
       const _align = computeOverallExpectationsPctClient(ex2Answers, partnerEx2, userName, partnerName);
       return deriveCoupleTypeFromExercise(_my, _part, _align);
     } catch { return null; }
