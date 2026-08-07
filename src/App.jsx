@@ -8336,12 +8336,15 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
                         driver: (() => {
                           const s = name === userName ? myS : partS;
                           const scores = [
-                            { dim: "Conflict", w: 0.55, v: s.conflict || 3 },
-                            { dim: "Stress",   w: 0.30, v: s.stress   || 3 },
+                            { dim: "Conflict", w: 0.45, v: s.conflict || 3 },
+                            { dim: "Stress",   w: 0.25, v: s.stress   || 3 },
                             { dim: "Repair",   w: 0.15, v: s.repair   || 3 },
                           ];
                           const dominant = scores.reduce((a, b) => Math.abs(a.v - 3) * a.w > Math.abs(b.v - 3) * b.w ? a : b);
-                          const dir = dominant.v > 3 ? (dominant.dim === "Conflict" ? "engages quickly in conflict" : dominant.dim === "Repair" ? "repairs quickly" : "externalises stress") : (dominant.dim === "Conflict" ? "needs space in conflict" : dominant.dim === "Repair" ? "takes longer to repair" : "internalises stress");
+                          // Direction follows AXIS_CONFIG invert flags: Conflict/Repair not inverted (high raw = withdraw), Stress inverted (high raw = engage/seek).
+                          const dir = dominant.dim === "Conflict" ? (dominant.v > 3 ? "needs space in conflict" : "engages quickly in conflict")
+                                    : dominant.dim === "Repair"   ? (dominant.v > 3 ? "takes longer to repair" : "repairs quickly")
+                                    :                                (dominant.v > 3 ? "externalises stress" : "internalises stress");
                           return `${name} ${dir}`;
                         })(),
                       },
@@ -8353,12 +8356,15 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
                         driver: (() => {
                           const s = name === userName ? myS : partS;
                           const scores = [
-                            { dim: "Expression", w: 0.45, v: s.expression || 3 },
-                            { dim: "Feedback",   w: 0.30, v: s.feedback   || 3 },
-                            { dim: "Needs",      w: 0.25, v: s.needs      || 3 },
+                            { dim: "Expression", w: 0.40, v: s.expression || 3 },
+                            { dim: "Feedback",   w: 0.25, v: s.feedback   || 3 },
+                            { dim: "Needs",      w: 0.20, v: s.needs      || 3 },
                           ];
                           const dominant = scores.reduce((a, b) => Math.abs(a.v - 3) * a.w > Math.abs(b.v - 3) * b.w ? a : b);
-                          const dir = dominant.v > 3 ? (dominant.dim === "Expression" ? "expresses feelings readily" : dominant.dim === "Feedback" ? "takes feedback openly" : "states needs directly") : (dominant.dim === "Expression" ? "processes feelings privately" : dominant.dim === "Feedback" ? "can be guarded with feedback" : "tends to signal needs indirectly");
+                          // Direction follows AXIS_CONFIG invert flags: Expression/Feedback not inverted (high raw = open), Needs inverted (high raw = guarded).
+                          const dir = dominant.dim === "Expression" ? (dominant.v > 3 ? "expresses feelings readily" : "processes feelings privately")
+                                    : dominant.dim === "Feedback"   ? (dominant.v > 3 ? "takes feedback openly" : "can be guarded with feedback")
+                                    :                                  (dominant.v > 3 ? "tends to signal needs indirectly" : "states needs directly");
                           return `${name} ${dir}`;
                         })(),
                       },
