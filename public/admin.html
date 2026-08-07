@@ -575,6 +575,7 @@
           </div>
         </div>
       </div>
+      <div id="svp-gap" style="margin-top:1.25rem"></div>
       <div class="qx-section" id="qx-comm" style="margin-top:1.25rem"></div>
     </div>
 
@@ -4416,6 +4417,27 @@ function ensureQxTooltip(){
   document.addEventListener('mousemove',e=>{ if(tip.style.opacity!=='1')return; const el=e.target.closest&&e.target.closest('[data-tip]'); if(el)pos(e.clientX,e.clientY); else tip.style.opacity='0'; });
   document.addEventListener('mouseout',e=>{ const el=e.target.closest&&e.target.closest('[data-tip]'); if(el)tip.style.opacity='0'; });
 }
+async function renderSelfPartnerGap(containerId){
+  const el=document.getElementById(containerId); if(!el) return;
+  let cube; try{ cube=await ensureCube(); }catch(e){ return; }
+  const rows=cube.rows||[];
+  const PVMAP={pv_conflict:'conflict',pv_stress:'stress',pv_repair:'repair',pv_expression:'expression',pv_feedback:'feedback'};
+  const LBL={conflict:'Conflict',stress:'Under stress',repair:'Repair',expression:'Expression',feedback:'Feedback'};
+  const stats=Object.entries(PVMAP).map(([pv,dim])=>{
+    let n=0,sum=0;
+    rows.forEach(r=>{ const self=r['dim_'+dim], pview=r['p_'+pv]; if(self==null||pview==null||isNaN(self)||isNaN(pview)) return; n++; sum+=Math.abs(Number(self)-Number(pview)); });
+    return { l:LBL[dim], gap: n?sum/n:null, n };
+  });
+  const withData=stats.filter(x=>x.n>0);
+  const head='<div style="font-size:.62rem;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);font-weight:700;font-family:var(--mono);margin:0 0 .3rem;">Self vs partner-view gap</div><div style="font-size:.7rem;color:var(--muted);margin-bottom:.8rem;">Average distance between how people rate themselves and how their partner rates them, per dimension (0\u20134 scale). Largest first.</div>';
+  const card=(inner)=>'<div class="chart-card" style="padding:1.1rem 1.25rem;margin-bottom:1rem;">'+head+inner+'</div>';
+  if(!withData.length){ el.innerHTML=card('<div style="color:var(--dim);font-size:.78rem;padding:.5rem 0;line-height:1.6;">No partner-view answers yet. This fills in as couples complete the updated communication exercise.</div>'); return; }
+  const bars=withData.sort((a,b)=>b.gap-a.gap).map(x=>{
+    const w=Math.round(x.gap/4*100);
+    return '<div style="display:flex;align-items:center;gap:.6rem;margin-bottom:.5rem;"><div style="flex:0 0 110px;font-size:.72rem;color:var(--text);">'+x.l+'</div><div style="flex:1 1 auto;height:8px;background:var(--surface);border-radius:5px;overflow:hidden;"><div style="height:100%;width:'+w+'%;background:#6C7FFF;"></div></div><div style="flex:0 0 auto;font-size:.66rem;font-family:var(--mono);color:var(--text);min-width:3.4rem;text-align:right;">'+x.gap.toFixed(1)+' pts</div><div style="flex:0 0 auto;font-size:.6rem;color:var(--dim);font-family:var(--mono);">n='+x.n+'</div></div>';
+  }).join('');
+  el.innerHTML=card(bars);
+}
 async function renderQuestionExplorer(containerId, groupPrefixes, highPrefixes, hideCrosstab) {
   ensureQxTooltip();
   const el = document.getElementById(containerId);
@@ -5049,6 +5071,7 @@ function initCharts(page) {
     wireResponseTile({target:'chart-story-feel',kind:'relfeel',selId:'slz-rfeel'});
     renderRelReflTiles();
     renderIntimacyResponses();
+    renderSelfPartnerGap('svp-gap');
     renderQuestionExplorer('qx-comm', ['Ex1 · Communication'], ['Dimensions (score'], true);
     renderQuestionExplorer('qx-exp', ['Ex2 · Life & values', 'Ex2 · Who does what'], undefined, true);
     renderQuestionExplorer('qx-story', ['Ex3 · Relationship Reflection'], undefined, true);
