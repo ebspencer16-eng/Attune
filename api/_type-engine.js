@@ -124,3 +124,41 @@ export function lowConfidence(scores) {
   const nearMid = Math.abs(withdrawScore - 3) < 0.3 && Math.abs(openScore - 3) < 0.3;
   return stdDev < 0.3 && nearMid;
 }
+
+
+// ─────────────────────────────────────────────────────────────────────────────
+// PARTNER-VIEW BLEND (Proposal B). A person's type blends their own dimension
+// scores with their partner's view of them, per dimension. The partner-view
+// answers (pv_*) live on the PARTNER'S answer object (their rating of THIS
+// person). Only observable dimensions are blended; the rest stay self-report.
+// A dimension is blended ONLY when the partner-view answer exists — never
+// against a phantom neutral — so interim (self-only) scoring stays correct
+// until the partner has answered.
+// ─────────────────────────────────────────────────────────────────────────────
+export const PARTNER_VIEW_QUESTIONS = {
+  pv_conflict: 'conflict', pv_stress: 'stress', pv_repair: 'repair',
+  pv_expression: 'expression', pv_feedback: 'feedback',
+};
+export const PARTNER_VIEW_BLEND = {
+  conflict:   { self: 0.5, partner: 0.5 },
+  stress:     { self: 0.5, partner: 0.5 },
+  repair:     { self: 0.6, partner: 0.4 },
+  expression: { self: 0.4, partner: 0.6 },
+  feedback:   { self: 0.4, partner: 0.6 },
+};
+// selfAnswers = this person's exercise answers; partnerAnswers = their partner's
+// answers (source of the pv_* view-of-this-person). Returns dimension scores with
+// the blend applied where a partner-view answer exists.
+export function blendedDimScores(selfAnswers, partnerAnswers) {
+  const selfDim = calcDimScores(selfAnswers);
+  if (!partnerAnswers) return selfDim;
+  const out = { ...selfDim };
+  for (const [pvId, dim] of Object.entries(PARTNER_VIEW_QUESTIONS)) {
+    const pv = partnerAnswers[pvId];
+    if (pv == null || isNaN(pv)) continue;
+    const w = PARTNER_VIEW_BLEND[dim] || { self: 0.5, partner: 0.5 };
+    const self = out[dim];
+    out[dim] = (self == null || isNaN(self)) ? Number(pv) : (w.self * self + w.partner * Number(pv));
+  }
+  return out;
+}

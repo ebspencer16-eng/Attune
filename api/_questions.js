@@ -127,3 +127,30 @@ export const LIFE_QUESTIONS = [
     core: "Conservative or growth-oriented?", anniversary: "Does your approach to risk match your partner's?", revisiting: "Where are you on risk today?",
     options: ["Very conservative", "Cautious but open", "Comfortable with thought-through risk", "Lean toward risk", "Drawn to bold moves"] },
 ];
+
+
+// ─────────────────────────────────────────────────────────────────────────────
+// PARTNER-VIEW ITEMS (Proposal B). Dimension-level summary questions the user
+// answers ABOUT their partner, on the SAME 1-5 A->B scale and orientation as the
+// dimension's self items (a=1, b=5). `after` places each one right after that
+// self item in the exercise flow. Scored via a self/partner blend
+// (blendedDimScores in _type-engine.js); NOT in DIM_KEYS, so self dimension
+// scores are never affected by them.
+// ─────────────────────────────────────────────────────────────────────────────
+export const PARTNER_VIEW_ITEMS = [
+  { id: "pv_conflict", dimension: "conflict", partnerView: true, after: "cf2",
+    text: "When something feels off between you, your partner tends to:",
+    a: "Address it as soon as possible.", b: "Need time and space before engaging." },
+  { id: "pv_stress", dimension: "stress", partnerView: true, after: "st1",
+    text: "When your partner is going through a hard stretch, they tend to:",
+    a: "Pull inward and get through it on their own.", b: "Lean on you. Closeness is part of how they cope." },
+  { id: "pv_repair", dimension: "repair", partnerView: true, after: "rp6",
+    text: "After a conflict, the move toward repair usually comes from your partner:",
+    a: "Relatively quickly. They tend to reach out first.", b: "Only once they're ready. They wait it out." },
+  { id: "pv_expression", dimension: "expression", partnerView: true, after: "ex10",
+    text: "When your partner is going through something, they tend to:",
+    a: "Keep it mostly to themselves until they've worked through it.", b: "Let you in as it's happening." },
+  { id: "pv_feedback", dimension: "feedback", partnerView: true, after: "fb5",
+    text: "When you raise something that bothers you, your partner:",
+    a: "Needs a calm tone and careful timing to take it in.", b: "Takes it straight. Direct and specific lands best." },
+];
