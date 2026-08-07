@@ -1338,6 +1338,13 @@ window.adminAuthHeaders = function(extra){
       </div>
     </div>
 
+    <div class="chart-grid chart-grid full">
+      <div class="chart-card">
+        <div class="chart-card-header" style="display:flex;justify-content:space-between;align-items:flex-start;gap:.75rem"><div><div class="chart-card-title">Couple type &times; outcomes</div><div class="chart-card-sub">Beta feedback grouped by couple type. Delivery and shift are 1&ndash;5 averages. Conversation is the share who said it led to a new one.</div></div><select class="tile-slicer" id="slz-tout" title="Filter the population before grouping"><option value="">Everyone</option></select></div>
+        <div id="types-outcomes" style="padding:.7rem 1.4rem 1.4rem;"></div>
+      </div>
+    </div>
+
     <details style="margin-top:1.25rem;">
       <summary style="cursor:pointer;list-style:none;display:flex;align-items:center;gap:.5rem;padding:.85rem 1.1rem;background:var(--card);border:1px solid var(--border);border-radius:12px;font-size:.8rem;font-weight:700;color:var(--text);">
         <span style="color:var(--muted);font-weight:400;">▸</span> Formula diagnostics (advanced)
@@ -4374,6 +4381,45 @@ async function renderTypeCoupleMap(opts){
   svg+='</svg>';
   el.innerHTML=svg+'<div style="display:flex;gap:.9rem;flex-wrap:wrap;justify-content:center;margin-top:.7rem;">'+legend.join('')+'</div>';
 }
+async function renderCoupleOutcomes(opts){
+  const el=document.getElementById(opts.containerId); if(!el) return;
+  let cube; try{ cube=await ensureCube(); }catch(e){ return; }
+  const sel=document.getElementById(opts.selId);
+  if(sel){ populateSlicer(sel,'couple_type',cube.betaResponses||[]); sel.classList.toggle('on',!!sel.value);
+    if(!sel.dataset.wired){ sel.dataset.wired='1'; sel.onchange=()=>renderCoupleOutcomes(opts); } }
+  const rows=sliceFilter(cube.betaResponses||[], sel?sel.value:'').filter(r=>r.couple_type!=null&&r.couple_type!=='');
+  setTileN(el, rows.length);
+  if(!rows.length){ el.innerHTML='<div style="color:var(--dim);font-size:.78rem;padding:1rem 0;text-align:center;">No beta feedback with a couple type yet.</div>'; return; }
+  const avg=(arr,k)=>{ const v=arr.map(r=>parseFloat(r[k])).filter(Number.isFinite); return v.length?v.reduce((a,b)=>a+b,0)/v.length:null; };
+  const groups={};
+  rows.forEach(r=>{ (groups[r.couple_type]=groups[r.couple_type]||[]).push(r); });
+  const order=Object.keys(groups).sort((a,b)=>groups[b].length-groups[a].length);
+  const fmt=v=>v==null?'<span style="color:var(--dim)">&mdash;</span>':v.toFixed(1);
+  const body=order.map(ct=>{
+    const g=groups[ct], n=g.length;
+    const em=avg(g,'expectationMatch'), sc=avg(g,'shiftCouple');
+    const cy=g.filter(r=>/^yes/i.test(String(r.convoHappened||''))).length;
+    const convo=Math.round(100*cy/n);
+    // top package = most common pkg segment in the group
+    const pc={}; g.forEach(r=>{ const p=r.pkg; if(p!=null&&p!=='') pc[p]=(pc[p]||0)+1; });
+    const pk=Object.keys(pc).sort((a,b)=>pc[b]-pc[a])[0];
+    const pkLbl=pk?(sliceLabel('pkg',pk)+(pc[pk]<n?' ('+pc[pk]+'/'+n+')':'')):'<span style="color:var(--dim)">&mdash;</span>';
+    const nm=CT_NAMES[ct]||'';
+    return '<tr style="border-bottom:1px solid var(--border)">'
+      +'<td style="padding:.55rem .75rem;white-space:nowrap"><span style="font-family:var(--mono);font-size:.68rem;background:rgba(27,37,71,0.06);padding:.12rem .4rem;border-radius:4px">'+ct+'</span> <span style="color:var(--muted)">'+nm+'</span></td>'
+      +'<td style="padding:.55rem .75rem;text-align:right;font-weight:700">'+n+'</td>'
+      +'<td style="padding:.55rem .75rem;color:var(--muted)">'+pkLbl+'</td>'
+      +'<td style="padding:.55rem .75rem;text-align:right">'+fmt(em)+'</td>'
+      +'<td style="padding:.55rem .75rem;text-align:right">'+fmt(sc)+'</td>'
+      +'<td style="padding:.55rem .75rem;text-align:right">'+convo+'%</td>'
+      +'</tr>';
+  }).join('');
+  const th=(t,a)=>'<th style="text-align:'+(a||'left')+';padding:.45rem .75rem;font-size:.6rem;letter-spacing:.09em;text-transform:uppercase;color:var(--dim);white-space:nowrap">'+t+'</th>';
+  el.innerHTML='<table style="width:100%;border-collapse:collapse;font-size:.75rem">'
+    +'<thead><tr style="background:var(--surface);border-bottom:1px solid var(--border)">'
+    +th('Couple type')+th('n','right')+th('Top package')+th('Delivery','right')+th('Couple shift','right')+th('New convo','right')
+    +'</tr></thead><tbody>'+body+'</tbody></table>';
+}
 async function renderTypeAxis(opts){
   ensureQxTooltip();
   const el=document.getElementById(opts.containerId); if(!el) return;
@@ -5204,6 +5250,7 @@ function renderTypes() {
   renderTypeAxis({selId:'slz-teng', field:'axis_w', containerId:'types-w-axis', leftLbl:'Engage', rightLbl:'Withdraw', color:'#FF6B35'});
   renderTypeAxis({selId:'slz-topen', field:'axis_o', containerId:'types-o-axis', leftLbl:'Guarded', rightLbl:'Open', color:'#6C7FFF'});
   renderTypeCoupleMap({selId:'slz-tmap', containerId:'types-couple-map'});
+  renderCoupleOutcomes({selId:'slz-tout', containerId:'types-outcomes'});
 
   // Per-dimension table (recompute outlier rate for filtered set)
   const cfgDims = Object.keys(cfg);
