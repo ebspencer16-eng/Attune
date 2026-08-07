@@ -321,7 +321,7 @@ const FONT_URL = "https://fonts.googleapis.com/css2?family=Syne:wght@700;800;900
 
 // PERSONALITY_QUESTIONS — Communication Exercise (Exercise 01)
 //
-// 23 questions across 10 dimensions. 5-point scale (Strongly A -> Strongly B).
+// 28 questions across 10 dimensions (23 self + 5 partner-view). 5-point scale (Strongly A -> Strongly B).
 // Order is intentional: pairs of similar questions are spaced apart, and a
 // few are framed as scenarios to break repetitive patterns. Several dims
 // use non-sequential IDs (en1/en2/en4, lv1/lv2/lv5, etc) — the gaps are
@@ -15383,8 +15383,12 @@ export default function App() {
         try {
           const mineEx1 = ARCHETYPE_EX1[demoType[0]];
           const partEx1 = ARCHETYPE_EX1[demoType[1]];
-          const _my = calcDimScores(mineEx1);
-          const _part = calcDimScores(partEx1);
+          // Match the demo results view: couple type uses the partner-view blend,
+          // while the workbook score bars stay self-reported (mineEx1/partEx1).
+          const _minePV = demoWithPartnerView(mineEx1, partEx1);
+          const _partPV = demoWithPartnerView(partEx1, mineEx1);
+          const _my = typingDimScores(_minePV, _partPV);
+          const _part = typingDimScores(_partPV, _minePV);
           const _ex2 = ex2Answers || sarahEx2;
           const _align = computeOverallExpectationsPctClient(_ex2, partnerEx2, userName, partnerName);
           const _ct = deriveCoupleTypeFromExercise(_my, _part, _align);
