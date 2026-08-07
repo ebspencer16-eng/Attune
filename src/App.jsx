@@ -1358,7 +1358,7 @@ function computeIndividualType(scores) {
     stdDev = Math.sqrt(variance);
   }
   const nearMidpoint = Math.abs(withdrawScore - 3) < 0.3 && Math.abs(openScore - 3) < 0.3;
-  // Near-line (within 0.35 of a boundary): the categorical type is a lean, not a fixed position.
+  // Near-line (within 0.6 of a boundary): the categorical type is a lean, not a fixed position.
   const nearEngageLine = Math.abs(withdrawScore - 3) < 0.6;
   const nearOpenLine   = Math.abs(openScore    - 3) < 0.6;
   // Broadened low-confidence: flat-answers-near-midpoint OR sitting near either axis line.
@@ -7526,6 +7526,11 @@ function SelfVsPartnerSection({ ex1Answers, partnerEx1, userName, partnerName })
     { name: userName,    white: d => selfA[d.dim],            blue: d => num(partnerEx1[d.pv]) },
     { name: partnerName, white: d => num(ex1Answers[d.pv]),   blue: d => selfB[d.dim] },
   ];
+  // Legacy couples who finished Ex1 before partner-view existed have no pv_*
+  // answers. Without this guard the section renders half-empty (self dots only),
+  // which reads as broken. Hide it entirely unless at least one pv answer exists.
+  const anyPartnerView = DIMS.some(d => num(ex1Answers[d.pv]) != null || num(partnerEx1[d.pv]) != null);
+  if (!anyPartnerView) return null;
   let top = null;
   DIMS.forEach(d => columns.forEach(c => {
     const w = c.white(d), b = c.blue(d);
