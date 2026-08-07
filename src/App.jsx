@@ -1,7 +1,11 @@
 import React, { useState, useEffect, useLayoutEffect, useRef } from "react";
-import { axisScores } from "../api/_type-engine.js";
-import { PERSONALITY_QUESTIONS, RESPONSIBILITY_CATEGORIES, LIFE_QUESTIONS } from "../api/_questions.js";
+import { axisScores, blendedDimScores } from "../api/_type-engine.js";
+import { PERSONALITY_QUESTIONS, RESPONSIBILITY_CATEGORIES, LIFE_QUESTIONS, PARTNER_VIEW_ITEMS } from "../api/_questions.js";
 import { INTIMACY_QUESTIONS, INTIMACY_DIMENSIONS, summarizeIntimacy, intimacyDimensionPositions, intimacyDimensionSkips } from "../api/_intimacy-questions.js";
+
+// Proposal B master switch. Off = comms exercise, scoring, and results are unchanged.
+// Flip to true only after the full partner-view flow is verified end-to-end.
+const PARTNER_VIEW_ENABLED = false;
 import { INTIMACY_RESULTS_PROSE } from "../api/_intimacy-results-prose.js";
 import { PKG_CAPS, ORDER_SELECT, computeEntitlements, mergeEntitlementsGrantOnly, sameEntitlements } from "../api/_lib/entitlements.js";
 
@@ -3272,8 +3276,18 @@ function WithSideNav({ navItems = [], currentStep, onGo, accent = "#9B5DE5", chi
 // Shows PERSONALITY_QUESTIONS one at a time. Each question has two poles (a/b).
 // User picks from a 5-point scale: 1=strongly a, 3=middle, 5=strongly b.
 // On completion, calls onComplete(answers) with full dimension key map.
+// Comms exercise with the 5 partner-view items interleaved after their self
+// counterpart (Proposal B). Only used when PARTNER_VIEW_ENABLED.
+const INTERLEAVED_EX1 = (() => {
+  const out = [];
+  for (const q of PERSONALITY_QUESTIONS) {
+    out.push(q);
+    PARTNER_VIEW_ITEMS.filter(pv => pv.after === q.id).forEach(pv => out.push(pv));
+  }
+  return out;
+})();
 function Exercise01Flow({ userName, partnerName, onComplete, skipIntro = false }) {
-  const questions = PERSONALITY_QUESTIONS;
+  const questions = PARTNER_VIEW_ENABLED ? INTERLEAVED_EX1 : PERSONALITY_QUESTIONS;
 
   // Mid-exercise persistence: save after each answer, hydrate on mount.
   // Under key attune_ex1_progress so final submission's attune_ex1 stays
@@ -3415,6 +3429,11 @@ function Exercise01Flow({ userName, partnerName, onComplete, skipIntro = false }
           <p style={{ fontSize: "0.72rem", letterSpacing: "0.1em", textTransform: "uppercase", color: "#999", fontFamily: "'DM Sans', sans-serif", marginBottom: "0.4rem" }}>
             Question {idx + 1} of {total}
           </p>
+          {q.partnerView && (
+            <p style={{ fontSize: "0.72rem", fontStyle: "italic", color: "#9B5DE5", fontFamily: "'DM Sans', sans-serif", marginBottom: "0.4rem" }}>
+              About {partnerName || "your partner"}
+            </p>
+          )}
           <p style={{ fontSize: "1.25rem", fontWeight: 600, color: "#1C1C1E", fontFamily: "'Playfair Display', serif", lineHeight: 1.4, margin: 0 }}>
             {q.text}
           </p>
