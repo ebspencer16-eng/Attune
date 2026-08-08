@@ -3305,13 +3305,16 @@ const INTERLEAVED_EX1 = (() => {
   }
   return out;
 })();
-function Exercise01Flow({ userName, partnerName, onComplete, skipIntro = false }) {
+function Exercise01Flow({ userName, partnerName, onComplete, skipIntro = false, fresh = false }) {
   const questions = PARTNER_VIEW_ENABLED ? INTERLEAVED_EX1 : PERSONALITY_QUESTIONS;
 
   // Mid-exercise persistence: save after each answer, hydrate on mount.
   // Under key attune_ex1_progress so final submission's attune_ex1 stays
-  // distinct. Cleared after onComplete runs.
+  // distinct. Cleared after onComplete runs. In fresh preview mode (admin
+  // ?fresh=1) we ignore any saved progress so the reviewer always starts at
+  // question 1 and sees the full set, including the partner-view questions.
   const [idx, setIdx] = useState(() => {
+    if (fresh) return 0;
     try {
       const raw = localStorage.getItem('attune_ex1_progress');
       if (!raw) return 0;
@@ -3320,6 +3323,7 @@ function Exercise01Flow({ userName, partnerName, onComplete, skipIntro = false }
     } catch { return 0; }
   });
   const [answers, setAnswers] = useState(() => {
+    if (fresh) return {};
     try {
       const raw = localStorage.getItem('attune_ex1_progress');
       if (!raw) return {};
@@ -3397,10 +3401,14 @@ function Exercise01Flow({ userName, partnerName, onComplete, skipIntro = false }
       setChosen(null);
       const nextIdx = idx + 1;
       setIdx(nextIdx);
-      // Persist after each answer so refresh resumes mid-exercise
-      try { localStorage.setItem('attune_ex1_progress', JSON.stringify({ answers: updated, idx: nextIdx })); } catch {}
-      // And sync to server so resume works cross-device (debounced)
-      syncProgressCrossDevice(1, { answers: updated, idx: nextIdx });
+      // Persist after each answer so refresh resumes mid-exercise. Skipped in
+      // fresh preview mode so an admin walkthrough never overwrites a real
+      // user's saved progress in the same browser.
+      if (!fresh) {
+        try { localStorage.setItem('attune_ex1_progress', JSON.stringify({ answers: updated, idx: nextIdx })); } catch {}
+        // And sync to server so resume works cross-device (debounced)
+        syncProgressCrossDevice(1, { answers: updated, idx: nextIdx });
+      }
     } else {
       // Clear progress cache — final result goes to attune_ex1 (done by onComplete)
       try { localStorage.removeItem('attune_ex1_progress'); } catch {}
@@ -12468,6 +12476,12 @@ export default function App() {
     // Only rehydrate for a real logged-in account. Without this guard we could
     // clobber the unauthenticated demo/sandbox state.
     if (!account?.id) return;
+    // Admin preview + demo links (?fresh=1 / ?demo=...) must stay self-contained.
+    // A reviewer who also has a real account in this browser would otherwise see
+    // their own saved answers clobber the blank/demo state (blank exercise shows
+    // "Exercise 1 Complete", demo results pull real partner data with no
+    // partner-view answers). Skip rehydration entirely in those modes.
+    if (params.get('demo') || params.get('fresh') === '1') return;
     const hydrateAnswers = (key, setAns) => {
       try {
         const raw = localStorage.getItem(key);
@@ -13339,9 +13353,13 @@ export default function App() {
   // actual questions (not the pre-filled "complete" state). Results links omit
   // the flag, so they stay pre-populated with demo data.
   const _previewFresh = params.get('fresh') === '1';
-  const _initEx1 = _previewFresh ? null : (_hasAccount ? _hydrateLS('attune_ex1') : (_demoParam ? sarahEx1Demo : null));
-  const _initEx2 = _previewFresh ? null : (_hasAccount ? _hydrateLS('attune_ex2') : (_demoParam ? sarahEx2Demo : null));
-  const _initEx3 = _previewFresh ? null : (_hasAccount ? _hydrateLS('attune_ex3') : sarahEx3Demo);
+  // Demo preview must win over any real account left in this browser. A reviewer
+  // who is also a real user would otherwise see their own (often empty) answers,
+  // which pushes the demo into a "Results pending" state instead of demo results.
+  // Order: fresh preview → blank; demo → demo data; real account → their answers.
+  const _initEx1 = _previewFresh ? null : (_demoParam ? sarahEx1Demo : (_hasAccount ? _hydrateLS('attune_ex1') : null));
+  const _initEx2 = _previewFresh ? null : (_demoParam ? sarahEx2Demo : (_hasAccount ? _hydrateLS('attune_ex2') : null));
+  const _initEx3 = _previewFresh ? null : (_demoParam ? sarahEx3Demo : (_hasAccount ? _hydrateLS('attune_ex3') : null));
 
   const [ex1Answers, setEx1State] = useState(_initEx1);
   const [ex2Answers, setEx2State] = useState(_initEx2);
@@ -13816,8 +13834,8 @@ export default function App() {
   // In demo mode the picker drives both partners' Ex1 via type archetypes.
   const _demoMineEx1    = _demoParam ? demoWithPartnerView(ARCHETYPE_EX1[demoType[0]], ARCHETYPE_EX1[demoType[1]]) : null;
   const _demoPartnerEx1 = _demoParam ? demoWithPartnerView(ARCHETYPE_EX1[demoType[1]], ARCHETYPE_EX1[demoType[0]]) : null;
-  const partnerEx1 = hasRealPartner ? partnerSession.ex1 : (_demoPartnerEx1 || jamesEx1);
-  const partnerEx2 = hasRealPartner ? partnerSession.ex2 : jamesEx2;
+  const partnerEx1 = (hasRealPartner && !_demoParam) ? partnerSession.ex1 : (_demoPartnerEx1 || jamesEx1);
+  const partnerEx2 = (hasRealPartner && !_demoParam) ? partnerSession.ex2 : jamesEx2;
   // bothDone: BOTH partners have completed exercises with real data.
   //   - hasRealPartner means partnerSession exists (Partner B has finished)
   //   - We do NOT trust account.partnerJoined alone — that just means they
@@ -14755,7 +14773,7 @@ export default function App() {
                     </div>
                   )}
                 </div>
-              : <Exercise01Flow userName={userName} partnerName={partnerName} onComplete={async (a) => {
+              : <Exercise01Flow userName={userName} partnerName={partnerName} fresh={_previewFresh} onComplete={async (a) => {
                   setEx1State(a);
                   try { localStorage.setItem('attune_ex1', JSON.stringify(a)); } catch {}
                   // Persist exercise 1 answers to Supabase for cross-device access.
