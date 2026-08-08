@@ -139,6 +139,7 @@ const coupleMap = [
     { what: 'Open / Guarded axis', desc: 'Axis question + label for each end.', source: U, content: 'see RS 3.2' },
     { what: 'Placement callout', desc: 'Speaks to where each partner sits.', source: CA, content: 'see RS 3.3 (generated)' },
     { what: 'Individual profiles', desc: 'One per partner. Varies by type and placement.', source: CA, content: 'see RS 4.x' },
+    { what: 'How you see each other', desc: 'Self-vs-partner-view comparison across five dimensions, with a largest-gap callout. Shown once the couple has answered the partner-view questions.', source: CA, content: 'see RS 3.5' },
   ]),
 ];
 

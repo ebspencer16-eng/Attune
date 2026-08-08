@@ -41,6 +41,18 @@ children.push(h1('Ten couple dynamics'));
 children.push(body('Two individual types pair into one of ten couple dynamics: four same-type and six cross-type. Order does not matter (W+X is the same dynamic as X+W).'));
 NEW_COUPLE_TYPES.forEach(t => children.push(kv(t.id + ' · ' + t.name, String(t.tagline).replace(/\{U\}/g,'Partner A').replace(/\{P\}/g,'Partner B'), BLUE)));
 children.push(rule());
+
+children.push(h1('Partner-view questions'));
+children.push(body('Each partner also answers five short questions about the other. These add an outside read on five of the dimensions, so the type reflects how a person comes across, not only how they see themselves.'));
+children.push(body('The blend is per dimension. Where a partner-view question exists, that dimension becomes a weighted mix of the self-rating and the partner\'s read. If a partner skipped a partner-view question, that dimension falls back to the self-rating alone. No neutral filler is added.'));
+children.push(pairTable([['Dimension','Blend (self / partner)'],['Conflict Style','.50 / .50'],['Communication Under Stress','.50 / .50'],['How You Repair','.60 / .40'],['Emotional Expression','.40 / .60'],['Giving & Receiving Feedback','.40 / .60']], 60));
+children.push(body('Type and placement use the blend. The dimension bars and the gap feedback stay self-reported. Only the individual type and the Couple Map reflect the partner-view blend.'));
+children.push(rule());
+
+children.push(h1('Near the line'));
+children.push(body('A score within 0.6 of a boundary reads as a lean, not a fixed position. The categorical type still holds. The person is simply more flexible on that axis than a score near the extreme.'));
+children.push(body('When one partner sits within 0.6 of a line, their results frame that orientation as a lean. When both partners sit within 0.6 of the same line, the results add that who plays which role may shift depending on the situation.'));
+children.push(rule());
 children.push(small('Dimension labels and axis assignments are read live from api/_workbook-content.js (DIM_META, DIM_AXIS). Type prose from App.jsx (INDIVIDUAL_TYPES, NEW_COUPLE_TYPES).'));
 
 await saveDoc('attune_typing_framework', children, { title:'Attune Typing Framework' });
