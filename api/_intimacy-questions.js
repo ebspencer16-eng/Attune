@@ -1,4 +1,4 @@
-// Intimacy Expectations add-on — question data + gap scoring.
+// Physical Intimacy Expectations add-on — question data + gap scoring.
 //
 // Structure mirrors Ex2 (_questions.js): each question has an id, a dimension,
 // a topic, and per-variant framing. The variant here is premarital vs married,

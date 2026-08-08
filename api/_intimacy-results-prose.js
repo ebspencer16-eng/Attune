@@ -1,4 +1,4 @@
-// Intimacy Expectations — results interpretation prose.
+// Physical Intimacy Expectations — results interpretation prose.
 //
 // Single source of truth for the per-dimension results copy. Imported by the
 // results section (App.jsx) and the review-doc generator. SCAFFOLD COPY pending

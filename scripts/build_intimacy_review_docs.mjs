@@ -48,7 +48,7 @@ const mkDoc = (children) => new Document({
 // DOC 1 — QUESTIONS TABLE (both variants side by side)
 // ════════════════════════════════════════════════════════════════════
 const qc = [];
-qc.push(new Paragraph({ spacing: { after: 40 }, children: [new TextRun({ text: 'ATTUNE · INTIMACY EXPECTATIONS · QUESTIONS', bold: true, size: 18, color: ROSE, characterSpacing: 40 })] }));
+qc.push(new Paragraph({ spacing: { after: 40 }, children: [new TextRun({ text: 'ATTUNE · PHYSICAL INTIMACY EXPECTATIONS · QUESTIONS', bold: true, size: 18, color: ROSE, characterSpacing: 40 })] }));
 qc.push(new Paragraph({ heading: HeadingLevel.TITLE, children: [new TextRun({ text: 'Question Review — Both Versions' })] }));
 qc.push(p('SCAFFOLD COPY pending review. 18 questions across 6 dimensions. Premarital and already-married framing shown side by side. Every question is required; "Prefer not to say" is the comfort option. Question ids are stable, so wording edits will not disturb saved answers.', { italics: true, color: MUTED, after: 120 }));
 qc.push(p('Entry branch question (whoever starts first sets the version for both): "Are you and [partner] regularly physically intimate?" Yes shows the married version, No shows the premarital version.', { italics: true, color: MUTED, after: 160 }));
@@ -85,7 +85,7 @@ console.log(`Wrote ${OUT}/attune_intimacy_questions_review.docx`);
 // DOC 2 — RESULTS PROSE
 // ════════════════════════════════════════════════════════════════════
 const rc = [];
-rc.push(new Paragraph({ spacing: { after: 40 }, children: [new TextRun({ text: 'ATTUNE · INTIMACY EXPECTATIONS · RESULTS PROSE', bold: true, size: 18, color: ROSE, characterSpacing: 40 })] }));
+rc.push(new Paragraph({ spacing: { after: 40 }, children: [new TextRun({ text: 'ATTUNE · PHYSICAL INTIMACY EXPECTATIONS · RESULTS PROSE', bold: true, size: 18, color: ROSE, characterSpacing: 40 })] }));
 rc.push(new Paragraph({ heading: HeadingLevel.TITLE, children: [new TextRun({ text: 'Results Prose Review' })] }));
 rc.push(p('SCAFFOLD COPY pending review. This is the interpretation copy shown in the intimacy results section, per dimension. Each dimension shows one of the gap-state versions (aligned / worth discussing / different) based on how close the partners\' answers are, plus the conversation prompt. {U} and {P} are replaced with the two names. No end of any dimension is framed as better. Once approved, this feeds the results section and the specific-content review doc.', { italics: true, color: MUTED, after: 160 }));
 

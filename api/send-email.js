@@ -216,7 +216,7 @@ function resultsViewedEmail({ toName, partnerName, coupleType, portalUrl, hasRef
   const CATALOG = [
     { owned: !!hasWorkbook,   name: 'Personalized Workbook',   icon: '📖', price: 'from $19', bg: '#FDF8F3',
       desc: 'A 20 to 30 page workbook built from your results. Conversation starters and exercises for how you two are wired.' },
-    { owned: !!hasIntimacy,   name: 'Intimacy Expectations',   icon: '♡', price: '+$20', bg: '#EEF2FF',
+    { owned: !!hasIntimacy,   name: 'Physical Intimacy Expectations',   icon: '♡', price: '+$20', bg: '#EEF2FF',
       desc: 'A private set of questions about physical intimacy. Scored for gaps and conversation, like the rest of your results.' },
     { owned: !!hasReflection, name: 'Relationship Reflection', icon: '♡', price: '+$40', bg: '#EEF2FF',
       desc: 'A third exercise. Shared history, the moments that shaped you, and where you are pointed. Side-by-side insights and an action plan.' },

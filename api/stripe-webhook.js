@@ -373,7 +373,7 @@ async function handleWebhook(req) {
       const PKG_LABELS = { core: 'The Attune Assessment', newlywed: 'Starting Out Collection', anniversary: 'Relationship Reflection', premium: 'Attune Premium' };
       const includedItems = [];
       if (meta.addonWorkbook)          includedItems.push(`Personalized Workbook (${meta.addonWorkbook === 'print' ? 'printed' : 'digital'})`);
-      if (meta.addonIntimacy === '1')  includedItems.push('Intimacy Expectations');
+      if (meta.addonIntimacy === '1')  includedItems.push('Physical Intimacy Expectations');
       if (meta.addonReflection === '1') includedItems.push('Relationship Reflection');
       if (meta.addonBudget === '1')    includedItems.push('Build a Budget tool');
       if (meta.addonChecklist === '1') includedItems.push('Starting Out Checklist');

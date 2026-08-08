@@ -1,6 +1,6 @@
 // Build a review .docx for the NEW customer-facing copy added recently:
 //   1. Same-type Communication Profile pages (4 versions: W/X/Y/Z)
-//   2. Intimacy Expectations add-on questions (18 Qs x premarital/married)
+//   2. Physical Intimacy Expectations add-on questions (18 Qs x premarital/married)
 //
 // For Ellie + Carolina to redline before launch. Body size 22 (11pt) per the
 // earlier flag that internal docs were too small. Sources are read straight
@@ -55,7 +55,7 @@ const children = [];
 
 // ── Title ──
 children.push(new Paragraph({ spacing: { after: 40 }, children: [new TextRun({ text: 'ATTUNE · NEW COPY REVIEW', bold: true, size: 18, color: ROSE, characterSpacing: 40 })] }));
-children.push(new Paragraph({ heading: HeadingLevel.TITLE, children: [new TextRun({ text: 'Same-Type Profiles + Intimacy Expectations' })] }));
+children.push(new Paragraph({ heading: HeadingLevel.TITLE, children: [new TextRun({ text: 'Same-Type Profiles + Physical Intimacy Expectations' })] }));
 children.push(p('Two new customer-facing copy areas for review. Mark anything to change. The question ids are stable, so wording edits will not disturb saved answers.', { italics: true, color: MUTED, after: 200 }));
 
 // ════════════════════════════════════════════════════════════════════
@@ -80,10 +80,10 @@ TYPE_ORDER.forEach((code, i) => {
 });
 
 // ════════════════════════════════════════════════════════════════════
-// SECTION 2 — INTIMACY EXPECTATIONS QUESTIONS
+// SECTION 2 — PHYSICAL INTIMACY EXPECTATIONS QUESTIONS
 // ════════════════════════════════════════════════════════════════════
 children.push(new Paragraph({ pageBreakBefore: true, children: [] }));
-children.push(h1('2. Intimacy Expectations — Add-On Questions'));
+children.push(h1('2. Physical Intimacy Expectations — Add-On Questions'));
 children.push(p('SCAFFOLD COPY — pending Carolina review. 18 questions across 6 dimensions. Each question shows both variant framings (premarital / already-married) and every answer option. Every question is required; "Prefer not to say" is the comfort option.', { italics: true, color: MUTED, after: 80 }));
 children.push(p('Entry framing (shown before the questions):', { bold: true, after: 40 }));
 children.push(p('Physical intimacy is one of the biggest things couples assume they are aligned on, and one of the least talked about. This is a private set of questions about what you each expect. You answer on your own. Neither of you sees the other\'s answers until you have both finished. There are no right answers, and no answer here is better than another. This is an expectations tool, not therapy.', { italics: true, indent: 360, after: 160 }));

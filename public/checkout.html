@@ -840,7 +840,7 @@ function persistOrderComplete(orderNum) {
       ? { title: 'Add Personalized Workbook', price: '+$19', desc: 'Conversation prompts and guided exercises built from your joint results. Digital, delivered with your results. Switch to a printed copy in your cart.' }
       : _promptKey === 'checklist'
       ? { title: 'Add Starting Out Checklist', price: '+$20', desc: 'Finances, name changes, insurance, estate basics. Seven categories of real-world logistics to work through together.' }
-      : { title: 'Add Intimacy Expectations', price: '+$20', desc: 'A private set of questions about physical intimacy, answered independently and compared side by side. Covers frequency, initiating, comfort, communication, and more. Premarital and already-married versions.' };
+      : { title: 'Add Physical Intimacy Expectations', price: '+$20', desc: 'A private set of questions about physical intimacy, answered independently and compared side by side. Covers frequency, initiating, comfort, communication, and more. Premarital and already-married versions.' };
     document.getElementById('addonPromptTitle').textContent = meta.title;
     document.getElementById('addonPromptPrice').textContent = meta.price;
     document.getElementById('addonPromptDesc').textContent  = meta.desc;
@@ -1084,7 +1084,7 @@ function renderSummary() {
     if (g.item.addons.lmft)       addonLines.push({ label: ADDON_LMFT.label, price: ADDON_LMFT.price });
     if (g.item.addons.reflection) addonLines.push({ label: ADDON_REFLECTION.label, price: ADDON_REFLECTION.price });
     if (g.item.addons.budget)     addonLines.push({ label: 'Shared Budgeting Activity', price: 20 });
-    if (g.item.addons.intimacy)   addonLines.push({ label: 'Intimacy Expectations', price: 20 });
+    if (g.item.addons.intimacy)   addonLines.push({ label: 'Physical Intimacy Expectations', price: 20 });
     if (g.item.addons.checklist)  addonLines.push({ label: 'Starting Out Checklist', price: 20 });
     for (const a of addonLines) {
       rows += `
@@ -1659,7 +1659,7 @@ async function handleSubmit(e) {
       if (it.addons.lmft)       lineItems.push({ label: ADDON_LMFT.label, price: ADDON_LMFT.price });
       if (it.addons.reflection) lineItems.push({ label: ADDON_REFLECTION.label, price: ADDON_REFLECTION.price });
       if (it.addons.budget)     lineItems.push({ label: 'Shared Budgeting Activity', price: 20 });
-      if (it.addons.intimacy)   lineItems.push({ label: 'Intimacy Expectations', price: 20 });
+      if (it.addons.intimacy)   lineItems.push({ label: 'Physical Intimacy Expectations', price: 20 });
       if (it.addons.checklist)  lineItems.push({ label: 'Starting Out Checklist', price: 20 });
       const itemSubtotal = lineItems.reduce((sum, l) => sum + l.price, 0);
       fetch('/api/send-order-email', {

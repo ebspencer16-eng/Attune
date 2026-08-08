@@ -1062,7 +1062,7 @@ export function ExpectationsExercise({ partnerName, userName = "Partner A", onCo
 }
 
 
-// -- INTIMACY EXPECTATIONS ADD-ON EXERCISE --
+// -- PHYSICAL INTIMACY EXPECTATIONS ADD-ON EXERCISE --
 // Variant (premarital | married) is chosen by the FIRST partner to start, via
 // the entry question "are you regularly physically intimate?". That choice is
 // passed in as lockedVariant for the second partner so both answer the same set.
@@ -1097,7 +1097,7 @@ export function IntimacyExercise({ userName = "You", partnerName = "your partner
   if (phase === 'intro') return (
     <div style={{ maxWidth: 480, margin: "0 auto", padding: "3rem 1rem 2rem" }}>
       <link href={FONT_LINK} rel="stylesheet" />
-      <div style={{ fontSize: "0.6rem", letterSpacing: "0.2em", textTransform: "uppercase", color: accent, fontFamily: BFONT, fontWeight: 700, marginBottom: "0.75rem" }}>{exerciseNumber ? `Exercise 0${exerciseNumber} · ` : ""}Intimacy Expectations</div>
+      <div style={{ fontSize: "0.6rem", letterSpacing: "0.2em", textTransform: "uppercase", color: accent, fontFamily: BFONT, fontWeight: 700, marginBottom: "0.75rem" }}>{exerciseNumber ? `Exercise 0${exerciseNumber} · ` : ""}Physical Intimacy Expectations</div>
       <h2 style={{ fontFamily: HFONT, fontSize: "1.8rem", fontWeight: 700, color: C.ink, lineHeight: 1.15, marginBottom: "1.25rem" }}>What you each expect.</h2>
       <p style={{ fontSize: "0.92rem", color: C.text, fontFamily: BFONT, fontWeight: 300, lineHeight: 1.7, marginBottom: "1rem" }}>
         Physical intimacy is one of the biggest things couples assume they are aligned on, and one of the least talked about. This is a private set of questions about what you each expect.
@@ -1180,7 +1180,7 @@ export function IntimacyExercise({ userName = "You", partnerName = "your partner
         <span style={{ fontSize: "0.7rem", color: C.muted, fontFamily: BFONT, whiteSpace: "nowrap" }}>{qIdx + 1} / {total}</span>
       </div>
 
-      <p style={{ fontSize: "0.6rem", letterSpacing: "0.2em", textTransform: "uppercase", color: accent, marginBottom: "0.25rem", fontFamily: BFONT }}>Intimacy Expectations</p>
+      <p style={{ fontSize: "0.6rem", letterSpacing: "0.2em", textTransform: "uppercase", color: accent, marginBottom: "0.25rem", fontFamily: BFONT }}>Physical Intimacy Expectations</p>
       <p style={{ fontSize: "0.6rem", letterSpacing: "0.12em", textTransform: "uppercase", color: C.muted, marginBottom: "0.85rem", fontFamily: BFONT }}>{dimMeta?.label}</p>
       <p style={{ fontFamily: HFONT, fontSize: "1.3rem", fontWeight: 400, color: C.ink, lineHeight: 1.45, marginBottom: "1.5rem" }}>{(() => { const t = (framing || "").trim(); return /[?.!:]$/.test(t) ? t : t + ":"; })()}</p>
 
@@ -1223,7 +1223,7 @@ function IntimacyResults({ myAnswers, partnerAnswers, userName = "You", partnerN
   return (
     <div style={{ maxWidth: 640, margin: "0 auto", padding: "2.5rem 1rem" }}>
       <link href={FONT_LINK} rel="stylesheet" />
-      <div style={{ fontSize: "0.6rem", letterSpacing: "0.2em", textTransform: "uppercase", color: accent, fontFamily: BFONT, fontWeight: 700, marginBottom: "0.6rem" }}>Intimacy Expectations · {userName} & {partnerName}</div>
+      <div style={{ fontSize: "0.6rem", letterSpacing: "0.2em", textTransform: "uppercase", color: accent, fontFamily: BFONT, fontWeight: 700, marginBottom: "0.6rem" }}>Physical Intimacy Expectations · {userName} & {partnerName}</div>
       <h2 style={{ fontFamily: HFONT, fontSize: "1.9rem", fontWeight: 700, color: C.ink, lineHeight: 1.1, marginBottom: "0.5rem" }}>Where you each land.</h2>
       <p style={{ fontSize: "0.85rem", color: C.muted, fontFamily: BFONT, fontWeight: 300, lineHeight: 1.6, marginBottom: "2rem" }}>
         {variant === 'married' ? "Based on how things are now." : "Based on what you each expect."} The gap is the conversation, not a verdict.
@@ -12017,7 +12017,7 @@ const UPSELL_PRODUCTS = {
     badge: "Add-on",
     badgeColor: "#FBEAF0",
     badgeText: "#B5546E",
-    title: "Intimacy Expectations",
+    title: "Physical Intimacy Expectations",
     price: "$20",
     tagline: "What you each expect about physical intimacy.",
     description: "A private set of questions about physical intimacy, answered independently. You each respond on your own, then see where your expectations match and where they are worth a conversation. Covers frequency, initiating, comfort, communication, adventurousness, and what intimacy means to each of you.",
@@ -14608,7 +14608,7 @@ export default function App() {
                         )}
                         {!pkg.hasIntimacy && (
                           <GrowSquare color="#B5546E" muted icon={GrowIcons.intimacy("#B5546E")}
-                            title="Intimacy Expectations"
+                            title="Physical Intimacy Expectations"
                             sub="Answered independently, compared side by side."
                             cta="$20 →" onClick={() => setUpsellModal({ product: 'intimacy', cartAdded: false })} />
                         )}
@@ -14966,7 +14966,7 @@ export default function App() {
           />
         )}
 
-        {/* ── INTIMACY EXPECTATIONS: add-on ── */}
+        {/* ── PHYSICAL INTIMACY EXPECTATIONS: add-on ── */}
         {view === "intimacy" && pkg.hasIntimacy && (() => {
           const myAns = intimacyData?.answers || null;
           const myDone = !!(intimacyData?.completedAt);
@@ -15024,7 +15024,7 @@ export default function App() {
           if (myDone && !partnerDone) {
             return (
               <div style={{ maxWidth: 480, margin: "0 auto", padding: "3rem 1rem", textAlign: "center" }}>
-                <div style={{ fontSize: "0.6rem", letterSpacing: "0.2em", textTransform: "uppercase", color: "#B5546E", fontFamily: BFONT, fontWeight: 700, marginBottom: "0.75rem" }}>Intimacy Expectations</div>
+                <div style={{ fontSize: "0.6rem", letterSpacing: "0.2em", textTransform: "uppercase", color: "#B5546E", fontFamily: BFONT, fontWeight: 700, marginBottom: "0.75rem" }}>Physical Intimacy Expectations</div>
                 <h2 style={{ fontFamily: HFONT, fontSize: "1.6rem", fontWeight: 700, color: C.ink, marginBottom: "0.75rem" }}>You're done.</h2>
                 <p style={{ fontSize: "0.9rem", color: C.muted, fontFamily: BFONT, fontWeight: 300, lineHeight: 1.65, marginBottom: "2rem" }}>
                   Your comparison with {partnerName} unlocks here once they finish their answers too.
