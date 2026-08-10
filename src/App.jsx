@@ -4732,14 +4732,16 @@ function PersonalityResults({ myAnswers, partnerAnswers, userName, partnerName, 
             placed the OTHER (accent dot = the partner, matching the self bar).
             Labels use the shared DotLabels placement (centred under each dot,
             re-aligned around the dots only if they would collide, leader line
-            only when the dots coincide). Hidden until at least one partner-view
-            answer exists for this dimension. */}
+            only when the dots coincide). Requires BOTH partners' partner-view
+            answers: the insight is "how you each see each other," so a one-sided
+            read is meaningless. Legacy couples who finished Ex1 before partner-view
+            existed (and mixed couples where only one partner has it) get no bar. */}
         {PARTNER_VIEW_ENABLED && (() => {
           const pvId = "pv_" + dim;
           const numv = v => (v == null || isNaN(v)) ? null : Number(v);
           const aV = numv(myAnswers && myAnswers[pvId]);          // viewer's view OF partner
           const bV = numv(partnerAnswers && partnerAnswers[pvId]); // partner's view OF viewer
-          if (aV == null && bV == null) return null;
+          if (aV == null || bV == null) return null;
           const pctOf = v => Math.max(4, Math.min(96, ((v - 1) / 4) * 100));
           const aPct  = aV != null ? pctOf(aV) : null;                 // how userName sees partnerName (about partner)
           const bPct  = bV != null ? pctOf(bV) : null;                 // how partnerName sees userName (about viewer)
