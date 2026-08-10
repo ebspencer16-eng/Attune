@@ -15459,7 +15459,7 @@ export default function App() {
             // Results live as a section in the unified results experience.
             return (
               <div style={{ maxWidth: 480, margin: "0 auto", padding: "3rem 1rem", textAlign: "center" }}>
-                <div style={{ fontSize: "0.6rem", letterSpacing: "0.2em", textTransform: "uppercase", color: "#B5546E", fontFamily: BFONT, fontWeight: 700, marginBottom: "0.75rem" }}>Physical Intimacy</div>
+                <div style={{ fontSize: "0.6rem", letterSpacing: "0.2em", textTransform: "uppercase", color: "#B5546E", fontFamily: BFONT, fontWeight: 700, marginBottom: "0.75rem" }}>Physical Intimacy Expectations</div>
                 <h2 style={{ fontFamily: HFONT, fontSize: "1.6rem", fontWeight: 700, color: C.ink, marginBottom: "0.75rem" }}>Your comparison is ready.</h2>
                 <p style={{ fontSize: "0.9rem", color: C.muted, fontFamily: BFONT, fontWeight: 300, lineHeight: 1.65, marginBottom: "2rem" }}>
                   It lives with the rest of your results.

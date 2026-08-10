@@ -250,7 +250,7 @@ export const INTIMACY_QUESTIONS = [
     premarital: 'How do you expect novelty and routine to balance over a long marriage?',
     married: 'How do novelty and routine balance for you now?',
     options: [
-      { label: 'Keeping it fresh matters a lot to me', value: 1.0 },
+      { label: 'Novelty matters more to me', value: 1.0 },
       { label: 'It matters somewhat', value: 0.75 },
       { label: 'Neutral', value: 0.5 },
       { label: 'Routine matters more to me', value: 0.25 },
@@ -284,7 +284,7 @@ export const INTIMACY_QUESTIONS = [
     options: [
       { label: 'Be how we reconnect', value: 1.0 },
       { label: 'Help, usually', value: 0.75 },
-      { label: 'Depend on the day', value: 0.5 },
+      { label: 'Help, depending on the day', value: 0.5 },
       { label: 'Feel hard until we talk', value: 0.25 },
       { label: 'Be off the table for me', value: 0.0 },
       PNS,
@@ -297,7 +297,7 @@ export const INTIMACY_QUESTIONS = [
     married: 'What does intimacy most mean in your marriage now?',
     options: [
       { label: 'A primary way we stay close', value: 1.0 },
-      { label: 'One of several ways', value: 0.75 },
+      { label: 'One of several ways we stay close', value: 0.75 },
       { label: 'Important but not central', value: 0.5 },
       { label: 'Meaningful in its own lane', value: 0.25 },
       { label: "I'm still working that out", value: 0.0 },
