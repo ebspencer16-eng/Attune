@@ -224,8 +224,6 @@ function resultsViewedEmail({ toName, partnerName, coupleType, portalUrl, hasRef
       desc: 'Map what each of you values spending on and where your instincts differ. Adds context to your expectations results.' },
     { owned: !!hasChecklist,  name: 'Starting Out Checklist',  icon: '✓', price: '+$20', bg: '#FDF8F3',
       desc: 'A practical guide to starting your life together. Names, finances, household logistics.' },
-    { owned: !!hasLMFT,       name: 'LMFT Session',            icon: '🧠', price: '+$150', bg: '#F0F0FF',
-      desc: 'A 50-minute video session with a licensed marriage and family therapist. They review your results before you meet.' },
   ];
 
   const card = (a, showPrice) => `
