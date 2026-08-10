@@ -2631,16 +2631,23 @@ function PerceptionBar({ above = [], below = [] }) {
     maxWidth: w > 0 ? (bx.lw + 2) + "px" : "60%",
     textAlign: "left", color: GREY, lineHeight: 1.3,
     fontFamily: "'DM Sans', sans-serif", whiteSpace: "nowrap", fontSize: "0.56rem" });
-  const dots = [...(above || []), ...(below || [])].filter(it => it && it.pct != null);
+  // Dots coloured by the person each is about. A dot whose label sits above the
+  // bar leans up; one whose label sits below leans down. The lean only kicks in
+  // when a dot would overlap one from the other band, so a coincident pair (e.g.
+  // both partners' own-view at the same score) splits vertically instead of
+  // stacking on top of each other. Leader lines are intentionally omitted.
+  const _aboveDots = (above || []).filter(it => it && it.pct != null).map(it => ({ it, dir: -1 }));
+  const _belowDots = (below || []).filter(it => it && it.pct != null).map(it => ({ it, dir: 1 }));
+  const dotItems = [..._aboveDots, ..._belowDots];
+  const OFFY = 6;
+  dotItems.forEach((d, i) => {
+    const overlaps = dotItems.some((e, j) => j !== i && e.dir !== d.dir && Math.abs(e.it.pct - d.it.pct) < 5);
+    d.offY = overlaps ? d.dir * OFFY : 0;
+  });
   return (
     <div>
       {/* ABOVE band: partner's two labels, leader lines down to the bar */}
       <div style={{ position: "relative", height: aboveH }}>
-        {w > 0 && (
-          <svg width={w} height={aboveH} style={{ position: "absolute", top: 0, left: 0, overflow: "visible" }}>
-            {pa.map((bx, i) => <line key={i} x1={Math.max(0, Math.min(innerX(bx), w))} y1={nA * LINEH} x2={bx.cx} y2={aboveH} stroke={bx.it.dotColor} strokeWidth="1.25" strokeOpacity="0.85" />)}
-          </svg>
-        )}
         {pa.map((bx, i) => (
           <div key={i} style={{ ...labelStyle(bx), top: 0 }}>
             {bx.it.lines.map((ln, j) => <div key={j}>{ln}</div>)}
@@ -2649,18 +2656,13 @@ function PerceptionBar({ above = [], below = [] }) {
       </div>
       {/* THE BAR — four dots, coloured by person */}
       <div ref={ref} style={{ position: "relative", height: 6, background: "rgba(255,255,255,0.12)", borderRadius: 999, overflow: "visible" }}>
-        {dots.map((it, i) => {
-          const white = it.dotColor === "#fff";
-          return <div key={i} title={it.title || undefined} style={{ position: "absolute", top: "50%", left: it.pct + "%", transform: "translate(-50%,-50%)", width: 13, height: 13, borderRadius: "50%", background: it.dotColor, border: white ? "2px solid rgba(255,255,255,0.55)" : "2px solid " + it.dotColor, boxShadow: white ? "0 0 6px rgba(255,255,255,0.35)" : "0 0 8px " + it.dotColor + "66", zIndex: i + 1 }} />;
+        {dotItems.map((d, i) => {
+          const it = d.it; const white = it.dotColor === "#fff";
+          return <div key={i} title={it.title || undefined} style={{ position: "absolute", top: "50%", left: it.pct + "%", transform: `translate(-50%, calc(-50% + ${d.offY}px))`, width: 13, height: 13, borderRadius: "50%", background: it.dotColor, border: white ? "2px solid rgba(255,255,255,0.55)" : "2px solid " + it.dotColor, boxShadow: white ? "0 0 6px rgba(255,255,255,0.35)" : "0 0 8px " + it.dotColor + "66", zIndex: i + 1 }} />;
         })}
       </div>
       {/* BELOW band: viewer's two labels, leader lines up to the bar */}
       <div style={{ position: "relative", height: belowH }}>
-        {w > 0 && (
-          <svg width={w} height={belowH} style={{ position: "absolute", top: 0, left: 0, overflow: "visible" }}>
-            {pb.map((bx, i) => <line key={i} x1={bx.cx} y1={0} x2={Math.max(0, Math.min(innerX(bx), w))} y2={LEADER} stroke={bx.it.dotColor} strokeWidth="1.25" strokeOpacity="0.85" />)}
-          </svg>
-        )}
         {pb.map((bx, i) => (
           <div key={i} style={{ ...labelStyle(bx), top: LEADER }}>
             {bx.it.lines.map((ln, j) => <div key={j}>{ln}</div>)}
@@ -4537,7 +4539,7 @@ function resolveRoleTokens(str, myS, partS, userName, partnerName, userPronouns 
   return out;
 }
 
-function PersonalityResults({ myAnswers, partnerAnswers, userName, partnerName, coupleType, noSideNav = false, externalStep, onExternalGo, onGoExpectations }) {
+function PersonalityResults({ myAnswers, partnerAnswers, userName, partnerName, coupleType, userPronouns = "", partnerPronouns = "", noSideNav = false, externalStep, onExternalGo, onGoExpectations }) {
   const [step, setStep] = useState(externalStep ?? 0);
   const [showRaw, setShowRaw] = useState(false);
   useEffect(() => { if (externalStep !== undefined) setStep(externalStep); }, [externalStep]);
@@ -4774,11 +4776,11 @@ function PersonalityResults({ myAnswers, partnerAnswers, userName, partnerName, 
           // use the accent colour, the viewer's two are white. The partner's dots
           // are labelled above the bar; the viewer's below. (2 above, 2 below.)
           const above = [
-            selfP != null ? { pct: selfP, lines: [partnerName + "'s", "own view"], dotColor: m.color, title: partnerName + "'s own view" } : null,
+            selfP != null ? { pct: selfP, lines: [partnerName + "'s view", "of " + pronoun(partnerPronouns, "ref")], dotColor: m.color, title: partnerName + "'s view of " + pronoun(partnerPronouns, "ref") } : null,
             aPct  != null ? { pct: aPct,  lines: [userName + "'s view", "of " + partnerName], dotColor: m.color, title: "How " + userName + " sees " + partnerName } : null,
           ];
           const below = [
-            selfV != null ? { pct: selfV, lines: [userName + "'s", "own view"], dotColor: "#fff", title: userName + "'s own view" } : null,
+            selfV != null ? { pct: selfV, lines: [userName + "'s view", "of " + pronoun(userPronouns, "ref")], dotColor: "#fff", title: userName + "'s view of " + pronoun(userPronouns, "ref") } : null,
             bPct  != null ? { pct: bPct,  lines: [partnerName + "'s view", "of " + userName], dotColor: "#fff", title: "How " + partnerName + " sees " + userName } : null,
           ];
           return (
@@ -9001,6 +9003,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
           myAnswers={ex1Answers} partnerAnswers={partnerEx1}
           userName={userName} partnerName={partnerName}
           coupleType={coupleType}
+          userPronouns={userPronouns} partnerPronouns={partnerPronouns}
           forcedStep={dimStep} orderedDims={orderedDims}
           onGoExpectations={() => go("exp-overview")}
           onStepChange={s => {
@@ -10051,9 +10054,9 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
 }
 
 // Thin wrappers so PersonalityResults/ExpectationsResults can be driven externally
-function PersonalityResultsPage({ myAnswers, partnerAnswers, userName, partnerName, coupleType, forcedStep, orderedDims: extDims, onStepChange, onGoExpectations }) {
+function PersonalityResultsPage({ myAnswers, partnerAnswers, userName, partnerName, coupleType, userPronouns = "", partnerPronouns = "", forcedStep, orderedDims: extDims, onStepChange, onGoExpectations }) {
   const go = s => { if (onStepChange) onStepChange(s); };
-  return <PersonalityResults myAnswers={myAnswers} partnerAnswers={partnerAnswers} userName={userName} partnerName={partnerName} coupleType={coupleType} externalStep={forcedStep ?? 0} onExternalGo={go} noSideNav={true} onGoExpectations={onGoExpectations} />;
+  return <PersonalityResults myAnswers={myAnswers} partnerAnswers={partnerAnswers} userName={userName} partnerName={partnerName} coupleType={coupleType} userPronouns={userPronouns} partnerPronouns={partnerPronouns} externalStep={forcedStep ?? 0} onExternalGo={go} noSideNav={true} onGoExpectations={onGoExpectations} />;
 }
 function ExpectationsResultsPage({ myAnswers, partnerAnswers, userName, partnerName, forcedSection, onGoWhatComesNext, onExternalGo, coupleTypeCode = null, coupleTypeName = null, coupleTypeColor = "#1B5FE8" }) {
   return <ExpectationsResults myAnswers={myAnswers} partnerAnswers={partnerAnswers} userName={userName} partnerName={partnerName} forcedSection={forcedSection} noSideNav={true} onGoWhatComesNext={onGoWhatComesNext} onExternalGo={onExternalGo} coupleTypeCode={coupleTypeCode} coupleTypeName={coupleTypeName} coupleTypeColor={coupleTypeColor} />;
