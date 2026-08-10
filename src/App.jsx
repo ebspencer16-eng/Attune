@@ -11057,15 +11057,22 @@ function AuthModal({ mode, onClose, onSuccess }) {
       try { localStorage.setItem("attune_account", JSON.stringify(account)); } catch {}
 
       // Restore exercise answers from Supabase (cross-device support)
-      if (profile?.ex1_answers) {
-        try { localStorage.setItem('attune_ex1', JSON.stringify(profile.ex1_answers)); } catch {}
-      }
-      if (profile?.ex2_answers) {
-        try { localStorage.setItem('attune_ex2', JSON.stringify(profile.ex2_answers)); } catch {}
-      }
-      if (profile?.ex3_answers) {
-        try { localStorage.setItem('attune_ex3', JSON.stringify(profile.ex3_answers)); } catch {}
-      }
+      // Restore exercise answers from Supabase (cross-device support). When the
+      // server has no answers for an exercise (e.g. after an admin reset), clear
+      // any stale local copy so a previously-completed exercise doesn't linger on
+      // the device and keep showing as done.
+      try {
+        if (profile?.ex1_answers) localStorage.setItem('attune_ex1', JSON.stringify(profile.ex1_answers));
+        else localStorage.removeItem('attune_ex1');
+      } catch {}
+      try {
+        if (profile?.ex2_answers) localStorage.setItem('attune_ex2', JSON.stringify(profile.ex2_answers));
+        else localStorage.removeItem('attune_ex2');
+      } catch {}
+      try {
+        if (profile?.ex3_answers) localStorage.setItem('attune_ex3', JSON.stringify(profile.ex3_answers));
+        else localStorage.removeItem('attune_ex3');
+      } catch {}
       // Prior-completion snapshots (for retake comparison). These exist only
       // when the user has re-taken an exercise. Stored in localStorage so
       // the retake comparison card can render without a round-trip.
