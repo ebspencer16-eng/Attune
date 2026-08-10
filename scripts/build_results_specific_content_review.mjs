@@ -84,7 +84,7 @@ const cover = buildCover({
   indexRows: [
     ['1.', 'Highlights', 'eight cards'],
     ['2.', 'Full Summary', 'cards + surfaced prompts'],
-    ['3.', 'Couple Map', 'two axes + placement + share + how you see each other'],
+    ['3.', 'Couple Map', 'two axes + placement + share'],
     ['4.', 'Individual profiles', `${allBlurbs.length} blurbs`],
     ['5.', 'Communication action plan', `${protocols.length} protocols`],
     ['6.', 'Expectations results', 'overview + 5 categories + action plan'],
@@ -168,14 +168,6 @@ const section3 = [
   prose('One blurb per partner, generated from type and placement. Cataloged in full in Section 4.', { indent: INDENT_PROSE_UNDER_SMALL }),
   midSection('3.4', 'Share text', GREEN),
   prose('"We\u2019re \u2018[type name]\u2019, [tagline] Find yours at attune.com"', { italics: true, indent: INDENT_PROSE_UNDER_SMALL }),
-  midSection('3.5', 'How you see each other', GREEN, { extras: 'shown once partner-view answered' }),
-  prose('A per-dimension comparison of each person\u2019s self-rating against how their partner sees them. One row per dimension, two dots each: white is what you said, blue is what your partner said. The column is the person being described; the dot colour is whose voice it is. Hidden until the couple has answered the partner-view questions.', { indent: INDENT_PROSE_UNDER_SMALL }),
-  smallSection('3.5.1', 'Key', GREEN),
-  ...lines(['white dot = what you said', 'blue dot = what [partner] said']),
-  smallSection('3.5.2', 'Dimensions and poles', GREEN),
-  ...lines(['Conflict: Engages quickly / Needs space first', 'Under stress: Pulls inward / Leans on you', 'Repair: Reaches out first / Waits it out', 'Expression: Holds it in / Shares openly', 'Feedback: Wants a soft approach / Wants it direct']),
-  smallSection('3.5.3', 'Largest-gap callout', GREEN),
-  prose('"The biggest gap between how you two see each other is [dimension]. Start there." Shown when a gap of 1 or more exists.', { italics: true, indent: INDENT_PROSE_UNDER_SMALL }),
 ];
 
 // ── SECTION 4 — Individual profiles ─────────────────────────────────────────
