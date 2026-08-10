@@ -2230,49 +2230,101 @@ function PctTrackViz({ myPct, partPct, userName = "You", partnerName = "Partner"
   );
 }
 
-function DimTrackViz({ myScore = 3, theirScore = 3, color = "#9B5DE5", userName = "You", partnerName = "Partner" }) {
-  const pct = v => ((v - 1) / 4) * 100;
-  const myPctV = pct(myScore), theirPctV = pct(theirScore);
-  const close = Math.abs(myPctV - theirPctV) < 8;   // vertical-offset dots so they don't overlap
-  const stack = Math.abs(myPctV - theirPctV) < 30;  // stack labels vertically so they never collide
-  // Dot colours are keyed to the PERSON, not to "me vs them": the partner
-  // (theirScore) carries the dimension accent, the viewer (myScore) is white.
-  // This keeps a given person the same colour across the self bar and the
-  // "how you each perceive the other" bar.
-  // Labels are bound inside the tile: pinned to the left/right edge when the dot
-  // sits near an end, centred under the dot otherwise, and stacked vertically
-  // when the two dots are close so nothing clips or overlaps.
-  const labelStyle = (pctv, top) => {
-    const anchor = pctv < 22 ? "left" : pctv > 78 ? "right" : "center";
-    return {
-      position: "absolute", top,
-      left: anchor === "left" ? 0 : anchor === "center" ? pctv + "%" : "auto",
-      right: anchor === "right" ? 0 : "auto",
-      transform: anchor === "center" ? "translateX(-50%)" : "none",
-      textAlign: anchor, maxWidth: "50%",
-      fontSize: "0.58rem", color: "rgba(255,255,255,0.6)", fontFamily: "'DM Sans', sans-serif",
-      whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", display: "inline-block",
-    };
-  };
+// Canvas-based text measurement so label placement can react to real widths.
+let _dlMeasCtx = null;
+function _dlWidth(lines, fontPx) {
+  try {
+    if (!_dlMeasCtx) { _dlMeasCtx = document.createElement("canvas").getContext("2d"); }
+    _dlMeasCtx.font = fontPx + "px 'DM Sans', sans-serif";
+    return Math.max.apply(null, lines.map(l => _dlMeasCtx.measureText(String(l)).width));
+  } catch (e) { return Math.max.apply(null, lines.map(l => String(l).length)) * fontPx * 0.55; }
+}
+// Shared label row for a 1-5 track with up to two dots. Rules:
+//  - each label is centred under its dot by default;
+//  - if the two centred labels would overlap, the left dot's label becomes
+//    right-aligned (extends left) and the right dot's label left-aligned
+//    (extends right) so they separate around the dots;
+//  - a label that would spill past the tile edge is pushed just inside it;
+//  - a small leader line is drawn only when the two dots essentially coincide,
+//    to show which label belongs to which dot.
+// Text is the same grey as the rest of the track labels.
+function DotLabels({ items, leader = false }) {
+  const ref = React.useRef(null);
+  const [w, setW] = React.useState(0);
+  React.useLayoutEffect(() => {
+    const el = ref.current; if (!el) return;
+    const upd = () => setW(el.clientWidth || 0);
+    upd();
+    let ro; try { ro = new ResizeObserver(upd); ro.observe(el); } catch (e) {}
+    window.addEventListener("resize", upd);
+    return () => { window.removeEventListener("resize", upd); if (ro) ro.disconnect(); };
+  }, []);
+  const GREY = "rgba(255,255,255,0.6)";
+  const fontPx = 0.58 * 16;
+  const present = items.filter(it => it && it.pct != null);
+  const nLines = Math.max(1, ...present.map(it => it.lines.length));
+  const leaderH = leader ? 12 : 0;
+  const height = nLines * fontPx * 1.3 + leaderH + 4;
+  let placed = present.map(it => ({ it, leftPx: null, lw: 0, cx: 0 }));
+  let coincident = false;
+  if (w > 0 && present.length) {
+    placed = present.map(it => { const lw = _dlWidth(it.lines, fontPx); const cx = (it.pct / 100) * w; return { it, lw, cx, leftPx: cx - lw / 2 }; });
+    if (placed.length === 2) {
+      const order = placed[0].cx <= placed[1].cx ? [0, 1] : [1, 0];
+      const A = placed[order[0]], B = placed[order[1]];
+      if (A.cx + A.lw / 2 > B.cx - B.lw / 2) { A.leftPx = A.cx - A.lw; B.leftPx = B.cx; } // overlap -> split around dots
+      coincident = Math.abs(A.cx - B.cx) < 6;
+      if (coincident) { const GAP = 10; A.leftPx -= GAP; B.leftPx += GAP; } // small gap so the leader lines are visible
+    }
+    placed.forEach(bx => { bx.leftPx = Math.max(0, Math.min(bx.leftPx, w - bx.lw)); }); // keep inside tile
+    if (placed.length === 2) { // final guarantee: no residual overlap after clamping (e.g. both dots near an edge)
+      const ord = placed[0].cx <= placed[1].cx ? [0, 1] : [1, 0];
+      const A = placed[ord[0]], B = placed[ord[1]];
+      const minGap = coincident ? 8 : 4;
+      if (A.leftPx + A.lw + minGap > B.leftPx) {
+        B.leftPx = A.leftPx + A.lw + minGap;
+        if (B.leftPx + B.lw > w) { B.leftPx = w - B.lw; A.leftPx = Math.max(0, B.leftPx - A.lw - minGap); }
+      }
+    }
+  }
   return (
-    <div style={{ margin: "1.25rem 0", paddingBottom: stack ? "2.2rem" : "1.6rem", position: "relative" }}>
-      {/* Track — overflow visible so vertical-offset dots don't clip */}
-      <div style={{ height: 4, background: "rgba(255,255,255,0.12)", borderRadius: 2, position: "relative", overflow: "visible" }}>
-        <div style={{ position: "absolute", inset: 0, borderRadius: 2, background: "linear-gradient(90deg, rgba(255,255,255,0.05), rgba(255,255,255,0.18))" }} />
-        {/* Partner dot — dimension accent */}
-        <div style={{ position: "absolute", top: "50%", left: theirPctV + "%", transform: `translate(-50%, calc(-50% + ${close ? 6 : 0}px))`, width: 14, height: 14, borderRadius: "50%", background: color, border: "2px solid " + color, boxShadow: "0 0 8px " + color + "66", zIndex: 2 }} />
-        {/* Viewer dot — white */}
-        <div style={{ position: "absolute", top: "50%", left: myPctV + "%", transform: `translate(-50%, calc(-50% + ${close ? -6 : 0}px))`, width: 12, height: 12, borderRadius: "50%", background: "#fff", border: "2px solid rgba(255,255,255,0.5)", zIndex: 1 }} />
-      </div>
-      {/* Name labels, bound within the tile */}
-      <div style={{ position: "relative", height: stack ? 34 : 18, marginTop: 8 }}>
-        <span style={labelStyle(myPctV, 0)}>{userName}</span>
-        <span style={labelStyle(theirPctV, stack ? 16 : 0)}>{partnerName}</span>
-      </div>
+    <div ref={ref} style={{ position: "relative", height, marginTop: 8 }}>
+      {leader && coincident && w > 0 && (
+        <svg width={w} height={leaderH} style={{ position: "absolute", top: 0, left: 0, overflow: "visible" }}>
+          {placed.map((bx, i) => { const inner = bx.leftPx < bx.cx ? bx.leftPx + bx.lw : bx.leftPx; return <line key={i} x1={bx.cx} y1="0" x2={Math.max(0, Math.min(inner, w))} y2={leaderH} stroke="rgba(255,255,255,0.35)" strokeWidth="1" />; })}
+        </svg>
+      )}
+      {placed.map((bx, i) => (
+        <div key={i} style={{ position: "absolute", top: leaderH,
+          left: w > 0 ? bx.leftPx + "px" : bx.it.pct + "%",
+          transform: w > 0 ? "none" : "translateX(-50%)",
+          maxWidth: w > 0 ? (bx.lw + 2) + "px" : "60%",
+          textAlign: "left", color: GREY, fontSize: "0.58rem", lineHeight: 1.3,
+          fontFamily: "'DM Sans', sans-serif", whiteSpace: "nowrap" }}>
+          {bx.it.lines.map((ln, j) => <div key={j}>{ln}</div>)}
+        </div>
+      ))}
     </div>
   );
 }
-// ── COUPLE PORTRAIT BUBBLE ───────────────────────────────────────────────────
+function DimTrackViz({ myScore = 3, theirScore = 3, color = "#9B5DE5", userName = "You", partnerName = "Partner" }) {
+  const pct = v => ((v - 1) / 4) * 100;
+  const myPctV = pct(myScore), theirPctV = pct(theirScore);
+  const close = Math.abs(myPctV - theirPctV) < 8; // vertical-offset dots so they don't overlap
+  // Dot colour is keyed to the PERSON: the partner (theirScore) carries the
+  // dimension accent, the viewer (myScore) is white, matching the additional-
+  // insight bar. Labels are handled by the shared DotLabels component.
+  return (
+    <div style={{ margin: "1.25rem 0", position: "relative" }}>
+      <div style={{ height: 4, background: "rgba(255,255,255,0.12)", borderRadius: 2, position: "relative", overflow: "visible" }}>
+        <div style={{ position: "absolute", inset: 0, borderRadius: 2, background: "linear-gradient(90deg, rgba(255,255,255,0.05), rgba(255,255,255,0.18))" }} />
+        <div style={{ position: "absolute", top: "50%", left: theirPctV + "%", transform: `translate(-50%, calc(-50% + ${close ? 6 : 0}px))`, width: 14, height: 14, borderRadius: "50%", background: color, border: "2px solid " + color, boxShadow: "0 0 8px " + color + "66", zIndex: 2 }} />
+        <div style={{ position: "absolute", top: "50%", left: myPctV + "%", transform: `translate(-50%, calc(-50% + ${close ? -6 : 0}px))`, width: 12, height: 12, borderRadius: "50%", background: "#fff", border: "2px solid rgba(255,255,255,0.5)", zIndex: 1 }} />
+      </div>
+      <DotLabels items={[{ pct: myPctV, lines: [userName] }, { pct: theirPctV, lines: [partnerName] }]} leader />
+    </div>
+  );
+}// ── COUPLE PORTRAIT BUBBLE ───────────────────────────────────────────────────
 // Small avatar circle shown in nav header when portrait is set.
 function CouplePortraitBubble({ portrait, size = 32, dark = false, uid, onClick, style = {} }) {
   if (!portrait) return null;
@@ -4340,12 +4392,11 @@ function PersonalityResults({ myAnswers, partnerAnswers, userName, partnerName, 
         {/* Additional insight: how you each perceive the other. Only the five
             dimensions with a partner-view question have this data (pv_<dim>).
             Two dots on the same track style as the self bar: where each partner
-            placed the OTHER (accent dot = the partner, person-keyed colour to
-            match the self bar). Each dot has a two-line label colour-matched to
-            it. When the dots are far apart the labels sit under them; when they
-            are close the labels spread to the sides, each with a thin leader
-            line back to its dot. Hidden until at least one partner-view answer
-            exists for this dimension. */}
+            placed the OTHER (accent dot = the partner, matching the self bar).
+            Labels use the shared DotLabels placement (centred under each dot,
+            re-aligned around the dots only if they would collide, leader line
+            only when the dots coincide). Hidden until at least one partner-view
+            answer exists for this dimension. */}
         {PARTNER_VIEW_ENABLED && (() => {
           const pvId = "pv_" + dim;
           const numv = v => (v == null || isNaN(v)) ? null : Number(v);
@@ -4355,36 +4406,9 @@ function PersonalityResults({ myAnswers, partnerAnswers, userName, partnerName, 
           const pctOf = v => Math.max(4, Math.min(96, ((v - 1) / 4) * 100));
           const aPct = aV != null ? pctOf(aV) : null, bPct = bV != null ? pctOf(bV) : null;
           const close = aPct != null && bPct != null && Math.abs(aPct - bPct) < 8;
-          const items = [];
-          if (aV != null) items.push({ pct: aPct, textColor: m.color, lineColor: m.color, l1: "Where " + userName + " thinks", l2: partnerName + " sits" });
-          if (bV != null) items.push({ pct: bPct, textColor: "rgba(255,255,255,0.82)", lineColor: "rgba(255,255,255,0.55)", l1: "Where " + partnerName + " thinks", l2: userName + " sits" });
-          const textBlock = (it, side, xPct, top) => (
-            <div style={{ position: "absolute", top, maxWidth: "40%",
-              left: side === "left" ? xPct + "%" : "auto",
-              right: side === "right" ? (100 - xPct) + "%" : "auto",
-              textAlign: side, fontSize: "0.62rem", fontWeight: 600, lineHeight: 1.3, fontFamily: BFONT, color: it.textColor, textShadow: "0 1px 2px rgba(0,0,0,0.35)" }}>
-              <div>{it.l1}</div><div>{it.l2}</div>
-            </div>
-          );
-          let labelArea;
-          if (items.length === 1) {
-            const it = items[0]; const side = it.pct < 50 ? "left" : "right";
-            labelArea = <div style={{ position: "relative", marginTop: 6, height: 30 }}>{textBlock(it, side, side === "left" ? Math.min(it.pct, 40) : it.pct, 0)}</div>;
-          } else {
-            const sorted = [...items].sort((x, y) => x.pct - y.pct);
-            const L = sorted[0], R = sorted[1];
-            const Lx = Math.min(L.pct, 20), Rx = Math.max(R.pct, 80); // spread anchors so wide labels clear each other, even on mobile
-            labelArea = (
-              <div style={{ position: "relative", marginTop: 4, height: 48 }}>
-                <svg width="100%" height="14" style={{ position: "absolute", top: 0, left: 0, overflow: "visible" }}>
-                  <line x1={L.pct + "%"} y1="0" x2={Lx + "%"} y2="14" stroke={L.lineColor} strokeWidth="1" />
-                  <line x1={R.pct + "%"} y1="0" x2={Rx + "%"} y2="14" stroke={R.lineColor} strokeWidth="1" />
-                </svg>
-                {textBlock(L, "left", Lx, 18)}
-                {textBlock(R, "right", Rx, 18)}
-              </div>
-            );
-          }
+          const labelItems = [];
+          if (aV != null) labelItems.push({ pct: aPct, lines: ["Where " + userName + " thinks", partnerName + " sits"] });
+          if (bV != null) labelItems.push({ pct: bPct, lines: ["Where " + partnerName + " thinks", userName + " sits"] });
           return (
             <div style={{ marginTop: "1rem", background: "rgba(255,255,255,0.06)", borderRadius: 14, padding: "1.2rem 1.5rem", border: "1px solid rgba(255,255,255,0.14)" }}>
               <div style={{ fontSize: "0.62rem", textTransform: "uppercase", letterSpacing: "0.12em", color: "rgba(255,255,255,0.9)", fontWeight: 700, marginBottom: "0.9rem", fontFamily: BFONT }}>Additional insight: how you each perceive the other</div>
@@ -4392,11 +4416,11 @@ function PersonalityResults({ myAnswers, partnerAnswers, userName, partnerName, 
                 <span style={{ fontSize: "0.68rem", fontWeight: 600, color: "rgba(255,255,255,0.7)", fontFamily: BFONT }}>{m.ends[0]}</span>
                 <span style={{ fontSize: "0.68rem", fontWeight: 600, color: "rgba(255,255,255,0.7)", fontFamily: BFONT }}>{m.ends[1]}</span>
               </div>
-              <div style={{ position: "relative", height: 6, background: "rgba(255,255,255,0.12)", borderRadius: 999, margin: "0.5rem 0 0" }}>
+              <div style={{ position: "relative", height: 6, background: "rgba(255,255,255,0.12)", borderRadius: 999, margin: "0.5rem 0 0", overflow: "visible" }}>
                 {bV != null && <div title={"Where " + partnerName + " thinks " + userName + " sits"} style={{ position: "absolute", top: "50%", left: bPct + "%", transform: `translate(-50%, calc(-50% + ${close ? 5 : 0}px))`, width: 12, height: 12, borderRadius: "50%", background: "#fff", border: "2px solid rgba(255,255,255,0.5)", zIndex: 1 }} />}
                 {aV != null && <div title={"Where " + userName + " thinks " + partnerName + " sits"} style={{ position: "absolute", top: "50%", left: aPct + "%", transform: `translate(-50%, calc(-50% + ${close ? -5 : 0}px))`, width: 14, height: 14, borderRadius: "50%", background: m.color, border: "2px solid " + m.color, boxShadow: "0 0 8px " + m.color + "66", zIndex: 2 }} />}
               </div>
-              {labelArea}
+              <DotLabels items={labelItems} leader />
             </div>
           );
         })()}
