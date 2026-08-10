@@ -1507,6 +1507,27 @@ const PARTNER_PERSPECTIVE = {
 };
 
 
+// Near-line prose softener. When a partner sits within 0.6 of an axis boundary,
+// the categorical type is a lean, not a fixed position, so absolute phrasing in
+// the couple-type dynamic prose (patterns + sticking points) is softened to
+// match. Deliberately conservative: it only touches clear certainty markers, so
+// it reads naturally across every couple type. A type that needs a bespoke
+// near-line rewrite carries patternsNear / stickingPointsNear arrays, which take
+// precedence over this function.
+function softenNearLine(text) {
+  if (!text) return text;
+  let s = String(text);
+  // Only the certainty markers that soften cleanly in every context. Absolute
+  // words like "always"/"never" are intentionally NOT touched here: a global
+  // swap flips negations ("doesn't always match" -> wrong) and reads as
+  // repetition in triple-absolute lines. Those lines carry hand-authored
+  // *Near variants instead (see WX, WY, WZ).
+  s = s.replace(/\bNeeds to\b/g, "May need to").replace(/\bneeds to\b/g, "may need to");
+  s = s.replace(/\bHas to\b/g, "May need to").replace(/\bhas to\b/g, "may need to");
+  s = s.replace(/\bHave to\b/g, "May need to").replace(/\bhave to\b/g, "may need to");
+  return s;
+}
+
 const NEW_COUPLE_TYPES = [
   // ── Same-type pairings ──────────────────────────────────────────────────────
   {
@@ -1660,9 +1681,19 @@ const NEW_COUPLE_TYPES = [
       "{GRD} can feel pressure to match an emotional expressiveness that doesn't come naturally, which sometimes makes {GRD_obj} pull back further.",
       "What the expressive partner reads as withholding, the guarded partner experiences as just needing time to form it properly. Both readings feel true; neither is quite right.",
     ],
+    stickingPointsNear: [
+      "{EXP} can feel like {EXP_isC} always the one initiating depth, pushing for emotional work, or putting words to it first.",
+      "{GRD} may feel pressure to match emotional expressiveness when {GRD} is drawing inward, which sometimes makes {GRD_obj} pull back further.",
+      "What the expressive partner reads as withholding, the guarded partner experiences as just needing time to form it properly. Both readings feel true; neither is quite right.",
+    ],
     patterns: [
       "When something is off, {U} and {P} are usually both aware of it, but processing it at different speeds.",
       "{EXP} tends to process out loud. {GRD} needs to think it through first, then bring it. Same conversation, different way in.",
+      "When the conversation does happen, it tends to go somewhere useful. You're not fighting about whether to have it, just when.",
+    ],
+    patternsNear: [
+      "When something is off, {U} and {P} are usually both aware of it, but processing it at different speeds.",
+      "{EXP} tends to process out loud. {GRD} may need to think it through first, then bring it. Same conversation, different way in.",
       "When the conversation does happen, it tends to go somewhere useful. You're not fighting about whether to have it, just when.",
     ],
     tips: [
@@ -1691,6 +1722,11 @@ const NEW_COUPLE_TYPES = [
       "Without a framework, whoever needs space reads urgency as pressure, and whoever needs resolution reads distance as avoidance. Both interpretations feel true, and both are wrong.",
       "The pursuer-withdrawer loop: one presses for resolution, the other retreats further, which makes the first person press harder. It escalates without anyone wanting it to.",
       "Repair happens on one person's timeline, usually the person who initiates. The other person doesn't always feel ready when it starts.",
+    ],
+    stickingPointsNear: [
+      "Without a framework, whoever needs space reads urgency as pressure, and whoever needs resolution reads distance as avoidance. Both interpretations feel true, and both are wrong.",
+      "The pursuer-withdrawer loop: one presses for resolution, the other retreats further, which makes the first person press harder. It escalates without anyone wanting it to.",
+      "Repair often happens on one person's timeline, usually the person who initiates. The other person may not feel ready when it starts.",
     ],
     patterns: [
       "When something is off, {U} and {P} are usually not in the same place at the same time. {RCH} is ready to engage. {WDR} isn't there yet.",
@@ -1722,6 +1758,11 @@ const NEW_COUPLE_TYPES = [
     stickingPoints: [
       "{RCH} can feel like {RCH_isC} always the one initiating emotional depth, always doing the emotional work, always making the first move.",
       "The reserved partner can feel pressure to match an emotional expressiveness that isn't natural to {GRD}, which can push {GRD_obj} further into withdrawal.",
+      "The translation gap is real. What {U} means and what {P} hears aren't always the same thing, and the assumption that you've understood each other can lead to confusion downstream.",
+    ],
+    stickingPointsNear: [
+      "{RCH} can feel like {RCH_isC} always the one initiating emotional depth, pushing for the emotional work, or making the first move.",
+      "The reserved partner may feel pressure to match emotional expressiveness when {GRD} is drawing inward, which can push {GRD_obj} further into withdrawal.",
       "The translation gap is real. What {U} means and what {P} hears aren't always the same thing, and the assumption that you've understood each other can lead to confusion downstream.",
     ],
     patterns: [
@@ -1872,11 +1913,20 @@ function CoupleMapSVG({ myS, partS, userName, partnerName, size = 480 }) {
   const tagW = (name) => Math.max(name.length * 7.2 + tagPad * 2, 60);
   const tagWA = tagW(userName), tagWB = tagW(partnerName);
 
-  // Tag position — above A, below B, nudged if near edges
-  const tagAx = Math.max(cx0 + 4, Math.min(cx1 - tagWA - 4, axA.x - tagWA / 2));
-  const tagBx = Math.max(cx0 + 4, Math.min(cx1 - tagWB - 4, axB.x - tagWB / 2));
-  const tagAy = axA.y - 38;
-  const tagBy = axB.y + 18;
+  // Tag placement — assign the above/below slots by which dot is higher, so the
+  // two name tags never collide when the dots sit close together or touch. Each
+  // name keeps its own colour regardless of which slot it lands in.
+  const aIsUpper = axA.y <= axB.y;
+  const upperTag = aIsUpper
+    ? { x: axA.x, name: userName, color: itA.color, w: tagWA }
+    : { x: axB.x, name: partnerName, color: itB.color, w: tagWB };
+  const lowerTag = aIsUpper
+    ? { x: axB.x, name: partnerName, color: itB.color, w: tagWB }
+    : { x: axA.x, name: userName, color: itA.color, w: tagWA };
+  const upperTagY = (aIsUpper ? axA.y : axB.y) - 38;
+  const lowerTagY = (aIsUpper ? axB.y : axA.y) + 18;
+  const upperTagX = Math.max(cx0 + 4, Math.min(cx1 - upperTag.w - 4, upperTag.x - upperTag.w / 2));
+  const lowerTagX = Math.max(cx0 + 4, Math.min(cx1 - lowerTag.w - 4, lowerTag.x - lowerTag.w / 2));
 
   const idA = `gA_${typeInfoA.typeCode}`;
   const idB = `gB_${typeInfoB.typeCode}`;
@@ -1968,11 +2018,7 @@ function CoupleMapSVG({ myS, partS, userName, partnerName, size = 480 }) {
         <circle cx={axB.x} cy={axB.y} r="15" fill="none" stroke="white" strokeWidth="2.5"/>
         {/* Shine */}
         <circle cx={axB.x - 4} cy={axB.y - 4} r="4.5" fill="white" opacity="0.38"/>
-        {/* Name tag pill — below dot */}
-        <rect x={tagBx} y={tagBy} width={tagWB} height={tagH} rx={tagR} fill={itB.color} filter="url(#tagShadow)"/>
-        <text x={tagBx + tagWB / 2} y={tagBy + 15} textAnchor="middle" fontSize="11" fontWeight="700" fill="white" fontFamily="Arial">{partnerName}</text>
-        {/* Tail triangle */}
-        <polygon points={`${axB.x},${tagBy} ${axB.x - 5},${tagBy + 6} ${axB.x + 5},${tagBy + 6}`} fill={itB.color}/>
+        {/* Name tags rendered together after both dots (see below) */}
 
         {/* ── PARTNER A DOT (on top) ── */}
         <circle cx={axA.x} cy={axA.y} r="36" fill={`url(#${idA})`}/>
@@ -1980,11 +2026,13 @@ function CoupleMapSVG({ myS, partS, userName, partnerName, size = 480 }) {
         <circle cx={axA.x} cy={axA.y} r="15" fill={itA.color} filter="url(#dotShadow)"/>
         <circle cx={axA.x} cy={axA.y} r="15" fill="none" stroke="white" strokeWidth="2.5"/>
         <circle cx={axA.x - 4} cy={axA.y - 4} r="4.5" fill="white" opacity="0.38"/>
-        {/* Name tag pill — above dot */}
-        <rect x={tagAx} y={tagAy} width={tagWA} height={tagH} rx={tagR} fill={itA.color} filter="url(#tagShadow)"/>
-        <text x={tagAx + tagWA / 2} y={tagAy + 15} textAnchor="middle" fontSize="11" fontWeight="700" fill="white" fontFamily="Arial">{userName}</text>
-        {/* Tail triangle */}
-        <polygon points={`${axA.x},${tagAy + tagH} ${axA.x - 5},${tagAy + tagH - 6} ${axA.x + 5},${tagAy + tagH - 6}`} fill={itA.color}/>
+        {/* ── NAME TAGS — upper dot's tag above it, lower dot's tag below it ── */}
+        <rect x={upperTagX} y={upperTagY} width={upperTag.w} height={tagH} rx={tagR} fill={upperTag.color} filter="url(#tagShadow)"/>
+        <text x={upperTagX + upperTag.w / 2} y={upperTagY + 15} textAnchor="middle" fontSize="11" fontWeight="700" fill="white" fontFamily="Arial">{upperTag.name}</text>
+        <polygon points={`${upperTag.x},${upperTagY + tagH} ${upperTag.x - 5},${upperTagY + tagH - 6} ${upperTag.x + 5},${upperTagY + tagH - 6}`} fill={upperTag.color}/>
+        <rect x={lowerTagX} y={lowerTagY} width={lowerTag.w} height={tagH} rx={tagR} fill={lowerTag.color} filter="url(#tagShadow)"/>
+        <text x={lowerTagX + lowerTag.w / 2} y={lowerTagY + 15} textAnchor="middle" fontSize="11" fontWeight="700" fill="white" fontFamily="Arial">{lowerTag.name}</text>
+        <polygon points={`${lowerTag.x},${lowerTagY} ${lowerTag.x - 5},${lowerTagY + 6} ${lowerTag.x + 5},${lowerTagY + 6}`} fill={lowerTag.color}/>
       </svg>
 
       {/* ── HOW PLACEMENT IS CALCULATED (footnote, not a tile) ── */}
@@ -2248,7 +2296,7 @@ function _dlWidth(lines, fontPx) {
 //  - a small leader line is drawn only when the two dots essentially coincide,
 //    to show which label belongs to which dot.
 // Text is the same grey as the rest of the track labels.
-function DotLabels({ items, leader = false }) {
+function DotLabels({ items, leader = false, fontRem = 0.58, gap = 8 }) {
   const ref = React.useRef(null);
   const [w, setW] = React.useState(0);
   React.useLayoutEffect(() => {
@@ -2260,11 +2308,11 @@ function DotLabels({ items, leader = false }) {
     return () => { window.removeEventListener("resize", upd); if (ro) ro.disconnect(); };
   }, []);
   const GREY = "rgba(255,255,255,0.6)";
-  const fontPx = 0.58 * 16;
+  const fontPx = fontRem * 16;
   const present = items.filter(it => it && it.pct != null);
   const nLines = Math.max(1, ...present.map(it => it.lines.length));
   const leaderH = leader ? 12 : 0;
-  const height = nLines * fontPx * 1.3 + leaderH + 4;
+  const height = nLines * fontPx * 1.35 + leaderH + 4;
   let placed = present.map(it => ({ it, leftPx: null, lw: 0, cx: 0 }));
   let coincident = false;
   if (w > 0 && present.length) {
@@ -2288,7 +2336,7 @@ function DotLabels({ items, leader = false }) {
     }
   }
   return (
-    <div ref={ref} style={{ position: "relative", height, marginTop: 8 }}>
+    <div ref={ref} style={{ position: "relative", height, marginTop: gap }}>
       {leader && coincident && w > 0 && (
         <svg width={w} height={leaderH + 24} style={{ position: "absolute", top: -20, left: 0, overflow: "visible" }}>
           {placed.map((bx, i) => {
@@ -2303,11 +2351,101 @@ function DotLabels({ items, leader = false }) {
           left: w > 0 ? bx.leftPx + "px" : bx.it.pct + "%",
           transform: w > 0 ? "none" : "translateX(-50%)",
           maxWidth: w > 0 ? (bx.lw + 2) + "px" : "60%",
-          textAlign: "left", color: GREY, fontSize: "0.58rem", lineHeight: 1.3,
-          fontFamily: "'DM Sans', sans-serif", whiteSpace: "nowrap" }}>
+          textAlign: "left", color: GREY, lineHeight: 1.3,
+          fontFamily: "'DM Sans', sans-serif", whiteSpace: "nowrap", fontSize: fontRem + "rem" }}>
           {bx.it.lines.map((ln, j) => <div key={j}>{ln}</div>)}
         </div>
       ))}
+    </div>
+  );
+}
+// Four-dot perception bar for the dimension pages. Each dot is coloured by the
+// PERSON it is about (not by who is reporting), so a person's two dots — their
+// own view of themselves and their partner's view of them — share a colour.
+// The two dots about the partner are labelled above the bar; the two about the
+// viewer are labelled below. Every label has a leader line to its dot, and two
+// labels in the same band are nudged apart if they would collide.
+function PerceptionBar({ above = [], below = [] }) {
+  const ref = React.useRef(null);
+  const [w, setW] = React.useState(0);
+  React.useLayoutEffect(() => {
+    const el = ref.current; if (!el) return;
+    const upd = () => setW(el.clientWidth || 0);
+    upd();
+    let ro; try { ro = new ResizeObserver(upd); ro.observe(el); } catch (e) {}
+    window.addEventListener("resize", upd);
+    return () => { window.removeEventListener("resize", upd); if (ro) ro.disconnect(); };
+  }, []);
+  const GREY = "rgba(255,255,255,0.62)";
+  const fontPx = 0.56 * 16;
+  const LINEH = fontPx * 1.32;
+  const LEADER = 16;
+  const layout = (items) => {
+    const present = (items || []).filter(it => it && it.pct != null);
+    if (!(w > 0) || !present.length) return present.map(it => ({ it, leftPx: 0, lw: 0, cx: 0 }));
+    let placed = present.map(it => { const lw = _dlWidth(it.lines, fontPx); const cx = (it.pct / 100) * w; return { it, lw, cx, leftPx: cx - lw / 2 }; });
+    if (placed.length === 2) {
+      const ord = placed[0].cx <= placed[1].cx ? [0, 1] : [1, 0];
+      const A = placed[ord[0]], B = placed[ord[1]];
+      if (A.cx + A.lw / 2 > B.cx - B.lw / 2) { A.leftPx = A.cx - A.lw; B.leftPx = B.cx; } // split around dots
+    }
+    placed.forEach(bx => { bx.leftPx = Math.max(0, Math.min(bx.leftPx, w - bx.lw)); });
+    if (placed.length === 2) {
+      const ord = placed[0].cx <= placed[1].cx ? [0, 1] : [1, 0];
+      const A = placed[ord[0]], B = placed[ord[1]];
+      const minGap = 6;
+      if (A.leftPx + A.lw + minGap > B.leftPx) { B.leftPx = A.leftPx + A.lw + minGap; if (B.leftPx + B.lw > w) { B.leftPx = w - B.lw; A.leftPx = Math.max(0, B.leftPx - A.lw - minGap); } }
+    }
+    return placed;
+  };
+  const pa = layout(above), pb = layout(below);
+  const nA = Math.max(1, ...(above || []).filter(Boolean).map(it => it.lines.length));
+  const nB = Math.max(1, ...(below || []).filter(Boolean).map(it => it.lines.length));
+  const aboveH = nA * LINEH + LEADER + 2;
+  const belowH = nB * LINEH + LEADER + 2;
+  const innerX = (bx) => (bx.leftPx < bx.cx ? bx.leftPx + bx.lw : bx.leftPx);
+  const labelStyle = (bx) => ({ position: "absolute",
+    left: w > 0 ? bx.leftPx + "px" : bx.it.pct + "%",
+    transform: w > 0 ? "none" : "translateX(-50%)",
+    maxWidth: w > 0 ? (bx.lw + 2) + "px" : "60%",
+    textAlign: "left", color: GREY, lineHeight: 1.3,
+    fontFamily: "'DM Sans', sans-serif", whiteSpace: "nowrap", fontSize: "0.56rem" });
+  const dots = [...(above || []), ...(below || [])].filter(it => it && it.pct != null);
+  return (
+    <div>
+      {/* ABOVE band: partner's two labels, leader lines down to the bar */}
+      <div style={{ position: "relative", height: aboveH }}>
+        {w > 0 && (
+          <svg width={w} height={aboveH} style={{ position: "absolute", top: 0, left: 0, overflow: "visible" }}>
+            {pa.map((bx, i) => <line key={i} x1={Math.max(0, Math.min(innerX(bx), w))} y1={nA * LINEH} x2={bx.cx} y2={aboveH} stroke={bx.it.dotColor} strokeWidth="1.25" strokeOpacity="0.85" />)}
+          </svg>
+        )}
+        {pa.map((bx, i) => (
+          <div key={i} style={{ ...labelStyle(bx), top: 0 }}>
+            {bx.it.lines.map((ln, j) => <div key={j}>{ln}</div>)}
+          </div>
+        ))}
+      </div>
+      {/* THE BAR — four dots, coloured by person */}
+      <div ref={ref} style={{ position: "relative", height: 6, background: "rgba(255,255,255,0.12)", borderRadius: 999, overflow: "visible" }}>
+        {dots.map((it, i) => {
+          const white = it.dotColor === "#fff";
+          return <div key={i} title={it.title || undefined} style={{ position: "absolute", top: "50%", left: it.pct + "%", transform: "translate(-50%,-50%)", width: 13, height: 13, borderRadius: "50%", background: it.dotColor, border: white ? "2px solid rgba(255,255,255,0.55)" : "2px solid " + it.dotColor, boxShadow: white ? "0 0 6px rgba(255,255,255,0.35)" : "0 0 8px " + it.dotColor + "66", zIndex: i + 1 }} />;
+        })}
+      </div>
+      {/* BELOW band: viewer's two labels, leader lines up to the bar */}
+      <div style={{ position: "relative", height: belowH }}>
+        {w > 0 && (
+          <svg width={w} height={belowH} style={{ position: "absolute", top: 0, left: 0, overflow: "visible" }}>
+            {pb.map((bx, i) => <line key={i} x1={bx.cx} y1={0} x2={Math.max(0, Math.min(innerX(bx), w))} y2={LEADER} stroke={bx.it.dotColor} strokeWidth="1.25" strokeOpacity="0.85" />)}
+          </svg>
+        )}
+        {pb.map((bx, i) => (
+          <div key={i} style={{ ...labelStyle(bx), top: LEADER }}>
+            {bx.it.lines.map((ln, j) => <div key={j}>{ln}</div>)}
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
@@ -2325,7 +2463,7 @@ function DimTrackViz({ myScore = 3, theirScore = 3, color = "#9B5DE5", userName 
         <div style={{ position: "absolute", top: "50%", left: theirPctV + "%", transform: `translate(-50%, calc(-50% + ${close ? 6 : 0}px))`, width: 14, height: 14, borderRadius: "50%", background: color, border: "2px solid " + color, boxShadow: "0 0 8px " + color + "66", zIndex: 2 }} />
         <div style={{ position: "absolute", top: "50%", left: myPctV + "%", transform: `translate(-50%, calc(-50% + ${close ? -6 : 0}px))`, width: 12, height: 12, borderRadius: "50%", background: "#fff", border: "2px solid rgba(255,255,255,0.5)", zIndex: 1 }} />
       </div>
-      <DotLabels items={[{ pct: myPctV, lines: [userName], dotColor: "#fff", dotY: -16 }, { pct: theirPctV, lines: [partnerName], dotColor: color, dotY: -4 }]} leader />
+      <DotLabels items={[{ pct: myPctV, lines: [userName], dotColor: "#fff", dotY: -16 }, { pct: theirPctV, lines: [partnerName], dotColor: color, dotY: -4 }]} leader fontRem={0.72} gap={4} />
     </div>
   );
 }// ── COUPLE PORTRAIT BUBBLE ───────────────────────────────────────────────────
@@ -4401,27 +4539,36 @@ function PersonalityResults({ myAnswers, partnerAnswers, userName, partnerName, 
         {PARTNER_VIEW_ENABLED && (() => {
           const pvId = "pv_" + dim;
           const numv = v => (v == null || isNaN(v)) ? null : Number(v);
-          const aV = numv(myAnswers && myAnswers[pvId]);          // viewer's read of the partner
-          const bV = numv(partnerAnswers && partnerAnswers[pvId]); // partner's read of the viewer
+          const aV = numv(myAnswers && myAnswers[pvId]);          // viewer's view OF partner
+          const bV = numv(partnerAnswers && partnerAnswers[pvId]); // partner's view OF viewer
           if (aV == null && bV == null) return null;
           const pctOf = v => Math.max(4, Math.min(96, ((v - 1) / 4) * 100));
-          const aPct = aV != null ? pctOf(aV) : null, bPct = bV != null ? pctOf(bV) : null;
-          const close = aPct != null && bPct != null && Math.abs(aPct - bPct) < 8;
-          const labelItems = [];
-          if (aV != null) labelItems.push({ pct: aPct, lines: ["Where " + userName + " thinks", partnerName + " sits"], dotColor: m.color, dotY: -16 });
-          if (bV != null) labelItems.push({ pct: bPct, lines: ["Where " + partnerName + " thinks", userName + " sits"], dotColor: "#fff", dotY: -6 });
+          const aPct  = aV != null ? pctOf(aV) : null;                 // how userName sees partnerName (about partner)
+          const bPct  = bV != null ? pctOf(bV) : null;                 // how partnerName sees userName (about viewer)
+          const selfV = myS[dim] != null ? pctOf(myS[dim]) : null;     // userName's own view (about viewer)
+          const selfP = partS[dim] != null ? pctOf(partS[dim]) : null; // partnerName's own view (about partner)
+          // Dots are coloured by the PERSON each is about: the partner's two dots
+          // use the accent colour, the viewer's two are white. The partner's dots
+          // are labelled above the bar; the viewer's below. (2 above, 2 below.)
+          const above = [
+            selfP != null ? { pct: selfP, lines: [partnerName + "'s", "own view"], dotColor: m.color, title: partnerName + "'s own view" } : null,
+            aPct  != null ? { pct: aPct,  lines: [userName + "'s view", "of " + partnerName], dotColor: m.color, title: "How " + userName + " sees " + partnerName } : null,
+          ];
+          const below = [
+            selfV != null ? { pct: selfV, lines: [userName + "'s", "own view"], dotColor: "#fff", title: userName + "'s own view" } : null,
+            bPct  != null ? { pct: bPct,  lines: [partnerName + "'s view", "of " + userName], dotColor: "#fff", title: "How " + partnerName + " sees " + userName } : null,
+          ];
           return (
             <div style={{ marginTop: "1rem", background: "rgba(255,255,255,0.06)", borderRadius: 14, padding: "1.2rem 1.5rem", border: "1px solid rgba(255,255,255,0.14)" }}>
-              <div style={{ fontSize: "0.62rem", textTransform: "uppercase", letterSpacing: "0.12em", color: "rgba(255,255,255,0.9)", fontWeight: 700, marginBottom: "0.9rem", fontFamily: BFONT }}>Additional insight: how you each perceive the other</div>
-              <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "0.1rem" }}>
+              <div style={{ fontSize: "0.62rem", textTransform: "uppercase", letterSpacing: "0.12em", color: "rgba(255,255,255,0.9)", fontWeight: 700, marginBottom: "0.9rem", fontFamily: BFONT }}>Additional insight: how you each see yourselves and each other</div>
+              <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "0.35rem" }}>
                 <span style={{ fontSize: "0.68rem", fontWeight: 600, color: "rgba(255,255,255,0.7)", fontFamily: BFONT }}>{m.ends[0]}</span>
                 <span style={{ fontSize: "0.68rem", fontWeight: 600, color: "rgba(255,255,255,0.7)", fontFamily: BFONT }}>{m.ends[1]}</span>
               </div>
-              <div style={{ position: "relative", height: 6, background: "rgba(255,255,255,0.12)", borderRadius: 999, margin: "0.5rem 0 0", overflow: "visible" }}>
-                {bV != null && <div title={"Where " + partnerName + " thinks " + userName + " sits"} style={{ position: "absolute", top: "50%", left: bPct + "%", transform: `translate(-50%, calc(-50% + ${close ? 5 : 0}px))`, width: 12, height: 12, borderRadius: "50%", background: "#fff", border: "2px solid rgba(255,255,255,0.5)", zIndex: 1 }} />}
-                {aV != null && <div title={"Where " + userName + " thinks " + partnerName + " sits"} style={{ position: "absolute", top: "50%", left: aPct + "%", transform: `translate(-50%, calc(-50% + ${close ? -5 : 0}px))`, width: 14, height: 14, borderRadius: "50%", background: m.color, border: "2px solid " + m.color, boxShadow: "0 0 8px " + m.color + "66", zIndex: 2 }} />}
-              </div>
-              <DotLabels items={labelItems} leader />
+              <PerceptionBar above={above} below={below} />
+              <p style={{ fontSize: "0.62rem", fontStyle: "italic", color: "rgba(255,255,255,0.5)", lineHeight: 1.65, margin: "0.9rem 0 0", fontFamily: BFONT }}>
+                Calculations for {m.label.toLowerCase()} draw on several questions. They weigh each person's own sense of themselves alongside their partner's perception of their behavior, so a dot is not a simple midpoint.
+              </p>
             </div>
           );
         })()}
@@ -8373,6 +8520,19 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
       .replace(/\{U\}/g, userName).replace(/\{P\}/g, partnerName)
       .replace(/\{U_sub\}/g, pronoun(userPronouns, "sub")).replace(/\{U_obj\}/g, pronoun(userPronouns, "obj")).replace(/\{U_pos\}/g, pronoun(userPronouns, "pos")).replace(/\{U_isC\}/g, pronoun(userPronouns, "isC"))
       .replace(/\{P_sub\}/g, pronoun(partnerPronouns, "sub")).replace(/\{P_obj\}/g, pronoun(partnerPronouns, "obj")).replace(/\{P_pos\}/g, pronoun(partnerPronouns, "pos")).replace(/\{P_isC\}/g, pronoun(partnerPronouns, "isC")));
+    // Near-line softening: if either partner sits within 0.6 of an axis, soften
+    // the couple-type dynamic prose (patterns + sticking points). A type-authored
+    // *Near array wins; otherwise the generic softenNearLine pass runs. interp is
+    // applied here, so consumers render the returned strings directly.
+    const _anyNear =
+      Math.abs(_ctTypeA.withdrawScore - 3) < 0.6 || Math.abs(_ctTypeA.openScore - 3) < 0.6 ||
+      Math.abs(_ctTypeB.withdrawScore - 3) < 0.6 || Math.abs(_ctTypeB.openScore - 3) < 0.6;
+    const _proseSet = (arr, nearArr) => {
+      const hasNear = _anyNear && nearArr && nearArr.length;
+      const src = hasNear ? nearArr : (arr || []);
+      const useSoften = _anyNear && !hasNear;
+      return src.map(x => interp(useSoften ? softenNearLine(x) : x));
+    };
     // The share card sits mounted off-screen at storycard dimensions, so this
     // just screenshots it with the same html2canvas path the highlights reel uses.
     const handleShare = () => {
@@ -8575,7 +8735,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
               What this looks like in your relationship
             </div>
             <p style={{ fontSize: "0.88rem", color: C.ink, fontFamily: BFONT, lineHeight: 1.75, margin: 0, fontWeight: 400 }}>
-              {ct.patterns?.map(pp => interp(pp)).join(" ")}
+              {_proseSet(ct.patterns, ct.patternsNear).join(" ")}
             </p>
           </div>
 
@@ -8600,7 +8760,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
               <div style={{ background: "white", border: `1.5px solid ${C.stone}`, borderRadius: 18, padding: "1.5rem" }}>
                 <div style={{ fontSize: "0.6rem", letterSpacing: "0.2em", textTransform: "uppercase", color: "#E8673A", fontFamily: BFONT, fontWeight: 700, marginBottom: "1rem" }}>What's worth being aware of</div>
                 <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
-                  {ct.stickingPoints.slice(0,2).map((sx, i) => (
+                  {_proseSet(ct.stickingPoints, ct.stickingPointsNear).slice(0,2).map((sx, i) => (
                     <div key={i} style={{ display: "flex", gap: "0.7rem", alignItems: "flex-start" }}>
                       <div style={{ width: 20, height: 20, borderRadius: "50%", background: "rgba(232,103,58,0.1)", border: "1.5px solid rgba(232,103,58,0.28)", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", marginTop: 2 }}>
                         <span style={{ fontSize: "0.65rem", color: "#E8673A", fontWeight: 700 }}>!</span>
@@ -13962,6 +14122,27 @@ export default function App() {
       return deriveCoupleTypeFromExercise(_my, _part, _align);
     } catch { return null; }
   })();
+
+  // Persist the derived couple type onto the profile once both partners have
+  // completed, so beta cohorts can be backtracked by type. Idempotent: writes
+  // only when the stored value would change. Never runs in demo mode. Best
+  // effort — a failed write never blocks results.
+  useEffect(() => {
+    if (isDemo || !bothDone) return;
+    const ct = coupleType?.id;
+    const aid = account?.id;
+    if (!ct || !aid) return;
+    const flagKey = 'attune_couple_type_saved';
+    try { if (localStorage.getItem(flagKey) === (aid + ':' + ct)) return; } catch {}
+    (async () => {
+      try {
+        const { supabase: sb, hasSupabase } = await import('./supabase.js');
+        if (!hasSupabase()) return;
+        const r = await trackedSupabaseWrite(sb.from('profiles').update({ couple_type: ct }).eq('id', aid).select('id'));
+        if (!r?.error) { try { localStorage.setItem(flagKey, aid + ':' + ct); } catch {} }
+      } catch (e) { /* best effort */ }
+    })();
+  }, [bothDone, coupleType?.id, account?.id, isDemo]);
   // Granular completion signals for the dashboard status view and the
   // results-pending screen. Partner signals require the linked partner session
   // (invite-code match), never the demo fallback.
