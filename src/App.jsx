@@ -2232,55 +2232,46 @@ function PctTrackViz({ myPct, partPct, userName = "You", partnerName = "Partner"
 
 function DimTrackViz({ myScore = 3, theirScore = 3, color = "#9B5DE5", userName = "You", partnerName = "Partner" }) {
   const pct = v => ((v - 1) / 4) * 100;
-  // Dots (14px) only overlap when they sit within ~4% of each other on the
-  // track. Wider gaps stay on the line. Vertical offset keeps overlapping dots
-  // readable without changing horizontal position.
   const myPctV = pct(myScore), theirPctV = pct(theirScore);
-  const close = Math.abs(myPctV - theirPctV) < 4;
-  // Identify which marker is on the left vs right for outward-anchoring labels.
-  const myIsLeft = myPctV <= theirPctV;
+  const close = Math.abs(myPctV - theirPctV) < 8;   // vertical-offset dots so they don't overlap
+  const stack = Math.abs(myPctV - theirPctV) < 30;  // stack labels vertically so they never collide
+  // Dot colours are keyed to the PERSON, not to "me vs them": the partner
+  // (theirScore) carries the dimension accent, the viewer (myScore) is white.
+  // This keeps a given person the same colour across the self bar and the
+  // "how you each perceive the other" bar.
+  // Labels are bound inside the tile: pinned to the left/right edge when the dot
+  // sits near an end, centred under the dot otherwise, and stacked vertically
+  // when the two dots are close so nothing clips or overlaps.
+  const labelStyle = (pctv, top) => {
+    const anchor = pctv < 22 ? "left" : pctv > 78 ? "right" : "center";
+    return {
+      position: "absolute", top,
+      left: anchor === "left" ? 0 : anchor === "center" ? pctv + "%" : "auto",
+      right: anchor === "right" ? 0 : "auto",
+      transform: anchor === "center" ? "translateX(-50%)" : "none",
+      textAlign: anchor, maxWidth: "50%",
+      fontSize: "0.58rem", color: "rgba(255,255,255,0.6)", fontFamily: "'DM Sans', sans-serif",
+      whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", display: "inline-block",
+    };
+  };
   return (
-    <div style={{ margin: "1.25rem 0", paddingBottom: "1.6rem", position: "relative" }}>
-      {/* Track — overflow visible so vertical-offset dots and outward-anchored names don't clip */}
+    <div style={{ margin: "1.25rem 0", paddingBottom: stack ? "2.2rem" : "1.6rem", position: "relative" }}>
+      {/* Track — overflow visible so vertical-offset dots don't clip */}
       <div style={{ height: 4, background: "rgba(255,255,255,0.12)", borderRadius: 2, position: "relative", overflow: "visible" }}>
         <div style={{ position: "absolute", inset: 0, borderRadius: 2, background: "linear-gradient(90deg, rgba(255,255,255,0.05), rgba(255,255,255,0.18))" }} />
-        {/* My dot — vertical offset upward when close to partner dot */}
-        <div style={{ position: "absolute", top: "50%", left: myPctV + "%", transform: `translate(-50%, calc(-50% + ${close ? (myIsLeft ? -6 : 6) : 0}px))`, width: 14, height: 14, borderRadius: "50%", background: color, border: "2px solid " + color, boxShadow: "0 0 8px " + color + "66", zIndex: 2 }} />
-        {/* Partner dot — vertical offset downward when close */}
-        <div style={{ position: "absolute", top: "50%", left: theirPctV + "%", transform: `translate(-50%, calc(-50% + ${close ? (myIsLeft ? 6 : -6) : 0}px))`, width: 12, height: 12, borderRadius: "50%", background: "rgba(255,255,255,0.5)", border: "2px solid rgba(255,255,255,0.3)", zIndex: 1 }} />
+        {/* Partner dot — dimension accent */}
+        <div style={{ position: "absolute", top: "50%", left: theirPctV + "%", transform: `translate(-50%, calc(-50% + ${close ? 6 : 0}px))`, width: 14, height: 14, borderRadius: "50%", background: color, border: "2px solid " + color, boxShadow: "0 0 8px " + color + "66", zIndex: 2 }} />
+        {/* Viewer dot — white */}
+        <div style={{ position: "absolute", top: "50%", left: myPctV + "%", transform: `translate(-50%, calc(-50% + ${close ? -6 : 0}px))`, width: 12, height: 12, borderRadius: "50%", background: "#fff", border: "2px solid rgba(255,255,255,0.5)", zIndex: 1 }} />
       </div>
-      {/* Name labels below the bar.
-          Outward anchoring: leftmost name right-aligns to its dot (extends leftward);
-          rightmost name left-aligns to its dot (extends rightward).
-          Prevents collision when scores are close, even with long names.
-          Max-width caps very long names at ~110px with ellipsis. */}
-      <div style={{ position: "relative", height: 20, marginTop: 8 }}>
-        {[
-          { score: myScore, label: userName, isLeft: myIsLeft },
-          { score: theirScore, label: partnerName, isLeft: !myIsLeft },
-        ].map(({ score, label, isLeft }) => (
-          <span key={label} style={{
-            position: "absolute",
-            left: isLeft ? "auto" : `calc(${pct(score)}% + 4px)`,
-            right: isLeft ? `calc(${100 - pct(score)}% + 4px)` : "auto",
-            textAlign: isLeft ? "right" : "left",
-            maxWidth: "44%",
-            fontSize: "0.58rem",
-            color: "rgba(255,255,255,0.55)",
-            fontFamily: "'DM Sans', sans-serif",
-            whiteSpace: "nowrap",
-            overflow: "hidden",
-            textOverflow: "ellipsis",
-            display: "inline-block",
-          }}>
-            {label}
-          </span>
-        ))}
+      {/* Name labels, bound within the tile */}
+      <div style={{ position: "relative", height: stack ? 34 : 18, marginTop: 8 }}>
+        <span style={labelStyle(myPctV, 0)}>{userName}</span>
+        <span style={labelStyle(theirPctV, stack ? 16 : 0)}>{partnerName}</span>
       </div>
     </div>
   );
 }
-
 // ── COUPLE PORTRAIT BUBBLE ───────────────────────────────────────────────────
 // Small avatar circle shown in nav header when portrait is set.
 function CouplePortraitBubble({ portrait, size = 32, dark = false, uid, onClick, style = {} }) {
@@ -4348,15 +4339,52 @@ function PersonalityResults({ myAnswers, partnerAnswers, userName, partnerName, 
 
         {/* Additional insight: how you each perceive the other. Only the five
             dimensions with a partner-view question have this data (pv_<dim>).
-            Two dots: where each partner placed the OTHER. Hidden if neither
-            partner answered the partner-view question for this dimension. */}
+            Two dots on the same track style as the self bar: where each partner
+            placed the OTHER (accent dot = the partner, person-keyed colour to
+            match the self bar). Each dot has a two-line label colour-matched to
+            it. When the dots are far apart the labels sit under them; when they
+            are close the labels spread to the sides, each with a thin leader
+            line back to its dot. Hidden until at least one partner-view answer
+            exists for this dimension. */}
         {PARTNER_VIEW_ENABLED && (() => {
           const pvId = "pv_" + dim;
           const numv = v => (v == null || isNaN(v)) ? null : Number(v);
-          const aV = numv(myAnswers && myAnswers[pvId]);       // userName's read of partnerName
-          const bV = numv(partnerAnswers && partnerAnswers[pvId]); // partnerName's read of userName
+          const aV = numv(myAnswers && myAnswers[pvId]);          // viewer's read of the partner
+          const bV = numv(partnerAnswers && partnerAnswers[pvId]); // partner's read of the viewer
           if (aV == null && bV == null) return null;
           const pctOf = v => Math.max(4, Math.min(96, ((v - 1) / 4) * 100));
+          const aPct = aV != null ? pctOf(aV) : null, bPct = bV != null ? pctOf(bV) : null;
+          const close = aPct != null && bPct != null && Math.abs(aPct - bPct) < 8;
+          const items = [];
+          if (aV != null) items.push({ pct: aPct, textColor: m.color, lineColor: m.color, l1: "Where " + userName + " thinks", l2: partnerName + " sits" });
+          if (bV != null) items.push({ pct: bPct, textColor: "rgba(255,255,255,0.82)", lineColor: "rgba(255,255,255,0.55)", l1: "Where " + partnerName + " thinks", l2: userName + " sits" });
+          const textBlock = (it, side, xPct, top) => (
+            <div style={{ position: "absolute", top, maxWidth: "40%",
+              left: side === "left" ? xPct + "%" : "auto",
+              right: side === "right" ? (100 - xPct) + "%" : "auto",
+              textAlign: side, fontSize: "0.62rem", fontWeight: 600, lineHeight: 1.3, fontFamily: BFONT, color: it.textColor, textShadow: "0 1px 2px rgba(0,0,0,0.35)" }}>
+              <div>{it.l1}</div><div>{it.l2}</div>
+            </div>
+          );
+          let labelArea;
+          if (items.length === 1) {
+            const it = items[0]; const side = it.pct < 50 ? "left" : "right";
+            labelArea = <div style={{ position: "relative", marginTop: 6, height: 30 }}>{textBlock(it, side, side === "left" ? Math.min(it.pct, 40) : it.pct, 0)}</div>;
+          } else {
+            const sorted = [...items].sort((x, y) => x.pct - y.pct);
+            const L = sorted[0], R = sorted[1];
+            const Lx = Math.min(L.pct, 20), Rx = Math.max(R.pct, 80); // spread anchors so wide labels clear each other, even on mobile
+            labelArea = (
+              <div style={{ position: "relative", marginTop: 4, height: 48 }}>
+                <svg width="100%" height="14" style={{ position: "absolute", top: 0, left: 0, overflow: "visible" }}>
+                  <line x1={L.pct + "%"} y1="0" x2={Lx + "%"} y2="14" stroke={L.lineColor} strokeWidth="1" />
+                  <line x1={R.pct + "%"} y1="0" x2={Rx + "%"} y2="14" stroke={R.lineColor} strokeWidth="1" />
+                </svg>
+                {textBlock(L, "left", Lx, 18)}
+                {textBlock(R, "right", Rx, 18)}
+              </div>
+            );
+          }
           return (
             <div style={{ marginTop: "1rem", background: "rgba(255,255,255,0.06)", borderRadius: 14, padding: "1.2rem 1.5rem", border: "1px solid rgba(255,255,255,0.14)" }}>
               <div style={{ fontSize: "0.62rem", textTransform: "uppercase", letterSpacing: "0.12em", color: "rgba(255,255,255,0.9)", fontWeight: 700, marginBottom: "0.9rem", fontFamily: BFONT }}>Additional insight: how you each perceive the other</div>
@@ -4364,14 +4392,11 @@ function PersonalityResults({ myAnswers, partnerAnswers, userName, partnerName, 
                 <span style={{ fontSize: "0.68rem", fontWeight: 600, color: "rgba(255,255,255,0.7)", fontFamily: BFONT }}>{m.ends[0]}</span>
                 <span style={{ fontSize: "0.68rem", fontWeight: 600, color: "rgba(255,255,255,0.7)", fontFamily: BFONT }}>{m.ends[1]}</span>
               </div>
-              <div style={{ position: "relative", height: 6, background: "rgba(255,255,255,0.12)", borderRadius: 999, margin: "0.5rem 0 1rem" }}>
-                {aV != null && <div title={"Where " + userName + " thinks " + partnerName + " sits"} style={{ position: "absolute", top: "50%", left: pctOf(aV) + "%", transform: "translate(-50%,-50%)", width: 14, height: 14, borderRadius: "50%", background: m.color, border: "2px solid " + m.color, boxShadow: "0 0 8px " + m.color + "66" }} />}
-                {bV != null && <div title={"Where " + partnerName + " thinks " + userName + " sits"} style={{ position: "absolute", top: "50%", left: pctOf(bV) + "%", transform: "translate(-50%,-50%)", width: 13, height: 13, borderRadius: "50%", background: "#fff", border: "2px solid rgba(255,255,255,0.45)" }} />}
+              <div style={{ position: "relative", height: 6, background: "rgba(255,255,255,0.12)", borderRadius: 999, margin: "0.5rem 0 0" }}>
+                {bV != null && <div title={"Where " + partnerName + " thinks " + userName + " sits"} style={{ position: "absolute", top: "50%", left: bPct + "%", transform: `translate(-50%, calc(-50% + ${close ? 5 : 0}px))`, width: 12, height: 12, borderRadius: "50%", background: "#fff", border: "2px solid rgba(255,255,255,0.5)", zIndex: 1 }} />}
+                {aV != null && <div title={"Where " + userName + " thinks " + partnerName + " sits"} style={{ position: "absolute", top: "50%", left: aPct + "%", transform: `translate(-50%, calc(-50% + ${close ? -5 : 0}px))`, width: 14, height: 14, borderRadius: "50%", background: m.color, border: "2px solid " + m.color, boxShadow: "0 0 8px " + m.color + "66", zIndex: 2 }} />}
               </div>
-              <div style={{ display: "flex", flexDirection: "column", gap: "0.45rem" }}>
-                {aV != null && <span style={{ display: "inline-flex", alignItems: "center", gap: "0.45rem", fontSize: "0.72rem", color: "rgba(255,255,255,0.82)", fontFamily: BFONT }}><span style={{ width: 11, height: 11, borderRadius: "50%", background: m.color, flexShrink: 0 }} />Where {userName} thinks {partnerName} sits</span>}
-                {bV != null && <span style={{ display: "inline-flex", alignItems: "center", gap: "0.45rem", fontSize: "0.72rem", color: "rgba(255,255,255,0.82)", fontFamily: BFONT }}><span style={{ width: 11, height: 11, borderRadius: "50%", background: "#fff", border: "1px solid rgba(255,255,255,0.45)", flexShrink: 0 }} />Where {partnerName} thinks {userName} sits</span>}
-              </div>
+              {labelArea}
             </div>
           );
         })()}
