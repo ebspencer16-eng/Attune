@@ -2290,8 +2290,12 @@ function DotLabels({ items, leader = false }) {
   return (
     <div ref={ref} style={{ position: "relative", height, marginTop: 8 }}>
       {leader && coincident && w > 0 && (
-        <svg width={w} height={leaderH} style={{ position: "absolute", top: 0, left: 0, overflow: "visible" }}>
-          {placed.map((bx, i) => { const inner = bx.leftPx < bx.cx ? bx.leftPx + bx.lw : bx.leftPx; return <line key={i} x1={bx.cx} y1="0" x2={Math.max(0, Math.min(inner, w))} y2={leaderH} stroke="rgba(255,255,255,0.35)" strokeWidth="1" />; })}
+        <svg width={w} height={leaderH + 24} style={{ position: "absolute", top: -20, left: 0, overflow: "visible" }}>
+          {placed.map((bx, i) => {
+            const inner = bx.leftPx < bx.cx ? bx.leftPx + bx.lw : bx.leftPx; // label edge nearest the dot
+            const y1 = (bx.it.dotY != null ? bx.it.dotY : -10) + 20;         // start at THIS dot (its stacked offset)
+            return <line key={i} x1={bx.cx} y1={y1} x2={Math.max(0, Math.min(inner, w))} y2={leaderH + 20} stroke={bx.it.dotColor || "rgba(255,255,255,0.5)"} strokeWidth="1.25" strokeOpacity="0.9" />;
+          })}
         </svg>
       )}
       {placed.map((bx, i) => (
@@ -2321,7 +2325,7 @@ function DimTrackViz({ myScore = 3, theirScore = 3, color = "#9B5DE5", userName 
         <div style={{ position: "absolute", top: "50%", left: theirPctV + "%", transform: `translate(-50%, calc(-50% + ${close ? 6 : 0}px))`, width: 14, height: 14, borderRadius: "50%", background: color, border: "2px solid " + color, boxShadow: "0 0 8px " + color + "66", zIndex: 2 }} />
         <div style={{ position: "absolute", top: "50%", left: myPctV + "%", transform: `translate(-50%, calc(-50% + ${close ? -6 : 0}px))`, width: 12, height: 12, borderRadius: "50%", background: "#fff", border: "2px solid rgba(255,255,255,0.5)", zIndex: 1 }} />
       </div>
-      <DotLabels items={[{ pct: myPctV, lines: [userName] }, { pct: theirPctV, lines: [partnerName] }]} leader />
+      <DotLabels items={[{ pct: myPctV, lines: [userName], dotColor: "#fff", dotY: -16 }, { pct: theirPctV, lines: [partnerName], dotColor: color, dotY: -4 }]} leader />
     </div>
   );
 }// ── COUPLE PORTRAIT BUBBLE ───────────────────────────────────────────────────
@@ -3499,13 +3503,10 @@ function Exercise01Flow({ userName, partnerName, onComplete, skipIntro = false, 
           <p style={{ fontSize: "0.72rem", letterSpacing: "0.1em", textTransform: "uppercase", color: "#999", fontFamily: "'DM Sans', sans-serif", marginBottom: "0.4rem" }}>
             Question {idx + 1} of {total}
           </p>
-          {q.partnerView && (
-            <p style={{ fontSize: "0.72rem", fontStyle: "italic", color: "#9B5DE5", fontFamily: "'DM Sans', sans-serif", marginBottom: "0.4rem" }}>
-              About {partnerName || "your partner"}
-            </p>
-          )}
           <p style={{ fontSize: "1.25rem", fontWeight: 600, color: "#1C1C1E", fontFamily: "'Playfair Display', serif", lineHeight: 1.4, margin: 0 }}>
-            {q.text}
+            {q.partnerView
+              ? q.text.split(/(your partner)/i).map((seg, i) => (/^your partner$/i.test(seg) ? <em key={i}>{seg}</em> : <React.Fragment key={i}>{seg}</React.Fragment>))
+              : q.text}
           </p>
         </div>
 
@@ -4407,8 +4408,8 @@ function PersonalityResults({ myAnswers, partnerAnswers, userName, partnerName, 
           const aPct = aV != null ? pctOf(aV) : null, bPct = bV != null ? pctOf(bV) : null;
           const close = aPct != null && bPct != null && Math.abs(aPct - bPct) < 8;
           const labelItems = [];
-          if (aV != null) labelItems.push({ pct: aPct, lines: ["Where " + userName + " thinks", partnerName + " sits"] });
-          if (bV != null) labelItems.push({ pct: bPct, lines: ["Where " + partnerName + " thinks", userName + " sits"] });
+          if (aV != null) labelItems.push({ pct: aPct, lines: ["Where " + userName + " thinks", partnerName + " sits"], dotColor: m.color, dotY: -16 });
+          if (bV != null) labelItems.push({ pct: bPct, lines: ["Where " + partnerName + " thinks", userName + " sits"], dotColor: "#fff", dotY: -6 });
           return (
             <div style={{ marginTop: "1rem", background: "rgba(255,255,255,0.06)", borderRadius: 14, padding: "1.2rem 1.5rem", border: "1px solid rgba(255,255,255,0.14)" }}>
               <div style={{ fontSize: "0.62rem", textTransform: "uppercase", letterSpacing: "0.12em", color: "rgba(255,255,255,0.9)", fontWeight: 700, marginBottom: "0.9rem", fontFamily: BFONT }}>Additional insight: how you each perceive the other</div>
@@ -10379,6 +10380,7 @@ function AuthModal({ mode, onClose, onSuccess }) {
   const _authIsGift = _authParams.get('gift') === '1';
   const [welcomeAck, setWelcomeAck] = useState(false); // gift/QR celebratory landing acknowledged
   const [err, setErr] = useState("");
+  const [capsOn, setCapsOn] = useState(false); // Caps Lock warning for password fields
   const [loading, setLoading] = useState(false);
   const [resetSent, setResetSent] = useState(false);
   const [loginAttempts, setLoginAttempts] = useState(0);
@@ -10907,16 +10909,30 @@ function AuthModal({ mode, onClose, onSuccess }) {
     setResetSent(true);
   };
 
-  const inp = (placeholder, key, type = "text", extra = {}) => (
-    <input
-      type={type}
-      placeholder={placeholder}
-      value={form[key]}
-      onChange={e => { upd(key, e.target.value); setErr(""); }}
-      style={{ width: "100%", padding: "0.78rem 1rem", border: `1.5px solid ${err && !form[key] ? "#ef4444" : "#E8DDD0"}`, borderRadius: 11, fontSize: "0.88rem", fontFamily: "'DM Sans', sans-serif", color: "#0E0B07", background: "#FFFDF9", outline: "none", marginBottom: "0.6rem", boxSizing: "border-box" }}
-      {...extra}
-    />
-  );
+  const _capsCheck = (e) => { try { setCapsOn(!!(e.getModifierState && e.getModifierState("CapsLock"))); } catch (_) {} };
+  const inp = (placeholder, key, type = "text", extra = {}) => {
+    const isPw = type === "password";
+    return (
+      <React.Fragment>
+        <input
+          type={type}
+          placeholder={placeholder}
+          value={form[key]}
+          onChange={e => { upd(key, e.target.value); setErr(""); }}
+          onKeyDown={isPw ? _capsCheck : undefined}
+          onKeyUp={isPw ? _capsCheck : undefined}
+          onBlur={isPw ? (() => setCapsOn(false)) : undefined}
+          style={{ width: "100%", padding: "0.78rem 1rem", border: `1.5px solid ${err && !form[key] ? "#ef4444" : "#E8DDD0"}`, borderRadius: 11, fontSize: "0.88rem", fontFamily: "'DM Sans', sans-serif", color: "#0E0B07", background: "#FFFDF9", outline: "none", marginBottom: isPw && capsOn ? "0.3rem" : "0.6rem", boxSizing: "border-box" }}
+          {...extra}
+        />
+        {isPw && capsOn && (
+          <div style={{ display: "flex", alignItems: "center", gap: "0.35rem", fontSize: "0.72rem", color: "#B5546E", fontFamily: "'DM Sans', sans-serif", margin: "0 0 0.6rem 0.15rem" }}>
+            <span style={{ fontSize: "0.8rem", lineHeight: 1 }}>⇪</span> Caps Lock is on
+          </div>
+        )}
+      </React.Fragment>
+    );
+  };
 
   // Celebratory welcome landing for gift recipients and physical-card (QR) arrivals.
   // Shown once before the signup form. Gift-aware copy. Normal sign-in/up is unaffected.

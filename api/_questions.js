@@ -138,7 +138,7 @@ export const LIFE_QUESTIONS = [
 // scores are never affected by them.
 // ─────────────────────────────────────────────────────────────────────────────
 export const PARTNER_VIEW_ITEMS = [
-  { id: "pv_conflict", dimension: "conflict", partnerView: true, after: "cf2",
+  { id: "pv_conflict", dimension: "conflict", partnerView: true, after: "cf1",
     text: "When something feels off between you, your partner tends to:",
     a: "Address it as soon as possible.", b: "Need time and space before engaging." },
   { id: "pv_stress", dimension: "stress", partnerView: true, after: "st1",
@@ -147,7 +147,7 @@ export const PARTNER_VIEW_ITEMS = [
   { id: "pv_repair", dimension: "repair", partnerView: true, after: "rp6",
     text: "After a conflict, the move toward repair usually comes from your partner:",
     a: "Relatively quickly. They tend to reach out first.", b: "Only once they're ready. They wait it out." },
-  { id: "pv_expression", dimension: "expression", partnerView: true, after: "ex10",
+  { id: "pv_expression", dimension: "expression", partnerView: true, after: "ex6",
     text: "When your partner is going through something, they tend to:",
     a: "Keep it mostly to themselves until they've worked through it.", b: "Let you in as it's happening." },
   { id: "pv_feedback", dimension: "feedback", partnerView: true, after: "fb5",
