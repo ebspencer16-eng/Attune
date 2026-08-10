@@ -528,7 +528,7 @@ hr{border:none;border-top:1px solid var(--border-soft);margin:2rem 0}
 function buildGrid(containerId, rows, cols, skipMap = {}) {
   const wrap = document.getElementById(containerId);
   if (!wrap) return;
-  const headStyle = `grid-template-columns: 2fr ${cols.map(() => '1fr').join(' ')}`;
+  const headStyle = `grid-template-columns: minmax(120px, 2fr) ${cols.map(() => 'minmax(156px, 1fr)').join(' ')}`;
   let html = `<div class="grid-head" style="${headStyle}">
     <div class="grid-head-cell"></div>
     ${cols.map(c => `<div class="grid-head-cell"><span class="gh-label">${c.label}</span>${c.desc ? `<span class="gh-desc">${c.desc}</span>` : ''}</div>`).join('')}
@@ -621,28 +621,24 @@ function lowsComplete(gridId) {
 const BANDS = {
   expectationMatch: ['What was missing or fell short of what you expected?',
                      'What would have made this a better match for what you were expecting?',
-                     'What exceeded what you were expecting?'],
-  commsOverall:     ['What made it fall short?',
+                     'Were there any aspects of Attune that particularly exceeded your expectations?'],
+  commsOverall:     ['In what ways did this fall short?',
                      'How could the communication exercise have been better?',
-                     'What made it great?'],
-  commsHonesty:     ['What made it difficult to answer fully honestly?',
+                     'Are there any elements of the communications exercise that stood out as positive?'],
+  commsHonesty:     ['What would have helped you answer more openly?',
                      'What would have helped you answer more openly?',
                      null],   // 4-5 gets no follow-up
-  expOverall:       ['What made it fall short?',
+  expOverall:       ['In what ways did this fall short?',
                      'How could the expectations exercise have been better?',
-                     'What made it great?'],
-  expHonesty:       ['What made it difficult to answer fully honestly?',
+                     'What did you enjoy about the expectations exercise?'],
+  expHonesty:       ['What would have helped you answer more openly?',
                      'What would have helped you answer more openly?',
                      null],   // 4-5 gets no follow-up
   shiftCouple:      ['Why not? What could be done differently to provide more insight into how you operate as a couple?',
                      'What could be done differently to create more impact for you?',
                      'Tell us more – what in particular shifted your understanding?'],
-  shiftSelf:        ['Why not? What could be done differently to provide more insight about yourself?',
-                     'What could be done differently to create more impact for you?',
-                     'Tell us more – what in particular shifted how you see yourself?'],
-  returnLikelihood: ['Why not? What could be done differently to make your results worth returning to?',
-                     'What could be done differently to make you more likely to revisit?',
-                     'Tell us more – what makes you want to revisit your results?'],
+  shiftSelf:        [null, null, null],   // follow-up removed
+  returnLikelihood: [null, null, null],   // follow-up removed
 };
 
 function bandIndex(v) { return v <= 2 ? 0 : (v === 3 ? 1 : 2); }
@@ -685,10 +681,10 @@ const ASPECT_COLS = [
 ];
 
 const COMMS_ROWS = ['The questions themselves', 'Seeing scores side by side', 'Dimension breakdowns', 'Your couple type', 'Detailed feedback pages'];
-// "The questions themselves" isn't a representation of the relationship, so no accuracy rating.
-const COMMS_SKIP = { 0: [1] };
+// "The questions themselves" isn't rated for importance/interest here.
+const COMMS_SKIP = { 0: [2] };
 
-const EXP_ROWS = ['The responsibility questions', 'Including childhood context', 'Category breakdowns', 'Detailed feedback pages'];
+const EXP_ROWS = ['Life and values questions', 'Responsibilities section', 'Detailed feedback pages'];
 // Same reasoning for the two input-style rows.
 const EXP_SKIP = { 0: [1], 1: [1] };
 
@@ -698,7 +694,7 @@ const OVERALL_COLS = [
   { label: 'Impact',               desc: 'How much will you think about this going forward in your relationship?' },
   { label: 'Overall Satisfaction', desc: 'How would you rate your feelings toward this aspect of the Attune experience?' },
 ];
-const OVERALL_SKIP = { 0: [1], 1: [1], 7: [1], 8: [0, 1] };
+const OVERALL_SKIP = { 0: [1], 1: [1], 2: [1], 7: [1], 8: [0, 1] };
 
 // ── Time-spent grid ───────────────────────────────────────────────────────────
 // Unlike the rating grids, this one is a single pick per row: each aspect of
@@ -709,7 +705,7 @@ const TIME_COLS = ['Less than 10 minutes', '10–20 minutes', '20–45 minutes',
 function buildChoiceGrid(containerId, rows, cols) {
   const wrap = document.getElementById(containerId);
   if (!wrap) return;
-  const gt = `grid-template-columns: 2fr ${cols.map(() => '1fr').join(' ')}`;
+  const gt = `grid-template-columns: minmax(120px, 2fr) ${cols.map(() => 'minmax(156px, 1fr)').join(' ')}`;
   let html = `<div class="grid-head" style="${gt}">
     <div class="grid-head-cell"></div>
     ${cols.map(c => `<div class="grid-head-cell"><span class="gh-label">${c}</span></div>`).join('')}

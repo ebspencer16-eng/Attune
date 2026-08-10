@@ -42,6 +42,7 @@ export default async function handler(req) {
   if (supabaseUrl && serviceKey) {
     await fetch(`${supabaseUrl}/rest/v1/feedback_submissions`, {
       method: 'POST',
+      signal: AbortSignal.timeout(6000),
       headers: {
         'Content-Type': 'application/json',
         'apikey': serviceKey,
@@ -72,6 +73,7 @@ export default async function handler(req) {
       .join('');
     await fetch('https://api.resend.com/emails', {
       method: 'POST',
+      signal: AbortSignal.timeout(3500),
       headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
       body: JSON.stringify({
         from: `Attune <${fromEmail}>`,
