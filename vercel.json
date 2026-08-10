@@ -303,7 +303,7 @@
   ],
   "buildCommand": "node scripts/check-admin-html.mjs && node scripts/check-workbook-budget.mjs && node scripts/entitlement_matrix_test.mjs && npx vite build",
   "outputDirectory": "dist",
-  "installCommand": "npm install",
+  "installCommand": "npm ci",
   "crons": [
     {
       "path": "/api/cron-checkin",
