@@ -4354,26 +4354,27 @@ async function renderTypeCoupleMap(opts){
   const genders=Object.keys(groups).sort((a,b)=>groups[b].n-groups[a].n);
   const PAL=['#1B5FE8','#E5578C','#10B981','#F59E0B','#9B5DE5'];
   const W=320,H=320,pad=36;
-  const X=v=>pad+((v-1)/4)*(W-2*pad);
-  const Y=v=>pad+((v-1)/4)*(H-2*pad);
+  const X=v=>pad+((5-v)/4)*(W-2*pad); // open: 5 (Open) -> left, 1 (Guarded) -> right, matches results map
+  const Y=v=>pad+((v-1)/4)*(H-2*pad);       // withdraw: 1 (Engage) -> top, 5 (Withdraw) -> bottom
   const xmid=X(3), ymid=Y(3);
   let svg='<svg viewBox="0 0 '+W+' '+H+'" style="width:100%;max-width:420px;display:block;margin:0 auto;">';
   svg+='<rect x="'+pad+'" y="'+pad+'" width="'+(W-2*pad)+'" height="'+(H-2*pad)+'" fill="#E6ECF7" stroke="#D3DCEC" rx="10"/>';
   svg+='<line x1="'+xmid+'" y1="'+pad+'" x2="'+xmid+'" y2="'+(H-pad)+'" stroke="#C7D0E2" stroke-dasharray="3 3"/>';
   svg+='<line x1="'+pad+'" y1="'+ymid+'" x2="'+(W-pad)+'" y2="'+ymid+'" stroke="#C7D0E2" stroke-dasharray="3 3"/>';
   const qlab=(x,y,t,a)=>'<text x="'+x+'" y="'+y+'" fill="#8892A9" font-size="8.5" text-anchor="'+a+'" font-family="monospace" opacity="0.85">'+t+'</text>';
-  svg+=qlab(W-pad-5, pad+13,'W · Initiator','end');
-  svg+=qlab(pad+5, pad+13,'X · Anchor','start');
-  svg+=qlab(W-pad-5, H-pad-6,'Y · Feeler','end');
-  svg+=qlab(pad+5, H-pad-6,'Z · Protector','start');
+  svg+=qlab(pad+5, pad+13,'W · Initiator','start');
+  svg+=qlab(W-pad-5, pad+13,'X · Anchor','end');
+  svg+=qlab(pad+5, H-pad-6,'Y · Feeler','start');
+  svg+=qlab(W-pad-5, H-pad-6,'Z · Protector','end');
   svg+='<text x="'+(W/2)+'" y="'+(pad-12)+'" fill="#586187" font-size="9.5" text-anchor="middle" font-family="monospace">Engage</text>';
   svg+='<text x="'+(W/2)+'" y="'+(H-pad+24)+'" fill="#586187" font-size="9.5" text-anchor="middle" font-family="monospace">Withdraw</text>';
-  svg+='<text x="'+(pad-16)+'" y="'+(H/2)+'" fill="#586187" font-size="9.5" text-anchor="middle" font-family="monospace" transform="rotate(-90 '+(pad-16)+' '+(H/2)+')">Guarded</text>';
-  svg+='<text x="'+(W-pad+18)+'" y="'+(H/2)+'" fill="#586187" font-size="9.5" text-anchor="middle" font-family="monospace" transform="rotate(90 '+(W-pad+18)+' '+(H/2)+')">Open</text>';
+  svg+='<text x="'+(pad-16)+'" y="'+(H/2)+'" fill="#586187" font-size="9.5" text-anchor="middle" font-family="monospace" transform="rotate(-90 '+(pad-16)+' '+(H/2)+')">Open</text>';
+  svg+='<text x="'+(W-pad+18)+'" y="'+(H/2)+'" fill="#586187" font-size="9.5" text-anchor="middle" font-family="monospace" transform="rotate(90 '+(W-pad+18)+' '+(H/2)+')">Guarded</text>';
   const legend=[];
   if(!genders.length){ el.innerHTML='<div style="color:var(--dim);font-size:.75rem;padding:1rem 0;text-align:center;">No gendered placements in this slice yet.</div>'; return; }
   genders.forEach((g,i)=>{
-    const gr=groups[g], ox=gr.o/gr.n, wy=gr.w/gr.n, col=PAL[i%PAL.length];
+    const GENDER_COL={man:"#1B5FE8",woman:"#E5578C",nonbinary:"#10B981",other:"#F59E0B"};
+    const gr=groups[g], ox=gr.o/gr.n, wy=gr.w/gr.n, col=(GENDER_COL[String(g).toLowerCase()]||PAL[i%PAL.length]);
     const lbl=(typeof sliceLabel==='function'?sliceLabel('gender',g):g);
     svg+='<circle cx="'+X(ox)+'" cy="'+Y(wy)+'" r="7.5" fill="'+col+'" stroke="#fff" stroke-width="2"><title>'+lbl+': open '+ox.toFixed(2)+', withdraw '+wy.toFixed(2)+' (n='+gr.n+')</title></circle>';
     legend.push('<span style="display:inline-flex;align-items:center;gap:.32rem;font-size:.66rem;color:var(--text);"><span style="width:9px;height:9px;border-radius:50%;background:'+col+';"></span>'+lbl+' (n='+gr.n+')</span>');
