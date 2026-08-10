@@ -2121,10 +2121,33 @@ function CoupleMapSVG({ myS, partS, userName, partnerName, size = 480 }) {
   const lowerTag = aIsUpper
     ? { x: axB.x, name: partnerName, color: itB.color, w: tagWB }
     : { x: axA.x, name: userName, color: itA.color, w: tagWA };
-  const upperTagY = (aIsUpper ? axA.y : axB.y) - 38;
-  const lowerTagY = (aIsUpper ? axB.y : axA.y) + 18;
-  const upperTagX = Math.max(cx0 + 4, Math.min(cx1 - upperTag.w - 4, upperTag.x - upperTag.w / 2));
-  const lowerTagX = Math.max(cx0 + 4, Math.min(cx1 - lowerTag.w - 4, lowerTag.x - lowerTag.w / 2));
+  // Name tag Y/X. Keep the above/below split (guarantees the two names never
+  // overlap each other), then nudge each tag clear of the four quadrant corner
+  // labels ("The Initiator" etc.) if a dot sits near a corner. Upper tag only
+  // ever moves further up, lower tag further down, so they stay separated.
+  const _clampX = (t) => Math.max(cx0 + 4, Math.min(cx1 - t.w - 4, t.x - t.w / 2));
+  const _qlbox = [
+    { x: cx0 + 14, y: cy0 + 26, w: QN.W.length * 6.6, h: 16 },
+    { x: cx1 - 14 - QN.X.length * 6.6, y: cy0 + 26, w: QN.X.length * 6.6, h: 16 },
+    { x: cx0 + 14, y: cy1 - 22, w: QN.Y.length * 6.6, h: 16 },
+    { x: cx1 - 14 - QN.Z.length * 6.6, y: cy1 - 22, w: QN.Z.length * 6.6, h: 16 },
+  ];
+  const _ov = (a, b) => a.x < b.x + b.w && b.x < a.x + a.w && a.y < b.y + b.h && b.y < a.y + a.h;
+  const _H = cy1 + 42;
+  const _place = (tag, dotY, dir) => {
+    const box = { x: _clampX(tag), y: dotY + (dir < 0 ? -38 : 18), w: tag.w, h: tagH };
+    for (let i = 0; i < 8; i++) {
+      const hit = _qlbox.find((o) => _ov(box, o));
+      if (!hit) break;
+      box.y = dir < 0 ? hit.y - box.h - 3 : hit.y + hit.h + 3;
+    }
+    box.y = Math.max(3, Math.min(_H - box.h - 3, box.y));
+    return box;
+  };
+  const _upBox = _place(upperTag, aIsUpper ? axA.y : axB.y, -1);
+  const _loBox = _place(lowerTag, aIsUpper ? axB.y : axA.y, +1);
+  const upperTagX = _upBox.x, upperTagY = _upBox.y;
+  const lowerTagX = _loBox.x, lowerTagY = _loBox.y;
 
   const idA = `gA_${typeInfoA.typeCode}`;
   const idB = `gB_${typeInfoB.typeCode}`;
