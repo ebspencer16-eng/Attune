@@ -1990,10 +1990,10 @@ function CoupleMapSVG({ myS, partS, userName, partnerName, size = 480 }) {
       {/* ── HOW PLACEMENT IS CALCULATED (footnote, not a tile) ── */}
       <div style={{ marginTop: "0.75rem" }}>
         <p style={{ fontSize: "0.72rem", color: "#8C7A68", lineHeight: 1.65, margin: "0 0 0.5rem", fontWeight: 300, fontFamily: BFONT }}>
-          Two people who think they know their type will almost always land somewhere different than expected.
+          Where you each sit on this map is calculated from your responses. Scores for Conflict, Repair, and Stress determine placement on the Engage/Withdraw axis, and Expression, Feedback, and Needs scores determine placement on the Open/Guarded axis. Proximity to an axis line means that partner is more flexible on that dimension.
         </p>
-        <p style={{ fontSize: "0.7rem", color: "#8C7A68", lineHeight: 1.65, margin: 0, fontWeight: 300, fontStyle: "italic", fontFamily: BFONT }}>
-          Where you each sit on this map is calculated from your responses. Scores for Conflict, Repair, and Stress determine placement on the Engage/Withdraw axis, and Expression, Feedback, and Needs scores determine placement on the Open/Guarded axis. Dot position is continuous, proximity to an axis line means that partner is more flexible on that dimension.
+        <p style={{ fontSize: "0.72rem", color: "#8C7A68", lineHeight: 1.65, margin: 0, fontWeight: 300, fontFamily: BFONT }}>
+          Two people who think they know their type will almost always land somewhere different than expected.
         </p>
       </div>
     </div>
@@ -4345,6 +4345,36 @@ function PersonalityResults({ myAnswers, partnerAnswers, userName, partnerName, 
             <p style={{ fontSize: "0.9rem", color: "white", lineHeight: 1.8, margin: 0, fontFamily: BFONT, fontWeight: f.isStrength ? 400 : 500 }}>{f.adviceText || (f.isStrength ? ALIGNED_ADVICE[f.dim] : null) || `You two line up here. That's an easy place to take for granted. Name it out loud once in a while so the alignment stays a choice, not an assumption.`}</p>
           </div>
         )}
+
+        {/* Additional insight: how you each perceive the other. Only the five
+            dimensions with a partner-view question have this data (pv_<dim>).
+            Two dots: where each partner placed the OTHER. Hidden if neither
+            partner answered the partner-view question for this dimension. */}
+        {PARTNER_VIEW_ENABLED && (() => {
+          const pvId = "pv_" + dim;
+          const numv = v => (v == null || isNaN(v)) ? null : Number(v);
+          const aV = numv(myAnswers && myAnswers[pvId]);       // userName's read of partnerName
+          const bV = numv(partnerAnswers && partnerAnswers[pvId]); // partnerName's read of userName
+          if (aV == null && bV == null) return null;
+          const pctOf = v => Math.max(4, Math.min(96, ((v - 1) / 4) * 100));
+          return (
+            <div style={{ marginTop: "1rem", background: "rgba(255,255,255,0.06)", borderRadius: 14, padding: "1.2rem 1.5rem", border: "1px solid rgba(255,255,255,0.14)" }}>
+              <div style={{ fontSize: "0.62rem", textTransform: "uppercase", letterSpacing: "0.12em", color: "rgba(255,255,255,0.9)", fontWeight: 700, marginBottom: "0.9rem", fontFamily: BFONT }}>Additional insight: how you each perceive the other</div>
+              <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "0.1rem" }}>
+                <span style={{ fontSize: "0.68rem", fontWeight: 600, color: "rgba(255,255,255,0.7)", fontFamily: BFONT }}>{m.ends[0]}</span>
+                <span style={{ fontSize: "0.68rem", fontWeight: 600, color: "rgba(255,255,255,0.7)", fontFamily: BFONT }}>{m.ends[1]}</span>
+              </div>
+              <div style={{ position: "relative", height: 6, background: "rgba(255,255,255,0.12)", borderRadius: 999, margin: "0.5rem 0 1rem" }}>
+                {aV != null && <div title={"Where " + userName + " thinks " + partnerName + " sits"} style={{ position: "absolute", top: "50%", left: pctOf(aV) + "%", transform: "translate(-50%,-50%)", width: 14, height: 14, borderRadius: "50%", background: m.color, border: "2px solid " + m.color, boxShadow: "0 0 8px " + m.color + "66" }} />}
+                {bV != null && <div title={"Where " + partnerName + " thinks " + userName + " sits"} style={{ position: "absolute", top: "50%", left: pctOf(bV) + "%", transform: "translate(-50%,-50%)", width: 13, height: 13, borderRadius: "50%", background: "#fff", border: "2px solid rgba(255,255,255,0.45)" }} />}
+              </div>
+              <div style={{ display: "flex", flexDirection: "column", gap: "0.45rem" }}>
+                {aV != null && <span style={{ display: "inline-flex", alignItems: "center", gap: "0.45rem", fontSize: "0.72rem", color: "rgba(255,255,255,0.82)", fontFamily: BFONT }}><span style={{ width: 11, height: 11, borderRadius: "50%", background: m.color, flexShrink: 0 }} />Where {userName} thinks {partnerName} sits</span>}
+                {bV != null && <span style={{ display: "inline-flex", alignItems: "center", gap: "0.45rem", fontSize: "0.72rem", color: "rgba(255,255,255,0.82)", fontFamily: BFONT }}><span style={{ width: 11, height: 11, borderRadius: "50%", background: "#fff", border: "1px solid rgba(255,255,255,0.45)", flexShrink: 0 }} />Where {partnerName} thinks {userName} sits</span>}
+              </div>
+            </div>
+          );
+        })()}
 
         <NavButtons
           onBack={() => go(step - 1)}
@@ -8335,8 +8365,8 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
             <div style={{ height: 1, background: C.stone, opacity: 0.6, margin: "0 0 1.25rem" }} />
             <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: "1.1rem" }}>
               {[
-                { label: "Engage / Withdraw", desc: "How you respond when something is hard or unresolved, do you move toward the situation or pull back from it first?", poles: ["Engage: moves toward resolution, addresses quickly", "Withdraw: needs space first, processes privately"], color: "#9B5DE5", bothNear: Math.abs(newType.typeInfoA.withdrawScore - 3) < 0.6 && Math.abs(newType.typeInfoB.withdrawScore - 3) < 0.6 },
-                { label: "Open / Guarded", desc: "How freely you express what's going on inside, do you share it openly or hold it privately until ready?", poles: ["Open: partner usually knows how you're feeling", "Guarded: processes internally, expressive when ready"], color: "#1B5FE8", bothNear: Math.abs(newType.typeInfoA.openScore - 3) < 0.6 && Math.abs(newType.typeInfoB.openScore - 3) < 0.6 },
+                { label: "Engage / Withdraw", desc: "How you respond when something is hard or unresolved.", poles: ["Engage: moves toward resolution, addresses quickly", "Withdraw: needs space first, processes privately"], color: "#9B5DE5", bothNear: Math.abs(newType.typeInfoA.withdrawScore - 3) < 0.6 && Math.abs(newType.typeInfoB.withdrawScore - 3) < 0.6 },
+                { label: "Open / Guarded", desc: "How freely you express what's going on inside.", poles: ["Open: partner usually knows how you're feeling", "Guarded: processes internally, expressive when ready"], color: "#1B5FE8", bothNear: Math.abs(newType.typeInfoA.openScore - 3) < 0.6 && Math.abs(newType.typeInfoB.openScore - 3) < 0.6 },
               ].map(ax => (
                 <div key={ax.label} style={{ borderLeft: `3px solid ${ax.color}`, paddingLeft: "0.9rem" }}>
                   <div style={{ fontSize: "0.6rem", letterSpacing: "0.2em", textTransform: "uppercase", color: ax.color, fontFamily: BFONT, fontWeight: 700, marginBottom: "0.5rem" }}>{ax.label}</div>
@@ -8352,7 +8382,6 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
             </div>
           </div>
 
-{PARTNER_VIEW_ENABLED && <SelfVsPartnerSection ex1Answers={ex1Answers} partnerEx1={partnerEx1} userName={userName} partnerName={partnerName} />}
           <div style={{ fontSize: "0.6rem", letterSpacing: "0.22em", textTransform: "uppercase", color: C.muted, fontFamily: BFONT, fontWeight: 700, marginTop: "1.75rem", marginBottom: "1rem" }}>
             Your individual types
           </div>
