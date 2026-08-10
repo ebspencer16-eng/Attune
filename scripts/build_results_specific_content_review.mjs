@@ -52,6 +52,28 @@ const AXIS = {
 };
 console.log(`profiles=${allBlurbs.length}, protocols=${protocols.length}, axes=${!!AXIS.eq}`);
 
+// ── live: couple-type near-axis prose (NEAR_AXIS_PROSE) ──────────────────────
+// The object is pure data (template-literal strings, no interpolation), so we
+// slice it from source and eval it. Every token in the strings is a balanced
+// {...} pair, so matchBrace lands on the correct closing brace.
+const _napStart = src.indexOf('const NEAR_AXIS_PROSE = {');
+const _napObj = src.indexOf('{', _napStart);
+const NEAR_AXIS_PROSE = eval('(' + src.slice(_napObj, matchBrace(src, _napObj) + 1) + ')');
+const NAMES = {};
+for (const m of src.matchAll(/id:\s*"([WXYZ]{2})",[\s\S]{0,160}?name:\s*"([^"]+)"/g)) NAMES[m[1]] = m[2];
+// Render couple-type tokens readably. Suffix forms first (bare {EXP} won't match
+// {EXP_sub} because it needs the brace right after, but order it safely anyway).
+const tok = (s) => String(s ?? '')
+  .replace(/\{(?:EXP|GRD|RCH|WDR|U|P)_sub\}/g, '[they]')
+  .replace(/\{(?:EXP|GRD|RCH|WDR|U|P)_obj\}/g, '[them]')
+  .replace(/\{(?:EXP|GRD|RCH|WDR|U|P)_pos\}/g, '[their]')
+  .replace(/\{(?:EXP|GRD|RCH|WDR|U|P)_isC\}/g, '[they are]')
+  .replace(/\{EXP\}/g, '[expressive partner]').replace(/\{GRD\}/g, '[guarded partner]')
+  .replace(/\{RCH\}/g, '[reaching partner]').replace(/\{WDR\}/g, '[withdrawing partner]')
+  .replace(/\{U\}/g, '[you]').replace(/\{P\}/g, '[partner]')
+  .replace(/\{[^}]*\}/g, '[\u2026]');
+console.log(`near-axis pairings=${Object.keys(NEAR_AXIS_PROSE).length}, names=${Object.keys(NAMES).length}`);
+
 const lines = (arr) => arr.map(t => prose(t, { indent: INDENT_PROSE_UNDER_SMALL }));
 
 // ════════════════════════════════════════════════════════════════════════════
@@ -68,6 +90,7 @@ const cover = buildCover({
     ['6.', 'Expectations results', 'overview + 5 categories + action plan'],
     ['7.', 'Relationship Reflection results', 'overview + side by side'],
     ['8.', 'What Comes Next', 'closing CTAs'],
+    ['9.', 'Couple type near-axis prose', '10 pairings'],
   ],
 });
 
@@ -237,8 +260,40 @@ const section8 = [
   ]),
 ];
 
+// ── SECTION 9 — Couple type near-axis prose ─────────────────────────────────
+const NEAR_KIND = [
+  ['patternsNearEngage', 'Patterns', 'Engage/Withdraw'],
+  ['stickingPointsNearEngage', 'Sticking point', 'Engage/Withdraw'],
+  ['patternsNearOpen', 'Patterns', 'Open/Guarded'],
+  ['stickingPointsNearOpen', 'Sticking point', 'Open/Guarded'],
+];
+const NEAR_COLOR = '9B5DE5';
+const section9 = [
+  ...bigSection(9, 'Couple type near-axis prose',
+    'On the couple type page, when a partner sits within 0.6 of an axis line the default pattern or sticking-point item is replaced with a near-axis variant. Two forms: one-near (a single partner near the line) and both-near (both partners near it). Both forms are shown below. Items with no variant keep the default and are not listed. The variant fires per axis, so a couple near both lines gets both sets. Bracketed tokens fill with names and pronouns at render.', NEAR_COLOR),
+];
+Object.keys(NEAR_AXIS_PROSE).forEach((id, i) => {
+  const np = NEAR_AXIS_PROSE[id];
+  const axesPresent = [];
+  if (np.patternsNearEngage || np.stickingPointsNearEngage) axesPresent.push('Engage/Withdraw');
+  if (np.patternsNearOpen || np.stickingPointsNearOpen) axesPresent.push('Open/Guarded');
+  section9.push(midSection(`9.${i + 1}`, `${id} \u2014 ${NAMES[id] || id}`, NEAR_COLOR, { extras: 'near ' + axesPresent.join(' + ') }));
+  NEAR_KIND.forEach(([key, kind, axis]) => {
+    const map = np[key];
+    if (!map) return;
+    Object.keys(map).map(Number).sort((a, b) => a - b).forEach((idx) => {
+      const v = map[idx];
+      const one = typeof v === 'string' ? v : v.one;
+      const both = typeof v === 'string' ? null : v.both;
+      section9.push(groupLabel(`${kind} [${idx}] \u00b7 near ${axis}`, NEAR_COLOR));
+      section9.push(prose(`One near: ${tok(one)}`, { indent: INDENT_PROSE_UNDER_SMALL }));
+      if (both) section9.push(prose(`Both near: ${tok(both)}`, { indent: INDENT_PROSE_UNDER_SMALL }));
+    });
+  });
+});
+
 await renderDoc({
   footerLabel: 'Attune · Results specific content review',
   outPath: '/mnt/user-data/outputs/attune_results_specific_content_review.docx',
-  children: [...cover, ...section1, ...section2, ...section3, ...section4, ...section5, ...section6, ...section7, ...section8],
+  children: [...cover, ...section1, ...section2, ...section3, ...section4, ...section5, ...section6, ...section7, ...section8, ...section9],
 });
