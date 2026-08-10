@@ -705,7 +705,7 @@ const TIME_COLS = ['Less than 10 minutes', '10–20 minutes', '20–45 minutes',
 function buildChoiceGrid(containerId, rows, cols) {
   const wrap = document.getElementById(containerId);
   if (!wrap) return;
-  const gt = `grid-template-columns: minmax(120px, 2fr) ${cols.map(() => 'minmax(156px, 1fr)').join(' ')}`;
+  const gt = `grid-template-columns: minmax(120px, 2fr) ${cols.map(() => 'minmax(0, 1fr)').join(' ')}`;
   let html = `<div class="grid-head" style="${gt}">
     <div class="grid-head-cell"></div>
     ${cols.map(c => `<div class="grid-head-cell"><span class="gh-label">${c}</span></div>`).join('')}
