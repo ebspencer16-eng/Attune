@@ -61,23 +61,36 @@ export default async function handler(req) {
     const withAnswers = profiles.filter(hasAnswers);
     const individuals = withAnswers.map(profileToRecord);
 
-    // Couples: iterate Partner A (has invite_code), join Partner B via FK.
-    // Both partners must have answers to form a typed couple.
+    // Couples: pair by partner_profile_id so a couple is counted whenever the
+    // link exists and both partners have answers. This does NOT depend on the
+    // invite_code / joined_via_invite flags, which get cleared or flipped by
+    // account resets and manual relinking (and would otherwise drop a real
+    // couple from the distribution). Each unordered pair is counted once, and a
+    // one-directional link still resolves from the side that has it.
     const byId = Object.fromEntries(profiles.map(p => [p.id, p]));
     const couples = [];
     const pairedIds = new Set();
-    for (const a of profiles.filter(p => p.invite_code && !p.joined_via_invite)) {
-      const b = a.partner_profile_id ? byId[a.partner_profile_id] : null;
+    const seenPair = new Set();
+    for (const a of profiles) {
+      if (!a.partner_profile_id) continue;
+      const b = byId[a.partner_profile_id];
+      if (!b) continue;
+      const key = [a.id, b.id].sort().join('|');
+      if (seenPair.has(key)) continue;
+      seenPair.add(key);
       if (!hasAnswers(a) || !hasAnswers(b)) continue;
-      pairedIds.add(a.id); pairedIds.add(b.id);
-      const ra = profileToRecord(a), rb = profileToRecord(b);
+      // Keep the inviter as "A" for couple-level fields when we can tell, so
+      // gender order and relationship fields stay stable across runs.
+      const [pa, pb] = ((a.invite_code && !a.joined_via_invite) || !b.invite_code) ? [a, b] : [b, a];
+      pairedIds.add(pa.id); pairedIds.add(pb.id);
+      const ra = profileToRecord(pa), rb = profileToRecord(pb);
       couples.push({
         aType: ra.type, bType: rb.type,
         coupleType: [ra.type, rb.type].sort().join(''),
         aScores: ra.scores, bScores: rb.scores,
-        relLength: a.relationship_length || null,
-        relStatus: a.relationship_status || null,
-        genders: [a.gender || null, b.gender || null],
+        relLength: pa.relationship_length || pb.relationship_length || null,
+        relStatus: pa.relationship_status || pb.relationship_status || null,
+        genders: [pa.gender || null, pb.gender || null],
       });
     }
 
