@@ -110,6 +110,9 @@ function ownFields(p) {
     axis_w: _axisW,
     axis_o: _axisO,
     has_ex2: !!(p.ex2_answers && Object.keys(p.ex2_answers).length > 0),
+    has_ex1: hasE1,
+    has_ex3: !!(p.ex3_answers && Object.keys(p.ex3_answers).length > 0),
+    has_intimacy: !!(p.intimacy_data && p.intimacy_data.answers && Object.keys(p.intimacy_data.answers).length > 0),
   };
   for (const k of DEMO_KEYS) r[k] = p[k] != null && p[k] !== '' ? p[k] : null;
   // Gender isn't collected directly; derive it from the person's own pronouns.
