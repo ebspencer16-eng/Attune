@@ -4518,7 +4518,7 @@ async function renderSelfPartnerGap(containerId){
   if(!withData.length){ el.innerHTML=card('<div style="color:var(--dim);font-size:.78rem;padding:.5rem 0;line-height:1.6;">No partner-view answers yet. This fills in as couples complete the updated communication exercise.</div>'); return; }
   const bars=withData.sort((a,b)=>b.gap-a.gap).map(x=>{
     const w=Math.round(x.gap/4*100);
-    return '<div style="display:flex;align-items:center;gap:.6rem;margin-bottom:.5rem;"><div style="flex:0 0 110px;font-size:.72rem;color:var(--text);">'+x.l+'</div><div style="flex:1 1 auto;height:8px;background:var(--surface);border-radius:5px;overflow:hidden;"><div style="height:100%;width:'+w+'%;background:#6C7FFF;"></div></div><div style="flex:0 0 auto;font-size:.66rem;font-family:var(--mono);color:var(--text);min-width:3.4rem;text-align:right;">'+x.gap.toFixed(1)+' pts</div><div style="flex:0 0 auto;font-size:.6rem;color:var(--dim);font-family:var(--mono);">n='+x.n+'</div></div>';
+    return '<div title="'+x.l+': '+x.gap.toFixed(1)+' pts gap (n='+x.n+')" style="display:flex;align-items:center;gap:.6rem;margin-bottom:.5rem;"><div style="flex:0 0 110px;font-size:.72rem;color:var(--text);">'+x.l+'</div><div style="flex:1 1 auto;height:8px;background:var(--surface);border-radius:5px;overflow:hidden;"><div style="height:100%;width:'+w+'%;background:#6C7FFF;"></div></div></div>';
   }).join('');
   el.innerHTML=card(bars);
 }
