@@ -2996,11 +2996,12 @@ function renderBars(containerId, items, color='#6C7FFF') {
   el.innerHTML = '';
   items.forEach(item => {
     const pct = Math.round((item.v/max)*100);
+    // Score/n removed from the row; the value shows on hover instead.
+    const hover = (item.hover != null ? item.hover : (item.l + ': ' + item.v + '%'));
     el.innerHTML += `
-      <div class="insight-row">
+      <div class="insight-row" title="${String(hover).replace(/"/g,'&quot;')}">
         <div class="insight-label">${item.l}</div>
         <div class="insight-bar-wrap"><div class="insight-bar" style="width:${pct}%;background:${color}"></div></div>
-        <div class="insight-pct">${item.v}%</div>
       </div>`;
   });
   // Animate
