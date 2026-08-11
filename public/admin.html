@@ -4720,13 +4720,12 @@ async function renderQuestionExplorer(containerId, groupPrefixes, highPrefixes, 
     const track = '<div style="position:relative;flex:1 1 auto;min-width:0;height:6px;background:var(--surface);border-radius:999px;">' +
       dot(sliced ? omean : mean, theme, 1, (sliced ? 'Mean (everyone): ' : 'Mean: ') + score(sliced ? omean : mean) + ' (n=' + (sliced ? on : n) + ')') +
       (sliced ? dot(mean, '#8892A9', 2, 'Selected view: ' + score(mean) + ' (n=' + n + ')') : '') + '</div>';
-    const readout = '<span style="flex:0 0 auto;font-size:.62rem;font-family:var(--mono);color:var(--text);min-width:2.1rem;text-align:right;">' + score(mean) + '</span>';
+    // Score readout removed from the row; the dot's hover shows the exact mean.
     return '<div style="margin-bottom:.95rem;">' + header +
-      '<div style="display:flex;align-items:center;gap:.6rem;">' +
-        '<span title="' + QX_ESC(loFull) + '" style="flex:0 0 122px;font-size:.62rem;font-style:italic;color:var(--dim);text-align:right;line-height:1.2;">' + loPre + lo + '</span>' +
+      '<div style="display:flex;align-items:center;gap:.5rem;">' +
+        '<span title="' + QX_ESC(loFull) + '" style="flex:0 0 96px;font-size:.6rem;font-style:italic;color:var(--dim);text-align:right;line-height:1.2;">' + loPre + lo + '</span>' +
         track +
-        '<span title="' + QX_ESC(hiFull) + '" style="flex:0 0 122px;font-size:.62rem;font-style:italic;color:var(--dim);text-align:left;line-height:1.2;">' + hiPre + hi + '</span>' +
-        readout +
+        '<span title="' + QX_ESC(hiFull) + '" style="flex:0 0 96px;font-size:.6rem;font-style:italic;color:var(--dim);text-align:left;line-height:1.2;">' + hiPre + hi + '</span>' +
       '</div></div>';
   };
   const measureBar = (f, drows, sliced) => (QX_MODE[containerId] === 'mean' && (f.kind === 'scale' || f.ordinal)) ? meanBar(f, drows, sliced) : barFor(f, drows);
