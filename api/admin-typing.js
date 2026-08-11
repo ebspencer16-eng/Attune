@@ -10,7 +10,7 @@
 import { createClient } from '@supabase/supabase-js';
 import { checkAdminAuth } from './_lib/admin-auth.js';
 import {
-  AXIS_CONFIG, DIM_KEYS, calcDimScores, axisScores, typeCodeFromAxes, lowConfidence,
+  AXIS_CONFIG, DIM_KEYS, calcDimScores, blendedDimScores, axisScores, typeCodeFromAxes, lowConfidence,
 } from './_type-engine.js';
 
 export const config = { runtime: 'edge' };
@@ -23,8 +23,12 @@ const json = (obj, status = 200) =>
   new Response(JSON.stringify(obj), { status, headers: { 'Content-Type': 'application/json' } });
 
 // One individual's typing payload (anonymized — scores + demographics only).
-function profileToRecord(p) {
-  const scores = calcDimScores(p.ex1_answers);
+function profileToRecord(p, partnerAnswers = null) {
+  // Partner-view blend, same as the app's typingDimScores: a person's type uses
+  // their own answers plus their partner's view of them (pv_* on the partner's
+  // object). Falls back to self-only when there's no partner. This is what makes
+  // the dashboard's couple types match what couples see in their results.
+  const scores = blendedDimScores(p.ex1_answers, partnerAnswers);
   const { withdrawScore, openScore } = axisScores(scores);
   return {
     scores,
@@ -57,9 +61,14 @@ export default async function handler(req) {
       .from('profiles')
       .select('id, invite_code, partner_profile_id, joined_via_invite, gender, relationship_status, relationship_length, ex1_answers, created_at');
 
-    // Individuals: every profile that has Exercise 1 answers.
+    // Partner lookup shared by individual and couple typing below.
+    const byId = Object.fromEntries(profiles.map(p => [p.id, p]));
+    const partnerAnswersOf = (p) => (p.partner_profile_id && byId[p.partner_profile_id] && byId[p.partner_profile_id].ex1_answers) || null;
+
+    // Individuals: every profile that has Exercise 1 answers (blended with their
+    // partner's view where a partner exists, matching the app).
     const withAnswers = profiles.filter(hasAnswers);
-    const individuals = withAnswers.map(profileToRecord);
+    const individuals = withAnswers.map(p => profileToRecord(p, partnerAnswersOf(p)));
 
     // Couples: pair by partner_profile_id so a couple is counted whenever the
     // link exists and both partners have answers. This does NOT depend on the
@@ -67,7 +76,6 @@ export default async function handler(req) {
     // account resets and manual relinking (and would otherwise drop a real
     // couple from the distribution). Each unordered pair is counted once, and a
     // one-directional link still resolves from the side that has it.
-    const byId = Object.fromEntries(profiles.map(p => [p.id, p]));
     const couples = [];
     const pairedIds = new Set();
     const seenPair = new Set();
@@ -83,7 +91,7 @@ export default async function handler(req) {
       // gender order and relationship fields stay stable across runs.
       const [pa, pb] = ((a.invite_code && !a.joined_via_invite) || !b.invite_code) ? [a, b] : [b, a];
       pairedIds.add(pa.id); pairedIds.add(pb.id);
-      const ra = profileToRecord(pa), rb = profileToRecord(pb);
+      const ra = profileToRecord(pa, pb.ex1_answers), rb = profileToRecord(pb, pa.ex1_answers);
       couples.push({
         aType: ra.type, bType: rb.type,
         coupleType: [ra.type, rb.type].sort().join(''),

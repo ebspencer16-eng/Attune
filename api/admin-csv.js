@@ -26,7 +26,7 @@ export const config = { runtime: 'edge' };
 
 // ── Scoring + typing now live in the shared engine (single source of truth,
 // also used by the app, workbook, and admin typing endpoint). ──
-import { DIM_KEYS, calcDimScores, axisScores, typeCodeFromAxes, lowConfidence } from './_type-engine.js';
+import { DIM_KEYS, calcDimScores, blendedDimScores, axisScores, typeCodeFromAxes, lowConfidence } from './_type-engine.js';
 
 // Thin wrapper preserving this file's null-guard: a couple with no Exercise 1
 // answers yields null axes/type rather than a midpoint default.
@@ -224,8 +224,8 @@ async function buildCombinedData(admin) {
     const o = ordersByUser[p.id];
     const ex2a = p.ex2_answers || {};
     const ex2b = ps?.ex2_answers || {};
-    const aScores = calcDimScores(p.ex1_answers);
-    const bScores = calcDimScores(ps?.ex1_answers);
+    const aScores = ps ? blendedDimScores(p.ex1_answers, ps.ex1_answers) : calcDimScores(p.ex1_answers);
+    const bScores = ps ? blendedDimScores(ps.ex1_answers, p.ex1_answers) : calcDimScores(ps?.ex1_answers);
     const aAxes = computeAxes(aScores);
     const bAxes = computeAxes(bScores);
     const aEx3 = p.ex3_answers || {};
@@ -528,8 +528,8 @@ async function exportDemographics(admin) {
     const ex2a = p.ex2_answers || {};
     const ex2b = partnerB?.ex2_answers || {};
 
-    const aScores = calcDimScores(p.ex1_answers);
-    const bScores = calcDimScores(partnerB?.ex1_answers);
+    const aScores = partnerB ? blendedDimScores(p.ex1_answers, partnerB.ex1_answers) : calcDimScores(p.ex1_answers);
+    const bScores = partnerB ? blendedDimScores(partnerB.ex1_answers, p.ex1_answers) : calcDimScores(partnerB?.ex1_answers);
     const aAxes = computeAxes(aScores);
     const bAxes = computeAxes(bScores);
 
@@ -625,8 +625,8 @@ async function exportResults(admin) {
   const fmt = (n) => n == null ? '' : Number(n).toFixed(3);
   const rows = partnerAList.map(p => {
     const ps = p.partner_profile_id ? byId[p.partner_profile_id] : null;
-    const aScores = calcDimScores(p.ex1_answers);
-    const bScores = calcDimScores(ps?.ex1_answers);
+    const aScores = ps ? blendedDimScores(p.ex1_answers, ps.ex1_answers) : calcDimScores(p.ex1_answers);
+    const bScores = ps ? blendedDimScores(ps.ex1_answers, p.ex1_answers) : calcDimScores(ps?.ex1_answers);
     const aAxes = computeAxes(aScores);
     const bAxes = computeAxes(bScores);
     const aEx3 = p.ex3_answers || {};
@@ -654,7 +654,8 @@ async function exportResults(admin) {
 async function exportTyping(admin) {
   const { data: profiles } = await admin
     .from('profiles')
-    .select('id, gender, relationship_status, relationship_length, ex1_answers');
+    .select('id, gender, relationship_status, relationship_length, ex1_answers, partner_profile_id');
+  const _byIdScored = Object.fromEntries((profiles || []).map(p => [p.id, p]));
 
   const dimCols = Object.keys(DIM_KEYS).map(d => `comms_${d}`);
   const headers = [
@@ -666,7 +667,8 @@ async function exportTyping(admin) {
   const rows = (profiles || [])
     .filter(p => p.ex1_answers && Object.keys(p.ex1_answers).length)
     .map(p => {
-      const scores = calcDimScores(p.ex1_answers);
+      const _partner = p.partner_profile_id ? _byIdScored[p.partner_profile_id] : null;
+      const scores = _partner ? blendedDimScores(p.ex1_answers, _partner.ex1_answers) : calcDimScores(p.ex1_answers);
       const { withdrawScore, openScore } = axisScores(scores);
       return [
         (p.id || '').replace(/-/g, '').slice(0, 8),

@@ -33,7 +33,7 @@ export const config = { runtime: 'edge' };
 import { createClient } from '@supabase/supabase-js';
 import { checkAdminAuth } from './_lib/admin-auth.js';
 import { RESPONSIBILITY_CATEGORIES, LIFE_QUESTIONS } from './_questions.js';
-import { axisScores, typeCodeFromAxes } from './_type-engine.js';
+import { axisScores, typeCodeFromAxes, blendedDimScores } from './_type-engine.js';
 
 // ── Response aggregates ──────────────────────────────────────────────────────
 // The Responses page charts used to be hardcoded zero arrays: the raw answers
@@ -297,8 +297,10 @@ export default async function handler(req) {
     // Annotate each profile with its couple type (sorted pair of both partners'
     // individual types) so the aggregates can be sliced by couple type. Uses the
     // same type engine as the cube so values match the slicer's dropdown.
-    const _typeOf = (ans) => {
-      const sc = calcDimScores(ans);
+    // Type with the partner-view blend (same shared engine the app uses), so the
+    // slicer's couple types match what couples see in their results.
+    const _typeOf = (selfAns, partnerAns) => {
+      const sc = blendedDimScores(selfAns, partnerAns);
       if (!sc || !Object.keys(sc).length) return null;
       const { withdrawScore, openScore } = axisScores(sc);
       return typeCodeFromAxes(withdrawScore, openScore);
@@ -307,10 +309,10 @@ export default async function handler(req) {
       const byIdT = {}; profiles.forEach(p => { byIdT[p.id] = p; });
       const byInviteT = new Map(); (psQ.data || []).forEach(s => { if (s.invite_code) byInviteT.set(s.invite_code, s); });
       profiles.forEach(p => {
-        const myType = _typeOf(p.ex1_answers);
-        if (!myType) return;
         const partner = (p.partner_profile_id && byIdT[p.partner_profile_id]) || (p.invite_code && byInviteT.get(p.invite_code)) || null;
-        const partnerType = partner ? _typeOf(partner.ex1_answers) : null;
+        const myType = _typeOf(p.ex1_answers, partner ? partner.ex1_answers : null);
+        if (!myType) return;
+        const partnerType = partner ? _typeOf(partner.ex1_answers, p.ex1_answers) : null;
         if (myType && partnerType) p.couple_type = [myType, partnerType].sort().join('');
       });
     }

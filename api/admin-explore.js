@@ -17,7 +17,7 @@
 
 import { createClient } from '@supabase/supabase-js';
 import { checkAdminAuth } from './_lib/admin-auth.js';
-import { calcDimScores, axisScores, typeCodeFromAxes, DIM_KEYS, PARTNER_VIEW_QUESTIONS } from './_type-engine.js';
+import { calcDimScores, blendedDimScores, axisScores, typeCodeFromAxes, DIM_KEYS, PARTNER_VIEW_QUESTIONS } from './_type-engine.js';
 // Individual type from raw ex1 answers (for invited partners who answered via a
 // partner_session and never created a full profile).
 function typeFromEx1(ans){
@@ -309,21 +309,33 @@ export default async function handler(req) {
       if (!own) continue;
       const partnerId = p.partner_profile_id || null;
       const partner = partnerId ? computed[partnerId] : null;
-      // Fall back to the invited partner's session answers when there's no
-      // profile-to-profile link, so the couple is still paired and typed.
-      let partnerType = partner ? partner.type : null;
+      const partnerRaw = partnerId ? profileById[partnerId] : null;
+      // Partner-view blend (matches the app): a person's type uses their own
+      // answers plus their partner's view of them. Recomputed here where the
+      // partner's raw answers are available. Raw axis/dim columns stay
+      // self-report; only the classification (type/couple_type) is blended.
+      const blendType = (self, pans) => {
+        const sc = blendedDimScores(self, pans);
+        if (!sc || !Object.keys(sc).length) return null;
+        const { withdrawScore, openScore } = axisScores(sc);
+        return typeCodeFromAxes(withdrawScore, openScore);
+      };
+      let ownType = blendType(p.ex1_answers, partnerRaw ? partnerRaw.ex1_answers : null) || own.type;
+      let partnerType = partnerRaw ? blendType(partnerRaw.ex1_answers, p.ex1_answers) : null;
       let coupleKey = partnerId;
-      if (!partner && p.invite_code && sessByInvite.has(p.invite_code)) {
-        const st = typeFromEx1(sessByInvite.get(p.invite_code).ex1_answers);
-        if (st) { partnerType = st; coupleKey = 'inv:' + p.invite_code; }
+      if (!partnerRaw && p.invite_code && sessByInvite.has(p.invite_code)) {
+        const sAns = sessByInvite.get(p.invite_code).ex1_answers;
+        const st = blendType(sAns, p.ex1_answers);
+        if (st) { ownType = blendType(p.ex1_answers, sAns) || ownType; partnerType = st; coupleKey = 'inv:' + p.invite_code; }
       }
       const row = {
         ...own,
+        type: ownType,
         role: p.joined_via_invite ? 'B' : 'A',
         couple_id: partnerType ? coupleHash(p.id, coupleKey) : null,
-        couple_type: partnerType ? [own.type, partnerType].sort().join('') : null,
+        couple_type: partnerType ? [ownType, partnerType].sort().join('') : null,
       };
-      if (partner) for (const k of PARTNERABLE) row['p_' + k] = partner[k];
+      if (partner) { for (const k of PARTNERABLE) row['p_' + k] = partner[k]; if (partnerType) row.p_type = partnerType; }
       // Gender fallback: each partner records the other's pronouns, so a person
       // who never set their own can still be filled from their partner's record.
       if (!row.gender && partnerId && profileById[partnerId]?.partner_pronouns) {
