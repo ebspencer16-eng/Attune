@@ -96,15 +96,16 @@ const coupleHash = (a, b) => {
 
 // Per-respondent "own" fields (the partner-denormalized p_* are added in a second pass).
 function ownFields(p) {
-  const scores = calcDimScores(p.ex1_answers);
+  const hasE1 = !!(p.ex1_answers && Object.keys(p.ex1_answers).length > 0);
+  const scores = hasE1 ? calcDimScores(p.ex1_answers) : {};
   const { withdrawScore, openScore } = axisScores(scores);
-  const type = typeCodeFromAxes(withdrawScore, openScore);
-  const _axisW = Number.isFinite(withdrawScore) ? Number(withdrawScore.toFixed(3)) : null;
-  const _axisO = Number.isFinite(openScore) ? Number(openScore.toFixed(3)) : null;
+  const type = hasE1 ? typeCodeFromAxes(withdrawScore, openScore) : null;
+  const _axisW = (hasE1 && Number.isFinite(withdrawScore)) ? Number(withdrawScore.toFixed(3)) : null;
+  const _axisO = (hasE1 && Number.isFinite(openScore)) ? Number(openScore.toFixed(3)) : null;
   const r = {
     type,
-    axisEngage: type === 'W' || type === 'X' ? 'Engage' : 'Withdraw',
-    axisOpen: type === 'W' || type === 'Y' ? 'Open' : 'Guarded',
+    axisEngage: type == null ? null : (type === 'W' || type === 'X' ? 'Engage' : 'Withdraw'),
+    axisOpen: type == null ? null : (type === 'W' || type === 'Y' ? 'Open' : 'Guarded'),
     pkg: p.pkg || 'core',
     axis_w: _axisW,
     axis_o: _axisO,
@@ -288,12 +289,17 @@ export default async function handler(req) {
     } catch {}
     const fbCatOpts = Object.fromEntries(Object.entries(fbCatOptions).map(([k, set]) => [k, [...set]]));
 
-    const hasEx1 = (p) => p && p.ex1_answers && Object.keys(p.ex1_answers).length > 0;
+    const _has = (o) => !!(o && typeof o === 'object' && Object.keys(o).length > 0);
+    const hasEx1 = (p) => p && _has(p.ex1_answers);
+    const tookAny = (p) => p && (_has(p.ex1_answers) || _has(p.ex2_answers) || _has(p.ex3_answers));
 
-    // Pass 1: own fields for every respondent who took Exercise 1.
+    // Pass 1: own fields for every respondent who took ANY exercise, so Ex2
+    // (expectations) and Ex3 (relationship reflection) responses still appear
+    // for people who haven't done Exercise 1. Communication type is left null
+    // for them (set in ownFields), so type/axis views stay Ex1-only.
     const computed = {};
     for (const p of profiles) {
-      if (!hasEx1(p)) continue;
+      if (!tookAny(p)) continue;
       computed[p.id] = ownFields(p);
     }
 
@@ -320,20 +326,24 @@ export default async function handler(req) {
         const { withdrawScore, openScore } = axisScores(sc);
         return typeCodeFromAxes(withdrawScore, openScore);
       };
-      let ownType = blendType(p.ex1_answers, partnerRaw ? partnerRaw.ex1_answers : null) || own.type;
-      let partnerType = partnerRaw ? blendType(partnerRaw.ex1_answers, p.ex1_answers) : null;
+      let ownType = own.type == null ? null : (blendType(p.ex1_answers, partnerRaw ? partnerRaw.ex1_answers : null) || own.type);
+      let partnerType = (partnerRaw && partnerRaw.ex1_answers) ? blendType(partnerRaw.ex1_answers, p.ex1_answers) : null;
       let coupleKey = partnerId;
+      let hasPartner = !!partnerRaw;
       if (!partnerRaw && p.invite_code && sessByInvite.has(p.invite_code)) {
         const sAns = sessByInvite.get(p.invite_code).ex1_answers;
+        hasPartner = true; coupleKey = 'inv:' + p.invite_code;
         const st = blendType(sAns, p.ex1_answers);
-        if (st) { ownType = blendType(p.ex1_answers, sAns) || ownType; partnerType = st; coupleKey = 'inv:' + p.invite_code; }
+        if (st) { if (own.type != null) ownType = blendType(p.ex1_answers, sAns) || ownType; partnerType = st; }
       }
       const row = {
         ...own,
         type: ownType,
         role: p.joined_via_invite ? 'B' : 'A',
-        couple_id: partnerType ? coupleHash(p.id, coupleKey) : null,
-        couple_type: partnerType ? [ownType, partnerType].sort().join('') : null,
+        // couple_id is set whenever a partner exists (so Ex2/Ex3 couple visuals
+        // pair them), even when a communication type can't be computed.
+        couple_id: hasPartner ? coupleHash(p.id, coupleKey) : null,
+        couple_type: (ownType && partnerType) ? [ownType, partnerType].sort().join('') : null,
       };
       if (partner) { for (const k of PARTNERABLE) row['p_' + k] = partner[k]; if (partnerType) row.p_type = partnerType; }
       // Gender fallback: each partner records the other's pronouns, so a person
