@@ -649,14 +649,10 @@
     </div>
 
     <div id="resp-intimacy" style="display:none">
-      <div class="chart-grid">
+      <div class="chart-grid full">
         <div class="chart-card">
-          <div class="chart-head"><div><div class="chart-title">Alignment by intimacy dimension</div><div class="chart-subtitle">Physical Intimacy exercise · where partners align vs differ</div></div></div>
+          <div class="chart-head"><div><div class="chart-title">Alignment by intimacy dimension</div><div class="chart-subtitle">Average alignment across dimensions</div></div></div>
           <div class="chart-body"><div class="insight-list" id="intimacy-dim-bars" style="margin-top:.5rem;"></div></div>
-        </div>
-        <div class="chart-card">
-          <div class="chart-head"><div><div class="chart-title">Most common intimacy gaps</div><div class="chart-subtitle">Dimensions where couples most often differ</div></div></div>
-          <div class="chart-body"><div class="insight-list" id="intimacy-gap-bars" style="margin-top:.5rem;"></div></div>
         </div>
       </div>
       <div class="qx-section" id="qx-intimacy" style="margin-top:1.25rem"></div>
@@ -4053,8 +4049,7 @@ async function renderIntimacyResponses(){
     return qN? {l:info.label, align:Math.round(alignSum/qN), gap:Math.round(gapSum/qN)} : null;
   }).filter(Boolean);
   const emptyHtml='<div style="color:var(--dim);font-size:.78rem;padding:.75rem 0;line-height:1.6">'+empty+'</div>';
-  if(dimEl){ if(!stats.length) dimEl.innerHTML=emptyHtml; else renderBars('intimacy-dim-bars', stats.map(d=>({l:d.l,v:d.align})), '#10B981'); }
-  if(gapEl){ if(!stats.length) gapEl.innerHTML=emptyHtml; else renderBars('intimacy-gap-bars', stats.slice().sort((a,b)=>b.gap-a.gap).map(d=>({l:d.l,v:d.gap})), '#B5546E'); }
+  if(dimEl){ if(!stats.length) dimEl.innerHTML=emptyHtml; else renderBars('intimacy-dim-bars', stats.slice().sort((a,b)=>b.align-a.align).map(d=>({l:d.l,v:d.align})), '#10B981'); }
 }
 
 // ── Per-exercise Question Explorer (crosstab + a visual for every question) ──
