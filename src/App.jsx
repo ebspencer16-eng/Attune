@@ -2644,12 +2644,19 @@ function PerceptionBar({ above = [], below = [] }) {
     const overlaps = dotItems.some((e, j) => j !== i && e.dir !== d.dir && Math.abs(e.it.pct - d.it.pct) < 5);
     d.offY = overlaps ? d.dir * OFFY : 0;
   });
+  // Label sits a small resting gap from the bar, and only moves out by the
+  // stagger amount when ITS dot was pushed off the line. A centred dot keeps its
+  // label close instead of parked at the far height reserved for the moved case.
+  const offYOf = (it) => { const d = dotItems.find(x => x.it === it); return d ? d.offY : 0; };
+  const LGAP = 6;
+  const aboveTop = (bx) => (LEADER + 2) - LGAP - (offYOf(bx.it) !== 0 ? OFFY : 0);
+  const belowTop = (bx) => LGAP + (offYOf(bx.it) !== 0 ? OFFY : 0);
   return (
     <div>
       {/* ABOVE band: partner's two labels, leader lines down to the bar */}
       <div style={{ position: "relative", height: aboveH }}>
         {pa.map((bx, i) => (
-          <div key={i} style={{ ...labelStyle(bx), top: 0 }}>
+          <div key={i} style={{ ...labelStyle(bx), top: aboveTop(bx) }}>
             {bx.it.lines.map((ln, j) => <div key={j}>{ln}</div>)}
           </div>
         ))}
@@ -2664,7 +2671,7 @@ function PerceptionBar({ above = [], below = [] }) {
       {/* BELOW band: viewer's two labels, leader lines up to the bar */}
       <div style={{ position: "relative", height: belowH }}>
         {pb.map((bx, i) => (
-          <div key={i} style={{ ...labelStyle(bx), top: LEADER }}>
+          <div key={i} style={{ ...labelStyle(bx), top: belowTop(bx) }}>
             {bx.it.lines.map((ln, j) => <div key={j}>{ln}</div>)}
           </div>
         ))}
@@ -4718,7 +4725,6 @@ function PersonalityResults({ myAnswers, partnerAnswers, userName, partnerName, 
     const dim = orderedDims[step - 1];
     const f = byDim[dim];
     const m = DIM_META[dim];
-    const headline = dimHeadline(dim, f.gap); // unique per dim + gap tier (items 3 & 4)
     const isLast = step === orderedDims.length;
     const nextDim = orderedDims[step]; // next in sorted order
 
@@ -4726,13 +4732,14 @@ function PersonalityResults({ myAnswers, partnerAnswers, userName, partnerName, 
     <MaybeNav noSideNav={noSideNav} navItems={personalityNavItems} currentStep={step} onGo={go} accent="#E8673A">
       <ResultsSlide bg={"linear-gradient(145deg, " + m.dark + "dd, " + m.dark + "99, #22204a)"}>
         <link href={FONT_URL} rel="stylesheet" />
-        {/* Dim label only, no badge chip (item 4: merged into headline) */}
+        {/* Top row: colour dot + progress. The dimension name is the hero below;
+            the templated gap-tier headline is gone (it could contradict the dots
+            and the "keep in mind" copy). The slider and advice carry the meaning. */}
         <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", marginBottom: "0.75rem" }}>
           <div style={{ width: 10, height: 10, borderRadius: "50%", background: m.color, flexShrink: 0, alignSelf: "center" }} />
-          <div style={{ fontSize: "0.62rem", textTransform: "uppercase", letterSpacing: "0.15em", color: "rgba(255,255,255,0.82)", fontWeight: 700, fontFamily: BFONT }}>{m.label}</div>
           <div style={{ marginLeft: "auto", fontSize: "0.68rem", color: "rgba(255,255,255,0.3)", fontFamily: BFONT }}>{step} of {orderedDims.length}</div>
         </div>
-        <div style={{ fontSize: "clamp(1.5rem,5vw,2rem)", fontWeight: 700, color: "white", lineHeight: 1.1, marginBottom: "1.25rem", fontFamily: HFONT }}>{headline}</div>
+        <div style={{ fontSize: "clamp(1.5rem,5vw,2rem)", fontWeight: 700, color: "white", lineHeight: 1.1, marginBottom: "1.25rem", fontFamily: HFONT }}>{m.label}</div>
 
         {/* Track */}
         <div style={{ background: "rgba(255,255,255,0.12)", borderRadius: 14, padding: "1.25rem 1.5rem", marginBottom: "1rem", border: "1px solid rgba(255,255,255,0.2)" }}>
@@ -5491,7 +5498,7 @@ function ExpectationsResults({ myAnswers, partnerAnswers, userName, partnerName,
                 ))}
               </div>
               <div style={{ padding: "0.5rem 1rem", borderTop: "1px solid rgba(16,185,129,0.15)" }}>
-                <span style={{ fontSize: "0.7rem", color: "rgba(16,185,129,0.85)", fontFamily: BFONT, fontWeight: 300 }}>{thisCatGaps.length === 0 ? `Fully aligned here. You and ${partnerName} are on the same page across all ${thisCatAligned.length} item${thisCatAligned.length !== 1 ? "s" : ""}.` : "You both expect the same thing here. Nothing to work out."}</span>
+                <span style={{ fontSize: "0.7rem", color: "rgba(16,185,129,0.85)", fontFamily: BFONT, fontWeight: 300 }}>{thisCatGaps.length === 0 ? `Fully aligned here. You and ${partnerName} are on the same page across all ${thisCatAligned.length} item${thisCatAligned.length !== 1 ? "s" : ""}.` : "You both expect the same thing here."}</span>
               </div>
             </div>
           )}
@@ -10368,17 +10375,6 @@ function ResultsHighlights({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3
           <p style={{ fontSize: "0.92rem", color: "rgba(255,255,255,0.85)", fontFamily: BFONT, fontWeight: 500, lineHeight: 1.45, margin: "0 0 1.25rem", fontStyle: "italic", animation: "fadeUp 0.4s 0.2s both" }}>
             {coupleType?.tagline}
           </p>
-          {/* Famous duos — directly under tagline, always visible */}
-          {coupleType?.famousDuos?.length > 0 && (
-            <div style={{ background: "rgba(0,0,0,0.2)", borderRadius: 12, padding: "0.85rem 1rem", marginBottom: "1.25rem", animation: "fadeUp 0.4s 0.28s both" }}>
-              <div style={{ fontSize: "0.48rem", letterSpacing: "0.2em", textTransform: "uppercase", color: "rgba(255,255,255,0.5)", fontFamily: BFONT, marginBottom: "0.5rem" }}>You're in good company</div>
-              {coupleType?.famousDuos.map((d, i) => (
-                <div key={i} style={{ fontSize: "0.78rem", color: "rgba(255,255,255,0.88)", fontFamily: BFONT, fontWeight: 600, marginBottom: "0.2rem" }}>
-                  {d.names} <span style={{ color: "rgba(255,255,255,0.42)", fontWeight: 300, fontSize: "0.72rem" }}>· {d.show}</span>
-                </div>
-              ))}
-            </div>
-          )}
           {/* Description */}
           <p style={{ fontSize: "0.82rem", color: "rgba(255,255,255,0.7)", fontFamily: BFONT, fontWeight: 300, lineHeight: 1.7, margin: 0, animation: "fadeUp 0.4s 0.35s both" }}>
             {coupleType?.description ? coupleType?.description.replace(/\{U\}/g, userName).replace(/\{P\}/g, partnerName) : ""}

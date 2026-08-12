@@ -252,7 +252,7 @@ function resultsViewedEmail({ toName, partnerName, coupleType, portalUrl, hasRef
   const upsellRows = upsell.map(a => card(a, true)).join('');
 
   return {
-    subject: `Your Attune results are ready${coupleType ? `. You're ${coupleType}` : ""}`,
+    subject: `Your Attune results are ready${coupleType ? `. You're: '${coupleType.toLowerCase()}'` : ""}`,
     html: layout(`
       <h1>Your results are ready.</h1>
       <p>Hi ${name}, you and ${partner} just completed Attune${coupleType ? `. Your couple type is <strong>${coupleType}</strong>` : ""}. Everything you need is in your results portal.</p>
