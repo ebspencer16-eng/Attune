@@ -294,16 +294,41 @@ const DIMS = ["energy","expression","needs","bids","listening","conflict","repai
 // but which pole is data-dependent, so each line works for either.
 const ALIGNED_ADVICE = {
   energy:     "You recharge in similar ways. That makes it easy to assume the other always wants what you want. Check before you plan the weekend around it.",
-  expression: "You process emotion at a similar pace. The risk here isn't friction. It's that neither of you pushes the other toward the part that's harder to say.",
-  needs:      "You ask for things in similar ways. When you both hint, the hint gets missed by both of you. Say the direct version sometimes anyway.",
-  bids:       "You both catch the small reaches for connection. Keep catching them out loud. The acknowledgment is what makes a bid land, not just the noticing.",
+  // Direction-dependent: which pole the couple is aligned toward changes the copy.
+  expression: {
+    low:  "You both process emotion inwardly. That gives feelings room to settle before they're spoken. It also means nothing forces the deeper thing to the surface, so neither of you pushes the other toward the part that's harder to say. Ask for it sometimes, even when neither of you offers first.",
+    high: "You both process emotion out loud. Feelings reach the table fast, which is easy. The watch-out is volume. When you're both expressing at once, leave room for one of you to just listen.",
+  },
+  needs: {
+    low:  "You both ask directly. Nothing gets buried, which is its own kind of ease. The watch-out is tone, not clarity. When you're tired, directness can read sharper than you mean it. Same ask, softer.",
+    high: "You both tend to hint. That keeps things gentle, but when neither of you says it straight, the ask gets missed by both of you. Say the direct version sometimes anyway.",
+  },
+  bids: {
+    low:  "You're both reserved with the small reaches for connection. Neither of you makes a show of them, which keeps things low-key. It also means they can pass unnoticed. Name one out loud now and then. The reach only lands when the other person knows it happened.",
+    high: "You both catch the small reaches for connection. Keep catching them out loud. The acknowledgment is what makes a bid land, not just the noticing.",
+  },
   listening:  "You listen in similar ways. That works until one of you needs the other mode. Ask which one is wanted before you give it.",
   conflict:   "You handle conflict in similar ways. If you both engage, it can escalate fast. If you both step back, things go unsaid. Watch for whichever one is yours.",
-  repair:     "You repair in similar ways. Because it comes naturally to both of you, it's easy to skip naming that a repair happened at all. Say it landed.",
+  repair: {
+    low:  "You both repair deliberately, with a real reset. That makes repairs count. It can also leave small ruptures waiting for a big enough moment. Let some be smaller and sooner.",
+    high: "You both repair casually, without much ceremony. Because it comes so naturally, it's easy to skip naming that a repair even happened. Say it landed.",
+  },
   love:       "Love lands in similar ways for both of you. That's rare. Keep giving it in that form on purpose, not just by default.",
   stress:     "You respond to stress in similar ways. If you both pull inward, no one reaches first. If you both seek, you can crowd each other. Name which is yours before the next hard week.",
   feedback:   "You handle feedback in similar ways. When you're both open, keep it kind. When you're both guarded, small things pile up. Say the small thing early.",
 };
+
+// Aligned advice is a plain string (direction-neutral) or { low, high } when the
+// right advice depends on WHICH pole the couple is aligned toward. Dimension score
+// 1 = ends[0] (low pole), 5 = ends[1] (high pole); pick by the couple's average.
+function alignedAdvice(dim, a, b) {
+  const adv = ALIGNED_ADVICE[dim];
+  if (!adv) return null;
+  if (typeof adv === "string") return adv;
+  const na = Number(a), nb = Number(b);
+  const avg = ((isNaN(na) ? 3 : na) + (isNaN(nb) ? 3 : nb)) / 2;
+  return avg < 3 ? adv.low : adv.high;
+}
 
 // Gap -> label system (playful/warm/direct mix by degree)
 // Dimension-aware label pool -- each dimension has its own voice
@@ -4754,7 +4779,7 @@ function PersonalityResults({ myAnswers, partnerAnswers, userName, partnerName, 
         {(f.adviceText || f.isStrength) && (
           <div style={{ background: (m.color + (f.isStrength ? "28" : "45")), borderRadius: 14, padding: "1.25rem 1.5rem", border: ("1px solid " + (m.color) + (f.isStrength ? "50" : "80")) }}>
             <div style={{ fontSize: "0.62rem", textTransform: "uppercase", letterSpacing: "0.12em", color: "rgba(255,255,255,0.9)", fontWeight: 700, marginBottom: "0.5rem", fontFamily: BFONT }}>{f.isStrength ? "One thing to keep in mind" : "One shift that helps"}</div>
-            <p style={{ fontSize: "0.9rem", color: "white", lineHeight: 1.8, margin: 0, fontFamily: BFONT, fontWeight: f.isStrength ? 400 : 500 }}>{f.adviceText || (f.isStrength ? ALIGNED_ADVICE[f.dim] : null) || `You two line up here. That's an easy place to take for granted. Name it out loud once in a while so the alignment stays a choice, not an assumption.`}</p>
+            <p style={{ fontSize: "0.9rem", color: "white", lineHeight: 1.8, margin: 0, fontFamily: BFONT, fontWeight: f.isStrength ? 400 : 500 }}>{f.adviceText || (f.isStrength ? alignedAdvice(f.dim, myS[f.dim], partS[f.dim]) : null) || `You two line up here. That's an easy place to take for granted. Name it out loud once in a while so the alignment stays a choice, not an assumption.`}</p>
           </div>
         )}
 
