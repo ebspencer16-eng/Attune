@@ -2704,6 +2704,49 @@ function PerceptionBar({ above = [], below = [] }) {
     </div>
   );
 }
+// Per-question side-by-side responses for a dimension page. Shows every Ex1
+// question that feeds this dimension, with each partner's placement on that
+// question's own two poles. Viewer = white dot, partner = accent dot (matching
+// the self bar); coincident dots stagger vertically. Raw 1-5 values render on
+// the displayed a->b axis (the lv5 scoring flip is only for the dimension
+// average, never for showing an actual answer).
+function DimResponseBreakdown({ dim, myAnswers, partnerAnswers, userName, partnerName, color }) {
+  const qs = (PERSONALITY_QUESTIONS || []).filter(q => q.dimension === dim && !q.partnerView);
+  const num = v => (v == null || isNaN(v)) ? null : Number(v);
+  const rows = qs
+    .map(q => ({ q, a: num(myAnswers && myAnswers[q.id]), b: num(partnerAnswers && partnerAnswers[q.id]) }))
+    .filter(r => r.a != null || r.b != null);
+  if (!rows.length) return null;
+  const pct = v => Math.max(5, Math.min(95, ((v - 1) / 4) * 100));
+  return (
+    <div style={{ marginTop: "1rem", background: "rgba(255,255,255,0.06)", borderRadius: 14, padding: "1.2rem 1.5rem", border: "1px solid rgba(255,255,255,0.14)" }}>
+      <div style={{ fontSize: "0.62rem", textTransform: "uppercase", letterSpacing: "0.12em", color: "rgba(255,255,255,0.9)", fontWeight: 700, marginBottom: "0.35rem", fontFamily: BFONT }}>Your responses, side by side</div>
+      <p style={{ fontSize: "0.66rem", color: "rgba(255,255,255,0.5)", fontFamily: BFONT, lineHeight: 1.55, margin: "0 0 1.35rem" }}>The questions behind this dimension, and where you each landed on them.</p>
+      <div style={{ display: "flex", flexDirection: "column", gap: "1.6rem" }}>
+        {rows.map(({ q, a, b }) => {
+          const close = a != null && b != null && Math.abs(pct(a) - pct(b)) < 9;
+          return (
+            <div key={q.id}>
+              <div style={{ fontSize: "0.78rem", color: "rgba(255,255,255,0.92)", fontFamily: BFONT, lineHeight: 1.5, marginBottom: "0.8rem", fontWeight: 500 }}>{q.text}</div>
+              <div style={{ display: "flex", justifyContent: "space-between", gap: "1rem", marginBottom: "0.15rem" }}>
+                <span style={{ fontSize: "0.6rem", color: "rgba(255,255,255,0.5)", fontFamily: BFONT, lineHeight: 1.35, flex: "0 1 46%" }}>{q.a}</span>
+                <span style={{ fontSize: "0.6rem", color: "rgba(255,255,255,0.5)", fontFamily: BFONT, lineHeight: 1.35, flex: "0 1 46%", textAlign: "right" }}>{q.b}</span>
+              </div>
+              <div style={{ position: "relative", height: 8, background: "rgba(255,255,255,0.12)", borderRadius: 999, marginTop: "0.55rem", overflow: "visible" }}>
+                {b != null && <div title={partnerName + " answered here"} style={{ position: "absolute", top: "50%", left: pct(b) + "%", transform: "translate(-50%, calc(-50% + " + (close ? 6 : 0) + "px))", width: 15, height: 15, borderRadius: "50%", background: color, border: "2px solid " + color, boxShadow: "0 0 8px " + color + "66", zIndex: 1 }} />}
+                {a != null && <div title={userName + " answered here"} style={{ position: "absolute", top: "50%", left: pct(a) + "%", transform: "translate(-50%, calc(-50% + " + (close ? -6 : 0) + "px))", width: 13, height: 13, borderRadius: "50%", background: "#fff", border: "2px solid rgba(255,255,255,0.5)", zIndex: 2 }} />}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+      <div style={{ display: "flex", gap: "1.3rem", marginTop: "1.4rem", paddingTop: "1rem", borderTop: "1px solid rgba(255,255,255,0.1)", fontSize: "0.64rem", color: "rgba(255,255,255,0.65)", fontFamily: BFONT }}>
+        <span style={{ display: "flex", alignItems: "center", gap: "0.4rem" }}><span style={{ width: 11, height: 11, borderRadius: "50%", background: "#fff", border: "2px solid rgba(255,255,255,0.5)", display: "inline-block" }} />{userName}</span>
+        <span style={{ display: "flex", alignItems: "center", gap: "0.4rem" }}><span style={{ width: 11, height: 11, borderRadius: "50%", background: color, display: "inline-block" }} />{partnerName}</span>
+      </div>
+    </div>
+  );
+}
 function DimTrackViz({ myScore = 3, theirScore = 3, color = "#9B5DE5", userName = "You", partnerName = "Partner" }) {
   const pct = v => ((v - 1) / 4) * 100;
   const myPctV = pct(myScore), theirPctV = pct(theirScore);
@@ -4829,6 +4872,8 @@ function PersonalityResults({ myAnswers, partnerAnswers, userName, partnerName, 
             </div>
           );
         })()}
+
+        <DimResponseBreakdown dim={dim} myAnswers={myAnswers} partnerAnswers={partnerAnswers} userName={userName} partnerName={partnerName} color={m.color} />
 
         <NavButtons
           onBack={() => go(step - 1)}
