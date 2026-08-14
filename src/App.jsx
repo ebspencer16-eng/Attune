@@ -1643,7 +1643,7 @@ const NEAR_AXIS_PROSE = {
     stickingPointsNearOpen: {
       0: {
         one: `{EXP} tends to start the deeper conversations, but one of you sits closer to the middle than the label suggests, so the map placement should read less like fixed roles and more like who happens to speak first.`,
-        both: `{EXP} tends to start the deeper conversations, but {GRD} shares more than a guarded partner would, so who speaks first may change depending on the situation.`,
+        both: `{EXP} tends to start the deeper conversations, but {GRD} shares more than a truly guarded partner would, so who speaks first may change depending on the situation.`,
       },
       1: {
         one: `One of you sits close to the middle on how much you show. On an easy day, that person shares freely. Under stress, they can pull inward, which may feel sudden to the other.`,
@@ -8865,7 +8865,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
                       <span style={{ fontWeight: 700, color: ax.color }}>{i === 0 ? "↑ " : "↓ "}</span>{p}
                     </div>
                   ))}
-                  {ax.bothNear && <p style={{ fontSize: "0.72rem", color: C.ink, fontFamily: BFONT, fontStyle: "italic", lineHeight: 1.6, margin: "0.55rem 0 0" }}>Because you two share very similar perspectives here, who plays which role may shift depending on the situation.</p>}
+                  
                 </div>
               ))}
             </div>
@@ -9280,9 +9280,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
           <div style={{ background: "white", border: `1.5px solid ${C.stone}`, borderRadius: 14, padding: "1.1rem 1.25rem 0.9rem", marginBottom: "0.75rem" }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: "1rem", marginBottom: "1rem" }}>
               <span style={{ fontFamily: HFONT, fontSize: "0.86rem", fontWeight: 700, color: C.ink }}>{q.text}</span>
-              <span style={{ fontSize: "0.6rem", letterSpacing: "0.1em", textTransform: "uppercase", fontWeight: 700, color: tone, whiteSpace: "nowrap", flexShrink: 0 }}>
-                {gap === 0 ? "Same read" : gap === 1 ? "Close" : `${gap} apart`}
-              </span>
+
             </div>
             <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "0.5rem" }}>
               <span style={{ fontSize: "0.66rem", color: C.muted, fontFamily: BFONT }}>{q.scaleLabels[0]}</span>
