@@ -10481,7 +10481,7 @@ function ResultsHighlights({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3
       <div onClick={advance} style={{ flex: 1, display: "flex", flexDirection: "column", cursor: "pointer", position: "relative", overflow: "hidden" }}>
         {watermark}
         <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "2.25rem 1.75rem 2rem", textAlign: "center" }}>
-          <div style={{ fontFamily: HFONT, fontSize: "clamp(1.45rem,5.5vw,1.95rem)", fontWeight: 700, color: "white", lineHeight: 1.12, letterSpacing: "-0.02em", marginBottom: "1.4rem", maxWidth: 300, animation: "fadeUp 0.5s 0.1s both" }}>Your unique relationship environment</div>
+          <div style={{ fontFamily: HFONT, fontSize: "clamp(1.3rem,4.4vw,1.65rem)", fontWeight: 700, color: "white", lineHeight: 1.15, letterSpacing: "-0.015em", marginBottom: "1.4rem", maxWidth: 320, animation: "fadeUp 0.5s 0.1s both" }}>Your unique relationship environment</div>
           <div style={{ animation: "popIn 0.5s 0.25s cubic-bezier(0.34,1.56,0.64,1) both", marginBottom: "1.4rem" }}>
             <CoupleMapSVG myS={myS} partS={partS} userName={userName} partnerName={partnerName} size={268} hideCaption />
           </div>
@@ -10590,11 +10590,11 @@ function ResultsHighlights({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3
     // ── 8. ONE CONVERSATION — tailored-guidance framing ──────────────────────
     <WrappedCard key={hasReflData ? 6 : 5} bg="linear-gradient(145deg, #120d2e 0%, #2a1a5e 50%, #120d2e 100%)" onDownload={handleDl} cardIndex={hasReflData ? 6 : 5} cardRef={cardRef} inline={inline} isMobile={isMobile} portraitCorner={portrait}>
       <style>{cardAnim}</style>
-      <div onClick={advance} style={{ flex: 1, display: "flex", flexDirection: "column", cursor: "pointer", position: "relative", overflow: "hidden", justifyContent: "center", padding: "2.5rem 2.25rem", textAlign: "center" }}>
+      <div onClick={advance} style={{ flex: 1, display: "flex", flexDirection: "column", cursor: "pointer", position: "relative", overflow: "hidden", justifyContent: "center", alignItems: "center", padding: "2.5rem 2.25rem", textAlign: "center" }}>
         {watermark}
         <p style={{ fontSize: "0.82rem", color: "rgba(255,255,255,0.6)", fontFamily: BFONT, fontWeight: 300, lineHeight: 1.65, maxWidth: 300, margin: "0 auto 1.75rem", animation: "fadeUp 0.4s 0.05s both" }}>As you explore your results, you'll learn more about your unique dynamic and unlock guidance tailored to the two of you.</p>
         <div style={{ fontSize: "0.55rem", letterSpacing: "0.16em", textTransform: "uppercase", color: "rgba(255,255,255,0.5)", fontFamily: BFONT, fontWeight: 700, lineHeight: 1.6, marginBottom: "1rem", animation: "fadeUp 0.4s 0.12s both" }}>One conversation worth having for {userName} &amp; {partnerName}</div>
-        <div style={{ background: "rgba(255,255,255,0.1)", border: "1px solid rgba(255,255,255,0.22)", borderRadius: 20, padding: "1.75rem 1.6rem", maxWidth: 320, width: "100%", margin: "0 auto", animation: "popIn 0.55s 0.2s cubic-bezier(0.34,1.56,0.64,1) both", boxShadow: "0 8px 40px rgba(0,0,0,0.3)" }}>
+        <div style={{ background: "rgba(255,255,255,0.1)", border: "1px solid rgba(255,255,255,0.22)", borderRadius: 20, padding: "1.75rem 1.6rem", maxWidth: 320, width: "100%", boxSizing: "border-box", margin: "0 auto", animation: "popIn 0.55s 0.2s cubic-bezier(0.34,1.56,0.64,1) both", boxShadow: "0 8px 40px rgba(0,0,0,0.3)" }}>
           <p style={{ fontFamily: HFONT, fontSize: "clamp(1.1rem,3.2vw,1.3rem)", fontWeight: 400, color: "white", lineHeight: 1.55, fontStyle: "italic", margin: 0 }}>{convoPrompt}</p>
         </div>
       </div>
@@ -10636,11 +10636,20 @@ function ResultsHighlights({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3
         {cards[cardIdx]}
       </div>
 
+      {!inline && !isMobile && (<>
+        {cardIdx > 0 && <button onClick={() => setCardIdx(n => n - 1)} aria-label="Previous"
+          style={{ position: "absolute", top: "50%", left: "1.75rem", transform: "translateY(-50%)", width: 50, height: 50, borderRadius: "50%", background: "rgba(255,255,255,0.1)", border: "1px solid rgba(255,255,255,0.18)", color: "white", fontSize: "1.4rem", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 210, backdropFilter: "blur(8px)" }}>‹</button>}
+        {!isLast && <button onClick={advance} aria-label="Next"
+          style={{ position: "absolute", top: "50%", right: "1.75rem", transform: "translateY(-50%)", width: 50, height: 50, borderRadius: "50%", background: "rgba(255,255,255,0.1)", border: "1px solid rgba(255,255,255,0.18)", color: "white", fontSize: "1.4rem", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 210, backdropFilter: "blur(8px)" }}>›</button>}
+      </>)}
+
       <div style={{ position: inline ? "static" : "absolute", bottom: inline ? undefined : 0, left: inline ? undefined : 0, right: inline ? undefined : 0, padding: inline ? "0" : "0 1.5rem 1.25rem", display: "flex", alignItems: "center", justifyContent: "space-between", gap: "1rem", marginTop: inline ? "1rem" : 0 }}>
+        {(!inline && !isMobile) ? <div style={{ width: 44, height: 44 }} /> : (
         <button onClick={() => cardIdx > 0 && setCardIdx(n => n - 1)} disabled={cardIdx === 0}
           style={{ width: 44, height: 44, borderRadius: "50%", background: cardIdx === 0 ? "transparent" : inline ? "rgba(0,0,0,0.07)" : "rgba(255,255,255,0.1)", border: cardIdx === 0 ? "none" : "1px solid " + (inline ? "rgba(0,0,0,0.12)" : "rgba(255,255,255,0.15)"), color: cardIdx === 0 ? "transparent" : inline ? "#0E0B07" : "white", fontSize: "1.1rem", cursor: cardIdx === 0 ? "default" : "pointer", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
           ‹
         </button>
+        )}
         {/* Progress dots — prominent at bottom on mobile */}
         <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: inline ? 0 : 6 }}>
           {inline
@@ -10651,7 +10660,7 @@ function ResultsHighlights({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3
               ))
           }
         </div>
-        {isLast
+        {(isLast || (!inline && !isMobile))
           ? <div style={{ width: 44, height: 44 }} />
           : <button onClick={advance}
               style={{ width: 44, height: 44, borderRadius: "50%", background: inline ? "rgba(0,0,0,0.07)" : "rgba(255,255,255,0.1)", border: "1px solid " + (inline ? "rgba(0,0,0,0.12)" : "rgba(255,255,255,0.15)"), color: inline ? "#0E0B07" : "white", fontSize: "1.1rem", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
