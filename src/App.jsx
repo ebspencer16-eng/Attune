@@ -2720,6 +2720,7 @@ function DimResponseBreakdown({ dim, myAnswers, partnerAnswers, userName, partne
   if (!rows.length) return null;
   const pct = v => Math.max(5, Math.min(95, ((v - 1) / 4) * 100));
   const UC = "#E8673A", PC = "#1B5FE8";
+  const sameInitial = (userName?.[0] || "").toUpperCase() === (partnerName?.[0] || "").toUpperCase();
   return (
     <div style={{ marginTop: "1rem", background: "rgba(255,255,255,0.06)", borderRadius: 14, padding: "1.2rem 1.5rem", border: "1px solid rgba(255,255,255,0.14)" }}>
       <div style={{ fontSize: "0.62rem", textTransform: "uppercase", letterSpacing: "0.12em", color: "rgba(255,255,255,0.9)", fontWeight: 700, marginBottom: "1.35rem", fontFamily: BFONT }}>{((DIM_META[dim] && DIM_META[dim].label) || "") + " exercise questions, side by side"}</div>
@@ -2732,8 +2733,8 @@ function DimResponseBreakdown({ dim, myAnswers, partnerAnswers, userName, partne
               <div style={{ display: "flex", alignItems: "center", gap: "0.7rem" }}>
                 <span style={{ fontSize: "0.58rem", color: "rgba(255,255,255,0.5)", fontFamily: BFONT, lineHeight: 1.3, flex: "0 0 27%", textAlign: "right" }}>{q.a}</span>
                 <div style={{ flex: 1, position: "relative", height: 8, background: "rgba(255,255,255,0.12)", borderRadius: 999, overflow: "visible" }}>
-                  {b != null && <div title={partnerName} style={{ position: "absolute", top: "50%", left: pct(b) + "%", transform: "translate(-50%, calc(-50% + " + (close ? 9 : 0) + "px))", width: 20, height: 20, borderRadius: "50%", background: PC, border: "2px solid white", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "0.46rem", color: "white", fontWeight: 700, fontFamily: BFONT, zIndex: 1 }}>{partnerName[0]}</div>}
-                  {a != null && <div title={userName} style={{ position: "absolute", top: "50%", left: pct(a) + "%", transform: "translate(-50%, calc(-50% + " + (close ? -9 : 0) + "px))", width: 20, height: 20, borderRadius: "50%", background: UC, border: "2px solid white", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "0.46rem", color: "white", fontWeight: 700, fontFamily: BFONT, zIndex: 2 }}>{userName[0]}</div>}
+                  {b != null && <div title={partnerName} style={{ position: "absolute", top: "50%", left: pct(b) + "%", transform: "translate(-50%, calc(-50% + " + (close ? 9 : 0) + "px))", width: 20, height: 20, borderRadius: "50%", background: PC, border: "2px solid white", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "0.46rem", color: "white", fontWeight: 700, fontFamily: BFONT, zIndex: 1 }}>{sameInitial ? "" : partnerName[0]}</div>}
+                  {a != null && <div title={userName} style={{ position: "absolute", top: "50%", left: pct(a) + "%", transform: "translate(-50%, calc(-50% + " + (close ? -9 : 0) + "px))", width: 20, height: 20, borderRadius: "50%", background: UC, border: "2px solid white", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "0.46rem", color: "white", fontWeight: 700, fontFamily: BFONT, zIndex: 2 }}>{sameInitial ? "" : userName[0]}</div>}
                 </div>
                 <span style={{ fontSize: "0.58rem", color: "rgba(255,255,255,0.5)", fontFamily: BFONT, lineHeight: 1.3, flex: "0 0 27%", textAlign: "left" }}>{q.b}</span>
               </div>
@@ -2741,10 +2742,12 @@ function DimResponseBreakdown({ dim, myAnswers, partnerAnswers, userName, partne
           );
         })}
       </div>
+{sameInitial && (
       <div style={{ display: "flex", gap: "1.3rem", marginTop: "1.4rem", paddingTop: "1rem", borderTop: "1px solid rgba(255,255,255,0.1)", fontSize: "0.64rem", color: "rgba(255,255,255,0.65)", fontFamily: BFONT }}>
         <span style={{ display: "flex", alignItems: "center", gap: "0.4rem" }}><span style={{ width: 11, height: 11, borderRadius: "50%", background: UC, display: "inline-block" }} />{userName}</span>
         <span style={{ display: "flex", alignItems: "center", gap: "0.4rem" }}><span style={{ width: 11, height: 11, borderRadius: "50%", background: PC, display: "inline-block" }} />{partnerName}</span>
       </div>
+      )}
     </div>
   );
 }
@@ -2765,8 +2768,8 @@ function DimTrackViz({ myScore = 3, theirScore = 3, color = "#9B5DE5", userName 
     <div style={{ margin: "1.15rem 0 0.35rem", position: "relative" }}>
       <div style={{ height: 5, background: "rgba(255,255,255,0.12)", borderRadius: 3, position: "relative", overflow: "visible" }}>
         <div style={{ position: "absolute", inset: 0, borderRadius: 3, background: "linear-gradient(90deg, rgba(255,255,255,0.05), rgba(255,255,255,0.18))" }} />
-        <div title={partnerName} style={{ position: "absolute", top: "50%", left: theirPctV + "%", transform: `translate(-50%, calc(-50% + ${theirDy}px))`, width: 22, height: 22, borderRadius: "50%", background: PC, border: "2.5px solid white", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "0.5rem", color: "white", fontWeight: 700, fontFamily: BFONT, zIndex: 2 }}>{partnerName[0]}</div>
-        <div title={userName} style={{ position: "absolute", top: "50%", left: myPctV + "%", transform: `translate(-50%, calc(-50% + ${myDy}px))`, width: 22, height: 22, borderRadius: "50%", background: UC, border: "2.5px solid white", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "0.5rem", color: "white", fontWeight: 700, fontFamily: BFONT, zIndex: 2 }}>{userName[0]}</div>
+        <div title={partnerName} style={{ position: "absolute", top: "50%", left: theirPctV + "%", transform: `translate(-50%, calc(-50% + ${theirDy}px))`, width: 22, height: 22, borderRadius: "50%", background: PC, border: "2.5px solid white", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "0.5rem", color: "white", fontWeight: 700, fontFamily: BFONT, zIndex: 2 }}>{sameInitial ? "" : partnerName[0]}</div>
+        <div title={userName} style={{ position: "absolute", top: "50%", left: myPctV + "%", transform: `translate(-50%, calc(-50% + ${myDy}px))`, width: 22, height: 22, borderRadius: "50%", background: UC, border: "2.5px solid white", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "0.5rem", color: "white", fontWeight: 700, fontFamily: BFONT, zIndex: 2 }}>{sameInitial ? "" : userName[0]}</div>
       </div>
       {sameInitial && (
         <div style={{ display: "flex", justifyContent: "center", gap: "1rem", marginTop: "1.1rem" }}>
@@ -4820,7 +4823,6 @@ function PersonalityResults({ myAnswers, partnerAnswers, userName, partnerName, 
             the templated gap-tier headline is gone (it could contradict the dots
             and the "keep in mind" copy). The slider and advice carry the meaning. */}
         <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", marginBottom: "0.75rem" }}>
-          <div style={{ width: 10, height: 10, borderRadius: "50%", background: m.color, flexShrink: 0, alignSelf: "center" }} />
           <div style={{ marginLeft: "auto", fontSize: "0.68rem", color: "rgba(255,255,255,0.3)", fontFamily: BFONT }}>{step} of {orderedDims.length}</div>
         </div>
         <div style={{ fontSize: "clamp(1.5rem,5vw,2rem)", fontWeight: 700, color: "white", lineHeight: 1.1, marginBottom: "1.25rem", fontFamily: HFONT }}>{m.label}</div>
@@ -4838,7 +4840,7 @@ function PersonalityResults({ myAnswers, partnerAnswers, userName, partnerName, 
         {/* Try this / Keep this in mind */}
         {(f.adviceText || f.isStrength) && (
           <div style={{ background: "rgba(255,255,255,0.08)", borderRadius: 14, padding: "1.25rem 1.5rem", border: "1px solid rgba(255,255,255,0.16)" }}>
-            <div style={{ fontSize: "0.62rem", textTransform: "uppercase", letterSpacing: "0.12em", color: m.color, fontWeight: 700, marginBottom: "0.5rem", fontFamily: BFONT }}>{f.isStrength ? "One thing to keep in mind" : "One shift that helps"}</div>
+            <div style={{ fontSize: "0.62rem", textTransform: "uppercase", letterSpacing: "0.12em", color: "rgba(255,255,255,0.9)", fontWeight: 700, marginBottom: "0.5rem", fontFamily: BFONT }}>{f.isStrength ? "One thing to keep in mind" : "One shift that helps"}</div>
             <p style={{ fontSize: "0.9rem", color: "white", lineHeight: 1.8, margin: 0, fontFamily: BFONT, fontWeight: f.isStrength ? 400 : 500 }}>{f.adviceText || (f.isStrength ? alignedAdvice(f.dim, myS[f.dim], partS[f.dim]) : null) || `You two line up here. That's an easy place to take for granted. Name it out loud once in a while so the alignment stays a choice, not an assumption.`}</p>
           </div>
         )}
@@ -10354,7 +10356,7 @@ function ResultsHighlights({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3
             <circle cx="50" cy="50" r={r} fill="none" stroke="rgba(255,255,255,0.12)" strokeWidth="10" />
             <circle cx="50" cy="50" r={r} fill="none" stroke={color} strokeWidth="10" strokeLinecap="round" strokeDasharray={`${dash} ${CC}`} transform="rotate(-90 50 50)" />
           </svg>
-          <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.4rem", fontWeight: 700, color: "white", fontFamily: HFONT }}>{pct}%</div>
+          <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", paddingBottom: "5px", fontSize: "1.4rem", fontWeight: 700, color: "white", fontFamily: HFONT }}>{pct}%</div>
         </div>
         <div style={{ fontSize: "0.66rem", color: "rgba(255,255,255,0.62)", fontFamily: BFONT, textAlign: "center", lineHeight: 1.3, maxWidth: 120, letterSpacing: "0.03em" }}>{label}</div>
       </div>
@@ -10373,7 +10375,7 @@ function ResultsHighlights({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3
     </div>
   );
 
-  const TOTAL_CARDS = (ex3Answers && partnerEx3) ? 8 : 7;
+  const TOTAL_CARDS = 7 + ((ex3Answers && partnerEx3) ? 1 : 0) + (intimacyHighlight ? 1 : 0);
   const isLast = cardIdx === TOTAL_CARDS - 1;
   const handleDl = () => {
     if (cardRef.current) downloadCard(cardRef.current, "attune-" + userName.toLowerCase() + "-" + partnerName.toLowerCase() + "-" + (cardIdx + 1) + ".png");
@@ -10428,8 +10430,8 @@ function ResultsHighlights({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3
           <span style={{ fontSize: "0.6rem", color: "rgba(255,255,255,0.45)", fontFamily: BFONT }}>{meta?.ends?.[1]}</span>
         </div>
         <div style={{ height: 6, background: "rgba(255,255,255,0.12)", borderRadius: 3, position: "relative", overflow: "visible" }}>
-          <div title={userName} style={{ position: "absolute", top: "50%", left: myPct + "%", transform: `translate(-50%, calc(-50% + ${myDy}px))`, width: 22, height: 22, borderRadius: "50%", background: "#E8673A", border: "2.5px solid white", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "0.5rem", color: "white", fontWeight: 700, fontFamily: BFONT, zIndex: 2 }}>{userName[0]}</div>
-          <div title={partnerName} style={{ position: "absolute", top: "50%", left: theirPct + "%", transform: `translate(-50%, calc(-50% + ${theirDy}px))`, width: 22, height: 22, borderRadius: "50%", background: "#1B5FE8", border: "2.5px solid white", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "0.5rem", color: "white", fontWeight: 700, fontFamily: BFONT, zIndex: 2 }}>{partnerName[0]}</div>
+          <div title={userName} style={{ position: "absolute", top: "50%", left: myPct + "%", transform: `translate(-50%, calc(-50% + ${myDy}px))`, width: 22, height: 22, borderRadius: "50%", background: "#E8673A", border: "2.5px solid white", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "0.5rem", color: "white", fontWeight: 700, fontFamily: BFONT, zIndex: 2 }}>{sameInitial ? "" : userName[0]}</div>
+          <div title={partnerName} style={{ position: "absolute", top: "50%", left: theirPct + "%", transform: `translate(-50%, calc(-50% + ${theirDy}px))`, width: 22, height: 22, borderRadius: "50%", background: "#1B5FE8", border: "2.5px solid white", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "0.5rem", color: "white", fontWeight: 700, fontFamily: BFONT, zIndex: 2 }}>{sameInitial ? "" : partnerName[0]}</div>
         </div>
         {sameInitial && (
           <div style={{ display: "flex", justifyContent: "center", gap: "1rem", marginTop: "1rem" }}>
@@ -10493,16 +10495,7 @@ function ResultsHighlights({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3
       <div onClick={advance} style={{ flex: 1, display: "flex", flexDirection: "column", cursor: "pointer", position: "relative", overflow: "hidden" }}>
         {watermark}
         <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center", padding: "2.5rem 2.25rem 2rem" }}>
-          <div style={{ fontFamily: HFONT, fontSize: "clamp(1.5rem,5vw,2rem)", fontWeight: 700, color: "white", lineHeight: 1.1, letterSpacing: "-0.02em", marginBottom: "0.55rem", animation: "fadeUp 0.5s 0.08s both" }}>How you each show up</div>
-          <p style={{ fontSize: "0.8rem", color: "rgba(255,255,255,0.6)", fontFamily: BFONT, fontWeight: 300, lineHeight: 1.55, margin: "0 0 1rem", animation: "fadeUp 0.4s 0.16s both" }}>You answered on your own. Here's where you each landed across a few of the ways couples connect.</p>
-          <div style={{ display: "flex", gap: "1.1rem", marginBottom: "1.5rem", animation: "fadeUp 0.4s 0.22s both" }}>
-            {[[userName, "#E8673A"], [partnerName, "#1B5FE8"]].map(([nm, c]) => (
-              <div key={nm} style={{ display: "flex", alignItems: "center", gap: "0.4rem" }}>
-                <div style={{ width: 18, height: 18, borderRadius: "50%", background: c, border: "2px solid white", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "0.42rem", color: "white", fontWeight: 700, fontFamily: BFONT }}>{nm[0]}</div>
-                <span style={{ fontSize: "0.66rem", color: "rgba(255,255,255,0.65)", fontFamily: BFONT }}>{nm}</span>
-              </div>
-            ))}
-          </div>
+          <div style={{ fontFamily: HFONT, fontSize: "clamp(1.45rem,4.8vw,1.9rem)", fontWeight: 700, color: "white", lineHeight: 1.12, letterSpacing: "-0.02em", marginBottom: "1.7rem", animation: "fadeUp 0.5s 0.08s both" }}>How you each show up in the relationship</div>
           {commPeekDims.filter(Boolean).map(f => <DimSlider key={f.dim} dim={f.dim} meta={DIM_META[f.dim]} />)}
         </div>
       </div>
@@ -10514,10 +10507,10 @@ function ResultsHighlights({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3
       <div onClick={advance} style={{ flex: 1, display: "flex", flexDirection: "column", cursor: "pointer", position: "relative", overflow: "hidden" }}>
         {watermark}
         <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center", padding: "3rem 2.25rem 2.5rem" }}>
-          <div style={{ fontSize: "0.55rem", letterSpacing: "0.28em", textTransform: "uppercase", color: "rgba(255,255,255,0.45)", fontFamily: BFONT, fontWeight: 700, marginBottom: "0.75rem", animation: "fadeUp 0.4s 0.05s both" }}>Communication</div>
-          <div style={{ display: "flex", alignItems: "baseline", gap: "0.5rem", marginBottom: "2rem", animation: "numCount 0.6s 0.1s cubic-bezier(0.34,1.56,0.64,1) both" }}>
-            <span style={{ fontFamily: HFONT, fontSize: "clamp(3.5rem,11vw,5rem)", fontWeight: 700, color: "white", lineHeight: 0.85, letterSpacing: "-0.04em" }}>{commAlignPct}%</span>
-            <span style={{ fontSize: "0.9rem", color: "rgba(255,255,255,0.6)", fontFamily: BFONT, fontWeight: 400 }}>closely in step</span>
+          <div style={{ textAlign: "center", marginBottom: "2.25rem" }}>
+            <div style={{ fontSize: "0.92rem", color: "rgba(255,255,255,0.72)", fontFamily: BFONT, fontWeight: 400, lineHeight: 1.45, marginBottom: "0.45rem", animation: "fadeUp 0.4s 0.05s both" }}>{userName} and {partnerName}'s communication styles are</div>
+            <div style={{ fontFamily: HFONT, fontSize: "clamp(3.75rem,13vw,5.25rem)", fontWeight: 700, color: "white", lineHeight: 0.9, letterSpacing: "-0.04em", animation: "numCount 0.6s 0.12s cubic-bezier(0.34,1.56,0.64,1) both" }}>{commAlignPct}%</div>
+            <div style={{ fontSize: "1.05rem", color: "rgba(255,255,255,0.72)", fontFamily: BFONT, fontWeight: 500, marginTop: "0.25rem", animation: "fadeUp 0.4s 0.22s both" }}>aligned</div>
           </div>
           <div style={{ display: "flex", flexDirection: "column", gap: "0.9rem", marginBottom: "1.75rem" }}>
             <div style={{ background: "rgba(16,185,129,0.14)", border: "1px solid rgba(16,185,129,0.28)", borderRadius: 12, padding: "0.9rem 1.1rem", animation: "slideRight 0.4s 0.25s both" }}>
@@ -10556,8 +10549,7 @@ function ResultsHighlights({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3
       <style>{cardAnim}</style>
       <div onClick={advance} style={{ flex: 1, display: "flex", flexDirection: "column", cursor: "pointer", position: "relative", overflow: "hidden", justifyContent: "center", padding: "2.75rem 2.25rem 2.75rem" }}>
         {watermark}
-        <div style={{ fontSize: "0.52rem", letterSpacing: "0.28em", textTransform: "uppercase", color: "rgba(155,140,255,0.85)", fontFamily: BFONT, fontWeight: 700, marginBottom: "0.6rem", animation: "fadeUp 0.4s 0.05s both" }}>What you admire in each other</div>
-        <div style={{ fontFamily: HFONT, fontSize: "clamp(1.4rem,4.6vw,1.85rem)", fontWeight: 700, color: "white", lineHeight: 1.1, marginBottom: "1.75rem", animation: "fadeUp 0.5s 0.12s both" }}>The first thing each of you named.</div>
+        <div style={{ fontFamily: HFONT, fontSize: "clamp(1.5rem,5vw,2rem)", fontWeight: 700, color: "white", lineHeight: 1.15, marginBottom: "1.75rem", animation: "fadeUp 0.5s 0.1s both" }}>What you admire in each other</div>
         <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
           {[[userName, uPos, reflTheirAdmire, "#E8673A", "0.24s"], [partnerName, pPos, reflMyAdmire, "#5B6DF8", "0.34s"]].map(([nm, pos, admire, col, delay]) => (
             <div key={nm} style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.12)", borderRadius: 16, padding: "1.25rem 1.35rem", animation: "fadeUp 0.5s " + delay + " both" }}>
@@ -10585,7 +10577,7 @@ function ResultsHighlights({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3
           <rect x="26.5" y="46" width="5" height="11" rx="2.5" fill="#2a0f1a" />
         </svg>
         <div style={{ fontSize: "0.52rem", letterSpacing: "0.28em", textTransform: "uppercase", color: "rgba(224,141,166,0.85)", fontFamily: BFONT, fontWeight: 700, marginBottom: "0.9rem", animation: "fadeUp 0.4s 0.15s both" }}>Physical Intimacy</div>
-        {intimacyAlignPct != null && (<div style={{ fontFamily: HFONT, fontSize: "clamp(3.5rem,12vw,5.5rem)", fontWeight: 700, color: "#E08DA6", lineHeight: 0.85, letterSpacing: "-0.04em", marginBottom: "0.25rem", animation: "numCount 0.6s 0.2s cubic-bezier(0.34,1.56,0.64,1) both" }}>{intimacyAlignPct}%</div>)}
+        {intimacyAlignPct != null && (<div style={{ fontFamily: HFONT, fontSize: "clamp(3.5rem,12vw,5.5rem)", fontWeight: 700, color: "#E08DA6", lineHeight: 1, letterSpacing: "-0.04em", marginBottom: "0.7rem", animation: "numCount 0.6s 0.2s cubic-bezier(0.34,1.56,0.64,1) both" }}>{intimacyAlignPct}%</div>)}
         <div style={{ fontSize: "1rem", color: "rgba(255,255,255,0.8)", fontFamily: BFONT, fontWeight: 500, marginBottom: "1.5rem", animation: "fadeUp 0.4s 0.3s both" }}>aligned</div>
         <p style={{ fontSize: "0.82rem", color: "rgba(255,255,255,0.58)", fontFamily: BFONT, fontWeight: 300, lineHeight: 1.65, maxWidth: 280, margin: 0, animation: "fadeUp 0.4s 0.38s both" }}>Explore what you each expect out of this part of your relationship.</p>
       </div>
