@@ -2100,7 +2100,7 @@ const NEW_COUPLE_TYPES = [
 // Shareable couple type card component
 
 // ── COUPLE MAP SVG COMPONENT ──────────────────────────────────────────────────
-function CoupleMapSVG({ myS, partS, userName, partnerName, size = 480, hideCaption = false }) {
+function CoupleMapSVG({ myS, partS, userName, partnerName, size = 480, hideCaption = false, axisLabelColor = "#8C7A68" }) {
   const typeInfoA = computeIndividualType(myS);
   const typeInfoB = computeIndividualType(partS);
   const itA = INDIVIDUAL_TYPES[typeInfoA.typeCode];
@@ -2244,11 +2244,11 @@ function CoupleMapSVG({ myS, partS, userName, partnerName, size = 480, hideCapti
 
         {/* ── AXIS LABELS ── */}
         {/* Vertical axis: Engage (top) / Withdraw (bottom) */}
-        <text x={midX} y={cy0 - 16} textAnchor="middle" fontSize="11" fontWeight="700" fill="#8C7A68" fontFamily="Arial" letterSpacing="2">ENGAGE</text>
-        <text x={midX} y={cy1 + 30} textAnchor="middle" fontSize="11" fontWeight="700" fill="#8C7A68" fontFamily="Arial" letterSpacing="2">WITHDRAW</text>
+        <text x={midX} y={cy0 - 16} textAnchor="middle" fontSize="11" fontWeight="700" fill={axisLabelColor} fontFamily="Arial" letterSpacing="2">ENGAGE</text>
+        <text x={midX} y={cy1 + 30} textAnchor="middle" fontSize="11" fontWeight="700" fill={axisLabelColor} fontFamily="Arial" letterSpacing="2">WITHDRAW</text>
         {/* Horizontal axis: Open (left) / Guarded (right) — rotated to run along each side */}
-        <text x={cx0 - 14} y={midY} textAnchor="middle" fontSize="11" fontWeight="700" fill="#8C7A68" fontFamily="Arial" letterSpacing="2" transform={`rotate(-90 ${cx0 - 14} ${midY})`}>OPEN</text>
-        <text x={cx1 + 14} y={midY} textAnchor="middle" fontSize="11" fontWeight="700" fill="#8C7A68" fontFamily="Arial" letterSpacing="2" transform={`rotate(90 ${cx1 + 14} ${midY})`}>GUARDED</text>
+        <text x={cx0 - 14} y={midY} textAnchor="middle" fontSize="11" fontWeight="700" fill={axisLabelColor} fontFamily="Arial" letterSpacing="2" transform={`rotate(-90 ${cx0 - 14} ${midY})`}>OPEN</text>
+        <text x={cx1 + 14} y={midY} textAnchor="middle" fontSize="11" fontWeight="700" fill={axisLabelColor} fontFamily="Arial" letterSpacing="2" transform={`rotate(90 ${cx1 + 14} ${midY})`}>GUARDED</text>
 
 
         {/* ── CONNECTING LINE ── */}
@@ -5495,6 +5495,11 @@ function ExpectationsResults({ myAnswers, partnerAnswers, userName, partnerName,
         <ResultsSlide bg={fc.bg || EXP_BG}>
           <link href={FONT_URL} rel="stylesheet" />
 
+          {/* Exercise eyebrow — matches comms / reflection / intimacy */}
+          <div style={{ display: "flex", alignItems: "center", gap: "0.6rem", marginBottom: "0.75rem" }}>
+            <div style={{ width: 10, height: 10, borderRadius: "50%", background: "#1B5FE8", flexShrink: 0 }} />
+            <div style={{ fontSize: "0.62rem", textTransform: "uppercase", letterSpacing: "0.15em", color: "rgba(255,255,255,0.5)", fontWeight: 700, fontFamily: BFONT }}>Expectations</div>
+          </div>
           {/* Header */}
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginBottom: "0.5rem" }}>
             <div style={{ fontSize: "1.65rem", fontFamily: HFONT, fontWeight: 700, letterSpacing: "-0.02em", background: "linear-gradient(135deg,#E8673A,#9B5DE5,#1B5FE8)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text", lineHeight: 1 }}>
@@ -10485,9 +10490,9 @@ function ResultsHighlights({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3
       <div onClick={advance} style={{ flex: 1, display: "flex", flexDirection: "column", cursor: "pointer", position: "relative", overflow: "hidden" }}>
         {watermark}
         <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "2.25rem 1.75rem 2rem", textAlign: "center" }}>
-          <div style={{ fontFamily: HFONT, fontSize: "clamp(1.3rem,4.4vw,1.65rem)", fontWeight: 700, color: "white", lineHeight: 1.15, letterSpacing: "-0.015em", marginBottom: "1.4rem", maxWidth: 320, animation: "fadeUp 0.5s 0.1s both" }}>Your unique relationship environment</div>
-          <div style={{ animation: "popIn 0.5s 0.25s cubic-bezier(0.34,1.56,0.64,1) both", marginBottom: "1.4rem" }}>
-            <CoupleMapSVG myS={myB} partS={partB} userName={userName} partnerName={partnerName} size={268} hideCaption />
+          <div style={{ fontFamily: HFONT, fontSize: "clamp(1.3rem,4.4vw,1.65rem)", fontWeight: 700, color: "white", lineHeight: 1.15, letterSpacing: "-0.015em", marginBottom: "1.1rem", maxWidth: 320, animation: "fadeUp 0.5s 0.1s both" }}>Your unique relationship environment</div>
+          <div style={{ animation: "popIn 0.5s 0.25s cubic-bezier(0.34,1.56,0.64,1) both", marginBottom: "1.1rem" }}>
+            <CoupleMapSVG myS={myB} partS={partB} userName={userName} partnerName={partnerName} size={244} hideCaption axisLabelColor="rgba(255,255,255,0.62)" />
           </div>
           <div style={{ fontSize: "0.94rem", color: "rgba(255,255,255,0.85)", fontFamily: BFONT, fontWeight: 400, marginBottom: "0.85rem", animation: "fadeUp 0.4s 0.4s both" }}>Your couple type: <span style={{ fontWeight: 700, color: "white" }}>{coupleType?.name || "The orbit"}</span></div>
           <p style={{ fontSize: "0.78rem", color: "rgba(255,255,255,0.6)", fontFamily: BFONT, fontWeight: 300, lineHeight: 1.6, maxWidth: 258, margin: 0, animation: "fadeUp 0.4s 0.5s both" }}>Explore your full results to learn what this looks like for the two of you.</p>
