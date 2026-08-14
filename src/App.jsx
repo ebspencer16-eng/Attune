@@ -8685,6 +8685,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
             ex2Answers={ex2Answers} partnerEx2={partnerEx2}
             ex3Answers={ex3Answers} partnerEx3={partnerEx3}
             userName={userName} partnerName={partnerName}
+            userPronouns={userPronouns} partnerPronouns={partnerPronouns}
             portrait={portrait}
             intimacyAnswers={intimacyBothDone ? intimacyAnswers : null}
             partnerIntimacy={intimacyBothDone ? partnerIntimacy : null}
@@ -10255,7 +10256,7 @@ function WrappedCard({ children, bg, onDownload, cardIndex, cardRef, inline, por
   );
 }
 
-function ResultsHighlights({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Answers, partnerEx3, userName, partnerName, portrait, onDone, onExit = null, inline = false, intimacyAnswers = null, partnerIntimacy = null, intimacyVariant = "premarital" }) {
+function ResultsHighlights({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Answers, partnerEx3, userName, partnerName, userPronouns = "", partnerPronouns = "", portrait, onDone, onExit = null, inline = false, intimacyAnswers = null, partnerIntimacy = null, intimacyVariant = "premarital" }) {
   const [cardIdx, setCardIdx] = useState(0);
   const cardRef = useRef(null);
   const isMobile = useMobile(640);
@@ -10333,6 +10334,32 @@ function ResultsHighlights({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3
 
   const strengthMeta = DIM_META[topStrength?.dim];
   const gapMeta = DIM_META[topGap?.dim];
+
+  // ── Storycard highlight helpers ──────────────────────────────────────────
+  const uPos = pronoun(userPronouns, "pos");
+  const pPos = pronoun(partnerPronouns, "pos");
+  const commAlignPct = feedback.length ? Math.round(feedback.filter(f => (f.gap ?? 0) <= 1).length / feedback.length * 100) : 0;
+  const lifeAlignPct = lifeRows.length ? Math.round(lifeRows.filter(r => r.aligned).length / lifeRows.length * 100) : 0;
+  const respAlignPct = allRows.length ? Math.round(allRows.filter(r => r.aligned).length / allRows.length * 100) : 0;
+  const intimacyAlignPct = (intimacySum && intimacySum.dimSummary && intimacySum.dimSummary.length)
+    ? Math.round(intimacySum.dimSummary.filter(d => d.state === "aligned").length / intimacySum.dimSummary.length * 100) : null;
+  // A five-dimension spread for the comms peek (most aligned -> most divergent).
+  const commPeekDims = (() => { const n = sortedFeedback.length; if (n <= 5) return sortedFeedback; return [0, Math.round(n*0.25), Math.round(n*0.5), Math.round(n*0.72), n-1].map(i => sortedFeedback[i]); })();
+  const Donut = ({ pct, color, label }) => {
+    const r = 40, CC = 2 * Math.PI * r, dash = Math.max(0, Math.min(100, pct)) / 100 * CC;
+    return (
+      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "0.7rem" }}>
+        <div style={{ position: "relative", width: 100, height: 100 }}>
+          <svg width="100" height="100" viewBox="0 0 100 100">
+            <circle cx="50" cy="50" r={r} fill="none" stroke="rgba(255,255,255,0.12)" strokeWidth="10" />
+            <circle cx="50" cy="50" r={r} fill="none" stroke={color} strokeWidth="10" strokeLinecap="round" strokeDasharray={`${dash} ${CC}`} transform="rotate(-90 50 50)" />
+          </svg>
+          <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.4rem", fontWeight: 700, color: "white", fontFamily: HFONT }}>{pct}%</div>
+        </div>
+        <div style={{ fontSize: "0.66rem", color: "rgba(255,255,255,0.62)", fontFamily: BFONT, textAlign: "center", lineHeight: 1.3, maxWidth: 120, letterSpacing: "0.03em" }}>{label}</div>
+      </div>
+    );
+  };
 
   // Shared watermark style
   const watermark = (
@@ -10460,243 +10487,137 @@ function ResultsHighlights({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3
       </div>
     </WrappedCard>,
 
-    // ── 3. STRENGTH — "How two like minds show up" framing ────────────────────
-    <WrappedCard key={2} bg="linear-gradient(145deg, #022c1c 0%, #064d2e 50%, #022c1c 100%)" onDownload={handleDl} cardIndex={2} cardRef={cardRef} inline={inline} isMobile={isMobile} portraitCorner={portrait}>
+    // ── 3. HOW YOU COMMUNICATE — overview sliders, plainly introduced ─────────
+    <WrappedCard key={2} bg="linear-gradient(145deg, #0a1226 0%, #16233f 55%, #0a1226 100%)" onDownload={handleDl} cardIndex={2} cardRef={cardRef} inline={inline} isMobile={isMobile} portraitCorner={portrait}>
       <style>{cardAnim}</style>
       <div onClick={advance} style={{ flex: 1, display: "flex", flexDirection: "column", cursor: "pointer", position: "relative", overflow: "hidden" }}>
         {watermark}
-        <div style={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -60%)", width: 340, height: 340, borderRadius: "50%", background: "radial-gradient(circle, rgba(16,185,129,0.15) 0%, transparent 70%)", pointerEvents: "none" }} />
-        <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center", padding: "3rem 2.5rem 2.5rem", position: "relative" }}>
-          <div style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", background: "rgba(16,185,129,0.2)", border: "1px solid rgba(16,185,129,0.35)", borderRadius: 999, padding: "0.35rem 0.85rem", marginBottom: "1.5rem", alignSelf: "flex-start", animation: "slideRight 0.4s 0.05s both" }}>
-            <span style={{ fontSize: "0.55rem", letterSpacing: "0.22em", textTransform: "uppercase", color: "#10b981", fontFamily: BFONT, fontWeight: 700 }}>Naturally in tune</span>
+        <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center", padding: "2.5rem 2.25rem 2rem" }}>
+          <div style={{ fontFamily: HFONT, fontSize: "clamp(1.5rem,5vw,2rem)", fontWeight: 700, color: "white", lineHeight: 1.1, letterSpacing: "-0.02em", marginBottom: "0.55rem", animation: "fadeUp 0.5s 0.08s both" }}>How you each show up</div>
+          <p style={{ fontSize: "0.8rem", color: "rgba(255,255,255,0.6)", fontFamily: BFONT, fontWeight: 300, lineHeight: 1.55, margin: "0 0 1rem", animation: "fadeUp 0.4s 0.16s both" }}>You answered on your own. Here's where you each landed across a few of the ways couples connect.</p>
+          <div style={{ display: "flex", gap: "1.1rem", marginBottom: "1.5rem", animation: "fadeUp 0.4s 0.22s both" }}>
+            {[[userName, "#E8673A"], [partnerName, "#1B5FE8"]].map(([nm, c]) => (
+              <div key={nm} style={{ display: "flex", alignItems: "center", gap: "0.4rem" }}>
+                <div style={{ width: 18, height: 18, borderRadius: "50%", background: c, border: "2px solid white", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "0.42rem", color: "white", fontWeight: 700, fontFamily: BFONT }}>{nm[0]}</div>
+                <span style={{ fontSize: "0.66rem", color: "rgba(255,255,255,0.65)", fontFamily: BFONT }}>{nm}</span>
+              </div>
+            ))}
           </div>
-          <div style={{ fontSize: "0.78rem", color: "rgba(255,255,255,0.42)", fontFamily: BFONT, fontWeight: 300, marginBottom: "0.5rem", animation: "fadeUp 0.4s 0.12s both" }}>Where you don't have to work for it</div>
-          <div style={{ fontFamily: HFONT, fontSize: "clamp(2.4rem,6vw,3.2rem)", fontWeight: 700, color: "#10b981", lineHeight: 0.95, letterSpacing: "-0.02em", marginBottom: "1.25rem", animation: "fadeUp 0.5s 0.18s cubic-bezier(0.22,1,0.36,1) both" }}>
-            {strengthMeta?.label || "Emotional Expression"}
-          </div>
-          <DimSlider dim={topStrength?.dim} meta={strengthMeta} />
-          {/* Reframed: for two like minds */}
-          <div style={{ background: "rgba(16,185,129,0.12)", border: "1px solid rgba(16,185,129,0.22)", borderRadius: 12, padding: "0.85rem 1.1rem", animation: "fadeUp 0.4s 0.34s both" }}>
-            <div style={{ fontSize: "0.48rem", letterSpacing: "0.18em", textTransform: "uppercase", color: "#10b981", fontFamily: BFONT, fontWeight: 700, marginBottom: "0.35rem" }}>For two who think alike</div>
-            <p style={{ fontSize: "0.78rem", color: "#6ee7b7", fontFamily: BFONT, fontWeight: 400, lineHeight: 1.65, margin: 0 }}>
-              {topStrength?.adviceText || "This alignment removes an entire category of slow-burn friction. Make the most of it, because this kind of alignment is rarer than it looks."}
-            </p>
-          </div>
+          {commPeekDims.filter(Boolean).map(f => <DimSlider key={f.dim} dim={f.dim} meta={DIM_META[f.dim]} />)}
         </div>
       </div>
     </WrappedCard>,
 
-    // ── 4. GROWTH SPOT — Lighter, warmer ──────────────────────────────────────
-    <WrappedCard key={3} bg="linear-gradient(145deg, #3d1800 0%, #6b2f00 40%, #3d1800 100%)" onDownload={handleDl} cardIndex={3} cardRef={cardRef} inline={inline} isMobile={isMobile} portraitCorner={portrait}>
+    // ── 4. IN TUNE / DIVERGE — two call-outs + a comms alignment % ────────────
+    <WrappedCard key={3} bg="linear-gradient(145deg, #07130f 0%, #0e2a1d 50%, #07130f 100%)" onDownload={handleDl} cardIndex={3} cardRef={cardRef} inline={inline} isMobile={isMobile} portraitCorner={portrait}>
       <style>{cardAnim}</style>
       <div onClick={advance} style={{ flex: 1, display: "flex", flexDirection: "column", cursor: "pointer", position: "relative", overflow: "hidden" }}>
         {watermark}
-        <div style={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -60%)", width: 340, height: 340, borderRadius: "50%", background: "radial-gradient(circle, rgba(232,103,58,0.22) 0%, transparent 70%)", pointerEvents: "none" }} />
-        <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center", padding: "3rem 2.5rem 2.5rem", position: "relative" }}>
-          <div style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", background: "rgba(232,103,58,0.25)", border: "1px solid rgba(232,103,58,0.4)", borderRadius: 999, padding: "0.35rem 0.85rem", marginBottom: "1.5rem", alignSelf: "flex-start", animation: "slideRight 0.4s 0.05s both" }}>
-            <span style={{ fontSize: "0.55rem", letterSpacing: "0.22em", textTransform: "uppercase", color: "#ff8c5a", fontFamily: BFONT, fontWeight: 700 }}>Worth understanding</span>
+        <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center", padding: "3rem 2.25rem 2.5rem" }}>
+          <div style={{ fontSize: "0.55rem", letterSpacing: "0.28em", textTransform: "uppercase", color: "rgba(255,255,255,0.45)", fontFamily: BFONT, fontWeight: 700, marginBottom: "0.75rem", animation: "fadeUp 0.4s 0.05s both" }}>Communication</div>
+          <div style={{ display: "flex", alignItems: "baseline", gap: "0.5rem", marginBottom: "2rem", animation: "numCount 0.6s 0.1s cubic-bezier(0.34,1.56,0.64,1) both" }}>
+            <span style={{ fontFamily: HFONT, fontSize: "clamp(3.5rem,11vw,5rem)", fontWeight: 700, color: "white", lineHeight: 0.85, letterSpacing: "-0.04em" }}>{commAlignPct}%</span>
+            <span style={{ fontSize: "0.9rem", color: "rgba(255,255,255,0.6)", fontFamily: BFONT, fontWeight: 400 }}>closely in step</span>
           </div>
-          <div style={{ fontSize: "0.78rem", color: "rgba(255,255,255,0.5)", fontFamily: BFONT, fontWeight: 300, marginBottom: "0.5rem", animation: "fadeUp 0.4s 0.12s both" }}>Where you diverge most</div>
-          <div style={{ fontFamily: HFONT, fontSize: "clamp(2.4rem,6vw,3.2rem)", fontWeight: 700, color: "#ff8c5a", lineHeight: 0.95, letterSpacing: "-0.02em", marginBottom: "1rem", animation: "fadeUp 0.5s 0.18s cubic-bezier(0.22,1,0.36,1) both" }}>
-            {gapMeta?.label || "Conflict Style"}
+          <div style={{ display: "flex", flexDirection: "column", gap: "0.9rem", marginBottom: "1.75rem" }}>
+            <div style={{ background: "rgba(16,185,129,0.14)", border: "1px solid rgba(16,185,129,0.28)", borderRadius: 12, padding: "0.9rem 1.1rem", animation: "slideRight 0.4s 0.25s both" }}>
+              <div style={{ fontSize: "0.5rem", letterSpacing: "0.18em", textTransform: "uppercase", color: "#34d399", fontFamily: BFONT, fontWeight: 700, marginBottom: "0.3rem" }}>Where you're most in tune</div>
+              <div style={{ fontFamily: HFONT, fontSize: "1.25rem", fontWeight: 700, color: "white" }}>{strengthMeta?.label || "Emotional Expression"}</div>
+            </div>
+            <div style={{ background: "rgba(232,103,58,0.14)", border: "1px solid rgba(232,103,58,0.28)", borderRadius: 12, padding: "0.9rem 1.1rem", animation: "slideRight 0.4s 0.34s both" }}>
+              <div style={{ fontSize: "0.5rem", letterSpacing: "0.18em", textTransform: "uppercase", color: "#ff8c5a", fontFamily: BFONT, fontWeight: 700, marginBottom: "0.3rem" }}>Where you diverge most</div>
+              <div style={{ fontFamily: HFONT, fontSize: "1.25rem", fontWeight: 700, color: "white" }}>{gapMeta?.label || "Conflict Style"}</div>
+            </div>
           </div>
-          <DimSlider dim={topGap?.dim} meta={gapMeta} />
-          <div style={{ background: "rgba(232,103,58,0.15)", border: "1px solid rgba(232,103,58,0.25)", borderRadius: 12, padding: "0.85rem 1.1rem", animation: "fadeUp 0.4s 0.38s both" }}>
-            <div style={{ fontSize: "0.48rem", letterSpacing: "0.18em", textTransform: "uppercase", color: "#ff8c5a", fontFamily: BFONT, fontWeight: 700, marginBottom: "0.35rem" }}>One thing to try</div>
-            <p style={{ fontSize: "0.78rem", color: "rgba(255,210,180,0.92)", fontFamily: BFONT, fontWeight: 400, lineHeight: 1.6, margin: 0 }}>
-              {topGap?.adviceText || "Name it out loud when you notice it. That alone changes how it plays out."}
-            </p>
-          </div>
+          <p style={{ fontSize: "0.78rem", color: "rgba(255,255,255,0.5)", fontFamily: BFONT, fontWeight: 300, lineHeight: 1.6, margin: 0, animation: "fadeUp 0.4s 0.42s both" }}>Explore your results to see what each of these means, with guidance built for the two of you.</p>
         </div>
       </div>
     </WrappedCard>,
 
-    // ── 5. BY THE NUMBERS ─────────────────────────────────────────────────────
+    // ── 5. EXPECTATIONS — overall % + life-values and responsibilities donuts ─
     <WrappedCard key={4} bg="linear-gradient(145deg, #060d1a 0%, #0d2545 50%, #060d1a 100%)" onDownload={handleDl} cardIndex={4} cardRef={cardRef} inline={inline} isMobile={isMobile} portraitCorner={portrait}>
       <style>{cardAnim}</style>
-      <div onClick={advance} style={{ flex: 1, display: "flex", flexDirection: "column", cursor: "pointer", position: "relative", overflow: "hidden", alignItems: "center", justifyContent: "center", padding: "3rem 2.5rem 3rem", textAlign: "center" }}>
+      <div onClick={advance} style={{ flex: 1, display: "flex", flexDirection: "column", cursor: "pointer", position: "relative", overflow: "hidden", alignItems: "center", justifyContent: "center", padding: "2.75rem 2.25rem 2.75rem", textAlign: "center" }}>
         {watermark}
-        <div style={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%,-55%)", width: 280, height: 280, borderRadius: "50%", background: `radial-gradient(circle, ${alignPct >= 70 ? "rgba(16,185,129,0.14)" : alignPct >= 50 ? "rgba(27,95,232,0.14)" : "rgba(232,103,58,0.14)"} 0%, transparent 70%)`, pointerEvents: "none" }} />
-        <div style={{ position: "relative", zIndex: 1, width: "100%" }}>
-          <div style={{ fontSize: "0.58rem", letterSpacing: "0.28em", textTransform: "uppercase", color: "rgba(255,255,255,0.45)", fontFamily: BFONT, fontWeight: 700, marginBottom: "1.25rem", animation: "fadeUp 0.4s 0.05s both" }}>Expectations</div>
-          <div style={{ fontFamily: HFONT, fontSize: "clamp(5rem,15vw,8rem)", fontWeight: 700, color: alignPct >= 70 ? "#10b981" : alignPct >= 50 ? "#60a5fa" : "#E8673A", lineHeight: 0.85, letterSpacing: "-0.05em", marginBottom: "0.35rem", animation: "numCount 0.6s 0.1s cubic-bezier(0.34,1.56,0.64,1) both" }}>{alignPct}%</div>
-          <div style={{ fontSize: "1.1rem", color: "rgba(255,255,255,0.85)", fontFamily: BFONT, fontWeight: 500, marginBottom: "1.75rem", animation: "fadeUp 0.4s 0.25s both" }}>already aligned</div>
-          <div style={{ width: 50, height: 1, background: "rgba(255,255,255,0.18)", margin: "0 auto 1.75rem", animation: "popIn 0.3s 0.3s both" }} />
-          <p style={{ fontSize: "0.84rem", color: "rgba(255,255,255,0.55)", fontFamily: BFONT, fontWeight: 300, lineHeight: 1.75, maxWidth: 260, margin: "0 auto 1.75rem", animation: "fadeUp 0.4s 0.35s both" }}>
-            {alignPct >= 70 ? "That's a strong foundation. The gaps you do have are conversations, not problems."
-              : alignPct >= 50 ? "Solid common ground. The places you differ are exactly worth naming now."
-              : "More to discuss, which is the whole point. Most couples don't surface these topics until they're harder to talk about."}
-          </p>
-          <div style={{ display: "flex", gap: "1.5rem", justifyContent: "center", animation: "fadeUp 0.4s 0.42s both" }}>
-            <div style={{ textAlign: "center" }}>
-              <div style={{ fontSize: "1.5rem", fontWeight: 700, color: "#10b981", fontFamily: HFONT }}>{alignedCount}</div>
-              <div style={{ fontSize: "0.62rem", color: "rgba(255,255,255,0.35)", fontFamily: BFONT, letterSpacing: "0.08em" }}>aligned</div>
-            </div>
-            <div style={{ width: 1, background: "rgba(255,255,255,0.1)" }} />
-            <div style={{ textAlign: "center" }}>
-              <div style={{ fontSize: "1.5rem", fontWeight: 700, color: "#E8673A", fontFamily: HFONT }}>{allExpRows.length - alignedCount}</div>
-              <div style={{ fontSize: "0.62rem", color: "rgba(255,255,255,0.35)", fontFamily: BFONT, letterSpacing: "0.08em" }}>to discuss</div>
-            </div>
-          </div>
+        <div style={{ fontSize: "0.55rem", letterSpacing: "0.28em", textTransform: "uppercase", color: "rgba(255,255,255,0.45)", fontFamily: BFONT, fontWeight: 700, marginBottom: "0.9rem", animation: "fadeUp 0.4s 0.05s both" }}>Expectations</div>
+        <div style={{ fontFamily: HFONT, fontSize: "clamp(4.5rem,14vw,7rem)", fontWeight: 700, color: alignPct >= 70 ? "#34d399" : alignPct >= 50 ? "#60a5fa" : "#ff8c5a", lineHeight: 0.85, letterSpacing: "-0.05em", marginBottom: "0.3rem", animation: "numCount 0.6s 0.1s cubic-bezier(0.34,1.56,0.64,1) both" }}>{alignPct}%</div>
+        <div style={{ fontSize: "1rem", color: "rgba(255,255,255,0.8)", fontFamily: BFONT, fontWeight: 500, marginBottom: "2.25rem", animation: "fadeUp 0.4s 0.25s both" }}>aligned overall</div>
+        <div style={{ display: "flex", gap: "2.5rem", justifyContent: "center", animation: "fadeUp 0.4s 0.35s both" }}>
+          <Donut pct={lifeAlignPct} color="#9B5DE5" label="Life & values" />
+          <Donut pct={respAlignPct} color="#1B5FE8" label="Responsibilities" />
         </div>
       </div>
     </WrappedCard>,
 
     // ── 6. RELATIONSHIP REFLECTION (conditional) ──────────────────────────────
     ...(hasReflData ? [
-    <WrappedCard key={5} bg="linear-gradient(145deg, #0f0c29 0%, #1d1a4e 50%, #0f0c29 100%)" onDownload={handleDl} cardIndex={5} cardRef={cardRef} inline={inline} isMobile={isMobile} portraitCorner={portrait}>
+
+    <WrappedCard key={5} bg="linear-gradient(145deg, #0f0c29 0%, #241a5e 50%, #0f0c29 100%)" onDownload={handleDl} cardIndex={5} cardRef={cardRef} inline={inline} isMobile={isMobile} portraitCorner={portrait}>
       <style>{cardAnim}</style>
-      <div onClick={advance} style={{ flex: 1, display: "flex", flexDirection: "column", cursor: "pointer", position: "relative", overflow: "hidden" }}>
+      <div onClick={advance} style={{ flex: 1, display: "flex", flexDirection: "column", cursor: "pointer", position: "relative", overflow: "hidden", justifyContent: "center", padding: "2.75rem 2.25rem 2.75rem" }}>
         {watermark}
-        <div style={{ height: 3, background: "linear-gradient(90deg, #1B5FE8, #5B6DF8)", flexShrink: 0 }} />
-        <div style={{ flex: 1, display: "flex", flexDirection: "column", padding: "2.25rem 2.25rem 2rem", position: "relative" }}>
-          <div style={{ fontSize: "0.48rem", letterSpacing: "0.28em", textTransform: "uppercase", color: "rgba(91,109,248,0.8)", fontFamily: BFONT, fontWeight: 700, marginBottom: "0.6rem", animation: "fadeUp 0.4s 0.05s both" }}>
-            Relationship Reflection
-          </div>
-          {/* Overall feel */}
-          <div style={{ fontFamily: HFONT, fontSize: "clamp(1.4rem,5vw,2rem)", fontWeight: 700, color: "white", lineHeight: 1.05, letterSpacing: "-0.02em", marginBottom: "1.35rem", animation: "fadeUp 0.5s 0.12s cubic-bezier(0.22,1,0.36,1) both" }}>
-            {reflOverallAligned
-              ? `You're both feeling ${reflOverallLabel.toLowerCase()}.`
-              : `Different reads on the same relationship.`}
-          </div>
-          {/* Scale bars — scale ends sit in the left and right margins, once per
-              category, centered between the two data rows. */}
-          {[
-            { id: "a_sat_conn", label: "Day-to-day connection", q: ANNIVERSARY_QUESTIONS.find(q=>q.id==="a_sat_conn") },
-            { id: "a_sat_comm", label: "Communication", q: ANNIVERSARY_QUESTIONS.find(q=>q.id==="a_sat_comm") },
-            { id: "a_sat_fun", label: "Fun & lightness", q: ANNIVERSARY_QUESTIONS.find(q=>q.id==="a_sat_fun") },
-          ].filter(({q}) => q).map(({id, label, q}) => {
-            const myVal = ex3Answers[id] ?? 2;
-            const theirVal = partnerEx3[id] ?? 2;
-            const endLow = q.scaleLabels[0];
-            const endHigh = q.scaleLabels[q.scaleLabels.length - 1];
-            return (
-              <div key={id} style={{ marginBottom: "0.9rem", animation: "fadeUp 0.4s 0.28s both" }}>
-                <div style={{ fontSize: "0.6rem", color: "rgba(255,255,255,0.62)", fontFamily: BFONT, fontWeight: 500, marginBottom: "0.35rem", letterSpacing: "0.06em" }}>{label}</div>
-                <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-                  <span style={{ fontSize: "0.5rem", color: "rgba(255,255,255,0.35)", fontFamily: BFONT, width: 52, flexShrink: 0, lineHeight: 1.25, textAlign: "right" }}>{endLow}</span>
-                  <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 4 }}>
-                    {[[userName, myVal, "#E8673A"], [partnerName, theirVal, "#5B6DF8"]].map(([name, val, color]) => (
-                      <div key={name} style={{ display: "flex", gap: 3 }}>
-                        {q.scaleLabels.map((_, i) => (
-                          <div key={i} style={{ flex: 1, height: 7, borderRadius: 2, background: i <= val ? color : color + "22" }} />
-                        ))}
-                      </div>
-                    ))}
-                  </div>
-                  <span style={{ fontSize: "0.5rem", color: "rgba(255,255,255,0.35)", fontFamily: BFONT, width: 52, flexShrink: 0, lineHeight: 1.25 }}>{endHigh}</span>
-                </div>
-              </div>
-            );
-          })}
-          {/* Colour key for the three metrics above */}
-          <div style={{ display: "flex", justifyContent: "center", gap: "1.1rem", marginTop: "0.35rem", marginBottom: "0.9rem", animation: "fadeUp 0.4s 0.34s both" }}>
-            {[[userName, "#E8673A"], [partnerName, "#5B6DF8"]].map(([name, color]) => (
-              <div key={name} style={{ display: "flex", alignItems: "center", gap: "0.35rem" }}>
-                <div style={{ width: 8, height: 8, borderRadius: "50%", background: color, flexShrink: 0 }} />
-                <span style={{ fontSize: "0.6rem", color: "rgba(255,255,255,0.55)", fontFamily: BFONT, maxWidth: 110, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{name}</span>
-              </div>
-            ))}
-          </div>
-          {/* Appreciation reveal */}
-          {reflMyAdmire && reflTheirAdmire && (
-            <div style={{ marginTop: "0.25rem", background: "rgba(255,255,255,0.07)", borderRadius: 12, padding: "1rem 1.1rem", border: "1px solid rgba(255,255,255,0.1)", animation: "fadeUp 0.4s 0.38s both" }}>
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.75rem" }}>
-                {[[userName, reflTheirAdmire, "#E8673A"], [partnerName, reflMyAdmire, "#5B6DF8"]].map(([name, admires, color]) => (
-                  <div key={name}>
-                    <div style={{ fontSize: "0.58rem", color: "rgba(255,255,255,0.6)", fontFamily: BFONT, marginBottom: "0.3rem" }}>{name} is admired for</div>
-                    <div style={{ fontSize: "1.05rem", fontWeight: 700, color, fontFamily: HFONT, lineHeight: 1.2 }}>{admiredNoun(admires)}</div>
-                  </div>
-                ))}
-              </div>
+        <div style={{ fontSize: "0.52rem", letterSpacing: "0.28em", textTransform: "uppercase", color: "rgba(155,140,255,0.85)", fontFamily: BFONT, fontWeight: 700, marginBottom: "0.6rem", animation: "fadeUp 0.4s 0.05s both" }}>What you admire in each other</div>
+        <div style={{ fontFamily: HFONT, fontSize: "clamp(1.4rem,4.6vw,1.85rem)", fontWeight: 700, color: "white", lineHeight: 1.1, marginBottom: "1.75rem", animation: "fadeUp 0.5s 0.12s both" }}>The first thing each of you named.</div>
+        <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+          {[[userName, uPos, reflTheirAdmire, "#E8673A", "0.24s"], [partnerName, pPos, reflMyAdmire, "#5B6DF8", "0.34s"]].map(([nm, pos, admire, col, delay]) => (
+            <div key={nm} style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.12)", borderRadius: 16, padding: "1.25rem 1.35rem", animation: "fadeUp 0.5s " + delay + " both" }}>
+              <div style={{ fontSize: "0.72rem", color: "rgba(255,255,255,0.6)", fontFamily: BFONT, marginBottom: "0.4rem" }}>{nm} is most admired for {pos}</div>
+              <div style={{ fontFamily: HFONT, fontSize: "clamp(1.5rem,5vw,2rem)", fontWeight: 700, color: col, lineHeight: 1.1 }}>{admiredNounLower(admire)}</div>
             </div>
-          )}
+          ))}
         </div>
       </div>
     </WrappedCard>
+    
     ] : []),
 
     // ── INTIMACY HIGHLIGHT — one card when the add-on is owned + both done ──────
     ...(intimacyHighlight ? [
+
     <WrappedCard key="intimacy-card" bg="linear-gradient(145deg, #2a0f1a 0%, #4a1c30 50%, #2a0f1a 100%)" onDownload={handleDl} cardIndex={99} cardRef={cardRef} inline={inline} isMobile={isMobile} portraitCorner={portrait}>
       <style>{cardAnim}</style>
-      <div onClick={advance} style={{ flex: 1, display: "flex", flexDirection: "column", cursor: "pointer", position: "relative", overflow: "hidden" }}>
+      <div onClick={advance} style={{ flex: 1, display: "flex", flexDirection: "column", cursor: "pointer", position: "relative", overflow: "hidden", alignItems: "center", justifyContent: "center", padding: "2.75rem 2.5rem", textAlign: "center" }}>
         {watermark}
-        <div style={{ height: 4, background: "linear-gradient(90deg, #B5546E, #E08DA6)", flexShrink: 0 }} />
-        <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center", padding: "2.5rem 2.5rem 2.5rem", position: "relative" }}>
-          <div style={{ fontSize: "0.52rem", letterSpacing: "0.28em", textTransform: "uppercase", color: "rgba(224,141,166,0.85)", fontFamily: BFONT, fontWeight: 700, marginBottom: "1.5rem", animation: "fadeUp 0.4s 0.05s both" }}>
-            Physical Intimacy
-          </div>
-          {intimacyTopAligned ? (
-            <>
-              <div style={{ fontFamily: HFONT, fontSize: "clamp(1.6rem,4.5vw,2.2rem)", fontWeight: 700, color: "white", lineHeight: 1.15, marginBottom: "1rem", animation: "fadeUp 0.5s 0.12s both" }}>
-                You're aligned on {intimacyTopAligned.label.toLowerCase()}.
-              </div>
-              <p style={{ fontSize: "0.85rem", color: "rgba(255,255,255,0.6)", fontFamily: BFONT, fontWeight: 300, lineHeight: 1.7, maxWidth: 300, margin: 0, animation: "fadeUp 0.4s 0.2s both" }}>
-                Of everything you each expect about physical intimacy, this is where you most naturally agree.
-              </p>
-            </>
-          ) : (
-            <>
-              <div style={{ fontFamily: HFONT, fontSize: "clamp(1.6rem,4.5vw,2.2rem)", fontWeight: 700, color: "white", lineHeight: 1.15, marginBottom: "1rem", animation: "fadeUp 0.5s 0.12s both" }}>
-                Talk about {intimacyTopGap?.label.toLowerCase()}.
-              </div>
-              <p style={{ fontSize: "0.85rem", color: "rgba(255,255,255,0.6)", fontFamily: BFONT, fontWeight: 300, lineHeight: 1.7, maxWidth: 300, margin: 0, animation: "fadeUp 0.4s 0.2s both" }}>
-                It's where your expectations differ most. The gap is the conversation, not a verdict.
-              </p>
-            </>
-          )}
-          <div style={{ marginTop: "1.75rem", fontSize: "0.7rem", color: "rgba(255,255,255,0.4)", fontFamily: BFONT, animation: "fadeUp 0.4s 0.3s both" }}>
-            Full breakdown in your results.
-          </div>
-        </div>
+        <svg width="58" height="70" viewBox="0 0 58 70" style={{ marginBottom: "1.75rem", animation: "popIn 0.5s 0.1s cubic-bezier(0.34,1.56,0.64,1) both" }}>
+          <path d="M15 29 V19 a14 14 0 0 1 28 0 V29" fill="none" stroke="#E08DA6" strokeWidth="5" strokeLinecap="round" />
+          <rect x="7" y="29" width="44" height="35" rx="9" fill="#E08DA6" />
+          <circle cx="29" cy="44" r="5.5" fill="#2a0f1a" />
+          <rect x="26.5" y="46" width="5" height="11" rx="2.5" fill="#2a0f1a" />
+        </svg>
+        <div style={{ fontSize: "0.52rem", letterSpacing: "0.28em", textTransform: "uppercase", color: "rgba(224,141,166,0.85)", fontFamily: BFONT, fontWeight: 700, marginBottom: "0.9rem", animation: "fadeUp 0.4s 0.15s both" }}>Physical Intimacy</div>
+        {intimacyAlignPct != null && (<div style={{ fontFamily: HFONT, fontSize: "clamp(3.5rem,12vw,5.5rem)", fontWeight: 700, color: "#E08DA6", lineHeight: 0.85, letterSpacing: "-0.04em", marginBottom: "0.25rem", animation: "numCount 0.6s 0.2s cubic-bezier(0.34,1.56,0.64,1) both" }}>{intimacyAlignPct}%</div>)}
+        <div style={{ fontSize: "1rem", color: "rgba(255,255,255,0.8)", fontFamily: BFONT, fontWeight: 500, marginBottom: "1.5rem", animation: "fadeUp 0.4s 0.3s both" }}>aligned</div>
+        <p style={{ fontSize: "0.82rem", color: "rgba(255,255,255,0.58)", fontFamily: BFONT, fontWeight: 300, lineHeight: 1.65, maxWidth: 280, margin: 0, animation: "fadeUp 0.4s 0.38s both" }}>Explore what you each expect out of this part of your relationship.</p>
       </div>
     </WrappedCard>
+    
     ] : []),
 
-    // ── 7. ONE CONVERSATION — Quote is the star ────────────────────────────────
+    // ── 8. ONE CONVERSATION — tailored-guidance framing ──────────────────────
     <WrappedCard key={hasReflData ? 6 : 5} bg="linear-gradient(145deg, #120d2e 0%, #2a1a5e 50%, #120d2e 100%)" onDownload={handleDl} cardIndex={hasReflData ? 6 : 5} cardRef={cardRef} inline={inline} isMobile={isMobile} portraitCorner={portrait}>
       <style>{cardAnim}</style>
-      <div onClick={advance} style={{ flex: 1, display: "flex", flexDirection: "column", cursor: "pointer", position: "relative", overflow: "hidden" }}>
+      <div onClick={advance} style={{ flex: 1, display: "flex", flexDirection: "column", cursor: "pointer", position: "relative", overflow: "hidden", justifyContent: "center", padding: "2.5rem 2.25rem", textAlign: "center" }}>
         {watermark}
-        <div style={{ height: 4, background: "linear-gradient(90deg, #9B5DE5, #1B5FE8)", flexShrink: 0 }} />
-        <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "2.25rem 2.25rem 2.25rem", textAlign: "center" }}>
-          <div style={{ fontSize: "0.52rem", letterSpacing: "0.2em", textTransform: "uppercase", color: "rgba(255,255,255,0.5)", fontFamily: BFONT, fontWeight: 700, lineHeight: 1.8, maxWidth: 290, marginBottom: "1.5rem", animation: "fadeUp 0.4s 0.05s both" }}>
-            One conversation worth having based on where you two diverge most
-          </div>
-          <div style={{ background: "rgba(255,255,255,0.1)", border: "1px solid rgba(255,255,255,0.22)", borderRadius: 20, padding: "1.75rem 1.75rem 1.5rem", maxWidth: 320, width: "100%", animation: "popIn 0.55s 0.12s cubic-bezier(0.34,1.56,0.64,1) both", boxShadow: "0 8px 40px rgba(0,0,0,0.3)" }}>
-            <p style={{ fontFamily: HFONT, fontSize: "clamp(1.1rem,3.2vw,1.3rem)", fontWeight: 400, color: "white", lineHeight: 1.55, fontStyle: "italic", margin: 0 }}>
-              {convoPrompt}
-            </p>
-          </div>
+        <p style={{ fontSize: "0.82rem", color: "rgba(255,255,255,0.6)", fontFamily: BFONT, fontWeight: 300, lineHeight: 1.65, maxWidth: 300, margin: "0 auto 1.75rem", animation: "fadeUp 0.4s 0.05s both" }}>As you explore your results, you'll learn more about your unique dynamic and unlock guidance tailored to the two of you.</p>
+        <div style={{ fontSize: "0.55rem", letterSpacing: "0.16em", textTransform: "uppercase", color: "rgba(255,255,255,0.5)", fontFamily: BFONT, fontWeight: 700, lineHeight: 1.6, marginBottom: "1rem", animation: "fadeUp 0.4s 0.12s both" }}>One conversation worth having for {userName} &amp; {partnerName}</div>
+        <div style={{ background: "rgba(255,255,255,0.1)", border: "1px solid rgba(255,255,255,0.22)", borderRadius: 20, padding: "1.75rem 1.6rem", maxWidth: 320, width: "100%", margin: "0 auto", animation: "popIn 0.55s 0.2s cubic-bezier(0.34,1.56,0.64,1) both", boxShadow: "0 8px 40px rgba(0,0,0,0.3)" }}>
+          <p style={{ fontFamily: HFONT, fontSize: "clamp(1.1rem,3.2vw,1.3rem)", fontWeight: 400, color: "white", lineHeight: 1.55, fontStyle: "italic", margin: 0 }}>{convoPrompt}</p>
         </div>
       </div>
     </WrappedCard>,
 
-
-    // ── 8. FINALE — View results + download ───────────────────────────────────
+    // ── 9. SENDOFF — celebratory entry into the full results ──────────────────
     <WrappedCard key={hasReflData ? 7 : 6} bg="linear-gradient(145deg, #0e0b1e 0%, #1a1040 50%, #0e0b1e 100%)" onDownload={handleDl} cardIndex={hasReflData ? 7 : 6} cardRef={cardRef} inline={inline} isMobile={isMobile} portraitCorner={portrait}>
       <style>{cardAnim}</style>
       <div style={{ flex: 1, display: "flex", flexDirection: "column", position: "relative", overflow: "hidden" }}>
         {watermark}
         <div style={{ height: 5, background: "linear-gradient(90deg, #E8673A, #9B5DE5, #1B5FE8)", flexShrink: 0 }} />
-        <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "2.5rem 2.5rem 2.5rem", textAlign: "center", animation: "cardReveal 0.5s cubic-bezier(0.22,1,0.36,1) both" }}>
-          <div style={{ fontFamily: HFONT, fontSize: "clamp(1.75rem,4vw,2.4rem)", fontWeight: 700, color: "white", lineHeight: 1.1, marginBottom: "0.5rem", animation: "fadeUp 0.4s 0.1s both" }}>
-            That's your preview.
-          </div>
-          <div style={{ fontFamily: HFONT, fontSize: "clamp(1.75rem,4vw,2.4rem)", fontWeight: 700, color: "rgba(255,255,255,0.32)", lineHeight: 1.1, marginBottom: "2.25rem", animation: "fadeUp 0.4s 0.16s both" }}>
-            Ready for the full picture?
-          </div>
-          {/* Primary CTA */}
-          <button onClick={onDone}
-            style={{ background: "linear-gradient(135deg, #E8673A, #1B5FE8)", color: "white", border: "none", borderRadius: 14, padding: "1rem 2.25rem", fontSize: "0.85rem", fontWeight: 700, cursor: "pointer", fontFamily: BFONT, letterSpacing: "0.05em", marginBottom: "0.85rem", width: "100%", maxWidth: 300, animation: "popIn 0.5s 0.24s cubic-bezier(0.34,1.56,0.64,1) both" }}>
-            View your full results →
-          </button>
-          {/* Secondary — download */}
-          <button onClick={handleDl}
-            style={{ background: "rgba(255,255,255,0.07)", color: "rgba(255,255,255,0.75)", border: "1px solid rgba(255,255,255,0.15)", borderRadius: 14, padding: "0.85rem 2.25rem", fontSize: "0.78rem", fontWeight: 600, cursor: "pointer", fontFamily: BFONT, letterSpacing: "0.04em", marginBottom: "1.75rem", width: "100%", maxWidth: 300, animation: "popIn 0.5s 0.32s cubic-bezier(0.34,1.56,0.64,1) both" }}>
-            Download this overview ↓
-          </button>
+        <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "2.5rem 2.5rem", textAlign: "center", animation: "cardReveal 0.5s cubic-bezier(0.22,1,0.36,1) both" }}>
+          <div style={{ width: 44, height: 2, background: "linear-gradient(90deg, #E8673A, #1B5FE8)", borderRadius: 2, marginBottom: "1.75rem", animation: "popIn 0.4s 0.1s both" }} />
+          <div style={{ fontFamily: HFONT, fontSize: "clamp(1.6rem,4.4vw,2.15rem)", fontWeight: 700, color: "white", lineHeight: 1.2, marginBottom: "1rem", maxWidth: 320, animation: "fadeUp 0.5s 0.15s both" }}>We hope you continue to grow together throughout your Attune experience.</div>
+          <p style={{ fontSize: "0.85rem", color: "rgba(255,255,255,0.55)", fontFamily: BFONT, fontWeight: 300, lineHeight: 1.65, maxWidth: 280, margin: "0 0 2.25rem", animation: "fadeUp 0.4s 0.25s both" }}>Your full results are ready whenever you are.</p>
+          <button onClick={onDone} style={{ background: "linear-gradient(135deg, #E8673A, #1B5FE8)", color: "white", border: "none", borderRadius: 14, padding: "1rem 2.25rem", fontSize: "0.85rem", fontWeight: 700, cursor: "pointer", fontFamily: BFONT, letterSpacing: "0.05em", marginBottom: "0.85rem", width: "100%", maxWidth: 300, animation: "popIn 0.5s 0.32s cubic-bezier(0.34,1.56,0.64,1) both" }}>Explore your full results →</button>
+          <button onClick={handleDl} style={{ background: "rgba(255,255,255,0.07)", color: "rgba(255,255,255,0.75)", border: "1px solid rgba(255,255,255,0.15)", borderRadius: 14, padding: "0.85rem 2.25rem", fontSize: "0.78rem", fontWeight: 600, cursor: "pointer", fontFamily: BFONT, letterSpacing: "0.04em", width: "100%", maxWidth: 300, animation: "popIn 0.5s 0.4s cubic-bezier(0.34,1.56,0.64,1) both" }}>Download this preview ↓</button>
         </div>
       </div>
     </WrappedCard>,
@@ -16013,6 +15934,7 @@ export default function App() {
         ex3Answers={ex3Answers || (pkg.hasAnniversary ? SARAH_ANNIVERSARY_DEMO : null)}
         partnerEx3={pkg.hasAnniversary ? (partnerSession?.ex3 || (hasRealPartner ? null : JAMES_ANNIVERSARY_DEMO)) : null}
         userName={userName} partnerName={partnerName}
+        userPronouns={userPronouns} partnerPronouns={partnerPronouns}
         portrait={couplePortrait}
         intimacyAnswers={pkg.hasIntimacy ? (intimacyData?.answers || null) : null}
         partnerIntimacy={pkg.hasIntimacy && hasRealPartner ? (partnerSession?.intimacy || null) : null}
