@@ -34,6 +34,16 @@ export default async function handler(req) {
         coupleId = self.partner_profile_id
           ? [self.id, self.partner_profile_id].sort().join(':')
           : self.id;
+        // Record completion on the profile so the results page can detect it
+        // across devices (localStorage alone is per-device).
+        try {
+          await fetch(`${supabaseUrl}/rest/v1/profiles?id=eq.${encodeURIComponent(body.respondentId)}`, {
+            method: 'PATCH',
+            headers: { apikey: serviceKey, Authorization: `Bearer ${serviceKey}`, 'Content-Type': 'application/json', Prefer: 'return=minimal' },
+            body: JSON.stringify({ beta_survey_at: new Date().toISOString() }),
+            signal: AbortSignal.timeout(4000),
+          });
+        } catch (e) { console.warn('[survey] beta_survey_at update failed:', e); }
       }
     } catch (e) { console.warn('[survey] couple resolve failed:', e); }
   }

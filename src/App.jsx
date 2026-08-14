@@ -277,7 +277,7 @@ const DIM_META = {
   // CONNECTION — orange
   love:        { label: "How Love Lands",                 emoji: "", ends: ["Words","Actions"],             color: "#E8673A", bg: "#FFF3EE", dark: "#C2410C", domain: "connection" },
   needs:       { label: "How You Ask For What You Need",  emoji: "", ends: ["Direct","Indirect"],           color: "#E8673A", bg: "#FFF3EE", dark: "#C2410C", domain: "connection" },
-  bids:        { label: "Bids for Connection",             emoji: "", ends: ["Reserved","Attuned"],          color: "#E8673A", bg: "#FFF3EE", dark: "#C2410C", domain: "connection" },
+  bids:        { label: "Bids for Connection",             emoji: "", ends: ["Subtle","Expressive"],         color: "#E8673A", bg: "#FFF3EE", dark: "#C2410C", domain: "connection" },
   listening:   { label: "How You Listen",                 emoji: "", ends: ["Reflective","Responsive"],     color: "#E8673A", bg: "#FFF3EE", dark: "#C2410C", domain: "connection" },
   // HARD MOMENTS — blue
   conflict:    { label: "Conflict Style",                 emoji: "", ends: ["Engage","Withdraw"],           color: "#1B5FE8", bg: "#EEF3FF", dark: "#1E3A8A", domain: "hard" },
@@ -11050,6 +11050,7 @@ function AuthModal({ mode, onClose, onSuccess }) {
         // hydration). The previous `|| false` pattern masked an actual
         // user preference of false vs null/missing. Issue 2.3.
         emailOptIn: typeof profile?.email_opt_in === 'boolean' ? profile.email_opt_in : true,
+        betaSurveyAt: profile?.beta_survey_at || null,
         inviteCode: profile?.invite_code || "",
         partnerJoined: profile?.partner_joined || false,
         joinedViaInvite: profile?.joined_via_invite || false,
@@ -12887,6 +12888,9 @@ export default function App() {
   const [isBetaTester, setIsBetaTester] = useState(false);
   const [showPostSurvey, setShowPostSurvey] = useState(false);
   const [postSurveyDone, setPostSurveyDone] = useState(() => { try { return !!(localStorage.getItem('attune_survey_done') || localStorage.getItem('attune_post_survey_done')); } catch { return false; } });
+  // If the profile records a completed survey (set server-side on submit), treat
+  // it as done even on a device whose localStorage never saw it.
+  useEffect(() => { if (account?.betaSurveyAt) setPostSurveyDone(true); }, [account?.betaSurveyAt]);
   const isMobile = useMobile(680);
 
   // Lock body scroll when results are shown (prevents mobile page drift)
