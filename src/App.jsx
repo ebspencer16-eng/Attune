@@ -2720,21 +2720,20 @@ function DimResponseBreakdown({ dim, myAnswers, partnerAnswers, userName, partne
   const pct = v => Math.max(5, Math.min(95, ((v - 1) / 4) * 100));
   return (
     <div style={{ marginTop: "1rem", background: "rgba(255,255,255,0.06)", borderRadius: 14, padding: "1.2rem 1.5rem", border: "1px solid rgba(255,255,255,0.14)" }}>
-      <div style={{ fontSize: "0.62rem", textTransform: "uppercase", letterSpacing: "0.12em", color: "rgba(255,255,255,0.9)", fontWeight: 700, marginBottom: "0.35rem", fontFamily: BFONT }}>Your responses, side by side</div>
-      <p style={{ fontSize: "0.66rem", color: "rgba(255,255,255,0.5)", fontFamily: BFONT, lineHeight: 1.55, margin: "0 0 1.35rem" }}>The questions behind this dimension, and where you each landed on them.</p>
+      <div style={{ fontSize: "0.62rem", textTransform: "uppercase", letterSpacing: "0.12em", color: "rgba(255,255,255,0.9)", fontWeight: 700, marginBottom: "1.35rem", fontFamily: BFONT }}>{((DIM_META[dim] && DIM_META[dim].label) || "") + " exercise questions, side by side"}</div>
       <div style={{ display: "flex", flexDirection: "column", gap: "1.6rem" }}>
         {rows.map(({ q, a, b }) => {
           const close = a != null && b != null && Math.abs(pct(a) - pct(b)) < 9;
           return (
             <div key={q.id}>
-              <div style={{ fontSize: "0.78rem", color: "rgba(255,255,255,0.92)", fontFamily: BFONT, lineHeight: 1.5, marginBottom: "0.8rem", fontWeight: 500 }}>{q.text}</div>
-              <div style={{ display: "flex", justifyContent: "space-between", gap: "1rem", marginBottom: "0.15rem" }}>
-                <span style={{ fontSize: "0.6rem", color: "rgba(255,255,255,0.5)", fontFamily: BFONT, lineHeight: 1.35, flex: "0 1 46%" }}>{q.a}</span>
-                <span style={{ fontSize: "0.6rem", color: "rgba(255,255,255,0.5)", fontFamily: BFONT, lineHeight: 1.35, flex: "0 1 46%", textAlign: "right" }}>{q.b}</span>
-              </div>
-              <div style={{ position: "relative", height: 8, background: "rgba(255,255,255,0.12)", borderRadius: 999, marginTop: "0.55rem", overflow: "visible" }}>
-                {b != null && <div title={partnerName + " answered here"} style={{ position: "absolute", top: "50%", left: pct(b) + "%", transform: "translate(-50%, calc(-50% + " + (close ? 6 : 0) + "px))", width: 15, height: 15, borderRadius: "50%", background: color, border: "2px solid " + color, boxShadow: "0 0 8px " + color + "66", zIndex: 1 }} />}
-                {a != null && <div title={userName + " answered here"} style={{ position: "absolute", top: "50%", left: pct(a) + "%", transform: "translate(-50%, calc(-50% + " + (close ? -6 : 0) + "px))", width: 13, height: 13, borderRadius: "50%", background: "#fff", border: "2px solid rgba(255,255,255,0.5)", zIndex: 2 }} />}
+              <div style={{ fontSize: "0.78rem", color: "rgba(255,255,255,0.92)", fontFamily: BFONT, lineHeight: 1.5, marginBottom: "0.85rem", fontWeight: 500 }}>{q.text}</div>
+              <div style={{ display: "flex", alignItems: "center", gap: "0.7rem" }}>
+                <span style={{ fontSize: "0.58rem", color: "rgba(255,255,255,0.5)", fontFamily: BFONT, lineHeight: 1.3, flex: "0 0 27%", textAlign: "right" }}>{q.a}</span>
+                <div style={{ flex: 1, position: "relative", height: 8, background: "rgba(255,255,255,0.12)", borderRadius: 999, overflow: "visible" }}>
+                  {b != null && <div title={partnerName + " answered here"} style={{ position: "absolute", top: "50%", left: pct(b) + "%", transform: "translate(-50%, calc(-50% + " + (close ? 6 : 0) + "px))", width: 15, height: 15, borderRadius: "50%", background: color, border: "2px solid " + color, boxShadow: "0 0 8px " + color + "66", zIndex: 1 }} />}
+                  {a != null && <div title={userName + " answered here"} style={{ position: "absolute", top: "50%", left: pct(a) + "%", transform: "translate(-50%, calc(-50% + " + (close ? -6 : 0) + "px))", width: 13, height: 13, borderRadius: "50%", background: "#fff", border: "2px solid rgba(255,255,255,0.5)", zIndex: 2 }} />}
+                </div>
+                <span style={{ fontSize: "0.58rem", color: "rgba(255,255,255,0.5)", fontFamily: BFONT, lineHeight: 1.3, flex: "0 0 27%", textAlign: "left" }}>{q.b}</span>
               </div>
             </div>
           );
@@ -2755,7 +2754,7 @@ function DimTrackViz({ myScore = 3, theirScore = 3, color = "#9B5DE5", userName 
   // dimension accent, the viewer (myScore) is white, matching the additional-
   // insight bar. Labels are handled by the shared DotLabels component.
   return (
-    <div style={{ margin: "1.25rem 0", position: "relative" }}>
+    <div style={{ margin: "1.15rem 0 0.35rem", position: "relative" }}>
       <div style={{ height: 4, background: "rgba(255,255,255,0.12)", borderRadius: 2, position: "relative", overflow: "visible" }}>
         <div style={{ position: "absolute", inset: 0, borderRadius: 2, background: "linear-gradient(90deg, rgba(255,255,255,0.05), rgba(255,255,255,0.18))" }} />
         <div style={{ position: "absolute", top: "50%", left: theirPctV + "%", transform: `translate(-50%, calc(-50% + ${close ? 6 : 0}px))`, width: 14, height: 14, borderRadius: "50%", background: color, border: "2px solid " + color, boxShadow: "0 0 8px " + color + "66", zIndex: 2 }} />
@@ -4809,8 +4808,9 @@ function PersonalityResults({ myAnswers, partnerAnswers, userName, partnerName, 
         </div>
         <div style={{ fontSize: "clamp(1.5rem,5vw,2rem)", fontWeight: 700, color: "white", lineHeight: 1.1, marginBottom: "1.25rem", fontFamily: HFONT }}>{m.label}</div>
 
-        {/* Track */}
-        <div style={{ background: "rgba(255,255,255,0.12)", borderRadius: 14, padding: "1.25rem 1.5rem", marginBottom: "1rem", border: "1px solid rgba(255,255,255,0.2)" }}>
+        {/* Track (top tile) */}
+        <div style={{ background: "rgba(255,255,255,0.10)", borderRadius: 14, padding: "1.25rem 1.5rem", marginBottom: "1rem", border: "1px solid rgba(255,255,255,0.16)" }}>
+          <div style={{ fontSize: "0.62rem", textTransform: "uppercase", letterSpacing: "0.12em", color: "rgba(255,255,255,0.9)", fontWeight: 700, marginBottom: "0.9rem", fontFamily: BFONT }}>Overall orientation</div>
           <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "0.1rem" }}>
             <span style={{ fontSize: "0.7rem", fontWeight: 600, color: "rgba(255,255,255,0.85)", fontFamily: BFONT }}>{m.ends[0]}</span>
             <span style={{ fontSize: "0.7rem", fontWeight: 600, color: "rgba(255,255,255,0.85)", fontFamily: BFONT }}>{m.ends[1]}</span>
@@ -4820,8 +4820,8 @@ function PersonalityResults({ myAnswers, partnerAnswers, userName, partnerName, 
 
         {/* Try this / Keep this in mind */}
         {(f.adviceText || f.isStrength) && (
-          <div style={{ background: (m.color + (f.isStrength ? "28" : "45")), borderRadius: 14, padding: "1.25rem 1.5rem", border: ("1px solid " + (m.color) + (f.isStrength ? "50" : "80")) }}>
-            <div style={{ fontSize: "0.62rem", textTransform: "uppercase", letterSpacing: "0.12em", color: "rgba(255,255,255,0.9)", fontWeight: 700, marginBottom: "0.5rem", fontFamily: BFONT }}>{f.isStrength ? "One thing to keep in mind" : "One shift that helps"}</div>
+          <div style={{ background: "rgba(255,255,255,0.08)", borderRadius: 14, padding: "1.25rem 1.5rem", border: "1px solid rgba(255,255,255,0.16)" }}>
+            <div style={{ fontSize: "0.62rem", textTransform: "uppercase", letterSpacing: "0.12em", color: m.color, fontWeight: 700, marginBottom: "0.5rem", fontFamily: BFONT }}>{f.isStrength ? "One thing to keep in mind" : "One shift that helps"}</div>
             <p style={{ fontSize: "0.9rem", color: "white", lineHeight: 1.8, margin: 0, fontFamily: BFONT, fontWeight: f.isStrength ? 400 : 500 }}>{f.adviceText || (f.isStrength ? alignedAdvice(f.dim, myS[f.dim], partS[f.dim]) : null) || `You two line up here. That's an easy place to take for granted. Name it out loud once in a while so the alignment stays a choice, not an assumption.`}</p>
           </div>
         )}
