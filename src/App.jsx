@@ -8455,10 +8455,11 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
 
   const go = (sec) => {
     setSection(sec);
-    if (sec.startsWith("comm")) setCommExpanded(true);
-    if (sec.startsWith("exp")) setExpExpanded(true);
-    if (sec.startsWith("reflection")) setReflExpanded(true);
-    if (sec.startsWith("intimacy")) setIntimExpanded(true);
+    // Accordion: expand the section being entered, collapse every other one.
+    setCommExpanded(sec.startsWith("comm"));
+    setExpExpanded(sec.startsWith("exp"));
+    setReflExpanded(sec.startsWith("reflection"));
+    setIntimExpanded(sec.startsWith("intimacy"));
     const sc = document.querySelector("[data-results-scroll]");
     if (sc) sc.scrollTop = 0; else window.scrollTo({ top: 0 });
   };
