@@ -2719,6 +2719,7 @@ function DimResponseBreakdown({ dim, myAnswers, partnerAnswers, userName, partne
     .filter(r => r.a != null || r.b != null);
   if (!rows.length) return null;
   const pct = v => Math.max(5, Math.min(95, ((v - 1) / 4) * 100));
+  const UC = "#E8673A", PC = "#1B5FE8";
   return (
     <div style={{ marginTop: "1rem", background: "rgba(255,255,255,0.06)", borderRadius: 14, padding: "1.2rem 1.5rem", border: "1px solid rgba(255,255,255,0.14)" }}>
       <div style={{ fontSize: "0.62rem", textTransform: "uppercase", letterSpacing: "0.12em", color: "rgba(255,255,255,0.9)", fontWeight: 700, marginBottom: "1.35rem", fontFamily: BFONT }}>{((DIM_META[dim] && DIM_META[dim].label) || "") + " exercise questions, side by side"}</div>
