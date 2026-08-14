@@ -2496,6 +2496,7 @@ function NavButtons({ onBack, onNext, backDisabled, nextDisabled, nextLabel = "N
 // Same visual language as DimTrackViz, but for tracks whose positions are
 // already percentages (physical intimacy) rather than 1-5 scores.
 function PctTrackViz({ myPct, partPct, userName = "You", partnerName = "Partner" }) {
+  const sameInitial = (userName?.[0] || "").toUpperCase() === (partnerName?.[0] || "").toUpperCase();
   const close = myPct != null && partPct != null && Math.abs(myPct - partPct) < 6;
   const myIsLeft = (myPct ?? 0) <= (partPct ?? 0);
   const dots = [
@@ -2506,10 +2507,11 @@ function PctTrackViz({ myPct, partPct, userName = "You", partnerName = "Partner"
     <div style={{ margin: "1.25rem 0 0", paddingBottom: "0.25rem", position: "relative" }}>
       <div style={{ height: 10, background: "rgba(255,255,255,0.18)", borderRadius: 999, position: "relative", overflow: "visible" }}>
         {dots.map(d => (
-          <div key={d.label} style={{ position: "absolute", top: "50%", left: `${d.pct}%`, transform: `translate(-50%, calc(-50% + ${d.dy}px))`, width: 14, height: 14, borderRadius: "50%", background: d.color, border: "2px solid white", boxShadow: "0 1px 4px rgba(0,0,0,0.25)", zIndex: d.z }} />
+          <div key={d.label} style={{ position: "absolute", top: "50%", left: `${d.pct}%`, transform: `translate(-50%, calc(-50% + ${d.dy}px))`, width: 18, height: 18, borderRadius: "50%", background: d.color, border: "2px solid white", boxShadow: "0 1px 4px rgba(0,0,0,0.25)", zIndex: d.z, display: "flex", alignItems: "center", justifyContent: "center", fontSize: "0.5rem", color: "white", fontWeight: 700, fontFamily: BFONT }}>{sameInitial ? "" : d.label[0]}</div>
         ))}
       </div>
       {/* Outward anchoring keeps long names from colliding when the dots are close. */}
+{sameInitial && (
       <div style={{ position: "relative", height: 20, marginTop: 10 }}>
         {dots.map(d => (
           <span key={d.label} style={{
@@ -2521,6 +2523,7 @@ function PctTrackViz({ myPct, partPct, userName = "You", partnerName = "Partner"
           }}>{d.label}</span>
         ))}
       </div>
+      )}
     </div>
   );
 }
@@ -4823,6 +4826,8 @@ function PersonalityResults({ myAnswers, partnerAnswers, userName, partnerName, 
             the templated gap-tier headline is gone (it could contradict the dots
             and the "keep in mind" copy). The slider and advice carry the meaning. */}
         <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", marginBottom: "0.75rem" }}>
+          <div style={{ width: 10, height: 10, borderRadius: "50%", background: m.color, flexShrink: 0 }} />
+          <div style={{ fontSize: "0.62rem", textTransform: "uppercase", letterSpacing: "0.15em", color: "rgba(255,255,255,0.82)", fontWeight: 700, fontFamily: BFONT }}>Communication</div>
           <div style={{ marginLeft: "auto", fontSize: "0.68rem", color: "rgba(255,255,255,0.3)", fontFamily: BFONT }}>{step} of {orderedDims.length}</div>
         </div>
         <div style={{ fontSize: "clamp(1.5rem,5vw,2rem)", fontWeight: 700, color: "white", lineHeight: 1.1, marginBottom: "1.25rem", fontFamily: HFONT }}>{m.label}</div>
@@ -9176,7 +9181,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
             <link href={FONT_URL} rel="stylesheet" />
             <div style={{ color: "white" }}>
               {/* Header — matches the comms + expectations overviews */}
-              <div style={{ fontSize: "0.65rem", textTransform: "uppercase", letterSpacing: "0.2em", color: "rgba(255,255,255,0.38)", marginBottom: "0.5rem", fontFamily: BFONT }}>Relationship Reflection</div>
+              <div style={{ display: "flex", alignItems: "center", gap: "0.6rem", marginBottom: "0.5rem" }}><div style={{ width: 10, height: 10, borderRadius: "50%", background: "#1B5FE8", flexShrink: 0 }} /><div style={{ fontSize: "0.65rem", textTransform: "uppercase", letterSpacing: "0.2em", color: "rgba(255,255,255,0.5)", fontFamily: BFONT, fontWeight: 700 }}>Relationship Reflection</div></div>
               <div style={{ fontSize: "clamp(1.8rem,6vw,2.8rem)", fontWeight: 700, fontFamily: HFONT, lineHeight: 1.05, marginBottom: "0.6rem" }}>{userName} &amp; {partnerName}</div>
               <p style={{ fontSize: "0.9rem", color: "rgba(255,255,255,0.6)", fontFamily: BFONT, fontWeight: 300, lineHeight: 1.6, marginBottom: "1rem" }}>
                 {overallAligned
@@ -9310,7 +9315,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
       return (
         <Layout accent="#1B5FE8" noPrevNext={true}>
           <div style={{ maxWidth: 660 }}>
-            <div style={{ fontSize: "0.62rem", letterSpacing: "0.22em", textTransform: "uppercase", color: "#1B5FE8", fontWeight: 700, fontFamily: BFONT, marginBottom: "0.5rem" }}>Relationship Reflection</div>
+            <div style={{ display: "flex", alignItems: "center", gap: "0.6rem", marginBottom: "0.5rem" }}><div style={{ width: 10, height: 10, borderRadius: "50%", background: "#1B5FE8", flexShrink: 0 }} /><div style={{ fontSize: "0.62rem", letterSpacing: "0.22em", textTransform: "uppercase", color: "#1B5FE8", fontWeight: 700, fontFamily: BFONT }}>Relationship Reflection</div></div>
             <h2 style={{ fontFamily: HFONT, fontSize: "clamp(1.6rem,3vw,2.2rem)", fontWeight: 700, color: C.ink, lineHeight: 1.1, marginBottom: "0.5rem" }}>How you each rated it.</h2>
             <p style={{ fontSize: "0.82rem", color: C.muted, fontFamily: BFONT, fontWeight: 300, marginBottom: "1.5rem", lineHeight: 1.65 }}>
               Every question with a fixed answer, shown together. The distance between the two dots is the whole point.
@@ -9446,7 +9451,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
       return (
         <Layout accent="#1B5FE8" noPrevNext={true}>
           <div style={{ maxWidth: 660 }}>
-            <div style={{ fontSize: "0.62rem", letterSpacing: "0.22em", textTransform: "uppercase", color: "#1B5FE8", fontWeight: 700, fontFamily: BFONT, marginBottom: "0.5rem" }}>Relationship Reflection</div>
+            <div style={{ display: "flex", alignItems: "center", gap: "0.6rem", marginBottom: "0.5rem" }}><div style={{ width: 10, height: 10, borderRadius: "50%", background: "#1B5FE8", flexShrink: 0 }} /><div style={{ fontSize: "0.62rem", letterSpacing: "0.22em", textTransform: "uppercase", color: "#1B5FE8", fontWeight: 700, fontFamily: BFONT }}>Relationship Reflection</div></div>
             <h2 style={{ fontFamily: HFONT, fontSize: "clamp(1.6rem,3vw,2.2rem)", fontWeight: 700, color: C.ink, lineHeight: 1.1, marginBottom: "0.5rem" }}>Side by Side</h2>
             <p style={{ fontSize: "0.82rem", color: C.muted, fontFamily: BFONT, fontWeight: 300, marginBottom: "1.5rem", lineHeight: 1.65 }}>Everything you each wrote, unedited, next to each other. Read them together.</p>
             {["Milestones", "How We're Doing", "Looking Forward", "What Matters"].map(cat => {
