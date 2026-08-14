@@ -5481,6 +5481,7 @@ function ExpectationsResults({ myAnswers, partnerAnswers, userName, partnerName,
       financial: "Beneath money disagreements is usually a difference in values, not just numbers. The question worth asking: what do you each want money to make possible?",
       career: "How you think about work, ambition, and sacrifice for each other's careers will evolve. These conversations lay groundwork before the hard moments arrive.",
       emotional: "The invisible work of a relationship, tracking, anticipating, initiating, is the category most couples never name. Naming it changes how it lands.",
+      extended_family: "Extended family expectations surface fast, around holidays, visits, and boundaries. You each carry a template from how your own family did it. Naming those templates now saves a lot of friction later.",
       life: "These are the bigger-picture expectations: children, family, where you live, and how you want your life to feel. Getting aligned on these now is one of the most valuable things a couple can do.",
     };
 
