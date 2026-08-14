@@ -2730,8 +2730,8 @@ function DimResponseBreakdown({ dim, myAnswers, partnerAnswers, userName, partne
               <div style={{ display: "flex", alignItems: "center", gap: "0.7rem" }}>
                 <span style={{ fontSize: "0.58rem", color: "rgba(255,255,255,0.5)", fontFamily: BFONT, lineHeight: 1.3, flex: "0 0 27%", textAlign: "right" }}>{q.a}</span>
                 <div style={{ flex: 1, position: "relative", height: 8, background: "rgba(255,255,255,0.12)", borderRadius: 999, overflow: "visible" }}>
-                  {b != null && <div title={partnerName + " answered here"} style={{ position: "absolute", top: "50%", left: pct(b) + "%", transform: "translate(-50%, calc(-50% + " + (close ? 6 : 0) + "px))", width: 15, height: 15, borderRadius: "50%", background: color, border: "2px solid " + color, boxShadow: "0 0 8px " + color + "66", zIndex: 1 }} />}
-                  {a != null && <div title={userName + " answered here"} style={{ position: "absolute", top: "50%", left: pct(a) + "%", transform: "translate(-50%, calc(-50% + " + (close ? -6 : 0) + "px))", width: 13, height: 13, borderRadius: "50%", background: "#fff", border: "2px solid rgba(255,255,255,0.5)", zIndex: 2 }} />}
+                  {b != null && <div title={partnerName} style={{ position: "absolute", top: "50%", left: pct(b) + "%", transform: "translate(-50%, calc(-50% + " + (close ? 9 : 0) + "px))", width: 20, height: 20, borderRadius: "50%", background: PC, border: "2px solid white", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "0.46rem", color: "white", fontWeight: 700, fontFamily: BFONT, zIndex: 1 }}>{partnerName[0]}</div>}
+                  {a != null && <div title={userName} style={{ position: "absolute", top: "50%", left: pct(a) + "%", transform: "translate(-50%, calc(-50% + " + (close ? -9 : 0) + "px))", width: 20, height: 20, borderRadius: "50%", background: UC, border: "2px solid white", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "0.46rem", color: "white", fontWeight: 700, fontFamily: BFONT, zIndex: 2 }}>{userName[0]}</div>}
                 </div>
                 <span style={{ fontSize: "0.58rem", color: "rgba(255,255,255,0.5)", fontFamily: BFONT, lineHeight: 1.3, flex: "0 0 27%", textAlign: "left" }}>{q.b}</span>
               </div>
@@ -2740,8 +2740,8 @@ function DimResponseBreakdown({ dim, myAnswers, partnerAnswers, userName, partne
         })}
       </div>
       <div style={{ display: "flex", gap: "1.3rem", marginTop: "1.4rem", paddingTop: "1rem", borderTop: "1px solid rgba(255,255,255,0.1)", fontSize: "0.64rem", color: "rgba(255,255,255,0.65)", fontFamily: BFONT }}>
-        <span style={{ display: "flex", alignItems: "center", gap: "0.4rem" }}><span style={{ width: 11, height: 11, borderRadius: "50%", background: "#fff", border: "2px solid rgba(255,255,255,0.5)", display: "inline-block" }} />{userName}</span>
-        <span style={{ display: "flex", alignItems: "center", gap: "0.4rem" }}><span style={{ width: 11, height: 11, borderRadius: "50%", background: color, display: "inline-block" }} />{partnerName}</span>
+        <span style={{ display: "flex", alignItems: "center", gap: "0.4rem" }}><span style={{ width: 11, height: 11, borderRadius: "50%", background: UC, display: "inline-block" }} />{userName}</span>
+        <span style={{ display: "flex", alignItems: "center", gap: "0.4rem" }}><span style={{ width: 11, height: 11, borderRadius: "50%", background: PC, display: "inline-block" }} />{partnerName}</span>
       </div>
     </div>
   );
@@ -2749,18 +2749,33 @@ function DimResponseBreakdown({ dim, myAnswers, partnerAnswers, userName, partne
 function DimTrackViz({ myScore = 3, theirScore = 3, color = "#9B5DE5", userName = "You", partnerName = "Partner" }) {
   const pct = v => ((v - 1) / 4) * 100;
   const myPctV = pct(myScore), theirPctV = pct(theirScore);
-  const close = Math.abs(myPctV - theirPctV) < 8; // vertical-offset dots so they don't overlap
-  // Dot colour is keyed to the PERSON: the partner (theirScore) carries the
-  // dimension accent, the viewer (myScore) is white, matching the additional-
-  // insight bar. Labels are handled by the shared DotLabels component.
+  const close = Math.abs(myPctV - theirPctV) < 8;
+  const myIsLeft = myPctV <= theirPctV;
+  const myDy = close ? (myIsLeft ? -11 : 11) : 0;
+  const theirDy = close ? (myIsLeft ? 11 : -11) : 0;
+  // Person-coloured, initial-labelled dots (user = orange, partner = blue),
+  // matching the highlights sliders. The name key only appears when both first
+  // initials collide; otherwise the letters resolve who's who.
+  const UC = "#E8673A", PC = "#1B5FE8";
+  const sameInitial = (userName?.[0] || "").toUpperCase() === (partnerName?.[0] || "").toUpperCase();
+  const legend = myIsLeft ? [{ name: userName, color: UC }, { name: partnerName, color: PC }] : [{ name: partnerName, color: PC }, { name: userName, color: UC }];
   return (
     <div style={{ margin: "1.15rem 0 0.35rem", position: "relative" }}>
-      <div style={{ height: 4, background: "rgba(255,255,255,0.12)", borderRadius: 2, position: "relative", overflow: "visible" }}>
-        <div style={{ position: "absolute", inset: 0, borderRadius: 2, background: "linear-gradient(90deg, rgba(255,255,255,0.05), rgba(255,255,255,0.18))" }} />
-        <div style={{ position: "absolute", top: "50%", left: theirPctV + "%", transform: `translate(-50%, calc(-50% + ${close ? 6 : 0}px))`, width: 14, height: 14, borderRadius: "50%", background: color, border: "2px solid " + color, boxShadow: "0 0 8px " + color + "66", zIndex: 2 }} />
-        <div style={{ position: "absolute", top: "50%", left: myPctV + "%", transform: `translate(-50%, calc(-50% + ${close ? -6 : 0}px))`, width: 12, height: 12, borderRadius: "50%", background: "#fff", border: "2px solid rgba(255,255,255,0.5)", zIndex: 1 }} />
+      <div style={{ height: 5, background: "rgba(255,255,255,0.12)", borderRadius: 3, position: "relative", overflow: "visible" }}>
+        <div style={{ position: "absolute", inset: 0, borderRadius: 3, background: "linear-gradient(90deg, rgba(255,255,255,0.05), rgba(255,255,255,0.18))" }} />
+        <div title={partnerName} style={{ position: "absolute", top: "50%", left: theirPctV + "%", transform: `translate(-50%, calc(-50% + ${theirDy}px))`, width: 22, height: 22, borderRadius: "50%", background: PC, border: "2.5px solid white", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "0.5rem", color: "white", fontWeight: 700, fontFamily: BFONT, zIndex: 2 }}>{partnerName[0]}</div>
+        <div title={userName} style={{ position: "absolute", top: "50%", left: myPctV + "%", transform: `translate(-50%, calc(-50% + ${myDy}px))`, width: 22, height: 22, borderRadius: "50%", background: UC, border: "2.5px solid white", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "0.5rem", color: "white", fontWeight: 700, fontFamily: BFONT, zIndex: 2 }}>{userName[0]}</div>
       </div>
-      <DotLabels items={[{ pct: myPctV, lines: [userName], dotColor: "#fff", dotY: -16 }, { pct: theirPctV, lines: [partnerName], dotColor: color, dotY: -4 }]} leader fontRem={0.72} gap={4} />
+      {sameInitial && (
+        <div style={{ display: "flex", justifyContent: "center", gap: "1rem", marginTop: "1.1rem" }}>
+          {legend.map(k => (
+            <div key={k.name} style={{ display: "flex", alignItems: "center", gap: "0.35rem" }}>
+              <div style={{ width: 8, height: 8, borderRadius: "50%", background: k.color, flexShrink: 0 }} />
+              <span style={{ fontSize: "0.62rem", color: "rgba(255,255,255,0.55)", fontFamily: BFONT }}>{k.name}</span>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }// ── COUPLE PORTRAIT BUBBLE ───────────────────────────────────────────────────
