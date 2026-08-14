@@ -9167,7 +9167,6 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
       const theirOverall = theirs.a0 ?? 3;
       const avgOverall = (myOverall + theirOverall) / 2;
       const overallLabel = overallQ ? overallQ.scaleLabels[Math.round(avgOverall)] : "really good";
-      const _reflSameInit = (userName?.[0] || "").toUpperCase() === (partnerName?.[0] || "").toUpperCase();
       const overallAligned = Math.abs(myOverall - theirOverall) <= 1;
       const myAdmire = mine.a8;
       const theirAdmire = theirs.a8;
@@ -9259,6 +9258,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
     // Free-text answers live on Side by Side, in the couple's own words.
     if (section === "reflection-ratings" || section === "reflection-insights") {
       const overallQ = ANNIVERSARY_QUESTIONS.find(q => q.id === "a0");
+      const _reflSameInit = (userName?.[0] || "").toUpperCase() === (partnerName?.[0] || "").toUpperCase();
       const ratedScales = scaleQs.filter(q => mine[q.id] != null && theirs[q.id] != null);
       const pct = v => (v / 4) * 100;
 
