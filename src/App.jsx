@@ -2754,6 +2754,49 @@ function DimResponseBreakdown({ dim, myAnswers, partnerAnswers, userName, partne
     </div>
   );
 }
+function IntimacyResponseBreakdown({ dim, myAnswers, partnerAnswers, userName, partnerName, variant = "premarital" }) {
+  const qs = (INTIMACY_QUESTIONS || []).filter(q => q.dimension === dim && q.kind !== "selfref");
+  const valOf = (q, ans) => { if (ans == null) return null; const o = q.options.find(x => x.label === ans); return (o && o.value != null) ? o.value : null; };
+  const rows = qs.map(q => {
+    const opts = q.options.filter(o => o.value != null).slice().sort((a, b) => a.value - b.value);
+    const lo = opts[0], hi = opts[opts.length - 1];
+    return { q, text: q[variant] || q.premarital || q.topic || "", lo: (lo && lo.label) || "", hi: (hi && hi.label) || "", a: valOf(q, myAnswers && myAnswers[q.id]), b: valOf(q, partnerAnswers && partnerAnswers[q.id]) };
+  }).filter(r => r.a != null || r.b != null);
+  if (!rows.length) return null;
+  const pct = v => Math.max(5, Math.min(95, v * 100));
+  const UC = "#E8673A", PC = "#6C7FFF";
+  const sameInitial = (userName?.[0] || "").toUpperCase() === (partnerName?.[0] || "").toUpperCase();
+  const label = (INTIMACY_DIMENSIONS.find(x => x.id === dim) || {}).label || "";
+  return (
+    <div style={{ marginTop: "1rem", background: "rgba(255,255,255,0.06)", borderRadius: 14, padding: "1.2rem 1.5rem", border: "1px solid rgba(255,255,255,0.14)" }}>
+      <div style={{ fontSize: "0.62rem", textTransform: "uppercase", letterSpacing: "0.12em", color: "rgba(255,255,255,0.9)", fontWeight: 700, marginBottom: "1.35rem", fontFamily: BFONT }}>{label + " questions, side by side"}</div>
+      <div style={{ display: "flex", flexDirection: "column", gap: "1.6rem" }}>
+        {rows.map(({ q, text, lo, hi, a, b }) => {
+          const close = a != null && b != null && Math.abs(pct(a) - pct(b)) < 9;
+          return (
+            <div key={q.id}>
+              <div style={{ fontSize: "0.78rem", color: "rgba(255,255,255,0.92)", fontFamily: BFONT, lineHeight: 1.5, marginBottom: "0.85rem", fontWeight: 500 }}>{text}</div>
+              <div style={{ display: "flex", alignItems: "center", gap: "0.7rem" }}>
+                <span style={{ fontSize: "0.58rem", color: "rgba(255,255,255,0.5)", fontFamily: BFONT, lineHeight: 1.3, flex: "0 0 27%", textAlign: "right" }}>{lo}</span>
+                <div style={{ flex: 1, position: "relative", height: 8, background: "rgba(255,255,255,0.12)", borderRadius: 999, overflow: "visible" }}>
+                  {b != null && <div title={partnerName} style={{ position: "absolute", top: "50%", left: pct(b) + "%", transform: "translate(-50%, calc(-50% + " + (close ? 9 : 0) + "px))", width: 20, height: 20, borderRadius: "50%", background: PC, border: "2px solid white", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "0.46rem", color: "white", fontWeight: 700, fontFamily: BFONT, zIndex: 1 }}>{sameInitial ? "" : partnerName[0]}</div>}
+                  {a != null && <div title={userName} style={{ position: "absolute", top: "50%", left: pct(a) + "%", transform: "translate(-50%, calc(-50% + " + (close ? -9 : 0) + "px))", width: 20, height: 20, borderRadius: "50%", background: UC, border: "2px solid white", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "0.46rem", color: "white", fontWeight: 700, fontFamily: BFONT, zIndex: 2 }}>{sameInitial ? "" : userName[0]}</div>}
+                </div>
+                <span style={{ fontSize: "0.58rem", color: "rgba(255,255,255,0.5)", fontFamily: BFONT, lineHeight: 1.3, flex: "0 0 27%", textAlign: "left" }}>{hi}</span>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+      {sameInitial && (
+        <div style={{ display: "flex", gap: "1.3rem", marginTop: "1.4rem", paddingTop: "1rem", borderTop: "1px solid rgba(255,255,255,0.1)", fontSize: "0.64rem", color: "rgba(255,255,255,0.65)", fontFamily: BFONT }}>
+          <span style={{ display: "flex", alignItems: "center", gap: "0.4rem" }}><span style={{ width: 11, height: 11, borderRadius: "50%", background: UC, display: "inline-block" }} />{userName}</span>
+          <span style={{ display: "flex", alignItems: "center", gap: "0.4rem" }}><span style={{ width: 11, height: 11, borderRadius: "50%", background: PC, display: "inline-block" }} />{partnerName}</span>
+        </div>
+      )}
+    </div>
+  );
+}
 function DimTrackViz({ myScore = 3, theirScore = 3, color = "#9B5DE5", userName = "You", partnerName = "Partner" }) {
   const pct = v => ((v - 1) / 4) * 100;
   const myPctV = pct(myScore), theirPctV = pct(theirScore);
@@ -9679,6 +9722,8 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
               </div>
               <PctTrackViz myPct={myPct} partPct={partPct} userName={userName} partnerName={partnerName} />
             </div>
+
+            <IntimacyResponseBreakdown dim={dimMatch} myAnswers={intimacyAnswers} partnerAnswers={partnerIntimacy} userName={userName} partnerName={partnerName} variant={intimacyVariant} />
 
             {/* Talk about it / one-partner-skipped (the skip variant stays intact) */}
             {skipper && osk ? (
