@@ -9167,6 +9167,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
       const theirOverall = theirs.a0 ?? 3;
       const avgOverall = (myOverall + theirOverall) / 2;
       const overallLabel = overallQ ? overallQ.scaleLabels[Math.round(avgOverall)] : "really good";
+      const _reflSameInit = (userName?.[0] || "").toUpperCase() === (partnerName?.[0] || "").toUpperCase();
       const overallAligned = Math.abs(myOverall - theirOverall) <= 1;
       const myAdmire = mine.a8;
       const theirAdmire = theirs.a8;
@@ -9282,7 +9283,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
                 <div style={{ position: "absolute", top: 0, bottom: 0, left: `${Math.min(pct(mv), pct(tv))}%`, width: `${Math.abs(pct(mv) - pct(tv))}%`, background: tone, opacity: 0.22, borderRadius: 999 }} />
               )}
               {[[mv, userName, "#E8673A", 2, -5], [tv, partnerName, "#1B5FE8", 1, 5]].map(([v, name, col, z, dy]) => (
-                <div key={name} style={{ position: "absolute", top: "50%", left: `${pct(v)}%`, transform: `translate(-50%, calc(-50% + ${gap === 0 ? dy : 0}px))`, width: 14, height: 14, borderRadius: "50%", background: col, border: "2.5px solid white", boxShadow: "0 1px 4px rgba(0,0,0,0.18)", zIndex: z }} />
+                <div key={name} style={{ position: "absolute", top: "50%", left: `${pct(v)}%`, transform: `translate(-50%, calc(-50% + ${gap === 0 ? dy : 0}px))`, width: 18, height: 18, borderRadius: "50%", background: col, border: "2.5px solid white", boxShadow: "0 1px 4px rgba(0,0,0,0.18)", zIndex: z, display: "flex", alignItems: "center", justifyContent: "center", fontSize: "0.5rem", color: "white", fontWeight: 700, fontFamily: BFONT }}>{_reflSameInit ? "" : name[0]}</div>
               ))}
             </div>
             <div style={{ position: "relative", height: gap === 0 ? 20 : 18, marginTop: gap === 0 ? 10 : 6 }}>
@@ -9290,16 +9291,14 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
                 // Same score: one label centred under the shared position, so the
                 // two names cannot print on top of each other.
                 <span style={{ position: "absolute", left: `${pct(mv)}%`, transform: "translateX(-50%)", fontSize: "0.66rem", fontWeight: 700, fontFamily: BFONT, whiteSpace: "nowrap", textAlign: "center" }}>
-                  <span style={{ color: "#E8673A" }}>{userName}</span>
-                  <span style={{ color: C.muted }}> &amp; </span>
-                  <span style={{ color: "#1B5FE8" }}>{partnerName}</span>
-                  <span style={{ color: C.text, fontWeight: 600 }}> · {q.scaleLabels[mv]}</span>
+                  {_reflSameInit && (<><span style={{ color: "#E8673A" }}>{userName}</span><span style={{ color: C.muted }}> &amp; </span><span style={{ color: "#1B5FE8" }}>{partnerName}</span><span style={{ color: C.muted }}> · </span></>)}
+                  <span style={{ color: C.text, fontWeight: 600 }}>{q.scaleLabels[mv]}</span>
                 </span>
               ) : [[mv, userName, "#E8673A"], [tv, partnerName, "#1B5FE8"]].map(([v, name, col], idx) => {
                 const isLeft = pct(v) < pct(idx === 0 ? tv : mv);
                 return (
                   <span key={name} style={{ position: "absolute", left: `${pct(v)}%`, transform: isLeft ? "translateX(-100%)" : "translateX(0)", paddingRight: isLeft ? 5 : 0, paddingLeft: isLeft ? 0 : 5, fontSize: "0.66rem", fontWeight: 700, color: col, fontFamily: BFONT, whiteSpace: "nowrap" }}>
-                    {name} · {q.scaleLabels[v]}
+                    {_reflSameInit ? (name + " · " + q.scaleLabels[v]) : q.scaleLabels[v]}
                   </span>
                 );
               })}
