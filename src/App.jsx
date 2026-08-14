@@ -2100,7 +2100,7 @@ const NEW_COUPLE_TYPES = [
 // Shareable couple type card component
 
 // ── COUPLE MAP SVG COMPONENT ──────────────────────────────────────────────────
-function CoupleMapSVG({ myS, partS, userName, partnerName, size = 480 }) {
+function CoupleMapSVG({ myS, partS, userName, partnerName, size = 480, hideCaption = false }) {
   const typeInfoA = computeIndividualType(myS);
   const typeInfoB = computeIndividualType(partS);
   const itA = INDIVIDUAL_TYPES[typeInfoA.typeCode];
@@ -2281,7 +2281,7 @@ function CoupleMapSVG({ myS, partS, userName, partnerName, size = 480 }) {
         <polygon points={`${lowerTag.x},${lowerTagY} ${lowerTag.x - 5},${lowerTagY + 6} ${lowerTag.x + 5},${lowerTagY + 6}`} fill={lowerTag.color}/>
       </svg>
 
-      {/* ── HOW PLACEMENT IS CALCULATED (footnote, not a tile) ── */}
+      {!hideCaption && (
       <div style={{ marginTop: "0.75rem" }}>
         <p style={{ fontSize: "0.72rem", color: "#8C7A68", lineHeight: 1.65, margin: "0 0 0.5rem", fontWeight: 300, fontFamily: BFONT }}>
           Where you each sit on this map is calculated from your responses. Scores for Conflict, Repair, and Stress determine placement on the Engage/Withdraw axis, and Expression, Feedback, and Needs scores determine placement on the Open/Guarded axis. Proximity to an axis line means that partner is more flexible on that dimension.
@@ -2290,6 +2290,7 @@ function CoupleMapSVG({ myS, partS, userName, partnerName, size = 480 }) {
           Two people who think they know their type will almost always land somewhere different than expected.
         </p>
       </div>
+      )}
     </div>
   );
 }
@@ -10442,28 +10443,18 @@ function ResultsHighlights({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3
       </div>
     </WrappedCard>,
 
-    // ── 2. COUPLE TYPE — Fixed overflow, "Your couple type is", duos visible ───
-    <WrappedCard key={1} bg={`linear-gradient(145deg, ${coupleType?.color || "#E8673A"}cc 0%, ${coupleType?.color || "#E8673A"}77 60%, #1a1035 100%)`} onDownload={handleDl} cardIndex={1} cardRef={cardRef} inline={inline} isMobile={isMobile} portraitCorner={portrait}>
+    // ── 2. COUPLE TYPE + MAP — "Your unique relationship environment" ─────────
+    <WrappedCard key={1} bg={`linear-gradient(145deg, ${coupleType?.color || "#E8673A"}cc 0%, ${coupleType?.color || "#E8673A"}66 55%, #14102e 100%)`} onDownload={handleDl} cardIndex={1} cardRef={cardRef} inline={inline} isMobile={isMobile} portraitCorner={portrait}>
       <style>{cardAnim}</style>
       <div onClick={advance} style={{ flex: 1, display: "flex", flexDirection: "column", cursor: "pointer", position: "relative", overflow: "hidden" }}>
         {watermark}
-        <div style={{ flex: 1, display: "flex", flexDirection: "column", padding: "2.75rem 2.5rem 2rem", position: "relative" }}>
-          {/* Eyebrow */}
-          <div style={{ fontSize: "0.52rem", letterSpacing: "0.3em", textTransform: "uppercase", color: "rgba(255,255,255,0.65)", fontFamily: BFONT, fontWeight: 700, marginBottom: "0.6rem", animation: "fadeUp 0.4s 0.05s both" }}>
-            Your couple type is
+        <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "2.25rem 1.75rem 2rem", textAlign: "center" }}>
+          <div style={{ fontFamily: HFONT, fontSize: "clamp(1.45rem,5.5vw,1.95rem)", fontWeight: 700, color: "white", lineHeight: 1.12, letterSpacing: "-0.02em", marginBottom: "1.4rem", maxWidth: 300, animation: "fadeUp 0.5s 0.1s both" }}>Your unique relationship environment</div>
+          <div style={{ animation: "popIn 0.5s 0.25s cubic-bezier(0.34,1.56,0.64,1) both", marginBottom: "1.4rem" }}>
+            <CoupleMapSVG myS={myS} partS={partS} userName={userName} partnerName={partnerName} size={268} hideCaption />
           </div>
-          {/* Type name — clamped so it always fits */}
-          <div style={{ fontFamily: HFONT, fontSize: "clamp(2rem,8vw,3rem)", fontWeight: 700, color: "white", lineHeight: 1.0, letterSpacing: "-0.02em", marginBottom: "0.75rem", wordBreak: "break-word", animation: "fadeUp 0.5s 0.12s cubic-bezier(0.22,1,0.36,1) both" }}>
-            {coupleType?.name || "The orbit"}
-          </div>
-          {/* Tagline */}
-          <p style={{ fontSize: "0.92rem", color: "rgba(255,255,255,0.85)", fontFamily: BFONT, fontWeight: 500, lineHeight: 1.45, margin: "0 0 1.25rem", fontStyle: "italic", animation: "fadeUp 0.4s 0.2s both" }}>
-            {coupleType?.tagline}
-          </p>
-          {/* Description */}
-          <p style={{ fontSize: "0.82rem", color: "rgba(255,255,255,0.7)", fontFamily: BFONT, fontWeight: 300, lineHeight: 1.7, margin: 0, animation: "fadeUp 0.4s 0.35s both" }}>
-            {coupleType?.description ? coupleType?.description.replace(/\{U\}/g, userName).replace(/\{P\}/g, partnerName) : ""}
-          </p>
+          <div style={{ fontSize: "0.94rem", color: "rgba(255,255,255,0.85)", fontFamily: BFONT, fontWeight: 400, marginBottom: "0.85rem", animation: "fadeUp 0.4s 0.4s both" }}>Your couple type: <span style={{ fontWeight: 700, color: "white" }}>{coupleType?.name || "The orbit"}</span></div>
+          <p style={{ fontSize: "0.78rem", color: "rgba(255,255,255,0.6)", fontFamily: BFONT, fontWeight: 300, lineHeight: 1.6, maxWidth: 258, margin: 0, animation: "fadeUp 0.4s 0.5s both" }}>Explore your full results to learn what this looks like for the two of you.</p>
         </div>
       </div>
     </WrappedCard>,
