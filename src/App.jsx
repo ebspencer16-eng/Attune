@@ -5421,17 +5421,6 @@ function ExpectationsResults({ myAnswers, partnerAnswers, userName, partnerName,
               <div style={{ fontSize: "0.65rem", letterSpacing: "0.2em", textTransform: "uppercase", color: "rgba(255,255,255,0.4)", marginBottom: "0.5rem", fontFamily: BFONT }}>What You Expect</div>
               <div style={{ fontSize: "clamp(1.8rem,6vw,2.8rem)", fontWeight: 700, fontFamily: HFONT, lineHeight: 1.0, marginBottom: "0.6rem" }}>{userName} & {partnerName}</div>
 
-              {/* ── COUPLE TYPE CONTEXT ── */}
-              {coupleTypeName && (
-                <div style={{ display: "flex", alignItems: "flex-start", gap: "0.55rem", background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.12)", borderRadius: 10, padding: "0.7rem 0.85rem", marginBottom: "0.85rem" }}>
-                  <div style={{ width: 6, height: 6, borderRadius: "50%", background: coupleTypeColor, flexShrink: 0, marginTop: 5 }}/>
-                  <p style={{ fontSize: "0.74rem", color: "rgba(255,255,255,0.65)", fontFamily: BFONT, fontWeight: 300, lineHeight: 1.6, margin: 0 }}>
-                    <span style={{ fontWeight: 700, color: "rgba(255,255,255,0.88)" }}>{coupleTypeName}: </span>
-                    {coupleTypeExpContext}
-                  </p>
-                </div>
-              )}
-
               {/* Already aligned / Worth discussing counts */}
               <div style={{ display: "flex", gap: "1.25rem", marginBottom: "0.35rem" }}>
                 <div style={{ display: "flex", alignItems: "center", gap: "0.45rem" }}>
@@ -5543,7 +5532,7 @@ function ExpectationsResults({ myAnswers, partnerAnswers, userName, partnerName,
           </div>
           {/* Header */}
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginBottom: "0.5rem" }}>
-            <div style={{ fontSize: "1.65rem", fontFamily: HFONT, fontWeight: 700, letterSpacing: "-0.02em", background: "linear-gradient(135deg,#E8673A,#9B5DE5,#1B5FE8)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text", lineHeight: 1 }}>
+            <div style={{ fontSize: "clamp(1.5rem,5vw,2rem)", fontFamily: HFONT, fontWeight: 700, letterSpacing: "-0.02em", color: "white", lineHeight: 1.1 }}>
               {fc.label}
             </div>
             <span style={{ fontSize: "0.68rem", color: "rgba(255,255,255,0.35)", fontFamily: BFONT, paddingBottom: "0.1rem" }}>{catIdx + 1} of {FIXED_CATS.length}</span>
@@ -5639,7 +5628,7 @@ function ExpectationsResults({ myAnswers, partnerAnswers, userName, partnerName,
                 ))}
               </div>
               <div style={{ padding: "0.5rem 1rem", borderTop: "1px solid rgba(16,185,129,0.15)" }}>
-                <span style={{ fontSize: "0.7rem", color: "rgba(16,185,129,0.85)", fontFamily: BFONT, fontWeight: 300 }}>{thisCatGaps.length === 0 ? `Fully aligned here. You and ${partnerName} are on the same page across all ${thisCatAligned.length} item${thisCatAligned.length !== 1 ? "s" : ""}.` : "You both expect the same thing here."}</span>
+                <span style={{ fontSize: "0.7rem", color: "rgba(16,185,129,0.85)", fontFamily: BFONT, fontWeight: 300 }}>{thisCatGaps.length === 0 ? `Fully aligned here. You and ${partnerName} are on the same page across all ${thisCatAligned.length} item${thisCatAligned.length !== 1 ? "s" : ""}.` : ""}</span>
               </div>
             </div>
           )}
@@ -9278,7 +9267,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
                 <div style={{ fontSize: "0.55rem", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.3)", fontFamily: BFONT, fontWeight: 700, marginBottom: "0.5rem" }}>What's in this section</div>
                 <div style={{ display: "flex", flexDirection: "column", gap: "0.3rem" }}>
                   {[
-                    { label: "How You Each Rated", sub: "Your scores and rankings, compared", id: "reflection-ratings" },
+                    { label: "High-level look", sub: "Your scores and rankings, compared", id: "reflection-ratings" },
                     { label: "Side by Side", sub: "Everything you each wrote, in your own words", id: "reflection-story" },
                     { label: "Action Plan", sub: `${explores} conversation${explores !== 1 ? "s" : ""} worth having`, id: "reflection-plan" },
                   ].map(item => (
@@ -9360,7 +9349,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
         <Layout accent="#1B5FE8" noPrevNext={true}>
           <div style={{ maxWidth: 660 }}>
             <div style={{ display: "flex", alignItems: "center", gap: "0.6rem", marginBottom: "0.5rem" }}><div style={{ width: 10, height: 10, borderRadius: "50%", background: "#1B5FE8", flexShrink: 0 }} /><div style={{ fontSize: "0.62rem", letterSpacing: "0.22em", textTransform: "uppercase", color: "#1B5FE8", fontWeight: 700, fontFamily: BFONT }}>Relationship Reflection</div></div>
-            <h2 style={{ fontFamily: HFONT, fontSize: "clamp(1.6rem,3vw,2.2rem)", fontWeight: 700, color: C.ink, lineHeight: 1.1, marginBottom: "0.5rem" }}>How you each rated it.</h2>
+            <h2 style={{ fontFamily: HFONT, fontSize: "clamp(1.6rem,3vw,2.2rem)", fontWeight: 700, color: C.ink, lineHeight: 1.1, marginBottom: "0.5rem" }}>What you view the relationship as a whole</h2>
             <p style={{ fontSize: "0.82rem", color: C.muted, fontFamily: BFONT, fontWeight: 300, marginBottom: "1.5rem", lineHeight: 1.65 }}>
               Every question with a fixed answer, shown together. The distance between the two dots is the whole point.
             </p>
@@ -9756,7 +9745,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
             <div style={{ fontSize: "0.62rem", letterSpacing: "0.22em", textTransform: "uppercase", color: ROSE, fontWeight: 700, fontFamily: BFONT, marginBottom: "0.5rem" }}>Physical Intimacy</div>
             <div style={{ fontSize: "clamp(1.5rem,4vw,2rem)", fontWeight: 700, fontFamily: HFONT, color: C.ink, lineHeight: 1.1, marginBottom: "0.5rem" }}>Conversations worth having</div>
             <p style={{ fontSize: "0.85rem", color: C.muted, fontFamily: BFONT, fontWeight: 300, lineHeight: 1.6, marginBottom: "1.5rem" }}>
-              {misaligned.length ? "Drawn from where you differ most. Start with one." : "You line up across the board. These are still worth saying out loud."}
+              {misaligned.length ? "" : "You line up across the board. These are still worth saying out loud."}
             </p>
             <div style={{ display: "flex", flexDirection: "column", gap: "0.85rem" }}>
               {list.map(d => (
