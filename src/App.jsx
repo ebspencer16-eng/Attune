@@ -7095,6 +7095,7 @@ function deriveAnniversaryInsights(mine, theirs, userName, partnerName, coupleTy
       tier: 1,
       evidence: ["a0:mine","a0:theirs"],
       title: "You're experiencing this relationship from different vantage points",
+      prompt: "Let's talk about how we each see the relationship right now. I want to understand what's shaping our different reads.",
       body: `${userName} describes the overall feel as "${myLabel}", ${partnerName} says "${theirLabel}." Neither is wrong, and the gap doesn't mean one of you isn't paying attention. But it's worth understanding what's shaping each perspective.`,
       priority: "Have this conversation gently",
       action: `Ask each other: what would make this feel even better from where you're standing right now? Don't defend your own rating, get curious about theirs first.`,
@@ -7121,6 +7122,7 @@ function deriveAnniversaryInsights(mine, theirs, userName, partnerName, coupleTy
       tier: 1,
       evidence: ["a_sat_fun:mine","a_sat_fun:theirs"],
       title: "You're not aligned on how much lightness and fun you're getting",
+      prompt: "Let's talk about whether we're making enough room for fun. I don't want to keep saving it for vacations.",
       body: `${wantMoreFun} feels like you could be having more fun together than you currently are. This isn't a complaint about the relationship, it's a signal about what's been deprioritized.`,
       priority: "Easy win to act on",
       action: `Block something deliberately fun in the next two weeks, not a big trip, just something that has no productive purpose whatsoever. Fun doesn't usually happen by accident when life gets full.`,
@@ -7146,6 +7148,7 @@ function deriveAnniversaryInsights(mine, theirs, userName, partnerName, coupleTy
       tier: 1,
       evidence: ["a_sat_comm:mine","a_sat_comm:theirs"],
       title: "One of you finds hard conversations easier than the other does",
+      prompt: "Let's talk about how hard conversations land for each of us. I want to know if one of us is carrying more of the friction.",
       body: `${lowPerson} rates how well you handle difficult conversations more cautiously than their partner does. This asymmetry is common, usually it means one person absorbs more friction before raising something, while the other thinks things resolve smoothly.`,
       priority: "Worth naming explicitly",
       action: `${lowPerson}: try naming one thing that's been sitting unspoken, not a criticism, just something you've been carrying. The other person likely doesn't know it's there.`,
@@ -7206,6 +7209,7 @@ function deriveAnniversaryInsights(mine, theirs, userName, partnerName, coupleTy
         tier: 1,
         evidence: ["a_sat_conn:mine", "a_sat_conn:theirs"],
         title: "You are not feeling equally connected day to day",
+      prompt: "Let's talk about what makes each of us feel close day to day. I want to know what actually builds connection for you.",
         body: `${userName} rates day-to-day connection as "${qDef.scaleLabels[mine.a_sat_conn]}". ${partnerName} rates it as "${qDef.scaleLabels[theirs.a_sat_conn]}". Same weeks, same house, different read. That gap usually means the things that create closeness for one of you are not the same things that create it for the other.`,
         priority: "Name what closeness looks like",
         action: `Each of you finish this sentence out loud: "I feel closest to you when we..." Do not negotiate the answers, just hear them. The point is finding out whether you have been aiming at different targets.`,
@@ -7235,6 +7239,7 @@ function deriveAnniversaryInsights(mine, theirs, userName, partnerName, coupleTy
       tier: 2,
       evidence: ["a4:mine", "a4:theirs"],
       title: "You each named what you want more of",
+      prompt: "Let's talk about what we each want more of. I want to make sure we're doing intentional things to meet those needs.",
       body: `${userName} wants ${quoted(mine.a4)}. ${partnerName} wants ${quoted(theirs.a4)}. Read those next to each other before deciding whether they are the same wish or two different ones.`,
       priority: "Compare directly",
       action: `Put both answers side by side and find the overlap. Most couples discover these are two routes to the same thing: more intentional time that actually feels like you. Pick one concrete version of each and try both this month.`,
@@ -7250,6 +7255,7 @@ function deriveAnniversaryInsights(mine, theirs, userName, partnerName, coupleTy
       tier: 2,
       evidence: ["a5:mine", "a5:theirs"],
       title: "Your five-year pictures, in your own words",
+      prompt: "Let's talk about where we each see us in five years. I want to know if we're building toward the same picture.",
       body: `${userName} pictures ${quoted(mine.a5)}. ${partnerName} pictures ${quoted(theirs.a5)}. These do not have to match. What matters is whether you have said them out loud to each other in this much detail.`,
       priority: "Build a shared map",
       action: `Block an evening for this one specifically. Where these two pictures overlap is your shared plan. Where they differ is not a problem to solve tonight, it is the thing to keep talking about. Get concrete: numbers, places, timelines.`,
@@ -7329,6 +7335,7 @@ function deriveAnniversaryInsights(mine, theirs, userName, partnerName, coupleTy
         tier: 2,
         evidence: ["a7:mine","a7:theirs"],
         title: "You both identified a moment where communication broke down under pressure",
+      prompt: "Let's talk about that moment when things broke down under pressure. I want to understand what each of us needed then.",
         body: `${userName} named ${quoted(mineA7)} and ${partnerName} named ${quoted(theirsA7)}. Both point at something not fully said or heard. Landing there independently, without coordinating, suggests it is a real pattern rather than a one-off.`,
         quotes: [{ name: userName, text: mineA7 }, { name: partnerName, text: theirsA7 }],
         priority: "Have the meta-conversation",
@@ -7339,6 +7346,7 @@ function deriveAnniversaryInsights(mine, theirs, userName, partnerName, coupleTy
         tier: 2,
         evidence: ["a7:mine","a7:theirs"],
         title: "You each identified something you wish had gone differently",
+      prompt: "Let's talk about what we each wish had gone differently. I want to hear it without either of us getting defensive.",
         body: `${userName} named ${quoted(mineA7)} and ${partnerName} named ${quoted(theirsA7)}. These don't have to match to be useful. The fact that both of you can identify something shows self-awareness, which is the first requirement for handling it better next time.`,
         quotes: [{ name: userName, text: mineA7 }, { name: partnerName, text: theirsA7 }],
         priority: "Talk about it directly",
@@ -7356,6 +7364,7 @@ function deriveAnniversaryInsights(mine, theirs, userName, partnerName, coupleTy
         tier: 2,
         evidence: ["a7:one"],
         title: `Only one of you had a moment in mind`,
+        prompt: `Let's talk about the moment one of us had in mind. I want to hear what made it stick.`,
         body: `${who} named ${quoted(text)}. ${other} didn't have something that came to mind. That difference is worth noticing on its own: it can mean the moment landed harder for one of you, or simply that you were tracking different things. It does not mean either answer is wrong.`,
         quotes: [{ name: who, text }],
         priority: "Compare notes",
@@ -7389,6 +7398,7 @@ function deriveAnniversaryInsights(mine, theirs, userName, partnerName, coupleTy
         tier: 1,
         evidence: ["a_priority:mine","a_priority:theirs"],
         title: `You agree on what matters most this year`,
+        prompt: `Let's talk about what matters most to us this year. We're aligned, and I want to make sure we actually act on it.`,
         body: `Both of you independently ranked "${myTop}" as your top priority for the year ahead. When two people rank the same thing first without discussing it, that alignment is real, and it makes it much easier to act on.`,
         priority: "Turn it into a plan",
         action: `Alignment on priorities is only useful if it produces decisions. Agree on one concrete thing you'll do differently in the next 30 days that reflects this priority. Even one change made on purpose counts.`,
@@ -7400,6 +7410,7 @@ function deriveAnniversaryInsights(mine, theirs, userName, partnerName, coupleTy
         tier: 1,
         evidence: ["a_priority:mine","a_priority:theirs"],
         title: `Your top priorities for this year are different`,
+        prompt: `Let's talk about our different priorities this year. I want to understand what's behind each of them.`,
         body: `${userName}'s top priority: "${myTop}." ${partnerName}'s top priority: "${theirTop}." Neither is wrong, but without naming it, this difference quietly shapes decisions, energy allocation, and what each of you feels is being neglected.`,
         priority: "Negotiate, not compromise",
         action: `Both priorities deserve to be real. The question is how to protect both, not which one wins. What would it look like to honor "${myTop}" and "${theirTop}" in the same month? Start with something small and specific.`,
@@ -7413,6 +7424,7 @@ function deriveAnniversaryInsights(mine, theirs, userName, partnerName, coupleTy
         tier: 1,
         evidence: ["a_priority:mine","a_priority:theirs"],
         title: `You see "${biggestRankGap.item}" very differently`,
+        prompt: `Let's talk about how differently we see "${biggestRankGap.item}". I want to understand where you're coming from.`,
         body: `${userName} ranked "${biggestRankGap.item}" #${biggestRankGap.myRank + 1}. ${partnerName} ranked it #${biggestRankGap.theirRank + 1}. That's a significant gap on the same item, and the kind of thing that creates friction without either person fully understanding why.`,
         priority: "Worth one honest conversation",
         action: `Ask each other: "What would it feel like if we invested more in ${biggestRankGap.item.toLowerCase()} this year?" The answer usually reveals something about what's been missing that neither person has said directly.`,
@@ -7481,7 +7493,7 @@ function ActionPlanList({ explores = [] }) {
         <div key={i} style={{ background: "white", border: `1.5px solid ${C.stone}`, borderRadius: 14, overflow: "hidden" }}>
           <div style={{ background: "#F5F7FF", borderBottom: "1px solid rgba(27,95,232,0.12)", padding: "0.75rem 1.1rem", display: "flex", alignItems: "center", gap: "0.75rem" }}>
             <div style={{ width: 8, height: 8, borderRadius: "50%", background: "#1B5FE8", flexShrink: 0 }} />
-            <span style={{ fontSize: "0.85rem", fontWeight: 700, color: C.ink, fontFamily: BFONT }}>{ins.title}</span>
+            <span style={{ fontSize: "0.85rem", fontWeight: 700, color: C.ink, fontFamily: BFONT, lineHeight: 1.4 }}>{ins.prompt || ins.title}</span>
           </div>
           <div style={{ padding: "0.85rem 1.1rem" }}>
             <p style={{ fontSize: "0.8rem", color: C.muted, fontFamily: BFONT, fontWeight: 300, lineHeight: 1.65, margin: "0 0 0.65rem" }}>{ins.action}</p>
