@@ -8509,6 +8509,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
   });
 
   const go = (sec) => {
+    if (sec !== section) { try { window.history.pushState({ attuneSection: sec }, ''); } catch {} }
     setSection(sec);
     // Accordion: expand the section being entered, collapse every other one.
     setCommExpanded(sec.startsWith("comm"));
@@ -8518,6 +8519,17 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
     const sc = document.querySelector("[data-results-scroll]");
     if (sc) sc.scrollTop = 0; else window.scrollTo({ top: 0 });
   };
+
+  // Browser Back moves one section back within results (11.1). The root results
+  // entry is tagged with the current section; each go() pushes a section entry.
+  // On Back we restore that section; the app-level results popstate is taught to
+  // stay put while a section entry is present, so only Back from the root exits.
+  useEffect(() => {
+    try { window.history.replaceState({ ...(window.history.state || {}), attuneSection: section }, ''); } catch {}
+    const onPop = (e) => { if (e && e.state && e.state.attuneSection) setSection(e.state.attuneSection); };
+    window.addEventListener('popstate', onPop);
+    return () => window.removeEventListener('popstate', onPop);
+  }, []);
 
   // Sidebar items
   const sidebarSections = [
@@ -12871,7 +12883,7 @@ export default function App() {
     } else { _pushedToolHist.current = false; }
   }, [view]);
   useEffect(() => {
-    const onPop = () => setView(v => _toolViews.includes(v) ? 'home' : v);
+    const onPop = (e) => setView(v => (v === 'results' && e && e.state && e.state.attuneSection) ? v : (_toolViews.includes(v) ? 'home' : v));
     window.addEventListener('popstate', onPop);
     return () => window.removeEventListener('popstate', onPop);
   }, []);
