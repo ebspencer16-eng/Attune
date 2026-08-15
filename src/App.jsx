@@ -4918,23 +4918,21 @@ function PersonalityResults({ myAnswers, partnerAnswers, userName, partnerName, 
           // use the accent colour, the viewer's two are white. The partner's dots
           // are labelled above the bar; the viewer's below. (2 above, 2 below.)
           const above = [
-            selfP != null ? { pct: selfP, lines: [partnerName + "'s view", "of " + pronoun(partnerPronouns, "ref")], dotColor: m.color, title: partnerName + "'s view of " + pronoun(partnerPronouns, "ref") } : null,
             aPct  != null ? { pct: aPct,  lines: [userName + "'s view", "of " + partnerName], dotColor: m.color, title: "How " + userName + " sees " + partnerName } : null,
           ];
           const below = [
-            selfV != null ? { pct: selfV, lines: [userName + "'s view", "of " + pronoun(userPronouns, "ref")], dotColor: "#fff", title: userName + "'s view of " + pronoun(userPronouns, "ref") } : null,
             bPct  != null ? { pct: bPct,  lines: [partnerName + "'s view", "of " + userName], dotColor: "#fff", title: "How " + partnerName + " sees " + userName } : null,
           ];
           return (
             <div style={{ marginTop: "1rem", background: "rgba(255,255,255,0.06)", borderRadius: 14, padding: "1.2rem 1.5rem", border: "1px solid rgba(255,255,255,0.14)" }}>
-              <div style={{ fontSize: "0.62rem", textTransform: "uppercase", letterSpacing: "0.12em", color: "rgba(255,255,255,0.9)", fontWeight: 700, marginBottom: "0.9rem", fontFamily: BFONT }}>Additional insight: how you each see yourselves and each other</div>
+              <div style={{ fontSize: "0.62rem", textTransform: "uppercase", letterSpacing: "0.12em", color: "rgba(255,255,255,0.9)", fontWeight: 700, marginBottom: "0.9rem", fontFamily: BFONT }}>Additional insight: how you each read each other</div>
               <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "0.35rem" }}>
                 <span style={{ fontSize: "0.68rem", fontWeight: 600, color: "rgba(255,255,255,0.7)", fontFamily: BFONT }}>{m.ends[0]}</span>
                 <span style={{ fontSize: "0.68rem", fontWeight: 600, color: "rgba(255,255,255,0.7)", fontFamily: BFONT }}>{m.ends[1]}</span>
               </div>
               <PerceptionBar above={above} below={below} />
               <p style={{ fontSize: "0.62rem", fontStyle: "italic", color: "rgba(255,255,255,0.5)", lineHeight: 1.65, margin: "0.9rem 0 0", fontFamily: BFONT }}>
-                Calculations for {m.label.toLowerCase()} draw on several questions. They weigh each person's own sense of themselves alongside their partner's perception of their behavior, so a dot is not a simple midpoint.
+                Where each of you placed the other on {m.label.toLowerCase()}. Set it beside the bar above, where you each placed yourselves.
               </p>
             </div>
           );
