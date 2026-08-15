@@ -9713,17 +9713,14 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
             <p style={{ fontSize: "0.85rem", color: "rgba(255,255,255,0.6)", fontFamily: BFONT, fontWeight: 300, lineHeight: 1.6, marginBottom: "1.25rem" }}>{sub(INTIMACY_RESULTS_PROSE[dimMatch]?.intro)}</p>
 
             {/* Track */}
-            <div style={{ background: "rgba(255,255,255,0.12)", borderRadius: 14, padding: "1.25rem 1.5rem", marginBottom: "1rem", border: "1px solid rgba(255,255,255,0.2)" }}>
-              {/* Names sit under their own dot, same as the communication pages,
-                  so there is no key to cross-reference. */}
+            <div style={{ background: "rgba(255,255,255,0.1)", borderRadius: 14, padding: "1.25rem 1.5rem", marginBottom: "1rem", border: "1px solid rgba(255,255,255,0.16)" }}>
+              <div style={{ fontSize: "0.62rem", textTransform: "uppercase", letterSpacing: "0.12em", color: "rgba(255,255,255,0.9)", fontWeight: 700, marginBottom: "0.9rem", fontFamily: BFONT }}>Overall</div>
               <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "0.1rem" }}>
                 <span style={{ fontSize: "0.7rem", fontWeight: 600, color: "rgba(255,255,255,0.85)", fontFamily: BFONT }}>{d.poles?.[0]}</span>
                 <span style={{ fontSize: "0.7rem", fontWeight: 600, color: "rgba(255,255,255,0.85)", fontFamily: BFONT }}>{d.poles?.[1]}</span>
               </div>
               <PctTrackViz myPct={myPct} partPct={partPct} userName={userName} partnerName={partnerName} />
             </div>
-
-            <IntimacyResponseBreakdown dim={dimMatch} myAnswers={intimacyAnswers} partnerAnswers={partnerIntimacy} userName={userName} partnerName={partnerName} variant={intimacyVariant} />
 
             {/* Talk about it / one-partner-skipped (the skip variant stays intact) */}
             {skipper && osk ? (
@@ -9738,6 +9735,8 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
                 <p style={{ fontSize: "0.9rem", color: "white", lineHeight: 1.75, margin: 0, fontFamily: BFONT, fontWeight: 400 }}>{sub(INTIMACY_RESULTS_PROSE[dimMatch]?.prompt)}</p>
               </div>
             )}
+
+            <IntimacyResponseBreakdown dim={dimMatch} myAnswers={intimacyAnswers} partnerAnswers={partnerIntimacy?.answers} userName={userName} partnerName={partnerName} variant={intimacyVariant} />
 
             <NavButtons
               onBack={() => go(prevId)}
