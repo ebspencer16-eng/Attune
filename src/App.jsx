@@ -5000,7 +5000,7 @@ function PersonalityResults({ myAnswers, partnerAnswers, userName, partnerName, 
       {/* Add-ons row */}
       <div style={{ display: "grid", gridTemplateColumns: LMFT_ENABLED ? "1fr 1fr" : "1fr", gap: "0.75rem", marginTop: "1.25rem" }}>
         <div style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.12)", borderRadius: 14, padding: "1rem" }}>
-          <div style={{ width: 20, height: 20, borderRadius: 5, background: "rgba(232,103,58,0.25)", border: "1.5px solid rgba(232,103,58,0.45)", marginBottom: "0.4rem" }} />
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#E8673A" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" style={{ marginBottom: "0.4rem" }}><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
           <div style={{ fontSize: "0.82rem", fontWeight: 700, color: "white", marginBottom: "0.3rem", fontFamily: BFONT }}>Personalized Workbook</div>
           <p style={{ fontSize: "0.72rem", color: "rgba(255,255,255,0.55)", lineHeight: 1.6, fontFamily: BFONT, margin: "0 0 0.6rem" }}>Guided exercises and conversation prompts built directly from these action items.</p>
           <a href="/offerings" style={{ fontSize: "0.7rem", color: "#E8673A", fontFamily: BFONT, fontWeight: 700, textDecoration: "none" }}>Get the workbook →</a>
@@ -9636,11 +9636,8 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
                 <div style={{ fontSize: "0.55rem", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.3)", fontFamily: BFONT, fontWeight: 700, marginBottom: "0.5rem" }}>What's in this section</div>
                 <div style={{ display: "flex", flexDirection: "column", gap: "0.3rem" }}>
                   {[
-                    ...INTIMACY_DIMENSIONS.map(d => {
-                      const ds = dims.find(x => x.id === d.id);
-                      return { label: d.label, sub: ds?.state === "aligned" ? "Closely matched" : "Worth discussing", id: `intimacy-${d.id}` };
-                    }),
-                    { label: "Conversations Worth Having", sub: "Drawn from where you differ most", id: "intimacy-plan" },
+                    { label: "Detailed pages", sub: "Each aspect, one at a time", id: `intimacy-${INTIMACY_DIMENSIONS[0].id}` },
+                    { label: "Conversations to have", sub: "Prompts drawn from your answers", id: "intimacy-plan" },
                   ].map(item => (
                     <div key={item.id} onClick={() => go(item.id)}
                       style={{ display: "flex", alignItems: "center", gap: "0.75rem", padding: "0.45rem 0.75rem", borderRadius: 8, background: "rgba(255,255,255,0.04)", cursor: "pointer", transition: "all 0.12s", border: "1px solid rgba(255,255,255,0.06)" }}
