@@ -1422,6 +1422,28 @@ function deriveNewCoupleType(myS, partS) {
 }
 
 // Individual type metadata
+// Individual-profile blurb built from per-axis fragments (1.2/4.1). Each axis has
+// 5 proximity bands; verbs conjugate for the pronoun (they -> plural). DRAFT COPY.
+function individualBlurb(name, pron, ec, oc) {
+  const sub = pronoun(pron, "sub");
+  const pos = pronoun(pron, "pos");
+  const Sub = sub.charAt(0).toUpperCase() + sub.slice(1);
+  const pl = sub === "they";
+  const v = (sg, pv) => pl ? pv : sg;
+  const eng =
+    ec >= 0.8 ? `${name} moves toward resolution quickly, feeling what is unresolved and going straight at it.`
+    : ec >= 0.6 ? `${name} leans toward engaging, usually after a short beat to process first.`
+    : ec >= 0.4 ? `${name} sits near the middle on engaging. Quick to move toward resolution on an easy day, wanting a beat first under stress.`
+    : ec >= 0.2 ? `${name} tends to take space first, then circle back to what is unresolved.`
+    : `${name} needs real space before engaging. What ${sub} ${v("brings", "bring")} back, once ready, is worth the wait.`;
+  const opn =
+    oc >= 0.8 ? `${Sub} ${v("names", "name")} what ${sub} ${v("is", "are")} feeling in the moment.`
+    : oc >= 0.6 ? `${Sub} ${v("shares", "share")} more of the inner picture than ${sub} ${v("keeps", "keep")} back.`
+    : oc >= 0.4 ? `On how much ${sub} ${v("shows", "show")}, ${sub} ${v("shares", "share")} some and ${v("holds", "hold")} some, depending on the moment.`
+    : oc >= 0.2 ? `${Sub} ${v("keeps", "keep")} ${pos} inner world a little closer.`
+    : `${Sub} ${v("processes", "process")} privately and ${v("surfaces", "surface")} it later.`;
+  return `${eng} ${opn}`;
+}
 const INDIVIDUAL_TYPES = {
   W: { code: "W", name: "The Initiator", color: "#E8673A", fill: "#FFF4F0", axis1: "Engage", axis2: "Open",
        desc: "Moves toward resolution. Processes and expresses relatively freely.",
@@ -5086,9 +5108,10 @@ function PersonalityResults({ myAnswers, partnerAnswers, userName, partnerName, 
       return perspectives ? perspectives[idx] : "Your partner processes and responds differently than you do. Understanding that difference is what makes this pairing interesting.";
     };
 
+    const _myII = computeIndividualType(myS), _partII = computeIndividualType(partS);
     const people = [
-      { name: userName, partner: partnerName, code: myTypeCode, type: INDIVIDUAL_TYPES[myTypeCode], perspective: perspFor(myTypeCode) },
-      { name: partnerName, partner: userName, code: partTypeCode, type: INDIVIDUAL_TYPES[partTypeCode], perspective: perspFor(partTypeCode) },
+      { name: userName, partner: partnerName, code: myTypeCode, type: INDIVIDUAL_TYPES[myTypeCode], perspective: perspFor(myTypeCode), pron: userPronouns, ec: _myII.engageCoord, oc: _myII.openCoord },
+      { name: partnerName, partner: userName, code: partTypeCode, type: INDIVIDUAL_TYPES[partTypeCode], perspective: perspFor(partTypeCode), pron: partnerPronouns, ec: _partII.engageCoord, oc: _partII.openCoord },
     ];
     const pageColor = "#E8673A";
 
@@ -5114,7 +5137,7 @@ function PersonalityResults({ myAnswers, partnerAnswers, userName, partnerName, 
                   <span style={{ fontSize: "0.7rem", fontWeight: 700, color: pp.type.color, fontFamily: BFONT, letterSpacing: "0.06em" }}>{pp.type.name}</span>
                   <span style={{ fontSize: "0.62rem", color: "rgba(255,255,255,0.35)", fontFamily: BFONT }}>· {pp.type.axis1} · {pp.type.axis2}</span>
                 </div>
-                <p style={{ fontSize: "0.85rem", color: "rgba(255,255,255,0.82)", fontFamily: BFONT, fontWeight: 300, lineHeight: 1.7, margin: 0 }}>{pp.type.typeDesc}</p>
+                <p style={{ fontSize: "0.85rem", color: "rgba(255,255,255,0.82)", fontFamily: BFONT, fontWeight: 300, lineHeight: 1.7, margin: 0 }}>{individualBlurb(pp.name, pp.pron, pp.ec, pp.oc)}</p>
               </div>
             ))}
           </div>
@@ -8934,32 +8957,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
           {/* 4. INDIVIDUAL TILES */}
           {/* ── INDIVIDUAL TYPES (merged: identity + placement blurb + bars) ── */}
           {(() => {
-            // Individual-profile blurb, built from per-axis fragments so it tracks
-            // proximity (1.2). Each axis has 5 bands; a near-axis person reads
-            // "sits near the middle" language instead of a fixed strong paragraph.
-            // Verb forms are conjugated for the pronoun (they -> plural verbs).
-            // DRAFT COPY — pending Ellie/Carolina review.
-            const blurbFor = (name, pron, info) => {
-              const sub = pronoun(pron, "sub");
-              const pos = pronoun(pron, "pos");
-              const Sub = sub.charAt(0).toUpperCase() + sub.slice(1);
-              const pl = sub === "they";
-              const v = (sg, pv) => pl ? pv : sg;
-              const ec = info.engageCoord, oc = info.openCoord;
-              const eng =
-                ec >= 0.8 ? `${name} moves toward resolution quickly, feeling what is unresolved and going straight at it.`
-                : ec >= 0.6 ? `${name} leans toward engaging, usually after a short beat to process first.`
-                : ec >= 0.4 ? `${name} sits near the middle on engaging. Quick to move toward resolution on an easy day, wanting a beat first under stress.`
-                : ec >= 0.2 ? `${name} tends to take space first, then circle back to what is unresolved.`
-                : `${name} needs real space before engaging. What ${sub} ${v("brings", "bring")} back, once ready, is worth the wait.`;
-              const opn =
-                oc >= 0.8 ? `${Sub} ${v("names", "name")} what ${sub} ${v("is", "are")} feeling in the moment.`
-                : oc >= 0.6 ? `${Sub} ${v("shares", "share")} more of the inner picture than ${sub} ${v("keeps", "keep")} back.`
-                : oc >= 0.4 ? `On how much ${sub} ${v("shows", "show")}, ${sub} ${v("shares", "share")} some and ${v("holds", "hold")} some, depending on the moment.`
-                : oc >= 0.2 ? `${Sub} ${v("keeps", "keep")} ${pos} inner world a little closer.`
-                : `${Sub} ${v("processes", "process")} privately and ${v("surfaces", "surface")} it later.`;
-              return `${eng} ${opn}`;
-            };
+            const blurbFor = (name, pron, info) => individualBlurb(name, pron, info.engageCoord, info.openCoord);
             // 5-band axis label (1.3): clearly / leans / balanced. score is 0..1,
             // high end = hi pole.
             const axisBand = (score, hi, lo) =>
