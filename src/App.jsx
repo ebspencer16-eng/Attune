@@ -8934,47 +8934,36 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
           {/* 4. INDIVIDUAL TILES */}
           {/* ── INDIVIDUAL TYPES (merged: identity + placement blurb + bars) ── */}
           {(() => {
+            // Individual-profile blurb, built from per-axis fragments so it tracks
+            // proximity (1.2). Each axis has 5 bands; a near-axis person reads
+            // "sits near the middle" language instead of a fixed strong paragraph.
+            // DRAFT COPY — pending Ellie/Carolina review.
+            const engageFrag = (name, sub, Sub, ec) =>
+              ec >= 0.8 ? `${name} moves toward resolution quickly. When something is unresolved, ${sub} feels it and goes straight at it.`
+              : ec >= 0.6 ? `${name} leans toward engaging, usually after a short beat to process first.`
+              : ec >= 0.4 ? `${name} sits near the middle on engaging. Quick to move toward resolution on an easy day, wanting a beat first under stress.`
+              : ec >= 0.2 ? `${name} tends to take space first, then circle back to what is unresolved.`
+              : `${name} needs real space before engaging. What ${sub} brings back once ${sub} is ready is worth the wait.`;
+            const openFrag = (sub, Sub, pos, oc) =>
+              oc >= 0.8 ? `${Sub} names what ${sub} is feeling in the moment.`
+              : oc >= 0.6 ? `${Sub} shares more of the inner picture than ${sub} keeps back.`
+              : oc >= 0.4 ? `On how much ${sub} shows, ${sub} shares some and holds some, depending on the moment.`
+              : oc >= 0.2 ? `${Sub} keeps ${pos} inner world a little closer.`
+              : `${Sub} processes privately and tends to surface it later.`;
             const blurbFor = (name, pron, info) => {
-              const { typeCode, engageCoord, openCoord } = info;
               const sub = pronoun(pron, "sub");
               const pos = pronoun(pron, "pos");
               const Sub = sub.charAt(0).toUpperCase() + sub.slice(1);
-              const strongEngage = engageCoord > 0.8;
-              const nearEngageCenter = engageCoord >= 0.35 && engageCoord <= 0.65;
-              const strongWithdraw = engageCoord < 0.2;
-              const nearOpenCenter = openCoord >= 0.35 && openCoord <= 0.65;
-              const blurbs = {
-                W: strongEngage
-                  ? `${name} engages quickly and with full momentum. When something is unresolved, ${sub} feels it and moves toward it without hesitation.`
-                  : nearEngageCenter
-                  ? `${name} leans toward resolution but has a slightly longer runway than a typical Initiator. There's a beat of processing before ${sub} engages fully.`
-                  : nearOpenCenter
-                  ? `${name} engages readily but holds ${pos} inner experience a little closer than a typical Initiator. ${Sub} shows up for the conversation; ${sub} just doesn't put every feeling into the shared space immediately.`
-                  : `${name} moves toward resolution and expresses openly, with enough self-awareness to calibrate what ${sub}'s sharing and when.`,
-                X: strongEngage
-                  ? `${name} pushes hard toward resolution. Once ${sub}'s processed internally, ${sub} doesn't sit on it. The urgency toward resolution is real; it's just preceded by a private preparation phase.`
-                  : nearEngageCenter
-                  ? `${name} has a longer internal preparation phase before engaging. ${Sub} pushes toward resolution, but the processing takes real time before anything surfaces.`
-                  : nearOpenCenter
-                  ? `${name} is a Driver who runs slightly warmer than average. ${Sub} processes privately but shares a bit more of the working-through than a typical Driver.`
-                  : `${name} engages toward resolution and processes privately, with a comfortable mix of thoughtfulness and forward momentum.`,
-                Y: strongWithdraw
-                  ? `${name} needs significant space before ${sub} can show up to a hard conversation. Not avoidance, just a longer processing runway. What ${sub} eventually brings is emotionally complete and worth the wait.`
-                  : nearEngageCenter
-                  ? `${name} needs space first, but it's a shorter runway than many Feelers. ${Sub} comes back relatively quickly once ${sub}'s landed somewhere.`
-                  : nearOpenCenter
-                  ? `${name} processes inward and holds what's going on privately until ready. Emotionally expressive when ${sub} arrives, but the arrival takes both time and internal settling.`
-                  : `${name} needs space to process before engaging, carries emotional weight visibly in the interim, and returns when ready with something real.`,
-                Z: strongWithdraw
-                  ? `${name} has the longest runway in the room. ${Sub} processes privately and needs substantial space before anything surfaces. What comes out is considered and real; it just requires time and no pressure.`
-                  : nearEngageCenter
-                  ? `${name} processes privately but has a slightly stronger pull toward resolution than a typical Holder. ${Sub}'ll surface what's going on, ${sub} just needs space and no pressure.`
-                  : nearOpenCenter
-                  ? `${name} holds things privately but is slightly more emotionally accessible than a typical Holder. More going on internally than most Protectors show.`
-                  : `${name} holds things close and processes privately, with a baseline steadiness and a comfortable relationship with quiet.`,
-              };
-              return blurbs[typeCode] || "";
+              return `${engageFrag(name, sub, Sub, info.engageCoord)} ${openFrag(sub, Sub, pos, info.openCoord)}`;
             };
+            // 5-band axis label (1.3): clearly / leans / balanced. score is 0..1,
+            // high end = hi pole.
+            const axisBand = (score, hi, lo) =>
+              score >= 0.8 ? `clearly ${hi}`
+              : score >= 0.6 ? `leans ${hi}`
+              : score >= 0.4 ? "balanced"
+              : score >= 0.2 ? `leans ${lo}`
+              : `clearly ${lo}`;
             return (
             <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "minmax(0,1fr) minmax(0,1fr)", gap: isMobile ? "1rem" : "1rem", marginBottom: "1.5rem" }}>
               {[
@@ -8989,7 +8978,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
                     {[
                       {
                         label: "Engage/Withdraw",
-                        value: info.withdrawScore <= 3.0 ? "Engage-leaning" : "Withdraw-leaning",
+                        value: axisBand(info.engageCoord, "engaged", "withdrawn"),
                         score: info.engageCoord,
                         near: Math.abs(info.withdrawScore - 3) < 0.6,
                         driver: (() => {
@@ -9009,7 +8998,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
                       },
                       {
                         label: "Open/Guarded",
-                        value: info.openScore >= 3.0 ? "Open-leaning" : "Guarded-leaning",
+                        value: axisBand(info.openCoord, "open", "guarded"),
                         score: info.openCoord,
                         near: Math.abs(info.openScore - 3) < 0.6,
                         driver: (() => {
@@ -9036,8 +9025,6 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
                         <div style={{ height: 4, background: C.stone, borderRadius: 2, overflow: "hidden" }}>
                           <div style={{ height: "100%", width: `${Math.round(score * 100)}%`, background: it.color, borderRadius: 2 }} />
                         </div>
-                        {driver && <div style={{ fontSize: "0.6rem", color: C.muted, fontFamily: BFONT, marginTop: "0.25rem", fontStyle: "italic" }}>{driver}</div>}
-                        {near && <div style={{ fontSize: "0.6rem", color: C.muted, fontFamily: BFONT, marginTop: "0.2rem", fontStyle: "italic" }}>{name} sits close to the line here. Interpret this as 'leaning' toward one orientation rather than being fixed in that mindset.</div>}
                       </div>
                     ))}
                   </div>
