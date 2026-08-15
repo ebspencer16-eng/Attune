@@ -5006,14 +5006,14 @@ function PersonalityResults({ myAnswers, partnerAnswers, userName, partnerName, 
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#E8673A" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" style={{ marginBottom: "0.4rem" }}><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
           <div style={{ fontSize: "0.82rem", fontWeight: 700, color: "white", marginBottom: "0.3rem", fontFamily: BFONT }}>Personalized Workbook</div>
           <p style={{ fontSize: "0.72rem", color: "rgba(255,255,255,0.55)", lineHeight: 1.6, fontFamily: BFONT, margin: "0 0 0.6rem" }}>Guided exercises and conversation prompts built directly from these action items.</p>
-          <a href="/offerings" style={{ fontSize: "0.7rem", color: "#E8673A", fontFamily: BFONT, fontWeight: 700, textDecoration: "none" }}>Get the workbook →</a>
+          <a href="/offerings" onClick={(e) => { if (onNavigateTool) { e.preventDefault(); onNavigateTool("workbook-upsell"); } }} style={{ fontSize: "0.7rem", color: "#E8673A", fontFamily: BFONT, fontWeight: 700, textDecoration: "none" }}>Get the workbook →</a>
         </div>
         {LMFT_ENABLED && (
         <div style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.12)", borderRadius: 14, padding: "1rem" }}>
           <div style={{ width: 20, height: 20, borderRadius: 5, background: "rgba(27,95,232,0.2)", border: "1.5px solid rgba(27,95,232,0.4)", marginBottom: "0.4rem" }} />
           <div style={{ fontSize: "0.82rem", fontWeight: 700, color: "white", marginBottom: "0.3rem", fontFamily: BFONT }}>LMFT Session</div>
           <p style={{ fontSize: "0.72rem", color: "rgba(255,255,255,0.55)", lineHeight: 1.6, fontFamily: BFONT, margin: "0 0 0.6rem" }}>A licensed therapist reviews your results and runs a 50-minute session built around exactly this.</p>
-          <a href="/offerings#pkg-premium" style={{ fontSize: "0.7rem", color: "#1B5FE8", fontFamily: BFONT, fontWeight: 700, textDecoration: "none" }}>Learn more →</a>
+          <a href="/offerings#pkg-premium" onClick={(e) => { if (onNavigateTool) { e.preventDefault(); onNavigateTool("lmft-upsell"); } }} style={{ fontSize: "0.7rem", color: "#1B5FE8", fontFamily: BFONT, fontWeight: 700, textDecoration: "none" }}>Learn more →</a>
         </div>
         )}
       </div>
@@ -9172,6 +9172,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
           userPronouns={userPronouns} partnerPronouns={partnerPronouns}
           forcedStep={dimStep} orderedDims={orderedDims}
           onGoExpectations={() => go("exp-overview")}
+          onNavigateTool={onNavigateTool}
           onStepChange={s => {
             if (s === 0) go("comm-overview");
             else if (s === orderedDims.length + 1) go("comm-profiles");
@@ -10064,20 +10065,8 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
               ))}
 
               {/* Relationship Reflection */}
-              {hasAnniversary ? (
-                <div onClick={() => onNavigateTool && onNavigateTool("exercise3")} style={{ display: "flex", alignItems: "center", gap: "1rem", background: C.warm, border: `1.5px solid ${C.stone}`, borderRadius: 14, padding: "0.85rem 1.1rem", cursor: "pointer", transition: "all 0.15s" }}
-                  onMouseEnter={e => { e.currentTarget.style.borderColor = "#10b981"; }}
-                  onMouseLeave={e => { e.currentTarget.style.borderColor = C.stone; }}>
-                  <div style={{ width: 34, height: 34, borderRadius: 10, background: "rgba(16,185,129,0.12)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#10b981" strokeWidth="1.8" strokeLinecap="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
-                  </div>
-                  <div style={{ flex: 1 }}>
-                    <div style={{ fontSize: "0.8rem", fontWeight: 700, color: C.ink, fontFamily: BFONT, marginBottom: "0.1rem" }}>Relationship Reflection {ex3Answers && <span style={{ fontSize: "0.62rem", color: "#10b981", fontWeight: 600, marginLeft: "0.25rem" }}>✓</span>}</div>
-                    <div style={{ fontSize: "0.68rem", color: C.muted, fontFamily: BFONT }}>A third exercise about the moments that shaped you</div>
-                  </div>
-                  <div style={{ color: C.muted, fontSize: "0.9rem" }}>→</div>
-                </div>
-              ) : (
+              {/* Relationship Reflection — only shown as an add-on prompt when not owned (10.2) */}
+              {!hasAnniversary && (
                 <a href="/offerings" style={{ display: "flex", alignItems: "center", gap: "1rem", background: C.warm, border: `1.5px solid ${C.stone}`, borderRadius: 14, padding: "0.85rem 1.1rem", textDecoration: "none", transition: "all 0.15s" }}
                   onClick={(e) => { e.preventDefault(); onNavigateTool && onNavigateTool('reflection-upsell'); }}
                   onMouseEnter={e => { e.currentTarget.style.borderColor = "#10b981"; }}
@@ -10089,7 +10078,23 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
                     <div style={{ fontSize: "0.8rem", fontWeight: 700, color: C.ink, fontFamily: BFONT, marginBottom: "0.1rem" }}>Relationship Reflection <span style={{ fontSize: "0.62rem", fontWeight: 600, color: "#10b981", background: "rgba(16,185,129,0.1)", borderRadius: 999, padding: "0.1rem 0.5rem", marginLeft: "0.35rem" }}>Add-on</span></div>
                     <div style={{ fontSize: "0.68rem", color: C.muted, fontFamily: BFONT }}>A third exercise about the moments that shaped you</div>
                   </div>
-                  <div style={{ color: C.muted, fontSize: "0.9rem" }}>→</div>
+                  <div style={{ color: "#10b981", fontSize: "1.3rem", fontWeight: 700, lineHeight: 1 }}>+</div>
+                </a>
+              )}
+              {/* Physical Intimacy Expectations — add-on prompt when not owned (10.2) */}
+              {!hasIntimacy && (
+                <a href="/offerings" style={{ display: "flex", alignItems: "center", gap: "1rem", background: C.warm, border: `1.5px solid ${C.stone}`, borderRadius: 14, padding: "0.85rem 1.1rem", textDecoration: "none", transition: "all 0.15s" }}
+                  onClick={(e) => { e.preventDefault(); onNavigateTool && onNavigateTool('intimacy-upsell'); }}
+                  onMouseEnter={e => { e.currentTarget.style.borderColor = "#B5546E"; }}
+                  onMouseLeave={e => { e.currentTarget.style.borderColor = C.stone; }}>
+                  <div style={{ width: 34, height: 34, borderRadius: 10, background: "rgba(181,84,110,0.08)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                    <svg width="15" height="16" viewBox="0 0 24 26" fill="none" stroke="#B5546E" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M7 11 V8 a5 5 0 0 1 10 0 V11"/><rect x="4" y="11" width="16" height="12" rx="3"/></svg>
+                  </div>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontSize: "0.8rem", fontWeight: 700, color: C.ink, fontFamily: BFONT, marginBottom: "0.1rem" }}>Physical Intimacy Expectations <span style={{ fontSize: "0.62rem", fontWeight: 600, color: "#B5546E", background: "rgba(181,84,110,0.1)", borderRadius: 999, padding: "0.1rem 0.5rem", marginLeft: "0.35rem" }}>Add-on</span></div>
+                    <div style={{ fontSize: "0.68rem", color: C.muted, fontFamily: BFONT }}>Answered independently, compared side by side</div>
+                  </div>
+                  <div style={{ color: "#B5546E", fontSize: "1.3rem", fontWeight: 700, lineHeight: 1 }}>+</div>
                 </a>
               )}
 
@@ -10215,7 +10220,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
 }
 
 // Thin wrappers so PersonalityResults/ExpectationsResults can be driven externally
-function PersonalityResultsPage({ myAnswers, partnerAnswers, userName, partnerName, coupleType, userPronouns = "", partnerPronouns = "", forcedStep, orderedDims: extDims, onStepChange, onGoExpectations }) {
+function PersonalityResultsPage({ myAnswers, partnerAnswers, userName, partnerName, coupleType, userPronouns = "", partnerPronouns = "", forcedStep, orderedDims: extDims, onStepChange, onGoExpectations, onNavigateTool }) {
   const go = s => { if (onStepChange) onStepChange(s); };
   return <PersonalityResults myAnswers={myAnswers} partnerAnswers={partnerAnswers} userName={userName} partnerName={partnerName} coupleType={coupleType} userPronouns={userPronouns} partnerPronouns={partnerPronouns} externalStep={forcedStep ?? 0} onExternalGo={go} noSideNav={true} onGoExpectations={onGoExpectations} />;
 }
