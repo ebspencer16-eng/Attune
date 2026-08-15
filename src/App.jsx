@@ -1251,7 +1251,7 @@ function IntimacyResults({ myAnswers, partnerAnswers, userName = "You", partnerN
       <div style={{ fontSize: "0.6rem", letterSpacing: "0.2em", textTransform: "uppercase", color: accent, fontFamily: BFONT, fontWeight: 700, marginBottom: "0.6rem" }}>Physical Intimacy Expectations · {userName} & {partnerName}</div>
       <h2 style={{ fontFamily: HFONT, fontSize: "1.9rem", fontWeight: 700, color: C.ink, lineHeight: 1.1, marginBottom: "0.5rem" }}>Where you each land.</h2>
       <p style={{ fontSize: "0.85rem", color: C.muted, fontFamily: BFONT, fontWeight: 300, lineHeight: 1.6, marginBottom: "2rem" }}>
-        {variant === 'married' ? "Based on how things are now." : "Based on what you each expect."} The gap is the conversation, not a verdict.
+        {variant === 'married' ? "Based on how things are now." : "Based on what you each expect."}
       </p>
 
       <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
@@ -2284,7 +2284,7 @@ function CoupleMapSVG({ myS, partS, userName, partnerName, size = 480, hideCapti
       {!hideCaption && (
       <div style={{ marginTop: "0.75rem" }}>
         <p style={{ fontSize: "0.72rem", color: "#8C7A68", lineHeight: 1.65, margin: "0 0 0.5rem", fontWeight: 300, fontFamily: BFONT }}>
-          Where you each sit on this map is calculated from your responses. Scores for Conflict, Repair, and Stress determine placement on the Engage/Withdraw axis, and Expression, Feedback, and Needs scores determine placement on the Open/Guarded axis. Proximity to an axis line means that partner is more flexible on that dimension.
+          Where you each sit on this map is calculated from your responses. Scores for Conflict, Repair, and Stress determine placement on the Engage/Withdraw axis, and Expression, Feedback, and Needs scores determine placement on the Open/Guarded axis.
         </p>
         <p style={{ fontSize: "0.72rem", color: "#8C7A68", lineHeight: 1.65, margin: 0, fontWeight: 300, fontFamily: BFONT }}>
           Two people who think they know their type will almost always land somewhere different than expected.
@@ -4945,7 +4945,7 @@ function PersonalityResults({ myAnswers, partnerAnswers, userName, partnerName, 
         <NavButtons
           onBack={() => go(step - 1)}
           onNext={() => go(step + 1)}
-          nextLabel={isLast ? (sameType ? "Communication Profile →" : ((userName) + "'s Profile ->")) : ((DIM_META[nextDim]?.label) + " →")}
+          nextLabel={isLast ? "Individual Profiles →" : ((DIM_META[nextDim]?.label) + " →")}
         />
       </ResultsSlide>
     </MaybeNav>
@@ -9605,7 +9605,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
               <div style={{ fontSize: "0.65rem", textTransform: "uppercase", letterSpacing: "0.2em", color: "rgba(255,255,255,0.38)", marginBottom: "0.5rem", fontFamily: BFONT }}>Physical Intimacy Expectations</div>
               <div style={{ fontSize: "clamp(1.8rem,6vw,2.8rem)", fontWeight: 700, fontFamily: HFONT, lineHeight: 1.05, marginBottom: "0.6rem" }}>{userName} &amp; {partnerName}</div>
               <p style={{ fontSize: "0.9rem", color: "rgba(255,255,255,0.6)", fontFamily: BFONT, fontWeight: 300, lineHeight: 1.6, marginBottom: "1rem" }}>
-                {intimacyVariant === "married" ? "Based on how things are now." : "Based on what you each expect."} {exploreCount === 0 ? "You line up across the board." : `${alignedCount} of ${dims.length} closely matched.`} The gap is the conversation.
+                {intimacyVariant === "married" ? "Based on how things are now." : "Based on what you each expect."} {exploreCount === 0 ? "You line up across the board." : `${alignedCount} of ${dims.length} closely matched.`}
               </p>
               
               {/* Where you each land — label left, bar right, key top-right (9.1) */}

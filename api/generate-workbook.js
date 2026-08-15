@@ -1274,7 +1274,7 @@ function buildPartOneIntro(u, p, coupleType, domainsToShow) {
   const totalDims = (domainsToShow || []).reduce((n, d) => n + (d.dims?.length || 0), 0);
   const color = coupleType ? (coupleType.color || '#E8673A').replace('#', '') : BLUE;
 
-  const dimsLine = `The next pages walk through ${totalDims || 10} communication dimensions, one per page. Where ${u} and ${p}'s answers align, the gap is small. Where they diverge, the gap is the conversation.`;
+  const dimsLine = `The next pages walk through ${totalDims || 10} communication dimensions, one per page. Where ${u} and ${p}'s answers align, the gap is small. Where they diverge, that's worth talking through.`;
 
   return [
     pb(),
@@ -1599,7 +1599,7 @@ function buildExpDomains(u, p, responsibilities, lifeQuestions) {
       run('what you expect from each other.', { size: 36, italics: true, color: GREEN }),
     ] }));
   result.push(new Paragraph({ spacing: { before: 160, after: 240, line: 340, lineRule: 'atLeast' },
-    children: [run(`Each domain is one slice of the life ${u} and ${p} are building. Where you align, the assumptions hold without saying. Where you don't, the gap is the conversation.`, { size: 20, italics: true, color: MUTED })] }));
+    children: [run(`Each domain is one slice of the life ${u} and ${p} are building. Where you align, the assumptions hold without saying. Where you don't, that's worth talking through.`, { size: 20, italics: true, color: MUTED })] }));
   result.push(new Paragraph({ spacing: { before: 120, after: 0 },
     border: { top: { style: BorderStyle.SINGLE, size: 4, color: STONE, space: 4 } },
     children: [new TextRun('')] }));
