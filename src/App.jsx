@@ -10011,7 +10011,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
 
               {/* LMFT Session (offering discontinued — gated by LMFT_ENABLED) */}
               {LMFT_ENABLED && (hasLMFT ? (
-                <div onClick={() => setView("lmft")} style={{ display: "flex", alignItems: "center", gap: "1rem", background: C.warm, border: `1.5px solid ${C.stone}`, borderRadius: 14, padding: "0.85rem 1.1rem", cursor: "pointer", transition: "all 0.15s" }}
+                <div onClick={() => onNavigateTool && onNavigateTool("lmft")} style={{ display: "flex", alignItems: "center", gap: "1rem", background: C.warm, border: `1.5px solid ${C.stone}`, borderRadius: 14, padding: "0.85rem 1.1rem", cursor: "pointer", transition: "all 0.15s" }}
                   onMouseEnter={e => { e.currentTarget.style.borderColor = "#5B6DF8"; }}
                   onMouseLeave={e => { e.currentTarget.style.borderColor = C.stone; }}>
                   <div style={{ width: 34, height: 34, borderRadius: 10, background: "rgba(91,109,248,0.12)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
@@ -10041,7 +10041,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
 
               {/* Relationship Reflection */}
               {hasAnniversary ? (
-                <div onClick={() => setView("exercise3")} style={{ display: "flex", alignItems: "center", gap: "1rem", background: C.warm, border: `1.5px solid ${C.stone}`, borderRadius: 14, padding: "0.85rem 1.1rem", cursor: "pointer", transition: "all 0.15s" }}
+                <div onClick={() => onNavigateTool && onNavigateTool("exercise3")} style={{ display: "flex", alignItems: "center", gap: "1rem", background: C.warm, border: `1.5px solid ${C.stone}`, borderRadius: 14, padding: "0.85rem 1.1rem", cursor: "pointer", transition: "all 0.15s" }}
                   onMouseEnter={e => { e.currentTarget.style.borderColor = "#10b981"; }}
                   onMouseLeave={e => { e.currentTarget.style.borderColor = C.stone; }}>
                   <div style={{ width: 34, height: 34, borderRadius: 10, background: "rgba(16,185,129,0.12)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
@@ -10071,7 +10071,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
 
               {/* Starting Out Checklist */}
               {hasChecklist ? (
-                <div onClick={() => setView("checklist")} style={{ display: "flex", alignItems: "center", gap: "1rem", background: C.warm, border: `1.5px solid ${C.stone}`, borderRadius: 14, padding: "0.85rem 1.1rem", cursor: "pointer", transition: "all 0.15s" }}
+                <div onClick={() => onNavigateTool && onNavigateTool("checklist")} style={{ display: "flex", alignItems: "center", gap: "1rem", background: C.warm, border: `1.5px solid ${C.stone}`, borderRadius: 14, padding: "0.85rem 1.1rem", cursor: "pointer", transition: "all 0.15s" }}
                   onMouseEnter={e => { e.currentTarget.style.borderColor = C.clay; }}
                   onMouseLeave={e => { e.currentTarget.style.borderColor = C.stone; }}>
                   <div style={{ width: 34, height: 34, borderRadius: 10, background: "rgba(193,127,71,0.12)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
@@ -10101,7 +10101,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
 
               {/* Shared Budgeting */}
               {hasBudget ? (
-                <div onClick={() => setView("budget")} style={{ display: "flex", alignItems: "center", gap: "1rem", background: C.warm, border: `1.5px solid ${C.stone}`, borderRadius: 14, padding: "0.85rem 1.1rem", cursor: "pointer", transition: "all 0.15s" }}
+                <div onClick={() => onNavigateTool && onNavigateTool("budget")} style={{ display: "flex", alignItems: "center", gap: "1rem", background: C.warm, border: `1.5px solid ${C.stone}`, borderRadius: 14, padding: "0.85rem 1.1rem", cursor: "pointer", transition: "all 0.15s" }}
                   onMouseEnter={e => { e.currentTarget.style.borderColor = "#1B5FE8"; }}
                   onMouseLeave={e => { e.currentTarget.style.borderColor = C.stone; }}>
                   <div style={{ width: 34, height: 34, borderRadius: 10, background: "rgba(27,95,232,0.12)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
