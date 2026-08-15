@@ -4789,6 +4789,13 @@ function PersonalityResults({ myAnswers, partnerAnswers, userName, partnerName, 
               </div>
             </div>
           </div>
+          <div style={{ display: "flex", alignItems: "center", gap: "0.65rem", marginBottom: "0.55rem" }}>
+            <span style={{ flexShrink: 0, width: "clamp(88px,30%,120px)" }} />
+            <div style={{ flex: 1, display: "flex", justifyContent: "space-between" }}>
+              <span style={{ fontSize: "0.58rem", fontWeight: 600, color: "rgba(255,255,255,0.42)", fontFamily: BFONT }}>{DIM_META[orderedDims[0]]?.ends?.[0] ?? "A"}</span>
+              <span style={{ fontSize: "0.58rem", fontWeight: 600, color: "rgba(255,255,255,0.42)", fontFamily: BFONT }}>{DIM_META[orderedDims[0]]?.ends?.[1] ?? "B"}</span>
+            </div>
+          </div>
           <div style={{ display: "flex", flexDirection: "column", gap: "0.55rem" }}>
             {orderedDims.map(dim => {
               const f = byDim[dim];
@@ -4815,10 +4822,6 @@ function PersonalityResults({ myAnswers, partnerAnswers, userName, partnerName, 
                 </div>
               );
             })}
-          </div>
-          <div style={{ display: "flex", justifyContent: "space-between", marginTop: "0.5rem" }}>
-            <span style={{ fontSize: "0.55rem", color: "rgba(255,255,255,0.2)", fontFamily: BFONT }}>{DIM_META[orderedDims[0]]?.ends?.[0] ?? "A"}</span>
-            <span style={{ fontSize: "0.55rem", color: "rgba(255,255,255,0.2)", fontFamily: BFONT }}>{DIM_META[orderedDims[0]]?.ends?.[1] ?? "B"}</span>
           </div>
         </div>
 
