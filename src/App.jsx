@@ -4749,7 +4749,7 @@ function resolveRoleTokens(str, myS, partS, userName, partnerName, userPronouns 
   return out;
 }
 
-function PersonalityResults({ myAnswers, partnerAnswers, userName, partnerName, coupleType, userPronouns = "", partnerPronouns = "", noSideNav = false, externalStep, onExternalGo, onGoExpectations }) {
+function PersonalityResults({ myAnswers, partnerAnswers, userName, partnerName, coupleType, userPronouns = "", partnerPronouns = "", noSideNav = false, externalStep, onExternalGo, onGoExpectations, onNavigateTool, hasWorkbook = false, hasLMFT = false }) {
   const [step, setStep] = useState(externalStep ?? 0);
   const [showRaw, setShowRaw] = useState(false);
   useEffect(() => { if (externalStep !== undefined) setStep(externalStep); }, [externalStep]);
@@ -5070,15 +5070,18 @@ function PersonalityResults({ myAnswers, partnerAnswers, userName, partnerName, 
       </button>
       <NavButtons onBack={() => go(step - 1)} onNext={onGoExpectations || (() => {})} nextLabel={onGoExpectations ? "Expectations →" : "Done"} nextDisabled={!onGoExpectations} />
 
-      {/* Add-ons row */}
-      <div style={{ display: "grid", gridTemplateColumns: LMFT_ENABLED ? "1fr 1fr" : "1fr", gap: "0.75rem", marginTop: "1.25rem" }}>
+      {/* Add-ons row — hide anything already owned */}
+      {(!hasWorkbook || (LMFT_ENABLED && !hasLMFT)) && (
+      <div style={{ display: "grid", gridTemplateColumns: (!hasWorkbook && LMFT_ENABLED && !hasLMFT) ? "1fr 1fr" : "1fr", gap: "0.75rem", marginTop: "1.25rem" }}>
+        {!hasWorkbook && (
         <div style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.12)", borderRadius: 14, padding: "1rem" }}>
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#E8673A" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" style={{ marginBottom: "0.4rem" }}><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
           <div style={{ fontSize: "0.82rem", fontWeight: 700, color: "white", marginBottom: "0.3rem", fontFamily: BFONT }}>Personalized Workbook</div>
           <p style={{ fontSize: "0.72rem", color: "rgba(255,255,255,0.55)", lineHeight: 1.6, fontFamily: BFONT, margin: "0 0 0.6rem" }}>Guided exercises and conversation prompts built directly from these action items.</p>
           <a href="/offerings" onClick={(e) => { if (onNavigateTool) { e.preventDefault(); onNavigateTool("workbook-upsell"); } }} style={{ fontSize: "0.7rem", color: "#E8673A", fontFamily: BFONT, fontWeight: 700, textDecoration: "none" }}>Get the workbook →</a>
         </div>
-        {LMFT_ENABLED && (
+        )}
+        {LMFT_ENABLED && !hasLMFT && (
         <div style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.12)", borderRadius: 14, padding: "1rem" }}>
           <div style={{ width: 20, height: 20, borderRadius: 5, background: "rgba(27,95,232,0.2)", border: "1.5px solid rgba(27,95,232,0.4)", marginBottom: "0.4rem" }} />
           <div style={{ fontSize: "0.82rem", fontWeight: 700, color: "white", marginBottom: "0.3rem", fontFamily: BFONT }}>LMFT Session</div>
@@ -5087,6 +5090,7 @@ function PersonalityResults({ myAnswers, partnerAnswers, userName, partnerName, 
         </div>
         )}
       </div>
+      )}
     </ResultsSlide>
     </MaybeNav>
   );
@@ -9214,6 +9218,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
           forcedStep={dimStep} orderedDims={orderedDims}
           onGoExpectations={() => go("exp-overview")}
           onNavigateTool={onNavigateTool}
+          hasWorkbook={hasWorkbook} hasLMFT={hasLMFT}
           onStepChange={s => {
             if (s === 0) go("comm-overview");
             else if (s === orderedDims.length + 1) go("comm-profiles");
@@ -10261,9 +10266,9 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
 }
 
 // Thin wrappers so PersonalityResults/ExpectationsResults can be driven externally
-function PersonalityResultsPage({ myAnswers, partnerAnswers, userName, partnerName, coupleType, userPronouns = "", partnerPronouns = "", forcedStep, orderedDims: extDims, onStepChange, onGoExpectations, onNavigateTool }) {
+function PersonalityResultsPage({ myAnswers, partnerAnswers, userName, partnerName, coupleType, userPronouns = "", partnerPronouns = "", forcedStep, orderedDims: extDims, onStepChange, onGoExpectations, onNavigateTool, hasWorkbook = false, hasLMFT = false }) {
   const go = s => { if (onStepChange) onStepChange(s); };
-  return <PersonalityResults myAnswers={myAnswers} partnerAnswers={partnerAnswers} userName={userName} partnerName={partnerName} coupleType={coupleType} userPronouns={userPronouns} partnerPronouns={partnerPronouns} externalStep={forcedStep ?? 0} onExternalGo={go} noSideNav={true} onGoExpectations={onGoExpectations} />;
+  return <PersonalityResults myAnswers={myAnswers} partnerAnswers={partnerAnswers} userName={userName} partnerName={partnerName} coupleType={coupleType} userPronouns={userPronouns} partnerPronouns={partnerPronouns} externalStep={forcedStep ?? 0} onExternalGo={go} noSideNav={true} onGoExpectations={onGoExpectations} onNavigateTool={onNavigateTool} hasWorkbook={hasWorkbook} hasLMFT={hasLMFT} />;
 }
 function ExpectationsResultsPage({ myAnswers, partnerAnswers, userName, partnerName, forcedSection, onGoWhatComesNext, onExternalGo, coupleTypeCode = null, coupleTypeName = null, coupleTypeColor = "#1B5FE8" }) {
   return <ExpectationsResults myAnswers={myAnswers} partnerAnswers={partnerAnswers} userName={userName} partnerName={partnerName} forcedSection={forcedSection} noSideNav={true} onGoWhatComesNext={onGoWhatComesNext} onExternalGo={onExternalGo} coupleTypeCode={coupleTypeCode} coupleTypeName={coupleTypeName} coupleTypeColor={coupleTypeColor} />;
@@ -16216,17 +16221,10 @@ export default function App() {
         onCheckout={() => {
           const prod = upsellModal.product;
           setUpsellModal(null);
-          if (prod === 'lmft') {
-            // LMFT is an add-on purchasable on any package — go to checkout with current pkg + lmft
-            const currentPkg = Object.keys({ core: 1, newlywed: 1, anniversary: 1, premium: 1 }).includes(demoPkg) ? demoPkg : 'core';
-            window.location.href = `/checkout?pkg=${currentPkg}&addon_lmft=1`;
-          } else if (prod === 'intimacy') {
-            // Intimacy is an add-on purchasable on any package — checkout with current pkg + intimacy
-            const currentPkg = Object.keys({ core: 1, newlywed: 1, anniversary: 1, premium: 1 }).includes(demoPkg) ? demoPkg : 'core';
-            window.location.href = `/checkout?pkg=${currentPkg}&addon_intimacy=1`;
-          } else {
-            window.location.href = "/offerings#pkg-" + (UPSELL_PRODUCTS[prod]?.cartParam || "core");
-          }
+          // All add-ons route to the quick checkout with the add-on preselected,
+          // never the marketing offerings page.
+          const currentPkg = ['core','newlywed','anniversary','premium'].includes(demoPkg) ? demoPkg : 'core';
+          window.location.href = `/checkout?pkg=${currentPkg}&addon_${prod}=1`;
         }}
         onClose={() => setUpsellModal(null)}
       />
