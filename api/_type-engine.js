@@ -29,11 +29,11 @@ export const DIM_KEYS = {
   love:       ['lv1', 'lv2', 'lv5'],
   bids:       ['bd1', 'bd3', 'bd4'],
   needs:      ['nd1', 'nd5'],
-  conflict:   ['cf1', 'cf2'],
+  conflict:   ['cf1', 'cf2', 'cf3'],
   stress:     ['st1'],
   repair:     ['rp2', 'rp3', 'rp6'],
-  feedback:   ['fb5'],
-  listening:  ['ls1'],
+  feedback:   ['fb5', 'fb2'],
+  listening:  ['ls1', 'ls2'],
 };
 
 // Source of truth for the type formula.
