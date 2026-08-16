@@ -94,6 +94,25 @@ export default async function handler(req) {
     console.warn('[wb-promo] dedup check failed (continuing):', e);
   }
 
+  // ── Skip if the couple already owns the workbook (premium bundles it, or the
+  //    workbook add-on was purchased). No point promoting what they already have.
+  try {
+    const emails = [accountEmail];
+    if (partnerEmail && partnerEmail.includes('@')) emails.push(partnerEmail);
+    const inList = emails.map(e => `"${String(e).replace(/[",()]/g, '')}"`).join(',');
+    const oq = `${sUrl}/rest/v1/orders?select=addon_workbook,pkg_key&buyer_email=in.(${inList})`;
+    const or = await fetch(oq, { headers: dbHeaders });
+    const orders = or.ok ? await or.json().catch(() => []) : [];
+    const ownsWorkbook = Array.isArray(orders) && orders.some(o => o.addon_workbook || o.pkg_key === 'premium');
+    if (ownsWorkbook) {
+      return new Response(JSON.stringify({ ok: true, skipped: 'owns_workbook' }), {
+        status: 200, headers: { 'Content-Type': 'application/json' },
+      });
+    }
+  } catch (e) {
+    console.warn('[wb-promo] workbook-ownership check failed (continuing):', e);
+  }
+
   const code = genCode();
   const expiresAt = new Date(Date.now() + VALID_DAYS * 24 * 60 * 60 * 1000).toISOString();
   const bound = [accountEmail];

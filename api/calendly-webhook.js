@@ -182,28 +182,7 @@ async function handleBookingCreated(payload) {
     console.error('[calendly-webhook] supabase upsert non-200:', upsertRes.status, txt);
   }
 
-  // Send our branded confirmation email — replaces Calendly's default user email
-  const apiKey = process.env.RESEND_API_KEY;
-  if (apiKey && inviteeEmail) {
-    const baseUrl = process.env.PUBLIC_BASE_URL || 'https://attune-relationships.com';
-    await fetch(`${baseUrl}/api/send-email`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        type: 'lmft_confirmed',
-        toEmail: inviteeEmail,
-        toName: p1Name,
-        partnerName: p2Name || null,
-        scheduledStart,
-        timezone,
-        videoUrl,
-        rescheduleUrl,
-        cancelUrl,
-        therapistName,
-        orderId,
-      }),
-    }).catch(e => console.warn('[calendly-webhook] confirmation email failed:', e));
-  }
+  // lmft_confirmed email retired (email #6 removed).
 }
 
 // ── invitee.canceled → mark row cancelled ────────────────────────────────────

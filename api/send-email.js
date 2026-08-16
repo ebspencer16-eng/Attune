@@ -255,8 +255,9 @@ function resultsViewedEmail({ toName, partnerName, coupleType, portalUrl, hasRef
     subject: `Your Attune results are ready${coupleType ? `. You're: '${coupleType.toLowerCase()}'` : ""}`,
     html: layout(`
       <h1>Your results are ready.</h1>
-      <p>Hi ${name}, you and ${partner} just completed Attune${coupleType ? `. Your couple type is <strong>${coupleType}</strong>` : ""}. Everything you need is in your results portal.</p>
-      <div class="btn-wrap"><a href="${appUrl}" class="btn">View your results →</a></div>
+      <p>Hi ${name}, you and ${partner} just completed Attune${coupleType ? `. Your couple type is <strong>${coupleType}</strong>` : ""}. Your results${hasWorkbook ? ' and your personalized workbook are' : ' are'} in your portal, ready whenever you are.</p>
+      <div class="btn-wrap"><a href="${appUrl}" class="btn">Open your portal →</a></div>
+      ${hasWorkbook ? `<p style="font-size:0.82rem;color:#8C7A68;margin-top:-4px">Your personalized workbook is in the portal too. Open it, read it, or download it there whenever you are ready.</p>` : ''}
       <div class="divider"></div>
       <p style="font-size:0.82rem;font-weight:700;color:#0E0B07;margin-bottom:10px">Your results include</p>
       <table style="width:100%;border-collapse:collapse;margin-bottom:4px">

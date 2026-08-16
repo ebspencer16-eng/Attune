@@ -415,22 +415,7 @@ async function handleWebhook(req) {
         body: JSON.stringify({ from: `Attune <${fromEmail}>`, to: [intent.receipt_email], subject, html }),
       }).catch(err => console.warn('Confirmation email failed:', err));
 
-      // LMFT scheduling email — fires for premium pkg or when addonLmft=1
-      const needsLmft = meta.pkgKey === 'premium' || meta.addonLmft === '1';
-      if (needsLmft) {
-        await fetch(`${baseUrl}/api/send-email`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            type: 'lmft_scheduled',
-            toEmail: intent.receipt_email,
-            toName: meta.buyerName || meta.partner1Name || 'there',
-            partnerName: meta.partner2Name || 'your partner',
-            schedulingUrl: `${baseUrl}/lmft-booking?order=${meta.orderNum || intent.id}`,
-            orderNum: meta.orderNum || intent.id,
-          }),
-        }).catch(err => console.warn('LMFT email failed:', err));
-      }
+      // lmft_scheduled email retired (email #5 removed).
 
       // Auto-generate QR card for physical orders — stores URL in order record
       if (meta.isPhysical === '1') {

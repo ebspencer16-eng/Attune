@@ -257,23 +257,7 @@ async function handlePartnerSync(req) {
         .select('email_opt_in').eq('id', partnerA.id).maybeSingle();
       const optedOut = partnerAProfile && partnerAProfile.email_opt_in === false;
 
-      if (partnerAEmail && !optedOut) {
-        // Fire-and-forget. We don't await on the response — link should
-        // return promptly so the client can navigate.
-        const siteUrl = process.env.SITE_URL || 'https://attune-relationships.com';
-        fetch(`${siteUrl}/api/send-email`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            type: 'partner_joined_notification',
-            userId: partnerA.id,
-            toEmail: partnerAEmail,
-            toName: partnerAName,
-            partnerName: partnerBName,
-            portalUrl: `${siteUrl}/app`,
-          }),
-        }).catch(e => console.warn('[partner-sync] notify partner_joined failed:', e));
-      }
+      // partner_joined_notification email retired (email #3 removed).
     } catch (e) {
       console.warn('[partner-sync] partner_joined notification setup failed:', e);
     }
