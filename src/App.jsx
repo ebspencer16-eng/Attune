@@ -5194,12 +5194,16 @@ function PersonalityResults({ myAnswers, partnerAnswers, userName, partnerName, 
           <div style={{ background: `${pageColor}18`, borderRadius: 16, padding: "1.25rem", border: `1px solid ${pageColor}45` }}>
             <div style={{ fontSize: "0.6rem", textTransform: "uppercase", letterSpacing: "0.18em", color: pageColor, fontWeight: 700, marginBottom: "0.85rem", fontFamily: BFONT }}>Communicating with each other</div>
             <div style={{ display: "flex", flexDirection: "column", gap: "0.9rem" }}>
-              {people.map(pp => (
-                <div key={pp.name}>
-                  <div style={{ fontSize: "0.72rem", fontWeight: 700, color: pp.type.color, fontFamily: BFONT, marginBottom: "0.25rem" }}>{pp.name} with {pp.partner}</div>
-                  <p style={{ fontSize: "0.88rem", color: "rgba(255,255,255,0.88)", fontFamily: BFONT, fontWeight: 400, lineHeight: 1.75, margin: 0 }}>{pp.perspective}</p>
-                </div>
-              ))}
+              {people[0].perspective === people[1].perspective ? (
+                <p style={{ fontSize: "0.88rem", color: "rgba(255,255,255,0.88)", fontFamily: BFONT, fontWeight: 400, lineHeight: 1.75, margin: 0 }}>{people[0].perspective}</p>
+              ) : (
+                people.map(pp => (
+                  <div key={pp.name}>
+                    <div style={{ fontSize: "0.72rem", fontWeight: 700, color: pp.type.color, fontFamily: BFONT, marginBottom: "0.25rem" }}>{pp.name} with {pp.partner}</div>
+                    <p style={{ fontSize: "0.88rem", color: "rgba(255,255,255,0.88)", fontFamily: BFONT, fontWeight: 400, lineHeight: 1.75, margin: 0 }}>{pp.perspective}</p>
+                  </div>
+                ))
+              )}
             </div>
           </div>
 
