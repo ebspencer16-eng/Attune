@@ -16241,9 +16241,9 @@ export default function App() {
         }}
         onPickAddon={(addonId) => {
           setShowPackagesModal(false);
-          // Route to offerings with the add-on preselected; offerings handles
-          // attaching an add-on to a purchase.
-          window.location.href = `/offerings?addon=${addonId}`;
+          // Add-ons route to the quick checkout with the add-on preselected.
+          const currentPkg = ['core','newlywed','anniversary','premium'].includes(demoPkg) ? demoPkg : 'core';
+          window.location.href = `/checkout?pkg=${currentPkg}&addon_${addonId}=1`;
         }}
       />
     )}

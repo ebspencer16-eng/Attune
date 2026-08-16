@@ -16,7 +16,7 @@
 //                skipped. For these couples the separate prompt tile is hidden.
 //
 // {U} = current user's name, {P} = partner's name. Neither end of any
-// dimension is better. The gap is the conversation.
+// dimension is better; the difference is what's worth talking through.
 
 export const INTIMACY_RESULTS_PROSE = {
   frequency: {
