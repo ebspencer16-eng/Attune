@@ -10067,7 +10067,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
                     style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", background: "#9B5DE5", color: "white", borderRadius: 10, padding: "0.6rem 1.25rem", border: "none", cursor: "pointer", fontSize: "0.78rem", fontWeight: 700, fontFamily: BFONT }}>
                     ↓ Download (.docx)
                   </button>
-                  <a href="/offerings#pkg-workbook" style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", background: "white", border: `1.5px solid ${C.stone}`, color: C.ink, borderRadius: 10, padding: "0.6rem 1.15rem", textDecoration: "none", fontSize: "0.78rem", fontWeight: 600, fontFamily: BFONT }}>
+                  <a href="/offerings#pkg-workbook" onClick={(e) => { if (onNavigateTool) { e.preventDefault(); onNavigateTool("workbook-upsell"); } }} style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", background: "white", border: `1.5px solid ${C.stone}`, color: C.ink, borderRadius: 10, padding: "0.6rem 1.15rem", textDecoration: "none", fontSize: "0.78rem", fontWeight: 600, fontFamily: BFONT }}>
                     Order a bound copy →
                   </a>
                   <span style={{ fontSize: "0.66rem", color: C.muted, fontFamily: BFONT }}>Opens in Word, Google Docs, or Pages</span>
