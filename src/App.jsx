@@ -1445,28 +1445,44 @@ function individualBlurb(name, pron, ec, oc) {
   return `${eng} ${opn}`;
 }
 // "Communicating with each other" (4.2), built from the gap between the two people
-// on each axis, so it is specific to this pairing. Second person, addressed to the
-// person whose tile it is; ${partner} + partner pronouns refer to the other. DRAFT.
+// on each axis (aligned / small gap / large gap), so it is specific to this pairing.
+// Second person, addressed to the person whose tile it is; ${partner} + partner
+// pronouns refer to the other. DRAFT copy pending Ellie/Carolina review.
 function communicatingBlurb(partner, partnerPron, myEc, myOc, partEc, partOc) {
   const pSub = pronoun(partnerPron, "sub");
-  const pPos = pronoun(partnerPron, "pos");
+  const pObj = pronoun(partnerPron, "obj");
+  const pIsC = pronoun(partnerPron, "isC");
   const pv = (sg, plr) => (pSub === "they") ? plr : sg;
-  const eGap = myEc - partEc, eAvg = (myEc + partEc) / 2;
-  const eng =
-    Math.abs(eGap) < 0.2
-      ? (eAvg >= 0.6 ? `You both move toward resolution quickly, so the risk here is heat, not distance. Slow the tempo, not the honesty.`
-         : eAvg <= 0.4 ? `You both tend to take space first, so nothing gets forced. The risk is that the conversation never quite starts, so name a time to come back to it.`
-         : `You both sit near the middle on engaging, so timing shifts with the day. Say which mode you are in when it matters.`)
-      : eGap > 0 ? `You reach for resolution faster than ${partner}. Giving ${partner} the minute ${pSub} ${pv("needs", "need")} keeps the pace workable for both of you.`
-                 : `${partner} reaches for resolution faster than you. Saying "I need a minute" out loud keeps ${partner} from reading the pause as avoidance.`;
-  const oGap = myOc - partOc, oAvg = (myOc + partOc) / 2;
-  const opn =
-    Math.abs(oGap) < 0.2
-      ? (oAvg >= 0.6 ? `You both put things into words, so you rarely have to guess. Keep leaving room for the quieter thought.`
-         : oAvg <= 0.4 ? `You both hold things close, so a lot can go unsaid. The direct question is your friend here.`
-         : `You both share some and hold some, so what stays unsaid depends on the moment. A quick check-in clears it up.`)
-      : oGap > 0 ? `You share more readily than ${partner}. Leaving space lets ${partner} arrive at ${pPos} own pace.`
-                 : `${partner} shares more readily than you. A half-formed thought said out loud still counts, and ${partner} usually needs it.`;
+  const eGap = myEc - partEc, eAbs = Math.abs(eGap), eAvg = (myEc + partEc) / 2;
+  let eng;
+  if (eAbs < 0.2) {
+    eng = eAvg >= 0.6 ? `You both move toward resolution quickly, so the risk here is unbridled emotion rather than distance. Try to keep the conversation from heating up, but keep the honesty.`
+        : eAvg <= 0.4 ? `You both tend to take space before starting the conversation, so things aren't often forced. The risk is that the conversation never quite starts, it may help to name a time to come back to it.`
+        : `You both sit near the middle in terms of whether you engage or withdraw in conflict, so the roles you play in conversations may shift with the day. Say which mode you are in when it matters.`;
+  } else if (eGap > 0) {
+    eng = eAbs >= 0.45
+      ? `You tend to reach for resolution faster than ${partner}. Giving ${partner} time when ${pSub} ${pv("needs","need")} it can help the conversation be more productive for both of you.`
+      : `You reach for resolution a little faster than ${partner}. A short pause to let ${partner} catch up keeps the two of you closer to the same pace.`;
+  } else {
+    eng = eAbs >= 0.45
+      ? `${partner} usually reaches for resolution faster than you. Telling ${pObj} "I need a minute" out loud keeps ${partner} from interpreting your pause as avoidance.`
+      : `${partner} reaches for resolution a little faster than you. A quick "I'm still with you, give me a second" keeps ${partner} from wondering.`;
+  }
+  const oGap = myOc - partOc, oAbs = Math.abs(oGap), oAvg = (myOc + partOc) / 2;
+  let opn;
+  if (oAbs < 0.2) {
+    opn = oAvg >= 0.6 ? `Even though you don't often have to guess what ${partner} is thinking, there may occasionally be quieter thoughts that get shared when the time is right.`
+        : oAvg <= 0.4 ? `You both hold internal things close to your chests, which means things can go unsaid. Remember that it's alright to ask direct questions sometimes.`
+        : `You are both fairly balanced when it comes to sharing or keeping things to yourselves, so the dynamic shifts depending on the situation. Quick check-ins can clear this up. You can ask "is there anything I need to know?"`;
+  } else if (oGap > 0) {
+    opn = oAbs >= 0.45
+      ? `You share more readily than ${partner}. Make sure ${partner} knows you are there when ${pIsC} ready to let you in.`
+      : `You share a little more readily than ${partner}. A bit of patience lets ${partner} meet you there.`;
+  } else {
+    opn = oAbs >= 0.45
+      ? `${partner} shares more readily than you. Remember that a half-formed thought said out loud still counts, and ${partner} will usually appreciate the effort.`
+      : `${partner} shares a little more readily than you. Offering a half-formed thought now and then goes a long way.`;
+  }
   return `${eng} ${opn}`;
 }
 const INDIVIDUAL_TYPES = {
