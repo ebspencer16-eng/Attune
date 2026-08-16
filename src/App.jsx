@@ -1462,7 +1462,7 @@ function communicatingBlurb(partner, partnerPron, myEc, myOc, partEc, partOc) {
   } else if (eGap > 0) {
     eng = eAbs >= 0.45
       ? `You tend to reach for resolution faster than ${partner}. Giving ${partner} time when ${pSub} ${pv("needs","need")} it can help the conversation be more productive for both of you.`
-      : `You reach for resolution a little faster than ${partner}. A short pause to let ${partner} catch up keeps the two of you closer to the same pace.`;
+      : `You reach for resolution slightly faster than ${partner}. A short pause to let ${partner} catch up can help make the conversation more productive.`;
   } else {
     eng = eAbs >= 0.45
       ? `${partner} usually reaches for resolution faster than you. Telling ${pObj} "I need a minute" out loud keeps ${partner} from interpreting your pause as avoidance.`
@@ -1477,7 +1477,7 @@ function communicatingBlurb(partner, partnerPron, myEc, myOc, partEc, partOc) {
   } else if (oGap > 0) {
     opn = oAbs >= 0.45
       ? `You share more readily than ${partner}. Make sure ${partner} knows you are there when ${pIsC} ready to let you in.`
-      : `You share a little more readily than ${partner}. A bit of patience lets ${partner} meet you there.`;
+      : `You tend to share more readily than ${partner}. Make sure ${partner} knows you are there when ${pIsC} ready to let you in.`;
   } else {
     opn = oAbs >= 0.45
       ? `${partner} shares more readily than you. Remember that a half-formed thought said out loud still counts, and ${partner} will usually appreciate the effort.`
