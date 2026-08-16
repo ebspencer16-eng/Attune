@@ -1432,16 +1432,16 @@ function individualBlurb(name, pron, ec, oc) {
   const v = (sg, pv) => pl ? pv : sg;
   const eng =
     ec >= 0.8 ? `${name} moves toward resolution quickly, feeling what is unresolved and going straight at it.`
-    : ec >= 0.6 ? `${name} leans toward engaging, usually after a short beat to process first.`
-    : ec >= 0.4 ? `${name} sits near the middle on engaging. Quick to move toward resolution on an easy day, wanting a beat first under stress.`
-    : ec >= 0.2 ? `${name} tends to take space first, then circle back to what is unresolved.`
-    : `${name} needs real space before engaging. What ${sub} ${v("brings", "bring")} back, once ready, is worth the wait.`;
+    : ec >= 0.6 ? `${name} leans toward engaging, sometimes after a minute to process first.`
+    : ec >= 0.4 ? `${name} sits near the middle in terms of how much ${sub} ${v("engages", "engage")}. Quick to move toward resolution on an easy day, wanting to take a minute under stress.`
+    : ec >= 0.2 ? `${name} tends to take space first, then discuss what is unresolved.`
+    : `${name} usually needs real space before engaging. What ${sub} ${v("brings", "bring")} back, once ready, is often thought out.`;
   const opn =
-    oc >= 0.8 ? `${Sub} ${v("names", "name")} what ${sub} ${v("is", "are")} feeling in the moment.`
-    : oc >= 0.6 ? `${Sub} ${v("shares", "share")} more of the inner picture than ${sub} ${v("keeps", "keep")} back.`
-    : oc >= 0.4 ? `On how much ${sub} ${v("shows", "show")}, ${sub} ${v("shares", "share")} some and ${v("holds", "hold")} some, depending on the moment.`
-    : oc >= 0.2 ? `${Sub} ${v("keeps", "keep")} ${pos} inner world a little closer.`
-    : `${Sub} ${v("processes", "process")} privately and ${v("surfaces", "surface")} it later.`;
+    oc >= 0.8 ? `${Sub} ${v("names", "name")} feelings in the moment.`
+    : oc >= 0.6 ? `${Sub} usually ${v("shares", "share")} more of ${pos} thoughts and feelings than ${sub} ${v("keeps", "keep")} back.`
+    : oc >= 0.4 ? `${Sub} ${v("shares", "share")} some thoughts and feelings and ${v("holds", "hold")} some privately, depending on the moment.`
+    : oc >= 0.2 ? `${Sub} may prefer to keep ${pos} thoughts and feelings more private.`
+    : `${Sub} ${v("processes", "process")} privately and ${v("surfaces", "surface")} thoughts and feelings later.`;
   return `${eng} ${opn}`;
 }
 const INDIVIDUAL_TYPES = {
@@ -8963,7 +8963,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
             const axisBand = (score, hi, lo) =>
               score >= 0.8 ? `clearly ${hi}`
               : score >= 0.6 ? `leans ${hi}`
-              : score >= 0.4 ? "balanced"
+              : score >= 0.4 ? "flexible"
               : score >= 0.2 ? `leans ${lo}`
               : `clearly ${lo}`;
             return (
