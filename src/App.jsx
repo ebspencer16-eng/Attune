@@ -1444,6 +1444,31 @@ function individualBlurb(name, pron, ec, oc) {
     : `${Sub} ${v("processes", "process")} privately and ${v("surfaces", "surface")} thoughts and feelings later.`;
   return `${eng} ${opn}`;
 }
+// "Communicating with each other" (4.2), built from the gap between the two people
+// on each axis, so it is specific to this pairing. Second person, addressed to the
+// person whose tile it is; ${partner} + partner pronouns refer to the other. DRAFT.
+function communicatingBlurb(partner, partnerPron, myEc, myOc, partEc, partOc) {
+  const pSub = pronoun(partnerPron, "sub");
+  const pPos = pronoun(partnerPron, "pos");
+  const pv = (sg, plr) => (pSub === "they") ? plr : sg;
+  const eGap = myEc - partEc, eAvg = (myEc + partEc) / 2;
+  const eng =
+    Math.abs(eGap) < 0.2
+      ? (eAvg >= 0.6 ? `You both move toward resolution quickly, so the risk here is heat, not distance. Slow the tempo, not the honesty.`
+         : eAvg <= 0.4 ? `You both tend to take space first, so nothing gets forced. The risk is that the conversation never quite starts, so name a time to come back to it.`
+         : `You both sit near the middle on engaging, so timing shifts with the day. Say which mode you are in when it matters.`)
+      : eGap > 0 ? `You reach for resolution faster than ${partner}. Giving ${partner} the minute ${pSub} ${pv("needs", "need")} keeps the pace workable for both of you.`
+                 : `${partner} reaches for resolution faster than you. Saying "I need a minute" out loud keeps ${partner} from reading the pause as avoidance.`;
+  const oGap = myOc - partOc, oAvg = (myOc + partOc) / 2;
+  const opn =
+    Math.abs(oGap) < 0.2
+      ? (oAvg >= 0.6 ? `You both put things into words, so you rarely have to guess. Keep leaving room for the quieter thought.`
+         : oAvg <= 0.4 ? `You both hold things close, so a lot can go unsaid. The direct question is your friend here.`
+         : `You both share some and hold some, so what stays unsaid depends on the moment. A quick check-in clears it up.`)
+      : oGap > 0 ? `You share more readily than ${partner}. Leaving space lets ${partner} arrive at ${pPos} own pace.`
+                 : `${partner} shares more readily than you. A half-formed thought said out loud still counts, and ${partner} usually needs it.`;
+  return `${eng} ${opn}`;
+}
 const INDIVIDUAL_TYPES = {
   W: { code: "W", name: "The Initiator", color: "#E8673A", fill: "#FFF4F0", axis1: "Engage", axis2: "Open",
        desc: "Moves toward resolution. Processes and expresses relatively freely.",
@@ -5110,8 +5135,8 @@ function PersonalityResults({ myAnswers, partnerAnswers, userName, partnerName, 
 
     const _myII = computeIndividualType(myS), _partII = computeIndividualType(partS);
     const people = [
-      { name: userName, partner: partnerName, code: myTypeCode, type: INDIVIDUAL_TYPES[myTypeCode], perspective: perspFor(myTypeCode), pron: userPronouns, ec: _myII.engageCoord, oc: _myII.openCoord },
-      { name: partnerName, partner: userName, code: partTypeCode, type: INDIVIDUAL_TYPES[partTypeCode], perspective: perspFor(partTypeCode), pron: partnerPronouns, ec: _partII.engageCoord, oc: _partII.openCoord },
+      { name: userName, partner: partnerName, code: myTypeCode, type: INDIVIDUAL_TYPES[myTypeCode], perspective: communicatingBlurb(partnerName, partnerPronouns, _myII.engageCoord, _myII.openCoord, _partII.engageCoord, _partII.openCoord), pron: userPronouns, ec: _myII.engageCoord, oc: _myII.openCoord },
+      { name: partnerName, partner: userName, code: partTypeCode, type: INDIVIDUAL_TYPES[partTypeCode], perspective: communicatingBlurb(userName, userPronouns, _partII.engageCoord, _partII.openCoord, _myII.engageCoord, _myII.openCoord), pron: partnerPronouns, ec: _partII.engageCoord, oc: _partII.openCoord },
     ];
     const pageColor = "#E8673A";
 
