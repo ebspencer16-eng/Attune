@@ -5004,9 +5004,6 @@ function PersonalityResults({ myAnswers, partnerAnswers, userName, partnerName, 
                 <span style={{ fontSize: "0.68rem", fontWeight: 600, color: "rgba(255,255,255,0.7)", fontFamily: BFONT }}>{m.ends[1]}</span>
               </div>
               <PerceptionBar above={above} below={below} />
-              <p style={{ fontSize: "0.62rem", fontStyle: "italic", color: "rgba(255,255,255,0.5)", lineHeight: 1.65, margin: "0.9rem 0 0", fontFamily: BFONT }}>
-                Where each of you placed the other on {m.label.toLowerCase()}. Set it beside the bar above, where you each placed yourselves.
-              </p>
             </div>
           );
         })()}
