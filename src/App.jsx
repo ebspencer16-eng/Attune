@@ -4991,10 +4991,10 @@ function PersonalityResults({ myAnswers, partnerAnswers, userName, partnerName, 
           // use the accent colour, the viewer's two are white. The partner's dots
           // are labelled above the bar; the viewer's below. (2 above, 2 below.)
           const above = [
-            aPct  != null ? { pct: aPct,  lines: [userName + "'s view", "of " + partnerName], dotColor: m.color, title: "How " + userName + " sees " + partnerName } : null,
+            aPct  != null ? { pct: aPct,  lines: ["Where " + userName + " thinks", partnerName + " sits"], dotColor: m.color, title: "Where " + userName + " thinks " + partnerName + " sits" } : null,
           ];
           const below = [
-            bPct  != null ? { pct: bPct,  lines: [partnerName + "'s view", "of " + userName], dotColor: "#fff", title: "How " + partnerName + " sees " + userName } : null,
+            bPct  != null ? { pct: bPct,  lines: ["Where " + partnerName + " thinks", userName + " sits"], dotColor: "#fff", title: "Where " + partnerName + " thinks " + userName + " sits" } : null,
           ];
           return (
             <div style={{ marginTop: "1rem", background: "rgba(255,255,255,0.06)", borderRadius: 14, padding: "1.2rem 1.5rem", border: "1px solid rgba(255,255,255,0.14)" }}>
