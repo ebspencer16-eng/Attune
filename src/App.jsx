@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useLayoutEffect, useRef } from "react";
 import { axisScores, blendedDimScores } from "../api/_type-engine.js";
-import { PERSONALITY_QUESTIONS, RESPONSIBILITY_CATEGORIES, LIFE_QUESTIONS, PARTNER_VIEW_ITEMS, PARTNER_VIEW_TEXT } from "../api/_questions.js";
+import { PERSONALITY_QUESTIONS, RESPONSIBILITY_CATEGORIES, LIFE_QUESTIONS, PARTNER_VIEW_TEXT } from "../api/_questions.js";
 import { INTIMACY_QUESTIONS, INTIMACY_DIMENSIONS, summarizeIntimacy, intimacyDimensionPositions, intimacyDimensionSkips } from "../api/_intimacy-questions.js";
 
 // Proposal B master switch. Off = comms exercise, scoring, and results are unchanged.
@@ -3786,14 +3786,6 @@ function WithSideNav({ navItems = [], currentStep, onGo, accent = "#9B5DE5", chi
 // On completion, calls onComplete(answers) with full dimension key map.
 // Comms exercise with the 5 partner-view items interleaved after their self
 // counterpart (Proposal B). Only used when PARTNER_VIEW_ENABLED.
-const INTERLEAVED_EX1 = (() => {
-  const out = [];
-  for (const q of PERSONALITY_QUESTIONS) {
-    out.push(q);
-    PARTNER_VIEW_ITEMS.filter(pv => pv.after === q.id).forEach(pv => out.push(pv));
-  }
-  return out;
-})();
 // Two-part comms exercise: Part 1 asks all questions about yourself, Part 2 (after
 // a break screen) re-asks the same set about your partner, storing under pv_<id>.
 const TWO_PART_EX1 = (() => {
@@ -12075,7 +12067,7 @@ function PartnerBExerciseFlow({ account, onComplete }) {
           {`Exercise 01 covers how you communicate and connect. Exercise 02 maps your expectations.${hasReflection ? ' Exercise 03 captures your relationship story.' : ''} ${hasReflection ? 'They take' : 'Both take'} about 15 minutes. Answer honestly. Your partner won't see your individual answers.`}
         </p>
         <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', marginBottom: '2.5rem', flexWrap: 'wrap' }}>
-          {[{ num: '01', title: 'Communication', color: '#E8673A', desc: (PARTNER_VIEW_ENABLED ? INTERLEAVED_EX1.length : PERSONALITY_QUESTIONS.length) + ' questions · 10 dimensions' }, { num: '02', title: 'Expectations', color: '#1B5FE8', desc: 'Responsibilities & life' }, ...(hasReflection ? [{ num: '03', title: 'Relationship Reflection', color: '#7C3AED', desc: 'Your story together' }] : [])].map(e => (
+          {[{ num: '01', title: 'Communication', color: '#E8673A', desc: (PARTNER_VIEW_ENABLED ? PERSONALITY_QUESTIONS.length * 2 : PERSONALITY_QUESTIONS.length) + ' questions · 10 dimensions' }, { num: '02', title: 'Expectations', color: '#1B5FE8', desc: 'Responsibilities & life' }, ...(hasReflection ? [{ num: '03', title: 'Relationship Reflection', color: '#7C3AED', desc: 'Your story together' }] : [])].map(e => (
             <div key={e.num} style={{ background: 'rgba(255,255,255,0.06)', border: `1px solid ${e.color}33`, borderRadius: 14, padding: '1.1rem 1.4rem', textAlign: 'left', minWidth: 160 }}>
               <div style={{ fontSize: '0.58rem', letterSpacing: '0.18em', color: e.color, fontWeight: 700, fontFamily: "'DM Sans', sans-serif", textTransform: 'uppercase', marginBottom: '0.35rem' }}>Exercise {e.num}</div>
               <div style={{ fontFamily: "'Playfair Display', Georgia, serif", fontSize: '1rem', fontWeight: 700, color: 'white', marginBottom: '0.25rem' }}>{e.title}</div>

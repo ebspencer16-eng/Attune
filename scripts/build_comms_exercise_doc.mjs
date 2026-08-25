@@ -1,5 +1,5 @@
 // Communication (Exercise 01) reference doc — every question, grouped by dimension.
-import { PERSONALITY_QUESTIONS, PARTNER_VIEW_ITEMS } from '../api/_questions.js';
+import { PERSONALITY_QUESTIONS, PARTNER_VIEW_TEXT } from '../api/_questions.js';
 import { DIM_META, DIM_AXIS, DIMS } from '../api/_workbook-content.js';
 import { Paragraph } from 'docx';
 import { run, eyebrow, title, h1, body, small, kv, rule, saveDoc, ORANGE, BLUE, PURPLE, INK, MUTED } from './_doc_style.mjs';
@@ -12,9 +12,9 @@ const optLine = (letter,t) => new Paragraph({ spacing:{after:40}, indent:{left:2
 const children = [];
 children.push(eyebrow('Attune · Exercise 01 · Communication', ORANGE));
 children.push(title('The Communication Exercise'));
-children.push(body((PERSONALITY_QUESTIONS.length + PARTNER_VIEW_ITEMS.length) + ' forced-choice questions. ' + PERSONALITY_QUESTIONS.length + ' are about you and ' + PARTNER_VIEW_ITEMS.length + ' are about how your partner shows up, woven in beside the related question. Each maps to one of 10 communication dimensions, which roll up into two axes: Engage / Withdraw and Open / Guarded. There is no right answer. Each option describes a real, workable way of relating. The point is where each partner sits, and where the two of you differ.'));
+children.push(body((PERSONALITY_QUESTIONS.length * 2) + ' forced-choice questions, in two parts. Part 1 asks ' + PERSONALITY_QUESTIONS.length + ' questions about you. Part 2 asks the same ' + PERSONALITY_QUESTIONS.length + ' about your partner. Each maps to one of 10 communication dimensions, which roll up into two axes: Engage / Withdraw and Open / Guarded. There is no right answer. Each option describes a real, workable way of relating. The point is where each partner sits, and where the two of you differ.'));
 children.push(small('Format: pick A or B. Partners answer independently, then see their answers side by side once both finish.'));
-children.push(small('Five questions ask about your partner rather than yourself. They are marked "About your partner" and appear beside the related question about you.'));
+children.push(small('Both versions of each question are shown together below. The Part 2 wording is marked "About your partner".'));
 children.push(rule());
 
 for (const dim of DIMS) {
@@ -23,22 +23,21 @@ for (const dim of DIMS) {
   if (!qs.length) continue;
   const ax = DIM_AXIS[dim];
   children.push(h1(meta.label));
-  children.push(kv('Axis', ax ? AXIS_NAME[ax.axis] : '—', BLUE));
+  children.push(kv('Axis', ax ? AXIS_NAME[ax.axis] : 'Not assigned', BLUE));
   children.push(kv('Poles', meta.left + '  <->  ' + meta.right, ORANGE));
   qs.forEach(q => {
     children.push(qLine(q.text));
     children.push(optLine('A', q.a));
     children.push(optLine('B', q.b));
-  });
-  const pvs = PARTNER_VIEW_ITEMS.filter(pv => pv.dimension === dim);
-  pvs.forEach(pv => {
-    children.push(new Paragraph({ spacing:{before:150,after:20}, children:[ run('About your partner', {size:16,italics:true,bold:true,color:PURPLE}) ] }));
-    children.push(qLine(pv.text));
+    const pv = PARTNER_VIEW_TEXT[q.id];
+    if (!pv) return;
+    children.push(new Paragraph({ spacing:{before:110,after:20}, indent:{left:240}, children:[ run('About your partner', {size:16,italics:true,bold:true,color:PURPLE}) ] }));
+    children.push(new Paragraph({ spacing:{after:40}, indent:{left:240}, children:[ run(pv.text,{size:20,bold:true,color:INK}) ]}));
     children.push(optLine('A', pv.a));
     children.push(optLine('B', pv.b));
   });
 }
 children.push(rule());
-children.push(small('Total questions: ' + (PERSONALITY_QUESTIONS.length + PARTNER_VIEW_ITEMS.length) + ' (' + PERSONALITY_QUESTIONS.length + ' about yourself, ' + PARTNER_VIEW_ITEMS.length + ' about your partner). Dimensions: ' + DIMS.length + '.'));
+children.push(small('Total questions: ' + (PERSONALITY_QUESTIONS.length * 2) + ' (' + PERSONALITY_QUESTIONS.length + ' about yourself, then the same ' + PERSONALITY_QUESTIONS.length + ' about your partner). Dimensions: ' + DIMS.length + '.'));
 
 await saveDoc('attune_comms_exercise', children, { title:'Attune Communication Exercise' });

@@ -17,7 +17,7 @@
 
 import { createClient } from '@supabase/supabase-js';
 import { checkAdminAuth } from './_lib/admin-auth.js';
-import { calcDimScores, blendedDimScores, axisScores, typeCodeFromAxes, DIM_KEYS, PARTNER_VIEW_QUESTIONS } from './_type-engine.js';
+import { calcDimScores, blendedDimScores, axisScores, typeCodeFromAxes, DIM_KEYS } from './_type-engine.js';
 // Individual type from raw ex1 answers (for invited partners who answered via a
 // partner_session and never created a full profile).
 function typeFromEx1(ans){
@@ -26,7 +26,7 @@ function typeFromEx1(ans){
   const { withdrawScore, openScore } = axisScores(sc);
   return typeCodeFromAxes(withdrawScore, openScore);
 }
-import { PERSONALITY_QUESTIONS, LIFE_QUESTIONS, RESPONSIBILITY_CATEGORIES } from './_questions.js';
+import { PERSONALITY_QUESTIONS, PARTNER_VIEW_TEXT, LIFE_QUESTIONS, RESPONSIBILITY_CATEGORIES } from './_questions.js';
 import { REFLECTION_QUESTIONS } from './_anniversary-questions.js';
 import { INTIMACY_QUESTIONS, INTIMACY_DIMENSIONS } from './_intimacy-questions.js';
 
@@ -124,11 +124,22 @@ function ownFields(p) {
     const v = p.ex1_answers ? p.ex1_answers[q.id] : null;
     r['q_' + q.id] = v != null && !isNaN(v) ? Number(v) : null;
   }
-  // Partner-view answers (Proposal B): this person's rating of their partner.
-  // Denormalized as p_pv_* onto the partner's row = "how your partner sees you".
-  for (const pvId of Object.keys(PARTNER_VIEW_QUESTIONS)) {
-    const v = p.ex1_answers ? p.ex1_answers[pvId] : null;
-    r[pvId] = v != null && !isNaN(v) ? Number(v) : null;
+  // Partner-view answers: Part 2 of the comms exercise re-asks all 27 questions
+  // about the partner, stored as pv_<questionId>. Denormalized as p_pv_* onto
+  // the partner's row = "how your partner sees you". (The old scheme was four
+  // dimension-level pv_<dim> items; those no longer exist.)
+  const pvRaw = {};
+  for (const q of PERSONALITY_QUESTIONS) {
+    const v = p.ex1_answers ? p.ex1_answers['pv_' + q.id] : null;
+    const n = v != null && !isNaN(v) ? Number(v) : null;
+    r['pv_' + q.id] = n;
+    if (n != null) pvRaw[q.id] = n;
+  }
+  // Dimension scores built from those answers: how this person reads their
+  // partner on each dimension, on the same 1-5 scale as dim_*.
+  const pvScores = Object.keys(pvRaw).length ? calcDimScores(pvRaw) : {};
+  for (const dim of Object.keys(DIM_KEYS)) {
+    r['pvdim_' + dim] = pvScores[dim] != null ? Number(Number(pvScores[dim]).toFixed(3)) : null;
   }
   // Ex2 life questions: stored flat under ex2_answers.life
   const life = (p.ex2_answers && p.ex2_answers.life) || {};
@@ -184,7 +195,8 @@ const PARTNERABLE = [
   ...RESPONSIBILITY_CATEGORIES.flatMap((c) => c.items.map((_, i) => 'resp_' + c.id + '_' + i)),
   ...REFLECTION_QUESTIONS.map((q) => 'ref_' + q.id),
   ...INTIMACY_QUESTIONS.filter((q) => q.kind !== 'multi').map((q) => 'iq_' + q.id),
-  ...Object.keys(PARTNER_VIEW_QUESTIONS),
+  ...PERSONALITY_QUESTIONS.map((q) => 'pv_' + q.id),
+  ...Object.keys(DIM_KEYS).map((d) => 'pvdim_' + d),
 ];
 
 // Beta-survey fields joined onto the respondent by their profile id, so survey
@@ -221,7 +233,11 @@ function buildCatalog(fbCatOptions) {
   for (const k of DEMO_KEYS) f.push({ key: k, label: DEMO_LABELS[k], group: 'Demographics', kind: 'cat', partnerable: true });
   for (const dim of Object.keys(DIM_KEYS)) f.push({ key: 'dim_' + dim, label: DIM_LABELS[dim] || dim, group: 'Dimensions (score 1–5)', kind: 'scale', poleLow: (DIM_POLES[dim]||[])[0], poleHigh: (DIM_POLES[dim]||[])[1], partnerable: true });
   for (const q of PERSONALITY_QUESTIONS) f.push({ key: 'q_' + q.id, label: q.text, group: 'Ex1 · Communication (1–5)', kind: 'scale', poleLow: shortPole(q.a), poleHigh: shortPole(q.b), partnerable: true });
-  for (const [pvId, dim] of Object.entries(PARTNER_VIEW_QUESTIONS)) f.push({ key: pvId, label: 'Partner-view · ' + (DIM_LABELS[dim] || dim), group: 'Ex1 · Partner-view (1–5)', kind: 'scale', poleLow: (DIM_POLES[dim]||[])[0], poleHigh: (DIM_POLES[dim]||[])[1], partnerable: true });
+  for (const dim of Object.keys(DIM_KEYS)) f.push({ key: 'pvdim_' + dim, label: (DIM_LABELS[dim] || dim) + ' (as read by partner)', group: 'Ex1 · Partner-view dimensions (1–5)', kind: 'scale', poleLow: (DIM_POLES[dim]||[])[0], poleHigh: (DIM_POLES[dim]||[])[1], partnerable: true });
+  for (const q of PERSONALITY_QUESTIONS) {
+    const pvt = PARTNER_VIEW_TEXT[q.id] || {};
+    f.push({ key: 'pv_' + q.id, label: pvt.text || q.text, group: 'Ex1 · Partner-view (1–5)', kind: 'scale', poleLow: shortPole(pvt.a || q.a), poleHigh: shortPole(pvt.b || q.b), partnerable: true });
+  }
   for (const lq of LIFE_QUESTIONS) f.push({ key: lq.id, label: (lq.category ? lq.category + ' · ' : '') + genericLabel(lq.text), group: 'Ex2 · Life & values', kind: 'cat', options: (lq.options || []).map((v) => ({ v, label: v })), partnerable: true });
   for (const cat of RESPONSIBILITY_CATEGORIES) {
     cat.items.forEach((item, i) => {

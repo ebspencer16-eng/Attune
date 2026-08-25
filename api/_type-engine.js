@@ -135,10 +135,6 @@ export function lowConfidence(scores) {
 // against a phantom neutral — so interim (self-only) scoring stays correct
 // until the partner has answered.
 // ─────────────────────────────────────────────────────────────────────────────
-export const PARTNER_VIEW_QUESTIONS = {
-  pv_conflict: 'conflict', pv_repair: 'repair',
-  pv_expression: 'expression', pv_feedback: 'feedback',
-};
 export const PARTNER_VIEW_BLEND = {
   conflict:   { self: 0.5, partner: 0.5 },
   repair:     { self: 0.6, partner: 0.4 },

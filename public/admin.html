@@ -4505,11 +4505,13 @@ async function renderSelfPartnerGap(containerId){
   const el=document.getElementById(containerId); if(!el) return;
   let cube; try{ cube=await ensureCube(); }catch(e){ return; }
   const rows=cube.rows||[];
-  const PVMAP={pv_conflict:'conflict',pv_stress:'stress',pv_repair:'repair',pv_expression:'expression',pv_feedback:'feedback'};
-  const LBL={conflict:'Conflict',stress:'Under stress',repair:'Repair',expression:'Expression',feedback:'Feedback'};
-  const stats=Object.entries(PVMAP).map(([pv,dim])=>{
+  // Part 2 of the comms exercise asks every question about the partner, so the
+  // partner-view score exists for all ten dimensions as pvdim_<dim>. The old
+  // four dimension-level pv_<dim> fields are gone, as is the stress dimension.
+  const LBL={energy:'Energy & recharge',expression:'Expression',reassurance:'Reassurance',love:'Emotional intimacy',needs:'Communicating needs',bids:'Bids for connection',listening:'Listening',conflict:'Conflict',repair:'Repairing',feedback:'Feedback'};
+  const stats=Object.keys(LBL).map(dim=>{
     let n=0,sum=0;
-    rows.forEach(r=>{ const self=r['dim_'+dim], pview=r['p_'+pv]; if(self==null||pview==null||isNaN(self)||isNaN(pview)) return; n++; sum+=Math.abs(Number(self)-Number(pview)); });
+    rows.forEach(r=>{ const self=r['dim_'+dim], pview=r['p_pvdim_'+dim]; if(self==null||pview==null||isNaN(self)||isNaN(pview)) return; n++; sum+=Math.abs(Number(self)-Number(pview)); });
     return { l:LBL[dim], gap: n?sum/n:null, n };
   });
   const withData=stats.filter(x=>x.n>0);
