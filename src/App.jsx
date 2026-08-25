@@ -4862,7 +4862,24 @@ function PersonalityResults({ myAnswers, partnerAnswers, userName, partnerName, 
   // logical reading sequence matching the sidebar.
   const DOMAIN_ORDER = ["energy","expression","reassurance","love","needs","bids","listening","conflict","repair","feedback"];
   const orderedDims = DOMAIN_ORDER.filter(d => feedback.some(f => f.dim === d));
-  const TOTAL = orderedDims.length + 4; // overview + N dims + action plan + 2 individual + summary
+  // Detailed results are 3 grouped domain pages, not one page per dimension.
+  // domainGroups is the source of truth for both the pages and the sidebar.
+  const domainGroups = [
+    { id: "inner",      label: "Your Inner Worlds",    color: "#9B5DE5", dims: ["energy","expression","reassurance"],
+      prose: "Your inner worlds are how each of you processes feeling and energy on your own, before any of it reaches the other person. This is where a lot of quiet mismatches start. One of you refuels in company, the other in solitude. One voices what's stirring, the other holds it until it's formed. None of it needs fixing. It's the map of where you each begin." },
+    { id: "connection", label: "How You Connect",      color: "#E8673A", dims: ["love","needs","bids","listening"],
+      prose: "How you connect is the everyday machinery of closeness: the bids you make, the love you show, the needs you name, the way you listen. Most of a relationship lives here, in small moments rather than big talks. When two people connect in different currencies, the care is real but it can miss. This is where you learn each other's." },
+    { id: "hard",       label: "When Things Get Hard", color: "#1B5FE8", dims: ["conflict","repair","feedback"],
+      prose: "When things get hard is what happens under pressure: conflict, repair, and feedback. It's the part couples worry about most, and the most learnable. The goal was never to stop disagreeing. It's to know how each of you moves when it's difficult, so the difference reads as difference and not as a threat." },
+  ];
+  // Only domains that actually have answered dimensions become pages.
+  const detailDomains = domainGroups
+    .map(g => ({ ...g, dims: orderedDims.filter(d => g.dims.includes(d)) }))
+    .filter(g => g.dims.length);
+  const nDetail = detailDomains.length;
+  // Step for the page a given dimension now lives on (overview tiles link here).
+  const domainStepOf = dim => { const i = detailDomains.findIndex(g => g.dims.includes(dim)); return i >= 0 ? i + 1 : 1; };
+  const TOTAL = nDetail + 4; // overview + 3 domain pages + action plan + 2 individual + summary
   // Same-type couples (both partners the same individual type) collapse to a
   // single combined "Communication Profile" page instead of two near-identical
   // individual pages.
@@ -4908,24 +4925,13 @@ function PersonalityResults({ myAnswers, partnerAnswers, userName, partnerName, 
 
   // -- SIDE NAV ITEMS --
   // Group ordered dims by domain for sidebar display
-  const domainGroups = [
-    { id: "inner",      label: "Your Inner Worlds",    color: "#9B5DE5", dims: ["energy","expression","reassurance"] },
-    { id: "connection", label: "How You Connect",      color: "#E8673A", dims: ["love","needs","bids","listening"] },
-    { id: "hard",       label: "When Things Get Hard", color: "#1B5FE8", dims: ["conflict","repair","feedback"] },
-  ];
   const personalityNavItems = [
     { label: "Overview", step: 0 },
-    ...domainGroups.flatMap(domain => {
-      const domainDims = orderedDims.filter(d => domain.dims.includes(d));
-      if (!domainDims.length) return [];
-      return [
-        { label: domain.label, step: "section-" + domain.id, isSection: true, color: domain.color },
-        ...domainDims.map((dim) => ({ label: DIM_META[dim].label, step: orderedDims.indexOf(dim) + 1, isChild: true, color: domain.color })),
-      ];
-    }),
+    { label: "Detailed results", step: "detail-section", isSection: true },
+    ...detailDomains.map((domain, i) => ({ label: domain.label, step: i + 1, isChild: true, italic: true, color: domain.color })),
     { label: "Profiles & Plan", step: "profiles-section", isSection: true },
-    { label: sameType ? "Communication Profile" : "Individual Profiles", step: orderedDims.length + 1, isChild: true },
-    { label: "Comm. Action Plan", step: orderedDims.length + 3, isChild: true },
+    { label: sameType ? "Communication Profile" : "Individual Profiles", step: nDetail + 1, isChild: true },
+    { label: "Comm. Action Plan", step: nDetail + 3, isChild: true },
   ];
 
   // -- STEP 0: OVERVIEW --
@@ -4980,7 +4986,7 @@ function PersonalityResults({ myAnswers, partnerAnswers, userName, partnerName, 
               const myDy = close ? (myIsLeft ? -4 : 4) : 0;
               const partDy = close ? (myIsLeft ? 4 : -4) : 0;
               return (
-                <div key={f.dim} onClick={() => go(orderedDims.indexOf(f.dim) + 1)}
+                <div key={f.dim} onClick={() => go(domainStepOf(f.dim))}
                   style={{ cursor: "pointer", display: "flex", alignItems: "center", gap: "0.65rem" }}>
                   <span style={{ fontSize: "0.65rem", color: "rgba(255,255,255,0.65)", fontFamily: BFONT, flexShrink: 0, width: "clamp(88px,30%,120px)", lineHeight: 1.25 }}>{m.label}</span>
                   <div style={{ flex: 1, position: "relative", height: 6, background: "rgba(255,255,255,0.08)", borderRadius: 999, overflow: "visible" }}>
@@ -5013,11 +5019,11 @@ function PersonalityResults({ myAnswers, partnerAnswers, userName, partnerName, 
           <div style={{ fontSize: "0.55rem", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.3)", fontFamily: BFONT, fontWeight: 700, marginBottom: "0.5rem" }}>What's in this section</div>
           <div style={{ display: "flex", flexDirection: "column", gap: "0.3rem" }}>
             {[
-              { label: "Detailed pages", sub: "One page per dimension", onClick: () => go(1) },
+              { label: "Detailed results", sub: "Three pages, grouped by where it shows up", onClick: () => go(1) },
               sameType
-                ? { label: "Communication Profile", sub: "What you share as the same type", onClick: () => go(orderedDims.length + 1) }
-                : { label: "Individual communication profiles", sub: "Each of your types, and how they meet", onClick: () => go(orderedDims.length + 1) },
-              { label: "Communication Action Plan", sub: "Practices built from your results", onClick: () => go(orderedDims.length + 3) },
+                ? { label: "Communication Profile", sub: "What you share as the same type", onClick: () => go(nDetail + 1) }
+                : { label: "Individual communication profiles", sub: "Each of your types, and how they meet", onClick: () => go(nDetail + 1) },
+              { label: "Communication Action Plan", sub: "Practices built from your results", onClick: () => go(nDetail + 3) },
             ].map(({ label, sub, onClick }, idx) => (
               <div key={idx} onClick={onClick}
                 style={{ display: "flex", alignItems: "center", gap: "0.75rem", padding: "0.4rem 0.75rem", borderRadius: 8, background: "rgba(255,255,255,0.04)", cursor: "pointer", transition: "all 0.12s", border: "1px solid rgba(255,255,255,0.06)" }}
@@ -5034,94 +5040,57 @@ function PersonalityResults({ myAnswers, partnerAnswers, userName, partnerName, 
         </div>
 
       </div>
-      <NavButtons onBack={() => {}} backDisabled nextLabel={"Begin: " + DIM_META[orderedDims[0]]?.label + " →"} onNext={() => go(1)} />
+      <NavButtons onBack={() => {}} backDisabled nextLabel={"Begin: " + detailDomains[0]?.label + " →"} onNext={() => go(1)} />
       </ResultsSlide>
     </MaybeNav>
   );
 
   // -- STEPS 1-N: ONE DIMENSION PER SCREEN (sorted order) --
-  if (step >= 1 && step <= orderedDims.length) {
-    const dim = orderedDims[step - 1];
-    const f = byDim[dim];
-    const m = DIM_META[dim];
-    const isLast = step === orderedDims.length;
-    const nextDim = orderedDims[step]; // next in sorted order
+  // -- STEPS 1-3: ONE GROUPED DOMAIN PAGE PER SCREEN --
+  // The detail pages are grouped by domain (inner worlds / how you connect /
+  // when things get hard) rather than one page per dimension. Each page carries
+  // the domain prose, one orientation bar per dimension in that domain, and the
+  // side-by-side response dropdown (same on every page, all dimensions).
+  if (step >= 1 && step <= nDetail) {
+    const grp = detailDomains[step - 1];
+    const isLast = step === nDetail;
+    const nextGrp = detailDomains[step];
+    const gDark = DIM_META[grp.dims[0]].dark;
 
     return (
     <MaybeNav noSideNav={noSideNav} navItems={personalityNavItems} currentStep={step} onGo={go} accent="#E8673A">
-      <ResultsSlide bg={"linear-gradient(145deg, " + m.dark + "dd, " + m.dark + "99, #22204a)"}>
+      <ResultsSlide bg={"linear-gradient(145deg, " + gDark + "dd, " + gDark + "99, #22204a)"}>
         <link href={FONT_URL} rel="stylesheet" />
-        {/* Top row: colour dot + progress. The dimension name is the hero below;
-            the templated gap-tier headline is gone (it could contradict the dots
-            and the "keep in mind" copy). The slider and advice carry the meaning. */}
         <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", marginBottom: "0.75rem" }}>
-          <div style={{ width: 10, height: 10, borderRadius: "50%", background: m.color, flexShrink: 0 }} />
+          <div style={{ width: 10, height: 10, borderRadius: "50%", background: grp.color, flexShrink: 0 }} />
           <div style={{ fontSize: "0.62rem", textTransform: "uppercase", letterSpacing: "0.15em", color: "rgba(255,255,255,0.82)", fontWeight: 700, fontFamily: BFONT }}>Communication</div>
-          <div style={{ marginLeft: "auto", fontSize: "0.68rem", color: "rgba(255,255,255,0.3)", fontFamily: BFONT }}>{step} of {orderedDims.length}</div>
+          <div style={{ marginLeft: "auto", fontSize: "0.68rem", color: "rgba(255,255,255,0.3)", fontFamily: BFONT }}>{step} of {nDetail}</div>
         </div>
-        <div style={{ fontSize: "clamp(1.5rem,5vw,2rem)", fontWeight: 700, color: "white", lineHeight: 1.1, marginBottom: "1.25rem", fontFamily: HFONT }}>{m.label}</div>
+        <div style={{ fontSize: "clamp(1.5rem,5vw,2rem)", fontWeight: 700, color: "white", lineHeight: 1.1, marginBottom: "1rem", fontFamily: HFONT }}>{grp.label}</div>
 
-        {/* Track (top tile) */}
-        <div style={{ background: "rgba(255,255,255,0.10)", borderRadius: 14, padding: "1.25rem 1.5rem", marginBottom: "1rem", border: "1px solid rgba(255,255,255,0.16)" }}>
-          <div style={{ fontSize: "0.62rem", textTransform: "uppercase", letterSpacing: "0.12em", color: "rgba(255,255,255,0.9)", fontWeight: 700, marginBottom: "0.9rem", fontFamily: BFONT }}>Overall orientation</div>
-          <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "0.1rem" }}>
-            <span style={{ fontSize: "0.7rem", fontWeight: 600, color: "rgba(255,255,255,0.85)", fontFamily: BFONT }}>{m.ends[0]}</span>
-            <span style={{ fontSize: "0.7rem", fontWeight: 600, color: "rgba(255,255,255,0.85)", fontFamily: BFONT }}>{m.ends[1]}</span>
+        {/* Domain prose */}
+        <p style={{ fontSize: "0.88rem", color: "rgba(255,255,255,0.75)", lineHeight: 1.8, fontFamily: BFONT, fontWeight: 300, margin: "0 0 1.5rem" }}>{grp.prose}</p>
+
+        {/* Orientation overview: one bar per dimension in this domain */}
+        <div style={{ background: "rgba(255,255,255,0.10)", borderRadius: 14, padding: "1.25rem 1.5rem", border: "1px solid rgba(255,255,255,0.16)" }}>
+          <div style={{ fontSize: "0.62rem", textTransform: "uppercase", letterSpacing: "0.12em", color: "rgba(255,255,255,0.9)", fontWeight: 700, marginBottom: "1.1rem", fontFamily: BFONT }}>Overall orientation</div>
+          <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
+            {grp.dims.map(dim => {
+              const m = DIM_META[dim];
+              return (
+                <div key={dim}>
+                  <div style={{ fontSize: "0.78rem", fontWeight: 700, color: "white", fontFamily: BFONT, marginBottom: "0.55rem" }}>{m.label}</div>
+                  <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "0.1rem" }}>
+                    <span style={{ fontSize: "0.7rem", fontWeight: 600, color: "rgba(255,255,255,0.85)", fontFamily: BFONT }}>{m.ends[0]}</span>
+                    <span style={{ fontSize: "0.7rem", fontWeight: 600, color: "rgba(255,255,255,0.85)", fontFamily: BFONT }}>{m.ends[1]}</span>
+                  </div>
+                  <DimTrackViz myScore={myS[dim]} theirScore={partS[dim]} color={m.color} userName={userName} partnerName={partnerName} />
+                </div>
+              );
+            })}
           </div>
-          <DimTrackViz myScore={myS[dim]} theirScore={partS[dim]} color={m.color} userName={userName} partnerName={partnerName} />
         </div>
 
-        {/* Try this / Keep this in mind */}
-        {(f.adviceText || f.isStrength) && (
-          <div style={{ background: "rgba(255,255,255,0.08)", borderRadius: 14, padding: "1.25rem 1.5rem", border: "1px solid rgba(255,255,255,0.16)" }}>
-            <div style={{ fontSize: "0.62rem", textTransform: "uppercase", letterSpacing: "0.12em", color: "rgba(255,255,255,0.9)", fontWeight: 700, marginBottom: "0.5rem", fontFamily: BFONT }}>{f.isStrength ? "One thing to keep in mind" : "One shift that helps"}</div>
-            <p style={{ fontSize: "0.9rem", color: "white", lineHeight: 1.8, margin: 0, fontFamily: BFONT, fontWeight: f.isStrength ? 400 : 500 }}>{f.adviceText || (f.isStrength ? alignedAdvice(f.dim, myS[f.dim], partS[f.dim]) : null) || `You two line up here. That's an easy place to take for granted. Name it out loud once in a while so the alignment stays a choice, not an assumption.`}</p>
-          </div>
-        )}
-
-        {/* Additional insight: how you each perceive the other. Only the five
-            dimensions with a partner-view question have this data (pv_<dim>).
-            Two dots on the same track style as the self bar: where each partner
-            placed the OTHER (accent dot = the partner, matching the self bar).
-            Labels use the shared DotLabels placement (centred under each dot,
-            re-aligned around the dots only if they would collide, leader line
-            only when the dots coincide). Requires BOTH partners' partner-view
-            answers: the insight is "how you each see each other," so a one-sided
-            read is meaningless. Legacy couples who finished Ex1 before partner-view
-            existed (and mixed couples where only one partner has it) get no bar. */}
-        {PARTNER_VIEW_ENABLED && (() => {
-          const pvId = "pv_" + dim;
-          const numv = v => (v == null || isNaN(v)) ? null : Number(v);
-          const aV = numv(myAnswers && myAnswers[pvId]);          // viewer's view OF partner
-          const bV = numv(partnerAnswers && partnerAnswers[pvId]); // partner's view OF viewer
-          if (aV == null || bV == null) return null;
-          const pctOf = v => Math.max(4, Math.min(96, ((v - 1) / 4) * 100));
-          const aPct  = aV != null ? pctOf(aV) : null;                 // how userName sees partnerName (about partner)
-          const bPct  = bV != null ? pctOf(bV) : null;                 // how partnerName sees userName (about viewer)
-          const selfV = myS[dim] != null ? pctOf(myS[dim]) : null;     // userName's own view (about viewer)
-          const selfP = partS[dim] != null ? pctOf(partS[dim]) : null; // partnerName's own view (about partner)
-          // Dots are coloured by the PERSON each is about: the partner's two dots
-          // use the accent colour, the viewer's two are white. The partner's dots
-          // are labelled above the bar; the viewer's below. (2 above, 2 below.)
-          const above = [
-            aPct  != null ? { pct: aPct,  lines: ["Where " + userName + " thinks", partnerName + " sits"], dotColor: m.color, title: "Where " + userName + " thinks " + partnerName + " sits" } : null,
-          ];
-          const below = [
-            bPct  != null ? { pct: bPct,  lines: ["Where " + partnerName + " thinks", userName + " sits"], dotColor: "#fff", title: "Where " + partnerName + " thinks " + userName + " sits" } : null,
-          ];
-          return (
-            <div style={{ marginTop: "1rem", background: "rgba(255,255,255,0.06)", borderRadius: 14, padding: "1.2rem 1.5rem", border: "1px solid rgba(255,255,255,0.14)" }}>
-              <div style={{ fontSize: "0.62rem", textTransform: "uppercase", letterSpacing: "0.12em", color: "rgba(255,255,255,0.9)", fontWeight: 700, marginBottom: "0.9rem", fontFamily: BFONT }}>Additional insight: how you each read each other</div>
-              <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "0.35rem" }}>
-                <span style={{ fontSize: "0.68rem", fontWeight: 600, color: "rgba(255,255,255,0.7)", fontFamily: BFONT }}>{m.ends[0]}</span>
-                <span style={{ fontSize: "0.68rem", fontWeight: 600, color: "rgba(255,255,255,0.7)", fontFamily: BFONT }}>{m.ends[1]}</span>
-              </div>
-              <PerceptionBar above={above} below={below} />
-            </div>
-          );
-        })()}
-
-        <DimResponseBreakdown dim={dim} myAnswers={myAnswers} partnerAnswers={partnerAnswers} userName={userName} partnerName={partnerName} color={m.color} />
         {/* Two-column arrows-to-bar side-by-side (all dims, exercise order) — dropdown */}
         <details style={{ marginTop: "1.5rem", background: "rgba(255,255,255,0.05)", borderRadius: 14, border: "1px solid rgba(255,255,255,0.14)" }}>
           <summary style={{ listStyle: "none", cursor: "pointer", padding: "1.1rem 1.5rem", fontSize: "0.72rem", textTransform: "uppercase", letterSpacing: "0.1em", color: "rgba(255,255,255,0.85)", fontWeight: 700, fontFamily: BFONT, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
@@ -5136,15 +5105,16 @@ function PersonalityResults({ myAnswers, partnerAnswers, userName, partnerName, 
         <NavButtons
           onBack={() => go(step - 1)}
           onNext={() => go(step + 1)}
-          nextLabel={isLast ? "Individual Profiles →" : ((DIM_META[nextDim]?.label) + " →")}
+          nextLabel={isLast ? "Individual Profiles →" : (nextGrp.label + " →")}
         />
       </ResultsSlide>
     </MaybeNav>
     );
   }
 
+
   // -- ACTION PLAN (now step N+3) --
-  if (step === orderedDims.length + 3) return (
+  if (step === nDetail + 3) return (
     <MaybeNav noSideNav={noSideNav} navItems={personalityNavItems} currentStep={step} onGo={go} accent="#E8673A">
       <ResultsSlide bg="linear-gradient(145deg, #0f0c29, #1e1a40, #0f0c29)">
       <link href={FONT_URL} rel="stylesheet" />
@@ -5216,7 +5186,7 @@ function PersonalityResults({ myAnswers, partnerAnswers, userName, partnerName, 
   );
 
   // -- INDIVIDUAL PAGES (now steps N+1 and N+2) --
-  if (step === orderedDims.length + 1 || step === orderedDims.length + 2) {
+  if (step === nDetail + 1 || step === nDetail + 2) {
     // ── SAME-TYPE COUPLES: one combined Communication Profile page ──
     if (sameType) {
       const profile = SAME_TYPE_PROFILE[_myTypeCode];
@@ -5259,8 +5229,8 @@ function PersonalityResults({ myAnswers, partnerAnswers, userName, partnerName, 
           </div>
 
           <NavButtons
-            onBack={() => go(orderedDims.length)}
-            onNext={() => go(orderedDims.length + 3)}
+            onBack={() => go(nDetail)}
+            onNext={() => go(nDetail + 3)}
             nextLabel={"Communication Action Plan →"}
           />
         </ResultsSlide>
@@ -5334,8 +5304,8 @@ function PersonalityResults({ myAnswers, partnerAnswers, userName, partnerName, 
         </div>
 
         <NavButtons
-          onBack={() => go(orderedDims.length)}
-          onNext={() => go(orderedDims.length + 3)}
+          onBack={() => go(nDetail)}
+          onNext={() => go(nDetail + 3)}
           nextLabel={"Communication Action Plan →"}
         />
       </ResultsSlide>
@@ -5374,7 +5344,7 @@ function PersonalityResults({ myAnswers, partnerAnswers, userName, partnerName, 
               {coupleStrengths.map(f => {
                 const m = DIM_META[f.dim];
                 return (
-                  <div key={f.dim} onClick={() => go(orderedDims.indexOf(f.dim) + 1)}
+                  <div key={f.dim} onClick={() => go(domainStepOf(f.dim))}
                     style={{ background: "rgba(255,255,255,0.07)", borderRadius: 10, padding: "0.75rem 0.85rem", cursor: "pointer", transition: "background 0.15s" }}
                     onMouseEnter={e => e.currentTarget.style.background = "rgba(255,255,255,0.14)"}
                     onMouseLeave={e => e.currentTarget.style.background = "rgba(255,255,255,0.07)"}>
@@ -5395,7 +5365,7 @@ function PersonalityResults({ myAnswers, partnerAnswers, userName, partnerName, 
               {coupleGrowth.map(f => {
                 const m = DIM_META[f.dim];
                 return (
-                  <div key={f.dim} onClick={() => go(orderedDims.indexOf(f.dim) + 1)}
+                  <div key={f.dim} onClick={() => go(domainStepOf(f.dim))}
                     style={{ background: "rgba(255,255,255,0.07)", borderRadius: 10, padding: "0.75rem 0.85rem", cursor: "pointer", transition: "background 0.15s" }}
                     onMouseEnter={e => e.currentTarget.style.background = "rgba(255,255,255,0.14)"}
                     onMouseLeave={e => e.currentTarget.style.background = "rgba(255,255,255,0.07)"}>
@@ -8332,8 +8302,16 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
   const personalityFeedback = generatePersonalityFeedback(mySelf, partSelf, userName, partnerName);
   const sortedFeedback = [...personalityFeedback].sort((a, b) => a.gap - b.gap);
   // Domain order — matches PersonalityResults navigation
-  const UR_DOMAIN_ORDER = ["energy","expression","love","needs","bids","listening","conflict","repair","feedback"];
+  const UR_DOMAIN_ORDER = ["energy","expression","reassurance","love","needs","bids","listening","conflict","repair","feedback"];
   const orderedDims = UR_DOMAIN_ORDER.filter(d => personalityFeedback.some(f => f.dim === d));
+  // Comms detailed results are three grouped domain pages, not one per dimension.
+  // Must stay in step with detailDomains inside PersonalityResults.
+  const UR_DOMAINS = [
+    { id: "inner",      label: "Your Inner Worlds",    color: "#9B5DE5", dims: ["energy","expression","reassurance"] },
+    { id: "connection", label: "How You Connect",      color: "#E8673A", dims: ["love","needs","bids","listening"] },
+    { id: "hard",       label: "When Things Get Hard", color: "#1B5FE8", dims: ["conflict","repair","feedback"] },
+  ].filter(g => orderedDims.some(d => g.dims.includes(d)));
+  const nUR = UR_DOMAINS.length;
   const byDim = Object.fromEntries(personalityFeedback.map(f => [f.dim, f]));
   const avgGap = personalityFeedback.reduce((s, f) => s + f.gap, 0) / personalityFeedback.length;
   const pairing = overallPairingLabel(avgGap);
@@ -8728,15 +8706,8 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
       id: "comm", label: "Communication", icon: "◉", color: "#9B5DE5",
       children: [
         { id: "comm-overview", label: "Overview" },
-        // Inner Worlds — purple
-        { id: "comm-domain-inner", label: "Your Inner Worlds", isDomainHeader: true, color: "#9B5DE5" },
-        ...orderedDims.filter(d => ["energy","expression","reassurance"].includes(d)).map(d => ({ id: `comm-${d}`, label: DIM_META[d].label, isDeepChild: true, color: "#9B5DE5" })),
-        // Connection — orange
-        { id: "comm-domain-connection", label: "How You Connect", isDomainHeader: true, color: "#E8673A" },
-        ...orderedDims.filter(d => ["love","needs","bids","listening"].includes(d)).map(d => ({ id: `comm-${d}`, label: DIM_META[d].label, isDeepChild: true, color: "#E8673A" })),
-        // Hard moments — blue
-        { id: "comm-domain-hard", label: "When Things Get Hard", isDomainHeader: true, color: "#1B5FE8" },
-        ...orderedDims.filter(d => ["conflict","repair","feedback"].includes(d)).map(d => ({ id: `comm-${d}`, label: DIM_META[d].label, isDeepChild: true, color: "#1B5FE8" })),
+        { id: "comm-detail-header", label: "Detailed results", isDomainHeader: true, color: "#9B5DE5" },
+        ...UR_DOMAINS.map(g => ({ id: `comm-${g.id}`, label: g.label, isDeepChild: true, italic: true, color: g.color })),
         { id: "comm-profiles", label: urSameType ? "Communication Profile" : "Individual profiles" },
         { id: "comm-plan", label: "Communication Action Plan" },
       ]
@@ -8806,7 +8777,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
                   const childColor = child.color || color;
                   return (
                     <button key={child.id} data-nav-active={section === child.id ? "true" : undefined} onClick={() => go(child.id)} style={{ background: section === child.id ? childColor + "12" : "transparent", border: "none", borderLeft: section === child.id ? `2px solid ${childColor}` : "2px solid transparent", borderRadius: "0 6px 6px 0", padding: child.isDeepChild ? "0.25rem 0.6rem 0.25rem 1.25rem" : "0.35rem 0.6rem", textAlign: "left", cursor: "pointer", fontFamily: BFONT, transition: "all .12s" }}>
-                      <span style={{ fontSize: child.isDeepChild ? "0.65rem" : "0.7rem", fontWeight: section === child.id ? 700 : 400, color: section === child.id ? childColor : child.isDeepChild ? "#AAA098" : "#8C7A68" }}>{child.label}</span>
+                      <span style={{ fontSize: child.isDeepChild ? "0.65rem" : "0.7rem", fontStyle: child.italic ? "italic" : "normal", fontWeight: section === child.id ? 700 : 400, color: section === child.id ? childColor : child.isDeepChild ? "#AAA098" : "#8C7A68" }}>{child.label}</span>
                     </button>
                   );
                 })}
@@ -8838,15 +8809,11 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
   // Prev/Next navigation
   // allPages must exactly match sidebar order so Prev/Next stays in sync with the nav
   // Domain order matches sidebar exactly
-  const PAGE_DOMAIN_ORDER = ["energy","expression","values","love","needs","bids","listening","conflict","repair","feedback"];
-  const domainOrderedDims = [
-    ...PAGE_DOMAIN_ORDER.filter(d => orderedDims.includes(d)),
-  ];
   const allPages = [
     "highlights",
     "couple-type",
     "comm-overview",
-    ...domainOrderedDims.map(d => `comm-${d}`),
+    ...UR_DOMAINS.map(g => `comm-${g.id}`),
     "comm-profiles", "comm-plan",
     "exp-overview",
     ...FIXED_CATS.map((_, ci) => `exp-convo-${ci}`),
@@ -8871,7 +8838,11 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
     if (id === "highlights") return "Highlights";
     if (id === "couple-type") return "Couple Type";
     if (id === "comm-overview") return "Communication Overview";
-    if (id.startsWith("comm-") && id !== "comm-profiles" && id !== "comm-plan") return DIM_META[id.replace("comm-","")]?.label || id;
+    if (id.startsWith("comm-") && id !== "comm-profiles" && id !== "comm-plan") {
+      const key = id.replace("comm-","");
+      const g = UR_DOMAINS.find(x => x.id === key);
+      return g ? g.label : (DIM_META[key]?.label || id);
+    }
     if (id === "comm-profiles") return urSameType ? "Communication Profile" : "Individual Profiles";
     if (id === "comm-plan") return "Communication Action Plan";
     if (id === "exp-overview") return "Expectations Overview";
@@ -9313,10 +9284,13 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
   if (section.startsWith("comm")) {
     const dimStep = (() => {
       if (section === "comm-overview") return 0;
-      if (section === "comm-profiles") return orderedDims.length + 1;
-      if (section === "comm-plan") return orderedDims.length + 3;
-      const dimIdx = orderedDims.indexOf(section.replace("comm-", ""));
-      return dimIdx >= 0 ? dimIdx + 1 : 0;
+      if (section === "comm-profiles") return nUR + 1;
+      if (section === "comm-plan") return nUR + 3;
+      const key = section.replace("comm-", "");
+      // Domain page id, or a legacy comm-<dim> link resolving to its domain page.
+      let i = UR_DOMAINS.findIndex(g => g.id === key);
+      if (i < 0) i = UR_DOMAINS.findIndex(g => g.dims.includes(key));
+      return i >= 0 ? i + 1 : 0;
     })();
     return (
       <Layout accent="#E8673A" noPrevNext={true}>
@@ -9331,9 +9305,9 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
           hasWorkbook={hasWorkbook} hasLMFT={hasLMFT}
           onStepChange={s => {
             if (s === 0) go("comm-overview");
-            else if (s === orderedDims.length + 1) go("comm-profiles");
-            else if (s === orderedDims.length + 3 || s === orderedDims.length + 4) go("comm-plan");
-            else if (s >= 1 && s <= orderedDims.length) go(`comm-${orderedDims[s-1]}`);
+            else if (s === nUR + 1) go("comm-profiles");
+            else if (s === nUR + 3 || s === nUR + 4) go("comm-plan");
+            else if (s >= 1 && s <= nUR) go(`comm-${UR_DOMAINS[s-1].id}`);
           }}
         />
       </Layout>
