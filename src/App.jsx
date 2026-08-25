@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useLayoutEffect, useRef } from "react";
 import { axisScores, blendedDimScores } from "../api/_type-engine.js";
-import { PERSONALITY_QUESTIONS, RESPONSIBILITY_CATEGORIES, LIFE_QUESTIONS, PARTNER_VIEW_ITEMS } from "../api/_questions.js";
+import { PERSONALITY_QUESTIONS, RESPONSIBILITY_CATEGORIES, LIFE_QUESTIONS, PARTNER_VIEW_ITEMS, PARTNER_VIEW_TEXT } from "../api/_questions.js";
 import { INTIMACY_QUESTIONS, INTIMACY_DIMENSIONS, summarizeIntimacy, intimacyDimensionPositions, intimacyDimensionSkips } from "../api/_intimacy-questions.js";
 
 // Proposal B master switch. Off = comms exercise, scoring, and results are unchanged.
@@ -49,14 +49,13 @@ const TYPE_LABEL = { W: 'Initiator', X: 'Anchor', Y: 'Feeler', Z: 'Protector' };
 // Demo only: give each archetype a partner-view of the OTHER archetype so demo mode
 // exercises the Proposal B blend + self-vs-partner view. Perception is modeled as
 // a slightly muted read of the partner's real orientation (compressed toward center).
-const _PV_DEMO_KEYS = { pv_conflict: 'conflict', pv_repair: 'repair', pv_expression: 'expression', pv_feedback: 'feedback' };
 function demoWithPartnerView(selfArch, otherArch) {
   if (!PARTNER_VIEW_ENABLED || !selfArch || !otherArch) return selfArch;
-  const other = calcDimScores(otherArch);
   const out = { ...selfArch };
-  for (const [pv, dim] of Object.entries(_PV_DEMO_KEYS)) {
-    const d = other[dim];
-    if (d != null && !isNaN(d)) out[pv] = 3 + (d - 3) * 0.6;
+  // Demo: this person's view of the other = a muted read of the other's real answers,
+  // stored per-question as pv_<qid> to match the real two-part exercise.
+  for (const [qid, val] of Object.entries(otherArch)) {
+    if (val != null && !isNaN(val)) out['pv_' + qid] = 3 + (Number(val) - 3) * 0.6;
   }
   return out;
 }
@@ -3903,8 +3902,19 @@ const INTERLEAVED_EX1 = (() => {
   }
   return out;
 })();
+// Two-part comms exercise: Part 1 asks all questions about yourself, Part 2 (after
+// a break screen) re-asks the same set about your partner, storing under pv_<id>.
+const TWO_PART_EX1 = (() => {
+  const p1 = PERSONALITY_QUESTIONS.map(q => ({ ...q, answerKey: q.id, isPV: false }));
+  const p2 = PERSONALITY_QUESTIONS.map(q => {
+    const pv = PARTNER_VIEW_TEXT[q.id] || {};
+    return { ...q, answerKey: 'pv_' + q.id, isPV: true, partnerView: true,
+             text: pv.text || q.text, a: pv.a ?? q.a, b: pv.b ?? q.b };
+  });
+  return [...p1, { __partBreak: true, id: '__partBreak' }, ...p2];
+})();
 function Exercise01Flow({ userName, partnerName, onComplete, skipIntro = false, fresh = false }) {
-  const questions = PARTNER_VIEW_ENABLED ? INTERLEAVED_EX1 : PERSONALITY_QUESTIONS;
+  const questions = PARTNER_VIEW_ENABLED ? TWO_PART_EX1 : PERSONALITY_QUESTIONS;
 
   // Mid-exercise persistence: save after each answer, hydrate on mount.
   // Under key attune_ex1_progress so final submission's attune_ex1 stays
@@ -3941,8 +3951,8 @@ function Exercise01Flow({ userName, partnerName, onComplete, skipIntro = false, 
   // saved answer (user refreshed after Next but before selecting again),
   // pre-fill so they can see what they picked.
   useEffect(() => {
-    if (answers[questions[idx]?.id] !== undefined && chosen === null) {
-      setChosen(answers[questions[idx].id]);
+    if (answers[questions[idx]?.answerKey] !== undefined && chosen === null) {
+      setChosen(answers[questions[idx].answerKey]);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -3965,7 +3975,7 @@ function Exercise01Flow({ userName, partnerName, onComplete, skipIntro = false, 
         <p style={{ fontSize: "0.78rem", color: C.muted, fontFamily: font.body, fontWeight: 400, lineHeight: 1.6, marginBottom: "1.75rem" }}>Built on relationship research and shaped with licensed therapists.</p>
         <div style={{ display: "flex", gap: "0.85rem", marginBottom: "1.75rem", flexWrap: "wrap" }}>
           {[
-            { num: '01', title: 'Communication', color: '#E8673A', desc: (PARTNER_VIEW_ENABLED ? INTERLEAVED_EX1.length : PERSONALITY_QUESTIONS.length) + ' questions · 10 dimensions' },
+            { num: '01', title: 'Communication', color: '#E8673A', desc: PERSONALITY_QUESTIONS.length + ' questions, about you and your partner' },
             { num: '02', title: 'Expectations',  color: '#1B5FE8', desc: 'Responsibilities & life' },
           ].map(e => (
             <div key={e.num} style={{ flex: "1 1 180px", background: C.warm, border: `1.5px solid ${e.color}33`, borderRadius: 12, padding: "0.9rem 1rem" }}>
@@ -3986,6 +3996,8 @@ function Exercise01Flow({ userName, partnerName, onComplete, skipIntro = false, 
   const q = questions[idx];
   const total = questions.length;
   const progress = Math.round((idx / total) * 100);
+  const qCount = questions.filter(x => !x.__partBreak).length;
+  const answeredNum = questions.slice(0, idx + 1).filter(x => !x.__partBreak).length;
 
   const pick = (val) => {
     setChosen(val);
@@ -3993,7 +4005,7 @@ function Exercise01Flow({ userName, partnerName, onComplete, skipIntro = false, 
 
   const next = () => {
     if (chosen === null) return;
-    const updated = { ...answers, [q.id]: chosen };
+    const updated = { ...answers, [q.answerKey || q.id]: chosen };
     if (idx + 1 < total) {
       setAnswers(updated);
       setChosen(null);
@@ -4024,7 +4036,7 @@ function Exercise01Flow({ userName, partnerName, onComplete, skipIntro = false, 
     // walked forward again. Just move, and re-select what's already stored.
     const prevIdx = idx - 1;
     setIdx(prevIdx);
-    setChosen(answers[questions[prevIdx].id] ?? null);
+    setChosen(answers[questions[prevIdx].answerKey] ?? null);
     try { localStorage.setItem('attune_ex1_progress', JSON.stringify({ answers, idx: prevIdx })); } catch {}
   };
 
@@ -4035,6 +4047,21 @@ function Exercise01Flow({ userName, partnerName, onComplete, skipIntro = false, 
     { val: 4, label: "Mostly B" },
     { val: 5, label: "Strongly B" },
   ];
+
+  if (q?.__partBreak) {
+    return (
+      <div style={{ minHeight: "100vh", background: "#FBF8F3", fontFamily: "'DM Sans', sans-serif" }}>
+        <link href={FONT_LINK} rel="stylesheet" />
+        <div style={{ height: 3, background: "#E5E2DC" }}><div style={{ height: "100%", width: progress + "%", background: "linear-gradient(90deg,#E8673A,#1B5FE8)" }} /></div>
+        <div style={{ maxWidth: 520, margin: "0 auto", padding: "3.5rem 1.5rem 2rem", animation: "fadeIn 0.5s ease" }}>
+          <p style={{ fontSize: "0.62rem", letterSpacing: "0.22em", textTransform: "uppercase", color: "#E8673A", fontWeight: 700, fontFamily: font.body, marginBottom: "1rem" }}>Part 2 of 2</p>
+          <p style={{ fontFamily: font.display, fontSize: "clamp(1.5rem, 5vw, 2rem)", fontWeight: 700, color: C.ink, lineHeight: 1.15, marginBottom: "1.25rem" }}>Now, the same questions about your partner.</p>
+          <p style={{ fontSize: "0.92rem", color: C.muted, fontFamily: font.body, lineHeight: 1.75, marginBottom: "1.75rem" }}>You just answered these about yourself. This time, answer the same set the way you think <em>your partner</em> would. It shows each of you where your reads of each other line up, and where they do not. There are no right answers, and your partner never sees how you answered.</p>
+          <button onClick={() => { const ni = idx + 1; setIdx(ni); setChosen(answers[questions[ni]?.answerKey] ?? null); if (!fresh) { try { localStorage.setItem('attune_ex1_progress', JSON.stringify({ answers, idx: ni })); } catch {} } }} style={{ background: "linear-gradient(135deg,#E8673A,#1B5FE8)", color: "white", border: "none", padding: "0.95rem 2rem", borderRadius: 10, cursor: "pointer", fontFamily: font.body, fontSize: "0.95rem", fontWeight: 600, minHeight: 48 }}>Continue →</button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div style={{ minHeight: "100vh", background: "#FBF8F3", fontFamily: "'DM Sans', sans-serif" }}>
@@ -4048,11 +4075,11 @@ function Exercise01Flow({ userName, partnerName, onComplete, skipIntro = false, 
         {/* Anonymous storage banner — only renders when no logged-in account */}
         <AnonymousStorageBanner />
         {/* Resume toast — fires once when the component mounts with saved progress */}
-        <ResumeToast show={hasProgress} message={`You're on question ${idx + 1} of ${total}.`} />
+        <ResumeToast show={hasProgress} message={`You're on question ${answeredNum} of ${qCount}.`} />
         {/* Header */}
         <div style={{ marginBottom: "2rem" }}>
           <p style={{ fontSize: "0.72rem", letterSpacing: "0.1em", textTransform: "uppercase", color: "#999", fontFamily: "'DM Sans', sans-serif", marginBottom: "0.4rem" }}>
-            Question {idx + 1} of {total}
+            Part {q.isPV ? "2" : "1"} of 2 &middot; Question {answeredNum} of {qCount}
           </p>
           <p style={{ fontSize: "1.25rem", fontWeight: 600, color: "#1C1C1E", fontFamily: "'Playfair Display', serif", lineHeight: 1.4, margin: 0 }}>
             {q.partnerView

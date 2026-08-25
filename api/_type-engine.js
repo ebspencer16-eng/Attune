@@ -151,9 +151,17 @@ export const PARTNER_VIEW_BLEND = {
 export function blendedDimScores(selfAnswers, partnerAnswers) {
   const selfDim = calcDimScores(selfAnswers);
   if (!partnerAnswers) return selfDim;
+  // Part 2 of the exercise stores the partner-view of each question as pv_<qid>.
+  // Key the partner's pv_* answers back to <qid> and run the same dimension math to
+  // get a per-dimension "how the partner sees this person" score, then blend it in.
+  const pvSelf = {};
+  for (const [k, v] of Object.entries(partnerAnswers)) {
+    if (k.startsWith('pv_')) pvSelf[k.slice(3)] = v;
+  }
+  const partnerViewDim = calcDimScores(pvSelf); // null for dims with no partner-view
   const out = { ...selfDim };
-  for (const [pvId, dim] of Object.entries(PARTNER_VIEW_QUESTIONS)) {
-    const pv = partnerAnswers[pvId];
+  for (const dim of Object.keys(out)) {
+    const pv = partnerViewDim[dim];
     if (pv == null || isNaN(pv)) continue;
     const w = PARTNER_VIEW_BLEND[dim] || { self: 0.5, partner: 0.5 };
     const self = out[dim];

@@ -155,3 +155,35 @@ export const PARTNER_VIEW_ITEMS = [
     text: "When you raise something that bothers you, your partner:",
     a: "Needs a calm tone and careful timing to take it in.", b: "Takes it straight. Direct and specific lands best." },
 ];
+
+// Part 2 of the comms exercise: the same 27 questions re-asked about the
+// partner. Keyed by self-question id. Reviewed copy.
+export const PARTNER_VIEW_TEXT = {
+  lv1: { text: "Your partner feels most loved when you:", a: "Tell them. Words land most deeply.", b: "Show them. Presence, touch, and acts of care speak loudest." },
+  lv2: { text: "Your partner shows love primarily by:", a: "Expressing it, verbally and explicitly.", b: "Doing things. Showing up and making life easier." },
+  ex6: { text: "When your partner is going through something, they tend to:", a: "Keep it mostly to themselves until they've worked through it.", b: "Let you in as it's happening." },
+  en4: { text: "When you need alone time, your partner's instinct is to:", a: "Respect it right away.", b: "Check in. Silence can feel like something's wrong to them." },
+  ex7: { text: "Your partner feels most understood when:", a: "You pick up on something without them having to say it.", b: "They're able to explain themselves clearly." },
+  lv5: { text: "In day-to-day life, your partner feels closest to you when:", a: "You're simply together. Shared presence, doing life side by side.", b: "You're talking. Conversation keeps them close." },
+  bd1: { text: "For your partner, small everyday moments of connection:", a: "Are nice but not something they track or depend on.", b: "Matter a lot. They're how they feel close day to day." },
+  bd3: { text: "In your relationship, your partner tends to:", a: "Wait for you to initiate small moments of connection.", b: "Reach for connection often, through small gestures or check-ins." },
+  bd4: { text: "When your partner reaches for connection and you don't respond:", a: "They let it go easily.", b: "They notice. It can leave them feeling a little distant or unseen." },
+  nd5: { text: "For your partner, articulating what they need feels:", a: "Straightforward. They can usually name it.", b: "Hard to name, even when they know something's missing." },
+  nd1: { text: "When something feels off for your partner but they haven't said anything, they expect you to:", a: "Wait until they bring it up.", b: "Notice and check in." },
+  st1: { text: "When your partner is going through a hard stretch, they tend to:", a: "Pull inward. They get through it themselves before they can be present.", b: "Lean in. Closeness is part of how they cope." },
+  cf1: { text: "When something feels off between you, your partner tends to:", a: "Address it as soon as possible.", b: "Need time and space before engaging." },
+  cf2: { text: "In a difficult conversation, what matters most to your partner is:", a: "That you stay present and keep engaging.", b: "That you give them room to step back if they need it." },
+  ls1: { text: "When you're talking through something that matters to you, your partner tends to:", a: "Listen and sit with it. They don't need to fix it or fill the silence.", b: "Respond, reflect back, ask questions." },
+  rp3: { text: "After a conflict, your partner needs repair to happen:", a: "Relatively quickly. Unresolved tension is hard for them.", b: "When it's ready. They can hold it without it consuming them." },
+  rp2: { text: "When your partner has been hurt, they feel ready to move forward when:", a: "You've named what happened and shown you understand.", b: "The tension has lifted and things feel okay again." },
+  rp6: { text: "After a conflict, the move toward repair usually comes from your partner:", a: "Relatively quickly. They tend to reach out first.", b: "Only once they're ready. They wait it out." },
+  fb5: { text: "When you raise something that bothers you, your partner:", a: "Needs a calm tone and careful timing to take it in.", b: "Takes it straight. Direct and specific lands best." },
+  en6: { text: "When it comes to your social lives, your partner leans toward:", a: "Independent. Their own friendships and plans keep them themselves.", b: "Shared. Doing things together is how they most want to spend time." },
+  ex8: { text: "When you do something your partner appreciates, they tend to:", a: "Feel it more than say it.", b: "Say it. They name the small things, not just the big ones." },
+  ex9: { text: "When something good happens to your partner, their first instinct is to:", a: "Sit with it for a bit before sharing.", b: "Tell you immediately. Sharing it is part of enjoying it." },
+  ex10: { text: "When you share exciting news, your partner tends to:", a: "Respond genuinely but quietly.", b: "Match your energy. They light up with you." },
+  cf3: { text: "When something small bothers your partner, they tend to:", a: "Bring it up. They'd rather clear the air.", b: "Let it go. Not everything needs a conversation." },
+  fb2: { text: "When your partner has feedback for you, they tend to:", a: "Soften it and choose the moment carefully.", b: "Say it plainly, close to when it comes up." },
+  rs1: { text: "When it comes to feeling secure, your partner would rather:", a: "Have it reaffirmed. Hearing where they stand keeps them close.", b: "Take it as given. They don't need it confirmed to feel steady." },
+  rs2: { text: "If a while goes by with no 'we're okay' between you, your partner:", a: "Feels the gap and wants to check in.", b: "Doesn't think twice. Silence isn't a signal to them." },
+};
