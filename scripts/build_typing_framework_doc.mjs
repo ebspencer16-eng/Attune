@@ -1,12 +1,21 @@
 // Couple Typing Framework — the methodology behind the types.
 import { INDIVIDUAL_TYPES, NEW_COUPLE_TYPES } from './_type_data.mjs';
 import { DIM_META, DIM_AXIS, DIMS } from '../api/_workbook-content.js';
+import { AXIS_CONFIG } from '../api/_type-engine.js';
 import { Paragraph } from 'docx';
 import { run, eyebrow, title, h1, h2, body, kv, small, bullet, rule, pairTable, saveDoc, ORANGE, BLUE, INK, MUTED } from './_doc_style.mjs';
 
-// Weights (single source of truth: computeIndividualType comment in App.jsx)
-const EW_WEIGHTS = [['Conflict Style','.45'],['Communication Under Stress','.25'],['How You Repair','.15'],['Energy & Recharge','.10'],['How You Listen','.05']];
-const OG_WEIGHTS = [['Emotional Expression','.40'],['Giving & Receiving Feedback','.25'],['How You Ask for Needs','.20'],['Bids for Connection','.10'],['How Love Lands','.05']];
+// Weights are read from AXIS_CONFIG (api/_type-engine.js), the scorer's own
+// source of truth, so this table can never drift from the live formula.
+const weightsFor = (axis) => Object.entries(AXIS_CONFIG)
+  .filter(([, c]) => c.axis === axis)
+  .sort((a, b) => b[1].weight - a[1].weight)
+  .map(([dim, c]) => [DIM_META[dim]?.label || dim, c.weight.toFixed(2).replace(/^0/, '')]);
+const invertedFor = (axis) => Object.entries(AXIS_CONFIG)
+  .filter(([, c]) => c.axis === axis && c.invert)
+  .map(([dim]) => (DIM_META[dim]?.label || dim).toLowerCase());
+const EW_WEIGHTS = weightsFor('withdraw');
+const OG_WEIGHTS = weightsFor('open');
 
 const children = [];
 children.push(eyebrow('Attune · Reference · Typing Framework', ORANGE));
@@ -19,10 +28,11 @@ children.push(body('Every communication dimension loads onto one of two axes. Ea
 children.push(h2('Engage / Withdraw', BLUE));
 children.push(body('How you move when a conversation gets hard. Engagers move toward it; withdrawers need space first. Neither is avoidance, and neither is better.'));
 children.push(pairTable([['Dimension','Weight'], ...EW_WEIGHTS], 60));
-children.push(small('Some dimensions are oriented by spectrum (stress, energy, listening) so that a high reading always points the same way on the axis.'));
+children.push(small('Some dimensions are oriented by spectrum (' + invertedFor('withdraw').join(', ') + ') so that a high reading always points the same way on the axis.'));
 children.push(h2('Open / Guarded', BLUE));
 children.push(body('How much of your inner world you share, and how directly. Open partners externalize; guarded partners process privately and share selectively.'));
 children.push(pairTable([['Dimension','Weight'], ...OG_WEIGHTS], 60));
+children.push(small('Oriented by spectrum on this axis: ' + invertedFor('open').join(', ') + '.'));
 children.push(rule());
 
 children.push(h1('The 3.0 boundary'));

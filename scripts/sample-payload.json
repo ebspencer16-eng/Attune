@@ -5,25 +5,25 @@
   "scores": {
     "energy": 4,
     "expression": 4,
+    "reassurance": 1.8,
     "needs": 3,
     "bids": 4,
     "conflict": 4,
     "repair": 3,
-    "closeness": 4,
+    "listening": 4,
     "love": 4,
-    "stress": 3,
     "feedback": 3
   },
   "partnerScores": {
     "energy": 2,
     "expression": 2,
+    "reassurance": 4.1,
     "needs": 3,
     "bids": 3,
     "conflict": 2,
     "repair": 4,
-    "closeness": 3,
+    "listening": 3,
     "love": 4,
-    "stress": 4,
     "feedback": 4
   },
   "coupleType": {

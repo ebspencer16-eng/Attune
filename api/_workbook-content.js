@@ -2,23 +2,25 @@
 // Shared content for the personalized workbook generator.
 // Underscore prefix = not an API route (Vercel ignores it).
 
-export const DIMS = ['energy','expression','needs','bids','conflict','repair','listening','love','stress','feedback'];
+export const DIMS = ['energy','expression','reassurance','needs','bids','conflict','repair','listening','love','feedback'];
 
 export const DIM_META = {
-  energy:     { label: 'Energy & Recharge',           left: 'Inward',         right: 'Outward',          color: '9B5DE5' },
-  expression: { label: 'Emotional Expression',         left: 'Guarded',        right: 'Expressive',       color: 'E8673A' },
-  needs:      { label: 'How You Ask for Needs',        left: 'Direct',         right: 'Indirect',         color: '1B5FE8' },
-  bids:       { label: 'Bids for Connection',           left: 'Reserved',       right: 'Attuned',          color: '10B981' },
-  conflict:   { label: 'Conflict Style',               left: 'Engage quickly', right: 'Needs space first', color: '1B5FE8' },
-  repair:     { label: 'How You Repair',               left: 'Formal / verbal', right: 'Informal / warmth', color: 'E8673A' },
-  listening:  { label: 'How You Listen',              left: 'Reflective',     right: 'Responsive',      color: 'E8673A' },
-  love:       { label: 'How Love Lands',               left: 'Words',          right: 'Actions & Presence', color: '10B981' },
-  stress:     { label: 'Communication Under Stress',   left: 'Withdraw',       right: 'Seek connection',  color: '1B5FE8' },
-  feedback:   { label: 'Giving & Receiving Feedback',  left: 'Guarded',        right: 'Open',             color: 'E8673A' },
+  energy:      { label: 'Energy & Recharge',              left: 'Inward',     right: 'Outward',    color: '9B5DE5' },
+  expression:  { label: 'Emotional Expression',           left: 'Internal',   right: 'External',   color: '9B5DE5' },
+  reassurance: { label: 'Reassurance',                    left: 'Voiced',     right: 'Assumed',    color: '9B5DE5' },
+  needs:       { label: 'Communicating Needs',            left: 'Direct',     right: 'Indirect',   color: 'E8673A' },
+  bids:        { label: 'Bids for Connection',            left: 'Subtle',     right: 'Expressive', color: 'E8673A' },
+  conflict:    { label: 'Conflict Style',                 left: 'Engage',     right: 'Withdraw',   color: '1B5FE8' },
+  repair:      { label: 'Repairing',                      left: 'Formal',     right: 'Informal',   color: '1B5FE8' },
+  listening:   { label: 'Listening',                      left: 'Reflective', right: 'Responsive', color: 'E8673A' },
+  love:        { label: 'Emotional Intimacy',             left: 'Words',      right: 'Actions',    color: 'E8673A' },
+  feedback:    { label: 'Giving and Receiving Feedback',  left: 'Guarded',    right: 'Open',       color: '1B5FE8' },
 };
 
 // Returns dimension-level close/gap text and a weekly practice.
 // All strings support {U} and {P} substitution (caller handles).
+// NOTE: the reassurance entries below are a first draft pending Carolina's
+// clinical pass. Everything else here has been through review.
 export const DIM_CONTENT = {
   energy: {
     measures: 'How each of you recovers, socially, emotionally, physically. Inward: solitude recharges. Outward: connection recharges. This shapes your weekend default, how you decompress, and what a good evening looks like.',
@@ -43,6 +45,18 @@ export const DIM_CONTENT = {
       'What would feel different if either of you shared more, or less?',
     ],
     thisWeek: 'Each of you shares one thing you\'d normally hold back or let pass, not something big, just something that\'s been sitting there. Notice what happens.',
+  },
+  reassurance: {
+    measures: 'How each of you stays sure of where you stand. Voiced: hearing it said keeps you close. Assumed: security is the baseline and does not need confirming. This shapes what a long quiet stretch means to each of you.',
+    closeText: '{U} and {P} need reassurance in similar amounts. Neither of you is left waiting for a signal the other never thought to send.',
+    gapText: 'One of you needs where you stand said out loud. The other treats it as settled and does not think to say it. The voiced partner can read the quiet as distance. The assumed partner can read the asking as doubt. Neither reading is accurate, and both feel true in the moment.',
+    prompts: [
+      'When was the last time either of you wanted to hear you were okay and did not say so?',
+      'What does a long quiet stretch mean to each of you?',
+      'Which words land as reassurance, and which ones feel automatic?',
+      'If each of you set the number, how often would it get said?',
+    ],
+    thisWeek: 'Once this week, say where you stand out loud without being asked for it. One sentence. Notice how it lands.',
   },
   needs: {
     measures: 'How directly each partner communicates needs, whether they ask outright or signal indirectly. Direct communicators state needs explicitly. Indirect communicators hint, hope to be noticed, or pull back.',
@@ -115,18 +129,6 @@ export const DIM_CONTENT = {
       'Do you each know specifically how to make the other feel appreciated?',
     ],
     thisWeek: 'Each of you asks the other: "What\'s one thing I do that makes you feel really loved that I might not realize has that effect?" Then do more of it.',
-  },
-  stress: {
-    measures: 'How each partner\'s communication style shifts when they\'re overwhelmed, anxious, or depleted. Some people shut down; others become more urgent and seek reassurance. That shift is a stress response, not a statement about the relationship.',
-    closeText: '{U} and {P} respond to stress in similar ways. This symmetry means neither partner is likely to be left alone in the way that matters most when pressure builds.',
-    gapText: 'Under pressure, one of you shuts down; the other becomes more urgent and reaches for closeness. Without language for this, the seeking partner reads withdrawal as rejection; the withdrawing partner reads urgency as escalation. Both are in stress response, and making each other worse.',
-    prompts: [
-      'When either of you is really under pressure, what do you need from the other? Does the other know?',
-      'How does each of you know when the other is struggling, even when they\'re not saying so?',
-      'Have you ever been in a moment where you were both stressed and made it worse for each other?',
-      'What\'s the most helpful thing someone can do when you\'re at your worst?',
-    ],
-    thisWeek: 'Next time one of you is clearly under pressure, the other asks: "Do you need me to help fix something, or do you just need me to be here?" Notice which answer comes back. Do that.',
   },
   feedback: {
     measures: 'How comfortably each partner gives and receives direct, honest feedback. Guarded partners tend toward defensiveness. Open partners can engage with critical input without feeling attacked, and tend to surface concerns more readily.',
@@ -373,24 +375,25 @@ export const LIFE_QUESTION_OPTIONS = {
 //
 // Axis assignment + orientation. Orientation is derived from each dimension's
 // SPECTRUM/blurb semantics (which score end the blurbs treat as engage/open),
-// NOT from the overall composite — the composite adds stress and needs in the
+// NOT from the overall composite. The composite adds reassurance and needs in the
 // reverse direction from their spectrum meaning, so trusting it here would
 // pull the wrong blurb. Verified against blurb text per dimension.
 //   E/W engage end: conflict=low(Engage quickly), repair=low(Formal/verbal),
-//     stress=high(Seek connection), energy=high(Outward), listening=high(Responsive)
-//   O/G open end: expression=high(Expressive), feedback=high(Open),
-//     bids=high(Attuned), needs=low(Direct), love=low(Words)
+//     energy=high(Outward), listening=high(Responsive)
+//   O/G open end: expression=high(External), feedback=high(Open),
+//     bids=high(Expressive), needs=low(Direct), love=low(Words),
+//     reassurance=low(Voiced)
 export const DIM_AXIS = {
-  conflict:   { axis: 'EW', engageWhen: 'low'  },
-  repair:     { axis: 'EW', engageWhen: 'low'  },
-  stress:     { axis: 'EW', engageWhen: 'high' },
-  energy:     { axis: 'EW', engageWhen: 'high' },
-  listening:  { axis: 'EW', engageWhen: 'high' },
-  expression: { axis: 'OG', openWhen:   'high' },
-  feedback:   { axis: 'OG', openWhen:   'high' },
-  bids:       { axis: 'OG', openWhen:   'high' },
-  needs:      { axis: 'OG', openWhen:   'low'  },
-  love:       { axis: 'OG', openWhen:   'low'  },
+  conflict:    { axis: 'EW', engageWhen: 'low'  },
+  repair:      { axis: 'EW', engageWhen: 'low'  },
+  energy:      { axis: 'EW', engageWhen: 'high' },
+  listening:   { axis: 'EW', engageWhen: 'high' },
+  expression:  { axis: 'OG', openWhen:   'high' },
+  feedback:    { axis: 'OG', openWhen:   'high' },
+  bids:        { axis: 'OG', openWhen:   'high' },
+  needs:       { axis: 'OG', openWhen:   'low'  },
+  love:        { axis: 'OG', openWhen:   'low'  },
+  reassurance: { axis: 'OG', openWhen:   'low'  },
 };
 
 // Decompose a type letter into its two axis readings.
@@ -459,6 +462,11 @@ export const GAP_BLURBS = {
     some_gap:    "You express emotion at slightly different levels.",
     notable_gap: "You express at very different levels. One wears it; the other holds it. The balance is found once you learn each other\'s signals.",
   },
+  reassurance: {
+    aligned:     "You need reassurance in similar amounts. Whether it gets said often or rarely, you share a baseline, so a quiet stretch tends to mean the same thing to both of you.",
+    some_gap:    "You need reassurance in slightly different amounts. One of you may want it said a little more often than the other thinks to say it.",
+    notable_gap: "You need reassurance in very different amounts. One of you wants where you stand said out loud. The other treats it as settled. Unnamed, the quiet reads as distance to one of you and as ordinary to the other.",
+  },
   needs: {
     aligned:     "You ask for needs in similar ways. Whether direct or indirect, you share a protocol, which keeps small things from accumulating. Consider checking in with your partner on if the current state is still serving you both.",
     some_gap:    "You ask for needs at slightly different directness levels. One of you may be hinting while the other misses it.",
@@ -488,11 +496,6 @@ export const GAP_BLURBS = {
     aligned:     "You tend to give and receive love in compatible ways. What works for one tends to work for the other. Less translation needed.",
     some_gap:    "You give and receive love slightly differently. In busy stretches, the version sent isn\'t always the version the other needs.",
     notable_gap: "You give and receive love in very different ways. One often needs words while the other needs presence and action. Both are real, and neither replaces the other.",
-  },
-  stress: {
-    aligned:     "You tend to handle stress in similar ways. Either you both reach out or both pull in. Matching stress responses means that the stress is not compounded.",
-    some_gap:    "You handle stress slightly differently. The gap can show up exactly when one of you has the least bandwidth to translate.",
-    notable_gap: "You handle stress in opposite directions. One often needs a listener, while the other often needs the room cleared. The wrong response can make it worse.",
   },
   feedback: {
     aligned:     "You give and receive feedback at similar comfort levels.",
@@ -536,6 +539,18 @@ export const WHEN_THIS_SHOWS_UP = {
     XY: "[X partner name] is ready to name things concretely, while [Y partner name] needs emotional space to surface first. Name the observation, not the feeling. \'You\'ve been quiet since Tuesday\' can land better than \'what\'s wrong?\'",
     XZ: "Both of you default to holding. Schedule a specific time, not \'we should talk soon\' but \'Sunday at 4.\' The structure can make the conversation possible when nothing else does.",
     YZ: "Both of you need time to surface. If the quiet doesn\'t break on its own after two days, check in. Consider scheduling a specific time to check in.",
+  },
+  reassurance: {
+    WW: "Both of you say where you stand readily, so it rarely goes unsaid. The risk is that it turns into a routine and stops carrying weight. Make it specific. Name the thing, not the category.",
+    XX: "Neither of you says it much, and both of you assume it is understood. That holds until a hard stretch, when neither of you thinks to check. Say it plainly once a month anyway.",
+    YY: "Both of you feel the quiet. Under pressure you each go inward and wait for the other to reach first. Whoever notices the gap says it first.",
+    ZZ: "Both of you treat it as settled, and mostly it is. The gap shows up after a rough patch, when neither of you names that you are okay. Say it once out loud. Short is fine.",
+    WX: "[W partner name] wants where they stand said out loud. [X partner name] treats it as given and does not think to say it. [X partner name] can offer it without being asked, and [W partner name] can read the steadiness in the quiet.",
+    WY: "Both of you want it said. [W partner name] asks in the moment; [Y partner name] waits. When [Y partner name] goes quiet is usually when it matters most, so [W partner name] can offer it first.",
+    WZ: "[W partner name] checks in to feel close. [Z partner name] holds it as obvious and stays quiet. When [W partner name] asks, they are not doubting the relationship. When [Z partner name] does not say it, they are not withholding.",
+    XY: "[Y partner name] feels a long quiet and starts to wonder about it. [X partner name] does not register the gap at all. One unprompted sentence from [X partner name] closes it.",
+    XZ: "Neither of you asks for it and neither of you offers it. That is comfortable right up until something is actually off and there is no signal either way. Build one small check-in you both do on purpose.",
+    YZ: "Both of you wait rather than ask. [Y partner name] feels the distance. [Z partner name] does not read the silence as anything. Whoever notices the gap names it, even briefly.",
   },
   needs: {
     WW: "Both of you tend to hope the other will notice, then feel let down when they don\'t. Ask directly even when it feels clunky.",
@@ -608,18 +623,6 @@ export const WHEN_THIS_SHOWS_UP = {
     XY: "[X partner name] tends to love practically, while [Y partner name] loves emotionally. [X partner name] can add a word about the feeling, alongside the task. [Y partner name] can acknowledge the task, alongside the feeling. Both stretch a little.",
     XZ: "Both of you tend to prefer love expressed through reliable action, and may miss the words. Add them occasionally, without ceremony. \'I\'m glad it\'s you.\' That\'s enough.",
     YZ: "Love is quiet and steady, and both of you may sometimes wonder if it\'s still there. It is. Once in a while, mark it explicitly. A Tuesday text, a specific sentence. Unnecessary by design, and worth it.",
-  },
-  stress: {
-    WW: "Both of you tend to reach toward each other under stress, which is mostly good. The risk is that you can both lean on someone equally depleted. It can help when one of you names the load first, and the other takes one thing off their plate.",
-    XX: "Both of you tend to compartmentalize and assume the other is handling it. Ask directly, not generally: \'What\'s on your plate this week that I don\'t know about?\'",
-    YY: "Both of you tend to withdraw under pressure. The repair is a specific ritual: weekly, name one thing each of you is carrying. No solution required, just put it in the room.",
-    ZZ: "Both of you tend to hold. The ask is direct: once a week, each of you names one thing that\'s been weighing on you. Brief is fine, but silence is not.",
-    WX: "[W partner name] tends to talk through stress, while [X partner name] keeps theirs internal. [W partner name] needs a listener, and [X partner name] needs their plate cleared without a conversation. Do both, in the right direction.",
-    WY: "When [W partner name] reaches for connection under stress, [Y partner name] may need to retreat. [W partner name] gives [Y partner name] space first, and [Y partner name] can come back with a specific \'I\'m ready now\' signal. Both trust the return.",
-    WZ: "[W partner name] wants to share the stress, while [Z partner name] tends to handle it alone. [W partner name] can offer support without requiring a conversation, and [Z partner name] can name the stress once, briefly. A single sentence is enough.",
-    XY: "[X partner name] tends to manage stress practically, while [Y partner name] manages it through processing. [X partner name] can take things off [Y partner name]\'s plate, and [Y partner name] can help [X partner name] slow down when they\'re overfunctioning.",
-    XZ: "Both of you tend to handle stress internally. Try one direct question a week: \'What\'s heaviest right now?\' Expect a short answer, sometimes that\'s the whole point.",
-    YZ: "Both of you may wait for the other to notice, and you usually won\'t. Name it plainly, even when it feels like a burden to say. \'I\'m running low this week\' is enough. No elaboration required.",
   },
   feedback: {
     WW: "Both of you tend to prefer honest conversation to resentment, but avoidance can still happen around topics that feel risky. Name the topic first, then the feedback. \'I want to talk about X\' can lower the stakes.",

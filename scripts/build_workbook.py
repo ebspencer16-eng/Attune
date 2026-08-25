@@ -30,19 +30,19 @@ from pathlib import Path
 # CONTENT DATA — mirrored from api/_workbook-content.js
 # ═══════════════════════════════════════════════════════════════════
 
-DIMS = ['energy','expression','needs','bids','conflict','repair','listening','love','stress','feedback']
+DIMS = ['energy','expression','reassurance','needs','bids','conflict','repair','listening','love','feedback']
 
 DIM_META = {
-    'energy':     {'label': 'Energy & Recharge',           'left': 'Inward',         'right': 'Outward',          'color': 'purple'},
-    'expression': {'label': 'Emotional Expression',         'left': 'Guarded',        'right': 'Expressive',       'color': 'coral'},
-    'needs':      {'label': 'How You Ask for Needs',        'left': 'Direct',         'right': 'Indirect',         'color': 'indigo'},
-    'bids':       {'label': 'Bids for Connection',           'left': 'Reserved',       'right': 'Attuned',          'color': 'green'},
-    'conflict':   {'label': 'Conflict Style',               'left': 'Engage quickly', 'right': 'Needs space first','color': 'indigo'},
-    'repair':     {'label': 'How You Repair',               'left': 'Formal / verbal','right': 'Informal / warmth','color': 'coral'},
-    'listening':  {'label': 'How You Listen',               'left': 'Reflective',     'right': 'Responsive',       'color': 'purple'},
-    'love':       {'label': 'How Love Lands',               'left': 'Words',          'right': 'Actions & Presence','color': 'green'},
-    'stress':     {'label': 'Communication Under Stress',   'left': 'Withdraw',       'right': 'Seek connection',  'color': 'indigo'},
-    'feedback':   {'label': 'Giving & Receiving Feedback',  'left': 'Guarded',        'right': 'Open',             'color': 'coral'},
+    'energy':      {'label': 'Energy & Recharge',             'left': 'Inward',     'right': 'Outward',    'color': 'purple'},
+    'expression':  {'label': 'Emotional Expression',          'left': 'Internal',   'right': 'External',   'color': 'purple'},
+    'reassurance': {'label': 'Reassurance',                   'left': 'Voiced',     'right': 'Assumed',    'color': 'purple'},
+    'needs':       {'label': 'Communicating Needs',           'left': 'Direct',     'right': 'Indirect',   'color': 'coral'},
+    'bids':        {'label': 'Bids for Connection',           'left': 'Subtle',     'right': 'Expressive', 'color': 'coral'},
+    'conflict':    {'label': 'Conflict Style',                'left': 'Engage',     'right': 'Withdraw',   'color': 'indigo'},
+    'repair':      {'label': 'Repairing',                     'left': 'Formal',     'right': 'Informal',   'color': 'indigo'},
+    'listening':   {'label': 'Listening',                     'left': 'Reflective', 'right': 'Responsive', 'color': 'coral'},
+    'love':        {'label': 'Emotional Intimacy',            'left': 'Words',      'right': 'Actions',    'color': 'coral'},
+    'feedback':    {'label': 'Giving and Receiving Feedback', 'left': 'Guarded',    'right': 'Open',       'color': 'indigo'},
 }
 
 DIM_CONTENT = {
@@ -67,6 +67,17 @@ DIM_CONTENT = {
             "Is there a version of your emotional experience you share, and a version you hold back?",
         ],
         'thisWeek': "Each of you shares one thing you'd normally hold back or let pass, not something big, just something that's been sitting there. Notice what happens.",
+    },
+    'reassurance': {
+        'measures': "How each of you stays sure of where you stand. Voiced: hearing it said keeps you close. Assumed: security is the baseline and does not need confirming. This shapes what a long quiet stretch means to each of you.",
+        'closeText': "{U} and {P} need reassurance in similar amounts. Neither of you is left waiting for a signal the other never thought to send.",
+        'gapText': "One of you needs where you stand said out loud. The other treats it as settled and does not think to say it. The voiced partner can read the quiet as distance. The assumed partner can read the asking as doubt. Neither reading is accurate, and both feel true in the moment.",
+        'prompts': [
+            "When was the last time either of you wanted to hear you were okay and did not say so?",
+            "What does a long quiet stretch mean to each of you?",
+            "If each of you set the number, how often would it get said?",
+        ],
+        'thisWeek': "Once this week, say where you stand out loud without being asked for it. One sentence. Notice how it lands.",
     },
     'needs': {
         'measures': "How directly each partner communicates needs, whether they ask outright or signal indirectly. Direct communicators state needs explicitly. Indirect communicators hint, hope to be noticed, or pull back.",
@@ -133,17 +144,6 @@ DIM_CONTENT = {
             "Do you each know specifically how to make the other feel appreciated?",
         ],
         'thisWeek': "Each of you asks the other: \"What's one thing I do that makes you feel really loved that I might not realize has that effect?\" Then do more of it.",
-    },
-    'stress': {
-        'measures': "How each partner's communication style shifts when they're overwhelmed, anxious, or depleted. Some people shut down; others become more urgent and seek reassurance. Neither is a statement about the relationship, it's a stress response.",
-        'closeText': "{U} and {P} respond to stress in similar ways. This symmetry means neither partner is likely to be left alone in the way that matters most when pressure builds.",
-        'gapText': "Under pressure, one of you shuts down; the other becomes more urgent and reaches for closeness. Without language for this, the seeking partner reads withdrawal as rejection; the withdrawing partner reads urgency as escalation.",
-        'prompts': [
-            "When either of you is really under pressure, what do you need from the other? Does the other know?",
-            "How does each of you know when the other is struggling, even when they're not saying so?",
-            "What's the most helpful thing someone can do when you're at your worst?",
-        ],
-        'thisWeek': "Next time one of you is clearly under pressure, the other asks: \"Do you need me to help fix something, or do you just need me to be here?\" Notice which answer comes back. Do that.",
     },
     'feedback': {
         'measures': "How comfortably each partner gives and receives direct, honest feedback. Guarded partners tend toward defensiveness. Open partners can engage with critical input without feeling attacked.",
@@ -778,17 +778,17 @@ COUPLE = {
     'edition_internal': '0247',
     'date': 'April 2026',
     # WX scores. Both engage quickly (low conflict scores), but differ on
-    # expression, repair style, listening, love, stress, feedback.
+    # expression, reassurance, repair style, listening, love, feedback.
     'scores': {
         'energy':     (4.0, 3.4),  # both center-warm, small gap
-        'expression': (4.5, 2.3),  # W open, X guarded, notable gap
+        'expression': (4.5, 2.3),  # W external, X internal, notable gap
+        'reassurance':(1.8, 4.1),  # W voiced, X assumed, notable gap
         'needs':      (2.0, 2.2),  # both direct (low = direct), aligned
         'bids':       (4.3, 3.6),  # W more attuned, small gap
         'conflict':   (1.8, 2.0),  # both engage quickly, aligned
         'repair':     (4.0, 2.4),  # W informal/warmth, X formal/verbal, notable gap
         'listening':  (4.5, 2.8),  # W responsive, X reflective, notable gap
         'love':       (2.0, 4.2),  # W words, X actions, notable gap
-        'stress':     (4.2, 1.8),  # W seek connection, X withdraw, notable gap
         'feedback':   (4.2, 2.5),  # W open, X guarded, notable gap
     },
     # Expectations alignment percentages per the new 5-domain model.
