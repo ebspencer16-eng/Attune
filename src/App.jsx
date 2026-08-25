@@ -13657,6 +13657,10 @@ export default function App() {
       "emotional__Maintaining closeness and emotional intimacy over time": "Both of us",
       "emotional__Initiating difficult conversations": "Both of us",
       "emotional__Being the first to reach out after conflict": "Sarah",
+      "extended_family__Planning visits with {userName}'s family": "Sarah",
+      "extended_family__Gifting for {userName}'s family": "Sarah",
+      "extended_family__Planning visits with {partnerName}'s family": "Both of us",
+      "extended_family__Gifting for {partnerName}'s family": "Sarah",
     },
     life: {
       lq_children: "Important to me, I want at least one",
@@ -13767,6 +13771,10 @@ export default function App() {
       "emotional__Maintaining closeness and emotional intimacy over time": "Both of us",
       "emotional__Initiating difficult conversations": "Both of us",
       "emotional__Being the first to reach out after conflict": "James",
+      "extended_family__Planning visits with {userName}'s family": "James",
+      "extended_family__Gifting for {userName}'s family": "Both of us",
+      "extended_family__Planning visits with {partnerName}'s family": "Both of us",
+      "extended_family__Gifting for {partnerName}'s family": "James",
     },
     life: {
       lq_children: "Important to me, I want at least one",

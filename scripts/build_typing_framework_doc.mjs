@@ -1,7 +1,8 @@
 // Couple Typing Framework — the methodology behind the types.
 import { INDIVIDUAL_TYPES, NEW_COUPLE_TYPES } from './_type_data.mjs';
 import { DIM_META, DIM_AXIS, DIMS } from '../api/_workbook-content.js';
-import { AXIS_CONFIG } from '../api/_type-engine.js';
+import { AXIS_CONFIG, PARTNER_VIEW_BLEND } from '../api/_type-engine.js';
+import { PERSONALITY_QUESTIONS } from '../api/_questions.js';
 import { Paragraph } from 'docx';
 import { run, eyebrow, title, h1, h2, body, kv, small, bullet, rule, pairTable, saveDoc, ORANGE, BLUE, INK, MUTED } from './_doc_style.mjs';
 
@@ -53,9 +54,20 @@ NEW_COUPLE_TYPES.forEach(t => children.push(kv(t.id + ' · ' + t.name, String(t.
 children.push(rule());
 
 children.push(h1('Partner-view questions'));
-children.push(body('Each partner also answers five short questions about the other. These add an outside read on five of the dimensions, so the type reflects how a person comes across, not only how they see themselves.'));
+children.push(body('The exercise runs in two parts. Part 1 asks ' + PERSONALITY_QUESTIONS.length + ' questions about you. Part 2 asks the same ' + PERSONALITY_QUESTIONS.length + ' about your partner. Every dimension therefore carries an outside read, so the type reflects how a person comes across, not only how they see themselves.'));
 children.push(body('The blend is per dimension. Where a partner-view question exists, that dimension becomes a weighted mix of the self-rating and the partner\'s read. If a partner skipped a partner-view question, that dimension falls back to the self-rating alone. No neutral filler is added.'));
-children.push(pairTable([['Dimension','Blend (self / partner)'],['Conflict Style','.50 / .50'],['Communication Under Stress','.50 / .50'],['How You Repair','.60 / .40'],['Emotional Expression','.40 / .60'],['Giving & Receiving Feedback','.40 / .60']], 60));
+// Blend weights read from PARTNER_VIEW_BLEND. Dimensions not listed there fall
+// back to an even split, which the table states rather than hides.
+const fmt = (n) => n.toFixed(2).replace(/^0/, '');
+const BLEND_ROWS = DIMS.map(d => {
+  const b = PARTNER_VIEW_BLEND[d];
+  const label = DIM_META[d]?.label || d;
+  return b
+    ? [label, fmt(b.self) + ' / ' + fmt(b.partner)]
+    : [label, '.50 / .50  (default)'];
+});
+children.push(pairTable([['Dimension','Blend (self / partner)'], ...BLEND_ROWS], 60));
+children.push(small('Dimensions marked default are not listed in PARTNER_VIEW_BLEND and fall back to an even split.'));
 children.push(body('Type and placement use the blend. The dimension bars and the gap feedback stay self-reported. Only the individual type and the Couple Map reflect the partner-view blend.'));
 children.push(rule());
 

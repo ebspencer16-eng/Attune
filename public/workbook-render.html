@@ -122,17 +122,20 @@ const scores = D.scores || {};
 const pScores = D.partnerScores || {};
 const expGaps = D.expGaps || [];
 
+// Labels and poles mirror DIM_META in src/App.jsx and api/_workbook-content.js.
+// This file is standalone (no imports), so it has to be kept in step by hand:
+// if a dimension is renamed or its poles change, change it here too.
 const DIMS = [
   { key: 'energy', label: 'Energy & Recharge', lo: 'Inward', hi: 'Outward' },
-  { key: 'expression', label: 'Emotional Expression', lo: 'Guarded', hi: 'Expressive' },
-  { key: 'needs', label: 'Asking for Needs', lo: 'Direct', hi: 'Indirect' },
-  { key: 'bids', label: 'Bids for Connection', lo: 'Reserved', hi: 'Attuned' },
-  { key: 'conflict', label: 'Conflict Style', lo: 'Engages fast', hi: 'Withdraws first' },
-  { key: 'repair', label: 'Repair Approach', lo: 'Verbal', hi: 'Gestural' },
-  { key: 'listening', label: 'How You Listen', lo: 'Reflective', hi: 'Responsive' },
-  { key: 'love', label: 'Love Language', lo: 'Acts of service', hi: 'Words & affirmation' },
-  { key: 'stress', label: 'Stress Response', lo: 'Externalises', hi: 'Internalises' },
-  { key: 'feedback', label: 'Feedback Receptivity', lo: 'Defensive', hi: 'Open' },
+  { key: 'expression', label: 'Emotional Expression', lo: 'Internal', hi: 'External' },
+  { key: 'reassurance', label: 'Reassurance', lo: 'Voiced', hi: 'Assumed' },
+  { key: 'needs', label: 'Communicating Needs', lo: 'Direct', hi: 'Indirect' },
+  { key: 'bids', label: 'Bids for Connection', lo: 'Subtle', hi: 'Expressive' },
+  { key: 'conflict', label: 'Conflict Style', lo: 'Engage', hi: 'Withdraw' },
+  { key: 'repair', label: 'Repairing', lo: 'Formal', hi: 'Informal' },
+  { key: 'listening', label: 'Listening', lo: 'Reflective', hi: 'Responsive' },
+  { key: 'love', label: 'Emotional Intimacy', lo: 'Words', hi: 'Actions' },
+  { key: 'feedback', label: 'Giving and Receiving Feedback', lo: 'Guarded', hi: 'Open' },
 ];
 
 function scoreLabel(score, lo, hi) {
