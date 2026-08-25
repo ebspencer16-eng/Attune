@@ -37,8 +37,8 @@ const PHYSICAL_ENABLED = false;
 // picker. Keyed to the current DIM_KEYS question ids.
 const _ENGAGE   = { cf1:1, cf2:1, cf3:1, st1:5, rp2:1, rp3:1, rp6:1, en4:5, en6:5, ls1:5 };
 const _WITHDRAW = { cf1:5, cf2:5, cf3:5, st1:1, rp2:5, rp3:5, rp6:5, en4:1, en6:1, ls1:1 };
-const _OPEN     = { ex6:5, ex7:5, ex8:5, ex9:5, ex10:5, fb5:5, fb2:5, nd1:1, nd5:1, bd1:5, bd3:5, bd4:5, lv1:1, lv2:1, lv5:5 };
-const _GUARDED  = { ex6:1, ex7:1, ex8:1, ex9:1, ex10:1, fb5:1, fb2:1, nd1:5, nd5:5, bd1:1, bd3:1, bd4:1, lv1:5, lv2:5, lv5:1 };
+const _OPEN     = { ex6:5, ex7:5, ex8:5, ex9:5, ex10:5, rs1:1, rs2:1, fb5:5, fb2:5, nd1:1, nd5:1, bd1:5, bd3:5, bd4:5, lv1:1, lv2:1, lv5:5 };
+const _GUARDED  = { ex6:1, ex7:1, ex8:1, ex9:1, ex10:1, rs1:5, rs2:5, fb5:1, fb2:1, nd1:5, nd5:5, bd1:1, bd3:1, bd4:1, lv1:5, lv2:5, lv5:1 };
 const ARCHETYPE_EX1 = {
   W: { ..._ENGAGE,   ..._OPEN },     // Initiator: engage + open
   X: { ..._ENGAGE,   ..._GUARDED },  // Anchor:    engage + guarded
@@ -274,19 +274,20 @@ const DIM_META = {
   // INNER WORLDS — purple
   energy:      { label: "Energy & Recharge",              emoji: "", ends: ["Inward","Outward"],            color: "#9B5DE5", bg: "#F3EEFF", dark: "#5B21B6", domain: "inner" },
   expression:  { label: "Emotional Expression",           emoji: "", ends: ["Internal","External"],         color: "#9B5DE5", bg: "#F3EEFF", dark: "#5B21B6", domain: "inner" },
+  reassurance: { label: "Reassurance",                   emoji: "", ends: ["Voiced","Assumed"],            color: "#9B5DE5", bg: "#F3EEFF", dark: "#5B21B6", domain: "inner" },
   // CONNECTION — orange
-  love:        { label: "How Love Lands",                 emoji: "", ends: ["Words","Actions"],             color: "#E8673A", bg: "#FFF3EE", dark: "#C2410C", domain: "connection" },
-  needs:       { label: "How You Ask For What You Need",  emoji: "", ends: ["Direct","Indirect"],           color: "#E8673A", bg: "#FFF3EE", dark: "#C2410C", domain: "connection" },
+  love:        { label: "Emotional Intimacy",                 emoji: "", ends: ["Words","Actions"],             color: "#E8673A", bg: "#FFF3EE", dark: "#C2410C", domain: "connection" },
+  needs:       { label: "Communicating Needs",  emoji: "", ends: ["Direct","Indirect"],           color: "#E8673A", bg: "#FFF3EE", dark: "#C2410C", domain: "connection" },
   bids:        { label: "Bids for Connection",             emoji: "", ends: ["Subtle","Expressive"],         color: "#E8673A", bg: "#FFF3EE", dark: "#C2410C", domain: "connection" },
-  listening:   { label: "How You Listen",                 emoji: "", ends: ["Reflective","Responsive"],     color: "#E8673A", bg: "#FFF3EE", dark: "#C2410C", domain: "connection" },
+  listening:   { label: "Listening",                 emoji: "", ends: ["Reflective","Responsive"],     color: "#E8673A", bg: "#FFF3EE", dark: "#C2410C", domain: "connection" },
   // HARD MOMENTS — blue
   conflict:    { label: "Conflict Style",                 emoji: "", ends: ["Engage","Withdraw"],           color: "#1B5FE8", bg: "#EEF3FF", dark: "#1E3A8A", domain: "hard" },
   stress:      { label: "Communication Under Stress",     emoji: "", ends: ["Withdraw","Seek"],             color: "#1B5FE8", bg: "#EEF3FF", dark: "#1E3A8A", domain: "hard" },
-  repair:      { label: "How You Repair",                 emoji: "", ends: ["Formal","Informal"],           color: "#1B5FE8", bg: "#EEF3FF", dark: "#1E3A8A", domain: "hard" },
-  feedback:    { label: "Giving & Receiving Feedback",    emoji: "", ends: ["Guarded","Open"],              color: "#1B5FE8", bg: "#EEF3FF", dark: "#1E3A8A", domain: "hard" },
+  repair:      { label: "Repairing",                 emoji: "", ends: ["Formal","Informal"],           color: "#1B5FE8", bg: "#EEF3FF", dark: "#1E3A8A", domain: "hard" },
+  feedback:    { label: "Giving and Receiving Feedback",    emoji: "", ends: ["Guarded","Open"],              color: "#1B5FE8", bg: "#EEF3FF", dark: "#1E3A8A", domain: "hard" },
 };
 
-const DIMS = ["energy","expression","needs","bids","listening","conflict","repair","love","stress","feedback"];
+const DIMS = ["energy","expression","reassurance","needs","bids","listening","conflict","repair","love","stress","feedback"];
 
 // 6.3 — "One thing to keep in mind" prose for ALIGNED dimensions. Previously
 // every aligned dimension fell back to one generic line. These are per-
@@ -1374,7 +1375,7 @@ function computeIndividualType(scores) {
   // flag as low-confidence so the UI can surface a methodology note.
   // Threshold of 0.3 on stdDev = the user mostly answered 3s.
   // Methodology TODO: LMFT to tune the threshold + the surface text.
-  const dimValues = ['energy','expression','love','bids','needs','conflict','stress','repair','feedback','listening']
+  const dimValues = ['energy','expression','reassurance','love','bids','needs','conflict','stress','repair','feedback','listening']
     .map(k => s[k]).filter(v => v != null && !isNaN(v));
   let stdDev = 0;
   if (dimValues.length >= 3) {
@@ -3578,6 +3579,7 @@ function calcDimScores(answers) {
     // api/_type-engine.js — keep the two in sync. Counts are uneven post-restructure.
     energy:     avg('en4','en6'),
     expression: avg('ex6','ex7','ex8','ex9','ex10'),
+    reassurance: avg('rs1','rs2'),
     love:       avg('lv1','lv2','lv5'),
     bids:       avg('bd1','bd3','bd4'),
     needs:      avg('nd1','nd5'),
@@ -3785,7 +3787,7 @@ function buildWorkbookPayload(userName, partnerName, ex1Answers, partnerEx1, ex2
 // ── PERSONALITY FEEDBACK GENERATOR ──────────────────────────────────────────
 // Produces one feedback object per dimension comparing two score objects.
 function generatePersonalityFeedback(myS, partS, userName, partnerName) {
-  const dims = ["energy","expression","needs","bids","conflict","repair","listening","love","stress","feedback"];
+  const dims = ["energy","expression","reassurance","needs","bids","conflict","repair","listening","love","stress","feedback"];
   return dims.map(dim => {
     const myScore   = myS[dim]   ?? 3;
     const partScore = partS[dim] ?? 3;
@@ -4770,7 +4772,7 @@ function PersonalityResults({ myAnswers, partnerAnswers, userName, partnerName, 
   // Ordered dims follow sorted order for step navigation (item 1)
   // Domain order drives navigation — keeps dims in a consistent,
   // logical reading sequence matching the sidebar.
-  const DOMAIN_ORDER = ["energy","expression","love","needs","bids","listening","conflict","stress","repair","feedback"];
+  const DOMAIN_ORDER = ["energy","expression","reassurance","love","needs","bids","listening","conflict","stress","repair","feedback"];
   const orderedDims = DOMAIN_ORDER.filter(d => feedback.some(f => f.dim === d));
   const TOTAL = orderedDims.length + 4; // overview + N dims + action plan + 2 individual + summary
   // Same-type couples (both partners the same individual type) collapse to a
@@ -4804,7 +4806,7 @@ function PersonalityResults({ myAnswers, partnerAnswers, userName, partnerName, 
   // -- SIDE NAV ITEMS --
   // Group ordered dims by domain for sidebar display
   const domainGroups = [
-    { id: "inner",      label: "Your Inner Worlds",    color: "#9B5DE5", dims: ["energy","expression"] },
+    { id: "inner",      label: "Your Inner Worlds",    color: "#9B5DE5", dims: ["energy","expression","reassurance"] },
     { id: "connection", label: "How You Connect",      color: "#E8673A", dims: ["love","needs","bids","listening"] },
     { id: "hard",       label: "When Things Get Hard", color: "#1B5FE8", dims: ["conflict","stress","repair","feedback"] },
   ];
@@ -8607,7 +8609,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
         { id: "comm-overview", label: "Overview" },
         // Inner Worlds — purple
         { id: "comm-domain-inner", label: "Your Inner Worlds", isDomainHeader: true, color: "#9B5DE5" },
-        ...orderedDims.filter(d => ["energy","expression"].includes(d)).map(d => ({ id: `comm-${d}`, label: DIM_META[d].label, isDeepChild: true, color: "#9B5DE5" })),
+        ...orderedDims.filter(d => ["energy","expression","reassurance"].includes(d)).map(d => ({ id: `comm-${d}`, label: DIM_META[d].label, isDeepChild: true, color: "#9B5DE5" })),
         // Connection — orange
         { id: "comm-domain-connection", label: "How You Connect", isDomainHeader: true, color: "#E8673A" },
         ...orderedDims.filter(d => ["love","needs","bids","listening"].includes(d)).map(d => ({ id: `comm-${d}`, label: DIM_META[d].label, isDeepChild: true, color: "#E8673A" })),

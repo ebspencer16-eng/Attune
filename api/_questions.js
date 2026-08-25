@@ -155,4 +155,6 @@ export const PARTNER_VIEW_ITEMS = [
   { id: "pv_feedback", dimension: "feedback", partnerView: true, after: "fb5",
     text: "When you raise something that bothers you, your partner:",
     a: "Needs a calm tone and careful timing to take it in.", b: "Takes it straight. Direct and specific lands best." },
+  { id:"rs1", dimension:"reassurance", text:"When it comes to feeling secure in the relationship, you'd rather:", a:"Have it reaffirmed. Hearing where you stand keeps you close.", b:"Take it as given. You don't need it confirmed to feel steady." },
+  { id:"rs2", dimension:"reassurance", text:"If a while goes by with no 'we're okay' between you, you:", a:"Feel the gap and want to check in.", b:"Don't think twice. Silence isn't a signal to you." },
 ];

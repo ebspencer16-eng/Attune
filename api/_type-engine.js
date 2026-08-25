@@ -26,6 +26,7 @@
 export const DIM_KEYS = {
   energy:     ['en4', 'en6'],
   expression: ['ex6', 'ex7', 'ex8', 'ex9', 'ex10'],
+  reassurance:['rs1', 'rs2'],
   love:       ['lv1', 'lv2', 'lv5'],
   bids:       ['bd1', 'bd3', 'bd4'],
   needs:      ['nd1', 'nd5'],
@@ -46,9 +47,10 @@ export const AXIS_CONFIG = {
   // Axis (withdraw) + invert (B "respond/engage" -> engage end) + weight are a
   // first pass pending methodology sign-off. See the next-steps list.
   listening:  { axis: 'withdraw', weight: 0.05, invert: true  },
-  expression: { axis: 'open',     weight: 0.40, invert: false },
-  feedback:   { axis: 'open',     weight: 0.25, invert: false },
-  needs:      { axis: 'open',     weight: 0.20, invert: true  },
+  expression: { axis: 'open',     weight: 0.35, invert: false },
+  feedback:   { axis: 'open',     weight: 0.20, invert: false },
+  needs:      { axis: 'open',     weight: 0.15, invert: true  },
+  reassurance:{ axis: 'open',     weight: 0.15, invert: true  },
   bids:       { axis: 'open',     weight: 0.10, invert: false },
   love:       { axis: 'open',     weight: 0.05, invert: true  },
 };
