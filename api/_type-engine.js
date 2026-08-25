@@ -33,7 +33,7 @@ export const DIM_KEYS = {
   stress:     ['st1'],
   repair:     ['rp2', 'rp3', 'rp6'],
   feedback:   ['fb5', 'fb2'],
-  listening:  ['ls1', 'ls2'],
+  listening:  ['ls1'],
 };
 
 // Source of truth for the type formula.

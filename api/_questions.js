@@ -40,7 +40,6 @@ export const PERSONALITY_QUESTIONS = [
   { id:"ex10", dimension:"expression", text:"When your partner shares exciting news, you tend to:", a:"Respond genuinely but quietly. You're present without necessarily amplifying.", b:"Match their energy. You light up with them." },
   { id:"cf3", dimension:"conflict",   text:"When something small bothers you about the relationship, you tend to:", a:"Bring it up. You'd rather clear the air than let it build.", b:"Let it go. Not everything needs a conversation." },
   { id:"fb2", dimension:"feedback",   text:"When you have feedback for your partner, you tend to:", a:"Soften it and choose the moment carefully.", b:"Say it plainly, close to when it comes up." },
-  { id:"ls2", dimension:"listening",  text:"A lull in conversation usually feels:", a:"Comfortable. You don't need to fill it.", b:"Like a cue to check in or say something." },
 ];
 
 // Exercise 2 (Expectations) source of truth, shared with api/admin-explore.js.

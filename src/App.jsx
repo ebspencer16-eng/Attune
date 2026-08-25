@@ -35,8 +35,8 @@ const PHYSICAL_ENABLED = false;
 // engine (verified against api/_type-engine.js: W/X/Y/Z each land exactly).
 // Used only in demo mode (?demo=...) to drive the results/workbook couple-type
 // picker. Keyed to the current DIM_KEYS question ids.
-const _ENGAGE   = { cf1:1, cf2:1, cf3:1, st1:5, rp2:1, rp3:1, rp6:1, en4:5, en6:5, ls1:5, ls2:5 };
-const _WITHDRAW = { cf1:5, cf2:5, cf3:5, st1:1, rp2:5, rp3:5, rp6:5, en4:1, en6:1, ls1:1, ls2:1 };
+const _ENGAGE   = { cf1:1, cf2:1, cf3:1, st1:5, rp2:1, rp3:1, rp6:1, en4:5, en6:5, ls1:5 };
+const _WITHDRAW = { cf1:5, cf2:5, cf3:5, st1:1, rp2:5, rp3:5, rp6:5, en4:1, en6:1, ls1:1 };
 const _OPEN     = { ex6:5, ex7:5, ex8:5, ex9:5, ex10:5, fb5:5, fb2:5, nd1:1, nd5:1, bd1:5, bd3:5, bd4:5, lv1:1, lv2:1, lv5:5 };
 const _GUARDED  = { ex6:1, ex7:1, ex8:1, ex9:1, ex10:1, fb5:1, fb2:1, nd1:5, nd5:5, bd1:1, bd3:1, bd4:1, lv1:5, lv2:5, lv5:1 };
 const ARCHETYPE_EX1 = {
@@ -3585,7 +3585,7 @@ function calcDimScores(answers) {
     stress:     avg('st1'),
     repair:     avg('rp2','rp3','rp6'),
     feedback:   avg('fb5','fb2'),
-    listening:  avg('ls1','ls2'),
+    listening:  avg('ls1'),
   };
 }
 
