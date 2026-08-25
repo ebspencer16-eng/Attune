@@ -5377,11 +5377,24 @@ function ExpectationsResults({ myAnswers, partnerAnswers, userName, partnerName,
   // Cats with any gaps
   const gapCats = catData.filter(c => c.hasGaps);
 
+  // Results at a glance: the three categories with the widest gaps, one card
+  // each, leading with the first topic to talk about. The full list lives on
+  // the Expectations Action Plan page.
+  const catPct = c => {
+    const scored = c.rows.filter(r => r.score != null);
+    return scored.length ? Math.round((scored.reduce((a, r) => a + r.score, 0) / scored.length) * 100) : 0;
+  };
+  const glanceConversations = gapCats
+    .map(c => ({ ...c, pct: catPct(c) }))
+    .sort((a, b) => a.pct - b.pct)
+    .slice(0, 3);
+
   // ── Nav items ─────────────────────────────────────────────────────────────────
   const expectationsNavItems = [
     { label: "Overview", step: 0 },
+    { label: "Detailed results", step: "detail-section", isSection: true },
     ...FIXED_CATS.map((fc, i) => ({
-      label: fc.label, step: `convo-${i}`, isChild: true,
+      label: fc.label, step: `convo-${i}`, isChild: true, italic: true,
       onClick: () => go(`convo-${i}`),
     })),
     { label: "Expectations Action Plan", step: "action-plan", onClick: () => go("action-plan") },
@@ -5447,12 +5460,33 @@ function ExpectationsResults({ myAnswers, partnerAnswers, userName, partnerName,
               </div>
             </div>
 
+            {/* ── CONVERSATIONS TO HAVE (glance action plan) ── */}
+            {glanceConversations.length > 0 && (
+              <div style={{ marginBottom: "1rem" }}>
+                <div style={{ fontSize: "0.55rem", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.3)", fontFamily: BFONT, fontWeight: 700, marginBottom: "0.5rem" }}>Conversations to have</div>
+                <div style={{ display: "flex", flexDirection: "column", gap: "0.6rem" }}>
+                  {glanceConversations.map(c => (
+                    <div key={c.id} onClick={() => go(`convo-${FIXED_CATS.findIndex(x => x.id === c.id)}`)}
+                      style={{ background: "rgba(255,255,255,0.05)", border: `1px solid ${c.color}33`, borderRadius: 12, padding: "0.9rem 1.1rem", cursor: "pointer", transition: "background 0.12s" }}
+                      onMouseEnter={e => e.currentTarget.style.background = "rgba(255,255,255,0.09)"}
+                      onMouseLeave={e => e.currentTarget.style.background = "rgba(255,255,255,0.05)"}>
+                      <div style={{ fontSize: "0.55rem", letterSpacing: "0.14em", textTransform: "uppercase", color: c.color, fontFamily: BFONT, fontWeight: 700, marginBottom: "0.4rem" }}>{c.label}</div>
+                      <div style={{ fontSize: "0.82rem", color: "rgba(255,255,255,0.9)", fontFamily: BFONT, fontWeight: 600, lineHeight: 1.5 }}>{c.gaps[0].item}</div>
+                      {c.gaps.length > 1 && (
+                        <div style={{ fontSize: "0.72rem", color: "rgba(255,255,255,0.5)", fontFamily: BFONT, marginTop: "0.35rem" }}>{c.gaps.length - 1} more topic{c.gaps.length - 1 !== 1 ? "s" : ""} in this area.</div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
             {/* What's in this section */}
             <div style={{ borderTop: "1px solid rgba(255,255,255,0.1)", paddingTop: "0.85rem" }}>
               <div style={{ fontSize: "0.55rem", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.3)", fontFamily: BFONT, fontWeight: 700, marginBottom: "0.5rem" }}>What's in this section</div>
               <div style={{ display: "flex", flexDirection: "column", gap: "0.3rem" }}>
                 {[
-                  { label: "Detailed category pages", sub: `${FIXED_CATS.length} categories, item by item`, s: "convo-0" },
+                  { label: "Detailed results", sub: `${FIXED_CATS.length} categories, item by item`, s: "convo-0" },
                   { label: "Action Plan", sub: "Your discussion guide", s: "action-plan" },
                 ].map(({ label, sub, s }) => (
                   <div key={label} onClick={() => typeof s === "string" ? go(s) : go(s)}
@@ -8525,8 +8559,8 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
       id: "exp", label: "Expectations", icon: "◉", color: "#1B5FE8",
       children: [
         { id: "exp-overview", label: "Overview" },
-        { id: "exp-life-header", label: "The Life You're Building", isDomainHeader: true, color: "#10B981" },
-        ...FIXED_CATS.map((fc, ci) => ({ id: `exp-convo-${ci}`, label: fc.label, isDeepChild: true, color: "#10B981" })),
+        { id: "exp-detail-header", label: "Detailed results", isDomainHeader: true, color: "#10B981" },
+        ...FIXED_CATS.map((fc, ci) => ({ id: `exp-convo-${ci}`, label: fc.label, isDeepChild: true, italic: true, color: "#10B981" })),
         { id: "exp-action-plan", label: "Expectations Action Plan" },
       ]
     },
