@@ -4790,16 +4790,31 @@ function PersonalityResults({ myAnswers, partnerAnswers, userName, partnerName, 
   const go = s => { setStep(s); if (onExternalGo) onExternalGo(s); const sc = document.querySelector("[data-results-scroll]"); if (sc) sc.scrollTop = 0; else window.scrollTo({ top: 0, behavior: "smooth" }); };
 
   const protocols = [];
-  if (byDim.conflict?.isOpportunity || byDim.conflict?.isNote) protocols.push({ title: "Create a pause protocol", body: byDim.conflict.adviceText, thisWeek: "Next time something feels off between you, before trying to resolve it, one of you says: 'I need [time amount] before we talk about this.' Practice naming the specific time you need, rather than only asking for space." });
-  if (byDim.repair?.isOpportunity || byDim.repair?.isNote) protocols.push({ title: "Agree on what repaired looks like", body: byDim.repair.adviceText, thisWeek: "Within 24 hours of your next disagreement, one of you takes a small step to come back, not to relitigate it, just to signal you're okay. Notice how the other responds." });
-  if (byDim.energy?.isOpportunity || byDim.energy?.isNote) protocols.push({ title: "Name your recharge needs", body: byDim.energy.adviceText, thisWeek: "This week, tell each other in advance when you need recharge time, before you're depleted. Try: 'I need a quiet evening Thursday.' That's it." });
-  if (byDim.needs?.isOpportunity || byDim.needs?.isNote) protocols.push({ title: "Practice the direct ask", body: byDim.needs.adviceText, thisWeek: "Once this week, ask directly for something you'd normally hint at or leave unsaid. Just the request, no preamble, no apology." });
-  if (byDim.bids?.isOpportunity || byDim.bids?.isNote) protocols.push({ title: "Stay tuned to small moments", body: byDim.bids.adviceText, thisWeek: "Once a day this week, when the other person does something small for you, makes you coffee, sends you something, acknowledge it specifically. Not just 'thanks,' but 'I noticed that.'" });
-  if (byDim.listening?.isOpportunity || byDim.listening?.isNote) protocols.push({ title: "Match presence to what's needed", body: byDim.listening.adviceText, thisWeek: "This week, when one of you brings something up, ask first: 'do you want me to just listen, or do you want me to weigh in?' Then do that one thing." });
-  if (byDim.expression?.isOpportunity || byDim.expression?.isNote) protocols.push({ title: "Build toward more openness", body: byDim.expression.adviceText, thisWeek: "This week, each of you says one thing out loud that you'd normally hold back or let pass. Not something big, just something that's been sitting there." });
-  if (byDim.stress?.isOpportunity || byDim.stress?.isNote) protocols.push({ title: "Name your stress mode in advance", body: byDim.stress.adviceText, thisWeek: "Next time one of you is clearly under pressure, instead of asking 'what's wrong?' try asking 'do you need me to help fix something, or do you just need me to be here?' Notice what they say." });
-  if (byDim.feedback?.isOpportunity || byDim.feedback?.isNote) protocols.push({ title: "Practice the small direct mention", body: byDim.feedback.adviceText, thisWeek: "This week, when something bothers you, name it within the same day, not to fight, just to say it. 'Hey, that landed a little off for me.' See what happens." });
-  if (byDim.love?.isOpportunity || byDim.love?.isNote) protocols.push({ title: "Learn each other's language", body: byDim.love.adviceText, thisWeek: "Ask your partner: 'What's one thing I do that makes you feel really cared for that I might not realize has that effect?' Then listen without commenting." });
+  if (byDim.conflict?.isOpportunity || byDim.conflict?.isNote) protocols.push({ dim: "conflict", title: "Create a pause protocol", body: byDim.conflict.adviceText, thisWeek: "Next time something feels off between you, before trying to resolve it, one of you says: 'I need [time amount] before we talk about this.' Practice naming the specific time you need, rather than only asking for space." });
+  if (byDim.repair?.isOpportunity || byDim.repair?.isNote) protocols.push({ dim: "repair", title: "Agree on what repaired looks like", body: byDim.repair.adviceText, thisWeek: "Within 24 hours of your next disagreement, one of you takes a small step to come back, not to relitigate it, just to signal you're okay. Notice how the other responds." });
+  if (byDim.energy?.isOpportunity || byDim.energy?.isNote) protocols.push({ dim: "energy", title: "Name your recharge needs", body: byDim.energy.adviceText, thisWeek: "This week, tell each other in advance when you need recharge time, before you're depleted. Try: 'I need a quiet evening Thursday.' That's it." });
+  if (byDim.needs?.isOpportunity || byDim.needs?.isNote) protocols.push({ dim: "needs", title: "Practice the direct ask", body: byDim.needs.adviceText, thisWeek: "Once this week, ask directly for something you'd normally hint at or leave unsaid. Just the request, no preamble, no apology." });
+  if (byDim.bids?.isOpportunity || byDim.bids?.isNote) protocols.push({ dim: "bids", title: "Stay tuned to small moments", body: byDim.bids.adviceText, thisWeek: "Once a day this week, when the other person does something small for you, makes you coffee, sends you something, acknowledge it specifically. Not just 'thanks,' but 'I noticed that.'" });
+  if (byDim.listening?.isOpportunity || byDim.listening?.isNote) protocols.push({ dim: "listening", title: "Match presence to what's needed", body: byDim.listening.adviceText, thisWeek: "This week, when one of you brings something up, ask first: 'do you want me to just listen, or do you want me to weigh in?' Then do that one thing." });
+  if (byDim.expression?.isOpportunity || byDim.expression?.isNote) protocols.push({ dim: "expression", title: "Build toward more openness", body: byDim.expression.adviceText, thisWeek: "This week, each of you says one thing out loud that you'd normally hold back or let pass. Not something big, just something that's been sitting there." });
+  if (byDim.stress?.isOpportunity || byDim.stress?.isNote) protocols.push({ dim: "stress", title: "Name your stress mode in advance", body: byDim.stress.adviceText, thisWeek: "Next time one of you is clearly under pressure, instead of asking 'what's wrong?' try asking 'do you need me to help fix something, or do you just need me to be here?' Notice what they say." });
+  if (byDim.feedback?.isOpportunity || byDim.feedback?.isNote) protocols.push({ dim: "feedback", title: "Practice the small direct mention", body: byDim.feedback.adviceText, thisWeek: "This week, when something bothers you, name it within the same day, not to fight, just to say it. 'Hey, that landed a little off for me.' See what happens." });
+
+  // Results-at-a-glance action plan: one item per domain (inner worlds / how you
+  // connect / when things get hard), drawn from the dimension protocols above.
+  const _DOMAIN_DIMS = { inner: ["energy","expression","reassurance"], connection: ["love","needs","bids","listening"], hard: ["conflict","repair","feedback"] };
+  const _DOMAIN_LABELS = { inner: "Your inner worlds", connection: "How you connect", hard: "When things get hard" };
+  const glancePlan = ["inner","connection","hard"].map(dom => {
+    const p = protocols.find(pr => _DOMAIN_DIMS[dom].includes(pr.dim));
+    const base = p
+      ? { title: p.title, body: p.thisWeek }
+      : { title: "Keep noticing what's working", body: "You're well matched across " + _DOMAIN_LABELS[dom].toLowerCase() + ". Name one thing here that already works, out loud, this week." };
+    if (dom === "hard") {
+      base.reflect = "In your next hard conversation, pause and ask yourself: am I trying to understand my partner's side, or am I trying to win the argument? Aim for the first one.";
+    }
+    return { domain: dom, label: _DOMAIN_LABELS[dom], color: DIM_META[_DOMAIN_DIMS[dom][0]].color, ...base };
+  });
+  if (byDim.love?.isOpportunity || byDim.love?.isNote) protocols.push({ dim: "love", title: "Learn each other's language", body: byDim.love.adviceText, thisWeek: "Ask your partner: 'What's one thing I do that makes you feel really cared for that I might not realize has that effect?' Then listen without commenting." });
   if (protocols.length === 0) {
     protocols.push({ emoji: "", title: "Keep checking in", body: ((userName) + " and " + (partnerName) + " are closely aligned across all ten dimensions. The work here is about staying connected rather than catching up. Couples who stay curious about each other's inner experience, even when things feel stable, tend to stay that way longer.") });
     protocols.push({ emoji: "", title: "Stay curious as things change", body: "When two people are this in sync, it's easy to assume the picture stays the same. But what each of you needs, values, and envisions can shift gradually. A brief check-in every few months keeps you current with each other." });
@@ -4892,6 +4907,21 @@ function PersonalityResults({ myAnswers, partnerAnswers, userName, partnerName, 
                 </div>
               );
             })}
+          </div>
+        </div>
+
+        {/* Results-at-a-glance action plan — one item per domain */}
+        <div style={{ marginBottom: "1rem" }}>
+          <div style={{ fontSize: "0.55rem", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.3)", fontFamily: BFONT, fontWeight: 700, marginBottom: "0.6rem" }}>Your action plan</div>
+          <div style={{ display: "flex", flexDirection: "column", gap: "0.6rem" }}>
+            {glancePlan.map((item, i) => (
+              <div key={i} style={{ background: "rgba(255,255,255,0.05)", border: `1px solid ${item.color}33`, borderRadius: 12, padding: "0.9rem 1.1rem" }}>
+                <div style={{ fontSize: "0.55rem", letterSpacing: "0.14em", textTransform: "uppercase", color: item.color, fontFamily: BFONT, fontWeight: 700, marginBottom: "0.4rem" }}>{item.label}</div>
+                <div style={{ fontSize: "0.82rem", color: "rgba(255,255,255,0.9)", fontFamily: BFONT, fontWeight: 600, marginBottom: "0.35rem" }}>{item.title}</div>
+                <div style={{ fontSize: "0.75rem", color: "rgba(255,255,255,0.6)", fontFamily: BFONT, lineHeight: 1.6 }}>{item.body}</div>
+                {item.reflect && <div style={{ fontSize: "0.75rem", color: "rgba(255,255,255,0.72)", fontFamily: BFONT, lineHeight: 1.6, marginTop: "0.5rem", fontStyle: "italic", borderLeft: `2px solid ${item.color}55`, paddingLeft: "0.7rem" }}>{item.reflect}</div>}
+              </div>
+            ))}
           </div>
         </div>
 
