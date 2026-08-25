@@ -89,7 +89,14 @@ export function axisScores(scores, config = AXIS_CONFIG) {
     if (cfg.axis === 'withdraw') withdrawScore += oriented * cfg.weight;
     else                          openScore     += oriented * cfg.weight;
   }
-  return { withdrawScore, openScore };
+  // Summing weighted floats leaves noise in the last bits: a dead-centre
+  // respondent produces 2.9999999999999996, not 3. The boundary below is
+  // exact and asymmetric (>= 3.0 is open, < 3.0 is guarded), so that noise
+  // flipped an all-neutral respondent from W to X. Round the noise off. This
+  // is not normalization, and it does not move any score a person could
+  // otherwise land on.
+  const _clean = (n) => Math.round(n * 1e10) / 1e10;
+  return { withdrawScore: _clean(withdrawScore), openScore: _clean(openScore) };
 }
 
 // Type code from axis scores. Boundary at 3.0: engage/open inclusive,

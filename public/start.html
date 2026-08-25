@@ -536,7 +536,11 @@ function toggleWorkbook() {
 }
 
 function setWbFormat(f, e) {
-  e.stopPropagation();
+  // e is optional: the digital-only gate below calls this with no event.
+  // Without the guard it threw, and everything after that call in the gate
+  // (premium workbook lock, variant hiding, the setFormat price sync, the
+  // LMFT block) never ran.
+  if (e) e.stopPropagation();
   wbFormat = f;
   document.getElementById('wv-digital').classList.toggle('active', f === 'digital');
   document.getElementById('wv-print').classList.toggle('active', f === 'print');

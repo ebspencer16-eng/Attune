@@ -1504,7 +1504,7 @@ document.getElementById('email').addEventListener('input', validateForm);
 
 // ── Submit ────────────────────────────────────────────────────────────────────
 async function handleSubmit(e) {
-  e.preventDefault();
+  if (e) e.preventDefault();
   const btn = document.getElementById('submitBtn');
   btn.disabled = true;
   // Inline spinner + text while payment is processing

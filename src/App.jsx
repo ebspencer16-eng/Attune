@@ -262,11 +262,10 @@ async function resolveEntitlements(sb, session, profile) {
   return ent;
 }
 
-// -- 8-DIMENSION PERSONALITY QUESTIONS (5 each = 40 total) --
 // ── INTENTIONAL COLOR SCHEMA ──────────────────────────────────────────────────
-// Purple  #9B5DE5  = Your Inner Worlds     (energy, expression)
+// Purple  #9B5DE5  = Your Inner Worlds     (energy, expression, reassurance)
 // Orange  #E8673A  = How You Connect       (love, needs, bids, listening)
-// Blue    #1B5FE8  = When Things Get Hard  (conflict, stress, repair, feedback)
+// Blue    #1B5FE8  = When Things Get Hard  (conflict, repair, feedback)
 // Green   #10B981  = The Life You're Building (expectations domains)
 // ─────────────────────────────────────────────────────────────────────────────
 const DIM_META = {
@@ -1304,9 +1303,9 @@ function getCodeLabel(code) {
 // type engine (api/_type-engine.js) so the frontend and the workbook backend
 // stay in lockstep. This wrapper adds the couple-map coordinates and the
 // low-confidence flag the UI needs.
-//   Engage/Withdraw: conflict .45, stress .25, repair .15, energy .10, listening .05
-//   Open/Guarded:    expression .40, feedback .25, needs .20, bids .10, love .05
-//   (stress/energy/listening/needs/love oriented by spectrum via 6-score)
+//   Weights and orientation live in AXIS_CONFIG (api/_type-engine.js). They are
+//   deliberately not restated here: this comment drifted twice already, once
+//   through the stress fold and once through the conflict reweight.
 function computeIndividualType(scores) {
   const s = scores || {};
   const { withdrawScore, openScore } = axisScores(s);
@@ -3423,7 +3422,7 @@ const LIFE_QUESTIONS_ANNIVERSARY = LIFE_QUESTIONS;
 
 // ── DIMENSION SCORING ────────────────────────────────────────────────────────
 // Maps ex1Answers to named average scores per dimension.
-// Question counts per dimension are uneven; stress/feedback/listening have 1 (flagged for
+// Question counts per dimension are uneven; listening has 1 (flagged for
 // methodology review with the LMFT). avg returns 3 (neutral) when no answers
 // are present so partial completion still produces a usable score, and
 // `valenceUnknown` flag is set on the result so callers can surface that
@@ -3892,8 +3891,12 @@ function Exercise01Flow({ userName, partnerName, onComplete, skipIntro = false, 
     const updated = { ...answers, [q.answerKey || q.id]: chosen };
     if (idx + 1 < total) {
       setAnswers(updated);
-      setChosen(null);
       const nextIdx = idx + 1;
+      // Restore the stored answer rather than blanking. Walking back and then
+      // forward again used to clear each selection on the way, and next() will
+      // not advance with a null selection, so the user was forced to re-answer
+      // questions they had already answered.
+      setChosen(updated[questions[nextIdx]?.answerKey] ?? null);
       setIdx(nextIdx);
       // Persist after each answer so refresh resumes mid-exercise. Skipped in
       // fresh preview mode so an admin walkthrough never overwrites a real
@@ -3921,7 +3924,9 @@ function Exercise01Flow({ userName, partnerName, onComplete, skipIntro = false, 
     const prevIdx = idx - 1;
     setIdx(prevIdx);
     setChosen(answers[questions[prevIdx].answerKey] ?? null);
-    try { localStorage.setItem('attune_ex1_progress', JSON.stringify({ answers, idx: prevIdx })); } catch {}
+    if (!fresh) {
+      try { localStorage.setItem('attune_ex1_progress', JSON.stringify({ answers, idx: prevIdx })); } catch {}
+    }
   };
 
   const SCALE = [
@@ -4680,7 +4685,6 @@ function PersonalityResults({ myAnswers, partnerAnswers, userName, partnerName, 
   const nDetail = detailDomains.length;
   // Step for the page a given dimension now lives on (overview tiles link here).
   const domainStepOf = dim => { const i = detailDomains.findIndex(g => g.dims.includes(dim)); return i >= 0 ? i + 1 : 1; };
-  const TOTAL = nDetail + 4; // overview + 3 domain pages + action plan + 2 individual + summary
   // Same-type couples (both partners the same individual type) collapse to a
   // single combined "Communication Profile" page instead of two near-identical
   // individual pages.
