@@ -49,7 +49,7 @@ const TYPE_LABEL = { W: 'Initiator', X: 'Anchor', Y: 'Feeler', Z: 'Protector' };
 // Demo only: give each archetype a partner-view of the OTHER archetype so demo mode
 // exercises the Proposal B blend + self-vs-partner view. Perception is modeled as
 // a slightly muted read of the partner's real orientation (compressed toward center).
-const _PV_DEMO_KEYS = { pv_conflict: 'conflict', pv_stress: 'stress', pv_repair: 'repair', pv_expression: 'expression', pv_feedback: 'feedback' };
+const _PV_DEMO_KEYS = { pv_conflict: 'conflict', pv_repair: 'repair', pv_expression: 'expression', pv_feedback: 'feedback' };
 function demoWithPartnerView(selfArch, otherArch) {
   if (!PARTNER_VIEW_ENABLED || !selfArch || !otherArch) return selfArch;
   const other = calcDimScores(otherArch);
@@ -282,12 +282,11 @@ const DIM_META = {
   listening:   { label: "Listening",                 emoji: "", ends: ["Reflective","Responsive"],     color: "#E8673A", bg: "#FFF3EE", dark: "#C2410C", domain: "connection" },
   // HARD MOMENTS — blue
   conflict:    { label: "Conflict Style",                 emoji: "", ends: ["Engage","Withdraw"],           color: "#1B5FE8", bg: "#EEF3FF", dark: "#1E3A8A", domain: "hard" },
-  stress:      { label: "Communication Under Stress",     emoji: "", ends: ["Withdraw","Seek"],             color: "#1B5FE8", bg: "#EEF3FF", dark: "#1E3A8A", domain: "hard" },
   repair:      { label: "Repairing",                 emoji: "", ends: ["Formal","Informal"],           color: "#1B5FE8", bg: "#EEF3FF", dark: "#1E3A8A", domain: "hard" },
   feedback:    { label: "Giving and Receiving Feedback",    emoji: "", ends: ["Guarded","Open"],              color: "#1B5FE8", bg: "#EEF3FF", dark: "#1E3A8A", domain: "hard" },
 };
 
-const DIMS = ["energy","expression","reassurance","needs","bids","listening","conflict","repair","love","stress","feedback"];
+const DIMS = ["energy","expression","reassurance","needs","bids","listening","conflict","repair","love","feedback"];
 
 // 6.3 — "One thing to keep in mind" prose for ALIGNED dimensions. Previously
 // every aligned dimension fell back to one generic line. These are per-
@@ -1375,7 +1374,7 @@ function computeIndividualType(scores) {
   // flag as low-confidence so the UI can surface a methodology note.
   // Threshold of 0.3 on stdDev = the user mostly answered 3s.
   // Methodology TODO: LMFT to tune the threshold + the surface text.
-  const dimValues = ['energy','expression','reassurance','love','bids','needs','conflict','stress','repair','feedback','listening']
+  const dimValues = ['energy','expression','reassurance','love','bids','needs','conflict','repair','feedback','listening']
     .map(k => s[k]).filter(v => v != null && !isNaN(v));
   let stdDev = 0;
   if (dimValues.length >= 3) {
@@ -2796,7 +2795,7 @@ function DimResponseBreakdown({ dim, myAnswers, partnerAnswers, userName, partne
           // lv5 is written physical->verbal for the exercise, but scored (and shown on
           // the other love questions) verbal->physical. Flip its DISPLAY only so all
           // three love questions read the same direction. No scoring change. (3.2)
-          const flip = q.id === "lv5";
+          const flip = q.id === "lv5" || q.id === "st1";
           const loLabel = flip ? q.b : q.a;
           const hiLabel = flip ? q.a : q.b;
           const P = v => flip ? (100 - pct(v)) : pct(v);
@@ -3563,7 +3562,7 @@ function calcDimScores(answers) {
   // Helper: avg the answered keys, return 3 (neutral) if none are answered.
   // lv5's a/b display order is reversed vs its dimension orientation, so its
   // raw value is flipped (6 - v) to keep love oriented verbal->physical.
-  const FLIPPED = new Set(['lv5']);
+  const FLIPPED = new Set(['lv5', 'st1']);
   const avg = (...keys) => {
     const vals = keys
       .map(k => {
@@ -3583,8 +3582,7 @@ function calcDimScores(answers) {
     love:       avg('lv1','lv2','lv5'),
     bids:       avg('bd1','bd3','bd4'),
     needs:      avg('nd1','nd5'),
-    conflict:   avg('cf1','cf2','cf3'),
-    stress:     avg('st1'),
+    conflict:   avg('cf1','cf2','cf3','st1'),
     repair:     avg('rp2','rp3','rp6'),
     feedback:   avg('fb5','fb2'),
     listening:  avg('ls1'),
@@ -3787,7 +3785,7 @@ function buildWorkbookPayload(userName, partnerName, ex1Answers, partnerEx1, ex2
 // ── PERSONALITY FEEDBACK GENERATOR ──────────────────────────────────────────
 // Produces one feedback object per dimension comparing two score objects.
 function generatePersonalityFeedback(myS, partS, userName, partnerName) {
-  const dims = ["energy","expression","reassurance","needs","bids","conflict","repair","listening","love","stress","feedback"];
+  const dims = ["energy","expression","reassurance","needs","bids","conflict","repair","listening","love","feedback"];
   return dims.map(dim => {
     const myScore   = myS[dim]   ?? 3;
     const partScore = partS[dim] ?? 3;
@@ -4772,7 +4770,7 @@ function PersonalityResults({ myAnswers, partnerAnswers, userName, partnerName, 
   // Ordered dims follow sorted order for step navigation (item 1)
   // Domain order drives navigation — keeps dims in a consistent,
   // logical reading sequence matching the sidebar.
-  const DOMAIN_ORDER = ["energy","expression","reassurance","love","needs","bids","listening","conflict","stress","repair","feedback"];
+  const DOMAIN_ORDER = ["energy","expression","reassurance","love","needs","bids","listening","conflict","repair","feedback"];
   const orderedDims = DOMAIN_ORDER.filter(d => feedback.some(f => f.dim === d));
   const TOTAL = orderedDims.length + 4; // overview + N dims + action plan + 2 individual + summary
   // Same-type couples (both partners the same individual type) collapse to a
@@ -4808,7 +4806,7 @@ function PersonalityResults({ myAnswers, partnerAnswers, userName, partnerName, 
   const domainGroups = [
     { id: "inner",      label: "Your Inner Worlds",    color: "#9B5DE5", dims: ["energy","expression","reassurance"] },
     { id: "connection", label: "How You Connect",      color: "#E8673A", dims: ["love","needs","bids","listening"] },
-    { id: "hard",       label: "When Things Get Hard", color: "#1B5FE8", dims: ["conflict","stress","repair","feedback"] },
+    { id: "hard",       label: "When Things Get Hard", color: "#1B5FE8", dims: ["conflict","repair","feedback"] },
   ];
   const personalityNavItems = [
     { label: "Overview", step: 0 },
@@ -8211,7 +8209,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
   const personalityFeedback = generatePersonalityFeedback(mySelf, partSelf, userName, partnerName);
   const sortedFeedback = [...personalityFeedback].sort((a, b) => a.gap - b.gap);
   // Domain order — matches PersonalityResults navigation
-  const UR_DOMAIN_ORDER = ["energy","expression","love","needs","bids","listening","conflict","stress","repair","feedback"];
+  const UR_DOMAIN_ORDER = ["energy","expression","love","needs","bids","listening","conflict","repair","feedback"];
   const orderedDims = UR_DOMAIN_ORDER.filter(d => personalityFeedback.some(f => f.dim === d));
   const byDim = Object.fromEntries(personalityFeedback.map(f => [f.dim, f]));
   const avgGap = personalityFeedback.reduce((s, f) => s + f.gap, 0) / personalityFeedback.length;
@@ -8615,7 +8613,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
         ...orderedDims.filter(d => ["love","needs","bids","listening"].includes(d)).map(d => ({ id: `comm-${d}`, label: DIM_META[d].label, isDeepChild: true, color: "#E8673A" })),
         // Hard moments — blue
         { id: "comm-domain-hard", label: "When Things Get Hard", isDomainHeader: true, color: "#1B5FE8" },
-        ...orderedDims.filter(d => ["conflict","stress","repair","feedback"].includes(d)).map(d => ({ id: `comm-${d}`, label: DIM_META[d].label, isDeepChild: true, color: "#1B5FE8" })),
+        ...orderedDims.filter(d => ["conflict","repair","feedback"].includes(d)).map(d => ({ id: `comm-${d}`, label: DIM_META[d].label, isDeepChild: true, color: "#1B5FE8" })),
         { id: "comm-profiles", label: urSameType ? "Communication Profile" : "Individual profiles" },
         { id: "comm-plan", label: "Communication Action Plan" },
       ]
@@ -8717,7 +8715,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
   // Prev/Next navigation
   // allPages must exactly match sidebar order so Prev/Next stays in sync with the nav
   // Domain order matches sidebar exactly
-  const PAGE_DOMAIN_ORDER = ["energy","expression","values","love","needs","bids","listening","conflict","stress","repair","feedback"];
+  const PAGE_DOMAIN_ORDER = ["energy","expression","values","love","needs","bids","listening","conflict","repair","feedback"];
   const domainOrderedDims = [
     ...PAGE_DOMAIN_ORDER.filter(d => orderedDims.includes(d)),
   ];

@@ -30,8 +30,7 @@ export const DIM_KEYS = {
   love:       ['lv1', 'lv2', 'lv5'],
   bids:       ['bd1', 'bd3', 'bd4'],
   needs:      ['nd1', 'nd5'],
-  conflict:   ['cf1', 'cf2', 'cf3'],
-  stress:     ['st1'],
+  conflict:   ['cf1', 'cf2', 'cf3', 'st1'],
   repair:     ['rp2', 'rp3', 'rp6'],
   feedback:   ['fb5', 'fb2'],
   listening:  ['ls1'],
@@ -39,8 +38,7 @@ export const DIM_KEYS = {
 
 // Source of truth for the type formula.
 export const AXIS_CONFIG = {
-  conflict:   { axis: 'withdraw', weight: 0.45, invert: false },
-  stress:     { axis: 'withdraw', weight: 0.25, invert: true  },
+  conflict:   { axis: 'withdraw', weight: 0.70, invert: false },
   repair:     { axis: 'withdraw', weight: 0.15, invert: false },
   energy:     { axis: 'withdraw', weight: 0.10, invert: true  },
   // listening took closeness's slot/weight when the exercise was restructured.
@@ -59,7 +57,7 @@ export const AXIS_CONFIG = {
 // scoring orientation. Their raw 1-5 value is flipped (6 - v) before averaging
 // so the dimension stays consistently oriented. lv5: poles display
 // physical(a)->verbal(b), but love is oriented verbal->physical (lv1/lv2).
-export const FLIPPED_QUESTIONS = new Set(['lv5']);
+export const FLIPPED_QUESTIONS = new Set(['lv5', 'st1']);
 
 // Average the answered question values for each dimension. Returns null for a
 // dimension with no answers (callers / axisScores treat missing as neutral 3).
@@ -138,12 +136,11 @@ export function lowConfidence(scores) {
 // until the partner has answered.
 // ─────────────────────────────────────────────────────────────────────────────
 export const PARTNER_VIEW_QUESTIONS = {
-  pv_conflict: 'conflict', pv_stress: 'stress', pv_repair: 'repair',
+  pv_conflict: 'conflict', pv_repair: 'repair',
   pv_expression: 'expression', pv_feedback: 'feedback',
 };
 export const PARTNER_VIEW_BLEND = {
   conflict:   { self: 0.5, partner: 0.5 },
-  stress:     { self: 0.5, partner: 0.5 },
   repair:     { self: 0.6, partner: 0.4 },
   expression: { self: 0.4, partner: 0.6 },
   feedback:   { self: 0.4, partner: 0.6 },
