@@ -8126,7 +8126,7 @@ function PostResultsSurvey({ respondentId = null, userName, coupleType, onClose,
   );
 }
 
-function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Answers, partnerEx3, ex2AnswersPrior = null, ex2PriorAt = null, hasAnniversary, userName, partnerName, initialSection, isMobile = false, portrait = null, hasChecklist = false, hasBudget = false, hasLMFT = false, hasWorkbook = false, hasIntimacy = false, intimacyAnswers = null, partnerIntimacy = null, intimacyVariant = 'premarital', onNavigateTool = null, userPronouns = "", partnerPronouns = "", isBetaTester = false }) {
+function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Answers, partnerEx3, ex2AnswersPrior = null, ex2PriorAt = null, hasAnniversary, userName, partnerName, initialSection, onSectionChange = null, isMobile = false, portrait = null, hasChecklist = false, hasBudget = false, hasLMFT = false, hasWorkbook = false, hasIntimacy = false, intimacyAnswers = null, partnerIntimacy = null, intimacyVariant = 'premarital', onNavigateTool = null, userPronouns = "", partnerPronouns = "", isBetaTester = false }) {
 
   // Compute all the data we need up front
   const myS = typingDimScores(ex1Answers, partnerEx1);
@@ -8206,22 +8206,41 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
   };
 
   // Section/page system: "summary" | "comm-overview" | "comm-{dim}" | "exp-overview" | "exp-{catId}" | "exp-life" | "reflection"
-  const getInitialSection = () => {
-    if (initialSection === "personality") return "comm-overview";
-    if (initialSection === "expectations") return "exp-overview";
-    if (initialSection === "anniversary") return "reflection";
+  const mapSection = (s) => {
+    if (s === "personality") return "comm-overview";
+    if (s === "expectations") return "exp-overview";
+    if (s === "anniversary") return "reflection";
     // Migrate saved section ids that were removed/renamed, so returning users
     // whose stored state points at an old page don't land on a blank section.
-    if (initialSection === "couple-map") return "couple-type";
-    if (initialSection === "summary" || initialSection === "full-summary") return "couple-type";
-    if (initialSection) return initialSection;
+    if (s === "couple-map") return "couple-type";
+    if (s === "summary" || s === "full-summary") return "couple-type";
+    if (s) return s;
     return "highlights";
   };
+  const getInitialSection = () => mapSection(initialSection);
   const [section, setSection] = useState(getInitialSection());
   const [commExpanded, setCommExpanded] = useState(section.startsWith("comm"));
   const [expExpanded, setExpExpanded] = useState(section.startsWith("exp"));
   const [reflExpanded, setReflExpanded] = useState(section.startsWith("reflection"));
   const [intimExpanded, setIntimExpanded] = useState(section.startsWith("intimacy"));
+  // section is internal state seeded once from initialSection. The mobile
+  // sub-nav lives outside this component and can only set the parent's
+  // activeResult, so without this every mobile tab was a no-op. Deliberately
+  // keyed on initialSection alone: adding section to the deps would fight
+  // with go().
+  useEffect(() => {
+    if (!initialSection) return;
+    const mapped = mapSection(initialSection);
+    setSection(cur => {
+      if (mapped === cur) return cur;
+      setCommExpanded(mapped.startsWith("comm"));
+      setExpExpanded(mapped.startsWith("exp"));
+      setReflExpanded(mapped.startsWith("reflection"));
+      setIntimExpanded(mapped.startsWith("intimacy"));
+      return mapped;
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialSection]);
   // Intimacy results: only present when the couple owns the add-on AND both
   // partners have finished. summarizeIntimacy is imported at module top.
   const intimacyBothDone = hasIntimacy && !!(intimacyAnswers) && !!(partnerIntimacy?.answers);
@@ -8516,6 +8535,10 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
   const go = (sec) => {
     if (sec !== section) { try { window.history.pushState({ attuneSection: sec }, ''); } catch {} }
     setSection(sec);
+    // Tell the parent where we are. Without this the parent's activeResult
+    // stayed at whatever it was seeded with, so the persisted results state
+    // was stale and a refresh dropped the user back on the wrong page.
+    if (onSectionChange) onSectionChange(sec);
     // Accordion: expand the section being entered, collapse every other one.
     setCommExpanded(sec.startsWith("comm"));
     setExpExpanded(sec.startsWith("exp"));
@@ -8531,7 +8554,12 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
   // stay put while a section entry is present, so only Back from the root exits.
   useEffect(() => {
     try { window.history.replaceState({ ...(window.history.state || {}), attuneSection: section }, ''); } catch {}
-    const onPop = (e) => { if (e && e.state && e.state.attuneSection) setSection(e.state.attuneSection); };
+    const onPop = (e) => {
+      if (e && e.state && e.state.attuneSection) {
+        setSection(e.state.attuneSection);
+        if (onSectionChange) onSectionChange(e.state.attuneSection);
+      }
+    };
     window.addEventListener('popstate', onPop);
     return () => window.removeEventListener('popstate', onPop);
   }, []);
@@ -16003,6 +16031,7 @@ export default function App() {
               const inRefl = activeResult && activeResult.startsWith("reflection");
               const inComm = activeResult === "personality" || activeResult && activeResult.startsWith("comm");
               const inExp = activeResult === "expectations" || activeResult && activeResult.startsWith("exp");
+              const inIntim = activeResult === "intimacy" || activeResult && activeResult.startsWith("intimacy");
               let subnav = [];
               if (inRefl) {
                 subnav = [
@@ -16012,17 +16041,29 @@ export default function App() {
                   { label: "Action Plan", id: "reflection-plan" },
                 ];
               } else if (inComm) {
+                // Ids must be real section ids. These were personality /
+                // comm-detail / comm-action, none of which resolve, so every
+                // tab but Overview landed back on Overview. The strip scrolls,
+                // so it mirrors the desktop sidebar rather than abbreviating.
                 subnav = [
                   { label: "Overview", id: "comm-overview" },
-                  { label: "By Dimension", id: "personality" },
-                  { label: "Side by Side", id: "comm-detail" },
-                  { label: "Action Plan", id: "comm-action" },
+                  { label: "Your Inner Worlds", id: "comm-inner" },
+                  { label: "How You Connect", id: "comm-connection" },
+                  { label: "When Things Get Hard", id: "comm-hard" },
+                  { label: "Profiles", id: "comm-profiles" },
+                  { label: "Action Plan", id: "comm-plan" },
                 ];
               } else if (inExp) {
                 subnav = [
                   { label: "Overview", id: "exp-overview" },
-                  { label: "Expectations", id: "expectations" },
-                  { label: "Action Plan", id: "exp-action" },
+                  ...FIXED_CATS.map((fc, ci) => ({ label: fc.label, id: `exp-convo-${ci}` })),
+                  { label: "Action Plan", id: "exp-action-plan" },
+                ];
+              } else if (inIntim) {
+                subnav = [
+                  { label: "Overview", id: "intimacy-overview" },
+                  ...INTIMACY_DIMENSIONS.map(d => ({ label: d.label, id: `intimacy-${d.id}` })),
+                  { label: "Conversations", id: "intimacy-plan" },
                 ];
               }
               if (!subnav.length) return null;
@@ -16074,6 +16115,7 @@ export default function App() {
                     } else { setView(tool); }
                   }}
                   initialSection={activeResult !== "overview" ? activeResult : undefined}
+                  onSectionChange={setActiveResult}
                 />
                 </div>
               </div>
