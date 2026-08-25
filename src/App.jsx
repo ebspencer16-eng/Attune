@@ -314,7 +314,6 @@ const ALIGNED_ADVICE = {
     high: "You both repair casually, without much ceremony. Because it comes so naturally, it's easy to skip naming that a repair even happened. Say it landed.",
   },
   love:       "Love lands in similar ways for both of you. That's rare. Keep giving it in that form on purpose, not just by default.",
-  stress:     "You respond to stress in similar ways. If you both pull inward, no one reaches first. If you both seek, you can crowd each other. Name which is yours before the next hard week.",
   feedback:   "You handle feedback in similar ways. When you're both open, keep it kind. When you're both guarded, small things pile up. Say the small thing early.",
 };
 
@@ -3367,25 +3366,6 @@ function getDimShift(dim, myScore, partScore, U, P) {
       '4_4': `You both lean toward acts and presence as expressions of care. A close match. Neither of you may say what you feel in words very often, which means the verbal thread can fade. Naming what you appreciate explicitly, occasionally, holds the relationship in the light.`,
       '4_5': `Both of you lean toward acts, ${hiName} more strongly. Good match. When both of you are very busy and the acts start slipping, neither may say anything, and the connection can fade quietly. Name when you notice it dropping.`,
       '5_5': `You both feel most loved through presence and acts of care. Strong match. Because neither of you relies heavily on words, make sure feelings get named occasionally. Even once a week, saying something sincere out loud keeps the emotional connection explicit.`,
-    },
-
-    // ── COMMUNICATION UNDER STRESS (A=Withdraw, B=Seek) ─────────────────────────────────────────────────────────────────────────────────────────────────────────────
-    stress: {
-      '1_1': `You both tend to internalize stress, carry it quietly, process alone. You won't dump on each other unintentionally. The risk: both of you can quietly go under without the other noticing. Build a habit of checking in directly, "you seem off, what's going on?", rather than waiting for signals.`,
-      '1_2': `${loName} internalizes significantly; ${hiName} leans similar. Close match. When both of you are carrying things quietly, the relationship can feel more distant than intended. A regular "how are you really?" catches it early.`,
-      '1_3': `${loName} goes very internal under stress; ${hiName} is flexible. ${hiName} can offer an opening regularly, "I can tell you're carrying something, you don't have to talk about it, but I'm here", removes the burden from ${loName} of deciding whether to share.`,
-      '1_4': `${loName} internalizes; ${hiName} leans toward externalizing when stressed. A real difference. Agree: ${loName} going quiet doesn't mean something is wrong between you. Name the pattern so ${hiName} doesn't fill the silence with their own interpretation.`,
-      '1_5': `${loName} carries stress privately; ${hiName} processes it externally and visibly. A significant difference. ${hiName} can say "I'm stressed, it's not about you" when venting, and ${loName} can say "I'm processing something, I'll bring you in when I have words." Removes ambiguity for both.`,
-      '2_2': `You both lean toward internalizing. That's a stable but potentially blind pairing. You may not notice each other under pressure. Build a norm: when stress is high for either person, name it. "I'm having a hard week" doesn't require a solution, just acknowledgment.`,
-      '2_3': `${loName} leans internal; ${hiName} is flexible. ${hiName} can lean toward more open expression when ${loName} seems to be carrying something, modeling it makes it easier for ${loName} to share without having to initiate.`,
-      '2_4': `${loName} tends inward; ${hiName} tends to show stress more externally. Moderate gap. When ${hiName} is stressed, ${loName} can respond with presence rather than problem-solving. What ${hiName} usually needs is someone listening, not someone fixing.`,
-      '2_5': `${loName} tends to carry stress quietly; ${hiName} processes it expressively. A meaningful gap. Agree: ${hiName}'s visible stress is them processing, not a problem to fix, and ${loName}'s quiet is them coping, not withdrawal. Name this before a high-pressure moment, not during one.`,
-      '3_3': `You're both somewhere in the middle. Watch for: neither of you reliably signaling when you're under pressure, which can lead to both carrying more than you need to. A weekly "how's your load right now?" helps.`,
-      '3_4': `${hiName} leans a bit more toward externalizing stress. Small gap. When ${hiName} is stressed, they often show it, which gives ${loName} information. ${loName} can learn to respond with presence rather than immediately trying to solve it.`,
-      '3_5': `${loName} is neutral; ${hiName} processes stress externally. ${hiName}'s venting is a form of processing, not a request for solutions. When ${hiName} is stressed, listening without offering fixes is usually the most useful response.`,
-      '4_4': `You both tend to show stress externally when you're under pressure. The relationship probably doesn't carry a lot of hidden load. Watch for: when both of you are externally stressed at once, the home can feel tense. Agree to name it: "we're both having a hard week, let's not take it out on each other."`,
-      '4_5': `Both of you lean toward externalizing stress, ${hiName} more so. Close match. When ${hiName}'s stress is high, ${loName} can name it and offer something specific, "what would actually help right now?", rather than defaulting to unsolicited advice.`,
-      '5_5': `You both externalize stress visibly and expressively. The relationship probably doesn't hide much. The shift: when both of you are stressed at the same time, the combined energy can amplify. Practice naming it in the moment: "I think we're both running hot, can we take a minute?"`,
     },
 
     // ── GIVING & RECEIVING FEEDBACK (A=Guarded, B=Open) ─────────────────────────────────────────────────────────────────────────────────────────────────────────────
@@ -10432,7 +10412,6 @@ function ResultsHighlights({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3
     repair: "What do you need from me in the hours after a hard conversation?",
     listening: "When you bring something to me, do you want me to listen, or do you want me to respond and ask questions?",
     love: "What's something I do that makes you feel genuinely loved?",
-    stress: "When you're at your worst, what does the most helpful version of me look like?",
     feedback: "Is there something I do that bothers you that you haven't found the right way to bring up?",
   }[topConvo.dim] : "What do you each need that you haven't fully said out loud yet?";
 
