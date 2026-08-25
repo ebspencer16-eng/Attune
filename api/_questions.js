@@ -40,6 +40,8 @@ export const PERSONALITY_QUESTIONS = [
   { id:"ex10", dimension:"expression", text:"When your partner shares exciting news, you tend to:", a:"Respond genuinely but quietly. You're present without necessarily amplifying.", b:"Match their energy. You light up with them." },
   { id:"cf3", dimension:"conflict",   text:"When something small bothers you about the relationship, you tend to:", a:"Bring it up. You'd rather clear the air than let it build.", b:"Let it go. Not everything needs a conversation." },
   { id:"fb2", dimension:"feedback",   text:"When you have feedback for your partner, you tend to:", a:"Soften it and choose the moment carefully.", b:"Say it plainly, close to when it comes up." },
+  { id:"rs1", dimension:"reassurance", text:"When it comes to feeling secure in the relationship, you'd rather:", a:"Have it reaffirmed. Hearing where you stand keeps you close.", b:"Take it as given. You don't need it confirmed to feel steady." },
+  { id:"rs2", dimension:"reassurance", text:"If a while goes by with no 'we're okay' between you, you:", a:"Feel the gap and want to check in.", b:"Don't think twice. Silence isn't a signal to you." },
 ];
 
 // Exercise 2 (Expectations) source of truth, shared with api/admin-explore.js.
@@ -152,6 +154,4 @@ export const PARTNER_VIEW_ITEMS = [
   { id: "pv_feedback", dimension: "feedback", partnerView: true, after: "fb5",
     text: "When you raise something that bothers you, your partner:",
     a: "Needs a calm tone and careful timing to take it in.", b: "Takes it straight. Direct and specific lands best." },
-  { id:"rs1", dimension:"reassurance", text:"When it comes to feeling secure in the relationship, you'd rather:", a:"Have it reaffirmed. Hearing where you stand keeps you close.", b:"Take it as given. You don't need it confirmed to feel steady." },
-  { id:"rs2", dimension:"reassurance", text:"If a while goes by with no 'we're okay' between you, you:", a:"Feel the gap and want to check in.", b:"Don't think twice. Silence isn't a signal to you." },
 ];
