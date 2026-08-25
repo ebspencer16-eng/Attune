@@ -2865,6 +2865,89 @@ function IntimacyResponseBreakdown({ dim, myAnswers, partnerAnswers, userName, p
     </div>
   );
 }
+// Phase 4 side-by-side. Positions on a 1-5 dimension are marked with a labelled
+// arrow/line to the bar (not a dot). Two markers per bar; when they'd collide the
+// labels split above/below, and when both initials match a legend names the colours.
+function _pct15(v) { return v == null || isNaN(v) ? null : Math.max(6, Math.min(94, ((Number(v) - 1) / 4) * 100)); }
+function ArrowBar({ points }) {
+  // points: [{ pct, color, initial, name }]; up to two.
+  const pts = (points || []).filter(p => p && p.pct != null);
+  const close = pts.length === 2 && Math.abs(pts[0].pct - pts[1].pct) < 7;
+  return (
+    <div style={{ position: "relative", height: 34 }}>
+      {pts.map((p, i) => {
+        // when close, first marker sits above the bar, second below
+        const above = !close || i === 0;
+        return (
+          <div key={i} style={{ position: "absolute", left: p.pct + "%", top: 0, height: 34, transform: "translateX(-50%)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", pointerEvents: "none" }}>
+            {above && p.initial && <span style={{ fontSize: "0.58rem", fontWeight: 800, color: p.color, fontFamily: BFONT, lineHeight: 1, marginBottom: 1 }}>{p.initial}</span>}
+            <svg width="9" height={above ? 8 : 8} viewBox="0 0 9 8" style={{ display: "block" }}>
+              <polygon points={above ? "4.5,8 0,0 9,0" : "4.5,0 0,8 9,8"} fill={p.color} />
+            </svg>
+            {!above && p.initial && <span style={{ fontSize: "0.58rem", fontWeight: 800, color: p.color, fontFamily: BFONT, lineHeight: 1, marginTop: 1 }}>{p.initial}</span>}
+          </div>
+        );
+      })}
+      {/* the bar sits vertically centered */}
+      <div style={{ position: "absolute", top: "50%", left: 0, right: 0, transform: "translateY(-50%)", height: 5, background: "rgba(255,255,255,0.12)", borderRadius: 999 }} />
+    </div>
+  );
+}
+// Per-dimension cross-view scores: how THIS person's pv_* answers read the partner.
+function pvDimScores(answers) {
+  const pvSelf = {};
+  for (const k in (answers || {})) { if (k.indexOf('pv_') === 0) pvSelf[k.slice(3)] = answers[k]; }
+  return calcDimScores(pvSelf);
+}
+// Two-column side-by-side for a set of dimensions (exercise order).
+function SideBySideResponses({ dims, myS, partS, myAnswers, partnerAnswers, userName, partnerName }) {
+  const uInit = (userName || "You").trim().charAt(0).toUpperCase() || "Y";
+  const pInit = (partnerName || "Partner").trim().charAt(0).toUpperCase() || "P";
+  const sameInit = uInit === pInit;
+  const U = "#E8673A", Pc = "#6C7FFF";
+  const myView = pvDimScores(myAnswers);      // how I see my partner
+  const partView = pvDimScores(partnerAnswers); // how my partner sees me
+  const initFor = (c) => sameInit ? null : (c === U ? uInit : pInit);
+  const Legend = () => sameInit ? (
+    <div style={{ display: "flex", gap: "0.9rem", marginBottom: "0.6rem" }}>
+      {[[U, userName], [Pc, partnerName]].map(([c, n]) => (
+        <div key={n} style={{ display: "flex", alignItems: "center", gap: "0.3rem" }}>
+          <div style={{ width: 8, height: 8, borderRadius: "50%", background: c }} />
+          <span style={{ fontSize: "0.6rem", color: "rgba(255,255,255,0.55)", fontFamily: BFONT }}>{n}</span>
+        </div>
+      ))}
+    </div>
+  ) : null;
+  const Col = ({ title, sub, rows }) => (
+    <div style={{ flex: 1, minWidth: 0 }}>
+      <div style={{ fontSize: "0.62rem", textTransform: "uppercase", letterSpacing: "0.1em", color: "rgba(255,255,255,0.85)", fontWeight: 700, fontFamily: BFONT, marginBottom: "0.2rem" }}>{title}</div>
+      <div style={{ fontSize: "0.58rem", color: "rgba(255,255,255,0.4)", fontFamily: BFONT, marginBottom: "0.8rem" }}>{sub}</div>
+      <Legend />
+      <div style={{ display: "flex", flexDirection: "column", gap: "0.35rem" }}>
+        {dims.map(d => (
+          <div key={d}>
+            <div style={{ fontSize: "0.58rem", color: "rgba(255,255,255,0.5)", fontFamily: BFONT, marginBottom: "-2px" }}>{DIM_META[d].label}</div>
+            <ArrowBar points={rows(d)} />
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+  return (
+    <div style={{ display: "flex", gap: "1.5rem", flexWrap: "wrap" }}>
+      <Col title="How you think of yourself" sub="Each of you, on your own read"
+        rows={d => [
+          { pct: _pct15(myS[d]), color: U, initial: initFor(U), name: userName },
+          { pct: _pct15(partS[d]), color: Pc, initial: initFor(Pc), name: partnerName },
+        ]} />
+      <Col title="What you each think of each other" sub="Your read of them, their read of you"
+        rows={d => [
+          { pct: _pct15(myView[d]), color: U, initial: initFor(U), name: userName },
+          { pct: _pct15(partView[d]), color: Pc, initial: initFor(Pc), name: partnerName },
+        ]} />
+    </div>
+  );
+}
 function DimTrackViz({ myScore = 3, theirScore = 3, color = "#9B5DE5", userName = "You", partnerName = "Partner" }) {
   const pct = v => ((v - 1) / 4) * 100;
   const myPctV = pct(myScore), theirPctV = pct(theirScore);
@@ -5039,6 +5122,16 @@ function PersonalityResults({ myAnswers, partnerAnswers, userName, partnerName, 
         })()}
 
         <DimResponseBreakdown dim={dim} myAnswers={myAnswers} partnerAnswers={partnerAnswers} userName={userName} partnerName={partnerName} color={m.color} />
+        {/* Two-column arrows-to-bar side-by-side (all dims, exercise order) — dropdown */}
+        <details style={{ marginTop: "1.5rem", background: "rgba(255,255,255,0.05)", borderRadius: 14, border: "1px solid rgba(255,255,255,0.14)" }}>
+          <summary style={{ listStyle: "none", cursor: "pointer", padding: "1.1rem 1.5rem", fontSize: "0.72rem", textTransform: "uppercase", letterSpacing: "0.1em", color: "rgba(255,255,255,0.85)", fontWeight: 700, fontFamily: BFONT, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+            <span>Side by side internal processing responses from communications exercise</span>
+            <span style={{ fontSize: "0.9rem", opacity: 0.6 }}>▾</span>
+          </summary>
+          <div style={{ padding: "0.5rem 1.5rem 1.5rem" }}>
+            <SideBySideResponses dims={orderedDims} myS={myS} partS={partS} myAnswers={myAnswers} partnerAnswers={partnerAnswers} userName={userName} partnerName={partnerName} />
+          </div>
+        </details>
 
         <NavButtons
           onBack={() => go(step - 1)}
