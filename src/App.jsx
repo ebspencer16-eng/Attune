@@ -9062,6 +9062,18 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
             </button>
           </div>
           {showSurvey && <BetaSurveyModal userName={userName} coupleType={coupleType} onClose={() => setShowSurvey(false)} />}
+
+          {/* Back out of the last page. Everything before this has a Back;
+              without one here the final page of the whole experience could
+              only be left through the sidebar. */}
+          {curIdx > 0 && (
+            <div style={{ marginTop: "2.5rem", paddingTop: "1.5rem", borderTop: `1px solid ${C.stone}` }}>
+              <button onClick={() => go(allPages[curIdx - 1])}
+                style={{ background: "transparent", border: `1.5px solid ${C.stone}`, borderRadius: 10, padding: "0.6rem 1.2rem", fontSize: "0.8rem", fontWeight: 600, color: C.ink, fontFamily: BFONT, cursor: "pointer" }}>
+                ← {getPageLabel(allPages[curIdx - 1])}
+              </button>
+            </div>
+          )}
         </div>
       </Layout>
     );
