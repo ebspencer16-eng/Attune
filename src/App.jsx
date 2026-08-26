@@ -2448,91 +2448,88 @@ function IntimacyResponseBreakdown({ dim, myAnswers, partnerAnswers, userName, p
     </div>
   );
 }
-// Phase 4 side-by-side. Positions on a 1-5 dimension are marked with a labelled
-// arrow/line to the bar (not a dot). Two markers per bar; when they'd collide the
-// labels split above/below, and when both initials match a legend names the colours.
-function _pct15(v) { return v == null || isNaN(v) ? null : Math.max(6, Math.min(94, ((Number(v) - 1) / 4) * 100)); }
-function ArrowBar({ points }) {
-  // points: [{ pct, color, initial, name }]; up to two.
-  const pts = (points || []).filter(p => p && p.pct != null);
-  const close = pts.length === 2 && Math.abs(pts[0].pct - pts[1].pct) < 7;
-  return (
-    <div style={{ position: "relative", height: 34 }}>
-      {pts.map((p, i) => {
-        // when close, first marker sits above the bar, second below
-        const above = !close || i === 0;
-        return (
-          <div key={i} style={{ position: "absolute", left: p.pct + "%", top: 0, height: 34, transform: "translateX(-50%)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", pointerEvents: "none" }}>
-            {above && p.initial && <span style={{ fontSize: "0.58rem", fontWeight: 800, color: p.color, fontFamily: BFONT, lineHeight: 1, marginBottom: 1 }}>{p.initial}</span>}
-            <svg width="9" height={above ? 8 : 8} viewBox="0 0 9 8" style={{ display: "block" }}>
-              <polygon points={above ? "4.5,8 0,0 9,0" : "4.5,0 0,8 9,8"} fill={p.color} />
-            </svg>
-            {!above && p.initial && <span style={{ fontSize: "0.58rem", fontWeight: 800, color: p.color, fontFamily: BFONT, lineHeight: 1, marginTop: 1 }}>{p.initial}</span>}
-          </div>
-        );
-      })}
-      {/* the bar sits vertically centered */}
-      <div style={{ position: "absolute", top: "50%", left: 0, right: 0, transform: "translateY(-50%)", height: 5, background: "rgba(255,255,255,0.12)", borderRadius: 999 }} />
-    </div>
-  );
-}
-// Per-dimension cross-view scores: how THIS person's pv_* answers read the partner.
-function pvDimScores(answers) {
-  const pvSelf = {};
-  for (const k in (answers || {})) { if (k.indexOf('pv_') === 0) pvSelf[k.slice(3)] = answers[k]; }
-  return calcDimScores(pvSelf);
-}
-// Two-column side-by-side for a set of dimensions (exercise order).
-function SideBySideResponses({ dims, myS, partS, myAnswers, partnerAnswers, userName, partnerName }) {
+// Per-question side-by-side for one domain. Each row is the question as it was
+// asked, both options, and one bar carrying four markers: each partner's own
+// answer, and each partner's answer about the other from Part 2. The cross-view
+// markers are hollow and carry a leader line to a label, so a row reads as
+// "here is where each of you put yourself, and here is where each of you put
+// the other".
+function SideBySideResponses({ dims, myAnswers, partnerAnswers, userName, partnerName }) {
   const uInit = (userName || "You").trim().charAt(0).toUpperCase() || "Y";
   const pInit = (partnerName || "Partner").trim().charAt(0).toUpperCase() || "P";
-  const sameInit = uInit === pInit;
   const U = "#E8673A", Pc = "#6C7FFF";
-  const myView = pvDimScores(myAnswers);      // how I see my partner
-  const partView = pvDimScores(partnerAnswers); // how my partner sees me
-  const initFor = (c) => sameInit ? null : (c === U ? uInit : pInit);
-  const Legend = () => sameInit ? (
-    <div style={{ display: "flex", gap: "0.9rem", marginBottom: "0.6rem" }}>
-      {[[U, userName], [Pc, partnerName]].map(([c, n]) => (
-        <div key={n} style={{ display: "flex", alignItems: "center", gap: "0.3rem" }}>
-          <div style={{ width: 8, height: 8, borderRadius: "50%", background: c }} />
-          <span style={{ fontSize: "0.6rem", color: "rgba(255,255,255,0.55)", fontFamily: BFONT }}>{n}</span>
-        </div>
-      ))}
-    </div>
-  ) : null;
-  const Col = ({ title, sub, rows }) => (
-    <div style={{ flex: 1, minWidth: 0 }}>
-      <div style={{ fontSize: "0.62rem", textTransform: "uppercase", letterSpacing: "0.1em", color: "rgba(255,255,255,0.85)", fontWeight: 700, fontFamily: BFONT, marginBottom: "0.2rem" }}>{title}</div>
-      <div style={{ fontSize: "0.58rem", color: "rgba(255,255,255,0.4)", fontFamily: BFONT, marginBottom: "0.8rem" }}>{sub}</div>
-      <Legend />
-      <div style={{ display: "flex", flexDirection: "column", gap: "0.35rem" }}>
-        {dims.map(d => (
-          <div key={d}>
-            <div style={{ fontSize: "0.58rem", color: "rgba(255,255,255,0.5)", fontFamily: BFONT, marginBottom: "-2px" }}>{DIM_META[d].label}</div>
-            <ArrowBar points={rows(d)} />
-          </div>
-        ))}
-      </div>
+  const qs = PERSONALITY_QUESTIONS.filter(q => dims.includes(q.dimension));
+  const num = v => (v == null || isNaN(v)) ? null : Number(v);
+  const pct = v => Math.max(3, Math.min(97, ((v - 1) / 4) * 100));
+  const flip = id => id === 'lv5' || id === 'st1';
+
+  const Marker = ({ v, color, initial, hollow, dy }) => v == null ? null : (
+    <div title={initial} style={{ position: "absolute", top: "50%", left: pct(v) + "%",
+      transform: `translate(-50%, calc(-50% + ${dy}px))`, width: 20, height: 20, borderRadius: "50%",
+      background: hollow ? "transparent" : color, border: `2px solid ${color}`,
+      boxShadow: hollow ? "none" : `0 0 8px ${color}55`,
+      display: "flex", alignItems: "center", justifyContent: "center", zIndex: 2 }}>
+      <span style={{ fontSize: "0.52rem", fontWeight: 800, color: hollow ? color : "white", fontFamily: BFONT }}>{initial}</span>
     </div>
   );
+
   return (
-    <div style={{ display: "flex", gap: "1.5rem", flexWrap: "wrap" }}>
-      <Col title="How you think of yourself" sub="Each of you, on your own read"
-        rows={d => [
-          { pct: _pct15(myS[d]), color: U, initial: initFor(U), name: userName },
-          { pct: _pct15(partS[d]), color: Pc, initial: initFor(Pc), name: partnerName },
-        ]} />
-      <Col title="What you each think of each other" sub="Your read of them, their read of you"
-        rows={d => [
-          // Coloured by the person the dot is ABOUT, matching the self column
-          // above. myView is my read OF MY PARTNER, so it carries the partner's
-          // colour; partView is their read OF ME, so it carries mine. Colouring
-          // these by the reporter instead put my initial on a dot describing my
-          // partner, directly under a column where my initial meant me.
-          { pct: _pct15(partView[d]), color: U, initial: initFor(U), name: userName },
-          { pct: _pct15(myView[d]), color: Pc, initial: initFor(Pc), name: partnerName },
-        ]} />
+    <div>
+      <div style={{ display: "flex", gap: "1.1rem", flexWrap: "wrap", marginBottom: "1.1rem" }}>
+        {[[U, uInit, userName], [Pc, pInit, partnerName]].map(([c, i, n]) => (
+          <span key={n} style={{ display: "flex", alignItems: "center", gap: "0.4rem", fontSize: "0.62rem", color: "rgba(255,255,255,0.7)", fontFamily: BFONT }}>
+            <span style={{ width: 13, height: 13, borderRadius: "50%", background: c }} /> {n}
+            <span style={{ width: 13, height: 13, borderRadius: "50%", border: `2px solid ${c}`, marginLeft: "0.35rem" }} /> how {n === userName ? partnerName : userName} views {n}
+          </span>
+        ))}
+      </div>
+
+      <div style={{ display: "flex", flexDirection: "column", gap: "1.4rem" }}>
+        {qs.map(q => {
+          const f = flip(q.id);
+          const adj = v => (v == null ? null : (f ? 6 - v : v));
+          const mine = adj(num(myAnswers?.[q.id]));
+          const theirs = adj(num(partnerAnswers?.[q.id]));
+          const myRead = adj(num(myAnswers?.["pv_" + q.id]));    // how I see them
+          const theirRead = adj(num(partnerAnswers?.["pv_" + q.id])); // how they see me
+          const close = mine != null && theirs != null && Math.abs(pct(mine) - pct(theirs)) < 7;
+          return (
+            <div key={q.id}>
+              <div style={{ fontSize: "0.8rem", color: "white", fontFamily: BFONT, fontWeight: 600, lineHeight: 1.45, marginBottom: "0.55rem" }}>{q.text}</div>
+              <div style={{ display: "flex", justifyContent: "space-between", gap: "1rem", marginBottom: "0.45rem" }}>
+                <span style={{ fontSize: "0.68rem", color: "rgba(255,255,255,0.62)", fontFamily: BFONT, lineHeight: 1.35, maxWidth: "45%" }}>{f ? q.b : q.a}</span>
+                <span style={{ fontSize: "0.68rem", color: "rgba(255,255,255,0.62)", fontFamily: BFONT, lineHeight: 1.35, maxWidth: "45%", textAlign: "right" }}>{f ? q.a : q.b}</span>
+              </div>
+              <div style={{ position: "relative", height: 6, background: "rgba(255,255,255,0.14)", borderRadius: 999, margin: "0 11px" }}>
+                <Marker v={mine} color={U} initial={uInit} dy={close ? -7 : 0} />
+                <Marker v={theirs} color={Pc} initial={pInit} dy={close ? 7 : 0} />
+                <Marker v={myRead} color={Pc} initial={pInit} hollow dy={0} />
+                <Marker v={theirRead} color={U} initial={uInit} hollow dy={0} />
+              </div>
+              {(myRead != null || theirRead != null) && (
+                <div style={{ position: "relative", height: (myRead != null && theirRead != null) ? 40 : 22, margin: "0 11px" }}>
+                  {[[myRead, Pc, `How ${userName} views ${partnerName}`],
+                    [theirRead, U, `How ${partnerName} views ${userName}`]].map(([v, c, label], i) => {
+                    if (v == null) return null;
+                    const x = pct(v);
+                    // Anchor by where the marker sits, so a label at either
+                    // extreme reads inward instead of off the end of the bar.
+                    const anchor = x < 25 ? "left" : x > 75 ? "right" : "center";
+                    const pos = anchor === "left" ? { left: 0 } : anchor === "right" ? { right: 0 } : { left: x + "%", transform: "translateX(-50%)" };
+                    const tick = anchor === "left" ? { marginLeft: 0 } : anchor === "right" ? { marginLeft: "auto" } : { margin: "0 auto" };
+                    return (
+                      <div key={i} style={{ position: "absolute", top: i * 19, ...pos }}>
+                        <div style={{ width: 1, height: 7, background: c, opacity: 0.7, ...tick }} />
+                        <span style={{ fontSize: "0.56rem", color: "rgba(255,255,255,0.66)", fontFamily: BFONT, whiteSpace: "nowrap" }}>{label}</span>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 }
@@ -4156,7 +4153,7 @@ function PersonalityResults({ myAnswers, partnerAnswers, userName, partnerName, 
             <span style={{ fontSize: "0.9rem", opacity: 0.6 }}>▾</span>
           </summary>
           <div style={{ padding: "0.5rem 1.5rem 1.5rem" }}>
-            <SideBySideResponses dims={orderedDims} myS={myS} partS={partS} myAnswers={myAnswers} partnerAnswers={partnerAnswers} userName={userName} partnerName={partnerName} />
+            <SideBySideResponses dims={grp.dims} myAnswers={myAnswers} partnerAnswers={partnerAnswers} userName={userName} partnerName={partnerName} />
           </div>
         </details>
 
