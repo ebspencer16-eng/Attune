@@ -1393,32 +1393,6 @@ const INDIVIDUAL_TYPES = {
        typeDesc: "You carry things privately and surface them selectively, which means there's usually more going on internally than what's visible. You don't perform your inner life, and you don't dump it on the people around you. Under pressure, you go quiet and go deep. The thing to stay aware of: the people who love you most sometimes struggle to know what you're carrying, which can make them feel shut out without you intending it." },
 };
 
-// Same-type couples share an individual type, so two separate profile pages
-// would read almost identically. Instead we show one combined "Communication
-// Profile" page framed for both partners. One version per type.
-// {U} and {P} are substituted with the two partner names at render time.
-const SAME_TYPE_PROFILE = {
-  W: {
-    hook: "You're both Initiators. Let's look at what that means for the two of you.",
-    shared: "You both move toward connection. When something needs addressing, neither of you waits for an opening, you create one. You both process outward, so you rarely have to guess where the other stands. That makes you easy to know and quick to engage. Most couples spend years learning to say things out loud that the two of you say by default.",
-    tricky: "When two people both engage fast and express freely, conversations can escalate before either of you has slowed down. The risk isn't silence, it's two people reacting in real time. Your work is the pause: deciding, together, when to let something sit for an hour before you both pile in.",
-  },
-  X: {
-    hook: "You're both Anchors. Let's look at what that means for the two of you.",
-    shared: "You both move toward resolution and you both process privately before you speak. Neither of you avoids the hard conversation, and neither of you reacts out loud. When you each arrive, you arrive with something considered. That makes you a steady, deliberate pair, the kind that works through hard things without much drama.",
-    tricky: "Two people who both process internally can leave a lot unsaid in the meantime. You each assume the other knows what you're working through, because you're doing the same quiet work. Your task is to narrate more than feels necessary: say the thinking out loud, including how you got there.",
-  },
-  Y: {
-    hook: "You're both Feelers. Let's look at what that means for the two of you.",
-    shared: "You both feel things deeply and you both need space before you can show up to a hard conversation. Neither of you mistakes the other's need for time as avoidance, because you both know it's how you get to something honest. When you each arrive, you bring real feeling. There's a depth here most couples have to work to reach.",
-    tricky: "When both of you need space first, a hard moment can stall, with each waiting for the other to come back. Without a plan, the gap stretches. Your work is agreeing, in advance, on who reaches first and how long the space lasts, so the pause is deliberate rather than indefinite.",
-  },
-  Z: {
-    hook: "You're both Protectors. Let's look at what that means for the two of you.",
-    shared: "You both process privately and share selectively. There's more going on inside each of you than shows on the surface, and you both respect that the other doesn't perform their inner life. When either of you does speak, it carries weight. You give each other room, and you don't manufacture conflict that isn't there.",
-    tricky: "Two people who both hold things close can let a lot go unspoken. What's unsaid accumulates quietly, and neither of you is wired to force it into the open. Your work is the deliberate habit of saying the small thing before it becomes a big one, since neither of you will reach for it on instinct.",
-  },
-};
 
 // Per-couple-type, per-person perspective for profile pages (Option B)
 // Keys: coupleTypeId -> [personA_perspective, personB_perspective]
@@ -3997,9 +3971,6 @@ function PersonalityResults({ myAnswers, partnerAnswers, userName, partnerName, 
   // Same-type couples (both partners the same individual type) collapse to a
   // single combined "Communication Profile" page instead of two near-identical
   // individual pages.
-  const _myTypeCode = computeIndividualType(myB).typeCode;
-  const _partTypeCode = computeIndividualType(partB).typeCode;
-  const sameType = _myTypeCode === _partTypeCode;
 
   const go = s => { setStep(s); if (onExternalGo) onExternalGo(s); const sc = document.querySelector("[data-results-scroll]"); if (sc) sc.scrollTop = 0; else window.scrollTo({ top: 0, behavior: "smooth" }); };
 
@@ -4042,36 +4013,35 @@ function PersonalityResults({ myAnswers, partnerAnswers, userName, partnerName, 
     { label: "Overview", step: 0 },
     { label: "Detailed results", step: "detail-section", isSection: true },
     ...detailDomains.map((domain, i) => ({ label: domain.label, step: i + 1, isChild: true, italic: true, color: domain.color })),
-    { label: "Profiles & Plan", step: "profiles-section", isSection: true },
-    { label: sameType ? "Communication Profile" : "Individual Profiles", step: nDetail + 1, isChild: true },
-    { label: "Comm. Action Plan", step: nDetail + 3, isChild: true },
   ];
 
   // -- STEP 0: OVERVIEW --
   if (step === 0) return (
     <MaybeNav noSideNav={noSideNav} navItems={personalityNavItems} currentStep={step} onGo={go} accent="#E8673A">
-      <ResultsSlide bg="linear-gradient(145deg, #0f0c29, #302b63, #24243e)">
+      {/* Brighter than the old near-black navy: this is the page people land
+          on, and it was the darkest slide in the results. */}
+      <ResultsSlide bg="linear-gradient(150deg, #3B2A6B, #6C4BB0 55%, #C8522E)">
       <link href={FONT_URL} rel="stylesheet" />
       <div style={{ color: "white" }}>
 
         {/* Header */}
         <div style={{ marginBottom: "1.25rem" }}>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "0.5rem" }}>
-            <div style={{ fontSize: "0.65rem", letterSpacing: "0.2em", textTransform: "uppercase", color: "rgba(255,255,255,0.4)", fontFamily: BFONT }}>How You Communicate</div>
-            <div style={{ fontSize: "0.58rem", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)", fontFamily: BFONT, background: "rgba(255,255,255,0.07)", border: "1px solid rgba(255,255,255,0.12)", borderRadius: 99, padding: "0.2rem 0.6rem" }}>Overview</div>
+            <div style={{ fontSize: "0.65rem", letterSpacing: "0.2em", textTransform: "uppercase", color: "rgba(255,255,255,0.65)", fontFamily: BFONT }}>How You Communicate</div>
+            <div style={{ fontSize: "0.58rem", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.85)", fontFamily: BFONT, background: "rgba(255,255,255,0.16)", border: "1px solid rgba(255,255,255,0.3)", borderRadius: 99, padding: "0.2rem 0.7rem", fontWeight: 700 }}>Results at a glance</div>
           </div>
           <div style={{ fontSize: "clamp(1.8rem,6vw,2.8rem)", fontWeight: 700, fontFamily: HFONT, lineHeight: 1.0, marginBottom: "0.6rem" }}>{userName} & {partnerName}</div>
-          <p style={{ fontSize: "0.82rem", color: "rgba(255,255,255,0.55)", fontFamily: BFONT, fontWeight: 300, lineHeight: 1.6, margin: 0 }}>
+          <p style={{ fontSize: "0.88rem", color: "rgba(255,255,255,0.82)", fontFamily: BFONT, fontWeight: 400, lineHeight: 1.6, margin: 0 }}>
             {sortedFeedback.filter(f => f.gap <= 1).length} of {DIMS.length} dimensions closely matched.{" "}
             {sortedFeedback.filter(f => f.gap > 1).length > 0 ? (sortedFeedback.filter(f => f.gap > 1).length + " worth a closer look.") : "Strong alignment across the board."}
           </p>
-          <p style={{ fontSize: "0.72rem", color: "rgba(255,255,255,0.32)", fontFamily: BFONT, fontWeight: 300, lineHeight: 1.55, margin: "0.6rem 0 0" }}>Tap any dimension below to read the full picture.</p>
+          <p style={{ fontSize: "0.72rem", color: "rgba(255,255,255,0.6)", fontFamily: BFONT, fontWeight: 300, lineHeight: 1.55, margin: "0.6rem 0 0" }}>Tap any dimension below to read the full picture.</p>
         </div>
 
         {/* ── COMPARISON BARS GRAPHIC ── */}
-        <div style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 14, padding: "1rem 1.1rem", marginBottom: "1rem" }}>
+        <div style={{ background: "rgba(255,255,255,0.12)", border: "1px solid rgba(255,255,255,0.22)", borderRadius: 14, padding: "1rem 1.1rem", marginBottom: "1rem", boxShadow: "0 8px 26px rgba(0,0,0,0.16)" }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.7rem" }}>
-            <div style={{ fontSize: "0.55rem", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.3)", fontFamily: BFONT, fontWeight: 700 }}>Where you each land</div>
+            <div style={{ fontSize: "0.55rem", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.75)", fontFamily: BFONT, fontWeight: 700 }}>Where you each land</div>
             <div style={{ display: "flex", gap: "0.85rem" }}>
               <div style={{ display: "flex", alignItems: "center", gap: "0.3rem" }}>
                 <div style={{ width: 7, height: 7, borderRadius: "50%", background: "#E8673A" }} />
@@ -4114,10 +4084,10 @@ function PersonalityResults({ myAnswers, partnerAnswers, userName, partnerName, 
 
         {/* Results-at-a-glance action plan — one item per domain */}
         <div style={{ marginBottom: "1rem" }}>
-          <div style={{ fontSize: "0.55rem", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.3)", fontFamily: BFONT, fontWeight: 700, marginBottom: "0.6rem" }}>Your action plan</div>
+          <div style={{ fontSize: "0.55rem", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.75)", fontFamily: BFONT, fontWeight: 700, marginBottom: "0.6rem" }}>Your action plan</div>
           <div style={{ display: "flex", flexDirection: "column", gap: "0.6rem" }}>
             {glancePlan.map((item, i) => (
-              <div key={i} style={{ background: "rgba(255,255,255,0.05)", border: `1px solid ${item.color}33`, borderRadius: 12, padding: "0.9rem 1.1rem" }}>
+              <div key={i} style={{ background: "rgba(255,255,255,0.13)", border: `1px solid ${item.color}66`, borderRadius: 12, padding: "0.9rem 1.1rem", boxShadow: "0 6px 20px rgba(0,0,0,0.14)" }}>
                 <div style={{ fontSize: "0.55rem", letterSpacing: "0.14em", textTransform: "uppercase", color: item.color, fontFamily: BFONT, fontWeight: 700, marginBottom: "0.4rem" }}>{item.label}</div>
                 <div style={{ fontSize: "0.82rem", color: "rgba(255,255,255,0.9)", fontFamily: BFONT, fontWeight: 600, marginBottom: "0.35rem" }}>{item.title}</div>
                 <div style={{ fontSize: "0.75rem", color: "rgba(255,255,255,0.6)", fontFamily: BFONT, lineHeight: 1.6 }}>{item.body}</div>
@@ -4127,30 +4097,6 @@ function PersonalityResults({ myAnswers, partnerAnswers, userName, partnerName, 
           </div>
         </div>
 
-        {/* What's in this section */}
-        <div style={{ borderTop: "1px solid rgba(255,255,255,0.1)", paddingTop: "0.85rem" }}>
-          <div style={{ fontSize: "0.55rem", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.3)", fontFamily: BFONT, fontWeight: 700, marginBottom: "0.5rem" }}>What's in this section</div>
-          <div style={{ display: "flex", flexDirection: "column", gap: "0.3rem" }}>
-            {[
-              { label: "Detailed results", sub: "Three pages, grouped by where it shows up", onClick: () => go(1) },
-              sameType
-                ? { label: "Communication Profile", sub: "What you share as the same type", onClick: () => go(nDetail + 1) }
-                : { label: "Individual communication profiles", sub: "Each of your types, and how they meet", onClick: () => go(nDetail + 1) },
-              { label: "Communication Action Plan", sub: "Practices built from your results", onClick: () => go(nDetail + 3) },
-            ].map(({ label, sub, onClick }, idx) => (
-              <div key={idx} onClick={onClick}
-                style={{ display: "flex", alignItems: "center", gap: "0.75rem", padding: "0.4rem 0.75rem", borderRadius: 8, background: "rgba(255,255,255,0.04)", cursor: "pointer", transition: "all 0.12s", border: "1px solid rgba(255,255,255,0.06)" }}
-                onMouseEnter={e => e.currentTarget.style.background = "rgba(255,255,255,0.09)"}
-                onMouseLeave={e => e.currentTarget.style.background = "rgba(255,255,255,0.04)"}>
-                <div style={{ flex: 1 }}>
-                  <div style={{ fontSize: "0.74rem", color: "rgba(255,255,255,0.72)", fontFamily: BFONT }}>{label}</div>
-                  <div style={{ fontSize: "0.58rem", color: "rgba(255,255,255,0.35)", fontFamily: BFONT, marginTop: "0.1rem" }}>{sub}</div>
-                </div>
-                <span style={{ fontSize: "0.85rem", color: "rgba(255,255,255,0.25)", fontFamily: BFONT, flexShrink: 0 }}>→</span>
-              </div>
-            ))}
-          </div>
-        </div>
 
       </div>
       <NavButtons onBack={() => {}} backDisabled nextLabel={"Begin: " + detailDomains[0]?.label + " →"} onNext={() => go(1)} />
@@ -4217,214 +4163,15 @@ function PersonalityResults({ myAnswers, partnerAnswers, userName, partnerName, 
 
         <NavButtons
           onBack={() => go(step - 1)}
-          onNext={() => go(step + 1)}
-          nextLabel={isLast ? "Individual Profiles →" : (nextGrp.label + " →")}
+          onNext={() => (isLast ? (onGoExpectations || (() => {})) : () => go(step + 1))()}
+          nextLabel={isLast ? (onGoExpectations ? "Expectations →" : "Done") : (nextGrp.label + " →")}
+          nextDisabled={isLast && !onGoExpectations}
         />
       </ResultsSlide>
     </MaybeNav>
     );
   }
 
-
-  // -- ACTION PLAN (now step N+3) --
-  if (step === nDetail + 3) return (
-    <MaybeNav noSideNav={noSideNav} navItems={personalityNavItems} currentStep={step} onGo={go} accent="#E8673A">
-      <ResultsSlide bg="linear-gradient(145deg, #0f0c29, #1e1a40, #0f0c29)">
-      <link href={FONT_URL} rel="stylesheet" />
-      <div style={{ fontSize: "0.65rem", textTransform: "uppercase", letterSpacing: "0.18em", color: "rgba(232,103,58,0.8)", fontWeight: 700, marginBottom: "0.4rem", fontFamily: BFONT }}>Communication Action Plan</div>
-      <div style={{ fontSize: "clamp(1.6rem,5vw,2.2rem)", fontWeight: 700, color: "white", lineHeight: 1.1, marginBottom: "0.6rem", fontFamily: HFONT }}>{protocols[0]?.title === "Keep checking in" ? "Remarkably well matched." : "Built from your answers."}</div>
-      <p style={{ fontSize: "0.85rem", color: "rgba(255,255,255,0.65)", marginBottom: "1.75rem", lineHeight: 1.7, fontFamily: BFONT, fontWeight: 300 }}>{protocols[0]?.title === "Keep checking in" ? (userName + " and " + partnerName + " are closely aligned across all " + DIMS.length + " communication dimensions. That's genuinely rare, and worth knowing.") : ("Three practices for " + userName + " and " + partnerName + ", drawn from where you differ most.")}</p>
-      <div style={{ display: "flex", flexDirection: "column", gap: "0.85rem", marginBottom: "0.5rem" }}>
-        {protocols.slice(0, 3).map((p, i) => (
-          <div key={i} style={{ background: "rgba(255,255,255,0.06)", borderRadius: 16, padding: "1.1rem 1.4rem", border: "1px solid rgba(255,255,255,0.1)" }}>
-            <div style={{ fontSize: "0.85rem", fontWeight: 700, color: "white", fontFamily: BFONT, marginBottom: "0.5rem" }}>{p.title}</div>
-            <div style={{ fontSize: "0.82rem", color: "rgba(255,255,255,0.72)", lineHeight: 1.75, fontFamily: BFONT, fontWeight: 300, marginBottom: p.thisWeek ? "0.75rem" : 0 }}>{p.body}</div>
-            {p.thisWeek && (
-              <div style={{ background: "rgba(232,103,58,0.12)", border: "1px solid rgba(232,103,58,0.28)", borderRadius: 10, padding: "0.6rem 0.85rem", display: "flex", gap: "0.5rem", alignItems: "flex-start" }}>
-                <span style={{ fontSize: "0.55rem", letterSpacing: "0.18em", textTransform: "uppercase", color: "#E8673A", fontFamily: BFONT, fontWeight: 700, flexShrink: 0, paddingTop: "0.1rem" }}>Try this week</span>
-                <span style={{ fontSize: "0.78rem", color: "rgba(255,255,255,0.82)", fontFamily: BFONT, fontWeight: 400, lineHeight: 1.6 }}>{p.thisWeek}</span>
-              </div>
-            )}
-          </div>
-        ))}
-      </div>
-      {/* ── TYPE-SPECIFIC PRACTICE ── */}
-      {coupleType?.tips?.length > 0 && (() => {
-        const interp = s => resolveRoleTokens(String(s || "").replace(/\{U\}/g, userName).replace(/\{P\}/g, partnerName), myB, partB, userName, partnerName);
-        const practiceTip = coupleType?.tips[coupleType?.tips.length - 1];
-        return (
-          <div style={{ background: `${coupleType?.color}12`, border: `1px solid ${coupleType?.color}35`, borderRadius: 14, padding: '1rem 1.25rem', marginTop: '0.85rem' }}>
-            <div style={{ fontSize: '0.55rem', letterSpacing: '0.18em', textTransform: 'uppercase', color: coupleType?.color, fontFamily: BFONT, fontWeight: 700, marginBottom: '0.4rem' }}>
-              For a {coupleType?.name.replace('The ', '').toLowerCase()} dynamic
-            </div>
-            <div style={{ fontSize: '0.8rem', fontWeight: 700, color: 'white', fontFamily: BFONT, marginBottom: '0.3rem' }}>{interp(practiceTip.title)}</div>
-            <div style={{ fontSize: '0.76rem', color: 'rgba(255,255,255,0.6)', fontFamily: BFONT, fontWeight: 300, lineHeight: 1.7 }}>{interp(practiceTip.body)}</div>
-          </div>
-        );
-      })()}
-      {/* Download action plan */}
-      <button onClick={() => {
-        const lines = ["COMMUNICATION ACTION PLAN", "━".repeat(40), `${userName} & ${partnerName}`, "", ...protocols.slice(0,3).flatMap(p => [p.title, p.body, p.thisWeek ? "Try this week: " + p.thisWeek : "", ""])];
-        const blob = new Blob([lines.join("\n")], { type: "text/plain" });
-        const a = document.createElement("a"); a.href = URL.createObjectURL(blob);
-        a.download = "Attune_Communication_Action_Plan.txt"; a.click();
-      }} style={{ display: "inline-flex", alignItems: "center", gap: "0.45rem", background: "rgba(255,255,255,0.07)", border: "1px solid rgba(255,255,255,0.15)", color: "rgba(255,255,255,0.6)", borderRadius: 9, padding: "0.5rem 1rem", fontSize: "0.72rem", fontWeight: 600, fontFamily: BFONT, cursor: "pointer", marginTop: "0.75rem", marginBottom: "0.25rem" }}>
-        ↓ Download action plan
-      </button>
-      <NavButtons onBack={() => go(step - 1)} onNext={onGoExpectations || (() => {})} nextLabel={onGoExpectations ? "Expectations →" : "Done"} nextDisabled={!onGoExpectations} />
-
-      {/* Add-ons row — hide anything already owned */}
-      {(!hasWorkbook || (LMFT_ENABLED && !hasLMFT)) && (
-      <div style={{ display: "grid", gridTemplateColumns: (!hasWorkbook && LMFT_ENABLED && !hasLMFT) ? "1fr 1fr" : "1fr", gap: "0.75rem", marginTop: "1.25rem" }}>
-        {!hasWorkbook && (
-        <div style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.12)", borderRadius: 14, padding: "1rem" }}>
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#E8673A" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" style={{ marginBottom: "0.4rem" }}><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
-          <div style={{ fontSize: "0.82rem", fontWeight: 700, color: "white", marginBottom: "0.3rem", fontFamily: BFONT }}>Personalized Workbook</div>
-          <p style={{ fontSize: "0.72rem", color: "rgba(255,255,255,0.55)", lineHeight: 1.6, fontFamily: BFONT, margin: "0 0 0.6rem" }}>Guided exercises and conversation prompts built directly from these action items.</p>
-          <a href="/offerings" onClick={(e) => { if (onNavigateTool) { e.preventDefault(); onNavigateTool("workbook-upsell"); } }} style={{ fontSize: "0.7rem", color: "#E8673A", fontFamily: BFONT, fontWeight: 700, textDecoration: "none" }}>Get the workbook →</a>
-        </div>
-        )}
-        {LMFT_ENABLED && !hasLMFT && (
-        <div style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.12)", borderRadius: 14, padding: "1rem" }}>
-          <div style={{ width: 20, height: 20, borderRadius: 5, background: "rgba(27,95,232,0.2)", border: "1.5px solid rgba(27,95,232,0.4)", marginBottom: "0.4rem" }} />
-          <div style={{ fontSize: "0.82rem", fontWeight: 700, color: "white", marginBottom: "0.3rem", fontFamily: BFONT }}>LMFT Session</div>
-          <p style={{ fontSize: "0.72rem", color: "rgba(255,255,255,0.55)", lineHeight: 1.6, fontFamily: BFONT, margin: "0 0 0.6rem" }}>A licensed therapist reviews your results and runs a 50-minute session built around exactly this.</p>
-          <a href="/offerings#pkg-premium" onClick={(e) => { if (onNavigateTool) { e.preventDefault(); onNavigateTool("lmft-upsell"); } }} style={{ fontSize: "0.7rem", color: "#1B5FE8", fontFamily: BFONT, fontWeight: 700, textDecoration: "none" }}>Learn more →</a>
-        </div>
-        )}
-      </div>
-      )}
-    </ResultsSlide>
-    </MaybeNav>
-  );
-
-  // -- INDIVIDUAL PAGES (now steps N+1 and N+2) --
-  if (step === nDetail + 1 || step === nDetail + 2) {
-    // ── SAME-TYPE COUPLES: one combined Communication Profile page ──
-    if (sameType) {
-      const profile = SAME_TYPE_PROFILE[_myTypeCode];
-      const it = INDIVIDUAL_TYPES[_myTypeCode];
-      const pageColor = it.color;
-      const pageBg = {
-        W: "linear-gradient(145deg, #1c0e06, #2e1a0e, #1c0e06)",
-        X: "linear-gradient(145deg, #060d2a, #0f1c48, #060d2a)",
-        Y: "linear-gradient(145deg, #100720, #1e0d3a, #100720)",
-        Z: "linear-gradient(145deg, #0d0d0d, #1a1a1a, #0d0d0d)",
-      }[_myTypeCode] || "linear-gradient(145deg, #0f0c29, #302b63, #24243e)";
-      const interp = s => (s || "").replace(/\{U\}/g, userName).replace(/\{P\}/g, partnerName);
-      return (
-      <MaybeNav noSideNav={noSideNav} navItems={personalityNavItems} currentStep={step} onGo={go} accent={pageColor}>
-        <ResultsSlide bg={pageBg}>
-          <link href={FONT_URL} rel="stylesheet" />
-          <div style={{ color: "white" }}>
-            {/* ── Header ── */}
-            <div style={{ marginBottom: "1.75rem" }}>
-              <div style={{ fontSize: "0.65rem", textTransform: "uppercase", letterSpacing: "0.2em", color: "rgba(255,255,255,0.38)", marginBottom: "0.55rem", fontFamily: BFONT }}>Communication Profile</div>
-              <div style={{ fontSize: "clamp(1.7rem,5.5vw,2.5rem)", fontWeight: 700, fontFamily: HFONT, lineHeight: 1.05, marginBottom: "0.65rem" }}>{interp(profile?.hook) || `You're both ${it.name}.`}</div>
-              <div style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", background: pageColor + "22", border: `1px solid ${pageColor}50`, borderRadius: 999, padding: "0.3rem 0.85rem" }}>
-                <div style={{ width: 7, height: 7, borderRadius: "50%", background: pageColor, flexShrink: 0 }} />
-                <span style={{ fontSize: "0.72rem", fontWeight: 700, color: pageColor, fontFamily: BFONT, letterSpacing: "0.06em" }}>Both {it.name}</span>
-                <span style={{ fontSize: "0.65rem", color: "rgba(255,255,255,0.35)", fontFamily: BFONT }}>· {it.axis1} · {it.axis2}</span>
-              </div>
-            </div>
-
-            {/* ── What you share ── */}
-            <div style={{ background: "rgba(255,255,255,0.04)", borderRadius: 16, padding: "1.25rem", marginBottom: "0.85rem", borderLeft: `3px solid ${pageColor}80` }}>
-              <div style={{ fontSize: "0.6rem", textTransform: "uppercase", letterSpacing: "0.18em", color: pageColor, fontWeight: 700, marginBottom: "0.6rem", fontFamily: BFONT }}>What you share</div>
-              <p style={{ fontSize: "0.88rem", color: "rgba(255,255,255,0.86)", fontFamily: BFONT, fontWeight: 300, lineHeight: 1.72, margin: 0 }}>{interp(profile?.shared)}</p>
-            </div>
-
-            {/* ── Where it can get tricky ── */}
-            <div style={{ background: `${pageColor}18`, borderRadius: 16, padding: "1.25rem", border: `1px solid ${pageColor}45` }}>
-              <div style={{ fontSize: "0.6rem", textTransform: "uppercase", letterSpacing: "0.18em", color: pageColor, fontWeight: 700, marginBottom: "0.55rem", fontFamily: BFONT }}>Where it can get tricky</div>
-              <p style={{ fontSize: "0.88rem", color: "rgba(255,255,255,0.88)", fontFamily: BFONT, fontWeight: 400, lineHeight: 1.75, margin: 0 }}>{interp(profile?.tricky)}</p>
-            </div>
-          </div>
-
-          <NavButtons
-            onBack={() => go(nDetail)}
-            onNext={() => go(nDetail + 3)}
-            nextLabel={"Communication Action Plan →"}
-          />
-        </ResultsSlide>
-      </MaybeNav>
-      );
-    }
-
-    // ── CROSS-TYPE COUPLES: one page, a tile per person, then one tile on how
-    //    the two types meet. (6.4 — was two near-identical pages.)
-    const myTypeCode   = computeIndividualType(myB).typeCode;
-    const partTypeCode = computeIndividualType(partB).typeCode;
-    const coupleId = coupleType?.id || [myTypeCode, partTypeCode].sort().join("");
-    const perspectives = PARTNER_PERSPECTIVE[coupleId];
-    const sortedCodes = [myTypeCode, partTypeCode].sort();
-    const perspFor = code => {
-      const idx = (code === sortedCodes[0] && coupleId[0] === sortedCodes[0]) ? 0 : 1;
-      return perspectives ? perspectives[idx] : "Your partner processes and responds differently than you do. Understanding that difference is what makes this pairing interesting.";
-    };
-
-    const _myII = computeIndividualType(myS), _partII = computeIndividualType(partS);
-    const people = [
-      { name: userName, partner: partnerName, code: myTypeCode, type: INDIVIDUAL_TYPES[myTypeCode], perspective: communicatingBlurb(partnerName, partnerPronouns, _myII.engageCoord, _myII.openCoord, _partII.engageCoord, _partII.openCoord), pron: userPronouns, ec: _myII.engageCoord, oc: _myII.openCoord },
-      { name: partnerName, partner: userName, code: partTypeCode, type: INDIVIDUAL_TYPES[partTypeCode], perspective: communicatingBlurb(userName, userPronouns, _partII.engageCoord, _partII.openCoord, _myII.engageCoord, _myII.openCoord), pron: partnerPronouns, ec: _partII.engageCoord, oc: _partII.openCoord },
-    ];
-    const pageColor = "#E8673A";
-
-    return (
-    <MaybeNav noSideNav={noSideNav} navItems={personalityNavItems} currentStep={step} onGo={go} accent={pageColor}>
-      <ResultsSlide bg="linear-gradient(145deg, #0f0c29, #302b63, #24243e)">
-        <link href={FONT_URL} rel="stylesheet" />
-        <div style={{ color: "white" }}>
-
-          {/* ── Header ── */}
-          <div style={{ marginBottom: "1.5rem" }}>
-            <div style={{ fontSize: "0.65rem", textTransform: "uppercase", letterSpacing: "0.2em", color: "rgba(255,255,255,0.38)", marginBottom: "0.55rem", fontFamily: BFONT }}>Individual communication profiles</div>
-            <div style={{ fontSize: "clamp(1.7rem,5.5vw,2.5rem)", fontWeight: 700, fontFamily: HFONT, lineHeight: 1.05 }}>Two types, one conversation.</div>
-          </div>
-
-          {/* ── A tile per person ── */}
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: "0.85rem", marginBottom: "0.85rem" }}>
-            {people.map(pp => (
-              <div key={pp.name} style={{ background: "rgba(255,255,255,0.04)", borderRadius: 16, padding: "1.1rem 1.25rem", borderLeft: `3px solid ${pp.type.color}` }}>
-                <div style={{ fontSize: "1.25rem", fontWeight: 700, fontFamily: HFONT, marginBottom: "0.5rem" }}>{pp.name}</div>
-                <div style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", background: pp.type.color + "22", border: `1px solid ${pp.type.color}50`, borderRadius: 999, padding: "0.28rem 0.8rem", marginBottom: "0.7rem" }}>
-                  <div style={{ width: 7, height: 7, borderRadius: "50%", background: pp.type.color, flexShrink: 0 }} />
-                  <span style={{ fontSize: "0.7rem", fontWeight: 700, color: pp.type.color, fontFamily: BFONT, letterSpacing: "0.06em" }}>{pp.type.name}</span>
-                  <span style={{ fontSize: "0.62rem", color: "rgba(255,255,255,0.35)", fontFamily: BFONT }}>· {pp.type.axis1} · {pp.type.axis2}</span>
-                </div>
-                <p style={{ fontSize: "0.85rem", color: "rgba(255,255,255,0.82)", fontFamily: BFONT, fontWeight: 300, lineHeight: 1.7, margin: 0 }}>{individualBlurb(pp.name, pp.pron, pp.ec, pp.oc)}</p>
-              </div>
-            ))}
-          </div>
-
-          {/* ── One tile on how the two types meet ── */}
-          <div style={{ background: `${pageColor}18`, borderRadius: 16, padding: "1.25rem", border: `1px solid ${pageColor}45` }}>
-            <div style={{ fontSize: "0.6rem", textTransform: "uppercase", letterSpacing: "0.18em", color: pageColor, fontWeight: 700, marginBottom: "0.85rem", fontFamily: BFONT }}>Communicating with each other</div>
-            <div style={{ display: "flex", flexDirection: "column", gap: "0.9rem" }}>
-              {people[0].perspective === people[1].perspective ? (
-                <p style={{ fontSize: "0.88rem", color: "rgba(255,255,255,0.88)", fontFamily: BFONT, fontWeight: 400, lineHeight: 1.75, margin: 0 }}>{people[0].perspective}</p>
-              ) : (
-                people.map(pp => (
-                  <div key={pp.name}>
-                    <div style={{ fontSize: "0.72rem", fontWeight: 700, color: pp.type.color, fontFamily: BFONT, marginBottom: "0.25rem" }}>{pp.name} with {pp.partner}</div>
-                    <p style={{ fontSize: "0.88rem", color: "rgba(255,255,255,0.88)", fontFamily: BFONT, fontWeight: 400, lineHeight: 1.75, margin: 0 }}>{pp.perspective}</p>
-                  </div>
-                ))
-              )}
-            </div>
-          </div>
-
-        </div>
-
-        <NavButtons
-          onBack={() => go(nDetail)}
-          onNext={() => go(nDetail + 3)}
-          nextLabel={"Communication Action Plan →"}
-        />
-      </ResultsSlide>
-    </MaybeNav>
-    );
-  }
 
   // -- SUMMARY -- dark navy, mirrors overview --
   const coupleStrengths = sortedFeedback.filter(f => f.gap <= 1);
@@ -4571,7 +4318,6 @@ function ExpectationsResults({ myAnswers, partnerAnswers, userName, partnerName,
   const sectionToStep = (s) => {
     if (!s || s === "overview") return 0;
     if (s === "common-ground" || s === "conversations") return 0;
-    if (s === "action-plan") return "action-plan";
     if (s === "summary") return "summary";
     // "convo-N" comes in directly from UnifiedResults routing — pass through as-is
     if (typeof s === "string" && s.startsWith("convo-")) return s;
@@ -4689,7 +4435,6 @@ function ExpectationsResults({ myAnswers, partnerAnswers, userName, partnerName,
       label: fc.label, step: `convo-${i}`, isChild: true, italic: true,
       onClick: () => go(`convo-${i}`),
     })),
-    { label: "Expectations Action Plan", step: "action-plan", onClick: () => go("action-plan") },
   ];
 
   // navCurrentStep passed directly — SideNav matches by exact equality
@@ -4699,31 +4444,36 @@ function ExpectationsResults({ myAnswers, partnerAnswers, userName, partnerName,
   if (step === 0) {
     return (
       <MaybeNav noSideNav={noSideNav} navItems={expectationsNavItems} currentStep={navCurrentStep} onGo={go} accent="#1B5FE8">
-        <ResultsSlide bg={EXP_BG}>
+        {/* Brighter than EXP_BG, which the detail pages keep. This is the
+            landing page for the section. */}
+        <ResultsSlide bg="linear-gradient(150deg, #2E2A6B, #4C56C0 55%, #1B8FA8)">
           <link href={FONT_URL} rel="stylesheet" />
           <div style={{ color: "white" }}>
             {/* Header */}
             <div style={{ marginBottom: "1.25rem" }}>
-              <div style={{ fontSize: "0.65rem", letterSpacing: "0.2em", textTransform: "uppercase", color: "rgba(255,255,255,0.4)", marginBottom: "0.5rem", fontFamily: BFONT }}>What You Expect</div>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "0.5rem" }}>
+                <div style={{ fontSize: "0.65rem", letterSpacing: "0.2em", textTransform: "uppercase", color: "rgba(255,255,255,0.65)", fontFamily: BFONT }}>What You Expect</div>
+                <div style={{ fontSize: "0.58rem", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.85)", fontFamily: BFONT, background: "rgba(255,255,255,0.16)", border: "1px solid rgba(255,255,255,0.3)", borderRadius: 99, padding: "0.2rem 0.7rem", fontWeight: 700 }}>Results at a glance</div>
+              </div>
               <div style={{ fontSize: "clamp(1.8rem,6vw,2.8rem)", fontWeight: 700, fontFamily: HFONT, lineHeight: 1.0, marginBottom: "0.6rem" }}>{userName} & {partnerName}</div>
 
               {/* Already aligned / Worth discussing counts */}
               <div style={{ display: "flex", gap: "1.25rem", marginBottom: "0.35rem" }}>
                 <div style={{ display: "flex", alignItems: "center", gap: "0.45rem" }}>
                   <div style={{ width: 8, height: 8, borderRadius: "50%", background: "#10b981", flexShrink: 0 }} />
-                  <span style={{ fontSize: "0.82rem", color: "rgba(255,255,255,0.82)", fontFamily: BFONT }}>Already aligned: <strong>{aligned.length}</strong></span>
+                  <span style={{ fontSize: "0.85rem", color: "rgba(255,255,255,0.92)", fontFamily: BFONT }}>Already aligned: <strong>{aligned.length}</strong></span>
                 </div>
                 <div style={{ display: "flex", alignItems: "center", gap: "0.45rem" }}>
                   <div style={{ width: 8, height: 8, borderRadius: "50%", background: "#E8673A", flexShrink: 0 }} />
-                  <span style={{ fontSize: "0.82rem", color: "rgba(255,255,255,0.82)", fontFamily: BFONT }}>Worth discussing: <strong>{gaps.length}</strong></span>
+                  <span style={{ fontSize: "0.85rem", color: "rgba(255,255,255,0.92)", fontFamily: BFONT }}>Worth discussing: <strong>{gaps.length}</strong></span>
                 </div>
               </div>
             </div>
 
             {/* ── EXPECTATIONS ALIGNMENT SCALE ── */}
-            <div style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 14, padding: "1rem 1.1rem", marginBottom: "1rem" }}>
+            <div style={{ background: "rgba(255,255,255,0.12)", border: "1px solid rgba(255,255,255,0.22)", borderRadius: 14, padding: "1rem 1.1rem", marginBottom: "1rem", boxShadow: "0 8px 26px rgba(0,0,0,0.16)" }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.7rem" }}>
-                <div style={{ fontSize: "0.55rem", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.3)", fontFamily: BFONT, fontWeight: 700 }}>Alignment by category</div>
+                <div style={{ fontSize: "0.55rem", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.75)", fontFamily: BFONT, fontWeight: 700 }}>Alignment by category</div>
                 <div style={{ fontSize: "0.6rem", color: "rgba(255,255,255,0.3)", fontFamily: BFONT }}>% aligned</div>
               </div>
               <div style={{ display: "flex", flexDirection: "column", gap: "0.55rem" }}>
@@ -4755,11 +4505,11 @@ function ExpectationsResults({ myAnswers, partnerAnswers, userName, partnerName,
             {/* ── CONVERSATIONS TO HAVE (glance action plan) ── */}
             {glanceConversations.length > 0 && (
               <div style={{ marginBottom: "1rem" }}>
-                <div style={{ fontSize: "0.55rem", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.3)", fontFamily: BFONT, fontWeight: 700, marginBottom: "0.5rem" }}>Conversations to have</div>
+                <div style={{ fontSize: "0.55rem", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.75)", fontFamily: BFONT, fontWeight: 700, marginBottom: "0.5rem" }}>Conversations to have</div>
                 <div style={{ display: "flex", flexDirection: "column", gap: "0.6rem" }}>
                   {glanceConversations.map(c => (
                     <div key={c.id} onClick={() => go(`convo-${FIXED_CATS.findIndex(x => x.id === c.id)}`)}
-                      style={{ background: "rgba(255,255,255,0.05)", border: `1px solid ${c.color}33`, borderRadius: 12, padding: "0.9rem 1.1rem", cursor: "pointer", transition: "background 0.12s" }}
+                      style={{ background: "rgba(255,255,255,0.13)", border: `1px solid ${c.color}66`, borderRadius: 12, padding: "0.9rem 1.1rem", cursor: "pointer", transition: "background 0.12s", boxShadow: "0 6px 20px rgba(0,0,0,0.14)" }}
                       onMouseEnter={e => e.currentTarget.style.background = "rgba(255,255,255,0.09)"}
                       onMouseLeave={e => e.currentTarget.style.background = "rgba(255,255,255,0.05)"}>
                       <div style={{ fontSize: "0.55rem", letterSpacing: "0.14em", textTransform: "uppercase", color: c.color, fontFamily: BFONT, fontWeight: 700, marginBottom: "0.4rem" }}>{c.label}</div>
@@ -4773,27 +4523,6 @@ function ExpectationsResults({ myAnswers, partnerAnswers, userName, partnerName,
               </div>
             )}
 
-            {/* What's in this section */}
-            <div style={{ borderTop: "1px solid rgba(255,255,255,0.1)", paddingTop: "0.85rem" }}>
-              <div style={{ fontSize: "0.55rem", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.3)", fontFamily: BFONT, fontWeight: 700, marginBottom: "0.5rem" }}>What's in this section</div>
-              <div style={{ display: "flex", flexDirection: "column", gap: "0.3rem" }}>
-                {[
-                  { label: "Detailed results", sub: `${FIXED_CATS.length} categories, item by item`, s: "convo-0" },
-                  { label: "Action Plan", sub: "Your discussion guide", s: "action-plan" },
-                ].map(({ label, sub, s }) => (
-                  <div key={label} onClick={() => typeof s === "string" ? go(s) : go(s)}
-                    style={{ display: "flex", alignItems: "center", gap: "0.75rem", padding: "0.45rem 0.75rem", borderRadius: 8, background: "rgba(255,255,255,0.04)", cursor: "pointer", transition: "all 0.12s", border: "1px solid rgba(255,255,255,0.06)" }}
-                    onMouseEnter={e => e.currentTarget.style.background = "rgba(255,255,255,0.09)"}
-                    onMouseLeave={e => e.currentTarget.style.background = "rgba(255,255,255,0.04)"}>
-                    <div style={{ flex: 1 }}>
-                      <div style={{ fontSize: "0.76rem", color: "rgba(255,255,255,0.72)", fontFamily: BFONT }}>{label}</div>
-                      <div style={{ fontSize: "0.6rem", color: "rgba(255,255,255,0.35)", fontFamily: BFONT, marginTop: "0.1rem" }}>{sub}</div>
-                    </div>
-                    <span style={{ fontSize: "0.85rem", color: "rgba(255,255,255,0.25)", fontFamily: BFONT, flexShrink: 0 }}>→</span>
-                  </div>
-                ))}
-              </div>
-            </div>
           </div>
           <NavButtons onBack={() => {}} backDisabled onNext={() => go("convo-0")} nextLabel={`${FIXED_CATS[0].label} →`} />
         </ResultsSlide>
@@ -4942,7 +4671,7 @@ function ExpectationsResults({ myAnswers, partnerAnswers, userName, partnerName,
 
           <NavButtons
             onBack={() => catIdx > 0 ? go(`convo-${catIdx - 1}`) : go(0)}
-            onNext={() => isLastCat ? go("action-plan") : go(`convo-${catIdx + 1}`)}
+            onNext={() => isLastCat ? (onGoWhatComesNext || (() => {}))() : go(`convo-${catIdx + 1}`)}
             nextLabel={isLastCat ? "Action Plan →" : `Next: ${FIXED_CATS[catIdx + 1].label} →`}
           />
         </ResultsSlide>
@@ -4951,63 +4680,6 @@ function ExpectationsResults({ myAnswers, partnerAnswers, userName, partnerName,
   }
 
   // ── ACTION PLAN ──────────────────────────────────────────────────────────────
-  if (step === "action-plan") {
-    const checklistItems = FIXED_CATS.map(fc => ({
-      ...fc,
-      gapItems: gaps.filter(r => r.catId === fc.id),
-    })).filter(c => c.gapItems.length > 0);
-
-    return (
-      <MaybeNav noSideNav={noSideNav} navItems={expectationsNavItems} currentStep={navCurrentStep} onGo={go} accent="#1B5FE8">
-        <ResultsSlide bg={EXP_BG}>
-          <link href={FONT_URL} rel="stylesheet" />
-          <div style={{ color: "white" }}>
-            <div style={{ fontSize: "0.65rem", letterSpacing: "0.2em", textTransform: "uppercase", color: "rgba(255,255,255,0.4)", marginBottom: "0.5rem", fontFamily: BFONT }}>Expectations Action Plan</div>
-            <div style={{ fontSize: "clamp(1.6rem,5vw,2.2rem)", fontWeight: 700, fontFamily: HFONT, lineHeight: 1.1, marginBottom: "0.4rem" }}>What to discuss.</div>
-            <p style={{ fontSize: "0.82rem", color: "rgba(255,255,255,0.55)", fontFamily: BFONT, fontWeight: 300, lineHeight: 1.6, marginBottom: "1.5rem" }}>
-              {gaps.length > 0
-                ? `${gaps.length} topic${gaps.length !== 1 ? "s" : ""} where you have different assumptions, across ${checklistItems.length} area${checklistItems.length !== 1 ? "s" : ""}. Work through these together.`
-                : "You're aligned across all areas. Nothing to work through, just keep staying current with each other."}
-            </p>
-
-            {gaps.length === 0 ? (
-              <div style={{ background: "rgba(16,185,129,0.12)", border: "1px solid rgba(16,185,129,0.25)", borderRadius: 16, padding: "1.5rem", textAlign: "center" }}>
-                <div style={{ fontSize: "2rem", marginBottom: "0.5rem" }}>✓</div>
-                <div style={{ fontSize: "0.9rem", fontWeight: 700, color: "white", fontFamily: BFONT }}>Fully aligned on all expectations.</div>
-              </div>
-            ) : (
-              <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
-                {checklistItems.map(fc => (
-                  <div key={fc.id} style={{ background: "rgba(255,255,255,0.05)", borderRadius: 14, overflow: "hidden", border: "1px solid rgba(255,255,255,0.08)" }}>
-                    <div style={{ background: fc.color + "22", borderBottom: `1px solid ${fc.color}30`, padding: "0.55rem 1rem", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                      <span style={{ fontSize: "0.68rem", fontWeight: 700, color: fc.color, textTransform: "uppercase", letterSpacing: "0.08em", fontFamily: BFONT }}>{fc.label}</span>
-                      <span style={{ fontSize: "0.62rem", color: "rgba(255,255,255,0.4)", fontFamily: BFONT }}>{fc.gapItems.length} topic{fc.gapItems.length !== 1 ? "s" : ""}</span>
-                    </div>
-                    {fc.gapItems.map((g, gi) => (
-                      <div key={gi} style={{ display: "flex", alignItems: "flex-start", gap: "0.75rem", padding: "0.65rem 1rem", borderBottom: gi < fc.gapItems.length - 1 ? "1px solid rgba(255,255,255,0.05)" : "none" }}>
-                        <div style={{ width: 17, height: 17, borderRadius: 4, border: "1.5px solid rgba(255,255,255,0.5)", background: "rgba(255,255,255,0.08)", flexShrink: 0, marginTop: 1 }} />
-                        <span style={{ fontSize: "0.8rem", color: "rgba(255,255,255,0.78)", fontFamily: BFONT, lineHeight: 1.45 }}>{g.item}</span>
-                      </div>
-                    ))}
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-          {/* Download action plan */}
-          <button onClick={() => {
-            const lines = ["EXPECTATIONS ACTION PLAN", "━".repeat(40), `${userName} & ${partnerName}`, "", ...checklistItems.flatMap(fc => [fc.label.toUpperCase(), ...fc.gapItems.map(g => "• " + g.item), ""])];
-            const blob = new Blob([lines.join("\n")], { type: "text/plain" });
-            const a = document.createElement("a"); a.href = URL.createObjectURL(blob);
-            a.download = "Attune_Expectations_Action_Plan.txt"; a.click();
-          }} style={{ display: "inline-flex", alignItems: "center", gap: "0.45rem", background: "rgba(255,255,255,0.07)", border: "1px solid rgba(255,255,255,0.15)", color: "rgba(255,255,255,0.6)", borderRadius: 9, padding: "0.5rem 1rem", fontSize: "0.72rem", fontWeight: 600, fontFamily: BFONT, cursor: "pointer", marginTop: "0.75rem", marginBottom: "0.25rem" }}>
-            ↓ Download action plan
-          </button>
-          <NavButtons onBack={() => go(`convo-${FIXED_CATS.length - 1}`)} onNext={onGoWhatComesNext || (() => {})} nextLabel={onGoWhatComesNext ? "What Comes Next →" : "Done"} nextDisabled={!onGoWhatComesNext} />
-        </ResultsSlide>
-      </MaybeNav>
-    );
-  }
 
   return null;
 }
@@ -7297,7 +6969,6 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
   const partSelf = calcDimScores(partnerEx1);
   // Same-type couples get a single combined "Communication Profile" page; the
   // comms sub-nav label reflects that.
-  const urSameType = computeIndividualType(myS).typeCode === computeIndividualType(partS).typeCode;
   const personalityFeedback = generatePersonalityFeedback(mySelf, partSelf, userName, partnerName);
   const sortedFeedback = [...personalityFeedback].sort((a, b) => a.gap - b.gap);
   // Domain order — matches PersonalityResults navigation
@@ -7734,8 +7405,6 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
         { id: "comm-overview", label: "Overview" },
         { id: "comm-detail-header", label: "Detailed results", isDomainHeader: true, color: "#9B5DE5" },
         ...UR_DOMAINS.map(g => ({ id: `comm-${g.id}`, label: g.label, isDeepChild: true, italic: true, color: g.color })),
-        { id: "comm-profiles", label: urSameType ? "Communication Profile" : "Individual profiles" },
-        { id: "comm-plan", label: "Communication Action Plan" },
       ]
     },
     {
@@ -7744,7 +7413,6 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
         { id: "exp-overview", label: "Overview" },
         { id: "exp-detail-header", label: "Detailed results", isDomainHeader: true, color: "#10B981" },
         ...FIXED_CATS.map((fc, ci) => ({ id: `exp-convo-${ci}`, label: fc.label, isDeepChild: true, italic: true, color: "#10B981" })),
-        { id: "exp-action-plan", label: "Expectations Action Plan" },
       ]
     },
     ...(hasAnniversary ? [{
@@ -7773,7 +7441,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
   const Sidebar = () => (
     <div style={{ width: 200, flexShrink: 0, paddingRight: "1.5rem", display: "flex", flexDirection: "column", gap: "0.15rem" }}>
       {sidebarSections.map(sec => {
-        const isActive = section === sec.id || (sec.children && section.startsWith(sec.id + "-") || section === `comm-profiles` && sec.id === "comm" || section === `comm-plan` && sec.id === "comm");
+        const isActive = section === sec.id || (sec.children && section.startsWith(sec.id + "-"));
         const isExpanded = sec.id === "comm" ? commExpanded : sec.id === "exp" ? expExpanded : sec.id === "reflection" ? reflExpanded : sec.id === "intimacy" ? intimExpanded : false;
         const color = sec.color || "#8C7A68";
         return (
@@ -7840,10 +7508,8 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
     "couple-type",
     "comm-overview",
     ...UR_DOMAINS.map(g => `comm-${g.id}`),
-    "comm-profiles", "comm-plan",
     "exp-overview",
     ...FIXED_CATS.map((_, ci) => `exp-convo-${ci}`),
-    "exp-action-plan",
     ...(hasAnniversary ? ["reflection-overview", "reflection-ratings", "reflection-story", "reflection-plan"] : []),
     ...(intimacyBothDone ? ["intimacy-overview", ...INTIMACY_DIMENSIONS.map(d => `intimacy-${d.id}`), "intimacy-plan"] : []),
     "what-comes-next",
@@ -7864,15 +7530,12 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
     if (id === "highlights") return "Highlights";
     if (id === "couple-type") return "Couple Type";
     if (id === "comm-overview") return "Communication Overview";
-    if (id.startsWith("comm-") && id !== "comm-profiles" && id !== "comm-plan") {
+    if (id.startsWith("comm-")) {
       const key = id.replace("comm-","");
       const g = UR_DOMAINS.find(x => x.id === key);
       return g ? g.label : (DIM_META[key]?.label || id);
     }
-    if (id === "comm-profiles") return urSameType ? "Communication Profile" : "Individual Profiles";
-    if (id === "comm-plan") return "Communication Action Plan";
     if (id === "exp-overview") return "Expectations Overview";
-    if (id === "exp-action-plan") return "Expectations Action Plan";
     if (id.startsWith("exp-convo-")) { const ci = parseInt(id.replace("exp-convo-","")); return FIXED_CATS[ci]?.label || id; }
     if (id === "reflection-overview") return "Reflection Overview";
     if (id === "reflection-ratings") return "How You Each Rated";
@@ -8310,8 +7973,9 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
   if (section.startsWith("comm")) {
     const dimStep = (() => {
       if (section === "comm-overview") return 0;
-      if (section === "comm-profiles") return nUR + 1;
-      if (section === "comm-plan") return nUR + 3;
+      // comm-profiles and comm-plan were removed. Any stored or bookmarked
+      // link to them lands on the overview rather than a blank page.
+      if (section === "comm-profiles" || section === "comm-plan") return 0;
       const key = section.replace("comm-", "");
       // Domain page id, or a legacy comm-<dim> link resolving to its domain page.
       let i = UR_DOMAINS.findIndex(g => g.id === key);
@@ -8331,8 +7995,6 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
           hasWorkbook={hasWorkbook} hasLMFT={hasLMFT}
           onStepChange={s => {
             if (s === 0) go("comm-overview");
-            else if (s === nUR + 1) go("comm-profiles");
-            else if (s === nUR + 3 || s === nUR + 4) go("comm-plan");
             else if (s >= 1 && s <= nUR) go(`comm-${UR_DOMAINS[s-1].id}`);
           }}
         />
@@ -8343,7 +8005,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
   // ── EXP PAGES: delegate to ExpectationsResults with section override ────────
   if (section.startsWith("exp")) {
     const expSection = section === "exp-overview" ? "overview"
-      : section === "exp-action-plan" ? "action-plan"
+      : section === "exp-action-plan" ? "overview"
       : section.startsWith("exp-convo-") ? `convo-${section.replace("exp-convo-", "")}`
       : "overview";
     return (
@@ -8358,7 +8020,6 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
           onGoWhatComesNext={() => go(hasAnniversary ? "reflection-overview" : intimacyBothDone ? "intimacy-overview" : "what-comes-next")}
           onExternalGo={s => {
             if (s === 0) go("exp-overview");
-            else if (s === "action-plan") go("exp-action-plan");
             else if (typeof s === "string" && s.startsWith("convo-")) go("exp-" + s);
           }}
         />
@@ -8780,7 +8441,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
               </p>
               
               {/* Where you each land — label left, bar right, key top-right (9.1) */}
-              <div style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 14, padding: "1rem 1.1rem", marginBottom: "1rem" }}>
+              <div style={{ background: "rgba(255,255,255,0.12)", border: "1px solid rgba(255,255,255,0.22)", borderRadius: 14, padding: "1rem 1.1rem", marginBottom: "1rem", boxShadow: "0 8px 26px rgba(0,0,0,0.16)" }}>
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "0.7rem", gap: "1rem", flexWrap: "wrap" }}>
                   <div style={{ fontSize: "0.55rem", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.3)", fontFamily: BFONT, fontWeight: 700 }}>Where you each land</div>
                   <div style={{ display: "flex", gap: "0.85rem" }}>
@@ -14071,7 +13732,6 @@ export default function App() {
                       { label: "Expectations results", section: "exp-overview", color: "#1B5FE8" },
                       ...(pkg.hasAnniversary ? [{ label: "Relationship reflection results", section: "reflection-overview", color: "#10B981" }] : []),
                       ...(pkg.hasIntimacy ? [{ label: "Physical intimacy results", section: "intimacy-overview", color: "#B5546E" }] : []),
-                      { label: "Action plan", section: "exp-action-plan", color: "#1B5FE8" },
                     ].map((r, i, arr) => (
                       <div key={r.section} onClick={bothDone ? () => {
                           if (r.section === "highlights") {
@@ -15082,14 +14742,11 @@ export default function App() {
                   { label: "Your Inner Worlds", id: "comm-inner" },
                   { label: "How You Connect", id: "comm-connection" },
                   { label: "When Things Get Hard", id: "comm-hard" },
-                  { label: "Profiles", id: "comm-profiles" },
-                  { label: "Action Plan", id: "comm-plan" },
                 ];
               } else if (inExp) {
                 subnav = [
                   { label: "Overview", id: "exp-overview" },
                   ...FIXED_CATS.map((fc, ci) => ({ label: fc.label, id: `exp-convo-${ci}` })),
-                  { label: "Action Plan", id: "exp-action-plan" },
                 ];
               } else if (inIntim) {
                 subnav = [
