@@ -821,7 +821,7 @@ function persistOrderComplete(orderNum) {
   }
   if (_promptKey) {
     const meta = _promptKey === 'workbook'
-      ? { title: 'Add Personalized Workbook', price: '+$19', desc: 'Conversation prompts and guided exercises built from your joint results. Digital, delivered with your results. Switch to a printed copy in your cart.' }
+      ? { title: 'Add Personalized Workbook', price: '+$19', desc: 'Conversation prompts and guided exercises built from your joint results. Digital, delivered with your results.' + (PHYSICAL_ENABLED ? ' Switch to a printed copy in your cart.' : '') }
       : _promptKey === 'checklist'
       ? { title: 'Add Starting Out Checklist', price: '+$20', desc: 'Finances, name changes, insurance, estate basics. Seven categories of real-world logistics to work through together.' }
       : { title: 'Add Physical Intimacy Expectations', price: '+$20', desc: 'A private set of questions about physical intimacy, answered independently and compared side by side. Covers frequency, initiating, comfort, communication, and more. Premarital and already-married versions.' };
