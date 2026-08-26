@@ -4070,15 +4070,15 @@ function PersonalityResults({ myAnswers, partnerAnswers, userName, partnerName, 
   // rendering blank.
   const dimAdviceFor = (dim) => {
     if (!dim) return null;
-    const approved = byDim[dim]?.adviceText;
-    if (approved) return approved;
-    const fb = DIM_ACTION_ITEMS[dim];
-    return fb ? interpDimAction(fb.body, userName, partnerName, byDim[dim]) : null;
+    const fb = byDim[dim];
+    // adviceText is the approved shift prose. It is only written when the pair
+    // is far enough apart to warrant it, so a closely matched couple falls
+    // through to that dimension's strength line rather than an empty tile.
+    return fb?.adviceText || fb?.strengthText || fb?.insightText || null;
   };
   const glancePlan = ["inner","connection","hard"].map(dom => {
     const lead = leadDimFor(dom);
-    const wide = lead && (byDim[lead]?.gap ?? 0) >= 1;
-    const advice = wide ? dimAdviceFor(lead) : null;
+    const advice = dimAdviceFor(lead);
     const base = advice
       ? { title: "One thing to try", body: advice, dimLabel: DIM_META[lead]?.label }
       : { title: DOMAIN_ALIGNED[dom].title, body: DOMAIN_ALIGNED[dom].body };
@@ -4242,7 +4242,7 @@ function PersonalityResults({ myAnswers, partnerAnswers, userName, partnerName, 
         {/* ── ONE THING TO TRY — guidance for this domain's widest gap ── */}
         {(() => {
           const lead = leadDimFor(grp.id);
-          const advice = lead && (byDim[lead]?.gap ?? 0) >= 1 ? dimAdviceFor(lead) : null;
+          const advice = dimAdviceFor(lead);
           if (!advice) return null;
           const m = DIM_META[lead];
           return (
