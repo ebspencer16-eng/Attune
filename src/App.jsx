@@ -2567,8 +2567,13 @@ function SideBySideResponses({ dims, myS, partS, myAnswers, partnerAnswers, user
         ]} />
       <Col title="What you each think of each other" sub="Your read of them, their read of you"
         rows={d => [
-          { pct: _pct15(myView[d]), color: U, initial: initFor(U), name: userName },
-          { pct: _pct15(partView[d]), color: Pc, initial: initFor(Pc), name: partnerName },
+          // Coloured by the person the dot is ABOUT, matching the self column
+          // above. myView is my read OF MY PARTNER, so it carries the partner's
+          // colour; partView is their read OF ME, so it carries mine. Colouring
+          // these by the reporter instead put my initial on a dot describing my
+          // partner, directly under a column where my initial meant me.
+          { pct: _pct15(partView[d]), color: U, initial: initFor(U), name: userName },
+          { pct: _pct15(myView[d]), color: Pc, initial: initFor(Pc), name: partnerName },
         ]} />
     </div>
   );
@@ -11802,7 +11807,10 @@ export default function App() {
     if (pwaPrompt) { pwaPrompt.prompt(); pwaPrompt.userChoice.then(() => setPwaPrompt(null)); }
   };
   const params = new URLSearchParams(window.location.search);
-  const initialView = params.get("view") || "home";
+  // The dashboard renders only for a logged-in account. Demo mode has none, so
+  // defaulting a demo link to "home" produced a blank page. Send demo straight
+  // to results instead.
+  const initialView = params.get("view") || (params.get("demo") ? "results" : "home");
   // Prefer the real purchase package from localStorage order over URL ?pkg= param
   const _urlPkg = params.get("pkg") || "core";
   const _demoParam = params.get("demo"); // ?demo=anniversary bypasses localStorage
@@ -13712,7 +13720,7 @@ export default function App() {
         )}
         </div>
         {/* Mobile: ← Dashboard row below logo+auth row */}
-      {isMobile && view !== "home" && view !== "results" && (
+      {isMobile && view !== "home" && view !== "results" && !(isDemo && !isLoggedIn) && (
         <div style={{ paddingTop: "0.45rem", marginTop: "0.35rem", borderTop: "1px solid rgba(255,255,255,0.18)", display: "flex" }}>
           <button onClick={() => setView("home")}
             style={{ background: "transparent", border: "none", cursor: "pointer", fontSize: "0.65rem", color: "rgba(255,255,255,0.8)", fontFamily: font.body, padding: 0, fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase" }}>
@@ -13723,7 +13731,7 @@ export default function App() {
       </div>
 
       {/* ── SUB-TOOLBAR: ← Dashboard — desktop only, non-home, non-results views ── */}
-      {!isMobile && view !== "home" && view !== "results" && (
+      {!isMobile && view !== "home" && view !== "results" && !(isDemo && !isLoggedIn) && (
         <div style={{ background: "rgba(255,253,249,0.97)", backdropFilter: "blur(12px)", borderBottom: `1px solid ${C.stone}`, padding: "0.6rem 1.5rem", display: "flex", alignItems: "center", flexShrink: 0, position: "sticky", top: 56, zIndex: 90 }}>
           <button onClick={() => setView("home")}
             style={{ background: "transparent", border: "none", cursor: "pointer", fontSize: "0.68rem", color: C.clay, fontFamily: font.body, padding: 0, fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase", transition: "color .15s", display: "flex", alignItems: "center", lineHeight: 1, position: "relative", top: "2px", gap: "0.35rem" }}
@@ -15043,7 +15051,11 @@ export default function App() {
     {view === "results" && bothDone && highlightsSeen && (
           <div style={{ position: "fixed", top: 56, left: 0, right: 0, bottom: 60, display: "flex", flexDirection: "column", overflow: "hidden", zIndex: 50, background: C.warm, paddingBottom: "env(safe-area-inset-bottom)" }}>
             <div style={{ background: "rgba(255,253,249,0.97)", backdropFilter: "blur(12px)", borderBottom: ("1px solid " + (C.stone)), padding: isMobile ? "0.75rem 1rem" : "0.9rem 1.5rem", flexShrink: 0, display: "flex", alignItems: "center", gap: "0.5rem" }}>
+              {/* Hidden in demo: there is no account, so the dashboard renders
+                  blank and this was a dead end. */}
+              {!(isDemo && !isLoggedIn) && (
               <button onClick={() => setView("home")} style={{ background: "transparent", border: "none", color: C.clay, fontSize: isMobile ? "1.4rem" : "0.72rem", lineHeight: 1, letterSpacing: isMobile ? "0" : "0.1em", textTransform: "uppercase", cursor: "pointer", fontFamily: font.body, padding: isMobile ? "0.25rem 0.5rem 0.25rem 0" : 0, fontWeight: 600, flexShrink: 0, display: "flex", alignItems: "center", position: "relative", top: "2px" }} aria-label="Back to dashboard">← {isMobile ? "" : "Dashboard"}</button>
+              )}
               {/* Beta feedback entry point lives in the results-end card (branches on isBetaTester) */}
             </div>
             {/* Mobile sticky sub-section nav */}
