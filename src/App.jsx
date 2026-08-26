@@ -5923,9 +5923,58 @@ function NotesView({ userName, partnerName, notesState, setNotesState, onBack })
 
 // ======================================================
 
-// ======================================================
-// ANNIVERSARY RESULTS VIEW
-// ======================================================
+// Demo intimacy answers for Sarah & James, so the Physical Intimacy pages can
+// be reached from a demo link and covered by the render smoke test. Scale and
+// selfref answers are stored as the option LABEL (that is what the exercise
+// writes); multi answers are stored as arrays of option values.
+// Shaped to exercise every state the results handle: matched dimensions, a wide
+// gap on communication, a selfref pair that agrees, both multi shapes, and one
+// question James skipped so the one-partner-skipped copy renders.
+// Demo only. Never written to a real session.
+const SARAH_INTIMACY_DEMO = {
+  iq_freq_want:       "Several times a week",
+  iq_freq_relative:   "Lean slightly higher",
+  iq_freq_meaning:    "It matters",
+  iq_init_who:        "My partner a bit more",
+  iq_init_feel:       "I like being the one who initiates",
+  iq_init_turndown:   "Read it how they read it",
+  iq_comfort_ease:    "Mostly",
+  iq_comfort_safe:    ["emo", "talk", "patience"],
+  iq_comfort_off:     "Hope they notice",
+  iq_comm_open:       "Very openly",
+  iq_comm_moment:     "I can do it",
+  iq_comm_debrief:    "Open to it sometimes",
+  iq_adv_appetite:    "Somewhere in the middle",
+  iq_adv_suggest:     "Be open",
+  iq_adv_balance:     "Neutral",
+  iq_mean_for:        ["closeness", "security"],
+  iq_mean_disconnect: "Help, usually",
+  iq_mean_hope:       "A primary way we stay close",
+};
+const JAMES_INTIMACY_DEMO = {
+  iq_freq_want:       "Several times a week",
+  iq_freq_relative:   "Lean slightly lower",
+  iq_freq_meaning:    "Neutral",
+  iq_init_who:        "My partner a bit more",
+  iq_init_feel:       "Comfortable with it",
+  iq_init_turndown:   "Reassure me it\u2019s okay",
+  iq_comfort_ease:    "It depends",
+  iq_comfort_safe:    ["privacy", "routine", "desired"],
+  iq_comfort_off:     "Push through it",
+  iq_comm_open:       "With some difficulty",
+  iq_comm_moment:     "I find it awkward",
+  iq_comm_debrief:    "I'd rather not analyze it",
+  // James skips the whole Adventurousness dimension, so the demo shows the
+  // one-partner-skipped state. It takes every question in a dimension: a
+  // single skipped question reads as incomplete, not as a skip.
+  iq_adv_appetite:    "Prefer not to say",
+  iq_adv_suggest:     "Prefer not to say",
+  iq_adv_balance:     "Prefer not to say",
+  iq_mean_for:        ["release", "play"],
+  iq_mean_disconnect: "Help, depending on the day",
+  iq_mean_hope:       "One of several ways we stay close",
+};
+
 const SARAH_ANNIVERSARY_DEMO = {
   a0: 3,  // "Really good"
   a_memory: "You made coffee exactly how I like it this morning without me asking. Tiny thing. Noticed it.",
@@ -12493,6 +12542,13 @@ export default function App() {
   // Users can still retake the exercise from the exercise tile.
   // Fix: use _demoParam and demoPkg directly (available here) instead of isDemo/_basePkg (defined later)
   const sarahEx3Demo = _demoParam && (demoPkg === 'anniversary' || demoPkg === 'premium') ? SARAH_ANNIVERSARY_DEMO : null;
+  // Same for intimacy, so the Physical Intimacy pages are reachable from a demo
+  // link. Premium bundles intimacy; other packages get it as an add-on, which
+  // demo has no way to express, so premium is the trigger.
+  const sarahIntimacyDemo = _demoParam && demoPkg === 'premium'
+    ? { answers: SARAH_INTIMACY_DEMO, variant: 'premarital' } : null;
+  const jamesIntimacyDemo = _demoParam && demoPkg === 'premium'
+    ? { answers: JAMES_INTIMACY_DEMO, variant: 'premarital' } : null;
   // Initialize exercise answers. Logic:
   //  - If logged in (real account): hydrate from localStorage if real answers
   //    exist. Otherwise null (means "not yet completed" — bothDone correctly
@@ -14642,8 +14698,8 @@ export default function App() {
         userName={userName} partnerName={partnerName}
         userPronouns={userPronouns} partnerPronouns={partnerPronouns}
         portrait={couplePortrait}
-        intimacyAnswers={pkg.hasIntimacy ? (intimacyData?.answers || null) : null}
-        partnerIntimacy={pkg.hasIntimacy && hasRealPartner ? (partnerSession?.intimacy || null) : null}
+        intimacyAnswers={pkg.hasIntimacy ? (intimacyData?.answers || sarahIntimacyDemo?.answers || null) : null}
+        partnerIntimacy={pkg.hasIntimacy ? (hasRealPartner ? (partnerSession?.intimacy || null) : jamesIntimacyDemo) : null}
         intimacyVariant={(hasRealPartner ? partnerSession?.intimacy?.variant : null) || intimacyData?.variant || 'premarital'}
         onDone={() => { setActiveResult("couple-type"); setHighlightsSeen(true); }}
         onExit={() => setView("home")}
@@ -14734,8 +14790,8 @@ export default function App() {
                   hasBudget={pkg.hasBudget}
                   hasWorkbook={hasWorkbookOrder}
                   hasIntimacy={pkg.hasIntimacy}
-                  intimacyAnswers={intimacyData?.answers || null}
-                  partnerIntimacy={hasRealPartner ? (partnerSession?.intimacy || null) : null}
+                  intimacyAnswers={intimacyData?.answers || sarahIntimacyDemo?.answers || null}
+                  partnerIntimacy={hasRealPartner ? (partnerSession?.intimacy || null) : jamesIntimacyDemo}
                   intimacyVariant={(hasRealPartner ? partnerSession?.intimacy?.variant : null) || intimacyData?.variant || 'premarital'}
                   isBetaTester={isBetaTester}
                   onNavigateTool={(tool) => {

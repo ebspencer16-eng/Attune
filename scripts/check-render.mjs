@@ -28,7 +28,8 @@ const SECTIONS = [
   'exp-overview', 'exp-convo-0', 'exp-convo-1', 'exp-convo-2',
   'exp-convo-3', 'exp-convo-4', 'exp-convo-5',
   'reflection-overview', 'reflection-ratings', 'reflection-story', 'reflection-plan',
-  'intimacy-overview', 'intimacy-plan',
+  'intimacy-overview', 'intimacy-frequency', 'intimacy-initiating', 'intimacy-comfort',
+  'intimacy-communication', 'intimacy-adventure', 'intimacy-meaning', 'intimacy-plan',
   'what-comes-next',
 ];
 
