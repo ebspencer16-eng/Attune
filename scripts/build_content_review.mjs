@@ -10,6 +10,7 @@
 // Landscape to give the Content column room to breathe.
 
 import { writeFileSync } from 'fs';
+import { DIMS, DIM_META } from '../api/_workbook-content.js';
 import { execSync } from 'child_process';
 import {
   Document, Packer, Paragraph, TextRun, Table, TableRow, TableCell,
@@ -233,11 +234,11 @@ const part1Section = [
     { what: 'Dimension page, title + gap eyebrow',
       desc: 'Big centered dimension title + small gap eyebrow below it.',
       source: 'Calculated',
-      content: '10 possible dimensions (Energy, Emotional Expression, How You Ask for Needs, Bids for Connection, Conflict Style, How You Repair, Closeness & Independence, How Love Lands, Communication Under Stress, Giving & Receiving Feedback). Gap eyebrow: "GAP X.X · [label]" where label is derived from gap size.' },
+      content: `${DIMS.length} possible dimensions (${DIMS.map(d => DIM_META[d].label).join(', ')}). Gap eyebrow: "GAP X.X · [label]" where label is derived from gap size.` },
     { what: 'Dimension page, "Your scores" column (left side of hero)',
       desc: 'Spectrum with axis endpoints and a dot per partner showing their 1–5 score.',
       source: 'Exercise responses',
-      content: 'Axis labels show numeric endpoints: "1 [LEFT LABEL]" on far left, "[RIGHT LABEL] 5" on far right. Below, two rows, one per partner, with a thin grey line and a colored dot at the score position. Axis pairs per dim: Energy (Inward/Outward) · Emotional Expression (Guarded/Expressive) · Needs (Direct/Indirect) · Bids (Reserved/Attuned) · Conflict (Engage quickly/Needs space first) · Repair (Formal-verbal/Informal-warmth) · Closeness (Autonomous/Close-seeking) · Love (Words/Actions & Presence) · Stress (Withdraw/Seek connection) · Feedback (Guarded/Open).' },
+      content: `Axis labels show numeric endpoints: "1 [LEFT LABEL]" on far left, "[RIGHT LABEL] 5" on far right. Below, two rows, one per partner, with a thin grey line and a colored dot at the score position. Axis pairs per dim: ${DIMS.map(d => `${DIM_META[d].label} (${DIM_META[d].left}/${DIM_META[d].right})`).join(' · ')}.` },
     { what: 'Dimension page, "What this means for your relationship" callout (right side of hero)',
       desc: 'Two stacked italic paragraphs in the right column. Para 1 is the gap blurb (universal across types, varies only by gap state). Para 2 is the type blurb (one of 10 versions per couple type).',
       source: 'Calculated + Couple-type-specific',

@@ -313,7 +313,9 @@ const FONT_URL = "https://fonts.googleapis.com/css2?family=Syne:wght@700;800;900
 
 // PERSONALITY_QUESTIONS — Communication Exercise (Exercise 01)
 //
-// 28 questions across 10 dimensions (23 self + 5 partner-view). 5-point scale (Strongly A -> Strongly B).
+// 27 questions across 10 dimensions, each asked twice: Part 1 about you,
+// Part 2 about your partner (stored as pv_<id>). 54 in total. 5-point scale
+// (Strongly A -> Strongly B).
 // Order is intentional: pairs of similar questions are spaced apart, and a
 // few are framed as scenarios to break repetitive patterns. Several dims
 // use non-sequential IDs (en1/en2/en4, lv1/lv2/lv5, etc) — the gaps are
@@ -2982,7 +2984,7 @@ function getDimShift(dim, myScore, partScore, U, P) {
       '5_5': `You both tend to signal needs rather than state them. The relationship carries real goodwill. You're both trying not to burden each other. The cost is that needs can quietly go unmet. Build a weekly "what do you need?" into your rhythm. It removes the weight from the ask.`,
     },
 
-    // ── RESPONDING TO BIDS (A=Reserved, B=Attuned) ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+    // ── RESPONDING TO BIDS (A=Subtle, B=Expressive) ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────
     bids: {
       '1_1': `You're both on the reserved end, fewer bids, quieter reaching. The relationship is probably stable but low-key. The shift: increase bid volume deliberately. Share a thought, ask a small question, notice something out loud. Connection is built in those tiny moments more than the big ones.`,
       '1_2': `${loName} is very reserved; ${hiName} is a bit more present. Close match, but the bid volume between you is probably low. Worth deliberately creating more moments, share more small things, even when they feel insignificant.`,
