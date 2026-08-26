@@ -2330,82 +2330,170 @@ function IntimacyResponseBreakdown({ dim, myAnswers, partnerAnswers, userName, p
     </div>
   );
 }
+// Measures a label so it can be placed without overlapping its neighbour or
+// spilling past the bar. Canvas measurement, with a character-count fallback
+// for environments without one.
+function _dlWidth(lines, fontPx) {
+  try {
+    if (!_dlMeasCtx) { _dlMeasCtx = document.createElement("canvas").getContext("2d"); }
+    _dlMeasCtx.font = fontPx + "px 'DM Sans', sans-serif";
+    return Math.max.apply(null, lines.map(l => _dlMeasCtx.measureText(String(l)).width));
+  } catch (e) { return Math.max.apply(null, lines.map(l => String(l).length)) * fontPx * 0.55; }
+}
+
+// The two cross-view points under a question bar: "How Sarah views James" and
+// "How James views Sarah". No dot on the bar, just a leader line from the label
+// up to the point. Labels split around each other when they would collide and
+// clamp to the bar's edges so they never spill past the margins.
+function CrossViewLabels({ items }) {
+  const ref = React.useRef(null);
+  const [w, setW] = React.useState(0);
+  React.useLayoutEffect(() => {
+    const el = ref.current; if (!el) return;
+    const upd = () => setW(el.clientWidth || 0);
+    upd();
+    let ro; try { ro = new ResizeObserver(upd); ro.observe(el); } catch (e) {}
+    window.addEventListener("resize", upd);
+    return () => { window.removeEventListener("resize", upd); if (ro) ro.disconnect(); };
+  }, []);
+  const GREY = "rgba(255,255,255,0.62)";
+  const FONT_REM = 0.56;
+  const fontPx = FONT_REM * 16;
+  const LEADER = 12;
+  const present = (items || []).filter(it => it && it.pct != null);
+  if (!present.length) return null;
+  const nLines = Math.max(1, ...present.map(it => it.lines.length));
+  const height = nLines * fontPx * 1.35 + LEADER + 4;
+
+  let placed = present.map(it => ({ it, leftPx: 0, lw: 0, cx: 0 }));
+  if (w > 0) {
+    placed = present.map(it => {
+      const lw = _dlWidth(it.lines, fontPx);
+      const cx = (it.pct / 100) * w;
+      return { it, lw, cx, leftPx: cx - lw / 2 };
+    });
+    if (placed.length === 2) {
+      const ord = placed[0].cx <= placed[1].cx ? [0, 1] : [1, 0];
+      const A = placed[ord[0]], B = placed[ord[1]];
+      // Overlapping: split them around their own points rather than centring.
+      if (A.cx + A.lw / 2 > B.cx - B.lw / 2) { A.leftPx = A.cx - A.lw; B.leftPx = B.cx; }
+    }
+    placed.forEach(bx => { bx.leftPx = Math.max(0, Math.min(bx.leftPx, w - bx.lw)); });
+    if (placed.length === 2) {
+      // Final guarantee after clamping, for the case where both points sit near
+      // the same edge and clamping pushed them back together.
+      const ord = placed[0].cx <= placed[1].cx ? [0, 1] : [1, 0];
+      const A = placed[ord[0]], B = placed[ord[1]];
+      const minGap = 6;
+      if (A.leftPx + A.lw + minGap > B.leftPx) {
+        B.leftPx = A.leftPx + A.lw + minGap;
+        if (B.leftPx + B.lw > w) { B.leftPx = w - B.lw; A.leftPx = Math.max(0, B.leftPx - A.lw - minGap); }
+      }
+    }
+  }
+  return (
+    <div ref={ref} style={{ position: "relative", height, marginTop: 6 }}>
+      {w > 0 && (
+        <svg width={w} height={LEADER} style={{ position: "absolute", top: 0, left: 0, overflow: "visible" }}>
+          {placed.map((bx, i) => {
+            const inner = bx.leftPx < bx.cx ? bx.leftPx + bx.lw : bx.leftPx;
+            return <line key={i} x1={bx.cx} y1={0} x2={Math.max(0, Math.min(inner, w))} y2={LEADER}
+              stroke={bx.it.color} strokeWidth="1.25" strokeOpacity="0.85" />;
+          })}
+        </svg>
+      )}
+      {placed.map((bx, i) => (
+        <div key={i} style={{ position: "absolute", top: LEADER,
+          left: w > 0 ? bx.leftPx + "px" : bx.it.pct + "%",
+          transform: w > 0 ? "none" : "translateX(-50%)",
+          maxWidth: w > 0 ? (bx.lw + 2) + "px" : "60%",
+          textAlign: "left", color: GREY, lineHeight: 1.3,
+          fontFamily: BFONT, whiteSpace: "nowrap", fontSize: FONT_REM + "rem" }}>
+          {bx.it.lines.map((ln, j) => <div key={j}>{ln}</div>)}
+        </div>
+      ))}
+    </div>
+  );
+}
+
 // Per-question side-by-side for one domain. Each row is the question as it was
-// asked, both options, and one bar carrying four markers: each partner's own
-// answer, and each partner's answer about the other from Part 2. The cross-view
-// markers are hollow and carry a leader line to a label, so a row reads as
-// "here is where each of you put yourself, and here is where each of you put
-// the other".
+// asked, its two options either side of a narrow bar, and one dot per partner
+// showing where they put themselves. Each partner's Part 2 answer about the
+// other is shown as a labelled leader line to a point on the same bar, with no
+// dot, since a dot there would read as a third and fourth person.
 function SideBySideResponses({ dims, myAnswers, partnerAnswers, userName, partnerName }) {
   const uInit = (userName || "You").trim().charAt(0).toUpperCase() || "Y";
   const pInit = (partnerName || "Partner").trim().charAt(0).toUpperCase() || "P";
+  // Initials only work when they differ. When they collide, the dots go plain
+  // and a legend carries the names instead.
+  const sameInit = uInit === pInit;
   const U = "#E8673A", Pc = "#6C7FFF";
   const qs = PERSONALITY_QUESTIONS.filter(q => dims.includes(q.dimension));
   const num = v => (v == null || isNaN(v)) ? null : Number(v);
   const pct = v => Math.max(3, Math.min(97, ((v - 1) / 4) * 100));
   const flip = id => id === 'lv5' || id === 'st1';
+  // Shared by the bar row and the label row beneath it, so both columns line up.
+  const POLE = { fontSize: "0.66rem", color: "rgba(255,255,255,0.62)", fontFamily: BFONT, lineHeight: 1.3, flexShrink: 0, width: "clamp(74px,26%,150px)" };
 
-  const Marker = ({ v, color, initial, hollow, dy }) => v == null ? null : (
-    <div title={initial} style={{ position: "absolute", top: "50%", left: pct(v) + "%",
+  const Dot = ({ v, color, initial, dy }) => v == null ? null : (
+    <div style={{ position: "absolute", top: "50%", left: pct(v) + "%",
       transform: `translate(-50%, calc(-50% + ${dy}px))`, width: 20, height: 20, borderRadius: "50%",
-      background: hollow ? "transparent" : color, border: `2px solid ${color}`,
-      boxShadow: hollow ? "none" : `0 0 8px ${color}55`,
+      background: color, border: `2px solid ${color}`, boxShadow: `0 0 8px ${color}55`,
       display: "flex", alignItems: "center", justifyContent: "center", zIndex: 2 }}>
-      <span style={{ fontSize: "0.52rem", fontWeight: 800, color: hollow ? color : "white", fontFamily: BFONT }}>{initial}</span>
+      {initial && <span style={{ fontSize: "0.52rem", fontWeight: 800, color: "white", fontFamily: BFONT }}>{initial}</span>}
     </div>
   );
 
   return (
     <div>
-      <div style={{ display: "flex", gap: "1.1rem", flexWrap: "wrap", marginBottom: "1.1rem" }}>
-        {[[U, uInit, userName], [Pc, pInit, partnerName]].map(([c, i, n]) => (
-          <span key={n} style={{ display: "flex", alignItems: "center", gap: "0.4rem", fontSize: "0.62rem", color: "rgba(255,255,255,0.7)", fontFamily: BFONT }}>
-            <span style={{ width: 13, height: 13, borderRadius: "50%", background: c }} /> {n}
-            <span style={{ width: 13, height: 13, borderRadius: "50%", border: `2px solid ${c}`, marginLeft: "0.35rem" }} /> how {n === userName ? partnerName : userName} views {n}
-          </span>
-        ))}
-      </div>
+      {sameInit && (
+        <div style={{ display: "flex", gap: "1.1rem", flexWrap: "wrap", marginBottom: "1.1rem" }}>
+          {[[U, userName], [Pc, partnerName]].map(([c, n]) => (
+            <span key={n} style={{ display: "flex", alignItems: "center", gap: "0.4rem", fontSize: "0.62rem", color: "rgba(255,255,255,0.7)", fontFamily: BFONT }}>
+              <span style={{ width: 13, height: 13, borderRadius: "50%", background: c }} /> {n}
+            </span>
+          ))}
+        </div>
+      )}
 
-      <div style={{ display: "flex", flexDirection: "column", gap: "1.4rem" }}>
+      <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
         {qs.map(q => {
           const f = flip(q.id);
           const adj = v => (v == null ? null : (f ? 6 - v : v));
           const mine = adj(num(myAnswers?.[q.id]));
           const theirs = adj(num(partnerAnswers?.[q.id]));
-          const myRead = adj(num(myAnswers?.["pv_" + q.id]));    // how I see them
+          const myRead = adj(num(myAnswers?.["pv_" + q.id]));      // how I see them
           const theirRead = adj(num(partnerAnswers?.["pv_" + q.id])); // how they see me
           const close = mine != null && theirs != null && Math.abs(pct(mine) - pct(theirs)) < 7;
           return (
             <div key={q.id}>
-              <div style={{ fontSize: "0.8rem", color: "white", fontFamily: BFONT, fontWeight: 600, lineHeight: 1.45, marginBottom: "0.55rem" }}>{q.text}</div>
-              <div style={{ display: "flex", justifyContent: "space-between", gap: "1rem", marginBottom: "0.45rem" }}>
-                <span style={{ fontSize: "0.68rem", color: "rgba(255,255,255,0.62)", fontFamily: BFONT, lineHeight: 1.35, maxWidth: "45%" }}>{f ? q.b : q.a}</span>
-                <span style={{ fontSize: "0.68rem", color: "rgba(255,255,255,0.62)", fontFamily: BFONT, lineHeight: 1.35, maxWidth: "45%", textAlign: "right" }}>{f ? q.a : q.b}</span>
-              </div>
-              <div style={{ position: "relative", height: 6, background: "rgba(255,255,255,0.14)", borderRadius: 999, margin: "0 11px" }}>
-                <Marker v={mine} color={U} initial={uInit} dy={close ? -7 : 0} />
-                <Marker v={theirs} color={Pc} initial={pInit} dy={close ? 7 : 0} />
-                <Marker v={myRead} color={Pc} initial={pInit} hollow dy={0} />
-                <Marker v={theirRead} color={U} initial={uInit} hollow dy={0} />
+              <div style={{ fontSize: "0.8rem", color: "white", fontFamily: BFONT, fontWeight: 600, lineHeight: 1.45, marginBottom: "0.7rem" }}>{q.text}</div>
+              {/* Options either side of the bar, vertically centred on it, free
+                  to wrap onto up to three lines. */}
+              {/* Poles and bar on one centred row, so the labels sit on the
+                  bar's centre line however many lines they wrap to. The
+                  cross-view labels go on a second row that mirrors the same
+                  widths, keeping them aligned to the bar rather than the row. */}
+              <div style={{ display: "flex", alignItems: "center", gap: "0.7rem" }}>
+                <span style={{ ...POLE, textAlign: "right" }}>{f ? q.b : q.a}</span>
+                <div style={{ flex: 1, minWidth: 0, padding: "0 12px" }}>
+                  <div style={{ position: "relative", height: 6, background: "rgba(255,255,255,0.14)", borderRadius: 999 }}>
+                    <Dot v={mine} color={U} initial={sameInit ? null : uInit} dy={close ? -7 : 0} />
+                    <Dot v={theirs} color={Pc} initial={sameInit ? null : pInit} dy={close ? 7 : 0} />
+                  </div>
+                </div>
+                <span style={POLE}>{f ? q.a : q.b}</span>
               </div>
               {(myRead != null || theirRead != null) && (
-                <div style={{ position: "relative", height: (myRead != null && theirRead != null) ? 40 : 22, margin: "0 11px" }}>
-                  {[[myRead, Pc, `How ${userName} views ${partnerName}`],
-                    [theirRead, U, `How ${partnerName} views ${userName}`]].map(([v, c, label], i) => {
-                    if (v == null) return null;
-                    const x = pct(v);
-                    // Anchor by where the marker sits, so a label at either
-                    // extreme reads inward instead of off the end of the bar.
-                    const anchor = x < 25 ? "left" : x > 75 ? "right" : "center";
-                    const pos = anchor === "left" ? { left: 0 } : anchor === "right" ? { right: 0 } : { left: x + "%", transform: "translateX(-50%)" };
-                    const tick = anchor === "left" ? { marginLeft: 0 } : anchor === "right" ? { marginLeft: "auto" } : { margin: "0 auto" };
-                    return (
-                      <div key={i} style={{ position: "absolute", top: i * 19, ...pos }}>
-                        <div style={{ width: 1, height: 7, background: c, opacity: 0.7, ...tick }} />
-                        <span style={{ fontSize: "0.56rem", color: "rgba(255,255,255,0.66)", fontFamily: BFONT, whiteSpace: "nowrap" }}>{label}</span>
-                      </div>
-                    );
-                  })}
+                <div style={{ display: "flex", gap: "0.7rem" }}>
+                  <span style={{ ...POLE, visibility: "hidden" }} aria-hidden="true" />
+                  <div style={{ flex: 1, minWidth: 0, padding: "0 12px" }}>
+                    <CrossViewLabels items={[
+                      myRead != null ? { pct: pct(myRead), color: U, lines: [`How ${userName} views`, partnerName] } : null,
+                      theirRead != null ? { pct: pct(theirRead), color: Pc, lines: [`How ${partnerName} views`, userName] } : null,
+                    ]} />
+                  </div>
+                  <span style={{ ...POLE, visibility: "hidden" }} aria-hidden="true" />
                 </div>
               )}
             </div>
