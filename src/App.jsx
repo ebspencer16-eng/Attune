@@ -2769,8 +2769,12 @@ function DimTrackViz({ myScore = 3, theirScore = 3, color = "#9B5DE5", userName 
   const UC = "#E8673A", PC = "#1B5FE8";
   const sameInitial = (userName?.[0] || "").toUpperCase() === (partnerName?.[0] || "").toUpperCase();
   const legend = myIsLeft ? [{ name: userName, color: UC }, { name: partnerName, color: PC }] : [{ name: partnerName, color: PC }, { name: userName, color: UC }];
+  // When the two scores are close the markers stagger 11px apart vertically.
+  // The raised one then reaches ~19px above the bar, which is more than the
+  // default 1.15rem gap, so it printed on top of the pole label above it.
+  // Reserve the extra headroom only in that case.
   return (
-    <div style={{ margin: "1.15rem 0 0.35rem", position: "relative" }}>
+    <div style={{ margin: (close ? "1.85rem" : "1.15rem") + " 0 " + (close ? "0.85rem" : "0.35rem"), position: "relative" }}>
       <div style={{ height: 5, background: "rgba(255,255,255,0.12)", borderRadius: 3, position: "relative", overflow: "visible" }}>
         <div style={{ position: "absolute", inset: 0, borderRadius: 3, background: "linear-gradient(90deg, rgba(255,255,255,0.05), rgba(255,255,255,0.18))" }} />
         <div title={partnerName} style={{ position: "absolute", top: "50%", left: theirPctV + "%", transform: `translate(-50%, calc(-50% + ${theirDy}px))`, width: 22, height: 22, borderRadius: "50%", background: PC, border: "2.5px solid white", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "0.5rem", color: "white", fontWeight: 700, fontFamily: BFONT, zIndex: 2 }}>{sameInitial ? "" : partnerName[0]}</div>
