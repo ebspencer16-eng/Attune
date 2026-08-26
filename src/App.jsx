@@ -4402,20 +4402,16 @@ function ExpectationsResults({ myAnswers, partnerAnswers, userName, partnerName,
 
   // Fully aligned cats (no gaps at all)
   const fullyAlignedCats = catData.filter(c => c.fullyAligned);
-  // Cats with any gaps
-  const gapCats = catData.filter(c => c.hasGaps);
 
   // Results at a glance: the three categories with the widest gaps, one card
   // each, leading with the first topic to talk about. The full list lives on
   // the Expectations Action Plan page.
-  const catPct = c => {
-    const scored = c.rows.filter(r => r.score != null);
-    return scored.length ? Math.round((scored.reduce((a, r) => a + r.score, 0) / scored.length) * 100) : 0;
-  };
-  const glanceConversations = gapCats
-    .map(c => ({ ...c, pct: catPct(c) }))
-    .sort((a, b) => a.pct - b.pct)
-    .slice(0, 3);
+  // Every category that has gaps, with all of its gap topics. Drives the full
+  // checklist on the glance page (it used to be the top three categories with
+  // one topic each, which hid most of the list).
+  const checklistItems = FIXED_CATS
+    .map(fc => ({ ...fc, gapItems: gaps.filter(r => r.catId === fc.id) }))
+    .filter(c => c.gapItems.length > 0);
 
   // ── Nav items ─────────────────────────────────────────────────────────────────
   const expectationsNavItems = [
@@ -4492,24 +4488,35 @@ function ExpectationsResults({ myAnswers, partnerAnswers, userName, partnerName,
               </div>
             </div>
 
-            {/* ── CONVERSATIONS TO HAVE (glance action plan) ── */}
-            {glanceConversations.length > 0 && (
+            {/* ── CONVERSATIONS TO HAVE — every gap topic, grouped by category ── */}
+            {gaps.length > 0 ? (
               <div style={{ marginBottom: "1rem" }}>
                 <div style={{ fontSize: "0.55rem", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.75)", fontFamily: BFONT, fontWeight: 700, marginBottom: "0.5rem" }}>Conversations to have</div>
-                <div style={{ display: "flex", flexDirection: "column", gap: "0.6rem" }}>
-                  {glanceConversations.map(c => (
-                    <div key={c.id} onClick={() => go(`convo-${FIXED_CATS.findIndex(x => x.id === c.id)}`)}
-                      style={{ background: "rgba(255,255,255,0.13)", border: `1px solid ${c.color}66`, borderLeft: `4px solid ${c.color}`, borderRadius: 12, padding: "0.9rem 1.1rem", cursor: "pointer", transition: "background 0.12s", boxShadow: "0 6px 20px rgba(0,0,0,0.14)" }}
-                      onMouseEnter={e => e.currentTarget.style.background = "rgba(255,255,255,0.09)"}
-                      onMouseLeave={e => e.currentTarget.style.background = "rgba(255,255,255,0.05)"}>
-                      <div style={{ fontSize: "0.58rem", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.95)", fontFamily: BFONT, fontWeight: 700, marginBottom: "0.4rem" }}>{c.label}</div>
-                      <div style={{ fontSize: "0.82rem", color: "rgba(255,255,255,0.9)", fontFamily: BFONT, fontWeight: 600, lineHeight: 1.5 }}>{c.gaps[0].item}</div>
-                      {c.gaps.length > 1 && (
-                        <div style={{ fontSize: "0.72rem", color: "rgba(255,255,255,0.5)", fontFamily: BFONT, marginTop: "0.35rem" }}>{c.gaps.length - 1} more topic{c.gaps.length - 1 !== 1 ? "s" : ""} in this area.</div>
-                      )}
+                <p style={{ fontSize: "0.75rem", color: "rgba(255,255,255,0.62)", fontFamily: BFONT, lineHeight: 1.55, margin: "0 0 0.75rem" }}>
+                  {gaps.length} topic{gaps.length !== 1 ? "s" : ""} where your assumptions differ, across {checklistItems.length} area{checklistItems.length !== 1 ? "s" : ""}. Tap a heading to open that category.
+                </p>
+                <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
+                  {checklistItems.map(fc => (
+                    <div key={fc.id} style={{ background: "rgba(255,255,255,0.13)", borderRadius: 14, overflow: "hidden", border: "1px solid rgba(255,255,255,0.22)", borderLeft: `4px solid ${fc.color}`, boxShadow: "0 6px 20px rgba(0,0,0,0.14)" }}>
+                      <div onClick={() => go(`convo-${FIXED_CATS.findIndex(x => x.id === fc.id)}`)}
+                        style={{ background: "rgba(255,255,255,0.09)", borderBottom: "1px solid rgba(255,255,255,0.16)", padding: "0.6rem 1rem", display: "flex", justifyContent: "space-between", alignItems: "center", cursor: "pointer" }}>
+                        <span style={{ fontSize: "0.68rem", fontWeight: 700, color: "rgba(255,255,255,0.95)", textTransform: "uppercase", letterSpacing: "0.1em", fontFamily: BFONT }}>{fc.label}</span>
+                        <span style={{ fontSize: "0.62rem", color: "rgba(255,255,255,0.62)", fontFamily: BFONT }}>{fc.gapItems.length} topic{fc.gapItems.length !== 1 ? "s" : ""} →</span>
+                      </div>
+                      {fc.gapItems.map((g, gi) => (
+                        <div key={gi} style={{ display: "flex", alignItems: "flex-start", gap: "0.75rem", padding: "0.6rem 1rem", borderBottom: gi < fc.gapItems.length - 1 ? "1px solid rgba(255,255,255,0.1)" : "none" }}>
+                          <div style={{ width: 17, height: 17, borderRadius: 4, border: "1.5px solid rgba(255,255,255,0.55)", background: "rgba(255,255,255,0.12)", flexShrink: 0, marginTop: 1 }} />
+                          <span style={{ fontSize: "0.8rem", color: "rgba(255,255,255,0.88)", fontFamily: BFONT, lineHeight: 1.45 }}>{g.item}</span>
+                        </div>
+                      ))}
                     </div>
                   ))}
                 </div>
+              </div>
+            ) : (
+              <div style={{ background: "rgba(16,185,129,0.16)", border: "1px solid rgba(16,185,129,0.35)", borderRadius: 16, padding: "1.5rem", textAlign: "center", marginBottom: "1rem" }}>
+                <div style={{ fontSize: "0.9rem", fontWeight: 700, color: "white", fontFamily: BFONT }}>Aligned across every area.</div>
+                <div style={{ fontSize: "0.78rem", color: "rgba(255,255,255,0.75)", fontFamily: BFONT, marginTop: "0.35rem" }}>Nothing to work through. Keep staying current with each other.</div>
               </div>
             )}
 
