@@ -11157,6 +11157,23 @@ function PartnerBCompletionScreen({ partnerAName, partnerBName, partnerADone, pa
 // ─────────────────────────────────────────────────────────────────────────────
 // UPSELL MODAL — shown when users click workbook/reflection cards post-exercise
 // ─────────────────────────────────────────────────────────────────────────────
+// The add-on query params public/checkout.html actually reads. Anything not on
+// this list is silently ignored there: the customer pays the package price and
+// never receives the add-on they clicked. UPSELL_PRODUCTS used to carry a
+// separate cartParam field with different values ("anniversary" for reflection,
+// "newlywed" for checklist), which was unused but sat there looking like the
+// field the URL should be built from. Removed, and replaced with this check.
+const CHECKOUT_ADDON_PARAMS = ["workbook", "reflection", "budget", "intimacy", "checklist"];
+function checkoutUrlForAddon(pkg, addon) {
+  if (!CHECKOUT_ADDON_PARAMS.includes(addon)) {
+    // Loud in development, and never sends a URL that would quietly drop the
+    // add-on. Falls back to the plain package checkout.
+    console.error(`[Attune] "${addon}" is not an add-on param checkout accepts (${CHECKOUT_ADDON_PARAMS.join(", ")}). Sending package-only checkout instead.`);
+    return `/checkout?pkg=${pkg}`;
+  }
+  return `/checkout?pkg=${pkg}&addon_${addon}=1`;
+}
+
 const UPSELL_PRODUCTS = {
   workbook: {
     badge: "Add-on",
@@ -11179,7 +11196,6 @@ const UPSELL_PRODUCTS = {
       // Printed & bound is a shipped item — phase 2 only.
       ...(PHYSICAL_ENABLED ? [{ id: "print", label: "Printed & bound", price: "$39" }] : []),
     ],
-    cartParam: "workbook",
   },
   reflection: {
     badge: "Relationship Reflection",
@@ -11196,7 +11212,6 @@ const UPSELL_PRODUCTS = {
       "Reflection action plan with conversation prompts",
     ],
     accentColor: "#5B6DF8",
-    cartParam: "anniversary",
   },
   checklist: {
     badge: "Starting Out Collection",
@@ -11213,7 +11228,6 @@ const UPSELL_PRODUCTS = {
       "Estate basics: wills, proxies, beneficiaries, term life",
     ],
     accentColor: "#E8673A",
-    cartParam: "newlywed",
   },
   budget: {
     badge: "Add-on",
@@ -11230,7 +11244,6 @@ const UPSELL_PRODUCTS = {
       "Yours to keep and revisit",
     ],
     accentColor: "#1B5FE8",
-    cartParam: "budget",
   },
   intimacy: {
     badge: "Add-on",
@@ -11247,7 +11260,6 @@ const UPSELL_PRODUCTS = {
       "Private, and yours to retake later",
     ],
     accentColor: "#B5546E",
-    cartParam: "intimacy",
   },
 };
 
@@ -14910,7 +14922,7 @@ export default function App() {
           // All add-ons route to the quick checkout with the add-on preselected,
           // never the marketing offerings page.
           const currentPkg = ['core','newlywed','anniversary','premium'].includes(demoPkg) ? demoPkg : 'core';
-          window.location.href = `/checkout?pkg=${currentPkg}&addon_${prod}=1`;
+          window.location.href = checkoutUrlForAddon(currentPkg, prod);
         }}
         onClose={() => setUpsellModal(null)}
       />
@@ -14929,7 +14941,7 @@ export default function App() {
           setShowPackagesModal(false);
           // Add-ons route to the quick checkout with the add-on preselected.
           const currentPkg = ['core','newlywed','anniversary','premium'].includes(demoPkg) ? demoPkg : 'core';
-          window.location.href = `/checkout?pkg=${currentPkg}&addon_${addonId}=1`;
+          window.location.href = checkoutUrlForAddon(currentPkg, addonId);
         }}
       />
     )}
