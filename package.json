@@ -9,7 +9,8 @@
     "preview": "vite preview",
     "check": "node scripts/check-admin-html.mjs && node scripts/check-workbook-budget.mjs && node scripts/check-localstorage-keys.mjs && node scripts/check-copy-tokens.mjs && node scripts/entitlement_matrix_test.mjs",
     "test:entitlements": "node scripts/entitlement_matrix_test.mjs",
-    "smoke": "node scripts/check-render.mjs"
+    "smoke": "node scripts/check-render.mjs",
+    "check:docs": "node scripts/check-doc-generators.mjs"
   },
   "dependencies": {
     "@fontsource/dm-mono": "^5.2.7",

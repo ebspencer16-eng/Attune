@@ -12,7 +12,9 @@
  * Returns: { ok, url, filename }
  */
 
-import fetch from 'node-fetch';
+// fetch is global on the Node 18+ runtime this deploys to. This imported
+// node-fetch, which is not in package.json, so the module failed to load and
+// every call to this endpoint 500'd before reaching the handler.
 
 export const config = { runtime: 'nodejs' };
 
