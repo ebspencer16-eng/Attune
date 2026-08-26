@@ -273,7 +273,7 @@ async function resolveEntitlements(sb, session, profile) {
 }
 
 // ── INTENTIONAL COLOR SCHEMA ──────────────────────────────────────────────────
-// Purple  #9B5DE5  = Your Inner Worlds     (energy, expression, reassurance)
+// Purple  #9B5DE5  = Internal Processing   (energy, expression, reassurance)
 // Orange  #E8673A  = How You Connect       (love, needs, bids, listening)
 // Blue    #1B5FE8  = When Things Get Hard  (conflict, repair, feedback)
 // Green   #10B981  = The Life You're Building (expectations domains)
@@ -3954,8 +3954,8 @@ function PersonalityResults({ myAnswers, partnerAnswers, userName, partnerName, 
   // Detailed results are 3 grouped domain pages, not one page per dimension.
   // domainGroups is the source of truth for both the pages and the sidebar.
   const domainGroups = [
-    { id: "inner",      label: "Your Inner Worlds",    color: "#9B5DE5", dims: ["energy","expression","reassurance"],
-      prose: "Your inner worlds are how each of you processes feeling and energy on your own, before any of it reaches the other person. This is where a lot of quiet mismatches start. One of you refuels in company, the other in solitude. One voices what's stirring, the other holds it until it's formed. None of it needs fixing. It's the map of where you each begin." },
+    { id: "inner",      label: "Internal Processing",  color: "#9B5DE5", dims: ["energy","expression","reassurance"],
+      prose: "Internal processing is how each of you handles feeling and energy on your own, before any of it reaches the other person. This is where a lot of quiet mismatches start. One of you refuels in company, the other in solitude. One voices what's stirring, the other holds it until it's formed. None of it needs fixing. It's the map of where you each begin." },
     { id: "connection", label: "How You Connect",      color: "#E8673A", dims: ["love","needs","bids","listening"],
       prose: "How you connect is the everyday machinery of closeness: the bids you make, the love you show, the needs you name, the way you listen. Most of a relationship lives here, in small moments rather than big talks. When two people connect in different currencies, the care is real but it can miss. This is where you learn each other's." },
     { id: "hard",       label: "When Things Get Hard", color: "#1B5FE8", dims: ["conflict","repair","feedback"],
@@ -3984,10 +3984,10 @@ function PersonalityResults({ myAnswers, partnerAnswers, userName, partnerName, 
   if (byDim.expression?.isOpportunity || byDim.expression?.isNote) protocols.push({ dim: "expression", title: "Build toward more openness", body: byDim.expression.adviceText, thisWeek: "This week, each of you says one thing out loud that you'd normally hold back or let pass. Not something big, just something that's been sitting there." });
   if (byDim.feedback?.isOpportunity || byDim.feedback?.isNote) protocols.push({ dim: "feedback", title: "Practice the small direct mention", body: byDim.feedback.adviceText, thisWeek: "This week, when something bothers you, name it within the same day, not to fight, just to say it. 'Hey, that landed a little off for me.' See what happens." });
 
-  // Results-at-a-glance action plan: one item per domain (inner worlds / how you
-  // connect / when things get hard), drawn from the dimension protocols above.
+  // Results-at-a-glance action plan: one item per domain (internal processing /
+  // how you connect / when things get hard), from the dimension protocols above.
   const _DOMAIN_DIMS = { inner: ["energy","expression","reassurance"], connection: ["love","needs","bids","listening"], hard: ["conflict","repair","feedback"] };
-  const _DOMAIN_LABELS = { inner: "Your inner worlds", connection: "How you connect", hard: "When things get hard" };
+  const _DOMAIN_LABELS = { inner: "Internal processing", connection: "How you connect", hard: "When things get hard" };
   const glancePlan = ["inner","connection","hard"].map(dom => {
     const p = protocols.find(pr => _DOMAIN_DIMS[dom].includes(pr.dim));
     const base = p
@@ -4106,7 +4106,7 @@ function PersonalityResults({ myAnswers, partnerAnswers, userName, partnerName, 
 
   // -- STEPS 1-N: ONE DIMENSION PER SCREEN (sorted order) --
   // -- STEPS 1-3: ONE GROUPED DOMAIN PAGE PER SCREEN --
-  // The detail pages are grouped by domain (inner worlds / how you connect /
+  // The detail pages are grouped by domain (internal processing / how you connect /
   // when things get hard) rather than one page per dimension. Each page carries
   // the domain prose, one orientation bar per dimension in that domain, and the
   // side-by-side response dropdown (same on every page, all dimensions).
@@ -6977,7 +6977,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
   // Comms detailed results are three grouped domain pages, not one per dimension.
   // Must stay in step with detailDomains inside PersonalityResults.
   const UR_DOMAINS = [
-    { id: "inner",      label: "Your Inner Worlds",    color: "#9B5DE5", dims: ["energy","expression","reassurance"] },
+    { id: "inner",      label: "Internal Processing",  color: "#9B5DE5", dims: ["energy","expression","reassurance"] },
     { id: "connection", label: "How You Connect",      color: "#E8673A", dims: ["love","needs","bids","listening"] },
     { id: "hard",       label: "When Things Get Hard", color: "#1B5FE8", dims: ["conflict","repair","feedback"] },
   ].filter(g => orderedDims.some(d => g.dims.includes(d)));
@@ -14739,7 +14739,7 @@ export default function App() {
                 // so it mirrors the desktop sidebar rather than abbreviating.
                 subnav = [
                   { label: "Overview", id: "comm-overview" },
-                  { label: "Your Inner Worlds", id: "comm-inner" },
+                  { label: "Internal Processing", id: "comm-inner" },
                   { label: "How You Connect", id: "comm-connection" },
                   { label: "When Things Get Hard", id: "comm-hard" },
                 ];
