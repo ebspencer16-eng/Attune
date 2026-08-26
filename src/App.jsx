@@ -4087,8 +4087,8 @@ function PersonalityResults({ myAnswers, partnerAnswers, userName, partnerName, 
           <div style={{ fontSize: "0.55rem", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.75)", fontFamily: BFONT, fontWeight: 700, marginBottom: "0.6rem" }}>Your action plan</div>
           <div style={{ display: "flex", flexDirection: "column", gap: "0.6rem" }}>
             {glancePlan.map((item, i) => (
-              <div key={i} style={{ background: "rgba(255,255,255,0.13)", border: `1px solid ${item.color}66`, borderRadius: 12, padding: "0.9rem 1.1rem", boxShadow: "0 6px 20px rgba(0,0,0,0.14)" }}>
-                <div style={{ fontSize: "0.55rem", letterSpacing: "0.14em", textTransform: "uppercase", color: item.color, fontFamily: BFONT, fontWeight: 700, marginBottom: "0.4rem" }}>{item.label}</div>
+              <div key={i} style={{ background: "rgba(255,255,255,0.13)", border: `1px solid ${item.color}66`, borderLeft: `4px solid ${item.color}`, borderRadius: 12, padding: "0.9rem 1.1rem", boxShadow: "0 6px 20px rgba(0,0,0,0.14)" }}>
+                <div style={{ fontSize: "0.58rem", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.95)", fontFamily: BFONT, fontWeight: 700, marginBottom: "0.4rem" }}>{item.label}</div>
                 <div style={{ fontSize: "0.82rem", color: "rgba(255,255,255,0.9)", fontFamily: BFONT, fontWeight: 600, marginBottom: "0.35rem" }}>{item.title}</div>
                 <div style={{ fontSize: "0.75rem", color: "rgba(255,255,255,0.6)", fontFamily: BFONT, lineHeight: 1.6 }}>{item.body}</div>
                 {item.reflect && <div style={{ fontSize: "0.75rem", color: "rgba(255,255,255,0.72)", fontFamily: BFONT, lineHeight: 1.6, marginTop: "0.5rem", fontStyle: "italic", borderLeft: `2px solid ${item.color}55`, paddingLeft: "0.7rem" }}>{item.reflect}</div>}
@@ -4133,17 +4133,23 @@ function PersonalityResults({ myAnswers, partnerAnswers, userName, partnerName, 
         {/* Orientation overview: one bar per dimension in this domain */}
         <div style={{ background: "rgba(255,255,255,0.10)", borderRadius: 14, padding: "1.25rem 1.5rem", border: "1px solid rgba(255,255,255,0.16)" }}>
           <div style={{ fontSize: "0.62rem", textTransform: "uppercase", letterSpacing: "0.12em", color: "rgba(255,255,255,0.9)", fontWeight: 700, marginBottom: "1.1rem", fontFamily: BFONT }}>Overall orientation</div>
-          <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: "1.1rem" }}>
             {grp.dims.map(dim => {
               const m = DIM_META[dim];
               return (
                 <div key={dim}>
-                  <div style={{ fontSize: "0.78rem", fontWeight: 700, color: "white", fontFamily: BFONT, marginBottom: "0.55rem" }}>{m.label}</div>
-                  <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "0.1rem" }}>
-                    <span style={{ fontSize: "0.7rem", fontWeight: 600, color: "rgba(255,255,255,0.85)", fontFamily: BFONT }}>{m.ends[0]}</span>
-                    <span style={{ fontSize: "0.7rem", fontWeight: 600, color: "rgba(255,255,255,0.85)", fontFamily: BFONT }}>{m.ends[1]}</span>
+                  <div style={{ fontSize: "0.78rem", fontWeight: 700, color: "white", fontFamily: BFONT, marginBottom: "0.15rem" }}>{m.label}</div>
+                  {/* Poles sit either side of the bar rather than above it, so
+                      each dimension costs one row instead of three. */}
+                  <div style={{ display: "flex", alignItems: "center", gap: "0.6rem" }}>
+                    <span style={{ fontSize: "0.68rem", fontWeight: 600, color: "rgba(255,255,255,0.8)", fontFamily: BFONT, flexShrink: 0, width: "clamp(58px,18%,92px)", textAlign: "right", lineHeight: 1.2 }}>{m.ends[0]}</span>
+                    {/* Inset so a marker at either extreme clears the pole
+                        label instead of printing on it. */}
+                    <div style={{ flex: 1, minWidth: 0, padding: "0 13px" }}>
+                      <DimTrackViz myScore={myS[dim]} theirScore={partS[dim]} color={m.color} userName={userName} partnerName={partnerName} />
+                    </div>
+                    <span style={{ fontSize: "0.68rem", fontWeight: 600, color: "rgba(255,255,255,0.8)", fontFamily: BFONT, flexShrink: 0, width: "clamp(58px,18%,92px)", lineHeight: 1.2 }}>{m.ends[1]}</span>
                   </div>
-                  <DimTrackViz myScore={myS[dim]} theirScore={partS[dim]} color={m.color} userName={userName} partnerName={partnerName} />
                 </div>
               );
             })}
@@ -4153,7 +4159,7 @@ function PersonalityResults({ myAnswers, partnerAnswers, userName, partnerName, 
         {/* Two-column arrows-to-bar side-by-side (all dims, exercise order) — dropdown */}
         <details style={{ marginTop: "1.5rem", background: "rgba(255,255,255,0.05)", borderRadius: 14, border: "1px solid rgba(255,255,255,0.14)" }}>
           <summary style={{ listStyle: "none", cursor: "pointer", padding: "1.1rem 1.5rem", fontSize: "0.72rem", textTransform: "uppercase", letterSpacing: "0.1em", color: "rgba(255,255,255,0.85)", fontWeight: 700, fontFamily: BFONT, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-            <span>Side by side internal processing responses from communications exercise</span>
+            <span>Side by side {grp.label.toLowerCase()} responses</span>
             <span style={{ fontSize: "0.9rem", opacity: 0.6 }}>▾</span>
           </summary>
           <div style={{ padding: "0.5rem 1.5rem 1.5rem" }}>
@@ -4509,10 +4515,10 @@ function ExpectationsResults({ myAnswers, partnerAnswers, userName, partnerName,
                 <div style={{ display: "flex", flexDirection: "column", gap: "0.6rem" }}>
                   {glanceConversations.map(c => (
                     <div key={c.id} onClick={() => go(`convo-${FIXED_CATS.findIndex(x => x.id === c.id)}`)}
-                      style={{ background: "rgba(255,255,255,0.13)", border: `1px solid ${c.color}66`, borderRadius: 12, padding: "0.9rem 1.1rem", cursor: "pointer", transition: "background 0.12s", boxShadow: "0 6px 20px rgba(0,0,0,0.14)" }}
+                      style={{ background: "rgba(255,255,255,0.13)", border: `1px solid ${c.color}66`, borderLeft: `4px solid ${c.color}`, borderRadius: 12, padding: "0.9rem 1.1rem", cursor: "pointer", transition: "background 0.12s", boxShadow: "0 6px 20px rgba(0,0,0,0.14)" }}
                       onMouseEnter={e => e.currentTarget.style.background = "rgba(255,255,255,0.09)"}
                       onMouseLeave={e => e.currentTarget.style.background = "rgba(255,255,255,0.05)"}>
-                      <div style={{ fontSize: "0.55rem", letterSpacing: "0.14em", textTransform: "uppercase", color: c.color, fontFamily: BFONT, fontWeight: 700, marginBottom: "0.4rem" }}>{c.label}</div>
+                      <div style={{ fontSize: "0.58rem", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.95)", fontFamily: BFONT, fontWeight: 700, marginBottom: "0.4rem" }}>{c.label}</div>
                       <div style={{ fontSize: "0.82rem", color: "rgba(255,255,255,0.9)", fontFamily: BFONT, fontWeight: 600, lineHeight: 1.5 }}>{c.gaps[0].item}</div>
                       {c.gaps.length > 1 && (
                         <div style={{ fontSize: "0.72rem", color: "rgba(255,255,255,0.5)", fontFamily: BFONT, marginTop: "0.35rem" }}>{c.gaps.length - 1} more topic{c.gaps.length - 1 !== 1 ? "s" : ""} in this area.</div>
@@ -7463,7 +7469,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
                   if (child.isDomainHeader) {
                     // Domain group header — not clickable, just a label with domain color
                     return (
-                      <div key={child.id} style={{ padding: "0.5rem 0.6rem 0.15rem", marginTop: "0.25rem" }}>
+                      <div key={child.id} style={{ padding: "0.35rem 0.6rem 0.1rem", marginTop: 0 }}>
                         <span style={{ fontSize: "0.55rem", letterSpacing: "0.14em", textTransform: "uppercase", fontWeight: 700, color: child.color || color, fontFamily: BFONT }}>{child.label}</span>
                       </div>
                     );

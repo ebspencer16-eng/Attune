@@ -1216,7 +1216,7 @@ function buildOneDimension(dim, u, p, score1, score2, coupleType, overallUserTyp
 // categories used in the comms exercise on the website, so the workbook
 // feels like a direct extension of what the couple just did.
 const DOMAIN_ORDER = [
-  { title: 'Your Inner Worlds',    color: PURPLE, dims: ['energy','expression','reassurance'] },
+  { title: 'Internal Processing',  color: PURPLE, dims: ['energy','expression','reassurance'] },
   { title: 'How You Connect',      color: ORANGE, dims: ['love','needs','bids','listening'] },
   { title: 'When Things Get Hard', color: BLUE,   dims: ['conflict','repair','feedback'] },
 ];
@@ -1249,7 +1249,7 @@ function bigSectionHeader(label, subtitle, color) {
   ];
 }
 
-// Smaller category header within a section (e.g. "Your Inner Worlds"
+// Smaller category header within a section (e.g. "Internal Processing"
 // within Communication). Meant to feel like a chapter subtitle.
 function categoryHeader(label, color) {
   return [
