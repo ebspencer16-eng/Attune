@@ -38,13 +38,19 @@ export const DIM_KEYS = {
 
 // Source of truth for the type formula.
 export const AXIS_CONFIG = {
-  conflict:   { axis: 'withdraw', weight: 0.70, invert: false },
-  repair:     { axis: 'withdraw', weight: 0.15, invert: false },
-  energy:     { axis: 'withdraw', weight: 0.10, invert: true  },
-  // listening took closeness's slot/weight when the exercise was restructured.
-  // Axis (withdraw) + invert (B "respond/engage" -> engage end) + weight are a
-  // first pass pending methodology sign-off. See the next-steps list.
-  listening:  { axis: 'withdraw', weight: 0.05, invert: true  },
+  // Engage/Withdraw was reweighted after Communication Under Stress folded into
+  // Conflict Style. Conflict had simply absorbed stress's 0.25 and reached 0.70
+  // of the axis on four questions, which is more leverage than any one
+  // dimension should carry. 0.55 keeps conflict clearly dominant, since it is
+  // the dimension that most defines how a couple moves when things are hard,
+  // while giving repair, energy and listening enough weight to matter.
+  conflict:   { axis: 'withdraw', weight: 0.55, invert: false },
+  repair:     { axis: 'withdraw', weight: 0.20, invert: false },
+  energy:     { axis: 'withdraw', weight: 0.15, invert: true  },
+  // listening took closeness's slot when the exercise was restructured. Axis
+  // (withdraw) and invert (B "respond/engage" -> engage end) still want
+  // methodology sign-off; the weight is now deliberate rather than inherited.
+  listening:  { axis: 'withdraw', weight: 0.10, invert: true  },
   expression: { axis: 'open',     weight: 0.35, invert: false },
   feedback:   { axis: 'open',     weight: 0.20, invert: false },
   needs:      { axis: 'open',     weight: 0.15, invert: true  },
