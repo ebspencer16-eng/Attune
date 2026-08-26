@@ -371,6 +371,18 @@ function ResumeToast({ show, message }) {
 // Wraps a Supabase write with sync-state tracking. On failure shows a toast
 // ("Saved on this device. We'll sync when you're back online.") and sets a
 // window flag. On next success if the flag is set, shows "Synced." toast.
+// showToast is defined inside App(). Code outside that scope (UnifiedResults,
+// downloadCard, and the share-card helpers) referenced it directly, which threw
+// ReferenceError the moment those paths ran: the share/download control on the
+// couple-type page did exactly that. App publishes the real toast on
+// window.__attuneShowToast; this is the safe way to reach it from anywhere.
+function toast(msg) {
+  try {
+    const fn = typeof window !== 'undefined' ? window.__attuneShowToast : null;
+    if (fn) fn(msg); else console.warn('[Attune] toast:', msg);
+  } catch { /* never let a toast break the action it was reporting on */ }
+}
+
 // Uses window.__attuneShowToast if showToast is not provided explicitly.
 async function trackedSupabaseWrite(promise, showToast) {
   const toast = showToast || (typeof window !== 'undefined' ? window.__attuneShowToast : null);
@@ -7708,7 +7720,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
       if (shareBusy || !shareCardRef.current) return;
       setShareBusy(true);
       const file = `attune-couple-type-${userName.toLowerCase()}-${partnerName.toLowerCase()}.png`;
-      try { downloadCard(shareCardRef.current, file); } catch { showToast("Download not available. Take a screenshot instead."); }
+      try { downloadCard(shareCardRef.current, file); } catch { toast("Download not available. Take a screenshot instead."); }
       setTypeShared(true);
       setTimeout(() => { setTypeShared(false); setShareBusy(false); }, 2800);
     };
@@ -8806,7 +8818,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
                   return;
                 }
                 // Always try docx API first — reliable on all browsers
-                showToast('Generating your workbook…');
+                toast('Generating your workbook…');
                 const resp2 = await fetch('/api/generate-workbook', { method: 'POST', headers: _wbHeaders, body: JSON.stringify(payload) });
                 if (resp2.ok) {
                   const blob2 = await resp2.blob();
@@ -8818,7 +8830,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
                   return;
                 }
                 // Fallback: Generate PDF in-browser using html2pdf.js
-                showToast('Generating your workbook as PDF… this takes about 5 seconds.');
+                toast('Generating your workbook as PDF… this takes about 5 seconds.');
                 const script = document.createElement('script');
                 script.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js';
                 await new Promise((res, rej) => { script.onload = res; script.onerror = rej; document.head.appendChild(script); });
@@ -8877,7 +8889,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
                   a.download = `Attune_Workbook_${userName}_and_${partnerName}.docx`;
                   document.body.appendChild(a); a.click(); document.body.removeChild(a);
                   URL.revokeObjectURL(url);
-                } catch { showToast('Workbook generation failed. Please try again.'); }
+                } catch { toast('Workbook generation failed. Please try again.'); }
               }
             };
 
@@ -9109,7 +9121,7 @@ function downloadCard(cardRef, filename) {
         link.download = filename;
         link.href = canvas.toDataURL("image/png");
         link.click();
-      }).catch(() => showToast("Screenshot not available in this browser. Try long-pressing the card to save."));
+      }).catch(() => toast("Screenshot not available in this browser. Try long-pressing the card to save."));
     return;
   }
   const script = document.createElement("script");
@@ -9118,7 +9130,7 @@ function downloadCard(cardRef, filename) {
     window._h2c = window.html2canvas;
     downloadCard(cardRef, filename);
   };
-  script.onerror = () => showToast("Download not available. Take a screenshot instead.");
+  script.onerror = () => toast("Download not available. Take a screenshot instead.");
   document.head.appendChild(script);
 }
 
