@@ -11597,6 +11597,20 @@ export default function App() {
 
   // ── VIEW STATE ────────────────────────────────────────────────────────────
   const [view, setView] = useState(initialView);
+  // Views gated on an entitlement render nothing when the package lacks it, so
+  // a bookmark or stale link to an exercise they do not own showed a blank
+  // page. Send those to the dashboard instead. Runs after mount, because pkg
+  // is derived further down the component body.
+  useEffect(() => {
+    const gated = { exercise3: 'hasAnniversary', intimacy: 'hasIntimacy' };
+    const need = gated[view];
+    if (need && pkg && !pkg[need]) setView('home');
+    // Deps are [view] alone on purpose: pkg is declared further down the
+    // component body, so reading it in the dependency array evaluates during
+    // render and hits the temporal dead zone. Inside the effect body it is
+    // safe, because effects run after the body has finished.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [view]);
 
   // Keep browser Back inside the app. Without this, Back from a tool (e.g. the
   // budget builder) or from results leaves /app entirely and lands on the
