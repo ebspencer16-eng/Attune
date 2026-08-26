@@ -102,7 +102,7 @@ const USER_LOCALSTORAGE_KEYS = [
   'attune_checklist', 'attune_notes',
   'attune_intimacy', 'attune_intimacy_progress',
   'attune_workbook_ready', 'attune_workbook_blob',
-  'attune_workbook_notif_seen', 'attune_workbook_print_queued',
+  'attune_workbook_print_queued',
   'attune_profile_setup_done',
   'attune_results_email_sent', 'attune_stay_subscribed',
   'attune_results_state', 'attune_couple_type_saved',
@@ -306,7 +306,6 @@ const DIMS = ["energy","expression","reassurance","needs","bids","listening","co
 // the results view swaps components — a component ref would reset to 0 (10.2).
 let _navScrollTop = 0;
 
-const RFONT = "'Syne', sans-serif";
 const BFONT = "'DM Sans', sans-serif";
 const HFONT = "'Playfair Display', Georgia, serif";
 const FONT_URL = "https://fonts.googleapis.com/css2?family=Syne:wght@700;800;900&family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600&display=swap";
@@ -324,18 +323,6 @@ const FONT_URL = "https://fonts.googleapis.com/css2?family=Syne:wght@700;800;900
 
 
 
-// -- INLINE CHOICE (replaces dropdowns) --
-function InlineChoice({ options, value, onChange }) {
-  return (
-    <div style={{ display: "flex", gap: "0.3rem", flexWrap: "wrap" }}>
-      {options.map(opt => {
-        const sel = value === opt;
-        const short = opt.replace(" did it","").replace("Doesn't apply to us","N/A").replace("Both of us","Both");
-        return <button key={opt} onClick={() => onChange(opt)} style={{ padding: "0.22rem 0.55rem", border: ("1px solid " + (sel ? C.clay : C.stone)), background: sel ? "rgba(184,150,110,0.12)" : "transparent", color: sel ? C.deep : C.muted, fontSize: "0.7rem", cursor: "pointer", fontFamily: font.body, borderRadius: 2, whiteSpace: "nowrap", fontWeight: sel ? 500 : 300, transition: "all 0.12s" }}>{short}</button>;
-      })}
-    </div>
-  );
-}
 
 // ─────────────────────────────────────────────────────────────────────────────
 // SHARED EDGE-CASE UI — resume toast, anon-storage banner, sync helpers
@@ -1205,56 +1192,6 @@ export function IntimacyExercise({ userName = "You", partnerName = "your partner
   );
 }
 
-// -- INTIMACY RESULTS -- per-dimension comparison --
-function IntimacyResults({ myAnswers, partnerAnswers, userName = "You", partnerName = "Partner", variant = "premarital", onBack }) {
-  const accent = "#B5546E";
-  const { rows, dimSummary, overall, overallState } = summarizeIntimacy(myAnswers, partnerAnswers);
-  const stateLabel = { aligned: "Aligned", discuss: "Worth discussing", different: "Different expectations", unspoken: "Left unspoken", incomplete: "Incomplete" };
-  const stateColor = { aligned: "#10b981", discuss: "#E8673A", different: "#B5546E", unspoken: "#8C7A68", incomplete: "#8C7A68" };
-  const byDimRows = (dimId) => rows.filter(r => r.dimension === dimId);
-
-  return (
-    <div style={{ maxWidth: 640, margin: "0 auto", padding: "2.5rem 1rem" }}>
-      <link href={FONT_LINK} rel="stylesheet" />
-      <div style={{ fontSize: "0.6rem", letterSpacing: "0.2em", textTransform: "uppercase", color: accent, fontFamily: BFONT, fontWeight: 700, marginBottom: "0.6rem" }}>Physical Intimacy Expectations · {userName} & {partnerName}</div>
-      <h2 style={{ fontFamily: HFONT, fontSize: "1.9rem", fontWeight: 700, color: C.ink, lineHeight: 1.1, marginBottom: "0.5rem" }}>Where you each land.</h2>
-      <p style={{ fontSize: "0.85rem", color: C.muted, fontFamily: BFONT, fontWeight: 300, lineHeight: 1.6, marginBottom: "2rem" }}>
-        {variant === 'married' ? "Based on how things are now." : "Based on what you each expect."}
-      </p>
-
-      <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
-        {INTIMACY_DIMENSIONS.map(d => {
-          const ds = dimSummary.find(x => x.id === d.id);
-          const drows = byDimRows(d.id);
-          return (
-            <div key={d.id} style={{ border: `1px solid ${C.stone}`, borderRadius: 14, padding: "1.1rem 1.25rem", background: "white" }}>
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "0.75rem" }}>
-                <div style={{ fontSize: "0.95rem", fontWeight: 700, color: C.ink, fontFamily: BFONT }}>{d.label}</div>
-                <div style={{ fontSize: "0.62rem", fontWeight: 700, color: stateColor[ds?.state] || C.muted, fontFamily: BFONT, textTransform: "uppercase", letterSpacing: "0.08em" }}>{stateLabel[ds?.state] || ""}</div>
-              </div>
-              <div style={{ display: "flex", flexDirection: "column", gap: "0.4rem" }}>
-                {drows.map(r => {
-                  const q = INTIMACY_QUESTIONS.find(x => x.id === r.id);
-                  return (
-                    <div key={r.id} style={{ display: "flex", alignItems: "center", gap: "0.6rem" }}>
-                      <div style={{ width: 7, height: 7, borderRadius: "50%", background: stateColor[r.state] || C.muted, flexShrink: 0 }} />
-                      <span style={{ fontSize: "0.78rem", color: C.text, fontFamily: BFONT, flex: 1 }}>{q?.topic}</span>
-                      <span style={{ fontSize: "0.62rem", color: stateColor[r.state] || C.muted, fontFamily: BFONT }}>{stateLabel[r.state]}</span>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          );
-        })}
-      </div>
-
-      {onBack && (
-        <button onClick={onBack} style={{ marginTop: "2rem", background: "transparent", border: `1.5px solid ${C.stone}`, color: C.muted, borderRadius: 12, padding: "0.7rem 1.5rem", fontSize: "0.85rem", fontFamily: BFONT, cursor: "pointer" }}>← Back to dashboard</button>
-      )}
-    </div>
-  );
-}
 
 // -- JOINT OVERVIEW -- unified landing page for both exercises --
 
@@ -1282,24 +1219,6 @@ function getStyleCode(scores) {
   return e + x + f + c + d + q;
 }
 
-function getCodeLabel(code) {
-  const labels = {
-    E: 'Outward', I: 'Inward',
-    X: 'Expressive', G: 'Guarded',
-    F: 'Fast to resolve', S: 'Needs space first',
-    R: 'Responsive', L: 'Reflective',
-    D: 'Direct', H: 'Indirect',
-    Q: 'Gesture-led repair', T: 'Talk-through repair',
-  };
-  return [
-    { axis: 'Energy',     letter: code[0], label: labels[code[0]] },
-    { axis: 'Expression', letter: code[1], label: labels[code[1]] },
-    { axis: 'Conflict',   letter: code[2], label: labels[code[2]] },
-    { axis: 'Listening',  letter: code[3], label: labels[code[3]] },
-    { axis: 'Needs',      letter: code[4], label: labels[code[4]] },
-    { axis: 'Repair',     letter: code[5], label: labels[code[5]] },
-  ];
-}
 
 // Score-based couple type derivation using all 10 communication dimensions.
 // Each type has a signature across the full dimension space; the best-scoring type wins.
@@ -2354,42 +2273,7 @@ function DashStepHeader({ num, title, sub, active = true, isMobile = false }) {
   );
 }
 
-// ── Dashboard Step-3 tile: owned tool, add-on, or article ──────────────────
-function DashTile({ color, eyebrow, title, sub, cta, onClick, href, disabled = false }) {
-  const inner = (
-    <>
-      <div style={{ flex: 1, minWidth: 0 }}>
-        {eyebrow && <div style={{ fontSize: "0.55rem", letterSpacing: "0.18em", textTransform: "uppercase", color: color, fontWeight: 700, fontFamily: BFONT, marginBottom: "0.3rem" }}>{eyebrow}</div>}
-        <div style={{ fontSize: "0.92rem", fontWeight: 700, color: "#0E0B07", fontFamily: BFONT, lineHeight: 1.25, marginBottom: "0.2rem" }}>{title}</div>
-        <div style={{ fontSize: "0.78rem", color: "#8C7A68", fontFamily: BFONT, fontWeight: 300, lineHeight: 1.5 }}>{sub}</div>
-      </div>
-      {cta && <span style={{ fontSize: "0.78rem", fontWeight: 700, color: disabled ? "#B3A693" : color, fontFamily: BFONT, flexShrink: 0, marginLeft: "1rem", whiteSpace: "nowrap" }}>{cta}</span>}
-    </>
-  );
-  const style = { display: "flex", alignItems: "center", background: "white", border: "1.5px solid " + (disabled ? "#EFE7DD" : "#E8DDD0"), borderLeft: "4px solid " + (disabled ? "#E0D6C8" : color), borderRadius: 14, padding: "1rem 1.25rem", cursor: disabled ? "default" : "pointer", textDecoration: "none", transition: "box-shadow .15s", opacity: disabled ? 0.75 : 1 };
-  const onEnter = disabled ? undefined : (e) => { e.currentTarget.style.boxShadow = "0 4px 18px rgba(0,0,0,.06)"; };
-  const onLeave = disabled ? undefined : (e) => { e.currentTarget.style.boxShadow = "none"; };
-  if (href) return <a href={href} style={style} onMouseEnter={onEnter} onMouseLeave={onLeave}>{inner}</a>;
-  return <div onClick={disabled ? undefined : onClick} style={style} onMouseEnter={onEnter} onMouseLeave={onLeave}>{inner}</div>;
-}
 
-// 10.8 — In Practice guides render as square icon tiles in a grid, not as
-// another horizontal row in the stacked list above them.
-function GuideSquare({ color = "#9B5DE5", icon, title, sub, href }) {
-  return (
-    <a href={href}
-      style={{ display: "flex", flexDirection: "column", aspectRatio: "1 / 1", background: "white", border: "1.5px solid #E8DDD0", borderRadius: 16, padding: "1.1rem", textDecoration: "none", transition: "box-shadow .15s, border-color .15s" }}
-      onMouseEnter={e => { e.currentTarget.style.boxShadow = "0 4px 18px rgba(0,0,0,.06)"; e.currentTarget.style.borderColor = color; }}
-      onMouseLeave={e => { e.currentTarget.style.boxShadow = "none"; e.currentTarget.style.borderColor = "#E8DDD0"; }}>
-      <div style={{ width: 38, height: 38, borderRadius: 11, background: color + "1f", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, marginBottom: "0.75rem" }}>
-        {icon}
-      </div>
-      <div style={{ fontSize: "0.85rem", fontWeight: 700, color: "#0E0B07", fontFamily: BFONT, lineHeight: 1.3, marginBottom: "0.3rem" }}>{title}</div>
-      <div style={{ fontSize: "0.72rem", color: "#8C7A68", fontFamily: BFONT, fontWeight: 300, lineHeight: 1.5 }}>{sub}</div>
-      <div style={{ marginTop: "auto", fontSize: "0.75rem", fontWeight: 700, color, fontFamily: BFONT }}>Read →</div>
-    </a>
-  );
-}
 
 // Step 3 tile. One shape for everything the couple can pick up next: an icon,
 // a title, a line, and an action. Owned tools carry their product colour; add-ons
@@ -2561,85 +2445,6 @@ function PctTrackViz({ myPct, partPct, userName = "You", partnerName = "Partner"
 
 // Canvas-based text measurement so label placement can react to real widths.
 let _dlMeasCtx = null;
-function _dlWidth(lines, fontPx) {
-  try {
-    if (!_dlMeasCtx) { _dlMeasCtx = document.createElement("canvas").getContext("2d"); }
-    _dlMeasCtx.font = fontPx + "px 'DM Sans', sans-serif";
-    return Math.max.apply(null, lines.map(l => _dlMeasCtx.measureText(String(l)).width));
-  } catch (e) { return Math.max.apply(null, lines.map(l => String(l).length)) * fontPx * 0.55; }
-}
-// Shared label row for a 1-5 track with up to two dots. Rules:
-//  - each label is centred under its dot by default;
-//  - if the two centred labels would overlap, the left dot's label becomes
-//    right-aligned (extends left) and the right dot's label left-aligned
-//    (extends right) so they separate around the dots;
-//  - a label that would spill past the tile edge is pushed just inside it;
-//  - a small leader line is drawn only when the two dots essentially coincide,
-//    to show which label belongs to which dot.
-// Text is the same grey as the rest of the track labels.
-function DotLabels({ items, leader = false, fontRem = 0.58, gap = 8 }) {
-  const ref = React.useRef(null);
-  const [w, setW] = React.useState(0);
-  React.useLayoutEffect(() => {
-    const el = ref.current; if (!el) return;
-    const upd = () => setW(el.clientWidth || 0);
-    upd();
-    let ro; try { ro = new ResizeObserver(upd); ro.observe(el); } catch (e) {}
-    window.addEventListener("resize", upd);
-    return () => { window.removeEventListener("resize", upd); if (ro) ro.disconnect(); };
-  }, []);
-  const GREY = "rgba(255,255,255,0.6)";
-  const fontPx = fontRem * 16;
-  const present = items.filter(it => it && it.pct != null);
-  const nLines = Math.max(1, ...present.map(it => it.lines.length));
-  const leaderH = leader ? 12 : 0;
-  const height = nLines * fontPx * 1.35 + leaderH + 4;
-  let placed = present.map(it => ({ it, leftPx: null, lw: 0, cx: 0 }));
-  let coincident = false;
-  if (w > 0 && present.length) {
-    placed = present.map(it => { const lw = _dlWidth(it.lines, fontPx); const cx = (it.pct / 100) * w; return { it, lw, cx, leftPx: cx - lw / 2 }; });
-    if (placed.length === 2) {
-      const order = placed[0].cx <= placed[1].cx ? [0, 1] : [1, 0];
-      const A = placed[order[0]], B = placed[order[1]];
-      if (A.cx + A.lw / 2 > B.cx - B.lw / 2) { A.leftPx = A.cx - A.lw; B.leftPx = B.cx; } // overlap -> split around dots
-      coincident = Math.abs(A.cx - B.cx) < 6;
-      if (coincident) { const GAP = 10; A.leftPx -= GAP; B.leftPx += GAP; } // small gap so the leader lines are visible
-    }
-    placed.forEach(bx => { bx.leftPx = Math.max(0, Math.min(bx.leftPx, w - bx.lw)); }); // keep inside tile
-    if (placed.length === 2) { // final guarantee: no residual overlap after clamping (e.g. both dots near an edge)
-      const ord = placed[0].cx <= placed[1].cx ? [0, 1] : [1, 0];
-      const A = placed[ord[0]], B = placed[ord[1]];
-      const minGap = coincident ? 8 : 4;
-      if (A.leftPx + A.lw + minGap > B.leftPx) {
-        B.leftPx = A.leftPx + A.lw + minGap;
-        if (B.leftPx + B.lw > w) { B.leftPx = w - B.lw; A.leftPx = Math.max(0, B.leftPx - A.lw - minGap); }
-      }
-    }
-  }
-  return (
-    <div ref={ref} style={{ position: "relative", height, marginTop: gap }}>
-      {leader && coincident && w > 0 && (
-        <svg width={w} height={leaderH + 24} style={{ position: "absolute", top: -20, left: 0, overflow: "visible" }}>
-          {placed.map((bx, i) => {
-            const inner = bx.leftPx < bx.cx ? bx.leftPx + bx.lw : bx.leftPx; // label edge nearest the dot
-            const y1 = (bx.it.dotY != null ? bx.it.dotY : -10) + 20;         // start at THIS dot (its stacked offset)
-            return <line key={i} x1={bx.cx} y1={y1} x2={Math.max(0, Math.min(inner, w))} y2={leaderH + 20} stroke={bx.it.dotColor || "rgba(255,255,255,0.5)"} strokeWidth="1.25" strokeOpacity="0.9" />;
-          })}
-        </svg>
-      )}
-      {placed.map((bx, i) => (
-        <div key={i} style={{ position: "absolute", top: leaderH,
-          left: w > 0 ? bx.leftPx + "px" : bx.it.pct + "%",
-          transform: w > 0 ? "none" : "translateX(-50%)",
-          maxWidth: w > 0 ? (bx.lw + 2) + "px" : "60%",
-          textAlign: "left", color: GREY, lineHeight: 1.3,
-          fontFamily: "'DM Sans', sans-serif", whiteSpace: "nowrap", fontSize: fontRem + "rem" }}>
-          {bx.it.lines.map((ln, j) => <div key={j}>{ln}</div>)}
-        </div>
-      ))}
-    </div>
-  );
-}
 function IntimacyResponseBreakdown({ dim, myAnswers, partnerAnswers, userName, partnerName, variant = "premarital" }) {
   const qs = (INTIMACY_QUESTIONS || []).filter(q => q.dimension === dim && q.kind !== "selfref");
   const valOf = (q, ans) => { if (ans == null) return null; const o = q.options.find(x => x.label === ans); return (o && o.value != null) ? o.value : null; };
@@ -4051,524 +3856,7 @@ function Exercise01Flow({ userName, partnerName, onComplete, skipIntro = false, 
 }
 
 
-function JointOverview({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Answers, partnerEx3, hasAnniversary, userName, partnerName, onGoPersonality, onGoExpectations, onGoAnniversary, intimacySummary = null, onGoIntimacy = null }) {
-  const myS = calcDimScores(ex1Answers);
-  const partS = calcDimScores(partnerEx1);
-  const feedback = generatePersonalityFeedback(myS, partS, userName, partnerName);
-  const sortedFeedback = [...feedback].sort((a, b) => a.gap - b.gap);
-  const avgGap = feedback.reduce((s, f) => s + f.gap, 0) / feedback.length;
-  const pairing = overallPairingLabel(avgGap);
-  const topStrengths = sortedFeedback.filter(f => f.gap <= 1).slice(0, 3);
-  const topOpportunities = sortedFeedback.filter(f => f.gap > 2).slice(0, 2);
 
-  // Expectations summary
-  const rows = [];
-  RESPONSIBILITY_CATEGORIES.forEach(cat => {
-    cat.items.forEach(item => {
-      const key = ((cat.id) + "__" + (item));
-      const rawMine = ex2Answers.responsibilities?.[key];
-      const rawTheirs = partnerEx2.responsibilities?.[mirrorRespKey(key)];
-      if (!rawMine || !rawTheirs) return;
-      const mine = normRespValue(rawMine, true, userName, partnerName);
-      const theirs = normRespValue(rawTheirs, false, userName, partnerName);
-      rows.push({ category: cat.label, item: substName(item, userName, partnerName), mine, theirs, aligned: mine === theirs });
-    });
-  });
-  const lifeRows = LIFE_QUESTIONS.map(q => ({
-    category: q.category, item: substName(q.text, userName, partnerName),
-    mine: ex2Answers.life?.[q.id], theirs: partnerEx2.life?.[mirrorLifeId(q.id)],
-    aligned: ex2Answers.life?.[q.id] === partnerEx2.life?.[mirrorLifeId(q.id)],
-  })).filter(r => r.mine && r.theirs);
-  const allRows = [...rows, ...lifeRows];
-  const alignedCount = allRows.filter(r => r.aligned).length;
-  const gapCount = allRows.filter(r => !r.aligned).length;
-  // Headline expectations alignment: similarity-based overall (mean of 6
-  // domain pcts). Matches the workbook Snapshot overall row.
-  const alignPct = computeOverallExpectationsPctClient(ex2Answers, partnerEx2, userName, partnerName);
-
-  const coupleType = deriveCoupleTypeFromExercise(
-    myS, partS, alignPct
-  );
-  // Individual profile descriptions based on actual dimension scores
-  const makeProfile = (scores, name) => {
-    const top = DIMS.filter(d => scores[d] !== undefined).sort((a,b) => Math.abs((scores[b]||3)-3) - Math.abs((scores[a]||3)-3));
-    const d1 = top[0], d2 = top[1];
-    const m1 = DIM_META[d1], m2 = DIM_META[d2];
-    if (!m1) return { tag: "A distinctive communication style." };
-    const end1 = scores[d1] < 3 ? m1.ends[0] : m1.ends[1];
-    const end2 = d2 && m2 ? (scores[d2] < 3 ? m2.ends[0] : m2.ends[1]) : null;
-    const cap = s => s ? s.charAt(0).toUpperCase() + s.slice(1) : s;
-    // Declarative, no "tends toward" hedge (reads as an AI tell, and both
-    // partners carrying it made it worse).
-    const desc1 = cap(end1.toLowerCase()) + " when it comes to " + m1.label.toLowerCase();
-    const desc2 = end2 ? (". More " + end2.toLowerCase() + " around " + m2.label.toLowerCase()) : "";
-    return { tag: desc1 + desc2 + "." };
-  };
-  const myProfile = makeProfile(myS, userName);
-  const theirProfile = makeProfile(partS, partnerName);
-
-  // Conversation starters -- pre-computed to avoid IIFE in JSX
-  const startersList = [];
-  topOpportunities.forEach(f => {
-    const meta = DIM_META[f.dim];
-    if (!meta) return;
-    const prompts = {
-      energy: `When one of us needs alone time to recharge and the other wants to connect, how do we handle that without it feeling like rejection?`,
-      decision: `Walk me through the last big decision you made. What did that feel like from the inside?`,
-      conflict: `After a disagreement, what does "being okay again" actually feel like for you?`,
-      affection: `What's something I do that makes you feel really loved, that I might not realize has that effect?`,
-      planning: `How much certainty do you need before you feel comfortable with a plan? What does uncertainty feel like for you?`,
-      expressiveness: `Is there something you've wanted to share with me but haven't found the right way to bring up?`,
-      togetherness: `What's your ideal ratio of time together vs. time doing your own thing in a given week?`,
-      change: `Tell me about a time a big change went really well for you. What made it feel okay?`,
-    };
-    if (prompts[f.dim]) startersList.push({ dim: meta.label, prompt: prompts[f.dim], color: meta.color });
-  });
-  const topExpGap = allRows.filter(r => !r.aligned)[0];
-  if (topExpGap) {
-    startersList.push({ dim: topExpGap.category, prompt: `We have different expectations about who handles "${topExpGap.item}". What's the thinking behind yours? I want to understand where you're coming from.`, color: "#1B5FE8" });
-  }
-  const conversationStarters = startersList.length > 0 ? (
-    <div style={{ marginTop: "2rem", background: "#FBF8F3", border: "1.5px solid #E8DDD0", borderRadius: 18, padding: "1.5rem 1.5rem 1.25rem" }}>
-      <div style={{ display: "flex", alignItems: "center", gap: "0.6rem", marginBottom: "1.1rem" }}>
-        <div style={{ fontSize: "0.6rem", letterSpacing: "0.22em", textTransform: "uppercase", color: "#E8673A", fontFamily: BFONT, fontWeight: 700 }}>Start here</div>
-        <div style={{ flex: 1, height: 1, background: "#E8DDD0" }} />
-      </div>
-      <div style={{ fontFamily: HFONT, fontSize: "1.05rem", fontWeight: 700, color: "#0E0B07", marginBottom: "0.35rem", lineHeight: 1.2 }}>{Math.min(3, startersList.length)} conversation{Math.min(3, startersList.length) !== 1 ? "s" : ""} worth having</div>
-      <p style={{ fontSize: "0.8rem", color: "#8C7A68", fontFamily: BFONT, fontWeight: 300, marginBottom: "1.25rem", lineHeight: 1.65 }}>Based on where your expectations differed most.</p>
-      <div style={{ display: "flex", flexDirection: "column", gap: "0.85rem" }}>
-        {startersList.slice(0, 3).map((s, i) => (
-          <div key={i} style={{ background: "white", border: "1.5px solid #E8DDD0", borderRadius: 14, padding: "1rem 1.1rem", borderLeft: `3px solid ${s.color}` }}>
-            <div style={{ fontSize: "0.58rem", letterSpacing: "0.16em", textTransform: "uppercase", color: s.color, fontFamily: BFONT, fontWeight: 700, marginBottom: "0.4rem" }}>{s.dim}</div>
-            <p style={{ fontSize: "0.84rem", color: "#0E0B07", fontFamily: BFONT, fontWeight: 400, lineHeight: 1.65, margin: "0 0 0.5rem", fontStyle: "italic" }}>"{s.prompt}"</p>
-
-          </div>
-        ))}
-      </div>
-      <div style={{ marginTop: "1rem", paddingTop: "1rem", borderTop: "1px solid #E8DDD0", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-        <p style={{ fontSize: "0.72rem", color: "#8C7A68", fontFamily: BFONT, margin: 0, lineHeight: 1.5 }}>
-          Want more conversations built from your specific results?
-        </p>
-        <a href="/offerings" style={{ fontSize: "0.72rem", color: "#E8673A", fontWeight: 700, textDecoration: "none", fontFamily: BFONT, whiteSpace: "nowrap", marginLeft: "1rem" }}>Get the Workbook →</a>
-      </div>
-    </div>
-  ) : null;
-
-  // Cross-exercise conflict insight retired: the Ex02 conflict question
-  // (lq_conflict_when) was removed when the Conflict section was cut, so this
-  // card no longer has an Ex02 signal to cross-reference. Force it off.
-  const showConflictCrossLink = false;
-
-  const conflictCrossLinkCard = showConflictCrossLink ? (
-    <div style={{ marginTop: "1.5rem", background: "#FFF8F5", border: "1.5px solid rgba(232,103,58,0.25)", borderRadius: 18, padding: "1.5rem 1.5rem 1.25rem" }}>
-      <div style={{ display: "flex", alignItems: "center", gap: "0.6rem", marginBottom: "0.85rem" }}>
-        <div style={{ fontSize: "0.6rem", letterSpacing: "0.22em", textTransform: "uppercase", color: "#E8673A", fontFamily: BFONT, fontWeight: 700 }}>Pattern across both exercises</div>
-        <div style={{ flex: 1, height: 1, background: "rgba(232,103,58,0.2)" }} />
-      </div>
-      <div style={{ fontFamily: HFONT, fontSize: "1.05rem", fontWeight: 700, color: "#0E0B07", marginBottom: "0.35rem", lineHeight: 1.2 }}>Your conflict styles are different, and both exercises said so</div>
-      <p style={{ fontSize: "0.82rem", color: "#8C7A68", fontFamily: BFONT, fontWeight: 300, marginBottom: "0.85rem", lineHeight: 1.7 }}>
-        Exercise 01 mapped a gap in how you each process conflict. Exercise 02 confirmed it, one of you moves toward resolution quickly, and the other needs space first. Neither is wrong. But without naming it, the person who needs resolution reads the other's silence as avoidance, and the person who needs space reads the other's urgency as pressure. It loops.
-      </p>
-      <p style={{ fontSize: "0.82rem", color: "#0E0B07", fontFamily: BFONT, fontWeight: 400, lineHeight: 1.7, fontStyle: "italic" }}>
-        "When something is hard between us, before we try to talk about it, what does each of us actually need first?"
-      </p>
-    </div>
-  ) : null;
-
-  // Anniversary card -- pre-computed to avoid IIFE in JSX
-  let anniversaryCard = null;
-  if (hasAnniversary && ex3Answers && partnerEx3) {
-    const scaleQs = ANNIVERSARY_QUESTIONS.filter(q => q.type === "scale");
-    const overallQ = scaleQs.find(q => q.id === "a0");
-    const myOverall = ex3Answers.a0 ?? 3;
-    const theirOverall = partnerEx3.a0 ?? 3;
-    const avgOverall = (myOverall + theirOverall) / 2;
-    const overallLabel = overallQ ? overallQ.scaleLabels[Math.round(avgOverall)] : "Really good";
-    const annGap = Math.abs(myOverall - theirOverall);
-    anniversaryCard = (
-      <div onClick={onGoAnniversary}
-        style={{ background: "white", borderRadius: 18, overflow: "hidden", border: "1.5px solid #E8DDD0", cursor: "pointer", transition: "all 0.18s", boxShadow: "0 2px 12px rgba(0,0,0,0.06)", marginTop: "1rem" }}
-        onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-3px)"; e.currentTarget.style.boxShadow = "0 8px 32px rgba(16,185,129,0.18)"; e.currentTarget.style.borderColor = "#10b98166"; }}
-        onMouseLeave={e => { e.currentTarget.style.transform = ""; e.currentTarget.style.boxShadow = "0 2px 12px rgba(0,0,0,0.06)"; e.currentTarget.style.borderColor = "#E8DDD0"; }}>
-        <div style={{ background: "linear-gradient(135deg, #059669, #10b981)", padding: "1.1rem 1.25rem", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <div>
-            <div style={{ fontSize: "0.6rem", letterSpacing: "0.15em", textTransform: "uppercase", color: "rgba(255,255,255,0.75)", fontFamily: BFONT, marginBottom: "0.25rem" }}>Exercise 03</div>
-            <div style={{ fontSize: "1.1rem", fontWeight: 700, color: "white", fontFamily: HFONT }}>Relationship Reflection</div>
-          </div>
-          <div style={{ background: "rgba(255,255,255,0.15)", borderRadius: 10, padding: "0.5rem 0.75rem", textAlign: "center" }}>
-            <div style={{ fontSize: "0.6rem", color: "rgba(255,255,255,0.65)", fontFamily: BFONT, marginBottom: "0.15rem" }}>Overall feel</div>
-            <div style={{ fontSize: "0.82rem", fontWeight: 700, color: "white", fontFamily: BFONT }}>{overallLabel}</div>
-          </div>
-        </div>
-        <div style={{ padding: "1rem 1.25rem" }}>
-          <div style={{ marginBottom: "0.75rem" }}>
-            {scaleQs.filter(q => q.id !== "a0").map(q => {
-              const myVal = ex3Answers[q.id] ?? 2;
-              const theirVal = partnerEx3[q.id] ?? 2;
-              const shortLabel = { a_sat_conn: "Day-to-day connection", a_sat_comm: "Communication", a_sat_fun: "Fun & lightness" }[q.id] || q.text.split("?")[0];
-              return (
-                <div key={q.id} style={{ marginBottom: "0.5rem" }}>
-                  <div style={{ fontSize: "0.68rem", color: "#8C7A68", fontFamily: BFONT, marginBottom: "0.2rem" }}>{shortLabel}</div>
-                  <div style={{ display: "flex", flexDirection: "column", gap: 3 }}>
-                    {[[userName, myVal, "#E8673A"], [partnerName, theirVal, "#1B5FE8"]].map(([nm, val, col]) => (
-                      <div key={nm} style={{ display: "flex", gap: 3 }}>
-                        {q.scaleLabels.map((_, i) => (
-                          <div key={i} style={{ flex: 1, height: 5, borderRadius: 2, background: i <= val ? col : col + "1f" }} />
-                        ))}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              );
-            })}
-            <div style={{ display: "flex", gap: "0.75rem", marginTop: "0.5rem" }}>
-              {[[userName, "#E8673A"], [partnerName, "#1B5FE8"]].map(([nm, col]) => (
-                <span key={nm} style={{ display: "flex", alignItems: "center", gap: "0.3rem", fontSize: "0.62rem", color: "#8C7A68", fontFamily: BFONT }}>
-                  <span style={{ width: 7, height: 7, borderRadius: "50%", background: col }} />{nm}
-                </span>
-              ))}
-            </div>
-          </div>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-            <div style={{ fontSize: "0.7rem", color: "#8C7A68", fontFamily: BFONT }}>{annGap >= 1 ? "Different perspectives on how things feel" : "Shared sense of where you are"}</div>
-            <span style={{ fontSize: "0.7rem", color: "#10b981", fontWeight: 700, fontFamily: BFONT }}>Explore results →</span>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <div style={{ animation: "slideUp 0.4s cubic-bezier(0.16,1,0.3,1)" }}>
-      <style>{'@keyframes slideUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}'}</style>
-      <link href={FONT_URL} rel="stylesheet" />
-
-      {/* ── COUPLE TYPE HERO ── */}
-      <p style={{ fontSize: "0.85rem", color: C.muted, fontFamily: BFONT, fontWeight: 300, lineHeight: 1.7, margin: "0 0 1rem", maxWidth: 560 }}>
-        You'll learn more about what you see here as you explore your detailed results.
-      </p>
-      <div style={{ marginBottom: "1.25rem" }}>
-        <CoupleTypeCard coupleType={coupleType} userName={userName} partnerName={partnerName} />
-      </div>
-
-      {/* Profile chips, above stats bar */}
-      <div style={{ display: "flex", gap: "0.75rem", marginBottom: "1.25rem", flexWrap: "wrap" }}>
-        {[[userName, myProfile, "#E8673A"],[partnerName, theirProfile, "#3B5BDB"]].map(([name, profile, color]) => (
-          <div key={name} style={{ flex: 1, minWidth: 200, background: color + "0E", border: ("1.5px solid " + color + "30"), borderRadius: 14, padding: "0.85rem 1rem" }}>
-            <div style={{ fontSize: "0.6rem", textTransform: "uppercase", letterSpacing: "0.12em", color, fontWeight: 700, marginBottom: "0.3rem", fontFamily: BFONT }}>{name}</div>
-            <div style={{ fontSize: "0.82rem", color: "#0E0B07", fontFamily: BFONT, lineHeight: 1.5, fontWeight: 400 }}>{profile.tag}</div>
-          </div>
-        ))}
-      </div>
-
-      {/* Stats bar, "completed independently" as hero */}
-      <div style={{ background: "white", border: "1.5px solid #E8DDD0", borderRadius: 14, padding: "1.25rem 1.5rem", marginBottom: "1.25rem", textAlign: "center" }}>
-        <div style={{ fontSize: "0.65rem", letterSpacing: "0.18em", textTransform: "uppercase", color: "#8C7A68", fontFamily: BFONT, fontWeight: 600, marginBottom: "0.85rem" }}>Completed independently, built entirely from your own answers</div>
-        <div style={{ display: "flex", gap: "2rem", justifyContent: "center", flexWrap: "wrap" }}>
-          {[
-            { label: (DIMS.length + " dimensions"), color: "#E8673A" },
-            { label: `${allRows.length} topics compared`, color: "#1B5FE8" },
-            { label: `${alignPct}% aligned`, color: alignPct >= 70 ? "#10b981" : alignPct >= 50 ? "#1B5FE8" : "#E8673A" },
-          ].map(({ label, color }) => (
-            <div key={label} style={{ display: "flex", alignItems: "center", gap: "0.45rem" }}>
-              <div style={{ width: 7, height: 7, borderRadius: "50%", background: color, flexShrink: 0 }} />
-              <span style={{ fontSize: "0.82rem", color: "#0E0B07", fontFamily: BFONT, fontWeight: 600 }}>{label}</span>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Two report cards */}
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem", marginBottom: "1.25rem" }}>
-        {/* Communication card — item 5: content centered, no empty space */}
-        <div onClick={onGoPersonality}
-          style={{ background: "white", borderRadius: 18, overflow: "hidden", border: "1.5px solid #E8DDD0", cursor: "pointer", transition: "all 0.18s", boxShadow: "0 2px 12px rgba(0,0,0,0.06)", display: "flex", flexDirection: "column" }}
-          onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-3px)"; e.currentTarget.style.boxShadow = "0 8px 32px rgba(232,103,58,0.18)"; e.currentTarget.style.borderColor = "#E8673A66"; }}
-          onMouseLeave={e => { e.currentTarget.style.transform = ""; e.currentTarget.style.boxShadow = "0 2px 12px rgba(0,0,0,0.06)"; e.currentTarget.style.borderColor = "#E8DDD0"; }}>
-          <div style={{ background: "linear-gradient(135deg, #E8673A, #d4592f)", padding: "1rem 1.25rem" }}>
-            <div style={{ fontSize: "0.58rem", letterSpacing: "0.15em", textTransform: "uppercase", color: "rgba(255,255,255,0.7)", fontFamily: BFONT, marginBottom: "0.2rem" }}>Exercise 01</div>
-            <div style={{ fontSize: "1rem", fontWeight: 700, color: "white", fontFamily: HFONT }}>How You Communicate</div>
-          </div>
-          <div style={{ padding: "1rem 1.25rem", flex: 1, display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
-            {/* Dimension alignment bars */}
-            <div style={{ marginBottom: "0.75rem" }}>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.5rem" }}>
-                <div style={{ fontSize: "0.65rem", color: C.muted, fontFamily: BFONT }}>{DIMS.length} dimensions</div>
-                <div style={{ fontSize: "0.65rem", color: "#10b981", fontWeight: 600, fontFamily: BFONT }}>{sortedFeedback.filter(f => f.gap <= 1).length} in sync</div>
-              </div>
-              <div style={{ display: "flex", gap: "2px" }}>
-                {sortedFeedback.map(f => (
-                  <div key={f.dim} title={DIM_META[f.dim].label} style={{ flex: 1, height: 6, borderRadius: 2, background: f.gap <= 1 ? DIM_META[f.dim].color : DIM_META[f.dim].color + "35" }} />
-                ))}
-              </div>
-            </div>
-            {/* Top strength */}
-            {topStrengths[0] && (
-              <div style={{ background: "#F0FDF9", border: "1px solid rgba(16,185,129,0.2)", borderRadius: 10, padding: "0.6rem 0.8rem", marginBottom: "0.5rem" }}>
-                <div style={{ fontSize: "0.55rem", textTransform: "uppercase", letterSpacing: "0.1em", color: "#10b981", fontWeight: 700, fontFamily: BFONT, marginBottom: "0.2rem" }}>Strongest alignment</div>
-                <div style={{ fontSize: "0.75rem", color: C.ink, fontFamily: BFONT, fontWeight: 600 }}>{DIM_META[topStrengths[0].dim].label}</div>
-              </div>
-            )}
-            {/* Top gap */}
-            {topOpportunities[0] && (
-              <div style={{ background: "#FFF8F5", border: "1px solid rgba(232,103,58,0.2)", borderRadius: 10, padding: "0.6rem 0.8rem", marginBottom: "0.75rem" }}>
-                <div style={{ fontSize: "0.55rem", textTransform: "uppercase", letterSpacing: "0.1em", color: "#E8673A", fontWeight: 700, fontFamily: BFONT, marginBottom: "0.2rem" }}>Biggest difference</div>
-                <div style={{ fontSize: "0.75rem", color: C.ink, fontFamily: BFONT, fontWeight: 600 }}>{DIM_META[topOpportunities[0].dim].label}</div>
-              </div>
-            )}
-            <div style={{ display: "flex", justifyContent: "flex-end" }}>
-              <span style={{ fontSize: "0.7rem", color: "#E8673A", fontWeight: 700, fontFamily: BFONT }}>Explore →</span>
-            </div>
-          </div>
-        </div>
-
-        {/* Expectations card — item 6: click-through style */}
-        <div onClick={onGoExpectations}
-          style={{ background: "white", borderRadius: 18, overflow: "hidden", border: "1.5px solid #E8DDD0", cursor: "pointer", transition: "all 0.18s", boxShadow: "0 2px 12px rgba(0,0,0,0.06)", display: "flex", flexDirection: "column" }}
-          onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-3px)"; e.currentTarget.style.boxShadow = "0 8px 32px rgba(91,109,248,0.18)"; e.currentTarget.style.borderColor = "#1B5FE866"; }}
-          onMouseLeave={e => { e.currentTarget.style.transform = ""; e.currentTarget.style.boxShadow = "0 2px 12px rgba(0,0,0,0.06)"; e.currentTarget.style.borderColor = "#E8DDD0"; }}>
-          <div style={{ background: "linear-gradient(135deg, #1B5FE8, #4a5ce8)", padding: "1rem 1.25rem" }}>
-            <div style={{ fontSize: "0.58rem", letterSpacing: "0.15em", textTransform: "uppercase", color: "rgba(255,255,255,0.7)", fontFamily: BFONT, marginBottom: "0.2rem" }}>Exercise 02</div>
-            <div style={{ fontSize: "1rem", fontWeight: 700, color: "white", fontFamily: HFONT }}>What You Expect</div>
-          </div>
-          <div style={{ padding: "1rem 1.25rem", flex: 1, display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
-            {/* Big alignment number */}
-            <div style={{ textAlign: "center", padding: "0.5rem 0 0.75rem" }}>
-              <div style={{ fontFamily: HFONT, fontSize: "2.6rem", fontWeight: 700, color: alignPct >= 70 ? "#10b981" : alignPct >= 50 ? "#1B5FE8" : "#E8673A", lineHeight: 1 }}>{alignPct}%</div>
-              <div style={{ fontSize: "0.72rem", color: C.muted, fontFamily: BFONT, marginTop: "0.2rem" }}>already aligned</div>
-            </div>
-            {/* Progress bar */}
-            <div style={{ marginBottom: "0.75rem" }}>
-              <div style={{ height: 6, background: C.stone, borderRadius: 3 }}>
-                <div style={{ height: "100%", width: alignPct + "%", background: alignPct >= 70 ? "#10b981" : alignPct >= 50 ? "#1B5FE8" : "#E8673A", borderRadius: 3, transition: "width 0.8s" }} />
-              </div>
-              <div style={{ display: "flex", justifyContent: "space-between", marginTop: "0.35rem" }}>
-                <div style={{ fontSize: "0.62rem", color: C.muted, fontFamily: BFONT }}>{alignedCount} aligned</div>
-                <div style={{ fontSize: "0.62rem", color: gapCount > 0 ? "#E8673A" : "#10b981", fontFamily: BFONT, fontWeight: gapCount > 0 ? 600 : 400 }}>
-                  {gapCount > 0 ? gapCount + " to discuss" : "Fully aligned"}
-                </div>
-              </div>
-            </div>
-            <div style={{ display: "flex", justifyContent: "flex-end" }}>
-              <span style={{ fontSize: "0.7rem", color: "#1B5FE8", fontWeight: 700, fontFamily: BFONT }}>Explore →</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Anniversary card, shown when pkg.hasAnniversary */}
-      {anniversaryCard}
-
-      {/* Intimacy card (Exercise 04) — shown when the add-on is owned and both finished (3.6) */}
-      {intimacySummary && (() => {
-        const idims = intimacySummary.dimSummary.filter(d => d.avgGap != null);
-        const ialigned = idims.filter(d => d.state === "aligned").length;
-        return (
-          <div onClick={onGoIntimacy || undefined}
-            style={{ background: "white", borderRadius: 18, overflow: "hidden", border: "1.5px solid #E8DDD0", cursor: onGoIntimacy ? "pointer" : "default", transition: "all 0.18s", boxShadow: "0 2px 12px rgba(0,0,0,0.06)", marginTop: "1rem" }}
-            onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-3px)"; e.currentTarget.style.boxShadow = "0 8px 32px rgba(181,84,110,0.18)"; e.currentTarget.style.borderColor = "#B5546E66"; }}
-            onMouseLeave={e => { e.currentTarget.style.transform = ""; e.currentTarget.style.boxShadow = "0 2px 12px rgba(0,0,0,0.06)"; e.currentTarget.style.borderColor = "#E8DDD0"; }}>
-            <div style={{ background: "linear-gradient(135deg, #B5546E, #E08DA6)", padding: "1.1rem 1.25rem", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-              <div>
-                <div style={{ fontSize: "0.6rem", letterSpacing: "0.15em", textTransform: "uppercase", color: "rgba(255,255,255,0.75)", fontFamily: BFONT, marginBottom: "0.25rem" }}>Exercise 0{hasAnniversary ? 4 : 3}</div>
-                <div style={{ fontSize: "1.1rem", fontWeight: 700, color: "white", fontFamily: HFONT }}>Physical Intimacy</div>
-              </div>
-              <div style={{ background: "rgba(255,255,255,0.15)", borderRadius: 10, padding: "0.5rem 0.75rem", textAlign: "center" }}>
-                <div style={{ fontSize: "0.6rem", color: "rgba(255,255,255,0.65)", fontFamily: BFONT, marginBottom: "0.15rem" }}>Closely matched</div>
-                <div style={{ fontSize: "0.82rem", fontWeight: 700, color: "white", fontFamily: BFONT }}>{ialigned} of {idims.length}</div>
-              </div>
-            </div>
-            <div style={{ padding: "1rem 1.25rem" }}>
-              <div style={{ display: "flex", flexDirection: "column", gap: "0.45rem", marginBottom: "0.75rem" }}>
-                {idims.map(d => {
-                  const meta = INTIMACY_DIMENSIONS.find(x => x.id === d.id);
-                  const pct = Math.max(0, Math.min(100, Math.round((1 - (d.avgGap ?? 0)) * 100)));
-                  const barColor = d.state === "aligned" ? "#10b981" : "#E8673A";
-                  return (
-                    <div key={d.id} style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-                      <span style={{ fontSize: "0.68rem", color: "#8C7A68", fontFamily: BFONT, width: "clamp(88px,30%,120px)", flexShrink: 0, lineHeight: 1.25 }}>{meta?.label || d.id}</span>
-                      <div style={{ flex: 1, height: 6, background: "#EFE7DD", borderRadius: 999 }}>
-                        <div style={{ height: "100%", width: pct + "%", background: barColor, borderRadius: 999 }} />
-                      </div>
-                      <span style={{ fontSize: "0.62rem", color: barColor, fontFamily: BFONT, fontWeight: 700, flexShrink: 0, minWidth: 32, textAlign: "right" }}>{pct}%</span>
-                    </div>
-                  );
-                })}
-              </div>
-              <div style={{ display: "flex", justifyContent: "flex-end" }}>
-                <span style={{ fontSize: "0.7rem", color: "#B5546E", fontWeight: 700, fontFamily: BFONT }}>Explore results →</span>
-              </div>
-            </div>
-          </div>
-        );
-      })()}
-
-      {/* ── CONVERSATION STARTERS, drawn from their biggest gaps ── */}
-      {conversationStarters}
-
-      {/* ── CROSS-EXERCISE CONFLICT INSIGHT ── */}
-      {conflictCrossLinkCard}
-
-  </div>
-
-  );
-}
-
-// ── EXPERIENCE FEEDBACK COMPONENT ──
-function ExperienceFeedback({ userName }) {
-  const [phase, setPhase] = useState("idle"); // idle | form | thanks
-  const [rating, setRating] = useState(null);
-  const [answers, setAnswers] = useState({});
-  const [submitting, setSubmitting] = useState(false);
-
-  const questions = [
-    { id: "q_clear",    label: "The results felt clear and easy to understand",       type: "scale" },
-    { id: "q_accurate", label: "The results felt accurate for me personally",          type: "scale" },
-    { id: "q_useful",   label: "I learned something useful about myself or my partner", type: "scale" },
-    { id: "q_conv",     label: "This made me want to have a real conversation with my partner", type: "scale" },
-    { id: "q_stage",    label: "Where are you in your relationship?",                  type: "choice",
-      options: ["Just started dating", "In a relationship (1–3 yrs)", "Long-term (3+ yrs)", "Engaged", "Married"] },
-    { id: "q_source",   label: "How did you hear about Attune?",                        type: "choice",
-      options: ["Friend or partner", "Social media", "Google / search", "Gift", "Other"] },
-    { id: "q_open",     label: "Anything else you'd like us to know?",                 type: "text" },
-  ];
-
-  const scaleLabels = ["Strongly disagree", "Disagree", "Neutral", "Agree", "Strongly agree"];
-  const scaleColors = ["#ef4444","#f97316","#eab308","#22c55e","#10b981"];
-
-  function handleSubmit() {
-    setSubmitting(true);
-    // POST to feedback API with non-PII demographic context
-    const payload = {
-      source: 'app_experience',
-      rating,
-      questionAnswers: answers,
-      // Demographic context (non-PII)
-      pkgType: demoPkg || 'unknown',
-      exercisesComplete: [myAnswers, partAnswers].filter(a => a && Object.keys(a).length > 0).length,
-      stage: answers['q_stage'] || null,
-      howHeard: answers['q_source'] || null,
-      message: answers['q_open'] || null,
-    };
-    fetch('/api/send-feedback', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
-    }).catch(() => {}); // non-blocking
-    setTimeout(() => { setPhase("thanks"); setSubmitting(false); }, 600);
-  }
-
-  const allScaleAnswered = questions.filter(q => q.type === "scale").every(q => answers[q.id] != null);
-
-  if (phase === "idle") {
-    return (
-      <div style={{ marginTop: "2.5rem", background: "linear-gradient(135deg,#0f0c29,#1d1a4e)", borderRadius: 18, padding: "2rem", textAlign: "center", position: "relative", overflow: "hidden" }}>
-        <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 3, background: "linear-gradient(90deg,#E8673A,#1B5FE8)" }} />
-        <div style={{ width: 28, height: 28, borderRadius: "50%", background: "linear-gradient(135deg,#E8673A,#1B5FE8)", marginBottom: "0.6rem" }} />
-        <div style={{ fontFamily: HFONT, fontSize: "1.1rem", fontWeight: 700, color: "white", marginBottom: "0.4rem" }}>How was your experience?</div>
-        <p style={{ fontSize: "0.78rem", color: "rgba(255,255,255,.75)", lineHeight: 1.65, marginBottom: "1.25rem", maxWidth: 400, margin: "0 auto 1.25rem" }}>Tell us how it went, it takes 2 minutes and helps us make Attune better for every couple after you.</p>
-        <div style={{ display: "flex", gap: "0.75rem", justifyContent: "center", flexWrap: "wrap", marginBottom: "1rem" }}>
-          {["😕 Not great","😐 It was okay","🙂 Pretty good","😍 Loved it"].map((label, i) => (
-            <button key={i} onClick={() => { setRating(i); setPhase("form"); }}
-              style={{ background: "rgba(255,255,255,.08)", border: "1.5px solid rgba(255,255,255,.15)", borderRadius: 10, padding: "0.55rem 1rem", fontSize: "0.8rem", color: "rgba(255,255,255,.75)", cursor: "pointer", fontFamily: BFONT, fontWeight: 500, transition: "all .15s" }}
-              onMouseEnter={e => { e.currentTarget.style.background = "rgba(255,255,255,.14)"; e.currentTarget.style.borderColor = "rgba(255,255,255,.3)"; }}
-              onMouseLeave={e => { e.currentTarget.style.background = "rgba(255,255,255,.08)"; e.currentTarget.style.borderColor = "rgba(255,255,255,.15)"; }}>
-              {label}
-            </button>
-          ))}
-        </div>
-        <button onClick={() => setPhase("form")}
-          style={{ fontSize: "0.7rem", color: "rgba(255,255,255,.3)", background: "transparent", border: "none", cursor: "pointer", fontFamily: BFONT, textDecoration: "underline" }}>
-          Skip rating and give detailed feedback
-        </button>
-      </div>
-    );
-  }
-
-  if (phase === "thanks") {
-    return (
-      <div style={{ marginTop: "2.5rem", background: "linear-gradient(135deg,#0e2a18,#154428)", borderRadius: 18, padding: "2rem", textAlign: "center" }}>
-        <div style={{ width: 28, height: 28, borderRadius: "50%", background: "#10b981", marginBottom: "0.5rem" }} />
-        <div style={{ fontFamily: HFONT, fontSize: "1.05rem", fontWeight: 700, color: "white", marginBottom: "0.4rem" }}>Thank you{userName ? `, ${userName}` : ""}.</div>
-        <p style={{ fontSize: "0.78rem", color: "rgba(255,255,255,.4)", lineHeight: 1.65 }}>Your feedback goes directly to the people building Attune. It genuinely matters.</p>
-      </div>
-    );
-  }
-
-  // form phase
-  return (
-    <div style={{ marginTop: "2.5rem", background: "white", border: `1.5px solid ${C.stone}`, borderRadius: 18, overflow: "hidden" }}>
-      {/* Header */}
-      <div style={{ background: "linear-gradient(135deg,#0f0c29,#1d1a4e)", padding: "1.25rem 1.5rem", position: "relative" }}>
-        <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 3, background: "linear-gradient(90deg,#E8673A,#1B5FE8)" }} />
-        <div style={{ fontFamily: HFONT, fontSize: "1rem", fontWeight: 700, color: "white" }}>Tell us how it was</div>
-        <div style={{ fontSize: "0.72rem", color: "rgba(255,255,255,.4)", marginTop: "0.25rem", fontFamily: BFONT }}>Anonymous · 2 minutes · helps us improve Attune for everyone</div>
-        {rating !== null && (
-          <div style={{ marginTop: "0.6rem", display: "inline-block", background: "rgba(255,255,255,.1)", borderRadius: 8, padding: "0.3rem 0.75rem", fontSize: "0.78rem", color: "rgba(255,255,255,.7)", fontFamily: BFONT }}>
-            You said: {["😕 Not great","😐 It was okay","🙂 Pretty good","😍 Loved it"][rating]}
-          </div>
-        )}
-      </div>
-
-      {/* Questions */}
-      <div style={{ padding: "1.5rem" }}>
-        {/* Scale questions */}
-        <div style={{ marginBottom: "1.5rem" }}>
-          <div style={{ fontSize: "0.6rem", letterSpacing: "0.18em", textTransform: "uppercase", color: C.muted, fontFamily: BFONT, fontWeight: 700, marginBottom: "1rem" }}>Rate each statement</div>
-          {questions.filter(q => q.type === "scale").map(q => (
-            <div key={q.id} style={{ marginBottom: "1.1rem" }}>
-              <div style={{ fontSize: "0.8rem", color: C.text, fontFamily: BFONT, fontWeight: 500, marginBottom: "0.5rem", lineHeight: 1.4 }}>{q.label}</div>
-              <div style={{ display: "flex", gap: "0.4rem" }}>
-                {scaleLabels.map((lbl, i) => (
-                  <button key={i} onClick={() => setAnswers(prev => ({ ...prev, [q.id]: i }))}
-                    style={{ flex: 1, background: answers[q.id] === i ? scaleColors[i] : C.warm, border: `1.5px solid ${answers[q.id] === i ? scaleColors[i] : C.stone}`, borderRadius: 8, padding: "0.4rem 0.25rem", fontSize: "0.6rem", color: answers[q.id] === i ? "white" : C.muted, cursor: "pointer", fontFamily: BFONT, fontWeight: answers[q.id] === i ? 700 : 400, transition: "all .15s", lineHeight: 1.3 }}>
-                    {lbl}
-                  </button>
-                ))}
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {/* Choice questions */}
-        {questions.filter(q => q.type === "choice").map(q => (
-          <div key={q.id} style={{ marginBottom: "1.1rem" }}>
-            <div style={{ fontSize: "0.8rem", color: C.text, fontFamily: BFONT, fontWeight: 500, marginBottom: "0.5rem" }}>{q.label}</div>
-            <div style={{ display: "flex", gap: "0.4rem", flexWrap: "wrap" }}>
-              {q.options.map(opt => (
-                <button key={opt} onClick={() => setAnswers(prev => ({ ...prev, [q.id]: opt }))}
-                  style={{ background: answers[q.id] === opt ? "#1B5FE8" : C.warm, border: `1.5px solid ${answers[q.id] === opt ? "#1B5FE8" : C.stone}`, borderRadius: 999, padding: "0.35rem 0.75rem", fontSize: "0.72rem", color: answers[q.id] === opt ? "white" : C.muted, cursor: "pointer", fontFamily: BFONT, fontWeight: answers[q.id] === opt ? 700 : 400, transition: "all .15s" }}>
-                  {opt}
-                </button>
-              ))}
-            </div>
-          </div>
-        ))}
-
-        {/* Open text */}
-        {questions.filter(q => q.type === "text").map(q => (
-          <div key={q.id} style={{ marginBottom: "1.25rem" }}>
-            <div style={{ fontSize: "0.8rem", color: C.text, fontFamily: BFONT, fontWeight: 500, marginBottom: "0.5rem" }}>{q.label}</div>
-            <textarea
-              value={answers[q.id] || ""}
-              onChange={e => setAnswers(prev => ({ ...prev, [q.id]: e.target.value }))}
-              placeholder="Optional, anything at all..."
-              style={{ width: "100%", minHeight: 90, padding: "0.75rem", borderRadius: 10, border: `1.5px solid ${C.stone}`, fontFamily: BFONT, fontSize: "0.82rem", color: C.text, resize: "vertical", outline: "none", boxSizing: "border-box", lineHeight: 1.65 }}
-              onFocus={e => e.target.style.borderColor = "#1B5FE8"}
-              onBlur={e => e.target.style.borderColor = C.stone}
-            />
-          </div>
-        ))}
-
-        <button onClick={handleSubmit} disabled={!allScaleAnswered || submitting}
-          style={{ width: "100%", background: allScaleAnswered ? "linear-gradient(135deg,#E8673A,#1B5FE8)" : C.stone, color: allScaleAnswered ? "white" : C.muted, border: "none", borderRadius: 12, padding: "0.85rem", fontSize: "0.82rem", fontWeight: 700, cursor: allScaleAnswered ? "pointer" : "default", fontFamily: BFONT, letterSpacing: "0.04em", transition: "opacity .2s" }}>
-          {submitting ? "Sending..." : "Submit feedback →"}
-        </button>
-        <div style={{ fontSize: "0.68rem", color: C.muted, textAlign: "center", marginTop: "0.6rem", fontFamily: BFONT }}>Your feedback is anonymous and never linked to your name or email.</div>
-      </div>
-    </div>
-  );
-}
 
 // -- PERSONALITY RESULTS --
 // Per-dimension headline copy - unique per dim, 3 tiers by gap
@@ -5260,25 +4548,13 @@ function PersonalityResults({ myAnswers, partnerAnswers, userName, partnerName, 
 }
 
 
-// -- EXPECTATIONS// -- EXPECTATIONS RESULTS -- VISUAL FLOW --
-const EXP_CAT_COLORS = ["#2196F3","#FF9800","#E8673A","#9C27B0","#4CAF50","#FF5722","#00BCD4","#795548","#FFC107","#3F51B5"];
-const EXP_CAT_BGS    = ["#E8F4FD","#FFF3E0","#FCE4EC","#F3E5F5","#E8F5E9","#FBE9E7","#E0F7FA","#EFEBE9","#FFFDE7","#E8EAF6"];
 
-// Category importance weight -- higher = more significant conversations (item 8)
-const CAT_WEIGHT = {
-  "Intimacy": 5, "Parenting": 5, "Career": 4, "Extended Family": 4,
-  "Money Values": 4, "Finances": 3, "Social Life": 3,
-  "Family Life": 2, "Home": 2, "Health": 2,
-};
 
 // Unique origin context per gap -- avoids repeated phrases (item 12)
 // Expectations pages share one background. The previous values read near-black:
 // the category pages had no bg at all and fell through to the flat #0f0c29.
 const EXP_BG = "linear-gradient(145deg, #211d4d, #413a85, #2e295c)";
 
-function buildOriginNote(g, userName, partnerName, gapIdx) {
-  return null; // Origin tracking removed from simplified exercise
-}
 function ExpectationsResults({ myAnswers, partnerAnswers, userName, partnerName, forcedSection, noSideNav = false, onGoWhatComesNext, onExternalGo, coupleTypeCode = null, coupleTypeName = null, coupleTypeColor = "#1B5FE8" }) {
   // ── Fixed 5 display categories ──────────────────────────────────────────────
   // ── Step system: 0=overview, "convo-0".."convo-4"=individual cats,
@@ -7504,7 +6780,6 @@ function InsightCardList({ insights = [] }) {
 
 // ── Action plan item list with show-more ─────────────────────────────────────
 function ActionPlanList({ explores = [] }) {
-  const [showAll, setShowAll] = useState(false);
   const SHOW_INIT = 3;
   const visible = explores; // #5: always show all; no reveal dropdown
   const hidden = explores.length - SHOW_INIT;
@@ -7531,141 +6806,6 @@ function ActionPlanList({ explores = [] }) {
   );
 }
 
-function AnniversaryResultsView({ userName, partnerName, myAnswers, onBack }) {
-  const mine = myAnswers || SARAH_ANNIVERSARY_DEMO;
-  const theirs = JAMES_ANNIVERSARY_DEMO;
-  const [activeSection, setActiveSection] = useState("insights");
-  const insights = deriveAnniversaryInsights(mine, theirs, userName, partnerName, coupleType);
-
-  const questions = [
-    { id: "a1", label: "A moment that defined us", category: "Milestones" },
-    { id: "a2", label: "Something that made us stronger", category: "Milestones" },
-    { id: "a6", label: "What I want to work on", category: "Looking Forward" },
-    { id: "a7", label: "Something I wish we'd handled differently", category: "Looking Forward" },
-    { id: "a5", label: "Where I see us in 5 years", category: "Looking Forward" },
-    { id: "a3", label: "What I'm most grateful for", category: "What Matters" },
-    { id: "a4", label: "What I want more of together", category: "What Matters" },
-  ];
-
-  const sections = [
-    { id: "insights", label: "Insights & Next Steps" },
-    { id: "story",    label: "Side by Side" },
-  ];
-
-  return (
-    <div style={{ animation: "slideUp 0.4s cubic-bezier(0.16,1,0.3,1)" }}>
-      <style>{'@keyframes slideUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}'}</style>
-      <link href={FONT_URL} rel="stylesheet" />
-
-      {/* Hero */}
-      <div style={{ background: "linear-gradient(145deg, #071a10, #0d3320, #0f3d26)", borderRadius: 20, padding: "2rem 2rem 1.75rem", marginBottom: "1.25rem", color: "white", position: "relative", overflow: "hidden" }}>
-        <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 3, background: "linear-gradient(90deg, #1B5FE8, #5B6DF8)" }} />
-        <div style={{ position: "absolute", bottom: -40, right: -20, width: 160, height: 160, borderRadius: "50%", background: "radial-gradient(circle, rgba(16,185,129,0.1), transparent 70%)", pointerEvents: "none" }} />
-        <div style={{ fontSize: "0.6rem", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(52,211,153,0.9)", marginBottom: "0.5rem", fontFamily: BFONT }}>Relationship Reflection</div>
-        <div style={{ fontSize: "clamp(1.8rem,5vw,2.4rem)", fontWeight: 700, fontFamily: HFONT, lineHeight: 1.1, marginBottom: "0.6rem" }}>
-          {userName} & {partnerName}
-        </div>
-        <p style={{ fontSize: "0.8rem", color: "rgba(255,255,255,0.65)", fontFamily: BFONT, fontWeight: 300, lineHeight: 1.65, maxWidth: 460 }}>Both of you reflected independently. What follows draws out what's most meaningful, and what's worth prioritizing together next.</p>
-
-        {/* Section tabs */}
-        <div style={{ display: "flex", gap: "0.4rem", marginTop: "1.25rem" }}>
-          {sections.map(s => (
-            <button key={s.id} onClick={() => setActiveSection(s.id)}
-              style={{ background: activeSection === s.id ? "rgba(52,211,153,0.18)" : "rgba(255,255,255,0.06)", border: "1px solid " + (activeSection === s.id ? "rgba(52,211,153,0.45)" : "rgba(255,255,255,0.1)"), color: activeSection === s.id ? "#34d399" : "rgba(255,255,255,0.65)", padding: "0.35rem 0.9rem", fontSize: "0.68rem", cursor: "pointer", fontFamily: BFONT, borderRadius: 999, fontWeight: activeSection === s.id ? 600 : 400, transition: "all 0.15s" }}>
-              {s.label}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* INSIGHTS TAB */}
-      {activeSection === "insights" && (
-        <div>
-          {/* Scale snapshot */}
-          <div style={{ background: "white", border: "1.5px solid " + C.stone, borderRadius: 16, padding: "1.25rem 1.25rem 1rem", marginBottom: "1.25rem", overflow: "hidden" }}>
-            <div style={{ fontSize: "0.6rem", fontWeight: 700, color: C.clay, textTransform: "uppercase", letterSpacing: "0.18em", fontFamily: BFONT, marginBottom: "1rem" }}>How you're each feeling right now</div>
-            {ANNIVERSARY_QUESTIONS.filter(q => q.type === "scale").map(q => {
-              const myVal = mine[q.id] ?? 2;
-              const theirVal = theirs[q.id] ?? 2;
-              return (
-                <div key={q.id} style={{ marginBottom: "0.85rem" }}>
-                  <div style={{ fontSize: "0.72rem", color: C.ink, fontWeight: 500, fontFamily: BFONT, marginBottom: "0.45rem" }}>{q.text}</div>
-                  <div style={{ display: "flex", flexDirection: "column", gap: "0.3rem" }}>
-                    {[[userName, myVal, "#E8673A"], [partnerName, theirVal, "#1B5FE8"]].map(([name, val, color]) => (
-                      <div key={name} style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-                        <div style={{ fontSize: "0.6rem", fontWeight: 700, color, width: 44, flexShrink: 0, fontFamily: BFONT }}>{name}</div>
-                        <div style={{ display: "flex", gap: 3, flex: 1 }}>
-                          {q.scaleLabels.map((_, i) => (
-                            <div key={i} style={{ flex: 1, height: 7, borderRadius: 3, background: i <= val ? color : color + "22" }} />
-                          ))}
-                        </div>
-                        <div style={{ fontSize: "0.62rem", color: C.muted, fontFamily: BFONT, width: 90, flexShrink: 0, textAlign: "right" }}>{q.scaleLabels[val]}</div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-
-          {/* Summary bar */}
-          <div style={{ display: "flex", gap: "0.6rem", marginBottom: "1.25rem", flexWrap: "wrap" }}>
-            {[
-              { label: `${insights.filter(i=>i.type==="strength").length} strengths identified`, color: "#10b981", bg: "#EDFAF5" },
-              { label: `${insights.filter(i=>i.type==="explore").length} areas to explore`, color: "#F59E0B", bg: "#FEF9EE" },
-              { label: "14 questions · 2 voices", color: "#1B5FE8", bg: "#EEF0FF" },
-            ].map(b => (
-              <div key={b.label} style={{ background: b.bg, borderRadius: 8, padding: "0.3rem 0.7rem", display: "flex", alignItems: "center", gap: "0.3rem" }}>
-                <div style={{ width: 6, height: 6, borderRadius: "50%", background: b.color, flexShrink: 0 }} />
-                <span style={{ fontSize: "0.65rem", color: b.color, fontWeight: 600, fontFamily: BFONT }}>{b.label}</span>
-              </div>
-            ))}
-          </div>
-
-          {/* Insight cards */}
-          <InsightCardList insights={insights} />
-
-          {/* Closing card */}
-          <div style={{ background: "linear-gradient(145deg, #071a10, #0d3320)", borderRadius: 16, padding: "2rem", color: "white", textAlign: "center", marginTop: "0.5rem" }}>
-            <div style={{ width: 24, height: 24, borderRadius: "50%", background: "#10b981", marginBottom: "0.75rem" }} />
-            <p style={{ fontFamily: font.display, fontSize: "1.15rem", fontWeight: 700, color: "white", marginBottom: "0.75rem", lineHeight: 1.3 }}>You're not starting from scratch. You're building on something real.</p>
-            <p style={{ fontSize: "0.8rem", color: "rgba(255,255,255,0.65)", fontFamily: BFONT, fontWeight: 300, lineHeight: 1.75, maxWidth: 420, margin: "0 auto" }}>These reflections are yours to keep. Come back to them. The conversations they point to are the ones that matter, the ones about choosing each other with more intention.</p>
-          </div>
-        </div>
-      )}
-
-      {/* SIDE BY SIDE TAB */}
-      {activeSection === "story" && (
-        <div>
-          {/* Group by category */}
-          {["Milestones", "How We're Doing", "Looking Forward", "What Matters"].map(cat => {
-            const catQs = questions.filter(q => q.category === cat);
-            return (
-              <div key={cat} style={{ marginBottom: "1.5rem" }}>
-                <div style={{ fontSize: "0.6rem", letterSpacing: "0.2em", textTransform: "uppercase", color: "#1B5FE8", fontWeight: 700, fontFamily: BFONT, marginBottom: "0.6rem" }}>{cat}</div>
-                {catQs.map(q => (
-                  <div key={q.id} style={{ background: "white", border: "1.5px solid " + C.stone, borderRadius: 14, marginBottom: "0.65rem", overflow: "hidden" }}>
-                    <div style={{ padding: "0.7rem 1.1rem", borderBottom: "1px solid " + C.stone + "50", background: "#FAFAF8" }}>
-                      <span style={{ fontFamily: font.display, fontSize: "0.82rem", fontWeight: 700, color: C.ink }}>{q.label}</span>
-                    </div>
-                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr" }}>
-                      {[[userName, mine[q.id], "#E8673A"], [partnerName, theirs[q.id], "#1B5FE8"]].map(([name, ans, col], i) => (
-                        <div key={name} style={{ padding: "0.9rem 1.1rem", borderRight: i === 0 ? "1px solid " + C.stone + "40" : "none" }}>
-                          <div style={{ fontSize: "0.58rem", letterSpacing: "0.14em", textTransform: "uppercase", color: col, fontWeight: 700, fontFamily: BFONT, marginBottom: "0.45rem" }}>{name}</div>
-                          <p style={{ fontSize: "0.79rem", color: C.text, fontFamily: BFONT, fontWeight: 300, lineHeight: 1.72, margin: 0, fontStyle: "italic" }}>"{ans || "-"}"</p>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            );
-          })}
-        </div>
-      )}
-    </div>
-  );
-}
 
 // ─────────────────────────────────────────────────────────────────────────────
 // BETA SURVEY MODAL — 4-question in-app feedback, triggered from results sidebar
@@ -8197,7 +7337,6 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
   const coupleType = deriveCoupleTypeFromExercise(
     myS, partS, alignPct
   );
-  const [typeCopied, setTypeCopied] = useState(false);
   const [typeShared, setTypeShared] = useState(false);
   const shareCardRef = useRef(null);
   const [shareBusy, setShareBusy] = useState(false);
@@ -12289,138 +11428,7 @@ function PartnerBCompletionScreen({ partnerAName, partnerBName, partnerADone, pa
   );
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// PARTNER INVITE PANEL — shown on dashboard when partner hasn't joined
-// ─────────────────────────────────────────────────────────────────────────────
-function PartnerInviteCard({ account, onCopy, copied }) {
-  if (!account) return null;
-  const inviteUrl = `${window.location.origin}/app?invite=${account.inviteCode}&from=${encodeURIComponent(account.name)}${account.email ? `&pae=${encodeURIComponent(account.email)}` : ''}${account.partnerEmail ? `&iie=${encodeURIComponent(account.partnerEmail)}` : ''}`;
-  const [resent, setResent] = React.useState(false);
-  const [resending, setResending] = React.useState(false);
-  const canShare = typeof navigator !== 'undefined' && typeof navigator.share === 'function';
 
-  const handleNativeShare = async () => {
-    try {
-      await navigator.share({
-        title: 'Attune',
-        text: `${account.name} invited you to Attune. Set up your profile here:`,
-        url: inviteUrl,
-      });
-    } catch {
-      // User cancelled or share unavailable — no-op
-    }
-  };
-
-  const handleResend = async () => {
-    if (!account.partnerEmail || resending || resent) return;
-    setResending(true);
-    // Retry helper handles transient failures. The 'resent' UI flag should
-    // only flip on actual success — otherwise a confused user thinks their
-    // partner got the invite when they didn't.
-    const result = await sendEmailWithRetry({
-      type: 'partner_invite',
-      fromName: account.name,
-      toEmail: account.partnerEmail,
-      toName: account.partnerName || 'Your partner',
-      inviteUrl,
-    });
-    if (result.ok) setResent(true);
-    setResending(false);
-  };
-
-  // Days since the account was created (proxy for "how long has partner been invited")
-  const daysSinceInvite = account.createdAt ? Math.floor((Date.now() - account.createdAt) / 86400000) : 0;
-  const isOverdue = daysSinceInvite >= 5;
-
-  return (
-    <div style={{ background: "linear-gradient(135deg, #1B5FE8, #1447b8)", borderRadius: 16, padding: "1.35rem 1.5rem", marginBottom: "1rem", color: "white" }}>
-      <div style={{ fontSize: "0.58rem", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.55)", fontFamily: "'DM Sans',sans-serif", fontWeight: 700, marginBottom: "0.4rem" }}>
-        {isOverdue ? 'Still waiting' : 'Invite your partner'}
-      </div>
-      <p style={{ fontSize: "0.88rem", fontWeight: 600, color: "white", fontFamily: "'Playfair Display',Georgia,serif", marginBottom: "0.25rem", lineHeight: 1.3 }}>
-        {isOverdue
-          ? `It's been a few days since you invited ${account.partnerName || 'your partner'}.`
-          : (account.partnerName ? `Send this to ${account.partnerName}` : "Share this link with your partner")}
-      </p>
-      <p style={{ fontSize: "0.72rem", color: "rgba(255,255,255,0.65)", fontFamily: "'DM Sans',sans-serif", marginBottom: "1rem", lineHeight: 1.5 }}>
-        {isOverdue
-          ? (account.partnerEmail ? 'Resend the invite email, or share the link below directly.' : 'Share the link below to nudge them.')
-          : "They'll create their own account and complete the exercises independently. Results unlock when both of you are done."}
-      </p>
-      <div style={{ display: "flex", gap: "0.6rem", alignItems: "center" }}>
-        <div style={{ flex: 1, background: "rgba(255,255,255,0.12)", borderRadius: 10, padding: "0.55rem 0.85rem", fontSize: "0.68rem", fontFamily: "'DM Sans',sans-serif", color: "rgba(255,255,255,0.8)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-          {inviteUrl}
-        </div>
-        {canShare ? (
-          <button onClick={handleNativeShare}
-            style={{ background: "white", color: "#1B5FE8", border: "none", borderRadius: 10, padding: "0.55rem 1rem", fontSize: "0.75rem", fontWeight: 700, cursor: "pointer", fontFamily: "'DM Sans',sans-serif", flexShrink: 0, display: "flex", alignItems: "center", gap: "0.35rem", minHeight: 44, WebkitTapHighlightColor: "transparent" }}>
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.25" strokeLinecap="round" strokeLinejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
-            Share
-          </button>
-        ) : (
-          <button onClick={() => onCopy(inviteUrl)}
-            style={{ background: copied ? "#10b981" : "white", color: copied ? "white" : "#1B5FE8", border: "none", borderRadius: 10, padding: "0.55rem 1rem", fontSize: "0.75rem", fontWeight: 700, cursor: "pointer", fontFamily: "'DM Sans',sans-serif", flexShrink: 0, transition: "all 0.2s", minHeight: 44 }}>
-            {copied ? "Copied ✓" : "Copy link"}
-          </button>
-        )}
-      </div>
-      {account.partnerEmail && (
-        <div style={{ marginTop: "0.75rem", display: "flex", alignItems: "center", justifyContent: "space-between", gap: "0.75rem" }}>
-          <p style={{ fontSize: "0.68rem", color: "rgba(255,255,255,0.45)", fontFamily: "'DM Sans',sans-serif", margin: 0 }}>
-            We emailed this link to {account.partnerEmail}
-          </p>
-          <button onClick={handleResend} disabled={resent || resending}
-            style={{ background: "transparent", border: "1px solid rgba(255,255,255,0.3)", borderRadius: 8, padding: "0.3rem 0.65rem", fontSize: "0.65rem", fontWeight: 600, color: resent ? "#10b981" : "rgba(255,255,255,0.7)", cursor: resent ? "default" : "pointer", fontFamily: "'DM Sans',sans-serif", flexShrink: 0, transition: "all 0.2s" }}>
-            {resent ? "Sent ✓" : resending ? "Sending…" : "Resend email"}
-          </button>
-        </div>
-      )}
-    </div>
-  );
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// PROFILE SETUP PROMPT — big card shown at top of dashboard until profile complete
-// ─────────────────────────────────────────────────────────────────────────────
-function ProfileSetupPrompt({ account, onSetupProfile }) {
-  return (
-    <div style={{ background: "linear-gradient(135deg, rgba(232,103,58,0.08), rgba(27,95,232,0.08))", border: "1.5px solid rgba(232,103,58,0.2)", borderRadius: 20, padding: "1.75rem 2rem", marginBottom: "1.5rem" }}>
-      <div style={{ display: "flex", alignItems: "flex-start", gap: "1rem" }}>
-        <div style={{ width: 44, height: 44, borderRadius: 12, background: "linear-gradient(135deg, #E8673A22, #1B5FE822)", border: "1.5px solid rgba(232,103,58,0.2)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, fontSize: "1.2rem" }}>
-          ✦
-        </div>
-        <div style={{ flex: 1 }}>
-          <div style={{ fontFamily: "'Playfair Display',Georgia,serif", fontSize: "1.15rem", fontWeight: 700, color: "#0E0B07", marginBottom: "0.35rem" }}>
-            Set up your profile to get started
-          </div>
-          <p style={{ fontSize: "0.82rem", color: "#8C7A68", fontFamily: "'DM Sans',sans-serif", lineHeight: 1.65, marginBottom: "1rem", margin: "0 0 1rem" }}>
-            Add your name and your partner's name, then invite them to complete their exercises. Results unlock the moment both of you are done.
-          </p>
-          <div style={{ display: "flex", flexDirection: "column", gap: "0.55rem", marginBottom: "1.25rem" }}>
-            {[
-              { done: !!account?.name, label: "Your name added" },
-              { done: !!account?.partnerName, label: "Partner's name added" },
-              { done: account?.partnerJoined, label: "Partner has joined" },
-            ].map((step, i) => (
-              <div key={i} style={{ display: "flex", alignItems: "center", gap: "0.65rem" }}>
-                <div style={{ width: 18, height: 18, borderRadius: "50%", background: step.done ? "#10b981" : "transparent", border: `1.5px solid ${step.done ? "#10b981" : "#C17F47"}`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                  {step.done && <span style={{ color: "white", fontSize: "0.6rem", fontWeight: 700 }}>✓</span>}
-                </div>
-                <span style={{ fontSize: "0.8rem", color: step.done ? "#0E0B07" : "#8C7A68", fontFamily: "'DM Sans',sans-serif", fontWeight: step.done ? 600 : 400, textDecoration: step.done ? "line-through" : "none" }}>
-                  {step.label}
-                </span>
-              </div>
-            ))}
-          </div>
-          <button onClick={onSetupProfile}
-            style={{ background: "linear-gradient(135deg, #E8673A, #d45a2e)", color: "white", border: "none", borderRadius: 11, padding: "0.7rem 1.5rem", fontSize: "0.82rem", fontWeight: 700, cursor: "pointer", fontFamily: "'DM Sans',sans-serif" }}>
-            Complete profile setup →
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}
 
 
 
@@ -12782,7 +11790,6 @@ export default function App() {
   // showToast in scope) can surface sync errors.
   useEffect(() => { window.__attuneShowToast = showToast; return () => { delete window.__attuneShowToast; }; }, [toastTimer]);
   const [pwaPrompt, setPwaPrompt] = useState(null);
-  const [pwaDismissed, setPwaDismissed] = useState(false);
   useEffect(() => {
     const handler = (e) => { e.preventDefault(); setPwaPrompt(e); };
     window.addEventListener('beforeinstallprompt', handler);
@@ -12790,7 +11797,7 @@ export default function App() {
   }, []);
 
   const handleInstall = () => {
-    if (pwaPrompt) { pwaPrompt.prompt(); pwaPrompt.userChoice.then(() => { setPwaPrompt(null); setPwaDismissed(true); }); }
+    if (pwaPrompt) { pwaPrompt.prompt(); pwaPrompt.userChoice.then(() => setPwaPrompt(null)); }
   };
   const params = new URLSearchParams(window.location.search);
   const initialView = params.get("view") || "home";
@@ -13882,8 +12889,10 @@ export default function App() {
   const [ex2Answers, setEx2State] = useState(_initEx2);
   const [ex3Answers, setEx3State] = useState(_initEx3); // Anniversary exercise
   // Prior completions — populated from profile.ex{N}_answers_prior when the
-  // user has retaken an exercise. Powers the RetakeComparisonCard on
-  // the results page. null for first-time completions.
+  // user has retaken an exercise. null for first-time completions.
+  // Only ex2 currently renders a RetakeComparisonCard (it is the only exercise
+  // the card knows how to flatten). The ex1/ex3 prior values are hydrated and
+  // held for when that card covers them; nothing reads them yet.
   const [ex1AnswersPrior, setEx1Prior] = useState(null);
   const [ex2AnswersPrior, setEx2Prior] = useState(null);
   const [ex3AnswersPrior, setEx3Prior] = useState(null);
@@ -13982,7 +12991,6 @@ export default function App() {
   const [showProfileSetup, setShowProfileSetup] = useState(false);
   const [showNavDropdown, setShowNavDropdown] = useState(false); // Profile nav dropdown
   const [mobileNavOpen, setMobileNavOpen] = useState(false); // Mobile hamburger nav
-  const [inviteCopied, setInviteCopied] = useState(false);
   const [inviteResent, setInviteResent] = useState(false);
   const [upsellModal, setUpsellModal] = useState(null); // { product: 'workbook'|'reflection'|'checklist', cartAdded: false }
   const [showPackagesModal, setShowPackagesModal] = useState(false); // "Explore other packages" modal
@@ -13993,10 +13001,6 @@ export default function App() {
   // 'digital' | 'print' | '' (premium includes it without an explicit add-on)
   const hasWorkbookOrder = !!order?.addonWorkbook || (order?.pkgKey || order?.pkg) === 'premium';
   const isWorkbookPrint  = order?.addonWorkbook === 'print';
-  // Workbook notification: show prominent tile when workbook is generated
-  const [workbookNotifSeen, setWorkbookNotifSeen] = useState(() => {
-    try { return localStorage.getItem('attune_workbook_notif_seen') === '1'; } catch { return false; }
-  });
   const [workbookReady,  setWorkbookReady]  = useState(() => {
     try {
       if (localStorage.getItem('attune_workbook_ready') === 'true') return true;
