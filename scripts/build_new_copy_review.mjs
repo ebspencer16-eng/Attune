@@ -1,6 +1,8 @@
-// Build a review .docx for the NEW customer-facing copy added recently:
-//   1. Same-type Communication Profile pages (4 versions: W/X/Y/Z)
-//   2. Physical Intimacy Expectations add-on questions (18 Qs x premarital/married)
+// Build a review .docx for the Physical Intimacy Expectations add-on questions
+// (18 questions x premarital/married wording).
+//
+// It also covered the same-type Communication Profile pages until those pages
+// were deleted; that section went with them.
 //
 // For Ellie + Carolina to redline before launch. Body size 22 (11pt) per the
 // earlier flag that internal docs were too small. Sources are read straight
@@ -22,15 +24,6 @@ mkdirSync(OUT, { recursive: true });
 const ROSE = 'B5546E';
 const INK = '0E0B07';
 const MUTED = '8C7A68';
-
-// ── Extract SAME_TYPE_PROFILE from App.jsx (it's a const, not exported) ──
-const appSrc = readFileSync(new URL('../src/App.jsx', import.meta.url), 'utf-8');
-const stMatch = appSrc.match(/const SAME_TYPE_PROFILE = (\{[\s\S]+?\n\});/);
-if (!stMatch) throw new Error("Can't find SAME_TYPE_PROFILE in App.jsx");
-const SAME_TYPE_PROFILE = (new Function('return ' + stMatch[1]))();
-// Individual type names for headings
-const itMatch = appSrc.match(/const INDIVIDUAL_TYPES = (\{[\s\S]+?\n\});/);
-const INDIVIDUAL_TYPES = itMatch ? (new Function('return ' + itMatch[1]))() : {};
 
 // ── docx helpers ──
 const p = (text, opts = {}) => new Paragraph({
@@ -54,42 +47,21 @@ const bullet = (text, opts = {}) => new Paragraph({
 const children = [];
 
 // ── Title ──
-children.push(new Paragraph({ spacing: { after: 40 }, children: [new TextRun({ text: 'ATTUNE · NEW COPY REVIEW', bold: true, size: 18, color: ROSE, characterSpacing: 40 })] }));
-children.push(new Paragraph({ heading: HeadingLevel.TITLE, children: [new TextRun({ text: 'Same-Type Profiles + Physical Intimacy Expectations' })] }));
-children.push(p('Two new customer-facing copy areas for review. Mark anything to change. The question ids are stable, so wording edits will not disturb saved answers.', { italics: true, color: MUTED, after: 200 }));
+children.push(new Paragraph({ spacing: { after: 40 }, children: [new TextRun({ text: 'ATTUNE · COPY REVIEW', bold: true, size: 18, color: ROSE, characterSpacing: 40 })] }));
+children.push(new Paragraph({ heading: HeadingLevel.TITLE, children: [new TextRun({ text: 'Physical Intimacy Expectations' })] }));
+children.push(p('Customer-facing copy for review. Mark anything to change. The question ids are stable, so wording edits will not disturb saved answers.', { italics: true, color: MUTED, after: 200 }));
 
-// ════════════════════════════════════════════════════════════════════
-// SECTION 1 — SAME-TYPE COMMUNICATION PROFILES
-// ════════════════════════════════════════════════════════════════════
-children.push(h1('1. Same-Type Communication Profiles'));
-children.push(p('Shown when both partners share the same individual type. Replaces the two near-identical individual profile pages with one combined page. Four versions, one per type.', { color: MUTED, after: 160 }));
-
-const TYPE_ORDER = ['W', 'X', 'Y', 'Z'];
-TYPE_ORDER.forEach((code, i) => {
-  const prof = SAME_TYPE_PROFILE[code];
-  if (!prof) return;
-  const name = INDIVIDUAL_TYPES[code]?.name || code;
-  children.push(h2(`1.${i + 1}  Both ${name} (${code}/${code})`));
-  children.push(eyebrow('Opening line'));
-  children.push(p(prof.hook));
-  children.push(eyebrow('What you share'));
-  children.push(p(prof.shared));
-  children.push(eyebrow('Where it can get tricky'));
-  children.push(p(prof.tricky));
-  children.push(rule());
-});
 
 // ════════════════════════════════════════════════════════════════════
 // SECTION 2 — PHYSICAL INTIMACY EXPECTATIONS QUESTIONS
 // ════════════════════════════════════════════════════════════════════
-children.push(new Paragraph({ pageBreakBefore: true, children: [] }));
-children.push(h1('2. Physical Intimacy Expectations — Add-On Questions'));
+children.push(h1('Physical Intimacy Expectations — Add-On Questions'));
 children.push(p('SCAFFOLD COPY — pending Carolina review. 18 questions across 6 dimensions. Each question shows both variant framings (premarital / already-married) and every answer option. Every question is required; "Prefer not to say" is the comfort option.', { italics: true, color: MUTED, after: 80 }));
 children.push(p('Entry framing (shown before the questions):', { bold: true, after: 40 }));
 children.push(p('Physical intimacy is one of the biggest things couples assume they are aligned on, and one of the least talked about. This is a private set of questions about what you each expect. You answer on your own. Neither of you sees the other\'s answers until you have both finished. There are no right answers, and no answer here is better than another. This is an expectations tool, not therapy.', { italics: true, indent: 360, after: 160 }));
 
 INTIMACY_DIMENSIONS.forEach((dim, di) => {
-  children.push(h2(`2.${di + 1}  ${dim.label}`));
+  children.push(h2(`${di + 1}.  ${dim.label}`));
   const qs = INTIMACY_QUESTIONS.filter(q => q.dimension === dim.id);
   qs.forEach((q, qi) => {
     children.push(p(`${dim.label} — Q${qi + 1}: ${q.topic}`, { bold: true, before: 120, after: 40 }));

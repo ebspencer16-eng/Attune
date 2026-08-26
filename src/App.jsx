@@ -4698,16 +4698,6 @@ const admiredNounLower = v => { const n = admiredNoun(v); return n ? n.toLowerCa
 // problem the person never described. Anything that reads as a non-answer, or
 // is too short to carry meaning, is treated as "not provided".
 const NON_ANSWER = /^(n\/?a|none|nothing|no|nope|idk|i don'?t know|not sure|nothing really|nothing comes to mind|nothing much|can'?t think of (one|any|anything)|nothing i can think of|-+|\.+)$/i;
-// Quoted user words render in italics so they read as the person's own voice
-// rather than as our copy. Splits on the curly quotes that quoted() emits.
-function renderWithQuotes(text) {
-  const parts = String(text || "").split(/(\u201C[^\u201D]*\u201D)/g);
-  return parts.map((part, i) =>
-    part.startsWith("\u201C") && part.endsWith("\u201D")
-      ? <em key={i} style={{ fontStyle: "italic" }}>{part}</em>
-      : <React.Fragment key={i}>{part}</React.Fragment>
-  );
-}
 
 function isSubstantive(v) {
   if (typeof v !== "string") return false;
@@ -6417,10 +6407,6 @@ function deriveAnniversaryInsights(mine, theirs, userName, partnerName, coupleTy
   return insights;
 }
 
-const INSIGHT_COLORS = {
-  strength: { bg: "#EDFAF5", border: "#10b981", label: "rgba(5,150,105,0.9)", labelBg: "#D1FAE5", dot: "#10b981" },
-  explore:  { bg: "#FFF7ED", border: "#F59E0B", label: "rgba(180,83,9,0.9)",  labelBg: "#FEF3C7", dot: "#F59E0B" },
-};
 
 
 // ── Action plan item list with show-more ─────────────────────────────────────
