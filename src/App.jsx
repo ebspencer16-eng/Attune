@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useLayoutEffect, useRef } from "react";
-import { axisScores, blendedDimScores } from "../api/_type-engine.js";
+import { axisScores, blendedDimScores, AXIS_CONFIG } from "../api/_type-engine.js";
 import { PERSONALITY_QUESTIONS, RESPONSIBILITY_CATEGORIES, LIFE_QUESTIONS, PARTNER_VIEW_TEXT } from "../api/_questions.js";
 import { INTIMACY_QUESTIONS, INTIMACY_DIMENSIONS, summarizeIntimacy, intimacyDimensionPositions, intimacyDimensionSkips } from "../api/_intimacy-questions.js";
 
@@ -3909,6 +3909,81 @@ function resolveRoleTokens(str, myS, partS, userName, partnerName, userPronouns 
   return out;
 }
 
+// One action item per dimension, ten in all, for the results-at-a-glance plan.
+// The plan shows the widest-gap dimension in each domain, so these need to be
+// pointed rather than generic: each names the specific mismatch and gives one
+// concrete thing to do this week. {LO} and {HI} resolve to whichever partner
+// sits at the low and high end of that dimension.
+// DRAFT copy, in the prose approval doc.
+const DIM_ACTION_ITEMS = {
+  energy: {
+    title: "Say when you are running empty",
+    body: "{LO} refuels alone, {HI} refuels around people. Neither of you can read the other's tank from the outside. This week, say it out loud before you hit empty, not after. One sentence: 'I need an hour on my own' or 'I need to be around people tonight.'",
+  },
+  expression: {
+    title: "Close the gap between feeling it and saying it",
+    body: "{HI} names it in the moment. {LO} works it out inside first and brings it later. The quiet is not withholding and the speed is not pressure. This week, {LO} shares one thing while it is still half-formed, and {HI} waits a beat before filling the silence.",
+  },
+  reassurance: {
+    title: "Say where you stand without being asked",
+    body: "{LO} needs it said. {HI} treats it as settled. That difference decides what a long quiet stretch means to each of you. Once this week, say it plainly and unprompted. One sentence. Notice how it lands.",
+  },
+  love: {
+    title: "Give it in their currency, not yours",
+    body: "{LO} feels it in words, {HI} feels it in what gets done. You are both showing up, in the language that reads as love to you. This week, each of you does one thing in the other's currency instead of your own.",
+  },
+  needs: {
+    title: "Ask straight, once",
+    body: "{LO} asks directly. {HI} hints, or waits to be offered. The hint is a real ask, and it is easy to miss. Once this week, {HI} asks for something outright, with no preamble and no apology, and {LO} notices the hints that were already there.",
+  },
+  bids: {
+    title: "Catch the small ones",
+    body: "{HI} reaches out obviously. {LO} reaches out quietly, and quiet bids are the ones that get missed. Once a day this week, when the other does something small for you, say what you noticed, not just thanks.",
+  },
+  listening: {
+    title: "Say which kind of listening you want",
+    body: "{LO} listens by reflecting it back. {HI} listens by helping fix it. Both are attention. Neither is what the other wants in the moment. This week, whoever is bringing something says first: 'I want you to just hear this' or 'I want help solving this.'",
+  },
+  conflict: {
+    title: "Build a pause you both agreed to in advance",
+    body: "{LO} wants it resolved now. {HI} needs space before they can think. Without a plan, the pressing reads as attack and the space reads as abandonment. Agree this week on the words for a pause and the time it ends. The person who calls it is the person who restarts it.",
+  },
+  repair: {
+    title: "Agree on what repaired actually looks like",
+    body: "{LO} needs it said out loud to feel finished. {HI} repairs through warmth and moving on. One of you can be done while the other is still waiting. This week, name what closure takes for each of you, and say it before the next disagreement, not during.",
+  },
+  feedback: {
+    title: "Say the small thing early",
+    body: "{LO} holds feedback until it matters enough. {HI} says it as it comes. Held-back feedback arrives heavier than it needed to be. This week, when something lands a little off, name it the same day, in one sentence, not to fight but to say it.",
+  },
+};
+
+// When a domain has no meaningful gap, each domain gets its own line rather
+// than one shared "keep noticing what's working" that printed twice.
+const DOMAIN_ALIGNED = {
+  inner: {
+    title: "Keep telling each other what is going on inside",
+    body: "You process on similar rhythms, so neither of you is left guessing. That holds while life is steady. Say the quiet stuff out loud once this week anyway, so the habit is there when it is not.",
+  },
+  connection: {
+    title: "Name what already works",
+    body: "You connect in compatible currencies, which is rarer than it sounds. Once this week, tell each other one specific thing the other does that lands. Specific, not general.",
+  },
+  hard: {
+    title: "Pressure-test it while things are calm",
+    body: "You handle hard moments in similar ways, so they rarely escalate. The time to agree on what happens in a genuinely bad week is a good one. Talk it through before you need it.",
+  },
+};
+
+// {LO} / {HI} name the partner at each end of the dimension being discussed.
+function interpDimAction(text, userName, partnerName, fb) {
+  if (!fb) return String(text || "").replace(/\{LO\}/g, userName).replace(/\{HI\}/g, partnerName);
+  const userIsLow = (fb.myScore ?? 3) <= (fb.partScore ?? 3);
+  const lo = userIsLow ? userName : partnerName;
+  const hi = userIsLow ? partnerName : userName;
+  return String(text || "").replace(/\{LO\}/g, lo).replace(/\{HI\}/g, hi);
+}
+
 // Comms action items, one per dimension where the gap is worth naming.
 // Extracted to module level so What Comes Next can list the same items the
 // results-at-a-glance plan draws from, rather than a second set.
@@ -3980,19 +4055,30 @@ function PersonalityResults({ myAnswers, partnerAnswers, userName, partnerName, 
 
   const protocols = buildCommsProtocols(byDim, userName, partnerName);
 
-  // Results-at-a-glance action plan: one item per domain (internal processing /
-  // how you connect / when things get hard), from the dimension protocols above.
+  // Results-at-a-glance action plan: one item per domain. The item is chosen by
+  // the WIDEST GAP in that domain, not by protocol order, so the three cards
+  // speak to this couple's three biggest mismatches. Ties break toward the
+  // dimension weighted more heavily in the axis scoring, since that is the one
+  // doing more to shape their type. Every dimension has its own item, so two
+  // cards can no longer show the same text.
   const _DOMAIN_DIMS = { inner: ["energy","expression","reassurance"], connection: ["love","needs","bids","listening"], hard: ["conflict","repair","feedback"] };
   const _DOMAIN_LABELS = { inner: "Internal processing", connection: "How you connect", hard: "When things get hard" };
   const glancePlan = ["inner","connection","hard"].map(dom => {
-    const p = protocols.find(pr => _DOMAIN_DIMS[dom].includes(pr.dim));
-    const base = p
-      ? { title: p.title, body: p.thisWeek }
-      : { title: "Keep noticing what's working", body: "You're well matched across " + _DOMAIN_LABELS[dom].toLowerCase() + ". Name one thing here that already works, out loud, this week." };
+    const dims = _DOMAIN_DIMS[dom].filter(d => byDim[d]);
+    const lead = dims.slice().sort((x, y) => {
+      const gx = byDim[x]?.gap ?? 0, gy = byDim[y]?.gap ?? 0;
+      if (Math.abs(gx - gy) > 1e-9) return gy - gx;
+      return (AXIS_CONFIG[y]?.weight ?? 0) - (AXIS_CONFIG[x]?.weight ?? 0);
+    })[0];
+    const wide = lead && (byDim[lead]?.gap ?? 0) >= 1;
+    const item = wide ? DIM_ACTION_ITEMS[lead] : null;
+    const base = item
+      ? { title: item.title, body: interpDimAction(item.body, userName, partnerName, byDim[lead]) }
+      : { title: DOMAIN_ALIGNED[dom].title, body: DOMAIN_ALIGNED[dom].body };
     if (dom === "hard") {
       base.reflect = "In your next hard conversation, pause and ask yourself: am I trying to understand my partner's side, or am I trying to win the argument? Aim for the first one.";
     }
-    return { domain: dom, label: _DOMAIN_LABELS[dom], color: DIM_META[_DOMAIN_DIMS[dom][0]].color, ...base };
+    return { domain: dom, label: _DOMAIN_LABELS[dom], color: DIM_META[_DOMAIN_DIMS[dom][0]].color, dim: lead, ...base };
   });
 
   const scaleLabels = ["Strongly A","Lean A","Neutral","Lean B","Strongly B"];

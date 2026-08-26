@@ -17,6 +17,9 @@ const app = readFileSync(new URL('../src/App.jsx', import.meta.url), 'utf8');
 
 // Domain prose lives in the PersonalityResults domainGroups literal.
 const domainGroups = evalConst(app, 'domainGroups');
+const DIM_ACTION_ITEMS = evalConst(app, 'DIM_ACTION_ITEMS');
+const DOMAIN_ALIGNED = evalConst(app, 'DOMAIN_ALIGNED');
+const REFLECTION_ACTION_TITLES = evalConst(app, 'REFLECTION_ACTION_TITLES');
 
 // The bids gap prose, pulled from the per-cell block so the doc shows exactly
 // what ships rather than a paraphrase.
@@ -51,6 +54,8 @@ const cover = buildCover({
     ['4.', 'Exercise and site copy', 'counts and descriptions'],
     ['5.', 'Bids prose', 'still uses the old pole words'],
     ['6.', 'Labels already changed', 'confirm or revert'],
+    ['7.', 'Action plan items', '10 dimensions + 3 aligned states'],
+    ['8.', 'Reflection action titles', 'rewritten as instructions'],
   ],
 });
 
@@ -158,6 +163,27 @@ children.push(midSection('6.2', 'Pole labels', MUTED));
 children.push(midSection('6.3', 'Current poles, all ten', MUTED));
 DIMS.forEach((d, i) => children.push(smallSection(`6.3.${i + 1}`, '', MUTED,
   { inline: `${DIM_META[d].label}   ${DIM_META[d].left} / ${DIM_META[d].right}` })));
+
+// ── 7 ────────────────────────────────────────────────────────────────────────
+children.push(...bigSection('7', 'Action plan items', 'One per dimension. The results-at-a-glance plan shows the widest-gap dimension in each of the three domains, so each of these has to stand on its own. {LO} and {HI} are the partners at each end.', ORANGE));
+Object.entries(DIM_ACTION_ITEMS).forEach(([dim, item], i) => {
+  children.push(midSection(`7.${i + 1}`, DIM_META[dim]?.label || dim, ORANGE));
+  children.push(prose(item.title, { bold: true }));
+  children.push(prose(fill(item.body).replace(/\{LO\}/g, 'Maya').replace(/\{HI\}/g, 'David')));
+});
+children.push(midSection('7.11', 'When a domain has no gap', ORANGE, { extras: 'one per domain' }));
+Object.entries(DOMAIN_ALIGNED).forEach(([dom, item], i) => {
+  children.push(smallSection(`7.11.${i + 1}`, dom, ORANGE));
+  children.push(prose(item.title, { indent: INDENT_PROSE_UNDER_SMALL, bold: true }));
+  children.push(prose(item.body, { indent: INDENT_PROSE_UNDER_SMALL }));
+});
+
+// ── 8 ────────────────────────────────────────────────────────────────────────
+children.push(...bigSection('8', 'Reflection action titles', 'The Relationship Reflection headlines describe what the answers showed. On the glance page and What Comes Next they need to be something you can do. Left is what the insight says, right is what now renders.', GREEN));
+Object.entries(REFLECTION_ACTION_TITLES).forEach(([was, now], i) => {
+  children.push(midSection(`8.${i + 1}`, '', GREEN, { inline: was }));
+  children.push(prose('->  ' + now, { indent: INDENT_PROSE_UNDER_SMALL }));
+});
 
 const out = (process.env.ATTUNE_DOC_OUT || '/mnt/user-data/outputs') + '/attune_prose_to_approve.docx';
 await renderDoc({ footerLabel: 'Attune · Prose to approve', children, outPath: out });
