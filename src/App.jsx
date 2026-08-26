@@ -1327,47 +1327,6 @@ function individualBlurb(name, pron, ec, oc) {
     : `${Sub} ${v("processes", "process")} privately and ${v("surfaces", "surface")} thoughts and feelings later.`;
   return `${eng} ${opn}`;
 }
-// "Communicating with each other" (4.2), built from the gap between the two people
-// on each axis (aligned / small gap / large gap), so it is specific to this pairing.
-// Second person, addressed to the person whose tile it is; ${partner} + partner
-// pronouns refer to the other. DRAFT copy pending Ellie/Carolina review.
-function communicatingBlurb(partner, partnerPron, myEc, myOc, partEc, partOc) {
-  const pSub = pronoun(partnerPron, "sub");
-  const pObj = pronoun(partnerPron, "obj");
-  const pIsC = pronoun(partnerPron, "isC");
-  const pv = (sg, plr) => (pSub === "they") ? plr : sg;
-  const eGap = myEc - partEc, eAbs = Math.abs(eGap), eAvg = (myEc + partEc) / 2;
-  let eng;
-  if (eAbs < 0.2) {
-    eng = eAvg >= 0.6 ? `You both move toward resolution quickly, so the risk here is unbridled emotion rather than distance. Try to keep the conversation from heating up, but keep the honesty.`
-        : eAvg <= 0.4 ? `You both tend to take space before starting the conversation, so things aren't often forced. The risk is that the conversation never quite starts, it may help to name a time to come back to it.`
-        : `You both sit near the middle in terms of whether you engage or withdraw in conflict, so the roles you play in conversations may shift with the day. Say which mode you are in when it matters.`;
-  } else if (eGap > 0) {
-    eng = eAbs >= 0.45
-      ? `You tend to reach for resolution faster than ${partner}. Giving ${partner} time when ${pSub} ${pv("needs","need")} it can help the conversation be more productive for both of you.`
-      : `You reach for resolution slightly faster than ${partner}. A short pause to let ${partner} catch up can help make the conversation more productive.`;
-  } else {
-    eng = eAbs >= 0.45
-      ? `${partner} usually reaches for resolution faster than you. Telling ${pObj} "I need a minute" out loud keeps ${partner} from interpreting your pause as avoidance.`
-      : `${partner} reaches for resolution a little faster than you. A quick "I'm still with you, give me a second" keeps ${partner} from wondering.`;
-  }
-  const oGap = myOc - partOc, oAbs = Math.abs(oGap), oAvg = (myOc + partOc) / 2;
-  let opn;
-  if (oAbs < 0.2) {
-    opn = oAvg >= 0.6 ? `Even though you don't often have to guess what ${partner} is thinking, there may occasionally be quieter thoughts that get shared when the time is right.`
-        : oAvg <= 0.4 ? `You both hold internal things close to your chests, which means things can go unsaid. Remember that it's alright to ask direct questions sometimes.`
-        : `You are both fairly balanced when it comes to sharing or keeping things to yourselves, so the dynamic shifts depending on the situation. Quick check-ins can clear this up. You can ask "is there anything I need to know?"`;
-  } else if (oGap > 0) {
-    opn = oAbs >= 0.45
-      ? `You share more readily than ${partner}. Make sure ${partner} knows you are there when ${pIsC} ready to let you in.`
-      : `You tend to share more readily than ${partner}. Make sure ${partner} knows you are there when ${pIsC} ready to let you in.`;
-  } else {
-    opn = oAbs >= 0.45
-      ? `${partner} shares more readily than you. Remember that a half-formed thought said out loud still counts, and ${partner} will usually appreciate the effort.`
-      : `${partner} shares a little more readily than you. Offering a half-formed thought now and then goes a long way.`;
-  }
-  return `${eng} ${opn}`;
-}
 const INDIVIDUAL_TYPES = {
   W: { code: "W", name: "The Initiator", color: "#E8673A", fill: "#FFF4F0", axis1: "Engage", axis2: "Open",
        desc: "Moves toward resolution. Processes and expresses relatively freely.",
@@ -1388,68 +1347,6 @@ const INDIVIDUAL_TYPES = {
 };
 
 
-// Per-couple-type, per-person perspective for profile pages (Option B)
-// Keys: coupleTypeId -> [personA_perspective, personB_perspective]
-// typeA is always alphabetically first in the pairing ID.
-// For same-type pairings (WW, XX, YY, ZZ), both perspectives are the same.
-const PARTNER_PERSPECTIVE = {
-  WW: [
-    // Both W
-    "You're with someone who shows up the same way you do, who reaches toward things rather than away from them, and who processes outwardly. The warmth between you runs in both directions without anyone having to coax it. What to watch: when you're both feeling something intensely, the intensity can feed itself. One of you naming 'I think we're amplifying each other right now' is usually enough to bring the temperature back down.",
-    "You're with someone who shows up the same way you do, who reaches toward things rather than away from them, and who processes outwardly. The warmth between you runs in both directions without anyone having to coax it. What to watch: when you're both feeling something intensely, the intensity can feed itself. One of you naming 'I think we're amplifying each other right now' is usually enough to bring the temperature back down.",
-  ],
-  XX: [
-    // Both X
-    "You're with someone who also engages directly but processes privately, which means neither of you dumps unprocessed feeling on the other. There's a shared efficiency between you. What to watch: because neither of you expresses freely in the moment, things can go unnamed longer than they should. You can both be carrying something without the other knowing it. A habit of asking 'is there anything on your mind?' goes further than waiting for signals.",
-    "You're with someone who also engages directly but processes privately, which means neither of you dumps unprocessed feeling on the other. There's a shared efficiency between you. What to watch: because neither of you expresses freely in the moment, things can go unnamed longer than they should. You can both be carrying something without the other knowing it. A habit of asking 'is there anything on your mind?' goes further than waiting for signals.",
-  ],
-  YY: [
-    // Both Y
-    "You're with someone who also needs space before they can fully show up to a hard conversation. Neither of you will rush the other, which feels like relief. What to watch: both of you withdrawing at the same time can create distance that neither of you intended, two people waiting for things to feel right before engaging can drift further apart without either meaning to. Someone has to eventually reach across. It doesn't have to be the one who's less hurt.",
-    "You're with someone who also needs space before they can fully show up to a hard conversation. Neither of you will rush the other, which feels like relief. What to watch: both of you withdrawing at the same time can create distance that neither of you intended, two people waiting for things to feel right before engaging can drift further apart without either meaning to. Someone has to eventually reach across. It doesn't have to be the one who's less hurt.",
-  ],
-  ZZ: [
-    // Both Z
-    "You're with someone who also processes privately and shares selectively. You're not going to overwhelm each other with feeling, and neither of you will be pushed to share before you're ready. What to watch: real things can go unspoken for a very long time between two people who both hold things close. You'll need to build deliberate habits of checking in, the connection you have doesn't maintain itself automatically.",
-    "You're with someone who also processes privately and shares selectively. You're not going to overwhelm each other with feeling, and neither of you will be pushed to share before you're ready. What to watch: real things can go unspoken for a very long time between two people who both hold things close. You'll need to build deliberate habits of checking in, the connection you have doesn't maintain itself automatically.",
-  ],
-  WX: [
-    // W's perspective (with X)
-    "You're with someone who, like you, moves toward things, but who processes before speaking rather than out loud. They'll usually get to the same place you do, just not as quickly, and not as visibly. You don't have to drag them to the conversation. They want to be there. What you're adjusting to: they're not being cagey when they go quiet before responding. They're thinking, and giving them that pause usually produces something more real than pushing for it.",
-    // X's perspective (with W)
-    "You're with someone who, like you, moves toward resolution, but who processes outwardly rather than privately. They'll often have a response available while you're still forming yours. They simply process faster than you do. The feeling underneath runs just as deep. What you're adjusting to: when they raise something quickly, it's not impulsive. They've felt it and they want to address it. Meeting them partway, even with 'I need a few minutes, and then I'm ready', goes a long way.",
-  ],
-  WY: [
-    // W's perspective (with Y)
-    "You're with someone who expresses freely when ready, but who needs space to get there. They need that space to get ready for the conversation. Your instinct when something needs addressing is to get into it; theirs is to step back and find solid ground first. What you're adjusting to: reaching for the conversation before they're ready usually produces something incomplete. The patience is worth it, what comes when they're ready is usually real.",
-    // Y's perspective (with W)
-    "You're with someone who wants to address things directly and who processes out loud, which can feel fast when you're still figuring out what's true for you. They express out loud because that's how they process, not to pressure you. What you're adjusting to: when they raise something before you're ready, saying 'I need a little time and then I want to talk about this' is enough. It tells them the conversation is coming without making them wait in silence.",
-  ],
-  WZ: [
-    // W's perspective (with Z)
-    "You're with someone who processes privately, shares selectively, and doesn't move toward hard things quickly. You'll often feel the pull to address things first. That's simply the shape of this pairing. What you're adjusting to: their quietness is rarely indifference. There's usually more going on internally than is visible. Asking directly, 'is there something you're carrying right now?', is more useful than waiting for a signal.",
-    // Z's perspective (with W)
-    "You're with someone who moves toward things quickly and expresses freely, which can feel like a lot when you're still deciding whether something is worth naming. When they raise something quickly, it's their natural pace, not an attack. What you're adjusting to: their pace can feel overwhelming, but silence from you often reads to them as something being wrong. Even a brief 'I'm processing, give me a bit' prevents them from filling the quiet with their own interpretation.",
-  ],
-  XY: [
-    // X's perspective (with Y)
-    "You're with someone who feels things deeply and expresses them openly, but who needs space to get there. They're not avoiding the conversation; they're building toward it. Your instinct is to engage and resolve. Theirs is to process and then share. What you're adjusting to: pushing for resolution before they've had space usually gets you something incomplete. Naming that you want to address it, 'I want to talk about this when you're ready', keeps things moving without forcing the timeline.",
-    // Y's perspective (with X)
-    "You're with someone who wants to address things directly and thinks privately before speaking. The quiet is processing, not coldness, and they'll usually have something real to say once they get there. What you're adjusting to: they can seem impatient for resolution in a way that feels pressuring when you're still getting clear. Telling them you need time and that you're not avoiding is usually enough. They want resolution, and your getting there at your pace is still resolution.",
-  ],
-  XZ: [
-    // X's perspective (with Z)
-    "You're with someone who processes privately and doesn't surface things quickly. Neither of you expresses freely in the moment, but you're more inclined to engage when something needs addressing. They may not be. What you're adjusting to: they're not suppressing things to punish you. They're genuinely uncertain about whether to name something or let it go. Asking directly is almost always more effective than waiting for them to volunteer it.",
-    // Z's perspective (with X)
-    "You're with someone who also processes privately, but who moves toward resolution when something needs addressing, even if quietly. They're not going to dump feeling on you. But they will eventually raise things, and they'll expect a real response. What you're adjusting to: their directness when they do raise something can feel abrupt when you haven't quite decided where you stand on it. Saying 'I've been thinking about that too, can we come back to it?' keeps the door open without forcing you to respond before you're ready.",
-  ],
-  YZ: [
-    // Y's perspective (with Z)
-    "You're with someone who also needs space to process, but who shares much less of what they're carrying. You'll usually surface more than they do, which is fine. But there can be an imbalance: you know where you stand with yourself and you say so; they may be carrying more than they're revealing. What you're adjusting to: their quietness isn't indifference. Asking them specific questions, not 'how are you doing' but 'what's actually going on for you with that', usually gets something more real.",
-    // Z's perspective (with Y)
-    "You're with someone who also withdraws to process, but who expresses what they're feeling once they get there. They'll often share more than you do, and that's fine. What you're adjusting to: their willingness to express doesn't mean they expect the same from you immediately. But they do care about knowing you're there. Small signals, acknowledging that you heard something, or that you're thinking about it, go further than you might expect.",
-  ],
-};
 
 
 // Axis-aware near-line prose. When a partner sits within 0.6 of an axis line the
@@ -2300,33 +2197,6 @@ const GrowIcons = {
   library: c => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.8" strokeLinecap="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>,
 };
 
-function CoupleTypeCard({ coupleType, userName, partnerName, onClick }) {
-  if (!coupleType) return null;
-  const { name, tagline, description, nuance, color } = coupleType;
-  const interp = (str) => str ? str.replace(/\{U\}/g, userName).replace(/\{P\}/g, partnerName) : str;
-  return (
-    <div onClick={onClick}
-      style={{ background: "#2d2250", borderRadius: 20, overflow: "hidden", position: "relative", cursor: onClick ? "pointer" : "default", transition: "transform 0.2s" }}
-      onMouseEnter={e => onClick && (e.currentTarget.style.transform = "translateY(-2px)")}
-      onMouseLeave={e => onClick && (e.currentTarget.style.transform = "")}>
-      <div style={{ height: 4, background: `linear-gradient(90deg, ${color}, ${color}88)` }} />
-      <div style={{ padding: "2rem 2rem 1.75rem" }}>
-        <div style={{ fontSize: "0.6rem", letterSpacing: "0.24em", textTransform: "uppercase", color: color + "99", fontFamily: BFONT, fontWeight: 700, marginBottom: "0.6rem" }}>
-          Your couple type · {userName} &amp; {partnerName}
-        </div>
-        <div style={{ fontFamily: HFONT, fontSize: "clamp(1.8rem, 4vw, 2.4rem)", fontWeight: 700, color: "white", lineHeight: 1.0, marginBottom: "0.5rem", letterSpacing: "-0.01em" }}>
-          {name}
-        </div>
-        <div style={{ fontSize: "0.55rem", letterSpacing: "0.2em", textTransform: "uppercase", color: "rgba(255,255,255,0.42)", fontFamily: BFONT, fontWeight: 700, marginBottom: "0.35rem" }}>
-          What this means
-        </div>
-        <p style={{ fontSize: "0.92rem", color: color, fontFamily: BFONT, fontWeight: 500, lineHeight: 1.5, margin: "0", maxWidth: 480 }}>
-          {interp(tagline)}
-        </p>
-      </div>
-    </div>
-  );
-}
 
 // ── RESULTS SLIDE CONTAINER ─────────────────────────────────────────────────
 // Full-screen dark slide wrapper used throughout personality results.
@@ -6503,45 +6373,6 @@ const INSIGHT_COLORS = {
   explore:  { bg: "#FFF7ED", border: "#F59E0B", label: "rgba(180,83,9,0.9)",  labelBg: "#FEF3C7", dot: "#F59E0B" },
 };
 
-// ── Reusable insight card list with show-more ─────────────────────────────────
-// Every insight renders. No show-more, no expand-to-read (8.2).
-function InsightCardList({ insights = [] }) {
-  return (
-    <>
-      {insights.map((ins, i) => {
-        const col = INSIGHT_COLORS[ins.type] || INSIGHT_COLORS.explore;
-        return (
-          <div key={i} style={{ background: "white", border: `1.5px solid ${C.stone}`, borderRadius: 16, marginBottom: "1rem", overflow: "hidden" }}>
-            <div style={{ padding: "0.85rem 1.25rem", borderBottom: `1px solid ${C.stone}50`, background: col.bg, display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: "0.75rem" }}>
-              <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", flex: 1 }}>
-                <div style={{ width: 8, height: 8, borderRadius: "50%", background: col.dot, flexShrink: 0 }} />
-                <span style={{ fontFamily: HFONT, fontSize: "0.9rem", fontWeight: 700, color: C.ink, lineHeight: 1.3 }}>{ins.title}</span>
-              </div>
-              <div style={{ background: col.labelBg, borderRadius: 999, padding: "0.2rem 0.6rem", flexShrink: 0 }}>
-                <span style={{ fontSize: "0.58rem", fontWeight: 700, color: col.label, fontFamily: BFONT, letterSpacing: "0.06em", textTransform: "uppercase" }}>
-                  {ins.type === "strength" ? "Strength" : "Worth exploring"}
-                </span>
-              </div>
-            </div>
-            <div style={{ padding: "1.1rem 1.25rem" }}>
-              <p style={{ fontSize: "0.84rem", color: C.text, fontFamily: BFONT, fontWeight: 300, lineHeight: 1.75, marginBottom: "1rem" }}>{renderWithQuotes(ins.body)}</p>
-              <div style={{ background: "#F9F7F4", borderRadius: 10, padding: "0.85rem 1rem", borderLeft: `3px solid ${col.dot}` }}>
-                <div style={{ fontSize: "0.58rem", fontWeight: 700, color: col.label, textTransform: "uppercase", letterSpacing: "0.1em", fontFamily: BFONT, marginBottom: "0.4rem" }}>{ins.priority}</div>
-                <p style={{ fontSize: "0.8rem", color: C.text, fontFamily: BFONT, fontWeight: 400, lineHeight: 1.7, margin: 0 }}>{ins.action}</p>
-              </div>
-              {ins.coupleTypeNote && (
-                <div style={{ marginTop: "0.6rem", padding: "0.6rem 0.85rem", background: "rgba(27,95,232,0.05)", borderRadius: 8, border: "1px solid rgba(27,95,232,0.12)" }}>
-                  <span style={{ fontSize: "0.55rem", fontWeight: 700, color: "#1B5FE8", textTransform: "uppercase", letterSpacing: "0.12em", fontFamily: BFONT }}>For your couple type · </span>
-                  <span style={{ fontSize: "0.76rem", color: "#1B5FE8", fontFamily: BFONT, fontWeight: 300, lineHeight: 1.6 }}>{ins.coupleTypeNote}</span>
-                </div>
-              )}
-            </div>
-          </div>
-        );
-      })}
-    </>
-  );
-}
 
 // ── Action plan item list with show-more ─────────────────────────────────────
 function ActionPlanList({ explores = [] }) {
