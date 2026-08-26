@@ -139,20 +139,49 @@ export function lowConfidence(scores) {
 }
 
 
-// ─────────────────────────────────────────────────────────────────────────────
-// PARTNER-VIEW BLEND (Proposal B). A person's type blends their own dimension
-// scores with their partner's view of them, per dimension. The partner-view
-// answers (pv_*) live on the PARTNER'S answer object (their rating of THIS
-// person). Only observable dimensions are blended; the rest stay self-report.
-// A dimension is blended ONLY when the partner-view answer exists — never
-// against a phantom neutral — so interim (self-only) scoring stays correct
-// until the partner has answered.
-// ─────────────────────────────────────────────────────────────────────────────
+// ──────────────────────────────────────────────────────────────────────────
+// PARTNER-VIEW BLEND. Part 2 of the comms exercise asks every question again
+// about the partner, so a partner-view answer now exists for all ten
+// dimensions. A person's dimension score blends their own answer with their
+// partner's read of them.
+//
+// The split follows VISIBILITY, specifically whether the partner can see BOTH
+// ends of the dimension equally. Where one pole is defined by being hard to
+// detect, the partner's read is not merely noisier, it is biased in a fixed
+// direction: they can only report what reached them, so weighting them heavily
+// drags everyone toward the visible end. A subtle bid is one the partner may
+// not register. An indirect ask is easy to miss. Assumed reassurance and
+// inward energy are invisible by design. Those dimensions lead with self.
+//
+//   0.7 / 0.3  energy, reassurance, love, needs, bids
+//              One end is low-visibility, or the thing being measured is what
+//              lands internally rather than what is done.
+//   0.6 / 0.4  repair, listening
+//              You know your intent; they see whether it landed.
+//   0.4 / 0.6  conflict, expression, feedback
+//              Conflict passes the test outright: pressing and going quiet are
+//              both observable. Expression and feedback are a deliberate
+//              exception. The same visibility argument would push them toward
+//              self, but "how you come across" is the more useful signal in a
+//              relationship product even when it is the weaker measurement of
+//              the person. That is a product judgement, made on purpose.
+//
+// A dimension is blended ONLY when the partner-view answer exists, never
+// against a phantom neutral, so interim (self-only) scoring stays correct
+// until the partner has answered. Dimensions absent from this table fall back
+// to an even split; none should be absent.
+// ──────────────────────────────────────────────────────────────────────────
 export const PARTNER_VIEW_BLEND = {
-  conflict:   { self: 0.5, partner: 0.5 },
-  repair:     { self: 0.6, partner: 0.4 },
-  expression: { self: 0.4, partner: 0.6 },
-  feedback:   { self: 0.4, partner: 0.6 },
+  energy:      { self: 0.7, partner: 0.3 },
+  reassurance: { self: 0.7, partner: 0.3 },
+  love:        { self: 0.7, partner: 0.3 },
+  needs:       { self: 0.7, partner: 0.3 },
+  bids:        { self: 0.7, partner: 0.3 },
+  repair:      { self: 0.6, partner: 0.4 },
+  listening:   { self: 0.6, partner: 0.4 },
+  conflict:    { self: 0.4, partner: 0.6 },
+  expression:  { self: 0.4, partner: 0.6 },
+  feedback:    { self: 0.4, partner: 0.6 },
 };
 // selfAnswers = this person's exercise answers; partnerAnswers = their partner's
 // answers (source of the pv_* view-of-this-person). Returns dimension scores with

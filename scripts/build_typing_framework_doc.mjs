@@ -67,7 +67,7 @@ const BLEND_ROWS = DIMS.map(d => {
     : [label, '.50 / .50  (default)'];
 });
 children.push(pairTable([['Dimension','Blend (self / partner)'], ...BLEND_ROWS], 60));
-children.push(small('Dimensions marked default are not listed in PARTNER_VIEW_BLEND and fall back to an even split.'));
+children.push(small('The split follows visibility: whether a partner can see both ends of a dimension equally. Where one end is defined by being hard to detect (a subtle bid, an indirect ask, assumed reassurance, inward energy), the outside read is biased toward what reached them, so the dimension leads with self-report. Expression and feedback are a deliberate exception: how a person comes across is the more useful signal here, even where it is the weaker measurement of the person.'));
 children.push(body('Type and placement use the blend. The dimension bars and the gap feedback stay self-reported. Only the individual type and the Couple Map reflect the partner-view blend.'));
 children.push(rule());
 
