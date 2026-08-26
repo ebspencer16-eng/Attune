@@ -45,7 +45,7 @@ async function verifyStripeSignature(body, signature, secret) {
   const computed = Array.from(new Uint8Array(sig))
     .map(b => b.toString(16).padStart(2, '0')).join('');
 
-  // Constant-time compare (matches calendly-webhook). A plain === leaks timing.
+  // Constant-time compare. A plain === leaks timing.
   if (computed.length !== v1.length) return false;
   let mismatch = 0;
   for (let i = 0; i < computed.length; i++) mismatch |= computed.charCodeAt(i) ^ v1.charCodeAt(i);
@@ -250,7 +250,6 @@ async function handleWebhook(req) {
                 is_physical:             !!it.ph,
                 total:                   null, // itemized total — aggregate is on the PaymentIntent
                 addon_workbook:          it.w || null,
-                addon_lmft:              !!it.l,
                 addon_reflection:        !!it.r,
                 addon_budget:            !!it.b,
                 addon_checklist:         !!it.c,
@@ -307,7 +306,6 @@ async function handleWebhook(req) {
               is_physical:             meta.isPhysical === '1',
               total:                   (intent.amount / 100),
               addon_workbook:          meta.addonWorkbook || null,
-              addon_lmft:              meta.addonLmft === '1',
               addon_reflection:        meta.addonReflection === '1',
               addon_budget:            meta.addonBudget === '1',
               addon_checklist:         meta.addonChecklist === '1',
@@ -369,7 +367,7 @@ async function handleWebhook(req) {
     if (apiKey && intent.receipt_email && orderCreated) {
       // Order confirmation
       const subject = `Attune Order Confirmation`;
-      // Itemize what the order actually includes (premium bundles workbook + LMFT).
+      // Itemize what the order actually includes (premium bundles the workbook).
       const PKG_LABELS = { core: 'The Attune Assessment', newlywed: 'Starting Out Collection', anniversary: 'Relationship Reflection', premium: 'Attune Premium' };
       const includedItems = [];
       if (meta.addonWorkbook)          includedItems.push(`Personalized Workbook (${meta.addonWorkbook === 'print' ? 'printed' : 'digital'})`);
@@ -377,7 +375,6 @@ async function handleWebhook(req) {
       if (meta.addonReflection === '1') includedItems.push('Relationship Reflection');
       if (meta.addonBudget === '1')    includedItems.push('Build a Budget tool');
       if (meta.addonChecklist === '1') includedItems.push('Starting Out Checklist');
-      if (meta.pkgKey === 'premium' || meta.addonLmft === '1') includedItems.push('LMFT Session');
       const includedRow = includedItems.length ? `
             <tr>
               <td style="padding:.65rem 1rem;font-weight:700;border-top:1px solid #E8DDD0;vertical-align:top;">Included</td>
@@ -415,7 +412,6 @@ async function handleWebhook(req) {
         body: JSON.stringify({ from: `Attune <${fromEmail}>`, to: [intent.receipt_email], subject, html }),
       }).catch(err => console.warn('Confirmation email failed:', err));
 
-      // lmft_scheduled email retired (email #5 removed).
 
       // Auto-generate QR card for physical orders — stores URL in order record
       if (meta.isPhysical === '1') {

@@ -24,12 +24,10 @@ const PHYSICAL_PRICES = { core: 124, newlywed: 174, anniversary: 174, premium: 2
 // Launch flags — server-side enforcement so a crafted or stale request can
 // never bill for a disabled offering. Keep in sync with /_flags.js + App.jsx.
 const PHYSICAL_ENABLED = process.env.ATTUNE_PHYSICAL_ENABLED === '1';
-const LMFT_ENABLED     = process.env.ATTUNE_LMFT_ENABLED === '1';
 
 const ADDON_PRICES = {
   workbookDigital: 19,
   workbookPrint:   39,
-  lmft:           150,
   reflection:      40,
   budget:          20,
   checklist:       20,
@@ -43,7 +41,7 @@ const ADDON_PRICES = {
 // See: https://stripe.com/docs/tax/tax-codes
 //
 // Ellie — review these. If the wrong code is set, tax calculations will be
-// wrong (e.g. LMFT therapy is generally tax-exempt but if coded as "service"
+// wrong (e.g. a service coded incorrectly)
 // it could be taxed).
 const TAX_CODES = {
   // Digital delivery of the Attune package (assessment + workbook access)
@@ -51,7 +49,6 @@ const TAX_CODES = {
   // Physical gift boxes (newlywed/anniversary/premium boxes)
   physicalPackage:  'txcd_99999999', // General Tangible Goods
   // Professional counseling session — tax-exempt in most US states
-  lmft:             'txcd_20030000', // Professional Services
   // Digital workbook PDF
   workbookDigital:  'txcd_10304100', // Books and Magazines (electronic)
   // Print workbook
@@ -81,9 +78,6 @@ function buildTaxLineItems(item, itemIndex) {
       const tax = item.addonWorkbook === 'print' ? TAX_CODES.workbookPrint : TAX_CODES.workbookDigital;
       lines.push({ amount: wbAmt * 100, tax_code: tax, reference: `item-${itemIndex}-wb`, quantity: 1 });
     }
-  }
-  if (item.addonLmft) {
-    lines.push({ amount: ADDON_PRICES.lmft * 100,       tax_code: TAX_CODES.lmft,         reference: `item-${itemIndex}-lmft`,       quantity: 1 });
   }
   if (item.addonReflection) {
     lines.push({ amount: ADDON_PRICES.reflection * 100, tax_code: TAX_CODES.digitalAddon, reference: `item-${itemIndex}-reflection`, quantity: 1 });
@@ -255,7 +249,6 @@ function wbAmount(item) {
 function itemAddonTotal(item) {
   let addons = 0;
   addons += wbAmount(item);
-  if (item.addonLmft)       addons += ADDON_PRICES.lmft;
   if (item.addonReflection) addons += ADDON_PRICES.reflection;
   if (item.addonBudget)     addons += ADDON_PRICES.budget;
   if (item.addonChecklist)  addons += ADDON_PRICES.checklist;
@@ -276,9 +269,8 @@ function normalizeItem(item) {
     partner2Name:    item.partner2Name || null,
     giftNote:        item.giftNote || null,
     addonWorkbook:   item.addonWorkbook || null,     // 'digital' | 'print' | null
-    // Phase-1: LMFT discontinued, digital-only. Never bill for either even if
+    // Phase-1: digital-only. Never bill for physical even if
     // the request asks for it.
-    addonLmft:       LMFT_ENABLED && !!item.addonLmft,
     // Premium bundles reflection, budget, and intimacy into its base price, so
     // they are never billed again as add-ons on a premium item.
     _premiumBundled: (item.pkgKey || item.pkg) === 'premium',
@@ -344,7 +336,6 @@ export default async function handler(req) {
         partner2Name:    body.partner2Name,
         giftNote:        body.giftNote,
         addonWorkbook:   body.addonWorkbook,
-        addonLmft:       body.addonLmft,
         addonReflection: body.addonReflection,
         addonBudget:     body.addonBudget,
         addonIntimacy:   body.addonIntimacy,
@@ -605,7 +596,6 @@ export default async function handler(req) {
               is_physical:       item.isPhysical,
               total:             0,
               addon_workbook:    item.addonWorkbook || null,
-              addon_lmft:        item.addonLmft,
               addon_reflection:  item.addonReflection,
               addon_budget:      item.addonBudget,
               addon_checklist:   item.addonChecklist,
@@ -735,7 +725,6 @@ export default async function handler(req) {
     p2:  (it.partner2Name || '').slice(0, 40),
     gn:  (it.giftNote || '').slice(0, 200),
     w:   it.addonWorkbook || '',
-    l:   it.addonLmft ? 1 : 0,
     r:   it.addonReflection ? 1 : 0,
     b:   it.addonBudget ? 1 : 0,
     i:   it.addonIntimacy ? 1 : 0,
@@ -759,7 +748,6 @@ export default async function handler(req) {
     'metadata[isGift]':       items[0].isGift ? '1' : '',
     'metadata[isPhysical]':   items[0].isPhysical ? '1' : '',
     'metadata[addonWorkbook]':items[0].addonWorkbook || '',
-    'metadata[addonLmft]':    items[0].addonLmft ? '1' : '',
     'metadata[addonReflection]':items[0].addonReflection ? '1' : '',
     'metadata[addonBudget]':  items[0].addonBudget ? '1' : '',
     'metadata[addonIntimacy]': items[0].addonIntimacy ? '1' : '',

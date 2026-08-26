@@ -18,16 +18,12 @@ import { PKG_CAPS, ORDER_SELECT, computeEntitlements, mergeEntitlementsGrantOnly
 // LAUNCH FLAGS — flip these to change what the product offers. Nothing below is
 // deleted, so re-enabling is a one-line change per flag.
 //
-//   LMFT_ENABLED    — the licensed-therapist session offering. Discontinued.
-//                     Off hides every LMFT surface (dashboard tile, add-on
-//                     prompts, offerings, results reference, booking).
 //   PHYSICAL_ENABLED — physical (printed/shipped) package variants. Phase 1
 //                     launches digital-only. Off hides the digital/physical
 //                     toggle, shipping, and physical pricing everywhere, and
 //                     forces every order to the digital variant. Phase 2:
 //                     set true (and the matching flag in public/_flags.js).
 // ═══════════════════════════════════════════════════════════════════════════
-const LMFT_ENABLED = false;
 const PHYSICAL_ENABLED = false;
 
 // ── Demo couple-type archetypes ───────────────────────────────────────────────
@@ -145,7 +141,6 @@ async function fetchOrderEntitlements(sb, { userId, email, partnerAId } = {}, pr
   if (profile) {
     rows.push({
       order_num: null, pkg_key: profile.pkg || null, is_physical: false,
-      addon_lmft: profile.addon_lmft, addon_reflection: profile.addon_reflection,
       addon_budget: profile.addon_budget, addon_checklist: profile.addon_checklist,
       addon_intimacy: profile.addon_intimacy, addon_workbook: profile.addon_workbook,
       created_at: null,
@@ -210,7 +205,6 @@ function entFromStoredOrder(o) {
     pkg: o.pkgKey || o.pkg || 'core',
     orderNum: o.orderNum || '',
     isPhysical: !!o.isPhysical,
-    addonLmft: !!o.addonLmft,
     addonReflection: !!o.addonReflection,
     addonBudget: !!o.addonBudget,
     addonChecklist: !!o.addonChecklist,
@@ -2300,16 +2294,6 @@ const GrowIcons = {
   ),
   budget: c => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.8" strokeLinecap="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>,
   checklist: c => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.8" strokeLinecap="round"><polyline points="9 11 12 14 20 6"/><path d="M20 12v7a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h9"/></svg>,
-  lmft: c => (
-    <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
-      {/* monitor */}
-      <rect x="2.5" y="3.5" width="19" height="13" rx="2"/>
-      <path d="M9 20.5h6"/><path d="M12 16.5v4"/>
-      {/* person on the call */}
-      <circle cx="12" cy="8.4" r="2.1"/>
-      <path d="M8.3 14c.5-1.9 2-2.9 3.7-2.9s3.2 1 3.7 2.9"/>
-    </svg>
-  ),
   intimacy: c => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.8" strokeLinecap="round"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8l8.8 8.8 8.8-8.8a5.5 5.5 0 0 0 0-7.8z"/></svg>,
   guide: c => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.8" strokeLinecap="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>,
   talk: c => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.8" strokeLinecap="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>,
@@ -3928,7 +3912,7 @@ function resolveRoleTokens(str, myS, partS, userName, partnerName, userPronouns 
   return out;
 }
 
-function PersonalityResults({ myAnswers, partnerAnswers, userName, partnerName, coupleType, userPronouns = "", partnerPronouns = "", noSideNav = false, externalStep, onExternalGo, onGoExpectations, onNavigateTool, hasWorkbook = false, hasLMFT = false }) {
+function PersonalityResults({ myAnswers, partnerAnswers, userName, partnerName, coupleType, userPronouns = "", partnerPronouns = "", noSideNav = false, externalStep, onExternalGo, onGoExpectations, onNavigateTool, hasWorkbook = false }) {
   const [step, setStep] = useState(externalStep ?? 0);
   const [showRaw, setShowRaw] = useState(false);
   useEffect(() => { if (externalStep !== undefined) setStep(externalStep); }, [externalStep]);
@@ -5957,43 +5941,6 @@ function NotesView({ userName, partnerName, notesState, setNotesState, onBack })
 }
 
 // ======================================================
-// LMFT SESSION -- Premium
-// ======================================================
-function LMFTSession({ userName, partnerName, userEmail, orderNum, onBack }) {
-  // Redirect to the real booking page — /lmft-booking handles scheduling
-  // Pass names + email + order so Calendly's embed can pre-fill them
-  const params = new URLSearchParams();
-  if (userName)  params.set('p1', userName);
-  if (partnerName) params.set('p2', partnerName);
-  if (userEmail) params.set('email', userEmail);
-  if (orderNum)  params.set('order', orderNum);
-  const bookingUrl = `/lmft-booking?${params.toString()}`;
-
-  return (
-    <div style={{ maxWidth: 520, margin: "0 auto" }}>
-      <h1 style={{ fontFamily: font.display, fontSize: "1.8rem", fontWeight: 700, color: C.ink, lineHeight: 1.1, marginBottom: "0.75rem" }}>Schedule Your LMFT Session</h1>
-      <p style={{ fontSize: "0.88rem", color: C.muted, fontFamily: font.body, fontWeight: 300, lineHeight: 1.7, marginBottom: "0.5rem" }}>Your therapist will review your joint results before the session, so the conversation starts from your actual data, not from scratch.</p>
-      <p style={{ fontSize: "0.82rem", color: C.muted, fontFamily: font.body, fontWeight: 300, lineHeight: 1.65, marginBottom: "2rem" }}>Both {userName} and {partnerName} attend together. 50 minutes, virtual.</p>
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "1rem", marginBottom: "2rem" }}>
-        {[
-          { icon: "1", label: "Finish your exercises", body: "Both partners need to complete their exercises before the session." },
-          { icon: "2", label: "Pick a time", body: "Choose any open slot. You'll get an instant confirmation with a video link." },
-          { icon: "3", label: "Meet over video", body: "50 minutes. Your results are the starting point, not an intake form." },
-        ].map(s => (
-          <div key={s.icon} style={{ background: "#F5F7FF", borderRadius: 14, padding: "1.1rem" }}>
-            <div style={{ fontSize: "0.58rem", letterSpacing: "0.18em", textTransform: "uppercase", color: "#3B5BDB", fontWeight: 700, fontFamily: font.body, marginBottom: "0.4rem" }}>Step {s.icon}</div>
-            <div style={{ fontSize: "0.82rem", fontWeight: 700, color: C.ink, fontFamily: font.body, marginBottom: "0.35rem" }}>{s.label}</div>
-            <div style={{ fontSize: "0.75rem", color: C.muted, fontFamily: font.body, lineHeight: 1.6 }}>{s.body}</div>
-          </div>
-        ))}
-      </div>
-      <a href={bookingUrl} style={{ display: "block", textAlign: "center", padding: "0.95rem 2rem", background: "linear-gradient(135deg,#1B5FE8,#3B3A8A)", color: "white", borderRadius: 14, fontWeight: 700, fontSize: "0.9rem", fontFamily: font.body, textDecoration: "none", letterSpacing: "0.02em" }}>
-        Book my session →
-      </a>
-      <p style={{ fontSize: "0.72rem", color: C.muted, fontFamily: font.body, textAlign: "center", marginTop: "1rem", lineHeight: 1.6 }}>You'll get a calendar invite and confirmation email immediately after booking.</p>
-    </div>
-  );
-}
 
 // ======================================================
 // ANNIVERSARY RESULTS VIEW
@@ -6965,7 +6912,7 @@ function PostResultsSurvey({ respondentId = null, userName, coupleType, onClose,
   );
 }
 
-function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Answers, partnerEx3, ex2AnswersPrior = null, ex2PriorAt = null, hasAnniversary, userName, partnerName, initialSection, onSectionChange = null, isMobile = false, portrait = null, hasChecklist = false, hasBudget = false, hasLMFT = false, hasWorkbook = false, hasIntimacy = false, intimacyAnswers = null, partnerIntimacy = null, intimacyVariant = 'premarital', onNavigateTool = null, userPronouns = "", partnerPronouns = "", isBetaTester = false }) {
+function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Answers, partnerEx3, ex2AnswersPrior = null, ex2PriorAt = null, hasAnniversary, userName, partnerName, initialSection, onSectionChange = null, isMobile = false, portrait = null, hasChecklist = false, hasBudget = false, hasWorkbook = false, hasIntimacy = false, intimacyAnswers = null, partnerIntimacy = null, intimacyVariant = 'premarital', onNavigateTool = null, userPronouns = "", partnerPronouns = "", isBetaTester = false }) {
 
   // Compute all the data we need up front
   const myS = typingDimScores(ex1Answers, partnerEx1);
@@ -7998,7 +7945,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
           forcedStep={dimStep} orderedDims={orderedDims}
           onGoExpectations={() => go("exp-overview")}
           onNavigateTool={onNavigateTool}
-          hasWorkbook={hasWorkbook} hasLMFT={hasLMFT}
+          hasWorkbook={hasWorkbook}
           onStepChange={s => {
             if (s === 0) go("comm-overview");
             else if (s >= 1 && s <= nUR) go(`comm-${UR_DOMAINS[s-1].id}`);
@@ -8857,35 +8804,6 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
           <div style={{ marginTop: "0.5rem", marginBottom: "0.5rem" }}>
             <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
 
-              {/* LMFT Session (offering discontinued — gated by LMFT_ENABLED) */}
-              {LMFT_ENABLED && (hasLMFT ? (
-                <div onClick={() => onNavigateTool && onNavigateTool("lmft")} style={{ display: "flex", alignItems: "center", gap: "1rem", background: C.warm, border: `1.5px solid ${C.stone}`, borderRadius: 14, padding: "0.85rem 1.1rem", cursor: "pointer", transition: "all 0.15s" }}
-                  onMouseEnter={e => { e.currentTarget.style.borderColor = "#5B6DF8"; }}
-                  onMouseLeave={e => { e.currentTarget.style.borderColor = C.stone; }}>
-                  <div style={{ width: 34, height: 34, borderRadius: 10, background: "rgba(91,109,248,0.12)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#5B6DF8" strokeWidth="1.8" strokeLinecap="round"><path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96-.46 2.5 2.5 0 0 1-1.04-4.69A2.5 2.5 0 0 1 5 12a2.5 2.5 0 0 1 2-2.45V4.5A2.5 2.5 0 0 1 9.5 2z"/><path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96-.46 2.5 2.5 0 0 0 1.04-4.69A2.5 2.5 0 0 0 19 12a2.5 2.5 0 0 0-2-2.45V4.5A2.5 2.5 0 0 0 14.5 2z"/></svg>
-                  </div>
-                  <div style={{ flex: 1 }}>
-                    <div style={{ fontSize: "0.8rem", fontWeight: 700, color: C.ink, fontFamily: BFONT, marginBottom: "0.1rem" }}>LMFT Session</div>
-                    <div style={{ fontSize: "0.68rem", color: C.muted, fontFamily: BFONT }}>Your therapist reviews your results before you meet</div>
-                  </div>
-                  <div style={{ color: C.muted, fontSize: "0.9rem" }}>→</div>
-                </div>
-              ) : (
-                <a href="/offerings" style={{ display: "flex", alignItems: "center", gap: "1rem", background: C.warm, border: `1.5px solid ${C.stone}`, borderRadius: 14, padding: "0.85rem 1.1rem", textDecoration: "none", cursor: "pointer", transition: "all 0.15s" }}
-                  onClick={(e) => { e.preventDefault(); onNavigateTool && onNavigateTool('lmft-upsell'); }}
-                  onMouseEnter={e => { e.currentTarget.style.borderColor = "#5B6DF8"; }}
-                  onMouseLeave={e => { e.currentTarget.style.borderColor = C.stone; }}>
-                  <div style={{ width: 34, height: 34, borderRadius: 10, background: "rgba(91,109,248,0.08)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#5B6DF8" strokeWidth="1.8" strokeLinecap="round"><path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96-.46 2.5 2.5 0 0 1-1.04-4.69A2.5 2.5 0 0 1 5 12a2.5 2.5 0 0 1 2-2.45V4.5A2.5 2.5 0 0 1 9.5 2z"/><path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96-.46 2.5 2.5 0 0 0 1.04-4.69A2.5 2.5 0 0 0 19 12a2.5 2.5 0 0 0-2-2.45V4.5A2.5 2.5 0 0 0 14.5 2z"/></svg>
-                  </div>
-                  <div style={{ flex: 1 }}>
-                    <div style={{ fontSize: "0.8rem", fontWeight: 700, color: C.ink, fontFamily: BFONT, marginBottom: "0.1rem" }}>LMFT Session <span style={{ fontSize: "0.62rem", fontWeight: 600, color: "#5B6DF8", background: "rgba(91,109,248,0.1)", borderRadius: 999, padding: "0.1rem 0.5rem", marginLeft: "0.35rem" }}>Add-on</span></div>
-                    <div style={{ fontSize: "0.68rem", color: C.muted, fontFamily: BFONT }}>A therapist reviews your results before you meet</div>
-                  </div>
-                  <div style={{ color: C.muted, fontSize: "0.9rem" }}>→</div>
-                </a>
-              ))}
 
               {/* Relationship Reflection */}
               {/* Relationship Reflection — only shown as an add-on prompt when not owned (10.2) */}
@@ -9043,9 +8961,9 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
 }
 
 // Thin wrappers so PersonalityResults/ExpectationsResults can be driven externally
-function PersonalityResultsPage({ myAnswers, partnerAnswers, userName, partnerName, coupleType, userPronouns = "", partnerPronouns = "", forcedStep, orderedDims: extDims, onStepChange, onGoExpectations, onNavigateTool, hasWorkbook = false, hasLMFT = false }) {
+function PersonalityResultsPage({ myAnswers, partnerAnswers, userName, partnerName, coupleType, userPronouns = "", partnerPronouns = "", forcedStep, orderedDims: extDims, onStepChange, onGoExpectations, onNavigateTool, hasWorkbook = false }) {
   const go = s => { if (onStepChange) onStepChange(s); };
-  return <PersonalityResults myAnswers={myAnswers} partnerAnswers={partnerAnswers} userName={userName} partnerName={partnerName} coupleType={coupleType} userPronouns={userPronouns} partnerPronouns={partnerPronouns} externalStep={forcedStep ?? 0} onExternalGo={go} noSideNav={true} onGoExpectations={onGoExpectations} onNavigateTool={onNavigateTool} hasWorkbook={hasWorkbook} hasLMFT={hasLMFT} />;
+  return <PersonalityResults myAnswers={myAnswers} partnerAnswers={partnerAnswers} userName={userName} partnerName={partnerName} coupleType={coupleType} userPronouns={userPronouns} partnerPronouns={partnerPronouns} externalStep={forcedStep ?? 0} onExternalGo={go} noSideNav={true} onGoExpectations={onGoExpectations} onNavigateTool={onNavigateTool} hasWorkbook={hasWorkbook} />;
 }
 function ExpectationsResultsPage({ myAnswers, partnerAnswers, userName, partnerName, forcedSection, onGoWhatComesNext, onExternalGo, coupleTypeCode = null, coupleTypeName = null, coupleTypeColor = "#1B5FE8" }) {
   return <ExpectationsResults myAnswers={myAnswers} partnerAnswers={partnerAnswers} userName={userName} partnerName={partnerName} forcedSection={forcedSection} noSideNav={true} onGoWhatComesNext={onGoWhatComesNext} onExternalGo={onExternalGo} coupleTypeCode={coupleTypeCode} coupleTypeName={coupleTypeName} coupleTypeColor={coupleTypeColor} />;
@@ -10045,11 +9963,11 @@ function AuthModal({ mode, onClose, onSuccess }) {
         } catch {}
       }
 
-      // Restore order from Supabase so pkg features (budget, LMFT, reflection) work on a new device
+      // Restore order from Supabase so pkg features (budget, reflection) work on a new device
       if (!localStorage.getItem('attune_order') && authData.user.email) {
         try {
           const { data: orderRow } = await sb.from('orders')
-            .select('id,pkg_key,addon_lmft,addon_reflection,addon_budget,addon_checklist,addon_intimacy,addon_workbook,is_physical,order_num,user_id,workbook_url,workbook_status')
+            .select('id,pkg_key,addon_reflection,addon_budget,addon_checklist,addon_intimacy,addon_workbook,is_physical,order_num,user_id,workbook_url,workbook_status')
             .eq('buyer_email', authData.user.email)
             .order('created_at', { ascending: false })
             .limit(1)
@@ -10057,7 +9975,6 @@ function AuthModal({ mode, onClose, onSuccess }) {
           if (orderRow) {
             localStorage.setItem('attune_order', JSON.stringify({
               pkgKey:          orderRow.pkg_key,
-              addonLmft:       orderRow.addon_lmft || false,
               addonReflection: orderRow.addon_reflection || false,
               addonBudget:     orderRow.addon_budget || false,
               addonChecklist:  orderRow.addon_checklist || false,
@@ -10639,7 +10556,6 @@ function PartnerLandingScreen({ inviteFrom, inviteCode, onCreateAccount }) {
         addonBudget:     !!inheritedEntitlements?.addonBudget,
         addonChecklist:  !!inheritedEntitlements?.addonChecklist,
         addonIntimacy:     !!inheritedEntitlements?.addonIntimacy,
-        addonLmft:       !!inheritedEntitlements?.addonLmft,
         addonWorkbook:   inheritedEntitlements?.addonWorkbook || '',
         createdAt: Date.now(),
       };
@@ -10716,7 +10632,6 @@ function PartnerLandingScreen({ inviteFrom, inviteCode, onCreateAccount }) {
         addonBudget: !!inherited?.addonBudget,
         addonChecklist: !!inherited?.addonChecklist,
         addonIntimacy: !!inherited?.addonIntimacy,
-        addonLmft: !!inherited?.addonLmft,
         addonWorkbook: inherited?.addonWorkbook || '',
         createdAt: Date.now(),
       };
@@ -11022,7 +10937,6 @@ function PartnerBCompletionScreen({ partnerAName, partnerBName, partnerADone, pa
             portalUrl: window.location.origin + '/app',
             hasReflection: !!(ord?.addon_reflection || acct?.pkg === 'anniversary'),
             hasBudget: !!(ord?.addon_budget || acct?.pkg === 'newlywed'),
-            hasLMFT: !!(ord?.addon_lmft || acct?.pkg === 'premium'),
             hasWorkbook: !!(ord?.addon_workbook),
             hasIntimacy: !!(ord?.addon_intimacy),
             hasChecklist: !!(ord?.addon_checklist || acct?.pkg === 'newlywed'),
@@ -11110,23 +11024,6 @@ function PartnerBCompletionScreen({ partnerAName, partnerBName, partnerADone, pa
 // UPSELL MODAL — shown when users click workbook/reflection cards post-exercise
 // ─────────────────────────────────────────────────────────────────────────────
 const UPSELL_PRODUCTS = {
-  lmft: {
-    badge: "Add-on · Any package",
-    badgeColor: "rgba(91,109,248,0.1)",
-    badgeText: "#5B6DF8",
-    title: "LMFT Session",
-    price: "$150",
-    tagline: "50 minutes with a licensed therapist, prepared with your results.",
-    description: "A licensed marriage and family therapist receives your joint results before your session. They come prepared with context specific to your couple type and the gaps that showed up, no generic intake, no wasted time getting them up to speed. One focused session, no ongoing commitment.",
-    includes: [
-      "Therapist reviews your results before you meet",
-      "50-minute virtual session",
-      "Focused on what your specific results surface",
-      "No ongoing commitment required",
-    ],
-    accentColor: "#5B6DF8",
-    cartParam: "lmft",
-  },
   workbook: {
     badge: "Add-on",
     badgeColor: "#FFF0EB",
@@ -11571,7 +11468,7 @@ export default function App() {
   // budget builder) or from results leaves /app entirely and lands on the
   // marketing site. Entering one of these views pushes a single history entry;
   // Back pops it and returns to the dashboard.
-  const _toolViews = ['budget', 'checklist', 'notes', 'lmft', 'intimacy', 'account', 'workbook', 'results'];
+  const _toolViews = ['budget', 'checklist', 'notes', 'intimacy', 'account', 'workbook', 'results'];
   const _pushedToolHist = useRef(false);
   useEffect(() => {
     if (_toolViews.includes(view)) {
@@ -11817,7 +11714,6 @@ export default function App() {
         const _wbStatus = prof?.workbook_status || _stored.workbookStatus || null;
         const _order = {
           orderNum: ent.orderNum, pkgKey: ent.pkg, pkg: ent.pkg, isPhysical: ent.isPhysical,
-          addonLmft: ent.addonLmft, addonReflection: ent.addonReflection, addonBudget: ent.addonBudget,
           addonChecklist: ent.addonChecklist, addonIntimacy: ent.addonIntimacy, addonWorkbook: ent.addonWorkbook,
           workbookUrl: _wbUrl, workbookStatus: _wbStatus,
         };
@@ -11829,7 +11725,6 @@ export default function App() {
         setAccount(prev => prev ? {
           ...prev,
           pkg: (PKG_CAPS[ent.pkg]?.rank ?? 0) >= (PKG_CAPS[prev.pkg]?.rank ?? 0) ? ent.pkg : prev.pkg,
-          addonLmft:       prev.addonLmft       || ent.addonLmft,
           addonReflection: prev.addonReflection || ent.addonReflection,
           addonBudget:     prev.addonBudget     || ent.addonBudget,
           addonChecklist:  prev.addonChecklist  || ent.addonChecklist,
@@ -11958,7 +11853,6 @@ export default function App() {
               relationshipStatus: profile?.relationship_status || null,
               buyerRelationshipStatus: profile?.joined_via_invite ? null : (profile?.relationship_status || null),
               pkg: ent.pkg,
-              addonLmft:       ent.addonLmft,
               addonReflection: ent.addonReflection,
               addonBudget:     ent.addonBudget,
               addonChecklist:  ent.addonChecklist,
@@ -11992,7 +11886,6 @@ export default function App() {
                   pkgKey:   ent.pkg,
                   pkg:      ent.pkg,
                   isPhysical: ent.isPhysical,
-                  addonLmft:       ent.addonLmft,
                   addonReflection: ent.addonReflection,
                   addonBudget:     ent.addonBudget,
                   addonChecklist:  ent.addonChecklist,
@@ -12088,7 +11981,7 @@ export default function App() {
                 ent,
               );
               const anyEntitlement = merged.comp || merged.hasGrant ||
-                merged.addonLmft || merged.addonReflection || merged.addonBudget ||
+                merged.addonReflection || merged.addonBudget ||
                 merged.addonChecklist || merged.addonIntimacy || ((PKG_CAPS[merged.pkg]?.rank || 0) > 0);
               if (anyEntitlement) {
                 const _syncedOrder = {
@@ -12096,7 +11989,6 @@ export default function App() {
                   pkgKey:   merged.pkg,
                   pkg:      merged.pkg,
                   isPhysical: merged.isPhysical,
-                  addonLmft:       merged.addonLmft,
                   addonReflection: merged.addonReflection,
                   addonBudget:     merged.addonBudget,
                   addonChecklist:  merged.addonChecklist,
@@ -12112,7 +12004,6 @@ export default function App() {
                 setAccount(prev => prev ? {
                   ...prev,
                   pkg: merged.pkg,
-                  addonLmft:       merged.addonLmft,
                   addonReflection: merged.addonReflection,
                   addonBudget:     merged.addonBudget,
                   addonChecklist:  merged.addonChecklist,
@@ -12261,7 +12152,6 @@ export default function App() {
         portalUrl: window.location.origin + '/app',
         hasReflection: pkg.hasAnniversary,
         hasBudget: pkg.hasBudget,
-        hasLMFT: pkg.hasLMFT,
         hasWorkbook: !!(order?.addonWorkbook),
         hasIntimacy: pkg.hasIntimacy,
         hasChecklist: pkg.hasChecklist,
@@ -12974,7 +12864,7 @@ export default function App() {
         }
         // Rebuild the invitee's couple-level order from the buyer's inherited
         // addons. The invitee never placed the order, so this is the only way
-        // their device learns about the workbook / reflection / budget / lmft.
+        // their device learns about the workbook / reflection / budget.
         // Runs on every poll so it survives logout/login.
         if (json.inherited && account?.joinedViaInvite && !cancelled) {
           try {
@@ -12985,7 +12875,6 @@ export default function App() {
               addonBudget:     json.inherited.addonBudget,
               addonChecklist:  json.inherited.addonChecklist,
               addonIntimacy:     json.inherited.addonIntimacy,
-              addonLmft:       json.inherited.addonLmft,
               addonWorkbook:   json.inherited.addonWorkbook || null,
               workbookStatus:  json.inherited.workbookStatus || prev.workbookStatus || null,
               inheritedFromPartner: true,
@@ -13112,12 +13001,12 @@ export default function App() {
   const inProgressFor = (viewId) => viewId === 'exercise1' ? ex1InProgress : viewId === 'exercise2' ? ex2InProgress : viewId === 'exercise3' ? ex3InProgress : false;
   // Package config
   const pkgConfig = {
-    core:        { label: "The Attune Assessment",     color: "#E8673A", hasChecklist: false, hasAnniversary: false, hasBudget: false, hasLMFT: false },
-    newlywed:    { label: "Starting Out Collection",   color: "#E8673A", hasChecklist: true,  hasAnniversary: false, hasBudget: true,  hasLMFT: false },
-    anniversary: { label: "Relationship Reflection",    color: "#1B5FE8", hasChecklist: false, hasAnniversary: true,  hasBudget: false, hasLMFT: false },
-    premium:     { label: "Attune Premium",            color: "#3B5BDB", hasChecklist: false, hasAnniversary: true,  hasBudget: true,  hasLMFT: false },
+    core:        { label: "The Attune Assessment",     color: "#E8673A", hasChecklist: false, hasAnniversary: false, hasBudget: false },
+    newlywed:    { label: "Starting Out Collection",   color: "#E8673A", hasChecklist: true,  hasAnniversary: false, hasBudget: true },
+    anniversary: { label: "Relationship Reflection",    color: "#1B5FE8", hasChecklist: false, hasAnniversary: true,  hasBudget: false },
+    premium:     { label: "Attune Premium",            color: "#3B5BDB", hasChecklist: false, hasAnniversary: true,  hasBudget: true },
   };
-  // Merge add-on flags from stored order (e.g. LMFT add-on on non-premium packages)
+  // Merge add-on flags from stored order (add-ons bought on non-premium packages)
   // Outside demo mode the reconciled `order` state is authoritative for the
   // package key. demoPkg reads a localStorage snapshot, which can lag behind
   // the entitlement resync and silently drop package-inherent features.
@@ -13126,7 +13015,6 @@ export default function App() {
   const pkg = {
     ..._basePkg,
     hasChecklist:   _basePkg.hasChecklist   || !!(order?.addonChecklist),
-    hasLMFT:        LMFT_ENABLED && (_basePkg.hasLMFT || !!(order?.addonLmft)),
     hasAnniversary: _basePkg.hasAnniversary || !!(order?.addonReflection),
     hasBudget:      _basePkg.hasBudget      || !!(order?.addonBudget),
     hasWorkbook:    _effectivePkgKey === 'premium' || !!(order?.addonWorkbook),
@@ -13790,12 +13678,6 @@ export default function App() {
                         sub="A practical guide to starting your life together."
                         cta="Open →" onClick={() => setView("checklist")} />
                     )}
-                    {pkg.hasLMFT && (
-                      <GrowSquare color="#5B6DF8" icon={GrowIcons.lmft("#5B6DF8")}
-                        title="Your LMFT session"
-                        sub="50 minutes with a therapist who has read your results."
-                        cta="Schedule →" onClick={() => setView("lmft")} />
-                    )}
                     <GrowSquare color="#9B5DE5" icon={GrowIcons.guide("#9B5DE5")}
                       title="How to review your results together"
                       sub="A simple structure for the first conversation."
@@ -13811,7 +13693,7 @@ export default function App() {
                   </div>
 
                   {/* Add-ons — separate, quieter, never mixed with what you own */}
-                  {(!hasWorkbookOrder || !pkg.hasIntimacy || (LMFT_ENABLED && !pkg.hasLMFT)) && (
+                  {(!hasWorkbookOrder || !pkg.hasIntimacy) && (
                     <div style={{ marginTop: "1.5rem" }}>
                       <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", marginBottom: "0.85rem" }}>
                         <span style={{ fontSize: "0.58rem", letterSpacing: "0.2em", textTransform: "uppercase", fontWeight: 700, fontFamily: BFONT, color: "#A89C8C" }}>Add to your package</span>
@@ -13829,12 +13711,6 @@ export default function App() {
                             title="Physical Intimacy Expectations"
                             sub="Answered independently, compared side by side."
                             cta="$20 →" onClick={() => setUpsellModal({ product: 'intimacy', cartAdded: false })} />
-                        )}
-                        {LMFT_ENABLED && !pkg.hasLMFT && (
-                          <GrowSquare color="#5B6DF8" muted icon={GrowIcons.lmft("#5B6DF8")}
-                            title="LMFT Session"
-                            sub="50 minutes with a therapist who reviews your results first."
-                            cta="$150 →" onClick={() => setUpsellModal({ product: 'lmft', cartAdded: false })} />
                         )}
                       </div>
                     </div>
@@ -14259,16 +14135,6 @@ export default function App() {
             onChooseVariant={() => {}} />;
         })()}
 
-        {/* ── LMFT SESSION: Premium ── */}
-        {view === "lmft" && pkg.hasLMFT && (
-          <LMFTSession
-            userName={userName}
-            partnerName={partnerName}
-            userEmail={account?.email || ''}
-            orderNum={(() => { try { return JSON.parse(localStorage.getItem('attune_order') || '{}').orderNum || ''; } catch { return ''; } })()}
-            onBack={() => setView("home")}
-          />
-        )}
 
         {/* ── OUR NOTES ── */}
         {view === "notes" && (
@@ -14797,7 +14663,6 @@ export default function App() {
                   portrait={couplePortrait}
                   hasChecklist={pkg.hasChecklist}
                   hasBudget={pkg.hasBudget}
-                  hasLMFT={pkg.hasLMFT}
                   hasWorkbook={hasWorkbookOrder}
                   hasIntimacy={pkg.hasIntimacy}
                   intimacyAnswers={intimacyData?.answers || null}

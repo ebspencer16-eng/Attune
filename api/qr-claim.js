@@ -3,7 +3,7 @@
  *
  * GET  ?token=ATQR-xxxx           → look up an order by its QR token.
  *   Returns { order: { pkgKey, partner1Name, partner2Name, giftNote,
- *   buyerName, isPhysical, addonLmft, addonWorkbook, addonReflection,
+ *   buyerName, isPhysical, addonWorkbook, addonReflection,
  *   addonBudget, claimed, alreadyClaimedAt, alreadyClaimedBy } }
  *   or { error } if the token doesn't match any order.
  *
@@ -45,7 +45,6 @@ function orderToPublic(o) {
     partner1Name:     o.partner1_name || null,
     partner2Name:     o.partner2_name || null,
     giftNote:         o.gift_note || null,
-    addonLmft:        !!o.addon_lmft,
     addonWorkbook:    o.addon_workbook || null,
     addonReflection:  !!o.addon_reflection,
     addonBudget:      !!o.addon_budget,

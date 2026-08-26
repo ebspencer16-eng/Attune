@@ -1,7 +1,6 @@
 /* Shared Attune cart widget. Extracted verbatim from offerings.html so behaviour and rendering match. State lives in localStorage['attune_cart']. Do NOT include this on offerings.html (it has its own inline copy). */
 // Launch flags (defined in /_flags.js, which must load before this file).
 const CART_PHYSICAL_ENABLED = !!(window.ATTUNE_FLAGS && window.ATTUNE_FLAGS.PHYSICAL_ENABLED);
-const CART_LMFT_ENABLED     = !!(window.ATTUNE_FLAGS && window.ATTUNE_FLAGS.LMFT_ENABLED);
 // Canonical pricing — matches the offering cards and checkout.html PACKAGES.
 // If you change prices, update checkout.html/PACKAGES too.
 const CART_PKGS = {
@@ -35,7 +34,6 @@ const CART_PKGS = {
 const ADDON_PRICES = {
   workbookDigital: 19,
   workbookPrint:   39,
-  lmft:           150,
   reflection:      40,   // The Relationship Reflection exercise
   budget:          20,   // Build a Budget / Budgeting Activity
   checklist:       20,   // Starting Out Checklist
@@ -49,25 +47,20 @@ const ADDON_META = {
   budget:     { title: 'Shared Budgeting Activity',  desc: 'Build a shared budget together' },
   checklist:  { title: 'Starting Out Checklist',     desc: 'Merging lives, finances, logistics' },
   reflection: { title: 'Relationship Reflection',    desc: 'Exercise on experiences that shaped you' },
-  lmft:       { title: 'LMFT Session',               desc: 'Licensed therapist reviews your results' },
 };
 // What each package already bundles, so it isn't offered again as a paid add-on.
 const PKG_INCLUDED = {
-  core:        { checklist:false, budget:false, reflection:false, lmft:false, intimacy:false },
-  newlywed:    { checklist:true,  budget:true,  reflection:false, lmft:false, intimacy:false },
-  anniversary: { checklist:false, budget:false, reflection:true,  lmft:false, intimacy:false },
-  premium:     { checklist:false, budget:true,  reflection:true,  lmft:false, intimacy:true  },
+  core:        { checklist:false, budget:false, reflection:false, intimacy:false },
+  newlywed:    { checklist:true,  budget:true,  reflection:false, intimacy:false },
+  anniversary: { checklist:false, budget:false, reflection:true, intimacy:false },
+  premium:     { checklist:false, budget:true,  reflection:true, intimacy:true  },
 };
 // Display order: workbook first (primary upsell), then cheapest → most expensive.
 const ADDON_ORDER = (function(){
-  var order = ['workbook','intimacy','budget','checklist','reflection','lmft'];
-  // Phase 1: physical off, LMFT discontinued. Physical prices stay on CART_PKGS
+  var order = ['workbook','intimacy','budget','checklist','reflection'];
+  // Phase 1: physical off. Physical prices stay on CART_PKGS
   // so phase 2 is a flag flip.
   if (!CART_PHYSICAL_ENABLED) Object.values(CART_PKGS).forEach(function(p){ p.supportsPhysical = false; });
-  if (!CART_LMFT_ENABLED) {
-    order = order.filter(function(a){ return a !== 'lmft'; });
-    if (PKG_INCLUDED.premium) PKG_INCLUDED.premium.lmft = false;
-  }
   return order;
 })();
 
@@ -83,7 +76,7 @@ function _addonUnitPrice(key, item) {
 }
 
 // ── State ──────────────────────────────────────────────────────────────────
-// Each item: { id, pkg, format, qty, addons: { workbook, workbookVariant, lmft, reflection, budget, checklist } }
+// Each item: { id, pkg, format, qty, addons: { workbook, workbookVariant, reflection, budget, checklist } }
 let _cartItems = [];
 // Track which format is currently selected on each offering card
 let _currentFormats = CART_PHYSICAL_ENABLED
@@ -95,7 +88,7 @@ let _expandedItemId = null;
 function _newItemId() { return 'i' + Date.now().toString(36) + Math.random().toString(36).slice(2,6); }
 
 function _defaultAddons() {
-  return { workbook:false, workbookVariant:'digital', lmft:false, reflection:false, budget:false, checklist:false, intimacy:false };
+  return { workbook:false, workbookVariant:'digital', reflection:false, budget:false, checklist:false, intimacy:false };
 
 // A printed workbook is a shipped item. When physical is off, any stored
 // 'print' variant is treated as digital so nobody is charged $39 for
@@ -112,7 +105,6 @@ function _itemPrice(item) {
   const base = item.format === 'physical' ? p.physicalPrice : p.digitalPrice;
   let add = 0;
   if (item.addons.workbook)   add += wbVariant(item) === 'print' ? ADDON_PRICES.workbookPrint : ADDON_PRICES.workbookDigital;
-  if (item.addons.lmft)       add += ADDON_PRICES.lmft;
   if (item.addons.reflection) add += ADDON_PRICES.reflection;
   if (item.addons.budget)     add += ADDON_PRICES.budget;
   if (item.addons.checklist)  add += ADDON_PRICES.checklist;
@@ -430,7 +422,6 @@ function goCheckout() {
   const params = new URLSearchParams({ pkg: first.pkg });
   if (first.format === 'physical') params.set('format', 'physical');
   if (first.addons.workbook) params.set('addon_workbook', wbVariant(first));
-  if (first.addons.lmft) params.set('addon_lmft', '1');
   if (first.addons.reflection) params.set('addon_reflection', '1');
   if (first.addons.budget) params.set('addon_budget', '1');
   if (first.addons.intimacy) params.set('addon_intimacy', '1');

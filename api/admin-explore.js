@@ -405,7 +405,6 @@ export default async function handler(req) {
           order_pkg: o.pkg_key || null,
           is_physical: !!o.is_physical,
           promo_code: o.promo_code || null,
-          addon_lmft: !!o.addon_lmft,
           addon_workbook: o.addon_workbook || null,
           addon_reflection: !!o.addon_reflection,
           addon_budget: !!o.addon_budget,

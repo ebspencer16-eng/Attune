@@ -184,11 +184,6 @@
   .pkg.premium .ex-title{color:white}
   .pkg.premium .ex-desc,.pkg.premium .ex-meta,.pkg.premium .ex-num{color:rgba(255,255,255,.42)}
   .pkg.premium .physical-item{color:rgba(255,255,255,.78)}
-  .lmft-callout{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);border-radius:14px;padding:1.5rem;display:flex;gap:1.25rem;align-items:flex-start}
-  .lmft-icon{width:46px;height:46px;border-radius:12px;background:rgba(91,109,248,.25);display:flex;align-items:center;justify-content:center;flex-shrink:0}
-  .lmft-text h4{font-size:.92rem;font-weight:700;color:white;margin-bottom:.3rem}
-  .lmft-text p{font-size:.8rem;color:rgba(255,255,255,.5);line-height:1.6}
-  .lmft-value{font-size:.7rem;color:rgba(91,109,248,.8);margin-top:.4rem;font-weight:600}
 
   /* section label */
   .section-label{max-width:1100px;margin:0 auto 1.5rem;padding:0 2.5rem}
@@ -1027,16 +1022,6 @@
           </div>
         </div>
       </div>
-      <div id="premium-lmft-col" class="lmft-callout">
-        <div class="lmft-icon">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#8b9fff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
-        </div>
-        <div class="lmft-text">
-          <h4>Your personalized workbook</h4>
-          <p>A workbook built from your joint results: guided exercises and conversation prompts specific to your couple type and where you differ most. Yours to keep and work through together.</p>
-          <p class="lmft-value">Included with Premium</p>
-        </div>
-      </div>
       <div id="premium-physical-col" style="display:none;">
         <div class="inc-block">
           <div class="inc-block-title">In the gift box</div>
@@ -1310,7 +1295,6 @@ function setFormat(pkg,format){
     document.getElementById('premium-price').textContent=physical?'$233':'$198';
     document.getElementById('premium-price-sub').textContent=physical?'Physical gift box (+$35) · ships in 5-7 days':'Digital · instant access · yours to keep';
     document.getElementById('premium-cta').textContent='Add to cart →';
-    document.getElementById('premium-lmft-col').style.display=physical?'none':'block';
     document.getElementById('premium-physical-col').style.display=physical?'block':'none';
     document.querySelectorAll('#pkg-premium .fmt-btn').forEach((b,i)=>{
       b.className='fmt-btn'+(i===(physical?1:0)?' active':'');
@@ -1438,7 +1422,7 @@ document.addEventListener('click', function(e) {
 
 
 <script>
-/* Phase-1 offerings display gate. Physical + LMFT markup is preserved in the
+/* Phase-1 offerings display gate. Physical markup is preserved in the
    page; this hides it when the flags are off (see /_flags.js). */
 (function(){
   var F = window.ATTUNE_FLAGS || {};

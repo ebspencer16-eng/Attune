@@ -154,7 +154,7 @@ async function handlePartnerSync(req) {
     // Resolve Partner A's full entitlement so Partner B inherits the same
     // experience. Package is copied onto Partner B's profile below; add-ons
     // live on Partner A's order and are returned for the client to apply.
-    let inherited = { pkg: partnerA.pkg || 'core', partnerPronouns: partnerA.pronouns || '', addonReflection: false, addonBudget: false, addonChecklist: false, addonLmft: false, addonWorkbook: '', addonIntimacy: false };
+    let inherited = { pkg: partnerA.pkg || 'core', partnerPronouns: partnerA.pronouns || '', addonReflection: false, addonBudget: false, addonChecklist: false, addonWorkbook: '', addonIntimacy: false };
     try {
       // Union ALL of Partner A's orders (never newest-wins) and match on
       // buyer_email too, since guest-checkout orders can have a null user_id.
@@ -176,7 +176,6 @@ async function handlePartnerSync(req) {
         inherited.addonReflection = ent.addonReflection;
         inherited.addonBudget     = ent.addonBudget;
         inherited.addonChecklist  = ent.addonChecklist;
-        inherited.addonLmft       = ent.addonLmft;
         inherited.addonIntimacy   = ent.addonIntimacy;
         inherited.addonWorkbook   = ent.addonWorkbook || '';
       }
@@ -201,7 +200,6 @@ async function handlePartnerSync(req) {
     const { error: addonErr } = await sb.from('profiles').update({
       addon_reflection: inherited.addonReflection,
       addon_budget:     inherited.addonBudget,
-      addon_lmft:       inherited.addonLmft,
       addon_intimacy:   inherited.addonIntimacy,
       addon_workbook:   inherited.addonWorkbook,
     }).eq('id', bId);
@@ -372,10 +370,10 @@ async function handlePartnerSync(req) {
       if (!data)  return new Response(JSON.stringify({ ok: true, found: false }), { status: 200, headers: CORS });
 
       // Inherit the buyer's order addons so the invitee's device can rebuild
-      // the couple-level order (workbook readiness, reflection, budget, lmft)
+      // the couple-level order (workbook readiness, reflection, budget)
       // on every poll. The invitee never placed the order, so without this
       // they never see the workbook and lose order state across logout/login.
-      let inherited = { addonReflection: false, addonBudget: false, addonChecklist: false, addonLmft: false, addonWorkbook: '', addonIntimacy: false, workbookStatus: null };
+      let inherited = { addonReflection: false, addonBudget: false, addonChecklist: false, addonWorkbook: '', addonIntimacy: false, workbookStatus: null };
       try {
         // Union ALL of Partner A's orders, never newest-wins. A newer partial
         // order (a test purchase, a single add-on) would otherwise strip the
@@ -399,8 +397,7 @@ async function handlePartnerSync(req) {
           inherited.addonReflection = ent.addonReflection;
           inherited.addonBudget     = ent.addonBudget;
           inherited.addonChecklist  = ent.addonChecklist;
-          inherited.addonLmft       = ent.addonLmft;
-          inherited.addonIntimacy   = ent.addonIntimacy;
+            inherited.addonIntimacy   = ent.addonIntimacy;
           inherited.addonWorkbook   = ent.addonWorkbook || '';
           // Newest non-null workbook_status wins for display.
           const withStatus = rows.filter(r => r.workbook_status)

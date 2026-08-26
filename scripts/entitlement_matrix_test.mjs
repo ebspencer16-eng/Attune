@@ -12,10 +12,10 @@ import { computeEntitlements, mergeEntitlementsGrantOnly, PKG_CAPS } from '../ap
 
 // Mirror of pkgConfig in src/App.jsx (verified against source).
 const pkgConfig = {
-  core:        { hasChecklist: false, hasAnniversary: false, hasBudget: false, hasLMFT: false },
-  newlywed:    { hasChecklist: true,  hasAnniversary: false, hasBudget: true,  hasLMFT: false },
-  anniversary: { hasChecklist: false, hasAnniversary: true,  hasBudget: false, hasLMFT: false },
-  premium:     { hasChecklist: false, hasAnniversary: true,  hasBudget: true,  hasLMFT: false },
+  core:        { hasChecklist: false, hasAnniversary: false, hasBudget: false },
+  newlywed:    { hasChecklist: true,  hasAnniversary: false, hasBudget: true },
+  anniversary: { hasChecklist: false, hasAnniversary: true,  hasBudget: false },
+  premium:     { hasChecklist: false, hasAnniversary: true,  hasBudget: true },
 };
 
 // Mirror of the dashboard's `pkg` object construction.
@@ -23,7 +23,6 @@ function gates(order) {
   const base = pkgConfig[order.pkgKey] || pkgConfig.core;
   return {
     checklist:   base.hasChecklist   || !!order.addonChecklist,
-    lmft:        base.hasLMFT        || !!order.addonLmft,
     reflection:  base.hasAnniversary || !!order.addonReflection,
     budget:      base.hasBudget      || !!order.addonBudget,
     workbook:    order.pkgKey === 'premium' || !!order.addonWorkbook,
@@ -32,7 +31,7 @@ function gates(order) {
 }
 
 const toOrder = (ent) => ({
-  pkgKey: ent.pkg, addonLmft: ent.addonLmft, addonReflection: ent.addonReflection,
+  pkgKey: ent.pkg, addonReflection: ent.addonReflection,
   addonBudget: ent.addonBudget, addonChecklist: ent.addonChecklist,
   addonIntimacy: ent.addonIntimacy, addonWorkbook: ent.addonWorkbook,
 });
@@ -49,7 +48,7 @@ function check(name, got, want) {
   }
 }
 
-const F = { checklist:false, lmft:false, reflection:false, budget:false, workbook:false, intimacy:false };
+const F = { checklist:false, reflection:false, budget:false, workbook:false, intimacy:false };
 
 console.log('\n— Fresh device (no localStorage): entitlements from DB only —');
 
@@ -81,7 +80,7 @@ check('premium alone (reflection+budget+intimacy+workbook)',
 // 4. Every single add-on on top of core.
 for (const [flag, gate] of [
   ['addon_reflection','reflection'], ['addon_budget','budget'],
-  ['addon_checklist','checklist'], ['addon_lmft','lmft'], ['addon_intimacy','intimacy'],
+  ['addon_checklist','checklist'], ['addon_intimacy','intimacy'],
 ]) {
   check(`core + ${flag}`,
     gates(toOrder(computeEntitlements([{ order_num:'X', pkg_key:'core', [flag]:true, created_at:'2026-01-01' }], {}))),
@@ -112,7 +111,7 @@ console.log('\n— Comp accounts (no order rows at all) —');
 
 check('comp grants everything',
   gates(toOrder(computeEntitlements([], { is_comp:true }))),
-  { checklist:true, lmft:true, reflection:true, budget:true, workbook:true, intimacy:true });
+  { checklist:true, reflection:true, budget:true, workbook:true, intimacy:true });
 
 console.log('\n— Invitee (Partner B) inherits Partner A\'s orders —');
 
@@ -136,7 +135,7 @@ console.log('\n— A resync must never write back fewer grants than the device a
 // The stored attune_order is a grant record. Mirrors entFromStoredOrder().
 const entFromStoredOrder = (o) => ({
   comp:false, hasGrant:!!(o.orderNum||o.pkgKey), pkg:o.pkgKey||'core', orderNum:o.orderNum||'',
-  isPhysical:!!o.isPhysical, addonLmft:!!o.addonLmft, addonReflection:!!o.addonReflection,
+  isPhysical:!!o.isPhysical, addonReflection:!!o.addonReflection,
   addonBudget:!!o.addonBudget, addonChecklist:!!o.addonChecklist, addonIntimacy:!!o.addonIntimacy,
   addonWorkbook:o.addonWorkbook||'',
 });
@@ -173,8 +172,8 @@ console.log('\n— PKG_CAPS must mirror pkgConfig —');
 for (const key of Object.keys(pkgConfig)) {
   const c = PKG_CAPS[key], p = pkgConfig[key];
   check(`PKG_CAPS.${key} matches pkgConfig.${key}`,
-    { checklist:c.hasChecklist, reflection:c.hasReflection, budget:c.hasBudget, lmft:c.hasLmft },
-    { checklist:p.hasChecklist, reflection:p.hasAnniversary, budget:p.hasBudget, lmft:p.hasLMFT });
+    { checklist:c.hasChecklist, reflection:c.hasReflection, budget:c.hasBudget },
+    { checklist:p.hasChecklist, reflection:p.hasAnniversary, budget:p.hasBudget });
 }
 
 console.log(`\n${pass} passed, ${fail} failed\n`);

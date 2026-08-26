@@ -43,7 +43,6 @@ export default async function handler(req) {
     recipientName, recipientEmail,   // gift digital
     orderNum, total, lineItems,
     addonWorkbook,
-    addonLmft,
     addonReflection,
     addonBudget,
     addonIntimacy,
@@ -69,7 +68,7 @@ export default async function handler(req) {
     from: `Attune <${FROM}>`,
     to: [buyerEmail],
     subject: `Attune Order Confirmation`,
-    html: orderConfirmationHtml({ buyerName, pkgName, orderNum, total, lineItems, isGift, isPhysical, recipientName, addonWorkbook, addonLmft, addonReflection, addonBudget }),
+    html: orderConfirmationHtml({ buyerName, pkgName, orderNum, total, lineItems, isGift, isPhysical, recipientName, addonWorkbook, addonReflection, addonBudget }),
   });
 
   // ── 2. "Set up your account" to buyer (digital, for-self) ──────────────────
@@ -215,7 +214,7 @@ function brandedEmail({ preheader = '', title, subtitle, bodyHtml, ctaLabel, cta
 </html>`;
 }
 
-function orderConfirmationHtml({ buyerName, pkgName, orderNum, total, lineItems, isGift, isPhysical, recipientName, addonWorkbook, addonLmft, addonReflection, addonBudget }) {
+function orderConfirmationHtml({ buyerName, pkgName, orderNum, total, lineItems, isGift, isPhysical, recipientName, addonWorkbook, addonReflection, addonBudget }) {
   const deliveryLine = isPhysical
     ? 'Your gift box will arrive within 3–5 business days. Setup instructions are inside.'
     : isGift
@@ -227,7 +226,6 @@ function orderConfirmationHtml({ buyerName, pkgName, orderNum, total, lineItems,
   if (!items) {
     items = [{ label: pkgName, price: Number(total) || 0 }];
     if (addonWorkbook)   items.push({ label: 'Personalized Workbook (' + (addonWorkbook === 'print' ? 'printed' : 'digital') + ')', price: addonWorkbook === 'print' ? 39 : 19 });
-    if (addonLmft)       items.push({ label: 'LMFT Session', price: 150 });
     if (addonReflection) items.push({ label: 'Relationship Reflection', price: 40 });
     if (addonBudget)     items.push({ label: 'Budget Priorities Exercise', price: 20 });
   }

@@ -27,13 +27,12 @@ export const config = { runtime: 'edge' };
 const DIGITAL_PRICES  = { core: 89,  newlywed: 139, anniversary: 139, premium: 295 };
 const PHYSICAL_PRICES = { core: 124, newlywed: 174, anniversary: 174, premium: 330 };
 const ADDON_PRICES = {
-  workbookDigital: 19, workbookPrint: 39, lmft: 150,
+  workbookDigital: 19, workbookPrint: 39,
   reflection: 40, budget: 20, checklist: 20,
 };
 const TAX_CODES = {
   digitalPackage:  'txcd_10000000',
   physicalPackage: 'txcd_99999999',
-  lmft:            'txcd_20030000',
   workbookDigital: 'txcd_10304100',
   workbookPrint:   'txcd_20030007',
   digitalAddon:    'txcd_10000000',
@@ -56,7 +55,6 @@ function itemAddonTotal(it) {
   let a = 0;
   if (it.addonWorkbook === 'print')   a += ADDON_PRICES.workbookPrint;
   if (it.addonWorkbook === 'digital') a += ADDON_PRICES.workbookDigital;
-  if (it.addonLmft)       a += ADDON_PRICES.lmft;
   if (it.addonReflection) a += ADDON_PRICES.reflection;
   if (it.addonBudget)     a += ADDON_PRICES.budget;
   if (it.addonChecklist)  a += ADDON_PRICES.checklist;
@@ -85,7 +83,6 @@ function buildTaxLines(items, promoCoversBase, promoFixedAmount = null, includes
     }
     if (!includesWorkbook && it.addonWorkbook === 'print')   lines.push({ amount: Math.round(ADDON_PRICES.workbookPrint*100*(1-workbookPercent/100)),   tax_code: TAX_CODES.workbookPrint,   reference: `item-${idx}-wbprint`,   quantity: 1 });
     if (!includesWorkbook && it.addonWorkbook === 'digital') lines.push({ amount: Math.round(ADDON_PRICES.workbookDigital*100*(1-workbookPercent/100)), tax_code: TAX_CODES.workbookDigital, reference: `item-${idx}-wbdigital`, quantity: 1 });
-    if (it.addonLmft)       lines.push({ amount: ADDON_PRICES.lmft*100,       tax_code: TAX_CODES.lmft,         reference: `item-${idx}-lmft`,       quantity: 1 });
     if (it.addonReflection) lines.push({ amount: ADDON_PRICES.reflection*100, tax_code: TAX_CODES.digitalAddon, reference: `item-${idx}-reflection`, quantity: 1 });
     if (it.addonBudget)     lines.push({ amount: ADDON_PRICES.budget*100,     tax_code: TAX_CODES.digitalAddon, reference: `item-${idx}-budget`,     quantity: 1 });
     if (it.addonChecklist)  lines.push({ amount: ADDON_PRICES.checklist*100,  tax_code: TAX_CODES.digitalAddon, reference: `item-${idx}-checklist`,  quantity: 1 });
@@ -104,7 +101,6 @@ export default async function handler(req) {
       pkgKey:          it.pkgKey || it.pkg,
       isPhysical:      !!it.isPhysical || it.format === 'physical',
       addonWorkbook:   it.addonWorkbook || null,
-      addonLmft:       !!it.addonLmft,
       addonReflection: !!it.addonReflection,
       addonBudget:     !!it.addonBudget,
       addonChecklist:  !!it.addonChecklist,

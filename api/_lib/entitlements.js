@@ -13,18 +13,18 @@
  */
 
 // Capability flags per package key. These MUST mirror pkgConfig in the
-// dashboard component (src/App.jsx). Verified against it: premium grants LMFT
+// dashboard component (src/App.jsx). The LMFT session offering is discontinued;
 // only; reflection/budget/checklist come from explicit add-on flags. Claiming
 // a package grants more than it does inflates entitlements; claiming less
 // strips them.
 export const PKG_CAPS = {
-  core:        { rank: 0, hasChecklist: false, hasReflection: false, hasBudget: false, hasLmft: false },
-  newlywed:    { rank: 1, hasChecklist: true,  hasReflection: false, hasBudget: true,  hasLmft: false },
-  anniversary: { rank: 1, hasChecklist: false, hasReflection: true,  hasBudget: false, hasLmft: false },
-  premium:     { rank: 2, hasChecklist: false, hasReflection: true,  hasBudget: true,  hasLmft: false, hasIntimacy: true, hasWorkbook: 'digital' },
+  core:        { rank: 0, hasChecklist: false, hasReflection: false, hasBudget: false },
+  newlywed:    { rank: 1, hasChecklist: true,  hasReflection: false, hasBudget: true },
+  anniversary: { rank: 1, hasChecklist: false, hasReflection: true,  hasBudget: false },
+  premium:     { rank: 2, hasChecklist: false, hasReflection: true,  hasBudget: true,  hasIntimacy: true, hasWorkbook: 'digital' },
 };
 
-export const ORDER_SELECT = 'order_num,pkg_key,is_physical,addon_lmft,addon_reflection,addon_budget,addon_checklist,addon_intimacy,addon_workbook,created_at';
+export const ORDER_SELECT = 'order_num,pkg_key,is_physical,addon_reflection,addon_budget,addon_checklist,addon_intimacy,addon_workbook,created_at';
 
 // Entitlements are cumulative, never chronological. Union every order the
 // account owns (plus its profile columns, plus any comp grant) so a newer or
@@ -37,13 +37,13 @@ export function computeEntitlements(rows, profile) {
     return {
       comp: true, hasGrant: true,
       pkg: 'premium', orderNum: '', isPhysical: false,
-      addonLmft: true, addonReflection: true, addonBudget: true,
+      addonReflection: true, addonBudget: true,
       addonChecklist: true, addonIntimacy: true, addonWorkbook: 'digital',
     };
   }
   const list = (Array.isArray(rows) ? rows : []).filter(Boolean);
   let pkg = 'core', bestRank = -1, orderNum = '', newestAt = -1, isPhysical = false;
-  let addonLmft = false, addonReflection = false, addonBudget = false;
+  let addonReflection = false, addonBudget = false;
   let addonChecklist = false, addonIntimacy = false, addonWorkbook = '';
   let hasGrant = false;
   for (const o of list) {
@@ -57,7 +57,6 @@ export function computeEntitlements(rows, profile) {
     }
     if (o.is_physical) isPhysical = true;
     // Capability = package-inherent OR the add-on flag.
-    addonLmft       = addonLmft       || cap.hasLmft       || !!o.addon_lmft;
     addonReflection = addonReflection || cap.hasReflection || !!o.addon_reflection;
     addonBudget     = addonBudget     || cap.hasBudget     || !!o.addon_budget;
     addonChecklist  = addonChecklist  || cap.hasChecklist  || !!o.addon_checklist;
@@ -65,10 +64,10 @@ export function computeEntitlements(rows, profile) {
     if (o.addon_workbook === 'printed') addonWorkbook = 'printed';
     else if (o.addon_workbook) addonWorkbook = addonWorkbook || o.addon_workbook;
     else if (cap.hasWorkbook && !addonWorkbook) addonWorkbook = cap.hasWorkbook;
-    if (cap.rank > 0 || o.addon_lmft || o.addon_reflection || o.addon_budget || o.addon_checklist || o.addon_intimacy || o.addon_workbook) hasGrant = true;
+    if (cap.rank > 0 || o.addon_reflection || o.addon_budget || o.addon_checklist || o.addon_intimacy || o.addon_workbook) hasGrant = true;
   }
   return { comp: false, hasGrant, pkg, orderNum, isPhysical,
-    addonLmft, addonReflection, addonBudget, addonChecklist, addonIntimacy, addonWorkbook };
+    addonReflection, addonBudget, addonChecklist, addonIntimacy, addonWorkbook };
 }
 
 // Merge two entitlement objects grant-only (OR the capabilities). Used on the
@@ -82,7 +81,6 @@ export function mergeEntitlementsGrantOnly(a, b) {
     pkg: rankOf(b?.pkg) >= rankOf(a?.pkg) ? (b?.pkg || a?.pkg || 'core') : (a?.pkg || 'core'),
     orderNum: b?.orderNum || a?.orderNum || '',
     isPhysical: !!(a?.isPhysical || b?.isPhysical),
-    addonLmft: !!(a?.addonLmft || b?.addonLmft),
     addonReflection: !!(a?.addonReflection || b?.addonReflection),
     addonBudget: !!(a?.addonBudget || b?.addonBudget),
     addonChecklist: !!(a?.addonChecklist || b?.addonChecklist),
@@ -99,7 +97,6 @@ export function sameEntitlements(a, b) {
     && !!a.addonReflection === !!b.addonReflection
     && !!a.addonBudget === !!b.addonBudget
     && !!a.addonChecklist === !!b.addonChecklist
-    && !!a.addonLmft === !!b.addonLmft
     && !!a.addonIntimacy === !!b.addonIntimacy
     && (a.addonWorkbook || '') === (b.addonWorkbook || '')
     && !!a.comp === !!b.comp;
@@ -158,7 +155,7 @@ export async function writeEntitlements({ supabaseUrl, serviceKey, userId, email
     // undefined, which computeEntitlements treats as "no grant".
     rows.push({
       order_num: null, pkg_key: profile.pkg || null, is_physical: false,
-      addon_lmft: profile.addon_lmft, addon_reflection: profile.addon_reflection,
+      addon_reflection: profile.addon_reflection,
       addon_budget: profile.addon_budget, addon_checklist: profile.addon_checklist,
       addon_intimacy: profile.addon_intimacy, addon_workbook: profile.addon_workbook,
       created_at: null,
