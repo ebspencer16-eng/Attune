@@ -4493,23 +4493,35 @@ function ExpectationsResults({ myAnswers, partnerAnswers, userName, partnerName,
               <div style={{ marginBottom: "1rem" }}>
                 <div style={{ fontSize: "0.55rem", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.75)", fontFamily: BFONT, fontWeight: 700, marginBottom: "0.5rem" }}>Conversations to have</div>
                 <p style={{ fontSize: "0.75rem", color: "rgba(255,255,255,0.62)", fontFamily: BFONT, lineHeight: 1.55, margin: "0 0 0.75rem" }}>
-                  {gaps.length} topic{gaps.length !== 1 ? "s" : ""} where your assumptions differ, across {checklistItems.length} area{checklistItems.length !== 1 ? "s" : ""}. Tap a heading to open that category.
+                  {gaps.length} topic{gaps.length !== 1 ? "s" : ""} where your assumptions differ, across {checklistItems.length} area{checklistItems.length !== 1 ? "s" : ""}. Open an area to see its full list.
                 </p>
                 <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
+                  {/* Collapsed by default so the page stays scannable. The
+                      summary row carries the count, the word "topics", and a
+                      chevron, so it reads as openable rather than as a link. */}
                   {checklistItems.map(fc => (
-                    <div key={fc.id} style={{ background: "rgba(255,255,255,0.13)", borderRadius: 14, overflow: "hidden", border: "1px solid rgba(255,255,255,0.22)", borderLeft: `4px solid ${fc.color}`, boxShadow: "0 6px 20px rgba(0,0,0,0.14)" }}>
-                      <div onClick={() => go(`convo-${FIXED_CATS.findIndex(x => x.id === fc.id)}`)}
-                        style={{ background: "rgba(255,255,255,0.09)", borderBottom: "1px solid rgba(255,255,255,0.16)", padding: "0.6rem 1rem", display: "flex", justifyContent: "space-between", alignItems: "center", cursor: "pointer" }}>
+                    <details key={fc.id} style={{ background: "rgba(255,255,255,0.13)", borderRadius: 14, overflow: "hidden", border: "1px solid rgba(255,255,255,0.22)", borderLeft: `4px solid ${fc.color}`, boxShadow: "0 6px 20px rgba(0,0,0,0.14)" }}>
+                      <summary style={{ listStyle: "none", cursor: "pointer", background: "rgba(255,255,255,0.09)", padding: "0.7rem 1rem", display: "flex", justifyContent: "space-between", alignItems: "center", gap: "0.75rem" }}>
                         <span style={{ fontSize: "0.68rem", fontWeight: 700, color: "rgba(255,255,255,0.95)", textTransform: "uppercase", letterSpacing: "0.1em", fontFamily: BFONT }}>{fc.label}</span>
-                        <span style={{ fontSize: "0.62rem", color: "rgba(255,255,255,0.62)", fontFamily: BFONT }}>{fc.gapItems.length} topic{fc.gapItems.length !== 1 ? "s" : ""} →</span>
-                      </div>
-                      {fc.gapItems.map((g, gi) => (
-                        <div key={gi} style={{ display: "flex", alignItems: "flex-start", gap: "0.75rem", padding: "0.6rem 1rem", borderBottom: gi < fc.gapItems.length - 1 ? "1px solid rgba(255,255,255,0.1)" : "none" }}>
-                          <div style={{ width: 17, height: 17, borderRadius: 4, border: "1.5px solid rgba(255,255,255,0.55)", background: "rgba(255,255,255,0.12)", flexShrink: 0, marginTop: 1 }} />
-                          <span style={{ fontSize: "0.8rem", color: "rgba(255,255,255,0.88)", fontFamily: BFONT, lineHeight: 1.45 }}>{g.item}</span>
+                        <span style={{ display: "flex", alignItems: "center", gap: "0.5rem", flexShrink: 0 }}>
+                          <span style={{ fontSize: "0.62rem", color: "rgba(255,255,255,0.75)", fontFamily: BFONT }}>{fc.gapItems.length} topic{fc.gapItems.length !== 1 ? "s" : ""}</span>
+                          <span style={{ fontSize: "0.6rem", color: "rgba(255,255,255,0.6)", fontFamily: BFONT, letterSpacing: "0.06em" }}>Show</span>
+                          <span style={{ fontSize: "0.8rem", color: "rgba(255,255,255,0.75)", lineHeight: 1 }}>▾</span>
+                        </span>
+                      </summary>
+                      <div style={{ borderTop: "1px solid rgba(255,255,255,0.16)" }}>
+                        {fc.gapItems.map((g, gi) => (
+                          <div key={gi} style={{ display: "flex", alignItems: "flex-start", gap: "0.75rem", padding: "0.6rem 1rem", borderBottom: "1px solid rgba(255,255,255,0.1)" }}>
+                            <div style={{ width: 17, height: 17, borderRadius: 4, border: "1.5px solid rgba(255,255,255,0.55)", background: "rgba(255,255,255,0.12)", flexShrink: 0, marginTop: 1 }} />
+                            <span style={{ fontSize: "0.8rem", color: "rgba(255,255,255,0.88)", fontFamily: BFONT, lineHeight: 1.45 }}>{g.item}</span>
+                          </div>
+                        ))}
+                        <div onClick={() => go(`convo-${FIXED_CATS.findIndex(x => x.id === fc.id)}`)}
+                          style={{ padding: "0.6rem 1rem", cursor: "pointer", fontSize: "0.7rem", fontWeight: 600, color: "rgba(255,255,255,0.8)", fontFamily: BFONT }}>
+                          Open {fc.label} →
                         </div>
-                      ))}
-                    </div>
+                      </div>
+                    </details>
                   ))}
                 </div>
               </div>
