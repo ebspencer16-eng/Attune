@@ -4,14 +4,13 @@
  * POST ?secret=ADMIN_SECRET  { action, ...params }
  *
  * Service-role writes for the admin dashboard. The admin page previously
- * wrote beta_codes and lmft_requests through PostgREST with the anon key;
+ * wrote beta_codes through PostgREST with the anon key;
  * RLS (migration 010) blocks those writes. Same gate as the other admin
  * endpoints.
  *
  * Actions:
  *   beta_toggle  { code, active }          → set beta code active flag
  *   beta_upsert  { row }                   → insert/update a beta code (by code)
- *   lmft_status  { id, status }            → update an lmft_requests row
  */
 
 export const config = { runtime: 'edge' };
@@ -26,7 +25,6 @@ function json(obj, status = 200) {
   });
 }
 
-const LMFT_STATUSES = ['pending', 'contacted', 'scheduled', 'completed', 'canceled'];
 
 export default async function handler(req) {
   if (req.method !== 'POST') return json({ error: 'Method not allowed' }, 405);
@@ -75,15 +73,6 @@ export default async function handler(req) {
       return json({ ok: true });
     }
 
-    if (body.action === 'lmft_status') {
-      const id = body.id;
-      const status = String(body.status || '');
-      if (!id) return json({ error: 'Missing id' }, 400);
-      if (!LMFT_STATUSES.includes(status)) return json({ error: 'Invalid status' }, 400);
-      const { error } = await admin.from('lmft_requests').update({ status }).eq('id', id);
-      if (error) return json({ error: error.message }, 500);
-      return json({ ok: true });
-    }
 
     if (body.action === 'feature_testimonial') {
       const id = body.id;

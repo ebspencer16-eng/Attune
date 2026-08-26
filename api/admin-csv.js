@@ -166,8 +166,6 @@ async function buildCombinedData(admin) {
     ['',              'budget_when'],
     ['',              'checklist_purchased'],
     ['',              'checklist_when'],
-    ['',              'lmft_purchased'],
-    ['',              'lmft_when'],
 
     ['Demographics', 'partner_a_gender'],
     ['',             'partner_b_gender'],
@@ -235,7 +233,6 @@ async function buildCombinedData(admin) {
     const pkgHasChecklist   = o?.pkg_key === 'newlywed';
     const pkgHasBudget      = o?.pkg_key === 'newlywed' || o?.pkg_key === 'premium';
     const pkgHasReflection  = o?.pkg_key === 'anniversary' || o?.pkg_key === 'premium';
-    const pkgHasLMFT        = o?.pkg_key === 'premium';
     const whenHeuristic = (o_, field) => {
       if (!o_ || !o_[field]) return '';
       if (!o_.updated_at || !o_.created_at) return 'initial_checkout';
@@ -249,7 +246,6 @@ async function buildCombinedData(admin) {
     const hasReflection = pkgHasReflection || !!o?.addon_reflection;
     const hasBudget     = pkgHasBudget     || !!o?.addon_budget;
     const hasChecklist  = pkgHasChecklist;
-    const hasLMFT       = pkgHasLMFT       || !!o?.addon_lmft;
 
     const anonId = (p.id || '').replace(/-/g, '').slice(0, 8);
     const fb = (o?.buyer_email && feedbackByEmail[o.buyer_email.toLowerCase()]) || null;
@@ -267,7 +263,6 @@ async function buildCombinedData(admin) {
       hasReflection ? 'Y' : 'N',  hasReflection ? whenFor(pkgHasReflection, 'addon_reflection') : '',
       hasBudget     ? 'Y' : 'N',  hasBudget     ? whenFor(pkgHasBudget, 'addon_budget') : '',
       hasChecklist  ? 'Y' : 'N',  hasChecklist  ? 'initial_checkout' : '',
-      hasLMFT       ? 'Y' : 'N',  hasLMFT       ? whenFor(pkgHasLMFT, 'addon_lmft') : '',
 
       p.gender || '',
       ps?.gender || '',
@@ -435,7 +430,6 @@ async function exportOrders(admin) {
     'reflection_purchased', 'reflection_purchased_when',
     'budget_purchased', 'budget_purchased_when',
     'checklist_purchased', 'checklist_purchased_when',
-    'lmft_purchased', 'lmft_purchased_when',
   ];
 
   // "When" inference: Addon columns in orders are set at checkout time
@@ -459,18 +453,16 @@ async function exportOrders(admin) {
     // Package inclusion rules (from src/App.jsx pkgConfig):
     //   newlywed    → includes checklist + budget
     //   anniversary → includes reflection
-    //   premium     → includes reflection + budget + LMFT
+    //   premium     → includes reflection + budget
     // Add-ons stack on top of package inclusions.
     const pkgHasChecklist   = o.pkg_key === 'newlywed';
     const pkgHasBudget      = o.pkg_key === 'newlywed' || o.pkg_key === 'premium';
     const pkgHasReflection  = o.pkg_key === 'anniversary' || o.pkg_key === 'premium';
-    const pkgHasLMFT        = o.pkg_key === 'premium';
 
     const hasWorkbook   = !!o.addon_workbook;
     const hasReflection = pkgHasReflection || !!o.addon_reflection;
     const hasBudget     = pkgHasBudget     || !!o.addon_budget;
     const hasChecklist  = pkgHasChecklist;  // No addon column today
-    const hasLMFT       = pkgHasLMFT       || !!o.addon_lmft;
 
     // If the feature came with the package, "when" = initial_checkout.
     const whenFor = (pkgIncluded, addonField) => {
@@ -493,7 +485,6 @@ async function exportOrders(admin) {
       hasReflection ? 'Y' : 'N',   hasReflection ? whenFor(pkgHasReflection, 'addon_reflection') : '',
       hasBudget     ? 'Y' : 'N',   hasBudget     ? whenFor(pkgHasBudget, 'addon_budget') : '',
       hasChecklist  ? 'Y' : 'N',   hasChecklist  ? 'initial_checkout' : '',
-      hasLMFT       ? 'Y' : 'N',   hasLMFT       ? whenFor(pkgHasLMFT, 'addon_lmft') : '',
     ];
   });
   return csvResponse(`attune_orders_${new Date().toISOString().slice(0,10)}.csv`, toCSV(headers, rows));

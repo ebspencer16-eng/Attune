@@ -253,7 +253,7 @@
       </div>
     </div>
 
-    <!-- Add-on upsell prompt (single-item carts). Workbook by default; LMFT if the workbook is already in the cart. -->
+    <!-- Add-on upsell prompt (single-item carts). Workbook only. -->
     <div id="addonPromptRow" class="co-card" style="display:none">
       <div style="padding:1rem 1.5rem">
         <label style="display:flex;align-items:flex-start;gap:.85rem;cursor:pointer">
@@ -462,7 +462,6 @@ if(new URLSearchParams(location.search).get('test')==='1' || location.hostname==
 // ── Package definitions ──────────────────────────────────────────────────────
 // ── Launch flags (mirror src/App.jsx) ────────────────────────────────────────
 const PHYSICAL_ENABLED = !!(window.ATTUNE_FLAGS && window.ATTUNE_FLAGS.PHYSICAL_ENABLED);
-const LMFT_ENABLED     = !!(window.ATTUNE_FLAGS && window.ATTUNE_FLAGS.LMFT_ENABLED);
 
 const PACKAGES = {
   core: {
@@ -495,16 +494,10 @@ const PACKAGES = {
   },
 };
 
-// Phase-1 normalization: digital-only, no LMFT. Physical data (physicalPrice,
+// Phase-1 normalization: digital-only. Physical data (physicalPrice,
 // physicalTags) stays on each package so phase 2 is a flag flip.
 if (!PHYSICAL_ENABLED) {
   Object.values(PACKAGES).forEach(p => { p.format = 'digital'; p.price = p.digitalPrice; p.priceLabel = '$' + p.digitalPrice; });
-}
-if (!LMFT_ENABLED) {
-  Object.values(PACKAGES).forEach(p => {
-    if (Array.isArray(p.tags)) p.tags = p.tags.filter(t => !/LMFT/i.test(t));
-    if (Array.isArray(p.physicalTags)) p.physicalTags = p.physicalTags.filter(t => !/LMFT/i.test(t));
-  });
 }
 // forceFmt: honours the physical flag. Every format read routes through this.
 function forceFmt(f) { return PHYSICAL_ENABLED ? (f || 'digital') : 'digital'; }
@@ -512,7 +505,6 @@ function forceFmt(f) { return PHYSICAL_ENABLED ? (f || 'digital') : 'digital'; }
 // off any stored 'print' variant is treated (and charged) as digital.
 function forceWbVariant(v) { return PHYSICAL_ENABLED ? (v || 'digital') : 'digital'; }
 
-const ADDON_LMFT = { label: 'LMFT Session (50 min · licensed therapist)', price: 150 };
 const ADDON_REFLECTION = { label: "Relationship Reflection exercise", price: 40 };
 
 const ADDON_WORKBOOK = {
@@ -560,10 +552,9 @@ let addonReflection = false;
 let addonBudget = false;
 let addonIntimacy = false;
 let addonChecklist = false;
-let addonLmft = false;
 
 // Multi-item state: one entry per couple (qty expanded). Each entry:
-//   { pkg, format, addons:{workbook,workbookVariant,lmft,reflection,budget,checklist},
+//   { pkg, format, addons:{workbook,workbookVariant,reflection,budget,checklist},
 //     intent:'self'|'gift', partner1Name, partner2Name, giftNote, shipping:{name,address,city,state} }
 // One-time token for this checkout page load. Combined with the amount it forms
 // the Stripe idempotency key, so a resubmit (retry, double-submit, slow network)
@@ -661,7 +652,6 @@ async function refreshTax() {
           pkgKey:          it.pkg,
           isPhysical:      it.format === 'physical',
           addonWorkbook:   it.addons.workbook ? forceWbVariant(it.addons.workbookVariant) : null,
-          addonLmft:       !!it.addons.lmft,
           addonReflection: !!it.addons.reflection,
           addonBudget:     !!it.addons.budget,
           addonIntimacy:   !!it.addons.intimacy,
@@ -777,7 +767,6 @@ function persistOrderComplete(orderNum) {
         // (not billed as an add-on). Otherwise use the add-on's own variant.
         workbookVariant:  (pkgId === 'premium' && params.get('wb_format') === 'print') ? 'print'
                           : params.get('addon_workbook') === 'print' ? 'print' : 'digital',
-        lmft:             params.get('addon_lmft') === '1',
         reflection:       params.get('addon_reflection') === '1',
         budget:           params.get('addon_budget') === '1',
         intimacy:         params.get('addon_intimacy') === '1',
@@ -795,16 +784,12 @@ function persistOrderComplete(orderNum) {
     window.__attuneFromRegistry = true;
   }
 
-  // Phase-1 safety: strip any LMFT add-on that arrived via URL param or saved
-  // cart, so a stale /checkout?addon_lmft=1 link can never bill for it.
-  if (!LMFT_ENABLED) _items.forEach(it => { if (it.addons) it.addons.lmft = false; });
 
   // Mirror first item into legacy vars (for summary code that still uses them)
   const first = _items[0];
   pkg = PACKAGES[first.pkg] || PACKAGES.core;
   pkg.format = first.format;
   addonWorkbook   = first.addons.workbook ? (first.addons.workbookVariant || 'digital') : null;
-  addonLmft       = !!first.addons.lmft;
   addonReflection = !!first.addons.reflection;
   addonBudget     = !!first.addons.budget;
   addonIntimacy   = !!first.addons.intimacy;
@@ -820,7 +805,7 @@ function persistOrderComplete(orderNum) {
     if (ftEl) ftEl.style.display = 'block';
   }
   // Add-on upsell prompt: single-item carts only. Prompt for the workbook by
-  // default; if the workbook is already in the cart, prompt for the LMFT
+  // default.
   // session instead. Premium includes both, so it gets no prompt.
   let _promptKey = null;
   if (_items.length === 1) {
@@ -832,7 +817,6 @@ function persistOrderComplete(orderNum) {
     } else {
       if (!it0.addons.workbook)        _promptKey = 'workbook';
       else if (!it0.addons.intimacy)   _promptKey = 'intimacy';
-      else if (LMFT_ENABLED && !it0.addons.lmft) _promptKey = 'lmft';
     }
   }
   if (_promptKey) {
@@ -1042,7 +1026,6 @@ function renderSummary() {
     let base = it.format === 'physical' ? p.physicalPrice : p.digitalPrice;
     let add = 0;
     add += wbCharge(it);
-    if (it.addons.lmft)       add += ADDON_LMFT.price;
     if (it.addons.reflection) add += ADDON_REFLECTION.price;
     if (it.addons.budget)     add += 20;
     if (it.addons.intimacy)   add += 20;
@@ -1081,7 +1064,6 @@ function renderSummary() {
     if (g.item.addons.workbook) {
       addonLines.push(wbLine(g.item));
     }
-    if (g.item.addons.lmft)       addonLines.push({ label: ADDON_LMFT.label, price: ADDON_LMFT.price });
     if (g.item.addons.reflection) addonLines.push({ label: ADDON_REFLECTION.label, price: ADDON_REFLECTION.price });
     if (g.item.addons.budget)     addonLines.push({ label: 'Shared Budgeting Activity', price: 20 });
     if (g.item.addons.intimacy)   addonLines.push({ label: 'Physical Intimacy Expectations', price: 20 });
@@ -1279,7 +1261,6 @@ function validateForm() {
         const base = it.format === 'physical' ? p.physicalPrice : p.digitalPrice;
         let add = 0;
         add += wbCharge(it);
-        if (it.addons.lmft)       add += 150;
         if (it.addons.reflection) add += 40;
         if (it.addons.budget)     add += 20;
         if (it.addons.intimacy)     add += 20;
@@ -1417,7 +1398,7 @@ function validateForm() {
                   partner1Name: it.partner1Name, partner2Name: it.partner2Name,
                   giftNote: it.giftNote || null,
                   addonWorkbook: it.addons.workbook ? (it.addons.workbookVariant || 'digital') : null,
-                  addonLmft: !!it.addons.lmft, addonReflection: !!it.addons.reflection,
+                  addonReflection: !!it.addons.reflection,
                   addonBudget: !!it.addons.budget, addonIntimacy: !!it.addons.intimacy, addonChecklist: !!it.addons.checklist,
                   shipping: it.format === 'physical' ? it.shipping : null,
                 })),
@@ -1461,7 +1442,6 @@ function validateForm() {
               p1: first.partner1Name, p2: first.partner2Name,
               orderNum: realOrderNum,
             });
-            if (first.addons.lmft)       params.set('lmft', '1');
             if (first.addons.workbook)   params.set('addon_workbook', first.addons.workbookVariant || 'digital');
             if (first.intent === 'gift') params.set('gift', '1');
             document.getElementById('startLink').href = '/app?' + params.toString();
@@ -1490,7 +1470,6 @@ function updatePaymentRequestTotal() {
     const base = it.format === 'physical' ? p.physicalPrice : p.digitalPrice;
     let add = 0;
     add += wbCharge(it);
-    if (it.addons.lmft)       add += 150;
     if (it.addons.reflection) add += 40;
     if (it.addons.budget)     add += 20;
     if (it.addons.intimacy)   add += 20;
@@ -1554,7 +1533,6 @@ async function handleSubmit(e) {
           partner2Name:     it.partner2Name,
           giftNote:         it.giftNote || null,
           addonWorkbook:    it.addons.workbook ? (it.addons.workbookVariant || 'digital') : null,
-          addonLmft:        !!it.addons.lmft,
           addonReflection:  !!it.addons.reflection,
           addonBudget:      !!it.addons.budget,
           addonIntimacy:    !!it.addons.intimacy,
@@ -1565,7 +1543,6 @@ async function handleSubmit(e) {
         pkg:              first.pkg,
         pkgKey:           first.pkg,
         addonWorkbook:    first.addons.workbook ? (first.addons.workbookVariant || 'digital') : null,
-        addonLmft:        !!first.addons.lmft,
         addonReflection:  !!first.addons.reflection,
         addonBudget:      !!first.addons.budget,
         addonIntimacy:    !!first.addons.intimacy,
@@ -1632,7 +1609,6 @@ async function handleSubmit(e) {
       p1:     first.partner1Name,
       p2:     first.partner2Name,
     });
-    if (first.addons.lmft)       params.set('lmft', '1');
     if (first.addons.reflection) params.set('addon_reflection', '1');
     if (first.addons.workbook)   params.set('addon_workbook', first.addons.workbookVariant || 'digital');
     if (first.addons.budget)     params.set('addon_budget', '1');
@@ -1656,7 +1632,6 @@ async function handleSubmit(e) {
       if (it.addons.workbook) {
         lineItems.push(wbLine(it));
       }
-      if (it.addons.lmft)       lineItems.push({ label: ADDON_LMFT.label, price: ADDON_LMFT.price });
       if (it.addons.reflection) lineItems.push({ label: ADDON_REFLECTION.label, price: ADDON_REFLECTION.price });
       if (it.addons.budget)     lineItems.push({ label: 'Shared Budgeting Activity', price: 20 });
       if (it.addons.intimacy)   lineItems.push({ label: 'Physical Intimacy Expectations', price: 20 });
@@ -1677,7 +1652,6 @@ async function handleSubmit(e) {
           lineItems:     lineItems,
           total:         isFreePromo ? 0 : itemSubtotal,
           addonWorkbook: it.addons.workbook ? (it.addons.workbookVariant || 'digital') : null,
-          addonLmft:     !!it.addons.lmft,
           addonReflection: !!it.addons.reflection,
           addonBudget:     !!it.addons.budget,
           addonIntimacy:   !!it.addons.intimacy,
@@ -1694,7 +1668,6 @@ async function handleSubmit(e) {
     try {
       localStorage.setItem('attune_order', JSON.stringify({
         pkgKey:        first.pkg,
-        addonLmft:     !!first.addons.lmft,
         addonReflection: !!first.addons.reflection,
         addonWorkbook: first.addons.workbook ? (first.addons.workbookVariant || 'digital') : null,
         addonBudget:   !!first.addons.budget,
@@ -1842,7 +1815,6 @@ function cartItemPrice(it) {
   let base = it.format === 'physical' ? p.physicalPrice : p.digitalPrice;
   let add = 0;
   if (it.addons.workbook)   add += wbCharge(it);
-  if (it.addons.lmft)       add += ADDON_LMFT.price;
   if (it.addons.reflection) add += ADDON_REFLECTION.price;
   if (it.addons.budget)     add += 20;
   if (it.addons.intimacy)     add += 20;
@@ -1857,7 +1829,6 @@ function getPkgTotal() {
     if (appliedPromoMode === 'fixed') {
       let t = appliedPromoAmount;
       if (addonWorkbook && ADDON_WORKBOOK[addonWorkbook]) t += ADDON_WORKBOOK[addonWorkbook].price;
-      if (addonLmft) t += ADDON_LMFT.price;
       if (addonReflection) t += ADDON_REFLECTION.price;
       if (addonBudget) t += 20;
       if (addonIntimacy) t += 20;
@@ -2033,7 +2004,6 @@ async function applyPromo() {
   // keep the card so we can still collect for it.
   let remainingCharge = 0;
   _items.forEach(it => {
-    if (it.addons.lmft)                                            remainingCharge += ADDON_LMFT.price;
     if (it.addons.reflection && !appliedPromoCovers.reflection)    remainingCharge += ADDON_REFLECTION.price;
     if (it.addons.budget     && !appliedPromoCovers.budget)        remainingCharge += 20;
     if (it.addons.checklist  && !appliedPromoCovers.checklist)     remainingCharge += 20;

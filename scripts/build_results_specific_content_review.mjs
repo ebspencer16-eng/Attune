@@ -248,7 +248,7 @@ const section8 = [
     'Personalized workbook: "Download your personalized workbook." · "Structured activities drawn from your top gap dimensions"',
     'Expectations discussion guide: "Topics to discuss, organized by area"',
     'Conversation prompts: "Questions specific to where you and [partner] differ"',
-    'Links to share, download the workbook, and book an LMFT session. An upgrade prompt shows where applicable.',
+    'Links to share and download the workbook. An upgrade prompt shows where applicable.',
   ]),
 ];
 

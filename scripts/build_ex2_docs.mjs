@@ -418,7 +418,7 @@ function buildLMFTContextDoc() {
     bullet('Their couple type — the dynamic produced by their pairing, drawn from a four-individual-type / ten-pairing framework'),
     bullet('A side-by-side view of where they aligned and where they diverged on expectations across six domains'),
     bullet('Conversation prompts and an action plan calibrated to their specific results'),
-    bullet('Optionally: a personalized workbook PDF, a 50-minute LMFT session, and physical fulfillment'),
+    bullet('Optionally: a personalized workbook PDF and physical fulfillment'),
 
     h2('How the four individual types and ten pairings work'),
     p('Communication scores are condensed onto two axes:'),

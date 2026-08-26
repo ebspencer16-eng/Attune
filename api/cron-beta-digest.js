@@ -3,7 +3,7 @@
  *
  * Vercel Cron — weekly (Mondays 09:00 UTC). Emails a live beta health digest
  * to the team. Pulls live data via the service-role Supabase client (same
- * source the admin dashboard reads): profiles, orders, lmft_requests,
+ * source the admin dashboard reads): profiles, orders,
  * partner_sessions. Revenue comes from orders.total, which is mirrored from
  * Stripe at payment time, so it reflects real charges.
  *
@@ -44,18 +44,16 @@ export default async function handler(req) {
   const wIso = weekAgo.toISOString();
 
   try {
-    const [profQ, ordersQ, lmftQ, psQ] = await Promise.all([
+    const [profQ, ordersQ, psQ] = await Promise.all([
       admin.from('profiles').select('id, created_at, partner_profile_id, invite_code, joined_via_invite, is_comp, ex1_completed, ex2_completed, ex3_completed, ex1_answers, ex2_answers'),
-      admin.from('orders').select('order_num, created_at, total, pkg_key, is_physical, addon_lmft, addon_reflection, addon_budget, addon_checklist, addon_intimacy, addon_workbook').order('created_at', { ascending: false }).limit(2000),
-      admin.from('lmft_requests').select('created_at').order('created_at', { ascending: false }).limit(500),
+      admin.from('orders').select('order_num, created_at, total, pkg_key, is_physical, addon_reflection, addon_budget, addon_checklist, addon_intimacy, addon_workbook').order('created_at', { ascending: false }).limit(2000),
       admin.from('partner_sessions').select('invite_code, ex1_answers, ex2_answers'),
     ]);
-    const firstErr = [profQ, ordersQ, lmftQ, psQ].find(q => q.error);
+    const firstErr = [profQ, ordersQ, psQ].find(q => q.error);
     if (firstErr) return new Response(JSON.stringify({ error: firstErr.error.message }), { status: 500 });
 
     const profiles = (profQ.data || []).filter(p => !p.is_comp); // exclude comp/test accounts from beta metrics
     const orders = ordersQ.data || [];
-    const lmft = lmftQ.data || [];
     const sessions = psQ.data || [];
 
     // ── Accounts ──
@@ -83,9 +81,6 @@ export default async function handler(req) {
     for (const o of orders) { const k = o.pkg_key || 'unknown'; pkgCounts[k] = (pkgCounts[k] || 0) + 1; }
     const pkgLine = Object.entries(pkgCounts).sort((a, b) => b[1] - a[1]).map(([k, n]) => `${k}: ${n}`).join(' · ') || '—';
 
-    // ── LMFT ──
-    const lmftWeek = lmft.filter(r => r.created_at && r.created_at >= wIso).length;
-    const lmftAll = lmft.length;
 
     const row = (label, value, sub = '') =>
       `<tr><td style="padding:6px 12px;color:#6a6052;font-size:13px">${label}</td>` +
@@ -125,11 +120,6 @@ export default async function handler(req) {
     ${row('By package', pkgLine)}
   </table>
 
-  <h3 style="font-size:13px;text-transform:uppercase;letter-spacing:.06em;color:#B8431F;margin:16px 0 4px">LMFT bookings</h3>
-  <table style="width:100%;border-collapse:collapse">
-    ${row('This week', lmftWeek)}
-    ${row('All time', lmftAll)}
-  </table>
 
   <p style="color:#a99f8f;font-size:11px;margin-top:20px">Comp/test accounts are excluded from account and activation counts. Revenue is from recorded orders (mirrored from Stripe at payment).</p>
 </div>`;

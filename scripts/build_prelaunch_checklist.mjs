@@ -236,7 +236,7 @@ const section2 = [
     { item: 'Stripe checkout for all 4 packages × digital/physical combinations' },
     { item: 'Apple Pay / Google Pay captures shipping address correctly', notes: 'fixed earlier session' },
     { item: 'Stripe webhook → Supabase orders table end-to-end test' },
-    { item: 'Add-ons (LMFT $150, Relationship Reflection $40, Budget $20) price correctly at checkout' },
+    { item: 'Add-ons (Relationship Reflection $40, Budget $20) price correctly at checkout' },
     { item: 'Beta codes (BETA-CORE, BETA-NEWLYWED, BETA-ANNIVERSARY, BETA-PREMIUM) work at checkout' },
     { item: 'Gift-note field works and propagates to admin + physical shipment' },
   ], BLUE),
@@ -278,7 +278,6 @@ const section2 = [
     { item: 'Types Analytics page: all 10 couple types distribution accurate' },
     { item: 'Feedback page: beta survey responses flow through' },
     { item: 'Beta codes page: usage tracked accurately, can toggle active/inactive' },
-    { item: 'LMFT requests page: displays incoming requests, status tracking works' },
     { item: 'CSV export works across Orders, Responses, Types' },
   ], BLUE),
 

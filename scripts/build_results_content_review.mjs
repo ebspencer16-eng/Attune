@@ -179,7 +179,7 @@ const whatNext = [
   sectionTable([
     { what: 'Heading + subhead', desc: 'Closing framing.', source: U, content: '"What comes next." / "What to do with all of this."' },
     { what: 'Your action plans', desc: 'The action plans gathered in one place.', source: CA, content: 'see RS 5.x, 6.2 (generated)' },
-    { what: 'Next-step links', desc: 'Share, download workbook, book LMFT.', source: U, content: 'Shown by what the couple owns. see RS 8.3' },
+    { what: 'Next-step links', desc: 'Share and download the workbook.', source: U, content: 'Shown by what the couple owns. see RS 8.3' },
     { what: 'Upgrade prompt', desc: 'Shown where applicable.', source: CA, content: 'Universal upsell copy, shown by ownership' },
   ]),
 ];

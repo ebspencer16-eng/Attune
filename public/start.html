@@ -393,17 +393,6 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;height:58px;background:rgba(
       </div>
     </div>
 
-    <!-- LMFT — $150 — most expensive -->
-    <div class="addon-card" id="addon-lmft" onclick="toggleLmft()" style="display:none">
-      <div class="addon-check" id="lmft-check">
-        <svg width="10" height="8" viewBox="0 0 11 9" fill="none"><path d="M1 4.5L4 7.5L10 1" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-      </div>
-      <div class="addon-body">
-        <div class="addon-name">LMFT Session</div>
-        <div class="addon-desc">A 50-minute video session with a licensed marriage and family therapist to review and discuss your results.</div>
-        <div class="addon-price">+$150</div>
-      </div>
-    </div>
 
   </div>
 </div>
@@ -438,9 +427,7 @@ const DIGITAL_SUB  = 'Digital · instant access · yours to keep';
 let selectedPkg = null;
 // Launch flags (from /_flags.js, loaded before this script).
 const START_PHYSICAL_ENABLED = !!(window.ATTUNE_FLAGS && window.ATTUNE_FLAGS.PHYSICAL_ENABLED);
-const START_LMFT_ENABLED     = !!(window.ATTUNE_FLAGS && window.ATTUNE_FLAGS.LMFT_ENABLED);
 let format = START_PHYSICAL_ENABLED ? 'physical' : 'digital';
-let addonLmft = false;
 let addonWorkbook = false;
 let wbFormat = 'digital';
 let addonBudget = false;
@@ -489,20 +476,17 @@ function selectPkg(id) {
   const checklistIncluded = id === 'newlywed';
   const reflectionIncluded = id === 'anniversary' || id === 'premium';
   const intimacyIncluded = id === 'premium';
-  const lmftIncluded = START_LMFT_ENABLED && id === 'premium';
   const workbookIncluded = id === 'premium';   // Premium includes the workbook
   if (budgetIncluded)     addonBudget = false;
   if (checklistIncluded)  addonChecklist = false;
   if (reflectionIncluded) addonReflection = false;
   if (intimacyIncluded)   addonIntimacy = false;
-  if (lmftIncluded)       addonLmft = false;
   if (workbookIncluded) { addonWorkbook = false; document.getElementById('wb-variants').classList.remove('show'); }
-  ['addon-budget','addon-checklist','addon-reflection','addon-intimacy','addon-lmft','addon-workbook'].forEach(a => { const el = document.getElementById(a); if (el) el.classList.remove('selected'); });
+  ['addon-budget','addon-checklist','addon-reflection','addon-intimacy','addon-workbook'].forEach(a => { const el = document.getElementById(a); if (el) el.classList.remove('selected'); });
   setAddonIncluded('addon-budget', budgetIncluded);
   setAddonIncluded('addon-checklist', checklistIncluded);
   setAddonIncluded('addon-reflection', reflectionIncluded);
   setAddonIncluded('addon-intimacy', intimacyIncluded);
-  setAddonIncluded('addon-lmft', lmftIncluded);
   setAddonIncluded('addon-workbook', workbookIncluded);
   // Premium: the included workbook tracks the package format (digital/printed).
   document.getElementById('premium-wb').style.display = (id === 'premium') ? '' : 'none';
@@ -514,19 +498,12 @@ function setAddonIncluded(id, included) {
   const el = document.getElementById(id);
   if (!el) return;
   // Never re-show a surface that a launch flag has switched off. Without this,
-  // selecting a package un-hides the LMFT add-on even when LMFT_ENABLED=false.
-  if (id === 'addon-lmft' && !START_LMFT_ENABLED) { el.style.display = 'none'; el.classList.remove('selected'); return; }
   // Fully hide add-ons already included in the package rather than dimming.
   // The user can still see what's in the package via the package tile itself.
   el.style.display = included ? 'none' : '';
   if (included) el.classList.remove('selected');
 }
 
-function toggleLmft() {
-  addonLmft = !addonLmft;
-  document.getElementById('addon-lmft').classList.toggle('selected', addonLmft);
-  updateBar();
-}
 
 function toggleWorkbook() {
   addonWorkbook = !addonWorkbook;
@@ -539,7 +516,7 @@ function setWbFormat(f, e) {
   // e is optional: the digital-only gate below calls this with no event.
   // Without the guard it threw, and everything after that call in the gate
   // (premium workbook lock, variant hiding, the setFormat price sync, the
-  // LMFT block) never ran.
+  // price sync) never ran.
   if (e) e.stopPropagation();
   wbFormat = f;
   document.getElementById('wv-digital').classList.toggle('active', f === 'digital');
@@ -583,7 +560,6 @@ function setPremiumWb(f, e) {
 function updateBar() {
   if (!selectedPkg) return;
   let total = PRICES[selectedPkg][format];
-  if (addonLmft) total += 150;
   if (addonWorkbook) total += wbFormat === 'print' ? 39 : 19;
   if (addonBudget) total += 20;
   if (addonReflection) total += 40;
@@ -599,7 +575,6 @@ function updateBar() {
 function goNext() {
   if (!selectedPkg) return;
   const params = new URLSearchParams({ pkg: selectedPkg, format });
-  if (addonLmft) params.set('addon_lmft', '1');
   if (addonWorkbook) params.set('addon_workbook', wbFormat);
   if (addonBudget) params.set('addon_budget', '1');
   if (addonReflection) params.set('addon_reflection', '1');
@@ -754,7 +729,7 @@ function openSidebar(pkg, e) {
   let html = '';
   d.sections.forEach(sec => {
     html += `<div class="sidebar-section"><div class="sidebar-section-title">${sec.title}</div>`;
-    sec.items.filter(item => START_LMFT_ENABLED || !/LMFT/i.test(item.label)).forEach(item => {
+    sec.items.forEach(item => {
       html += `<div class="sidebar-item">
         <div class="sidebar-item-dot ${item.dot}">✦</div>
         <div class="sidebar-item-body">
@@ -801,7 +776,7 @@ document.addEventListener('click',function(e){var menu=document.getElementById('
 <script src="/cart.js"></script>
 
 <script>
-/* Phase-1 start-page gate. Physical + LMFT markup preserved; hidden by flags. */
+/* Phase-1 start-page gate. Physical markup preserved; hidden by flag. */
 (function(){
   var F = window.ATTUNE_FLAGS || {};
   if (!F.PHYSICAL_ENABLED) {
@@ -821,9 +796,6 @@ document.addEventListener('click',function(e){var menu=document.getElementById('
   // hardcoded markup prices stick, which is how physical pricing survived the
   // digital-only switch.
   if (typeof setFormat === 'function') setFormat(F.PHYSICAL_ENABLED ? 'physical' : 'digital');
-  if (F.LMFT_ENABLED) {
-    var l = document.getElementById('addon-lmft'); if (l) l.style.display='';
-  }
 })();
 </script>
 </body>

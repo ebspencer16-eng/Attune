@@ -13,7 +13,7 @@
  */
 
 // Capability flags per package key. These MUST mirror pkgConfig in the
-// dashboard component (src/App.jsx). The LMFT session offering is discontinued;
+// dashboard component (src/App.jsx). Verified against it.
 // only; reflection/budget/checklist come from explicit add-on flags. Claiming
 // a package grants more than it does inflates entitlements; claiming less
 // strips them.

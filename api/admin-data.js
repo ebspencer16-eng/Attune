@@ -4,7 +4,7 @@
  * GET ?secret=ADMIN_SECRET
  *
  * One service-role payload for every admin dashboard loader. The admin page
- * previously read orders/profiles/lmft_requests/feedback_submissions straight
+ * previously read orders/profiles/feedback_submissions straight
  * from PostgREST with the anon key; migration 010 (correctly) locked anon out
  * of those tables, which silently broke every real-data section. Migration
  * 010's comments call for exactly this pattern: admin reads via service role
@@ -15,7 +15,6 @@
  *   ok: true,
  *   orders:               [ full order rows, newest first, limit 1000 ],
  *   beta_codes:           [ full rows ],
- *   lmft_requests:        [ full rows, newest first, limit 200 ],
  *   feedback_submissions: [ full rows, newest first, limit 2000 ],
  *   profiles: {
  *     demographics:        [ {age_range, gender, relationship_status,
@@ -252,16 +251,15 @@ export default async function handler(req) {
   const admin = createClient(SUPABASE_URL, SUPABASE_KEY);
 
   try {
-    const [ordersQ, codesQ, lmftQ, fbQ, profQ, psQ] = await Promise.all([
+    const [ordersQ, codesQ, fbQ, profQ, psQ] = await Promise.all([
       admin.from('orders').select('*').order('created_at', { ascending: false }).limit(1000),
       admin.from('beta_codes').select('*').order('code', { ascending: true }),
-      admin.from('lmft_requests').select('*').order('created_at', { ascending: false }).limit(200),
       admin.from('feedback_submissions').select('*').order('submitted_at', { ascending: false }).limit(2000),
       admin.from('profiles').select('id, partner_profile_id, invite_code, name, partner_name, age_range, gender, pronouns, partner_pronouns, relationship_status, relationship_length, children, signup_source, ex1_answers, ex2_answers, ex3_answers'),
       admin.from('partner_sessions').select('invite_code, ex1_answers, ex2_answers'),
     ]);
 
-    const firstErr = [ordersQ, codesQ, lmftQ, fbQ, profQ, psQ].find(q => q.error);
+    const firstErr = [ordersQ, codesQ, fbQ, profQ, psQ].find(q => q.error);
     if (firstErr) return json({ error: firstErr.error.message }, 500);
 
     const profiles = profQ.data || [];
@@ -331,7 +329,6 @@ export default async function handler(req) {
       responsesBySegment,
       orders: ordersQ.data || [],
       beta_codes: codesQ.data || [],
-      lmft_requests: lmftQ.data || [],
       feedback_submissions: fbQ.data || [],
       profiles: {
         demographics: profiles.map(p => ({
