@@ -93,17 +93,27 @@ const FONT_LINK = "https://fonts.googleapis.com/css2?family=Playfair+Display:ita
 // browser (e.g. Partner B inheriting Partner A's workbook flag, or a fresh
 // signup seeing demo data marked as completed).
 const USER_LOCALSTORAGE_KEYS = [
+  'attune_account',
   'attune_ex1', 'attune_ex2', 'attune_ex3',
   'attune_ex1_progress', 'attune_ex2_progress', 'attune_ex3_progress',
   'attune_ex1_prior', 'attune_ex2_prior', 'attune_ex3_prior',
   'attune_partner_session', 'attune_live_session',
   'attune_order', 'attune_portrait', 'attune_budget',
+  'attune_checklist', 'attune_notes',
+  'attune_intimacy', 'attune_intimacy_progress',
   'attune_workbook_ready', 'attune_workbook_blob',
   'attune_workbook_notif_seen', 'attune_workbook_print_queued',
   'attune_profile_setup_done',
   'attune_results_email_sent', 'attune_stay_subscribed',
+  'attune_results_state', 'attune_couple_type_saved',
+  'attune_post_survey_done', 'attune_survey_done',
+  'attune_wb_promo_fired', 'attune_feedback_ctx',
   'attune_6mo_sent',
 ];
+// Deliberately NOT here: attune_dev_intimacy, a developer toggle rather than
+// user data. Everything a person creates or that identifies them belongs in
+// this list, because this is what runs on sign-out and on account switch.
+// scripts/check-localstorage-keys.mjs fails the build if a key drifts out.
 function clearAllUserLocalStorage() {
   for (const k of USER_LOCALSTORAGE_KEYS) {
     try { localStorage.removeItem(k); } catch {}
