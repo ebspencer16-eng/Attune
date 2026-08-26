@@ -79,6 +79,13 @@ for (const section of SECTIONS) {
   // links and nothing else. Every real section is several times that. 600 sits
   // well clear of both.
   const empty = text.trim().length < 600;
+  // A section this couple cannot reach now redirects to highlights rather than
+  // rendering blank, so a length check alone would call it clean. Ask where we
+  // actually landed.
+  const landed = await page.evaluate(() => {
+    try { return JSON.parse(localStorage.getItem('attune_results_state') || '{}').activeResult; } catch { return null; }
+  });
+  const redirected = landed && landed !== section;
 
   const problems = [
     ...errors,
@@ -88,13 +95,13 @@ for (const section of SECTIONS) {
     failed++;
     console.error(`  FAIL  ${section}`);
     for (const p of problems.slice(0, 3)) console.error(`        ${p.slice(0, 160)}`);
-  } else if (empty) {
+  } else if (redirected || empty) {
     // Not a failure: the section exists but the demo has no answers for it, so
     // there is nothing to render and nothing to check. Reported loudly rather
     // than silently passed, because a section that can never be seen in demo
     // is also a section nobody has visually reviewed.
     skipped.push(section);
-    console.log(`  SKIP  ${section}  (no demo data — ${text.trim().length} chars)`);
+    console.log(`  SKIP  ${section}  (${redirected ? 'not available for this package, redirected to ' + landed : 'no demo data — ' + text.trim().length + ' chars'})`);
   } else {
     console.log(`  ok    ${section}`);
   }

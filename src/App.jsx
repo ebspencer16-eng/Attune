@@ -7131,10 +7131,29 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
     // whose stored state points at an old page don't land on a blank section.
     if (s === "couple-map") return "couple-type";
     if (s === "summary" || s === "full-summary") return "couple-type";
-    if (s) return s;
-    return "highlights";
+    if (!s) return "highlights";
+    // A section this couple does not own (a core package on reflection-plan
+    // from a stale stored state or a shared link) used to render an empty
+    // column. Sections are validated against availableSections below.
+    return s;
   };
   const getInitialSection = () => mapSection(initialSection);
+  // Sections this couple can actually reach. hasAnniversary and
+  // intimacyBothDone are declared further down the component body, so this has
+  // to stay a function: calling it during the initial render would hit the
+  // temporal dead zone. It is only ever called from effects and from go(),
+  // both of which run after the body has finished executing.
+  const availableSections = () => [
+    "highlights", "couple-type", "comm-overview", "comm-inner", "comm-connection", "comm-hard",
+    "exp-overview", ...FIXED_CATS.map((_, ci) => `exp-convo-${ci}`),
+    ...(hasAnniversary ? ["reflection-overview", "reflection-ratings", "reflection-story", "reflection-plan"] : []),
+    ...(intimacyBothDone ? ["intimacy-overview", ...INTIMACY_DIMENSIONS.map(d => `intimacy-${d.id}`), "intimacy-plan"] : []),
+    "what-comes-next",
+  ];
+  const safeSection = (s) => {
+    const m = mapSection(s);
+    return availableSections().includes(m) ? m : "highlights";
+  };
   const [section, setSection] = useState(getInitialSection());
   const [commExpanded, setCommExpanded] = useState(section.startsWith("comm"));
   const [expExpanded, setExpExpanded] = useState(section.startsWith("exp"));
@@ -7145,9 +7164,22 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
   // activeResult, so without this every mobile tab was a no-op. Deliberately
   // keyed on initialSection alone: adding section to the deps would fight
   // with go().
+  // Correct an unreachable stored section after mount (a core package landing
+  // on reflection-plan from a stale saved state or a shared link).
+  useEffect(() => {
+    setSection(cur => {
+      if (availableSections().includes(cur)) return cur;
+      // Report up too, so the persisted state stops pointing at a page this
+      // couple cannot reach and a refresh does not repeat the correction.
+      if (onSectionChange) onSectionChange("highlights");
+      return "highlights";
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   useEffect(() => {
     if (!initialSection) return;
-    const mapped = mapSection(initialSection);
+    const mapped = safeSection(initialSection);
     setSection(cur => {
       if (mapped === cur) return cur;
       setCommExpanded(mapped.startsWith("comm"));
