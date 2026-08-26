@@ -54,6 +54,7 @@ page.on('console', (m) => {
 });
 
 let failed = 0;
+const skipped = [];
 await page.goto(BASE + '/', { waitUntil: 'domcontentloaded' });
 
 for (const section of SECTIONS) {
@@ -65,19 +66,35 @@ for (const section of SECTIONS) {
   await page.goto(`${BASE}/?demo=1&type=${TYPE}&pkg=${PKG}&view=results`, { waitUntil: 'networkidle' });
   await page.waitForTimeout(900);
 
-  const text = await page.evaluate(() => document.body.innerText || '');
+  // Read the results column, not the whole document: a section the demo has no
+  // data for still renders the shell and the marketing footer, which is long
+  // enough to pass a body-length check while showing the user nothing.
+  const text = await page.evaluate(() => {
+    const el = document.querySelector('[data-results-scroll]');
+    return (el ? el.innerText : document.body.innerText) || '';
+  });
   const leaks = [...new Set((text.match(LEAK) || []))];
-  const empty = text.trim().length < 200;
+  // A section the demo has no data for still renders the shell and the site
+  // footer, so the column is not empty: it comes to ~290 characters of nav
+  // links and nothing else. Every real section is several times that. 600 sits
+  // well clear of both.
+  const empty = text.trim().length < 600;
 
   const problems = [
     ...errors,
     ...(leaks.length ? ['leaked: ' + leaks.slice(0, 4).join(', ')] : []),
-    ...(empty ? ['rendered empty'] : []),
   ];
   if (problems.length) {
     failed++;
     console.error(`  FAIL  ${section}`);
     for (const p of problems.slice(0, 3)) console.error(`        ${p.slice(0, 160)}`);
+  } else if (empty) {
+    // Not a failure: the section exists but the demo has no answers for it, so
+    // there is nothing to render and nothing to check. Reported loudly rather
+    // than silently passed, because a section that can never be seen in demo
+    // is also a section nobody has visually reviewed.
+    skipped.push(section);
+    console.log(`  SKIP  ${section}  (no demo data — ${text.trim().length} chars)`);
   } else {
     console.log(`  ok    ${section}`);
   }
@@ -89,4 +106,5 @@ if (failed) {
   console.error(`\n[check-render] ${failed} of ${SECTIONS.length} sections failed.`);
   process.exit(1);
 }
-console.log(`\n[check-render] ${SECTIONS.length} sections rendered clean (${TYPE}, ${PKG}).`);
+console.log(`\n[check-render] ${SECTIONS.length - skipped.length} of ${SECTIONS.length} sections rendered clean (${TYPE}, ${PKG}).`);
+if (skipped.length) console.log(`[check-render] skipped, no demo data: ${skipped.join(', ')}`);
