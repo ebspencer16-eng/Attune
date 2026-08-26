@@ -21,6 +21,16 @@ const DIM_ACTION_ITEMS = evalConst(app, 'DIM_ACTION_ITEMS');
 const DOMAIN_ALIGNED = evalConst(app, 'DOMAIN_ALIGNED');
 const REFLECTION_ACTION_TITLES = evalConst(app, 'REFLECTION_ACTION_TITLES');
 
+// The reassurance shift prose, pulled straight out of getDimShift's SHIFTS map.
+// Rendered with sample names so the {loName}/{hiName} slots read as real copy.
+const reassuranceShifts = (() => {
+  const i = app.indexOf('    reassurance: {', app.indexOf('const SHIFTS = {'));
+  const j = app.indexOf('\n    },', i);
+  return [...app.slice(i, j).matchAll(/'(\d_\d)':\s*`([^`]*)`/g)]
+    .map(m => [m[1], m[2].replace(/\$\{loName\}/g, 'Maya').replace(/\$\{hiName\}/g, 'David')]);
+})();
+const BAND = { 1: 'strongly Voiced', 2: 'leans Voiced', 3: 'flexible', 4: 'leans Assumed', 5: 'strongly Assumed' };
+
 // The bids gap prose, pulled from the per-cell block so the doc shows exactly
 // what ships rather than a paraphrase.
 const bidsBlock = (() => {
@@ -56,6 +66,7 @@ const cover = buildCover({
     ['6.', 'Labels already changed', 'confirm or revert'],
     ['7.', 'Action plan items', '10 dimensions + 3 aligned states'],
     ['8.', 'Reflection action titles', 'rewritten as instructions'],
+    ['9.', 'Reassurance guidance', '15 score pairings, new'],
   ],
 });
 
@@ -183,6 +194,14 @@ children.push(...bigSection('8', 'Reflection action titles', 'The Relationship R
 Object.entries(REFLECTION_ACTION_TITLES).forEach(([was, now], i) => {
   children.push(midSection(`8.${i + 1}`, '', GREEN, { inline: was }));
   children.push(prose('->  ' + now, { indent: INDENT_PROSE_UNDER_SMALL }));
+});
+
+// ── 9 ────────────────────────────────────────────────────────────────────────
+children.push(...bigSection('9', 'Reassurance guidance', 'The One thing to try tile shows guidance written for where each partner sits on the dimension. Every other dimension already had this and was approved; Reassurance postdates that pass, so these 15 are new. Maya sits toward Voiced, David toward Assumed.', PURPLE));
+reassuranceShifts.forEach(([key, text], i) => {
+  const [lo, hi] = key.split('_');
+  children.push(midSection(`9.${i + 1}`, `${BAND[lo]}  +  ${BAND[hi]}`, PURPLE, { extras: key.replace('_', ' and ') }));
+  children.push(prose(text));
 });
 
 const out = (process.env.ATTUNE_DOC_OUT || '/mnt/user-data/outputs') + '/attune_prose_to_approve.docx';

@@ -2770,6 +2770,27 @@ function getDimShift(dim, myScore, partScore, U, P) {
 
   const SHIFTS = {
 
+    // ── REASSURANCE (A=Voiced, B=Assumed) ──
+    // DRAFT copy, in the prose approval doc. Every other dimension's shift
+    // prose was reviewed; this one postdates that pass.
+    reassurance: {
+      '1_1': `You both need where you stand said out loud, and you both say it. Nothing goes unnamed. The risk is that it turns into a routine and stops carrying weight. Make it specific this week: name the thing, not the category.`,
+      '1_2': `${loName} needs it said plainly; ${hiName} leans the same way. Close match, so neither of you is left waiting. The one gap: when life gets busy, the saying is the first thing to drop. Put it somewhere it survives a hard week.`,
+      '1_3': `${loName} needs where they stand said out loud; ${hiName} is steady either way. That steadiness can read as not needing to say it. It costs ${hiName} very little to say it anyway, and it lands.`,
+      '1_4': `${loName} needs it voiced; ${hiName} treats it as settled and does not think to say it. The quiet is not withholding, and the asking is not doubt. The shift: ${hiName} says it once this week unprompted, before ${loName} has to ask.`,
+      '1_5': `${loName} needs where they stand said out loud. ${hiName} takes it as given and rarely says it. This is the gap where a long quiet stretch means two completely different things. Agree on a small, regular way it gets said. It matters more to one of you than the other, and that is fine.`,
+      '2_2': `You both like hearing it, without needing much. Comfortable match. Watch for it thinning out over time, since neither of you will chase it. Say it when you notice it, not only when it is asked for.`,
+      '2_3': `${loName} likes it said; ${hiName} is comfortable either way. No real strain here. ${hiName} can be the one who says it first, since it costs them less.`,
+      '2_4': `${loName} likes hearing it; ${hiName} assumes it and moves on. Small but real. The shift: ${hiName} answers the unasked question sometimes, rather than waiting for a prompt.`,
+      '2_5': `${loName} wants it said now and then; ${hiName} treats it as long since settled. ${hiName} may not hear the ask, because it arrives quietly. ${loName} can ask outright, and ${hiName} can take the ask at face value.`,
+      '3_3': `Neither of you needs it said, and neither of you goes looking for it. That is a low-maintenance place to be. The gap shows up after a rough patch, when neither of you names that you are okay. Say it once out loud after the next hard week.`,
+      '3_4': `${loName} is steady either way; ${hiName} takes it as given. Nothing is straining. The one thing worth doing is saying it during a good stretch, so it is available during a bad one.`,
+      '3_5': `${loName} does not need much; ${hiName} needs none at all. You will rarely talk about where you stand. That works until something is actually off and there is no signal either way. Build one small check-in you both do on purpose.`,
+      '4_4': `You both take it as settled and rarely say it. Secure and uncomplicated. The risk is that silence carries no information, so a hard stretch looks exactly like an easy one. Name it out loud once a month, even when nothing prompts it.`,
+      '4_5': `${loName} assumes it; ${hiName} assumes it more. Neither of you will bring it up. That is fine while things are steady. Pick one moment, an anniversary or the start of a month, and say it then.`,
+      '5_5': `You both treat security as a given and neither of you asks for confirmation. Genuinely settled. The only thing to watch: after something hard, neither of you will be the one to say you are okay. Decide now who says it first next time.`,
+    },
+
     // ── ENERGY & RECHARGE (A=Inward, B=Outward) ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
     energy: {
       '1_1': `You both recharge in solitude. The risk is that neither of you flags when you're depleted. You just go quiet. Try naming it before you disappear: "I need a low-key evening." It prevents the silence from reading as something else.`,
