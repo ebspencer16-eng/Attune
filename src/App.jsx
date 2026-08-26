@@ -2847,6 +2847,47 @@ function PortraitSetup({ userName, partnerName, existing, onSave, onClose }) {
 // based on where each partner scores (5 buckets × 5 buckets = 15 unordered combos).
 // pos: 0=strongly A, 1=lean A, 2=middle, 3=lean B, 4=strongly B
 
+// 6.3 — "One thing to keep in mind" prose for ALIGNED dimensions. Previously
+// every aligned dimension fell back to one generic line. These are per-
+// dimension. Pole-neutral on purpose: an aligned couple sits on the same pole,
+// but which pole is data-dependent, so each line works for either.
+const ALIGNED_ADVICE = {
+  reassurance: {
+    low:  "You both want where you stand said out loud, and you both say it. Nothing goes unnamed. The thing to watch is it becoming a routine that stops carrying weight. Name the specific thing, not the category.",
+    high: "You both take security as a given, so it rarely gets said. That is a settled place to be. The thing to watch is that silence carries no information, so a hard stretch looks exactly like an easy one. Say it out loud after the next rough week.",
+  },
+  energy:     "You recharge in similar ways. That makes it easy to assume the other always wants what you want. Check before you plan the weekend around it.",
+  // Direction-dependent: which pole the couple is aligned toward changes the copy.
+  expression: {
+    low:  "You both process emotion inwardly. That gives feelings room to settle before they're spoken. It also means nothing forces the deeper thing to the surface, so neither of you pushes the other toward the part that's harder to say. Ask for it sometimes, even when neither of you offers first.",
+    high: "You both process emotion out loud. Feelings reach the table fast, which is easy. The watch-out is volume. When you're both expressing at once, leave room for one of you to just listen.",
+  },
+  needs: {
+    low:  "You both ask directly. Nothing gets buried, which is its own kind of ease. The watch-out is tone, not clarity. When you're tired, directness can read sharper than you mean it. Same ask, softer.",
+    high: "You both tend to hint. That keeps things gentle, but when neither of you says it straight, the ask gets missed by both of you. Say the direct version sometimes anyway.",
+  },
+  bids: {
+    low:  "You're both reserved with the small reaches for connection. Neither of you makes a show of them, which keeps things low-key. It also means they can pass unnoticed. Name one out loud now and then. The reach only lands when the other person knows it happened.",
+    high: "You both catch the small reaches for connection. Keep catching them out loud. The acknowledgment is what makes a bid land, not just the noticing.",
+  },
+  listening:  "You listen in similar ways. That works until one of you needs the other mode. Ask which one is wanted before you give it.",
+  conflict:   "You handle conflict in similar ways. If you both engage, it can escalate fast. If you both step back, things go unsaid. Watch for whichever one is yours.",
+  repair: {
+    low:  "You both repair deliberately, with a real reset. That makes repairs count. It can also leave small ruptures waiting for a big enough moment. Let some be smaller and sooner.",
+    high: "You both repair casually, without much ceremony. Because it comes so naturally, it's easy to skip naming that a repair even happened. Say it landed.",
+  },
+  love:       "Love lands in similar ways for both of you. That's rare. Keep giving it in that form on purpose, not just by default.",
+  feedback:   "You handle feedback in similar ways. When you're both open, keep it kind. When you're both guarded, small things pile up. Say the small thing early.",
+};
+function alignedAdvice(dim, a, b) {
+  const adv = ALIGNED_ADVICE[dim];
+  if (!adv) return null;
+  if (typeof adv === "string") return adv;
+  const na = Number(a), nb = Number(b);
+  const avg = ((isNaN(na) ? 3 : na) + (isNaN(nb) ? 3 : nb)) / 2;
+  return avg < 3 ? adv.low : adv.high;
+}
+
 function getDimShift(dim, myScore, partScore, U, P) {
   // Buckets: 1=Strongly A (≤1.8), 2=Lean A (1.8-2.6), 3=Middle (2.6-3.4), 4=Lean B (3.4-4.2), 5=Strongly B (>4.2)
   const pos = s => s <= 1.8 ? 1 : s <= 2.6 ? 2 : s <= 3.4 ? 3 : s <= 4.2 ? 4 : 5;
@@ -4071,16 +4112,23 @@ function PersonalityResults({ myAnswers, partnerAnswers, userName, partnerName, 
   const dimAdviceFor = (dim) => {
     if (!dim) return null;
     const fb = byDim[dim];
-    // adviceText is the approved shift prose. It is only written when the pair
-    // is far enough apart to warrant it, so a closely matched couple falls
-    // through to that dimension's strength line rather than an empty tile.
-    return fb?.adviceText || fb?.strengthText || fb?.insightText || null;
+    // adviceText is the approved shift prose, written for pairs far enough
+    // apart to warrant it. A closely matched couple gets the per-dimension
+    // "one thing to keep in mind" line instead, which says something useful
+    // about sharing a position rather than restating that they share it. The
+    // strength line is a last resort so the tile is never empty.
+    return fb?.adviceText
+      || alignedAdvice(dim, fb?.myScore, fb?.partScore)
+      || fb?.strengthText
+      || null;
   };
+  // Title follows the content: guidance for a gap, a caution for a match.
+  const adviceTitleFor = (dim) => (byDim[dim]?.adviceText ? "One thing to try" : "One thing to keep in mind");
   const glancePlan = ["inner","connection","hard"].map(dom => {
     const lead = leadDimFor(dom);
     const advice = dimAdviceFor(lead);
     const base = advice
-      ? { title: "One thing to try", body: advice, dimLabel: DIM_META[lead]?.label }
+      ? { title: adviceTitleFor(lead), body: advice, dimLabel: DIM_META[lead]?.label }
       : { title: DOMAIN_ALIGNED[dom].title, body: DOMAIN_ALIGNED[dom].body };
     if (dom === "hard") {
       base.reflect = "In your next hard conversation, pause and ask yourself: am I trying to understand my partner's side, or am I trying to win the argument? Aim for the first one.";
@@ -4248,7 +4296,7 @@ function PersonalityResults({ myAnswers, partnerAnswers, userName, partnerName, 
           return (
             <div style={{ marginTop: "1.5rem", background: "rgba(255,255,255,0.10)", border: "1px solid rgba(255,255,255,0.2)", borderLeft: `4px solid ${m.color}`, borderRadius: 14, padding: "1.25rem 1.5rem" }}>
               <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: "1rem", marginBottom: "0.6rem" }}>
-                <div style={{ fontSize: "0.62rem", textTransform: "uppercase", letterSpacing: "0.12em", color: "rgba(255,255,255,0.9)", fontWeight: 700, fontFamily: BFONT }}>One thing to try</div>
+                <div style={{ fontSize: "0.62rem", textTransform: "uppercase", letterSpacing: "0.12em", color: "rgba(255,255,255,0.9)", fontWeight: 700, fontFamily: BFONT }}>{adviceTitleFor(lead)}</div>
                 <div style={{ fontSize: "0.62rem", color: "rgba(255,255,255,0.6)", fontFamily: BFONT, whiteSpace: "nowrap" }}>{m.label}</div>
               </div>
               <p style={{ fontSize: "0.86rem", color: "rgba(255,255,255,0.88)", fontFamily: BFONT, lineHeight: 1.7, margin: 0 }}>{advice}</p>

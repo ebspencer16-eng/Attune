@@ -29,6 +29,7 @@ const reassuranceShifts = (() => {
   return [...app.slice(i, j).matchAll(/'(\d_\d)':\s*`([^`]*)`/g)]
     .map(m => [m[1], m[2].replace(/\$\{loName\}/g, 'Maya').replace(/\$\{hiName\}/g, 'David')]);
 })();
+const ALIGNED_ADVICE = evalConst(app, 'ALIGNED_ADVICE');
 const BAND = { 1: 'strongly Voiced', 2: 'leans Voiced', 3: 'flexible', 4: 'leans Assumed', 5: 'strongly Assumed' };
 
 // The bids gap prose, pulled from the per-cell block so the doc shows exactly
@@ -67,6 +68,7 @@ const cover = buildCover({
     ['7.', 'Action plan items', '10 dimensions + 3 aligned states'],
     ['8.', 'Reflection action titles', 'rewritten as instructions'],
     ['9.', 'Reassurance guidance', '15 score pairings, new'],
+    ['10.', 'Reassurance when aligned', 'keep-in-mind line, new'],
   ],
 });
 
@@ -203,6 +205,14 @@ reassuranceShifts.forEach(([key, text], i) => {
   children.push(midSection(`9.${i + 1}`, `${BAND[lo]}  +  ${BAND[hi]}`, PURPLE, { extras: key.replace('_', ' and ') }));
   children.push(prose(text));
 });
+
+// ── 10 ───────────────────────────────────────────────────────────────────────
+children.push(...bigSection('10', 'Reassurance when aligned', 'When both partners sit on the same end of a dimension there is no gap to close, so the tile shows a keep-in-mind line instead. Those existed for nine dimensions and were approved. These two are the new Reassurance ones, one for each end.', PURPLE));
+[['Both toward Voiced', ALIGNED_ADVICE.reassurance.low], ['Both toward Assumed', ALIGNED_ADVICE.reassurance.high]]
+  .forEach(([label, text], i) => {
+    children.push(midSection(`10.${i + 1}`, label, PURPLE));
+    children.push(prose(text));
+  });
 
 const out = (process.env.ATTUNE_DOC_OUT || '/mnt/user-data/outputs') + '/attune_prose_to_approve.docx';
 await renderDoc({ footerLabel: 'Attune · Prose to approve', children, outPath: out });
