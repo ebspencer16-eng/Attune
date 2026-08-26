@@ -2428,12 +2428,13 @@ function DimTrackViz({ myScore = 3, theirScore = 3, color = "#9B5DE5", userName 
   const UC = "#E8673A", PC = "#1B5FE8";
   const sameInitial = (userName?.[0] || "").toUpperCase() === (partnerName?.[0] || "").toUpperCase();
   const legend = myIsLeft ? [{ name: userName, color: UC }, { name: partnerName, color: PC }] : [{ name: partnerName, color: PC }, { name: userName, color: UC }];
-  // When the two scores are close the markers stagger 11px apart vertically.
-  // The raised one then reaches ~19px above the bar, which is more than the
-  // default 1.15rem gap, so it printed on top of the pole label above it.
-  // Reserve the extra headroom only in that case.
+  // Symmetric margin, the same on every row whether or not the markers are
+  // staggered, so rows in a tile all have the same height and the bar sits on
+  // the row's vertical centre. It used to reserve extra headroom when close,
+  // which made a staggered row taller than its neighbours. That headroom was
+  // for pole labels above the bar, and those now sit beside it.
   return (
-    <div style={{ margin: (close ? "1.85rem" : "1.15rem") + " 0 " + (close ? "0.85rem" : "0.35rem"), position: "relative" }}>
+    <div style={{ margin: "0.95rem 0", position: "relative" }}>
       <div style={{ height: 5, background: "rgba(255,255,255,0.12)", borderRadius: 3, position: "relative", overflow: "visible" }}>
         <div style={{ position: "absolute", inset: 0, borderRadius: 3, background: "linear-gradient(90deg, rgba(255,255,255,0.05), rgba(255,255,255,0.18))" }} />
         <div title={partnerName} style={{ position: "absolute", top: "50%", left: theirPctV + "%", transform: `translate(-50%, calc(-50% + ${theirDy}px))`, width: 22, height: 22, borderRadius: "50%", background: PC, border: "2.5px solid white", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "0.5rem", color: "white", fontWeight: 700, fontFamily: BFONT, zIndex: 2 }}>{sameInitial ? "" : partnerName[0]}</div>
@@ -3945,17 +3946,32 @@ function PersonalityResults({ myAnswers, partnerAnswers, userName, partnerName, 
   // cards can no longer show the same text.
   const _DOMAIN_DIMS = { inner: ["energy","expression","reassurance"], connection: ["love","needs","bids","listening"], hard: ["conflict","repair","feedback"] };
   const _DOMAIN_LABELS = { inner: "Internal processing", connection: "How you connect", hard: "When things get hard" };
+  // Widest-gap dimension in a domain, ties broken toward the dimension weighted
+  // more heavily in the axis scoring. Used by both the glance card and the
+  // "One thing to try" tile on that domain's page, so they never disagree.
+  const leadDimFor = (dom) => (_DOMAIN_DIMS[dom] || []).filter(d => byDim[d]).slice().sort((x, y) => {
+    const gx = byDim[x]?.gap ?? 0, gy = byDim[y]?.gap ?? 0;
+    if (Math.abs(gx - gy) > 1e-9) return gy - gx;
+    return (AXIS_CONFIG[y]?.weight ?? 0) - (AXIS_CONFIG[x]?.weight ?? 0);
+  })[0];
+  // The guidance itself is the approved per-dimension prose from getDimShift,
+  // which already adapts to where each partner sits on that spectrum (15 score
+  // pairings per dimension). adviceText is that prose. Reassurance is new and
+  // has no shift prose yet, so it falls back to its action item rather than
+  // rendering blank.
+  const dimAdviceFor = (dim) => {
+    if (!dim) return null;
+    const approved = byDim[dim]?.adviceText;
+    if (approved) return approved;
+    const fb = DIM_ACTION_ITEMS[dim];
+    return fb ? interpDimAction(fb.body, userName, partnerName, byDim[dim]) : null;
+  };
   const glancePlan = ["inner","connection","hard"].map(dom => {
-    const dims = _DOMAIN_DIMS[dom].filter(d => byDim[d]);
-    const lead = dims.slice().sort((x, y) => {
-      const gx = byDim[x]?.gap ?? 0, gy = byDim[y]?.gap ?? 0;
-      if (Math.abs(gx - gy) > 1e-9) return gy - gx;
-      return (AXIS_CONFIG[y]?.weight ?? 0) - (AXIS_CONFIG[x]?.weight ?? 0);
-    })[0];
+    const lead = leadDimFor(dom);
     const wide = lead && (byDim[lead]?.gap ?? 0) >= 1;
-    const item = wide ? DIM_ACTION_ITEMS[lead] : null;
-    const base = item
-      ? { title: item.title, body: interpDimAction(item.body, userName, partnerName, byDim[lead]) }
+    const advice = wide ? dimAdviceFor(lead) : null;
+    const base = advice
+      ? { title: "One thing to try", body: advice, dimLabel: DIM_META[lead]?.label }
       : { title: DOMAIN_ALIGNED[dom].title, body: DOMAIN_ALIGNED[dom].body };
     if (dom === "hard") {
       base.reflect = "In your next hard conversation, pause and ask yourself: am I trying to understand my partner's side, or am I trying to win the argument? Aim for the first one.";
@@ -3968,7 +3984,7 @@ function PersonalityResults({ myAnswers, partnerAnswers, userName, partnerName, 
   // -- SIDE NAV ITEMS --
   // Group ordered dims by domain for sidebar display
   const personalityNavItems = [
-    { label: "Overview", step: 0 },
+    { label: "Results at a glance", step: 0 },
     { label: "Detailed results", step: "detail-section", isSection: true },
     ...detailDomains.map((domain, i) => ({ label: domain.label, step: i + 1, isChild: true, italic: true, color: domain.color })),
   ];
@@ -4113,6 +4129,23 @@ function PersonalityResults({ myAnswers, partnerAnswers, userName, partnerName, 
             })}
           </div>
         </div>
+
+        {/* ── ONE THING TO TRY — guidance for this domain's widest gap ── */}
+        {(() => {
+          const lead = leadDimFor(grp.id);
+          const advice = lead && (byDim[lead]?.gap ?? 0) >= 1 ? dimAdviceFor(lead) : null;
+          if (!advice) return null;
+          const m = DIM_META[lead];
+          return (
+            <div style={{ marginTop: "1.5rem", background: "rgba(255,255,255,0.10)", border: "1px solid rgba(255,255,255,0.2)", borderLeft: `4px solid ${m.color}`, borderRadius: 14, padding: "1.25rem 1.5rem" }}>
+              <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: "1rem", marginBottom: "0.6rem" }}>
+                <div style={{ fontSize: "0.62rem", textTransform: "uppercase", letterSpacing: "0.12em", color: "rgba(255,255,255,0.9)", fontWeight: 700, fontFamily: BFONT }}>One thing to try</div>
+                <div style={{ fontSize: "0.62rem", color: "rgba(255,255,255,0.6)", fontFamily: BFONT, whiteSpace: "nowrap" }}>{m.label}</div>
+              </div>
+              <p style={{ fontSize: "0.86rem", color: "rgba(255,255,255,0.88)", fontFamily: BFONT, lineHeight: 1.7, margin: 0 }}>{advice}</p>
+            </div>
+          );
+        })()}
 
         {/* Two-column arrows-to-bar side-by-side (all dims, exercise order) — dropdown */}
         <details style={{ marginTop: "1.5rem", background: "rgba(255,255,255,0.05)", borderRadius: 14, border: "1px solid rgba(255,255,255,0.14)" }}>
@@ -4389,7 +4422,7 @@ function ExpectationsResults({ myAnswers, partnerAnswers, userName, partnerName,
 
   // ── Nav items ─────────────────────────────────────────────────────────────────
   const expectationsNavItems = [
-    { label: "Overview", step: 0 },
+    { label: "Results at a glance", step: 0 },
     { label: "Detailed results", step: "detail-section", isSection: true },
     ...FIXED_CATS.map((fc, i) => ({
       label: fc.label, step: `convo-${i}`, isChild: true, italic: true,
@@ -7398,7 +7431,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
     {
       id: "comm", label: "Communication", icon: "◉", color: "#9B5DE5",
       children: [
-        { id: "comm-overview", label: "Overview" },
+        { id: "comm-overview", label: "Results at a glance" },
         { id: "comm-detail-header", label: "Detailed results", isDomainHeader: true, color: "#9B5DE5" },
         ...UR_DOMAINS.map(g => ({ id: `comm-${g.id}`, label: g.label, isDeepChild: true, italic: true, color: g.color })),
       ]
@@ -7406,7 +7439,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
     {
       id: "exp", label: "Expectations", icon: "◉", color: "#1B5FE8",
       children: [
-        { id: "exp-overview", label: "Overview" },
+        { id: "exp-overview", label: "Results at a glance" },
         { id: "exp-detail-header", label: "Detailed results", isDomainHeader: true, color: "#10B981" },
         ...FIXED_CATS.map((fc, ci) => ({ id: `exp-convo-${ci}`, label: fc.label, isDeepChild: true, italic: true, color: "#10B981" })),
       ]
@@ -7414,7 +7447,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
     ...(hasAnniversary ? [{
       id: "reflection", label: "Relationship Reflection", shortLabel: "Refl.", icon: "◉", color: "#1B5FE8",
       children: [
-        { id: "reflection-overview", label: "Overview" },
+        { id: "reflection-overview", label: "Results at a glance" },
         { id: "reflection-detail-header", label: "Detailed results", isDomainHeader: true, color: "#1B5FE8" },
         { id: "reflection-ratings", label: "How You Each Rated", isDeepChild: true, italic: true, color: "#1B5FE8" },
         { id: "reflection-story", label: "Side by Side", isDeepChild: true, italic: true, color: "#1B5FE8" },
@@ -7424,7 +7457,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
     ...(intimacyBothDone ? [{
       id: "intimacy", label: "Physical Intimacy", shortLabel: "Intimacy", icon: "◉", color: "#B5546E",
       children: [
-        { id: "intimacy-overview", label: "Overview" },
+        { id: "intimacy-overview", label: "Results at a glance" },
         { id: "intimacy-detail-header", label: "Detailed results", isDomainHeader: true, color: "#B5546E" },
         ...INTIMACY_DIMENSIONS.map(d => ({ id: `intimacy-${d.id}`, label: d.label, isDeepChild: true, italic: true, color: "#B5546E" })),
         { id: "intimacy-plan", label: "Conversations Worth Having", isDeepChild: true, italic: true, color: "#B5546E" },
@@ -14766,7 +14799,7 @@ export default function App() {
               let subnav = [];
               if (inRefl) {
                 subnav = [
-                  { label: "Overview", id: "reflection-overview" },
+                  { label: "Results at a glance", id: "reflection-overview" },
                   { label: "How You Each Rated", id: "reflection-ratings" },
                   { label: "Side by Side", id: "reflection-story" },
                   { label: "Action Plan", id: "reflection-plan" },
@@ -14777,19 +14810,19 @@ export default function App() {
                 // tab but Overview landed back on Overview. The strip scrolls,
                 // so it mirrors the desktop sidebar rather than abbreviating.
                 subnav = [
-                  { label: "Overview", id: "comm-overview" },
+                  { label: "Results at a glance", id: "comm-overview" },
                   { label: "Internal Processing", id: "comm-inner" },
                   { label: "How You Connect", id: "comm-connection" },
                   { label: "When Things Get Hard", id: "comm-hard" },
                 ];
               } else if (inExp) {
                 subnav = [
-                  { label: "Overview", id: "exp-overview" },
+                  { label: "Results at a glance", id: "exp-overview" },
                   ...FIXED_CATS.map((fc, ci) => ({ label: fc.label, id: `exp-convo-${ci}` })),
                 ];
               } else if (inIntim) {
                 subnav = [
-                  { label: "Overview", id: "intimacy-overview" },
+                  { label: "Results at a glance", id: "intimacy-overview" },
                   ...INTIMACY_DIMENSIONS.map(d => ({ label: d.label, id: `intimacy-${d.id}` })),
                   { label: "Conversations", id: "intimacy-plan" },
                 ];
