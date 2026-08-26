@@ -1851,7 +1851,7 @@ const NEW_COUPLE_TYPES = [
     ],
     tips: [
       { title: "Name which mode you're in", body: "'I need to process this out loud' vs. 'I need to think before I talk.' That one sentence tells the other person how to meet you. Use it early in the process.", phraseTry: "I need to process this out loud, bear with me. I don't have it figured out yet." },
-      { title: "Guarded partner: share the half-formed version", body: "You don't have to wait until it's fully formed. 'I'm still figuring out how I feel about this' is a form of sharing, and it's usually exactly what the expressive partner needs to hear.", phraseTry: "I'm still working through it, but I think I'm bothered by {something}. Not sure why yet." },
+      { title: "Guarded partner: share the half-formed version", body: "You don't have to wait until it's fully formed. 'I'm still figuring out how I feel about this' is a form of sharing, and it's usually exactly what the expressive partner needs to hear.", phraseTry: "I'm still working through it, but I think I'm bothered by this. Not sure why yet." },
       { title: "Expressive partner: give the guarded partner room to process", body: "Pressing for more than the guarded partner is ready to give doesn't create connection, it creates pressure. Ask once, then wait. The sharing will come in its own time.", phraseTry: "I can wait until you are ready to share. Thank you for being willing to talk." },
     ],
   },
@@ -3912,6 +3912,29 @@ function resolveRoleTokens(str, myS, partS, userName, partnerName, userPronouns 
   return out;
 }
 
+// Comms action items, one per dimension where the gap is worth naming.
+// Extracted to module level so What Comes Next can list the same items the
+// results-at-a-glance plan draws from, rather than a second set.
+function buildCommsProtocols(byDim, userName, partnerName) {
+    const protocols = [];
+    if (byDim.conflict?.isOpportunity || byDim.conflict?.isNote) protocols.push({ dim: "conflict", title: "Create a pause protocol", body: byDim.conflict.adviceText, thisWeek: "Next time something feels off between you, before trying to resolve it, one of you says: 'I need [time amount] before we talk about this.' Practice naming the specific time you need, rather than only asking for space." });
+    if (byDim.repair?.isOpportunity || byDim.repair?.isNote) protocols.push({ dim: "repair", title: "Agree on what repaired looks like", body: byDim.repair.adviceText, thisWeek: "Within 24 hours of your next disagreement, one of you takes a small step to come back, not to relitigate it, just to signal you're okay. Notice how the other responds." });
+    if (byDim.energy?.isOpportunity || byDim.energy?.isNote) protocols.push({ dim: "energy", title: "Name your recharge needs", body: byDim.energy.adviceText, thisWeek: "This week, tell each other in advance when you need recharge time, before you're depleted. Try: 'I need a quiet evening Thursday.' That's it." });
+    if (byDim.needs?.isOpportunity || byDim.needs?.isNote) protocols.push({ dim: "needs", title: "Practice the direct ask", body: byDim.needs.adviceText, thisWeek: "Once this week, ask directly for something you'd normally hint at or leave unsaid. Just the request, no preamble, no apology." });
+    if (byDim.bids?.isOpportunity || byDim.bids?.isNote) protocols.push({ dim: "bids", title: "Stay tuned to small moments", body: byDim.bids.adviceText, thisWeek: "Once a day this week, when the other person does something small for you, makes you coffee, sends you something, acknowledge it specifically. Not just 'thanks,' but 'I noticed that.'" });
+    if (byDim.listening?.isOpportunity || byDim.listening?.isNote) protocols.push({ dim: "listening", title: "Match presence to what's needed", body: byDim.listening.adviceText, thisWeek: "This week, when one of you brings something up, ask first: 'do you want me to just listen, or do you want me to weigh in?' Then do that one thing." });
+    if (byDim.expression?.isOpportunity || byDim.expression?.isNote) protocols.push({ dim: "expression", title: "Build toward more openness", body: byDim.expression.adviceText, thisWeek: "This week, each of you says one thing out loud that you'd normally hold back or let pass. Not something big, just something that's been sitting there." });
+    if (byDim.feedback?.isOpportunity || byDim.feedback?.isNote) protocols.push({ dim: "feedback", title: "Practice the small direct mention", body: byDim.feedback.adviceText, thisWeek: "This week, when something bothers you, name it within the same day, not to fight, just to say it. 'Hey, that landed a little off for me.' See what happens." });
+  
+    if (byDim.love?.isOpportunity || byDim.love?.isNote) protocols.push({ dim: "love", title: "Learn each other's language", body: byDim.love.adviceText, thisWeek: "Ask your partner: 'What's one thing I do that makes you feel really cared for that I might not realize has that effect?' Then listen without commenting." });
+    if (protocols.length === 0) {
+      protocols.push({ emoji: "", title: "Keep checking in", body: ((userName) + " and " + (partnerName) + " are closely aligned across all ten dimensions. The work here is about staying connected rather than catching up. Couples who stay curious about each other's inner experience, even when things feel stable, tend to stay that way longer.") });
+      protocols.push({ emoji: "", title: "Stay curious as things change", body: "When two people are this in sync, it's easy to assume the picture stays the same. But what each of you needs, values, and envisions can shift gradually. A brief check-in every few months keeps you current with each other." });
+      protocols.push({ emoji: "", title: "Name what's working", body: ("Most couples only talk about their relationship when something feels off. " + (userName) + " and " + (partnerName) + " have something worth naming explicitly: real alignment. Talking about what you're doing well, alongside what feels hard, reinforces it.") });
+    }
+  return protocols;
+}
+
 function PersonalityResults({ myAnswers, partnerAnswers, userName, partnerName, coupleType, userPronouns = "", partnerPronouns = "", noSideNav = false, externalStep, onExternalGo, onGoExpectations, onNavigateTool, hasWorkbook = false }) {
   const [step, setStep] = useState(externalStep ?? 0);
   const [showRaw, setShowRaw] = useState(false);
@@ -3958,15 +3981,7 @@ function PersonalityResults({ myAnswers, partnerAnswers, userName, partnerName, 
 
   const go = s => { setStep(s); if (onExternalGo) onExternalGo(s); const sc = document.querySelector("[data-results-scroll]"); if (sc) sc.scrollTop = 0; else window.scrollTo({ top: 0, behavior: "smooth" }); };
 
-  const protocols = [];
-  if (byDim.conflict?.isOpportunity || byDim.conflict?.isNote) protocols.push({ dim: "conflict", title: "Create a pause protocol", body: byDim.conflict.adviceText, thisWeek: "Next time something feels off between you, before trying to resolve it, one of you says: 'I need [time amount] before we talk about this.' Practice naming the specific time you need, rather than only asking for space." });
-  if (byDim.repair?.isOpportunity || byDim.repair?.isNote) protocols.push({ dim: "repair", title: "Agree on what repaired looks like", body: byDim.repair.adviceText, thisWeek: "Within 24 hours of your next disagreement, one of you takes a small step to come back, not to relitigate it, just to signal you're okay. Notice how the other responds." });
-  if (byDim.energy?.isOpportunity || byDim.energy?.isNote) protocols.push({ dim: "energy", title: "Name your recharge needs", body: byDim.energy.adviceText, thisWeek: "This week, tell each other in advance when you need recharge time, before you're depleted. Try: 'I need a quiet evening Thursday.' That's it." });
-  if (byDim.needs?.isOpportunity || byDim.needs?.isNote) protocols.push({ dim: "needs", title: "Practice the direct ask", body: byDim.needs.adviceText, thisWeek: "Once this week, ask directly for something you'd normally hint at or leave unsaid. Just the request, no preamble, no apology." });
-  if (byDim.bids?.isOpportunity || byDim.bids?.isNote) protocols.push({ dim: "bids", title: "Stay tuned to small moments", body: byDim.bids.adviceText, thisWeek: "Once a day this week, when the other person does something small for you, makes you coffee, sends you something, acknowledge it specifically. Not just 'thanks,' but 'I noticed that.'" });
-  if (byDim.listening?.isOpportunity || byDim.listening?.isNote) protocols.push({ dim: "listening", title: "Match presence to what's needed", body: byDim.listening.adviceText, thisWeek: "This week, when one of you brings something up, ask first: 'do you want me to just listen, or do you want me to weigh in?' Then do that one thing." });
-  if (byDim.expression?.isOpportunity || byDim.expression?.isNote) protocols.push({ dim: "expression", title: "Build toward more openness", body: byDim.expression.adviceText, thisWeek: "This week, each of you says one thing out loud that you'd normally hold back or let pass. Not something big, just something that's been sitting there." });
-  if (byDim.feedback?.isOpportunity || byDim.feedback?.isNote) protocols.push({ dim: "feedback", title: "Practice the small direct mention", body: byDim.feedback.adviceText, thisWeek: "This week, when something bothers you, name it within the same day, not to fight, just to say it. 'Hey, that landed a little off for me.' See what happens." });
+  const protocols = buildCommsProtocols(byDim, userName, partnerName);
 
   // Results-at-a-glance action plan: one item per domain (internal processing /
   // how you connect / when things get hard), from the dimension protocols above.
@@ -3982,12 +3997,6 @@ function PersonalityResults({ myAnswers, partnerAnswers, userName, partnerName, 
     }
     return { domain: dom, label: _DOMAIN_LABELS[dom], color: DIM_META[_DOMAIN_DIMS[dom][0]].color, ...base };
   });
-  if (byDim.love?.isOpportunity || byDim.love?.isNote) protocols.push({ dim: "love", title: "Learn each other's language", body: byDim.love.adviceText, thisWeek: "Ask your partner: 'What's one thing I do that makes you feel really cared for that I might not realize has that effect?' Then listen without commenting." });
-  if (protocols.length === 0) {
-    protocols.push({ emoji: "", title: "Keep checking in", body: ((userName) + " and " + (partnerName) + " are closely aligned across all ten dimensions. The work here is about staying connected rather than catching up. Couples who stay curious about each other's inner experience, even when things feel stable, tend to stay that way longer.") });
-    protocols.push({ emoji: "", title: "Stay curious as things change", body: "When two people are this in sync, it's easy to assume the picture stays the same. But what each of you needs, values, and envisions can shift gradually. A brief check-in every few months keeps you current with each other." });
-    protocols.push({ emoji: "", title: "Name what's working", body: ("Most couples only talk about their relationship when something feels off. " + (userName) + " and " + (partnerName) + " have something worth naming explicitly: real alignment. Talking about what you're doing well, alongside what feels hard, reinforces it.") });
-  }
 
   const scaleLabels = ["Strongly A","Lean A","Neutral","Lean B","Strongly B"];
 
@@ -6006,6 +6015,28 @@ const JAMES_ANNIVERSARY_DEMO = {
 // Tier 3 (keyword inference about what free text *means*) was retired: it made
 // claims the evidence could not support. Anything whose copy says "both",
 // "each" or "you two" must be gated on BOTH partners having a real answer.
+// Relationship Reflection insight titles describe what the answers showed
+// ("You each named what you want more of"). On What Comes Next they need to be
+// something a couple can actually do, so this maps each explore title to an
+// instruction. Anything unmapped falls through unchanged rather than blank.
+// DRAFT copy, in the prose approval doc.
+const REFLECTION_ACTION_TITLES = {
+  "You're experiencing this relationship from different vantage points": "Read your overall ratings side by side and name what each of you was measuring",
+  "You're not aligned on how much lightness and fun you're getting": "Plan one thing this month that is purely for fun, chosen by whoever is missing it",
+  "One of you finds hard conversations easier than the other does": "Agree on how a hard conversation starts, and who gets to call for a pause",
+  "You are not feeling equally connected day to day": "Pick one daily moment to protect, and hold it for two weeks",
+  "You each named what you want more of": "Read your 'what you want more of' answers side by side",
+  "Your five-year pictures, in your own words": "Read your five-year answers aloud to each other and mark where they overlap",
+};
+function reflectionActionTitle(title) {
+  const t = String(title || "");
+  if (REFLECTION_ACTION_TITLES[t]) return REFLECTION_ACTION_TITLES[t];
+  // Fall back on a light rewrite of the "One of you named X" shape.
+  const m = t.match(/^(.+?) named (.+)$/);
+  if (m) return `Read what ${m[1]} said about ${m[2]}, together`;
+  return t;
+}
+
 function deriveAnniversaryInsights(mine, theirs, userName, partnerName, coupleType) {
   const insights = [];
   // Dev-only guard so a future "both" claim cannot ship on one-sided evidence.
@@ -8613,57 +8644,115 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
           <div style={{ fontFamily: BFONT, fontSize: "0.62rem", letterSpacing: "0.22em", textTransform: "uppercase", color: C.clay, fontWeight: 700, marginBottom: "0.85rem" }}>What comes next</div>
           <h2 style={{ fontFamily: HFONT, fontSize: "clamp(1.8rem,3vw,2.4rem)", fontWeight: 700, color: C.ink, lineHeight: 1.1, letterSpacing: "-0.02em", marginBottom: "1.5rem" }}>What to do with all of this.</h2>
 
-          {/* ── PRACTICAL GUIDANCE — every exercise's tips + phrases in one table ── */}
+          {/* ── ACTION ITEMS — one dropdown per exercise the couple has ── */}
           {(() => {
-            const gInterp = (str) => resolveRoleTokens(String(str || "").replace(/\{U\}/g, userName).replace(/\{P\}/g, partnerName), myS, partS, userName, partnerName).replace(/\{something[^}]*\}/g, "something specific");
-            const rows = [];
-            // Communication — the couple-type tips (title + phrase to try)
-            (coupleType?.tips || []).slice(0, 3).forEach(t => {
-              if (t?.title) rows.push({ ex: "Couple Type", color: coupleType?.color || "#9B5DE5", tip: gInterp(t.title), phrase: t.phraseTry ? gInterp(t.phraseTry) : "" });
-            });
-            // Expectations — the two domains, with a conversation to open each
-            rows.push({ ex: "Expectations", color: "#1B5FE8", tip: "Get explicit about who handles what", phrase: "Where did we each assume the other would take the lead, without ever saying it out loud?" });
-            rows.push({ ex: "Expectations", color: "#1B5FE8", tip: "Compare your life-and-values expectations", phrase: "On the big questions, family, money, where we live, where do our answers line up, and where did we differ?" });
-            // Relationship Reflection — the explore insights (action doubles as the phrase)
+            const gInterp = (str) => resolveRoleTokens(String(str || "").replace(/\{U\}/g, userName).replace(/\{P\}/g, partnerName), myS, partS, userName, partnerName, coupleType);
+            const groups = [];
+
+            // 1. Couple type — the type's own tips, each with a phrase to try.
+            const ctItems = (coupleType?.tips || []).slice(0, 3)
+              .filter(t => t?.title)
+              .map(t => ({ tip: gInterp(t.title), phrase: t.phraseTry ? gInterp(t.phraseTry) : "" }));
+            if (ctItems.length) groups.push({ id: "couple-type", label: "Couple type", color: coupleType?.color || "#9B5DE5", items: ctItems });
+
+            // 2. Communication — the same protocols the glance action plan draws
+            //    from. These were missing from this page entirely.
+            try {
+              const commsItems = buildCommsProtocols(byDim, userName, partnerName)
+                .slice(0, 4)
+                .map(pr => ({ tip: gInterp(pr.title), phrase: gInterp(pr.thisWeek || pr.body || "") }));
+              if (commsItems.length) groups.push({ id: "comm", label: "Communication", color: "#E8673A", items: commsItems });
+            } catch {}
+
+            // 3. Expectations — the widest-gap areas, named rather than generic.
+            try {
+              const expItems = [];
+              const catCounts = {};
+              allRows.filter(r => r.bothAnswered && !r.aligned).forEach(r => { catCounts[r.category] = (catCounts[r.category] || 0) + 1; });
+              Object.entries(catCounts).sort((a, b) => b[1] - a[1]).slice(0, 3).forEach(([label, n]) => {
+                expItems.push({
+                  tip: `Work through your ${label.toLowerCase()} list together`,
+                  phrase: `${n} topic${n !== 1 ? "s" : ""} here where you assumed different things. Start with the first one.`,
+                });
+              });
+              if (!expItems.length) expItems.push({ tip: "Keep your expectations current", phrase: "You matched across every area. Revisit this when something changes." });
+              groups.push({ id: "exp", label: "Expectations", color: "#1B5FE8", items: expItems });
+            } catch {}
+
+            // 4. Relationship Reflection — headlines rewritten as instructions
+            //    you can actually do, rather than statements of what happened.
             if (hasAnniversary && ex3Answers && partnerEx3) {
               try {
-                deriveAnniversaryInsights(ex3Answers, partnerEx3, userName, partnerName, coupleType)
-                  .filter(i => i.type === "explore").slice(0, 2)
-                  .forEach(i => rows.push({ ex: "Relationship Reflection", color: "#10b981", tip: i.title, phrase: i.action || "" }));
+                const reflItems = deriveAnniversaryInsights(ex3Answers, partnerEx3, userName, partnerName, coupleType)
+                  .filter(i => i.type === "explore").slice(0, 3)
+                  .map(i => ({ tip: reflectionActionTitle(i.title), phrase: i.action || "" }));
+                if (reflItems.length) groups.push({ id: "reflection", label: "Relationship Reflection", color: "#10b981", items: reflItems });
               } catch {}
             }
-            // Physical Intimacy — the non-aligned dimensions and their prompts
+
+            // 5. Physical Intimacy — the dimensions that are not aligned.
             if (intimacyBothDone && intimacySummary) {
-              intimacySummary.dimSummary.filter(d => d.state !== "aligned" && d.avgGap != null).slice(0, 2).forEach(d => {
-                const meta = INTIMACY_DIMENSIONS.find(x => x.id === d.id);
-                const prompt = (INTIMACY_RESULTS_PROSE[d.id]?.prompt || "").replace(/\{U\}/g, userName).replace(/\{P\}/g, partnerName);
-                rows.push({ ex: "Physical Intimacy", color: "#B5546E", tip: `Talk about ${(meta?.label || d.id).toLowerCase()}`, phrase: prompt });
-              });
+              const intItems = intimacySummary.dimSummary
+                .filter(d => d.state !== "aligned" && d.avgGap != null).slice(0, 3)
+                .map(d => {
+                  const meta = INTIMACY_DIMENSIONS.find(x => x.id === d.id);
+                  const prompt = (INTIMACY_RESULTS_PROSE[d.id]?.prompt || "").replace(/\{U\}/g, userName).replace(/\{P\}/g, partnerName);
+                  return { tip: `Talk about ${(meta?.label || d.id).toLowerCase()}`, phrase: prompt };
+                });
+              if (intItems.length) groups.push({ id: "intimacy", label: "Physical Intimacy", color: "#B5546E", items: intItems });
             }
-            if (!rows.length) return null;
+
+            if (!groups.length) return null;
             return (
               <div style={{ marginBottom: "1.75rem" }}>
-                <div style={{ fontSize: "0.62rem", letterSpacing: "0.22em", textTransform: "uppercase", color: C.clay, fontFamily: BFONT, fontWeight: 700, marginBottom: "0.35rem" }}>Practical guidance</div>
-                <p style={{ fontSize: "0.8rem", color: C.muted, fontFamily: BFONT, fontWeight: 300, lineHeight: 1.6, margin: "0 0 0.85rem" }}>Every practical takeaway from your results, in one place. The exercise it came from, what to do, and a phrase to start the conversation.</p>
-                <div style={{ background: "white", border: `1.5px solid ${C.stone}`, borderRadius: 14, overflow: "hidden" }}>
-                  {rows.map((r, i) => (
-                    <div key={i} style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "128px 1fr", gap: isMobile ? "0.35rem" : "0.9rem", padding: "0.9rem 1rem", borderTop: i === 0 ? "none" : `1px solid ${C.stone}80`, alignItems: "start" }}>
-                      <div style={{ display: "flex", alignItems: "center", gap: "0.4rem" }}>
-                        <span style={{ width: 7, height: 7, borderRadius: "50%", background: r.color, flexShrink: 0 }} />
-                        <span style={{ fontSize: "0.6rem", letterSpacing: "0.06em", textTransform: "uppercase", fontWeight: 700, color: r.color, fontFamily: BFONT, lineHeight: 1.3 }}>{r.ex}</span>
-                      </div>
-                      <div>
-                        <div style={{ fontSize: "0.82rem", fontWeight: 700, color: C.ink, fontFamily: BFONT, marginBottom: r.phrase ? "0.3rem" : 0, lineHeight: 1.35 }}>{r.tip}</div>
-                        {r.phrase && (
-                          <div style={{ display: "flex", gap: "0.45rem", alignItems: "flex-start" }}>
-                            <span style={{ fontSize: "0.55rem", letterSpacing: "0.12em", textTransform: "uppercase", color: r.color, fontFamily: BFONT, fontWeight: 700, whiteSpace: "nowrap", marginTop: "0.15rem" }}>Try</span>
-                            <span style={{ fontSize: "0.78rem", color: C.muted, fontFamily: BFONT, fontStyle: "italic", lineHeight: 1.55 }}>"{r.phrase}"</span>
+                <div style={{ fontSize: "0.62rem", letterSpacing: "0.22em", textTransform: "uppercase", color: C.clay, fontFamily: BFONT, fontWeight: 700, marginBottom: "0.5rem" }}>Your action items</div>
+                <p style={{ fontSize: "0.8rem", color: C.muted, fontFamily: BFONT, fontWeight: 300, lineHeight: 1.6, margin: "0 0 0.85rem" }}>
+                  Each part of your results ends in something to do. They are gathered here, grouped by where they came from. Open one to see its items and the words to start with.
+                </p>
+                <div style={{ display: "flex", flexDirection: "column", gap: "0.6rem" }}>
+                  {groups.map(g => (
+                    <details key={g.id} style={{ background: "white", border: `1.5px solid ${C.stone}`, borderLeft: `4px solid ${g.color}`, borderRadius: 14, overflow: "hidden" }}>
+                      <summary style={{ listStyle: "none", cursor: "pointer", padding: "0.85rem 1.1rem", display: "flex", alignItems: "center", justifyContent: "space-between", gap: "0.75rem" }}>
+                        <span style={{ fontSize: "0.82rem", fontWeight: 700, color: C.ink, fontFamily: BFONT }}>{g.label}</span>
+                        <span style={{ display: "flex", alignItems: "center", gap: "0.5rem", flexShrink: 0 }}>
+                          <span style={{ fontSize: "0.68rem", color: C.muted, fontFamily: BFONT }}>{g.items.length} item{g.items.length !== 1 ? "s" : ""}</span>
+                          <span style={{ fontSize: "0.62rem", color: g.color, fontFamily: BFONT, fontWeight: 700 }}>Show</span>
+                          <span style={{ fontSize: "0.8rem", color: g.color, lineHeight: 1 }}>▾</span>
+                        </span>
+                      </summary>
+                      <div style={{ borderTop: `1px solid ${C.stone}` }}>
+                        {g.items.map((it, i) => (
+                          <div key={i} style={{ padding: "0.85rem 1.1rem", borderBottom: i < g.items.length - 1 ? `1px solid ${C.stone}` : "none" }}>
+                            <div style={{ fontSize: "0.82rem", fontWeight: 700, color: C.ink, fontFamily: BFONT, marginBottom: it.phrase ? "0.3rem" : 0, lineHeight: 1.4 }}>{it.tip}</div>
+                            {it.phrase && (
+                              <div style={{ display: "flex", gap: "0.45rem", alignItems: "flex-start" }}>
+                                <span style={{ fontSize: "0.55rem", letterSpacing: "0.12em", textTransform: "uppercase", color: g.color, fontFamily: BFONT, fontWeight: 700, flexShrink: 0, marginTop: "0.2rem" }}>Try</span>
+                                <span style={{ fontSize: "0.78rem", color: C.muted, fontFamily: BFONT, fontStyle: "italic", lineHeight: 1.55 }}>{it.phrase}</span>
+                              </div>
+                            )}
                           </div>
-                        )}
+                        ))}
                       </div>
-                    </div>
+                    </details>
                   ))}
                 </div>
+
+                {/* Download — one plain-text file with every item above. */}
+                <button onClick={() => {
+                  const out = ["ATTUNE ACTION PLAN", "=".repeat(40), `${userName} & ${partnerName}`, ""];
+                  groups.forEach(g => {
+                    out.push(g.label.toUpperCase());
+                    g.items.forEach(it => { out.push("- " + it.tip); if (it.phrase) out.push('  Try: "' + it.phrase + '"'); });
+                    out.push("");
+                  });
+                  const blob = new Blob([out.join("\n")], { type: "text/plain" });
+                  const el = document.createElement("a");
+                  el.href = URL.createObjectURL(blob);
+                  el.download = "Attune_Action_Plan.txt";
+                  el.click();
+                }} style={{ display: "inline-flex", alignItems: "center", gap: "0.45rem", background: "white", border: `1.5px solid ${C.stone}`, color: C.ink, borderRadius: 10, padding: "0.6rem 1.1rem", fontSize: "0.75rem", fontWeight: 600, fontFamily: BFONT, cursor: "pointer", marginTop: "0.85rem" }}>
+                  ↓ Download action plan
+                </button>
               </div>
             );
           })()}
