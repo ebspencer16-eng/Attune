@@ -3877,7 +3877,7 @@ function buildCommsProtocols(byDim, userName, partnerName) {
   return protocols;
 }
 
-function PersonalityResults({ myAnswers, partnerAnswers, userName, partnerName, coupleType, userPronouns = "", partnerPronouns = "", noSideNav = false, externalStep, onExternalGo, onGoExpectations, onNavigateTool, hasWorkbook = false }) {
+function PersonalityResults({ myAnswers, partnerAnswers, userName, partnerName, coupleType, userPronouns = "", partnerPronouns = "", noSideNav = false, externalStep, onExternalGo, onGoExpectations, onGoBack, onNavigateTool, hasWorkbook = false }) {
   const [step, setStep] = useState(externalStep ?? 0);
   const [showRaw, setShowRaw] = useState(false);
   useEffect(() => { if (externalStep !== undefined) setStep(externalStep); }, [externalStep]);
@@ -4045,7 +4045,7 @@ function PersonalityResults({ myAnswers, partnerAnswers, userName, partnerName, 
 
 
       </div>
-      <NavButtons onBack={() => {}} backDisabled nextLabel={"Begin: " + detailDomains[0]?.label + " →"} onNext={() => go(1)} />
+      <NavButtons onBack={() => (onGoBack || (() => {}))()} backDisabled={!onGoBack} nextLabel={"Begin: " + detailDomains[0]?.label + " →"} onNext={() => go(1)} />
       </ResultsSlide>
     </MaybeNav>
   );
@@ -4261,7 +4261,7 @@ function PersonalityResults({ myAnswers, partnerAnswers, userName, partnerName, 
 // the category pages had no bg at all and fell through to the flat #0f0c29.
 const EXP_BG = "linear-gradient(145deg, #211d4d, #413a85, #2e295c)";
 
-function ExpectationsResults({ myAnswers, partnerAnswers, userName, partnerName, forcedSection, noSideNav = false, onGoWhatComesNext, onExternalGo, coupleTypeCode = null, coupleTypeName = null, coupleTypeColor = "#1B5FE8" }) {
+function ExpectationsResults({ myAnswers, partnerAnswers, userName, partnerName, forcedSection, noSideNav = false, onGoWhatComesNext, onGoBack, onExternalGo, coupleTypeCode = null, coupleTypeName = null, coupleTypeColor = "#1B5FE8" }) {
   // ── Fixed 5 display categories ──────────────────────────────────────────────
   // ── Step system: 0=overview, "convo-0".."convo-4"=individual cats,
   //                "action-plan"=plan, "summary"=summary.
@@ -4495,7 +4495,7 @@ function ExpectationsResults({ myAnswers, partnerAnswers, userName, partnerName,
             )}
 
           </div>
-          <NavButtons onBack={() => {}} backDisabled onNext={() => go("convo-0")} nextLabel={`${FIXED_CATS[0].label} →`} />
+          <NavButtons onBack={() => (onGoBack || (() => {}))()} backDisabled={!onGoBack} onNext={() => go("convo-0")} nextLabel={`${FIXED_CATS[0].label} →`} />
         </ResultsSlide>
       </MaybeNav>
     );
@@ -7975,6 +7975,9 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
           userPronouns={userPronouns} partnerPronouns={partnerPronouns}
           forcedStep={dimStep} orderedDims={orderedDims}
           onGoExpectations={() => go("exp-overview")}
+          // The forward path arrives here from Couple Type, so Back returns
+          // there rather than dead-ending on the first page of the section.
+          onGoBack={() => go("couple-type")}
           onNavigateTool={onNavigateTool}
           hasWorkbook={hasWorkbook}
           onStepChange={s => {
@@ -8002,6 +8005,9 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
           userName={userName} partnerName={partnerName}
           forcedSection={expSection}
           onGoWhatComesNext={() => go(hasAnniversary ? "reflection-overview" : intimacyBothDone ? "intimacy-overview" : "what-comes-next")}
+          // Back out of the section rather than dead-ending: the forward path
+          // arrives here from the last comms detail page.
+          onGoBack={() => go(UR_DOMAINS.length ? `comm-${UR_DOMAINS[UR_DOMAINS.length - 1].id}` : "comm-overview")}
           onExternalGo={s => {
             if (s === 0) go("exp-overview");
             else if (typeof s === "string" && s.startsWith("convo-")) go("exp-" + s);
@@ -9065,12 +9071,12 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
 }
 
 // Thin wrappers so PersonalityResults/ExpectationsResults can be driven externally
-function PersonalityResultsPage({ myAnswers, partnerAnswers, userName, partnerName, coupleType, userPronouns = "", partnerPronouns = "", forcedStep, orderedDims: extDims, onStepChange, onGoExpectations, onNavigateTool, hasWorkbook = false }) {
+function PersonalityResultsPage({ myAnswers, partnerAnswers, userName, partnerName, coupleType, userPronouns = "", partnerPronouns = "", forcedStep, orderedDims: extDims, onStepChange, onGoExpectations, onGoBack, onNavigateTool, hasWorkbook = false }) {
   const go = s => { if (onStepChange) onStepChange(s); };
-  return <PersonalityResults myAnswers={myAnswers} partnerAnswers={partnerAnswers} userName={userName} partnerName={partnerName} coupleType={coupleType} userPronouns={userPronouns} partnerPronouns={partnerPronouns} externalStep={forcedStep ?? 0} onExternalGo={go} noSideNav={true} onGoExpectations={onGoExpectations} onNavigateTool={onNavigateTool} hasWorkbook={hasWorkbook} />;
+  return <PersonalityResults myAnswers={myAnswers} partnerAnswers={partnerAnswers} userName={userName} partnerName={partnerName} coupleType={coupleType} userPronouns={userPronouns} partnerPronouns={partnerPronouns} externalStep={forcedStep ?? 0} onExternalGo={go} noSideNav={true} onGoExpectations={onGoExpectations} onGoBack={onGoBack} onNavigateTool={onNavigateTool} hasWorkbook={hasWorkbook} />;
 }
-function ExpectationsResultsPage({ myAnswers, partnerAnswers, userName, partnerName, forcedSection, onGoWhatComesNext, onExternalGo, coupleTypeCode = null, coupleTypeName = null, coupleTypeColor = "#1B5FE8" }) {
-  return <ExpectationsResults myAnswers={myAnswers} partnerAnswers={partnerAnswers} userName={userName} partnerName={partnerName} forcedSection={forcedSection} noSideNav={true} onGoWhatComesNext={onGoWhatComesNext} onExternalGo={onExternalGo} coupleTypeCode={coupleTypeCode} coupleTypeName={coupleTypeName} coupleTypeColor={coupleTypeColor} />;
+function ExpectationsResultsPage({ myAnswers, partnerAnswers, userName, partnerName, forcedSection, onGoWhatComesNext, onGoBack, onExternalGo, coupleTypeCode = null, coupleTypeName = null, coupleTypeColor = "#1B5FE8" }) {
+  return <ExpectationsResults myAnswers={myAnswers} partnerAnswers={partnerAnswers} userName={userName} partnerName={partnerName} forcedSection={forcedSection} noSideNav={true} onGoWhatComesNext={onGoWhatComesNext} onGoBack={onGoBack} onExternalGo={onExternalGo} coupleTypeCode={coupleTypeCode} coupleTypeName={coupleTypeName} coupleTypeColor={coupleTypeColor} />;
 }
 // ─────────────────────────────────────────────────────────────────────────────
 
