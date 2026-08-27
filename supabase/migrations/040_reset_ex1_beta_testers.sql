@@ -51,10 +51,11 @@
 
 do $$
 declare
-  -- Pre-filled. Check line 1 before running: the other three are the addresses
-  -- on record, but the account you sign in with may not be the one below.
+  -- All four confirmed. Ellie signs in with a personal address, not the
+  -- attune-relationships.com one, which is why the first attempt at this used
+  -- the wrong address for her.
   emails text[] := array[
-    lower('ellie@attune-relationships.com'),   -- CHECK THIS ONE
+    lower('ebspencer16@gmail.com'),            -- Ellie
     lower('mightyhunter00@gmail.com'),         -- Preston
     lower('carolina.c.cannon@gmail.com'),      -- Carolina
     lower('aaron.m.miner@gmail.com')           -- Aaron
