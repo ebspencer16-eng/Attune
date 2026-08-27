@@ -7792,17 +7792,31 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
       // Capitalize the replacement when the role label starts a sentence/title
       // (e.g. "Guarded partner: ..." -> "Preston: ..."). Names are already
       // capitalized, so a single case-insensitive replace works for both.
+      // Swap a role label for the partner's name: "The guarded partner tends
+      // to..." becomes "Preston tends to...". Names are already capitalized, so
+      // one case-insensitive replace covers sentence starts too.
+      //
+      // An INDEFINITE article means the phrase is generic, describing the
+      // archetype rather than this person, and must be left alone. Without this
+      // check, "shares more than a truly guarded partner would" rendered as
+      // "more than a truly Preston would". Definite article or none means this
+      // person, and still swaps.
+      const roleSwap = (str, phrase, name) =>
+        str.replace(
+          new RegExp('\\b(a |an |the )?(?:truly |genuinely |really )?' + phrase + '\\b', 'gi'),
+          (match, article) => (article && /^(a|an) $/i.test(article) ? match : name),
+        );
       if (_expressiveName && _guardedName) {
-        s = s.replace(/\b(the )?expressive partner\b/gi, _expressiveName)
-             .replace(/\b(the )?guarded partner\b/gi, _guardedName)
-             .replace(/\b(the )?open partner\b/gi, _expressiveName)
-             .replace(/\b(the )?reserved partner\b/gi, _guardedName);
+        s = roleSwap(s, 'expressive partner', _expressiveName);
+        s = roleSwap(s, 'guarded partner',    _guardedName);
+        s = roleSwap(s, 'open partner',       _expressiveName);
+        s = roleSwap(s, 'reserved partner',   _guardedName);
       }
       if (_reachingName && _withdrawingName) {
-        s = s.replace(/\b(the )?reaching partner\b/gi, _reachingName)
-             .replace(/\b(the )?engaging partner\b/gi, _reachingName)
-             .replace(/\b(the )?withdrawing partner\b/gi, _withdrawingName)
-             .replace(/\b(the )?quieter partner\b/gi, _withdrawingName);
+        s = roleSwap(s, 'reaching partner',    _reachingName);
+        s = roleSwap(s, 'engaging partner',    _reachingName);
+        s = roleSwap(s, 'withdrawing partner', _withdrawingName);
+        s = roleSwap(s, 'quieter partner',     _withdrawingName);
       }
       return s;
     };
