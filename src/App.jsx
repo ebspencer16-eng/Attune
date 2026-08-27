@@ -2361,12 +2361,14 @@ function SideBySideResponses({ dims, myAnswers, partnerAnswers, userName, partne
   // Shared by the bar row and the label row beneath it, so both columns line up.
   const POLE = { fontSize: "0.66rem", color: "rgba(255,255,255,0.62)", fontFamily: BFONT, lineHeight: 1.3, flexShrink: 0, width: "clamp(74px,26%,150px)" };
 
-  // Cross-view reads: small, no initial, no outline, sitting behind the self
-  // dots so they read as context rather than as two more people.
-  const SmallDot = ({ v, color }) => v == null ? null : (
+  // Cross-view reads: small, no initial, no outline, so they read as context
+  // rather than as two more people. dy stacks them the way the large dots
+  // stack, because a read landing on the same point as another dot would
+  // otherwise vanish underneath it and look like missing data.
+  const SmallDot = ({ v, color, dy }) => v == null ? null : (
     <div style={{ position: "absolute", top: "50%", left: pct(v) + "%",
-      transform: "translate(-50%,-50%)", width: 10, height: 10, borderRadius: "50%",
-      background: color, opacity: 0.85, zIndex: 1 }} />
+      transform: `translate(-50%, calc(-50% + ${dy}px))`, width: 10, height: 10, borderRadius: "50%",
+      background: color, opacity: 0.9, zIndex: 1 }} />
   );
 
   const Dot = ({ v, color, initial, dy }) => v == null ? null : (
@@ -2386,8 +2388,8 @@ function SideBySideResponses({ dims, myAnswers, partnerAnswers, userName, partne
           colour and sits next to Ellie's own dot. */}
       <div style={{ display: "flex", gap: "0.5rem 1.1rem", flexWrap: "wrap", marginBottom: "1.1rem" }}>
         {[
-          { size: 16, color: U, label: userName, initial: sameInit ? null : uInit },
-          { size: 16, color: Pc, label: partnerName, initial: sameInit ? null : pInit },
+          { size: 16, color: U, label: `${userName}'s responses`, initial: sameInit ? null : uInit },
+          { size: 16, color: Pc, label: `${partnerName}'s responses`, initial: sameInit ? null : pInit },
           { size: 9, color: U, label: `How ${partnerName} views ${userName}` },
           { size: 9, color: Pc, label: `How ${userName} views ${partnerName}` },
         ].map((it, i) => (
@@ -2409,6 +2411,27 @@ function SideBySideResponses({ dims, myAnswers, partnerAnswers, userName, partne
           const myRead = adj(num(myAnswers?.["pv_" + q.id]));      // how I see them
           const theirRead = adj(num(partnerAnswers?.["pv_" + q.id])); // how they see me
           const close = mine != null && theirs != null && Math.abs(pct(mine) - pct(theirs)) < 7;
+          // Vertical stacking. Every dot occupies a position; a dot landing
+          // within 7% of one already placed steps down until it finds a free
+          // row, so nothing ends up hidden underneath anything else.
+          //
+          // Self dots are placed first and keep the existing close-together
+          // offsets, so a cross-view read moves rather than displacing the
+          // answer it describes.
+          const STACK = 11;
+          const placed = [];
+          const place = (v, preferredDy) => {
+            if (v == null) return 0;
+            const p = pct(v);
+            let dy = preferredDy;
+            while (placed.some(o => Math.abs(o.p - p) < 7 && Math.abs(o.dy - dy) < 9)) dy += STACK;
+            placed.push({ p, dy });
+            return dy;
+          };
+          const dyMine = place(mine, close ? -7 : 0);
+          const dyTheirs = place(theirs, close ? 7 : 0);
+          const dyTheirRead = place(theirRead, 0);
+          const dyMyRead = place(myRead, 0);
           return (
             <div key={q.id}>
               <div style={{ fontSize: "0.8rem", color: "white", fontFamily: BFONT, fontWeight: 600, lineHeight: 1.45, marginBottom: "0.7rem" }}>{q.text}</div>
@@ -2424,10 +2447,10 @@ function SideBySideResponses({ dims, myAnswers, partnerAnswers, userName, partne
                   <div style={{ position: "relative", height: 6, background: "rgba(255,255,255,0.14)", borderRadius: 999 }}>
                     {/* theirRead is the partner's answer ABOUT the user, so it
                         carries the user's colour, and vice versa. */}
-                    <SmallDot v={theirRead} color={U} />
-                    <SmallDot v={myRead} color={Pc} />
-                    <Dot v={mine} color={U} initial={sameInit ? null : uInit} dy={close ? -7 : 0} />
-                    <Dot v={theirs} color={Pc} initial={sameInit ? null : pInit} dy={close ? 7 : 0} />
+                    <SmallDot v={theirRead} color={U} dy={dyTheirRead} />
+                    <SmallDot v={myRead} color={Pc} dy={dyMyRead} />
+                    <Dot v={mine} color={U} initial={sameInit ? null : uInit} dy={dyMine} />
+                    <Dot v={theirs} color={Pc} initial={sameInit ? null : pInit} dy={dyTheirs} />
                   </div>
                 </div>
                 <span style={POLE}>{f ? q.a : q.b}</span>
@@ -2846,7 +2869,7 @@ function getDimShift(dim, myScore, partScore, U, P) {
       '1_5': `${loName} needs where they stand said out loud. ${hiName} takes it as given and rarely says it. This is the gap where a long quiet stretch means two completely different things. Agree on a small, regular way it gets said. It matters more to one of you than the other, and that is fine.`,
       '2_2': `You both like hearing it, without needing much. Comfortable match. Watch for it thinning out over time, since neither of you will chase it. Say it when you notice it, not only when it is asked for.`,
       '2_3': `${loName} likes it said; ${hiName} is comfortable either way. No real strain here. ${hiName} can be the one who says it first, since it costs them less.`,
-      '2_4': `${loName} likes hearing it; ${hiName} assumes it and moves on. Small but real. The shift: ${hiName} answers the unasked question sometimes, rather than waiting for a prompt.`,
+      '2_4': `${loName} likes hearing it; ${hiName} assumes it and moves on. The shift: ${hiName} answers the unasked question sometimes, rather than waiting for a prompt.`,
       '2_5': `${loName} wants it said now and then; ${hiName} treats it as long since settled. ${hiName} may not hear the ask, because it arrives quietly. ${loName} can ask outright, and ${hiName} can take the ask at face value.`,
       '3_3': `Neither of you needs it said, and neither of you goes looking for it. That is a low-maintenance place to be. The gap shows up after a rough patch, when neither of you names that you are okay. Say it once out loud after the next hard week.`,
       '3_4': `${loName} is steady either way; ${hiName} takes it as given. Nothing is straining. The one thing worth doing is saying it during a good stretch, so it is available during a bad one.`,
@@ -2868,7 +2891,7 @@ function getDimShift(dim, myScore, partScore, U, P) {
       '2_4': `${loName} leans toward recharging alone; ${hiName} leans toward connection. One shift: when you've both had a long day, name your mode before defaulting to it. "I need an hour to decompress" lands very differently than silently withdrawing.`,
       '2_5': `${loName} tends toward quiet; ${hiName} genuinely energizes from togetherness. The shift: ${hiName} shouldn't read ${loName}'s quiet time as withdrawal, and ${loName} should flag when they're recharged and ready to reconnect. Both need to become signals.`,
       '3_3': `You're both genuinely flexible about how you restore. That's adaptive, but it can mean connection gets left to chance. When stress hits, each of you may default to a mode the other doesn't know about. Check in when things are hard.`,
-      '3_4': `${hiName} leans more toward needing togetherness than ${loName} does. Small but real. ${hiName} can name when they want company rather than hoping ${loName} picks it up. ${loName} tends to assume everyone's preferences match their own.`,
+      '3_4': `${hiName} leans more toward needing togetherness than ${loName} does. ${hiName} can name when they want company rather than hoping ${loName} picks it up. ${loName} tends to assume everyone's preferences match their own.`,
       '3_5': `${loName} is neutral; ${hiName} genuinely energizes from people and connection. ${hiName}'s need is a real preference worth designing around. Build in deliberate closeness even when ${loName} would otherwise be fine either way.`,
       '4_4': `You both restore through connection and togetherness. Warm match. Give each other explicit permission to want a quiet night sometimes. It shouldn't feel like a confession when one of you needs to be alone for a bit.`,
       '4_5': `Both of you lean toward connection, ${hiName} more strongly. When one of you is genuinely depleted and doesn't have energy for togetherness, build in an easy way to signal it: "I'm low tonight but I'm not going anywhere."`,
@@ -2887,7 +2910,7 @@ function getDimShift(dim, myScore, partScore, U, P) {
       '2_4': `${loName} leans internal; ${hiName} leans toward sharing. ${loName} may often appear fine when they're not. Agree that "I need to think about this" means "I'll come back to you", not "nothing's wrong."`,
       '2_5': `${loName} tends inward; ${hiName} processes externally. The shift: ${hiName} may share unfinished thoughts, which can feel like oversharing to ${loName}. Agree that thinking out loud is allowed and doesn't require an immediate response.`,
       '3_3': `You're both flexible on expression, can hold or share depending on the day. That's adaptive. Watch for: when something actually needs saying, the flexibility can become avoidance. Make it easy for either person to say "I need to talk about something."`,
-      '3_4': `${hiName} leans more toward sharing than ${loName}. Small but real. ${hiName} may feel like they're doing most of the initiating when it comes to talking things through. ${loName} can start sometimes, even when nothing is wrong.`,
+      '3_4': `${hiName} leans more toward sharing than ${loName}. ${hiName} may feel like they're doing most of the initiating when it comes to talking things through. ${loName} can start sometimes, even when nothing is wrong.`,
       '3_5': `${loName} is neutral; ${hiName} genuinely processes out loud and needs to share. Give ${hiName} explicit room to think aloud without ${loName} treating every word as a conclusion. Processing isn't the same as deciding.`,
       '4_4': `You both lean toward sharing rather than holding. The relationship is verbally expressive. Watch for: both of you sharing at once without one person listening. Practice one person speaking while the other actively receives, especially when things are charged.`,
       '4_5': `Both lean external, ${hiName} more so. You're likely to talk things through, which is healthy. When both of you are processing out loud at the same time, the volume can get high. Take turns more deliberately when things are tense.`,
@@ -2919,10 +2942,10 @@ function getDimShift(dim, myScore, partScore, U, P) {
       '1_2': `${loName} is very reserved; ${hiName} is a bit more present. Close match, but the bid volume between you is probably low. Worth deliberately creating more moments, share more small things, even when they feel insignificant.`,
       '1_3': `${loName} is reserved; ${hiName} is in the middle. ${hiName} can start noticing and naming when ${loName} makes a small bid, "you seemed like you wanted to say something earlier", making it easier for ${loName} to reach again.`,
       '1_4': `${loName} tends quiet in reaching for connection; ${hiName} is more responsive and attuned. The shift: ${loName} can practice making the smallest version of a bid, sending a link, sharing an observation, without expecting more than a nod.`,
-      '1_5': `${loName} rarely bids for connection; ${hiName} is very attuned and responsive. A real gap. The shift: ${loName} can start with the simplest thing, showing ${hiName} something, sharing a minor thought. Bids don't need to be meaningful to matter.`,
+      '1_5': `${loName} rarely bids for connection; ${hiName} is very attuned and responsive, a real gap. The shift: ${loName} can start with the simplest thing, showing ${hiName} something, sharing a minor thought. Bids don't need to be meaningful to matter.`,
       '2_2': `You both lean quieter in how you reach for each other. Warm but not loudly expressive. Agree to initiate at least one small connection moment per day, a specific question, a brief check-in. Build it into the routine rather than leaving it to chance.`,
       '2_3': `${loName} leans reserved; ${hiName} is flexible. ${hiName} can make it easier to respond to ${loName}'s bids by acknowledging them explicitly, "you mentioned X earlier, tell me more", signals that ${loName}'s reaching is always welcome.`,
-      '2_4': `${loName} tends quieter; ${hiName} is more attuned to small moments. Moderate gap. ${loName} can become more aware of what ${hiName} does to reach for connection, and make a deliberate effort to turn toward it, even when it's a small thing.`,
+      '2_4': `${loName} tends quieter; ${hiName} is more attuned to small moments. ${loName} can become more aware of what ${hiName} does to reach for connection, and make a deliberate effort to turn toward it, even when it's a small thing.`,
       '2_5': `${loName} leans reserved; ${hiName} is highly responsive. ${hiName} may feel like they're always the one reaching. The shift: ${loName} can pick one type of bid and practice it consistently, asking about ${hiName}'s day, noticing something they did. It doesn't have to be grand.`,
       '3_3': `You're both somewhere in the middle. Workable, but "somewhere in the middle" can mean neither reaches reliably. Build in deliberate connection moments rather than leaving it to feel.`,
       '3_4': `${hiName} is more tuned to small moments than ${loName}. ${loName} can practice responding explicitly when ${hiName} bids, even a "I noticed that", makes ${hiName} feel seen.`,
@@ -2957,7 +2980,7 @@ function getDimShift(dim, myScore, partScore, U, P) {
       '1_2': `${loName} takes longer to recover; ${hiName} leans similar. Close match. Name what "repaired" actually means to each of you, if you don't share that definition, one person can feel resolved before the other is ready.`,
       '1_3': `${loName} recovers slowly; ${hiName} is flexible. ${hiName} can check in without forcing, "I feel okay, how are you feeling?", gives ${loName} a chance to name where they are without pressure to match.`,
       '1_4': `${loName} takes longer to recover; ${hiName} bounces back sooner. A real difference. When ${hiName} is ready to move forward, ask rather than assume, "are we good, or do you need more time?", instead of acting normal and leaving ${loName} feeling unseen.`,
-      '1_5': `${loName} takes significantly longer to recover; ${hiName} moves on quickly. A meaningful gap. Agree: ${hiName} moving on first doesn't mean it's resolved. ${loName} can name a window, "I'll be ready to put this behind me by tomorrow morning", gives both something to work with.`,
+      '1_5': `${loName} takes significantly longer to recover; ${hiName} moves on quickly, a meaningful gap. Agree: ${hiName} moving on first doesn't mean it's resolved. ${loName} can name a window, "I'll be ready to put this behind me by tomorrow morning", gives both something to work with.`,
       '2_2': `You both tend to take a bit of time recovering. Neither of you will push the other to perform "fine" before they are. Watch for: slow repair slipping into distance. Make sure "I need time" doesn't become indefinite.`,
       '2_3': `${loName} leans toward slower recovery; ${hiName} is flexible. ${hiName} can signal when they're ready, "I'm feeling good about where we are", without demanding ${loName} match it. Gives ${loName} information without pressure.`,
       '2_4': `${loName} tends slower; ${hiName} tends to recover more quickly. Moderate difference. Try a check-in 24 hours after conflict, "are we good?", low pressure, high information.`,
@@ -2982,7 +3005,7 @@ function getDimShift(dim, myScore, partScore, U, P) {
       '2_4': `${loName} listens more quietly; ${hiName} engages more actively. When ${hiName} reflects back or asks, that's how they show care. When ${loName} stays quiet, that's how they stay present. Say which one you need in the moment.`,
       '2_5': `${loName} tends to receive quietly; ${hiName} engages hard, asks, fills the space. The shift: ${hiName} can leave room before jumping in, and ${loName} can offer a word so ${hiName} knows the silence is full, not empty.`,
       '3_3': `You both adjust how you listen depending on the day. That's adaptive. Watch for: in a hard moment, you each default to a mode the other didn't expect. When it matters, say what you need, presence or engagement.`,
-      '3_4': `${hiName} leans more toward active listening than ${loName}. Small but real. ${hiName} can carry the engagement. ${loName} can ask a question sometimes, even a small one, so the drawing-out runs both directions.`,
+      '3_4': `${hiName} leans more toward active listening than ${loName}. ${hiName} can carry the engagement. ${loName} can ask a question sometimes, even a small one, so the drawing-out runs both directions.`,
       '3_5': `${loName} is flexible; ${hiName} listens by engaging, reflecting, asking. ${hiName}'s questions are how they connect, not a demand for more than you have. ${loName} can meet it with a short answer rather than retreating into quiet.`,
       '4_4': `You both listen by engaging, asking, reflecting back. Conversations move. Watch for: two people responding at once crowds out the actual listening. Let one person finish and sit with it before the other steps in.`,
       '4_5': `Both of you listen actively, ${hiName} more so. You draw each other out, which keeps you current. When one of you wants to be heard and not questioned, say so. Active listening tips into problem-solving when the other just wanted presence.`,
@@ -2999,7 +3022,7 @@ function getDimShift(dim, myScore, partScore, U, P) {
       '2_2': `You both lean toward words as the primary love language. A close match. Keep the words specific over time, "I appreciate you" lands less than "I noticed how you handled that today." Specificity is what keeps verbal expression feeling real.`,
       '2_3': `${loName} leans toward words; ${hiName} is flexible. ${hiName} doesn't need to choose a lane, but paying attention to when verbal appreciation lands well for ${loName} and doing more of it deliberately matters.`,
       '2_4': `${loName} leans toward words; ${hiName} leans toward acts. Moderate difference. Spend a week noticing each other's expressions in the other's language. ${loName} tracks what ${hiName} does; ${hiName} pays attention to what ${loName} says. Noticing shifts reception.`,
-      '2_5': `${loName} leans verbal; ${hiName} strongly shows love through acts. A meaningful gap. Neither is wrong, but each needs to learn to feel the other's expressions as love. ${loName} can verbalize what ${hiName} does; ${hiName} can act on what ${loName} says.`,
+      '2_5': `${loName} leans verbal; ${hiName} strongly shows love through acts, a meaningful gap. Neither is wrong, but each needs to learn to feel the other's expressions as love. ${loName} can verbalize what ${hiName} does; ${hiName} can act on what ${loName} says.`,
       '3_3': `You're both genuinely receptive to both words and acts. Flexible. Watch for: when neither of you has a strong pull, love expression can get inconsistent. Build in deliberate moments rather than leaving it to spontaneity.`,
       '3_4': `${hiName} leans more toward actions and presence. When ${hiName} does something, ${loName} can notice and name it, "thank you for that", rather than letting the act disappear unacknowledged.`,
       '3_5': `${loName} is neutral; ${hiName} feels love primarily through acts and presence. For ${hiName}, showing up and doing things is the language of care. ${loName} can practice acts of service, planning something, making something easier, even when verbal expression would feel more natural.`,
@@ -3018,7 +3041,7 @@ function getDimShift(dim, myScore, partScore, U, P) {
       '2_2': `You both lean a bit guarded. That means the relationship stays relatively conflict-free, but things that should be named sometimes don't get named. Practice low-stakes feedback on small things so that raising something doesn't always feel like a production.`,
       '2_3': `${loName} leans guarded; ${hiName} is flexible. ${hiName} can be explicit about intent, "I want to mention something, and it's not a big deal", which removes the anticipatory dread ${loName} may feel when feedback is incoming.`,
       '2_4': `${loName} leans guarded; ${hiName} leans more open. Moderate difference. ${hiName} can work on timing, feedback lands better when the temperature is low. Ask if it's a good time before starting.`,
-      '2_5': `${loName} leans guarded; ${hiName} is very comfortable with direct feedback. A meaningful gap. ${hiName} needs to slow down delivery. One thing, specific, followed by silence. Not a list, not a conversation. ${loName} needs time to sit with it.`,
+      '2_5': `${loName} leans guarded; ${hiName} is very comfortable with direct feedback, a meaningful gap. ${hiName} needs to slow down delivery. One thing, specific, followed by silence. Not a list, not a conversation. ${loName} needs time to sit with it.`,
       '3_3': `You're both in the middle. Watch for: feedback needing to happen but neither person reaching for it. A norm: one thing each month that each person wants to mention, raised gently. Small volume, regular cadence.`,
       '3_4': `${hiName} is a bit more open to feedback. ${loName} can practice receiving ${hiName}'s feedback without responding immediately, "thanks for saying that, let me think about it" is a complete response.`,
       '3_5': `${loName} is neutral; ${hiName} is very open to feedback. ${loName} can communicate what format works best, "I'd rather you bring it up in the moment" or the opposite. Giving ${hiName} the protocol makes it easier.`,
@@ -4397,7 +4420,10 @@ function PersonalityResults({ myAnswers, partnerAnswers, userName, partnerName, 
 // Unique origin context per gap -- avoids repeated phrases (item 12)
 // Expectations pages share one background. The previous values read near-black:
 // the category pages had no bg at all and fell through to the flat #0f0c29.
-const EXP_BG = "linear-gradient(145deg, #211d4d, #413a85, #2e295c)";
+// Detail-page ground. Lifted from near-black navy: the glance page moved to a
+// brighter treatment and these read as murky beside it. Still darker than the
+// glance page, so the two are distinguishable.
+const EXP_BG = "linear-gradient(145deg, #443D8C, #6F63D6 55%, #514AAE)";
 
 function ExpectationsResults({ myAnswers, partnerAnswers, userName, partnerName, forcedSection, noSideNav = false, onGoWhatComesNext, onGoBack, onExternalGo, coupleTypeCode = null, coupleTypeName = null, coupleTypeColor = "#1B5FE8" }) {
   // ── Fixed 5 display categories ──────────────────────────────────────────────
