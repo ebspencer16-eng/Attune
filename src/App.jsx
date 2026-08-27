@@ -12445,12 +12445,41 @@ export default function App() {
           if (event === 'SIGNED_IN' && sess?.user?.id) {
             (async () => {
               const accountId = sess.user.id;
+              // Only ever push answers that match the CURRENT question set.
+              // Exercise 1 is two parts now: every question answered about
+              // yourself, and the same set again about your partner as
+              // pv_<questionId>. The retired scheme was 23 self answers plus
+              // five dimension-level pv_<dimension> keys.
+              //
+              // Without this check the resync resurrects obsolete answers. It
+              // is what undid the beta reset: the server was empty by design,
+              // a browser still held pre-restructure answers, signing in
+              // pushed them straight back, and the reset looked like it had
+              // failed when it had actually been reversed.
+              const isCurrentEx1 = (a) => {
+                const keys = Object.keys(a || {});
+                const selfIds = PERSONALITY_QUESTIONS.map(q => q.id);
+                const hasAllSelf = selfIds.every(id => a[id] != null);
+                const pvKeys = keys.filter(k => k.startsWith('pv_'));
+                // Every pv key must name a current question, not a dimension.
+                const pvAreQuestions = pvKeys.length > 0
+                  && pvKeys.every(k => selfIds.includes(k.slice(3)));
+                return hasAllSelf && pvAreQuestions;
+              };
               const tryResync = async (exNum, key) => {
                 try {
                   const raw = localStorage.getItem(key);
                   if (!raw) return;
                   const answers = JSON.parse(raw);
                   if (!answers || typeof answers !== 'object') return;
+                  if (exNum === 1 && !isCurrentEx1(answers)) {
+                    // Stale local copy from before the exercise changed. Drop
+                    // it rather than pushing it, so the device stops showing a
+                    // completion the server has correctly cleared.
+                    try { localStorage.removeItem('attune_ex1'); localStorage.removeItem('attune_ex1_progress'); } catch {}
+                    console.warn('[Attune] local Ex1 answers predate the two-part exercise. Discarded rather than resynced.');
+                    return;
+                  }
                   // Check if the server already has answers for this exercise.
                   // Only push if server is missing — don't overwrite a more
                   // recent server-side completion (rare but possible).
