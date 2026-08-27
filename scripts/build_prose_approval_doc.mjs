@@ -136,7 +136,7 @@ children.push(caption('Was "Detailed category pages". The comms equivalent reads
 children.push(...bigSection('4', 'Exercise and site copy', 'Changed because the exercise is now two parts of the same 27 questions.', BLUE));
 children.push(midSection('4.1', 'Part 2 intro screen', BLUE, { extras: 'already live' }));
 children.push(prose('Now, the same questions about your partner.'));
-children.push(prose('You just answered these about yourself. This time, answer the same set the way you think your partner would. It shows each of you where your reads of each other line up, and where they do not. There are no right answers, and your partner never sees how you answered.'));
+children.push(prose('You just answered these about yourself. This time, answer the same set the way you think your partner would. It shows each of you where your reads of each other line up, and where they do not. There are no right answers.'));
 children.push(midSection('4.2', 'Question count, everywhere it appears', BLUE));
 children.push(prose(`Was 28. Now ${PERSONALITY_QUESTIONS.length * 2}, described as "${PERSONALITY_QUESTIONS.length * 2} questions in two parts". Appears on how-it-works, offerings, and four places on start.`));
 children.push(midSection('4.3', 'How it works page', BLUE));

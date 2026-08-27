@@ -3667,7 +3667,7 @@ function Exercise01Flow({ userName, partnerName, onComplete, skipIntro = false, 
           First, how you communicate.
         </p>
         <p style={{ fontSize: "0.92rem", color: C.muted, fontFamily: font.body, lineHeight: 1.75, marginBottom: "1.75rem" }}>
-          This is the communication exercise. It looks at how you connect, handle conflict, and show up day to day. Exercise 02 comes next and maps what you each expect. Both take about 15 minutes. Answer honestly. Your partner never sees your individual answers.
+          This is the communication exercise. It looks at how you connect, handle conflict, and show up day to day. Exercise 02 comes next and maps what you each expect. Both take about 15 minutes. Answer honestly. View results once you and your partner have completed the exercises.
         </p>
         <p style={{ fontSize: "0.78rem", color: C.muted, fontFamily: font.body, fontWeight: 400, lineHeight: 1.6, marginBottom: "1.75rem" }}>Built on relationship research and shaped with licensed therapists.</p>
         <div style={{ display: "flex", gap: "0.85rem", marginBottom: "1.75rem", flexWrap: "wrap" }}>
@@ -3759,7 +3759,7 @@ function Exercise01Flow({ userName, partnerName, onComplete, skipIntro = false, 
         <div style={{ maxWidth: 520, margin: "0 auto", padding: "3.5rem 1.5rem 2rem", animation: "fadeIn 0.5s ease" }}>
           <p style={{ fontSize: "0.62rem", letterSpacing: "0.22em", textTransform: "uppercase", color: "#E8673A", fontWeight: 700, fontFamily: font.body, marginBottom: "1rem" }}>Part 2 of 2</p>
           <p style={{ fontFamily: font.display, fontSize: "clamp(1.5rem, 5vw, 2rem)", fontWeight: 700, color: C.ink, lineHeight: 1.15, marginBottom: "1.25rem" }}>Now, the same questions about your partner.</p>
-          <p style={{ fontSize: "0.92rem", color: C.muted, fontFamily: font.body, lineHeight: 1.75, marginBottom: "1.75rem" }}>You just answered these about yourself. This time, answer the same set the way you think <em>your partner</em> would. It shows each of you where your reads of each other line up, and where they do not. There are no right answers, and your partner never sees how you answered.</p>
+          <p style={{ fontSize: "0.92rem", color: C.muted, fontFamily: font.body, lineHeight: 1.75, marginBottom: "1.75rem" }}>You just answered these about yourself. This time, answer the same set the way you think <em>your partner</em> would. It shows each of you where your reads of each other line up, and where they do not. There are no right answers.</p>
           <button onClick={() => { const ni = idx + 1; setIdx(ni); setChosen(answers[questions[ni]?.answerKey] ?? null); if (!fresh) { try { localStorage.setItem('attune_ex1_progress', JSON.stringify({ answers, idx: ni })); } catch {} } }} style={{ background: "linear-gradient(135deg,#E8673A,#1B5FE8)", color: "white", border: "none", padding: "0.95rem 2rem", borderRadius: 10, cursor: "pointer", fontFamily: font.body, fontSize: "0.95rem", fontWeight: 600, minHeight: 48 }}>Continue →</button>
         </div>
       </div>
