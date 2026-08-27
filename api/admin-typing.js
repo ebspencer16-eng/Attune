@@ -9,6 +9,7 @@
 
 import { createClient } from '@supabase/supabase-js';
 import { checkAdminAuth } from './_lib/admin-auth.js';
+import { personResults } from './_lib/results.js';
 import {
   AXIS_CONFIG, DIM_KEYS, calcDimScores, blendedDimScores, axisScores, typeCodeFromAxes, lowConfidence,
 } from './_type-engine.js';
@@ -28,14 +29,18 @@ function profileToRecord(p, partnerAnswers = null) {
   // their own answers plus their partner's view of them (pv_* on the partner's
   // object). Falls back to self-only when there's no partner. This is what makes
   // the dashboard's couple types match what couples see in their results.
-  const scores = blendedDimScores(p.ex1_answers, partnerAnswers);
-  const { withdrawScore, openScore } = axisScores(scores);
+  // Scoring comes from api/_lib/results.js, the one implementation. This used
+  // to repeat blendedDimScores -> axisScores -> typeCodeFromAxes inline, which
+  // is the pattern that had to be found by hand in five files every time the
+  // weights or the blend changed.
+  const r = personResults(p.ex1_answers, partnerAnswers);
+  const scores = Object.fromEntries(Object.entries(r.dimensions).map(([d, v]) => [d, v.blended]));
   return {
     scores,
-    w: withdrawScore,
-    o: openScore,
-    type: typeCodeFromAxes(withdrawScore, openScore),
-    lowConf: lowConfidence(scores),
+    w: r.axes.withdraw,
+    o: r.axes.open,
+    type: r.typeCode,
+    lowConf: r.lowConfidence,
     gender: p.gender || null,
     relLength: p.relationship_length || null,
     relStatus: p.relationship_status || null,

@@ -26,6 +26,15 @@ export const config = { runtime: 'edge' };
 
 // ── Scoring + typing now live in the shared engine (single source of truth,
 // also used by the app, workbook, and admin typing endpoint). ──
+import { personResults } from './_lib/results.js';
+// Dimension scores for one person, blended against their partner's reads when
+// those exist. Wraps the shared implementation so the exports below cannot
+// drift from what couples actually see.
+const scoresOf = (self, other) => {
+  if (!self || !Object.keys(self).length) return {};
+  const r = personResults(self, other && Object.keys(other).length ? other : null);
+  return Object.fromEntries(Object.entries(r.dimensions).map(([d, v]) => [d, v.blended]));
+};
 import { DIM_KEYS, calcDimScores, blendedDimScores, axisScores, typeCodeFromAxes, lowConfidence } from './_type-engine.js';
 
 // Thin wrapper preserving this file's null-guard: a couple with no Exercise 1
@@ -222,8 +231,9 @@ async function buildCombinedData(admin) {
     const o = ordersByUser[p.id];
     const ex2a = p.ex2_answers || {};
     const ex2b = ps?.ex2_answers || {};
-    const aScores = ps ? blendedDimScores(p.ex1_answers, ps.ex1_answers) : calcDimScores(p.ex1_answers);
-    const bScores = ps ? blendedDimScores(ps.ex1_answers, p.ex1_answers) : calcDimScores(ps?.ex1_answers);
+    // Scoring via api/_lib/results.js, the one implementation.
+    const aScores = scoresOf(p.ex1_answers, ps?.ex1_answers);
+    const bScores = scoresOf(ps?.ex1_answers, p.ex1_answers);
     const aAxes = computeAxes(aScores);
     const bAxes = computeAxes(bScores);
     const aEx3 = p.ex3_answers || {};
@@ -519,8 +529,8 @@ async function exportDemographics(admin) {
     const ex2a = p.ex2_answers || {};
     const ex2b = partnerB?.ex2_answers || {};
 
-    const aScores = partnerB ? blendedDimScores(p.ex1_answers, partnerB.ex1_answers) : calcDimScores(p.ex1_answers);
-    const bScores = partnerB ? blendedDimScores(partnerB.ex1_answers, p.ex1_answers) : calcDimScores(partnerB?.ex1_answers);
+    const aScores = scoresOf(p.ex1_answers, partnerB?.ex1_answers);
+    const bScores = scoresOf(partnerB?.ex1_answers, p.ex1_answers);
     const aAxes = computeAxes(aScores);
     const bAxes = computeAxes(bScores);
 
@@ -616,8 +626,9 @@ async function exportResults(admin) {
   const fmt = (n) => n == null ? '' : Number(n).toFixed(3);
   const rows = partnerAList.map(p => {
     const ps = p.partner_profile_id ? byId[p.partner_profile_id] : null;
-    const aScores = ps ? blendedDimScores(p.ex1_answers, ps.ex1_answers) : calcDimScores(p.ex1_answers);
-    const bScores = ps ? blendedDimScores(ps.ex1_answers, p.ex1_answers) : calcDimScores(ps?.ex1_answers);
+    // Scoring via api/_lib/results.js, the one implementation.
+    const aScores = scoresOf(p.ex1_answers, ps?.ex1_answers);
+    const bScores = scoresOf(ps?.ex1_answers, p.ex1_answers);
     const aAxes = computeAxes(aScores);
     const bAxes = computeAxes(bScores);
     const aEx3 = p.ex3_answers || {};
@@ -659,13 +670,15 @@ async function exportTyping(admin) {
     .filter(p => p.ex1_answers && Object.keys(p.ex1_answers).length)
     .map(p => {
       const _partner = p.partner_profile_id ? _byIdScored[p.partner_profile_id] : null;
-      const scores = _partner ? blendedDimScores(p.ex1_answers, _partner.ex1_answers) : calcDimScores(p.ex1_answers);
-      const { withdrawScore, openScore } = axisScores(scores);
+      // Scoring via api/_lib/results.js, the one implementation.
+      const _r = personResults(p.ex1_answers, _partner ? _partner.ex1_answers : null);
+      const scores = Object.fromEntries(Object.entries(_r.dimensions).map(([d, v]) => [d, v.blended]));
+      const withdrawScore = _r.axes.withdraw, openScore = _r.axes.open;
       return [
         (p.id || '').replace(/-/g, '').slice(0, 8),
         p.gender || '', p.relationship_length || '', p.relationship_status || '',
         fmt(withdrawScore), fmt(openScore),
-        typeCodeFromAxes(withdrawScore, openScore), lowConfidence(scores) ? 'Y' : 'N',
+        _r.typeCode, _r.lowConfidence ? 'Y' : 'N',
         ...Object.keys(DIM_KEYS).map(d => fmt(scores[d])),
       ];
     });

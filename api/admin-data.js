@@ -33,6 +33,7 @@ import { createClient } from '@supabase/supabase-js';
 import { checkAdminAuth } from './_lib/admin-auth.js';
 import { RESPONSIBILITY_CATEGORIES, LIFE_QUESTIONS } from './_questions.js';
 import { axisScores, typeCodeFromAxes, blendedDimScores } from './_type-engine.js';
+import { personResults } from './_lib/results.js';
 
 // ── Response aggregates ──────────────────────────────────────────────────────
 // The Responses page charts used to be hardcoded zero arrays: the raw answers
@@ -297,11 +298,10 @@ export default async function handler(req) {
     // same type engine as the cube so values match the slicer's dropdown.
     // Type with the partner-view blend (same shared engine the app uses), so the
     // slicer's couple types match what couples see in their results.
+    // Scoring via api/_lib/results.js, the one implementation.
     const _typeOf = (selfAns, partnerAns) => {
-      const sc = blendedDimScores(selfAns, partnerAns);
-      if (!sc || !Object.keys(sc).length) return null;
-      const { withdrawScore, openScore } = axisScores(sc);
-      return typeCodeFromAxes(withdrawScore, openScore);
+      if (!selfAns || !Object.keys(selfAns).length) return null;
+      return personResults(selfAns, partnerAns).typeCode;
     };
     {
       const byIdT = {}; profiles.forEach(p => { byIdT[p.id] = p; });

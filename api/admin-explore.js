@@ -18,6 +18,7 @@
 import { createClient } from '@supabase/supabase-js';
 import { checkAdminAuth } from './_lib/admin-auth.js';
 import { calcDimScores, blendedDimScores, axisScores, typeCodeFromAxes, DIM_KEYS } from './_type-engine.js';
+import { personResults } from './_lib/results.js';
 // Individual type from raw ex1 answers (for invited partners who answered via a
 // partner_session and never created a full profile).
 function typeFromEx1(ans){
@@ -339,11 +340,10 @@ export default async function handler(req) {
       // answers plus their partner's view of them. Recomputed here where the
       // partner's raw answers are available. Raw axis/dim columns stay
       // self-report; only the classification (type/couple_type) is blended.
+      // Scoring via api/_lib/results.js, the one implementation.
       const blendType = (self, pans) => {
-        const sc = blendedDimScores(self, pans);
-        if (!sc || !Object.keys(sc).length) return null;
-        const { withdrawScore, openScore } = axisScores(sc);
-        return typeCodeFromAxes(withdrawScore, openScore);
+        if (!self || !Object.keys(self).length) return null;
+        return personResults(self, pans).typeCode;
       };
       let ownType = own.type == null ? null : (blendType(p.ex1_answers, partnerRaw ? partnerRaw.ex1_answers : null) || own.type);
       let partnerType = (partnerRaw && partnerRaw.ex1_answers) ? blendType(partnerRaw.ex1_answers, p.ex1_answers) : null;
