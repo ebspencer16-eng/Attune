@@ -2341,80 +2341,6 @@ function _dlWidth(lines, fontPx) {
   } catch (e) { return Math.max.apply(null, lines.map(l => String(l).length)) * fontPx * 0.55; }
 }
 
-// The two cross-view points under a question bar: "How Sarah views James" and
-// "How James views Sarah". No dot on the bar, just a leader line from the label
-// up to the point. Labels split around each other when they would collide and
-// clamp to the bar's edges so they never spill past the margins.
-function CrossViewLabels({ items }) {
-  const ref = React.useRef(null);
-  const [w, setW] = React.useState(0);
-  React.useLayoutEffect(() => {
-    const el = ref.current; if (!el) return;
-    const upd = () => setW(el.clientWidth || 0);
-    upd();
-    let ro; try { ro = new ResizeObserver(upd); ro.observe(el); } catch (e) {}
-    window.addEventListener("resize", upd);
-    return () => { window.removeEventListener("resize", upd); if (ro) ro.disconnect(); };
-  }, []);
-  const GREY = "rgba(255,255,255,0.62)";
-  const FONT_REM = 0.56;
-  const fontPx = FONT_REM * 16;
-  const LEADER = 12;
-  const present = (items || []).filter(it => it && it.pct != null);
-  if (!present.length) return null;
-  const nLines = Math.max(1, ...present.map(it => it.lines.length));
-  const height = nLines * fontPx * 1.35 + LEADER + 4;
-
-  let placed = present.map(it => ({ it, leftPx: 0, lw: 0, cx: 0 }));
-  if (w > 0) {
-    placed = present.map(it => {
-      const lw = _dlWidth(it.lines, fontPx);
-      const cx = (it.pct / 100) * w;
-      return { it, lw, cx, leftPx: cx - lw / 2 };
-    });
-    if (placed.length === 2) {
-      const ord = placed[0].cx <= placed[1].cx ? [0, 1] : [1, 0];
-      const A = placed[ord[0]], B = placed[ord[1]];
-      // Overlapping: split them around their own points rather than centring.
-      if (A.cx + A.lw / 2 > B.cx - B.lw / 2) { A.leftPx = A.cx - A.lw; B.leftPx = B.cx; }
-    }
-    placed.forEach(bx => { bx.leftPx = Math.max(0, Math.min(bx.leftPx, w - bx.lw)); });
-    if (placed.length === 2) {
-      // Final guarantee after clamping, for the case where both points sit near
-      // the same edge and clamping pushed them back together.
-      const ord = placed[0].cx <= placed[1].cx ? [0, 1] : [1, 0];
-      const A = placed[ord[0]], B = placed[ord[1]];
-      const minGap = 6;
-      if (A.leftPx + A.lw + minGap > B.leftPx) {
-        B.leftPx = A.leftPx + A.lw + minGap;
-        if (B.leftPx + B.lw > w) { B.leftPx = w - B.lw; A.leftPx = Math.max(0, B.leftPx - A.lw - minGap); }
-      }
-    }
-  }
-  return (
-    <div ref={ref} style={{ position: "relative", height, marginTop: 6 }}>
-      {w > 0 && (
-        <svg width={w} height={LEADER} style={{ position: "absolute", top: 0, left: 0, overflow: "visible" }}>
-          {placed.map((bx, i) => {
-            const inner = bx.leftPx < bx.cx ? bx.leftPx + bx.lw : bx.leftPx;
-            return <line key={i} x1={bx.cx} y1={0} x2={Math.max(0, Math.min(inner, w))} y2={LEADER}
-              stroke={bx.it.color} strokeWidth="1.25" strokeOpacity="0.85" />;
-          })}
-        </svg>
-      )}
-      {placed.map((bx, i) => (
-        <div key={i} style={{ position: "absolute", top: LEADER,
-          left: w > 0 ? bx.leftPx + "px" : bx.it.pct + "%",
-          transform: w > 0 ? "none" : "translateX(-50%)",
-          maxWidth: w > 0 ? (bx.lw + 2) + "px" : "60%",
-          textAlign: "left", color: GREY, lineHeight: 1.3,
-          fontFamily: BFONT, whiteSpace: "nowrap", fontSize: FONT_REM + "rem" }}>
-          {bx.it.lines.map((ln, j) => <div key={j}>{ln}</div>)}
-        </div>
-      ))}
-    </div>
-  );
-}
 
 // Per-question side-by-side for one domain. Each row is the question as it was
 // asked, its two options either side of a narrow bar, and one dot per partner
@@ -2435,6 +2361,14 @@ function SideBySideResponses({ dims, myAnswers, partnerAnswers, userName, partne
   // Shared by the bar row and the label row beneath it, so both columns line up.
   const POLE = { fontSize: "0.66rem", color: "rgba(255,255,255,0.62)", fontFamily: BFONT, lineHeight: 1.3, flexShrink: 0, width: "clamp(74px,26%,150px)" };
 
+  // Cross-view reads: small, no initial, no outline, sitting behind the self
+  // dots so they read as context rather than as two more people.
+  const SmallDot = ({ v, color }) => v == null ? null : (
+    <div style={{ position: "absolute", top: "50%", left: pct(v) + "%",
+      transform: "translate(-50%,-50%)", width: 10, height: 10, borderRadius: "50%",
+      background: color, opacity: 0.85, zIndex: 1 }} />
+  );
+
   const Dot = ({ v, color, initial, dy }) => v == null ? null : (
     <div style={{ position: "absolute", top: "50%", left: pct(v) + "%",
       transform: `translate(-50%, calc(-50% + ${dy}px))`, width: 20, height: 20, borderRadius: "50%",
@@ -2446,17 +2380,27 @@ function SideBySideResponses({ dims, myAnswers, partnerAnswers, userName, partne
 
   return (
     <div>
-      {sameInit && (
-        <div style={{ display: "flex", gap: "1.1rem", flexWrap: "wrap", marginBottom: "1.1rem" }}>
-          {[[U, userName], [Pc, partnerName]].map(([c, n]) => (
-            <span key={n} style={{ display: "flex", alignItems: "center", gap: "0.4rem", fontSize: "0.62rem", color: "rgba(255,255,255,0.7)", fontFamily: BFONT }}>
-              <span style={{ width: 13, height: 13, borderRadius: "50%", background: c }} /> {n}
+      {/* Always shown: the cross-view dots carry no initial, so the legend is
+          the only thing naming them. Colour follows the person the dot is
+          about, not who answered, so "how Preston views Ellie" is Ellie's
+          colour and sits next to Ellie's own dot. */}
+      <div style={{ display: "flex", gap: "0.5rem 1.1rem", flexWrap: "wrap", marginBottom: "1.1rem" }}>
+        {[
+          { size: 16, color: U, label: userName, initial: sameInit ? null : uInit },
+          { size: 16, color: Pc, label: partnerName, initial: sameInit ? null : pInit },
+          { size: 9, color: U, label: `How ${partnerName} views ${userName}` },
+          { size: 9, color: Pc, label: `How ${userName} views ${partnerName}` },
+        ].map((it, i) => (
+          <span key={i} style={{ display: "flex", alignItems: "center", gap: "0.4rem", fontSize: "0.62rem", color: "rgba(255,255,255,0.7)", fontFamily: BFONT }}>
+            <span style={{ width: it.size, height: it.size, borderRadius: "50%", background: it.color, flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
+              {it.initial && <span style={{ fontSize: "0.46rem", fontWeight: 800, color: "white" }}>{it.initial}</span>}
             </span>
-          ))}
-        </div>
-      )}
+            {it.label}
+          </span>
+        ))}
+      </div>
 
-      <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
+      <div style={{ display: "flex", flexDirection: "column", gap: "1.1rem" }}>
         {qs.map(q => {
           const f = flip(q.id);
           const adj = v => (v == null ? null : (f ? 6 - v : v));
@@ -2478,24 +2422,16 @@ function SideBySideResponses({ dims, myAnswers, partnerAnswers, userName, partne
                 <span style={{ ...POLE, textAlign: "right" }}>{f ? q.b : q.a}</span>
                 <div style={{ flex: 1, minWidth: 0, padding: "0 12px" }}>
                   <div style={{ position: "relative", height: 6, background: "rgba(255,255,255,0.14)", borderRadius: 999 }}>
+                    {/* theirRead is the partner's answer ABOUT the user, so it
+                        carries the user's colour, and vice versa. */}
+                    <SmallDot v={theirRead} color={U} />
+                    <SmallDot v={myRead} color={Pc} />
                     <Dot v={mine} color={U} initial={sameInit ? null : uInit} dy={close ? -7 : 0} />
                     <Dot v={theirs} color={Pc} initial={sameInit ? null : pInit} dy={close ? 7 : 0} />
                   </div>
                 </div>
                 <span style={POLE}>{f ? q.a : q.b}</span>
               </div>
-              {(myRead != null || theirRead != null) && (
-                <div style={{ display: "flex", gap: "0.7rem" }}>
-                  <span style={{ ...POLE, visibility: "hidden" }} aria-hidden="true" />
-                  <div style={{ flex: 1, minWidth: 0, padding: "0 12px" }}>
-                    <CrossViewLabels items={[
-                      myRead != null ? { pct: pct(myRead), color: U, lines: [`How ${userName} views`, partnerName] } : null,
-                      theirRead != null ? { pct: pct(theirRead), color: Pc, lines: [`How ${partnerName} views`, userName] } : null,
-                    ]} />
-                  </div>
-                  <span style={{ ...POLE, visibility: "hidden" }} aria-hidden="true" />
-                </div>
-              )}
             </div>
           );
         })}
