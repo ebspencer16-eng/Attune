@@ -10273,6 +10273,12 @@ function AuthModal({ mode, onClose, onSuccess }) {
               try { localStorage.setItem("attune_account", JSON.stringify(account)); } catch {}
             }
           }
+          // Mirror of the ex1/ex2/ex3 clearing above: when the partner has no
+          // answers on the server (a reset, or they have not finished), drop
+          // any cached session so they do not keep reading as complete.
+          if (ps.found && !(ps.profile?.ex1_answers && ps.profile?.ex2_answers)) {
+            try { localStorage.removeItem('attune_partner_session'); } catch {}
+          }
           if (ps.found && ps.profile?.ex1_answers && ps.profile?.ex2_answers) {
             localStorage.setItem('attune_partner_session', JSON.stringify({
               name: ps.profile.name,
@@ -13278,8 +13284,16 @@ export default function App() {
   // In demo mode the picker drives both partners' Ex1 via type archetypes.
   const _demoMineEx1    = _demoParam ? demoWithPartnerView(ARCHETYPE_EX1[demoType[0]], ARCHETYPE_EX1[demoType[1]]) : null;
   const _demoPartnerEx1 = _demoParam ? demoWithPartnerView(ARCHETYPE_EX1[demoType[1]], ARCHETYPE_EX1[demoType[0]]) : null;
-  const partnerEx1 = (hasRealPartner && !_demoParam) ? partnerSession.ex1 : (_demoPartnerEx1 || jamesEx1);
-  const partnerEx2 = (hasRealPartner && !_demoParam) ? partnerSession.ex2 : jamesEx2;
+  // Demo partner data is only ever for demo mode or a signed-out visitor. A
+  // real account with no partner session means the partner genuinely has not
+  // answered, and must read as not answered. Falling back to James here made a
+  // reset or unfinished partner look complete, which is what happened after the
+  // beta Ex1 reset.
+  const _useDemoPartner = !!_demoParam || !_hasAccount;
+  const partnerEx1 = (hasRealPartner && !_demoParam) ? partnerSession.ex1
+    : (_useDemoPartner ? (_demoPartnerEx1 || jamesEx1) : null);
+  const partnerEx2 = (hasRealPartner && !_demoParam) ? partnerSession.ex2
+    : (_useDemoPartner ? jamesEx2 : null);
   // bothDone: BOTH partners have completed exercises with real data.
   //   - hasRealPartner means partnerSession exists (Partner B has finished)
   //   - We do NOT trust account.partnerJoined alone — that just means they
