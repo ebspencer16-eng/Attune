@@ -27,7 +27,10 @@
 --      addresses on record; the one you sign in with may differ.
 --   2. Run the whole file in the Supabase SQL Editor, in one execution, and
 --      actually click Run. Saving the tab is not running it.
---   3. Read the NOTICE at the end. Expect profiles=4 and link rows set=4.
+--   3. A DO block returns no rows, so "Success. No rows returned" is what a
+--      good run looks like. The Supabase SQL Editor does not show RAISE NOTICE
+--      output, so the verification query at the bottom of this file reports the
+--      result as an actual result set instead.
 --      If it raises "Expected exactly 4 profiles, found N", one of the four
 --      addresses does not match an account. Nothing is changed when it raises.
 --   Safe to run more than once.
@@ -138,3 +141,23 @@ begin
   raise notice 'Expect profiles=4 and link rows set=4. If link rows is not 4, the couples are not paired by invite_code and the link needs setting by hand.';
   raise notice 'All four must now clear site data (or sign out and back in) BEFORE reopening the app, then retake Exercise 1.';
 end $$;
+
+-- ── Verification. Runs with the block above and returns a visible result. ──
+-- Expect four rows, every one reading reset = true and partner_linked = true.
+select
+  p.email,
+  p.ex1_answers is null and p.ex1_progress is null
+    and coalesce(p.ex1_completed, false) = false
+    and p.couple_type is null                     as reset,
+  p.partner_profile_id is not null                as partner_linked,
+  p.ex2_answers is not null                       as ex2_kept,
+  p.ex3_answers is not null                       as ex3_kept
+from public.profiles p
+join auth.users u on u.id = p.id
+where lower(u.email) in (
+  'ebspencer16@gmail.com',
+  'mightyhunter00@gmail.com',
+  'carolina.c.cannon@gmail.com',
+  'aaron.m.miner@gmail.com'
+)
+order by p.email;
