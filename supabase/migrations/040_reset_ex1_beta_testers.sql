@@ -123,22 +123,37 @@ begin
     raise notice 'partner_sessions not updated (table or column missing). Profiles were still reset.';
   end;
 
-  -- Repair the mutual partner link within each couple, so partner signals
-  -- resolve in both directions. Pairs by shared invite code rather than
-  -- assuming an order, so it cannot cross-link Ellie to Carolina.
+  -- Repair the mutual partner link, so partner signals resolve both ways.
+  --
+  -- Pairs are derived from whichever direction of the link already exists,
+  -- then written back the other way. An earlier version matched on a shared
+  -- invite_code, which never fires: only the inviting partner carries a code,
+  -- the invitee's is null, and null equals nothing. That version silently
+  -- matched zero rows and would not have repaired a broken link.
+  --
+  -- Deriving from the existing link also means this cannot cross-link one
+  -- couple to the other, since it never guesses a pairing it was not told.
   update public.profiles a
      set partner_profile_id = b.id
     from public.profiles b
    where a.id = any(pids)
      and b.id = any(pids)
      and a.id <> b.id
-     and a.invite_code is not null
-     and a.invite_code = b.invite_code;
+     and b.partner_profile_id = a.id
+     and a.partner_profile_id is distinct from b.id;
   get diagnostics n_link = row_count;
+
+  -- A pair with no link in either direction cannot be repaired from the data,
+  -- so say so rather than reporting success.
+  if exists (
+    select 1 from public.profiles p
+     where p.id = any(pids) and p.partner_profile_id is null
+  ) then
+    raise notice 'At least one profile has no partner link in either direction. The verification select below will show which.';
+  end if;
 
   raise notice 'Ex1 reset complete: profiles=%, partner_sessions cleared=% (-1 means skipped), link rows set=%.',
     n_reset, n_sessions, n_link;
-  raise notice 'Expect profiles=4 and link rows set=4. If link rows is not 4, the couples are not paired by invite_code and the link needs setting by hand.';
   raise notice 'All four must now clear site data (or sign out and back in) BEFORE reopening the app, then retake Exercise 1.';
 end $$;
 
