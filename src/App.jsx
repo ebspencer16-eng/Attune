@@ -4026,11 +4026,11 @@ function PersonalityResults({ myAnswers, partnerAnswers, userName, partnerName, 
   // domainGroups is the source of truth for both the pages and the sidebar.
   const domainGroups = [
     { id: "inner",      label: "Internal Processing",  color: "#9B5DE5", dims: ["energy","expression","reassurance"],
-      prose: "Internal processing is how each of you handles feeling and energy on your own, before any of it reaches the other person. This is where a lot of quiet mismatches start. One of you refuels in company, the other in solitude. One voices what's stirring, the other holds it until it's formed. None of it needs fixing. It's the map of where you each begin." },
+      prose: "Internal processing focuses on how each of you handles feelings before sharing thoughts with the other person. Often, a rift in communication begins because two partners have different internal processing methods. Whether your energy, expression tendencies, or needs regarding reassurance are aligned or opposite, it doesn't need fixing, but understanding where each other's approaches helps you establish supportive communication methods." },
     { id: "connection", label: "How You Connect",      color: "#E8673A", dims: ["love","needs","bids","listening"],
-      prose: "How you connect is the everyday machinery of closeness: the bids you make, the love you show, the needs you name, the way you listen. Most of a relationship lives here, in small moments rather than big talks. When two people connect in different currencies, the care is real but it can miss. This is where you learn each other's." },
+      prose: "How you connect can be thought of as the mechanics of your relationship. Every couple is unique, and the ways you make bids, show love, name needs, and listen shed light into your relationship environment. When partners connect in different ways, the love and care is there but may not be interpreted clearly. Learn about each other's approaches to help you connect as a couple." },
     { id: "hard",       label: "When Things Get Hard", color: "#1B5FE8", dims: ["conflict","repair","feedback"],
-      prose: "When things get hard is what happens under pressure: conflict, repair, and feedback. It's the part couples worry about most, and the most learnable. The goal was never to stop disagreeing. It's to know how each of you moves when it's difficult, so the difference reads as difference and not as a threat." },
+      prose: "All couples navigate conflict. What sets healthy relationships apart is the ability to communicate effectively in hard situations. Understanding each other's mindsets regarding conflict, repair, and feedback can help you each learn how to grow together and communicate under pressure." },
   ];
   // Only domains that actually have answered dimensions become pages.
   const detailDomains = domainGroups
