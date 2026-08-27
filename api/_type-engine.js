@@ -24,16 +24,16 @@
 // energy/needs 2, stress/feedback/listening 1). calcDimScores averages within a
 // dimension, so the axis math is unaffected by count.
 export const DIM_KEYS = {
-  energy:     ['en4', 'en6'],
-  expression: ['ex6', 'ex7', 'ex8', 'ex9', 'ex10'],
-  reassurance:['rs1', 'rs2'],
-  love:       ['lv1', 'lv2', 'lv5'],
-  bids:       ['bd1', 'bd3', 'bd4'],
-  needs:      ['nd1', 'nd5'],
-  conflict:   ['cf1', 'cf2', 'cf3', 'st1'],
-  repair:     ['rp2', 'rp3', 'rp6'],
-  feedback:   ['fb5', 'fb2'],
-  listening:  ['ls1'],
+  energy:      ['en4', 'en6'],
+  expression:  ['ex6', 'ex7', 'ex8'],
+  reassurance: ['rs1', 'rs3'],
+  love:        ['lv1', 'lv2', 'lv5'],
+  bids:        ['bd1', 'bd3', 'bd4'],
+  needs:       ['nd1', 'nd5'],
+  conflict:    ['cf1', 'cf2', 'cf3', 'st1'],
+  repair:      ['rp2', 'rp3', 'rp6'],
+  feedback:    ['fb2', 'fb5'],
+  listening:   ['ls1', 'ls3'],
 };
 
 // Source of truth for the type formula.

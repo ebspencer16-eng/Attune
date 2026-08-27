@@ -140,12 +140,12 @@ children.push(prose('You just answered these about yourself. This time, answer t
 children.push(midSection('4.2', 'Question count, everywhere it appears', BLUE));
 children.push(prose(`Was 28. Now ${PERSONALITY_QUESTIONS.length * 2}, described as "${PERSONALITY_QUESTIONS.length * 2} questions in two parts". Appears on how-it-works, offerings, and four places on start.`));
 children.push(midSection('4.3', 'How it works page', BLUE));
-children.push(prose(`54 questions in two parts. Part 1 is about you. Part 2 is the same questions about your partner. Each person answers independently.`));
+children.push(prose(`${PERSONALITY_QUESTIONS.length * 2} questions in two parts. Part 1 is about you. Part 2 is the same questions about your partner. Each person answers independently.`));
 children.push(midSection('4.4', 'Offerings, exercise description', BLUE));
 children.push(prose('Communication, conflict, repair, emotional intimacy, and reassurance across 10 dimensions.'));
 children.push(caption('Was "Communication, conflict, repair, love languages, and stress patterns across 10 dimensions." Stress is gone as a dimension.', MUTED, INDENT_PROSE_UNDER_SMALL));
 children.push(midSection('4.5', 'Timing estimate', RED, { extras: 'needs a decision' }));
-children.push(prose('Offerings still says ~10 min next to 54 questions. The count doubled and the estimate did not. I did not invent a new number.'));
+children.push(prose('Offerings still says ~10 min next to the full question count. The count doubled and the estimate did not. I did not invent a new number.'));
 
 // ── 5 ────────────────────────────────────────────────────────────────────────
 children.push(...bigSection('5', 'Bids prose', 'The Bids poles changed from Reserved/Attuned to Subtle/Expressive, because "attuned" frames one end as the better one. The per-cell prose underneath still uses the old words, and still reads as a verdict.', RED));

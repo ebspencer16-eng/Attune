@@ -44,15 +44,15 @@ import { axisScores, typeCodeFromAxes, blendedDimScores } from './_type-engine.j
 // relative to its dimension orientation, so its raw value is flipped.
 const DIM_ITEMS = {
   energy:     ['en4','en6'],
-  expression: ['ex6','ex7','ex8','ex9','ex10'],
+  expression: ['ex6','ex7','ex8'],
   love:       ['lv1','lv2','lv5'],
   bids:       ['bd1','bd3','bd4'],
   needs:      ['nd1','nd5'],
-  conflict:   ['cf1','cf2'],
-  stress:     ['st1'],
+  conflict:   ['cf1','cf2','cf3','st1'],
   repair:     ['rp2','rp3','rp6'],
-  feedback:   ['fb5'],
-  listening:  ['ls1'],
+  feedback:   ['fb2','fb5'],
+  listening:  ['ls1','ls3'],
+  reassurance:['rs1','rs3'],
 };
 const FLIPPED = new Set(['lv5']);
 

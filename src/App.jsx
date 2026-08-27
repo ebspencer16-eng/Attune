@@ -31,10 +31,10 @@ const PHYSICAL_ENABLED = false;
 // engine (verified against api/_type-engine.js: W/X/Y/Z each land exactly).
 // Used only in demo mode (?demo=...) to drive the results/workbook couple-type
 // picker. Keyed to the current DIM_KEYS question ids.
-const _ENGAGE   = { cf1:1, cf2:1, cf3:1, st1:5, rp2:1, rp3:1, rp6:1, en4:5, en6:5, ls1:5 };
-const _WITHDRAW = { cf1:5, cf2:5, cf3:5, st1:1, rp2:5, rp3:5, rp6:5, en4:1, en6:1, ls1:1 };
-const _OPEN     = { ex6:5, ex7:5, ex8:5, ex9:5, ex10:5, rs1:1, rs2:1, fb5:5, fb2:5, nd1:1, nd5:1, bd1:5, bd3:5, bd4:5, lv1:1, lv2:1, lv5:5 };
-const _GUARDED  = { ex6:1, ex7:1, ex8:1, ex9:1, ex10:1, rs1:5, rs2:5, fb5:1, fb2:1, nd1:5, nd5:5, bd1:1, bd3:1, bd4:1, lv1:5, lv2:5, lv5:1 };
+const _ENGAGE   = { cf1:1, cf2:1, cf3:1, st1:5, rp2:1, rp3:1, rp6:1, en4:5, en6:5, ls1:5, ls3:5 };
+const _WITHDRAW = { cf1:5, cf2:5, cf3:5, st1:1, rp2:5, rp3:5, rp6:5, en4:1, en6:1, ls1:1, ls3:1 };
+const _OPEN     = { ex6:5, ex7:5, ex8:5, rs1:1, rs3:1, fb5:5, fb2:5, nd1:1, nd5:1, bd1:5, bd3:5, bd4:5, lv1:1, lv2:1, lv5:5 };
+const _GUARDED  = { ex6:1, ex7:1, ex8:1, rs1:5, rs3:5, fb5:1, fb2:1, nd1:5, nd5:5, bd1:1, bd3:1, bd4:1, lv1:5, lv2:5, lv5:1 };
 const ARCHETYPE_EX1 = {
   W: { ..._ENGAGE,   ..._OPEN },     // Initiator: engage + open
   X: { ..._ENGAGE,   ..._GUARDED },  // Anchor:    engage + guarded
@@ -307,8 +307,8 @@ const FONT_URL = "https://fonts.googleapis.com/css2?family=Syne:wght@700;800;900
 
 // PERSONALITY_QUESTIONS — Communication Exercise (Exercise 01)
 //
-// 27 questions across 10 dimensions, each asked twice: Part 1 about you,
-// Part 2 about your partner (stored as pv_<id>). 54 in total. 5-point scale
+// 26 questions across 10 dimensions, each asked twice: Part 1 about you,
+// Part 2 about your partner (stored as pv_<id>). 52 in total. 5-point scale
 // (Strongly A -> Strongly B).
 // Order is intentional: pairs of similar questions are spaced apart, and a
 // few are framed as scenarios to break repetitive patterns. Several dims
@@ -3220,15 +3220,15 @@ function calcDimScores(answers) {
     // IDs match PERSONALITY_QUESTIONS (api/_questions.js). Mirrors DIM_KEYS in
     // api/_type-engine.js — keep the two in sync. Counts are uneven post-restructure.
     energy:     avg('en4','en6'),
-    expression: avg('ex6','ex7','ex8','ex9','ex10'),
-    reassurance: avg('rs1','rs2'),
+    expression: avg(['ex6','ex7','ex8']),
+    reassurance: avg(['rs1','rs3']),
     love:       avg('lv1','lv2','lv5'),
     bids:       avg('bd1','bd3','bd4'),
     needs:      avg('nd1','nd5'),
     conflict:   avg('cf1','cf2','cf3','st1'),
     repair:     avg('rp2','rp3','rp6'),
     feedback:   avg('fb5','fb2'),
-    listening:  avg('ls1'),
+    listening:  avg(['ls1','ls3']),
   };
 }
 
@@ -4026,9 +4026,9 @@ function PersonalityResults({ myAnswers, partnerAnswers, userName, partnerName, 
   // domainGroups is the source of truth for both the pages and the sidebar.
   const domainGroups = [
     { id: "inner",      label: "Internal Processing",  color: "#9B5DE5", dims: ["energy","expression","reassurance"],
-      prose: "Internal processing focuses on how each of you handles feelings before sharing thoughts with the other person. Often, a rift in communication begins because two partners have different internal processing methods. Whether your energy, expression tendencies, or needs regarding reassurance are aligned or opposite, it doesn't need fixing, but understanding where each other's approaches helps you establish supportive communication methods." },
+      prose: "Internal processing focuses on how you handle feelings before sharing thoughts aloud. Whether energy, expression tendencies, or needs regarding reassurance are aligned or opposite, understanding each other's approaches helps you establish supportive communication methods." },
     { id: "connection", label: "How You Connect",      color: "#E8673A", dims: ["love","needs","bids","listening"],
-      prose: "How you connect can be thought of as the mechanics of your relationship. Every couple is unique, and the ways you make bids, show love, name needs, and listen shed light into your relationship environment. When partners connect in different ways, the love and care is there but may not be interpreted clearly. Learn about each other's approaches to help you connect as a couple." },
+      prose: "How you connect can be thought of as the mechanics of your relationship. The ways you make bids, show love, name needs, and listen define your relationship environment. Learn about each other's approaches to help you communicate love in a way that will be interpreted clearly." },
     { id: "hard",       label: "When Things Get Hard", color: "#1B5FE8", dims: ["conflict","repair","feedback"],
       prose: "All couples navigate conflict. What sets healthy relationships apart is the ability to communicate effectively in hard situations. Understanding each other's mindsets regarding conflict, repair, and feedback can help you each learn how to grow together and communicate under pressure." },
   ];
