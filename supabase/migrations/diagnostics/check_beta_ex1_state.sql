@@ -7,15 +7,16 @@
 -- populated, the dashboard will show Exercise 1 complete no matter what the
 -- browser does, and incognito will not help.
 --
--- Fill in the same four emails you used in 040.
+-- Pre-filled to match 040. If a row comes back with auth_user_found = false,
+-- that address has no account and the email is wrong, not the data.
 -- ============================================================================
 
 with people as (
   select unnest(array[
-    lower('ELLIE_EMAIL_HERE'),
-    lower('PRESTON_EMAIL_HERE'),
-    lower('CAROLINA_EMAIL_HERE'),
-    lower('AARON_EMAIL_HERE')
+    lower('ellie@attune-relationships.com'),   -- CHECK THIS ONE
+    lower('mightyhunter00@gmail.com'),         -- Preston
+    lower('carolina.c.cannon@gmail.com'),      -- Carolina
+    lower('aaron.m.miner@gmail.com')           -- Aaron
   ]) as email
 )
 select

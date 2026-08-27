@@ -23,10 +23,13 @@
 -- is consistent.
 --
 -- HOW TO RUN
---   1. Replace the four placeholder emails below.
+--   1. Check the first email in the list below. The other three are the
+--      addresses on record; the one you sign in with may differ.
 --   2. Run the whole file in the Supabase SQL Editor, in one execution, and
 --      actually click Run. Saving the tab is not running it.
 --   3. Read the NOTICE at the end. Expect profiles=4 and link rows set=4.
+--      If it raises "Expected exactly 4 profiles, found N", one of the four
+--      addresses does not match an account. Nothing is changed when it raises.
 --   Safe to run more than once.
 --
 -- KEEPS: their logins, Exercise 2, Exercise 3, the intimacy exercise, orders,
@@ -48,21 +51,21 @@
 
 do $$
 declare
-  -- ── REPLACE THESE FOUR EMAILS, then run ──────────────────────────────────
+  -- Pre-filled. Check line 1 before running: the other three are the addresses
+  -- on record, but the account you sign in with may not be the one below.
   emails text[] := array[
-    lower('ELLIE_EMAIL_HERE'),
-    lower('PRESTON_EMAIL_HERE'),
-    lower('CAROLINA_EMAIL_HERE'),
-    lower('AARON_EMAIL_HERE')
+    lower('ellie@attune-relationships.com'),   -- CHECK THIS ONE
+    lower('mightyhunter00@gmail.com'),         -- Preston
+    lower('carolina.c.cannon@gmail.com'),      -- Carolina
+    lower('aaron.m.miner@gmail.com')           -- Aaron
   ];
-  -- ── REPLACE THESE FOUR EMAILS, then run ──────────────────────────────────
 
   uids uuid[];
   pids uuid[];
   n_reset int; n_link int; n_sessions int;
 begin
   if exists (select 1 from unnest(emails) e where e like '%email_here%') then
-    raise exception 'Replace the four placeholder emails at the top of this file before running.';
+    raise exception 'Placeholder emails are still in this file. Replace them before running.';
   end if;
 
   select coalesce(array_agg(id), '{}') into uids
