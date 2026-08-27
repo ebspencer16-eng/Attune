@@ -7153,6 +7153,23 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
   };
 
   // Section/page system: "summary" | "comm-overview" | "comm-{dim}" | "exp-overview" | "exp-{catId}" | "exp-life" | "reflection"
+  // The results section is part of the URL, so a page can be linked to,
+  // shared, bookmarked, and opened directly by a notification. A query param
+  // rather than a path segment: no server rewrite rules needed, and the static
+  // routes (/checkout, /start) are unaffected.
+  const SECTION_PARAM = "s";
+  const sectionFromUrl = () => {
+    try { return new URLSearchParams(window.location.search).get(SECTION_PARAM) || null; } catch { return null; }
+  };
+  const writeSectionToUrl = (sec, { replace = false } = {}) => {
+    try {
+      const url = new URL(window.location.href);
+      if (sec) url.searchParams.set(SECTION_PARAM, sec); else url.searchParams.delete(SECTION_PARAM);
+      const method = replace ? "replaceState" : "pushState";
+      window.history[method]({ ...(window.history.state || {}), attuneSection: sec }, "", url.toString());
+    } catch {}
+  };
+
   const mapSection = (s) => {
     if (s === "personality") return "comm-overview";
     if (s === "expectations") return "exp-overview";
@@ -7167,7 +7184,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
     // column. Sections are validated against availableSections below.
     return s;
   };
-  const getInitialSection = () => mapSection(initialSection);
+  const getInitialSection = () => mapSection(sectionFromUrl() || initialSection);
   // Sections this couple can actually reach. hasAnniversary and
   // intimacyBothDone are declared further down the component body, so this has
   // to stay a function: calling it during the initial render would hit the
@@ -7512,7 +7529,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
   });
 
   const go = (sec) => {
-    if (sec !== section) { try { window.history.pushState({ attuneSection: sec }, ''); } catch {} }
+    if (sec !== section) writeSectionToUrl(sec);
     setSection(sec);
     // Tell the parent where we are. Without this the parent's activeResult
     // stayed at whatever it was seeded with, so the persisted results state
@@ -7532,11 +7549,17 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
   // On Back we restore that section; the app-level results popstate is taught to
   // stay put while a section entry is present, so only Back from the root exits.
   useEffect(() => {
-    try { window.history.replaceState({ ...(window.history.state || {}), attuneSection: section }, ''); } catch {}
+    // Stamp the current section onto the entry the user arrived on, so Back
+    // has something to return to and the URL matches what is on screen.
+    writeSectionToUrl(section, { replace: true });
     const onPop = (e) => {
-      if (e && e.state && e.state.attuneSection) {
-        setSection(e.state.attuneSection);
-        if (onSectionChange) onSectionChange(e.state.attuneSection);
+      // Prefer the URL: it is authoritative and survives entries pushed before
+      // this ran. History state is the fallback for older entries.
+      const sec = sectionFromUrl() || (e && e.state && e.state.attuneSection);
+      if (sec) {
+        const mapped = safeSection(sec);
+        setSection(mapped);
+        if (onSectionChange) onSectionChange(mapped);
       }
     };
     window.addEventListener('popstate', onPop);
@@ -11843,12 +11866,19 @@ export default function App() {
   // summary was removed).
   const _migrateResult = (r) => r === 'couple-map' ? 'couple-type'
     : (r === 'summary' || r === 'full-summary') ? 'overview' : r;
+  // ?s=<section> is the deep link: a shared link, a bookmark, or a
+  // notification opening a specific results page. It outranks the section this
+  // device was last on, and it skips the highlights reel, which would
+  // otherwise swallow the link on a first open and drop the reader on card one.
+  const _deepSection = params.get('s') || null;
   const [activeResult, setActiveResult] = useState(
-    (initialView === 'results' && _demoSec && _secMap[_demoSec]) ? _secMap[_demoSec]
+    (initialView === 'results' && _deepSection) ? _migrateResult(_deepSection)
+      : (initialView === 'results' && _demoSec && _secMap[_demoSec]) ? _secMap[_demoSec]
       : (initialView === 'results' && _savedResults?.activeResult ? _migrateResult(_savedResults.activeResult) : "overview")
   );
   const [highlightsSeen, setHighlightsSeen] = useState(
-    (initialView === 'results' && _demoSec && _secMap[_demoSec]) ? true
+    (initialView === 'results' && _deepSection) ? true
+      : (initialView === 'results' && _demoSec && _secMap[_demoSec]) ? true
       : (initialView === 'results' ? !!_savedResults?.highlightsSeen : false)
   );
   useEffect(() => {
