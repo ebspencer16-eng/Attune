@@ -36,6 +36,46 @@ export const DIM_KEYS = {
   listening:   ['ls1', 'ls3'],
 };
 
+// Share of a dimension's score carried by each of its questions. Questions
+// inside a dimension are not equally diagnostic: one usually asks the dimension
+// directly while another asks about a specific moment or overlaps a neighbouring
+// dimension. The axes already weight dimensions unequally for the same reason;
+// this is that principle one level down.
+//
+// It also fixes a real loss of information. Under a plain mean, answering 2 and
+// 4 produced exactly 3.0, indistinguishable from answering 3 and 3, so a person
+// with a strong split read as having no orientation at all.
+//
+// Weights within a dimension must sum to 1.0, enforced below. A dimension
+// absent from this table falls back to an equal split.
+// Reviewed by: DRAFT, pending Carolina.
+export const QUESTION_WEIGHTS = {
+  energy:      { en6: 0.60, en4: 0.40 },
+  expression:  { ex6: 0.45, ex8: 0.35, ex7: 0.20 },
+  reassurance: { rs1: 0.65, rs3: 0.35 },
+  love:        { lv1: 0.40, lv2: 0.35, lv5: 0.25 },
+  needs:       { nd5: 0.60, nd1: 0.40 },
+  bids:        { bd3: 0.40, bd1: 0.35, bd4: 0.25 },
+  listening:   { ls1: 0.70, ls3: 0.30 },
+  conflict:    { cf1: 0.35, cf2: 0.30, st1: 0.20, cf3: 0.15 },
+  repair:      { rp3: 0.40, rp2: 0.35, rp6: 0.25 },
+  feedback:    { fb5: 0.55, fb2: 0.45 },
+};
+
+// Fails fast rather than silently mis-scoring: a hand edit that breaks a sum or
+// names a question the dimension does not have stops the module from loading.
+for (const [dim, weights] of Object.entries(QUESTION_WEIGHTS)) {
+  const sum = Object.values(weights).reduce((a, w) => a + w, 0);
+  if (Math.abs(sum - 1) > 1e-9) {
+    throw new Error(`QUESTION_WEIGHTS.${dim} sums to ${sum.toFixed(3)}, must be 1.0`);
+  }
+  const listed = Object.keys(weights).sort().join(',');
+  const actual = [...(DIM_KEYS[dim] || [])].sort().join(',');
+  if (listed !== actual) {
+    throw new Error(`QUESTION_WEIGHTS.${dim} lists [${listed}] but the dimension has [${actual}]`);
+  }
+}
+
 // Source of truth for the type formula.
 export const AXIS_CONFIG = {
   // Engage/Withdraw was reweighted after Communication Under Stress folded into
@@ -67,18 +107,26 @@ export const FLIPPED_QUESTIONS = new Set(['lv5', 'st1']);
 
 // Average the answered question values for each dimension. Returns null for a
 // dimension with no answers (callers / axisScores treat missing as neutral 3).
-export function calcDimScores(answers) {
+export function calcDimScores(answers, weights = QUESTION_WEIGHTS) {
   if (!answers) return {};
   const out = {};
   for (const [dim, keys] of Object.entries(DIM_KEYS)) {
-    const vals = keys
+    const w = weights?.[dim] || null;
+    const parts = keys
       .map(k => {
         const raw = answers[k];
         if (raw == null || isNaN(raw)) return null;
-        return FLIPPED_QUESTIONS.has(k) ? (6 - Number(raw)) : Number(raw);
+        const v = FLIPPED_QUESTIONS.has(k) ? (6 - Number(raw)) : Number(raw);
+        return { v, w: w ? (w[k] ?? 0) : 1 };
       })
-      .filter(v => v != null && !isNaN(v));
-    out[dim] = vals.length ? vals.reduce((s, v) => s + Number(v), 0) / vals.length : null;
+      .filter(x => x != null && !isNaN(x.v));
+    // Renormalise over the questions actually answered, so a partly answered
+    // dimension is still scored on the right scale rather than dragged toward
+    // zero by the missing weight.
+    const totalW = parts.reduce((s, x) => s + x.w, 0);
+    out[dim] = (parts.length && totalW > 0)
+      ? parts.reduce((s, x) => s + x.v * x.w, 0) / totalW
+      : null;
   }
   return out;
 }

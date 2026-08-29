@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useLayoutEffect, useRef } from "react";
-import { axisScores, blendedDimScores, AXIS_CONFIG } from "../api/_type-engine.js";
+import { axisScores, blendedDimScores, AXIS_CONFIG, QUESTION_WEIGHTS } from "../api/_type-engine.js";
 import { PERSONALITY_QUESTIONS, RESPONSIBILITY_CATEGORIES, LIFE_QUESTIONS, PARTNER_VIEW_TEXT } from "../api/_questions.js";
 import { INTIMACY_QUESTIONS, INTIMACY_DIMENSIONS, summarizeIntimacy, intimacyDimensionPositions, intimacyDimensionSkips } from "../api/_intimacy-questions.js";
 
@@ -3202,33 +3202,45 @@ const LIFE_QUESTIONS_ANNIVERSARY = LIFE_QUESTIONS;
 // the score is low-confidence.
 function calcDimScores(answers) {
   if (!answers) return {};
-  // Helper: avg the answered keys, return 3 (neutral) if none are answered.
-  // lv5's a/b display order is reversed vs its dimension orientation, so its
-  // raw value is flipped (6 - v) to keep love oriented verbal->physical.
+  // Mirrors calcDimScores in api/_type-engine.js. Questions inside a dimension
+  // are weighted by QUESTION_WEIGHTS there, imported here rather than restated
+  // so the two cannot drift: that duplication is what let the admin dashboard
+  // and the results pages disagree in the past.
+  //
+  // lv5's a/b display order is reversed vs its dimension orientation, and st1's
+  // options run withdraw->seek, so both are flipped (6 - v).
   const FLIPPED = new Set(['lv5', 'st1']);
-  const avg = (...keys) => {
-    const vals = keys
+  const score = (dim, ...keys) => {
+    const w = QUESTION_WEIGHTS[dim] || null;
+    const parts = keys
       .map(k => {
         const raw = answers[k];
         if (raw == null || isNaN(raw)) return null;
-        return FLIPPED.has(k) ? (6 - Number(raw)) : Number(raw);
+        const v = FLIPPED.has(k) ? (6 - Number(raw)) : Number(raw);
+        return { v, w: w ? (w[k] ?? 0) : 1 };
       })
-      .filter(v => v != null && !isNaN(v));
-    return vals.length ? vals.reduce((s, v) => s + Number(v), 0) / vals.length : 3;
+      .filter(x => x != null && !isNaN(x.v));
+    // Renormalise over what was actually answered, so a partly answered
+    // dimension stays on the right scale.
+    const totalW = parts.reduce((s, x) => s + x.w, 0);
+    // 3 (neutral) when nothing is answered, matching the previous behaviour of
+    // this mirror. The engine returns null; this one is used for display where
+    // a position is always needed.
+    return (parts.length && totalW > 0)
+      ? parts.reduce((s, x) => s + x.v * x.w, 0) / totalW
+      : 3;
   };
   return {
-    // IDs match PERSONALITY_QUESTIONS (api/_questions.js). Mirrors DIM_KEYS in
-    // api/_type-engine.js — keep the two in sync. Counts are uneven post-restructure.
-    energy:     avg('en4','en6'),
-    expression: avg(['ex6','ex7','ex8']),
-    reassurance: avg(['rs1','rs3']),
-    love:       avg('lv1','lv2','lv5'),
-    bids:       avg('bd1','bd3','bd4'),
-    needs:      avg('nd1','nd5'),
-    conflict:   avg('cf1','cf2','cf3','st1'),
-    repair:     avg('rp2','rp3','rp6'),
-    feedback:   avg('fb5','fb2'),
-    listening:  avg(['ls1','ls3']),
+    energy:      score('energy', 'en4', 'en6'),
+    expression:  score('expression', 'ex6', 'ex7', 'ex8'),
+    reassurance: score('reassurance', 'rs1', 'rs3'),
+    love:        score('love', 'lv1', 'lv2', 'lv5'),
+    bids:        score('bids', 'bd1', 'bd3', 'bd4'),
+    needs:       score('needs', 'nd1', 'nd5'),
+    conflict:    score('conflict', 'cf1', 'cf2', 'cf3', 'st1'),
+    repair:      score('repair', 'rp2', 'rp3', 'rp6'),
+    feedback:    score('feedback', 'fb2', 'fb5'),
+    listening:   score('listening', 'ls1', 'ls3'),
   };
 }
 
