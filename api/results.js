@@ -87,17 +87,29 @@ export default async function handler(req) {
       });
     }
 
-    // Served from couple_results when the stored row matches the current
-    // RESULTS_VERSION and the answers have not changed since; recomputed and
-    // stored otherwise. The app can therefore open straight into results
-    // without waiting on a recomputation, and a failed write degrades to
-    // recomputing rather than to an error.
+    // Results are frozen. A stored row is served back whatever engine version
+    // it was computed under, so changing the weights, the questions or the
+    // prose never changes what an existing couple sees. Only a retake
+    // recomputes, and the previous row is archived first so notes written
+    // against it still resolve.
     const table = `${supabaseUrl}/rest/v1/couple_results`;
     const db = {
       read: async (a, b) => {
         const r = await fetch(`${table}?partner_a=eq.${a}&partner_b=eq.${b}&select=*`, { headers: svc });
         if (!r.ok) return null;
         return (await r.json().catch(() => []))?.[0] || null;
+      },
+      archive: async (row) => {
+        await fetch(`${supabaseUrl}/rest/v1/couple_results_history`, {
+          method: 'POST',
+          headers: { ...svc, 'Content-Type': 'application/json', Prefer: 'return=minimal' },
+          body: JSON.stringify({
+            partner_a: row.partner_a, partner_b: row.partner_b,
+            version: row.version, couple_type: row.couple_type,
+            results: row.results, answers_hash: row.answers_hash,
+            frozen_at: row.frozen_at || row.computed_at || new Date().toISOString(),
+          }),
+        });
       },
       write: async (row) => {
         const r = await fetch(`${table}?on_conflict=partner_a,partner_b`, {
@@ -109,7 +121,7 @@ export default async function handler(req) {
       },
     };
 
-    const { results, cached, reason } = await getOrComputeResults({
+    const { results, cached, reason, frozenAt, computedUnderVersion, stale } = await getOrComputeResults({
       db,
       aId: me.id, bId: partner.id,
       aAnswers: mine, bAnswers: theirs,
@@ -117,7 +129,15 @@ export default async function handler(req) {
     });
     if (!results) return json({ ok: true, ready: false, reason: 'neither_complete' });
 
-    return json({ ok: true, ready: true, cached, recomputed: reason, results });
+    return json({
+      ok: true, ready: true, cached, recomputed: reason, results,
+      // frozenAt is when these results were fixed. computedUnderVersion is the
+      // engine that produced them, which may be older than the current one:
+      // that is the point, not a problem.
+      frozenAt: frozenAt || null,
+      computedUnderVersion: computedUnderVersion ?? null,
+      olderEngine: !!stale,
+    });
   } catch (e) {
     console.error('[results] failed:', e);
     return json({ ok: false, error: 'results unavailable' }, 500);
