@@ -3988,6 +3988,40 @@ function interpDimAction(text, userName, partnerName, fb) {
   return String(text || "").replace(/\{LO\}/g, lo).replace(/\{HI\}/g, hi);
 }
 
+// How far each partner's Part 2 read of the other is from what that person
+// actually said. Positive means they placed their partner further toward the B
+// pole than the partner placed themselves.
+//
+// ADMIN ONLY. This is diagnostic, not customer copy: telling a couple they have
+// each other wrong, without the care that framing needs, is the kind of thing
+// that lands badly. It renders only behind ?misreads=1.
+function readErrorsFor(myAnswers, partnerAnswers) {
+  if (!myAnswers || !partnerAnswers) return null;
+  const pvOf = (ans) => {
+    const out = {};
+    for (const [k, v] of Object.entries(ans || {})) if (k.startsWith('pv_')) out[k.slice(3)] = v;
+    return out;
+  };
+  const myTruth = calcDimScores(myAnswers);
+  const partTruth = calcDimScores(partnerAnswers);
+  const myRead = calcDimScores(pvOf(myAnswers));        // how I see them
+  const partRead = calcDimScores(pvOf(partnerAnswers)); // how they see me
+  const rows = [];
+  for (const dim of DIMS) {
+    const iSeeThem = myRead[dim], theyAre = partTruth[dim];
+    const theySeeMe = partRead[dim], iAm = myTruth[dim];
+    if ([iSeeThem, theyAre, theySeeMe, iAm].some(v => v == null || isNaN(v))) continue;
+    rows.push({
+      dim,
+      mineOnThem: Number((iSeeThem - theyAre).toFixed(2)),
+      theirsOnMe: Number((theySeeMe - iAm).toFixed(2)),
+    });
+  }
+  if (!rows.length) return null;
+  const mean = rows.reduce((a, r) => a + (Math.abs(r.mineOnThem) + Math.abs(r.theirsOnMe)) / 2, 0) / rows.length;
+  return { rows: rows.sort((a, b) => Math.max(Math.abs(b.mineOnThem), Math.abs(b.theirsOnMe)) - Math.max(Math.abs(a.mineOnThem), Math.abs(a.theirsOnMe))), mean: Number(mean.toFixed(2)) };
+}
+
 // Comms action items, one per dimension where the gap is worth naming.
 // Extracted to module level so What Comes Next can list the same items the
 // results-at-a-glance plan draws from, rather than a second set.
@@ -4257,6 +4291,42 @@ function PersonalityResults({ myAnswers, partnerAnswers, userName, partnerName, 
             })}
           </div>
         </div>
+
+        {/* ── MISREADS (admin only, ?misreads=1) ──────────────────────────
+            Diagnostic view of how far each partner's Part 2 read is from what
+            the other actually said. Never shown to customers. */}
+        {(() => {
+          let on = false;
+          try { on = new URLSearchParams(window.location.search).get('misreads') === '1'; } catch {}
+          if (!on) return null;
+          const re = readErrorsFor(myAnswers, partnerAnswers);
+          if (!re) return null;
+          const inDomain = re.rows.filter(r => grp.dims.includes(r.dim));
+          if (!inDomain.length) return null;
+          const fmt = v => (v > 0 ? '+' : '') + v.toFixed(2);
+          const tone = v => Math.abs(v) >= 1 ? "#FF9E80" : Math.abs(v) >= 0.5 ? "#FFD27F" : "rgba(255,255,255,0.75)";
+          return (
+            <div style={{ marginTop: "1.5rem", background: "rgba(0,0,0,0.22)", border: "1px dashed rgba(255,255,255,0.35)", borderRadius: 14, padding: "1.1rem 1.35rem" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: "0.7rem" }}>
+                <span style={{ fontSize: "0.6rem", textTransform: "uppercase", letterSpacing: "0.14em", color: "rgba(255,255,255,0.9)", fontWeight: 700, fontFamily: BFONT }}>Misreads · admin only</span>
+                <span style={{ fontSize: "0.6rem", color: "rgba(255,255,255,0.6)", fontFamily: BFONT }}>mean error {re.mean.toFixed(2)}</span>
+              </div>
+              <div style={{ fontSize: "0.62rem", color: "rgba(255,255,255,0.55)", fontFamily: BFONT, marginBottom: "0.6rem", lineHeight: 1.5 }}>
+                How far each read sits from what the other actually said. Positive means read further toward the right-hand pole than they placed themselves.
+              </div>
+              {inDomain.map(r => (
+                <div key={r.dim} style={{ display: "flex", justifyContent: "space-between", gap: "1rem", padding: "0.3rem 0", borderTop: "1px solid rgba(255,255,255,0.12)" }}>
+                  <span style={{ fontSize: "0.72rem", color: "rgba(255,255,255,0.85)", fontFamily: BFONT }}>{DIM_META[r.dim].label}</span>
+                  <span style={{ fontSize: "0.72rem", fontFamily: BFONT, whiteSpace: "nowrap" }}>
+                    <span style={{ color: tone(r.mineOnThem) }}>{userName} on {partnerName} {fmt(r.mineOnThem)}</span>
+                    <span style={{ color: "rgba(255,255,255,0.3)" }}>  ·  </span>
+                    <span style={{ color: tone(r.theirsOnMe) }}>{partnerName} on {userName} {fmt(r.theirsOnMe)}</span>
+                  </span>
+                </div>
+              ))}
+            </div>
+          );
+        })()}
 
         {/* ── ONE THING TO TRY — guidance for this domain's widest gap ── */}
         {(() => {
