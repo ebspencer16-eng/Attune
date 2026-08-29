@@ -320,6 +320,11 @@
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
       Survey Explorer
     </a>
+    <div class="sb-section">Content</div>
+    <a class="sb-item" onclick="showPage('posts'); window.__initPosts && window.__initPosts();">
+      <span>In Practice</span>
+    </a>
+
     <div class="sb-section">Demo</div>
     <a class="sb-item" onclick="showPage('ux-views')">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg>
@@ -435,6 +440,73 @@
   </div>
 
   <!-- ══ ORDERS ══ -->
+  <div class="page" id="page-posts">
+    <div class="page-head">
+      <h1>In Practice</h1>
+      <p class="page-sub">Write, schedule and publish posts. Drafts are never visible to anyone but you.</p>
+    </div>
+
+    <div class="chart-grid chart-grid full">
+      <div class="chart-card">
+        <div class="chart-card-header">
+          <div class="chart-card-title">Posts</div>
+          <div class="chart-card-sub">Newest first. Status is derived from the publish date: no date is a draft, a future date is scheduled.</div>
+        </div>
+        <div style="padding:0 1.4rem 1rem;">
+          <button class="btn-secondary" onclick="postsNew()">New post</button>
+          <span id="posts-status" style="font-size:.72rem;color:var(--muted);margin-left:.6rem;"></span>
+        </div>
+        <div class="table-wrap">
+          <table class="response-table" id="posts-table">
+            <thead><tr><th>Title</th><th>Status</th><th>Published</th><th>Rev</th><th></th></tr></thead>
+            <tbody><tr><td colspan="5" style="color:var(--muted)">Loading</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="chart-grid chart-grid full" id="posts-editor" style="display:none;">
+      <div class="chart-card">
+        <div class="chart-card-header">
+          <div class="chart-card-title" id="posts-editor-title">Edit post</div>
+          <div class="chart-card-sub">Each paragraph is a block with its own id. Highlights readers leave are attached to those ids, so rewording a block keeps its notes. Removing a block orphans them.</div>
+        </div>
+        <div style="padding:.5rem 1.4rem 1.4rem;display:grid;gap:.8rem;">
+          <label style="font-size:.72rem;color:var(--muted);">Slug (the address, cannot change once published)
+            <input id="post-id" type="text" placeholder="repair-after-a-hard-week" style="width:100%;padding:.5rem;margin-top:.25rem;">
+          </label>
+          <label style="font-size:.72rem;color:var(--muted);">Title
+            <input id="post-title" type="text" style="width:100%;padding:.5rem;margin-top:.25rem;">
+          </label>
+          <label style="font-size:.72rem;color:var(--muted);">Subtitle
+            <input id="post-subtitle" type="text" style="width:100%;padding:.5rem;margin-top:.25rem;">
+          </label>
+          <label style="font-size:.72rem;color:var(--muted);">What it is about (tag keys, comma separated, e.g. dim:repair, expcat:household)
+            <input id="post-dims" type="text" style="width:100%;padding:.5rem;margin-top:.25rem;">
+          </label>
+          <div>
+            <div style="font-size:.72rem;color:var(--muted);margin-bottom:.35rem;">Blocks</div>
+            <div id="post-blocks"></div>
+            <button class="btn-secondary" onclick="postAddBlock()" style="margin-top:.5rem;">Add block</button>
+          </div>
+          <label style="font-size:.72rem;color:var(--muted);display:flex;align-items:center;gap:.5rem;">
+            <input id="post-substantive" type="checkbox">
+            Substantive change: resurface this for readers who already read it. Leave unchecked for typos.
+          </label>
+          <div style="display:flex;gap:.6rem;flex-wrap:wrap;align-items:center;">
+            <button class="btn-secondary" onclick="postSave()">Save</button>
+            <button class="btn-secondary" onclick="postPublish()">Publish now</button>
+            <input id="post-schedule" type="datetime-local" style="padding:.4rem;">
+            <button class="btn-secondary" onclick="postSchedule()">Schedule</button>
+            <button class="btn-secondary" onclick="postUnpublish()">Unpublish</button>
+            <button class="btn-secondary" onclick="postsCancel()">Close</button>
+          </div>
+          <div id="post-msg" style="font-size:.75rem;color:var(--muted);"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <div class="page" id="page-orders">
     <div class="topbar">
       <div>
@@ -2212,6 +2284,177 @@ function exportOrdersCSV() {
 
 function toggleNav(){ document.body.classList.toggle('nav-open'); }
 function closeNav(){ document.body.classList.remove('nav-open'); }
+// ── In Practice editor ─────────────────────────────────────────────────────
+// Blocks are the unit, not one text field. Readers' highlights anchor to block
+// ids, so the editor must round-trip those ids: rebuilding the array from text
+// would orphan every note on the post.
+let POSTS = [];
+let editingBlocks = [];
+
+window.__initPosts = async function () { await postsLoad(); };
+
+const postsMsg = (t, isError) => {
+  const el = document.getElementById('post-msg');
+  if (el) { el.textContent = t || ''; el.style.color = isError ? '#B4413A' : 'var(--muted)'; }
+};
+
+async function postsApi(payload) {
+  const opts = payload
+    ? { method: 'POST', headers: window.adminAuthHeaders({ 'Content-Type': 'application/json' }), body: JSON.stringify(payload) }
+    : { headers: window.adminAuthHeaders() };
+  const url = payload ? '/api/admin-posts' : '/api/admin-posts?action=list';
+  const r = await fetch(url, opts);
+  return r.json().catch(() => ({ ok: false, error: 'bad response' }));
+}
+
+async function postsLoad() {
+  const tbody = document.querySelector('#posts-table tbody');
+  tbody.innerHTML = '<tr><td colspan="5" style="color:var(--muted)">Loading</td></tr>';
+  const d = await postsApi(null);
+  if (!d.ok) {
+    tbody.innerHTML = '<tr><td colspan="5" style="color:var(--muted)">' + (d.error || 'Could not load') + '</td></tr>';
+    return;
+  }
+  POSTS = d.posts || [];
+  if (!POSTS.length) {
+    tbody.innerHTML = '<tr><td colspan="5" style="color:var(--muted)">No posts yet.</td></tr>';
+    return;
+  }
+  const tone = { draft: '#8C7A68', scheduled: '#C98A2E', published: '#2E7D5B' };
+  tbody.innerHTML = POSTS.map(p => `
+    <tr>
+      <td style="color:#1B2547;">${escapeHtml(p.title || p.id)}<div style="font-size:.68rem;color:#8C7A68;">${escapeHtml(p.id)}</div></td>
+      <td style="color:${tone[p.status]};text-transform:capitalize;">${p.status}</td>
+      <td style="color:#586187;">${p.published_at ? new Date(p.published_at).toLocaleString() : '&mdash;'}</td>
+      <td style="color:#586187;">${p.revision}</td>
+      <td><button class="btn-secondary" onclick="postsEdit('${p.id}')">Edit</button></td>
+    </tr>`).join('');
+}
+
+function escapeHtml(s) {
+  return String(s == null ? '' : s).replace(/[&<>"']/g, c =>
+    ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+}
+
+function postsNew() {
+  editingBlocks = [{ id: null, type: 'paragraph', text: '' }];
+  document.getElementById('posts-editor').style.display = '';
+  document.getElementById('posts-editor-title').textContent = 'New post';
+  ['post-id', 'post-title', 'post-subtitle', 'post-dims'].forEach(i => { document.getElementById(i).value = ''; });
+  document.getElementById('post-id').disabled = false;
+  document.getElementById('post-substantive').checked = false;
+  renderBlocks();
+  postsMsg('');
+}
+
+async function postsEdit(id) {
+  const r = await fetch('/api/admin-posts?action=post&id=' + encodeURIComponent(id), { headers: window.adminAuthHeaders() });
+  const d = await r.json().catch(() => ({}));
+  if (!d.ok) { postsMsg(d.error || 'Could not load post', true); return; }
+  const p = d.post;
+  document.getElementById('posts-editor').style.display = '';
+  document.getElementById('posts-editor-title').textContent = 'Edit: ' + (p.title || p.id);
+  document.getElementById('post-id').value = p.id;
+  // The slug is the address. Changing it on a published post breaks every link
+  // already shared and every annotation pointing at it.
+  document.getElementById('post-id').disabled = !!p.published_at;
+  document.getElementById('post-title').value = p.title || '';
+  document.getElementById('post-subtitle').value = p.subtitle || '';
+  document.getElementById('post-dims').value = (p.dimension_keys || []).join(', ');
+  document.getElementById('post-substantive').checked = false;
+  editingBlocks = (p.blocks || []).map(b => ({ ...b }));
+  if (!editingBlocks.length) editingBlocks = [{ id: null, type: 'paragraph', text: '' }];
+  renderBlocks();
+  postsMsg('');
+  document.getElementById('posts-editor').scrollIntoView({ behavior: 'smooth' });
+}
+
+function renderBlocks() {
+  const wrap = document.getElementById('post-blocks');
+  wrap.innerHTML = editingBlocks.map((b, i) => `
+    <div style="display:flex;gap:.5rem;margin-bottom:.5rem;align-items:flex-start;">
+      <select onchange="postBlockType(${i}, this.value)" style="padding:.4rem;">
+        ${['paragraph', 'heading', 'quote', 'list', 'prompt'].map(t =>
+          `<option value="${t}"${b.type === t ? ' selected' : ''}>${t}</option>`).join('')}
+      </select>
+      <textarea rows="3" oninput="postBlockText(${i}, this.value)"
+        style="flex:1;padding:.5rem;font-family:inherit;">${escapeHtml(b.text)}</textarea>
+      <div style="display:flex;flex-direction:column;gap:.25rem;">
+        <button class="btn-secondary" onclick="postMoveBlock(${i},-1)" ${i === 0 ? 'disabled' : ''}>&uarr;</button>
+        <button class="btn-secondary" onclick="postMoveBlock(${i},1)" ${i === editingBlocks.length - 1 ? 'disabled' : ''}>&darr;</button>
+        <button class="btn-secondary" onclick="postRemoveBlock(${i})">&times;</button>
+      </div>
+    </div>
+    <div style="font-size:.62rem;color:#8C7A68;margin:-.35rem 0 .6rem 3.6rem;">
+      ${b.id ? 'id ' + b.id + ' &middot; highlights on this block survive an edit' : 'new block, no highlights yet'}
+    </div>`).join('');
+}
+
+function postBlockText(i, v) { editingBlocks[i].text = v; }
+function postBlockType(i, v) { editingBlocks[i].type = v; renderBlocks(); }
+function postAddBlock() { editingBlocks.push({ id: null, type: 'paragraph', text: '' }); renderBlocks(); }
+function postMoveBlock(i, d) {
+  const j = i + d;
+  if (j < 0 || j >= editingBlocks.length) return;
+  [editingBlocks[i], editingBlocks[j]] = [editingBlocks[j], editingBlocks[i]];
+  renderBlocks();
+}
+function postRemoveBlock(i) {
+  const b = editingBlocks[i];
+  // Deleting a block orphans any highlight on it, and unlike an edit that
+  // cannot be undone by putting the text back: the id is gone.
+  if (b.id && !confirm('Delete this block? Any highlights readers left on it will be orphaned. Editing the text instead keeps them.')) return;
+  editingBlocks.splice(i, 1);
+  if (!editingBlocks.length) editingBlocks.push({ id: null, type: 'paragraph', text: '' });
+  renderBlocks();
+}
+function postsCancel() { document.getElementById('posts-editor').style.display = 'none'; }
+
+function postPayload(extra) {
+  return Object.assign({
+    id: document.getElementById('post-id').value.trim(),
+    title: document.getElementById('post-title').value.trim(),
+    subtitle: document.getElementById('post-subtitle').value.trim() || null,
+    dimensionKeys: document.getElementById('post-dims').value.split(',').map(s => s.trim()).filter(Boolean),
+    blocks: editingBlocks.filter(b => (b.text || '').trim()),
+    substantive: document.getElementById('post-substantive').checked,
+  }, extra || {});
+}
+
+async function postSave() {
+  postsMsg('Saving...');
+  const d = await postsApi(Object.assign({ action: 'save' }, postPayload()));
+  if (!d.ok) { postsMsg(d.error || 'Save failed', true); return; }
+  editingBlocks = (d.post.blocks || []).map(b => ({ ...b }));
+  renderBlocks();
+  postsMsg('Saved. Revision ' + d.post.revision + '.');
+  await postsLoad();
+}
+
+async function postPublishAt(when, label) {
+  const id = document.getElementById('post-id').value.trim();
+  if (!id) { postsMsg('Save the post first', true); return; }
+  const d = await postsApi({ action: 'publish', id, publishedAt: when });
+  postsMsg(d.ok ? label : (d.error || 'Failed'), !d.ok);
+  await postsLoad();
+}
+async function postPublish() {
+  if (!confirm('Publish now? It becomes visible to everyone with the app.')) return;
+  await postPublishAt(new Date().toISOString(), 'Published.');
+}
+async function postSchedule() {
+  const v = document.getElementById('post-schedule').value;
+  if (!v) { postsMsg('Pick a date and time first', true); return; }
+  await postPublishAt(new Date(v).toISOString(), 'Scheduled for ' + new Date(v).toLocaleString() + '.');
+}
+async function postUnpublish() {
+  if (!confirm('Unpublish? Readers lose access, and anyone who annotated it keeps notes pointing at a post they can no longer open.')) return;
+  const id = document.getElementById('post-id').value.trim();
+  const d = await postsApi({ action: 'unpublish', id });
+  postsMsg(d.ok ? 'Back to draft.' : (d.error || 'Failed'), !d.ok);
+  await postsLoad();
+}
+
 function showPage(id) {
   const pageEl = document.getElementById('page-'+id);
   if (!pageEl) return; // unknown id (e.g. stale hash) — ignore
