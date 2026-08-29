@@ -17,26 +17,29 @@ const app = readFileSync(new URL('../src/App.jsx', import.meta.url), 'utf8');
 
 // Domain prose lives in the PersonalityResults domainGroups literal.
 const domainGroups = evalConst(app, 'domainGroups');
-const DIM_ACTION_ITEMS = evalConst(app, 'DIM_ACTION_ITEMS');
-const DOMAIN_ALIGNED = evalConst(app, 'DOMAIN_ALIGNED');
-const REFLECTION_ACTION_TITLES = evalConst(app, 'REFLECTION_ACTION_TITLES');
+// Results copy now lives in versioned snapshots. Read it from the current
+// version rather than from App.jsx, which no longer holds it.
+const content = readFileSync(new URL('../src/content/v1.js', import.meta.url), 'utf8');
+const DIM_ACTION_ITEMS = evalConst(content, 'DIM_ACTION_ITEMS');
+const DOMAIN_ALIGNED = evalConst(content, 'DOMAIN_ALIGNED');
+const REFLECTION_ACTION_TITLES = evalConst(content, 'REFLECTION_ACTION_TITLES');
 
 // The reassurance shift prose, pulled straight out of getDimShift's SHIFTS map.
 // Rendered with sample names so the {loName}/{hiName} slots read as real copy.
 const reassuranceShifts = (() => {
-  const i = app.indexOf('    reassurance: {', app.indexOf('const SHIFTS = {'));
-  const j = app.indexOf('\n    },', i);
-  return [...app.slice(i, j).matchAll(/'(\d_\d)':\s*`([^`]*)`/g)]
+  const i = content.indexOf('  reassurance: {', content.indexOf('export const SHIFTS'));
+  const j = content.indexOf('\n  },', i);
+  return [...content.slice(i, j).matchAll(/'(\d_\d)':\s*`([^`]*)`/g)]
     .map(m => [m[1], m[2].replace(/\$\{loName\}/g, 'Maya').replace(/\$\{hiName\}/g, 'David')]);
 })();
-const ALIGNED_ADVICE = evalConst(app, 'ALIGNED_ADVICE');
+const ALIGNED_ADVICE = evalConst(content, 'ALIGNED_ADVICE');
 const BAND = { 1: 'strongly Voiced', 2: 'leans Voiced', 3: 'flexible', 4: 'leans Assumed', 5: 'strongly Assumed' };
 
 // The bids gap prose, pulled from the per-cell block so the doc shows exactly
 // what ships rather than a paraphrase.
 const bidsBlock = (() => {
   const i = app.indexOf("    bids: {", app.indexOf('RESPONDING TO BIDS'));
-  const j = app.indexOf('\n    },', i);
+  const j = content.indexOf('\n  },', i);
   const raw = app.slice(i, j);
   return [...raw.matchAll(/'(\d_\d)':\s*`([^`]*)`/g)].map(m => [m[1], m[2]]);
 })();
