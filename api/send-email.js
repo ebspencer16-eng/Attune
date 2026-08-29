@@ -428,13 +428,55 @@ function sanitizeBody(body) {
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
+/** Constant-time compare, so a wrong secret leaks nothing through timing. */
+function timingSafeCompare(a, b) {
+  if (a.length !== b.length) return false;
+  let diff = 0;
+  for (let i = 0; i < a.length; i++) diff |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  return diff === 0;
+}
+
 export default async function handler(req) {
   if (req.method !== 'POST') return new Response('Method not allowed', { status: 405 });
 
-  // Basic origin guard — only accept requests from our own domain or internal (no origin = server-to-server)
+  // Origin guard.
+  //
+  // The previous version let a missing Origin through entirely, on the
+  // reasoning that server-to-server calls have no Origin. Browsers set it;
+  // curl and scripts do not, so "no Origin" was an open door rather than a
+  // trusted signal. Anyone could send mail from the Attune domain to any
+  // address, with attacker-controlled names interpolated into the templates.
+  // URL fields were already allowlisted, so links could not be hijacked, but
+  // the sender reputation and the recipient list were both free to abuse.
+  //
+  // Now: a browser request must come from one of our own origins, and a
+  // request with no Origin must carry the internal secret. Server-to-server
+  // callers set it; scripts from outside cannot.
   const origin = req.headers.get('origin') || '';
-  if (origin && !origin.includes('attune-relationships.com') && !origin.includes('localhost') && !origin.includes('vercel.app')) {
-    return new Response('Forbidden', { status: 403 });
+  const internalSecret = process.env.INTERNAL_API_SECRET || '';
+  const presentedSecret = req.headers.get('x-attune-internal') || '';
+
+  const originAllowed = (o) => {
+    try {
+      const host = new URL(o).hostname;
+      return host === 'attune-relationships.com'
+          || host.endsWith('.attune-relationships.com')
+          || host === 'localhost' || host === '127.0.0.1'
+          // Preview deployments only, not any *.vercel.app someone can create:
+          // the previous substring check trusted every Vercel app in existence.
+          || /^attune[a-z0-9-]*\.vercel\.app$/.test(host);
+    } catch { return false; }
+  };
+
+  if (origin) {
+    if (!originAllowed(origin)) return new Response('Forbidden', { status: 403 });
+  } else {
+    // No Origin: only our own server may call, and only with the secret. If
+    // the secret is unset we fail closed rather than reverting to open.
+    const ok = internalSecret && presentedSecret
+      && presentedSecret.length === internalSecret.length
+      && timingSafeCompare(presentedSecret, internalSecret);
+    if (!ok) return new Response('Forbidden', { status: 403 });
   }
 
   let body;

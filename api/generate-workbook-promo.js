@@ -160,9 +160,11 @@ export default async function handler(req) {
   async function sendTo(toEmail, name, otherName) {
     if (!toEmail || !toEmail.includes('@')) return;
     try {
+      // Server-to-server: no Origin header, so it must present the internal
+      // secret or send-email refuses it.
       await fetch(`${origin}/api/send-email`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', 'x-attune-internal': process.env.INTERNAL_API_SECRET || '' },
         body: JSON.stringify({
           type: 'workbook_promo',
           toEmail, toName: name || 'there', partnerName: otherName || '',
