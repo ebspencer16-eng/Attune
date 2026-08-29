@@ -91,6 +91,27 @@ export default async function handler(req) {
       if (top) topGapDimensionLabel = top;
     }
 
+    // Newest published post, and whether they have read it. Drives the
+    // "new in In Practice" card, and the badge below.
+    let inPractice = {};
+    try {
+      const nowIso = new Date().toISOString();
+      const [pRes, rRes] = await Promise.all([
+        fetch(`${supabaseUrl}/rest/v1/posts?published_at=not.is.null&published_at=lte.${nowIso}&select=id,title,published_at&order=published_at.desc&limit=1`, { headers: svc }),
+        fetch(`${supabaseUrl}/rest/v1/post_reads?owner_id=eq.${me.id}&select=post_id,read_at&order=read_at.desc&limit=1`, { headers: svc }),
+      ]);
+      const latest = (await pRes.json().catch(() => []))?.[0];
+      const lastRead = (await rRes.json().catch(() => []))?.[0];
+      if (latest) {
+        inPractice = {
+          latestId: latest.id,
+          latestTitle: latest.title,
+          latestPublishedAt: latest.published_at,
+          lastReadAt: lastRead?.read_at || null,
+        };
+      }
+    } catch { /* no posts table yet, or a read failure: the card just never raises */ }
+
     const state = {
       now: new Date().toISOString(),
       firstName: (me.name || '').trim().split(/\s+/)[0] || null,
@@ -105,9 +126,7 @@ export default async function handler(req) {
         checklist: { owned: pkg === 'newlywed' || !!me.addon_checklist,
                      started: has(me.checklist_data), complete: !!me.checklist_data?.completedAt },
       },
-      // In Practice is not built yet. Passing an empty object means the engine
-      // simply never raises a post card, rather than guessing.
-      inPractice: {},
+      inPractice,
       partnerNudgedAt: me.partner_nudged_at || null,
       opens30d: 0,
       feedbackGivenAt: me.feedback_given_at || null,
@@ -127,7 +146,8 @@ export default async function handler(req) {
                + (state.resources.budget.owned && !state.resources.budget.complete ? 1 : 0)
                + (state.resources.checklist.owned && !state.resources.checklist.complete ? 1 : 0),
         insights: resultsReady && !me.results_last_opened_at ? 1 : 0,
-        practice: 0,
+        practice: (inPractice.latestId && (!inPractice.lastReadAt
+          || new Date(inPractice.lastReadAt) < new Date(inPractice.latestPublishedAt))) ? 1 : 0,
         notes: 0,
       },
       state: { resultsReady, coupleType, partnerLinked: !!me.partner_profile_id },
