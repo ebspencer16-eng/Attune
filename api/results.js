@@ -22,7 +22,8 @@
 
 export const config = { runtime: 'edge' };
 
-import { coupleResults, personResults } from './_lib/results.js';
+import { personResults } from './_lib/results.js';
+import { getOrComputeResults } from './_lib/results-store.js';
 
 const HEADERS = { 'Content-Type': 'application/json', 'X-Content-Type-Options': 'nosniff' };
 const json = (body, status = 200) => new Response(JSON.stringify(body), { status, headers: HEADERS });
@@ -86,11 +87,37 @@ export default async function handler(req) {
       });
     }
 
-    const results = coupleResults({
-      aAnswers: mine, bAnswers: theirs, aName: me.name || null, bName: partner.name || null,
-    });
+    // Served from couple_results when the stored row matches the current
+    // RESULTS_VERSION and the answers have not changed since; recomputed and
+    // stored otherwise. The app can therefore open straight into results
+    // without waiting on a recomputation, and a failed write degrades to
+    // recomputing rather than to an error.
+    const table = `${supabaseUrl}/rest/v1/couple_results`;
+    const db = {
+      read: async (a, b) => {
+        const r = await fetch(`${table}?partner_a=eq.${a}&partner_b=eq.${b}&select=*`, { headers: svc });
+        if (!r.ok) return null;
+        return (await r.json().catch(() => []))?.[0] || null;
+      },
+      write: async (row) => {
+        const r = await fetch(`${table}?on_conflict=partner_a,partner_b`, {
+          method: 'POST',
+          headers: { ...svc, 'Content-Type': 'application/json', Prefer: 'resolution=merge-duplicates,return=minimal' },
+          body: JSON.stringify(row),
+        });
+        if (!r.ok) throw new Error(`upsert ${r.status}`);
+      },
+    };
 
-    return json({ ok: true, ready: true, results });
+    const { results, cached, reason } = await getOrComputeResults({
+      db,
+      aId: me.id, bId: partner.id,
+      aAnswers: mine, bAnswers: theirs,
+      aName: me.name || null, bName: partner.name || null,
+    });
+    if (!results) return json({ ok: true, ready: false, reason: 'neither_complete' });
+
+    return json({ ok: true, ready: true, cached, recomputed: reason, results });
   } catch (e) {
     console.error('[results] failed:', e);
     return json({ ok: false, error: 'results unavailable' }, 500);
