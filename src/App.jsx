@@ -536,6 +536,34 @@ async function claimQrTokenWithRetry(token, email, opts = {}) {
   return { ok: false, error: lastErr };
 }
 
+/**
+ * Write a patch to the caller's own profile row, and notice when it wrote
+ * nothing.
+ *
+ * trackedSupabaseWrite only sees res.error. An update blocked by RLS returns no
+ * error and touches zero rows, so it reports success while the user's data is
+ * silently discarded. That is exactly what happened to the first real Partner B
+ * completion, and saveExerciseWithRetakeSnapshot was hardened against it while
+ * budget, checklist and notes were left on the plain path.
+ *
+ * .select('id') makes the update return what it touched, so zero rows is
+ * detectable. On zero rows the person is told their data is local-only rather
+ * than being shown a silent success.
+ */
+async function saveProfileData(sb, accountId, patch, label) {
+  if (!sb || !accountId) return { error: new Error('bad args') };
+  const res = await trackedSupabaseWrite(sb.from('profiles').update(patch).eq('id', accountId).select('id'));
+  const zeroRows = !res?.error && (!res?.data || res.data.length === 0);
+  if (zeroRows) {
+    console.warn(`[Attune] ${label || 'profile'} save touched 0 rows (RLS or wrong id). Kept on this device only.`);
+    try { window.__attune_sync_failed = true; } catch {}
+    const t = (typeof window !== 'undefined' && window.__attuneShowToast) || null;
+    if (t) t("Saved on this device. We'll sync when you're back online.");
+    return { error: new Error('zero rows written') };
+  }
+  return res;
+}
+
 async function saveExerciseWithRetakeSnapshot(sb, accountId, exerciseNum, answers, extraPatch = {}) {
   if (!sb || !accountId || !exerciseNum || !answers) return { error: new Error('bad args') };
   const col     = `ex${exerciseNum}_answers`;
@@ -5435,7 +5463,7 @@ function BudgetTool({ userName, partnerName, onBack, budgetState, setBudgetState
     if (accountId) {
       try {
         const { supabase: sb, hasSupabase } = await import('./supabase.js');
-        if (hasSupabase()) await trackedSupabaseWrite(sb.from('profiles').update({ budget_data: snapshot }).eq('id', accountId));
+        if (hasSupabase()) await saveProfileData(sb, accountId, { budget_data: snapshot }, 'budget');
       } catch {}
     }
     setDirty(false);
@@ -10045,14 +10073,24 @@ function AuthModal({ mode, onClose, onSuccess }) {
       if (profile?.ex3_progress && !profile?.ex3_answers) {
         try { localStorage.setItem('attune_ex3_progress', JSON.stringify(profile.ex3_progress)); } catch {}
       }
+      // else-remove on every one of these: without it, signing into an account
+      // whose server copy is empty leaves the previous account's data on the
+      // device, which is the same shape as the bug that made a reset partner
+      // keep reading as complete.
       if (profile?.budget_data) {
         try { localStorage.setItem('attune_budget', JSON.stringify(profile.budget_data)); } catch {}
+      } else {
+        try { localStorage.removeItem('attune_budget'); } catch {}
       }
       if (profile?.checklist_data) {
         try { localStorage.setItem('attune_checklist', JSON.stringify(profile.checklist_data)); } catch {}
+      } else {
+        try { localStorage.removeItem('attune_checklist'); } catch {}
       }
       if (profile?.notes_data) {
         try { localStorage.setItem('attune_notes', JSON.stringify(profile.notes_data)); } catch {}
+      } else {
+        try { localStorage.removeItem('attune_notes'); } catch {}
       }
       // The workbook is persisted on the profile as well as the order, so comp
       // accounts (which have no order row) restore it on any device exactly like
@@ -12121,9 +12159,13 @@ export default function App() {
               if (profile?.ex1_progress && !profile?.ex1_answers) localStorage.setItem('attune_ex1_progress', JSON.stringify(profile.ex1_progress));
               if (profile?.ex2_progress && !profile?.ex2_answers) localStorage.setItem('attune_ex2_progress', JSON.stringify(profile.ex2_progress));
               if (profile?.ex3_progress && !profile?.ex3_answers) localStorage.setItem('attune_ex3_progress', JSON.stringify(profile.ex3_progress));
+              // Same else-remove rule as the other hydration path.
               if (profile?.budget_data)        localStorage.setItem('attune_budget', JSON.stringify(profile.budget_data));
+              else                             localStorage.removeItem('attune_budget');
               if (profile?.checklist_data)     localStorage.setItem('attune_checklist', JSON.stringify(profile.checklist_data));
+              else                             localStorage.removeItem('attune_checklist');
               if (profile?.notes_data)         localStorage.setItem('attune_notes', JSON.stringify(profile.notes_data));
+              else                             localStorage.removeItem('attune_notes');
               if (profile?.intimacy_data)      { localStorage.setItem('attune_intimacy', JSON.stringify(profile.intimacy_data)); setIntimacyData(profile.intimacy_data); }
               if (profile?.profile_setup_complete) localStorage.setItem('attune_profile_setup_done', '1');
               // Invitee (Partner B) completion marker. Routing keys off
@@ -12730,7 +12772,7 @@ export default function App() {
       (async () => {
         try {
           const { supabase: sb, hasSupabase } = await import('./supabase.js');
-          if (hasSupabase()) await trackedSupabaseWrite(sb.from('profiles').update({ checklist_data: value }).eq('id', aid));
+          if (hasSupabase()) await saveProfileData(sb, aid, { checklist_data: value }, 'checklist');
         } catch {}
       })();
     }
@@ -12778,7 +12820,7 @@ export default function App() {
         _notesSaveTimerRef.current = setTimeout(async () => {
           try {
             const { supabase: sb, hasSupabase } = await import('./supabase.js');
-            if (hasSupabase()) await trackedSupabaseWrite(sb.from('profiles').update({ notes_data: value }).eq('id', aid));
+            if (hasSupabase()) await saveProfileData(sb, aid, { notes_data: value }, 'notes');
           } catch {}
         }, 1500);
       }
@@ -15130,14 +15172,17 @@ export default function App() {
                 // Apply edits for the case where the row already existed
                 // (create-profile no-ops then, so this update is what persists).
                 try {
-                  await sb.from('profiles').update({
+                  // Profile setup carries the pronouns every exercise and every
+                  // line of results prose depends on, so a silent zero-row write
+                  // here misgenders someone for the life of their results.
+                  await saveProfileData(sb, updated.id, {
                     name: name || null,
                     pronouns: pronouns || '',
                     partner_name: partnerName || '',
                     partner_pronouns: partnerPronouns || '',
                     partner_email: partnerEmail || '',
                     email_opt_in: emailOptIn,
-                  }).eq('id', updated.id);
+                  }, 'profile setup');
                 } catch (e) { console.warn('[profile-setup] profile update failed:', e); }
                 // Send partner invite if email newly added.
                 if (partnerEmail && partnerEmail !== prevEmail && inviteCode) {
