@@ -107,6 +107,7 @@ export default async function handler(req) {
             partner_a: row.partner_a, partner_b: row.partner_b,
             version: row.version, couple_type: row.couple_type,
             results: row.results, answers_hash: row.answers_hash,
+            content_version: row.content_version ?? null,
             frozen_at: row.frozen_at || row.computed_at || new Date().toISOString(),
           }),
         });
@@ -121,7 +122,7 @@ export default async function handler(req) {
       },
     };
 
-    const { results, cached, reason, frozenAt, computedUnderVersion, stale } = await getOrComputeResults({
+    const { results, cached, reason, frozenAt, computedUnderVersion, contentVersion, stale } = await getOrComputeResults({
       db,
       aId: me.id, bId: partner.id,
       aAnswers: mine, bAnswers: theirs,
@@ -136,6 +137,9 @@ export default async function handler(req) {
       // that is the point, not a problem.
       frozenAt: frozenAt || null,
       computedUnderVersion: computedUnderVersion ?? null,
+      // Which copy to render this couple's results from. The client must honour
+      // this rather than using whatever the current copy library says.
+      contentVersion: contentVersion ?? null,
       olderEngine: !!stale,
     });
   } catch (e) {

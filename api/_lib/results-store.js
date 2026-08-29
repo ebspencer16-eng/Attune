@@ -25,6 +25,7 @@
  */
 
 import { coupleResults, RESULTS_VERSION } from './results.js';
+import { CONTENT_VERSION } from './content-version.js';
 
 /**
  * Stable fingerprint of both partners' answers.
@@ -82,6 +83,9 @@ export async function getOrComputeResults({ db, aId, bId, aAnswers, bAnswers, aN
       reason: null,
       frozenAt: stored.frozen_at || stored.computed_at || null,
       computedUnderVersion: stored.version,
+      // The copy this couple's results should render from. Not the current
+      // one: that is the point.
+      contentVersion: stored.content_version ?? CONTENT_VERSION,
       stale: stored.version !== RESULTS_VERSION,
     };
   }
@@ -103,6 +107,7 @@ export async function getOrComputeResults({ db, aId, bId, aAnswers, bAnswers, aN
     await db.write({
       partner_a: a, partner_b: b,
       version: RESULTS_VERSION,
+      content_version: CONTENT_VERSION,
       couple_type: results.coupleType,
       results,
       answers_hash: hash,
@@ -116,5 +121,6 @@ export async function getOrComputeResults({ db, aId, bId, aAnswers, bAnswers, aN
     console.warn('[results-store] write failed, serving uncached:', e?.message || e);
   }
 
-  return { results, cached: false, reason, frozenAt: frozenAtIso, computedUnderVersion: RESULTS_VERSION, stale: false };
+  return { results, cached: false, reason, frozenAt: frozenAtIso,
+    computedUnderVersion: RESULTS_VERSION, contentVersion: CONTENT_VERSION, stale: false };
 }
