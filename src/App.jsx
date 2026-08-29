@@ -9639,13 +9639,18 @@ function ResultsHighlights({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3
       : [{ name: partnerName, color: "#1B5FE8" }, { name: userName, color: "#E8673A" }];
     return (
       <div style={{ marginBottom: "1.5rem", animation: "fadeUp 0.4s 0.24s both" }}>
-        <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "0.5rem" }}>
-          <span style={{ fontSize: "0.6rem", color: "rgba(255,255,255,0.45)", fontFamily: BFONT }}>{meta?.ends?.[0]}</span>
-          <span style={{ fontSize: "0.6rem", color: "rgba(255,255,255,0.45)", fontFamily: BFONT }}>{meta?.ends?.[1]}</span>
-        </div>
+        {/* Poles either side of the bar and centred on it, matching the
+            orientation tiles. They were above the bar and at 45% opacity,
+            which made them hard to read on the card's ground. */}
+        <div style={{ display: "flex", alignItems: "center", gap: "0.7rem" }}>
+          <span style={{ fontSize: "0.68rem", color: "rgba(255,255,255,0.78)", fontFamily: BFONT, lineHeight: 1.3, flexShrink: 0, width: "clamp(64px,24%,120px)", textAlign: "right" }}>{meta?.ends?.[0]}</span>
+          <div style={{ flex: 1, minWidth: 0, padding: "0 13px" }}>
         <div style={{ height: 6, background: "rgba(255,255,255,0.12)", borderRadius: 3, position: "relative", overflow: "visible" }}>
           <div title={userName} style={{ position: "absolute", top: "50%", left: myPct + "%", transform: `translate(-50%, calc(-50% + ${myDy}px))`, width: 22, height: 22, borderRadius: "50%", background: "#E8673A", border: "2.5px solid white", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "0.5rem", color: "white", fontWeight: 700, fontFamily: BFONT, zIndex: 2 }}>{sameInitial ? "" : userName[0]}</div>
           <div title={partnerName} style={{ position: "absolute", top: "50%", left: theirPct + "%", transform: `translate(-50%, calc(-50% + ${theirDy}px))`, width: 22, height: 22, borderRadius: "50%", background: "#1B5FE8", border: "2.5px solid white", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "0.5rem", color: "white", fontWeight: 700, fontFamily: BFONT, zIndex: 2 }}>{sameInitial ? "" : partnerName[0]}</div>
+        </div>
+          </div>
+          <span style={{ fontSize: "0.68rem", color: "rgba(255,255,255,0.78)", fontFamily: BFONT, lineHeight: 1.3, flexShrink: 0, width: "clamp(64px,24%,120px)" }}>{meta?.ends?.[1]}</span>
         </div>
         {sameInitial && (
           <div style={{ display: "flex", justifyContent: "center", gap: "1rem", marginTop: "1rem" }}>
