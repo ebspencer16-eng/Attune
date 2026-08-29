@@ -33,7 +33,7 @@ import { createClient } from '@supabase/supabase-js';
 import { checkAdminAuth } from './_lib/admin-auth.js';
 import { RESPONSIBILITY_CATEGORIES, LIFE_QUESTIONS } from './_questions.js';
 import { axisScores, typeCodeFromAxes, blendedDimScores } from './_type-engine.js';
-import { personResults } from './_lib/results.js';
+import { personResults, readAccuracy } from './_lib/results.js';
 
 // ── Response aggregates ──────────────────────────────────────────────────────
 // The Responses page charts used to be hardcoded zero arrays: the raw answers
@@ -308,13 +308,38 @@ export default async function handler(req) {
       const byInviteT = new Map(); (psQ.data || []).forEach(s => { if (s.invite_code) byInviteT.set(s.invite_code, s); });
       profiles.forEach(p => {
         const partner = (p.partner_profile_id && byIdT[p.partner_profile_id]) || (p.invite_code && byInviteT.get(p.invite_code)) || null;
+        // Understanding: how accurately these two read each other, which is a
+        // different question from how different they are. Attached to the
+        // profile so the slicer can cut by it like any other segment.
+        if (partner?.ex1_answers && p.ex1_answers) {
+          const mine = readAccuracy(p.ex1_answers, partner.ex1_answers);      // how well I read them
+          const theirs = readAccuracy(partner.ex1_answers, p.ex1_answers);    // how well they read me
+          if (mine && theirs) {
+            const mean = (mine.meanError + theirs.meanError) / 2;
+            p.understanding = mean < 0.5 ? 'Understand each other'
+              : mean < 1.0 ? 'Partial' : 'Misunderstand each other';
+            p.understanding_error = Number(mean.toFixed(2));
+            // How well this person reads their partner, separately from the
+            // couple average, so a lopsided pair is visible.
+            p.reads_partner = mine.meanError < 0.5 ? 'Reads them well'
+              : mine.meanError < 1.0 ? 'Mixed' : 'Misreads them';
+            p.reads_partner_error = Number(mine.meanError.toFixed(2));
+            p.understanding_lopsided = Math.abs(mine.meanError - theirs.meanError) >= 0.4 ? 'Lopsided' : 'Even';
+            // The dimension this person has their partner most wrong about.
+            p.worst_misread_dim = mine.worst?.[0]?.dim || null;
+          }
+        }
         const myType = _typeOf(p.ex1_answers, partner ? partner.ex1_answers : null);
         if (!myType) return;
         const partnerType = partner ? _typeOf(partner.ex1_answers, p.ex1_answers) : null;
         if (myType && partnerType) p.couple_type = [myType, partnerType].sort().join('');
       });
     }
-    const COUPLE_SEG = ['relationship_status', 'relationship_length', 'children', 'couple_type'];
+    const COUPLE_SEG = ['relationship_status', 'relationship_length', 'children', 'couple_type',
+      // Understanding cuts. Couple-level, so both partners carry the same value.
+      'understanding', 'understanding_lopsided',
+      // Person-level: this individual's accuracy about their partner.
+      'reads_partner', 'worst_misread_dim'];
     const responsesBySegment = { '': responses };
     for (const fld of COUPLE_SEG) {
       const vals = [...new Set(profiles.map(p => p[fld]).filter(v => v != null && v !== ''))];

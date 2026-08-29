@@ -18,7 +18,7 @@
 import { createClient } from '@supabase/supabase-js';
 import { checkAdminAuth } from './_lib/admin-auth.js';
 import { calcDimScores, blendedDimScores, axisScores, typeCodeFromAxes, DIM_KEYS } from './_type-engine.js';
-import { personResults } from './_lib/results.js';
+import { personResults, readAccuracy } from './_lib/results.js';
 // Individual type from raw ex1 answers (for invited partners who answered via a
 // partner_session and never created a full profile).
 function typeFromEx1(ans){
@@ -141,6 +141,9 @@ function ownFields(p) {
   const pvScores = Object.keys(pvRaw).length ? calcDimScores(pvRaw) : {};
   for (const dim of Object.keys(DIM_KEYS)) {
     r['pvdim_' + dim] = pvScores[dim] != null ? Number(Number(pvScores[dim]).toFixed(3)) : null;
+    // How far this person's read of their partner is from what the partner
+    // actually said. Signed, so over- and under-reading are distinguishable.
+    r['readerr_' + dim] = null;
   }
   // Ex2 life questions: stored flat under ex2_answers.life
   const life = (p.ex2_answers && p.ex2_answers.life) || {};
@@ -198,6 +201,8 @@ const PARTNERABLE = [
   ...INTIMACY_QUESTIONS.filter((q) => q.kind !== 'multi').map((q) => 'iq_' + q.id),
   ...PERSONALITY_QUESTIONS.map((q) => 'pv_' + q.id),
   ...Object.keys(DIM_KEYS).map((d) => 'pvdim_' + d),
+  ...Object.keys(DIM_KEYS).map((d) => 'readerr_' + d),
+  'read_error_mean', 'reads_partner', 'understanding', 'worst_misread_dim',
 ];
 
 // Beta-survey fields joined onto the respondent by their profile id, so survey
@@ -234,6 +239,11 @@ function buildCatalog(fbCatOptions) {
   for (const k of DEMO_KEYS) f.push({ key: k, label: DEMO_LABELS[k], group: 'Demographics', kind: 'cat', partnerable: true });
   for (const dim of Object.keys(DIM_KEYS)) f.push({ key: 'dim_' + dim, label: DIM_LABELS[dim] || dim, group: 'Dimensions (score 1–5)', kind: 'scale', poleLow: (DIM_POLES[dim]||[])[0], poleHigh: (DIM_POLES[dim]||[])[1], partnerable: true });
   for (const q of PERSONALITY_QUESTIONS) f.push({ key: 'q_' + q.id, label: q.text, group: 'Ex1 · Communication (1–5)', kind: 'scale', poleLow: shortPole(q.a), poleHigh: shortPole(q.b), partnerable: true });
+  for (const dim of Object.keys(DIM_KEYS)) f.push({ key: 'readerr_' + dim, label: (DIM_LABELS[dim] || dim) + ' read error', group: 'Ex1 . Understanding (0 = read exactly right)', kind: 'scale', partnerable: true });
+  f.push({ key: 'read_error_mean', label: 'Mean read error', group: 'Ex1 . Understanding (0 = read exactly right)', kind: 'scale', partnerable: true });
+  f.push({ key: 'reads_partner', label: 'Reads partner', group: 'Ex1 . Understanding (0 = read exactly right)', kind: 'cat', partnerable: true });
+  f.push({ key: 'understanding', label: 'Couple understanding', group: 'Ex1 . Understanding (0 = read exactly right)', kind: 'cat' });
+  f.push({ key: 'worst_misread_dim', label: 'Most misread dimension', group: 'Ex1 . Understanding (0 = read exactly right)', kind: 'cat', partnerable: true });
   for (const dim of Object.keys(DIM_KEYS)) f.push({ key: 'pvdim_' + dim, label: (DIM_LABELS[dim] || dim) + ' (as read by partner)', group: 'Ex1 · Partner-view dimensions (1–5)', kind: 'scale', poleLow: (DIM_POLES[dim]||[])[0], poleHigh: (DIM_POLES[dim]||[])[1], partnerable: true });
   for (const q of PERSONALITY_QUESTIONS) {
     const pvt = PARTNER_VIEW_TEXT[q.id] || {};
@@ -355,8 +365,34 @@ export default async function handler(req) {
         const st = blendType(sAns, p.ex1_answers);
         if (st) { if (own.type != null) ownType = blendType(p.ex1_answers, sAns) || ownType; partnerType = st; }
       }
+      // Understanding, computed once per row from whichever partner answers we
+      // resolved above (linked profile, or the legacy session by invite code).
+      const _partnerAns = partnerRaw?.ex1_answers
+        || (p.invite_code && sessByInvite.get(p.invite_code)?.ex1_answers)
+        || null;
+      const _u = {};
+      if (_partnerAns && p.ex1_answers) {
+        const mine = readAccuracy(p.ex1_answers, _partnerAns);    // my read of them
+        const theirs = readAccuracy(_partnerAns, p.ex1_answers);  // their read of me
+        if (mine) {
+          for (const [dim, d] of Object.entries(mine.dimensions)) {
+            _u['readerr_' + dim] = d ? d.signed : null;
+          }
+          _u.read_error_mean = mine.meanError;
+          _u.reads_partner = mine.band === 'reads_them_well' ? 'Reads them well'
+            : mine.band === 'mixed' ? 'Mixed' : 'Misreads them';
+          _u.worst_misread_dim = mine.worst?.[0]?.dim || null;
+        }
+        if (mine && theirs) {
+          const mean = (mine.meanError + theirs.meanError) / 2;
+          _u.understanding = mean < 0.5 ? 'Understand each other'
+            : mean < 1.0 ? 'Partial' : 'Misunderstand each other';
+        }
+      }
+
       const row = {
         ...own,
+        ..._u,
         type: ownType,
         role: p.joined_via_invite ? 'B' : 'A',
         // couple_id is set whenever a partner exists (so Ex2/Ex3 couple visuals
