@@ -70,6 +70,13 @@ ok('a completed resource does not prompt',
 ok('profile setup when incomplete',
   primary({ profileComplete: false }).kind === 'profile_setup');
 
+// Profile outranks starting an exercise: the exercises need pronouns, and
+// answering without them produces results copy that misgenders someone.
+ok('profile setup outranks starting an exercise',
+  primary({ profileComplete: false, resultsReady: false,
+    exercises: { ex1: { owned: true, mine: false, theirs: false }, ex2: { owned: true },
+                 ex3: { owned: false }, intimacy: { owned: false } } }).kind === 'profile_setup');
+
 ok('a new post they have not read',
   primary({ inPractice: { latestId: 'p1', latestTitle: 'Repair after a hard week',
     latestPublishedAt: '2026-08-27T10:00:00.000Z', lastReadAt: null } }).kind === 'new_post');

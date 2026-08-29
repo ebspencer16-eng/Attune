@@ -52,7 +52,18 @@ export function nextActions(state = {}) {
   const cards = [];
   const add = (c) => cards.push(c);
 
-  // 1. Your own unfinished exercise. Above nudging the partner on purpose:
+  // 1. Profile setup. First because the exercises need pronouns and the
+  //    results prose addresses people by name: starting an exercise without
+  //    them produces copy that misgenders someone, which is not a cosmetic
+  //    problem and cannot be fixed after the fact without a retake.
+  if (!state.profileComplete) {
+    add({ id: 'profile', kind: 'profile_setup', priority: 12,
+      title: 'Finish setting up your profile',
+      body: 'Your name and pronouns, so the exercises and your results read properly.',
+      cta: 'Set up', deepLink: '/?view=profile' });
+  }
+
+  // 2. Your own unfinished exercise. Above nudging the partner on purpose:
   //    asking someone else to finish while you have not is a bad look, and the
   //    app should not help you do it.
   for (const [key, label, link] of [
@@ -107,15 +118,6 @@ export function nextActions(state = {}) {
         cta: r.started ? 'Continue' : 'Start', deepLink: `/?view=${link}` });
       break;
     }
-  }
-
-  // 5. Profile setup. Low urgency, but it makes everything else read better,
-  //    since results address people by name.
-  if (!state.profileComplete) {
-    add({ id: 'profile', kind: 'profile_setup', priority: 6,
-      title: 'Finish setting up your profile',
-      body: 'Takes a minute, and it makes your results read properly.',
-      cta: 'Set up', deepLink: '/?view=profile' });
   }
 
   // 6. A new In Practice post they have not read.
