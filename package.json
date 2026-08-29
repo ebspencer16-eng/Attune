@@ -5,9 +5,9 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "node scripts/check-admin-html.mjs && node scripts/check-workbook-budget.mjs && node scripts/check-localstorage-keys.mjs && node scripts/check-copy-tokens.mjs && node scripts/check-addon-params.mjs && node scripts/entitlement_matrix_test.mjs && vite build",
+    "build": "node scripts/check-admin-html.mjs && node scripts/check-workbook-budget.mjs && node scripts/check-localstorage-keys.mjs && node scripts/check-copy-tokens.mjs && node scripts/check-addon-params.mjs && node scripts/next-action-test.mjs && node scripts/entitlement_matrix_test.mjs && vite build",
     "preview": "vite preview",
-    "check": "node scripts/check-admin-html.mjs && node scripts/check-workbook-budget.mjs && node scripts/check-localstorage-keys.mjs && node scripts/check-copy-tokens.mjs && node scripts/check-addon-params.mjs && node scripts/entitlement_matrix_test.mjs",
+    "check": "node scripts/check-admin-html.mjs && node scripts/check-workbook-budget.mjs && node scripts/check-localstorage-keys.mjs && node scripts/check-copy-tokens.mjs && node scripts/check-addon-params.mjs && node scripts/next-action-test.mjs && node scripts/entitlement_matrix_test.mjs",
     "test:entitlements": "node scripts/entitlement_matrix_test.mjs",
     "smoke": "node scripts/check-render.mjs",
     "check:docs": "node scripts/check-doc-generators.mjs"
