@@ -6,7 +6,20 @@ import { PERSONALITY_QUESTIONS, RESPONSIBILITY_CATEGORIES, LIFE_QUESTIONS, PARTN
 // moves the words a highlight was written against. contentFor(null) returns
 // current, which is right for couples stamped before pinning existed.
 import { contentFor, CURRENT_CONTENT_VERSION } from "./content/index.js";
+// Default binding, used by module-level helpers when no couple context is
+// available (the workbook path, share cards, anything outside the results
+// tree). Components inside the results tree use useContent() instead, which
+// resolves the version stamped on that couple's results row.
 const { ALIGNED_ADVICE, SHIFTS, DIM_ACTION_ITEMS, DOMAIN_ALIGNED, REFLECTION_ACTION_TITLES } = contentFor(null);
+
+// The copy this couple's results render from. null means current, which is
+// correct both for couples stamped before pinning existed and for demo mode.
+const ContentContext = React.createContext(null);
+/** Copy for the couple being rendered. Falls back to current. */
+function useContent() {
+  const version = React.useContext(ContentContext);
+  return React.useMemo(() => contentFor(version), [version]);
+}
 import { INTIMACY_QUESTIONS, INTIMACY_DIMENSIONS, summarizeIntimacy, intimacyDimensionPositions, intimacyDimensionSkips } from "../api/_intimacy-questions.js";
 
 // Proposal B master switch. Off = comms exercise, scoring, and results are unchanged.
@@ -2812,8 +2825,8 @@ function PortraitSetup({ userName, partnerName, existing, onSave, onClose }) {
 // based on where each partner scores (5 buckets × 5 buckets = 15 unordered combos).
 // pos: 0=strongly A, 1=lean A, 2=middle, 3=lean B, 4=strongly B
 
-function alignedAdvice(dim, a, b) {
-  const adv = ALIGNED_ADVICE[dim];
+function alignedAdvice(dim, a, b, content) {
+  const adv = (content || { ALIGNED_ADVICE })["ALIGNED_ADVICE"][dim];
   if (!adv) return null;
   if (typeof adv === "string") return adv;
   const na = Number(a), nb = Number(b);
@@ -2821,7 +2834,7 @@ function alignedAdvice(dim, a, b) {
   return avg < 3 ? adv.low : adv.high;
 }
 
-function getDimShift(dim, myScore, partScore, U, P) {
+function getDimShift(dim, myScore, partScore, U, P, content) {
   // Buckets: 1=Strongly A (≤1.8), 2=Lean A (1.8-2.6), 3=Middle (2.6-3.4), 4=Lean B (3.4-4.2), 5=Strongly B (>4.2)
   const pos = s => s <= 1.8 ? 1 : s <= 2.6 ? 2 : s <= 3.4 ? 3 : s <= 4.2 ? 4 : 5;
   const mp = pos(myScore), pp = pos(partScore);
@@ -2833,7 +2846,7 @@ function getDimShift(dim, myScore, partScore, U, P) {
 
   // SHIFTS is a function of the two names now that the copy lives in a
   // versioned snapshot module rather than in this closure.
-  const _shifts = SHIFTS(loName, hiName);
+  const _shifts = (content?.SHIFTS || SHIFTS)(loName, hiName);
   if (!_shifts[dim]) return null;
   const fn = _shifts[dim][key];
   return fn !== undefined ? fn : null;
@@ -3222,7 +3235,7 @@ function buildWorkbookPayload(userName, partnerName, ex1Answers, partnerEx1, ex2
 
 // ── PERSONALITY FEEDBACK GENERATOR ──────────────────────────────────────────
 // Produces one feedback object per dimension comparing two score objects.
-function generatePersonalityFeedback(myS, partS, userName, partnerName) {
+function generatePersonalityFeedback(myS, partS, userName, partnerName, content) {
   const dims = ["energy","expression","reassurance","needs","bids","conflict","repair","listening","love","feedback"];
   return dims.map(dim => {
     const myScore   = myS[dim]   ?? 3;
@@ -3254,7 +3267,7 @@ function generatePersonalityFeedback(myS, partS, userName, partnerName) {
         ? `You're close but not identical here, ${meta.label.toLowerCase()} shows a small but real difference.`
         : null,
       adviceText: (isOpportunity || isNote)
-        ? getDimShift(dim, myScore, partScore, userName, partnerName)
+        ? getDimShift(dim, myScore, partScore, userName, partnerName, content)
         : null,
     };
   });
@@ -3774,7 +3787,9 @@ function PersonalityResults({ myAnswers, partnerAnswers, userName, partnerName, 
   // Type/placement/role prose use the partner-view blend; the dimension bars below stay self-reported.
   const myB = typingDimScores(myAnswers, partnerAnswers);
   const partB = typingDimScores(partnerAnswers, myAnswers);
-  const feedback = generatePersonalityFeedback(myS, partS, userName, partnerName);
+  // Copy for this couple: the version stamped on their results row.
+  const _content = useContent();
+  const feedback = generatePersonalityFeedback(myS, partS, userName, partnerName, _content);
 
   // Sort by gap ascending -- most similar first (items 1 & 4, 6 & 7 use this order)
   const sortedFeedback = [...feedback].sort((a, b) => a.gap - b.gap);
@@ -3842,7 +3857,7 @@ function PersonalityResults({ myAnswers, partnerAnswers, userName, partnerName, 
     // about sharing a position rather than restating that they share it. The
     // strength line is a last resort so the tile is never empty.
     return fb?.adviceText
-      || alignedAdvice(dim, fb?.myScore, fb?.partScore)
+      || alignedAdvice(dim, fb?.myScore, fb?.partScore, _content)
       || fb?.strengthText
       || null;
   };
@@ -3853,7 +3868,7 @@ function PersonalityResults({ myAnswers, partnerAnswers, userName, partnerName, 
     const advice = dimAdviceFor(lead);
     const base = advice
       ? { title: adviceTitleFor(lead), body: advice, dimLabel: DIM_META[lead]?.label }
-      : { title: DOMAIN_ALIGNED[dom].title, body: DOMAIN_ALIGNED[dom].body };
+      : { title: _content.DOMAIN_ALIGNED[dom].title, body: _content.DOMAIN_ALIGNED[dom].body };
     if (dom === "hard") {
       base.reflect = "In your next hard conversation, pause and ask yourself: am I trying to understand my partner's side, or am I trying to win the argument? Aim for the first one.";
     }
@@ -5963,9 +5978,10 @@ const JAMES_ANNIVERSARY_DEMO = {
   a_priority: ["Communication","Long-term planning","Quality time","Financial alignment","Physical intimacy","Shared adventures"],
 };
 
-function reflectionActionTitle(title) {
+function reflectionActionTitle(title, content) {
   const t = String(title || "");
-  if (REFLECTION_ACTION_TITLES[t]) return REFLECTION_ACTION_TITLES[t];
+  const titles = content?.REFLECTION_ACTION_TITLES || REFLECTION_ACTION_TITLES;
+  if (titles[t]) return titles[t];
   // Fall back on a light rewrite of the "One of you named X" shape.
   const m = t.match(/^(.+?) named (.+)$/);
   if (m) return `Read what ${m[1]} said about ${m[2]}, together`;
@@ -6854,6 +6870,18 @@ function PostResultsSurvey({ respondentId = null, userName, coupleType, onClose,
   );
 }
 
+// Wraps the results tree so every component inside renders from the copy
+// version stamped on this couple's results row. contentVersion is null for
+// demo mode and for couples stamped before pinning existed, which resolves to
+// current.
+function UnifiedResultsRoot(props) {
+  return (
+    <ContentContext.Provider value={props.contentVersion ?? null}>
+      <UnifiedResults {...props} />
+    </ContentContext.Provider>
+  );
+}
+
 function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Answers, partnerEx3, ex2AnswersPrior = null, ex2PriorAt = null, hasAnniversary, userName, partnerName, initialSection, onSectionChange = null, isMobile = false, portrait = null, hasChecklist = false, hasBudget = false, hasWorkbook = false, hasIntimacy = false, intimacyAnswers = null, partnerIntimacy = null, intimacyVariant = 'premarital', onNavigateTool = null, userPronouns = "", partnerPronouns = "", isBetaTester = false }) {
 
   // Compute all the data we need up front
@@ -6864,7 +6892,9 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
   const partSelf = calcDimScores(partnerEx1);
   // Same-type couples get a single combined "Communication Profile" page; the
   // comms sub-nav label reflects that.
-  const personalityFeedback = generatePersonalityFeedback(mySelf, partSelf, userName, partnerName);
+  // Copy for this couple: the version stamped on their results row.
+  const _content = useContent();
+  const personalityFeedback = generatePersonalityFeedback(mySelf, partSelf, userName, partnerName, _content);
   const sortedFeedback = [...personalityFeedback].sort((a, b) => a.gap - b.gap);
   // Domain order — matches PersonalityResults navigation
   const UR_DOMAIN_ORDER = ["energy","expression","reassurance","love","needs","bids","listening","conflict","repair","feedback"];
@@ -8096,7 +8126,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
                     <div style={{ display: "flex", flexDirection: "column", gap: "0.6rem" }}>
                       {items.map((it, i) => (
                         <div key={i} style={{ background: "rgba(255,255,255,0.13)", border: "1px solid rgba(255,255,255,0.22)", borderLeft: "4px solid #1B5FE8", borderRadius: 12, padding: "0.9rem 1.1rem", boxShadow: "0 6px 20px rgba(0,0,0,0.14)" }}>
-                          <div style={{ fontSize: "0.85rem", fontWeight: 700, color: "white", fontFamily: BFONT, lineHeight: 1.4 }}>{reflectionActionTitle(it.title)}</div>
+                          <div style={{ fontSize: "0.85rem", fontWeight: 700, color: "white", fontFamily: BFONT, lineHeight: 1.4 }}>{reflectionActionTitle(it.title, _content)}</div>
                           {it.action && <div style={{ fontSize: "0.78rem", color: "rgba(255,255,255,0.72)", fontFamily: BFONT, lineHeight: 1.55, marginTop: "0.3rem" }}>{it.action}</div>}
                         </div>
                       ))}
@@ -8667,7 +8697,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
               try {
                 const reflItems = deriveAnniversaryInsights(ex3Answers, partnerEx3, userName, partnerName, coupleType)
                   .filter(i => i.type === "explore").slice(0, 3)
-                  .map(i => ({ tip: reflectionActionTitle(i.title), phrase: i.action || "" }));
+                  .map(i => ({ tip: reflectionActionTitle(i.title, _content), phrase: i.action || "" }));
                 if (reflItems.length) groups.push({ id: "reflection", label: "Relationship Reflection", color: "#10b981", items: reflItems });
               } catch {}
             }
@@ -9180,7 +9210,9 @@ function ResultsHighlights({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3
   // Share-card couple type uses the blend; the gap feedback below stays self.
   const myB = typingDimScores(ex1Answers, partnerEx1);
   const partB = typingDimScores(partnerEx1, ex1Answers);
-  const feedback = generatePersonalityFeedback(myS, partS, userName, partnerName);
+  // Copy for this couple: the version stamped on their results row.
+  const _content = useContent();
+  const feedback = generatePersonalityFeedback(myS, partS, userName, partnerName, _content);
   const sortedFeedback = [...feedback].sort((a, b) => a.gap - b.gap);
   const topStrength = sortedFeedback[0];
   const topGap = [...feedback].sort((a, b) => b.gap - a.gap)[0];
@@ -11588,6 +11620,32 @@ export default function App() {
 
   // ── VIEW STATE ────────────────────────────────────────────────────────────
   const [view, setView] = useState(initialView);
+  // Which copy version this couple's results render from. Comes from
+  // /api/results, which reads it off the frozen results row. Null means
+  // current, which is right for demo mode and for couples stamped before
+  // pinning existed.
+  const [resultsContentVersion, setResultsContentVersion] = useState(null);
+  useEffect(() => {
+    if (isDemo || view !== 'results') return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const { supabase: sb, hasSupabase } = await import('./supabase.js');
+        if (!hasSupabase()) return;
+        const { data } = await sb.auth.getSession();
+        const tok = data?.session?.access_token;
+        if (!tok) return;
+        const r = await fetch('/api/results', { headers: { Authorization: `Bearer ${tok}` } });
+        if (!r.ok) return;
+        const body = await r.json();
+        if (!cancelled && body?.ok && body.contentVersion != null) {
+          setResultsContentVersion(body.contentVersion);
+        }
+      } catch { /* falls back to current copy, which is correct */ }
+    })();
+    return () => { cancelled = true; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [view]);
   // Views gated on an entitlement render nothing when the package lacks it, so
   // a bookmark or stale link to an exercise they do not own showed a blank
   // page. Send those to the dashboard instead. Runs after mount, because pkg
@@ -14839,7 +14897,8 @@ export default function App() {
             <div data-results-scroll style={{ flex: 1, overflowY: "auto", WebkitOverflowScrolling: "touch", overscrollBehavior: "contain", scrollPaddingBottom: "60px" }}>
               <div style={{ maxWidth: 920, margin: "0 auto", padding: isMobile ? "1rem 0.5rem 0" : "1.25rem 1.5rem 0", width: "100%", minWidth: 0, boxSizing: "border-box" }}>
                 <div style={{ width: "100%", minWidth: 0, overflowX: "clip" }}>
-                <UnifiedResults
+                <UnifiedResultsRoot
+                  contentVersion={resultsContentVersion}
                   isMobile={isMobile}
                   ex1Answers={_demoMineEx1 || ex1Answers || sarahEx1} partnerEx1={partnerEx1}
                   ex2Answers={ex2Answers || sarahEx2} partnerEx2={partnerEx2}
