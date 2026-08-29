@@ -1410,6 +1410,22 @@ window.adminAuthHeaders = function(extra){
       </div>
     </div>
 
+    <!-- Question-weight sandbox -->
+    <div class="chart-grid chart-grid full">
+      <div class="chart-card">
+        <div class="chart-card-header">
+          <div class="chart-card-title">Question weights &mdash; what-if</div>
+          <div class="chart-card-sub">Questions inside a dimension are not equally diagnostic. Drag to reweight them and see how many people change type. Weights are normalized within each dimension, so only their relative size matters. Preview only.</div>
+        </div>
+        <div id="qsandbox-dims" style="padding:.5rem 1.4rem;display:grid;grid-template-columns:1fr 1fr;gap:1.2rem 1.5rem;"></div>
+        <div style="display:flex;gap:.75rem;align-items:center;margin:.75rem 1.4rem 0;">
+          <button class="btn-secondary" onclick="resetQSandbox()">Reset to current</button>
+          <span id="qsandbox-status" style="font-size:.72rem;color:var(--muted);"></span>
+        </div>
+        <div id="qsandbox-movement" style="padding:.75rem 1.4rem 1.2rem;font-size:.78rem;color:var(--muted);"></div>
+      </div>
+    </div>
+
     <!-- Phase 2: weight sandbox -->
     <div class="chart-grid chart-grid full">
       <div class="chart-card">
@@ -5041,6 +5057,8 @@ async function loadTypesData(force) {
 
   sandboxWeights = null;
   buildSandbox();
+  buildQSandbox();
+  refreshQSandbox();
   renderTypes();
 }
 
@@ -5224,6 +5242,90 @@ function onSandboxInput(d) {
   clearTimeout(_sbTimer); _sbTimer = setTimeout(refreshSandbox, 180);
 }
 function resetSandbox() { buildSandbox(); refreshSandbox(); }
+
+// ── Question-weight sandbox ────────────────────────────────────────────────
+// The axis sandbox above reweights DIMENSIONS. This reweights the QUESTIONS
+// inside each dimension, which is the thing that decides whether answering 2
+// and 4 reads as neutral or as a split. It recomputes each person's dimension
+// scores from their raw answers, applying the same blend and flips the real
+// scorer uses, then runs them through the existing axis maths.
+let qSandboxWeights = null;
+function buildQSandbox() {
+  if (!TYPES_DATA || !TYPES_DATA.questionWeights) return;
+  qSandboxWeights = JSON.parse(JSON.stringify(TYPES_DATA.questionWeights));
+  const dims = Object.keys(qSandboxWeights);
+  document.getElementById('qsandbox-dims').innerHTML = dims.map(d => {
+    const qs = Object.keys(qSandboxWeights[d]);
+    const rows = qs.map(q =>
+      `<div style="display:flex;align-items:center;gap:.5rem;margin-bottom:.25rem;">
+         <span style="width:42px;font-size:.66rem;color:#586187;font-family:monospace;">${q}</span>
+         <input id="qw-${d}-${q}" type="range" min="0.05" max="0.90" step="0.05" value="${qSandboxWeights[d][q]}"
+                oninput="onQSandboxInput('${d}','${q}')" style="flex:1;">
+         <span id="qw-val-${d}-${q}" style="width:34px;text-align:right;font-size:.7rem;color:#1B2547;">${qSandboxWeights[d][q].toFixed(2)}</span>
+       </div>`).join('');
+    return `<div><div style="font-size:.66rem;letter-spacing:.1em;text-transform:uppercase;color:#586187;font-weight:700;margin-bottom:.4rem;">${d}</div>${rows}</div>`;
+  }).join('');
+}
+let _qsbTimer = null;
+function onQSandboxInput(d, q) {
+  qSandboxWeights[d][q] = parseFloat(document.getElementById('qw-' + d + '-' + q).value);
+  document.getElementById('qw-val-' + d + '-' + q).textContent = qSandboxWeights[d][q].toFixed(2);
+  clearTimeout(_qsbTimer); _qsbTimer = setTimeout(refreshQSandbox, 180);
+}
+function resetQSandbox() { buildQSandbox(); refreshQSandbox(); }
+
+// One person's dimension scores under a given set of question weights.
+// Mirrors calcDimScores + blendedDimScores: flip first, weight, renormalise
+// over answered questions, then blend self against the partner's read.
+function qScoresFor(rec, qw) {
+  const flipped = new Set(TYPES_DATA.flipped || []);
+  const blend = TYPES_DATA.blend || {};
+  const out = {};
+  for (const [dim, ids] of Object.entries(TYPES_DATA.dimKeys || {})) {
+    let sN = 0, sD = 0, pN = 0, pD = 0;
+    for (const id of ids) {
+      const a = rec.qa && rec.qa[id];
+      if (!a) continue;
+      const w = (qw[dim] && qw[dim][id] != null) ? qw[dim][id] : 0;
+      if (!w) continue;
+      const fs = flipped.has(id) ? 6 - a.s : a.s;
+      sN += fs * w; sD += w;
+      if (a.p != null) { const fp = flipped.has(id) ? 6 - a.p : a.p; pN += fp * w; pD += w; }
+    }
+    if (!sD) { out[dim] = 3; continue; }
+    const self = sN / sD;
+    if (!pD) { out[dim] = self; continue; }
+    const b = blend[dim] || { self: 0.5, partner: 0.5 };
+    out[dim] = b.self * self + b.partner * (pN / pD);
+  }
+  return out;
+}
+
+function refreshQSandbox() {
+  if (!TYPES_DATA || !qSandboxWeights) return;
+  const f = activeFilters();
+  const cfg = TYPES_DATA.config;
+  const indiv = TYPES_DATA.individuals.filter(r => matchIndiv(r, f) && r.qa);
+  if (!indiv.length) {
+    document.getElementById('qsandbox-movement').textContent = 'No individuals with per-question answers in this filter.';
+    return;
+  }
+  let moved = 0, onWhole = 0, dimCount = 0;
+  indiv.forEach(r => {
+    const sc = qScoresFor(r, qSandboxWeights);
+    const { w, o } = axisFromScores(sc, cfg, null);
+    if (typeFromAxes(w, o) !== r.type) moved++;
+    for (const d in sc) { dimCount++; if (Math.abs(sc[d] - Math.round(sc[d])) < 0.02) onWhole++; }
+  });
+  const n = indiv.length;
+  const movedPct = Math.round(100 * moved / n);
+  const wholePct = dimCount ? (100 * onWhole / dimCount).toFixed(1) : '0';
+  document.getElementById('qsandbox-movement').innerHTML =
+    `<strong style="color:#1B2547;">${moved}</strong> of ${n} individuals (${movedPct}%) would change type under these question weights.<br>` +
+    `<span style="color:#586187;">${wholePct}% of dimension scores land exactly on a whole number.</span> ` +
+    `<span style="color:#8C7A68;">Lower is better: scores sitting on 1&ndash;5 ticks are what make results look uncalculated.</span>`;
+  document.getElementById('qsandbox-status').textContent = 'Preview only, not saved';
+}
 
 function refreshSandbox() {
   if (!TYPES_DATA || !sandboxWeights) return;

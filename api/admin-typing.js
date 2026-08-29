@@ -10,6 +10,7 @@
 import { createClient } from '@supabase/supabase-js';
 import { checkAdminAuth } from './_lib/admin-auth.js';
 import { personResults } from './_lib/results.js';
+import { QUESTION_WEIGHTS, FLIPPED_QUESTIONS, PARTNER_VIEW_BLEND } from './_type-engine.js';
 import {
   AXIS_CONFIG, DIM_KEYS, calcDimScores, blendedDimScores, axisScores, typeCodeFromAxes, lowConfidence,
 } from './_type-engine.js';
@@ -35,8 +36,24 @@ function profileToRecord(p, partnerAnswers = null) {
   // weights or the blend changed.
   const r = personResults(p.ex1_answers, partnerAnswers);
   const scores = Object.fromEntries(Object.entries(r.dimensions).map(([d, v]) => [d, v.blended]));
+  // Raw per-question values, so the weight sandbox can recompute dimension
+  // scores client-side under different question weights. Blended against the
+  // partner's reads the same way the real scorer does, so the sandbox is
+  // recomputing the actual quantity rather than a self-report approximation.
+  const pv = {};
+  for (const [k, v] of Object.entries(partnerAnswers || {})) if (k.startsWith('pv_')) pv[k.slice(3)] = v;
+  const qa = {};
+  for (const ids of Object.values(DIM_KEYS)) {
+    for (const id of ids) {
+      const self = p.ex1_answers?.[id];
+      if (self == null || isNaN(self)) continue;
+      const read = pv[id];
+      qa[id] = { s: Number(self), p: (read == null || isNaN(read)) ? null : Number(read) };
+    }
+  }
   return {
     scores,
+    qa,
     w: r.axes.withdraw,
     o: r.axes.open,
     type: r.typeCode,
@@ -124,6 +141,12 @@ export default async function handler(req) {
 
     return json({
       config: AXIS_CONFIG,
+      // For the question-weight sandbox: the current weights, which questions
+      // belong to which dimension, the blend, and which questions are flipped.
+      questionWeights: QUESTION_WEIGHTS,
+      dimKeys: DIM_KEYS,
+      flipped: [...FLIPPED_QUESTIONS],
+      blend: PARTNER_VIEW_BLEND,
       dims: DIMS,
       generatedAt: new Date().toISOString(),
       summary: summarize(individuals, couples),
