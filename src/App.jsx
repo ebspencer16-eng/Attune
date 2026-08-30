@@ -25,6 +25,15 @@ import { INTIMACY_QUESTIONS, INTIMACY_DIMENSIONS, summarizeIntimacy, intimacyDim
 // Proposal B master switch. Off = comms exercise, scoring, and results are unchanged.
 // Flip to true only after the full partner-view flow is verified end-to-end.
 const PARTNER_VIEW_ENABLED = true;
+
+// The "get the app" banner on the portal. OFF until the app is actually in the
+// App Store: a banner promising an app that does not exist is worse than no
+// banner, and an App Store link that 404s reads as a broken product.
+//
+// When it ships: set APP_BANNER_ENABLED to true and APP_STORE_URL to the real
+// listing. Nothing else needs changing.
+const APP_BANNER_ENABLED = false;
+const APP_STORE_URL = 'https://apps.apple.com/app/attune-relationships/idPENDING';
 // Dimension scores for TYPE derivation: blended with the partner's view when the
 // feature is on, self-only otherwise. Self-report displays keep calcDimScores.
 function typingDimScores(selfAnswers, partnerAnswers) {
@@ -114,7 +123,7 @@ const USER_LOCALSTORAGE_KEYS = [
   'attune_ex1_prior', 'attune_ex2_prior', 'attune_ex3_prior',
   'attune_partner_session', 'attune_live_session',
   'attune_order', 'attune_portrait', 'attune_budget',
-  'attune_checklist', 'attune_notes',
+  'attune_checklist', 'attune_notes', 'attune_app_banner_dismissed',
   'attune_intimacy', 'attune_intimacy_progress',
   'attune_workbook_ready', 'attune_workbook_blob',
   'attune_workbook_print_queued',
@@ -2760,7 +2769,7 @@ function GiftSignupForm({ myName, theirName, theirEmail, pkg, orderId, onCreateA
         {theirEmail ? `We've sent ${theirName || 'your partner'} an invite. Create your account to get started.` : 'Create your account to begin the exercises.'}
       </p>
       <input type="email" placeholder="Your email" value={email} onChange={e => { setEmail(e.target.value); setErr(''); }} style={inp} />
-      <input type="password" placeholder="Choose a password" value={password} onChange={e => { setPassword(e.target.value); setErr(''); }} style={inp} />
+      <input type="password" placeholder="Choose a password" autoComplete="new-password" value={password} onChange={e => { setPassword(e.target.value); setErr(''); }} style={inp} />
       {err && <p style={{ color: '#ef4444', fontSize: '0.75rem', marginBottom: '0.75rem' }}>{err}</p>}
       <button onClick={handleCreate} disabled={loading}
         style={{ width: '100%', padding: '0.9rem', background: `linear-gradient(135deg, ${C.orange}, ${C.indigo})`, color: 'white', border: 'none', borderRadius: 12, fontSize: '0.85rem', fontWeight: 700, cursor: loading ? 'default' : 'pointer', opacity: loading ? 0.7 : 1, fontFamily: "'DM Sans', sans-serif" }}>
@@ -10237,11 +10246,24 @@ function AuthModal({ mode, onClose, onSuccess }) {
   const _capsCheck = (e) => { try { setCapsOn(!!(e.getModifierState && e.getModifierState("CapsLock"))); } catch (_) {} };
   const inp = (placeholder, key, type = "text", extra = {}) => {
     const isPw = type === "password";
+    // Password managers need autocomplete hints to offer to save a credential
+    // and to fill it later. Without them iOS never shows the strong-password
+    // suggestion or the save prompt, and 1Password and Chrome fill
+    // inconsistently. There were none anywhere in the app.
+    //
+    // 'username' rather than 'email' on the email field: that is the token
+    // password managers pair with a password to form a saved credential.
+    const autoFill = extra.autoComplete
+      || (isPw ? 'current-password' : type === 'email' ? 'username' : undefined);
     return (
       <React.Fragment>
         <input
           type={type}
           placeholder={placeholder}
+          autoComplete={autoFill}
+          autoCapitalize={type === 'email' ? 'none' : undefined}
+          autoCorrect={type === 'email' ? 'off' : undefined}
+          spellCheck={type === 'email' ? false : undefined}
           value={form[key]}
           onChange={e => { upd(key, e.target.value); setErr(""); }}
           onKeyDown={isPw ? _capsCheck : undefined}
@@ -10339,7 +10361,7 @@ function AuthModal({ mode, onClose, onSuccess }) {
           <>
             <div style={{ fontFamily: "'Playfair Display',Georgia,serif", fontSize: "1.1rem", fontWeight: 700, color: "#0E0B07", marginBottom: "0.35rem" }}>Set up your profile</div>
             <p style={{ fontSize: "0.78rem", color: "#8C7A68", fontFamily: "'DM Sans',sans-serif", marginBottom: "1.25rem", lineHeight: 1.55 }}>Your answers are private until both of you are done. We'll never show your partner what you wrote until results unlock.</p>
-            {inp("Your first name", "name")}
+            {inp("Your first name", "name", "text", { autoComplete: 'given-name' })}
             <div style={{ fontSize: "0.7rem", color: "#8C7A68", fontFamily: "'DM Sans',sans-serif", fontWeight: 600, marginBottom: "0.35rem", letterSpacing: "0.04em" }}>Your pronouns</div>
             <div style={{ display: "flex", gap: "0.5rem", marginBottom: "0rem" }}>
               {["she/her", "he/him", "they/them"].map(p => (
@@ -10350,10 +10372,10 @@ function AuthModal({ mode, onClose, onSuccess }) {
               ))}
             </div>
             {inp("Your email", "email", "email")}
-            {inp("Choose a password", "password", "password")}
+            {inp("Choose a password", "password", "password", { autoComplete: 'new-password' })}
             <div style={{ borderTop: "1px solid #E8DDD0", margin: "0.75rem 0 0.75rem" }} />
             <p style={{ fontSize: "0.75rem", color: "#8C7A68", fontFamily: "'DM Sans',sans-serif", marginBottom: "0.6rem", fontWeight: 600 }}>Your partner, required before results unlock</p>
-            {inp("Partner's first name", "partnerName")}
+            {inp("Partner's first name", "partnerName", "text", { autoComplete: 'off' })}
             <div style={{ fontSize: "0.7rem", color: "#8C7A68", fontFamily: "'DM Sans',sans-serif", fontWeight: 600, marginBottom: "0.35rem", letterSpacing: "0.04em" }}>Partner's pronouns</div>
             <div style={{ display: "flex", gap: "0.5rem", marginBottom: "0rem" }}>
               {["she/her", "he/him", "they/them"].map(p => (
@@ -10363,7 +10385,11 @@ function AuthModal({ mode, onClose, onSuccess }) {
                 </button>
               ))}
             </div>
-            {inp("Partner's email. We'll send them an invite", "partnerEmail", "email")}
+            {inp("Partner's email. We'll send them an invite", "partnerEmail", "email",
+              // Not 'username': this is the partner's address, and a password
+              // manager pairing it with this person's password would save the
+              // wrong credential.
+              { autoComplete: 'off' })}
             <div style={{ background: "#F3EDE6", borderRadius: 10, padding: "0.75rem 1rem", marginBottom: "0.85rem", display: "flex", gap: "0.6rem", alignItems: "flex-start" }}>
               <span style={{ fontSize: "0.82rem", flexShrink: 0 }}>✦</span>
               <p style={{ fontSize: "0.72rem", color: "#8C7A68", fontFamily: "'DM Sans',sans-serif", lineHeight: 1.6, margin: 0 }}>Attune uses your names and pronouns to personalize your results, making the insights feel specific to you two, not generic.</p>
@@ -10491,8 +10517,11 @@ function NewPasswordScreen({ onDone }) {
     } catch { setLoading(false); setErr('Something went wrong. Please try again.'); }
   };
 
+  // Reset form: always a new password, so the manager offers to update the
+  // stored credential rather than filling the old one back in.
   const inp = (placeholder, val, onChange, type = 'password') => (
-    <input type={type} placeholder={placeholder} value={val} onChange={e => { onChange(e.target.value); setErr(''); }}
+    <input type={type} placeholder={placeholder} autoComplete={type === 'password' ? 'new-password' : 'username'}
+      value={val} onChange={e => { onChange(e.target.value); setErr(''); }}
       style={{ width: '100%', padding: '0.78rem 1rem', border: `1.5px solid ${err ? '#ef4444' : '#E8DDD0'}`, borderRadius: 11, fontSize: '0.88rem', fontFamily: "'DM Sans', sans-serif", color: '#0E0B07', background: '#FFFDF9', outline: 'none', marginBottom: '0.6rem', boxSizing: 'border-box' }} />
   );
 
@@ -10861,14 +10890,17 @@ function PartnerLandingScreen({ inviteFrom, inviteCode, onCreateAccount }) {
             : 'Create your account to get started. Your answers stay private until both of you are done, then your results unlock together.'}
         </p>
 
-        {!existing && inp('Your first name', 'name')}
+        {!existing && inp('Your first name', 'name', 'text', { autoComplete: 'given-name' })}
         {inp('Your email', 'email', 'email')}
         {_iie && form.email.trim().toLowerCase() === _iie && (
           <p style={{ fontSize: '0.68rem', color: '#8C7A68', fontFamily: "'DM Sans', sans-serif", margin: '-0.35rem 0 0.6rem', lineHeight: 1.4 }}>
             From your invite. Change it if this isn't your email.
           </p>
         )}
-        {inp('Password (6+ characters)', 'password', 'password')}
+        {inp(existing ? 'Password' : 'Password (6+ characters)', 'password', 'password',
+          // new-password only when creating: telling a manager 'new' on a
+          // sign-in form makes it offer to overwrite a stored credential.
+          { autoComplete: existing ? 'current-password' : 'new-password' })}
 
         {!existing && (
         <div style={{ marginBottom: "1rem" }}>
@@ -11565,6 +11597,28 @@ export default function App() {
   const handleInstall = () => {
     if (pwaPrompt) { pwaPrompt.prompt(); pwaPrompt.userChoice.then(() => setPwaPrompt(null)); }
   };
+
+  // ── "Get the app" banner ────────────────────────────────────────────────
+  // Shown on the portal to signed-in people on a phone. Dismissal is
+  // remembered, because a banner that returns on every visit is the thing
+  // people resent about these. Hidden entirely when already running as an
+  // installed app: prompting someone to get the app they are using is the
+  // clearest possible sign nobody checked.
+  const [appBannerDismissed, setAppBannerDismissed] = useState(() => {
+    try { return localStorage.getItem('attune_app_banner_dismissed') === '1'; } catch { return false; }
+  });
+  const dismissAppBanner = () => {
+    setAppBannerDismissed(true);
+    try { localStorage.setItem('attune_app_banner_dismissed', '1'); } catch {}
+  };
+  const _isStandalone = (() => {
+    try {
+      return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+    } catch { return false; }
+  })();
+  const _isIOS = (() => {
+    try { return /iPad|iPhone|iPod/.test(navigator.userAgent); } catch { return false; }
+  })();
   const params = new URLSearchParams(window.location.search);
   // The dashboard renders only for a logged-in account. Demo mode has none, so
   // defaulting a demo link to "home" produced a blank page. Send demo straight
@@ -13588,6 +13642,29 @@ export default function App() {
       )}
 
       <div data-main-scroll style={{ maxWidth: view === "home" ? "unset" : 860, margin: view === "home" ? 0 : "0 auto", padding: view === "home" ? 0 : (view === "results" ? 0 : (isMobile ? "1rem 1.25rem" : "3rem 2rem")) }}>
+        {/* Get the app. Phones only, signed in, not already installed, and not
+            dismissed. Off entirely until APP_BANNER_ENABLED. */}
+        {APP_BANNER_ENABLED && view === "home" && isLoggedIn && isMobile && !_isStandalone && !appBannerDismissed && (
+          <div style={{ display: "flex", alignItems: "center", gap: "0.9rem", background: "white",
+            border: `1.5px solid ${C.stone}`, borderRadius: 14, padding: "0.9rem 1rem",
+            margin: "0 0 1rem", boxShadow: "0 6px 18px rgba(14,11,7,0.06)" }}>
+            <img src="/icon-192.png" alt="" width="40" height="40" style={{ borderRadius: 9, flexShrink: 0 }} />
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ fontSize: "0.85rem", fontWeight: 700, color: C.ink, fontFamily: BFONT }}>Attune in the App Store</div>
+              <div style={{ fontSize: "0.75rem", color: C.muted, fontFamily: BFONT, lineHeight: 1.45 }}>
+                Your results, notes and exercises, without opening a browser.
+              </div>
+            </div>
+            <a href={APP_STORE_URL} target="_blank" rel="noopener noreferrer"
+              style={{ flexShrink: 0, background: C.clay, color: "white", borderRadius: 10,
+                padding: "0.5rem 0.9rem", fontSize: "0.78rem", fontWeight: 700,
+                fontFamily: BFONT, textDecoration: "none" }}>Get</a>
+            <button onClick={dismissAppBanner} aria-label="Dismiss"
+              style={{ flexShrink: 0, background: "transparent", border: "none", color: C.muted,
+                fontSize: "1.1rem", lineHeight: 1, cursor: "pointer", padding: "0.2rem 0.3rem" }}>&times;</button>
+          </div>
+        )}
+
         {view === "home" && isLoggedIn && (
           <div style={{ display: "flex", minHeight: "100vh", background: "#FBF8F3" }}>
 
