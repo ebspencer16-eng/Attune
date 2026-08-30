@@ -35,99 +35,114 @@ export default async function handler(req) {
     return new Response(JSON.stringify({ error: 'Missing env vars' }), { status: 500 });
   }
 
-  const now = new Date();
-  let sent6mo = 0, sent1yr = 0, failed = 0;
+  // A throw anywhere below used to surface as an unexplained 500 with the work
+  // half done and no record of how far it got. This endpoint sends real email
+  // to real people, so a partial run has to be visible: the failure names the
+  // stage it reached, and the counts already sent are reported rather than lost.
+  let stage = "starting";
+  let sentSoFar = { sent6mo: 0, sent1yr: 0, failed: 0 };
+  try {
+    const now = new Date();
+    let sent6mo = 0, sent1yr = 0, failed = 0;
 
-  // ── Helper: date window ───────────────────────────────────────────────────
-  function windowFor(monthsAgo, daysBefore = 7, daysAfter = 7) {
-    const target = new Date(now);
-    target.setMonth(target.getMonth() - monthsAgo);
-    const start = new Date(target); start.setDate(start.getDate() - daysBefore);
-    const end   = new Date(target); end.setDate(end.getDate() + daysAfter);
-    return { start, end };
-  }
+    // ── Helper: date window ───────────────────────────────────────────────────
+    function windowFor(monthsAgo, daysBefore = 7, daysAfter = 7) {
+      const target = new Date(now);
+      target.setMonth(target.getMonth() - monthsAgo);
+      const start = new Date(target); start.setDate(start.getDate() - daysBefore);
+      const end   = new Date(target); end.setDate(end.getDate() + daysAfter);
+      return { start, end };
+    }
 
-  // ── Helper: fetch eligible users ─────────────────────────────────────────
-  // We select `pkg` rather than `has_anniversary` (which doesn't exist as
-  // a column). hasReflection is derived as: ex3_completed OR pkg in
-  // ('anniversary','premium'), OR (further down) any matching order has
-  // addon_reflection. The cron's intent is to suppress the upsell block
-  // for users who already have anniversary access.
-  async function fetchUsers(sentAtField, window) {
-    const res = await fetch(
-      `${supabaseUrl}/rest/v1/profiles?select=id,email,name,partner_name,created_at,ex3_completed,pkg` +
-      `&email_opt_in=eq.true` +
-      `&${sentAtField}=is.null` +
-      `&created_at=gte.${window.start.toISOString()}` +
-      `&created_at=lte.${window.end.toISOString()}`,
-      { headers: { 'apikey': serviceKey, 'Authorization': `Bearer ${serviceKey}` } }
-    );
-    if (!res.ok) { console.error('[cron-checkin] Query failed:', await res.text()); return []; }
-    return res.json();
-  }
+    // ── Helper: fetch eligible users ─────────────────────────────────────────
+    // We select `pkg` rather than `has_anniversary` (which doesn't exist as
+    // a column). hasReflection is derived as: ex3_completed OR pkg in
+    // ('anniversary','premium'), OR (further down) any matching order has
+    // addon_reflection. The cron's intent is to suppress the upsell block
+    // for users who already have anniversary access.
+    async function fetchUsers(sentAtField, window) {
+      const res = await fetch(
+        `${supabaseUrl}/rest/v1/profiles?select=id,email,name,partner_name,created_at,ex3_completed,pkg` +
+        `&email_opt_in=eq.true` +
+        `&${sentAtField}=is.null` +
+        `&created_at=gte.${window.start.toISOString()}` +
+        `&created_at=lte.${window.end.toISOString()}`,
+        { headers: { 'apikey': serviceKey, 'Authorization': `Bearer ${serviceKey}` } }
+      );
+      if (!res.ok) { console.error('[cron-checkin] Query failed:', await res.text()); return []; }
+      return res.json();
+    }
 
-  // True if user already has anniversary content access. Used to suppress
-  // the upsell block in the check-in email.
-  function hasReflectionAccess(user) {
-    if (user.ex3_completed) return true;
-    if (user.pkg === 'anniversary' || user.pkg === 'premium') return true;
-    return false;
-  }
+    // True if user already has anniversary content access. Used to suppress
+    // the upsell block in the check-in email.
+    function hasReflectionAccess(user) {
+      if (user.ex3_completed) return true;
+      if (user.pkg === 'anniversary' || user.pkg === 'premium') return true;
+      return false;
+    }
 
-  // ── Helper: mark sent ─────────────────────────────────────────────────────
-  async function markSent(userId, field) {
-    await fetch(`${supabaseUrl}/rest/v1/profiles?id=eq.${userId}`, {
-      method: 'PATCH',
-      headers: {
-        'apikey': serviceKey, 'Authorization': `Bearer ${serviceKey}`,
-        'Content-Type': 'application/json', 'Prefer': 'return=minimal',
-      },
-      body: JSON.stringify({ [field]: now.toISOString() }),
+    // ── Helper: mark sent ─────────────────────────────────────────────────────
+    async function markSent(userId, field) {
+      await fetch(`${supabaseUrl}/rest/v1/profiles?id=eq.${userId}`, {
+        method: 'PATCH',
+        headers: {
+          'apikey': serviceKey, 'Authorization': `Bearer ${serviceKey}`,
+          'Content-Type': 'application/json', 'Prefer': 'return=minimal',
+        },
+        body: JSON.stringify({ [field]: now.toISOString() }),
+      });
+    }
+
+    // ── Helper: send via Resend ───────────────────────────────────────────────
+    async function sendEmail(to, subject, html) {
+      const r = await fetch('https://api.resend.com/emails', {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${resendKey}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ from: `Attune <${fromEmail}>`, to: [to], subject, html }),
+      });
+      return r.ok;
+    }
+
+    // ── 6-month check-in ──────────────────────────────────────────────────────
+    stage = '6-month check-in';
+    const users6mo = await fetchUsers('checkin_sent_at', windowFor(6));
+    for (const user of users6mo) {
+      if (!user.email) continue;
+      const hasRefl = hasReflectionAccess(user);
+      const ok = await sendEmail(
+        user.email,
+        `How are you and ${user.partner_name || 'your partner'} doing?`,
+        checkinHtml({ toName: user.name || 'there', partnerName: user.partner_name || 'your partner', months: 6, hasReflection: hasRefl, retakeUrl: 'https://attune-relationships.com/app?signin=1' })
+      );
+      if (ok) { await markSent(user.id, 'checkin_sent_at'); sent6mo++; sentSoFar.sent6mo = sent6mo; }
+      else { console.error('[cron-checkin] 6mo email failed:', user.email); failed++; sentSoFar.failed = failed; }
+    }
+
+    // ── 1-year check-in ───────────────────────────────────────────────────────
+    stage = '1-year check-in';
+    const users1yr = await fetchUsers('checkin_1yr_sent_at', windowFor(12));
+    for (const user of users1yr) {
+      if (!user.email) continue;
+      const hasRefl = hasReflectionAccess(user);
+      const ok = await sendEmail(
+        user.email,
+        `A year with ${user.partner_name || 'your partner'} — how things look now`,
+        checkinHtml({ toName: user.name || 'there', partnerName: user.partner_name || 'your partner', months: 12, hasReflection: hasRefl, retakeUrl: 'https://attune-relationships.com/app?signin=1' })
+      );
+      if (ok) { await markSent(user.id, 'checkin_1yr_sent_at'); sent1yr++; sentSoFar.sent1yr = sent1yr; }
+      else { console.error('[cron-checkin] 1yr email failed:', user.email); failed++; sentSoFar.failed = failed; }
+    }
+
+    console.log(`[cron-checkin] 6mo: sent ${sent6mo}, 1yr: sent ${sent1yr}, failed: ${failed}`);
+    return new Response(JSON.stringify({ sent6mo, sent1yr, failed }), {
+      status: 200, headers: { 'Content-Type': 'application/json' },
+    });
+  } catch (e) {
+    console.error(`[cron-checkin] failed during ${stage}:`, e);
+    return new Response(JSON.stringify({ error: "cron-checkin failed", stage, ...sentSoFar }), {
+      status: 500, headers: { "Content-Type": "application/json" },
     });
   }
-
-  // ── Helper: send via Resend ───────────────────────────────────────────────
-  async function sendEmail(to, subject, html) {
-    const r = await fetch('https://api.resend.com/emails', {
-      method: 'POST',
-      headers: { 'Authorization': `Bearer ${resendKey}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ from: `Attune <${fromEmail}>`, to: [to], subject, html }),
-    });
-    return r.ok;
-  }
-
-  // ── 6-month check-in ──────────────────────────────────────────────────────
-  const users6mo = await fetchUsers('checkin_sent_at', windowFor(6));
-  for (const user of users6mo) {
-    if (!user.email) continue;
-    const hasRefl = hasReflectionAccess(user);
-    const ok = await sendEmail(
-      user.email,
-      `How are you and ${user.partner_name || 'your partner'} doing?`,
-      checkinHtml({ toName: user.name || 'there', partnerName: user.partner_name || 'your partner', months: 6, hasReflection: hasRefl, retakeUrl: 'https://attune-relationships.com/app?signin=1' })
-    );
-    if (ok) { await markSent(user.id, 'checkin_sent_at'); sent6mo++; }
-    else { console.error('[cron-checkin] 6mo email failed:', user.email); failed++; }
-  }
-
-  // ── 1-year check-in ───────────────────────────────────────────────────────
-  const users1yr = await fetchUsers('checkin_1yr_sent_at', windowFor(12));
-  for (const user of users1yr) {
-    if (!user.email) continue;
-    const hasRefl = hasReflectionAccess(user);
-    const ok = await sendEmail(
-      user.email,
-      `A year with ${user.partner_name || 'your partner'} — how things look now`,
-      checkinHtml({ toName: user.name || 'there', partnerName: user.partner_name || 'your partner', months: 12, hasReflection: hasRefl, retakeUrl: 'https://attune-relationships.com/app?signin=1' })
-    );
-    if (ok) { await markSent(user.id, 'checkin_1yr_sent_at'); sent1yr++; }
-    else { console.error('[cron-checkin] 1yr email failed:', user.email); failed++; }
-  }
-
-  console.log(`[cron-checkin] 6mo: sent ${sent6mo}, 1yr: sent ${sent1yr}, failed: ${failed}`);
-  return new Response(JSON.stringify({ sent6mo, sent1yr, failed }), {
-    status: 200, headers: { 'Content-Type': 'application/json' },
-  });
 }
 
 // ── Email template ────────────────────────────────────────────────────────────
