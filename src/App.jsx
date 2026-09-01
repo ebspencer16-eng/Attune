@@ -241,6 +241,7 @@ function entFromStoredOrder(o) {
     addonBudget: !!o.addonBudget,
     addonChecklist: !!o.addonChecklist,
     addonIntimacy: !!o.addonIntimacy,
+    addonConflict: !!o.addonConflict,
     addonWorkbook: o.addonWorkbook || '',
   };
 }
@@ -10620,6 +10621,7 @@ function AuthModal({ mode, onClose, onSuccess }) {
               addonBudget:     orderRow.addon_budget || false,
               addonChecklist:  orderRow.addon_checklist || false,
               addonIntimacy:     orderRow.addon_intimacy || false,
+              addonConflict:     orderRow.addon_conflict || false,
               addonWorkbook:   orderRow.addon_workbook || null,
               isPhysical:      orderRow.is_physical || false,
               orderNum:        orderRow.order_num || null,
@@ -11217,6 +11219,7 @@ function PartnerLandingScreen({ inviteFrom, inviteCode, onCreateAccount }) {
         addonBudget:     !!inheritedEntitlements?.addonBudget,
         addonChecklist:  !!inheritedEntitlements?.addonChecklist,
         addonIntimacy:     !!inheritedEntitlements?.addonIntimacy,
+        addonConflict:     !!inheritedEntitlements?.addonConflict,
         addonWorkbook:   inheritedEntitlements?.addonWorkbook || '',
         createdAt: Date.now(),
       };
@@ -11293,6 +11296,7 @@ function PartnerLandingScreen({ inviteFrom, inviteCode, onCreateAccount }) {
         addonBudget: !!inherited?.addonBudget,
         addonChecklist: !!inherited?.addonChecklist,
         addonIntimacy: !!inherited?.addonIntimacy,
+        addonConflict: !!inherited?.addonConflict,
         addonWorkbook: inherited?.addonWorkbook || '',
         createdAt: Date.now(),
       };
@@ -12475,7 +12479,13 @@ export default function App() {
         const _wbStatus = prof?.workbook_status || _stored.workbookStatus || null;
         const _order = {
           orderNum: ent.orderNum, pkgKey: ent.pkg, pkg: ent.pkg, isPhysical: ent.isPhysical,
-          addonChecklist: ent.addonChecklist, addonIntimacy: ent.addonIntimacy, addonWorkbook: ent.addonWorkbook,
+          // Every add-on the engine grants, not a subset. This object is
+          // written straight to attune_order, so anything omitted here is an
+          // add-on the person paid for and cannot see until the next full
+          // recompute. addonBudget and addonReflection were missing.
+          addonChecklist: ent.addonChecklist, addonIntimacy: ent.addonIntimacy,
+          addonConflict: ent.addonConflict, addonWorkbook: ent.addonWorkbook,
+          addonBudget: ent.addonBudget, addonReflection: ent.addonReflection,
           workbookUrl: _wbUrl, workbookStatus: _wbStatus,
         };
         try { localStorage.setItem('attune_order', JSON.stringify(_order)); } catch {}
@@ -12490,6 +12500,7 @@ export default function App() {
           addonBudget:     prev.addonBudget     || ent.addonBudget,
           addonChecklist:  prev.addonChecklist  || ent.addonChecklist,
           addonIntimacy:   prev.addonIntimacy   || ent.addonIntimacy,
+          addonConflict:   prev.addonConflict   || ent.addonConflict,
           addonWorkbook:   (prev.addonWorkbook === 'printed' || ent.addonWorkbook === 'printed') ? 'printed' : (ent.addonWorkbook || prev.addonWorkbook || ''),
           orderNum:        prev.orderNum || ent.orderNum,
         } : prev);
@@ -12618,6 +12629,7 @@ export default function App() {
               addonBudget:     ent.addonBudget,
               addonChecklist:  ent.addonChecklist,
               addonIntimacy:   ent.addonIntimacy,
+              addonConflict:   ent.addonConflict,
               addonWorkbook:   ent.addonWorkbook,
               orderNum:        ent.orderNum,
               createdAt: profile?.created_at ? new Date(profile.created_at).getTime() : Date.now(),
@@ -12651,6 +12663,7 @@ export default function App() {
                   addonBudget:     ent.addonBudget,
                   addonChecklist:  ent.addonChecklist,
                   addonIntimacy:   ent.addonIntimacy,
+                  addonConflict:   ent.addonConflict,
                   addonWorkbook:   ent.addonWorkbook,
                 };
                 const _rebuiltWB = carryWorkbook(_rebuiltOrder);
@@ -12758,6 +12771,7 @@ export default function App() {
                   addonBudget:     merged.addonBudget,
                   addonChecklist:  merged.addonChecklist,
                   addonIntimacy:   merged.addonIntimacy,
+                  addonConflict:   merged.addonConflict,
                   addonWorkbook:   merged.addonWorkbook,
                 };
                 const _syncedWB = carryWorkbook(_syncedOrder);
@@ -12773,6 +12787,7 @@ export default function App() {
                   addonBudget:     merged.addonBudget,
                   addonChecklist:  merged.addonChecklist,
                   addonIntimacy:   merged.addonIntimacy,
+                  addonConflict:   merged.addonConflict,
                   addonWorkbook:   merged.addonWorkbook,
                   orderNum: merged.orderNum || prev.orderNum,
                 } : prev);
@@ -13680,6 +13695,7 @@ export default function App() {
               addonBudget:     json.inherited.addonBudget,
               addonChecklist:  json.inherited.addonChecklist,
               addonIntimacy:     json.inherited.addonIntimacy,
+              addonConflict:     json.inherited.addonConflict,
               addonWorkbook:   json.inherited.addonWorkbook || null,
               workbookStatus:  json.inherited.workbookStatus || prev.workbookStatus || null,
               inheritedFromPartner: true,
