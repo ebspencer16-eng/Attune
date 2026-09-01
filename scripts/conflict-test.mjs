@@ -77,5 +77,29 @@ ok('the four pattern labels are present',
   ['Criticism', 'Contempt', 'Defensiveness', 'Stonewalling']
     .every(l => CONFLICT_QUESTIONS.some(q => q.riskLabel === l)));
 
+// ── Results copy ────────────────────────────────────────────────────────────
+// Every pattern needs a line for every frequency. A missing band renders an
+// empty tip under a bar, which reads as the product having nothing to say
+// about the answer someone just gave honestly.
+const { PATTERN_COPY, SNAPSHOT_PROSE, CONFLICT_RESULTS_COPY, interpConflict } =
+  await import('../api/_conflict-results-prose.js');
+const { RISK_QUESTIONS } = await import('../api/_conflict-questions.js');
+
+ok('every pattern has copy for every frequency',
+  RISK_QUESTIONS.every(q => [0, 1, 2, 3].every(v => PATTERN_COPY[q.riskKey]?.[v]?.note)));
+ok('copy labels match the question labels',
+  RISK_QUESTIONS.every(q => PATTERN_COPY[q.riskKey]?.label === q.riskLabel));
+ok('a Never band says something rather than nothing',
+  RISK_QUESTIONS.every(q => PATTERN_COPY[q.riskKey][0].note.length > 30));
+
+const allCopy = JSON.stringify({ PATTERN_COPY, SNAPSHOT_PROSE, CONFLICT_RESULTS_COPY });
+ok('no em dashes in results copy', !allCopy.includes('\u2014'));
+ok('no branded terminology in results copy', !/gottman|four horse(man|men)/i.test(allCopy));
+ok('no hedging in results copy', !/\b(perhaps|might|possibly|it seems|somewhat)\b/i.test(allCopy));
+ok('partner token resolves',
+  !interpConflict(PATTERN_COPY.contempt[2].note, { partner: 'Preston' }).includes('{partner}'));
+ok('no unresolved tokens left in any line', !/\{(partner|a|b)\}/.test(
+  RISK_QUESTIONS.flatMap(q => [0,1,2,3].map(v => interpConflict(PATTERN_COPY[q.riskKey][v].note, { partner: 'P' }))).join(' ')));
+
 console.log(`\n${pass} passed, ${fail} failed`);
 if (fail) process.exit(1);
