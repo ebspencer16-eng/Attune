@@ -51,7 +51,7 @@ export const config = { runtime: 'edge' };
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 // 'intimacy' writes the whole record to profiles.intimacy_data (no _answers /
 // _completed columns exist for it), so it is handled separately below.
-const VALID_EXERCISES = new Set(['ex1', 'ex2', 'ex3', 'intimacy']);
+const VALID_EXERCISES = new Set(['ex1', 'ex2', 'ex3', 'intimacy', 'conflict']);
 const HEADERS = { 'Content-Type': 'application/json', 'X-Content-Type-Options': 'nosniff' };
 
 const err = (status, message) => new Response(JSON.stringify({ ok: false, error: message }), { status, headers: HEADERS });
@@ -133,6 +133,12 @@ export default async function handler(req) {
     // The client sends the full intimacy record (answers + variant +
     // completedAt) as `answers`; it lands verbatim in profiles.intimacy_data.
     updates.intimacy_data = answers;
+  } else if (exercise === 'conflict') {
+    // Same shape as intimacy: the whole record lands in one column. Without
+    // this branch the generic path below would write conflict_answers, a
+    // column that does not exist, so the fallback would fail exactly when it
+    // was needed most: after the direct write had already been blocked.
+    updates.conflict_data = answers;
   } else if (isProgress) {
     updates[`${exercise}_progress`] = answers;
   } else {
