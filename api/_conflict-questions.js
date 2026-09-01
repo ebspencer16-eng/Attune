@@ -141,10 +141,16 @@ export const CONFLICT_QUESTIONS = [
   },
 ];
 
-/** Questions that must be answered before the exercise can complete. */
-export const CONFLICT_REQUIRED = CONFLICT_QUESTIONS
-  .filter(q => q.kind !== 'openText')
-  .map(q => q.id);
+/**
+ * Questions that must be answered before the exercise can complete.
+ *
+ * Every question, open text included. The two written answers are the warm
+ * ones, a disagreement that went better than expected and something they
+ * appreciate, and they are what the results close on. Skipped, the results end
+ * on the risk patterns instead, which is the wrong note for this exercise to
+ * leave someone on.
+ */
+export const CONFLICT_REQUIRED = CONFLICT_QUESTIONS.map(q => q.id);
 
 export const RISK_QUESTIONS = CONFLICT_QUESTIONS.filter(q => q.kind === 'frequency');
 

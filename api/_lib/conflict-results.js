@@ -39,14 +39,20 @@ export function riskBand(value) {
 
 const BAND_ORDER = { not_present: 0, occasional: 1, worth_watching: 2, worth_attention: 3 };
 
-/** Is the exercise finished? Open text is optional; everything else required. */
+/**
+ * Is the exercise finished? Every question, open text included.
+ *
+ * Whitespace does not count as an answer: trimming means a space bar does not
+ * satisfy a written question.
+ */
 export function isConflictComplete(answers) {
   if (!answers) return false;
   return CONFLICT_REQUIRED.every(id => {
     const v = answers[id];
     if (v == null) return false;
     if (Array.isArray(v)) return v.length > 0;
-    return v !== '';
+    if (typeof v === 'string') return v.trim() !== '';
+    return true;
   });
 }
 

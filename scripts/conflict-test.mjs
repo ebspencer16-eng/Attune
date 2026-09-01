@@ -15,21 +15,23 @@ const ok = (name, cond, detail = '') => {
 const base = (over = {}) => ({
   c0: 3, c1: 'A', c2: 'B',
   c_crit: 0, c_cont: 0, c_def: 0, c_stone: 0,
-  c8: 'Using humor', c9: '',
+  c8: 'Using humor', c9: 'We talked it out in the car.',
   c_repair: ['A genuine apology', 'Suggesting a pause', 'Humor to break the tension',
              'Physical affection (a hug, holding hands)', 'Naming that they see it from my side',
              'Directly asking what I need'],
-  c_topic: 'A', c_grat: '', ...over,
+  c_topic: 'A', c_grat: 'She always comes back to it.', ...over,
 });
 
 // ── Shape ───────────────────────────────────────────────────────────────────
 ok('12 questions across 6 sections', CONFLICT_QUESTIONS.length === 12 && CONFLICT_SECTIONS.length === 6);
 ok('display order covers every question', conflictQuestionsInOrder().length === 12);
 ok('no duplicate ids', new Set(CONFLICT_QUESTIONS.map(q => q.id)).size === 12);
-ok('open text is optional, everything else required', CONFLICT_REQUIRED.length === 10);
+ok('every question is required, open text included', CONFLICT_REQUIRED.length === 12);
 
 // ── Completion ──────────────────────────────────────────────────────────────
-ok('complete with both open texts blank', isConflictComplete(base()));
+ok('complete when everything including the written answers is filled', isConflictComplete(base()));
+ok('incomplete with a written answer blank', !isConflictComplete(base({ c9: '' })));
+ok('whitespace does not count as an answer', !isConflictComplete(base({ c_grat: '   ' })));
 ok('incomplete when a required answer is missing', !isConflictComplete(base({ c_def: undefined })));
 ok('incomplete when the ranking is empty', !isConflictComplete(base({ c_repair: [] })));
 ok('a zero answer counts as answered', isConflictComplete(base({ c_crit: 0 })));

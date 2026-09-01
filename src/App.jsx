@@ -1287,14 +1287,15 @@ export function ConflictExercise({ userName = "You", partnerName = "your partner
   const total = ORDER.length;
   const setAns = (id, value) => setAnswers(a => ({ ...a, [id]: value }));
 
-  // Open text is optional; everything else must be answered before Next.
+  // Every question must be answered, written ones included. Whitespace does
+  // not count, so the space bar cannot satisfy a written question.
   const answeredNow = (() => {
     if (!q) return false;
-    if (q.kind === 'openText') return true;
     const v = answers[q.id];
     if (v == null) return false;
     if (Array.isArray(v)) return v.length === (q.options?.length || 0);
-    return v !== '';
+    if (typeof v === 'string') return v.trim() !== '';
+    return true;
   })();
 
   const section = CONFLICT_SECTIONS.find(s => s.id === q?.section);
@@ -1320,7 +1321,7 @@ export function ConflictExercise({ userName = "You", partnerName = "your partner
       <h2 style={{ fontFamily: HFONT, fontSize: "1.7rem", fontWeight: 700, color: C.ink, lineHeight: 1.2, marginBottom: "1rem" }}>How you fight</h2>
       <p style={{ fontSize: "0.9rem", color: C.muted, fontFamily: BFONT, fontWeight: 300, lineHeight: 1.7, marginBottom: "1.25rem" }}>{CONFLICT_INTRO}</p>
       <p style={{ fontSize: "0.82rem", color: C.muted, fontFamily: BFONT, fontWeight: 300, lineHeight: 1.65, marginBottom: "1.75rem" }}>
-        Twelve questions, about ten minutes. You answer on your own. One section stays private to you, and {partnerName} never sees it.
+        Twelve questions, about ten minutes. Two ask you to write a sentence. You answer on your own, and one section stays private to you that {partnerName} never sees.
       </p>
       <button onClick={() => setPhase('questions')}
         style={{ background: accent, color: "white", border: "none", borderRadius: 12, padding: "0.9rem 1.75rem", fontSize: "0.9rem", fontWeight: 700, fontFamily: BFONT, cursor: "pointer" }}>
@@ -1459,7 +1460,7 @@ export function ConflictExercise({ userName = "You", partnerName = "your partner
           <textarea value={answers[q.id] || ''} onChange={e => setAns(q.id, e.target.value)}
             placeholder={q.placeholder || ''} rows={5}
             style={{ width: "100%", padding: "0.9rem 1rem", border: `1.5px solid ${C.stone}`, borderRadius: 12, fontFamily: BFONT, fontSize: "0.9rem", lineHeight: 1.6, color: C.ink, resize: "vertical" }} />
-          <p style={{ fontSize: "0.72rem", color: C.muted, fontFamily: BFONT, marginTop: "0.4rem" }}>Optional. Skip it if nothing comes to mind.</p>
+          <p style={{ fontSize: "0.72rem", color: C.muted, fontFamily: BFONT, marginTop: "0.4rem" }}>A sentence is enough.</p>
         </div>
       )}
 
