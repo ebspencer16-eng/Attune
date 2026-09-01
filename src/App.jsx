@@ -12699,6 +12699,11 @@ export default function App() {
               if (profile?.notes_data)         localStorage.setItem('attune_notes', JSON.stringify(profile.notes_data));
               else                             localStorage.removeItem('attune_notes');
               if (profile?.intimacy_data)      { localStorage.setItem('attune_intimacy', JSON.stringify(profile.intimacy_data)); setIntimacyData(profile.intimacy_data); }
+              // Same as intimacy: written on completion, so it has to come back
+              // on hydration or the answers do not survive a device change or a
+              // sign-out. Else-remove so a second account cannot inherit them.
+              if (profile?.conflict_data)      { localStorage.setItem('attune_conflict', JSON.stringify(profile.conflict_data)); setConflictData(profile.conflict_data); }
+              else                             { localStorage.removeItem('attune_conflict'); setConflictData(null); }
               if (profile?.profile_setup_complete) localStorage.setItem('attune_profile_setup_done', '1');
               // Invitee (Partner B) completion marker. Routing keys off
               // attune_partner_session; without it, an invitee who finished on
@@ -14649,6 +14654,28 @@ export default function App() {
                     doneLabel: "Your reflection is captured",
                     onClick: () => setView("exercise3"),
                     icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#10b981" strokeWidth="1.8" strokeLinecap="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>,
+                  })}
+                  {/* Owned add-on exercises. Without these the dashboard has
+                      no way into them at all: the upsell square disappears the
+                      moment you own it, leaving the exercise reachable only by
+                      typing the URL. That was true for Physical Intimacy too. */}
+                  {pkg.hasIntimacy && exTile({
+                    title: "Physical Intimacy Expectations",
+                    sub: "A private set of questions about physical intimacy, answered independently.",
+                    color: "#B5546E", accent: "#B5546E",
+                    done: !!(intimacyData?.completedAt), inProgress: false,
+                    doneLabel: "Your answers are saved",
+                    onClick: () => setView("intimacy"),
+                    icon: GrowIcons.intimacy("#B5546E"),
+                  })}
+                  {pkg.hasConflict && exTile({
+                    title: "How You Fight",
+                    sub: "How conflict actually goes for you. One section stays private to you, always.",
+                    color: "#1B5FE8", accent: "#1B5FE8",
+                    done: !!(conflictData?.completedAt), inProgress: false,
+                    doneLabel: "Your answers are saved",
+                    onClick: () => setView("conflict"),
+                    icon: GrowIcons.intimacy("#1B5FE8"),
                   })}
                 </div>
 
