@@ -72,6 +72,7 @@ const cover = buildCover({
     ['8.', 'Reflection action titles', 'rewritten as instructions'],
     ['9.', 'Reassurance guidance', '15 score pairings, new'],
     ['10.', 'Reassurance when aligned', 'keep-in-mind line, new'],
+    ['11.', 'How You Fight (Exercise 5)', '12 questions and 16 results lines, all new'],
   ],
 });
 
@@ -216,6 +217,54 @@ children.push(...bigSection('10', 'Reassurance when aligned', 'When both partner
     children.push(midSection(`10.${i + 1}`, label, PURPLE));
     children.push(prose(text));
   });
+
+// ── 11 ───────────────────────────────────────────────────────────────────────
+// Exercise 5. All new copy, and the one exercise where a dimension IS
+// evaluative, so the usual "neither pole is better" rule does not apply. That
+// makes the tone worth reading closely rather than skimming.
+const { CONFLICT_QUESTIONS, CONFLICT_SECTIONS, CONFLICT_INTRO } =
+  await import('../api/_conflict-questions.js');
+const { PATTERN_COPY, SNAPSHOT_PROSE, CONFLICT_RESULTS_COPY, FREQUENCY_LABELS } =
+  await import('../api/_conflict-results-prose.js');
+
+children.push(...bigSection('11', 'How You Fight (Exercise 5)',
+  'A $40 add-on, never bundled. Twelve questions, self-only, no partner-view. The four risk patterns are the one place in Attune where one direction genuinely is worse, so this copy asserts rather than staying neutral. Nothing here has been reviewed.', BLUE));
+
+children.push(midSection('11.1', 'Opening framing', BLUE, { extras: 'shown before question 1' }));
+children.push(prose(CONFLICT_INTRO));
+
+children.push(midSection('11.2', 'The twelve questions', BLUE, { extras: 'in display order' }));
+const bySection = new Map(CONFLICT_SECTIONS.map(sec => [sec.id, sec.label]));
+CONFLICT_QUESTIONS.forEach((q, i) => {
+  const opts = q.kind === 'forcedAB' ? [`A. ${q.a}`, `B. ${q.b}`]
+    : q.kind === 'frequency' ? [FREQUENCY_LABELS.join('  /  ')]
+    : q.options ? q.options.map(o => (typeof o === 'string' ? o : o.label))
+    : [q.placeholder || 'Written answer'];
+  children.push(prose(`${i + 1}. [${bySection.get(q.section)}] ${q.text}`));
+  opts.forEach(o => children.push(prose(`      ${o}`)));
+});
+
+children.push(midSection('11.3', 'Results: the four patterns', BLUE,
+  { extras: 'one line per pattern per answer. This section is private to each person and the partner never sees it.' }));
+for (const key of ['criticism', 'contempt', 'defensiveness', 'stonewalling']) {
+  const c = PATTERN_COPY[key];
+  children.push(prose(`${c.label} — ${c.definition}`.replace(' — ', '. ')));
+  [0, 1, 2, 3].forEach(v => children.push(prose(`      ${FREQUENCY_LABELS[v]}: ${c[v].note.replace(/\{partner\}/g, 'David')}`)));
+}
+
+children.push(midSection('11.4', 'Results: the snapshot line', BLUE,
+  { extras: 'from the two forced-choice openers. The one part of this exercise where both answers are equally valid.' }));
+[['They differ', SNAPSHOT_PROSE.differ], ['Both address it immediately', SNAPSHOT_PROSE.bothImmediate],
+ ['Both need time first', SNAPSHOT_PROSE.bothDelayed]].forEach(([label, text]) => {
+  children.push(prose(`${label}: ${text.replace(/\{a\}/g, 'Maya').replace(/\{b\}/g, 'David')}`));
+});
+
+children.push(midSection('11.5', 'Results: headings and framing', BLUE));
+[['Privacy banner', CONFLICT_RESULTS_COPY.patternsPrivacy],
+ ['Patterns intro', CONFLICT_RESULTS_COPY.patternsIntro],
+ ['Repair intro', CONFLICT_RESULTS_COPY.repairIntro],
+ ['When no pattern is flagged', CONFLICT_RESULTS_COPY.allClear.replace(/\{partner\}/g, 'David')]]
+  .forEach(([label, text]) => children.push(prose(`${label}: ${text}`)));
 
 const out = (process.env.ATTUNE_DOC_OUT || '/mnt/user-data/outputs') + '/attune_prose_to_approve.docx';
 await renderDoc({ footerLabel: 'Attune · Prose to approve', children, outPath: out });
