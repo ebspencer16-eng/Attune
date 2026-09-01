@@ -51,11 +51,14 @@ const ADDON_META = {
   reflection: { title: 'Relationship Reflection',    desc: 'Exercise on experiences that shaped you' },
 };
 // What each package already bundles, so it isn't offered again as a paid add-on.
+// conflict is false everywhere on purpose: How You Fight is never bundled into
+// a package, including premium. Omitting it here would make the lookup
+// undefined, which is falsy and happens to work, but only by accident.
 const PKG_INCLUDED = {
-  core:        { checklist:false, budget:false, reflection:false, intimacy:false },
-  newlywed:    { checklist:true,  budget:true,  reflection:false, intimacy:false },
-  anniversary: { checklist:false, budget:false, reflection:true, intimacy:false },
-  premium:     { checklist:false, budget:true,  reflection:true, intimacy:true  },
+  core:        { checklist:false, budget:false, reflection:false, intimacy:false, conflict:false },
+  newlywed:    { checklist:true,  budget:true,  reflection:false, intimacy:false, conflict:false },
+  anniversary: { checklist:false, budget:false, reflection:true, intimacy:false, conflict:false },
+  premium:     { checklist:false, budget:true,  reflection:true, intimacy:true,  conflict:false },
 };
 // Display order: workbook first (primary upsell), then cheapest → most expensive.
 const ADDON_ORDER = (function(){
