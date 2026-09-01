@@ -11,6 +11,7 @@ import { DIM_CONTENT, GAP_BLURBS, WHEN_THIS_SHOWS_UP } from '../api/_workbook-co
 import { PERSONALITY_QUESTIONS, PARTNER_VIEW_TEXT, LIFE_QUESTIONS, RESPONSIBILITY_CATEGORIES } from '../api/_questions.js';
 import { INTIMACY_QUESTIONS } from '../api/_intimacy-questions.js';
 import { INTIMACY_RESULTS_PROSE } from '../api/_intimacy-results-prose.js';
+import { CONFLICT_QUESTIONS } from '../api/_conflict-questions.js';
 
 // Tokens the render layer substitutes. Anything else in braces is a leak.
 // Names: {U}/{P} and the couple-type role names, each with pronoun forms.
@@ -47,6 +48,29 @@ walk(LIFE_QUESTIONS, 'LIFE_QUESTIONS');
 walk(RESPONSIBILITY_CATEGORIES, 'RESPONSIBILITY_CATEGORIES');
 walk(INTIMACY_QUESTIONS, 'INTIMACY_QUESTIONS');
 walk(INTIMACY_RESULTS_PROSE, 'INTIMACY_RESULTS_PROSE');
+walk(CONFLICT_QUESTIONS, 'CONFLICT_QUESTIONS');
+
+// ── Branded terminology ────────────────────────────────────────────────────
+// Cleared for customer use: Criticism, Contempt, Defensiveness, Stonewalling.
+// NOT cleared, pending counsel via Carolina: "Gottman", "Gottman Method" and
+// "Four Horsemen". The underlying concepts are research findings and not
+// protectable; the branding is a licensing business, and implying affiliation
+// or certification is where a problem starts. Remove this block once counsel
+// clears it, not before.
+const BRANDED = /gottman|four\s+horse(man|men)/i;
+const brandHits = [];
+const scanBrand = (value, path) => {
+  if (typeof value === 'string') { if (BRANDED.test(value)) brandHits.push({ path, sample: value.slice(0, 90) }); }
+  else if (Array.isArray(value)) value.forEach((v, i) => scanBrand(v, `${path}[${i}]`));
+  else if (value && typeof value === 'object') for (const [k, v] of Object.entries(value)) scanBrand(v, `${path}.${k}`);
+};
+scanBrand(CONFLICT_QUESTIONS, 'CONFLICT_QUESTIONS');
+if (brandHits.length) {
+  console.error('[check-copy-tokens] branded terminology in customer copy, not cleared for use:');
+  for (const h of brandHits) console.error(`  ${h.path}  ::  ${h.sample}`);
+  console.error('The four pattern names are fine. "Gottman" and "Four Horsemen" need counsel first.');
+  process.exit(1);
+}
 
 if (hits.length) {
   console.error('[check-copy-tokens] unresolved template tokens in customer copy:');

@@ -65,7 +65,15 @@ ok('overall gap is reported', conflictPair(base({ c0: 4 }), base({ c0: 1 })).ove
 // ── Voice ───────────────────────────────────────────────────────────────────
 const copy = JSON.stringify(CONFLICT_QUESTIONS);
 ok('no em dashes in customer copy', !copy.includes('\u2014'));
-ok('no clinical labels shown to customers', !/horseman|horsemen|stonewalling|gottman/i.test(copy));
+// The four pattern names are cleared for customer use. The BRANDING around
+// them is not, pending counsel: the concepts are research findings and not
+// protectable, but "Gottman Method" is a licensing business and implying
+// affiliation is where the risk sits. This fails the build rather than relying
+// on anyone remembering.
+ok('no branded terminology in customer copy', !/gottman|four horse(man|men)/i.test(copy));
+ok('the four pattern labels are present',
+  ['Criticism', 'Contempt', 'Defensiveness', 'Stonewalling']
+    .every(l => CONFLICT_QUESTIONS.some(q => q.riskLabel === l)));
 
 console.log(`\n${pass} passed, ${fail} failed`);
 if (fail) process.exit(1);

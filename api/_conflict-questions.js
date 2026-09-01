@@ -76,22 +76,28 @@ export const CONFLICT_QUESTIONS = [
   },
 
   // ── 3. The Risk Patterns. Evaluative, self-only, frequency-rated. ────────
-  // riskKey names the pattern for the results copy without putting the
-  // clinical term in front of the customer.
+  // riskKey is the internal key; riskLabel is what the customer reads.
+  //
+  // The four pattern names are cleared for use. What is NOT cleared, pending
+  // counsel via Carolina, is "Gottman", "Gottman Method" and "Four Horsemen":
+  // the concepts are research findings and not protectable, but the branding
+  // around them is a licensing business. check-copy-tokens fails the build if
+  // any of those three reach customer copy, so the line holds without anyone
+  // having to remember it.
   {
-    id: 'c_crit', section: 'risk', kind: 'frequency', riskKey: 'criticism',
+    id: 'c_crit', section: 'risk', kind: 'frequency', riskKey: 'criticism', riskLabel: 'Criticism',
     text: "When I'm frustrated, I find myself criticizing my partner's character rather than naming the specific issue.",
   },
   {
-    id: 'c_cont', section: 'risk', kind: 'frequency', riskKey: 'contempt',
+    id: 'c_cont', section: 'risk', kind: 'frequency', riskKey: 'contempt', riskLabel: 'Contempt',
     text: 'When we disagree, I catch myself being sarcastic, dismissive, or rolling my eyes.',
   },
   {
-    id: 'c_def', section: 'risk', kind: 'frequency', riskKey: 'defensiveness',
+    id: 'c_def', section: 'risk', kind: 'frequency', riskKey: 'defensiveness', riskLabel: 'Defensiveness',
     text: 'When my partner brings up a concern, I respond by defending myself or pointing out what they do wrong.',
   },
   {
-    id: 'c_stone', section: 'risk', kind: 'frequency', riskKey: 'withdrawal',
+    id: 'c_stone', section: 'risk', kind: 'frequency', riskKey: 'stonewalling', riskLabel: 'Stonewalling',
     text: 'When things get tense, I shut down or withdraw instead of staying in the conversation.',
   },
 
