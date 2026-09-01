@@ -5309,8 +5309,12 @@ async function loadTypesData(force) {
 
   sandboxWeights = null;
   buildSandbox();
-  buildQSandbox();
-  refreshQSandbox();
+  // The sandboxes are a diagnostic. A throw inside one must never stop the
+  // page rendering, which is exactly what happened when this was added: the
+  // Types page went blank with no error, because the fetch try/catch only
+  // covers the fetch.
+  try { buildQSandbox(); refreshQSandbox(); }
+  catch (e) { console.error('[types] question-weight sandbox failed:', e); }
   renderTypes();
 }
 
@@ -5565,7 +5569,13 @@ function refreshQSandbox() {
   let moved = 0, onWhole = 0, dimCount = 0;
   indiv.forEach(r => {
     const sc = qScoresFor(r, qSandboxWeights);
-    const { w, o } = axisFromScores(sc, cfg, null);
+    // The dimension weights, not the question weights: this sandbox changes
+    // how questions combine INTO a dimension, then scores the result with the
+    // normal axis weights. Passing null here threw on the first dimension and
+    // took the whole Types page down with it.
+    const dimWeights = {};
+    for (const d in cfg) dimWeights[d] = cfg[d].weight;
+    const { w, o } = axisFromScores(sc, cfg, dimWeights);
     if (typeFromAxes(w, o) !== r.type) moved++;
     for (const d in sc) { dimCount++; if (Math.abs(sc[d] - Math.round(sc[d])) < 0.02) onWhole++; }
   });
