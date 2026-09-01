@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useLayoutEffect, useRef } from "react";
 import { axisScores, blendedDimScores, AXIS_CONFIG, QUESTION_WEIGHTS } from "../api/_type-engine.js";
 import { PERSONALITY_QUESTIONS, RESPONSIBILITY_CATEGORIES, LIFE_QUESTIONS, PARTNER_VIEW_TEXT } from "../api/_questions.js";
+import { CONFLICT_SECTIONS, CONFLICT_INTRO, FREQUENCY_OPTIONS, conflictQuestionsInOrder } from "../api/_conflict-questions.js";
 // Results copy now lives in versioned snapshots. A couple's results render
 // from the version stamped on their results row, so revising the wording never
 // moves the words a highlight was written against. contentFor(null) returns
@@ -124,6 +125,7 @@ const USER_LOCALSTORAGE_KEYS = [
   'attune_partner_session', 'attune_live_session',
   'attune_order', 'attune_portrait', 'attune_budget',
   'attune_checklist', 'attune_notes', 'attune_app_banner_dismissed',
+  'attune_conflict', 'attune_conflict_progress',
   'attune_intimacy', 'attune_intimacy_progress',
   'attune_workbook_ready', 'attune_workbook_blob',
   'attune_workbook_print_queued',
@@ -1255,6 +1257,226 @@ export function IntimacyExercise({ userName = "You", partnerName = "your partner
     </div>
   );
 }
+
+// ── EXERCISE 5: HOW YOU FIGHT ────────────────────────────────────────────────
+// Self-only, so there is no partner-view half and no Part 2 break. Six question
+// formats, three of which exist nowhere else in the product: a frequency
+// rating, a pick-one from ten, and a six-item ranking.
+//
+// The risk section is the reason this exercise reads differently from the
+// others. Its questions ask someone to admit to contempt and stonewalling, so
+// the framing before them, and the absence of any "which of you is worse"
+// comparison, is doing real work. Nothing here is scored against the partner.
+export function ConflictExercise({ userName = "You", partnerName = "your partner", onComplete, fresh = false }) {
+  const PROGRESS_KEY = 'attune_conflict_progress';
+  const hydrate = () => { try { return JSON.parse(localStorage.getItem(PROGRESS_KEY) || 'null'); } catch { return null; } };
+  const saved = fresh ? null : hydrate();
+
+  const ORDER = React.useMemo(() => conflictQuestionsInOrder(), []);
+  const [phase, setPhase] = useState(saved?.phase || 'intro');
+  const [qIdx, setQIdx] = useState(saved?.qIdx ?? 0);
+  const [answers, setAnswers] = useState(saved?.answers || {});
+
+  useEffect(() => {
+    if (fresh) return;
+    try { localStorage.setItem(PROGRESS_KEY, JSON.stringify({ phase, qIdx, answers })); } catch {}
+  }, [phase, qIdx, answers, fresh]);
+
+  const accent = "#1B5FE8";
+  const q = ORDER[qIdx];
+  const total = ORDER.length;
+  const setAns = (id, value) => setAnswers(a => ({ ...a, [id]: value }));
+
+  // Open text is optional; everything else must be answered before Next.
+  const answeredNow = (() => {
+    if (!q) return false;
+    if (q.kind === 'openText') return true;
+    const v = answers[q.id];
+    if (v == null) return false;
+    if (Array.isArray(v)) return v.length === (q.options?.length || 0);
+    return v !== '';
+  })();
+
+  const section = CONFLICT_SECTIONS.find(s => s.id === q?.section);
+  // The risk section gets its framing once, on the first of its questions,
+  // rather than repeated above each one.
+  const isFirstOfRisk = q?.id === 'c_crit';
+
+  const next = () => (qIdx + 1 < total ? setQIdx(qIdx + 1) : setPhase('done'));
+  const back = () => (qIdx > 0 ? setQIdx(qIdx - 1) : setPhase('intro'));
+
+  const optionBtn = (selected) => ({
+    textAlign: "left", width: "100%", background: selected ? "#EEF3FF" : "white",
+    border: `1.5px solid ${selected ? accent : C.stone}`, borderRadius: 12,
+    padding: "0.85rem 1.05rem", cursor: "pointer", fontFamily: BFONT,
+    fontSize: "0.88rem", color: C.ink, lineHeight: 1.45, transition: "border-color 0.12s, background 0.12s",
+  });
+
+  // ── INTRO ─────────────────────────────────────────────────────────────────
+  if (phase === 'intro') return (
+    <div style={{ maxWidth: 520, margin: "0 auto", padding: "3rem 1rem 2rem" }}>
+      <link href={FONT_LINK} rel="stylesheet" />
+      <div style={{ fontSize: "0.6rem", letterSpacing: "0.2em", textTransform: "uppercase", color: accent, fontFamily: BFONT, fontWeight: 700, marginBottom: "0.75rem" }}>Exercise 05 · How You Fight</div>
+      <h2 style={{ fontFamily: HFONT, fontSize: "1.7rem", fontWeight: 700, color: C.ink, lineHeight: 1.2, marginBottom: "1rem" }}>How you fight</h2>
+      <p style={{ fontSize: "0.9rem", color: C.muted, fontFamily: BFONT, fontWeight: 300, lineHeight: 1.7, marginBottom: "1.25rem" }}>{CONFLICT_INTRO}</p>
+      <p style={{ fontSize: "0.82rem", color: C.muted, fontFamily: BFONT, fontWeight: 300, lineHeight: 1.65, marginBottom: "1.75rem" }}>
+        Twelve questions, about ten minutes. You answer on your own. One section stays private to you, and {partnerName} never sees it.
+      </p>
+      <button onClick={() => setPhase('questions')}
+        style={{ background: accent, color: "white", border: "none", borderRadius: 12, padding: "0.9rem 1.75rem", fontSize: "0.9rem", fontWeight: 700, fontFamily: BFONT, cursor: "pointer" }}>
+        Begin exercise →
+      </button>
+    </div>
+  );
+
+  // ── DONE ──────────────────────────────────────────────────────────────────
+  if (phase === 'done') return (
+    <div style={{ maxWidth: 480, margin: "0 auto", padding: "3rem 1rem", textAlign: "center" }}>
+      <link href={FONT_LINK} rel="stylesheet" />
+      <h2 style={{ fontFamily: HFONT, fontSize: "1.6rem", fontWeight: 700, color: C.ink, marginBottom: "0.75rem" }}>Done.</h2>
+      <p style={{ fontSize: "0.9rem", color: C.muted, fontFamily: BFONT, fontWeight: 300, lineHeight: 1.65, marginBottom: "2rem" }}>
+        Your answers are saved. What you said about your own patterns stays private to you.
+      </p>
+      <button onClick={() => onComplete?.({ answers })}
+        style={{ background: accent, color: "white", border: "none", borderRadius: 12, padding: "0.9rem 1.75rem", fontSize: "0.9rem", fontWeight: 600, fontFamily: BFONT, cursor: "pointer" }}>
+        Back to dashboard
+      </button>
+    </div>
+  );
+
+  // ── QUESTIONS ─────────────────────────────────────────────────────────────
+  return (
+    <div style={{ maxWidth: 560, margin: "0 auto", padding: "2.5rem 1rem 2rem" }}>
+      <link href={FONT_LINK} rel="stylesheet" />
+
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: "0.5rem" }}>
+        <span style={{ fontSize: "0.6rem", letterSpacing: "0.18em", textTransform: "uppercase", color: accent, fontFamily: BFONT, fontWeight: 700 }}>{section?.label}</span>
+        <span style={{ fontSize: "0.7rem", color: C.muted, fontFamily: BFONT }}>{qIdx + 1} / {total}</span>
+      </div>
+      <div style={{ height: 4, background: C.stone, borderRadius: 99, marginBottom: "1.75rem" }}>
+        <div style={{ height: "100%", width: `${((qIdx + 1) / total) * 100}%`, background: accent, borderRadius: 99, transition: "width 0.2s" }} />
+      </div>
+
+      {/* Said once, before the first risk question. These are the questions
+          people are most likely to answer defensively, and the framing is what
+          makes an honest answer feel safe. */}
+      {isFirstOfRisk && (
+        <div style={{ background: "#F4F7FF", border: `1px solid ${accent}33`, borderRadius: 12, padding: "0.9rem 1.1rem", marginBottom: "1.25rem" }}>
+          <div style={{ fontSize: "0.78rem", color: C.ink, fontFamily: BFONT, lineHeight: 1.6 }}>
+            These next four stay private to you. {partnerName} never sees them. Everyone does some of these sometimes, and answering honestly is the only thing that makes the result useful.
+          </div>
+        </div>
+      )}
+
+      <h3 style={{ fontFamily: HFONT, fontSize: "1.2rem", fontWeight: 700, color: C.ink, lineHeight: 1.35, marginBottom: "1.25rem" }}>{q.text}</h3>
+
+      {/* ── scale: 5 labelled steps ── */}
+      {q.kind === 'scale' && (
+        <div style={{ display: "flex", flexDirection: "column", gap: "0.6rem" }}>
+          {q.options.map(o => (
+            <button key={o.value} onClick={() => setAns(q.id, o.value)} style={optionBtn(answers[q.id] === o.value)}>{o.label}</button>
+          ))}
+        </div>
+      )}
+
+      {/* ── forced A/B: two equally valid styles, so no visual ranking ── */}
+      {q.kind === 'forcedAB' && (
+        <div style={{ display: "flex", flexDirection: "column", gap: "0.6rem" }}>
+          {[['A', q.a], ['B', q.b]].map(([v, label]) => (
+            <button key={v} onClick={() => setAns(q.id, v)} style={optionBtn(answers[q.id] === v)}>{label}</button>
+          ))}
+        </div>
+      )}
+
+      {/* ── frequency: a rate, not a verdict. Laid out left-to-right so the
+             scale reads as a continuum rather than a list of accusations. ── */}
+      {q.kind === 'frequency' && (
+        <div style={{ display: "flex", gap: "0.5rem" }}>
+          {FREQUENCY_OPTIONS.map(o => {
+            const on = answers[q.id] === o.value;
+            return (
+              <button key={o.value} onClick={() => setAns(q.id, o.value)}
+                style={{ flex: 1, background: on ? accent : "white", color: on ? "white" : C.ink,
+                  border: `1.5px solid ${on ? accent : C.stone}`, borderRadius: 12, padding: "0.9rem 0.4rem",
+                  cursor: "pointer", fontFamily: BFONT, fontSize: "0.8rem", fontWeight: on ? 700 : 500 }}>
+                {o.label}
+              </button>
+            );
+          })}
+        </div>
+      )}
+
+      {/* ── pick one from ten ── */}
+      {q.kind === 'pickOne' && (
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "0.5rem" }}>
+          {q.options.map(o => (
+            <button key={o} onClick={() => setAns(q.id, o)}
+              style={{ ...optionBtn(answers[q.id] === o), fontSize: "0.82rem", padding: "0.7rem 0.9rem" }}>{o}</button>
+          ))}
+        </div>
+      )}
+
+      {/* ── rank: tap to add in order, matching Exercise 3's pattern so the
+             interaction is already familiar. Tapping a ranked item removes it
+             and everything after keeps its relative order. ── */}
+      {q.kind === 'rank' && (() => {
+        const picked = Array.isArray(answers[q.id]) ? answers[q.id] : [];
+        const remaining = q.options.filter(o => !picked.includes(o));
+        return (
+          <div>
+            <p style={{ fontSize: "0.78rem", color: C.muted, fontFamily: BFONT, marginBottom: "0.75rem" }}>
+              Tap in order, most helpful first. Tap a ranked item to remove it.
+            </p>
+            {picked.length > 0 && (
+              <div style={{ display: "flex", flexDirection: "column", gap: "0.4rem", marginBottom: "0.9rem" }}>
+                {picked.map((o, i) => (
+                  <button key={o} onClick={() => setAns(q.id, picked.filter(x => x !== o))}
+                    style={{ ...optionBtn(true), display: "flex", alignItems: "center", gap: "0.7rem" }}>
+                    <span style={{ width: 22, height: 22, borderRadius: "50%", background: accent, color: "white", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "0.72rem", fontWeight: 700, flexShrink: 0 }}>{i + 1}</span>
+                    <span>{o}</span>
+                  </button>
+                ))}
+              </div>
+            )}
+            <div style={{ display: "flex", flexDirection: "column", gap: "0.4rem" }}>
+              {remaining.map(o => (
+                <button key={o} onClick={() => setAns(q.id, [...picked, o])} style={optionBtn(false)}>{o}</button>
+              ))}
+            </div>
+            {remaining.length > 0 && (
+              <p style={{ fontSize: "0.72rem", color: C.muted, fontFamily: BFONT, marginTop: "0.7rem" }}>
+                {remaining.length} left to rank.
+              </p>
+            )}
+          </div>
+        );
+      })()}
+
+      {/* ── open text: optional, and said so, because an unskippable free-text
+             box is where people abandon an exercise ── */}
+      {q.kind === 'openText' && (
+        <div>
+          <textarea value={answers[q.id] || ''} onChange={e => setAns(q.id, e.target.value)}
+            placeholder={q.placeholder || ''} rows={5}
+            style={{ width: "100%", padding: "0.9rem 1rem", border: `1.5px solid ${C.stone}`, borderRadius: 12, fontFamily: BFONT, fontSize: "0.9rem", lineHeight: 1.6, color: C.ink, resize: "vertical" }} />
+          <p style={{ fontSize: "0.72rem", color: C.muted, fontFamily: BFONT, marginTop: "0.4rem" }}>Optional. Skip it if nothing comes to mind.</p>
+        </div>
+      )}
+
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: "2rem" }}>
+        <button onClick={back}
+          style={{ background: "transparent", border: "none", color: C.muted, fontSize: "0.82rem", fontFamily: BFONT, cursor: "pointer" }}>← Back</button>
+        <button onClick={next} disabled={!answeredNow}
+          style={{ background: answeredNow ? accent : C.stone, color: answeredNow ? "white" : C.muted,
+            border: "none", borderRadius: 12, padding: "0.8rem 1.6rem", fontSize: "0.88rem", fontWeight: 700,
+            fontFamily: BFONT, cursor: answeredNow ? "pointer" : "not-allowed" }}>
+          {qIdx + 1 === total ? 'Finish' : 'Next →'}
+        </button>
+      </div>
+    </div>
+  );
+}
+
 
 
 // -- JOINT OVERVIEW -- unified landing page for both exercises --
@@ -12843,6 +13065,12 @@ export default function App() {
     }
   }); // Premium budget tool
   // Intimacy add-on: own answers + the variant the couple is locked into.
+  const [conflictData, setConflictData] = useState(() => {
+    try {
+      const raw = localStorage.getItem('attune_conflict');
+      return raw ? JSON.parse(raw) : null; // { answers, completedAt }
+    } catch { return null; }
+  });
   const [intimacyData, setIntimacyData] = useState(() => {
     try {
       const raw = localStorage.getItem('attune_intimacy');
@@ -13362,6 +13590,9 @@ export default function App() {
     hasAnniversary: _basePkg.hasAnniversary || !!(order?.addonReflection),
     hasBudget:      _basePkg.hasBudget      || !!(order?.addonBudget),
     hasWorkbook:    _effectivePkgKey === 'premium' || !!(order?.addonWorkbook),
+    // Never bundled into a package, unlike intimacy: the add-on flag is the
+    // only route to it.
+    hasConflict:    !!(order?.addonConflict),
     hasIntimacy:    _effectivePkgKey === 'premium' || !!(order?.addonIntimacy) || (() => { try { return localStorage.getItem('attune_dev_intimacy') === '1'; } catch { return false; } })() || (() => { try { const q = new URLSearchParams(window.location.search); return !!q.get('demo') && q.get('intimacy') === '1'; } catch { return false; } })(),
   };
 
@@ -14428,6 +14659,56 @@ export default function App() {
         )}
 
         {/* ── PHYSICAL INTIMACY EXPECTATIONS: add-on ── */}
+        {/* ── EXERCISE 5: HOW YOU FIGHT ────────────────────────────────
+            Self-only, so there is no waiting-on-partner state and no locked
+            variant. A person's own results are available the moment they
+            finish; the shared sections fill in when the partner finishes. */}
+        {view === "conflict" && pkg.hasConflict && (() => {
+          const myDone = !!(conflictData?.completedAt);
+
+          const persist = (payload) => {
+            const record = { ...payload, completedAt: Date.now() };
+            setConflictData(record);
+            try { localStorage.setItem('attune_conflict', JSON.stringify(record)); } catch {}
+            (async () => {
+              try {
+                const { supabase: sb, hasSupabase } = await import('./supabase.js');
+                if (!hasSupabase() || !account?.id) return;
+                // Same guard as every other exercise write: an update blocked
+                // by RLS reports success while touching zero rows, so without
+                // .select('id') the answers silently never reach the database.
+                const res = await saveProfileData(sb, account.id, { conflict_data: record }, 'conflict');
+                if (res?.error) {
+                  const { data: { session } } = await sb.auth.getSession();
+                  const headers = { 'Content-Type': 'application/json' };
+                  if (session?.access_token) headers.Authorization = `Bearer ${session.access_token}`;
+                  const body = { userId: account.id, exercise: 'conflict', answers: record, completedAt: new Date().toISOString() };
+                  if (!session?.access_token && account?.email) body.email = account.email;
+                  const resp = await fetch('/api/save-exercise', { method: 'POST', headers, body: JSON.stringify(body) });
+                  if (!resp.ok) console.error('[conflict] persist failed:', resp.status);
+                }
+              } catch (e) { console.warn('[conflict] persist failed', e); }
+            })();
+          };
+
+          if (myDone) {
+            return (
+              <div style={{ maxWidth: 480, margin: "0 auto", padding: "3rem 1rem", textAlign: "center" }}>
+                <div style={{ fontSize: "0.6rem", letterSpacing: "0.2em", textTransform: "uppercase", color: "#1B5FE8", fontFamily: BFONT, fontWeight: 700, marginBottom: "0.75rem" }}>Exercise 05</div>
+                <h2 style={{ fontFamily: HFONT, fontSize: "1.6rem", fontWeight: 700, color: C.ink, marginBottom: "0.75rem" }}>You're done.</h2>
+                <p style={{ fontSize: "0.9rem", color: C.muted, fontFamily: BFONT, fontWeight: 300, lineHeight: 1.65, marginBottom: "2rem" }}>
+                  What you said about your own patterns stays private to you. The shared parts fill in once {partnerName} finishes too.
+                </p>
+                <button onClick={() => setView("home")} style={{ background: "#1B5FE8", color: "white", border: "none", borderRadius: 12, padding: "0.9rem 1.75rem", fontSize: "0.9rem", fontWeight: 600, fontFamily: BFONT, cursor: "pointer" }}>Back to dashboard</button>
+              </div>
+            );
+          }
+          return <ConflictExercise
+            userName={userName} partnerName={partnerName} fresh={_previewFresh}
+            onComplete={(payload) => { persist(payload); setView("home"); }}
+          />;
+        })()}
+
         {view === "intimacy" && pkg.hasIntimacy && (() => {
           const myAns = intimacyData?.answers || null;
           const myDone = !!(intimacyData?.completedAt);
