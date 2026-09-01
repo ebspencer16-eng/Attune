@@ -1025,6 +1025,10 @@ function renderSummary() {
   const totalEl = document.getElementById('totalPrice');
 
   // Compute total across all items in cart
+  // NOTE: this duplicates cartItemPrice() further down the file. The two got
+  // out of step when the conflict add-on was added: cartItemPrice knew about it
+  // and this one did not, so the button showed the wrong total while every
+  // other computation was right. Any new add-on has to be added to BOTH.
   function itemPrice(it) {
     const p = PACKAGES[it.pkg] || PACKAGES.core;
     let base = it.format === 'physical' ? p.physicalPrice : p.digitalPrice;
@@ -1033,6 +1037,7 @@ function renderSummary() {
     if (it.addons.reflection) add += ADDON_REFLECTION.price;
     if (it.addons.budget)     add += 20;
     if (it.addons.intimacy)   add += 20;
+    if (it.addons.conflict)   add += 40;
     if (it.addons.checklist)  add += 20;
     return base + add;
   }
