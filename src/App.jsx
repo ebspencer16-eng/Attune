@@ -2,6 +2,8 @@ import React, { useState, useEffect, useLayoutEffect, useRef } from "react";
 import { axisScores, blendedDimScores, AXIS_CONFIG, QUESTION_WEIGHTS } from "../api/_type-engine.js";
 import { PERSONALITY_QUESTIONS, RESPONSIBILITY_CATEGORIES, LIFE_QUESTIONS, PARTNER_VIEW_TEXT } from "../api/_questions.js";
 import { CONFLICT_SECTIONS, CONFLICT_INTRO, FREQUENCY_OPTIONS, conflictQuestionsInOrder } from "../api/_conflict-questions.js";
+import { summarizeConflict, conflictPair } from "../api/_lib/conflict-results.js";
+import { PATTERN_COPY, SNAPSHOT_PROSE, OPENING_CHIPS, CONFLICT_RESULTS_COPY, FREQUENCY_LABELS, interpConflict } from "../api/_conflict-results-prose.js";
 // Results copy now lives in versioned snapshots. A couple's results render
 // from the version stamped on their results row, so revising the wording never
 // moves the words a highlight was written against. contentFor(null) returns
@@ -7142,7 +7144,7 @@ function UnifiedResultsRoot(props) {
   );
 }
 
-function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Answers, partnerEx3, ex2AnswersPrior = null, ex2PriorAt = null, hasAnniversary, userName, partnerName, initialSection, onSectionChange = null, isMobile = false, portrait = null, hasChecklist = false, hasBudget = false, hasWorkbook = false, hasIntimacy = false, intimacyAnswers = null, partnerIntimacy = null, intimacyVariant = 'premarital', onNavigateTool = null, userPronouns = "", partnerPronouns = "", isBetaTester = false }) {
+function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Answers, partnerEx3, ex2AnswersPrior = null, ex2PriorAt = null, hasAnniversary, userName, partnerName, initialSection, onSectionChange = null, isMobile = false, portrait = null, hasChecklist = false, hasBudget = false, hasWorkbook = false, hasIntimacy = false, intimacyAnswers = null, partnerIntimacy = null, hasConflict = false, conflictAnswers = null, partnerConflict = null, intimacyVariant = 'premarital', onNavigateTool = null, userPronouns = "", partnerPronouns = "", isBetaTester = false }) {
 
   // Compute all the data we need up front
   const myS = typingDimScores(ex1Answers, partnerEx1);
@@ -7264,6 +7266,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
     "exp-overview", ...FIXED_CATS.map((_, ci) => `exp-convo-${ci}`),
     ...(hasAnniversary ? ["reflection-overview", "reflection-ratings", "reflection-story", "reflection-plan"] : []),
     ...(intimacyBothDone ? ["intimacy-overview", ...INTIMACY_DIMENSIONS.map(d => `intimacy-${d.id}`), "intimacy-plan"] : []),
+    ...(conflictMine ? ["conflict-overview", "conflict-snapshot", "conflict-patterns", "conflict-repair", "conflict-wrote"] : []),
     "what-comes-next",
   ];
   const safeSection = (s) => {
@@ -7310,6 +7313,14 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
   // partners have finished. summarizeIntimacy is imported at module top.
   const intimacyBothDone = hasIntimacy && !!(intimacyAnswers) && !!(partnerIntimacy?.answers);
   const intimacySummary = intimacyBothDone ? summarizeIntimacy(intimacyAnswers, partnerIntimacy.answers) : null;
+
+  // Conflict results appear as soon as THIS person has finished, unlike every
+  // other exercise: their patterns are their own and do not need the partner.
+  // The shared sections fill in later, so this section can be half-populated,
+  // which no other results section can be.
+  const conflictMine = hasConflict && conflictAnswers ? summarizeConflict(conflictAnswers) : null;
+  const conflictBothDone = !!(conflictMine && partnerConflict && summarizeConflict(partnerConflict));
+  const conflictPairing = conflictBothDone ? conflictPair(conflictAnswers, partnerConflict) : null;
 
   // ── ANONYMOUS TYPE TRACKING ─────────────────────────────────────────────────
   // Fires once per results session. No PII — only type IDs and 4-letter style codes.
@@ -7674,6 +7685,17 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
         { id: "intimacy-plan", label: "Conversations Worth Having", isDeepChild: true, italic: true, color: "#B5546E" },
       ]
     }] : []),
+    ...(conflictMine ? [{
+      id: "conflict", label: "How You Fight", shortLabel: "Conflict", icon: "\u2726", color: "#1B5FE8",
+      children: [
+        { id: "conflict-overview", label: "Results at a glance" },
+        { id: "conflict-detail-header", label: "Detailed results", isDomainHeader: true, color: "#1B5FE8" },
+        { id: "conflict-snapshot", label: "Your Conflict Snapshot", isDeepChild: true, italic: true, color: "#1B5FE8" },
+        { id: "conflict-patterns", label: "Your Patterns", isDeepChild: true, italic: true, color: "#1B5FE8" },
+        { id: "conflict-repair", label: "What Helps You Reset", isDeepChild: true, italic: true, color: "#1B5FE8" },
+        { id: "conflict-wrote", label: "What You Both Wrote", isDeepChild: true, italic: true, color: "#1B5FE8" },
+      ]
+    }] : []),
     { id: "what-comes-next", label: "What Comes Next", icon: "→", color: "#E8673A" },
   ];
 
@@ -7752,6 +7774,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
     ...FIXED_CATS.map((_, ci) => `exp-convo-${ci}`),
     ...(hasAnniversary ? ["reflection-overview", "reflection-ratings", "reflection-story", "reflection-plan"] : []),
     ...(intimacyBothDone ? ["intimacy-overview", ...INTIMACY_DIMENSIONS.map(d => `intimacy-${d.id}`), "intimacy-plan"] : []),
+    ...(conflictMine ? ["conflict-overview", "conflict-snapshot", "conflict-patterns", "conflict-repair", "conflict-wrote"] : []),
     "what-comes-next",
   ];
   const curIdx = allPages.indexOf(section);
@@ -8885,6 +8908,225 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
   }
 
   // ── PAGE: WHAT COMES NEXT ─────────────────────────────────────────────────────
+  // ── HOW YOU FIGHT ─────────────────────────────────────────────────────────
+  // Half of this section is private and half is shared, which no other results
+  // section is. Your own patterns render the moment you finish; everything
+  // needing your partner waits for them.
+  if (conflictMine && section.startsWith("conflict-")) {
+    const BLUE = "#1B5FE8";
+    const cc = CONFLICT_RESULTS_COPY;
+    const interp = (t) => interpConflict(t, { partner: partnerName, a: userName, b: partnerName });
+
+    const Badge = ({ shared }) => (
+      <span style={{ fontSize: "0.6rem", fontWeight: 700, fontFamily: BFONT, borderRadius: 99,
+        padding: "0.25rem 0.6rem", letterSpacing: "0.04em",
+        background: shared ? "#E7F3EC" : "#FBE9F1", color: shared ? "#2E7D5B" : "#B5546E" }}>
+        {shared ? cc.sharedBadge : cc.privateBadge}
+      </span>
+    );
+
+    // Shown wherever a shared section has nothing to show yet.
+    const WaitingNote = () => (
+      <div style={{ background: "#FAF7F2", border: `1px solid ${C.stone}`, borderRadius: 12, padding: "1rem 1.2rem",
+        fontSize: "0.85rem", color: C.muted, fontFamily: BFONT, lineHeight: 1.6 }}>
+        {interp(cc.waitingOnPartner)}
+      </div>
+    );
+
+    const Chip = ({ children }) => (
+      <span style={{ display: "inline-block", background: "#EEF3FF", border: `1px solid ${BLUE}33`,
+        color: BLUE, borderRadius: 99, padding: "0.35rem 0.75rem", fontSize: "0.76rem",
+        fontFamily: BFONT, fontWeight: 600, marginRight: "0.4rem", marginBottom: "0.4rem" }}>{children}</span>
+    );
+
+    const chipsFor = (ans) => ['c1', 'c2', 'c_topic']
+      .map(id => OPENING_CHIPS[id]?.[ans?.[id]])
+      .filter(Boolean);
+
+    // The four bars. Colour tracks the band rather than the pattern, so the
+    // page reads at a glance without needing to know which is which.
+    const PatternRow = ({ p }) => {
+      const copy = PATTERN_COPY[p.key];
+      const pct = ((p.value ?? 0) / 3) * 100;
+      const tone = p.value >= 3 ? "#C2410C" : p.value === 2 ? "#C98A2E" : BLUE;
+      return (
+        <div key={p.key} style={{ padding: "1rem 0", borderTop: `1px solid ${C.stone}` }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: "0.4rem" }}>
+            <span style={{ fontSize: "0.92rem", fontWeight: 700, color: C.ink, fontFamily: BFONT }}>{copy.label}</span>
+            <span style={{ fontSize: "0.8rem", color: C.muted, fontFamily: BFONT }}>{FREQUENCY_LABELS[p.value ?? 0]}</span>
+          </div>
+          <div style={{ height: 5, background: C.stone, borderRadius: 99, marginBottom: "0.55rem" }}>
+            <div style={{ height: "100%", width: `${Math.max(pct, 3)}%`, background: tone, borderRadius: 99 }} />
+          </div>
+          <div style={{ fontSize: "0.72rem", color: C.muted, fontFamily: BFONT, marginBottom: "0.3rem" }}>{copy.definition}</div>
+          <p style={{ fontSize: "0.84rem", color: C.ink, fontFamily: BFONT, lineHeight: 1.65, margin: 0 }}>
+            {interp(copy[p.value ?? 0].note)}
+          </p>
+        </div>
+      );
+    };
+
+    const Head = ({ title, shared }) => (
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem" }}>
+        <div style={{ fontSize: "clamp(1.4rem,3.5vw,1.85rem)", fontWeight: 700, fontFamily: HFONT, color: C.ink }}>{title}</div>
+        <Badge shared={shared} />
+      </div>
+    );
+
+    const Card = ({ children }) => (
+      <div style={{ background: "white", border: `1.5px solid ${C.stone}`, borderRadius: 16, padding: "1.4rem 1.6rem" }}>{children}</div>
+    );
+
+    // ── Snapshot: how each of you opens a disagreement. Shared, and the one
+    //    part of this exercise where both answers are equally valid. ──
+    if (section === "conflict-snapshot") {
+      const differ = conflictBothDone && (conflictAnswers.c1 !== partnerConflict.c1 || conflictAnswers.c2 !== partnerConflict.c2);
+      const bothImmediate = conflictBothDone && conflictAnswers.c1 === 'A' && partnerConflict.c1 === 'A';
+      const prose = !conflictBothDone ? null
+        : differ ? SNAPSHOT_PROSE.differ
+        : bothImmediate ? SNAPSHOT_PROSE.bothImmediate : SNAPSHOT_PROSE.bothDelayed;
+      return (
+        <Layout accent={BLUE}>
+          <div style={{ maxWidth: 660 }}>
+            <div style={{ fontSize: "0.62rem", letterSpacing: "0.22em", textTransform: "uppercase", color: BLUE, fontWeight: 700, fontFamily: BFONT, marginBottom: "0.6rem" }}>{cc.eyebrow}</div>
+            <Head title={cc.snapshotTitle} shared={true} />
+            <Card>
+              <div style={{ display: "grid", gridTemplateColumns: conflictBothDone ? "1fr 1fr" : "1fr", gap: "1.5rem" }}>
+                <div>
+                  <div style={{ fontSize: "0.62rem", letterSpacing: "0.14em", textTransform: "uppercase", color: C.muted, fontWeight: 700, fontFamily: BFONT, marginBottom: "0.6rem" }}>{userName}</div>
+                  {chipsFor(conflictAnswers).map(c => <Chip key={c}>{c}</Chip>)}
+                </div>
+                {conflictBothDone && (
+                  <div>
+                    <div style={{ fontSize: "0.62rem", letterSpacing: "0.14em", textTransform: "uppercase", color: C.muted, fontWeight: 700, fontFamily: BFONT, marginBottom: "0.6rem" }}>{partnerName}</div>
+                    {chipsFor(partnerConflict).map(c => <Chip key={c}>{c}</Chip>)}
+                  </div>
+                )}
+              </div>
+              {prose && (
+                <p style={{ fontSize: "0.88rem", color: C.ink, fontFamily: BFONT, lineHeight: 1.7, marginTop: "1.25rem", marginBottom: 0 }}>{interp(prose)}</p>
+              )}
+            </Card>
+            {!conflictBothDone && <div style={{ marginTop: "1rem" }}><WaitingNote /></div>}
+          </div>
+        </Layout>
+      );
+    }
+
+    // ── Patterns: private, always. Never rendered for the partner. ──
+    if (section === "conflict-patterns") {
+      return (
+        <Layout accent={BLUE}>
+          <div style={{ maxWidth: 660 }}>
+            <div style={{ fontSize: "0.62rem", letterSpacing: "0.22em", textTransform: "uppercase", color: BLUE, fontWeight: 700, fontFamily: BFONT, marginBottom: "0.6rem" }}>{cc.eyebrow}</div>
+            <Head title={cc.patternsTitle} shared={false} />
+            <Card>
+              <div style={{ background: "#FBE9F1", borderRadius: 10, padding: "0.75rem 1rem", marginBottom: "1.1rem",
+                fontSize: "0.82rem", fontWeight: 700, color: "#B5546E", fontFamily: BFONT, lineHeight: 1.5 }}>
+                {cc.patternsPrivacy}
+              </div>
+              <p style={{ fontSize: "0.86rem", color: C.muted, fontFamily: BFONT, lineHeight: 1.65, marginTop: 0, marginBottom: "0.6rem" }}>{cc.patternsIntro}</p>
+              {conflictMine.ranked.map(p => <PatternRow key={p.key} p={p} />)}
+              {conflictMine.flaggedCount === 0 && (
+                <p style={{ fontSize: "0.86rem", color: C.ink, fontFamily: BFONT, lineHeight: 1.7, marginTop: "1.1rem", marginBottom: 0, fontWeight: 600 }}>
+                  {interp(cc.allClear)}
+                </p>
+              )}
+            </Card>
+          </div>
+        </Layout>
+      );
+    }
+
+    // ── Repair: what each of you says helps. The actionable half. ──
+    if (section === "conflict-repair") {
+      const col = (name, ranking) => (
+        <div>
+          <div style={{ fontSize: "0.62rem", letterSpacing: "0.14em", textTransform: "uppercase", color: C.muted, fontWeight: 700, fontFamily: BFONT, marginBottom: "0.7rem" }}>For {name}, in order</div>
+          {(ranking || []).slice(0, 3).map((r, i) => (
+            <div key={r} style={{ display: "flex", gap: "0.6rem", alignItems: "flex-start", marginBottom: "0.55rem" }}>
+              <span style={{ color: BLUE, fontWeight: 700, fontSize: "0.85rem", fontFamily: BFONT }}>{i + 1}</span>
+              <span style={{ fontSize: "0.86rem", color: C.ink, fontFamily: BFONT, lineHeight: 1.5 }}>{r}</span>
+            </div>
+          ))}
+        </div>
+      );
+      return (
+        <Layout accent={BLUE}>
+          <div style={{ maxWidth: 660 }}>
+            <div style={{ fontSize: "0.62rem", letterSpacing: "0.22em", textTransform: "uppercase", color: BLUE, fontWeight: 700, fontFamily: BFONT, marginBottom: "0.6rem" }}>{cc.eyebrow}</div>
+            <Head title={cc.repairTitle} shared={true} />
+            <p style={{ fontSize: "0.86rem", color: C.muted, fontFamily: BFONT, lineHeight: 1.65, marginTop: 0, marginBottom: "1rem" }}>{cc.repairIntro}</p>
+            <Card>
+              <div style={{ display: "grid", gridTemplateColumns: conflictBothDone ? "1fr 1fr" : "1fr", gap: "1.75rem" }}>
+                {col(userName, conflictMine.repairRanking)}
+                {conflictBothDone && col(partnerName, conflictPairing.b.repairRanking)}
+              </div>
+            </Card>
+            {!conflictBothDone && <div style={{ marginTop: "1rem" }}><WaitingNote /></div>}
+          </div>
+        </Layout>
+      );
+    }
+
+    // ── What you both wrote ──
+    if (section === "conflict-wrote") {
+      const quote = (name, label, text) => text ? (
+        <div style={{ background: "#FDF6EC", border: "1px solid #EBD9BE", borderRadius: 12, padding: "1.1rem 1.3rem", marginBottom: "0.9rem" }}>
+          <div style={{ fontSize: "0.6rem", letterSpacing: "0.14em", textTransform: "uppercase", color: "#9A6B2F", fontWeight: 700, fontFamily: BFONT, marginBottom: "0.5rem" }}>{name} · {label}</div>
+          <p style={{ fontSize: "0.9rem", color: C.ink, fontFamily: BFONT, fontStyle: "italic", lineHeight: 1.7, margin: 0 }}>"{text}"</p>
+        </div>
+      ) : null;
+      return (
+        <Layout accent={BLUE} noPrevNext={true}>
+          <div style={{ maxWidth: 660 }}>
+            <div style={{ fontSize: "0.62rem", letterSpacing: "0.22em", textTransform: "uppercase", color: BLUE, fontWeight: 700, fontFamily: BFONT, marginBottom: "0.6rem" }}>{cc.eyebrow}</div>
+            <Head title={cc.wroteTitle} shared={true} />
+            {quote(userName, 'A disagreement that went better than expected', conflictMine.reflection)}
+            {quote(userName, 'One thing I appreciate about how we handle conflict', conflictMine.appreciation)}
+            {conflictBothDone ? (
+              <>
+                {quote(partnerName, 'A disagreement that went better than expected', conflictPairing.b.reflection)}
+                {quote(partnerName, 'One thing I appreciate about how we handle conflict', conflictPairing.b.appreciation)}
+              </>
+            ) : <WaitingNote />}
+          </div>
+        </Layout>
+      );
+    }
+
+    // ── Glance ──
+    const worst = conflictMine.ranked[0];
+    return (
+      <Layout accent={BLUE}>
+        <div style={{ maxWidth: 720 }}>
+          <div style={{ fontSize: "0.62rem", letterSpacing: "0.22em", textTransform: "uppercase", color: BLUE, fontWeight: 700, fontFamily: BFONT, marginBottom: "0.6rem" }}>{cc.eyebrow}</div>
+          <div style={{ fontSize: "clamp(1.7rem,4.5vw,2.4rem)", fontWeight: 700, fontFamily: HFONT, color: C.ink, lineHeight: 1.15, marginBottom: "0.6rem" }}>
+            {conflictBothDone ? `${userName} & ${partnerName}` : userName}
+          </div>
+          <p style={{ fontSize: "0.92rem", color: C.muted, fontFamily: BFONT, lineHeight: 1.7, marginBottom: "1.5rem" }}>
+            {conflictMine.flaggedCount === 0
+              ? interp(cc.allClear)
+              : `${FREQUENCY_LABELS[worst.value]} is the highest rate you reported, on ${PATTERN_COPY[worst.key].label.toLowerCase()}. Your patterns are private to you.`}
+          </p>
+          {!conflictBothDone && <div style={{ marginBottom: "1.25rem" }}><WaitingNote /></div>}
+          <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
+            {[["conflict-snapshot", cc.snapshotTitle, true], ["conflict-patterns", cc.patternsTitle, false],
+              ["conflict-repair", cc.repairTitle, true], ["conflict-wrote", cc.wroteTitle, true]].map(([id, label, shared]) => (
+              <button key={id} onClick={() => go(id)}
+                style={{ textAlign: "left", background: "white", border: `1.5px solid ${C.stone}`, borderRadius: 14,
+                  padding: "1rem 1.2rem", cursor: "pointer", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <span style={{ fontSize: "0.95rem", fontWeight: 700, color: C.ink, fontFamily: BFONT }}>{label}</span>
+                <Badge shared={shared} />
+              </button>
+            ))}
+          </div>
+        </div>
+      </Layout>
+    );
+  }
+
+
   if (section === "what-comes-next") {
     const NavActionLink = ({ onClick, bg, border, icon, title, sub, accentColor }) => {
       const iconSvgs = {
@@ -15224,6 +15466,9 @@ export default function App() {
         portrait={couplePortrait}
         intimacyAnswers={pkg.hasIntimacy ? (intimacyData?.answers || sarahIntimacyDemo?.answers || null) : null}
         partnerIntimacy={pkg.hasIntimacy ? (hasRealPartner ? (partnerSession?.intimacy || null) : jamesIntimacyDemo) : null}
+        hasConflict={pkg.hasConflict}
+        conflictAnswers={pkg.hasConflict ? (conflictData?.answers || null) : null}
+        partnerConflict={pkg.hasConflict && hasRealPartner ? (partnerSession?.conflict?.answers || null) : null}
         intimacyVariant={(hasRealPartner ? partnerSession?.intimacy?.variant : null) || intimacyData?.variant || 'premarital'}
         onDone={() => { setActiveResult("couple-type"); setHighlightsSeen(true); }}
         onExit={() => setView("home")}
