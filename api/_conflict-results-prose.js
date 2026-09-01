@@ -93,7 +93,7 @@ export const CONFLICT_RESULTS_COPY = {
   wroteTitle: 'What you both wrote',
   sharedBadge: 'Shared',
   privateBadge: 'Just for you',
-  waitingOnPartner: '{partner} has not finished this exercise yet. Your own patterns are here now. The shared sections fill in when they are done.',
+
   allClear: 'None of the four patterns are showing up often for you. That is worth knowing, and worth saying to {partner}.',
 };
 

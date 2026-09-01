@@ -1338,7 +1338,7 @@ export function ConflictExercise({ userName = "You", partnerName = "your partner
       <link href={FONT_LINK} rel="stylesheet" />
       <h2 style={{ fontFamily: HFONT, fontSize: "1.6rem", fontWeight: 700, color: C.ink, marginBottom: "0.75rem" }}>Done.</h2>
       <p style={{ fontSize: "0.9rem", color: C.muted, fontFamily: BFONT, fontWeight: 300, lineHeight: 1.65, marginBottom: "2rem" }}>
-        Your answers are saved. What you said about your own patterns stays private to you.
+        Your answers are saved. Your results open when you have both finished everything, and what you said about your own patterns stays private to you.
       </p>
       <button onClick={() => onComplete?.({ answers })}
         style={{ background: accent, color: "white", border: "none", borderRadius: 12, padding: "0.9rem 1.75rem", fontSize: "0.9rem", fontWeight: 600, fontFamily: BFONT, cursor: "pointer" }}>
@@ -7318,8 +7318,12 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
   // other exercise: their patterns are their own and do not need the partner.
   // The shared sections fill in later, so this section can be half-populated,
   // which no other results section can be.
-  const conflictMine = hasConflict && conflictAnswers ? summarizeConflict(conflictAnswers) : null;
-  const conflictBothDone = !!(conflictMine && partnerConflict && summarizeConflict(partnerConflict));
+  // Gated on both partners, like every other exercise. The patterns section is
+  // still private to each viewer once open; gating controls WHEN results
+  // appear, not who can see what inside them.
+  const conflictSelf = hasConflict && conflictAnswers ? summarizeConflict(conflictAnswers) : null;
+  const conflictBothDone = !!(conflictSelf && partnerConflict && summarizeConflict(partnerConflict));
+  const conflictMine = conflictBothDone ? conflictSelf : null;
   const conflictPairing = conflictBothDone ? conflictPair(conflictAnswers, partnerConflict) : null;
 
   // ── ANONYMOUS TYPE TRACKING ─────────────────────────────────────────────────
@@ -8925,14 +8929,6 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
       </span>
     );
 
-    // Shown wherever a shared section has nothing to show yet.
-    const WaitingNote = () => (
-      <div style={{ background: "#FAF7F2", border: `1px solid ${C.stone}`, borderRadius: 12, padding: "1rem 1.2rem",
-        fontSize: "0.85rem", color: C.muted, fontFamily: BFONT, lineHeight: 1.6 }}>
-        {interp(cc.waitingOnPartner)}
-      </div>
-    );
-
     const Chip = ({ children }) => (
       <span style={{ display: "inline-block", background: "#EEF3FF", border: `1px solid ${BLUE}33`,
         color: BLUE, borderRadius: 99, padding: "0.35rem 0.75rem", fontSize: "0.76rem",
@@ -8980,10 +8976,9 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
     // ── Snapshot: how each of you opens a disagreement. Shared, and the one
     //    part of this exercise where both answers are equally valid. ──
     if (section === "conflict-snapshot") {
-      const differ = conflictBothDone && (conflictAnswers.c1 !== partnerConflict.c1 || conflictAnswers.c2 !== partnerConflict.c2);
-      const bothImmediate = conflictBothDone && conflictAnswers.c1 === 'A' && partnerConflict.c1 === 'A';
-      const prose = !conflictBothDone ? null
-        : differ ? SNAPSHOT_PROSE.differ
+      const differ = conflictAnswers.c1 !== partnerConflict.c1 || conflictAnswers.c2 !== partnerConflict.c2;
+      const bothImmediate = conflictAnswers.c1 === 'A' && partnerConflict.c1 === 'A';
+      const prose = differ ? SNAPSHOT_PROSE.differ
         : bothImmediate ? SNAPSHOT_PROSE.bothImmediate : SNAPSHOT_PROSE.bothDelayed;
       return (
         <Layout accent={BLUE}>
@@ -8991,23 +8986,18 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
             <div style={{ fontSize: "0.62rem", letterSpacing: "0.22em", textTransform: "uppercase", color: BLUE, fontWeight: 700, fontFamily: BFONT, marginBottom: "0.6rem" }}>{cc.eyebrow}</div>
             <Head title={cc.snapshotTitle} shared={true} />
             <Card>
-              <div style={{ display: "grid", gridTemplateColumns: conflictBothDone ? "1fr 1fr" : "1fr", gap: "1.5rem" }}>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1.5rem" }}>
                 <div>
                   <div style={{ fontSize: "0.62rem", letterSpacing: "0.14em", textTransform: "uppercase", color: C.muted, fontWeight: 700, fontFamily: BFONT, marginBottom: "0.6rem" }}>{userName}</div>
                   {chipsFor(conflictAnswers).map(c => <Chip key={c}>{c}</Chip>)}
                 </div>
-                {conflictBothDone && (
-                  <div>
-                    <div style={{ fontSize: "0.62rem", letterSpacing: "0.14em", textTransform: "uppercase", color: C.muted, fontWeight: 700, fontFamily: BFONT, marginBottom: "0.6rem" }}>{partnerName}</div>
-                    {chipsFor(partnerConflict).map(c => <Chip key={c}>{c}</Chip>)}
-                  </div>
-                )}
+                <div>
+                  <div style={{ fontSize: "0.62rem", letterSpacing: "0.14em", textTransform: "uppercase", color: C.muted, fontWeight: 700, fontFamily: BFONT, marginBottom: "0.6rem" }}>{partnerName}</div>
+                  {chipsFor(partnerConflict).map(c => <Chip key={c}>{c}</Chip>)}
+                </div>
               </div>
-              {prose && (
-                <p style={{ fontSize: "0.88rem", color: C.ink, fontFamily: BFONT, lineHeight: 1.7, marginTop: "1.25rem", marginBottom: 0 }}>{interp(prose)}</p>
-              )}
+              <p style={{ fontSize: "0.88rem", color: C.ink, fontFamily: BFONT, lineHeight: 1.7, marginTop: "1.25rem", marginBottom: 0 }}>{interp(prose)}</p>
             </Card>
-            {!conflictBothDone && <div style={{ marginTop: "1rem" }}><WaitingNote /></div>}
           </div>
         </Layout>
       );
@@ -9058,12 +9048,11 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
             <Head title={cc.repairTitle} shared={true} />
             <p style={{ fontSize: "0.86rem", color: C.muted, fontFamily: BFONT, lineHeight: 1.65, marginTop: 0, marginBottom: "1rem" }}>{cc.repairIntro}</p>
             <Card>
-              <div style={{ display: "grid", gridTemplateColumns: conflictBothDone ? "1fr 1fr" : "1fr", gap: "1.75rem" }}>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1.75rem" }}>
                 {col(userName, conflictMine.repairRanking)}
-                {conflictBothDone && col(partnerName, conflictPairing.b.repairRanking)}
+                {col(partnerName, conflictPairing.b.repairRanking)}
               </div>
             </Card>
-            {!conflictBothDone && <div style={{ marginTop: "1rem" }}><WaitingNote /></div>}
           </div>
         </Layout>
       );
@@ -9084,12 +9073,8 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
             <Head title={cc.wroteTitle} shared={true} />
             {quote(userName, 'A disagreement that went better than expected', conflictMine.reflection)}
             {quote(userName, 'One thing I appreciate about how we handle conflict', conflictMine.appreciation)}
-            {conflictBothDone ? (
-              <>
-                {quote(partnerName, 'A disagreement that went better than expected', conflictPairing.b.reflection)}
-                {quote(partnerName, 'One thing I appreciate about how we handle conflict', conflictPairing.b.appreciation)}
-              </>
-            ) : <WaitingNote />}
+            {quote(partnerName, 'A disagreement that went better than expected', conflictPairing.b.reflection)}
+            {quote(partnerName, 'One thing I appreciate about how we handle conflict', conflictPairing.b.appreciation)}
           </div>
         </Layout>
       );
@@ -9102,14 +9087,13 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
         <div style={{ maxWidth: 720 }}>
           <div style={{ fontSize: "0.62rem", letterSpacing: "0.22em", textTransform: "uppercase", color: BLUE, fontWeight: 700, fontFamily: BFONT, marginBottom: "0.6rem" }}>{cc.eyebrow}</div>
           <div style={{ fontSize: "clamp(1.7rem,4.5vw,2.4rem)", fontWeight: 700, fontFamily: HFONT, color: C.ink, lineHeight: 1.15, marginBottom: "0.6rem" }}>
-            {conflictBothDone ? `${userName} & ${partnerName}` : userName}
+            {userName} & {partnerName}
           </div>
           <p style={{ fontSize: "0.92rem", color: C.muted, fontFamily: BFONT, lineHeight: 1.7, marginBottom: "1.5rem" }}>
             {conflictMine.flaggedCount === 0
               ? interp(cc.allClear)
               : `${FREQUENCY_LABELS[worst.value]} is the highest rate you reported, on ${PATTERN_COPY[worst.key].label.toLowerCase()}. Your patterns are private to you.`}
           </p>
-          {!conflictBothDone && <div style={{ marginBottom: "1.25rem" }}><WaitingNote /></div>}
           <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
             {[["conflict-snapshot", cc.snapshotTitle, true], ["conflict-patterns", cc.patternsTitle, false],
               ["conflict-repair", cc.repairTitle, true], ["conflict-wrote", cc.wroteTitle, true]].map(([id, label, shared]) => (
@@ -14940,7 +14924,7 @@ export default function App() {
                 <div style={{ fontSize: "0.6rem", letterSpacing: "0.2em", textTransform: "uppercase", color: "#1B5FE8", fontFamily: BFONT, fontWeight: 700, marginBottom: "0.75rem" }}>Exercise 05</div>
                 <h2 style={{ fontFamily: HFONT, fontSize: "1.6rem", fontWeight: 700, color: C.ink, marginBottom: "0.75rem" }}>You're done.</h2>
                 <p style={{ fontSize: "0.9rem", color: C.muted, fontFamily: BFONT, fontWeight: 300, lineHeight: 1.65, marginBottom: "2rem" }}>
-                  What you said about your own patterns stays private to you. The shared parts fill in once {partnerName} finishes too.
+                  Your results open when you and {partnerName} have both finished everything, the same as the other exercises. What you said about your own patterns stays private to you either way.
                 </p>
                 <button onClick={() => setView("home")} style={{ background: "#1B5FE8", color: "white", border: "none", borderRadius: 12, padding: "0.9rem 1.75rem", fontSize: "0.9rem", fontWeight: 600, fontFamily: BFONT, cursor: "pointer" }}>Back to dashboard</button>
               </div>
