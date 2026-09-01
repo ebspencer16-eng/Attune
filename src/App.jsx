@@ -11775,6 +11775,22 @@ const UPSELL_PRODUCTS = {
     ],
     accentColor: "#1B5FE8",
   },
+  conflict: {
+    badge: "Add-on",
+    badgeColor: "#EAF0FF",
+    badgeText: "#1B5FE8",
+    title: "How You Fight",
+    price: "$40",
+    tagline: "The patterns that show up when things get hard.",
+    description: "Twelve questions about how conflict actually goes for you. Answered on your own. One section stays private to you, and your partner never sees it.",
+    includes: [
+      "Answered independently, compared side by side",
+      "One section that stays private to you, always",
+      "What each of you says helps you reset",
+      "Patterns research links to relationship strain",
+    ],
+    accentColor: "#1B5FE8",
+  },
   intimacy: {
     badge: "Add-on",
     badgeColor: "#FBEAF0",
@@ -14536,6 +14552,12 @@ export default function App() {
                             title="Physical Intimacy Expectations"
                             sub="Answered independently, compared side by side."
                             cta="$20 →" onClick={() => setUpsellModal({ product: 'intimacy', cartAdded: false })} />
+                        )}
+                        {!pkg.hasConflict && (
+                          <GrowSquare color="#1B5FE8" muted icon={GrowIcons.intimacy("#1B5FE8")}
+                            title="How You Fight"
+                            sub="How conflict actually goes, with one section that stays private to you."
+                            cta={"$40 →"} onClick={() => setUpsellModal({ product: 'conflict', cartAdded: false })} />
                         )}
                       </div>
                     </div>
