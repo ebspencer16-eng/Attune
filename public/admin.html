@@ -3545,11 +3545,20 @@ async function loadRealFunnel(orders) {
 // the existing chart shapes here.
 // Shape a raw responses aggregate into the client chart structures.
 function shapeResponses(r){
-  const DIM_ORDER=['energy','expression','needs','bids','listening','conflict','repair','love','stress','feedback'];
-  const idx=Object.fromEntries((r&&r.dimLabels||[]).map((k,i)=>[k,i]));
+  // Dimensions come from the server rather than being restated here. The old
+  // hardcoded list still had 'stress', a dimension folded into Conflict Style
+  // months ago, and had never gained 'reassurance'. A key the server does not
+  // send falls to 0, so the chart showed Stress at 0% alignment forever and
+  // omitted Reassurance entirely. A restated list is how this drifts; reading
+  // the server's own labels is how it cannot.
+  const PRETTY = { energy:'Energy', expression:'Expression', reassurance:'Reassurance',
+    needs:'Needs', bids:'Bids', listening:'Listening', conflict:'Conflict',
+    repair:'Repair', love:'Love', feedback:'Feedback' };
+  const dimKeys = (r && r.dimLabels) || [];
+  const idx=Object.fromEntries(dimKeys.map((k,i)=>[k,i]));
   return {
-    dimScores:{ labels:['Energy','Expression','Needs','Bids','Listening','Conflict','Repair','Love','Stress','Feedback'],
-      data: DIM_ORDER.map(k=> (r&&idx[k]!=null)? r.dimScores[idx[k]] : 0) },
+    dimScores:{ labels: dimKeys.map(k => PRETTY[k] || k),
+      data: dimKeys.map(k => (r && r.dimScores && r.dimScores[idx[k]] != null) ? r.dimScores[idx[k]] : 0) },
     expAlign:{ labels:(r&&r.expLabels)||['Household','Financial','Career','Extended family','Emotional'], data:(r&&r.expAlign)||[0,0,0,0,0] },
     relFeel:(r&&r.relationshipFeel)||[0,0,0,0,0],
     expGaps:(r&&Array.isArray(r.lifeGaps))? r.lifeGaps.map(g=>({l:g.label,v:g.pct})) : [],
