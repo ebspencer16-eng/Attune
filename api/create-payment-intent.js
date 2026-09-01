@@ -32,6 +32,7 @@ const ADDON_PRICES = {
   budget:          20,
   checklist:       20,
   intimacy:        20,
+  conflict:        40,
 };
 
 // ── Stripe Tax product codes ─────────────────────────────────────────────
@@ -253,6 +254,7 @@ function itemAddonTotal(item) {
   if (item.addonBudget)     addons += ADDON_PRICES.budget;
   if (item.addonChecklist)  addons += ADDON_PRICES.checklist;
   if (item.addonIntimacy)   addons += ADDON_PRICES.intimacy;
+  if (item.addonConflict)   addons += ADDON_PRICES.conflict;
   return addons;
 }
 
@@ -339,6 +341,7 @@ export default async function handler(req) {
         addonReflection: body.addonReflection,
         addonBudget:     body.addonBudget,
         addonIntimacy:   body.addonIntimacy,
+        addonConflict:   body.addonConflict,
         addonChecklist:  body.addonChecklist,
         shipping:        body.shipping,
       }];
@@ -728,6 +731,7 @@ export default async function handler(req) {
     r:   it.addonReflection ? 1 : 0,
     b:   it.addonBudget ? 1 : 0,
     i:   it.addonIntimacy ? 1 : 0,
+    cf:  it.addonConflict ? 1 : 0,
     c:   it.addonChecklist ? 1 : 0,
     s:   it.shipping ? [it.shipping.name, it.shipping.address, it.shipping.city, it.shipping.state].join('|').slice(0, 200) : '',
   }));
@@ -751,6 +755,7 @@ export default async function handler(req) {
     'metadata[addonReflection]':items[0].addonReflection ? '1' : '',
     'metadata[addonBudget]':  items[0].addonBudget ? '1' : '',
     'metadata[addonIntimacy]': items[0].addonIntimacy ? '1' : '',
+    'metadata[addonConflict]': items[0].addonConflict ? '1' : '',
     'metadata[giftNote]':     (items[0].giftNote || '').slice(0, 500),
     // When a promo covers the package base, pass it through so the webhook
     // tags the resulting order rows with promo_code + adjusts accounting.

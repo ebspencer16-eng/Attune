@@ -38,11 +38,13 @@ const ADDON_PRICES = {
   budget:          20,   // Build a Budget / Budgeting Activity
   checklist:       20,   // Starting Out Checklist
   intimacy:        20,   // Physical Intimacy Expectations exercise
+  conflict:        40,   // How You Fight exercise
 };
 
 // Add-on display metadata (titles/descriptions shown in the cart). Prices come from ADDON_PRICES.
 const ADDON_META = {
   workbook:   { title: 'Personalized Workbook',     desc: 'Conversation prompts drawn from your results' },
+  conflict:   { title: 'How You Fight',                    desc: 'A look at your conflict patterns, answered independently' },
   intimacy:   { title: 'Physical Intimacy Expectations', desc: 'A private exercise on what you each expect' },
   budget:     { title: 'Shared Budgeting Activity',  desc: 'Build a shared budget together' },
   checklist:  { title: 'Starting Out Checklist',     desc: 'Merging lives, finances, logistics' },
@@ -57,7 +59,7 @@ const PKG_INCLUDED = {
 };
 // Display order: workbook first (primary upsell), then cheapest → most expensive.
 const ADDON_ORDER = (function(){
-  var order = ['workbook','intimacy','budget','checklist','reflection'];
+  var order = ['workbook','intimacy','conflict','budget','checklist','reflection'];
   // Phase 1: physical off. Physical prices stay on CART_PKGS
   // so phase 2 is a flag flip.
   if (!CART_PHYSICAL_ENABLED) Object.values(CART_PKGS).forEach(function(p){ p.supportsPhysical = false; });
@@ -76,7 +78,7 @@ function _addonUnitPrice(key, item) {
 }
 
 // ── State ──────────────────────────────────────────────────────────────────
-// Each item: { id, pkg, format, qty, addons: { workbook, workbookVariant, reflection, budget, checklist } }
+// Each item: { id, pkg, format, qty, addons: { workbook, workbookVariant, reflection, budget, checklist, conflict } }
 let _cartItems = [];
 // Track which format is currently selected on each offering card
 let _currentFormats = CART_PHYSICAL_ENABLED
@@ -88,7 +90,7 @@ let _expandedItemId = null;
 function _newItemId() { return 'i' + Date.now().toString(36) + Math.random().toString(36).slice(2,6); }
 
 function _defaultAddons() {
-  return { workbook:false, workbookVariant:'digital', reflection:false, budget:false, checklist:false, intimacy:false };
+  return { workbook:false, workbookVariant:'digital', conflict:false, reflection:false, budget:false, checklist:false, intimacy:false };
 
 // A printed workbook is a shipped item. When physical is off, any stored
 // 'print' variant is treated as digital so nobody is charged $39 for
@@ -109,6 +111,7 @@ function _itemPrice(item) {
   if (item.addons.budget)     add += ADDON_PRICES.budget;
   if (item.addons.checklist)  add += ADDON_PRICES.checklist;
   if (item.addons.intimacy)   add += ADDON_PRICES.intimacy;
+  if (item.addons.conflict)   add += ADDON_PRICES.conflict;
   return base + add;
 }
 
@@ -425,6 +428,7 @@ function goCheckout() {
   if (first.addons.reflection) params.set('addon_reflection', '1');
   if (first.addons.budget) params.set('addon_budget', '1');
   if (first.addons.intimacy) params.set('addon_intimacy', '1');
+  if (first.addons.conflict) params.set('addon_conflict', '1');
   if (_cartItems.length > 1 || _cartItems[0].qty > 1) params.set('multi', '1');
   window.location.href = '/checkout?' + params.toString();
 }

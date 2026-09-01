@@ -24,7 +24,7 @@ export const PKG_CAPS = {
   premium:     { rank: 2, hasChecklist: false, hasReflection: true,  hasBudget: true,  hasIntimacy: true, hasWorkbook: 'digital' },
 };
 
-export const ORDER_SELECT = 'order_num,pkg_key,is_physical,addon_reflection,addon_budget,addon_checklist,addon_intimacy,addon_workbook,created_at';
+export const ORDER_SELECT = 'order_num,pkg_key,is_physical,addon_reflection,addon_budget,addon_checklist,addon_intimacy,addon_conflict,addon_workbook,created_at';
 
 // Entitlements are cumulative, never chronological. Union every order the
 // account owns (plus its profile columns, plus any comp grant) so a newer or
@@ -38,12 +38,14 @@ export function computeEntitlements(rows, profile) {
       comp: true, hasGrant: true,
       pkg: 'premium', orderNum: '', isPhysical: false,
       addonReflection: true, addonBudget: true,
-      addonChecklist: true, addonIntimacy: true, addonWorkbook: 'digital',
+      addonChecklist: true, addonIntimacy: true, addonConflict: true, addonWorkbook: 'digital',
     };
   }
   const list = (Array.isArray(rows) ? rows : []).filter(Boolean);
   let pkg = 'core', bestRank = -1, orderNum = '', newestAt = -1, isPhysical = false;
   let addonReflection = false, addonBudget = false;
+  // How You Fight: a $40 add-on exercise, never bundled into a package.
+  let addonConflict = false;
   let addonChecklist = false, addonIntimacy = false, addonWorkbook = '';
   let hasGrant = false;
   for (const o of list) {
@@ -61,13 +63,14 @@ export function computeEntitlements(rows, profile) {
     addonBudget     = addonBudget     || cap.hasBudget     || !!o.addon_budget;
     addonChecklist  = addonChecklist  || cap.hasChecklist  || !!o.addon_checklist;
     addonIntimacy   = addonIntimacy   || cap.hasIntimacy   || !!o.addon_intimacy;
+    addonConflict   = addonConflict   || !!o.addon_conflict;
     if (o.addon_workbook === 'printed') addonWorkbook = 'printed';
     else if (o.addon_workbook) addonWorkbook = addonWorkbook || o.addon_workbook;
     else if (cap.hasWorkbook && !addonWorkbook) addonWorkbook = cap.hasWorkbook;
-    if (cap.rank > 0 || o.addon_reflection || o.addon_budget || o.addon_checklist || o.addon_intimacy || o.addon_workbook) hasGrant = true;
+    if (cap.rank > 0 || o.addon_reflection || o.addon_budget || o.addon_checklist || o.addon_intimacy || o.addon_conflict || o.addon_workbook) hasGrant = true;
   }
   return { comp: false, hasGrant, pkg, orderNum, isPhysical,
-    addonReflection, addonBudget, addonChecklist, addonIntimacy, addonWorkbook };
+    addonReflection, addonBudget, addonChecklist, addonIntimacy, addonConflict, addonWorkbook };
 }
 
 // Merge two entitlement objects grant-only (OR the capabilities). Used on the
@@ -85,6 +88,7 @@ export function mergeEntitlementsGrantOnly(a, b) {
     addonBudget: !!(a?.addonBudget || b?.addonBudget),
     addonChecklist: !!(a?.addonChecklist || b?.addonChecklist),
     addonIntimacy: !!(a?.addonIntimacy || b?.addonIntimacy),
+    addonConflict: !!(a?.addonConflict || b?.addonConflict),
     addonWorkbook: (a?.addonWorkbook === 'printed' || b?.addonWorkbook === 'printed') ? 'printed' : (b?.addonWorkbook || a?.addonWorkbook || ''),
   };
 }
@@ -98,6 +102,7 @@ export function sameEntitlements(a, b) {
     && !!a.addonBudget === !!b.addonBudget
     && !!a.addonChecklist === !!b.addonChecklist
     && !!a.addonIntimacy === !!b.addonIntimacy
+    && !!a.addonConflict === !!b.addonConflict
     && (a.addonWorkbook || '') === (b.addonWorkbook || '')
     && !!a.comp === !!b.comp;
 }
@@ -157,7 +162,7 @@ export async function writeEntitlements({ supabaseUrl, serviceKey, userId, email
       order_num: null, pkg_key: profile.pkg || null, is_physical: false,
       addon_reflection: profile.addon_reflection,
       addon_budget: profile.addon_budget, addon_checklist: profile.addon_checklist,
-      addon_intimacy: profile.addon_intimacy, addon_workbook: profile.addon_workbook,
+      addon_intimacy: profile.addon_intimacy, addon_conflict: profile.addon_conflict, addon_workbook: profile.addon_workbook,
       created_at: null,
     });
 

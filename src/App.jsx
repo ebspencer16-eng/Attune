@@ -11244,7 +11244,7 @@ function PartnerBCompletionScreen({ partnerAName, partnerBName, partnerADone, pa
 // separate cartParam field with different values ("anniversary" for reflection,
 // "newlywed" for checklist), which was unused but sat there looking like the
 // field the URL should be built from. Removed, and replaced with this check.
-const CHECKOUT_ADDON_PARAMS = ["workbook", "reflection", "budget", "intimacy", "checklist"];
+const CHECKOUT_ADDON_PARAMS = ["workbook", "reflection", "budget", "intimacy", "checklist", "conflict"];
 function checkoutUrlForAddon(pkg, addon) {
   if (!CHECKOUT_ADDON_PARAMS.includes(addon)) {
     // Loud in development, and never sends a URL that would quietly drop the

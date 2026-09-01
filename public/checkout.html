@@ -551,6 +551,7 @@ let addonWorkbook = null;
 let addonReflection = false;
 let addonBudget = false;
 let addonIntimacy = false;
+let addonConflict = false;
 let addonChecklist = false;
 
 // Multi-item state: one entry per couple (qty expanded). Each entry:
@@ -655,6 +656,7 @@ async function refreshTax() {
           addonReflection: !!it.addons.reflection,
           addonBudget:     !!it.addons.budget,
           addonIntimacy:   !!it.addons.intimacy,
+          addonConflict:   !!it.addons.conflict,
           addonChecklist:  !!it.addons.checklist,
         })),
         customerAddress: addr,
@@ -770,6 +772,7 @@ function persistOrderComplete(orderNum) {
         reflection:       params.get('addon_reflection') === '1',
         budget:           params.get('addon_budget') === '1',
         intimacy:         params.get('addon_intimacy') === '1',
+        conflict:         params.get('addon_conflict') === '1',
         checklist:        params.get('addon_checklist') === '1',
       },
       intent: (fromRegistry || params.get('gift') === '1') ? 'gift' : 'self',
@@ -793,6 +796,7 @@ function persistOrderComplete(orderNum) {
   addonReflection = !!first.addons.reflection;
   addonBudget     = !!first.addons.budget;
   addonIntimacy   = !!first.addons.intimacy;
+  addonConflict   = !!first.addons.conflict;
   addonChecklist  = !!first.addons.checklist;
   intent          = first.intent;
 
@@ -1399,7 +1403,7 @@ function validateForm() {
                   giftNote: it.giftNote || null,
                   addonWorkbook: it.addons.workbook ? (it.addons.workbookVariant || 'digital') : null,
                   addonReflection: !!it.addons.reflection,
-                  addonBudget: !!it.addons.budget, addonIntimacy: !!it.addons.intimacy, addonChecklist: !!it.addons.checklist,
+                  addonBudget: !!it.addons.budget, addonIntimacy: !!it.addons.intimacy, addonConflict: !!it.addons.conflict, addonChecklist: !!it.addons.checklist,
                   shipping: it.format === 'physical' ? it.shipping : null,
                 })),
                 pkgKey: first.pkg, buyerEmail: email, buyerName: first.partner1Name,
@@ -1536,6 +1540,7 @@ async function handleSubmit(e) {
           addonReflection:  !!it.addons.reflection,
           addonBudget:      !!it.addons.budget,
           addonIntimacy:    !!it.addons.intimacy,
+          addonConflict:    !!it.addons.conflict,
           addonChecklist:   !!it.addons.checklist,
           shipping:         it.format === 'physical' ? it.shipping : null,
         })),
@@ -1546,6 +1551,7 @@ async function handleSubmit(e) {
         addonReflection:  !!first.addons.reflection,
         addonBudget:      !!first.addons.budget,
         addonIntimacy:    !!first.addons.intimacy,
+        addonConflict:    !!first.addons.conflict,
         isGift:           first.intent === 'gift',
         isPhysical:       first.format === 'physical',
         partner1Name:     first.partner1Name,
@@ -1655,6 +1661,7 @@ async function handleSubmit(e) {
           addonReflection: !!it.addons.reflection,
           addonBudget:     !!it.addons.budget,
           addonIntimacy:   !!it.addons.intimacy,
+          addonConflict:   !!it.addons.conflict,
           giftNote:      it.giftNote || null,
           setupPath:     '/app?' + params.toString(),
         }),
@@ -1672,6 +1679,7 @@ async function handleSubmit(e) {
         addonWorkbook: first.addons.workbook ? (first.addons.workbookVariant || 'digital') : null,
         addonBudget:   !!first.addons.budget,
         addonIntimacy: !!first.addons.intimacy,
+        addonConflict: !!first.addons.conflict,
         partner1Name:  first.partner1Name,
         partner2Name:  first.partner2Name,
         isPhysical:    first.format === 'physical',
@@ -1818,6 +1826,7 @@ function cartItemPrice(it) {
   if (it.addons.reflection) add += ADDON_REFLECTION.price;
   if (it.addons.budget)     add += 20;
   if (it.addons.intimacy)     add += 20;
+  if (it.addons.conflict)     add += 40;
   if (it.addons.checklist)  add += 20;
   return base + add;
 }
@@ -1832,6 +1841,7 @@ function getPkgTotal() {
       if (addonReflection) t += ADDON_REFLECTION.price;
       if (addonBudget) t += 20;
       if (addonIntimacy) t += 20;
+      if (addonConflict) t += 40;
       if (addonChecklist) t += 20;
       return t;
     }

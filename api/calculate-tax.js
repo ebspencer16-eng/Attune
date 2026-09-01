@@ -28,7 +28,7 @@ const DIGITAL_PRICES  = { core: 89,  newlywed: 139, anniversary: 139, premium: 2
 const PHYSICAL_PRICES = { core: 124, newlywed: 174, anniversary: 174, premium: 330 };
 const ADDON_PRICES = {
   workbookDigital: 19, workbookPrint: 39,
-  reflection: 40, budget: 20, checklist: 20,
+  reflection: 40, budget: 20, checklist: 20, intimacy: 20, conflict: 40,
 };
 const TAX_CODES = {
   digitalPackage:  'txcd_10000000',
@@ -58,6 +58,8 @@ function itemAddonTotal(it) {
   if (it.addonReflection) a += ADDON_PRICES.reflection;
   if (it.addonBudget)     a += ADDON_PRICES.budget;
   if (it.addonChecklist)  a += ADDON_PRICES.checklist;
+  if (it.addonIntimacy)   a += ADDON_PRICES.intimacy;
+  if (it.addonConflict)   a += ADDON_PRICES.conflict;
   return a;
 }
 
@@ -85,6 +87,8 @@ function buildTaxLines(items, promoCoversBase, promoFixedAmount = null, includes
     if (!includesWorkbook && it.addonWorkbook === 'digital') lines.push({ amount: Math.round(ADDON_PRICES.workbookDigital*100*(1-workbookPercent/100)), tax_code: TAX_CODES.workbookDigital, reference: `item-${idx}-wbdigital`, quantity: 1 });
     if (it.addonReflection) lines.push({ amount: ADDON_PRICES.reflection*100, tax_code: TAX_CODES.digitalAddon, reference: `item-${idx}-reflection`, quantity: 1 });
     if (it.addonBudget)     lines.push({ amount: ADDON_PRICES.budget*100,     tax_code: TAX_CODES.digitalAddon, reference: `item-${idx}-budget`,     quantity: 1 });
+    if (it.addonIntimacy)   lines.push({ amount: ADDON_PRICES.intimacy*100,   tax_code: TAX_CODES.digitalAddon, reference: 'addon_intimacy' });
+    if (it.addonConflict)   lines.push({ amount: ADDON_PRICES.conflict*100,   tax_code: TAX_CODES.digitalAddon, reference: 'addon_conflict' });
     if (it.addonChecklist)  lines.push({ amount: ADDON_PRICES.checklist*100,  tax_code: TAX_CODES.digitalAddon, reference: `item-${idx}-checklist`,  quantity: 1 });
   });
   return lines;
