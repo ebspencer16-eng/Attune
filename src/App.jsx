@@ -64,8 +64,8 @@ const PHYSICAL_ENABLED = false;
 // picker. Keyed to the current DIM_KEYS question ids.
 const _ENGAGE   = { cf1:1, cf2:1, cf3:1, st1:5, rp2:1, rp3:1, rp6:1, en4:5, en6:5, ls1:5, ls3:5 };
 const _WITHDRAW = { cf1:5, cf2:5, cf3:5, st1:1, rp2:5, rp3:5, rp6:5, en4:1, en6:1, ls1:1, ls3:1 };
-const _OPEN     = { ex6:5, ex7:5, ex8:5, rs1:1, rs3:1, fb5:5, fb2:5, nd1:1, nd5:1, bd1:5, bd3:5, bd4:5, lv1:1, lv2:1, lv5:5 };
-const _GUARDED  = { ex6:1, ex7:1, ex8:1, rs1:5, rs3:5, fb5:1, fb2:1, nd1:5, nd5:5, bd1:1, bd3:1, bd4:1, lv1:5, lv2:5, lv5:1 };
+const _OPEN     = { ex6:5, ex7:5, ex8:5, rs1:1, rs3:1, fb5:5, fb2:5, nd1:1, nd5:1, bd1:5, bd3:5, bd4:5, lv1:1, lv2:1 };
+const _GUARDED  = { ex6:1, ex7:1, ex8:1, rs1:5, rs3:5, fb5:1, fb2:1, nd1:5, nd5:5, bd1:1, bd3:1, bd4:1, lv1:5, lv2:5 };
 const ARCHETYPE_EX1 = {
   W: { ..._ENGAGE,   ..._OPEN },     // Initiator: engage + open
   X: { ..._ENGAGE,   ..._GUARDED },  // Anchor:    engage + guarded
@@ -2638,7 +2638,7 @@ function SideBySideResponses({ dims, myAnswers, partnerAnswers, userName, partne
   const qs = PERSONALITY_QUESTIONS.filter(q => dims.includes(q.dimension));
   const num = v => (v == null || isNaN(v)) ? null : Number(v);
   const pct = v => Math.max(3, Math.min(97, ((v - 1) / 4) * 100));
-  const flip = id => id === 'lv5' || id === 'st1';
+  const flip = id => id === 'st1';
   // Shared by the bar row and the label row beneath it, so both columns line up.
   const POLE = { fontSize: "0.66rem", color: "rgba(255,255,255,0.62)", fontFamily: BFONT, lineHeight: 1.3, flexShrink: 0, width: "clamp(74px,26%,150px)" };
 
@@ -3265,9 +3265,9 @@ function calcDimScores(answers) {
   // so the two cannot drift: that duplication is what let the admin dashboard
   // and the results pages disagree in the past.
   //
-  // lv5's a/b display order is reversed vs its dimension orientation, and st1's
+  // st1's a/b display order is reversed vs its dimension orientation, so it
   // options run withdraw->seek, so both are flipped (6 - v).
-  const FLIPPED = new Set(['lv5', 'st1']);
+  const FLIPPED = new Set(['st1']);
   const score = (dim, ...keys) => {
     const w = QUESTION_WEIGHTS[dim] || null;
     const parts = keys
@@ -3292,7 +3292,7 @@ function calcDimScores(answers) {
     energy:      score('energy', 'en4', 'en6'),
     expression:  score('expression', 'ex6', 'ex7', 'ex8'),
     reassurance: score('reassurance', 'rs1', 'rs3'),
-    love:        score('love', 'lv1', 'lv2', 'lv5'),
+    love:        score('love', 'lv1', 'lv2'),
     bids:        score('bids', 'bd1', 'bd3', 'bd4'),
     needs:       score('needs', 'nd1', 'nd5'),
     conflict:    score('conflict', 'cf1', 'cf2', 'cf3', 'st1'),
@@ -9857,15 +9857,15 @@ function ResultsHighlights({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3
         {/* Poles either side of the bar and centred on it, matching the
             orientation tiles. They were above the bar and at 45% opacity,
             which made them hard to read on the card's ground. */}
-        <div style={{ display: "flex", alignItems: "center", gap: "0.7rem" }}>
-          <span style={{ fontSize: "0.68rem", color: "rgba(255,255,255,0.78)", fontFamily: BFONT, lineHeight: 1.3, flexShrink: 0, width: "clamp(64px,24%,120px)", textAlign: "right" }}>{meta?.ends?.[0]}</span>
-          <div style={{ flex: 1, minWidth: 0, padding: "0 13px" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+          <span style={{ fontSize: "0.68rem", color: "rgba(255,255,255,0.78)", fontFamily: BFONT, lineHeight: 1.3, flexShrink: 0, width: "clamp(56px,19%,96px)", textAlign: "right" }}>{meta?.ends?.[0]}</span>
+          <div style={{ flex: 1, minWidth: 0, padding: "0 11px" }}>
         <div style={{ height: 6, background: "rgba(255,255,255,0.12)", borderRadius: 3, position: "relative", overflow: "visible" }}>
           <div title={userName} style={{ position: "absolute", top: "50%", left: myPct + "%", transform: `translate(-50%, calc(-50% + ${myDy}px))`, width: 22, height: 22, borderRadius: "50%", background: "#E8673A", border: "2.5px solid white", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "0.5rem", color: "white", fontWeight: 700, fontFamily: BFONT, zIndex: 2 }}>{sameInitial ? "" : userName[0]}</div>
           <div title={partnerName} style={{ position: "absolute", top: "50%", left: theirPct + "%", transform: `translate(-50%, calc(-50% + ${theirDy}px))`, width: 22, height: 22, borderRadius: "50%", background: "#1B5FE8", border: "2.5px solid white", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "0.5rem", color: "white", fontWeight: 700, fontFamily: BFONT, zIndex: 2 }}>{sameInitial ? "" : partnerName[0]}</div>
         </div>
           </div>
-          <span style={{ fontSize: "0.68rem", color: "rgba(255,255,255,0.78)", fontFamily: BFONT, lineHeight: 1.3, flexShrink: 0, width: "clamp(64px,24%,120px)" }}>{meta?.ends?.[1]}</span>
+          <span style={{ fontSize: "0.68rem", color: "rgba(255,255,255,0.78)", fontFamily: BFONT, lineHeight: 1.3, flexShrink: 0, width: "clamp(56px,19%,96px)" }}>{meta?.ends?.[1]}</span>
         </div>
         {sameInitial && (
           <div style={{ display: "flex", justifyContent: "center", gap: "1rem", marginTop: "1rem" }}>
@@ -13017,7 +13017,6 @@ export default function App() {
     lv2:1,
     lv3:1,
     lv4:1,
-    lv5:5,
     st1:5,
     st2:5,
     st3:5,
@@ -13129,7 +13128,6 @@ export default function App() {
     lv2:5,
     lv3:5,
     lv4:5,
-    lv5:1,
     st1:1,
     st2:1,
     st3:1,

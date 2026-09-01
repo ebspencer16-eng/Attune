@@ -46,7 +46,7 @@ import { personResults, readAccuracy } from './_lib/results.js';
 const DIM_ITEMS = {
   energy:     ['en4','en6'],
   expression: ['ex6','ex7','ex8'],
-  love:       ['lv1','lv2','lv5'],
+  love:       ['lv1','lv2'],
   bids:       ['bd1','bd3','bd4'],
   needs:      ['nd1','nd5'],
   conflict:   ['cf1','cf2','cf3','st1'],
@@ -55,7 +55,9 @@ const DIM_ITEMS = {
   listening:  ['ls1','ls3'],
   reassurance:['rs1','rs3'],
 };
-const FLIPPED = new Set(['lv5']);
+// lv5 was removed from the exercise. st1 is the only flipped question, and it
+// is handled by the shared scorer rather than here.
+const FLIPPED = new Set();
 
 function calcDimScores(answers) {
   if (!answers || typeof answers !== 'object') return null;

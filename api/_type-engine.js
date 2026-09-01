@@ -27,7 +27,7 @@ export const DIM_KEYS = {
   energy:      ['en4', 'en6'],
   expression:  ['ex6', 'ex7', 'ex8'],
   reassurance: ['rs1', 'rs3'],
-  love:        ['lv1', 'lv2', 'lv5'],
+  love:        ['lv1', 'lv2'],
   bids:        ['bd1', 'bd3', 'bd4'],
   needs:       ['nd1', 'nd5'],
   conflict:    ['cf1', 'cf2', 'cf3', 'st1'],
@@ -53,11 +53,11 @@ export const QUESTION_WEIGHTS = {
   energy:      { en6: 0.60, en4: 0.40 },
   expression:  { ex6: 0.45, ex8: 0.35, ex7: 0.20 },
   reassurance: { rs1: 0.65, rs3: 0.35 },
-  love:        { lv1: 0.40, lv2: 0.35, lv5: 0.25 },
+  love:        { lv1: 0.60, lv2: 0.40 },
   needs:       { nd5: 0.60, nd1: 0.40 },
   bids:        { bd3: 0.40, bd1: 0.35, bd4: 0.25 },
   listening:   { ls1: 0.70, ls3: 0.30 },
-  conflict:    { cf1: 0.35, cf2: 0.30, st1: 0.20, cf3: 0.15 },
+  conflict:    { cf1: 0.35, cf2: 0.20, st1: 0.30, cf3: 0.15 },
   repair:      { rp3: 0.40, rp2: 0.35, rp6: 0.25 },
   feedback:    { fb5: 0.55, fb2: 0.45 },
 };
@@ -103,7 +103,9 @@ export const AXIS_CONFIG = {
 // scoring orientation. Their raw 1-5 value is flipped (6 - v) before averaging
 // so the dimension stays consistently oriented. lv5: poles display
 // physical(a)->verbal(b), but love is oriented verbal->physical (lv1/lv2).
-export const FLIPPED_QUESTIONS = new Set(['lv5', 'st1']);
+// lv5 was the other flipped question. It was removed from the exercise, so
+// st1 is the only one left whose options run opposite to its dimension.
+export const FLIPPED_QUESTIONS = new Set(['st1']);
 
 // Average the answered question values for each dimension. Returns null for a
 // dimension with no answers (callers / axisScores treat missing as neutral 3).

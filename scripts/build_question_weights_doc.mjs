@@ -41,9 +41,8 @@ const PROPOSAL = {
     rs3: { weight: 0.35, why: 'About how you want to be responded to when upset. Related, but partly a listening question.' },
   },
   love: {
-    lv1: { weight: 0.40, why: 'What lands for you is the anchor of the dimension.' },
-    lv2: { weight: 0.35, why: 'What you give. Usually consistent with what you want, and diagnostic when it is not.' },
-    lv5: { weight: 0.25, why: 'Day-to-day closeness. Overlaps with bids and with energy.' },
+    lv1: { weight: 0.60, why: 'What lands for you is the anchor of the dimension.' },
+    lv2: { weight: 0.40, why: 'What you give. Usually consistent with what you want, and diagnostic when it is not.' },
   },
   needs: {
     nd5: { weight: 0.60, why: 'Whether you can name a need at all. The dimension in one question.' },
@@ -60,8 +59,8 @@ const PROPOSAL = {
   },
   conflict: {
     cf1: { weight: 0.35, why: 'Engage now or need space. The defining split of the dimension.' },
-    cf2: { weight: 0.30, why: 'What you need mid-conflict. Closest thing to a behavioural read under pressure.' },
-    st1: { weight: 0.20, why: 'Pull inward or lean in during a hard stretch. Broader than conflict specifically.' },
+    cf2: { weight: 0.20, why: 'What you need mid-conflict. Closest thing to a behavioural read under pressure.' },
+    st1: { weight: 0.30, why: 'Pull inward or lean in during a hard stretch. Broader than conflict specifically.' },
     cf3: { weight: 0.15, why: 'Whether small things get raised. A threshold question more than a style one.' },
   },
   repair: {

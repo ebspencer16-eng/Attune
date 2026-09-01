@@ -11,7 +11,7 @@ export const PERSONALITY_QUESTIONS = [
   { id:"ex6", dimension:"expression",  text:"When you're going through something, you tend to:", a:"Keep it mostly to yourself until you've worked through it.", b:"Let your partner in as it's happening, even before you have answers." },
   // ex7 poles are ordered guarded -> external for scoring consistency with the
   // other expression items.
-  { id:"ex7", dimension:"expression",  text:"You feel most understood by your partner when:", a:"They pick up on something without you having to say it.", b:"You're able to explain yourself clearly." },
+  { id:"ex7", dimension:"expression",  text:"You feel most understood by your partner when:", a:"They pick up on something without you having to say it", b:"They give you time to explain yourself fully" },
   { id:"ex8", dimension:"expression",  text:"When your partner does something you appreciate, you tend to:", a:"Feel it more than say it.", b:"Say it. You name the small things, not just the big ones." },
   { id:"rs3", dimension:"reassurance", text:"When you're upset and your partner responds, you feel most heard when:", a:"They show they get why you feel that way, even if they see it differently.", b:"They move toward fixing or figuring out the issue itself." },
   { id:"rs1", dimension:"reassurance", text:"When it comes to feeling secure in the relationship, you'd rather:", a:"Have it reaffirmed. Hearing where you stand keeps you close.", b:"Take it as given. You don't need it confirmed to feel steady." },
@@ -19,7 +19,6 @@ export const PERSONALITY_QUESTIONS = [
   // ── How you connect: love, needs, bids, listening ─────────────────────────
   { id:"lv1", dimension:"love",        text:"You feel most loved when your partner:", a:"Tells you. Words, spoken or written, specific and sincere, land most deeply.", b:"Shows you. Presence, touch, acts of care, and shared time speak louder than words." },
   { id:"lv2", dimension:"love",        text:"You show love primarily by:", a:"Expressing it, verbally and explicitly.", b:"Doing things. Showing up, making things easier, creating moments of closeness." },
-  { id:"lv5", dimension:"love",        text:"In ordinary day-to-day life, you feel closest to your partner when:", a:"You're simply together. Shared presence, physical closeness, doing life side by side.", b:"You're talking. Conversation keeps you close." },
   { id:"nd5", dimension:"needs",       text:"Articulating what you need from a partner feels:", a:"Straightforward. You can usually name it.", b:"Hard to name, even when you know something is missing." },
   { id:"nd1", dimension:"needs",       text:"It's the end of a hard day and something feels off for you, but you haven't said anything. You expect your partner to:", a:"Wait until you bring it up. It's on you to say something when you're ready.", b:"Notice and check in. Someone who knows you well should be able to tell when something's wrong." },
   { id:"bd1", dimension:"bids",        text:"Small everyday moments of connection, a squeeze of the hand, a brief check-in, a shared look:", a:"Are nice but not something you track or depend on.", b:"Matter a lot. They're how you feel close day to day." },
@@ -29,7 +28,7 @@ export const PERSONALITY_QUESTIONS = [
   { id:"ls3", dimension:"listening",   text:"A lull in conversation usually feels:", a:"Comfortable. You don't need to fill it.", b:"Like a cue to check in or say something." },
 
   // ── When things get hard: conflict, repair, feedback ──────────────────────
-  { id:"cf1", dimension:"conflict",    text:"When something feels off between you, you:", a:"Want to address it as soon as possible. Leaving things unresolved sits heavily with you.", b:"Need time before you can engage. Space first, conversation later." },
+  { id:"cf1", dimension:"conflict",    text:"When something feels off between you, you:", a:"Want to address it as soon as possible. Leaving things unsaid sits heavily with you.", b:"Need time before you can engage. Space first, conversation later." },
   { id:"cf2", dimension:"conflict",    text:"When you're in the middle of a difficult conversation with your partner, what matters most is:", a:"That they stay present and keep engaging, even if it's uncomfortable.", b:"That they give you room to step back if you need it, without taking it personally." },
   { id:"cf3", dimension:"conflict",    text:"When something small bothers you about the relationship, you tend to:", a:"Bring it up. You'd rather clear the air than let it build.", b:"Let it go. Not everything needs a conversation." },
   // st1's options run withdraw -> seek, the opposite of the other conflict
@@ -37,8 +36,8 @@ export const PERSONALITY_QUESTIONS = [
   { id:"st1", dimension:"conflict",    text:"When you're going through a hard stretch, you tend to:", a:"Pull inward. You need to get through it yourself before you can really be present with your partner.", b:"Lean in. Being close to your partner is part of how you get through hard things." },
   { id:"rp3", dimension:"repair",      text:"After a conflict, you need repair to happen:", a:"Relatively quickly. Unresolved tension sitting overnight or longer is hard for you.", b:"When it's ready. You can hold unresolved tension without it consuming you." },
   { id:"rp2", dimension:"repair",      text:"When you've been hurt, you feel ready to move forward when:", a:"Your partner has named what happened and shown they understand.", b:"The tension has lifted and things feel okay between you again." },
-  { id:"rp6", dimension:"repair",      text:"After a conflict, the move toward repair usually comes from:", a:"Whoever feels ready first, often you.", b:"Waiting to see if your partner reaches out first." },
-  { id:"fb5", dimension:"feedback",    text:"You can receive feedback from your partner most easily when:", a:"The tone is calm and the timing feels considered. Approach makes all the difference for you.", b:"It's direct and specific. You'd rather have it straight than carefully managed." },
+  { id:"rp6", dimension:"repair",      text:"After a conflict, when you want to repair things, it feels natural to:", a:"Initiate a conversation to resolve the issue", b:"Wait until your partner brings it up" },
+  { id:"fb5", dimension:"feedback",    text:"When receiving feedback from your partner, it matters most to you that:", a:"The tone is calm and the timing feels considered. Approach makes all the difference for you.", b:"It's direct and specific. You'd rather have it straight than carefully managed." },
   { id:"fb2", dimension:"feedback",    text:"When you have feedback for your partner, you tend to:", a:"Soften it and choose the moment carefully.", b:"Say it plainly, close to when it comes up." },
 ];
 
@@ -140,7 +139,6 @@ export const PARTNER_VIEW_TEXT = {
   ex6: { text: "When your partner is going through something, they tend to:", a: "Keep it mostly to themselves until they've worked through it.", b: "Let you in as it's happening." },
   en4: { text: "When you need alone time, your partner's instinct is to:", a: "Respect it right away.", b: "Check in. Silence can feel like something's wrong to them." },
   ex7: { text: "Your partner feels most understood when:", a: "You pick up on something without them having to say it.", b: "They're able to explain themselves clearly." },
-  lv5: { text: "In day-to-day life, your partner feels closest to you when:", a: "You're simply together. Shared presence, doing life side by side.", b: "You're talking. Conversation keeps them close." },
   bd1: { text: "For your partner, small everyday moments of connection:", a: "Are nice but not something they track or depend on.", b: "Matter a lot. They're how they feel close day to day." },
   bd3: { text: "In your relationship, your partner tends to:", a: "Wait for you to initiate small moments of connection.", b: "Reach for connection often, through small gestures or check-ins." },
   bd4: { text: "When your partner reaches for connection and you don't respond:", a: "They let it go easily.", b: "They notice. It can leave them feeling a little distant or unseen." },
