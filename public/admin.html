@@ -436,6 +436,14 @@
         </div>
         <div class="chart-body"><canvas id="chart-source"></canvas></div>
       </div>
+      <div class="chart-card">
+        <div class="chart-head"><div><div class="chart-title">How misaligned</div><div class="chart-subtitle">Couples with a 1+ point gap in 3 or more dimensions. Positions, not perception.</div></div></div>
+        <div id="regroup-misaligned" style="padding:1.25rem 1.4rem 1.6rem;"></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-head"><div><div class="chart-title">How misunderstood</div><div class="chart-subtitle">Couples where either partner reads the other 1+ point wrong in 3 or more dimensions. Perception, not positions.</div></div></div>
+        <div id="regroup-misunderstood" style="padding:1.25rem 1.4rem 1.6rem;"></div>
+      </div>
     </div>
   </div>
 
@@ -669,7 +677,7 @@
       <div class="chart-grid">
         <div class="chart-card">
           <div class="chart-head"><div><div class="chart-title">Avg alignment score by dimension</div><div class="chart-subtitle">Communication exercise · 10 dimensions</div></div><select class="tile-slicer" id="slz-rdim" title="Cut this tile by a couple-level segment"><option value="">Everyone</option></select></div>
-          <div class="chart-body"><canvas id="chart-dim-scores"></canvas></div>
+          <div class="chart-body" style="height:260px"><canvas id="chart-dim-scores"></canvas></div>
         </div>
         <div class="chart-card">
           <div class="chart-head"><div><div class="chart-title">Couple type distribution</div><div class="chart-subtitle">Across all typed couples</div></div><select class="tile-slicer" id="slz-rcouple" title="Cut this tile by a segment"><option value="">Everyone</option></select></div>
@@ -3576,7 +3584,7 @@ async function renderResponseTile(opts){
   const a=seg[sel?sel.value:'']||seg['']||null; if(!a) return;
   setTileN(el, a.pairs);
   if(opts.kind==='radar'){
-    mkChart(el,{type:'radar',data:{labels:a.dimScores.labels,datasets:[{label:'Avg alignment',data:a.dimScores.data,borderColor:'#6C7FFF',backgroundColor:'rgba(108,127,255,.15)',borderWidth:2,pointRadius:3,pointBackgroundColor:'#6C7FFF'}]},options:{scales:{r:{grid:{color:'#E6ECF6'},angleLines:{color:'#E6ECF6'},ticks:{display:false},min:0,max:100}},plugins:{legend:{display:false}}}});
+    mkChart(el,{type:'bar',data:{labels:a.dimScores.labels,datasets:[{label:'Avg alignment',data:a.dimScores.data,backgroundColor:'#6C7FFF',borderRadius:4,maxBarThickness:34}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>c.parsed.y+'% aligned'}}},scales:{y:{beginAtZero:true,max:100,ticks:{callback:v=>v+'%',font:{size:10}},grid:{color:'rgba(0,0,0,.06)'}},x:{ticks:{font:{size:10},maxRotation:45,minRotation:45},grid:{display:false}}}}});
   } else if(opts.kind==='expalign'){
     mkChart(el,{type:'radar',data:{labels:a.expAlign.labels,datasets:[{label:'% aligned',data:a.expAlign.data,borderColor:'#FF6B35',backgroundColor:'rgba(255,107,53,.15)',borderWidth:2,pointRadius:3,pointBackgroundColor:'#FF6B35'}]},options:{scales:{r:{grid:{color:'#E6ECF6'},angleLines:{color:'#E6ECF6'},ticks:{display:false},min:0,max:100}},plugins:{legend:{display:false}}}});
   } else if(opts.kind==='relfeel'){
@@ -5185,14 +5193,73 @@ function exportFulfillmentCSV() {
 // "Canvas is already in use" if an existing chart is not destroyed first, and
 // because initCharts builds many charts in sequence, one throw silently killed
 // every chart after it — leaving real data unrendered behind mock values.
+// Shared defaults for every chart on every page, applied here so a new chart
+// cannot be built without them.
+//
+// Tooltips felt laggy because Chart.js animates them in by default and only
+// resolves a hover when the cursor is near a point ('nearest' with intersect).
+// Killing the tooltip animation and switching to index mode makes it appear
+// the instant the cursor is over that column, which is what "hover to see
+// details" is expected to do.
 function mkChart(el, cfg) {
   if (!el) return null;
   try { const ex = Chart.getChart(el); if (ex) ex.destroy(); } catch (e) {}
+  const o = cfg.options = cfg.options || {};
+  o.animation = o.animation === false ? false : Object.assign({ duration: 300 }, o.animation);
+  // Instant tooltips, and a hover that triggers anywhere in the column rather
+  // than only on the point itself.
+  o.interaction = Object.assign({ mode: 'index', intersect: false, axis: 'x' }, o.interaction);
+  o.hover = Object.assign({ animationDuration: 0 }, o.hover);
+  o.plugins = o.plugins || {};
+  o.plugins.tooltip = Object.assign({ animation: false, position: 'nearest' }, o.plugins.tooltip);
   return new Chart(el, cfg);
+}
+
+// ── Regrouped rates on the overview ────────────────────────────────────────
+// A big percentage with the count under it, rather than a chart. Two numbers
+// do not need axes, and the denominator matters more than the shape: 60% of
+// five couples is not a finding.
+async function renderRegrouped() {
+  const wrap = (id) => document.getElementById(id);
+  if (!wrap('regroup-misaligned')) return;
+  let d = null;
+  try { d = await fetchAdminData(); } catch (e) { /* fall through to the empty state */ }
+  const r = d && d.regrouped;
+  const paint = (id, pct, n, total, label, color) => {
+    const el = wrap(id); if (!el) return;
+    if (!r || !total) {
+      el.innerHTML = '<div style="color:var(--muted);font-size:.8rem;">No complete couples yet.</div>';
+      return;
+    }
+    el.innerHTML =
+      `<div style="display:flex;align-items:baseline;gap:.5rem;">
+         <span style="font-family:var(--hfont);font-size:2.6rem;font-weight:700;color:${color};line-height:1;">${pct}%</span>
+         <span style="font-size:.8rem;color:var(--muted);">of couples</span>
+       </div>
+       <div style="height:8px;background:#EFE7DD;border-radius:99px;margin:.75rem 0 .6rem;overflow:hidden;">
+         <div style="height:100%;width:${pct}%;background:${color};border-radius:99px;"></div>
+       </div>
+       <div style="font-size:.75rem;color:var(--muted);">${n} of ${total} complete couples ${label}</div>`;
+  };
+  paint('regroup-misaligned', r ? r.misalignedPct : 0, r ? r.misalignedPairs : 0,
+    r ? r.ratedPairs : 0, 'are misaligned', '#E5578C');
+  paint('regroup-misunderstood', r ? r.misunderstoodPct : 0, r ? r.misunderstoodPairs : 0,
+    r ? r.ratedPairs : 0, 'misunderstand each other', '#6C7FFF');
+
+  // The threshold is a judgement call, not a finding. Say so where it is read.
+  const note = r && r.threshold
+    ? `Threshold: a ${r.threshold.gap.toFixed(1)}-point gap in ${r.threshold.dims}+ of 10 dimensions. Provisional, worth revisiting against a real distribution.`
+    : '';
+  ['regroup-misaligned', 'regroup-misunderstood'].forEach(id => {
+    const el = wrap(id);
+    if (el && note && r) el.insertAdjacentHTML('beforeend',
+      `<div style="font-size:.68rem;color:var(--muted);margin-top:.5rem;font-style:italic;">${note}</div>`);
+  });
 }
 
 function initCharts(page) {
   if (page==='overview') {
+    renderRegrouped();
     wireOrderChart({target:'chart-revenue',kind:'revenue',selId:'slz-revenue'});
     wireOrderChart({target:'chart-pkg-mix',kind:'pkgmix',selId:'slz-pkgmix'});
     wireCubeTile({target:'rellength-bars',field:'relationship_length',mode:'insightbars',selId:'slz-ovrellen',color:'#6C7FFF'});

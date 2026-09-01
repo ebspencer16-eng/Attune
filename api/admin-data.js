@@ -220,7 +220,46 @@ function buildResponseAggregates(profiles, sessions) {
     if (Number.isInteger(v) && v >= 0 && v <= 4) feel[v]++;
   });
 
+  // ── Headline rates for the overview: how many couples are misaligned, and
+  //    how many misunderstand each other. Computed over complete pairs only.
+  const GAP = 1.0, CUTOFF = 3;
+  let misalignedPairs = 0, misunderstoodPairs = 0, ratedPairs = 0;
+  pairs.forEach(([a, b]) => {
+    const sa = calcDimScores(a.ex1_answers), sb = calcDimScores(b.ex1_answers);
+    if (!sa || !sb) return;
+    let wide = 0, scored = 0;
+    for (const d of dimKeys) {
+      if (sa[d] == null || sb[d] == null) continue;
+      scored++;
+      if (Math.abs(sa[d] - sb[d]) >= GAP) wide++;
+    }
+    if (!scored) return;
+    ratedPairs++;
+    if (wide >= CUTOFF) misalignedPairs++;
+    const mine = readAccuracy(a.ex1_answers, b.ex1_answers);
+    const theirs = readAccuracy(b.ex1_answers, a.ex1_answers);
+    if (mine && theirs) {
+      let misread = 0;
+      for (const d of Object.keys(mine.dimensions || {})) {
+        const x = mine.dimensions[d], y = theirs.dimensions[d];
+        if (!x || !y) continue;
+        if (x.error >= GAP || y.error >= GAP) misread++;
+      }
+      if (misread >= CUTOFF) misunderstoodPairs++;
+    }
+  });
+
   return {
+    // Rates, with the denominator, so a small n is visible rather than a
+    // percentage standing on two couples.
+    regrouped: {
+      ratedPairs,
+      misalignedPairs,
+      misunderstoodPairs,
+      misalignedPct: ratedPairs ? Math.round((misalignedPairs / ratedPairs) * 100) : 0,
+      misunderstoodPct: ratedPairs ? Math.round((misunderstoodPairs / ratedPairs) * 100) : 0,
+      threshold: { gap: GAP, dims: CUTOFF },
+    },
     dimLabels: dimKeys,
     dimScores,
     expLabels: RESPONSIBILITY_CATEGORIES.map(c => c.label),
@@ -313,6 +352,33 @@ export default async function handler(req) {
         // Understanding: how accurately these two read each other, which is a
         // different question from how different they are. Attached to the
         // profile so the slicer can cut by it like any other segment.
+        // ── Regrouped cuts: aligned vs misaligned, in tune vs misunderstood ──
+        // Two different questions that are easy to conflate. ALIGNMENT is how
+        // similar their positions are. UNDERSTANDING is how accurately each
+        // reads the other. A couple can be far apart and read each other
+        // perfectly, or nearly identical and misread each other badly.
+        //
+        // Threshold: a gap of 1.0+ on the 1-5 scale, in 3 or more of the 10
+        // dimensions. Deliberately coarse and deliberately provisional. See
+        // the note in the admin UI: this needs revisiting against a real
+        // distribution rather than being treated as settled.
+        const GAP_THRESHOLD = 1.0;
+        const DIM_COUNT_CUTOFF = 3;
+        if (partner?.ex1_answers && p.ex1_answers) {
+          const mineScores = calcDimScores(p.ex1_answers);
+          const theirScores = calcDimScores(partner.ex1_answers);
+          let wideDims = 0, scored = 0;
+          for (const d of Object.keys(DIM_ITEMS)) {
+            const x = mineScores[d], y = theirScores[d];
+            if (x == null || y == null) continue;
+            scored++;
+            if (Math.abs(x - y) >= GAP_THRESHOLD) wideDims++;
+          }
+          if (scored) {
+            p.alignment_group = wideDims >= DIM_COUNT_CUTOFF ? 'Misaligned' : 'Aligned';
+            p.wide_gap_dims = wideDims;
+          }
+        }
         if (partner?.ex1_answers && p.ex1_answers) {
           const mine = readAccuracy(p.ex1_answers, partner.ex1_answers);      // how well I read them
           const theirs = readAccuracy(partner.ex1_answers, p.ex1_answers);    // how well they read me
@@ -327,6 +393,16 @@ export default async function handler(req) {
               : mine.meanError < 1.0 ? 'Mixed' : 'Misreads them';
             p.reads_partner_error = Number(mine.meanError.toFixed(2));
             p.understanding_lopsided = Math.abs(mine.meanError - theirs.meanError) >= 0.4 ? 'Lopsided' : 'Even';
+            // Same shape as the alignment cut, applied to read error: how many
+            // dimensions either partner has the other wrong about by 1.0+.
+            let misreadDims = 0;
+            for (const d of Object.keys(mine.dimensions || {})) {
+              const a = mine.dimensions[d], b = theirs.dimensions[d];
+              if (!a || !b) continue;
+              if (a.error >= GAP_THRESHOLD || b.error >= GAP_THRESHOLD) misreadDims++;
+            }
+            p.understanding_group = misreadDims >= DIM_COUNT_CUTOFF ? 'Misunderstood' : 'In tune';
+            p.wide_misread_dims = misreadDims;
             // The dimension this person has their partner most wrong about.
             p.worst_misread_dim = mine.worst?.[0]?.dim || null;
           }
@@ -338,6 +414,8 @@ export default async function handler(req) {
       });
     }
     const COUPLE_SEG = ['relationship_status', 'relationship_length', 'children', 'couple_type',
+      // The two regrouped cuts. Both couple-level, so partners share a value.
+      'alignment_group', 'understanding_group',
       // Understanding cuts. Couple-level, so both partners carry the same value.
       'understanding', 'understanding_lopsided',
       // Person-level: this individual's accuracy about their partner.
