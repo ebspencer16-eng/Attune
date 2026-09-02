@@ -3,7 +3,7 @@ import { axisScores, blendedDimScores, AXIS_CONFIG, QUESTION_WEIGHTS } from "../
 import { PERSONALITY_QUESTIONS, RESPONSIBILITY_CATEGORIES, LIFE_QUESTIONS, PARTNER_VIEW_TEXT } from "../api/_questions.js";
 import { CONFLICT_SECTIONS, CONFLICT_INTRO, FREQUENCY_OPTIONS, conflictQuestionsInOrder } from "../api/_conflict-questions.js";
 import { summarizeConflict, conflictPair } from "../api/_lib/conflict-results.js";
-import { PATTERN_COPY, SNAPSHOT_PROSE, OPENING_CHIPS, CONFLICT_RESULTS_COPY, FREQUENCY_LABELS, interpConflict } from "../api/_conflict-results-prose.js";
+import { PATTERN_COPY, PATTERN_ACTIONS, NO_ACTION_NEEDED, SNAPSHOT_PROSE, OPENING_CHIPS, CONFLICT_RESULTS_COPY, FREQUENCY_LABELS, interpConflict } from "../api/_conflict-results-prose.js";
 // Results copy now lives in versioned snapshots. A couple's results render
 // from the version stamped on their results row, so revising the wording never
 // moves the words a highlight was written against. contentFor(null) returns
@@ -7286,6 +7286,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
   const [expExpanded, setExpExpanded] = useState(section.startsWith("exp"));
   const [reflExpanded, setReflExpanded] = useState(section.startsWith("reflection"));
   const [intimExpanded, setIntimExpanded] = useState(section.startsWith("intimacy"));
+  const [conflictExpanded, setConflictExpanded] = useState(section.startsWith("conflict"));
   // section is internal state seeded once from initialSection. The mobile
   // sub-nav lives outside this component and can only set the parent's
   // activeResult, so without this every mobile tab was a no-op. Deliberately
@@ -7313,6 +7314,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
       setExpExpanded(mapped.startsWith("exp"));
       setReflExpanded(mapped.startsWith("reflection"));
       setIntimExpanded(mapped.startsWith("intimacy"));
+      setConflictExpanded(mapped.startsWith("conflict"));
       return mapped;
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -7636,6 +7638,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
     setExpExpanded(sec.startsWith("exp"));
     setReflExpanded(sec.startsWith("reflection"));
     setIntimExpanded(sec.startsWith("intimacy"));
+    setConflictExpanded(sec.startsWith("conflict"));
     const sc = document.querySelector("[data-results-scroll]");
     if (sc) sc.scrollTop = 0; else window.scrollTo({ top: 0 });
   };
@@ -7721,7 +7724,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
     <div style={{ width: 200, flexShrink: 0, paddingRight: "1.5rem", display: "flex", flexDirection: "column", gap: "0.15rem" }}>
       {sidebarSections.map(sec => {
         const isActive = section === sec.id || (sec.children && section.startsWith(sec.id + "-"));
-        const isExpanded = sec.id === "comm" ? commExpanded : sec.id === "exp" ? expExpanded : sec.id === "reflection" ? reflExpanded : sec.id === "intimacy" ? intimExpanded : false;
+        const isExpanded = sec.id === "comm" ? commExpanded : sec.id === "exp" ? expExpanded : sec.id === "reflection" ? reflExpanded : sec.id === "intimacy" ? intimExpanded : sec.id === "conflict" ? conflictExpanded : false;
         const color = sec.color || "#8C7A68";
         return (
           <div key={sec.id}>
@@ -7731,6 +7734,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
                 else if (sec.id === "exp") { setExpExpanded(e => !e); if (!expExpanded) go("exp-overview"); }
                 else if (sec.id === "reflection") { setReflExpanded(e => !e); if (!reflExpanded) go("reflection-overview"); }
                 else if (sec.id === "intimacy") { setIntimExpanded(e => !e); if (!intimExpanded) go("intimacy-overview"); }
+                else if (sec.id === "conflict") { setConflictExpanded(e => !e); if (!conflictExpanded) go("conflict-overview"); }
               } else { go(sec.id); }
             }} data-nav-active={section === sec.id ? "true" : undefined} style={{ width: "100%", background: (section === sec.id) ? color + "15" : "transparent", border: "none", borderRadius: 8, padding: "0.5rem 0.65rem", display: "flex", alignItems: "center", justifyContent: "space-between", cursor: "pointer", fontFamily: BFONT, transition: "background .15s" }}>
               <span style={{ fontSize: "0.75rem", fontWeight: isActive ? 700 : 500, color: isActive ? color : "#8C7A68" }}>{sec.icon && <span style={{ marginRight: "0.4rem", fontSize: "0.65rem", opacity: 0.7 }}>{sec.icon}</span>}{sec.label}</span>
@@ -8994,6 +8998,16 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
           <p style={{ fontSize: "0.84rem", color: C.ink, fontFamily: BFONT, lineHeight: 1.65, margin: 0 }}>
             {interp(copy[p.value ?? 0].note)}
           </p>
+          {/* An action only where the rate crosses into Sometimes. Attaching
+              one to every pattern would make a clean result read as a list of
+              corrections. */}
+          {(p.value ?? 0) >= 2 && PATTERN_ACTIONS[p.key] && (
+            <div style={{ marginTop: "0.8rem", background: "#F4F7FF", borderLeft: `3px solid ${BLUE}`, borderRadius: 8, padding: "0.75rem 0.95rem" }}>
+              <div style={{ fontSize: "0.6rem", letterSpacing: "0.12em", textTransform: "uppercase", color: BLUE, fontWeight: 700, fontFamily: BFONT, marginBottom: "0.35rem" }}>One thing to try</div>
+              <div style={{ fontSize: "0.84rem", fontWeight: 700, color: C.ink, fontFamily: BFONT, marginBottom: "0.25rem" }}>{PATTERN_ACTIONS[p.key].title}</div>
+              <p style={{ fontSize: "0.82rem", color: C.ink, fontFamily: BFONT, lineHeight: 1.6, margin: 0 }}>{interp(PATTERN_ACTIONS[p.key].body)}</p>
+            </div>
+          )}
         </div>
       );
     };
@@ -9116,8 +9130,15 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
       );
     }
 
-    // ── Glance ──
+    // ── Results at a glance ──────────────────────────────────────────────
+    // Same shape as the other sections: a headline, the action plan, then the
+    // detail pages listed as cards. The action plan leads, because it is the
+    // part a couple can act on and the risk detail is private to each reader.
     const worst = conflictMine.ranked[0];
+    const flagged = conflictMine.ranked.filter(p => (p.value ?? 0) >= 2);
+    const sharedRepair = (conflictMine.repairRanking || []).find(
+      r => (conflictPairing?.b?.repairRanking || []).slice(0, 3).includes(r));
+
     return (
       <Layout accent={BLUE}>
         <div style={{ maxWidth: 720 }}>
@@ -9125,18 +9146,46 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
           <div style={{ fontSize: "clamp(1.7rem,4.5vw,2.4rem)", fontWeight: 700, fontFamily: HFONT, color: C.ink, lineHeight: 1.15, marginBottom: "0.6rem" }}>
             {userName} & {partnerName}
           </div>
-          <p style={{ fontSize: "0.92rem", color: C.muted, fontFamily: BFONT, lineHeight: 1.7, marginBottom: "1.5rem" }}>
-            {conflictMine.flaggedCount === 0
-              ? interp(cc.allClear)
-              : `${FREQUENCY_LABELS[worst.value]} is the highest rate you reported, on ${PATTERN_COPY[worst.key].label.toLowerCase()}. Your patterns are private to you.`}
+          <p style={{ fontSize: "0.92rem", color: C.muted, fontFamily: BFONT, lineHeight: 1.7, marginBottom: "1.75rem" }}>
+            {sharedRepair
+              ? `You both put "${sharedRepair}" near the top of what helps you reset. That is the most useful thing on this page.`
+              : `You reset differently. Yours is "${conflictMine.repairRanking?.[0] || ''}", theirs is "${conflictPairing?.b?.repairRanking?.[0] || ''}".`}
           </p>
+
+          {/* ── Your action plan ── */}
+          <div style={{ fontSize: "0.62rem", letterSpacing: "0.16em", textTransform: "uppercase", color: C.muted, fontWeight: 700, fontFamily: BFONT, marginBottom: "0.75rem" }}>Your action plan</div>
+          <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem", marginBottom: "2rem" }}>
+            {flagged.length > 0 ? flagged.map(p => (
+              <div key={p.key} style={{ background: "white", border: `1.5px solid ${C.stone}`, borderLeft: `4px solid ${BLUE}`, borderRadius: 14, padding: "1.1rem 1.3rem" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: "0.4rem" }}>
+                  <span style={{ fontSize: "0.6rem", letterSpacing: "0.12em", textTransform: "uppercase", color: BLUE, fontWeight: 700, fontFamily: BFONT }}>One thing to try</span>
+                  <span style={{ fontSize: "0.62rem", color: C.muted, fontFamily: BFONT }}>{PATTERN_COPY[p.key].label} · private to you</span>
+                </div>
+                <div style={{ fontSize: "0.95rem", fontWeight: 700, color: C.ink, fontFamily: BFONT, marginBottom: "0.3rem" }}>{PATTERN_ACTIONS[p.key]?.title}</div>
+                <p style={{ fontSize: "0.86rem", color: C.ink, fontFamily: BFONT, lineHeight: 1.7, margin: 0 }}>{interp(PATTERN_ACTIONS[p.key]?.body)}</p>
+              </div>
+            )) : (
+              <div style={{ background: "white", border: `1.5px solid ${C.stone}`, borderLeft: `4px solid #2E7D5B`, borderRadius: 14, padding: "1.1rem 1.3rem" }}>
+                <div style={{ fontSize: "0.95rem", fontWeight: 700, color: C.ink, fontFamily: BFONT, marginBottom: "0.3rem" }}>{NO_ACTION_NEEDED.title}</div>
+                <p style={{ fontSize: "0.86rem", color: C.ink, fontFamily: BFONT, lineHeight: 1.7, margin: 0 }}>{interp(NO_ACTION_NEEDED.body)}</p>
+              </div>
+            )}
+          </div>
+
+          {/* ── Detailed results ── */}
+          <div style={{ fontSize: "0.62rem", letterSpacing: "0.16em", textTransform: "uppercase", color: C.muted, fontWeight: 700, fontFamily: BFONT, marginBottom: "0.75rem" }}>Detailed results</div>
           <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
-            {[["conflict-snapshot", cc.snapshotTitle, true], ["conflict-patterns", cc.patternsTitle, false],
-              ["conflict-repair", cc.repairTitle, true], ["conflict-wrote", cc.wroteTitle, true]].map(([id, label, shared]) => (
+            {[["conflict-snapshot", cc.snapshotTitle, "How each of you opens a disagreement", true],
+              ["conflict-patterns", cc.patternsTitle, `${flagged.length} of 4 worth attention`, false],
+              ["conflict-repair", cc.repairTitle, "Ranked by what lands for each of you", true],
+              ["conflict-wrote", cc.wroteTitle, "In your own words", true]].map(([id, label, sub, shared]) => (
               <button key={id} onClick={() => go(id)}
                 style={{ textAlign: "left", background: "white", border: `1.5px solid ${C.stone}`, borderRadius: 14,
-                  padding: "1rem 1.2rem", cursor: "pointer", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                <span style={{ fontSize: "0.95rem", fontWeight: 700, color: C.ink, fontFamily: BFONT }}>{label}</span>
+                  padding: "1rem 1.2rem", cursor: "pointer", display: "flex", justifyContent: "space-between", alignItems: "center", gap: "1rem" }}>
+                <span>
+                  <span style={{ display: "block", fontSize: "0.95rem", fontWeight: 700, color: C.ink, fontFamily: BFONT }}>{label}</span>
+                  <span style={{ display: "block", fontSize: "0.76rem", color: C.muted, fontFamily: BFONT, marginTop: "0.15rem" }}>{sub}</span>
+                </span>
                 <Badge shared={shared} />
               </button>
             ))}
@@ -9145,7 +9194,6 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
       </Layout>
     );
   }
-
 
   if (section === "what-comes-next") {
     const NavActionLink = ({ onClick, bg, border, icon, title, sub, accentColor }) => {

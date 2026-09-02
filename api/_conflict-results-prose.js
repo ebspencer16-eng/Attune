@@ -74,6 +74,43 @@ export const SNAPSHOT_PROSE = {
   bothDelayed: 'You both need time before engaging. That keeps things from boiling over. The watch-out is that a conversation neither of you starts can go unhad for a long time. Agree who raises it, or when.',
 };
 
+/**
+ * Action items, one per pattern, shown when that pattern is worth attention.
+ *
+ * The other sections build an action plan from the widest gap. This one cannot
+ * use a gap, because these are rates rather than positions. So the action is
+ * keyed to the pattern itself and only appears once the rate crosses into
+ * "Sometimes", where the research signal starts.
+ *
+ * Each is a single concrete thing to do, phrased as an experiment rather than a
+ * correction. "Try X for a week" is something a person can agree to; "stop
+ * being defensive" is not.
+ */
+export const PATTERN_ACTIONS = {
+  criticism: {
+    title: 'Name the behavior, not the person',
+    body: 'For the next two weeks, before raising something, say the specific thing that happened out loud to yourself first. "The dishes sat for three days" rather than "you never help". If you cannot name a specific thing, the complaint is probably about something else.',
+  },
+  contempt: {
+    title: 'Say it once, outside an argument',
+    body: 'Tell {partner} you noticed this in your own answers. Not mid-conflict, and not as an apology. Contempt loses most of its power once it has been named out loud by the person doing it, and almost none of it when the other person raises it first.',
+  },
+  defensiveness: {
+    title: 'Reflect back before you respond',
+    body: 'When {partner} raises something, say what you heard before you say anything else. One sentence. You are not agreeing, only confirming. It costs a few seconds and it removes the thing defensiveness is usually protecting against, which is not being heard.',
+  },
+  stonewalling: {
+    title: 'Agree a pause signal in advance',
+    body: 'Pick a phrase now, while things are calm, that means "I need twenty minutes and I am coming back". Agree what the return looks like. A stated pause protects the conversation; a silent one reads as leaving.',
+  },
+};
+
+/** Shown on the glance page when no pattern crosses the line. */
+export const NO_ACTION_NEEDED = {
+  title: 'Nothing here needs work',
+  body: 'None of the four patterns are showing up often for you. That is worth saying out loud to {partner}, because it is the kind of thing couples rarely tell each other.',
+};
+
 /** Labels for the answers, shown as chips under each name. */
 export const OPENING_CHIPS = {
   c1: { A: 'Speaks up right away', B: 'Takes time before bringing it up' },
