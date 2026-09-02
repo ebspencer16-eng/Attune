@@ -3,7 +3,7 @@ import { axisScores, blendedDimScores, AXIS_CONFIG, QUESTION_WEIGHTS } from "../
 import { PERSONALITY_QUESTIONS, RESPONSIBILITY_CATEGORIES, LIFE_QUESTIONS, PARTNER_VIEW_TEXT } from "../api/_questions.js";
 import { CONFLICT_SECTIONS, CONFLICT_INTRO, FREQUENCY_OPTIONS, conflictQuestionsInOrder } from "../api/_conflict-questions.js";
 import { summarizeConflict, conflictPair } from "../api/_lib/conflict-results.js";
-import { PATTERN_COPY, PATTERN_ACTIONS, NO_ACTION_NEEDED, SNAPSHOT_PROSE, SNAPSHOT_ROWS, OPENING_CHIPS, CONFLICT_RESULTS_COPY, FREQUENCY_LABELS, interpConflict } from "../api/_conflict-results-prose.js";
+import { PATTERN_COPY, PATTERN_ACTIONS, PATTERN_NOTES, BAND_COLORS, NO_ACTION_NEEDED, SNAPSHOT_PROSE, SNAPSHOT_ROWS, OPENING_CHIPS, CONFLICT_RESULTS_COPY, FREQUENCY_LABELS, interpConflict } from "../api/_conflict-results-prose.js";
 // Results copy now lives in versioned snapshots. A couple's results render
 // from the version stamped on their results row, so revising the wording never
 // moves the words a highlight was written against. contentFor(null) returns
@@ -8988,28 +8988,33 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
     // page reads at a glance without needing to know which is which.
     const PatternRow = ({ p }) => {
       const copy = PATTERN_COPY[p.key];
-      const pct = ((p.value ?? 0) / 3) * 100;
-      const tone = p.value >= 3 ? "#C2410C" : p.value === 2 ? "#C98A2E" : BLUE;
+      const v = p.value ?? 0;
+      const pct = (v / 3) * 100;
+      const tone = BAND_COLORS[v] || BAND_COLORS[0];
+      // Never gets no advice at all. Rarely gets an awareness note. Sometimes
+      // and Often get the action. Attaching an instruction to an absent
+      // pattern would read as a warning about something that is not happening.
+      const advice = v >= 2 ? PATTERN_ACTIONS[p.key] : v === 1 ? PATTERN_NOTES[p.key] : null;
+      const adviceLabel = v >= 2 ? 'One thing to try' : 'One thing to keep in mind';
       return (
         <div key={p.key} style={{ padding: "1rem 0", borderTop: `1px solid ${C.stone}` }}>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: "0.4rem" }}>
-            <span style={{ fontSize: "0.92rem", fontWeight: 700, color: C.ink, fontFamily: BFONT }}>{copy.label}</span>
-            <span style={{ fontSize: "0.8rem", color: C.muted, fontFamily: BFONT }}>{FREQUENCY_LABELS[p.value ?? 0]}</span>
-          </div>
-          {/* Definition sits under the title and above the bar, so the reader
-              knows what is being measured before seeing the measurement. */}
+          <div style={{ fontSize: "0.92rem", fontWeight: 700, color: C.ink, fontFamily: BFONT, marginBottom: "0.15rem" }}>{copy.label}</div>
           <div style={{ fontSize: "0.74rem", color: C.muted, fontFamily: BFONT, marginBottom: "0.5rem" }}>{copy.definition}</div>
+          {/* Frequency sits directly above the right edge of the bar, in the
+              bar's own colour, so the reading and the measure are one unit. */}
+          <div style={{ textAlign: "right", fontSize: "0.68rem", fontWeight: 700, color: tone, fontFamily: BFONT, marginBottom: "0.25rem" }}>
+            {FREQUENCY_LABELS[v]}
+          </div>
           <div style={{ height: 5, background: C.stone, borderRadius: 99 }}>
             <div style={{ height: "100%", width: `${Math.max(pct, 3)}%`, background: tone, borderRadius: 99 }} />
           </div>
-          {/* An action only where the rate crosses into Sometimes. Attaching
-              one to every pattern would make a clean result read as a list of
-              corrections. */}
-          {(p.value ?? 0) >= 2 && PATTERN_ACTIONS[p.key] && (
+          {advice && (
             <div style={{ marginTop: "0.8rem", background: "#F4F7FF", borderLeft: `3px solid ${BLUE}`, borderRadius: 8, padding: "0.75rem 0.95rem" }}>
-              <div style={{ fontSize: "0.6rem", letterSpacing: "0.12em", textTransform: "uppercase", color: BLUE, fontWeight: 700, fontFamily: BFONT, marginBottom: "0.35rem" }}>One thing to try</div>
-              <div style={{ fontSize: "0.84rem", fontWeight: 700, color: C.ink, fontFamily: BFONT, marginBottom: "0.25rem" }}>{PATTERN_ACTIONS[p.key].title}</div>
-              <p style={{ fontSize: "0.82rem", color: C.ink, fontFamily: BFONT, lineHeight: 1.6, margin: 0 }}>{interp(PATTERN_ACTIONS[p.key].body)}</p>
+              <div style={{ fontSize: "0.6rem", letterSpacing: "0.12em", textTransform: "uppercase", color: BLUE, fontWeight: 700, fontFamily: BFONT, marginBottom: "0.35rem" }}>{adviceLabel}</div>
+              {v >= 2 && (
+                <div style={{ fontSize: "0.84rem", fontWeight: 700, color: C.ink, fontFamily: BFONT, marginBottom: "0.25rem" }}>{advice.title}</div>
+              )}
+              <p style={{ fontSize: "0.82rem", color: C.ink, fontFamily: BFONT, lineHeight: 1.6, margin: 0 }}>{interp(advice.body)}</p>
             </div>
           )}
         </div>
@@ -9038,7 +9043,8 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
         <Layout accent={BLUE}>
           <div style={{ maxWidth: 760 }}>
             <div style={{ fontSize: "0.62rem", letterSpacing: "0.22em", textTransform: "uppercase", color: BLUE, fontWeight: 700, fontFamily: BFONT, marginBottom: "0.6rem" }}>{cc.eyebrow}</div>
-            <Head title={cc.snapshotTitle} shared={true} />
+            <div style={{ fontSize: "clamp(1.4rem,3.5vw,1.85rem)", fontWeight: 700, fontFamily: HFONT, color: C.ink, marginBottom: "1rem" }}>{cc.snapshotTitle}</div>
+            <div style={{ fontSize: "0.62rem", letterSpacing: "0.16em", textTransform: "uppercase", color: C.muted, fontWeight: 700, fontFamily: BFONT, marginBottom: "0.6rem" }}>Conflict</div>
             <Card>
               <div style={{ display: "grid", gridTemplateColumns: COLS, gap: "0.5rem 1.25rem", marginBottom: "0.5rem" }}>
                 <div />
@@ -9058,8 +9064,8 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
             {/* What helps you reset, absorbed from its own page. It is short,
                 it is about the same shared material, and a page of two lists
                 did not earn a nav entry of its own. */}
-            <div style={{ marginTop: "1.5rem" }}>
-              <Head title={cc.repairTitle} shared={true} />
+            <div style={{ marginTop: "1.75rem" }}>
+              <div style={{ fontSize: "0.62rem", letterSpacing: "0.16em", textTransform: "uppercase", color: C.muted, fontWeight: 700, fontFamily: BFONT, marginBottom: "0.6rem" }}>Repair</div>
               <Card>
                 <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: "1.75rem" }}>
                   {[[partnerName, userName, conflictMine.repairRanking],
@@ -9090,7 +9096,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
         <Layout accent={BLUE}>
           <div style={{ maxWidth: 660 }}>
             <div style={{ fontSize: "0.62rem", letterSpacing: "0.22em", textTransform: "uppercase", color: BLUE, fontWeight: 700, fontFamily: BFONT, marginBottom: "0.6rem" }}>{cc.eyebrow}</div>
-            <Head title={cc.patternsTitle} shared={false} />
+            <div style={{ fontSize: "clamp(1.4rem,3.5vw,1.85rem)", fontWeight: 700, fontFamily: HFONT, color: C.ink, marginBottom: "0.5rem" }}>{cc.patternsTitle}</div>
             <div style={{ fontSize: "0.8rem", fontWeight: 600, color: "#B5546E", fontFamily: BFONT, lineHeight: 1.5, marginBottom: "0.9rem" }}>
               * {cc.patternsPrivacy}
             </div>
@@ -9155,7 +9161,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
     const c0Aligned = Math.abs(myC0 - theirC0) <= 1;
 
     return (
-      <Layout accent={BLUE} noPrevNext={true}>
+      <Layout accent={BLUE}>
         <ResultsSlide bg="linear-gradient(150deg, #1B2A5E, #2F55C4 55%, #1B8FB8)">
           <link href={FONT_URL} rel="stylesheet" />
           <div style={{ color: "white" }}>
@@ -9166,12 +9172,6 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
               </div>
             </div>
             <div style={{ fontSize: "clamp(1.8rem,6vw,2.8rem)", fontWeight: 700, fontFamily: HFONT, lineHeight: 1.05, marginBottom: "0.6rem" }}>{userName} &amp; {partnerName}</div>
-            <p style={{ fontSize: "0.92rem", color: "rgba(255,255,255,0.85)", fontFamily: BFONT, fontWeight: 400, lineHeight: 1.6, marginBottom: "1.25rem" }}>
-              {c0Aligned
-                ? `You both describe conflict as "${(C0_LABELS[myC0] || '').toLowerCase()}". A shared read on where you are.`
-                : `${userName} says "${(C0_LABELS[myC0] || '').toLowerCase()}". ${partnerName} says "${(C0_LABELS[theirC0] || '').toLowerCase()}".`}
-            </p>
-
             {/* Q1, the one shared number this exercise produces. Everything
                 else on the risk side is private to each reader. */}
             <div style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 14, padding: "1.1rem 1.25rem", marginBottom: "1.25rem" }}>
@@ -9187,9 +9187,6 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
                   </div>
                 </div>
               ))}
-              <div style={{ fontSize: "0.68rem", color: "rgba(255,255,255,0.5)", fontFamily: BFONT, marginTop: "0.6rem", lineHeight: 1.5 }}>
-                {(4 - flagged.length)} of 4 patterns are not showing up for you. That part stays private.
-              </div>
             </div>
 
             <div style={{ fontSize: "0.55rem", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.45)", fontFamily: BFONT, fontWeight: 700, marginBottom: "0.7rem" }}>Your action plan</div>
@@ -9303,6 +9300,19 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
                   return { tip: `Talk about ${(meta?.label || d.id).toLowerCase()}`, phrase: prompt };
                 });
               if (intItems.length) groups.push({ id: "intimacy", label: "Physical Intimacy", color: "#B5546E", items: intItems });
+
+              // Conflict Patterns, last. Only the patterns that crossed into
+              // Sometimes, since those are the ones carrying an action. The
+              // pattern name is not shown here: this page is read together and
+              // the risk detail is private to each reader, so the action is
+              // surfaced without naming which pattern produced it.
+              const confItems = (conflictMine?.ranked || [])
+                .filter(pp => (pp.value ?? 0) >= 2 && PATTERN_ACTIONS[pp.key])
+                .map(pp => ({
+                  tip: PATTERN_ACTIONS[pp.key].title,
+                  phrase: interpConflict(PATTERN_ACTIONS[pp.key].body, { partner: partnerName }),
+                }));
+              if (confItems.length) groups.push({ id: "conflict", label: "Conflict Patterns", color: "#1B5FE8", items: confItems });
             }
 
             if (!groups.length) return null;

@@ -105,6 +105,39 @@ export const PATTERN_ACTIONS = {
   },
 };
 
+/**
+ * The softer variant, shown at "Rarely".
+ *
+ * Never gets nothing: a pattern that is absent does not need advice, and
+ * attaching one would turn a clean answer into a warning. Rarely gets an
+ * awareness note rather than an instruction, because there is nothing to fix
+ * yet. Sometimes and Often get the action in PATTERN_ACTIONS.
+ */
+export const PATTERN_NOTES = {
+  criticism: {
+    title: 'One thing to keep in mind',
+    body: 'It can be easy to criticize your partner rather than a behavior. Be wary of turning frustration into personal attacks.',
+  },
+  contempt: {
+    title: 'One thing to keep in mind',
+    body: 'Contempt grows quietly, but loses most of its power when it has been named out loud by the person doing it, and almost none when the other person points it out first.',
+  },
+  defensiveness: {
+    title: 'One thing to keep in mind',
+    body: 'Defensiveness can result in your partner not feeling heard or understood, and can compound problems that began as minor misunderstandings.',
+  },
+  stonewalling: {
+    title: 'One thing to keep in mind',
+    body: 'When your partner is engaging, stonewalling from you can communicate unwillingness to repair.',
+  },
+};
+
+/**
+ * Bar colour per frequency. The scale has four levels, not five, so these run
+ * green, yellow-green, orange, red rather than the five steps discussed.
+ */
+export const BAND_COLORS = ['#2E7D5B', '#7FA53C', '#D98A1F', '#C2410C'];
+
 /** Shown on the glance page when no pattern crosses the line. */
 export const NO_ACTION_NEEDED = {
   title: 'Nothing here needs work',
