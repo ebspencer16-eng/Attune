@@ -299,7 +299,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;height:58px;background:rgba(
     <ul class="pkg-features">
       <li class="bold-feat">Everything in the Assessment</li>
       <li>Relationship Reflection</li>
-      <li>Budget + intimacy exercises</li>
+      <li>Budget + conflict patterns exercises</li>
       <li>Personalized workbook</li>
       <li class="gift-feat">Gift box</li>
     </ul>
@@ -356,6 +356,19 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;height:58px;background:rgba(
         <div class="addon-price">+$20</div>
       </div>
     </div>
+
+    <!-- Conflict Patterns exercise · $40 -->
+    <div class="addon-card" id="addon-conflict" onclick="toggleConflict()">
+      <div class="addon-check" id="conflict-check">
+        <svg width="10" height="8" viewBox="0 0 11 9" fill="none"><path d="M1 4.5L4 7.5L10 1" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      <div class="addon-body">
+        <div class="addon-name">Conflict Patterns Exercise</div>
+        <div class="addon-desc">Twelve questions on how conflict actually goes for you. Answered on your own, with one section that stays private to you.</div>
+        <div class="addon-price">+$40</div>
+      </div>
+    </div>
+
 
     <!-- Relationship Reflection exercise — $40 -->
     <div class="addon-card" id="addon-reflection" onclick="toggleReflection()">
@@ -433,6 +446,7 @@ let wbFormat = 'digital';
 let addonBudget = false;
 let addonReflection = false;
 let addonIntimacy = false;
+let addonConflict = false;
 let addonChecklist = false;
 let premiumWbFormat = 'digital';  // format of the workbook included with Premium
 
@@ -470,23 +484,25 @@ function selectPkg(id) {
   document.getElementById('btn-next').disabled = false;
   // Hide add-ons already included in this package, and clear any prior selection
   // so an included add-on is never also billed.
-  // Premium now bundles budget + reflection + intimacy + workbook. Its one
-  // optional add-on is the Starting Out Checklist.
+  // Premium bundles budget + reflection + conflict + workbook. Physical
+  // Intimacy is add-on only now, and so is the Starting Out Checklist.
   const budgetIncluded = id === 'newlywed' || id === 'premium';
   const checklistIncluded = id === 'newlywed';
   const reflectionIncluded = id === 'anniversary' || id === 'premium';
-  const intimacyIncluded = id === 'premium';
+  const intimacyIncluded = false;
+  const conflictIncluded = id === 'premium';
   const workbookIncluded = id === 'premium';   // Premium includes the workbook
   if (budgetIncluded)     addonBudget = false;
   if (checklistIncluded)  addonChecklist = false;
   if (reflectionIncluded) addonReflection = false;
-  if (intimacyIncluded)   addonIntimacy = false;
+  if (conflictIncluded)   addonConflict = false;
   if (workbookIncluded) { addonWorkbook = false; document.getElementById('wb-variants').classList.remove('show'); }
-  ['addon-budget','addon-checklist','addon-reflection','addon-intimacy','addon-workbook'].forEach(a => { const el = document.getElementById(a); if (el) el.classList.remove('selected'); });
+  ['addon-budget','addon-checklist','addon-reflection','addon-intimacy','addon-conflict','addon-workbook'].forEach(a => { const el = document.getElementById(a); if (el) el.classList.remove('selected'); });
   setAddonIncluded('addon-budget', budgetIncluded);
   setAddonIncluded('addon-checklist', checklistIncluded);
   setAddonIncluded('addon-reflection', reflectionIncluded);
   setAddonIncluded('addon-intimacy', intimacyIncluded);
+  setAddonIncluded('addon-conflict', conflictIncluded);
   setAddonIncluded('addon-workbook', workbookIncluded);
   // Premium: the included workbook tracks the package format (digital/printed).
   document.getElementById('premium-wb').style.display = (id === 'premium') ? '' : 'none';
@@ -542,6 +558,11 @@ function toggleIntimacy() {
   document.getElementById('addon-intimacy').classList.toggle('selected', addonIntimacy);
   updateBar();
 }
+function toggleConflict() {
+  addonConflict = !addonConflict;
+  document.getElementById('addon-conflict').classList.toggle('selected', addonConflict);
+  updateBar();
+}
 
 function toggleChecklist() {
   addonChecklist = !addonChecklist;
@@ -564,6 +585,7 @@ function updateBar() {
   if (addonBudget) total += 20;
   if (addonReflection) total += 40;
   if (addonIntimacy) total += 20;
+  if (addonConflict) total += 40;
   if (addonChecklist) total += 20;
   // Physical premium includes the printed workbook in its price. The +$20 upgrade
   // only applies if someone keeps the digital package but wants a printed workbook.
@@ -579,6 +601,7 @@ function goNext() {
   if (addonBudget) params.set('addon_budget', '1');
   if (addonReflection) params.set('addon_reflection', '1');
   if (addonIntimacy) params.set('addon_intimacy', '1');
+  if (addonConflict) params.set('addon_conflict', '1');
   if (addonChecklist) params.set('addon_checklist', '1');
   // Premium includes the workbook; pass its chosen format (not billed as an add-on).
   if (selectedPkg === 'premium') params.set('wb_format', premiumWbFormat);

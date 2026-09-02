@@ -275,11 +275,11 @@
 
   /* Narrower than the container: at full width the eye travels too far between
      a feature name and its ticks, which is what made it hard to read. */
-  .cmp-wrap{max-width:760px;margin:0;overflow-x:auto;-webkit-overflow-scrolling:touch;border:1px solid var(--stone);border-radius:16px;background:var(--cream)}
+  .cmp-wrap{width:100%;max-width:760px;margin:0 auto;overflow-x:auto;-webkit-overflow-scrolling:touch;border:1px solid rgba(27,95,232,.22);border-radius:16px;background:var(--cream)}
   .cmp{width:100%;border-collapse:collapse;font-size:.8rem}
   .cmp th,.cmp td{padding:.5rem .4rem;text-align:center;vertical-align:middle}
   .cmp th:first-child,.cmp td:first-child{text-align:left;width:38%;color:var(--text);font-weight:400;padding-left:1rem}
-  .cmp thead th{font-family:'Playfair Display',Georgia,serif;font-size:.8rem;line-height:1.2;font-weight:700;color:var(--ink);padding-top:.9rem;padding-bottom:.65rem;border-bottom:2px solid var(--stone)}
+  .cmp thead th{font-family:'Playfair Display',Georgia,serif;font-size:.8rem;line-height:1.2;font-weight:700;color:var(--ink);padding-top:.9rem;padding-bottom:.65rem;border-bottom:2px solid var(--indigo)}
   .cmp thead th span{display:block;font-family:'DM Sans',sans-serif;font-size:.66rem;font-weight:700;color:var(--clay);margin-top:.15rem}
   .cmp tbody tr:nth-child(even){background:var(--warm)}
   .cmp tbody tr:hover{background:#FBEFE6}
@@ -287,7 +287,7 @@
   .cmp .yes{color:var(--orange);font-weight:700;font-size:.95rem}
   .cmp .no{color:#DCCDBA}
   .cmp th:last-child,.cmp td:last-child{background:rgba(232,103,58,.06)}
-  .cmp-note{font-size:.74rem;color:var(--muted);line-height:1.55;margin:.7rem 0 0;font-style:italic;max-width:760px}
+  .cmp-note{width:100%;font-size:.72rem;color:var(--muted);line-height:1.5;margin:.5rem auto 0;font-style:italic;max-width:760px;text-align:right}
 
   @media(max-width:900px){ .byo-grid{grid-template-columns:repeat(2,1fr)} }
   @media(max-width:600px){
@@ -609,7 +609,7 @@
     <div class="pov-name">Attune Premium</div>
     <div class="pov-price">$198</div>
     <div style="font-size:.65rem;color:rgba(255,255,255,.45);margin-top:.2rem;line-height:1.5;">Everything, in one place.</div>
-    <div class="pov-desc">Both bonus exercises and the personalized workbook, bundled with the full Assessment.</div>
+    <div class="pov-desc">Two bonus exercises and the personalized workbook, bundled with the full Assessment.</div>
     <div class="pov-cta" onclick="event.stopPropagation();addToCartWithIntent('premium')">Add to cart →</div>
   </div>
 </div>
@@ -639,7 +639,7 @@
     <div class="cmp-wrap">
       <table class="cmp" id="cmp-table"></table>
     </div>
-    <p class="cmp-note">Anything not included in a package can be added to it at checkout, or bought later from your dashboard.</p>
+    <p class="cmp-note">* Anything not included in a package can be added to it at checkout, or bought later from your dashboard.</p>
 
   </div><!-- end packages-inner -->
 </div><!-- end packages -->
