@@ -250,46 +250,62 @@
   .fu2{animation:fadeUp .6s .1s ease both}
 
   /* ── BUILD YOUR OWN + COMPARISON TABLE ─────────────────────────────────── */
-  .byo-eyebrow{font-size:.6rem;letter-spacing:.22em;text-transform:uppercase;color:var(--clay);font-weight:700;margin-bottom:.5rem}
-  .byo-sub{font-size:.88rem;color:var(--muted);line-height:1.6;margin-bottom:1.75rem;max-width:52ch}
-  .byo-row-label{font-size:.72rem;font-weight:700;color:var(--ink);margin-bottom:.75rem}
-  .byo-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:.75rem}
-  .byo-tile{border:1.5px solid var(--stone);border-radius:12px;padding:.9rem 1rem;background:white;display:flex;flex-direction:column;gap:.4rem}
-  .byo-tile h4{font-size:.85rem;font-weight:700;color:var(--ink);margin:0;line-height:1.3}
-  .byo-tile p{font-size:.74rem;color:var(--muted);line-height:1.5;margin:0;flex:1}
-  .byo-foot{display:flex;align-items:center;justify-content:space-between;gap:.5rem;margin-top:.2rem}
-  .byo-price{font-size:.8rem;font-weight:700;color:var(--ink)}
-  .byo-add{background:var(--clay);color:#fff;border:none;border-radius:8px;padding:.35rem .7rem;font-size:.72rem;font-weight:700;cursor:pointer;font-family:inherit}
-  .byo-add:disabled{background:var(--stone);color:var(--muted);cursor:default}
-  /* Core exercises: shown, not hidden, so the base price explains itself. */
-  .byo-tile.core{background:#FAF7F2;border-style:dashed}
+  /* The block sits on a tinted panel. The page above it is white tiles on a
+     warm ground; without a change of surface this section read as more of the
+     same and the eye slid off it. */
+  .byo-panel{background:linear-gradient(160deg,#FFF6F1,#F3F1FB);border:1px solid var(--stone);border-radius:20px;padding:2rem 2rem 2.25rem;margin-bottom:2.5rem}
+  .byo-eyebrow{font-size:.6rem;letter-spacing:.22em;text-transform:uppercase;color:var(--clay);font-weight:700;margin-bottom:.35rem}
+  .byo-sub{font-size:.86rem;color:var(--muted);line-height:1.55;margin:0 0 1.5rem;max-width:56ch}
+  .byo-row-label{font-size:.62rem;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);font-weight:700;margin:0 0 .6rem}
+  /* Fixed columns, not auto-fill: auto-fill left the tiles filling half the
+     width with dead space to the right, which is what made the page look
+     empty. Four exercises, three resources, each row spans the container. */
+  .byo-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:.7rem}
+  .byo-grid.three{grid-template-columns:repeat(3,1fr)}
+  .byo-tile{border:1px solid var(--stone);border-radius:12px;padding:.85rem .95rem;background:#fff;display:flex;flex-direction:column;gap:.35rem;min-height:0}
+  .byo-tile h4{font-size:.82rem;font-weight:700;color:var(--ink);margin:0;line-height:1.25}
+  .byo-tile p{font-size:.72rem;color:var(--muted);line-height:1.45;margin:0;flex:1}
+  .byo-foot{display:flex;align-items:center;justify-content:space-between;gap:.4rem;margin-top:.4rem}
+  .byo-foot .byo-add{width:max-content}
+  .byo-price{font-size:.85rem;font-weight:700;color:var(--ink);font-family:'Playfair Display',Georgia,serif}
+  .byo-add{flex:0 0 auto;background:var(--clay);color:#fff;border:none;border-radius:7px;padding:.34rem .8rem;font-size:.7rem;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap}
+  .byo-add:hover{filter:brightness(1.06)}
+  .byo-tile.core{background:rgba(255,255,255,.45);border-style:dashed}
   .byo-tile.core h4{color:var(--muted)}
-  .byo-core-note{font-size:.7rem;color:var(--muted);font-style:italic}
+  .byo-core-note{font-size:.68rem;color:var(--muted);font-style:italic}
 
-  .cmp-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+  /* Table: full width, banded rows, package columns visually separated. It was
+     a thin grey grid floating in white, which is the "blah" problem. */
+  .cmp-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;border:1px solid var(--stone);border-radius:16px;background:#fff}
   .cmp{width:100%;border-collapse:collapse;font-size:.8rem}
-  .cmp th,.cmp td{padding:.6rem .5rem;border-bottom:1px solid var(--stone);text-align:center;vertical-align:middle}
-  .cmp th:first-child,.cmp td:first-child{text-align:left;width:38%;color:var(--text);font-weight:400}
-  .cmp thead th{font-size:.68rem;line-height:1.25;font-weight:700;color:var(--ink);white-space:normal;vertical-align:bottom}
-  .cmp thead th span{display:block;font-size:.66rem;font-weight:400;color:var(--muted);margin-top:.15rem}
-  .cmp .yes{color:#2E7D5B;font-weight:700}
-  .cmp .no{color:var(--stone)}
-  .cmp-note{font-size:.76rem;color:var(--muted);line-height:1.6;margin-top:.9rem;font-style:italic}
+  .cmp th,.cmp td{padding:.55rem .5rem;text-align:center;vertical-align:middle}
+  .cmp th:first-child,.cmp td:first-child{text-align:left;width:34%;color:var(--text);font-weight:400;padding-left:1.1rem}
+  .cmp thead th{font-family:'Playfair Display',Georgia,serif;font-size:.82rem;line-height:1.2;font-weight:700;color:var(--ink);padding-top:1rem;padding-bottom:.75rem;border-bottom:2px solid var(--stone)}
+  .cmp thead th span{display:block;font-family:'DM Sans',sans-serif;font-size:.68rem;font-weight:700;color:var(--clay);margin-top:.2rem}
+  .cmp tbody tr:nth-child(even){background:#FBF9F6}
+  .cmp tbody tr:hover{background:#FFF3EC}
+  .cmp tbody td{border-top:1px solid #F1EAE1}
+  .cmp .yes{color:#2E7D5B;font-weight:700;font-size:.95rem}
+  .cmp .no{color:#D8CDBF}
+  /* Premium reads as the full column, so it gets a tinted spine. */
+  .cmp th:last-child,.cmp td:last-child{background:rgba(232,103,58,.05)}
+  .cmp-note{font-size:.74rem;color:var(--muted);line-height:1.55;margin:.75rem 0 0;font-style:italic}
 
-  /* Mobile: the table stays a table. Side labels shrink, column headers wrap,
-     padding tightens. Stacking one package per block would lose the
-     comparison, which is the only reason the table exists. */
-  @media(max-width:600px){
-    .cmp{font-size:.72rem}
-    .cmp th,.cmp td{padding:.5rem .2rem}
-    .cmp th:first-child,.cmp td:first-child{width:42%;font-size:.7rem;line-height:1.35;padding-right:.4rem}
-    .cmp thead th{font-size:.6rem}
-    .cmp thead th span{display:none}
-    .byo-grid{grid-template-columns:1fr 1fr;gap:.5rem}
-    .byo-tile{padding:.7rem .8rem}
-    .byo-tile p{display:none}
+  @media(max-width:900px){
+    .byo-grid{grid-template-columns:repeat(2,1fr)}
+    .byo-grid.three{grid-template-columns:repeat(3,1fr)}
   }
-
+  @media(max-width:600px){
+    .byo-panel{padding:1.25rem 1rem 1.5rem;border-radius:16px}
+    .byo-grid,.byo-grid.three{grid-template-columns:1fr 1fr;gap:.5rem}
+    .byo-tile{padding:.65rem .7rem}
+    .byo-tile p{display:none}
+    .cmp{font-size:.72rem}
+    .cmp th,.cmp td{padding:.45rem .18rem}
+    .cmp th:first-child,.cmp td:first-child{width:40%;font-size:.69rem;line-height:1.3;padding-left:.6rem}
+    .cmp thead th{font-size:.72rem}
+    .cmp thead th span{font-size:.6rem}
+  }
   /* PACKAGE OVERVIEW TILES */
   .pkg-overview{max-width:1120px;margin:0 auto 2.5rem;padding:0 2.5rem;display:grid;grid-template-columns:repeat(4,1fr);gap:1rem}
   .pov-tile{background:white;border:1.5px solid var(--stone);border-top:3px solid var(--stone);border-radius:16px;padding:1.4rem 1.25rem;cursor:pointer;transition:all .2s;display:flex;flex-direction:column;gap:.5rem}
@@ -613,17 +629,19 @@
     <!-- Every package starts from the two core exercises. They are shown here
          greyed rather than hidden, so it is obvious what the base price buys
          and why they have no Add button. -->
-    <div class="byo-eyebrow">Or build your own</div>
-    <p class="byo-sub">Start with the core exercises, then add what you want. Everything here can also be added later.</p>
+    <div class="byo-panel">
+      <div class="byo-eyebrow">Or build your own</div>
+      <p class="byo-sub">Start with the core exercises, then add what you want. Everything here can also be added later.</p>
 
-    <div class="byo-row-label">The exercises</div>
-    <div class="byo-grid" id="byo-exercises"></div>
+      <div class="byo-row-label">The exercises</div>
+      <div class="byo-grid" id="byo-exercises"></div>
 
-    <div class="byo-row-label" style="margin-top:2rem;">The resources</div>
-    <div class="byo-grid" id="byo-resources"></div>
+      <div class="byo-row-label" style="margin-top:1.4rem;">The resources</div>
+      <div class="byo-grid three" id="byo-resources"></div>
+    </div>
 
     <!-- COMPARISON TABLE -->
-    <div class="byo-eyebrow" style="margin-top:3.5rem;">What each package includes</div>
+    <div class="byo-eyebrow">What each package includes</div>
     <div class="cmp-wrap">
       <table class="cmp" id="cmp-table"></table>
     </div>
