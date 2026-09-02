@@ -505,6 +505,7 @@
   @media(max-width:780px){input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]),textarea,select{font-size:16px!important}}</style>
   <link rel="stylesheet" href="/cart.css">
   <script src="/_flags.js"></script>
+  <script src="/_pkg-rules.js"></script>
 <script src="/cart.js"></script>
 </head>
 <body>
@@ -1020,18 +1021,27 @@ document.addEventListener('click', function(e) {
     { key:'anniversary', label:'Reflection',   price:'$139' },
     { key:'premium',     label:'Premium',      price:'$198' }
   ];
+  // Rows derive their ticks from the generated package rules where the feature
+  // maps to an add-on, so the table cannot disagree with checkout. Only the
+  // rows with no add-on equivalent carry a literal list.
+  var INC = window.ATTUNE_PKG_INCLUDED || {};
+  var PKG_KEYS = PKGS.map(function (p) { return p.key; });
+  var byAddon = function (addon) {
+    return PKG_KEYS.filter(function (k) { return INC[k] && INC[k][addon]; });
+  };
+  var ALL = PKG_KEYS;
   var ROWS = [
-    ['Communication style exercise',        ['core','newlywed','anniversary','premium']],
-    ['Expectations exercise',               ['core','newlywed','anniversary','premium']],
-    ['Relationship reflection exercise',    ['anniversary','premium']],
-    ['Physical intimacy expectations',      []],
-    ['Conflict patterns exercise',          ['premium']],
-    ['Personalized workbook',               ['premium']],
-    ['Build a budget tool',                 ['newlywed','premium']],
-    ['Starting out checklist',              ['newlywed']],
-    ['Personalized action plan',            ['core','newlywed','anniversary','premium']],
-    ['Lifetime digital access',             ['core','newlywed','anniversary','premium']],
-    ['Full access in the Attune app',       ['core','newlywed','anniversary','premium']]
+    ['Communication style exercise',        ALL],
+    ['Expectations exercise',               ALL],
+    ['Relationship reflection exercise',    byAddon('reflection')],
+    ['Physical intimacy expectations',      byAddon('intimacy')],
+    ['Conflict patterns exercise',          byAddon('conflict')],
+    ['Personalized workbook',               byAddon('workbook')],
+    ['Build a budget tool',                 byAddon('budget')],
+    ['Starting out checklist',              byAddon('checklist')],
+    ['Personalized action plan',            ALL],
+    ['Lifetime digital access',             ALL],
+    ['Full access in the Attune app',       ALL]
   ];
 
   var t = document.getElementById('cmp-table');

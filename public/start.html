@@ -182,6 +182,8 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;height:58px;background:rgba(
 @media(max-width:900px){nav{padding:0 1.25rem}.nav-center{display:none}.nav-right .btn-nav,.nav-signin{display:none}.hamburger{display:flex}}
 </style>
   <link rel="stylesheet" href="/cart.css">
+  <script src="/_flags.js"></script>
+  <script src="/_pkg-rules.js"></script>
 </head>
 <body>
 
@@ -484,17 +486,21 @@ function selectPkg(id) {
   document.getElementById('btn-next').disabled = false;
   // Hide add-ons already included in this package, and clear any prior selection
   // so an included add-on is never also billed.
-  // Premium bundles budget + reflection + conflict + workbook. Physical
-  // Intimacy is add-on only now, and so is the Starting Out Checklist.
-  const budgetIncluded = id === 'newlywed' || id === 'premium';
-  const checklistIncluded = id === 'newlywed';
-  const reflectionIncluded = id === 'anniversary' || id === 'premium';
-  const intimacyIncluded = false;
-  const conflictIncluded = id === 'premium';
-  const workbookIncluded = id === 'premium';   // Premium includes the workbook
+  // Inclusion comes from public/_pkg-rules.js, generated from PKG_CAPS, rather
+  // than being restated here. This block was a hand-kept copy and it fell
+  // behind when Premium switched from intimacy to conflict: the flow showed
+  // intimacy as included when it was not, and never offered conflict at all.
+  const inc = (window.ATTUNE_PKG_INCLUDED && window.ATTUNE_PKG_INCLUDED[id]) || {};
+  const budgetIncluded     = !!inc.budget;
+  const checklistIncluded  = !!inc.checklist;
+  const reflectionIncluded = !!inc.reflection;
+  const intimacyIncluded   = !!inc.intimacy;
+  const conflictIncluded   = !!inc.conflict;
+  const workbookIncluded   = !!inc.workbook;
   if (budgetIncluded)     addonBudget = false;
   if (checklistIncluded)  addonChecklist = false;
   if (reflectionIncluded) addonReflection = false;
+  if (intimacyIncluded)   addonIntimacy = false;
   if (conflictIncluded)   addonConflict = false;
   if (workbookIncluded) { addonWorkbook = false; document.getElementById('wb-variants').classList.remove('show'); }
   ['addon-budget','addon-checklist','addon-reflection','addon-intimacy','addon-conflict','addon-workbook'].forEach(a => { const el = document.getElementById(a); if (el) el.classList.remove('selected'); });

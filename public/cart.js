@@ -51,15 +51,12 @@ const ADDON_META = {
   reflection: { title: 'Relationship Reflection',    desc: 'Exercise on experiences that shaped you' },
 };
 // What each package already bundles, so it isn't offered again as a paid add-on.
-// conflict is false everywhere on purpose: Conflict Patterns is never bundled into
-// a package, including premium. Omitting it here would make the lookup
-// undefined, which is falsy and happens to work, but only by accident.
-const PKG_INCLUDED = {
-  core:        { checklist:false, budget:false, reflection:false, intimacy:false, conflict:false },
-  newlywed:    { checklist:true,  budget:true,  reflection:false, intimacy:false, conflict:false },
-  anniversary: { checklist:false, budget:false, reflection:true, intimacy:false, conflict:false },
-  premium:     { checklist:false, budget:true,  reflection:true, intimacy:false, conflict:true  },
-};
+// Package inclusion comes from public/_pkg-rules.js, generated from PKG_CAPS.
+// This was a hand-kept copy; when Premium switched from intimacy to conflict,
+// keeping four copies in sync is what let the start flow fall behind.
+// Falls back to an empty map so a page that forgets the script degrades to
+// "nothing is included" rather than throwing.
+const PKG_INCLUDED = (typeof window !== 'undefined' && window.ATTUNE_PKG_INCLUDED) || {};
 // Display order: workbook first (primary upsell), then cheapest → most expensive.
 const ADDON_ORDER = (function(){
   var order = ['workbook','intimacy','conflict','budget','checklist','reflection'];
