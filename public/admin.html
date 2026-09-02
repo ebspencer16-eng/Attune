@@ -444,6 +444,9 @@
         <div class="chart-head"><div><div class="chart-title">Understanding</div><div class="chart-subtitle">Couples where either partner reads the other 1+ point wrong in 3 or more dimensions count as misunderstood. Needs Part 2 answers, so the denominator is smaller.</div></div></div>
         <div class="chart-body" style="height:230px"><canvas id="regroup-misunderstood"></canvas></div><div id="regroup-misunderstood-note" style="padding:0 1.4rem 1rem;font-size:.7rem;color:var(--muted);"></div>
       </div>
+      <div class="chart-card" style="grid-column:1/-1">
+        <div id="threshold-grid" style="padding:1.25rem 1.4rem 1.5rem;"></div>
+      </div>
     </div>
   </div>
 
@@ -5317,6 +5320,59 @@ async function renderRegrouped() {
 
   // Leaves a trace in the console for exactly this situation.
   if (!r) console.warn('[regrouped] no figures.', failure || 'payload had no regrouped key', d ? Object.keys(d) : null);
+
+  renderThresholdGrid(r);
+}
+
+/**
+ * Threshold explorer.
+ *
+ * The current cutoff (1.0-point gap in 3+ of 10 dimensions) puts 6 of 7
+ * couples on the misaligned side, which means it is labelling rather than
+ * measuring. This shows how many couples would be flagged at every combination
+ * of gap size and dimension count, so the cutoff is chosen from the data.
+ */
+function renderThresholdGrid(r) {
+  const host = document.getElementById('threshold-grid');
+  if (!host) return;
+  if (!r || !r.gapGrid || !r.ratedPairs) { host.innerHTML = ''; return; }
+
+  const gaps = Object.keys(r.gapGrid).map(Number).sort((a, b) => a - b);
+  const counts = [2, 3, 4, 5, 6];
+  const total = r.ratedPairs;
+
+  // flagged(g, c) = couples with c or more dimensions at a gap of g or more.
+  const flagged = (g, c) => r.gapGrid[g].slice(c).reduce((a, b) => a + b, 0);
+
+  let html = '<div style="font-size:.62rem;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);font-weight:700;margin:1.5rem 0 .5rem">Threshold explorer</div>'
+    + '<p style="font-size:.76rem;color:var(--muted);line-height:1.5;margin:0 0 .75rem">'
+    + 'Couples flagged as misaligned at each cutoff, out of ' + total + '. '
+    + 'A cutoff that flags nearly everyone, or nearly nobody, is not separating anything.</p>'
+    + '<table style="border-collapse:collapse;font-size:.78rem"><thead><tr>'
+    + '<th style="text-align:left;padding:.35rem .6rem;color:var(--muted);font-weight:700">Gap of</th>';
+  counts.forEach(c => { html += '<th style="padding:.35rem .6rem;color:var(--muted);font-weight:700">' + c + '+ dims</th>'; });
+  html += '</tr></thead><tbody>';
+  gaps.forEach(g => {
+    html += '<tr><td style="padding:.35rem .6rem;font-weight:700">' + g.toFixed(2) + '</td>';
+    counts.forEach(c => {
+      const n = flagged(g, c);
+      const pct = Math.round((n / total) * 100);
+      // Highlight cutoffs that land between a quarter and three quarters: the
+      // range where a split is actually informative.
+      const useful = pct >= 25 && pct <= 75;
+      html += '<td style="padding:.35rem .6rem;text-align:center;'
+        + (useful ? 'background:#E7F3EC;font-weight:700;color:#2E7D5B' : 'color:var(--muted)') + '">'
+        + n + ' (' + pct + '%)</td>';
+    });
+    html += '</tr>';
+  });
+  html += '</tbody></table>';
+  if (r.gapStats) {
+    html += '<p style="font-size:.74rem;color:var(--muted);margin:.75rem 0 0">'
+      + 'Across ' + r.gapStats.n + ' dimension gaps: median ' + r.gapStats.median
+      + ', 75th percentile ' + r.gapStats.p75 + ', max ' + r.gapStats.max + '.</p>';
+  }
+  host.innerHTML = html;
 }
 function initCharts(page) {
   if (page==='overview') {

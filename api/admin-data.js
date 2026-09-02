@@ -224,6 +224,15 @@ function buildResponseAggregates(profiles, sessions) {
   //    how many misunderstand each other. Computed over complete pairs only.
   const GAP = 1.0, CUTOFF = 3;
   let misalignedPairs = 0, misunderstoodPairs = 0, ratedPairs = 0, understoodRated = 0;
+  // Distribution, so the cutoff can be chosen from the data rather than
+  // guessed. gapHist[n] is how many couples have exactly n dimensions at or
+  // above GAP; gapGrid[g][n] does the same across candidate gap sizes, which
+  // is what shows whether a threshold separates anything or just labels
+  // everyone.
+  const gapHist = new Array(11).fill(0);
+  const GAP_CANDIDATES = [0.75, 1.0, 1.25, 1.5, 2.0];
+  const gapGrid = Object.fromEntries(GAP_CANDIDATES.map(g => [g, new Array(11).fill(0)]));
+  const allGaps = [];
   pairs.forEach(([a, b]) => {
     const sa = calcDimScores(a.ex1_answers), sb = calcDimScores(b.ex1_answers);
     if (!sa || !sb) return;
@@ -235,6 +244,19 @@ function buildResponseAggregates(profiles, sessions) {
     }
     if (!scored) return;
     ratedPairs++;
+    gapHist[Math.min(wide, 10)]++;
+    // Per-dimension gaps for this couple, so the grid can be built at every
+    // candidate threshold in one pass.
+    const perDim = [];
+    for (const d of dimKeys) {
+      if (sa[d] == null || sb[d] == null) continue;
+      const g = Math.abs(sa[d] - sb[d]);
+      perDim.push(g);
+      allGaps.push(g);
+    }
+    for (const g of GAP_CANDIDATES) {
+      gapGrid[g][Math.min(perDim.filter(x => x >= g).length, 10)]++;
+    }
     if (wide >= CUTOFF) misalignedPairs++;
     const mine = readAccuracy(a.ex1_answers, b.ex1_answers);
     const theirs = readAccuracy(b.ex1_answers, a.ex1_answers);
@@ -263,6 +285,18 @@ function buildResponseAggregates(profiles, sessions) {
       misalignedPairs,
       misunderstoodPairs,
       understoodRated,
+      // How many couples land on each side at every candidate threshold. A
+      // threshold that puts 6 of 7 couples on one side is not measuring
+      // anything; this is what makes that visible.
+      gapHist,
+      gapGrid,
+      gapStats: allGaps.length ? {
+        n: allGaps.length,
+        mean: Math.round((allGaps.reduce((a, b) => a + b, 0) / allGaps.length) * 100) / 100,
+        median: Math.round(allGaps.slice().sort((a, b) => a - b)[Math.floor(allGaps.length / 2)] * 100) / 100,
+        p75: Math.round(allGaps.slice().sort((a, b) => a - b)[Math.floor(allGaps.length * 0.75)] * 100) / 100,
+        max: Math.round(Math.max(...allGaps) * 100) / 100,
+      } : null,
       misalignedPct: ratedPairs ? Math.round((misalignedPairs / ratedPairs) * 100) : 0,
       // Denominator is couples with partner-view answers, not all couples.
       misunderstoodPct: understoodRated ? Math.round((misunderstoodPairs / understoodRated) * 100) : 0,
