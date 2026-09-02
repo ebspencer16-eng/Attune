@@ -38,20 +38,20 @@ const ADDON_PRICES = {
   budget:          20,   // Build a Budget / Budgeting Activity
   checklist:       20,   // Starting Out Checklist
   intimacy:        20,   // Physical Intimacy Expectations exercise
-  conflict:        40,   // How You Fight exercise
+  conflict:        40,   // Conflict Patterns exercise
 };
 
 // Add-on display metadata (titles/descriptions shown in the cart). Prices come from ADDON_PRICES.
 const ADDON_META = {
   workbook:   { title: 'Personalized Workbook',     desc: 'Conversation prompts drawn from your results' },
-  conflict:   { title: 'How You Fight',                    desc: 'A look at your conflict patterns, answered independently' },
+  conflict:   { title: 'Conflict Patterns',                    desc: 'A look at your conflict patterns, answered independently' },
   intimacy:   { title: 'Physical Intimacy Expectations', desc: 'A private exercise on what you each expect' },
   budget:     { title: 'Shared Budgeting Activity',  desc: 'Build a shared budget together' },
   checklist:  { title: 'Starting Out Checklist',     desc: 'Merging lives, finances, logistics' },
   reflection: { title: 'Relationship Reflection',    desc: 'Exercise on experiences that shaped you' },
 };
 // What each package already bundles, so it isn't offered again as a paid add-on.
-// conflict is false everywhere on purpose: How You Fight is never bundled into
+// conflict is false everywhere on purpose: Conflict Patterns is never bundled into
 // a package, including premium. Omitting it here would make the lookup
 // undefined, which is falsy and happens to work, but only by accident.
 const PKG_INCLUDED = {

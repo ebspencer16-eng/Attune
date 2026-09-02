@@ -1,5 +1,5 @@
 /**
- * Results copy for Exercise 5: How You Fight.
+ * Results copy for Exercise 5: Conflict Patterns.
  *
  * DRAFT. Carolina's mockup marks the per-pattern tips as illustrative
  * placeholders, so everything here goes in the approval doc before it ships.
@@ -83,7 +83,7 @@ export const OPENING_CHIPS = {
 
 /** Headings and framing, matching the mockup. */
 export const CONFLICT_RESULTS_COPY = {
-  eyebrow: 'How you fight · results',
+  eyebrow: 'Conflict patterns · results',
   snapshotTitle: 'Your conflict snapshot',
   patternsTitle: 'Your patterns',
   patternsPrivacy: 'Not visible to your partner. This is the one section that stays private, always.',

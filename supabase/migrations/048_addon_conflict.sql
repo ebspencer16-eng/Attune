@@ -1,4 +1,4 @@
--- Migration 048: the How You Fight add-on
+-- Migration 048: the Conflict Patterns add-on
 -- ============================================================================
 -- Exercise 5 is a $40 add-on, never bundled into a package. Premium does not
 -- include it, unlike intimacy, so the flag is the only way anyone gets it.
@@ -21,7 +21,7 @@ alter table public.profiles
   add column if not exists conflict_data jsonb;
 
 comment on column public.orders.addon_conflict is
-  'How You Fight ($40). Never bundled into a package, including premium.';
+  'Conflict Patterns ($40). Never bundled into a package, including premium.';
 comment on column public.profiles.conflict_data is
   'Exercise 5 answers: { answers, completedAt }. Self-only, no partner-view.';
 

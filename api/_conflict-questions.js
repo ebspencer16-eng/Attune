@@ -1,5 +1,5 @@
 /**
- * Exercise 5: How You Fight.
+ * Exercise 5: Conflict Patterns.
  *
  * A standalone add-on, not folded into Communication. Twelve questions across
  * six sections.

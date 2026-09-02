@@ -437,12 +437,12 @@
         <div class="chart-body"><canvas id="chart-source"></canvas></div>
       </div>
       <div class="chart-card">
-        <div class="chart-head"><div><div class="chart-title">How misaligned</div><div class="chart-subtitle">Couples with a 1+ point gap in 3 or more dimensions. Positions, not perception.</div></div></div>
-        <div id="regroup-misaligned" style="padding:1.25rem 1.4rem 1.6rem;"></div>
+        <div class="chart-head"><div><div class="chart-title">Alignment</div><div class="chart-subtitle">Couples with a 1+ point gap in 3 or more dimensions count as misaligned. Positions, not perception.</div></div></div>
+        <div class="chart-body" style="height:230px"><canvas id="regroup-misaligned"></canvas></div><div id="regroup-misaligned-note" style="padding:0 1.4rem 1rem;font-size:.7rem;color:var(--muted);"></div>
       </div>
       <div class="chart-card">
-        <div class="chart-head"><div><div class="chart-title">How misunderstood</div><div class="chart-subtitle">Couples where either partner reads the other 1+ point wrong in 3 or more dimensions. Perception, not positions.</div></div></div>
-        <div id="regroup-misunderstood" style="padding:1.25rem 1.4rem 1.6rem;"></div>
+        <div class="chart-head"><div><div class="chart-title">Understanding</div><div class="chart-subtitle">Couples where either partner reads the other 1+ point wrong in 3 or more dimensions count as misunderstood. Needs Part 2 answers, so the denominator is smaller.</div></div></div>
+        <div class="chart-body" style="height:230px"><canvas id="regroup-misunderstood"></canvas></div><div id="regroup-misunderstood-note" style="padding:0 1.4rem 1rem;font-size:.7rem;color:var(--muted);"></div>
       </div>
     </div>
   </div>
@@ -677,7 +677,7 @@
       <div class="chart-grid">
         <div class="chart-card">
           <div class="chart-head"><div><div class="chart-title">Avg alignment score by dimension</div><div class="chart-subtitle">Communication exercise · 10 dimensions</div></div><select class="tile-slicer" id="slz-rdim" title="Cut this tile by a couple-level segment"><option value="">Everyone</option></select></div>
-          <div class="chart-body" style="height:260px"><canvas id="chart-dim-scores"></canvas></div>
+          <div class="chart-body"><canvas id="chart-dim-scores"></canvas></div>
         </div>
         <div class="chart-card">
           <div class="chart-head"><div><div class="chart-title">Couple type distribution</div><div class="chart-subtitle">Across all typed couples</div></div><select class="tile-slicer" id="slz-rcouple" title="Cut this tile by a segment"><option value="">Everyone</option></select></div>
@@ -3574,7 +3574,7 @@ function shapeResponses(r){
     pairs:(r&&r.pairs)||0,
   };
 }
-const RESP_SLICE_DIMS=['relationship_status','relationship_length','children','couple_type'];
+const RESP_SLICE_DIMS=['relationship_status','relationship_length','children','couple_type','alignment_group','understanding_group'];
 async function renderResponseTile(opts){
   const el=document.getElementById(opts.target); if(!el) return;
   const sel=document.getElementById(opts.selId);
@@ -3584,7 +3584,7 @@ async function renderResponseTile(opts){
   const a=seg[sel?sel.value:'']||seg['']||null; if(!a) return;
   setTileN(el, a.pairs);
   if(opts.kind==='radar'){
-    mkChart(el,{type:'bar',data:{labels:a.dimScores.labels,datasets:[{label:'Avg alignment',data:a.dimScores.data,backgroundColor:'#6C7FFF',borderRadius:4,maxBarThickness:34}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>c.parsed.y+'% aligned'}}},scales:{y:{beginAtZero:true,max:100,ticks:{callback:v=>v+'%',font:{size:10}},grid:{color:'rgba(0,0,0,.06)'}},x:{ticks:{font:{size:10},maxRotation:45,minRotation:45},grid:{display:false}}}}});
+    mkChart(el,{type:'radar',data:{labels:a.dimScores.labels,datasets:[{label:'Avg alignment',data:a.dimScores.data,borderColor:'#6C7FFF',backgroundColor:'rgba(108,127,255,.15)',borderWidth:2,pointRadius:3,pointBackgroundColor:'#6C7FFF'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{r:{beginAtZero:true,max:100,ticks:{stepSize:25,font:{size:9}},pointLabels:{font:{size:10}}}}}});
   } else if(opts.kind==='expalign'){
     mkChart(el,{type:'radar',data:{labels:a.expAlign.labels,datasets:[{label:'% aligned',data:a.expAlign.data,borderColor:'#FF6B35',backgroundColor:'rgba(255,107,53,.15)',borderWidth:2,pointRadius:3,pointBackgroundColor:'#FF6B35'}]},options:{scales:{r:{grid:{color:'#E6ECF6'},angleLines:{color:'#E6ECF6'},ticks:{display:false},min:0,max:100}},plugins:{legend:{display:false}}}});
   } else if(opts.kind==='relfeel'){
@@ -4177,6 +4177,8 @@ const QX_CROSS = [
   { key: 'relationship_status', label: 'Relationship status' }, { key: 'relationship_length', label: 'Time together' },
   { key: 'children', label: 'Children' }, { key: 'signup_source', label: 'How they found us' },
   { key: 'pkg', label: 'Package' },
+  { key: 'alignment_group', label: 'Aligned / Misaligned' },
+  { key: 'understanding_group', label: 'In tune / Misunderstood' },
 ];
 const QX_SCALE_COLORS = ['#F87171', '#FBBF24', '#B9C0CF', '#7DD3A8', '#34D399'];
 const QX_CAT_COLORS = ['#6C7FFF', '#FF6B35', '#34D399', '#FBBF24', '#B5546E', '#9B5DE5', '#22A5C4'];
@@ -4227,6 +4229,8 @@ const SLICE_DIMS = [
   { key:'gender', label:'Gender' }, { key:'age_range', label:'Age range' },
   { key:'relationship_status', label:'Relationship status' }, { key:'relationship_length', label:'Time together' },
   { key:'children', label:'Children' }, { key:'signup_source', label:'How they found us' },
+  { key:'alignment_group', label:'Aligned / Misaligned' },
+  { key:'understanding_group', label:'In tune / Misunderstood' },
   { key:'type', label:'Individual type' }, { key:'axisEngage', label:'Engage / Withdraw' },
   { key:'axisOpen', label:'Open / Guarded' }, { key:'couple_type', label:'Couple type' }, { key:'pkg', label:'Package' },
 ];
@@ -4269,7 +4273,7 @@ function sliceFilter(rows, val){
 // as the cube is available so no tile shows an empty (collapsed) dropdown while
 // waiting for its own chart to render. Couple-level tiles only offer couple-level
 // segments; distribution tiles exclude their own dimension.
-const COUPLE_LEVEL_DIMS=['relationship_status','relationship_length','children','couple_type'];
+const COUPLE_LEVEL_DIMS=['relationship_status','relationship_length','children','couple_type','alignment_group','understanding_group'];
 const SLICER_CFG={
   'slz-age':{ex:'age_range'},'slz-gender':{ex:'gender'},'slz-relstatus':{ex:'relationship_status'},
   'slz-children':{ex:'children'},'slz-demorellen':{ex:'relationship_length'},'slz-ovrellen':{ex:'relationship_length'},
@@ -4620,11 +4624,29 @@ async function renderSelfPartnerGap(containerId){
   const head='<div style="font-size:.62rem;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);font-weight:700;font-family:var(--mono);margin:0 0 .3rem;">Self vs partner-view gap</div><div style="font-size:.7rem;color:var(--muted);margin-bottom:.8rem;">Average distance between how people rate themselves and how their partner rates them, per dimension (0\u20134 scale). Largest first.</div>';
   const card=(inner)=>'<div class="chart-card" style="padding:1.1rem 1.25rem;margin-bottom:1rem;">'+head+inner+'</div>';
   if(!withData.length){ el.innerHTML=card('<div style="color:var(--dim);font-size:.78rem;padding:.5rem 0;line-height:1.6;">No partner-view answers yet. This fills in as couples complete the updated communication exercise.</div>'); return; }
-  const bars=withData.sort((a,b)=>b.gap-a.gap).map(x=>{
-    const w=Math.round(x.gap/4*100);
-    return '<div title="'+x.l+': '+x.gap.toFixed(1)+' pts gap (n='+x.n+')" style="display:flex;align-items:center;gap:.6rem;margin-bottom:.5rem;"><div style="flex:0 0 110px;font-size:.72rem;color:var(--text);">'+x.l+'</div><div style="flex:1 1 auto;height:8px;background:var(--surface);border-radius:5px;overflow:hidden;"><div style="height:100%;width:'+w+'%;background:#6C7FFF;"></div></div></div>';
-  }).join('');
-  el.innerHTML=card(bars);
+  // A column chart rather than ten stacked HTML rows: same information, a
+  // fraction of the height, and it gets the shared instant-tooltip behaviour
+  // from mkChart instead of relying on a title attribute.
+  const sorted = withData.sort((a, b) => b.gap - a.gap);
+  el.innerHTML = card('<div style="height:220px"><canvas id="' + containerId + '-canvas"></canvas></div>');
+  const cv = document.getElementById(containerId + '-canvas');
+  mkChart(cv, {
+    type: 'bar',
+    data: { labels: sorted.map(x => x.l), datasets: [{
+      data: sorted.map(x => Number(x.gap.toFixed(2))),
+      backgroundColor: '#6C7FFF', borderRadius: 4, maxBarThickness: 34,
+    }] },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false }, tooltip: { callbacks: {
+        label: c => c.parsed.y.toFixed(1) + ' pts gap (n=' + sorted[c.dataIndex].n + ')' } } },
+      scales: {
+        y: { beginAtZero: true, max: 4, title: { display: true, text: 'Points', font: { size: 10 } },
+             ticks: { font: { size: 10 } }, grid: { color: 'rgba(0,0,0,.06)' } },
+        x: { ticks: { font: { size: 9 }, maxRotation: 45, minRotation: 45 }, grid: { display: false } },
+      },
+    },
+  });
 }
 async function renderQuestionExplorer(containerId, groupPrefixes, highPrefixes, hideCrosstab) {
   ensureQxTooltip();
@@ -5220,43 +5242,50 @@ function mkChart(el, cfg) {
 // do not need axes, and the denominator matters more than the shape: 60% of
 // five couples is not a finding.
 async function renderRegrouped() {
-  const wrap = (id) => document.getElementById(id);
-  if (!wrap('regroup-misaligned')) return;
+  if (!document.getElementById('regroup-misaligned')) return;
   let d = null;
   try { d = await fetchAdminData(); } catch (e) { /* fall through to the empty state */ }
   const r = d && d.regrouped;
-  const paint = (id, pct, n, total, label, color) => {
-    const el = wrap(id); if (!el) return;
-    if (!r || !total) {
-      el.innerHTML = '<div style="color:var(--muted);font-size:.8rem;">No complete couples yet.</div>';
+
+  const pie = (canvasId, noteId, part, total, partLabel, restLabel, color, note) => {
+    const cv = document.getElementById(canvasId);
+    const nEl = document.getElementById(noteId);
+    if (!cv) return;
+    if (!total) {
+      cv.parentElement.innerHTML = '<div style="color:var(--muted);font-size:.8rem;padding:1rem 0;">Not enough complete couples yet.</div>';
+      if (nEl) nEl.textContent = '';
       return;
     }
-    el.innerHTML =
-      `<div style="display:flex;align-items:baseline;gap:.5rem;">
-         <span style="font-family:var(--hfont);font-size:2.6rem;font-weight:700;color:${color};line-height:1;">${pct}%</span>
-         <span style="font-size:.8rem;color:var(--muted);">of couples</span>
-       </div>
-       <div style="height:8px;background:#EFE7DD;border-radius:99px;margin:.75rem 0 .6rem;overflow:hidden;">
-         <div style="height:100%;width:${pct}%;background:${color};border-radius:99px;"></div>
-       </div>
-       <div style="font-size:.75rem;color:var(--muted);">${n} of ${total} complete couples ${label}</div>`;
+    mkChart(cv, {
+      type: 'doughnut',
+      data: { labels: [partLabel, restLabel], datasets: [{
+        data: [part, total - part],
+        backgroundColor: [color, '#EFE7DD'], borderWidth: 0,
+      }] },
+      options: {
+        responsive: true, maintainAspectRatio: false, cutout: '58%',
+        // Doughnut hover is per-segment, so the shared index mode does not
+        // apply here.
+        interaction: { mode: 'nearest', intersect: true },
+        plugins: {
+          legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 11 } } },
+          tooltip: { callbacks: { label: c => `${c.label}: ${c.parsed} of ${total} couples` } },
+        },
+      },
+    });
+    if (nEl) nEl.textContent = note;
   };
-  paint('regroup-misaligned', r ? r.misalignedPct : 0, r ? r.misalignedPairs : 0,
-    r ? r.ratedPairs : 0, 'are misaligned', '#E5578C');
-  paint('regroup-misunderstood', r ? r.misunderstoodPct : 0, r ? r.misunderstoodPairs : 0,
-    r ? r.ratedPairs : 0, 'misunderstand each other', '#6C7FFF');
 
-  // The threshold is a judgement call, not a finding. Say so where it is read.
-  const note = r && r.threshold
-    ? `Threshold: a ${r.threshold.gap.toFixed(1)}-point gap in ${r.threshold.dims}+ of 10 dimensions. Provisional, worth revisiting against a real distribution.`
-    : '';
-  ['regroup-misaligned', 'regroup-misunderstood'].forEach(id => {
-    const el = wrap(id);
-    if (el && note && r) el.insertAdjacentHTML('beforeend',
-      `<div style="font-size:.68rem;color:var(--muted);margin-top:.5rem;font-style:italic;">${note}</div>`);
-  });
+  pie('regroup-misaligned', 'regroup-misaligned-note',
+    r ? r.misalignedPairs : 0, r ? r.ratedPairs : 0,
+    'Misaligned', 'Aligned', '#E5578C',
+    r ? `${r.misalignedPct}% misaligned, across all ${r.ratedPairs} complete couples.` : '');
+
+  pie('regroup-misunderstood', 'regroup-misunderstood-note',
+    r ? r.misunderstoodPairs : 0, r ? (r.understoodRated || 0) : 0,
+    'Misunderstood', 'In tune', '#6C7FFF',
+    r ? `${r.misunderstoodPct}% misunderstood, across the ${r.understoodRated || 0} couples with Part 2 answers.` : '');
 }
-
 function initCharts(page) {
   if (page==='overview') {
     renderRegrouped();

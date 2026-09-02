@@ -1076,7 +1076,7 @@ function renderSummary() {
     if (g.item.addons.reflection) addonLines.push({ label: ADDON_REFLECTION.label, price: ADDON_REFLECTION.price });
     if (g.item.addons.budget)     addonLines.push({ label: 'Shared Budgeting Activity', price: 20 });
     if (g.item.addons.intimacy)   addonLines.push({ label: 'Physical Intimacy Expectations', price: 20 });
-    if (g.item.addons.conflict)   addonLines.push({ label: 'How You Fight', price: 40 });
+    if (g.item.addons.conflict)   addonLines.push({ label: 'Conflict Patterns', price: 40 });
     if (g.item.addons.checklist)  addonLines.push({ label: 'Starting Out Checklist', price: 20 });
     for (const a of addonLines) {
       rows += `
@@ -1647,7 +1647,7 @@ async function handleSubmit(e) {
       if (it.addons.reflection) lineItems.push({ label: ADDON_REFLECTION.label, price: ADDON_REFLECTION.price });
       if (it.addons.budget)     lineItems.push({ label: 'Shared Budgeting Activity', price: 20 });
       if (it.addons.intimacy)   lineItems.push({ label: 'Physical Intimacy Expectations', price: 20 });
-      if (it.addons.conflict)   lineItems.push({ label: 'How You Fight', price: 40 });
+      if (it.addons.conflict)   lineItems.push({ label: 'Conflict Patterns', price: 40 });
       if (it.addons.checklist)  lineItems.push({ label: 'Starting Out Checklist', price: 20 });
       const itemSubtotal = lineItems.reduce((sum, l) => sum + l.price, 0);
       fetch('/api/send-order-email', {

@@ -1,5 +1,5 @@
 /**
- * Scoring for Exercise 5: How You Fight.
+ * Scoring for Exercise 5: Conflict Patterns.
  *
  * ── WHAT THIS DELIBERATELY DOES NOT DO ────────────────────────────────────
  * No type, no letter, no couple pairing. The other exercises describe a

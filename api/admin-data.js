@@ -223,7 +223,7 @@ function buildResponseAggregates(profiles, sessions) {
   // ── Headline rates for the overview: how many couples are misaligned, and
   //    how many misunderstand each other. Computed over complete pairs only.
   const GAP = 1.0, CUTOFF = 3;
-  let misalignedPairs = 0, misunderstoodPairs = 0, ratedPairs = 0;
+  let misalignedPairs = 0, misunderstoodPairs = 0, ratedPairs = 0, understoodRated = 0;
   pairs.forEach(([a, b]) => {
     const sa = calcDimScores(a.ex1_answers), sb = calcDimScores(b.ex1_answers);
     if (!sa || !sb) return;
@@ -245,6 +245,12 @@ function buildResponseAggregates(profiles, sessions) {
         if (!x || !y) continue;
         if (x.error >= GAP || y.error >= GAP) misread++;
       }
+      // Understanding has its own denominator. It needs Part 2 answers, which
+      // only the couples who took the two-part exercise have. Counting the
+      // older self-report-only couples as 'in tune' would be wrong: we do not
+      // know how they read each other, and treating unknown as good inflates
+      // the number in the flattering direction.
+      understoodRated++;
       if (misread >= CUTOFF) misunderstoodPairs++;
     }
   });
@@ -256,8 +262,10 @@ function buildResponseAggregates(profiles, sessions) {
       ratedPairs,
       misalignedPairs,
       misunderstoodPairs,
+      understoodRated,
       misalignedPct: ratedPairs ? Math.round((misalignedPairs / ratedPairs) * 100) : 0,
-      misunderstoodPct: ratedPairs ? Math.round((misunderstoodPairs / ratedPairs) * 100) : 0,
+      // Denominator is couples with partner-view answers, not all couples.
+      misunderstoodPct: understoodRated ? Math.round((misunderstoodPairs / understoodRated) * 100) : 0,
       threshold: { gap: GAP, dims: CUTOFF },
     },
     dimLabels: dimKeys,

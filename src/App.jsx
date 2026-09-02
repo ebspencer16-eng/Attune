@@ -1320,8 +1320,8 @@ export function ConflictExercise({ userName = "You", partnerName = "your partner
   if (phase === 'intro') return (
     <div style={{ maxWidth: 520, margin: "0 auto", padding: "3rem 1rem 2rem" }}>
       <link href={FONT_LINK} rel="stylesheet" />
-      <div style={{ fontSize: "0.6rem", letterSpacing: "0.2em", textTransform: "uppercase", color: accent, fontFamily: BFONT, fontWeight: 700, marginBottom: "0.75rem" }}>Exercise 05 · How You Fight</div>
-      <h2 style={{ fontFamily: HFONT, fontSize: "1.7rem", fontWeight: 700, color: C.ink, lineHeight: 1.2, marginBottom: "1rem" }}>How you fight</h2>
+      <div style={{ fontSize: "0.6rem", letterSpacing: "0.2em", textTransform: "uppercase", color: accent, fontFamily: BFONT, fontWeight: 700, marginBottom: "0.75rem" }}>Exercise 05 · Conflict Patterns</div>
+      <h2 style={{ fontFamily: HFONT, fontSize: "1.7rem", fontWeight: 700, color: C.ink, lineHeight: 1.2, marginBottom: "1rem" }}>Conflict patterns</h2>
       <p style={{ fontSize: "0.9rem", color: C.muted, fontFamily: BFONT, fontWeight: 300, lineHeight: 1.7, marginBottom: "1.25rem" }}>{CONFLICT_INTRO}</p>
       <p style={{ fontSize: "0.82rem", color: C.muted, fontFamily: BFONT, fontWeight: 300, lineHeight: 1.65, marginBottom: "1.75rem" }}>
         Twelve questions, about ten minutes. Two ask you to write a sentence. You answer on your own, and one section stays private to you that {partnerName} never sees.
@@ -7267,7 +7267,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
     "exp-overview", ...FIXED_CATS.map((_, ci) => `exp-convo-${ci}`),
     ...(hasAnniversary ? ["reflection-overview", "reflection-ratings", "reflection-story", "reflection-plan"] : []),
     ...(intimacyBothDone ? ["intimacy-overview", ...INTIMACY_DIMENSIONS.map(d => `intimacy-${d.id}`), "intimacy-plan"] : []),
-    ...(conflictMine ? ["conflict-overview", "conflict-snapshot", "conflict-patterns", "conflict-repair", "conflict-wrote"] : []),
+    ...(conflictBothDone ? ["conflict-overview", "conflict-snapshot", "conflict-patterns", "conflict-repair", "conflict-wrote"] : []),
     "what-comes-next",
   ];
   const safeSection = (s) => {
@@ -7324,7 +7324,11 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
   // appear, not who can see what inside them.
   const conflictSelf = hasConflict && conflictAnswers ? summarizeConflict(conflictAnswers) : null;
   const conflictBothDone = !!(conflictSelf && partnerConflict && summarizeConflict(partnerConflict));
+  // Content requires both partners, the same as every other results section.
   const conflictMine = conflictBothDone ? conflictSelf : null;
+  // Nav presence only requires owning it, so the section is listed and greyed
+  // rather than missing, which is how the other exercises behave.
+  const conflictListed = !!hasConflict;
   const conflictPairing = conflictBothDone ? conflictPair(conflictAnswers, partnerConflict) : null;
 
   // ── ANONYMOUS TYPE TRACKING ─────────────────────────────────────────────────
@@ -7690,8 +7694,9 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
         { id: "intimacy-plan", label: "Conversations Worth Having", isDeepChild: true, italic: true, color: "#B5546E" },
       ]
     }] : []),
-    ...(conflictMine ? [{
-      id: "conflict", label: "How You Fight", shortLabel: "Conflict", icon: "\u2726", color: "#1B5FE8",
+    ...(conflictListed ? [{
+      id: "conflict", label: "Conflict Patterns", shortLabel: "Conflict", icon: "\u2726", color: "#1B5FE8",
+      locked: !conflictBothDone,
       children: [
         { id: "conflict-overview", label: "Results at a glance" },
         { id: "conflict-detail-header", label: "Detailed results", isDomainHeader: true, color: "#1B5FE8" },
@@ -7779,7 +7784,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
     ...FIXED_CATS.map((_, ci) => `exp-convo-${ci}`),
     ...(hasAnniversary ? ["reflection-overview", "reflection-ratings", "reflection-story", "reflection-plan"] : []),
     ...(intimacyBothDone ? ["intimacy-overview", ...INTIMACY_DIMENSIONS.map(d => `intimacy-${d.id}`), "intimacy-plan"] : []),
-    ...(conflictMine ? ["conflict-overview", "conflict-snapshot", "conflict-patterns", "conflict-repair", "conflict-wrote"] : []),
+    ...(conflictBothDone ? ["conflict-overview", "conflict-snapshot", "conflict-patterns", "conflict-repair", "conflict-wrote"] : []),
     "what-comes-next",
   ];
   const curIdx = allPages.indexOf(section);
@@ -11783,7 +11788,7 @@ const UPSELL_PRODUCTS = {
     badge: "Add-on",
     badgeColor: "#EAF0FF",
     badgeText: "#1B5FE8",
-    title: "How You Fight",
+    title: "Conflict Patterns",
     price: "$40",
     tagline: "The patterns that show up when things get hard.",
     description: "Twelve questions about how conflict actually goes for you. Answered on your own. One section stays private to you, and your partner never sees it.",
@@ -14424,7 +14429,7 @@ export default function App() {
                         { key: "exp", label: "Expectations", viewId: "exercise2", myDone: myEx2Done, myInProgress: ex2InProgress, partnerDone: partnerEx2Done },
                         ...(pkg.hasAnniversary ? [{ key: "refl", label: "Reflection", viewId: "exercise3", myDone: !!ex3Answers, myInProgress: ex3InProgress, partnerDone: !!(partnerSession && partnerSession.ex3) }] : []),
                         ...(pkg.hasIntimacy ? [{ key: "intim", label: "Physical intimacy", viewId: "intimacy", myDone: !!(intimacyData?.completedAt), myInProgress: false, partnerDone: !!(partnerSession && partnerSession.intimacy && partnerSession.intimacy.completedAt) }] : []),
-                        ...(pkg.hasConflict ? [{ key: "conflict", label: "How you fight", viewId: "conflict", myDone: !!(conflictData?.completedAt), myInProgress: false, partnerDone: !!(partnerSession?.conflict?.completedAt) }] : []),
+                        ...(pkg.hasConflict ? [{ key: "conflict", label: "Conflict patterns", viewId: "conflict", myDone: !!(conflictData?.completedAt), myInProgress: false, partnerDone: !!(partnerSession?.conflict?.completedAt) }] : []),
                       ].map((r, i) => ({ ...r, num: String(i + 1).padStart(2, "0") }));
                       const COLS = "minmax(0,1.15fr) minmax(0,1fr) minmax(0,1fr)";
                       const dot = (done, inProgress) => (
@@ -14487,6 +14492,7 @@ export default function App() {
                       { label: "Expectations results", section: "exp-overview", color: "#1B5FE8" },
                       ...(pkg.hasAnniversary ? [{ label: "Relationship reflection results", section: "reflection-overview", color: "#10B981" }] : []),
                       ...(pkg.hasIntimacy ? [{ label: "Physical intimacy results", section: "intimacy-overview", color: "#B5546E" }] : []),
+                      ...(pkg.hasConflict ? [{ label: "Conflict patterns results", section: "conflict-overview", color: "#1B5FE8" }] : []),
                     ].map((r, i, arr) => (
                       <div key={r.section} onClick={bothDone ? () => {
                           if (r.section === "highlights") {
@@ -14575,7 +14581,7 @@ export default function App() {
                         )}
                         {!pkg.hasConflict && (
                           <GrowSquare color="#1B5FE8" muted icon={GrowIcons.intimacy("#1B5FE8")}
-                            title="How You Fight"
+                            title="Conflict Patterns"
                             sub="How conflict actually goes, with one section that stays private to you."
                             cta={"$40 →"} onClick={() => setUpsellModal({ product: 'conflict', cartAdded: false })} />
                         )}
@@ -14634,7 +14640,7 @@ export default function App() {
                 </div>
 
                 {/* Numbering follows what this couple owns, so a core package
-                    plus How You Fight reads 01, 02, 03. The exercises are
+                    plus Conflict Patterns reads 01, 02, 03. The exercises are
                     listed in a fixed order and numbered by position, never by
                     a hardcoded label. */}
                 <div style={{ display: "flex", flexDirection: "column", gap: "1rem", marginBottom: "2rem" }}>
@@ -14684,7 +14690,7 @@ export default function App() {
                   })}
                   {pkg.hasConflict && exTile({
                     num: pkg.hasConflict ? nextExNum() : null,
-                    title: "How You Fight",
+                    title: "Conflict Patterns",
                     sub: "How conflict actually goes for you. One section stays private to you, always.",
                     color: "#1B5FE8", accent: "#1B5FE8",
                     done: !!(conflictData?.completedAt), inProgress: false,
@@ -15492,9 +15498,9 @@ export default function App() {
           <div style={{ background: "white", border: ("1.5px solid " + C.stone), borderRadius: 14, overflow: "hidden", textAlign: "left", marginBottom: "1.25rem" }}>
             {(() => {
               // Numbered by what this couple actually owns, so a core package
-              // plus How You Fight reads 01, 02, 03 rather than 01, 02, 05.
+              // plus Conflict Patterns reads 01, 02, 03 rather than 01, 02, 05.
               // The list was hardcoded to the two core exercises, which meant
-              // Reflection, Physical Intimacy and How You Fight never appeared
+              // Reflection, Physical Intimacy and Conflict Patterns never appeared
               // here at all, however far along either partner was.
               const owned = [
                 { key: 'ex1', name: 'communication', mine: myEx1Done, theirs: partnerEx1Done, viewId: 'exercise1' },

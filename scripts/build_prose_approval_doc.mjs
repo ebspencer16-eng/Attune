@@ -72,7 +72,7 @@ const cover = buildCover({
     ['8.', 'Reflection action titles', 'rewritten as instructions'],
     ['9.', 'Reassurance guidance', '15 score pairings, new'],
     ['10.', 'Reassurance when aligned', 'keep-in-mind line, new'],
-    ['11.', 'How You Fight (Exercise 5)', '12 questions and 16 results lines, all new'],
+    ['11.', 'Conflict Patterns (Exercise 5)', '12 questions and 16 results lines, all new'],
   ],
 });
 
@@ -227,7 +227,7 @@ const { CONFLICT_QUESTIONS, CONFLICT_SECTIONS, CONFLICT_INTRO } =
 const { PATTERN_COPY, SNAPSHOT_PROSE, CONFLICT_RESULTS_COPY, FREQUENCY_LABELS } =
   await import('../api/_conflict-results-prose.js');
 
-children.push(...bigSection('11', 'How You Fight (Exercise 5)',
+children.push(...bigSection('11', 'Conflict Patterns (Exercise 5)',
   'A $40 add-on, never bundled. Twelve questions, self-only, no partner-view. The four risk patterns are the one place in Attune where one direction genuinely is worse, so this copy asserts rather than staying neutral. Nothing here has been reviewed.', BLUE));
 
 children.push(midSection('11.1', 'Opening framing', BLUE, { extras: 'shown before question 1' }));

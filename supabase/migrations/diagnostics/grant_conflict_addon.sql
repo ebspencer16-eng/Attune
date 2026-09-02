@@ -1,4 +1,4 @@
--- Grant Exercise 5 (How You Fight) to the beta testers
+-- Grant Exercise 5 (Conflict Patterns) to the beta testers
 -- ============================================================================
 -- A direct entitlement grant rather than a promo code, because a code would
 -- have to travel through the payment path: validate-promo, the checkout

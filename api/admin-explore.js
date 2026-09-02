@@ -243,6 +243,8 @@ function buildCatalog(fbCatOptions) {
   f.push({ key: 'read_error_mean', label: 'Mean read error', group: 'Ex1 . Understanding (0 = read exactly right)', kind: 'scale', partnerable: true });
   f.push({ key: 'reads_partner', label: 'Reads partner', group: 'Ex1 . Understanding (0 = read exactly right)', kind: 'cat', partnerable: true });
   f.push({ key: 'understanding', label: 'Couple understanding', group: 'Ex1 . Understanding (0 = read exactly right)', kind: 'cat' });
+  f.push({ key: 'alignment_group', label: 'Aligned / Misaligned', group: 'Ex1 . Understanding (0 = read exactly right)', kind: 'cat' });
+  f.push({ key: 'understanding_group', label: 'In tune / Misunderstood', group: 'Ex1 . Understanding (0 = read exactly right)', kind: 'cat' });
   f.push({ key: 'worst_misread_dim', label: 'Most misread dimension', group: 'Ex1 . Understanding (0 = read exactly right)', kind: 'cat', partnerable: true });
   for (const dim of Object.keys(DIM_KEYS)) f.push({ key: 'pvdim_' + dim, label: (DIM_LABELS[dim] || dim) + ' (as read by partner)', group: 'Ex1 · Partner-view dimensions (1–5)', kind: 'scale', poleLow: (DIM_POLES[dim]||[])[0], poleHigh: (DIM_POLES[dim]||[])[1], partnerable: true });
   for (const q of PERSONALITY_QUESTIONS) {
@@ -372,6 +374,16 @@ export default async function handler(req) {
         || null;
       const _u = {};
       if (_partnerAns && p.ex1_answers) {
+        // Same thresholds as the dashboard cuts, so a slice in the explorer
+        // matches the same slice elsewhere.
+        const _sa = calcDimScores(p.ex1_answers), _sb = calcDimScores(_partnerAns);
+        let _wide = 0, _scored = 0;
+        for (const d of Object.keys(DIM_KEYS)) {
+          if (_sa[d] == null || _sb[d] == null) continue;
+          _scored++;
+          if (Math.abs(_sa[d] - _sb[d]) >= 1) _wide++;
+        }
+        if (_scored) _u.alignment_group = _wide >= 3 ? 'Misaligned' : 'Aligned';
         const mine = readAccuracy(p.ex1_answers, _partnerAns);    // my read of them
         const theirs = readAccuracy(_partnerAns, p.ex1_answers);  // their read of me
         if (mine) {
@@ -382,6 +394,15 @@ export default async function handler(req) {
           _u.reads_partner = mine.band === 'reads_them_well' ? 'Reads them well'
             : mine.band === 'mixed' ? 'Mixed' : 'Misreads them';
           _u.worst_misread_dim = mine.worst?.[0]?.dim || null;
+        }
+        if (mine && theirs) {
+          let _mis = 0;
+          for (const d of Object.keys(mine.dimensions || {})) {
+            const x = mine.dimensions[d], y = theirs.dimensions[d];
+            if (!x || !y) continue;
+            if (x.error >= 1 || y.error >= 1) _mis++;
+          }
+          _u.understanding_group = _mis >= 3 ? 'Misunderstood' : 'In tune';
         }
         if (mine && theirs) {
           const mean = (mine.meanError + theirs.meanError) / 2;

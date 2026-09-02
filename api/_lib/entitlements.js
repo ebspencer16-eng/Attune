@@ -44,7 +44,7 @@ export function computeEntitlements(rows, profile) {
   const list = (Array.isArray(rows) ? rows : []).filter(Boolean);
   let pkg = 'core', bestRank = -1, orderNum = '', newestAt = -1, isPhysical = false;
   let addonReflection = false, addonBudget = false;
-  // How You Fight: a $40 add-on exercise, never bundled into a package.
+  // Conflict Patterns: a $40 add-on exercise, never bundled into a package.
   let addonConflict = false;
   let addonChecklist = false, addonIntimacy = false, addonWorkbook = '';
   let hasGrant = false;
