@@ -172,9 +172,16 @@ async function fetchOrderEntitlements(sb, { userId, email, partnerAId } = {}, pr
   // whose entitlements were only ever written to the profile, e.g. invitees).
   if (profile) {
     rows.push({
+      // Every add-on column, matching fetchEntitlements on the server. This
+      // list omitted addon_conflict and addon_reflection, so an invitee whose
+      // grant lives only on their profile, which is every Partner B, could
+      // never see either. The server read them and the client did not, so the
+      // same account resolved differently depending on which ran.
       order_num: null, pkg_key: profile.pkg || null, is_physical: false,
+      addon_reflection: profile.addon_reflection,
       addon_budget: profile.addon_budget, addon_checklist: profile.addon_checklist,
-      addon_intimacy: profile.addon_intimacy, addon_workbook: profile.addon_workbook,
+      addon_intimacy: profile.addon_intimacy, addon_conflict: profile.addon_conflict,
+      addon_workbook: profile.addon_workbook,
       created_at: null,
     });
   }

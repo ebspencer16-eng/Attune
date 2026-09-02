@@ -61,4 +61,26 @@ if (problems.length) {
   process.exit(1);
 }
 
+// ── The profile grant source, client vs server ─────────────────────────────
+// Both build a synthetic order row from the profile's own add-on columns. They
+// are separate copies of the same list, and they drifted: the client omitted
+// addon_conflict and addon_reflection, so an invitee whose grant lives only on
+// their profile, which is every Partner B, resolved differently depending on
+// whether the client or the server did the computing.
+const grabProfileGrant = (text) => {
+  const i = text.indexOf('order_num: null, pkg_key: profile.pkg');
+  if (i < 0) return null;
+  const j = text.indexOf('created_at: null', i);
+  return [...new Set([...text.slice(i, j).matchAll(/addon_[a-z]+/g)].map(m => m[0]))].sort();
+};
+const clientGrant = grabProfileGrant(app);
+const serverGrant = grabProfileGrant(engine);
+if (clientGrant && serverGrant && clientGrant.join(',') !== serverGrant.join(',')) {
+  console.error('[check-entitlement-flow] the profile grant source differs between client and server:');
+  console.error(`  client: ${clientGrant.join(', ')}`);
+  console.error(`  server: ${serverGrant.join(', ')}`);
+  console.error('An account will resolve differently depending on which one computes it.');
+  process.exit(1);
+}
+
 console.log(`[check-entitlement-flow] ${granted.length} add-ons carried through ${blocks.filter(b => granted.filter(k => b.text.includes(k)).length >= 2).length} order-building sites.`);
