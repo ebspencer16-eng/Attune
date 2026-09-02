@@ -7274,7 +7274,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
     "exp-overview", ...FIXED_CATS.map((_, ci) => `exp-convo-${ci}`),
     ...(hasAnniversary ? ["reflection-overview", "reflection-ratings", "reflection-story", "reflection-plan"] : []),
     ...(intimacyBothDone ? ["intimacy-overview", ...INTIMACY_DIMENSIONS.map(d => `intimacy-${d.id}`), "intimacy-plan"] : []),
-    ...(conflictBothDone ? ["conflict-overview", "conflict-snapshot", "conflict-patterns", "conflict-repair", "conflict-wrote"] : []),
+    ...(conflictListed ? ["conflict-overview", "conflict-snapshot", "conflict-patterns", "conflict-repair", "conflict-wrote"] : []),
     "what-comes-next",
   ];
   const safeSection = (s) => {
@@ -7791,7 +7791,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
     ...FIXED_CATS.map((_, ci) => `exp-convo-${ci}`),
     ...(hasAnniversary ? ["reflection-overview", "reflection-ratings", "reflection-story", "reflection-plan"] : []),
     ...(intimacyBothDone ? ["intimacy-overview", ...INTIMACY_DIMENSIONS.map(d => `intimacy-${d.id}`), "intimacy-plan"] : []),
-    ...(conflictBothDone ? ["conflict-overview", "conflict-snapshot", "conflict-patterns", "conflict-repair", "conflict-wrote"] : []),
+    ...(conflictListed ? ["conflict-overview", "conflict-snapshot", "conflict-patterns", "conflict-repair", "conflict-wrote"] : []),
     "what-comes-next",
   ];
   const curIdx = allPages.indexOf(section);
@@ -8929,7 +8929,30 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
   // Half of this section is private and half is shared, which no other results
   // section is. Your own patterns render the moment you finish; everything
   // needing your partner waits for them.
-  if (conflictMine && section.startsWith("conflict-")) {
+  if (conflictListed && section.startsWith("conflict-")) {
+    // Listed once owned, so the contents link always resolves. Until both
+    // partners have finished this exercise the section renders a waiting
+    // state rather than nothing, which is what made the link look stale.
+    if (!conflictBothDone) {
+      const whoseTurn = !conflictSelf ? 'you have' : `${partnerName} has`;
+      return (
+        <Layout accent="#1B5FE8" noPrevNext={true}>
+          <div style={{ maxWidth: 560 }}>
+            <div style={{ fontSize: "0.62rem", letterSpacing: "0.22em", textTransform: "uppercase", color: "#1B5FE8", fontWeight: 700, fontFamily: BFONT, marginBottom: "0.6rem" }}>Conflict patterns</div>
+            <div style={{ fontSize: "clamp(1.4rem,3.5vw,1.85rem)", fontWeight: 700, fontFamily: HFONT, color: C.ink, marginBottom: "0.75rem" }}>Not open yet</div>
+            <p style={{ fontSize: "0.9rem", color: C.muted, fontFamily: BFONT, lineHeight: 1.7, marginBottom: "1.5rem" }}>
+              This section opens when you have both finished Conflict Patterns. {whoseTurn} not completed it yet.
+            </p>
+            {/* setView is not in scope here, so this navigates by URL rather
+                than referencing a prop this component does not receive. */}
+            <button onClick={() => { try { window.location.href = '/app?view=conflict'; } catch {} }}
+              style={{ background: "#1B5FE8", color: "white", border: "none", borderRadius: 12, padding: "0.8rem 1.5rem", fontSize: "0.86rem", fontWeight: 700, fontFamily: BFONT, cursor: "pointer", display: !conflictSelf ? "inline-block" : "none" }}>
+              Take the exercise
+            </button>
+          </div>
+        </Layout>
+      );
+    }
     const BLUE = "#1B5FE8";
     const cc = CONFLICT_RESULTS_COPY;
     const interp = (t) => interpConflict(t, { partner: partnerName, a: userName, b: partnerName });
@@ -14558,6 +14581,9 @@ export default function App() {
                       ...(pkg.hasAnniversary ? [{ label: "Relationship reflection results", section: "reflection-overview", color: "#10B981" }] : []),
                       ...(pkg.hasIntimacy ? [{ label: "Physical intimacy results", section: "intimacy-overview", color: "#B5546E" }] : []),
                       ...(pkg.hasConflict ? [{ label: "Conflict patterns results", section: "conflict-overview", color: "#1B5FE8" }] : []),
+                      // Restored: this is the closing section of the results
+                      // experience and had dropped out of the contents.
+                      { label: "What comes next", section: "what-comes-next", color: "#E8673A" },
                     ].map((r, i, arr) => (
                       <div key={r.section} onClick={bothDone ? () => {
                           if (r.section === "highlights") {
