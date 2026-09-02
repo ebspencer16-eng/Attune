@@ -19,6 +19,11 @@
 
 export const config = { runtime: 'edge' };
 
+// Off until the app is in the App Store, matching APP_BANNER_ENABLED in
+// public/_flags.js and src/App.jsx. Telling buyers to download an app that
+// does not exist yet is worse than saying nothing.
+const APP_LIVE = false;
+
 const FROM = process.env.FROM_EMAIL || 'hello@attune-relationships.com';
 
 export default async function handler(req) {
@@ -304,11 +309,20 @@ function getStartedBuyerHtml({ name, partnerName, setupUrl, partnerEmail, hasRef
     <p style="font-family:'DM Sans',Helvetica,Arial,sans-serif;font-size:13px;color:#8C7A68;line-height:1.6;margin:20px 0 0"><strong style="color:#1E1610">One note:</strong> don't compare answers until you're both finished. The value comes from answering honestly first.</p>
   `;
 
+  // The app prompt sits after the CTA copy rather than before it: the setup
+  // link works in a browser today, and telling someone to download an app
+  // before they can finish something they just paid for loses people. Once
+  // the app is live setupUrl becomes a universal link, so the same button
+  // opens the app for anyone who has it.
+  const appLine = APP_LIVE
+    ? `<p style="font-family:'DM Sans',Helvetica,Arial,sans-serif;font-size:14px;color:#5C4A38;line-height:1.7;margin:18px 0 0">Download the Attune app to set up your account there. The button above opens it automatically if you already have it installed.</p>`
+    : '';
+
   return brandedEmail({
     preheader: `Set up your Attune account, ${_esc(name)}`,
     title: `Welcome, ${_esc(name)}.`,
     subtitle: `One step left: set up your account.`,
-    bodyHtml: body,
+    bodyHtml: body + appLine,
     ctaLabel: 'Set up your account →',
     ctaUrl: setupUrl,
   });
