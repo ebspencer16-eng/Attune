@@ -15639,9 +15639,6 @@ export default function App() {
         portrait={couplePortrait}
         intimacyAnswers={pkg.hasIntimacy ? (intimacyData?.answers || sarahIntimacyDemo?.answers || null) : null}
         partnerIntimacy={pkg.hasIntimacy ? (hasRealPartner ? (partnerSession?.intimacy || null) : jamesIntimacyDemo) : null}
-        hasConflict={pkg.hasConflict}
-        conflictAnswers={pkg.hasConflict ? (conflictData?.answers || null) : null}
-        partnerConflict={pkg.hasConflict && hasRealPartner ? (partnerSession?.conflict?.answers || null) : null}
         intimacyVariant={(hasRealPartner ? partnerSession?.intimacy?.variant : null) || intimacyData?.variant || 'premarital'}
         onDone={() => { setActiveResult("couple-type"); setHighlightsSeen(true); }}
         onExit={() => setView("home")}
@@ -15733,6 +15730,9 @@ export default function App() {
                   hasBudget={pkg.hasBudget}
                   hasWorkbook={hasWorkbookOrder}
                   hasIntimacy={pkg.hasIntimacy}
+                  hasConflict={pkg.hasConflict}
+                  conflictAnswers={pkg.hasConflict ? (conflictData?.answers || null) : null}
+                  partnerConflict={pkg.hasConflict && hasRealPartner ? (partnerSession?.conflict?.answers || null) : null}
                   intimacyAnswers={intimacyData?.answers || sarahIntimacyDemo?.answers || null}
                   partnerIntimacy={hasRealPartner ? (partnerSession?.intimacy || null) : jamesIntimacyDemo}
                   intimacyVariant={(hasRealPartner ? partnerSession?.intimacy?.variant : null) || intimacyData?.variant || 'premarital'}
