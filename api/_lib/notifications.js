@@ -102,3 +102,28 @@ export function notificationFor(kind, { partnerName, postTitle, dimensionLabel }
       return null;
   }
 }
+
+/**
+ * Should this alert be written to the person's list?
+ *
+ * The database was going to enforce this with a unique index on "same owner,
+ * same kind, same subject, same day". A date derived from a timestamptz is not
+ * immutable, so Postgres refused to index it twice over. The rule is simple
+ * enough to state in code, and here it is testable and changeable without a
+ * migration.
+ *
+ * `recent` is the person's rows for this kind, newest first, as returned by
+ * the notifications_recent_idx query.
+ */
+export function shouldRecord({ kind, subjectId = null, recent = [], now = Date.now() }) {
+  if (!kind) return false;
+  const DAY = 24 * 60 * 60 * 1000;
+  return !recent.some(r =>
+    r.kind === kind
+    && (r.subject_id || null) === (subjectId || null)
+    // Same calendar-ish window, measured as 24 hours rather than a calendar
+    // day: a partner finishing at 11pm and a sync firing at 1am is one event,
+    // and a date boundary would treat it as two.
+    && (now - new Date(r.created_at).getTime()) < DAY
+  );
+}
