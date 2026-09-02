@@ -45,9 +45,15 @@ function orderToPublic(o) {
     partner1Name:     o.partner1_name || null,
     partner2Name:     o.partner2_name || null,
     giftNote:         o.gift_note || null,
+    // Every add-on, so the claim page lists what the buyer actually paid for.
+    // Checklist, intimacy and conflict were missing, so a card bought with any
+    // of them showed an incomplete list of what was included.
     addonWorkbook:    o.addon_workbook || null,
     addonReflection:  !!o.addon_reflection,
     addonBudget:      !!o.addon_budget,
+    addonChecklist:   !!o.addon_checklist,
+    addonIntimacy:    !!o.addon_intimacy,
+    addonConflict:    !!o.addon_conflict,
     claimed:          !!o.qr_claimed_at,
     claimedAt:        o.qr_claimed_at || null,
     claimedBy:        o.qr_claimed_by || null,

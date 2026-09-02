@@ -46,6 +46,8 @@ export default async function handler(req) {
     addonReflection,
     addonBudget,
     addonIntimacy,
+    addonChecklist,
+    addonConflict,
     setupPath,                       // '/app?signup=1&...' built by checkout
   } = body;
 
@@ -85,7 +87,7 @@ export default async function handler(req) {
       from: `Attune <${FROM}>`,
       to: [buyerEmail],
       subject: `Set up your Attune account, ${buyerName}`,
-      html: getStartedBuyerHtml({ name: buyerName, partnerName, setupUrl, partnerEmail, hasReflection: addonReflection, hasIntimacy: addonIntimacy }),
+      html: getStartedBuyerHtml({ name: buyerName, partnerName, setupUrl, partnerEmail, hasReflection: addonReflection, hasConflict: addonConflict, hasIntimacy: addonIntimacy }),
       scheduled_at: new Date(Date.now() + 10_000).toISOString(),
     });
   }
@@ -228,6 +230,12 @@ function orderConfirmationHtml({ buyerName, pkgName, orderNum, total, lineItems,
     if (addonWorkbook)   items.push({ label: 'Personalized Workbook (' + (addonWorkbook === 'print' ? 'printed' : 'digital') + ')', price: addonWorkbook === 'print' ? 39 : 19 });
     if (addonReflection) items.push({ label: 'Relationship Reflection', price: 40 });
     if (addonBudget)     items.push({ label: 'Budget Priorities Exercise', price: 20 });
+    // Checklist, intimacy and conflict were missing. A receipt that omits a
+    // paid add-on shows a total that does not match its own line items, which
+    // is the kind of thing that generates a support email on the first order.
+    if (addonChecklist)  items.push({ label: 'Newlywed Checklist', price: 20 });
+    if (addonIntimacy)   items.push({ label: 'Physical Intimacy Expectations', price: 20 });
+    if (addonConflict)   items.push({ label: 'Conflict Patterns', price: 40 });
   }
   const sub = items.reduce((acc, l) => acc + (Number(l.price) || 0), 0);
   const grandTotal = (total != null && total !== '') ? Number(total) : sub;
@@ -261,7 +269,7 @@ function orderConfirmationHtml({ buyerName, pkgName, orderNum, total, lineItems,
   });
 }
 
-function getStartedBuyerHtml({ name, partnerName, setupUrl, partnerEmail, hasReflection, hasIntimacy }) {
+function getStartedBuyerHtml({ name, partnerName, setupUrl, partnerEmail, hasReflection, hasIntimacy, hasConflict }) {
   // Exercises this order actually includes, so the email count matches the
   // dashboard. Communication + Expectations are always present.
   const exercises = [
@@ -269,6 +277,9 @@ function getStartedBuyerHtml({ name, partnerName, setupUrl, partnerEmail, hasRef
     "Expectations",
     ...(hasReflection ? ["Relationship Reflection"] : []),
     ...(hasIntimacy ? ["Physical Intimacy"] : []),
+    // Conflict Patterns was missing, so a buyer was told they had fewer
+    // exercises than they paid for, and the count in the sentence was wrong.
+    ...(hasConflict ? ["Conflict Patterns"] : []),
   ];
   const exCount = exercises.length;
   const exWord = exCount === 1 ? "exercise" : "exercises";
