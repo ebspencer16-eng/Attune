@@ -177,6 +177,7 @@ async function handlePartnerSync(req) {
         inherited.addonBudget     = ent.addonBudget;
         inherited.addonChecklist  = ent.addonChecklist;
         inherited.addonIntimacy   = ent.addonIntimacy;
+        inherited.addonConflict   = ent.addonConflict;
         inherited.addonWorkbook   = ent.addonWorkbook || '';
       }
     } catch (e) { console.warn('[partner-sync] addon inherit lookup failed:', e); }
@@ -200,7 +201,11 @@ async function handlePartnerSync(req) {
     const { error: addonErr } = await sb.from('profiles').update({
       addon_reflection: inherited.addonReflection,
       addon_budget:     inherited.addonBudget,
+      // addon_checklist was missing here: an invitee whose partner bought
+      // Starting Out never inherited the checklist onto their own profile.
+      addon_checklist:  inherited.addonChecklist,
       addon_intimacy:   inherited.addonIntimacy,
+      addon_conflict:   inherited.addonConflict,
       addon_workbook:   inherited.addonWorkbook,
     }).eq('id', bId);
     if (addonErr) console.warn('[partner-sync] add-on persist skipped (migration 016 not run yet?):', addonErr.message);
@@ -373,7 +378,7 @@ async function handlePartnerSync(req) {
       // the couple-level order (workbook readiness, reflection, budget)
       // on every poll. The invitee never placed the order, so without this
       // they never see the workbook and lose order state across logout/login.
-      let inherited = { addonReflection: false, addonBudget: false, addonChecklist: false, addonWorkbook: '', addonIntimacy: false, workbookStatus: null };
+      let inherited = { addonReflection: false, addonBudget: false, addonChecklist: false, addonWorkbook: '', addonIntimacy: false, workbookStatus: null , addonConflict: false };
       try {
         // Union ALL of Partner A's orders, never newest-wins. A newer partial
         // order (a test purchase, a single add-on) would otherwise strip the
@@ -397,7 +402,8 @@ async function handlePartnerSync(req) {
           inherited.addonReflection = ent.addonReflection;
           inherited.addonBudget     = ent.addonBudget;
           inherited.addonChecklist  = ent.addonChecklist;
-            inherited.addonIntimacy   = ent.addonIntimacy;
+          inherited.addonIntimacy   = ent.addonIntimacy;
+          inherited.addonConflict   = ent.addonConflict;
           inherited.addonWorkbook   = ent.addonWorkbook || '';
           // Newest non-null workbook_status wins for display.
           const withStatus = rows.filter(r => r.workbook_status)
