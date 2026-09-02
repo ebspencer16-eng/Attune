@@ -64,7 +64,10 @@ for (const section of SECTIONS) {
     (s) => localStorage.setItem('attune_results_state', JSON.stringify({ activeResult: s, highlightsSeen: true })),
     section,
   );
-  await page.goto(`${BASE}/?demo=1&type=${TYPE}&pkg=${PKG}&view=results`, { waitUntil: 'networkidle' });
+  // intimacy=1 because Premium no longer bundles Physical Intimacy; it is an
+  // add-on now, and without this flag the eight intimacy sections have no demo
+  // data and the run silently covers 18 of 26 instead of 26.
+  await page.goto(`${BASE}/?demo=1&type=${TYPE}&pkg=${PKG}&intimacy=1&view=results`, { waitUntil: 'networkidle' });
   await page.waitForTimeout(900);
 
   // Read the results column, not the whole document: a section the demo has no

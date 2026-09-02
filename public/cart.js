@@ -58,7 +58,7 @@ const PKG_INCLUDED = {
   core:        { checklist:false, budget:false, reflection:false, intimacy:false, conflict:false },
   newlywed:    { checklist:true,  budget:true,  reflection:false, intimacy:false, conflict:false },
   anniversary: { checklist:false, budget:false, reflection:true, intimacy:false, conflict:false },
-  premium:     { checklist:false, budget:true,  reflection:true, intimacy:true,  conflict:false },
+  premium:     { checklist:false, budget:true,  reflection:true, intimacy:false, conflict:true  },
 };
 // Display order: workbook first (primary upsell), then cheapest → most expensive.
 const ADDON_ORDER = (function(){

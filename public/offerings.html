@@ -191,7 +191,7 @@
   .section-label p{font-size:.82rem;color:var(--muted)}
 
   /* gift context bar */
-  .gift-bar{max-width:1120px;margin-left:auto;margin-right:auto;box-sizing:border-box;background:linear-gradient(135deg,#FFF0EB,#EEEFFF);border:1px solid var(--stone);border-radius:14px;padding:1.25rem 1.5rem;display:flex;align-items:center;gap:1rem;margin:0 2.5rem 1.5rem;max-width:1100px;margin-left:auto;margin-right:auto}
+  .gift-bar{max-width:min(1120px,calc(100% - 2.5rem));margin-left:auto;margin-right:auto;box-sizing:border-box;background:linear-gradient(135deg,#FFF0EB,#EEEFFF);border:1px solid var(--stone);border-radius:14px;padding:1.25rem 1.5rem;display:flex;align-items:center;gap:1rem;margin:0 2.5rem 1.5rem;margin-left:auto;margin-right:auto}
   .gift-bar p{font-size:.83rem;color:var(--text);line-height:1.55}
   .gift-bar p strong{color:var(--ink)}
   .gift-bar-icon{width:38px;height:38px;background:white;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 2px 8px rgba(14,11,7,.07)}
@@ -250,53 +250,48 @@
   .fu2{animation:fadeUp .6s .1s ease both}
 
   /* ── BUILD YOUR OWN + COMPARISON TABLE ─────────────────────────────────── */
-  /* The block sits on a tinted panel. The page above it is white tiles on a
-     warm ground; without a change of surface this section read as more of the
-     same and the eye slid off it. */
-  .byo-panel{background:linear-gradient(160deg,#FFF6F1,#F3F1FB);border:1px solid var(--stone);border-radius:20px;padding:2rem 2rem 2.25rem;margin-bottom:2.5rem}
-  .byo-eyebrow{font-size:.6rem;letter-spacing:.22em;text-transform:uppercase;color:var(--clay);font-weight:700;margin-bottom:.35rem}
-  .byo-sub{font-size:.86rem;color:var(--muted);line-height:1.55;margin:0 0 1.5rem;max-width:56ch}
-  .byo-row-label{font-size:.62rem;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);font-weight:700;margin:0 0 .6rem}
-  /* Fixed columns, not auto-fill: auto-fill left the tiles filling half the
-     width with dead space to the right, which is what made the page look
-     empty. Four exercises, three resources, each row spans the container. */
+  /* Uses the page's own tokens rather than one-off hexes, so it reads as the
+     same product as the tiles above it. The eyebrow gets the gradient rule the
+     rest of the page uses. */
+  .byo-panel{background:var(--warm);border:1px solid var(--stone);border-radius:18px;padding:1.75rem 1.75rem 2rem;margin-bottom:2.25rem}
+  .byo-eyebrow{font-size:.6rem;letter-spacing:.3em;text-transform:uppercase;color:var(--clay);font-weight:700;margin-bottom:.5rem;display:flex;align-items:center;gap:.6rem}
+  .byo-eyebrow::before{content:'';width:28px;height:2.5px;border-radius:999px;background:linear-gradient(90deg,var(--orange),var(--indigo));flex-shrink:0}
+  .byo-sub{font-size:.86rem;color:var(--muted);line-height:1.55;margin:0 0 1.4rem;max-width:56ch}
+  .byo-row-label{font-size:.58rem;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);font-weight:700;margin:0 0 .55rem}
   .byo-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:.7rem}
   .byo-grid.three{grid-template-columns:repeat(3,1fr)}
-  .byo-tile{border:1px solid var(--stone);border-radius:12px;padding:.85rem .95rem;background:#fff;display:flex;flex-direction:column;gap:.35rem;min-height:0}
-  .byo-tile h4{font-size:.82rem;font-weight:700;color:var(--ink);margin:0;line-height:1.25}
+  .byo-tile{border:1px solid var(--stone);border-radius:12px;padding:.85rem .95rem;background:var(--cream);display:flex;flex-direction:column;gap:.3rem;transition:border-color .15s}
+  .byo-tile:hover{border-color:var(--clay)}
+  .byo-tile h4{font-family:'Playfair Display',Georgia,serif;font-size:.9rem;font-weight:700;color:var(--ink);margin:0;line-height:1.25}
   .byo-tile p{font-size:.72rem;color:var(--muted);line-height:1.45;margin:0;flex:1}
-  .byo-foot{display:flex;align-items:center;justify-content:space-between;gap:.4rem;margin-top:.4rem}
+  .byo-foot{display:flex;align-items:center;justify-content:space-between;gap:.4rem;margin-top:.45rem}
   .byo-foot .byo-add{width:max-content}
-  .byo-price{font-size:.85rem;font-weight:700;color:var(--ink);font-family:'Playfair Display',Georgia,serif}
-  .byo-add{flex:0 0 auto;background:var(--clay);color:#fff;border:none;border-radius:7px;padding:.34rem .8rem;font-size:.7rem;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap}
+  .byo-price{font-family:'Playfair Display',Georgia,serif;font-size:.95rem;font-weight:700;color:var(--ink)}
+  .byo-add{flex:0 0 auto;background:var(--orange);color:#fff;border:none;border-radius:7px;padding:.34rem .8rem;font-size:.7rem;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap}
   .byo-add:hover{filter:brightness(1.06)}
-  .byo-tile.core{background:rgba(255,255,255,.45);border-style:dashed}
+  .byo-tile.core{background:transparent;border-style:dashed;border-color:#DCCDBA}
   .byo-tile.core h4{color:var(--muted)}
   .byo-core-note{font-size:.68rem;color:var(--muted);font-style:italic}
 
-  /* Table: full width, banded rows, package columns visually separated. It was
-     a thin grey grid floating in white, which is the "blah" problem. */
-  .cmp-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;border:1px solid var(--stone);border-radius:16px;background:#fff}
+  /* Narrower than the container: at full width the eye travels too far between
+     a feature name and its ticks, which is what made it hard to read. */
+  .cmp-wrap{max-width:760px;margin:0;overflow-x:auto;-webkit-overflow-scrolling:touch;border:1px solid var(--stone);border-radius:16px;background:var(--cream)}
   .cmp{width:100%;border-collapse:collapse;font-size:.8rem}
-  .cmp th,.cmp td{padding:.55rem .5rem;text-align:center;vertical-align:middle}
-  .cmp th:first-child,.cmp td:first-child{text-align:left;width:34%;color:var(--text);font-weight:400;padding-left:1.1rem}
-  .cmp thead th{font-family:'Playfair Display',Georgia,serif;font-size:.82rem;line-height:1.2;font-weight:700;color:var(--ink);padding-top:1rem;padding-bottom:.75rem;border-bottom:2px solid var(--stone)}
-  .cmp thead th span{display:block;font-family:'DM Sans',sans-serif;font-size:.68rem;font-weight:700;color:var(--clay);margin-top:.2rem}
-  .cmp tbody tr:nth-child(even){background:#FBF9F6}
-  .cmp tbody tr:hover{background:#FFF3EC}
-  .cmp tbody td{border-top:1px solid #F1EAE1}
-  .cmp .yes{color:#2E7D5B;font-weight:700;font-size:.95rem}
-  .cmp .no{color:#D8CDBF}
-  /* Premium reads as the full column, so it gets a tinted spine. */
-  .cmp th:last-child,.cmp td:last-child{background:rgba(232,103,58,.05)}
-  .cmp-note{font-size:.74rem;color:var(--muted);line-height:1.55;margin:.75rem 0 0;font-style:italic}
+  .cmp th,.cmp td{padding:.5rem .4rem;text-align:center;vertical-align:middle}
+  .cmp th:first-child,.cmp td:first-child{text-align:left;width:38%;color:var(--text);font-weight:400;padding-left:1rem}
+  .cmp thead th{font-family:'Playfair Display',Georgia,serif;font-size:.8rem;line-height:1.2;font-weight:700;color:var(--ink);padding-top:.9rem;padding-bottom:.65rem;border-bottom:2px solid var(--stone)}
+  .cmp thead th span{display:block;font-family:'DM Sans',sans-serif;font-size:.66rem;font-weight:700;color:var(--clay);margin-top:.15rem}
+  .cmp tbody tr:nth-child(even){background:var(--warm)}
+  .cmp tbody tr:hover{background:#FBEFE6}
+  .cmp tbody td{border-top:1px solid var(--stone)}
+  .cmp .yes{color:var(--orange);font-weight:700;font-size:.95rem}
+  .cmp .no{color:#DCCDBA}
+  .cmp th:last-child,.cmp td:last-child{background:rgba(232,103,58,.06)}
+  .cmp-note{font-size:.74rem;color:var(--muted);line-height:1.55;margin:.7rem 0 0;font-style:italic;max-width:760px}
 
-  @media(max-width:900px){
-    .byo-grid{grid-template-columns:repeat(2,1fr)}
-    .byo-grid.three{grid-template-columns:repeat(3,1fr)}
-  }
+  @media(max-width:900px){ .byo-grid{grid-template-columns:repeat(2,1fr)} }
   @media(max-width:600px){
-    .byo-panel{padding:1.25rem 1rem 1.5rem;border-radius:16px}
+    .byo-panel{padding:1.2rem 1rem 1.4rem;border-radius:14px}
     .byo-grid,.byo-grid.three{grid-template-columns:1fr 1fr;gap:.5rem}
     .byo-tile{padding:.65rem .7rem}
     .byo-tile p{display:none}
@@ -304,7 +299,6 @@
     .cmp th,.cmp td{padding:.45rem .18rem}
     .cmp th:first-child,.cmp td:first-child{width:40%;font-size:.69rem;line-height:1.3;padding-left:.6rem}
     .cmp thead th{font-size:.72rem}
-    .cmp thead th span{font-size:.6rem}
   }
   /* PACKAGE OVERVIEW TILES */
   .pkg-overview{max-width:1120px;margin:0 auto 2.5rem;padding:0 2.5rem;display:grid;grid-template-columns:repeat(4,1fr);gap:1rem}
@@ -1030,8 +1024,8 @@ document.addEventListener('click', function(e) {
     ['Communication style exercise',        ['core','newlywed','anniversary','premium']],
     ['Expectations exercise',               ['core','newlywed','anniversary','premium']],
     ['Relationship reflection exercise',    ['anniversary','premium']],
-    ['Physical intimacy expectations',      ['premium']],
-    ['Conflict patterns exercise',          []],
+    ['Physical intimacy expectations',      []],
+    ['Conflict patterns exercise',          ['premium']],
     ['Personalized workbook',               ['premium']],
     ['Build a budget tool',                 ['newlywed','premium']],
     ['Starting out checklist',              ['newlywed']],

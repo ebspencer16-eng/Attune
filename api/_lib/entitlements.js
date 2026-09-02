@@ -21,7 +21,7 @@ export const PKG_CAPS = {
   core:        { rank: 0, hasChecklist: false, hasReflection: false, hasBudget: false },
   newlywed:    { rank: 1, hasChecklist: true,  hasReflection: false, hasBudget: true },
   anniversary: { rank: 1, hasChecklist: false, hasReflection: true,  hasBudget: false },
-  premium:     { rank: 2, hasChecklist: false, hasReflection: true,  hasBudget: true,  hasIntimacy: true, hasWorkbook: 'digital' },
+  premium:     { rank: 2, hasChecklist: false, hasReflection: true,  hasBudget: true,  hasConflict: true, hasWorkbook: 'digital' },
 };
 
 export const ORDER_SELECT = 'order_num,pkg_key,is_physical,addon_reflection,addon_budget,addon_checklist,addon_intimacy,addon_conflict,addon_workbook,created_at';
@@ -62,8 +62,8 @@ export function computeEntitlements(rows, profile) {
     addonReflection = addonReflection || cap.hasReflection || !!o.addon_reflection;
     addonBudget     = addonBudget     || cap.hasBudget     || !!o.addon_budget;
     addonChecklist  = addonChecklist  || cap.hasChecklist  || !!o.addon_checklist;
-    addonIntimacy   = addonIntimacy   || cap.hasIntimacy   || !!o.addon_intimacy;
-    addonConflict   = addonConflict   || !!o.addon_conflict;
+    addonIntimacy   = addonIntimacy   || !!o.addon_intimacy;
+    addonConflict   = addonConflict   || cap.hasConflict   || !!o.addon_conflict;
     if (o.addon_workbook === 'printed') addonWorkbook = 'printed';
     else if (o.addon_workbook) addonWorkbook = addonWorkbook || o.addon_workbook;
     else if (cap.hasWorkbook && !addonWorkbook) addonWorkbook = cap.hasWorkbook;

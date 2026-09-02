@@ -14026,8 +14026,9 @@ export default function App() {
     hasWorkbook:    _effectivePkgKey === 'premium' || !!(order?.addonWorkbook),
     // Never bundled into a package, unlike intimacy: the add-on flag is the
     // only route to it.
-    hasConflict:    !!(order?.addonConflict),
-    hasIntimacy:    _effectivePkgKey === 'premium' || !!(order?.addonIntimacy) || (() => { try { return localStorage.getItem('attune_dev_intimacy') === '1'; } catch { return false; } })() || (() => { try { const q = new URLSearchParams(window.location.search); return !!q.get('demo') && q.get('intimacy') === '1'; } catch { return false; } })(),
+    // Premium bundles Conflict Patterns. Physical Intimacy is add-on only.
+    hasConflict:    _effectivePkgKey === 'premium' || !!(order?.addonConflict),
+    hasIntimacy:    !!(order?.addonIntimacy) || (() => { try { return localStorage.getItem('attune_dev_intimacy') === '1'; } catch { return false; } })() || (() => { try { const q = new URLSearchParams(window.location.search); return !!q.get('demo') && q.get('intimacy') === '1'; } catch { return false; } })(),
   };
 
   // Partner B "waiting/ready" poll. Declared here, BEFORE any early return,
