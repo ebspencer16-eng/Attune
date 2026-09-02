@@ -248,6 +248,48 @@
   @keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
   .fu1{animation:fadeUp .6s ease both}
   .fu2{animation:fadeUp .6s .1s ease both}
+
+  /* ── BUILD YOUR OWN + COMPARISON TABLE ─────────────────────────────────── */
+  .byo-eyebrow{font-size:.6rem;letter-spacing:.22em;text-transform:uppercase;color:var(--clay);font-weight:700;margin-bottom:.5rem}
+  .byo-sub{font-size:.88rem;color:var(--muted);line-height:1.6;margin-bottom:1.75rem;max-width:52ch}
+  .byo-row-label{font-size:.72rem;font-weight:700;color:var(--ink);margin-bottom:.75rem}
+  .byo-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:.75rem}
+  .byo-tile{border:1.5px solid var(--stone);border-radius:12px;padding:.9rem 1rem;background:white;display:flex;flex-direction:column;gap:.4rem}
+  .byo-tile h4{font-size:.85rem;font-weight:700;color:var(--ink);margin:0;line-height:1.3}
+  .byo-tile p{font-size:.74rem;color:var(--muted);line-height:1.5;margin:0;flex:1}
+  .byo-foot{display:flex;align-items:center;justify-content:space-between;gap:.5rem;margin-top:.2rem}
+  .byo-price{font-size:.8rem;font-weight:700;color:var(--ink)}
+  .byo-add{background:var(--clay);color:#fff;border:none;border-radius:8px;padding:.35rem .7rem;font-size:.72rem;font-weight:700;cursor:pointer;font-family:inherit}
+  .byo-add:disabled{background:var(--stone);color:var(--muted);cursor:default}
+  /* Core exercises: shown, not hidden, so the base price explains itself. */
+  .byo-tile.core{background:#FAF7F2;border-style:dashed}
+  .byo-tile.core h4{color:var(--muted)}
+  .byo-core-note{font-size:.7rem;color:var(--muted);font-style:italic}
+
+  .cmp-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+  .cmp{width:100%;border-collapse:collapse;font-size:.8rem}
+  .cmp th,.cmp td{padding:.6rem .5rem;border-bottom:1px solid var(--stone);text-align:center;vertical-align:middle}
+  .cmp th:first-child,.cmp td:first-child{text-align:left;width:38%;color:var(--text);font-weight:400}
+  .cmp thead th{font-size:.68rem;line-height:1.25;font-weight:700;color:var(--ink);white-space:normal;vertical-align:bottom}
+  .cmp thead th span{display:block;font-size:.66rem;font-weight:400;color:var(--muted);margin-top:.15rem}
+  .cmp .yes{color:#2E7D5B;font-weight:700}
+  .cmp .no{color:var(--stone)}
+  .cmp-note{font-size:.76rem;color:var(--muted);line-height:1.6;margin-top:.9rem;font-style:italic}
+
+  /* Mobile: the table stays a table. Side labels shrink, column headers wrap,
+     padding tightens. Stacking one package per block would lose the
+     comparison, which is the only reason the table exists. */
+  @media(max-width:600px){
+    .cmp{font-size:.72rem}
+    .cmp th,.cmp td{padding:.5rem .2rem}
+    .cmp th:first-child,.cmp td:first-child{width:42%;font-size:.7rem;line-height:1.35;padding-right:.4rem}
+    .cmp thead th{font-size:.6rem}
+    .cmp thead th span{display:none}
+    .byo-grid{grid-template-columns:1fr 1fr;gap:.5rem}
+    .byo-tile{padding:.7rem .8rem}
+    .byo-tile p{display:none}
+  }
+
   /* PACKAGE OVERVIEW TILES */
   .pkg-overview{max-width:1120px;margin:0 auto 2.5rem;padding:0 2.5rem;display:grid;grid-template-columns:repeat(4,1fr);gap:1rem}
   .pov-tile{background:white;border:1.5px solid var(--stone);border-top:3px solid var(--stone);border-radius:16px;padding:1.4rem 1.25rem;cursor:pointer;transition:all .2s;display:flex;flex-direction:column;gap:.5rem}
@@ -564,572 +606,34 @@
 
 <p style="text-align:center;max-width:1120px;margin:.25rem auto 0;padding:0 2.5rem;font-size:.82rem;font-style:italic;color:var(--muted);">Grounded in relationship research and developed with licensed therapists.</p>
 
+<!-- BUILD YOUR OWN + COMPARISON TABLE -->
 <div class="packages fu2" style="padding-top:3rem;">
   <div class="packages-inner">
 
-  
-  <!-- ─── WORKBOOK ADD-ON CALLOUT ─── -->
-  <div style="margin:0 auto 2.5rem;max-width:860px;background:linear-gradient(135deg,#FFF8F5,#F0F3FF);border:1.5px dashed #C17F47;border-radius:18px;padding:1.75rem 2rem;display:flex;align-items:flex-start;justify-content:space-between;gap:2rem;flex-wrap:wrap;">
-    <div style="flex:1;min-width:260px;">
-      <div style="font-size:.6rem;letter-spacing:.18em;text-transform:uppercase;color:#C17F47;font-weight:700;margin-bottom:.4rem;">Optional add-on · available after your results</div>
-      <div style="font-size:1.05rem;font-weight:700;color:#0E0B07;font-family:'Playfair Display',Georgia,serif;margin-bottom:.5rem;">The Personalized Workbook</div>
-      <p style="font-size:.8rem;color:#8C7A68;line-height:1.65;margin:0 0 .65rem;max-width:480px;">Drawn from your exercise results. Conversation starters, reflection activities, and guided exercises built entirely from what you two discovered about each other. Not generic. Yours.</p>
-      <p style="font-size:.78rem;color:var(--text);font-weight:500;margin:0 0 .85rem;">Typically 20-30 pages depending on your results, structured to work through together at your own pace.</p>
-      <button onclick="document.getElementById('wb-modal').style.display='flex'" style="background:none;border:none;padding:0;cursor:pointer;font-size:.78rem;color:#C17F47;font-weight:700;font-family:'DM Sans',sans-serif;display:inline-flex;align-items:center;gap:.3rem;text-decoration:underline;text-underline-offset:3px;">Learn more about the Personalized Workbook →</button>
-    </div>
-    <div style="text-align:right;flex-shrink:0;">
-      <div style="font-size:.72rem;color:#8C7A68;margin-bottom:.2rem;">Digital PDF</div>
-      <div style="font-size:1.2rem;font-weight:800;color:#0E0B07;">$19</div>
-      <div class="phys-only" style="font-size:.7rem;color:#8C7A68;margin-top:.5rem;">Printed &amp; bound edition available<br><span style="font-weight:600;color:#0E0B07;">$39 shipped</span></div>
-    </div>
-  </div>
+    <!-- Every package starts from the two core exercises. They are shown here
+         greyed rather than hidden, so it is obvious what the base price buys
+         and why they have no Add button. -->
+    <div class="byo-eyebrow">Or build your own</div>
+    <p class="byo-sub">Start with the core exercises, then add what you want. Everything here can also be added later.</p>
 
-<!-- WORKBOOK DETAILS MODAL -->
-<div id="wb-modal" style="display:none;position:fixed;inset:0;z-index:900;align-items:center;justify-content:center;padding:1.25rem;" onclick="if(event.target===this)this.style.display='none'">
-  <div style="position:absolute;inset:0;background:rgba(14,11,7,.6);backdrop-filter:blur(6px);"></div>
-  <div style="position:relative;background:white;border-radius:22px;max-width:560px;width:100%;max-height:90vh;overflow-y:auto;box-shadow:0 32px 80px rgba(14,11,7,.28);">
-    <div style="height:3px;background:linear-gradient(90deg,var(--orange),var(--indigo));border-radius:22px 22px 0 0;"></div>
-    <div style="padding:2rem 2rem 1.75rem;">
-      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:1.25rem;">
-        <div>
-          <p style="font-size:.58rem;letter-spacing:.22em;text-transform:uppercase;color:var(--clay);font-weight:700;margin-bottom:.4rem;font-family:'DM Sans',sans-serif;">Optional add-on</p>
-          <h2 style="font-family:'Playfair Display',Georgia,serif;font-size:1.55rem;font-weight:700;color:var(--ink);line-height:1.1;letter-spacing:-.02em;">The Personalized Workbook</h2>
-        </div>
-        <button onclick="document.getElementById('wb-modal').style.display='none'" aria-label="Close" style="background:var(--warm);border:1.5px solid var(--stone);border-radius:10px;width:34px;height:34px;cursor:pointer;color:var(--muted);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:.9rem;font-family:'DM Sans',sans-serif;">✕</button>
-      </div>
-      <p style="font-size:.88rem;color:var(--muted);line-height:1.78;margin-bottom:.65rem;font-weight:300;">Built from your actual joint results. Not a template, not generic relationship content. Every conversation prompt, reflection activity, and exercise is drawn from what you two specifically discovered about each other.</p>
-      <p style="font-size:.82rem;color:var(--text);font-weight:500;margin-bottom:1.5rem;">Typically 20-30 pages depending on your results, structured to work through together at your own pace.</p>
-      <div style="background:var(--warm);border-radius:14px;padding:1.25rem 1.5rem;margin-bottom:1.5rem;">
-        <p style="font-size:.6rem;letter-spacing:.18em;text-transform:uppercase;color:var(--clay);font-weight:700;margin-bottom:.85rem;font-family:'DM Sans',sans-serif;">What's inside</p>
-        <div style="display:flex;flex-direction:column;gap:.65rem;">
-          <div style="display:flex;gap:.75rem;align-items:flex-start;"><div style="width:6px;height:6px;border-radius:50%;background:var(--orange);flex-shrink:0;margin-top:.35rem;"></div><span style="font-size:.82rem;color:var(--text);line-height:1.6;font-family:'DM Sans',sans-serif;">Conversation starters drawn from your specific dimension gaps, not generic prompts</span></div>
-          <div style="display:flex;gap:.75rem;align-items:flex-start;"><div style="width:6px;height:6px;border-radius:50%;background:var(--orange);flex-shrink:0;margin-top:.35rem;"></div><span style="font-size:.82rem;color:var(--text);line-height:1.6;font-family:'DM Sans',sans-serif;">Reflection activities built around your couple type and communication patterns</span></div>
-          <div style="display:flex;gap:.75rem;align-items:flex-start;"><div style="width:6px;height:6px;border-radius:50%;background:var(--orange);flex-shrink:0;margin-top:.35rem;"></div><span style="font-size:.82rem;color:var(--text);line-height:1.6;font-family:'DM Sans',sans-serif;">Guided exercises for the expectation areas where you diverged most</span></div>
-          <div style="display:flex;gap:.75rem;align-items:flex-start;"><div style="width:6px;height:6px;border-radius:50%;background:var(--orange);flex-shrink:0;margin-top:.35rem;"></div><span style="font-size:.82rem;color:var(--text);line-height:1.6;font-family:'DM Sans',sans-serif;">A structured format to work through together, at your own pace</span></div>
-        </div>
-      </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:.85rem;margin-bottom:1.5rem;">
-        <div style="border:1.5px solid var(--stone);border-radius:14px;padding:1.1rem;text-align:center;">
-          <p style="font-size:.6rem;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);font-weight:700;margin-bottom:.35rem;font-family:'DM Sans',sans-serif;">Digital PDF</p>
-          <p style="font-family:'Playfair Display',Georgia,serif;font-size:1.8rem;font-weight:700;color:var(--ink);line-height:1;">$19</p>
-          <p style="font-size:.72rem;color:var(--muted);margin-top:.3rem;font-family:'DM Sans',sans-serif;">Instant delivery · print or read on screen</p>
-        </div>
-        <div class="phys-only" style="border:1.5px solid var(--stone);border-radius:14px;padding:1.1rem;text-align:center;">
-          <p style="font-size:.6rem;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);font-weight:700;margin-bottom:.35rem;font-family:'DM Sans',sans-serif;">Printed &amp; Bound</p>
-          <p style="font-family:'Playfair Display',Georgia,serif;font-size:1.8rem;font-weight:700;color:var(--ink);line-height:1;">$39</p>
-          <p style="font-size:.72rem;color:var(--muted);margin-top:.3rem;font-family:'DM Sans',sans-serif;">Ships within 5-7 business days</p>
-        </div>
-      </div>
-      <p style="font-size:.75rem;color:var(--muted);text-align:center;line-height:1.6;margin-bottom:1.25rem;font-family:'DM Sans',sans-serif;">Available after you complete both exercises. You'll see the option in your results once they unlock.</p>
-      <button onclick="document.getElementById('wb-modal').style.display='none'" style="width:100%;background:var(--ink);color:white;border:none;border-radius:12px;padding:.85rem;font-size:.8rem;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;letter-spacing:.04em;text-transform:uppercase;">Got it →</button>
-    </div>
-  </div>
-</div>
+    <div class="byo-row-label">The exercises</div>
+    <div class="byo-grid" id="byo-exercises"></div>
 
-<!-- ─── PACKAGE 1: Core Digital ─── -->
-  <div class="pkg" id="pkg-core">
-    <div class="pkg-header">
-      <div class="pkg-meta">
-        <div class="pkg-left">
-          <div class="pkg-badge" style="background:#FFF0EB;color:var(--orange);">The Foundation</div>
-          <h2 class="pkg-title">The Attune Assessment</h2>
-          <p class="pkg-sub">Two independent exercises that map how you communicate and what you each expect. The results unlock together, built entirely from your own answers.</p>
-        </div>
-        <div class="pkg-price">
-          <div class="pkg-price-row"><span class="price-main" id="core-price">$89</span><span class="price-label">per couple</span></div>
-          <div class="price-alt" id="core-price-sub">Digital · instant access · yours to keep</div>
-          <div class="price-alt" style="margin-top:.35rem;">Physical gift box · <strong>$124</strong> · shipping included · ships in 5-7 days</div>
-        </div>
-      </div>
-    </div>
-    <div class="format-toggle">
-      <button class="fmt-btn active" onclick="setFormat('core','virtual')">
-        <svg style="display:inline;margin-right:.3rem" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><polyline points="8 21 12 17 16 21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
-        Digital edition
-      </button>
-      <button class="fmt-btn" onclick="setFormat('core','physical')">
-        <svg style="display:inline;margin-right:.3rem" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a4 4 0 0 0-8 0v2"/></svg>
-        Physical box
-      </button>
-    </div>
-    <div class="pkg-body two-col" style="padding-top:0">
-      <div>
-        <div class="ex-mini o" style="margin-bottom:.75rem">
-          <div class="ex-num">Exercise 01</div>
-          <div class="ex-title">How You Communicate</div>
-          
-          <div class="ex-desc">Communication, conflict, repair, emotional intimacy, and reassurance across 10 dimensions.</div>
-          <div class="ex-meta">~20 min · 50 questions</div>
-        </div>
-        <div class="ex-mini i">
-          <div class="ex-num">Exercise 02</div>
-          <div class="ex-title">What You Expect</div>
-          
-          <div class="ex-desc">Finances, family, closeness, daily life, the assumptions that shape everything.</div>
-          <div class="ex-meta">~15 min · 6 areas</div>
-        </div>
-      </div>
-      <div class="inc-block">
-        <div class="inc-block-title">What's included</div>
-        <div class="inc-list">
-          <div class="inc-item"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#E8673A" stroke-width="2" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg><span>Joint results across all 10 dimensions</span></div>
-          <div class="inc-item"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#E8673A" stroke-width="2" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg><span>Side-by-side expectations comparison</span></div>
-          <div class="inc-item"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#E8673A" stroke-width="2" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg><span>Personalized action plan for your pairing</span></div>
-          <div class="inc-item"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#E8673A" stroke-width="2" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg><span>Conversations worth having, surfaced early</span></div>
-          <div class="inc-item"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#E8673A" stroke-width="2" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg><span>Individual communication profiles</span></div>
-          <div class="inc-item"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#E8673A" stroke-width="2" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg><span>Lifetime digital access</span></div>
-        </div>
-      </div>
-    </div>
-    
-    <!-- Physical box contents - Core -->
-    <div class="pkg-body single" id="core-physical-col" style="padding-top:0;margin-top:0;">
-            <div class="inc-block">
-          <div class="inc-block-title">In the gift box</div>
-          <div class="physical-items">
-            <div class="physical-item">
-              <div class="physical-icon" style="background:#E8673A15;">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#E8673A" stroke-width="1.6" stroke-linecap="round"><rect x="2" y="4" width="20" height="16" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
-              </div>
-              <span>Welcome card with registration instructions</span>
-            </div>
-            <div class="physical-item">
-              <div class="physical-icon" style="background:#E8673A15;">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#E8673A" stroke-width="1.6" stroke-linecap="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
-              </div>
-              <span>Gift note from sender (if applicable)</span>
-            </div>
-            <div class="physical-item">
-              <div class="physical-icon" style="background:#E8673A15;">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#E8673A" stroke-width="1.6" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="3" x2="9" y2="21"/></svg>
-              </div>
-              <span>Attune tearaway notepad</span>
-            </div>
-            <div class="physical-item">
-              <div class="physical-icon" style="background:#E8673A15;">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#E8673A" stroke-width="1.6" stroke-linecap="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
-              </div>
-              <span>Attune transfer stickers (×2) + tissue seal sticker</span>
-            </div>
-            <div class="physical-item">
-              <div class="physical-icon" style="background:#E8673A15;">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#E8673A" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3"/><line x1="12" y1="3" x2="12" y2="9"/></svg>
-              </div>
-              <span>Handmade ceramic ring tray ('understanding takes intention')</span>
-            </div>
-          </div>
-        </div>
-    </div>
-    <div class="pkg-actions">
-      <div style="margin-bottom:.85rem;background:#EEF2FF;border:1.5px solid rgba(27,95,232,.28);border-radius:12px;padding:.85rem 1.1rem;display:flex;justify-content:space-between;align-items:flex-start;gap:.75rem;">
-        <div>
-          <div style="font-size:.62rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#1B5FE8;margin-bottom:.25rem;">Optional add-on · ♡</div>
-          <div style="font-size:.82rem;font-weight:700;color:#0E0B07;margin-bottom:.2rem;">Relationship Reflection</div>
-          <div style="font-size:.72rem;color:#8C7A68;line-height:1.5;">A third exercise: shared history, meaningful moments, priorities, and what you admire in each other. Side-by-side insights included.</div>
-        </div>
-        <div style="text-align:right;flex-shrink:0;">
-          <div style="font-size:.95rem;font-weight:700;color:#0E0B07;">+$40</div>
-        </div>
-      </div>
-      <button onclick="addToCartWithIntent('core')" class="btn-primary" id="core-cta">Add to cart →</button>
-      <span class="pkg-note">Answers stay private until both partners are done</span>
-    </div>
-    <p style="font-size:.75rem;color:var(--muted);margin-top:0;padding:1rem 2.25rem 1.5rem;">Looking for more? <a href="#pkg-premium" onclick="addToCartWithIntent('premium')" style="color:var(--clay);font-weight:600;text-decoration:none;">Check out the premium package →</a></p>
-  </div>
+    <div class="byo-row-label" style="margin-top:2rem;">The resources</div>
+    <div class="byo-grid" id="byo-resources"></div>
 
-  <!-- ─── PACKAGE 2: Newlywed ─── -->
-  <div class="pkg highlight-orange" id="pkg-newlywed">
-    <div class="pkg-header">
-      <div class="pkg-meta">
-        <div class="pkg-left">
-          <div class="pkg-badge" style="background:#FFF0EB;color:var(--orange);">Wedding Gift · Newlywed</div>
-          <h2 class="pkg-title">The Starting Out Collection</h2>
-          <p class="pkg-sub">The full Assessment plus a practical checklist for name changes, finances, and household logistics. For couples just starting out, or who want to start right.</p>
-        </div>
-        <div class="pkg-price">
-          <div class="pkg-price-row"><span class="price-main" id="newlywed-price">$139</span><span class="price-label">per couple</span></div>
-          <div class="price-alt" id="newlywed-price-sub">Digital · instant access · yours to keep</div>
-          <div class="price-alt" style="margin-top:.35rem;">Physical gift box · <strong>$174</strong> · shipping included · ships in 5-7 days</div>
-        </div>
-      </div>
+    <!-- COMPARISON TABLE -->
+    <div class="byo-eyebrow" style="margin-top:3.5rem;">What each package includes</div>
+    <div class="cmp-wrap">
+      <table class="cmp" id="cmp-table"></table>
     </div>
-    <div class="format-toggle">
-      <button class="fmt-btn active" onclick="setFormat('newlywed','physical')">
-        <svg style="display:inline;margin-right:.3rem" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a4 4 0 0 0-8 0v2"/></svg>
-        Physical box
-      </button>
-      <button class="fmt-btn" onclick="setFormat('newlywed','virtual')">
-        <svg style="display:inline;margin-right:.3rem" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><polyline points="8 21 12 17 16 21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
-        Digital edition
-      </button>
-    </div>
-    <div class="pkg-body three-col" style="padding-top:0">
-      <div>
-        <div class="ex-mini o" style="margin-bottom:.75rem">
-          <div class="ex-num">Exercise 01</div>
-          <div class="ex-title">How You Communicate</div>
-          
-          <div class="ex-desc">10 dimensions, independently and together.</div>
-          <div class="ex-meta">~20 min</div>
-        </div>
-        <div class="ex-mini i" style="margin-bottom:.75rem">
-          <div class="ex-num">Exercise 02</div>
-          <div class="ex-title">What You Expect</div>
-          
-          <div class="ex-desc">6 areas covering responsibilities and life &amp; values, surfaced and compared.</div>
-          <div class="ex-meta">~15 min</div>
-        </div>
-        <div class="ex-mini gold">
-          <div class="ex-num">Bonus Exercise</div>
-          <div class="ex-title">Build a Budget</div>
-          <div class="ex-desc">A guided worksheet for building a real shared budget together, using context from your expectations results.</div>
-          <div class="ex-meta">Guided · Shareable · Yours to revisit</div>
-        </div>
-      </div>
-      <div class="inc-block">
-        <div class="inc-block-title">What's included</div>
-        <div class="inc-list">
-          <div class="inc-item"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#E8673A" stroke-width="2" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg><span>Everything in the Attune Assessment</span></div>
-          <div class="inc-item"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#E8673A" stroke-width="2" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg><span>Merging finances & bank accounts</span></div>
-          <div class="inc-item"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#E8673A" stroke-width="2" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg><span>Name change process & timeline</span></div>
-          <div class="inc-item"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#E8673A" stroke-width="2" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg><span>Insurance beneficiary updates</span></div>
-          <div class="inc-item"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#E8673A" stroke-width="2" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg><span>Estate basics: wills & beneficiaries</span></div>
-          <div class="inc-item"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#E8673A" stroke-width="2" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg><span>Social Security & government records</span></div>
-          <div class="inc-item"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#E8673A" stroke-width="2" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg><span>Tax filing status & joint returns</span></div>
-          <div class="inc-item"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#E8673A" stroke-width="2" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg><span>Shared household setup guide</span></div>
-        </div>
-      </div>
-      <div id="newlywed-physical-col">
-              <div class="inc-block">
-          <div class="inc-block-title">In the gift box</div>
-          <div class="physical-items">
-            <div class="physical-item">
-              <div class="physical-icon" style="background:#E8673A15;">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#E8673A" stroke-width="1.6" stroke-linecap="round"><rect x="2" y="4" width="20" height="16" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
-              </div>
-              <span>Welcome card with registration instructions</span>
-            </div>
-            <div class="physical-item">
-              <div class="physical-icon" style="background:#E8673A15;">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#E8673A" stroke-width="1.6" stroke-linecap="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
-              </div>
-              <span>Gift note from sender (if applicable)</span>
-            </div>
-            <div class="physical-item">
-              <div class="physical-icon" style="background:#E8673A15;">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#E8673A" stroke-width="1.6" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="3" x2="9" y2="21"/></svg>
-              </div>
-              <span>Attune tearaway notepad</span>
-            </div>
-            <div class="physical-item">
-              <div class="physical-icon" style="background:#E8673A15;">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#E8673A" stroke-width="1.6" stroke-linecap="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
-              </div>
-              <span>Attune transfer stickers (×2) + tissue seal sticker</span>
-            </div>
-            <div class="physical-item">
-              <div class="physical-icon" style="background:#E8673A15;">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#E8673A" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3"/><line x1="12" y1="3" x2="12" y2="9"/></svg>
-              </div>
-              <span>Handmade ceramic ring tray ('understanding takes intention')</span>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-    <div class="pkg-actions">
-      <button onclick="addToCartWithIntent('newlywed')" class="btn-primary" id="newlywed-cta">Add to cart →</button>
-      <a href="/wedding-registry" class="pkg-link-secondary" style="font-size:.82rem;font-weight:600;color:var(--orange);text-decoration:none;display:inline-flex;align-items:center;gap:.35rem;padding:.5rem 0;transition:color .15s" onmouseover="this.style.color='#cf5530'" onmouseout="this.style.color='var(--orange)'">
-        Add to registry
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
-      </a>
-      <span class="pkg-note">Ships within 3-5 business days</span>
-    </div>
-    <p style="font-size:.75rem;color:var(--muted);margin-top:0;padding:1rem 2.25rem 1.5rem;">Looking for more? <a href="#pkg-premium" onclick="addToCartWithIntent('premium')" style="color:var(--clay);font-weight:600;text-decoration:none;">Check out the premium package →</a></p>
-  </div>
-
-  <!-- ─── PACKAGE 3: Anniversary ─── -->
-  <div class="pkg highlight-indigo" id="pkg-anniversary">
-    <div class="pkg-header">
-      <div class="pkg-meta">
-        <div class="pkg-left">
-          <div class="pkg-badge" style="background:#EEEFFF;color:var(--indigo);">Anniversary Gift</div>
-          <h2 class="pkg-title">The Relationship Reflection</h2>
-          <p class="pkg-sub">The full Assessment plus a third exercise covering shared history, meaningful moments, what you each prioritize, and what you admire in each other. For couples with a chapter or two behind them.</p>
-        </div>
-        <div class="pkg-price">
-          <div class="pkg-price-row"><span class="price-main" id="ann-price">$139</span><span class="price-label">per couple</span></div>
-          <div class="price-alt" id="ann-price-sub">Digital · instant access · yours to keep</div>
-          <div class="price-alt" style="margin-top:.35rem;">Physical gift box · <strong>$174</strong> · shipping included · ships in 5-7 days</div>
-        </div>
-      </div>
-    </div>
-    <div class="format-toggle">
-      <button class="fmt-btn active" onclick="setFormat('ann','physical')">
-        <svg style="display:inline;margin-right:.3rem" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a4 4 0 0 0-8 0v2"/></svg>
-        Physical box
-      </button>
-      <button class="fmt-btn" onclick="setFormat('ann','virtual')">
-        <svg style="display:inline;margin-right:.3rem" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><polyline points="8 21 12 17 16 21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
-        Digital edition
-      </button>
-    </div>
-    <div class="pkg-body three-col" style="padding-top:0">
-      <div>
-        <div class="ex-mini o" style="margin-bottom:.5rem">
-          <div class="ex-num">Exercise 01</div>
-          <div class="ex-title">How You Communicate</div>
-          
-          <div class="ex-meta">~20 min · 10 dimensions</div>
-        </div>
-        <div class="ex-mini i" style="margin-bottom:.5rem">
-          <div class="ex-num">Exercise 02</div>
-          <div class="ex-title">What You Expect</div>
-          
-          <div class="ex-meta">~15 min · 6 areas</div>
-        </div>
-        <div class="ex-mini" style="background:rgba(91,109,248,.06);border:1px solid rgba(91,109,248,.25)">
-          <div class="ex-num">Exercise 03</div>
-          <div class="ex-title">Relationship Reflection</div>
-          <div class="ex-desc">Favorite moments, what's felt meaningful, how you've each grown, and what you're looking forward to next.</div>
-          <div class="ex-meta">~15 min · Completed independently</div>
-        </div>
-      </div>
-      <div>
-        <div class="inc-block">
-          <div class="inc-block-title">What's included</div>
-          <div class="inc-list">
-            <div class="inc-item"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#1B5FE8" stroke-width="2" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg><span>Everything in the Attune Assessment</span></div>
-            <div class="inc-item"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#1B5FE8" stroke-width="2" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg><span>Anniversary results: a side-by-side view of how you've each experienced the relationship</span></div>
-            <div class="inc-item"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#1B5FE8" stroke-width="2" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg><span>Highlights, meaningful moments, and what each of you is looking forward to, compared</span></div>
-            <div class="inc-item"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#1B5FE8" stroke-width="2" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg><span>Personalized anniversary reflection & action plan</span></div>
-            <div class="inc-item"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#1B5FE8" stroke-width="2" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg><span>Lifetime digital access to all results</span></div>
-          </div>
-        </div>
-      </div>
-      <div id="ann-physical-col">
-        <div class="inc-block">
-          <div class="inc-block-title">In the gift box</div>
-          <div class="physical-items">
-            <div class="physical-item">
-              <div class="physical-icon" style="background:#E8673A15;">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#E8673A" stroke-width="1.6" stroke-linecap="round"><rect x="2" y="4" width="20" height="16" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
-              </div>
-              <span>Welcome card with registration instructions</span>
-            </div>
-            <div class="physical-item">
-              <div class="physical-icon" style="background:#E8673A15;">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#E8673A" stroke-width="1.6" stroke-linecap="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
-              </div>
-              <span>Gift note from sender (if applicable)</span>
-            </div>
-            <div class="physical-item">
-              <div class="physical-icon" style="background:#E8673A15;">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#E8673A" stroke-width="1.6" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="3" x2="9" y2="21"/></svg>
-              </div>
-              <span>Attune tearaway notepad</span>
-            </div>
-            <div class="physical-item">
-              <div class="physical-icon" style="background:#E8673A15;">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#E8673A" stroke-width="1.6" stroke-linecap="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
-              </div>
-              <span>Attune transfer stickers (×2) + tissue seal sticker</span>
-            </div>
-            <div class="physical-item">
-              <div class="physical-icon" style="background:#E8673A15;">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#E8673A" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3"/><line x1="12" y1="3" x2="12" y2="9"/></svg>
-              </div>
-              <span>Handmade ceramic ring tray ('understanding takes intention')</span>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-    <div class="pkg-actions">
-      <button onclick="addToCartWithIntent('anniversary')" class="btn-primary indigo" id="ann-cta">Add to cart →</button>
-      <span class="pkg-note">Ships within 3-5 business days</span>
-    </div>
-    <p style="font-size:.75rem;color:var(--muted);margin-top:0;padding:1rem 2.25rem 1.5rem;">Looking for more? <a href="#pkg-premium" onclick="addToCartWithIntent('premium')" style="color:var(--clay);font-weight:600;text-decoration:none;">Check out the premium package →</a></p>
-  </div>
-
-  <!-- ─── PACKAGE 4: Premium ─── -->
-  <div class="pkg premium" id="pkg-premium">
-    <div class="pkg-header">
-      <div class="pkg-meta">
-        <div class="pkg-left">
-          <div class="pkg-badge" style="background:rgba(91,109,248,.2);color:rgba(180,188,255,.9);">Most Complete · Premium</div>
-          <h2 class="pkg-title">Attune Premium</h2>
-          <p class="pkg-sub">Everything in the Assessment, plus both bonus exercises and the personalized workbook, in one place.</p>
-        </div>
-        <div class="pkg-price">
-          <div class="pkg-price-row"><span class="price-main" id="premium-price">$198</span><span class="price-label">per couple</span></div>
-          <div class="price-alt" id="premium-price-sub">Digital · instant access · yours to keep</div>
-          <div class="price-alt" style="margin-top:.35rem;">Physical gift box · <strong>$233</strong> · shipping included · ships in 5-7 days</div>
-                  </div>
-      </div>
-    </div>
-    <div class="format-toggle">
-      <button class="fmt-btn active" onclick="setFormat('premium','virtual')">
-        <svg style="display:inline;margin-right:.3rem" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><polyline points="8 21 12 17 16 21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
-        Digital edition
-      </button>
-      <button class="fmt-btn" onclick="setFormat('premium','physical')">
-        <svg style="display:inline;margin-right:.3rem" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a4 4 0 0 0-8 0v2"/></svg>
-        Gift box (+$40)
-      </button>
-    </div>
-    <div class="pkg-body three-col" style="padding-top:0">
-      <div>
-        <div class="ex-mini o" style="margin-bottom:.5rem">
-          <div class="ex-num">Exercise 01</div>
-          <div class="ex-title">How You Communicate</div>
-          
-          <div class="ex-meta">~20 min · 10 dimensions</div>
-        </div>
-        <div class="ex-mini i" style="margin-bottom:.5rem">
-          <div class="ex-num">Exercise 02</div>
-          <div class="ex-title">What You Expect</div>
-          
-          <div class="ex-meta">~15 min · 6 areas</div>
-        </div>
-
-      </div>
-      <div class="inc-block">
-        <div class="inc-block-title">What's included</div>
-        <div class="inc-list">
-          <div class="inc-item"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#1B5FE8" stroke-width="2" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg><span>Everything in the Attune Assessment</span></div>
-          <div class="inc-item"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#1B5FE8" stroke-width="2" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg><span>Relationship Reflection (the third exercise)</span></div>
-          <div class="inc-item"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#1B5FE8" stroke-width="2" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg><span>Shared budget exercise</span></div>
-          <div class="inc-item"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#1B5FE8" stroke-width="2" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg><span>Physical intimacy expectations</span></div>
-          <div class="inc-item"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#1B5FE8" stroke-width="2" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg><span>Personalized workbook</span></div>
-          <div class="inc-item"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#1B5FE8" stroke-width="2" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg><span>Lifetime digital access to all results</span></div>
-        </div>
-
-        <!-- OPTIONAL ADD-ONS -->
-        <div style="margin-top:1.25rem;padding-top:1.1rem;border-top:1px solid rgba(255,255,255,.1);">
-          <div style="font-size:.6rem;letter-spacing:.18em;text-transform:uppercase;color:rgba(180,188,255,.5);font-weight:700;margin-bottom:.65rem;">Optional add-ons</div>
-          <div style="display:flex;flex-direction:column;gap:.55rem;">
-            <div style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:.75rem .9rem;display:flex;justify-content:space-between;align-items:flex-start;gap:.75rem;">
-              <div>
-                <div style="font-size:.75rem;font-weight:700;color:rgba(255,255,255,.85);margin-bottom:.2rem;">Starting Out Checklist</div>
-                <div style="font-size:.7rem;color:rgba(255,255,255,.4);line-height:1.5;">Finances, name changes, insurance, estate basics, 7 categories to work through together.</div>
-              </div>
-              <div style="text-align:right;flex-shrink:0;">
-                <div style="font-size:.9rem;font-weight:700;color:white;">+$20</div>
-                <div style="font-size:.6rem;color:rgba(255,255,255,.35);">digital</div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div id="premium-physical-col" style="display:none;">
-        <div class="inc-block">
-          <div class="inc-block-title">In the gift box</div>
-          <div class="physical-items">
-            <div class="physical-item">
-              <div class="physical-icon" style="background:#E8673A15;">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#E8673A" stroke-width="1.6" stroke-linecap="round"><rect x="2" y="4" width="20" height="16" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
-              </div>
-              <span>Welcome card with registration instructions</span>
-            </div>
-            <div class="physical-item">
-              <div class="physical-icon" style="background:#E8673A15;">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#E8673A" stroke-width="1.6" stroke-linecap="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
-              </div>
-              <span>Gift note from sender (if applicable)</span>
-            </div>
-            <div class="physical-item">
-              <div class="physical-icon" style="background:#E8673A15;">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#E8673A" stroke-width="1.6" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="3" x2="9" y2="21"/></svg>
-              </div>
-              <span>Attune tearaway notepad</span>
-            </div>
-            <div class="physical-item">
-              <div class="physical-icon" style="background:#E8673A15;">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#E8673A" stroke-width="1.6" stroke-linecap="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
-              </div>
-              <span>Attune transfer stickers (×2) + tissue seal sticker</span>
-            </div>
-            <div class="physical-item">
-              <div class="physical-icon" style="background:#E8673A15;">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#E8673A" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3"/><line x1="12" y1="3" x2="12" y2="9"/></svg>
-              </div>
-              <span>Handmade ceramic ring tray ('understanding takes intention')</span>
-            </div>
-          </div>
-        </div>
-        <div class="inc-block" style="margin-top:.75rem;">
-          <div class="inc-block-title">Also included</div>
-          <div style="font-size:.78rem;color:rgba(255,255,255,.55);line-height:1.65;">All results and the workbook are delivered digitally, ready the moment both partners finish.</div>
-        </div>
-      </div>
-    </div>
-    <div class="pkg-actions">
-      <button onclick="addToCartWithIntent('premium')" class="btn-primary" id="premium-cta" style="background:linear-gradient(135deg,var(--indigo),#4555e8);box-shadow:0 6px 22px rgba(91,109,248,.4);">Add to cart →</button>
-      <span class="pkg-note" id="premium-note" style="color:rgba(255,255,255,.35);">Digital · access delivered by email immediately</span>
-    </div>
-  </div>
+    <p class="cmp-note">Anything not included in a package can be added to it at checkout, or bought later from your dashboard.</p>
 
   </div><!-- end packages-inner -->
 </div><!-- end packages -->
 
 <!-- GIFT CALLOUT -->
 
-<!-- ADD-ONS -->
-<section id="workbook" style="background:linear-gradient(150deg,#1c1940,#282560);padding:5rem 2.5rem;" class="addons-dark-section">
-  <div class="si">
-    <p class="s-eye" style="color:rgba(232,103,58,.7);">Take it further</p>
-    <h2 class="s-title" style="color:white;">Add-ons.</h2>
-    <p class="s-sub" style="color:rgba(255,255,255,.45);max-width:640px;">Optional extras that work with any package. Each one is built from your own answers, not a generic template.</p>
-
-    <div class="addon-tiles">
-      <div class="addon-tile">
-        <div class="addon-tile-name">Personalized Workbook</div>
-        <div class="addon-tile-price">$19</div>
-        <p class="addon-tile-desc">Conversation prompts, activities, and exercises generated from your own results.</p>
-        <div class="addon-tile-inc">Included in Premium</div>
-        <button class="addon-tile-btn" onclick="addAddonToCart('workbook', event)">Add to cart →</button>
-      </div>
-      <div class="addon-tile">
-        <div class="addon-tile-name">Physical Intimacy Expectations</div>
-        <div class="addon-tile-price">$20</div>
-        <p class="addon-tile-desc">A private exercise on what you each expect, scored for gaps like the rest of your results.</p>
-        <div class="addon-tile-inc">Included in Premium</div>
-        <button class="addon-tile-btn" onclick="addAddonToCart('intimacy', event)">Add to cart →</button>
-      </div>
-      <div class="addon-tile">
-        <div class="addon-tile-name">Conflict Patterns</div>
-        <div class="addon-tile-price">$40</div>
-        <p class="addon-tile-desc">Twelve questions on how conflict actually goes. One section stays private to you, and your partner never sees it.</p>
-        <div class="addon-tile-inc">Add-on only</div>
-        <button class="addon-tile-btn" onclick="addAddonToCart('conflict', event)">Add to cart &rarr;</button>
-      </div>
-      <div class="addon-tile">
-        <div class="addon-tile-name">Relationship Reflection</div>
-        <div class="addon-tile-price">$40</div>
-        <p class="addon-tile-desc">A third exercise on the moments that shaped you, and where you're pointed next.</p>
-        <div class="addon-tile-inc">Included in Reflection &amp; Premium</div>
-        <button class="addon-tile-btn" onclick="addAddonToCart('reflection', event)">Add to cart →</button>
-      </div>
-      <div class="addon-tile">
-        <div class="addon-tile-name">Starting Out Checklist</div>
-        <div class="addon-tile-price">$20</div>
-        <p class="addon-tile-desc">A practical guide to merging lives: names, finances, household logistics.</p>
-        <div class="addon-tile-inc">Included in Starting Out</div>
-        <button class="addon-tile-btn" onclick="addAddonToCart('checklist', event)">Add to cart →</button>
-      </div>
-      <div class="addon-tile">
-        <div class="addon-tile-name">Shared Budgeting Activity</div>
-        <div class="addon-tile-price">$20</div>
-        <p class="addon-tile-desc">Map what you each value spending on, and where your instincts differ.</p>
-        <div class="addon-tile-inc">Included in Starting Out &amp; Premium</div>
-        <button class="addon-tile-btn" onclick="addAddonToCart('budget', event)">Add to cart →</button>
-      </div>
-    </div>
-
-    <p style="font-size:.78rem;color:rgba(255,255,255,.4);line-height:1.7;margin-top:2rem;max-width:640px;">Add any of these at checkout, or from your portal once your results unlock. Where an add-on is already part of a package, you won't be charged for it twice.</p>
-  </div>
-</section>
 
 <!-- FAQ link -->
 <section style="padding:3rem 2.5rem;text-align:center;">
@@ -1448,5 +952,91 @@ document.addEventListener('click', function(e) {
   }
 })();
 </script>
+
+<script>
+/* ── Build-your-own tiles and the comparison table ──────────────────────────
+ * Both are rendered from data rather than hand-written markup, so a new
+ * exercise or add-on is one entry rather than three places to update. That is
+ * the same failure this codebase has produced repeatedly.
+ */
+(function () {
+  var F = window.ATTUNE_FLAGS || {};
+
+  // Communication and Expectations are the core assessment. They are not
+  // separately purchasable, so they render greyed with no Add button and the
+  // base price explains itself.
+  var EXERCISES = [
+    { key:'core',      name:'Communication + Expectations', desc:'The core assessment. Two exercises, 50 questions, answered independently.', price:'$89', core:true },
+    { key:'reflection',name:'Relationship Reflection',      desc:'Where you have been and where you are heading. Built for anniversaries.', price:'$40' },
+    { key:'intimacy',  name:'Physical Intimacy Expectations',desc:'A private set of questions about physical intimacy, answered independently.', price:'$20' },
+    { key:'conflict',  name:'Conflict Patterns',            desc:'How conflict actually goes. One section stays private to you.', price:'$40' }
+  ];
+  var RESOURCES = [
+    { key:'workbook',  name:'Personalized Workbook',  desc:'Built from your answers. Prompts, exercises, and space to write.', price:'$19' },
+    { key:'budget',    name:'Build a Budget',         desc:'A guided worksheet for building a shared budget together.', price:'$20' },
+    { key:'checklist', name:'Starting Out Checklist', desc:'The practical list for couples setting up a life together.', price:'$20' }
+  ];
+
+  function tile(it) {
+    var d = document.createElement('div');
+    d.className = 'byo-tile' + (it.core ? ' core' : '');
+    d.innerHTML =
+      '<h4>' + it.name + '</h4>' +
+      '<p>' + it.desc + '</p>' +
+      '<div class="byo-foot">' +
+        '<span class="byo-price">' + it.price + '</span>' +
+        (it.core
+          ? '<span class="byo-core-note">Automatically included</span>'
+          : '<button class="byo-add addon-tile-btn" data-key="' + it.key + '">Add to cart</button>') +
+      '</div>';
+    var btn = d.querySelector('button');
+    if (btn) btn.addEventListener('click', function (e) { addAddonToCart(it.key, e); });
+    return d;
+  }
+
+  var ex = document.getElementById('byo-exercises');
+  var rs = document.getElementById('byo-resources');
+  if (ex) EXERCISES.forEach(function (it) { ex.appendChild(tile(it)); });
+  if (rs) RESOURCES.forEach(function (it) { rs.appendChild(tile(it)); });
+
+  // ── Comparison table ──
+  // Columns are packages, rows are features. A tick means included in the
+  // package; anything blank can be added on.
+  var PKGS = [
+    { key:'core',        label:'Foundation',   price:'$89'  },
+    { key:'newlywed',    label:'Starting Out', price:'$139' },
+    { key:'anniversary', label:'Reflection',   price:'$139' },
+    { key:'premium',     label:'Premium',      price:'$198' }
+  ];
+  var ROWS = [
+    ['Communication style exercise',        ['core','newlywed','anniversary','premium']],
+    ['Expectations exercise',               ['core','newlywed','anniversary','premium']],
+    ['Relationship reflection exercise',    ['anniversary','premium']],
+    ['Physical intimacy expectations',      ['premium']],
+    ['Conflict patterns exercise',          []],
+    ['Personalized workbook',               ['premium']],
+    ['Build a budget tool',                 ['newlywed','premium']],
+    ['Starting out checklist',              ['newlywed']],
+    ['Personalized action plan',            ['core','newlywed','anniversary','premium']],
+    ['Lifetime digital access',             ['core','newlywed','anniversary','premium']],
+    ['Full access in the Attune app',       ['core','newlywed','anniversary','premium']]
+  ];
+
+  var t = document.getElementById('cmp-table');
+  if (t) {
+    var head = '<thead><tr><th></th>' + PKGS.map(function (p) {
+      return '<th>' + p.label + '<span>' + p.price + '</span></th>';
+    }).join('') + '</tr></thead>';
+    var body = '<tbody>' + ROWS.map(function (r) {
+      return '<tr><td>' + r[0] + '</td>' + PKGS.map(function (p) {
+        var on = r[1].indexOf(p.key) >= 0;
+        return '<td class="' + (on ? 'yes' : 'no') + '">' + (on ? '&#10003;' : '&mdash;') + '</td>';
+      }).join('') + '</tr>';
+    }).join('') + '</tbody>';
+    t.innerHTML = head + body;
+  }
+})();
+</script>
+
 </body>
 </html>
