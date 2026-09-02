@@ -7274,7 +7274,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
     "exp-overview", ...FIXED_CATS.map((_, ci) => `exp-convo-${ci}`),
     ...(hasAnniversary ? ["reflection-overview", "reflection-ratings", "reflection-story", "reflection-plan"] : []),
     ...(intimacyBothDone ? ["intimacy-overview", ...INTIMACY_DIMENSIONS.map(d => `intimacy-${d.id}`), "intimacy-plan"] : []),
-    ...(conflictListed ? ["conflict-overview", "conflict-snapshot", "conflict-patterns", "conflict-repair", "conflict-wrote"] : []),
+    ...(conflictListed ? ["conflict-overview", "conflict-snapshot", "conflict-patterns", "conflict-wrote"] : []),
     "what-comes-next",
   ];
   const safeSection = (s) => {
@@ -7712,7 +7712,6 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
         { id: "conflict-detail-header", label: "Detailed results", isDomainHeader: true, color: "#1B5FE8" },
         { id: "conflict-snapshot", label: "Your Conflict Snapshot", isDeepChild: true, italic: true, color: "#1B5FE8" },
         { id: "conflict-patterns", label: "Your Patterns", isDeepChild: true, italic: true, color: "#1B5FE8" },
-        { id: "conflict-repair", label: "What Helps You Reset", isDeepChild: true, italic: true, color: "#1B5FE8" },
         { id: "conflict-wrote", label: "What You Both Wrote", isDeepChild: true, italic: true, color: "#1B5FE8" },
       ]
     }] : []),
@@ -7795,7 +7794,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
     ...FIXED_CATS.map((_, ci) => `exp-convo-${ci}`),
     ...(hasAnniversary ? ["reflection-overview", "reflection-ratings", "reflection-story", "reflection-plan"] : []),
     ...(intimacyBothDone ? ["intimacy-overview", ...INTIMACY_DIMENSIONS.map(d => `intimacy-${d.id}`), "intimacy-plan"] : []),
-    ...(conflictListed ? ["conflict-overview", "conflict-snapshot", "conflict-patterns", "conflict-repair", "conflict-wrote"] : []),
+    ...(conflictListed ? ["conflict-overview", "conflict-snapshot", "conflict-patterns", "conflict-wrote"] : []),
     "what-comes-next",
   ];
   const curIdx = allPages.indexOf(section);
@@ -7833,7 +7832,6 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
     if (id === "conflict-overview") return "Conflict Patterns";
     if (id === "conflict-snapshot") return "Your Conflict Snapshot";
     if (id === "conflict-patterns") return "Your Patterns";
-    if (id === "conflict-repair")   return "What Helps You Reset";
     if (id === "conflict-wrote")    return "What You Each Wrote";
     if (id === "what-comes-next") return "What Comes Next";
     return id;
@@ -8998,13 +8996,12 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
             <span style={{ fontSize: "0.92rem", fontWeight: 700, color: C.ink, fontFamily: BFONT }}>{copy.label}</span>
             <span style={{ fontSize: "0.8rem", color: C.muted, fontFamily: BFONT }}>{FREQUENCY_LABELS[p.value ?? 0]}</span>
           </div>
-          <div style={{ height: 5, background: C.stone, borderRadius: 99, marginBottom: "0.55rem" }}>
+          {/* Definition sits under the title and above the bar, so the reader
+              knows what is being measured before seeing the measurement. */}
+          <div style={{ fontSize: "0.74rem", color: C.muted, fontFamily: BFONT, marginBottom: "0.5rem" }}>{copy.definition}</div>
+          <div style={{ height: 5, background: C.stone, borderRadius: 99 }}>
             <div style={{ height: "100%", width: `${Math.max(pct, 3)}%`, background: tone, borderRadius: 99 }} />
           </div>
-          {/* The per-band paragraph is gone: with a definition above and an
-              action below, it was a third block of prose saying much the same
-              thing, and the page was mostly text. */}
-          <div style={{ fontSize: "0.74rem", color: C.muted, fontFamily: BFONT }}>{copy.definition}</div>
           {/* An action only where the rate crosses into Sometimes. Attaching
               one to every pattern would make a clean result read as a list of
               corrections. */}
@@ -9033,31 +9030,55 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
     // ── Snapshot: how each of you opens a disagreement. Shared, and the one
     //    part of this exercise where both answers are equally valid. ──
     if (section === "conflict-snapshot") {
-      // One row per question, labelled. Two chips side by side with no
-      // indication of which question each answered read as contradictory when
-      // it was not: speaking up early and needing a pause mid-argument are
-      // coherent together, but only once you can see which is which. The rows
-      // make the data self-explanatory, so the prose below them is gone.
+      // Three columns: the question on the left, then each person's answer.
+      // With the label above the pair, the eye had to travel down and back up
+      // to connect a question to its answers.
+      const COLS = isMobile ? "1fr" : "minmax(0,1.3fr) minmax(0,1fr) minmax(0,1fr)";
       return (
         <Layout accent={BLUE}>
-          <div style={{ maxWidth: 720 }}>
+          <div style={{ maxWidth: 760 }}>
             <div style={{ fontSize: "0.62rem", letterSpacing: "0.22em", textTransform: "uppercase", color: BLUE, fontWeight: 700, fontFamily: BFONT, marginBottom: "0.6rem" }}>{cc.eyebrow}</div>
             <Head title={cc.snapshotTitle} shared={true} />
             <Card>
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.6rem 1.5rem", marginBottom: "0.9rem" }}>
+              <div style={{ display: "grid", gridTemplateColumns: COLS, gap: "0.5rem 1.25rem", marginBottom: "0.5rem" }}>
+                <div />
                 <div style={{ fontSize: "0.62rem", letterSpacing: "0.14em", textTransform: "uppercase", color: C.muted, fontWeight: 700, fontFamily: BFONT }}>{userName}</div>
                 <div style={{ fontSize: "0.62rem", letterSpacing: "0.14em", textTransform: "uppercase", color: C.muted, fontWeight: 700, fontFamily: BFONT }}>{partnerName}</div>
               </div>
               {SNAPSHOT_ROWS.map((row, i) => (
-                <div key={row.id} style={{ paddingTop: i ? "1rem" : 0, marginTop: i ? "1rem" : 0, borderTop: i ? `1px solid ${C.stone}` : "none" }}>
-                  <div style={{ fontSize: "0.78rem", color: C.muted, fontFamily: BFONT, marginBottom: "0.5rem" }}>{row.label}</div>
-                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.6rem 1.5rem" }}>
-                    <div><Chip>{OPENING_CHIPS[row.id]?.[conflictAnswers?.[row.id]] || "\u2014"}</Chip></div>
-                    <div><Chip>{OPENING_CHIPS[row.id]?.[partnerConflict?.[row.id]] || "\u2014"}</Chip></div>
-                  </div>
+                <div key={row.id} style={{ display: "grid", gridTemplateColumns: COLS, gap: "0.4rem 1.25rem", alignItems: "center",
+                  paddingTop: "0.9rem", marginTop: i ? "0.9rem" : 0, borderTop: `1px solid ${C.stone}` }}>
+                  <div style={{ fontSize: "0.8rem", color: C.muted, fontFamily: BFONT, lineHeight: 1.45 }}>{row.label}</div>
+                  <div><Chip>{OPENING_CHIPS[row.id]?.[conflictAnswers?.[row.id]] || "\u2014"}</Chip></div>
+                  <div><Chip>{OPENING_CHIPS[row.id]?.[partnerConflict?.[row.id]] || "\u2014"}</Chip></div>
                 </div>
               ))}
             </Card>
+
+            {/* What helps you reset, absorbed from its own page. It is short,
+                it is about the same shared material, and a page of two lists
+                did not earn a nav entry of its own. */}
+            <div style={{ marginTop: "1.5rem" }}>
+              <Head title={cc.repairTitle} shared={true} />
+              <Card>
+                <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: "1.75rem" }}>
+                  {[[partnerName, userName, conflictMine.repairRanking],
+                    [userName, partnerName, conflictPairing.b.repairRanking]].map(([actor, wants, ranking]) => (
+                    <div key={wants}>
+                      <div style={{ fontSize: "0.62rem", letterSpacing: "0.14em", textTransform: "uppercase", color: C.muted, fontWeight: 700, fontFamily: BFONT, marginBottom: "0.7rem", lineHeight: 1.4 }}>
+                        What {wants} wants from {actor}, in order
+                      </div>
+                      {(ranking || []).slice(0, 3).map((r, i) => (
+                        <div key={r} style={{ display: "flex", gap: "0.6rem", alignItems: "flex-start", marginBottom: "0.55rem" }}>
+                          <span style={{ color: BLUE, fontWeight: 700, fontSize: "0.85rem", fontFamily: BFONT }}>{i + 1}</span>
+                          <span style={{ fontSize: "0.86rem", color: C.ink, fontFamily: BFONT, lineHeight: 1.5 }}>{r}</span>
+                        </div>
+                      ))}
+                    </div>
+                  ))}
+                </div>
+              </Card>
+            </div>
           </div>
         </Layout>
       );
@@ -9070,11 +9091,10 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
           <div style={{ maxWidth: 660 }}>
             <div style={{ fontSize: "0.62rem", letterSpacing: "0.22em", textTransform: "uppercase", color: BLUE, fontWeight: 700, fontFamily: BFONT, marginBottom: "0.6rem" }}>{cc.eyebrow}</div>
             <Head title={cc.patternsTitle} shared={false} />
+            <div style={{ fontSize: "0.8rem", fontWeight: 600, color: "#B5546E", fontFamily: BFONT, lineHeight: 1.5, marginBottom: "0.9rem" }}>
+              * {cc.patternsPrivacy}
+            </div>
             <Card>
-              <div style={{ background: "#FBE9F1", borderRadius: 10, padding: "0.75rem 1rem", marginBottom: "1.1rem",
-                fontSize: "0.82rem", fontWeight: 700, color: "#B5546E", fontFamily: BFONT, lineHeight: 1.5 }}>
-                {cc.patternsPrivacy}
-              </div>
               <p style={{ fontSize: "0.86rem", color: C.muted, fontFamily: BFONT, lineHeight: 1.65, marginTop: 0, marginBottom: "0.6rem" }}>{cc.patternsIntro}</p>
               {conflictMine.ranked.map(p => <PatternRow key={p.key} p={p} />)}
               {conflictMine.flaggedCount === 0 && (
@@ -9082,38 +9102,6 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
                   {interp(cc.allClear)}
                 </p>
               )}
-            </Card>
-          </div>
-        </Layout>
-      );
-    }
-
-    // ── Repair: what each of you says helps. The actionable half. ──
-    if (section === "conflict-repair") {
-      // Named by who acts, not whose column it is. "What Preston should do to
-      // help Ellie" is a direct instruction; "For Ellie, in order" leaves the
-      // reader to work out whether it is a list about them or for them.
-      const col = (actor, beneficiary, ranking) => (
-        <div>
-          <div style={{ fontSize: "0.62rem", letterSpacing: "0.14em", textTransform: "uppercase", color: C.muted, fontWeight: 700, fontFamily: BFONT, marginBottom: "0.7rem", lineHeight: 1.4 }}>What {actor} should do to help {beneficiary}, in order</div>
-          {(ranking || []).slice(0, 3).map((r, i) => (
-            <div key={r} style={{ display: "flex", gap: "0.6rem", alignItems: "flex-start", marginBottom: "0.55rem" }}>
-              <span style={{ color: BLUE, fontWeight: 700, fontSize: "0.85rem", fontFamily: BFONT }}>{i + 1}</span>
-              <span style={{ fontSize: "0.86rem", color: C.ink, fontFamily: BFONT, lineHeight: 1.5 }}>{r}</span>
-            </div>
-          ))}
-        </div>
-      );
-      return (
-        <Layout accent={BLUE}>
-          <div style={{ maxWidth: 660 }}>
-            <div style={{ fontSize: "0.62rem", letterSpacing: "0.22em", textTransform: "uppercase", color: BLUE, fontWeight: 700, fontFamily: BFONT, marginBottom: "0.6rem" }}>{cc.eyebrow}</div>
-            <Head title={cc.repairTitle} shared={true} />
-            <Card>
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1.75rem" }}>
-                {col(partnerName, userName, conflictMine.repairRanking)}
-                {col(userName, partnerName, conflictPairing.b.repairRanking)}
-              </div>
             </Card>
           </div>
         </Layout>
@@ -9157,62 +9145,73 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
     }
 
     // ── Results at a glance ──────────────────────────────────────────────
-    // Stat tile, then the action plan. No detailed-results list: the left nav
-    // already carries it, and duplicating it here made the page a menu.
+    // Coloured ground, matching the reflection glance page. Q1 is the
+    // high-level read: each partner's own sense of how conflict goes, which is
+    // the only shared, non-private number this exercise produces.
     const flagged = conflictMine.ranked.filter(p => (p.value ?? 0) >= 2);
-    const clean = 4 - flagged.length;
-    const sharedRepair = (conflictMine.repairRanking || []).find(
-      r => (conflictPairing?.b?.repairRanking || []).slice(0, 3).includes(r));
+    const C0_LABELS = ['Really rocky', "We manage but it's hard", "We're okay", 'Pretty good', 'We handle it well'];
+    const myC0 = conflictMine.overall ?? 2;
+    const theirC0 = conflictPairing?.b?.overall ?? 2;
+    const c0Aligned = Math.abs(myC0 - theirC0) <= 1;
 
     return (
-      <Layout accent={BLUE}>
-        <div style={{ maxWidth: 720 }}>
-          <div style={{ fontSize: "0.62rem", letterSpacing: "0.22em", textTransform: "uppercase", color: BLUE, fontWeight: 700, fontFamily: BFONT, marginBottom: "0.6rem" }}>{cc.eyebrow}</div>
-          <div style={{ fontSize: "clamp(1.7rem,4.5vw,2.4rem)", fontWeight: 700, fontFamily: HFONT, color: C.ink, lineHeight: 1.15, marginBottom: "1.5rem" }}>
-            {userName} & {partnerName}
-          </div>
-
-          {/* Stat tile. Leads with what is clean rather than what is flagged:
-              the same information, and it does not open the section on an
-              accusation. */}
-          <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: "0.9rem", marginBottom: "2rem" }}>
-            <div style={{ background: "white", border: `1.5px solid ${C.stone}`, borderRadius: 14, padding: "1.2rem 1.3rem" }}>
-              <div style={{ fontFamily: HFONT, fontSize: "2.2rem", fontWeight: 700, color: clean === 4 ? "#2E7D5B" : BLUE, lineHeight: 1 }}>{clean} of 4</div>
-              <div style={{ fontSize: "0.8rem", color: C.muted, fontFamily: BFONT, marginTop: "0.4rem", lineHeight: 1.5 }}>
-                patterns are not showing up for you. Private to you.
+      <Layout accent={BLUE} noPrevNext={true}>
+        <ResultsSlide bg="linear-gradient(150deg, #1B2A5E, #2F55C4 55%, #1B8FB8)">
+          <link href={FONT_URL} rel="stylesheet" />
+          <div style={{ color: "white" }}>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "0.6rem", marginBottom: "0.5rem" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "0.6rem" }}>
+                <div style={{ width: 10, height: 10, borderRadius: "50%", background: BLUE, flexShrink: 0 }} />
+                <div style={{ fontSize: "0.65rem", textTransform: "uppercase", letterSpacing: "0.2em", color: "rgba(255,255,255,0.7)", fontFamily: BFONT, fontWeight: 700 }}>Conflict patterns</div>
               </div>
             </div>
-            <div style={{ background: "white", border: `1.5px solid ${C.stone}`, borderRadius: 14, padding: "1.2rem 1.3rem" }}>
-              <div style={{ fontFamily: HFONT, fontSize: "1.05rem", fontWeight: 700, color: C.ink, lineHeight: 1.35 }}>
-                {sharedRepair || conflictMine.repairRanking?.[0] || ""}
-              </div>
-              <div style={{ fontSize: "0.8rem", color: C.muted, fontFamily: BFONT, marginTop: "0.4rem", lineHeight: 1.5 }}>
-                {sharedRepair ? "You both put this near the top of what helps you reset." : `What helps you reset most. ${partnerName} put "${conflictPairing?.b?.repairRanking?.[0] || ""}" first.`}
-              </div>
-            </div>
-          </div>
+            <div style={{ fontSize: "clamp(1.8rem,6vw,2.8rem)", fontWeight: 700, fontFamily: HFONT, lineHeight: 1.05, marginBottom: "0.6rem" }}>{userName} &amp; {partnerName}</div>
+            <p style={{ fontSize: "0.92rem", color: "rgba(255,255,255,0.85)", fontFamily: BFONT, fontWeight: 400, lineHeight: 1.6, marginBottom: "1.25rem" }}>
+              {c0Aligned
+                ? `You both describe conflict as "${(C0_LABELS[myC0] || '').toLowerCase()}". A shared read on where you are.`
+                : `${userName} says "${(C0_LABELS[myC0] || '').toLowerCase()}". ${partnerName} says "${(C0_LABELS[theirC0] || '').toLowerCase()}".`}
+            </p>
 
-          {/* Action plan, matching the eyebrow and tile format used on the
-              communication glance page. */}
-          <div style={{ fontSize: "0.62rem", letterSpacing: "0.16em", textTransform: "uppercase", color: C.muted, fontWeight: 700, fontFamily: BFONT, marginBottom: "0.75rem" }}>Your action plan</div>
-          <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
-            {flagged.length > 0 ? flagged.map(p => (
-              <div key={p.key} style={{ background: "white", border: `1.5px solid ${C.stone}`, borderLeft: `4px solid ${BLUE}`, borderRadius: 14, padding: "1rem 1.2rem" }}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: "0.35rem", gap: "0.75rem" }}>
-                  <span style={{ fontSize: "0.6rem", letterSpacing: "0.12em", textTransform: "uppercase", color: BLUE, fontWeight: 700, fontFamily: BFONT }}>One thing to try</span>
-                  <span style={{ fontSize: "0.62rem", color: C.muted, fontFamily: BFONT, flexShrink: 0 }}>{PATTERN_COPY[p.key].label}</span>
+            {/* Q1, the one shared number this exercise produces. Everything
+                else on the risk side is private to each reader. */}
+            <div style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 14, padding: "1.1rem 1.25rem", marginBottom: "1.25rem" }}>
+              <div style={{ fontSize: "0.55rem", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.35)", fontFamily: BFONT, fontWeight: 700, marginBottom: "0.8rem" }}>How you each describe it</div>
+              {[[userName, myC0], [partnerName, theirC0]].map(([nm, v]) => (
+                <div key={nm} style={{ marginBottom: "0.7rem" }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: "0.3rem" }}>
+                    <span style={{ fontSize: "0.78rem", color: "white", fontFamily: BFONT, fontWeight: 600 }}>{nm}</span>
+                    <span style={{ fontSize: "0.76rem", color: "rgba(255,255,255,0.8)", fontFamily: BFONT }}>{C0_LABELS[v]}</span>
+                  </div>
+                  <div style={{ height: 5, background: "rgba(255,255,255,0.14)", borderRadius: 99 }}>
+                    <div style={{ height: "100%", width: `${((v + 1) / 5) * 100}%`, background: "white", borderRadius: 99, opacity: 0.85 }} />
+                  </div>
                 </div>
-                <div style={{ fontSize: "0.88rem", fontWeight: 700, color: C.ink, fontFamily: BFONT, marginBottom: "0.25rem" }}>{PATTERN_ACTIONS[p.key]?.title}</div>
-                <p style={{ fontSize: "0.82rem", color: C.ink, fontFamily: BFONT, lineHeight: 1.65, margin: 0 }}>{interp(PATTERN_ACTIONS[p.key]?.body)}</p>
+              ))}
+              <div style={{ fontSize: "0.68rem", color: "rgba(255,255,255,0.5)", fontFamily: BFONT, marginTop: "0.6rem", lineHeight: 1.5 }}>
+                {(4 - flagged.length)} of 4 patterns are not showing up for you. That part stays private.
               </div>
-            )) : (
-              <div style={{ background: "white", border: `1.5px solid ${C.stone}`, borderLeft: "4px solid #2E7D5B", borderRadius: 14, padding: "1rem 1.2rem" }}>
-                <div style={{ fontSize: "0.88rem", fontWeight: 700, color: C.ink, fontFamily: BFONT, marginBottom: "0.25rem" }}>{NO_ACTION_NEEDED.title}</div>
-                <p style={{ fontSize: "0.82rem", color: C.ink, fontFamily: BFONT, lineHeight: 1.65, margin: 0 }}>{interp(NO_ACTION_NEEDED.body)}</p>
-              </div>
-            )}
+            </div>
+
+            <div style={{ fontSize: "0.55rem", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.45)", fontFamily: BFONT, fontWeight: 700, marginBottom: "0.7rem" }}>Your action plan</div>
+            <div style={{ display: "flex", flexDirection: "column", gap: "0.7rem" }}>
+              {flagged.length > 0 ? flagged.map(p => (
+                <div key={p.key} style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.14)", borderRadius: 14, padding: "1rem 1.2rem" }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: "0.35rem", gap: "0.75rem" }}>
+                    <span style={{ fontSize: "0.58rem", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.75)", fontWeight: 700, fontFamily: BFONT }}>One thing to try</span>
+                    <span style={{ fontSize: "0.62rem", color: "rgba(255,255,255,0.55)", fontFamily: BFONT, flexShrink: 0 }}>{PATTERN_COPY[p.key].label}</span>
+                  </div>
+                  <div style={{ fontSize: "0.88rem", fontWeight: 700, color: "white", fontFamily: BFONT, marginBottom: "0.25rem" }}>{PATTERN_ACTIONS[p.key]?.title}</div>
+                  <p style={{ fontSize: "0.82rem", color: "rgba(255,255,255,0.85)", fontFamily: BFONT, lineHeight: 1.65, margin: 0 }}>{interp(PATTERN_ACTIONS[p.key]?.body)}</p>
+                </div>
+              )) : (
+                <div style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.14)", borderRadius: 14, padding: "1rem 1.2rem" }}>
+                  <div style={{ fontSize: "0.88rem", fontWeight: 700, color: "white", fontFamily: BFONT, marginBottom: "0.25rem" }}>{NO_ACTION_NEEDED.title}</div>
+                  <p style={{ fontSize: "0.82rem", color: "rgba(255,255,255,0.85)", fontFamily: BFONT, lineHeight: 1.65, margin: 0 }}>{interp(NO_ACTION_NEEDED.body)}</p>
+                </div>
+              )}
+            </div>
           </div>
-        </div>
+        </ResultsSlide>
       </Layout>
     );
   }
