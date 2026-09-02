@@ -5247,23 +5247,46 @@ function mkChart(el, cfg) {
 // do not need axes, and the denominator matters more than the shape: 60% of
 // five couples is not a finding.
 async function renderRegrouped() {
-  if (!document.getElementById('regroup-misaligned')) return;
-  let d = null;
-  try { d = await fetchAdminData(); } catch (e) { /* fall through to the empty state */ }
+  const wrapA = document.getElementById('regroup-misaligned');
+  if (!wrapA) return;
+
+  // Force a fresh fetch rather than reusing the memoised promise. If
+  // fetchAdminData ran before the admin secret was available it caches null
+  // forever, and every later caller sees "no data" that is really "no auth".
+  let d = null, failure = null;
+  try { d = await fetchAdminData(true); }
+  catch (e) { failure = String(e && e.message || e); }
+  if (!d && !failure) failure = 'the admin data endpoint returned no payload';
+
   // regrouped is computed inside buildResponseAggregates, so it arrives nested
-  // under responses rather than at the top level. Reading d.regrouped returned
-  // undefined and the tiles rendered their empty state forever.
+  // under responses. Accept either shape.
   const r = (d && (d.regrouped || (d.responses && d.responses.regrouped))) || null;
 
-  const pie = (canvasId, noteId, part, total, partLabel, restLabel, color, note) => {
+  const paint = (canvasId, noteId, part, total, partLabel, restLabel, color, note) => {
     const cv = document.getElementById(canvasId);
     const nEl = document.getElementById(noteId);
     if (!cv) return;
     if (!total) {
-      cv.parentElement.innerHTML = '<div style="color:var(--muted);font-size:.8rem;padding:1rem 0;">Not enough complete couples yet.</div>';
-      if (nEl) nEl.textContent = '';
+      // Say WHICH empty this is. "Not enough couples" and "the request failed"
+      // looked identical before, which made this impossible to diagnose from
+      // the screen.
+      const msg = failure
+        ? 'Could not load: ' + failure
+        : (r ? 'No couples have completed enough to measure this yet.'
+             : 'The response did not include the regrouped figures.');
+      // Write into the note element, not the canvas parent: replacing the
+      // canvas removes the element this function needs on the next render, so
+      // the message vanished and the tile just looked blank.
+      cv.style.display = 'none';
+      if (nEl) {
+        nEl.style.color = 'var(--muted)';
+        nEl.style.fontSize = '.8rem';
+        nEl.style.lineHeight = '1.5';
+        nEl.textContent = msg;
+      }
       return;
     }
+    cv.style.display = '';
     mkChart(cv, {
       type: 'doughnut',
       data: { labels: [partLabel, restLabel], datasets: [{
@@ -5272,8 +5295,6 @@ async function renderRegrouped() {
       }] },
       options: {
         responsive: true, maintainAspectRatio: false, cutout: '58%',
-        // Doughnut hover is per-segment, so the shared index mode does not
-        // apply here.
         interaction: { mode: 'nearest', intersect: true },
         plugins: {
           legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 11 } } },
@@ -5284,15 +5305,18 @@ async function renderRegrouped() {
     if (nEl) nEl.textContent = note;
   };
 
-  pie('regroup-misaligned', 'regroup-misaligned-note',
+  paint('regroup-misaligned', 'regroup-misaligned-note',
     r ? r.misalignedPairs : 0, r ? r.ratedPairs : 0,
     'Misaligned', 'Aligned', '#E5578C',
     r ? `${r.misalignedPct}% misaligned, across all ${r.ratedPairs} complete couples.` : '');
 
-  pie('regroup-misunderstood', 'regroup-misunderstood-note',
+  paint('regroup-misunderstood', 'regroup-misunderstood-note',
     r ? r.misunderstoodPairs : 0, r ? (r.understoodRated || 0) : 0,
     'Misunderstood', 'In tune', '#6C7FFF',
     r ? `${r.misunderstoodPct}% misunderstood, across the ${r.understoodRated || 0} couples with Part 2 answers.` : '');
+
+  // Leaves a trace in the console for exactly this situation.
+  if (!r) console.warn('[regrouped] no figures.', failure || 'payload had no regrouped key', d ? Object.keys(d) : null);
 }
 function initCharts(page) {
   if (page==='overview') {
