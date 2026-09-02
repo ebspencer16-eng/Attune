@@ -10600,15 +10600,31 @@ function AuthModal({ mode, onClose, onSuccess }) {
           // Mirror of the ex1/ex2/ex3 clearing above: when the partner has no
           // answers on the server (a reset, or they have not finished), drop
           // any cached session so they do not keep reading as complete.
-          if (ps.found && !(ps.profile?.ex1_answers && ps.profile?.ex2_answers)) {
+          // The partner session used to be written only when the partner had
+          // BOTH ex1 and ex2, and cleared otherwise. That made partner status
+          // all-or-nothing: someone who had finished Communication but not
+          // Expectations showed as Pending on everything, including the
+          // exercise they had actually completed. Per-exercise status was
+          // impossible to report accurately.
+          //
+          // Now it is written whenever the partner has any answers at all, and
+          // each field carries its own truth, so every row can report the
+          // exercise it is about.
+          const _anyPartnerAnswers = !!(ps.profile?.ex1_answers || ps.profile?.ex2_answers
+            || ps.profile?.ex3_answers || ps.profile?.intimacy_data || ps.profile?.conflict_data);
+          if (ps.found && !_anyPartnerAnswers) {
             try { localStorage.removeItem('attune_partner_session'); } catch {}
           }
-          if (ps.found && ps.profile?.ex1_answers && ps.profile?.ex2_answers) {
+          if (ps.found && _anyPartnerAnswers) {
             localStorage.setItem('attune_partner_session', JSON.stringify({
               name: ps.profile.name,
               ex1: ps.profile.ex1_answers,
               ex2: ps.profile.ex2_answers,
               ex3: ps.profile.ex3_answers,
+              // conflict was never carried here, so a partner's Conflict
+              // Patterns row could only ever read Pending, however long ago
+              // they finished it.
+              ...(ps.profile.conflict_data ? { conflict: ps.profile.conflict_data } : {}),
               ...(ps.profile.intimacy_data ? { intimacy: ps.profile.intimacy_data } : {}),
               partnerProfileId: profile.partner_profile_id,
               inviteCode: profile.invite_code,
