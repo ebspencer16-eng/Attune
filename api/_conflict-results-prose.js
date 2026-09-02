@@ -88,20 +88,20 @@ export const SNAPSHOT_PROSE = {
  */
 export const PATTERN_ACTIONS = {
   criticism: {
-    title: 'Name the behavior, not the person',
-    body: 'For the next two weeks, before raising something, say the specific thing that happened out loud to yourself first. "The dishes sat for three days" rather than "you never help". If you cannot name a specific thing, the complaint is probably about something else.',
+    title: 'Call out the behavior rather than your partner',
+    body: 'For the next two weeks, say the specific thing that happened out loud first. "The dishes sat for three days" rather than "you never help". If you cannot name a specific thing, your complaint is likely about something else.',
   },
   contempt: {
-    title: 'Say it once, outside an argument',
-    body: 'Tell {partner} you noticed this in your own answers. Not mid-conflict, and not as an apology. Contempt loses most of its power once it has been named out loud by the person doing it, and almost none of it when the other person raises it first.',
+    title: 'Acknowledge it once, outside an argument',
+    body: 'Pay attention to micro-aggressions and tell {partner} you noticed it, but not mid-conflict and not as an apology. Contempt grows quietly, but loses most of its power when it has been named out loud by the person doing it, and almost none when the other person points it out first.',
   },
   defensiveness: {
     title: 'Reflect back before you respond',
-    body: 'When {partner} raises something, say what you heard before you say anything else. One sentence. You are not agreeing, only confirming. It costs a few seconds and it removes the thing defensiveness is usually protecting against, which is not being heard.',
+    body: 'When {partner} raises something, say what you heard before you say anything else. You are not agreeing, only confirming that you are listening. This changes the pace of the discussion and can correct misunderstandings.',
   },
   stonewalling: {
-    title: 'Agree a pause signal in advance',
-    body: 'Pick a phrase now, while things are calm, that means "I need twenty minutes and I am coming back". Agree what the return looks like. A stated pause protects the conversation; a silent one reads as leaving.',
+    title: 'Agree on a pause signal in advance',
+    body: 'Pick a phrase when things are calm that means "I need twenty minutes and then I will come back." A well-communicated pause protects the conversation, whereas a silent one reads as disengaging.',
   },
 };
 
@@ -110,6 +110,20 @@ export const NO_ACTION_NEEDED = {
   title: 'Nothing here needs work',
   body: 'None of the four patterns are showing up often for you. That is worth saying out loud to {partner}, because it is the kind of thing couples rarely tell each other.',
 };
+
+/**
+ * Row labels for the snapshot.
+ *
+ * The chips alone were unreadable: two answers side by side with no indication
+ * of which question each came from looked contradictory when it was not.
+ * Speaking up early and needing a pause mid-argument are perfectly coherent
+ * together, but only if you can see which is which.
+ */
+export const SNAPSHOT_ROWS = [
+  { id: 'c1', label: 'When you notice something frustrating' },
+  { id: 'c2', label: "When you're in an argument" },
+  { id: 'c_topic', label: 'When the scope of the argument changes' },
+];
 
 /** Labels for the answers, shown as chips under each name. */
 export const OPENING_CHIPS = {
@@ -124,10 +138,10 @@ export const CONFLICT_RESULTS_COPY = {
   snapshotTitle: 'Your conflict snapshot',
   patternsTitle: 'Your patterns',
   patternsPrivacy: 'Not visible to your partner. This is the one section that stays private, always.',
-  patternsIntro: 'How often these showed up for you. Everyone does some of these sometimes. The goal is noticing, not a verdict.',
+  patternsIntro: 'An in-depth look at pain points in your conflict management. Being aware of these areas is the first step toward growth in your communication under pressure.',
   repairTitle: 'What helps each of you reset',
-  repairIntro: 'Ranked by what lands best. This is the part your partner can act on directly.',
-  wroteTitle: 'What you both wrote',
+  repairIntro: '',
+  wroteTitle: 'What you each wrote',
   sharedBadge: 'Shared',
   privateBadge: 'Just for you',
 
