@@ -14592,7 +14592,12 @@ export default function App() {
 
         {view === "exercises" && (() => {
           // Exercise progress helper
-          const exTile = ({ title, sub, color, accent, done, doneLabel, inProgress, onClick, icon }) => (
+          // Exercise numbering is positional: the nth exercise this couple
+          // owns is 0n. Hardcoding 'Exercise 05' would show a core-plus-conflict
+          // couple a number for exercises they never bought.
+          let _exN = 0;
+          const nextExNum = () => String(++_exN).padStart(2, '0');
+          const exTile = ({ title, sub, color, accent, done, doneLabel, inProgress, onClick, icon, num }) => (
             <div onClick={onClick} style={{ background: done ? "linear-gradient(135deg," + color + "18," + color + "08)" : "white", border: "1.5px solid " + (done ? color + "40" : "#E8DDD0"), borderRadius: 16, padding: "1.25rem 1.4rem", cursor: "pointer", transition: "all 0.15s", position: "relative", overflow: "hidden" }}
               onMouseEnter={e => { e.currentTarget.style.borderColor = color; e.currentTarget.style.boxShadow = "0 4px 18px " + color + "22"; }}
               onMouseLeave={e => { e.currentTarget.style.borderColor = done ? color + "40" : "#E8DDD0"; e.currentTarget.style.boxShadow = "none"; }}>
@@ -14600,7 +14605,7 @@ export default function App() {
               <div style={{ display: "flex", alignItems: "center", gap: "1rem", marginBottom: "0.75rem" }}>
                 <div style={{ width: 40, height: 40, borderRadius: 12, background: color + "20", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>{icon}</div>
                 <div>
-                  <div style={{ fontSize: "0.88rem", fontWeight: 700, color: "#0E0B07", fontFamily: BFONT, lineHeight: 1.2 }}>{title}</div>
+                  <div style={{ fontSize: "0.88rem", fontWeight: 700, color: "#0E0B07", fontFamily: BFONT, lineHeight: 1.2 }}>{num ? <span style={{ color: color, fontWeight: 700, marginRight: "0.4rem", fontSize: "0.76rem", letterSpacing: "0.06em" }}>{num}</span> : null}{title}</div>
                   {done && <div style={{ fontSize: "0.65rem", letterSpacing: "0.1em", textTransform: "uppercase", color: color, fontWeight: 700, fontFamily: BFONT, marginTop: "0.2rem" }}>{doneLabel || "Complete ✓"}</div>}
                 </div>
               </div>
@@ -14627,8 +14632,13 @@ export default function App() {
                   </p>
                 </div>
 
+                {/* Numbering follows what this couple owns, so a core package
+                    plus How You Fight reads 01, 02, 03. The exercises are
+                    listed in a fixed order and numbered by position, never by
+                    a hardcoded label. */}
                 <div style={{ display: "flex", flexDirection: "column", gap: "1rem", marginBottom: "2rem" }}>
                   {exTile({
+                    num: nextExNum(),
                     title: "Communication",
                     sub: "Map your style across 10 dimensions, how you recharge, express, handle conflict, and connect.",
                     color: "#E8673A", accent: "#9B5DE5",
@@ -14638,6 +14648,7 @@ export default function App() {
                     icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#E8673A" strokeWidth="1.8" strokeLinecap="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>,
                   })}
                   {exTile({
+                    num: nextExNum(),
                     title: "Expectations",
                     sub: "Who handles what, and what you each grew up seeing. Reveals gaps you haven't talked about.",
                     color: "#1B5FE8", accent: "#9B5DE5",
@@ -14647,6 +14658,7 @@ export default function App() {
                     icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1B5FE8" strokeWidth="1.8" strokeLinecap="round"><rect x="9" y="2" width="6" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><line x1="9" y1="12" x2="15" y2="12"/><line x1="9" y1="16" x2="13" y2="16"/></svg>,
                   })}
                   {hasEx3 && exTile({
+                    num: hasEx3 ? nextExNum() : null,
                     title: "Relationship Reflection",
                     sub: "A third exercise about the moments and memories that shaped your relationship.",
                     color: "#10b981", accent: "#059669",
@@ -14660,6 +14672,7 @@ export default function App() {
                       moment you own it, leaving the exercise reachable only by
                       typing the URL. That was true for Physical Intimacy too. */}
                   {pkg.hasIntimacy && exTile({
+                    num: pkg.hasIntimacy ? nextExNum() : null,
                     title: "Physical Intimacy Expectations",
                     sub: "A private set of questions about physical intimacy, answered independently.",
                     color: "#B5546E", accent: "#B5546E",
@@ -14669,6 +14682,7 @@ export default function App() {
                     icon: GrowIcons.intimacy("#B5546E"),
                   })}
                   {pkg.hasConflict && exTile({
+                    num: pkg.hasConflict ? nextExNum() : null,
                     title: "How You Fight",
                     sub: "How conflict actually goes for you. One section stays private to you, always.",
                     color: "#1B5FE8", accent: "#1B5FE8",
@@ -15475,12 +15489,26 @@ export default function App() {
           <h2 style={{ fontFamily: font.display, fontSize: "1.6rem", fontWeight: 700, color: C.ink, margin: "0 0 0.5rem" }}>Results pending</h2>
           <p style={{ fontSize: "0.9rem", color: C.muted, lineHeight: 1.65, margin: "0 0 1.5rem" }}>Your results open when both of you finish all exercises. You'll both see everything at the same time.</p>
           <div style={{ background: "white", border: ("1.5px solid " + C.stone), borderRadius: 14, overflow: "hidden", textAlign: "left", marginBottom: "1.25rem" }}>
-            {[
-              { label: "Your communication exercise", done: myEx1Done, viewId: "exercise1", you: true },
-              { label: "Your expectations exercise", done: myEx2Done, viewId: "exercise2", you: true },
-              { label: partnerName + "'s communication exercise", done: partnerEx1Done, you: false },
-              { label: partnerName + "'s expectations exercise", done: partnerEx2Done, you: false },
-            ].map((r, i, arr) => (
+            {(() => {
+              // Numbered by what this couple actually owns, so a core package
+              // plus How You Fight reads 01, 02, 03 rather than 01, 02, 05.
+              // The list was hardcoded to the two core exercises, which meant
+              // Reflection, Physical Intimacy and How You Fight never appeared
+              // here at all, however far along either partner was.
+              const owned = [
+                { key: 'ex1', name: 'communication', mine: myEx1Done, theirs: partnerEx1Done, viewId: 'exercise1' },
+                { key: 'ex2', name: 'expectations', mine: myEx2Done, theirs: partnerEx2Done, viewId: 'exercise2' },
+                ...(pkg.hasAnniversary ? [{ key: 'ex3', name: 'relationship reflection', mine: !!ex3Answers, theirs: !!partnerSession?.ex3, viewId: 'exercise3' }] : []),
+                ...(pkg.hasIntimacy ? [{ key: 'intimacy', name: 'physical intimacy', mine: !!intimacyData?.completedAt, theirs: !!partnerSession?.intimacy?.completedAt, viewId: 'intimacy' }] : []),
+                ...(pkg.hasConflict ? [{ key: 'conflict', name: 'how you fight', mine: !!conflictData?.completedAt, theirs: !!partnerSession?.conflict?.completedAt, viewId: 'conflict' }] : []),
+              ];
+              const num = (i) => String(i + 1).padStart(2, '0');
+              const rows = [
+                ...owned.map((e, i) => ({ label: `Your exercise ${num(i)}: ${e.name}`, done: e.mine, viewId: e.viewId, you: true })),
+                ...owned.map((e, i) => ({ label: `${partnerName}'s exercise ${num(i)}: ${e.name}`, done: e.theirs, you: false })),
+              ];
+              return rows;
+            })().map((r, i, arr) => (
               <div key={r.label} onClick={r.you && !r.done ? () => setView(r.viewId) : undefined}
                 style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0.8rem 1.1rem", borderBottom: i < arr.length - 1 ? ("1px solid " + C.stone + "60") : "none", cursor: r.you && !r.done ? "pointer" : "default", gap: "0.75rem" }}>
                 <span style={{ display: "flex", alignItems: "center", gap: "0.6rem", fontSize: "0.83rem", color: C.ink, fontFamily: font.body }}>

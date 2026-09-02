@@ -36,8 +36,8 @@ export const CONFLICT_SECTIONS = [
 
 /** Shown before the first question. Sets expectation: noticing, not verdict. */
 export const CONFLICT_INTRO =
-  "This one works differently. It looks at patterns research links to relationship strain. "
-  + "Everyone does some of these sometimes. The goal is not a verdict, it is noticing.";
+  "Conflict is part of every relationship. This exercise helps each of you identify "
+  + "patterns linked to relationship strain so that you can approach conflict in a healthy way.";
 
 /** Frequency options, shared by the four risk questions. Value is the rate. */
 export const FREQUENCY_OPTIONS = [
