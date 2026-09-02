@@ -5250,7 +5250,10 @@ async function renderRegrouped() {
   if (!document.getElementById('regroup-misaligned')) return;
   let d = null;
   try { d = await fetchAdminData(); } catch (e) { /* fall through to the empty state */ }
-  const r = d && d.regrouped;
+  // regrouped is computed inside buildResponseAggregates, so it arrives nested
+  // under responses rather than at the top level. Reading d.regrouped returned
+  // undefined and the tiles rendered their empty state forever.
+  const r = (d && (d.regrouped || (d.responses && d.responses.regrouped))) || null;
 
   const pie = (canvasId, noteId, part, total, partLabel, restLabel, color, note) => {
     const cv = document.getElementById(canvasId);
