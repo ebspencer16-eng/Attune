@@ -3584,7 +3584,7 @@ async function renderResponseTile(opts){
   const a=seg[sel?sel.value:'']||seg['']||null; if(!a) return;
   setTileN(el, a.pairs);
   if(opts.kind==='radar'){
-    mkChart(el,{type:'radar',data:{labels:a.dimScores.labels,datasets:[{label:'Avg alignment',data:a.dimScores.data,borderColor:'#6C7FFF',backgroundColor:'rgba(108,127,255,.15)',borderWidth:2,pointRadius:3,pointBackgroundColor:'#6C7FFF'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{r:{beginAtZero:true,max:100,ticks:{stepSize:25,font:{size:9}},pointLabels:{font:{size:10}}}}}});
+    mkChart(el,{type:'radar',data:{labels:a.dimScores.labels,datasets:[{label:'Avg alignment',data:a.dimScores.data,borderColor:'#6C7FFF',backgroundColor:'rgba(108,127,255,.15)',borderWidth:2,pointRadius:3,pointBackgroundColor:'#6C7FFF'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{r:{beginAtZero:true,max:100,ticks:{display:false},pointLabels:{font:{size:10}}}}}});
   } else if(opts.kind==='expalign'){
     mkChart(el,{type:'radar',data:{labels:a.expAlign.labels,datasets:[{label:'% aligned',data:a.expAlign.data,borderColor:'#FF6B35',backgroundColor:'rgba(255,107,53,.15)',borderWidth:2,pointRadius:3,pointBackgroundColor:'#FF6B35'}]},options:{scales:{r:{grid:{color:'#E6ECF6'},angleLines:{color:'#E6ECF6'},ticks:{display:false},min:0,max:100}},plugins:{legend:{display:false}}}});
   } else if(opts.kind==='relfeel'){
@@ -4628,7 +4628,9 @@ async function renderSelfPartnerGap(containerId){
   // fraction of the height, and it gets the shared instant-tooltip behaviour
   // from mkChart instead of relying on a title attribute.
   const sorted = withData.sort((a, b) => b.gap - a.gap);
-  el.innerHTML = card('<div style="height:220px"><canvas id="' + containerId + '-canvas"></canvas></div>');
+  const peak = Math.max(...sorted.map(x => x.gap), 0.2);
+  const yMax = Math.ceil(peak * 4) / 4;  // nearest 0.25 above the largest gap
+  el.innerHTML = card('<div style="height:170px"><canvas id="' + containerId + '-canvas"></canvas></div>');
   const cv = document.getElementById(containerId + '-canvas');
   mkChart(cv, {
     type: 'bar',
@@ -4641,8 +4643,11 @@ async function renderSelfPartnerGap(containerId){
       plugins: { legend: { display: false }, tooltip: { callbacks: {
         label: c => c.parsed.y.toFixed(1) + ' pts gap (n=' + sorted[c.dataIndex].n + ')' } } },
       scales: {
-        y: { beginAtZero: true, max: 4, title: { display: true, text: 'Points', font: { size: 10 } },
-             ticks: { font: { size: 10 } }, grid: { color: 'rgba(0,0,0,.06)' } },
+        // Max follows the data rather than the scale's theoretical 4 points.
+        // Real gaps sit under 1, so a fixed axis left the bars as slivers.
+        // Rounded up to a clean step so the top gridline is a round number.
+        y: { beginAtZero: true, max: yMax, ticks: { stepSize: yMax / 2, font: { size: 10 } },
+             grid: { color: 'rgba(0,0,0,.06)' } },
         x: { ticks: { font: { size: 9 }, maxRotation: 45, minRotation: 45 }, grid: { display: false } },
       },
     },

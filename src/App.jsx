@@ -10613,8 +10613,13 @@ function AuthModal({ mode, onClose, onSuccess }) {
       // Restore order from Supabase so pkg features (budget, reflection) work on a new device
       if (!localStorage.getItem('attune_order') && authData.user.email) {
         try {
+          // NOTE: this is the one orders query in the app with a hand-written
+          // column list rather than ORDER_SELECT. addon_conflict was missing
+          // from it, so a granted add-on read as undefined and was stored as
+          // false, which is why Partner B never saw the exercise on a fresh
+          // sign-in. Any new add-on column has to be added here too.
           const { data: orderRow } = await sb.from('orders')
-            .select('id,pkg_key,addon_reflection,addon_budget,addon_checklist,addon_intimacy,addon_workbook,is_physical,order_num,user_id,workbook_url,workbook_status')
+            .select('id,pkg_key,addon_reflection,addon_budget,addon_checklist,addon_intimacy,addon_conflict,addon_workbook,is_physical,order_num,user_id,workbook_url,workbook_status')
             .eq('buyer_email', authData.user.email)
             .order('created_at', { ascending: false })
             .limit(1)
