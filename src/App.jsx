@@ -14424,6 +14424,7 @@ export default function App() {
                         { key: "exp", label: "Expectations", viewId: "exercise2", myDone: myEx2Done, myInProgress: ex2InProgress, partnerDone: partnerEx2Done },
                         ...(pkg.hasAnniversary ? [{ key: "refl", label: "Reflection", viewId: "exercise3", myDone: !!ex3Answers, myInProgress: ex3InProgress, partnerDone: !!(partnerSession && partnerSession.ex3) }] : []),
                         ...(pkg.hasIntimacy ? [{ key: "intim", label: "Physical intimacy", viewId: "intimacy", myDone: !!(intimacyData?.completedAt), myInProgress: false, partnerDone: !!(partnerSession && partnerSession.intimacy && partnerSession.intimacy.completedAt) }] : []),
+                        ...(pkg.hasConflict ? [{ key: "conflict", label: "How you fight", viewId: "conflict", myDone: !!(conflictData?.completedAt), myInProgress: false, partnerDone: !!(partnerSession?.conflict?.completedAt) }] : []),
                       ].map((r, i) => ({ ...r, num: String(i + 1).padStart(2, "0") }));
                       const COLS = "minmax(0,1.15fr) minmax(0,1fr) minmax(0,1fr)";
                       const dot = (done, inProgress) => (

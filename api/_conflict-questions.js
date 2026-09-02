@@ -51,7 +51,7 @@ export const CONFLICT_QUESTIONS = [
   // ── 1. Getting Started ───────────────────────────────────────────────────
   {
     id: 'c0', section: 'start', kind: 'scale',
-    text: 'How would you describe how we typically handle disagreements?',
+    text: 'How would you describe the way you two typically handle disagreements?',
     options: [
       { value: 0, label: 'Really rocky' },
       { value: 1, label: "We manage but it's hard" },
@@ -64,13 +64,13 @@ export const CONFLICT_QUESTIONS = [
   // ── 2. How Disagreements Start. Both options equally valid. ──────────────
   {
     id: 'c1', section: 'openings', kind: 'forcedAB',
-    text: "When a disagreement starts, I'm more likely to:",
+    text: "When a disagreement starts, you're more likely to:",
     a: "Say what's bothering me right away",
     b: 'Take some time before I bring it up',
   },
   {
     id: 'c2', section: 'openings', kind: 'forcedAB',
-    text: 'In the middle of a disagreement, I tend to:',
+    text: 'In the middle of a disagreement, you tend to:',
     a: "Want to keep talking until we've resolved it",
     b: 'Need a pause before I can keep talking',
   },
@@ -86,25 +86,25 @@ export const CONFLICT_QUESTIONS = [
   // having to remember it.
   {
     id: 'c_crit', section: 'risk', kind: 'frequency', riskKey: 'criticism', riskLabel: 'Criticism',
-    text: "When I'm frustrated, I find myself criticizing my partner's character rather than naming the specific issue.",
+    text: "When you're frustrated, you find yourself criticizing your partner's character rather than naming the specific issue.",
   },
   {
     id: 'c_cont', section: 'risk', kind: 'frequency', riskKey: 'contempt', riskLabel: 'Contempt',
-    text: 'When we disagree, I catch myself being sarcastic, dismissive, or rolling my eyes.',
+    text: 'When you disagree, you catch yourself being sarcastic, dismissive, or rolling your eyes.',
   },
   {
     id: 'c_def', section: 'risk', kind: 'frequency', riskKey: 'defensiveness', riskLabel: 'Defensiveness',
-    text: 'When my partner brings up a concern, I respond by defending myself or pointing out what they do wrong.',
+    text: 'When your partner brings up a concern, you respond by defending yourself or pointing out what they do wrong.',
   },
   {
     id: 'c_stone', section: 'risk', kind: 'frequency', riskKey: 'stonewalling', riskLabel: 'Stonewalling',
-    text: 'When things get tense, I shut down or withdraw instead of staying in the conversation.',
+    text: 'When things get tense, you shut down or withdraw instead of staying in the conversation.',
   },
 
   // ── 4. What Already Works. Balances the section above. ───────────────────
   {
     id: 'c8', section: 'works', kind: 'pickOne',
-    text: 'The thing I do that most often helps us reset mid-conflict:',
+    text: 'The thing you do that most often helps you reset mid-conflict:',
     options: [
       'Taking a break', 'Using humor', 'Physical touch', 'Naming the pattern out loud',
       'Apologizing first', 'Listening without responding', 'Asking a clarifying question',
@@ -113,7 +113,7 @@ export const CONFLICT_QUESTIONS = [
   },
   {
     id: 'c9', section: 'works', kind: 'openText',
-    text: 'A disagreement that ended better than I expected. What made it work:',
+    text: 'A disagreement that ended better than you expected. What made it work:',
     placeholder: 'Take as much space as you want.',
   },
 
@@ -128,7 +128,7 @@ export const CONFLICT_QUESTIONS = [
   },
   {
     id: 'c_topic', section: 'repair', kind: 'forcedAB',
-    text: 'When a disagreement touches on something old, I tend to:',
+    text: 'When a disagreement touches on something old, you tend to:',
     a: "Stick to what's happening right now",
     b: 'Notice how it connects to a pattern we have had before',
   },
@@ -136,7 +136,7 @@ export const CONFLICT_QUESTIONS = [
   // ── 6. What Matters ─────────────────────────────────────────────────────
   {
     id: 'c_grat', section: 'closing', kind: 'openText',
-    text: 'One thing about how we handle conflict that I actually appreciate:',
+    text: 'One thing about how you two handle conflict that you actually appreciate:',
     placeholder: 'One sentence is plenty.',
   },
 ];
