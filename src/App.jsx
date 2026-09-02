@@ -9132,7 +9132,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
         </div>
       );
       return (
-        <Layout accent={BLUE} noPrevNext={true}>
+        <Layout accent={BLUE}>
           <div style={{ maxWidth: 720 }}>
             <div style={{ fontSize: "0.62rem", letterSpacing: "0.22em", textTransform: "uppercase", color: BLUE, fontWeight: 700, fontFamily: BFONT, marginBottom: "0.6rem" }}>{cc.eyebrow}</div>
             <Head title={cc.wroteTitle} shared={true} />
@@ -9175,7 +9175,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
             {/* Q1, the one shared number this exercise produces. Everything
                 else on the risk side is private to each reader. */}
             <div style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 14, padding: "1.1rem 1.25rem", marginBottom: "1.25rem" }}>
-              <div style={{ fontSize: "0.55rem", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.35)", fontFamily: BFONT, fontWeight: 700, marginBottom: "0.8rem" }}>How you each describe it</div>
+              <div style={{ fontSize: "0.55rem", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.35)", fontFamily: BFONT, fontWeight: 700, marginBottom: "0.8rem" }}>How you each describe conflict resolution in your relationship</div>
               {[[userName, myC0], [partnerName, theirC0]].map(([nm, v]) => (
                 <div key={nm} style={{ marginBottom: "0.7rem" }}>
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: "0.3rem" }}>

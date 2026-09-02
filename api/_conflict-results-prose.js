@@ -136,7 +136,7 @@ export const PATTERN_NOTES = {
  * Bar colour per frequency. The scale has four levels, not five, so these run
  * green, yellow-green, orange, red rather than the five steps discussed.
  */
-export const BAND_COLORS = ['#2E7D5B', '#7FA53C', '#D98A1F', '#C2410C'];
+export const BAND_COLORS = ['#2E7D5B', '#D4A017', '#E07A1F', '#C2410C'];  // green, yellow, orange, red
 
 /** Shown on the glance page when no pattern crosses the line. */
 export const NO_ACTION_NEEDED = {
