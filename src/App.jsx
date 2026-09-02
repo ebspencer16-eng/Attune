@@ -12390,6 +12390,23 @@ export default function App() {
     hydrateAnswers('attune_ex1', setEx1State);
     hydrateAnswers('attune_ex2', setEx2State);
     hydrateAnswers('attune_ex3', setEx3State);
+    // Intimacy and conflict store a record ({ answers, completedAt }) rather
+    // than a bare answers object, so they need their own sync. Without it,
+    // their state was only ever read at mount: the login flow wrote
+    // localStorage but the rendered status kept the value from page load,
+    // which is why a row could read Start on one refresh and Done on the next.
+    const hydrateRecord = (key, setRec) => {
+      try {
+        const raw = localStorage.getItem(key);
+        if (!raw) return;
+        const parsed = JSON.parse(raw);
+        if (parsed && typeof parsed === 'object' && parsed.completedAt) {
+          setRec(prev => (prev && prev.completedAt ? prev : parsed));
+        }
+      } catch {}
+    };
+    hydrateRecord('attune_intimacy', setIntimacyData);
+    hydrateRecord('attune_conflict', setConflictData);
 
     // Rehydrate the linked partner's session too. The login flow writes
     // attune_partner_session to localStorage but doesn't call setPartnerSession,
@@ -12757,7 +12774,14 @@ export default function App() {
             // Force a reload so the state initializers re-read localStorage.
             // Without this the dashboard renders with sarah*Demo until the
             // next page navigation.
-            if (profile?.ex1_answers || profile?.ex2_answers || profile?.ex3_answers) {
+            // Every exercise, not just the first three. The list was written
+            // when there were three and never grew, so an account whose only
+            // answers are in intimacy or conflict never triggered the reload
+            // and rendered stale until the next navigation. Combined with the
+            // state initializers only reading localStorage at mount, that is
+            // why a status could read Start on one load and Done on the next.
+            if (profile?.ex1_answers || profile?.ex2_answers || profile?.ex3_answers
+                || profile?.intimacy_data || profile?.conflict_data) {
               window.location.reload();
               return;
             }
