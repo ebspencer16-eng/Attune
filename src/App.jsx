@@ -10508,8 +10508,15 @@ function AuthModal({ mode, onClose, onSuccess }) {
       // any stale local copy so a previously-completed exercise doesn't linger on
       // the device and keep showing as done.
       try {
+        // Every exercise, derived rather than listed: this block covered the
+        // first three only, so an admin reset of a newer exercise left the
+        // local copy in place and it kept reading as complete.
         if (profile?.ex1_answers) localStorage.setItem('attune_ex1', JSON.stringify(profile.ex1_answers));
         else localStorage.removeItem('attune_ex1');
+        if (profile?.intimacy_data) localStorage.setItem('attune_intimacy', JSON.stringify(profile.intimacy_data));
+        else localStorage.removeItem('attune_intimacy');
+        if (profile?.conflict_data) localStorage.setItem('attune_conflict', JSON.stringify(profile.conflict_data));
+        else localStorage.removeItem('attune_conflict');
       } catch {}
       try {
         if (profile?.ex2_answers) localStorage.setItem('attune_ex2', JSON.stringify(profile.ex2_answers));
@@ -13731,7 +13738,12 @@ export default function App() {
         });
         if (!res.ok || cancelled) return;
         const json = await res.json();
-        if (json.found && json.profile?.ex1_answers && json.profile?.ex2_answers) {
+        // Any answers, not both of the first two. The all-or-nothing gate made
+        // partner status binary: a partner mid-way through showed Pending on
+        // everything, including exercises they had finished.
+        const _any = !!(json.profile?.ex1_answers || json.profile?.ex2_answers
+          || json.profile?.ex3_answers || json.profile?.intimacy_data || json.profile?.conflict_data);
+        if (json.found && _any) {
           const s = {
             partnerProfileId: partnerId,
             inviteCode: account.inviteCode,
@@ -13740,6 +13752,7 @@ export default function App() {
             ex2: json.profile.ex2_answers,
             ...(json.profile.ex3_answers ? { ex3: json.profile.ex3_answers } : {}),
             ...(json.profile.intimacy_data ? { intimacy: json.profile.intimacy_data } : {}),
+            ...(json.profile.conflict_data ? { conflict: json.profile.conflict_data } : {}),
             completedAt: Date.now(),
           };
           if (!cancelled) savePartnerSession(s);

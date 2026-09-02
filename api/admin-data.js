@@ -305,7 +305,7 @@ export default async function handler(req) {
       admin.from('orders').select('*').order('created_at', { ascending: false }).limit(1000),
       admin.from('beta_codes').select('*').order('code', { ascending: true }),
       admin.from('feedback_submissions').select('*').order('submitted_at', { ascending: false }).limit(2000),
-      admin.from('profiles').select('id, partner_profile_id, invite_code, name, partner_name, age_range, gender, pronouns, partner_pronouns, relationship_status, relationship_length, children, signup_source, ex1_answers, ex2_answers, ex3_answers'),
+      admin.from('profiles').select('id, partner_profile_id, invite_code, name, partner_name, age_range, gender, pronouns, partner_pronouns, relationship_status, relationship_length, children, signup_source, ex1_answers, ex2_answers, ex3_answers, intimacy_data, conflict_data'),
       admin.from('partner_sessions').select('invite_code, ex1_answers, ex2_answers'),
     ]);
 
