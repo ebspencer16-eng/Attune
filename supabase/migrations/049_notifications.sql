@@ -55,8 +55,20 @@ create index if not exists notifications_unread_idx
 -- Idempotency. A partner completing an exercise can fire from several paths
 -- (their write, a sync, a cron), and three identical rows in someone's list is
 -- worse than none. Same owner, kind and subject on the same day collapses.
+--
+-- The day has to be computed in a fixed zone. created_at::date on a timestamptz
+-- reads the session's TimeZone setting, which makes it STABLE rather than
+-- IMMUTABLE, and Postgres refuses to index it. AT TIME ZONE 'UTC' pins it, and
+-- that form is immutable.
+--
+-- A stored generated column rather than an index expression, so the value is
+-- visible when debugging why a row did or did not collapse.
+alter table public.notifications
+  add column if not exists created_on date
+  generated always as (((created_at at time zone 'UTC')::date)) stored;
+
 create unique index if not exists notifications_dedupe_idx
-  on public.notifications (owner_id, kind, coalesce(subject_id, ''), (created_at::date));
+  on public.notifications (owner_id, kind, coalesce(subject_id, ''), created_on);
 
 comment on table public.notifications is
   'Per-person in-app alerts. Read state is per owner, not per couple: "your partner finished" belongs to the other partner only.';
