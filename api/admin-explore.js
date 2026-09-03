@@ -18,7 +18,7 @@
 import { createClient } from '@supabase/supabase-js';
 import { checkAdminAuth } from './_lib/admin-auth.js';
 import { calcDimScores, blendedDimScores, axisScores, typeCodeFromAxes, DIM_KEYS } from './_type-engine.js';
-import { personResults, readAccuracy } from './_lib/results.js';
+import { personResults, readAccuracy, ALIGNMENT_THRESHOLD } from './_lib/results.js';
 // Individual type from raw ex1 answers (for invited partners who answered via a
 // partner_session and never created a full profile).
 function typeFromEx1(ans){
@@ -381,9 +381,9 @@ export default async function handler(req) {
         for (const d of Object.keys(DIM_KEYS)) {
           if (_sa[d] == null || _sb[d] == null) continue;
           _scored++;
-          if (Math.abs(_sa[d] - _sb[d]) >= 1) _wide++;
+          if (Math.abs(_sa[d] - _sb[d]) >= ALIGNMENT_THRESHOLD.gap) _wide++;
         }
-        if (_scored) _u.alignment_group = _wide >= 3 ? 'Misaligned' : 'Aligned';
+        if (_scored) _u.alignment_group = _wide >= ALIGNMENT_THRESHOLD.dims ? 'Misaligned' : 'Aligned';
         const mine = readAccuracy(p.ex1_answers, _partnerAns);    // my read of them
         const theirs = readAccuracy(_partnerAns, p.ex1_answers);  // their read of me
         if (mine) {
@@ -400,9 +400,9 @@ export default async function handler(req) {
           for (const d of Object.keys(mine.dimensions || {})) {
             const x = mine.dimensions[d], y = theirs.dimensions[d];
             if (!x || !y) continue;
-            if (x.error >= 1 || y.error >= 1) _mis++;
+            if (x.error >= ALIGNMENT_THRESHOLD.gap || y.error >= ALIGNMENT_THRESHOLD.gap) _mis++;
           }
-          _u.understanding_group = _mis >= 3 ? 'Misunderstood' : 'In tune';
+          _u.understanding_group = _mis >= ALIGNMENT_THRESHOLD.dims ? 'Misunderstood' : 'In tune';
         }
         if (mine && theirs) {
           const mean = (mine.meanError + theirs.meanError) / 2;

@@ -212,3 +212,21 @@ export function coupleResults({ aAnswers, bAnswers, aName = null, bName = null }
     understanding,
   };
 }
+
+/**
+ * Where a gap stops being ordinary variation and starts being a difference
+ * worth naming.
+ *
+ * 1.5 is the 75th percentile of every dimension gap observed across the first
+ * cohort, so "misaligned" means a gap in the top quarter of gaps, in at least
+ * three of the ten dimensions. That is a definition that survives being
+ * explained, unlike a number picked because it produced a pleasing split.
+ *
+ * The previous 1.0 in 3+ flagged 6 of 7 couples, which is labelling rather
+ * than measuring.
+ *
+ * Provisional on a small cohort. The threshold explorer in the admin overview
+ * shows the distribution; reread it once there are thirty or so couples and
+ * check whether 1.5 still sits near the 75th percentile.
+ */
+export const ALIGNMENT_THRESHOLD = { gap: 1.5, dims: 3 };

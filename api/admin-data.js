@@ -33,7 +33,7 @@ import { createClient } from '@supabase/supabase-js';
 import { checkAdminAuth } from './_lib/admin-auth.js';
 import { RESPONSIBILITY_CATEGORIES, LIFE_QUESTIONS } from './_questions.js';
 import { axisScores, typeCodeFromAxes, blendedDimScores } from './_type-engine.js';
-import { personResults, readAccuracy } from './_lib/results.js';
+import { personResults, readAccuracy, ALIGNMENT_THRESHOLD } from './_lib/results.js';
 
 // ── Response aggregates ──────────────────────────────────────────────────────
 // The Responses page charts used to be hardcoded zero arrays: the raw answers
@@ -222,7 +222,7 @@ function buildResponseAggregates(profiles, sessions) {
 
   // ── Headline rates for the overview: how many couples are misaligned, and
   //    how many misunderstand each other. Computed over complete pairs only.
-  const GAP = 1.0, CUTOFF = 3;
+  const GAP = ALIGNMENT_THRESHOLD.gap, CUTOFF = ALIGNMENT_THRESHOLD.dims;
   let misalignedPairs = 0, misunderstoodPairs = 0, ratedPairs = 0, understoodRated = 0;
   // Distribution, so the cutoff can be chosen from the data rather than
   // guessed. gapHist[n] is how many couples have exactly n dimensions at or
@@ -404,8 +404,8 @@ export default async function handler(req) {
         // dimensions. Deliberately coarse and deliberately provisional. See
         // the note in the admin UI: this needs revisiting against a real
         // distribution rather than being treated as settled.
-        const GAP_THRESHOLD = 1.0;
-        const DIM_COUNT_CUTOFF = 3;
+        const GAP_THRESHOLD = ALIGNMENT_THRESHOLD.gap;
+        const DIM_COUNT_CUTOFF = ALIGNMENT_THRESHOLD.dims;
         if (partner?.ex1_answers && p.ex1_answers) {
           const mineScores = calcDimScores(p.ex1_answers);
           const theirScores = calcDimScores(partner.ex1_answers);

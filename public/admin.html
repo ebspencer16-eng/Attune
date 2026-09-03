@@ -437,11 +437,11 @@
         <div class="chart-body"><canvas id="chart-source"></canvas></div>
       </div>
       <div class="chart-card">
-        <div class="chart-head"><div><div class="chart-title">Alignment</div><div class="chart-subtitle">Couples with a 1+ point gap in 3 or more dimensions count as misaligned. Positions, not perception.</div></div></div>
+        <div class="chart-head"><div><div class="chart-title">Alignment</div><div class="chart-subtitle">Couples with a 1.5+ point gap in 3 or more dimensions count as misaligned. Positions, not perception.</div></div></div>
         <div class="chart-body" style="height:230px"><canvas id="regroup-misaligned"></canvas></div><div id="regroup-misaligned-note" style="padding:0 1.4rem 1rem;font-size:.7rem;color:var(--muted);"></div>
       </div>
       <div class="chart-card">
-        <div class="chart-head"><div><div class="chart-title">Understanding</div><div class="chart-subtitle">Couples where either partner reads the other 1+ point wrong in 3 or more dimensions count as misunderstood. Needs Part 2 answers, so the denominator is smaller.</div></div></div>
+        <div class="chart-head"><div><div class="chart-title">Understanding</div><div class="chart-subtitle">Couples where either partner reads the other 1.5+ points wrong in 3 or more dimensions count as misunderstood. Needs Part 2 answers, so the denominator is smaller.</div></div></div>
         <div class="chart-body" style="height:230px"><canvas id="regroup-misunderstood"></canvas></div><div id="regroup-misunderstood-note" style="padding:0 1.4rem 1rem;font-size:.7rem;color:var(--muted);"></div>
       </div>
       <div class="chart-card" style="grid-column:1/-1">
@@ -5327,10 +5327,10 @@ async function renderRegrouped() {
 /**
  * Threshold explorer.
  *
- * The current cutoff (1.0-point gap in 3+ of 10 dimensions) puts 6 of 7
- * couples on the misaligned side, which means it is labelling rather than
- * measuring. This shows how many couples would be flagged at every combination
- * of gap size and dimension count, so the cutoff is chosen from the data.
+ * The cutoff is 1.5 in 3+ of 10 dimensions, set from this grid: 1.5 was the
+ * 75th percentile of all observed gaps, and the previous 1.0 flagged 6 of 7
+ * couples. This shows how many couples each combination would flag, so the
+ * next revision is also chosen from data rather than instinct.
  */
 function renderThresholdGrid(r) {
   const host = document.getElementById('threshold-grid');
