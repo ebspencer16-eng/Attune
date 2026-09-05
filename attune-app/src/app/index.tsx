@@ -1,98 +1,123 @@
-import * as Device from 'expo-device';
-import { Platform, StyleSheet } from 'react-native';
+/**
+ * Home.
+ *
+ * Renders whatever `/api/home` returns and nothing else. Ordering is the
+ * priority engine's job, server-side and covered by 26 tests, so this screen
+ * has no opinion about which card matters most.
+ *
+ * The rule worth stating: do NOT branch on `kind` for layout beyond an accent.
+ * Every card is `{ id, kind, title, body, cta, deepLink }`, so adding a card
+ * kind server-side should never require an app release. A switch statement
+ * here would quietly make that untrue.
+ */
+
+import { useCallback, useEffect, useState } from 'react';
+import { Pressable, RefreshControl, ScrollView, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useRouter } from 'expo-router';
 
-import { AnimatedIcon } from '@/components/animated-icon';
-import { HintRow } from '@/components/hint-row';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { WebBadge } from '@/components/web-badge';
-import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
+import { fetchHome } from '@/api/client';
+import type { ApiError, HomeCard, HomeResponse } from '@/api/client';
+import { ScreenError, ScreenLoading } from '@/components/screen-states';
+import { Colors, MaxContentWidth, Radius, Spacing, Type } from '@/constants/attune-theme';
 
-function getDevMenuHint() {
-  if (Platform.OS === 'web') {
-    return <ThemedText type="small">use browser devtools</ThemedText>;
-  }
-  if (Device.isDevice) {
-    return (
-      <ThemedText type="small">
-        shake device or press <ThemedText type="code">m</ThemedText> in terminal
-      </ThemedText>
-    );
-  }
-  const shortcut = Platform.OS === 'android' ? 'cmd+m (or ctrl+m)' : 'cmd+d';
-  return (
-    <ThemedText type="small">
-      press <ThemedText type="code">{shortcut}</ThemedText>
-    </ThemedText>
-  );
-}
+const c = Colors.light;
 
 export default function HomeScreen() {
+  const router = useRouter();
+  const [data, setData] = useState<HomeResponse | null>(null);
+  const [error, setError] = useState<ApiError | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+
+  const load = useCallback(async () => {
+    const res = await fetchHome();
+    if (res.ok) { setData(res.data); setError(null); }
+    else { setError(res.error); }
+    setLoading(false);
+    setRefreshing(false);
+  }, []);
+
+  useEffect(() => { load(); }, [load]);
+
+  const open = (card: HomeCard) => {
+    if (card.disabled || !card.deepLink) return;
+    router.push(card.deepLink as never);
+  };
+
+  if (loading) return <Shell><ScreenLoading label="Getting your dashboard" /></Shell>;
+
+  // Stale-while-error: with data already in hand, keep showing it and let
+  // pull-to-refresh retry. Replacing a working screen with an error because a
+  // background refresh failed is worse than the failure.
+  if (error && !data) {
+    return <Shell><ScreenError error={error} onRetry={() => { setLoading(true); load(); }} /></Shell>;
+  }
+  if (!data) return <Shell><ScreenLoading /></Shell>;
+
   return (
-    <ThemedView style={styles.container}>
-      <SafeAreaView style={styles.safeArea}>
-        <ThemedView style={styles.heroSection}>
-          <AnimatedIcon />
-          <ThemedText type="title" style={styles.title}>
-            Welcome to&nbsp;Expo
-          </ThemedText>
-        </ThemedView>
+    <Shell>
+      <ScrollView
+        contentContainerStyle={{ padding: Spacing.xl, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center' }}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); load(); }} tintColor={c.accentQuiet} />
+        }>
+        <Text style={{ ...Type.hero, color: c.textStrong, marginBottom: Spacing.xl }}>
+          {data.greeting}
+        </Text>
 
-        <ThemedText type="code" style={styles.code}>
-          get started
-        </ThemedText>
+        {data.primary ? <Card card={data.primary} primary onPress={() => open(data.primary)} /> : null}
 
-        <ThemedView type="backgroundElement" style={styles.stepContainer}>
-          <HintRow
-            title="Try editing"
-            hint={<ThemedText type="code">src/app/index.tsx</ThemedText>}
-          />
-          <HintRow title="Dev tools" hint={getDevMenuHint()} />
-          <HintRow
-            title="Fresh start"
-            hint={<ThemedText type="code">npm run reset-project</ThemedText>}
-          />
-        </ThemedView>
+        {data.secondary?.length ? (
+          <View style={{ marginTop: Spacing.lg, gap: Spacing.md }}>
+            {data.secondary.map((s) => <Card key={s.id} card={s} onPress={() => open(s)} />)}
+          </View>
+        ) : null}
 
-        {Platform.OS === 'web' && <WebBadge />}
-      </SafeAreaView>
-    </ThemedView>
+        {error ? (
+          <Text style={{ ...Type.small, color: c.textMuted, marginTop: Spacing.xl }}>
+            Showing what we last loaded. Pull down to refresh.
+          </Text>
+        ) : null}
+      </ScrollView>
+    </Shell>
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    flexDirection: 'row',
-  },
-  safeArea: {
-    flex: 1,
-    paddingHorizontal: Spacing.four,
-    alignItems: 'center',
-    gap: Spacing.three,
-    paddingBottom: BottomTabInset + Spacing.three,
-    maxWidth: MaxContentWidth,
-  },
-  heroSection: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    flex: 1,
-    paddingHorizontal: Spacing.four,
-    gap: Spacing.four,
-  },
-  title: {
-    textAlign: 'center',
-  },
-  code: {
-    textTransform: 'uppercase',
-  },
-  stepContainer: {
-    gap: Spacing.three,
-    alignSelf: 'stretch',
-    paddingHorizontal: Spacing.three,
-    paddingVertical: Spacing.four,
-    borderRadius: Spacing.four,
-  },
-});
+function Shell({ children }: { children: React.ReactNode }) {
+  return (
+    <SafeAreaView style={{ flex: 1, backgroundColor: c.background }} edges={['top']}>
+      {children}
+    </SafeAreaView>
+  );
+}
+
+function Card({ card, primary, onPress }: { card: HomeCard; primary?: boolean; onPress: () => void }) {
+  const dim = !!card.disabled;
+  return (
+    <Pressable
+      onPress={onPress}
+      disabled={dim}
+      style={{
+        backgroundColor: c.surface,
+        borderColor: dim ? c.border : primary ? c.accent : c.border,
+        borderWidth: 1,
+        // The primary card takes a left rule in the accent rather than a
+        // heavier border all round: emphasis without shouting.
+        borderLeftWidth: primary ? 4 : 1,
+        borderRadius: Radius.lg,
+        padding: Spacing.lg,
+        opacity: dim ? 0.55 : 1,
+      }}>
+      <Text style={{ ...Type.cardTitle, color: c.textStrong }}>{card.title}</Text>
+      {card.body ? (
+        <Text style={{ ...Type.body, color: c.textMuted, marginTop: Spacing.xs }}>{card.body}</Text>
+      ) : null}
+      {card.cta && !dim ? (
+        <Text style={{ ...Type.small, color: c.accent, fontWeight: '700', marginTop: Spacing.md }}>
+          {card.cta}
+        </Text>
+      ) : null}
+    </Pressable>
+  );
+}
