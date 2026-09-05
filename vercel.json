@@ -299,7 +299,14 @@
   "headers": [
     { "source": "/assets/(.*)", "headers": [{ "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }] },
     { "source": "/app", "headers": [{ "key": "Cache-Control", "value": "no-cache, must-revalidate" }] },
-    { "source": "/app/(.*)", "headers": [{ "key": "Cache-Control", "value": "no-cache, must-revalidate" }] }
+    { "source": "/app/(.*)", "headers": [{ "key": "Cache-Control", "value": "no-cache, must-revalidate" }] },
+    {
+      "source": "/.well-known/apple-app-site-association",
+      "headers": [
+        { "key": "Content-Type", "value": "application/json" },
+        { "key": "Cache-Control", "value": "no-cache, must-revalidate" }
+      ]
+    }
   ],
   "buildCommand": "node scripts/check-admin-html.mjs && node scripts/check-workbook-budget.mjs && node scripts/entitlement_matrix_test.mjs && npx vite build",
   "outputDirectory": "dist",

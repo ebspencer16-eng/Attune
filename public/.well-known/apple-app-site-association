@@ -1,0 +1,35 @@
+{
+  "applinks": {
+    "details": [
+      {
+        "appIDs": ["HX5FX68K6L.com.attunerelationships.app"],
+        "components": [
+          {
+            "/": "/setup*",
+            "comment": "Account setup from the purchase email. The token in the query string is claimed by the app, so a buyer who has installed it lands directly in profile setup instead of the browser."
+          },
+          {
+            "/": "/join*",
+            "comment": "Partner invite. Same reasoning: the invitee should land in the app if they have it."
+          },
+          {
+            "/": "/app*",
+            "comment": "Anything under /app is the product itself, so it belongs in the app when one is installed."
+          },
+          {
+            "/": "/results*",
+            "comment": "Results deep links, including the ?s= section anchors used by notifications."
+          },
+          {
+            "/": "/*",
+            "exclude": true,
+            "comment": "Everything else stays in the browser. Marketing, offerings, checkout and the FAQ are web pages, and checkout in particular MUST NOT open in the app: an app that hands a cart to an external payment page is what Apple rejects for."
+          }
+        ]
+      }
+    ]
+  },
+  "webcredentials": {
+    "apps": ["HX5FX68K6L.com.attunerelationships.app"]
+  }
+}
