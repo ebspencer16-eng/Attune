@@ -21,7 +21,7 @@ const money = (n) => `$${(Number(n) || 0).toFixed(2)}`;
 const pct = (num, den) => den > 0 ? `${Math.round((num / den) * 100)}%` : '—';
 
 export default async function handler(req) {
-  const auth = req.headers.get('authorization');
+  const auth = req.headers.get('authorization') || req.headers.get('Authorization');
   const secret = process.env.CRON_SECRET;
   // Fail closed: without CRON_SECRET set, an unauthenticated caller could
   // trigger this endpoint at will. Vercel Cron sends Authorization: Bearer

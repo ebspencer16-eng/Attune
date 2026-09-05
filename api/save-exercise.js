@@ -83,7 +83,7 @@ export default async function handler(req) {
   // If the caller passed a session token, verify it and use the user id
   // from the token (NOT from the body — never trust client-supplied IDs
   // when a token is present).
-  const authHeader = req.headers.get('authorization') || '';
+  const authHeader = req.headers.get('authorization') || req.headers.get('Authorization') || '';
   const accessToken = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : '';
 
   let resolvedUserId = null;

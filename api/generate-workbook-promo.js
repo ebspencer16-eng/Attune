@@ -47,7 +47,7 @@ export default async function handler(req) {
   // could POST an arbitrary address and have us email it (from our verified
   // sending domain) and mint a promo code bound to it.
   {
-    const authHeader = req.headers.get('authorization') || '';
+    const authHeader = req.headers.get('authorization') || req.headers.get('Authorization') || '';
     const token = authHeader.replace(/^Bearer\s+/i, '').trim();
     if (!token) {
       return new Response(JSON.stringify({ error: 'Authentication required' }), {

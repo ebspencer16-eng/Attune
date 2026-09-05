@@ -35,7 +35,7 @@ function extractText(row) {
 }
 
 export default async function handler(req) {
-  const auth = req.headers.get('authorization');
+  const auth = req.headers.get('authorization') || req.headers.get('Authorization');
   const secret = process.env.CRON_SECRET;
   // Fail closed (see cron-beta-digest).
   if (!secret) return new Response('Cron not configured', { status: 500 });

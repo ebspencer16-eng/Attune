@@ -14,7 +14,7 @@
 export const config = { runtime: 'edge' };
 
 export default async function handler(req) {
-  const auth = req.headers.get('authorization');
+  const auth = req.headers.get('authorization') || req.headers.get('Authorization');
   const secret = process.env.CRON_SECRET;
   // Fail closed. This endpoint sends email to real users; without CRON_SECRET
   // set, anyone could trigger a check-in email blast by hitting the URL.

@@ -26,7 +26,8 @@ function nudge2Html(name) {
 export default async function handler(req) {
   const secret = process.env.CRON_SECRET;
   if (!secret) return new Response('Cron not configured', { status: 500 });
-  if (req.headers.get('authorization') !== `Bearer ${secret}`) return new Response('Unauthorized', { status: 401 });
+  const _auth = req.headers.get('authorization') || req.headers.get('Authorization');
+  if (_auth !== `Bearer ${secret}`) return new Response('Unauthorized', { status: 401 });
   const url = process.env.SUPABASE_URL;
   const key = process.env.SUPABASE_SERVICE_KEY;
   const resendKey = process.env.RESEND_API_KEY;

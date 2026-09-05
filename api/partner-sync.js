@@ -127,7 +127,7 @@ async function handlePartnerSync(req) {
       }
 
       let authorized = false;
-      const authHeader = req.headers.get('authorization') || '';
+      const authHeader = req.headers.get('authorization') || req.headers.get('Authorization') || '';
       const token = authHeader.replace(/^Bearer\s+/i, '').trim();
       if (token) {
         try {
@@ -337,7 +337,7 @@ async function handlePartnerSync(req) {
       // We accept the user's auth token in the Authorization header,
       // validate it, then confirm their profile.partner_profile_id matches
       // the requested UUID. Only then return the data.
-      const authHeader = req.headers.get('authorization') || '';
+      const authHeader = req.headers.get('authorization') || req.headers.get('Authorization') || '';
       const accessToken = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : '';
       if (!accessToken) {
         return new Response(JSON.stringify({ ok: false, error: 'Authentication required' }), { status: 401, headers: CORS });

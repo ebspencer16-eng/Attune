@@ -33,7 +33,7 @@ export default async function handler(req) {
   const admin = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY);
 
   // ── Verify the caller actually owns the account they're deleting ─────────
-  const authHeader = req.headers.get('authorization') || '';
+  const authHeader = req.headers.get('authorization') || req.headers.get('Authorization') || '';
   const token = authHeader.replace(/^Bearer\s+/i, '').trim();
   if (!token) return err(401, 'Missing access token');
 

@@ -33,7 +33,7 @@ export default async function handler(req) {
   const anonKey = process.env.SUPABASE_ANON_KEY || process.env.VITE_SUPABASE_ANON_KEY || serviceKey;
   if (!supabaseUrl || !serviceKey) return json({ ok: false, error: 'Server not configured' }, 500);
 
-  const token = (req.headers.get('authorization') || '').replace(/^Bearer\s+/i, '').trim();
+  const token = (req.headers.get('authorization') || req.headers.get('Authorization') || '').replace(/^Bearer\s+/i, '').trim();
   if (!token) return json({ ok: false, error: 'missing auth token' }, 401);
 
   try {
