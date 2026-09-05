@@ -55,7 +55,12 @@ export function isSignedIn(): boolean {
  */
 export function initSession() {
   configureApi({
-    baseUrl: 'https://attune-relationships.com',
+    // www, not the apex. The apex 307-redirects to www, and React Native's
+    // fetch does not carry the Authorization header across a redirect, so
+    // every request arrived with no credentials and the API correctly
+    // answered "missing auth token". Browsers follow the redirect and resend
+    // the header, which is why the website never showed this.
+    baseUrl: 'https://www.attune-relationships.com',
     getToken,
   });
 }

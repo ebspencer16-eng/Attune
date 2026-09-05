@@ -13,7 +13,9 @@
       "supportsTablet": false,
       "associatedDomains": [
         "applinks:attune-relationships.com",
-        "webcredentials:attune-relationships.com"
+        "applinks:www.attune-relationships.com",
+        "webcredentials:attune-relationships.com",
+        "webcredentials:www.attune-relationships.com"
       ]
     },
     "android": {
