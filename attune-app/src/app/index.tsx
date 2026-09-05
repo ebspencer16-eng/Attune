@@ -56,10 +56,7 @@ export default function HomeScreen() {
         <ScreenError
           error={error}
           onRetry={() => { setLoading(true); load(); }}
-          // Sign-in is not built yet, so the button retries rather than
-          // pretending to route somewhere. A button that goes nowhere is
-          // worse than one that does the honest thing.
-          onSignIn={() => { setLoading(true); load(); }}
+          onSignIn={() => router.push('/sign-in')}
         />
       </Shell>
     );
