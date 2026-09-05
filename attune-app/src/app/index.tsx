@@ -51,7 +51,18 @@ export default function HomeScreen() {
   // pull-to-refresh retry. Replacing a working screen with an error because a
   // background refresh failed is worse than the failure.
   if (error && !data) {
-    return <Shell><ScreenError error={error} onRetry={() => { setLoading(true); load(); }} /></Shell>;
+    return (
+      <Shell>
+        <ScreenError
+          error={error}
+          onRetry={() => { setLoading(true); load(); }}
+          // Sign-in is not built yet, so the button retries rather than
+          // pretending to route somewhere. A button that goes nowhere is
+          // worse than one that does the honest thing.
+          onSignIn={() => { setLoading(true); load(); }}
+        />
+      </Shell>
+    );
   }
   if (!data) return <Shell><ScreenLoading /></Shell>;
 
