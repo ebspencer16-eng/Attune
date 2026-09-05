@@ -68,6 +68,8 @@ export type HomeCard = {
 };
 
 export type HomeResponse = {
+  /** Flat list of add-on keys this person owns, derived server-side. */
+  owned?: string[];
   greeting: string;
   primary: HomeCard;
   secondary: HomeCard[];

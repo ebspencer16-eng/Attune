@@ -49,6 +49,7 @@ export default async function handler(req) {
       'id', 'name', 'pronouns', 'partner_profile_id', 'pkg',
       'ex1_answers', 'ex2_answers', 'ex3_answers', 'intimacy_data',
       'addon_reflection', 'addon_budget', 'addon_checklist', 'addon_intimacy',
+      'addon_conflict', 'addon_workbook', 'conflict_data',
       'budget_data', 'checklist_data', 'profile_setup_complete',
       'results_last_opened_at', 'partner_nudged_at', 'feedback_given_at',
     ].join(',');
@@ -67,14 +68,34 @@ export default async function handler(req) {
     // grant them on other packages. Exercises 1 and 2 are in every package.
     const pkg = me.pkg || 'core';
     const ownsReflection = pkg === 'premium' || pkg === 'anniversary' || !!me.addon_reflection;
-    const ownsIntimacy = pkg === 'premium' || !!me.addon_intimacy;
+    // Premium bundles Conflict Patterns, not Physical Intimacy. This endpoint
+    // still had the old rule, so a premium buyer was told they owned intimacy
+    // and never told they owned conflict.
+    const ownsIntimacy = !!me.addon_intimacy;
+    const ownsConflict = pkg === 'premium' || !!me.addon_conflict;
+    const ownsBudget = pkg === 'premium' || pkg === 'newlywed' || !!me.addon_budget;
+    const ownsChecklist = pkg === 'newlywed' || !!me.addon_checklist;
+    const ownsWorkbook = pkg === 'premium' || !!me.addon_workbook;
 
     const exercises = {
       ex1: { owned: true, mine: has(me.ex1_answers), theirs: has(partner?.ex1_answers) },
       ex2: { owned: true, mine: has(me.ex2_answers), theirs: has(partner?.ex2_answers) },
       ex3: { owned: ownsReflection, mine: has(me.ex3_answers), theirs: has(partner?.ex3_answers) },
       intimacy: { owned: ownsIntimacy, mine: has(me.intimacy_data?.answers), theirs: has(partner?.intimacy_data?.answers) },
+      conflict: { owned: ownsConflict, mine: has(me.conflict_data?.answers), theirs: has(partner?.conflict_data?.answers) },
     };
+
+    // A flat list of what this person owns, for surfaces that ask "what do
+    // they have" rather than "how far through are they". Derived here so the
+    // app never works it out for itself.
+    const owned = [
+      ownsReflection && 'reflection',
+      ownsIntimacy && 'intimacy',
+      ownsConflict && 'conflict',
+      ownsBudget && 'budget',
+      ownsChecklist && 'checklist',
+      ownsWorkbook && 'workbook',
+    ].filter(Boolean);
     const resultsReady = exercises.ex1.mine && exercises.ex1.theirs && exercises.ex2.mine && exercises.ex2.theirs;
 
     // The revisit anchor: the couple's widest gap, read from the stored results
@@ -140,9 +161,10 @@ export default async function handler(req) {
       greeting: greeting({ now: state.now, firstName: state.firstName, returning: !!me.results_last_opened_at }),
       primary,
       secondary,
+      owned,
       // Tab badges: what each tab should show as outstanding.
       badges: {
-        toolbox: ['ex1', 'ex2', 'ex3', 'intimacy'].filter(k => exercises[k].owned && !exercises[k].mine).length
+        toolbox: ['ex1', 'ex2', 'ex3', 'intimacy', 'conflict'].filter(k => exercises[k].owned && !exercises[k].mine).length
                + (state.resources.budget.owned && !state.resources.budget.complete ? 1 : 0)
                + (state.resources.checklist.owned && !state.resources.checklist.complete ? 1 : 0),
         insights: resultsReady && !me.results_last_opened_at ? 1 : 0,
