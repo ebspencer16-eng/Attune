@@ -12,7 +12,7 @@
  * when the software is working exactly as designed.
  */
 
-import { ActivityIndicator, Pressable, Text, View } from 'react-native';
+import { ActivityIndicator, Image, Pressable, Text, View } from 'react-native';
 import type { ApiError } from '@/api/client';
 import { Colors, MaxContentWidth, Radius, Spacing, Type } from '@/constants/attune-theme';
 
@@ -62,18 +62,10 @@ export function ScreenError({
 
   return (
     <Centre>
-      {/* A quiet mark rather than a warning icon. This is a normal moment in
-          the life of an app, not an alarm. */}
-      <View
-        style={{
-          width: 44, height: 44, borderRadius: Radius.pill,
-          borderWidth: 1, borderColor: c.border, backgroundColor: c.surface,
-          alignItems: 'center', justifyContent: 'center', marginBottom: Spacing.lg,
-        }}>
-        <Text style={{ ...Type.title, color: c.accentQuiet, lineHeight: 26 }}>
-          {error.kind === 'offline' ? '\u2601' : error.kind === 'unauthorized' ? '\u2022' : '\u203D'}
-        </Text>
-      </View>
+      {/* The Attune mark, not an invented glyph. A dot in a circle reads as a
+          rendering bug, and this is the moment someone is least sure anything
+          is working. */}
+      <AttuneMark />
 
       <Text style={{ ...Type.title, color: c.textStrong, textAlign: 'center' }}>{copy.title}</Text>
       <Text
@@ -95,6 +87,22 @@ export function ScreenError({
         </Pressable>
       ) : null}
     </Centre>
+  );
+}
+
+/**
+ * The product mark, used wherever a screen needs to identify itself.
+ *
+ * Rendered from a PNG rather than SVG so it needs no extra dependency, at 2x
+ * and 3x so it stays crisp on every device.
+ */
+export function AttuneMark({ size = 52 }: { size?: number }) {
+  return (
+    <Image
+      source={require('@/assets/images/attune-mark.png')}
+      style={{ width: size, height: size * (64 / 88), marginBottom: Spacing.lg }}
+      resizeMode="contain"
+    />
   );
 }
 
