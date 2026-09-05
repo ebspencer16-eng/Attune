@@ -30,12 +30,23 @@ comment on column public.profiles.addon_checklist is
 -- Anyone whose order includes the checklist should have the flag on their
 -- profile, matching how the other add-ons behave. Without this, existing
 -- customers who bought Starting Out would show the column as false.
+-- Matched on user_id, and on buyer_email for older orders placed before the
+-- account existed. The column is buyer_email, not email: orders records who
+-- paid, which is not always who ends up owning the profile.
 update public.profiles p
    set addon_checklist = true
   from public.orders o
  where o.addon_checklist = true
-   and (o.user_id = p.id or lower(o.email) = lower((select email from auth.users u where u.id = p.id)))
-   and p.addon_checklist = false;
+   and p.addon_checklist = false
+   and (
+     o.user_id = p.id
+     -- The email branch requires a non-empty address on both sides, or two
+     -- nulls would match every profile against every order.
+     or (
+       coalesce(o.buyer_email, '') <> ''
+       and lower(o.buyer_email) = lower((select u.email from auth.users u where u.id = p.id))
+     )
+   );
 
 -- ── Verification ───────────────────────────────────────────────────────────
 -- Expect column_exists = 1. flagged is how many profiles the backfill set.
