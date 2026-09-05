@@ -16,13 +16,24 @@ import { readFileSync, readdirSync } from 'fs';
 const apiDir = new URL('../api/', import.meta.url);
 const migDir = new URL('../supabase/migrations/', import.meta.url);
 
-// Every column any migration adds to profiles.
+// Every column any migration adds TO PROFILES specifically.
+//
+// The first version of this check collected column names from every table,
+// which is how it passed while addon_checklist existed only on orders. A
+// column name is not a column; it belongs to a table, and the whole point of
+// this gate is that profiles has it.
 const known = new Set();
 for (const f of readdirSync(migDir).filter((f) => f.endsWith('.sql'))) {
   const sql = readFileSync(new URL(f, migDir), 'utf8');
-  // `add column [if not exists] name`, and `name type` inside a create table.
-  for (const m of sql.matchAll(/add column\s+(?:if not exists\s+)?([a-z0-9_]+)/gi)) known.add(m[1]);
-  const create = sql.match(/create table[^(]*profiles\s*\(([\s\S]*?)\n\);/i);
+
+  // `alter table ... profiles ... add column x, add column y` up to the
+  // statement terminator, so multi-column alters are covered.
+  for (const stmt of sql.split(';')) {
+    if (!/alter\s+table\s+(public\.)?profiles\b/i.test(stmt)) continue;
+    for (const m of stmt.matchAll(/add column\s+(?:if not exists\s+)?([a-z0-9_]+)/gi)) known.add(m[1]);
+  }
+
+  const create = sql.match(/create table[^(]*\bprofiles\s*\(([\s\S]*?)\n\);/i);
   if (create) for (const m of create[1].matchAll(/^\s*([a-z0-9_]+)\s+[a-z]/gim)) known.add(m[1]);
 }
 
