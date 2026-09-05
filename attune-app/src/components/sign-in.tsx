@@ -17,7 +17,6 @@ import {
   ScrollView, Text, TextInput, View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useRouter } from 'expo-router';
 
 import { isAuthConfigured, signIn } from '@/api/auth';
 import { AttuneMark } from '@/components/screen-states';
@@ -25,8 +24,7 @@ import { Colors, MaxContentWidth, Radius, Spacing, Type } from '@/constants/attu
 
 const c = Colors.light;
 
-export default function SignInScreen() {
-  const router = useRouter();
+export default function SignIn({ onSignedIn }: { onSignedIn: () => void }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [busy, setBusy] = useState(false);
@@ -41,9 +39,9 @@ export default function SignInScreen() {
     const res = await signIn(email, password);
     setBusy(false);
     if (res.ok) {
-      // replace, not push: signing in should not leave a back route to the
-      // sign-in screen behind the dashboard.
-      router.replace('/');
+      // Rendered inline by the home screen, so signing in just reloads it.
+      // No navigation means no route to get wrong.
+      onSignedIn();
     } else {
       setError(res.message);
     }
@@ -122,10 +120,15 @@ export default function SignInScreen() {
           ) : null}
 
           {!isAuthConfigured() ? (
-            <Text style={{ ...Type.small, color: c.textMuted, marginTop: Spacing.md }}>
-              Sign-in is not configured on this build yet.
+            <Text style={{ ...Type.small, color: '#C2410C', marginTop: Spacing.md }}>
+              This build has no Supabase config. Check attune-app/.env, then restart
+              with: npx expo start --ios --clear
             </Text>
-          ) : null}
+          ) : (
+            <Text style={{ ...Type.small, color: c.textMuted, marginTop: Spacing.md }}>
+              Connected to Attune.
+            </Text>
+          )}
 
           <Pressable
             onPress={submit}

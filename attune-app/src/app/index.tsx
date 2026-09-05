@@ -19,6 +19,7 @@ import { useRouter } from 'expo-router';
 import { fetchHome } from '@/api/client';
 import type { ApiError, HomeCard, HomeResponse } from '@/api/client';
 import { ScreenError, ScreenLoading } from '@/components/screen-states';
+import SignIn from '@/components/sign-in';
 import { Colors, MaxContentWidth, Radius, Spacing, Type } from '@/constants/attune-theme';
 
 const c = Colors.light;
@@ -50,14 +51,17 @@ export default function HomeScreen() {
   // Stale-while-error: with data already in hand, keep showing it and let
   // pull-to-refresh retry. Replacing a working screen with an error because a
   // background refresh failed is worse than the failure.
+  if (error?.kind === 'unauthorized') {
+    return (
+      <Shell>
+        <SignIn onSignedIn={() => { setLoading(true); load(); }} />
+      </Shell>
+    );
+  }
   if (error && !data) {
     return (
       <Shell>
-        <ScreenError
-          error={error}
-          onRetry={() => { setLoading(true); load(); }}
-          onSignIn={() => router.push('/sign-in')}
-        />
+        <ScreenError error={error} onRetry={() => { setLoading(true); load(); }} />
       </Shell>
     );
   }
