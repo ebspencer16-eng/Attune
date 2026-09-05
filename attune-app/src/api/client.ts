@@ -17,7 +17,7 @@ export type ApiResult<T> =
 
 export type ApiError =
   | { kind: 'offline' }
-  | { kind: 'unauthorized' }
+  | { kind: 'unauthorized'; detail?: string }
   | { kind: 'not_found' }
   | { kind: 'server'; status: number; message?: string };
 
@@ -88,7 +88,7 @@ export function configureApi(opts: { baseUrl?: string; getToken: () => Promise<s
 
 async function request<T>(path: string, init: RequestInit = {}): Promise<ApiResult<T>> {
   const token = await getToken();
-  if (!token) return { ok: false, error: { kind: 'unauthorized' } };
+  if (!token) return { ok: false, error: { kind: 'unauthorized', detail: 'no token stored' } };
 
   let res: Response;
   try {
@@ -103,7 +103,13 @@ async function request<T>(path: string, init: RequestInit = {}): Promise<ApiResu
     return { ok: false, error: { kind: 'offline' } };
   }
 
-  if (res.status === 401) return { ok: false, error: { kind: 'unauthorized' } };
+  if (res.status === 401) {
+    // Read the body: the endpoint distinguishes a missing token from an
+    // invalid one, and those need different fixes.
+    let detail = 'server returned 401';
+    try { const b = await res.json(); if (b?.error) detail = String(b.error); } catch { /* no body */ }
+    return { ok: false, error: { kind: 'unauthorized', detail } };
+  }
   if (res.status === 404) return { ok: false, error: { kind: 'not_found' } };
   if (!res.ok) return { ok: false, error: { kind: 'server', status: res.status } };
 

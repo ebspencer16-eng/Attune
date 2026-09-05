@@ -54,7 +54,13 @@ export default function HomeScreen() {
   if (error?.kind === 'unauthorized') {
     return (
       <Shell>
-        <SignIn onSignedIn={() => { setLoading(true); load(); }} />
+        <SignIn
+          onSignedIn={() => { setLoading(true); load(); }}
+          // Shown only when a sign-in appeared to work and the very next call
+          // still came back unauthorized. That combination means the token is
+          // being rejected rather than missing, which is a different problem.
+          rejectedReason={error.detail}
+        />
       </Shell>
     );
   }

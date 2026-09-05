@@ -24,7 +24,7 @@ import { Colors, MaxContentWidth, Radius, Spacing, Type } from '@/constants/attu
 
 const c = Colors.light;
 
-export default function SignIn({ onSignedIn }: { onSignedIn: () => void }) {
+export default function SignIn({ onSignedIn, rejectedReason }: { onSignedIn: () => void; rejectedReason?: string }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [busy, setBusy] = useState(false);
@@ -117,6 +117,15 @@ export default function SignIn({ onSignedIn }: { onSignedIn: () => void }) {
 
           {error ? (
             <Text style={{ ...Type.small, color: '#C2410C', marginTop: Spacing.md }}>{error}</Text>
+          ) : null}
+
+          {/* Signed in, but the next request was still refused. Naming the
+              server's reason turns "it sent me back to sign-in" into something
+              diagnosable without another round trip. */}
+          {rejectedReason && rejectedReason !== 'no token stored' ? (
+            <Text style={{ ...Type.small, color: '#C2410C', marginTop: Spacing.md }}>
+              Signed in, but Attune refused the session: {rejectedReason}
+            </Text>
           ) : null}
 
           {!isAuthConfigured() ? (
