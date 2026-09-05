@@ -29,6 +29,10 @@ import {
 const c = Colors.light;
 const SITE = 'https://www.attune-relationships.com';
 
+/** The shelves, matching practice.html so the web and app agree. */
+const CATEGORIES = ['All', 'Getting Started', "When It's Difficult", 'Understanding Each Other', 'Methodology'] as const;
+type Category = (typeof CATEGORIES)[number];
+
 /**
  * Everything purchasable, with the capability that grants it.
  *
@@ -50,6 +54,7 @@ export default function ResourcesScreen() {
   const [posts, setPosts] = useState<PostSummary[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [category, setCategory] = useState<Category>('All');
 
   const load = useCallback(async () => {
     const [h, p] = await Promise.all([fetchHome(), fetchPosts()]);
@@ -69,6 +74,12 @@ export default function ResourcesScreen() {
   const owned = CATALOGUE.filter((r) => ownedKeys.has(r.key));
   const more = CATALOGUE.filter((r) => !ownedKeys.has(r.key));
 
+  // Posts carry `category` when the author set one. Anything uncategorised
+  // still shows under All, so a missing field never hides a piece.
+  const visible = category === 'All'
+    ? posts
+    : posts.filter((p) => p.category === category);
+
   return (
     <Shell>
       <ScrollView
@@ -81,7 +92,9 @@ export default function ResourcesScreen() {
 
           {owned.length ? (
             <>
-              <Text style={{ ...Type.eyebrow, color: c.textMuted, marginBottom: Spacing.md }}>Yours</Text>
+              <Text style={{ ...Type.eyebrow, color: c.textMuted, marginBottom: Spacing.md }}>
+                Included with your package
+              </Text>
               {/* Wraps to as many rows as it needs: two up at phone widths. */}
               <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.md, marginBottom: Spacing.xxl }}>
                 {owned.map((r) => <OwnedTile key={r.key} item={r} />)}
@@ -92,29 +105,74 @@ export default function ResourcesScreen() {
 
         {more.length ? (
           <>
-            <Text
+            <View
               style={{
-                ...Type.eyebrow, color: c.textMuted,
+                flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
                 paddingHorizontal: Spacing.xl, marginBottom: Spacing.md,
               }}>
-              Explore more resources
-            </Text>
+              <Text style={{ ...Type.eyebrow, color: c.textMuted }}>Explore more resources</Text>
+              {/* Says it outright. The fade alone is a hint people miss, and a
+                  row nobody realises is scrollable is a row half seen. */}
+              <Text style={{ ...Type.small, color: c.textMuted }}>Swipe {'\u203A'}</Text>
+            </View>
             <EdgeFadedRow width={width}>
               {more.map((r) => <ExploreTile key={r.key} item={r} />)}
             </EdgeFadedRow>
           </>
         ) : null}
 
-        <View style={{ paddingHorizontal: Spacing.xl, marginTop: Spacing.xxl, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center' }}>
-          <Text style={{ ...Type.eyebrow, color: c.textMuted, marginBottom: Spacing.md }}>In Practice</Text>
+        <View style={{ marginTop: Spacing.xxl }}>
+          <View style={{ paddingHorizontal: Spacing.xl, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center' }}>
+            <Text style={{ ...Type.eyebrow, color: c.textMuted, marginBottom: Spacing.md }}>In Practice</Text>
+          </View>
+
           {posts.length ? (
-            <View style={{ backgroundColor: c.surface, borderColor: c.border, borderWidth: 1, borderRadius: Radius.lg, overflow: 'hidden' }}>
-              {posts.slice(0, 6).map((p, i) => <PostRow key={p.id} post={p} first={i === 0} />)}
-            </View>
+            <>
+              {/* Same four categories as practice.html, so someone who reads on
+                  the web finds the same shelves here. 'All' first and selected,
+                  because most people are browsing rather than searching. */}
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={{ paddingHorizontal: Spacing.xl, gap: Spacing.sm, paddingBottom: Spacing.md }}>
+                {CATEGORIES.map((cat) => {
+                  const on = cat === category;
+                  return (
+                    <Pressable
+                      key={cat}
+                      onPress={() => setCategory(cat)}
+                      style={{
+                        paddingVertical: Spacing.sm, paddingHorizontal: Spacing.lg,
+                        borderRadius: Radius.pill,
+                        backgroundColor: on ? c.textStrong : c.surface,
+                        borderColor: on ? c.textStrong : c.border, borderWidth: 1,
+                      }}>
+                      <Text style={{ ...Type.small, fontWeight: '700', color: on ? Palette.white : c.textMuted }}>
+                        {cat}
+                      </Text>
+                    </Pressable>
+                  );
+                })}
+              </ScrollView>
+
+              <View style={{ paddingHorizontal: Spacing.xl, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center' }}>
+                {visible.length ? (
+                  <View style={{ backgroundColor: c.surface, borderColor: c.border, borderWidth: 1, borderRadius: Radius.lg, overflow: 'hidden' }}>
+                    {visible.map((p, i) => <PostRow key={p.id} post={p} first={i === 0} />)}
+                  </View>
+                ) : (
+                  <Text style={{ ...Type.body, color: c.textMuted }}>
+                    Nothing in {category.toLowerCase()} yet.
+                  </Text>
+                )}
+              </View>
+            </>
           ) : (
-            <Text style={{ ...Type.body, color: c.textMuted }}>
-              Nothing published yet. New pieces will appear here.
-            </Text>
+            <View style={{ paddingHorizontal: Spacing.xl }}>
+              <Text style={{ ...Type.body, color: c.textMuted }}>
+                Nothing published yet. New pieces will appear here.
+              </Text>
+            </View>
           )}
         </View>
       </ScrollView>
@@ -145,7 +203,10 @@ function EdgeFadedRow({ children, width }: { children: React.ReactNode; width: n
         horizontal
         showsHorizontalScrollIndicator={false}
         decelerationRate="fast"
-        contentContainerStyle={{ paddingHorizontal: Spacing.xl, gap: Spacing.md }}>
+        // paddingRight is deliberately short of the left inset so the last
+        // tile sits partly under the fade. A row that ends flush looks
+        // complete; one that is visibly cut invites the swipe.
+        contentContainerStyle={{ paddingLeft: Spacing.xl, paddingRight: Spacing.xxxl, gap: Spacing.md }}>
         {children}
       </ScrollView>
       <LinearGradient
@@ -172,10 +233,22 @@ function OwnedTile({ item }: { item: Item }) {
     <Pressable
       style={{
         flexGrow: 1, flexBasis: '46%',
-        backgroundColor: c.surface, borderColor: c.border, borderWidth: 1,
-        borderLeftWidth: 4, borderLeftColor: item.color,
+        // The tile carries the resource's colour as a wash rather than a
+        // stripe down the side. A coloured bar bolted onto a white box is
+        // decoration standing in for design; a tinted surface makes the tile
+        // itself the thing you recognise.
+        backgroundColor: item.color + '14',
+        borderColor: item.color + '33', borderWidth: 1,
         borderRadius: Radius.lg, padding: Spacing.lg,
       }}>
+      <View
+        style={{
+          width: 30, height: 30, borderRadius: Radius.sm,
+          backgroundColor: item.color, alignItems: 'center', justifyContent: 'center',
+          marginBottom: Spacing.md,
+        }}>
+        <Text style={{ ...Type.cardTitle, color: Palette.white }}>{item.label.charAt(0)}</Text>
+      </View>
       <Text style={{ ...Type.cardTitle, color: c.textStrong }}>{item.label}</Text>
       <Text numberOfLines={2} style={{ ...Type.small, color: c.textMuted, marginTop: Spacing.xs }}>
         {item.blurb}

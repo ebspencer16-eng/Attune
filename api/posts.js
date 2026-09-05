@@ -51,7 +51,7 @@ export default async function handler(req) {
 
     if (action === 'feed') {
       const [pRes, rRes] = await Promise.all([
-        rest(`posts?${publishedFilter}&select=id,title,subtitle,dimension_keys,read_minutes,hero_color,published_at,revision&order=published_at.desc&limit=50`, { headers: svc }),
+        rest(`posts?${publishedFilter}&select=id,title,subtitle,category,dimension_keys,read_minutes,hero_color,published_at,revision&order=published_at.desc&limit=50`, { headers: svc }),
         rest(`post_reads?owner_id=eq.${me}&select=post_id,revision,read_at`, { headers: svc }),
       ]);
       const posts = await pRes.json().catch(() => []);

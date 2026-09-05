@@ -159,6 +159,8 @@ export type PostSummary = {
   id: string;
   title: string;
   subtitle: string | null;
+  /** One of the four shelves, or null for uncategorised. */
+  category: string | null;
   dimension_keys: string[];
   read_minutes: number | null;
   hero_color: string | null;
