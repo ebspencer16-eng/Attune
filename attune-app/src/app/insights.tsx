@@ -1,19 +1,156 @@
 /**
- * Placeholder so the tab bar works end to end before the screen exists.
+ * Insights.
  *
- * A tab that opens a blank white page reads as broken; one that says what it
- * will hold reads as unfinished, which is the truth. Replaced by the real
- * screen from SCREENS.md.
+ * One tab, two lives. Before both partners finish, it shows the exercises and
+ * what is left. Once results exist, it becomes the results experience.
+ *
+ * The label never changes. A tab bar is spatial memory, and a label that
+ * changes underneath someone is disorienting in a way that is hard to
+ * attribute to anything. What changes is what the tab holds, which is the
+ * honest version of the same idea: the place grows up rather than moving.
  */
 
+import { useCallback, useEffect, useState } from 'react';
+import { RefreshControl, ScrollView, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { ScreenEmpty } from '@/components/screen-states';
-import { Colors } from '@/constants/attune-theme';
 
-export default function Placeholder() {
+import { fetchHome } from '@/api/client';
+import type { ExerciseState, HomeResponse } from '@/api/client';
+import { ScreenLoading } from '@/components/screen-states';
+import { Colors, MaxContentWidth, Palette, Radius, SectionColor, Spacing, Type } from '@/constants/attune-theme';
+
+const c = Colors.light;
+
+/** Display order and labels. Mirrors the exercise registry on the server. */
+const EXERCISES = [
+  { key: 'ex1', label: 'Communication', color: SectionColor.communication },
+  { key: 'ex2', label: 'Expectations', color: SectionColor.expectations },
+  { key: 'ex3', label: 'Relationship Reflection', color: SectionColor.reflection },
+  { key: 'intimacy', label: 'Physical Intimacy', color: SectionColor.intimacy },
+  { key: 'conflict', label: 'Conflict Patterns', color: SectionColor.conflict },
+] as const;
+
+export default function InsightsScreen() {
+  const [home, setHome] = useState<HomeResponse | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+
+  const load = useCallback(async () => {
+    const res = await fetchHome();
+    if (res.ok) setHome(res.data);
+    setLoading(false);
+    setRefreshing(false);
+  }, []);
+
+  useEffect(() => { load(); }, [load]);
+
+  if (loading) return <Shell><ScreenLoading label="Checking where you both are" /></Shell>;
+
+  const exercises = home?.exercises ?? {};
+  const owned = EXERCISES.filter((e) => exercises[e.key]?.owned);
+  const partner = home?.partnerName || 'your partner';
+
+  // Results are the payoff, so once they exist the tab is about them. Until
+  // then it is about getting there, which is the only useful thing it can say.
+  const ready = !!home?.resultsReady;
+
+  const mineLeft = owned.filter((e) => !exercises[e.key]?.mine).length;
+  const theirsLeft = owned.filter((e) => !exercises[e.key]?.theirs).length;
+
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: Colors.light.background }} edges={['top']}>
-      <ScreenEmpty title="Insights" body="Your results live here: couple type, communication, expectations, and every exercise you own. Opens once you have both finished." />
+    <Shell>
+      <ScrollView
+        contentContainerStyle={{
+          padding: Spacing.xl, paddingBottom: Spacing.xxxl,
+          maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center',
+        }}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); load(); }} tintColor={c.accentQuiet} />
+        }>
+        <Text style={{ ...Type.hero, color: c.textStrong }}>
+          {ready ? 'Your results' : 'Your exercises'}
+        </Text>
+        <Text style={{ ...Type.body, color: c.textMuted, marginTop: Spacing.sm, marginBottom: Spacing.xl }}>
+          {ready
+            ? 'Everything you both answered, side by side.'
+            : mineLeft === 0 && theirsLeft > 0
+              ? `You're done. Results open once ${partner} finishes.`
+              : mineLeft === 0 && theirsLeft === 0
+                ? 'Both finished. Your results are being prepared.'
+                : `Results open once you have both finished. ${mineLeft} left for you.`}
+        </Text>
+
+        {owned.map((e) => (
+          <ExerciseRow
+            key={e.key}
+            label={e.label}
+            color={e.color}
+            state={exercises[e.key]}
+            partner={partner}
+          />
+        ))}
+
+        {ready ? (
+          <Text style={{ ...Type.small, color: c.textMuted, marginTop: Spacing.xl }}>
+            The full results experience opens here next.
+          </Text>
+        ) : null}
+      </ScrollView>
+    </Shell>
+  );
+}
+
+function Shell({ children }: { children: React.ReactNode }) {
+  return (
+    <SafeAreaView style={{ flex: 1, backgroundColor: c.background }} edges={['top']}>
+      {children}
     </SafeAreaView>
+  );
+}
+
+/**
+ * One exercise, both sides.
+ *
+ * Shows each partner separately rather than a single combined state, because
+ * "waiting on them" and "waiting on you" call for completely different things
+ * and a merged badge hides which it is.
+ */
+function ExerciseRow({
+  label, color, state, partner,
+}: { label: string; color: string; state?: ExerciseState; partner: string }) {
+  const mine = !!state?.mine;
+  const theirs = !!state?.theirs;
+
+  return (
+    <View
+      style={{
+        backgroundColor: c.surface, borderColor: c.border, borderWidth: 1,
+        borderRadius: Radius.lg, padding: Spacing.lg, marginBottom: Spacing.md,
+      }}>
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: Spacing.md }}>
+        <View style={{ width: 10, height: 10, borderRadius: Radius.pill, backgroundColor: color }} />
+        <Text style={{ ...Type.cardTitle, color: c.textStrong, flex: 1 }}>{label}</Text>
+      </View>
+      <View style={{ flexDirection: 'row', gap: Spacing.sm, marginTop: Spacing.md }}>
+        <Pill done={mine} label={mine ? 'You: done' : 'You: not started'} />
+        <Pill done={theirs} label={theirs ? `${partner}: done` : `${partner}: waiting`} />
+      </View>
+    </View>
+  );
+}
+
+function Pill({ done, label }: { done: boolean; label: string }) {
+  return (
+    <View
+      style={{
+        paddingVertical: Spacing.xs + 2, paddingHorizontal: Spacing.md,
+        borderRadius: Radius.pill,
+        backgroundColor: done ? '#E7F3EC' : c.background,
+        borderColor: done ? '#B7DCC6' : c.border, borderWidth: 1,
+      }}>
+      <Text style={{ ...Type.small, fontWeight: '700', color: done ? '#2E7D5B' : c.textMuted }}>
+        {label}
+      </Text>
+    </View>
   );
 }

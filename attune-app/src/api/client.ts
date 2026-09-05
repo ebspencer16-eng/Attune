@@ -67,9 +67,15 @@ export type HomeCard = {
   disabled?: boolean;
 };
 
+export type ExerciseState = { owned: boolean; mine: boolean; theirs: boolean };
+
 export type HomeResponse = {
   /** Flat list of add-on keys this person owns, derived server-side. */
   owned?: string[];
+  /** Per-exercise progress for both partners. */
+  exercises?: Record<string, ExerciseState>;
+  resultsReady?: boolean;
+  partnerName?: string | null;
   greeting: string;
   primary: HomeCard;
   secondary: HomeCard[];

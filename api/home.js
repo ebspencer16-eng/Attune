@@ -162,6 +162,10 @@ export default async function handler(req) {
       primary,
       secondary,
       owned,
+      // Per-exercise progress, so the Insights tab can show what is left
+      // before results exist rather than a locked empty screen. Computed here
+      // already; it was simply never returned.
+      exercises,
       // Tab badges: what each tab should show as outstanding.
       badges: {
         toolbox: ['ex1', 'ex2', 'ex3', 'intimacy', 'conflict'].filter(k => exercises[k].owned && !exercises[k].mine).length
