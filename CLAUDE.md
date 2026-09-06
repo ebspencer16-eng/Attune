@@ -65,6 +65,18 @@ silently in combination.
 So: **derive, do not restate.** Before adding a second copy of any rule, ask
 whether it can read the first. If it genuinely cannot, add a gate.
 
+**Known violation, in the app, mine.** I wrote three hardcoded lists in
+`attune-app/` two commits after writing this warning:
+
+- `EXERCISES` in `src/app/insights.tsx` duplicates `api/_exercises.js` exactly
+- `CATALOGUE` in `src/app/resources.tsx` restates the purchasable add-ons
+- `CATEGORIES` in `src/app/resources.tsx` restates the In Practice shelves
+
+Add an exercise or a shelf and the site changes while the app silently does
+not. Fix by having the endpoints return these lists (`/api/home` already
+returns `owned`, so the pattern exists) and deleting the app-side copies.
+**Do not extend these lists. Replace them.**
+
 Existing single sources of truth:
 
 | Rule | Lives in |
