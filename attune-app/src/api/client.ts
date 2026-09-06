@@ -183,12 +183,20 @@ export type Post = PostSummary & { blocks: PostBlock[] };
 
 export type Note = {
   id: string;
+  /** Whose note it is. Present on every row, and the only way to tell a note
+   *  the partner shared from one of your own once they are on the same screen. */
+  owner_id: string;
   title: string | null;
   body: string;
   visibility: 'private' | 'shared';
   anchor_type: string | null;
   anchor_key: string | null;
+  /** The wording of the anchored thing when the note was written. */
   anchor_context: string | null;
+  /** RESULTS_VERSION at the time, so the app can tell that results have been
+   *  recomputed since. Null on notes written before a version was recorded. */
+  anchor_version: number | null;
+  created_at: string;
   updated_at: string;
 };
 
@@ -221,9 +229,19 @@ export function fetchNotes() {
     '/api/notes?action=list');
 }
 
+export type Tag = {
+  id: string;
+  name: string;
+  color: string | null;
+  /** 'dim:conflict', 'expcat:finances', 'intdim:frequency'. Null on a tag the
+   *  person made themselves. This is what lets the app label an annotation's
+   *  anchor without keeping its own copy of the dimension list. */
+  standard_key: string | null;
+};
+
+/** Seeded on the first call, so this is also what creates them. */
 export function fetchTags() {
-  return request<{ ok: true; tags: { id: string; name: string; color: string | null }[] }>(
-    '/api/notes?action=tags');
+  return request<{ ok: true; tags: Tag[] }>('/api/notes?action=tags');
 }
 
 export function createNote(input: {
@@ -234,6 +252,41 @@ export function createNote(input: {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ action: 'create', ...input }),
+  });
+}
+
+/**
+ * Edit your own note. The server filters on owner, so someone else's note
+ * matches nothing rather than erroring in a way that confirms it exists.
+ */
+export function updateNote(input: { id: string; title?: string | null; body?: string }) {
+  return request<{ ok: true; note: Note }>('/api/notes', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ action: 'update', ...input }),
+  });
+}
+
+/**
+ * Show a note to the partner, or stop.
+ *
+ * Separate from updateNote because it is a different decision with different
+ * consequences, and folding it into a general save is how a note gets shared
+ * by someone who only meant to fix a typo.
+ */
+export function shareNote(id: string, visibility: 'private' | 'shared') {
+  return request<{ ok: true; note: Note }>('/api/notes', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ action: 'share', id, visibility }),
+  });
+}
+
+export function deleteNote(id: string) {
+  return request<{ ok: true; deleted: number }>('/api/notes', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ action: 'delete', id }),
   });
 }
 
