@@ -22,11 +22,30 @@
 
 export const config = { runtime: 'edge' };
 
+import { DIM_META } from './_workbook-content.js';
 import { personResults } from './_lib/results.js';
 import { getOrComputeResults } from './_lib/results-store.js';
 
 const HEADERS = { 'Content-Type': 'application/json', 'X-Content-Type-Options': 'nosniff' };
 const json = (body, status = 200) => new Response(JSON.stringify(body), { status, headers: HEADERS });
+
+/**
+ * Attach customer-facing dimension names to a results payload.
+ *
+ * Non-destructive and tolerant of a payload that predates rankedGaps entirely,
+ * because these rows were written by older versions of this engine and a read
+ * path that assumes the current shape will throw on the oldest couples.
+ */
+function withLabels(results) {
+  if (!results || !Array.isArray(results.rankedGaps)) return results;
+  return {
+    ...results,
+    rankedGaps: results.rankedGaps.map(g => ({
+      ...g,
+      label: g.label || DIM_META[g.dim]?.label || g.dim,
+    })),
+  };
+}
 
 export default async function handler(req) {
   if (req.method !== 'GET') return json({ ok: false, error: 'GET only' }, 405);
@@ -131,7 +150,18 @@ export default async function handler(req) {
     if (!results) return json({ ok: true, ready: false, reason: 'neither_complete' });
 
     return json({
-      ok: true, ready: true, cached, recomputed: reason, results,
+      ok: true, ready: true, cached, recomputed: reason,
+      // Labels are applied on the way out, not baked into the stored blob.
+      //
+      // Results are frozen: once a couple's row exists it is served back as it
+      // was written, which is the whole point of freezing them. So adding a
+      // display label at compute time reaches new couples only, and every
+      // existing couple keeps reading raw dimension keys forever.
+      //
+      // Scores are frozen. Names for things are not, and should follow the
+      // current copy rather than whatever was current the day the couple
+      // finished.
+      results: withLabels(results),
       // frozenAt is when these results were fixed. computedUnderVersion is the
       // engine that produced them, which may be older than the current one:
       // that is the point, not a problem.
