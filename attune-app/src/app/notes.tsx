@@ -1,15 +1,22 @@
 /**
  * Notes.
  *
- * Three lists, and the reason they are three rather than one is that they are
- * not the same kind of thing. Your notes are yours to write and change.
- * Annotations belong to whatever they are attached to, so they read as a set
- * per place rather than a stream. What your partner shared is theirs: readable,
- * never editable, because the server enforces that and a UI that offers a save
- * button which always fails is worse than one that never offered it.
+ * One list, newest first: notes you wrote, annotations you left on something,
+ * and what your partner shared with you, in the order they last changed.
  *
- * A merged chronological list would have to be pulled apart again to say any of
- * that, so the split is in the data from /api/notes and stays in the screen.
+ * It was three lists behind a pill row. That shape asked you to know which of
+ * three places a note was in before you could look for it, which is a question
+ * about how the data is stored rather than about the note. A single stream
+ * answers "what did we write" without making anyone choose a lane first.
+ *
+ * The three still arrive separately from /api/notes, because they are separate
+ * questions server-side, and shared notes have to stay distinguishable: only
+ * the author edits one, so the card has to know whose it is.
+ *
+ * Filtering by tag, source, author, and highlight against commentary is
+ * deliberately not built yet. Every one of those filters cuts on something the
+ * Results and In Practice screens have not defined, so building the controls
+ * now means guessing at anchors and reworking them. See HANDOFF.md.
  *
  * Nothing here decides what an anchor means. That resolution lives in
  * constants/anchors.ts and derives from the standard tags the server seeds, so
@@ -31,24 +38,17 @@ import type { ApiError, Note, Tag } from '@/api/client';
 import { ScreenError, ScreenLoading } from '@/components/screen-states';
 import SignIn from '@/components/sign-in';
 import { resolveAnchor } from '@/constants/anchors';
-import type { AnchorContext } from '@/constants/anchors';
+import type { AnchorContext, ResolvedAnchor } from '@/constants/anchors';
 import {
   Colors, MaxContentWidth, Palette, Radius, Spacing, Type,
 } from '@/constants/attune-theme';
 
 const c = Colors.light;
 
-type Lane = 'mine' | 'anchored' | 'shared';
-
-const LANES: { key: Lane; label: string }[] = [
-  { key: 'mine', label: 'Yours' },
-  { key: 'anchored', label: 'On your results' },
-  { key: 'shared', label: 'Shared with you' },
-];
+/** A note plus the two things the list has to know that the row itself does not. */
+type Row = { note: Note; readOnly: boolean };
 
 export default function NotesScreen() {
-  const [lane, setLane] = useState<Lane>('mine');
-
   const [notes, setNotes] = useState<Note[]>([]);
   const [annotations, setAnnotations] = useState<Note[]>([]);
   const [shared, setShared] = useState<Note[]>([]);
@@ -117,22 +117,23 @@ export default function NotesScreen() {
   }, [tags, postTitles]);
 
   /**
-   * Annotations, gathered by what they are attached to.
+   * Everything, newest first.
    *
-   * Insertion order is kept rather than sorted alphabetically, and the server
-   * sends them newest first, so the place someone was last reading sits at the
-   * top instead of whichever section starts with A.
+   * Sorted on updated_at rather than created_at: editing a note is the act of
+   * still thinking about it, and a list that buries a note you just rewrote
+   * under one you have not touched in a month is sorting by the wrong thing.
+   *
+   * Parsed as dates rather than compared as strings. The timestamps are ISO and
+   * would usually sort lexicographically, but that quietly stops being true the
+   * moment two rows come back with different timezone offsets.
    */
-  const groups = useMemo(() => {
-    const map = new Map<string, { key: string; label: string; color: string | null; notes: Note[] }>();
-    for (const a of annotations) {
-      const { groupKey, label, color } = resolveAnchor(a, anchorCtx);
-      const existing = map.get(groupKey);
-      if (existing) existing.notes.push(a);
-      else map.set(groupKey, { key: groupKey, label, color, notes: [a] });
-    }
-    return [...map.values()];
-  }, [annotations, anchorCtx]);
+  const rows: Row[] = useMemo(() => {
+    const mine = [...notes, ...annotations].map((note) => ({ note, readOnly: false }));
+    const theirs = shared.map((note) => ({ note, readOnly: true }));
+    return [...mine, ...theirs].sort(
+      (a, b) => Date.parse(b.note.updated_at) - Date.parse(a.note.updated_at),
+    );
+  }, [notes, annotations, shared]);
 
   if (loading) return <Shell><ScreenLoading label="Getting your notes" /></Shell>;
 
@@ -147,11 +148,6 @@ export default function NotesScreen() {
     return <Shell><ScreenError error={error} onRetry={() => { setLoading(true); load(); }} /></Shell>;
   }
 
-  const counts: Record<Lane, number> = {
-    mine: notes.length,
-    anchored: annotations.length,
-    shared: shared.length,
-  };
   const partner = partnerName || 'your partner';
 
   return (
@@ -184,92 +180,28 @@ export default function NotesScreen() {
           </View>
         </View>
 
-        {/* Same pill row as Resources, so the two tabs filter the same way. */}
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={{ paddingHorizontal: Spacing.xl, gap: Spacing.sm, paddingTop: Spacing.lg, paddingBottom: Spacing.lg }}>
-          {LANES.map((l) => {
-            const on = l.key === lane;
-            return (
-              <Pressable
-                key={l.key}
-                onPress={() => setLane(l.key)}
-                style={{
-                  paddingVertical: Spacing.sm, paddingHorizontal: Spacing.lg,
-                  borderRadius: Radius.pill,
-                  backgroundColor: on ? c.textStrong : c.surface,
-                  borderColor: on ? c.textStrong : c.border, borderWidth: 1,
-                }}>
-                <Text style={{ ...Type.small, fontWeight: '700', color: on ? Palette.white : c.textMuted }}>
-                  {l.label}{counts[l.key] ? `  ${counts[l.key]}` : ''}
-                </Text>
-              </Pressable>
-            );
-          })}
-        </ScrollView>
-
-        <View style={{ paddingHorizontal: Spacing.xl, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center' }}>
-          {lane === 'mine' ? (
-            notes.length ? (
-              notes.map((n) => (
-                <NoteCard key={n.id} note={n} onPress={() => setEditing(n)} />
-              ))
-            ) : (
-              <Blank
-                title="No notes yet"
-                body="Anything you write here stays private until you choose to share it."
+        <View style={{ paddingHorizontal: Spacing.xl, paddingTop: Spacing.xl, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center' }}>
+          {rows.length ? (
+            rows.map(({ note, readOnly }) => (
+              <NoteCard
+                key={note.id}
+                note={note}
+                source={note.anchor_type ? resolveAnchor(note, anchorCtx) : null}
+                moved={hasMoved(note, resultsVersion)}
+                author={readOnly ? partner : undefined}
+                readOnly={readOnly}
+                // A note the partner shared is theirs. The server refuses an
+                // edit from anyone but the author, so the row does not open an
+                // editor that could only ever fail to save.
+                onPress={readOnly ? undefined : () => setEditing(note)}
               />
-            )
-          ) : null}
-
-          {lane === 'anchored' ? (
-            groups.length ? (
-              groups.map((g) => (
-                <View key={g.key} style={{ marginBottom: Spacing.xl }}>
-                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: Spacing.sm, marginBottom: Spacing.md }}>
-                    <View
-                      style={{
-                        width: 22, height: 3, borderRadius: Radius.pill,
-                        backgroundColor: g.color || c.border,
-                      }}
-                    />
-                    <Text style={{ ...Type.eyebrow, color: c.textMuted }}>{g.label}</Text>
-                  </View>
-                  {g.notes.map((n) => (
-                    <NoteCard
-                      key={n.id}
-                      note={n}
-                      accent={g.color}
-                      moved={hasMoved(n, resultsVersion)}
-                      onPress={() => setEditing(n)}
-                    />
-                  ))}
-                </View>
-              ))
-            ) : (
-              <Blank
-                title="No highlights yet"
-                body="Notes you leave on a result collect here, grouped by where they came from."
-              />
-            )
-          ) : null}
-
-          {lane === 'shared' ? (
-            shared.length ? (
-              <>
-                <Text style={{ ...Type.small, color: c.textMuted, marginBottom: Spacing.lg }}>
-                  {partner} wrote these. Only the author can change a shared note.
-                </Text>
-                {shared.map((n) => <NoteCard key={n.id} note={n} author={partner} readOnly />)}
-              </>
-            ) : (
-              <Blank
-                title="Nothing shared yet"
-                body={`When ${partner} shares a note, it appears here.`}
-              />
-            )
-          ) : null}
+            ))
+          ) : (
+            <Blank
+              title="No notes yet"
+              body="Anything you write here stays private until you choose to share it."
+            />
+          )}
         </View>
       </ScrollView>
 
@@ -338,18 +270,23 @@ function Blank({ title, body }: { title: string; body: string }) {
 }
 
 /**
- * One note, in every list it can appear in.
+ * One note, whatever kind it is.
  *
  * The same card carries a standalone note, an annotation and a note the partner
  * shared, because they are the same object with different things known about
  * them. Branching into three components would mean three places to change when
  * a note gains a field.
+ *
+ * The source line matters more now than it did. Grouping used to say which
+ * section an annotation came from; in one flat list the card has to say it
+ * itself, or the only thing left indicating where a note came from is a quote
+ * with no name on it.
  */
 function NoteCard({
-  note, accent, moved, author, readOnly, onPress,
+  note, source, moved, author, readOnly, onPress,
 }: {
   note: Note;
-  accent?: string | null;
+  source?: ResolvedAnchor | null;
   moved?: boolean;
   author?: string;
   readOnly?: boolean;
@@ -357,6 +294,7 @@ function NoteCard({
 }) {
   const heading = note.title?.trim() || leadLine(note.body);
   const showBody = !!note.body.trim() && note.body.trim() !== heading;
+  const accent = source?.color;
 
   return (
     <Pressable
@@ -366,6 +304,18 @@ function NoteCard({
         backgroundColor: c.surface, borderColor: c.border, borderWidth: 1,
         borderRadius: Radius.lg, padding: Spacing.lg, marginBottom: Spacing.md,
       }}>
+      {source ? (
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: Spacing.sm, marginBottom: Spacing.md }}>
+          <View
+            style={{
+              width: 22, height: 3, borderRadius: Radius.pill,
+              backgroundColor: accent || c.border,
+            }}
+          />
+          <Text style={{ ...Type.eyebrow, color: c.textMuted }}>{source.label}</Text>
+        </View>
+      ) : null}
+
       {/* What the note was written against, quoted as it read at the time. The
           rule on the left is the section's colour, so a quote is visibly not
           the person's own words. */}
@@ -400,9 +350,9 @@ function NoteCard({
       ) : null}
 
       <Text style={{ ...Type.small, color: c.textMuted, marginTop: Spacing.md }}>
-        {author ? `${author}  ·  ` : ''}
+        {author ? `${author}  \u00b7  ` : ''}
         {when(note.updated_at)}
-        {!readOnly && note.visibility === 'shared' ? '  ·  Shared' : ''}
+        {!readOnly && note.visibility === 'shared' ? '  \u00b7  Shared' : ''}
       </Text>
     </Pressable>
   );
