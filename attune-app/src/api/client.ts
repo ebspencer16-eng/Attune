@@ -48,7 +48,9 @@ export type CoupleResults = {
   coupleType: string;
   partners: { a: PersonResults; b: PersonResults };
   gaps: Record<string, number | null>;
-  rankedGaps: { dim: string; gap: number }[];
+  /** Widest gaps first. `label` is the customer-facing dimension name; the app
+   *  renders that and never keeps its own map of dimension names. */
+  rankedGaps: { dim: string; gap: number; label?: string }[];
   /** Present only when both partners answered Part 2. Never shown to customers. */
   understanding: unknown | null;
 };

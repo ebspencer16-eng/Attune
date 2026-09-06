@@ -18,6 +18,7 @@
  * matters more now that screen-level checks are moving to Xcode.
  */
 
+import { DIM_META } from '../_workbook-content.js';
 import {
   DIM_KEYS,
   QUESTION_WEIGHTS,
@@ -165,7 +166,12 @@ export function coupleResults({ aAnswers, bAnswers, aName = null, bName = null }
     .sort((p, q) => (Math.abs(p[1] - q[1]) > 1e-9
       ? q[1] - p[1]
       : (AXIS_CONFIG[q[0]]?.weight ?? 0) - (AXIS_CONFIG[p[0]]?.weight ?? 0)))
-    .map(([dim, gap]) => ({ dim, gap }));
+    // Carries the customer-facing label, not just the key. The app must not
+    // keep its own map of dimension names: that is a second copy of a list the
+    // server already owns, and it is also results copy, which is version-pinned
+    // and belongs here. Without this the Insights tab rendered raw keys, so a
+    // couple read "love, conflict, feedback" as though it were prose.
+    .map(([dim, gap]) => ({ dim, gap, label: DIM_META[dim]?.label || dim }));
 
   // Understanding, both directions. aReadsB is how accurately A sees B.
   const aReadsB = readAccuracy(aAnswers, bAnswers);

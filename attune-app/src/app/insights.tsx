@@ -25,8 +25,7 @@ import type { ApiError, ExerciseState, HomeResponse, ResultsResponse } from '@/a
 import { ScreenError, ScreenLoading } from '@/components/screen-states';
 import SignIn from '@/components/sign-in';
 import {
-  AccentFallback, AccentFor, Colors, MaxContentWidth, Palette, Radius, Spacing,
-  StatusColor, Type,
+  Colors, MaxContentWidth, Palette, Radius, Spacing, StatusColor, Type,
 } from '@/constants/attune-theme';
 
 const c = Colors.light;
@@ -106,7 +105,7 @@ export default function InsightsScreen() {
         </Text>
 
         {ready
-          ? <Results results={results} coupleType={home?.state?.coupleType ?? null} />
+          ? <Results results={results} />
           : <StatusTable exercises={exercises} you={you} partner={partner} />}
       </ScrollView>
     </Shell>
@@ -152,7 +151,7 @@ function StatusTable({
       }}>
       {/* Header: blank, then a column each. */}
       <View style={{ flexDirection: 'row', backgroundColor: Palette.warm, borderBottomWidth: 1, borderBottomColor: c.border }}>
-        <View style={{ flex: 1.15 }} />
+        <View style={{ flex: 1.6 }} />
         <HeaderCell label={you} />
         <HeaderCell label={partner} />
       </View>
@@ -164,14 +163,16 @@ function StatusTable({
             flexDirection: 'row', alignItems: 'stretch',
             borderBottomWidth: i < exercises.length - 1 ? 1 : 0, borderBottomColor: c.border,
           }}>
-          <View style={{ flex: 1.15, flexDirection: 'row', alignItems: 'center', gap: Spacing.sm, padding: Spacing.md }}>
+          {/* Wider than the status columns, and by a bigger margin than the
+              web needs. "Communication" and "Relationship Reflection" broke
+              mid-word at 1.15, which reads as a rendering fault rather than a
+              long name. There was an accent dot here too; it cost the label
+              about fifteen points and the web table does not have one. */}
+          <View style={{ flex: 1.6, flexDirection: 'row', alignItems: 'center', gap: Spacing.sm, paddingVertical: Spacing.md, paddingLeft: Spacing.md, paddingRight: Spacing.sm }}>
             <Text style={{ ...Type.small, fontWeight: '700', color: c.textMuted }}>
               {String(i + 1).padStart(2, '0')}
             </Text>
-            {/* The accent dot keeps each exercise recognisable by its colour,
-                the way it is everywhere else in the app. */}
-            <View style={{ width: 7, height: 7, borderRadius: Radius.pill, backgroundColor: AccentFor[e.key] ?? AccentFallback }} />
-            <Text style={{ ...Type.small, color: c.textStrong, fontWeight: '500', flexShrink: 1 }}>
+            <Text style={{ ...Type.small, color: c.textStrong, fontWeight: '500', flex: 1 }}>
               {e.label || e.key}
             </Text>
           </View>
@@ -205,7 +206,7 @@ function StatusCell({ done, muted }: { done: boolean; muted?: boolean }) {
     <View
       style={{
         flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
-        gap: Spacing.xs, padding: Spacing.md,
+        gap: Spacing.xs, paddingVertical: Spacing.md, paddingHorizontal: Spacing.sm,
         borderLeftWidth: 1, borderLeftColor: c.border,
       }}>
       <View
@@ -242,9 +243,7 @@ function StatusCell({ done, muted }: { done: boolean; muted?: boolean }) {
  * The individual section screens are the next piece of work. This renders the
  * couple type and what is available, which is what the payload supports today.
  */
-function Results({
-  results, coupleType,
-}: { results: ResultsResponse | null; coupleType: string | null }) {
+function Results({ results }: { results: ResultsResponse | null }) {
   if (!results) {
     return (
       <Text style={{ ...Type.body, color: c.textMuted }}>
@@ -263,22 +262,17 @@ function Results({
   }
 
   const { results: couple } = results;
-  const type = couple.coupleType || coupleType;
 
   return (
     <View>
-      {type ? (
-        <View
-          style={{
-            backgroundColor: c.surface, borderColor: c.border, borderWidth: 1,
-            borderRadius: Radius.lg, padding: Spacing.lg, marginBottom: Spacing.lg,
-          }}>
-          <Text style={{ ...Type.eyebrow, color: c.accentQuiet, marginBottom: Spacing.sm }}>
-            Your couple type
-          </Text>
-          <Text style={{ ...Type.title, color: c.textStrong }}>{type}</Text>
-        </View>
-      ) : null}
+      {/* The couple type is deliberately not shown yet.
+          /api/results returns the code, 'WX', and the name a customer should
+          read, "The jumpstart", lives in src/App.jsx with its tagline and
+          description. It is web-bundle content, so the app cannot ask for it.
+          Rendering the bare code puts an internal identifier in front of a
+          couple, and hardcoding the names here would put a second copy of
+          version-pinned results copy in the app, which is the failure this
+          project keeps having. The content moves server-side first. */}
 
       {/* The widest gaps, which is the one thing the payload can already say
           without any of the section screens existing. Ordered by the server. */}
@@ -291,9 +285,12 @@ function Results({
           <Text style={{ ...Type.eyebrow, color: c.accentQuiet, marginBottom: Spacing.md }}>
             Where you differ most
           </Text>
+          {/* The server sends the label. Falling back to the key keeps an
+              older payload readable rather than blank, but the key is not
+              something a customer should ever be reading. */}
           {couple.rankedGaps.slice(0, 3).map((g) => (
             <Text key={g.dim} style={{ ...Type.body, color: c.text, marginBottom: Spacing.xs }}>
-              {g.dim}
+              {g.label || g.dim}
             </Text>
           ))}
         </View>
