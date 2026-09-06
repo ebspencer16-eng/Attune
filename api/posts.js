@@ -15,6 +15,8 @@
 
 export const config = { runtime: 'edge' };
 
+import { POST_CATEGORIES } from './_lib/post-categories.js';
+
 const HEADERS = { 'Content-Type': 'application/json', 'X-Content-Type-Options': 'nosniff' };
 const json = (b, s = 200) => new Response(JSON.stringify(b), { status: s, headers: HEADERS });
 
@@ -60,6 +62,9 @@ export default async function handler(req) {
 
       return json({
         ok: true,
+        // The shelves, so the app builds its filter row from what the server
+        // knows rather than a copy of the markup on practice.html.
+        categories: POST_CATEGORIES,
         posts: posts.map(p => {
           const r = readBy.get(p.id);
           return {

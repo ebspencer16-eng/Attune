@@ -17,18 +17,11 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { fetchHome } from '@/api/client';
 import type { ExerciseState, HomeResponse } from '@/api/client';
 import { ScreenLoading } from '@/components/screen-states';
-import { Colors, MaxContentWidth, Palette, Radius, SectionColor, Spacing, Type } from '@/constants/attune-theme';
+import {
+  AccentFallback, AccentFor, Colors, MaxContentWidth, Radius, Spacing, Type,
+} from '@/constants/attune-theme';
 
 const c = Colors.light;
-
-/** Display order and labels. Mirrors the exercise registry on the server. */
-const EXERCISES = [
-  { key: 'ex1', label: 'Communication', color: SectionColor.communication },
-  { key: 'ex2', label: 'Expectations', color: SectionColor.expectations },
-  { key: 'ex3', label: 'Relationship Reflection', color: SectionColor.reflection },
-  { key: 'intimacy', label: 'Physical Intimacy', color: SectionColor.intimacy },
-  { key: 'conflict', label: 'Conflict Patterns', color: SectionColor.conflict },
-] as const;
 
 export default function InsightsScreen() {
   const [home, setHome] = useState<HomeResponse | null>(null);
@@ -46,16 +39,24 @@ export default function InsightsScreen() {
 
   if (loading) return <Shell><ScreenLoading label="Checking where you both are" /></Shell>;
 
-  const exercises = home?.exercises ?? {};
-  const owned = EXERCISES.filter((e) => exercises[e.key]?.owned);
+  // What exercises exist, in what order, under what name: all of it comes from
+  // /api/home, which builds it from api/_exercises.js. This screen used to keep
+  // its own copy, so adding an exercise changed the site and left the app
+  // showing four of five with nothing failing.
+  // Falls back to the key for a label and to 0 for order, so an app talking to
+  // an API that predates those fields shows a plainly-named row rather than a
+  // blank one. A fallback, not a second copy of the list.
+  const owned = Object.values(home?.exercises ?? {})
+    .filter((e) => e.owned)
+    .sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
   const partner = home?.partnerName || 'your partner';
 
   // Results are the payoff, so once they exist the tab is about them. Until
   // then it is about getting there, which is the only useful thing it can say.
   const ready = !!home?.resultsReady;
 
-  const mineLeft = owned.filter((e) => !exercises[e.key]?.mine).length;
-  const theirsLeft = owned.filter((e) => !exercises[e.key]?.theirs).length;
+  const mineLeft = owned.filter((e) => !e.mine).length;
+  const theirsLeft = owned.filter((e) => !e.theirs).length;
 
   return (
     <Shell>
@@ -83,9 +84,9 @@ export default function InsightsScreen() {
         {owned.map((e) => (
           <ExerciseRow
             key={e.key}
-            label={e.label}
-            color={e.color}
-            state={exercises[e.key]}
+            label={e.label || e.key}
+            color={AccentFor[e.key] ?? AccentFallback}
+            state={e}
             partner={partner}
           />
         ))}

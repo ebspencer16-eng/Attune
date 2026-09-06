@@ -18,6 +18,8 @@
 export const config = { runtime: 'edge' };
 
 import { nextActions, greeting } from './_lib/next-action.js';
+import { EXERCISES, EXERCISE_COLUMNS, CORE_EXERCISES, isExerciseDone } from './_exercises.js';
+import { CATALOGUE } from './_catalogue.js';
 
 const HEADERS = { 'Content-Type': 'application/json', 'X-Content-Type-Options': 'nosniff' };
 const json = (body, status = 200) => new Response(JSON.stringify(body), { status, headers: HEADERS });
@@ -47,9 +49,12 @@ export default async function handler(req) {
     const svc = { apikey: serviceKey, Authorization: `Bearer ${serviceKey}` };
     const cols = [
       'id', 'name', 'pronouns', 'partner_profile_id', 'pkg',
-      'ex1_answers', 'ex2_answers', 'ex3_answers', 'intimacy_data',
+      // Answer columns come from the registry. Selecting them by hand is how a
+      // new exercise ends up read as never started: the column is simply not in
+      // the select, so it arrives undefined and nothing errors.
+      ...EXERCISE_COLUMNS,
       'addon_reflection', 'addon_budget', 'addon_checklist', 'addon_intimacy',
-      'addon_conflict', 'addon_workbook', 'conflict_data',
+      'addon_conflict', 'addon_workbook',
       'budget_data', 'checklist_data', 'profile_setup_complete',
       'results_last_opened_at', 'partner_nudged_at', 'feedback_given_at',
     ].join(',');
@@ -77,13 +82,33 @@ export default async function handler(req) {
     const ownsChecklist = pkg === 'newlywed' || !!me.addon_checklist;
     const ownsWorkbook = pkg === 'premium' || !!me.addon_workbook;
 
-    const exercises = {
-      ex1: { owned: true, mine: has(me.ex1_answers), theirs: has(partner?.ex1_answers) },
-      ex2: { owned: true, mine: has(me.ex2_answers), theirs: has(partner?.ex2_answers) },
-      ex3: { owned: ownsReflection, mine: has(me.ex3_answers), theirs: has(partner?.ex3_answers) },
-      intimacy: { owned: ownsIntimacy, mine: has(me.intimacy_data?.answers), theirs: has(partner?.intimacy_data?.answers) },
-      conflict: { owned: ownsConflict, mine: has(me.conflict_data?.answers), theirs: has(partner?.conflict_data?.answers) },
+    // Per-exercise progress, built from the registry rather than listed here.
+    // This block used to name all five by hand, which is the exact shape of the
+    // bug api/_exercises.js exists to prevent: add an exercise, update four of
+    // the five places that enumerate them, and the missed one fails silently.
+    //
+    // The capability names are the registry's own (`capability: 'hasIntimacy'`),
+    // so ownership is a lookup rather than another branch per exercise.
+    const caps = {
+      hasAnniversary: ownsReflection,
+      hasIntimacy: ownsIntimacy,
+      hasConflict: ownsConflict,
     };
+    // Completion comes from isExerciseDone, which knows the two shapes apart.
+    // This block previously tested `has(me.intimacy_data?.answers)`, marking a
+    // record-shaped exercise complete as soon as it had any answers rather than
+    // when completedAt was set: done the moment someone opened it.
+    const exercises = Object.fromEntries(EXERCISES.map((e) => [
+      e.key,
+      {
+        key: e.key,
+        label: e.label,
+        order: e.order,
+        owned: !e.capability || !!caps[e.capability],
+        mine: isExerciseDone(e, me[e.column]),
+        theirs: isExerciseDone(e, partner?.[e.column]),
+      },
+    ]));
 
     // A flat list of what this person owns, for surfaces that ask "what do
     // they have" rather than "how far through are they". Derived here so the
@@ -96,7 +121,11 @@ export default async function handler(req) {
       ownsChecklist && 'checklist',
       ownsWorkbook && 'workbook',
     ].filter(Boolean);
-    const resultsReady = exercises.ex1.mine && exercises.ex1.theirs && exercises.ex2.mine && exercises.ex2.theirs;
+    // Results need both partners through the exercises every package includes.
+    // Named ex1 and ex2 by hand before, which would have silently kept results
+    // open if a third core exercise were ever added.
+    const resultsReady = CORE_EXERCISES.every(
+      (e) => exercises[e.key].mine && exercises[e.key].theirs);
 
     // The revisit anchor: the couple's widest gap, read from the stored results
     // rather than recomputed, since this endpoint should stay cheap.
@@ -162,13 +191,16 @@ export default async function handler(req) {
       primary,
       secondary,
       owned,
+      // What exists to buy, so the app renders the server's catalogue rather
+      // than a copy that goes stale the moment an add-on is added or repriced.
+      catalogue: CATALOGUE,
       // Per-exercise progress, so the Insights tab can show what is left
       // before results exist rather than a locked empty screen. Computed here
       // already; it was simply never returned.
       exercises,
       // Tab badges: what each tab should show as outstanding.
       badges: {
-        toolbox: ['ex1', 'ex2', 'ex3', 'intimacy', 'conflict'].filter(k => exercises[k].owned && !exercises[k].mine).length
+        toolbox: EXERCISES.filter(e => exercises[e.key].owned && !exercises[e.key].mine).length
                + (state.resources.budget.owned && !state.resources.budget.complete ? 1 : 0)
                + (state.resources.checklist.owned && !state.resources.checklist.complete ? 1 : 0),
         insights: resultsReady && !me.results_last_opened_at ? 1 : 0,

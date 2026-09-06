@@ -67,12 +67,35 @@ export type HomeCard = {
   disabled?: boolean;
 };
 
-export type ExerciseState = { owned: boolean; mine: boolean; theirs: boolean };
+/**
+ * One exercise, as the server describes it.
+ *
+ * Carries its own label and order, so no screen keeps a list of what exercises
+ * exist. api/_exercises.js is the registry; this is that registry arriving.
+ */
+export type ExerciseState = {
+  key: string;
+  label: string;
+  order: number;
+  owned: boolean;
+  mine: boolean;
+  theirs: boolean;
+};
+
+/** One purchasable thing, from api/_catalogue.js. Price is whole dollars. */
+export type CatalogueItem = {
+  key: string;
+  label: string;
+  blurb: string;
+  price: number;
+};
 
 export type HomeResponse = {
   /** Flat list of add-on keys this person owns, derived server-side. */
   owned?: string[];
-  /** Per-exercise progress for both partners. */
+  /** Everything purchasable. Keys match `owned`, so the two intersect directly. */
+  catalogue?: CatalogueItem[];
+  /** Per-exercise progress for both partners, keyed by exercise key. */
   exercises?: Record<string, ExerciseState>;
   resultsReady?: boolean;
   partnerName?: string | null;
@@ -201,8 +224,10 @@ export type Note = {
 };
 
 /** In Practice feed. Drafts and scheduled posts are filtered server-side. */
+/** The feed, plus the shelves it can be filtered by. */
 export function fetchPosts() {
-  return request<{ ok: true; posts: PostSummary[] }>('/api/posts?action=feed');
+  return request<{ ok: true; posts: PostSummary[]; categories: string[] }>(
+    '/api/posts?action=feed');
 }
 
 export function fetchPost(id: string) {

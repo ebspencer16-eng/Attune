@@ -20,13 +20,27 @@
 import { readFileSync } from 'fs';
 import { EXERCISES, EXERCISE_COLUMNS, EXERCISE_LOCAL_KEYS, PARTNER_SESSION_FIELDS } from '../api/_exercises.js';
 
-const FILES = ['src/App.jsx', 'api/partner-sync.js', 'api/save-exercise.js', 'api/admin-data.js'];
+const FILES = [
+  'src/App.jsx', 'api/partner-sync.js', 'api/save-exercise.js', 'api/admin-data.js',
+  'api/home.js',
+  // The app screens. These each carried their own copy of the exercise list
+  // until CLAUDE.md named them; they derive now, and this keeps them that way.
+  'attune-app/src/app/insights.tsx', 'attune-app/src/app/resources.tsx',
+];
 
 // Each group is a set of identifiers that should always appear together.
 const GROUPS = [
   { name: 'profile columns', items: EXERCISE_COLUMNS },
   { name: 'localStorage keys', items: EXERCISES.map(e => e.localKey) },
   { name: 'partner session fields', items: PARTNER_SESSION_FIELDS.map(f => `${f}:`) },
+  // Exercise keys, which is the form the app used.
+  //
+  // Matched only where a key is written the way a list writes one: quoted, or
+  // as an object property. A bare substring match also hits 'ex1_answers' and
+  // the word ex1 in a comment, which made this fire on admin-data.js for a
+  // sentence describing a metric. A gate that cries wolf gets ignored, which
+  // is worse than no gate.
+  { name: 'exercise keys', items: EXERCISES.map(e => e.key), asListMember: true },
 ];
 
 const problems = [];
@@ -47,10 +61,17 @@ for (const file of FILES) {
   let text;
   try { text = readFileSync(new URL(`../${file}`, import.meta.url), 'utf8'); }
   catch { continue; }
-  if (text.includes('_exercises.js')) continue;   // already derived
+  // Already derived. This has to be a real import, not a mention: it was a
+  // plain includes('_exercises.js'), so writing the filename in a comment was
+  // enough to switch the gate off for that file. Found by planting the bug the
+  // gate exists to catch and watching it pass.
+  if (/^\s*import\s[^\n]*_exercises\.js/m.test(text)) continue;
 
   for (const group of GROUPS) {
-    const present = group.items.filter(k => text.includes(k));
+    const hit = group.asListMember
+      ? (k) => new RegExp(`['"\`]${k}['"\`]|\\b${k}\\s*:`).test(text)
+      : (k) => text.includes(k);
+    const present = group.items.filter(hit);
     if (present.length < 3) continue;             // not an exercise-handling file
     const missing = group.items.filter(k => !present.includes(k));
     if (missing.length) problems.push({ file, group: group.name, missing });

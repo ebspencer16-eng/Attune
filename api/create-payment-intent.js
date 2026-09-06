@@ -14,6 +14,8 @@
  */
 
 import { reportToSentry } from './_lib/sentry-edge.js';
+// Prices live in one place. This file used to declare its own copy.
+import { ADDON_PRICES } from './_catalogue.js';
 
 export const config = { runtime: 'edge' };
 
@@ -25,15 +27,7 @@ const PHYSICAL_PRICES = { core: 124, newlywed: 174, anniversary: 174, premium: 2
 // never bill for a disabled offering. Keep in sync with /_flags.js + App.jsx.
 const PHYSICAL_ENABLED = process.env.ATTUNE_PHYSICAL_ENABLED === '1';
 
-const ADDON_PRICES = {
-  workbookDigital: 19,
-  workbookPrint:   39,
-  reflection:      40,
-  budget:          20,
-  checklist:       20,
-  intimacy:        20,
-  conflict:        40,
-};
+
 
 // ── Stripe Tax product codes ─────────────────────────────────────────────
 // Per-line-item tax category. Stripe uses these to determine:

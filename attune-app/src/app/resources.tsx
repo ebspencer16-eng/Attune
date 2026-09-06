@@ -20,46 +20,34 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 
 import { fetchHome, fetchPosts } from '@/api/client';
-import type { HomeResponse, PostSummary } from '@/api/client';
+import type { CatalogueItem, HomeResponse, PostSummary } from '@/api/client';
 import { ScreenLoading } from '@/components/screen-states';
 import {
-  Colors, MaxContentWidth, Palette, Radius, SectionColor, Spacing, Type,
+  AccentFallback, AccentFor, Colors, MaxContentWidth, Palette, Radius, Spacing, Type,
 } from '@/constants/attune-theme';
 
 const c = Colors.light;
 const SITE = 'https://www.attune-relationships.com';
 
-/** The shelves, matching practice.html so the web and app agree. */
-const CATEGORIES = ['All', 'Getting Started', "When It's Difficult", 'Understanding Each Other', 'Methodology'] as const;
-type Category = (typeof CATEGORIES)[number];
-
 /**
- * Everything purchasable, with the capability that grants it.
- *
- * Mirrors PKG_CAPS on the server rather than deciding anything: the app never
- * works out what someone owns, it only asks. `owned` comes from /api/home.
+ * The shelf shown before any filtering. Not a category: it is the absence of
+ * one, which is why it is not in the server's list.
  */
-const CATALOGUE = [
-  { key: 'conflict',   label: 'Conflict Patterns',   blurb: 'How conflict actually goes for you.',        price: '$40', color: SectionColor.conflict },
-  { key: 'intimacy',   label: 'Physical Intimacy',   blurb: 'What you each expect, answered privately.',  price: '$20', color: SectionColor.intimacy },
-  { key: 'reflection', label: 'Relationship Reflection', blurb: 'Where you have been, and where next.',   price: '$40', color: SectionColor.reflection },
-  { key: 'budget',     label: 'Build a Budget',      blurb: 'A shared budget, built together.',           price: '$20', color: SectionColor.expectations },
-  { key: 'checklist',  label: 'Starting Out',        blurb: 'The practical list for setting up a life.',  price: '$20', color: Palette.clay },
-  { key: 'workbook',   label: 'Your Workbook',       blurb: 'Built from your answers.',                   price: '$19', color: Palette.orange },
-] as const;
+const ALL = 'All';
 
 export default function ResourcesScreen() {
   const { width } = useWindowDimensions();
   const [home, setHome] = useState<HomeResponse | null>(null);
   const [posts, setPosts] = useState<PostSummary[]>([]);
+  const [categories, setCategories] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  const [category, setCategory] = useState<Category>('All');
+  const [category, setCategory] = useState<string>(ALL);
 
   const load = useCallback(async () => {
     const [h, p] = await Promise.all([fetchHome(), fetchPosts()]);
     if (h.ok) setHome(h.data);
-    if (p.ok) setPosts(p.data.posts);
+    if (p.ok) { setPosts(p.data.posts); setCategories(p.data.categories ?? []); }
     setLoading(false);
     setRefreshing(false);
   }, []);
@@ -71,14 +59,21 @@ export default function ResourcesScreen() {
   // The server tells us what is owned. If the field is absent, everything shows
   // as explorable rather than the screen guessing and getting it wrong.
   const ownedKeys = new Set<string>(home?.owned ?? []);
-  const owned = CATALOGUE.filter((r) => ownedKeys.has(r.key));
-  const more = CATALOGUE.filter((r) => !ownedKeys.has(r.key));
+  // The catalogue comes from the server too. The app used to carry its own copy
+  // with prices typed out, so a repriced or newly added add-on changed the site
+  // and left the app selling the old one.
+  const catalogue = home?.catalogue ?? [];
+  const owned = catalogue.filter((r) => ownedKeys.has(r.key));
+  const more = catalogue.filter((r) => !ownedKeys.has(r.key));
 
   // Posts carry `category` when the author set one. Anything uncategorised
   // still shows under All, so a missing field never hides a piece.
-  const visible = category === 'All'
+  const visible = category === ALL
     ? posts
     : posts.filter((p) => p.category === category);
+
+  // All, then whatever shelves the server says exist.
+  const shelves = [ALL, ...categories];
 
   return (
     <Shell>
@@ -135,7 +130,7 @@ export default function ResourcesScreen() {
                 horizontal
                 showsHorizontalScrollIndicator={false}
                 contentContainerStyle={{ paddingHorizontal: Spacing.xl, gap: Spacing.sm, paddingBottom: Spacing.md }}>
-                {CATEGORIES.map((cat) => {
+                {shelves.map((cat) => {
                   const on = cat === category;
                   return (
                     <Pressable
@@ -225,10 +220,11 @@ function EdgeFadedRow({ children, width }: { children: React.ReactNode; width: n
   );
 }
 
-type Item = (typeof CATALOGUE)[number];
+type Item = CatalogueItem;
 
 /** Owned: full colour, a coloured spine, and it opens. */
 function OwnedTile({ item }: { item: Item }) {
+  const color = AccentFor[item.key] ?? AccentFallback;
   return (
     <Pressable
       style={{
@@ -237,14 +233,14 @@ function OwnedTile({ item }: { item: Item }) {
         // stripe down the side. A coloured bar bolted onto a white box is
         // decoration standing in for design; a tinted surface makes the tile
         // itself the thing you recognise.
-        backgroundColor: item.color + '14',
-        borderColor: item.color + '33', borderWidth: 1,
+        backgroundColor: color + '14',
+        borderColor: color + '33', borderWidth: 1,
         borderRadius: Radius.lg, padding: Spacing.lg,
       }}>
       <View
         style={{
           width: 30, height: 30, borderRadius: Radius.sm,
-          backgroundColor: item.color, alignItems: 'center', justifyContent: 'center',
+          backgroundColor: color, alignItems: 'center', justifyContent: 'center',
           marginBottom: Spacing.md,
         }}>
         <Text style={{ ...Type.cardTitle, color: Palette.white }}>{item.label.charAt(0)}</Text>
@@ -259,6 +255,7 @@ function OwnedTile({ item }: { item: Item }) {
 
 /** Not owned: priced, and it opens the site rather than selling in-app. */
 function ExploreTile({ item }: { item: Item }) {
+  const color = AccentFor[item.key] ?? AccentFallback;
   return (
     <Pressable
       onPress={() => Linking.openURL(`${SITE}/offerings`)}
@@ -267,13 +264,13 @@ function ExploreTile({ item }: { item: Item }) {
         borderColor: c.border, borderWidth: 1, borderRadius: Radius.lg,
         padding: Spacing.lg,
       }}>
-      <View style={{ width: 26, height: 4, borderRadius: Radius.pill, backgroundColor: item.color, marginBottom: Spacing.md }} />
+      <View style={{ width: 26, height: 4, borderRadius: Radius.pill, backgroundColor: color, marginBottom: Spacing.md }} />
       <Text style={{ ...Type.cardTitle, color: c.textStrong }}>{item.label}</Text>
       <Text numberOfLines={2} style={{ ...Type.small, color: c.textMuted, marginTop: Spacing.xs, minHeight: 34 }}>
         {item.blurb}
       </Text>
       <Text style={{ ...Type.small, color: Palette.orange, fontWeight: '700', marginTop: Spacing.md }}>
-        {item.price}
+        {`$${item.price}`}
       </Text>
     </Pressable>
   );

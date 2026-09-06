@@ -39,6 +39,35 @@ export const SectionColor = {
 } as const;
 
 /**
+ * Accent per exercise and per purchasable thing.
+ *
+ * A colour is design, not a rule the server owns, so this stays app-side. What
+ * it deliberately is NOT is a list of what exists: the keys are looked up, and
+ * anything absent falls back to a neutral. Add an exercise server-side and it
+ * appears here in the right place wearing the fallback colour, rather than
+ * vanishing because the app had never heard of it.
+ *
+ * That is the difference between a lookup and a list. A stale lookup shows the
+ * wrong colour. A stale list shows nothing at all.
+ */
+export const AccentFor: Record<string, string> = {
+  // Exercises, by registry key.
+  ex1: SectionColor.communication,
+  ex2: SectionColor.expectations,
+  ex3: SectionColor.reflection,
+  intimacy: SectionColor.intimacy,
+  conflict: SectionColor.conflict,
+  // Purchasable things, by catalogue key.
+  reflection: SectionColor.reflection,
+  budget: SectionColor.expectations,
+  checklist: Palette.clay,
+  workbook: Palette.orange,
+};
+
+/** The neutral an unknown key wears until someone gives it a colour. */
+export const AccentFallback = Palette.clay;
+
+/**
  * The four conflict-pattern frequency bands, green through red.
  * Mirrors BAND_COLORS in api/_conflict-results-prose.js.
  */
