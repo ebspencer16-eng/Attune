@@ -68,6 +68,22 @@ export const AccentFor: Record<string, string> = {
 export const AccentFallback = Palette.clay;
 
 /**
+ * Exercise status, matching the dashboard table on the web.
+ *
+ * Green reads as done, clay as underway, sand as not started. Deliberately the
+ * same three the site uses, because a couple checks progress in both places and
+ * two colour languages for one fact is how someone ends up unsure whether they
+ * finished.
+ */
+export const StatusColor = {
+  done: '#059669',
+  inProgress: Palette.clay,
+  waiting: '#D4C0A8',
+  /** Partner column, which is reported rather than actionable. */
+  waitingText: '#A8997F',
+} as const;
+
+/**
  * The four conflict-pattern frequency bands, green through red.
  * Mirrors BAND_COLORS in api/_conflict-results-prose.js.
  */

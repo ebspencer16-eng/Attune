@@ -191,6 +191,17 @@ export default async function handler(req) {
       primary,
       secondary,
       owned,
+      // Both names, which the app needs to label a two-column status table.
+      // client.ts already declared partnerName and the response has never
+      // carried it, so every app screen naming the partner said "your partner"
+      // to people whose partner has a name. Computed on `state` below since the
+      // first version of this endpoint; simply never returned.
+      firstName: state.firstName,
+      partnerName: state.partnerName,
+      // Results readiness, alongside the copy of it inside `state`. Insights
+      // read a top-level field that was never sent, so a couple who had both
+      // finished were shown their exercise progress instead of their results.
+      resultsReady,
       // What exists to buy, so the app renders the server's catalogue rather
       // than a copy that goes stale the moment an add-on is added or repriced.
       catalogue: CATALOGUE,

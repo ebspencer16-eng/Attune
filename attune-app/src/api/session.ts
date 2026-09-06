@@ -53,8 +53,11 @@ export function isSignedIn(): boolean {
  * baseUrl points at production because there is no staging environment. When
  * one exists this is the single place that changes.
  */
-export function initSession() {
+export function initSession(opts: { refresh?: () => Promise<boolean> } = {}) {
   configureApi({
+    // Passed in by the root layout rather than imported here: auth.ts already
+    // imports from this file, so importing it back would close a cycle.
+    refresh: opts.refresh,
     // www, not the apex. The apex 307-redirects to www, and React Native's
     // fetch does not carry the Authorization header across a redirect, so
     // every request arrived with no credentials and the API correctly

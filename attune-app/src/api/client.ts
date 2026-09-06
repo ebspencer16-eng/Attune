@@ -97,12 +97,28 @@ export type HomeResponse = {
   catalogue?: CatalogueItem[];
   /** Per-exercise progress for both partners, keyed by exercise key. */
   exercises?: Record<string, ExerciseState>;
+  /** The viewer's first name, for labelling their own column. */
+  firstName?: string | null;
+  /**
+   * Both of these are now genuinely returned. They were declared here and never
+   * sent, so every screen that used them silently got undefined: the status
+   * table said "your partner" instead of a name, and Insights showed exercise
+   * progress to couples whose results were ready.
+   */
   resultsReady?: boolean;
   partnerName?: string | null;
   greeting: string;
   primary: HomeCard;
   secondary: HomeCard[];
   badges: { toolbox: number; insights: number; practice: number; notes: number };
+  /**
+   * The only place readiness is reported. There used to be an optional
+   * top-level `resultsReady` declared here too, which the server has never
+   * sent: it exists on the internal state object api/home.js passes to the
+   * next-action engine, and never on the response. Insights read that phantom
+   * field, so it was always undefined and the tab showed exercise progress to
+   * couples whose results were ready and waiting.
+   */
   state: { resultsReady: boolean; coupleType: string | null; partnerLinked: boolean };
 };
 
@@ -110,14 +126,27 @@ export type HomeResponse = {
 
 let baseUrl = 'https://attune-relationships.com';
 let getToken: () => Promise<string | null> = async () => null;
+let refresh: (() => Promise<boolean>) | null = null;
 
-/** Called once at startup. Keeps auth out of every call site. */
-export function configureApi(opts: { baseUrl?: string; getToken: () => Promise<string | null> }) {
+/**
+ * Called once at startup. Keeps auth out of every call site.
+ *
+ * `refresh` is injected rather than imported. auth.ts already imports from
+ * session.ts, and session.ts imports from here, so reaching back for it
+ * directly would close a require cycle. The root layout owns both and hands it
+ * in, which is also what makes it easy to leave out in a test.
+ */
+export function configureApi(opts: {
+  baseUrl?: string;
+  getToken: () => Promise<string | null>;
+  refresh?: () => Promise<boolean>;
+}) {
   if (opts.baseUrl) baseUrl = opts.baseUrl.replace(/\/$/, '');
   getToken = opts.getToken;
+  refresh = opts.refresh ?? null;
 }
 
-async function request<T>(path: string, init: RequestInit = {}): Promise<ApiResult<T>> {
+async function request<T>(path: string, init: RequestInit = {}, retrying = false): Promise<ApiResult<T>> {
   const token = await getToken();
   if (!token) return { ok: false, error: { kind: 'unauthorized', detail: 'no token stored' } };
 
@@ -135,6 +164,18 @@ async function request<T>(path: string, init: RequestInit = {}): Promise<ApiResu
   }
 
   if (res.status === 401) {
+    // A Supabase access token lasts about an hour, so this fires constantly in
+    // normal use. refreshSession existed and was never called from anywhere,
+    // which meant every session died after an hour and the only way back was
+    // typing a password again.
+    //
+    // Once per request. If the refresh works the original call is replayed with
+    // the new token; if it does not, this is genuinely signed out and the
+    // screen should say so.
+    if (!retrying && refresh) {
+      const renewed = await refresh();
+      if (renewed) return request<T>(path, init, true);
+    }
     // Read the body: the endpoint distinguishes a missing token from an
     // invalid one, and those need different fixes.
     let detail = 'server returned 401';
