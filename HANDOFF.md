@@ -168,3 +168,64 @@ Short declarative sentences. No em dashes. No hedging language. No AI-sounding c
 - Print workbook POD
 
 *Last updated: Session 16 — April 2026*
+
+---
+
+## Session 17 Notes — September 6, 2026
+
+The Notes tab, the three copied lists CLAUDE.md named, and two anchor bugs.
+
+**Done:**
+- **Notes tab is built** (`attune-app/src/app/notes.tsx`), replacing the
+  placeholder. One list, newest first: your notes, your annotations, and what
+  your partner shared. Shared notes are read-only, annotations show the wording
+  they were written against, and a compose sheet writes new ones with sharing
+  as its own switch.
+- **Anchor labels derive** (`attune-app/src/constants/anchors.ts`). An
+  annotation stores `results_dimension` + `conflict` and nothing else, so
+  something has to turn that into "Conflict Style". It reads the standard tags
+  the server already seeds, whose `standard_key` is the same shape as the
+  anchor, rather than keeping a copy of the dimension list.
+- **The three lists are gone.** `EXERCISES`, `CATALOGUE` and `CATEGORIES` are
+  deleted from the app. `/api/home` returns exercises with labels and order
+  plus a new `catalogue`; `/api/posts` returns `categories`. New sources:
+  `api/_catalogue.js`, `api/_lib/post-categories.js`. `api/home.js` was doing
+  the same thing server-side and now derives too.
+- **Two gates**, both verified by planting the bug they catch:
+  `check-exercise-registry.mjs` extended to the app, and a new
+  `check-app-derives.mjs`. Wired into `npm run check` and `npm run build`.
+- **Conflict Patterns can be annotated.** The validator refused every
+  `conflict-*` section, so those notes were dropped. The section list is now
+  `api/_lib/results-sections.js`.
+- **In Practice highlights can name their post.** `post_block` anchors are
+  `post-slug#block-id` now. The old bare-block form is still read.
+
+**Deliberately not built: Notes filtering.**
+
+Filtering by tag, by source, by author, and highlight against commentary is
+deferred until the Results experience exists. Every one of those filters cuts
+on something Results and In Practice have not defined yet, so building the
+controls first means guessing at the anchors and reworking them once the real
+screens land. The one list is the whole screen until then.
+
+**Next step: the Results experience.** It is the largest remaining piece, and
+Notes anchors into it. `app/SCREENS.md` has it screen by screen.
+
+**Open, and worth knowing:**
+- The results section list is still restated in three places:
+  `api/_lib/results-sections.js` (canonical), `src/App.jsx`
+  (`availableSections()`), and `attune-app/src/constants/anchors.ts`. App.jsx
+  can import the canonical one; attune-app cannot, since it is a separate
+  package. Fold these together while building Results.
+- Exercise completion changed. It now uses `isExerciseDone`, so a record-shaped
+  exercise counts as done only when `completedAt` is set. Intimacy and Conflict
+  Patterns may read as unfinished where they previously read as finished. The
+  old check marked them done the moment someone opened them.
+- `node_modules/` is partly tracked in git (`.package-lock.json`,
+  `esbuild/bin/esbuild`) despite being gitignored. A local reinstall shows them
+  as modified. Worth `git rm --cached`ing.
+- The local `node_modules` was corrupted this session (`@supabase/*` and
+  `@rollup/rollup-darwin-arm64` incomplete), which broke `npx vite build`. A
+  clean `npm ci` fixed it. Not a code problem, but it will look like one.
+
+*Last updated: Session 17 — September 2026*

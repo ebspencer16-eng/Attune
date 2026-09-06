@@ -142,7 +142,14 @@ async function request<T>(path: string, init: RequestInit = {}): Promise<ApiResu
     return { ok: false, error: { kind: 'unauthorized', detail } };
   }
   if (res.status === 404) return { ok: false, error: { kind: 'not_found' } };
-  if (!res.ok) return { ok: false, error: { kind: 'server', status: res.status } };
+  if (!res.ok) {
+    // Read the body here too. It was read for 401 and thrown away for every
+    // other failure, so a 500 arrived as a bare status with the server's own
+    // explanation discarded. That is the exact moment the explanation matters.
+    let message;
+    try { const b = await res.json(); if (b?.error) message = String(b.error); } catch { /* no body */ }
+    return { ok: false, error: { kind: 'server', status: res.status, message } };
+  }
 
   try {
     const body = await res.json();
