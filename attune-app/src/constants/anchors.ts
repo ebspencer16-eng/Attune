@@ -172,12 +172,23 @@ export function resolveAnchor(note: AnchoredNote, ctx: AnchorContext): ResolvedA
       return { groupKey: `post:${key}`, label: title ?? 'In Practice', color: Palette.clay };
     }
 
-    case 'post_block':
-      // A block id does not carry the post it belongs to, so there is no way to
-      // name the piece from the note alone. These group together under one
-      // header and lean on the quoted wording to say where each came from.
-      // Fixing it properly means storing the post with the block on write.
-      return { groupKey: 'post_block', label: 'In Practice', color: Palette.clay };
+    case 'post_block': {
+      // 'post-slug#block-id'. The post travels with the block now, so a
+      // highlight can name the piece it came from. It could not before: a block
+      // id is unique only within its post, so every highlight collapsed into one
+      // anonymous group and relied on the quoted text to say where it came from.
+      //
+      // The bare-block form is still read, because notes written under the old
+      // shape are someone's words and must not disappear. They keep the old
+      // behaviour: grouped together, named only as In Practice.
+      const [postId, blockId] = key.split('#');
+      if (!blockId) return { groupKey: 'post_block', label: 'In Practice', color: Palette.clay };
+      return {
+        groupKey: `post:${postId}`,
+        label: ctx.postTitle(postId) ?? 'In Practice',
+        color: Palette.clay,
+      };
+    }
 
     default:
       return { groupKey: `${type}:${key}`, label: humanise(key), color: null };

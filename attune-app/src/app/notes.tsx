@@ -88,7 +88,8 @@ export default function NotesScreen() {
     // them. Most people have no annotations at all, and a tab that opens five
     // connections to render three cards is a tab that feels slow on a train.
     const anns = n.data.annotations;
-    if (anns.some((a) => a.anchor_type === 'post')) {
+    // post_block carries its post id too, so both kinds need the titles.
+    if (anns.some((a) => a.anchor_type === 'post' || a.anchor_type === 'post_block')) {
       const p = await fetchPosts();
       if (p.ok) {
         setPostTitles(Object.fromEntries(p.data.posts.map((post) => [post.id, post.title])));

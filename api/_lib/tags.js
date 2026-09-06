@@ -19,6 +19,7 @@ import { DIM_META } from '../_workbook-content.js';
 import { DIM_KEYS } from '../_type-engine.js';
 import { RESPONSIBILITY_CATEGORIES } from '../_questions.js';
 import { INTIMACY_DIMENSIONS } from '../_intimacy-questions.js';
+import { isResultsSection } from './results-sections.js';
 
 /** Colours match the results domains, so a tag looks like where it came from. */
 const DOMAIN_COLOR = {
@@ -99,7 +100,11 @@ export function isValidAnchor(type, key) {
     case 'results_dimension':
       return Object.keys(DIM_KEYS).includes(key);
     case 'results_section':
-      return /^(highlights|couple-type|comm-(overview|inner|connection|hard)|exp-(overview|convo-\d+)|reflection-[a-z]+|intimacy-[a-z]+|what-comes-next)$/.test(key);
+      // Was a regex written before Conflict Patterns shipped, which refused
+      // every conflict-* section outright: annotating one returned "invalid
+      // anchor" and the note was simply never saved. The list is now shared
+      // with the results UI rather than described twice.
+      return isResultsSection(key);
     case 'results_question':
       return Object.values(DIM_KEYS).flat().includes(key);
     case 'expectations_item':
@@ -107,8 +112,21 @@ export function isValidAnchor(type, key) {
     case 'intimacy_dimension':
       return INTIMACY_DIMENSIONS.some(d => d.id === key);
     case 'post':
-    case 'post_block':
       return key.length > 0 && key.length <= 200;
+
+    case 'post_block': {
+      // 'post-slug#block-id', both halves required.
+      //
+      // A block id is stable but only unique within its post, and stored alone
+      // it does not say which post that is. So a highlight could never name the
+      // piece it came from: the Notes screen had to group every In Practice
+      // highlight under one anonymous heading and hope the quoted text was
+      // enough. Carrying the post id with it is what makes a highlight
+      // resolvable back to the thing it highlights.
+      if (key.length > 200) return false;
+      const parts = key.split('#');
+      return parts.length === 2 && !!parts[0] && !!parts[1];
+    }
     default:
       return false;
   }
