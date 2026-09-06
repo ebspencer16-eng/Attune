@@ -228,4 +228,49 @@ Notes anchors into it. `app/SCREENS.md` has it screen by screen.
   `@rollup/rollup-darwin-arm64` incomplete), which broke `npx vite build`. A
   clean `npm ci` fixed it. Not a code problem, but it will look like one.
 
+### Continued: Insights, results gating, and the couple type blocker
+
+**Done since the above:**
+- **Insights switches to results when results exist.** It was reading
+  `home.resultsReady`, which /api/home has never sent: it lives on the internal
+  state object passed to the next-action engine, never on the response. Always
+  undefined, so a couple with everything finished saw a progress list forever.
+  `partnerName` was the same shape of bug, which is why the app said "your
+  partner" to people whose partner has a name. Both are returned now, along
+  with `firstName`, and the phantom declarations are gone from the client type.
+- **The status table matches the website dashboard.** Row per exercise, column
+  per partner, positional numbering, same three status colours. The web's own
+  column is clickable and reads Start or Resume; this one is not, because the
+  exercises live on the website and a button that cannot do what it names is
+  worse than a plain status. Whether these rows should hand off to the browser
+  is a product question.
+- **Ranked gaps carry real labels**, applied when results are read rather than
+  when they are computed. Results are frozen, so decorating at compute time
+  reaches only couples who finish from now on and leaves everyone else reading
+  raw keys. Scores are frozen; names for things should not be.
+- **Sessions survive.** `refreshSession` existed and was called from nowhere, so
+  every session died after about an hour and the only way back was typing a
+  password. The client now refreshes once on a 401 and replays the request.
+
+**The next real piece: move couple type content server-side.**
+
+/api/results returns the code, `WX`. The name a customer should read, "The
+jumpstart", with its tagline, description, nuance and famous duos, lives in
+`src/App.jsx` as web-bundle content. The app cannot ask for it.
+
+So the couple type card is deliberately not rendered. The two ways to make it
+work are moving that content behind /api/results, or copying it into the app.
+The second is the failure this project keeps having, and here it would be copy
+about someone's relationship going stale rather than a label.
+
+Every remaining results screen needs the same thing, so this move comes before
+Highlights, Couple Type, the Communication domains, Expectations, Reflection,
+Intimacy, the four Conflict Patterns screens, and What Comes Next.
+
+**Verifying a server change in the simulator:** deep-linking to a tab that is
+already mounted does not remount it, so no refetch happens and the old payload
+stays on screen. This read as "the deploy has not landed" twice. Terminate and
+relaunch (`xcrun simctl terminate booted host.exp.Exponent`) to actually see a
+server-side change.
+
 *Last updated: Session 17 — September 2026*
