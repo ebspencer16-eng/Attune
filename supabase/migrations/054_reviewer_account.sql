@@ -40,6 +40,22 @@
 -- see the add-on sections one day, fill ex3_answers, intimacy_data and
 -- conflict_data with real answers here rather than granting empty add-ons.
 --
+-- ── WHY ENTITLEMENTS ARE CLEARED ───────────────────────────────────────────
+-- Entitlements are cumulative by design: mergeEntitlementsGrantOnly ORs
+-- capabilities so a partial or failed resync can only ever add access, never
+-- strip it. For a paying customer that is exactly right.
+--
+-- It also means downgrading this couple from premium to core in the profile
+-- does nothing on its own. Signing in once while they were premium wrote
+-- premium entitlements to profiles.entitlements, and every sync after that
+-- merged them back on top. The dashboard kept showing five exercises.
+--
+-- So the column is set to null here, letting it recompute from the package.
+--
+-- THE BROWSER KEEPS A COPY TOO. Local grants merge the same way, so after
+-- running this, sign out fully before signing back in as the reviewer. Signing
+-- out clears the stored grants; reloading the page does not.
+--
 -- ── WHY THE LINKING IS A SEPARATE STEP ─────────────────────────────────────
 -- profiles.partner_profile_id is a foreign key to profiles.id, so neither row
 -- can point at the other until both exist. A first version set the link inside
@@ -80,11 +96,13 @@ begin
 
   insert into public.profiles as p (
     id, name, pronouns, partner_pronouns,
+    partner_name, partner_email, partner_joined, entitlements,
     pkg, addon_intimacy, addon_conflict, addon_reflection, addon_budget, addon_checklist,
     profile_setup_complete, ex1_answers, ex2_answers,
     ex3_answers, intimacy_data, conflict_data
   ) values (
     a_id, 'Alex', 'they/them', 'she/her',
+    'Sam', 'review-partner@attune-relationships.com', true, null,
     'core', false, false, false, false, false,
     true, '{"en4": 1, "en6": 4, "ex6": 2, "ex7": 5, "ex8": 3, "rs1": 1, "rs3": 4, "lv1": 2, "lv2": 5, "bd1": 3, "bd3": 1, "bd4": 4, "nd1": 2, "nd5": 5, "cf1": 3, "cf2": 1, "cf3": 4, "st1": 2, "rp2": 5, "rp3": 3, "rp6": 1, "fb2": 4, "fb5": 2, "ls1": 5, "ls3": 3}'::jsonb, '{"responsibilities": {"household__Cooking meals": "Both of us", "household__Grocery shopping and meal planning": "Alex", "household__Keeping the home tidy day-to-day": "Sam", "household__Managing home repairs and maintenance": "Both of us", "household__Managing the family calendar": "Alex", "household__Planning and organizing social events, holidays, and gatherings": "Sam", "household__Planning and booking vacations": "Both of us", "financial__Paying bills and managing day-to-day finances": "Alex", "financial__Making major financial decisions": "Sam", "financial__Managing savings and investments": "Both of us", "financial__Filing taxes": "Alex", "career__Being the primary income earner": "Sam", "career__Whose career shapes major family decisions, where you live, your schedule, your lifestyle": "Both of us", "career__Who makes career sacrifices when the family needs it": "Alex", "emotional__Carrying the mental load, remembering, anticipating, planning ahead": "Both of us", "emotional__Tracking the emotional wellbeing of the household": "Alex", "extended_family__Planning visits with {userName}''s family": "Alex", "extended_family__Gifting for {userName}''s family": "Sam", "extended_family__Planning visits with {partnerName}''s family": "Both of us", "extended_family__Gifting for {partnerName}''s family": "Alex"}, "childhood": {}, "bothDetail": {}, "childhoodBothDetail": {}, "life": {"lq_children": "1", "lq_involve_user": "2", "lq_involve_partner": "3", "lq_family_conf": "4", "lq_location": "1", "lq_social": "2", "lq_routine": "3", "lq_faith": "4"}}'::jsonb,
     null, null, null
@@ -93,6 +111,14 @@ begin
     name = excluded.name,
     pronouns = excluded.pronouns,
     partner_pronouns = excluded.partner_pronouns,
+    partner_name = excluded.partner_name,
+    partner_email = excluded.partner_email,
+    partner_joined = excluded.partner_joined,
+    -- Cleared, not merged. Entitlements are stored grant-only on purpose, so a
+    -- resync can never take access away. That is right for a customer and
+    -- wrong here: signing in once while this couple was premium wrote premium
+    -- entitlements, and every later sync ORed them back on top of core.
+    entitlements = null,
     pkg = excluded.pkg,
     addon_intimacy = excluded.addon_intimacy,
     addon_conflict = excluded.addon_conflict,
@@ -108,11 +134,13 @@ begin
 
   insert into public.profiles as p (
     id, name, pronouns, partner_pronouns,
+    partner_name, partner_email, partner_joined, entitlements,
     pkg, addon_intimacy, addon_conflict, addon_reflection, addon_budget, addon_checklist,
     profile_setup_complete, ex1_answers, ex2_answers,
     ex3_answers, intimacy_data, conflict_data
   ) values (
     b_id, 'Sam', 'she/her', 'they/them',
+    'Alex', 'review@attune-relationships.com', true, null,
     'core', false, false, false, false, false,
     true, '{"en4": 1, "en6": 3, "ex6": 5, "ex7": 2, "ex8": 4, "rs1": 1, "rs3": 3, "lv1": 5, "lv2": 2, "bd1": 4, "bd3": 1, "bd4": 3, "nd1": 5, "nd5": 2, "cf1": 4, "cf2": 1, "cf3": 3, "st1": 5, "rp2": 2, "rp3": 4, "rp6": 1, "fb2": 3, "fb5": 5, "ls1": 2, "ls3": 4}'::jsonb, '{"responsibilities": {"household__Cooking meals": "Alex", "household__Grocery shopping and meal planning": "Sam", "household__Keeping the home tidy day-to-day": "Both of us", "household__Managing home repairs and maintenance": "Alex", "household__Managing the family calendar": "Sam", "household__Planning and organizing social events, holidays, and gatherings": "Both of us", "household__Planning and booking vacations": "Alex", "financial__Paying bills and managing day-to-day finances": "Sam", "financial__Making major financial decisions": "Both of us", "financial__Managing savings and investments": "Alex", "financial__Filing taxes": "Sam", "career__Being the primary income earner": "Both of us", "career__Whose career shapes major family decisions, where you live, your schedule, your lifestyle": "Alex", "career__Who makes career sacrifices when the family needs it": "Sam", "emotional__Carrying the mental load, remembering, anticipating, planning ahead": "Alex", "emotional__Tracking the emotional wellbeing of the household": "Sam", "extended_family__Planning visits with {userName}''s family": "Sam", "extended_family__Gifting for {userName}''s family": "Both of us", "extended_family__Planning visits with {partnerName}''s family": "Alex", "extended_family__Gifting for {partnerName}''s family": "Sam"}, "childhood": {}, "bothDetail": {}, "childhoodBothDetail": {}, "life": {"lq_children": "2", "lq_involve_user": "3", "lq_involve_partner": "4", "lq_family_conf": "1", "lq_location": "2", "lq_social": "3", "lq_routine": "4", "lq_faith": "1"}}'::jsonb,
     null, null, null
@@ -121,6 +149,14 @@ begin
     name = excluded.name,
     pronouns = excluded.pronouns,
     partner_pronouns = excluded.partner_pronouns,
+    partner_name = excluded.partner_name,
+    partner_email = excluded.partner_email,
+    partner_joined = excluded.partner_joined,
+    -- Cleared, not merged. Entitlements are stored grant-only on purpose, so a
+    -- resync can never take access away. That is right for a customer and
+    -- wrong here: signing in once while this couple was premium wrote premium
+    -- entitlements, and every later sync ORed them back on top of core.
+    entitlements = null,
     pkg = excluded.pkg,
     addon_intimacy = excluded.addon_intimacy,
     addon_conflict = excluded.addon_conflict,
@@ -169,6 +205,8 @@ select
   (p.partner_profile_id is not null)                            as partner_linked,
   (p.ex1_answers is not null and p.ex1_answers <> '{}'::jsonb)  as ex1_done,
   (p.ex2_answers is not null and p.ex2_answers <> '{}'::jsonb)  as ex2_done,
+  p.partner_name,
+  (p.entitlements is null)                                      as entitlements_cleared,
   (coalesce(p.addon_intimacy,false) or coalesce(p.addon_conflict,false)
      or coalesce(p.addon_reflection,false))                     as owns_addons
 from public.profiles p
