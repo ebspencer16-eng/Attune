@@ -365,6 +365,38 @@ export function deleteNote(id: string) {
   });
 }
 
+/**
+ * Delete this account, permanently.
+ *
+ * The user id is not passed in from a screen. The endpoint requires it and
+ * checks it against the token, so it is read from the token here rather than
+ * letting a caller hand in an id: a screen that can name the account it deletes
+ * is a screen that can be made to name the wrong one.
+ */
+export async function deleteAccount(): Promise<ApiResult<{ ok: true }>> {
+  const token = await getToken();
+  if (!token) return { ok: false, error: { kind: 'unauthorized', detail: 'no token stored' } };
+
+  // The subject claim of the JWT is the Supabase user id. Decoded rather than
+  // fetched so deletion needs one round trip, not two.
+  let userId: string | null = null;
+  try {
+    const payload = token.split('.')[1];
+    const pad = payload.length % 4 ? '='.repeat(4 - (payload.length % 4)) : '';
+    const json = atob(payload.replace(/-/g, '+').replace(/_/g, '/') + pad);
+    userId = JSON.parse(json)?.sub ?? null;
+  } catch {
+    userId = null;
+  }
+  if (!userId) return { ok: false, error: { kind: 'unauthorized', detail: 'token has no subject' } };
+
+  return request<{ ok: true }>('/api/delete-account', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ userId }),
+  });
+}
+
 export function fetchNotifications() {
   return request<{ ok: true; notifications: Notification[]; unread: number }>('/api/notifications');
 }

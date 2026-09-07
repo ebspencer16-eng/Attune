@@ -23,6 +23,7 @@ import { fetchHome } from '@/api/client';
 import type { ApiError, HomeCard, HomeResponse } from '@/api/client';
 import { ScreenError, ScreenLoading } from '@/components/screen-states';
 import SignIn from '@/components/sign-in';
+import Settings from '@/components/settings';
 import { Colors, MaxContentWidth, Palette, Radius, Spacing, Type } from '@/constants/attune-theme';
 
 const c = Colors.light;
@@ -34,6 +35,7 @@ export default function HomeScreen() {
   const [error, setError] = useState<ApiError | null>(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
 
   const load = useCallback(async () => {
     const res = await fetchHome();
@@ -92,9 +94,28 @@ export default function HomeScreen() {
               tintColor="rgba(255,255,255,0.8)"
             />
           }>
-          <Text style={{ ...Type.eyebrow, color: 'rgba(255,255,255,0.55)', marginTop: Spacing.sm }}>
-            Attune
-          </Text>
+          {/* The wordmark and the way into Settings share a row. Settings is
+              where account deletion lives, which App Review has to be able to
+              find without being told where it is. */}
+          <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: Spacing.sm }}>
+            <Text style={{ ...Type.eyebrow, color: 'rgba(255,255,255,0.55)' }}>
+              Attune
+            </Text>
+            <Pressable
+              onPress={() => setSettingsOpen(true)}
+              hitSlop={12}
+              accessibilityRole="button"
+              accessibilityLabel="Settings"
+              style={{
+                paddingHorizontal: Spacing.md, paddingVertical: Spacing.xs,
+                borderRadius: Radius.pill, borderWidth: 1,
+                borderColor: 'rgba(255,255,255,0.35)',
+              }}>
+              <Text style={{ ...Type.small, color: 'rgba(255,255,255,0.9)', fontWeight: '700' }}>
+                Settings
+              </Text>
+            </Pressable>
+          </View>
           <Text
             style={{
               ...Type.hero, color: Palette.white, marginTop: Spacing.sm, marginBottom: Spacing.xl,
@@ -128,6 +149,13 @@ export default function HomeScreen() {
           ) : null}
         </ScrollView>
       </SafeAreaView>
+
+      {settingsOpen ? (
+        <Settings
+          onClose={() => setSettingsOpen(false)}
+          onSignedOut={() => { setSettingsOpen(false); setLoading(true); load(); }}
+        />
+      ) : null}
     </View>
   );
 }
