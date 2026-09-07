@@ -3,7 +3,10 @@
  *
  * POST { userId }   (Authorization: Bearer <user access token>)
  *   → Verifies the token belongs to userId, then:
- *     1. Archives de-identified research data to deleted_user_archive
+ *     1. Archives de-identified research data to deleted_user_archive, unless
+ *        the person has opted out of research use on /privacy-choices or by
+ *        sending Global Privacy Control. An unreadable preference is treated
+ *        as opt-out.
  *        (exercise answers, couple type, expectation gaps, package tier,
  *         signup date, pronouns — NO names, emails, or invite codes).
  *     2. Removes all PII: workbooks (storage + rows), orders (contain
@@ -61,10 +64,28 @@ export default async function handler(req) {
       .eq('id', userId)
       .maybeSingle();
 
+    // Has this person opted out of research use, on the privacy choices page or
+    // by sending Global Privacy Control? If so the archive is skipped entirely.
+    // The opt-out is only honoured if it is actually read somewhere, and this is
+    // the one place that keeps anything after deletion.
+    //
+    // Read failure means no archive. A preference we cannot confirm is treated
+    // as opt-out, because the reverse keeps data from someone who may have
+    // asked us not to.
+    let optedOutOfResearch = true;
+    try {
+      const { data: prefs, error: prefsErr } = await admin.from('privacy_preferences')
+        .select('opt_out_research')
+        .eq('owner_id', userId)
+        .maybeSingle();
+      if (!prefsErr) optedOutOfResearch = !!prefs?.opt_out_research;
+    } catch (e) { /* stays true: no archive */ }
+    summary.researchOptOut = optedOutOfResearch;
+
     // Only write the archive row if there's something worth archiving.
     // Users who signed up but never finished an exercise have no research value.
     const hasAnswers = profile && (profile.ex1_answers || profile.ex2_answers || profile.ex3_answers);
-    if (hasAnswers) {
+    if (hasAnswers && !optedOutOfResearch) {
       // Compute couple_type and exp_gaps from the answers if a partner profile
       // exists with answers too. Without a partner, leave them null — the
       // archive is per-user not per-couple.

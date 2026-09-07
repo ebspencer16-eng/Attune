@@ -4,6 +4,16 @@
       "source": "/",
       "destination": "/home",
       "permanent": false
+    },
+    {
+      "source": "/privacy",
+      "destination": "/legal#privacy",
+      "permanent": false
+    },
+    {
+      "source": "/terms",
+      "destination": "/legal#terms",
+      "permanent": false
     }
   ],
   "rewrites": [
@@ -98,6 +108,14 @@
     {
       "source": "/legal",
       "destination": "/legal.html"
+    },
+    {
+      "source": "/privacy-choices",
+      "destination": "/privacy-choices.html"
+    },
+    {
+      "source": "/api/privacy-choices",
+      "destination": "/api/privacy-choices.js"
     },
     {
       "source": "/faq",
@@ -297,14 +315,44 @@
     }
   ],
   "headers": [
-    { "source": "/assets/(.*)", "headers": [{ "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }] },
-    { "source": "/app", "headers": [{ "key": "Cache-Control", "value": "no-cache, must-revalidate" }] },
-    { "source": "/app/(.*)", "headers": [{ "key": "Cache-Control", "value": "no-cache, must-revalidate" }] },
+    {
+      "source": "/assets/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    },
+    {
+      "source": "/app",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-cache, must-revalidate"
+        }
+      ]
+    },
+    {
+      "source": "/app/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-cache, must-revalidate"
+        }
+      ]
+    },
     {
       "source": "/.well-known/apple-app-site-association",
       "headers": [
-        { "key": "Content-Type", "value": "application/json" },
-        { "key": "Cache-Control", "value": "no-cache, must-revalidate" }
+        {
+          "key": "Content-Type",
+          "value": "application/json"
+        },
+        {
+          "key": "Cache-Control",
+          "value": "no-cache, must-revalidate"
+        }
       ]
     }
   ],

@@ -12323,6 +12323,13 @@ export default function App() {
 
   // ── VIEW STATE ────────────────────────────────────────────────────────────
   const [view, setView] = useState(initialView);
+  // Account deletion, on the account view. Kept as four small pieces of state
+  // rather than one object so a half-finished confirmation cannot leave the
+  // button enabled with the typed word cleared.
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [deleteConfirm, setDeleteConfirm] = useState("");
+  const [deleteBusy, setDeleteBusy] = useState(false);
+  const [deleteErr, setDeleteErr] = useState("");
   // Which copy version this couple's results render from. Comes from
   // /api/results, which reads it off the frozen results row. Null means
   // current, which is right for demo mode and for couples stamped before
@@ -15507,6 +15514,106 @@ export default function App() {
                         style={{ fontSize: "0.75rem", fontWeight: 600, color: "#ef4444", fontFamily: font.body, background: "none", border: "none", cursor: "pointer", padding: 0 }}>
                         Sign out
                       </button>
+                    </div>
+                  </div>
+                )}
+
+                {/* Delete account.
+                    The endpoint has existed since migration 006 and nothing
+                    ever called it, so the privacy policy promised a control
+                    that was not in the product. This is that control.
+
+                    Typing DELETE rather than a confirm dialog: this removes a
+                    couple's answers and cannot be undone, and a dialog people
+                    dismiss by habit is not consent to that. */}
+                {isLoggedIn && (
+                  <div style={{ background: "white", border: "1.5px solid #F0C9C0", borderRadius: 16, overflow: "hidden", marginTop: "1.25rem" }}>
+                    <div style={{ padding: "1rem 1.35rem", borderBottom: "1px solid #F9E7E2" }}>
+                      <div style={{ fontSize: "0.6rem", letterSpacing: ".18em", textTransform: "uppercase", color: "#B4463A", fontWeight: 700, fontFamily: font.body }}>Delete account</div>
+                    </div>
+                    <div style={{ padding: "1.1rem 1.35rem" }}>
+                      {!deleteOpen ? (
+                        <>
+                          <p style={{ fontSize: "0.82rem", color: "#5C4A38", fontFamily: font.body, lineHeight: 1.7, margin: "0 0 0.9rem" }}>
+                            Deleting removes your name, email, login, orders and workbooks. Your answers go with them.
+                            Your partner keeps their own answers and their own results.
+                          </p>
+                          <p style={{ fontSize: "0.82rem", color: "#5C4A38", fontFamily: font.body, lineHeight: 1.7, margin: "0 0 1rem" }}>
+                            Unless you have opted out, we keep a de-identified copy of your answers with no name or
+                            email attached. You can stop that on{" "}
+                            <a href="/privacy-choices" style={{ color: "#C17F47" }}>Your privacy choices</a>{" "}
+                            before you delete.
+                          </p>
+                          <button
+                            onClick={() => { setDeleteOpen(true); setDeleteErr(""); setDeleteConfirm(""); }}
+                            style={{ fontSize: "0.75rem", fontWeight: 700, color: "#B4463A", fontFamily: font.body, background: "none", border: "1.5px solid #F0C9C0", borderRadius: 10, cursor: "pointer", padding: "0.5rem 0.9rem" }}>
+                            Delete my account
+                          </button>
+                        </>
+                      ) : (
+                        <>
+                          <p style={{ fontSize: "0.82rem", color: "#5C4A38", fontFamily: font.body, lineHeight: 1.7, margin: "0 0 0.75rem" }}>
+                            This cannot be undone. Type <strong>DELETE</strong> to confirm.
+                          </p>
+                          <input
+                            value={deleteConfirm}
+                            onChange={(e) => { setDeleteConfirm(e.target.value); setDeleteErr(""); }}
+                            placeholder="DELETE"
+                            aria-label="Type DELETE to confirm"
+                            style={{ width: "100%", padding: "0.6rem 0.75rem", border: "1.5px solid #E8DDD0", borderRadius: 10, fontSize: "0.85rem", fontFamily: font.body, marginBottom: "0.75rem" }}
+                          />
+                          {deleteErr && (
+                            <p style={{ fontSize: "0.78rem", color: "#B4463A", fontFamily: font.body, margin: "0 0 0.75rem" }}>{deleteErr}</p>
+                          )}
+                          <div style={{ display: "flex", gap: "0.6rem" }}>
+                            <button
+                              disabled={deleteBusy || deleteConfirm.trim() !== "DELETE"}
+                              onClick={async () => {
+                                setDeleteBusy(true); setDeleteErr("");
+                                try {
+                                  const { supabase: sb, hasSupabase } = await import('./supabase.js');
+                                  if (!hasSupabase()) throw new Error('no-auth');
+                                  const { data: { session } } = await sb.auth.getSession();
+                                  const tok = session?.access_token;
+                                  const uid = session?.user?.id;
+                                  if (!tok || !uid) throw new Error('no-session');
+                                  const res = await fetch('/api/delete-account', {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${tok}` },
+                                    body: JSON.stringify({ userId: uid }),
+                                  });
+                                  const body = await res.json().catch(() => ({}));
+                                  if (!res.ok || !body.ok) throw new Error(body.error || 'failed');
+                                  // The account is gone server-side. Clear the
+                                  // device before leaving, or the next visit
+                                  // loads cached answers for an account that no
+                                  // longer exists.
+                                  try { await sb.auth.signOut(); } catch {}
+                                  setAccount(null);
+                                  try { localStorage.removeItem("attune_account"); } catch {}
+                                  clearAllUserLocalStorage();
+                                  window.location.href = '/home?deleted=1';
+                                } catch (err) {
+                                  setDeleteBusy(false);
+                                  setDeleteErr(
+                                    String(err.message) === 'no-session'
+                                      ? 'Your session has expired. Sign in again and retry.'
+                                      : 'That did not go through. Try again, or email hello@attune-relationships.com.'
+                                  );
+                                }
+                              }}
+                              style={{ fontSize: "0.75rem", fontWeight: 700, color: "white", fontFamily: font.body, background: deleteConfirm.trim() === "DELETE" && !deleteBusy ? "#B4463A" : "#D9C9C4", border: "none", borderRadius: 10, cursor: deleteConfirm.trim() === "DELETE" && !deleteBusy ? "pointer" : "default", padding: "0.55rem 1rem" }}>
+                              {deleteBusy ? "Deleting" : "Delete permanently"}
+                            </button>
+                            <button
+                              disabled={deleteBusy}
+                              onClick={() => { setDeleteOpen(false); setDeleteConfirm(""); setDeleteErr(""); }}
+                              style={{ fontSize: "0.75rem", fontWeight: 600, color: "#8C7A68", fontFamily: font.body, background: "none", border: "none", cursor: "pointer", padding: "0.55rem 0.4rem" }}>
+                              Keep my account
+                            </button>
+                          </div>
+                        </>
+                      )}
                     </div>
                   </div>
                 )}

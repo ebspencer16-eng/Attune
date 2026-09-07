@@ -40,6 +40,7 @@
   p{font-size:.9rem;color:#3a2e24;line-height:1.8;margin-bottom:1rem}
   ul{font-size:.9rem;color:#3a2e24;line-height:1.8;margin-bottom:1rem;padding-left:1.4rem}
   li{margin-bottom:.35rem}
+  .todo{background:#FFF8E6;border:1px solid #E8CF8F;border-left:3px solid var(--clay);border-radius:8px;padding:.9rem 1rem;font-size:.85rem;color:#5a4630;margin-bottom:1rem}
   .footer-note{margin-top:3rem;padding:1.5rem;background:white;border:1px solid var(--stone);border-radius:12px;font-size:.82rem;color:var(--muted);line-height:1.7}
   .footer-note a{color:var(--clay);text-decoration:none}
   .site-footer{background:var(--ink);color:rgba(255,255,255,.55);padding:4rem 0 2rem;width:100%;margin-left:0;margin-right:0;max-width:none;display:block}
@@ -115,177 +116,225 @@
   </div>
 
   <div class="doc active" id="doc-privacy">
-    <h1 id="privacy">Privacy Policy</h1>
-    <p class="doc-meta">Effective date: May 15, 2026 · Attune Relationships LLC</p>
+  <h1>Privacy Policy</h1>
+  <p class="doc-meta">Effective date: TODO before publishing &middot; Attune Relationships LLC</p>
 
-    <p>Attune Relationships LLC ("Attune," "we," "us," or "our") is committed to protecting the privacy of both individuals in a couple. This Privacy Policy explains what data we collect, how we use it, and how we protect it. Because Attune involves sensitive relational data shared between two people, we apply heightened care to how that data is handled.</p>
+  <p>Attune is used by two people about their relationship. That makes this
+  document different from most privacy policies you have read, because the
+  question that matters is not only what we hold. It is what your partner sees.
+  Section 3 answers that, and it is the section worth reading.</p>
 
-    <h2>1. Information we collect</h2>
-    <p><strong>a. Information you provide directly</strong></p>
-    <ul>
-      <li>Account registration data: name, email address, and password</li>
-      <li>Partner pairing data: the email address of your partner when you send an invitation</li>
-      <li>Assessment responses: your answers to all assessment questions and exercises</li>
-      <li>Purchase information: billing name, email, and payment method (processed by Stripe; we do not store full card numbers)</li>
-    </ul>
-    <p><strong>b. Information collected automatically</strong></p>
-    <ul>
-      <li>Device and browser type, IP address, and operating system</li>
-      <li>Pages visited, time spent, and interactions within the platform</li>
-      <li>Session data and authentication tokens</li>
-    </ul>
-    <p><strong>c. Information we do not collect</strong></p>
-    <ul>
-      <li>We do not collect biometric data, government identification, or sensitive health information</li>
-      <li>We do not purchase or import third-party data about you</li>
-    </ul>
+  <h2>1. What we collect</h2>
+  <p>From you, directly:</p>
+  <ul>
+    <li>Your name, email address, and password.</li>
+    <li>Your partner's email address, when you invite them.</li>
+    <li>Your answers to every exercise you complete.</li>
+    <li>Optional profile details you choose to give: pronouns, age range, gender, relationship status, how long you have been together, and whether you have children.</li>
+    <li>Billing name and email at checkout. Card details go straight to Stripe. We never see or store a card number.</li>
+    <li>Anything you write to us, including feedback and support messages.</li>
+  </ul>
+  <p>Automatically, when you use the site or the app: your IP address, browser
+  and device type, and which pages you opened. Our error monitoring records the
+  technical details of a crash so we can fix it.</p>
+  <p>We do not buy data about you. We do not collect biometric data or
+  government identification.</p>
 
-    <h2>2. How we use your information</h2>
-    <p>We use your information to:</p>
-    <ul>
-      <li>Create and manage your account and your couple's shared session</li>
-      <li>Deliver and display assessment results to both partners once both have completed the exercise</li>
-      <li>Process payments and send receipts and access credentials</li>
-      <li>Send transactional emails including welcome messages, partner invitations, and results notifications</li>
-      <li>Improve the Service through anonymized, aggregated analysis of usage patterns</li>
-      <li>Respond to support requests and enforce our Terms of Service</li>
-    </ul>
-    <p>We do not sell your personal information to third parties. We do not use your responses to serve advertising.</p>
+  <h2>2. How we use it</h2>
+  <p>We use your information to run your account and your couple's session, to
+  show you both your results, to take payment and send receipts, to send email
+  you would expect from us, and to answer you when you get in touch.</p>
+  <p>We do not sell your personal information. We do not share it for
+  advertising.</p>
 
-    <h2>3. Couples data and partner privacy</h2>
-    <p>Attune is uniquely designed for two-person use. We apply the following protections specific to couples data:</p>
-    <ul>
-      <li>Each partner's individual responses are never visible to the other partner during the assessment</li>
-      <li>Results are only unlocked and shared with both partners simultaneously after both have completed the full assessment</li>
-      <li>Each partner must individually consent to these Terms and this Privacy Policy before any data is collected from them</li>
-      <li>If one partner requests deletion of their account, their individual responses are deleted. This may affect the availability of joint results.</li>
-    </ul>
+  <h2>3. What your partner sees</h2>
+  <p>This is the part people ask about, so it is written plainly.</p>
+  <ul>
+    <li>You each answer on your own. Your partner cannot see your answers while either of you is still working.</li>
+    <li>Results open once you have both finished Communication and Expectations. They do not wait for add-on exercises.</li>
+    <li>Once results open, you both see both sets of answers. That includes the questions where you wrote in your own words. Your partner will read what you wrote, in full.</li>
+    <li>Conflict Patterns is the exception. The section called Your Patterns is yours alone. Your partner is never shown it, in any view, at any point.</li>
+    <li>A note you write is private until you choose to share it. Sharing is per note and off by default. Only the person who wrote a note can change it.</li>
+  </ul>
+  <p>Write your answers expecting your partner to read them. That is the
+  product working as intended, not a setting you can turn off.</p>
 
-    <h2>4. Data sharing and disclosure</h2>
-    <p>We share your information only in the following circumstances:</p>
-    <ul>
-      <li><strong>Service providers:</strong> We share data with trusted vendors who help us operate the Service (including Stripe for payments, Supabase for database hosting, Vercel for website and API hosting, Resend for transactional email, and Sentry for error monitoring). These vendors are contractually obligated to protect your data and may not use it for their own purposes.</li>
-      <li><strong>Legal requirements:</strong> We may disclose information if required by law, court order, or to protect the rights, property, or safety of Attune or others.</li>
-      <li><strong>Business transfers:</strong> In the event of a merger, acquisition, or sale of assets, your information may be transferred to the acquiring entity, subject to the same privacy protections.</li>
-    </ul>
+  <h2>4. Who else touches your data</h2>
+  <p>We use a small number of companies to run the service. They act on our
+  instructions and may not use your data for their own purposes.</p>
+  <ul>
+    <li><strong>Stripe</strong> takes payments and holds card details.</li>
+    <li><strong>Supabase</strong> stores your account, your answers, and your results.</li>
+    <li><strong>Vercel</strong> hosts the website and the API.</li>
+    <li><strong>Resend</strong> sends transactional email.</li>
+    <li><strong>Sentry</strong> records technical errors so we can fix them.</li>
+  </ul>
+  <p>We may disclose information if the law requires it. If the company is ever
+  sold or merged, your information would transfer with it, under this policy.</p>
 
-    <h2>5. Data security</h2>
-    <p>We implement industry-standard security measures including:</p>
-    <ul>
-      <li>Encryption of assessment responses at rest using AES-256 encryption</li>
-      <li>Encrypted HTTPS transmission for all data in transit</li>
-      <li>Row-level security ensuring users can only access their own and their partner's authorized data</li>
-      <li>Regular automated database backups</li>
-    </ul>
-    <p>No method of transmission or storage is 100% secure. While we strive to protect your data, we cannot guarantee absolute security.</p>
+  <h2>5. Security</h2>
+  <p>Your answers are encrypted with AES-256 while stored, and everything
+  travels over HTTPS. Access is restricted by row-level rules, so an account
+  reaches only its own data and what its partner has shared.</p>
+  <p>No system is perfectly secure, and we will not tell you otherwise.</p>
 
-    <h2>6. Data retention</h2>
-    <p>We retain your personal data for as long as your account is active or as needed to provide the Service. Specifically:</p>
-    <ul>
-      <li>Account and assessment data is retained for as long as your account exists</li>
-      <li>You may request deletion of your account and all associated data at any time from your account settings or by contacting us</li>
-      <li>Following a deletion request, we will remove your personal data within 30 days, except where retention is required by law</li>
-      <li>Anonymized, aggregated data derived from your responses may be retained indefinitely</li>
-    </ul>
-    <p>Full details are set forth in our <a href="#data" onclick="showDoc('data');return false" style="color:var(--clay)">Data Retention and Deletion Policy</a>.</p>
+  <h2>6. How long we keep it, and how to delete it</h2>
+  <p>We keep your account and your answers for as long as your account
+  exists.</p>
+  <p>You can delete your account yourself, from your account settings in the
+  portal. Deleting removes your name, email, login, orders (which contain
+  shipping addresses), and any workbooks. Where you appear in your partner's
+  session, your name is removed from it. You can also write to us and we will do
+  it for you.</p>
+  <p>One thing survives deletion, and you should know about it before you
+  decide. Unless you opt out, we keep a de-identified copy of your exercise
+  answers and the profile details listed in section 1, with no name, email, or
+  invite code attached. We use it to improve the exercises. You can stop that
+  copy being kept at any time on
+  <a href="/privacy-choices">Your privacy choices</a>. Opt out before you delete
+  your account and nothing is kept.</p>
+  <p class="todo"><strong>TODO, needs a lawyer:</strong> that de-identified copy
+  also includes your partner's answers to Communication and Expectations, stored
+  alongside yours so the pair can be analysed together. Your partner does not
+  separately consent to that at the moment you delete. Confirm whether that is
+  acceptable, whether it needs its own consent, or whether the partner half
+  should be dropped.</p>
 
-    <h2>7. Your rights (CCPA, California residents)</h2>
-    <p>If you are a California resident, you have the following rights under the California Consumer Privacy Act (CCPA):</p>
-    <ul>
-      <li><strong>Right to know:</strong> You may request disclosure of the categories and specific pieces of personal information we have collected about you</li>
-      <li><strong>Right to delete:</strong> You may request deletion of your personal information, subject to certain exceptions</li>
-      <li><strong>Right to non-discrimination:</strong> We will not discriminate against you for exercising your CCPA rights</li>
-    </ul>
-    <p>To exercise these rights, contact us at <a href="mailto:hello@attune-relationships.com" style="color:var(--clay)">hello@attune-relationships.com</a>. We will respond to verified requests within 45 days.</p>
+  <h2>7. Your choices</h2>
+  <p>You can ask us what we hold about you, ask for it to be deleted, and ask
+  us to stop keeping the de-identified research copy. We will not treat you
+  differently for asking.</p>
+  <p>We honour the Global Privacy Control browser signal. If your browser sends
+  it, we read it on our servers and record it as an opt-out of research use
+  against your account. You do not have to do anything else.</p>
+  <p>Choices you can set yourself are on
+  <a href="/privacy-choices">Your privacy choices</a>. To ask us anything else,
+  write to
+  <a href="mailto:hello@attune-relationships.com">hello@attune-relationships.com</a>.
+  We answer within 45 days.</p>
+  <p class="todo"><strong>TODO, needs a lawyer:</strong> which US state privacy
+  laws Attune is subject to, and the exact rights language each requires. This
+  policy previously cited only CCPA. Confirm the list of states, thresholds, and
+  whether an authorised agent process and an appeals process are required.</p>
 
-    <h2>8. Children's privacy</h2>
-    <p>The Service is intended for adults aged 18 and older. We do not knowingly collect personal information from individuals under the age of 18. If we become aware that we have collected data from a minor, we will delete it promptly.</p>
+  <h2>8. Cookies and local storage</h2>
+  <p>What we store on your device, and why, is set out in the Cookie Policy
+  tab above.</p>
 
-    <h2>9. Cookies and tracking</h2>
-    <p>We use essential cookies required for authentication and session management. We do not use third-party advertising cookies. We do not currently use third-party analytics tools. Please see our <a href="#cookies" onclick="showDoc('cookies');return false" style="color:var(--clay)">Cookie Policy</a> for full details.</p>
+  <h2>9. Children</h2>
+  <p>Attune is for adults. You must be 18 or older to use it. We do not
+  knowingly collect information from anyone under 18.</p>
 
-    <h2>10. Changes to this policy</h2>
-    <p>We may update this Privacy Policy periodically. We will notify you of material changes by email or by posting a notice on our website. Your continued use of the Service after the effective date constitutes acceptance of the revised policy.</p>
+  <h2>10. Changes</h2>
+  <p>If we change this policy we will update the date at the top. If a change
+  materially affects what we do with your answers, we will email you.</p>
 
-    <h2>11. Contact</h2>
-    <p>For privacy-related inquiries, data requests, or concerns, contact: Attune Relationships LLC, <a href="mailto:hello@attune-relationships.com" style="color:var(--clay)">hello@attune-relationships.com</a>.</p>
-  </div>
+  <h2>11. Contact</h2>
+  <p>Attune Relationships LLC.
+  <a href="mailto:hello@attune-relationships.com">hello@attune-relationships.com</a>.</p>
+</div>
 
-  <div class="doc" id="doc-terms">
-    <h1 id="terms">Terms of Service</h1>
-    <p class="doc-meta">Effective date: May 15, 2026 · Attune Relationships LLC</p>
+<div class="doc" id="doc-terms">
+  <h1>Terms of Service</h1>
+  <p class="doc-meta">Effective date: TODO before publishing &middot; Attune Relationships LLC</p>
 
-    <p>Please read these Terms of Service carefully before using the Attune platform. By creating an account or purchasing an assessment, you agree to be bound by these terms.</p>
+  <p>These terms are the agreement between you and Attune Relationships LLC, a
+  Utah limited liability company. By making an account or buying an assessment,
+  you agree to them.</p>
 
-    <h2>1. Acceptance of terms</h2>
-    <p>These Terms of Service ("Terms") constitute a legally binding agreement between you and Attune Relationships LLC ("Attune," "we," "us," or "our"), a Utah limited liability company, governing your access to and use of the Attune platform, website, and services (collectively, the "Service"). By accessing or using the Service, you confirm that you are at least 18 years of age, have read and understood these Terms, and agree to be bound by them.</p>
+  <h2>1. Attune is not therapy</h2>
+  <p>This is the most important thing on this page, so it comes first.</p>
+  <p>Attune is not therapy. It is not counselling. It is not medical, mental
+  health, or psychological advice, and it is not a diagnosis. It is not a
+  substitute for care from a licensed professional, and it is not a
+  professional relationship of any kind.</p>
+  <p>Your results describe patterns in what you and your partner each answered.
+  Neither end of any dimension is better than the other. A couple type is a
+  dynamic between two people, not a condition either of you has.</p>
+  <p>Nothing here is a clinical judgement about your relationship or about
+  either of you. If you are struggling, please talk to a licensed professional.
+  If you are in immediate danger or in crisis, contact your local emergency
+  services. In the US you can call or text 988 to reach the Suicide and Crisis
+  Lifeline.</p>
+  <p>Attune does not detect abuse and is not built to. If there is violence or
+  coercion in your relationship, this is not the right tool and answering
+  honestly may not be safe for you.</p>
 
-    <h2>2. Description of service</h2>
-    <p>Attune provides a couples assessment platform designed to help partners explore communication styles, expectations, and relational patterns. The Service includes guided assessment exercises completed independently by each partner, a shared results dashboard visible to both partners after both have completed their assessment, and related educational content.</p>
-    <p>Attune is not a licensed mental health service, therapy platform, or substitute for professional counseling. Nothing in the Service constitutes medical, psychological, or therapeutic advice.</p>
+  <h2>2. Who can use it</h2>
+  <p>You must be 18 or older. You are responsible for your login and for what
+  happens under your account.</p>
+  <p>Attune is built for two people who both want to use it. Both of you make
+  your own account and agree to these terms yourself. Do not ask, pressure, or
+  require anyone to complete an assessment. If you are using it because someone
+  made you, stop.</p>
 
-    <h2>3. Account registration and partner pairing</h2>
-    <p>To use the Service, each partner must create an individual account using a valid email address. You are responsible for maintaining the confidentiality of your login credentials and for all activity that occurs under your account.</p>
-    <p>The Service requires both partners to independently register and consent before a shared session is created. Account pairing is accomplished via a unique invitation link or code. You agree not to share your partner's invitation link with anyone other than your intended partner.</p>
+  <h2>3. What you are buying</h2>
+  <p>Access is a one-time payment, not a subscription. Prices are in US dollars
+  and can change, though a change never affects an order already placed.
+  Payment is handled by Stripe.</p>
+  <p>After payment we email access details to the address used at checkout. If
+  that address is wrong we cannot deliver, so check it.</p>
+  <p>What each package includes is listed on the packages page at the time you
+  buy. Add-ons are separate purchases and unlock separate exercises.</p>
 
-    <h2>4. Dual consent requirement</h2>
-    <p>Both individuals in a couple must individually accept these Terms and our Privacy Policy before any assessment session begins. Neither partner's responses are visible to the other until both have independently completed the full assessment. By starting an assessment, you confirm that you are participating voluntarily and that you have not been coerced into using the Service.</p>
+  <h2>4. Refunds</h2>
+  <p>All sales are final once either of you has begun an exercise. Beginning
+  means opening the first question, not opening the portal or reading the
+  dashboard.</p>
+  <p>Before that, and within 7 days of buying, we refund you. We also refund a
+  double charge, and a verified technical fault on our side that kept you out
+  and was not fixed within 48 hours of you telling us.</p>
+  <p>Disagreeing with your results is not grounds for a refund. The results
+  report what you each answered.</p>
+  <p>The full rules, including gift cards and printed workbooks, are in the
+  Refunds tab above. Write to
+  <a href="mailto:hello@attune-relationships.com">hello@attune-relationships.com</a>
+  with your order number.</p>
 
-    <h2>5. Purchases and payment</h2>
-    <p>Access to assessments requires a one-time payment processed through Stripe. All prices are listed in US dollars and are subject to change without notice. By providing payment information, you authorize Attune to charge the applicable fees to your payment method.</p>
-    <p>Access credentials and QR codes are delivered electronically to the purchasing email address following confirmed payment. Attune is not responsible for delivery failures caused by incorrect email addresses provided at checkout.</p>
+  <h2>5. Your answers, and what your partner sees</h2>
+  <p>Your answers are yours. You give us permission to store them and to show
+  them where the product is designed to show them, which includes showing them
+  to your partner.</p>
+  <p>Read section 3 of the Privacy Policy before you start. In short: once you
+  have both finished the core exercises, you each see the other's answers,
+  including anything you wrote in your own words. Conflict Patterns has one
+  section that stays private to you.</p>
+  <p>We may use de-identified data to improve the exercises. You can opt out on
+  <a href="/privacy-choices">Your privacy choices</a>.</p>
 
-    <h2>6. Refund and cancellation policy</h2>
-    <p>All sales are final once either partner has begun an assessment exercise. If you believe you were charged in error or experienced a technical failure that prevented access, contact us at <a href="mailto:hello@attune-relationships.com" style="color:var(--clay)">hello@attune-relationships.com</a> within 7 days of purchase and we will review your request on a case-by-case basis.</p>
-    <p>Refund requests due to dissatisfaction with results, disagreement with insights, or change of mind after purchase are not eligible for refunds. Full details, including provisions specific to physical gift boxes, gift cards, and workbooks, are set forth in our <a href="#refund" onclick="showDoc('refund');return false" style="color:var(--clay)">Refund and Cancellation Policy</a>, incorporated herein by reference.</p>
+  <h2>6. What you agree not to do</h2>
+  <ul>
+    <li>Use someone else's account, or make an account for someone without them knowing.</li>
+    <li>Resell or republish the exercises, the results, or the written content.</li>
+    <li>Try to break, scrape, or get around the security of the service.</li>
+    <li>Use Attune to coerce, monitor, or pressure another person.</li>
+  </ul>
+  <p>We can suspend an account that does these things. What you may and may not
+  do with the assessment content is set out in full in the EULA tab above.</p>
 
-    <h2>7. Ownership of results and data</h2>
-    <p>You retain ownership of the personal information and responses you submit through the Service. By submitting content, you grant Attune a limited, non-exclusive, royalty-free license to process and display your content solely to provide the Service to you and your partner.</p>
-    <p>Attune may use anonymized, aggregated, and de-identified data derived from user responses to improve the Service, conduct research, and develop new features. Such aggregated data will not identify you or your partner individually.</p>
-    <p>Assessment results are provided for personal, non-commercial use only. You may not reproduce, sell, license, or distribute results as professional guidance or therapeutic content.</p>
+  <h2>7. Availability</h2>
+  <p>We try to keep Attune running and we do not promise it will never be down.
+  We may change or stop features. If we stop something you paid for and have not
+  yet used, contact us and we will sort it out.</p>
 
-    <h2>8. Intellectual property</h2>
-    <p>The Attune name, logo, platform design, assessment questions, scoring methodology, feedback language, and all other content created by Attune are the exclusive intellectual property of Attune Relationships LLC and are protected by applicable copyright, trademark, and trade secret laws. You may not copy, modify, distribute, reverse engineer, or create derivative works from any part of the Service without prior written consent.</p>
-    <p>The assessment methodology and scoring algorithm are proprietary trade secrets of Attune and are not disclosed to users.</p>
+  <h2>8. Limits on our liability</h2>
+  <p class="todo"><strong>TODO, needs a lawyer:</strong> the limitation of
+  liability, warranty disclaimer, indemnity, governing law, venue, and any
+  dispute resolution or arbitration clause belong here. They were present in the
+  earlier terms in generic form. Do not publish this page until a lawyer has
+  written this section. Guessing at these is exactly the kind of clause that
+  fails when it is needed.</p>
 
-    <h2>9. Prohibited conduct</h2>
-    <p>You agree not to:</p>
-    <ul>
-      <li>Use the Service on behalf of another person without their knowledge and consent</li>
-      <li>Share, publish, or distribute your partner's responses or results without their explicit consent</li>
-      <li>Attempt to access, reverse engineer, or extract any part of the scoring algorithm or backend logic</li>
-      <li>Use the Service for any unlawful purpose or in violation of any applicable law</li>
-      <li>Interfere with or disrupt the Service or servers connected to the Service</li>
-      <li>Attempt to circumvent any security or authentication measures</li>
-    </ul>
+  <h2>9. Changes to these terms</h2>
+  <p>If we change these terms we will update the date at the top. If a change is
+  material we will email you before it takes effect.</p>
 
-    <h2>10. Privacy</h2>
-    <p>Your use of the Service is also governed by our <a href="#privacy" onclick="showDoc('privacy');return false" style="color:var(--clay)">Privacy Policy</a>, which is incorporated into these Terms by reference. Please review our Privacy Policy to understand our practices regarding the collection, use, and disclosure of your personal information.</p>
+  <h2>10. Contact</h2>
+  <p>Attune Relationships LLC.
+  <a href="mailto:hello@attune-relationships.com">hello@attune-relationships.com</a>.</p>
+</div>
 
-    <h2>11. Disclaimer of warranties</h2>
-    <p>THE SERVICE IS PROVIDED ON AN "AS IS" AND "AS AVAILABLE" BASIS WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, OR NON-INFRINGEMENT. ATTUNE DOES NOT WARRANT THAT THE SERVICE WILL BE UNINTERRUPTED, ERROR-FREE, OR FREE OF VIRUSES OR OTHER HARMFUL COMPONENTS.</p>
-
-    <h2>12. Limitation of liability</h2>
-    <p>TO THE FULLEST EXTENT PERMITTED BY LAW, ATTUNE RELATIONSHIPS LLC AND ITS MEMBERS, MANAGERS, EMPLOYEES, AND AGENTS SHALL NOT BE LIABLE FOR ANY INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, OR PUNITIVE DAMAGES, INCLUDING LOSS OF DATA, LOSS OF PROFITS, OR DAMAGE TO RELATIONSHIPS OR PERSONAL WELLBEING, ARISING OUT OF OR IN CONNECTION WITH YOUR USE OF THE SERVICE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES. IN NO EVENT SHALL ATTUNE'S TOTAL LIABILITY EXCEED THE AMOUNT YOU PAID FOR THE SERVICE IN THE 12 MONTHS PRECEDING THE CLAIM.</p>
-    <p>Attune is a self-guided insights and reflection tool, not a licensed therapeutic, counseling, or clinical service. Attune does not provide relationship therapy, mental health treatment, or professional advice of any kind.</p>
-    <ul>
-      <li>Attune is not liable for any conflict, emotional distress, relationship difficulties, or outcomes of any kind that arise from completing these exercises, reviewing your results, or engaging in any conversations that the exercises may prompt.</li>
-      <li>The exercises may surface topics that feel difficult or sensitive. This is a normal part of honest reflection and is not a defect in the product. Attune is not responsible for how you or your partner choose to respond to what you discover.</li>
-      <li>Attune is not a substitute for couples therapy, professional counseling, or any other licensed service. If you are experiencing serious relationship difficulties, mental health challenges, or safety concerns, please consult a licensed professional.</li>
-      <li>You are solely responsible for the decisions you make based on your Attune results.</li>
-    </ul>
-
-    <h2>13. Governing law and dispute resolution</h2>
-    <p>These Terms shall be governed by and construed in accordance with the laws of the State of Utah, without regard to its conflict of law principles. Any dispute arising out of or relating to these Terms or the Service shall first be submitted to informal resolution by contacting us at <a href="mailto:hello@attune-relationships.com" style="color:var(--clay)">hello@attune-relationships.com</a>. If not resolved within 30 days, disputes shall be resolved by binding arbitration in Utah under the rules of the American Arbitration Association. You waive any right to participate in a class action lawsuit or class-wide arbitration.</p>
-
-    <h2>14. Changes to terms</h2>
-    <p>We may update these Terms from time to time. We will notify you of material changes by posting the updated Terms on our website and updating the effective date. Your continued use of the Service after the effective date of changes constitutes acceptance of the revised Terms.</p>
-
-    <h2>15. Contact</h2>
-    <p>For questions about these Terms, please contact: Attune Relationships LLC, <a href="mailto:hello@attune-relationships.com" style="color:var(--clay)">hello@attune-relationships.com</a>.</p>
-  </div>
-
-  <div class="doc" id="doc-cookies">
+<div class="doc" id="doc-cookies">
     <h1 id="cookies">Cookie Policy</h1>
     <p class="doc-meta">Effective date: May 15, 2026 · Attune Relationships LLC</p>
 
@@ -562,7 +611,8 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;height:58px;background:rgba(
       <div class="sf-col">
         <p class="sf-col-title">Support</p>
         <a href="/contact">Contact</a>
-        <a href="/legal">Privacy</a>
+        <a href="/legal">Privacy &amp; Terms</a>
+        <a href="/privacy-choices">Your privacy choices</a>
       </div>
     </div>
   </div>

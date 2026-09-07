@@ -60,3 +60,62 @@ window.ATTUNE_FLAGS = {
     document.body.insertBefore(bar, document.body.firstChild);
   });
 })();
+
+
+/* ── Privacy notice ─────────────────────────────────────────────────────────
+ * A slim bar at the bottom of every static page, shown once.
+ *
+ * Notice, not a gate. US state privacy law is opt-out: consent is not required
+ * before storing what the site already stores, so a wall that blocks the page
+ * until someone clicks Accept would be asking permission we do not need and
+ * cannot honour a refusal of. It also trains people to click Accept without
+ * reading, which is worse for them than no banner.
+ *
+ * So this says what happens and points at the controls. It does not have an
+ * Accept button, because there is nothing to accept.
+ *
+ * It is careful about what it claims. This site sets no cookies and runs no
+ * analytics or advertising trackers, so the banner says local storage rather
+ * than borrowing cookie-banner language for something that is not a cookie.
+ *
+ * Dismissal is remembered the same way the app banner above remembers it: a
+ * notice that returns on every visit is the thing people resent about these.
+ */
+(function () {
+  var KEY = 'attune_privacy_notice_dismissed';
+  try {
+    if (localStorage.getItem(KEY) === '1') return;
+  } catch (e) { return; }   // storage blocked: no banner rather than every load
+
+  document.addEventListener('DOMContentLoaded', function () {
+    // Not on the pages that explain this, where it would be telling someone
+    // what they are already reading.
+    var here = (location.pathname || '').replace(/\/$/, '');
+    if (here === '/privacy' || here === '/privacy-choices' || here === '/terms') return;
+
+    var bar = document.createElement('div');
+    bar.setAttribute('role', 'region');
+    bar.setAttribute('aria-label', 'Privacy notice');
+    bar.style.cssText = 'position:fixed;left:0;right:0;bottom:0;z-index:9998;display:flex;'
+      + 'align-items:center;gap:.9rem;padding:.85rem 1.1rem;background:#1E1610;color:rgba(255,255,255,.82);'
+      + 'font-family:"DM Sans",system-ui,sans-serif;font-size:.8rem;line-height:1.5;'
+      + 'box-shadow:0 -2px 20px rgba(14,11,7,.18)';
+    bar.innerHTML =
+      '<span style="flex:1;min-width:0">Attune stores a little data in your browser to keep the site working. '
+      + 'We set no cookies and run no advertising or analytics trackers. '
+      + '<a href="/privacy" style="color:#E8A87A;text-decoration:underline">Privacy</a>'
+      + ' &middot; '
+      + '<a href="/privacy-choices" style="color:#E8A87A;text-decoration:underline">Your privacy choices</a>'
+      + '</span>'
+      + '<button type="button" style="flex-shrink:0;background:#E8673A;color:#fff;border:none;'
+      + 'border-radius:8px;padding:.45rem .9rem;font-weight:700;font-size:.78rem;cursor:pointer;'
+      + 'font-family:inherit">Got it</button>';
+
+    bar.querySelector('button').addEventListener('click', function () {
+      try { localStorage.setItem(KEY, '1'); } catch (e) {}
+      bar.remove();
+    });
+
+    document.body.appendChild(bar);
+  });
+})();
