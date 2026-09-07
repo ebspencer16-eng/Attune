@@ -13554,6 +13554,23 @@ export default function App() {
   const _urlSignup = params.get('signup') === '1';
   const _urlSignin = params.get('signin') === '1';
   const [showAuth, setShowAuth] = useState(!isLoggedIn && (_urlSignup || _urlSignin)); // Auth modal
+
+  // Reopen the auth modal if the session goes away while we are sitting on the
+  // sign-in URL.
+  //
+  // showAuth was only ever computed at mount. Land on /app?signin=1 with a
+  // session that looks valid and showAuth initialises false. The async checks
+  // then run, find the session expired or the profile missing, and call
+  // setAccount(null). Every one of those paths skips its redirect when the URL
+  // already says signin=1, which is correct, it stops a redirect loop. What it
+  // leaves behind is a signed-out app with no modal open, which renders
+  // nothing. The page looks broken because there is genuinely nothing on it.
+  //
+  // Deriving it here rather than in each of those three paths keeps the fix in
+  // one place, and it covers any future path that clears the account.
+  useEffect(() => {
+    if (!isLoggedIn && (_urlSignup || _urlSignin)) setShowAuth(true);
+  }, [isLoggedIn, _urlSignup, _urlSignin]);
   const [authMode, setAuthMode] = useState(_urlSignin ? "login" : "signup"); // "signup" | "login"
   // Explicit ?signin=1 / ?signup=1 while a session is active. Don't silently
   // drop into the signed-in dashboard: a sign-in click should show a sign-in
