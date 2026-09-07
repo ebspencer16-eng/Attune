@@ -91,52 +91,34 @@ export default function Settings({
         <Row label="Your privacy choices" onPress={() => Linking.openURL(`${SITE}/privacy-choices`)} last />
       </View>
 
-      {/* ── Delete account ────────────────────────────────────────────────── */}
-      <View
-        style={{
-          backgroundColor: c.surface, borderColor: '#F0C9C0', borderWidth: 1,
-          borderRadius: Radius.lg, padding: Spacing.lg, marginTop: Spacing.md,
-        }}>
-        <Text style={{ ...Type.eyebrow, color: '#B4463A', marginBottom: Spacing.sm }}>
-          Delete account
-        </Text>
-
+      {/* ── Delete account ──────────────────────────────────────────────────
+          Quiet, and last on the screen. The first version was a bordered card
+          of warning text directly under the other settings, which put an
+          irreversible action where a routine one belongs. What deletion removes
+          is on /legal; a wall of text beside the button is something to scroll
+          past, not informed consent. */}
+      <View style={{ marginTop: Spacing.xxxl, paddingTop: Spacing.lg, borderTopWidth: 1, borderTopColor: c.border, alignItems: 'center' }}>
         {!confirming ? (
-          <>
-            <Text style={{ ...Type.body, color: c.text }}>This removes:</Text>
-            <Bullet>Your name, email and login</Bullet>
-            <Bullet>Your answers to every exercise</Bullet>
-            <Bullet>Your orders and any workbooks</Bullet>
-            <Bullet>Your name from your partner&apos;s session</Bullet>
-
-            <Text style={{ ...Type.body, color: c.text, marginTop: Spacing.md }}>
-              Your partner keeps their own answers and their own results.
+          <Pressable
+            onPress={() => { setConfirming(true); setTyped(''); setError(null); }}
+            hitSlop={8}
+            style={{ paddingVertical: Spacing.sm, paddingHorizontal: Spacing.md }}>
+            <Text style={{ ...Type.small, color: c.textMuted, textDecorationLine: 'underline' }}>
+              Delete account
             </Text>
-            <Text style={{ ...Type.body, color: c.textMuted, marginTop: Spacing.md }}>
-              Unless you have opted out, we keep a de-identified copy of your answers with no name
-              or email attached. Opt out on Your privacy choices first if you want nothing kept.
-            </Text>
-            <Text style={{ ...Type.body, color: c.textStrong, fontWeight: '700', marginTop: Spacing.md }}>
-              This cannot be undone.
-            </Text>
-
-            <Pressable
-              onPress={() => { setConfirming(true); setTyped(''); setError(null); }}
-              style={{
-                marginTop: Spacing.lg, borderColor: '#F0C9C0', borderWidth: 1.5,
-                borderRadius: Radius.md, paddingVertical: Spacing.md, alignItems: 'center',
-              }}>
-              <Text style={{ ...Type.small, color: '#B4463A', fontWeight: '700' }}>
-                Delete my account
-              </Text>
-            </Pressable>
-          </>
+          </Pressable>
         ) : (
-          <>
-            {/* Typing the word, not a yes/no alert. This erases a person's
-                answers about their relationship, and an alert dismissed by
-                habit is not a decision. */}
-            <Text style={{ ...Type.body, color: c.text }}>
+          <View style={{ width: '100%' }}>
+            <Text style={{ ...Type.small, color: c.text, lineHeight: 20 }}>
+              This permanently deletes your account and your answers. It cannot be undone.{' '}
+              <Text
+                style={{ color: c.accentQuiet, textDecorationLine: 'underline' }}
+                onPress={() => Linking.openURL(`${SITE}/legal#privacy`)}>
+                What is deleted
+              </Text>
+              .
+            </Text>
+            <Text style={{ ...Type.small, color: c.text, marginTop: Spacing.sm }}>
               Type DELETE to confirm.
             </Text>
             <TextInput
@@ -162,7 +144,7 @@ export default function Settings({
               onPress={armed ? remove : undefined}
               disabled={!armed}
               style={{
-                marginTop: Spacing.lg, borderRadius: Radius.md, paddingVertical: Spacing.md,
+                marginTop: Spacing.md, borderRadius: Radius.md, paddingVertical: Spacing.md,
                 alignItems: 'center',
                 backgroundColor: armed ? '#B4463A' : '#D9C9C4',
               }}>
@@ -179,11 +161,9 @@ export default function Settings({
               onPress={() => { setConfirming(false); setTyped(''); setError(null); }}
               disabled={busy}
               style={{ marginTop: Spacing.sm, paddingVertical: Spacing.sm, alignItems: 'center' }}>
-              <Text style={{ ...Type.small, color: c.textMuted, fontWeight: '600' }}>
-                Keep my account
-              </Text>
+              <Text style={{ ...Type.small, color: c.textMuted, fontWeight: '600' }}>Cancel</Text>
             </Pressable>
-          </>
+          </View>
         )}
       </View>
     </Sheet>

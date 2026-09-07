@@ -13155,12 +13155,19 @@ export default function App() {
   // surface as someone else's demo name. (Issue 3.9)
   // The Section 2 fixes ensure account.name is always set on signup, but
   // legacy accounts pre-fix might still be empty.
+  // Demo names belong to demo mode only.
+  //
+  // This used to read `account ? account.name : "Sarah"`, so anything that left
+  // `account` null showed the demo couple. Nothing sets an auth-resolved flag,
+  // so account IS null for the first paint of every load while the session
+  // restores. A signed-in person reloading could land on a dashboard belonging
+  // to Sarah and James, which is what happened to the reviewer account.
   const userName = account
     ? (account.name || "You")
-    : "Sarah";
+    : (_demoParam ? "Sarah" : "You");
   const partnerName = account
     ? (account.partnerName || "Your partner")
-    : "James";
+    : (_demoParam ? "James" : "Your partner");
   const userPronouns = account?.pronouns || "";
   const partnerPronouns = account?.partnerPronouns || "";
   // interp for App-level use (e.g. couple type patterns in demo)
@@ -13944,6 +13951,12 @@ export default function App() {
   //   - isDemo is a separate query-param escape hatch (?demo=xxx) for the
   //     marketing flow / showcase tour.
   const isDemo = !!_demoParam; // true when ?demo=xxx is in URL
+  // Sarah's answers are demo fixtures. Outside demo mode they must never stand
+  // in for a real person's answers: results built from someone else's data are
+  // the single worst thing this product could show.
+  const _demoEx1 = _demoParam ? sarahEx1 : null;
+  const _demoEx2 = _demoParam ? sarahEx2 : null;
+
   // Intimacy is an add-on exercise. For couples who bought it, results gate on
   // both partners finishing it too. For everyone else it's a no-op.
   // Use `order` directly (pkg is declared later); mirror its hasIntimacy logic.
@@ -15141,7 +15154,7 @@ export default function App() {
             onBack={() => setView("home")}
             budgetState={budgetState}
             setBudgetState={setBudgetState}
-            ex2Answers={ex2Answers || sarahEx2}
+            ex2Answers={ex2Answers || _demoEx2}
             partnerEx2={partnerEx2}
             accountId={account?.id}
           />
@@ -15519,102 +15532,88 @@ export default function App() {
                 )}
 
                 {/* Delete account.
-                    The endpoint has existed since migration 006 and nothing
-                    ever called it, so the privacy policy promised a control
-                    that was not in the product. This is that control.
 
-                    Typing DELETE rather than a confirm dialog: this removes a
-                    couple's answers and cannot be undone, and a dialog people
-                    dismiss by habit is not consent to that. */}
+                    Deliberately quiet, and deliberately last. It sat directly
+                    under Sign out as a full card, which put an irreversible
+                    action next to a routine one and got clicked by accident.
+
+                    What deletion removes is written out on /legal rather than
+                    here. A wall of warning text beside a button is not informed
+                    consent, it is something to scroll past, and it made the
+                    account page read as though deleting were the main thing
+                    you came to do. */}
                 {isLoggedIn && (
-                  <div style={{ background: "white", border: "1.5px solid #F0C9C0", borderRadius: 16, overflow: "hidden", marginTop: "1.25rem" }}>
-                    <div style={{ padding: "1rem 1.35rem", borderBottom: "1px solid #F9E7E2" }}>
-                      <div style={{ fontSize: "0.6rem", letterSpacing: ".18em", textTransform: "uppercase", color: "#B4463A", fontWeight: 700, fontFamily: font.body }}>Delete account</div>
-                    </div>
-                    <div style={{ padding: "1.1rem 1.35rem" }}>
-                      {!deleteOpen ? (
-                        <>
-                          <p style={{ fontSize: "0.82rem", color: "#5C4A38", fontFamily: font.body, lineHeight: 1.7, margin: "0 0 0.9rem" }}>
-                            Deleting removes your name, email, login, orders and workbooks. Your answers go with them.
-                            Your partner keeps their own answers and their own results.
-                          </p>
-                          <p style={{ fontSize: "0.82rem", color: "#5C4A38", fontFamily: font.body, lineHeight: 1.7, margin: "0 0 1rem" }}>
-                            Unless you have opted out, we keep a de-identified copy of your answers with no name or
-                            email attached. You can stop that on{" "}
-                            <a href="/privacy-choices" style={{ color: "#C17F47" }}>Your privacy choices</a>{" "}
-                            before you delete.
-                          </p>
+                  <div style={{ marginTop: "3.5rem", paddingTop: "1.25rem", borderTop: "1px solid #EFE7DD", textAlign: "center" }}>
+                    {!deleteOpen ? (
+                      <button
+                        onClick={() => { setDeleteOpen(true); setDeleteErr(""); setDeleteConfirm(""); }}
+                        style={{ fontSize: "0.72rem", fontWeight: 500, color: "#A8997F", fontFamily: font.body, background: "none", border: "none", cursor: "pointer", padding: "0.35rem", textDecoration: "underline", textUnderlineOffset: 3 }}>
+                        Delete account
+                      </button>
+                    ) : (
+                      <div style={{ maxWidth: 340, margin: "0 auto", textAlign: "left" }}>
+                        <p style={{ fontSize: "0.8rem", color: "#5C4A38", fontFamily: font.body, lineHeight: 1.6, margin: "0 0 0.6rem" }}>
+                          This permanently deletes your account and your answers. It cannot be undone.{" "}
+                          <a href="/legal#privacy" style={{ color: "#C17F47" }}>What is deleted</a>.
+                        </p>
+                        <p style={{ fontSize: "0.8rem", color: "#5C4A38", fontFamily: font.body, lineHeight: 1.6, margin: "0 0 0.6rem" }}>
+                          Type DELETE to confirm.
+                        </p>
+                        <input
+                          value={deleteConfirm}
+                          onChange={(e) => { setDeleteConfirm(e.target.value); setDeleteErr(""); }}
+                          placeholder="DELETE"
+                          aria-label="Type DELETE to confirm"
+                          style={{ width: "100%", padding: "0.55rem 0.7rem", border: "1.5px solid #E8DDD0", borderRadius: 10, fontSize: "0.85rem", fontFamily: font.body, marginBottom: "0.6rem" }}
+                        />
+                        {deleteErr && (
+                          <p style={{ fontSize: "0.76rem", color: "#B4463A", fontFamily: font.body, margin: "0 0 0.6rem" }}>{deleteErr}</p>
+                        )}
+                        <div style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
                           <button
-                            onClick={() => { setDeleteOpen(true); setDeleteErr(""); setDeleteConfirm(""); }}
-                            style={{ fontSize: "0.75rem", fontWeight: 700, color: "#B4463A", fontFamily: font.body, background: "none", border: "1.5px solid #F0C9C0", borderRadius: 10, cursor: "pointer", padding: "0.5rem 0.9rem" }}>
-                            Delete my account
+                            disabled={deleteBusy || deleteConfirm.trim().toUpperCase() !== "DELETE"}
+                            onClick={async () => {
+                              setDeleteBusy(true); setDeleteErr("");
+                              try {
+                                const { supabase: sb, hasSupabase } = await import('./supabase.js');
+                                if (!hasSupabase()) throw new Error('no-auth');
+                                const { data: { session } } = await sb.auth.getSession();
+                                const tok = session?.access_token;
+                                const uid = session?.user?.id;
+                                if (!tok || !uid) throw new Error('no-session');
+                                const res = await fetch('/api/delete-account', {
+                                  method: 'POST',
+                                  headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${tok}` },
+                                  body: JSON.stringify({ userId: uid }),
+                                });
+                                const body = await res.json().catch(() => ({}));
+                                if (!res.ok || !body.ok) throw new Error(body.error || 'failed');
+                                try { await sb.auth.signOut(); } catch {}
+                                setAccount(null);
+                                try { localStorage.removeItem("attune_account"); } catch {}
+                                clearAllUserLocalStorage();
+                                window.location.href = '/home?deleted=1';
+                              } catch (err) {
+                                setDeleteBusy(false);
+                                setDeleteErr(
+                                  String(err.message) === 'no-session'
+                                    ? 'Your session has expired. Sign in again and retry.'
+                                    : 'That did not go through. Try again, or email hello@attune-relationships.com.'
+                                );
+                              }
+                            }}
+                            style={{ fontSize: "0.74rem", fontWeight: 700, color: "white", fontFamily: font.body, background: deleteConfirm.trim().toUpperCase() === "DELETE" && !deleteBusy ? "#B4463A" : "#D9C9C4", border: "none", borderRadius: 9, cursor: deleteConfirm.trim().toUpperCase() === "DELETE" && !deleteBusy ? "pointer" : "default", padding: "0.5rem 0.9rem" }}>
+                            {deleteBusy ? "Deleting" : "Delete permanently"}
                           </button>
-                        </>
-                      ) : (
-                        <>
-                          <p style={{ fontSize: "0.82rem", color: "#5C4A38", fontFamily: font.body, lineHeight: 1.7, margin: "0 0 0.75rem" }}>
-                            This cannot be undone. Type <strong>DELETE</strong> to confirm.
-                          </p>
-                          <input
-                            value={deleteConfirm}
-                            onChange={(e) => { setDeleteConfirm(e.target.value); setDeleteErr(""); }}
-                            placeholder="DELETE"
-                            aria-label="Type DELETE to confirm"
-                            style={{ width: "100%", padding: "0.6rem 0.75rem", border: "1.5px solid #E8DDD0", borderRadius: 10, fontSize: "0.85rem", fontFamily: font.body, marginBottom: "0.75rem" }}
-                          />
-                          {deleteErr && (
-                            <p style={{ fontSize: "0.78rem", color: "#B4463A", fontFamily: font.body, margin: "0 0 0.75rem" }}>{deleteErr}</p>
-                          )}
-                          <div style={{ display: "flex", gap: "0.6rem" }}>
-                            <button
-                              disabled={deleteBusy || deleteConfirm.trim() !== "DELETE"}
-                              onClick={async () => {
-                                setDeleteBusy(true); setDeleteErr("");
-                                try {
-                                  const { supabase: sb, hasSupabase } = await import('./supabase.js');
-                                  if (!hasSupabase()) throw new Error('no-auth');
-                                  const { data: { session } } = await sb.auth.getSession();
-                                  const tok = session?.access_token;
-                                  const uid = session?.user?.id;
-                                  if (!tok || !uid) throw new Error('no-session');
-                                  const res = await fetch('/api/delete-account', {
-                                    method: 'POST',
-                                    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${tok}` },
-                                    body: JSON.stringify({ userId: uid }),
-                                  });
-                                  const body = await res.json().catch(() => ({}));
-                                  if (!res.ok || !body.ok) throw new Error(body.error || 'failed');
-                                  // The account is gone server-side. Clear the
-                                  // device before leaving, or the next visit
-                                  // loads cached answers for an account that no
-                                  // longer exists.
-                                  try { await sb.auth.signOut(); } catch {}
-                                  setAccount(null);
-                                  try { localStorage.removeItem("attune_account"); } catch {}
-                                  clearAllUserLocalStorage();
-                                  window.location.href = '/home?deleted=1';
-                                } catch (err) {
-                                  setDeleteBusy(false);
-                                  setDeleteErr(
-                                    String(err.message) === 'no-session'
-                                      ? 'Your session has expired. Sign in again and retry.'
-                                      : 'That did not go through. Try again, or email hello@attune-relationships.com.'
-                                  );
-                                }
-                              }}
-                              style={{ fontSize: "0.75rem", fontWeight: 700, color: "white", fontFamily: font.body, background: deleteConfirm.trim() === "DELETE" && !deleteBusy ? "#B4463A" : "#D9C9C4", border: "none", borderRadius: 10, cursor: deleteConfirm.trim() === "DELETE" && !deleteBusy ? "pointer" : "default", padding: "0.55rem 1rem" }}>
-                              {deleteBusy ? "Deleting" : "Delete permanently"}
-                            </button>
-                            <button
-                              disabled={deleteBusy}
-                              onClick={() => { setDeleteOpen(false); setDeleteConfirm(""); setDeleteErr(""); }}
-                              style={{ fontSize: "0.75rem", fontWeight: 600, color: "#8C7A68", fontFamily: font.body, background: "none", border: "none", cursor: "pointer", padding: "0.55rem 0.4rem" }}>
-                              Keep my account
-                            </button>
-                          </div>
-                        </>
-                      )}
-                    </div>
+                          <button
+                            disabled={deleteBusy}
+                            onClick={() => { setDeleteOpen(false); setDeleteConfirm(""); setDeleteErr(""); }}
+                            style={{ fontSize: "0.74rem", fontWeight: 600, color: "#8C7A68", fontFamily: font.body, background: "none", border: "none", cursor: "pointer", padding: "0.5rem 0.3rem" }}>
+                            Cancel
+                          </button>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 )}
 
@@ -15733,7 +15732,7 @@ export default function App() {
           const _partPV = demoWithPartnerView(partEx1, mineEx1);
           const _my = typingDimScores(_minePV, _partPV);
           const _part = typingDimScores(_partPV, _minePV);
-          const _ex2 = ex2Answers || sarahEx2;
+          const _ex2 = ex2Answers || _demoEx2;
           const _align = computeOverallExpectationsPctClient(_ex2, partnerEx2, userName, partnerName);
           const _ct = deriveCoupleTypeFromExercise(_my, _part, _align);
           const _pl = buildWorkbookPayload(userName, partnerName, mineEx1, partEx1, _ex2, partnerEx2, _ct);
@@ -15817,8 +15816,8 @@ export default function App() {
     )}
     {view === "results" && bothDone && !highlightsSeen && (
       <ResultsHighlights
-        ex1Answers={_demoMineEx1 || ex1Answers || sarahEx1} partnerEx1={partnerEx1}
-        ex2Answers={ex2Answers || sarahEx2} partnerEx2={partnerEx2}
+        ex1Answers={_demoMineEx1 || ex1Answers || _demoEx1} partnerEx1={partnerEx1}
+        ex2Answers={ex2Answers || _demoEx2} partnerEx2={partnerEx2}
         ex3Answers={ex3Answers || (pkg.hasAnniversary ? SARAH_ANNIVERSARY_DEMO : null)}
         partnerEx3={pkg.hasAnniversary ? (partnerSession?.ex3 || (hasRealPartner ? null : JAMES_ANNIVERSARY_DEMO)) : null}
         userName={userName} partnerName={partnerName}
@@ -15903,8 +15902,8 @@ export default function App() {
                 <UnifiedResultsRoot
                   contentVersion={resultsContentVersion}
                   isMobile={isMobile}
-                  ex1Answers={_demoMineEx1 || ex1Answers || sarahEx1} partnerEx1={partnerEx1}
-                  ex2Answers={ex2Answers || sarahEx2} partnerEx2={partnerEx2}
+                  ex1Answers={_demoMineEx1 || ex1Answers || _demoEx1} partnerEx1={partnerEx1}
+                  ex2Answers={ex2Answers || _demoEx2} partnerEx2={partnerEx2}
                   ex3Answers={ex3Answers || (pkg.hasAnniversary ? SARAH_ANNIVERSARY_DEMO : null)}
                   partnerEx3={pkg.hasAnniversary ? (partnerSession?.ex3 || (hasRealPartner ? null : JAMES_ANNIVERSARY_DEMO)) : null}
                   ex2AnswersPrior={ex2AnswersPrior}
