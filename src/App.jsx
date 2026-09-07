@@ -12724,8 +12724,50 @@ export default function App() {
         }
 
         if (session?.user) {
-          // Session is valid. If localStorage account is missing OR belongs to
-          // a different user, rebuild it from the profile.
+          // Session is valid and the cached account is this same user. Refresh
+          // the fields that come straight off the profile.
+          //
+          // Without this the profile was read only when there was no cached
+          // account or it belonged to someone else. Same user plus a cached
+          // account meant the profile was never read again, on any reload,
+          // ever. A name changed server-side, a partner's name filled in, a
+          // package changed: none of it appeared until the person signed out.
+          //
+          // Deliberately narrow. It refreshes display fields only, and leaves
+          // entitlements to the resync path below, which merges grant-only so a
+          // flaky read can never strip access someone paid for. A failed read
+          // here keeps the cached account rather than doing anything drastic:
+          // the careful orphaned-account handling belongs to the branch below,
+          // where there is no cached account to fall back on.
+          if (localAcct && localAcct.id === session.user.id) {
+            try {
+              const { data: fresh } = await sb.from('profiles')
+                .select('name, pronouns, partner_name, partner_pronouns, partner_email, partner_joined, relationship_status')
+                .eq('id', session.user.id)
+                .maybeSingle();
+              if (cancelled) return;
+              if (fresh) {
+                setAccount(prev => {
+                  if (!prev || prev.id !== session.user.id) return prev;
+                  const merged = {
+                    ...prev,
+                    name: fresh.name || prev.name || '',
+                    pronouns: fresh.pronouns || prev.pronouns || '',
+                    partnerName: fresh.partner_name || '',
+                    partnerPronouns: fresh.partner_pronouns || '',
+                    partnerEmail: fresh.partner_email || '',
+                    partnerJoined: fresh.partner_joined || false,
+                    relationshipStatus: fresh.relationship_status ?? prev.relationshipStatus ?? null,
+                  };
+                  saveAccount(merged);
+                  return merged;
+                });
+              }
+            } catch (e) { /* keep the cached account */ }
+          }
+
+          // If localStorage account is missing OR belongs to a different user,
+          // rebuild it from the profile.
           if (!localAcct || localAcct.id !== session.user.id) {
             let { data: profile, error: profErr } = await sb.from('profiles').select('*').eq('id', session.user.id).maybeSingle();
             if (cancelled) return;
