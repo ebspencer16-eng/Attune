@@ -29,6 +29,15 @@ import { Colors, MaxContentWidth, Palette, Radius, Spacing, Type } from '@/const
 const c = Colors.light;
 const SITE = 'https://www.attune-relationships.com';
 
+/**
+ * The routes this app actually has, matching the tab triggers in app-tabs.tsx.
+ *
+ * These are the app's own facts rather than a rule the server owns, so keeping
+ * them here is right. What matters is that a route the server sends which is
+ * not in this set falls through to the website instead of navigating nowhere.
+ */
+const APP_ROUTES = new Set(['/', '/insights', '/resources', '/notes']);
+
 export default function HomeScreen() {
   const router = useRouter();
   const { height } = useWindowDimensions();
@@ -64,8 +73,17 @@ export default function HomeScreen() {
     const target = card.app;
     if (target?.external) { Linking.openURL(target.external); return; }
     if (target?.route) {
-      router.push(target.route as never);
-      return;
+      // Checked against the routes that exist before pushing.
+      //
+      // expo-router's typed routes cannot check a string decided at runtime, so
+      // this push needs a cast, and a cast is exactly what hid the last version
+      // of this bug: an unroutable value compiled fine and silently went
+      // nowhere. Validating first means an unknown route falls through to the
+      // website rather than doing nothing at all.
+      if (APP_ROUTES.has(target.route)) {
+        router.push(target.route as never);
+        return;
+      }
     }
     // No app target at all means an older payload. Opening the website is the
     // honest fallback: the thing exists, just not here.
