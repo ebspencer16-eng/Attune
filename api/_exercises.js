@@ -54,13 +54,13 @@ export const EXERCISES = [
     view: 'exercise2', capability: null, partnerField: 'ex2', selfOnly: false,
   },
   {
-    order: 3, key: 'ex3', inApp: false, label: 'Relationship Reflection',
+    order: 3, key: 'ex3', inApp: true, label: 'Relationship Reflection',
     column: 'ex3_answers', shape: 'answers',
     localKey: 'attune_ex3', progressKey: 'attune_ex3_progress',
     view: 'exercise3', capability: 'hasAnniversary', partnerField: 'ex3', selfOnly: false,
   },
   {
-    order: 4, key: 'intimacy', inApp: false, label: 'Physical Intimacy Expectations',
+    order: 4, key: 'intimacy', inApp: true, label: 'Physical Intimacy Expectations',
     column: 'intimacy_data', shape: 'record',
     localKey: 'attune_intimacy', progressKey: 'attune_intimacy_progress',
     view: 'intimacy', capability: 'hasIntimacy', partnerField: 'intimacy', selfOnly: false,

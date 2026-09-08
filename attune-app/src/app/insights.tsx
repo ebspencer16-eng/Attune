@@ -28,6 +28,8 @@ import ResultsExperience from '@/components/results';
 import Exercise from '@/components/exercise';
 import Expectations from '@/components/expectations';
 import ConflictExercise from '@/components/conflict-exercise';
+import ReflectionExercise from '@/components/reflection-exercise';
+import IntimacyExercise from '@/components/intimacy-exercise';
 import SignIn from '@/components/sign-in';
 import {
   Colors, MaxContentWidth, Palette, Radius, Spacing, StatusColor, Type,
@@ -133,13 +135,27 @@ export default function InsightsScreen() {
   if (openExercise) {
     const close = () => setOpenExercise(null);
     const finished = () => { setOpenExercise(null); setLoading(true); load(); };
-    // Expectations asks a different shape of question from Communication, so it
-    // is a different screen rather than one screen with a mode flag.
-    // Each of these asks a different shape of question, so each is its own
-    // screen rather than one screen with a mode flag.
-    if (openExercise === 'ex2') return <Expectations onClose={close} onFinished={finished} />;
-    if (openExercise === 'conflict') return <ConflictExercise onClose={close} onFinished={finished} />;
-    return <Exercise exerciseKey={openExercise} onClose={close} onFinished={finished} />;
+    /**
+     * One screen per exercise, named rather than defaulted.
+     *
+     * Each asks a genuinely different shape of question, so each is its own
+     * screen rather than one screen with four mode flags. Every key in
+     * api/_exercises.js appears here, including ex1: a dispatch that names
+     * four of five and falls through for the fifth is a list that has stopped
+     * matching the registry, and check-exercise-registry.mjs says so.
+     */
+    const screens: Record<string, React.ReactNode> = {
+      ex1: <Exercise exerciseKey="ex1" onClose={close} onFinished={finished} />,
+      ex2: <Expectations onClose={close} onFinished={finished} />,
+      ex3: <ReflectionExercise onClose={close} onFinished={finished} />,
+      intimacy: <IntimacyExercise onClose={close} onFinished={finished} />,
+      conflict: <ConflictExercise onClose={close} onFinished={finished} />,
+    };
+    // An unknown key means /api/home offered something this build cannot ask.
+    // Showing the wrong exercise would be worse than saying so.
+    return screens[openExercise] ?? (
+      <Exercise exerciseKey={openExercise} onClose={close} onFinished={finished} />
+    );
   }
 
   return (

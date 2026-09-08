@@ -32,6 +32,8 @@ import {
   conflictQuestionsInOrder, CONFLICT_SECTIONS, FREQUENCY_OPTIONS, CONFLICT_INTRO,
   CONFLICT_REQUIRED,
 } from './_conflict-questions.js';
+import { ANNIVERSARY_QUESTIONS, ANNIVERSARY_VERSION } from './_anniversary-questions.js';
+import { INTIMACY_QUESTIONS, INTIMACY_DIMENSIONS } from './_intimacy-questions.js';
 
 const HEADERS = { 'Content-Type': 'application/json', 'X-Content-Type-Options': 'nosniff' };
 const json = (b, s = 200) => new Response(JSON.stringify(b), { status: s, headers: HEADERS });
@@ -96,7 +98,10 @@ export default async function handler(req) {
     // registry so this does not go stale when an exercise is added.
     const answerCols = EXERCISES.map(e => e.column);
     const progressCols = EXERCISES.filter(e => e.shape !== 'record').map(e => `${e.key}_progress`);
-    const profCols = ['name', 'partner_name', ...answerCols, ...progressCols].join(',');
+    // relationship_status picks the Physical Intimacy wording. Without it the
+    // variant silently falls back to premarital, which asks a married couple
+    // how they imagine things will be.
+    const profCols = ['name', 'partner_name', 'relationship_status', ...answerCols, ...progressCols].join(',');
     const profRes = await fetch(
       `${supabaseUrl}/rest/v1/profiles?id=eq.${user.id}&select=${profCols}`, { headers: svc });
     const profile = (await profRes.json().catch(() => []))?.[0] || null;
@@ -210,8 +215,84 @@ export default async function handler(req) {
       });
     }
 
-    // The remaining exercises are not answerable in the app yet. Saying so is
-    // better than returning an empty list, which reads as a bug.
+    if (key === 'ex3') {
+      /**
+       * Relationship Reflection.
+       *
+       * Four kinds of question in one exercise: scales, free text, one pick and
+       * one ranking. Each item carries its own type, so the app renders what a
+       * question says it is rather than keeping a map of which id is which.
+       *
+       * Scale answers are stored as the option index, which is why the labels
+       * are sent in order and the app must send back a position rather than a
+       * word.
+       */
+      return json({
+        ok: true,
+        exercise: { key: exercise.key, label: exercise.label, shape: exercise.shape },
+        version: ANNIVERSARY_VERSION,
+        items: ANNIVERSARY_QUESTIONS.map(q => ({
+          id: q.id,
+          type: q.type,
+          category: q.category,
+          text: q.text,
+          ...(q.scaleLabels ? { scaleLabels: q.scaleLabels } : {}),
+          ...(q.options ? { options: q.options } : {}),
+          ...(q.placeholder ? { placeholder: q.placeholder } : {}),
+        })),
+        /**
+         * Only the scales and the pick are required.
+         *
+         * The free text is the point of the exercise and it is still optional,
+         * because a required text box gets "n/a" typed into it, and a section
+         * built on non-answers is worse than a shorter one.
+         */
+        requiredIds: ANNIVERSARY_QUESTIONS
+          .filter(q => q.type === 'scale' || q.type === 'pick')
+          .map(q => q.id),
+        saved: await savedAnswers(exercise, profile),
+      });
+    }
+
+    if (key === 'intimacy') {
+      /**
+       * Physical Intimacy.
+       *
+       * The wording changes with where the couple is: the premarital set asks
+       * how someone imagines things, the married set asks how they are. The
+       * variant is resolved here from the profile rather than chosen by the
+       * app, so both partners are always asked the same version.
+       *
+       * Every question can be declined. That is a real answer, stored and
+       * scored differently from an unanswered one, so the option is sent as
+       * part of the question rather than added by the app.
+       */
+      const variant = (profile?.relationship_status === 'married'
+        || profile?.relationship_status === 'remarried') ? 'married' : 'premarital';
+
+      return json({
+        ok: true,
+        exercise: { key: exercise.key, label: exercise.label, shape: exercise.shape },
+        variant,
+        dimensions: INTIMACY_DIMENSIONS,
+        items: INTIMACY_QUESTIONS.map(q => ({
+          id: q.id,
+          dimension: q.dimension,
+          kind: q.kind,
+          topic: q.topic,
+          text: q[variant] || q.text || q.premarital,
+          options: (q.options || []).map(o => ({ label: o.label, value: o.value })),
+        })),
+        // Nothing is required. Someone who wants to skip the whole exercise has
+        // said something by doing that, and the results say so rather than
+        // reporting agreement nobody expressed.
+        requiredIds: [],
+        saved: await savedAnswers(exercise, profile),
+      });
+    }
+
+    // Anything left is genuinely not answerable in the app. Saying so is better
+    // than returning an empty list, which reads as a bug.
     return json({
       ok: false,
       error: `${exercise.label} is not answerable in the app yet`,

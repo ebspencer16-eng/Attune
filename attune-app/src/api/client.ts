@@ -731,6 +731,68 @@ export function fetchQuestions(exercise: string) {
     `/api/questions?exercise=${encodeURIComponent(exercise)}`);
 }
 
+/**
+ * Relationship Reflection: four kinds of question in one exercise.
+ *
+ * `type` says which. The app renders what an item says it is rather than
+ * keeping a map of which id is which shape, so a new question of an existing
+ * kind needs no app change.
+ */
+export type ReflectionQuestionSet = {
+  saved: SavedAnswers;
+  exercise: { key: string; label: string; shape: 'answers' | 'record' };
+  version: number;
+  items: {
+    id: string;
+    type: 'scale' | 'text' | 'pick' | 'rank';
+    category: string;
+    text: string;
+    /** Scales only. Answers are stored as the index into this list. */
+    scaleLabels?: string[];
+    /** Pick and rank only. */
+    options?: string[];
+    placeholder?: string;
+  }[];
+  /** Which ids must be answered. The app never decides this. */
+  requiredIds: string[];
+};
+
+/**
+ * Physical Intimacy.
+ *
+ * `variant` is resolved by the server from the profile, so both partners are
+ * always asked the same wording. Every question carries its own "Prefer not to
+ * say" option with a null value: declining is a real answer, stored and scored
+ * differently from an unanswered one.
+ */
+export type IntimacyQuestionSet = {
+  saved: SavedAnswers;
+  exercise: { key: string; label: string; shape: 'answers' | 'record' };
+  variant: 'premarital' | 'married';
+  dimensions: { id: string; label: string }[];
+  items: {
+    id: string;
+    dimension: string;
+    kind: 'scale' | 'selfref' | 'multi';
+    topic: string;
+    text: string;
+    options: { label: string; value: string | number | null }[];
+  }[];
+  requiredIds: string[];
+};
+
+/**
+ * Questions for any exercise whose payload shape the caller knows.
+ *
+ * One reader rather than one per exercise. /api/questions answers 501 with
+ * notYetInApp for an exercise the app cannot ask, which arrives here as a
+ * normal error rather than a crash.
+ */
+export function fetchExerciseQuestions<T>(exercise: string) {
+  return request<T & { ok: true }>(
+    `/api/questions?exercise=${encodeURIComponent(exercise)}`);
+}
+
 /** Expectations. A different shape from ex1, so it gets its own reader. */
 export function fetchExpectations() {
   return request<ExpectationsSet & { ok: true }>('/api/questions?exercise=ex2');
