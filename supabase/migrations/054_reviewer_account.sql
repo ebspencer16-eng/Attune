@@ -192,7 +192,10 @@ begin
     raise notice 'couple_results not found, skipping.';
   end;
 
-  raise notice 'Reviewer couple ready: Alex % and Sam %', a_id, b_id;
+  -- Version marker. An earlier copy of this file granted premium and never set
+  -- partner_name, and re-running that copy looked identical to running this
+  -- one. If the line below does not say v2, the file being run is out of date.
+  raise notice '054 v2 (core package, partner names set). Reviewer couple ready: Alex % and Sam %', a_id, b_id;
 end $$;
 
 -- ── Verification ───────────────────────────────────────────────────────────
