@@ -44,6 +44,7 @@ function typingDimScores(selfAnswers, partnerAnswers) {
 }
 import { INTIMACY_RESULTS_PROSE } from "../api/_intimacy-results-prose.js";
 import { PKG_CAPS, ORDER_SELECT, computeEntitlements, mergeEntitlementsGrantOnly, sameEntitlements } from "../api/_lib/entitlements.js";
+import { OAUTH_PROVIDERS } from "../api/_lib/auth-providers.js";
 import { COUPLE_TYPES as NEW_COUPLE_TYPES } from "../api/_couple-types.js";
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -10004,6 +10005,133 @@ function AuthModal({ mode, onClose, onSuccess }) {
   const [shake, setShake] = useState(false);
   const upd = (k, v) => setForm(f => ({ ...f, [k]: v }));
 
+  // ── Google and Apple ────────────────────────────────────────────────────────
+  //
+  // The setup email link is where most people make their account, and until now
+  // the only way to make one was to invent another password. Both providers, not
+  // one: Apple requires Sign in with Apple wherever a third-party login is
+  // offered, and shipping Google alone is what gets an app rejected.
+  //
+  // The round trip leaves the site, so the order number from the setup email has
+  // to survive it. It rides in the redirect URL, which is why redirectTo is the
+  // current URL rather than a fixed path.
+  //
+  // Identity first, then the profile. Coming back from a provider, we know who
+  // someone is and nothing else, so the same form still runs: names, pronouns,
+  // partner, demographics. The email and password fields are the only part that
+  // goes away, because the provider has already answered that question.
+  const _oauthProvider = _authParams.get('oauth') || '';
+  const [oauthIdentity, setOauthIdentity] = useState(null); // { user, session, provider }
+  const [oauthBusy, setOauthBusy] = useState('');
+
+  const startOAuth = async (provider) => {
+    setErr('');
+    setOauthBusy(provider);
+    try {
+      const { supabase: sb, hasSupabase } = await import('./supabase.js');
+      if (!hasSupabase()) {
+        setOauthBusy('');
+        return setErr('Sign-in is unavailable right now. Please try again in a moment.');
+      }
+      const back = new URL(window.location.href);
+      back.searchParams.set(tab === 'login' ? 'signin' : 'signup', '1');
+      back.searchParams.set('oauth', provider);
+      const { error } = await sb.auth.signInWithOAuth({
+        provider,
+        options: { redirectTo: back.toString() },
+      });
+      // No error means the browser is already navigating away.
+      if (error) {
+        setOauthBusy('');
+        setErr(`${provider === 'apple' ? 'Apple' : 'Google'} sign-in is not available right now. Use an email and password below.`);
+      }
+    } catch (e) {
+      console.warn('[oauth] start failed:', e);
+      setOauthBusy('');
+      setErr('That did not open. Use an email and password below.');
+    }
+  };
+
+  // Coming back from the provider.
+  React.useEffect(() => {
+    if (!_oauthProvider) return;
+    let cancelled = false;
+    (async () => {
+      setLoading(true);
+      try {
+        const { supabase: sb, hasSupabase } = await import('./supabase.js');
+        if (!hasSupabase()) return;
+        const { data } = await sb.auth.getSession();
+        const session = data?.session || null;
+        if (cancelled) return;
+        if (!session?.user) {
+          setErr('That sign-in did not complete. Try again, or use an email and password below.');
+          return;
+        }
+        // A profile with a name means this is someone who already has an
+        // account, whichever tab they pressed the button on. Send them through
+        // the returning-person path rather than asking them to set up again.
+        const { data: prof } = await sb.from('profiles').select('name').eq('id', session.user.id).maybeSingle();
+        if (cancelled) return;
+        if (prof?.name) {
+          await completeLogin(sb, session.user);
+          return;
+        }
+        // No profile, and nothing that says a new account is expected here.
+        //
+        // Setup arrives with an order number; an invited partner arrives with
+        // an invite code. Without either, this is someone pressing Google or
+        // Apple on the sign-in page for an identity Attune has never seen, and
+        // the honest answer is to say so. Making them a blank account instead
+        // is worse than refusing: they would land on an empty dashboard with
+        // nothing they paid for, and now hold two accounts.
+        const expectsNewAccount = !!(_authParams.get('orderNum') || _authParams.get('invite') || _qrToken);
+        if (!expectsNewAccount) {
+          await sb.auth.signOut().catch(() => {});
+          setTab('login');
+          setErr(
+            `There is no Attune account for that ${_oauthProvider === 'apple' ? 'Apple' : 'Google'} sign-in. ` +
+            'If you bought with a different email, sign in with that email and password below.');
+          return;
+        }
+        setOauthIdentity({ user: session.user, session, provider: _oauthProvider });
+        setTab('signup');
+        // Providers hand back a display name. Prefilling the first name saves a
+        // step; it stays editable because a Google account name is often not
+        // what someone wants their partner to read.
+        const meta = session.user.user_metadata || {};
+        const guessed = String(meta.given_name || meta.name || meta.full_name || '').trim().split(/\s+/)[0] || '';
+        setForm(f => ({ ...f, name: f.name || guessed, email: session.user.email || f.email }));
+      } catch (e) {
+        console.warn('[oauth] return failed:', e);
+        if (!cancelled) setErr('Something went wrong finishing that sign-in. Use an email and password below.');
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    })();
+    return () => { cancelled = true; };
+    // completeLogin is stable for the life of this modal and depending on it
+    // would re-run the exchange on every render.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [_oauthProvider]);
+
+  // Finish an account whose identity came from a provider. Same tail as a
+  // password signup, so nothing can be done for one and skipped for the other.
+  const handleOAuthFinish = async () => {
+    if (!oauthIdentity) return;
+    if (!form.name.trim()) return setErr('Add your first name above to continue.');
+    setLoading(true);
+    setErr('');
+    try {
+      await completeSignup(oauthIdentity.user, oauthIdentity.session, (oauthIdentity.user.email || '').toLowerCase());
+    } catch (e) {
+      console.warn('[oauth] finish failed:', e);
+      setErr('Something went wrong. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // When we arrive via a QR-code scan, look up the order it was issued to and
   // prefill the signup form with the partner names. This makes the first step
   // feel personal ("Welcome Sarah and James") instead of starting from blank.
@@ -10052,6 +10180,140 @@ function AuthModal({ mode, onClose, onSuccess }) {
     promise,
     new Promise((_, reject) => setTimeout(() => reject(new Error(`Timed out: ${label}`)), ms)),
   ]);
+
+  /**
+   * Everything after the identity exists.
+   *
+   * Split out of handleSignup because there are now two ways to arrive here
+   * with an authenticated user: a password signup, and coming back from Google
+   * or Apple. Both then need exactly the same things done — the profile row,
+   * the local account, the order claim, the partner invite, the QR claim — and
+   * the surest way to make one of those paths quietly skip a step is to write
+   * it out twice.
+   *
+   * `signedInEmail` is passed rather than read off the form because with Apple
+   * the form has no email in it: Apple supplies the address, and it may be a
+   * relay one.
+   */
+  const completeSignup = async (user, session, signedInEmail) => {
+    // Write profile fields that aren't in auth metadata.
+    // Uses /api/create-profile (service role) instead of a direct
+    // supabase write because when "Confirm email" is ON in Supabase,
+    // auth.signUp() returns a user but no session — and the RLS
+    // policy on profiles requires auth.uid() = id for inserts.
+    // Without a session that check fails silently.
+    const inviteCode = genInvite();
+    try {
+      await withTimeout(
+        fetch('/api/create-profile', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            userId:              user.id,
+            name:                form.name.trim(),
+            pronouns:            form.pronouns.trim() || "",
+            partnerName:         form.partnerName.trim() || "",
+            partnerPronouns:     form.partnerPronouns.trim() || "",
+            partnerEmail:        form.partnerEmail.trim().toLowerCase() || "",
+            emailOptIn:          form.emailOptIn,
+            inviteCode,
+            pkg:                 new URLSearchParams(window.location.search).get("pkg") || "core",
+            ageRange:            form.ageRange || null,
+            gender:              form.gender || null,
+            relationshipStatus:  form.relationshipStatus || null,
+            relationshipLength:  form.relationshipLength || null,
+            children:            form.children || null,
+            signupSource:        form.signupSource || null,
+          }),
+        }),
+        15000,
+        'create-profile'
+      );
+    } catch (e) {
+      // Profile creation is recoverable — login flow re-syncs missing
+      // profile data. Better to let the user proceed than block them.
+      console.warn('[signup] create-profile failed (will retry on next login):', e);
+    }
+
+    const account = {
+      id: user.id,
+      email: signedInEmail,
+      name: form.name.trim(),
+      pronouns: form.pronouns.trim() || "",
+      partnerName: form.partnerName.trim() || "",
+      partnerPronouns: form.partnerPronouns.trim() || "",
+      partnerEmail: form.partnerEmail.trim().toLowerCase() || "",
+      emailOptIn: form.emailOptIn,
+      inviteCode,
+      partnerJoined: false,
+      pkg: new URLSearchParams(window.location.search).get("pkg") || "core",
+      createdAt: Date.now(),
+    };
+    // Preserve the order summary checkout.html just wrote. The wipe below
+    // removes attune_order, and the DB-based rebuild only runs on a later
+    // fresh sign-in — without this, package add-ons are invisible until the
+    // user signs out and back in.
+    let _checkoutOrderSnapshot = null;
+    try {
+      if (_authParams.get('orderNum')) _checkoutOrderSnapshot = localStorage.getItem('attune_order');
+    } catch {}
+    // Clear stale data from any prior user/demo on this browser. Single
+    // source of truth at module top; see USER_LOCALSTORAGE_KEYS.
+    clearAllUserLocalStorage();
+    try { localStorage.setItem("attune_account", JSON.stringify(account)); } catch {}
+    if (_checkoutOrderSnapshot) {
+      try { localStorage.setItem('attune_order', _checkoutOrderSnapshot); } catch {}
+    }
+
+    // Link the order created at checkout (via stripe-webhook with no user_id)
+    // to this newly-created auth user. orderNum was passed in the URL by
+    // checkout.html on success. Without this link, the user's orders are
+    // only findable by buyer_email — fragile if email is changed later.
+    // Multi-item orders are written as ORDER_NUM-1, ORDER_NUM-2, etc. by
+    // the stripe webhook, so we also match the prefix to catch all rows.
+    //
+    // This used to be fire-and-forget, with a comment saying linkage "falls
+    // back to buyer_email match on later sign-in if this fails". That
+    // fallback only works while everyone signs in with the address they
+    // bought with. Sign in with Apple can hand back a private relay address,
+    // which never matches, so a dropped link leaves a paying customer with an
+    // account and no entitlements. It is now awaited, on the server, where it
+    // also records the purchase email on the profile so the account stays
+    // findable whatever address the person logs in with.
+    const _checkoutOrderNum = _authParams.get('orderNum');
+    if (_checkoutOrderNum) {
+      await claimOrder(_checkoutOrderNum, session?.access_token);
+    }
+
+    // Send partner invite email if partner email was provided.
+    // Uses retry helper so a single transient failure doesn't permanently
+    // lose the invite (Issue 4.7).
+    if (form.partnerEmail.trim()) {
+      const inviteUrl = `${window.location.origin}/app?invite=${encodeURIComponent(inviteCode)}&from=${encodeURIComponent(form.name.trim())}&pae=${encodeURIComponent(signedInEmail)}${form.partnerEmail?.trim() ? `&iie=${encodeURIComponent(form.partnerEmail.trim().toLowerCase())}` : ''}`;
+      sendEmailWithRetry({
+        type: 'partner_invite',
+        fromName: form.name.trim(),
+        toEmail: form.partnerEmail.trim(),
+        toName: form.partnerName.trim() || 'Your partner',
+        inviteUrl,
+      });
+    }
+
+    // Welcome email is now fired on first dashboard view (Issue 2.6),
+    // not at signup. This prevents the user from receiving two emails
+    // back-to-back (Supabase confirm + Attune welcome) before they've
+    // even confirmed.
+
+    // If the user arrived via a QR-code scan, claim the order so the token
+    // can't be reused. Uses retry helper (Issue 2.7) — without retry, a
+    // transient network failure here means the QR token stays unclaimed
+    // and anyone with the physical card could re-claim it.
+    if (_qrToken && qrStatus === 'ok') {
+      claimQrTokenWithRetry(_qrToken, signedInEmail);
+    }
+
+    onSuccess(account);
+  };
 
   const handleSignup = async () => {
     if (!form.name.trim()) return setErr("Add your first name above to continue.");
@@ -10111,123 +10373,7 @@ function AuthModal({ mode, onClose, onSuccess }) {
       }
       if (!authData?.user?.id) return setErr("Sign-up didn't complete. Please try again.");
 
-      // Write profile fields that aren't in auth metadata.
-      // Uses /api/create-profile (service role) instead of a direct
-      // supabase write because when "Confirm email" is ON in Supabase,
-      // auth.signUp() returns a user but no session — and the RLS
-      // policy on profiles requires auth.uid() = id for inserts.
-      // Without a session that check fails silently.
-      const inviteCode = genInvite();
-      try {
-        await withTimeout(
-          fetch('/api/create-profile', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              userId:              authData.user.id,
-              name:                form.name.trim(),
-              pronouns:            form.pronouns.trim() || "",
-              partnerName:         form.partnerName.trim() || "",
-              partnerPronouns:     form.partnerPronouns.trim() || "",
-              partnerEmail:        form.partnerEmail.trim().toLowerCase() || "",
-              emailOptIn:          form.emailOptIn,
-              inviteCode,
-              pkg:                 new URLSearchParams(window.location.search).get("pkg") || "core",
-              ageRange:            form.ageRange || null,
-              gender:              form.gender || null,
-              relationshipStatus:  form.relationshipStatus || null,
-              relationshipLength:  form.relationshipLength || null,
-              children:            form.children || null,
-              signupSource:        form.signupSource || null,
-            }),
-          }),
-          15000,
-          'create-profile'
-        );
-      } catch (e) {
-        // Profile creation is recoverable — login flow re-syncs missing
-        // profile data. Better to let the user proceed than block them.
-        console.warn('[signup] create-profile failed (will retry on next login):', e);
-      }
-
-      const account = {
-        id: authData.user.id,
-        email: form.email.trim().toLowerCase(),
-        name: form.name.trim(),
-        pronouns: form.pronouns.trim() || "",
-        partnerName: form.partnerName.trim() || "",
-        partnerPronouns: form.partnerPronouns.trim() || "",
-        partnerEmail: form.partnerEmail.trim().toLowerCase() || "",
-        emailOptIn: form.emailOptIn,
-        inviteCode,
-        partnerJoined: false,
-        pkg: new URLSearchParams(window.location.search).get("pkg") || "core",
-        createdAt: Date.now(),
-      };
-      // Preserve the order summary checkout.html just wrote. The wipe below
-      // removes attune_order, and the DB-based rebuild only runs on a later
-      // fresh sign-in — without this, package add-ons are invisible until the
-      // user signs out and back in.
-      let _checkoutOrderSnapshot = null;
-      try {
-        if (_authParams.get('orderNum')) _checkoutOrderSnapshot = localStorage.getItem('attune_order');
-      } catch {}
-      // Clear stale data from any prior user/demo on this browser. Single
-      // source of truth at module top; see USER_LOCALSTORAGE_KEYS.
-      clearAllUserLocalStorage();
-      try { localStorage.setItem("attune_account", JSON.stringify(account)); } catch {}
-      if (_checkoutOrderSnapshot) {
-        try { localStorage.setItem('attune_order', _checkoutOrderSnapshot); } catch {}
-      }
-
-      // Link the order created at checkout (via stripe-webhook with no user_id)
-      // to this newly-created auth user. orderNum was passed in the URL by
-      // checkout.html on success. Without this link, the user's orders are
-      // only findable by buyer_email — fragile if email is changed later.
-      // Multi-item orders are written as ORDER_NUM-1, ORDER_NUM-2, etc. by
-      // the stripe webhook, so we also match the prefix to catch all rows.
-      //
-      // This used to be fire-and-forget, with a comment saying linkage "falls
-      // back to buyer_email match on later sign-in if this fails". That
-      // fallback only works while everyone signs in with the address they
-      // bought with. Sign in with Apple can hand back a private relay address,
-      // which never matches, so a dropped link leaves a paying customer with an
-      // account and no entitlements. It is now awaited, on the server, where it
-      // also records the purchase email on the profile so the account stays
-      // findable whatever address the person logs in with.
-      const _checkoutOrderNum = _authParams.get('orderNum');
-      if (_checkoutOrderNum) {
-        await claimOrder(_checkoutOrderNum, authData?.session?.access_token);
-      }
-
-      // Send partner invite email if partner email was provided.
-      // Uses retry helper so a single transient failure doesn't permanently
-      // lose the invite (Issue 4.7).
-      if (form.partnerEmail.trim()) {
-        const inviteUrl = `${window.location.origin}/app?invite=${encodeURIComponent(inviteCode)}&from=${encodeURIComponent(form.name.trim())}&pae=${encodeURIComponent(form.email.trim().toLowerCase())}${form.partnerEmail?.trim() ? `&iie=${encodeURIComponent(form.partnerEmail.trim().toLowerCase())}` : ''}`;
-        sendEmailWithRetry({
-          type: 'partner_invite',
-          fromName: form.name.trim(),
-          toEmail: form.partnerEmail.trim(),
-          toName: form.partnerName.trim() || 'Your partner',
-          inviteUrl,
-        });
-      }
-
-      // Welcome email is now fired on first dashboard view (Issue 2.6),
-      // not at signup. This prevents the user from receiving two emails
-      // back-to-back (Supabase confirm + Attune welcome) before they've
-      // even confirmed.
-
-      // If the user arrived via a QR-code scan, claim the order so the token
-      // can't be reused. Uses retry helper (Issue 2.7) — without retry, a
-      // transient network failure here means the QR token stays unclaimed
-      // and anyone with the physical card could re-claim it.
-      if (_qrToken && qrStatus === 'ok') {
-        claimQrTokenWithRetry(_qrToken, form.email.trim().toLowerCase());
-      }
-
-      onSuccess(account);
+      await completeSignup(authData.user, authData.session, form.email.trim().toLowerCase());
       return;
     }
 
@@ -10269,6 +10415,242 @@ function AuthModal({ mode, onClose, onSuccess }) {
     } finally {
       setLoading(false);
     }
+  };
+
+  /**
+   * Everything after a returning person is authenticated.
+   *
+   * Split out for the same reason as completeSignup: pressing Google on the
+   * sign-in tab has to do all of this, and this is a hundred lines of
+   * hydration — prior answers, mid-exercise progress, budget, checklist,
+   * notes, the workbook, the partner session — where every single line exists
+   * because leaving it out broke something. A second copy would rot.
+   *
+   * `sb` is passed in so the caller owns the import.
+   */
+  const completeLogin = async (sb, user) => {
+    // Fetch profile
+    const { data: profile } = await sb.from('profiles').select('*').eq('id', user.id).single();
+
+    const account = {
+      id: user.id,
+      email: user.email,
+      name: profile?.name || "",
+      pronouns: profile?.pronouns || "",
+      partnerName: profile?.partner_name || "",
+      partnerPronouns: profile?.partner_pronouns || "",
+      partnerEmail: profile?.partner_email || "",
+      // email_opt_in defaults to true when missing entirely (new account
+      // hydration). The previous `|| false` pattern masked an actual
+      // user preference of false vs null/missing. Issue 2.3.
+      emailOptIn: typeof profile?.email_opt_in === 'boolean' ? profile.email_opt_in : true,
+      betaSurveyAt: profile?.beta_survey_at || null,
+      inviteCode: profile?.invite_code || "",
+      partnerJoined: profile?.partner_joined || false,
+      joinedViaInvite: profile?.joined_via_invite || false,
+      relationshipStatus: profile?.relationship_status || null,
+      // Buyer's status drives the Ex2 variant for both partners. For the
+      // buyer (Partner A, not joined via invite) it's their own status; for
+      // the invitee it's resolved from the partner-sync fetch below.
+      buyerRelationshipStatus: profile?.joined_via_invite ? null : (profile?.relationship_status || null),
+      pkg: profile?.pkg || "core",
+      createdAt: profile?.created_at ? new Date(profile.created_at).getTime() : Date.now(),
+    };
+    try { localStorage.setItem("attune_account", JSON.stringify(account)); } catch {}
+
+    // Restore exercise answers from Supabase (cross-device support)
+    // Restore exercise answers from Supabase (cross-device support). When the
+    // server has no answers for an exercise (e.g. after an admin reset), clear
+    // any stale local copy so a previously-completed exercise doesn't linger on
+    // the device and keep showing as done.
+    try {
+      // Every exercise, derived rather than listed: this block covered the
+      // first three only, so an admin reset of a newer exercise left the
+      // local copy in place and it kept reading as complete.
+      if (profile?.ex1_answers) localStorage.setItem('attune_ex1', JSON.stringify(profile.ex1_answers));
+      else localStorage.removeItem('attune_ex1');
+      if (profile?.intimacy_data) localStorage.setItem('attune_intimacy', JSON.stringify(profile.intimacy_data));
+      else localStorage.removeItem('attune_intimacy');
+      if (profile?.conflict_data) localStorage.setItem('attune_conflict', JSON.stringify(profile.conflict_data));
+      else localStorage.removeItem('attune_conflict');
+    } catch {}
+    try {
+      if (profile?.ex2_answers) localStorage.setItem('attune_ex2', JSON.stringify(profile.ex2_answers));
+      else localStorage.removeItem('attune_ex2');
+    } catch {}
+    try {
+      if (profile?.ex3_answers) localStorage.setItem('attune_ex3', JSON.stringify(profile.ex3_answers));
+      else localStorage.removeItem('attune_ex3');
+    } catch {}
+    // Prior-completion snapshots (for retake comparison). These exist only
+    // when the user has re-taken an exercise. Stored in localStorage so
+    // the retake comparison card can render without a round-trip.
+    if (profile?.ex1_answers_prior) {
+      try { localStorage.setItem('attune_ex1_prior', JSON.stringify({ answers: profile.ex1_answers_prior, at: profile.ex1_prior_completed_at })); } catch {}
+    }
+    if (profile?.ex2_answers_prior) {
+      try { localStorage.setItem('attune_ex2_prior', JSON.stringify({ answers: profile.ex2_answers_prior, at: profile.ex2_prior_completed_at })); } catch {}
+    }
+    if (profile?.ex3_answers_prior) {
+      try { localStorage.setItem('attune_ex3_prior', JSON.stringify({ answers: profile.ex3_answers_prior, at: profile.ex3_prior_completed_at })); } catch {}
+    }
+    // Mid-exercise progress (Issue 3.5). Hydrate the per-exercise progress
+    // snapshots so a user who started on one device can resume on another.
+    // Only restore progress for exercises NOT yet completed (otherwise the
+    // completed answer takes precedence).
+    if (profile?.ex1_progress && !profile?.ex1_answers) {
+      try { localStorage.setItem('attune_ex1_progress', JSON.stringify(profile.ex1_progress)); } catch {}
+    }
+    if (profile?.ex2_progress && !profile?.ex2_answers) {
+      try { localStorage.setItem('attune_ex2_progress', JSON.stringify(profile.ex2_progress)); } catch {}
+    }
+    if (profile?.ex3_progress && !profile?.ex3_answers) {
+      try { localStorage.setItem('attune_ex3_progress', JSON.stringify(profile.ex3_progress)); } catch {}
+    }
+    // else-remove on every one of these: without it, signing into an account
+    // whose server copy is empty leaves the previous account's data on the
+    // device, which is the same shape as the bug that made a reset partner
+    // keep reading as complete.
+    if (profile?.budget_data) {
+      try { localStorage.setItem('attune_budget', JSON.stringify(profile.budget_data)); } catch {}
+    } else {
+      try { localStorage.removeItem('attune_budget'); } catch {}
+    }
+    if (profile?.checklist_data) {
+      try { localStorage.setItem('attune_checklist', JSON.stringify(profile.checklist_data)); } catch {}
+    } else {
+      try { localStorage.removeItem('attune_checklist'); } catch {}
+    }
+    if (profile?.notes_data) {
+      try { localStorage.setItem('attune_notes', JSON.stringify(profile.notes_data)); } catch {}
+    } else {
+      try { localStorage.removeItem('attune_notes'); } catch {}
+    }
+    // The workbook is persisted on the profile as well as the order, so comp
+    // accounts (which have no order row) restore it on any device exactly like
+    // paid ones. Whichever source has it wins; the order is checked first.
+    if (profile?.workbook_url || profile?.workbook_status === 'ready') {
+      try {
+        const _o = JSON.parse(localStorage.getItem('attune_order') || 'null') || {};
+        if (!_o.workbookUrl) {
+          _o.workbookUrl = profile.workbook_url || null;
+          _o.workbookStatus = profile.workbook_status || 'ready';
+          localStorage.setItem('attune_order', JSON.stringify(_o));
+        }
+        localStorage.setItem('attune_workbook_ready', 'true');
+      } catch {}
+    }
+    // Restore partner session if partner already completed
+    if (profile?.partner_profile_id) {
+      try {
+        // After signInWithPassword, the session is fresh. Pull the
+        // access token to authenticate the partner-sync call.
+        const { data: { session: authSession } } = await sb.auth.getSession();
+        const psRes = await fetch(`/api/partner-sync?partnerProfileId=${encodeURIComponent(profile.partner_profile_id)}`, {
+          headers: authSession?.access_token
+            ? { Authorization: `Bearer ${authSession.access_token}` }
+            : {},
+        });
+        const ps = await psRes.json();
+        if (ps.found && ps.profile) {
+          // The invitee inherits the buyer's (Partner A's) relationship
+          // status so both partners get the same Ex2 variant.
+          if (profile?.joined_via_invite && ps.profile.relationship_status) {
+            account.buyerRelationshipStatus = ps.profile.relationship_status;
+            try { localStorage.setItem("attune_account", JSON.stringify(account)); } catch {}
+          }
+        }
+        // Mirror of the ex1/ex2/ex3 clearing above: when the partner has no
+        // answers on the server (a reset, or they have not finished), drop
+        // any cached session so they do not keep reading as complete.
+        // The partner session used to be written only when the partner had
+        // BOTH ex1 and ex2, and cleared otherwise. That made partner status
+        // all-or-nothing: someone who had finished Communication but not
+        // Expectations showed as Pending on everything, including the
+        // exercise they had actually completed. Per-exercise status was
+        // impossible to report accurately.
+        //
+        // Now it is written whenever the partner has any answers at all, and
+        // each field carries its own truth, so every row can report the
+        // exercise it is about.
+        const _anyPartnerAnswers = !!(ps.profile?.ex1_answers || ps.profile?.ex2_answers
+          || ps.profile?.ex3_answers || ps.profile?.intimacy_data || ps.profile?.conflict_data);
+        if (ps.found && !_anyPartnerAnswers) {
+          try { localStorage.removeItem('attune_partner_session'); } catch {}
+        }
+        if (ps.found && _anyPartnerAnswers) {
+          localStorage.setItem('attune_partner_session', JSON.stringify({
+            name: ps.profile.name,
+            ex1: ps.profile.ex1_answers,
+            ex2: ps.profile.ex2_answers,
+            ex3: ps.profile.ex3_answers,
+            // conflict was never carried here, so a partner's Conflict
+            // Patterns row could only ever read Pending, however long ago
+            // they finished it.
+            ...(ps.profile.conflict_data ? { conflict: ps.profile.conflict_data } : {}),
+            ...(ps.profile.intimacy_data ? { intimacy: ps.profile.intimacy_data } : {}),
+            partnerProfileId: profile.partner_profile_id,
+            inviteCode: profile.invite_code,
+          }));
+        }
+      } catch {}
+    }
+
+    // Restore order from Supabase so pkg features (budget, reflection) work on a new device
+    if (!localStorage.getItem('attune_order') && user.email) {
+      try {
+        // NOTE: this is the one orders query in the app with a hand-written
+        // column list rather than ORDER_SELECT. addon_conflict was missing
+        // from it, so a granted add-on read as undefined and was stored as
+        // false, which is why Partner B never saw the exercise on a fresh
+        // sign-in. Any new add-on column has to be added here too.
+        const { data: orderRow } = await sb.from('orders')
+          .select('id,pkg_key,addon_reflection,addon_budget,addon_checklist,addon_intimacy,addon_conflict,addon_workbook,is_physical,order_num,user_id,workbook_url,workbook_status')
+          .eq('buyer_email', user.email)
+          .order('created_at', { ascending: false })
+          .limit(1)
+          .single();
+        if (orderRow) {
+          localStorage.setItem('attune_order', JSON.stringify({
+            pkgKey:          orderRow.pkg_key,
+            addonReflection: orderRow.addon_reflection || false,
+            addonBudget:     orderRow.addon_budget || false,
+            addonChecklist:  orderRow.addon_checklist || false,
+            addonIntimacy:     orderRow.addon_intimacy || false,
+            addonConflict:     orderRow.addon_conflict || false,
+            addonWorkbook:   orderRow.addon_workbook || null,
+            isPhysical:      orderRow.is_physical || false,
+            orderNum:        orderRow.order_num || null,
+            // 10.6 — the workbook's real state lives on the order row. Without
+            // these, a login on any other device shows "Generating now" forever,
+            // because readiness was only ever a localStorage flag.
+            workbookUrl:     orderRow.workbook_url || null,
+            workbookStatus:  orderRow.workbook_status || null,
+          }));
+          if (orderRow.workbook_url || orderRow.workbook_status === 'ready') {
+            try { localStorage.setItem('attune_workbook_ready', 'true'); } catch {}
+          }
+          // Link the order to the auth user so future cross-device logins
+          // can find it by user_id (faster + works even if email changes).
+          if (!orderRow.user_id) {
+            await sb.from('orders').update({ user_id: user.id }).eq('id', orderRow.id).catch(() => {});
+          }
+        }
+      } catch {}
+    }
+    if (form.partnerEmail.trim()) {
+      const inviteUrl = `${window.location.origin}/app?invite=${encodeURIComponent(inviteCode)}&from=${encodeURIComponent(form.name.trim())}&pae=${encodeURIComponent(form.email.trim().toLowerCase())}${form.partnerEmail?.trim() ? `&iie=${encodeURIComponent(form.partnerEmail.trim().toLowerCase())}` : ''}`;
+      sendEmailWithRetry({
+        type: 'partner_invite',
+        fromName: form.name.trim(),
+        toEmail: form.partnerEmail.trim(),
+        toName: form.partnerName.trim() || 'Your partner',
+        inviteUrl,
+      });
+    }
+
+    setLoading(false);
+    onSuccess(account);
   };
 
   const handleLogin = async () => {
@@ -10317,228 +10699,7 @@ function AuthModal({ mode, onClose, onSuccess }) {
       }
       setLoginAttempts(0); // reset on success
 
-      // Fetch profile
-      const { data: profile } = await sb.from('profiles').select('*').eq('id', authData.user.id).single();
-
-      const account = {
-        id: authData.user.id,
-        email: authData.user.email,
-        name: profile?.name || "",
-        pronouns: profile?.pronouns || "",
-        partnerName: profile?.partner_name || "",
-        partnerPronouns: profile?.partner_pronouns || "",
-        partnerEmail: profile?.partner_email || "",
-        // email_opt_in defaults to true when missing entirely (new account
-        // hydration). The previous `|| false` pattern masked an actual
-        // user preference of false vs null/missing. Issue 2.3.
-        emailOptIn: typeof profile?.email_opt_in === 'boolean' ? profile.email_opt_in : true,
-        betaSurveyAt: profile?.beta_survey_at || null,
-        inviteCode: profile?.invite_code || "",
-        partnerJoined: profile?.partner_joined || false,
-        joinedViaInvite: profile?.joined_via_invite || false,
-        relationshipStatus: profile?.relationship_status || null,
-        // Buyer's status drives the Ex2 variant for both partners. For the
-        // buyer (Partner A, not joined via invite) it's their own status; for
-        // the invitee it's resolved from the partner-sync fetch below.
-        buyerRelationshipStatus: profile?.joined_via_invite ? null : (profile?.relationship_status || null),
-        pkg: profile?.pkg || "core",
-        createdAt: profile?.created_at ? new Date(profile.created_at).getTime() : Date.now(),
-      };
-      try { localStorage.setItem("attune_account", JSON.stringify(account)); } catch {}
-
-      // Restore exercise answers from Supabase (cross-device support)
-      // Restore exercise answers from Supabase (cross-device support). When the
-      // server has no answers for an exercise (e.g. after an admin reset), clear
-      // any stale local copy so a previously-completed exercise doesn't linger on
-      // the device and keep showing as done.
-      try {
-        // Every exercise, derived rather than listed: this block covered the
-        // first three only, so an admin reset of a newer exercise left the
-        // local copy in place and it kept reading as complete.
-        if (profile?.ex1_answers) localStorage.setItem('attune_ex1', JSON.stringify(profile.ex1_answers));
-        else localStorage.removeItem('attune_ex1');
-        if (profile?.intimacy_data) localStorage.setItem('attune_intimacy', JSON.stringify(profile.intimacy_data));
-        else localStorage.removeItem('attune_intimacy');
-        if (profile?.conflict_data) localStorage.setItem('attune_conflict', JSON.stringify(profile.conflict_data));
-        else localStorage.removeItem('attune_conflict');
-      } catch {}
-      try {
-        if (profile?.ex2_answers) localStorage.setItem('attune_ex2', JSON.stringify(profile.ex2_answers));
-        else localStorage.removeItem('attune_ex2');
-      } catch {}
-      try {
-        if (profile?.ex3_answers) localStorage.setItem('attune_ex3', JSON.stringify(profile.ex3_answers));
-        else localStorage.removeItem('attune_ex3');
-      } catch {}
-      // Prior-completion snapshots (for retake comparison). These exist only
-      // when the user has re-taken an exercise. Stored in localStorage so
-      // the retake comparison card can render without a round-trip.
-      if (profile?.ex1_answers_prior) {
-        try { localStorage.setItem('attune_ex1_prior', JSON.stringify({ answers: profile.ex1_answers_prior, at: profile.ex1_prior_completed_at })); } catch {}
-      }
-      if (profile?.ex2_answers_prior) {
-        try { localStorage.setItem('attune_ex2_prior', JSON.stringify({ answers: profile.ex2_answers_prior, at: profile.ex2_prior_completed_at })); } catch {}
-      }
-      if (profile?.ex3_answers_prior) {
-        try { localStorage.setItem('attune_ex3_prior', JSON.stringify({ answers: profile.ex3_answers_prior, at: profile.ex3_prior_completed_at })); } catch {}
-      }
-      // Mid-exercise progress (Issue 3.5). Hydrate the per-exercise progress
-      // snapshots so a user who started on one device can resume on another.
-      // Only restore progress for exercises NOT yet completed (otherwise the
-      // completed answer takes precedence).
-      if (profile?.ex1_progress && !profile?.ex1_answers) {
-        try { localStorage.setItem('attune_ex1_progress', JSON.stringify(profile.ex1_progress)); } catch {}
-      }
-      if (profile?.ex2_progress && !profile?.ex2_answers) {
-        try { localStorage.setItem('attune_ex2_progress', JSON.stringify(profile.ex2_progress)); } catch {}
-      }
-      if (profile?.ex3_progress && !profile?.ex3_answers) {
-        try { localStorage.setItem('attune_ex3_progress', JSON.stringify(profile.ex3_progress)); } catch {}
-      }
-      // else-remove on every one of these: without it, signing into an account
-      // whose server copy is empty leaves the previous account's data on the
-      // device, which is the same shape as the bug that made a reset partner
-      // keep reading as complete.
-      if (profile?.budget_data) {
-        try { localStorage.setItem('attune_budget', JSON.stringify(profile.budget_data)); } catch {}
-      } else {
-        try { localStorage.removeItem('attune_budget'); } catch {}
-      }
-      if (profile?.checklist_data) {
-        try { localStorage.setItem('attune_checklist', JSON.stringify(profile.checklist_data)); } catch {}
-      } else {
-        try { localStorage.removeItem('attune_checklist'); } catch {}
-      }
-      if (profile?.notes_data) {
-        try { localStorage.setItem('attune_notes', JSON.stringify(profile.notes_data)); } catch {}
-      } else {
-        try { localStorage.removeItem('attune_notes'); } catch {}
-      }
-      // The workbook is persisted on the profile as well as the order, so comp
-      // accounts (which have no order row) restore it on any device exactly like
-      // paid ones. Whichever source has it wins; the order is checked first.
-      if (profile?.workbook_url || profile?.workbook_status === 'ready') {
-        try {
-          const _o = JSON.parse(localStorage.getItem('attune_order') || 'null') || {};
-          if (!_o.workbookUrl) {
-            _o.workbookUrl = profile.workbook_url || null;
-            _o.workbookStatus = profile.workbook_status || 'ready';
-            localStorage.setItem('attune_order', JSON.stringify(_o));
-          }
-          localStorage.setItem('attune_workbook_ready', 'true');
-        } catch {}
-      }
-      // Restore partner session if partner already completed
-      if (profile?.partner_profile_id) {
-        try {
-          // After signInWithPassword, the session is fresh. Pull the
-          // access token to authenticate the partner-sync call.
-          const { data: { session: authSession } } = await sb.auth.getSession();
-          const psRes = await fetch(`/api/partner-sync?partnerProfileId=${encodeURIComponent(profile.partner_profile_id)}`, {
-            headers: authSession?.access_token
-              ? { Authorization: `Bearer ${authSession.access_token}` }
-              : {},
-          });
-          const ps = await psRes.json();
-          if (ps.found && ps.profile) {
-            // The invitee inherits the buyer's (Partner A's) relationship
-            // status so both partners get the same Ex2 variant.
-            if (profile?.joined_via_invite && ps.profile.relationship_status) {
-              account.buyerRelationshipStatus = ps.profile.relationship_status;
-              try { localStorage.setItem("attune_account", JSON.stringify(account)); } catch {}
-            }
-          }
-          // Mirror of the ex1/ex2/ex3 clearing above: when the partner has no
-          // answers on the server (a reset, or they have not finished), drop
-          // any cached session so they do not keep reading as complete.
-          // The partner session used to be written only when the partner had
-          // BOTH ex1 and ex2, and cleared otherwise. That made partner status
-          // all-or-nothing: someone who had finished Communication but not
-          // Expectations showed as Pending on everything, including the
-          // exercise they had actually completed. Per-exercise status was
-          // impossible to report accurately.
-          //
-          // Now it is written whenever the partner has any answers at all, and
-          // each field carries its own truth, so every row can report the
-          // exercise it is about.
-          const _anyPartnerAnswers = !!(ps.profile?.ex1_answers || ps.profile?.ex2_answers
-            || ps.profile?.ex3_answers || ps.profile?.intimacy_data || ps.profile?.conflict_data);
-          if (ps.found && !_anyPartnerAnswers) {
-            try { localStorage.removeItem('attune_partner_session'); } catch {}
-          }
-          if (ps.found && _anyPartnerAnswers) {
-            localStorage.setItem('attune_partner_session', JSON.stringify({
-              name: ps.profile.name,
-              ex1: ps.profile.ex1_answers,
-              ex2: ps.profile.ex2_answers,
-              ex3: ps.profile.ex3_answers,
-              // conflict was never carried here, so a partner's Conflict
-              // Patterns row could only ever read Pending, however long ago
-              // they finished it.
-              ...(ps.profile.conflict_data ? { conflict: ps.profile.conflict_data } : {}),
-              ...(ps.profile.intimacy_data ? { intimacy: ps.profile.intimacy_data } : {}),
-              partnerProfileId: profile.partner_profile_id,
-              inviteCode: profile.invite_code,
-            }));
-          }
-        } catch {}
-      }
-
-      // Restore order from Supabase so pkg features (budget, reflection) work on a new device
-      if (!localStorage.getItem('attune_order') && authData.user.email) {
-        try {
-          // NOTE: this is the one orders query in the app with a hand-written
-          // column list rather than ORDER_SELECT. addon_conflict was missing
-          // from it, so a granted add-on read as undefined and was stored as
-          // false, which is why Partner B never saw the exercise on a fresh
-          // sign-in. Any new add-on column has to be added here too.
-          const { data: orderRow } = await sb.from('orders')
-            .select('id,pkg_key,addon_reflection,addon_budget,addon_checklist,addon_intimacy,addon_conflict,addon_workbook,is_physical,order_num,user_id,workbook_url,workbook_status')
-            .eq('buyer_email', authData.user.email)
-            .order('created_at', { ascending: false })
-            .limit(1)
-            .single();
-          if (orderRow) {
-            localStorage.setItem('attune_order', JSON.stringify({
-              pkgKey:          orderRow.pkg_key,
-              addonReflection: orderRow.addon_reflection || false,
-              addonBudget:     orderRow.addon_budget || false,
-              addonChecklist:  orderRow.addon_checklist || false,
-              addonIntimacy:     orderRow.addon_intimacy || false,
-              addonConflict:     orderRow.addon_conflict || false,
-              addonWorkbook:   orderRow.addon_workbook || null,
-              isPhysical:      orderRow.is_physical || false,
-              orderNum:        orderRow.order_num || null,
-              // 10.6 — the workbook's real state lives on the order row. Without
-              // these, a login on any other device shows "Generating now" forever,
-              // because readiness was only ever a localStorage flag.
-              workbookUrl:     orderRow.workbook_url || null,
-              workbookStatus:  orderRow.workbook_status || null,
-            }));
-            if (orderRow.workbook_url || orderRow.workbook_status === 'ready') {
-              try { localStorage.setItem('attune_workbook_ready', 'true'); } catch {}
-            }
-            // Link the order to the auth user so future cross-device logins
-            // can find it by user_id (faster + works even if email changes).
-            if (!orderRow.user_id) {
-              await sb.from('orders').update({ user_id: authData.user.id }).eq('id', orderRow.id).catch(() => {});
-            }
-          }
-        } catch {}
-      }
-      if (form.partnerEmail.trim()) {
-        const inviteUrl = `${window.location.origin}/app?invite=${encodeURIComponent(inviteCode)}&from=${encodeURIComponent(form.name.trim())}&pae=${encodeURIComponent(form.email.trim().toLowerCase())}${form.partnerEmail?.trim() ? `&iie=${encodeURIComponent(form.partnerEmail.trim().toLowerCase())}` : ''}`;
-        sendEmailWithRetry({
-          type: 'partner_invite',
-          fromName: form.name.trim(),
-          toEmail: form.partnerEmail.trim(),
-          toName: form.partnerName.trim() || 'Your partner',
-          inviteUrl,
-        });
-      }
-
-      setLoading(false);
-      onSuccess(account);
+      await completeLogin(sb, authData.user);
       return;
     }
 
@@ -10579,6 +10740,46 @@ function AuthModal({ mode, onClose, onSuccess }) {
   };
 
   const _capsCheck = (e) => { try { setCapsOn(!!(e.getModifierState && e.getModifierState("CapsLock"))); } catch (_) {} };
+  // Google and Apple, given equal weight. Neither is the recommended one, and
+  // the marks are drawn rather than loaded so the row cannot render as two
+  // broken images if a CDN is blocked.
+  const providerRow = (verb) => (
+    <>
+      <div style={{ display: "flex", gap: "0.6rem", marginBottom: "0.9rem" }}>
+        {/* The list is shared with the app, so a provider cannot be added to
+            one surface and forgotten on the other. Only the styling is local. */}
+        {OAUTH_PROVIDERS.map(p0 => {
+          const pv = p0.id === 'apple'
+            ? { ...p0, bg: '#0E0B07', fg: '#FFFFFF', border: '#0E0B07' }
+            : { ...p0, bg: '#FFFDF9', fg: '#0E0B07', border: '#E8DDD0' };
+          return (
+          <button key={pv.id} type="button" onClick={() => startOAuth(pv.id)} disabled={!!oauthBusy || loading}
+            style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: "0.45rem", padding: "0.78rem 0.5rem", borderRadius: 11, border: `1.5px solid ${pv.border}`, background: pv.bg, color: pv.fg, fontFamily: "'DM Sans',sans-serif", fontSize: "0.82rem", fontWeight: 600, cursor: oauthBusy ? "default" : "pointer", opacity: oauthBusy && oauthBusy !== pv.id ? 0.5 : 1 }}>
+            {pv.id === 'google' ? (
+              <svg width="15" height="15" viewBox="0 0 48 48" aria-hidden="true">
+                <path fill="#4285F4" d="M45.1 24.5c0-1.6-.1-3.1-.4-4.5H24v8.5h11.8c-.5 2.7-2 5-4.4 6.6v5.5h7.1c4.1-3.8 6.6-9.4 6.6-16.1z"/>
+                <path fill="#34A853" d="M24 46c5.9 0 10.9-2 14.5-5.4l-7.1-5.5c-2 1.3-4.5 2.1-7.4 2.1-5.7 0-10.5-3.8-12.2-9H4.5v5.7C8.1 41.1 15.5 46 24 46z"/>
+                <path fill="#FBBC05" d="M11.8 28.2c-.4-1.3-.7-2.7-.7-4.2s.3-2.9.7-4.2v-5.7H4.5A22 22 0 0 0 2 24c0 3.6.9 6.9 2.5 9.9l7.3-5.7z"/>
+                <path fill="#EA4335" d="M24 10.3c3.2 0 6.1 1.1 8.4 3.3l6.3-6.3C34.9 3.7 29.9 1.6 24 1.6 15.5 1.6 8.1 6.5 4.5 13.9l7.3 5.7c1.7-5.2 6.5-9.3 12.2-9.3z"/>
+              </svg>
+            ) : (
+              <svg width="14" height="16" viewBox="0 0 14 16" aria-hidden="true" fill="currentColor">
+                <path d="M11.6 8.5c0-2 1.6-3 1.7-3.1-.9-1.4-2.4-1.5-2.9-1.6-1.2-.1-2.4.7-3 .7-.6 0-1.6-.7-2.6-.7C3.5 3.8 2.2 4.6 1.5 5.9c-1.4 2.4-.4 6 1 8 .7 1 1.5 2.1 2.5 2 1-.1 1.4-.6 2.6-.6s1.5.6 2.6.6c1.1 0 1.8-1 2.5-2 .8-1.1 1.1-2.2 1.1-2.3 0 0-2.1-.8-2.2-3.1zM9.7 2.6c.5-.7.9-1.6.8-2.6-.8 0-1.8.5-2.4 1.2-.5.6-1 1.6-.8 2.5.9.1 1.8-.4 2.4-1.1z"/>
+              </svg>
+            )}
+            {oauthBusy === pv.id ? 'Opening…' : `${verb} ${pv.label}`}
+          </button>
+          );
+        })}
+      </div>
+      <div style={{ display: "flex", alignItems: "center", gap: "0.7rem", marginBottom: "0.9rem" }}>
+        <div style={{ flex: 1, height: 1, background: "#E8DDD0" }} />
+        <span style={{ fontSize: "0.7rem", color: "#8C7A68", fontFamily: "'DM Sans',sans-serif" }}>or</span>
+        <div style={{ flex: 1, height: 1, background: "#E8DDD0" }} />
+      </div>
+    </>
+  );
+
   const inp = (placeholder, key, type = "text", extra = {}) => {
     const isPw = type === "password";
     // Password managers need autocomplete hints to offer to save a credential
@@ -10696,6 +10897,12 @@ function AuthModal({ mode, onClose, onSuccess }) {
           <>
             <div style={{ fontFamily: "'Playfair Display',Georgia,serif", fontSize: "1.1rem", fontWeight: 700, color: "#0E0B07", marginBottom: "0.35rem" }}>Set up your profile</div>
             <p style={{ fontSize: "0.78rem", color: "#8C7A68", fontFamily: "'DM Sans',sans-serif", marginBottom: "1.25rem", lineHeight: 1.55 }}>Your answers are private until both of you are done. We'll never show your partner what you wrote until results unlock.</p>
+            {oauthIdentity ? (
+              <div style={{ background: "#F3EDE6", borderRadius: 10, padding: "0.7rem 0.9rem", marginBottom: "1rem", fontSize: "0.75rem", color: "#8C7A68", fontFamily: "'DM Sans',sans-serif", lineHeight: 1.5 }}>
+                Signed in with {oauthIdentity.provider === 'apple' ? 'Apple' : 'Google'}
+                {oauthIdentity.user?.email ? ` as ${oauthIdentity.user.email}` : ''}. Finish your profile below.
+              </div>
+            ) : providerRow('Continue with')}
             {inp("Your first name", "name", "text", { autoComplete: 'given-name' })}
             <div style={{ fontSize: "0.7rem", color: "#8C7A68", fontFamily: "'DM Sans',sans-serif", fontWeight: 600, marginBottom: "0.35rem", letterSpacing: "0.04em" }}>Your pronouns</div>
             <div style={{ display: "flex", gap: "0.5rem", marginBottom: "0rem" }}>
@@ -10706,8 +10913,12 @@ function AuthModal({ mode, onClose, onSuccess }) {
                 </button>
               ))}
             </div>
-            {inp("Your email", "email", "email")}
-            {inp("Choose a password", "password", "password", { autoComplete: 'new-password' })}
+            {oauthIdentity ? null : (
+              <>
+                {inp("Your email", "email", "email")}
+                {inp("Choose a password", "password", "password", { autoComplete: 'new-password' })}
+              </>
+            )}
             <div style={{ borderTop: "1px solid #E8DDD0", margin: "0.75rem 0 0.75rem" }} />
             <p style={{ fontSize: "0.75rem", color: "#8C7A68", fontFamily: "'DM Sans',sans-serif", marginBottom: "0.6rem", fontWeight: 600 }}>Your partner, required before results unlock</p>
             {inp("Partner's first name", "partnerName", "text", { autoComplete: 'off' })}
@@ -10766,14 +10977,15 @@ function AuthModal({ mode, onClose, onSuccess }) {
               </span>
             </label>
             {err && <p style={{ color: "#ef4444", fontSize: "0.75rem", fontFamily: "'DM Sans',sans-serif", marginBottom: "0.75rem" }}>{err}</p>}
-            <button onClick={handleSignup} disabled={loading}
+            <button onClick={oauthIdentity ? handleOAuthFinish : handleSignup} disabled={loading}
               style={{ width: "100%", padding: "0.9rem", background: "linear-gradient(135deg, #E8673A, #d45a2e)", color: "white", border: "none", borderRadius: 12, fontSize: "0.85rem", fontWeight: 700, cursor: loading ? "default" : "pointer", fontFamily: "'DM Sans',sans-serif", opacity: loading ? 0.7 : 1 }}>
-              {loading ? <span style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", gap: "0.55rem" }}><InlineSpinner /> Creating account…</span> : "Create account →"}
+              {loading ? <span style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", gap: "0.55rem" }}><InlineSpinner /> Creating account…</span> : oauthIdentity ? "Finish setting up →" : "Create account →"}
             </button>
           </>
         ) : tab === "login" ? (
           <>
             <div style={{ fontFamily: "'Playfair Display',Georgia,serif", fontSize: "1.1rem", fontWeight: 700, color: "#0E0B07", marginBottom: "1.25rem" }}>Welcome back</div>
+            {providerRow('Sign in with')}
             {inp("Email", "email", "email")}
             {inp("Password", "password", "password")}
             {err && <p style={{ color: "#ef4444", fontSize: "0.75rem", fontFamily: "'DM Sans',sans-serif", marginBottom: "0.75rem" }}>{err}</p>}
@@ -15854,6 +16066,10 @@ export default function App() {
           // Strip signup param from URL so refresh doesn't re-open modal
           const _clean = new URL(window.location.href);
           _clean.searchParams.delete('signup');
+          // And the provider marker, or a refresh re-runs the return handler
+          // against a session that has already been dealt with.
+          _clean.searchParams.delete('oauth');
+          _clean.searchParams.delete('signin');
           window.history.replaceState({}, '', _clean.toString());
         }}
       />

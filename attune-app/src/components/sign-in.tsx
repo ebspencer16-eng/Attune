@@ -19,7 +19,8 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { isAuthConfigured, signIn } from '@/api/auth';
+import { OAUTH_PROVIDERS, isAuthConfigured, signIn, signInWithProvider } from '@/api/auth';
+import type { OAuthProvider } from '@/api/auth';
 import { AttuneMark } from '@/components/screen-states';
 import { Colors, MaxContentWidth, Radius, Spacing, Type, inputType } from '@/constants/attune-theme';
 
@@ -31,6 +32,9 @@ export default function SignIn({ onSignedIn, rejectedReason }: { onSignedIn: () 
   const [password, setPassword] = useState('');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // Which provider sheet is open. Separate from `busy` so the password button
+  // does not spin while someone is looking at a Google page.
+  const [provider, setProvider] = useState<OAuthProvider | null>(null);
 
   const canSubmit = email.trim().length > 3 && password.length > 0 && !busy;
 
@@ -50,6 +54,22 @@ export default function SignIn({ onSignedIn, rejectedReason }: { onSignedIn: () 
       onSignedIn();
       router.replace('/');
     } else {
+      setError(res.message);
+    }
+  };
+
+  const useProvider = async (id: OAuthProvider) => {
+    if (busy || provider) return;
+    setProvider(id);
+    setError(null);
+    const res = await signInWithProvider(id);
+    setProvider(null);
+    if (res.ok) {
+      // Same landing as a password sign-in: reload this tab, then Home.
+      onSignedIn();
+      router.replace('/');
+    } else if (res.message) {
+      // An empty message means they closed the sheet themselves.
       setError(res.message);
     }
   };
@@ -161,6 +181,45 @@ export default function SignIn({ onSignedIn, rejectedReason }: { onSignedIn: () 
               ? <ActivityIndicator color={c.onDark} />
               : <Text style={{ ...Type.cardTitle, color: canSubmit ? c.onDark : c.textMuted }}>Sign in</Text>}
           </Pressable>
+
+          {/* Google and Apple, given equal weight and the same space as the
+              password button above. Both or neither: Guideline 4.8 requires
+              Sign in with Apple wherever another provider is offered. */}
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: Spacing.md, marginVertical: Spacing.xl }}>
+            <View style={{ flex: 1, height: 1, backgroundColor: c.border }} />
+            <Text style={{ ...Type.small, color: c.textMuted }}>or</Text>
+            <View style={{ flex: 1, height: 1, backgroundColor: c.border }} />
+          </View>
+
+          <View style={{ gap: Spacing.md }}>
+            {OAUTH_PROVIDERS.map((p) => {
+              const dark = p.id === 'apple';
+              const open = provider === p.id;
+              return (
+                <Pressable
+                  key={p.id}
+                  onPress={() => useProvider(p.id)}
+                  disabled={busy || !!provider}
+                  style={{
+                    borderRadius: Radius.md,
+                    paddingVertical: Spacing.md + 2,
+                    alignItems: 'center',
+                    backgroundColor: dark ? c.textStrong : c.surface,
+                    borderColor: dark ? c.textStrong : c.border,
+                    borderWidth: 1,
+                    opacity: provider && !open ? 0.5 : 1,
+                  }}>
+                  {open ? (
+                    <ActivityIndicator color={dark ? c.onDark : c.textMuted} />
+                  ) : (
+                    <Text style={{ ...Type.cardTitle, color: dark ? c.onDark : c.textStrong }}>
+                      Continue with {p.label}
+                    </Text>
+                  )}
+                </Pressable>
+              );
+            })}
+          </View>
 
           {/* No account creation here. Buying happens on the web, so an app
               sign-up form would be a dead end, and Apple treats an app that

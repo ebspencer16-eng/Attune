@@ -15,6 +15,7 @@
  */
 
 import { createClient } from '@supabase/supabase-js';
+import { isOAuthProvider } from './_lib/auth-providers.js';
 
 export const config = { runtime: 'edge' };
 
@@ -70,6 +71,12 @@ export default async function handler(req) {
   try {
     const { data: authUser } = await admin.auth.admin.getUserById(userId);
     if (authUser?.user?.email) profile.email = authUser.user.email.toLowerCase();
+    // How this person signs in, recorded from the verified auth user rather
+    // than from the request. Support cannot answer "why can't I get in" without
+    // knowing whether an account has a password at all, and an Apple account
+    // whose address is a relay looks like a stranger from every other angle.
+    const p = authUser?.user?.app_metadata?.provider;
+    profile.auth_provider = isOAuthProvider(p) ? p : 'email';
   } catch { /* non-fatal: backfillable from auth.users */ }
 
   // Check if a profile already exists for this user. If yes, this is a no-op

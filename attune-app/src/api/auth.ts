@@ -70,6 +70,92 @@ export async function signIn(email: string, password: string): Promise<AuthResul
   return { ok: true };
 }
 
+// ── Google and Apple ───────────────────────────────────────────────────────
+//
+// Done against Supabase's authorize endpoint through the system browser rather
+// than with a native SDK. Native Google and expo-apple-authentication both
+// require a development build, which cannot be run or checked in the simulator
+// from Expo Go; this works in both, and it is the same flow the website uses.
+//
+// Supabase's /authorize returns the session in the URL fragment, so the tokens
+// arrive the same shape as a password sign-in and go into the same store. No
+// second session concept, no second refresh path.
+
+import * as Linking from 'expo-linking';
+import * as WebBrowser from 'expo-web-browser';
+
+/**
+ * The providers offered, matching api/_lib/auth-providers.js.
+ *
+ * Written out rather than fetched: this is the sign-in screen, and making it
+ * depend on a network call is how you get an app nobody can sign in to when a
+ * request fails. scripts/check-oauth-providers.mjs fails the build if this
+ * list and the server's stop agreeing.
+ *
+ * Both, always. Guideline 4.8 requires Sign in with Apple wherever a
+ * third-party login is offered, so shipping Google on its own is a rejection.
+ */
+export const OAUTH_PROVIDERS = [
+  { id: 'google', label: 'Google' },
+  { id: 'apple', label: 'Apple' },
+] as const;
+
+export type OAuthProvider = (typeof OAUTH_PROVIDERS)[number]['id'];
+
+/** Tokens come back in the fragment; errors can arrive in either half. */
+function paramsFrom(url: string): URLSearchParams {
+  const merged = new URLSearchParams();
+  for (const half of [url.split('#')[1], url.split('#')[0].split('?')[1]]) {
+    if (!half) continue;
+    for (const [k, v] of new URLSearchParams(half)) if (!merged.has(k)) merged.set(k, v);
+  }
+  return merged;
+}
+
+export async function signInWithProvider(provider: OAuthProvider): Promise<AuthResult> {
+  if (!isAuthConfigured()) {
+    return { ok: false, message: 'The app is not configured to sign in yet.' };
+  }
+
+  const redirectTo = Linking.createURL('auth-callback');
+  const authorize =
+    `${SUPABASE_URL}/auth/v1/authorize?provider=${encodeURIComponent(provider)}` +
+    `&redirect_to=${encodeURIComponent(redirectTo)}`;
+
+  let result: WebBrowser.WebBrowserAuthSessionResult;
+  try {
+    // Not an ephemeral session. An ephemeral sheet shares no cookies with
+    // Safari, which means signing in to Google or Apple from scratch, password
+    // and second factor, every single time. Both providers still show an
+    // account chooser and still require a tap to continue, so the shared-phone
+    // case is covered without making the common case miserable.
+    result = await WebBrowser.openAuthSessionAsync(authorize, redirectTo);
+  } catch {
+    return { ok: false, message: "Couldn't open that sign-in. Try again, or use your email and password." };
+  }
+
+  // Closing the sheet is a choice, not a failure. Saying "something went wrong"
+  // to someone who tapped Cancel is the app arguing with them.
+  if (result.type !== 'success') return { ok: false, message: '' };
+
+  const params = paramsFrom(result.url);
+  const error = params.get('error_description') || params.get('error');
+  if (error) {
+    console.warn('[auth] provider returned an error:', error);
+    return { ok: false, message: 'That sign-in did not complete. Try again, or use your email and password.' };
+  }
+
+  const access = params.get('access_token');
+  const refresh = params.get('refresh_token');
+  if (!access) {
+    return { ok: false, message: 'Signed in, but no session came back. Try again.' };
+  }
+
+  await setToken(access);
+  if (refresh) await setRefresh(refresh);
+  return { ok: true };
+}
+
 export async function signOut(): Promise<void> {
   await clearToken();
   await setRefresh(null);

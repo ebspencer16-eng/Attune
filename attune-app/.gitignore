@@ -43,3 +43,6 @@ example
 /android
 
 .env
+
+# Metro's log when the app is run locally. Never useful in the repo.
+expo.log
