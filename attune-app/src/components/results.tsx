@@ -17,7 +17,7 @@
  * product, and a section invented in the app is a second copy of a rule.
  */
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Pressable, ScrollView, Text, View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 
@@ -82,8 +82,27 @@ export default function Results({
     : [{ id: 'highlights', label: 'Highlights' }, { id: 'couple-type', label: 'Couple Type' }];
 
   const [sectionId, setSectionId] = useState<string>(sections[0]?.id ?? 'highlights');
+
+  /**
+   * Keep the active pill on screen.
+   *
+   * With up to twenty-nine sections the spine is far wider than the phone, so
+   * moving forward with the button at the bottom left the pill for the section
+   * you were reading somewhere off to the right. The pill row then said you
+   * were on the first section no matter where you actually were.
+   */
+  const spine = useRef<ScrollView>(null);
+  const pillX = useRef<Record<string, number>>({});
   const section = sections.some((s) => s.id === sectionId) ? sectionId : (sections[0]?.id ?? 'highlights');
   const index = sections.findIndex((s) => s.id === section);
+
+  useEffect(() => {
+    const x = pillX.current[section];
+    if (x == null) return;
+    // A little to the left of the pill, so it does not sit flush against the
+    // edge and look like the row starts there.
+    spine.current?.scrollTo({ x: Math.max(0, x - Spacing.xl), animated: true });
+  }, [section]);
 
   // Conflict Patterns is a separate payload with its own privacy rules, so it
   // is fetched separately rather than folded into /api/results. Not owning the
@@ -133,6 +152,7 @@ export default function Results({
       {/* The spine. Sideways rather than stacked, so it costs one line of
           height on a screen whose job is the content below it. */}
       <ScrollView
+        ref={spine}
         horizontal
         showsHorizontalScrollIndicator={false}
         // Its own height, and no share of the column's.
@@ -152,6 +172,7 @@ export default function Results({
             <Pressable
               key={s.id}
               onPress={() => setSectionId(s.id)}
+              onLayout={(e) => { pillX.current[s.id] = e.nativeEvent.layout.x; }}
               style={{
                 paddingVertical: Spacing.sm, paddingHorizontal: Spacing.lg,
                 minHeight: 36, justifyContent: 'center',
@@ -338,7 +359,17 @@ function ExpectationsOverview({
         </Text>
 
         <View style={{ marginTop: Spacing.xl, gap: Spacing.md }}>
-          {summary.categories.filter((cat) => cat.answered > 0).map((cat) => (
+          {[
+            ...summary.categories.filter((cat) => cat.answered > 0),
+            ...(summary.life.length ? [{
+              section: 'life',
+              label: 'The bigger questions',
+              answered: summary.life.length,
+              aligned: summary.life.filter((r) => r.aligned).length,
+              differences: summary.life.filter((r) => !r.aligned).length,
+              rows: summary.life,
+            }] : []),
+          ].map((cat) => (
             <View
               key={cat.section}
               style={{
@@ -366,6 +397,10 @@ function ExpectationsOverview({
         {summary.life.length ? (
           <View style={{ marginTop: Spacing.xl }}>
             <Eyebrow>The bigger questions</Eyebrow>
+            <Text style={{ ...Type.small, color: c.textMuted, marginBottom: Spacing.md }}>
+              Not about who does what. These are the ones worth knowing you see
+              differently before it matters.
+            </Text>
             {summary.life.map((row) => (
               <ExpectationRowView key={row.key} row={row} you={you} them={them} />
             ))}
