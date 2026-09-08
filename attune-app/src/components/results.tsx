@@ -126,7 +126,17 @@ export default function Results({
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
-        contentContainerStyle={{ paddingHorizontal: Spacing.xl, gap: Spacing.sm, paddingBottom: Spacing.lg }}>
+        // Its own height, and no share of the column's.
+        //
+        // None of the three children of this screen had a flex rule, so the
+        // column had nothing to distribute height by and squeezed the spine
+        // until its labels were a sliver. The spine is as tall as a pill, the
+        // body takes what is left, and the nav row is as tall as a button.
+        style={{ flexGrow: 0, flexShrink: 0 }}
+        contentContainerStyle={{
+          paddingHorizontal: Spacing.xl, gap: Spacing.sm,
+          paddingBottom: Spacing.lg, alignItems: 'center',
+        }}>
         {sections.map((s) => {
           const on = s.id === section;
           return (
@@ -135,6 +145,7 @@ export default function Results({
               onPress={() => setSectionId(s.id)}
               style={{
                 paddingVertical: Spacing.sm, paddingHorizontal: Spacing.lg,
+                minHeight: 36, justifyContent: 'center',
                 borderRadius: Radius.pill,
                 backgroundColor: on ? c.textStrong : c.surface,
                 borderColor: on ? c.textStrong : c.border,
@@ -157,17 +168,19 @@ export default function Results({
         })}
       </ScrollView>
 
-      <SectionBody
-        section={section}
-        results={results}
-        conflict={conflict}
-        conflictWaiting={conflictWaiting}
-        byDomain={byDomain}
-        you={you}
-        them={them}
-        viewer={viewer}
-        wideGap={wideGap}
-      />
+      <View style={{ flex: 1 }}>
+        <SectionBody
+          section={section}
+          results={results}
+          conflict={conflict}
+          conflictWaiting={conflictWaiting}
+          byDomain={byDomain}
+          you={you}
+          them={them}
+          viewer={viewer}
+          wideGap={wideGap}
+        />
+      </View>
 
       {/* Straight through, in the website's order. Someone reading results is
           reading them, not hunting for the next pill: the spine above is for
