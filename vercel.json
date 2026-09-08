@@ -316,6 +316,10 @@
     {
       "source": "/api/questions",
       "destination": "/api/questions.js"
+    },
+    {
+      "source": "/api/conflict-results",
+      "destination": "/api/conflict-results.js"
     }
   ],
   "headers": [

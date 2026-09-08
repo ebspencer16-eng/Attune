@@ -17,11 +17,13 @@
  * product, and a section invented in the app is a second copy of a rule.
  */
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Pressable, ScrollView, Text, View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 
-import type { CoupleResults, ResultDimension } from '@/api/client';
+import { fetchConflictResults } from '@/api/client';
+import type { ConflictResults, CoupleResults, ResultDimension } from '@/api/client';
+import ConflictResultsView from '@/components/conflict-results';
 import {
   BottomTabInset, Colors, MaxContentWidth, Palette, Radius, SectionColor, Spacing, Type,
 } from '@/constants/attune-theme';
@@ -44,10 +46,23 @@ function interp(text: string | null | undefined, you: string, them: string): str
   return text.replace(/\{U\}/g, you).replace(/\{P\}/g, them);
 }
 
-type SectionKey = 'overview' | 'couple-type' | 'inner' | 'connection' | 'hard';
+type SectionKey = 'overview' | 'couple-type' | 'inner' | 'connection' | 'hard' | 'conflict';
 
 export default function Results({ results }: { results: CoupleResults }) {
   const [section, setSection] = useState<SectionKey>('overview');
+
+  // Conflict Patterns is a separate payload with its own privacy rules, so it
+  // is fetched separately rather than folded into /api/results. Not owning the
+  // add-on comes back as ready:false, which is a normal state, not an error.
+  const [conflict, setConflict] = useState<ConflictResults | null>(null);
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const res = await fetchConflictResults();
+      if (!cancelled && res.ok) setConflict(res.data);
+    })();
+    return () => { cancelled = true; };
+  }, []);
 
   const content = results.content;
   const dims = content?.dimensions ?? [];
@@ -70,6 +85,7 @@ export default function Results({ results }: { results: CoupleResults }) {
     { key: 'inner', label: 'Internal Processing', enabled: byDomain.inner.length > 0 },
     { key: 'connection', label: 'How You Connect', enabled: byDomain.connection.length > 0 },
     { key: 'hard', label: 'When Things Get Hard', enabled: byDomain.hard.length > 0 },
+    { key: 'conflict', label: 'Conflict Patterns', enabled: !!conflict?.ready },
   ];
 
   return (
@@ -105,6 +121,7 @@ export default function Results({ results }: { results: CoupleResults }) {
       {section === 'inner' ? <Domain title="Internal Processing" accent={Palette.indigo} dims={byDomain.inner} you={you} them={them} /> : null}
       {section === 'connection' ? <Domain title="How You Connect" accent={SectionColor.communication} dims={byDomain.connection} you={you} them={them} /> : null}
       {section === 'hard' ? <Domain title="When Things Get Hard" accent={SectionColor.conflict} dims={byDomain.hard} you={you} them={them} /> : null}
+      {section === 'conflict' && conflict?.ready ? <ConflictResultsView data={conflict} /> : null}
     </View>
   );
 }

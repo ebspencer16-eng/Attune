@@ -553,3 +553,73 @@ export async function saveExercise(input: {
     }),
   });
 }
+
+// ── Conflict Patterns ──────────────────────────────────────────────────────
+
+/** One pattern, for the person reading. Never sent for the partner. */
+export type ConflictPattern = {
+  id: string;
+  key: 'criticism' | 'contempt' | 'defensiveness' | 'stonewalling' | string;
+  value: number | null;
+  band: 'not_present' | 'occasional' | 'worth_watching' | 'worth_attention' | null;
+};
+
+export type ConflictSummary = {
+  overall: number | null;
+  patterns: ConflictPattern[];
+  ranked: ConflictPattern[];
+  flagged: string[];
+  flaggedCount: number;
+  strength: string | null;
+  repairRanking: string[];
+  openings: { start: number | null; middle: number | null; oldTopics: number | null };
+  reflection: string | null;
+  appreciation: string | null;
+};
+
+/**
+ * The partner's half. Deliberately has no pattern fields, and this type says so
+ * rather than reusing ConflictSummary with everything marked optional: a type
+ * that admits patterns is a type a screen can try to render.
+ */
+export type ConflictPartnerView = {
+  name: string | null;
+  overall: number | null;
+  repairRanking: string[];
+  openings: { start: number | null; middle: number | null; oldTopics: number | null };
+  strength: string | null;
+  reflection: string | null;
+  appreciation: string | null;
+};
+
+export type ConflictResults =
+  | { ready: false; reason: string }
+  | {
+      ready: true;
+      names: { you: string; partner: string };
+      you: ConflictSummary;
+      partner: ConflictPartnerView | null;
+      partnerFinished: boolean;
+      content: {
+        patternCopy: Record<string, Record<string, { note: string }>>;
+        patternActions: Record<string, { title: string; body: string }>;
+        patternNotes: Record<string, string>;
+        bandColors: string[];
+        frequencyLabels: string[];
+        snapshotRows: { id: string; label: string }[];
+        snapshotProse: Record<string, string>;
+        openingChips: Record<string, { A: string; B: string }>;
+        noActionNeeded: Record<string, string>;
+        copy: Record<string, string>;
+      };
+    };
+
+/**
+ * Conflict Patterns results.
+ *
+ * The partner's patterns are not in this payload and must never be. The server
+ * builds their half from an allowlist and a build gate checks it.
+ */
+export function fetchConflictResults() {
+  return request<ConflictResults & { ok: true }>('/api/conflict-results');
+}
