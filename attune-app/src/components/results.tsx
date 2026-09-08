@@ -22,8 +22,12 @@ import { Pressable, ScrollView, Text, View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 
 import { fetchConflictResults } from '@/api/client';
-import type { ConflictResults, CoupleResults, ResultDimension, ResultsSection } from '@/api/client';
+import type {
+  ConflictResults, CoupleResults, ExpectationRow, ExpectationsSummary,
+  ResultDimension, ResultsSection,
+} from '@/api/client';
 import ConflictResultsView from '@/components/conflict-results';
+import { Eyebrow } from '@/components/screen-states';
 import {
   BottomTabInset, Colors, MaxContentWidth, Palette, Radius, SectionColor, Spacing, Type,
 } from '@/constants/attune-theme';
@@ -60,8 +64,13 @@ function interp(text: string | null | undefined, you: string, them: string): str
 }
 
 export default function Results({
-  results, owned = [], sections: fromServer,
-}: { results: CoupleResults; owned?: string[]; sections?: ResultsSection[] }) {
+  results, owned = [], sections: fromServer, expectations = null,
+}: {
+  results: CoupleResults;
+  owned?: string[];
+  sections?: ResultsSection[];
+  expectations?: ExpectationsSummary | null;
+}) {
   // The spine comes from the server, in the server's order, with the server's
   // names. It used to be six entries written here against the website's
   // twenty-nine, so a couple who owned Expectations saw five conversation
@@ -171,6 +180,7 @@ export default function Results({
       <View style={{ flex: 1 }}>
         <SectionBody
           section={section}
+          expectations={expectations}
           results={results}
           conflict={conflict}
           conflictWaiting={conflictWaiting}
@@ -235,9 +245,10 @@ export default function Results({
  * the same screen.
  */
 function SectionBody({
-  section, results, conflict, conflictWaiting, byDomain, you, them, viewer, wideGap,
+  section, results, conflict, conflictWaiting, byDomain, you, them, viewer, wideGap, expectations,
 }: {
   section: string;
+  expectations: ExpectationsSummary | null;
   results: CoupleResults;
   conflict: ConflictResults | null;
   conflictWaiting: boolean;
@@ -262,6 +273,14 @@ function SectionBody({
     return <Domain title="When Things Get Hard" accent={SectionColor.conflict} dims={byDomain.hard} you={you} them={them} viewer={viewer} wideGap={wideGap} />;
   }
 
+  if (section === 'exp-overview') {
+    return <ExpectationsOverview summary={expectations} you={you} them={them} />;
+  }
+  if (section.startsWith('exp-convo-')) {
+    const bucket = expectations?.categories.find((cat) => cat.section === section) ?? null;
+    return <ExpectationsConversation bucket={bucket} you={you} them={them} />;
+  }
+
   if (section.startsWith('conflict-')) {
     // ready:false carries the reason; ready:true does not have the field at
     // all, which is why this is a narrow rather than a cast.
@@ -281,6 +300,161 @@ function SectionBody({
   // not a section the couple does not have. Saying which one is missing is the
   // difference between a known gap and a bug.
   return <NotYet section={section} />;
+}
+
+/**
+ * Expectations, in one number and five conversations.
+ *
+ * The number is what the exercise is for: how often two people assumed the
+ * same thing. Neither a high nor a low one is a verdict, so nothing here is
+ * coloured good or bad, and the copy names the differences as conversations
+ * rather than as problems.
+ */
+function ExpectationsOverview({
+  summary, you, them,
+}: { summary: ExpectationsSummary | null; you: string; them: string }) {
+  if (!summary) {
+    return (
+      <Waiting
+        title="Expectations"
+        body="This opens when you have both finished Expectations."
+      />
+    );
+  }
+
+  return (
+    <ScrollView contentContainerStyle={{ paddingBottom: Spacing.xxl }}>
+      <View style={{ paddingHorizontal: Spacing.xl, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center' }}>
+        <Eyebrow>Expectations</Eyebrow>
+        <Text style={{ ...Type.hero, color: c.textStrong }}>
+          {summary.differences === 0
+            ? 'You matched on everything you both answered.'
+            : `${summary.differences} of ${summary.answered} where you assumed different things.`}
+        </Text>
+        <Text style={{ ...Type.body, color: c.textMuted, marginTop: Spacing.md }}>
+          {summary.differences === 0
+            ? 'That is rare. Worth revisiting when something in your life changes.'
+            : 'Not disagreements. Neither of you knew the other had a different answer, which is the only reason they are worth reading together.'}
+        </Text>
+
+        <View style={{ marginTop: Spacing.xl, gap: Spacing.md }}>
+          {summary.categories.filter((cat) => cat.answered > 0).map((cat) => (
+            <View
+              key={cat.section}
+              style={{
+                backgroundColor: c.surface, borderColor: c.border, borderWidth: 1,
+                borderRadius: Radius.lg, padding: Spacing.lg,
+              }}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+                <Text style={{ ...Type.cardTitle, color: c.textStrong, flex: 1 }}>{cat.label}</Text>
+                <Text style={{ ...Type.small, color: c.textMuted }}>
+                  {cat.differences === 0 ? 'All matched' : `${cat.differences} to talk about`}
+                </Text>
+              </View>
+              <View style={{ height: 4, borderRadius: Radius.pill, backgroundColor: c.border, marginTop: Spacing.md, overflow: 'hidden' }}>
+                <View
+                  style={{
+                    width: `${cat.answered ? (cat.aligned / cat.answered) * 100 : 0}%`,
+                    height: 4, backgroundColor: c.accentQuiet,
+                  }}
+                />
+              </View>
+            </View>
+          ))}
+        </View>
+
+        {summary.life.length ? (
+          <View style={{ marginTop: Spacing.xl }}>
+            <Eyebrow>The bigger questions</Eyebrow>
+            {summary.life.map((row) => (
+              <ExpectationRowView key={row.key} row={row} you={you} them={them} />
+            ))}
+          </View>
+        ) : null}
+      </View>
+    </ScrollView>
+  );
+}
+
+/** One conversation: every item in that category, differences first. */
+function ExpectationsConversation({
+  bucket, you, them,
+}: {
+  bucket: ExpectationsSummary['categories'][number] | null;
+  you: string;
+  them: string;
+}) {
+  if (!bucket || bucket.answered === 0) {
+    return (
+      <Waiting
+        title={bucket?.label || 'Expectations'}
+        body="Neither of you answered anything in this area, so there is nothing to compare."
+      />
+    );
+  }
+
+  // Differences first. The matches still appear, because knowing what you
+  // already agree on is the reason the differences are not alarming.
+  const ordered = [...bucket.rows].sort((a, b) => Number(a.aligned) - Number(b.aligned));
+
+  return (
+    <ScrollView contentContainerStyle={{ paddingBottom: Spacing.xxl }}>
+      <View style={{ paddingHorizontal: Spacing.xl, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center' }}>
+        <Eyebrow>Expectations</Eyebrow>
+        <Text style={{ ...Type.title, color: c.textStrong }}>{bucket.label}</Text>
+        <Text style={{ ...Type.body, color: c.textMuted, marginTop: Spacing.sm }}>
+          {bucket.differences === 0
+            ? `You matched on all ${bucket.answered}.`
+            : `${bucket.differences} of ${bucket.answered} where you pictured it differently.`}
+        </Text>
+
+        <View style={{ marginTop: Spacing.lg }}>
+          {ordered.map((row) => <ExpectationRowView key={row.key} row={row} you={you} them={them} />)}
+        </View>
+      </View>
+    </ScrollView>
+  );
+}
+
+/**
+ * One item, with both answers.
+ *
+ * Both names are always shown, even when the two agree, because the answer is
+ * the content here. A row that collapsed to a tick when two people matched
+ * would hide the thing they matched on.
+ */
+function ExpectationRowView({
+  row, you, them,
+}: { row: ExpectationRow; you: string; them: string }) {
+  return (
+    <View
+      style={{
+        backgroundColor: c.surface, borderColor: c.border, borderWidth: 1,
+        borderRadius: Radius.lg, padding: Spacing.lg, marginBottom: Spacing.md,
+      }}>
+      <Text style={{ ...Type.cardTitle, color: c.textStrong }}>{row.item}</Text>
+      {row.prompt ? (
+        <Text style={{ ...Type.small, color: c.textMuted, marginTop: Spacing.xs }}>{row.prompt}</Text>
+      ) : null}
+
+      <View style={{ flexDirection: 'row', gap: Spacing.lg, marginTop: Spacing.md }}>
+        <View style={{ flex: 1 }}>
+          <Text style={{ ...Type.eyebrow, color: c.accentQuiet }}>{you}</Text>
+          <Text style={{ ...Type.body, color: c.text, marginTop: Spacing.xs }}>{row.you}</Text>
+        </View>
+        <View style={{ flex: 1 }}>
+          <Text style={{ ...Type.eyebrow, color: c.textMuted }}>{them}</Text>
+          <Text style={{ ...Type.body, color: c.text, marginTop: Spacing.xs }}>{row.them}</Text>
+        </View>
+      </View>
+
+      {/* Said in words, not colour. A red row would make a difference read as
+          a fault, and neither answer here is the right one. */}
+      <Text style={{ ...Type.small, color: c.textMuted, marginTop: Spacing.md }}>
+        {row.aligned ? 'You pictured this the same way.' : 'Worth talking about.'}
+      </Text>
+    </View>
+  );
 }
 
 function Waiting({ title, body }: { title: string; body: string }) {

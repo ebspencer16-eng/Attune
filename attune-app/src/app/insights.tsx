@@ -318,5 +318,12 @@ function Results({ results, owned }: { results: ResultsResponse | null; owned: s
       </Text>
     );
   }
-  return <ResultsExperience results={results.results} owned={owned} sections={results.sections} />;
+  return (
+    <ResultsExperience
+      results={results.results}
+      owned={owned}
+      sections={results.sections}
+      expectations={results.expectations}
+    />
+  );
 }

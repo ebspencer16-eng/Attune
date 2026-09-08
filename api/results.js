@@ -23,6 +23,7 @@
 export const config = { runtime: 'edge' };
 
 import { sectionsWithLabels } from './_lib/results-sections.js';
+import { expectationsSummary } from './_lib/expectations.js';
 import { EXERCISES, EXERCISE_COLUMNS, isExerciseDone } from './_exercises.js';
 import { capabilitiesFor, OWNERSHIP_COLUMNS } from './_lib/ownership.js';
 import { DIM_META } from './_workbook-content.js';
@@ -308,6 +309,23 @@ export default async function handler(req) {
        * because its sections compare two sets of answers and have nothing to
        * show with one.
        */
+      /**
+       * The Expectations comparison, for the overview and the five
+       * conversation screens.
+       *
+       * Sent whenever both partners have answered, because Expectations is in
+       * every package: there is no ownership question to ask. `mine` is the
+       * reader's own answers, so the mirror is applied from their side and the
+       * two columns are already the right way round.
+       */
+      expectations: (me.ex2_answers && partner?.ex2_answers)
+        ? expectationsSummary({
+            mine: me.ex2_answers,
+            theirs: partner.ex2_answers,
+            youName: me.name || 'You',
+            themName: partner.name || 'Your partner',
+          })
+        : null,
       sections: sectionsWithLabels({
         hasReflection: ownership.ownsReflection,
         intimacyReady: ownership.ownsIntimacy && bothDone('intimacy'),

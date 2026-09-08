@@ -123,6 +123,42 @@ export type CoupleResults = {
 /** One entry in the results spine. Both fields come from the server. */
 export type ResultsSection = { id: string; label: string };
 
+/**
+ * One expectation, as the two people answered it.
+ *
+ * `you` and `them` are already resolved to names by the server, which is where
+ * the mirror lives: these questions are asked in the first person, so two
+ * people answering "Primarily mine" have disagreed. The app never compares
+ * these two strings itself.
+ */
+export type ExpectationRow = {
+  key: string;
+  kind: 'responsibility' | 'life';
+  category: string;
+  item: string;
+  prompt?: string | null;
+  you: string;
+  them: string;
+  aligned: boolean;
+};
+
+export type ExpectationsSummary = {
+  answered: number;
+  aligned: number;
+  differences: number;
+  alignedPct: number | null;
+  categories: {
+    /** The section id this bucket belongs to, e.g. exp-convo-2. */
+    section: string;
+    label: string;
+    rows: ExpectationRow[];
+    answered: number;
+    aligned: number;
+    differences: number;
+  }[];
+  life: ExpectationRow[];
+};
+
 export type ResultsResponse =
   | {
       ready: true;
@@ -139,6 +175,8 @@ export type ResultsResponse =
       sections?: ResultsSection[];
       /** What the couple owns, so nothing has to be inferred from the payload. */
       owned?: string[];
+      /** Null until both partners have finished Expectations. */
+      expectations?: ExpectationsSummary | null;
     }
   | { ready: false; reason: string; self: PersonResults | null; partnerName?: string | null };
 
