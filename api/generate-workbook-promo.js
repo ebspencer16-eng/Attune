@@ -9,6 +9,8 @@
  * Idempotent: if a workbook flash code already exists for either email, it
  * returns that code and sends nothing.
  */
+import { capabilitiesFor } from './_lib/ownership.js';
+
 export const config = { runtime: 'edge' };
 
 const DISCOUNT_PERCENT = 30;
@@ -103,7 +105,7 @@ export default async function handler(req) {
     const oq = `${sUrl}/rest/v1/orders?select=addon_workbook,pkg_key&buyer_email=in.(${inList})`;
     const or = await fetch(oq, { headers: dbHeaders });
     const orders = or.ok ? await or.json().catch(() => []) : [];
-    const ownsWorkbook = Array.isArray(orders) && orders.some(o => o.addon_workbook || o.pkg_key === 'premium');
+    const ownsWorkbook = Array.isArray(orders) && orders.some(o => capabilitiesFor(o).ownsWorkbook);
     if (ownsWorkbook) {
       return new Response(JSON.stringify({ ok: true, skipped: 'owns_workbook' }), {
         status: 200, headers: { 'Content-Type': 'application/json' },

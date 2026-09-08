@@ -19,6 +19,8 @@
  * Returns: { ok, url, filename }
  */
 
+import { capabilitiesFor } from './_lib/ownership.js';
+
 import { payloadToCouple } from './_couple-shape.js';
 
 export const config = { runtime: 'nodejs' };
@@ -73,7 +75,7 @@ export default async function handler(req, res) {
       // order row at all. Gating on addon_workbook alone 403'd both, which the
       // client swallowed, leaving the dashboard stuck on "Generating now".
       let hasWorkbook = Array.isArray(orders)
-        && orders.some(o => !!o.addon_workbook || o.pkg_key === 'premium');
+        && orders.some(o => capabilitiesFor(o).ownsWorkbook);
       if (!hasWorkbook) {
         const profRes = await fetch(
           `${authSupabaseUrl}/rest/v1/profiles?id=eq.${userId}&select=is_comp&limit=1`,

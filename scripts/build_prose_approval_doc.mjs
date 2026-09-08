@@ -19,7 +19,7 @@ const app = readFileSync(new URL('../src/App.jsx', import.meta.url), 'utf8');
 const domainGroups = evalConst(app, 'domainGroups');
 // Results copy now lives in versioned snapshots. Read it from the current
 // version rather than from App.jsx, which no longer holds it.
-const content = readFileSync(new URL('../src/content/v1.js', import.meta.url), 'utf8');
+const content = readFileSync(new URL('../api/_content/v1.js', import.meta.url), 'utf8');
 const DIM_ACTION_ITEMS = evalConst(content, 'DIM_ACTION_ITEMS');
 const DOMAIN_ALIGNED = evalConst(content, 'DOMAIN_ALIGNED');
 const REFLECTION_ACTION_TITLES = evalConst(content, 'REFLECTION_ACTION_TITLES');

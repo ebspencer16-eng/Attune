@@ -11,6 +11,8 @@
  *
  * Required env vars: SUPABASE_URL, SUPABASE_SERVICE_KEY, RESEND_API_KEY, FROM_EMAIL, CRON_SECRET
  */
+import { capabilitiesFor } from './_lib/ownership.js';
+
 export const config = { runtime: 'edge' };
 
 export default async function handler(req) {
@@ -77,7 +79,7 @@ export default async function handler(req) {
     // the upsell block in the check-in email.
     function hasReflectionAccess(user) {
       if (user.ex3_completed) return true;
-      if (user.pkg === 'anniversary' || user.pkg === 'premium') return true;
+      if (capabilitiesFor(user).ownsReflection) return true;
       return false;
     }
 

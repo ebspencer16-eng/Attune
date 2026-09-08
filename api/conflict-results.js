@@ -25,6 +25,7 @@
 export const config = { runtime: 'edge' };
 
 import { summarizeConflict } from './_lib/conflict-results.js';
+import { capabilitiesFor } from './_lib/ownership.js';
 import {
   PATTERN_COPY, PATTERN_ACTIONS, PATTERN_NOTES, BAND_COLORS, FREQUENCY_LABELS,
   SNAPSHOT_ROWS, SNAPSHOT_PROSE, OPENING_CHIPS, CONFLICT_RESULTS_COPY, NO_ACTION_NEEDED,
@@ -112,7 +113,7 @@ export default async function handler(req) {
     if (!me) return json({ ok: false, error: 'profile not found' }, 404);
 
     // Premium bundles Conflict Patterns; otherwise it is an explicit add-on.
-    const owns = me.pkg === 'premium' || !!me.addon_conflict;
+    const { ownsConflict: owns } = capabilitiesFor(me);
     if (!owns) return json({ ok: true, ready: false, reason: 'not_owned' });
 
     let partner = null;

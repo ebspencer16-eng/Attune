@@ -20,6 +20,7 @@ export const config = { runtime: 'edge' };
 import { nextActions, greeting } from './_lib/next-action.js';
 import { EXERCISES, EXERCISE_COLUMNS, CORE_EXERCISES, isExerciseDone } from './_exercises.js';
 import { CATALOGUE } from './_catalogue.js';
+import { capabilitiesFor } from './_lib/ownership.js';
 
 const HEADERS = { 'Content-Type': 'application/json', 'X-Content-Type-Options': 'nosniff' };
 const json = (body, status = 200) => new Response(JSON.stringify(body), { status, headers: HEADERS });
@@ -71,16 +72,14 @@ export default async function handler(req) {
 
     // What the couple owns. Premium bundles reflection and intimacy; add-ons
     // grant them on other packages. Exercises 1 and 2 are in every package.
-    const pkg = me.pkg || 'core';
-    const ownsReflection = pkg === 'premium' || pkg === 'anniversary' || !!me.addon_reflection;
-    // Premium bundles Conflict Patterns, not Physical Intimacy. This endpoint
-    // still had the old rule, so a premium buyer was told they owned intimacy
-    // and never told they owned conflict.
-    const ownsIntimacy = !!me.addon_intimacy;
-    const ownsConflict = pkg === 'premium' || !!me.addon_conflict;
-    const ownsBudget = pkg === 'premium' || pkg === 'newlywed' || !!me.addon_budget;
-    const ownsChecklist = pkg === 'newlywed' || !!me.addon_checklist;
-    const ownsWorkbook = pkg === 'premium' || !!me.addon_workbook;
+    // From api/_lib/ownership.js. It used to be worked out here, and results
+    // needed the same answer, which is one copy away from the bug this
+    // endpoint already had: premium bundles Conflict Patterns and not Physical
+    // Intimacy, and the stale copy said the opposite.
+    const {
+      pkg, ownsReflection, ownsIntimacy, ownsConflict,
+      ownsBudget, ownsChecklist, caps, owned,
+    } = capabilitiesFor(me);
 
     // Per-exercise progress, built from the registry rather than listed here.
     // This block used to name all five by hand, which is the exact shape of the
@@ -89,11 +88,6 @@ export default async function handler(req) {
     //
     // The capability names are the registry's own (`capability: 'hasIntimacy'`),
     // so ownership is a lookup rather than another branch per exercise.
-    const caps = {
-      hasAnniversary: ownsReflection,
-      hasIntimacy: ownsIntimacy,
-      hasConflict: ownsConflict,
-    };
     // Completion comes from isExerciseDone, which knows the two shapes apart.
     // This block previously tested `has(me.intimacy_data?.answers)`, marking a
     // record-shaped exercise complete as soon as it had any answers rather than
@@ -117,14 +111,6 @@ export default async function handler(req) {
     // A flat list of what this person owns, for surfaces that ask "what do
     // they have" rather than "how far through are they". Derived here so the
     // app never works it out for itself.
-    const owned = [
-      ownsReflection && 'reflection',
-      ownsIntimacy && 'intimacy',
-      ownsConflict && 'conflict',
-      ownsBudget && 'budget',
-      ownsChecklist && 'checklist',
-      ownsWorkbook && 'workbook',
-    ].filter(Boolean);
     // Results need both partners through the exercises every package includes.
     // Named ex1 and ex2 by hand before, which would have silently kept results
     // open if a third core exercise were ever added.
@@ -175,9 +161,9 @@ export default async function handler(req) {
       resultsReady,
       resultsLastOpenedAt: me.results_last_opened_at || null,
       resources: {
-        budget: { owned: pkg === 'premium' || pkg === 'newlywed' || !!me.addon_budget,
+        budget: { owned: ownsBudget,
                   started: has(me.budget_data), complete: !!me.budget_data?.completedAt },
-        checklist: { owned: pkg === 'newlywed' || !!me.addon_checklist,
+        checklist: { owned: ownsChecklist,
                      started: has(me.checklist_data), complete: !!me.checklist_data?.completedAt },
       },
       inPractice,

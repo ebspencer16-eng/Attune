@@ -81,6 +81,39 @@ export const RESULTS_SECTION_LABELS = {
   'what-comes-next': 'What Comes Next',
 };
 
+/**
+ * The sections a particular couple can actually reach, in order.
+ *
+ * The same rule as the web's availableSections(), moved here so there is one
+ * of it. The website built this list, the app built a different one with six
+ * entries and its own labels, and the two products stopped being the same
+ * product: a couple who owned Expectations saw eleven conversation screens on
+ * a laptop and none on their phone.
+ *
+ * Everything not owned is genuinely absent rather than listed and locked.
+ * Listing it would be advertising inside results, which is the wrong place to
+ * sell anything. Owned-but-not-ready is a different state and stays visible,
+ * because a section that vanishes reads as a bug.
+ */
+export function availableSections({ hasReflection = false, intimacyReady = false, conflictListed = false } = {}) {
+  return RESULTS_SECTIONS.filter((id) => {
+    if (id.startsWith('reflection-')) return hasReflection;
+    if (id.startsWith('intimacy-')) return intimacyReady;
+    if (id.startsWith('conflict-')) return conflictListed;
+    return true;
+  });
+}
+
+/**
+ * The section list with the labels attached, which is what a nav needs.
+ *
+ * Returned by /api/results so the app never decides for itself what results
+ * contain.
+ */
+export function sectionsWithLabels(opts) {
+  return availableSections(opts).map((id) => ({ id, label: RESULTS_SECTION_LABELS[id] }));
+}
+
 /** Sections are a fixed set, so membership is the whole validation. */
 export function isResultsSection(key) {
   return RESULTS_SECTIONS.includes(key);

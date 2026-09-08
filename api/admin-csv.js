@@ -22,6 +22,8 @@
 import { createClient } from '@supabase/supabase-js';
 import { checkAdminAuth } from './_lib/admin-auth.js';
 
+import { packageIncludes } from './_lib/ownership.js';
+
 export const config = { runtime: 'edge' };
 
 // ── Scoring + typing now live in the shared engine (single source of truth,
@@ -240,9 +242,8 @@ async function buildCombinedData(admin) {
     const bEx3 = ps?.ex3_answers || {};
     const budgetComplete = p.budget_data && Object.keys(p.budget_data).length > 0;
 
-    const pkgHasChecklist   = o?.pkg_key === 'newlywed';
-    const pkgHasBudget      = o?.pkg_key === 'newlywed' || o?.pkg_key === 'premium';
-    const pkgHasReflection  = o?.pkg_key === 'anniversary' || o?.pkg_key === 'premium';
+    const { checklist: pkgHasChecklist, budget: pkgHasBudget, reflection: pkgHasReflection } =
+      packageIncludes(o?.pkg_key);
     const whenHeuristic = (o_, field) => {
       if (!o_ || !o_[field]) return '';
       if (!o_.updated_at || !o_.created_at) return 'initial_checkout';
@@ -465,9 +466,8 @@ async function exportOrders(admin) {
     //   anniversary → includes reflection
     //   premium     → includes reflection + budget
     // Add-ons stack on top of package inclusions.
-    const pkgHasChecklist   = o.pkg_key === 'newlywed';
-    const pkgHasBudget      = o.pkg_key === 'newlywed' || o.pkg_key === 'premium';
-    const pkgHasReflection  = o.pkg_key === 'anniversary' || o.pkg_key === 'premium';
+    const { checklist: pkgHasChecklist, budget: pkgHasBudget, reflection: pkgHasReflection } =
+      packageIncludes(o.pkg_key);
 
     const hasWorkbook   = !!o.addon_workbook;
     const hasReflection = pkgHasReflection || !!o.addon_reflection;

@@ -8,7 +8,13 @@ import { PATTERN_COPY, PATTERN_ACTIONS, PATTERN_NOTES, BAND_COLORS, NO_ACTION_NE
 // from the version stamped on their results row, so revising the wording never
 // moves the words a highlight was written against. contentFor(null) returns
 // current, which is right for couples stamped before pinning existed.
-import { contentFor, CURRENT_CONTENT_VERSION } from "./content/index.js";
+// Results copy lives under api/ so the server can serve it too.
+//
+// It was in src/content/, which meant it only existed inside the website
+// bundle. The app therefore could not show a word of it, and the only way to
+// get results copy onto a phone would have been to type it out again. Same
+// reason api/_couple-types.js moved out of this file.
+import { contentFor, CURRENT_CONTENT_VERSION } from "../api/_content/index.js";
 // Default binding, used by module-level helpers when no couple context is
 // available (the workbook path, share cards, anything outside the results
 // tree). Components inside the results tree use useContent() instead, which
@@ -45,6 +51,7 @@ function typingDimScores(selfAnswers, partnerAnswers) {
 import { INTIMACY_RESULTS_PROSE } from "../api/_intimacy-results-prose.js";
 import { PKG_CAPS, ORDER_SELECT, computeEntitlements, mergeEntitlementsGrantOnly, sameEntitlements } from "../api/_lib/entitlements.js";
 import { OAUTH_PROVIDERS } from "../api/_lib/auth-providers.js";
+import { availableSections as availableResultsSections } from "../api/_lib/results-sections.js";
 import { COUPLE_TYPES as NEW_COUPLE_TYPES } from "../api/_couple-types.js";
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -7011,14 +7018,18 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
   // to stay a function: calling it during the initial render would hit the
   // temporal dead zone. It is only ever called from effects and from go(),
   // both of which run after the body has finished executing.
-  const availableSections = () => [
-    "highlights", "couple-type", "comm-overview", "comm-inner", "comm-connection", "comm-hard",
-    "exp-overview", ...FIXED_CATS.map((_, ci) => `exp-convo-${ci}`),
-    ...(hasAnniversary ? ["reflection-overview", "reflection-ratings", "reflection-story", "reflection-plan"] : []),
-    ...(intimacyBothDone ? ["intimacy-overview", ...INTIMACY_DIMENSIONS.map(d => `intimacy-${d.id}`), "intimacy-plan"] : []),
-    ...(conflictListed ? ["conflict-overview", "conflict-snapshot", "conflict-patterns", "conflict-wrote"] : []),
-    "what-comes-next",
-  ];
+  // Which sections this couple can reach, from api/_lib/results-sections.js.
+  //
+  // This list used to be written out here, and the app wrote out a different
+  // one with six entries and its own labels. Two products, same name. It stays
+  // a function for the same reason as before: hasAnniversary and
+  // intimacyBothDone are declared below, so calling it during the initial
+  // render would hit the temporal dead zone.
+  const availableSections = () => availableResultsSections({
+    hasReflection: hasAnniversary,
+    intimacyReady: intimacyBothDone,
+    conflictListed,
+  });
   const safeSection = (s) => {
     const m = mapSection(s);
     return availableSections().includes(m) ? m : "highlights";

@@ -28,6 +28,7 @@ export const config = { runtime: 'edge' };
 
 import { isValidAnchor, standardTags } from './_lib/tags.js';
 import { RESULTS_SECTION_LABELS } from './_lib/results-sections.js';
+import { capabilitiesFor, OWNERSHIP_COLUMNS } from './_lib/ownership.js';
 
 const HEADERS = { 'Content-Type': 'application/json', 'X-Content-Type-Options': 'nosniff' };
 const json = (b, s = 200) => new Response(JSON.stringify(b), { status: s, headers: HEADERS });
@@ -60,7 +61,7 @@ export default async function handler(req) {
     const rest = (path, init) => fetch(`${supabaseUrl}/rest/v1/${path}`, init);
 
     // Partner, for the couple key and for reading what they shared.
-    const pRes = await rest(`profiles?id=eq.${me}&select=partner_profile_id,pkg,addon_intimacy`, { headers: svc });
+    const pRes = await rest(`profiles?id=eq.${me}&select=partner_profile_id,${OWNERSHIP_COLUMNS.join(',')}`, { headers: svc });
     const profile = (await pRes.json().catch(() => []))?.[0] || {};
     const partnerId = profile.partner_profile_id || null;
     const coupleKey = partnerId ? coupleKeyOf(me, partnerId) : null;
@@ -122,7 +123,10 @@ export default async function handler(req) {
       // Seed on first use rather than at signup, so a person who never opens
       // Notes never gets rows, and the seed always reflects current dimensions.
       if (!tags.length) {
-        const ownsIntimacy = profile.pkg === 'premium' || !!profile.addon_intimacy;
+        // Premium bundles Conflict Patterns, not Physical Intimacy. This line
+        // said otherwise, so a premium buyer who had never bought intimacy got
+        // seeded the six intimacy tags, permanently, on first opening Notes.
+        const { ownsIntimacy } = capabilitiesFor(profile);
         const rows = standardTags({ ownsIntimacy }).map(t => ({
           owner_id: me, name: t.name, color: t.color, standard_key: t.standard_key,
         }));
