@@ -340,4 +340,54 @@ Patterns. The list is `ANSWERABLE_IN_APP` in `attune-app/src/app/insights.tsx`,
 and `/api/questions` refuses anything not served, so the two cannot disagree
 for long.
 
+### Audit, same session
+
+A deliberate bug hunt across the backend, the results logic and data saving.
+Nine real bugs. Most were silent: plausible wrong answers rather than errors.
+
+**Results described the wrong person for half of all couples.** Stored results
+are keyed by the two user ids in sorted order, so `partners.a` is whichever id
+sorts lower, not the reader. The app assumed `a` was you, which swapped names
+and both marks on every scale for one partner in every couple.
+
+**The scales drew the typing score, not the self-report.** `blended` mixes a
+person's answers with their partner's view of them and exists to derive the
+couple type. The mark under someone's own name was moving because of what their
+partner said about them.
+
+**An infinite fetch loop**, measured at 3,522 requests in twenty seconds, from
+an effect that depended on the state it set. Worth reading the commit: a fixture
+cannot catch this, because require returns the same object and React bails out.
+
+**Concurrent refreshes spent each other's token.** Screens load several things
+at once; each 401 started its own refresh; Supabase rotates refresh tokens, so
+all but the first failed and reported the person signed out. This is the likely
+cause of the sign-outs that kept happening.
+
+**Every Home card did nothing.** The engine returns website routes and the app
+pushed them directly. An `as never` cast is what let it compile.
+
+**Conflict Patterns was never prompted.** The priority engine carried a
+hardcoded list with four of the five exercises.
+
+Also: progress was saved and never read back, Resources had no failure state at
+all, In Practice rows looked tappable and were not, a hardcoded alignment
+threshold that agreed with the server's by coincidence, and a retry button that
+led to a spinner that never resolved.
+
+**Seven new gates**, each verified by planting the bug it catches:
+`check-conflict-privacy`, `check-results-viewer`, `check-refresh-single-flight`,
+`check-app-routes`, `check-effect-deps`, plus `check-app-derives` and
+`check-exercise-registry` extended.
+
+**Checked and deliberately not changed:** `atob` is not polyfilled by React
+Native or Expo, and both `deleteAccount` and `saveExercise` decode the token
+with it. Probed in the simulator; it is present and works on Hermes/RN 0.86.
+Re-check if the runtime changes, because the failure mode is total and silent.
+
+**Known and not fixed:** answers are never range checked. A value of 99 scores
+as 99 and produces a gap of 104. Nothing in either client can send that today
+and there is no evidence of it happening, but results are frozen once computed,
+so a bad write would be permanent.
+
 *Last updated: Session 17 — September 2026*
