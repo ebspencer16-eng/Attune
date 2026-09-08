@@ -26,12 +26,22 @@ import { ScreenError, ScreenLoading } from '@/components/screen-states';
 import ResultsExperience from '@/components/results';
 import Exercise from '@/components/exercise';
 import Expectations from '@/components/expectations';
+import ConflictExercise from '@/components/conflict-exercise';
 import SignIn from '@/components/sign-in';
 import {
   Colors, MaxContentWidth, Palette, Radius, Spacing, StatusColor, Type,
 } from '@/constants/attune-theme';
 
 const c = Colors.light;
+
+/**
+ * Exercises the app can actually ask.
+ *
+ * The rest still live on the website, and their rows read as Pending rather
+ * than opening a screen with nothing in it. /api/questions returns a clear 501
+ * for anything not listed here, so the two cannot silently disagree for long.
+ */
+const ANSWERABLE_IN_APP = new Set(['ex1', 'ex2', 'conflict']);
 
 export default function InsightsScreen() {
   const [home, setHome] = useState<HomeResponse | null>(null);
@@ -102,7 +112,7 @@ export default function InsightsScreen() {
             Everything you both answered, side by side.
           </Text>
         </View>
-        <Results results={results} />
+        <Results results={results} owned={home?.owned ?? []} />
       </Shell>
     );
   }
@@ -112,9 +122,11 @@ export default function InsightsScreen() {
     const finished = () => { setOpenExercise(null); setLoading(true); load(); };
     // Expectations asks a different shape of question from Communication, so it
     // is a different screen rather than one screen with a mode flag.
-    return openExercise === 'ex2'
-      ? <Expectations onClose={close} onFinished={finished} />
-      : <Exercise exerciseKey={openExercise} onClose={close} onFinished={finished} />;
+    // Each of these asks a different shape of question, so each is its own
+    // screen rather than one screen with a mode flag.
+    if (openExercise === 'ex2') return <Expectations onClose={close} onFinished={finished} />;
+    if (openExercise === 'conflict') return <ConflictExercise onClose={close} onFinished={finished} />;
+    return <Exercise exerciseKey={openExercise} onClose={close} onFinished={finished} />;
   }
 
   return (
@@ -207,7 +219,7 @@ function StatusTable({
           {/* Only your own column is actionable, and only for exercises the
               app can actually ask. A cell that opens nothing is worse than a
               plain status. */}
-          <StatusCell done={e.mine} onPress={!e.mine && (e.key === 'ex1' || e.key === 'ex2') ? () => onOpen(e.key) : undefined} />
+          <StatusCell done={e.mine} onPress={!e.mine && ANSWERABLE_IN_APP.has(e.key) ? () => onOpen(e.key) : undefined} />
           <StatusCell done={e.theirs} muted />
         </View>
       ))}
@@ -276,7 +288,7 @@ function StatusCell({ done, muted, onPress }: { done: boolean; muted?: boolean; 
  * The individual section screens are the next piece of work. This renders the
  * couple type and what is available, which is what the payload supports today.
  */
-function Results({ results }: { results: ResultsResponse | null }) {
+function Results({ results, owned }: { results: ResultsResponse | null; owned: string[] }) {
   if (!results) {
     return (
       <Text style={{ ...Type.body, color: c.textMuted }}>
@@ -293,5 +305,5 @@ function Results({ results }: { results: ResultsResponse | null }) {
       </Text>
     );
   }
-  return <ResultsExperience results={results.results} />;
+  return <ResultsExperience results={results.results} owned={owned} />;
 }

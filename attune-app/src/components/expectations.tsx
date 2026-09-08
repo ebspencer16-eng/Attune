@@ -75,10 +75,10 @@ export default function Expectations({
 
   const persist = useCallback(async (next: Answers, completed: boolean) => {
     setSaving(true);
-    const res = await saveExercise({ exercise: 'ex2', answers: next, completed });
+    const res = await saveExercise({ exercise: 'ex2', answers: next, completed, shape: set?.exercise.shape });
     setSaving(false);
     return res.ok;
-  }, []);
+  }, [set]);
 
   const cats = set?.categories ?? [];
   const cat = cats[catIdx];

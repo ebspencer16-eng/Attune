@@ -527,6 +527,20 @@ export async function saveExercise(input: {
   exercise: string;
   answers: Record<string, unknown>;
   completed?: boolean;
+  /**
+   * How the server stores this exercise, from /api/questions.
+   *
+   * 'answers' writes the object straight into <exercise>_answers and sets the
+   * completed columns. 'record' writes the whole { answers, completedAt }
+   * record into one column instead, which is what intimacy_data and
+   * conflict_data hold.
+   *
+   * This matters more than it looks. Sending a record-shaped exercise the
+   * flat way writes conflict_data with no completedAt, and a record-shaped
+   * exercise is only done when completedAt is set, so it would save
+   * successfully and never count as finished.
+   */
+  shape?: 'answers' | 'record';
 }): Promise<ApiResult<{ ok: true }>> {
   const token = await getToken();
   if (!token) return { ok: false, error: { kind: 'unauthorized', detail: 'no token stored' } };
@@ -542,14 +556,27 @@ export async function saveExercise(input: {
   }
   if (!userId) return { ok: false, error: { kind: 'unauthorized', detail: 'token has no subject' } };
 
+  const completedAt = input.completed ? new Date().toISOString() : undefined;
+
+  // A record-shaped exercise carries its own completedAt inside the record,
+  // because the whole record lands in one column and there is nowhere else for
+  // it to go.
+  const payload = input.shape === 'record'
+    ? { answers: input.answers, ...(completedAt ? { completedAt } : {}) }
+    : input.answers;
+
   return request<{ ok: true }>('/api/save-exercise', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       userId,
       exercise: input.exercise,
-      answers: input.answers,
-      ...(input.completed ? { completedAt: new Date().toISOString() } : {}),
+      answers: payload,
+      ...(completedAt ? { completedAt } : {}),
+      // Without this a partial save writes the answers column and sets the
+      // completed flag, marking an exercise done that someone is halfway
+      // through.
+      ...(input.completed ? {} : { progress: true }),
     }),
   });
 }
@@ -622,4 +649,29 @@ export type ConflictResults =
  */
 export function fetchConflictResults() {
   return request<ConflictResults & { ok: true }>('/api/conflict-results');
+}
+
+/** One conflict question. `kind` says how to render it. */
+export type ConflictQuestion = {
+  id: string;
+  section: string;
+  kind: 'scale' | 'forcedAB' | 'frequency' | 'pickOne' | 'openText' | 'rank';
+  text: string;
+  a?: string;
+  b?: string;
+  options?: ({ value: number; label: string } | string)[];
+  placeholder?: string;
+  riskKey?: string;
+};
+
+export type ConflictQuestionSet = {
+  exercise: { key: string; label: string; shape: 'answers' | 'record' };
+  intro: string | null;
+  sections: { id: string; label: string; questions: string[] }[];
+  frequencyOptions: { value: number; label: string }[];
+  items: ConflictQuestion[];
+};
+
+export function fetchConflictQuestions() {
+  return request<ConflictQuestionSet & { ok: true }>('/api/questions?exercise=conflict');
 }

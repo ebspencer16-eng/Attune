@@ -53,7 +53,7 @@ export default function Exercise({
       setLoading(false);
     })();
     return () => { cancelled = true; };
-  }, [exerciseKey]);
+  }, [exerciseKey, set]);
 
   const items = set?.items ?? [];
   const item: QuestionItem | undefined = items[idx];
@@ -65,11 +65,11 @@ export default function Exercise({
 
   const persist = useCallback(async (next: Record<string, number>, completed: boolean) => {
     setSaving(true);
-    const res = await saveExercise({ exercise: exerciseKey, answers: next, completed });
+    const res = await saveExercise({ exercise: exerciseKey, answers: next, completed, shape: set?.exercise.shape });
     setSaving(false);
     setSaveFailed(!res.ok);
     return res.ok;
-  }, [exerciseKey]);
+  }, [exerciseKey, set]);
 
   if (loading) return <Shell onClose={onClose}><ScreenLoading label="Getting your questions" /></Shell>;
   if (error) {

@@ -40,6 +40,19 @@ const THEM_COLOR = Palette.ink;
 
 const c = Colors.light;
 
+/**
+ * Why a section someone owns cannot open yet.
+ *
+ * Mapped from the server's own reason rather than inferred, so the app never
+ * explains a lock it does not understand. An unrecognised reason falls back to
+ * saying it is not ready, which is true of every case.
+ */
+function lockReason(reason: string): string {
+  if (reason === 'you_have_not_finished') return 'Finish the exercise to open this';
+  if (reason === 'partner_has_not_finished') return 'Waiting on your partner';
+  return 'Not ready yet';
+}
+
 /** Replace {U} and {P} with the two names, from this reader's point of view. */
 function interp(text: string | null | undefined, you: string, them: string): string {
   if (!text) return '';
@@ -48,7 +61,9 @@ function interp(text: string | null | undefined, you: string, them: string): str
 
 type SectionKey = 'overview' | 'couple-type' | 'inner' | 'connection' | 'hard' | 'conflict';
 
-export default function Results({ results }: { results: CoupleResults }) {
+export default function Results({
+  results, owned = [],
+}: { results: CoupleResults; owned?: string[] }) {
   const [section, setSection] = useState<SectionKey>('overview');
 
   // Conflict Patterns is a separate payload with its own privacy rules, so it
@@ -79,13 +94,26 @@ export default function Results({ results }: { results: CoupleResults }) {
     hard: dims.filter((d) => d.domain === 'hard'),
   }), [dims]);
 
-  const sections: { key: SectionKey; label: string; enabled: boolean }[] = [
+  // A section someone owns is listed even when it cannot open yet, greyed with
+  // the reason. SCREENS.md is blunt about why: a section that vanishes reads as
+  // a bug, which is exactly what happened on the web. A section nobody owns is
+  // genuinely absent, because listing it would be advertising inside results.
+  const sections: { key: SectionKey; label: string; enabled: boolean; locked?: string }[] = [
     { key: 'overview', label: 'At a glance', enabled: true },
     { key: 'couple-type', label: 'Couple Type', enabled: !!content?.coupleType },
     { key: 'inner', label: 'Internal Processing', enabled: byDomain.inner.length > 0 },
     { key: 'connection', label: 'How You Connect', enabled: byDomain.connection.length > 0 },
     { key: 'hard', label: 'When Things Get Hard', enabled: byDomain.hard.length > 0 },
-    { key: 'conflict', label: 'Conflict Patterns', enabled: !!conflict?.ready },
+    {
+      key: 'conflict',
+      label: 'Conflict Patterns',
+      enabled: !!conflict?.ready,
+      // Only if they own it. The server's reason is used rather than a guess,
+      // so the app never explains a lock it does not understand.
+      locked: owned.includes('conflict') && conflict && !conflict.ready
+        ? lockReason(conflict.reason)
+        : undefined,
+    },
   ];
 
   return (
@@ -96,25 +124,42 @@ export default function Results({ results }: { results: CoupleResults }) {
         horizontal
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={{ paddingHorizontal: Spacing.xl, gap: Spacing.sm, paddingBottom: Spacing.lg }}>
-        {sections.filter((s) => s.enabled).map((s) => {
+        {sections.filter((s) => s.enabled || s.locked).map((s) => {
           const on = s.key === section;
+          const locked = !s.enabled;
           return (
             <Pressable
               key={s.key}
-              onPress={() => setSection(s.key)}
+              onPress={locked ? undefined : () => setSection(s.key)}
+              disabled={locked}
+              accessibilityState={{ disabled: locked }}
               style={{
                 paddingVertical: Spacing.sm, paddingHorizontal: Spacing.lg,
                 borderRadius: Radius.pill,
-                backgroundColor: on ? c.textStrong : c.surface,
-                borderColor: on ? c.textStrong : c.border, borderWidth: 1,
+                backgroundColor: on ? c.textStrong : locked ? 'transparent' : c.surface,
+                borderColor: on ? c.textStrong : c.border,
+                borderWidth: 1,
+                borderStyle: locked ? 'dashed' : 'solid',
               }}>
-              <Text style={{ ...Type.small, fontWeight: '700', color: on ? Palette.white : c.textMuted }}>
+              <Text
+                style={{
+                  ...Type.small, fontWeight: '700',
+                  color: on ? Palette.white : locked ? c.border : c.textMuted,
+                }}>
                 {s.label}
               </Text>
             </Pressable>
           );
         })}
       </ScrollView>
+
+      {/* The reason a locked section is locked, said once under the list. A
+          greyed pill on its own tells someone it is unavailable but not why. */}
+      {sections.filter((s) => !s.enabled && s.locked).map((s) => (
+        <Text key={s.key} style={{ ...Type.small, color: c.textMuted, paddingHorizontal: Spacing.xl, marginBottom: Spacing.md }}>
+          {s.label}: {s.locked}
+        </Text>
+      ))}
 
       {section === 'overview' ? <Glance results={results} you={you} them={them} /> : null}
       {section === 'couple-type' ? <CoupleType results={results} you={you} them={them} /> : null}

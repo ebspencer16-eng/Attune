@@ -28,6 +28,9 @@ import {
   CHILDHOOD_STRUCTURES, substName,
 } from './_questions.js';
 import { EXERCISES } from './_exercises.js';
+import {
+  conflictQuestionsInOrder, CONFLICT_SECTIONS, FREQUENCY_OPTIONS, CONFLICT_INTRO,
+} from './_conflict-questions.js';
 
 const HEADERS = { 'Content-Type': 'application/json', 'X-Content-Type-Options': 'nosniff' };
 const json = (b, s = 200) => new Response(JSON.stringify(b), { status: s, headers: HEADERS });
@@ -129,6 +132,20 @@ export default async function handler(req) {
           text: substName(q.core || q.text, you, partner),
           options: (q.options || []).map(o => substName(o, you, partner)),
         })),
+      });
+    }
+
+    if (key === 'conflict') {
+      // Conflict asks six different kinds of question. They are sent as they
+      // are, each carrying its own kind, so the app renders what a question
+      // says it is rather than keeping a map of which id is which shape.
+      return json({
+        ok: true,
+        exercise: { key: exercise.key, label: exercise.label, shape: exercise.shape },
+        intro: CONFLICT_INTRO || null,
+        sections: CONFLICT_SECTIONS,
+        frequencyOptions: FREQUENCY_OPTIONS,
+        items: conflictQuestionsInOrder(),
       });
     }
 
