@@ -77,14 +77,39 @@ membership you already have for the app.
    and never again. Note the Key ID shown next to it, and your Team ID
    `HX5FX68K6L`.
 
+5. Turn the .p8 into the token Supabase actually wants. The Supabase panel has
+   no Team ID or Key ID field. Those are ingredients, not settings: the Secret
+   Key is a token signed with the .p8, and Apple rejects the .p8 itself.
+
+   Supabase offers a generator on its docs page, which means pasting your
+   Apple private key into a web page. That key is downloadable once and
+   authorises sign-in for every Attune account, so do it on your own machine
+   instead. In Terminal, from the project folder, one line:
+
+   ```
+   node scripts/apple-secret.mjs ~/Downloads/AuthKey_XXXXXXXXXX.p8 --team HX5FX68K6L --key XXXXXXXXXX --service com.attunerelationships.web
+   ```
+
+   Replace `XXXXXXXXXX` with your Key ID in both places, and point the path at
+   wherever you saved the .p8. It prints a long token and the date it expires.
+
 **Supabase dashboard** → Authentication → Providers → Apple → enable, and fill
-in:
+in the only two fields there are:
 
 - Client IDs: `com.attunerelationships.web` **and** `com.attunerelationships.app`,
   comma separated. Both, because the website uses the Services ID and the app
   uses the bundle id.
-- Secret Key: the contents of the .p8 file.
-- Team ID, Key ID: from above.
+- Secret Key: the long token the script printed. Not the .p8 file.
+
+### This one expires
+
+Apple caps that token at six months. When it lapses, Sign in with Apple stops
+working for everyone at once, with no warning and nothing in the app that
+explains it. Google has no equivalent; this is Apple only.
+
+Put the date the script printed in your calendar now, a week early. Renewing is
+the same one line with the same .p8 file, which is the other reason not to lose
+it.
 
 ---
 
