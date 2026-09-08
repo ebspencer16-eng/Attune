@@ -65,14 +65,71 @@ for (const file of readdirSync(apiDir).filter((f) => f.endsWith('.js'))) {
   }
 }
 
+// Inline selects, and writes.
+//
+// The check above only understood one shape: a `const cols = [...]` array
+// joined into the query. Most endpoints write the select inline, and none of
+// them were being checked at all. Writes were not checked either, and a PATCH
+// naming a column that does not exist is the same bug facing the other way:
+// PostgREST rejects it, the write silently does nothing, and the value the
+// endpoint was supposed to record is simply absent later.
+//
+// /api/claim-order writes purchase_email, auth_provider and claimed_order_num.
+// Those three are the whole reason an account stays findable when someone signs
+// in with an Apple relay address that matches no order.
+function objectKeysAfter(text, from) {
+  // The object literal passed to JSON.stringify, by brace matching rather than
+  // a regex, so a nested object cannot end the match early.
+  const open = text.indexOf('{', from);
+  if (open === -1) return [];
+  let depth = 0;
+  for (let i = open; i < text.length; i++) {
+    if (text[i] === '{') depth++;
+    else if (text[i] === '}') {
+      depth--;
+      if (depth === 0) {
+        const inner = text.slice(open + 1, i);
+        // Top-level keys only: anything nested belongs to a value, not a column.
+        const keys = [];
+        let d = 0;
+        for (const m of inner.matchAll(/[{}]|(?:^|[,\s(])([a-z][a-z0-9_]*)\s*:/gm)) {
+          if (m[0] === '{') d++;
+          else if (m[0] === '}') d--;
+          else if (d === 0 && m[1]) keys.push(m[1]);
+        }
+        return keys;
+      }
+    }
+  }
+  return [];
+}
+
+for (const file of readdirSync(apiDir).filter((f) => f.endsWith('.js'))) {
+  const text = readFileSync(new URL(file, apiDir), 'utf8');
+
+  for (const m of text.matchAll(/profiles\?[^`'"]*?select=([a-z0-9_,]+)/g)) {
+    const missing = m[1].split(',').filter((c) => c && c !== '*' && !known.has(c));
+    if (missing.length) problems.push({ file, missing, how: 'selects' });
+  }
+
+  for (const m of text.matchAll(/profiles\?[^`'"]*`,\s*\{[\s\S]{0,400}?method:\s*'PATCH'/g)) {
+    const at = text.indexOf('JSON.stringify(', m.index);
+    if (at === -1) continue;
+    const missing = objectKeysAfter(text, at).filter((c) => !known.has(c));
+    if (missing.length) problems.push({ file, missing, how: 'writes' });
+  }
+}
+
 if (problems.length) {
-  console.error('[check-profile-columns] endpoints selecting columns no migration creates:');
-  for (const p of problems) console.error(`  api/${p.file}  ${p.missing.join(', ')}`);
+  console.error('[check-profile-columns] endpoints naming columns no migration creates:');
+  for (const p of problems) console.error(`  api/${p.file}  ${p.how || 'selects'}: ${p.missing.join(', ')}`);
   console.error('');
-  console.error('PostgREST rejects the entire select when one column is unknown, so the');
-  console.error('lookup returns nothing and the endpoint reports the row as missing.');
-  console.error('Add a migration, or remove the column from the select.');
+  console.error('A select naming an unknown column is rejected whole, so the lookup');
+  console.error('returns nothing and the endpoint reports the row as missing. A write');
+  console.error('naming one is rejected too, and that failure is usually caught and');
+  console.error('logged, so the value is simply never recorded.');
+  console.error('Add a migration, or stop naming the column.');
   process.exit(1);
 }
 
-console.log(`[check-profile-columns] every selected profiles column exists (${known.size} known).`);
+console.log(`[check-profile-columns] every profiles column read or written exists (${known.size} known).`);

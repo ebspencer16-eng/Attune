@@ -138,6 +138,9 @@ const USER_LOCALSTORAGE_KEYS = [
   'attune_post_survey_done', 'attune_survey_done',
   'attune_wb_promo_fired', 'attune_feedback_ctx',
   'attune_6mo_sent',
+  // An order number whose claim did not land. Kept so the next sign-in can try
+  // again, and cleared on sign-out like everything else that names a purchase.
+  'attune_pending_order',
 ];
 // Deliberately NOT here: attune_dev_intimacy, a developer toggle rather than
 // user data. Everything a person creates or that identifies them belongs in
@@ -192,8 +195,14 @@ async function fetchOrderEntitlements(sb, { userId, email, partnerAId } = {}, pr
       const { data, error } = await sb.from('orders').select(ORDER_SELECT).eq('user_id', userId);
       if (error) { readFailed = true; console.warn('[Attune] orders read (user_id) failed:', error.message); } else add(data);
     }
-    if (email) {
-      const { data, error } = await sb.from('orders').select(ORDER_SELECT).eq('buyer_email', email.toLowerCase());
+    // Both the address they sign in with and, if it is different, the address
+    // they bought with. Sign in with Apple can return a relay address, which
+    // matches no order ever written, so an account that pays through Apple and
+    // then loses its order link would resolve to core on every device. The
+    // purchase email is recorded at claim time for exactly this.
+    const emails = [...new Set([email, profile?.purchase_email].filter(Boolean).map(e => e.toLowerCase()))];
+    for (const addr of emails) {
+      const { data, error } = await sb.from('orders').select(ORDER_SELECT).eq('buyer_email', addr);
       if (error) { readFailed = true; console.warn('[Attune] orders read (buyer_email) failed:', error.message); } else add(data);
     }
     if (partnerAId) {
@@ -230,6 +239,75 @@ async function postRecompute(accessToken) {
     console.error('[Attune] recompute-entitlements threw:', e);
     return null;
   }
+}
+
+/**
+ * Attach the order someone paid for to the account they just made.
+ *
+ * The browser used to do this itself, in the background, and nobody waited for
+ * the answer. When it failed there was one fallback: match the purchase email
+ * on a later sign-in. That is fine while everyone signs in with the address
+ * they bought with, and it stops being fine the moment Sign in with Apple
+ * exists, because Apple can return a relay address that matches nothing.
+ *
+ * So it is awaited now, and it goes through /api/claim-order, which runs with
+ * the service role and writes the purchase email onto the profile while the
+ * order is still in hand.
+ *
+ * Two attempts, four seconds each. Long enough to ride out one bad request,
+ * short enough that nobody sits on a blank screen after paying. If both fail,
+ * the order number is kept so the next sign-in can try again: losing the link
+ * between a person and what they bought is not something to leave to one
+ * network round trip.
+ */
+async function claimOrder(orderNum, accessToken) {
+  if (!orderNum || !accessToken) return null;
+  for (let attempt = 0; attempt < 2; attempt++) {
+    try {
+      const ctl = new AbortController();
+      const timer = setTimeout(() => ctl.abort(), 4000);
+      const r = await fetch('/api/claim-order', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${accessToken}` },
+        body: JSON.stringify({ orderNum }),
+        signal: ctl.signal,
+      }).finally(() => clearTimeout(timer));
+      const body = await r.json().catch(() => null);
+      if (r.ok && body?.ok) {
+        // Claimed, but the profile row did not exist yet, so purchase_email and
+        // the provider did not land. create-profile is allowed to fail and
+        // re-sync later, so this is a real state, not an impossible one.
+        if (body.profileMissing) {
+          try { localStorage.setItem('attune_pending_order', orderNum); } catch {}
+        } else {
+          try { localStorage.removeItem('attune_pending_order'); } catch {}
+        }
+        return body;
+      }
+      // 409 means the order belongs to another account. Retrying cannot change
+      // that, and it is not this person's order to claim.
+      if (r.status === 409) { console.warn('[Attune] order already claimed by another account'); return null; }
+      console.warn('[Attune] claim-order failed:', r.status, body?.error || '(no body)');
+    } catch (e) {
+      console.warn('[Attune] claim-order threw:', e?.name === 'AbortError' ? 'timed out' : e);
+    }
+  }
+  try { localStorage.setItem('attune_pending_order', orderNum); } catch {}
+  return null;
+}
+
+/**
+ * Retry a claim that did not land, on the next sign-in.
+ *
+ * Fire-and-forget is correct here and was not correct at signup: by this point
+ * the person already has an account, and the claim is catching up rather than
+ * being the only chance to record what they paid for.
+ */
+function retryPendingClaim(accessToken) {
+  let pending = null;
+  try { pending = localStorage.getItem('attune_pending_order'); } catch {}
+  if (!pending || !accessToken) return;
+  claimOrder(pending, accessToken).catch(() => {});
 }
 
 // The stored `attune_order` is itself a record of granted entitlements. Fold it
@@ -280,6 +358,10 @@ function loadStoredOrderEnt() {
 }
 
 async function resolveEntitlements(sb, session, profile) {
+  // A claim that did not land at signup gets one more chance here, because
+  // this is the one place that runs on every signed-in load and the thing at
+  // stake is exactly what this function computes.
+  retryPendingClaim(session?.access_token);
   let ent = await fetchOrderEntitlements(sb, {
     userId: session?.user?.id,
     email: session?.user?.email,
@@ -10105,16 +10187,17 @@ function AuthModal({ mode, onClose, onSuccess }) {
       // Multi-item orders are written as ORDER_NUM-1, ORDER_NUM-2, etc. by
       // the stripe webhook, so we also match the prefix to catch all rows.
       //
-      // Fire-and-forget: this runs in the background after the user has
-      // already proceeded to the dashboard. A slow or stalled query here
-      // must never block account creation. Linkage falls back to
-      // buyer_email match on later sign-in if this fails.
+      // This used to be fire-and-forget, with a comment saying linkage "falls
+      // back to buyer_email match on later sign-in if this fails". That
+      // fallback only works while everyone signs in with the address they
+      // bought with. Sign in with Apple can hand back a private relay address,
+      // which never matches, so a dropped link leaves a paying customer with an
+      // account and no entitlements. It is now awaited, on the server, where it
+      // also records the purchase email on the profile so the account stays
+      // findable whatever address the person logs in with.
       const _checkoutOrderNum = _authParams.get('orderNum');
       if (_checkoutOrderNum) {
-        sb.from('orders').update({ user_id: authData.user.id })
-          .or(`order_num.eq.${_checkoutOrderNum},order_num.like.${_checkoutOrderNum}-%`)
-          .then(({ error }) => { if (error) console.warn('[Attune] order linkage failed:', error); })
-          .catch(e => console.warn('[Attune] order linkage error:', e));
+        await claimOrder(_checkoutOrderNum, authData?.session?.access_token);
       }
 
       // Send partner invite email if partner email was provided.
