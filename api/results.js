@@ -24,6 +24,7 @@ export const config = { runtime: 'edge' };
 
 import { sectionsWithLabels } from './_lib/results-sections.js';
 import { expectationsSummary } from './_lib/expectations.js';
+import { intimacyResults } from './_lib/intimacy-results.js';
 import { EXERCISES, EXERCISE_COLUMNS, isExerciseDone } from './_exercises.js';
 import { capabilitiesFor, OWNERSHIP_COLUMNS } from './_lib/ownership.js';
 import { DIM_META } from './_workbook-content.js';
@@ -325,6 +326,18 @@ export default async function handler(req) {
             youName: me.name || 'You',
             themName: partner.name || 'Your partner',
           })
+        : null,
+      /**
+       * Physical Intimacy, when they own it and both have answered.
+       *
+       * Gated twice on purpose. Ownership decides whether the sections are
+       * listed at all; both-finished decides whether they can say anything,
+       * because every one of them is about the distance between two answers.
+       *
+       * Carries states, distances and copy. Never the answers themselves.
+       */
+      intimacy: (ownership.ownsIntimacy && bothDone('intimacy'))
+        ? intimacyResults({ mine: me.intimacy_data, theirs: partner?.intimacy_data })
         : null,
       sections: sectionsWithLabels({
         hasReflection: ownership.ownsReflection,

@@ -24,7 +24,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { fetchConflictResults } from '@/api/client';
 import type {
   ConflictResults, CoupleResults, ExpectationRow, ExpectationsSummary,
-  ResultDimension, ResultsSection,
+  IntimacyDimension, IntimacyResults, ResultDimension, ResultsSection,
 } from '@/api/client';
 import ConflictResultsView from '@/components/conflict-results';
 import { Eyebrow } from '@/components/screen-states';
@@ -64,12 +64,13 @@ function interp(text: string | null | undefined, you: string, them: string): str
 }
 
 export default function Results({
-  results, owned = [], sections: fromServer, expectations = null,
+  results, owned = [], sections: fromServer, expectations = null, intimacy = null,
 }: {
   results: CoupleResults;
   owned?: string[];
   sections?: ResultsSection[];
   expectations?: ExpectationsSummary | null;
+  intimacy?: IntimacyResults | null;
 }) {
   // The spine comes from the server, in the server's order, with the server's
   // names. It used to be six entries written here against the website's
@@ -202,6 +203,7 @@ export default function Results({
         <SectionBody
           section={section}
           expectations={expectations}
+          intimacy={intimacy}
           results={results}
           conflict={conflict}
           conflictWaiting={conflictWaiting}
@@ -266,10 +268,12 @@ export default function Results({
  * the same screen.
  */
 function SectionBody({
-  section, results, conflict, conflictWaiting, byDomain, you, them, viewer, wideGap, expectations,
+  section, results, conflict, conflictWaiting, byDomain, you, them, viewer, wideGap,
+  expectations, intimacy,
 }: {
   section: string;
   expectations: ExpectationsSummary | null;
+  intimacy: IntimacyResults | null;
   results: CoupleResults;
   conflict: ConflictResults | null;
   conflictWaiting: boolean;
@@ -300,6 +304,13 @@ function SectionBody({
   if (section.startsWith('exp-convo-')) {
     const bucket = expectations?.categories.find((cat) => cat.section === section) ?? null;
     return <ExpectationsConversation bucket={bucket} you={you} them={them} />;
+  }
+
+  if (section === 'intimacy-overview') return <IntimacyOverview data={intimacy} />;
+  if (section === 'intimacy-plan') return <IntimacyConversations data={intimacy} />;
+  if (section.startsWith('intimacy-')) {
+    const dim = intimacy?.dimensions.find((d) => d.section === section) ?? null;
+    return <IntimacyDimensionView dim={dim} />;
   }
 
   if (section.startsWith('conflict-')) {
@@ -489,6 +500,166 @@ function ExpectationRowView({
         {row.aligned ? 'You pictured this the same way.' : 'Worth talking about.'}
       </Text>
     </View>
+  );
+}
+
+/**
+ * How far apart, said without a verdict.
+ *
+ * Four states, and none of them is a grade. "Different" is the interesting one
+ * on a page about sex, not the bad one, and the colours reflect that: a single
+ * quiet accent throughout rather than a run from green to red. A couple
+ * reading that they are red on Frequency has been told something about
+ * themselves that the exercise never measured.
+ */
+function DistanceBar({ pct, state }: { pct: number | null; state: string }) {
+  if (pct == null) return null;
+  return (
+    <View style={{ marginTop: Spacing.md }}>
+      <View style={{ height: 6, borderRadius: Radius.pill, backgroundColor: c.border, overflow: 'hidden' }}>
+        <View style={{ width: `${Math.max(3, pct)}%`, height: 6, backgroundColor: c.accentQuiet }} />
+      </View>
+      <Text style={{ ...Type.small, color: c.textMuted, marginTop: Spacing.xs }}>
+        {state === 'aligned' ? 'Close together'
+          : state === 'discuss' ? 'Somewhat apart'
+          : state === 'different' ? 'Furthest apart'
+          : 'Not answered'}
+      </Text>
+    </View>
+  );
+}
+
+function IntimacyOverview({ data }: { data: IntimacyResults | null }) {
+  if (!data) {
+    return (
+      <Waiting
+        title="Physical Intimacy"
+        body="This opens when you have both finished the exercise."
+      />
+    );
+  }
+  const spoken = data.dimensions.filter((d) => d.state !== 'unspoken');
+  return (
+    <ScrollView contentContainerStyle={{ paddingBottom: Spacing.xxl }}>
+      <View style={{ paddingHorizontal: Spacing.xl, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center' }}>
+        <Eyebrow>Physical Intimacy</Eyebrow>
+        <Text style={{ ...Type.hero, color: c.textStrong }}>
+          {data.overallState === 'aligned' ? 'You are closer together than most.'
+            : data.overallState === 'unspoken' ? 'Neither of you said much here.'
+            : 'Six things, and where each of you sits on them.'}
+        </Text>
+        <Text style={{ ...Type.body, color: c.textMuted, marginTop: Spacing.md }}>
+          None of these has a right answer. The distance is the subject, and a
+          wide one is a conversation you have not had yet rather than a problem
+          you have.
+        </Text>
+
+        <View style={{ marginTop: Spacing.xl, gap: Spacing.md }}>
+          {data.dimensions.map((d) => (
+            <View
+              key={d.section}
+              style={{
+                backgroundColor: c.surface, borderColor: c.border, borderWidth: 1,
+                borderRadius: Radius.lg, padding: Spacing.lg,
+              }}>
+              <Text style={{ ...Type.cardTitle, color: c.textStrong }}>{d.label}</Text>
+              {d.intro ? (
+                <Text style={{ ...Type.small, color: c.textMuted, marginTop: Spacing.xs }}>{d.intro}</Text>
+              ) : null}
+              <DistanceBar pct={d.distancePct} state={d.state} />
+            </View>
+          ))}
+        </View>
+
+        {spoken.length === 0 ? (
+          <Text style={{ ...Type.small, color: c.textMuted, marginTop: Spacing.xl }}>
+            You both skipped most of this. That is a valid answer, and it stays
+            here if you ever want to come back to it.
+          </Text>
+        ) : null}
+      </View>
+    </ScrollView>
+  );
+}
+
+function IntimacyDimensionView({ dim }: { dim: IntimacyDimension | null }) {
+  if (!dim) {
+    return <Waiting title="Physical Intimacy" body="This opens when you have both finished the exercise." />;
+  }
+  return (
+    <ScrollView contentContainerStyle={{ paddingBottom: Spacing.xxl }}>
+      <View style={{ paddingHorizontal: Spacing.xl, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center' }}>
+        <Eyebrow>Physical Intimacy</Eyebrow>
+        <Text style={{ ...Type.title, color: c.textStrong }}>{dim.label}</Text>
+        {dim.intro ? (
+          <Text style={{ ...Type.body, color: c.textMuted, marginTop: Spacing.sm }}>{dim.intro}</Text>
+        ) : null}
+
+        <DistanceBar pct={dim.distancePct} state={dim.state} />
+
+        {dim.body ? (
+          <View
+            style={{
+              backgroundColor: c.surface, borderColor: c.border, borderWidth: 1,
+              borderRadius: Radius.lg, padding: Spacing.lg, marginTop: Spacing.xl,
+            }}>
+            <Text style={{ ...Type.body, color: c.text }}>{dim.body}</Text>
+          </View>
+        ) : null}
+
+        {dim.prompt ? (
+          <View style={{ marginTop: Spacing.xl }}>
+            <Eyebrow>Ask each other</Eyebrow>
+            <Text style={{ ...Type.title, color: c.textStrong }}>{dim.prompt}</Text>
+          </View>
+        ) : null}
+      </View>
+    </ScrollView>
+  );
+}
+
+/**
+ * The Conversations screen: every prompt, furthest apart first.
+ *
+ * This is what the exercise is actually for. The scores exist to decide the
+ * order of these questions, not to be the thing anyone takes away.
+ */
+function IntimacyConversations({ data }: { data: IntimacyResults | null }) {
+  if (!data) {
+    return <Waiting title="Conversations" body="This opens when you have both finished the exercise." />;
+  }
+  if (!data.conversations.length) {
+    return (
+      <Waiting
+        title="Conversations"
+        body="You both skipped these, so there is nothing here yet. It stays if you want to come back to it."
+      />
+    );
+  }
+  return (
+    <ScrollView contentContainerStyle={{ paddingBottom: Spacing.xxl }}>
+      <View style={{ paddingHorizontal: Spacing.xl, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center' }}>
+        <Eyebrow>Physical Intimacy</Eyebrow>
+        <Text style={{ ...Type.hero, color: c.textStrong }}>Conversations</Text>
+        <Text style={{ ...Type.body, color: c.textMuted, marginTop: Spacing.md }}>
+          Furthest apart first. One at a time, and not all in one evening.
+        </Text>
+
+        <View style={{ marginTop: Spacing.xl, gap: Spacing.md }}>
+          {data.conversations.map((d) => (
+            <View
+              key={d.section}
+              style={{
+                backgroundColor: c.surface, borderColor: c.border, borderWidth: 1,
+                borderRadius: Radius.lg, padding: Spacing.lg,
+              }}>
+              <Text style={{ ...Type.eyebrow, color: c.accentQuiet }}>{d.label}</Text>
+              <Text style={{ ...Type.cardTitle, color: c.textStrong, marginTop: Spacing.xs }}>{d.prompt}</Text>
+            </View>
+          ))}
+        </View>
+      </View>
+    </ScrollView>
   );
 }
 

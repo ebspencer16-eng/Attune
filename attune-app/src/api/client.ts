@@ -142,6 +142,35 @@ export type ExpectationRow = {
   aligned: boolean;
 };
 
+/**
+ * Physical Intimacy, as distances rather than answers.
+ *
+ * The server sends states, distances and copy, and never what either person
+ * answered. scripts/check-intimacy-privacy.mjs fails the build if that ever
+ * stops being true, so the app has nothing private to mishandle.
+ */
+export type IntimacyDimension = {
+  /** The section id this belongs to, e.g. intimacy-comfort. */
+  section: string;
+  id: string;
+  label: string;
+  intro: string | null;
+  state: 'aligned' | 'discuss' | 'different' | 'unspoken';
+  /** How far apart, as a percentage of the scale. Null when unanswered. */
+  distancePct: number | null;
+  body: string | null;
+  reason: string;
+  prompt: string | null;
+};
+
+export type IntimacyResults = {
+  overallState: 'aligned' | 'discuss' | 'different' | 'unspoken';
+  overallDistancePct: number | null;
+  dimensions: IntimacyDimension[];
+  /** Furthest apart first: where a conversation is most worth having. */
+  conversations: IntimacyDimension[];
+};
+
 export type ExpectationsSummary = {
   answered: number;
   aligned: number;
@@ -177,6 +206,8 @@ export type ResultsResponse =
       owned?: string[];
       /** Null until both partners have finished Expectations. */
       expectations?: ExpectationsSummary | null;
+      /** Null unless they own Physical Intimacy and both have finished it. */
+      intimacy?: IntimacyResults | null;
     }
   | { ready: false; reason: string; self: PersonResults | null; partnerName?: string | null };
 
