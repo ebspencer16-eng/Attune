@@ -22,7 +22,7 @@ import { Pressable, ScrollView, Text, View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 
 import { fetchConflictResults } from '@/api/client';
-import type { ConflictResults, CoupleResults, ResultDimension } from '@/api/client';
+import type { ConflictResults, CoupleResults, ResultDimension, ResultsSection } from '@/api/client';
 import ConflictResultsView from '@/components/conflict-results';
 import {
   BottomTabInset, Colors, MaxContentWidth, Palette, Radius, SectionColor, Spacing, Type,
@@ -59,12 +59,22 @@ function interp(text: string | null | undefined, you: string, them: string): str
   return text.replace(/\{U\}/g, you).replace(/\{P\}/g, them);
 }
 
-type SectionKey = 'overview' | 'couple-type' | 'inner' | 'connection' | 'hard' | 'conflict';
-
 export default function Results({
-  results, owned = [],
-}: { results: CoupleResults; owned?: string[] }) {
-  const [section, setSection] = useState<SectionKey>('overview');
+  results, owned = [], sections: fromServer,
+}: { results: CoupleResults; owned?: string[]; sections?: ResultsSection[] }) {
+  // The spine comes from the server, in the server's order, with the server's
+  // names. It used to be six entries written here against the website's
+  // twenty-nine, so a couple who owned Expectations saw five conversation
+  // screens on a laptop and none at all on their phone.
+  //
+  // The fallback covers a cached payload written before the server sent this.
+  const sections: ResultsSection[] = fromServer?.length
+    ? fromServer
+    : [{ id: 'highlights', label: 'Highlights' }, { id: 'couple-type', label: 'Couple Type' }];
+
+  const [sectionId, setSectionId] = useState<string>(sections[0]?.id ?? 'highlights');
+  const section = sections.some((s) => s.id === sectionId) ? sectionId : (sections[0]?.id ?? 'highlights');
+  const index = sections.findIndex((s) => s.id === section);
 
   // Conflict Patterns is a separate payload with its own privacy rules, so it
   // is fetched separately rather than folded into /api/results. Not owning the
@@ -104,27 +114,10 @@ export default function Results({
     hard: dims.filter((d) => d.domain === 'hard'),
   }), [dims]);
 
-  // A section someone owns is listed even when it cannot open yet, greyed with
-  // the reason. SCREENS.md is blunt about why: a section that vanishes reads as
-  // a bug, which is exactly what happened on the web. A section nobody owns is
-  // genuinely absent, because listing it would be advertising inside results.
-  const sections: { key: SectionKey; label: string; enabled: boolean; locked?: string }[] = [
-    { key: 'overview', label: 'At a glance', enabled: true },
-    { key: 'couple-type', label: 'Couple Type', enabled: !!content?.coupleType },
-    { key: 'inner', label: 'Internal Processing', enabled: byDomain.inner.length > 0 },
-    { key: 'connection', label: 'How You Connect', enabled: byDomain.connection.length > 0 },
-    { key: 'hard', label: 'When Things Get Hard', enabled: byDomain.hard.length > 0 },
-    {
-      key: 'conflict',
-      label: 'Conflict Patterns',
-      enabled: !!conflict?.ready,
-      // Only if they own it. The server's reason is used rather than a guess,
-      // so the app never explains a lock it does not understand.
-      locked: owned.includes('conflict') && conflict && !conflict.ready
-        ? lockReason(conflict.reason)
-        : undefined,
-    },
-  ];
+  // Conflict sections are listed by the server on ownership alone, matching
+  // the website. They can still be waiting on a partner, which is a different
+  // state from not owning it and reads as a bug if the section just vanishes.
+  const conflictWaiting = section.startsWith('conflict-') && !conflict?.ready;
 
   return (
     <View style={{ flex: 1 }}>
@@ -134,27 +127,28 @@ export default function Results({
         horizontal
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={{ paddingHorizontal: Spacing.xl, gap: Spacing.sm, paddingBottom: Spacing.lg }}>
-        {sections.filter((s) => s.enabled || s.locked).map((s) => {
-          const on = s.key === section;
-          const locked = !s.enabled;
+        {sections.map((s) => {
+          const on = s.id === section;
           return (
             <Pressable
-              key={s.key}
-              onPress={locked ? undefined : () => setSection(s.key)}
-              disabled={locked}
-              accessibilityState={{ disabled: locked }}
+              key={s.id}
+              onPress={() => setSectionId(s.id)}
               style={{
                 paddingVertical: Spacing.sm, paddingHorizontal: Spacing.lg,
                 borderRadius: Radius.pill,
-                backgroundColor: on ? c.textStrong : locked ? 'transparent' : c.surface,
+                backgroundColor: on ? c.textStrong : c.surface,
                 borderColor: on ? c.textStrong : c.border,
                 borderWidth: 1,
-                borderStyle: locked ? 'dashed' : 'solid',
               }}>
               <Text
+                numberOfLines={1}
                 style={{
                   ...Type.small, fontWeight: '700',
-                  color: on ? Palette.white : locked ? c.border : c.textMuted,
+                  // Explicit, and taller than the font size. Type.small's own
+                  // lineHeight clipped the descenders inside the pill: "Highlights"
+                  // lost the tail of its g and "Couple Type" the tail of its p.
+                  lineHeight: 18,
+                  color: on ? Palette.white : c.textMuted,
                 }}>
                 {s.label}
               </Text>
@@ -163,21 +157,146 @@ export default function Results({
         })}
       </ScrollView>
 
-      {/* The reason a locked section is locked, said once under the list. A
-          greyed pill on its own tells someone it is unavailable but not why. */}
-      {sections.filter((s) => !s.enabled && s.locked).map((s) => (
-        <Text key={s.key} style={{ ...Type.small, color: c.textMuted, paddingHorizontal: Spacing.xl, marginBottom: Spacing.md }}>
-          {s.label}: {s.locked}
-        </Text>
-      ))}
+      <SectionBody
+        section={section}
+        results={results}
+        conflict={conflict}
+        conflictWaiting={conflictWaiting}
+        byDomain={byDomain}
+        you={you}
+        them={them}
+        viewer={viewer}
+        wideGap={wideGap}
+      />
 
-      {section === 'overview' ? <Glance results={results} you={you} them={them} viewer={viewer} wideGap={wideGap} /> : null}
-      {section === 'couple-type' ? <CoupleType results={results} you={you} them={them} /> : null}
-      {section === 'inner' ? <Domain title="Internal Processing" accent={Palette.indigo} dims={byDomain.inner} you={you} them={them} viewer={viewer} wideGap={wideGap} /> : null}
-      {section === 'connection' ? <Domain title="How You Connect" accent={SectionColor.communication} dims={byDomain.connection} you={you} them={them} viewer={viewer} wideGap={wideGap} /> : null}
-      {section === 'hard' ? <Domain title="When Things Get Hard" accent={SectionColor.conflict} dims={byDomain.hard} you={you} them={them} viewer={viewer} wideGap={wideGap} /> : null}
-      {section === 'conflict' && conflict?.ready ? <ConflictResultsView data={conflict} /> : null}
+      {/* Straight through, in the website's order. Someone reading results is
+          reading them, not hunting for the next pill: the spine above is for
+          jumping, and this is for going. */}
+      <View
+        style={{
+          flexDirection: 'row', gap: Spacing.md,
+          paddingHorizontal: Spacing.xl,
+          paddingTop: Spacing.md,
+          // Clear of the tab bar. Without this the row rendered underneath it,
+          // so the next section was a strip of colour behind Home and Insights.
+          paddingBottom: BottomTabInset,
+          backgroundColor: c.background,
+          borderTopColor: c.border,
+          borderTopWidth: 1,
+        }}>
+        {index > 0 ? (
+          <Pressable
+            onPress={() => setSectionId(sections[index - 1].id)}
+            style={{
+              flex: 1, paddingVertical: Spacing.md, borderRadius: Radius.md, alignItems: 'center',
+              backgroundColor: c.surface, borderColor: c.border, borderWidth: 1,
+            }}>
+            <Text numberOfLines={1} style={{ ...Type.small, fontWeight: '700', color: c.textMuted }}>
+              {sections[index - 1].label}
+            </Text>
+          </Pressable>
+        ) : null}
+        {index >= 0 && index < sections.length - 1 ? (
+          <Pressable
+            onPress={() => setSectionId(sections[index + 1].id)}
+            style={{
+              flex: 1, paddingVertical: Spacing.md, borderRadius: Radius.md, alignItems: 'center',
+              backgroundColor: c.accent,
+            }}>
+            <Text numberOfLines={1} style={{ ...Type.small, fontWeight: '700', color: c.onDark }}>
+              {sections[index + 1].label}
+            </Text>
+          </Pressable>
+        ) : null}
+      </View>
     </View>
+  );
+}
+
+/**
+ * Which content a section id shows.
+ *
+ * One place, so adding a section is adding a case rather than editing a
+ * conditional buried in the nav. Section ids are the server's, and are the same
+ * ids notes anchor to, so a note written against a section keeps pointing at
+ * the same screen.
+ */
+function SectionBody({
+  section, results, conflict, conflictWaiting, byDomain, you, them, viewer, wideGap,
+}: {
+  section: string;
+  results: CoupleResults;
+  conflict: ConflictResults | null;
+  conflictWaiting: boolean;
+  byDomain: { inner: ResultDimension[]; connection: ResultDimension[]; hard: ResultDimension[] };
+  you: string; them: string; viewer: 'a' | 'b'; wideGap: number | null;
+}) {
+  if (section === 'highlights') {
+    return <Glance results={results} you={you} them={them} viewer={viewer} wideGap={wideGap} />;
+  }
+  if (section === 'couple-type') return <CoupleType results={results} you={you} them={them} />;
+
+  if (section === 'comm-overview') {
+    return <Glance results={results} you={you} them={them} viewer={viewer} wideGap={wideGap} />;
+  }
+  if (section === 'comm-inner') {
+    return <Domain title="Internal Processing" accent={Palette.indigo} dims={byDomain.inner} you={you} them={them} viewer={viewer} wideGap={wideGap} />;
+  }
+  if (section === 'comm-connection') {
+    return <Domain title="How You Connect" accent={SectionColor.communication} dims={byDomain.connection} you={you} them={them} viewer={viewer} wideGap={wideGap} />;
+  }
+  if (section === 'comm-hard') {
+    return <Domain title="When Things Get Hard" accent={SectionColor.conflict} dims={byDomain.hard} you={you} them={them} viewer={viewer} wideGap={wideGap} />;
+  }
+
+  if (section.startsWith('conflict-')) {
+    // ready:false carries the reason; ready:true does not have the field at
+    // all, which is why this is a narrow rather than a cast.
+    if (!conflict || !conflict.ready) {
+      return (
+        <Waiting
+          title="Conflict Patterns"
+          body={conflict ? lockReason(conflict.reason) : 'Loading your conflict results.'}
+        />
+      );
+    }
+    return <ConflictResultsView data={conflict} section={section} />;
+  }
+
+  // A section the website renders and the app does not yet. Named rather than
+  // hidden: this list is the server's, so a missing screen is a gap in the app,
+  // not a section the couple does not have. Saying which one is missing is the
+  // difference between a known gap and a bug.
+  return <NotYet section={section} />;
+}
+
+function Waiting({ title, body }: { title: string; body: string }) {
+  return (
+    <ScrollView contentContainerStyle={{ paddingBottom: Spacing.xxl }}>
+      <View style={{ paddingHorizontal: Spacing.xl, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center' }}>
+        <Text style={{ ...Type.title, color: c.textStrong }}>{title}</Text>
+        <Text style={{ ...Type.body, color: c.textMuted, marginTop: Spacing.sm }}>{body}</Text>
+      </View>
+    </ScrollView>
+  );
+}
+
+function NotYet({ section }: { section: string }) {
+  return (
+    <ScrollView contentContainerStyle={{ paddingBottom: Spacing.xxl }}>
+      <View style={{ paddingHorizontal: Spacing.xl, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center' }}>
+        <View style={{ backgroundColor: c.surface, borderColor: c.border, borderWidth: 1, borderRadius: Radius.lg, padding: Spacing.xl }}>
+          <Text style={{ ...Type.eyebrow, color: c.accentQuiet }}>Not on your phone yet</Text>
+          <Text style={{ ...Type.body, color: c.text, marginTop: Spacing.sm }}>
+            This section is part of your results and is written and ready on the
+            website. It is being built for the app now.
+          </Text>
+          <Text style={{ ...Type.small, color: c.textMuted, marginTop: Spacing.md }}>
+            Open it at attune-relationships.com in the meantime.
+          </Text>
+        </View>
+      </View>
+    </ScrollView>
   );
 }
 
@@ -196,7 +315,7 @@ function Glance({
   const find = (k: string) => dims.find((d) => d.key === k);
 
   return (
-    <ScrollView contentContainerStyle={{ paddingBottom: BottomTabInset + Spacing.xxl }}>
+    <ScrollView contentContainerStyle={{ paddingBottom: Spacing.xxl }}>
       <View style={{ paddingHorizontal: Spacing.xl, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center' }}>
         <LinearGradient
           colors={['#1B2A5E', '#2F55C4']}
@@ -239,7 +358,7 @@ function CoupleType({ results, you, them }: { results: CoupleResults; you: strin
   if (!type) return null;
 
   return (
-    <ScrollView contentContainerStyle={{ paddingBottom: BottomTabInset + Spacing.xxl }}>
+    <ScrollView contentContainerStyle={{ paddingBottom: Spacing.xxl }}>
       <View style={{ paddingHorizontal: Spacing.xl, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center' }}>
         <Text style={{ ...Type.eyebrow, color: c.accentQuiet }}>Couple type</Text>
         <Text style={{ ...Type.hero, color: c.textStrong, marginTop: Spacing.sm }}>{type.name}</Text>
@@ -279,7 +398,7 @@ function Domain({
   you: string; them: string; viewer: 'a' | 'b'; wideGap: number | null;
 }) {
   return (
-    <ScrollView contentContainerStyle={{ paddingBottom: BottomTabInset + Spacing.xxl }}>
+    <ScrollView contentContainerStyle={{ paddingBottom: Spacing.xxl }}>
       <View style={{ paddingHorizontal: Spacing.xl, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center' }}>
         <Text style={{ ...Type.eyebrow, color: accent }}>Communication</Text>
         <Text style={{ ...Type.title, color: c.textStrong, marginTop: Spacing.xs, marginBottom: Spacing.lg }}>

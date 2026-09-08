@@ -120,8 +120,26 @@ export type CoupleResults = {
   content?: ResultsContent;
 };
 
+/** One entry in the results spine. Both fields come from the server. */
+export type ResultsSection = { id: string; label: string };
+
 export type ResultsResponse =
-  | { ready: true; cached: boolean; results: CoupleResults }
+  | {
+      ready: true;
+      cached: boolean;
+      results: CoupleResults;
+      /**
+       * Which sections these results contain, in order, with their names.
+       *
+       * The app used to build this list itself and reached six sections with
+       * labels of its own invention, while the website showed up to
+       * twenty-nine. Optional only so a cached response from before this
+       * existed still renders.
+       */
+      sections?: ResultsSection[];
+      /** What the couple owns, so nothing has to be inferred from the payload. */
+      owned?: string[];
+    }
   | { ready: false; reason: string; self: PersonResults | null; partnerName?: string | null };
 
 export type HomeCard = {

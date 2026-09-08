@@ -22,6 +22,9 @@
 
 export const config = { runtime: 'edge' };
 
+import { sectionsWithLabels } from './_lib/results-sections.js';
+import { EXERCISES, EXERCISE_COLUMNS, isExerciseDone } from './_exercises.js';
+import { capabilitiesFor, OWNERSHIP_COLUMNS } from './_lib/ownership.js';
 import { DIM_META } from './_workbook-content.js';
 import { DIM_KEYS, AXIS_CONFIG } from './_type-engine.js';
 import { ALIGNMENT_THRESHOLD } from './_lib/results.js';
@@ -172,7 +175,15 @@ export default async function handler(req) {
     if (!user?.id) return json({ ok: false, error: 'invalid auth token' }, 401);
 
     const svc = { apikey: serviceKey, Authorization: `Bearer ${serviceKey}` };
-    const cols = 'id,name,ex1_answers,partner_profile_id';
+    // Enough to answer which sections exist, not just what the scales say.
+    // The app was deciding that for itself and reached six of twenty-nine.
+    const cols = [
+      'id', 'name', 'partner_profile_id',
+      // From the registry. Naming answer columns by hand is how a new exercise
+      // ends up read as never started: it is simply not in the select.
+      ...EXERCISE_COLUMNS, 'ex3_completed',
+      ...OWNERSHIP_COLUMNS,
+    ].join(',');
     const meRes = await fetch(
       `${supabaseUrl}/rest/v1/profiles?id=eq.${user.id}&select=${cols}`, { headers: svc });
     const me = (await meRes.json().catch(() => []))?.[0];
@@ -247,6 +258,17 @@ export default async function handler(req) {
     });
     if (!results) return json({ ok: true, ready: false, reason: 'neither_complete' });
 
+    // What this couple owns, and which exercises both of them have finished.
+    // Ownership sits on the buyer's profile and is inherited by the partner,
+    // so it is read from whichever of the two has it rather than from the
+    // person asking: an invited partner owns exactly what was bought for them.
+    const ownership = capabilitiesFor(
+      capabilitiesFor(me).owned.length ? me : (partner || me));
+    const bothDone = (key) => {
+      const ex = EXERCISES.find((e) => e.key === key);
+      return !!ex && isExerciseDone(ex, me[ex.column]) && isExerciseDone(ex, partner?.[ex.column]);
+    };
+
     return json({
       ok: true, ready: true, cached, recomputed: reason,
       // Labels are applied on the way out, not baked into the stored blob.
@@ -263,6 +285,7 @@ export default async function handler(req) {
       // with the same orderPair the store uses, rather than re-deriving the
       // comparison here and risking the two disagreeing.
       results: withContent(withLabels(results), orderPair(me.id, partner.id).swapped ? 'b' : 'a'),
+      owned: ownership.owned,
       // frozenAt is when these results were fixed. computedUnderVersion is the
       // engine that produced them, which may be older than the current one:
       // that is the point, not a problem.
@@ -272,6 +295,24 @@ export default async function handler(req) {
       // this rather than using whatever the current copy library says.
       contentVersion: contentVersion ?? null,
       olderEngine: !!stale,
+      /**
+       * Which sections this couple's results contain, in order, with names.
+       *
+       * The app used to work this out and arrived at six, with labels it had
+       * written itself. The website showed twenty-nine. Same couple, same
+       * purchase, two different products.
+       *
+       * The three conditions match the website exactly, including that they
+       * are not the same shape as each other. Reflection and Conflict appear
+       * on ownership alone; Physical Intimacy waits for both partners,
+       * because its sections compare two sets of answers and have nothing to
+       * show with one.
+       */
+      sections: sectionsWithLabels({
+        hasReflection: ownership.ownsReflection,
+        intimacyReady: ownership.ownsIntimacy && bothDone('intimacy'),
+        conflictListed: ownership.ownsConflict,
+      }),
     });
   } catch (e) {
     console.error('[results] failed:', e);

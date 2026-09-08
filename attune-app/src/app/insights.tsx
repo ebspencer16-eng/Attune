@@ -318,5 +318,5 @@ function Results({ results, owned }: { results: ResultsResponse | null; owned: s
       </Text>
     );
   }
-  return <ResultsExperience results={results.results} owned={owned} />;
+  return <ResultsExperience results={results.results} owned={owned} sections={results.sections} />;
 }

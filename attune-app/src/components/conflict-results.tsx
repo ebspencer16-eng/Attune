@@ -35,7 +35,17 @@ const c = Colors.light;
 
 type Screen = 'glance' | 'snapshot' | 'patterns' | 'wrote';
 
-export default function ConflictResultsView({ data }: { data: Extract<ConflictResults, { ready: true }> }) {
+export default function ConflictResultsView({
+  data, section,
+}: {
+  data: Extract<ConflictResults, { ready: true }>;
+  /**
+   * Which of the four Conflict screens to show. The website splits this into
+   * conflict-overview, -snapshot, -patterns and -wrote, and notes anchor to
+   * those ids, so the app shows the same four rather than one long page.
+   */
+  section?: string;
+}) {
   const [screen, setScreen] = useState<Screen>('glance');
   const { you, partner, names, content } = data;
 
