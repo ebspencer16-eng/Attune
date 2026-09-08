@@ -23,6 +23,9 @@ import { EXERCISES, EXERCISE_COLUMNS, EXERCISE_LOCAL_KEYS, PARTNER_SESSION_FIELD
 const FILES = [
   'src/App.jsx', 'api/partner-sync.js', 'api/save-exercise.js', 'api/admin-data.js',
   'api/home.js',
+  // The priority engine. It carried four of the five exercises for long enough
+  // that a couple owning Conflict Patterns was never prompted to finish it.
+  'api/_lib/next-action.js',
   // The app screens. These each carried their own copy of the exercise list
   // until CLAUDE.md named them; they derive now, and this keeps them that way.
   'attune-app/src/app/insights.tsx', 'attune-app/src/app/resources.tsx',

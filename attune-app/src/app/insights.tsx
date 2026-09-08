@@ -34,14 +34,6 @@ import {
 
 const c = Colors.light;
 
-/**
- * Exercises the app can actually ask.
- *
- * The rest still live on the website, and their rows read as Pending rather
- * than opening a screen with nothing in it. /api/questions returns a clear 501
- * for anything not listed here, so the two cannot silently disagree for long.
- */
-const ANSWERABLE_IN_APP = new Set(['ex1', 'ex2', 'conflict']);
 
 export default function InsightsScreen() {
   const [home, setHome] = useState<HomeResponse | null>(null);
@@ -219,7 +211,7 @@ function StatusTable({
           {/* Only your own column is actionable, and only for exercises the
               app can actually ask. A cell that opens nothing is worse than a
               plain status. */}
-          <StatusCell done={e.mine} onPress={!e.mine && ANSWERABLE_IN_APP.has(e.key) ? () => onOpen(e.key) : undefined} />
+          <StatusCell done={e.mine} onPress={!e.mine && e.inApp ? () => onOpen(e.key) : undefined} />
           <StatusCell done={e.theirs} muted />
         </View>
       ))}

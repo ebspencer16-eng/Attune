@@ -36,34 +36,37 @@
  * capability   the pkg capability gating it; null means every package has it
  * partnerField the field name inside the partner session
  * selfOnly     no partner-view questions, so no pv_ answers exist
+ * inApp        the iOS app can ask this one. /api/questions serves it and
+ *              /api/home tells the app, so the app keeps no list of its own.
+ *              Flip to true here when the screen exists, in one place.
  */
 export const EXERCISES = [
   {
-    order: 1, key: 'ex1', label: 'Communication',
+    order: 1, key: 'ex1', inApp: true, label: 'Communication',
     column: 'ex1_answers', shape: 'answers',
     localKey: 'attune_ex1', progressKey: 'attune_ex1_progress',
     view: 'exercise1', capability: null, partnerField: 'ex1', selfOnly: false,
   },
   {
-    order: 2, key: 'ex2', label: 'Expectations',
+    order: 2, key: 'ex2', inApp: true, label: 'Expectations',
     column: 'ex2_answers', shape: 'answers',
     localKey: 'attune_ex2', progressKey: 'attune_ex2_progress',
     view: 'exercise2', capability: null, partnerField: 'ex2', selfOnly: false,
   },
   {
-    order: 3, key: 'ex3', label: 'Relationship Reflection',
+    order: 3, key: 'ex3', inApp: false, label: 'Relationship Reflection',
     column: 'ex3_answers', shape: 'answers',
     localKey: 'attune_ex3', progressKey: 'attune_ex3_progress',
     view: 'exercise3', capability: 'hasAnniversary', partnerField: 'ex3', selfOnly: false,
   },
   {
-    order: 4, key: 'intimacy', label: 'Physical Intimacy Expectations',
+    order: 4, key: 'intimacy', inApp: false, label: 'Physical Intimacy Expectations',
     column: 'intimacy_data', shape: 'record',
     localKey: 'attune_intimacy', progressKey: 'attune_intimacy_progress',
     view: 'intimacy', capability: 'hasIntimacy', partnerField: 'intimacy', selfOnly: false,
   },
   {
-    order: 5, key: 'conflict', label: 'Conflict Patterns',
+    order: 5, key: 'conflict', inApp: true, label: 'Conflict Patterns',
     column: 'conflict_data', shape: 'record',
     localKey: 'attune_conflict', progressKey: 'attune_conflict_progress',
     view: 'conflict', capability: 'hasConflict', partnerField: 'conflict', selfOnly: true,

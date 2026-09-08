@@ -8,6 +8,7 @@
 //   node scripts/next-action-test.mjs
 
 import { nextActions, greeting } from '../api/_lib/next-action.js';
+import { EXERCISES } from '../api/_exercises.js';
 
 let pass = 0, fail = 0;
 const NOW = '2026-08-29T10:00:00.000Z';
@@ -45,6 +46,27 @@ ok('own unfinished exercise outranks nudging the partner',
     ex2: { owned: true, mine: true, theirs: false },
     ex3: { owned: false }, intimacy: { owned: false },
   }, resultsReady: false }).kind === 'finish_exercise');
+
+// Conflict Patterns was missing from the hardcoded list this engine used to
+// carry, so a couple who owned it and had not finished it was never prompted.
+// Every exercise in the registry gets a card, not four of the five.
+ok('an owned unfinished Conflict Patterns is prompted',
+  primary({ exercises: {
+    ex1: { owned: true, mine: true, theirs: true },
+    ex2: { owned: true, mine: true, theirs: true },
+    ex3: { owned: false }, intimacy: { owned: false },
+    conflict: { owned: true, mine: false, theirs: false },
+  }, resultsReady: false }).id === 'finish-conflict');
+
+// The same, stated as a rule rather than a case, so adding an exercise to the
+// registry without teaching the engine about it fails here.
+for (const e of EXERCISES) {
+  const only = Object.fromEntries(EXERCISES.map(x => [
+    x.key, x.key === e.key ? { owned: true, mine: false, theirs: false } : { owned: false },
+  ]));
+  ok(`every registry exercise can be prompted: ${e.key}`,
+    primary({ exercises: only, resultsReady: false }).id === `finish-${e.key}`);
+}
 
 ok('nudge the partner when you are done and they are not',
   primary({ exercises: { ...base().exercises, ex2: { owned: true, mine: true, theirs: false } },
@@ -117,6 +139,25 @@ const full = nextActions(base({ profileComplete: false, resultsLastOpenedAt: nul
 ok('one primary and at most three secondary', !!full.primary && full.secondary.length <= 3);
 ok('secondary is lower priority than primary',
   full.secondary.every(c => c.priority <= full.primary.priority));
+// Every card must also carry an app destination, or the card does nothing when
+// tapped in the app. That was true of every card for the life of the screen:
+// the app pushed the website route and navigated nowhere.
+{
+  const all = [];
+  for (const over of [
+    {}, { profileComplete: false }, { resultsReady: false },
+    { exercises: { ex1: { owned: true, mine: false, theirs: false }, ex2: { owned: false }, ex3: { owned: false }, intimacy: { owned: false }, conflict: { owned: false } }, resultsReady: false },
+    { exercises: { ex1: { owned: true, mine: true, theirs: true }, ex2: { owned: true, mine: true, theirs: true }, ex3: { owned: true, mine: false, theirs: false }, intimacy: { owned: false }, conflict: { owned: false } }, resultsReady: false },
+  ]) {
+    const r = nextActions(base(over));
+    all.push(r.primary, ...r.secondary);
+  }
+  ok('every card carries an app destination',
+    all.filter(Boolean).every(c => c.app && (c.app.route || c.app.external)));
+  ok('no app destination is a raw website view route',
+    all.filter(Boolean).every(c => !c.app?.route || !c.app.route.includes('view=')));
+}
+
 ok('every card carries a deep link', [full.primary, ...full.secondary].every(c => c.deepLink));
 
 // ── No streak mechanics ─────────────────────────────────────────────────────

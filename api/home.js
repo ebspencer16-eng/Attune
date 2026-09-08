@@ -105,6 +105,10 @@ export default async function handler(req) {
         label: e.label,
         order: e.order,
         owned: !e.capability || !!caps[e.capability],
+        // Whether the app can ask this one. Sent so the app holds no list of
+        // its own: a hand-kept set of answerable exercises is the same shape of
+        // bug as a hand-kept list of exercises.
+        inApp: !!e.inApp,
         mine: isExerciseDone(e, me[e.column]),
         theirs: isExerciseDone(e, partner?.[e.column]),
       },

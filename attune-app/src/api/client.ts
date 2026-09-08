@@ -130,7 +130,17 @@ export type HomeCard = {
   title: string;
   body: string;
   cta: string;
+  /** The website route. Kept for the site; the app routes on `app`. */
   deepLink: string;
+  /**
+   * Where this card goes in the app, decided server-side.
+   *
+   * `route` is a tab, optionally with the exercise to open. `external` is a
+   * website URL for something the app has no screen for. The app used to push
+   * deepLink directly, which is a web route the app has no concept of, so every
+   * card did nothing at all.
+   */
+  app?: { route?: string; exercise?: string; external?: string };
   disabled?: boolean;
 };
 
@@ -147,6 +157,8 @@ export type ExerciseState = {
   owned: boolean;
   mine: boolean;
   theirs: boolean;
+  /** Whether the app can ask this exercise. From api/_exercises.js. */
+  inApp?: boolean;
 };
 
 /** One purchasable thing, from api/_catalogue.js. Price is whole dollars. */

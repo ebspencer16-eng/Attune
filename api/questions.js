@@ -106,6 +106,17 @@ export default async function handler(req) {
     const exercise = EXERCISES.find(e => e.key === key);
     if (!exercise) return json({ ok: false, error: `unknown exercise: ${key}` }, 400);
 
+    // The registry decides what the app can ask. Refusing here from the same
+    // flag /api/home reports means the two cannot drift into saying different
+    // things about the same exercise.
+    if (!exercise.inApp) {
+      return json({
+        ok: false,
+        error: `${exercise.label} is not answerable in the app yet`,
+        notYetInApp: true,
+      }, 501);
+    }
+
     if (key === 'ex1') {
       const items = twoPartEx1();
       return json({

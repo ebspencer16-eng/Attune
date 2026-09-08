@@ -40,6 +40,45 @@ const DAY = 24 * 60 * 60 * 1000;
  * }
  * @returns { primary, secondary[] } cards, each { id, kind, title, body, cta, deepLink }
  */
+import { EXERCISES } from '../_exercises.js';
+
+
+/**
+ * Where a card goes in the iOS app.
+ *
+ * deepLink is a website route, /?view=results. The app has four tabs and no
+ * concept of ?view=, so pushing it navigated nowhere: every card on Home was
+ * silently inert, including the primary one, which is the whole screen.
+ *
+ * Derived here from the deepLink so a new card kind needs no app release, which
+ * is the same reason SCREENS.md says to route on deepLink rather than on kind.
+ *
+ * A view the app has no screen for opens the website in the browser instead of
+ * doing nothing. That is honest: the thing genuinely lives there.
+ */
+const SITE = 'https://www.attune-relationships.com';
+
+function appTargetFor(deepLink) {
+  const view = /[?&]view=([^&]+)/.exec(deepLink || '')?.[1] || '';
+
+  // Tabs the app has.
+  if (view === 'results') return { route: '/insights' };
+  if (view === 'home' || view === '') return { route: '/' };
+  if (view === 'practice') return { route: '/resources' };
+
+  // An exercise. Routed to Insights, carrying which one, so the app can open it
+  // directly when it can ask it and show its row when it cannot.
+  const exercise = EXERCISES.find(e => e.view === view);
+  if (exercise) {
+    return exercise.inApp
+      ? { route: '/insights', exercise: exercise.key }
+      : { external: `${SITE}/app${deepLink.replace(/^\//, '')}` };
+  }
+
+  // Profile setup, feedback, budget, checklist: all still on the website.
+  return { external: `${SITE}/app${deepLink.replace(/^\//, '')}` };
+}
+
 export function nextActions(state = {}) {
   const now = state.now ? new Date(state.now).getTime() : Date.now();
   const ago = (iso) => (iso ? (now - new Date(iso).getTime()) / DAY : Infinity);
@@ -66,12 +105,11 @@ export function nextActions(state = {}) {
   // 2. Your own unfinished exercise. Above nudging the partner on purpose:
   //    asking someone else to finish while you have not is a bad look, and the
   //    app should not help you do it.
-  for (const [key, label, link] of [
-    ['ex1', 'Communication', 'exercise1'],
-    ['ex2', 'What You Expect', 'exercise2'],
-    ['ex3', 'Relationship Reflection', 'exercise3'],
-    ['intimacy', 'Physical Intimacy', 'intimacy'],
-  ]) {
+  //    The list comes from the registry. It was written out here and had four
+  //    of the five exercises: Conflict Patterns was missing, so a couple who
+  //    owned it and had not finished it was never once prompted to. Nothing
+  //    errored; the card simply never existed.
+  for (const { key, label, view: link } of EXERCISES) {
     const e = ex[key];
     if (e?.owned && !e.mine) {
       add({ id: `finish-${key}`, kind: 'finish_exercise', priority: 10,
@@ -159,7 +197,10 @@ export function nextActions(state = {}) {
   }
 
   cards.sort((a, b) => b.priority - a.priority);
-  return { primary: cards[0], secondary: cards.slice(1, 4) };
+  // Every card gains its app destination here, once, rather than each add()
+  // call remembering to set one.
+  const withApp = cards.map(c => ({ ...c, app: appTargetFor(c.deepLink) }));
+  return { primary: withApp[0], secondary: withApp.slice(1, 4) };
 }
 
 /** Greeting for the home screen. Time-of-day only, no streak, no guilt. */

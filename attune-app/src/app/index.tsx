@@ -14,7 +14,7 @@
  */
 
 import { useCallback, useEffect, useState } from 'react';
-import { Pressable, RefreshControl, ScrollView, Text, View, useWindowDimensions } from 'react-native';
+import { Linking, Pressable, RefreshControl, ScrollView, Text, View, useWindowDimensions } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
@@ -27,6 +27,7 @@ import Settings from '@/components/settings';
 import { Colors, MaxContentWidth, Palette, Radius, Spacing, Type } from '@/constants/attune-theme';
 
 const c = Colors.light;
+const SITE = 'https://www.attune-relationships.com';
 
 export default function HomeScreen() {
   const router = useRouter();
@@ -47,9 +48,28 @@ export default function HomeScreen() {
 
   useEffect(() => { load(); }, [load]);
 
+  /**
+   * Follow a card.
+   *
+   * Routes on `app`, which the server derives from the same deepLink the site
+   * uses. It used to push deepLink itself, a website route like /?view=results
+   * that the app has no concept of, so every card on this screen quietly did
+   * nothing. The `as never` cast is what let that compile.
+   *
+   * Nothing here branches on card.kind, so a new kind server-side still needs
+   * no app release.
+   */
   const open = (card: HomeCard) => {
-    if (card.disabled || !card.deepLink) return;
-    router.push(card.deepLink as never);
+    if (card.disabled) return;
+    const target = card.app;
+    if (target?.external) { Linking.openURL(target.external); return; }
+    if (target?.route) {
+      router.push(target.route as never);
+      return;
+    }
+    // No app target at all means an older payload. Opening the website is the
+    // honest fallback: the thing exists, just not here.
+    if (card.deepLink) Linking.openURL(`${SITE}/app${card.deepLink.replace(/^\//, '')}`);
   };
 
   if (loading) return <Shell><ScreenLoading label="Getting your dashboard" /></Shell>;
