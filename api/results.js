@@ -90,8 +90,20 @@ function withContent(results, viewer) {
       // Which Communication screen this dimension belongs on.
       domain: DOMAIN_OF[dim] || null,
       domainLabel: DOMAIN_LABEL[DOMAIN_OF[dim]] || null,
-      a: a?.dimensions?.[dim]?.blended ?? a?.dimensions?.[dim]?.self ?? null,
-      b: b?.dimensions?.[dim]?.blended ?? b?.dimensions?.[dim]?.self ?? null,
+      // Self-report, not the blended score.
+      //
+      // blendedDimScores mixes a person's answers with their partner's view of
+      // them. That is right for deriving the couple type and wrong for showing
+      // someone where they placed themselves: the mark under your own name
+      // would move because of what your partner said about you. src/App.jsx is
+      // explicit about the split, and the app was plotting the wrong one, so
+      // the same person sat at a different point in the app than on the site.
+      a: a?.dimensions?.[dim]?.self ?? null,
+      b: b?.dimensions?.[dim]?.self ?? null,
+      // Kept alongside for anything that legitimately needs the typing input.
+      // Not what the scales draw.
+      aBlended: a?.dimensions?.[dim]?.blended ?? null,
+      bBlended: b?.dimensions?.[dim]?.blended ?? null,
       gap: results.gaps?.[dim] ?? null,
     };
   });

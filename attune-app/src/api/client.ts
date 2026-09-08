@@ -61,8 +61,17 @@ export type ResultDimension = {
   /** Which Communication screen it belongs on. */
   domain: 'inner' | 'connection' | 'hard' | null;
   domainLabel: string | null;
+  /** Self-report, 1 to 5. What the scales draw. */
   a: number | null;
   b: number | null;
+  /**
+   * The blended score, which mixes each person's answers with their partner's
+   * view of them. Used to derive the couple type. Deliberately not what the
+   * scales draw: a mark under your own name should not move because of what
+   * your partner said about you.
+   */
+  aBlended?: number | null;
+  bBlended?: number | null;
   gap: number | null;
 };
 

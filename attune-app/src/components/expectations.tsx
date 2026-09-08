@@ -71,9 +71,30 @@ export default function Expectations({
         setError(null);
         const saved = res.data.saved?.answers as Partial<Answers> | undefined;
         if (saved) {
-          setAnswers({ ...EMPTY, ...saved });
-          // Straight past the household question if it is already answered.
-          if (saved.childhoodStructure) setStage('responsibilities');
+          const restored = { ...EMPTY, ...saved };
+          setAnswers(restored);
+          if (saved.childhoodStructure) {
+            setStage('responsibilities');
+            // Land on the first unfinished category rather than the first one.
+            // Otherwise someone who stopped in Extended Family reopens on
+            // Household and has to press Next past four finished pages.
+            const firstOpen = res.data.categories.findIndex((cat) =>
+              cat.items.some((it) => {
+                const k = `${cat.id}__${it.key}`;
+                const choice = restored.responsibilities[k];
+                if (!choice) return true;
+                return choice === 'Both of us' && !restored.bothDetail[k];
+              }));
+            if (firstOpen === -1) {
+              // Every category done, so the remaining work is the life
+              // questions. Same idea there: first unanswered.
+              setStage('life');
+              const firstLife = res.data.lifeQuestions.findIndex((q) => !restored.life[q.id]);
+              setLifeIdx(firstLife === -1 ? res.data.lifeQuestions.length - 1 : firstLife);
+            } else {
+              setCatIdx(firstOpen);
+            }
+          }
         }
       } else setError(res.error);
       setLoading(false);
