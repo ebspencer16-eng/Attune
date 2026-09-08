@@ -374,6 +374,8 @@ export type Note = {
   /** RESULTS_VERSION at the time, so the app can tell that results have been
    *  recomputed since. Null on notes written before a version was recorded. */
   anchor_version: number | null;
+  /** Tag ids on this note. Empty when it has none. */
+  tagIds?: string[];
   created_at: string;
   updated_at: string;
 };
@@ -427,6 +429,8 @@ export function fetchTags() {
 export function createNote(input: {
   body: string; title?: string; visibility?: 'private' | 'shared';
   anchorType?: string; anchorKey?: string; anchorContext?: string; anchorVersion?: number;
+  /** Tags to attach. The server accepted these all along; nothing sent them. */
+  tagIds?: string[];
 }) {
   return request<{ ok: true; note: Note }>('/api/notes', {
     method: 'POST',
@@ -439,7 +443,11 @@ export function createNote(input: {
  * Edit your own note. The server filters on owner, so someone else's note
  * matches nothing rather than erroring in a way that confirms it exists.
  */
-export function updateNote(input: { id: string; title?: string | null; body?: string }) {
+export function updateNote(input: {
+  id: string; title?: string | null; body?: string;
+  /** The full set of tags the note should end up with. Omit to leave them. */
+  tagIds?: string[];
+}) {
   return request<{ ok: true; note: Note }>('/api/notes', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },

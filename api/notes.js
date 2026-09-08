@@ -76,7 +76,7 @@ export default async function handler(req) {
     // ── Read ───────────────────────────────────────────────────────────────
     if (req.method === 'GET' && action === 'list') {
       const mineRes = await rest(`notes?owner_id=eq.${me}&select=*&order=updated_at.desc`, { headers: svc });
-      const mine = await mineRes.json().catch(() => []);
+      let mine = await mineRes.json().catch(() => []);
 
       let shared = [];
       if (coupleKey) {
@@ -85,6 +85,25 @@ export default async function handler(req) {
           { headers: svc });
         shared = await sRes.json().catch(() => []);
       }
+
+      // Which tags are on which note.
+      //
+      // Notes came back with no tags at all, so nothing could show or change
+      // them: a note could be tagged at creation and then the tags were
+      // invisible forever. Read in one query over the notes already fetched
+      // rather than per note.
+      const allIds = [...mine, ...shared].map(n => n.id);
+      const tagsByNote = {};
+      if (allIds.length) {
+        const inList = allIds.map(id => `"${id}"`).join(',');
+        const ntRes = await rest(`note_tags?note_id=in.(${inList})&select=note_id,tag_id`, { headers: svc });
+        for (const row of (await ntRes.json().catch(() => []))) {
+          (tagsByNote[row.note_id] ||= []).push(row.tag_id);
+        }
+      }
+      const withTags = (n) => ({ ...n, tagIds: tagsByNote[n.id] || [] });
+      mine = mine.map(withTags);
+      shared = shared.map(withTags);
       // Annotations separated out, because the app lists them by what they are
       // attached to rather than chronologically.
       return json({
@@ -188,7 +207,23 @@ export default async function handler(req) {
       });
       const rows = await r.json().catch(() => []);
       if (!rows.length) return json({ ok: false, error: 'not found' }, 404);
-      return json({ ok: true, note: rows[0] });
+
+      // Tags could only ever be set when a note was created, so there was no
+      // way to add or remove one afterwards. Replaced wholesale rather than
+      // diffed: the client sends the set it wants, which is what a chip picker
+      // produces, and a diff would need the client to know what is already
+      // there and be right about it.
+      if (action === 'update' && Array.isArray(body.tagIds)) {
+        await rest(`note_tags?note_id=eq.${body.id}`, { method: 'DELETE', headers: svc });
+        if (body.tagIds.length) {
+          await rest('note_tags', {
+            method: 'POST',
+            headers: { ...jsonHeaders, Prefer: 'return=minimal,resolution=ignore-duplicates' },
+            body: JSON.stringify(body.tagIds.map(t => ({ note_id: body.id, tag_id: t }))),
+          });
+        }
+      }
+      return json({ ok: true, note: { ...rows[0], tagIds: body.tagIds ?? undefined } });
     }
 
     return json({ ok: false, error: 'unsupported action' }, 400);

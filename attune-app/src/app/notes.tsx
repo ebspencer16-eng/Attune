@@ -187,6 +187,7 @@ export default function NotesScreen() {
               <NoteCard
                 key={note.id}
                 note={note}
+                tags={tags}
                 source={note.anchor_type ? resolveAnchor(note, anchorCtx) : null}
                 moved={hasMoved(note, resultsVersion)}
                 author={readOnly ? partner : undefined}
@@ -209,6 +210,7 @@ export default function NotesScreen() {
       {editing ? (
         <Editor
           note={editing === 'new' ? null : editing}
+          tags={tags}
           canShare={partnerLinked}
           partner={partner}
           onClose={() => setEditing(null)}
@@ -284,9 +286,10 @@ function Blank({ title, body }: { title: string; body: string }) {
  * with no name on it.
  */
 function NoteCard({
-  note, source, moved, author, readOnly, onPress,
+  note, tags, source, moved, author, readOnly, onPress,
 }: {
   note: Note;
+  tags: Tag[];
   source?: ResolvedAnchor | null;
   moved?: boolean;
   author?: string;
@@ -350,6 +353,30 @@ function NoteCard({
         </Text>
       ) : null}
 
+      {/* Tags, so a note's tags are visible without opening it. Resolved
+          against the tag list rather than stored on the note, so a renamed tag
+          shows its new name everywhere at once. */}
+      {note.tagIds?.length ? (
+        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.xs, marginTop: Spacing.md }}>
+          {note.tagIds
+            .map((id) => tags.find((t) => t.id === id))
+            .filter((t): t is Tag => !!t)
+            .map((t) => (
+              <View
+                key={t.id}
+                style={{
+                  paddingVertical: 2, paddingHorizontal: Spacing.sm, borderRadius: Radius.pill,
+                  backgroundColor: (t.color || c.textMuted) + '1A',
+                  borderColor: (t.color || c.border) + '55', borderWidth: 1,
+                }}>
+                <Text style={{ ...Type.small, fontSize: 11, color: t.color || c.textMuted, fontWeight: '600' }}>
+                  {t.name}
+                </Text>
+              </View>
+            ))}
+        </View>
+      ) : null}
+
       <Text style={{ ...Type.small, color: c.textMuted, marginTop: Spacing.md }}>
         {author ? `${author}  \u00b7  ` : ''}
         {when(note.updated_at)}
@@ -370,9 +397,10 @@ function NoteCard({
  * and the shared list does not offer the press that opens this.
  */
 function Editor({
-  note, canShare, partner, onClose, onSaved,
+  note, tags, canShare, partner, onClose, onSaved,
 }: {
   note: Note | null;
+  tags: Tag[];
   canShare: boolean;
   partner: string;
   onClose: () => void;
@@ -381,6 +409,7 @@ function Editor({
   const [title, setTitle] = useState(note?.title ?? '');
   const [body, setBody] = useState(note?.body ?? '');
   const [isShared, setIsShared] = useState(note?.visibility === 'shared');
+  const [picked, setPicked] = useState<string[]>(note?.tagIds ?? []);
   const [busy, setBusy] = useState(false);
 
   const wasShared = note?.visibility === 'shared';
@@ -395,13 +424,14 @@ function Editor({
         body: body.trim(),
         title: cleanTitle ?? undefined,
         visibility: isShared ? 'shared' : 'private',
+        tagIds: picked,
       });
       setBusy(false);
       if (!res.ok) return Alert.alert('Not saved', 'That did not save. Try again in a moment.');
       return onSaved();
     }
 
-    const res = await updateNote({ id: note.id, title: cleanTitle, body: body.trim() });
+    const res = await updateNote({ id: note.id, title: cleanTitle, body: body.trim(), tagIds: picked });
     if (!res.ok) {
       setBusy(false);
       return Alert.alert('Not saved', 'That did not save. Try again in a moment.');
@@ -498,6 +528,37 @@ function Editor({
               textAlignVertical="top"
               style={{ ...Type.body, color: c.text, minHeight: 180, paddingVertical: Spacing.sm }}
             />
+
+            {/* Tags. The list is seeded server-side from the live dimension and
+                category lists, so these are the same names a person sees on
+                their results rather than free text that drifts from them. */}
+            {tags.length ? (
+              <View style={{ marginTop: Spacing.xl }}>
+                <Text style={{ ...Type.eyebrow, color: c.textMuted, marginBottom: Spacing.sm }}>
+                  Tags
+                </Text>
+                <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.sm }}>
+                  {tags.map((t) => {
+                    const on = picked.includes(t.id);
+                    return (
+                      <Pressable
+                        key={t.id}
+                        onPress={() => setPicked((p) => (on ? p.filter((x) => x !== t.id) : [...p, t.id]))}
+                        style={{
+                          paddingVertical: Spacing.xs, paddingHorizontal: Spacing.md,
+                          borderRadius: Radius.pill, borderWidth: 1,
+                          backgroundColor: on ? (t.color || c.textStrong) : c.surface,
+                          borderColor: on ? (t.color || c.textStrong) : c.border,
+                        }}>
+                        <Text style={{ ...Type.small, fontSize: 12, fontWeight: '600', color: on ? Palette.white : c.textMuted }}>
+                          {t.name}
+                        </Text>
+                      </Pressable>
+                    );
+                  })}
+                </View>
+              </View>
+            ) : null}
 
             {canShare ? (
               <View
