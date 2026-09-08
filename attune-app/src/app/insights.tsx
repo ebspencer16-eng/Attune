@@ -17,13 +17,14 @@
  */
 
 import { useCallback, useEffect, useState } from 'react';
-import { RefreshControl, ScrollView, Text, View } from 'react-native';
+import { Pressable, RefreshControl, ScrollView, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { fetchHome, fetchResults } from '@/api/client';
 import type { ApiError, ExerciseState, HomeResponse, ResultsResponse } from '@/api/client';
 import { ScreenError, ScreenLoading } from '@/components/screen-states';
 import ResultsExperience from '@/components/results';
+import Exercise from '@/components/exercise';
 import SignIn from '@/components/sign-in';
 import {
   Colors, MaxContentWidth, Palette, Radius, Spacing, StatusColor, Type,
@@ -37,6 +38,10 @@ export default function InsightsScreen() {
   const [error, setError] = useState<ApiError | null>(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  // Which exercise is open, if any. Only ex1 is answerable in the app so far;
+  // the rest still live on the website and the row says so rather than opening
+  // a screen that cannot ask anything.
+  const [openExercise, setOpenExercise] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     const res = await fetchHome();
@@ -101,6 +106,16 @@ export default function InsightsScreen() {
     );
   }
 
+  if (openExercise) {
+    return (
+      <Exercise
+        exerciseKey={openExercise}
+        onClose={() => setOpenExercise(null)}
+        onFinished={() => { setOpenExercise(null); setLoading(true); load(); }}
+      />
+    );
+  }
+
   return (
     <Shell>
       <ScrollView
@@ -118,7 +133,7 @@ export default function InsightsScreen() {
             : `Results open once you have both finished. ${mineLeft} left for you.`}
         </Text>
 
-        <StatusTable exercises={exercises} you={you} partner={partner} />
+        <StatusTable exercises={exercises} you={you} partner={partner} onOpen={setOpenExercise} />
       </ScrollView>
     </Shell>
   );
@@ -150,8 +165,8 @@ function Shell({ children }: { children: React.ReactNode }) {
  * the browser is a product question, not something to guess at here.
  */
 function StatusTable({
-  exercises, you, partner,
-}: { exercises: ExerciseState[]; you: string; partner: string }) {
+  exercises, you, partner, onOpen,
+}: { exercises: ExerciseState[]; you: string; partner: string; onOpen: (key: string) => void }) {
   return (
     <View
       style={{
@@ -188,7 +203,10 @@ function StatusTable({
               {e.label || e.key}
             </Text>
           </View>
-          <StatusCell done={e.mine} />
+          {/* Only your own column is actionable, and only for exercises the
+              app can actually ask. A cell that opens nothing is worse than a
+              plain status. */}
+          <StatusCell done={e.mine} onPress={!e.mine && e.key === 'ex1' ? () => onOpen(e.key) : undefined} />
           <StatusCell done={e.theirs} muted />
         </View>
       ))}
@@ -213,9 +231,11 @@ function HeaderCell({ label }: { label: string }) {
  * partners but has no notion of an exercise being underway, so an "in progress"
  * state here would be invented rather than observed.
  */
-function StatusCell({ done, muted }: { done: boolean; muted?: boolean }) {
+function StatusCell({ done, muted, onPress }: { done: boolean; muted?: boolean; onPress?: () => void }) {
+  const Wrap: React.ElementType = onPress ? Pressable : View;
   return (
-    <View
+    <Wrap
+      onPress={onPress}
       style={{
         flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
         gap: Spacing.xs, paddingVertical: Spacing.md, paddingHorizontal: Spacing.sm,
@@ -236,9 +256,9 @@ function StatusCell({ done, muted }: { done: boolean; muted?: boolean }) {
           ...Type.small, fontWeight: done ? '700' : '600',
           color: done ? StatusColor.done : muted ? StatusColor.waitingText : c.accentQuiet,
         }}>
-        {done ? 'Done' : 'Pending'}
+        {done ? 'Done' : onPress ? 'Start' : 'Pending'}
       </Text>
-    </View>
+    </Wrap>
   );
 }
 

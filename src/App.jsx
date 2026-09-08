@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useLayoutEffect, useRef } from "react";
 import { axisScores, blendedDimScores, AXIS_CONFIG, QUESTION_WEIGHTS } from "../api/_type-engine.js";
-import { PERSONALITY_QUESTIONS, RESPONSIBILITY_CATEGORIES, LIFE_QUESTIONS, PARTNER_VIEW_TEXT } from "../api/_questions.js";
+import { PERSONALITY_QUESTIONS, RESPONSIBILITY_CATEGORIES, LIFE_QUESTIONS, PARTNER_VIEW_TEXT, twoPartEx1 } from "../api/_questions.js";
 import { CONFLICT_SECTIONS, CONFLICT_INTRO, FREQUENCY_OPTIONS, conflictQuestionsInOrder } from "../api/_conflict-questions.js";
 import { summarizeConflict, conflictPair } from "../api/_lib/conflict-results.js";
 import { PATTERN_COPY, PATTERN_ACTIONS, PATTERN_NOTES, BAND_COLORS, NO_ACTION_NEEDED, SNAPSHOT_PROSE, SNAPSHOT_ROWS, OPENING_CHIPS, CONFLICT_RESULTS_COPY, FREQUENCY_LABELS, interpConflict } from "../api/_conflict-results-prose.js";
@@ -3316,15 +3316,11 @@ function WithSideNav({ navItems = [], currentStep, onGo, accent = "#9B5DE5", chi
 // counterpart (Proposal B). Only used when PARTNER_VIEW_ENABLED.
 // Two-part comms exercise: Part 1 asks all questions about yourself, Part 2 (after
 // a break screen) re-asks the same set about your partner, storing under pv_<id>.
-const TWO_PART_EX1 = (() => {
-  const p1 = PERSONALITY_QUESTIONS.map(q => ({ ...q, answerKey: q.id, isPV: false }));
-  const p2 = PERSONALITY_QUESTIONS.map(q => {
-    const pv = PARTNER_VIEW_TEXT[q.id] || {};
-    return { ...q, answerKey: 'pv_' + q.id, isPV: true, partnerView: true,
-             text: pv.text || q.text, a: pv.a ?? q.a, b: pv.b ?? q.b };
-  });
-  return [...p1, { __partBreak: true, id: '__partBreak' }, ...p2];
-})();
+// Assembly moved to api/_questions.js as twoPartEx1(), so the app is handed
+// the same list in the same order with the same answer keys. Two surfaces
+// building this separately is two ways to write answers that do not score the
+// same.
+const TWO_PART_EX1 = twoPartEx1();
 function Exercise01Flow({ userName, partnerName, onComplete, skipIntro = false, fresh = false }) {
   const questions = PARTNER_VIEW_ENABLED ? TWO_PART_EX1 : PERSONALITY_QUESTIONS;
 

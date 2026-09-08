@@ -455,3 +455,82 @@ export function markNotificationRead(id?: string) {
     body: JSON.stringify(id ? { action: 'read', id } : { action: 'read', all: true }),
   });
 }
+
+
+// ── Exercises ──────────────────────────────────────────────────────────────
+
+export type QuestionItem = {
+  id: string;
+  /** Where the answer is stored. Part two stores under pv_<id>. */
+  answerKey: string;
+  dimension?: string;
+  text: string;
+  a: string;
+  b: string;
+  isPV?: boolean;
+  /** The divider between answering about yourself and about your partner. */
+  __partBreak?: boolean;
+};
+
+export type QuestionSet = {
+  exercise: { key: string; label: string; shape: 'answers' | 'record' };
+  scale: { val: number; label: string }[];
+  items: QuestionItem[];
+  /** Every key a finished set contains, so the app never counts items itself. */
+  expectedKeys: string[];
+};
+
+/**
+ * The questions for one exercise.
+ *
+ * The app holds no question text of its own. A reworded question in two places
+ * means two people answering different questions and being scored as though
+ * they answered the same one.
+ */
+export function fetchQuestions(exercise: string) {
+  return request<QuestionSet & { ok: true }>(
+    `/api/questions?exercise=${encodeURIComponent(exercise)}`);
+}
+
+/**
+ * Save answers for an exercise.
+ *
+ * The user id is read from the token rather than passed in, for the same reason
+ * deleteAccount does it: a screen that can name the account it writes to is a
+ * screen that can be made to name the wrong one. The server checks it against
+ * the token regardless.
+ *
+ * `completedAt` marks a finished set. Exercises that store a bare answers
+ * object are done when they have keys; record-shaped ones are done only when
+ * completedAt is set, which is why partial saves must leave it off.
+ */
+export async function saveExercise(input: {
+  exercise: string;
+  answers: Record<string, unknown>;
+  completed?: boolean;
+}): Promise<ApiResult<{ ok: true }>> {
+  const token = await getToken();
+  if (!token) return { ok: false, error: { kind: 'unauthorized', detail: 'no token stored' } };
+
+  let userId: string | null = null;
+  try {
+    const payload = token.split('.')[1];
+    const pad = payload.length % 4 ? '='.repeat(4 - (payload.length % 4)) : '';
+    const json = atob(payload.replace(/-/g, '+').replace(/_/g, '/') + pad);
+    userId = JSON.parse(json)?.sub ?? null;
+  } catch {
+    userId = null;
+  }
+  if (!userId) return { ok: false, error: { kind: 'unauthorized', detail: 'token has no subject' } };
+
+  return request<{ ok: true }>('/api/save-exercise', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      userId,
+      exercise: input.exercise,
+      answers: input.answers,
+      ...(input.completed ? { completedAt: new Date().toISOString() } : {}),
+    }),
+  });
+}

@@ -312,6 +312,10 @@
     {
       "source": "/(.*)",
       "destination": "/index.html"
+    },
+    {
+      "source": "/api/questions",
+      "destination": "/api/questions.js"
     }
   ],
   "headers": [

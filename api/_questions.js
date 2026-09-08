@@ -160,3 +160,51 @@ export const PARTNER_VIEW_TEXT = {
   ls3: { text: "A lull in conversation usually feels, to your partner:", a: "Comfortable. They don't need to fill it.", b: "Like a cue to check in or say something." },
   rs1: { text: "When it comes to feeling secure, your partner would rather:", a: "Have it reaffirmed. Hearing where they stand keeps them close.", b: "Take it as given. They don't need it confirmed to feel steady." },
 };
+
+
+/**
+ * Exercise 1 as it is actually asked: your own answers, then the same questions
+ * about your partner.
+ *
+ * ── WHY THIS IS HERE ──────────────────────────────────────────────────────
+ * This assembly lived in src/App.jsx, so it was reachable only from the
+ * website. The iOS app needs the identical list, in the identical order, with
+ * the identical answer keys, or the two surfaces write answers that do not
+ * score the same way. Keeping it here means the app can be handed the list
+ * rather than rebuilding it and hoping.
+ *
+ * Part 2 stores under `pv_<id>`. Those answers drive the understanding metric,
+ * which is never shown to a customer, and they are what make the two parts
+ * different questions rather than the same question twice.
+ */
+export function twoPartEx1() {
+  const part1 = PERSONALITY_QUESTIONS.map(q => ({ ...q, answerKey: q.id, isPV: false }));
+  const part2 = PERSONALITY_QUESTIONS.map(q => {
+    const pv = PARTNER_VIEW_TEXT[q.id] || {};
+    return {
+      ...q,
+      answerKey: 'pv_' + q.id,
+      isPV: true,
+      partnerView: true,
+      text: pv.text || q.text,
+      a: pv.a ?? q.a,
+      b: pv.b ?? q.b,
+    };
+  });
+  return [...part1, { __partBreak: true, id: '__partBreak' }, ...part2];
+}
+
+/**
+ * The five points, A through B.
+ *
+ * 1 is the A end and 5 is the B end. Neither end is better than the other, and
+ * the labels deliberately do not imply one. Scoring reads these values, so the
+ * numbers are part of the data contract and cannot be renumbered casually.
+ */
+export const EX1_SCALE = [
+  { val: 1, label: 'Strongly A' },
+  { val: 2, label: 'Mostly A' },
+  { val: 3, label: 'In the middle' },
+  { val: 4, label: 'Mostly B' },
+  { val: 5, label: 'Strongly B' },
+];
