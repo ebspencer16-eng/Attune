@@ -480,3 +480,43 @@ once on each surface: buy, follow the setup email, press Continue with Google,
 finish the profile, and check that the order is attached. Then the same with
 Apple, choosing Hide My Email, which is the case the whole purchase_email
 change exists for.
+
+---
+
+## Where I stopped: app and website at parity (2026-09-08)
+
+**Results.** All 29 sections render in the app, from 6 when this started. The
+section list, its order and its labels now come from `/api/results`, built by
+`availableSections()` in `api/_lib/results-sections.js`, which the website also
+calls. The app decides nothing about what results contain.
+
+**Exercises.** All five are answerable in the app. Relationship Reflection and
+Physical Intimacy were the two that were not; both now have a screen and both
+are served by `/api/questions`.
+
+**What moved out of `src/App.jsx`** so the app could reach it: the results copy
+(now `api/_content/`), the reflection question set (now
+`api/_anniversary-questions.js`), and which sections exist. Ownership moved out
+of `api/home.js` into `api/_lib/ownership.js`.
+
+**Bugs found on the way, both live:**
+- `api/notes.js` seeded the six Physical Intimacy tags for every premium buyer.
+  Premium bundles Conflict Patterns, not Intimacy. Found by the ownership gate.
+- `profiles.beta_survey_at` was written by `/api/submit-beta-survey` and created
+  by no migration, so finishing the survey on a phone never registered on a
+  laptop. Migration 056.
+
+**Gates added this session,** each verified by planting the bug it catches:
+`check-ownership-rule`, `check-results-coverage`, `check-inapp-screens`,
+`check-intimacy-privacy`, `check-oauth-providers`, plus `expectations-test`
+(23 cases on the answer mirror) and an extension to `check-profile-columns` so
+it checks writes and inline selects, not just `const cols` arrays.
+
+**Not verified, and it matters.** Synthetic taps do not register in this
+simulator, so nothing has been tapped through end to end. Every screenshot was
+taken by temporarily forcing a screen to render and then reverting. Screens
+have been confirmed to render with real data; the flow between them has not.
+That is the first thing to do by hand.
+
+**Still open:** Highlights and the post reader are stubs, Notes filtering is
+still deliberately deferred, and notifications and tab-bar badges are not built.
