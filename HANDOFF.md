@@ -306,18 +306,38 @@ The written shape matches the website's field for field, which is a different
 thing from having watched it round-trip. Answer one of each on the reviewer
 account and check the results that come out.
 
+**Conflict Patterns is done, results and exercise.** `/api/conflict-results`
+serves the four screens. The privacy rule is enforced three times: the server
+builds the partner's half from an allowlist and never by deletion, the app's
+type for that half has no pattern fields at all, and
+`scripts/check-conflict-privacy.mjs` fails the build if anything pattern-shaped
+survives. That gate was verified by planting the leak and watching it fail.
+
+The exercise is answerable in the app too, twelve questions across six kinds,
+each rendered from the kind it declares.
+
+**A save bug worth knowing about, since it is the shape of thing that recurs.**
+`saveExercise` sent every exercise the flat way. Record-shaped exercises
+(conflict, intimacy) need the whole `{ answers, completedAt }` record as
+`answers`, because it lands in one column. Sent flat it would have written
+`conflict_data` with no `completedAt`, saved fine, and never counted as
+finished. Partial saves were also missing `progress: true`, so every autosave
+set the completed flag. Both fixed; the shape now comes from `/api/questions`.
+
 **Not built yet:**
 - Highlights and What Comes Next. Both need content that does not exist
-  server-side yet, and inventing it in the app would put results prose in a
-  second place.
-- Conflict Patterns results, all four screens. The privacy rule there is the
-  part to get right: `Your Patterns` must never render the partner's, and
-  `api/_conflict-results-prose.js` already holds the copy.
-- Relationship Reflection, Physical Intimacy and Conflict Patterns as
-  answerable exercises. `/api/questions` returns a clear 501 for these rather
-  than an empty list, so the app says so instead of looking broken.
-- The results section list has no locked or greyed rows. SCREENS.md wants an
-  owned-but-unfinished section listed rather than absent; today a section only
-  appears when the payload carries it.
+  server-side, and writing it in the app would put results prose in a second
+  place.
+- Relationship Reflection and Physical Intimacy as answerable exercises, and
+  their results sections. `/api/questions` returns a clear 501 for these, so the
+  app says so rather than looking broken.
+- Notes filtering, still deliberately deferred. Now that Results exists the
+  anchors it would filter on are real, so this is unblocked whenever you want
+  it.
+
+**Exercises answerable in the app:** Communication, Expectations, Conflict
+Patterns. The list is `ANSWERABLE_IN_APP` in `attune-app/src/app/insights.tsx`,
+and `/api/questions` refuses anything not served, so the two cannot disagree
+for long.
 
 *Last updated: Session 17 — September 2026*
