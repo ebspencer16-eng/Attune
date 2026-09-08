@@ -23,6 +23,8 @@
 export const config = { runtime: 'edge' };
 
 import { DIM_META } from './_workbook-content.js';
+import { DIM_KEYS, AXIS_CONFIG } from './_type-engine.js';
+import { COUPLE_TYPES } from './_couple-types.js';
 import { personResults } from './_lib/results.js';
 import { getOrComputeResults } from './_lib/results-store.js';
 
@@ -44,6 +46,66 @@ function withLabels(results) {
       ...g,
       label: g.label || DIM_META[g.dim]?.label || g.dim,
     })),
+  };
+}
+
+/**
+ * Everything needed to render results, that the stored payload does not carry.
+ *
+ * Stored results hold scores. They deliberately do not hold the words, because
+ * the words are content and freezing them means a typo fixed today never
+ * reaches a couple who finished yesterday. So the display layer is attached on
+ * the way out, the same way labels are.
+ *
+ * `content` is additive. Nothing that already existed in the payload changes
+ * shape, so the website keeps reading exactly what it read before.
+ */
+function withContent(results) {
+  if (!results) return results;
+
+  const a = results.partners?.a;
+  const b = results.partners?.b;
+
+  // The couple type, with its name and prose. {U} and {P} are left in place:
+  // two people read the same results and each is {U} in their own view, so the
+  // substitution belongs to whoever is rendering.
+  const type = COUPLE_TYPES.find(t => t.id === results.coupleType) || null;
+
+  // Per-dimension display: what it is called, what each end of it means, and
+  // where both partners landed. Built from the live dimension list so a new
+  // dimension appears here without anyone remembering to add it.
+  const dimensions = Object.keys(DIM_KEYS).map((dim) => {
+    const meta = DIM_META[dim] || {};
+    const axis = AXIS_CONFIG[dim] || {};
+    return {
+      key: dim,
+      label: meta.label || dim,
+      left: meta.left || null,
+      right: meta.right || null,
+      color: meta.color ? `#${String(meta.color).replace(/^#/, '')}` : null,
+      axis: axis.axis || null,
+      weight: axis.weight ?? null,
+      a: a?.dimensions?.[dim]?.blended ?? a?.dimensions?.[dim]?.self ?? null,
+      b: b?.dimensions?.[dim]?.blended ?? b?.dimensions?.[dim]?.self ?? null,
+      gap: results.gaps?.[dim] ?? null,
+    };
+  });
+
+  return {
+    ...results,
+    content: {
+      coupleType: type ? {
+        id: type.id,
+        name: type.name,
+        tagline: type.tagline,
+        description: type.description,
+        nuance: type.nuance,
+        color: type.color,
+        shade: type.shade,
+      } : null,
+      dimensions,
+      names: { a: a?.name || null, b: b?.name || null },
+    },
   };
 }
 
@@ -161,7 +223,7 @@ export default async function handler(req) {
       // Scores are frozen. Names for things are not, and should follow the
       // current copy rather than whatever was current the day the couple
       // finished.
-      results: withLabels(results),
+      results: withContent(withLabels(results)),
       // frozenAt is when these results were fixed. computedUnderVersion is the
       // engine that produced them, which may be older than the current one:
       // that is the point, not a problem.
