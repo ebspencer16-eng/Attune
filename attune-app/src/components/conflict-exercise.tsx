@@ -117,13 +117,17 @@ export default function ConflictExercise({
   if (!q) return <Shell onClose={onClose}><ScreenLoading /></Shell>;
 
   const value = answers[q.id];
-  const answered = q.kind === 'openText'
-    // Written answers are optional. Requiring prose to continue turns a
-    // reflection into a toll gate and produces filler.
-    ? true
-    : q.kind === 'rank'
-      ? Array.isArray(value) && value.length === (q.options?.length ?? 0)
-      : value !== undefined && value !== '';
+  // Required means required by the server, which is what reads these back and
+  // decides whether the exercise is finished. Treating the free-text questions
+  // as optional here wrote completedAt for an answer set the server considered
+  // incomplete: the exercise read Done and the results never opened.
+  const required = set.requiredIds?.includes(q.id) ?? true;
+  const hasValue = q.kind === 'rank'
+    ? Array.isArray(value) && value.length === (q.options?.length ?? 0)
+    : typeof value === 'string'
+      ? value.trim() !== ''
+      : value !== undefined;
+  const answered = hasValue || !required;
   const isLast = idx === set.items.length - 1;
 
   const set1 = (v: Answer) => setAnswers((a) => ({ ...a, [q.id]: v }));
@@ -152,6 +156,21 @@ export default function ConflictExercise({
           onPress={async () => {
             const next = { ...answers };
             if (isLast) {
+              // Checked across the whole set, not just this screen. Back lets
+              // someone move around, so the last question being answered does
+              // not mean the rest are.
+              const outstanding = (set.requiredIds ?? []).filter((id) => {
+                const v = next[id];
+                if (v === undefined) return true;
+                if (Array.isArray(v)) return v.length === 0;
+                if (typeof v === 'string') return v.trim() === '';
+                return false;
+              });
+              if (outstanding.length) {
+                const firstIdx = set.items.findIndex((i) => i.id === outstanding[0]);
+                if (firstIdx >= 0) setIdx(firstIdx);
+                return;
+              }
               const ok = await persist(next, true);
               if (ok) setDone(true);
               return;
@@ -277,7 +296,7 @@ function Body({
     <TextInput
       value={typeof value === 'string' ? value : ''}
       onChangeText={onChange}
-      placeholder={q.placeholder || 'Optional'}
+      placeholder={q.placeholder || 'Your answer'}
       placeholderTextColor={c.textMuted}
       multiline
       textAlignVertical="top"

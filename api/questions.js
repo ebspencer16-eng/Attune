@@ -30,6 +30,7 @@ import {
 import { EXERCISES } from './_exercises.js';
 import {
   conflictQuestionsInOrder, CONFLICT_SECTIONS, FREQUENCY_OPTIONS, CONFLICT_INTRO,
+  CONFLICT_REQUIRED,
 } from './_conflict-questions.js';
 
 const HEADERS = { 'Content-Type': 'application/json', 'X-Content-Type-Options': 'nosniff' };
@@ -194,6 +195,17 @@ export default async function handler(req) {
         sections: CONFLICT_SECTIONS,
         frequencyOptions: FREQUENCY_OPTIONS,
         items: conflictQuestionsInOrder(),
+        /**
+         * What has to be answered for this to count as finished.
+         *
+         * The server decides, because it is the server that decides. The app
+         * treated the two free-text questions as optional, so someone could
+         * skip them, press Finish, and get completedAt written. The exercise
+         * then read Done while isConflictComplete returned false, so the
+         * summary was null and the results never opened. Done on one screen and
+         * permanently not ready on the next, with nothing explaining why.
+         */
+        requiredIds: CONFLICT_REQUIRED,
         saved: await savedAnswers(exercise, profile),
       });
     }

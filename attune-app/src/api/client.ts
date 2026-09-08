@@ -734,6 +734,12 @@ export type ConflictQuestion = {
 
 export type ConflictQuestionSet = {
   saved: SavedAnswers;
+  /**
+   * Question ids that must be answered for the exercise to count as finished.
+   * From CONFLICT_REQUIRED. The app must not decide this for itself: the server
+   * is what reads the answers back and calls them complete or not.
+   */
+  requiredIds: string[];
   exercise: { key: string; label: string; shape: 'answers' | 'record' };
   intro: string | null;
   sections: { id: string; label: string; questions: string[] }[];

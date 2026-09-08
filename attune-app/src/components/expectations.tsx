@@ -115,6 +115,18 @@ export default function Expectations({
 
   const cats = set?.categories ?? [];
   const cat = cats[catIdx];
+
+  // The "growing up" columns are named after the household someone described.
+  // Two Dads gives Dad / Papa, grandparents gives Grandma / Grandpa. That is
+  // the entire reason the first question is asked, and until now the answer was
+  // collected and never used again.
+  const structure = set?.childhoodStructures.find((st) => st.id === answers.childhoodStructure);
+  const childCols = structure?.cols ?? ['Adult 1', 'Adult 2', 'Both', 'N/A'];
+  const childDetailOpts = [
+    'Genuinely 50/50',
+    `Usually ${childCols[0]}, sometimes ${childCols[1]}`,
+    `Usually ${childCols[1]}, sometimes ${childCols[0]}`,
+  ];
   const life = set?.lifeQuestions ?? [];
   const lifeQ = life[lifeIdx];
 
@@ -205,6 +217,48 @@ export default function Expectations({
               <View key={key} style={{ ...card, marginBottom: Spacing.md }}>
                 <Text style={{ ...Type.cardTitle, color: c.textStrong, marginBottom: Spacing.md }}>
                   {it.label}
+                </Text>
+                {/* Growing up, then now. Both rows, as the website asks them:
+                    most of what people expect at home traces back to what they
+                    saw, and the comparison is the point of the exercise. */}
+                <Text style={{ ...Type.small, color: c.textMuted, marginBottom: Spacing.sm }}>
+                  Growing up
+                </Text>
+                <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.sm }}>
+                  {childCols.map((col) => (
+                    <Pill
+                      key={col}
+                      label={col}
+                      small
+                      selected={answers.childhood[key] === col}
+                      onPress={() => setAnswers((a) => ({
+                        ...a,
+                        childhood: { ...a.childhood, [key]: col },
+                        childhoodBothDetail: col === 'Both'
+                          ? a.childhoodBothDetail
+                          : Object.fromEntries(Object.entries(a.childhoodBothDetail).filter(([k]) => k !== key)),
+                      }))}
+                    />
+                  ))}
+                </View>
+                {answers.childhood[key] === 'Both' ? (
+                  <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.sm, marginTop: Spacing.sm }}>
+                    {childDetailOpts.map((opt) => (
+                      <Pill
+                        key={opt}
+                        label={opt}
+                        small
+                        selected={answers.childhoodBothDetail[key] === opt}
+                        onPress={() => setAnswers((a) => ({
+                          ...a, childhoodBothDetail: { ...a.childhoodBothDetail, [key]: opt },
+                        }))}
+                      />
+                    ))}
+                  </View>
+                ) : null}
+
+                <Text style={{ ...Type.small, color: c.textMuted, marginTop: Spacing.md, marginBottom: Spacing.sm }}>
+                  In your home
                 </Text>
                 <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.sm }}>
                   {set.futureCols.map((col, i) => (
