@@ -22,12 +22,26 @@ import { INTIMACY_DIMENSIONS } from '../_intimacy-questions.js';
 import { isResultsSection } from './results-sections.js';
 
 /** Colours match the results domains, so a tag looks like where it came from. */
+/** Domain display names, matching the results nav on the web. */
+export const DOMAIN_LABEL = {
+  inner: 'Internal Processing',
+  connection: 'How You Connect',
+  hard: 'When Things Get Hard',
+};
+
 const DOMAIN_COLOR = {
   inner: '#9B5DE5',
   connection: '#E8673A',
   hard: '#1B5FE8',
 };
-const DOMAIN_OF = {
+/**
+ * Which of the three Communication domains a dimension belongs to.
+ *
+ * Exported because the results screens group by it too. It was private here,
+ * so the only other way to group dimensions was to write the mapping out a
+ * second time.
+ */
+export const DOMAIN_OF = {
   energy: 'inner', expression: 'inner', reassurance: 'inner',
   love: 'connection', needs: 'connection', bids: 'connection', listening: 'connection',
   conflict: 'hard', repair: 'hard', feedback: 'hard',

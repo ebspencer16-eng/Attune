@@ -25,6 +25,7 @@ export const config = { runtime: 'edge' };
 import { DIM_META } from './_workbook-content.js';
 import { DIM_KEYS, AXIS_CONFIG } from './_type-engine.js';
 import { COUPLE_TYPES } from './_couple-types.js';
+import { DOMAIN_OF, DOMAIN_LABEL } from './_lib/tags.js';
 import { personResults } from './_lib/results.js';
 import { getOrComputeResults } from './_lib/results-store.js';
 
@@ -85,6 +86,9 @@ function withContent(results) {
       color: meta.color ? `#${String(meta.color).replace(/^#/, '')}` : null,
       axis: axis.axis || null,
       weight: axis.weight ?? null,
+      // Which Communication screen this dimension belongs on.
+      domain: DOMAIN_OF[dim] || null,
+      domainLabel: DOMAIN_LABEL[DOMAIN_OF[dim]] || null,
       a: a?.dimensions?.[dim]?.blended ?? a?.dimensions?.[dim]?.self ?? null,
       b: b?.dimensions?.[dim]?.blended ?? b?.dimensions?.[dim]?.self ?? null,
       gap: results.gaps?.[dim] ?? null,

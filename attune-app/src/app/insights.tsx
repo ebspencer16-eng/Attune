@@ -23,6 +23,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { fetchHome, fetchResults } from '@/api/client';
 import type { ApiError, ExerciseState, HomeResponse, ResultsResponse } from '@/api/client';
 import { ScreenError, ScreenLoading } from '@/components/screen-states';
+import ResultsExperience from '@/components/results';
 import SignIn from '@/components/sign-in';
 import {
   Colors, MaxContentWidth, Palette, Radius, Spacing, StatusColor, Type,
@@ -83,6 +84,23 @@ export default function InsightsScreen() {
   const mineLeft = exercises.filter((e) => !e.mine).length;
   const theirsLeft = exercises.filter((e) => !e.theirs).length;
 
+  // Results own their own scrolling, so they sit outside this one. A vertical
+  // ScrollView inside another vertical ScrollView does not scroll: the outer
+  // one takes the gesture and the inner one never moves.
+  if (ready) {
+    return (
+      <Shell>
+        <View style={{ paddingHorizontal: Spacing.xl, paddingTop: Spacing.lg, paddingBottom: Spacing.lg, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center' }}>
+          <Text style={{ ...Type.hero, color: c.textStrong }}>Your results</Text>
+          <Text style={{ ...Type.body, color: c.textMuted, marginTop: Spacing.sm }}>
+            Everything you both answered, side by side.
+          </Text>
+        </View>
+        <Results results={results} />
+      </Shell>
+    );
+  }
+
   return (
     <Shell>
       <ScrollView
@@ -93,20 +111,14 @@ export default function InsightsScreen() {
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); load(); }} tintColor={c.accentQuiet} />
         }>
-        <Text style={{ ...Type.hero, color: c.textStrong }}>
-          {ready ? 'Your results' : 'Your exercises'}
-        </Text>
+        <Text style={{ ...Type.hero, color: c.textStrong }}>Your exercises</Text>
         <Text style={{ ...Type.body, color: c.textMuted, marginTop: Spacing.sm, marginBottom: Spacing.xl }}>
-          {ready
-            ? 'Everything you both answered, side by side.'
-            : mineLeft === 0 && theirsLeft > 0
-              ? `You're done. Results open once ${partner} finishes.`
-              : `Results open once you have both finished. ${mineLeft} left for you.`}
+          {mineLeft === 0 && theirsLeft > 0
+            ? `You're done. Results open once ${partner} finishes.`
+            : `Results open once you have both finished. ${mineLeft} left for you.`}
         </Text>
 
-        {ready
-          ? <Results results={results} />
-          : <StatusTable exercises={exercises} you={you} partner={partner} />}
+        <StatusTable exercises={exercises} you={you} partner={partner} />
       </ScrollView>
     </Shell>
   );
@@ -260,45 +272,5 @@ function Results({ results }: { results: ResultsResponse | null }) {
       </Text>
     );
   }
-
-  const { results: couple } = results;
-
-  return (
-    <View>
-      {/* The couple type is deliberately not shown yet.
-          /api/results returns the code, 'WX', and the name a customer should
-          read, "The jumpstart", lives in src/App.jsx with its tagline and
-          description. It is web-bundle content, so the app cannot ask for it.
-          Rendering the bare code puts an internal identifier in front of a
-          couple, and hardcoding the names here would put a second copy of
-          version-pinned results copy in the app, which is the failure this
-          project keeps having. The content moves server-side first. */}
-
-      {/* The widest gaps, which is the one thing the payload can already say
-          without any of the section screens existing. Ordered by the server. */}
-      {couple.rankedGaps?.length ? (
-        <View
-          style={{
-            backgroundColor: c.surface, borderColor: c.border, borderWidth: 1,
-            borderRadius: Radius.lg, padding: Spacing.lg,
-          }}>
-          <Text style={{ ...Type.eyebrow, color: c.accentQuiet, marginBottom: Spacing.md }}>
-            Where you differ most
-          </Text>
-          {/* The server sends the label. Falling back to the key keeps an
-              older payload readable rather than blank, but the key is not
-              something a customer should ever be reading. */}
-          {couple.rankedGaps.slice(0, 3).map((g) => (
-            <Text key={g.dim} style={{ ...Type.body, color: c.text, marginBottom: Spacing.xs }}>
-              {g.label || g.dim}
-            </Text>
-          ))}
-        </View>
-      ) : null}
-
-      <Text style={{ ...Type.small, color: c.textMuted, marginTop: Spacing.xl }}>
-        The full results experience opens here next.
-      </Text>
-    </View>
-  );
+  return <ResultsExperience results={results.results} />;
 }

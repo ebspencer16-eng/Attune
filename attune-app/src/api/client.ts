@@ -42,6 +42,51 @@ export type PersonResults = {
   dimensions: Record<string, DimensionScore>;
 };
 
+/**
+ * One dimension, ready to draw.
+ *
+ * Assembled by /api/results from the live dimension list, so this arrives for
+ * every dimension that exists rather than the ones the app happens to know
+ * about. `a` and `b` are the two partners' positions on a 1 to 5 scale.
+ */
+export type ResultDimension = {
+  key: string;
+  label: string;
+  /** What each end of the scale means, e.g. Inward and Outward. */
+  left: string | null;
+  right: string | null;
+  color: string | null;
+  axis: 'withdraw' | 'open' | null;
+  weight: number | null;
+  /** Which Communication screen it belongs on. */
+  domain: 'inner' | 'connection' | 'hard' | null;
+  domainLabel: string | null;
+  a: number | null;
+  b: number | null;
+  gap: number | null;
+};
+
+/**
+ * The words. Attached by the server on read, never stored with the scores, so
+ * fixing a typo reaches couples who finished before the fix.
+ *
+ * {U} and {P} are the two partners' names and are left in place: two people
+ * read the same results and each is {U} in their own view.
+ */
+export type ResultsContent = {
+  coupleType: {
+    id: string;
+    name: string;
+    tagline: string;
+    description: string;
+    nuance: string;
+    color: string;
+    shade: string;
+  } | null;
+  dimensions: ResultDimension[];
+  names: { a: string | null; b: string | null };
+};
+
 export type CoupleResults = {
   version: number;
   computedAt: string;
@@ -53,6 +98,8 @@ export type CoupleResults = {
   rankedGaps: { dim: string; gap: number; label?: string }[];
   /** Present only when both partners answered Part 2. Never shown to customers. */
   understanding: unknown | null;
+  /** Optional so an older cached payload still typechecks. */
+  content?: ResultsContent;
 };
 
 export type ResultsResponse =
