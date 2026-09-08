@@ -37,6 +37,40 @@ const teamId = flag('team');
 const keyId = flag('key');
 const serviceId = flag('service');
 
+// Refuse anything that looks like the key itself rather than a path or an id.
+//
+// This happened: the contents of the .p8 were pasted in place of both the
+// filename and the key id, which puts an Apple private key into a shell
+// history and anywhere that command gets copied. The script cannot un-paste
+// it, but it can refuse loudly and say what the two values actually are.
+const looksLikeKeyMaterial = (v) =>
+  !!v && (/BEGIN [A-Z ]*PRIVATE KEY/.test(v) || (v.length > 40 && /^MIG[A-Za-z0-9+/=]+$/.test(v.replace(/\s+/g, ''))));
+
+for (const [label, value] of [['the .p8 path', p8Path], ['--key', keyId], ['--team', teamId], ['--service', serviceId]]) {
+  if (looksLikeKeyMaterial(value)) {
+    console.error(`\nStop. ${label} was given the contents of the private key itself.\n`);
+    console.error('That key is now in your shell history and in anything you pasted');
+    console.error('the command into. Revoke it at developer.apple.com under Keys and');
+    console.error('create a new one. Nothing breaks: Sign in with Apple is not live yet.\n');
+    console.error('Nothing here ever wants the contents of the file:');
+    console.error('  the .p8 path  where the file is, e.g. ~/Downloads/AuthKey_ABCD123456.p8');
+    console.error('  --key         the 10-character Key ID, the ABCD123456 in that filename');
+    console.error('');
+    process.exit(1);
+  }
+}
+
+if (keyId && !/^[A-Z0-9]{10}$/.test(keyId)) {
+  console.error(`\n--key should be the 10-character Key ID, like ABCD123456. Got ${keyId.length} characters.`);
+  console.error('It is the part of the filename between AuthKey_ and .p8.\n');
+  process.exit(1);
+}
+
+if (teamId && !/^[A-Z0-9]{10}$/.test(teamId)) {
+  console.error(`\n--team should be your 10-character Team ID, like HX5FX68K6L. Got ${teamId.length} characters.\n`);
+  process.exit(1);
+}
+
 if (!p8Path || !teamId || !keyId || !serviceId) {
   console.error('Missing something. The full command looks like:\n');
   console.error('  node scripts/apple-secret.mjs ~/Downloads/AuthKey_ABCD123456.p8 \\');
