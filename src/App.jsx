@@ -52,6 +52,11 @@ import { INTIMACY_RESULTS_PROSE } from "../api/_intimacy-results-prose.js";
 import { PKG_CAPS, ORDER_SELECT, computeEntitlements, mergeEntitlementsGrantOnly, sameEntitlements } from "../api/_lib/entitlements.js";
 import { OAUTH_PROVIDERS } from "../api/_lib/auth-providers.js";
 import { availableSections as availableResultsSections } from "../api/_lib/results-sections.js";
+// The reflection question set, moved out of this file so the app can reach
+// it too. See api/_anniversary-questions.js.
+import {
+  ANNIVERSARY_QUESTIONS, ANNIVERSARY_VERSION, ADMIRED_NOUN, admiredNoun, NON_ANSWER,
+} from "../api/_anniversary-questions.js";
 import { COUPLE_TYPES as NEW_COUPLE_TYPES } from "../api/_couple-types.js";
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -4653,50 +4658,10 @@ function ExpectationsResults({ myAnswers, partnerAnswers, userName, partnerName,
 
   return null;
 }
-const ANNIVERSARY_QUESTIONS = [
-  // Warm-up: light, accessible
-  { id: "a0", category: "Getting Started", type: "scale", text: "Right now, how would you describe the overall feel of our relationship?", scaleLabels: ["Needs real work", "Going through a rough patch", "Solid and steady", "Really good", "Better than ever"], scaleColors: ["#ef4444","#f97316","#eab308","#22c55e","#10b981"] },
-  { id: "a_memory", category: "Getting Started", type: "text", text: "Something small that happened recently that made me smile about us:", placeholder: "e.g. A quiet moment, something you said, something we laughed about..." },
-  // Milestones
-  { id: "a1", category: "Milestones", type: "text", text: "The moment I felt most proud of us as a couple:", placeholder: "e.g. When we navigated something hard together, or when we supported each other through..." },
-  { id: "a2", category: "Milestones", type: "text", text: "A challenge we faced together that made our relationship stronger:", placeholder: "e.g. Moving cities, a hard year, a disagreement we worked through..." },
-  // How we're doing — connection, communication, admiration, fun
-  { id: "a_sat_conn", category: "How We're Doing", type: "scale", text: "How connected do I feel to you day-to-day right now?", scaleLabels: ["Not very connected", "A bit distant", "Somewhat connected", "Quite connected", "Very connected"], scaleColors: ["#ef4444","#f97316","#eab308","#22c55e","#10b981"] },
-  { id: "a_sat_comm", category: "How We're Doing", type: "scale", text: "How well do I feel we communicate when something is bothering one of us?", scaleLabels: ["We avoid it", "It's hard", "We manage", "Pretty well", "Really well"], scaleColors: ["#ef4444","#f97316","#eab308","#22c55e","#10b981"] },
-  { id: "a8", category: "How We're Doing", type: "pick", text: "The quality I most admire in my partner right now:", options: ["Patient","Funny","Supportive","Ambitious","Kind","Curious","Steady","Adventurous","Honest","Thoughtful"] },
-  { id: "a_sat_fun", category: "How We're Doing", type: "scale", text: "How much do we prioritize fun and lightness together?", scaleLabels: ["Not enough", "Less than I'd like", "About right", "Quite a bit", "A lot"], scaleColors: ["#ef4444","#f97316","#eab308","#22c55e","#10b981"] },
-  // Looking forward — priorities first, then 6mo, then honest reflection, then 5yr
-  { id: "a_priority", category: "Looking Forward", type: "rank", text: "Rank these from most to least important to invest in together this year:", options: ["Quality time","Communication","Financial alignment","Physical intimacy","Shared adventures","Long-term planning"] },
-  { id: "a6", category: "Looking Forward", type: "text", text: "One thing I want to work on, in the next 6 months, in how I show up for you:", placeholder: "e.g. Being more present, saying what I need directly, making more time for us..." },
-  { id: "a7", category: "Looking Forward", type: "text", text: "Something I wish we'd approached differently:", placeholder: "e.g. A disagreement we got stuck on, a decision we made without fully talking it through..." },
-  { id: "a5", category: "Looking Forward", type: "text", text: "Where I see us in 5 years, what matters most to me about that picture:", placeholder: "e.g. Financially stable and adventurous, close to family, in a home we love..." },
-  // What matters — gratitude and intention, ends the exercise on a high note
-  { id: "a3", category: "What Matters", type: "text", text: "The part of our relationship I'm most grateful for:", placeholder: "e.g. How you make me feel safe, the way we laugh together, the life we've built..." },
-  { id: "a4", category: "What Matters", type: "text", text: "Something I want to do more of together in the next year:", placeholder: "e.g. Travel, slow weekends, have the big conversations, invest in our friendship..." },
-];
 
-// Bump this whenever the reflection question set changes (add, remove, or
-// reword). Stored on each completion as profiles.ex3_version, so responses can
-// be segmented later by which version of the questions they answered.
-const ANNIVERSARY_VERSION = 1;
 
-// ── ADMIRED QUALITY: adjective (as answered) → noun (as displayed) ───────────
-// The exercise asks for an adjective. Results read better as a quality:
-// "Ellie is admired for steadiness", not "for steady". The question itself is
-// unchanged; this only affects how the answer is referenced.
-const ADMIRED_NOUN = {
-  Patient: "Patience", Funny: "Humor", Supportive: "Support", Ambitious: "Ambition",
-  Kind: "Kindness", Curious: "Curiosity", Steady: "Steadiness", Adventurous: "Adventurousness",
-  Honest: "Honesty", Thoughtful: "Thoughtfulness",
-};
-const admiredNoun = v => (v ? (ADMIRED_NOUN[v] || v) : v);
 const admiredNounLower = v => { const n = admiredNoun(v); return n ? n.toLowerCase() : n; };
 
-// Free-text answers are frequently non-answers: "nothing", "n/a", "nothing
-// comes to mind". Treating those as content produced insights that asserted a
-// problem the person never described. Anything that reads as a non-answer, or
-// is too short to carry meaning, is treated as "not provided".
-const NON_ANSWER = /^(n\/?a|none|nothing|no|nope|idk|i don'?t know|not sure|nothing really|nothing comes to mind|nothing much|can'?t think of (one|any|anything)|nothing i can think of|-+|\.+)$/i;
 
 function isSubstantive(v) {
   if (typeof v !== "string") return false;

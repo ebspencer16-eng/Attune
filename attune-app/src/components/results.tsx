@@ -24,7 +24,8 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { fetchConflictResults } from '@/api/client';
 import type {
   ConflictResults, CoupleResults, ExpectationRow, ExpectationsSummary,
-  IntimacyDimension, IntimacyResults, ResultDimension, ResultsSection,
+  IntimacyDimension, IntimacyResults, ReflectionResults,
+  ResultDimension, ResultsSection,
 } from '@/api/client';
 import ConflictResultsView from '@/components/conflict-results';
 import { Eyebrow } from '@/components/screen-states';
@@ -64,13 +65,15 @@ function interp(text: string | null | undefined, you: string, them: string): str
 }
 
 export default function Results({
-  results, owned = [], sections: fromServer, expectations = null, intimacy = null,
+  results, owned = [], sections: fromServer,
+  expectations = null, intimacy = null, reflection = null,
 }: {
   results: CoupleResults;
   owned?: string[];
   sections?: ResultsSection[];
   expectations?: ExpectationsSummary | null;
   intimacy?: IntimacyResults | null;
+  reflection?: ReflectionResults | null;
 }) {
   // The spine comes from the server, in the server's order, with the server's
   // names. It used to be six entries written here against the website's
@@ -204,6 +207,7 @@ export default function Results({
           section={section}
           expectations={expectations}
           intimacy={intimacy}
+          reflection={reflection}
           results={results}
           conflict={conflict}
           conflictWaiting={conflictWaiting}
@@ -269,11 +273,12 @@ export default function Results({
  */
 function SectionBody({
   section, results, conflict, conflictWaiting, byDomain, you, them, viewer, wideGap,
-  expectations, intimacy,
+  expectations, intimacy, reflection,
 }: {
   section: string;
   expectations: ExpectationsSummary | null;
   intimacy: IntimacyResults | null;
+  reflection: ReflectionResults | null;
   results: CoupleResults;
   conflict: ConflictResults | null;
   conflictWaiting: boolean;
@@ -305,6 +310,11 @@ function SectionBody({
     const bucket = expectations?.categories.find((cat) => cat.section === section) ?? null;
     return <ExpectationsConversation bucket={bucket} you={you} them={them} />;
   }
+
+  if (section === 'reflection-overview') return <ReflectionOverview data={reflection} />;
+  if (section === 'reflection-ratings') return <ReflectionRatings data={reflection} />;
+  if (section === 'reflection-story') return <ReflectionStory data={reflection} />;
+  if (section === 'reflection-plan') return <ReflectionPlan data={reflection} />;
 
   if (section === 'intimacy-overview') return <IntimacyOverview data={intimacy} />;
   if (section === 'intimacy-plan') return <IntimacyConversations data={intimacy} />;
@@ -660,6 +670,266 @@ function IntimacyConversations({ data }: { data: IntimacyResults | null }) {
         </View>
       </View>
     </ScrollView>
+  );
+}
+
+function ReflectionWaiting() {
+  return (
+    <Waiting
+      title="Relationship Reflection"
+      body="This opens when you have both finished writing."
+    />
+  );
+}
+
+function ReflectionOverview({ data }: { data: ReflectionResults | null }) {
+  if (!data) return <ReflectionWaiting />;
+  return (
+    <ScrollView contentContainerStyle={{ paddingBottom: Spacing.xxl }}>
+      <View style={{ paddingHorizontal: Spacing.xl, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center' }}>
+        <Eyebrow>Relationship Reflection</Eyebrow>
+        <Text style={{ ...Type.hero, color: c.textStrong }}>
+          You both wrote about the same year.
+        </Text>
+        <Text style={{ ...Type.body, color: c.textMuted, marginTop: Spacing.md }}>
+          {data.writtenCount > 0
+            ? `${data.writtenCount} questions you both answered in your own words, and ${data.ratings.length} you both rated.`
+            : `${data.ratings.length} questions you both rated.`}
+        </Text>
+
+        {data.admired.you || data.admired.them ? (
+          <View
+            style={{
+              backgroundColor: c.surface, borderColor: c.border, borderWidth: 1,
+              borderRadius: Radius.lg, padding: Spacing.lg, marginTop: Spacing.xl,
+            }}>
+            <Eyebrow>What you each named</Eyebrow>
+            {data.admired.you ? (
+              <Text style={{ ...Type.body, color: c.text }}>
+                {data.names.you} admires {data.admired.them ? '' : ''}
+                {data.admired.you.toLowerCase()} in {data.names.them}.
+              </Text>
+            ) : null}
+            {data.admired.them ? (
+              <Text style={{ ...Type.body, color: c.text, marginTop: Spacing.sm }}>
+                {data.names.them} admires {data.admired.them.toLowerCase()} in {data.names.you}.
+              </Text>
+            ) : null}
+          </View>
+        ) : null}
+
+        {data.widest ? (
+          <View style={{ marginTop: Spacing.xl }}>
+            <Eyebrow>Furthest apart</Eyebrow>
+            <Text style={{ ...Type.title, color: c.textStrong }}>{data.widest.question}</Text>
+            <Text style={{ ...Type.body, color: c.textMuted, marginTop: Spacing.sm }}>
+              {data.names.you} said {data.widest.you.label.toLowerCase()}.{' '}
+              {data.names.them} said {data.widest.them.label.toLowerCase()}.
+            </Text>
+          </View>
+        ) : null}
+      </View>
+    </ScrollView>
+  );
+}
+
+/**
+ * How you each rated, on the same line.
+ *
+ * One track per question with both marks on it, the way the communication
+ * scales already work, so a reader who has come this far already knows how to
+ * read it. No colour runs from bad to good: two steps apart on how connected
+ * someone feels is the most useful thing on the page, not a failure.
+ */
+function ReflectionRatings({ data }: { data: ReflectionResults | null }) {
+  if (!data) return <ReflectionWaiting />;
+  if (!data.ratings.length) {
+    return <Waiting title="How You Each Rated" body="Neither of you answered the rating questions." />;
+  }
+  return (
+    <ScrollView contentContainerStyle={{ paddingBottom: Spacing.xxl }}>
+      <View style={{ paddingHorizontal: Spacing.xl, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center' }}>
+        <Eyebrow>Relationship Reflection</Eyebrow>
+        <Text style={{ ...Type.title, color: c.textStrong }}>How You Each Rated</Text>
+
+        <View style={{ marginTop: Spacing.md }}>
+          <Legend you={data.names.you} them={data.names.them} />
+        </View>
+
+        {data.ratings.map((r) => (
+          <View
+            key={r.key}
+            style={{
+              backgroundColor: c.surface, borderColor: c.border, borderWidth: 1,
+              borderRadius: Radius.lg, padding: Spacing.lg, marginBottom: Spacing.md,
+            }}>
+            <Text style={{ ...Type.cardTitle, color: c.textStrong }}>{r.question}</Text>
+
+            {/* The same track and markers the dimension scales use, so a
+                reader who has come this far already knows how to read it. */}
+            <View style={{ height: 28, justifyContent: 'center', marginTop: Spacing.lg }}>
+              <View style={{ height: 3, borderRadius: Radius.pill, backgroundColor: c.border }} />
+              <Marker left={r.you.pct} color={YOU_COLOR} label={initial(data.names.you)} />
+              <Marker left={r.them.pct} color={THEM_COLOR} label={initial(data.names.them)} />
+            </View>
+
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: Spacing.xs }}>
+              <Text style={{ ...Type.small, color: c.textMuted, flex: 1 }}>{r.low}</Text>
+              <Text style={{ ...Type.small, color: c.textMuted, flex: 1, textAlign: 'right' }}>{r.high}</Text>
+            </View>
+
+            <Text style={{ ...Type.small, color: c.textMuted, marginTop: Spacing.md }}>
+              {r.gapSteps === 0
+                ? 'You rated this the same.'
+                : `${data.names.you}: ${r.you.label}. ${data.names.them}: ${r.them.label}.`}
+            </Text>
+          </View>
+        ))}
+      </View>
+    </ScrollView>
+  );
+}
+
+
+/**
+ * Side by side: what you each wrote.
+ *
+ * Stacked rather than in two columns. These are paragraphs, and two columns of
+ * paragraphs on a phone is four words a line. Whose words they are is said
+ * above each one.
+ */
+function ReflectionStory({ data }: { data: ReflectionResults | null }) {
+  if (!data) return <ReflectionWaiting />;
+  if (!data.written.length) {
+    return (
+      <Waiting
+        title="Side by Side"
+        body="There is nothing here yet. These appear where you both wrote an answer to the same question."
+      />
+    );
+  }
+  return (
+    <ScrollView contentContainerStyle={{ paddingBottom: Spacing.xxl }}>
+      <View style={{ paddingHorizontal: Spacing.xl, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center' }}>
+        <Eyebrow>Relationship Reflection</Eyebrow>
+        <Text style={{ ...Type.title, color: c.textStrong }}>Side by Side</Text>
+        <Text style={{ ...Type.body, color: c.textMuted, marginTop: Spacing.sm, marginBottom: Spacing.lg }}>
+          In your own words, unedited.
+        </Text>
+
+        {data.written.map((w) => (
+          <View key={w.key} style={{ marginBottom: Spacing.xl }}>
+            <Text style={{ ...Type.cardTitle, color: c.textStrong, marginBottom: Spacing.md }}>
+              {w.question}
+            </Text>
+
+            <View
+              style={{
+                backgroundColor: c.surface, borderColor: c.border, borderWidth: 1,
+                borderRadius: Radius.lg, padding: Spacing.lg, marginBottom: Spacing.sm,
+              }}>
+              <Eyebrow>{data.names.you}</Eyebrow>
+              <Text style={{ ...Type.body, color: c.text }}>{w.you}</Text>
+            </View>
+
+            <View
+              style={{
+                backgroundColor: c.surface, borderColor: c.border, borderWidth: 1,
+                borderRadius: Radius.lg, padding: Spacing.lg,
+              }}>
+              <Eyebrow color={c.textMuted}>{data.names.them}</Eyebrow>
+              <Text style={{ ...Type.body, color: c.text }}>{w.them}</Text>
+            </View>
+          </View>
+        ))}
+      </View>
+    </ScrollView>
+  );
+}
+
+/**
+ * The action plan: what each of you said you would work on, and what you each
+ * put first.
+ *
+ * Their own words rather than advice generated about them. Two people who have
+ * each written down one thing they want to change have already done the
+ * difficult part.
+ */
+function ReflectionPlan({ data }: { data: ReflectionResults | null }) {
+  if (!data) return <ReflectionWaiting />;
+  const commitment = data.written.find((w) => w.key === 'a6');
+  const together = data.written.find((w) => w.key === 'a4');
+  const bothRanked = data.priorities.you && data.priorities.them;
+
+  return (
+    <ScrollView contentContainerStyle={{ paddingBottom: Spacing.xxl }}>
+      <View style={{ paddingHorizontal: Spacing.xl, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center' }}>
+        <Eyebrow>Relationship Reflection</Eyebrow>
+        <Text style={{ ...Type.title, color: c.textStrong }}>Action Plan</Text>
+
+        {commitment ? (
+          <View style={{ marginTop: Spacing.xl }}>
+            <Eyebrow>What you each said you would work on</Eyebrow>
+            <View
+              style={{
+                backgroundColor: c.surface, borderColor: c.border, borderWidth: 1,
+                borderRadius: Radius.lg, padding: Spacing.lg, marginBottom: Spacing.sm,
+              }}>
+              <Eyebrow>{data.names.you}</Eyebrow>
+              <Text style={{ ...Type.body, color: c.text }}>{commitment.you}</Text>
+            </View>
+            <View
+              style={{
+                backgroundColor: c.surface, borderColor: c.border, borderWidth: 1,
+                borderRadius: Radius.lg, padding: Spacing.lg,
+              }}>
+              <Eyebrow color={c.textMuted}>{data.names.them}</Eyebrow>
+              <Text style={{ ...Type.body, color: c.text }}>{commitment.them}</Text>
+            </View>
+          </View>
+        ) : null}
+
+        {bothRanked ? (
+          <View style={{ marginTop: Spacing.xl }}>
+            <Eyebrow>What you each put first this year</Eyebrow>
+            <View style={{ flexDirection: 'row', gap: Spacing.lg }}>
+              <PriorityList name={data.names.you} items={data.priorities.you!} />
+              <PriorityList name={data.names.them} items={data.priorities.them!} />
+            </View>
+          </View>
+        ) : null}
+
+        {together ? (
+          <View style={{ marginTop: Spacing.xl }}>
+            <Eyebrow>More of this, next year</Eyebrow>
+            <Text style={{ ...Type.body, color: c.text }}>{data.names.you}: {together.you}</Text>
+            <Text style={{ ...Type.body, color: c.text, marginTop: Spacing.sm }}>
+              {data.names.them}: {together.them}
+            </Text>
+          </View>
+        ) : null}
+
+        {!commitment && !bothRanked && !together ? (
+          <Text style={{ ...Type.body, color: c.textMuted, marginTop: Spacing.lg }}>
+            This fills in from the last few questions of the exercise, which you
+            have not both answered yet.
+          </Text>
+        ) : null}
+      </View>
+    </ScrollView>
+  );
+}
+
+function PriorityList({ name, items }: { name: string; items: string[] }) {
+  return (
+    <View style={{ flex: 1 }}>
+      <Eyebrow color={c.textMuted}>{name}</Eyebrow>
+      {items.slice(0, 3).map((item, i) => (
+        <Text key={item} style={{ ...Type.small, color: c.text, marginTop: Spacing.xs }}>
+          {i + 1}. {item}
+        </Text>
+      ))}
+    </View>
   );
 }
 

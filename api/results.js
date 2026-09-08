@@ -25,6 +25,7 @@ export const config = { runtime: 'edge' };
 import { sectionsWithLabels } from './_lib/results-sections.js';
 import { expectationsSummary } from './_lib/expectations.js';
 import { intimacyResults } from './_lib/intimacy-results.js';
+import { reflectionResults } from './_lib/reflection-results.js';
 import { EXERCISES, EXERCISE_COLUMNS, isExerciseDone } from './_exercises.js';
 import { capabilitiesFor, OWNERSHIP_COLUMNS } from './_lib/ownership.js';
 import { DIM_META } from './_workbook-content.js';
@@ -266,9 +267,19 @@ export default async function handler(req) {
     // person asking: an invited partner owns exactly what was bought for them.
     const ownership = capabilitiesFor(
       capabilitiesFor(me).owned.length ? me : (partner || me));
+    // An unknown key is a mistake, not a "no".
+    //
+    // This returned false for anything it did not recognise, and 'reflection'
+    // is the customer-facing name while 'ex3' is the registry key. Asking for
+    // the wrong one made a whole section permanently empty with nothing
+    // anywhere reporting why. Loud is the only safe behaviour here.
     const bothDone = (key) => {
       const ex = EXERCISES.find((e) => e.key === key);
-      return !!ex && isExerciseDone(ex, me[ex.column]) && isExerciseDone(ex, partner?.[ex.column]);
+      if (!ex) {
+        console.error(`[results] no exercise named "${key}". Keys are: ${EXERCISES.map((e) => e.key).join(', ')}`);
+        return false;
+      }
+      return isExerciseDone(ex, me[ex.column]) && isExerciseDone(ex, partner?.[ex.column]);
     };
 
     return json({
@@ -338,6 +349,24 @@ export default async function handler(req) {
        */
       intimacy: (ownership.ownsIntimacy && bothDone('intimacy'))
         ? intimacyResults({ mine: me.intimacy_data, theirs: partner?.intimacy_data })
+        : null,
+      /**
+       * Relationship Reflection, when they own it and both have finished.
+       *
+       * Listed on ownership alone, matching the website, but it can only say
+       * anything once both have written: the whole section is one person's
+       * words next to the other's.
+       */
+      // 'ex3' is the registry key; 'reflection' is only the customer-facing
+      // name and matches no exercise, so asking for it would have made this
+      // permanently null with nothing reporting why.
+      reflection: (ownership.ownsReflection && bothDone('ex3'))
+        ? reflectionResults({
+            mine: me.ex3_answers,
+            theirs: partner?.ex3_answers,
+            youName: me.name || 'You',
+            themName: partner?.name || 'Your partner',
+          })
         : null,
       sections: sectionsWithLabels({
         hasReflection: ownership.ownsReflection,

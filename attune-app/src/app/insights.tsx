@@ -325,6 +325,7 @@ function Results({ results, owned }: { results: ResultsResponse | null; owned: s
       sections={results.sections}
       expectations={results.expectations}
       intimacy={results.intimacy}
+      reflection={results.reflection}
     />
   );
 }

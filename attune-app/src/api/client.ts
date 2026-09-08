@@ -171,6 +171,34 @@ export type IntimacyResults = {
   conversations: IntimacyDimension[];
 };
 
+/**
+ * Relationship Reflection.
+ *
+ * Mostly free text, passed through as written. The product of this section is
+ * reading what the other person wrote, so nothing here is summarised or
+ * scored, and the app renders the words as they were typed.
+ */
+export type ReflectionRating = {
+  key: string;
+  question: string;
+  low: string;
+  high: string;
+  you: { index: number; label: string; pct: number };
+  them: { index: number; label: string; pct: number };
+  /** How many steps apart on a five-point scale. Not a grade. */
+  gapSteps: number;
+};
+
+export type ReflectionResults = {
+  names: { you: string; them: string };
+  ratings: ReflectionRating[];
+  admired: { you: string | null; them: string | null };
+  priorities: { you: string[] | null; them: string[] | null };
+  written: { key: string; question: string; category: string; you: string; them: string }[];
+  widest: ReflectionRating | null;
+  writtenCount: number;
+};
+
 export type ExpectationsSummary = {
   answered: number;
   aligned: number;
@@ -208,6 +236,8 @@ export type ResultsResponse =
       expectations?: ExpectationsSummary | null;
       /** Null unless they own Physical Intimacy and both have finished it. */
       intimacy?: IntimacyResults | null;
+      /** Null unless they own Reflection and both have finished it. */
+      reflection?: ReflectionResults | null;
     }
   | { ready: false; reason: string; self: PersonResults | null; partnerName?: string | null };
 
