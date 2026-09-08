@@ -36,6 +36,10 @@ export default function Exercise({
   const [set, setSet] = useState<QuestionSet | null>(null);
   const [error, setError] = useState<ApiError | null>(null);
   const [loading, setLoading] = useState(true);
+  // Bumped by the retry button. Without it the button set loading and nothing
+  // refetched, because the effect's dependencies had not changed, so Try again
+  // led to a spinner that never resolved.
+  const [attempt, setAttempt] = useState(0);
 
   const [idx, setIdx] = useState(0);
   const [answers, setAnswers] = useState<Record<string, number>>({});
@@ -68,7 +72,15 @@ export default function Exercise({
       setLoading(false);
     })();
     return () => { cancelled = true; };
-  }, [exerciseKey, set]);
+    // Only the exercise and the retry counter. `set` must never be in here: the
+    // effect calls setSet, so depending on it re-runs the effect on every
+    // response, and every response is a new object, which is an endless fetch
+    // loop against /api/questions.
+    //
+    // It was in here, from an over-eager find and replace, and the fixture used
+    // to check this screen hid it: require returns the same object every time,
+    // so React bailed out and the loop never started.
+  }, [exerciseKey, attempt]);
 
   const items = set?.items ?? [];
   const item: QuestionItem | undefined = items[idx];
@@ -90,7 +102,7 @@ export default function Exercise({
   if (error) {
     return (
       <Shell onClose={onClose}>
-        <ScreenError error={error} onRetry={() => { setLoading(true); setError(null); }} />
+        <ScreenError error={error} onRetry={() => { setError(null); setLoading(true); setAttempt((n) => n + 1); }} />
       </Shell>
     );
   }

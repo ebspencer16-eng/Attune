@@ -37,6 +37,10 @@ export default function ConflictExercise({
   const [set, setSet] = useState<ConflictQuestionSet | null>(null);
   const [error, setError] = useState<ApiError | null>(null);
   const [loading, setLoading] = useState(true);
+  // Bumped by the retry button. Without it the button set loading and nothing
+  // refetched, because the effect's dependencies had not changed, so Try again
+  // led to a spinner that never resolved.
+  const [attempt, setAttempt] = useState(0);
   const [intro, setIntro] = useState(true);
   const [idx, setIdx] = useState(0);
   const [answers, setAnswers] = useState<Record<string, Answer>>({});
@@ -62,7 +66,7 @@ export default function ConflictExercise({
       setLoading(false);
     })();
     return () => { cancelled = true; };
-  }, []);
+  }, [attempt]);
 
   const persist = useCallback(async (next: Record<string, Answer>, completed: boolean) => {
     setSaving(true);
@@ -74,7 +78,7 @@ export default function ConflictExercise({
   }, [set]);
 
   if (loading) return <Shell onClose={onClose}><ScreenLoading label="Getting your questions" /></Shell>;
-  if (error) return <Shell onClose={onClose}><ScreenError error={error} onRetry={() => setLoading(true)} /></Shell>;
+  if (error) return <Shell onClose={onClose}><ScreenError error={error} onRetry={() => { setError(null); setLoading(true); setAttempt((n) => n + 1); }} /></Shell>;
   if (!set) return <Shell onClose={onClose}><ScreenLoading /></Shell>;
 
   if (done) {

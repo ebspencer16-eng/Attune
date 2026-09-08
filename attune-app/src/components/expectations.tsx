@@ -54,6 +54,10 @@ export default function Expectations({
   const [set, setSet] = useState<ExpectationsSet | null>(null);
   const [error, setError] = useState<ApiError | null>(null);
   const [loading, setLoading] = useState(true);
+  // Bumped by the retry button. Without it the button set loading and nothing
+  // refetched, because the effect's dependencies had not changed, so Try again
+  // led to a spinner that never resolved.
+  const [attempt, setAttempt] = useState(0);
 
   const [answers, setAnswers] = useState<Answers>(EMPTY);
   const [stage, setStage] = useState<'structure' | 'responsibilities' | 'life' | 'done'>('structure');
@@ -100,7 +104,7 @@ export default function Expectations({
       setLoading(false);
     })();
     return () => { cancelled = true; };
-  }, []);
+  }, [attempt]);
 
   const persist = useCallback(async (next: Answers, completed: boolean) => {
     setSaving(true);
@@ -128,7 +132,7 @@ export default function Expectations({
   }, [cat, answers]);
 
   if (loading) return <Shell onClose={onClose}><ScreenLoading label="Getting your questions" /></Shell>;
-  if (error) return <Shell onClose={onClose}><ScreenError error={error} onRetry={() => setLoading(true)} /></Shell>;
+  if (error) return <Shell onClose={onClose}><ScreenError error={error} onRetry={() => { setError(null); setLoading(true); setAttempt((n) => n + 1); }} /></Shell>;
   if (!set) return <Shell onClose={onClose}><ScreenLoading /></Shell>;
 
   if (stage === 'done') {
