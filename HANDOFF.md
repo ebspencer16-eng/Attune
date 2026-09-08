@@ -390,4 +390,33 @@ as 99 and produces a gap of 104. Nothing in either client can send that today
 and there is no evidence of it happening, but results are frozen once computed,
 so a bad write would be permanent.
 
+### Round three of checks
+
+**Conflict could be finished in a state the server calls unfinished.**
+CONFLICT_REQUIRED is every question including the two free-text ones, and the
+app treated those as optional. Someone could skip them, press Finish, get
+completedAt written, see Done in the status table, and have results that never
+opened. /api/questions sends requiredIds now and the app requires exactly those.
+
+**Expectations asked which household you grew up in and never used it.** The
+answer set the column labels for a row the app did not have, and childhood was
+written as an empty object, so the website rendered its Expectations results
+three columns wide instead of five. Both rows are there now.
+
+**Tagging was half-built.** The server has had tags, note_tags and a tagIds
+field on create since migration 044 and nothing used them. The app could not
+tag anything, /api/notes returned notes with no tags so even a tagged note had
+invisible tags, and update could not change tags at all. All three fixed: there
+is a tag picker in the editor and tags show on cards.
+
+**Shared notes are checked by `check-shared-notes.mjs`**, which lifts the couple
+key function out of api/notes.js rather than copying it. A shared note reaches
+the partner, a private one does not, your own shared note stays out of your own
+shared-with-me list, unsharing clears the key, and nobody outside the couple can
+match. partner-sync writes partner_profile_id on both rows, which matters: a
+one-way link would let one partner share and the other never see it.
+
+**Still not built in the app:** Notes filtering (deliberately, and now
+unblocked), a post reader, notifications, and tab-bar badges.
+
 *Last updated: Session 17 — September 2026*
