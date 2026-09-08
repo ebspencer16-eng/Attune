@@ -448,3 +448,35 @@ and refuses a body whose userId does not match it.
 **Eleven gates now**, each verified by planting the bug it catches.
 
 *Last updated: Session 17 — September 2026*
+
+---
+
+## Where I stopped: social sign-in (2026-09-08)
+
+**Done and pushed.** Google and Apple sign-in is built on both surfaces, plus
+the order-claim hardening underneath it.
+
+**Blocked on you, and nothing works until it is done:** the console setup in
+`SOCIAL_SIGNIN_SETUP.md`. Four steps: run migrations 055 and 056, register a
+Google OAuth client, register an Apple Services ID and key, and add the
+redirect URLs to Supabase. All four are accounts only Ellie can sign in to.
+
+Until then the buttons appear and return an error. If that is not acceptable
+to have live, they can be hidden behind a flag in an afternoon.
+
+**What was found on the way.** `profiles.beta_survey_at` has been written by
+/api/submit-beta-survey since it was built and no migration ever created it.
+The write is caught and logged, so nothing errored; finishing the beta survey
+on a phone simply never registered on a laptop. Migration 056 adds it. Found
+because the profiles-column gate now checks writes, not only selects.
+
+**Not verified, and cannot be from here.** The provider round trip itself. It
+needs the console credentials above. What is verified: both buttons render on
+the app's sign-in screen (screenshot taken in the simulator), the site builds,
+all 21 gates pass, and the provider-parity gate fails when either list drifts.
+
+**Next.** Once the consoles are set up, the round trip needs walking through
+once on each surface: buy, follow the setup email, press Continue with Google,
+finish the profile, and check that the order is attached. Then the same with
+Apple, choosing Hide My Email, which is the case the whole purchase_email
+change exists for.
