@@ -208,6 +208,31 @@ let getToken: () => Promise<string | null> = async () => null;
 let refresh: (() => Promise<boolean>) | null = null;
 
 /**
+ * The refresh currently in flight, if any.
+ *
+ * Screens load several things at once: Notes asks for notes, tags and home
+ * together. When the access token has expired all of those come back 401 at
+ * once, and each one used to start its own refresh.
+ *
+ * Supabase rotates refresh tokens. The first refresh consumes the stored one
+ * and returns a new one, so the others arrive holding a token that has already
+ * been spent, fail, and report the person as signed out. The session was
+ * refreshed successfully and they get bounced to sign-in anyway, which looks
+ * exactly like an expiry that keeps happening for no reason.
+ *
+ * One refresh at a time. Everyone waiting on it gets the same answer.
+ */
+let refreshInFlight: Promise<boolean> | null = null;
+
+function refreshOnce(): Promise<boolean> {
+  if (!refresh) return Promise.resolve(false);
+  if (!refreshInFlight) {
+    refreshInFlight = refresh().finally(() => { refreshInFlight = null; });
+  }
+  return refreshInFlight;
+}
+
+/**
  * Called once at startup. Keeps auth out of every call site.
  *
  * `refresh` is injected rather than imported. auth.ts already imports from
@@ -223,6 +248,7 @@ export function configureApi(opts: {
   if (opts.baseUrl) baseUrl = opts.baseUrl.replace(/\/$/, '');
   getToken = opts.getToken;
   refresh = opts.refresh ?? null;
+  refreshInFlight = null;
 }
 
 async function request<T>(path: string, init: RequestInit = {}, retrying = false): Promise<ApiResult<T>> {
@@ -252,7 +278,9 @@ async function request<T>(path: string, init: RequestInit = {}, retrying = false
     // the new token; if it does not, this is genuinely signed out and the
     // screen should say so.
     if (!retrying && refresh) {
-      const renewed = await refresh();
+      // Shared, so several requests failing together cause one refresh rather
+      // than a race where all but the first spend an already-used token.
+      const renewed = await refreshOnce();
       if (renewed) return request<T>(path, init, true);
     }
     // Read the body: the endpoint distinguishes a missing token from an
