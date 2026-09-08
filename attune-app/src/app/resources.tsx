@@ -19,9 +19,10 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 
-import { fetchHome, fetchPosts } from '@/api/client';
-import type { CatalogueItem, HomeResponse, PostSummary } from '@/api/client';
-import { ScreenLoading } from '@/components/screen-states';
+import { fetchHome, fetchPosts, markPostRead } from '@/api/client';
+import type { ApiError, CatalogueItem, HomeResponse, PostSummary } from '@/api/client';
+import { ScreenError, ScreenLoading } from '@/components/screen-states';
+import SignIn from '@/components/sign-in';
 import {
   AccentFallback, AccentFor, Colors, MaxContentWidth, Palette, Radius, Spacing, Type,
 } from '@/constants/attune-theme';
@@ -43,11 +44,17 @@ export default function ResourcesScreen() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [category, setCategory] = useState<string>(ALL);
+  const [error, setError] = useState<ApiError | null>(null);
+  // Tracked separately from the catalogue: In Practice failing is not the same
+  // as In Practice being empty, and the screen said the same thing for both.
+  const [postsFailed, setPostsFailed] = useState(false);
 
   const load = useCallback(async () => {
     const [h, p] = await Promise.all([fetchHome(), fetchPosts()]);
-    if (h.ok) setHome(h.data);
-    if (p.ok) { setPosts(p.data.posts); setCategories(p.data.categories ?? []); }
+    if (h.ok) { setHome(h.data); setError(null); }
+    else setError(h.error);
+    if (p.ok) { setPosts(p.data.posts); setCategories(p.data.categories ?? []); setPostsFailed(false); }
+    else setPostsFailed(true);
     setLoading(false);
     setRefreshing(false);
   }, []);
@@ -55,6 +62,21 @@ export default function ResourcesScreen() {
   useEffect(() => { load(); }, [load]);
 
   if (loading) return <Shell><ScreenLoading label="Loading your resources" /></Shell>;
+
+  // This screen had no failure handling at all. Signed out, it rendered an
+  // empty page with a lone "Nothing published yet", which reads as a product
+  // with nothing in it rather than a session that has ended. Every other tab
+  // already handled this.
+  if (error?.kind === 'unauthorized') {
+    return (
+      <Shell>
+        <SignIn onSignedIn={() => { setLoading(true); load(); }} rejectedReason={error.detail} />
+      </Shell>
+    );
+  }
+  if (error && !home) {
+    return <Shell><ScreenError error={error} onRetry={() => { setLoading(true); load(); }} /></Shell>;
+  }
 
   // The server tells us what is owned. If the field is absent, everything shows
   // as explorable rather than the screen guessing and getting it wrong.
@@ -153,7 +175,7 @@ export default function ResourcesScreen() {
               <View style={{ paddingHorizontal: Spacing.xl, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center' }}>
                 {visible.length ? (
                   <View style={{ backgroundColor: c.surface, borderColor: c.border, borderWidth: 1, borderRadius: Radius.lg, overflow: 'hidden' }}>
-                    {visible.map((p, i) => <PostRow key={p.id} post={p} first={i === 0} />)}
+                    {visible.map((p, i) => <PostRow key={p.id} post={p} first={i === 0} onRead={load} />)}
                   </View>
                 ) : (
                   <Text style={{ ...Type.body, color: c.textMuted }}>
@@ -165,7 +187,9 @@ export default function ResourcesScreen() {
           ) : (
             <View style={{ paddingHorizontal: Spacing.xl }}>
               <Text style={{ ...Type.body, color: c.textMuted }}>
-                Nothing published yet. New pieces will appear here.
+                {postsFailed
+                  ? 'In Practice could not load. Pull down to try again.'
+                  : 'Nothing published yet. New pieces will appear here.'}
               </Text>
             </View>
           )}
@@ -276,9 +300,26 @@ function ExploreTile({ item }: { item: Item }) {
   );
 }
 
-function PostRow({ post, first }: { post: PostSummary; first: boolean }) {
+/**
+ * One piece in In Practice.
+ *
+ * It was a Pressable with no onPress: it gave press feedback and did nothing,
+ * which is worse than a plain row because it promises something.
+ *
+ * The reader itself is not built in the app yet, so this opens the piece on the
+ * website. Marking it read is the app's job either way, or the badge and the
+ * "new in In Practice" card keep raising something the person has read.
+ */
+function PostRow({ post, first, onRead }: { post: PostSummary; first: boolean; onRead: () => void }) {
   return (
     <Pressable
+      onPress={async () => {
+        // Opened first. Marking read is bookkeeping and should never stand
+        // between someone and the thing they tapped.
+        Linking.openURL(`${SITE}/practice/${post.id}`);
+        const res = await markPostRead(post.id);
+        if (res.ok) onRead();
+      }}
       style={{
         paddingVertical: Spacing.lg, paddingHorizontal: Spacing.lg,
         borderTopWidth: first ? 0 : 1, borderTopColor: c.border,
