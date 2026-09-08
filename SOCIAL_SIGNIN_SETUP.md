@@ -87,11 +87,26 @@ membership you already have for the app.
    instead. In Terminal, from the project folder, one line:
 
    ```
-   node scripts/apple-secret.mjs ~/Downloads/AuthKey_XXXXXXXXXX.p8 --team HX5FX68K6L --key XXXXXXXXXX --service com.attunerelationships.web
+   cd ~/Projects/unison
    ```
 
-   Replace `XXXXXXXXXX` with your Key ID in both places, and point the path at
-   wherever you saved the .p8. It prints a long token and the date it expires.
+   ```
+   node scripts/apple-secret.mjs ~/Downloads/AuthKey_ABCD123456.p8
+   ```
+
+   Change `AuthKey_ABCD123456.p8` to the name of the file Apple gave you.
+   Nothing else needs filling in: the Key ID is already in that filename, and
+   the team and services ids are Attune's own.
+
+   Keep both lines short. A command long enough to wrap in the terminal
+   becomes two commands when it is copied, and the second half fails with
+   `command not found`.
+
+   It prints a long token and the date it expires.
+
+   Run it in a second Terminal window, `Cmd + N`, rather than in a Claude Code
+   session. The token is a live credential, and anything printed in a session
+   becomes part of that conversation.
 
 **Supabase dashboard** → Authentication → Providers → Apple → enable, and fill
 in the only two fields there are:

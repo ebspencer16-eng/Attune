@@ -33,9 +33,23 @@ const flag = (name) => {
   return i === -1 ? null : args[i + 1];
 };
 
-const teamId = flag('team');
-const keyId = flag('key');
-const serviceId = flag('service');
+// Attune's own identifiers, so the everyday command is one short line.
+//
+// Everything below used to be typed out on the command line every time. That
+// line was long enough to wrap when copied out of a terminal, and a wrapped
+// line becomes two commands, the second of which is a key id being run as a
+// program. Nothing here is a secret: the team id is already in app.json and
+// CLAUDE.md, and the services id is a public client identifier.
+const ATTUNE_TEAM_ID = 'HX5FX68K6L';
+const ATTUNE_SERVICE_ID = 'com.attunerelationships.web';
+
+// Apple names the download AuthKey_<KEYID>.p8, so the key id is already in
+// hand. Asking for it again is asking to be given something else by mistake.
+const keyIdFromFilename = (path) => (path || '').match(/AuthKey_([A-Z0-9]{10})\.p8$/)?.[1] || null;
+
+const teamId = flag('team') || ATTUNE_TEAM_ID;
+const keyId = flag('key') || keyIdFromFilename(p8Path);
+const serviceId = flag('service') || ATTUNE_SERVICE_ID;
 
 // Refuse anything that looks like the key itself rather than a path or an id.
 //
@@ -72,13 +86,14 @@ if (teamId && !/^[A-Z0-9]{10}$/.test(teamId)) {
 }
 
 if (!p8Path || !teamId || !keyId || !serviceId) {
-  console.error('Missing something. The full command looks like:\n');
-  console.error('  node scripts/apple-secret.mjs ~/Downloads/AuthKey_ABCD123456.p8 \\');
-  console.error('    --team HX5FX68K6L --key ABCD123456 --service com.attunerelationships.web\n');
-  console.error('  the .p8   the file Apple let you download once');
-  console.error('  --team    your Team ID, top right of developer.apple.com');
-  console.error('  --key     the Key ID, also in the .p8 filename');
-  console.error('  --service the Services ID you made, not the app bundle id');
+  console.error('\nPoint this at the .p8 file Apple gave you:\n');
+  console.error('  cd ~/Projects/unison');
+  console.error('  node scripts/apple-secret.mjs ~/Downloads/AuthKey_ABCD123456.p8\n');
+  if (p8Path && !keyId) {
+    console.error(`Could not read a key id out of ${p8Path}.`);
+    console.error('Apple names the file AuthKey_<KEYID>.p8. If it has been renamed,');
+    console.error('add --key with the 10-character Key ID from developer.apple.com.\n');
+  }
   process.exit(1);
 }
 
