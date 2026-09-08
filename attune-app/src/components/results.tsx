@@ -24,7 +24,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { fetchConflictResults } from '@/api/client';
 import type {
   ConflictResults, CoupleResults, ExpectationRow, ExpectationsSummary,
-  IntimacyDimension, IntimacyResults, ReflectionResults,
+  IntimacyDimension, IntimacyResults, NextStepGroup, ReflectionResults,
   ResultDimension, ResultsSection,
 } from '@/api/client';
 import ConflictResultsView from '@/components/conflict-results';
@@ -66,7 +66,7 @@ function interp(text: string | null | undefined, you: string, them: string): str
 
 export default function Results({
   results, owned = [], sections: fromServer,
-  expectations = null, intimacy = null, reflection = null,
+  expectations = null, intimacy = null, reflection = null, whatComesNext = null,
 }: {
   results: CoupleResults;
   owned?: string[];
@@ -74,6 +74,7 @@ export default function Results({
   expectations?: ExpectationsSummary | null;
   intimacy?: IntimacyResults | null;
   reflection?: ReflectionResults | null;
+  whatComesNext?: { groups: NextStepGroup[] } | null;
 }) {
   // The spine comes from the server, in the server's order, with the server's
   // names. It used to be six entries written here against the website's
@@ -208,6 +209,8 @@ export default function Results({
           expectations={expectations}
           intimacy={intimacy}
           reflection={reflection}
+          whatComesNext={whatComesNext}
+          onGoToSection={setSectionId}
           results={results}
           conflict={conflict}
           conflictWaiting={conflictWaiting}
@@ -273,12 +276,14 @@ export default function Results({
  */
 function SectionBody({
   section, results, conflict, conflictWaiting, byDomain, you, them, viewer, wideGap,
-  expectations, intimacy, reflection,
+  expectations, intimacy, reflection, whatComesNext, onGoToSection,
 }: {
   section: string;
   expectations: ExpectationsSummary | null;
   intimacy: IntimacyResults | null;
   reflection: ReflectionResults | null;
+  whatComesNext: { groups: NextStepGroup[] } | null;
+  onGoToSection: (id: string) => void;
   results: CoupleResults;
   conflict: ConflictResults | null;
   conflictWaiting: boolean;
@@ -309,6 +314,10 @@ function SectionBody({
   if (section.startsWith('exp-convo-')) {
     const bucket = expectations?.categories.find((cat) => cat.section === section) ?? null;
     return <ExpectationsConversation bucket={bucket} you={you} them={them} />;
+  }
+
+  if (section === 'what-comes-next') {
+    return <WhatComesNext data={whatComesNext} onGoToSection={onGoToSection} />;
   }
 
   if (section === 'reflection-overview') return <ReflectionOverview data={reflection} />;
@@ -930,6 +939,77 @@ function PriorityList({ name, items }: { name: string; items: string[] }) {
         </Text>
       ))}
     </View>
+  );
+}
+
+/**
+ * The closing page.
+ *
+ * Everything the results ask this couple to do, in the order worth doing it,
+ * with a way back to the section each group came from. Nothing here is new:
+ * every line has already been read in its own context, and a closing page that
+ * introduces a fresh claim is a claim nothing else supports.
+ */
+function WhatComesNext({
+  data, onGoToSection,
+}: { data: { groups: NextStepGroup[] } | null; onGoToSection: (id: string) => void }) {
+  if (!data?.groups.length) {
+    return (
+      <Waiting
+        title="What Comes Next"
+        body="This fills in as you finish the exercises in your package."
+      />
+    );
+  }
+  return (
+    <ScrollView contentContainerStyle={{ paddingBottom: Spacing.xxl }}>
+      <View style={{ paddingHorizontal: Spacing.xl, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center' }}>
+        <Eyebrow>What comes next</Eyebrow>
+        <Text style={{ ...Type.hero, color: c.textStrong }}>What to do with all of this.</Text>
+        <Text style={{ ...Type.body, color: c.textMuted, marginTop: Spacing.md }}>
+          Not all at once. One of these, this week, is more than most couples do
+          with a result like this.
+        </Text>
+
+        {data.groups.map((group) => (
+          <View key={group.id} style={{ marginTop: Spacing.xl }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+              <Eyebrow>{group.label}</Eyebrow>
+              <Pressable onPress={() => onGoToSection(group.section)} hitSlop={8}>
+                <Text style={{ ...Type.small, color: c.accentQuiet, fontWeight: '700' }}>
+                  Back to it
+                </Text>
+              </Pressable>
+            </View>
+
+            {group.items.map((item, i) => (
+              <View
+                key={`${group.id}-${i}`}
+                style={{
+                  backgroundColor: c.surface, borderColor: c.border, borderWidth: 1,
+                  borderRadius: Radius.lg, padding: Spacing.lg, marginBottom: Spacing.md,
+                }}>
+                <Text style={{ ...Type.cardTitle, color: c.textStrong }}>{item.title}</Text>
+                {item.body ? (
+                  <Text style={{ ...Type.body, color: c.textMuted, marginTop: Spacing.sm }}>{item.body}</Text>
+                ) : null}
+                {item.say ? (
+                  <View
+                    style={{
+                      marginTop: Spacing.md, paddingLeft: Spacing.md,
+                      borderLeftColor: c.accentQuiet, borderLeftWidth: 2,
+                    }}>
+                    <Text style={{ ...Type.body, color: c.text, fontStyle: 'italic' }}>
+                      {item.say}
+                    </Text>
+                  </View>
+                ) : null}
+              </View>
+            ))}
+          </View>
+        ))}
+      </View>
+    </ScrollView>
   );
 }
 

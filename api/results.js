@@ -26,6 +26,7 @@ import { sectionsWithLabels } from './_lib/results-sections.js';
 import { expectationsSummary } from './_lib/expectations.js';
 import { intimacyResults } from './_lib/intimacy-results.js';
 import { reflectionResults } from './_lib/reflection-results.js';
+import { whatComesNext } from './_lib/what-comes-next.js';
 import { EXERCISES, EXERCISE_COLUMNS, isExerciseDone } from './_exercises.js';
 import { capabilitiesFor, OWNERSHIP_COLUMNS } from './_lib/ownership.js';
 import { DIM_META } from './_workbook-content.js';
@@ -282,6 +283,28 @@ export default async function handler(req) {
       return isExerciseDone(ex, me[ex.column]) && isExerciseDone(ex, partner?.[ex.column]);
     };
 
+    const expectations = (me.ex2_answers && partner?.ex2_answers)
+      ? expectationsSummary({
+          mine: me.ex2_answers,
+          theirs: partner.ex2_answers,
+          youName: me.name || 'You',
+          themName: partner.name || 'Your partner',
+        })
+      : null;
+
+    const intimacy = (ownership.ownsIntimacy && bothDone('intimacy'))
+      ? intimacyResults({ mine: me.intimacy_data, theirs: partner?.intimacy_data })
+      : null;
+
+    const reflection = (ownership.ownsReflection && bothDone('ex3'))
+      ? reflectionResults({
+          mine: me.ex3_answers,
+          theirs: partner?.ex3_answers,
+          youName: me.name || 'You',
+          themName: partner?.name || 'Your partner',
+        })
+      : null;
+
     return json({
       ok: true, ready: true, cached, recomputed: reason,
       // Labels are applied on the way out, not baked into the stored blob.
@@ -322,52 +345,32 @@ export default async function handler(req) {
        * show with one.
        */
       /**
-       * The Expectations comparison, for the overview and the five
-       * conversation screens.
+       * The Expectations comparison, Physical Intimacy and Reflection.
        *
-       * Sent whenever both partners have answered, because Expectations is in
-       * every package: there is no ownership question to ask. `mine` is the
-       * reader's own answers, so the mirror is applied from their side and the
-       * two columns are already the right way round.
+       * Computed above rather than inline, so What Comes Next can be assembled
+       * from the finished payloads instead of deriving all three a second
+       * time. A closing page that re-derives what the sections already said is
+       * a closing page that can disagree with them.
        */
-      expectations: (me.ex2_answers && partner?.ex2_answers)
-        ? expectationsSummary({
-            mine: me.ex2_answers,
-            theirs: partner.ex2_answers,
-            youName: me.name || 'You',
-            themName: partner.name || 'Your partner',
-          })
-        : null,
+      expectations,
+      intimacy,
+      reflection,
+
       /**
-       * Physical Intimacy, when they own it and both have answered.
+       * What Comes Next: everything the results ask this couple to do.
        *
-       * Gated twice on purpose. Ownership decides whether the sections are
-       * listed at all; both-finished decides whether they can say anything,
-       * because every one of them is about the distance between two answers.
-       *
-       * Carries states, distances and copy. Never the answers themselves.
+       * Assembled from the payloads above and the couple type's own tips.
+       * Nothing new is asserted here, because a closing page that introduces a
+       * fresh claim is a claim nothing else in the results supports.
        */
-      intimacy: (ownership.ownsIntimacy && bothDone('intimacy'))
-        ? intimacyResults({ mine: me.intimacy_data, theirs: partner?.intimacy_data })
-        : null,
-      /**
-       * Relationship Reflection, when they own it and both have finished.
-       *
-       * Listed on ownership alone, matching the website, but it can only say
-       * anything once both have written: the whole section is one person's
-       * words next to the other's.
-       */
-      // 'ex3' is the registry key; 'reflection' is only the customer-facing
-      // name and matches no exercise, so asking for it would have made this
-      // permanently null with nothing reporting why.
-      reflection: (ownership.ownsReflection && bothDone('ex3'))
-        ? reflectionResults({
-            mine: me.ex3_answers,
-            theirs: partner?.ex3_answers,
-            youName: me.name || 'You',
-            themName: partner?.name || 'Your partner',
-          })
-        : null,
+      whatComesNext: whatComesNext({
+        coupleTypeId: results.coupleType,
+        expectations,
+        intimacy,
+        reflection,
+        conflictReady: ownership.ownsConflict,
+        names: { you: me.name || 'You', them: partner?.name || 'your partner' },
+      }),
       sections: sectionsWithLabels({
         hasReflection: ownership.ownsReflection,
         intimacyReady: ownership.ownsIntimacy && bothDone('intimacy'),

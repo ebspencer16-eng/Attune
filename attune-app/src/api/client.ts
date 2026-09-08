@@ -199,6 +199,20 @@ export type ReflectionResults = {
   writtenCount: number;
 };
 
+/**
+ * What Comes Next.
+ *
+ * Assembled by the server from the sections the reader has already seen, so
+ * nothing here is a new claim about the couple. `section` is where each group
+ * came from, which is where the app links back to.
+ */
+export type NextStepGroup = {
+  id: string;
+  label: string;
+  section: string;
+  items: { title: string; body: string | null; say: string | null }[];
+};
+
 export type ExpectationsSummary = {
   answered: number;
   aligned: number;
@@ -238,6 +252,8 @@ export type ResultsResponse =
       intimacy?: IntimacyResults | null;
       /** Null unless they own Reflection and both have finished it. */
       reflection?: ReflectionResults | null;
+      /** The closing page, assembled from the sections above. */
+      whatComesNext?: { groups: NextStepGroup[] } | null;
     }
   | { ready: false; reason: string; self: PersonResults | null; partnerName?: string | null };
 
