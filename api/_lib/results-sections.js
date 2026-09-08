@@ -47,6 +47,40 @@ export const RESULTS_SECTIONS = [
   'what-comes-next',
 ];
 
+/**
+ * What each section is called.
+ *
+ * Built beside the ids, so a section can never exist without a name. The
+ * expectations conversations and the intimacy dimensions are generated from the
+ * live lists, which is exactly why they cannot be written out by hand anywhere:
+ * the iOS app kept its own map and had labels for the fixed sections and none
+ * for these eleven, so an annotation on one of them read as a raw key.
+ *
+ * Labels match the web's results nav.
+ */
+export const RESULTS_SECTION_LABELS = {
+  'highlights': 'Highlights',
+  'couple-type': 'Couple Type',
+  'comm-overview': 'Communication',
+  'comm-inner': 'Internal Processing',
+  'comm-connection': 'How You Connect',
+  'comm-hard': 'When Things Get Hard',
+  'exp-overview': 'Expectations',
+  ...Object.fromEntries(RESPONSIBILITY_CATEGORIES.map((cat, i) => [`exp-convo-${i}`, cat.label])),
+  'reflection-overview': 'Relationship Reflection',
+  'reflection-ratings': 'How You Each Rated',
+  'reflection-story': 'Side by Side',
+  'reflection-plan': 'Action Plan',
+  'intimacy-overview': 'Physical Intimacy',
+  ...Object.fromEntries(INTIMACY_DIMENSIONS.map(d => [`intimacy-${d.id}`, d.label])),
+  'intimacy-plan': 'Conversations',
+  'conflict-overview': 'Conflict Patterns',
+  'conflict-snapshot': 'Your Conflict Snapshot',
+  'conflict-patterns': 'Your Patterns',
+  'conflict-wrote': 'What You Each Wrote',
+  'what-comes-next': 'What Comes Next',
+};
+
 /** Sections are a fixed set, so membership is the whole validation. */
 export function isResultsSection(key) {
   return RESULTS_SECTIONS.includes(key);

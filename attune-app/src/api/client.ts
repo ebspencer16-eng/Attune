@@ -428,9 +428,18 @@ export type Tag = {
   standard_key: string | null;
 };
 
-/** Seeded on the first call, so this is also what creates them. */
+/**
+ * Tags, and the reference data the notes screen needs alongside them.
+ *
+ * `sections` maps a results section id to its heading. It comes from the server
+ * because five of those ids are generated from the expectations categories and
+ * six from the intimacy dimensions, so a copy in the app goes stale the moment
+ * either list changes. Seeded on the first call, so this is also what creates
+ * the tags.
+ */
 export function fetchTags() {
-  return request<{ ok: true; tags: Tag[] }>('/api/notes?action=tags');
+  return request<{ ok: true; tags: Tag[]; sections?: Record<string, string> }>(
+    '/api/notes?action=tags');
 }
 
 export function createNote(input: {

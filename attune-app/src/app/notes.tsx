@@ -53,6 +53,7 @@ export default function NotesScreen() {
   const [annotations, setAnnotations] = useState<Note[]>([]);
   const [shared, setShared] = useState<Note[]>([]);
   const [tags, setTags] = useState<Tag[]>([]);
+  const [sectionLabels, setSectionLabels] = useState<Record<string, string>>({});
   const [postTitles, setPostTitles] = useState<Record<string, string>>({});
   const [resultsVersion, setResultsVersion] = useState<number | null>(null);
   const [partnerName, setPartnerName] = useState<string | null>(null);
@@ -78,7 +79,7 @@ export default function NotesScreen() {
     setNotes(n.data.notes);
     setAnnotations(n.data.annotations);
     setShared(n.data.sharedWithMe);
-    if (t.ok) setTags(t.data.tags);
+    if (t.ok) { setTags(t.data.tags); setSectionLabels(t.data.sections ?? {}); }
     if (h.ok) {
       setPartnerName(h.data.partnerName ?? null);
       setPartnerLinked(!!h.data.state?.partnerLinked);
@@ -114,8 +115,9 @@ export default function NotesScreen() {
         return found ? { name: found.name, color: found.color } : undefined;
       },
       postTitle: (id) => postTitles[id],
+      sectionLabel: (id) => sectionLabels[id],
     };
-  }, [tags, postTitles]);
+  }, [tags, postTitles, sectionLabels]);
 
   /**
    * Everything, newest first.

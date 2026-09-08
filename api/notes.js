@@ -27,6 +27,7 @@
 export const config = { runtime: 'edge' };
 
 import { isValidAnchor, standardTags } from './_lib/tags.js';
+import { RESULTS_SECTION_LABELS } from './_lib/results-sections.js';
 
 const HEADERS = { 'Content-Type': 'application/json', 'X-Content-Type-Options': 'nosniff' };
 const json = (b, s = 200) => new Response(JSON.stringify(b), { status: s, headers: HEADERS });
@@ -133,7 +134,22 @@ export default async function handler(req) {
         const again = await rest(`tags?owner_id=eq.${me}&select=*&order=created_at.asc`, { headers: svc });
         tags = await again.json().catch(() => []);
       }
-      return json({ ok: true, tags });
+      return json({
+        ok: true,
+        tags,
+        /**
+         * What each results section is called.
+         *
+         * Sent with the tags because this is the reference data the notes
+         * screen needs to turn an anchor into a heading, and it is the same
+         * round trip. The app kept its own map and had no labels for the five
+         * expectations conversations or the six intimacy dimensions, because
+         * both are generated from the live lists and cannot be written out by
+         * hand without going stale. An annotation on one of them read as a raw
+         * key.
+         */
+        sections: RESULTS_SECTION_LABELS,
+      });
     }
 
     if (req.method !== 'POST') return json({ ok: false, error: 'unsupported action' }, 400);

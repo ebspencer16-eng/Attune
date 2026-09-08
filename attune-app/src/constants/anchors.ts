@@ -91,6 +91,13 @@ export type AnchorContext = {
   tag: (standardKey: string) => { name: string; color: string | null } | undefined;
   /** A post title by its slug, from /api/posts?action=feed. */
   postTitle: (id: string) => string | undefined;
+  /**
+   * A results section heading, from the same call as the tags.
+   *
+   * Preferred over the map below, which cannot cover the sections generated
+   * from the expectations categories and the intimacy dimensions.
+   */
+  sectionLabel?: (id: string) => string | undefined;
 };
 
 export type ResolvedAnchor = {
@@ -132,7 +139,9 @@ export function resolveAnchor(note: AnchoredNote, ctx: AnchorContext): ResolvedA
     case 'results_section':
       return {
         groupKey: `results_section:${key}`,
-        label: RESULTS_SECTIONS[key] ?? humanise(key),
+        // Server first. The map below is a fallback for an older payload, and
+        // it is missing every dynamically generated section by nature.
+        label: ctx.sectionLabel?.(key) ?? RESULTS_SECTIONS[key] ?? humanise(key),
         color: sectionColor(key),
       };
 
