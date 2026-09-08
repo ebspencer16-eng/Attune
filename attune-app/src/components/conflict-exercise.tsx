@@ -48,8 +48,17 @@ export default function ConflictExercise({
     (async () => {
       const res = await fetchConflictQuestions();
       if (cancelled) return;
-      if (res.ok) { setSet(res.data); setError(null); }
-      else setError(res.error);
+      if (res.ok) {
+        setSet(res.data);
+        setError(null);
+        const saved = res.data.saved?.answers as Record<string, Answer> | undefined;
+        if (saved && Object.keys(saved).length) {
+          setAnswers(saved);
+          setIntro(false);
+          const next = res.data.items.findIndex((i) => saved[i.id] === undefined);
+          setIdx(next === -1 ? res.data.items.length - 1 : next);
+        }
+      } else setError(res.error);
       setLoading(false);
     })();
     return () => { cancelled = true; };

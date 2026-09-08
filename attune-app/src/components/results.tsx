@@ -82,11 +82,21 @@ export default function Results({
   const content = results.content;
   const dims = content?.dimensions ?? [];
 
-  // Names, from this reader's side. The payload does not say which partner is
-  // reading, so `a` is treated as you. When the app knows the viewer's id this
-  // becomes a lookup rather than an assumption, and it is marked as such.
-  const you = content?.names?.a || 'You';
-  const them = content?.names?.b || 'Your partner';
+  // Which half of the payload is the reader.
+  //
+  // This used to assume `a` was you. It is not: stored results are keyed by the
+  // two user ids in sorted order, so `a` is whichever id sorts lower. For one
+  // partner in every couple that assumption put their partner's name on their
+  // own answers and swapped both marks on every scale.
+  //
+  // Defaults to 'a' only so an older cached payload without the field renders
+  // rather than blanking.
+  const viewer = content?.viewer ?? 'a';
+  const you = (viewer === 'a' ? content?.names?.a : content?.names?.b) || 'You';
+  const them = (viewer === 'a' ? content?.names?.b : content?.names?.a) || 'Your partner';
+
+  // How wide a gap has to be to be called wide. From the server.
+  const wideGap = content?.alignmentThreshold?.gap ?? null;
 
   const byDomain = useMemo(() => ({
     inner: dims.filter((d) => d.domain === 'inner'),
@@ -161,11 +171,11 @@ export default function Results({
         </Text>
       ))}
 
-      {section === 'overview' ? <Glance results={results} you={you} them={them} /> : null}
+      {section === 'overview' ? <Glance results={results} you={you} them={them} viewer={viewer} wideGap={wideGap} /> : null}
       {section === 'couple-type' ? <CoupleType results={results} you={you} them={them} /> : null}
-      {section === 'inner' ? <Domain title="Internal Processing" accent={Palette.indigo} dims={byDomain.inner} you={you} them={them} /> : null}
-      {section === 'connection' ? <Domain title="How You Connect" accent={SectionColor.communication} dims={byDomain.connection} you={you} them={them} /> : null}
-      {section === 'hard' ? <Domain title="When Things Get Hard" accent={SectionColor.conflict} dims={byDomain.hard} you={you} them={them} /> : null}
+      {section === 'inner' ? <Domain title="Internal Processing" accent={Palette.indigo} dims={byDomain.inner} you={you} them={them} viewer={viewer} wideGap={wideGap} /> : null}
+      {section === 'connection' ? <Domain title="How You Connect" accent={SectionColor.communication} dims={byDomain.connection} you={you} them={them} viewer={viewer} wideGap={wideGap} /> : null}
+      {section === 'hard' ? <Domain title="When Things Get Hard" accent={SectionColor.conflict} dims={byDomain.hard} you={you} them={them} viewer={viewer} wideGap={wideGap} /> : null}
       {section === 'conflict' && conflict?.ready ? <ConflictResultsView data={conflict} /> : null}
     </View>
   );
@@ -177,7 +187,9 @@ export default function Results({
  * On a coloured ground, because this is the summary. Ordering comes from the
  * server's rankedGaps and is not re-sorted here.
  */
-function Glance({ results, you, them }: { results: CoupleResults; you: string; them: string }) {
+function Glance({
+  results, you, them, viewer, wideGap,
+}: { results: CoupleResults; you: string; them: string; viewer: 'a' | 'b'; wideGap: number | null }) {
   const type = results.content?.coupleType;
   const gaps = (results.rankedGaps ?? []).slice(0, 4);
   const dims = results.content?.dimensions ?? [];
@@ -211,7 +223,7 @@ function Glance({ results, you, them }: { results: CoupleResults; you: string; t
             {gaps.map((g) => {
               const d = find(g.dim);
               return d ? (
-                <DimensionRow key={g.dim} dim={d} you={you} them={them} />
+                <DimensionRow key={g.dim} dim={d} you={you} them={them} viewer={viewer} wideGap={wideGap} />
               ) : null;
             })}
           </View>
@@ -261,8 +273,11 @@ function CoupleType({ results, you, them }: { results: CoupleResults; you: strin
 
 /** One Communication domain: every dimension in it, both partners on each. */
 function Domain({
-  title, accent, dims, you, them,
-}: { title: string; accent: string; dims: ResultDimension[]; you: string; them: string }) {
+  title, accent, dims, you, them, viewer, wideGap,
+}: {
+  title: string; accent: string; dims: ResultDimension[];
+  you: string; them: string; viewer: 'a' | 'b'; wideGap: number | null;
+}) {
   return (
     <ScrollView contentContainerStyle={{ paddingBottom: BottomTabInset + Spacing.xxl }}>
       <View style={{ paddingHorizontal: Spacing.xl, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center' }}>
@@ -271,7 +286,9 @@ function Domain({
           {title}
         </Text>
         <Legend you={you} them={them} />
-        {dims.map((d) => <DimensionRow key={d.key} dim={d} you={you} them={them} expanded />)}
+        {dims.map((d) => (
+          <DimensionRow key={d.key} dim={d} you={you} them={them} viewer={viewer} wideGap={wideGap} expanded />
+        ))}
       </View>
     </ScrollView>
   );
@@ -288,20 +305,25 @@ function Domain({
  * no colour gradient implying one side is the good side.
  */
 function DimensionRow({
-  dim, you, them, expanded,
-}: { dim: ResultDimension; you: string; them: string; expanded?: boolean }) {
+  dim, you, them, viewer, wideGap, expanded,
+}: {
+  dim: ResultDimension; you: string; them: string;
+  viewer: 'a' | 'b'; wideGap: number | null; expanded?: boolean;
+}) {
   // Scores are 1 to 5. Null means the person did not answer enough of it, and
   // an unanswered dimension is left off the track rather than defaulted to the
   // middle, which would read as a real answer.
   const pos = (v: number | null) => (v == null ? null : Math.max(0, Math.min(1, (v - 1) / 4)));
-  const pa = pos(dim.a);
-  const pb = pos(dim.b);
+  // dim.a and dim.b follow the stored order, not the reader. Resolve to yours
+  // and theirs before drawing, or the two marks land on each other's values.
+  const pYou = pos(viewer === 'a' ? dim.a : dim.b);
+  const pThem = pos(viewer === 'a' ? dim.b : dim.a);
 
   return (
     <View style={{ ...card(), marginBottom: Spacing.md }}>
       <Text style={{ ...Type.cardTitle, color: c.textStrong }}>{dim.label}</Text>
 
-      {pa == null && pb == null ? (
+      {pYou == null && pThem == null ? (
         <Text style={{ ...Type.small, color: c.textMuted, marginTop: Spacing.sm }}>
           Not enough answers to place this one.
         </Text>
@@ -312,8 +334,8 @@ function DimensionRow({
             <View style={{ height: 4, borderRadius: Radius.pill, backgroundColor: c.border }} />
             {/* Two marks on it. Offset by half their width so the centre of the
                 dot sits on the value rather than its left edge. */}
-            {pa != null ? <Marker left={pa} color={YOU_COLOR} label={initial(you)} /> : null}
-            {pb != null ? <Marker left={pb} color={THEM_COLOR} label={initial(them)} /> : null}
+            {pYou != null ? <Marker left={pYou} color={YOU_COLOR} label={initial(you)} /> : null}
+            {pThem != null ? <Marker left={pThem} color={THEM_COLOR} label={initial(them)} /> : null}
           </View>
 
           <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: Spacing.lg }}>
@@ -323,13 +345,15 @@ function DimensionRow({
         </>
       )}
 
-      {expanded && dim.gap != null ? (
+      {/* Wide or not, using the server's own threshold. The app used to carry
+          its own numbers here, which is a second copy of the rule that decides
+          what a couple is told about their results. Nothing is said at all when
+          the server has not sent one. */}
+      {expanded && dim.gap != null && wideGap != null ? (
         <Text style={{ ...Type.small, color: c.textMuted, marginTop: Spacing.md }}>
-          {dim.gap < 0.5
-            ? 'You landed close together here.'
-            : dim.gap < 1.5
-              ? 'A moderate distance between you.'
-              : 'One of your widest differences.'}
+          {dim.gap >= wideGap
+            ? 'One of your wider differences.'
+            : 'You landed close together here.'}
         </Text>
       ) : null}
     </View>

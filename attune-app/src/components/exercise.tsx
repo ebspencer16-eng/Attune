@@ -48,8 +48,23 @@ export default function Exercise({
     (async () => {
       const res = await fetchQuestions(exerciseKey);
       if (cancelled) return;
-      if (res.ok) { setSet(res.data); setError(null); }
-      else setError(res.error);
+      if (res.ok) {
+        setSet(res.data);
+        setError(null);
+        // Pick up where they left off. Answers were saved on every question and
+        // read by nobody until now, so stopping at question forty meant
+        // starting again at one.
+        const saved = res.data.saved;
+        if (saved?.answers) {
+          const restored = saved.answers as Record<string, number>;
+          setAnswers(restored);
+          // First unanswered question, not the count: a skipped question in the
+          // middle would otherwise drop them past questions they never saw.
+          const next = res.data.items.findIndex(
+            (i) => !i.__partBreak && restored[i.answerKey] == null);
+          setIdx(next === -1 ? res.data.items.length - 1 : next);
+        }
+      } else setError(res.error);
       setLoading(false);
     })();
     return () => { cancelled = true; };

@@ -66,8 +66,16 @@ export default function Expectations({
     (async () => {
       const res = await fetchExpectations();
       if (cancelled) return;
-      if (res.ok) { setSet(res.data); setError(null); }
-      else setError(res.error);
+      if (res.ok) {
+        setSet(res.data);
+        setError(null);
+        const saved = res.data.saved?.answers as Partial<Answers> | undefined;
+        if (saved) {
+          setAnswers({ ...EMPTY, ...saved });
+          // Straight past the household question if it is already answered.
+          if (saved.childhoodStructure) setStage('responsibilities');
+        }
+      } else setError(res.error);
       setLoading(false);
     })();
     return () => { cancelled = true; };

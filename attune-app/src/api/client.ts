@@ -74,6 +74,15 @@ export type ResultDimension = {
  * read the same results and each is {U} in their own view.
  */
 export type ResultsContent = {
+  /**
+   * Which side of `partners` the reader is.
+   *
+   * Stored results are keyed by the two user ids in sorted order, so `a` is
+   * whichever id sorts lower, not whoever is reading. Never assume a is you.
+   */
+  viewer: 'a' | 'b';
+  /** When a gap counts as wide. From the server, never redefined here. */
+  alignmentThreshold: { gap: number; dims: number };
   coupleType: {
     id: string;
     name: string;
@@ -473,6 +482,7 @@ export type QuestionItem = {
 };
 
 export type ExpectationsSet = {
+  saved: SavedAnswers;
   exercise: { key: string; label: string; shape: 'answers' | 'record' };
   names: { you: string; partner: string };
   childhoodStructures: { id: string; label: string; cols: string[] }[];
@@ -486,7 +496,16 @@ export type ExpectationsSet = {
   lifeQuestions: { id: string; topic: string; text: string; options: string[] }[];
 };
 
+/** Where this person got to last time, if anywhere. */
+export type SavedAnswers = {
+  answers: Record<string, unknown>;
+  completedAt: string | null;
+  /** Only on flat exercises: whether these are submitted answers or a partial. */
+  complete?: boolean;
+} | null;
+
 export type QuestionSet = {
+  saved: SavedAnswers;
   exercise: { key: string; label: string; shape: 'answers' | 'record' };
   scale: { val: number; label: string }[];
   items: QuestionItem[];
@@ -665,6 +684,7 @@ export type ConflictQuestion = {
 };
 
 export type ConflictQuestionSet = {
+  saved: SavedAnswers;
   exercise: { key: string; label: string; shape: 'answers' | 'record' };
   intro: string | null;
   sections: { id: string; label: string; questions: string[] }[];

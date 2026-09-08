@@ -24,10 +24,11 @@ export const config = { runtime: 'edge' };
 
 import { DIM_META } from './_workbook-content.js';
 import { DIM_KEYS, AXIS_CONFIG } from './_type-engine.js';
+import { ALIGNMENT_THRESHOLD } from './_lib/results.js';
 import { COUPLE_TYPES } from './_couple-types.js';
 import { DOMAIN_OF, DOMAIN_LABEL } from './_lib/tags.js';
 import { personResults } from './_lib/results.js';
-import { getOrComputeResults } from './_lib/results-store.js';
+import { getOrComputeResults, orderPair } from './_lib/results-store.js';
 
 const HEADERS = { 'Content-Type': 'application/json', 'X-Content-Type-Options': 'nosniff' };
 const json = (body, status = 200) => new Response(JSON.stringify(body), { status, headers: HEADERS });
@@ -61,7 +62,7 @@ function withLabels(results) {
  * `content` is additive. Nothing that already existed in the payload changes
  * shape, so the website keeps reading exactly what it read before.
  */
-function withContent(results) {
+function withContent(results, viewer) {
   if (!results) return results;
 
   const a = results.partners?.a;
@@ -98,6 +99,25 @@ function withContent(results) {
   return {
     ...results,
     content: {
+      /**
+       * Which side of `partners` is the person asking.
+       *
+       * Stored results are keyed by the two user ids in sorted order, and the
+       * answers travel with their owner through that sort. So `partners.a` is
+       * whichever id sorts lower, not whoever is reading. For one partner in
+       * every couple, a and b are the other way round from what they expect.
+       *
+       * Without this a client has no way to tell, and the obvious assumption,
+       * that a is you, is wrong half the time: names swapped, and both marks on
+       * every scale on the wrong side.
+       */
+      viewer,
+      /**
+       * When a gap counts as wide, from ALIGNMENT_THRESHOLD in _lib/results.js.
+       * Sent so no surface has to keep its own copy of the number that decides
+       * what a couple is told about their own results.
+       */
+      alignmentThreshold: ALIGNMENT_THRESHOLD,
       coupleType: type ? {
         id: type.id,
         name: type.name,
@@ -227,7 +247,10 @@ export default async function handler(req) {
       // Scores are frozen. Names for things are not, and should follow the
       // current copy rather than whatever was current the day the couple
       // finished.
-      results: withContent(withLabels(results)),
+      // Which half of the stored payload belongs to the person asking. Derived
+      // with the same orderPair the store uses, rather than re-deriving the
+      // comparison here and risking the two disagreeing.
+      results: withContent(withLabels(results), orderPair(me.id, partner.id).swapped ? 'b' : 'a'),
       // frozenAt is when these results were fixed. computedUnderVersion is the
       // engine that produced them, which may be older than the current one:
       // that is the point, not a problem.

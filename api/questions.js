@@ -35,6 +35,36 @@ import {
 const HEADERS = { 'Content-Type': 'application/json', 'X-Content-Type-Options': 'nosniff' };
 const json = (b, s = 200) => new Response(JSON.stringify(b), { status: s, headers: HEADERS });
 
+
+/**
+ * Where this person got to last time.
+ *
+ * The app saves progress on every answer and, until this existed, had no way to
+ * read it back. Someone who stopped at question forty restarted at question
+ * one, and their forty answers sat in a column nothing ever looked at.
+ *
+ * Columns come from the registry rather than being spelled out, so a new
+ * exercise is readable here without anyone remembering to add it.
+ *
+ * A record-shaped exercise keeps everything in one column, including its
+ * completedAt. A flat one keeps finished answers and in-progress answers apart,
+ * and finished wins: someone who completed an exercise and opened it again
+ * should see what they actually submitted, not a stale partial save.
+ */
+async function savedAnswers(exercise, profile) {
+  if (!profile) return null;
+  if (exercise.shape === 'record') {
+    const record = profile[exercise.column];
+    if (!record) return null;
+    return { answers: record.answers || {}, completedAt: record.completedAt || null };
+  }
+  const done = profile[exercise.column];
+  if (done && Object.keys(done).length) return { answers: done, completedAt: null, complete: true };
+  const partial = profile[`${exercise.key}_progress`];
+  if (partial && Object.keys(partial).length) return { answers: partial, completedAt: null, complete: false };
+  return null;
+}
+
 export default async function handler(req) {
   if (req.method !== 'GET') return json({ ok: false, error: 'GET only' }, 405);
 
@@ -60,6 +90,16 @@ export default async function handler(req) {
     const url = new URL(req.url);
     const key = url.searchParams.get('exercise') || 'ex1';
 
+    const svc = { apikey: serviceKey, Authorization: `Bearer ${serviceKey}` };
+    // Every answer column, plus the progress slots, read once. Derived from the
+    // registry so this does not go stale when an exercise is added.
+    const answerCols = EXERCISES.map(e => e.column);
+    const progressCols = EXERCISES.filter(e => e.shape !== 'record').map(e => `${e.key}_progress`);
+    const profCols = ['name', 'partner_name', ...answerCols, ...progressCols].join(',');
+    const profRes = await fetch(
+      `${supabaseUrl}/rest/v1/profiles?id=eq.${user.id}&select=${profCols}`, { headers: svc });
+    const profile = (await profRes.json().catch(() => []))?.[0] || null;
+
     // The exercise has to be one the registry knows about. Anything else is a
     // typo or a probe, and answering it with an empty list would look like an
     // exercise with no questions rather than a bad request.
@@ -79,6 +119,7 @@ export default async function handler(req) {
         // What a finished set looks like, so the app can tell done from partial
         // without counting items itself.
         expectedKeys: items.filter(i => !i.__partBreak).map(i => i.answerKey),
+        saved: await savedAnswers(exercise, profile),
       });
     }
 
@@ -87,13 +128,8 @@ export default async function handler(req) {
       // assembled without knowing who they are. Read from the profile rather
       // than taken from the request: a caller that can name the couple is a
       // caller that can put someone else's name on the answers.
-      const svc = { apikey: serviceKey, Authorization: `Bearer ${serviceKey}` };
-      const pRes = await fetch(
-        `${supabaseUrl}/rest/v1/profiles?id=eq.${user.id}&select=name,partner_name`,
-        { headers: svc });
-      const profile = (await pRes.json().catch(() => []))?.[0] || {};
-      const you = (profile.name || '').trim() || 'You';
-      const partner = (profile.partner_name || '').trim() || 'Your partner';
+      const you = (profile?.name || '').trim() || 'You';
+      const partner = (profile?.partner_name || '').trim() || 'Your partner';
 
       return json({
         ok: true,
@@ -132,6 +168,7 @@ export default async function handler(req) {
           text: substName(q.core || q.text, you, partner),
           options: (q.options || []).map(o => substName(o, you, partner)),
         })),
+        saved: await savedAnswers(exercise, profile),
       });
     }
 
@@ -146,6 +183,7 @@ export default async function handler(req) {
         sections: CONFLICT_SECTIONS,
         frequencyOptions: FREQUENCY_OPTIONS,
         items: conflictQuestionsInOrder(),
+        saved: await savedAnswers(exercise, profile),
       });
     }
 
