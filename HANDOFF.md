@@ -273,4 +273,51 @@ stays on screen. This read as "the deploy has not landed" twice. Terminate and
 relaunch (`xcrun simctl terminate booted host.exp.Exponent`) to actually see a
 server-side change.
 
+### Continued: the exercises and results experiences
+
+Built while Ellie was away. Everything below is pushed and green on
+`npm run check`, `npx vite build` and `tsc`.
+
+**The blocker cleared first.** Results content lived in `src/App.jsx`, the
+website bundle, so the app could only ever show the code `WX` and no name for
+it. The ten couple types are now `api/_couple-types.js`, imported by the site
+and attached by `/api/results` as a `content` block: couple type name, tagline,
+description and nuance, plus per-dimension label, both pole names, accent, and
+where each partner landed. Attached on read, never frozen with the scores, so
+fixing a typo reaches couples who finished before the fix.
+
+**Results experience** (`attune-app/src/components/results.tsx`). Section list,
+a glance screen on a coloured ground, detail on the warm one. The dimension row
+is one shared track with two marks rather than two bars: the subject is the
+distance between two people, and two bars make that something you work out by
+comparing lengths. Each person keeps one colour throughout, with a legend.
+
+**Communication** (`exercise.tsx`) and **Expectations** (`expectations.tsx`)
+are answerable in the app, served by the new `/api/questions`. The app holds no
+question text at all. `twoPartEx1()`, `EX1_SCALE`, `CHILDHOOD_STRUCTURES` and
+`substName` all moved into `api/_questions.js`, and the website now imports
+them, so both surfaces ask one list in one order with one set of answer keys.
+
+**Verify this before trusting it.** Both exercises were verified rendering
+against fixtures generated from the real question modules, so the shapes are
+the server's rather than invented. Neither has been run end to end writing real
+answers, because that needs a signed-in session and no password was available.
+The written shape matches the website's field for field, which is a different
+thing from having watched it round-trip. Answer one of each on the reviewer
+account and check the results that come out.
+
+**Not built yet:**
+- Highlights and What Comes Next. Both need content that does not exist
+  server-side yet, and inventing it in the app would put results prose in a
+  second place.
+- Conflict Patterns results, all four screens. The privacy rule there is the
+  part to get right: `Your Patterns` must never render the partner's, and
+  `api/_conflict-results-prose.js` already holds the copy.
+- Relationship Reflection, Physical Intimacy and Conflict Patterns as
+  answerable exercises. `/api/questions` returns a clear 501 for these rather
+  than an empty list, so the app says so instead of looking broken.
+- The results section list has no locked or greyed rows. SCREENS.md wants an
+  owned-but-unfinished section listed rather than absent; today a section only
+  appears when the payload carries it.
+
 *Last updated: Session 17 — September 2026*
