@@ -12,7 +12,7 @@
  * when the software is working exactly as designed.
  */
 
-import { ActivityIndicator, Image, Pressable, Text, View } from 'react-native';
+import { ActivityIndicator, Image, Linking, Pressable, Text, View } from 'react-native';
 import type { ApiError } from '@/api/client';
 import { Colors, MaxContentWidth, Radius, Spacing, Type } from '@/constants/attune-theme';
 
@@ -54,11 +54,23 @@ export function ScreenError({
       ? { title: 'No connection', body: "You're offline. This will load as soon as you're back.", action: 'Try again' }
     : error.kind === 'unauthorized'
       ? { title: 'Sign in to continue', body: 'Your session has ended. Signing in again picks up exactly where you left off.', action: 'Sign in' }
+    : error.kind === 'not_found' && /profile/i.test(error.detail || '')
+      // A signed-in person with no profile row. Every endpoint answers 404 for
+      // this, and it used to render as "That page has moved", which describes
+      // nothing that happened and offers nothing to do about it.
+      ? { title: 'Your account is not set up yet',
+          body: 'Finish setting up on the website and this will fill in.',
+          action: 'Open the website' }
     : error.kind === 'not_found'
-      ? { title: 'Not here', body: "That page has moved or is no longer available.", action: 'Go back' }
+      ? { title: 'Not here', body: 'That is no longer available.', action: 'Try again' }
       : { title: 'Something went wrong', body: 'This is on our end, not yours. Your answers are saved.', action: 'Try again' };
 
-  const press = error.kind === 'unauthorized' ? onSignIn || onRetry : onRetry;
+  // The button said "Go back" and called onRetry. Whatever it says, it should
+  // do that thing.
+  const needsWebsite = error.kind === 'not_found' && /profile/i.test(error.detail || '');
+  const press = needsWebsite
+    ? () => Linking.openURL('https://www.attune-relationships.com/app')
+    : error.kind === 'unauthorized' ? onSignIn || onRetry : onRetry;
 
   return (
     <Centre>
