@@ -22,7 +22,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { deleteAccount } from '@/api/client';
 import { clearToken } from '@/api/session';
-import { Colors, MaxContentWidth, Palette, Radius, Spacing, Type } from '@/constants/attune-theme';
+import { Colors, MaxContentWidth, Palette, Radius, Spacing, Type, inputType } from '@/constants/attune-theme';
 
 const c = Colors.light;
 const SITE = 'https://www.attune-relationships.com';
@@ -130,7 +130,7 @@ export default function Settings({
               autoCorrect={false}
               accessibilityLabel="Type DELETE to confirm"
               style={{
-                ...Type.body, color: c.textStrong, borderColor: c.border, borderWidth: 1,
+                ...inputType(Type.body), color: c.textStrong, borderColor: c.border, borderWidth: 1,
                 borderRadius: Radius.md, paddingHorizontal: Spacing.md, paddingVertical: Spacing.sm,
                 marginTop: Spacing.sm,
               }}

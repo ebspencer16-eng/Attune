@@ -12,7 +12,8 @@
  * rejects for. Tapping one opens the site in the browser.
  */
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { useFocusEffect } from 'expo-router';
 import {
   Linking, Pressable, RefreshControl, ScrollView, Text, View, useWindowDimensions,
 } from 'react-native';
@@ -49,7 +50,9 @@ export default function ResourcesScreen() {
   // as In Practice being empty, and the screen said the same thing for both.
   const [postsFailed, setPostsFailed] = useState(false);
 
+  const loadingRef = useRef(false);
   const load = useCallback(async () => {
+    loadingRef.current = true;
     const [h, p] = await Promise.all([fetchHome(), fetchPosts()]);
     if (h.ok) { setHome(h.data); setError(null); }
     else setError(h.error);
@@ -57,9 +60,27 @@ export default function ResourcesScreen() {
     else setPostsFailed(true);
     setLoading(false);
     setRefreshing(false);
+    loadingRef.current = false;
   }, []);
 
   useEffect(() => { load(); }, [load]);
+
+  // Reload when this tab comes into focus, not only when it mounts.
+  //
+  // All four tabs mount when the app starts, so all four load at once. Open the
+  // app with an expired session and all four store an unauthorized error and
+  // render sign-in. Signing in on one reloaded that one; the other three kept
+  // showing their own stale sign-in screen forever, so every tab switch looked
+  // like being asked to sign in again.
+  //
+  // Skipped while a load is already running, so switching tabs quickly does not
+  // stack requests.
+  useFocusEffect(
+    useCallback(() => {
+      if (!loadingRef.current) load();
+    }, [load]),
+  );
+
 
   if (loading) return <Shell><ScreenLoading label="Loading your resources" /></Shell>;
 

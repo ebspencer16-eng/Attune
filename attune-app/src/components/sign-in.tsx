@@ -12,6 +12,7 @@
  */
 
 import { useState } from 'react';
+import { useRouter } from 'expo-router';
 import {
   ActivityIndicator, KeyboardAvoidingView, Platform, Pressable,
   ScrollView, Text, TextInput, View,
@@ -20,11 +21,12 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { isAuthConfigured, signIn } from '@/api/auth';
 import { AttuneMark } from '@/components/screen-states';
-import { Colors, MaxContentWidth, Radius, Spacing, Type } from '@/constants/attune-theme';
+import { Colors, MaxContentWidth, Radius, Spacing, Type, inputType } from '@/constants/attune-theme';
 
 const c = Colors.light;
 
 export default function SignIn({ onSignedIn, rejectedReason }: { onSignedIn: () => void; rejectedReason?: string }) {
+  const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [busy, setBusy] = useState(false);
@@ -39,9 +41,14 @@ export default function SignIn({ onSignedIn, rejectedReason }: { onSignedIn: () 
     const res = await signIn(email, password);
     setBusy(false);
     if (res.ok) {
-      // Rendered inline by the home screen, so signing in just reloads it.
-      // No navigation means no route to get wrong.
+      // Reload whichever tab this was rendered in, then go to Home.
+      //
+      // Every tab renders this screen, so signing in from Notes used to leave
+      // you looking at Notes. Signing in is the start of a session and Home is
+      // where a session starts: it carries the one thing the priority engine
+      // says matters next.
       onSignedIn();
+      router.replace('/');
     } else {
       setError(res.message);
     }
@@ -54,7 +61,8 @@ export default function SignIn({ onSignedIn, rejectedReason }: { onSignedIn: () 
     borderRadius: Radius.md,
     paddingHorizontal: Spacing.lg,
     paddingVertical: Spacing.md + 2,
-    ...Type.body,
+    // No lineHeight: it clips a focused input on iOS. See inputType.
+    ...inputType(Type.body),
     color: c.text,
   } as const;
 

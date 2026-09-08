@@ -11,6 +11,8 @@
  * usual fate of a design system nobody enforces.
  */
 
+import type { TextStyle } from 'react-native';
+
 // ── Ground and ink ─────────────────────────────────────────────────────────
 export const Palette = {
   cream: '#FFFDF9',
@@ -130,6 +132,27 @@ export const Fonts = {
   display: 'ui-serif',
   body: 'system-ui',
 } as const;
+
+/**
+ * Type for a TextInput, rather than a Text.
+ *
+ * iOS clips the text of a focused TextInput when the style carries lineHeight:
+ * the bottom of every character is cut off while typing and snaps back to
+ * normal the moment the field loses focus. It looks like a font problem and it
+ * is a layout one.
+ *
+ * So inputs take the same family, size and weight, and no lineHeight. Height
+ * comes from padding, which is what an input should be sized by anyway.
+ */
+export function inputType(t: {
+  fontFamily: string; fontSize: number; fontWeight: string;
+}): Pick<TextStyle, 'fontFamily' | 'fontSize' | 'fontWeight'> {
+  return {
+    fontFamily: t.fontFamily,
+    fontSize: t.fontSize,
+    fontWeight: t.fontWeight as TextStyle['fontWeight'],
+  };
+}
 
 export const Type = {
   hero: { fontFamily: Fonts.display, fontSize: 30, lineHeight: 34, fontWeight: '700' },

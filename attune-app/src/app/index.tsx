@@ -13,7 +13,8 @@
  * on card kind, so adding a card kind server-side never needs an app release.
  */
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { useFocusEffect } from 'expo-router';
 import { Linking, Pressable, RefreshControl, ScrollView, Text, View, useWindowDimensions } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -47,15 +48,35 @@ export default function HomeScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
 
+  const loadingRef = useRef(false);
   const load = useCallback(async () => {
+    loadingRef.current = true;
     const res = await fetchHome();
     if (res.ok) { setData(res.data); setError(null); }
     else { setError(res.error); }
     setLoading(false);
     setRefreshing(false);
+    loadingRef.current = false;
   }, []);
 
   useEffect(() => { load(); }, [load]);
+
+  // Reload when this tab comes into focus, not only when it mounts.
+  //
+  // All four tabs mount when the app starts, so all four load at once. Open the
+  // app with an expired session and all four store an unauthorized error and
+  // render sign-in. Signing in on one reloaded that one; the other three kept
+  // showing their own stale sign-in screen forever, so every tab switch looked
+  // like being asked to sign in again.
+  //
+  // Skipped while a load is already running, so switching tabs quickly does not
+  // stack requests.
+  useFocusEffect(
+    useCallback(() => {
+      if (!loadingRef.current) load();
+    }, [load]),
+  );
+
 
   /**
    * Follow a card.

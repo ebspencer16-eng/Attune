@@ -24,7 +24,7 @@ import { fetchConflictQuestions, saveExercise } from '@/api/client';
 import type { ApiError, ConflictQuestion, ConflictQuestionSet } from '@/api/client';
 import { ScreenError, ScreenLoading } from '@/components/screen-states';
 import {
-  BottomTabInset, Colors, MaxContentWidth, Palette, Radius, Spacing, Type,
+  BottomTabInset, Colors, MaxContentWidth, Palette, Radius, Spacing, Type, inputType,
 } from '@/constants/attune-theme';
 
 const c = Colors.light;
@@ -301,7 +301,7 @@ function Body({
       multiline
       textAlignVertical="top"
       style={{
-        ...Type.body, color: c.text, minHeight: 140,
+        ...inputType(Type.body), color: c.text, minHeight: 140,
         backgroundColor: c.surface, borderColor: c.border, borderWidth: 1,
         borderRadius: Radius.lg, padding: Spacing.lg,
       }}

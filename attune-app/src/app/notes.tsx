@@ -23,7 +23,8 @@
  * a renamed dimension relabels itself instead of going stale.
  */
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useFocusEffect } from 'expo-router';
 import {
   ActivityIndicator, Alert, KeyboardAvoidingView, Modal, Platform, Pressable,
   RefreshControl, ScrollView, Switch, Text, TextInput, View,
@@ -40,7 +41,7 @@ import SignIn from '@/components/sign-in';
 import { resolveAnchor } from '@/constants/anchors';
 import type { AnchorContext, ResolvedAnchor } from '@/constants/anchors';
 import {
-  Colors, MaxContentWidth, Palette, Radius, Spacing, Type,
+  Colors, MaxContentWidth, Palette, Radius, Spacing, Type, inputType,
 } from '@/constants/attune-theme';
 
 const c = Colors.light;
@@ -64,7 +65,9 @@ export default function NotesScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const [editing, setEditing] = useState<Note | 'new' | null>(null);
 
+  const loadingRef = useRef(false);
   const load = useCallback(async () => {
+    loadingRef.current = true;
     // Three calls that are always needed. Tags are fetched for their labels,
     // and fetching them is also what seeds them on a first open.
     const [n, t, h] = await Promise.all([fetchNotes(), fetchTags(), fetchHome()]);
@@ -73,6 +76,10 @@ export default function NotesScreen() {
       setError(n.error);
       setLoading(false);
       setRefreshing(false);
+      // Cleared here too. This path returns early, and leaving the flag set
+      // would mean the focus reload below never runs again for this tab: one
+      // failed load and Notes stays stale until the app restarts.
+      loadingRef.current = false;
       return;
     }
     setError(null);
@@ -103,9 +110,27 @@ export default function NotesScreen() {
 
     setLoading(false);
     setRefreshing(false);
+    loadingRef.current = false;
   }, []);
 
   useEffect(() => { load(); }, [load]);
+
+  // Reload when this tab comes into focus, not only when it mounts.
+  //
+  // All four tabs mount when the app starts, so all four load at once. Open the
+  // app with an expired session and all four store an unauthorized error and
+  // render sign-in. Signing in on one reloaded that one; the other three kept
+  // showing their own stale sign-in screen forever, so every tab switch looked
+  // like being asked to sign in again.
+  //
+  // Skipped while a load is already running, so switching tabs quickly does not
+  // stack requests.
+  useFocusEffect(
+    useCallback(() => {
+      if (!loadingRef.current) load();
+    }, [load]),
+  );
+
 
   const anchorCtx: AnchorContext = useMemo(() => {
     const byKey = new Map(tags.filter((t) => t.standard_key).map((t) => [t.standard_key as string, t]));
@@ -518,7 +543,7 @@ function Editor({
               onChangeText={setTitle}
               placeholder="Title"
               placeholderTextColor={c.textMuted}
-              style={{ ...Type.title, color: c.textStrong, paddingVertical: Spacing.sm }}
+              style={{ ...inputType(Type.title), color: c.textStrong, paddingVertical: Spacing.sm }}
             />
             <TextInput
               value={body}
@@ -528,7 +553,7 @@ function Editor({
               multiline
               autoFocus={!note}
               textAlignVertical="top"
-              style={{ ...Type.body, color: c.text, minHeight: 180, paddingVertical: Spacing.sm }}
+              style={{ ...inputType(Type.body), color: c.text, minHeight: 180, paddingVertical: Spacing.sm }}
             />
 
             {/* Tags. The list is seeded server-side from the live dimension and

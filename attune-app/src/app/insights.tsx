@@ -16,7 +16,8 @@
  * their exercise progress instead of their results, forever.
  */
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { useFocusEffect } from 'expo-router';
 import { Pressable, RefreshControl, ScrollView, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -46,7 +47,9 @@ export default function InsightsScreen() {
   // a screen that cannot ask anything.
   const [openExercise, setOpenExercise] = useState<string | null>(null);
 
+  const loadingRef = useRef(false);
   const load = useCallback(async () => {
+    loadingRef.current = true;
     const res = await fetchHome();
     if (res.ok) { setHome(res.data); setError(null); }
     else { setError(res.error); }
@@ -63,9 +66,27 @@ export default function InsightsScreen() {
 
     setLoading(false);
     setRefreshing(false);
+    loadingRef.current = false;
   }, []);
 
   useEffect(() => { load(); }, [load]);
+
+  // Reload when this tab comes into focus, not only when it mounts.
+  //
+  // All four tabs mount when the app starts, so all four load at once. Open the
+  // app with an expired session and all four store an unauthorized error and
+  // render sign-in. Signing in on one reloaded that one; the other three kept
+  // showing their own stale sign-in screen forever, so every tab switch looked
+  // like being asked to sign in again.
+  //
+  // Skipped while a load is already running, so switching tabs quickly does not
+  // stack requests.
+  useFocusEffect(
+    useCallback(() => {
+      if (!loadingRef.current) load();
+    }, [load]),
+  );
+
 
   if (loading) return <Shell><ScreenLoading label="Checking where you both are" /></Shell>;
 
