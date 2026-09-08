@@ -419,4 +419,32 @@ one-way link would let one partner share and the other never see it.
 **Still not built in the app:** Notes filtering (deliberately, and now
 unblocked), a post reader, notifications, and tab-bar badges.
 
+### Round four of checks
+
+**A signed-in person with no profile was told the page had moved.** Every
+endpoint answers 404 for that state, and the app rendered "That page has moved
+or is no longer available" under a button labelled Go back that called retry.
+Reachable: it is what the reviewer accounts looked like between being created
+and 054 being run. The client reads the 404 body now and the screen says the
+account is not set up and opens the website.
+
+**Eleven results sections had no label in the app.** The five expectations
+conversations and six intimacy dimensions are generated server-side from the
+live lists, and the app's hand-written map had neither. An annotation on any of
+them would read as "Exp convo 0". `RESULTS_SECTION_LABELS` is built beside the
+ids now and served with the tags; the app's map is a fallback only.
+
+That one is worth reading the commit for. The gate that found it was circular
+at first: it checked RESULTS_SECTIONS against isValidAnchor, and both read the
+same array, so it could only pass. Planting a bug proved it. Rewritten to
+compare the two lists that can actually drift, it failed immediately.
+
+**Verified rather than assumed:** `couple_results_history` exists, so a retake
+archives rather than silently losing the previous results, which every
+annotation anchored to them depends on. `privacy_preferences` exists, so 053
+has been run and the research opt-out is live. save-exercise verifies the token
+and refuses a body whose userId does not match it.
+
+**Eleven gates now**, each verified by planting the bug it catches.
+
 *Last updated: Session 17 — September 2026*
