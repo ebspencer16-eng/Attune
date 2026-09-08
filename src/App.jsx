@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useLayoutEffect, useRef } from "react";
 import { axisScores, blendedDimScores, AXIS_CONFIG, QUESTION_WEIGHTS } from "../api/_type-engine.js";
-import { PERSONALITY_QUESTIONS, RESPONSIBILITY_CATEGORIES, LIFE_QUESTIONS, PARTNER_VIEW_TEXT, twoPartEx1 } from "../api/_questions.js";
+import { PERSONALITY_QUESTIONS, RESPONSIBILITY_CATEGORIES, LIFE_QUESTIONS, PARTNER_VIEW_TEXT, twoPartEx1, CHILDHOOD_STRUCTURES, substName } from "../api/_questions.js";
 import { CONFLICT_SECTIONS, CONFLICT_INTRO, FREQUENCY_OPTIONS, conflictQuestionsInOrder } from "../api/_conflict-questions.js";
 import { summarizeConflict, conflictPair } from "../api/_lib/conflict-results.js";
 import { PATTERN_COPY, PATTERN_ACTIONS, PATTERN_NOTES, BAND_COLORS, NO_ACTION_NEEDED, SNAPSHOT_PROSE, SNAPSHOT_ROWS, OPENING_CHIPS, CONFLICT_RESULTS_COPY, FREQUENCY_LABELS, interpConflict } from "../api/_conflict-results-prose.js";
@@ -2871,30 +2871,15 @@ const EXP_CAT_STARTERS = {
 
 // ── EXPECTATIONS EXERCISE DATA CONSTANTS ────────────────────────────────────
 
-const CHILDHOOD_STRUCTURES = [
-  { id: "mom-dad",      label: "Mom and Dad (married or together)", cols: ["Mom", "Dad", "Both", "N/A"] },
-  { id: "single-mom",  label: "Primarily raised by Mom",            cols: ["Mom", "Other", "Both", "N/A"] },
-  { id: "single-dad",  label: "Primarily raised by Dad",            cols: ["Dad", "Other", "Both", "N/A"] },
-  { id: "two-moms",    label: "Two Moms",                           cols: ["Mom", "Mama", "Both", "N/A"] },
-  { id: "two-dads",    label: "Two Dads",                           cols: ["Dad", "Papa", "Both", "N/A"] },
-  { id: "grandparents",label: "Grandparents or extended family",    cols: ["Grandma", "Grandpa", "Both", "N/A"] },
-  { id: "split",       label: "Split between two households",       cols: ["Home 1", "Home 2", "Both", "N/A"] },
-  { id: "other",       label: "Another arrangement",                cols: ["Adult 1", "Adult 2", "Both", "N/A"] },
-];
+// Moved to api/_questions.js so /api/questions can serve the same options.
+
 
 // Substitute partner-name placeholders in expectation question / item labels.
 // The Extended Family responsibility items and Life & Values per-family
 // questions both reference each partner's family using {userName} and
 // {partnerName} placeholders. Storage keys are stable (placeholders kept
 // raw); only display strings are substituted at render time.
-function substName(s, userName, partnerName) {
-  if (!s) return s;
-  return String(s)
-    .replace(/\{userName\}/g, userName || "")
-    .replace(/\{partnerName\}/g, partnerName || "")
-    .replace(/\{U\}/g, userName || "")
-    .replace(/\{P\}/g, partnerName || "");
-}
+// substName moved to api/_questions.js, imported above.
 
 // Extended-family responsibility items and the two "involvement" life questions
 // are person-relative: each partner answers about THEIR OWN family under the

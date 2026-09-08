@@ -208,3 +208,43 @@ export const EX1_SCALE = [
   { val: 4, label: 'Mostly B' },
   { val: 5, label: 'Strongly B' },
 ];
+
+/**
+ * How someone was raised, which decides what the "growing up" column is called.
+ *
+ * Moved out of src/App.jsx with substName below, because /api/questions has to
+ * hand the app the same options the website asks. Two surfaces offering
+ * different household shapes would store answers under labels that do not line
+ * up when the two are compared.
+ */
+export const CHILDHOOD_STRUCTURES = [
+  { id: "mom-dad",      label: "Mom and Dad (married or together)", cols: ["Mom", "Dad", "Both", "N/A"] },
+  { id: "single-mom",  label: "Primarily raised by Mom",            cols: ["Mom", "Other", "Both", "N/A"] },
+  { id: "single-dad",  label: "Primarily raised by Dad",            cols: ["Dad", "Other", "Both", "N/A"] },
+  { id: "two-moms",    label: "Two Moms",                           cols: ["Mom", "Mama", "Both", "N/A"] },
+  { id: "two-dads",    label: "Two Dads",                           cols: ["Dad", "Papa", "Both", "N/A"] },
+  { id: "grandparents",label: "Grandparents or extended family",    cols: ["Grandma", "Grandpa", "Both", "N/A"] },
+  { id: "split",       label: "Split between two households",       cols: ["Home 1", "Home 2", "Both", "N/A"] },
+  { id: "other",       label: "Another arrangement",                cols: ["Adult 1", "Adult 2", "Both", "N/A"] },
+];
+
+/**
+ * Put the two names into a question or an item label.
+ *
+ * Item text carries {userName} and {partnerName}; couple type prose carries
+ * {U} and {P}. Both are handled here so callers do not have to know which
+ * convention a given string uses.
+ *
+ * Substitution is for display only. Answer keys keep the raw text, because the
+ * key has to be stable across two people who each substitute different names
+ * into it.
+ */
+export function substName(s, userName, partnerName) {
+  if (!s) return s;
+  return String(s)
+    .replace(/\{userName\}/g, userName || "")
+    .replace(/\{partnerName\}/g, partnerName || "")
+    .replace(/\{U\}/g, userName || "")
+    .replace(/\{P\}/g, partnerName || "");
+}
+

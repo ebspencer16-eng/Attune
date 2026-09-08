@@ -25,6 +25,7 @@ import type { ApiError, ExerciseState, HomeResponse, ResultsResponse } from '@/a
 import { ScreenError, ScreenLoading } from '@/components/screen-states';
 import ResultsExperience from '@/components/results';
 import Exercise from '@/components/exercise';
+import Expectations from '@/components/expectations';
 import SignIn from '@/components/sign-in';
 import {
   Colors, MaxContentWidth, Palette, Radius, Spacing, StatusColor, Type,
@@ -107,13 +108,13 @@ export default function InsightsScreen() {
   }
 
   if (openExercise) {
-    return (
-      <Exercise
-        exerciseKey={openExercise}
-        onClose={() => setOpenExercise(null)}
-        onFinished={() => { setOpenExercise(null); setLoading(true); load(); }}
-      />
-    );
+    const close = () => setOpenExercise(null);
+    const finished = () => { setOpenExercise(null); setLoading(true); load(); };
+    // Expectations asks a different shape of question from Communication, so it
+    // is a different screen rather than one screen with a mode flag.
+    return openExercise === 'ex2'
+      ? <Expectations onClose={close} onFinished={finished} />
+      : <Exercise exerciseKey={openExercise} onClose={close} onFinished={finished} />;
   }
 
   return (
@@ -206,7 +207,7 @@ function StatusTable({
           {/* Only your own column is actionable, and only for exercises the
               app can actually ask. A cell that opens nothing is worse than a
               plain status. */}
-          <StatusCell done={e.mine} onPress={!e.mine && e.key === 'ex1' ? () => onOpen(e.key) : undefined} />
+          <StatusCell done={e.mine} onPress={!e.mine && (e.key === 'ex1' || e.key === 'ex2') ? () => onOpen(e.key) : undefined} />
           <StatusCell done={e.theirs} muted />
         </View>
       ))}

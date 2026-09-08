@@ -472,6 +472,20 @@ export type QuestionItem = {
   __partBreak?: boolean;
 };
 
+export type ExpectationsSet = {
+  exercise: { key: string; label: string; shape: 'answers' | 'record' };
+  names: { you: string; partner: string };
+  childhoodStructures: { id: string; label: string; cols: string[] }[];
+  /** `key` is the raw item text and is what the answer is stored under. `label`
+   *  is the same text with names substituted, and is what a person reads. They
+   *  differ because two partners substitute different names into one item. */
+  categories: { id: string; label: string; items: { key: string; label: string }[] }[];
+  futureCols: string[];
+  futureColsDisplay: string[];
+  futureDetailOpts: string[];
+  lifeQuestions: { id: string; topic: string; text: string; options: string[] }[];
+};
+
 export type QuestionSet = {
   exercise: { key: string; label: string; shape: 'answers' | 'record' };
   scale: { val: number; label: string }[];
@@ -490,6 +504,11 @@ export type QuestionSet = {
 export function fetchQuestions(exercise: string) {
   return request<QuestionSet & { ok: true }>(
     `/api/questions?exercise=${encodeURIComponent(exercise)}`);
+}
+
+/** Expectations. A different shape from ex1, so it gets its own reader. */
+export function fetchExpectations() {
+  return request<ExpectationsSet & { ok: true }>('/api/questions?exercise=ex2');
 }
 
 /**

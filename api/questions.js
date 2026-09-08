@@ -23,7 +23,10 @@
 
 export const config = { runtime: 'edge' };
 
-import { twoPartEx1, EX1_SCALE } from './_questions.js';
+import {
+  twoPartEx1, EX1_SCALE, RESPONSIBILITY_CATEGORIES, LIFE_QUESTIONS,
+  CHILDHOOD_STRUCTURES, substName,
+} from './_questions.js';
 import { EXERCISES } from './_exercises.js';
 
 const HEADERS = { 'Content-Type': 'application/json', 'X-Content-Type-Options': 'nosniff' };
@@ -76,7 +79,60 @@ export default async function handler(req) {
       });
     }
 
-    // The other exercises are not answerable in the app yet. Saying so is
+    if (key === 'ex2') {
+      // Expectations asks about two people by name, so the options cannot be
+      // assembled without knowing who they are. Read from the profile rather
+      // than taken from the request: a caller that can name the couple is a
+      // caller that can put someone else's name on the answers.
+      const svc = { apikey: serviceKey, Authorization: `Bearer ${serviceKey}` };
+      const pRes = await fetch(
+        `${supabaseUrl}/rest/v1/profiles?id=eq.${user.id}&select=name,partner_name`,
+        { headers: svc });
+      const profile = (await pRes.json().catch(() => []))?.[0] || {};
+      const you = (profile.name || '').trim() || 'You';
+      const partner = (profile.partner_name || '').trim() || 'Your partner';
+
+      return json({
+        ok: true,
+        exercise: { key: exercise.key, label: exercise.label, shape: exercise.shape },
+        names: { you, partner },
+
+        // Who raised you decides what the "growing up" column is called.
+        childhoodStructures: CHILDHOOD_STRUCTURES,
+
+        // Items carry their raw text as the key and their readable text as the
+        // label. The key has to stay raw: two partners substitute different
+        // names into the same item, and a key that moved with the name would
+        // stop lining up between them.
+        categories: RESPONSIBILITY_CATEGORIES.map(cat => ({
+          id: cat.id,
+          label: cat.label,
+          items: cat.items.map(item => ({
+            key: item,
+            label: substName(item, you, partner),
+          })),
+        })),
+
+        futureCols: [you, partner, 'Both of us', "Doesn't apply to us"],
+        futureColsDisplay: [you, partner, 'Both', 'N/A'],
+        // Shown when someone answers "Both of us", because both rarely means
+        // exactly half and the difference is the interesting part.
+        futureDetailOpts: [
+          'Genuinely 50/50',
+          `Usually ${you}, sometimes ${partner}`,
+          `Usually ${partner}, sometimes ${you}`,
+        ],
+
+        lifeQuestions: LIFE_QUESTIONS.map(q => ({
+          id: q.id,
+          topic: substName(q.topic, you, partner),
+          text: substName(q.core || q.text, you, partner),
+          options: (q.options || []).map(o => substName(o, you, partner)),
+        })),
+      });
+    }
+
+    // The remaining exercises are not answerable in the app yet. Saying so is
     // better than returning an empty list, which reads as a bug.
     return json({
       ok: false,
