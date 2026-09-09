@@ -8,7 +8,7 @@
 // is a different nine, PROTOCOLS in api/_lib/comms-plan.js, with titles like
 // "Name your recharge needs".
 //
-// So Carolina reviewed and approved ten pieces of copy nobody has ever read,
+// So ten pieces of copy were reviewed and approved that nobody has ever read,
 // while nine that ship went through no review at all. The cost is not the
 // wasted hours. It is that we believed the action-plan copy was approved.
 //

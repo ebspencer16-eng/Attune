@@ -84,7 +84,7 @@ export function personalityFeedback({ dimensions, viewer, youName, themName, cop
  * It is what a customer actually sees on the Communication overview. It was
  * private, so the copy-review document could not read it and showed
  * DIM_ACTION_ITEMS instead, which is a different ten items that the product
- * has never rendered. Carolina approved those; nobody has ever reviewed these.
+ * has never rendered. Those were reviewed and approved; these never were.
  *
  * If you add a dimension here, add it to the review document's reachability
  * check too, or rather: do not, because check-approval-doc.mjs derives from

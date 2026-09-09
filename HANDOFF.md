@@ -578,7 +578,7 @@ than the article callouts ever did. Separately, the spaced **en** dash was
 doing the em dash's job in 58 more places; 34 were prose and fixed, 17 are
 label separators and were left.
 
-**Copy for Carolina.** The email and workbook rewrites are in `6a14fcf` and
+**Copy for Ellie.** The email and workbook rewrites are in `6a14fcf` and
 `f1f3519`. Nobody has reviewed that copy yet; it was pushed on the
 understanding review happens after, not before.
 
@@ -695,8 +695,15 @@ hidden by the noise:
 | `build_reflection_results_review.mjs` | Same shape. |
 
 All three read `src/App.jsx` by regex, which is why they go stale whenever that
-file is refactored. Worth considering whether they should read the content
-modules directly, as `build_prose_approval_doc.mjs` now does.
+file is refactored.
+
+**The fix, when someone picks this up:** have them read the content modules
+directly, the way `build_prose_approval_doc.mjs` now does. A generator that
+regexes a 15,000-line React file for a `const` is coupled to how that file is
+formatted, not to what it means, so it breaks on every refactor and tells you
+nothing about whether the content changed. Importing `api/_content/v1.js` or
+`api/_couple-types.js` gives the same data, breaks loudly when a name actually
+goes away, and is checked by `check-approval-doc.mjs` for reachability.
 
 The four needing an external converter want `libreoffice` for PDF export. They
 produce their .docx correctly without it.
@@ -706,4 +713,4 @@ dimensions have one. A couple whose widest gap in a domain is Reassurance sees
 nothing there. It needs a title of about five words and one instruction a
 couple can carry out in a week, in the shape of the other nine. Flagged in the
 approval document as section 7's missing item, and printed by
-`check-protocols.mjs` on every run. Carolina to write.
+`check-protocols.mjs` on every run. Ellie to write.

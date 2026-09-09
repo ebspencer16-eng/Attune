@@ -208,7 +208,7 @@ Object.entries(DOMAIN_ALIGNED).forEach(([dom, item], i) => {
 // DIM_ACTION_ITEMS is ten action items that were written, reviewed and
 // approved, and that the product has never rendered. Deleting them would throw
 // away work and a decision that was actually made. They are shown here as a
-// proposal instead, so the choice between the two sets is Carolina's.
+// proposal instead, so the choice between the two sets is Ellie's.
 children.push(midSection(`7.${PROTOCOLS.length + 3}`, 'PROPOSAL, NOT SHIPPED', ORANGE));
 children.push(prose('The ten items below were written and approved but have never appeared in the product. Section 7 above is what customers actually see. These are kept here so nothing approved is lost: some read better than what ships, and swapping any of them in is a decision rather than a deletion. {LO} and {HI} are the partners at each end.', { bold: true }));
 Object.entries(DIM_ACTION_ITEMS).forEach(([dim, item], i) => {

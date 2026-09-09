@@ -8,7 +8,13 @@ copy-pasteable commands one at a time, and never assume familiarity with git,
 terminals or build tools. If something would be faster a different way, say so
 rather than waiting to be asked.
 
-**Carolina** handles content review with Ellie.
+**Ellie writes all customer-facing copy.** Every word a customer reads is
+hers. **Carolina reviews after publication**, not before, so copy is never
+blocked waiting on her. Neither of them is the LMFT.
+
+This matters for routing. Do not hold a copy gap for review, and do not write
+customer-facing copy yourself to fill one. Name the gap precisely, say what
+shape the missing copy needs to be, and leave it for Ellie.
 
 ---
 
@@ -126,6 +132,24 @@ Deriving the list is still right; it is what stops the list going stale. It
 just means any scanner has to resolve the derivation too. When you write a gate
 that looks for a column, a route, an exercise key or a package name, ask what
 the indirection for that thing is, and match on both.
+
+**When a check has been failing for a long time, the failure is not the
+problem. Nobody noticing is.** `npm run check:docs` reported "18 of 27
+generators failed" on every run, because nineteen of them wrote to a sandbox
+path that does not exist on a developer's machine. None of that was a
+generator being broken.
+
+A tool that always reports eighteen failures is a tool nobody reads, and a real
+break hides inside the noise. One did: the copy-review document had been
+showing ten action items the product has never rendered, so ten pieces of copy
+were reviewed and approved that nobody would ever see, while the nine that ship
+went through no review at all.
+
+Those were the same bug wearing two costumes. A tool nobody reads and a
+document nobody can check are both places where confidence outruns evidence,
+and the second was hiding inside the first. So: separate "broken" from
+"unavailable here" in any check that shells out, and treat a long-standing
+failure as a question about the check, not just about the thing it checks.
 
 **State the method next to the number.** A precise figure invites less
 scrutiny than a vague one, which is exactly backwards when the precision came
