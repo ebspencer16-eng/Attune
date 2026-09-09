@@ -24,7 +24,7 @@
  * its own colour whichever slot it lands in.
  */
 
-import { Text, View } from 'react-native';
+import { Text, View, useWindowDimensions } from 'react-native';
 
 import { Colors, Radius, Spacing, Type } from '@/constants/attune-theme';
 import type { PersonResults } from '@/api/client';
@@ -37,7 +37,7 @@ type Quadrant = { code: string; name: string; color: string; fill: string };
 const AXIS = { left: 'Open', right: 'Guarded', top: 'Engage', bottom: 'Withdraw' };
 
 export default function CoupleMap({
-  a, b, aName, bName, quadrants, size = 300,
+  a, b, aName, bName, quadrants, size: fixedSize,
 }: {
   a: PersonResults | null;
   b: PersonResults | null;
@@ -46,6 +46,10 @@ export default function CoupleMap({
   quadrants?: Quadrant[];
   size?: number;
 }) {
+  const { width } = useWindowDimensions();
+  // Full width inside the page's 24pt gutters, capped so it does not become a
+  // huge square on a tablet.
+  const size = fixedSize ?? Math.min(320, width - Spacing.xl * 2);
   const qs = quadrants?.length === 4 ? quadrants : null;
   const pa = a?.coords;
   const pb = b?.coords;
@@ -76,50 +80,45 @@ export default function CoupleMap({
         {AXIS.top.toUpperCase()}
       </Text>
 
-      <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-        <Text style={{ ...label, color: c.textMuted, width: 62, textAlign: 'right', marginRight: Spacing.sm }}>
-          {AXIS.left.toUpperCase()}
-        </Text>
-
-        <View style={{ width: size, height: size, borderRadius: Radius.lg, overflow: 'hidden' }}>
-          {/* Four quadrants, in the server's order: W X Y Z. */}
-          <View style={{ flexDirection: 'row', flexWrap: 'wrap', width: size, height: size }}>
-            {qs.map((q) => (
-              <View
-                key={q.code}
-                style={{ width: size / 2, height: size / 2, backgroundColor: q.fill, padding: Spacing.sm }}>
-                <Text style={{ ...label, fontSize: 9, color: q.color }} numberOfLines={1}>
-                  {q.name}
-                </Text>
-              </View>
-            ))}
-          </View>
-
-          {/* The two axis lines, so the quadrants read as one field rather than
-              four tiles. */}
-          <View style={{ position: 'absolute', left: 0, right: 0, top: size / 2 - 0.5, height: 1, backgroundColor: 'rgba(0,0,0,0.10)' }} />
-          <View style={{ position: 'absolute', top: 0, bottom: 0, left: size / 2 - 0.5, width: 1, backgroundColor: 'rgba(0,0,0,0.10)' }} />
-
-          {[A, B].map((p) => (
+      <View style={{ width: size, height: size, borderRadius: Radius.lg, overflow: 'hidden' }}>
+        {/* Four quadrants, in the server's order: W X Y Z. */}
+        <View style={{ flexDirection: 'row', flexWrap: 'wrap', width: size, height: size }}>
+          {qs.map((q) => (
             <View
-              key={p.name}
-              style={{
-                position: 'absolute', left: p.x - dot / 2, top: p.y - dot / 2,
-                width: dot, height: dot, borderRadius: dot / 2,
-                backgroundColor: p.color, borderColor: '#fff', borderWidth: 3,
-              }}
-            />
+              key={q.code}
+              style={{ width: size / 2, height: size / 2, backgroundColor: q.fill, padding: Spacing.sm }}>
+              <Text style={{ ...label, fontSize: 9, color: q.color }} numberOfLines={1}>
+                {q.name}
+              </Text>
+            </View>
           ))}
         </View>
 
-        <Text style={{ ...label, color: c.textMuted, width: 62, marginLeft: Spacing.sm }}>
-          {AXIS.right.toUpperCase()}
-        </Text>
+        {/* The two axis lines, so the quadrants read as one field rather than
+            four tiles. */}
+        <View style={{ position: 'absolute', left: 0, right: 0, top: size / 2 - 0.5, height: 1, backgroundColor: 'rgba(0,0,0,0.10)' }} />
+        <View style={{ position: 'absolute', top: 0, bottom: 0, left: size / 2 - 0.5, width: 1, backgroundColor: 'rgba(0,0,0,0.10)' }} />
+
+        {[A, B].map((p) => (
+          <View
+            key={p.name}
+            style={{
+              position: 'absolute', left: p.x - dot / 2, top: p.y - dot / 2,
+              width: dot, height: dot, borderRadius: dot / 2,
+              backgroundColor: p.color, borderColor: '#fff', borderWidth: 3,
+            }}
+          />
+        ))}
       </View>
 
-      <Text style={{ ...label, color: c.textMuted, marginTop: Spacing.xs }}>
-        {AXIS.bottom.toUpperCase()}
-      </Text>
+      {/* The horizontal axis is labelled under the map rather than flanking it.
+          Flanking labels need about 120 points of margin the phone does not
+          have, and the right-hand one was rendering as "GUARDE". */}
+      <View style={{ flexDirection: 'row', justifyContent: 'space-between', width: size, marginTop: Spacing.xs }}>
+        <Text style={{ ...label, color: c.textMuted }}>{AXIS.left.toUpperCase()}</Text>
+        <Text style={{ ...label, color: c.textMuted }}>{AXIS.bottom.toUpperCase()}</Text>
+        <Text style={{ ...label, color: c.textMuted }}>{AXIS.right.toUpperCase()}</Text>
+      </View>
 
       <View style={{ flexDirection: 'row', gap: Spacing.lg, marginTop: Spacing.md }}>
         {[upper, lower].map((p) => (
