@@ -112,11 +112,10 @@ export function commsProtocols(byDim, youName, themName) {
 /**
  * The three-tile plan on the Communication overview, one per domain.
  *
- * Each tile leads with the domain's widest dimension. When that dimension has
- * shift prose the tile is "One thing to try"; when the two are matched it is
- * "One thing to keep in mind" and the copy comes from DOMAIN_ALIGNED, which
- * says something useful about sharing a position rather than restating that
- * they share it.
+ * Each tile leads with the domain's widest dimension, and shows the shift that
+ * helps. When the two are matched there is no shift to give, so the tile
+ * carries DOMAIN_ALIGNED's own title and body, which say something useful
+ * about sharing a position rather than restating that they share it.
  */
 export function commsActionPlan({ feedback, copy }) {
   const byDim = Object.fromEntries(feedback.map((f) => [f.dim, f]));
@@ -131,11 +130,18 @@ export function commsActionPlan({ feedback, copy }) {
       || lead.strengthText
       || null;
 
+    // No generic label on this page. "One thing to try" and "One thing to keep
+    // in mind" sat where a summary line should and said nothing: the domain
+    // name is above and the advice below. On Conflict Patterns the same label
+    // does real work, separating an action from an awareness note against the
+    // frequency band. There is no such distinction here.
+    //
+    // An aligned domain keeps its title, because DOMAIN_ALIGNED's is a real
+    // sentence about this couple rather than a label.
     const aligned = copy.DOMAIN_ALIGNED?.[domain.id];
     const base = advice
-      ? { title: 'One thing to try', body: advice, dimLabel: lead.label }
+      ? { title: null, body: advice, dimLabel: lead.label }
       : { title: aligned?.title || null, body: aligned?.body || null, dimLabel: null };
-    if (!lead.adviceText && advice) base.title = 'One thing to keep in mind';
 
     return {
       domain: domain.id,

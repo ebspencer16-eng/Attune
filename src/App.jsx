@@ -3790,13 +3790,22 @@ function PersonalityResults({ myAnswers, partnerAnswers, userName, partnerName, 
       || fb?.strengthText
       || null;
   };
-  // Title follows the content: guidance for a gap, a caution for a match.
-  const adviceTitleFor = (dim) => (byDim[dim]?.adviceText ? "One thing to try" : "One thing to keep in mind");
+  // No generic label on this page.
+  //
+  // These tiles used to open with "One thing to try" or "One thing to keep in
+  // mind", which sits where a summary line should and says nothing: the domain
+  // name is already above it and the advice is already below. On Conflict
+  // Patterns the same label does real work, because there it separates an
+  // action from an awareness note and that difference is tied to the frequency
+  // band. Here there is no such distinction to carry.
+  //
+  // An aligned domain still gets a title, because DOMAIN_ALIGNED's is a real
+  // sentence about this couple rather than a label.
   const glancePlan = ["inner","connection","hard"].map(dom => {
     const lead = leadDimFor(dom);
     const advice = dimAdviceFor(lead);
     const base = advice
-      ? { title: adviceTitleFor(lead), body: advice, dimLabel: DIM_META[lead]?.label }
+      ? { title: null, body: advice, dimLabel: DIM_META[lead]?.label }
       : { title: _content.DOMAIN_ALIGNED[dom].title, body: _content.DOMAIN_ALIGNED[dom].body };
     if (dom === "hard") {
       base.reflect = "In your next hard conversation, pause and ask yourself: am I trying to understand my partner's side, or am I trying to win the argument? Aim for the first one.";
@@ -3888,7 +3897,7 @@ function PersonalityResults({ myAnswers, partnerAnswers, userName, partnerName, 
             {glancePlan.map((item, i) => (
               <div key={i} style={{ background: "rgba(255,255,255,0.13)", border: `1px solid ${item.color}66`, borderLeft: `4px solid ${item.color}`, borderRadius: 12, padding: "0.9rem 1.1rem", boxShadow: "0 6px 20px rgba(0,0,0,0.14)" }}>
                 <div style={{ fontSize: "0.58rem", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.95)", fontFamily: BFONT, fontWeight: 700, marginBottom: "0.4rem" }}>{item.label}</div>
-                <div style={{ fontSize: "0.82rem", color: "rgba(255,255,255,0.9)", fontFamily: BFONT, fontWeight: 600, marginBottom: "0.35rem" }}>{item.title}</div>
+                {item.title && <div style={{ fontSize: "0.82rem", color: "rgba(255,255,255,0.9)", fontFamily: BFONT, fontWeight: 600, marginBottom: "0.35rem" }}>{item.title}</div>}
                 <div style={{ fontSize: "0.75rem", color: "rgba(255,255,255,0.6)", fontFamily: BFONT, lineHeight: 1.6 }}>{item.body}</div>
                 {item.reflect && <div style={{ fontSize: "0.75rem", color: "rgba(255,255,255,0.72)", fontFamily: BFONT, lineHeight: 1.6, marginTop: "0.5rem", fontStyle: "italic", borderLeft: `2px solid ${item.color}55`, paddingLeft: "0.7rem" }}>{item.reflect}</div>}
               </div>
@@ -3991,7 +4000,10 @@ function PersonalityResults({ myAnswers, partnerAnswers, userName, partnerName, 
           );
         })()}
 
-        {/* ── ONE THING TO TRY — guidance for this domain's widest gap ── */}
+        {/* ── ONE THING TO TRY — guidance for this domain's widest gap ──
+            The title was a ternary on whether advice existed. It could not
+            reach the other branch: the guard below returns null when there is
+            no advice, so this only ever read "One thing to try". */}
         {(() => {
           const lead = leadDimFor(grp.id);
           const advice = dimAdviceFor(lead);
@@ -4000,7 +4012,7 @@ function PersonalityResults({ myAnswers, partnerAnswers, userName, partnerName, 
           return (
             <div style={{ marginTop: "1.5rem", background: "rgba(255,255,255,0.10)", border: "1px solid rgba(255,255,255,0.2)", borderLeft: `4px solid ${m.color}`, borderRadius: 14, padding: "1.25rem 1.5rem" }}>
               <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: "1rem", marginBottom: "0.6rem" }}>
-                <div style={{ fontSize: "0.62rem", textTransform: "uppercase", letterSpacing: "0.12em", color: "rgba(255,255,255,0.9)", fontWeight: 700, fontFamily: BFONT }}>{adviceTitleFor(lead)}</div>
+                <div style={{ fontSize: "0.62rem", textTransform: "uppercase", letterSpacing: "0.12em", color: "rgba(255,255,255,0.9)", fontWeight: 700, fontFamily: BFONT }}>One thing to try</div>
                 <div style={{ fontSize: "0.62rem", color: "rgba(255,255,255,0.6)", fontFamily: BFONT, whiteSpace: "nowrap" }}>{m.label}</div>
               </div>
               <p style={{ fontSize: "0.86rem", color: "rgba(255,255,255,0.88)", fontFamily: BFONT, lineHeight: 1.7, margin: 0 }}>{advice}</p>
