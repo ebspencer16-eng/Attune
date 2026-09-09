@@ -22,6 +22,17 @@
 // If a nav change ever has to be made in twenty files by hand and this gate
 // catches the one that was missed, that is the moment to build the generator.
 //
+// ── HOW IT WORKS AND COUPLE TYPES ──────────────────────────────────────────
+// Both were listed in the nav on 2 of 16 pages and in the footer on 2 of 13,
+// and nothing else linked either. Two pages we built that nobody could find.
+// They are now on every nav and every footer, so this gate has no recorded
+// exceptions: any difference it reports is drift.
+//
+// The two surfaces label the same page differently. The nav says "How it
+// works", the footer says "Methodology" and rewrites /methodology to the same
+// file. That was the existing pattern on both surfaces and was kept rather
+// than unified, but one page with two names in one site is worth a look.
+//
 // ── WHAT IS NOT COVERED, AND IT MATTERS ────────────────────────────────────
 // The <style> block inside <footer>. That block is not the footer's CSS: it
 // also carries the sub-page hero (.page-header) and the mobile nav, pasted
@@ -51,53 +62,6 @@ const NAV_EXEMPT = new Map([
   ['checkout.html', 'reduced nav: no menu during payment'],
   ['gift-confirmation.html', 'reduced nav, post-purchase'],
 ]);
-
-/**
- * ── OPEN DECISIONS, NOT PERMANENT ALLOWANCES ───────────────────────────────
- *
- * Two differences are known, explained, and waiting on an information
- * architecture decision that this gate has no business making by picking
- * whichever version is more common. They are recorded so they cannot be
- * forgotten and so no OTHER difference can hide behind them, and they are
- * printed on every successful run rather than sitting silently in a comment.
- *
- * When each is decided, delete it here and let the check run clean.
- */
-
-/**
- * how-it-works.html and couple-types.html list two extra links in the Learn
- * dropdown: "How it works" and "Couple Types". The other fourteen pages do
- * not, so those two pages are the only route to either from the nav.
- *
- * Combined with the footer difference below, /how-it-works is reachable from
- * the nav on 2 of 16 pages and from the footer on 2 of 13. The site's main
- * explainer is very close to orphaned.
- */
-const NAV_KNOWN_DIFFERENCE = {
-  files: ['public/how-it-works.html', 'public/couple-types.html'],
-  links: ['<a href="/how-it-works">How it works</a>', '<a href="/couple-types">Couple Types</a>'],
-  note: 'open decision: should all sixteen navs list How it works and Couple Types?',
-};
-
-/**
- * ── AN OPEN DECISION, NOT A PERMANENT ALLOWANCE ────────────────────────────
- * legal.html and privacy-choices.html carry a tenth footer link, "Methodology",
- * which rewrites to how-it-works.html. The other eleven footers do not have it,
- * and none of the thirteen links how-it-works by any other name. So the main
- * explainer is unreachable from the footer on eleven of thirteen pages.
- *
- * Whether the eleven gain the link or the two lose it is an information
- * architecture question for Ellie, not something this gate should decide by
- * picking whichever version is more common. It is recorded here so that it
- * cannot be forgotten, and so no OTHER difference can hide behind it.
- *
- * When it is decided, delete this and let the check run clean.
- */
-const FOOTER_KNOWN_DIFFERENCE = {
-  files: ['public/legal.html', 'public/privacy-choices.html'],
-  link: '<a href="/methodology">Methodology</a>',
-  note: 'open decision: should all thirteen footers link Methodology, or neither?',
-};
 
 function blockOf(text, openRe, tag) {
   const m = openRe.exec(text);
@@ -163,16 +127,7 @@ function compare(kind, openRe, tag, exempt, stripStyle) {
     let block = blockOf(text, new RegExp(openRe), tag);
     if (!block) continue;
     if (stripStyle) block = block.replace(/<style>[\s\S]*?<\/style>/g, '');
-    // The known differences are removed AFTER normalising, because in the
-    // source they carry whatever whitespace the file was written with and an
-    // exact string will not match.
-    let key = canon(block);
-    if (kind === 'footer' && FOOTER_KNOWN_DIFFERENCE.files.includes(rel)) {
-      key = key.replace(FOOTER_KNOWN_DIFFERENCE.link, '');
-    }
-    if (kind === 'nav' && NAV_KNOWN_DIFFERENCE.files.includes(rel)) {
-      for (const link of NAV_KNOWN_DIFFERENCE.links) key = key.replace(link, '');
-    }
+    const key = canon(block);
     if (!groups.has(key)) groups.set(key, []);
     groups.get(key).push(rel);
   }
@@ -208,7 +163,3 @@ if (problems.length) {
 console.log(
   `[check-chrome] one nav across ${navs} pages (${NAV_EXEMPT.size} named variants), `
   + `one footer across ${foots}. Footer style blocks are NOT covered; see the header.`);
-for (const d of [NAV_KNOWN_DIFFERENCE, FOOTER_KNOWN_DIFFERENCE]) {
-  console.log(`[check-chrome] ${d.note}`);
-  console.log(`               held by ${d.files.join(', ')}`);
-}

@@ -598,3 +598,43 @@ understanding review happens after, not before.
 - The `.btn-primary` background is itself an orange-to-orange gradient. Left
   alone; not flagged as a tell.
 - Four `<title>`s use commas where eleven now use a middle dot.
+
+---
+
+## Shared chrome, and one thing left for Ellie (2026-09-09)
+
+**Done.** The palette is in `public/tokens.css` (180 duplicated declarations
+removed, eleven real disagreements kept as visible overrides and listed there).
+`/how-it-works` and `/couple-types` were in the nav on 2 of 16 pages and the
+footer on 2 of 13, with nothing else linking either; both are now on every nav
+and footer. `check-chrome.mjs` holds one nav and one footer and has no recorded
+exceptions, so anything it reports is drift.
+
+Note: the nav labels that page "How it works" and the footer labels it
+"Methodology" (`/methodology` rewrites to the same file). Both were the
+existing pattern on their own surface and were kept. One page with two names
+is worth a decision at some point.
+
+### Open for Ellie: the seven footer style blocks
+
+The `<style>` inside `<footer>` is not the footer's CSS. It also carries the
+sub-page hero and the mobile nav, pasted into the footer element on each page,
+and it has drifted seven ways. **None of the seven is broken** — that was
+checked directly, by asking for each page whether it uses markup that only
+that block styles. Every page either carries the rules or styles them itself.
+So all seven differences are design or placement choices, and picking one is a
+judgement call rather than a fix.
+
+| Variant | Pages | What is different |
+|---|---|---|
+| v1 | couple-types, faq, how-it-works, offerings, resources, reviews | the baseline: full sub-page hero, `.page-header-inner` at **780px** |
+| v2 | legal, privacy-choices | no `.page-header` rules at all; neither page uses that markup |
+| v3 | purpose | identical to v1 except `.page-header-inner` is **1120px** |
+| v4 | home | no sub-page hero rules; home has a hero of its own, not a `.page-header` |
+| v5 | practice | v1 plus mobile-nav rules (`.mobile-menu`, `.mm-section`, `.mm-label`, `.mm-sub`) that no other page's block carries |
+| v6 | contact | like v2, no `.page-header` rules; does not use that markup |
+| v7 | wedding-registry | only `.site-footer` rules. It does use `.page-header`, but styles it in the page's own `<style>` instead |
+
+The one to look at first is **purpose at 1120px against everyone else's
+780px**, because that is the only case where two pages using the same markup
+are deliberately laid out to different widths.
