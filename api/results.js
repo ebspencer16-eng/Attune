@@ -22,7 +22,7 @@
 
 export const config = { runtime: 'edge' };
 
-import { sectionsWithLabels } from './_lib/results-sections.js';
+import { sectionsWithLabels, resultsNav } from './_lib/results-sections.js';
 import { expectationsSummary } from './_lib/expectations.js';
 import { intimacyResults } from './_lib/intimacy-results.js';
 import { reflectionResults } from './_lib/reflection-results.js';
@@ -32,6 +32,7 @@ import { capabilitiesFor, OWNERSHIP_COLUMNS } from './_lib/ownership.js';
 import { DIM_META } from './_workbook-content.js';
 import { DIM_KEYS, AXIS_CONFIG } from './_type-engine.js';
 import { ALIGNMENT_THRESHOLD } from './_lib/results.js';
+import { alignedAdvice, getDimShift } from './_lib/dimension-copy.js';
 import { COUPLE_TYPES } from './_couple-types.js';
 import { DOMAIN_OF, DOMAIN_LABEL } from './_lib/tags.js';
 import { personResults } from './_lib/results.js';
@@ -114,6 +115,26 @@ function withContent(results, viewer) {
       gap: results.gaps?.[dim] ?? null,
     };
   });
+
+  /**
+   * The words each dimension gets, the same ones the website shows.
+   *
+   * `aligned` when the two landed close together, `shift` when they did not.
+   * Only ever one of the two, chosen by the threshold rather than by whoever
+   * is rendering, so both surfaces make the same call.
+   *
+   * Names are substituted here because getDimShift writes the sentence around
+   * whichever of the two sits lower on the scale. Which of them is the reader
+   * does not change the sentence.
+   */
+  const nameA = a?.name || 'Your partner';
+  const nameB = b?.name || 'Your partner';
+  for (const d of dimensions) {
+    if (d.a == null || d.b == null) continue;
+    const wide = d.gap != null && d.gap >= ALIGNMENT_THRESHOLD.gap;
+    d.aligned = wide ? null : alignedAdvice(d.key, d.a, d.b, null);
+    d.shift = wide ? getDimShift(d.key, d.a, d.b, nameA, nameB, null) : null;
+  }
 
   return {
     ...results,
@@ -370,6 +391,19 @@ export default async function handler(req) {
         reflection,
         conflictReady: ownership.ownsConflict,
         names: { you: me.name || 'You', them: partner?.name || 'your partner' },
+      }),
+      /**
+       * The navigation, as two levels, exactly as the website's sidebar.
+       *
+       * A group with no children is a page. A group with children is a section
+       * whose first child is its overview. The app renders this rather than
+       * grouping the flat list itself, because a grouping invented in the app
+       * is a second opinion about what the product is.
+       */
+      nav: resultsNav({
+        hasReflection: ownership.ownsReflection,
+        intimacyReady: ownership.ownsIntimacy && bothDone('intimacy'),
+        conflictListed: ownership.ownsConflict,
       }),
       sections: sectionsWithLabels({
         hasReflection: ownership.ownsReflection,

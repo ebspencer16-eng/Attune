@@ -25,7 +25,7 @@ import { fetchConflictResults } from '@/api/client';
 import type {
   ConflictResults, CoupleResults, ExpectationRow, ExpectationsSummary,
   IntimacyDimension, IntimacyResults, NextStepGroup, ReflectionResults,
-  ResultDimension, ResultsSection,
+  ResultDimension, ResultsNavGroup, ResultsSection,
 } from '@/api/client';
 import ConflictResultsView from '@/components/conflict-results';
 import { Eyebrow } from '@/components/screen-states';
@@ -65,12 +65,13 @@ function interp(text: string | null | undefined, you: string, them: string): str
 }
 
 export default function Results({
-  results, owned = [], sections: fromServer,
+  results, owned = [], sections: fromServer, nav = [],
   expectations = null, intimacy = null, reflection = null, whatComesNext = null,
 }: {
   results: CoupleResults;
   owned?: string[];
   sections?: ResultsSection[];
+  nav?: ResultsNavGroup[];
   expectations?: ExpectationsSummary | null;
   intimacy?: IntimacyResults | null;
   reflection?: ReflectionResults | null;
@@ -89,25 +90,42 @@ export default function Results({
   const [sectionId, setSectionId] = useState<string>(sections[0]?.id ?? 'highlights');
 
   /**
-   * Keep the active pill on screen.
+   * The nav, two levels, from the server.
    *
-   * With up to twenty-nine sections the spine is far wider than the phone, so
-   * moving forward with the button at the bottom left the pill for the section
-   * you were reading somewhere off to the right. The pill row then said you
-   * were on the first section no matter where you actually were.
+   * The fallback groups the flat section list into one page each, which is
+   * what a cached payload from before the nav existed can still render.
    */
-  const spine = useRef<ScrollView>(null);
-  const pillX = useRef<Record<string, number>>({});
+  const groups: ResultsNavGroup[] = nav.length
+    ? nav
+    : sections.map((s) => ({ id: s.id, label: s.label }));
+
+  /** Which group the page being read belongs to. */
+  const groupOf = (id: string) =>
+    groups.find((g) => g.id === id || g.children?.some((ch) => ch.id === id)) ?? null;
+
+  /**
+   * Keep both rows following the reader.
+   *
+   * Twenty-nine sections is far wider than a phone, so moving forward left the
+   * entry for the page you were reading off to the right, and the row then
+   * claimed you were still at the start.
+   */
+  const topNav = useRef<ScrollView>(null);
+  const pageNav = useRef<ScrollView>(null);
+  const groupX = useRef<Record<string, number>>({});
+  const pageX = useRef<Record<string, number>>({});
   const section = sections.some((s) => s.id === sectionId) ? sectionId : (sections[0]?.id ?? 'highlights');
   const index = sections.findIndex((s) => s.id === section);
+  const activeGroup = groupOf(section);
 
   useEffect(() => {
-    const x = pillX.current[section];
-    if (x == null) return;
-    // A little to the left of the pill, so it does not sit flush against the
-    // edge and look like the row starts there.
-    spine.current?.scrollTo({ x: Math.max(0, x - Spacing.xl), animated: true });
-  }, [section]);
+    // A little to the left of each, so the active entry does not sit flush
+    // against the edge and look like the row starts there.
+    const gx = activeGroup ? groupX.current[activeGroup.id] : undefined;
+    if (gx != null) topNav.current?.scrollTo({ x: Math.max(0, gx - Spacing.xl), animated: true });
+    const px = pageX.current[section];
+    if (px != null) pageNav.current?.scrollTo({ x: Math.max(0, px - Spacing.xl), animated: true });
+  }, [section, activeGroup]);
 
   // Conflict Patterns is a separate payload with its own privacy rules, so it
   // is fetched separately rather than folded into /api/results. Not owning the
@@ -154,54 +172,86 @@ export default function Results({
 
   return (
     <View style={{ flex: 1 }}>
-      {/* The spine. Sideways rather than stacked, so it costs one line of
-          height on a screen whose job is the content below it. */}
+      {/* Two levels, the same as the sidebar on the website.
+          Top row is the sections; the row under it is the pages inside the one
+          you are in. A group with no pages of its own shows no second row. */}
       <ScrollView
-        ref={spine}
+        ref={topNav}
         horizontal
         showsHorizontalScrollIndicator={false}
-        // Its own height, and no share of the column's.
-        //
-        // None of the three children of this screen had a flex rule, so the
-        // column had nothing to distribute height by and squeezed the spine
-        // until its labels were a sliver. The spine is as tall as a pill, the
-        // body takes what is left, and the nav row is as tall as a button.
         style={{ flexGrow: 0, flexShrink: 0 }}
         contentContainerStyle={{
           paddingHorizontal: Spacing.xl, gap: Spacing.sm,
-          paddingBottom: Spacing.lg, alignItems: 'center',
+          paddingBottom: Spacing.md, alignItems: 'center',
         }}>
-        {sections.map((s) => {
-          const on = s.id === section;
+        {groups.map((g) => {
+          const on = g.id === activeGroup?.id;
           return (
             <Pressable
-              key={s.id}
-              onPress={() => setSectionId(s.id)}
-              onLayout={(e) => { pillX.current[s.id] = e.nativeEvent.layout.x; }}
+              key={g.id}
+              onPress={() => setSectionId(g.children?.length ? g.children[0].id : g.id)}
+              onLayout={(e) => { groupX.current[g.id] = e.nativeEvent.layout.x; }}
               style={{
                 paddingVertical: Spacing.sm, paddingHorizontal: Spacing.lg,
                 minHeight: 36, justifyContent: 'center',
                 borderRadius: Radius.pill,
-                backgroundColor: on ? c.textStrong : c.surface,
-                borderColor: on ? c.textStrong : c.border,
+                backgroundColor: on ? (g.color || c.textStrong) : c.surface,
+                borderColor: on ? (g.color || c.textStrong) : c.border,
                 borderWidth: 1,
               }}>
               <Text
                 numberOfLines={1}
                 style={{
-                  ...Type.small, fontWeight: '700',
-                  // Explicit, and taller than the font size. Type.small's own
-                  // lineHeight clipped the descenders inside the pill: "Highlights"
-                  // lost the tail of its g and "Couple Type" the tail of its p.
-                  lineHeight: 18,
+                  ...Type.small, fontWeight: '700', lineHeight: 18,
                   color: on ? Palette.white : c.textMuted,
                 }}>
-                {s.label}
+                {g.shortLabel || g.label}
               </Text>
             </Pressable>
           );
         })}
       </ScrollView>
+
+      {activeGroup?.children?.length ? (
+        <ScrollView
+          ref={pageNav}
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          style={{ flexGrow: 0, flexShrink: 0 }}
+          contentContainerStyle={{
+            paddingHorizontal: Spacing.xl, gap: Spacing.lg,
+            paddingBottom: Spacing.md, alignItems: 'center',
+          }}>
+          {activeGroup.children.map((child) => {
+            const on = child.id === section;
+            return (
+              <Pressable
+                key={child.id}
+                onPress={() => setSectionId(child.id)}
+                onLayout={(e) => { pageX.current[child.id] = e.nativeEvent.layout.x; }}
+                style={{ paddingVertical: Spacing.xs, minHeight: 28, justifyContent: 'center' }}>
+                <Text
+                  numberOfLines={1}
+                  style={{
+                    ...Type.small, lineHeight: 18,
+                    fontWeight: on ? '700' : '400',
+                    color: on ? (activeGroup.color || c.textStrong) : c.textMuted,
+                  }}>
+                  {child.label}
+                </Text>
+                {/* Underline rather than a second row of pills: two rows of
+                    pills reads as two equal choices, and these are not. */}
+                <View
+                  style={{
+                    height: 2, marginTop: 2, borderRadius: Radius.pill,
+                    backgroundColor: on ? (activeGroup.color || c.textStrong) : 'transparent',
+                  }}
+                />
+              </Pressable>
+            );
+          })}
+        </ScrollView>
+      ) : null}
 
       <View style={{ flex: 1 }}>
         <SectionBody
@@ -374,7 +424,7 @@ function ExpectationsOverview({
   }
 
   return (
-    <ScrollView contentContainerStyle={{ paddingBottom: Spacing.xxl }}>
+    <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: Spacing.xxl }}>
       <View style={{ paddingHorizontal: Spacing.xl, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center' }}>
         <Eyebrow>Expectations</Eyebrow>
         <Text style={{ ...Type.hero, color: c.textStrong }}>
@@ -463,7 +513,7 @@ function ExpectationsConversation({
   const ordered = [...bucket.rows].sort((a, b) => Number(a.aligned) - Number(b.aligned));
 
   return (
-    <ScrollView contentContainerStyle={{ paddingBottom: Spacing.xxl }}>
+    <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: Spacing.xxl }}>
       <View style={{ paddingHorizontal: Spacing.xl, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center' }}>
         <Eyebrow>Expectations</Eyebrow>
         <Text style={{ ...Type.title, color: c.textStrong }}>{bucket.label}</Text>
@@ -559,7 +609,7 @@ function IntimacyOverview({ data }: { data: IntimacyResults | null }) {
   }
   const spoken = data.dimensions.filter((d) => d.state !== 'unspoken');
   return (
-    <ScrollView contentContainerStyle={{ paddingBottom: Spacing.xxl }}>
+    <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: Spacing.xxl }}>
       <View style={{ paddingHorizontal: Spacing.xl, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center' }}>
         <Eyebrow>Physical Intimacy</Eyebrow>
         <Text style={{ ...Type.hero, color: c.textStrong }}>
@@ -606,7 +656,7 @@ function IntimacyDimensionView({ dim }: { dim: IntimacyDimension | null }) {
     return <Waiting title="Physical Intimacy" body="This opens when you have both finished the exercise." />;
   }
   return (
-    <ScrollView contentContainerStyle={{ paddingBottom: Spacing.xxl }}>
+    <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: Spacing.xxl }}>
       <View style={{ paddingHorizontal: Spacing.xl, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center' }}>
         <Eyebrow>Physical Intimacy</Eyebrow>
         <Text style={{ ...Type.title, color: c.textStrong }}>{dim.label}</Text>
@@ -656,7 +706,7 @@ function IntimacyConversations({ data }: { data: IntimacyResults | null }) {
     );
   }
   return (
-    <ScrollView contentContainerStyle={{ paddingBottom: Spacing.xxl }}>
+    <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: Spacing.xxl }}>
       <View style={{ paddingHorizontal: Spacing.xl, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center' }}>
         <Eyebrow>Physical Intimacy</Eyebrow>
         <Text style={{ ...Type.hero, color: c.textStrong }}>Conversations</Text>
@@ -694,7 +744,7 @@ function ReflectionWaiting() {
 function ReflectionOverview({ data }: { data: ReflectionResults | null }) {
   if (!data) return <ReflectionWaiting />;
   return (
-    <ScrollView contentContainerStyle={{ paddingBottom: Spacing.xxl }}>
+    <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: Spacing.xxl }}>
       <View style={{ paddingHorizontal: Spacing.xl, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center' }}>
         <Eyebrow>Relationship Reflection</Eyebrow>
         <Text style={{ ...Type.hero, color: c.textStrong }}>
@@ -756,7 +806,7 @@ function ReflectionRatings({ data }: { data: ReflectionResults | null }) {
     return <Waiting title="How You Each Rated" body="Neither of you answered the rating questions." />;
   }
   return (
-    <ScrollView contentContainerStyle={{ paddingBottom: Spacing.xxl }}>
+    <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: Spacing.xxl }}>
       <View style={{ paddingHorizontal: Spacing.xl, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center' }}>
         <Eyebrow>Relationship Reflection</Eyebrow>
         <Text style={{ ...Type.title, color: c.textStrong }}>How You Each Rated</Text>
@@ -818,7 +868,7 @@ function ReflectionStory({ data }: { data: ReflectionResults | null }) {
     );
   }
   return (
-    <ScrollView contentContainerStyle={{ paddingBottom: Spacing.xxl }}>
+    <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: Spacing.xxl }}>
       <View style={{ paddingHorizontal: Spacing.xl, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center' }}>
         <Eyebrow>Relationship Reflection</Eyebrow>
         <Text style={{ ...Type.title, color: c.textStrong }}>Side by Side</Text>
@@ -871,7 +921,7 @@ function ReflectionPlan({ data }: { data: ReflectionResults | null }) {
   const bothRanked = data.priorities.you && data.priorities.them;
 
   return (
-    <ScrollView contentContainerStyle={{ paddingBottom: Spacing.xxl }}>
+    <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: Spacing.xxl }}>
       <View style={{ paddingHorizontal: Spacing.xl, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center' }}>
         <Eyebrow>Relationship Reflection</Eyebrow>
         <Text style={{ ...Type.title, color: c.textStrong }}>Action Plan</Text>
@@ -962,7 +1012,7 @@ function WhatComesNext({
     );
   }
   return (
-    <ScrollView contentContainerStyle={{ paddingBottom: Spacing.xxl }}>
+    <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: Spacing.xxl }}>
       <View style={{ paddingHorizontal: Spacing.xl, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center' }}>
         <Eyebrow>What comes next</Eyebrow>
         <Text style={{ ...Type.hero, color: c.textStrong }}>What to do with all of this.</Text>
@@ -1015,7 +1065,7 @@ function WhatComesNext({
 
 function Waiting({ title, body }: { title: string; body: string }) {
   return (
-    <ScrollView contentContainerStyle={{ paddingBottom: Spacing.xxl }}>
+    <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: Spacing.xxl }}>
       <View style={{ paddingHorizontal: Spacing.xl, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center' }}>
         <Text style={{ ...Type.title, color: c.textStrong }}>{title}</Text>
         <Text style={{ ...Type.body, color: c.textMuted, marginTop: Spacing.sm }}>{body}</Text>
@@ -1026,7 +1076,7 @@ function Waiting({ title, body }: { title: string; body: string }) {
 
 function NotYet({ section }: { section: string }) {
   return (
-    <ScrollView contentContainerStyle={{ paddingBottom: Spacing.xxl }}>
+    <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: Spacing.xxl }}>
       <View style={{ paddingHorizontal: Spacing.xl, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center' }}>
         <View style={{ backgroundColor: c.surface, borderColor: c.border, borderWidth: 1, borderRadius: Radius.lg, padding: Spacing.xl }}>
           <Text style={{ ...Type.eyebrow, color: c.accentQuiet }}>Not on your phone yet</Text>
@@ -1058,7 +1108,7 @@ function Glance({
   const find = (k: string) => dims.find((d) => d.key === k);
 
   return (
-    <ScrollView contentContainerStyle={{ paddingBottom: Spacing.xxl }}>
+    <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: Spacing.xxl }}>
       <View style={{ paddingHorizontal: Spacing.xl, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center' }}>
         <LinearGradient
           colors={['#1B2A5E', '#2F55C4']}
@@ -1101,7 +1151,7 @@ function CoupleType({ results, you, them }: { results: CoupleResults; you: strin
   if (!type) return null;
 
   return (
-    <ScrollView contentContainerStyle={{ paddingBottom: Spacing.xxl }}>
+    <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: Spacing.xxl }}>
       <View style={{ paddingHorizontal: Spacing.xl, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center' }}>
         <Text style={{ ...Type.eyebrow, color: c.accentQuiet }}>Couple type</Text>
         <Text style={{ ...Type.hero, color: c.textStrong, marginTop: Spacing.sm }}>{type.name}</Text>
@@ -1141,7 +1191,7 @@ function Domain({
   you: string; them: string; viewer: 'a' | 'b'; wideGap: number | null;
 }) {
   return (
-    <ScrollView contentContainerStyle={{ paddingBottom: Spacing.xxl }}>
+    <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: Spacing.xxl }}>
       <View style={{ paddingHorizontal: Spacing.xl, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center' }}>
         <Text style={{ ...Type.eyebrow, color: accent }}>Communication</Text>
         <Text style={{ ...Type.title, color: c.textStrong, marginTop: Spacing.xs, marginBottom: Spacing.lg }}>
@@ -1211,11 +1261,14 @@ function DimensionRow({
           its own numbers here, which is a second copy of the rule that decides
           what a couple is told about their results. Nothing is said at all when
           the server has not sent one. */}
-      {expanded && dim.gap != null && wideGap != null ? (
-        <Text style={{ ...Type.small, color: c.textMuted, marginTop: Spacing.md }}>
-          {dim.gap >= wideGap
-            ? 'One of your wider differences.'
-            : 'You landed close together here.'}
+      {/* The website's own words for this dimension, from the server.
+          This used to be a sentence written here, "One of your wider
+          differences", which appears nowhere on the site. Nothing about a
+          couple should be asserted in the app that the product has not
+          already said in their results. */}
+      {expanded && (dim.shift || dim.aligned) ? (
+        <Text style={{ ...Type.body, color: c.text, marginTop: Spacing.md }}>
+          {dim.shift || dim.aligned}
         </Text>
       ) : null}
     </View>

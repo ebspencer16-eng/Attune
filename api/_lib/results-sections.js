@@ -24,6 +24,7 @@
 
 import { RESPONSIBILITY_CATEGORIES } from '../_questions.js';
 import { INTIMACY_DIMENSIONS } from '../_intimacy-questions.js';
+import { COMM_DOMAINS } from './tags.js';
 
 export const RESULTS_SECTIONS = [
   'highlights',
@@ -56,7 +57,11 @@ export const RESULTS_SECTIONS = [
  * the iOS app kept its own map and had labels for the fixed sections and none
  * for these eleven, so an annotation on one of them read as a raw key.
  *
- * Labels match the web's results nav.
+ * These name a section on its own, which is what a note anchored to it needs:
+ * "Communication" rather than "Results at a glance". The nav below uses the
+ * website's own wording, where an overview sits under its section heading and
+ * "Results at a glance" reads correctly. That is the one place the two sets
+ * differ, and they differ on purpose.
  */
 export const RESULTS_SECTION_LABELS = {
   'highlights': 'Highlights',
@@ -73,11 +78,11 @@ export const RESULTS_SECTION_LABELS = {
   'reflection-plan': 'Action Plan',
   'intimacy-overview': 'Physical Intimacy',
   ...Object.fromEntries(INTIMACY_DIMENSIONS.map(d => [`intimacy-${d.id}`, d.label])),
-  'intimacy-plan': 'Conversations',
+  'intimacy-plan': 'Conversations Worth Having',
   'conflict-overview': 'Conflict Patterns',
   'conflict-snapshot': 'Your Conflict Snapshot',
   'conflict-patterns': 'Your Patterns',
-  'conflict-wrote': 'What You Each Wrote',
+  'conflict-wrote': 'What You Both Wrote',
   'what-comes-next': 'What Comes Next',
 };
 
@@ -117,4 +122,87 @@ export function sectionsWithLabels(opts) {
 /** Sections are a fixed set, so membership is the whole validation. */
 export function isResultsSection(key) {
   return RESULTS_SECTIONS.includes(key);
+}
+
+/**
+ * The results navigation, as two levels.
+ *
+ * ── WHY THIS IS HERE ──────────────────────────────────────────────────────
+ * src/App.jsx built this tree as `sidebarSections`, with its own labels, and
+ * the app built a flat list with different labels again. So the same screen
+ * was called "Results at a glance" on a laptop and "Communication" on a phone,
+ * and "Conversations Worth Having" became "Conversations".
+ *
+ * A group with no children is a page. A group with children is a section whose
+ * children are pages, and the first child is always the overview.
+ *
+ * Labels are the website's, exactly, because the website is the product this
+ * is meant to match.
+ */
+export function resultsNav({ hasReflection = false, intimacyReady = false, conflictListed = false } = {}) {
+  const AT_A_GLANCE = 'Results at a glance';
+
+  const groups = [
+    { id: 'highlights', label: 'Highlights', color: '#E8673A' },
+    { id: 'couple-type', label: 'Couple Type', color: '#E8673A' },
+    {
+      id: 'comm', label: 'Communication', shortLabel: 'Comms', color: '#9B5DE5',
+      children: [
+        { id: 'comm-overview', label: AT_A_GLANCE },
+        ...COMM_DOMAINS.map(d => ({ id: `comm-${d.id}`, label: d.label, color: d.color })),
+      ],
+    },
+    {
+      id: 'exp', label: 'Expectations', color: '#1B5FE8',
+      children: [
+        { id: 'exp-overview', label: AT_A_GLANCE },
+        ...RESPONSIBILITY_CATEGORIES.map((cat, i) => ({
+          id: `exp-convo-${i}`, label: cat.label, color: '#10B981',
+        })),
+      ],
+    },
+  ];
+
+  if (hasReflection) {
+    groups.push({
+      id: 'reflection', label: 'Relationship Reflection', shortLabel: 'Rel. Refl.', color: '#1B5FE8',
+      children: [
+        { id: 'reflection-overview', label: AT_A_GLANCE },
+        { id: 'reflection-ratings', label: 'How You Each Rated' },
+        { id: 'reflection-story', label: 'Side by Side' },
+        { id: 'reflection-plan', label: 'Action Plan' },
+      ],
+    });
+  }
+
+  if (intimacyReady) {
+    groups.push({
+      id: 'intimacy', label: 'Physical Intimacy', shortLabel: 'Intimacy', color: '#B5546E',
+      children: [
+        { id: 'intimacy-overview', label: AT_A_GLANCE },
+        ...INTIMACY_DIMENSIONS.map(d => ({ id: `intimacy-${d.id}`, label: d.label })),
+        { id: 'intimacy-plan', label: 'Conversations Worth Having' },
+      ],
+    });
+  }
+
+  if (conflictListed) {
+    groups.push({
+      id: 'conflict', label: 'Conflict Patterns', shortLabel: 'Conflict', color: '#1B5FE8',
+      children: [
+        { id: 'conflict-overview', label: AT_A_GLANCE },
+        { id: 'conflict-snapshot', label: 'Your Conflict Snapshot' },
+        { id: 'conflict-patterns', label: 'Your Patterns' },
+        { id: 'conflict-wrote', label: 'What You Both Wrote' },
+      ],
+    });
+  }
+
+  groups.push({ id: 'what-comes-next', label: 'What Comes Next', shortLabel: "What's Next", color: '#E8673A' });
+  return groups;
+}
+
+/** Every page id the nav can reach, in order. */
+export function navPageIds(opts) {
+  return resultsNav(opts).flatMap(g => (g.children ? g.children.map(c => c.id) : [g.id]));
 }

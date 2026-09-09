@@ -49,7 +49,7 @@ export default async function handler(req) {
 
     const svc = { apikey: serviceKey, Authorization: `Bearer ${serviceKey}` };
     const cols = [
-      'id', 'name', 'pronouns', 'partner_profile_id', 'pkg',
+      'id', 'name', 'pronouns', 'partner_name', 'partner_profile_id', 'pkg',
       // Answer columns come from the registry. Selecting them by hand is how a
       // new exercise ends up read as never started: the column is simply not in
       // the select, so it arrives undefined and nothing errors.
@@ -156,7 +156,28 @@ export default async function handler(req) {
       now: new Date().toISOString(),
       firstName: (me.name || '').trim().split(/\s+/)[0] || null,
       partnerName: (partner?.name || '').trim().split(/\s+/)[0] || null,
-      profileComplete: !!me.profile_setup_complete,
+      /**
+       * Is the profile actually set up?
+       *
+       * This read profile_setup_complete alone, and that flag is only ever
+       * written by one modal on the website. Every account made before the
+       * flag existed has it false forever, so the dashboard told people with a
+       * complete profile to go and finish it, with a button that opens a form
+       * they have already filled in.
+       *
+       * Derived from the profile now, with the flag kept as an OR so nothing
+       * that already passes starts failing. Names are what results prose
+       * cannot do without: it addresses both people by name throughout.
+       * Pronouns are deliberately not required, because the setup form lets
+       * someone leave them blank on purpose and a card they can never dismiss
+       * is worse than copy that says "they".
+       */
+      profileComplete: !!me.profile_setup_complete
+        || (!!(me.name || '').trim() && !!(me.partner_name || '').trim()),
+      profileMissing: [
+        !(me.name || '').trim() && 'your name',
+        !(me.partner_name || '').trim() && "your partner's name",
+      ].filter(Boolean),
       exercises,
       resultsReady,
       resultsLastOpenedAt: me.results_last_opened_at || null,

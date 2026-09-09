@@ -96,9 +96,15 @@ export function nextActions(state = {}) {
   //    them produces copy that misgenders someone, which is not a cosmetic
   //    problem and cannot be fixed after the fact without a retake.
   if (!state.profileComplete) {
+    // Names what is actually missing. "Finish setting up your profile" to
+    // someone whose profile is finished is the app being wrong out loud, and
+    // there was no way for them to tell which part it meant.
+    const missing = state.profileMissing?.length
+      ? state.profileMissing.join(' and ')
+      : 'a couple of details';
     add({ id: 'profile', kind: 'profile_setup', priority: 12,
       title: 'Finish setting up your profile',
-      body: 'Your name and pronouns, so the exercises and your results read properly.',
+      body: `We still need ${missing}. Your results address you both by name throughout.`,
       cta: 'Set up', deepLink: '/?view=profile' });
   }
 

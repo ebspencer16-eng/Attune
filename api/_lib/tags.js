@@ -29,11 +29,13 @@ export const DOMAIN_LABEL = {
   hard: 'When Things Get Hard',
 };
 
-const DOMAIN_COLOR = {
+export const DOMAIN_COLOR = {
   inner: '#9B5DE5',
   connection: '#E8673A',
   hard: '#1B5FE8',
 };
+
+
 /**
  * Which of the three Communication domains a dimension belongs to.
  *
@@ -46,6 +48,20 @@ export const DOMAIN_OF = {
   love: 'connection', needs: 'connection', bids: 'connection', listening: 'connection',
   conflict: 'hard', repair: 'hard', feedback: 'hard',
 };
+
+/**
+ * The three Communication domains, in the order results present them.
+ *
+ * Derived from the two maps above rather than listed again. src/App.jsx built
+ * this list a fourth time as UR_DOMAINS, with its own labels and colours, and
+ * the results nav on both surfaces is built from it.
+ */
+export const COMM_DOMAINS = ['inner', 'connection', 'hard'].map((id) => ({
+  id,
+  label: DOMAIN_LABEL[id],
+  color: DOMAIN_COLOR[id],
+  dims: Object.keys(DOMAIN_OF).filter((d) => DOMAIN_OF[d] === id),
+}));
 
 export function standardTags({ ownsIntimacy = false } = {}) {
   const tags = [];

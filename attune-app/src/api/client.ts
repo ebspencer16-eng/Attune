@@ -65,6 +65,16 @@ export type ResultDimension = {
   a: number | null;
   b: number | null;
   /**
+   * The words for this dimension, exactly the website's.
+   *
+   * Only ever one of the two. `aligned` when the two landed close together,
+   * `shift` when they did not, chosen by the server against the alignment
+   * threshold so both surfaces make the same call. The app writes no copy of
+   * its own about a dimension.
+   */
+  aligned?: string | null;
+  shift?: string | null;
+  /**
    * The blended score, which mixes each person's answers with their partner's
    * view of them. Used to derive the couple type. Deliberately not what the
    * scales draw: a mark under your own name should not move because of what
@@ -122,6 +132,22 @@ export type CoupleResults = {
 
 /** One entry in the results spine. Both fields come from the server. */
 export type ResultsSection = { id: string; label: string };
+
+/**
+ * The results navigation, two levels, from the server.
+ *
+ * A group with no children is a page. A group with children is a section whose
+ * first child is its overview. Labels are the website's own, so the same
+ * screen is called the same thing on both.
+ */
+export type ResultsNavGroup = {
+  id: string;
+  label: string;
+  /** Used in the top row, where the full label will not fit. */
+  shortLabel?: string;
+  color?: string;
+  children?: { id: string; label: string; color?: string }[];
+};
 
 /**
  * One expectation, as the two people answered it.
@@ -244,6 +270,8 @@ export type ResultsResponse =
        * existed still renders.
        */
       sections?: ResultsSection[];
+      /** The two-level nav. The app never groups the flat list itself. */
+      nav?: ResultsNavGroup[];
       /** What the couple owns, so nothing has to be inferred from the payload. */
       owned?: string[];
       /** Null until both partners have finished Expectations. */

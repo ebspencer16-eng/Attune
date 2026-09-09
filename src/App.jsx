@@ -15,6 +15,7 @@ import { PATTERN_COPY, PATTERN_ACTIONS, PATTERN_NOTES, BAND_COLORS, NO_ACTION_NE
 // get results copy onto a phone would have been to type it out again. Same
 // reason api/_couple-types.js moved out of this file.
 import { contentFor, CURRENT_CONTENT_VERSION } from "../api/_content/index.js";
+import { alignedAdvice, getDimShift } from "../api/_lib/dimension-copy.js";
 // Default binding, used by module-level helpers when no couple context is
 // available (the workbook path, share cards, anything outside the results
 // tree). Components inside the results tree use useContent() instead, which
@@ -2868,32 +2869,8 @@ function PortraitSetup({ userName, partnerName, existing, onSave, onClose }) {
 // based on where each partner scores (5 buckets × 5 buckets = 15 unordered combos).
 // pos: 0=strongly A, 1=lean A, 2=middle, 3=lean B, 4=strongly B
 
-function alignedAdvice(dim, a, b, content) {
-  const adv = (content || { ALIGNED_ADVICE })["ALIGNED_ADVICE"][dim];
-  if (!adv) return null;
-  if (typeof adv === "string") return adv;
-  const na = Number(a), nb = Number(b);
-  const avg = ((isNaN(na) ? 3 : na) + (isNaN(nb) ? 3 : nb)) / 2;
-  return avg < 3 ? adv.low : adv.high;
-}
-
-function getDimShift(dim, myScore, partScore, U, P, content) {
-  // Buckets: 1=Strongly A (≤1.8), 2=Lean A (1.8-2.6), 3=Middle (2.6-3.4), 4=Lean B (3.4-4.2), 5=Strongly B (>4.2)
-  const pos = s => s <= 1.8 ? 1 : s <= 2.6 ? 2 : s <= 3.4 ? 3 : s <= 4.2 ? 4 : 5;
-  const mp = pos(myScore), pp = pos(partScore);
-  const lo = Math.min(mp, pp), hi = Math.max(mp, pp);
-  const loName = (mp <= pp) ? U : P;
-  const hiName = (mp <= pp) ? P : U;
-  const key = `${lo}_${hi}`;
-
-
-  // SHIFTS is a function of the two names now that the copy lives in a
-  // versioned snapshot module rather than in this closure.
-  const _shifts = (content?.SHIFTS || SHIFTS)(loName, hiName);
-  if (!_shifts[dim]) return null;
-  const fn = _shifts[dim][key];
-  return fn !== undefined ? fn : null;
-}
+// alignedAdvice and getDimShift moved to api/_lib/dimension-copy.js so the
+// app can render the same words. Imported at the top of this file.
 
 
 
