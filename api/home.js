@@ -20,6 +20,7 @@ export const config = { runtime: 'edge' };
 import { nextActions, greeting } from './_lib/next-action.js';
 import { EXERCISES, EXERCISE_COLUMNS, CORE_EXERCISES, isExerciseDone } from './_exercises.js';
 import { CATALOGUE } from './_catalogue.js';
+import { researchOfTheDay } from './_research.js';
 import { capabilitiesFor } from './_lib/ownership.js';
 
 const HEADERS = { 'Content-Type': 'application/json', 'X-Content-Type-Options': 'nosniff' };
@@ -216,6 +217,11 @@ export default async function handler(req) {
       // What exists to buy, so the app renders the server's catalogue rather
       // than a copy that goes stale the moment an add-on is added or repriced.
       catalogue: CATALOGUE,
+      // One research finding, the same for everyone on a given day. The app's
+      // home screen carries it; the copy and the citation live in
+      // api/_research.js so they cannot drift from the website's Our Purpose
+      // page, which says the same three things.
+      research: researchOfTheDay(),
       // Per-exercise progress, so the Insights tab can show what is left
       // before results exist rather than a locked empty screen. Computed here
       // already; it was simply never returned.

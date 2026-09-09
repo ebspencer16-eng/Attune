@@ -170,9 +170,15 @@ export default function HomeScreen() {
               </Text>
             </Pressable>
           </View>
+          {/* ── THE GREETING IS THE MASTHEAD ──────────────────────────────
+              Set large with real air under it. On a screen that has one thing
+              to ask for and two things waiting, the type is what makes it feel
+              considered rather than assembled: a page you are reading, not a
+              dashboard you are checking. */}
           <Text
             style={{
-              ...Type.hero, color: c.textStrong, marginTop: Spacing.sm, marginBottom: Spacing.xl,
+              ...Type.hero, color: c.textStrong,
+              marginTop: Spacing.lg, marginBottom: Spacing.xxl,
             }}>
             {data.greeting}
           </Text>
@@ -184,17 +190,18 @@ export default function HomeScreen() {
               <Text style={{ ...Type.eyebrow, color: c.textMuted, marginBottom: Spacing.sm }}>
                 Also waiting
               </Text>
-              <View
-                style={{
-                  backgroundColor: c.surface, borderColor: c.border, borderWidth: 1,
-                  borderRadius: Radius.lg, overflow: 'hidden',
-                }}>
+              {/* Rows on the page rather than a bordered box. Two items do not
+                  need a container to be a list, and a box around them makes a
+                  quiet screen busier than it is. */}
+              <View>
                 {rest.map((s, i) => (
                   <SecondaryRow key={s.id} card={s} first={i === 0} onPress={() => open(s)} />
                 ))}
               </View>
             </View>
           ) : null}
+
+          {data.research ? <ResearchNote finding={data.research} /> : null}
 
           {error ? (
             <Text style={{ ...Type.small, color: c.textMuted, marginTop: Spacing.xl }}>
@@ -249,9 +256,14 @@ function PrimaryCard({ card, onPress }: { card: HomeCard; onPress: () => void })
         padding: Spacing.xl, opacity: dim ? 0.6 : 1,
       }}>
       <Text style={{ ...Type.eyebrow, color: 'rgba(255,255,255,0.7)' }}>Next for you</Text>
-      <Text style={{ ...Type.title, color: Palette.white, marginTop: Spacing.sm }}>{card.title}</Text>
+      {/* The heading size, not the card-title size. This is the one thing the
+          screen is asking for, and it should be the largest thing on it after
+          the greeting. */}
+      <Text style={{ ...Type.hero, fontSize: 26, lineHeight: 32, color: Palette.white, marginTop: Spacing.sm }}>
+        {card.title}
+      </Text>
       {card.body ? (
-        <Text style={{ ...Type.body, color: 'rgba(255,255,255,0.82)', marginTop: Spacing.sm }}>{card.body}</Text>
+        <Text style={{ ...Type.body, color: 'rgba(255,255,255,0.82)', marginTop: Spacing.md, lineHeight: 23 }}>{card.body}</Text>
       ) : null}
       {card.cta && !dim ? (
         <Pressable
@@ -264,6 +276,50 @@ function PrimaryCard({ card, onPress }: { card: HomeCard; onPress: () => void })
           <Text style={{ ...Type.cardTitle, color: Palette.white }}>{card.cta}</Text>
         </Pressable>
       ) : null}
+    </View>
+  );
+}
+
+/**
+ * One research finding, with its citation.
+ *
+ * ── WHY THIS IS ON THE HOME SCREEN ────────────────────────────────────────
+ * The screen had a greeting, one prompt and a short list, which is a correct
+ * dashboard and not a reason to open an app. This is the thing underneath the
+ * product: it is built on relationship science, and saying so once a day, in
+ * the product's own words, with the source named, is more convincing than any
+ * amount of styling.
+ *
+ * ── WHY IT LOOKS LIKE PRINT ───────────────────────────────────────────────
+ * No card, no tint, no icon. A rule, a small label, the finding set in the
+ * serif at reading size, and the citation underneath in the muted body face.
+ * That is how a journal sets a pull quote and how the website's Our Purpose
+ * page sets these same three findings. Putting it in a box would make it a
+ * widget; leaving it on the page makes it something to read.
+ *
+ * The copy and the citation come from the server, from api/_research.js, so
+ * the app and the website cannot end up attributing different claims to the
+ * same source.
+ */
+function ResearchNote({ finding }: { finding: NonNullable<HomeResponse['research']> }) {
+  return (
+    <View style={{ marginTop: Spacing.xxxl }}>
+      <View style={{ height: 1, backgroundColor: c.border, marginBottom: Spacing.lg }} />
+      <Text style={{ ...Type.eyebrow, color: c.textMuted, marginBottom: Spacing.md }}>
+        From the research
+      </Text>
+      <Text style={{ ...Type.title, color: c.textStrong, marginBottom: Spacing.sm }}>
+        {finding.title}
+      </Text>
+      <Text style={{ ...Type.body, color: c.textMuted, lineHeight: 24 }}>
+        {finding.body}
+      </Text>
+      <Text
+        style={{
+          ...Type.small, color: c.textMuted, fontStyle: 'italic', marginTop: Spacing.md,
+        }}>
+        {finding.source}
+      </Text>
     </View>
   );
 }
@@ -300,13 +356,13 @@ function SecondaryRow({ card, first, onPress }: { card: HomeCard; first: boolean
       style={{
         paddingVertical: Spacing.lg, paddingHorizontal: Spacing.lg,
         borderTopWidth: first ? 0 : 1, borderTopColor: c.border,
-        // The exercise's own colour, from the same lookup the rest of the app
-        // uses, so a row here and its results screen agree.
-        borderLeftWidth: 3,
-        borderLeftColor: accentForCard(card),
         flexDirection: 'row', alignItems: 'center', gap: Spacing.md,
         opacity: dim ? 0.5 : 1,
       }}>
+      {/* The exercise's colour as a dot rather than a stripe down the side.
+          Same lookup, so a row and the screen it opens still agree; a three
+          pixel bar on a borderless row reads as a leftover from a card. */}
+      <View style={{ width: 7, height: 7, borderRadius: 4, backgroundColor: accentForCard(card) }} />
       <View style={{ flex: 1 }}>
         <Text style={{ ...Type.cardTitle, color: c.textStrong }}>{card.title}</Text>
         {card.body ? (

@@ -426,6 +426,8 @@ export type CatalogueItem = {
 };
 
 export type HomeResponse = {
+  /** One research finding a day, with its citation. From api/_research.js. */
+  research?: { id: string; title: string; body: string; source: string };
   /** Flat list of add-on keys this person owns, derived server-side. */
   owned?: string[];
   /** Everything purchasable. Keys match `owned`, so the two intersect directly. */
