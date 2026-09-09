@@ -84,7 +84,7 @@ const FallbackUI = ({ error }) => {
   <div style={{ padding: '3rem 1.5rem', textAlign: 'center', fontFamily: 'system-ui, sans-serif', maxWidth: 560, margin: '0 auto' }}>
     <h2 style={{ fontSize: '1.4rem', marginBottom: '0.75rem', color: '#0E0B07' }}>Something went wrong.</h2>
     <p style={{ fontSize: '0.9rem', color: '#8C7A68', marginBottom: '1.5rem', lineHeight: 1.6 }}>
-      We've been notified. Try refreshing the page — your progress is saved.
+      We've been notified. Try refreshing the page. Your progress is saved.
     </p>
     <button onClick={() => window.location.reload()}
       style={{ background: 'linear-gradient(135deg,#E8673A,#1B5FE8)', color: 'white', border: 'none', padding: '0.7rem 1.6rem', fontSize: '0.8rem', fontWeight: 600, borderRadius: 10, cursor: 'pointer' }}>

@@ -104,7 +104,7 @@ export default async function handler(req) {
     const r = await fetch('https://api.resend.com/emails', {
       method: 'POST',
       headers: { Authorization: `Bearer ${resendKey}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ from: `Attune <${fromEmail}>`, to: [to], subject: `Attune feedback — week of ${now.toISOString().slice(0, 10)} (${items.length})`, html }),
+      body: JSON.stringify({ from: `Attune <${fromEmail}>`, to: [to], subject: `Attune feedback, week of ${now.toISOString().slice(0, 10)} (${items.length})`, html }),
     });
     if (!r.ok) return new Response(JSON.stringify({ error: 'Resend failed', detail: await r.text().catch(() => '') }), { status: 502 });
     return new Response(JSON.stringify({ ok: true, sentTo: to, items: items.length, clustered: !!anthropicKey }), { status: 200 });

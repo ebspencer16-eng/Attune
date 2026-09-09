@@ -60,6 +60,6 @@ a{display:inline-block;padding:.65rem 1.5rem;border-radius:10px;background:${suc
     return html("You've been removed from Attune emails. Your account and results are not affected.", true);
   } catch (e) {
     console.error('[unsubscribe] error:', e);
-    return html("Something went wrong — reply to any Attune email and we'll remove you manually.", false);
+    return html("Something went wrong. Reply to any Attune email and we'll remove you manually.", false);
   }
 }

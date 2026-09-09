@@ -414,7 +414,7 @@ function scoreBarRow(label, score, leftAxis, rightAxis, color) {
 
 // PLACEHOLDER marker — used to clearly distinguish structure from
 // final content while the template is under review.
-const PH = (text) => `[PLACEHOLDER — ${text}]`;
+const PH = (text) => `[PLACEHOLDER: ${text}]`;
 
 // ─── Personalization helpers ──────────────────────────────────────────────────
 function fill(template, u, p) {
@@ -816,7 +816,7 @@ function buildIntro(u, p) {
       { size: 22, after: 200 }),
 
     accentBox('A note on the scores',
-      `Neither end of any dimension is better. The gap between your scores is the thing worth understanding. A large gap means more translation is required between the two of you — and more to gain from explicit conversation.`,
+      `Neither end of any dimension is better. The gap between your scores is the thing worth understanding. A large gap means more translation is required between the two of you, and more to gain from explicit conversation.`,
       'FFF3E0', ORANGE),
     sp(),
     accentBox('How to read this together',
@@ -903,7 +903,7 @@ function buildSnapshot(u, p, scores, partnerScores, coupleType, responsibilities
   return [
     pb(),
     new Paragraph({ heading: HeadingLevel.HEADING_2, children: [run('Your Snapshot', { color: ORANGE })] }),
-    para(`Where ${u} and ${p} are aligned — and where the gaps are.`, { size: 20, color: MUTED, after: 200 }),
+    para(`Where ${u} and ${p} are aligned, and where the gaps are.`, { size: 20, color: MUTED, after: 200 }),
 
     ...coupleTypeLine,
 
@@ -1732,14 +1732,14 @@ function buildConversationGuide(u, p, priorities) {
   return [
     pb(),
     new Paragraph({ heading: HeadingLevel.HEADING_1, children: [run('Conversation Guide')] }),
-    para(`A structured first conversation for ${u} and ${p}. Use this together — with or without a therapist. Budget 60\u201390 minutes.`, { size: 24, color: MUTED }),
+    para(`A structured first conversation for ${u} and ${p}. Use this together, with or without a therapist. Budget 60\u201390 minutes.`, { size: 24, color: MUTED }),
     sp(),
-    accentBox('Before you start', `Find a time when neither of you is depleted, rushed, or already charged. Put phones away. Have water. This isn't a fight — it's a structured conversation about things that matter. The goal is understanding, not resolution. You don't need to solve everything today.`, 'F0F9FF', BLUE),
+    accentBox('Before you start', `Find a time when neither of you is depleted, rushed, or already charged. Put phones away. Have water. This isn't a fight. It's a structured conversation about things that matter. The goal is understanding, not resolution. You don't need to solve everything today.`, 'F0F9FF', BLUE),
     sp(),
 
     hr(ORANGE, 8),
     new Paragraph({ heading: HeadingLevel.HEADING_2, children: [run('Phase 1 \u2014 Opening   (10 min)', { color: ORANGE })] }),
-    para('Each person answers these two questions out loud. Don\'t respond to each other yet — just listen.'),
+    para('Each person answers these two questions out loud. Don\'t respond to each other yet. Just listen.'),
     sp(),
     numItem('What\'s one thing you were curious or nervous about going into these exercises?'),
     numItem(`What do you most want to understand better about ${u === 'you' ? 'your partner' : p} after doing this?`),
@@ -1749,16 +1749,16 @@ function buildConversationGuide(u, p, priorities) {
     new Paragraph({ heading: HeadingLevel.HEADING_2, children: [run('Phase 2 \u2014 What Resonated   (15 min)', { color: BLUE })] }),
     para('Look at your Snapshot together. Each person takes a turn:'),
     sp(),
-    numItem('What result surprised you most — about yourself or about your partner?'),
+    numItem('What result surprised you most, about yourself or about your partner?'),
     numItem('What result felt most accurate to your experience of this relationship?'),
     numItem('Is there anything in the results you disagree with or want to push back on?'),
     sp(),
-    accentBox('Note', 'Resist the urge to explain or correct. The goal is hearing how each person experienced the process — not arriving at the right interpretation.', 'FFF3E0', ORANGE),
+    accentBox('Note', 'Resist the urge to explain or correct. The goal is hearing how each person experienced the process, not arriving at the right interpretation.', 'FFF3E0', ORANGE),
     sp(),
 
     hr(GREEN, 8),
     new Paragraph({ heading: HeadingLevel.HEADING_2, children: [run('Phase 3 \u2014 Your focus areas   (20 min)', { color: GREEN })] }),
-    para(`Open Part 3 — the Workbook section. Together, pick one to three things you want to focus on over the next month. For each one:`),
+    para(`Open Part 3, the Workbook section. Together, pick one to three things you want to focus on over the next month. For each one:`),
     sp(),
     numItem('Say it out loud. Name what you want to change and why.'),
     numItem('Each person describes a recent moment where this showed up.'),
@@ -1771,20 +1771,20 @@ function buildConversationGuide(u, p, priorities) {
     new Paragraph({ heading: HeadingLevel.HEADING_2, children: [run('Phase 4 \u2014 What\'s Going Well   (10 min)', { color: PURPLE })] }),
     para('This phase is deliberate. It\'s easy to spend all the time on gaps.'),
     sp(),
-    numItem('Name three specific things that have worked well in this relationship — things you want to protect.'),
+    numItem('Name three specific things that have worked well in this relationship, things you want to protect.'),
     numItem('Each person names something their partner does that they haven\'t said thank you for specifically.'),
-    numItem('Name one thing about how your partner is wired that you genuinely appreciate — something the results helped you see.'),
+    numItem('Name one thing about how your partner is wired that you genuinely appreciate, something the results helped you see.'),
     sp(),
 
     hr(MUTED, 8),
     new Paragraph({ heading: HeadingLevel.HEADING_2, children: [run('Phase 5 \u2014 Closing & Next Steps   (5 min)', { color: MUTED })] }),
     numItem(`State your focus areas and the action each of you is committing to this week.`),
-    numItem('Set a date — within two weeks — to briefly check in on how those actions landed.'),
+    numItem('Set a date (within two weeks) to briefly check in on how those actions landed.'),
     numItem('Decide together: will you work through Part 2 on your own, together, or with a facilitator?'),
     sp(),
     hr(STONE),
     sp(),
-    para('After the conversation — write briefly:', { bold: true }),
+    para('After the conversation, write briefly:', { bold: true }),
     sp(),
     new Table({
       width: { size: W, type: WidthType.DXA }, columnWidths: [W],
@@ -2166,7 +2166,7 @@ function buildPriorityCheckIn(u, p, priorities) {
     new Paragraph({ spacing: { after: 60 },
       children: [run('30-day check-in', { size: 36, bold: true, color: ORANGE })] }),
     new Paragraph({ spacing: { after: 200 },
-      children: [run(`Come back to this page in about a month. Answer honestly. Write in the workbook — that's what it's for.`,
+      children: [run(`Come back to this page in about a month. Answer honestly. Write in the workbook. That's what it's for.`,
         { size: 16, italics: true, color: MUTED })] }),
     new Paragraph({ spacing: { before: 0, after: 320 },
       border: { bottom: { style: BorderStyle.SINGLE, size: 6, color: ORANGE, space: 4 } },
@@ -2228,14 +2228,14 @@ function buildConversationLibrary(u, p, coupleType, priorities) {
       { size: 22, color: MUTED, after: 200 }),
 
     accentBox('Ground rules before you start',
-      `Both of you take turns. No interrupting. When one of you is talking, the other's job is to understand — not to respond, prepare a counter, or fix anything. You can use the reference card at the back as a prompt.`,
+      `Both of you take turns. No interrupting. When one of you is talking, the other's job is to understand, not to respond, prepare a counter, or fix anything. You can use the reference card at the back as a prompt.`,
       'F7F3FC', PURPLE),
     sp(),
 
     ...priorities.map((dim, i) => {
       const meta = DIM_META[dim];
       return new Paragraph({ spacing: { before: 240, after: 80 },
-        children: [run(`Phase ${i + 1} — ${meta.label} (20 min)`, { size: 22, bold: true, color: ORANGE })] });
+        children: [run(`Phase ${i + 1}: ${meta.label} (20 min)`, { size: 22, bold: true, color: ORANGE })] });
     }).flatMap(p => [p,
       para(PH(`3–4 guiding questions for this phase, tailored to the specific dimension.`), { size: 20, color: MUTED, after: 160 }),
       hr(STONE, 2),
@@ -2245,7 +2245,7 @@ function buildConversationLibrary(u, p, coupleType, priorities) {
   return [
     pb(),
     new Paragraph({ heading: HeadingLevel.HEADING_1, children: [run('Part 4 \u2014 Conversation Library')] }),
-    para(`Five situations every couple faces, with three prompts each — chosen to match ${typeName}. Flip to the situation you're in. Pick one. The prompt does the work.`,
+    para(`Five situations every couple faces, with three prompts each, chosen to match ${typeName}. Flip to the situation you're in. Pick one. The prompt does the work.`,
       { size: 22, color: MUTED, after: 200 }),
     accentBox('How this works',
       `The five situations are the same for every couple. The prompts inside each one are picked based on what couples like yours tend to need in that moment.`,

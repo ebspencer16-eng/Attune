@@ -128,7 +128,7 @@ export default async function handler(req) {
       const hasRefl = hasReflectionAccess(user);
       const ok = await sendEmail(
         user.email,
-        `A year with ${user.partner_name || 'your partner'} — how things look now`,
+        `A year with ${user.partner_name || 'your partner'}, and how things look now`,
         checkinHtml({ toName: user.name || 'there', partnerName: user.partner_name || 'your partner', months: 12, hasReflection: hasRefl, retakeUrl: 'https://attune-relationships.com/app?signin=1' })
       );
       if (ok) { await markSent(user.id, 'checkin_1yr_sent_at'); sent1yr++; sentSoFar.sent1yr = sent1yr; }
@@ -194,14 +194,14 @@ function checkinHtml({ toName, partnerName, months, hasReflection, retakeUrl }) 
   <div class="grad-bar"></div>
   <h1>${is6mo ? "Six months in." : "One year."}</h1>
   <p>Hi ${toName}, ${is6mo
-    ? `six months ago you and ${partnerName} took Attune together. Most couples find their results have shifted by now — in ways that reflect real changes in how they're relating.`
-    : `a year ago you and ${partnerName} took Attune together. A retake at this point usually surfaces something different — the early patterns are clearer, and the things you've been navigating together tend to show up in the results.`
+    ? `six months ago you and ${partnerName} took Attune together. Most couples find their results have shifted by now, in ways that reflect real changes in how they're relating.`
+    : `a year ago you and ${partnerName} took Attune together. A retake at this point usually surfaces something different. The early patterns are clearer, and the things you've been navigating together tend to show up in the results.`
   }</p>
   <p>The retake is the same exercises, answered independently. Your new results sit alongside your original ones so you can see what's changed.</p>
   ${reflBlock}
   <div class="btn-wrap"><a href="${retakeUrl}" class="btn">Return to Attune →</a></div>
   <div class="divider"></div>
-  <p style="font-size:0.78rem;color:#8C7A68;">Your previous results are still in your dashboard. Retaking creates a new session — you'll be able to compare the two.</p>
+  <p style="font-size:0.78rem;color:#8C7A68;">Your previous results are still in your dashboard. Retaking creates a new session. You'll be able to compare the two.</p>
 </div>
 <div class="footer">
   Attune · <a href="https://attune-relationships.com" style="color:#C17F47">attune-relationships.com</a><br/>

@@ -88,7 +88,7 @@ export default async function handler(req) {
       body: JSON.stringify({
         from: `Attune <${fromEmail}>`,
         to: [fromEmail],
-        subject: `Beta survey response${body.coupleType ? ` — ${body.coupleType}` : ''}`,
+        subject: `Beta survey response${body.coupleType ? `: ${body.coupleType}` : ''}`,
         html: `<div style="font-family:Arial,sans-serif;max-width:520px;padding:1.5rem"><h2 style="color:#E8673A;margin:0 0 1rem">Beta survey response</h2><table style="width:100%;border-collapse:collapse">${rows}</table></div>`,
       }),
     }).catch(e => console.warn('[survey] admin email failed:', e));
