@@ -32,6 +32,8 @@
 // watched, one open. This one checks every file under api/.
 
 import { readFileSync, readdirSync } from 'fs';
+import { insideResponse, isComment, holdsColumn } from './_lib/source-scan.mjs';
+import { EXERCISE_COLUMNS } from '../api/_exercises.js';
 
 const apiDir = new URL('../api/', import.meta.url);
 const problems = [];
@@ -45,7 +47,6 @@ const problems = [];
 // conflict_data holds the pattern answers. Reading it to summarise is correct;
 // putting it in a response is the violation. intimacy_data is not checked, on
 // purpose: see the header.
-const RESPONSE = /(?:JSON\.stringify|new Response\(|return json\(|res\.(?:status\(\d+\)\.)?json\()/;
 let readers = 0;
 
 function scan(dir, prefix = '') {
@@ -54,26 +55,22 @@ function scan(dir, prefix = '') {
     if (!entry.name.endsWith('.js')) continue;
     const rel = `${prefix}${entry.name}`;
     const text = readFileSync(new URL(entry.name, dir), 'utf8');
-    if (!text.includes('conflict_data')) continue;
+    // Named directly, or selected through EXERCISE_COLUMNS.
+    if (!holdsColumn(text, 'conflict_data', EXERCISE_COLUMNS)) continue;
     readers++;
 
     const lines = text.split('\n');
     lines.forEach((line, i) => {
-      if (/^\s*(\/\/|\*|\/\*)/.test(line)) return;
+      if (isComment(line)) return;
 
-      if (line.includes('conflict_data') && RESPONSE.test(line)) {
+      // Named directly in a response.
+      if (line.includes('conflict_data') && insideResponse(lines, i)) {
         problems.push({ where: `api/${rel}:${i + 1}`, why: 'conflict_data put into a response', line: line.trim().slice(0, 90) });
       }
 
-      // A response built by spreading the profile row carries conflict_data
-      // without naming it. The spread and the response opener sit on different
-      // lines of one object literal, so this looks back a few lines. Checking
-      // a single line let a planted `...me,` straight through.
-      if (/^\s*\.\.\.(?:data|profile|row|me|partner|self)\b/.test(line)) {
-        const before = lines.slice(Math.max(0, i - 8), i).join('\n');
-        if (RESPONSE.test(before)) {
-          problems.push({ where: `api/${rel}:${i + 1}`, why: 'a profile row spread into a response carries conflict_data', line: line.trim().slice(0, 90) });
-        }
+      // Or carried by a spread of the whole profile row, which names nothing.
+      if (/^\s*\.\.\.(?:data|profile|row|me|partner|self)\b/.test(line) && insideResponse(lines, i)) {
+        problems.push({ where: `api/${rel}:${i + 1}`, why: 'a profile row spread into a response carries conflict_data', line: line.trim().slice(0, 90) });
       }
     });
   }

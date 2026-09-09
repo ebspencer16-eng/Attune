@@ -1,66 +1,153 @@
-// Fails the build if the intimacy payload can carry raw answers.
+// Fails the build when Physical Intimacy answers reach a surface that has no
+// business with them.
 //
-// Same rule as check-conflict-privacy.mjs, for the section that needs it most.
-// Physical Intimacy asks people what they want, how often, and what it is for.
-// The results screens are about the distance between two answers, and that
-// distance is all any of them render, so nothing else has any business
-// crossing the wire.
+// ── THE PROMISE THIS KEEPS ─────────────────────────────────────────────────
+// The exercise intro tells the customer, in words that ship:
 //
-// An allowlist, never a denylist. A denylist protects the fields someone
-// thought of on the day they wrote it.
+//   "You answer on your own. Neither of you sees the other's answers until you
+//    have both finished."
+//
+// Until, not never. And the catalogue sells the exercise as "Answered
+// independently, compared side by side". So the promise is about *timing* and
+// about *who*, and it is not a promise of secrecy between partners.
+//
+// The rule, therefore:
+//
+//   1. Nothing about either person's answers leaves the server until BOTH have
+//      finished. That is the whole of what was promised.
+//   2. Positions may be shared between the two partners once both are done,
+//      because the comparison is the thing they bought.
+//   3. Nobody else ever sees them, in any form.
+//
+// ── WHAT THIS GATE USED TO CHECK, AND WHY THAT WAS WRONG ───────────────────
+// It asserted the payload carried no positions at all, and no question ids.
+// That was a privacy rule invented in this repo rather than one the product
+// made. It did not protect anyone: both partners are entitled to the
+// comparison. What it did was stop the app drawing a screen the website has
+// always had, so the two surfaces disagreed about what a customer had bought.
+//
+// The check is narrower and truer now. What changed is which surfaces are
+// allowed, not whether anything is checked.
+//
+// ── WHAT THIS DELIBERATELY DOES NOT COVER ──────────────────────────────────
+// Conflict Patterns, which carry a real promise of secrecy from the partner
+// ("This is the one section that stays private, always") and are guarded by
+// check-conflict-privacy.mjs and check-partner-privacy.mjs. Do not merge these
+// rules: they are different promises, and collapsing them would either leak
+// patterns or delete the intimacy comparison.
 
+import { readFileSync, readdirSync } from 'fs';
 import { INTIMACY_QUESTIONS } from '../api/_intimacy-questions.js';
 import { intimacyResults } from '../api/_lib/intimacy-results.js';
+import { insideResponse, isComment, holdsColumn } from './_lib/source-scan.mjs';
+import { EXERCISE_COLUMNS } from '../api/_exercises.js';
 
-const ALLOWED_TOP = ['overallState', 'overallDistancePct', 'dimensions', 'conversations'];
-const ALLOWED_DIM = ['section', 'id', 'label', 'intro', 'state', 'distancePct', 'body', 'reason', 'prompt'];
+const problems = [];
 
-// Answers that are individually identifying if they escape: distinct strings
-// planted so they can be searched for in the serialised payload.
-const mine = {}, theirs = {};
+// ── 1. Nothing is produced until both partners have finished ───────────────
+const answers = {};
 for (const q of INTIMACY_QUESTIONS) {
-  if (q.kind === 'multi') {
-    mine[q.id] = [q.options[0].value];
-    theirs[q.id] = [q.options[q.options.length - 1].value];
-  } else {
-    mine[q.id] = q.options[0].label;
-    theirs[q.id] = q.options[q.options.length - 1].label;
+  answers[q.id] = q.kind === 'multi' ? [q.options[0].value] : q.options[0].label;
+}
+
+if (intimacyResults({ mine: { answers }, theirs: null }) !== null) {
+  problems.push('a payload was produced with only one partner finished');
+}
+if (intimacyResults({ mine: null, theirs: { answers } }) !== null) {
+  problems.push('a payload was produced with only the partner finished');
+}
+
+// ── 2. What both partners may see, once both are done ──────────────────────
+const both = intimacyResults({ mine: { answers }, theirs: { answers }, variant: 'premarital' });
+if (!both) {
+  problems.push('no payload was produced when both partners had finished');
+} else {
+  const ALLOWED_TOP = ['overallState', 'overallDistancePct', 'dimensions', 'conversations'];
+  const ALLOWED_DIM = ['section', 'id', 'label', 'intro', 'state', 'distancePct',
+    'body', 'reason', 'prompt', 'questions'];
+  const ALLOWED_ROW = ['id', 'text', 'low', 'high', 'you', 'them'];
+
+  const extraTop = Object.keys(both).filter((k) => !ALLOWED_TOP.includes(k));
+  if (extraTop.length) problems.push(`payload carries unlisted fields: ${extraTop.join(', ')}`);
+
+  for (const d of both.dimensions) {
+    const extra = Object.keys(d).filter((k) => !ALLOWED_DIM.includes(k));
+    if (extra.length) problems.push(`dimension ${d.id} carries unlisted fields: ${extra.join(', ')}`);
+    for (const row of d.questions || []) {
+      const extraRow = Object.keys(row).filter((k) => !ALLOWED_ROW.includes(k));
+      if (extraRow.length) problems.push(`a ${d.id} row carries unlisted fields: ${extraRow.join(', ')}`);
+      // Positions are numbers on a shared scale. A raw answer label reaching
+      // the client would be the answer itself rather than a position, and the
+      // website has never shown one.
+      for (const side of ['you', 'them']) {
+        if (row[side] != null && typeof row[side] !== 'number') {
+          problems.push(`${d.id}/${row.id} sends ${side} as ${typeof row[side]}, not a position`);
+        }
+      }
+    }
+  }
+
+  // The comparison must actually be there. A gate that only removes things
+  // eventually removes the feature, which is how this one went wrong before.
+  const withRows = both.dimensions.filter((d) => (d.questions || []).length > 0);
+  if (!withRows.length) {
+    problems.push('no dimension carries any side-by-side rows; the comparison is the product');
   }
 }
 
-const payload = intimacyResults({ mine: { answers: mine }, theirs: { answers: theirs } });
-const problems = [];
+// ── 3. Nobody but the two partners, ever ───────────────────────────────────
+// intimacy_data is the raw record. /api/results reads it to build the payload
+// above, and /api/partner-sync passes it to the person it belongs with. Any
+// other endpoint returning it is sending it somewhere it was never promised.
+const apiDir = new URL('../api/', import.meta.url);
 
-const extraTop = Object.keys(payload).filter((k) => !ALLOWED_TOP.includes(k));
-if (extraTop.length) problems.push(`payload carries unlisted fields: ${extraTop.join(', ')}`);
+// Endpoints that legitimately handle it, and the reason each is allowed.
+const ALLOWED_ENDPOINTS = new Map([
+  // Builds the compared payload checked above.
+  ['results.js', 'builds the side-by-side comparison'],
+  // Hands one partner the other's record, which is the exercise working.
+  ['partner-sync.js', 'serves the linked partner, which is the comparison'],
+  // Writes it.
+  ['save-exercise.js', 'stores the answers'],
+  // Removes it.
+  ['delete-account.js', 'deletes and archives on request'],
+]);
 
-for (const d of payload.dimensions) {
-  const extra = Object.keys(d).filter((k) => !ALLOWED_DIM.includes(k));
-  if (extra.length) problems.push(`dimension ${d.id} carries unlisted fields: ${extra.join(', ')}`);
+let checked = 0;
+function scan(dir, prefix = '') {
+  for (const entry of readdirSync(dir, { withFileTypes: true })) {
+    if (entry.isDirectory()) { scan(new URL(`${entry.name}/`, dir), `${prefix}${entry.name}/`); continue; }
+    if (!entry.name.endsWith('.js')) continue;
+    const rel = `${prefix}${entry.name}`;
+    const text = readFileSync(new URL(entry.name, dir), 'utf8');
+    // Named directly, or selected through EXERCISE_COLUMNS.
+    if (!holdsColumn(text, 'intimacy_data', EXERCISE_COLUMNS)) continue;
+    checked++;
+    if (ALLOWED_ENDPOINTS.has(rel)) continue;
+
+    // Whether the column is inside a response is decided by
+    // scripts/_lib/source-scan.mjs, shared with check-partner-privacy.mjs.
+    // Both gates got this wrong the same two ways before it was shared.
+    const lines = text.split('\n');
+    lines.forEach((line, i) => {
+      if (isComment(line)) return;
+      if (!line.includes('intimacy_data')) return;
+      if (insideResponse(lines, i)) {
+        problems.push(`api/${rel}:${i + 1} returns intimacy_data, and is not one of the endpoints allowed to`);
+      }
+    });
+  }
 }
-
-// No question id should appear anywhere in the payload: a per-question field
-// is per-answer data by another name.
-const serialised = JSON.stringify(payload);
-for (const q of INTIMACY_QUESTIONS) {
-  if (serialised.includes(q.id)) problems.push(`question id ${q.id} reaches the client`);
-}
-
-// And no answer label either.
-const labels = new Set();
-for (const q of INTIMACY_QUESTIONS) for (const o of q.options || []) if (o.label) labels.add(o.label);
-for (const label of labels) {
-  if (serialised.includes(label)) problems.push(`answer label "${label}" reaches the client`);
-}
+scan(apiDir);
 
 if (problems.length) {
-  console.error('[check-intimacy-privacy] the intimacy payload leaks:');
+  console.error('[check-intimacy-privacy] intimacy answers are going somewhere they should not:');
   for (const p of problems) console.error(`  ${p}`);
   console.error('');
-  console.error('These screens render a distance between two answers. Add the field to');
-  console.error('the allowlist here only if a screen genuinely needs it, and never add');
-  console.error('anything that says what either person answered.');
+  console.error('The promise is that neither partner sees the other\'s answers until both');
+  console.error('have finished, and that the comparison is then theirs. Nothing before');
+  console.error('both are done, nothing to anyone else, and the comparison stays intact.');
   process.exit(1);
 }
 
-console.log(`[check-intimacy-privacy] ${payload.dimensions.length} dimensions, no answers, no question ids.`);
+console.log(`[check-intimacy-privacy] nothing before both finish; ${checked} endpoints touch intimacy_data, only the ${ALLOWED_ENDPOINTS.size} that must.`);

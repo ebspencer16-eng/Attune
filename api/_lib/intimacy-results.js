@@ -6,17 +6,34 @@
  * assembly was missing, so the app had eight sections and nothing to put in
  * them.
  *
- * ── WHAT IS AND IS NOT SENT ───────────────────────────────────────────────
- * Gaps, states and the copy for each state. Not the raw answers. This is the
- * most private thing in the product, and a payload that carries what each
- * person said about their own sex life is a payload that can leak it. The
- * dimension screens are about the distance between two answers, which is what
- * the exercise measures, and that number is enough to render every one of
- * them.
+ * ── WHAT IS SENT, AND WHY THAT CHANGED ────────────────────────────────────
+ * Gaps, states, the copy for each state, and each person's position on each
+ * question.
+ *
+ * The first version sent distances only, on the reasoning that this is the
+ * most private thing in the product. That was a rule invented here rather than
+ * one the product ever made. What the product actually promises, in the
+ * exercise intro, is:
+ *
+ *   "You answer on your own. Neither of you sees the other's answers until you
+ *    have both finished."
+ *
+ * Until, not never. And the catalogue sells the exercise as "Answered
+ * independently, compared side by side". The comparison is the product.
+ *
+ * Withholding positions did not make anyone safer. It made the app unable to
+ * draw a screen the website has always had, so the two surfaces disagreed
+ * about what a customer bought.
+ *
+ * What is still withheld: nothing is sent before both partners have finished.
+ * That is the promise, and /api/results only builds this payload when both are
+ * done. A declined question carries no position, so choosing not to answer
+ * stays invisible rather than becoming its own signal.
  */
 
 import {
   INTIMACY_DIMENSIONS,
+  INTIMACY_QUESTIONS,
   summarizeIntimacy,
   intimacyDimensionSkips,
 } from '../_intimacy-questions.js';
@@ -40,7 +57,46 @@ function proseFor(dimensionId, state, skips) {
   return { body: copy[state] || null, reason: state };
 }
 
-export function intimacyResults({ mine, theirs }) {
+/**
+ * Where each person sits on one question, 0 to 1.
+ *
+ * Answers are stored as the option label, so the position is that option's
+ * value. A declined answer has a null value and returns null, which renders as
+ * no mark rather than as a mark at zero.
+ */
+function positionOf(question, answer) {
+  if (answer == null) return null;
+  const option = (question.options || []).find((o) => o.label === answer);
+  return option && option.value != null ? option.value : null;
+}
+
+/**
+ * The side-by-side rows for one dimension, matching the website's screen.
+ *
+ * selfref questions are left out, as the website leaves them out: they ask
+ * about you relative to your partner, so two positions on one axis would be
+ * comparing two different questions.
+ */
+function questionRows(dimensionId, answersMine, answersTheirs, variant) {
+  return INTIMACY_QUESTIONS
+    .filter((q) => q.dimension === dimensionId && q.kind !== 'selfref')
+    .map((q) => {
+      const scored = (q.options || []).filter((o) => o.value != null)
+        .slice().sort((a, b) => a.value - b.value);
+      return {
+        id: q.id,
+        text: q[variant] || q.premarital || q.topic || '',
+        low: scored[0]?.label || '',
+        high: scored[scored.length - 1]?.label || '',
+        you: positionOf(q, answersMine?.[q.id]),
+        them: positionOf(q, answersTheirs?.[q.id]),
+      };
+    })
+    // A row neither of them answered has nothing to show.
+    .filter((r) => r.you != null || r.them != null);
+}
+
+export function intimacyResults({ mine, theirs, variant = 'premarital' }) {
   const answersMine = mine?.answers || mine || null;
   const answersTheirs = theirs?.answers || theirs || null;
   if (!answersMine || !answersTheirs) return null;
@@ -68,6 +124,9 @@ export function intimacyResults({ mine, theirs }) {
       // The question to take away. This is the actual product of the section:
       // the exercise exists to start a conversation, not to score one.
       prompt: copy.prompt || null,
+      // Both people's positions, question by question. This is the screen the
+      // catalogue sells as "compared side by side".
+      questions: questionRows(d.id, answersMine, answersTheirs, variant),
     };
   });
 

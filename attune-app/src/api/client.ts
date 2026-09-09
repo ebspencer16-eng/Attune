@@ -248,6 +248,22 @@ export type IntimacyDimension = {
   body: string | null;
   reason: string;
   prompt: string | null;
+  /**
+   * Both people's positions on each question in this dimension, 0 to 1.
+   *
+   * The exercise is sold as "answered independently, compared side by side",
+   * and this is that comparison. A question either of them declined carries
+   * null on that side and draws no mark, so declining stays invisible rather
+   * than becoming its own signal.
+   */
+  questions?: {
+    id: string;
+    text: string;
+    low: string;
+    high: string;
+    you: number | null;
+    them: number | null;
+  }[];
 };
 
 export type IntimacyResults = {

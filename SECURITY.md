@@ -108,11 +108,38 @@ now applies it. The comment there names the promise and where the copy lives,
 because a rule with no stated reason gets relaxed by whoever finds it
 inconvenient.
 
-**Intimacy is deliberately unchanged.** Physical Intimacy was designed as
-"questions, side by side": both people answer independently and then see both
-positions. That is the feature, not a leak, and no equivalent promise was ever
-made about it. Applying the stricter default there would have imposed a privacy
-rule the product never claimed and removed something customers paid for.
+**Intimacy went the other way, after checking what was promised.** Every
+customer-facing surface was searched for a privacy claim attached to the
+exercise. There is none. The opposite is promised, repeatedly:
+
+- The exercise intro: "You answer on your own. Neither of you sees the other's
+  answers **until you have both finished**." Until, not never.
+- The catalogue includes list: "Answered independently, **compared side by
+  side**."
+- `checkout.html`: "answered independently and compared side by side."
+- `start.html` and the purchase email: "scored for gaps and conversation, like
+  the rest of your results."
+
+"A private set of questions" appears six times and always describes the subject
+matter and answering alone. In the includes list it sits beside "compared side
+by side".
+
+So `/api/results` was stricter than the product, not safer than it. It sent
+distances only, which meant the app could not draw the side-by-side screen the
+website has always had, and the two surfaces disagreed about what a customer
+had bought. The payload now carries each person's position per question, and
+the app renders the comparison.
+
+**One string did promise privacy, and it was ours.** The app's intimacy
+exercise said "Your partner never sees your answers", and the completion screen
+said "your partner cannot see them". Both were written to match the gate rather
+than the product, and both are now the website's own wording.
+
+`check-intimacy-privacy.mjs` was rewritten rather than deleted. It now enforces
+what was actually promised: nothing leaves before both partners have finished,
+positions may pass between the two of them once both are done, and no other
+endpoint may return the raw record. It also asserts the comparison is still
+there, because a gate that only removes things eventually removes the feature.
 
 Two gates now cover the rule between them, and the split is deliberate:
 `check-conflict-privacy.mjs` proves `partnerView` carries no pattern data and

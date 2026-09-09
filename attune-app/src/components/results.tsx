@@ -402,7 +402,7 @@ function SectionBody({
   if (section === 'intimacy-plan') return <IntimacyConversations data={intimacy} />;
   if (section.startsWith('intimacy-')) {
     const dim = intimacy?.dimensions.find((d) => d.section === section) ?? null;
-    return <IntimacyDimensionView dim={dim} />;
+    return <IntimacyDimensionView dim={dim} you={you} them={them} />;
   }
 
   if (section.startsWith('conflict-')) {
@@ -670,7 +670,9 @@ function IntimacyOverview({ data }: { data: IntimacyResults | null }) {
   );
 }
 
-function IntimacyDimensionView({ dim }: { dim: IntimacyDimension | null }) {
+function IntimacyDimensionView({
+  dim, you, them,
+}: { dim: IntimacyDimension | null; you: string; them: string }) {
   if (!dim) {
     return <Waiting title="Physical Intimacy" body="This opens when you have both finished the exercise." />;
   }
@@ -699,6 +701,40 @@ function IntimacyDimensionView({ dim }: { dim: IntimacyDimension | null }) {
           <Text style={{ ...Type.title, color: c.textStrong, marginTop: Spacing.xl }}>
             {dim.prompt}
           </Text>
+        ) : null}
+
+        {/* The side-by-side comparison, which is what the exercise is sold as:
+            "answered independently, compared side by side". The app could not
+            draw this until the server carried positions, so the website had a
+            screen the app did not. */}
+        {dim.questions?.length ? (
+          <View style={{ marginTop: Spacing.xxl }}>
+            <Eyebrow>{`${dim.label} questions, side by side`}</Eyebrow>
+            <Legend you={you} them={them} />
+            {dim.questions.map((q) => (
+              <View
+                key={q.id}
+                style={{
+                  backgroundColor: c.surface, borderColor: c.border, borderWidth: 1,
+                  borderRadius: Radius.lg, padding: Spacing.lg, marginBottom: Spacing.md,
+                }}>
+                <Text style={{ ...Type.body, color: c.text }}>{q.text}</Text>
+                <View style={{ height: 28, justifyContent: 'center', marginTop: Spacing.md }}>
+                  <View style={{ height: 3, borderRadius: Radius.pill, backgroundColor: c.border }} />
+                  {q.you != null ? (
+                    <Marker left={q.you * 100} color={YOU_COLOR} label={initial(you)} />
+                  ) : null}
+                  {q.them != null ? (
+                    <Marker left={q.them * 100} color={THEM_COLOR} label={initial(them)} />
+                  ) : null}
+                </View>
+                <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: Spacing.xs }}>
+                  <Text style={{ ...Type.small, color: c.textMuted, flex: 1 }}>{q.low}</Text>
+                  <Text style={{ ...Type.small, color: c.textMuted, flex: 1, textAlign: 'right' }}>{q.high}</Text>
+                </View>
+              </View>
+            ))}
+          </View>
         ) : null}
       </View>
     </ScrollView>

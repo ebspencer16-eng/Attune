@@ -20,7 +20,9 @@
  * ── WHAT THIS SCREEN DOES NOT DO ──────────────────────────────────────────
  * It shows no running total, no score, and nothing about the partner. Someone
  * answering questions about their own sex life should not be watching a number
- * move while they do it.
+ * move while they do it. That is about this screen, not a privacy claim: once
+ * both partners finish, the results compare their answers side by side, which
+ * is what the exercise is sold as.
  */
 
 import { useCallback, useEffect, useState } from 'react';
@@ -105,8 +107,8 @@ export default function IntimacyExercise({
         <View style={{ padding: Spacing.xl }}>
           <Text style={{ ...Type.hero, color: c.textStrong }}>That is everything</Text>
           <Text style={{ ...Type.body, color: c.textMuted, marginTop: Spacing.sm }}>
-            Your answers are saved and your partner cannot see them. These
-            results open once you have both finished.
+            Your answers are saved. These results open once you have both
+            finished, and then you see them side by side.
           </Text>
           <Pressable
             onPress={onFinished}
@@ -250,9 +252,13 @@ export default function IntimacyExercise({
           </Pressable>
         ) : null}
 
+        {/* The website's own words, from the exercise intro. What was here
+            was written for the app and promised something the product does
+            not: it said the partner never sees these answers. The exercise is
+            sold as "answered independently, compared side by side". */}
         <Text style={{ ...Type.small, color: c.textMuted, textAlign: 'center', marginTop: Spacing.lg }}>
-          Your partner never sees your answers. Results show how far apart you
-          are, not what either of you said.
+          You answer on your own. Neither of you sees the other's answers until
+          you have both finished.
         </Text>
       </ScrollView>
     </Shell>

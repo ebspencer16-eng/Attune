@@ -332,7 +332,14 @@ export default async function handler(req) {
       : null;
 
     const intimacy = (ownership.ownsIntimacy && bothDone('intimacy'))
-      ? intimacyResults({ mine: me.intimacy_data, theirs: partner?.intimacy_data })
+      ? intimacyResults({
+          mine: me.intimacy_data,
+          theirs: partner?.intimacy_data,
+          // The wording each of them answered under. Taken from the stored
+          // record rather than recomputed from the profile, so the rows read
+          // back the questions they actually saw.
+          variant: me.intimacy_data?.variant || partner?.intimacy_data?.variant || 'premarital',
+        })
       : null;
 
     const reflection = (ownership.ownsReflection && bothDone('ex3'))
