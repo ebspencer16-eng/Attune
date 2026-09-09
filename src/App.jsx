@@ -3838,13 +3838,9 @@ function PersonalityResults({ myAnswers, partnerAnswers, userName, partnerName, 
         <div style={{ marginBottom: "1.25rem" }}>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "0.5rem" }}>
             <div style={{ fontSize: "0.65rem", letterSpacing: "0.2em", textTransform: "uppercase", color: "rgba(255,255,255,0.65)", fontFamily: BFONT }}>How You Communicate</div>
-            <div style={{ fontSize: "0.58rem", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.85)", fontFamily: BFONT, background: "rgba(255,255,255,0.16)", border: "1px solid rgba(255,255,255,0.3)", borderRadius: 99, padding: "0.2rem 0.7rem", fontWeight: 700 }}>Results at a glance</div>
           </div>
           <div style={{ fontSize: "clamp(1.8rem,6vw,2.8rem)", fontWeight: 700, fontFamily: HFONT, lineHeight: 1.0, marginBottom: "0.6rem" }}>{userName} & {partnerName}</div>
-          <p style={{ fontSize: "0.88rem", color: "rgba(255,255,255,0.82)", fontFamily: BFONT, fontWeight: 400, lineHeight: 1.6, margin: 0 }}>
-            {sortedFeedback.filter(f => f.gap <= 1).length} of {DIMS.length} dimensions closely matched.{" "}
-            {sortedFeedback.filter(f => f.gap > 1).length > 0 ? (sortedFeedback.filter(f => f.gap > 1).length + " worth a closer look.") : "Strong alignment across the board."}
-          </p>
+          
           <p style={{ fontSize: "0.72rem", color: "rgba(255,255,255,0.6)", fontFamily: BFONT, fontWeight: 300, lineHeight: 1.55, margin: "0.6rem 0 0" }}>Tap any dimension below to read the full picture.</p>
         </div>
 
@@ -4328,21 +4324,9 @@ function ExpectationsResults({ myAnswers, partnerAnswers, userName, partnerName,
             <div style={{ marginBottom: "1.25rem" }}>
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "0.5rem" }}>
                 <div style={{ fontSize: "0.65rem", letterSpacing: "0.2em", textTransform: "uppercase", color: "rgba(255,255,255,0.65)", fontFamily: BFONT }}>What You Expect</div>
-                <div style={{ fontSize: "0.58rem", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.85)", fontFamily: BFONT, background: "rgba(255,255,255,0.16)", border: "1px solid rgba(255,255,255,0.3)", borderRadius: 99, padding: "0.2rem 0.7rem", fontWeight: 700 }}>Results at a glance</div>
               </div>
               <div style={{ fontSize: "clamp(1.8rem,6vw,2.8rem)", fontWeight: 700, fontFamily: HFONT, lineHeight: 1.0, marginBottom: "0.6rem" }}>{userName} & {partnerName}</div>
 
-              {/* Already aligned / Worth discussing counts */}
-              <div style={{ display: "flex", gap: "1.25rem", marginBottom: "0.35rem" }}>
-                <div style={{ display: "flex", alignItems: "center", gap: "0.45rem" }}>
-                  <div style={{ width: 8, height: 8, borderRadius: "50%", background: "#10b981", flexShrink: 0 }} />
-                  <span style={{ fontSize: "0.85rem", color: "rgba(255,255,255,0.92)", fontFamily: BFONT }}>Already aligned: <strong>{aligned.length}</strong></span>
-                </div>
-                <div style={{ display: "flex", alignItems: "center", gap: "0.45rem" }}>
-                  <div style={{ width: 8, height: 8, borderRadius: "50%", background: "#E8673A", flexShrink: 0 }} />
-                  <span style={{ fontSize: "0.85rem", color: "rgba(255,255,255,0.92)", fontFamily: BFONT }}>Worth discussing: <strong>{gaps.length}</strong></span>
-                </div>
-              </div>
             </div>
 
             {/* ── EXPECTATIONS ALIGNMENT SCALE ── */}
@@ -7291,9 +7275,6 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
 
           {/* 1. HEADER */}
           <div style={{ marginBottom: "1.25rem" }}>
-            <div style={{ fontSize: "0.58rem", letterSpacing: "0.28em", textTransform: "uppercase", color: ct.color, fontFamily: BFONT, fontWeight: 700, marginBottom: "0.5rem" }}>
-              {userName} & {partnerName}
-            </div>
             <div style={{ fontFamily: HFONT, fontSize: "clamp(1.7rem,4vw,2.3rem)", fontWeight: 700, color: C.ink, lineHeight: 1.08, letterSpacing: "-0.02em" }}>
               What your responses uncover about your unique relationship dynamic
             </div>
@@ -7627,7 +7608,6 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
                   <div style={{ width: 10, height: 10, borderRadius: "50%", background: "#1B5FE8", flexShrink: 0 }} />
                   <div style={{ fontSize: "0.65rem", textTransform: "uppercase", letterSpacing: "0.2em", color: "rgba(255,255,255,0.7)", fontFamily: BFONT, fontWeight: 700 }}>Relationship Reflection</div>
                 </div>
-                <div style={{ fontSize: "0.58rem", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.85)", fontFamily: BFONT, background: "rgba(255,255,255,0.16)", border: "1px solid rgba(255,255,255,0.3)", borderRadius: 99, padding: "0.2rem 0.7rem", fontWeight: 700 }}>Results at a glance</div>
               </div>
               <div style={{ fontSize: "clamp(1.8rem,6vw,2.8rem)", fontWeight: 700, fontFamily: HFONT, lineHeight: 1.05, marginBottom: "0.6rem" }}>{userName} &amp; {partnerName}</div>
               <p style={{ fontSize: "0.92rem", color: "rgba(255,255,255,0.85)", fontFamily: BFONT, fontWeight: 400, lineHeight: 1.6, marginBottom: "1rem" }}>
@@ -8002,11 +7982,10 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
               {/* Header — same shape as the comms + expectations overviews */}
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "0.6rem", marginBottom: "0.5rem" }}>
                 <div style={{ fontSize: "0.65rem", textTransform: "uppercase", letterSpacing: "0.2em", color: "rgba(255,255,255,0.7)", fontFamily: BFONT, fontWeight: 700 }}>Physical Intimacy Expectations</div>
-                <div style={{ fontSize: "0.58rem", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.85)", fontFamily: BFONT, background: "rgba(255,255,255,0.16)", border: "1px solid rgba(255,255,255,0.3)", borderRadius: 99, padding: "0.2rem 0.7rem", fontWeight: 700 }}>Results at a glance</div>
               </div>
               <div style={{ fontSize: "clamp(1.8rem,6vw,2.8rem)", fontWeight: 700, fontFamily: HFONT, lineHeight: 1.05, marginBottom: "0.6rem" }}>{userName} &amp; {partnerName}</div>
               <p style={{ fontSize: "0.92rem", color: "rgba(255,255,255,0.85)", fontFamily: BFONT, fontWeight: 400, lineHeight: 1.6, marginBottom: "1rem" }}>
-                {intimacyVariant === "married" ? "Based on how things are now." : "Based on what you each expect."} {exploreCount === 0 ? "You line up across the board." : `${alignedCount} of ${dims.length} closely matched.`}
+                {intimacyVariant === "married" ? "Based on how things are now." : "Based on what you each expect."}
               </p>
               
               {/* Where you each land — label left, bar right, key top-right (9.1) */}
@@ -8494,7 +8473,6 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
     return (
       <Layout accent="#E8673A" noPrevNext={true}>
         <div style={{ maxWidth: 560, margin: "0 auto" }}>
-          <div style={{ fontFamily: BFONT, fontSize: "0.62rem", letterSpacing: "0.22em", textTransform: "uppercase", color: C.clay, fontWeight: 700, marginBottom: "0.85rem" }}>What comes next</div>
           <h2 style={{ fontFamily: HFONT, fontSize: "clamp(1.8rem,3vw,2.4rem)", fontWeight: 700, color: C.ink, lineHeight: 1.1, letterSpacing: "-0.02em", marginBottom: "1.5rem" }}>What to do with all of this.</h2>
 
           {/* ── ACTION ITEMS — one dropdown per exercise the couple has ── */}
@@ -8571,7 +8549,6 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
             if (!groups.length) return null;
             return (
               <div style={{ marginBottom: "1.75rem" }}>
-                <div style={{ fontSize: "0.62rem", letterSpacing: "0.22em", textTransform: "uppercase", color: C.clay, fontFamily: BFONT, fontWeight: 700, marginBottom: "0.5rem" }}>Your action items</div>
                 <p style={{ fontSize: "0.8rem", color: C.muted, fontFamily: BFONT, fontWeight: 300, lineHeight: 1.6, margin: "0 0 0.85rem" }}>
                   Each part of your results ends in something to do. They are gathered here, grouped by where they came from. Open one to see its items and the words to start with.
                 </p>
@@ -13930,7 +13907,7 @@ export default function App() {
                         <span style={{ fontFamily: "'Playfair Display', Georgia, serif", fontSize: isMobile ? "1.6rem" : "2.5rem", fontWeight: 700, lineHeight: 1, letterSpacing: "-.02em", color: "white" }}>{partnerName || "Partner"}</span>
                       </div>
                       <div style={{ fontSize: isMobile ? "0.78rem" : "0.92rem", color: "rgba(255,255,255,0.75)", fontFamily: BFONT, fontWeight: 300, marginTop: "0.6rem", lineHeight: 1.5 }}>
-                        {bothDone ? "Your results are ready. Take it one step at a time." : "Understanding takes intention. Get started together."}
+                        {bothDone ? "" : "Understanding takes intention. Get started together."}
                       </div>
                     </div>
                   </div>
