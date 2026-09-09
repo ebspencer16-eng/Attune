@@ -11,20 +11,21 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,800;1,700&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<link rel="stylesheet" href="/tokens.css">
 <style>
   * { margin:0; padding:0; box-sizing:border-box; }
   :root { --hfont:'Playfair Display',Georgia,serif; --bfont:'DM Sans',sans-serif; }
-  body { background:#E8E4DE; min-height:100vh; display:flex; flex-direction:column; align-items:center; padding:2rem 1rem; font-family:var(--bfont); }
+  body { background:#E8E4DE; min-height:100vh; display:flex; flex-direction:column; align-items:center; padding:var(--s-2xl) var(--s-md); font-family:var(--bfont); }
 
   /* ── Controls (hidden when printing) ── */
-  .controls { background:white; border-radius:14px; padding:1.25rem 1.5rem; margin-bottom:2rem; display:flex; align-items:center; gap:1rem; flex-wrap:wrap; box-shadow:0 4px 20px rgba(0,0,0,.1); }
+  .controls { background:white; border-radius:14px; padding:var(--s-lg) var(--s-xl); margin-bottom:var(--s-2xl); display:flex; align-items:center; gap:var(--s-md); flex-wrap:wrap; box-shadow:0 4px 20px rgba(0,0,0,.1); }
   .ctrl-label { font-size:.65rem; font-weight:700; letter-spacing:.12em; text-transform:uppercase; color:#8C7A68; }
-  .ctrl-select { background:#F8F5F0; border:1px solid #DDD4C4; border-radius:8px; padding:.35rem .75rem; font-size:.78rem; font-family:var(--bfont); color:#1E1610; cursor:pointer; }
-  .ctrl-btn { background:linear-gradient(135deg,#E8673A,#1B5FE8); color:white; border:none; border-radius:8px; padding:.5rem 1.25rem; font-size:.78rem; font-weight:700; cursor:pointer; font-family:var(--bfont); }
+  .ctrl-select { background:#F8F5F0; border:1px solid #DDD4C4; border-radius:8px; padding:.35rem var(--s-sm); font-size:.78rem; font-family:var(--bfont); color:#1E1610; cursor:pointer; }
+  .ctrl-btn { background:linear-gradient(135deg,#E8673A,#1B5FE8); color:white; border:none; border-radius:8px; padding:var(--s-xs) var(--s-lg); font-size:.78rem; font-weight:700; cursor:pointer; font-family:var(--bfont); }
   .ctrl-note { font-size:.65rem; color:#8C7A68; font-style:italic; }
 
   /* ── Card container ── */
-  .card-wrap { display:flex; flex-direction:column; align-items:center; gap:1.5rem; }
+  .card-wrap { display:flex; flex-direction:column; align-items:center; gap:var(--s-xl); }
 
   /* ── Card base ── */
   .spark-card {
@@ -45,7 +46,7 @@
   }
   .card-foundation .card-header {
     background: linear-gradient(150deg, #E8673A 0%, #C4522B 100%);
-    padding: 1.5rem 1.35rem 1.25rem;
+    padding:var(--s-xl) 1.35rem var(--s-lg);
     position: relative;
     overflow: hidden;
   }
@@ -61,7 +62,7 @@
   }
   .card-newlywed .card-header {
     background: linear-gradient(150deg, #1E1610 0%, #3D2E1F 60%, #4A3828 100%);
-    padding: 1.5rem 1.35rem 1.25rem;
+    padding:var(--s-xl) 1.35rem var(--s-lg);
     position: relative;
     overflow: hidden;
   }
@@ -82,7 +83,7 @@
   }
   .card-anniversary .card-header {
     background: linear-gradient(150deg, #0f0c29 0%, #1d1a4e 60%, #252165 100%);
-    padding: 1.5rem 1.35rem 1.25rem;
+    padding:var(--s-xl) 1.35rem var(--s-lg);
     position: relative;
     overflow: hidden;
   }
@@ -99,7 +100,7 @@
   }
   .card-premium .card-header {
     background: linear-gradient(150deg, #1a0a00 0%, #0E0B07 100%);
-    padding: 1.5rem 1.35rem 1.25rem;
+    padding:var(--s-xl) 1.35rem var(--s-lg);
     position: relative;
     overflow: hidden;
     border-bottom: 1px solid rgba(255,255,255,.08);
@@ -112,12 +113,12 @@
   }
 
   /* ── Shared header elements ── */
-  .card-logo { display:flex; align-items:center; gap:.5rem; margin-bottom:1rem; position:relative; z-index:1; }
+  .card-logo { display:flex; align-items:center; gap:var(--s-xs); margin-bottom:var(--s-md); position:relative; z-index:1; }
   .card-logo-text { font-family:var(--hfont); font-size:1.1rem; font-weight:700; }
   .header-pkg-badge {
     display:inline-block; border-radius:999px; padding:.2rem .65rem;
     font-size:.55rem; font-weight:700; letter-spacing:.12em; text-transform:uppercase;
-    font-family:var(--bfont); position:relative; z-index:1; margin-bottom:.75rem;
+    font-family:var(--bfont); position:relative; z-index:1; margin-bottom:var(--s-sm);
   }
   .card-names {
     font-family:var(--hfont); font-size:1.3rem; font-weight:700; line-height:1.2;
@@ -131,8 +132,8 @@
   /* ── QR section ── */
   .card-qr-section {
     flex:1; display:flex; flex-direction:column; align-items:center;
-    justify-content:center; padding:1.25rem 1.35rem;
-    gap:.75rem;
+    justify-content:center; padding:var(--s-lg) 1.35rem;
+    gap:var(--s-sm);
   }
   .qr-frame {
     background:white; border-radius:14px; padding:.85rem;
@@ -230,7 +231,7 @@
     position:absolute; bottom:-8px; right:16px; font-size:1.5rem; opacity:.3; z-index:0;
   }
   .anniversary-stars {
-    display:flex; gap:.5rem; justify-content:center; margin-top:.5rem;
+    display:flex; gap:var(--s-xs); justify-content:center; margin-top:var(--s-xs);
     font-size:.7rem; opacity:.5;
   }
   .premium-accent {
@@ -269,11 +270,11 @@
   </div>
   <div>
     <div class="ctrl-label" style="margin-bottom:.3rem;">Couple names</div>
-    <input type="text" id="ctrl-names" value="Sarah &amp; James" oninput="updateCard()" style="background:#F8F5F0;border:1px solid #DDD4C4;border-radius:8px;padding:.35rem .75rem;font-size:.78rem;font-family:var(--bfont);color:#1E1610;width:160px;">
+    <input type="text" id="ctrl-names" value="Sarah &amp; James" oninput="updateCard()" style="background:#F8F5F0;border:1px solid #DDD4C4;border-radius:8px;padding:.35rem var(--s-sm);font-size:.78rem;font-family:var(--bfont);color:#1E1610;width:160px;">
   </div>
   <div>
     <div class="ctrl-label" style="margin-bottom:.3rem;">Order ID</div>
-    <input type="text" id="ctrl-order" value="SP-14829" oninput="updateCard()" style="background:#F8F5F0;border:1px solid #DDD4C4;border-radius:8px;padding:.35rem .75rem;font-size:.78rem;font-family:var(--bfont);color:#1E1610;width:100px;">
+    <input type="text" id="ctrl-order" value="SP-14829" oninput="updateCard()" style="background:#F8F5F0;border:1px solid #DDD4C4;border-radius:8px;padding:.35rem var(--s-sm);font-size:.78rem;font-family:var(--bfont);color:#1E1610;width:100px;">
   </div>
   <button class="ctrl-btn" onclick="window.print()">🖨 Print card</button>
   <span class="ctrl-note">3.5" × 5.5" · fits standard gift card sleeve</span>
@@ -431,7 +432,7 @@ function renderQR(url) {
       correctLevel: QRCode.CorrectLevel.M,
     });
   } catch(e) {
-    container.innerHTML = '<div style="width:130px;height:130px;display:flex;align-items:center;justify-content:center;font-size:.65rem;color:#888;text-align:center;padding:.5rem;">QR preview<br>requires browser</div>';
+    container.innerHTML = '<div style="width:130px;height:130px;display:flex;align-items:center;justify-content:center;font-size:.65rem;color:#888;text-align:center;padding:var(--s-xs);">QR preview<br>requires browser</div>';
   }
 }
 

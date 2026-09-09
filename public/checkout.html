@@ -7,6 +7,7 @@
 <meta name="robots" content="noindex,nofollow">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <!-- attune:hscroll-lock -->
+  <link rel="stylesheet" href="/tokens.css">
   <style>
     html { overscroll-behavior-x: none; overflow-x: hidden; max-width: 100%; width: 100%; }
     body { overflow-x: hidden; max-width: 100%; width: 100%; position: relative; }
@@ -27,7 +28,7 @@
   html,body{min-height:100vh;background:var(--warm);color:var(--ink);font-family:var(--bfont)}
 
   /* NAV */
-  nav{position:sticky;top:0;z-index:100;height:58px;background:rgba(255,253,249,.97);backdrop-filter:blur(12px);border-bottom:1px solid var(--stone);display:flex;align-items:center;justify-content:space-between;padding:0 1.5rem}
+  nav{position:sticky;top:0;z-index:100;height:58px;background:rgba(255,253,249,.97);backdrop-filter:blur(12px);border-bottom:1px solid var(--stone);display:flex;align-items:center;justify-content:space-between;padding:0 var(--s-xl)}
   .logo{display:flex;align-items:center;gap:.6rem;text-decoration:none}
   .logo-text{font-family:var(--hfont);font-size:1.05rem;font-weight:700;color:var(--ink)}
   nav a.back{font-size:.75rem;color:var(--muted);text-decoration:none;font-weight:500}
@@ -35,23 +36,23 @@
   .nav-secure{display:flex;align-items:center;gap:.35rem;font-size:.68rem;color:var(--muted);font-weight:500}
 
   /* LAYOUT */
-  .co-wrap{max-width:1040px;margin:0 auto;padding:2.5rem 2rem 5rem;display:grid;grid-template-columns:1fr 360px;gap:3rem;align-items:start}
-  @media(max-width:780px){.co-wrap{grid-template-columns:1fr;padding:1.25rem 1rem 4rem}.summary-card{order:-1;position:static}.co-wrap>div:first-child{order:1}}
+  .co-wrap{max-width:1040px;margin:0 auto;padding:var(--s-3xl) var(--s-2xl) 5rem;display:grid;grid-template-columns:1fr 360px;gap:3rem;align-items:start}
+  @media(max-width:780px){.co-wrap{grid-template-columns:1fr;padding:var(--s-lg) var(--s-md) 4rem}.summary-card{order:-1;position:static}.co-wrap>div:first-child{order:1}}
 
   /* CARDS */
-  .co-card{background:white;border:1.5px solid var(--stone);border-radius:18px;overflow:hidden;margin-bottom:1.25rem}
-  .co-card-head{padding:1.1rem 1.5rem;border-bottom:1px solid var(--stone);display:flex;align-items:center;gap:.75rem}
+  .co-card{background:white;border:1.5px solid var(--stone);border-radius:18px;overflow:hidden;margin-bottom:var(--s-lg)}
+  .co-card-head{padding:1.1rem var(--s-xl);border-bottom:1px solid var(--stone);display:flex;align-items:center;gap:var(--s-sm)}
   .co-num{width:26px;height:26px;border-radius:50%;background:var(--ink);color:white;font-size:.72rem;font-weight:700;display:flex;align-items:center;justify-content:center;font-family:var(--bfont);flex-shrink:0}
   .co-num.done{background:var(--green)}
   .co-card-title{font-size:.88rem;font-weight:700;color:var(--ink)}
-  .co-body{padding:1.4rem 1.5rem}
+  .co-body{padding:1.4rem var(--s-xl)}
 
   /* PURPOSE TOGGLE */
-  .purpose-toggle{display:grid;grid-template-columns:1fr 1fr;gap:.75rem;margin-bottom:0}
-  .pt-btn{border:1.5px solid var(--stone);border-radius:14px;padding:1rem 1.1rem;cursor:pointer;background:var(--warm);transition:all .18s;text-align:left;font-family:var(--bfont)}
+  .purpose-toggle{display:grid;grid-template-columns:1fr 1fr;gap:var(--s-sm);margin-bottom:0}
+  .pt-btn{border:1.5px solid var(--stone);border-radius:14px;padding:var(--s-md) 1.1rem;cursor:pointer;background:var(--warm);transition:all .18s;text-align:left;font-family:var(--bfont)}
   .pt-btn:hover{border-color:var(--clay)}
   .pt-btn.active{border-color:var(--orange);background:#FFF8F5}
-  .pt-icon{font-size:1.4rem;margin-bottom:.5rem}
+  .pt-icon{font-size:1.4rem;margin-bottom:var(--s-xs)}
   .pt-label{font-size:.88rem;font-weight:700;color:var(--ink);margin-bottom:.2rem}
   .pt-sub{font-size:.72rem;color:var(--muted);line-height:1.45}
   @media(max-width:480px){.purpose-toggle{grid-template-columns:1fr}.pt-icon{display:none}}
@@ -59,13 +60,13 @@
   /* FORM */
   .form-row{display:grid;grid-template-columns:1fr 1fr;gap:.85rem}
   @media(max-width:480px){.form-row{grid-template-columns:1fr}}
-  .form-group{margin-bottom:1rem}
+  .form-group{margin-bottom:var(--s-md)}
   .form-group:last-child{margin-bottom:0}
   .form-label{display:block;font-size:.63rem;letter-spacing:.09em;text-transform:uppercase;color:var(--ink);font-weight:700;margin-bottom:.4rem}
-  .form-input{width:100%;padding:.78rem 1rem;border:1.5px solid var(--stone);border-radius:10px;font-size:.88rem;font-family:var(--bfont);color:var(--ink);background:var(--cream);outline:none;transition:border-color .15s}
+  .form-input{width:100%;padding:.78rem var(--s-md);border:1.5px solid var(--stone);border-radius:10px;font-size:.88rem;font-family:var(--bfont);color:var(--ink);background:var(--cream);outline:none;transition:border-color .15s}
   .form-input:focus{border-color:var(--clay)}
   .form-hint{font-size:.67rem;color:var(--muted);margin-top:.35rem;line-height:1.5}
-  .form-divider{font-size:.6rem;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);font-weight:700;margin:1.25rem 0 1rem;display:flex;align-items:center;gap:.65rem}
+  .form-divider{font-size:.6rem;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);font-weight:700;margin:var(--s-lg) 0 var(--s-md);display:flex;align-items:center;gap:.65rem}
   .form-divider::before,.form-divider::after{content:'';flex:1;height:1px;background:var(--stone)}
   /* iOS auto-zooms inputs smaller than 16px. Force 16px on mobile so taps don't zoom the page. */
   @media(max-width:780px){
@@ -73,7 +74,7 @@
   }
 
   /* STRIPE ELEMENT */
-  .stripe-field{width:100%;padding:.78rem 1rem;border:1.5px solid var(--stone);border-radius:10px;background:var(--cream);transition:border-color .15s}
+  .stripe-field{width:100%;padding:.78rem var(--s-md);border:1.5px solid var(--stone);border-radius:10px;background:var(--cream);transition:border-color .15s}
   .stripe-field.StripeElement--focus{border-color:var(--clay)}
   .stripe-field.StripeElement--invalid{border-color:#ef4444}
 
@@ -89,15 +90,15 @@
 
   /* ORDER SUMMARY SIDEBAR */
   .summary-card{background:white;border:1.5px solid var(--stone);border-radius:18px;overflow:hidden;position:sticky;top:74px}
-  .summary-head{padding:1.1rem 1.5rem;border-bottom:1px solid var(--stone)}
+  .summary-head{padding:1.1rem var(--s-xl);border-bottom:1px solid var(--stone)}
   .summary-head-title{font-size:.88rem;font-weight:700;color:var(--ink)}
-  .summary-body{padding:1.25rem 1.5rem}
-  .co-card-detail{padding:.6rem 0;border-bottom:1px solid var(--stone);display:flex;justify-content:space-between;align-items:baseline;gap:.5rem}
+  .summary-body{padding:var(--s-lg) var(--s-xl)}
+  .co-card-detail{padding:.6rem 0;border-bottom:1px solid var(--stone);display:flex;justify-content:space-between;align-items:baseline;gap:var(--s-xs)}
   .co-card-detail:last-of-type{border-bottom:none}
   .co-card-detail .name{font-size:.82rem;color:var(--ink);font-weight:500}
   .co-card-detail .price{font-size:.82rem;color:var(--ink);font-weight:700;white-space:nowrap}
   .co-card-detail .sub{font-size:.68rem;color:var(--muted);display:block;margin-top:.1rem}
-  .total-row{display:flex;justify-content:space-between;align-items:baseline;padding-top:1rem;margin-top:.5rem;border-top:1.5px solid var(--stone)}
+  .total-row{display:flex;justify-content:space-between;align-items:baseline;padding-top:var(--s-md);margin-top:var(--s-xs);border-top:1.5px solid var(--stone)}
   .total-label{font-size:.85rem;font-weight:700;color:var(--ink)}
   .total-price{font-size:1.15rem;font-weight:700;color:var(--orange);font-family:var(--hfont)}
   .badge{display:inline-block;font-size:.6rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;background:#EEF2FF;color:#4555e8;border-radius:999px;padding:.2rem .55rem;margin-left:.35rem}
@@ -110,16 +111,16 @@
   .step-done{display:none;font-size:.7rem;color:var(--green);font-weight:600;margin-left:auto}
 
   /* GIFT NOTE EXPAND */
-  .gift-note-wrap{display:none;margin-top:1rem}
+  .gift-note-wrap{display:none;margin-top:var(--s-md)}
   .gift-note-wrap.visible{display:block}
   textarea.form-input{resize:vertical;min-height:80px}
 
   /* SUCCESS */
-  .co-success{text-align:center;padding:4rem 2rem;max-width:480px;margin:0 auto;display:none}
+  .co-success{text-align:center;padding:4rem var(--s-2xl);max-width:480px;margin:0 auto;display:none}
   .co-success.visible{display:block}
-  .success-icon{width:72px;height:72px;border-radius:50%;background:linear-gradient(135deg,var(--orange),#9B5DE5);display:flex;align-items:center;justify-content:center;margin:0 auto 1.5rem;font-size:2rem}
-  .co-success h1{font-family:var(--hfont);font-size:2rem;margin-bottom:.75rem}
-  .co-success p{font-size:.9rem;color:var(--muted);line-height:1.75;margin-bottom:1.5rem}
+  .success-icon{width:72px;height:72px;border-radius:50%;background:linear-gradient(135deg,var(--orange),#9B5DE5);display:flex;align-items:center;justify-content:center;margin:0 auto var(--s-xl);font-size:2rem}
+  .co-success h1{font-family:var(--hfont);font-size:2rem;margin-bottom:var(--s-sm)}
+  .co-success p{font-size:.9rem;color:var(--muted);line-height:1.75;margin-bottom:var(--s-xl)}
 
   /* ERROR */
   .error-msg{font-size:.75rem;color:#ef4444;margin-top:.4rem;display:none}
@@ -132,8 +133,8 @@
     border:1.5px solid #EF4444;
     border-left:5px solid #DC2626;
     border-radius:12px;
-    padding:1rem 1.1rem;
-    margin-top:1rem;
+    padding:var(--s-md) 1.1rem;
+    margin-top:var(--s-md);
     box-shadow:0 6px 20px rgba(220,38,38,.12);
   }
   .pay-error-card.visible{display:block;animation:slideDown .2s ease}
@@ -146,7 +147,7 @@
     font-size:.76rem;color:#8a3030;line-height:1.55;
   }
   .pay-error-card .pay-error-hint{
-    font-size:.72rem;color:#5C4A38;margin-top:.5rem;padding-top:.5rem;
+    font-size:.72rem;color:#5C4A38;margin-top:var(--s-xs);padding-top:var(--s-xs);
     border-top:1px solid rgba(239,68,68,.18);
   }
 
@@ -170,10 +171,10 @@
     font-size:.72rem;color:#8C7A68;margin-top:.1rem;
   }
   .item-intent{
-    display:flex;gap:.5rem;margin-bottom:.9rem;
+    display:flex;gap:var(--s-xs);margin-bottom:.9rem;
   }
   .item-intent-btn{
-    flex:1;padding:.55rem .75rem;border-radius:10px;border:1.5px solid #E8DDD0;
+    flex:1;padding:.55rem var(--s-sm);border-radius:10px;border:1.5px solid #E8DDD0;
     background:white;color:#5C4A38;font-size:.78rem;font-weight:600;cursor:pointer;
     font-family:'DM Sans',sans-serif;transition:all .12s;
     display:flex;align-items:center;justify-content:center;gap:.4rem;
@@ -202,7 +203,7 @@
   <div id="coCheckInbox">
     <h1>Check your inbox.</h1>
     <p id="coInboxCopy">We sent a link to <strong id="coEmailDisp">your email</strong>. Use it to set up your account and get started.</p>
-    <p id="coOrderNum" style="font-family:'Menlo','SF Mono',monospace;font-size:.72rem;color:#8C7A68;margin:0 0 1.25rem"></p>
+    <p id="coOrderNum" style="font-family:'Menlo','SF Mono',monospace;font-size:.72rem;color:#8C7A68;margin:0 0 var(--s-lg)"></p>
     <p style="font-size:.82rem;color:var(--muted);">Didn't get the email? Check your spam folder, or reach out to us at <a href="mailto:hello@attune-relationships.com" style="color:var(--orange);">hello@attune-relationships.com</a>.</p>
     <a id="startLink" href="/app" style="display:none"></a>
   </div>
@@ -256,7 +257,7 @@
 
     <!-- Add-on upsell prompt (single-item carts). Workbook only. -->
     <div id="addonPromptRow" class="co-card" style="display:none">
-      <div style="padding:1rem 1.5rem">
+      <div style="padding:var(--s-md) var(--s-xl)">
         <label style="display:flex;align-items:flex-start;gap:.85rem;cursor:pointer">
           <div style="position:relative;flex-shrink:0;margin-top:.15rem">
             <input type="checkbox" id="addonPromptCheck" style="position:absolute;opacity:0;width:0;height:0"/>
@@ -285,9 +286,9 @@
         </div>
 
         <!-- Physical shipping (shown for physical packages) -->
-        <div id="formatToggleSection" style="display:none;margin-bottom:1rem">
-  <div style="font-size:.72rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#8C7A68;margin-bottom:.5rem;font-family:'DM Sans',sans-serif">Format</div>
-  <div style="display:flex;gap:.5rem">
+        <div id="formatToggleSection" style="display:none;margin-bottom:var(--s-md)">
+  <div style="font-size:.72rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#8C7A68;margin-bottom:var(--s-xs);font-family:'DM Sans',sans-serif">Format</div>
+  <div style="display:flex;gap:var(--s-xs)">
     <button class="fmt-btn active" data-fmt="digital" onclick="setFormat('digital')"
       style="flex:1;padding:.6rem;border-radius:10px;border:1.5px solid #E8673A;background:#FFF0EB;color:#E8673A;font-size:.78rem;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .15s">
       Digital · $89
@@ -324,7 +325,7 @@
         <div id="billingSection">
           <div class="form-divider">Billing address</div>
           <div class="form-group" id="billingSameAsShippingWrap" style="display:none">
-            <label style="display:flex;align-items:center;gap:.5rem;font-size:.8rem;color:#5A4A3A;cursor:pointer">
+            <label style="display:flex;align-items:center;gap:var(--s-xs);font-size:.8rem;color:#5A4A3A;cursor:pointer">
               <input type="checkbox" id="billingSameAsShipping" checked onchange="toggleBillingSame()">
               <span>Same as shipping address</span>
             </label>
@@ -360,9 +361,9 @@
         <!-- Apple Pay / Google Pay / Link button. Only renders on supported
              devices with a saved wallet. Requires names+email+shipping to be
              filled before it can be tapped (otherwise we can't create the order). -->
-        <div id="expressCheckoutWrap" style="display:none;margin-bottom:1rem">
+        <div id="expressCheckoutWrap" style="display:none;margin-bottom:var(--s-md)">
           <div id="expressCheckout"></div>
-          <div style="display:flex;align-items:center;gap:.75rem;margin:1rem 0 .25rem">
+          <div style="display:flex;align-items:center;gap:var(--s-sm);margin:var(--s-md) 0 .25rem">
             <div style="flex:1;height:1px;background:#E8DDD0"></div>
             <div style="font-size:.68rem;letter-spacing:.18em;text-transform:uppercase;color:#B8AC9C;font-weight:700;font-family:'DM Sans',sans-serif">Or pay with card</div>
             <div style="flex:1;height:1px;background:#E8DDD0"></div>
@@ -392,7 +393,7 @@
           <!-- Kept for backward compat but hidden in favor of the card above -->
           <div class="error-msg" id="payError" style="display:none"></div>
         </div>
-        <div style="margin-top:1.25rem">
+        <div style="margin-top:var(--s-lg)">
           <button class="btn-primary" id="submitBtn" onclick="handleSubmit(event)" disabled>
             <span id="btnLabel">Complete order</span>
           </button>
@@ -427,16 +428,16 @@
         </div>
 
         <!-- Promo code input -->
-        <div id="promoBlock" style="margin-top:1.1rem;padding-top:1rem;border-top:1px solid #F3EDE6">
+        <div id="promoBlock" style="margin-top:1.1rem;padding-top:var(--s-md);border-top:1px solid #F3EDE6">
           <button type="button" id="promoToggle" onclick="togglePromo()" style="background:none;border:none;color:#8C7A68;font-size:.78rem;font-family:'DM Sans',sans-serif;cursor:pointer;padding:0;text-decoration:underline;text-decoration-color:#E8DDD0;text-underline-offset:3px">Have a promo code?</button>
-          <div id="promoInputWrap" style="display:none;margin-top:.75rem">
-            <div style="display:flex;gap:.5rem">
+          <div id="promoInputWrap" style="display:none;margin-top:var(--s-sm)">
+            <div style="display:flex;gap:var(--s-xs)">
               <input id="promoInput" type="text" placeholder="Enter code" style="flex:1;min-width:0;padding:.55rem .7rem;border:1.5px solid #E8DDD0;border-radius:8px;font-size:.82rem;font-family:'DM Sans',sans-serif;text-transform:uppercase;color:#1E1610;background:white;outline:none;letter-spacing:.02em" oninput="this.value=this.value.toUpperCase()" onkeydown="if(event.key==='Enter'){event.preventDefault();applyPromo();}">
-              <button type="button" onclick="applyPromo()" style="padding:.55rem 1rem;background:#1E1610;color:white;border:none;border-radius:8px;font-size:.76rem;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;white-space:nowrap">Apply</button>
+              <button type="button" onclick="applyPromo()" style="padding:.55rem var(--s-md);background:#1E1610;color:white;border:none;border-radius:8px;font-size:.76rem;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;white-space:nowrap">Apply</button>
             </div>
-            <div id="promoFeedback" style="margin-top:.5rem;font-size:.72rem;font-family:'DM Sans',sans-serif;color:#8C7A68;line-height:1.5;min-height:1rem"></div>
+            <div id="promoFeedback" style="margin-top:var(--s-xs);font-size:.72rem;font-family:'DM Sans',sans-serif;color:#8C7A68;line-height:1.5;min-height:1rem"></div>
           </div>
-          <div id="promoApplied" style="display:none;margin-top:.25rem;padding:.55rem .75rem;background:rgba(16,185,129,.08);border:1px solid rgba(16,185,129,.3);border-radius:8px;display:none;align-items:center;justify-content:space-between;gap:.5rem;font-family:'DM Sans',sans-serif">
+          <div id="promoApplied" style="display:none;margin-top:.25rem;padding:.55rem var(--s-sm);background:rgba(16,185,129,.08);border:1px solid rgba(16,185,129,.3);border-radius:8px;display:none;align-items:center;justify-content:space-between;gap:var(--s-xs);font-family:'DM Sans',sans-serif">
             <div>
               <div style="font-size:.72rem;font-weight:700;color:#059669;letter-spacing:.08em;text-transform:uppercase">Promo applied</div>
               <div id="promoAppliedCode" style="font-size:.8rem;color:#1E1610;font-weight:600;margin-top:.15rem"></div>
@@ -948,7 +949,7 @@ function renderItemsStep() {
       ${isPhysical ? `
         <div class="form-divider" style="margin-top:.9rem">
           Shipping address
-          <span style="font-weight:400;font-family:'DM Sans',sans-serif;font-size:.68rem;color:#8C7A68;letter-spacing:0;text-transform:none;margin-left:.5rem">or use Apple Pay / Google Pay below</span>
+          <span style="font-weight:400;font-family:'DM Sans',sans-serif;font-size:.68rem;color:#8C7A68;letter-spacing:0;text-transform:none;margin-left:var(--s-xs)">or use Apple Pay / Google Pay below</span>
         </div>
         <div class="form-group">
           <label class="form-label">Full name</label>
@@ -1127,7 +1128,7 @@ function renderSummary() {
           ? `${appliedPromoCode} · covers package + included add-ons`
           : `${appliedPromoCode} · covers package only`);
     rows += `
-      <div class="co-card-detail" style="border-top:1px solid #E8DDD0;margin-top:.4rem;padding-top:.5rem">
+      <div class="co-card-detail" style="border-top:1px solid #E8DDD0;margin-top:.4rem;padding-top:var(--s-xs)">
         <div>
           <div class="name" style="color:#10B981">Promo code applied</div>
           <span class="sub" style="font-family:monospace;font-size:.7rem;color:#8C7A68">${subLabel}</span>
@@ -1165,7 +1166,7 @@ function renderSummary() {
     grandTotal = postDiscountSubtotal + taxDollars;
     if (taxLineEl) {
       taxLineEl.innerHTML = `
-        <div style="display:flex;justify-content:space-between;align-items:baseline;padding:.4rem 0;font-size:.8rem;color:#5A4A3A;border-top:1px solid #E8DDD0;margin-top:.4rem;padding-top:.5rem">
+        <div style="display:flex;justify-content:space-between;align-items:baseline;padding:.4rem 0;font-size:.8rem;color:#5A4A3A;border-top:1px solid #E8DDD0;margin-top:.4rem;padding-top:var(--s-xs)">
           <span>Sales tax</span>
           <span style="font-weight:700;color:#1E1610">$${taxDollars.toFixed(2)}</span>
         </div>`;

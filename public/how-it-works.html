@@ -9,6 +9,7 @@
   <meta name="theme-color" content="#0E0B07">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <!-- attune:hscroll-lock -->
+  <link rel="stylesheet" href="/tokens.css">
   <style>
     html { overscroll-behavior-x: none; overflow-x: hidden; max-width: 100%; width: 100%; }
     body { overflow-x: hidden; max-width: 100%; width: 100%; position: relative; }
@@ -43,11 +44,11 @@
   body{background:var(--cream);color:var(--text);font-family:var(--bfont);-webkit-font-smoothing:antialiased}
 
   /* NAV */
-  nav{position:fixed;top:0;left:0;right:0;z-index:100;height:58px;background:rgba(255,253,249,.94);backdrop-filter:blur(16px);border-bottom:1px solid var(--stone);display:flex;align-items:center;padding:0 2.5rem;justify-content:space-between}
+  nav{position:fixed;top:0;left:0;right:0;z-index:100;height:58px;background:rgba(255,253,249,.94);backdrop-filter:blur(16px);border-bottom:1px solid var(--stone);display:flex;align-items:center;padding:0 var(--s-3xl);justify-content:space-between}
   .logo{display:flex;align-items:center;gap:.65rem;text-decoration:none}
   .logo-mark{display:flex;align-items:center;flex-shrink:0}
   .logo-text{font-family:var(--hfont);font-size:1.15rem;font-weight:700;color:var(--ink)}
-  .nav-center{display:flex;gap:2.5rem;list-style:none;position:absolute;left:50%;transform:translateX(-50%);align-items:center}.nav-center li{display:flex;align-items:center}.nav-center li{display:flex;align-items:center}
+  .nav-center{display:flex;gap:var(--s-3xl);list-style:none;position:absolute;left:50%;transform:translateX(-50%);align-items:center}.nav-center li{display:flex;align-items:center}.nav-center li{display:flex;align-items:center}
   .nav-center a{text-decoration:none;color:var(--muted);font-size:.82rem;font-weight:500;transition:color .15s}
   .nav-center a:hover,.nav-center a.active{color:var(--ink)}
   .nav-center a.active{font-weight:600}
@@ -63,11 +64,11 @@
   .nav-dropdown-menu::before{content:'';position:absolute;top:-12px;left:0;right:0;height:12px;background:transparent;}
   .nav-dropdown-menu a{display:block;padding:.55rem .8rem;font-size:.78rem;color:var(--muted);text-decoration:none;border-radius:8px;transition:all .15s;font-weight:500}
   .nav-dropdown-menu a:hover{background:var(--warm);color:var(--ink)}
-  .nav-dropdown-menu .dd-divider{height:1px;background:var(--stone);margin:.35rem .5rem}
-  .nav-right{display:flex;align-items:center;gap:1.25rem}
+  .nav-dropdown-menu .dd-divider{height:1px;background:var(--stone);margin:.35rem var(--s-xs)}
+  .nav-right{display:flex;align-items:center;gap:var(--s-lg)}
   .nav-signin{font-size:.8rem;font-weight:500;color:var(--muted);text-decoration:none;transition:color .15s}
   .nav-signin:hover{color:var(--ink)}
-  .btn-nav{background:var(--ink);color:white;padding:.5rem 1.2rem;border-radius:10px;font-size:.78rem;font-weight:600;text-decoration:none;transition:background .15s}
+  .btn-nav{background:var(--ink);color:white;padding:var(--s-xs) 1.2rem;border-radius:10px;font-size:.78rem;font-weight:600;text-decoration:none;transition:background .15s}
   .btn-nav:hover{background:#2a2218}
   .mobile-nav-links{display:none;gap:.85rem;align-items:center}
   .mobile-nav-links a{font-size:.76rem;font-weight:500;color:var(--muted);text-decoration:none;transition:color .15s}
@@ -81,33 +82,33 @@
   .s-title{font-family:var(--hfont);font-size:clamp(1.85rem,3.2vw,2.7rem);font-weight:700;line-height:1.1;color:var(--ink);margin-bottom:1.1rem;letter-spacing:-.02em}
   .s-title em{font-style:italic;color:var(--orange)}
   .s-sub{font-size:.95rem;color:var(--muted);line-height:1.78;font-weight:300;max-width:540px}
-  section{padding:4rem 2.5rem}
+  section{padding:4rem var(--s-3xl)}
   .si{max-width:1100px;margin:0 auto}
   .bg-warm{background:var(--warm);border-top:1px solid var(--stone);border-bottom:1px solid var(--stone)}
   .bg-dark{background:linear-gradient(150deg,#1c1940,#282560)}
 
   /* PAGE HEADER */
   
-  .page-title{font-family:var(--hfont);font-size:clamp(2.4rem,4.5vw,3.4rem);font-weight:700;line-height:1.06;color:var(--ink);margin-bottom:1.25rem;letter-spacing:-.02em}
+  .page-title{font-family:var(--hfont);font-size:clamp(2.4rem,4.5vw,3.4rem);font-weight:700;line-height:1.06;color:var(--ink);margin-bottom:var(--s-lg);letter-spacing:-.02em}
   .page-title em{font-style:italic;color:var(--orange)}
   .page-sub{font-size:1rem;color:var(--muted);line-height:1.78;font-weight:300}
 
   /* STEP TIMELINE */
-  .steps{display:flex;flex-direction:column;gap:0;margin-top:1rem}
-  .step{display:grid;grid-template-columns:1fr 1fr;gap:4rem;align-items:center;padding:2.5rem 0;border-top:1px solid var(--stone)}
+  .steps{display:flex;flex-direction:column;gap:0;margin-top:var(--s-md)}
+  .step{display:grid;grid-template-columns:1fr 1fr;gap:4rem;align-items:center;padding:var(--s-3xl) 0;border-top:1px solid var(--stone)}
   .step:first-child{border-top:none;padding-top:0}
   .step.flip{direction:rtl}.flip>div{direction:ltr}
   .step.flip > *{direction:ltr}
   .step-num{display:none}
-  .step-eyebrow{font-size:.6rem;letter-spacing:.28em;text-transform:uppercase;color:var(--clay);font-weight:700;margin-bottom:.75rem;display:flex;align-items:center;gap:.65rem}
+  .step-eyebrow{font-size:.6rem;letter-spacing:.28em;text-transform:uppercase;color:var(--clay);font-weight:700;margin-bottom:var(--s-sm);display:flex;align-items:center;gap:.65rem}
   .step-eyebrow::before{content:'';width:28px;height:2.5px;border-radius:999px;background:linear-gradient(90deg,var(--orange),var(--indigo));flex-shrink:0}
   /* Solid ink at low opacity rather than a gradient fill. A ghost numeral is
    texture; background-clip:text made it three brand colours competing with
    the heading beside it, and it disappears entirely where unsupported. */
-  .step-ghost-num{color:var(--ink);font-family:'Playfair Display',Georgia,serif;font-size:clamp(3.5rem,10vw,8rem);font-weight:700;line-height:1;letter-spacing:-.04em;margin-bottom:.5rem;display:block;user-select:none;opacity:.12}
-  .step-title{font-family:var(--hfont);font-size:clamp(1.6rem,2.8vw,2.2rem);font-weight:700;line-height:1.12;color:var(--ink);margin-bottom:1rem;letter-spacing:-.02em}
+  .step-ghost-num{color:var(--ink);font-family:'Playfair Display',Georgia,serif;font-size:clamp(3.5rem,10vw,8rem);font-weight:700;line-height:1;letter-spacing:-.04em;margin-bottom:var(--s-xs);display:block;user-select:none;opacity:.12}
+  .step-title{font-family:var(--hfont);font-size:clamp(1.6rem,2.8vw,2.2rem);font-weight:700;line-height:1.12;color:var(--ink);margin-bottom:var(--s-md);letter-spacing:-.02em}
   .step-title em{font-style:italic;color:var(--orange)}
-  .step-body{font-size:.92rem;color:var(--muted);line-height:1.78;margin-bottom:1.5rem;font-weight:300}
+  .step-body{font-size:.92rem;color:var(--muted);line-height:1.78;margin-bottom:var(--s-xl);font-weight:300}
   .step-detail{display:flex;flex-direction:column;gap:.65rem}
   .step-detail-mobile{display:none}
   .sd-item{display:flex;align-items:flex-start;gap:.7rem;font-size:.84rem;color:var(--text)}
@@ -118,26 +119,26 @@
 
   /* Exercise mock */
   .ex-mock{background:var(--cream);border:1px solid var(--stone);border-radius:20px;padding:1.75rem;box-shadow:0 24px 64px rgba(14,11,7,.12)}
-  .em-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem}
+  .em-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:var(--s-xl)}
   .em-tag{font-size:.56rem;letter-spacing:.24em;text-transform:uppercase;color:var(--orange);font-weight:700}
   .em-prog{display:flex;gap:3px}
   .em-prog-dot{width:8px;height:8px;border-radius:50%;background:var(--stone)}
   .em-prog-dot.done{background:var(--orange)}
   .em-prog-dot.active{background:var(--orange);box-shadow:0 0 0 2px rgba(232,103,58,.3)}
-  .em-q{font-family:var(--hfont);font-size:1.15rem;font-weight:700;color:var(--ink);margin-bottom:1.25rem;line-height:1.35}
-  .em-options{display:flex;flex-direction:column;gap:.55rem;margin-bottom:1.25rem}
-  .em-opt{padding:.85rem 1rem;border:1.5px solid var(--stone);border-radius:12px;font-size:.83rem;color:var(--text);cursor:pointer;transition:all .15s;background:white}
+  .em-q{font-family:var(--hfont);font-size:1.15rem;font-weight:700;color:var(--ink);margin-bottom:var(--s-lg);line-height:1.35}
+  .em-options{display:flex;flex-direction:column;gap:.55rem;margin-bottom:var(--s-lg)}
+  .em-opt{padding:.85rem var(--s-md);border:1.5px solid var(--stone);border-radius:12px;font-size:.83rem;color:var(--text);cursor:pointer;transition:all .15s;background:white}
   .em-opt:hover{border-color:var(--clay);background:var(--warm)}
   .em-opt.sel{border-color:var(--orange);background:#FFF0EB;color:var(--orange);font-weight:500}
   .em-foot{display:flex;justify-content:space-between;align-items:center}
   .em-count{font-size:.72rem;color:var(--muted)}
-  .em-next{background:var(--orange);color:white;border:none;padding:.55rem 1.25rem;border-radius:8px;font-size:.72rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;font-family:var(--bfont)}
+  .em-next{background:var(--orange);color:white;border:none;padding:.55rem var(--s-lg);border-radius:8px;font-size:.72rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;font-family:var(--bfont)}
 
   /* Waiting mock */
   .wait-mock{background:linear-gradient(150deg,#1e1c42,#2b285c);border-radius:20px;padding:1.75rem;color:white;box-shadow:0 24px 64px rgba(14,11,7,.22);border:1px solid rgba(255,255,255,.06)}
   .wm-label{font-size:.56rem;letter-spacing:.28em;text-transform:uppercase;color:rgba(232,103,58,.65);margin-bottom:.35rem}
   .wm-title{font-family:var(--hfont);font-size:1.5rem;font-weight:700;margin-bottom:1.1rem;letter-spacing:-.02em}
-  .wm-people{display:grid;grid-template-columns:1fr 1fr;gap:.6rem;margin-bottom:1rem}
+  .wm-people{display:grid;grid-template-columns:1fr 1fr;gap:.6rem;margin-bottom:var(--s-md)}
   .wm-person{border-radius:10px;padding:.85rem;border:1px solid}
   .wm-person.s{background:rgba(232,103,58,.1);border-color:rgba(232,103,58,.25)}
   .wm-person.j{background:rgba(91,109,248,.1);border-color:rgba(91,109,248,.25)}
@@ -151,23 +152,23 @@
   /* Results mock */
   .results-mock{background:linear-gradient(150deg,#1e1c42,#2b285c);border-radius:20px;padding:1.75rem;color:white;box-shadow:0 24px 64px rgba(14,11,7,.22);border:1px solid rgba(255,255,255,.06)}
   .rm-lbl{font-size:.56rem;letter-spacing:.28em;text-transform:uppercase;color:rgba(232,103,58,.65);margin-bottom:.3rem}
-  .rm-name{font-family:var(--hfont);font-size:1.65rem;font-weight:700;margin-bottom:.5rem;letter-spacing:-.02em}
-  .rm-badge{display:inline-block;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.18);padding:.28rem .75rem;border-radius:999px;font-size:.68rem;font-weight:600;margin-bottom:.9rem}
-  .rm-profiles{display:grid;grid-template-columns:1fr 1fr;gap:.6rem;margin-bottom:1rem}
-  .rm-prof{border-radius:10px;padding:.75rem .9rem}
+  .rm-name{font-family:var(--hfont);font-size:1.65rem;font-weight:700;margin-bottom:var(--s-xs);letter-spacing:-.02em}
+  .rm-badge{display:inline-block;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.18);padding:.28rem var(--s-sm);border-radius:999px;font-size:.68rem;font-weight:600;margin-bottom:.9rem}
+  .rm-profiles{display:grid;grid-template-columns:1fr 1fr;gap:.6rem;margin-bottom:var(--s-md)}
+  .rm-prof{border-radius:10px;padding:var(--s-sm) .9rem}
   .rm-prof.s{background:rgba(232,103,58,.14);border:1px solid rgba(232,103,58,.25)}
   .rm-prof.j{background:rgba(91,109,248,.14);border:1px solid rgba(91,109,248,.25)}
   .rm-pn{font-size:.52rem;letter-spacing:.18em;text-transform:uppercase;opacity:.45;margin-bottom:.2rem}
   .rm-pd{font-size:.77rem;font-weight:500;line-height:1.35}
   .rm-dims{display:grid;grid-template-columns:1fr 1fr;gap:.45rem}
-  .rm-dim{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);border-radius:9px;padding:.6rem .75rem;display:flex;justify-content:space-between;align-items:center}
+  .rm-dim{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);border-radius:9px;padding:.6rem var(--s-sm);display:flex;justify-content:space-between;align-items:center}
   .rm-dn{font-size:.62rem;font-weight:600}
   .rm-dv{font-size:.55rem;color:rgba(255,255,255,.4)}
   .rm-chip-row{display:flex;gap:.4rem;flex-wrap:wrap;margin-bottom:.9rem}
   .rm-chip{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.13);padding:.18rem .55rem;border-radius:999px;font-size:.6rem;color:rgba(255,255,255,.55)}
 
   /* DIMENSIONS SECTION */
-  .dim-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:1rem;margin-top:1.75rem}
+  .dim-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:var(--s-md);margin-top:1.75rem}
   .dim-card{background:white;border:1px solid var(--stone);border-radius:16px;padding:1.35rem;transition:box-shadow .2s,transform .2s}
   .dim-card:hover{border-color:var(--clay)}
   .dim-icon{width:40px;height:40px;border-radius:11px;display:flex;align-items:center;justify-content:center;margin-bottom:.9rem}
@@ -175,19 +176,19 @@
   .dim-desc{font-size:.77rem;color:var(--muted);line-height:1.6;margin-bottom:.9rem}
   .dim-example{background:var(--warm);border-radius:8px;padding:.7rem .9rem}
   .dim-ex-lbl{font-size:.58rem;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);margin-bottom:.3rem;font-weight:600}
-  .dim-ex-row{display:flex;justify-content:space-between;gap:.5rem}
+  .dim-ex-row{display:flex;justify-content:space-between;gap:var(--s-xs)}
   .dim-ex-person{font-size:.7rem;text-align:center;flex:1}
   .dim-ex-name{font-size:.56rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-bottom:.15rem}
   .dim-ex-val{font-weight:600;font-size:.72rem}
 
   /* COMPARISON BAR */
   .comp-wrap{margin-top:3rem}
-  .comp-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem}
-  .comp-names{display:flex;gap:1.5rem;align-items:center}
-  .comp-name{display:flex;align-items:center;gap:.5rem;font-size:.78rem;font-weight:600;color:var(--ink)}
+  .comp-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:var(--s-xl)}
+  .comp-names{display:flex;gap:var(--s-xl);align-items:center}
+  .comp-name{display:flex;align-items:center;gap:var(--s-xs);font-size:.78rem;font-weight:600;color:var(--ink)}
   .comp-name-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
   .comp-rows{display:flex;flex-direction:column;gap:.85rem}
-  .comp-row{display:grid;grid-template-columns:140px 1fr 1fr;gap:1rem;align-items:center}
+  .comp-row{display:grid;grid-template-columns:140px 1fr 1fr;gap:var(--s-md);align-items:center}
   .comp-label{font-size:.75rem;color:var(--muted);font-weight:500}
   .comp-bar-wrap{position:relative;height:8px;background:var(--stone);border-radius:999px;overflow:visible}
   .comp-bar{height:100%;border-radius:999px;position:absolute;top:0}
@@ -198,10 +199,10 @@
   .comp-result.diff{background:#EEEFFF;color:var(--indigo)}
 
   /* EXPECTATIONS */
-  .expect-card{background:white;border:1px solid var(--stone);border-radius:14px;padding:1.25rem}
-  .expect-card-title{font-size:.82rem;font-weight:700;color:var(--ink);margin-bottom:.75rem;display:flex;align-items:center;gap:.6rem}
+  .expect-card{background:white;border:1px solid var(--stone);border-radius:14px;padding:var(--s-lg)}
+  .expect-card-title{font-size:.82rem;font-weight:700;color:var(--ink);margin-bottom:var(--s-sm);display:flex;align-items:center;gap:.6rem}
   .expect-icon{width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
-  .expect-rows{display:flex;flex-direction:column;gap:.5rem}
+  .expect-rows{display:flex;flex-direction:column;gap:var(--s-xs)}
   .expect-row{font-size:.76rem;color:var(--text);line-height:1.45;padding:.45rem .65rem;border-radius:8px;border:1px solid var(--stone)}
   .expect-row.s{background:#FFF0EB;border-color:rgba(232,103,58,.2)}
   .expect-row.j{background:#EEEFFF;border-color:rgba(91,109,248,.2)}
@@ -217,8 +218,8 @@
   .for-card p{font-size:.83rem;color:var(--muted);line-height:1.68}
 
   /* CTA */
-  .cta-wrap{text-align:center;padding:3rem 2.5rem;background:var(--warm);border-top:1px solid var(--stone)}
-  .cta-title{font-family:var(--hfont);font-size:clamp(2rem,3.8vw,3rem);font-weight:700;line-height:1.08;color:var(--ink);margin-bottom:1.25rem;letter-spacing:-.02em}
+  .cta-wrap{text-align:center;padding:3rem var(--s-3xl);background:var(--warm);border-top:1px solid var(--stone)}
+  .cta-title{font-family:var(--hfont);font-size:clamp(2rem,3.8vw,3rem);font-weight:700;line-height:1.08;color:var(--ink);margin-bottom:var(--s-lg);letter-spacing:-.02em}
   .cta-title em{font-style:italic;color:var(--orange)}
   .cta-sub{font-size:.96rem;color:var(--muted);line-height:1.78;margin-bottom:2.75rem;font-weight:300}
   .btn-primary{background:linear-gradient(135deg,var(--orange),#d45a2e);color:white;border:none;padding:.9rem 2.1rem;border-radius:12px;font-size:.82rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;cursor:pointer;font-family:var(--bfont);text-decoration:none;display:inline-block;transition:transform .18s}
@@ -228,7 +229,7 @@
 
   /* FOOTER */
   .footer-outer{border-top:1px solid var(--stone)}
-  footer{max-width:1120px;margin:0 auto;padding:2rem 2.5rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem}
+  footer{max-width:1120px;margin:0 auto;padding:var(--s-2xl) var(--s-3xl);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:var(--s-md)}
   .footer-links{display:flex;gap:1.75rem;list-style:none}
   .footer-links a{font-size:.78rem;color:var(--muted);text-decoration:none;transition:color .15s}
   .footer-links a:hover{color:var(--ink)}
@@ -241,44 +242,44 @@
   /* HAMBURGER */
   .hamburger{display:none;flex-direction:column;gap:4px;background:none;border:none;cursor:pointer;padding:6px;border-radius:6px}
   .hamburger span{display:block;width:20px;height:2px;background:var(--ink);border-radius:2px}
-  .mobile-menu{display:none;position:fixed;top:66px;right:1rem;left:auto;width:240px;background:rgba(255,253,249,.99);backdrop-filter:blur(20px);border:1.5px solid var(--stone);border-radius:14px;padding:1rem;z-index:200;flex-direction:column;gap:.15rem;box-shadow:0 12px 40px rgba(14,11,7,.14)}
+  .mobile-menu{display:none;position:fixed;top:66px;right:1rem;left:auto;width:240px;background:rgba(255,253,249,.99);backdrop-filter:blur(20px);border:1.5px solid var(--stone);border-radius:14px;padding:var(--s-md);z-index:200;flex-direction:column;gap:.15rem;box-shadow:0 12px 40px rgba(14,11,7,.14)}
   .mobile-menu.open{display:flex}
-  .mobile-menu a{font-size:.85rem;font-weight:500;color:var(--muted);text-decoration:none;padding:.5rem .65rem;border-radius:8px;transition:all .15s}
+  .mobile-menu a{font-size:.85rem;font-weight:500;color:var(--muted);text-decoration:none;padding:var(--s-xs) .65rem;border-radius:8px;transition:all .15s}
   .mobile-menu a:last-child{}
   .mobile-menu .mm-cta{color:var(--orange);font-weight:700}
   /* SITE FOOTER */
-  .site-footer{background:var(--ink);color:rgba(255,255,255,.55);padding:4rem 0 2rem;width:100%;margin-left:0;margin-right:0;max-width:none;display:block}
-  .sf-inner{max-width:1120px;margin:0 auto;padding:0 2.5rem 3rem;display:grid;grid-template-columns:1fr 2fr;gap:4rem;border-bottom:1px solid rgba(255,255,255,.1)}
+  .site-footer{background:var(--ink);color:rgba(255,255,255,.55);padding:4rem 0 var(--s-2xl);width:100%;margin-left:0;margin-right:0;max-width:none;display:block}
+  .sf-inner{max-width:1120px;margin:0 auto;padding:0 var(--s-3xl) 3rem;display:grid;grid-template-columns:1fr 2fr;gap:4rem;border-bottom:1px solid rgba(255,255,255,.1)}
   .sf-brand .logo-text{color:white}
   .sf-tagline{font-size:.82rem;color:rgba(255,255,255,.38);line-height:1.7;margin-top:.85rem;max-width:200px}
-  .sf-links{display:grid;grid-template-columns:repeat(3,1fr);gap:2rem}
-  .sf-col{display:flex;flex-direction:column;gap:.5rem}
+  .sf-links{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--s-2xl)}
+  .sf-col{display:flex;flex-direction:column;gap:var(--s-xs)}
   .sf-col-title{font-size:.62rem;letter-spacing:.22em;text-transform:uppercase;color:rgba(255,255,255,.35);font-weight:700;margin-bottom:.4rem}
   .sf-col a{font-size:.82rem;color:rgba(255,255,255,.55);text-decoration:none;transition:color .15s}
   .sf-col a:hover{color:white}
-  .sf-bottom{max-width:1120px;margin:0 auto;padding:1.75rem 2.5rem 0;display:flex;flex-direction:column;align-items:flex-start;gap:.4rem}
+  .sf-bottom{max-width:1120px;margin:0 auto;padding:1.75rem var(--s-3xl) 0;display:flex;flex-direction:column;align-items:flex-start;gap:.4rem}
   .sf-copy,.sf-email{font-size:.72rem;color:rgba(255,255,255,.28)}
   @media(max-width:900px){
-    section{padding:3.5rem 1.5rem}
-    .steps{margin-top:2rem}
-    .step{grid-template-columns:1fr;gap:2.5rem}
+    section{padding:3.5rem var(--s-xl)}
+    .steps{margin-top:var(--s-2xl)}
+    .step{grid-template-columns:1fr;gap:var(--s-3xl)}
     .step.flip{direction:ltr}
     .dim-grid{grid-template-columns:repeat(3,1fr)}
     .comp-row{grid-template-columns:100px 1fr auto}
     .nav-center{display:none}
     .nav-signin,.btn-nav{display:none}
     .hamburger{display:flex}
-    nav{padding:0 1.25rem}
+    nav{padding:0 var(--s-lg)}
     section{padding-left:1.25rem!important;padding-right:1.25rem!important}
     .si{padding-left:1.25rem!important;padding-right:1.25rem!important}
     .ex-side-grid{grid-template-columns:1fr!important;gap:1.25rem!important}
   }
-  @media(max-width:768px){.sf-inner{grid-template-columns:1fr 1.6fr;gap:1.25rem;padding-left:1.25rem;padding-right:1.25rem}.sf-links{grid-template-columns:1fr 1fr;gap:1rem}.sf-bottom{flex-direction:column;align-items:flex-start}.sf-tagline{font-size:.78rem}.sf-col a{font-size:.8rem}.sf-col-title{font-size:.62rem}}
+  @media(max-width:768px){.sf-inner{grid-template-columns:1fr 1.6fr;gap:var(--s-lg);padding-left:var(--s-lg);padding-right:var(--s-lg)}.sf-links{grid-template-columns:1fr 1fr;gap:var(--s-md)}.sf-bottom{flex-direction:column;align-items:flex-start}.sf-tagline{font-size:.78rem}.sf-col a{font-size:.8rem}.sf-col-title{font-size:.62rem}}
   @media(max-width:580px){
     .dim-grid{grid-template-columns:1fr}
   }
   .mm-section{display:flex;flex-direction:column;border-bottom:1px solid var(--stone);padding-bottom:.25rem;margin-bottom:.25rem}
-  .mm-label{font-size:.58rem;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);font-weight:700;padding:.55rem 0 .2rem .75rem}
+  .mm-label{font-size:.58rem;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);font-weight:700;padding:.55rem 0 .2rem var(--s-sm)}
   .mm-sub{padding-left:1.25rem !important;font-size:.85rem !important;border-bottom:none !important;font-style:italic;color:var(--muted)}
   .mm-sub:last-child{border-bottom:none}
 
@@ -341,10 +342,10 @@
   .page-header-inner{max-width:780px;margin-left:auto;margin-right:auto;position:relative;z-index:1;text-align:center}
   .page-header .page-title{color:white;text-align:center}
   .page-header .page-title em{color:var(--orange);font-style:italic}
-  .page-header .page-sub{color:rgba(255,255,255,.65);text-align:center;margin-top:.75rem}
+  .page-header .page-sub{color:rgba(255,255,255,.65);text-align:center;margin-top:var(--s-sm)}
   .page-header .eyebrow{color:rgba(232,103,58,.85)}
   .page-header .eyebrow::before{background:linear-gradient(90deg,rgba(232,103,58,.7),rgba(155,93,229,.5))}
-  .hero-actions{display:flex;align-items:center;justify-content:center;gap:1.5rem;margin-top:1.75rem;flex-wrap:wrap}
+  .hero-actions{display:flex;align-items:center;justify-content:center;gap:var(--s-xl);margin-top:1.75rem;flex-wrap:wrap}
   .gift-link{font-size:.88rem;color:rgba(232,103,58,.8);font-family:var(--bfont);font-weight:500;text-decoration:none;transition:color .15s}
   .gift-link:hover{color:var(--orange)}
   @media(max-width:780px){input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]),textarea,select{font-size:16px!important}}</style>
@@ -412,7 +413,7 @@
   <p class="eyebrow">How it works</p>
   <h1 class="page-title">The understanding that used to take years, <em>in one afternoon.</em></h1>
   <p class="page-sub">Each of you answers independently. The full picture only appears when both are done.</p>
-  <div style="margin-top:.5rem;display:flex;align-items:center;justify-content:center;gap:.5rem;flex-wrap:wrap;">
+  <div style="margin-top:var(--s-xs);display:flex;align-items:center;justify-content:center;gap:var(--s-xs);flex-wrap:wrap;">
   </div>
     <div class="hero-actions">
       <a href="/start" class="btn-primary">GET STARTED →</a>
@@ -422,7 +423,7 @@
 </div>
 
 <!-- STEP 1: Each partner answers alone -->
-<section style="padding-top:1.5rem;">
+<section style="padding-top:var(--s-xl);">
   <div class="si">
     <div class="steps">
       <div class="step">
@@ -432,7 +433,7 @@
           <h2 class="step-title">Answer separately.</h2>
           <p class="step-body">Each partner completes both exercises independently – no comparing notes until you're both done.</p>
         </div>
-        <div class="hiw-step-graphic" style="padding:0.5rem 0;">
+        <div class="hiw-step-graphic" style="padding:var(--s-xs) 0;">
 <svg viewBox="0 0 520 340" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;display:block;">
   <defs>
     <linearGradient id="hiw_g1" x1="18" y1="0" x2="502" y2="0" gradientUnits="userSpaceOnUse">
@@ -476,7 +477,7 @@
           <h2 class="step-title">See yourselves side by side.</h2>
           <p class="step-body">Your answers combine into a shared view of how you each operate, what you expect, and how you function together as a couple.</p>
         </div>
-        <div class="hiw-step-graphic" style="padding:0.5rem 0;">
+        <div class="hiw-step-graphic" style="padding:var(--s-xs) 0;">
 <svg viewBox="0 0 520 340" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;display:block;">
   <defs>
     <linearGradient id="hiw_g2" x1="18" y1="0" x2="502" y2="0" gradientUnits="userSpaceOnUse">
@@ -525,7 +526,7 @@
           <h2 class="step-title">Build from what you find.</h2>
           <p class="step-body">Your results aren't a one-time read. They're a shared language to return to as things shift.</p>
         </div>
-        <div class="hiw-step-graphic" style="padding:0.5rem 0;">
+        <div class="hiw-step-graphic" style="padding:var(--s-xs) 0;">
 <svg viewBox="0 0 520 340" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;display:block;">
   <defs>
     <linearGradient id="hiw_g3" x1="18" y1="0" x2="502" y2="0" gradientUnits="userSpaceOnUse">
@@ -584,11 +585,11 @@
     <h2 class="s-title">Two core exercises, one complete picture.</h2>
     <p class="s-sub" style="margin-bottom:2.25rem;">Each person answers independently. Your results combine the moment both of you are done.</p>
 
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:2rem;align-items:stretch;" class="ex-side-grid">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:var(--s-2xl);align-items:stretch;" class="ex-side-grid">
 
       <!-- LEFT: Exercise 01 -->
       <div style="background:white;border:1.5px solid var(--stone);border-radius:20px;padding:1.75rem;">
-        <div style="display:flex;align-items:center;gap:.75rem;margin-bottom:1.1rem;">
+        <div style="display:flex;align-items:center;gap:var(--s-sm);margin-bottom:1.1rem;">
           <div style="width:32px;height:32px;border-radius:9px;background:rgba(155,93,229,.1);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9B5DE5" stroke-width="1.8" stroke-linecap="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
           </div>
@@ -597,17 +598,17 @@
             <div style="font-size:.92rem;font-weight:700;color:var(--ink);font-family:'DM Sans',sans-serif;">How you communicate</div>
           </div>
         </div>
-        <p style="font-size:.8rem;color:var(--muted);line-height:1.65;margin-bottom:1.25rem;font-family:'DM Sans',sans-serif;">50 questions in two parts. Part 1 is about you. Part 2 is the same questions about your partner. Each person answers independently. Individual scores in each dimension drive the gap analysis and produce your individual type.</p>
+        <p style="font-size:.8rem;color:var(--muted);line-height:1.65;margin-bottom:var(--s-lg);font-family:'DM Sans',sans-serif;">50 questions in two parts. Part 1 is about you. Part 2 is the same questions about your partner. Each person answers independently. Individual scores in each dimension drive the gap analysis and produce your individual type.</p>
 
         <!-- 2×5 dimension bars grid -->
-        <div style="border-top:1px solid var(--stone);padding-top:1rem;">
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.75rem;">
-            <div style="display:flex;align-items:center;gap:1rem;">
+        <div style="border-top:1px solid var(--stone);padding-top:var(--s-md);">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:var(--s-sm);">
+            <div style="display:flex;align-items:center;gap:var(--s-md);">
               <div style="display:flex;align-items:center;gap:.3rem;font-size:.65rem;font-weight:600;color:var(--orange);font-family:'DM Sans',sans-serif;"><div style="width:7px;height:7px;border-radius:50%;background:var(--orange);"></div>Sarah</div>
               <div style="display:flex;align-items:center;gap:.3rem;font-size:.65rem;font-weight:600;color:var(--indigo);font-family:'DM Sans',sans-serif;"><div style="width:7px;height:7px;border-radius:50%;background:var(--indigo);"></div>James</div>
             </div>
           </div>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:.35rem .75rem;">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:.35rem var(--s-sm);">
             <div style="display:flex;align-items:center;gap:.4rem;">
               <span style="font-size:.58rem;color:var(--muted);font-family:'DM Sans',sans-serif;flex-shrink:0;width:88px;line-height:1.2;">Energy &amp; Recharge</span>
               <div style="flex:1;position:relative;height:4px;background:var(--stone);border-radius:999px;">
@@ -684,7 +685,7 @@
 
       <!-- RIGHT: Exercise 02 -->
       <div style="background:white;border:1.5px solid var(--stone);border-radius:20px;padding:1.75rem;">
-        <div style="display:flex;align-items:center;gap:.75rem;margin-bottom:1.1rem;">
+        <div style="display:flex;align-items:center;gap:var(--s-sm);margin-bottom:1.1rem;">
           <div style="width:32px;height:32px;border-radius:9px;background:rgba(16,185,129,.1);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="1.8" stroke-linecap="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
           </div>
@@ -693,11 +694,11 @@
             <div style="font-size:.92rem;font-weight:700;color:var(--ink);font-family:'DM Sans',sans-serif;">What you expect</div>
           </div>
         </div>
-        <p style="font-size:.8rem;color:var(--muted);line-height:1.65;margin-bottom:1.25rem;font-family:'DM Sans',sans-serif;">Where you each sit on the responsibilities and values that shape a shared life, across six areas. Who handled it growing up, and who you expect to handle it. The childhood context surfaces alongside results to understand why you each have the expectations you do.</p>
+        <p style="font-size:.8rem;color:var(--muted);line-height:1.65;margin-bottom:var(--s-lg);font-family:'DM Sans',sans-serif;">Where you each sit on the responsibilities and values that shape a shared life, across six areas. Who handled it growing up, and who you expect to handle it. The childhood context surfaces alongside results to understand why you each have the expectations you do.</p>
 
         <!-- Category alignment bars -->
         <div style="border-top:1px solid var(--stone);padding-top:1.1rem;">
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.75rem;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:var(--s-sm);">
             <span style="font-size:.6rem;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);font-weight:700;font-family:'DM Sans',sans-serif;">Alignment by category</span>
             <span style="font-size:.6rem;color:var(--muted);font-family:'DM Sans',sans-serif;">% aligned</span>
           </div>
@@ -756,14 +757,14 @@
 </section>
 
 <!-- WHAT COMES NEXT -->
-<section style="padding:3.5rem 0 2.5rem;background:var(--warm);">
+<section style="padding:3.5rem 0 var(--s-3xl);background:var(--warm);">
   <div class="si">
-    <p class="s-eye" style="margin-bottom:.75rem;">What comes next</p>
-    <h2 class="s-title" style="margin-bottom:2rem;">Interested in <em style="font-style:italic;color:var(--orange);">more?</em></h2>
-    <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:1.25rem;" class="wcn-grid">
+    <p class="s-eye" style="margin-bottom:var(--s-sm);">What comes next</p>
+    <h2 class="s-title" style="margin-bottom:var(--s-2xl);">Interested in <em style="font-style:italic;color:var(--orange);">more?</em></h2>
+    <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:var(--s-lg);" class="wcn-grid">
 
       <!-- Tile 1: Workbook -->
-      <div style="background:white;border:1.5px solid var(--stone);border-radius:16px;padding:1.5rem;border-top:3px solid var(--orange);">
+      <div style="background:white;border:1.5px solid var(--stone);border-radius:16px;padding:var(--s-xl);border-top:3px solid var(--orange);">
         <svg viewBox="0 0 52 52" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:44px;height:44px;margin-bottom:.85rem;display:block;">
           <rect width="52" height="52" rx="14" fill="rgba(232,103,58,.1)"/>
           <rect x="14" y="12" width="24" height="28" rx="3" fill="none" stroke="#E8673A" stroke-width="1.75"/>
@@ -777,7 +778,7 @@
       </div>
 
       <!-- Tile 2: Blog post / In Practice -->
-      <div style="background:white;border:1.5px solid var(--stone);border-radius:16px;padding:1.5rem;border-top:3px solid #9B5DE5;">
+      <div style="background:white;border:1.5px solid var(--stone);border-radius:16px;padding:var(--s-xl);border-top:3px solid #9B5DE5;">
         <svg viewBox="0 0 52 52" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:44px;height:44px;margin-bottom:.85rem;display:block;">
           <rect width="52" height="52" rx="14" fill="rgba(155,93,229,.1)"/>
           <rect x="13" y="14" width="26" height="24" rx="3" fill="none" stroke="#9B5DE5" stroke-width="1.75"/>
@@ -796,11 +797,11 @@
 </section>
 
 <!-- CTA -->
-<div class="cta-wrap" style="text-align:center;padding:4rem 2.5rem;background:var(--warm);border-top:1px solid var(--stone);">
+<div class="cta-wrap" style="text-align:center;padding:4rem var(--s-3xl);background:var(--warm);border-top:1px solid var(--stone);">
   <div style="max-width:860px;margin:0 auto;">
-    <h2 style="font-family:var(--hfont);font-size:clamp(1.4rem,4vw,3rem);font-weight:700;line-height:1.08;color:var(--ink);margin-bottom:1rem;letter-spacing:-.02em;">The conversation<br><em style="font-style:italic;color:var(--orange);">you've been meaning to have.</em></h2>
+    <h2 style="font-family:var(--hfont);font-size:clamp(1.4rem,4vw,3rem);font-weight:700;line-height:1.08;color:var(--ink);margin-bottom:var(--s-md);letter-spacing:-.02em;">The conversation<br><em style="font-style:italic;color:var(--orange);">you've been meaning to have.</em></h2>
     <p style="font-size:.95rem;color:var(--muted);line-height:1.7;font-weight:300;margin-bottom:1.75rem;">Two exercises. About 25 minutes each. Completely private until you're both done.</p>
-    <div style="display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;align-items:center;">
+    <div style="display:flex;gap:var(--s-md);justify-content:center;flex-wrap:wrap;align-items:center;">
       <a href="/start" class="btn-primary">GET STARTED →</a>
       <a href="/offerings#gift" style="font-size:.82rem;font-weight:500;color:var(--muted);text-decoration:none;transition:color .15s;" onmouseover="this.style.color='var(--orange)'" onmouseout="this.style.color='var(--muted)'">Give it as a gift →</a>
     </div>

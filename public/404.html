@@ -8,6 +8,7 @@
 <meta name="theme-color" content="#0E0B07">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <!-- attune:hscroll-lock -->
+  <link rel="stylesheet" href="/tokens.css">
   <style>
     html { overscroll-behavior-x: none; overflow-x: hidden; max-width: 100%; width: 100%; }
     body { overflow-x: hidden; max-width: 100%; width: 100%; position: relative; }
@@ -41,7 +42,7 @@
   }
   /* Top bar with logo */
   nav{
-    padding:1.25rem 2rem;
+    padding:var(--s-lg) var(--s-2xl);
     display:flex;
     align-items:center;
     border-bottom:1px solid var(--stone);
@@ -62,7 +63,7 @@
     display:flex;
     align-items:center;
     justify-content:center;
-    padding:2rem 1.5rem;
+    padding:var(--s-2xl) var(--s-xl);
   }
   .card{
     max-width:540px;
@@ -98,7 +99,7 @@
     font-size:1rem;
     color:var(--muted);
     max-width:440px;
-    margin:0 auto 2rem;
+    margin:0 auto var(--s-2xl);
     line-height:1.65;
   }
   /* Links list */
@@ -106,7 +107,7 @@
     display:grid;
     grid-template-columns:1fr 1fr;
     gap:.6rem;
-    margin-top:1.5rem;
+    margin-top:var(--s-xl);
     text-align:left;
   }
   @media(max-width:520px){
@@ -115,8 +116,8 @@
   .link-card{
     display:flex;
     align-items:center;
-    gap:.75rem;
-    padding:.85rem 1rem;
+    gap:var(--s-sm);
+    padding:.85rem var(--s-md);
     background:white;
     border:1px solid var(--stone);
     border-radius:10px;
@@ -152,7 +153,7 @@
     font-weight:600;
     font-size:.9rem;
     transition:transform .15s,box-shadow .15s;
-    margin-top:.5rem;
+    margin-top:var(--s-xs);
   }
   .btn-primary:hover{
     transform:translateY(-1px);
@@ -161,7 +162,7 @@
   /* Footer */
   footer{
     text-align:center;
-    padding:1.5rem;
+    padding:var(--s-xl);
     color:var(--muted);
     font-size:.72rem;
     border-top:1px solid var(--stone);

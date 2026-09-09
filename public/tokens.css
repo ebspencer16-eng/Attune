@@ -1,0 +1,39 @@
+/**
+ * The site's spacing scale.
+ *
+ * ── WHERE THESE NUMBERS CAME FROM ─────────────────────────────────────────
+ * They were not chosen. They were measured. Across the customer-facing pages
+ * there were 2,280 rem values in padding, margin and gap declarations, spread
+ * over 55 distinct numbers. Seven of them were used more than a hundred times
+ * each, and those seven turned out to be an unbroken ascending scale:
+ *
+ *     .5   .75   1   1.25   1.5   2   2.5
+ *
+ * That is the site's spacing system. It already existed; nobody had written
+ * it down. Everything else (.55rem, .6rem, .65rem, .85rem and the rest) is
+ * drift around these values, and is deliberately left alone: replacing a
+ * .65rem with a .75rem would move pixels, and this file moves none.
+ *
+ * ── WHY IT IS A SEPARATE FILE ─────────────────────────────────────────────
+ * Every page carries its own :root block, so the palette is already written
+ * out twenty times. Adding seven more variables to each of those would be
+ * twenty more copies of one rule, which is the failure this codebase keeps
+ * having. One file, linked by every page that uses it, and a build gate
+ * (check-spacing-tokens.mjs) that fails if a page uses var(--s-*) without
+ * linking this file. A page that used them without the link would lose all
+ * its spacing at once.
+ *
+ * ── ADDING TO THIS ────────────────────────────────────────────────────────
+ * Do not add a value because a design needs it once. Add one when it has
+ * earned its place by being used, and say how many times in the comment.
+ */
+
+:root {
+  --s-xs:  .5rem;
+  --s-sm:  .75rem;
+  --s-md:  1rem;
+  --s-lg:  1.25rem;
+  --s-xl:  1.5rem;
+  --s-2xl: 2rem;
+  --s-3xl: 2.5rem;
+}

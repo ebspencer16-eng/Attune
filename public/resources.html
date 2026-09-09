@@ -7,6 +7,7 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <!-- attune:hscroll-lock -->
+  <link rel="stylesheet" href="/tokens.css">
   <style>
     html { overscroll-behavior-x: none; overflow-x: hidden; max-width: 100%; width: 100%; }
     body { overflow-x: hidden; max-width: 100%; width: 100%; position: relative; }
@@ -24,11 +25,11 @@
   :root{--cream:#FFFDF9;--warm:#FBF8F3;--stone:#E8DDD0;--clay:#C17F47;--ink:#0E0B07;--text:#1E1610;--muted:#8C7A68;--orange:#E8673A;--indigo:#1B5FE8;--hfont:'Playfair Display',Georgia,serif;--bfont:'DM Sans',sans-serif;}
   html{scroll-behavior:smooth}
   body{background:var(--cream);color:var(--text);font-family:var(--bfont);-webkit-font-smoothing:antialiased}
-  nav{position:fixed;top:0;left:0;right:0;z-index:100;height:58px;background:rgba(255,253,249,.94);backdrop-filter:blur(16px);border-bottom:1px solid var(--stone);display:flex;align-items:center;padding:0 2.5rem;justify-content:space-between}
+  nav{position:fixed;top:0;left:0;right:0;z-index:100;height:58px;background:rgba(255,253,249,.94);backdrop-filter:blur(16px);border-bottom:1px solid var(--stone);display:flex;align-items:center;padding:0 var(--s-3xl);justify-content:space-between}
   .logo{display:flex;align-items:center;gap:.65rem;text-decoration:none}
   .logo-mark{display:flex;align-items:center;flex-shrink:0}
   .logo-text{font-family:var(--hfont);font-size:1.15rem;font-weight:700;color:var(--ink)}
-  .nav-center{display:flex;gap:2.5rem;list-style:none;position:absolute;left:50%;transform:translateX(-50%);align-items:center}.nav-center li{display:flex;align-items:center}.nav-center li{display:flex;align-items:center}
+  .nav-center{display:flex;gap:var(--s-3xl);list-style:none;position:absolute;left:50%;transform:translateX(-50%);align-items:center}.nav-center li{display:flex;align-items:center}.nav-center li{display:flex;align-items:center}
   .nav-center a{text-decoration:none;color:var(--muted);font-size:.82rem;font-weight:500;transition:color .15s}
   .nav-center a:hover,.nav-center a.active{color:var(--ink);font-weight:600}
   .nav-dropdown{position:relative}
@@ -42,23 +43,23 @@
   .nav-dropdown-menu a{display:block;padding:.55rem .8rem;font-size:.78rem;color:var(--muted);text-decoration:none;border-radius:8px;transition:all .15s;font-weight:500}
   .nav-dropdown-menu a:hover{background:var(--warm);color:var(--ink)}
   .nav-dropdown-menu a.active{color:var(--ink);font-weight:600}
-  .nav-dropdown-menu .dd-divider{height:1px;background:var(--stone);margin:.35rem .5rem}
-  .nav-right{display:flex;align-items:center;gap:1.25rem}
+  .nav-dropdown-menu .dd-divider{height:1px;background:var(--stone);margin:.35rem var(--s-xs)}
+  .nav-right{display:flex;align-items:center;gap:var(--s-lg)}
   .nav-signin{font-size:.8rem;font-weight:500;color:var(--muted);text-decoration:none;transition:color .15s}
   .nav-signin:hover{color:var(--ink)}
-  .btn-nav{background:var(--ink);color:white;padding:.5rem 1.2rem;border-radius:10px;font-size:.78rem;font-weight:600;text-decoration:none;display:inline-block;transition:background .15s}
+  .btn-nav{background:var(--ink);color:white;padding:var(--s-xs) 1.2rem;border-radius:10px;font-size:.78rem;font-weight:600;text-decoration:none;display:inline-block;transition:background .15s}
   .btn-nav:hover{background:#2a2218}
   .hamburger{display:none;flex-direction:column;gap:5px;cursor:pointer;background:none;border:none;padding:.3rem}
   .hamburger span{width:22px;height:2px;background:var(--ink);border-radius:2px}
   @media(max-width:768px){.nav-center{display:none}.hamburger{display:flex}.nav-signin,.btn-nav{display:none}}
-  .mobile-menu{display:none;position:fixed;top:66px;right:1rem;left:auto;width:240px;background:rgba(255,253,249,.99);backdrop-filter:blur(20px);border:1.5px solid var(--stone);border-radius:14px;padding:1rem;z-index:200;flex-direction:column;gap:.15rem;box-shadow:0 12px 40px rgba(14,11,7,.14)}
+  .mobile-menu{display:none;position:fixed;top:66px;right:1rem;left:auto;width:240px;background:rgba(255,253,249,.99);backdrop-filter:blur(20px);border:1.5px solid var(--stone);border-radius:14px;padding:var(--s-md);z-index:200;flex-direction:column;gap:.15rem;box-shadow:0 12px 40px rgba(14,11,7,.14)}
   .mobile-menu.open{display:flex}
-  .mobile-menu a{font-size:.85rem;font-weight:500;color:var(--muted);text-decoration:none;padding:.5rem .65rem;border-radius:8px;transition:all .15s}
+  .mobile-menu a{font-size:.85rem;font-weight:500;color:var(--muted);text-decoration:none;padding:var(--s-xs) .65rem;border-radius:8px;transition:all .15s}
   .mobile-menu a:last-child{}
   .mobile-menu .mm-cta{color:var(--orange);font-weight:700}
 
   /* PAGE */
-  .si{max-width:1080px;margin:0 auto;padding:0 2.5rem}
+  .si{max-width:1080px;margin:0 auto;padding:0 var(--s-3xl)}
   
   .eyebrow{font-size:.6rem;letter-spacing:.3em;text-transform:uppercase;color:var(--clay);font-weight:700;margin-bottom:.9rem;display:flex;align-items:center;justify-content:center;gap:.65rem}
   .eyebrow::before{content:'';width:28px;height:2.5px;border-radius:999px;background:linear-gradient(90deg,var(--orange),var(--indigo));flex-shrink:0}.eyebrow::after{content:'';width:28px;height:2.5px;border-radius:999px;background:linear-gradient(90deg,var(--indigo),var(--orange));flex-shrink:0}
@@ -66,25 +67,25 @@
   .page-sub{font-size:1rem;color:var(--muted);line-height:1.8;font-weight:300}
 
   /* RESOURCE SECTIONS */
-  .res-section{padding:4rem 2.5rem;border-top:1px solid var(--stone);max-width:1080px;margin:0 auto}
+  .res-section{padding:4rem var(--s-3xl);border-top:1px solid var(--stone);max-width:1080px;margin:0 auto}
   .s-eye{font-size:.6rem;letter-spacing:.3em;text-transform:uppercase;color:var(--clay);font-weight:700;margin-bottom:.85rem;display:flex;align-items:center;gap:.65rem}
   .s-eye::before{content:'';width:28px;height:2.5px;border-radius:999px;background:linear-gradient(90deg,var(--orange),var(--indigo));flex-shrink:0}
   .s-title{font-family:var(--hfont);font-size:clamp(1.75rem,2.8vw,2.3rem);font-weight:700;line-height:1.1;color:var(--ink);margin-bottom:.85rem;letter-spacing:-.02em}
-  .s-sub{font-size:.92rem;color:var(--muted);line-height:1.78;margin-bottom:2.5rem;font-weight:300;max-width:580px}
+  .s-sub{font-size:.92rem;color:var(--muted);line-height:1.78;margin-bottom:var(--s-3xl);font-weight:300;max-width:580px}
 
   /* BOOKS */
-  .books-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem}
-  .book-card{background:var(--warm);border:1.5px solid var(--stone);border-radius:18px;padding:1.75rem;display:flex;flex-direction:column;gap:.75rem;transition:transform .2s,box-shadow .2s}
+  .books-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--s-xl)}
+  .book-card{background:var(--warm);border:1.5px solid var(--stone);border-radius:18px;padding:1.75rem;display:flex;flex-direction:column;gap:var(--s-sm);transition:transform .2s,box-shadow .2s}
   .book-card:hover{transform:translateY(-3px);box-shadow:0 8px 32px rgba(14,11,7,.08)}
   .book-spine{width:48px;height:64px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:1.5rem;margin-bottom:.25rem;flex-shrink:0}
   .book-tag{font-size:.58rem;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--clay)}
   .book-title{font-family:var(--hfont);font-size:1rem;font-weight:700;color:var(--ink);line-height:1.25}
   .book-author{font-size:.75rem;color:var(--muted)}
   .book-desc{font-size:.8rem;color:var(--muted);line-height:1.65;flex:1}
-  .book-why{font-size:.75rem;color:var(--clay);font-weight:500;border-top:1px solid var(--stone);padding-top:.75rem;margin-top:auto;line-height:1.55}
+  .book-why{font-size:.75rem;color:var(--clay);font-weight:500;border-top:1px solid var(--stone);padding-top:var(--s-sm);margin-top:auto;line-height:1.55}
 
   /* GUIDES */
-  .guides-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:1.5rem;margin-top:2rem}
+  .guides-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:var(--s-xl);margin-top:var(--s-2xl)}
   /* Phones: the book + guide grids are locked to 3 and 2 columns, which
      overflows a 390px viewport (cards stay ~156px and run off the right
      edge). Stack to a single column. */
@@ -92,48 +93,48 @@
     .books-grid{grid-template-columns:1fr}
     .guides-grid{grid-template-columns:1fr}
   }
-  .guide-card{background:white;border:1.5px solid var(--stone);border-radius:18px;padding:2rem;position:relative;overflow:hidden;transition:transform .2s,box-shadow .2s}
+  .guide-card{background:white;border:1.5px solid var(--stone);border-radius:18px;padding:var(--s-2xl);position:relative;overflow:hidden;transition:transform .2s,box-shadow .2s}
   .guide-card:hover{border-color:var(--clay)}
   .guide-accent{position:absolute;top:0;left:0;bottom:0;width:4px;border-radius:2px 0 0 2px}
   .guide-tag{font-size:.58rem;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);margin-bottom:.65rem}
-  .guide-title{font-family:var(--hfont);font-size:1.1rem;font-weight:700;color:var(--ink);margin-bottom:.5rem;line-height:1.25}
-  .guide-desc{font-size:.82rem;color:var(--muted);line-height:1.7;margin-bottom:1rem}
+  .guide-title{font-family:var(--hfont);font-size:1.1rem;font-weight:700;color:var(--ink);margin-bottom:var(--s-xs);line-height:1.25}
+  .guide-desc{font-size:.82rem;color:var(--muted);line-height:1.7;margin-bottom:var(--s-md)}
   .guide-steps{display:flex;flex-direction:column;gap:.45rem}
   .guide-step{font-size:.78rem;color:var(--text);line-height:1.55;padding-left:1.1rem;position:relative}
   .guide-step::before{content:counter(step);counter-increment:step;position:absolute;left:0;font-size:.65rem;font-weight:700;color:var(--orange);top:.05rem}
   .guide-steps{counter-reset:step}
 
   /* PHILOSOPHY NOTE */
-  .philosophy-band{background:linear-gradient(150deg,#0f0c29,#181545);padding:4.5rem 2.5rem;margin-top:2rem}
+  .philosophy-band{background:linear-gradient(150deg,#0f0c29,#181545);padding:4.5rem var(--s-3xl);margin-top:var(--s-2xl)}
   .philosophy-inner{max-width:760px;margin:0 auto;text-align:center}
 
   /* CTA */
-  .cta-wrap{padding:5rem 2.5rem;text-align:center}
+  .cta-wrap{padding:5rem var(--s-3xl);text-align:center}
   .cta-inner{max-width:860px;margin:0 auto}
-  .cta-title{font-family:var(--hfont);font-size:clamp(2rem,3.5vw,2.9rem);font-weight:700;line-height:1.1;color:var(--ink);margin-bottom:1rem;letter-spacing:-.02em}
-  .cta-sub{font-size:.95rem;color:var(--muted);line-height:1.75;margin-bottom:2rem;font-weight:300}
-  .cta-actions{display:flex;gap:1rem;justify-content:center;flex-wrap:wrap}
-  .btn-primary{background:linear-gradient(135deg,var(--orange),#d4592f);color:white;padding:.85rem 2rem;border-radius:14px;font-size:.82rem;font-weight:700;text-decoration:none;display:inline-block;letter-spacing:.04em;transition:all .2s}
+  .cta-title{font-family:var(--hfont);font-size:clamp(2rem,3.5vw,2.9rem);font-weight:700;line-height:1.1;color:var(--ink);margin-bottom:var(--s-md);letter-spacing:-.02em}
+  .cta-sub{font-size:.95rem;color:var(--muted);line-height:1.75;margin-bottom:var(--s-2xl);font-weight:300}
+  .cta-actions{display:flex;gap:var(--s-md);justify-content:center;flex-wrap:wrap}
+  .btn-primary{background:linear-gradient(135deg,var(--orange),#d4592f);color:white;padding:.85rem var(--s-2xl);border-radius:14px;font-size:.82rem;font-weight:700;text-decoration:none;display:inline-block;letter-spacing:.04em;transition:all .2s}
   .btn-primary:hover{transform:translateY(-2px)}
-  .btn-ghost{border:1.5px solid var(--stone);color:var(--ink);padding:.85rem 2rem;border-radius:14px;font-size:.82rem;font-weight:600;text-decoration:none;display:inline-block;transition:all .2s}
+  .btn-ghost{border:1.5px solid var(--stone);color:var(--ink);padding:.85rem var(--s-2xl);border-radius:14px;font-size:.82rem;font-weight:600;text-decoration:none;display:inline-block;transition:all .2s}
   .btn-ghost:hover{background:var(--warm);border-color:var(--clay)}
 
   /* FOOTER */
-  .site-footer{background:var(--ink);padding:3.5rem 2.5rem 2rem}
-  .sf-inner{max-width:1080px;margin:0 auto;display:grid;grid-template-columns:1.4fr 1.8fr;gap:3rem;margin-bottom:2.5rem}
+  .site-footer{background:var(--ink);padding:3.5rem var(--s-3xl) var(--s-2xl)}
+  .sf-inner{max-width:1080px;margin:0 auto;display:grid;grid-template-columns:1.4fr 1.8fr;gap:3rem;margin-bottom:var(--s-3xl)}
   .sf-brand .logo-text,.sf-brand .logo-mark{color:white}
   .sf-tagline{font-size:.82rem;color:rgba(255,255,255,.35);line-height:1.7;margin-top:.85rem}
-  .sf-links{display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem}
+  .sf-links{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--s-xl)}
   .sf-col{display:flex;flex-direction:column;gap:.6rem}
   .sf-col-title{font-size:.62rem;letter-spacing:.2em;text-transform:uppercase;color:rgba(255,255,255,.3);font-weight:700;margin-bottom:.25rem}
   .sf-col a{font-size:.8rem;color:rgba(255,255,255,.45);text-decoration:none;transition:color .15s}
   .sf-col a:hover{color:rgba(255,255,255,.85)}
-  .sf-bottom{max-width:1080px;margin:0 auto;padding-top:2rem;border-top:1px solid rgba(255,255,255,.08);display:flex;justify-content:space-between;align-items:center;gap:1rem;flex-wrap:wrap}
+  .sf-bottom{max-width:1080px;margin:0 auto;padding-top:var(--s-2xl);border-top:1px solid rgba(255,255,255,.08);display:flex;justify-content:space-between;align-items:center;gap:var(--s-md);flex-wrap:wrap}
   .sf-copy,.sf-email{font-size:.75rem;color:rgba(255,255,255,.25)}
 
   @media(max-width:768px){.sf-inner{grid-template-columns:1fr 1.6fr!important;gap:1.25rem!important;padding-left:1.25rem!important;padding-right:1.25rem!important}.sf-links{grid-template-columns:1fr!important}.sf-tagline{font-size:.78rem}.sf-col a{font-size:.8rem}.sf-col-title{font-size:.62rem}}
   .mm-section{display:flex;flex-direction:column;border-bottom:1px solid var(--stone);padding-bottom:.25rem;margin-bottom:.25rem}
-  .mm-label{font-size:.58rem;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);font-weight:700;padding:.55rem 0 .2rem .75rem}
+  .mm-label{font-size:.58rem;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);font-weight:700;padding:.55rem 0 .2rem var(--s-sm)}
   .mm-sub{padding-left:1.25rem !important;font-size:.85rem !important;border-bottom:none !important;font-style:italic;color:var(--muted)}
   .mm-sub:last-child{border-bottom:none}
   @keyframes fadeUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
@@ -146,10 +147,10 @@
   .page-header-inner{max-width:780px;margin-left:auto;margin-right:auto;position:relative;z-index:1;text-align:center}
   .page-header .page-title{color:white;text-align:center}
   .page-header .page-title em{color:var(--orange);font-style:italic}
-  .page-header .page-sub{color:rgba(255,255,255,.65);text-align:center;margin-top:.75rem}
+  .page-header .page-sub{color:rgba(255,255,255,.65);text-align:center;margin-top:var(--s-sm)}
   .page-header .eyebrow{color:rgba(232,103,58,.85)}
   .page-header .eyebrow::before{background:linear-gradient(90deg,rgba(232,103,58,.7),rgba(155,93,229,.5))}
-  .hero-actions{display:flex;align-items:center;justify-content:center;gap:1.5rem;margin-top:1.75rem;flex-wrap:wrap}
+  .hero-actions{display:flex;align-items:center;justify-content:center;gap:var(--s-xl);margin-top:1.75rem;flex-wrap:wrap}
   .gift-link{font-size:.88rem;color:rgba(232,103,58,.8);font-family:var(--bfont);font-weight:500;text-decoration:none;transition:color .15s}
   .gift-link:hover{color:var(--orange)}
   @media(max-width:780px){input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]),textarea,select{font-size:16px!important}}</style>
@@ -234,7 +235,7 @@
   <p class="s-eye">How to use your results</p>
   <h2 class="s-title">Making the most of what you learn</h2>
   <p class="s-sub">Your results are a starting point, not a conclusion. Here are a few concrete ways to actually work through them together.</p>
-  <div style="display:flex;align-items:center;gap:.75rem;background:linear-gradient(135deg,#FFF8F5,#F0F3FF);border:1.5px solid #E8DDD0;border-radius:14px;padding:1rem 1.25rem;margin-bottom:1.75rem;">
+  <div style="display:flex;align-items:center;gap:var(--s-sm);background:linear-gradient(135deg,#FFF8F5,#F0F3FF);border:1.5px solid #E8DDD0;border-radius:14px;padding:var(--s-md) var(--s-lg);margin-bottom:1.75rem;">
     <svg width="46" height="33" viewBox="0 0 103 76" fill="none" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="spark_logo_8_2" x1="0" y1="0" x2="103" y2="76" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#E8673A"/><stop offset="100%" stop-color="#1B5FE8"/></linearGradient></defs><path d="M14,4 L44,4 A9,9 0 0,1 53,13 L53,42 A9,9 0 0,1 44,51 L20,51 L6,61 L11,51 A6,6 0 0,1 5,45 L5,13 A9,9 0 0,1 14,4 Z" fill="url(#spark_logo_8_2)"/><path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill="white" opacity="0.93" transform="translate(13.16,11.3) scale(0.72)"/><path d="M89,14 L59,14 A9,9 0 0,0 50,23 L50,52 A9,9 0 0,0 59,61 L83,61 L97,71 L92,61 A6,6 0 0,0 98,55 L98,23 A9,9 0 0,0 89,14 Z" fill="white" stroke="url(#spark_logo_8_2)" stroke-width="2.2" stroke-linejoin="round"/><path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill="url(#spark_logo_8_2)" transform="translate(58.16,21.3) scale(0.72)"/></svg>
     <p style="font-size:.8rem;color:#1E1610;line-height:1.6;margin:0;"><strong>Want structured guidance?</strong> The <strong>Personalized Workbook</strong> goes further, built from your specific results, it includes guided exercises, conversation prompts, and reflection activities for each place you two see things differently. Available to add from your portal after you get your results.</p>
   </div>
@@ -358,9 +359,9 @@
 <!-- PROFESSIONAL SUPPORT -->
 <section class="res-section">
   <p class="s-eye">If you need more than this</p>
-  <h2 style="font-family:var(--hfont);font-size:clamp(1.5rem,2.8vw,2rem);font-weight:700;color:var(--ink);margin-bottom:.75rem;line-height:1.1;">Attune is a starting point. Some conversations need a professional.</h2>
-  <p style="font-size:.92rem;color:var(--muted);line-height:1.78;font-weight:300;max-width:680px;margin-bottom:2rem;">If your results raised something harder, patterns that feel entrenched, pain that predates this relationship, or a sense that things are more serious than a conversation can address, that's not a failure of the process. It's useful information. A good therapist is trained for exactly that.</p>
-  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:1.25rem;margin-bottom:1.5rem;">
+  <h2 style="font-family:var(--hfont);font-size:clamp(1.5rem,2.8vw,2rem);font-weight:700;color:var(--ink);margin-bottom:var(--s-sm);line-height:1.1;">Attune is a starting point. Some conversations need a professional.</h2>
+  <p style="font-size:.92rem;color:var(--muted);line-height:1.78;font-weight:300;max-width:680px;margin-bottom:var(--s-2xl);">If your results raised something harder, patterns that feel entrenched, pain that predates this relationship, or a sense that things are more serious than a conversation can address, that's not a failure of the process. It's useful information. A good therapist is trained for exactly that.</p>
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:var(--s-lg);margin-bottom:var(--s-xl);">
     <div style="background:white;border:1.5px solid var(--stone);border-radius:14px;padding:1.4rem;">
       <div style="font-size:.62rem;letter-spacing:.2em;text-transform:uppercase;color:var(--orange);font-weight:700;margin-bottom:.6rem;">Couples therapy</div>
       <p style="font-size:.82rem;color:var(--muted);line-height:1.65;margin-bottom:.85rem;">For couples navigating sustained difficulty, repetitive conflict, or communication breakdown. A licensed couples therapist works with both of you together.</p>
@@ -383,18 +384,18 @@
 <!-- PHILOSOPHY BAND -->
 <div class="philosophy-band">
   <div class="philosophy-inner">
-    <p style="font-size:.62rem;letter-spacing:.3em;text-transform:uppercase;color:rgba(232,103,58,.65);font-weight:700;margin-bottom:1.25rem;">Why we built this page</p>
-    <h2 style="font-family:var(--hfont);font-size:clamp(1.6rem,2.8vw,2.2rem);font-weight:700;color:white;line-height:1.15;margin-bottom:1rem;letter-spacing:-.02em;">We're not trying to be your only resource.</h2>
+    <p style="font-size:.62rem;letter-spacing:.3em;text-transform:uppercase;color:rgba(232,103,58,.65);font-weight:700;margin-bottom:var(--s-lg);">Why we built this page</p>
+    <h2 style="font-family:var(--hfont);font-size:clamp(1.6rem,2.8vw,2.2rem);font-weight:700;color:white;line-height:1.15;margin-bottom:var(--s-md);letter-spacing:-.02em;">We're not trying to be your only resource.</h2>
     <p style="font-size:.92rem;color:rgba(255,255,255,.45);line-height:1.8;max-width:540px;margin:0 auto;font-weight:300;">Attune gives you a foundation, a precise shared understanding of how you each work and what you each expect. What you do with that foundation is up to you. These books and guides are things we genuinely believe in, curated because they make the kind of work Attune starts easier to continue.</p>
   </div>
 </div>
 
 <!-- CTA -->
-<div class="cta-wrap" style="text-align:center;padding:4rem 2.5rem;background:var(--warm);border-top:1px solid var(--stone);">
+<div class="cta-wrap" style="text-align:center;padding:4rem var(--s-3xl);background:var(--warm);border-top:1px solid var(--stone);">
   <div style="max-width:860px;margin:0 auto;">
-    <h2 style="font-family:var(--hfont);font-size:clamp(1.4rem,4vw,3rem);font-weight:700;line-height:1.08;color:var(--ink);margin-bottom:1rem;letter-spacing:-.02em;">Start with<br><em style="font-style:italic;color:var(--orange);">the foundation.</em></h2>
+    <h2 style="font-family:var(--hfont);font-size:clamp(1.4rem,4vw,3rem);font-weight:700;line-height:1.08;color:var(--ink);margin-bottom:var(--s-md);letter-spacing:-.02em;">Start with<br><em style="font-style:italic;color:var(--orange);">the foundation.</em></h2>
     <p style="font-size:.95rem;color:var(--muted);line-height:1.7;font-weight:300;margin-bottom:1.75rem;">Two exercises. About 25 minutes each. Everything you learn is yours to keep.</p>
-    <div style="display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;align-items:center;">
+    <div style="display:flex;gap:var(--s-md);justify-content:center;flex-wrap:wrap;align-items:center;">
       <a href="/start" class="btn-primary">GET STARTED →</a>
       <a href="/offerings#gift" style="font-size:.82rem;font-weight:500;color:var(--muted);text-decoration:none;transition:color .15s;" onmouseover="this.style.color='var(--orange)'" onmouseout="this.style.color='var(--muted)'">Give it as a gift →</a>
     </div>
