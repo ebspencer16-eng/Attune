@@ -130,6 +130,38 @@ export type CoupleResults = {
   content?: ResultsContent;
 };
 
+/**
+ * One highlight storycard.
+ *
+ * Words and numbers from the server, drawn by the app. Every field is
+ * optional because the nine cards are genuinely different from each other;
+ * `kind` says which shape to draw.
+ */
+export type HighlightCard = {
+  id: string;
+  kind: 'opener' | 'couple-type' | 'dimensions' | 'stat-pair' | 'stat-rings'
+      | 'admired' | 'named-dimension' | 'quote' | 'sendoff';
+  tone: string;
+  accent?: string | null;
+  eyebrow?: string;
+  title?: string;
+  lead?: string;
+  body?: string | null;
+  footer?: string;
+  cta?: string;
+  names?: { you: string; them: string };
+  typeName?: string | null;
+  typeLabel?: string;
+  stat?: string;
+  statLabel?: string;
+  value?: string;
+  quote?: string;
+  callouts?: { label: string; value: string | null }[];
+  rings?: { label: string; pct: number }[];
+  rows?: { name: string; admired: string | null }[];
+  dimensions?: { key: string; label: string; left: string | null; right: string | null; a: number | null; b: number | null }[];
+};
+
 /** One entry in the results spine. Both fields come from the server. */
 export type ResultsSection = { id: string; label: string };
 
@@ -272,6 +304,8 @@ export type ResultsResponse =
       sections?: ResultsSection[];
       /** The two-level nav. The app never groups the flat list itself. */
       nav?: ResultsNavGroup[];
+      /** The storycards, in the order they are meant to be read. */
+      highlights?: HighlightCard[];
       /** What the couple owns, so nothing has to be inferred from the payload. */
       owned?: string[];
       /** Null until both partners have finished Expectations. */

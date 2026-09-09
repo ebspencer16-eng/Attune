@@ -16,6 +16,8 @@ import { PATTERN_COPY, PATTERN_ACTIONS, PATTERN_NOTES, BAND_COLORS, NO_ACTION_NE
 // reason api/_couple-types.js moved out of this file.
 import { contentFor, CURRENT_CONTENT_VERSION } from "../api/_content/index.js";
 import { alignedAdvice, getDimShift } from "../api/_lib/dimension-copy.js";
+import { domainAlignmentPct as computeDomainPctClient, overallExpectationsPct } from "../api/_lib/expectations-alignment.js";
+import { normRespValue, mirrorRespKey, mirrorLifeId } from "../api/_lib/expectations.js";
 // Default binding, used by module-level helpers when no couple context is
 // available (the workbook path, share cards, anything outside the results
 // tree). Components inside the results tree use useContent() instead, which
@@ -2960,13 +2962,8 @@ const EXP_CAT_STARTERS = {
 // When reading the PARTNER's answer we swap the placeholders so both align to the
 // same real family. Identity for every non-family key / id (they have no
 // placeholders), so this is safe to apply to every partner-answer read.
-function mirrorRespKey(key) {
-  if (!key || (key.indexOf('{userName}') < 0 && key.indexOf('{partnerName}') < 0)) return key;
-  return String(key).replace(/\{userName\}/g, '\u0001').replace(/\{partnerName\}/g, '{userName}').replace(/\u0001/g, '{partnerName}');
-}
-function mirrorLifeId(id) {
-  return id === 'lq_involve_user' ? 'lq_involve_partner' : id === 'lq_involve_partner' ? 'lq_involve_user' : id;
-}
+// mirrorRespKey and mirrorLifeId now come from api/_lib/expectations.js, which
+// is also where the app gets them. Imported at the top of this file.
 
 // RESPONSIBILITY_CATEGORIES now lives in api/_questions.js (single source of truth).
 
@@ -3059,110 +3056,9 @@ function calcDimScores(answers) {
 //   coupleType                  - couple type object or null
 //
 // Output: payload ready to JSON.stringify and POST.
-// ── Expectations similarity scoring (client mirror of api/_workbook-content.js)
-// Mirrored intentionally rather than imported across the api/src boundary so
-// the build stays simple. If logic changes, update both copies. Spec: each
-// item gets a score in [0,1] from option-position distance; domain = mean of
-// items; overall = mean of 6 domain pcts.
-const _LIFE_OPTIONS_CLIENT = {};
-LIFE_QUESTIONS.forEach(q => { _LIFE_OPTIONS_CLIENT[q.id] = q.options; });
-
-// Career-category answers are stored relative to whoever answered
-// ("Primarily mine" / "Primarily my partner's"). This normalizes such a value
-// to an absolute person name. isUser=true when the value belongs to the user
-// (their "mine" = userName); isUser=false for the partner's answer (their
-// "mine" = partnerName). Non-career / absolute values pass through unchanged.
-function normRespValue(v, isUser, userName, partnerName) {
-  if (v === "Primarily mine") return isUser ? userName : partnerName;
-  if (v === "Primarily my partner's") return isUser ? partnerName : userName;
-  if (v === "Balanced") return "Both of us";
-  return v;
-}
-
-function scoreRespClient(uV, pV, userName, partnerName) {
-  // rankFor normalizes a value to an ABSOLUTE person rank: 0 = user, 2 = partner,
-  // 1 = both/balanced. The relative answers ("Primarily mine" / "Primarily my
-  // partner's") are interpreted from the perspective of whoever gave them, which
-  // is why we pass isUser: for the user's own answer "mine" means the user (0),
-  // but for the partner's answer "mine" means the partner (2).
-  const rankFor = (v, isUser) => {
-    if (v == null || v === '') return { r: null, o: null };
-    if (v === 'Primarily mine')           return { r: isUser ? 0 : 2, o: false };
-    if (v === 'Balanced')                 return { r: 1, o: false };
-    if (v === "Primarily my partner's")   return { r: isUser ? 2 : 0, o: false };
-    if (v === "Doesn't apply")            return { r: null, o: true };
-    if (v === userName)                   return { r: 0, o: false };
-    if (v === 'Both of us')               return { r: 1, o: false };
-    if (v === partnerName)                return { r: 2, o: false };
-    if (v === "Doesn't apply to us")      return { r: null, o: true };
-    return { r: null, o: null };
-  };
-  const a = rankFor(uV, true), b = rankFor(pV, false);
-  if (a.r === null && a.o === null) return null;
-  if (b.r === null && b.o === null) return null;
-  if (a.o && b.o) return 1.0;
-  if (a.o || b.o) return 0.0;
-  return (2 - Math.abs(a.r - b.r)) / 2;
-}
-function scoreLqClient(uV, pV, options) {
-  if (!options || options.length < 2) return null;
-  if (uV == null || pV == null) return null;
-  const a = options.indexOf(uV);
-  const b = options.indexOf(pV);
-  if (a === -1 || b === -1) return null;
-  const max = options.length - 1;
-  return (max - Math.abs(a - b)) / max;
-}
-
-// Domain row builder. Returns [{ score }] for each item in the domain. Used
-// to compute the domain pct via simple mean. Mirrors api/generate-workbook.js
-// getDomainRows but only needs scoring info, not labels.
-function _domainItemScores(domainKey, ex2, partnerEx2, userName, partnerName) {
-  const out = [];
-  const respScore = (catId, idx) => {
-    const cat = RESPONSIBILITY_CATEGORIES.find(c => c.id === catId);
-    if (!cat) return;
-    const item = cat.items[idx];
-    if (item === undefined) return;
-    const key = catId + '__' + item;
-    const uV = ex2?.responsibilities?.[key];
-    const pV = partnerEx2?.responsibilities?.[mirrorRespKey(key)];
-    const s = scoreRespClient(uV, pV, userName, partnerName);
-    if (s != null) out.push(s);
-  };
-  const lqScore = (lqId) => {
-    const uV = ex2?.life?.[lqId];
-    const pV = partnerEx2?.life?.[mirrorLifeId(lqId)];
-    const s = scoreLqClient(uV, pV, _LIFE_OPTIONS_CLIENT[lqId]);
-    if (s != null) out.push(s);
-  };
-  switch (domainKey) {
-    case 'household':
-      for (let i = 0; i < 7; i++) respScore('household', i); break;
-    case 'emotional':
-      for (let i = 0; i < 2; i++) respScore('emotional', i); break;
-    case 'extended_family':
-      [0, 2, 1, 3].forEach(i => respScore('extended_family', i)); break;
-    case 'money':
-      respScore('financial', 0); respScore('financial', 1); respScore('career', 1);
-      lqScore('lq_finances'); lqScore('lq_money_lean'); lqScore('lq_money_risk'); break;
-    case 'life':
-      ['lq_children','lq_family_conf','lq_location','lq_social','lq_routine','lq_faith','lq_values'].forEach(lqScore); break;
-  }
-  return out;
-}
-
-function computeDomainPctClient(domainKey, ex2, partnerEx2, userName, partnerName) {
-  const scores = _domainItemScores(domainKey, ex2, partnerEx2, userName, partnerName);
-  if (scores.length === 0) return 0;
-  return Math.round((scores.reduce((a,b) => a+b, 0) / scores.length) * 100);
-}
-
-function computeOverallExpectationsPctClient(ex2, partnerEx2, userName, partnerName) {
-  const domains = ['household', 'emotional', 'extended_family', 'money', 'life'];
-  const pcts = domains.map(d => computeDomainPctClient(d, ex2, partnerEx2, userName, partnerName));
-  return Math.round(pcts.reduce((a,b) => a+b, 0) / pcts.length);
-}
+// Expectations similarity scoring moved to api/_lib/expectations-alignment.js.
+// It used to be mirrored here, with a comment asking whoever changed one copy
+// to remember the other. Imported at the top of this file.
 
 function buildWorkbookPayload(userName, partnerName, ex1Answers, partnerEx1, ex2Answers, partnerEx2, coupleType) {
   const myS = calcDimScores(ex1Answers);

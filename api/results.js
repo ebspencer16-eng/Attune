@@ -27,6 +27,7 @@ import { expectationsSummary } from './_lib/expectations.js';
 import { intimacyResults } from './_lib/intimacy-results.js';
 import { reflectionResults } from './_lib/reflection-results.js';
 import { whatComesNext } from './_lib/what-comes-next.js';
+import { highlightCards } from './_lib/highlight-cards.js';
 import { EXERCISES, EXERCISE_COLUMNS, isExerciseDone } from './_exercises.js';
 import { capabilitiesFor, OWNERSHIP_COLUMNS } from './_lib/ownership.js';
 import { DIM_META } from './_workbook-content.js';
@@ -326,6 +327,11 @@ export default async function handler(req) {
         })
       : null;
 
+    // The display payload, built once. The highlight cards read the same
+    // dimensions the results screens do, so both are the reader's own side.
+    const viewerSide = orderPair(me.id, partner.id).swapped ? 'b' : 'a';
+    const displayed = withContent(withLabels(results), viewerSide);
+
     return json({
       ok: true, ready: true, cached, recomputed: reason,
       // Labels are applied on the way out, not baked into the stored blob.
@@ -341,7 +347,7 @@ export default async function handler(req) {
       // Which half of the stored payload belongs to the person asking. Derived
       // with the same orderPair the store uses, rather than re-deriving the
       // comparison here and risking the two disagreeing.
-      results: withContent(withLabels(results), orderPair(me.id, partner.id).swapped ? 'b' : 'a'),
+      results: displayed,
       owned: ownership.owned,
       // frozenAt is when these results were fixed. computedUnderVersion is the
       // engine that produced them, which may be older than the current one:
@@ -376,6 +382,23 @@ export default async function handler(req) {
       expectations,
       intimacy,
       reflection,
+
+      /**
+       * The highlight storycards, read in order before anything else.
+       *
+       * Words and numbers only. The website draws these as nine designed
+       * cards; the app draws its own. What neither does is invent a summary of
+       * its own, which is what the app was doing here.
+       */
+      highlights: highlightCards({
+        dimensions: displayed.content?.dimensions || [],
+        coupleTypeId: results.coupleType,
+        names: { you: me.name || 'You', them: partner?.name || 'Your partner' },
+        expectations,
+        reflection,
+        intimacy,
+        ex2: { mine: me.ex2_answers, theirs: partner?.ex2_answers },
+      }),
 
       /**
        * What Comes Next: everything the results ask this couple to do.

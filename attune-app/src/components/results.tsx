@@ -24,10 +24,11 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { fetchConflictResults } from '@/api/client';
 import type {
   ConflictResults, CoupleResults, ExpectationRow, ExpectationsSummary,
-  IntimacyDimension, IntimacyResults, NextStepGroup, ReflectionResults,
-  ResultDimension, ResultsNavGroup, ResultsSection,
+  HighlightCard, IntimacyDimension, IntimacyResults, NextStepGroup,
+  ReflectionResults, ResultDimension, ResultsNavGroup, ResultsSection,
 } from '@/api/client';
 import ConflictResultsView from '@/components/conflict-results';
+import HighlightCards from '@/components/highlight-cards';
 import { Eyebrow } from '@/components/screen-states';
 import {
   BottomTabInset, Colors, MaxContentWidth, Palette, Radius, SectionColor, Spacing, Type,
@@ -65,13 +66,14 @@ function interp(text: string | null | undefined, you: string, them: string): str
 }
 
 export default function Results({
-  results, owned = [], sections: fromServer, nav = [],
+  results, owned = [], sections: fromServer, nav = [], highlights = [],
   expectations = null, intimacy = null, reflection = null, whatComesNext = null,
 }: {
   results: CoupleResults;
   owned?: string[];
   sections?: ResultsSection[];
   nav?: ResultsNavGroup[];
+  highlights?: HighlightCard[];
   expectations?: ExpectationsSummary | null;
   intimacy?: IntimacyResults | null;
   reflection?: ReflectionResults | null;
@@ -257,6 +259,7 @@ export default function Results({
         <SectionBody
           section={section}
           expectations={expectations}
+          highlights={highlights}
           intimacy={intimacy}
           reflection={reflection}
           whatComesNext={whatComesNext}
@@ -326,10 +329,11 @@ export default function Results({
  */
 function SectionBody({
   section, results, conflict, conflictWaiting, byDomain, you, them, viewer, wideGap,
-  expectations, intimacy, reflection, whatComesNext, onGoToSection,
+  expectations, highlights, intimacy, reflection, whatComesNext, onGoToSection,
 }: {
   section: string;
   expectations: ExpectationsSummary | null;
+  highlights: HighlightCard[];
   intimacy: IntimacyResults | null;
   reflection: ReflectionResults | null;
   whatComesNext: { groups: NextStepGroup[] } | null;
@@ -341,6 +345,12 @@ function SectionBody({
   you: string; them: string; viewer: 'a' | 'b'; wideGap: number | null;
 }) {
   if (section === 'highlights') {
+    // The storycards, the same nine the website shows. This was a summary
+    // panel written for the app, which meant the first screen of results was
+    // the one place the two products disagreed most.
+    if (highlights.length) {
+      return <HighlightCards cards={highlights} onDone={() => onGoToSection('couple-type')} />;
+    }
     return <Glance results={results} you={you} them={them} viewer={viewer} wideGap={wideGap} />;
   }
   if (section === 'couple-type') return <CoupleType results={results} you={you} them={them} />;
