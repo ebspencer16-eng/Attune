@@ -2,6 +2,7 @@
 // used by build_ex2_docs / build_*_review). Arial body, Georgia display, brand
 // color tokens, no em-dashes in structural text.
 import { writeFileSync } from 'fs';
+import { docOut } from './_lib/doc-out.mjs';
 import {
   Document, Packer, Paragraph, TextRun, Table, TableRow, TableCell,
   AlignmentType, BorderStyle, WidthType, ShadingType, Footer, PageNumber, VerticalAlign, HeadingLevel,
@@ -9,7 +10,7 @@ import {
 
 export const ORANGE='E8673A', BLUE='1B5FE8', PURPLE='7C3AED', GREEN='10B981', ROSE='B5546E';
 export const INK='0E0B07', MUTED='8C7A68', STONE='E8DDD0', SOFT='6B5C4D';
-export const OUT_DIR = process.env.ATTUNE_DOC_OUT || '/mnt/user-data/outputs';
+export const OUT_DIR = process.env.ATTUNE_DOC_OUT || docOut();
 
 export const run=(t,o={})=>new TextRun({ text:String(t??''), font:'Arial', ...o });
 export const disp=(t,o={})=>new TextRun({ text:String(t??''), font:'Georgia', ...o });

@@ -78,7 +78,19 @@ export function personalityFeedback({ dimensions, viewer, youName, themName, cop
  * a couple reading a list of things to work on should meet the hardest one at
  * the top rather than after seven easier ones.
  */
-const PROTOCOLS = [
+/**
+ * Exported because it is the canonical list.
+ *
+ * It is what a customer actually sees on the Communication overview. It was
+ * private, so the copy-review document could not read it and showed
+ * DIM_ACTION_ITEMS instead, which is a different ten items that the product
+ * has never rendered. Carolina approved those; nobody has ever reviewed these.
+ *
+ * If you add a dimension here, add it to the review document's reachability
+ * check too, or rather: do not, because check-approval-doc.mjs derives from
+ * this export and will find it on its own.
+ */
+export const PROTOCOLS = [
   ['conflict', 'Create a pause protocol', "Next time something feels off between you, before trying to resolve it, one of you says: 'I need [time amount] before we talk about this.' Practice naming the specific time you need, rather than only asking for space."],
   ['repair', 'Agree on what repaired looks like', "Within 24 hours of your next disagreement, one of you takes a small step to come back, not to relitigate it, just to signal you're okay. Notice how the other responds."],
   ['energy', 'Name your recharge needs', "This week, tell each other in advance when you need recharge time, before you're depleted. Try: 'I need a quiet evening Thursday.' That's it."],

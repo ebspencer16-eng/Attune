@@ -82,6 +82,7 @@ import {
 } from "../api/_anniversary-questions.js";
 import { COUPLE_TYPES as NEW_COUPLE_TYPES } from "../api/_couple-types.js";
 import { INDIVIDUAL_TYPE_DISPLAY } from "../api/_individual-types.js";
+import { commsProtocols } from "../api/_lib/comms-plan.js";
 
 // ═══════════════════════════════════════════════════════════════════════════
 // LAUNCH FLAGS — flip these to change what the product offers. Nothing below is
@@ -3687,24 +3688,24 @@ function readErrorsFor(myAnswers, partnerAnswers) {
  */
 export const COMMS_PROTOCOL_LIMIT = 3;
 
+/**
+ * The "this week" protocols.
+ *
+ * ── WHY THIS IS FOUR LINES ────────────────────────────────────────────────
+ * It used to be the whole list written out again: nine dimensions with their
+ * titles and instructions, plus the three-item fallback for a couple with no
+ * gaps, all duplicated from api/_lib/comms-plan.js. Two copies of one list,
+ * maintained by hand, with nothing checking they agreed.
+ *
+ * They had already drifted. The listening protocol read "Match presence to
+ * what's needed" here with a straight apostrophe and with a curly one on the
+ * server, so the website and the app showed different characters for the same
+ * sentence. One character this time. The package rules started the same way.
+ *
+ * check-protocols.mjs now fails the build if this stops being the only copy.
+ */
 function buildCommsProtocols(byDim, userName, partnerName) {
-    const protocols = [];
-    if (byDim.conflict?.isOpportunity || byDim.conflict?.isNote) protocols.push({ dim: "conflict", title: "Create a pause protocol", body: byDim.conflict.adviceText, thisWeek: "Next time something feels off between you, before trying to resolve it, one of you says: 'I need [time amount] before we talk about this.' Practice naming the specific time you need, rather than only asking for space." });
-    if (byDim.repair?.isOpportunity || byDim.repair?.isNote) protocols.push({ dim: "repair", title: "Agree on what repaired looks like", body: byDim.repair.adviceText, thisWeek: "Within 24 hours of your next disagreement, one of you takes a small step to come back, not to relitigate it, just to signal you're okay. Notice how the other responds." });
-    if (byDim.energy?.isOpportunity || byDim.energy?.isNote) protocols.push({ dim: "energy", title: "Name your recharge needs", body: byDim.energy.adviceText, thisWeek: "This week, tell each other in advance when you need recharge time, before you're depleted. Try: 'I need a quiet evening Thursday.' That's it." });
-    if (byDim.needs?.isOpportunity || byDim.needs?.isNote) protocols.push({ dim: "needs", title: "Practice the direct ask", body: byDim.needs.adviceText, thisWeek: "Once this week, ask directly for something you'd normally hint at or leave unsaid. Just the request, no preamble, no apology." });
-    if (byDim.bids?.isOpportunity || byDim.bids?.isNote) protocols.push({ dim: "bids", title: "Stay tuned to small moments", body: byDim.bids.adviceText, thisWeek: "Once a day this week, when the other person does something small for you, makes you coffee, sends you something, acknowledge it specifically. Not just 'thanks,' but 'I noticed that.'" });
-    if (byDim.listening?.isOpportunity || byDim.listening?.isNote) protocols.push({ dim: "listening", title: "Match presence to what's needed", body: byDim.listening.adviceText, thisWeek: "This week, when one of you brings something up, ask first: 'do you want me to just listen, or do you want me to weigh in?' Then do that one thing." });
-    if (byDim.expression?.isOpportunity || byDim.expression?.isNote) protocols.push({ dim: "expression", title: "Build toward more openness", body: byDim.expression.adviceText, thisWeek: "This week, each of you says one thing out loud that you'd normally hold back or let pass. Not something big, just something that's been sitting there." });
-    if (byDim.feedback?.isOpportunity || byDim.feedback?.isNote) protocols.push({ dim: "feedback", title: "Practice the small direct mention", body: byDim.feedback.adviceText, thisWeek: "This week, when something bothers you, name it within the same day, not to fight, just to say it. 'Hey, that landed a little off for me.' See what happens." });
-  
-    if (byDim.love?.isOpportunity || byDim.love?.isNote) protocols.push({ dim: "love", title: "Learn each other's language", body: byDim.love.adviceText, thisWeek: "Ask your partner: 'What's one thing I do that makes you feel really cared for that I might not realize has that effect?' Then listen without commenting." });
-    if (protocols.length === 0) {
-      protocols.push({ emoji: "", title: "Keep checking in", body: ((userName) + " and " + (partnerName) + " are closely aligned across all ten dimensions. The work here is about staying connected rather than catching up. Couples who stay curious about each other's inner experience, even when things feel stable, tend to stay that way longer.") });
-      protocols.push({ emoji: "", title: "Stay curious as things change", body: "When two people are this in sync, it's easy to assume the picture stays the same. But what each of you needs, values, and envisions can shift gradually. A brief check-in every few months keeps you current with each other." });
-      protocols.push({ emoji: "", title: "Name what's working", body: ("Most couples only talk about their relationship when something feels off. " + (userName) + " and " + (partnerName) + " have something worth naming explicitly: real alignment. Talking about what you're doing well, alongside what feels hard, reinforces it.") });
-    }
-  return protocols;
+  return commsProtocols(byDim, userName, partnerName);
 }
 
 function PersonalityResults({ myAnswers, partnerAnswers, userName, partnerName, coupleType, userPronouns = "", partnerPronouns = "", noSideNav = false, externalStep, onExternalGo, onGoExpectations, onGoBack, onNavigateTool, hasWorkbook = false }) {

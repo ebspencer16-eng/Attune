@@ -5,3 +5,4 @@ dist/
 *.bak2
 .pyc
 __pycache__/
+.doc-out/

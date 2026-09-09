@@ -9,6 +9,7 @@
 // things confirmed in prior sessions that don't need re-checking.
 
 import { writeFileSync } from 'fs';
+import { docOut } from './_lib/doc-out.mjs';
 import { execSync } from 'child_process';
 import {
   Document, Packer, Paragraph, TextRun, Table, TableRow, TableCell,
@@ -402,7 +403,7 @@ const doc = new Document({
 });
 
 const buf = await Packer.toBuffer(doc);
-const outPath = '/mnt/user-data/outputs/attune_master_review_checklist.docx';
+const outPath = docOut('attune_master_review_checklist.docx');
 writeFileSync(outPath, buf);
 try {
   execSync('libreoffice --headless --convert-to pdf --outdir /mnt/user-data/outputs ' + outPath, { stdio: 'pipe' });

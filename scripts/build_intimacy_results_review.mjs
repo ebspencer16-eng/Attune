@@ -2,6 +2,7 @@
 // the specific content review. Reads live from the intimacy content files.
 
 import { INTIMACY_DIMENSIONS } from '../api/_intimacy-questions.js';
+import { docOut } from './_lib/doc-out.mjs';
 import { INTIMACY_RESULTS_PROSE } from '../api/_intimacy-results-prose.js';
 import {
   ORANGE, PURPLE, GREEN, BLUE, INK, MUTED,
@@ -77,6 +78,6 @@ const section2 = [
 
 await renderDoc({
   footerLabel: 'Attune · Intimacy results review',
-  outPath: '/mnt/user-data/outputs/attune_intimacy_results_review.docx',
+  outPath: docOut('attune_intimacy_results_review.docx'),
   children: [...cover, ...section1, ...section2],
 });

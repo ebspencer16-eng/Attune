@@ -5,8 +5,13 @@
 // means changing the source and regenerating rather than reconciling two copies.
 
 import { readFileSync } from 'fs';
+import { docOut } from './_lib/doc-out.mjs';
 import { DIM_META, DIM_CONTENT, GAP_BLURBS, WHEN_THIS_SHOWS_UP, DIMS } from '../api/_workbook-content.js';
 import { PERSONALITY_QUESTIONS, PARTNER_VIEW_TEXT } from '../api/_questions.js';
+// The action plan a customer actually sees. This document used to show
+// DIM_ACTION_ITEMS here, which the product has never rendered, so ten items
+// were reviewed and approved while the nine that ship were never read.
+import { PROTOCOLS } from '../api/_lib/comms-plan.js';
 import {
   ORANGE, BLUE, PURPLE, GREEN, INK, MUTED, RED,
   bigSection, midSection, smallSection, prose, caption, groupLabel, tag,
@@ -68,7 +73,7 @@ const cover = buildCover({
     ['4.', 'Exercise and site copy', 'counts and descriptions'],
     ['5.', 'Bids prose', 'still uses the old pole words'],
     ['6.', 'Labels already changed', 'confirm or revert'],
-    ['7.', 'Action plan items', '10 dimensions + 3 aligned states'],
+    ['7.', 'Action plan items', '9 shipped protocols + 3 aligned states, and one proposal'],
     ['8.', 'Reflection action titles', 'rewritten as instructions'],
     ['9.', 'Reassurance guidance', '15 score pairings, new'],
     ['10.', 'Reassurance when aligned', 'keep-in-mind line, new'],
@@ -182,17 +187,34 @@ DIMS.forEach((d, i) => children.push(smallSection(`6.3.${i + 1}`, '', MUTED,
   { inline: `${DIM_META[d].label}   ${DIM_META[d].left} / ${DIM_META[d].right}` })));
 
 // ── 7 ────────────────────────────────────────────────────────────────────────
-children.push(...bigSection('7', 'Action plan items', 'One per dimension. The results-at-a-glance plan shows the widest-gap dimension in each of the three domains, so each of these has to stand on its own. {LO} and {HI} are the partners at each end.', ORANGE));
-Object.entries(DIM_ACTION_ITEMS).forEach(([dim, item], i) => {
+children.push(...bigSection('7', 'Action plan items', 'What a couple sees on the Communication overview under "This week". One per dimension where the two of you are far enough apart to warrant one. These are the words that ship.', ORANGE));
+PROTOCOLS.forEach(([dim, title, thisWeek], i) => {
   children.push(midSection(`7.${i + 1}`, DIM_META[dim]?.label || dim, ORANGE));
-  children.push(prose(item.title, { bold: true }));
-  children.push(prose(fill(item.body).replace(/\{LO\}/g, 'Maya').replace(/\{HI\}/g, 'David')));
+  children.push(prose(title, { bold: true }));
+  children.push(prose(thisWeek));
 });
-children.push(midSection('7.11', 'When a domain has no gap', ORANGE, { extras: 'one per domain' }));
+
+// ── The dimension with no protocol ──────────────────────────────────────────
+children.push(midSection(`7.${PROTOCOLS.length + 1}`, 'Reassurance — MISSING', ORANGE));
+children.push(prose('There is no protocol for Reassurance. A couple whose widest gap in a domain is Reassurance sees nothing under "This week" for it. The other nine dimensions all have one. This needs writing: a title of about five words and one instruction a couple can carry out in a week, in the shape of the nine above.', { bold: true }));
+children.push(midSection(`7.${PROTOCOLS.length + 2}`, 'When a domain has no gap', ORANGE, { extras: 'one per domain' }));
 Object.entries(DOMAIN_ALIGNED).forEach(([dom, item], i) => {
-  children.push(smallSection(`7.11.${i + 1}`, dom, ORANGE));
+  children.push(smallSection(`7.${PROTOCOLS.length + 2}.${i + 1}`, dom, ORANGE));
   children.push(prose(item.title, { indent: INDENT_PROSE_UNDER_SMALL, bold: true }));
   children.push(prose(item.body, { indent: INDENT_PROSE_UNDER_SMALL }));
+});
+
+// ── The alternative set, kept rather than deleted ───────────────────────────
+// DIM_ACTION_ITEMS is ten action items that were written, reviewed and
+// approved, and that the product has never rendered. Deleting them would throw
+// away work and a decision that was actually made. They are shown here as a
+// proposal instead, so the choice between the two sets is Carolina's.
+children.push(midSection(`7.${PROTOCOLS.length + 3}`, 'PROPOSAL, NOT SHIPPED', ORANGE));
+children.push(prose('The ten items below were written and approved but have never appeared in the product. Section 7 above is what customers actually see. These are kept here so nothing approved is lost: some read better than what ships, and swapping any of them in is a decision rather than a deletion. {LO} and {HI} are the partners at each end.', { bold: true }));
+Object.entries(DIM_ACTION_ITEMS).forEach(([dim, item], i) => {
+  children.push(smallSection(`7.${PROTOCOLS.length + 3}.${i + 1}`, DIM_META[dim]?.label || dim, ORANGE));
+  children.push(prose(item.title, { indent: INDENT_PROSE_UNDER_SMALL, bold: true }));
+  children.push(prose(fill(item.body).replace(/\{LO\}/g, 'Maya').replace(/\{HI\}/g, 'David'), { indent: INDENT_PROSE_UNDER_SMALL }));
 });
 
 // ── 8 ────────────────────────────────────────────────────────────────────────
@@ -266,5 +288,5 @@ children.push(midSection('11.5', 'Results: headings and framing', BLUE));
  ['When no pattern is flagged', CONFLICT_RESULTS_COPY.allClear.replace(/\{partner\}/g, 'David')]]
   .forEach(([label, text]) => children.push(prose(`${label}: ${text}`)));
 
-const out = (process.env.ATTUNE_DOC_OUT || '/mnt/user-data/outputs') + '/attune_prose_to_approve.docx';
+const out = docOut('attune_prose_to_approve.docx');
 await renderDoc({ footerLabel: 'Attune · Prose to approve', children, outPath: out });

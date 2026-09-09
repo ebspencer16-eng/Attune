@@ -127,6 +127,19 @@ just means any scanner has to resolve the derivation too. When you write a gate
 that looks for a column, a route, an exercise key or a package name, ask what
 the indirection for that thing is, and match on both.
 
+**State the method next to the number.** A precise figure invites less
+scrutiny than a vague one, which is exactly backwards when the precision came
+from one grep over one file.
+
+"The app draws 8 of 21 highlight card fields" was wrong: it draws all 21. The
+scan had read `results.tsx` and the storycards live in `highlight-cards.tsx`.
+Nobody questioned the figure, including me, because 8 of 21 sounds like
+something that was counted. "Most of them, from a scan of one file" would have
+drawn the follow-up question that a specific number did not.
+
+So: say where a number came from in the same sentence you say the number. A
+single-file scan is a lead, not a conclusion.
+
 **A new field on the compute path reaches new users only.** Results are
 frozen: once a couple's row exists it is served back as it was written. So
 anything the display needs, that can be derived from what is already stored,

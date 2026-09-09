@@ -17,6 +17,7 @@
 // otherwise, so a hand edit cannot silently break the scoring.
 
 import { Document, Packer, Paragraph, TextRun, Table, TableRow, TableCell, WidthType, AlignmentType, HeadingLevel, BorderStyle } from 'docx';
+import { docOut } from './_lib/doc-out.mjs';
 import { writeFileSync, mkdirSync } from 'fs';
 import { DIM_KEYS, AXIS_CONFIG, PARTNER_VIEW_BLEND } from '../api/_type-engine.js';
 import { PERSONALITY_QUESTIONS } from '../api/_questions.js';
@@ -152,7 +153,7 @@ const doc = new Document({
   }],
 });
 
-const OUT = process.env.ATTUNE_DOC_OUT || '/mnt/user-data/outputs';
+const OUT = process.env.ATTUNE_DOC_OUT || docOut();
 mkdirSync(OUT, { recursive: true });
 const path = `${OUT}/attune_question_weights.docx`;
 writeFileSync(path, await Packer.toBuffer(doc));

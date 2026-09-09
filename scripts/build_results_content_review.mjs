@@ -8,6 +8,7 @@
 // the workbook specific content review (see WS X.Y).
 
 import { writeFileSync } from 'fs';
+import { docOut } from './_lib/doc-out.mjs';
 import { execSync } from 'child_process';
 import {
   Document, Packer, Paragraph, TextRun, Table, TableRow, TableCell,
@@ -201,7 +202,7 @@ const doc = new Document({
 });
 
 const buf = await Packer.toBuffer(doc);
-const outPath = '/mnt/user-data/outputs/attune_results_content_review.docx';
+const outPath = docOut('attune_results_content_review.docx');
 writeFileSync(outPath, buf);
 try {
   execSync('libreoffice --headless --convert-to pdf --outdir /mnt/user-data/outputs ' + outPath, { stdio: 'pipe' });

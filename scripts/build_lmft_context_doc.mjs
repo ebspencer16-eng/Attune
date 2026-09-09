@@ -11,6 +11,7 @@
 //   6. What we want flagged
 
 import { writeFileSync, readFileSync } from 'fs';
+import { docOut } from './_lib/doc-out.mjs';
 import { execSync } from 'child_process';
 import {
   Document, Packer, Paragraph, TextRun, Table, TableRow, TableCell,
@@ -355,7 +356,7 @@ const doc = new Document({
 });
 
 const buf = await Packer.toBuffer(doc);
-const outPath = '/mnt/user-data/outputs/attune_lmft_context.docx';
+const outPath = docOut('attune_lmft_context.docx');
 writeFileSync(outPath, buf);
 try {
   execSync('libreoffice --headless --convert-to pdf --outdir /mnt/user-data/outputs ' + outPath, { stdio: 'pipe' });

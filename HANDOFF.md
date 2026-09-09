@@ -678,3 +678,32 @@ website has no equivalent of by definition:
 "Not enough answers to place this one.", "This fills in from the last few
 questions of the exercise, which you have not both answered yet.", and the
 NotYet placeholder.
+
+---
+
+## Open: three broken document generators, and one missing protocol (2026-09-09)
+
+`npm run check:docs` used to report "18 of 27 generators failed" permanently,
+because nineteen hardcoded a sandbox output path. That is fixed. It now reports
+**3 broken, 4 needing an external converter**. The three are real and were
+hidden by the noise:
+
+| Generator | Why |
+|---|---|
+| `build_specific_content_review.mjs` | `Can't find NEW_COUPLE_TYPES in App.jsx`. App.jsx imports it under that alias now rather than declaring it, so the generator's `evalConst` finds nothing. |
+| `build_lmft_context_doc.mjs` | A regex over App.jsx returns null. Something it parses was renamed. |
+| `build_reflection_results_review.mjs` | Same shape. |
+
+All three read `src/App.jsx` by regex, which is why they go stale whenever that
+file is refactored. Worth considering whether they should read the content
+modules directly, as `build_prose_approval_doc.mjs` now does.
+
+The four needing an external converter want `libreoffice` for PDF export. They
+produce their .docx correctly without it.
+
+**Reassurance has no "this week" protocol.** Nine of ten communication
+dimensions have one. A couple whose widest gap in a domain is Reassurance sees
+nothing there. It needs a title of about five words and one instruction a
+couple can carry out in a week, in the shape of the other nine. Flagged in the
+approval document as section 7's missing item, and printed by
+`check-protocols.mjs` on every run. Carolina to write.

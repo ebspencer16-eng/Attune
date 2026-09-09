@@ -5,18 +5,19 @@
 //      interpretation prose (intro + gap-state copy + conversation prompt).
 //
 // Both for Ellie + Carolina to redline. Body 22 (11pt). Sources read live.
-// Output: /mnt/user-data/outputs/
+// Output: the directory docOut() resolves to (ATTUNE_DOC_OUT, else .doc-out) 
 
 import { writeFileSync, mkdirSync } from 'node:fs';
+import { docOut } from './_lib/doc-out.mjs';
 import {
   Document, Packer, Paragraph, TextRun, Table, TableRow, TableCell,
   HeadingLevel, BorderStyle, WidthType, ShadingType, Footer, PageNumber, AlignmentType,
-} from '/home/claude/.npm-global/lib/node_modules/docx/dist/index.mjs';
+} from 'docx';
 
 import { INTIMACY_QUESTIONS, INTIMACY_DIMENSIONS } from '../api/_intimacy-questions.js';
 import { INTIMACY_RESULTS_PROSE } from '../api/_intimacy-results-prose.js';
 
-const OUT = '/mnt/user-data/outputs';
+const OUT = docOut();
 mkdirSync(OUT, { recursive: true });
 
 const ROSE = 'B5546E', INK = '0E0B07', MUTED = '8C7A68', STONE = 'E8DDD0';

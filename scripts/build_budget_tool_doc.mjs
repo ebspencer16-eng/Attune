@@ -37,7 +37,7 @@ function extractArray(src, name) {
   return eval(src.slice(start, i));
 }
 
-const appSrc = readFileSync('/home/claude/unison/src/App.jsx', 'utf8');
+const appSrc = readFileSync(new URL('../src/App.jsx', import.meta.url), 'utf8');
 const BUDGET_CATEGORIES = extractArray(appSrc, 'BUDGET_CATEGORIES');
 const POOLING_MODELS    = extractArray(appSrc, 'POOLING_MODELS');
 

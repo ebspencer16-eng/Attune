@@ -20,6 +20,7 @@
  */
 
 import { chromium } from '/home/claude/.npm-global/lib/node_modules/playwright/index.mjs';
+import { docOut } from './_lib/doc-out.mjs';
 import { existsSync, readFileSync, mkdtempSync, writeFileSync, unlinkSync, rmdirSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
@@ -131,8 +132,8 @@ if (isService) {
 
 // ── Local sample mode (default) ──────────────────────────────────────────────
 const VARIANTS = [
-  { html: '/mnt/user-data/outputs/attune_workbook_sample.html',           pdf: '/mnt/user-data/outputs/attune_workbook_sample.pdf' },
-  { html: '/mnt/user-data/outputs/attune_workbook_sample_same_type.html', pdf: '/mnt/user-data/outputs/attune_workbook_sample_same_type.pdf' },
+  { html: docOut('attune_workbook_sample.html'),           pdf: docOut('attune_workbook_sample.pdf') },
+  { html: docOut('attune_workbook_sample_same_type.html'), pdf: docOut('attune_workbook_sample_same_type.pdf') },
 ];
 
 const browser = await chromium.launch();

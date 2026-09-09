@@ -12,6 +12,7 @@
 // answers) are marked in brackets and point to their source.
 
 import { readFileSync } from 'fs';
+import { docOut } from './_lib/doc-out.mjs';
 import {
   ORANGE, PURPLE, GREEN, BLUE, INK, MUTED, RED,
   bigSection, midSection, smallSection, prose, caption, groupLabel, tag,
@@ -286,6 +287,6 @@ Object.keys(NEAR_AXIS_PROSE).forEach((id, i) => {
 
 await renderDoc({
   footerLabel: 'Attune · Results specific content review',
-  outPath: '/mnt/user-data/outputs/attune_results_specific_content_review.docx',
+  outPath: docOut('attune_results_specific_content_review.docx'),
   children: [...cover, ...section1, ...section2, ...section3, ...section4, ...section5, ...section6, ...section7, ...section8, ...section9],
 });

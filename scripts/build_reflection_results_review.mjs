@@ -3,6 +3,7 @@
 // Reads live from src/App.jsx (ANNIVERSARY_QUESTIONS + deriveAnniversaryInsights).
 
 import { readFileSync } from 'fs';
+import { docOut } from './_lib/doc-out.mjs';
 import {
   ORANGE, PURPLE, GREEN, BLUE, INK, MUTED, RED,
   bigSection, midSection, smallSection, prose, caption, groupLabel, tag,
@@ -240,6 +241,6 @@ const section3 = [
 
 await renderDoc({
   footerLabel: 'Attune · Relationship Reflection results review',
-  outPath: '/mnt/user-data/outputs/attune_reflection_results_review.docx',
+  outPath: docOut('attune_reflection_results_review.docx'),
   children: [...cover, ...section1, ...section2, ...section3],
 });

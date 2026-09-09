@@ -10,6 +10,7 @@
 // Landscape to give the Content column room to breathe.
 
 import { writeFileSync } from 'fs';
+import { docOut } from './_lib/doc-out.mjs';
 import { DIMS, DIM_META } from '../api/_workbook-content.js';
 import { execSync } from 'child_process';
 import {
@@ -460,7 +461,7 @@ const doc = new Document({
 });
 
 const buf = await Packer.toBuffer(doc);
-const outPath = '/mnt/user-data/outputs/attune_workbook_content_review.docx';
+const outPath = docOut('attune_workbook_content_review.docx');
 writeFileSync(outPath, buf);
 try {
   execSync('libreoffice --headless --convert-to pdf --outdir /mnt/user-data/outputs ' + outPath, { stdio: 'pipe' });

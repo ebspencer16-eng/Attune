@@ -34,7 +34,20 @@ const files = readdirSync(scriptsDir)
   .filter(f => /^build_.*\.(mjs|py)$/.test(f))
   .sort();
 
-let failed = 0, skipped = 0;
+/**
+ * Tools a generator may need that are not this repo's problem.
+ *
+ * A generator that cannot find libreoffice is not broken; the machine simply
+ * does not have libreoffice. Counting those as failures is how this check came
+ * to report eighteen permanent failures, which made it unreadable, which is
+ * how a copy-review document showing ten unshipped action items survived.
+ *
+ * These are reported and do not fail the build. A generator that breaks for
+ * any other reason does.
+ */
+const EXTERNAL_TOOLS = [/\blibreoffice\b/i, /\bsoffice\b/i];
+
+let failed = 0, skipped = 0, needsTool = 0;
 for (const f of files) {
   if (SKIP[f]) { skipped++; console.log(`  SKIP  ${f}  (${SKIP[f]})`); continue; }
   const cmd = f.endsWith('.py') ? 'python3' : 'node';
@@ -46,9 +59,14 @@ for (const f of files) {
     });
     console.log(`  ok    ${f}`);
   } catch (e) {
+    const raw = (e.stderr?.toString() || e.stdout?.toString() || e.message || '');
+    const msg = raw.split('\n').filter(Boolean).slice(-3).join(' | ');
+    if (EXTERNAL_TOOLS.some((re) => re.test(raw))) {
+      needsTool++;
+      console.log(`  TOOL  ${f}  (needs an external converter this machine does not have)`);
+      continue;
+    }
     failed++;
-    const msg = (e.stderr?.toString() || e.stdout?.toString() || e.message || '')
-      .split('\n').filter(Boolean).slice(-3).join(' | ');
     console.error(`  FAIL  ${f}`);
     console.error(`        ${msg.slice(0, 220)}`);
   }
@@ -56,9 +74,16 @@ for (const f of files) {
 
 rmSync(out, { recursive: true, force: true });
 
+const tail = [
+  skipped ? `${skipped} skipped` : null,
+  needsTool ? `${needsTool} need an external converter` : null,
+].filter(Boolean).join(', ');
+
 if (failed) {
-  console.error(`\n[check-doc-generators] ${failed} of ${files.length} generators failed.`);
-  console.error('A generator usually breaks because it reads something from the app that was renamed or deleted.');
+  console.error(`\n[check-doc-generators] ${failed} of ${files.length} generators are broken${tail ? ` (${tail})` : ''}.`);
+  console.error('A generator breaks because it reads something from the app that was renamed or');
+  console.error('deleted. That is the point of this check: these documents are what content');
+  console.error('review reads, and a stale one shows copy the product does not ship.');
   process.exit(1);
 }
-console.log(`\n[check-doc-generators] ${files.length - skipped} generators ran clean.`);
+console.log(`\n[check-doc-generators] ${files.length - skipped - needsTool} generators ran clean${tail ? ` (${tail})` : ''}.`);

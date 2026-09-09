@@ -4,6 +4,7 @@
 // calculated from their exercise responses.
 
 import { writeFileSync } from 'fs';
+import { docOut } from './_lib/doc-out.mjs';
 import { execSync } from 'child_process';
 import {
   Document, Packer, Paragraph, TextRun, Table, TableRow, TableCell,
@@ -409,7 +410,7 @@ const doc = new Document({
 });
 
 const buf = await Packer.toBuffer(doc);
-const outPath = '/mnt/user-data/outputs/attune_workbook_content_map.docx';
+const outPath = docOut('attune_workbook_content_map.docx');
 writeFileSync(outPath, buf);
 try {
   execSync('libreoffice --headless --convert-to pdf --outdir /mnt/user-data/outputs ' + outPath, { stdio: 'pipe' });

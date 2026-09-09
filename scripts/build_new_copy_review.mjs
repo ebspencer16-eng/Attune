@@ -8,17 +8,18 @@
 // earlier flag that internal docs were too small. Sources are read straight
 // from the live code so this always reflects what's shipped.
 //
-// Output: /mnt/user-data/outputs/attune_new_copy_review.docx
+// Output: the directory docOut() resolves to (ATTUNE_DOC_OUT, else .doc-out) attune_new_copy_review.docx
 
 import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
+import { docOut } from './_lib/doc-out.mjs';
 import {
   Document, Packer, Paragraph, TextRun, HeadingLevel, BorderStyle,
   Footer, PageNumber, AlignmentType,
-} from '/home/claude/.npm-global/lib/node_modules/docx/dist/index.mjs';
+} from 'docx';
 
 import { INTIMACY_QUESTIONS, INTIMACY_DIMENSIONS } from '../api/_intimacy-questions.js';
 
-const OUT = '/mnt/user-data/outputs';
+const OUT = docOut();
 mkdirSync(OUT, { recursive: true });
 
 const ROSE = 'B5546E';

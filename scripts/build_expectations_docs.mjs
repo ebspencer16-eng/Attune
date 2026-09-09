@@ -5,6 +5,7 @@
 //   4. expectations_variant_comparison.pdf (landscape 4-col table)
 
 import { writeFileSync } from 'fs';
+import { docOut } from './_lib/doc-out.mjs';
 import { execSync } from 'child_process';
 import {
   Document, Packer, Paragraph, TextRun, Table, TableRow, TableCell,
@@ -650,10 +651,10 @@ function buildComparisonDoc() {
 
 async function buildAndSave(doc, filename) {
   const buf = await Packer.toBuffer(doc);
-  const docxPath = '/mnt/user-data/outputs/' + filename + '.docx';
+  const docxPath = docOut() + filename + '.docx';
   writeFileSync(docxPath, buf);
   try {
-    execSync('libreoffice --headless --convert-to pdf --outdir /mnt/user-data/outputs ' + docxPath, { stdio: 'pipe' });
+    execSync('libreoffice --headless --convert-to pdf --outdir ' + docOut() + ' ' + docxPath, { stdio: 'pipe' });
     console.log(`✓ ${filename} — ${buf.length} bytes`);
   } catch (e) {
     console.log(`✓ ${filename} — ${buf.length} bytes (pdf skipped)`);
@@ -665,4 +666,4 @@ await buildAndSave(buildFlowDoc('anniversary'), 'attune_expectations_flow_annive
 await buildAndSave(buildFlowDoc('revisiting'), 'attune_expectations_flow_revisiting');
 await buildAndSave(buildComparisonDoc(), 'attune_expectations_variant_comparison');
 
-console.log('\nDone. 4 docs built in /mnt/user-data/outputs/.');
+console.log('\nDone. 4 docs built in ' + docOut() + '.');

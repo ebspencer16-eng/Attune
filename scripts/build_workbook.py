@@ -10,7 +10,7 @@ Two modes:
 
   Local sample (default):
     python3 build_workbook.py
-    Writes /mnt/user-data/outputs/attune_workbook_sample.html using the
+    Writes attune_workbook_sample.html into the directory _doc_out()
     hardcoded Maya & David sample data below.
 
   Service mode (production):
@@ -193,6 +193,23 @@ _FONT_FACES = [
     ('DM Mono', 'normal', 400, '@fontsource/dm-mono/files/dm-mono-latin-400-normal.woff2'),
     ('DM Mono', 'normal', 500, '@fontsource/dm-mono/files/dm-mono-latin-500-normal.woff2'),
 ]
+
+
+
+def _doc_out():
+    """Where generated documents go.
+
+    Mirrors scripts/_lib/doc-out.mjs: ATTUNE_DOC_OUT, else the sandbox path if
+    it exists, else <repo>/.doc-out. A hardcoded sandbox path is why
+    `npm run check:docs` reported eighteen permanent failures on a developer
+    machine.
+    """
+    import os
+    root = Path(__file__).resolve().parent.parent
+    d = os.environ.get('ATTUNE_DOC_OUT') or (
+        '/mnt/user-data/outputs' if Path('/mnt/user-data/outputs').exists() else str(root / '.doc-out'))
+    Path(d).mkdir(parents=True, exist_ok=True)
+    return d
 
 
 def _build_font_face_block():
@@ -3241,13 +3258,13 @@ if __name__ == '__main__':
 
     # ── Local sample mode (default) ─────────────────────────────────
     # Cross-type sample (Maya W + David X)
-    out = Path('/mnt/user-data/outputs/attune_workbook_sample.html')
+    out = Path(_doc_out()) / 'attune_workbook_sample.html'
     html = build_full_workbook(same_type=False)
     out.write_text(html)
     print(f'Wrote {out} ({len(html):,} chars)')
 
     # Same-type sample (Maya + David both pretending to be W, for visual review of new Working Knowledge variant)
-    out2 = Path('/mnt/user-data/outputs/attune_workbook_sample_same_type.html')
+    out2 = Path(_doc_out()) / 'attune_workbook_sample_same_type.html'
     html2 = build_full_workbook(same_type=True)
     out2.write_text(html2)
     print(f'Wrote {out2} ({len(html2):,} chars)')

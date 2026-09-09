@@ -15,7 +15,7 @@ import {
 // The array is a JS literal — we locate it, capture the matching brackets
 // by counting, then eval with a tiny wrapper to pull it out. Safer than
 // regex because the strings contain quotes + escapes.
-const appSrc = readFileSync('/home/claude/unison/src/App.jsx', 'utf8');
+const appSrc = readFileSync(new URL('../src/App.jsx', import.meta.url), 'utf8');
 const startMatch = appSrc.match(/const CHECKLIST_AREAS = \[/);
 if (!startMatch) throw new Error('CHECKLIST_AREAS not found');
 const arrStart = startMatch.index + 'const CHECKLIST_AREAS = '.length;

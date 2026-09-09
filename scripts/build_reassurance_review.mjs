@@ -5,6 +5,7 @@
 // once edits land in the source this doc regenerates to match.
 
 import { PERSONALITY_QUESTIONS, PARTNER_VIEW_TEXT } from '../api/_questions.js';
+import { docOut } from './_lib/doc-out.mjs';
 import { DIM_META, DIM_CONTENT, GAP_BLURBS, WHEN_THIS_SHOWS_UP, DIM_AXIS } from '../api/_workbook-content.js';
 import { AXIS_CONFIG } from '../api/_type-engine.js';
 import {
@@ -108,5 +109,5 @@ TYPE_ORDER.forEach((code, i) => {
   children.push(prose(fill(showsUp[code], code)));
 });
 
-const out = (process.env.ATTUNE_DOC_OUT || '/mnt/user-data/outputs') + '/attune_reassurance_review.docx';
+const out = docOut('attune_reassurance_review.docx');
 await renderDoc({ footerLabel: 'Attune · Reassurance review · first draft', children, outPath: out });

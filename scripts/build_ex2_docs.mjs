@@ -13,8 +13,9 @@ import {
   Document, Packer, Paragraph, TextRun, Table, TableRow, TableCell,
   AlignmentType, HeadingLevel, BorderStyle, WidthType, ShadingType,
   LevelFormat, PageBreak,
-} from '/home/claude/.npm-global/lib/node_modules/docx/dist/index.mjs';
+} from 'docx';
 import { writeFileSync, mkdirSync } from 'node:fs';
+import { docOut } from './_lib/doc-out.mjs';
 import {
   RESPONSIBILITY_CATEGORIES,
   RESPONSIBILITY_FRAMING,
@@ -24,7 +25,7 @@ import {
   VARIANTS,
 } from './_expectations_variants.mjs';
 
-const OUT_DIR = '/mnt/user-data/outputs';
+const OUT_DIR = docOut();
 mkdirSync(OUT_DIR, { recursive: true });
 
 // ── Shared style helpers ────────────────────────────────────────────────────
