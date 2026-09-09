@@ -714,3 +714,26 @@ nothing there. It needs a title of about five words and one instruction a
 couple can carry out in a week, in the shape of the other nine. Flagged in the
 approval document as section 7's missing item, and printed by
 `check-protocols.mjs` on every run. Ellie to write.
+
+---
+
+## Open: app pages still structurally different from the site (2026-09-09)
+
+Fixed: the Communication glance and the Physical Intimacy overview both split
+a grouped list into one card per item. Both are one panel now, matching the
+website.
+
+**Still different, and not attempted:**
+
+| Page | Difference |
+|---|---|
+| Physical Intimacy overview | The website puts it on a dark ground with the couple's names as a hero above the panel. The app is a cream page with a plain heading. Page-level treatment, not grouping. |
+| Communication glance heading | The app calls the widest-gap block "Where you differ most" in one place and the website has no equivalent heading. Now moot on the glance, which uses the website's "Where you each land", but the phrase still appears elsewhere. |
+
+**How to find more of these:** compare the site's section render against the
+app's for *grouping*, not just content. The tell is a `.map` in the app whose
+items each carry `backgroundColor: c.surface` plus a border, where the site
+wraps the same list in one container. There were fifteen such maps in
+`results.tsx` when this was written; two were wrong. The rest are lists of
+genuinely separate things (conversations, action items, questions) where a
+card each is right.

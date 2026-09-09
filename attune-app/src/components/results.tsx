@@ -668,13 +668,23 @@ function IntimacyOverview({ data }: { data: IntimacyResults | null }) {
         <Text style={{ ...Type.cardTitle, color: c.textStrong, marginTop: Spacing.xl, marginBottom: Spacing.md }}>
           Where you each land
         </Text>
-        <View style={{ gap: Spacing.md }}>
-          {data.dimensions.map((d) => (
+        {/* One container, not one card per dimension.
+            The website puts "Where you each land" in a single panel with the
+            six dimensions as rows inside it. The app had six separate bordered
+            cards, which reads as six findings rather than one picture, and is
+            the same thing that was wrong on the Communication glance. */}
+        <View
+          style={{
+            backgroundColor: c.surface, borderColor: c.border, borderWidth: 1,
+            borderRadius: Radius.lg, overflow: 'hidden',
+          }}>
+          {data.dimensions.map((d, i) => (
             <View
               key={d.section}
               style={{
-                backgroundColor: c.surface, borderColor: c.border, borderWidth: 1,
-                borderRadius: Radius.lg, padding: Spacing.lg,
+                padding: Spacing.lg,
+                borderTopWidth: i === 0 ? 0 : 1,
+                borderTopColor: c.border,
               }}>
               <Text style={{ ...Type.cardTitle, color: c.textStrong }}>{d.label}</Text>
               {d.intro ? (
@@ -1274,6 +1284,59 @@ function NotYet({ section }: { section: string }) {
  * On a coloured ground, because this is the summary. Ordering comes from the
  * server's rankedGaps and is not re-sorted here.
  */
+/**
+ * The two dot colours on the glance panel.
+ *
+ * The website's values, not the app's section palette: on that dark ground it
+ * uses orange for the reader and a lighter indigo for the partner, and those
+ * two are what a reader has already learned by the time they get here.
+ */
+const GLANCE_YOU = '#E8673A';
+const GLANCE_THEM = '#6C7FFF';
+
+/**
+ * One dimension on the glance panel: a label and a shared track.
+ *
+ * Deliberately not DimensionRow, which is the detail-page treatment: a card
+ * with a border, the pole names spelled out and room to breathe. Ten of those
+ * is a list you scroll rather than a shape you see. Here the whole point is
+ * reading all ten at once, so it is one line each.
+ */
+function GlanceRow({ dim, viewer }: { dim: ResultDimension; viewer: 'a' | 'b' }) {
+  const mine = (viewer === 'a' ? dim.a : dim.b) ?? 3;
+  const theirs = (viewer === 'a' ? dim.b : dim.a) ?? 3;
+  // 1..5 onto 10..90 percent, the same range the website uses, so the two
+  // never place the same pair of answers in visibly different spots.
+  const pct = (v: number) => 10 + (v - 1) * 20;
+  const close = Math.abs(pct(mine) - pct(theirs)) < 3;
+  const mineLeft = pct(mine) <= pct(theirs);
+
+  return (
+    <View style={{ flexDirection: 'row', alignItems: 'center', gap: Spacing.md, marginBottom: Spacing.sm }}>
+      <Text
+        numberOfLines={2}
+        style={{ ...Type.small, fontSize: 11, lineHeight: 14, color: 'rgba(255,255,255,0.65)', width: 96 }}>
+        {dim.label}
+      </Text>
+      <View style={{ flex: 1, height: 6, borderRadius: Radius.pill, backgroundColor: 'rgba(255,255,255,0.10)' }}>
+        {[
+          { v: theirs, col: GLANCE_THEM, dy: close ? (mineLeft ? 4 : -4) : 0 },
+          { v: mine, col: GLANCE_YOU, dy: close ? (mineLeft ? -4 : 4) : 0 },
+        ].map((p, i) => (
+          <View
+            key={i}
+            style={{
+              position: 'absolute', left: `${pct(p.v)}%`, top: -2 + p.dy,
+              width: 10, height: 10, borderRadius: 5, marginLeft: -5,
+              backgroundColor: p.col, borderColor: '#1B2A5E', borderWidth: 1.5,
+            }}
+          />
+        ))}
+      </View>
+    </View>
+  );
+}
+
 function Glance({
   results, you, them, viewer, wideGap, plan = null,
 }: {
@@ -1281,13 +1344,21 @@ function Glance({
   wideGap: number | null; plan?: CommsPlan | null;
 }) {
   const type = results.content?.coupleType;
-  const gaps = (results.rankedGaps ?? []).slice(0, 4);
   const dims = results.content?.dimensions ?? [];
-  const find = (k: string) => dims.find((d) => d.key === k);
 
   return (
     <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: ResultsBottomInset }}>
       <View style={{ paddingHorizontal: Spacing.xl, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center' }}>
+        {/* ── ONE TILE, NOT ONE PER DIMENSION ────────────────────────────────
+            The website's glance is a single dark panel: the couple type, then
+            "Where you each land" with every dimension as a tight row inside
+            it. The app had the panel, then four of the ten dimensions as
+            separate white bordered cards underneath, which read as four
+            findings rather than one picture of the whole thing.
+
+            All ten, in the server's order, in the panel. The point of this
+            page is the shape of the pair across everything, and you cannot see
+            a shape in four cards. */}
         <LinearGradient
           colors={['#1B2A5E', '#2F55C4']}
           start={{ x: 0, y: 0 }}
@@ -1302,22 +1373,29 @@ function Glance({
               {interp(type.tagline, you, them)}
             </Text>
           ) : null}
-        </LinearGradient>
 
-        {gaps.length ? (
-          <View style={{ marginTop: Spacing.xl }}>
-            <Text style={{ ...Type.eyebrow, color: c.textMuted, marginBottom: Spacing.md }}>
-              Where you differ most
-            </Text>
-            <Legend you={you} them={them} />
-            {gaps.map((g) => {
-              const d = find(g.dim);
-              return d ? (
-                <DimensionRow key={g.dim} dim={d} you={you} them={them} viewer={viewer} wideGap={wideGap} />
-              ) : null;
-            })}
-          </View>
-        ) : null}
+          {dims.length ? (
+            <View style={{ marginTop: Spacing.xl }}>
+              <View style={{ flexDirection: 'row', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: Spacing.md }}>
+                <Text style={{ ...Type.eyebrow, color: 'rgba(255,255,255,0.85)' }}>
+                  Where you each land
+                </Text>
+                <View style={{ flexDirection: 'row', gap: Spacing.md }}>
+                  {[{ n: you, col: GLANCE_YOU }, { n: them, col: GLANCE_THEM }].map((x) => (
+                    <View key={x.n} style={{ flexDirection: 'row', alignItems: 'center', gap: Spacing.xs }}>
+                      <View style={{ width: 7, height: 7, borderRadius: 4, backgroundColor: x.col }} />
+                      <Text style={{ ...Type.small, fontSize: 11, color: 'rgba(255,255,255,0.55)' }}>{x.n}</Text>
+                    </View>
+                  ))}
+                </View>
+              </View>
+
+              {dims.map((d) => (
+                <GlanceRow key={d.key} dim={d} viewer={viewer} />
+              ))}
+            </View>
+          ) : null}
+        </LinearGradient>
       </View>
     {/* The three action tiles, one per domain. From DIM_ACTION_ITEMS and
         DOMAIN_ALIGNED, which the app could not reach until now: the
