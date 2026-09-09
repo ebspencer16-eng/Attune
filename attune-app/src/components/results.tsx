@@ -423,38 +423,6 @@ function SectionBody({
   return <NotYet section={section} />;
 }
 
-/**
- * One number and the word for it, the way the website opens these pages.
- *
- * Both Expectations and Physical Intimacy send an overall figure and neither
- * page drew it, so both opened straight into a list with nothing saying how
- * the couple did overall. The word comes from the server when there is one;
- * a percentage on its own is a number without a reading.
- */
-function OverallFigure({ pct, state, label }: { pct: number | null; state: string | null; label: string }) {
-  if (pct == null) return null;
-  const words: Record<string, string> = {
-    aligned: 'Closely aligned',
-    discuss: 'Worth discussing',
-    different: 'Some real differences',
-    unspoken: 'Mostly unspoken',
-  };
-  return (
-    <View
-      style={{
-        flexDirection: 'row', alignItems: 'baseline', gap: Spacing.md,
-        marginTop: Spacing.xl, paddingBottom: Spacing.lg,
-        borderBottomColor: c.border, borderBottomWidth: 1,
-      }}>
-      <Text style={{ ...Type.eyebrow, color: c.textMuted }}>{label}</Text>
-      <Text style={{ ...Type.hero, color: c.textStrong }}>{Math.round(pct)}%</Text>
-      {state && words[state] ? (
-        <Text style={{ ...Type.body, color: c.textMuted }}>{words[state]}</Text>
-      ) : null}
-    </View>
-  );
-}
-
 function ExpectationsOverview({
   summary, you, them,
 }: { summary: ExpectationsSummary | null; you: string; them: string }) {
@@ -498,10 +466,6 @@ function ExpectationsOverview({
             Worth discussing: <Text style={{ fontWeight: '700', color: c.text }}>{summary.differences}</Text>
           </Text>
         </View>
-
-        {/* The overall figure. It was in the payload and nothing drew it. */}
-        {/* block: exp-overview/overall */}
-        <OverallFigure pct={summary.alignedPct} state={null} label="Overall" />
 
           {/* block: exp-overview/by-category */}
         <Text style={{ ...Type.cardTitle, color: c.textStrong, marginTop: Spacing.xxl, marginBottom: Spacing.md }}>
@@ -662,15 +626,6 @@ function IntimacyOverview({ data }: { data: IntimacyResults | null }) {
       <View style={{ paddingHorizontal: Spacing.xl, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center' }}>
         <Text style={{ ...Type.hero, color: c.textStrong }}>Physical Intimacy Expectations</Text>
         <Eyebrow>Results at a glance</Eyebrow>
-
-        {/* The overall read. It was in the payload and nothing drew it, so the
-            page opened straight into the per-dimension list with no summary. */}
-        {/* block: intimacy-overview/overall */}
-        <OverallFigure
-          pct={data.overallDistancePct}
-          state={data.overallState}
-          label="Overall"
-        />
 
         {/* block: comm-overview/where-you-each-land */}
           {/* block: intimacy-overview/where-you-each-land */}

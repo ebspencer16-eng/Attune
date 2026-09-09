@@ -3941,6 +3941,7 @@ function PersonalityResults({ myAnswers, partnerAnswers, userName, partnerName, 
         <div style={{ background: "rgba(255,255,255,0.10)", borderRadius: 14, padding: "1.25rem 1.5rem", border: "1px solid rgba(255,255,255,0.16)" }}>
           <div style={{ fontSize: "0.62rem", textTransform: "uppercase", letterSpacing: "0.12em", color: "rgba(255,255,255,0.9)", fontWeight: 700, marginBottom: "1.1rem", fontFamily: BFONT }}>Overall orientation</div>
           <div style={{ display: "flex", flexDirection: "column", gap: "1.1rem" }}>
+            {/* block: comm-domain/dimensions */}
             {grp.dims.map(dim => {
               const m = DIM_META[dim];
               return (
@@ -3999,6 +4000,7 @@ function PersonalityResults({ myAnswers, partnerAnswers, userName, partnerName, 
           );
         })()}
 
+        {/* block: comm-domain/action-tile */}
         {/* ── ONE THING TO TRY — guidance for this domain's widest gap ──
             The title was a ternary on whether advice existed. It could not
             reach the other branch: the guard below returns null when there is
@@ -4334,6 +4336,7 @@ function ExpectationsResults({ myAnswers, partnerAnswers, userName, partnerName,
             {/* ── EXPECTATIONS ALIGNMENT SCALE ── */}
             <div style={{ background: "rgba(255,255,255,0.12)", border: "1px solid rgba(255,255,255,0.22)", borderRadius: 14, padding: "1rem 1.1rem", marginBottom: "1rem", boxShadow: "0 8px 26px rgba(0,0,0,0.16)" }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.7rem" }}>
+                {/* block: exp-overview/by-category */}
                 <div style={{ fontSize: "0.55rem", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.75)", fontFamily: BFONT, fontWeight: 700 }}>Alignment by category</div>
                 <div style={{ fontSize: "0.6rem", color: "rgba(255,255,255,0.3)", fontFamily: BFONT }}>% aligned</div>
               </div>
@@ -4366,6 +4369,7 @@ function ExpectationsResults({ myAnswers, partnerAnswers, userName, partnerName,
             {/* ── CONVERSATIONS TO HAVE — every gap topic, grouped by category ── */}
             {gaps.length > 0 ? (
               <div style={{ marginBottom: "1rem" }}>
+                {/* block: exp-overview/conversations */}
                 <div style={{ fontSize: "0.55rem", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.75)", fontFamily: BFONT, fontWeight: 700, marginBottom: "0.5rem" }}>Conversations to have</div>
                 <p style={{ fontSize: "0.75rem", color: "rgba(255,255,255,0.62)", fontFamily: BFONT, lineHeight: 1.55, margin: "0 0 0.75rem" }}>
                   {gaps.length} topic{gaps.length !== 1 ? "s" : ""} where your assumptions differ, across {checklistItems.length} area{checklistItems.length !== 1 ? "s" : ""}. Open an area to see its full list.
@@ -7109,6 +7113,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
   if (section === "highlights") {
     return (
       <Layout accent={coupleType?.color || "#E8673A"}>
+        {/* block: highlights/storycards */}
         <div style={{ maxWidth: 620 }}>
           {/* Retake comparison — renders only when the user has a prior
               Ex2 snapshot. Shows delta summary + expandable side-by-side. */}
@@ -7622,6 +7627,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
 
               {/* How you feel right now — scale questions (8.2) */}
               <div style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 14, padding: "1.1rem 1.25rem", marginBottom: "1rem" }}>
+                {/* block: reflection-overview/ratings */}
                 <div style={{ fontSize: "0.55rem", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.35)", fontFamily: BFONT, fontWeight: 700, marginBottom: "1rem" }}>How you feel right now</div>
                 {scaleQs.filter(q => q.id !== "a0").map(q => {
                   const myVal = mine[q.id] ?? 2;
@@ -7665,6 +7671,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
                 if (!items.length) return null;
                 return (
                   <div style={{ marginBottom: "1rem" }}>
+                    {/* block: reflection-overview/action-plan */}
                     <div style={{ fontSize: "0.55rem", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.75)", fontFamily: BFONT, fontWeight: 700, marginBottom: "0.6rem" }}>Your action plan</div>
                     <div style={{ display: "flex", flexDirection: "column", gap: "0.6rem" }}>
                       {items.map((it, i) => (
@@ -7765,6 +7772,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
             {/* Admiration pick */}
             {mine.a8 && theirs.a8 && (
               <div style={{ marginBottom: "1.5rem" }}>
+                {/* block: reflection-overview/admired */}
                 <div style={{ fontSize: "0.6rem", letterSpacing: "0.2em", textTransform: "uppercase", color: "#1B5FE8", fontWeight: 700, fontFamily: BFONT, marginBottom: "0.6rem" }}>What you each admire</div>
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.75rem" }}>
                   {[[userName, partnerName, mine.a8, "#E8673A"], [partnerName, userName, theirs.a8, "#1B5FE8"]].map(([from, about, val, col]) => (
@@ -7995,6 +8003,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
               {/* Where you each land — label left, bar right, key top-right (9.1) */}
               <div style={{ background: "rgba(255,255,255,0.12)", border: "1px solid rgba(255,255,255,0.22)", borderRadius: 14, padding: "1rem 1.1rem", marginBottom: "1rem", boxShadow: "0 8px 26px rgba(0,0,0,0.16)" }}>
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "0.7rem", gap: "1rem", flexWrap: "wrap" }}>
+                  {/* block: intimacy-overview/where-you-each-land */}
                   <div style={{ fontSize: "0.55rem", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.3)", fontFamily: BFONT, fontWeight: 700 }}>Where you each land</div>
                   <div style={{ display: "flex", gap: "0.85rem" }}>
                     <span style={{ display: "flex", alignItems: "center", gap: "0.35rem", fontSize: "0.62rem", color: "rgba(255,255,255,0.5)", fontFamily: BFONT }}><span style={{ width: 8, height: 8, borderRadius: "50%", background: "#E8673A" }} />{userName}</span>
@@ -8036,6 +8045,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
                 if (!items.length) return null;
                 return (
                   <div style={{ marginBottom: "1rem" }}>
+                    {/* block: intimacy-overview/action-plan */}
                     <div style={{ fontSize: "0.55rem", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.75)", fontFamily: BFONT, fontWeight: 700, marginBottom: "0.6rem" }}>Your action plan</div>
                     <div style={{ display: "flex", flexDirection: "column", gap: "0.6rem" }}>
                       {items.map((d, i) => {
@@ -8557,6 +8567,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
                   Each part of your results ends in something to do. They are gathered here, grouped by where they came from. Open one to see its items and the words to start with.
                 </p>
                 <div style={{ display: "flex", flexDirection: "column", gap: "0.6rem" }}>
+                  {/* block: what-comes-next/groups */}
                   {groups.map(g => (
                     <details key={g.id} style={{ background: "white", border: `1.5px solid ${C.stone}`, borderLeft: `4px solid ${g.color}`, borderRadius: 14, overflow: "hidden" }}>
                       <summary style={{ listStyle: "none", cursor: "pointer", padding: "0.85rem 1.1rem", display: "flex", alignItems: "center", justifyContent: "space-between", gap: "0.75rem" }}>

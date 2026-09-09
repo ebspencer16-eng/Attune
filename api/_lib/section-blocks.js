@@ -53,6 +53,31 @@
  */
 /** @type {Record<string, Block[]>} */
 export const SECTION_BLOCKS = {
+  'intimacy-overview': [
+    { id: 'where-you-each-land', note: 'Every dimension in one panel.' },
+    { id: 'action-plan', note: 'The conversations worth having.' },
+  ],
+
+  'exp-overview': [
+    { id: 'by-category', note: 'Each category with its alignment.' },
+    { id: 'conversations', note: 'The categories worth talking about.' },
+  ],
+
+  'reflection-overview': [
+    { id: 'admired', optional: true, note: 'What you each admire, and whether it matched.' },
+    { id: 'ratings', note: 'How you each feel right now.' },
+    { id: 'action-plan', note: 'What you each said you would work on.' },
+  ],
+
+  'comm-domain': [
+    { id: 'dimensions', note: 'Every dimension in this domain, both partners.' },
+    { id: 'action-tile', note: 'The domain\'s one instruction, labelled "One thing to try".' },
+  ],
+
+  highlights: [
+    { id: 'storycards', note: 'The nine cards, swipeable, in the order the server sends.' },
+  ],
+
 
 
 
@@ -91,26 +116,15 @@ export const SECTION_BLOCKS = {
  */
 /** @type {Record<string, Block[]>} */
 export const PLANNED = {
-  'comm-domain': [
-    { id: 'dimensions', note: 'Every dimension in this domain, both partners.' },
-    { id: 'action-tile', note: 'The domain\'s one instruction, labelled "One thing to try".' },
-  ],
 
-  'exp-overview': [
-    { id: 'overall', note: 'The overall alignment figure.' },
-    { id: 'by-category', note: 'Each category with its alignment.' },
-    { id: 'conversations', note: 'The categories worth talking about.' },
-  ],
+  // Neither surface shows an overall figure any more: the summary sentence on
+  // every glance was removed deliberately, because it restated what the rows
+  // underneath already show.
 
   'exp-conversation': [
     { id: 'questions', note: 'The questions in this category, both answers side by side.' },
   ],
 
-  'intimacy-overview': [
-    { id: 'overall', note: 'The overall state and distance.' },
-    { id: 'where-you-each-land', note: 'Every dimension in one panel.' },
-    { id: 'action-plan', note: 'The conversations worth having.' },
-  ],
 
   'intimacy-dimension': [
     { id: 'state', note: 'Where the two of you land on this one.' },
@@ -118,15 +132,7 @@ export const PLANNED = {
     { id: 'prompt', optional: true, note: 'Something to ask each other.' },
   ],
 
-  'reflection-overview': [
-    { id: 'admired', optional: true, note: 'What you each admire, and whether it matched.' },
-    { id: 'ratings', note: 'How you each feel right now.' },
-    { id: 'action-plan', note: 'What you each said you would work on.' },
-  ],
 
-  highlights: [
-    { id: 'storycards', note: 'The nine cards, swipeable, in the order the server sends.' },
-  ],
 
   /**
    * The app has no Keep growing block at all. The website's needs the
