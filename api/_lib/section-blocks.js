@@ -53,6 +53,21 @@
  */
 /** @type {Record<string, Block[]>} */
 export const SECTION_BLOCKS = {
+
+
+
+
+
+
+
+
+  'comm-overview': [
+    { id: 'couple-type-lead', note: 'The type, restated as the lead of the panel.' },
+    { id: 'where-you-each-land', note: 'Every dimension, both partners, one panel.' },
+    { id: 'action-tiles', note: 'One per domain. No label: the domain is named above.' },
+    { id: 'protocols', optional: true, note: 'Up to three things to try this week.' },
+  ],
+
   'couple-type': [
     { id: 'name', note: 'The type name and its tagline.' },
     { id: 'map', note: 'Where each partner sits on the two axes.' },
@@ -76,17 +91,6 @@ export const SECTION_BLOCKS = {
  */
 /** @type {Record<string, Block[]>} */
 export const PLANNED = {
-  highlights: [
-    { id: 'storycards', note: 'The nine cards, swipeable, in the order the server sends.' },
-  ],
-
-  'comm-overview': [
-    { id: 'couple-type-lead', note: 'The type, restated as the lead of the panel.' },
-    { id: 'where-you-each-land', note: 'Every dimension, both partners, one panel.' },
-    { id: 'action-tiles', note: 'One per domain. No label: the domain is named above.' },
-    { id: 'protocols', optional: true, note: 'Up to three things to try this week.' },
-  ],
-
   'comm-domain': [
     { id: 'dimensions', note: 'Every dimension in this domain, both partners.' },
     { id: 'action-tile', note: 'The domain\'s one instruction, labelled "One thing to try".' },
@@ -120,10 +124,22 @@ export const PLANNED = {
     { id: 'action-plan', note: 'What you each said you would work on.' },
   ],
 
+  highlights: [
+    { id: 'storycards', note: 'The nine cards, swipeable, in the order the server sends.' },
+  ],
+
+  /**
+   * The app has no Keep growing block at all. The website's needs the
+   * catalogue and the owned list, which arrive on /api/home rather than
+   * /api/results, so the app cannot draw it without that data being plumbed
+   * into the results screen. That is the work; it is not done, so this is not
+   * claimed as agreed.
+   */
   'what-comes-next': [
     { id: 'groups', note: 'The grouped next steps.' },
     { id: 'keep-growing', note: 'What they do not own yet, and nothing they do.' },
   ],
+
 };
 
 /** Every block id in the spec, for a checker that wants a flat list. */

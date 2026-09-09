@@ -33,7 +33,7 @@
 // drift has actually been.
 
 import { readFileSync } from 'fs';
-import { SECTION_BLOCKS, marker } from '../api/_lib/section-blocks.js';
+import { SECTION_BLOCKS, PLANNED, marker } from '../api/_lib/section-blocks.js';
 
 const ROOT = new URL('..', import.meta.url).pathname;
 
@@ -75,8 +75,13 @@ for (const [section, blocks] of Object.entries(SECTION_BLOCKS)) {
 for (const s of sources) {
   for (const m of s.text.matchAll(/block:\s*([a-z0-9-]+)\/([a-z0-9-]+)/g)) {
     const [, section, id] = m;
-    const known = SECTION_BLOCKS[section]?.some((b) => b.id === id);
-    if (!known) problems.push(`${s.name} draws ${section}/${id}, which the spec does not list`);
+    // A marker for a block that is only PLANNED is fine, and is how a surface
+    // gets ahead of adoption: it means that surface is already ready and the
+    // section is waiting on the other one. Only a name neither list knows is
+    // drift, because that is a surface inventing a block on its own.
+    const known = SECTION_BLOCKS[section]?.some((b) => b.id === id)
+      || PLANNED[section]?.some((b) => b.id === id);
+    if (!known) problems.push(`${s.name} draws ${section}/${id}, which neither the spec nor the queue lists`);
   }
 }
 

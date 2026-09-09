@@ -225,6 +225,7 @@ export default function Results({
         ref={topNav}
         gap={Spacing.sm}
         contentContainerStyle={{ paddingBottom: Spacing.md }}>
+        {/* block: what-comes-next/groups */}
         {groups.map((g) => {
           const on = g.id === activeGroup?.id;
           return (
@@ -352,6 +353,7 @@ function SectionBody({
     // panel written for the app, which meant the first screen of results was
     // the one place the two products disagreed most.
     if (highlights.length) {
+      {/* block: highlights/storycards */}
       return <HighlightCards cards={highlights} onDone={() => onGoToSection('couple-type')} />;
     }
     return <Glance results={results} you={you} them={them} viewer={viewer} wideGap={wideGap} />;
@@ -498,8 +500,10 @@ function ExpectationsOverview({
         </View>
 
         {/* The overall figure. It was in the payload and nothing drew it. */}
+        {/* block: exp-overview/overall */}
         <OverallFigure pct={summary.alignedPct} state={null} label="Overall" />
 
+          {/* block: exp-overview/by-category */}
         <Text style={{ ...Type.cardTitle, color: c.textStrong, marginTop: Spacing.xxl, marginBottom: Spacing.md }}>
           Alignment by category
         </Text>
@@ -529,6 +533,7 @@ function ExpectationsOverview({
 
         {conversations.length ? (
           <>
+              {/* block: exp-overview/conversations */}
             <Text style={{ ...Type.cardTitle, color: c.textStrong, marginTop: Spacing.xxl, marginBottom: Spacing.md }}>
               Conversations to have
             </Text>
@@ -550,6 +555,7 @@ function ExpectationsConversation({
   you: string;
   them: string;
 }) {
+  {/* block: exp-conversation/questions */}
   if (!bucket || bucket.answered === 0) {
     return (
       <Waiting
@@ -659,12 +665,15 @@ function IntimacyOverview({ data }: { data: IntimacyResults | null }) {
 
         {/* The overall read. It was in the payload and nothing drew it, so the
             page opened straight into the per-dimension list with no summary. */}
+        {/* block: intimacy-overview/overall */}
         <OverallFigure
           pct={data.overallDistancePct}
           state={data.overallState}
           label="Overall"
         />
 
+        {/* block: comm-overview/where-you-each-land */}
+          {/* block: intimacy-overview/where-you-each-land */}
         <Text style={{ ...Type.cardTitle, color: c.textStrong, marginTop: Spacing.xl, marginBottom: Spacing.md }}>
           Where you each land
         </Text>
@@ -697,6 +706,7 @@ function IntimacyOverview({ data }: { data: IntimacyResults | null }) {
 
         {data.conversations.length ? (
           <>
+              {/* block: intimacy-overview/action-plan */}
             <Text style={{ ...Type.cardTitle, color: c.textStrong, marginTop: Spacing.xxl, marginBottom: Spacing.md }}>
               Your action plan
             </Text>
@@ -733,6 +743,7 @@ function IntimacyDimensionView({
           <Text style={{ ...Type.body, color: c.textMuted, marginTop: Spacing.sm }}>{dim.intro}</Text>
         ) : null}
 
+        {/* block: intimacy-dimension/state */}
         <DistanceBar pct={dim.distancePct} state={dim.state} />
 
         {dim.body ? (
@@ -747,6 +758,7 @@ function IntimacyDimensionView({
 
         {dim.prompt ? (
           <Text style={{ ...Type.title, color: c.textStrong, marginTop: Spacing.xl }}>
+            {/* block: intimacy-dimension/prompt */}
             {dim.prompt}
           </Text>
         ) : null}
@@ -759,6 +771,7 @@ function IntimacyDimensionView({
           <View style={{ marginTop: Spacing.xxl }}>
             <Eyebrow>{`${dim.label} questions, side by side`}</Eyebrow>
             <Legend you={you} them={them} />
+            {/* block: intimacy-dimension/questions */}
             {dim.questions.map((q) => (
               <View
                 key={q.id}
@@ -849,6 +862,7 @@ function ReflectionOverview({ data }: { data: ReflectionResults | null }) {
             so the page itself never showed it. */}
         {data.admired?.you || data.admired?.them ? (
           <View style={{ marginTop: Spacing.xl }}>
+              {/* block: reflection-overview/admired */}
             <Text style={{ ...Type.eyebrow, color: Palette.indigo, marginBottom: Spacing.sm }}>
               What you each admire
             </Text>
@@ -889,6 +903,7 @@ function ReflectionOverview({ data }: { data: ReflectionResults | null }) {
           </View>
         ) : null}
 
+          {/* block: reflection-overview/ratings */}
         <Text style={{ ...Type.cardTitle, color: c.textStrong, marginTop: Spacing.xl, marginBottom: Spacing.md }}>
           How you feel right now
         </Text>
@@ -1083,6 +1098,7 @@ function ReflectionPlan({
   if (!data) return <ReflectionWaiting />;
   const commitment = data.written.find((w) => w.key === 'a6');
   const together = data.written.find((w) => w.key === 'a4');
+  {/* block: reflection-overview/action-plan */}
   const bothRanked = data.priorities.you && data.priorities.them;
 
   return (
@@ -1364,6 +1380,7 @@ function Glance({
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
           style={{ borderRadius: Radius.xl, padding: Spacing.xl }}>
+          {/* block: comm-overview/couple-type-lead */}
           <Text style={{ ...Type.eyebrow, color: 'rgba(255,255,255,0.6)' }}>You two are</Text>
           <Text style={{ ...Type.hero, color: Palette.white, marginTop: Spacing.sm }}>
             {type?.name || 'Your results'}
@@ -1403,6 +1420,7 @@ function Glance({
         with the gap list above. */}
     {plan?.tiles?.length ? (
       <View style={{ paddingHorizontal: Spacing.xl, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center', marginTop: Spacing.xxl }}>
+        {/* block: comm-overview/action-tiles */}
         {plan.tiles.map((tile) => (
           <View
             key={tile.domain}
@@ -1434,6 +1452,7 @@ function Glance({
         the three tiles. */}
     {plan?.protocols?.length ? (
       <View style={{ paddingHorizontal: Spacing.xl, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center', marginTop: Spacing.xxl }}>
+        {/* block: comm-overview/protocols */}
         <Text style={{ ...Type.eyebrow, color: c.accentQuiet, marginBottom: Spacing.sm }}>
           This week
         </Text>
@@ -1580,6 +1599,7 @@ function Domain({
           {title}
         </Text>
         <Legend you={you} them={them} />
+        {/* block: comm-domain/dimensions */}
         {dims.map((d) => (
           <DimensionRow key={d.key} dim={d} you={you} them={them} viewer={viewer} wideGap={wideGap} expanded />
         ))}
@@ -1601,6 +1621,7 @@ function Domain({
               borderRadius: Radius.lg, padding: Spacing.lg,
             }}>
             <View style={{ flexDirection: 'row', alignItems: 'baseline', justifyContent: 'space-between', gap: Spacing.md }}>
+              {/* block: comm-domain/action-tile */}
               <Text style={{ ...Type.eyebrow, color: accent }}>One thing to try</Text>
               {tile.dimLabel ? (
                 <Text style={{ ...Type.small, color: c.textMuted }}>{tile.dimLabel}</Text>

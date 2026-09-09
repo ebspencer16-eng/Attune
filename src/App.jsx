@@ -3837,6 +3837,7 @@ function PersonalityResults({ myAnswers, partnerAnswers, userName, partnerName, 
         {/* Header */}
         <div style={{ marginBottom: "1.25rem" }}>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "0.5rem" }}>
+            {/* block: comm-overview/couple-type-lead */}
             <div style={{ fontSize: "0.65rem", letterSpacing: "0.2em", textTransform: "uppercase", color: "rgba(255,255,255,0.65)", fontFamily: BFONT }}>How You Communicate</div>
           </div>
           <div style={{ fontSize: "clamp(1.8rem,6vw,2.8rem)", fontWeight: 700, fontFamily: HFONT, lineHeight: 1.0, marginBottom: "0.6rem" }}>{userName} & {partnerName}</div>
@@ -3847,6 +3848,7 @@ function PersonalityResults({ myAnswers, partnerAnswers, userName, partnerName, 
         {/* ── COMPARISON BARS GRAPHIC ── */}
         <div style={{ background: "rgba(255,255,255,0.12)", border: "1px solid rgba(255,255,255,0.22)", borderRadius: 14, padding: "1rem 1.1rem", marginBottom: "1rem", boxShadow: "0 8px 26px rgba(0,0,0,0.16)" }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.7rem" }}>
+            {/* block: comm-overview/where-you-each-land */}
             <div style={{ fontSize: "0.55rem", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.75)", fontFamily: BFONT, fontWeight: 700 }}>Where you each land</div>
             <div style={{ display: "flex", gap: "0.85rem" }}>
               <div style={{ display: "flex", alignItems: "center", gap: "0.3rem" }}>
@@ -3892,6 +3894,7 @@ function PersonalityResults({ myAnswers, partnerAnswers, userName, partnerName, 
         <div style={{ marginBottom: "1rem" }}>
           <div style={{ fontSize: "0.55rem", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.75)", fontFamily: BFONT, fontWeight: 700, marginBottom: "0.6rem" }}>Your action plan</div>
           <div style={{ display: "flex", flexDirection: "column", gap: "0.6rem" }}>
+            {/* block: comm-overview/action-tiles */}
             {glancePlan.map((item, i) => (
               <div key={i} style={{ background: "rgba(255,255,255,0.13)", border: `1px solid ${item.color}66`, borderLeft: `4px solid ${item.color}`, borderRadius: 12, padding: "0.9rem 1.1rem", boxShadow: "0 6px 20px rgba(0,0,0,0.14)" }}>
                 <div style={{ fontSize: "0.58rem", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.95)", fontFamily: BFONT, fontWeight: 700, marginBottom: "0.4rem" }}>{item.label}</div>
@@ -4125,6 +4128,7 @@ function PersonalityResults({ myAnswers, partnerAnswers, userName, partnerName, 
         {/* Action plan strip */}
         <div style={{ background: "rgba(255,255,255,0.05)", borderRadius: 14, padding: "1rem 1.25rem" }}>
           <div style={{ fontSize: "0.62rem", textTransform: "uppercase", letterSpacing: "0.12em", color: "rgba(255,255,255,0.4)", fontWeight: 700, marginBottom: "0.6rem", fontFamily: BFONT }}>Your next moves</div>
+          {/* block: comm-overview/protocols */}
           {protocols.slice(0, COMMS_PROTOCOL_LIMIT).map((p, i) => (
             <div key={i} style={{ display: "flex", alignItems: "center", gap: "0.6rem", marginBottom: i < protocols.slice(0, COMMS_PROTOCOL_LIMIT).length - 1 ? "0.5rem" : 0 }}>
               <span style={{ width: 6, height: 6, borderRadius: "50%", background: "rgba(255,255,255,0.3)", flexShrink: 0, display: "inline-block" }} />
