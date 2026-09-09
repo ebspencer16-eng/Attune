@@ -127,6 +127,23 @@ just means any scanner has to resolve the derivation too. When you write a gate
 that looks for a column, a route, an exercise key or a package name, ask what
 the indirection for that thing is, and match on both.
 
+**A new field on the compute path reaches new users only.** Results are
+frozen: once a couple's row exists it is served back as it was written. So
+anything the display needs, that can be derived from what is already stored,
+has to be derived on the way out, in `withContent`, not added next to the
+thing it comes from.
+
+The couple map needed two coordinates per person. They were added in
+`api/_lib/results.js` beside the axes they are computed from, which is where
+they look like they belong, and the map then worked for nobody: every couple
+who had already finished was being served a stored row without them. The only
+people who would ever have seen a map are ones who had not finished yet.
+
+Ask, of every field you add to results: does this reach a couple whose row was
+written last year? If it is derived from something already in the row, put it
+in `withContent`. If it genuinely cannot be derived, it needs a migration, and
+that is a different and larger decision.
+
 **A gate encodes a rule, not the current state.** Write it so the reason
 survives: name the promise, and say what it deliberately does not cover.
 `check-partner-privacy.mjs` is scoped to Conflict Patterns and says why

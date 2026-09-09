@@ -26,6 +26,7 @@ import { sectionsWithLabels, resultsNav } from './_lib/results-sections.js';
 import { expectationsSummary } from './_lib/expectations.js';
 import { INDIVIDUAL_TYPE_DISPLAY, MAP_QUADRANTS } from './_individual-types.js';
 import { mapCoords } from './_lib/results.js';
+import { resolveRoleTokens } from './_lib/role-tokens.js';
 import { intimacyResults } from './_lib/intimacy-results.js';
 import { reflectionResults } from './_lib/reflection-results.js';
 import { whatComesNext } from './_lib/what-comes-next.js';
@@ -76,8 +77,23 @@ function withLabels(results) {
  * `content` is additive. Nothing that already existed in the payload changes
  * shape, so the website keeps reading exactly what it read before.
  */
-function withContent(results, viewer, contentVersion) {
+function withContent(results, viewer, contentVersion, pronouns = {}) {
   if (!results) return results;
+
+  // ── ROLE TOKENS, RESOLVED ON THE WAY OUT ─────────────────────────────────
+  // Couple-type prose is written with {EXP}/{GRD} on the open axis and
+  // {RCH}/{WDR} on the engage axis, plus _sub/_obj/_pos/_isC pronoun forms.
+  // The website resolves them in resolveRoleTokens; the app cannot, because
+  // deciding which partner is the expressive one means comparing their scores,
+  // and the app does not score.
+  //
+  // They only resolve when the two partners actually differ on that axis. When
+  // they do not, the role is genuinely ambiguous and the token is replaced with
+  // a generic phrase rather than a name, which is what the website does.
+  //
+  // Whatever happens, no brace token survives this function. That guard is the
+  // point: forwarding strengths and stickingPoints without it put "{EXP} can
+  // feel like {EXP_isC} always the one initiating depth" on screen.
 
   // ── MAP POSITIONS, ADDED ON THE WAY OUT ──────────────────────────────────
   // Derived here rather than stored with the results, because results are
@@ -100,6 +116,16 @@ function withContent(results, viewer, contentVersion) {
   // two people read the same results and each is {U} in their own view, so the
   // substitution belongs to whoever is rendering.
   const type = COUPLE_TYPES.find(t => t.id === results.coupleType) || null;
+
+  /** Role tokens, resolved against these two people. See the note above. */
+  // Pronouns live on the profile, not in the stored results, so they are
+  // handed in. Without them every {EXP_isC} would come out as "they're" for a
+  // couple who use she and he.
+  const role = (text) => resolveRoleTokens(
+    text,
+    a ? { ...a, pronouns: pronouns.a } : a,
+    b ? { ...b, pronouns: pronouns.b } : b,
+  );
 
   // Per-dimension display: what it is called, what each end of it means, and
   // where both partners landed. Built from the live dimension list so a new
@@ -196,8 +222,8 @@ function withContent(results, viewer, contentVersion) {
         id: type.id,
         name: type.name,
         tagline: type.tagline,
-        description: type.description,
-        nuance: type.nuance,
+        description: role(type.description),
+        nuance: role(type.nuance),
         color: type.color,
         shade: type.shade,
         // The website reads these three straight off api/_couple-types.js and
@@ -205,9 +231,9 @@ function withContent(results, viewer, contentVersion) {
         // "Phrase to try" from them. They were not forwarded, so the app could
         // not show any of the three no matter how it was written: the data
         // never left the server.
-        strengths: type.strengths || [],
-        stickingPoints: type.stickingPoints || [],
-        tips: type.tips || [],
+        strengths: (type.strengths || []).map(role),
+        stickingPoints: (type.stickingPoints || []).map(role),
+        tips: (type.tips || []).map((t) => ({ title: role(t.title), body: role(t.body) })),
       } : null,
       dimensions,
       names: { a: a?.name || null, b: b?.name || null },
@@ -252,6 +278,9 @@ export default async function handler(req) {
     // The app was deciding that for itself and reached six of twenty-nine.
     const cols = [
       'id', 'name', 'partner_profile_id',
+      // Needed to resolve the {EXP_sub} style pronoun forms in couple-type
+      // prose. Without it those tokens print raw.
+      'pronouns',
       // From the registry. Naming answer columns by hand is how a new exercise
       // ends up read as never started: it is simply not in the select.
       ...EXERCISE_COLUMNS, 'ex3_completed',
@@ -384,7 +413,13 @@ export default async function handler(req) {
     // The display payload, built once. The highlight cards read the same
     // dimensions the results screens do, so both are the reader's own side.
     const viewerSide = orderPair(me.id, partner.id).swapped ? 'b' : 'a';
-    const displayed = withContent(withLabels(results), viewerSide, contentVersion);
+    // Whose pronouns are whose: the stored pair is ordered by user id, not by
+    // who is asking, so this follows the same swap the viewer side does.
+    const swapped = orderPair(me.id, partner.id).swapped;
+    const displayed = withContent(withLabels(results), viewerSide, contentVersion, {
+      a: swapped ? partner.pronouns : me.pronouns,
+      b: swapped ? me.pronouns : partner.pronouns,
+    });
 
     return json({
       ok: true, ready: true, cached, recomputed: reason,
