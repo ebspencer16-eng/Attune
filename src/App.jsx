@@ -3927,8 +3927,6 @@ function PersonalityResults({ myAnswers, partnerAnswers, userName, partnerName, 
       <ResultsSlide bg={"linear-gradient(145deg, " + gDark + "dd, " + gDark + "99, #22204a)"}>
         <link href={FONT_URL} rel="stylesheet" />
         <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", marginBottom: "0.75rem" }}>
-          <div style={{ width: 10, height: 10, borderRadius: "50%", background: grp.color, flexShrink: 0 }} />
-          <div style={{ fontSize: "0.62rem", textTransform: "uppercase", letterSpacing: "0.15em", color: "rgba(255,255,255,0.82)", fontWeight: 700, fontFamily: BFONT }}>Communication</div>
           <div style={{ marginLeft: "auto", fontSize: "0.68rem", color: "rgba(255,255,255,0.3)", fontFamily: BFONT }}>{step} of {nDetail}</div>
         </div>
         <div style={{ fontSize: "clamp(1.5rem,5vw,2rem)", fontWeight: 700, color: "white", lineHeight: 1.1, marginBottom: "1rem", fontFamily: HFONT }}>{grp.label}</div>
@@ -4445,8 +4443,6 @@ function ExpectationsResults({ myAnswers, partnerAnswers, userName, partnerName,
 
           {/* Exercise eyebrow — matches comms / reflection / intimacy */}
           <div style={{ display: "flex", alignItems: "center", gap: "0.6rem", marginBottom: "0.75rem" }}>
-            <div style={{ width: 10, height: 10, borderRadius: "50%", background: "#1B5FE8", flexShrink: 0 }} />
-            <div style={{ fontSize: "0.62rem", textTransform: "uppercase", letterSpacing: "0.15em", color: "rgba(255,255,255,0.5)", fontWeight: 700, fontFamily: BFONT }}>Expectations</div>
           </div>
           {/* Header */}
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginBottom: "0.5rem" }}>
@@ -7611,8 +7607,6 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
               {/* Header — matches the comms + expectations overviews */}
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "0.6rem", marginBottom: "0.5rem" }}>
                 <div style={{ display: "flex", alignItems: "center", gap: "0.6rem" }}>
-                  <div style={{ width: 10, height: 10, borderRadius: "50%", background: "#1B5FE8", flexShrink: 0 }} />
-                  <div style={{ fontSize: "0.65rem", textTransform: "uppercase", letterSpacing: "0.2em", color: "rgba(255,255,255,0.7)", fontFamily: BFONT, fontWeight: 700 }}>Relationship Reflection</div>
                 </div>
               </div>
               <div style={{ fontSize: "clamp(1.8rem,6vw,2.8rem)", fontWeight: 700, fontFamily: HFONT, lineHeight: 1.05, marginBottom: "0.6rem" }}>{userName} &amp; {partnerName}</div>
@@ -8797,20 +8791,11 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
               )}
 
               {/* Starting Out Checklist */}
-              {hasChecklist ? (
-                <div onClick={() => onNavigateTool && onNavigateTool("checklist")} style={{ display: "flex", alignItems: "center", gap: "1rem", background: C.warm, border: `1.5px solid ${C.stone}`, borderRadius: 14, padding: "0.85rem 1.1rem", cursor: "pointer", transition: "all 0.15s" }}
-                  onMouseEnter={e => { e.currentTarget.style.borderColor = C.clay; }}
-                  onMouseLeave={e => { e.currentTarget.style.borderColor = C.stone; }}>
-                  <div style={{ width: 34, height: 34, borderRadius: 10, background: "rgba(193,127,71,0.12)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke={C.clay} strokeWidth="1.8" strokeLinecap="round"><polyline points="20 6 9 17 4 12"/></svg>
-                  </div>
-                  <div style={{ flex: 1 }}>
-                    <div style={{ fontSize: "0.8rem", fontWeight: 700, color: C.ink, fontFamily: BFONT, marginBottom: "0.1rem" }}>Newlywed Checklist</div>
-                    <div style={{ fontSize: "0.68rem", color: C.muted, fontFamily: BFONT }}>A practical guide to starting your life together</div>
-                  </div>
-                  <div style={{ color: C.muted, fontSize: "0.9rem" }}>→</div>
-                </div>
-              ) : (
+              {/* Keep growing lists what they do NOT have. The owned branch
+                  used to render here too, so a reader who already had the tool
+                  saw it under a heading that frames everything below it as
+                  something to grow into. Owned tools live on the dashboard. */}
+              {!hasChecklist && (
                 <a href="/offerings" style={{ display: "flex", alignItems: "center", gap: "1rem", background: C.warm, border: `1.5px solid ${C.stone}`, borderRadius: 14, padding: "0.85rem 1.1rem", textDecoration: "none", transition: "all 0.15s" }}
                   onClick={(e) => { e.preventDefault(); onNavigateTool && onNavigateTool('checklist-upsell'); }}
                   onMouseEnter={e => { e.currentTarget.style.borderColor = C.clay; }}
@@ -8827,20 +8812,11 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
               )}
 
               {/* Shared Budgeting */}
-              {hasBudget ? (
-                <div onClick={() => onNavigateTool && onNavigateTool("budget")} style={{ display: "flex", alignItems: "center", gap: "1rem", background: C.warm, border: `1.5px solid ${C.stone}`, borderRadius: 14, padding: "0.85rem 1.1rem", cursor: "pointer", transition: "all 0.15s" }}
-                  onMouseEnter={e => { e.currentTarget.style.borderColor = "#1B5FE8"; }}
-                  onMouseLeave={e => { e.currentTarget.style.borderColor = C.stone; }}>
-                  <div style={{ width: 34, height: 34, borderRadius: 10, background: "rgba(27,95,232,0.12)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#1B5FE8" strokeWidth="1.8" strokeLinecap="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
-                  </div>
-                  <div style={{ flex: 1 }}>
-                    <div style={{ fontSize: "0.8rem", fontWeight: 700, color: C.ink, fontFamily: BFONT, marginBottom: "0.1rem" }}>Shared Budgeting Activity</div>
-                    <div style={{ fontSize: "0.68rem", color: C.muted, fontFamily: BFONT }}>Build a shared financial picture from your expectations</div>
-                  </div>
-                  <div style={{ color: C.muted, fontSize: "0.9rem" }}>→</div>
-                </div>
-              ) : (
+              {/* Keep growing lists what they do NOT have. The owned branch
+                  used to render here too, so a reader who already had the tool
+                  saw it under a heading that frames everything below it as
+                  something to grow into. Owned tools live on the dashboard. */}
+              {!hasBudget && (
                 <a href="/offerings" style={{ display: "flex", alignItems: "center", gap: "1rem", background: C.warm, border: `1.5px solid ${C.stone}`, borderRadius: 14, padding: "0.85rem 1.1rem", textDecoration: "none", transition: "all 0.15s" }}
                   onClick={(e) => { e.preventDefault(); onNavigateTool && onNavigateTool('budget-upsell'); }}
                   onMouseEnter={e => { e.currentTarget.style.borderColor = "#1B5FE8"; }}
