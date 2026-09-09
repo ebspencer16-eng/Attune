@@ -114,6 +114,19 @@ the allowlist itself carries no pattern data, the other proves no endpoint
 bypasses the allowlist. Neither could be deleted without losing coverage. A
 second fixture would have been a rewrite with a different name.
 
+**A gate matching on a literal name is blind to anything reached through a
+registry.** This is the cost of the pattern the rest of this file argues for.
+`api/home.js` selects every answer column through `EXERCISE_COLUMNS`, so the
+string `conflict_data` appears nowhere in it, while the row it holds carries
+that column. A privacy gate filtering files on the literal skipped the file
+entirely, and a spread of that row into a response would have leaked conflict
+patterns unseen.
+
+Deriving the list is still right; it is what stops the list going stale. It
+just means any scanner has to resolve the derivation too. When you write a gate
+that looks for a column, a route, an exercise key or a package name, ask what
+the indirection for that thing is, and match on both.
+
 **A gate encodes a rule, not the current state.** Write it so the reason
 survives: name the promise, and say what it deliberately does not cover.
 `check-partner-privacy.mjs` is scoped to Conflict Patterns and says why

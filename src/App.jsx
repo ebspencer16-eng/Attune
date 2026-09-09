@@ -3674,6 +3674,18 @@ function readErrorsFor(myAnswers, partnerAnswers) {
 // Comms action items, one per dimension where the gap is worth naming.
 // Extracted to module level so What Comes Next can list the same items the
 // results-at-a-glance plan draws from, rather than a second set.
+/**
+ * How many communication protocols any screen shows.
+ *
+ * Results at a glance sliced 3 and What Comes Next sliced 4, from this same
+ * list, so the two pages named a different number of things to work on and the
+ * fourth appeared only on one of them. Both read this.
+ *
+ * If you change it, change it here. Do not slice a different number at a call
+ * site: that is how the two disagreed in the first place.
+ */
+export const COMMS_PROTOCOL_LIMIT = 3;
+
 function buildCommsProtocols(byDim, userName, partnerName) {
     const protocols = [];
     if (byDim.conflict?.isOpportunity || byDim.conflict?.isNote) protocols.push({ dim: "conflict", title: "Create a pause protocol", body: byDim.conflict.adviceText, thisWeek: "Next time something feels off between you, before trying to resolve it, one of you says: 'I need [time amount] before we talk about this.' Practice naming the specific time you need, rather than only asking for space." });
@@ -4101,8 +4113,8 @@ function PersonalityResults({ myAnswers, partnerAnswers, userName, partnerName, 
         {/* Action plan strip */}
         <div style={{ background: "rgba(255,255,255,0.05)", borderRadius: 14, padding: "1rem 1.25rem" }}>
           <div style={{ fontSize: "0.62rem", textTransform: "uppercase", letterSpacing: "0.12em", color: "rgba(255,255,255,0.4)", fontWeight: 700, marginBottom: "0.6rem", fontFamily: BFONT }}>Your next moves</div>
-          {protocols.slice(0,3).map((p, i) => (
-            <div key={i} style={{ display: "flex", alignItems: "center", gap: "0.6rem", marginBottom: i < protocols.slice(0,3).length - 1 ? "0.5rem" : 0 }}>
+          {protocols.slice(0, COMMS_PROTOCOL_LIMIT).map((p, i) => (
+            <div key={i} style={{ display: "flex", alignItems: "center", gap: "0.6rem", marginBottom: i < protocols.slice(0, COMMS_PROTOCOL_LIMIT).length - 1 ? "0.5rem" : 0 }}>
               <span style={{ width: 6, height: 6, borderRadius: "50%", background: "rgba(255,255,255,0.3)", flexShrink: 0, display: "inline-block" }} />
               <span style={{ fontSize: "0.8rem", color: "rgba(255,255,255,0.75)", fontFamily: BFONT, fontWeight: 500 }}>{p.title}</span>
             </div>
@@ -8479,7 +8491,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
             //    from. These were missing from this page entirely.
             try {
               const commsItems = buildCommsProtocols(byDim, userName, partnerName)
-                .slice(0, 4)
+                .slice(0, COMMS_PROTOCOL_LIMIT)
                 .map(pr => ({ tip: gInterp(pr.title), phrase: gInterp(pr.thisWeek || pr.body || "") }));
               if (commsItems.length) groups.push({ id: "comm", label: "Communication", color: "#E8673A", items: commsItems });
             } catch {}
