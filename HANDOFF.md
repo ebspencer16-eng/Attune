@@ -737,3 +737,39 @@ wraps the same list in one container. There were fifteen such maps in
 `results.tsx` when this was written; two were wrong. The rest are lists of
 genuinely separate things (conversations, action items, questions) where a
 card each is right.
+
+---
+
+## Where I stopped (2026-09-09, later)
+
+**Done.** The couple type page reads the same on both surfaces now, and the
+gate can tell if that stops being true. Order is enforced for nine of the ten
+sections in `api/_lib/section-blocks.js`; `reflection-overview` is out and the
+file says why. Two blocks the website had all along and the app had nothing for
+are built: the axis descriptions (`api/_axes.js`) and the individual type panel
+(`api/_lib/individual-profile.js`). Both surfaces read those modules, so the
+copy cannot fork.
+
+**The thing worth carrying forward.** The spec was first built from what both
+surfaces already drew, which is why a page could pass the gate and still read
+wrong: an inventory taken from the intersection only certifies that neither
+side has changed. Adopt a section by reading the *website's* render top to
+bottom and listing what it draws. The failures that follow are the work. Noted
+at the top of `section-blocks.js` so it survives.
+
+**Half done.** The app was verified against the live API before the new fields
+were deployed, so the axes and individual type blocks were correctly silent but
+have not been seen with real data. They need one look on the simulator now that
+the deploy is out.
+
+**Not attempted, found on the way:**
+
+- The map's bottom row reads `OPEN · WITHDRAW · GUARDED`, which puts the
+  vertical axis's bottom label in the middle of the horizontal one. Correct
+  positions, ambiguous to read. The website flanks its SVG instead, which the
+  phone has no room for. Needs a design call, not a fix.
+- A per-bar `driver` sentence ("Ellie expresses feelings readily") was computed
+  on the website for every individual type bar and never rendered, on either
+  surface. It is not ported: it has never been read by anyone and so has never
+  been reviewed as copy. If the bars should say why, that is copy for Ellie and
+  a new block in the spec.

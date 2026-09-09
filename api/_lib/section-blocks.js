@@ -40,6 +40,23 @@
  * is neither.
  */
 
+/**
+ * ── WHERE THE INVENTORY COMES FROM ────────────────────────────────────────
+ * From the website's page, block by block. Not from what both surfaces happen
+ * to already draw.
+ *
+ * This file was first written the second way, and it is the reason a page that
+ * passed the gate still read wrong. Two blocks the website had shown all along,
+ * the axis descriptions and the individual type panel, were absent from the app
+ * and therefore absent from the spec, so the check could not see them: it was
+ * comparing the two surfaces against their own agreement rather than against
+ * the product. An inventory taken from the intersection can only ever certify
+ * that neither side has changed.
+ *
+ * When you adopt a section, read the website's render top to bottom and list
+ * what it draws. The failures that follow are the work.
+ */
+
 /** @typedef {{ id: string, optional?: boolean, note?: string }} Block */
 
 /**
