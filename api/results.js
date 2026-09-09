@@ -34,6 +34,7 @@ import { DIM_META } from './_workbook-content.js';
 import { DIM_KEYS, AXIS_CONFIG } from './_type-engine.js';
 import { ALIGNMENT_THRESHOLD } from './_lib/results.js';
 import { alignedAdvice, getDimShift } from './_lib/dimension-copy.js';
+import { contentFor } from './_content/index.js';
 import { COUPLE_TYPES } from './_couple-types.js';
 import { DOMAIN_OF, DOMAIN_LABEL } from './_lib/tags.js';
 import { personResults } from './_lib/results.js';
@@ -71,7 +72,7 @@ function withLabels(results) {
  * `content` is additive. Nothing that already existed in the payload changes
  * shape, so the website keeps reading exactly what it read before.
  */
-function withContent(results, viewer) {
+function withContent(results, viewer, contentVersion) {
   if (!results) return results;
 
   const a = results.partners?.a;
@@ -130,11 +131,25 @@ function withContent(results, viewer) {
    */
   const nameA = a?.name || 'Your partner';
   const nameB = b?.name || 'Your partner';
+
+  /**
+   * The copy this couple's results were stamped with, not whatever is current.
+   *
+   * This passed null, which contentFor reads as "use the newest version". That
+   * is exactly what the version stamp exists to prevent: a couple who finished
+   * under v1 must keep reading v1 until someone deliberately republishes them,
+   * or a note written against a sentence points at a sentence that changed.
+   *
+   * Invisible today because only v1 exists. It would have become a silent
+   * disagreement between the app and the website the day v2 shipped, with the
+   * website right and the app wrong.
+   */
+  const copy = contentFor(contentVersion ?? null);
   for (const d of dimensions) {
     if (d.a == null || d.b == null) continue;
     const wide = d.gap != null && d.gap >= ALIGNMENT_THRESHOLD.gap;
-    d.aligned = wide ? null : alignedAdvice(d.key, d.a, d.b, null);
-    d.shift = wide ? getDimShift(d.key, d.a, d.b, nameA, nameB, null) : null;
+    d.aligned = wide ? null : alignedAdvice(d.key, d.a, d.b, copy);
+    d.shift = wide ? getDimShift(d.key, d.a, d.b, nameA, nameB, copy) : null;
   }
 
   return {
@@ -330,7 +345,7 @@ export default async function handler(req) {
     // The display payload, built once. The highlight cards read the same
     // dimensions the results screens do, so both are the reader's own side.
     const viewerSide = orderPair(me.id, partner.id).swapped ? 'b' : 'a';
-    const displayed = withContent(withLabels(results), viewerSide);
+    const displayed = withContent(withLabels(results), viewerSide, contentVersion);
 
     return json({
       ok: true, ready: true, cached, recomputed: reason,

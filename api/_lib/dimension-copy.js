@@ -15,8 +15,24 @@
 
 import { contentFor } from '../_content/index.js';
 
+/**
+ * The copy snapshot, which the caller must supply.
+ *
+ * Both of these used to fall back to the current version when handed nothing.
+ * That is the one behaviour the version stamp exists to prevent: a couple
+ * reading copy that changed after they finished. Falling back is silent and
+ * plausible, so it says so instead and the build gate stops it being reached.
+ */
+function snapshot(content, fn) {
+  if (content) return content;
+  console.error(`[dimension-copy] ${fn} called with no copy snapshot; falling back to current. `
+    + "The caller must pass the couple's stamped contentVersion.");
+  // eslint-disable-next-line no-restricted-syntax -- see check-content-version.mjs
+  return contentFor(undefined);
+}
+
 export function alignedAdvice(dim, a, b, content) {
-  const adv = (content || contentFor(null)).ALIGNED_ADVICE[dim];
+  const adv = snapshot(content, 'alignedAdvice').ALIGNED_ADVICE[dim];
   if (!adv) return null;
   if (typeof adv === "string") return adv;
   const na = Number(a), nb = Number(b);
@@ -36,7 +52,7 @@ export function getDimShift(dim, myScore, partScore, U, P, content) {
 
   // SHIFTS is a function of the two names now that the copy lives in a
   // versioned snapshot module rather than in this closure.
-  const _shifts = (content || contentFor(null)).SHIFTS(loName, hiName);
+  const _shifts = snapshot(content, 'getDimShift').SHIFTS(loName, hiName);
   if (!_shifts[dim]) return null;
   const fn = _shifts[dim][key];
   return fn !== undefined ? fn : null;

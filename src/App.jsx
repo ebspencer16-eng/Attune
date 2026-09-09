@@ -18,11 +18,16 @@ import { contentFor, CURRENT_CONTENT_VERSION } from "../api/_content/index.js";
 import { alignedAdvice, getDimShift } from "../api/_lib/dimension-copy.js";
 import { domainAlignmentPct as computeDomainPctClient, overallExpectationsPct } from "../api/_lib/expectations-alignment.js";
 import { normRespValue, mirrorRespKey, mirrorLifeId } from "../api/_lib/expectations.js";
-// Default binding, used by module-level helpers when no couple context is
-// available (the workbook path, share cards, anything outside the results
-// tree). Components inside the results tree use useContent() instead, which
-// resolves the version stamped on that couple's results row.
-const { ALIGNED_ADVICE, SHIFTS, DIM_ACTION_ITEMS, DOMAIN_ALIGNED, REFLECTION_ACTION_TITLES } = contentFor(null);
+// Default binding for the paths with no couple context: the workbook, the
+// share cards, anything outside the results tree. Components inside the
+// results tree use useContent(), which resolves the version stamped on that
+// couple's results row.
+//
+// Three of the five names that used to be here are gone because alignedAdvice
+// and getDimShift moved to api/_lib/dimension-copy.js, where the app can reach
+// them too.
+// content-version: no couple context
+const { REFLECTION_ACTION_TITLES } = contentFor(null);
 
 // The copy this couple's results render from. null means current, which is
 // correct both for couples stamped before pinning existed and for demo mode.
