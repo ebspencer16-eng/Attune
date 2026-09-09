@@ -19,6 +19,8 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Pressable, ScrollView, Text, View } from 'react-native';
+
+import EdgeFadedRow from '@/components/edge-faded-row';
 import { LinearGradient } from 'expo-linear-gradient';
 
 import { fetchConflictResults } from '@/api/client';
@@ -180,15 +182,10 @@ export default function Results({
       {/* Two levels, the same as the sidebar on the website.
           Top row is the sections; the row under it is the pages inside the one
           you are in. A group with no pages of its own shows no second row. */}
-      <ScrollView
+      <EdgeFadedRow
         ref={topNav}
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        style={{ flexGrow: 0, flexShrink: 0 }}
-        contentContainerStyle={{
-          paddingHorizontal: Spacing.xl, gap: Spacing.sm,
-          paddingBottom: Spacing.md, alignItems: 'center',
-        }}>
+        gap={Spacing.sm}
+        contentContainerStyle={{ paddingBottom: Spacing.md }}>
         {groups.map((g) => {
           const on = g.id === activeGroup?.id;
           return (
@@ -215,18 +212,13 @@ export default function Results({
             </Pressable>
           );
         })}
-      </ScrollView>
+      </EdgeFadedRow>
 
       {activeGroup?.children?.length ? (
-        <ScrollView
+        <EdgeFadedRow
           ref={pageNav}
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          style={{ flexGrow: 0, flexShrink: 0 }}
-          contentContainerStyle={{
-            paddingHorizontal: Spacing.xl, gap: Spacing.lg,
-            paddingBottom: Spacing.md, alignItems: 'center',
-          }}>
+          gap={Spacing.lg}
+          contentContainerStyle={{ paddingBottom: Spacing.md }}>
           {activeGroup.children.map((child) => {
             const on = child.id === section;
             return (
@@ -255,7 +247,7 @@ export default function Results({
               </Pressable>
             );
           })}
-        </ScrollView>
+        </EdgeFadedRow>
       ) : null}
 
       <View style={{ flex: 1 }}>
@@ -456,7 +448,7 @@ function ExpectationsOverview({
   const conversations = categories.flatMap((cat) => cat.rows.filter((r) => !r.aligned));
 
   return (
-    <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: Spacing.xxl }}>
+    <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: Spacing.xxxl }}>
       <View style={{ paddingHorizontal: Spacing.xl, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center' }}>
         <Text style={{ ...Type.hero, color: c.textStrong }}>{you} & {them}</Text>
         <Eyebrow>Results at a glance</Eyebrow>
@@ -534,7 +526,7 @@ function ExpectationsConversation({
   const ordered = [...bucket.rows].sort((a, b) => Number(a.aligned) - Number(b.aligned));
 
   return (
-    <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: Spacing.xxl }}>
+    <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: Spacing.xxxl }}>
       <View style={{ paddingHorizontal: Spacing.xl, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center' }}>
         <Eyebrow>Expectations</Eyebrow>
         <Text style={{ ...Type.title, color: c.textStrong }}>{bucket.label}</Text>
@@ -622,7 +614,7 @@ function IntimacyOverview({ data }: { data: IntimacyResults | null }) {
   // framing paragraph, so neither does this. One written here would be the app
   // telling a couple something the product never told them.
   return (
-    <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: Spacing.xxl }}>
+    <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: Spacing.xxxl }}>
       <View style={{ paddingHorizontal: Spacing.xl, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center' }}>
         <Text style={{ ...Type.hero, color: c.textStrong }}>Physical Intimacy Expectations</Text>
         <Eyebrow>Results at a glance</Eyebrow>
@@ -677,7 +669,7 @@ function IntimacyDimensionView({
     return <Waiting title="Physical Intimacy" body="This opens when you have both finished the exercise." />;
   }
   return (
-    <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: Spacing.xxl }}>
+    <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: Spacing.xxxl }}>
       <View style={{ paddingHorizontal: Spacing.xl, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center' }}>
         <Eyebrow>Physical Intimacy</Eyebrow>
         <Text style={{ ...Type.title, color: c.textStrong }}>{dim.label}</Text>
@@ -754,7 +746,7 @@ function IntimacyConversations({ data }: { data: IntimacyResults | null }) {
     );
   }
   return (
-    <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: Spacing.xxl }}>
+    <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: Spacing.xxxl }}>
       <View style={{ paddingHorizontal: Spacing.xl, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center' }}>
         <Eyebrow>Physical Intimacy</Eyebrow>
         <Text style={{ ...Type.title, color: c.textStrong }}>Conversations Worth Having</Text>
@@ -791,7 +783,7 @@ function ReflectionOverview({ data }: { data: ReflectionResults | null }) {
   // opening line of its own, so none here either.
   const commitment = data.written.find((w) => w.key === 'a6');
   return (
-    <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: Spacing.xxl }}>
+    <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: Spacing.xxxl }}>
       <View style={{ paddingHorizontal: Spacing.xl, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center' }}>
         <Text style={{ ...Type.hero, color: c.textStrong }}>Relationship Reflection</Text>
         <Eyebrow>Results at a glance</Eyebrow>
@@ -878,7 +870,7 @@ function ReflectionRatings({ data }: { data: ReflectionResults | null }) {
     return <Waiting title="How You Each Rated" body="Neither of you answered the rating questions." />;
   }
   return (
-    <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: Spacing.xxl }}>
+    <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: Spacing.xxxl }}>
       <View style={{ paddingHorizontal: Spacing.xl, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center' }}>
         <Eyebrow>Relationship Reflection</Eyebrow>
         <Text style={{ ...Type.title, color: c.textStrong }}>How You Each Rated</Text>
@@ -941,7 +933,7 @@ function ReflectionStory({ data }: { data: ReflectionResults | null }) {
     );
   }
   return (
-    <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: Spacing.xxl }}>
+    <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: Spacing.xxxl }}>
       <View style={{ paddingHorizontal: Spacing.xl, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center' }}>
         <Eyebrow>Relationship Reflection</Eyebrow>
         <Text style={{ ...Type.title, color: c.textStrong }}>Side by Side</Text>
@@ -993,7 +985,7 @@ function ReflectionPlan({
   const bothRanked = data.priorities.you && data.priorities.them;
 
   return (
-    <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: Spacing.xxl }}>
+    <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: Spacing.xxxl }}>
       <View style={{ paddingHorizontal: Spacing.xl, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center' }}>
         <Eyebrow>Relationship Reflection</Eyebrow>
         <Text style={{ ...Type.title, color: c.textStrong }}>Action Plan</Text>
@@ -1108,7 +1100,7 @@ function WhatComesNext({
     );
   }
   return (
-    <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: Spacing.xxl }}>
+    <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: Spacing.xxxl }}>
       <View style={{ paddingHorizontal: Spacing.xl, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center' }}>
         <Eyebrow>What comes next</Eyebrow>
         <Text style={{ ...Type.hero, color: c.textStrong }}>What to do with all of this.</Text>
@@ -1157,7 +1149,7 @@ function WhatComesNext({
 
 function Waiting({ title, body }: { title: string; body: string }) {
   return (
-    <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: Spacing.xxl }}>
+    <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: Spacing.xxxl }}>
       <View style={{ paddingHorizontal: Spacing.xl, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center' }}>
         <Text style={{ ...Type.title, color: c.textStrong }}>{title}</Text>
         <Text style={{ ...Type.body, color: c.textMuted, marginTop: Spacing.sm }}>{body}</Text>
@@ -1168,7 +1160,7 @@ function Waiting({ title, body }: { title: string; body: string }) {
 
 function NotYet({ section }: { section: string }) {
   return (
-    <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: Spacing.xxl }}>
+    <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: Spacing.xxxl }}>
       <View style={{ paddingHorizontal: Spacing.xl, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center' }}>
         <View style={{ backgroundColor: c.surface, borderColor: c.border, borderWidth: 1, borderRadius: Radius.lg, padding: Spacing.xl }}>
           <Text style={{ ...Type.eyebrow, color: c.accentQuiet }}>Not on your phone yet</Text>
@@ -1203,7 +1195,7 @@ function Glance({
   const find = (k: string) => dims.find((d) => d.key === k);
 
   return (
-    <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: Spacing.xxl }}>
+    <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: Spacing.xxxl }}>
       <View style={{ paddingHorizontal: Spacing.xl, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center' }}>
         <LinearGradient
           colors={['#1B2A5E', '#2F55C4']}
@@ -1275,7 +1267,7 @@ function CoupleType({ results, you, them }: { results: CoupleResults; you: strin
   if (!type) return null;
 
   return (
-    <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: Spacing.xxl }}>
+    <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: Spacing.xxxl }}>
       <View style={{ paddingHorizontal: Spacing.xl, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center' }}>
         <Text style={{ ...Type.eyebrow, color: c.accentQuiet }}>Couple type</Text>
         <Text style={{ ...Type.hero, color: c.textStrong, marginTop: Spacing.sm }}>{type.name}</Text>
@@ -1315,7 +1307,7 @@ function Domain({
   you: string; them: string; viewer: 'a' | 'b'; wideGap: number | null;
 }) {
   return (
-    <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: Spacing.xxl }}>
+    <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: Spacing.xxxl }}>
       <View style={{ paddingHorizontal: Spacing.xl, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center' }}>
         <Text style={{ ...Type.eyebrow, color: accent }}>Communication</Text>
         <Text style={{ ...Type.title, color: c.textStrong, marginTop: Spacing.xs, marginBottom: Spacing.lg }}>

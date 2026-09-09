@@ -15,14 +15,14 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useFocusEffect } from 'expo-router';
 import {
-  Linking, Pressable, RefreshControl, ScrollView, Text, View, useWindowDimensions,
+  Linking, Pressable, RefreshControl, ScrollView, Text, View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { LinearGradient } from 'expo-linear-gradient';
 
 import { fetchHome, fetchPosts, markPostRead } from '@/api/client';
 import type { ApiError, CatalogueItem, HomeResponse, PostSummary } from '@/api/client';
 import { ScreenError, ScreenLoading } from '@/components/screen-states';
+import EdgeFadedRow from '@/components/edge-faded-row';
 import SignIn from '@/components/sign-in';
 import {
   AccentFallback, AccentFor, Colors, MaxContentWidth, Palette, Radius, Spacing, Type,
@@ -38,7 +38,6 @@ const SITE = 'https://www.attune-relationships.com';
 const ALL = 'All';
 
 export default function ResourcesScreen() {
-  const { width } = useWindowDimensions();
   const [home, setHome] = useState<HomeResponse | null>(null);
   const [posts, setPosts] = useState<PostSummary[]>([]);
   const [categories, setCategories] = useState<string[]>([]);
@@ -153,7 +152,7 @@ export default function ResourcesScreen() {
                   row nobody realises is scrollable is a row half seen. */}
               <Text style={{ ...Type.small, color: c.textMuted }}>Swipe {'\u203A'}</Text>
             </View>
-            <EdgeFadedRow width={width}>
+            <EdgeFadedRow>
               {more.map((r) => <ExploreTile key={r.key} item={r} />)}
             </EdgeFadedRow>
           </>
@@ -225,43 +224,6 @@ function Shell({ children }: { children: React.ReactNode }) {
     <SafeAreaView style={{ flex: 1, backgroundColor: c.background }} edges={['top']}>
       {children}
     </SafeAreaView>
-  );
-}
-
-/**
- * A horizontal strip whose contents fade into the margins.
- *
- * The fade is the affordance: a hard edge looks like the row has ended, while
- * a fade says there is more sideways. Gradients sit above the scroller and
- * ignore touches so they never eat a swipe.
- */
-function EdgeFadedRow({ children, width }: { children: React.ReactNode; width: number }) {
-  const fade = Math.min(28, width * 0.08);
-  return (
-    <View>
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        decelerationRate="fast"
-        // paddingRight is deliberately short of the left inset so the last
-        // tile sits partly under the fade. A row that ends flush looks
-        // complete; one that is visibly cut invites the swipe.
-        contentContainerStyle={{ paddingLeft: Spacing.xl, paddingRight: Spacing.xxxl, gap: Spacing.md }}>
-        {children}
-      </ScrollView>
-      <LinearGradient
-        pointerEvents="none"
-        colors={[c.background, 'rgba(251,248,243,0)']}
-        start={{ x: 0, y: 0.5 }} end={{ x: 1, y: 0.5 }}
-        style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: fade }}
-      />
-      <LinearGradient
-        pointerEvents="none"
-        colors={['rgba(251,248,243,0)', c.background]}
-        start={{ x: 0, y: 0.5 }} end={{ x: 1, y: 0.5 }}
-        style={{ position: 'absolute', right: 0, top: 0, bottom: 0, width: fade }}
-      />
-    </View>
   );
 }
 
