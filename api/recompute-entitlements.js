@@ -17,6 +17,8 @@
 
 export const config = { runtime: 'edge' };
 
+import { safeError } from './_lib/http.js';
+
 import { writeEntitlements } from './_lib/entitlements.js';
 
 const CORS = { 'Content-Type': 'application/json', 'X-Content-Type-Options': 'nosniff' };
@@ -63,13 +65,15 @@ export default async function handler(req) {
       email: user.email,
     });
     if (!result.ok) {
+      // result.error carries the PostgREST detail, which names the table and
+      // the failing constraint. Logged, not returned. What the caller gets
+      // back does not change which entitlements anyone has; only the sentence
+      // shown when the write fails.
       console.error('[recompute] writeEntitlements failed:', result.error);
-      return json({ ok: false, error: result.error }, 500);
+      return json({ ok: false, error: 'Could not refresh what this account owns.' }, 500);
     }
     return json({ ok: true, entitlements: result.entitlements }, 200);
   } catch (e) {
-    const msg = String(e && e.message ? e.message : e);
-    console.error('[recompute] unhandled:', msg);
-    return json({ ok: false, error: msg }, 500);
+    return json({ ok: false, error: safeError('recompute-entitlements', e, 'Could not refresh what this account owns.') }, 500);
   }
 }

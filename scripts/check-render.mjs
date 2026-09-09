@@ -8,55 +8,51 @@
 // render catches that class.
 //
 // Not part of `npm run build` — it needs a browser and a running preview, so
-// Vercel cannot run it. Run it locally before pushing anything that moves code
-// between scopes:
+// Vercel cannot run it. `npm run smoke` builds, starts a preview, runs this and
+// stops the preview.
 //
-//   npx vite build && npx vite preview --port 4173 &
-//   node scripts/check-render.mjs
+// It used to require Playwright and a Chromium build through two hardcoded
+// absolute paths inside one sandbox, so it could not run on any machine anyone
+// actually works on. It drives whatever Chrome is installed now, over the
+// DevTools protocol, with no dependency. See scripts/_lib/browser.mjs.
 //
-// Optional: BASE=http://127.0.0.1:4173 TYPE=WX PKG=premium
+// Optional: BASE=http://127.0.0.1:4173 TYPE=WX PKG=premium CHROME=/path/to/chrome
 
-import { createRequire } from 'module';
+import { launch } from './_lib/browser.mjs';
+import { RESULTS_SECTIONS } from '../api/_lib/results-sections.js';
 
-const BASE = process.env.BASE || 'http://127.0.0.1:4173';
+const BASE = process.env.BASE || 'http://localhost:4173';
 const TYPE = process.env.TYPE || 'WX';
 const PKG = process.env.PKG || 'premium';
 
-const SECTIONS = [
-  'highlights', 'couple-type',
-  'comm-overview', 'comm-inner', 'comm-connection', 'comm-hard',
-  'exp-overview', 'exp-convo-0', 'exp-convo-1', 'exp-convo-2',
-  'exp-convo-3', 'exp-convo-4', 'exp-convo-5',
-  'reflection-overview', 'reflection-ratings', 'reflection-story', 'reflection-plan',
-  'intimacy-overview', 'intimacy-frequency', 'intimacy-initiating', 'intimacy-comfort',
-  'intimacy-communication', 'intimacy-adventure', 'intimacy-meaning', 'intimacy-plan',
-  'what-comes-next',
-];
+// The sections come from the registry, not from a list kept here.
+//
+// This was written out by hand and had gone stale: it asked for exp-convo-5,
+// which does not exist. There are five expectations categories, so the
+// conversations are 0 to 4. A phantom section reports as skipped, which reads
+// like missing demo data rather than a list that stopped matching the product.
+//
+// Conflict is excluded because its results come from /api/conflict-results,
+// which the demo does not stand up. Excluded by name, from the same registry,
+// so it stays correct if the conflict section list changes.
+const SECTIONS = RESULTS_SECTIONS.filter((id) => !id.startsWith('conflict-'));
 
 // Anything in braces that survived to the screen, plus the two words that mean
 // a value was missing rather than absent.
 const LEAK = /\{[A-Za-z_][A-Za-z0-9_]*\}|\[[WXYZ] partner name\]|\bundefined\b|\bNaN\b/g;
 
-const require = createRequire('/home/claude/.npm-global/lib/node_modules/playwright/');
-const { chromium } = require('playwright');
-
-const browser = await chromium.launch({
-  executablePath: process.env.CHROME || '/opt/pw-browsers/chromium-1194/chrome-linux/chrome',
-  args: ['--no-sandbox'],
-});
-const page = await browser.newPage({ viewport: { width: 1280, height: 1200 } });
+const page = await launch({ width: 1280, height: 1200 });
 
 const errors = [];
-page.on('pageerror', (e) => errors.push('pageerror: ' + e.message));
+page.on('pageerror', (text) => errors.push('pageerror: ' + text));
 page.on('console', (m) => {
-  const t = m.text();
   // 403/404 are the demo's missing Supabase calls, not render failures.
-  if (m.type() === 'error' && !/403|404|Failed to load resource/.test(t)) errors.push('console: ' + t);
+  if (m.type === 'error' && !/403|404|Failed to load resource/.test(m.text)) errors.push('console: ' + m.text);
 });
 
 let failed = 0;
 const skipped = [];
-await page.goto(BASE + '/', { waitUntil: 'domcontentloaded' });
+await page.goto(BASE + '/');
 
 for (const section of SECTIONS) {
   errors.length = 0;
@@ -67,8 +63,8 @@ for (const section of SECTIONS) {
   // intimacy=1 because Premium no longer bundles Physical Intimacy; it is an
   // add-on now, and without this flag the eight intimacy sections have no demo
   // data and the run silently covers 18 of 26 instead of 26.
-  await page.goto(`${BASE}/?demo=1&type=${TYPE}&pkg=${PKG}&intimacy=1&view=results`, { waitUntil: 'networkidle' });
-  await page.waitForTimeout(900);
+  await page.goto(`${BASE}/?demo=1&type=${TYPE}&pkg=${PKG}&intimacy=1&view=results`);
+  await page.wait(900);
 
   // Read the results column, not the whole document: a section the demo has no
   // data for still renders the shell and the marketing footer, which is long
@@ -111,7 +107,7 @@ for (const section of SECTIONS) {
   }
 }
 
-await browser.close();
+await page.close();
 
 if (failed) {
   console.error(`\n[check-render] ${failed} of ${SECTIONS.length} sections failed.`);

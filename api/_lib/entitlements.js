@@ -197,11 +197,16 @@ export async function writeEntitlements({ supabaseUrl, serviceKey, userId, email
       body: JSON.stringify({ entitlements: blob, entitlements_updated_at: blob.computedAt }),
     });
     if (!patchRes.ok) {
+      // The body is PostgREST's, so it names the table and the constraint.
+      // Logged here and summarised for the caller. This changes what a failure
+      // reads like, not what anyone is entitled to.
       const detail = await patchRes.text().catch(() => '');
-      return { ok: false, error: `profile patch failed: ${patchRes.status} ${detail}` };
+      console.error('[entitlements] profile patch failed:', patchRes.status, detail);
+      return { ok: false, error: `profile patch failed: ${patchRes.status}` };
     }
     return { ok: true, entitlements: blob };
   } catch (e) {
-    return { ok: false, error: String(e && e.message ? e.message : e) };
+    console.error('[entitlements] writeEntitlements threw:', e);
+    return { ok: false, error: 'entitlement write failed' };
   }
 }

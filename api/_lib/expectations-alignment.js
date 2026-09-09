@@ -23,10 +23,57 @@
  */
 
 import { RESPONSIBILITY_CATEGORIES } from '../_questions.js';
-import {
-  scoreResponsibilityPair, scoreLifeQuestionPair, LIFE_QUESTION_OPTIONS, EXP_DOMAINS,
-} from '../_workbook-content.js';
+import { scoreLifeQuestionPair, LIFE_QUESTION_OPTIONS, EXP_DOMAINS } from '../_workbook-content.js';
 import { mirrorRespKey, mirrorLifeId } from './expectations.js';
+
+/**
+ * Score one responsibility pair, from each partner's own point of view.
+ *
+ * ── WHY NOT _workbook-content.js's scoreResponsibilityPair ────────────────
+ * Because it gets the relative answers backwards, and this module used it for
+ * a day.
+ *
+ * The career-set answers are stored relative to whoever gave them: "Primarily
+ * mine" means the person answering. Two partners who both answer that way have
+ * claimed the same job and disagree. scoreResponsibilityPair maps that string
+ * to the same rank for both sides, so it scores the disagreement as a perfect
+ * match, and scores a genuine agreement as a total mismatch.
+ *
+ *   both "Primarily mine"      correct 0.0    that scorer 1.0
+ *   opposite answers           correct 1.0    that scorer 0.0
+ *
+ * This is the same mirror that api/_lib/expectations.js documents at length.
+ * The website has always had it right; this is its implementation, moved out
+ * of src/App.jsx rather than reinvented.
+ *
+ * _workbook-content.js is deliberately left alone. It is the workbook's
+ * scorer, and changing it changes generated documents. See SECURITY.md.
+ */
+export function scoreResponsibilityPairSided(userValue, partnerValue, userName, partnerName) {
+  // Normalise to an ABSOLUTE rank: 0 = the user, 1 = both, 2 = the partner.
+  // isUser is what makes "mine" mean different people on the two sides.
+  const rankFor = (v, isUser) => {
+    if (v == null || v === '') return { r: null, o: null };
+    if (v === 'Primarily mine') return { r: isUser ? 0 : 2, o: false };
+    if (v === 'Balanced') return { r: 1, o: false };
+    if (v === "Primarily my partner's") return { r: isUser ? 2 : 0, o: false };
+    if (v === "Doesn't apply") return { r: null, o: true };
+    if (v === userName) return { r: 0, o: false };
+    if (v === 'Both of us') return { r: 1, o: false };
+    if (v === partnerName) return { r: 2, o: false };
+    if (v === "Doesn't apply to us") return { r: null, o: true };
+    return { r: null, o: null };
+  };
+  const a = rankFor(userValue, true);
+  const b = rankFor(partnerValue, false);
+  if (a.r === null && a.o === null) return null;
+  if (b.r === null && b.o === null) return null;
+  if (a.o && b.o) return 1.0;
+  if (a.o || b.o) return 0.0;
+  return (2 - Math.abs(a.r - b.r)) / 2;
+}
+
+export { scoreLifeQuestionPair };
 
 /**
  * Which items make up each domain.
@@ -60,7 +107,7 @@ function domainScores(domainKey, mine, theirs, youName, themName) {
     const item = cat?.items?.[index];
     if (item === undefined) continue;
     const key = `${catId}__${item}`;
-    const s = scoreResponsibilityPair(
+    const s = scoreResponsibilityPairSided(
       mine?.responsibilities?.[key],
       theirs?.responsibilities?.[mirrorRespKey(key)],
       youName, themName);

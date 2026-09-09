@@ -16,9 +16,23 @@ import { PATTERN_COPY, PATTERN_ACTIONS, PATTERN_NOTES, BAND_COLORS, NO_ACTION_NE
 // reason api/_couple-types.js moved out of this file.
 import { contentFor, CURRENT_CONTENT_VERSION } from "../api/_content/index.js";
 import { alignedAdvice, getDimShift } from "../api/_lib/dimension-copy.js";
-import { domainAlignmentPct as computeDomainPctClient, overallExpectationsPct } from "../api/_lib/expectations-alignment.js";
+// scoreRespClient and scoreLqClient used to live in this file. Extracting the
+// alignment maths deleted them and left three call sites referencing nothing,
+// which built clean and threw on every results page. They are the same two
+// functions, under their shared names.
+import {
+  domainAlignmentPct as computeDomainPctClient, overallExpectationsPct,
+  scoreResponsibilityPairSided as scoreRespClient,
+  scoreLifeQuestionPair as scoreLqClient,
+} from "../api/_lib/expectations-alignment.js";
+
+// The shared module takes a named object; these four call sites are positional
+// and predate it. Adapters rather than edits at the call sites, so this change
+// cannot alter which values reach the maths.
+const computeOverallExpectationsPctClient = (ex2, partnerEx2, userName, partnerName) =>
+  overallExpectationsPct({ mine: ex2, theirs: partnerEx2, youName: userName, themName: partnerName });
 import { normRespValue, mirrorRespKey, mirrorLifeId } from "../api/_lib/expectations.js";
-import { reflectionActionTitle, deriveAnniversaryInsights } from "../api/_lib/reflection-insights.js";
+import { reflectionActionTitle, deriveAnniversaryInsights, isSubstantive, quoted } from "../api/_lib/reflection-insights.js";
 // Default binding for the paths with no couple context: the workbook, the
 // share cards, anything outside the results tree. Components inside the
 // results tree use useContent(), which resolves the version stamped on that
@@ -4542,15 +4556,8 @@ function ExpectationsResults({ myAnswers, partnerAnswers, userName, partnerName,
 const admiredNounLower = v => { const n = admiredNoun(v); return n ? n.toLowerCase() : n; };
 
 
-function isSubstantive(v) {
-  if (typeof v !== "string") return false;
-  const t = v.trim().replace(/[.!?]+$/, "");
-  if (t.length < 8) return false;
-  if (NON_ANSWER.test(t)) return false;
-  return true;
-}
-// Quoting a person's own words needs to read as a quote, not as our prose.
-function quoted(v) { return `\u201C${String(v || "").trim().replace(/\s+/g, " ")}\u201D`; }
+// isSubstantive and quoted moved to api/_lib/reflection-insights.js with the
+// code that uses them. Imported at the top of this file.
 
 
 function AnniversaryExercise({ userName, partnerName, onComplete, onBack, partnerPronouns = "" }) {
