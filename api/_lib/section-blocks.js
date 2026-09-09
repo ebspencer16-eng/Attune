@@ -53,6 +53,14 @@
  */
 /** @type {Record<string, Block[]>} */
 export const SECTION_BLOCKS = {
+  // Split deliberately. `groups` is on both surfaces and is enforced;
+  // `keep-growing` is in PLANNED because the app cannot draw it yet. The unit
+  // of adoption is a block, not a page, so a section can be half adopted
+  // rather than waiting for its slowest block.
+  'what-comes-next': [
+    { id: 'groups', note: 'The grouped next steps.' },
+  ],
+
   'intimacy-dimension': [
     { id: 'state', note: 'Where the two of you land on this one.' },
     { id: 'questions', note: 'The questions behind it, both positions.' },
@@ -144,7 +152,6 @@ export const PLANNED = {
    * claimed as agreed.
    */
   'what-comes-next': [
-    { id: 'groups', note: 'The grouped next steps.' },
     { id: 'keep-growing', note: 'What they do not own yet, and nothing they do.' },
   ],
 
