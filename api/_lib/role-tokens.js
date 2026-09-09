@@ -32,7 +32,12 @@ const PRONOUNS = {
   'they/them': { sub: 'they', obj: 'them', pos: 'their', ref: 'themselves', isC: "they're" },
 };
 
-function pronounForm(pronouns, form) {
+/**
+ * One pronoun form for a person. Exported because src/App.jsx and
+ * api/_lib/individual-profile.js both need it, and a second copy of this table
+ * is how one surface ends up saying "they names feelings".
+ */
+export function pronounForm(pronouns, form) {
   const p = String(pronouns || '').toLowerCase();
   const key = PRONOUNS[p] ? p
     : p.includes('she') ? 'she/her'

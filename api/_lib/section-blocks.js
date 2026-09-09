@@ -52,6 +52,43 @@
  * agreement that does not exist. See PLANNED below for the queue.
  */
 /** @type {Record<string, Block[]>} */
+/**
+ * Sections whose block ORDER is enforced, not just their presence.
+ *
+ * ── WHY THIS IS OPT-IN ────────────────────────────────────────────────────
+ * Order was deliberately not checked when this file was written, on the
+ * reasoning that two surfaces legitimately stack things differently on a
+ * phone. That reasoning was wrong for the section it mattered most on. The
+ * website's couple type page opens on what the responses uncover, then the
+ * map, and only names the type further down. The app opened on the type name.
+ * Both surfaces claimed all six blocks, the gate passed, and the page still
+ * read as a different page.
+ *
+ * A checker that ignores the thing that is wrong is worse than no checker,
+ * because it certifies the drift.
+ *
+ * It stays opt-in because order is inferred from where the markers sit in the
+ * source, which is only a fair proxy when a section's blocks are marked inline
+ * and linearly. Turn it on for a section once you have checked that they are.
+ */
+export const ORDER_ENFORCED = new Set([
+  'couple-type',
+  'comm-overview',
+  'comm-domain',
+  'intimacy-overview',
+  'intimacy-dimension',
+  'exp-overview',
+  'exp-conversation',
+  'what-comes-next',
+  'highlights',
+  // reflection-overview is deliberately out. The website draws its ratings,
+  // action plan and admiration on one page; the app's nav gives the action
+  // plan a screen of its own, so the marker further down the file is a
+  // different screen rather than a later part of the same one. File position
+  // is not a fair proxy there, and a check that pretended otherwise would
+  // report drift that is not drift, which is how a gate loses its credibility.
+]);
+
 export const SECTION_BLOCKS = {
   // Split deliberately. `groups` is on both surfaces and is enforced;
   // `keep-growing` is in PLANNED because the app cannot draw it yet. The unit
@@ -63,8 +100,8 @@ export const SECTION_BLOCKS = {
 
   'intimacy-dimension': [
     { id: 'state', note: 'Where the two of you land on this one.' },
-    { id: 'questions', note: 'The questions behind it, both positions.' },
     { id: 'prompt', optional: true, note: 'Something to ask each other.' },
+    { id: 'questions', note: 'The questions behind it, both positions.' },
   ],
 
   'exp-conversation': [
@@ -112,8 +149,11 @@ export const SECTION_BLOCKS = {
   ],
 
   'couple-type': [
-    { id: 'name', note: 'The type name and its tagline.' },
+    { id: 'lead', note: 'The page\u2019s opening line: what the responses uncover.' },
     { id: 'map', note: 'Where each partner sits on the two axes.' },
+    { id: 'axes', note: 'What each axis means, both poles. Without it the map is a picture.' },
+    { id: 'individual-types', note: 'Each partner alone: their type, a blurb, a bar per axis.' },
+    { id: 'name', note: 'The type name and its tagline.' },
     { id: 'description', note: 'What this pairing is like.' },
     { id: 'strengths', optional: true, note: 'What comes naturally.' },
     { id: 'sticking-points', optional: true, note: "What's worth being aware of." },

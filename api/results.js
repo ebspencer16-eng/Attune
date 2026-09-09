@@ -25,6 +25,8 @@ export const config = { runtime: 'edge' };
 import { sectionsWithLabels, resultsNav } from './_lib/results-sections.js';
 import { expectationsSummary } from './_lib/expectations.js';
 import { INDIVIDUAL_TYPE_DISPLAY, MAP_QUADRANTS } from './_individual-types.js';
+import { AXES } from './_axes.js';
+import { individualBlurb, axisRows } from './_lib/individual-profile.js';
 import { mapCoords } from './_lib/results.js';
 import { resolveRoleTokens } from './_lib/role-tokens.js';
 import { intimacyResults } from './_lib/intimacy-results.js';
@@ -243,7 +245,47 @@ function withContent(results, viewer, contentVersion, pronouns = {}) {
        * holding a second copy of a colour table.
        */
       mapQuadrants: MAP_QUADRANTS.map((code) => INDIVIDUAL_TYPE_DISPLAY[code]),
+      /**
+       * What the two axes mean. Without them the map is a picture: a reader
+       * can see two dots in different corners and cannot tell what the corners
+       * are. The website prints these under its map; the app could not,
+       * because the copy was inline in src/App.jsx.
+       */
+      axes: AXES,
+      /**
+       * Each partner's own placement, in words. Derived here, not stored,
+       * for the same reason coords are: results are frozen, so a field added
+       * to the compute path reaches only couples who have not finished yet.
+       *
+       * The blurb and the band both come from api/_lib/individual-profile.js,
+       * which the website also calls, so the two surfaces cannot word this
+       * differently.
+       */
+      individualTypes: {
+        a: individualProfile(a, a?.name, pronouns.a),
+        b: individualProfile(b, b?.name, pronouns.b),
+      },
     },
+  };
+}
+
+/**
+ * One partner's individual type panel: who they are on this map, and why.
+ *
+ * Returns null when the person has no placement yet, because half a panel
+ * reads as one partner having been assessed and the other not.
+ */
+function individualProfile(person, name, pronouns) {
+  const coords = person?.coords;
+  if (!person || coords?.open == null || coords?.engage == null) return null;
+  const display = INDIVIDUAL_TYPE_DISPLAY[person.typeCode];
+  if (!display) return null;
+  return {
+    name: name || null,
+    typeName: display.name,
+    color: display.color,
+    blurb: individualBlurb(name || 'They', pronouns, coords.engage, coords.open),
+    rows: axisRows(name || 'They', coords),
   };
 }
 

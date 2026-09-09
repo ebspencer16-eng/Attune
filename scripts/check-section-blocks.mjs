@@ -26,14 +26,18 @@
 // author makes, and this verifies the claim is made in both places.
 //
 // ── WHAT THIS DOES NOT CHECK ───────────────────────────────────────────────
-// How anything looks, what order the blocks are drawn in within a file, or
-// whether the copy matches. Order is in the spec as documentation for a person
-// and is not enforced, because the two surfaces legitimately stack things
-// differently on a phone. This checks presence and absence, which is where the
-// drift has actually been.
+// How anything looks, or whether the copy matches. Order IS checked, for the
+// sections in ORDER_ENFORCED, because presence alone let the couple type page
+// pass while reading as a different page: the website opened on what the
+// responses uncover and the app opened on the type name, same blocks, same
+// green tick.
+//
+// Order is read from where the markers sit in the source, so it is only a fair
+// proxy when a section's blocks are drawn on one screen. A section whose blocks
+// are split across screens stays out of ORDER_ENFORCED and says why there.
 
 import { readFileSync } from 'fs';
-import { SECTION_BLOCKS, PLANNED, marker } from '../api/_lib/section-blocks.js';
+import { SECTION_BLOCKS, PLANNED, ORDER_ENFORCED, marker } from '../api/_lib/section-blocks.js';
 
 const ROOT = new URL('..', import.meta.url).pathname;
 
@@ -67,6 +71,31 @@ for (const [section, blocks] of Object.entries(SECTION_BLOCKS)) {
     problems.push(
       `${tag}: ${present.join(', ')} has it, ${missing.join(', ')} does not`
       + (block.note ? `\n      ${block.note}` : ''));
+  }
+}
+
+// ── ORDER, WHERE A SECTION HAS OPTED IN ────────────────────────────────────
+// Presence alone let the couple type page pass while reading as a different
+// page: the website opens on what the responses uncover and names the type
+// further down, and the app opened on the type name. Same six blocks, same
+// gate, different page.
+//
+// Order is taken from where the markers sit in the source, which is a fair
+// proxy only when a section's blocks are marked inline and linearly. That is
+// why sections opt in rather than getting this by default.
+for (const section of ORDER_ENFORCED) {
+  const want = (SECTION_BLOCKS[section] || []).map((b) => b.id);
+  for (const src of sources) {
+    const seen = [...src.text.matchAll(new RegExp(`block:\\s*${section}/([a-z0-9-]+)`, 'g'))]
+      .map((m) => m[1]);
+    const ordered = want.filter((id) => seen.includes(id));
+    const actual = seen.filter((id) => want.includes(id));
+    if (actual.join('>') !== ordered.join('>')) {
+      problems.push(
+        `${section} blocks are in a different order on ${src.name}:\n`
+        + `      spec: ${ordered.join(' -> ')}\n`
+        + `      ${src.name}: ${actual.join(' -> ')}`);
+    }
   }
 }
 

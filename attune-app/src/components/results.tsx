@@ -627,8 +627,7 @@ function IntimacyOverview({ data }: { data: IntimacyResults | null }) {
         <Text style={{ ...Type.hero, color: c.textStrong }}>Physical Intimacy Expectations</Text>
         <Eyebrow>Results at a glance</Eyebrow>
 
-        {/* block: comm-overview/where-you-each-land */}
-          {/* block: intimacy-overview/where-you-each-land */}
+        {/* block: intimacy-overview/where-you-each-land */}
         <Text style={{ ...Type.cardTitle, color: c.textStrong, marginTop: Spacing.xl, marginBottom: Spacing.md }}>
           Where you each land
         </Text>
@@ -812,6 +811,30 @@ function ReflectionOverview({ data }: { data: ReflectionResults | null }) {
         <Text style={{ ...Type.hero, color: c.textStrong }}>Relationship Reflection</Text>
         <Eyebrow>Results at a glance</Eyebrow>
 
+          {/* block: reflection-overview/ratings */}
+        <Text style={{ ...Type.cardTitle, color: c.textStrong, marginTop: Spacing.xl, marginBottom: Spacing.md }}>
+          How you feel right now
+        </Text>
+        <Legend you={data.names.you} them={data.names.them} />
+        {data.ratings.map((r) => (
+          <View
+            key={r.key}
+            style={{
+              backgroundColor: c.surface, borderColor: c.border, borderWidth: 1,
+              borderRadius: Radius.lg, padding: Spacing.lg, marginBottom: Spacing.md,
+            }}>
+            <Text style={{ ...Type.cardTitle, color: c.textStrong }}>{r.question}</Text>
+            <View style={{ height: 28, justifyContent: 'center', marginTop: Spacing.lg }}>
+              <View style={{ height: 3, borderRadius: Radius.pill, backgroundColor: c.border }} />
+              <Marker left={r.you.pct} color={YOU_COLOR} label={initial(data.names.you)} />
+              <Marker left={r.them.pct} color={THEM_COLOR} label={initial(data.names.them)} />
+            </View>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: Spacing.xs }}>
+              <Text style={{ ...Type.small, color: c.textMuted, flex: 1 }}>{r.low}</Text>
+              <Text style={{ ...Type.small, color: c.textMuted, flex: 1, textAlign: 'right' }}>{r.high}</Text>
+            </View>
+          </View>
+        ))}
         {/* What you each admire. On the website this sits on the Reflection
             page as well as inside a storycard. The app had it only in the card,
             so the page itself never showed it. */}
@@ -858,30 +881,6 @@ function ReflectionOverview({ data }: { data: ReflectionResults | null }) {
           </View>
         ) : null}
 
-          {/* block: reflection-overview/ratings */}
-        <Text style={{ ...Type.cardTitle, color: c.textStrong, marginTop: Spacing.xl, marginBottom: Spacing.md }}>
-          How you feel right now
-        </Text>
-        <Legend you={data.names.you} them={data.names.them} />
-        {data.ratings.map((r) => (
-          <View
-            key={r.key}
-            style={{
-              backgroundColor: c.surface, borderColor: c.border, borderWidth: 1,
-              borderRadius: Radius.lg, padding: Spacing.lg, marginBottom: Spacing.md,
-            }}>
-            <Text style={{ ...Type.cardTitle, color: c.textStrong }}>{r.question}</Text>
-            <View style={{ height: 28, justifyContent: 'center', marginTop: Spacing.lg }}>
-              <View style={{ height: 3, borderRadius: Radius.pill, backgroundColor: c.border }} />
-              <Marker left={r.you.pct} color={YOU_COLOR} label={initial(data.names.you)} />
-              <Marker left={r.them.pct} color={THEM_COLOR} label={initial(data.names.them)} />
-            </View>
-            <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: Spacing.xs }}>
-              <Text style={{ ...Type.small, color: c.textMuted, flex: 1 }}>{r.low}</Text>
-              <Text style={{ ...Type.small, color: c.textMuted, flex: 1, textAlign: 'right' }}>{r.high}</Text>
-            </View>
-          </View>
-        ))}
 
         {commitment ? (
           <>
@@ -1053,13 +1052,13 @@ function ReflectionPlan({
   if (!data) return <ReflectionWaiting />;
   const commitment = data.written.find((w) => w.key === 'a6');
   const together = data.written.find((w) => w.key === 'a4');
-  {/* block: reflection-overview/action-plan */}
   const bothRanked = data.priorities.you && data.priorities.them;
 
   return (
     <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: ResultsBottomInset }}>
       <View style={{ paddingHorizontal: Spacing.xl, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center' }}>
         <Eyebrow>Relationship Reflection</Eyebrow>
+        {/* block: reflection-overview/action-plan */}
         <Text style={{ ...Type.title, color: c.textStrong }}>Action Plan</Text>
 
         {/* The derived plan, under REFLECTION_ACTION_TITLES. The app could not
@@ -1349,6 +1348,7 @@ function Glance({
           {dims.length ? (
             <View style={{ marginTop: Spacing.xl }}>
               <View style={{ flexDirection: 'row', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: Spacing.md }}>
+                {/* block: comm-overview/where-you-each-land */}
                 <Text style={{ ...Type.eyebrow, color: 'rgba(255,255,255,0.85)' }}>
                   Where you each land
                 </Text>
@@ -1448,11 +1448,20 @@ function CoupleType({ results, you, them }: { results: CoupleResults; you: strin
   return (
     <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: ResultsBottomInset }}>
       <View style={{ paddingHorizontal: Spacing.xl, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center' }}>
-        {/* block: couple-type/name */}
-        <Text style={{ ...Type.eyebrow, color: accent }}>Couple type</Text>
-        <Text style={{ ...Type.hero, color: c.textStrong, marginTop: Spacing.sm }}>{type.name}</Text>
-        <Text style={{ ...Type.body, color: c.textMuted, marginTop: Spacing.sm }}>
-          {interp(type.tagline, you, them)}
+        {/* block: couple-type/lead
+
+            The page opens on what the answers uncovered, not on the type name.
+            The app used to lead with the name, so a reader met "The jumpstart"
+            before being told what they were looking at, and the two surfaces
+            read as different pages while both claimed the same six blocks.
+
+            The line is the website's, word for word. */}
+        <Text style={{ ...Type.hero, color: c.textStrong }}>
+          What your responses uncover about your unique relationship dynamic
+        </Text>
+
+        <Text style={{ ...Type.eyebrow, color: c.textMuted, marginTop: Spacing.xl, marginBottom: Spacing.sm }}>
+          Your couple map
         </Text>
 
         {/* The map. It was missing entirely: the positions were in the payload
@@ -1470,6 +1479,70 @@ function CoupleType({ results, you, them }: { results: CoupleResults; you: strin
           bName={results.content?.names?.b || 'Your partner'}
           quadrants={results.content?.mapQuadrants}
         />
+
+        {/* block: couple-type/axes
+
+            What the two axes mean. The map without these is a picture: two
+            dots in different corners and no way to know what the corners are.
+            The copy is api/_axes.js, which the website reads too. */}
+        <View style={{ marginTop: results.content?.axes?.length ? Spacing.xl : 0, gap: Spacing.lg }}>
+          {(results.content?.axes || []).map((ax) => (
+            <View key={ax.id} style={{ borderLeftColor: ax.color, borderLeftWidth: 3, paddingLeft: Spacing.md }}>
+              <Text style={{ ...Type.eyebrow, color: ax.color, marginBottom: Spacing.xs }}>{ax.label}</Text>
+              <Text style={{ ...Type.body, color: c.text, marginBottom: Spacing.sm }}>{ax.desc}</Text>
+              {ax.poles.map((pole, i) => (
+                <Text key={pole} style={{ ...Type.small, color: c.textMuted, marginBottom: 2 }}>
+                  <Text style={{ color: ax.color, fontWeight: '700' }}>{i === 0 ? '\u2191 ' : '\u2193 '}</Text>
+                  {pole}
+                </Text>
+              ))}
+            </View>
+          ))}
+        </View>
+
+        {/* block: couple-type/individual-types
+
+            Each partner on their own, before the pairing. The website has had
+            this panel all along; the app had nothing, because the blurb and
+            the bands were written inline in the website's source and had never
+            been anywhere the app could read them. They are in
+            api/_lib/individual-profile.js now and arrive on the payload. */}
+        {results.content?.individualTypes?.a || results.content?.individualTypes?.b ? (
+          <Text style={{ ...Type.eyebrow, color: c.textMuted, marginTop: Spacing.xxl, marginBottom: Spacing.sm }}>
+            Your individual types
+          </Text>
+        ) : null}
+        {[results.content?.individualTypes?.a, results.content?.individualTypes?.b]
+          .filter((p): p is NonNullable<typeof p> => !!p)
+          .map((p) => (
+            <View key={p.name} style={{ ...card(), marginBottom: Spacing.sm, borderTopColor: p.color, borderTopWidth: 4 }}>
+              <Text style={{ ...Type.eyebrow, color: p.color }}>{p.name}</Text>
+              <Text style={{ ...Type.title, color: c.textStrong, marginTop: Spacing.xs }}>{p.typeName}</Text>
+              <Text style={{ ...Type.body, color: c.textMuted, marginTop: Spacing.sm }}>{p.blurb}</Text>
+              <View style={{ marginTop: Spacing.md, gap: Spacing.sm }}>
+                {p.rows.map((r) => (
+                  <View key={r.axis}>
+                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 3 }}>
+                      <Text style={{ ...Type.small, color: c.textMuted }}>{r.label}</Text>
+                      <Text style={{ ...Type.small, color: p.color, fontWeight: '600' }}>{r.value}</Text>
+                    </View>
+                    {/* The bar is the same 0..1 the website draws, so a reader
+                        comparing the two screens sees the same fill. */}
+                    <View style={{ height: 4, borderRadius: 2, backgroundColor: c.border, overflow: 'hidden' }}>
+                      <View style={{ height: '100%', width: `${Math.round(r.score * 100)}%`, backgroundColor: p.color, borderRadius: 2 }} />
+                    </View>
+                  </View>
+                ))}
+              </View>
+            </View>
+          ))}
+
+        {/* block: couple-type/name */}
+        <Text style={{ ...Type.eyebrow, color: accent, marginTop: Spacing.xxl }}>Couple type</Text>
+        <Text style={{ ...Type.hero, color: c.textStrong, marginTop: Spacing.sm }}>{type.name}</Text>
+        <Text style={{ ...Type.body, color: c.textMuted, marginTop: Spacing.sm }}>
+          {interp(type.tagline, you, them)}
+        </Text>
 
         {/* block: couple-type/description */}
         <View style={{ ...card(), marginTop: Spacing.xl, borderLeftColor: accent, borderLeftWidth: 3 }}>

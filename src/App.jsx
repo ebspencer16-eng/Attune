@@ -82,6 +82,9 @@ import {
 } from "../api/_anniversary-questions.js";
 import { COUPLE_TYPES as NEW_COUPLE_TYPES } from "../api/_couple-types.js";
 import { INDIVIDUAL_TYPE_DISPLAY } from "../api/_individual-types.js";
+import { AXES } from "../api/_axes.js";
+import { individualBlurb, axisBand, axisRows } from "../api/_lib/individual-profile.js";
+import { pronounForm } from "../api/_lib/role-tokens.js";
 import { commsProtocols } from "../api/_lib/comms-plan.js";
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -1620,10 +1623,10 @@ export function ConflictExercise({ userName = "You", partnerName = "your partner
 // ─────────────────────────────────────────────────────────────────────────────
 
 // Pronoun helper — module-level so all components can use it
-const pronoun = (p, form) => {
-  const map = { "she/her": { sub: "she", obj: "her", pos: "her", ref: "herself", isC: "she's" }, "he/him": { sub: "he", obj: "him", pos: "his", ref: "himself", isC: "he's" }, "they/them": { sub: "they", obj: "them", pos: "their", ref: "themselves", isC: "they're" } };
-  return (map[p] || map["they/them"])[form] || "they";
-};
+// Delegates: the table lives in api/_lib/role-tokens.js, which is also what
+// the server resolves couple-type copy with. Two tables is how one surface
+// ends up saying "they names feelings".
+const pronoun = (p, form) => pronounForm(p, form);
 
 
 function getStyleCode(scores) {
@@ -1726,29 +1729,9 @@ function deriveNewCoupleType(myS, partS) {
   return { ...pairingType, typeInfoA, typeInfoB };
 }
 
-// Individual type metadata
-// Individual-profile blurb built from per-axis fragments (1.2/4.1). Each axis has
-// 5 proximity bands; verbs conjugate for the pronoun (they -> plural). DRAFT COPY.
-function individualBlurb(name, pron, ec, oc) {
-  const sub = pronoun(pron, "sub");
-  const pos = pronoun(pron, "pos");
-  const Sub = sub.charAt(0).toUpperCase() + sub.slice(1);
-  const pl = sub === "they";
-  const v = (sg, pv) => pl ? pv : sg;
-  const eng =
-    ec >= 0.8 ? `${name} moves toward resolution quickly, feeling what is unresolved and going straight at it.`
-    : ec >= 0.6 ? `${name} leans toward engaging, sometimes after a minute to process first.`
-    : ec >= 0.4 ? `${name} sits near the middle in terms of how much ${sub} ${v("engages", "engage")}. Quick to move toward resolution on an easy day, wanting to take a minute under stress.`
-    : ec >= 0.2 ? `${name} tends to take space first, then discuss what is unresolved.`
-    : `${name} usually needs real space before engaging. What ${sub} ${v("brings", "bring")} back, once ready, is often thought out.`;
-  const opn =
-    oc >= 0.8 ? `${Sub} ${v("names", "name")} feelings in the moment.`
-    : oc >= 0.6 ? `${Sub} usually ${v("shares", "share")} more of ${pos} thoughts and feelings than ${sub} ${v("keeps", "keep")} back.`
-    : oc >= 0.4 ? `${Sub} ${v("shares", "share")} some thoughts and feelings and ${v("holds", "hold")} some privately, depending on the moment.`
-    : oc >= 0.2 ? `${Sub} may prefer to keep ${pos} thoughts and feelings more private.`
-    : `${Sub} ${v("processes", "process")} privately and ${v("surfaces", "surface")} thoughts and feelings later.`;
-  return `${eng} ${opn}`;
-}
+// Individual type metadata. individualBlurb, axisBand and axisRows now live in
+// api/_lib/individual-profile.js, so /api/results can send the same words to
+// the app instead of the panel existing only in this file.
 const INDIVIDUAL_TYPES = {
   W: { ...INDIVIDUAL_TYPE_DISPLAY.W, axis1: "Engage", axis2: "Open",
        desc: "Moves toward resolution. Processes and expresses relatively freely.",
@@ -7280,6 +7263,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
         <div style={{ maxWidth: 660 }}>
 
           {/* 1. HEADER */}
+          {/* block: couple-type/lead */}
           <div style={{ marginBottom: "1.25rem" }}>
             <div style={{ fontFamily: HFONT, fontSize: "clamp(1.7rem,4vw,2.3rem)", fontWeight: 700, color: C.ink, lineHeight: 1.08, letterSpacing: "-0.02em" }}>
               What your responses uncover about your unique relationship dynamic
@@ -7300,10 +7284,8 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
             </div>
             <div style={{ height: 1, background: C.stone, opacity: 0.6, margin: "0 0 1.25rem" }} />
             <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: "1.1rem" }}>
-              {[
-                { label: "Engage / Withdraw", desc: "How you respond when something is hard or unresolved.", poles: ["Engage: moves toward resolution, addresses quickly", "Withdraw: needs space first, processes privately"], color: "#9B5DE5", bothNear: Math.abs(newType.typeInfoA.withdrawScore - 3) < 0.6 && Math.abs(newType.typeInfoB.withdrawScore - 3) < 0.6 },
-                { label: "Open / Guarded", desc: "How freely you express what's going on inside.", poles: ["Open: partner usually knows how you're feeling", "Guarded: processes internally, expressive when ready"], color: "#1B5FE8", bothNear: Math.abs(newType.typeInfoA.openScore - 3) < 0.6 && Math.abs(newType.typeInfoB.openScore - 3) < 0.6 },
-              ].map(ax => (
+              {/* block: couple-type/axes */}
+              {AXES.map(ax => (
                 <div key={ax.label} style={{ borderLeft: `3px solid ${ax.color}`, paddingLeft: "0.9rem" }}>
                   <div style={{ fontSize: "0.6rem", letterSpacing: "0.2em", textTransform: "uppercase", color: ax.color, fontFamily: BFONT, fontWeight: 700, marginBottom: "0.5rem" }}>{ax.label}</div>
                   <p style={{ fontSize: "0.82rem", color: C.ink, fontFamily: BFONT, lineHeight: 1.65, margin: "0 0 0.65rem" }}>{ax.desc}</p>
@@ -7321,18 +7303,11 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
           <div style={{ fontSize: "0.6rem", letterSpacing: "0.22em", textTransform: "uppercase", color: C.muted, fontFamily: BFONT, fontWeight: 700, marginTop: "1.75rem", marginBottom: "1rem" }}>
             Your individual types
           </div>
+          {/* block: couple-type/individual-types */}
           {/* 4. INDIVIDUAL TILES */}
           {/* ── INDIVIDUAL TYPES (merged: identity + placement blurb + bars) ── */}
           {(() => {
             const blurbFor = (name, pron, info) => individualBlurb(name, pron, info.engageCoord, info.openCoord);
-            // 5-band axis label (1.3): clearly / leans / balanced. score is 0..1,
-            // high end = hi pole.
-            const axisBand = (score, hi, lo) =>
-              score >= 0.8 ? `clearly ${hi}`
-              : score >= 0.6 ? `leans ${hi}`
-              : score >= 0.4 ? "flexible"
-              : score >= 0.2 ? `leans ${lo}`
-              : `clearly ${lo}`;
             return (
             <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "minmax(0,1fr) minmax(0,1fr)", gap: isMobile ? "1rem" : "1rem", marginBottom: "1.5rem" }}>
               {[
@@ -7344,48 +7319,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
                   <div style={{ fontFamily: HFONT, fontSize: isMobile ? "1.05rem" : "1.2rem", fontWeight: 700, color: C.ink, marginBottom: "0.6rem" }}>{it.name}</div>
                   <p style={{ fontSize: "0.82rem", color: C.muted, fontFamily: BFONT, lineHeight: 1.7, margin: "0 0 1.1rem" }}>{blurbFor(name, pron, info)}</p>
                   <div style={{ display: "flex", flexDirection: "column", gap: "0.55rem" }}>
-                    {[
-                      {
-                        label: "Engage/Withdraw",
-                        value: axisBand(info.engageCoord, "engaged", "withdrawn"),
-                        score: info.engageCoord,
-                        near: Math.abs(info.withdrawScore - 3) < 0.6,
-                        driver: (() => {
-                          const s = name === userName ? myS : partS;
-                          const scores = [
-                            { dim: "Conflict", w: 0.45, v: s.conflict || 3 },
-                            { dim: "Stress",   w: 0.25, v: s.stress   || 3 },
-                            { dim: "Repair",   w: 0.15, v: s.repair   || 3 },
-                          ];
-                          const dominant = scores.reduce((a, b) => Math.abs(a.v - 3) * a.w > Math.abs(b.v - 3) * b.w ? a : b);
-                          // Direction follows AXIS_CONFIG invert flags: Conflict/Repair not inverted (high raw = withdraw), Stress inverted (high raw = engage/seek).
-                          const dir = dominant.dim === "Conflict" ? (dominant.v > 3 ? "needs space in conflict" : "engages quickly in conflict")
-                                    : dominant.dim === "Repair"   ? (dominant.v > 3 ? "takes longer to repair" : "repairs quickly")
-                                    :                                (dominant.v > 3 ? "externalises stress" : "internalises stress");
-                          return `${name} ${dir}`;
-                        })(),
-                      },
-                      {
-                        label: "Open/Guarded",
-                        value: axisBand(info.openCoord, "open", "guarded"),
-                        score: info.openCoord,
-                        near: Math.abs(info.openScore - 3) < 0.6,
-                        driver: (() => {
-                          const s = name === userName ? myS : partS;
-                          const scores = [
-                            { dim: "Expression", w: 0.40, v: s.expression || 3 },
-                            { dim: "Feedback",   w: 0.25, v: s.feedback   || 3 },
-                            { dim: "Needs",      w: 0.20, v: s.needs      || 3 },
-                          ];
-                          const dominant = scores.reduce((a, b) => Math.abs(a.v - 3) * a.w > Math.abs(b.v - 3) * b.w ? a : b);
-                          // Direction follows AXIS_CONFIG invert flags: Expression/Feedback not inverted (high raw = open), Needs inverted (high raw = guarded).
-                          const dir = dominant.dim === "Expression" ? (dominant.v > 3 ? "expresses feelings readily" : "processes feelings privately")
-                                    : dominant.dim === "Feedback"   ? (dominant.v > 3 ? "takes feedback openly" : "can be guarded with feedback")
-                                    :                                  (dominant.v > 3 ? "tends to signal needs indirectly" : "states needs directly");
-                          return `${name} ${dir}`;
-                        })(),
-                      },
-                    ].map(({ label, value, score, driver, near }) => (
+                    {axisRows(name, { engage: info.engageCoord, open: info.openCoord }).map(({ label, value, score }) => (
                       <div key={label}>
                         <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "0.2rem" }}>
                           <span style={{ fontSize: "0.6rem", color: C.muted, fontFamily: BFONT, fontWeight: 600 }}>{label}</span>
