@@ -520,3 +520,81 @@ That is the first thing to do by hand.
 
 **Still open:** Highlights and the post reader are stubs, Notes filtering is
 still deliberately deferred, and notifications and tab-bar badges are not built.
+
+---
+
+## Design pass, seven groups (2026-09-09)
+
+All pushed. `npm run check`, `npx vite build` and `npm run smoke` (25 of 25)
+pass, and the app typechecks clean for the first time.
+
+**Groups 1, 2 and 5, the site.** Eyebrows that repeated the heading below them
+are gone. Gradient-filled headline text is solid ink on 404, how-it-works and
+the QR card; the frosted-glass control bar on gift-cards is flat; the
+gift-card Print button is solid orange. Hover states that faded the whole
+button now darken the background, at the value wedding-registry.html already
+used, so all fifteen copies of the nav agree on one colour. Nineteen coloured
+glow shadows on primary buttons are gone; the lift stays. The three icon cards
+on Our Purpose are seven plain ones naming actual situations.
+
+**Group 6, the app.** The Home screen no longer runs its own indigo-to-blue
+gradient. Ground is `Palette.warm`, the same cream as everywhere else. Indigo
+appears once, on the wordmark; orange once, on the button. The primary card
+took the hairline border it needed once the gradient went. Sign-in needed
+nothing: Google and Apple were already below the form.
+
+**Group 7, the three-across audit.** The headline number was wrong and worth
+recording why. Of 56 `repeat(3, 1fr)`, about 30 are the footer's three link
+columns counted two or three times per page, ten are mobile collapse rules,
+and **seven grid classes were dead CSS**: defined, given responsive
+overrides, never once used in markup. Those seven are why an audit counted
+nine icon-heading-sentence triples that do not exist. They are deleted. What
+actually renders three-across is mostly real: three steps, three
+testimonials, a book list, an article list. The one filler case, "What comes
+next" on how-it-works, is now two tiles.
+
+**Group 3, spacing.** Measured, not designed. 2,280 rem values in padding,
+margin and gap over 55 distinct numbers; seven clear 100 uses and form an
+unbroken scale: `.5 .75 1 1.25 1.5 2 2.5`. `public/tokens.css` writes it down
+and 1,607 literals across 38 pages read it. The other 48 values are untouched
+on purpose: rounding `.65rem` to `.75rem` would move pixels.
+
+Verified rather than asserted: 38 of 40 pages are **byte-identical** full-page
+screenshots before and after. The two that are not, gift-cards and qr-card,
+render a random one-time code and differ from themselves between runs, so
+they were compared by computed padding, margin and gap on all 666 elements
+instead. Identical. `scripts/spacing-dump.mjs` does that comparison and is
+worth reusing.
+
+**Group 4, dashes.** The counts we started from were wrong in both directions.
+Of 723 em dashes in the repo, all but 30 are comments or the "no value" dash
+in a results table. Of the 30, one was live website prose and **28 were in the
+emails and the generated workbook** (check-in emails, survey nudges, the
+unsubscribe page, seventeen in the workbook PDF). Those reach more customers
+than the article callouts ever did. Separately, the spaced **en** dash was
+doing the em dash's job in 58 more places; 34 were prose and fixed, 17 are
+label separators and were left.
+
+**Copy for Carolina.** The email and workbook rewrites are in `6a14fcf` and
+`f1f3519`. Nobody has reviewed that copy yet; it was pushed on the
+understanding review happens after, not before.
+
+**New gates,** each verified by planting the bug it catches:
+- `check-em-dashes.mjs` — a dash used as punctuation in customer copy. Seven
+  exemptions, each stated with its reason. Its own header names the hole it
+  does not close (a three-word prose clause) rather than pretending to.
+- `check-spacing-tokens.mjs` — a page using `var(--s-*)` without loading
+  tokens.css. An undefined custom property does not fall back, so that page
+  would lose every gap at once, silently, from a change in a different file.
+- `check-testimonials.mjs` — the two copies of the testimonials disagreeing.
+  A generator is the better answer and is deliberately not built; the header
+  says when to promote it.
+
+**Known, not fixed:**
+- The nav, the palette and the footer are copy-pasted into ~20 HTML files.
+  The spacing scale is now one file; the colours are still twenty.
+- `public/email-preview.html` restates the email copy in `api/cron-*.js`.
+  Nothing checks that they agree.
+- The `.btn-primary` background is itself an orange-to-orange gradient. Left
+  alone; not flagged as a tell.
+- Four `<title>`s use commas where eleven now use a middle dot.
