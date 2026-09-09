@@ -641,3 +641,40 @@ judgement call rather than a fix.
 The one to look at first is **purpose at 1120px against everyone else's
 780px**, because that is the only case where two pages using the same markup
 are deliberately laid out to different widths.
+
+---
+
+## Open for Ellie: two app-authored sentences on results pages (2026-09-09)
+
+The rule is that the app carries no copy of its own on a results page: anything
+a customer reads there should exist on the website too. A sweep of
+`attune-app/src/components/results.tsx` found sixteen literal sentences. Most
+are headings the website also uses. Three were dealt with:
+
+- "A couple type describes how two people move together. It is not a score, and
+  neither of you is the problem in it." Deleted. Invented, unreviewed.
+- "Worth watching" is now "What's worth being aware of", the website's wording.
+
+**Two are left deliberately, for a decision:**
+
+| App text | Where | Site equivalent |
+|---|---|---|
+| **"Where you differ most"** | Communication glance, above the widest-gap list | none. The site has no heading over that block. |
+| **"Back to it"** | What Comes Next, over the return-later group | none. |
+
+Both are app-authored copy on a results page, which is the rule we just
+enforced. They were not renamed because there is nothing on the site to copy,
+and cutting them would leave two blocks with no heading at all, which may be
+worse. So they may be filling a real gap the website has rather than being
+inventions.
+
+Three ways out, in order of my preference: add the equivalent heading to the
+website so the app is matching something; cut them and let the blocks run on;
+or keep them and accept two named exceptions. Ellie wants to see them in
+context first.
+
+The remaining app-only strings are waiting and not-yet-built states, which the
+website has no equivalent of by definition:
+"Not enough answers to place this one.", "This fills in from the last few
+questions of the exercise, which you have not both answered yet.", and the
+NotYet placeholder.

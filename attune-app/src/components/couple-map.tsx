@@ -59,7 +59,12 @@ export default function CoupleMap({
     return null;
   }
 
-  const dot = 16;
+  // The website draws these at r=15 on a 460 viewBox, with a white ring and a
+  // soft halo behind. Sized to the same proportion here, which is much larger
+  // than the 16pt dot this started with: at that size two people sitting close
+  // together were two indistinguishable specks.
+  const dot = Math.round(size * 0.13);
+  const halo = Math.round(dot * 1.5);
   // open 1 is Open, which is the LEFT of this map, so x is inverted.
   const xOf = (open: number) => (1 - open) * (size - dot) + dot / 2;
   const yOf = (engage: number) => (1 - engage) * (size - dot) + dot / 2;
@@ -99,6 +104,19 @@ export default function CoupleMap({
         <View style={{ position: 'absolute', left: 0, right: 0, top: size / 2 - 0.5, height: 1, backgroundColor: 'rgba(0,0,0,0.10)' }} />
         <View style={{ position: 'absolute', top: 0, bottom: 0, left: size / 2 - 0.5, width: 1, backgroundColor: 'rgba(0,0,0,0.10)' }} />
 
+        {/* Halos first, so both sit under both dots and neither person's ring
+            crops the other's when they are close together. */}
+        {[A, B].map((p) => (
+          <View
+            key={`halo-${p.name}`}
+            pointerEvents="none"
+            style={{
+              position: 'absolute', left: p.x - halo / 2, top: p.y - halo / 2,
+              width: halo, height: halo, borderRadius: halo / 2,
+              borderColor: p.color, borderWidth: 1.5, opacity: 0.28,
+            }}
+          />
+        ))}
         {[A, B].map((p) => (
           <View
             key={p.name}
@@ -106,8 +124,19 @@ export default function CoupleMap({
               position: 'absolute', left: p.x - dot / 2, top: p.y - dot / 2,
               width: dot, height: dot, borderRadius: dot / 2,
               backgroundColor: p.color, borderColor: '#fff', borderWidth: 3,
-            }}
-          />
+              alignItems: 'center', justifyContent: 'center',
+            }}>
+            {/* The initial, the same way the reader is identified everywhere
+                else in results. Two dots on a map have to say which is which
+                without the reader tracing back to a key. */}
+            <Text
+              style={{
+                ...Type.small, color: '#fff', fontWeight: '800',
+                fontSize: Math.round(dot * 0.42), lineHeight: Math.round(dot * 0.52),
+              }}>
+              {(p.name || '?').trim().charAt(0).toUpperCase()}
+            </Text>
+          </View>
         ))}
       </View>
 
