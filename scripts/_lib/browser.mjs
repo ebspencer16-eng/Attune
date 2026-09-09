@@ -170,6 +170,30 @@ export async function launch({ width = 1280, height = 1200 } = {}) {
 
     wait(ms) { return new Promise((r) => setTimeout(r, ms)); },
 
+    /**
+     * A PNG of the page, base64.
+     *
+     * `fullPage` captures beyond the fold by asking Chrome for the document's
+     * own height, which is what a design review needs: the fold is not where
+     * the page ends.
+     */
+    async screenshot({ fullPage = false } = {}) {
+      let clip;
+      if (fullPage) {
+        const size = await send('Runtime.evaluate', {
+          expression: `JSON.stringify({ w: document.documentElement.scrollWidth, h: document.documentElement.scrollHeight })`,
+          returnByValue: true,
+        });
+        const { w, h } = JSON.parse(size.result.value);
+        clip = { x: 0, y: 0, width: w, height: Math.min(h, 20000), scale: 1 };
+      }
+      const shot = await send('Page.captureScreenshot', {
+        format: 'png',
+        ...(clip ? { clip, captureBeyondViewport: true } : {}),
+      });
+      return shot.data;
+    },
+
     async close() {
       try { socket.close(); } catch { /* already gone */ }
       try { proc.kill(); } catch { /* already gone */ }
