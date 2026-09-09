@@ -341,6 +341,8 @@ function Results({ results, owned }: { results: ResultsResponse | null; owned: s
       sections={results.sections}
       nav={results.nav}
       highlights={results.highlights}
+      commsPlan={results.commsPlan}
+      reflectionPlan={results.reflectionPlan}
       expectations={results.expectations}
       intimacy={results.intimacy}
       reflection={results.reflection}

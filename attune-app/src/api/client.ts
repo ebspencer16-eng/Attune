@@ -162,6 +162,35 @@ export type HighlightCard = {
   dimensions?: { key: string; label: string; left: string | null; right: string | null; a: number | null; b: number | null }[];
 };
 
+/**
+ * The Communication action plan: three tiles, one per domain.
+ *
+ * From DIM_ACTION_ITEMS and DOMAIN_ALIGNED, resolved against the copy version
+ * this couple's results were stamped with.
+ */
+export type CommsPlan = {
+  tiles: {
+    domain: string;
+    label: string;
+    color: string;
+    dim: string;
+    title: string | null;
+    body: string | null;
+    dimLabel?: string | null;
+    /** Only on the hardest domain, matching the website. */
+    reflect?: string;
+  }[];
+  protocols: { dim: string | null; title: string; body: string | null; thisWeek?: string }[];
+};
+
+/** One item on the Reflection action plan, with the evidence tier behind it. */
+export type ReflectionInsight = {
+  title: string;
+  body: string | null;
+  action: string | null;
+  tier: string | null;
+};
+
 /** One entry in the results spine. Both fields come from the server. */
 export type ResultsSection = { id: string; label: string };
 
@@ -306,6 +335,10 @@ export type ResultsResponse =
       nav?: ResultsNavGroup[];
       /** The storycards, in the order they are meant to be read. */
       highlights?: HighlightCard[];
+      /** The Communication action plan. */
+      commsPlan?: CommsPlan | null;
+      /** The Reflection action plan. Null unless they own it and both finished. */
+      reflectionPlan?: ReflectionInsight[] | null;
       /** What the couple owns, so nothing has to be inferred from the payload. */
       owned?: string[];
       /** Null until both partners have finished Expectations. */

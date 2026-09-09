@@ -28,6 +28,8 @@ import { intimacyResults } from './_lib/intimacy-results.js';
 import { reflectionResults } from './_lib/reflection-results.js';
 import { whatComesNext } from './_lib/what-comes-next.js';
 import { highlightCards } from './_lib/highlight-cards.js';
+import { personalityFeedback, commsProtocols, commsActionPlan } from './_lib/comms-plan.js';
+import { deriveAnniversaryInsights, reflectionActionTitle } from './_lib/reflection-insights.js';
 import { EXERCISES, EXERCISE_COLUMNS, isExerciseDone } from './_exercises.js';
 import { capabilitiesFor, OWNERSHIP_COLUMNS } from './_lib/ownership.js';
 import { DIM_META } from './_workbook-content.js';
@@ -397,6 +399,50 @@ export default async function handler(req) {
       expectations,
       intimacy,
       reflection,
+
+      /**
+       * The Communication action plan, and the protocols behind it.
+       *
+       * DIM_ACTION_ITEMS and DOMAIN_ALIGNED were the last two copy sources the
+       * app could not reach: the website's Communication overview ends with
+       * three tiles and the app's ended with nothing.
+       */
+      commsPlan: (() => {
+        const copy = contentFor(contentVersion ?? null);
+        const feedback = personalityFeedback({
+          dimensions: displayed.content?.dimensions || [],
+          viewer: viewerSide,
+          youName: me.name || 'You',
+          themName: partner?.name || 'Your partner',
+          copy,
+        });
+        return {
+          tiles: commsActionPlan({ feedback, copy }),
+          protocols: commsProtocols(
+            Object.fromEntries(feedback.map((f) => [f.dim, f])),
+            me.name || 'You', partner?.name || 'Your partner'),
+        };
+      })(),
+
+      /**
+       * The Reflection action plan.
+       *
+       * Titles come from REFLECTION_ACTION_TITLES, the third source. Insights
+       * are derived rather than written: each carries the evidence it rests
+       * on, and one that speaks for both people needs a piece from each.
+       */
+      reflectionPlan: (ownership.ownsReflection && bothDone('ex3') && me.ex3_answers && partner?.ex3_answers)
+        ? deriveAnniversaryInsights(
+            me.ex3_answers, partner.ex3_answers,
+            me.name || 'You', partner?.name || 'Your partner',
+            COUPLE_TYPES.find((t) => t.id === results.coupleType) || null,
+          ).map((ins) => ({
+            title: reflectionActionTitle(ins.title, contentFor(contentVersion ?? null)),
+            body: ins.body || null,
+            action: ins.action || null,
+            tier: ins.tier || null,
+          }))
+        : null,
 
       /**
        * The highlight storycards, read in order before anything else.

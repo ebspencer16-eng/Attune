@@ -24,8 +24,8 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { fetchConflictResults } from '@/api/client';
 import type {
   ConflictResults, CoupleResults, ExpectationRow, ExpectationsSummary,
-  HighlightCard, IntimacyDimension, IntimacyResults, NextStepGroup,
-  ReflectionResults, ResultDimension, ResultsNavGroup, ResultsSection,
+  CommsPlan, HighlightCard, IntimacyDimension, IntimacyResults, NextStepGroup,
+  ReflectionInsight, ReflectionResults, ResultDimension, ResultsNavGroup, ResultsSection,
 } from '@/api/client';
 import ConflictResultsView from '@/components/conflict-results';
 import HighlightCards from '@/components/highlight-cards';
@@ -68,12 +68,15 @@ function interp(text: string | null | undefined, you: string, them: string): str
 export default function Results({
   results, owned = [], sections: fromServer, nav = [], highlights = [],
   expectations = null, intimacy = null, reflection = null, whatComesNext = null,
+  commsPlan = null, reflectionPlan = null,
 }: {
   results: CoupleResults;
   owned?: string[];
   sections?: ResultsSection[];
   nav?: ResultsNavGroup[];
   highlights?: HighlightCard[];
+  commsPlan?: CommsPlan | null;
+  reflectionPlan?: ReflectionInsight[] | null;
   expectations?: ExpectationsSummary | null;
   intimacy?: IntimacyResults | null;
   reflection?: ReflectionResults | null;
@@ -260,6 +263,8 @@ export default function Results({
           section={section}
           expectations={expectations}
           highlights={highlights}
+          commsPlan={commsPlan}
+          reflectionPlan={reflectionPlan}
           intimacy={intimacy}
           reflection={reflection}
           whatComesNext={whatComesNext}
@@ -329,11 +334,14 @@ export default function Results({
  */
 function SectionBody({
   section, results, conflict, conflictWaiting, byDomain, you, them, viewer, wideGap,
-  expectations, highlights, intimacy, reflection, whatComesNext, onGoToSection,
+  expectations, highlights, commsPlan, reflectionPlan,
+  intimacy, reflection, whatComesNext, onGoToSection,
 }: {
   section: string;
   expectations: ExpectationsSummary | null;
   highlights: HighlightCard[];
+  commsPlan: CommsPlan | null;
+  reflectionPlan: ReflectionInsight[] | null;
   intimacy: IntimacyResults | null;
   reflection: ReflectionResults | null;
   whatComesNext: { groups: NextStepGroup[] } | null;
@@ -356,7 +364,12 @@ function SectionBody({
   if (section === 'couple-type') return <CoupleType results={results} you={you} them={them} />;
 
   if (section === 'comm-overview') {
-    return <Glance results={results} you={you} them={them} viewer={viewer} wideGap={wideGap} />;
+    return (
+      <Glance
+        results={results} you={you} them={them} viewer={viewer} wideGap={wideGap}
+        plan={commsPlan}
+      />
+    );
   }
   if (section === 'comm-inner') {
     return <Domain title="Internal Processing" accent={Palette.indigo} dims={byDomain.inner} you={you} them={them} viewer={viewer} wideGap={wideGap} />;
@@ -383,7 +396,7 @@ function SectionBody({
   if (section === 'reflection-overview') return <ReflectionOverview data={reflection} />;
   if (section === 'reflection-ratings') return <ReflectionRatings data={reflection} />;
   if (section === 'reflection-story') return <ReflectionStory data={reflection} />;
-  if (section === 'reflection-plan') return <ReflectionPlan data={reflection} />;
+  if (section === 'reflection-plan') return <ReflectionPlan data={reflection} insights={reflectionPlan} />;
 
   if (section === 'intimacy-overview') return <IntimacyOverview data={intimacy} />;
   if (section === 'intimacy-plan') return <IntimacyConversations data={intimacy} />;
@@ -935,7 +948,9 @@ function ReflectionStory({ data }: { data: ReflectionResults | null }) {
  * each written down one thing they want to change have already done the
  * difficult part.
  */
-function ReflectionPlan({ data }: { data: ReflectionResults | null }) {
+function ReflectionPlan({
+  data, insights,
+}: { data: ReflectionResults | null; insights: ReflectionInsight[] | null }) {
   if (!data) return <ReflectionWaiting />;
   const commitment = data.written.find((w) => w.key === 'a6');
   const together = data.written.find((w) => w.key === 'a4');
@@ -946,6 +961,30 @@ function ReflectionPlan({ data }: { data: ReflectionResults | null }) {
       <View style={{ paddingHorizontal: Spacing.xl, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center' }}>
         <Eyebrow>Relationship Reflection</Eyebrow>
         <Text style={{ ...Type.title, color: c.textStrong }}>Action Plan</Text>
+
+        {/* The derived plan, under REFLECTION_ACTION_TITLES. The app could not
+            reach that copy until now, so this page showed only the couple's
+            own words and none of the plan the website builds from them. */}
+        {insights?.length ? (
+          <View style={{ marginTop: Spacing.xl }}>
+            {insights.map((ins, i) => (
+              <View
+                key={`${ins.title}-${i}`}
+                style={{
+                  backgroundColor: c.surface, borderColor: c.border, borderWidth: 1,
+                  borderRadius: Radius.lg, padding: Spacing.lg, marginBottom: Spacing.md,
+                }}>
+                <Text style={{ ...Type.cardTitle, color: c.textStrong }}>{ins.title}</Text>
+                {ins.body ? (
+                  <Text style={{ ...Type.body, color: c.text, marginTop: Spacing.sm }}>{ins.body}</Text>
+                ) : null}
+                {ins.action ? (
+                  <Text style={{ ...Type.body, color: c.textMuted, marginTop: Spacing.md }}>{ins.action}</Text>
+                ) : null}
+              </View>
+            ))}
+          </View>
+        ) : null}
 
         {commitment ? (
           <View style={{ marginTop: Spacing.xl }}>
@@ -1117,8 +1156,11 @@ function NotYet({ section }: { section: string }) {
  * server's rankedGaps and is not re-sorted here.
  */
 function Glance({
-  results, you, them, viewer, wideGap,
-}: { results: CoupleResults; you: string; them: string; viewer: 'a' | 'b'; wideGap: number | null }) {
+  results, you, them, viewer, wideGap, plan = null,
+}: {
+  results: CoupleResults; you: string; them: string; viewer: 'a' | 'b';
+  wideGap: number | null; plan?: CommsPlan | null;
+}) {
   const type = results.content?.coupleType;
   const gaps = (results.rankedGaps ?? []).slice(0, 4);
   const dims = results.content?.dimensions ?? [];
@@ -1158,6 +1200,35 @@ function Glance({
           </View>
         ) : null}
       </View>
+    {/* The three action tiles, one per domain. From DIM_ACTION_ITEMS and
+        DOMAIN_ALIGNED, which the app could not reach until now: the
+        website's Communication overview ends here and the app's ended
+        with the gap list above. */}
+    {plan?.tiles?.length ? (
+      <View style={{ paddingHorizontal: Spacing.xl, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center', marginTop: Spacing.xxl }}>
+        {plan.tiles.map((tile) => (
+          <View
+            key={tile.domain}
+            style={{
+              backgroundColor: c.surface, borderColor: c.border, borderWidth: 1,
+              borderLeftColor: tile.color, borderLeftWidth: 3,
+              borderRadius: Radius.lg, padding: Spacing.lg, marginBottom: Spacing.md,
+            }}>
+            <Text style={{ ...Type.eyebrow, color: tile.color }}>{tile.label}</Text>
+            {tile.title ? (
+              <Text style={{ ...Type.cardTitle, color: c.textStrong, marginTop: Spacing.xs }}>{tile.title}</Text>
+            ) : null}
+            {tile.body ? (
+              <Text style={{ ...Type.body, color: c.text, marginTop: Spacing.sm }}>{tile.body}</Text>
+            ) : null}
+            {tile.reflect ? (
+              <Text style={{ ...Type.small, color: c.textMuted, marginTop: Spacing.md }}>{tile.reflect}</Text>
+            ) : null}
+          </View>
+        ))}
+      </View>
+    ) : null}
+
     </ScrollView>
   );
 }
