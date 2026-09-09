@@ -53,7 +53,11 @@ function scan(dir, prefix = '') {
       // A message reaching a response body. Logging it is fine and common, so
       // a console call on the same line is not a finding.
       const returnsIt = /(?:JSON\.stringify|json\(|\.json\(|new Response\()/.test(line);
-      const hasMessage = /\b(?:e|err|error|firstErr\.error)\.message\b|String\(\s*e\s*(?:&&|\))/.test(line);
+      // Any identifier's .message, not a list of the names that happened to
+      // be in use when this was written. The first version named e, err, error
+      // and firstErr.error, and missed findErr.message and callerErr.message
+      // in partner-sync.js, which is the same failure this file exists to stop.
+      const hasMessage = /[A-Za-z_$][A-Za-z0-9_$.]*\.message\b|String\(\s*e\s*(?:&&|\))/.test(line);
       if (returnsIt && hasMessage && !/console\.(error|warn|log)/.test(line) && !/safeError\(/.test(line)) {
         problems.push({ at, why: 'raw error message returned', line: line.trim().slice(0, 90) });
       }

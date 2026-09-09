@@ -97,7 +97,7 @@ async function handlePartnerSync(req) {
       .eq('invite_code', code)
       .maybeSingle();
 
-    if (findErr) return new Response(JSON.stringify({ ok: false, error: findErr.message }), { status: 500, headers: CORS });
+    if (findErr) return new Response(JSON.stringify({ ok: false, error: safeError('partner-sync.find', findErr, 'Partner sync failed.') }), { status: 500, headers: CORS });
     if (!partnerA) return new Response(JSON.stringify({ ok: false, error: 'Invite code not found' }), { status: 404, headers: CORS });
 
     // Prevent self-linking (e.g. Partner A opening their own invite link)
@@ -361,7 +361,7 @@ async function handlePartnerSync(req) {
         .eq('id', authUser.id)
         .maybeSingle();
       if (callerErr) {
-        return new Response(JSON.stringify({ ok: false, error: callerErr.message }), { status: 500, headers: CORS });
+        return new Response(JSON.stringify({ ok: false, error: safeError('partner-sync.caller', callerErr, 'Partner sync failed.') }), { status: 500, headers: CORS });
       }
       if (!callerProfile || callerProfile.partner_profile_id !== pid) {
         return new Response(JSON.stringify({ ok: false, error: 'Not authorized to read this partner' }), { status: 403, headers: CORS });
