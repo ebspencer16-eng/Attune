@@ -99,15 +99,9 @@
 
   /* FEATURED ARTICLE HERO */
   .featured-wrap{margin-bottom:3rem}
-  .featured-article{display:grid;grid-template-columns:1fr 1fr;border-radius:22px;overflow:hidden;background:linear-gradient(145deg,#1e1a30,#2e2848,#1e1a30);min-height:300px;max-height:320px;text-decoration:none;transition:transform .2s;position:relative}
-  .featured-article:hover{transform:translateY(-3px)}
-  .featured-visual{display:flex;align-items:center;justify-content:center;padding:1.98rem;position:relative;overflow:hidden}
-  .featured-visual-inner{position:relative;z-index:2}
-  .featured-bg-text{position:absolute;font-family:var(--hfont);font-size:14rem;font-weight:700;color:rgba(255,255,255,.03);line-height:1;top:50%;left:50%;transform:translate(-50%,-50%);white-space:nowrap;pointer-events:none}
-  .featured-number{font-family:var(--hfont);font-size:7rem;font-weight:700;color:rgba(232,103,58,.15);line-height:1;position:absolute;bottom:2rem;right:2rem}
+  .featured-article{display:block;border-radius:22px;overflow:hidden;background:linear-gradient(145deg,#1e1a30,#2e2848,#1e1a30);min-height:300px;max-height:320px;text-decoration:none;transition:transform .2s;position:relative}
+  .featured-article:hover{opacity:.94}
   /* Icon illustration for featured */
-  .featured-icon{width:120px;height:120px;border-radius:24px;background:rgba(232,103,58,.12);border:1.5px solid rgba(232,103,58,.25);display:flex;align-items:center;justify-content:center;position:relative}
-  .featured-icon::after{content:'';position:absolute;inset:-8px;border-radius:32px;border:1px solid rgba(232,103,58,.1)}
   .featured-content{padding:var(--s-2xl) 2.25rem;display:flex;flex-direction:column;justify-content:center}
   .featured-tag-row{display:flex;align-items:center;gap:.65rem;margin-bottom:var(--s-md)}
   .featured-tag{font-size:.58rem;letter-spacing:.18em;text-transform:uppercase;font-weight:700;padding:.28rem var(--s-sm);border-radius:999px;background:rgba(232,103,58,.18);color:#E8673A;border:1px solid rgba(232,103,58,.35)}
@@ -127,9 +121,10 @@
   .section-eye-label{font-size:.6rem;letter-spacing:.26em;text-transform:uppercase;color:var(--clay);font-weight:700}
   .section-title{font-family:var(--hfont);font-size:clamp(1.5rem,2.5vw,2rem);font-weight:700;color:var(--ink);margin-bottom:var(--s-2xl);letter-spacing:-.015em}
   .collections-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:var(--s-lg)}
-  .collection-card{background:white;border:1.5px solid var(--stone);border-top:3px solid var(--stone);border-radius:18px;padding:1.75rem;transition:border-color .2s,box-shadow .2s}
-  .collection-card:hover{box-shadow:0 8px 28px rgba(14,11,7,.09);transform:translateY(-1px)}
-  .collection-card:hover{border-color:var(--clay);box-shadow:0 4px 20px rgba(14,11,7,.06)}
+  /* Not a card. Four pastel boxes with icon chips is the most recognisable
+     generated-landing-page shape there is, and what this section actually is
+     is an index: four headings with the pieces under each. Set as one. */
+  .collection-card{background:none;border:0;border-radius:0;padding:0}
   .coll-header{display:flex;align-items:flex-start;gap:var(--s-md);margin-bottom:var(--s-lg)}
   .coll-icon{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:1.1rem}
   .coll-title{font-family:var(--hfont);font-size:1.1rem;font-weight:700;color:var(--ink);line-height:1.2;margin-bottom:.2rem}
@@ -137,16 +132,17 @@
   .coll-articles{display:flex;flex-direction:column;gap:.4rem;border-top:1px solid var(--stone);padding-top:var(--s-md)}
   .coll-link{font-size:.8rem;color:var(--text);text-decoration:none;padding:.3rem 0;display:flex;align-items:center;gap:var(--s-xs);transition:color .15s;border-bottom:1px solid transparent}
   .coll-link:hover{color:var(--orange)}
-  .coll-link::before{content:'';width:4px;height:4px;border-radius:50%;background:var(--stone);flex-shrink:0;transition:background .15s}
-  .coll-link:hover::before{background:var(--orange)}
   .coll-link span{font-size:.65rem;color:var(--muted);margin-left:auto;white-space:nowrap}
 
   /* RECENT POSTS */
   .posts-section{margin-bottom:5rem}
   .posts-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--s-lg)}
   .post-card{background:white;border:1.5px solid var(--stone);border-radius:16px;overflow:hidden;text-decoration:none;display:flex;flex-direction:column;transition:transform .18s,box-shadow .18s,border-color .18s;box-shadow:0 1px 4px rgba(14,11,7,.06)}
-  .post-card:hover{transform:translateY(-3px);box-shadow:0 8px 32px rgba(14,11,7,.07);border-color:rgba(193,127,71,.4)}
-  .post-card-accent{height:3px}
+  .post-card:hover{border-color:var(--clay)}
+    /* The coloured strip on top of every post card is gone. Six cards in a
+     grid, each with a different bright edge, is decoration doing the job
+     the category label under it already does. */
+  .post-card-accent{display:none}
   .post-card-body{padding:var(--s-lg) 1.4rem var(--s-xl);flex:1;display:flex;flex-direction:column}
   .post-tag{font-size:.58rem;font-weight:700;letter-spacing:.16em;text-transform:uppercase;margin-bottom:.65rem}
   .post-title{font-family:var(--hfont);font-size:1.05rem;font-weight:700;color:var(--ink);line-height:1.25;margin-bottom:.6rem;letter-spacing:-.01em}
@@ -192,7 +188,6 @@
 
   @media(max-width:900px){
     .featured-article{grid-template-columns:1fr}
-    .featured-visual{display:none}
     .collections-grid{grid-template-columns:1fr}
     .posts-grid{grid-template-columns:repeat(2,1fr)}
   }
@@ -221,7 +216,6 @@
     .page-header{padding:calc(58px + 1.75rem) 1.25rem 2rem!important;text-align:center}
     .page-title{font-size:clamp(2rem,8vw,3rem)!important}
     .featured-article{grid-template-columns:1fr!important}
-    .featured-visual{display:none}
     .featured-content{padding:2rem 1.75rem 1.75rem!important}
     .featured-title{font-size:1.5rem!important}
     .featured-excerpt{margin-bottom:1.25rem!important}
@@ -237,12 +231,11 @@
   @media(max-width:640px){
     .page-header{padding:calc(58px + 1.75rem) 1.25rem 2rem!important}
     .featured-wrap{margin-bottom:2rem!important}
-    .featured-visual{display:none!important}
     .featured-content{padding:1.5rem!important}
     .featured-post{grid-template-columns:1fr!important}
     .category-bar{margin-bottom:2rem!important;padding:.65rem 0!important}
     .collection-grid{grid-template-columns:1fr!important;gap:1rem!important}
-    .collection-card{padding:1.25rem!important}
+    .collection-card{padding:0!important}
     .posts-section{padding:2rem 1.25rem 2.5rem!important;margin:0 -1.25rem!important}
     .posts-grid{grid-template-columns:1fr!important;gap:.85rem!important}
     .cta-section,.cta-inner{padding:2.5rem 1.25rem!important}
@@ -337,16 +330,9 @@
   <!-- FEATURED POST -->
   <div class="featured-wrap">
     <a href="/practice/how-to-use-your-results" class="featured-article">
-      <!-- Visual side -->
-      <div class="featured-visual">
-        <div class="featured-bg-text">01</div>
-        <div class="featured-visual-inner">
-          <div class="featured-icon">
-            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="rgba(232,103,58,0.7)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
-          </div>
-        </div>
-      </div>
-      <!-- Content side -->
+      <!-- No visual side. It held an icon chip and a seven-rem translucent
+           numeral, and both were decoration standing where the article's own
+           words could go. -->
       <div class="featured-content">
         <div class="featured-tag-row">
           <span class="featured-tag">Getting Started</span>
@@ -367,11 +353,8 @@
     <h2 class="section-title">Collections</h2>
     <div class="collections-grid">
 
-      <div class="collection-card" style="background:#FFF5F0;border-color:rgba(232,103,58,.3);">
+      <div class="collection-card">
         <div class="coll-header">
-          <div class="coll-icon" style="background:#FFF0EB;">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#E8673A" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-          </div>
           <div>
             <p class="coll-title">Getting Started</p>
             <p class="coll-desc">For new users and couples approaching this for the first time.</p>
@@ -384,11 +367,8 @@
         </div>
       </div>
 
-      <div class="collection-card" style="background:#FFF5F8;border-color:rgba(233,30,99,.28);">
+      <div class="collection-card">
         <div class="coll-header">
-          <div class="coll-icon" style="background:#FCE4EC;">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#E91E63" stroke-width="1.8" stroke-linecap="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
-          </div>
           <div>
             <p class="coll-title">When It's Difficult</p>
             <p class="coll-desc">Conflict, hard conversations, and how to repair after a hard moment.</p>
@@ -401,11 +381,8 @@
         </div>
       </div>
 
-      <div class="collection-card" style="background:#F4F5FF;border-color:rgba(92,107,192,.28);">
+      <div class="collection-card">
         <div class="coll-header">
-          <div class="coll-icon" style="background:#E8EAF6;">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#5C6BC0" stroke-width="1.8" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-          </div>
           <div>
             <p class="coll-title">Understanding Each Other</p>
             <p class="coll-desc">Deeper reads on communication, attachment, and how people actually work.</p>
@@ -418,11 +395,8 @@
         </div>
       </div>
 
-      <div class="collection-card" style="background:#F0FDF8;border-color:rgba(16,185,129,.3);">
+      <div class="collection-card">
         <div class="coll-header">
-          <div class="coll-icon" style="background:#EDFAF5;">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="1.8" stroke-linecap="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-          </div>
           <div>
             <p class="coll-title">Methodology</p>
             <p class="coll-desc">What the 10 couple types mean and how to work with yours specifically.</p>
