@@ -512,10 +512,13 @@ of `api/home.js` into `api/_lib/ownership.js`.
 (23 cases on the answer mirror) and an extension to `check-profile-columns` so
 it checks writes and inline selects, not just `const cols` arrays.
 
-**Not verified, and it matters.** Synthetic taps do not register in this
-simulator, so nothing has been tapped through end to end. Every screenshot was
-taken by temporarily forcing a screen to render and then reverting. Screens
-have been confirmed to render with real data; the flow between them has not.
+**~~Not verified, and it matters.~~ CORRECTED 2026-09-09.** This said synthetic
+taps do not register in the simulator, so nothing had been tapped through end
+to end, and every screenshot was of a state forced to render. That was wrong,
+and it stood for several sessions. `xcrun simctl` has no input command, which
+is all that was ever really established; the Simulator is an ordinary macOS
+window and can be driven. `scripts/sim.mjs` does it: tap, swipe, screenshot.
+The app can now be exercised for real.
 That is the first thing to do by hand.
 
 **Still open:** Highlights and the post reader are stubs, Notes filtering is

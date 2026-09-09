@@ -50,25 +50,57 @@ export default function InsightsScreen() {
   const [openExercise, setOpenExercise] = useState<string | null>(null);
 
   const loadingRef = useRef(false);
+  // Which load is current. A load that finishes after a newer one started must
+  // not write its results over the newer answer.
+  const runRef = useRef(0);
+
   const load = useCallback(async () => {
     loadingRef.current = true;
-    const res = await fetchHome();
-    if (res.ok) { setHome(res.data); setError(null); }
-    else { setError(res.error); }
+    const run = ++runRef.current;
+    const current = () => runRef.current === run;
+    try {
+      const res = await fetchHome();
+      if (!current()) return;
+      if (res.ok) { setHome(res.data); setError(null); }
+      else { setError(res.error); }
 
-    // Only asked for once the server says there is something to ask for.
-    // Fetching results before both partners finish returns a not-ready payload
-    // this screen has no use for, on a call that is not free.
-    if (res.ok && res.data.resultsReady) {
+      // ── WHY THIS DOES NOT CLEAR RESULTS ON FAILURE ──────────────────────
+      // It used to be `setResults(r.ok ? r.data : null)`, with a plain
+      // `setResults(null)` when /api/home failed. Either path threw away a
+      // good payload the moment one request did not come back.
+      //
+      // That is what the screen reporting "Your results are ready. They could
+      // not be loaded just now." on returning to the tab was: `home` was still
+      // populated from the previous load, so the ready branch still rendered,
+      // but `results` had been nulled by a transient failure. One dropped
+      // request turned a working screen into an error that only a pull to
+      // refresh could clear.
+      //
+      // Results are only cleared when the server actually says there are none.
+      // A failure leaves the last good payload on screen, which is both true
+      // and what the reader wants.
+      if (!res.ok) return;
+
+      if (!res.data.resultsReady) {
+        setResults(null);
+        return;
+      }
+
+      // Only asked for once the server says there is something to ask for.
+      // Fetching results before both partners finish returns a not-ready
+      // payload this screen has no use for, on a call that is not free.
       const r = await fetchResults();
-      setResults(r.ok ? r.data : null);
-    } else {
-      setResults(null);
+      if (!current()) return;
+      if (r.ok) setResults(r.data);
+    } finally {
+      // In a finally so a thrown request cannot leave the guard stuck on,
+      // which would stop every later focus from reloading anything.
+      if (current()) {
+        setLoading(false);
+        setRefreshing(false);
+      }
+      loadingRef.current = false;
     }
-
-    setLoading(false);
-    setRefreshing(false);
-    loadingRef.current = false;
   }, []);
 
   useEffect(() => { load(); }, [load]);
