@@ -413,14 +413,6 @@ function SectionBody({
   return <NotYet section={section} />;
 }
 
-/**
- * Expectations, in one number and five conversations.
- *
- * The number is what the exercise is for: how often two people assumed the
- * same thing. Neither a high nor a low one is a verdict, so nothing here is
- * coloured good or bad, and the copy names the differences as conversations
- * rather than as problems.
- */
 function ExpectationsOverview({
   summary, you, them,
 }: { summary: ExpectationsSummary | null; you: string; them: string }) {
@@ -433,33 +425,43 @@ function ExpectationsOverview({
     );
   }
 
+  // The website's page, in the website's order: the two counts, alignment by
+  // category, then the conversations. It carries no framing prose and neither
+  // does this. What was here was written for the app and appears nowhere in
+  // the product.
+  const categories = [
+    ...summary.categories.filter((cat) => cat.answered > 0),
+    ...(summary.life.length ? [{
+      section: 'life',
+      label: 'The bigger questions',
+      answered: summary.life.length,
+      aligned: summary.life.filter((r) => r.aligned).length,
+      differences: summary.life.filter((r) => !r.aligned).length,
+      rows: summary.life,
+    }] : []),
+  ];
+  const conversations = categories.flatMap((cat) => cat.rows.filter((r) => !r.aligned));
+
   return (
     <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: Spacing.xxl }}>
       <View style={{ paddingHorizontal: Spacing.xl, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center' }}>
-        <Eyebrow>Expectations</Eyebrow>
-        <Text style={{ ...Type.hero, color: c.textStrong }}>
-          {summary.differences === 0
-            ? 'You matched on everything you both answered.'
-            : `${summary.differences} of ${summary.answered} where you assumed different things.`}
-        </Text>
-        <Text style={{ ...Type.body, color: c.textMuted, marginTop: Spacing.md }}>
-          {summary.differences === 0
-            ? 'That is rare. Worth revisiting when something in your life changes.'
-            : 'Not disagreements. Neither of you knew the other had a different answer, which is the only reason they are worth reading together.'}
-        </Text>
+        <Text style={{ ...Type.hero, color: c.textStrong }}>{you} & {them}</Text>
+        <Eyebrow>Results at a glance</Eyebrow>
 
-        <View style={{ marginTop: Spacing.xl, gap: Spacing.md }}>
-          {[
-            ...summary.categories.filter((cat) => cat.answered > 0),
-            ...(summary.life.length ? [{
-              section: 'life',
-              label: 'The bigger questions',
-              answered: summary.life.length,
-              aligned: summary.life.filter((r) => r.aligned).length,
-              differences: summary.life.filter((r) => !r.aligned).length,
-              rows: summary.life,
-            }] : []),
-          ].map((cat) => (
+        <View style={{ flexDirection: 'row', gap: Spacing.xl, marginTop: Spacing.md }}>
+          <Text style={{ ...Type.body, color: c.textMuted }}>
+            Already aligned: <Text style={{ fontWeight: '700', color: c.text }}>{summary.aligned}</Text>
+          </Text>
+          <Text style={{ ...Type.body, color: c.textMuted }}>
+            Worth discussing: <Text style={{ fontWeight: '700', color: c.text }}>{summary.differences}</Text>
+          </Text>
+        </View>
+
+        <Text style={{ ...Type.cardTitle, color: c.textStrong, marginTop: Spacing.xxl, marginBottom: Spacing.md }}>
+          Alignment by category
+        </Text>
+        <View style={{ gap: Spacing.md }}>
+          {categories.map((cat) => (
             <View
               key={cat.section}
               style={{
@@ -468,9 +470,7 @@ function ExpectationsOverview({
               }}>
               <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
                 <Text style={{ ...Type.cardTitle, color: c.textStrong, flex: 1 }}>{cat.label}</Text>
-                <Text style={{ ...Type.small, color: c.textMuted }}>
-                  {cat.differences === 0 ? 'All matched' : `${cat.differences} to talk about`}
-                </Text>
+                <Text style={{ ...Type.small, color: c.textMuted }}>{cat.aligned} of {cat.answered}</Text>
               </View>
               <View style={{ height: 4, borderRadius: Radius.pill, backgroundColor: c.border, marginTop: Spacing.md, overflow: 'hidden' }}>
                 <View
@@ -484,17 +484,15 @@ function ExpectationsOverview({
           ))}
         </View>
 
-        {summary.life.length ? (
-          <View style={{ marginTop: Spacing.xl }}>
-            <Eyebrow>The bigger questions</Eyebrow>
-            <Text style={{ ...Type.small, color: c.textMuted, marginBottom: Spacing.md }}>
-              Not about who does what. These are the ones worth knowing you see
-              differently before it matters.
+        {conversations.length ? (
+          <>
+            <Text style={{ ...Type.cardTitle, color: c.textStrong, marginTop: Spacing.xxl, marginBottom: Spacing.md }}>
+              Conversations to have
             </Text>
-            {summary.life.map((row) => (
+            {conversations.map((row) => (
               <ExpectationRowView key={row.key} row={row} you={you} them={them} />
             ))}
-          </View>
+          </>
         ) : null}
       </View>
     </ScrollView>
@@ -573,11 +571,6 @@ function ExpectationRowView({
         </View>
       </View>
 
-      {/* Said in words, not colour. A red row would make a difference read as
-          a fault, and neither answer here is the right one. */}
-      <Text style={{ ...Type.small, color: c.textMuted, marginTop: Spacing.md }}>
-        {row.aligned ? 'You pictured this the same way.' : 'Worth talking about.'}
-      </Text>
     </View>
   );
 }
@@ -610,30 +603,21 @@ function DistanceBar({ pct, state }: { pct: number | null; state: string }) {
 
 function IntimacyOverview({ data }: { data: IntimacyResults | null }) {
   if (!data) {
-    return (
-      <Waiting
-        title="Physical Intimacy"
-        body="This opens when you have both finished the exercise."
-      />
-    );
+    return <Waiting title="Physical Intimacy" body="This opens when you have both finished the exercise." />;
   }
-  const spoken = data.dimensions.filter((d) => d.state !== 'unspoken');
+  // The website's page: where you each land, then the action plan. It has no
+  // framing paragraph, so neither does this. One written here would be the app
+  // telling a couple something the product never told them.
   return (
     <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: Spacing.xxl }}>
       <View style={{ paddingHorizontal: Spacing.xl, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center' }}>
-        <Eyebrow>Physical Intimacy</Eyebrow>
-        <Text style={{ ...Type.hero, color: c.textStrong }}>
-          {data.overallState === 'aligned' ? 'You are closer together than most.'
-            : data.overallState === 'unspoken' ? 'Neither of you said much here.'
-            : 'Six things, and where each of you sits on them.'}
-        </Text>
-        <Text style={{ ...Type.body, color: c.textMuted, marginTop: Spacing.md }}>
-          None of these has a right answer. The distance is the subject, and a
-          wide one is a conversation you have not had yet rather than a problem
-          you have.
-        </Text>
+        <Text style={{ ...Type.hero, color: c.textStrong }}>Physical Intimacy Expectations</Text>
+        <Eyebrow>Results at a glance</Eyebrow>
 
-        <View style={{ marginTop: Spacing.xl, gap: Spacing.md }}>
+        <Text style={{ ...Type.cardTitle, color: c.textStrong, marginTop: Spacing.xl, marginBottom: Spacing.md }}>
+          Where you each land
+        </Text>
+        <View style={{ gap: Spacing.md }}>
           {data.dimensions.map((d) => (
             <View
               key={d.section}
@@ -650,11 +634,23 @@ function IntimacyOverview({ data }: { data: IntimacyResults | null }) {
           ))}
         </View>
 
-        {spoken.length === 0 ? (
-          <Text style={{ ...Type.small, color: c.textMuted, marginTop: Spacing.xl }}>
-            You both skipped most of this. That is a valid answer, and it stays
-            here if you ever want to come back to it.
-          </Text>
+        {data.conversations.length ? (
+          <>
+            <Text style={{ ...Type.cardTitle, color: c.textStrong, marginTop: Spacing.xxl, marginBottom: Spacing.md }}>
+              Your action plan
+            </Text>
+            {data.conversations.map((d) => (
+              <View
+                key={d.section}
+                style={{
+                  backgroundColor: c.surface, borderColor: c.border, borderWidth: 1,
+                  borderRadius: Radius.lg, padding: Spacing.lg, marginBottom: Spacing.md,
+                }}>
+                <Text style={{ ...Type.eyebrow, color: c.accentQuiet }}>{d.label}</Text>
+                <Text style={{ ...Type.body, color: c.text, marginTop: Spacing.xs }}>{d.prompt}</Text>
+              </View>
+            ))}
+          </>
         ) : null}
       </View>
     </ScrollView>
@@ -687,31 +683,24 @@ function IntimacyDimensionView({ dim }: { dim: IntimacyDimension | null }) {
         ) : null}
 
         {dim.prompt ? (
-          <View style={{ marginTop: Spacing.xl }}>
-            <Eyebrow>Ask each other</Eyebrow>
-            <Text style={{ ...Type.title, color: c.textStrong }}>{dim.prompt}</Text>
-          </View>
+          <Text style={{ ...Type.title, color: c.textStrong, marginTop: Spacing.xl }}>
+            {dim.prompt}
+          </Text>
         ) : null}
       </View>
     </ScrollView>
   );
 }
 
-/**
- * The Conversations screen: every prompt, furthest apart first.
- *
- * This is what the exercise is actually for. The scores exist to decide the
- * order of these questions, not to be the thing anyone takes away.
- */
 function IntimacyConversations({ data }: { data: IntimacyResults | null }) {
   if (!data) {
-    return <Waiting title="Conversations" body="This opens when you have both finished the exercise." />;
+    return <Waiting title="Conversations Worth Having" body="This opens when you have both finished the exercise." />;
   }
   if (!data.conversations.length) {
     return (
       <Waiting
-        title="Conversations"
-        body="You both skipped these, so there is nothing here yet. It stays if you want to come back to it."
+        title="Conversations Worth Having"
+        body="Nothing here yet. These appear for the areas you both answered."
       />
     );
   }
@@ -719,12 +708,8 @@ function IntimacyConversations({ data }: { data: IntimacyResults | null }) {
     <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: Spacing.xxl }}>
       <View style={{ paddingHorizontal: Spacing.xl, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center' }}>
         <Eyebrow>Physical Intimacy</Eyebrow>
-        <Text style={{ ...Type.hero, color: c.textStrong }}>Conversations</Text>
-        <Text style={{ ...Type.body, color: c.textMuted, marginTop: Spacing.md }}>
-          Furthest apart first. One at a time, and not all in one evening.
-        </Text>
-
-        <View style={{ marginTop: Spacing.xl, gap: Spacing.md }}>
+        <Text style={{ ...Type.title, color: c.textStrong }}>Conversations Worth Having</Text>
+        <View style={{ marginTop: Spacing.lg, gap: Spacing.md }}>
           {data.conversations.map((d) => (
             <View
               key={d.section}
@@ -753,52 +738,80 @@ function ReflectionWaiting() {
 
 function ReflectionOverview({ data }: { data: ReflectionResults | null }) {
   if (!data) return <ReflectionWaiting />;
+  // The website's page: how you feel right now, then the action plan. No
+  // opening line of its own, so none here either.
+  const commitment = data.written.find((w) => w.key === 'a6');
   return (
     <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: Spacing.xxl }}>
       <View style={{ paddingHorizontal: Spacing.xl, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center' }}>
-        <Eyebrow>Relationship Reflection</Eyebrow>
-        <Text style={{ ...Type.hero, color: c.textStrong }}>
-          You both wrote about the same year.
-        </Text>
-        <Text style={{ ...Type.body, color: c.textMuted, marginTop: Spacing.md }}>
-          {data.writtenCount > 0
-            ? `${data.writtenCount} questions you both answered in your own words, and ${data.ratings.length} you both rated.`
-            : `${data.ratings.length} questions you both rated.`}
-        </Text>
+        <Text style={{ ...Type.hero, color: c.textStrong }}>Relationship Reflection</Text>
+        <Eyebrow>Results at a glance</Eyebrow>
 
-        {data.admired.you || data.admired.them ? (
+        <Text style={{ ...Type.cardTitle, color: c.textStrong, marginTop: Spacing.xl, marginBottom: Spacing.md }}>
+          How you feel right now
+        </Text>
+        <Legend you={data.names.you} them={data.names.them} />
+        {data.ratings.map((r) => (
           <View
+            key={r.key}
             style={{
               backgroundColor: c.surface, borderColor: c.border, borderWidth: 1,
-              borderRadius: Radius.lg, padding: Spacing.lg, marginTop: Spacing.xl,
+              borderRadius: Radius.lg, padding: Spacing.lg, marginBottom: Spacing.md,
             }}>
-            <Eyebrow>What you each named</Eyebrow>
-            {data.admired.you ? (
-              <Text style={{ ...Type.body, color: c.text }}>
-                {data.names.you} admires {data.admired.them ? '' : ''}
-                {data.admired.you.toLowerCase()} in {data.names.them}.
-              </Text>
-            ) : null}
-            {data.admired.them ? (
-              <Text style={{ ...Type.body, color: c.text, marginTop: Spacing.sm }}>
-                {data.names.them} admires {data.admired.them.toLowerCase()} in {data.names.you}.
-              </Text>
-            ) : null}
+            <Text style={{ ...Type.cardTitle, color: c.textStrong }}>{r.question}</Text>
+            <View style={{ height: 28, justifyContent: 'center', marginTop: Spacing.lg }}>
+              <View style={{ height: 3, borderRadius: Radius.pill, backgroundColor: c.border }} />
+              <Marker left={r.you.pct} color={YOU_COLOR} label={initial(data.names.you)} />
+              <Marker left={r.them.pct} color={THEM_COLOR} label={initial(data.names.them)} />
+            </View>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: Spacing.xs }}>
+              <Text style={{ ...Type.small, color: c.textMuted, flex: 1 }}>{r.low}</Text>
+              <Text style={{ ...Type.small, color: c.textMuted, flex: 1, textAlign: 'right' }}>{r.high}</Text>
+            </View>
           </View>
-        ) : null}
+        ))}
 
-        {data.widest ? (
-          <View style={{ marginTop: Spacing.xl }}>
-            <Eyebrow>Furthest apart</Eyebrow>
-            <Text style={{ ...Type.title, color: c.textStrong }}>{data.widest.question}</Text>
-            <Text style={{ ...Type.body, color: c.textMuted, marginTop: Spacing.sm }}>
-              {data.names.you} said {data.widest.you.label.toLowerCase()}.{' '}
-              {data.names.them} said {data.widest.them.label.toLowerCase()}.
+        {commitment ? (
+          <>
+            <Text style={{ ...Type.cardTitle, color: c.textStrong, marginTop: Spacing.xxl, marginBottom: Spacing.md }}>
+              Your action plan
             </Text>
-          </View>
+            <WrittenPair
+              you={data.names.you}
+              them={data.names.them}
+              yourWords={commitment.you}
+              theirWords={commitment.them}
+            />
+          </>
         ) : null}
       </View>
     </ScrollView>
+  );
+}
+
+/** Two people's words on the same question, stacked and attributed. */
+function WrittenPair({
+  you, them, yourWords, theirWords,
+}: { you: string; them: string; yourWords: string; theirWords: string }) {
+  return (
+    <>
+      <View
+        style={{
+          backgroundColor: c.surface, borderColor: c.border, borderWidth: 1,
+          borderRadius: Radius.lg, padding: Spacing.lg, marginBottom: Spacing.sm,
+        }}>
+        <Eyebrow>{you}</Eyebrow>
+        <Text style={{ ...Type.body, color: c.text }}>{yourWords}</Text>
+      </View>
+      <View
+        style={{
+          backgroundColor: c.surface, borderColor: c.border, borderWidth: 1,
+          borderRadius: Radius.lg, padding: Spacing.lg,
+        }}>
+        <Eyebrow color={c.textMuted}>{them}</Eyebrow>
+        <Text style={{ ...Type.body, color: c.text }}>{theirWords}</Text>
+      </View>
+    </>
   );
 }
 
@@ -847,10 +860,11 @@ function ReflectionRatings({ data }: { data: ReflectionResults | null }) {
               <Text style={{ ...Type.small, color: c.textMuted, flex: 1, textAlign: 'right' }}>{r.high}</Text>
             </View>
 
+            {/* Both answers, always, in their own words. This used to say
+                "You rated this the same" when the two matched, which is the
+                app drawing a conclusion the website leaves to the reader. */}
             <Text style={{ ...Type.small, color: c.textMuted, marginTop: Spacing.md }}>
-              {r.gapSteps === 0
-                ? 'You rated this the same.'
-                : `${data.names.you}: ${r.you.label}. ${data.names.them}: ${r.them.label}.`}
+              {data.names.you}: {r.you.label}. {data.names.them}: {r.them.label}.
             </Text>
           </View>
         ))}
@@ -882,9 +896,6 @@ function ReflectionStory({ data }: { data: ReflectionResults | null }) {
       <View style={{ paddingHorizontal: Spacing.xl, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center' }}>
         <Eyebrow>Relationship Reflection</Eyebrow>
         <Text style={{ ...Type.title, color: c.textStrong }}>Side by Side</Text>
-        <Text style={{ ...Type.body, color: c.textMuted, marginTop: Spacing.sm, marginBottom: Spacing.lg }}>
-          In your own words, unedited.
-        </Text>
 
         {data.written.map((w) => (
           <View key={w.key} style={{ marginBottom: Spacing.xl }}>
@@ -1026,10 +1037,6 @@ function WhatComesNext({
       <View style={{ paddingHorizontal: Spacing.xl, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center' }}>
         <Eyebrow>What comes next</Eyebrow>
         <Text style={{ ...Type.hero, color: c.textStrong }}>What to do with all of this.</Text>
-        <Text style={{ ...Type.body, color: c.textMuted, marginTop: Spacing.md }}>
-          Not all at once. One of these, this week, is more than most couples do
-          with a result like this.
-        </Text>
 
         {data.groups.map((group) => (
           <View key={group.id} style={{ marginTop: Spacing.xl }}>
