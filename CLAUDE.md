@@ -93,10 +93,32 @@ Existing single sources of truth:
 `npm run check` runs all of them, and `npm run build` runs them before
 building. They exist because each one caught a real bug that shipped.
 
-`npm run smoke` renders 26 results sections in a headless browser.
+`npm run smoke` builds, serves, and renders every results section in whatever
+Chrome is installed. It reports 25 of 25. It was never 26: the old hardcoded
+list asked for `exp-convo-5`, and there have only ever been five expectations
+categories, so the conversations are 0 to 4. The list derives from
+`RESULTS_SECTIONS` now and cannot drift again.
 
 **A gate that passes for the wrong reason is worse than no gate.** When you add
 one, verify it by planting the bug it is meant to catch and watching it fail.
+
+**If you find yourself building a fixture that mirrors an existing one, stop.**
+That is the signal you are writing a second version of a rule rather than a
+second half of it. Two gates that test the same thing slightly differently is
+the same failure as two copies of a rule: they drift, and the weaker one wins
+because it is the one that still passes.
+
+The split that is worth having is by *what* is checked, not by how. When the
+conflict privacy rule needed a second gate, the useful division was: one proves
+the allowlist itself carries no pattern data, the other proves no endpoint
+bypasses the allowlist. Neither could be deleted without losing coverage. A
+second fixture would have been a rewrite with a different name.
+
+**A gate encodes a rule, not the current state.** Write it so the reason
+survives: name the promise, and say what it deliberately does not cover.
+`check-partner-privacy.mjs` is scoped to Conflict Patterns and says why
+Physical Intimacy is out of scope, so nobody reads it as "partner data is
+private" and either widens it into a feature or quietly loosens it.
 
 ---
 
@@ -138,8 +160,14 @@ Identifiers: Team `HX5FX68K6L`, bundle `com.attunerelationships.app`.
 
 The API base URL is `https://www.attune-relationships.com`. **Keep the www.**
 
-Built: home, resources, insights, sign-in. Placeholder: notes. Not built: the
-results experience, which is the largest remaining piece.
+Built: home, resources, insights, sign-in, notes, settings, all five exercises,
+and the full results experience. The nav is two levels and comes from the
+server (`resultsNav` in `api/_lib/results-sections.js`), matching the website's
+sidebar; all 29 sections render, and `check-results-coverage.mjs` fails the
+build if the server sends one the app cannot draw.
+
+Not built: Highlights beyond the storycards, the post reader, notifications,
+tab-bar badges, and Notes filtering.
 
 ---
 
