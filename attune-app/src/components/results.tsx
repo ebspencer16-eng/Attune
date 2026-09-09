@@ -1474,6 +1474,7 @@ function CoupleType({ results, you, them }: { results: CoupleResults; you: strin
   return (
     <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: ResultsBottomInset }}>
       <View style={{ paddingHorizontal: Spacing.xl, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center' }}>
+        {/* block: couple-type/name */}
         <Text style={{ ...Type.eyebrow, color: accent }}>Couple type</Text>
         <Text style={{ ...Type.hero, color: c.textStrong, marginTop: Spacing.sm }}>{type.name}</Text>
         <Text style={{ ...Type.body, color: c.textMuted, marginTop: Spacing.sm }}>
@@ -1487,6 +1488,7 @@ function CoupleType({ results, you, them }: { results: CoupleResults; you: strin
             because the map returns null on an older cached payload that has no
             coords, and a wrapper with a margin around nothing leaves a hole in
             the page that looks like a failed image. */}
+        {/* block: couple-type/map */}
         <CoupleMap
           a={results.partners?.a ?? null}
           b={results.partners?.b ?? null}
@@ -1495,6 +1497,7 @@ function CoupleType({ results, you, them }: { results: CoupleResults; you: strin
           quadrants={results.content?.mapQuadrants}
         />
 
+        {/* block: couple-type/description */}
         <View style={{ ...card(), marginTop: Spacing.xl, borderLeftColor: accent, borderLeftWidth: 3 }}>
           <Text style={{ ...Type.body, color: c.text }}>{interp(type.description, you, them)}</Text>
         </View>
@@ -1505,6 +1508,7 @@ function CoupleType({ results, you, them }: { results: CoupleResults; you: strin
         {type.strengths?.length ? (
           <View style={{ marginTop: Spacing.xl }}>
             <Text style={{ ...Type.eyebrow, color: accent, marginBottom: Spacing.sm }}>
+              {/* block: couple-type/strengths */}
               What comes naturally
             </Text>
             {type.strengths.slice(0, 2).map((t) => (
@@ -1518,6 +1522,7 @@ function CoupleType({ results, you, them }: { results: CoupleResults; you: strin
         {type.stickingPoints?.length ? (
           <View style={{ marginTop: Spacing.lg }}>
             <Text style={{ ...Type.eyebrow, color: accent, marginBottom: Spacing.sm }}>
+              {/* block: couple-type/sticking-points */}
               What&apos;s worth being aware of
             </Text>
             {type.stickingPoints.slice(0, 2).map((t) => (
@@ -1541,6 +1546,7 @@ function CoupleType({ results, you, them }: { results: CoupleResults; you: strin
         {type.tips?.length ? (
           <View style={{ marginTop: Spacing.xl }}>
             <Text style={{ ...Type.eyebrow, color: accent, marginBottom: Spacing.sm }}>
+              {/* block: couple-type/tips */}
               Phrase to try
             </Text>
             {type.tips.map((tip) => (

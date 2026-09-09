@@ -43,14 +43,23 @@ export function capabilitiesFor(profile) {
   // workbook and admin code that works from orders does not need its own copy.
   const pkg = p.pkg || p.pkg_key || 'core';
 
-  // Premium bundles reflection and conflict. It does not bundle intimacy,
-  // which is add-on only on every package.
-  const ownsReflection = pkg === 'premium' || pkg === 'anniversary' || !!p.addon_reflection;
-  const ownsIntimacy = !!p.addon_intimacy;
-  const ownsConflict = pkg === 'premium' || !!p.addon_conflict;
-  const ownsBudget = pkg === 'premium' || pkg === 'newlywed' || !!p.addon_budget;
-  const ownsChecklist = pkg === 'newlywed' || !!p.addon_checklist;
-  const ownsWorkbook = pkg === 'premium' || !!p.addon_workbook;
+  // ── WHAT EACH PACKAGE BUNDLES COMES FROM PKG_CAPS ────────────────────────
+  // These lines used to name the packages themselves: `pkg === 'premium' ||
+  // pkg === 'newlywed'`. That is package inclusion, written out a second time,
+  // in a file that is not PKG_CAPS. It happened to agree, and nothing checked
+  // that it did. Package inclusion living in four places is the bug CLAUDE.md
+  // opens with, and this was the fourth place.
+  //
+  // Change what a package includes in PKG_CAPS and this follows. An add-on
+  // flag on the profile grants on top, as it always did.
+  const caps = PKG_CAPS[pkg] || PKG_CAPS.core;
+  const ownsReflection = !!caps.hasReflection || !!p.addon_reflection;
+  // Intimacy is add-on only on every package, so no capability bundles it.
+  const ownsIntimacy = !!caps.hasIntimacy || !!p.addon_intimacy;
+  const ownsConflict = !!caps.hasConflict || !!p.addon_conflict;
+  const ownsBudget = !!caps.hasBudget || !!p.addon_budget;
+  const ownsChecklist = !!caps.hasChecklist || !!p.addon_checklist;
+  const ownsWorkbook = !!caps.hasWorkbook || !!p.addon_workbook;
 
   return {
     pkg,

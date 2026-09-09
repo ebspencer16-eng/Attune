@@ -7288,6 +7288,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
           <div style={{ background: "white", border: `1.5px solid ${C.stone}`, borderRadius: 20, padding: isMobile ? "1.25rem" : "1.75rem", marginBottom: "1.5rem" }}>
             <div style={{ display: "flex", justifyContent: "center", marginBottom: "1.5rem" }}>
               <div style={{ width: "100%", maxWidth: isMobile ? 340 : 420 }}>
+                {/* block: couple-type/map */}
                 <CoupleMapSVG myS={myS} partS={partS} userName={userName} partnerName={partnerName} size={isMobile ? 320 : 400} />
               </div>
             </div>
@@ -7405,6 +7406,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
               <div style={{ position: "absolute", bottom: -20, right: -10, fontFamily: HFONT, fontSize: "6rem", fontWeight: 700, color: "rgba(255,255,255,0.08)", lineHeight: 1, pointerEvents: "none", userSelect: "none", letterSpacing: "-0.04em", whiteSpace: "nowrap" }}>
                 {ct.name.replace("The ", "")}
               </div>
+              {/* block: couple-type/name */}
               <div style={{ fontFamily: HFONT, fontSize: "clamp(2.4rem, 6vw, 3.6rem)", fontWeight: 700, color: "white", lineHeight: 0.95, marginBottom: "0.85rem", letterSpacing: "-0.03em" }}>
                 {ct.name}
               </div>
@@ -7414,6 +7416,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
             </div>
           </div>
 
+          {/* block: couple-type/description */}
           {/* 7. WHAT THIS LOOKS LIKE IN YOUR RELATIONSHIP */}
           <div style={{ background: "white", border: `1.5px solid ${C.stone}`, borderRadius: 18, padding: "1.75rem", marginBottom: "1.25rem" }}>
             <div style={{ fontSize: "0.6rem", letterSpacing: "0.22em", textTransform: "uppercase", color: ct.color, fontFamily: BFONT, fontWeight: 700, marginBottom: "1rem" }}>
@@ -7428,6 +7431,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
           <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: "1rem", marginBottom: "1.25rem" }}>
             {ct.strengths?.length > 0 && (
               <div style={{ background: "white", border: `1.5px solid ${C.stone}`, borderRadius: 18, padding: "1.5rem" }}>
+                {/* block: couple-type/strengths */}
                 <div style={{ fontSize: "0.6rem", letterSpacing: "0.2em", textTransform: "uppercase", color: "#10b981", fontFamily: BFONT, fontWeight: 700, marginBottom: "1rem" }}>What comes naturally</div>
                 <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
                   {ct.strengths.slice(0,2).map((sx, i) => (
@@ -7443,6 +7447,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
             )}
             {ct.stickingPoints?.length > 0 && (
               <div style={{ background: "white", border: `1.5px solid ${C.stone}`, borderRadius: 18, padding: "1.5rem" }}>
+                {/* block: couple-type/sticking-points */}
                 <div style={{ fontSize: "0.6rem", letterSpacing: "0.2em", textTransform: "uppercase", color: "#E8673A", fontFamily: BFONT, fontWeight: 700, marginBottom: "1rem" }}>What's worth being aware of</div>
                 <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
                   {_proseSet(ct.stickingPoints, _nearProse.stickingPointsNearEngage, _nearProse.stickingPointsNearOpen).slice(0,2).map((sx, i) => (
@@ -7472,6 +7477,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
                   <p style={{ fontSize: "0.82rem", color: C.muted, fontFamily: BFONT, lineHeight: 1.72, margin: "0 0 0.75rem", fontWeight: 300 }}>{interp(tip.body)}</p>
                   {tip.phraseTry && (
                     <div style={{ background: `${tipColor}0d`, border: `1px solid ${tipColor}30`, borderRadius: 8, padding: "0.55rem 0.8rem", display: "flex", gap: "0.5rem", alignItems: "flex-start" }}>
+                      {/* block: couple-type/tips */}
                       <span style={{ fontSize: "0.58rem", letterSpacing: "0.16em", textTransform: "uppercase", color: tipColor, fontFamily: BFONT, fontWeight: 700, whiteSpace: "nowrap", marginTop: "0.1rem" }}>Phrase to try</span>
                       <span style={{ fontSize: "0.78rem", color: C.ink, fontFamily: BFONT, fontStyle: "italic", lineHeight: 1.55 }}>"{interp(tip.phraseTry)}"</span>
                     </div>
