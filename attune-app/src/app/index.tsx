@@ -24,7 +24,9 @@ import type { ApiError, HomeCard, HomeResponse } from '@/api/client';
 import { ScreenError, ScreenLoading } from '@/components/screen-states';
 import SignIn from '@/components/sign-in';
 import Settings from '@/components/settings';
-import { Colors, MaxContentWidth, Palette, Radius, Spacing, Type } from '@/constants/attune-theme';
+import {
+  AccentFallback, AccentFor, Colors, MaxContentWidth, Palette, Radius, Spacing, Type,
+} from '@/constants/attune-theme';
 
 const c = Colors.light;
 const SITE = 'https://www.attune-relationships.com';
@@ -221,28 +223,35 @@ function Shell({ children }: { children: React.ReactNode }) {
 }
 
 /**
- * The one prompt. It used to be a white card lifting off a dark gradient. On
- * the cream ground it takes the same hairline border the list below it uses,
- * so the two agree about what a container looks like.
+ * The one prompt.
  *
- * The call to action is a real button rather than a line of coloured text:
- * this is the single thing the screen is asking for, and it should look like
- * it. It is also the only orange on the screen, so the eyebrow above it is
- * quiet. Two oranges in one card and neither one means anything.
+ * ── WHY THIS CARD IS COLOURED AND THE PAGE IS NOT ─────────────────────────
+ * The screen used to run a three-hue gradient behind the top two thirds, which
+ * was the app inventing a palette the site does not have. Replacing it with
+ * cream made the page correct and made it colourless, which is a different
+ * problem: nothing on it said what kind of product this is.
+ *
+ * So the colour is on the one card the screen is about, in the same shape the
+ * results glance already uses for its lead card. That is the product's own
+ * language rather than a new one, it puts the colour where the attention is
+ * meant to go, and it leaves everything else on the cream ground the rest of
+ * the app shares.
+ *
+ * The call to action stays orange on it. Orange on indigo is the contrast the
+ * site uses, and it keeps the button the single loudest thing on the screen.
  */
 function PrimaryCard({ card, onPress }: { card: HomeCard; onPress: () => void }) {
   const dim = !!card.disabled;
   return (
     <View
       style={{
-        backgroundColor: c.surface, borderRadius: Radius.xl,
-        borderColor: c.border, borderWidth: 1,
+        backgroundColor: Palette.indigo, borderRadius: Radius.xl,
         padding: Spacing.xl, opacity: dim ? 0.6 : 1,
       }}>
-      <Text style={{ ...Type.eyebrow, color: c.textMuted }}>Next for you</Text>
-      <Text style={{ ...Type.title, color: c.textStrong, marginTop: Spacing.sm }}>{card.title}</Text>
+      <Text style={{ ...Type.eyebrow, color: 'rgba(255,255,255,0.7)' }}>Next for you</Text>
+      <Text style={{ ...Type.title, color: Palette.white, marginTop: Spacing.sm }}>{card.title}</Text>
       {card.body ? (
-        <Text style={{ ...Type.body, color: c.textMuted, marginTop: Spacing.sm }}>{card.body}</Text>
+        <Text style={{ ...Type.body, color: 'rgba(255,255,255,0.82)', marginTop: Spacing.sm }}>{card.body}</Text>
       ) : null}
       {card.cta && !dim ? (
         <Pressable
@@ -259,6 +268,28 @@ function PrimaryCard({ card, onPress }: { card: HomeCard; onPress: () => void })
   );
 }
 
+/**
+ * Which colour a home card wears.
+ *
+ * ── WHY NOT AccentFor[card.id] ────────────────────────────────────────────
+ * Because that never matches. Home card ids are what the priority engine calls
+ * them, not registry keys: `finish-ex1`, `use-budget`, `revisit`,
+ * `open-results`. AccentFor is keyed by exercise and catalogue key, so every
+ * row fell through to the neutral and the whole column came out the same
+ * brown. A colour that is always the same is worse than no colour: it looks
+ * like it means something.
+ *
+ * The exercise key is on `app.exercise` when the card opens one. Otherwise it
+ * is the part of the id after the verb, which is how `use-budget` finds the
+ * budget colour. Anything else is genuinely not about one exercise, and gets
+ * the neutral honestly.
+ */
+function accentForCard(card: HomeCard): string {
+  const fromRoute = card.app?.exercise;
+  const fromId = card.id.includes('-') ? card.id.slice(card.id.indexOf('-') + 1) : card.id;
+  return AccentFor[fromRoute || ''] || AccentFor[fromId] || AccentFallback;
+}
+
 /** Everything else: one line each, present but not competing. */
 function SecondaryRow({ card, first, onPress }: { card: HomeCard; first: boolean; onPress: () => void }) {
   const dim = !!card.disabled;
@@ -269,6 +300,10 @@ function SecondaryRow({ card, first, onPress }: { card: HomeCard; first: boolean
       style={{
         paddingVertical: Spacing.lg, paddingHorizontal: Spacing.lg,
         borderTopWidth: first ? 0 : 1, borderTopColor: c.border,
+        // The exercise's own colour, from the same lookup the rest of the app
+        // uses, so a row here and its results screen agree.
+        borderLeftWidth: 3,
+        borderLeftColor: accentForCard(card),
         flexDirection: 'row', alignItems: 'center', gap: Spacing.md,
         opacity: dim ? 0.5 : 1,
       }}>

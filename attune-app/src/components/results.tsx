@@ -50,6 +50,17 @@ const THEM_COLOR = Palette.ink;
 const c = Colors.light;
 
 /**
+ * How much room every results section leaves at the bottom.
+ *
+ * The previous and next buttons used to sit under the content and carried
+ * BottomTabInset, so they were what kept the last card clear of the tab bar.
+ * Removing them took that with it, and the last paragraph of every section
+ * would have run underneath Home and Insights. The clearance belongs to the
+ * scrolling content, not to a row that happened to be there.
+ */
+const ResultsBottomInset = BottomTabInset + Spacing.lg;
+
+/**
  * How many protocols the Communication overview shows.
  *
  * The website's limit, named there as COMMS_PROTOCOL_LIMIT in src/App.jsx.
@@ -151,7 +162,6 @@ export default function Results({
   const groupX = useRef<Record<string, number>>({});
   const pageX = useRef<Record<string, number>>({});
   const section = sections.some((s) => s.id === sectionId) ? sectionId : (sections[0]?.id ?? 'highlights');
-  const index = sections.findIndex((s) => s.id === section);
   const activeGroup = groupOf(section);
 
   useEffect(() => {
@@ -300,47 +310,11 @@ export default function Results({
           wideGap={wideGap}
         />
       </View>
-
-      {/* Straight through, in the website's order. Someone reading results is
-          reading them, not hunting for the next pill: the spine above is for
-          jumping, and this is for going. */}
-      <View
-        style={{
-          flexDirection: 'row', gap: Spacing.md,
-          paddingHorizontal: Spacing.xl,
-          paddingTop: Spacing.md,
-          // Clear of the tab bar. Without this the row rendered underneath it,
-          // so the next section was a strip of colour behind Home and Insights.
-          paddingBottom: BottomTabInset,
-          backgroundColor: c.background,
-          borderTopColor: c.border,
-          borderTopWidth: 1,
-        }}>
-        {index > 0 ? (
-          <Pressable
-            onPress={() => rememberSection(sections[index - 1].id)}
-            style={{
-              flex: 1, paddingVertical: Spacing.md, borderRadius: Radius.md, alignItems: 'center',
-              backgroundColor: c.surface, borderColor: c.border, borderWidth: 1,
-            }}>
-            <Text numberOfLines={1} style={{ ...Type.small, fontWeight: '700', color: c.textMuted }}>
-              {sections[index - 1].label}
-            </Text>
-          </Pressable>
-        ) : null}
-        {index >= 0 && index < sections.length - 1 ? (
-          <Pressable
-            onPress={() => rememberSection(sections[index + 1].id)}
-            style={{
-              flex: 1, paddingVertical: Spacing.md, borderRadius: Radius.md, alignItems: 'center',
-              backgroundColor: c.accent,
-            }}>
-            <Text numberOfLines={1} style={{ ...Type.small, fontWeight: '700', color: c.onDark }}>
-              {sections[index + 1].label}
-            </Text>
-          </Pressable>
-        ) : null}
-      </View>
+      {/* No previous and next buttons.
+          They ran across the bottom of every results page, taking a strip of
+          the screen on the longest pages in the product to offer a move the
+          nav above already offers, by name, to any section rather than only
+          the adjacent one. Reading results is not a wizard. */}
     </View>
   );
 }
@@ -509,7 +483,7 @@ function ExpectationsOverview({
   const conversations = categories.flatMap((cat) => cat.rows.filter((r) => !r.aligned));
 
   return (
-    <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: Spacing.xxxl }}>
+    <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: ResultsBottomInset }}>
       <View style={{ paddingHorizontal: Spacing.xl, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center' }}>
         <Text style={{ ...Type.hero, color: c.textStrong }}>{you} & {them}</Text>
         <Eyebrow>Results at a glance</Eyebrow>
@@ -590,7 +564,7 @@ function ExpectationsConversation({
   const ordered = [...bucket.rows].sort((a, b) => Number(a.aligned) - Number(b.aligned));
 
   return (
-    <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: Spacing.xxxl }}>
+    <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: ResultsBottomInset }}>
       <View style={{ paddingHorizontal: Spacing.xl, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center' }}>
         <Eyebrow>Expectations</Eyebrow>
         <Text style={{ ...Type.title, color: c.textStrong }}>{bucket.label}</Text>
@@ -678,7 +652,7 @@ function IntimacyOverview({ data }: { data: IntimacyResults | null }) {
   // framing paragraph, so neither does this. One written here would be the app
   // telling a couple something the product never told them.
   return (
-    <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: Spacing.xxxl }}>
+    <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: ResultsBottomInset }}>
       <View style={{ paddingHorizontal: Spacing.xl, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center' }}>
         <Text style={{ ...Type.hero, color: c.textStrong }}>Physical Intimacy Expectations</Text>
         <Eyebrow>Results at a glance</Eyebrow>
@@ -741,7 +715,7 @@ function IntimacyDimensionView({
     return <Waiting title="Physical Intimacy" body="This opens when you have both finished the exercise." />;
   }
   return (
-    <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: Spacing.xxxl }}>
+    <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: ResultsBottomInset }}>
       <View style={{ paddingHorizontal: Spacing.xl, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center' }}>
         <Eyebrow>Physical Intimacy</Eyebrow>
         <Text style={{ ...Type.title, color: c.textStrong }}>{dim.label}</Text>
@@ -818,7 +792,7 @@ function IntimacyConversations({ data }: { data: IntimacyResults | null }) {
     );
   }
   return (
-    <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: Spacing.xxxl }}>
+    <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: ResultsBottomInset }}>
       <View style={{ paddingHorizontal: Spacing.xl, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center' }}>
         <Eyebrow>Physical Intimacy</Eyebrow>
         <Text style={{ ...Type.title, color: c.textStrong }}>Conversations Worth Having</Text>
@@ -855,7 +829,7 @@ function ReflectionOverview({ data }: { data: ReflectionResults | null }) {
   // opening line of its own, so none here either.
   const commitment = data.written.find((w) => w.key === 'a6');
   return (
-    <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: Spacing.xxxl }}>
+    <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: ResultsBottomInset }}>
       <View style={{ paddingHorizontal: Spacing.xl, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center' }}>
         <Text style={{ ...Type.hero, color: c.textStrong }}>Relationship Reflection</Text>
         <Eyebrow>Results at a glance</Eyebrow>
@@ -987,7 +961,7 @@ function ReflectionRatings({ data }: { data: ReflectionResults | null }) {
     return <Waiting title="How You Each Rated" body="Neither of you answered the rating questions." />;
   }
   return (
-    <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: Spacing.xxxl }}>
+    <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: ResultsBottomInset }}>
       <View style={{ paddingHorizontal: Spacing.xl, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center' }}>
         <Eyebrow>Relationship Reflection</Eyebrow>
         <Text style={{ ...Type.title, color: c.textStrong }}>How You Each Rated</Text>
@@ -1050,7 +1024,7 @@ function ReflectionStory({ data }: { data: ReflectionResults | null }) {
     );
   }
   return (
-    <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: Spacing.xxxl }}>
+    <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: ResultsBottomInset }}>
       <View style={{ paddingHorizontal: Spacing.xl, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center' }}>
         <Eyebrow>Relationship Reflection</Eyebrow>
         <Text style={{ ...Type.title, color: c.textStrong }}>Side by Side</Text>
@@ -1102,7 +1076,7 @@ function ReflectionPlan({
   const bothRanked = data.priorities.you && data.priorities.them;
 
   return (
-    <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: Spacing.xxxl }}>
+    <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: ResultsBottomInset }}>
       <View style={{ paddingHorizontal: Spacing.xl, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center' }}>
         <Eyebrow>Relationship Reflection</Eyebrow>
         <Text style={{ ...Type.title, color: c.textStrong }}>Action Plan</Text>
@@ -1217,7 +1191,7 @@ function WhatComesNext({
     );
   }
   return (
-    <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: Spacing.xxxl }}>
+    <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: ResultsBottomInset }}>
       <View style={{ paddingHorizontal: Spacing.xl, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center' }}>
         <Eyebrow>What comes next</Eyebrow>
         <Text style={{ ...Type.hero, color: c.textStrong }}>What to do with all of this.</Text>
@@ -1266,7 +1240,7 @@ function WhatComesNext({
 
 function Waiting({ title, body }: { title: string; body: string }) {
   return (
-    <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: Spacing.xxxl }}>
+    <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: ResultsBottomInset }}>
       <View style={{ paddingHorizontal: Spacing.xl, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center' }}>
         <Text style={{ ...Type.title, color: c.textStrong }}>{title}</Text>
         <Text style={{ ...Type.body, color: c.textMuted, marginTop: Spacing.sm }}>{body}</Text>
@@ -1277,7 +1251,7 @@ function Waiting({ title, body }: { title: string; body: string }) {
 
 function NotYet({ section }: { section: string }) {
   return (
-    <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: Spacing.xxxl }}>
+    <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: ResultsBottomInset }}>
       <View style={{ paddingHorizontal: Spacing.xl, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center' }}>
         <View style={{ backgroundColor: c.surface, borderColor: c.border, borderWidth: 1, borderRadius: Radius.lg, padding: Spacing.xl }}>
           <Text style={{ ...Type.eyebrow, color: c.accentQuiet }}>Not on your phone yet</Text>
@@ -1312,7 +1286,7 @@ function Glance({
   const find = (k: string) => dims.find((d) => d.key === k);
 
   return (
-    <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: Spacing.xxxl }}>
+    <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: ResultsBottomInset }}>
       <View style={{ paddingHorizontal: Spacing.xl, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center' }}>
         <LinearGradient
           colors={['#1B2A5E', '#2F55C4']}
@@ -1420,7 +1394,7 @@ function CoupleType({ results, you, them }: { results: CoupleResults; you: strin
   const accent = type.color || c.accent;
 
   return (
-    <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: Spacing.xxxl }}>
+    <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: ResultsBottomInset }}>
       <View style={{ paddingHorizontal: Spacing.xl, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center' }}>
         <Text style={{ ...Type.eyebrow, color: accent }}>Couple type</Text>
         <Text style={{ ...Type.hero, color: c.textStrong, marginTop: Spacing.sm }}>{type.name}</Text>
@@ -1476,13 +1450,15 @@ function CoupleType({ results, you, them }: { results: CoupleResults; you: strin
           </View>
         ) : null}
 
-        {/* The nuance line keeps the website's heading now. "Worth watching"
-            was the app naming a section for itself. */}
-        {type.nuance ? (
-          <View style={{ ...card(), marginTop: Spacing.lg }}>
-            <Text style={{ ...Type.body, color: c.text }}>{interp(type.nuance, you, them)}</Text>
-          </View>
-        ) : null}
+        {/* No nuance card. The website's couple-type page does not render
+            coupleType.nuance at all: the only place that field is read is the
+            workbook payload. The app was showing it, first under a heading it
+            invented and then as an unlabelled third tile under "What's worth
+            being aware of", where it also broke the spacing rhythm because it
+            carried a section-level margin inside a list of tiles.
+
+            Both problems were the same problem. It is copy the app was showing
+            and the website was not. */}
 
         {type.tips?.length ? (
           <View style={{ marginTop: Spacing.xl }}>
@@ -1512,7 +1488,7 @@ function Domain({
   you: string; them: string; viewer: 'a' | 'b'; wideGap: number | null;
 }) {
   return (
-    <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: Spacing.xxxl }}>
+    <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: ResultsBottomInset }}>
       <View style={{ paddingHorizontal: Spacing.xl, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center' }}>
         <Text style={{ ...Type.eyebrow, color: accent }}>Communication</Text>
         <Text style={{ ...Type.title, color: c.textStrong, marginTop: Spacing.xs, marginBottom: Spacing.lg }}>

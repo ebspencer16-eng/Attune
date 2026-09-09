@@ -23,7 +23,9 @@ import {
 import { LinearGradient } from 'expo-linear-gradient';
 
 import type { HighlightCard } from '@/api/client';
-import { Colors, Palette, Radius, Spacing, Type } from '@/constants/attune-theme';
+import {
+  BottomTabInset, Colors, Palette, Radius, Spacing, Type,
+} from '@/constants/attune-theme';
 
 const c = Colors.light;
 
@@ -90,7 +92,13 @@ export default function HighlightCards({
       <View
         style={{
           flexDirection: 'row', justifyContent: 'center', alignItems: 'center',
-          gap: Spacing.xs, paddingVertical: Spacing.md,
+          gap: Spacing.xs, paddingTop: Spacing.md,
+          // Clear of the tab bar. The results pages used to have a previous
+          // and next row under them that carried this; removing it left the
+          // dots, and the bottom of the card, underneath Home and Insights.
+          // This view does not scroll, so it cannot borrow the clearance the
+          // other sections got from their content padding.
+          paddingBottom: BottomTabInset,
         }}>
         {cards.map((card, i) => (
           <Pressable key={card.id} onPress={() => goTo(i)} hitSlop={8}>
