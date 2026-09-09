@@ -36,6 +36,9 @@ const json = (b, s = 200) => new Response(JSON.stringify(b), { status: s, header
 /** Canonical couple key, so both partners compute the same string. */
 const coupleKeyOf = (a, b) => [a, b].sort().join(':');
 
+/** Note and tag ids are uuids. Anything else is a malformed request. */
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 export default async function handler(req) {
   const supabaseUrl = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
   const serviceKey = process.env.SUPABASE_SERVICE_KEY
@@ -97,7 +100,7 @@ export default async function handler(req) {
       const allIds = [...mine, ...shared].map(n => n.id);
       const tagsByNote = {};
       if (allIds.length) {
-        const inList = allIds.map(id => `"${id}"`).join(',');
+        const inList = allIds.map(id => `"${encodeURIComponent(id)}"`).join(',');
         const ntRes = await rest(`note_tags?note_id=in.(${inList})&select=note_id,tag_id`, { headers: svc });
         for (const row of (await ntRes.json().catch(() => []))) {
           (tagsByNote[row.note_id] ||= []).push(row.tag_id);
@@ -198,11 +201,17 @@ export default async function handler(req) {
     }
 
     if (action === 'update' || action === 'share' || action === 'delete') {
-      if (!body.id) return json({ ok: false, error: 'missing id' }, 400);
+      // Shape-checked before it goes anywhere near a URL. notes.id is a uuid,
+      // so anything else is a malformed request rather than a note that does
+      // not exist, and saying so is better than building a query around it.
+      if (!body.id || !UUID_RE.test(String(body.id))) {
+        return json({ ok: false, error: 'missing or invalid id' }, 400);
+      }
+      const noteId = encodeURIComponent(String(body.id));
       // owner_id in the filter is the authorisation: another person's note
       // simply matches nothing rather than erroring in a way that confirms it
       // exists.
-      const scope = `notes?id=eq.${body.id}&owner_id=eq.${me}`;
+      const scope = `notes?id=eq.${noteId}&owner_id=eq.${me}`;
 
       if (action === 'delete') {
         const r = await rest(scope, { method: 'DELETE', headers: { ...svc, Prefer: 'return=representation' } });
@@ -234,7 +243,7 @@ export default async function handler(req) {
       // produces, and a diff would need the client to know what is already
       // there and be right about it.
       if (action === 'update' && Array.isArray(body.tagIds)) {
-        await rest(`note_tags?note_id=eq.${body.id}`, { method: 'DELETE', headers: svc });
+        await rest(`note_tags?note_id=eq.${noteId}`, { method: 'DELETE', headers: svc });
         if (body.tagIds.length) {
           await rest('note_tags', {
             method: 'POST',

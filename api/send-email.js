@@ -22,6 +22,8 @@
 
 export const config = { runtime: 'edge' };
 
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 const FROM = process.env.FROM_EMAIL || 'hello@attune-relationships.com';
 
 // ── Shared layout wrapper ────────────────────────────────────────────────────
@@ -500,7 +502,11 @@ export default async function handler(req) {
   const { type } = body;
   let email;
 
-  const userId = body.userId || null;
+  // Client-supplied, and it is interpolated into a PostgREST filter below.
+  // Shape-checked here so a malformed value is rejected rather than built into
+  // a query, and encoded at each use.
+  const rawUserId = body.userId || null;
+  const userId = (rawUserId && UUID_RE.test(String(rawUserId))) ? String(rawUserId) : null;
   if (type === 'partner_invite') {
     if (!body.toEmail || !body.fromName) return new Response('Missing toEmail or fromName', { status: 400 });
     email = partnerInviteEmail(body, userId);
@@ -533,7 +539,7 @@ export default async function handler(req) {
         // Check + set in a single conditional update. If results_email_sent_at
         // is null we set it to now and proceed; otherwise we short-circuit.
         const r = await fetch(
-          `${supabaseUrl}/rest/v1/profiles?id=eq.${userId}&results_email_sent_at=is.null`,
+          `${supabaseUrl}/rest/v1/profiles?id=eq.${encodeURIComponent(userId)}&results_email_sent_at=is.null`,
           {
             method: 'PATCH',
             headers: {
@@ -566,7 +572,7 @@ export default async function handler(req) {
     if (supabaseUrl && serviceKey && userId) {
       try {
         const r = await fetch(
-          `${supabaseUrl}/rest/v1/profiles?id=eq.${userId}&welcome_email_sent_at=is.null`,
+          `${supabaseUrl}/rest/v1/profiles?id=eq.${encodeURIComponent(userId)}&welcome_email_sent_at=is.null`,
           {
             method: 'PATCH',
             headers: {

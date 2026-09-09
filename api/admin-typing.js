@@ -17,6 +17,8 @@ import {
 
 export const config = { runtime: 'edge' };
 
+import { safeError } from './_lib/http.js';
+
 const DIMS = Object.keys(DIM_KEYS);
 const TYPES = ['W', 'X', 'Y', 'Z'];
 const COUPLE_TYPES = ['WW', 'WX', 'WY', 'WZ', 'XX', 'XY', 'XZ', 'YY', 'YZ', 'ZZ'];
@@ -155,7 +157,7 @@ export default async function handler(req) {
       couples,
     });
   } catch (e) {
-    return json({ error: 'Typing query failed: ' + (e.message || e) }, 500);
+    return json({ error: safeError('admin-typing', e, 'Typing query failed.') }, 500);
   }
 }
 

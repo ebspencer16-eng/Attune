@@ -34,6 +34,8 @@ import { createClient } from '@supabase/supabase-js';
 
 export const config = { runtime: 'edge' };
 
+import { safeError } from './_lib/http.js';
+
 import { reportToSentry } from './_lib/sentry-edge.js';
 import { writeEntitlements, computeEntitlements, ORDER_SELECT, PKG_CAPS } from './_lib/entitlements.js';
 
@@ -308,7 +310,7 @@ async function handlePartnerSync(req) {
         .eq('invite_code', code)
         .maybeSingle();
 
-      if (error) return new Response(JSON.stringify({ ok: false, error: error.message }), { status: 500, headers: CORS });
+      if (error) return new Response(JSON.stringify({ ok: false, error: safeError('partner-sync', error, 'Partner sync failed.') }), { status: 500, headers: CORS });
       if (!inviter) return new Response(JSON.stringify({ ok: true, found: false }), { status: 200, headers: CORS });
 
       return new Response(JSON.stringify({
@@ -371,7 +373,7 @@ async function handlePartnerSync(req) {
         .eq('id', pid)
         .maybeSingle();
 
-      if (error) return new Response(JSON.stringify({ ok: false, error: error.message }), { status: 500, headers: CORS });
+      if (error) return new Response(JSON.stringify({ ok: false, error: safeError('partner-sync', error, 'Partner sync failed.') }), { status: 500, headers: CORS });
       if (!data)  return new Response(JSON.stringify({ ok: true, found: false }), { status: 200, headers: CORS });
 
       // Inherit the buyer's order addons so the invitee's device can rebuild

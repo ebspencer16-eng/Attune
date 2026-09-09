@@ -15,6 +15,8 @@
 
 export const config = { runtime: 'edge' };
 
+import { safeError } from './_lib/http.js';
+
 import { createClient } from '@supabase/supabase-js';
 
 const esc = (s) => String(s || '').replace(/[<>&]/g, c => ({ '<': '&lt;', '>': '&gt;', '&': '&amp;' }[c]));
@@ -62,7 +64,7 @@ export default async function handler(req) {
       .gte('submitted_at', weekAgo.toISOString())
       .order('submitted_at', { ascending: false })
       .limit(500);
-    if (error) return new Response(JSON.stringify({ error: error.message }), { status: 500 });
+    if (error) return new Response(JSON.stringify({ error: safeError('cron-feedback-synthesis', error, 'Synthesis failed.') }), { status: 500 });
 
     const items = (rows || [])
       .map(r => ({ rating: r.rating, coupleType: r.couple_type, source: r.source, text: extractText(r) }))
@@ -107,7 +109,7 @@ export default async function handler(req) {
     if (!r.ok) return new Response(JSON.stringify({ error: 'Resend failed', detail: await r.text().catch(() => '') }), { status: 502 });
     return new Response(JSON.stringify({ ok: true, sentTo: to, items: items.length, clustered: !!anthropicKey }), { status: 200 });
   } catch (e) {
-    return new Response(JSON.stringify({ error: String(e && e.message ? e.message : e) }), { status: 500 });
+    return new Response(JSON.stringify({ error: safeError('cron-feedback-synthesis', e, 'Synthesis failed.') }), { status: 500 });
   }
 }
 

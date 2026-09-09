@@ -11,6 +11,8 @@ import { checkAdminAuth } from './_lib/admin-auth.js';
 
 export const config = { runtime: 'edge' };
 
+import { safeError } from './_lib/http.js';
+
 const sb = () => createClient(
   process.env.SUPABASE_URL,
   process.env.SUPABASE_SERVICE_KEY
@@ -71,7 +73,7 @@ export default async function handler(req) {
 
       if (error) {
         console.error('[orders] create error:', error);
-        return new Response(JSON.stringify({ ok: false, error: error.message }), { status: 500, headers });
+        return new Response(JSON.stringify({ ok: false, error: safeError('orders.create', error, 'Could not create the order.') }), { status: 500, headers });
       }
 
       return new Response(JSON.stringify({ ok: true, order: data, orderNum: num }), { status: 200, headers });
@@ -84,7 +86,7 @@ export default async function handler(req) {
         .update(updates)
         .eq('id', orderId);
 
-      if (error) return new Response(JSON.stringify({ ok: false, error: error.message }), { status: 500, headers });
+      if (error) return new Response(JSON.stringify({ ok: false, error: safeError('orders.update', error, 'Could not update the order.') }), { status: 500, headers });
       return new Response(JSON.stringify({ ok: true }), { status: 200, headers });
     }
 
@@ -102,7 +104,7 @@ export default async function handler(req) {
       .eq('user_id', userId)
       .order('created_at', { ascending: false });
 
-    if (error) return new Response(JSON.stringify({ ok: false, error: error.message }), { status: 500, headers });
+    if (error) return new Response(JSON.stringify({ ok: false, error: safeError('orders', error, 'Could not load orders.') }), { status: 500, headers });
     return new Response(JSON.stringify({ ok: true, orders: data }), { status: 200, headers });
   }
 

@@ -19,6 +19,8 @@ import { isOAuthProvider } from './_lib/auth-providers.js';
 
 export const config = { runtime: 'edge' };
 
+import { safeError } from './_lib/http.js';
+
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const CORS = { 'Content-Type': 'application/json', 'X-Content-Type-Options': 'nosniff' };
 
@@ -94,7 +96,7 @@ export default async function handler(req) {
   const { error } = await admin.from('profiles').insert(profile);
   if (error) {
     console.error('[create-profile] insert error:', error);
-    return new Response(JSON.stringify({ error: error.message }), { status: 500, headers: CORS });
+    return new Response(JSON.stringify({ error: safeError('create-profile', error, 'Could not create your profile.') }), { status: 500, headers: CORS });
   }
 
   return new Response(JSON.stringify({ ok: true, created: true }), { status: 200, headers: CORS });

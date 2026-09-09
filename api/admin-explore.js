@@ -36,10 +36,20 @@ import { INTIMACY_QUESTIONS, INTIMACY_DIMENSIONS } from './_intimacy-questions.j
 // and every request fails with FUNCTION_INVOCATION_FAILED.
 export const config = { runtime: 'edge' };
 
+import { corsHeaders, safeError } from './_lib/http.js';
+
+// No Access-Control-Allow-Origin.
+//
+// This answered `*`. The admin page fetches it with a relative URL from the
+// same origin, so CORS never applied to the only caller it has; the wildcard
+// was permission granted to the whole internet for nothing in return.
+// Emitting no header is stricter than an allowlist: a cross-origin read is
+// refused by the browser outright. corsHeaders takes a request when an
+// endpoint genuinely needs to answer another origin.
 const json = (obj, status = 200) =>
   new Response(JSON.stringify(obj), {
     status,
-    headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
+    headers: corsHeaders(),
   });
 
 const DIM_POLES = {
@@ -293,7 +303,7 @@ export default async function handler(req) {
 
   try {
     const { data: profiles = [], error } = await admin.from('profiles').select('*');
-    if (error) return json({ error: error.message }, 500);
+    if (error) return json({ error: safeError('admin-explore', error, 'Query failed.') }, 500);
     const profileById = {}; for (const p of profiles) profileById[p.id] = p;
     // Invited partners answer via partner_sessions (keyed by invite_code) and may
     // never create a full profile. Pull them so a couple isn't shown as unpaired
@@ -544,6 +554,6 @@ export default async function handler(req) {
       betaResponses: betaResponsesAnon,
     });
   } catch (e) {
-    return json({ error: String(e && e.message ? e.message : e) }, 500);
+    return json({ error: safeError('admin-explore', e, 'Query failed.') }, 500);
   }
 }

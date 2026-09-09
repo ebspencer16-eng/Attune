@@ -15,13 +15,23 @@
 
 export const config = { runtime: 'edge' };
 
+import { corsHeaders, safeError } from './_lib/http.js';
+
 import { createClient } from '@supabase/supabase-js';
 import { checkAdminAuth } from './_lib/admin-auth.js';
 
+// No Access-Control-Allow-Origin.
+//
+// This answered `*`. The admin page fetches it with a relative URL from the
+// same origin, so CORS never applied to the only caller it has; the wildcard
+// was permission granted to the whole internet for nothing in return.
+// Emitting no header is stricter than an allowlist: a cross-origin read is
+// refused by the browser outright. corsHeaders takes a request when an
+// endpoint genuinely needs to answer another origin.
 function json(obj, status = 200) {
   return new Response(JSON.stringify(obj), {
     status,
-    headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
+    headers: corsHeaders(),
   });
 }
 
@@ -48,7 +58,7 @@ export default async function handler(req) {
       const code = String(body.code || '').slice(0, 64);
       if (!code) return json({ error: 'Missing code' }, 400);
       const { error } = await admin.from('beta_codes').update({ active: !!body.active }).eq('code', code);
-      if (error) return json({ error: error.message }, 500);
+      if (error) return json({ error: safeError('admin-actions', error, 'Action failed.') }, 500);
       return json({ ok: true });
     }
 
@@ -69,7 +79,7 @@ export default async function handler(req) {
       if ('expires_at' in row)        clean.expires_at = row.expires_at || null;
       if ('note' in row)              clean.note = String(row.note || '').slice(0, 300);
       const { error } = await admin.from('beta_codes').upsert(clean, { onConflict: 'code' });
-      if (error) return json({ error: error.message }, 500);
+      if (error) return json({ error: safeError('admin-actions', error, 'Action failed.') }, 500);
       return json({ ok: true });
     }
 
@@ -78,7 +88,7 @@ export default async function handler(req) {
       const id = body.id;
       if (!id) return json({ error: 'Missing id' }, 400);
       const { error } = await admin.from('feedback_submissions').update({ featured: !!body.featured }).eq('id', id);
-      if (error) return json({ error: error.message }, 500);
+      if (error) return json({ error: safeError('admin-actions', error, 'Action failed.') }, 500);
       return json({ ok: true });
     }
 

@@ -29,6 +29,8 @@
 
 export const config = { runtime: 'edge' };
 
+import { corsHeaders, safeError } from './_lib/http.js';
+
 import { createClient } from '@supabase/supabase-js';
 import { checkAdminAuth } from './_lib/admin-auth.js';
 import { RESPONSIBILITY_CATEGORIES, LIFE_QUESTIONS } from './_questions.js';
@@ -313,10 +315,18 @@ function buildResponseAggregates(profiles, sessions) {
   };
 }
 
+// No Access-Control-Allow-Origin.
+//
+// This answered `*`. The admin page fetches it with a relative URL from the
+// same origin, so CORS never applied to the only caller it has; the wildcard
+// was permission granted to the whole internet for nothing in return.
+// Emitting no header is stricter than an allowlist: a cross-origin read is
+// refused by the browser outright. corsHeaders takes a request when an
+// endpoint genuinely needs to answer another origin.
 function json(obj, status = 200) {
   return new Response(JSON.stringify(obj), {
     status,
-    headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
+    headers: corsHeaders(),
   });
 }
 
@@ -344,7 +354,7 @@ export default async function handler(req) {
     ]);
 
     const firstErr = [ordersQ, codesQ, fbQ, profQ, psQ].find(q => q.error);
-    if (firstErr) return json({ error: firstErr.error.message }, 500);
+    if (firstErr) return json({ error: safeError('admin-data', firstErr.error, 'Could not load admin data.') }, 500);
 
     const profiles = profQ.data || [];
 

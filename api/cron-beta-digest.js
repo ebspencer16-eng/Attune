@@ -14,6 +14,8 @@
 
 export const config = { runtime: 'edge' };
 
+import { safeError } from './_lib/http.js';
+
 import { createClient } from '@supabase/supabase-js';
 
 const hasAnswers = (v) => v && typeof v === 'object' && Object.keys(v).length > 0;
@@ -50,7 +52,7 @@ export default async function handler(req) {
       admin.from('partner_sessions').select('invite_code, ex1_answers, ex2_answers'),
     ]);
     const firstErr = [profQ, ordersQ, psQ].find(q => q.error);
-    if (firstErr) return new Response(JSON.stringify({ error: firstErr.error.message }), { status: 500 });
+    if (firstErr) return new Response(JSON.stringify({ error: safeError('cron-beta-digest', firstErr.error, 'Digest failed.') }), { status: 500 });
 
     const profiles = (profQ.data || []).filter(p => !p.is_comp); // exclude comp/test accounts from beta metrics
     const orders = ordersQ.data || [];
@@ -132,6 +134,6 @@ export default async function handler(req) {
     if (!r.ok) return new Response(JSON.stringify({ error: 'Resend failed', detail: await r.text().catch(() => '') }), { status: 502 });
     return new Response(JSON.stringify({ ok: true, sentTo: to, newAccounts, ordersWeek: ordersWeek.length }), { status: 200 });
   } catch (e) {
-    return new Response(JSON.stringify({ error: String(e && e.message ? e.message : e) }), { status: 500 });
+    return new Response(JSON.stringify({ error: safeError('cron-beta-digest', e, 'Digest failed.') }), { status: 500 });
   }
 }

@@ -9,6 +9,8 @@
  */
 
 export const config = { runtime: 'edge' };
+
+import { corsHeaders, safeError } from './_lib/http.js';
 import { checkAdminAuth } from './_lib/admin-auth.js';
 
 async function kvGet(key, url, token) {
@@ -42,7 +44,7 @@ export default async function handler(req) {
   if (!kvUrl || !kvToken) {
     return new Response(JSON.stringify({ error: 'KV not configured', ok: false }), {
       status: 200,
-      headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
+      headers: corsHeaders(req),
     });
   }
 
@@ -200,7 +202,7 @@ export default async function handler(req) {
       lastUpdated: new Date().toISOString(),
     }), {
       status: 200,
-      headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
+      headers: corsHeaders(req),
     });
   } catch (err) {
     return new Response(JSON.stringify({ ok: false, error: String(err) }), {

@@ -26,6 +26,8 @@ import { packageIncludes } from './_lib/ownership.js';
 
 export const config = { runtime: 'edge' };
 
+import { safeError } from './_lib/http.js';
+
 // ── Scoring + typing now live in the shared engine (single source of truth,
 // also used by the app, workbook, and admin typing endpoint). ──
 import { personResults } from './_lib/results.js';
@@ -104,7 +106,7 @@ export default async function handler(req) {
     return errResponse(400, 'Unknown type. Use combined|combined_xlsx|orders|demographics|engagement|results|typing|feedback');
   } catch (e) {
     console.error('[admin-csv]', type, e);
-    return errResponse(500, 'Export failed: ' + (e.message || e));
+    return errResponse(500, safeError('admin-csv', e, 'Export failed.'));
   }
 }
 

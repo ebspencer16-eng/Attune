@@ -10,6 +10,8 @@
 
 export const config = { runtime: 'edge' };
 
+import { safeError } from './_lib/http.js';
+
 const VALID_PKGS = new Set(['core', 'newlywed', 'anniversary', 'premium']);
 const VALID_VERSIONS = new Set(['standard', 'gift_printed', 'gift_blank']);
 
@@ -86,6 +88,6 @@ export default async function handler(req) {
 
   } catch (err) {
     console.error('[generate-card] error:', err);
-    return new Response('Internal error: ' + err.message, { status: 500 });
+    return new Response(safeError('generate-card', err, 'Internal error.'), { status: 500 });
   }
 }

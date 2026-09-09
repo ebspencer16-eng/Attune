@@ -2,6 +2,7 @@
 // the Supabase service key. Backed by table public.admin_presets (migration 036).
 import { createClient } from '@supabase/supabase-js';
 import { checkAdminAuth } from './_lib/admin-auth.js';
+import { safeError } from './_lib/http.js';
 
 const HEADERS = { 'Content-Type': 'application/json' };
 const json = (obj, status = 200) => new Response(JSON.stringify(obj), { status, headers: HEADERS });
@@ -52,6 +53,6 @@ export default async function handler(req) {
 
     return json({ ok: false, error: 'method not allowed' }, 405);
   } catch (e) {
-    return json({ ok: false, error: (e && e.message) || String(e) }, 500);
+    return json({ ok: false, error: safeError('admin-presets', e, 'Preset operation failed.') }, 500);
   }
 }

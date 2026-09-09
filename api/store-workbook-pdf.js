@@ -22,6 +22,7 @@
 import { capabilitiesFor } from './_lib/ownership.js';
 
 import { payloadToCouple } from './_couple-shape.js';
+import { safeError } from './_lib/http.js';
 
 export const config = { runtime: 'nodejs' };
 
@@ -114,7 +115,7 @@ export default async function handler(req, res) {
     couple = payloadToCouple(body);
   } catch (e) {
     console.error('[store-workbook-pdf] transform error:', e);
-    return res.status(400).json({ error: 'Payload transform failed', detail: e.message });
+    return res.status(400).json({ error: safeError('store-workbook-pdf', e, 'Payload transform failed.') });
   }
 
   // ── Call the external Python+Playwright service ──────────────────────────
@@ -139,7 +140,7 @@ export default async function handler(req, res) {
     }
   } catch (e) {
     console.error('[store-workbook-pdf] service call error:', e);
-    return res.status(502).json({ error: 'PDF service failed', detail: e.message });
+    return res.status(502).json({ error: safeError('store-workbook-pdf', e, 'PDF service failed.') });
   }
 
   const p1 = (body.userName || 'PartnerA').replace(/\s+/g, '_');
@@ -255,6 +256,6 @@ export default async function handler(req, res) {
     return res.status(200).json({ ok: true, url: downloadUrl, filename });
   } catch (e) {
     console.error('[store-workbook-pdf] storage error:', e);
-    return res.status(500).json({ error: 'Storage upload failed', detail: e.message });
+    return res.status(500).json({ error: safeError('store-workbook-pdf', e, 'Storage upload failed.') });
   }
 }

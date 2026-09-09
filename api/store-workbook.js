@@ -18,6 +18,8 @@
 
 export const config = { runtime: 'nodejs' };
 
+import { safeError } from './_lib/http.js';
+
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
@@ -99,7 +101,7 @@ export default async function handler(req, res) {
     docxBuffer = Buffer.from(arrayBuf);
   } catch (e) {
     console.error('[store-workbook] generation error:', e);
-    return res.status(502).json({ error: 'Workbook generation failed', detail: e.message });
+    return res.status(502).json({ error: safeError('store-workbook', e, 'Workbook generation failed.') });
   }
 
   const p1 = (body.userName || 'PartnerA').replace(/\s+/g, '_');
@@ -176,6 +178,6 @@ export default async function handler(req, res) {
     return res.status(200).json({ ok: true, url: downloadUrl, filename });
   } catch (e) {
     console.error('[store-workbook] storage error:', e);
-    return res.status(500).json({ error: 'Storage upload failed', detail: e.message });
+    return res.status(500).json({ error: safeError('store-workbook', e, 'Storage upload failed.') });
   }
 }
