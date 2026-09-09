@@ -47,37 +47,37 @@ export const ADDON_PRICES = {
  */
 export const CATALOGUE = [
   {
-    key: 'conflict',
+    key: 'conflict', kind: 'exercise',
     label: 'Conflict Patterns',
     blurb: 'How conflict actually goes for you.',
     price: ADDON_PRICES.conflict,
   },
   {
-    key: 'intimacy',
+    key: 'intimacy', kind: 'exercise',
     label: 'Physical Intimacy',
     blurb: 'What you each expect, answered privately.',
     price: ADDON_PRICES.intimacy,
   },
   {
-    key: 'reflection',
+    key: 'reflection', kind: 'exercise',
     label: 'Relationship Reflection',
     blurb: 'Where you have been, and where next.',
     price: ADDON_PRICES.reflection,
   },
   {
-    key: 'budget',
+    key: 'budget', kind: 'tool',
     label: 'Build a Budget',
     blurb: 'A shared budget, built together.',
     price: ADDON_PRICES.budget,
   },
   {
-    key: 'checklist',
+    key: 'checklist', kind: 'tool',
     label: 'Starting Out',
     blurb: 'The practical list for setting up a life.',
     price: ADDON_PRICES.checklist,
   },
   {
-    key: 'workbook',
+    key: 'workbook', kind: 'tool',
     label: 'Your Workbook',
     blurb: 'Built from your answers.',
     price: ADDON_PRICES.workbookDigital,

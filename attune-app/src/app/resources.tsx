@@ -104,8 +104,20 @@ export default function ResourcesScreen() {
   // The catalogue comes from the server too. The app used to carry its own copy
   // with prices typed out, so a repriced or newly added add-on changed the site
   // and left the app selling the old one.
-  const catalogue = home?.catalogue ?? [];
+  // ── EXERCISES ARE NOT RESOURCES ─────────────────────────────────────────
+  // Conflict Patterns and Relationship Reflection are exercises. They live on
+  // Insights, where you answer them. They were appearing here as well, under
+  // "Included with your package", which made this page a second and worse
+  // version of the exercise list.
+  //
+  // The split is the server's: each catalogue entry says whether it is an
+  // exercise or a tool. Filtering on a list of keys here would be a second
+  // copy of that decision, and the two would drift the first time something
+  // new was added.
+  const catalogue = (home?.catalogue ?? []).filter((r) => r.kind !== 'exercise');
   const owned = catalogue.filter((r) => ownedKeys.has(r.key));
+  // Only what they do not have. When they have everything this is empty and
+  // the whole section is skipped, so In Practice follows the owned tiles.
   const more = catalogue.filter((r) => !ownedKeys.has(r.key));
 
   // Posts carry `category` when the author set one. Anything uncategorised
@@ -130,7 +142,7 @@ export default function ResourcesScreen() {
           {owned.length ? (
             <>
               <Text style={{ ...Type.eyebrow, color: c.textMuted, marginBottom: Spacing.md }}>
-                Included with your package
+                Yours to explore
               </Text>
               {/* Wraps to as many rows as it needs: two up at phone widths. */}
               <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.md, marginBottom: Spacing.xxl }}>

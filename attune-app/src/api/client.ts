@@ -417,6 +417,8 @@ export type ExerciseState = {
 
 /** One purchasable thing, from api/_catalogue.js. Price is whole dollars. */
 export type CatalogueItem = {
+  /** 'exercise' lives on Insights; 'tool' lives on Resources. From the server. */
+  kind?: 'exercise' | 'tool';
   key: string;
   label: string;
   blurb: string;

@@ -133,6 +133,26 @@ just means any scanner has to resolve the derivation too. When you write a gate
 that looks for a column, a route, an exercise key or a package name, ask what
 the indirection for that thing is, and match on both.
 
+**Never write a file in the same expression that computes its contents.**
+
+    open(p, 'w').write(build_the_string())     # do not
+
+Python evaluates `open()` first, which truncates the file, and only then
+evaluates the argument. If building the string raises, the file is left at
+zero bytes and nothing was ever written. That emptied src/App.jsx, 15,710
+lines, and only git had it. The pattern had worked all session because the
+argument had never failed.
+
+Compute the whole string, assert it is plausible, then open the file:
+
+    out = build_the_string()
+    assert len(out) > 400000
+    with open(p, 'w') as f: f.write(out)
+
+The assertion is not decoration. It caught the next bad edit the same day: a
+brace-depth scan that miscounts self-closing tags returned no end position,
+and the guard stopped it before it touched the file.
+
 **Absence is also what deletion looks like.** Before reporting that something
 is unreachable, missing or orphaned, check whether it was removed on purpose.
 `git log -S` on the thing takes ten seconds and answers it.
