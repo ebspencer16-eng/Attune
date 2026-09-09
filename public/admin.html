@@ -76,7 +76,7 @@
   .demo-banner strong{color:#7A5A0F;font-weight:700}
 
   /* EMPTY STATE — for tables/charts without real data */
-  .empty-state{text-align:center;padding:3rem 1rem;color:var(--dim);font-size:.82rem;font-family:var(--bfont);background:var(--surface);border:1px dashed var(--border);border-radius:10px}
+  .empty-state{text-align:center;padding:1.98rem 1rem;color:var(--dim);font-size:.82rem;font-family:var(--bfont);background:var(--surface);border:1px dashed var(--border);border-radius:10px}
   .empty-state-sub{font-size:.7rem;color:var(--dim);margin-top:.4rem}
 
   /* KPI CARDS */
@@ -110,7 +110,7 @@
     body.nav-open .sidebar{transform:translateX(0)}
     body.nav-open .nav-backdrop{display:block}
     .nav-toggle{display:flex}
-    .page{padding:3.3rem .8rem 2.5rem}
+    .page{padding:2.18rem .8rem 2.5rem}
     .topbar{margin-bottom:1rem;gap:.55rem}
     .topbar-title{font-size:1.2rem}
     .topbar-sub{font-size:.68rem}
@@ -2684,7 +2684,7 @@ function renderScoreBar(label, score, color='#6C7FFF') {
 
 function renderQuoteCard(text, name, score, color='') {
   const scoreColor = score >= 4 ? '#10B981' : score <= 2 ? '#F87171' : '#F59E0B';
-  return `<div style="padding:.9rem 1rem;background:var(--surface);border:1px solid var(--border);border-radius:10px;border-left:3px solid ${color||scoreColor}">
+  return `<div style="padding:.9rem 1rem;background:var(--surface);border:1px solid var(--border);border-radius:10px;">
     <p style="font-size:.82rem;color:var(--text);line-height:1.65;margin:0 0 .5rem">"${text}"</p>
     ${name ? `<div style="font-size:.68rem;color:var(--muted);font-weight:600">${name}</div>` : ''}
   </div>`;
@@ -4085,7 +4085,7 @@ function renderOrdersTable(rows) {
   if (rows.length === 0) {
     // Empty state — use colspan so the row spans the full table
     const colCount = tbody.closest('table')?.querySelector('thead tr')?.children.length || 8;
-    tbody.innerHTML = `<tr><td colspan="${colCount}" style="padding:3rem 1rem;text-align:center;color:var(--dim);font-size:.82rem">No orders yet.<br><span style="font-size:.7rem;color:var(--dim);margin-top:.4rem;display:inline-block">Orders will appear here as soon as customers start checking out.</span></td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="${colCount}" style="padding:1.98rem 1rem;text-align:center;color:var(--dim);font-size:.82rem">No orders yet.<br><span style="font-size:.7rem;color:var(--dim);margin-top:.4rem;display:inline-block">Orders will appear here as soon as customers start checking out.</span></td></tr>`;
     return;
   }
 
