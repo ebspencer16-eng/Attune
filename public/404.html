@@ -85,12 +85,14 @@
     margin-bottom:.9rem;
     font-weight:700;
   }
+  /* Solid orange, not a gradient fill.
+     background-clip:text renders the word as a coloured rectangle punched into
+     the glyphs. It fails to a transparent, invisible heading anywhere the
+     property is unsupported, and it makes the one word a reader most needs the
+     lowest-contrast thing on the page. The italic and the orange do the work. */
   h1 em{
     font-style:italic;
-    background:linear-gradient(120deg,var(--orange),var(--indigo));
-    -webkit-background-clip:text;
-    background-clip:text;
-    color:transparent;
+    color:var(--orange);
   }
   p.lede{
     font-size:1rem;

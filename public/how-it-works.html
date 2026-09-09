@@ -67,15 +67,15 @@
   .nav-right{display:flex;align-items:center;gap:1.25rem}
   .nav-signin{font-size:.8rem;font-weight:500;color:var(--muted);text-decoration:none;transition:color .15s}
   .nav-signin:hover{color:var(--ink)}
-  .btn-nav{background:var(--ink);color:white;padding:.5rem 1.2rem;border-radius:10px;font-size:.78rem;font-weight:600;text-decoration:none;transition:opacity .15s}
-  .btn-nav:hover{opacity:.82}
+  .btn-nav{background:var(--ink);color:white;padding:.5rem 1.2rem;border-radius:10px;font-size:.78rem;font-weight:600;text-decoration:none;transition:background .15s}
+  .btn-nav:hover{background:#2a2218}
   .mobile-nav-links{display:none;gap:.85rem;align-items:center}
   .mobile-nav-links a{font-size:.76rem;font-weight:500;color:var(--muted);text-decoration:none;transition:color .15s}
   .mobile-cta{background:var(--ink);color:white;padding:.4rem .9rem;border-radius:8px;font-size:.72rem;font-weight:600;text-decoration:none}
 
   /* SHARED */
   .eyebrow{font-size:.6rem;letter-spacing:.3em;text-transform:uppercase;color:var(--clay);font-weight:700;margin-bottom:.9rem;display:flex;align-items:center;justify-content:center;gap:.65rem}
-  .eyebrow::before{content:'';width:28px;height:2.5px;border-radius:999px;background:linear-gradient(90deg,var(--orange),var(--indigo));flex-shrink:0}.eyebrow::after{content:'';width:28px;height:2.5px;border-radius:999px;background:linear-gradient(90deg,var(--orange),var(--indigo));flex-shrink:0}
+  .eyebrow::before{content:'';width:28px;height:2.5px;border-radius:999px;background:linear-gradient(90deg,var(--orange),var(--indigo));flex-shrink:0}.eyebrow::after{content:'';width:28px;height:2.5px;border-radius:999px;background:linear-gradient(90deg,var(--indigo),var(--orange));flex-shrink:0}
   .s-eye{font-size:.6rem;letter-spacing:.3em;text-transform:uppercase;color:var(--clay);font-weight:700;margin-bottom:.85rem;display:flex;align-items:center;gap:.65rem}
   .s-eye::before{content:'';width:28px;height:2.5px;border-radius:999px;background:linear-gradient(90deg,var(--orange),var(--indigo));flex-shrink:0}
   .s-title{font-family:var(--hfont);font-size:clamp(1.85rem,3.2vw,2.7rem);font-weight:700;line-height:1.1;color:var(--ink);margin-bottom:1.1rem;letter-spacing:-.02em}
@@ -101,7 +101,10 @@
   .step-num{display:none}
   .step-eyebrow{font-size:.6rem;letter-spacing:.28em;text-transform:uppercase;color:var(--clay);font-weight:700;margin-bottom:.75rem;display:flex;align-items:center;gap:.65rem}
   .step-eyebrow::before{content:'';width:28px;height:2.5px;border-radius:999px;background:linear-gradient(90deg,var(--orange),var(--indigo));flex-shrink:0}
-  .step-ghost-num{font-family:'Playfair Display',Georgia,serif;font-size:clamp(3.5rem,10vw,8rem);font-weight:700;line-height:1;letter-spacing:-.04em;margin-bottom:.5rem;display:block;user-select:none;background:linear-gradient(135deg,#E8673A,#9B5DE5,#1B5FE8);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;opacity:.55}
+  /* Solid ink at low opacity rather than a gradient fill. A ghost numeral is
+   texture; background-clip:text made it three brand colours competing with
+   the heading beside it, and it disappears entirely where unsupported. */
+  .step-ghost-num{color:var(--ink);font-family:'Playfair Display',Georgia,serif;font-size:clamp(3.5rem,10vw,8rem);font-weight:700;line-height:1;letter-spacing:-.04em;margin-bottom:.5rem;display:block;user-select:none;opacity:.12}
   .step-title{font-family:var(--hfont);font-size:clamp(1.6rem,2.8vw,2.2rem);font-weight:700;line-height:1.12;color:var(--ink);margin-bottom:1rem;letter-spacing:-.02em}
   .step-title em{font-style:italic;color:var(--orange)}
   .step-body{font-size:.92rem;color:var(--muted);line-height:1.78;margin-bottom:1.5rem;font-weight:300}

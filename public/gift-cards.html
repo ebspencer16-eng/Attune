@@ -62,9 +62,13 @@ body {
 .controls {
   display: flex; align-items: center; gap: 1.25rem; flex-wrap: wrap;
   margin-bottom: 2.5rem;
-  background: rgba(255,255,255,.72);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255,255,255,.55);
+  /* Opaque, not frosted. This is a control bar, not navigation: nothing scrolls
+     under it, so the blur was rendering a texture for no reason and costing a
+     compositor layer to do it. The 13 remaining backdrop-filters on the site
+     are all sticky or fixed navigation, where the blur is what keeps the text
+     legible over moving content. */
+  background: #FFFFFF;
+  border: 1px solid var(--stone);
   border-radius: 10px;
   padding: .85rem 1.5rem;
   box-shadow: 0 4px 24px rgba(0,0,0,.09);
@@ -80,12 +84,12 @@ body {
 .flip-btn, .print-btn {
   border: none; border-radius: 3px; cursor: pointer;
   font-family: var(--sc); font-size: .65rem; letter-spacing: .14em;
-  padding: .5rem 1.15rem; transition: opacity .18s;
+  padding: .5rem 1.15rem; transition: background .18s, filter .18s;
 }
 .flip-btn { background: #1A1208; color: #F5EFE4; }
-.flip-btn:hover { opacity: .8; }
+.flip-btn:hover { background: #2E2214; }
 .print-btn { background: linear-gradient(135deg, var(--orange), var(--blue)); color: #fff; }
-.print-btn:hover { opacity: .88; }
+.print-btn:hover { filter: brightness(.92); }
 .ctrl-note { font-family: var(--sc); font-size: .56rem; letter-spacing: .12em; color: #9A8A78; font-style:italic; }
 
 /* ── Card scene ── */
@@ -469,8 +473,8 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;height:58px;background:rgba(
 .nav-right{display:flex;align-items:center;gap:1.25rem}
 .nav-signin{font-size:.8rem;font-weight:500;color:var(--muted);text-decoration:none;transition:color .15s}
 .nav-signin:hover{color:var(--ink)}
-.btn-nav{background:var(--ink);color:#fff;padding:.5rem 1.2rem;border-radius:10px;font-size:.78rem;font-weight:600;text-decoration:none;display:inline-block;transition:opacity .15s}
-.btn-nav:hover{opacity:.82}
+.btn-nav{background:var(--ink);color:#fff;padding:.5rem 1.2rem;border-radius:10px;font-size:.78rem;font-weight:600;text-decoration:none;display:inline-block;transition:background .15s}
+.btn-nav:hover{background:#2a2218}
 .hamburger{display:none;flex-direction:column;gap:4px;background:none;border:none;cursor:pointer;padding:6px;border-radius:6px}
 .hamburger span{display:block;width:20px;height:2px;background:var(--ink);border-radius:2px;transition:all .25s}
 .mobile-menu{display:none;position:fixed;top:58px;right:1rem;left:auto;width:240px;background:rgba(255,253,249,.99);backdrop-filter:blur(20px);border:1.5px solid var(--stone);border-radius:14px;padding:1rem;z-index:200;flex-direction:column;gap:.15rem;box-shadow:0 12px 40px rgba(14,11,7,.14)}

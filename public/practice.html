@@ -60,8 +60,8 @@
   .nav-right{display:flex;align-items:center;gap:1.25rem}
   .nav-signin{font-size:.8rem;font-weight:500;color:var(--muted);text-decoration:none;transition:color .15s}
   .nav-signin:hover{color:var(--ink)}
-  .btn-nav{background:var(--ink);color:white;padding:.5rem 1.2rem;border-radius:10px;font-size:.78rem;font-weight:600;text-decoration:none;display:inline-block;transition:opacity .15s}
-  .btn-nav:hover{opacity:.82}
+  .btn-nav{background:var(--ink);color:white;padding:.5rem 1.2rem;border-radius:10px;font-size:.78rem;font-weight:600;text-decoration:none;display:inline-block;transition:background .15s}
+  .btn-nav:hover{background:#2a2218}
   .hamburger{display:none;flex-direction:column;gap:5px;cursor:pointer;background:none;border:none;padding:.3rem}
   .hamburger span{width:22px;height:2px;background:var(--ink);border-radius:2px}
   @media(max-width:768px){.nav-center{display:none}.hamburger{display:flex}}
@@ -87,7 +87,7 @@
 
   /* CATEGORY PILLS */
   .eyebrow{font-size:.6rem;letter-spacing:.3em;text-transform:uppercase;color:var(--clay);font-weight:700;margin-bottom:.9rem;display:flex;align-items:center;justify-content:center;gap:.65rem}
-  .eyebrow::before{content:'';width:28px;height:2.5px;border-radius:999px;background:linear-gradient(90deg,var(--orange),var(--indigo));flex-shrink:0}.eyebrow::after{content:'';width:28px;height:2.5px;border-radius:999px;background:linear-gradient(90deg,var(--orange),var(--indigo));flex-shrink:0}
+  .eyebrow::before{content:'';width:28px;height:2.5px;border-radius:999px;background:linear-gradient(90deg,var(--orange),var(--indigo));flex-shrink:0}.eyebrow::after{content:'';width:28px;height:2.5px;border-radius:999px;background:linear-gradient(90deg,var(--indigo),var(--orange));flex-shrink:0}
   .page-title{font-family:var(--hfont);font-size:clamp(2.4rem,4.5vw,3.4rem);font-weight:700;line-height:1.06;color:var(--ink);margin-bottom:1.25rem;letter-spacing:-.02em}
   .page-title em{font-style:italic;color:var(--orange)}
   .page-sub{font-size:1rem;color:var(--muted);line-height:1.78;font-weight:300}
@@ -185,6 +185,11 @@
   .fu1{animation:fadeUp .6s ease both}
   .fu2{animation:fadeUp .6s .1s ease both}
   .fu3{animation:fadeUp .6s .2s ease both}
+  /* Anyone who has asked for less motion gets none. */
+  @media (prefers-reduced-motion: reduce){
+    .fu1,.fu2,.fu3{animation:none}
+  }
+
 
   @media(max-width:900px){
     .featured-article{grid-template-columns:1fr}
@@ -322,7 +327,7 @@
 <div class="si">
 
   <!-- CATEGORY PILLS -->
-  <div class="category-bar fu2">
+  <div class="category-bar">
     <div class="category-bar-inner">
       <a href="/practice" class="cat-pill active">All</a>
       <a href="/practice/getting-started" class="cat-pill">Getting Started</a>
@@ -333,7 +338,7 @@
   </div>
 
   <!-- FEATURED POST -->
-  <div class="featured-wrap fu3">
+  <div class="featured-wrap">
     <a href="/practice/how-to-use-your-results" class="featured-article">
       <!-- Visual side -->
       <div class="featured-visual">
@@ -362,8 +367,7 @@
 
   <!-- COLLECTIONS -->
   <div class="collections-section">
-    <div class="section-eyebrow"><span class="section-eye-label">Collections</span></div>
-    <h2 class="section-title">Curated by topic</h2>
+    <h2 class="section-title">Collections</h2>
     <div class="collections-grid">
 
       <div class="collection-card" style="background:#FFF5F0;border-color:rgba(232,103,58,.3);border-top:3px solid var(--orange);">
@@ -442,7 +446,7 @@
 
 <div class="posts-section" style="background:var(--warm);margin:0 -2.5rem;padding:3rem 2.5rem 3.5rem;border-top:1px solid var(--stone);">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.65rem">
-    <div class="section-eyebrow" style="margin-bottom:0"><span class="section-eye-label">Recent</span></div>
+    <h2 class="section-title" style="margin-bottom:0">Recent</h2>
     <a href="/practice/all" style="font-size:.78rem;color:var(--clay);font-weight:600;display:flex;align-items:center;gap:.35rem;transition:gap .15s;text-decoration:none" onmouseover="this.style.gap='.55rem'" onmouseout="this.style.gap='.35rem'">View all posts <span>→</span></a>
   </div>
     <div class="posts-grid">
