@@ -25,7 +25,7 @@ import { ScreenError, ScreenLoading } from '@/components/screen-states';
 import SignIn from '@/components/sign-in';
 import Settings from '@/components/settings';
 import {
-  AccentFallback, AccentFor, Colors, MaxContentWidth, Palette, Radius, Spacing, Type,
+  AccentFallback, AccentFor, BottomTabInset, Colors, MaxContentWidth, Palette, Radius, Spacing, Type,
 } from '@/constants/attune-theme';
 
 const c = Colors.light;
@@ -138,7 +138,10 @@ export default function HomeScreen() {
       <SafeAreaView style={{ flex: 1 }} edges={['top']}>
         <ScrollView
           contentContainerStyle={{
-            padding: Spacing.xl, paddingBottom: Spacing.xxxl,
+            padding: Spacing.xl,
+            // Clear of the floating tab bar. The research note is the last
+            // thing on the page and was running underneath Home and Insights.
+            paddingBottom: BottomTabInset + Spacing.lg,
             maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center',
           }}
           refreshControl={
