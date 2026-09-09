@@ -133,6 +133,23 @@ just means any scanner has to resolve the derivation too. When you write a gate
 that looks for a column, a route, an exercise key or a package name, ask what
 the indirection for that thing is, and match on both.
 
+**Where a JSX comment cannot go.** Section-block markers are JSX comments, and
+there are exactly two places they will not compile. Both fail loudly at build
+time, so they cost minutes rather than being dangerous, but knowing them saves
+the round trip:
+
+    return (
+      {/* marker */}          <- no. Nothing may sit between `return (` and
+      <Layout>                   the root element. Put it inside the root.
+
+    {items.map((x) => (
+      {/* marker */}          <- no. A callback's return position takes one
+      <Row key={x.id} />         expression. Put it above the `.map(`.
+
+Everywhere else is fine: between siblings, before a conditional, inside a
+fragment. When in doubt put the marker on the line above the block's outermost
+element rather than inside it.
+
 **Never write a file in the same expression that computes its contents.**
 
     open(p, 'w').write(build_the_string())     # do not

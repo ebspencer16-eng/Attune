@@ -53,6 +53,16 @@
  */
 /** @type {Record<string, Block[]>} */
 export const SECTION_BLOCKS = {
+  'intimacy-dimension': [
+    { id: 'state', note: 'Where the two of you land on this one.' },
+    { id: 'questions', note: 'The questions behind it, both positions.' },
+    { id: 'prompt', optional: true, note: 'Something to ask each other.' },
+  ],
+
+  'exp-conversation': [
+    { id: 'questions', note: 'The questions in this category, both answers side by side.' },
+  ],
+
   'intimacy-overview': [
     { id: 'where-you-each-land', note: 'Every dimension in one panel.' },
     { id: 'action-plan', note: 'The conversations worth having.' },
@@ -121,16 +131,8 @@ export const PLANNED = {
   // every glance was removed deliberately, because it restated what the rows
   // underneath already show.
 
-  'exp-conversation': [
-    { id: 'questions', note: 'The questions in this category, both answers side by side.' },
-  ],
 
 
-  'intimacy-dimension': [
-    { id: 'state', note: 'Where the two of you land on this one.' },
-    { id: 'questions', note: 'The questions behind it, both positions.' },
-    { id: 'prompt', optional: true, note: 'Something to ask each other.' },
-  ],
 
 
 

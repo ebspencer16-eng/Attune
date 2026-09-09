@@ -4509,6 +4509,7 @@ function ExpectationsResults({ myAnswers, partnerAnswers, userName, partnerName,
                   {hasAnyChildhood && <div style={{ background: "rgba(0,0,0,0.015)", padding: "0.2rem 0 0.4rem", textAlign: "center", fontSize: "0.5rem", fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase", color: "#bbb", fontFamily: BFONT }}>Experienced</div>}
                 </div>
                 {/* Rows */}
+                {/* block: exp-conversation/questions */}
                 {thisCatGaps.map((g, gi) => {
                   const ck = `${fc.id}__${g.item}`;
                   const myChild = myAnswers?.childhood?.[ck];
@@ -8101,13 +8102,12 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
           <ResultsSlide bg={`linear-gradient(145deg, ${tint}dd, ${tint}99, #22204a)`}>
             <link href={FONT_URL} rel="stylesheet" />
             <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", marginBottom: "0.75rem" }}>
-              <div style={{ width: 10, height: 10, borderRadius: "50%", background: "#E08DA6", flexShrink: 0 }} />
-              <div style={{ fontSize: "0.62rem", textTransform: "uppercase", letterSpacing: "0.15em", color: "rgba(255,255,255,0.82)", fontWeight: 700, fontFamily: BFONT }}>Physical Intimacy</div>
               <div style={{ marginLeft: "auto", fontSize: "0.68rem", color: "rgba(255,255,255,0.3)", fontFamily: BFONT }}>{idx + 1} of {dimIds.length}</div>
             </div>
             <div style={{ fontSize: "clamp(1.5rem,5vw,2rem)", fontWeight: 700, color: "white", lineHeight: 1.1, marginBottom: "0.4rem", fontFamily: HFONT }}>{d.label}</div>
             <p style={{ fontSize: "0.85rem", color: "rgba(255,255,255,0.6)", fontFamily: BFONT, fontWeight: 300, lineHeight: 1.6, marginBottom: "1.25rem" }}>{sub(INTIMACY_RESULTS_PROSE[dimMatch]?.intro)}</p>
 
+            {/* block: intimacy-dimension/state */}
             {/* Track */}
             <div style={{ background: "rgba(255,255,255,0.1)", borderRadius: 14, padding: "1.25rem 1.5rem", marginBottom: "1rem", border: "1px solid rgba(255,255,255,0.16)" }}>
               <div style={{ fontSize: "0.62rem", textTransform: "uppercase", letterSpacing: "0.12em", color: "rgba(255,255,255,0.9)", fontWeight: 700, marginBottom: "0.9rem", fontFamily: BFONT }}>Overall</div>
@@ -8118,6 +8118,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
               <PctTrackViz myPct={myPct} partPct={partPct} userName={userName} partnerName={partnerName} />
             </div>
 
+            {/* block: intimacy-dimension/prompt */}
             {/* Talk about it / one-partner-skipped (the skip variant stays intact) */}
             {skipper && osk ? (
               <div style={{ background: "rgba(255,255,255,0.08)", borderRadius: 14, padding: "1.25rem 1.5rem", border: "1px solid rgba(255,255,255,0.18)" }}>
@@ -8132,6 +8133,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
               </div>
             )}
 
+            {/* block: intimacy-dimension/questions */}
             <IntimacyResponseBreakdown dim={dimMatch} myAnswers={intimacyAnswers} partnerAnswers={partnerIntimacy?.answers} userName={userName} partnerName={partnerName} variant={intimacyVariant} />
 
             <NavButtons
