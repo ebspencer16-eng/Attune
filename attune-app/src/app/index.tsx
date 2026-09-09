@@ -15,9 +15,8 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useFocusEffect } from 'expo-router';
-import { Linking, Pressable, RefreshControl, ScrollView, Text, View, useWindowDimensions } from 'react-native';
+import { Linking, Pressable, RefreshControl, ScrollView, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 
 import { fetchHome } from '@/api/client';
@@ -41,7 +40,6 @@ const APP_ROUTES = new Set(['/', '/insights', '/resources', '/notes']);
 
 export default function HomeScreen() {
   const router = useRouter();
-  const { height } = useWindowDimensions();
   const [data, setData] = useState<HomeResponse | null>(null);
   const [error, setError] = useState<ApiError | null>(null);
   const [loading, setLoading] = useState(true);
@@ -129,17 +127,12 @@ export default function HomeScreen() {
 
   return (
     <View style={{ flex: 1, backgroundColor: c.background }}>
-      {/* The gradient is the screen's ground, not a decorative band: it runs
-          behind the greeting and the one prompt, so the first thing you see is
-          the brand rather than a cream page with boxes on it. Deep indigo to
-          the site's blue, the same family the results glance pages use. */}
-      <LinearGradient
-        colors={['#1B2A5E', '#2F55C4', '#2B6FD6']}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-        style={{ position: 'absolute', top: 0, left: 0, right: 0, height: height * 0.62 }}
-      />
-
+      {/* No gradient ground. Three hues running corner to corner behind the
+          greeting was the app introducing a palette the site does not have,
+          and it made this the only screen in the product with its own
+          background. The ground is the site's cream everywhere. Indigo is the
+          brand colour and appears once, on the wordmark. Orange is contrast
+          and appears once, on the thing the screen is asking you to do. */}
       <SafeAreaView style={{ flex: 1 }} edges={['top']}>
         <ScrollView
           contentContainerStyle={{
@@ -150,14 +143,14 @@ export default function HomeScreen() {
             <RefreshControl
               refreshing={refreshing}
               onRefresh={() => { setRefreshing(true); load(); }}
-              tintColor="rgba(255,255,255,0.8)"
+              tintColor={c.textMuted}
             />
           }>
           {/* The wordmark and the way into Settings share a row. Settings is
               where account deletion lives, which App Review has to be able to
               find without being told where it is. */}
           <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: Spacing.sm }}>
-            <Text style={{ ...Type.eyebrow, color: 'rgba(255,255,255,0.55)' }}>
+            <Text style={{ ...Type.eyebrow, color: Palette.indigo }}>
               Attune
             </Text>
             <Pressable
@@ -168,16 +161,16 @@ export default function HomeScreen() {
               style={{
                 paddingHorizontal: Spacing.md, paddingVertical: Spacing.xs,
                 borderRadius: Radius.pill, borderWidth: 1,
-                borderColor: 'rgba(255,255,255,0.35)',
+                borderColor: c.border,
               }}>
-              <Text style={{ ...Type.small, color: 'rgba(255,255,255,0.9)', fontWeight: '700' }}>
+              <Text style={{ ...Type.small, color: c.text, fontWeight: '700' }}>
                 Settings
               </Text>
             </Pressable>
           </View>
           <Text
             style={{
-              ...Type.hero, color: Palette.white, marginTop: Spacing.sm, marginBottom: Spacing.xl,
+              ...Type.hero, color: c.textStrong, marginTop: Spacing.sm, marginBottom: Spacing.xl,
             }}>
             {data.greeting}
           </Text>
@@ -228,10 +221,14 @@ function Shell({ children }: { children: React.ReactNode }) {
 }
 
 /**
- * The one prompt. White card on the gradient, so it lifts off the ground
- * without needing a shadow, and the call to action is a real button rather
- * than a line of coloured text: this is the single thing the screen is asking
- * for, and it should look like it.
+ * The one prompt. It used to be a white card lifting off a dark gradient. On
+ * the cream ground it takes the same hairline border the list below it uses,
+ * so the two agree about what a container looks like.
+ *
+ * The call to action is a real button rather than a line of coloured text:
+ * this is the single thing the screen is asking for, and it should look like
+ * it. It is also the only orange on the screen, so the eyebrow above it is
+ * quiet. Two oranges in one card and neither one means anything.
  */
 function PrimaryCard({ card, onPress }: { card: HomeCard; onPress: () => void }) {
   const dim = !!card.disabled;
@@ -239,9 +236,10 @@ function PrimaryCard({ card, onPress }: { card: HomeCard; onPress: () => void })
     <View
       style={{
         backgroundColor: c.surface, borderRadius: Radius.xl,
+        borderColor: c.border, borderWidth: 1,
         padding: Spacing.xl, opacity: dim ? 0.6 : 1,
       }}>
-      <Text style={{ ...Type.eyebrow, color: Palette.orange }}>Next for you</Text>
+      <Text style={{ ...Type.eyebrow, color: c.textMuted }}>Next for you</Text>
       <Text style={{ ...Type.title, color: c.textStrong, marginTop: Spacing.sm }}>{card.title}</Text>
       {card.body ? (
         <Text style={{ ...Type.body, color: c.textMuted, marginTop: Spacing.sm }}>{card.body}</Text>
