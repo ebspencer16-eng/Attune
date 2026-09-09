@@ -97,8 +97,8 @@
   .use-btn svg{width:14px;height:14px;flex-shrink:0}
   .use-desc{font-size:.82rem;color:var(--muted);line-height:1.65;margin-bottom:2.25rem;min-height:2.5rem;transition:opacity .2s}
   .hero-actions{display:flex;align-items:center;gap:1.25rem}
-  .btn-primary{background:linear-gradient(135deg,var(--orange),#d45a2e);color:white;border:none;padding:.9rem 2.1rem;border-radius:12px;font-size:.82rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;cursor:pointer;font-family:var(--bfont);text-decoration:none;display:inline-block;box-shadow:0 6px 24px rgba(232,103,58,.38);transition:transform .18s,box-shadow .18s}
-  .btn-primary:hover{transform:translateY(-2px);box-shadow:0 10px 30px rgba(232,103,58,.45)}
+  .btn-primary{background:linear-gradient(135deg,var(--orange),#d45a2e);color:white;border:none;padding:.9rem 2.1rem;border-radius:12px;font-size:.82rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;cursor:pointer;font-family:var(--bfont);text-decoration:none;display:inline-block;transition:transform .18s}
+  .btn-primary:hover{transform:translateY(-2px)}
   .btn-ghost{font-size:.82rem;font-weight:500;color:var(--muted);text-decoration:none;display:inline-flex;align-items:center;gap:.35rem;transition:color .15s}
   .btn-ghost:hover{color:var(--ink)}
   .hero-proof{margin-top:2rem;display:flex;align-items:center;gap:.75rem;font-size:.75rem;color:var(--muted)}
@@ -141,7 +141,6 @@
 
   /* WHY IT MATTERS, replaces "how it works" */
   .bg-warm{background:var(--warm);border-top:1px solid var(--stone);border-bottom:1px solid var(--stone)}
-  .why-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:2rem;margin-top:3.5rem}
   .why-card{background:white;border:1px solid var(--stone);border-radius:18px;padding:1.85rem;transition:box-shadow .22s,transform .22s;position:relative}
   .why-card:hover{box-shadow:0 10px 40px rgba(14,11,7,.09);transform:translateY(-2px)}
   .why-icon-wrap{width:48px;height:48px;border-radius:13px;display:flex;align-items:center;justify-content:center;margin-bottom:1.1rem}
@@ -196,7 +195,6 @@
   .bg-dark .s-eye::before{background:rgba(232,103,58,.4)}
   .bg-dark .s-title{color:white}
   .bg-dark .s-sub{color:rgba(255,255,255,.72)}
-  .phil-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem;margin-top:3rem}
   .phil-card{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.09);border-radius:18px;padding:1.85rem}
   .phil-q{font-family:var(--hfont);font-size:1.05rem;font-style:italic;line-height:1.58;color:rgba(255,255,255,.86);margin-bottom:1.1rem}
   .phil-src{font-size:.7rem;color:rgba(255,255,255,.3)}
@@ -204,7 +202,6 @@
   /* SOCIAL PROOF */
   .proof-section{padding:5rem 2.5rem;background:var(--warm)}
   .proof-inner{max-width:1120px;margin:0 auto}
-  .proof-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem;margin-top:3rem}
   .proof-card{background:transparent;border:none;padding:1.85rem 1.5rem;position:relative;border-top:1px solid var(--stone)}
   .proof-stars{color:var(--orange);font-size:.65rem;margin-bottom:.85rem;letter-spacing:.2em;opacity:.8}
   .proof-text{font-family:var(--hfont);font-size:1.05rem;font-style:italic;line-height:1.65;color:var(--ink);margin-bottom:1.25rem;padding-top:.35rem}
@@ -312,7 +309,6 @@
     .hero-left-bottom{order:3;padding-top:0;text-align:center}
     .hero-right img{max-height:240px;width:auto;margin:0 auto;border-radius:12px}
     .hero-right svg{max-width:480px!important;width:100%!important;margin-left:auto!important;margin-right:auto!important;margin-top:0!important;height:auto;display:block}
-    .why-grid,.for-grid,.phil-grid,.proof-grid{grid-template-columns:1fr}
     .what-layout{grid-template-columns:1fr;gap:2rem}
     .pb-inner{grid-template-columns:1fr}
     .nav-center{display:none}
@@ -340,7 +336,6 @@
     .story-cards-mobile-scroll > div{flex:0 0 calc(100% - 2.75rem)!important;min-width:0!important;max-width:none!important}
     .carousel-dots{display:flex!important}
     .what-grid{grid-template-columns:1fr!important}
-    .proof-grid{grid-template-columns:1fr!important}
     .proof-stat-row{display:grid!important;grid-template-columns:1fr 1fr;gap:1.5rem 2rem;justify-items:center;text-align:center}
     .proof-stat-row .proof-stat:nth-child(3){grid-column:1 / -1}
     

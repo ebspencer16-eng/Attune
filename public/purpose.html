@@ -89,17 +89,6 @@
     .page-header{padding:calc(58px + 1.75rem) 1.25rem 2rem!important}
     .si{padding:1.75rem 1.25rem!important}
 
-    /* Research: horizontal scroll strip instead of stacked cards */
-    .research-grid{
-      display:flex!important;
-      flex-wrap:nowrap!important;
-      overflow-x:auto!important;
-      gap:.75rem!important;
-      padding-bottom:.75rem!important;
-      -webkit-overflow-scrolling:touch!important;
-      scrollbar-width:none!important;
-    }
-    .research-grid::-webkit-scrollbar{display:none}
     .research-card{
       min-width:72vw!important;
       max-width:72vw!important;
@@ -109,7 +98,6 @@
 
     /* Principles: hide decorative large numbers */
     .principle-num{display:none!important}
-    .principles-grid{grid-template-columns:1fr!important}
 
     /* Principles numbered list items: remove left col grid */
     [style*="padding:2rem 0;border-top"]{padding:1.25rem 0!important}
@@ -167,14 +155,12 @@
   .bg-dark .s-sub{color:rgba(255,255,255,.78);max-width:600px}
 
   /* QUOTE CARDS */
-  .phil-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem;margin-top:3rem}
   .phil-card{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.14);border-radius:18px;padding:1.85rem}
   .phil-q{font-family:var(--hfont);font-size:1.05rem;font-style:italic;line-height:1.62;color:rgba(255,255,255,.94);margin-bottom:1.1rem}
   .phil-src{font-size:.7rem;color:rgba(255,255,255,.55);font-weight:500;letter-spacing:.04em;text-transform:uppercase}
 
   /* PRINCIPLES SECTION */
   .principles{background:white;border-top:1px solid var(--stone);border-bottom:1px solid var(--stone)}
-  .principles-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:2rem;margin-top:2.5rem}
   .principle-card{padding:1.75rem;background:var(--warm);border:1px solid var(--stone);border-radius:16px}
   .principle-num{font-family:var(--hfont);font-size:2rem;font-weight:700;color:rgba(232,103,58,.25);margin-bottom:.75rem;line-height:1}
   .principle-title{font-family:var(--hfont);font-size:1.05rem;font-weight:700;color:var(--ink);margin-bottom:.5rem}
@@ -182,7 +168,6 @@
 
   /* RESEARCH SECTION */
   .research-section{background:var(--warm)}
-  .research-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.25rem;margin-top:2.5rem}
   .research-card{background:white;border:1.5px solid var(--stone);border-radius:14px;padding:1.5rem;position:relative}
   .research-card::before{content:'';position:absolute;top:0;left:0;bottom:0;width:3px;border-radius:14px 0 0 14px}
   .research-card.rc-orange::before{background:var(--orange)}
@@ -197,8 +182,8 @@
   .cta-inner{max-width:640px;margin:0 auto;padding:0 2.5rem;text-align:center}
   .cta-section h2{font-family:var(--hfont);font-size:clamp(1.9rem,3.5vw,2.8rem);font-weight:700;color:var(--ink);line-height:1.1;margin-bottom:1.25rem}
   .cta-section p{font-size:.95rem;color:var(--muted);line-height:1.75;font-weight:300;margin-bottom:2rem}
-  .btn-primary{background:linear-gradient(135deg,var(--orange),#d45a2e);color:white;border:none;padding:.85rem 2rem;border-radius:14px;font-size:.82rem;font-weight:700;text-decoration:none;display:inline-block;letter-spacing:.04em;box-shadow:0 6px 24px rgba(232,103,58,.3);transition:all .2s;font-family:var(--bfont)}
-  .btn-primary:hover{transform:translateY(-2px);box-shadow:0 10px 32px rgba(232,103,58,.4)}
+  .btn-primary{background:linear-gradient(135deg,var(--orange),#d45a2e);color:white;border:none;padding:.85rem 2rem;border-radius:14px;font-size:.82rem;font-weight:700;text-decoration:none;display:inline-block;letter-spacing:.04em;transition:all .2s;font-family:var(--bfont)}
+  .btn-primary:hover{transform:translateY(-2px)}
   .cta-btn:hover{opacity:.82}
 
   /* FOOTER */
@@ -214,7 +199,6 @@
   .sf-copy,.sf-email{font-size:.72rem;color:rgba(255,255,255,.28);font-weight:300}
 
   @media(max-width:900px){
-    .phil-grid,.principles-grid,.research-grid{grid-template-columns:1fr}
     .sf-inner{grid-template-columns:1fr 1.6fr;gap:1.25rem;padding-left:1.25rem;padding-right:1.25rem}
     .sf-links{grid-template-columns:1fr 1fr;gap:1rem}
     .sf-tagline{font-size:.78rem}
@@ -243,7 +227,6 @@
     .page-title{font-size:clamp(1.45rem,5.6vw,2rem);word-break:keep-all;letter-spacing:-.018em}
     .page-title br.title-break{display:none}
     .si{padding:1.75rem 1.25rem!important}
-    .research-grid,.principles-grid,.phil-grid{grid-template-columns:1fr!important}
     .eyebrow{justify-content:center}
   }
 @media(max-width:780px){input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]),textarea,select{font-size:16px!important}}</style>
