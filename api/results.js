@@ -25,6 +25,7 @@ export const config = { runtime: 'edge' };
 import { sectionsWithLabels, resultsNav } from './_lib/results-sections.js';
 import { expectationsSummary } from './_lib/expectations.js';
 import { INDIVIDUAL_TYPE_DISPLAY, MAP_QUADRANTS } from './_individual-types.js';
+import { mapCoords } from './_lib/results.js';
 import { intimacyResults } from './_lib/intimacy-results.js';
 import { reflectionResults } from './_lib/reflection-results.js';
 import { whatComesNext } from './_lib/what-comes-next.js';
@@ -77,6 +78,20 @@ function withLabels(results) {
  */
 function withContent(results, viewer, contentVersion) {
   if (!results) return results;
+
+  // ── MAP POSITIONS, ADDED ON THE WAY OUT ──────────────────────────────────
+  // Derived here rather than stored with the results, because results are
+  // frozen: a couple whose row was written before the map existed is served
+  // that row for ever. A new field added to the compute path would only ever
+  // have reached couples who had not finished yet, which is to say almost
+  // nobody. See mapCoords in _lib/results.js.
+  results = {
+    ...results,
+    partners: {
+      a: results.partners?.a ? { ...results.partners.a, coords: mapCoords(results.partners.a.axes) } : null,
+      b: results.partners?.b ? { ...results.partners.b, coords: mapCoords(results.partners.b.axes) } : null,
+    },
+  };
 
   const a = results.partners?.a;
   const b = results.partners?.b;

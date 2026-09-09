@@ -122,32 +122,10 @@ export function personResults(selfAnswers, otherAnswers) {
     };
   }
 
-  /**
-   * Where this person sits on the couple map, 0..1 on each axis.
-   *
-   * Sent rather than left to the client because it is a placement rule, and
-   * the app is not allowed to compute one: CLAUDE.md says the app never scores
-   * anything, and "score minus one over four" is scoring however small it
-   * looks. Without this the app could not draw the map at all, which is why
-   * the map was missing from the app entirely.
-   *
-   * open 0 is guarded and 1 is open. engage 1 is engage and 0 is withdraw,
-   * inverted so that a high withdraw score sits at the bottom of the map.
-   *
-   * KNOWN DUPLICATE: the website derives the same two numbers itself, in
-   * computeIndividualType in src/App.jsx, because it types from raw answers
-   * client-side for the demo path. Two copies of one formula. If the demo path
-   * ever stops needing to type client-side, delete that copy and read these.
-   */
-  const unit = (score) => (score == null ? null : Math.max(0, Math.min(1, (score - 1) / 4)));
-
   return {
     typeCode,
     axes: { withdraw: round(axes.withdrawScore), open: round(axes.openScore) },
-    coords: {
-      open: unit(axes.openScore),
-      engage: unit(axes.withdrawScore) == null ? null : 1 - unit(axes.withdrawScore),
-    },
+
     // True when the answers sit close to neutral across the board, so the type
     // is a weak read rather than a confident one.
     lowConfidence: !!lowConfidence(blended),
@@ -259,3 +237,32 @@ export function coupleResults({ aAnswers, bAnswers, aName = null, bName = null }
  * check whether 1.5 still sits near the 75th percentile.
  */
 export const ALIGNMENT_THRESHOLD = { gap: 1.5, dims: 3 };
+
+
+/**
+ * Where a person sits on the couple map, 0..1 on each axis.
+ *
+ * ── WHY THIS IS DERIVED AT READ TIME ──────────────────────────────────────
+ * It was first added to the compute path, next to `axes`, which looked like
+ * the tidy place for it. It meant the map worked for nobody: results are
+ * frozen, so a couple whose row was computed before the change is served that
+ * stored row for ever, and the stored row has no coords in it. A new field on
+ * the compute path only ever reaches couples who have not finished yet.
+ *
+ * Anything the display needs, that can be derived from what is already stored,
+ * has to be derived when the payload is built. That is the difference between
+ * a field that ships and one that ships to new users only.
+ *
+ * open 0 is guarded and 1 is open. engage 1 is engage and 0 is withdraw,
+ * inverted so a high withdraw score sits at the bottom of the map.
+ *
+ * KNOWN DUPLICATE: the website derives the same two numbers in
+ * computeIndividualType in src/App.jsx, because it types from raw answers
+ * client-side for the demo path.
+ */
+export function mapCoords(axes) {
+  const unit = (score) => (score == null ? null : Math.max(0, Math.min(1, (score - 1) / 4)));
+  const open = unit(axes?.open);
+  const withdraw = unit(axes?.withdraw);
+  return { open, engage: withdraw == null ? null : 1 - withdraw };
+}
