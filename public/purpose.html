@@ -128,6 +128,17 @@
   /* Seven, in two rows of four and three. Tighter than the three-across it
      replaced: these are short labels, so the card only needs room for a line
      and a sentence. No icons, no carousel. */
+  /* ── From the founders ─────────────────────────────────────────────── */
+  .founders{max-width:34rem;margin:0 auto;padding:0 var(--s-lg)}
+  .founders-label{display:flex;align-items:center;gap:.7rem;font-size:.66rem;letter-spacing:.16em;
+    text-transform:uppercase;color:var(--muted);font-weight:600;font-family:var(--bfont);margin:0 0 var(--s-xl)}
+  .founders-label span{width:26px;height:1px;background:var(--stone);flex-shrink:0}
+  .founders-lede{font-family:var(--hfont);font-size:clamp(1.5rem,3.4vw,2.1rem);line-height:1.22;
+    color:var(--ink);font-weight:700;letter-spacing:-.015em;margin:0 0 var(--s-lg)}
+  .founders-body{font-size:.95rem;line-height:1.85;color:var(--text);font-family:var(--bfont);
+    font-weight:300;margin:0 0 var(--s-md)}
+  .founders-body:last-child{margin-bottom:0}
+  @media(max-width:640px){ .founders{padding:0} }
   .page-title{font-family:var(--hfont);font-size:clamp(2rem,3.6vw,2.8rem);font-weight:700;line-height:1.08;color:white;margin-bottom:var(--s-lg);letter-spacing:-.02em;max-width:1080px;margin-left:auto;margin-right:auto}
   .page-sub{font-size:1rem;color:rgba(255,255,255,.65);line-height:1.78;font-weight:300}
   @keyframes fadeUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
@@ -280,20 +291,31 @@
 </div>
 
 <!-- FROM THE FOUNDERS -->
-<section style="background:var(--warm);padding:var(--s-lg) 0 var(--s-sm);">
-  <div class="si" style="max-width:700px;">
-    <p style="font-size:.62rem;letter-spacing:.22em;text-transform:uppercase;color:var(--clay);font-weight:700;margin:0 0 1.1rem;font-family:var(--bfont);">From the founders</p>
-    <!-- The paragraphs sat behind a 3px orange bar with a matching indent.
-         The bar is gone and the indent went with it: an offset that exists to
-         clear something that is no longer there is what makes a block look
-         like it was assembled rather than written. -->
-    <div>
-      <p style="font-family:var(--bfont);font-size:.95rem;line-height:1.7;color:var(--ink);font-weight:400;margin:0 0 .85rem;">
-        We built Attune to provide a structured way for couples to understand each other and grow together. Our tagline is &lsquo;understanding takes intention,&rsquo; and we believe it. Taking time to understand each other now can save countless hours of confusion and frustration in relationships.
-      </p>
-      <p style="font-family:var(--bfont);font-size:.95rem;line-height:1.7;color:var(--ink);font-weight:400;margin:0;">
-        Our exercises were developed with licensed marriage and family therapists and built on established relationship science regarding how couples communicate, handle conflict, and stay close. The structure of Attune is driven by impactful research to facilitate meaningful growth opportunities and practical next steps for couples at any phase of their relationship.
-      </p>
+<!-- ── DESIGN NOTE ────────────────────────────────────────────────────────
+     Quiet and editorial rather than a card. Four things do the work:
+
+     1. No container. No border, no tint, no bar. The page is the ground and
+        the words sit on it. A box around a personal note is what makes it
+        read as a component rather than a message.
+     2. The label is a small caps line with a rule beside it, not an
+        all-caps orange eyebrow. It names the voice and then gets out of the
+        way.
+     3. The first line is set large, at heading size in the serif, because it
+        is the thesis. The rest is body copy at a comfortable measure. That
+        contrast is the whole layout.
+     4. One column, 34rem wide, left aligned. Centred blocks of body copy are
+        harder to read and always look like a landing page.
+-->
+<section style="background:var(--warm);padding:var(--s-3xl) 0 var(--s-2xl);">
+  <div class="si" style="max-width:none;">
+    <div class="founders">
+      <p class="founders-label"><span></span>From the founders</p>
+
+      <p class="founders-lede">Understanding takes intention.</p>
+
+      <p class="founders-body">We built Attune to give couples a structured way to have the tough conversations, since most friction in relationships comes from unmet expectations. Attune creates space to say out loud what&rsquo;s usually left unsaid, so couples can understand each other before conflict, not just after it.</p>
+
+      <p class="founders-body">Our exercises were developed with licensed marriage and family therapists and grounded in established relationship science on communication, conflict, and connection. Attune is designed to meet couples wherever they are, offering meaningful growth and practical next steps at any phase of the relationship.</p>
     </div>
   </div>
 </section>

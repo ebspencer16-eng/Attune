@@ -367,13 +367,13 @@ function SectionBody({
     );
   }
   if (section === 'comm-inner') {
-    return <Domain title="Internal Processing" accent={Palette.indigo} dims={byDomain.inner} you={you} them={them} viewer={viewer} wideGap={wideGap} />;
+    return <Domain title="Internal Processing" accent={Palette.indigo} dims={byDomain.inner} tile={commsPlan?.tiles?.find((t) => t.domain === 'inner') ?? null} you={you} them={them} viewer={viewer} wideGap={wideGap} />;
   }
   if (section === 'comm-connection') {
-    return <Domain title="How You Connect" accent={SectionColor.communication} dims={byDomain.connection} you={you} them={them} viewer={viewer} wideGap={wideGap} />;
+    return <Domain title="How You Connect" accent={SectionColor.communication} dims={byDomain.connection} tile={commsPlan?.tiles?.find((t) => t.domain === 'connection') ?? null} you={you} them={them} viewer={viewer} wideGap={wideGap} />;
   }
   if (section === 'comm-hard') {
-    return <Domain title="When Things Get Hard" accent={SectionColor.conflict} dims={byDomain.hard} you={you} them={them} viewer={viewer} wideGap={wideGap} />;
+    return <Domain title="When Things Get Hard" accent={SectionColor.conflict} dims={byDomain.hard} tile={commsPlan?.tiles?.find((t) => t.domain === 'hard') ?? null} you={you} them={them} viewer={viewer} wideGap={wideGap} />;
   }
 
   if (section === 'exp-overview') {
@@ -1560,10 +1560,11 @@ function CoupleType({ results, you, them }: { results: CoupleResults; you: strin
 
 /** One Communication domain: every dimension in it, both partners on each. */
 function Domain({
-  title, accent, dims, you, them, viewer, wideGap,
+  title, accent, dims, you, them, viewer, wideGap, tile = null,
 }: {
   title: string; accent: string; dims: ResultDimension[];
   you: string; them: string; viewer: 'a' | 'b'; wideGap: number | null;
+  tile?: CommsPlan['tiles'][number] | null;
 }) {
   return (
     <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: ResultsBottomInset }}>
@@ -1576,6 +1577,35 @@ function Domain({
         {dims.map((d) => (
           <DimensionRow key={d.key} dim={d} you={you} them={them} viewer={viewer} wideGap={wideGap} expanded />
         ))}
+
+        {/* The domain's one instruction. The website has ended these pages
+            with it for as long as they have existed and the app ended with the
+            dimension list, so the app was missing the only thing on the page
+            that tells a couple what to do.
+
+            The label stays here and is dropped on Results at a glance. On a
+            detail page this tile is the page's single instruction and the
+            words say which kind it is. On the glance the domain is named above
+            it and there are three of them at once. */}
+        {tile?.body ? (
+          <View
+            style={{
+              marginTop: Spacing.xl, backgroundColor: c.surface,
+              borderColor: c.border, borderWidth: 1,
+              borderRadius: Radius.lg, padding: Spacing.lg,
+            }}>
+            <View style={{ flexDirection: 'row', alignItems: 'baseline', justifyContent: 'space-between', gap: Spacing.md }}>
+              <Text style={{ ...Type.eyebrow, color: accent }}>One thing to try</Text>
+              {tile.dimLabel ? (
+                <Text style={{ ...Type.small, color: c.textMuted }}>{tile.dimLabel}</Text>
+              ) : null}
+            </View>
+            <Text style={{ ...Type.body, color: c.text, marginTop: Spacing.sm }}>{tile.body}</Text>
+            {tile.reflect ? (
+              <Text style={{ ...Type.small, color: c.textMuted, marginTop: Spacing.md }}>{tile.reflect}</Text>
+            ) : null}
+          </View>
+        ) : null}
       </View>
     </ScrollView>
   );
