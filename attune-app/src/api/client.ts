@@ -37,6 +37,8 @@ export type PersonResults = {
   name: string | null;
   typeCode: 'W' | 'X' | 'Y' | 'Z';
   axes: { withdraw: number | null; open: number | null };
+  /** Position on the couple map, 0..1. From the server: the app never scores. */
+  coords?: { open: number | null; engage: number | null };
   lowConfidence: boolean;
   blendedWithPartner: boolean;
   dimensions: Record<string, DimensionScore>;
@@ -110,9 +112,17 @@ export type ResultsContent = {
     nuance: string;
     color: string;
     shade: string;
+    /** "What comes naturally". Carries {U} and {P} placeholders. */
+    strengths?: string[];
+    /** "What's worth being aware of". Same placeholders. */
+    stickingPoints?: string[];
+    /** "Phrase to try": a title and the words to say. */
+    tips?: { title: string; body: string }[];
   } | null;
   dimensions: ResultDimension[];
   names: { a: string | null; b: string | null };
+  /** The couple map's four quadrants, named and coloured by the server. */
+  mapQuadrants?: { code: 'W' | 'X' | 'Y' | 'Z'; name: string; color: string; fill: string }[];
 };
 
 export type CoupleResults = {

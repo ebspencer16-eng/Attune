@@ -17,9 +17,10 @@
  * product, and a section invented in the app is a second copy of a rule.
  */
 
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Pressable, ScrollView, Text, View } from 'react-native';
 
+import CoupleMap from '@/components/couple-map';
 import EdgeFadedRow from '@/components/edge-faded-row';
 import { LinearGradient } from 'expo-linear-gradient';
 
@@ -49,6 +50,15 @@ const THEM_COLOR = Palette.ink;
 const c = Colors.light;
 
 /**
+ * How many protocols the Communication overview shows.
+ *
+ * The website's limit, named there as COMMS_PROTOCOL_LIMIT in src/App.jsx.
+ * Two surfaces showing a different number of the same list is the shape of
+ * bug this codebase keeps having, so if this changes, change it there too.
+ */
+const COMMS_PROTOCOL_LIMIT = 3;
+
+/**
  * Why a section someone owns cannot open yet.
  *
  * Mapped from the server's own reason rather than inferred, so the app never
@@ -66,6 +76,14 @@ function interp(text: string | null | undefined, you: string, them: string): str
   if (!text) return '';
   return text.replace(/\{U\}/g, you).replace(/\{P\}/g, them);
 }
+
+/**
+ * The section the reader was last on, for the lifetime of the process.
+ *
+ * Deliberately not persisted and deliberately not in a store. See the note in
+ * the component.
+ */
+let lastSection: string | null = null;
 
 export default function Results({
   results, owned = [], sections: fromServer, nav = [], highlights = [],
@@ -94,7 +112,18 @@ export default function Results({
     ? fromServer
     : [{ id: 'highlights', label: 'Highlights' }, { id: 'couple-type', label: 'Couple Type' }];
 
-  const [sectionId, setSectionId] = useState<string>(sections[0]?.id ?? 'highlights');
+  // ── WHY THIS IS NOT PLAIN STATE ──────────────────────────────────────────
+  // All four tabs mount at startup and the Insights screen remounts every time
+  // you come back to it, so plain state put the reader back on Highlights on
+  // every tab switch. Reaching Communication and then checking something on
+  // Home meant finding Communication again, which undoes the point of a nav
+  // you can jump around in.
+  //
+  // Module scope rather than a store: it is one string, it should not outlive
+  // the process, and it must not be persisted, because a section a couple no
+  // longer owns should not be restored on next launch.
+  const [sectionId, setSectionId] = useState<string>(lastSection || sections[0]?.id || 'highlights');
+  const rememberSection = useCallback((id: string) => { lastSection = id; setSectionId(id); }, []);
 
   /**
    * The nav, two levels, from the server.
@@ -191,7 +220,7 @@ export default function Results({
           return (
             <Pressable
               key={g.id}
-              onPress={() => setSectionId(g.children?.length ? g.children[0].id : g.id)}
+              onPress={() => rememberSection(g.children?.length ? g.children[0].id : g.id)}
               onLayout={(e) => { groupX.current[g.id] = e.nativeEvent.layout.x; }}
               style={{
                 paddingVertical: Spacing.sm, paddingHorizontal: Spacing.lg,
@@ -224,7 +253,7 @@ export default function Results({
             return (
               <Pressable
                 key={child.id}
-                onPress={() => setSectionId(child.id)}
+                onPress={() => rememberSection(child.id)}
                 onLayout={(e) => { pageX.current[child.id] = e.nativeEvent.layout.x; }}
                 style={{ paddingVertical: Spacing.xs, minHeight: 28, justifyContent: 'center' }}>
                 <Text
@@ -260,7 +289,7 @@ export default function Results({
           intimacy={intimacy}
           reflection={reflection}
           whatComesNext={whatComesNext}
-          onGoToSection={setSectionId}
+          onGoToSection={rememberSection}
           results={results}
           conflict={conflict}
           conflictWaiting={conflictWaiting}
@@ -289,7 +318,7 @@ export default function Results({
         }}>
         {index > 0 ? (
           <Pressable
-            onPress={() => setSectionId(sections[index - 1].id)}
+            onPress={() => rememberSection(sections[index - 1].id)}
             style={{
               flex: 1, paddingVertical: Spacing.md, borderRadius: Radius.md, alignItems: 'center',
               backgroundColor: c.surface, borderColor: c.border, borderWidth: 1,
@@ -301,7 +330,7 @@ export default function Results({
         ) : null}
         {index >= 0 && index < sections.length - 1 ? (
           <Pressable
-            onPress={() => setSectionId(sections[index + 1].id)}
+            onPress={() => rememberSection(sections[index + 1].id)}
             style={{
               flex: 1, paddingVertical: Spacing.md, borderRadius: Radius.md, alignItems: 'center',
               backgroundColor: c.accent,
@@ -418,6 +447,38 @@ function SectionBody({
   return <NotYet section={section} />;
 }
 
+/**
+ * One number and the word for it, the way the website opens these pages.
+ *
+ * Both Expectations and Physical Intimacy send an overall figure and neither
+ * page drew it, so both opened straight into a list with nothing saying how
+ * the couple did overall. The word comes from the server when there is one;
+ * a percentage on its own is a number without a reading.
+ */
+function OverallFigure({ pct, state, label }: { pct: number | null; state: string | null; label: string }) {
+  if (pct == null) return null;
+  const words: Record<string, string> = {
+    aligned: 'Closely aligned',
+    discuss: 'Worth discussing',
+    different: 'Some real differences',
+    unspoken: 'Mostly unspoken',
+  };
+  return (
+    <View
+      style={{
+        flexDirection: 'row', alignItems: 'baseline', gap: Spacing.md,
+        marginTop: Spacing.xl, paddingBottom: Spacing.lg,
+        borderBottomColor: c.border, borderBottomWidth: 1,
+      }}>
+      <Text style={{ ...Type.eyebrow, color: c.textMuted }}>{label}</Text>
+      <Text style={{ ...Type.hero, color: c.textStrong }}>{Math.round(pct)}%</Text>
+      {state && words[state] ? (
+        <Text style={{ ...Type.body, color: c.textMuted }}>{words[state]}</Text>
+      ) : null}
+    </View>
+  );
+}
+
 function ExpectationsOverview({
   summary, you, them,
 }: { summary: ExpectationsSummary | null; you: string; them: string }) {
@@ -461,6 +522,9 @@ function ExpectationsOverview({
             Worth discussing: <Text style={{ fontWeight: '700', color: c.text }}>{summary.differences}</Text>
           </Text>
         </View>
+
+        {/* The overall figure. It was in the payload and nothing drew it. */}
+        <OverallFigure pct={summary.alignedPct} state={null} label="Overall" />
 
         <Text style={{ ...Type.cardTitle, color: c.textStrong, marginTop: Spacing.xxl, marginBottom: Spacing.md }}>
           Alignment by category
@@ -618,6 +682,14 @@ function IntimacyOverview({ data }: { data: IntimacyResults | null }) {
       <View style={{ paddingHorizontal: Spacing.xl, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center' }}>
         <Text style={{ ...Type.hero, color: c.textStrong }}>Physical Intimacy Expectations</Text>
         <Eyebrow>Results at a glance</Eyebrow>
+
+        {/* The overall read. It was in the payload and nothing drew it, so the
+            page opened straight into the per-dimension list with no summary. */}
+        <OverallFigure
+          pct={data.overallDistancePct}
+          state={data.overallState}
+          label="Overall"
+        />
 
         <Text style={{ ...Type.cardTitle, color: c.textStrong, marginTop: Spacing.xl, marginBottom: Spacing.md }}>
           Where you each land
@@ -787,6 +859,51 @@ function ReflectionOverview({ data }: { data: ReflectionResults | null }) {
       <View style={{ paddingHorizontal: Spacing.xl, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center' }}>
         <Text style={{ ...Type.hero, color: c.textStrong }}>Relationship Reflection</Text>
         <Eyebrow>Results at a glance</Eyebrow>
+
+        {/* What you each admire. On the website this sits on the Reflection
+            page as well as inside a storycard. The app had it only in the card,
+            so the page itself never showed it. */}
+        {data.admired?.you || data.admired?.them ? (
+          <View style={{ marginTop: Spacing.xl }}>
+            <Text style={{ ...Type.eyebrow, color: Palette.indigo, marginBottom: Spacing.sm }}>
+              What you each admire
+            </Text>
+            <View style={{ flexDirection: 'row', gap: Spacing.sm }}>
+              {[
+                { from: data.names.you, about: data.names.them, val: data.admired.you, col: Palette.orange },
+                { from: data.names.them, about: data.names.you, val: data.admired.them, col: Palette.indigo },
+              ].map((x) => (
+                <View
+                  key={x.from}
+                  style={{
+                    flex: 1, backgroundColor: c.surface, borderColor: c.border, borderWidth: 1,
+                    borderTopColor: x.col, borderTopWidth: 3,
+                    borderRadius: Radius.lg, padding: Spacing.lg,
+                  }}>
+                  <Text style={{ ...Type.eyebrow, fontSize: 9, color: x.col, marginBottom: Spacing.xs }}>
+                    {x.from}
+                  </Text>
+                  <Text style={{ ...Type.cardTitle, color: c.textStrong }}>{x.val || 'Not answered'}</Text>
+                  <Text style={{ ...Type.small, color: c.textMuted, marginTop: Spacing.xs }}>
+                    in {x.about}
+                  </Text>
+                </View>
+              ))}
+            </View>
+            {data.admired.you && data.admired.you === data.admired.them ? (
+              <View
+                style={{
+                  marginTop: Spacing.sm, backgroundColor: '#EDFAF5',
+                  borderColor: '#10b98130', borderWidth: 1,
+                  borderRadius: Radius.md, padding: Spacing.md,
+                }}>
+                <Text style={{ ...Type.small, color: c.text }}>
+                  You picked the same quality, without conferring.
+                </Text>
+              </View>
+            ) : null}
+          </View>
+        ) : null}
 
         <Text style={{ ...Type.cardTitle, color: c.textStrong, marginTop: Spacing.xl, marginBottom: Spacing.md }}>
           How you feel right now
@@ -1255,6 +1372,36 @@ function Glance({
           </View>
         ))}
       </View>
+
+    ) : null}
+
+    {/* The protocols. The website caps this list at three, and the cap is
+        COMMS_PROTOCOL_LIMIT in src/App.jsx so both pages agree. The app was
+        receiving them and drawing none, so the website's Communication
+        overview ended with something to do this week and the app's ended with
+        the three tiles. */}
+    {plan?.protocols?.length ? (
+      <View style={{ paddingHorizontal: Spacing.xl, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center', marginTop: Spacing.xxl }}>
+        <Text style={{ ...Type.eyebrow, color: c.accentQuiet, marginBottom: Spacing.sm }}>
+          This week
+        </Text>
+        {plan.protocols.slice(0, COMMS_PROTOCOL_LIMIT).map((p) => (
+          <View
+            key={p.title}
+            style={{
+              backgroundColor: c.surface, borderColor: c.border, borderWidth: 1,
+              borderRadius: Radius.lg, padding: Spacing.lg, marginBottom: Spacing.md,
+            }}>
+            <Text style={{ ...Type.cardTitle, color: c.textStrong }}>{p.title}</Text>
+            {p.body ? (
+              <Text style={{ ...Type.body, color: c.textMuted, marginTop: Spacing.sm }}>{p.body}</Text>
+            ) : null}
+            {p.thisWeek ? (
+              <Text style={{ ...Type.body, color: c.text, marginTop: Spacing.sm }}>{p.thisWeek}</Text>
+            ) : null}
+          </View>
+        ))}
+      </View>
     ) : null}
 
     </ScrollView>
@@ -1266,34 +1413,92 @@ function CoupleType({ results, you, them }: { results: CoupleResults; you: strin
   const type = results.content?.coupleType;
   if (!type) return null;
 
+  // The type's own colour, which the website paints this page with. It was
+  // arriving in the payload and being ignored, so every couple type looked the
+  // same shade of orange and the visual identity the site gives each one was
+  // lost.
+  const accent = type.color || c.accent;
+
   return (
     <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: Spacing.xxxl }}>
       <View style={{ paddingHorizontal: Spacing.xl, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center' }}>
-        <Text style={{ ...Type.eyebrow, color: c.accentQuiet }}>Couple type</Text>
+        <Text style={{ ...Type.eyebrow, color: accent }}>Couple type</Text>
         <Text style={{ ...Type.hero, color: c.textStrong, marginTop: Spacing.sm }}>{type.name}</Text>
         <Text style={{ ...Type.body, color: c.textMuted, marginTop: Spacing.sm }}>
           {interp(type.tagline, you, them)}
         </Text>
 
-        <View style={{ ...card(), marginTop: Spacing.xl }}>
+        {/* The map. It was missing entirely: the positions were in the payload
+            and nothing drew them.
+
+            The spacing lives inside CoupleMap rather than on a wrapper here,
+            because the map returns null on an older cached payload that has no
+            coords, and a wrapper with a margin around nothing leaves a hole in
+            the page that looks like a failed image. */}
+        <CoupleMap
+          a={results.partners?.a ?? null}
+          b={results.partners?.b ?? null}
+          aName={results.content?.names?.a || 'You'}
+          bName={results.content?.names?.b || 'Your partner'}
+          quadrants={results.content?.mapQuadrants}
+        />
+
+        <View style={{ ...card(), marginTop: Spacing.xl, borderLeftColor: accent, borderLeftWidth: 3 }}>
           <Text style={{ ...Type.body, color: c.text }}>{interp(type.description, you, them)}</Text>
         </View>
 
-        {type.nuance ? (
-          <View style={{ ...card(), marginTop: Spacing.md }}>
-            <Text style={{ ...Type.eyebrow, color: c.accentQuiet, marginBottom: Spacing.sm }}>
-              Worth watching
+        {/* The website's three blocks, in the website's order and with the
+            website's headings. All three were absent because /api/results did
+            not forward strengths, stickingPoints or tips. */}
+        {type.strengths?.length ? (
+          <View style={{ marginTop: Spacing.xl }}>
+            <Text style={{ ...Type.eyebrow, color: accent, marginBottom: Spacing.sm }}>
+              What comes naturally
             </Text>
+            {type.strengths.slice(0, 2).map((t) => (
+              <View key={t} style={{ ...card(), marginBottom: Spacing.sm }}>
+                <Text style={{ ...Type.body, color: c.text }}>{interp(t, you, them)}</Text>
+              </View>
+            ))}
+          </View>
+        ) : null}
+
+        {type.stickingPoints?.length ? (
+          <View style={{ marginTop: Spacing.lg }}>
+            <Text style={{ ...Type.eyebrow, color: accent, marginBottom: Spacing.sm }}>
+              What&apos;s worth being aware of
+            </Text>
+            {type.stickingPoints.slice(0, 2).map((t) => (
+              <View key={t} style={{ ...card(), marginBottom: Spacing.sm }}>
+                <Text style={{ ...Type.body, color: c.text }}>{interp(t, you, them)}</Text>
+              </View>
+            ))}
+          </View>
+        ) : null}
+
+        {/* The nuance line keeps the website's heading now. "Worth watching"
+            was the app naming a section for itself. */}
+        {type.nuance ? (
+          <View style={{ ...card(), marginTop: Spacing.lg }}>
             <Text style={{ ...Type.body, color: c.text }}>{interp(type.nuance, you, them)}</Text>
           </View>
         ) : null}
 
-        {/* A couple type is a dynamic between two people, not a verdict on
-            either of them. Said once, here, rather than hedged throughout. */}
-        <Text style={{ ...Type.small, color: c.textMuted, marginTop: Spacing.xl }}>
-          A couple type describes how two people move together. It is not a
-          score, and neither of you is the problem in it.
-        </Text>
+        {type.tips?.length ? (
+          <View style={{ marginTop: Spacing.xl }}>
+            <Text style={{ ...Type.eyebrow, color: accent, marginBottom: Spacing.sm }}>
+              Phrase to try
+            </Text>
+            {type.tips.map((tip) => (
+              <View key={tip.title} style={{ ...card(), marginBottom: Spacing.sm }}>
+                <Text style={{ ...Type.cardTitle, color: c.textStrong, marginBottom: Spacing.xs }}>
+                  {interp(tip.title, you, them)}
+                </Text>
+                <Text style={{ ...Type.body, color: c.textMuted }}>{interp(tip.body, you, them)}</Text>
+              </View>
+            ))}
+          </View>
+        ) : null}
       </View>
     </ScrollView>
   );

@@ -24,6 +24,7 @@ export const config = { runtime: 'edge' };
 
 import { sectionsWithLabels, resultsNav } from './_lib/results-sections.js';
 import { expectationsSummary } from './_lib/expectations.js';
+import { INDIVIDUAL_TYPE_DISPLAY, MAP_QUADRANTS } from './_individual-types.js';
 import { intimacyResults } from './_lib/intimacy-results.js';
 import { reflectionResults } from './_lib/reflection-results.js';
 import { whatComesNext } from './_lib/what-comes-next.js';
@@ -184,9 +185,23 @@ function withContent(results, viewer, contentVersion) {
         nuance: type.nuance,
         color: type.color,
         shade: type.shade,
+        // The website reads these three straight off api/_couple-types.js and
+        // draws "What comes naturally", "What's worth being aware of" and
+        // "Phrase to try" from them. They were not forwarded, so the app could
+        // not show any of the three no matter how it was written: the data
+        // never left the server.
+        strengths: type.strengths || [],
+        stickingPoints: type.stickingPoints || [],
+        tips: type.tips || [],
       } : null,
       dimensions,
       names: { a: a?.name || null, b: b?.name || null },
+      /**
+       * The four quadrants of the couple map, with the names and colours the
+       * website paints them. Sent so the app can draw the same map instead of
+       * holding a second copy of a colour table.
+       */
+      mapQuadrants: MAP_QUADRANTS.map((code) => INDIVIDUAL_TYPE_DISPLAY[code]),
     },
   };
 }

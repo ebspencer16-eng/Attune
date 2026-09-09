@@ -81,6 +81,7 @@ import {
   ANNIVERSARY_QUESTIONS, ANNIVERSARY_VERSION, ADMIRED_NOUN, admiredNoun, NON_ANSWER,
 } from "../api/_anniversary-questions.js";
 import { COUPLE_TYPES as NEW_COUPLE_TYPES } from "../api/_couple-types.js";
+import { INDIVIDUAL_TYPE_DISPLAY } from "../api/_individual-types.js";
 
 // ═══════════════════════════════════════════════════════════════════════════
 // LAUNCH FLAGS — flip these to change what the product offers. Nothing below is
@@ -1748,19 +1749,19 @@ function individualBlurb(name, pron, ec, oc) {
   return `${eng} ${opn}`;
 }
 const INDIVIDUAL_TYPES = {
-  W: { code: "W", name: "The Initiator", color: "#E8673A", fill: "#FFF4F0", axis1: "Engage", axis2: "Open",
+  W: { ...INDIVIDUAL_TYPE_DISPLAY.W, axis1: "Engage", axis2: "Open",
        desc: "Moves toward resolution. Processes and expresses relatively freely.",
        wired: "You move toward connection when things need addressing. You don't wait for an opening, you create one. You process outward, which means the people close to you usually know where you stand without having to ask. This makes you easy to know, and relatively easy to be in productive conflict with.",
        typeDesc: "You engage quickly and express freely, which means the people close to you usually know where they stand, and they know where you stand too. You don't make them guess. Under pressure, you tend to reach toward the relationship rather than away from it, which can be genuinely stabilizing. The thing to stay aware of: your speed to engage can feel like a lot when someone else needs more time to get there." },
-  X: { code: "X", name: "The Anchor", color: "#1B5FE8", fill: "#EFF1FF", axis1: "Engage", axis2: "Guarded",
+  X: { ...INDIVIDUAL_TYPE_DISPLAY.X, axis1: "Engage", axis2: "Guarded",
        desc: "Pushes toward resolution. Processes internally, shares selectively.",
        wired: "You move toward resolution rather than away from it. When something needs addressing, you don't avoid the conversation. You process before you speak, which means your perspective is usually considered by the time it comes out. This makes you direct and deliberate, but sometimes harder to read in the middle of something.",
        typeDesc: "You engage with problems directly but process privately before speaking, which means you tend to arrive at conversations with something considered to say. You don't react out loud. Under pressure, you want resolution, but you need your own thinking to be in order first. The thing to stay aware of: your internal processing can look like distance to someone who expresses more freely." },
-  Y: { code: "Y", name: "The Feeler", color: "#7C3AED", fill: "#F5F0FF", axis1: "Withdraw", axis2: "Open",
+  Y: { ...INDIVIDUAL_TYPE_DISPLAY.Y, axis1: "Withdraw", axis2: "Open",
        desc: "Needs space first. Carries and expresses feeling when ready.",
        wired: "You need space to process before you can fully show up to a hard conversation. This isn't avoidance, it's how you get to something honest. You're emotionally expressive when you're ready, and the people close to you get real feeling when it comes. What you bring most is depth: you don't stay on the surface.",
        typeDesc: "You process before you can share, taking the time you need to understand what's actually true for you before you say it. You're emotionally present and expressive when you get there. Under pressure, you need time, and pushing you before you're ready usually produces something incomplete. The thing to stay aware of: your withdrawal before sharing can read as avoidance to someone who engages more quickly." },
-  Z: { code: "Z", name: "The Protector", color: "#6B7280", fill: "#F4F5F6", axis1: "Withdraw", axis2: "Guarded",
+  Z: { ...INDIVIDUAL_TYPE_DISPLAY.Z, axis1: "Withdraw", axis2: "Guarded",
        desc: "Withdraws and holds things close. Real depth and feeling running quiet beneath the surface.",
        wired: "You process privately and share selectively. There's usually more going on internally than what's visible from the outside. When you do speak, it carries weight precisely because you don't offer it carelessly. What you bring is steadiness: you don't react quickly, which means you don't create unnecessary chaos.",
        typeDesc: "You carry things privately and surface them selectively, which means there's usually more going on internally than what's visible. You don't perform your inner life, and you don't dump it on the people around you. Under pressure, you go quiet and go deep. The thing to stay aware of: the people who love you most sometimes struggle to know what you're carrying, which can make them feel shut out without you intending it." },

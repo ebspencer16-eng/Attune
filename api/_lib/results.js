@@ -122,9 +122,32 @@ export function personResults(selfAnswers, otherAnswers) {
     };
   }
 
+  /**
+   * Where this person sits on the couple map, 0..1 on each axis.
+   *
+   * Sent rather than left to the client because it is a placement rule, and
+   * the app is not allowed to compute one: CLAUDE.md says the app never scores
+   * anything, and "score minus one over four" is scoring however small it
+   * looks. Without this the app could not draw the map at all, which is why
+   * the map was missing from the app entirely.
+   *
+   * open 0 is guarded and 1 is open. engage 1 is engage and 0 is withdraw,
+   * inverted so that a high withdraw score sits at the bottom of the map.
+   *
+   * KNOWN DUPLICATE: the website derives the same two numbers itself, in
+   * computeIndividualType in src/App.jsx, because it types from raw answers
+   * client-side for the demo path. Two copies of one formula. If the demo path
+   * ever stops needing to type client-side, delete that copy and read these.
+   */
+  const unit = (score) => (score == null ? null : Math.max(0, Math.min(1, (score - 1) / 4)));
+
   return {
     typeCode,
     axes: { withdraw: round(axes.withdrawScore), open: round(axes.openScore) },
+    coords: {
+      open: unit(axes.openScore),
+      engage: unit(axes.withdrawScore) == null ? null : 1 - unit(axes.withdrawScore),
+    },
     // True when the answers sit close to neutral across the board, so the type
     // is a weak read rather than a confident one.
     lowConfidence: !!lowConfidence(blended),
