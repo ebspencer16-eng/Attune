@@ -818,7 +818,7 @@
     <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:1.1rem 1.25rem;margin-bottom:1.5rem;display:flex;gap:1rem;flex-wrap:wrap;align-items:flex-end;">
       <div style="flex:1;min-width:180px;">
         <div style="font-size:.6rem;letter-spacing:.12em;text-transform:uppercase;color:var(--dim);font-weight:600;margin-bottom:.4rem;">Filter by NPS segment</div>
-        <select id="filter-nps" onchange="applyFilters()" style="width:100%;padding:.45rem .65rem;border:1px solid var(--border);border-radius:7px;background:var(--bg);color:var(--text);font-size:.82rem;font-family:var(--sans);">
+        <select id="filter-nps" onchange="applyFilters()" style="width:100%;padding:.45rem .65rem;border:1px solid var(--border);border-radius:7px;background:var(--bg);color:var(--text);font-size:.82rem;font-family:var(--bfont);">
           <option value="all">All respondents</option>
           <option value="promoter">Promoters only (NPS 9–10)</option>
           <option value="passive">Passives only (NPS 7–8)</option>
@@ -827,7 +827,7 @@
       </div>
       <div style="flex:1;min-width:180px;">
         <div style="font-size:.6rem;letter-spacing:.12em;text-transform:uppercase;color:var(--dim);font-weight:600;margin-bottom:.4rem;">Filter by expectation match</div>
-        <select id="filter-exp-match" onchange="applyFilters()" style="width:100%;padding:.45rem .65rem;border:1px solid var(--border);border-radius:7px;background:var(--bg);color:var(--text);font-size:.82rem;font-family:var(--sans);">
+        <select id="filter-exp-match" onchange="applyFilters()" style="width:100%;padding:.45rem .65rem;border:1px solid var(--border);border-radius:7px;background:var(--bg);color:var(--text);font-size:.82rem;font-family:var(--bfont);">
           <option value="all">All</option>
           <option value="exceeded">Exceeded (4–5)</option>
           <option value="met">Met (3)</option>
@@ -836,7 +836,7 @@
       </div>
       <div style="flex:1;min-width:180px;">
         <div style="font-size:.6rem;letter-spacing:.12em;text-transform:uppercase;color:var(--dim);font-weight:600;margin-bottom:.4rem;">Filter by conversation outcome</div>
-        <select id="filter-convo" onchange="applyFilters()" style="width:100%;padding:.45rem .65rem;border:1px solid var(--border);border-radius:7px;background:var(--bg);color:var(--text);font-size:.82rem;font-family:var(--sans);">
+        <select id="filter-convo" onchange="applyFilters()" style="width:100%;padding:.45rem .65rem;border:1px solid var(--border);border-radius:7px;background:var(--bg);color:var(--text);font-size:.82rem;font-family:var(--bfont);">
           <option value="all">All</option>
           <option value="yes-significant">Had a significant conversation</option>
           <option value="yes-smaller">Had a smaller conversation</option>
@@ -847,7 +847,7 @@
       
       <div>
         <div style="font-size:.6rem;letter-spacing:.12em;text-transform:uppercase;color:var(--dim);font-weight:600;margin-bottom:.4rem;">&nbsp;</div>
-        <button onclick="clearFilters()" style="padding:.45rem .9rem;border:1px solid var(--border);border-radius:7px;background:transparent;color:var(--text);font-size:.82rem;cursor:pointer;font-family:var(--sans);">Clear filters</button>
+        <button onclick="clearFilters()" style="padding:.45rem .9rem;border:1px solid var(--border);border-radius:7px;background:transparent;color:var(--text);font-size:.82rem;cursor:pointer;font-family:var(--bfont);">Clear filters</button>
       </div>
       <div style="font-size:.72rem;color:var(--dim);align-self:center;white-space:nowrap;padding-bottom:.1rem;">
         Showing <strong id="explorer-count">0</strong> of <strong id="explorer-total">0</strong> responses
@@ -860,12 +860,12 @@
       <div style="display:flex;gap:1rem;align-items:center;flex-wrap:wrap;">
         <div style="flex:1;min-width:220px;">
           <div style="font-size:.72rem;color:var(--dim);margin-bottom:.3rem;">Row (segment by)</div>
-          <select id="crosstab-row" onchange="runCrosstab()" style="width:100%;padding:.45rem .65rem;border:1px solid var(--border);border-radius:7px;background:var(--bg);color:var(--text);font-size:.82rem;font-family:var(--sans);" id="crosstab-row"></select>
+          <select id="crosstab-row" onchange="runCrosstab()" style="width:100%;padding:.45rem .65rem;border:1px solid var(--border);border-radius:7px;background:var(--bg);color:var(--text);font-size:.82rem;font-family:var(--bfont);" id="crosstab-row"></select>
         </div>
         <div style="font-size:1.1rem;color:var(--dim);padding-top:1.2rem;">×</div>
         <div style="flex:1;min-width:220px;">
           <div style="font-size:.72rem;color:var(--dim);margin-bottom:.3rem;">Column (measure)</div>
-          <select id="crosstab-col" onchange="runCrosstab()" style="width:100%;padding:.45rem .65rem;border:1px solid var(--border);border-radius:7px;background:var(--bg);color:var(--text);font-size:.82rem;font-family:var(--sans);" id="crosstab-col"></select>
+          <select id="crosstab-col" onchange="runCrosstab()" style="width:100%;padding:.45rem .65rem;border:1px solid var(--border);border-radius:7px;background:var(--bg);color:var(--text);font-size:.82rem;font-family:var(--bfont);" id="crosstab-col"></select>
         </div>
       </div>
       <div id="crosstab-result" style="margin-top:1rem;"></div>
@@ -2993,7 +2993,7 @@ function renderConcludingRemarks(R){
   if(!withResp.length){ pills.innerHTML=''; scoreEl.style.display='none'; body.innerHTML='<div style="color:var(--muted);font-size:.8rem;">No written responses yet.</div>'; return; }
   const st = window.__remarksState = window.__remarksState || { q: withResp[0].key, sent:'all' };
   if(!withResp.some(q=>q.key===st.q)){ st.q=withResp[0].key; st.sent='all'; }
-  const pill=(active,label,onclick,color)=>'<button onclick="'+onclick+'" style="font-size:.72rem;padding:.32rem .8rem;border-radius:999px;border:1px solid '+(active?(color||'#6C7FFF'):'var(--border)')+';background:'+(active?(color||'#6C7FFF')+'22':'transparent')+';color:'+(active?'var(--text)':'var(--muted)')+';cursor:pointer;font-family:var(--sans);">'+label+'</button>';
+  const pill=(active,label,onclick,color)=>'<button onclick="'+onclick+'" style="font-size:.72rem;padding:.32rem .8rem;border-radius:999px;border:1px solid '+(active?(color||'#6C7FFF'):'var(--border)')+';background:'+(active?(color||'#6C7FFF')+'22':'transparent')+';color:'+(active?'var(--text)':'var(--muted)')+';cursor:pointer;font-family:var(--bfont);">'+label+'</button>';
   pills.innerHTML = withResp.map(q=>{ const cnt=R.filter(r=>String(r[q.key]||'').trim()).length; return pill(st.q===q.key, q.label+' ('+cnt+')', "__setRemarkQ('"+q.key+"')"); }).join('');
   const cur = withResp.find(q=>q.key===st.q);
   if(cur.score){ scoreEl.style.display='flex';
@@ -5344,7 +5344,7 @@ function renderThresholdGrid(r) {
   // flagged(g, c) = couples with c or more dimensions at a gap of g or more.
   const flagged = (g, c) => r.gapGrid[g].slice(c).reduce((a, b) => a + b, 0);
 
-  let html = '<details style="border:1px solid var(--stone);border-radius:12px;background:var(--warm);padding:.75rem 1rem">'
+  let html = '<details style="border:1px solid var(--border);border-radius:12px;background:var(--surface);padding:.75rem 1rem">'
     + '<summary style="cursor:pointer;font-size:.62rem;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);font-weight:700;list-style:none">'
     + 'Threshold explorer'
     + '<span style="font-weight:400;letter-spacing:0;text-transform:none;color:var(--muted);margin-left:.5rem">'
@@ -6035,7 +6035,7 @@ function renderScaleQuestion(q, container) {
     if (texts.length) {
       html += `<div style="margin-top:.85rem;display:flex;flex-direction:column;gap:.4rem;">
         <div style="font-size:.6rem;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);font-weight:600;">Why they scored this way</div>
-        ${texts.map(t => `<div style="font-size:.78rem;color:var(--text);padding:.5rem .7rem;background:var(--bg);border-radius:6px;border-left:2px solid var(--border-strong)">"${t}"</div>`).join('')}
+        ${texts.map(t => `<div style="font-size:.78rem;color:var(--text);padding:.5rem .7rem;background:var(--bg);border-radius:6px;border-left:2px solid var(--border)">"${t}"</div>`).join('')}
       </div>`;
     }
   }
@@ -6063,7 +6063,7 @@ function renderTextQuestion(q, container) {
   const texts = FILTERED_RESPONSES.filter(r => r[q.id]?.trim()).map(r => r[q.id]);
   if (!texts.length) { container.innerHTML = '<div style="color:var(--dim);font-size:.78rem">No responses yet.</div>'; return; }
   container.innerHTML = `<div style="font-size:.72rem;color:var(--dim);margin-bottom:.5rem">${texts.length} of ${FILTERED_RESPONSES.length} respondents answered this question</div>` +
-    texts.map(t => `<div style="padding:.6rem .8rem;background:var(--bg);border-radius:7px;border-left:2px solid var(--border-strong);font-size:.8rem;color:var(--text);line-height:1.6;margin-bottom:.4rem">"${t}"</div>`).join('');
+    texts.map(t => `<div style="padding:.6rem .8rem;background:var(--bg);border-radius:7px;border-left:2px solid var(--border);font-size:.8rem;color:var(--text);line-height:1.6;margin-bottom:.4rem">"${t}"</div>`).join('');
 }
 
 function renderAllQuestions() {
