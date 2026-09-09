@@ -33,22 +33,66 @@
 //    portal. The voice rule says "anything a customer reads", and these are
 //    the pages no customer reaches.
 //
-// ── WHAT THIS DOES NOT COVER ───────────────────────────────────────────────
-// The spaced en dash, " – ", which is doing the em dash's job in 65 places
-// across the customer-facing pages. That is the same offence wearing a
-// narrower glyph, and it is not gated here because fixing it is a copy
-// decision that has not been made yet: some of those are prose and some are
-// label separators ("Partner 1 – first name", "Digital PDF – $19") where a
-// dash is legitimate. When that decision is made, extend EM below to include
-// the en dash rather than writing a second gate for it.
+// ── THE SPACED EN DASH, AND THE SEVENTH EXEMPTION ──────────────────────────
+// " – " was doing the em dash's job in 58 places. It is the same offence in a
+// narrower glyph, so it is caught here rather than in a second gate. But it
+// has one honest use the em dash does not:
+//
+// 7. A label separator: a short name, a dash, and the thing it names.
+//
+//        Digital PDF – $19
+//        Partner 1 – first name
+//        Yes – keep it anonymous
+//
+//    That is formatting, not a sentence, and a dash is the right mark for it.
+//    Seventeen of these were left in place deliberately.
+//
+//    The test below is structural, not a list of blessed strings: at most
+//    three words before the dash, at most 24 characters, and no sentence-
+//    ending punctuation. A list of approved strings would go stale the first
+//    time someone added a price row; this does not.
+//
+//    Where it is wrong, and knowingly:
+//
+//    - A label longer than three words is reported. That is the right way to
+//      be wrong. At that length the thing is a sentence.
+//    - A three-word prose clause is not reported. "We looked closely – at
+//      every answer" passes. This is the real hole, and it is accepted rather
+//      than papered over, because closing it needs to know a verb from a noun
+//      and that is not something a regex can do honestly.
+//
+//    The em dash has no such exemption and is caught in every position.
 
 import { readFileSync, readdirSync } from 'fs';
 import { join, relative } from 'path';
 
 const ROOT = new URL('..', import.meta.url).pathname;
 
-/** The glyph. Only the em dash, for now. See the note above. */
-const EM = /—/;
+/** Both glyphs. The en dash counts only when spaced, because 6-12 is fine. */
+const EM = /—| – /;
+
+/**
+ * A label separator: a short name, a dash, and the thing it names.
+ *
+ * Structural rather than a list. The left side has to be short and has to
+ * read as a name, not the tail of a sentence. Only the en dash can be one; an
+ * em dash between a label and its value is not a convention this site uses.
+ */
+function isLabelSeparator(text) {
+  if (/—/.test(text)) return false;
+  // A legend that defines the glyph rather than using it: "– = didn't apply".
+  if (/–\s*=/.test(text)) return true;
+  const parts = text.split(' – ');
+  if (parts.length !== 2) return false;
+  const left = parts[0].replace(/^.*[>"'`,[({]\s*/, '').trim();
+  if (!left || left.length > 24 || /[.!?;:]$/.test(left)) return false;
+  // Words, not characters. "Your answers are saved" is 22 characters and read
+  // as a label under a length test alone, which let a real sentence through.
+  // A label is a noun phrase: "Digital PDF", "Partner 1", "Yes". Three words
+  // is the ceiling.
+  const words = left.replace(/[^\p{L}\p{N}\s]/gu, ' ').trim().split(/\s+/);
+  return words.length <= 3;
+}
 
 /** Pages no customer reaches. */
 const INTERNAL = new Set([
@@ -57,6 +101,10 @@ const INTERNAL = new Set([
   'public/qr-cards-print.html',
   'public/qr-card-v2.html',
   'public/portal.html',
+  // A developer preview of the email templates. The real copy lives in
+  // api/cron-*.js and is checked there; this page restates it, which is its
+  // own problem and not this gate's.
+  'public/email-preview.html',
 ]);
 
 /** Where customer-facing copy lives. */
@@ -85,7 +133,10 @@ function strip(text) {
     .replace(/<!--[\s\S]*?-->/g, blank)      // HTML comments
     .replace(/\{\/\*[\s\S]*?\*\/\}/g, blank) // JSX comments
     .replace(/\/\*[\s\S]*?\*\//g, blank)     // JS block comments
-    .replace(/<title>[^<]*<\/title>/g, blank);
+    .replace(/<title>[^<]*<\/title>/g, blank)
+    // og:title and twitter:title are the same breadcrumb as <title>, and are
+    // exempt for the same reason. Their descriptions are prose and are not.
+    .replace(/<meta[^>]*(?:og|twitter):title[^>]*>/g, blank);
 }
 
 /** Is this dash a lone "no value" marker rather than punctuation? */
@@ -125,13 +176,15 @@ for (const root of ROOTS) {
       if (/console\.(log|warn|error|info)/.test(code)) return;
       if (isCitation(code)) return;
       if (isPlaceholder(code)) return;
+      const bare = code.replace(/<[^>]*>/g, '').trim();
+      if (isLabelSeparator(bare)) return;
       problems.push(`${rel}:${i + 1}  ${code.trim().slice(0, 120)}`);
     });
   }
 }
 
 if (problems.length) {
-  console.error('[check-em-dashes] em dashes in copy a customer reads:');
+  console.error('[check-em-dashes] a dash standing in for punctuation in copy a customer reads:');
   for (const p of problems) console.error(`  ${p}`);
   console.error('');
   console.error('CLAUDE.md, editorial voice: no em dashes. Use a period if they are');
@@ -141,4 +194,4 @@ if (problems.length) {
   process.exit(1);
 }
 
-console.log(`[check-em-dashes] ${scanned} files contain an em dash, none of them in prose.`);
+console.log(`[check-em-dashes] ${scanned} files contain a dash; none of them uses one as punctuation in prose.`);
