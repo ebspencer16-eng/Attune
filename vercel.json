@@ -78,14 +78,6 @@
       "destination": "/home.html"
     },
     {
-      "source": "/how-it-works",
-      "destination": "/how-it-works.html"
-    },
-    {
-      "source": "/couple-types",
-      "destination": "/couple-types.html"
-    },
-    {
       "source": "/wedding-registry",
       "destination": "/wedding-registry.html"
     },
@@ -216,10 +208,6 @@
     {
       "source": "/welcome",
       "destination": "/welcome.html"
-    },
-    {
-      "source": "/methodology",
-      "destination": "/how-it-works.html"
     },
     {
       "source": "/lmft-booking",

@@ -4014,7 +4014,6 @@ function PersonalityResults({ myAnswers, partnerAnswers, userName, partnerName, 
           return (
             <div style={{ marginTop: "1.5rem", background: "rgba(255,255,255,0.10)", border: "1px solid rgba(255,255,255,0.2)", borderLeft: `4px solid ${m.color}`, borderRadius: 14, padding: "1.25rem 1.5rem" }}>
               <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: "1rem", marginBottom: "0.6rem" }}>
-                <div style={{ fontSize: "0.62rem", textTransform: "uppercase", letterSpacing: "0.12em", color: "rgba(255,255,255,0.9)", fontWeight: 700, fontFamily: BFONT }}>One thing to try</div>
                 <div style={{ fontSize: "0.62rem", color: "rgba(255,255,255,0.6)", fontFamily: BFONT, whiteSpace: "nowrap" }}>{m.label}</div>
               </div>
               <p style={{ fontSize: "0.86rem", color: "rgba(255,255,255,0.88)", fontFamily: BFONT, lineHeight: 1.7, margin: 0 }}>{advice}</p>
@@ -8241,7 +8240,6 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
       // and Often get the action. Attaching an instruction to an absent
       // pattern would read as a warning about something that is not happening.
       const advice = v >= 2 ? PATTERN_ACTIONS[p.key] : v === 1 ? PATTERN_NOTES[p.key] : null;
-      const adviceLabel = v >= 2 ? 'One thing to try' : 'One thing to keep in mind';
       return (
         <div key={p.key} style={{ padding: "1rem 0", borderTop: `1px solid ${C.stone}` }}>
           <div style={{ fontSize: "0.92rem", fontWeight: 700, color: C.ink, fontFamily: BFONT, marginBottom: "0.15rem" }}>{copy.label}</div>
@@ -8256,7 +8254,6 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
           </div>
           {advice && (
             <div style={{ marginTop: "0.8rem", background: "#F4F7FF", borderLeft: `3px solid ${BLUE}`, borderRadius: 8, padding: "0.75rem 0.95rem" }}>
-              <div style={{ fontSize: "0.6rem", letterSpacing: "0.12em", textTransform: "uppercase", color: BLUE, fontWeight: 700, fontFamily: BFONT, marginBottom: "0.35rem" }}>{adviceLabel}</div>
               {v >= 2 && (
                 <div style={{ fontSize: "0.84rem", fontWeight: 700, color: C.ink, fontFamily: BFONT, marginBottom: "0.25rem" }}>{advice.title}</div>
               )}
