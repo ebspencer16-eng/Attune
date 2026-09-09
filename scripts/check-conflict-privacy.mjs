@@ -11,19 +11,12 @@
 // side, even though partnerView itself is an allowlist: the test should fail
 // when someone adds a leaking field, and an allowlist test would silently pass.
 
-import { readFileSync } from 'fs';
+// partnerView moved to its own module so /api/partner-sync could apply the same
+// allowlist. It is imported rather than scraped out of an endpoint's source:
+// the previous version read api/conflict-results.js and failed the moment the
+// function moved, which is a gate breaking on a refactor rather than on a bug.
+import { partnerView } from '../api/_lib/conflict-partner-view.js';
 
-const src = readFileSync(new URL('../api/conflict-results.js', import.meta.url), 'utf8');
-
-// Pull partnerView out of the endpoint and run it, so the gate tests the real
-// function rather than a copy of it that can drift.
-const start = src.indexOf('function partnerView(');
-const end = src.indexOf('\n}', start) + 2;
-if (start < 0) {
-  console.error('[check-conflict-privacy] partnerView not found in api/conflict-results.js');
-  process.exit(1);
-}
-const partnerView = new Function(`${src.slice(start, end)}; return partnerView;`)();
 
 // A complete summary, shaped like summarizeConflict's output, with every
 // pattern field populated so anything passed through is visible.

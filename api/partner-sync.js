@@ -38,6 +38,8 @@ import { safeError } from './_lib/http.js';
 
 import { reportToSentry } from './_lib/sentry-edge.js';
 import { writeEntitlements, computeEntitlements, ORDER_SELECT, PKG_CAPS } from './_lib/entitlements.js';
+import { summarizeConflict } from './_lib/conflict-results.js';
+import { partnerView } from './_lib/conflict-partner-view.js';
 
 const supabase = () => createClient(
   process.env.SUPABASE_URL,
@@ -369,12 +371,45 @@ async function handlePartnerSync(req) {
 
       const { data, error } = await sb
         .from('profiles')
+        // conflict_data is read here and never returned raw. See below.
         .select('name, pronouns, ex1_answers, ex2_answers, ex3_answers, ex3_completed, relationship_status, joined_via_invite, intimacy_data, conflict_data')
         .eq('id', pid)
         .maybeSingle();
 
       if (error) return new Response(JSON.stringify({ ok: false, error: safeError('partner-sync', error, 'Partner sync failed.') }), { status: 500, headers: CORS });
       if (!data)  return new Response(JSON.stringify({ ok: true, found: false }), { status: 200, headers: CORS });
+
+      /**
+       * The partner's Conflict Patterns do not leave here.
+       *
+       * ── THE PROMISE ─────────────────────────────────────────────────────
+       * The Conflict Patterns screen tells the customer, in writing:
+       *
+       *   "Not visible to your partner. This is the one section that stays
+       *    private, always."
+       *
+       * That string is `patternsPrivacy` in api/_conflict-results-prose.js,
+       * rendered by src/App.jsx and attune-app conflict-results.tsx. It ships
+       * to customers, so serving pattern fields to a partner breaks a
+       * commitment we made to them, not just an internal convention.
+       *
+       * This endpoint returned the whole conflict record, patterns included,
+       * and had done since it was written, while /api/conflict-results applied
+       * an allowlist that omits them. Same allowlist here now.
+       *
+       * Intimacy is deliberately untouched. Physical Intimacy was designed as
+       * "questions, side by side": both people answer independently and then
+       * see both positions. That is the feature, not a leak, and no equivalent
+       * promise was ever made about it.
+       */
+      const rawConflict = data.conflict_data;
+      delete data.conflict_data;
+      data.conflictPartnerView = rawConflict
+        ? partnerView(summarizeConflict(rawConflict.answers || rawConflict), data.name)
+        : null;
+      // Whether they finished, which is all the dashboard needs to stop
+      // showing their Conflict Patterns row as pending forever.
+      data.conflictCompletedAt = rawConflict?.completedAt || null;
 
       // Inherit the buyer's order addons so the invitee's device can rebuild
       // the couple-level order (workbook readiness, reflection, budget)

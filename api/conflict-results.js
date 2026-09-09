@@ -25,6 +25,7 @@
 export const config = { runtime: 'edge' };
 
 import { summarizeConflict } from './_lib/conflict-results.js';
+import { partnerView } from './_lib/conflict-partner-view.js';
 import { capabilitiesFor } from './_lib/ownership.js';
 import {
   PATTERN_COPY, PATTERN_ACTIONS, PATTERN_NOTES, BAND_COLORS, FREQUENCY_LABELS,
@@ -56,31 +57,6 @@ function interpDeep(value, names) {
 const HEADERS = { 'Content-Type': 'application/json', 'X-Content-Type-Options': 'nosniff' };
 const json = (b, s = 200) => new Response(JSON.stringify(b), { status: s, headers: HEADERS });
 
-/**
- * What the partner is allowed to contribute to your results.
- *
- * Built by naming what goes in, never by deleting from their full summary.
- * A denylist silently starts leaking the day someone adds a field.
- */
-function partnerView(summary, name) {
-  if (!summary) return null;
-  return {
-    name: name || null,
-    // Their own read on how conflict goes. A feeling they chose to give, and
-    // the same question you answered, so comparing the two is the point.
-    overall: summary.overall,
-    // What helps them reset. This is the actionable half: it is the thing you
-    // can do for them.
-    repairRanking: summary.repairRanking,
-    // The three shared questions, which are about approach rather than risk.
-    openings: summary.openings,
-    // What they wrote in their own words, which both of you agreed to share by
-    // answering it.
-    strength: summary.strength,
-    reflection: summary.reflection,
-    appreciation: summary.appreciation,
-  };
-}
 
 export default async function handler(req) {
   if (req.method !== 'GET') return json({ ok: false, error: 'GET only' }, 405);

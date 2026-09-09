@@ -16,6 +16,7 @@
 
 import { createClient } from '@supabase/supabase-js';
 import { isOAuthProvider } from './_lib/auth-providers.js';
+import { PKG_CAPS } from './_lib/entitlements.js';
 
 export const config = { runtime: 'edge' };
 
@@ -54,7 +55,8 @@ export default async function handler(req) {
     email_opt_in:         body.emailOptIn !== false,
     invite_code:          (typeof body.inviteCode === 'string' && body.inviteCode.trim()) ? body.inviteCode.slice(0, 32) : null,
     partner_joined:       false,
-    pkg:                  typeof body.pkg === 'string' && ['core','newlywed','anniversary','premium'].includes(body.pkg) ? body.pkg : 'core',
+    // pkg is NOT taken from the body. See the block below: it is derived from
+    // a real order, and defaults to core.
     age_range:            typeof body.ageRange === 'string'           ? body.ageRange.slice(0, 30)        : null,
     gender:               typeof body.gender === 'string'             ? body.gender.slice(0, 30)          : null,
     relationship_status:  typeof body.relationshipStatus === 'string' ? body.relationshipStatus.slice(0, 50) : null,
@@ -70,9 +72,13 @@ export default async function handler(req) {
   // cron-checkin selects profiles.email daily; without this the check-in
   // emails have no recipient. Server-side lookup beats trusting the client
   // payload and covers every create-profile call site at once.
+  let authEmail = null;
   try {
     const { data: authUser } = await admin.auth.admin.getUserById(userId);
-    if (authUser?.user?.email) profile.email = authUser.user.email.toLowerCase();
+    if (authUser?.user?.email) {
+      authEmail = authUser.user.email.toLowerCase();
+      profile.email = authEmail;
+    }
     // How this person signs in, recorded from the verified auth user rather
     // than from the request. Support cannot answer "why can't I get in" without
     // knowing whether an account has a password at all, and an Apple account
@@ -80,6 +86,61 @@ export default async function handler(req) {
     const p = authUser?.user?.app_metadata?.provider;
     profile.auth_provider = isOAuthProvider(p) ? p : 'email';
   } catch { /* non-fatal: backfillable from auth.users */ }
+
+  /**
+   * The package, from a paid order rather than from the request.
+   *
+   * ── WHY ───────────────────────────────────────────────────────────────
+   * This endpoint takes no authentication, by design: with email confirmation
+   * on, the client has a user id and no session when it needs to write the
+   * profile. It used to accept `pkg` from the body, allowlisted to the four
+   * package names, which includes premium.
+   *
+   * profiles.pkg is a grant source. api/_lib/entitlements.js folds it in
+   * alongside real orders, and grant-only merging never takes a grant away, so
+   * whatever was written here was permanent. The website passed the value
+   * straight through from the URL, so signing up at ?pkg=premium granted
+   * premium. No payment, no order row, no admin action.
+   *
+   * So the value is derived. An order is matched by user id, and by the email
+   * on the auth record, because a guest checkout writes buyer_email before any
+   * user id exists. The best package across those orders wins, ranked by
+   * PKG_CAPS rather than by a list written here.
+   *
+   * With no order this is core, which grants nothing. That is the correct
+   * answer for someone who has not paid, and it is self-correcting for someone
+   * who has: /api/claim-order links the order moments later and
+   * /api/recompute-entitlements grants from it on the next load.
+   *
+   * A package the client asked for is an intent, not an entitlement, and this
+   * endpoint no longer records it at all.
+   */
+  try {
+    const filters = [`user_id=eq.${encodeURIComponent(userId)}`];
+    if (authEmail) filters.push(`buyer_email=eq.${encodeURIComponent(authEmail)}`);
+
+    const found = [];
+    for (const filter of filters) {
+      const r = await fetch(`${supabaseUrl}/rest/v1/orders?${filter}&select=pkg_key`, {
+        headers: { apikey: serviceKey, Authorization: `Bearer ${serviceKey}` },
+      });
+      if (r.ok) found.push(...(await r.json().catch(() => [])));
+    }
+
+    let best = 'core';
+    let bestRank = -1;
+    for (const row of found) {
+      const key = row?.pkg_key || 'core';
+      const rank = PKG_CAPS[key]?.rank ?? -1;
+      if (rank > bestRank) { bestRank = rank; best = key; }
+    }
+    profile.pkg = best;
+  } catch (e) {
+    // A failed lookup must not grant. core is the safe answer, and the
+    // entitlements engine will grant from the order on the next load.
+    console.error('[create-profile] order lookup failed, defaulting to core:', e);
+    profile.pkg = 'core';
+  }
 
   // Check if a profile already exists for this user. If yes, this is a no-op
   // (don't overwrite richer existing data with potentially-stale payload).

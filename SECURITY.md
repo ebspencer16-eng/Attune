@@ -10,11 +10,11 @@ actually reach.
 
 | # | Finding | Severity | Status |
 |---|---|---|---|
-| 1 | Anyone can grant themselves any package | **High** | Recommended |
-| 2 | A partner's raw Conflict and Intimacy answers are served | **High** | Recommended |
+| 1 | Anyone can grant themselves any package | **High** | **Fixed** |
+| 2 | A partner's raw Conflict Patterns are served | **High** | **Fixed** |
 | 3 | `save-exercise` can write another person's answers | Medium | Recommended |
-| 4 | `generate-card` is open when `CARD_SECRET` is unset | Medium | Recommended |
-| 5 | Sign-in reveals whether an account exists | Medium | Recommended |
+| 4 | `generate-card` is open when `CARD_SECRET` is unset | Medium | **Fixed** |
+| 5 | Sign-in reveals whether an account exists | Medium | **Fixed** |
 | 6 | No server-side rate limiting anywhere | Medium | Recommended |
 | 7 | Exercise answers are stored without validation | Medium | Recommended |
 | 8 | Partner link accepts an unconfirmed email match | Low | Recommended |
@@ -54,12 +54,25 @@ So signing up at `/app?signup=1&pkg=premium` is enough. No payment, no order
 row, no admin action. The only guard is that a profile must not already exist
 for that id, which is exactly the state a real person is in when they sign up.
 
-**Recommended fix.** `pkg` should not be an input. Take it from the order the
-signup is claiming, which `/api/claim-order` already resolves server-side, and
-default to `core` when there is no order. This touches entitlement logic, so it
-needs a decision rather than a patch.
+**Fixed.** `pkg` is no longer read from the body. It is derived from orders
+matched on user id and on the email held by the auth record, because a guest
+checkout writes `buyer_email` before any user id exists. The best package
+across those orders wins, ranked by `PKG_CAPS` rather than by a list written at
+the call site. No order means `core`, which grants nothing, and that is
+self-correcting for a real customer: `/api/claim-order` links the order moments
+later and `/api/recompute-entitlements` grants from it on the next load. A
+package the client asks for is an intent and is no longer recorded at all.
 
-## 2. A partner's raw Conflict and Intimacy answers are served — High
+`check-entitlement-inputs.mjs` fails the build if any endpoint reads a package
+or an add-on column from the request. Verified by planting.
+
+**Still to do: find out whether anyone used it.** `supabase/diagnostics/
+pkg-without-order.sql` lists every profile above `core` and labels each PAID,
+COMP, PARTNER or NO SOURCE. NO SOURCE is the list that matters, and it cannot
+tell an exploit from an undocumented manual grant, because neither leaves a
+trace. Run it before launch.
+
+## 2. A partner's raw Conflict Patterns are served — High
 
 `GET /api/partner-sync?partnerProfileId=…` is authorised correctly: the caller
 must be linked to that partner. It then returns their complete answer sets.
@@ -79,13 +92,34 @@ label ever appears in it.
 Both gates guard one door while this one stands open. The website then writes
 the result to `localStorage.attune_partner_session`, so it also lands on disk.
 
-Whether a partner should see these answers is a product decision, not a bug.
-What is a bug is that two endpoints disagree about it and only one is enforced.
+**Fixed, for conflict.** The decision was not close, because there is a promise
+in writing. The Conflict Patterns screen tells the customer:
 
-**Recommended fix.** Decide once. If partners may not read each other's
-conflict and intimacy answers, drop those two columns from this select and
-extend the existing privacy gates to cover `partner-sync`. If they may, the
-allowlist in `conflict-results` is wrong and should say so.
+> "Not visible to your partner. This is the one section that stays private,
+> always."
+
+That is `patternsPrivacy` in `api/_conflict-results-prose.js`, rendered by
+`src/App.jsx` and by the app's `conflict-results.tsx`. It ships. Serving those
+fields to a partner breaks a commitment already made to the person whose
+answers they are, so it closed regardless of cost.
+
+`partnerView` moved to `api/_lib/conflict-partner-view.js` and `partner-sync`
+now applies it. The comment there names the promise and where the copy lives,
+because a rule with no stated reason gets relaxed by whoever finds it
+inconvenient.
+
+**Intimacy is deliberately unchanged.** Physical Intimacy was designed as
+"questions, side by side": both people answer independently and then see both
+positions. That is the feature, not a leak, and no equivalent promise was ever
+made about it. Applying the stricter default there would have imposed a privacy
+rule the product never claimed and removed something customers paid for.
+
+Two gates now cover the rule between them, and the split is deliberate:
+`check-conflict-privacy.mjs` proves `partnerView` carries no pattern data and
+still carries what the screens need; `check-partner-privacy.mjs` proves no
+endpoint bypasses it by returning the raw record. The second is scoped to
+conflict on purpose, and says so, so nobody reads it as "partner data is
+private" and either breaks intimacy or loosens the gate.
 
 ## 3. `save-exercise` can write another person's answers — Medium
 
@@ -121,8 +155,8 @@ changed away from; the comment on `admin-csv.js` records what it cost last time.
 
 The comparison is also `!==` rather than constant-time.
 
-**Recommended fix.** Fail closed when the secret is missing, and use the
-`timingSafeEqual` already in `api/_lib/admin-auth.js`.
+**Fixed.** Refuses with 503 when `CARD_SECRET` is unset, and compares in
+constant time.
 
 ## 5. Sign-in reveals whether an account exists — Medium
 
@@ -147,8 +181,16 @@ from a fake one, and "hasn't been confirmed yet" confirms an account exists and
 names its state. For a product about people's relationships, confirming that a
 particular person has an account is itself the disclosure.
 
-**Recommended fix.** One message for every credential failure. Keep the
-unconfirmed-account case only if it is worth the tradeoff, and say so knowingly.
+**Fixed.** One message for every credential failure: "That email and password
+don't match. Check both, or reset your password below." The unconfirmed case is
+folded in deliberately, because telling an attacker an account exists but is
+unconfirmed is the same disclosure with a detail attached. Someone who has
+genuinely not confirmed still has the confirmation email.
+
+**Knowingly left.** Signup still says "that email is already registered" when
+it is. That is a weaker leak on a screen the person reached after paying, and
+collapsing it would strand a real customer with no way to understand why they
+cannot proceed. Worth revisiting if signup is ever opened to the public.
 
 ## 6. No server-side rate limiting anywhere — Medium
 
@@ -362,3 +404,25 @@ merged header cells, bold headers and the auto-filter.
 in the tree; keeping it is defensible because the vulnerable code path is not
 reachable. If it stays, pin it and re-check whenever `npm audit` changes, since
 a future advisory may land in the write path.
+
+---
+
+## The render smoke test: why it reports 25, not 26
+
+It reported "25 of 26" before and reports "25 of 25" now. **No section stopped
+rendering.** The same 25 render in both.
+
+The old list was written out by hand and contained `exp-convo-5`, which has
+never existed. `RESPONSIBILITY_CATEGORIES` has had exactly five entries in every
+commit back to 25 August — household, financial, career, emotional,
+extended_family — so the conversations are `exp-convo-0` through `exp-convo-4`.
+The sixth was a phantom, and it reported as SKIP, which reads like missing demo
+data rather than a list that had stopped matching the product.
+
+Confirmed by running the original 26-entry list against the current build:
+`25 of 26 sections rendered clean … skipped: exp-convo-5`. Identical coverage,
+different denominator.
+
+The list now derives from `RESULTS_SECTIONS`, so it cannot drift again. Conflict
+is excluded by name, from the same registry, because the demo does not stand up
+`/api/conflict-results`.

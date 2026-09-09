@@ -10167,13 +10167,21 @@ function AuthModal({ mode, onClose, onSuccess }) {
         // Trigger shake animation on every failed attempt
         triggerShake();
         if (attempts >= 5) { setLockedUntil(Date.now() + 30000); setLoginAttempts(0); return setErr("Too many failed attempts. Please wait 30 seconds."); }
-        // Try to distinguish email vs password error. Supabase returns a generic message for security,
-        // but we can check if the error mentions "email" specifically.
-        const msg = (authErr.message || '').toLowerCase();
-        if (msg.includes('email not confirmed') || msg.includes('not confirmed')) return setErr("This account hasn't been confirmed yet. Check your email for the confirmation link from Attune, then sign in.");
-        if (msg.includes('user not found') || msg.includes('no user') || msg.includes('invalid email')) return setErr("Wrong email, no account found.");
-        // Default: assume wrong password (most common case when email exists)
-        return setErr("Wrong password. Please try again.");
+        // One message, whatever went wrong.
+        //
+        // This used to sort the failure into three: "Wrong email, no account
+        // found", "Wrong password", and "This account hasn't been confirmed
+        // yet". Between them they answered a question nobody signed in to ask,
+        // which is whether a given address has an Attune account. For a
+        // product about someone's relationship, confirming that a particular
+        // person is a customer is itself the disclosure.
+        //
+        // Supabase already returns one generic message; this was undoing that.
+        // The unconfirmed case is folded in deliberately: telling an attacker
+        // an account exists but is unconfirmed is the same leak with an extra
+        // detail attached. Someone who genuinely has not confirmed still has
+        // the confirmation email, and the reset link below covers the rest.
+        return setErr("That email and password don't match. Check both, or reset your password below.");
       }
       setLoginAttempts(0); // reset on success
 

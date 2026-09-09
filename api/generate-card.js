@@ -15,6 +15,14 @@ import { safeError } from './_lib/http.js';
 const VALID_PKGS = new Set(['core', 'newlywed', 'anniversary', 'premium']);
 const VALID_VERSIONS = new Set(['standard', 'gift_printed', 'gift_blank']);
 
+/** Constant-time compare, so a wrong secret leaks no prefix. */
+function timingSafeEqual(a, b) {
+  if (typeof a !== 'string' || typeof b !== 'string' || a.length !== b.length) return false;
+  let mismatch = 0;
+  for (let i = 0; i < a.length; i++) mismatch |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  return mismatch === 0;
+}
+
 function clean(s, max = 100) {
   return (s && typeof s === 'string') ? s.trim().slice(0, max) : '';
 }
@@ -28,8 +36,20 @@ export default async function handler(req) {
     const { searchParams } = new URL(req.url);
 
     // Secret gate
+    // Fail CLOSED. This was `if (secret && ...)`, so an unset CARD_SECRET
+    // skipped the check and left the endpoint public. That is the same pattern
+    // admin-csv.js and stripe-webhook.js were both deliberately moved away
+    // from, and the comment on admin-csv.js records what it cost the first
+    // time: every customer's data served to anyone who knew the URL.
+    //
+    // Comparison is constant-time for the same reason checkAdminAuth is: a
+    // plain !== leaks how many leading characters matched.
     const secret = process.env.CARD_SECRET;
-    if (secret && searchParams.get('secret') !== secret) {
+    if (!secret) {
+      console.error('[generate-card] CARD_SECRET is not set; refusing.');
+      return new Response('Not configured', { status: 503 });
+    }
+    if (!timingSafeEqual(searchParams.get('secret') || '', secret)) {
       return new Response('Unauthorized', { status: 401 });
     }
 
