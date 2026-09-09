@@ -133,6 +133,21 @@ just means any scanner has to resolve the derivation too. When you write a gate
 that looks for a column, a route, an exercise key or a package name, ask what
 the indirection for that thing is, and match on both.
 
+**Absence is also what deletion looks like.** Before reporting that something
+is unreachable, missing or orphaned, check whether it was removed on purpose.
+`git log -S` on the thing takes ten seconds and answers it.
+
+`/how-it-works` and `/couple-types` were retired into `/methodology` in
+5c1924e, which says so in its subject line, and every nav link to them was
+replaced. Auditing the nav months later, I found two pages nothing linked,
+reported them as "very close to orphaned", and they were put back into every
+nav and footer on the strength of that framing. A deliberate retirement was
+undone because the audit measured reachability and never asked intent.
+
+An audit that only measures the current state cannot tell a gap from a
+decision. When something is missing, the question is not just "should this be
+here" but "was it taken out, and by whom, and why".
+
 **When a check has been failing for a long time, the failure is not the
 problem. Nobody noticing is.** `npm run check:docs` reported "18 of 27
 generators failed" on every run, because nineteen of them wrote to a sandbox
