@@ -978,6 +978,9 @@ Side by Side is grouped under its four headings.
 - `repairTitle` in the conflict prose is used by neither surface.
 - Greeting placeholders in `ANYTIME` (`api/_lib/next-action.js`) need review.
 
+**Conflict on the web: FOUND AND FIXED.** Superseded by the section below;
+what follows was written before the cause was known.
+
 **Conflict exercise on the web: not reproduced.** Driven in a real browser
 against the demo it opens, begins and answers through ten of twelve questions
 with no page error and no console error; the probe stops at the ranking
@@ -989,3 +992,31 @@ Neither changes what Ellie can reach, because PKG_CAPS.premium.hasConflict is
 true. **What is needed to go further: what "not working" looked like.** No
 tile on the dashboard is an ownership problem; a tile that opens a blank page
 or errors is a different one, and the two have opposite fixes.
+
+
+## 2026-09-10, third pass — the conflict cause, and two hidden answers
+
+**Conflict results have never opened on the website.** Ellie: "Conflict is
+present but when I click says 'not open yet'." It said that for every couple,
+on every conflict page, since the section shipped.
+
+Conflict is the one section that cannot be paired on the client: half of it is
+private, so `/api/partner-sync` withholds the partner's raw record by design.
+`src/App.jsx` read `partnerSession.conflict.answers`, which has never been
+sent, then called `summarizeConflict()` on it, which needs exactly those raw
+answers. Always null, so `conflictBothDone` was always false. Nothing errored.
+That is also the whole of "conflict works on the app and not the web": the app
+has always read `/api/conflict-results`. The website reads it now too.
+
+**The app has been showing the wrong snapshot answers.** A forced-A/B question
+stores the letter; the app's `chipText` compared it to `0`, so every "A"
+printed the "B" text. All three rows on Your Conflict Snapshot told each
+partner the opposite of what they said. It survived because the type declared
+`number`. Fixed, and `conflict-test.mjs` now pins the whole chain.
+
+**Both hidden answers are displayed**, per Ellie: `c8` in the Snapshot Repair
+block, `a_memory` first on Side by Side. Both use the question's own text as
+the label, so no new customer copy was written.
+
+**Still Ellie's:** the greeting placeholders in `ANYTIME`, and `repairTitle` in
+the conflict prose, which neither surface uses.
