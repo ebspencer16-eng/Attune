@@ -233,17 +233,39 @@ export function nextActions(state = {}) {
  * Someone's FIRST visit always gets the time of day. A first arrival greeted
  * with "welcome back" is the product claiming a history it does not have.
  */
-const ANYTIME = ['Welcome back', 'Nice to see you again'];
+const ANYTIME = [
+  // Ellie's.
+  'Welcome back',
+  'Nice to see you again',
+  // PLACEHOLDERS, awaiting Ellie's review. She asked for a few to look at
+  // rather than for me to settle the list. Written to her rules: short,
+  // declarative, no hedging, and nothing that congratulates someone for
+  // opening an app. Each has a name appended, so each has to read as a
+  // greeting and not as a sentence: "Good to see you, Ellie."
+  'Good to see you',
+  'Hello again',
+  'There you are',
+];
 
 export function greeting({ now, firstName, returning }) {
-  const at = new Date(now || Date.now());
+  // An unusable `now` falls back to the real clock rather than propagating.
+  // Indexing by the hour turns an invalid date into NaN, and options[NaN] is
+  // undefined, so the screen's first line rendered as nothing at all. The
+  // previous version could not do this: it only ever compared the hour, and
+  // NaN failed both comparisons and landed on 'Good evening'.
+  //
+  // Found by a test that passed a string where a number was expected, which is
+  // exactly the shape of the mistake a caller makes.
+  const ms = new Date(now ?? Date.now()).getTime();
+  const at = new Date(Number.isFinite(ms) ? ms : Date.now());
+
   const h = at.getHours();
   const timeOfDay = h < 12 ? 'Good morning' : h < 18 ? 'Good afternoon' : 'Good evening';
 
   let part = timeOfDay;
   if (returning) {
     const options = [timeOfDay, ...ANYTIME];
-    part = options[Math.floor(at.getTime() / 3600000) % options.length];
+    part = options[Math.floor(at.getTime() / 3600000) % options.length] || timeOfDay;
   }
   return firstName ? `${part}, ${firstName}` : part;
 }

@@ -166,8 +166,37 @@ ok('no streak or daily-habit language in the engine',
   !/streak|don'?t break|keep it going|days in a row/i.test(src.replace(/\/\*[\s\S]*?\*\//g, '')));
 
 // ── Greeting ────────────────────────────────────────────────────────────────
+//
+// This asserted one exact string, 'Welcome back', which was the whole of the
+// behaviour when the greeting never varied. It does now: Ellie asked for it to
+// move between the time of day and a few generic phrases. Asserting the output
+// of one hour would fail on five hours in six and prove nothing about the six.
+//
+// So the properties instead. They are the things that would actually be wrong.
 ok('greeting uses the name', greeting({ now: NOW, firstName: 'Ellie' }).includes('Ellie'));
-ok('greeting falls back without a name', greeting({ now: NOW, returning: true }) === 'Welcome back');
+
+// Date.parse, because NOW is an ISO string and adding a number to a string
+// concatenates. That mistake is what found greeting() returning undefined for
+// an unparseable date, so it is worth naming rather than just avoiding.
+const HOURS = Array.from({ length: 48 }, (_, i) => Date.parse(NOW) + i * 3600000);
+
+// A first visit is always the time of day. Greeting a first arrival with
+// "welcome back" is the product claiming a history it does not have.
+ok('a first visit is only ever the time of day',
+  HOURS.every((t) => /^Good (morning|afternoon|evening)$/.test(greeting({ now: t }))));
+
+// A returning visitor sees more than one phrase across a day, and every one of
+// them is from the list rather than assembled.
+const seen = new Set(HOURS.map((t) => greeting({ now: t, returning: true })));
+ok('a returning visitor sees several different greetings', seen.size >= 3);
+ok('every greeting is a whole phrase, never a fragment',
+  [...seen].every((g) => /^(Good (morning|afternoon|evening)|[A-Z][a-z].*[a-z])$/.test(g) && !g.endsWith(',')));
+
+// The time-of-day forms must still be honest about the clock: a greeting is
+// the one piece of copy a reader can immediately check against their own day.
+ok('a morning greeting never appears in the evening',
+  HOURS.filter((t) => new Date(t).getHours() >= 18)
+    .every((t) => !/morning|afternoon/.test(greeting({ now: t, returning: true }))));
 
 console.log(`\n${pass} passed, ${fail} failed`);
 if (fail) process.exit(1);

@@ -22,8 +22,7 @@
  * Every word comes from api/_conflict-results-prose.js.
  */
 
-import { useState } from 'react';
-import { Pressable, ScrollView, Text, View } from 'react-native';
+import { ScrollView, Text, View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 
 import type { ConflictResults, ConflictSummary } from '@/api/client';
@@ -33,7 +32,18 @@ import {
 
 const c = Colors.light;
 
-type Screen = 'glance' | 'snapshot' | 'patterns' | 'wrote';
+/**
+ * The four Conflict screens, named exactly as the server names them.
+ *
+ * They used to be 'glance' | 'snapshot' | 'patterns' | 'wrote', a second
+ * vocabulary for the same four things the results nav already calls
+ * conflict-overview, -snapshot, -patterns and -wrote. Two names for one screen
+ * is two lists to keep in step, and the `section` prop that carried the
+ * server's name was accepted here and never read.
+ */
+type Screen = 'overview' | 'snapshot' | 'patterns' | 'wrote';
+
+const SCREENS: Screen[] = ['overview', 'snapshot', 'patterns', 'wrote'];
 
 export default function ConflictResultsView({
   data, section,
@@ -46,43 +56,32 @@ export default function ConflictResultsView({
    */
   section?: string;
 }) {
-  const [screen, setScreen] = useState<Screen>('glance');
   const { you, partner, names, content } = data;
 
-  const tabs: { key: Screen; label: string }[] = [
-    { key: 'glance', label: 'At a glance' },
-    { key: 'snapshot', label: 'Your Snapshot' },
-    { key: 'patterns', label: 'Your Patterns' },
-    { key: 'wrote', label: 'What You Each Wrote' },
-  ];
+  /**
+   * Which screen, from the section the results nav asked for.
+   *
+   * ── WHY THE TAB BAR IS GONE ─────────────────────────────────────────────
+   * This screen had its own row of pills across the top, so Conflict Patterns
+   * was the only section in the app with two navigations: the results nav that
+   * every other section uses, and a second one inside it that looked nothing
+   * like it.
+   *
+   * Worse, they were not connected. `section` arrived from the nav and was
+   * never read, and the pills were local state defaulting to the first tab. So
+   * every conflict link in the nav, including the three that name a specific
+   * page, landed on At a glance and left the reader to find the rest through a
+   * control the rest of the product does not have.
+   *
+   * Ellie: "Conflict pages on app need to match site and currently don't...
+   * use the nav we've organized in other sections."
+   */
+  const screen: Screen =
+    (SCREENS.find((k) => section === `conflict-${k}`) || 'overview');
 
   return (
     <View style={{ flex: 1 }}>
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={{ paddingHorizontal: Spacing.xl, gap: Spacing.sm, paddingBottom: Spacing.lg }}>
-        {tabs.map((t) => {
-          const on = t.key === screen;
-          return (
-            <Pressable
-      accessibilityRole="button"
-              key={t.key}
-              onPress={() => setScreen(t.key)}
-              style={{
-                paddingVertical: Spacing.sm, paddingHorizontal: Spacing.lg, borderRadius: Radius.pill,
-                backgroundColor: on ? c.textStrong : c.surface,
-                borderColor: on ? c.textStrong : c.border, borderWidth: 1,
-              }}>
-              <Text style={{ ...Type.small, fontWeight: '700', color: on ? Palette.white : c.textMuted }}>
-                {t.label}
-              </Text>
-            </Pressable>
-          );
-        })}
-      </ScrollView>
-
-      {screen === 'glance' ? <Glance data={data} /> : null}
+      {screen === 'overview' ? <Glance data={data} /> : null}
       {screen === 'snapshot' ? <Snapshot data={data} /> : null}
       {screen === 'patterns' ? <Patterns you={you} content={content} /> : null}
       {screen === 'wrote' ? <Wrote data={data} /> : null}
@@ -141,12 +140,62 @@ function Glance({ data }: { data: Extract<ConflictResults, { ready: true }> }) {
   );
 }
 
+
+/**
+ * The header every Conflict detail page carries on the website: the section
+ * eyebrow, the page's own title, and a badge saying whether this page is
+ * shared or private.
+ *
+ * ── WHY THIS WAS WORTH ADDING ─────────────────────────────────────────────
+ * The app drew none of it. The three titles and both badge words have been on
+ * the payload since /api/conflict-results existed, in content.copy, and the
+ * app read two keys out of that object and ignored the rest. So each page
+ * opened straight into its content with nothing naming it, and the reader had
+ * no way to tell which pages their partner can see.
+ *
+ * On this section in particular that is not a cosmetic difference. Conflict
+ * Patterns is the one part of the product where half the answers stay private,
+ * and the badge is the only thing on the page that says so.
+ */
+function PageHead({
+  copy, title, shared,
+}: {
+  copy: { eyebrow?: string; sharedBadge?: string; privateBadge?: string };
+  title?: string;
+  shared: boolean;
+}) {
+  return (
+    <View style={{ marginBottom: Spacing.lg }}>
+      <Text style={{ ...Type.eyebrow, color: c.accent }}>
+        {copy.eyebrow || 'Conflict Patterns'}
+      </Text>
+      <View
+        style={{
+          flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
+          gap: Spacing.md, marginTop: Spacing.sm,
+        }}>
+        <Text style={{ ...Type.title, color: c.textStrong, flex: 1 }}>{title}</Text>
+        <View
+          style={{
+            paddingHorizontal: Spacing.md, paddingVertical: 3, borderRadius: Radius.pill,
+            backgroundColor: shared ? '#E7F3EC' : '#FBE9F1',
+          }}>
+          <Text style={{ ...Type.small, fontSize: 11, fontWeight: '700', color: shared ? '#2E7D5B' : '#B5546E' }}>
+            {shared ? (copy.sharedBadge || 'Shared') : (copy.privateBadge || 'Just for you')}
+          </Text>
+        </View>
+      </View>
+    </View>
+  );
+}
+
 /** Snapshot. The three shared questions, and what each of you helps with. */
 function Snapshot({ data }: { data: Extract<ConflictResults, { ready: true }> }) {
   const { you, partner, names, content } = data;
 
   return (
     <ScrollView contentContainerStyle={pad}>
+      <PageHead copy={content.copy} title={content.copy.snapshotTitle} shared />
       <View style={{ ...card }}>
         <Text style={{ ...Type.eyebrow, color: c.accentQuiet, marginBottom: Spacing.md }}>Conflict</Text>
         {content.snapshotRows.map((row) => {
@@ -173,10 +222,13 @@ function Snapshot({ data }: { data: Extract<ConflictResults, { ready: true }> })
       </View>
 
       <View style={{ ...card, marginTop: Spacing.md }}>
-        <Text style={{ ...Type.eyebrow, color: c.accentQuiet, marginBottom: Spacing.sm }}>Repair</Text>
-        <Text style={{ ...Type.small, color: c.textMuted, marginBottom: Spacing.md }}>
-          {content.copy.repairIntro || 'What helps each of you reset.'}
-        </Text>
+        {/* "Repair", then the two columns, which is what the website shows.
+            There was a line under this heading reading "What helps each of you
+            reset.", written here as a fallback for content.copy.repairIntro,
+            which is an empty string. So the fallback was the only thing that
+            ever rendered: a sentence the website does not have, written in the
+            app, which is the thing Ellie asked not to happen. */}
+        <Text style={{ ...Type.eyebrow, color: c.accentQuiet, marginBottom: Spacing.md }}>Repair</Text>
         <View style={{ flexDirection: 'row', gap: Spacing.lg }}>
           <RepairColumn title={`What ${names.you} wants`} items={you.repairRanking} />
           {partner ? (
@@ -199,6 +251,7 @@ function Patterns({
 }: { you: ConflictSummary; content: Extract<ConflictResults, { ready: true }>['content'] }) {
   return (
     <ScrollView contentContainerStyle={pad}>
+      <PageHead copy={content.copy} title={content.copy.patternsTitle} shared={false} />
       {/* The privacy line sits above the content, not below it, because someone
           reading their own worst pattern should know it is private before they
           read it rather than after. */}
@@ -263,7 +316,7 @@ function Patterns({
 
 /** What You Each Wrote. Only the questions you both answered knowing they were shared. */
 function Wrote({ data }: { data: Extract<ConflictResults, { ready: true }> }) {
-  const { you, partner, names } = data;
+  const { you, partner, names, content } = data;
   const rows: { label: string; mine: string | null; theirs: string | null }[] = [
     { label: 'What already works', mine: you.strength, theirs: partner?.strength ?? null },
     { label: 'Looking back', mine: you.reflection, theirs: partner?.reflection ?? null },
@@ -273,6 +326,7 @@ function Wrote({ data }: { data: Extract<ConflictResults, { ready: true }> }) {
   if (!rows.length) {
     return (
       <ScrollView contentContainerStyle={pad}>
+        <PageHead copy={content.copy} title={content.copy.wroteTitle} shared />
         <Text style={{ ...Type.body, color: c.textMuted }}>
           Neither of you wrote anything on these questions.
         </Text>
@@ -282,6 +336,7 @@ function Wrote({ data }: { data: Extract<ConflictResults, { ready: true }> }) {
 
   return (
     <ScrollView contentContainerStyle={pad}>
+      <PageHead copy={content.copy} title={content.copy.wroteTitle} shared />
       {rows.map((r) => (
         <View key={r.label} style={{ ...card, marginBottom: Spacing.md }}>
           <Text style={{ ...Type.eyebrow, color: c.accentQuiet, marginBottom: Spacing.md }}>{r.label}</Text>
