@@ -16,7 +16,7 @@
  *
  * Returns:
  *   200 { ok, ready: true,  results }     both partners have finished
- *   200 { ok, ready: false, reason, self } waiting on someone
+ *   200 { ok, ready: false, reason, waitingOn, self } waiting on someone
  *   401 not signed in or a bad token
  */
 
@@ -41,6 +41,7 @@ import { personalityFeedback, commsProtocols, commsActionPlan } from './_lib/com
 import { deriveAnniversaryInsights, reflectionActionTitle } from './_lib/reflection-insights.js';
 import { EXERCISES, EXERCISE_COLUMNS, isExerciseDone } from './_exercises.js';
 import { capabilitiesFor, OWNERSHIP_COLUMNS } from './_lib/ownership.js';
+import { resultsGate, doneFromProfile } from './_lib/results-gate.js';
 import { DIM_META } from './_workbook-content.js';
 import { DIM_KEYS, AXIS_CONFIG } from './_type-engine.js';
 import { ALIGNMENT_THRESHOLD } from './_lib/results.js';
@@ -380,10 +381,27 @@ export default async function handler(req) {
     const partner = (await partRes.json().catch(() => []))?.[0];
     const theirs = partner?.ex1_answers && Object.keys(partner.ex1_answers).length ? partner.ex1_answers : null;
 
-    if (!mine || !theirs) {
+    // Readiness is api/_lib/results-gate.js's decision, not this endpoint's.
+    // This tested Communication and nothing else, so a couple who owned
+    // Conflict Patterns and had not finished it were served a full results
+    // payload. Every owned exercise counts now, for both partners.
+    //
+    // ex1 is in every package, so a ready gate guarantees mine and theirs are
+    // both populated for the scoring below.
+    const { caps } = capabilitiesFor(me);
+    const gate = resultsGate({
+      pkg: caps,
+      mine: doneFromProfile(me),
+      theirs: doneFromProfile(partner),
+      partnerLinked: true,
+    });
+    if (!gate.ready) {
       return json({
         ok: true, ready: false,
-        reason: !mine && !theirs ? 'neither_complete' : (!mine ? 'you_incomplete' : 'partner_incomplete'),
+        reason: gate.reason,
+        // Which exercises, and whose. A waiting screen should be able to name
+        // them rather than work out the list a second time.
+        waitingOn: gate.waitingOn,
         // Whoever has answered still gets their own read.
         self: mine ? personResults(mine, null) : null,
         partnerName: partner?.name || null,

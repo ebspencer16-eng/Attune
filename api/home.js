@@ -18,7 +18,8 @@
 export const config = { runtime: 'edge' };
 
 import { nextActions, greeting } from './_lib/next-action.js';
-import { EXERCISES, EXERCISE_COLUMNS, CORE_EXERCISES, isExerciseDone } from './_exercises.js';
+import { EXERCISES, EXERCISE_COLUMNS, isExerciseDone } from './_exercises.js';
+import { resultsGate } from './_lib/results-gate.js';
 import { CATALOGUE } from './_catalogue.js';
 import { researchOfTheDay } from './_research.js';
 import { pickUp } from './_lib/pick-up.js';
@@ -113,11 +114,18 @@ export default async function handler(req) {
     // A flat list of what this person owns, for surfaces that ask "what do
     // they have" rather than "how far through are they". Derived here so the
     // app never works it out for itself.
-    // Results need both partners through the exercises every package includes.
-    // Named ex1 and ex2 by hand before, which would have silently kept results
-    // open if a third core exercise were ever added.
-    const resultsReady = CORE_EXERCISES.every(
-      (e) => exercises[e.key].mine && exercises[e.key].theirs);
+    // Results need both partners through every exercise the couple OWNS, not
+    // the core two. api/_lib/results-gate.js is the only place that decides
+    // this now; it was decided differently here, in api/results.js and in
+    // src/App.jsx, and a couple who owned Conflict Patterns and had not
+    // finished it saw everything but the conflict section.
+    const gate = resultsGate({
+      pkg: caps,
+      mine: Object.fromEntries(Object.entries(exercises).map(([k, e]) => [k, e.mine])),
+      theirs: Object.fromEntries(Object.entries(exercises).map(([k, e]) => [k, e.theirs])),
+      partnerLinked: !!me.partner_profile_id,
+    });
+    const resultsReady = gate.ready;
 
     // The revisit anchor: the couple's widest gap, read from the stored results
     // rather than recomputed, since this endpoint should stay cheap.
@@ -225,6 +233,11 @@ export default async function handler(req) {
       // read a top-level field that was never sent, so a couple who had both
       // finished were shown their exercise progress instead of their results.
       resultsReady,
+      // What is still outstanding, and whose it is. Sent so a waiting screen
+      // can say which exercise it is waiting on without deciding for itself
+      // which ones count: that decision is the gate's, and a surface that
+      // reimplements it is how this rule ended up with three versions.
+      resultsWaitingOn: gate.waitingOn,
       // What exists to buy, so the app renders the server's catalogue rather
       // than a copy that goes stale the moment an add-on is added or repriced.
       catalogue: CATALOGUE,

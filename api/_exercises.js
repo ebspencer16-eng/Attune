@@ -82,8 +82,6 @@ export const EXERCISE_LOCAL_KEYS = EXERCISES.flatMap(e => [e.localKey, e.progres
 /** Fields the partner session must carry for status to be reportable. */
 export const PARTNER_SESSION_FIELDS = EXERCISES.map(e => e.partnerField);
 
-/** Exercises included in every package, regardless of add-ons. */
-export const CORE_EXERCISES = EXERCISES.filter(e => !e.capability);
 
 /**
  * The exercises a couple owns, in display order, numbered positionally.

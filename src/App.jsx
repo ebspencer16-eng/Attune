@@ -74,6 +74,7 @@ function typingDimScores(selfAnswers, partnerAnswers) {
 import { INTIMACY_RESULTS_PROSE } from "../api/_intimacy-results-prose.js";
 import { PKG_CAPS, ORDER_SELECT, computeEntitlements, mergeEntitlementsGrantOnly, sameEntitlements } from "../api/_lib/entitlements.js";
 import { OAUTH_PROVIDERS } from "../api/_lib/auth-providers.js";
+import { resultsGate } from "../api/_lib/results-gate.js";
 import { availableSections as availableResultsSections } from "../api/_lib/results-sections.js";
 // The reflection question set, moved out of this file so the app can reach
 // it too. See api/_anniversary-questions.js.
@@ -12976,12 +12977,56 @@ export default function App() {
   const _demoEx1 = _demoParam ? sarahEx1 : null;
   const _demoEx2 = _demoParam ? sarahEx2 : null;
 
-  // Intimacy is an add-on exercise. For couples who bought it, results gate on
-  // both partners finishing it too. For everyone else it's a no-op.
-  // Use `order` directly (pkg is declared later); mirror its hasIntimacy logic.
-  const _ownsIntimacy = !!(order?.addonIntimacy) || (() => { try { return localStorage.getItem('attune_dev_intimacy') === '1'; } catch { return false; } })();
-  const _intimacyGateOk = !_ownsIntimacy || (!!(intimacyData?.completedAt) && !!(partnerSession?.intimacy?.completedAt));
-  const bothDone = !!(ex1Answers && ex2Answers && (isDemo || hasRealPartner)) && _intimacyGateOk;
+  // Package config
+  const pkgConfig = {
+    core:        { label: "The Attune Assessment",     color: "#E8673A", hasChecklist: false, hasAnniversary: false, hasBudget: false },
+    newlywed:    { label: "Starting Out Collection",   color: "#E8673A", hasChecklist: true,  hasAnniversary: false, hasBudget: true },
+    anniversary: { label: "Relationship Reflection",    color: "#1B5FE8", hasChecklist: false, hasAnniversary: true,  hasBudget: false },
+    premium:     { label: "Attune Premium",            color: "#3B5BDB", hasChecklist: false, hasAnniversary: true,  hasBudget: true },
+  };
+  // Merge add-on flags from stored order (add-ons bought on non-premium packages)
+  // Outside demo mode the reconciled `order` state is authoritative for the
+  // package key. demoPkg reads a localStorage snapshot, which can lag behind
+  // the entitlement resync and silently drop package-inherent features.
+  const _effectivePkgKey = _demoParam ? demoPkg : (order?.pkgKey || order?.pkg || demoPkg);
+  const _basePkg = pkgConfig[_effectivePkgKey] || pkgConfig.core;
+  const pkg = {
+    ..._basePkg,
+    hasChecklist:   _basePkg.hasChecklist   || !!(order?.addonChecklist),
+    hasAnniversary: _basePkg.hasAnniversary || !!(order?.addonReflection),
+    hasBudget:      _basePkg.hasBudget      || !!(order?.addonBudget),
+    hasWorkbook:    _effectivePkgKey === 'premium' || !!(order?.addonWorkbook),
+    // Never bundled into a package, unlike intimacy: the add-on flag is the
+    // only route to it.
+    // Premium bundles Conflict Patterns. Physical Intimacy is add-on only.
+    hasConflict:    _effectivePkgKey === 'premium' || !!(order?.addonConflict),
+    hasIntimacy:    !!(order?.addonIntimacy) || (() => { try { return localStorage.getItem('attune_dev_intimacy') === '1'; } catch { return false; } })() || (() => { try { const q = new URLSearchParams(window.location.search); return !!q.get('demo') && q.get('intimacy') === '1'; } catch { return false; } })(),
+  };
+
+  // Results open when both partners have finished every exercise the couple
+  // OWNS. The rule is api/_lib/results-gate.js's, shared with /api/home and
+  // /api/results, because it had been written three times and the three
+  // disagreed. This copy checked Communication, Expectations, and intimacy
+  // when owned, so a couple who owned Conflict Patterns and had not finished
+  // it walked into a full results experience with one section locked.
+  //
+  // The package block above used to sit below this line, which is why the
+  // intimacy half of the old rule was a hand-copy of pkg.hasIntimacy carrying
+  // the dev override and missing the demo one. Moving it up deletes the copy.
+  const _doneMine = {
+    ex1: !!ex1Answers, ex2: !!ex2Answers, ex3: !!ex3Answers,
+    intimacy: !!(intimacyData?.completedAt), conflict: !!(conflictData?.completedAt),
+  };
+  const _doneTheirs = {
+    ex1: !!(partnerSession?.ex1), ex2: !!(partnerSession?.ex2), ex3: !!(partnerSession?.ex3),
+    intimacy: !!(partnerSession?.intimacy?.completedAt),
+    conflict: !!(partnerSession?.conflict?.completedAt),
+  };
+  // Demo is a fixture couple, complete by construction, and that escape hatch
+  // belongs to the caller rather than to the rule.
+  const bothDone = isDemo
+    ? !!(ex1Answers && ex2Answers)
+    : resultsGate({ pkg, mine: _doneMine, theirs: _doneTheirs, partnerLinked: hasRealPartner }).ready;
 
   // Couple type, derived once at the App level. Several App-scope consumers
   // reference `coupleType` — the results-viewed email effect, the feedback
@@ -13044,31 +13089,6 @@ export default function App() {
   const ex2InProgress = !ex2Answers && _hasProgress('attune_ex2_progress', p => p.phase && p.phase !== 'intro');
   const ex3InProgress = !ex3Answers && _hasProgress('attune_ex3_progress', p => Object.keys(p.answers || {}).length > 0);
   const inProgressFor = (viewId) => viewId === 'exercise1' ? ex1InProgress : viewId === 'exercise2' ? ex2InProgress : viewId === 'exercise3' ? ex3InProgress : false;
-  // Package config
-  const pkgConfig = {
-    core:        { label: "The Attune Assessment",     color: "#E8673A", hasChecklist: false, hasAnniversary: false, hasBudget: false },
-    newlywed:    { label: "Starting Out Collection",   color: "#E8673A", hasChecklist: true,  hasAnniversary: false, hasBudget: true },
-    anniversary: { label: "Relationship Reflection",    color: "#1B5FE8", hasChecklist: false, hasAnniversary: true,  hasBudget: false },
-    premium:     { label: "Attune Premium",            color: "#3B5BDB", hasChecklist: false, hasAnniversary: true,  hasBudget: true },
-  };
-  // Merge add-on flags from stored order (add-ons bought on non-premium packages)
-  // Outside demo mode the reconciled `order` state is authoritative for the
-  // package key. demoPkg reads a localStorage snapshot, which can lag behind
-  // the entitlement resync and silently drop package-inherent features.
-  const _effectivePkgKey = _demoParam ? demoPkg : (order?.pkgKey || order?.pkg || demoPkg);
-  const _basePkg = pkgConfig[_effectivePkgKey] || pkgConfig.core;
-  const pkg = {
-    ..._basePkg,
-    hasChecklist:   _basePkg.hasChecklist   || !!(order?.addonChecklist),
-    hasAnniversary: _basePkg.hasAnniversary || !!(order?.addonReflection),
-    hasBudget:      _basePkg.hasBudget      || !!(order?.addonBudget),
-    hasWorkbook:    _effectivePkgKey === 'premium' || !!(order?.addonWorkbook),
-    // Never bundled into a package, unlike intimacy: the add-on flag is the
-    // only route to it.
-    // Premium bundles Conflict Patterns. Physical Intimacy is add-on only.
-    hasConflict:    _effectivePkgKey === 'premium' || !!(order?.addonConflict),
-    hasIntimacy:    !!(order?.addonIntimacy) || (() => { try { return localStorage.getItem('attune_dev_intimacy') === '1'; } catch { return false; } })() || (() => { try { const q = new URLSearchParams(window.location.search); return !!q.get('demo') && q.get('intimacy') === '1'; } catch { return false; } })(),
-  };
 
   // Partner B "waiting/ready" poll. Declared here, BEFORE any early return,
   // so the hook count stays constant across renders. (Previously this lived
