@@ -317,6 +317,7 @@ function PrimaryCard({ card, onPress }: { card: HomeCard; onPress: () => void })
       ) : null}
       {card.cta && !dim ? (
         <Pressable
+      accessibilityRole="button"
           onPress={onPress}
           style={{
             marginTop: Spacing.lg, alignSelf: 'flex-start',
@@ -420,6 +421,7 @@ function TileRow({
 }) {
   return (
     <Pressable
+      accessibilityRole="button"
       onPress={onPress}
       disabled={disabled}
       style={{

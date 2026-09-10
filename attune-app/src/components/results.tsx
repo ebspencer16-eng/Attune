@@ -102,7 +102,8 @@ let lastSection: string | null = null;
 export default function Results({
   results, owned = [], sections: fromServer, nav = [], highlights = [],
   expectations = null, intimacy = null, reflection = null, whatComesNext = null,
-  commsPlan = null, commDomains = [], commResponses = [], reflectionPlan = null,
+  commsPlan = null, commDomains = [], commResponses = [], storycardStyle = null,
+  reflectionPlan = null,
 }: {
   results: CoupleResults;
   owned?: string[];
@@ -112,6 +113,7 @@ export default function Results({
   commsPlan?: CommsPlan | null;
   commDomains?: CommDomain[];
   commResponses?: SbsRow[];
+  storycardStyle?: StorycardStyle | null;
   reflectionPlan?: ReflectionInsight[] | null;
   expectations?: ExpectationsSummary | null;
   intimacy?: IntimacyResults | null;
@@ -234,6 +236,7 @@ export default function Results({
           const on = g.id === activeGroup?.id;
           return (
             <Pressable
+      accessibilityRole="button"
               key={g.id}
               onPress={() => rememberSection(g.children?.length ? g.children[0].id : g.id)}
               onLayout={(e) => { groupX.current[g.id] = e.nativeEvent.layout.x; }}
@@ -267,6 +270,7 @@ export default function Results({
             const on = child.id === section;
             return (
               <Pressable
+      accessibilityRole="button"
                 key={child.id}
                 onPress={() => rememberSection(child.id)}
                 onLayout={(e) => { pageX.current[child.id] = e.nativeEvent.layout.x; }}
@@ -302,6 +306,7 @@ export default function Results({
           commsPlan={commsPlan}
           commDomains={commDomains}
           commResponses={commResponses}
+          storycardStyle={storycardStyle}
           reflectionPlan={reflectionPlan}
           intimacy={intimacy}
           reflection={reflection}
@@ -336,7 +341,7 @@ export default function Results({
  */
 function SectionBody({
   section, results, conflict, conflictWaiting, byDomain, you, them, viewer, wideGap,
-  expectations, highlights, commsPlan, commDomains, commResponses, reflectionPlan,
+  expectations, highlights, commsPlan, commDomains, commResponses, storycardStyle, reflectionPlan,
   intimacy, reflection, whatComesNext, onGoToSection,
 }: {
   section: string;
@@ -345,6 +350,7 @@ function SectionBody({
   commsPlan: CommsPlan | null;
   commDomains: CommDomain[];
   commResponses: SbsRow[];
+  storycardStyle: StorycardStyle | null;
   reflectionPlan: ReflectionInsight[] | null;
   intimacy: IntimacyResults | null;
   reflection: ReflectionResults | null;
@@ -366,7 +372,7 @@ function SectionBody({
         <HighlightCards
           cards={highlights}
           accent={results.content?.coupleType?.color || null}
-          style={results.content?.storycardStyle || null}
+          style={storycardStyle}
           onDone={() => onGoToSection('couple-type')}
         />
       );
@@ -1593,7 +1599,8 @@ function NextGroup({
               ) : null}
             </View>
           ))}
-          <Pressable onPress={onOpen} style={{ paddingVertical: Spacing.md, paddingHorizontal: Spacing.lg }}>
+          <Pressable
+      accessibilityRole="button" onPress={onOpen} style={{ paddingVertical: Spacing.md, paddingHorizontal: Spacing.lg }}>
             <Text style={{ ...Type.small, fontWeight: '700', color: c.textMuted }}>
               {`Open ${label} \u2192`}
             </Text>
@@ -1801,7 +1808,19 @@ function Glance({
 /** The couple type in full. Detail screen, so it stays on the warm ground. */
 function CoupleType({ results, you, them }: { results: CoupleResults; you: string; them: string }) {
   const type = results.content?.coupleType;
-  if (!type) return null;
+  // Not null. This section is in the nav, so returning nothing gives a blank
+  // page with no explanation, which reads as the app being broken. The website
+  // logs loudly and falls back rather than rendering an empty slide, and the
+  // only way here is a pairing the type table does not know, which is a bug
+  // worth saying out loud rather than hiding.
+  if (!type) {
+    return (
+      <Waiting
+        title="Couple type"
+        body="This one could not be built from your answers. Everything else in your results is unaffected."
+      />
+    );
+  }
 
   // The type's own colour, which the website paints this page with. It was
   // arriving in the payload and being ignored, so every couple type looked the
@@ -2246,6 +2265,10 @@ function SideBySide({
     </View>
   );
 }
+
+export type StorycardStyle = {
+  ratio: number; stripe: string[]; wordmark: string; siteLabel: string;
+};
 
 export type CommDomain = {
   id: string; label: string; color: string; dims: string[];

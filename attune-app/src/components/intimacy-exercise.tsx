@@ -111,6 +111,7 @@ export default function IntimacyExercise({
             finished, and then you see them side by side.
           </Text>
           <Pressable
+      accessibilityRole="button"
             onPress={onFinished}
             style={{
               marginTop: Spacing.xl, backgroundColor: c.textStrong,
@@ -191,6 +192,7 @@ export default function IntimacyExercise({
               : value === o.label;
             return (
               <Pressable
+      accessibilityRole="button"
                 key={o.label}
                 onPress={() => choose(o.value, o.label)}
                 style={{
@@ -229,6 +231,7 @@ export default function IntimacyExercise({
         {/* Never disabled. Nothing here is required, and a greyed Next on a
             question someone does not want to answer is the app insisting. */}
         <Pressable
+      accessibilityRole="button"
           onPress={advance}
           disabled={saving}
           style={{
@@ -246,6 +249,7 @@ export default function IntimacyExercise({
 
         {idx > 0 ? (
           <Pressable
+      accessibilityRole="button"
             onPress={() => setIdx(idx - 1)}
             style={{ marginTop: Spacing.sm, paddingVertical: Spacing.sm, alignItems: 'center' }}>
             <Text style={{ ...Type.small, color: c.textMuted, fontWeight: '600' }}>Back</Text>
@@ -269,7 +273,8 @@ function Shell({ children, onClose }: { children: React.ReactNode; onClose: () =
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: c.background }} edges={['top']}>
       <View style={{ flexDirection: 'row', justifyContent: 'flex-end', paddingHorizontal: Spacing.xl, paddingTop: Spacing.md }}>
-        <Pressable onPress={onClose} hitSlop={10}>
+        <Pressable
+      accessibilityRole="button" onPress={onClose} hitSlop={10}>
           <Text style={{ ...Type.body, color: c.textMuted }}>Close</Text>
         </Pressable>
       </View>

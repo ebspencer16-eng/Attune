@@ -373,6 +373,7 @@ function Results({ results, owned }: { results: ResultsResponse | null; owned: s
       commsPlan={results.commsPlan}
       commDomains={results.commDomains ?? []}
       commResponses={results.commResponses ?? []}
+      storycardStyle={results.storycardStyle ?? null}
       reflectionPlan={results.reflectionPlan}
       expectations={results.expectations}
       intimacy={results.intimacy}

@@ -189,6 +189,7 @@ export default function ResourcesScreen() {
                   const on = cat === category;
                   return (
                     <Pressable
+      accessibilityRole="button"
                       key={cat}
                       onPress={() => setCategory(cat)}
                       style={{
@@ -277,8 +278,15 @@ const ICON: Record<string, string> = {
  */
 function OwnedTile({ item }: { item: Item }) {
   const color = AccentFor[item.key] ?? AccentFallback;
+  // It opens the thing. This was a Pressable with no handler: a circle that
+  // looks tappable, is announced as a control, and does nothing. The tools all
+  // live on the website, and `/app?view=<key>` is the same link the priority
+  // engine sends people to from the home screen.
   return (
-    <Pressable style={{ alignItems: 'center', width: 84 }}>
+    <Pressable
+      accessibilityRole="button"
+      onPress={() => Linking.openURL(`${SITE}/app?view=${item.key}`)}
+      style={{ alignItems: 'center', width: 84 }}>
       <View
         style={{
           width: 64, height: 64, borderRadius: 32,
@@ -305,6 +313,7 @@ function ExploreTile({ item }: { item: Item }) {
   const color = AccentFor[item.key] ?? AccentFallback;
   return (
     <Pressable
+      accessibilityRole="button"
       onPress={() => Linking.openURL(`${SITE}/offerings`)}
       style={{
         width: 190, backgroundColor: c.surface,
@@ -338,6 +347,7 @@ function ExploreTile({ item }: { item: Item }) {
 function PostRow({ post, first, onRead }: { post: PostSummary; first: boolean; onRead: () => void }) {
   return (
     <Pressable
+      accessibilityRole="button"
       onPress={async () => {
         // Opened first. Marking read is bookkeeping and should never stand
         // between someone and the thing they tapped.

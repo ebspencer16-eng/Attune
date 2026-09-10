@@ -251,7 +251,8 @@ function Reel({
           gap: Spacing.xs, paddingTop: Spacing.lg, paddingBottom: Spacing.md,
         }}>
         {cards.map((card, i) => (
-          <Pressable key={card.id} onPress={() => goTo(i)} hitSlop={8}>
+          <Pressable
+      accessibilityRole="button" key={card.id} onPress={() => goTo(i)} hitSlop={8}>
             <View
               style={{
                 height: 4, width: i === index ? 28 : 18, borderRadius: 2,
@@ -272,6 +273,7 @@ function Reel({
         style={{ flex: 1 }}>
         {cards.map((card, i) => (
           <Pressable
+      accessibilityRole="button"
             key={card.id}
             // Tapping advances, the way the website's cards do. The last card
             // has its own button instead, because tapping into nothing is how
@@ -571,6 +573,7 @@ function Body({ card, onDone }: { card: HighlightCard; onDone: () => void }) {
             {card.body}
           </Text>
           <Pressable
+      accessibilityRole="button"
             onPress={onDone}
             style={{
               backgroundColor: c.accent, borderRadius: Radius.md,

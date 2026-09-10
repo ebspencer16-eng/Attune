@@ -117,6 +117,7 @@ export default function Exercise({
             Your answers are saved. Results open once you have both finished.
           </Text>
           <Pressable
+      accessibilityRole="button"
             onPress={onFinished}
             style={{
               marginTop: Spacing.xl, backgroundColor: c.textStrong, borderRadius: Radius.md,
@@ -143,6 +144,7 @@ export default function Exercise({
             these, and your partner never sees what you guessed.
           </Text>
           <Pressable
+      accessibilityRole="button"
             onPress={() => setIdx(idx + 1)}
             style={{
               marginTop: Spacing.xl, backgroundColor: c.accent, borderRadius: Radius.md,
@@ -240,6 +242,7 @@ export default function Exercise({
         ) : null}
 
         <Pressable
+      accessibilityRole="button"
           onPress={advance}
           disabled={chosen == null || saving}
           style={{
@@ -257,7 +260,8 @@ export default function Exercise({
         </Pressable>
 
         {idx > 0 ? (
-          <Pressable onPress={() => setIdx(idx - 1)} style={{ marginTop: Spacing.sm, paddingVertical: Spacing.sm, alignItems: 'center' }}>
+          <Pressable
+      accessibilityRole="button" onPress={() => setIdx(idx - 1)} style={{ marginTop: Spacing.sm, paddingVertical: Spacing.sm, alignItems: 'center' }}>
             <Text style={{ ...Type.small, color: c.textMuted, fontWeight: '600' }}>Back</Text>
           </Pressable>
         ) : null}
@@ -284,7 +288,8 @@ function Shell({ children, onClose }: { children: React.ReactNode; onClose: () =
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: c.background }} edges={['top']}>
       <View style={{ flexDirection: 'row', justifyContent: 'flex-end', paddingHorizontal: Spacing.xl, paddingTop: Spacing.md }}>
-        <Pressable onPress={onClose} hitSlop={10}>
+        <Pressable
+      accessibilityRole="button" onPress={onClose} hitSlop={10}>
           <Text style={{ ...Type.body, color: c.textMuted }}>Close</Text>
         </Pressable>
       </View>

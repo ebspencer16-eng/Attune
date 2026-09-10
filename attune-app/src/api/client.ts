@@ -421,6 +421,14 @@ export type ResultsResponse =
         id: string; label: string; color: string; dims: string[];
         prose: string; ground: string[];
       }[];
+      /**
+       * How the storycards are presented. Top level beside highlights, which
+       * is where the handler assembles it; the app read it from content and so
+       * ran on its own fallback from the day it was added.
+       */
+      storycardStyle?: {
+        ratio: number; stripe: string[]; wordmark: string; siteLabel: string;
+      };
       /** Every Communication question with both answers and both cross-views. */
       commResponses?: {
         id: string; dimension: string; text: string; left: string; right: string;

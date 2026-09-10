@@ -112,6 +112,7 @@ export default function ReflectionExercise({
             finished writing.
           </Text>
           <Pressable
+      accessibilityRole="button"
             onPress={onFinished}
             style={{
               marginTop: Spacing.xl, backgroundColor: c.textStrong,
@@ -215,6 +216,7 @@ export default function ReflectionExercise({
           ) : null}
 
           <Pressable
+      accessibilityRole="button"
             onPress={advance}
             disabled={!canAdvance || saving}
             style={{
@@ -242,6 +244,7 @@ export default function ReflectionExercise({
 
           {idx > 0 ? (
             <Pressable
+      accessibilityRole="button"
               onPress={() => setIdx(idx - 1)}
               style={{ marginTop: Spacing.sm, paddingVertical: Spacing.sm, alignItems: 'center' }}>
               <Text style={{ ...Type.small, color: c.textMuted, fontWeight: '600' }}>Back</Text>
@@ -272,6 +275,7 @@ function ScaleChoice({
         const on = chosen === i;
         return (
           <Pressable
+      accessibilityRole="button"
             key={label}
             onPress={() => onChoose(i)}
             style={{
@@ -297,6 +301,7 @@ function PickChoice({
         const on = chosen === o;
         return (
           <Pressable
+      accessibilityRole="button"
             key={o}
             onPress={() => onChoose(o)}
             style={{
@@ -337,6 +342,7 @@ function RankChoice({
 
       {picked.map((o, i) => (
         <Pressable
+      accessibilityRole="button"
           key={o}
           onPress={() => onChange(picked.filter((p) => p !== o))}
           style={{
@@ -352,6 +358,7 @@ function RankChoice({
 
       {remaining.map((o) => (
         <Pressable
+      accessibilityRole="button"
           key={o}
           onPress={() => onChange([...picked, o])}
           style={{
@@ -395,7 +402,8 @@ function Shell({ children, onClose }: { children: React.ReactNode; onClose: () =
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: c.background }} edges={['top']}>
       <View style={{ flexDirection: 'row', justifyContent: 'flex-end', paddingHorizontal: Spacing.xl, paddingTop: Spacing.md }}>
-        <Pressable onPress={onClose} hitSlop={10}>
+        <Pressable
+      accessibilityRole="button" onPress={onClose} hitSlop={10}>
           <Text style={{ ...Type.body, color: c.textMuted }}>Close</Text>
         </Pressable>
       </View>

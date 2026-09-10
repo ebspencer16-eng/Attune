@@ -381,6 +381,7 @@ function Pill({
 }: { label: string; selected: boolean; onPress: () => void; small?: boolean }) {
   return (
     <Pressable
+      accessibilityRole="button"
       onPress={onPress}
       style={{
         paddingVertical: small ? Spacing.xs : Spacing.sm,
@@ -399,6 +400,7 @@ function Pill({
 function Choice({ label, selected, onPress }: { label: string; selected: boolean; onPress: () => void }) {
   return (
     <Pressable
+      accessibilityRole="button"
       onPress={onPress}
       style={{
         ...card, marginBottom: Spacing.sm,
@@ -417,6 +419,7 @@ function Primary({
 }: { label: string; onPress: () => void; disabled?: boolean; busy?: boolean }) {
   return (
     <Pressable
+      accessibilityRole="button"
       onPress={disabled ? undefined : onPress}
       disabled={disabled}
       style={{
@@ -432,7 +435,8 @@ function Primary({
 
 function Secondary({ label, onPress }: { label: string; onPress: () => void }) {
   return (
-    <Pressable onPress={onPress} style={{ marginTop: Spacing.sm, paddingVertical: Spacing.sm, alignItems: 'center' }}>
+    <Pressable
+      accessibilityRole="button" onPress={onPress} style={{ marginTop: Spacing.sm, paddingVertical: Spacing.sm, alignItems: 'center' }}>
       <Text style={{ ...Type.small, color: c.textMuted, fontWeight: '600' }}>{label}</Text>
     </Pressable>
   );
@@ -442,7 +446,8 @@ function Shell({ children, onClose }: { children: React.ReactNode; onClose: () =
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: c.background }} edges={['top']}>
       <View style={{ flexDirection: 'row', justifyContent: 'flex-end', paddingHorizontal: Spacing.xl, paddingTop: Spacing.md }}>
-        <Pressable onPress={onClose} hitSlop={10}>
+        <Pressable
+      accessibilityRole="button" onPress={onClose} hitSlop={10}>
           <Text style={{ ...Type.body, color: c.textMuted }}>Close</Text>
         </Pressable>
       </View>

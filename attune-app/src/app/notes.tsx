@@ -329,6 +329,7 @@ function NoteCard({
 
   return (
     <Pressable
+      accessibilityRole="button"
       onPress={onPress}
       disabled={!onPress}
       style={{
@@ -505,10 +506,12 @@ function Editor({
               flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
               paddingHorizontal: Spacing.xl, paddingVertical: Spacing.lg,
             }}>
-            <Pressable onPress={onClose} hitSlop={10} disabled={busy}>
+            <Pressable
+      accessibilityRole="button" onPress={onClose} hitSlop={10} disabled={busy}>
               <Text style={{ ...Type.body, color: c.textMuted }}>Close</Text>
             </Pressable>
-            <Pressable onPress={save} hitSlop={10} disabled={!canSave}>
+            <Pressable
+      accessibilityRole="button" onPress={save} hitSlop={10} disabled={!canSave}>
               {busy ? (
                 <ActivityIndicator color={c.accentQuiet} />
               ) : (
@@ -569,6 +572,7 @@ function Editor({
                     const on = picked.includes(t.id);
                     return (
                       <Pressable
+      accessibilityRole="button"
                         key={t.id}
                         onPress={() => setPicked((p) => (on ? p.filter((x) => x !== t.id) : [...p, t.id]))}
                         style={{
@@ -609,7 +613,8 @@ function Editor({
             ) : null}
 
             {note ? (
-              <Pressable onPress={remove} disabled={busy} style={{ marginTop: Spacing.xxl, alignSelf: 'flex-start' }}>
+              <Pressable
+      accessibilityRole="button" onPress={remove} disabled={busy} style={{ marginTop: Spacing.xxl, alignSelf: 'flex-start' }}>
                 <Text style={{ ...Type.small, color: c.accentQuiet, fontWeight: '700' }}>Delete note</Text>
               </Pressable>
             ) : null}

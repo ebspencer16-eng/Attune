@@ -66,6 +66,7 @@ export default function ConflictResultsView({
           const on = t.key === screen;
           return (
             <Pressable
+      accessibilityRole="button"
               key={t.key}
               onPress={() => setScreen(t.key)}
               style={{

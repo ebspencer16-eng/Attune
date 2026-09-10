@@ -90,6 +90,7 @@ export function ScreenError({
 
       {press ? (
         <Pressable
+      accessibilityRole="button"
           onPress={press}
           style={{
             marginTop: Spacing.xl, backgroundColor: c.accent, borderRadius: Radius.md,

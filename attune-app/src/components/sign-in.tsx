@@ -168,6 +168,7 @@ export default function SignIn({ onSignedIn, rejectedReason }: { onSignedIn: () 
           )}
 
           <Pressable
+      accessibilityRole="button"
             onPress={submit}
             disabled={!canSubmit}
             style={{
@@ -197,6 +198,7 @@ export default function SignIn({ onSignedIn, rejectedReason }: { onSignedIn: () 
               const open = provider === p.id;
               return (
                 <Pressable
+      accessibilityRole="button"
                   key={p.id}
                   onPress={() => useProvider(p.id)}
                   disabled={busy || !!provider}

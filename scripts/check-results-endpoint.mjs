@@ -25,6 +25,8 @@
 // expectations tests do that. This checks that the endpoint runs at all and
 // answers with the shape both surfaces were built against.
 
+import { readFileSync } from 'fs';
+
 process.env.SUPABASE_URL ||= 'https://stub.local';
 process.env.SUPABASE_SERVICE_KEY ||= 'stub-service-key';
 process.env.SUPABASE_ANON_KEY ||= 'stub-anon-key';
@@ -120,6 +122,36 @@ if (body?.ok) {
     .filter((d) => !dims.has(d));
   if (orphans.length) {
     problems.push(`commResponses names dimensions the results do not: ${orphans.join(', ')}`);
+  }
+}
+
+/**
+ * ── EVERY FIELD THE APP READS, CHECKED AGAINST WHAT IS ACTUALLY SENT ───────
+ * The list above is hand-written and therefore only as good as someone
+ * remembering to add to it. This half is not: it reads the app's own source
+ * for `results.content.X` and requires each one to exist in the real payload.
+ *
+ * It found storycardStyle on the first run. The app read it from
+ * results.content and the handler assembles it at the top level beside
+ * highlights, so the storycards had been running on their fallback since the
+ * day that field was added, and nothing said so. Same shape as the bug that
+ * took results down: right field, wrong object.
+ */
+if (body?.ok) {
+  const appSrc = ['attune-app/src/components/results.tsx',
+                  'attune-app/src/components/highlight-cards.tsx',
+                  'attune-app/src/app/insights.tsx']
+    .map((f) => readFileSync(new URL('../' + f, import.meta.url), 'utf8')).join('\n');
+
+  const reads = new Set(
+    [...appSrc.matchAll(/results\.content\??\.([A-Za-z_]\w*)/g)].map((m) => m[1]));
+  const content = body.results?.content || {};
+  for (const key of reads) {
+    if (!(key in content)) {
+      problems.push(
+        `the app reads results.content.${key} and the payload has no such field `
+        + '(is it assembled at the top level instead?)');
+    }
   }
 }
 

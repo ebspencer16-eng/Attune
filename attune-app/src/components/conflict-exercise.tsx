@@ -234,6 +234,7 @@ function Body({
           const on = value === o.value;
           return (
             <Pressable
+      accessibilityRole="button"
               key={o.value}
               onPress={() => onChange(o.value)}
               style={{
@@ -265,6 +266,7 @@ function Body({
             const chosen = rank >= 0;
             return (
               <Pressable
+      accessibilityRole="button"
                 key={o}
                 onPress={() => onChange(chosen ? order.filter((x) => x !== o) : [...order, o])}
                 style={{
@@ -312,6 +314,7 @@ function Body({
 function Choice({ label, selected, onPress }: { label: string; selected: boolean; onPress: () => void }) {
   return (
     <Pressable
+      accessibilityRole="button"
       onPress={onPress}
       style={{ ...card, borderColor: selected ? c.accent : c.border, borderWidth: selected ? 2 : 1 }}>
       <Text style={{ ...Type.body, color: c.text, fontWeight: selected ? '700' : '400' }}>{label}</Text>
@@ -324,6 +327,7 @@ function Primary({
 }: { label: string; onPress: () => void; disabled?: boolean; busy?: boolean }) {
   return (
     <Pressable
+      accessibilityRole="button"
       onPress={disabled ? undefined : onPress}
       disabled={disabled}
       style={{
@@ -339,7 +343,8 @@ function Primary({
 
 function Secondary({ label, onPress }: { label: string; onPress: () => void }) {
   return (
-    <Pressable onPress={onPress} style={{ marginTop: Spacing.sm, paddingVertical: Spacing.sm, alignItems: 'center' }}>
+    <Pressable
+      accessibilityRole="button" onPress={onPress} style={{ marginTop: Spacing.sm, paddingVertical: Spacing.sm, alignItems: 'center' }}>
       <Text style={{ ...Type.small, color: c.textMuted, fontWeight: '600' }}>{label}</Text>
     </Pressable>
   );
@@ -349,7 +354,8 @@ function Shell({ children, onClose }: { children: React.ReactNode; onClose: () =
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: c.background }} edges={['top']}>
       <View style={{ flexDirection: 'row', justifyContent: 'flex-end', paddingHorizontal: Spacing.xl, paddingTop: Spacing.md }}>
-        <Pressable onPress={onClose} hitSlop={10}>
+        <Pressable
+      accessibilityRole="button" onPress={onClose} hitSlop={10}>
           <Text style={{ ...Type.body, color: c.textMuted }}>Close</Text>
         </Pressable>
       </View>

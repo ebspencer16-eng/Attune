@@ -70,6 +70,7 @@ export default function Settings({
           nothing was kept.
         </Text>
         <Pressable
+      accessibilityRole="button"
           onPress={onSignedOut}
           style={{
             marginTop: Spacing.xl, backgroundColor: c.textStrong, borderRadius: Radius.md,
@@ -100,6 +101,7 @@ export default function Settings({
       <View style={{ marginTop: Spacing.xxxl, paddingTop: Spacing.lg, borderTopWidth: 1, borderTopColor: c.border, alignItems: 'center' }}>
         {!confirming ? (
           <Pressable
+      accessibilityRole="button"
             onPress={() => { setConfirming(true); setTyped(''); setError(null); }}
             hitSlop={8}
             style={{ paddingVertical: Spacing.sm, paddingHorizontal: Spacing.md }}>
@@ -141,6 +143,7 @@ export default function Settings({
             ) : null}
 
             <Pressable
+      accessibilityRole="button"
               onPress={armed ? remove : undefined}
               disabled={!armed}
               style={{
@@ -158,6 +161,7 @@ export default function Settings({
             </Pressable>
 
             <Pressable
+      accessibilityRole="button"
               onPress={() => { setConfirming(false); setTyped(''); setError(null); }}
               disabled={busy}
               style={{ marginTop: Spacing.sm, paddingVertical: Spacing.sm, alignItems: 'center' }}>
@@ -182,7 +186,8 @@ function Sheet({
     <Modal visible animationType="slide" presentationStyle="pageSheet" onRequestClose={onClose}>
       <SafeAreaView style={{ flex: 1, backgroundColor: c.background }} edges={['top']}>
         <View style={{ flexDirection: 'row', justifyContent: 'flex-end', paddingHorizontal: Spacing.xl, paddingVertical: Spacing.lg }}>
-          <Pressable onPress={onClose} hitSlop={10}>
+          <Pressable
+      accessibilityRole="button" onPress={onClose} hitSlop={10}>
             <Text style={{ ...Type.body, color: c.textMuted }}>{closeLabel}</Text>
           </Pressable>
         </View>
@@ -211,6 +216,7 @@ function Bullet({ children }: { children: React.ReactNode }) {
 function Row({ label, onPress, last }: { label: string; onPress: () => void; last?: boolean }) {
   return (
     <Pressable
+      accessibilityRole="button"
       onPress={onPress}
       style={{
         paddingVertical: Spacing.md,
