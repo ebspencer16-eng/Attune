@@ -2,7 +2,6 @@ import React, { useState, useEffect, useLayoutEffect, useRef } from "react";
 import { axisScores, blendedDimScores, AXIS_CONFIG, QUESTION_WEIGHTS } from "../api/_type-engine.js";
 import { PERSONALITY_QUESTIONS, RESPONSIBILITY_CATEGORIES, LIFE_QUESTIONS, PARTNER_VIEW_TEXT, twoPartEx1, CHILDHOOD_STRUCTURES, substName } from "../api/_questions.js";
 import { CONFLICT_SECTIONS, CONFLICT_INTRO, FREQUENCY_OPTIONS, conflictQuestionsInOrder } from "../api/_conflict-questions.js";
-import { summarizeConflict, conflictPair } from "../api/_lib/conflict-results.js";
 import { PATTERN_COPY, PATTERN_ACTIONS, PATTERN_NOTES, BAND_COLORS, NO_ACTION_NEEDED, SNAPSHOT_PROSE, SNAPSHOT_ROWS, OPENING_CHIPS, CONFLICT_RESULTS_COPY, FREQUENCY_LABELS, interpConflict } from "../api/_conflict-results-prose.js";
 // Results copy now lives in versioned snapshots. A couple's results render
 // from the version stamped on their results row, so revising the wording never
@@ -5923,7 +5922,7 @@ function UnifiedResultsRoot(props) {
   );
 }
 
-function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Answers, partnerEx3, ex2AnswersPrior = null, ex2PriorAt = null, hasAnniversary, userName, partnerName, initialSection, onSectionChange = null, isMobile = false, portrait = null, hasChecklist = false, hasBudget = false, hasWorkbook = false, hasIntimacy = false, intimacyAnswers = null, partnerIntimacy = null, hasConflict = false, conflictAnswers = null, partnerConflict = null, intimacyVariant = 'premarital', onNavigateTool = null, userPronouns = "", partnerPronouns = "", isBetaTester = false }) {
+function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Answers, partnerEx3, ex2AnswersPrior = null, ex2PriorAt = null, hasAnniversary, userName, partnerName, initialSection, onSectionChange = null, isMobile = false, portrait = null, hasChecklist = false, hasBudget = false, hasWorkbook = false, hasIntimacy = false, intimacyAnswers = null, partnerIntimacy = null, hasConflict = false, conflictAnswers = null, conflictResults = null, intimacyVariant = 'premarital', onNavigateTool = null, userPronouns = "", partnerPronouns = "", isBetaTester = false }) {
 
   // Compute all the data we need up front
   const myS = typingDimScores(ex1Answers, partnerEx1);
@@ -6106,14 +6105,47 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
   // Gated on both partners, like every other exercise. The patterns section is
   // still private to each viewer once open; gating controls WHEN results
   // appear, not who can see what inside them.
-  const conflictSelf = hasConflict && conflictAnswers ? summarizeConflict(conflictAnswers) : null;
-  const conflictBothDone = !!(conflictSelf && partnerConflict && summarizeConflict(partnerConflict));
-  // Content requires both partners, the same as every other results section.
-  const conflictMine = conflictBothDone ? conflictSelf : null;
+  /**
+   * Conflict results come from /api/conflict-results, not from this device.
+   *
+   * They were computed here, from `conflictAnswers` and a `partnerConflict`
+   * prop that was always null: the partner's raw conflict record is withheld
+   * by /api/partner-sync on purpose, because the pattern half is private and
+   * the product says so in writing on the page. So conflictBothDone was always
+   * false and every conflict page on this site said "Not open yet", for every
+   * couple, however long ago they had both finished.
+   *
+   * That is also the answer to "conflict works on the app and not the web":
+   * the app has always read this endpoint. It pairs the two records on the
+   * server, where both legitimately are, and applies the partner allowlist on
+   * the way out.
+   *
+   * `you` is the reader's own full summary and `partner` is the allowlisted
+   * view of theirs, which is everything these pages draw.
+   */
+  const conflictSelf = conflictResults?.ready ? conflictResults.you : null;
+  const conflictTheirs = conflictResults?.ready ? conflictResults.partner : null;
+  const conflictBothDone = !!(conflictSelf && conflictTheirs);
+  /**
+   * Your own summary, available as soon as YOU have finished.
+   *
+   * This was gated on both partners, which made Your Patterns wait for a
+   * partner it does not use: it is the private page, built from the reader's
+   * answers alone. The three shared pages are gated where they are rendered.
+   */
+  const conflictMine = conflictSelf;
   // Nav presence only requires owning it, so the section is listed and greyed
   // rather than missing, which is how the other exercises behave.
   const conflictListed = !!hasConflict;
-  const conflictPairing = conflictBothDone ? conflictPair(conflictAnswers, partnerConflict) : null;
+  /**
+   * The pairing, which was conflictPair(mine, theirs) over two raw records.
+   *
+   * It cannot be that any more and should never have been: it needed the
+   * partner's raw answers. `partner` on the endpoint's payload is the
+   * allowlisted view of their summary, which is the same `b` shape these pages
+   * read: overall, repairRanking, openings, strength, reflection, appreciation.
+   */
+  const conflictPairing = conflictBothDone ? { a: conflictSelf, b: conflictTheirs } : null;
 
   // ── ANONYMOUS TYPE TRACKING ─────────────────────────────────────────────────
   // Fires once per results session. No PII — only type IDs and 4-letter style codes.
@@ -7679,20 +7711,41 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
     // Listed once owned, so the contents link always resolves. Until both
     // partners have finished this exercise the section renders a waiting
     // state rather than nothing, which is what made the link look stale.
-    if (!conflictBothDone) {
-      const whoseTurn = !conflictSelf ? 'you have' : `${partnerName} has`;
+    /**
+     * Three states, not two.
+     *
+     * Loading is its own state now. The payload arrives over the network, and
+     * treating "not here yet" as "not finished" told someone who had answered
+     * everything that they had not, for as long as the request took.
+     *
+     * Your Patterns opens as soon as YOU have finished, which is what the
+     * comment above this block has always said and what the app has always
+     * done. The website gated all four pages on both partners, so the one page
+     * that is private to you and needs nobody else waited for your partner.
+     */
+    const conflictLoading = conflictResults == null;
+    const conflictYoursReady = !!conflictSelf;
+    const needsBoth = section !== 'conflict-patterns';
+
+    if (conflictLoading || !conflictYoursReady || (needsBoth && !conflictBothDone)) {
+      const title = conflictLoading ? 'Loading' : 'Not open yet';
+      const body = conflictLoading
+        ? 'One moment.'
+        : !conflictYoursReady
+          ? 'This section opens once you have finished Conflict Patterns.'
+          : `This section opens when you have both finished Conflict Patterns. ${partnerName} has not completed it yet.`;
       return (
         <Layout accent="#1B5FE8" noPrevNext={true}>
           <div style={{ maxWidth: 560 }}>
             <div style={{ fontSize: "0.62rem", letterSpacing: "0.22em", textTransform: "uppercase", color: "#1B5FE8", fontWeight: 700, fontFamily: BFONT, marginBottom: "0.6rem" }}>Conflict patterns</div>
-            <div style={{ fontSize: "clamp(1.4rem,3.5vw,1.85rem)", fontWeight: 700, fontFamily: HFONT, color: C.ink, marginBottom: "0.75rem" }}>Not open yet</div>
+            <div style={{ fontSize: "clamp(1.4rem,3.5vw,1.85rem)", fontWeight: 700, fontFamily: HFONT, color: C.ink, marginBottom: "0.75rem" }}>{title}</div>
             <p style={{ fontSize: "0.9rem", color: C.muted, fontFamily: BFONT, lineHeight: 1.7, marginBottom: "1.5rem" }}>
-              This section opens when you have both finished Conflict Patterns. {whoseTurn} not completed it yet.
+              {body}
             </p>
             {/* setView is not in scope here, so this navigates by URL rather
                 than referencing a prop this component does not receive. */}
             <button onClick={() => { try { window.location.href = '/app?view=conflict'; } catch {} }}
-              style={{ background: "#1B5FE8", color: "white", border: "none", borderRadius: 12, padding: "0.8rem 1.5rem", fontSize: "0.86rem", fontWeight: 700, fontFamily: BFONT, cursor: "pointer", display: !conflictSelf ? "inline-block" : "none" }}>
+              style={{ background: "#1B5FE8", color: "white", border: "none", borderRadius: 12, padding: "0.8rem 1.5rem", fontSize: "0.86rem", fontWeight: 700, fontFamily: BFONT, cursor: "pointer", display: (!conflictLoading && !conflictYoursReady) ? "inline-block" : "none" }}>
               Take the exercise
             </button>
           </div>
@@ -7797,8 +7850,11 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
                 <div key={row.id} style={{ display: "grid", gridTemplateColumns: COLS, gap: "0.4rem 1.25rem", alignItems: "center",
                   paddingTop: "0.9rem", marginTop: i ? "0.9rem" : 0, borderTop: `1px solid ${C.stone}` }}>
                   <div style={{ fontSize: "0.8rem", color: C.muted, fontFamily: BFONT, lineHeight: 1.45 }}>{row.label}</div>
-                  <div><Chip>{OPENING_CHIPS[row.id]?.[conflictAnswers?.[row.id]] || "\u2014"}</Chip></div>
-                  <div><Chip>{OPENING_CHIPS[row.id]?.[partnerConflict?.[row.id]] || "\u2014"}</Chip></div>
+                  {/* Both sides off the summaries, by the field the row
+                      carries. These read raw answers by question id, which
+                      only ever worked for the reader's own half. */}
+                  <div><Chip>{OPENING_CHIPS[row.id]?.[conflictMine?.openings?.[row.field]] || "\u2014"}</Chip></div>
+                  <div><Chip>{OPENING_CHIPS[row.id]?.[conflictTheirs?.openings?.[row.field]] || "\u2014"}</Chip></div>
                 </div>
               ))}
             </Card>
@@ -11345,6 +11401,62 @@ export default function App() {
     return () => { cancelled = true; };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [view]);
+  /**
+   * Conflict Patterns results, from /api/conflict-results.
+   *
+   * ── WHY THIS IS FETCHED AND NOT COMPUTED ──────────────────────────────────
+   * Every other results section is computed on this device from both partners'
+   * answers. Conflict cannot be, and that is the whole point of the section:
+   * the pattern half is private, so /api/partner-sync withholds the partner's
+   * raw conflict record on purpose and sends an allowlisted summary instead.
+   *
+   * The website never got the message. It read
+   * `partnerSession.conflict.answers`, which has never existed, and then called
+   * summarizeConflict() on it, which needs the raw answers it must never have.
+   * The result was always null, so conflictBothDone was always false, so every
+   * conflict results page on the website has shown "Not open yet" for every
+   * couple since the section shipped, however long ago both of them finished.
+   *
+   * Ellie: "Conflict is present but when I click says 'not open yet'." That is
+   * also what "conflict working on the app but not the web" was: the app has
+   * always read this endpoint, which does the computation server-side where
+   * both records legitimately are, and applies the allowlist on the way out.
+   *
+   * The website reads the same endpoint now. Neither surface scores conflict.
+   */
+  const [conflictResults, setConflictResults] = useState(null);
+  useEffect(() => {
+    // Deps are [view] alone, for the same reason the effect below says: `pkg`
+    // and `isDemo` are declared further down the component body, so naming
+    // them in the dependency array evaluates during render and hits the
+    // temporal dead zone. Inside the body they are safe, because effects run
+    // after the body has finished.
+    if (_demoParam || view !== 'results') return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const { supabase: sb, hasSupabase } = await import('./supabase.js');
+        if (!hasSupabase()) return;
+        const { data } = await sb.auth.getSession();
+        const tok = data?.session?.access_token;
+        if (!tok) return;
+        const r = await fetch('/api/conflict-results', { headers: { Authorization: `Bearer ${tok}` } });
+        if (!r.ok) return;
+        const body = await r.json();
+        // Not-ready is a real answer, not a failure: one of them has not
+        // finished, and `reason` says which. Stored either way, so the waiting
+        // page can name the right person instead of guessing.
+        //
+        // A couple who do not own Conflict Patterns get reason 'not_owned' and
+        // never see any of this, so there is no need to ask about ownership
+        // before calling.
+        if (!cancelled && body?.ok) setConflictResults(body);
+      } catch { /* the waiting state is the honest fallback */ }
+    })();
+    return () => { cancelled = true; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [view]);
+
   // Views gated on an entitlement render nothing when the package lacks it, so
   // a bookmark or stale link to an exercise they do not own showed a blank
   // page. Send those to the dashboard instead. Runs after mount, because pkg
@@ -15010,7 +15122,15 @@ export default function App() {
                   hasIntimacy={pkg.hasIntimacy}
                   hasConflict={pkg.hasConflict}
                   conflictAnswers={pkg.hasConflict ? (conflictData?.answers || null) : null}
-                  partnerConflict={pkg.hasConflict && hasRealPartner ? (partnerSession?.conflict?.answers || null) : null}
+                  /* partnerConflict is gone. It read partnerSession.conflict
+                     .answers, a field /api/partner-sync has never sent and
+                     never will: the partner's raw conflict record is withheld
+                     on purpose, because the pattern half is private. So it was
+                     always null, summarizeConflict(null) was always null, and
+                     every conflict results page on this site said "Not open
+                     yet" for every couple. The endpoint does the pairing now,
+                     server-side, where both records legitimately are. */
+                  conflictResults={pkg.hasConflict ? conflictResults : null}
                   intimacyAnswers={intimacyData?.answers || sarahIntimacyDemo?.answers || null}
                   partnerIntimacy={hasRealPartner ? (partnerSession?.intimacy || null) : jamesIntimacyDemo}
                   intimacyVariant={(hasRealPartner ? partnerSession?.intimacy?.variant : null) || intimacyData?.variant || 'premarital'}

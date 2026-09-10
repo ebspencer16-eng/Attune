@@ -25,7 +25,7 @@
 import { ScrollView, Text, View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 
-import type { ConflictResults, ConflictSummary } from '@/api/client';
+import type { ConflictOpenings, ConflictResults, ConflictSummary } from '@/api/client';
 import {
   BottomTabInset, Colors, MaxContentWidth, Palette, Radius, Spacing, Type,
 } from '@/constants/attune-theme';
@@ -278,8 +278,8 @@ function Snapshot({ data }: { data: Extract<ConflictResults, { ready: true }> })
         <Text style={{ ...Type.eyebrow, color: c.accentQuiet, marginBottom: Spacing.md }}>Conflict</Text>
         {content.snapshotRows.map((row) => {
           const chips = content.openingChips[row.id];
-          const mine = pickChip(you.openings, row.id);
-          const theirs = partner ? pickChip(partner.openings, row.id) : null;
+          const mine = pickChip(you.openings, row.field);
+          const theirs = partner ? pickChip(partner.openings, row.field) : null;
           return (
             <View key={row.id} style={{ marginBottom: Spacing.lg }}>
               <Text style={{ ...Type.small, color: c.textMuted, marginBottom: Spacing.sm }}>{row.label}</Text>
@@ -489,15 +489,36 @@ function Written({ name, text, color }: { name: string; text: string | null; col
   );
 }
 
-function pickChip(openings: { start: number | null; middle: number | null; oldTopics: number | null }, id: string) {
-  if (id === 'c1') return openings.start;
-  if (id === 'c2') return openings.middle;
-  return openings.oldTopics;
+/**
+ * Where a snapshot row's answer sits on a summary's `openings`.
+ *
+ * This was three ifs mapping question ids to field names, written here and
+ * nowhere else. The row carries its own field now, from SNAPSHOT_ROWS, so the
+ * website can read the same data without a second copy of the mapping.
+ */
+function pickChip(openings: ConflictOpenings, field: string) {
+  return (openings as Record<string, string | null>)[field] ?? null;
 }
 
-function chipText(chips: { A: string; B: string } | undefined, value: number | null) {
+/**
+ * The text for a forced-A/B answer.
+ *
+ * ── WHAT WAS WRONG ────────────────────────────────────────────────────────
+ * This read `value === 0 ? chips.A : chips.B`. The exercise stores the letter,
+ * not an index: setAns(q.id, 'A'). So 'A' === 0 was false and every A answer
+ * printed the B text. All three snapshot rows told each partner the opposite
+ * of what they had said, on a page whose whole job is showing what they said.
+ *
+ * It survived because the type said `number`. Declaring the wrong type for a
+ * value is worse than declaring none: tsc then enforces the mistake and every
+ * reader downstream trusts it.
+ *
+ * The chips are keyed by the stored letter, so the answer indexes them
+ * directly, which is what the website has always done.
+ */
+function chipText(chips: Record<string, string> | undefined, value: string | null) {
   if (!chips || value == null) return 'Not answered';
-  return value === 0 ? chips.A : chips.B;
+  return chips[value] || 'Not answered';
 }
 
 /** Pattern names. The only strings this file owns, and they are labels. */

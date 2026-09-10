@@ -81,7 +81,8 @@ ok('the four pattern labels are present',
 // Every pattern needs a line for every frequency. A missing band renders an
 // empty tip under a bar, which reads as the product having nothing to say
 // about the answer someone just gave honestly.
-const { PATTERN_COPY, SNAPSHOT_PROSE, CONFLICT_RESULTS_COPY, interpConflict } =
+const { PATTERN_COPY, SNAPSHOT_PROSE, CONFLICT_RESULTS_COPY, interpConflict,
+  SNAPSHOT_ROWS, OPENING_CHIPS } =
   await import('../api/_conflict-results-prose.js');
 const { RISK_QUESTIONS } = await import('../api/_conflict-questions.js');
 
@@ -100,6 +101,53 @@ ok('partner token resolves',
   !interpConflict(PATTERN_COPY.contempt[2].note, { partner: 'Preston' }).includes('{partner}'));
 ok('no unresolved tokens left in any line', !/\{(partner|a|b)\}/.test(
   RISK_QUESTIONS.flatMap(q => [0,1,2,3].map(v => interpConflict(PATTERN_COPY[q.riskKey][v].note, { partner: 'P' }))).join(' ')));
+
+// ── The three snapshot answers, end to end ─────────────────────────────────
+//
+// The exercise stores a letter for a forced-A/B question: setAns(q.id, 'A').
+// summarizeConflict carries it through onto `openings`, and both surfaces look
+// the text up in OPENING_CHIPS by that letter.
+//
+// The app did not. It compared the value to 0 and printed chips.B whenever it
+// was not, so every A answer showed the B text: all three rows on Your
+// Conflict Snapshot told each partner the opposite of what they said, on the
+// one page whose job is showing what they said. It survived because the app's
+// type declared `number`, so tsc enforced the mistake.
+//
+// This pins the chain: what the exercise writes, what the summary carries, and
+// what a surface prints. All three, because the bug was in the join.
+{
+  const answered = (letter) => ({
+    c0: 3, c1: letter, c2: letter, c_topic: letter,
+    c_crit: 1, c_cont: 0, c_def: 2, c_stone: 1,
+    c8: 'Taking a break', c_repair: ['A genuine apology'],
+    c9: 'It went fine.', c_grat: 'You never walk out.',
+  });
+
+  for (const letter of ['A', 'B']) {
+    const summary = summarizeConflict(answered(letter));
+    ok(`a complete ${letter} answer set summarises`, !!summary);
+    if (!summary) continue;
+
+    for (const row of SNAPSHOT_ROWS) {
+      const stored = summary.openings[row.field];
+      ok(`${row.id} keeps the stored letter on openings.${row.field}`, stored === letter);
+      // What both surfaces print. A lookup by the stored value, never by an
+      // index derived from it.
+      const text = OPENING_CHIPS[row.id]?.[stored];
+      ok(`${row.id} resolves to the ${letter} text, not the other one`,
+        text === OPENING_CHIPS[row.id][letter]
+        && text !== OPENING_CHIPS[row.id][letter === 'A' ? 'B' : 'A']);
+    }
+  }
+
+  // And that the two chips for a row are actually different, or the assertion
+  // above would pass on a row where both options say the same thing.
+  for (const row of SNAPSHOT_ROWS) {
+    ok(`${row.id} has two distinct options`,
+      OPENING_CHIPS[row.id].A !== OPENING_CHIPS[row.id].B);
+  }
+}
 
 console.log(`\n${pass} passed, ${fail} failed`);
 if (fail) process.exit(1);

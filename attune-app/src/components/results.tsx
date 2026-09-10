@@ -233,7 +233,22 @@ export default function Results({
   // Conflict sections are listed by the server on ownership alone, matching
   // the website. They can still be waiting on a partner, which is a different
   // state from not owning it and reads as a bug if the section just vanishes.
-  const conflictWaiting = section.startsWith('conflict-') && !conflict?.ready;
+  /**
+   * A conflict section that cannot be shown yet.
+   *
+   * `ready` means the READER has finished, which is all Your Patterns needs:
+   * it is built from their answers alone and is the one page in the product
+   * that is private by promise. The other three pair the two of you, so they
+   * also need the partner to have finished.
+   *
+   * The three shared screens used to render with the partner half simply
+   * absent, which showed em-dashes where their answers go and read as if they
+   * had answered nothing. The website waits and says who it is waiting on;
+   * both surfaces wait now.
+   */
+  const conflictWaiting = section.startsWith('conflict-')
+    && (!conflict?.ready
+      || (section !== 'conflict-patterns' && !(conflict.ready && conflict.partnerFinished)));
 
   return (
     <View style={{ flex: 1 }}>
@@ -479,6 +494,11 @@ function SectionBody({
           body={conflict ? lockReason(conflict.reason) : 'Loading your conflict results.'}
         />
       );
+    }
+    // Your Patterns needs only the reader. The other three pair the two of
+    // you, so they wait rather than drawing the partner's half as blanks.
+    if (section !== 'conflict-patterns' && !conflict.partnerFinished) {
+      return <Waiting title="Conflict Patterns" body={lockReason('partner_has_not_finished')} />;
     }
     return <ConflictResultsView data={conflict} section={section} />;
   }

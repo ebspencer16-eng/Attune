@@ -1120,6 +1120,18 @@ export type ConflictPattern = {
   band: 'not_present' | 'occasional' | 'worth_watching' | 'worth_attention' | null;
 };
 
+/**
+ * The three forced-A/B answers, as the letters the exercise stores.
+ *
+ * Typed as `number` for as long as this type existed, which is why the app
+ * printed the wrong half of every one of them: the exercise stores 'A' or 'B'
+ * and chipText compared the value to 0. Declaring the wrong type is worse than
+ * declaring none, because tsc then enforces the mistake.
+ */
+export type ConflictOpenings = {
+  start: string | null; middle: string | null; oldTopics: string | null;
+};
+
 export type ConflictSummary = {
   overall: number | null;
   patterns: ConflictPattern[];
@@ -1128,7 +1140,7 @@ export type ConflictSummary = {
   flaggedCount: number;
   strength: string | null;
   repairRanking: string[];
-  openings: { start: number | null; middle: number | null; oldTopics: number | null };
+  openings: ConflictOpenings;
   reflection: string | null;
   appreciation: string | null;
 };
@@ -1142,7 +1154,7 @@ export type ConflictPartnerView = {
   name: string | null;
   overall: number | null;
   repairRanking: string[];
-  openings: { start: number | null; middle: number | null; oldTopics: number | null };
+  openings: ConflictOpenings;
   strength: string | null;
   reflection: string | null;
   appreciation: string | null;
@@ -1166,7 +1178,7 @@ export type ConflictResults =
         wroteRows: { key: string; label: string }[];
         /** The five c0 answers in order, derived from the question itself. */
         overallLabels: string[];
-        snapshotRows: { id: string; label: string }[];
+        snapshotRows: { id: string; field: string; label: string }[];
         snapshotProse: Record<string, string>;
         openingChips: Record<string, { A: string; B: string }>;
         noActionNeeded: Record<string, string>;

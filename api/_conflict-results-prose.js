@@ -153,10 +153,18 @@ export const NO_ACTION_NEEDED = {
  * together, but only if you can see which is which.
  */
 export const SNAPSHOT_ROWS = [
-  { id: 'c1', label: 'When you notice something frustrating' },
-  { id: 'c2', label: "When you're in an argument" },
-  { id: 'c_topic', label: 'When the scope of the argument changes' },
+  { id: 'c1', field: 'start', label: 'When you notice something frustrating' },
+  { id: 'c2', field: 'middle', label: "When you're in an argument" },
+  { id: 'c_topic', field: 'oldTopics', label: 'When the scope of the argument changes' },
 ];
+
+/*
+ * `field` is where this row's answer sits on a conflict summary's `openings`.
+ * The mapping from question id to field was written inside the app as a
+ * three-line pickChip function and nowhere else, so the website, which read
+ * raw answers by question id, had no equivalent and could not be moved onto
+ * the same data without inventing a second copy of it.
+ */
 
 /** Labels for the answers, shown as chips under each name. */
 export const OPENING_CHIPS = {
