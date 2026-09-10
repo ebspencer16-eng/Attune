@@ -45,7 +45,10 @@ import {
  * was who on every card. A person is a colour; a dimension is a row.
  */
 const YOU_COLOR = Palette.orange;
-const THEM_COLOR = Palette.ink;
+// The website's partner colour on every chart it draws: #1B5FE8, which is
+// Palette.indigo. The app used ink, so the same two people were orange and
+// blue on the site and orange and black here.
+const THEM_COLOR = Palette.indigo;
 
 const c = Colors.light;
 
@@ -1260,6 +1263,8 @@ function NotYet({ section }: { section: string }) {
  * two are what a reader has already learned by the time they get here.
  */
 const GLANCE_YOU = '#E8673A';
+// The same blue, lifted for a dark ground. #1B5FE8 on navy is barely visible;
+// this is that hue at a lightness the panel can carry.
 const GLANCE_THEM = '#6C7FFF';
 
 /**
