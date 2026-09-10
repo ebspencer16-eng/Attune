@@ -16,6 +16,7 @@
 export const config = { runtime: 'edge' };
 
 import { POST_CATEGORIES } from './_lib/post-categories.js';
+import { IN_PRACTICE, shelfFor } from './_in-practice.js';
 
 const HEADERS = { 'Content-Type': 'application/json', 'X-Content-Type-Options': 'nosniff' };
 const json = (b, s = 200) => new Response(JSON.stringify(b), { status: s, headers: HEADERS });
@@ -56,9 +57,37 @@ export default async function handler(req) {
         rest(`posts?${publishedFilter}&select=id,title,subtitle,category,dimension_keys,read_minutes,hero_color,published_at,revision&order=published_at.desc&limit=50`, { headers: svc }),
         rest(`post_reads?owner_id=eq.${me}&select=post_id,revision,read_at`, { headers: svc }),
       ]);
-      const posts = await pRes.json().catch(() => []);
+      const published = await pRes.json().catch(() => []);
       const reads = await rRes.json().catch(() => []);
       const readBy = new Map(reads.map(r => [r.post_id, r]));
+
+      /**
+       * Nothing published yet, so serve the website's index.
+       *
+       * The six In Practice pieces are pages on the site, written as routes in
+       * src/App.jsx and indexed in public/practice.html. Nothing has ever been
+       * written to the posts table, so the app's In Practice shelf has always
+       * said "Nothing published yet" while six pieces existed.
+       *
+       * The app was not missing a feature. It was reading a different source
+       * from the one the content lives in. These carry `external`, so the app
+       * opens them on the website rather than pretending it has a reader.
+       *
+       * A real published post takes precedence: this is the empty-table case
+       * only. See api/_in-practice.js.
+       */
+      const posts = published.length ? published : IN_PRACTICE.map((a) => ({
+        id: a.slug,
+        title: a.title,
+        subtitle: a.excerpt,
+        category: shelfFor(a),
+        dimension_keys: [],
+        read_minutes: a.readMinutes,
+        hero_color: null,
+        published_at: null,
+        revision: 1,
+        external: `https://www.attune-relationships.com${a.path}`,
+      }));
 
       return json({
         ok: true,

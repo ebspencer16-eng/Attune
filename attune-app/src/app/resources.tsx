@@ -17,6 +17,7 @@ import { useFocusEffect } from 'expo-router';
 import {
   Linking, Pressable, RefreshControl, ScrollView, Text, View,
 } from 'react-native';
+import { SymbolView } from 'expo-symbols';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { fetchHome, fetchPosts, markPostRead } from '@/api/client';
@@ -144,8 +145,8 @@ export default function ResourcesScreen() {
               <Text style={{ ...Type.eyebrow, color: c.textMuted, marginBottom: Spacing.md }}>
                 Yours to explore
               </Text>
-              {/* Wraps to as many rows as it needs: two up at phone widths. */}
-              <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.md, marginBottom: Spacing.xxl }}>
+              {/* A row of circles, wrapping only if someone owns more than four. */}
+              <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.lg, marginBottom: Spacing.xxl }}>
                 {owned.map((r) => <OwnedTile key={r.key} item={r} />)}
               </View>
             </>
@@ -242,37 +243,64 @@ function Shell({ children }: { children: React.ReactNode }) {
 type Item = CatalogueItem;
 
 /** Owned: full colour, a coloured spine, and it opens. */
+/**
+ * Icons for the things a couple can own.
+ *
+ * ── WHY THIS MAP IS ALLOWED TO LIVE IN THE APP ────────────────────────────
+ * The catalogue itself comes from the server, and check-app-derives fails the
+ * build if the app grows a second copy of it. This is not a copy of that list:
+ * it is a lookup keyed by it, an SF Symbol name per key, and a key with no
+ * entry falls back rather than disappearing. SF Symbols do not exist on the
+ * web, so there is no shared place for these to live.
+ */
+const ICON: Record<string, string> = {
+  budget: 'tablecells',            // a spreadsheet
+  workbook: 'text.book.closed',    // a bound notebook
+  checklist: 'checklist',          // a list of things to do
+  reflection: 'arrow.triangle.2.circlepath',
+  conflict: 'bubble.left.and.bubble.right',
+  intimacy: 'heart',
+};
+
+/**
+ * One thing you own: a circle, an icon, a word.
+ *
+ * ── WHY A CIRCLE AND ONE WORD ─────────────────────────────────────────────
+ * These were tinted rectangles carrying a letter in a rounded square, a title
+ * and two lines of blurb, two across. Four of them filled a screen before the
+ * shelf below had started. What a reader needs from this row is which of their
+ * things is which, and a circle with an icon and its name answers that in a
+ * fifth of the height.
+ *
+ * The blurb is gone rather than shortened. A sentence explaining a thing you
+ * already own is the least useful sentence on the page.
+ */
 function OwnedTile({ item }: { item: Item }) {
   const color = AccentFor[item.key] ?? AccentFallback;
   return (
-    <Pressable
-      style={{
-        flexGrow: 1, flexBasis: '46%',
-        // The tile carries the resource's colour as a wash rather than a
-        // stripe down the side. A coloured bar bolted onto a white box is
-        // decoration standing in for design; a tinted surface makes the tile
-        // itself the thing you recognise.
-        backgroundColor: color + '14',
-        borderColor: color + '33', borderWidth: 1,
-        borderRadius: Radius.lg, padding: Spacing.lg,
-      }}>
+    <Pressable style={{ alignItems: 'center', width: 84 }}>
       <View
         style={{
-          width: 30, height: 30, borderRadius: Radius.sm,
-          backgroundColor: color, alignItems: 'center', justifyContent: 'center',
-          marginBottom: Spacing.md,
+          width: 64, height: 64, borderRadius: 32,
+          backgroundColor: color + '1A',
+          borderColor: color + '33', borderWidth: 1,
+          alignItems: 'center', justifyContent: 'center',
         }}>
-        <Text style={{ ...Type.cardTitle, color: Palette.white }}>{item.label.charAt(0)}</Text>
+        <SymbolView
+          name={(ICON[item.key] || 'square.grid.2x2') as never}
+          size={26}
+          tintColor={color}
+          style={{ width: 28, height: 28 }}
+        />
       </View>
-      <Text style={{ ...Type.cardTitle, color: c.textStrong }}>{item.label}</Text>
-      <Text numberOfLines={2} style={{ ...Type.small, color: c.textMuted, marginTop: Spacing.xs }}>
-        {item.blurb}
+      {/* One word. The catalogue's own short name, from the server. */}
+      <Text numberOfLines={1} style={{ ...Type.small, fontWeight: '700', color: c.textStrong, marginTop: Spacing.sm }}>
+        {item.short || item.label}
       </Text>
     </Pressable>
   );
 }
 
-/** Not owned: priced, and it opens the site rather than selling in-app. */
 function ExploreTile({ item }: { item: Item }) {
   const color = AccentFor[item.key] ?? AccentFallback;
   return (
@@ -283,7 +311,9 @@ function ExploreTile({ item }: { item: Item }) {
         borderColor: c.border, borderWidth: 1, borderRadius: Radius.lg,
         padding: Spacing.lg,
       }}>
-      <View style={{ width: 26, height: 4, borderRadius: Radius.pill, backgroundColor: color, marginBottom: Spacing.md }} />
+      {/* No coloured rule above the title. It was a stripe standing in for a
+          design decision, and it put a bar over every tile in a row that is
+          already a row of bordered boxes. */}
       <Text style={{ ...Type.cardTitle, color: c.textStrong }}>{item.label}</Text>
       <Text numberOfLines={2} style={{ ...Type.small, color: c.textMuted, marginTop: Spacing.xs, minHeight: 34 }}>
         {item.blurb}
@@ -311,7 +341,11 @@ function PostRow({ post, first, onRead }: { post: PostSummary; first: boolean; o
       onPress={async () => {
         // Opened first. Marking read is bookkeeping and should never stand
         // between someone and the thing they tapped.
-        Linking.openURL(`${SITE}/practice/${post.id}`);
+        Linking.openURL(post.external || `${SITE}/practice/${post.id}`);
+        // An In Practice page is not a row in the posts table, so there is
+        // nothing to record a read against and the write would fail on a
+        // foreign key. See api/_in-practice.js.
+        if (post.external) return;
         const res = await markPostRead(post.id);
         if (res.ok) onRead();
       }}

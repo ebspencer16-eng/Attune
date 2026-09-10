@@ -446,6 +446,8 @@ export type CatalogueItem = {
   label: string;
   blurb: string;
   price: number;
+  /** One word, for the row of circles on Resources. */
+  short?: string;
 };
 
 export type HomeResponse = {
@@ -654,6 +656,12 @@ export type PostSummary = {
   read: boolean;
   /** The post changed since they read it, so it is worth resurfacing. */
   revised: boolean;
+  /**
+   * Set when this is one of the website's In Practice pages rather than a row
+   * in the posts table. The app opens it there and does not try to record a
+   * read against an id the table has never heard of.
+   */
+  external?: string | null;
 };
 
 export type PostBlock = { id: string; type: 'paragraph' | 'heading' | 'quote' | 'list' | 'prompt'; text: string };
