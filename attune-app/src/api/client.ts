@@ -286,6 +286,8 @@ export type IntimacyDimension = {
    * them, which reads as a score rather than as a comparison.
    */
   positions?: { you: number | null; them: number | null };
+  /** The gradient the website paints this dimension's page, three stops. */
+  ground?: string[];
   body: string | null;
   reason: string;
   prompt: string | null;

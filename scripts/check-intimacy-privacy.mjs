@@ -70,7 +70,7 @@ if (!both) {
   // the app only had the distance between them. Listed deliberately, because
   // this allowlist is the promise and a field nobody declared is a field
   // nobody thought about.
-  const ALLOWED_DIM = ['section', 'id', 'label', 'intro', 'state', 'distancePct', 'positions',
+  const ALLOWED_DIM = ['section', 'id', 'label', 'intro', 'state', 'distancePct', 'positions', 'ground', 'ground',
     'body', 'reason', 'prompt', 'questions'];
   const ALLOWED_ROW = ['id', 'text', 'low', 'high', 'you', 'them'];
 

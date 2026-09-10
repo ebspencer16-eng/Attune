@@ -84,6 +84,7 @@ import { COUPLE_TYPES as NEW_COUPLE_TYPES } from "../api/_couple-types.js";
 import { INDIVIDUAL_TYPE_DISPLAY } from "../api/_individual-types.js";
 import { AXES } from "../api/_axes.js";
 import { CATEGORY_INTRO } from "../api/_lib/category-intros.js";
+import { groundForDimension } from "../api/_lib/intimacy-results.js";
 import { COMM_DOMAINS } from "../api/_lib/comm-domains.js";
 import { STRIPE as SC_STRIPE, SITE_LABEL as SC_SITE } from "../api/_lib/storycard-style.js";
 import { individualBlurb, axisBand, axisRows } from "../api/_lib/individual-profile.js";
@@ -8012,18 +8013,11 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
       const osk = INTIMACY_RESULTS_PROSE[dimMatch]?.oneSkipped;
       // Per-dimension gradient, so each page has its own tone the way the comms
       // dimension pages do (they key off DIM_META.dark).
-      const DIM_TINT = {
-        frequency:     "#7A2540",
-        initiating:    "#8A3350",
-        comfort:       "#6E2A48",
-        communication: "#5E2E52",
-        adventure:     "#8A3A3A",
-        meaning:       "#4E2A55",
-      };
-      const tint = DIM_TINT[dimMatch] || "#7A2540";
+      // The tints live in api/_lib/intimacy-results.js so the app can paint
+      // the same six pages from the same numbers.
       return (
         <Layout accent={ROSE} noPrevNext={true}>
-          <ResultsSlide bg={`linear-gradient(145deg, ${tint}dd, ${tint}99, #22204a)`}>
+          <ResultsSlide bg={`linear-gradient(145deg, ${groundForDimension(dimMatch).join(", ")})`}>
             <link href={FONT_URL} rel="stylesheet" />
             <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", marginBottom: "0.75rem" }}>
               <div style={{ marginLeft: "auto", fontSize: "0.68rem", color: "rgba(255,255,255,0.3)", fontFamily: BFONT }}>{idx + 1} of {dimIds.length}</div>

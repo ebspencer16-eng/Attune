@@ -40,6 +40,28 @@ import {
 import { INTIMACY_RESULTS_PROSE } from '../_intimacy-results-prose.js';
 
 /**
+ * The ground each dimension's page is painted with.
+ *
+ * The website tints every Physical Intimacy detail page to its dimension. The
+ * app drew all six on cream, so the section that is most obviously designed on
+ * one product looked undesigned on the other. One table, both surfaces.
+ */
+const DIM_TINT = {
+  frequency: '#7A2540',
+  initiating: '#8A3350',
+  comfort: '#6E2A48',
+  communication: '#5E2E52',
+  adventure: '#8A3A3A',
+  meaning: '#4E2A55',
+};
+
+/** The three stops, dark to light, for one dimension's page. */
+export function groundForDimension(id) {
+  const t = DIM_TINT[id] || DIM_TINT.frequency;
+  return [`${t}dd`, `${t}99`, '#22204a'];
+}
+
+/**
  * Which line of copy a dimension gets.
  *
  * `oneSkipped` outranks the gap. If one person declined to answer a whole
@@ -114,6 +136,9 @@ export function intimacyResults({ mine, theirs, variant = 'premarital' }) {
       section: 'intimacy-' + d.id,
       id: d.id,
       label: d.label,
+      // The gradient the website paints this dimension's page. Sent so the app
+      // stops drawing all six on cream while the website tints each one.
+      ground: groundForDimension(d.id),
       intro: copy.intro || null,
       state,
       // Rounded to a percentage of the scale. The raw average is a distance

@@ -972,11 +972,18 @@ function IntimacyDimensionView({
     return <Waiting title="Physical Intimacy" body="This opens when you have both finished the exercise." />;
   }
   return (
-    <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: ResultsBottomInset }}>
+    <View style={{ flex: 1 }}>
+      <LinearGradient
+        colors={(dim.ground?.length === 3 ? dim.ground : ['#7A2540dd', '#7A254099', '#22204a']) as [string, string, string]}
+        start={{ x: 0.1, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
+      />
+      <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: ResultsBottomInset }}>
       <View style={{ paddingHorizontal: Spacing.xl, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center' }}>
-        <Text style={{ ...Type.title, color: c.textStrong }}>{dim.label}</Text>
+        <Text style={{ ...Type.title, color: Palette.white }}>{dim.label}</Text>
         {dim.intro ? (
-          <Text style={{ ...Type.body, color: c.textMuted, marginTop: Spacing.sm }}>{dim.intro}</Text>
+          <Text style={{ ...Type.body, color: 'rgba(255,255,255,0.7)', marginTop: Spacing.sm }}>{dim.intro}</Text>
         ) : null}
 
         {/* block: intimacy-dimension/state */}
@@ -985,15 +992,15 @@ function IntimacyDimensionView({
         {dim.body ? (
           <View
             style={{
-              backgroundColor: c.surface, borderColor: c.border, borderWidth: 1,
+              backgroundColor: 'rgba(255,255,255,0.10)', borderColor: 'rgba(255,255,255,0.2)', borderWidth: 1,
               borderRadius: Radius.lg, padding: Spacing.lg, marginTop: Spacing.xl,
             }}>
-            <Text style={{ ...Type.body, color: c.text }}>{dim.body}</Text>
+            <Text style={{ ...Type.body, color: 'rgba(255,255,255,0.85)' }}>{dim.body}</Text>
           </View>
         ) : null}
 
         {dim.prompt ? (
-          <Text style={{ ...Type.title, color: c.textStrong, marginTop: Spacing.xl }}>
+          <Text style={{ ...Type.title, color: Palette.white, marginTop: Spacing.xl }}>
             {/* block: intimacy-dimension/prompt */}
             {dim.prompt}
           </Text>
@@ -1012,12 +1019,12 @@ function IntimacyDimensionView({
               <View
                 key={q.id}
                 style={{
-                  backgroundColor: c.surface, borderColor: c.border, borderWidth: 1,
+                  backgroundColor: 'rgba(255,255,255,0.10)', borderColor: 'rgba(255,255,255,0.2)', borderWidth: 1,
                   borderRadius: Radius.lg, padding: Spacing.lg, marginBottom: Spacing.md,
                 }}>
-                <Text style={{ ...Type.body, color: c.text }}>{q.text}</Text>
+                <Text style={{ ...Type.body, color: 'rgba(255,255,255,0.85)' }}>{q.text}</Text>
                 <View style={{ height: 28, justifyContent: 'center', marginTop: Spacing.md }}>
-                  <View style={{ height: 3, borderRadius: Radius.pill, backgroundColor: c.border }} />
+                  <View style={{ height: 3, borderRadius: Radius.pill, backgroundColor: 'rgba(255,255,255,0.18)' }} />
                   {q.you != null ? (
                     <Marker left={q.you * 100} color={YOU_COLOR} label={initial(you)} />
                   ) : null}
@@ -1026,8 +1033,8 @@ function IntimacyDimensionView({
                   ) : null}
                 </View>
                 <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: Spacing.xs }}>
-                  <Text style={{ ...Type.small, color: c.textMuted, flex: 1 }}>{q.low}</Text>
-                  <Text style={{ ...Type.small, color: c.textMuted, flex: 1, textAlign: 'right' }}>{q.high}</Text>
+                  <Text style={{ ...Type.small, color: 'rgba(255,255,255,0.7)', flex: 1 }}>{q.low}</Text>
+                  <Text style={{ ...Type.small, color: 'rgba(255,255,255,0.7)', flex: 1, textAlign: 'right' }}>{q.high}</Text>
                 </View>
               </View>
             ))}
@@ -1035,6 +1042,7 @@ function IntimacyDimensionView({
         ) : null}
       </View>
     </ScrollView>
+    </View>
   );
 }
 
@@ -1051,24 +1059,32 @@ function IntimacyConversations({ data }: { data: IntimacyResults | null }) {
     );
   }
   return (
-    <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: ResultsBottomInset }}>
+    <View style={{ flex: 1 }}>
+      <LinearGradient
+        colors={['#4A1B33', '#A34468', '#C8703E'] as [string, string, string]}
+        start={{ x: 0.1, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
+      />
+      <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: ResultsBottomInset }}>
       <View style={{ paddingHorizontal: Spacing.xl, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center' }}>
-        <Text style={{ ...Type.title, color: c.textStrong }}>Conversations Worth Having</Text>
+        <Text style={{ ...Type.title, color: Palette.white }}>Conversations Worth Having</Text>
         <View style={{ marginTop: Spacing.lg, gap: Spacing.md }}>
           {data.conversations.map((d) => (
             <View
               key={d.section}
               style={{
-                backgroundColor: c.surface, borderColor: c.border, borderWidth: 1,
+                backgroundColor: 'rgba(255,255,255,0.10)', borderColor: 'rgba(255,255,255,0.2)', borderWidth: 1,
                 borderRadius: Radius.lg, padding: Spacing.lg,
               }}>
-              <Text style={{ ...Type.eyebrow, color: c.accentQuiet }}>{d.label}</Text>
-              <Text style={{ ...Type.cardTitle, color: c.textStrong, marginTop: Spacing.xs }}>{d.prompt}</Text>
+              <Text style={{ ...Type.eyebrow, color: 'rgba(255,255,255,0.85)' }}>{d.label}</Text>
+              <Text style={{ ...Type.cardTitle, color: Palette.white, marginTop: Spacing.xs }}>{d.prompt}</Text>
             </View>
           ))}
         </View>
       </View>
     </ScrollView>
+    </View>
   );
 }
 
@@ -1087,12 +1103,19 @@ function ReflectionOverview({ data }: { data: ReflectionResults | null }) {
   // opening line of its own, so none here either.
   const commitment = data.written.find((w) => w.key === 'a6');
   return (
-    <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: ResultsBottomInset }}>
+    <View style={{ flex: 1 }}>
+      <LinearGradient
+        colors={['#22285E', '#3E63C8', '#10A5B8'] as [string, string, string]}
+        start={{ x: 0.1, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
+      />
+      <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: ResultsBottomInset }}>
       <View style={{ paddingHorizontal: Spacing.xl, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center' }}>
-        <Text style={{ ...Type.hero, color: c.textStrong }}>Relationship Reflection</Text>
+        <Text style={{ ...Type.hero, color: Palette.white }}>Relationship Reflection</Text>
 
           {/* block: reflection-overview/ratings */}
-        <Text style={{ ...Type.cardTitle, color: c.textStrong, marginTop: Spacing.xl, marginBottom: Spacing.md }}>
+        <Text style={{ ...Type.cardTitle, color: Palette.white, marginTop: Spacing.xl, marginBottom: Spacing.md }}>
           How you feel right now
         </Text>
         <Legend you={data.names.you} them={data.names.them} />
@@ -1100,18 +1123,18 @@ function ReflectionOverview({ data }: { data: ReflectionResults | null }) {
           <View
             key={r.key}
             style={{
-              backgroundColor: c.surface, borderColor: c.border, borderWidth: 1,
+              backgroundColor: 'rgba(255,255,255,0.10)', borderColor: 'rgba(255,255,255,0.2)', borderWidth: 1,
               borderRadius: Radius.lg, padding: Spacing.lg, marginBottom: Spacing.md,
             }}>
-            <Text style={{ ...Type.cardTitle, color: c.textStrong }}>{r.question}</Text>
+            <Text style={{ ...Type.cardTitle, color: Palette.white }}>{r.question}</Text>
             <View style={{ height: 28, justifyContent: 'center', marginTop: Spacing.lg }}>
-              <View style={{ height: 3, borderRadius: Radius.pill, backgroundColor: c.border }} />
+              <View style={{ height: 3, borderRadius: Radius.pill, backgroundColor: 'rgba(255,255,255,0.18)' }} />
               <Marker left={r.you.pct} color={YOU_COLOR} label={initial(data.names.you)} />
               <Marker left={r.them.pct} color={THEM_COLOR} label={initial(data.names.them)} />
             </View>
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: Spacing.xs }}>
-              <Text style={{ ...Type.small, color: c.textMuted, flex: 1 }}>{r.low}</Text>
-              <Text style={{ ...Type.small, color: c.textMuted, flex: 1, textAlign: 'right' }}>{r.high}</Text>
+              <Text style={{ ...Type.small, color: 'rgba(255,255,255,0.7)', flex: 1 }}>{r.low}</Text>
+              <Text style={{ ...Type.small, color: 'rgba(255,255,255,0.7)', flex: 1, textAlign: 'right' }}>{r.high}</Text>
             </View>
           </View>
         ))}
@@ -1132,15 +1155,15 @@ function ReflectionOverview({ data }: { data: ReflectionResults | null }) {
                 <View
                   key={x.from}
                   style={{
-                    flex: 1, backgroundColor: c.surface, borderColor: c.border, borderWidth: 1,
+                    flex: 1, backgroundColor: 'rgba(255,255,255,0.10)', borderColor: 'rgba(255,255,255,0.2)', borderWidth: 1,
                     borderTopColor: x.col, borderTopWidth: 3,
                     borderRadius: Radius.lg, padding: Spacing.lg,
                   }}>
                   <Text style={{ ...Type.eyebrow, fontSize: 9, color: x.col, marginBottom: Spacing.xs }}>
                     {x.from}
                   </Text>
-                  <Text style={{ ...Type.cardTitle, color: c.textStrong }}>{x.val || 'Not answered'}</Text>
-                  <Text style={{ ...Type.small, color: c.textMuted, marginTop: Spacing.xs }}>
+                  <Text style={{ ...Type.cardTitle, color: Palette.white }}>{x.val || 'Not answered'}</Text>
+                  <Text style={{ ...Type.small, color: 'rgba(255,255,255,0.7)', marginTop: Spacing.xs }}>
                     in {x.about}
                   </Text>
                 </View>
@@ -1153,7 +1176,7 @@ function ReflectionOverview({ data }: { data: ReflectionResults | null }) {
                   borderColor: '#10b98130', borderWidth: 1,
                   borderRadius: Radius.md, padding: Spacing.md,
                 }}>
-                <Text style={{ ...Type.small, color: c.text }}>
+                <Text style={{ ...Type.small, color: 'rgba(255,255,255,0.85)' }}>
                   You picked the same quality, without conferring.
                 </Text>
               </View>
@@ -1164,7 +1187,7 @@ function ReflectionOverview({ data }: { data: ReflectionResults | null }) {
 
         {commitment ? (
           <>
-            <Text style={{ ...Type.cardTitle, color: c.textStrong, marginTop: Spacing.xxl, marginBottom: Spacing.md }}>
+            <Text style={{ ...Type.cardTitle, color: Palette.white, marginTop: Spacing.xxl, marginBottom: Spacing.md }}>
               Your action plan
             </Text>
             <WrittenPair
@@ -1177,6 +1200,7 @@ function ReflectionOverview({ data }: { data: ReflectionResults | null }) {
         ) : null}
       </View>
     </ScrollView>
+    </View>
   );
 }
 
@@ -1220,9 +1244,16 @@ function ReflectionRatings({ data }: { data: ReflectionResults | null }) {
     return <Waiting title="How You Each Rated" body="Neither of you answered the rating questions." />;
   }
   return (
-    <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: ResultsBottomInset }}>
+    <View style={{ flex: 1 }}>
+      <LinearGradient
+        colors={['#22285E', '#3E63C8', '#10A5B8'] as [string, string, string]}
+        start={{ x: 0.1, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
+      />
+      <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: ResultsBottomInset }}>
       <View style={{ paddingHorizontal: Spacing.xl, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center' }}>
-        <Text style={{ ...Type.title, color: c.textStrong }}>How You Each Rated</Text>
+        <Text style={{ ...Type.title, color: Palette.white }}>How You Each Rated</Text>
 
         <View style={{ marginTop: Spacing.md }}>
           <Legend you={data.names.you} them={data.names.them} />
@@ -1232,34 +1263,35 @@ function ReflectionRatings({ data }: { data: ReflectionResults | null }) {
           <View
             key={r.key}
             style={{
-              backgroundColor: c.surface, borderColor: c.border, borderWidth: 1,
+              backgroundColor: 'rgba(255,255,255,0.10)', borderColor: 'rgba(255,255,255,0.2)', borderWidth: 1,
               borderRadius: Radius.lg, padding: Spacing.lg, marginBottom: Spacing.md,
             }}>
-            <Text style={{ ...Type.cardTitle, color: c.textStrong }}>{r.question}</Text>
+            <Text style={{ ...Type.cardTitle, color: Palette.white }}>{r.question}</Text>
 
             {/* The same track and markers the dimension scales use, so a
                 reader who has come this far already knows how to read it. */}
             <View style={{ height: 28, justifyContent: 'center', marginTop: Spacing.lg }}>
-              <View style={{ height: 3, borderRadius: Radius.pill, backgroundColor: c.border }} />
+              <View style={{ height: 3, borderRadius: Radius.pill, backgroundColor: 'rgba(255,255,255,0.18)' }} />
               <Marker left={r.you.pct} color={YOU_COLOR} label={initial(data.names.you)} />
               <Marker left={r.them.pct} color={THEM_COLOR} label={initial(data.names.them)} />
             </View>
 
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: Spacing.xs }}>
-              <Text style={{ ...Type.small, color: c.textMuted, flex: 1 }}>{r.low}</Text>
-              <Text style={{ ...Type.small, color: c.textMuted, flex: 1, textAlign: 'right' }}>{r.high}</Text>
+              <Text style={{ ...Type.small, color: 'rgba(255,255,255,0.7)', flex: 1 }}>{r.low}</Text>
+              <Text style={{ ...Type.small, color: 'rgba(255,255,255,0.7)', flex: 1, textAlign: 'right' }}>{r.high}</Text>
             </View>
 
             {/* Both answers, always, in their own words. This used to say
                 "You rated this the same" when the two matched, which is the
                 app drawing a conclusion the website leaves to the reader. */}
-            <Text style={{ ...Type.small, color: c.textMuted, marginTop: Spacing.md }}>
+            <Text style={{ ...Type.small, color: 'rgba(255,255,255,0.7)', marginTop: Spacing.md }}>
               {data.names.you}: {r.you.label}. {data.names.them}: {r.them.label}.
             </Text>
           </View>
         ))}
       </View>
     </ScrollView>
+    </View>
   );
 }
 
@@ -1282,37 +1314,45 @@ function ReflectionStory({ data }: { data: ReflectionResults | null }) {
     );
   }
   return (
-    <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: ResultsBottomInset }}>
+    <View style={{ flex: 1 }}>
+      <LinearGradient
+        colors={['#22285E', '#3E63C8', '#10A5B8'] as [string, string, string]}
+        start={{ x: 0.1, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
+      />
+      <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: ResultsBottomInset }}>
       <View style={{ paddingHorizontal: Spacing.xl, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center' }}>
-        <Text style={{ ...Type.title, color: c.textStrong }}>Side by Side</Text>
+        <Text style={{ ...Type.title, color: Palette.white }}>Side by Side</Text>
 
         {data.written.map((w) => (
           <View key={w.key} style={{ marginBottom: Spacing.xl }}>
-            <Text style={{ ...Type.cardTitle, color: c.textStrong, marginBottom: Spacing.md }}>
+            <Text style={{ ...Type.cardTitle, color: Palette.white, marginBottom: Spacing.md }}>
               {w.question}
             </Text>
 
             <View
               style={{
-                backgroundColor: c.surface, borderColor: c.border, borderWidth: 1,
+                backgroundColor: 'rgba(255,255,255,0.10)', borderColor: 'rgba(255,255,255,0.2)', borderWidth: 1,
                 borderRadius: Radius.lg, padding: Spacing.lg, marginBottom: Spacing.sm,
               }}>
               <Eyebrow>{data.names.you}</Eyebrow>
-              <Text style={{ ...Type.body, color: c.text }}>{w.you}</Text>
+              <Text style={{ ...Type.body, color: 'rgba(255,255,255,0.85)' }}>{w.you}</Text>
             </View>
 
             <View
               style={{
-                backgroundColor: c.surface, borderColor: c.border, borderWidth: 1,
+                backgroundColor: 'rgba(255,255,255,0.10)', borderColor: 'rgba(255,255,255,0.2)', borderWidth: 1,
                 borderRadius: Radius.lg, padding: Spacing.lg,
               }}>
               <Eyebrow color={c.textMuted}>{data.names.them}</Eyebrow>
-              <Text style={{ ...Type.body, color: c.text }}>{w.them}</Text>
+              <Text style={{ ...Type.body, color: 'rgba(255,255,255,0.85)' }}>{w.them}</Text>
             </View>
           </View>
         ))}
       </View>
     </ScrollView>
+    </View>
   );
 }
 
@@ -1333,10 +1373,17 @@ function ReflectionPlan({
   const bothRanked = data.priorities.you && data.priorities.them;
 
   return (
-    <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: ResultsBottomInset }}>
+    <View style={{ flex: 1 }}>
+      <LinearGradient
+        colors={['#22285E', '#3E63C8', '#10A5B8'] as [string, string, string]}
+        start={{ x: 0.1, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
+      />
+      <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: ResultsBottomInset }}>
       <View style={{ paddingHorizontal: Spacing.xl, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center' }}>
         {/* block: reflection-overview/action-plan */}
-        <Text style={{ ...Type.title, color: c.textStrong }}>Action Plan</Text>
+        <Text style={{ ...Type.title, color: Palette.white }}>Action Plan</Text>
 
         {/* The derived plan, under REFLECTION_ACTION_TITLES. The app could not
             reach that copy until now, so this page showed only the couple's
@@ -1347,15 +1394,15 @@ function ReflectionPlan({
               <View
                 key={`${ins.title}-${i}`}
                 style={{
-                  backgroundColor: c.surface, borderColor: c.border, borderWidth: 1,
+                  backgroundColor: 'rgba(255,255,255,0.10)', borderColor: 'rgba(255,255,255,0.2)', borderWidth: 1,
                   borderRadius: Radius.lg, padding: Spacing.lg, marginBottom: Spacing.md,
                 }}>
-                <Text style={{ ...Type.cardTitle, color: c.textStrong }}>{ins.title}</Text>
+                <Text style={{ ...Type.cardTitle, color: Palette.white }}>{ins.title}</Text>
                 {ins.body ? (
-                  <Text style={{ ...Type.body, color: c.text, marginTop: Spacing.sm }}>{ins.body}</Text>
+                  <Text style={{ ...Type.body, color: 'rgba(255,255,255,0.85)', marginTop: Spacing.sm }}>{ins.body}</Text>
                 ) : null}
                 {ins.action ? (
-                  <Text style={{ ...Type.body, color: c.textMuted, marginTop: Spacing.md }}>{ins.action}</Text>
+                  <Text style={{ ...Type.body, color: 'rgba(255,255,255,0.7)', marginTop: Spacing.md }}>{ins.action}</Text>
                 ) : null}
               </View>
             ))}
@@ -1367,19 +1414,19 @@ function ReflectionPlan({
             <Eyebrow>What you each said you would work on</Eyebrow>
             <View
               style={{
-                backgroundColor: c.surface, borderColor: c.border, borderWidth: 1,
+                backgroundColor: 'rgba(255,255,255,0.10)', borderColor: 'rgba(255,255,255,0.2)', borderWidth: 1,
                 borderRadius: Radius.lg, padding: Spacing.lg, marginBottom: Spacing.sm,
               }}>
               <Eyebrow>{data.names.you}</Eyebrow>
-              <Text style={{ ...Type.body, color: c.text }}>{commitment.you}</Text>
+              <Text style={{ ...Type.body, color: 'rgba(255,255,255,0.85)' }}>{commitment.you}</Text>
             </View>
             <View
               style={{
-                backgroundColor: c.surface, borderColor: c.border, borderWidth: 1,
+                backgroundColor: 'rgba(255,255,255,0.10)', borderColor: 'rgba(255,255,255,0.2)', borderWidth: 1,
                 borderRadius: Radius.lg, padding: Spacing.lg,
               }}>
               <Eyebrow color={c.textMuted}>{data.names.them}</Eyebrow>
-              <Text style={{ ...Type.body, color: c.text }}>{commitment.them}</Text>
+              <Text style={{ ...Type.body, color: 'rgba(255,255,255,0.85)' }}>{commitment.them}</Text>
             </View>
           </View>
         ) : null}
@@ -1397,21 +1444,22 @@ function ReflectionPlan({
         {together ? (
           <View style={{ marginTop: Spacing.xl }}>
             <Eyebrow>More of this, next year</Eyebrow>
-            <Text style={{ ...Type.body, color: c.text }}>{data.names.you}: {together.you}</Text>
-            <Text style={{ ...Type.body, color: c.text, marginTop: Spacing.sm }}>
+            <Text style={{ ...Type.body, color: 'rgba(255,255,255,0.85)' }}>{data.names.you}: {together.you}</Text>
+            <Text style={{ ...Type.body, color: 'rgba(255,255,255,0.85)', marginTop: Spacing.sm }}>
               {data.names.them}: {together.them}
             </Text>
           </View>
         ) : null}
 
         {!commitment && !bothRanked && !together ? (
-          <Text style={{ ...Type.body, color: c.textMuted, marginTop: Spacing.lg }}>
+          <Text style={{ ...Type.body, color: 'rgba(255,255,255,0.7)', marginTop: Spacing.lg }}>
             This fills in from the last few questions of the exercise, which you
             have not both answered yet.
           </Text>
         ) : null}
       </View>
     </ScrollView>
+    </View>
   );
 }
 
