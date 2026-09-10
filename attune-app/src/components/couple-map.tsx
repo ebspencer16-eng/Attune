@@ -33,6 +33,17 @@ const c = Colors.light;
 
 type Quadrant = { code: string; name: string; color: string; fill: string };
 
+/**
+ * The margin each rotated axis label sits in.
+ *
+ * Open and Guarded belong at the left and right of this map, which is where
+ * the website puts them, and a phone has no room for them lying flat: the
+ * right hand one rendered as "GUARDE". Turned on their sides they need about
+ * twenty points each and read as the edges of the field rather than as a third
+ * row of labels under it.
+ */
+const SIDE = 22;
+
 /** Fallback used only when an older cached payload carries no quadrants. */
 const AXIS = { left: 'Open', right: 'Guarded', top: 'Engage', bottom: 'Withdraw' };
 
@@ -47,9 +58,10 @@ export default function CoupleMap({
   size?: number;
 }) {
   const { width } = useWindowDimensions();
-  // Full width inside the page's 24pt gutters, capped so it does not become a
-  // huge square on a tablet.
-  const size = fixedSize ?? Math.min(320, width - Spacing.xl * 2);
+  // Full width inside the page's 24pt gutters, less the two side margins the
+  // rotated axis labels sit in, capped so it does not become a huge square on
+  // a tablet.
+  const size = fixedSize ?? Math.min(320, width - Spacing.xl * 2 - SIDE * 2);
   const qs = quadrants?.length === 4 ? quadrants : null;
   const pa = a?.coords;
   const pb = b?.coords;
@@ -74,17 +86,17 @@ export default function CoupleMap({
 
   const A = { x: xOf(pa.open), y: yOf(pa.engage), color: colourOf(a), name: aName };
   const B = { x: xOf(pb.open), y: yOf(pb.engage), color: colourOf(b), name: bName };
-  const upper = A.y <= B.y ? A : B;
-  const lower = A.y <= B.y ? B : A;
 
   const label = { ...Type.small, fontSize: 10, letterSpacing: 0.6, fontWeight: '700' as const };
 
   return (
-    <View style={{ alignItems: 'center', marginTop: Spacing.xl }}>
+    <View style={{ alignItems: 'center', marginTop: Spacing.sm }}>
       <Text style={{ ...label, color: c.textMuted, marginBottom: Spacing.xs }}>
         {AXIS.top.toUpperCase()}
       </Text>
 
+      <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+        <SideLabel text={AXIS.left.toUpperCase()} side="left" height={size} />
       <View style={{ width: size, height: size, borderRadius: Radius.lg, overflow: 'hidden' }}>
         {/* Four quadrants, in the server's order: W X Y Z. */}
         <View style={{ flexDirection: 'row', flexWrap: 'wrap', width: size, height: size }}>
@@ -104,8 +116,17 @@ export default function CoupleMap({
         <View style={{ position: 'absolute', left: 0, right: 0, top: size / 2 - 0.5, height: 1, backgroundColor: 'rgba(0,0,0,0.10)' }} />
         <View style={{ position: 'absolute', top: 0, bottom: 0, left: size / 2 - 0.5, width: 1, backgroundColor: 'rgba(0,0,0,0.10)' }} />
 
-        {/* Halos first, so both sit under both dots and neither person's ring
-            crops the other's when they are close together. */}
+        {/* ── THE GLOW ─────────────────────────────────────────────────
+            The website draws each dot as a soft radial gradient at 2.4 times
+            the dot's radius, then a faint ring at 1.47 times, then the dot.
+            The app had the ring and not the glow, so the ring read as a
+            circle floating at an odd distance from the dot rather than the
+            outer edge of something.
+
+            A native shadow with no offset is a radial glow, which is what a
+            radial gradient would have been for. The ring stays, at the
+            website's proportion, now that there is something filling the
+            space between it and the dot. */}
         {[A, B].map((p) => (
           <View
             key={`halo-${p.name}`}
@@ -125,6 +146,8 @@ export default function CoupleMap({
               width: dot, height: dot, borderRadius: dot / 2,
               backgroundColor: p.color, borderColor: '#fff', borderWidth: 3,
               alignItems: 'center', justifyContent: 'center',
+              shadowColor: p.color, shadowOpacity: 0.55,
+              shadowRadius: dot * 0.5, shadowOffset: { width: 0, height: 0 },
             }}>
             {/* The initial, the same way the reader is identified everywhere
                 else in results. Two dots on a map have to say which is which
@@ -139,24 +162,43 @@ export default function CoupleMap({
           </View>
         ))}
       </View>
-
-      {/* The horizontal axis is labelled under the map rather than flanking it.
-          Flanking labels need about 120 points of margin the phone does not
-          have, and the right-hand one was rendering as "GUARDE". */}
-      <View style={{ flexDirection: 'row', justifyContent: 'space-between', width: size, marginTop: Spacing.xs }}>
-        <Text style={{ ...label, color: c.textMuted }}>{AXIS.left.toUpperCase()}</Text>
-        <Text style={{ ...label, color: c.textMuted }}>{AXIS.bottom.toUpperCase()}</Text>
-        <Text style={{ ...label, color: c.textMuted }}>{AXIS.right.toUpperCase()}</Text>
+        <SideLabel text={AXIS.right.toUpperCase()} side="right" height={size} />
       </View>
 
-      <View style={{ flexDirection: 'row', gap: Spacing.lg, marginTop: Spacing.md }}>
-        {[upper, lower].map((p) => (
-          <View key={p.name} style={{ flexDirection: 'row', alignItems: 'center', gap: Spacing.xs }}>
-            <View style={{ width: 10, height: 10, borderRadius: 5, backgroundColor: p.color }} />
-            <Text style={{ ...Type.small, color: c.text }}>{p.name}</Text>
-          </View>
-        ))}
-      </View>
+      {/* Withdraw alone under the map. Open and Guarded are on their sides in
+          the margins, so the bottom row is the foot of the vertical axis
+          rather than three labels that look like they belong to one axis. */}
+      <Text style={{ ...label, color: c.textMuted, marginTop: Spacing.xs }}>
+        {AXIS.bottom.toUpperCase()}
+      </Text>
+
+      {/* No name key. Each dot carries its own initial and each name sits in
+          its own colour on the tiles below, so a key underneath was a third
+          place to look up something already answered twice. */}
+    </View>
+  );
+}
+
+/**
+ * One axis label, turned on its side in the margin.
+ *
+ * Left reads bottom to top and right reads top to bottom, which is the
+ * convention for a chart's vertical margins and keeps both facing outward.
+ */
+function SideLabel({ text, side, height }: { text: string; side: 'left' | 'right'; height: number }) {
+  return (
+    <View style={{ width: SIDE, height, alignItems: 'center', justifyContent: 'center' }}>
+      <Text
+        numberOfLines={1}
+        style={{
+          ...Type.small, fontSize: 10, letterSpacing: 0.6, fontWeight: '700',
+          color: Colors.light.textMuted,
+          width: height,
+          textAlign: 'center',
+          transform: [{ rotate: side === 'left' ? '-90deg' : '90deg' }],
+        }}>
+        {text}
+      </Text>
     </View>
   );
 }

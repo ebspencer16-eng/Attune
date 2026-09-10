@@ -1467,7 +1467,7 @@ function CoupleType({ results, you, them }: { results: CoupleResults; you: strin
           What your responses uncover about your unique relationship dynamic
         </Text>
 
-        <Text style={{ ...Type.eyebrow, color: c.textMuted, marginTop: Spacing.xl, marginBottom: Spacing.sm }}>
+        <Text style={{ ...Type.eyebrow, color: accent, marginTop: Spacing.xl, marginBottom: Spacing.xs }}>
           Your couple map
         </Text>
 
@@ -1515,7 +1515,7 @@ function CoupleType({ results, you, them }: { results: CoupleResults; you: strin
             been anywhere the app could read them. They are in
             api/_lib/individual-profile.js now and arrive on the payload. */}
         {results.content?.individualTypes?.a || results.content?.individualTypes?.b ? (
-          <Text style={{ ...Type.eyebrow, color: c.textMuted, marginTop: Spacing.xxl, marginBottom: Spacing.sm }}>
+          <Text style={{ ...Type.eyebrow, color: accent, marginTop: Spacing.xxl, marginBottom: Spacing.sm }}>
             Your individual types
           </Text>
         ) : null}

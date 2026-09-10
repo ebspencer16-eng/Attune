@@ -23,6 +23,7 @@ import { Linking, Pressable, RefreshControl, ScrollView, Text, View, useWindowDi
 import { LinearGradient } from 'expo-linear-gradient';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
+import { SymbolView } from 'expo-symbols';
 
 import { fetchHome } from '@/api/client';
 import type { ApiError, HomeCard, HomeResponse } from '@/api/client';
@@ -30,7 +31,7 @@ import { ScreenError, ScreenLoading } from '@/components/screen-states';
 import SignIn from '@/components/sign-in';
 import Settings from '@/components/settings';
 import {
-  AccentFallback, AccentFor, BlueGround, BottomTabInset, Colors, MaxContentWidth, Palette, Radius,
+  BlueGround, BottomTabInset, Colors, MaxContentWidth, Palette, Radius,
   Spacing, Type,
 } from '@/constants/attune-theme';
 
@@ -181,10 +182,12 @@ export default function HomeScreen() {
               flexGrow: 1, minHeight: topHeight,
               paddingHorizontal: Spacing.xl, justifyContent: 'space-between',
             }}>
-            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: Spacing.sm }}>
-              <Text style={{ ...Type.eyebrow, color: 'rgba(255,255,255,0.75)' }}>Attune</Text>
-              {/* Settings is where account deletion lives, which App Review has
-                  to be able to find without being told where it is. */}
+            {/* The wordmark is gone. It named the app to someone already
+                inside it, on the one screen where the whole ground is the
+                brand colour. Settings keeps the row: it is where account
+                deletion lives, which App Review has to be able to find
+                without being told where it is. */}
+            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-end', marginTop: Spacing.sm }}>
               <Pressable
                 onPress={() => setSettingsOpen(true)}
                 hitSlop={12}
@@ -200,7 +203,7 @@ export default function HomeScreen() {
             </View>
 
             <View style={{ paddingBottom: Spacing.xxl }}>
-              <Text style={{ ...Type.hero, color: Palette.white, marginBottom: Spacing.xl }}>
+              <Text style={{ ...Type.hero, color: Palette.white, marginBottom: Spacing.xxl }}>
                 {data.greeting}
               </Text>
               {data.research ? <ResearchNote finding={data.research} /> : null}
@@ -218,10 +221,9 @@ export default function HomeScreen() {
             }}>
             {data.primary ? (
               <TileRow
-                label="Next for you"
+                icon="star.fill"
                 title={data.primary.title}
                 body={data.primary.body}
-                dot={accentForCard(data.primary)}
                 disabled={!!data.primary.disabled}
                 first
                 onPress={() => open(data.primary)}
@@ -230,10 +232,9 @@ export default function HomeScreen() {
 
             {alsoWaiting ? (
               <TileRow
-                label="Also waiting"
+                icon="checklist"
                 title={alsoWaiting.title}
                 body={alsoWaiting.body}
-                dot={accentForCard(alsoWaiting)}
                 disabled={!!alsoWaiting.disabled}
                 onPress={() => open(alsoWaiting)}
               />
@@ -244,10 +245,9 @@ export default function HomeScreen() {
                 Practice post when there is none. */}
             {data.pickUp ? (
               <TileRow
-                label={data.pickUp.label}
+                icon="square.and.pencil"
                 title={data.pickUp.title}
                 body={data.pickUp.preview}
-                dot={data.pickUp.kind === 'resume' ? Palette.indigo : Palette.clay}
                 onPress={() => open(data.pickUp as unknown as HomeCard)}
               />
             ) : null}
@@ -352,14 +352,28 @@ function PrimaryCard({ card, onPress }: { card: HomeCard; onPress: () => void })
  */
 function ResearchNote({ finding }: { finding: NonNullable<HomeResponse['research']> }) {
   return (
-    <View>
-      <Text style={{ ...Type.title, fontSize: 20, lineHeight: 30, color: Palette.white }}>
+    /* ── WHY INDENTED AND CENTRED ─────────────────────────────────────
+       It ran the full measure, flush left, in the same serif as the
+       greeting directly above it, so the two read as one paragraph and
+       the finding looked like the second line of hello.
+
+       Ellie's read was right: the problem was that they were too similar,
+       not that this was too light. So the fix is weight and size before
+       emphasis. The greeting stays bold; this drops to regular, steps down
+       a size, pulls in from both sides and centres. Same colour, same
+       family, different voice. */
+    <View style={{ paddingHorizontal: Spacing.xl }}>
+      <Text
+        style={{
+          ...Type.title, fontSize: 19, lineHeight: 29, fontWeight: '400',
+          color: Palette.white, textAlign: 'center',
+        }}>
         {finding.body}
       </Text>
       <Text
         style={{
-          ...Type.small, color: 'rgba(255,255,255,0.6)', fontStyle: 'italic',
-          marginTop: Spacing.md,
+          ...Type.small, color: 'rgba(255,255,255,0.55)', fontStyle: 'italic',
+          marginTop: Spacing.lg, textAlign: 'center',
         }}>
         {finding.source}
       </Text>
@@ -367,42 +381,39 @@ function ResearchNote({ finding }: { finding: NonNullable<HomeResponse['research
   );
 }
 
-/**
- * Which colour a home card wears.
+/*
+ * There is no colour lookup here any more: the rows carry icons.
  *
- * ── WHY NOT AccentFor[card.id] ────────────────────────────────────────────
- * Because that never matches. Home card ids are what the priority engine calls
- * them, not registry keys: `finish-ex1`, `use-budget`, `revisit`,
- * `open-results`. AccentFor is keyed by exercise and catalogue key, so every
- * row fell through to the neutral and the whole column came out the same
- * brown. A colour that is always the same is worse than no colour: it looks
- * like it means something.
- *
- * The exercise key is on `app.exercise` when the card opens one. Otherwise it
- * is the part of the id after the verb, which is how `use-budget` finds the
- * budget colour. Anything else is genuinely not about one exercise, and gets
- * the neutral honestly.
+ * If one ever comes back, the trap it fell into first was AccentFor[card.id].
+ * Home card ids are what the priority engine calls them, `finish-ex1`,
+ * `use-budget`, `open-results`, and AccentFor is keyed by exercise and
+ * catalogue key, so every row fell through to the same neutral brown. A colour
+ * that is always the same is worse than no colour: it looks like it means
+ * something.
  */
-function accentForCard(card: HomeCard): string {
-  const fromRoute = card.app?.exercise;
-  const fromId = card.id.includes('-') ? card.id.slice(card.id.indexOf('-') + 1) : card.id;
-  return AccentFor[fromRoute || ''] || AccentFor[fromId] || AccentFallback;
-}
 
 /**
  * One row of the tile.
  *
- * The label is the row's reason for existing rather than a heading above a
- * group, because each of the three rows is here for a different reason and a
- * shared heading could not say all three.
+ * ── WHY AN ICON AND NO LABEL ──────────────────────────────────────────────
+ * Each row carried a small uppercase label saying why it was there: next for
+ * you, also waiting, pick up where you left off. Three labels above three
+ * titles is six lines of text in a tile whose whole job is to be glanceable,
+ * and the labels were the half nobody needed to read twice.
+ *
+ * A star, a checklist and a pencil say the same three things in the space of
+ * a dot. The icon is the label now, so the label is gone. If a fourth row ever
+ * needs a word to be legible, that row is the one that should not be here.
+ *
+ * SF Symbols rather than drawn glyphs: they are already how the tab bar is
+ * built, they respect Dynamic Type, and they are the platform's own.
  */
 function TileRow({
-  label, title, body, dot, disabled, first, onPress,
+  icon, title, body, disabled, first, onPress,
 }: {
-  label: string;
+  icon: string;
   title: string;
   body?: string | null;
-  dot: string;
   disabled?: boolean;
   first?: boolean;
   onPress: () => void;
@@ -417,12 +428,13 @@ function TileRow({
         flexDirection: 'row', alignItems: 'center', gap: Spacing.md,
         opacity: disabled ? 0.5 : 1,
       }}>
-      {/* The section's own colour as a dot. Same lookup the row's destination
-          uses, so a row and the screen it opens agree on what colour that
-          thing is. */}
-      <View style={{ width: 7, height: 7, borderRadius: 4, backgroundColor: dot }} />
+      <SymbolView
+        name={icon as never}
+        size={20}
+        tintColor={c.textMuted}
+        style={{ width: 22, height: 22 }}
+      />
       <View style={{ flex: 1 }}>
-        <Text style={{ ...Type.eyebrow, color: c.textMuted, marginBottom: 3 }}>{label}</Text>
         <Text style={{ ...Type.cardTitle, color: c.textStrong }}>{title}</Text>
         {body ? (
           <Text numberOfLines={1} style={{ ...Type.small, color: c.textMuted, marginTop: 2 }}>
