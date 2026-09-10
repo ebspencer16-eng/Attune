@@ -7407,7 +7407,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
           {/* 9. WHAT TO DO WITH THIS INFORMATION */}
           <div style={{ marginBottom: "1.25rem" }}>
             <div style={{ fontSize: "0.6rem", letterSpacing: "0.22em", textTransform: "uppercase", color: C.muted, fontFamily: BFONT, fontWeight: 700, marginBottom: "1rem" }}>
-              What to do with this information
+              Phrases to try
             </div>
             <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
               {ct.tips?.map((tip, i) => {

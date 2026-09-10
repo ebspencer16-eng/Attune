@@ -236,7 +236,13 @@ function withContent(results, viewer, contentVersion, pronouns = {}) {
         // never left the server.
         strengths: (type.strengths || []).map(role),
         stickingPoints: (type.stickingPoints || []).map(role),
-        tips: (type.tips || []).map((t) => ({ title: role(t.title), body: role(t.body) })),
+        // phraseTry was not forwarded, so the app could not draw the nested
+        // quote tile the website's couple-type tips end with no matter how it
+        // was written: the words never left the server.
+        tips: (type.tips || []).map((t) => ({
+          title: role(t.title), body: role(t.body),
+          phraseTry: t.phraseTry ? role(t.phraseTry) : null,
+        })),
       } : null,
       dimensions,
       names: { a: a?.name || null, b: b?.name || null },

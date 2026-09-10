@@ -66,6 +66,8 @@ for (const pair of [DIFFERENT, ALIKE]) {
     for (const [i, tip] of (t.tips || []).entries()) {
       assertClean(`${t.id}.tips[${i}].title (${label})`, tip.title, pair);
       assertClean(`${t.id}.tips[${i}].body (${label})`, tip.body, pair);
+      // Forwarded as of the couple-type tips work, so it has to resolve too.
+      assertClean(`${t.id}.tips[${i}].phraseTry (${label})`, tip.phraseTry, pair);
     }
   }
 }

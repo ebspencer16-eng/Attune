@@ -125,7 +125,9 @@ export type ResultsContent = {
     /** "What's worth being aware of". Same placeholders. */
     stickingPoints?: string[];
     /** "Phrase to try": a title and the words to say. */
-    tips?: { title: string; body: string }[];
+    tips?: { title: string; body: string   /** The quoted line, for the nested tile. */
+    phraseTry?: string | null;
+  }[];
   } | null;
   dimensions: ResultDimension[];
   names: { a: string | null; b: string | null };

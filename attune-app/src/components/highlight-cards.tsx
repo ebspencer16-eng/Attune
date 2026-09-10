@@ -43,6 +43,8 @@ import {
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
+import { captureRef } from 'react-native-view-shot';
+import * as Sharing from 'expo-sharing';
 
 import type { HighlightCard } from '@/api/client';
 import {
@@ -172,6 +174,34 @@ function Reel({
     pager.current?.scrollTo({ x: next * width, animated: true });
   };
 
+  /**
+   * Save the card on screen.
+   *
+   * One ref per card, so what is captured is the card that is showing rather
+   * than whichever one mounted last. Failures are swallowed on purpose: a
+   * share sheet the person dismissed is not an error, and neither is a device
+   * with no share targets, and putting an alert in front of either would be
+   * the app complaining about something nobody did wrong.
+   */
+  const shots = useRef<Record<number, React.RefObject<View | null>>>({});
+  const refFor = (i: number) => {
+    if (!shots.current[i]) shots.current[i] = { current: null };
+    return shots.current[i];
+  };
+  const [saving, setSaving] = useState(false);
+  const save = async () => {
+    const node = shots.current[index]?.current;
+    if (!node || saving) return;
+    setSaving(true);
+    try {
+      const uri = await captureRef(node, { format: 'png', quality: 1 });
+      if (await Sharing.isAvailableAsync()) {
+        await Sharing.shareAsync(uri, { mimeType: 'image/png', UTI: 'public.png' });
+      }
+    } catch { /* dismissed, or nowhere to share to. Neither is a failure. */ }
+    setSaving(false);
+  };
+
   const onScrollEnd = (e: NativeSyntheticEvent<NativeScrollEvent>) => {
     const i = Math.round(e.nativeEvent.contentOffset.x / Math.max(1, width));
     if (i !== index) setIndex(i);
@@ -248,7 +278,7 @@ function Reel({
             // someone decides the thing is broken.
             onPress={() => (i === cards.length - 1 ? onDone() : goTo(i + 1))}
             style={{ width, alignItems: 'center', justifyContent: 'flex-start' }}>
-            <Card card={card} onDone={onDone} w={cardW} h={cardH} active={i === index} />
+            <Card card={card} onDone={onDone} w={cardW} h={cardH} active={i === index} shotRef={refFor(i)} />
           </Pressable>
         ))}
       </ScrollView>
@@ -267,6 +297,31 @@ function Reel({
         <Round label="Previous" hidden={index === 0} onPress={() => goTo(index - 1)}>
           {'\u2039'}
         </Round>
+
+        {/* ── SAVE ────────────────────────────────────────────────────────
+            The website has a Download button on every card and its own copy
+            says "Download any to share or save". The app had none, so the one
+            thing these cards exist for was the one thing it could not do.
+
+            Captured from the card's own view rather than the screen, so the
+            image is the card and not the card plus a tab bar. It goes to the
+            share sheet, which is the platform's way to save to Photos, send
+            it, or put it in a message. */}
+        <Pressable
+          onPress={save}
+          disabled={saving}
+          accessibilityRole="button"
+          style={{
+            flexDirection: 'row', alignItems: 'center', gap: Spacing.xs,
+            paddingVertical: Spacing.sm, paddingHorizontal: Spacing.lg,
+            borderRadius: Radius.pill,
+            backgroundColor: `${WHITE}0.1)`, borderColor: `${WHITE}0.15)`, borderWidth: 1,
+            opacity: saving ? 0.5 : 1,
+          }}>
+          <Text style={{ ...Type.eyebrow, color: Palette.white }}>
+            {saving ? 'Saving' : 'Save'}
+          </Text>
+        </Pressable>
         <Round
           label={index === cards.length - 1 ? 'Full results' : 'Next'}
           onPress={() => (index === cards.length - 1 ? onDone() : goTo(index + 1))}>
@@ -298,8 +353,11 @@ function Round({
 }
 
 function Card({
-  card, onDone, w, h, active,
-}: { card: HighlightCard; onDone: () => void; w: number; h: number; active: boolean }) {
+  card, onDone, w, h, active, shotRef,
+}: {
+  card: HighlightCard; onDone: () => void; w: number; h: number; active: boolean;
+  shotRef?: React.RefObject<View | null>;
+}) {
   const tone = card.kind === 'couple-type'
     ? typeGround(card.accent)
     : TONES[card.tone] || TONES.night;
@@ -323,7 +381,7 @@ function Card({
   }));
 
   return (
-    <Animated.View style={[{ width: w, height: h }, anim]}>
+    <Animated.View ref={shotRef} collapsable={false} style={[{ width: w, height: h }, anim]}>
       <LinearGradient
         colors={tone}
         start={{ x: 0, y: 0 }}

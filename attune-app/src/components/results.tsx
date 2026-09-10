@@ -376,13 +376,13 @@ function SectionBody({
     );
   }
   if (section === 'comm-inner') {
-    return <Domain title="Internal Processing" accent={Palette.indigo} dims={byDomain.inner} tile={commsPlan?.tiles?.find((t) => t.domain === 'inner') ?? null} you={you} them={them} viewer={viewer} wideGap={wideGap} />;
+    return <Domain title="Internal Processing" accent={Palette.indigo} dims={byDomain.inner} tile={commsPlan?.tiles?.find((t) => t.domain === 'inner') ?? null} you={you} them={them} viewer={viewer} />;
   }
   if (section === 'comm-connection') {
-    return <Domain title="How You Connect" accent={SectionColor.communication} dims={byDomain.connection} tile={commsPlan?.tiles?.find((t) => t.domain === 'connection') ?? null} you={you} them={them} viewer={viewer} wideGap={wideGap} />;
+    return <Domain title="How You Connect" accent={SectionColor.communication} dims={byDomain.connection} tile={commsPlan?.tiles?.find((t) => t.domain === 'connection') ?? null} you={you} them={them} viewer={viewer} />;
   }
   if (section === 'comm-hard') {
-    return <Domain title="When Things Get Hard" accent={SectionColor.conflict} dims={byDomain.hard} tile={commsPlan?.tiles?.find((t) => t.domain === 'hard') ?? null} you={you} them={them} viewer={viewer} wideGap={wideGap} />;
+    return <Domain title="When Things Get Hard" accent={SectionColor.conflict} dims={byDomain.hard} tile={commsPlan?.tiles?.find((t) => t.domain === 'hard') ?? null} you={you} them={them} viewer={viewer} />;
   }
 
   if (section === 'exp-overview') {
@@ -463,7 +463,6 @@ function ExpectationsOverview({
     <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: ResultsBottomInset }}>
       <View style={{ paddingHorizontal: Spacing.xl, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center' }}>
         <Text style={{ ...Type.hero, color: c.textStrong }}>{you} & {them}</Text>
-        <Eyebrow>Results at a glance</Eyebrow>
 
         <View style={{ flexDirection: 'row', gap: Spacing.xl, marginTop: Spacing.md }}>
           <Text style={{ ...Type.body, color: c.textMuted }}>
@@ -543,7 +542,6 @@ function ExpectationsConversation({
   return (
     <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: ResultsBottomInset }}>
       <View style={{ paddingHorizontal: Spacing.xl, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center' }}>
-        <Eyebrow>Expectations</Eyebrow>
         <Text style={{ ...Type.title, color: c.textStrong }}>{bucket.label}</Text>
         <Text style={{ ...Type.body, color: c.textMuted, marginTop: Spacing.sm }}>
           {bucket.differences === 0
@@ -632,7 +630,6 @@ function IntimacyOverview({ data }: { data: IntimacyResults | null }) {
     <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: ResultsBottomInset }}>
       <View style={{ paddingHorizontal: Spacing.xl, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center' }}>
         <Text style={{ ...Type.hero, color: c.textStrong }}>Physical Intimacy Expectations</Text>
-        <Eyebrow>Results at a glance</Eyebrow>
 
         {/* block: intimacy-overview/where-you-each-land */}
         <Text style={{ ...Type.cardTitle, color: c.textStrong, marginTop: Spacing.xl, marginBottom: Spacing.md }}>
@@ -698,7 +695,6 @@ function IntimacyDimensionView({
   return (
     <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: ResultsBottomInset }}>
       <View style={{ paddingHorizontal: Spacing.xl, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center' }}>
-        <Eyebrow>Physical Intimacy</Eyebrow>
         <Text style={{ ...Type.title, color: c.textStrong }}>{dim.label}</Text>
         {dim.intro ? (
           <Text style={{ ...Type.body, color: c.textMuted, marginTop: Spacing.sm }}>{dim.intro}</Text>
@@ -778,7 +774,6 @@ function IntimacyConversations({ data }: { data: IntimacyResults | null }) {
   return (
     <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: ResultsBottomInset }}>
       <View style={{ paddingHorizontal: Spacing.xl, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center' }}>
-        <Eyebrow>Physical Intimacy</Eyebrow>
         <Text style={{ ...Type.title, color: c.textStrong }}>Conversations Worth Having</Text>
         <View style={{ marginTop: Spacing.lg, gap: Spacing.md }}>
           {data.conversations.map((d) => (
@@ -816,7 +811,6 @@ function ReflectionOverview({ data }: { data: ReflectionResults | null }) {
     <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: ResultsBottomInset }}>
       <View style={{ paddingHorizontal: Spacing.xl, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center' }}>
         <Text style={{ ...Type.hero, color: c.textStrong }}>Relationship Reflection</Text>
-        <Eyebrow>Results at a glance</Eyebrow>
 
           {/* block: reflection-overview/ratings */}
         <Text style={{ ...Type.cardTitle, color: c.textStrong, marginTop: Spacing.xl, marginBottom: Spacing.md }}>
@@ -949,7 +943,6 @@ function ReflectionRatings({ data }: { data: ReflectionResults | null }) {
   return (
     <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: ResultsBottomInset }}>
       <View style={{ paddingHorizontal: Spacing.xl, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center' }}>
-        <Eyebrow>Relationship Reflection</Eyebrow>
         <Text style={{ ...Type.title, color: c.textStrong }}>How You Each Rated</Text>
 
         <View style={{ marginTop: Spacing.md }}>
@@ -1012,7 +1005,6 @@ function ReflectionStory({ data }: { data: ReflectionResults | null }) {
   return (
     <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: ResultsBottomInset }}>
       <View style={{ paddingHorizontal: Spacing.xl, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center' }}>
-        <Eyebrow>Relationship Reflection</Eyebrow>
         <Text style={{ ...Type.title, color: c.textStrong }}>Side by Side</Text>
 
         {data.written.map((w) => (
@@ -1064,7 +1056,6 @@ function ReflectionPlan({
   return (
     <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: ResultsBottomInset }}>
       <View style={{ paddingHorizontal: Spacing.xl, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center' }}>
-        <Eyebrow>Relationship Reflection</Eyebrow>
         {/* block: reflection-overview/action-plan */}
         <Text style={{ ...Type.title, color: c.textStrong }}>Action Plan</Text>
 
@@ -1342,8 +1333,9 @@ function Glance({
           end={{ x: 1, y: 1 }}
           style={{ borderRadius: Radius.xl, padding: Spacing.xl }}>
           {/* block: comm-overview/couple-type-lead */}
-          <Text style={{ ...Type.eyebrow, color: 'rgba(255,255,255,0.6)' }}>You two are</Text>
-          <Text style={{ ...Type.hero, color: Palette.white, marginTop: Spacing.sm }}>
+          {/* No "You two are" over the type name. The name is a noun phrase
+              and reads as the answer on its own. */}
+          <Text style={{ ...Type.hero, color: Palette.white }}>
             {type?.name || 'Your results'}
           </Text>
           {type?.tagline ? (
@@ -1374,69 +1366,75 @@ function Glance({
               ))}
             </View>
           ) : null}
+          {/* ── YOUR ACTION PLAN ─────────────────────────────────────
+              One tile per domain, inside the panel and on the dark ground,
+              which is where the website has them. The app had them as white
+              cards below the panel, so the page broke into two halves that did
+              not look like one finding. */}
+          {plan?.tiles?.length ? (
+            <View style={{ marginTop: Spacing.xl }}>
+              <Text style={{ ...Type.eyebrow, color: 'rgba(255,255,255,0.75)', marginBottom: Spacing.sm }}>
+                Your action plan
+              </Text>
+              {/* block: comm-overview/action-tiles */}
+              {plan.tiles.map((tile) => (
+                <View
+                  key={tile.domain}
+                  style={{
+                    backgroundColor: 'rgba(255,255,255,0.13)',
+                    borderColor: `${tile.color}66`, borderWidth: 1,
+                    borderLeftColor: tile.color, borderLeftWidth: 4,
+                    borderRadius: Radius.md, padding: Spacing.lg, marginBottom: Spacing.sm,
+                  }}>
+                  <Text style={{ ...Type.eyebrow, color: 'rgba(255,255,255,0.95)' }}>{tile.label}</Text>
+                  {tile.title ? (
+                    <Text style={{ ...Type.small, fontWeight: '700', color: 'rgba(255,255,255,0.9)', marginTop: Spacing.xs }}>
+                      {tile.title}
+                    </Text>
+                  ) : null}
+                  {tile.body ? (
+                    <Text style={{ ...Type.small, color: 'rgba(255,255,255,0.6)', marginTop: Spacing.xs, lineHeight: 20 }}>
+                      {tile.body}
+                    </Text>
+                  ) : null}
+                </View>
+              ))}
+            </View>
+          ) : null}
+
+          {/* ── YOUR NEXT MOVES ──────────────────────────────────────
+              The website ends this panel with a strip inside it: a small
+              label, the protocol titles as a short bulleted list, then a line
+              saying how many more are in the action plan.
+
+              The app had this as three white cards below the panel, under a
+              label reading "This week", each carrying the protocol's body and
+              its this-week line. None of that is on the website's glance: the
+              bodies belong to the action plan, and "This week" is a heading
+              the app made up. Ellie had never seen it, which is the point. */}
+          {plan?.protocols?.length ? (
+            <View style={{ backgroundColor: 'rgba(255,255,255,0.05)', borderRadius: Radius.lg, padding: Spacing.lg, marginTop: Spacing.xl }}>
+              {/* block: comm-overview/protocols */}
+              <Text style={{ ...Type.eyebrow, color: 'rgba(255,255,255,0.4)', marginBottom: Spacing.sm }}>
+                Your next moves
+              </Text>
+              {plan.protocols.slice(0, COMMS_PROTOCOL_LIMIT).map((p) => (
+                <View key={p.title} style={{ flexDirection: 'row', alignItems: 'center', gap: Spacing.sm, marginBottom: Spacing.xs }}>
+                  <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: 'rgba(255,255,255,0.3)' }} />
+                  <Text style={{ ...Type.small, color: 'rgba(255,255,255,0.75)', fontWeight: '600', flex: 1 }}>
+                    {p.title}
+                  </Text>
+                </View>
+              ))}
+              {plan.protocols.length > COMMS_PROTOCOL_LIMIT ? (
+                <Text style={{ ...Type.small, fontSize: 11, color: 'rgba(255,255,255,0.3)', marginTop: Spacing.xs }}>
+                  + {plan.protocols.length - COMMS_PROTOCOL_LIMIT} more in your action plan
+                </Text>
+              ) : null}
+            </View>
+          ) : null}
         </LinearGradient>
       </View>
-    {/* The three action tiles, one per domain. From DIM_ACTION_ITEMS and
-        DOMAIN_ALIGNED, which the app could not reach until now: the
-        website's Communication overview ends here and the app's ended
-        with the gap list above. */}
-    {plan?.tiles?.length ? (
-      <View style={{ paddingHorizontal: Spacing.xl, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center', marginTop: Spacing.xxl }}>
-        {/* block: comm-overview/action-tiles */}
-        {plan.tiles.map((tile) => (
-          <View
-            key={tile.domain}
-            style={{
-              backgroundColor: c.surface, borderColor: c.border, borderWidth: 1,
-              borderLeftColor: tile.color, borderLeftWidth: 3,
-              borderRadius: Radius.lg, padding: Spacing.lg, marginBottom: Spacing.md,
-            }}>
-            <Text style={{ ...Type.eyebrow, color: tile.color }}>{tile.label}</Text>
-            {tile.title ? (
-              <Text style={{ ...Type.cardTitle, color: c.textStrong, marginTop: Spacing.xs }}>{tile.title}</Text>
-            ) : null}
-            {tile.body ? (
-              <Text style={{ ...Type.body, color: c.text, marginTop: Spacing.sm }}>{tile.body}</Text>
-            ) : null}
-            {tile.reflect ? (
-              <Text style={{ ...Type.small, color: c.textMuted, marginTop: Spacing.md }}>{tile.reflect}</Text>
-            ) : null}
-          </View>
-        ))}
-      </View>
-
-    ) : null}
-
-    {/* The protocols. The website caps this list at three, and the cap is
-        COMMS_PROTOCOL_LIMIT in src/App.jsx so both pages agree. The app was
-        receiving them and drawing none, so the website's Communication
-        overview ended with something to do this week and the app's ended with
-        the three tiles. */}
-    {plan?.protocols?.length ? (
-      <View style={{ paddingHorizontal: Spacing.xl, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center', marginTop: Spacing.xxl }}>
-        {/* block: comm-overview/protocols */}
-        <Text style={{ ...Type.eyebrow, color: c.accentQuiet, marginBottom: Spacing.sm }}>
-          This week
-        </Text>
-        {plan.protocols.slice(0, COMMS_PROTOCOL_LIMIT).map((p) => (
-          <View
-            key={p.title}
-            style={{
-              backgroundColor: c.surface, borderColor: c.border, borderWidth: 1,
-              borderRadius: Radius.lg, padding: Spacing.lg, marginBottom: Spacing.md,
-            }}>
-            <Text style={{ ...Type.cardTitle, color: c.textStrong }}>{p.title}</Text>
-            {p.body ? (
-              <Text style={{ ...Type.body, color: c.textMuted, marginTop: Spacing.sm }}>{p.body}</Text>
-            ) : null}
-            {p.thisWeek ? (
-              <Text style={{ ...Type.body, color: c.text, marginTop: Spacing.sm }}>{p.thisWeek}</Text>
-            ) : null}
-          </View>
-        ))}
-      </View>
-    ) : null}
-
     </ScrollView>
   );
 }
@@ -1492,13 +1490,21 @@ function CoupleType({ results, you, them }: { results: CoupleResults; you: strin
             What the two axes mean. The map without these is a picture: two
             dots in different corners and no way to know what the corners are.
             The copy is api/_axes.js, which the website reads too. */}
-        <View style={{ marginTop: results.content?.axes?.length ? Spacing.xl : 0, gap: Spacing.lg }}>
+        {/* Side by side, which is what Ellie asked for and what the website
+            does on a wide screen. The two are halves of one explanation and
+            reading them stacked means holding the first while you read the
+            second. Type steps down because a column is half the measure. */}
+        <View
+          style={{
+            flexDirection: 'row', alignItems: 'stretch', gap: 10,
+            marginTop: results.content?.axes?.length ? Spacing.xl : 0,
+          }}>
           {(results.content?.axes || []).map((ax) => (
-            <View key={ax.id} style={{ borderLeftColor: ax.color, borderLeftWidth: 3, paddingLeft: Spacing.md }}>
+            <View key={ax.id} style={{ flex: 1, borderLeftColor: ax.color, borderLeftWidth: 3, paddingLeft: Spacing.sm }}>
               <Text style={{ ...Type.eyebrow, color: ax.color, marginBottom: Spacing.xs }}>{ax.label}</Text>
-              <Text style={{ ...Type.body, color: c.text, marginBottom: Spacing.sm }}>{ax.desc}</Text>
+              <Text style={{ ...Type.small, color: c.text, marginBottom: Spacing.sm }}>{ax.desc}</Text>
               {ax.poles.map((pole, i) => (
-                <Text key={pole} style={{ ...Type.small, color: c.textMuted, marginBottom: 2 }}>
+                <Text key={pole} style={{ ...Type.small, fontSize: 12, lineHeight: 17, color: c.textMuted, marginBottom: 2 }}>
                   <Text style={{ color: ax.color, fontWeight: '700' }}>{i === 0 ? '\u2191 ' : '\u2193 '}</Text>
                   {pole}
                 </Text>
@@ -1597,20 +1603,55 @@ function CoupleType({ results, you, them }: { results: CoupleResults; you: strin
             Both problems were the same problem. It is copy the app was showing
             and the website was not. */}
 
+        {/* ── PHRASES TO TRY ───────────────────────────────────────────
+            The website's shape, tile for tile: a white card with a thick
+            coloured left edge, a bold title, the body, and the phrase itself
+            in a nested tile tinted to match that edge, italicised and in
+            quotation marks.
+
+            The app had the outer card and neither the edge nor the phrase.
+            The phrase was not in the payload at all, so no amount of styling
+            here would have produced it.
+
+            The three colours cycle the way the website cycles them: the
+            couple's own colour, then indigo, then green. */}
         {type.tips?.length ? (
           <View style={{ marginTop: Spacing.xl }}>
             <Text style={{ ...Type.eyebrow, color: accent, marginBottom: Spacing.sm }}>
               {/* block: couple-type/tips */}
-              Phrase to try
+              Phrases to try
             </Text>
-            {type.tips.map((tip) => (
-              <View key={tip.title} style={{ ...card(), marginBottom: Spacing.sm }}>
-                <Text style={{ ...Type.cardTitle, color: c.textStrong, marginBottom: Spacing.xs }}>
-                  {interp(tip.title, you, them)}
-                </Text>
-                <Text style={{ ...Type.body, color: c.textMuted }}>{interp(tip.body, you, them)}</Text>
-              </View>
-            ))}
+            {type.tips.map((tip, i) => {
+              const tipColor = [accent, Palette.indigo, '#10b981'][i % 3];
+              return (
+                <View
+                  key={tip.title}
+                  style={{
+                    ...card(), marginBottom: Spacing.sm,
+                    borderLeftColor: tipColor, borderLeftWidth: 4,
+                  }}>
+                  <Text style={{ ...Type.cardTitle, color: c.textStrong, marginBottom: Spacing.xs }}>
+                    {interp(tip.title, you, them)}
+                  </Text>
+                  <Text style={{ ...Type.body, color: c.textMuted }}>{interp(tip.body, you, them)}</Text>
+                  {tip.phraseTry ? (
+                    <View
+                      style={{
+                        marginTop: Spacing.md, borderRadius: Radius.sm,
+                        backgroundColor: `${tipColor}0D`, borderColor: `${tipColor}30`, borderWidth: 1,
+                        paddingVertical: Spacing.sm, paddingHorizontal: Spacing.md,
+                      }}>
+                      <Text style={{ ...Type.eyebrow, fontSize: 9, color: tipColor, marginBottom: Spacing.xs }}>
+                        Phrase to try
+                      </Text>
+                      <Text style={{ ...Type.body, fontStyle: 'italic', color: c.text }}>
+                        {`\u201C${interp(tip.phraseTry, you, them)}\u201D`}
+                      </Text>
+                    </View>
+                  ) : null}
+                </View>
+              );
+            })}
           </View>
         ) : null}
       </View>
@@ -1620,24 +1661,51 @@ function CoupleType({ results, you, them }: { results: CoupleResults; you: strin
 
 /** One Communication domain: every dimension in it, both partners on each. */
 function Domain({
-  title, accent, dims, you, them, viewer, wideGap, tile = null,
+  title, accent, dims, you, them, viewer, tile = null,
 }: {
   title: string; accent: string; dims: ResultDimension[];
-  you: string; them: string; viewer: 'a' | 'b'; wideGap: number | null;
+  you: string; them: string; viewer: 'a' | 'b';
   tile?: CommsPlan['tiles'][number] | null;
 }) {
   return (
     <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: ResultsBottomInset }}>
       <View style={{ paddingHorizontal: Spacing.xl, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center' }}>
-        <Text style={{ ...Type.eyebrow, color: accent }}>Communication</Text>
-        <Text style={{ ...Type.title, color: c.textStrong, marginTop: Spacing.xs, marginBottom: Spacing.lg }}>
+        {/* No exercise-name eyebrow. "Communication" over a page already
+            reached from a tab called Comms is a label on a label, and Ellie has
+            asked for these off the detail pages twice. */}
+        <Text style={{ ...Type.title, color: c.textStrong, marginBottom: Spacing.lg }}>
           {title}
         </Text>
-        <Legend you={you} them={them} />
-        {/* block: comm-domain/dimensions */}
-        {dims.map((d) => (
-          <DimensionRow key={d.key} dim={d} you={you} them={them} viewer={viewer} wideGap={wideGap} expanded />
-        ))}
+
+        {/* ── ONE PANEL, ONE ROW PER DIMENSION ─────────────────────────
+            The website puts every dimension in this domain inside a single
+            "Overall orientation" panel. The app drew a bordered card each,
+            with a paragraph inside it, so three dimensions read as three
+            findings and the page was three times the height for the same
+            information.
+
+            The paragraph is gone rather than moved. It was dim.shift or
+            dim.aligned, which the website does not print on this page at all. */}
+        <View style={{ ...card(), padding: Spacing.lg }}>
+          <Text style={{ ...Type.eyebrow, color: accent, marginBottom: Spacing.md }}>
+            Overall orientation
+          </Text>
+          {/* block: comm-domain/dimensions */}
+          <View style={{ gap: Spacing.xs }}>
+            {dims.map((d) => (
+              <SliderRow
+                key={d.key}
+                label={d.label}
+                left={d.left || ''}
+                right={d.right || ''}
+                you={unit(viewer === 'a' ? d.a : d.b)}
+                them={unit(viewer === 'a' ? d.b : d.a)}
+                youName={you}
+                themName={them}
+              />
+            ))}
+          </View>
+        </View>
 
         {/* The domain's one instruction. The website has ended these pages
             with it for as long as they have existed and the app ended with the
@@ -1738,6 +1806,121 @@ function DimensionRow({
           {dim.shift || dim.aligned}
         </Text>
       ) : null}
+    </View>
+  );
+}
+
+/**
+ * A dimension track with both partners on it.
+ *
+ * ── THIS IS THE WEBSITE'S DimTrackViz, PORTED EXACTLY ─────────────────────
+ * Every number here is the website's, because the placement rule is the whole
+ * point of the chart and two products cannot round it differently.
+ *
+ *   position   ((score - 1) / 4) as a fraction of the track
+ *   close      the two are within 8 percentage points of each other
+ *   stagger    when close, one dot lifts 11 points and the other drops 11,
+ *              whichever is further left going up. Without it two people who
+ *              nearly agree print on top of each other and the page says they
+ *              answered the same thing.
+ *   margin     symmetric, and the same whether or not the dots are staggered,
+ *              so rows in a tile are all the same height
+ *   initials   hidden when both partners' first initials are the same letter,
+ *              because two dots both saying E resolve nothing. A name key
+ *              appears underneath only in that case.
+ *
+ * The colours are fixed: the reader is orange and the partner is blue, on
+ * every chart in the product.
+ */
+/** A 1..5 score as a position on the track. Null stays null: an unanswered
+ *  dimension is left off rather than defaulted to the middle, which would read
+ *  as a real answer. */
+function unit(v: number | null | undefined) {
+  return v == null ? null : Math.max(0, Math.min(1, (v - 1) / 4));
+}
+
+const CLOSE_PCT = 8;
+const STAGGER = 11;
+
+function Slider({
+  you, them, youName, themName,
+}: {
+  you: number | null; them: number | null; youName: string; themName: string;
+}) {
+  const yPct = you == null ? null : Math.max(0, Math.min(1, you)) * 100;
+  const tPct = them == null ? null : Math.max(0, Math.min(1, them)) * 100;
+  const close = yPct != null && tPct != null && Math.abs(yPct - tPct) < CLOSE_PCT;
+  const youIsLeft = (yPct ?? 0) <= (tPct ?? 0);
+  const yDy = close ? (youIsLeft ? -STAGGER : STAGGER) : 0;
+  const tDy = close ? (youIsLeft ? STAGGER : -STAGGER) : 0;
+  const same = initial(youName) === initial(themName);
+
+  return (
+    <View>
+      <View style={{ height: 5, borderRadius: 3, backgroundColor: c.border, marginVertical: 15 }}>
+        {tPct != null ? <Dot pct={tPct} dy={tDy} color={THEM_COLOR} label={same ? '' : initial(themName)} /> : null}
+        {yPct != null ? <Dot pct={yPct} dy={yDy} color={YOU_COLOR} label={same ? '' : initial(youName)} /> : null}
+      </View>
+      {same ? (
+        <View style={{ flexDirection: 'row', justifyContent: 'center', gap: Spacing.lg, marginTop: Spacing.xs }}>
+          {(youIsLeft
+            ? [[youName, YOU_COLOR], [themName, THEM_COLOR]]
+            : [[themName, THEM_COLOR], [youName, YOU_COLOR]]
+          ).map(([name, colour]) => (
+            <View key={name} style={{ flexDirection: 'row', alignItems: 'center', gap: Spacing.xs }}>
+              <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: colour }} />
+              <Text style={{ ...Type.small, fontSize: 11, color: c.textMuted }}>{name}</Text>
+            </View>
+          ))}
+        </View>
+      ) : null}
+    </View>
+  );
+}
+
+function Dot({ pct, dy, color, label }: { pct: number; dy: number; color: string; label: string }) {
+  const SIZE = 22;
+  return (
+    <View
+      style={{
+        position: 'absolute', left: `${pct}%`,
+        marginLeft: -SIZE / 2, top: (5 - SIZE) / 2 + dy,
+        width: SIZE, height: SIZE, borderRadius: SIZE / 2,
+        backgroundColor: color, borderColor: Palette.white, borderWidth: 2.5,
+        alignItems: 'center', justifyContent: 'center',
+      }}>
+      {label ? (
+        <Text style={{ fontSize: 9, lineHeight: 11, fontWeight: '700', color: Palette.white }}>{label}</Text>
+      ) : null}
+    </View>
+  );
+}
+
+/**
+ * One dimension: its name, then the track with a pole word either side.
+ *
+ * The poles sit beside the bar rather than under it, which is what the website
+ * does and why a dimension costs one row there instead of three.
+ */
+function SliderRow({
+  label, left, right, you, them, youName, themName,
+}: {
+  label: string; left: string; right: string;
+  you: number | null; them: number | null; youName: string; themName: string;
+}) {
+  const pole = { ...Type.small, fontSize: 11, fontWeight: '600' as const, color: c.textMuted, width: 68 };
+  return (
+    <View>
+      <Text style={{ ...Type.small, fontWeight: '700', color: c.textStrong }}>{label}</Text>
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: Spacing.sm }}>
+        <Text style={{ ...pole, textAlign: 'right' }}>{left}</Text>
+        {/* Inset so a dot at either extreme clears the pole word instead of
+            printing on it. */}
+        <View style={{ flex: 1, paddingHorizontal: 13 }}>
+          <Slider you={you} them={them} youName={youName} themName={themName} />
+        </View>
+        <Text style={pole}>{right}</Text>
+      </View>
     </View>
   );
 }

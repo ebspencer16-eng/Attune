@@ -144,10 +144,13 @@
 
   /* RECENT POSTS */
   .posts-section{margin-bottom:5rem}
-  /* Three across, always. Six posts is two rows of three, and the
-     breakpoints that dropped it to two and then one turned that into three
-     rows of very wide tiles on a narrow window. */
+  /* Three across on anything with room, two on a phone.
+     It used to drop to two under 900 and one under 640, which turned six
+     posts into three rows of very wide tiles on a narrow desktop window.
+     Three holds down to tablet; below 640 a third of the width is about 110
+     points and a title runs to five lines, so the phone gets two. */
   .posts-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--s-lg)}
+  @media(max-width:640px){.posts-grid{grid-template-columns:repeat(2,1fr);gap:var(--s-md)}}
   .post-card{background:white;border:1.5px solid var(--stone);border-radius:16px;overflow:hidden;text-decoration:none;display:flex;flex-direction:column;transition:transform .18s,box-shadow .18s,border-color .18s;box-shadow:0 1px 4px rgba(14,11,7,.06)}
   .post-card:hover{border-color:var(--clay)}
     /* The coloured strip on top of every post card is gone. Six cards in a
