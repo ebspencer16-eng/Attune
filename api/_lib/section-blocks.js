@@ -145,8 +145,10 @@ export const SECTION_BLOCKS = {
   ],
 
   'comm-domain': [
+    { id: 'intro', note: 'The paragraph the page opens with, from api/_lib/comm-domains.js.' },
     { id: 'dimensions', note: 'Every dimension in this domain, both partners.' },
     { id: 'action-tile', note: 'The domain\'s one instruction, labelled "One thing to try".' },
+    { id: 'side-by-side', note: 'Every question in the domain behind a disclosure, both answers and both cross-views.' },
   ],
 
   /**
@@ -177,7 +179,10 @@ export const SECTION_BLOCKS = {
     { id: 'couple-type-lead', note: 'The type, restated as the lead of the panel.' },
     { id: 'where-you-each-land', note: 'Every dimension, both partners, one panel.' },
     { id: 'action-tiles', note: 'One per domain. No label: the domain is named above.' },
-    { id: 'protocols', optional: true, note: 'Up to three things to try this week.' },
+    // No protocols block. The glance carried a "Your next moves" strip that
+    // restated three protocol titles the action plan already lists in full,
+    // under a heading nobody wrote. Removed from both surfaces rather than
+    // matched. The protocol copy itself is still used, on What Comes Next.
   ],
 
   'couple-type': [

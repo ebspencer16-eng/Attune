@@ -378,14 +378,28 @@ function SectionBody({
       />
     );
   }
-  if (section === 'comm-inner') {
-    return <Domain title="Internal Processing" accent={Palette.indigo} dims={byDomain.inner} tile={commsPlan?.tiles?.find((t) => t.domain === 'inner') ?? null} you={you} them={them} viewer={viewer} />;
-  }
-  if (section === 'comm-connection') {
-    return <Domain title="How You Connect" accent={SectionColor.communication} dims={byDomain.connection} tile={commsPlan?.tiles?.find((t) => t.domain === 'connection') ?? null} you={you} them={them} viewer={viewer} />;
-  }
-  if (section === 'comm-hard') {
-    return <Domain title="When Things Get Hard" accent={SectionColor.conflict} dims={byDomain.hard} tile={commsPlan?.tiles?.find((t) => t.domain === 'hard') ?? null} you={you} them={them} viewer={viewer} />;
+  // The three domain pages, all from the server's own list: its label, its
+  // colour, its opening paragraph and the gradient the website paints it. The
+  // app used to hard-code the first three and have none of the last two.
+  const DOMAIN_SECTION: Record<string, 'inner' | 'connection' | 'hard'> = {
+    'comm-inner': 'inner', 'comm-connection': 'connection', 'comm-hard': 'hard',
+  };
+  const domainId = DOMAIN_SECTION[section];
+  if (domainId) {
+    const d = results.content?.commDomains?.find((x) => x.id === domainId) ?? null;
+    return (
+      <Domain
+        title={d?.label || ''}
+        accent={d?.color || c.accent}
+        dims={byDomain[domainId]}
+        tile={commsPlan?.tiles?.find((t) => t.domain === domainId) ?? null}
+        domain={d}
+        responses={results.content?.commResponses ?? []}
+        you={you}
+        them={them}
+        viewer={viewer}
+      />
+    );
   }
 
   if (section === 'exp-overview') {
@@ -1407,37 +1421,6 @@ function Glance({
             </View>
           ) : null}
 
-          {/* ── YOUR NEXT MOVES ──────────────────────────────────────
-              The website ends this panel with a strip inside it: a small
-              label, the protocol titles as a short bulleted list, then a line
-              saying how many more are in the action plan.
-
-              The app had this as three white cards below the panel, under a
-              label reading "This week", each carrying the protocol's body and
-              its this-week line. None of that is on the website's glance: the
-              bodies belong to the action plan, and "This week" is a heading
-              the app made up. Ellie had never seen it, which is the point. */}
-          {plan?.protocols?.length ? (
-            <View style={{ backgroundColor: 'rgba(255,255,255,0.05)', borderRadius: Radius.lg, padding: Spacing.lg, marginTop: Spacing.xl }}>
-              {/* block: comm-overview/protocols */}
-              <Text style={{ ...Type.eyebrow, color: 'rgba(255,255,255,0.4)', marginBottom: Spacing.sm }}>
-                Your next moves
-              </Text>
-              {plan.protocols.slice(0, COMMS_PROTOCOL_LIMIT).map((p) => (
-                <View key={p.title} style={{ flexDirection: 'row', alignItems: 'center', gap: Spacing.sm, marginBottom: Spacing.xs }}>
-                  <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: 'rgba(255,255,255,0.3)' }} />
-                  <Text style={{ ...Type.small, color: 'rgba(255,255,255,0.75)', fontWeight: '600', flex: 1 }}>
-                    {p.title}
-                  </Text>
-                </View>
-              ))}
-              {plan.protocols.length > COMMS_PROTOCOL_LIMIT ? (
-                <Text style={{ ...Type.small, fontSize: 11, color: 'rgba(255,255,255,0.3)', marginTop: Spacing.xs }}>
-                  + {plan.protocols.length - COMMS_PROTOCOL_LIMIT} more in your action plan
-                </Text>
-              ) : null}
-            </View>
-          ) : null}
         </LinearGradient>
       </View>
     </ScrollView>
@@ -1635,10 +1618,12 @@ function CoupleType({ results, you, them }: { results: CoupleResults; you: strin
                     ...card(), marginBottom: Spacing.sm,
                     borderLeftColor: tipColor, borderLeftWidth: 4,
                   }}>
-                  <Text style={{ ...Type.cardTitle, color: c.textStrong, marginBottom: Spacing.xs }}>
+                  {/* Title and phrase only. The paragraph between them was
+                      the part nobody needed: the title says what to do and the
+                      phrase shows how. Gone from both surfaces. */}
+                  <Text style={{ ...Type.cardTitle, color: c.textStrong }}>
                     {interp(tip.title, you, them)}
                   </Text>
-                  <Text style={{ ...Type.body, color: c.textMuted }}>{interp(tip.body, you, them)}</Text>
                   {tip.phraseTry ? (
                     <View
                       style={{
@@ -1666,150 +1651,298 @@ function CoupleType({ results, you, them }: { results: CoupleResults; you: strin
 
 /** One Communication domain: every dimension in it, both partners on each. */
 function Domain({
-  title, accent, dims, you, them, viewer, tile = null,
+  title, accent, dims, you, them, viewer, tile = null, domain = null, responses = [],
 }: {
   title: string; accent: string; dims: ResultDimension[];
   you: string; them: string; viewer: 'a' | 'b';
   tile?: CommsPlan['tiles'][number] | null;
+  domain?: { label: string; color: string; prose: string; ground: string[] } | null;
+  responses?: SbsRow[];
 }) {
+  const ground = (domain?.ground?.length === 3
+    ? domain.ground
+    : ['#5B21B6dd', '#5B21B699', '#22204a']) as [string, string, string];
+
   return (
-    <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: ResultsBottomInset }}>
-      <View style={{ paddingHorizontal: Spacing.xl, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center' }}>
-        {/* No exercise-name eyebrow. "Communication" over a page already
-            reached from a tab called Comms is a label on a label, and Ellie has
-            asked for these off the detail pages twice. */}
-        <Text style={{ ...Type.title, color: c.textStrong, marginBottom: Spacing.lg }}>
-          {title}
-        </Text>
+    /* ── THE PAGE IS DARK, LIKE THE WEBSITE'S ──────────────────────────
+       Every Communication detail page on the site is a gradient tinted to its
+       domain: purple for internal processing, orange for how you connect, blue
+       for when things get hard. The app drew all three on cream, so the two
+       products did not look like the same product on the pages a couple spends
+       the most time in.
 
-        {/* ── ONE PANEL, ONE ROW PER DIMENSION ─────────────────────────
-            The website puts every dimension in this domain inside a single
-            "Overall orientation" panel. The app drew a bordered card each,
-            with a paragraph inside it, so three dimensions read as three
-            findings and the page was three times the height for the same
-            information.
-
-            The paragraph is gone rather than moved. It was dim.shift or
-            dim.aligned, which the website does not print on this page at all. */}
-        <View style={{ ...card(), padding: Spacing.lg }}>
-          <Text style={{ ...Type.eyebrow, color: accent, marginBottom: Spacing.md }}>
-            Overall orientation
+       The stops come from the server, from api/_lib/comm-domains.js, which the
+       website builds its own gradient from. Neither surface holds the colour. */
+    <View style={{ flex: 1 }}>
+      <LinearGradient
+        colors={ground}
+        start={{ x: 0.1, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
+      />
+      <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: ResultsBottomInset }}>
+        <View style={{ paddingHorizontal: Spacing.xl, paddingTop: Spacing.md, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center' }}>
+          {/* No exercise-name eyebrow. "Communication" over a page already
+              reached from a tab called Comms is a label on a label. */}
+          <Text style={{ ...Type.title, color: Palette.white, marginBottom: Spacing.md }}>
+            {title}
           </Text>
-          {/* block: comm-domain/dimensions */}
-          <View style={{ gap: Spacing.xs }}>
-            {dims.map((d) => (
-              <SliderRow
-                key={d.key}
-                label={d.label}
-                left={d.left || ''}
-                right={d.right || ''}
-                you={unit(viewer === 'a' ? d.a : d.b)}
-                them={unit(viewer === 'a' ? d.b : d.a)}
-                youName={you}
-                themName={them}
-              />
-            ))}
-          </View>
-        </View>
 
-        {/* The domain's one instruction. The website has ended these pages
-            with it for as long as they have existed and the app ended with the
-            dimension list, so the app was missing the only thing on the page
-            that tells a couple what to do.
+          {/* The paragraph the website opens every domain page with. The app
+              had none, because the words were inline in src/App.jsx and had
+              never been anywhere it could read them. */}
+          {/* block: comm-domain/intro */}
+          {domain?.prose ? (
+            <Text style={{ ...Type.body, color: 'rgba(255,255,255,0.75)', lineHeight: 25, marginBottom: Spacing.xl }}>
+              {domain.prose}
+            </Text>
+          ) : null}
 
-            The label stays here and is dropped on Results at a glance. On a
-            detail page this tile is the page's single instruction and the
-            words say which kind it is. On the glance the domain is named above
-            it and there are three of them at once. */}
-        {tile?.body ? (
+          {/* ── ONE PANEL, ONE ROW PER DIMENSION ───────────────────────
+              The website's "Overall orientation" panel. The app drew a
+              bordered card per dimension with a paragraph inside, so three
+              dimensions read as three findings at three times the height. */}
           <View
             style={{
-              marginTop: Spacing.xl, backgroundColor: c.surface,
-              borderColor: c.border, borderWidth: 1,
+              backgroundColor: 'rgba(255,255,255,0.10)',
+              borderColor: 'rgba(255,255,255,0.16)', borderWidth: 1,
               borderRadius: Radius.lg, padding: Spacing.lg,
             }}>
-            <View style={{ flexDirection: 'row', alignItems: 'baseline', justifyContent: 'space-between', gap: Spacing.md }}>
-              {/* block: comm-domain/action-tile */}
-              <Text style={{ ...Type.eyebrow, color: accent }}>One thing to try</Text>
-              {tile.dimLabel ? (
-                <Text style={{ ...Type.small, color: c.textMuted }}>{tile.dimLabel}</Text>
-              ) : null}
+            <Text style={{ ...Type.eyebrow, color: 'rgba(255,255,255,0.9)', marginBottom: Spacing.md }}>
+              Overall orientation
+            </Text>
+            {/* block: comm-domain/dimensions */}
+            <View style={{ gap: Spacing.xs }}>
+              {dims.map((d) => (
+                <SliderRow
+                  key={d.key}
+                  label={d.label}
+                  left={d.left || ''}
+                  right={d.right || ''}
+                  you={unit(viewer === 'a' ? d.a : d.b)}
+                  them={unit(viewer === 'a' ? d.b : d.a)}
+                  youName={you}
+                  themName={them}
+                  onDark
+                />
+              ))}
             </View>
-            <Text style={{ ...Type.body, color: c.text, marginTop: Spacing.sm }}>{tile.body}</Text>
-            {tile.reflect ? (
-              <Text style={{ ...Type.small, color: c.textMuted, marginTop: Spacing.md }}>{tile.reflect}</Text>
-            ) : null}
           </View>
-        ) : null}
-      </View>
-    </ScrollView>
+
+          {/* The domain's one instruction, which the website ends these pages
+              with. No dimension name in the corner: the tile is the page's one
+              instruction and the page already says which domain it is. */}
+          {tile?.body ? (
+            <View
+              style={{
+                marginTop: Spacing.xl,
+                backgroundColor: 'rgba(255,255,255,0.10)',
+                borderColor: 'rgba(255,255,255,0.2)', borderWidth: 1,
+                borderLeftColor: accent, borderLeftWidth: 4,
+                borderRadius: Radius.lg, padding: Spacing.lg,
+              }}>
+              {/* block: comm-domain/action-tile */}
+              <Text style={{ ...Type.eyebrow, color: 'rgba(255,255,255,0.9)' }}>One thing to try</Text>
+              <Text style={{ ...Type.body, color: 'rgba(255,255,255,0.88)', marginTop: Spacing.sm, lineHeight: 24 }}>
+                {tile.body}
+              </Text>
+            </View>
+          ) : null}
+
+          {/* block: comm-domain/side-by-side */}
+          <SideBySide dims={dims} you={you} them={them} viewer={viewer} label={title} rows={responses} />
+        </View>
+      </ScrollView>
+    </View>
   );
 }
 
 /**
- * One dimension, with both partners placed on it.
+ * The side-by-side dropdown: every question, both answers, both cross-views.
  *
- * A shared track rather than two bars. The subject is the distance between two
- * people, and two separate bars make that something you have to work out by
- * comparing lengths. One line with two marks on it shows it directly.
+ * ── WHAT IT MIRRORS ───────────────────────────────────────────────────────
+ * The website's SideBySideResponses, which every Communication detail page
+ * ends with behind a disclosure. Ellie called this the most important missing
+ * piece and she is right: the scores say where the two of you landed, and this
+ * is the only place that shows what you each actually answered.
  *
- * Neither end is better than the other, so the track carries no direction and
- * no colour gradient implying one side is the good side.
+ * Four dots per question. The two large ones are what each partner said about
+ * themselves. The two small ones are the cross-view reads: what each guessed
+ * about the other.
+ *
+ * ── WHOSE COLOUR A DOT WEARS ──────────────────────────────────────────────
+ * The person the dot is ABOUT, not the person who answered. "How your partner
+ * sees you" is your colour and sits beside your own dot, which is what makes
+ * the pair readable as agreement or a misread. The server names the fields
+ * readOfYou and readOfThem so this cannot be got backwards here.
+ *
+ * ── THE STACKING ──────────────────────────────────────────────────────────
+ * The website's rule, exactly: every dot claims a position, and a dot landing
+ * within 7 per cent of one already placed steps down 11 points until it finds
+ * a free row. Self dots are placed first and keep their close-together offset,
+ * so a cross-view read moves rather than displacing the answer it describes.
+ * Without it a read landing on another dot vanishes underneath and looks like
+ * missing data.
  */
-function DimensionRow({
-  dim, you, them, viewer, wideGap, expanded,
+const SBS_NEAR = 7;
+const SBS_STEP = 11;
+
+function SideBySide({
+  dims, you, them, viewer, label, rows,
 }: {
-  dim: ResultDimension; you: string; them: string;
-  viewer: 'a' | 'b'; wideGap: number | null; expanded?: boolean;
+  dims: ResultDimension[]; you: string; them: string; viewer: 'a' | 'b';
+  label: string; rows?: CoupleResults['content'] extends never ? never : SbsRow[];
 }) {
-  // Scores are 1 to 5. Null means the person did not answer enough of it, and
-  // an unanswered dimension is left off the track rather than defaulted to the
-  // middle, which would read as a real answer.
-  const pos = (v: number | null) => (v == null ? null : Math.max(0, Math.min(1, (v - 1) / 4)));
-  // dim.a and dim.b follow the stored order, not the reader. Resolve to yours
-  // and theirs before drawing, or the two marks land on each other's values.
-  const pYou = pos(viewer === 'a' ? dim.a : dim.b);
-  const pThem = pos(viewer === 'a' ? dim.b : dim.a);
+  const [open, setOpen] = useState(false);
+  const keys = new Set(dims.map((d) => d.key));
+  const qs = (rows || []).filter((r) => keys.has(r.dimension));
+  if (!qs.length) return null;
+
+  const uInit = initial(you);
+  const pInit = initial(them);
+  const same = uInit === pInit;
+  const U = YOU_COLOR;
+  const P = '#6C7FFF';
 
   return (
-    <View style={{ ...card(), marginBottom: Spacing.md }}>
-      <Text style={{ ...Type.cardTitle, color: c.textStrong }}>{dim.label}</Text>
-
-      {pYou == null && pThem == null ? (
-        <Text style={{ ...Type.small, color: c.textMuted, marginTop: Spacing.sm }}>
-          Not enough answers to place this one.
+    <View
+      style={{
+        marginTop: Spacing.xl, borderRadius: Radius.lg,
+        backgroundColor: 'rgba(255,255,255,0.05)',
+        borderColor: 'rgba(255,255,255,0.14)', borderWidth: 1,
+        overflow: 'hidden',
+      }}>
+      <Pressable
+        onPress={() => setOpen((v) => !v)}
+        accessibilityRole="button"
+        style={{
+          flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
+          paddingVertical: Spacing.lg, paddingHorizontal: Spacing.lg,
+        }}>
+        <Text style={{ ...Type.eyebrow, color: 'rgba(255,255,255,0.85)', flex: 1 }}>
+          {`Side by side ${label.toLowerCase()} responses`}
         </Text>
-      ) : (
-        <>
-          <View style={{ marginTop: Spacing.lg, marginBottom: Spacing.sm }}>
-            {/* The track */}
-            <View style={{ height: 4, borderRadius: Radius.pill, backgroundColor: c.border }} />
-            {/* Two marks on it. Offset by half their width so the centre of the
-                dot sits on the value rather than its left edge. */}
-            {pYou != null ? <Marker left={pYou} color={YOU_COLOR} label={initial(you)} /> : null}
-            {pThem != null ? <Marker left={pThem} color={THEM_COLOR} label={initial(them)} /> : null}
+        <Text style={{ color: 'rgba(255,255,255,0.6)', fontSize: 14 }}>{open ? '\u25B4' : '\u25BE'}</Text>
+      </Pressable>
+
+      {open ? (
+        <View style={{ paddingHorizontal: Spacing.lg, paddingBottom: Spacing.lg }}>
+          {/* The small dots carry no initial, so this is the only thing naming
+              them. */}
+          <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.md, marginBottom: Spacing.lg }}>
+            {[
+              { size: 14, color: U, text: `${you}'s responses`, ini: same ? '' : uInit },
+              { size: 14, color: P, text: `${them}'s responses`, ini: same ? '' : pInit },
+              { size: 9, color: U, text: `How ${them} views ${you}`, ini: '' },
+              { size: 9, color: P, text: `How ${you} views ${them}`, ini: '' },
+            ].map((it) => (
+              <View key={it.text} style={{ flexDirection: 'row', alignItems: 'center', gap: Spacing.xs }}>
+                <View
+                  style={{
+                    width: it.size, height: it.size, borderRadius: it.size / 2,
+                    backgroundColor: it.color, alignItems: 'center', justifyContent: 'center',
+                  }}>
+                  {it.ini ? (
+                    <Text style={{ fontSize: 7, fontWeight: '800', color: Palette.white }}>{it.ini}</Text>
+                  ) : null}
+                </View>
+                <Text style={{ ...Type.small, fontSize: 11, color: 'rgba(255,255,255,0.7)' }}>{it.text}</Text>
+              </View>
+            ))}
           </View>
 
-          <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: Spacing.lg }}>
-            <Text style={{ ...Type.small, color: c.textMuted }}>{dim.left}</Text>
-            <Text style={{ ...Type.small, color: c.textMuted }}>{dim.right}</Text>
+          <View style={{ gap: Spacing.xl }}>
+            {qs.map((q) => (
+              <SbsQuestion
+                key={q.id}
+                row={q}
+                uInit={same ? '' : uInit}
+                pInit={same ? '' : pInit}
+                U={U}
+                P={P}
+              />
+            ))}
           </View>
-        </>
-      )}
+        </View>
+      ) : null}
+    </View>
+  );
+}
 
-      {/* Wide or not, using the server's own threshold. The app used to carry
-          its own numbers here, which is a second copy of the rule that decides
-          what a couple is told about their results. Nothing is said at all when
-          the server has not sent one. */}
-      {/* The website's own words for this dimension, from the server.
-          This used to be a sentence written here, "One of your wider
-          differences", which appears nowhere on the site. Nothing about a
-          couple should be asserted in the app that the product has not
-          already said in their results. */}
-      {expanded && (dim.shift || dim.aligned) ? (
-        <Text style={{ ...Type.body, color: c.text, marginTop: Spacing.md }}>
-          {dim.shift || dim.aligned}
-        </Text>
+type SbsRow = {
+  id: string; dimension: string; text: string; left: string; right: string;
+  you: number | null; them: number | null;
+  readOfYou: number | null; readOfThem: number | null;
+};
+
+function SbsQuestion({
+  row, uInit, pInit, U, P,
+}: { row: SbsRow; uInit: string; pInit: string; U: string; P: string }) {
+  const pct = (v: number | null) =>
+    (v == null ? null : Math.max(3, Math.min(97, ((v - 1) / 4) * 100)));
+  const pYou = pct(row.you);
+  const pThem = pct(row.them);
+  const close = pYou != null && pThem != null && Math.abs(pYou - pThem) < SBS_NEAR;
+
+  const placed: { p: number; dy: number }[] = [];
+  const place = (p: number | null, preferred: number) => {
+    if (p == null) return 0;
+    let dy = preferred;
+    while (placed.some((o) => Math.abs(o.p - p) < SBS_NEAR && Math.abs(o.dy - dy) < 9)) dy += SBS_STEP;
+    placed.push({ p, dy });
+    return dy;
+  };
+  const dyYou = place(pYou, close ? -7 : 0);
+  const dyThem = place(pThem, close ? 7 : 0);
+  const dyReadOfYou = place(pct(row.readOfYou), 0);
+  const dyReadOfThem = place(pct(row.readOfThem), 0);
+
+  const pole = {
+    ...Type.small, fontSize: 11, lineHeight: 15,
+    color: 'rgba(255,255,255,0.62)', width: 86,
+  };
+
+  return (
+    <View>
+      <Text style={{ ...Type.small, fontWeight: '600', color: Palette.white, marginBottom: Spacing.sm, lineHeight: 19 }}>
+        {row.text}
+      </Text>
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: Spacing.sm }}>
+        <Text style={{ ...pole, textAlign: 'right' }}>{row.left}</Text>
+        <View style={{ flex: 1, paddingHorizontal: 12 }}>
+          <View style={{ height: 6, borderRadius: 999, backgroundColor: 'rgba(255,255,255,0.14)', marginVertical: 16 }}>
+            {/* readOfYou is the partner's answer ABOUT the reader, so it takes
+                the reader's colour and sits by the reader's own dot. */}
+            <SbsDot p={pct(row.readOfYou)} dy={dyReadOfYou} color={U} small />
+            <SbsDot p={pct(row.readOfThem)} dy={dyReadOfThem} color={P} small />
+            <SbsDot p={pYou} dy={dyYou} color={U} label={uInit} />
+            <SbsDot p={pThem} dy={dyThem} color={P} label={pInit} />
+          </View>
+        </View>
+        <Text style={pole}>{row.right}</Text>
+      </View>
+    </View>
+  );
+}
+
+function SbsDot({
+  p, dy, color, label, small,
+}: { p: number | null; dy: number; color: string; label?: string; small?: boolean }) {
+  if (p == null) return null;
+  const size = small ? 10 : 20;
+  return (
+    <View
+      style={{
+        position: 'absolute', left: `${p}%`, marginLeft: -size / 2,
+        top: (6 - size) / 2 + dy,
+        width: size, height: size, borderRadius: size / 2,
+        backgroundColor: color, opacity: small ? 0.9 : 1,
+        alignItems: 'center', justifyContent: 'center',
+        shadowColor: color, shadowOpacity: small ? 0 : 0.5,
+        shadowRadius: small ? 0 : 6, shadowOffset: { width: 0, height: 0 },
+      }}>
+      {label ? (
+        <Text style={{ fontSize: 8, fontWeight: '800', color: Palette.white }}>{label}</Text>
       ) : null}
     </View>
   );
@@ -1848,9 +1981,10 @@ const CLOSE_PCT = 8;
 const STAGGER = 11;
 
 function Slider({
-  you, them, youName, themName,
+  you, them, youName, themName, onDark,
 }: {
   you: number | null; them: number | null; youName: string; themName: string;
+  onDark?: boolean;
 }) {
   const yPct = you == null ? null : Math.max(0, Math.min(1, you)) * 100;
   const tPct = them == null ? null : Math.max(0, Math.min(1, them)) * 100;
@@ -1862,7 +1996,7 @@ function Slider({
 
   return (
     <View>
-      <View style={{ height: 5, borderRadius: 3, backgroundColor: c.border, marginVertical: 15 }}>
+      <View style={{ height: 5, borderRadius: 3, backgroundColor: onDark ? 'rgba(255,255,255,0.18)' : c.border, marginVertical: 15 }}>
         {tPct != null ? <Dot pct={tPct} dy={tDy} color={THEM_COLOR} label={same ? '' : initial(themName)} /> : null}
         {yPct != null ? <Dot pct={yPct} dy={yDy} color={YOU_COLOR} label={same ? '' : initial(youName)} /> : null}
       </View>
@@ -1874,7 +2008,7 @@ function Slider({
           ).map(([name, colour]) => (
             <View key={name} style={{ flexDirection: 'row', alignItems: 'center', gap: Spacing.xs }}>
               <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: colour }} />
-              <Text style={{ ...Type.small, fontSize: 11, color: c.textMuted }}>{name}</Text>
+              <Text style={{ ...Type.small, fontSize: 11, color: onDark ? 'rgba(255,255,255,0.6)' : c.textMuted }}>{name}</Text>
             </View>
           ))}
         </View>
@@ -1908,21 +2042,25 @@ function Dot({ pct, dy, color, label }: { pct: number; dy: number; color: string
  * does and why a dimension costs one row there instead of three.
  */
 function SliderRow({
-  label, left, right, you, them, youName, themName,
+  label, left, right, you, them, youName, themName, onDark,
 }: {
   label: string; left: string; right: string;
   you: number | null; them: number | null; youName: string; themName: string;
+  onDark?: boolean;
 }) {
-  const pole = { ...Type.small, fontSize: 11, fontWeight: '600' as const, color: c.textMuted, width: 68 };
+  const pole = {
+    ...Type.small, fontSize: 11, fontWeight: '600' as const,
+    color: onDark ? 'rgba(255,255,255,0.8)' : c.textMuted, width: 68,
+  };
   return (
     <View>
-      <Text style={{ ...Type.small, fontWeight: '700', color: c.textStrong }}>{label}</Text>
+      <Text style={{ ...Type.small, fontWeight: '700', color: onDark ? Palette.white : c.textStrong }}>{label}</Text>
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: Spacing.sm }}>
         <Text style={{ ...pole, textAlign: 'right' }}>{left}</Text>
         {/* Inset so a dot at either extreme clears the pole word instead of
             printing on it. */}
         <View style={{ flex: 1, paddingHorizontal: 13 }}>
-          <Slider you={you} them={them} youName={youName} themName={themName} />
+          <Slider you={you} them={them} youName={youName} themName={themName} onDark={onDark} />
         </View>
         <Text style={pole}>{right}</Text>
       </View>

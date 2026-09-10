@@ -83,6 +83,7 @@ import {
 import { COUPLE_TYPES as NEW_COUPLE_TYPES } from "../api/_couple-types.js";
 import { INDIVIDUAL_TYPE_DISPLAY } from "../api/_individual-types.js";
 import { AXES } from "../api/_axes.js";
+import { COMM_DOMAINS } from "../api/_lib/comm-domains.js";
 import { STRIPE as SC_STRIPE, SITE_LABEL as SC_SITE } from "../api/_lib/storycard-style.js";
 import { individualBlurb, axisBand, axisRows } from "../api/_lib/individual-profile.js";
 import { pronounForm } from "../api/_lib/role-tokens.js";
@@ -3719,14 +3720,7 @@ function PersonalityResults({ myAnswers, partnerAnswers, userName, partnerName, 
   const orderedDims = DOMAIN_ORDER.filter(d => feedback.some(f => f.dim === d));
   // Detailed results are 3 grouped domain pages, not one page per dimension.
   // domainGroups is the source of truth for both the pages and the sidebar.
-  const domainGroups = [
-    { id: "inner",      label: "Internal Processing",  color: "#9B5DE5", dims: ["energy","expression","reassurance"],
-      prose: "Internal processing focuses on how you handle feelings before sharing thoughts aloud. Whether energy, expression tendencies, or needs regarding reassurance are aligned or opposite, understanding each other's approaches helps you establish supportive communication methods." },
-    { id: "connection", label: "How You Connect",      color: "#E8673A", dims: ["love","needs","bids","listening"],
-      prose: "How you connect can be thought of as the mechanics of your relationship. The ways you make bids, show love, name needs, and listen define your relationship environment. Learn about each other's approaches to help you communicate love in a way that will be interpreted clearly." },
-    { id: "hard",       label: "When Things Get Hard", color: "#1B5FE8", dims: ["conflict","repair","feedback"],
-      prose: "All couples navigate conflict. What sets healthy relationships apart is the ability to communicate effectively in hard situations. Understanding each other's mindsets regarding conflict, repair, and feedback can help you each learn how to grow together and communicate under pressure." },
-  ];
+  const domainGroups = COMM_DOMAINS;
   // Only domains that actually have answered dimensions become pages.
   const detailDomains = domainGroups
     .map(g => ({ ...g, dims: orderedDims.filter(d => g.dims.includes(d)) }))
@@ -3919,6 +3913,7 @@ function PersonalityResults({ myAnswers, partnerAnswers, userName, partnerName, 
         <div style={{ fontSize: "clamp(1.5rem,5vw,2rem)", fontWeight: 700, color: "white", lineHeight: 1.1, marginBottom: "1rem", fontFamily: HFONT }}>{grp.label}</div>
 
         {/* Domain prose */}
+        {/* block: comm-domain/intro */}
         <p style={{ fontSize: "0.88rem", color: "rgba(255,255,255,0.75)", lineHeight: 1.8, fontFamily: BFONT, fontWeight: 300, margin: "0 0 1.5rem" }}>{grp.prose}</p>
 
         {/* Orientation overview: one bar per dimension in this domain */}
@@ -4002,13 +3997,13 @@ function PersonalityResults({ myAnswers, partnerAnswers, userName, partnerName, 
                     same tile is pulled onto Results at a glance, which names
                     the domain above it and shows three of them at once. */}
                 <div style={{ fontSize: "0.62rem", textTransform: "uppercase", letterSpacing: "0.12em", color: "rgba(255,255,255,0.9)", fontWeight: 700, fontFamily: BFONT }}>One thing to try</div>
-                <div style={{ fontSize: "0.62rem", color: "rgba(255,255,255,0.6)", fontFamily: BFONT, whiteSpace: "nowrap" }}>{m.label}</div>
               </div>
               <p style={{ fontSize: "0.86rem", color: "rgba(255,255,255,0.88)", fontFamily: BFONT, lineHeight: 1.7, margin: 0 }}>{advice}</p>
             </div>
           );
         })()}
 
+        {/* block: comm-domain/side-by-side */}
         {/* Two-column arrows-to-bar side-by-side (all dims, exercise order) — dropdown */}
         <details style={{ marginTop: "1.5rem", background: "rgba(255,255,255,0.05)", borderRadius: 14, border: "1px solid rgba(255,255,255,0.14)" }}>
           <summary style={{ listStyle: "none", cursor: "pointer", padding: "1.1rem 1.5rem", fontSize: "0.72rem", textTransform: "uppercase", letterSpacing: "0.1em", color: "rgba(255,255,255,0.85)", fontWeight: 700, fontFamily: BFONT, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
@@ -4111,18 +4106,9 @@ function PersonalityResults({ myAnswers, partnerAnswers, userName, partnerName, 
           ))}
         </div>
 
-        {/* Action plan strip */}
-        <div style={{ background: "rgba(255,255,255,0.05)", borderRadius: 14, padding: "1rem 1.25rem" }}>
-          <div style={{ fontSize: "0.62rem", textTransform: "uppercase", letterSpacing: "0.12em", color: "rgba(255,255,255,0.4)", fontWeight: 700, marginBottom: "0.6rem", fontFamily: BFONT }}>Your next moves</div>
-          {/* block: comm-overview/protocols */}
-          {protocols.slice(0, COMMS_PROTOCOL_LIMIT).map((p, i) => (
-            <div key={i} style={{ display: "flex", alignItems: "center", gap: "0.6rem", marginBottom: i < protocols.slice(0, COMMS_PROTOCOL_LIMIT).length - 1 ? "0.5rem" : 0 }}>
-              <span style={{ width: 6, height: 6, borderRadius: "50%", background: "rgba(255,255,255,0.3)", flexShrink: 0, display: "inline-block" }} />
-              <span style={{ fontSize: "0.8rem", color: "rgba(255,255,255,0.75)", fontFamily: BFONT, fontWeight: 500 }}>{p.title}</span>
-            </div>
-          ))}
-          {protocols.length > 3 && <div style={{ fontSize: "0.7rem", color: "rgba(255,255,255,0.3)", marginTop: "0.5rem", fontFamily: BFONT }}>+ {protocols.length - 3} more in your action plan</div>}
-        </div>
+        {/* No "Your next moves" strip. It restated three protocol titles that
+            the action plan already carries in full, under a heading nobody
+            wrote, on a page whose action tiles say what to do. */}
       </div>
 
       {/* Raw responses */}
@@ -7414,8 +7400,10 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
                 const tipColors = [ct.color, "#1B5FE8", "#10b981"];
                 const tipColor = tipColors[i % 3];
                 return (<div key={i} style={{ background: "white", border: `1.5px solid ${C.stone}`, borderRadius: 14, padding: "1.25rem 1.4rem", borderLeft: `4px solid ${tipColor}` }}>
-                  <div style={{ fontSize: "0.8rem", fontWeight: 700, color: C.ink, fontFamily: BFONT, marginBottom: "0.4rem" }}>{interp(tip.title)}</div>
-                  <p style={{ fontSize: "0.82rem", color: C.muted, fontFamily: BFONT, lineHeight: 1.72, margin: "0 0 0.75rem", fontWeight: 300 }}>{interp(tip.body)}</p>
+                  <div style={{ fontSize: "0.8rem", fontWeight: 700, color: C.ink, fontFamily: BFONT, marginBottom: "0.75rem" }}>{interp(tip.title)}</div>
+                  {/* No description paragraph. The title says what to do and
+                      the phrase shows how; the paragraph in between was the
+                      part nobody needed. Removed from both surfaces. */}
                   {tip.phraseTry && (
                     <div style={{ background: `${tipColor}0d`, border: `1px solid ${tipColor}30`, borderRadius: 8, padding: "0.55rem 0.8rem", display: "flex", gap: "0.5rem", alignItems: "flex-start" }}>
                       {/* block: couple-type/tips */}

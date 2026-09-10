@@ -33,6 +33,8 @@ import { intimacyResults } from './_lib/intimacy-results.js';
 import { reflectionResults } from './_lib/reflection-results.js';
 import { whatComesNext } from './_lib/what-comes-next.js';
 import { highlightCards } from './_lib/highlight-cards.js';
+import { commDomains } from './_lib/comm-domains.js';
+import { sideBySide } from './_lib/side-by-side.js';
 import { STORYCARD_STYLE } from './_lib/storycard-style.js';
 import { personalityFeedback, commsProtocols, commsActionPlan } from './_lib/comms-plan.js';
 import { deriveAnniversaryInsights, reflectionActionTitle } from './_lib/reflection-insights.js';
@@ -80,7 +82,7 @@ function withLabels(results) {
  * `content` is additive. Nothing that already existed in the payload changes
  * shape, so the website keeps reading exactly what it read before.
  */
-function withContent(results, viewer, contentVersion, pronouns = {}) {
+function withContent(results, viewer, contentVersion, pronouns = {}, answers = {}) {
   if (!results) return results;
 
   // ── ROLE TOKENS, RESOLVED ON THE WAY OUT ─────────────────────────────────
@@ -468,7 +470,9 @@ export default async function handler(req) {
     const displayed = withContent(withLabels(results), viewerSide, contentVersion, {
       a: swapped ? partner.pronouns : me.pronouns,
       b: swapped ? me.pronouns : partner.pronouns,
-    });
+    // The raw Communication answers, for the side-by-side dropdown. Already
+    // viewer-relative: `mine` is whoever is asking.
+    }, { mine, theirs });
 
     return json({
       ok: true, ready: true, cached, recomputed: reason,
@@ -528,6 +532,21 @@ export default async function handler(req) {
        * app could not reach: the website's Communication overview ends with
        * three tiles and the app's ended with nothing.
        */
+      /**
+       * The three Communication domain pages: label, colour, the paragraph
+       * each opens with, and the gradient the website paints it. All four were
+       * inline in src/App.jsx, so the app had no intro prose and drew every
+       * domain page on cream while the website tinted each to its domain.
+       * See api/_lib/comm-domains.js.
+       */
+      commDomains: commDomains(),
+      /**
+       * Every Communication question with both answers and both cross-view
+       * reads on it, for the dropdown the website ends each detail page with.
+       * The app had nothing here: it received scores and never an answer.
+       * See api/_lib/side-by-side.js.
+       */
+      commResponses: sideBySide(answers.mine, answers.theirs),
       commsPlan: (() => {
         const copy = contentFor(contentVersion ?? null);
         const feedback = personalityFeedback({

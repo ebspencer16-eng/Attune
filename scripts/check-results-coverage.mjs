@@ -24,6 +24,20 @@ const routing = src.slice(start, end === -1 ? undefined : end);
 const exact = new Set([...routing.matchAll(/section === '([a-z0-9-]+)'/g)].map((m) => m[1]));
 const prefixes = [...routing.matchAll(/section\.startsWith\('([a-z0-9-]+)'\)/g)].map((m) => m[1]);
 
+// ── SECTIONS REACHED THROUGH A LOOKUP ──────────────────────────────────────
+// The three Communication domain pages used to be three `section === '...'`
+// branches and are now one branch over a map, because they differ only in
+// which domain they draw. This gate matched the literal, so the moment the
+// literals moved into a table it reported two live screens as missing.
+//
+// That is the same blind spot the conflict privacy gate had: a checker that
+// matches a name cannot see a name reached through a registry, and the fix is
+// to resolve the registry rather than to give up the registry. Any object
+// literal in the routing function whose keys are section ids counts.
+for (const table of routing.matchAll(/Record<string,[^>]*>\s*=\s*\{([\s\S]*?)\}/g)) {
+  for (const key of table[1].matchAll(/'([a-z0-9-]+)'\s*:/g)) exact.add(key[1]);
+}
+
 const missing = RESULTS_SECTIONS.filter(
   (id) => !exact.has(id) && !prefixes.some((p) => id.startsWith(p)));
 
