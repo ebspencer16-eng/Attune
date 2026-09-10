@@ -85,6 +85,7 @@ import { COUPLE_TYPES as NEW_COUPLE_TYPES } from "../api/_couple-types.js";
 import { INDIVIDUAL_TYPE_DISPLAY } from "../api/_individual-types.js";
 import { AXES, MAP_CAPTION } from "../api/_axes.js";
 import { commAlignmentPct } from "../api/_lib/comm-alignment.js";
+import { EXERCISES } from "../api/_exercises.js";
 import { CATEGORY_INTRO } from "../api/_lib/category-intros.js";
 import { NEAR_AXIS_PROSE as NEAR_AXIS_PROSE_SHARED } from "../api/_lib/near-axis.js";
 import { EXP_CAT_STARTERS as EXP_CAT_STARTERS_SHARED } from "../api/_lib/expectation-starters.js";
@@ -11327,7 +11328,13 @@ export default function App() {
   // page. Send those to the dashboard instead. Runs after mount, because pkg
   // is derived further down the component body.
   useEffect(() => {
-    const gated = { exercise3: 'hasAnniversary', intimacy: 'hasIntimacy' };
+    // From the registry, not written out here. This named exercise3 and
+    // intimacy and had never heard of Conflict Patterns, so the one exercise
+    // added since it was written was the one that still rendered a blank page
+    // for anyone who did not own it. Every capability-gated view is covered
+    // now, and a sixth exercise is covered the day it is added.
+    const gated = Object.fromEntries(
+      EXERCISES.filter((e) => e.capability).map((e) => [e.view, e.capability]));
     const need = gated[view];
     if (need && pkg && !pkg[need]) setView('home');
     // Deps are [view] alone on purpose: pkg is declared further down the
@@ -13015,11 +13022,15 @@ export default function App() {
     hasChecklist:   _basePkg.hasChecklist   || !!(order?.addonChecklist),
     hasAnniversary: _basePkg.hasAnniversary || !!(order?.addonReflection),
     hasBudget:      _basePkg.hasBudget      || !!(order?.addonBudget),
-    hasWorkbook:    _effectivePkgKey === 'premium' || !!(order?.addonWorkbook),
+    // PKG_CAPS, not the package name. These two lines said `=== 'premium'`,
+    // which is package inclusion written out a second time in a file that is
+    // not PKG_CAPS. api/_lib/ownership.js had the same lines and says so.
+    // They happened to agree; nothing checked that they did.
+    hasWorkbook:    !!(PKG_CAPS[_effectivePkgKey]?.hasWorkbook) || !!(order?.addonWorkbook),
     // Never bundled into a package, unlike intimacy: the add-on flag is the
     // only route to it.
     // Premium bundles Conflict Patterns. Physical Intimacy is add-on only.
-    hasConflict:    _effectivePkgKey === 'premium' || !!(order?.addonConflict),
+    hasConflict:    !!(PKG_CAPS[_effectivePkgKey]?.hasConflict) || !!(order?.addonConflict),
     hasIntimacy:    !!(order?.addonIntimacy) || (() => { try { return localStorage.getItem('attune_dev_intimacy') === '1'; } catch { return false; } })() || (() => { try { const q = new URLSearchParams(window.location.search); return !!q.get('demo') && q.get('intimacy') === '1'; } catch { return false; } })(),
   };
 
