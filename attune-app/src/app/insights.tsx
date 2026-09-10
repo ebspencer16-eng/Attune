@@ -155,9 +155,6 @@ export default function InsightsScreen() {
       <Shell>
         <View style={{ paddingHorizontal: Spacing.xl, paddingTop: Spacing.lg, paddingBottom: Spacing.lg, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center' }}>
           <Text style={{ ...Type.hero, color: c.textStrong }}>Your results</Text>
-          <Text style={{ ...Type.body, color: c.textMuted, marginTop: Spacing.sm }}>
-            Everything you both answered, side by side.
-          </Text>
         </View>
         <Results results={results} owned={home?.owned ?? []} />
       </Shell>

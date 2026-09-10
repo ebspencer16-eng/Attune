@@ -354,7 +354,13 @@ function SectionBody({
     // the one place the two products disagreed most.
     if (highlights.length) {
       {/* block: highlights/storycards */}
-      return <HighlightCards cards={highlights} onDone={() => onGoToSection('couple-type')} />;
+      return (
+        <HighlightCards
+          cards={highlights}
+          accent={results.content?.coupleType?.color || null}
+          onDone={() => onGoToSection('couple-type')}
+        />
+      );
     }
     return <Glance results={results} you={you} them={them} viewer={viewer} wideGap={wideGap} />;
   }
