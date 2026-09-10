@@ -21,6 +21,7 @@
  */
 
 import { RESPONSIBILITY_CATEGORIES, LIFE_QUESTIONS, substName } from '../_questions.js';
+import { introFor } from './category-intros.js';
 
 /**
  * A responsibility key seen from the other side.
@@ -177,6 +178,7 @@ export function expectationsRows({ mine, theirs, youName = 'You', themName = 'Yo
  */
 export const LIFE_CATEGORY_LABEL = 'Life & Values';
 
+
 /** The overview numbers, and one bucket per conversation screen. */
 export function expectationsSummary({ mine, theirs, youName, themName }) {
   const rows = expectationsRows({ mine, theirs, youName, themName });
@@ -189,6 +191,11 @@ export function expectationsSummary({ mine, theirs, youName, themName }) {
       // The id the app navigates to and notes anchor against.
       section: 'exp-convo-' + i,
       label: cat.label,
+      // The category's own id, and the paragraph the website opens its page
+      // with. The app had neither, so its category pages opened straight into
+      // a list of rows.
+      categoryId: cat.id,
+      intro: introFor(cat.id),
       rows: inCat,
       answered: inCat.length,
       aligned: inCat.filter((r) => r.aligned).length,

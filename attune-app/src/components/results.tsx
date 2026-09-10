@@ -411,8 +411,17 @@ function SectionBody({
     return <ExpectationsOverview summary={expectations} you={you} them={them} />;
   }
   if (section.startsWith('exp-convo-')) {
-    const bucket = expectations?.categories.find((cat) => cat.section === section) ?? null;
-    return <ExpectationsConversation bucket={bucket} you={you} them={them} />;
+    const all = expectations?.categories ?? [];
+    const at = all.findIndex((cat) => cat.section === section);
+    const bucket = at >= 0 ? all[at] : null;
+    return (
+      <ExpectationsConversation
+        bucket={bucket}
+        you={you}
+        them={them}
+        position={at >= 0 ? { index: at + 1, total: all.length } : null}
+      />
+    );
   }
 
   if (section === 'what-comes-next') {
@@ -650,13 +659,13 @@ function CategoryDrawer({ label, items, color }: { label: string; items: string[
 
 /** One conversation: every item in that category, differences first. */
 function ExpectationsConversation({
-  bucket, you, them,
+  bucket, you, them, position,
 }: {
   bucket: ExpectationsSummary['categories'][number] | null;
   you: string;
   them: string;
+  position?: { index: number; total: number } | null;
 }) {
-  {/* block: exp-conversation/questions */}
   if (!bucket || bucket.answered === 0) {
     return (
       <Waiting
@@ -666,25 +675,147 @@ function ExpectationsConversation({
     );
   }
 
-  // Differences first. The matches still appear, because knowing what you
-  // already agree on is the reason the differences are not alarming.
-  const ordered = [...bucket.rows].sort((a, b) => Number(a.aligned) - Number(b.aligned));
+  const gaps = bucket.rows.filter((r) => !r.aligned);
+  const matched = bucket.rows.filter((r) => r.aligned);
+  const ground = ['#443D8C', '#6F63D6', '#514AAE'] as [string, string, string];
+  const accent = SectionColor.expectations;
 
   return (
-    <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: ResultsBottomInset }}>
-      <View style={{ paddingHorizontal: Spacing.xl, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center' }}>
-        <Text style={{ ...Type.title, color: c.textStrong }}>{bucket.label}</Text>
-        <Text style={{ ...Type.body, color: c.textMuted, marginTop: Spacing.sm }}>
-          {bucket.differences === 0
-            ? `You matched on all ${bucket.answered}.`
-            : `${bucket.differences} of ${bucket.answered} where you pictured it differently.`}
-        </Text>
+    /* The website's page: dark, the category and its position in the set, a
+       progress bar, the paragraph it opens with, then the differences as a
+       two-column table and what you already agree on underneath. The app had
+       a cream page, a summary sentence of its own and one card per row. */
+    <View style={{ flex: 1 }}>
+      <LinearGradient
+        colors={ground}
+        start={{ x: 0.1, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
+      />
+      <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: ResultsBottomInset }}>
+        <View style={{ paddingHorizontal: Spacing.xl, paddingTop: Spacing.md, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center' }}>
+          <View style={{ flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'space-between' }}>
+            <Text style={{ ...Type.title, color: Palette.white, flex: 1 }}>{bucket.label}</Text>
+            {position ? (
+              <Text style={{ ...Type.small, fontSize: 11, color: 'rgba(255,255,255,0.35)' }}>
+                {`${position.index} of ${position.total}`}
+              </Text>
+            ) : null}
+          </View>
 
-        <View style={{ marginTop: Spacing.lg }}>
-          {ordered.map((row) => <ExpectationRowView key={row.key} row={row} you={you} them={them} />)}
+          {position ? (
+            <View style={{ height: 2, borderRadius: 2, backgroundColor: 'rgba(255,255,255,0.1)', marginTop: Spacing.sm, marginBottom: Spacing.lg }}>
+              <View style={{ height: 2, borderRadius: 2, backgroundColor: accent, width: `${(position.index / position.total) * 100}%` }} />
+            </View>
+          ) : null}
+
+          {/* The paragraph the website opens this page with, from
+              api/_lib/category-intros.js. The app opened straight into rows. */}
+          {bucket.intro ? (
+            <View
+              style={{
+                backgroundColor: 'rgba(255,255,255,0.07)',
+                borderColor: 'rgba(255,255,255,0.13)', borderWidth: 1.5,
+                borderRadius: Radius.lg, padding: Spacing.lg, marginBottom: Spacing.lg,
+              }}>
+              <Text style={{ ...Type.eyebrow, color: accent, marginBottom: Spacing.sm }}>
+                Why this matters
+              </Text>
+              <Text style={{ ...Type.body, color: 'rgba(255,255,255,0.85)', lineHeight: 24 }}>
+                {bucket.intro}
+              </Text>
+            </View>
+          ) : null}
+
+          {/* block: exp-conversation/questions */}
+          {gaps.length ? (
+            <View style={{ backgroundColor: Palette.white, borderRadius: Radius.lg, overflow: 'hidden' }}>
+              <View style={{ paddingVertical: Spacing.sm, paddingHorizontal: Spacing.lg, backgroundColor: `${accent}14` }}>
+                <Text style={{ ...Type.eyebrow, color: accent }}>Conversations to have</Text>
+              </View>
+              <View style={{ flexDirection: 'row', paddingHorizontal: Spacing.lg, paddingTop: Spacing.sm }}>
+                <View style={{ flex: 1.6 }} />
+                <Text style={{ ...Type.eyebrow, fontSize: 9, color: accent, flex: 1, textAlign: 'center' }}>{you}</Text>
+                <Text style={{ ...Type.eyebrow, fontSize: 9, color: c.textMuted, flex: 1, textAlign: 'center' }}>{them}</Text>
+              </View>
+              {gaps.map((row, i) => (
+                <View
+                  key={row.key}
+                  style={{
+                    flexDirection: 'row', alignItems: 'center',
+                    paddingVertical: Spacing.sm, paddingHorizontal: Spacing.lg,
+                    borderTopColor: `${accent}20`, borderTopWidth: i === 0 ? 0 : 1,
+                  }}>
+                  <Text style={{ ...Type.small, fontSize: 12, color: c.text, flex: 1.6, paddingRight: Spacing.sm, lineHeight: 17 }}>
+                    {row.item}
+                  </Text>
+                  <Text style={{ ...Type.small, fontSize: 12, fontWeight: '700', color: c.textStrong, flex: 1, textAlign: 'center' }}>
+                    {row.you || '\u2014'}
+                  </Text>
+                  <Text style={{ ...Type.small, fontSize: 12, fontWeight: '700', color: c.textMuted, flex: 1, textAlign: 'center' }}>
+                    {row.them || '\u2014'}
+                  </Text>
+                </View>
+              ))}
+            </View>
+          ) : null}
+
+          {/* What you already agree on. The website shows it in full, green
+              tinted, with the shared answer beside each item. */}
+          {matched.length ? (
+            <View
+              style={{
+                marginTop: gaps.length ? Spacing.lg : 0,
+                backgroundColor: 'rgba(16,185,129,0.07)',
+                borderColor: 'rgba(16,185,129,0.3)', borderWidth: 1.5,
+                borderRadius: Radius.lg, overflow: 'hidden',
+              }}>
+              <View
+                style={{
+                  flexDirection: 'row', alignItems: 'center', gap: Spacing.sm,
+                  paddingVertical: Spacing.sm, paddingHorizontal: Spacing.lg,
+                  backgroundColor: 'rgba(16,185,129,0.1)',
+                  borderBottomColor: 'rgba(16,185,129,0.2)', borderBottomWidth: 1,
+                }}>
+                <Text style={{ ...Type.eyebrow, color: '#10B981', flex: 1 }}>Already aligned</Text>
+                <Text style={{ ...Type.small, fontSize: 11, color: 'rgba(255,255,255,0.4)' }}>
+                  {`${matched.length} item${matched.length !== 1 ? 's' : ''}`}
+                </Text>
+              </View>
+              {matched.map((row, i) => (
+                <View
+                  key={row.key}
+                  style={{
+                    flexDirection: 'row', alignItems: 'center',
+                    paddingVertical: Spacing.sm, paddingHorizontal: Spacing.lg,
+                    borderTopColor: 'rgba(16,185,129,0.12)', borderTopWidth: i === 0 ? 0 : 1,
+                  }}>
+                  <Text style={{ ...Type.small, fontSize: 12, color: 'rgba(255,255,255,0.6)', flex: 1.6, paddingRight: Spacing.sm, lineHeight: 17 }}>
+                    {row.item}
+                  </Text>
+                  <Text
+                    style={{
+                      ...Type.small, fontSize: 12, fontWeight: '600',
+                      color: 'rgba(255,255,255,0.75)', flex: 1, textAlign: 'center',
+                      backgroundColor: 'rgba(255,255,255,0.06)', borderRadius: 6,
+                      paddingVertical: 2, paddingHorizontal: 4,
+                    }}>
+                    {row.you || '\u2014'}
+                  </Text>
+                </View>
+              ))}
+              {!gaps.length ? (
+                <View style={{ paddingVertical: Spacing.sm, paddingHorizontal: Spacing.lg, borderTopColor: 'rgba(16,185,129,0.15)', borderTopWidth: 1 }}>
+                  <Text style={{ ...Type.small, fontSize: 12, color: 'rgba(16,185,129,0.85)' }}>
+                    {`Fully aligned here. You and ${them} are on the same page across all ${matched.length} item${matched.length !== 1 ? 's' : ''}.`}
+                  </Text>
+                </View>
+              ) : null}
+            </View>
+          ) : null}
         </View>
-      </View>
-    </ScrollView>
+      </ScrollView>
+    </View>
   );
 }
 

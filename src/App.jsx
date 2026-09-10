@@ -83,6 +83,7 @@ import {
 import { COUPLE_TYPES as NEW_COUPLE_TYPES } from "../api/_couple-types.js";
 import { INDIVIDUAL_TYPE_DISPLAY } from "../api/_individual-types.js";
 import { AXES } from "../api/_axes.js";
+import { CATEGORY_INTRO } from "../api/_lib/category-intros.js";
 import { COMM_DOMAINS } from "../api/_lib/comm-domains.js";
 import { STRIPE as SC_STRIPE, SITE_LABEL as SC_SITE } from "../api/_lib/storycard-style.js";
 import { individualBlurb, axisBand, axisRows } from "../api/_lib/individual-profile.js";
@@ -4412,14 +4413,7 @@ function ExpectationsResults({ myAnswers, partnerAnswers, userName, partnerName,
     const thisCatAligned = aligned.filter(r => r.catId === fc.id);
     const isLastCat = catIdx === FIXED_CATS.length - 1;
 
-    const catNarration = {
-      household: "Day-to-day domestic expectations are easy to assume rather than discuss. Getting explicit about them removes a major source of slow-build resentment.",
-      financial: "Beneath money disagreements is usually a difference in values, not just numbers. The question worth asking: what do you each want money to make possible?",
-      career: "How you think about work, ambition, and sacrifice for each other's careers will evolve. These conversations lay groundwork before the hard moments arrive.",
-      emotional: "The invisible work of a relationship, tracking, anticipating, initiating, is the category most couples never name. Naming it changes how it lands.",
-      extended_family: "Extended family expectations surface fast, around holidays, visits, and boundaries. You each carry a template from how your own family did it. Naming those templates now saves a lot of friction later.",
-      life: "These are the bigger-picture expectations: children, family, where you live, and how you want your life to feel. Getting aligned on these now is one of the most valuable things a couple can do.",
-    };
+    const catNarration = CATEGORY_INTRO;
 
     return (
       <MaybeNav noSideNav={noSideNav} navItems={expectationsNavItems} currentStep={navCurrentStep} onGo={go} accent="#1B5FE8">

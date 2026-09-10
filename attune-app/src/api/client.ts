@@ -364,6 +364,9 @@ export type ExpectationsSummary = {
     /** The section id this bucket belongs to, e.g. exp-convo-2. */
     section: string;
     label: string;
+    /** The category's own id, and the paragraph the page opens with. */
+    categoryId?: string;
+    intro?: string | null;
     rows: ExpectationRow[];
     answered: number;
     aligned: number;
