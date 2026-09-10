@@ -9544,8 +9544,16 @@ function AuthModal({ mode, onClose, onSuccess }) {
         // Now it is written whenever the partner has any answers at all, and
         // each field carries its own truth, so every row can report the
         // exercise it is about.
+        // conflict_data is NOT in this response and never will be:
+        // /api/partner-sync deletes it and sends conflictCompletedAt and
+        // conflictPartnerView in its place, because the raw record carries the
+        // patterns half that is private to whoever wrote it. Reading
+        // ps.profile.conflict_data here asked for a field the endpoint had
+        // already removed, so a partner who had finished Conflict Patterns
+        // read as having answered nothing.
         const _anyPartnerAnswers = !!(ps.profile?.ex1_answers || ps.profile?.ex2_answers
-          || ps.profile?.ex3_answers || ps.profile?.intimacy_data || ps.profile?.conflict_data);
+          || ps.profile?.ex3_answers || ps.profile?.intimacy_data
+          || ps.profile?.conflictCompletedAt);
         if (ps.found && !_anyPartnerAnswers) {
           try { localStorage.removeItem('attune_partner_session'); } catch {}
         }
@@ -9555,10 +9563,14 @@ function AuthModal({ mode, onClose, onSuccess }) {
             ex1: ps.profile.ex1_answers,
             ex2: ps.profile.ex2_answers,
             ex3: ps.profile.ex3_answers,
-            // conflict was never carried here, so a partner's Conflict
-            // Patterns row could only ever read Pending, however long ago
-            // they finished it.
-            ...(ps.profile.conflict_data ? { conflict: ps.profile.conflict_data } : {}),
+            // The partner's conflict, in the only shape this side is allowed
+            // to have: the sharable view plus when they finished. The previous
+            // line read ps.profile.conflict_data, which the endpoint strips,
+            // so this was always absent and the Conflict Patterns row read
+            // Pending however long ago they finished it.
+            ...(ps.profile.conflictCompletedAt
+              ? { conflict: { ...(ps.profile.conflictPartnerView || {}), completedAt: ps.profile.conflictCompletedAt } }
+              : {}),
             ...(ps.profile.intimacy_data ? { intimacy: ps.profile.intimacy_data } : {}),
             partnerProfileId: profile.partner_profile_id,
             inviteCode: profile.invite_code,
@@ -12856,8 +12868,14 @@ export default function App() {
         // Any answers, not both of the first two. The all-or-nothing gate made
         // partner status binary: a partner mid-way through showed Pending on
         // everything, including exercises they had finished.
+        // conflictCompletedAt, not conflict_data. /api/partner-sync strips the
+        // raw record because it carries the patterns half that stays private
+        // to whoever wrote it, and sends the flag and the sharable view in its
+        // place. This poller is the second of two that read the stripped name;
+        // both showed a finished partner's Conflict Patterns row as Pending.
         const _any = !!(json.profile?.ex1_answers || json.profile?.ex2_answers
-          || json.profile?.ex3_answers || json.profile?.intimacy_data || json.profile?.conflict_data);
+          || json.profile?.ex3_answers || json.profile?.intimacy_data
+          || json.profile?.conflictCompletedAt);
         if (json.found && _any) {
           const s = {
             partnerProfileId: partnerId,
@@ -12867,7 +12885,9 @@ export default function App() {
             ex2: json.profile.ex2_answers,
             ...(json.profile.ex3_answers ? { ex3: json.profile.ex3_answers } : {}),
             ...(json.profile.intimacy_data ? { intimacy: json.profile.intimacy_data } : {}),
-            ...(json.profile.conflict_data ? { conflict: json.profile.conflict_data } : {}),
+            ...(json.profile.conflictCompletedAt
+              ? { conflict: { ...(json.profile.conflictPartnerView || {}), completedAt: json.profile.conflictCompletedAt } }
+              : {}),
             completedAt: Date.now(),
           };
           if (!cancelled) savePartnerSession(s);
