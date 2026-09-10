@@ -86,6 +86,7 @@ import { INDIVIDUAL_TYPE_DISPLAY } from "../api/_individual-types.js";
 import { AXES, MAP_CAPTION } from "../api/_axes.js";
 import { commAlignmentPct } from "../api/_lib/comm-alignment.js";
 import { EXERCISES } from "../api/_exercises.js";
+import { CLOSE_PCT as TM_CLOSE, STAGGER as TM_STAGGER, SBS_NEAR as TM_SBS_NEAR, SBS_STEP as TM_SBS_STEP } from "../api/_lib/track-marks.js";
 import { CATEGORY_INTRO } from "../api/_lib/category-intros.js";
 import { NEAR_AXIS_PROSE as NEAR_AXIS_PROSE_SHARED } from "../api/_lib/near-axis.js";
 import { EXP_CAT_STARTERS as EXP_CAT_STARTERS_SHARED } from "../api/_lib/expectation-starters.js";
@@ -2261,7 +2262,7 @@ function SideBySideResponses({ dims, myAnswers, partnerAnswers, userName, partne
           const theirs = adj(num(partnerAnswers?.[q.id]));
           const myRead = adj(num(myAnswers?.["pv_" + q.id]));      // how I see them
           const theirRead = adj(num(partnerAnswers?.["pv_" + q.id])); // how they see me
-          const close = mine != null && theirs != null && Math.abs(pct(mine) - pct(theirs)) < 7;
+          const close = mine != null && theirs != null && Math.abs(pct(mine) - pct(theirs)) < TM_SBS_NEAR;
           // Vertical stacking. Every dot occupies a position; a dot landing
           // within 7% of one already placed steps down until it finds a free
           // row, so nothing ends up hidden underneath anything else.
@@ -2269,18 +2270,18 @@ function SideBySideResponses({ dims, myAnswers, partnerAnswers, userName, partne
           // Self dots are placed first and keep the existing close-together
           // offsets, so a cross-view read moves rather than displacing the
           // answer it describes.
-          const STACK = 11;
+          const STACK = TM_SBS_STEP;
           const placed = [];
           const place = (v, preferredDy) => {
             if (v == null) return 0;
             const p = pct(v);
             let dy = preferredDy;
-            while (placed.some(o => Math.abs(o.p - p) < 7 && Math.abs(o.dy - dy) < 9)) dy += STACK;
+            while (placed.some(o => Math.abs(o.p - p) < TM_SBS_NEAR && Math.abs(o.dy - dy) < 9)) dy += STACK;
             placed.push({ p, dy });
             return dy;
           };
-          const dyMine = place(mine, close ? -7 : 0);
-          const dyTheirs = place(theirs, close ? 7 : 0);
+          const dyMine = place(mine, close ? -TM_STAGGER : 0);
+          const dyTheirs = place(theirs, close ? TM_STAGGER : 0);
           const dyTheirRead = place(theirRead, 0);
           const dyMyRead = place(myRead, 0);
           return (
@@ -2316,10 +2317,10 @@ function SideBySideResponses({ dims, myAnswers, partnerAnswers, userName, partne
 function DimTrackViz({ myScore = 3, theirScore = 3, color = "#9B5DE5", userName = "You", partnerName = "Partner" }) {
   const pct = v => ((v - 1) / 4) * 100;
   const myPctV = pct(myScore), theirPctV = pct(theirScore);
-  const close = Math.abs(myPctV - theirPctV) < 8;
+  const close = Math.abs(myPctV - theirPctV) < TM_CLOSE;
   const myIsLeft = myPctV <= theirPctV;
-  const myDy = close ? (myIsLeft ? -11 : 11) : 0;
-  const theirDy = close ? (myIsLeft ? 11 : -11) : 0;
+  const myDy = close ? (myIsLeft ? -TM_STAGGER : TM_STAGGER) : 0;
+  const theirDy = close ? (myIsLeft ? TM_STAGGER : -TM_STAGGER) : 0;
   // Person-coloured, initial-labelled dots (user = orange, partner = blue),
   // matching the highlights sliders. The name key only appears when both first
   // initials collide; otherwise the letters resolve who's who.

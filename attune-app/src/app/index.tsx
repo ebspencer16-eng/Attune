@@ -202,7 +202,11 @@ export default function HomeScreen() {
               style={{
                 flexDirection: 'row', alignItems: 'center',
                 justifyContent: 'space-between', gap: Spacing.md,
-                marginTop: Spacing.sm,
+                // Ellie asked for the greeting a little lower than the very
+                // top edge. The profile control rides with it: they are one
+                // line, and splitting them puts a lone button back above the
+                // hello, which is what this layout moved away from.
+                marginTop: Spacing.xl,
               }}>
               <Text style={{ ...Type.hero, color: Palette.white, flex: 1 }}>
                 {data.greeting}
@@ -229,7 +233,10 @@ export default function HomeScreen() {
               </Pressable>
             </View>
 
-            <View style={{ paddingTop: Spacing.xxl, paddingBottom: Spacing.xxl }}>
+            {/* Closer to the greeting than it was: Ellie asked for the
+                finding to move up. The space below stays, so the tile beneath
+                does not crowd it. */}
+            <View style={{ paddingTop: Spacing.md, paddingBottom: Spacing.xxl }}>
               {data.research ? <ResearchNote finding={data.research} /> : null}
             </View>
           </View>
@@ -392,32 +399,41 @@ function ResearchNote({ finding }: { finding: NonNullable<HomeResponse['research
        family, different voice. */
     <View style={{ paddingHorizontal: Spacing.xl }}>
       {/* ── THE GLOW ─────────────────────────────────────────────────────
-          Ellie asked for a circular glow behind the finding so it reads as
-          the spotlit thing on the screen rather than as more text on the
-          blue.
+          A circular light behind the finding, brightest in the middle and
+          falling off to nothing, which is what the website paints behind each
+          dot on the couple map: a radialGradient from the dot's colour at 0.5
+          opacity to the same colour at 0.
 
-          Three concentric circles, not a radial gradient. React Native has
-          no radial gradient, and the libraries that add one bring a native
-          module for a decoration. Stacked circles at falling opacity give a
-          soft edge that is indistinguishable at these values, and each is a
-          plain View.
+          React Native has no radial gradient and no SVG here, and the first
+          version of this was three concentric circles at falling opacity. It
+          had visible edges, which is the one thing a glow must not have.
+          Ellie: "I don't like the concentric circles behind the text."
+
+          A shadow is a real radial falloff and needs nothing installed. A
+          white circle casting a wide white shadow with no offset gives a
+          bright core fading smoothly out, which is the same curve the SVG
+          draws. Two of them, a tight one for the core and a wide one for the
+          spill, so the middle carries more light than a single radius can.
 
           Behind the text and not around it: absolutely positioned and not
-          hit-testable, so it cannot change the layout when the finding is
-          long or swallow a touch. */}
+          hit-testable, so a long finding cannot be pushed around by it and no
+          touch is swallowed. */}
       <View pointerEvents="none" style={StyleSheet.absoluteFill}>
         <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
           {[
-            { size: 300, opacity: 0.05 },
-            { size: 220, opacity: 0.06 },
-            { size: 140, opacity: 0.07 },
-          ].map((ring) => (
+            { size: 210, opacity: 0.30, radius: 90 },
+            { size: 110, opacity: 0.22, radius: 45 },
+          ].map((glow) => (
             <View
-              key={ring.size}
+              key={glow.size}
               style={{
                 position: 'absolute',
-                width: ring.size, height: ring.size, borderRadius: ring.size / 2,
-                backgroundColor: `rgba(255,255,255,${ring.opacity})`,
+                width: glow.size, height: glow.size, borderRadius: glow.size / 2,
+                backgroundColor: 'rgba(255,255,255,0.05)',
+                shadowColor: '#FFFFFF',
+                shadowOpacity: glow.opacity,
+                shadowRadius: glow.radius,
+                shadowOffset: { width: 0, height: 0 },
               }}
             />
           ))}

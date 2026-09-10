@@ -2297,8 +2297,16 @@ function Domain({
  * Without it a read landing on another dot vanishes underneath and looks like
  * missing data.
  */
+/**
+ * These four numbers are api/_lib/track-marks.js.
+ *
+ * The app cannot import from api/, so they are named here and
+ * check-track-marks.mjs fails the build if they stop matching that file. The
+ * placement rule is the whole point of these charts and two products cannot
+ * round it differently.
+ */
 const SBS_NEAR = 7;
-const SBS_STEP = 11;
+const SBS_STEP = 9;
 
 function SideBySide({
   dims, you, them, viewer, label, rows,
@@ -2471,12 +2479,21 @@ function SbsQuestion({
       <Text style={{ ...Type.small, fontWeight: '600', color: Palette.white, marginBottom: Spacing.sm, lineHeight: 19 }}>
         {row.text}
       </Text>
-      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+      {/* ── THE ROW REACHES THE TILE EDGE ──────────────────────────────
+          Widening the labels took its width out of the bar, and the bar is
+          the thing being read. Ellie: "I don't want the bars any more narrow
+          than they were before, can we extend the margins toward the edge of
+          the tile instead?"
+
+          So the row pulls out into the disclosure's own side padding with a
+          negative margin, and the width it reclaims goes to the labels. The
+          track keeps the width it had. */}
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginHorizontal: -Spacing.md }}>
         <Text style={{ ...pole, textAlign: 'right' }}>{row.left}</Text>
         {/* Fixed, so the labels flex around it instead of the other way round.
             The padding is the dot overhang and nothing more: a 20pt dot at the
             3% clamp hangs 10pt past the bar's end. */}
-        <View style={{ width: 104, paddingHorizontal: 10 }}>
+        <View style={{ width: 128, paddingHorizontal: 10 }}>
           <View style={{ height: 6, borderRadius: 999, backgroundColor: 'rgba(255,255,255,0.14)', marginVertical: 16 }}>
             {/* readOfYou is the partner's answer ABOUT the reader, so it takes
                 the reader's colour and sits by the reader's own dot. */}
@@ -2544,8 +2561,9 @@ function unit(v: number | null | undefined) {
   return v == null ? null : Math.max(0, Math.min(1, (v - 1) / 4));
 }
 
+/** api/_lib/track-marks.js. See the note on SBS_NEAR. */
 const CLOSE_PCT = 8;
-const STAGGER = 11;
+const STAGGER = 7;
 
 function Slider({
   you, them, youName, themName, onDark,

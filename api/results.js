@@ -480,6 +480,35 @@ export default async function handler(req) {
       return isExerciseDone(ex, me[ex.column]) && isExerciseDone(ex, partner?.[ex.column]);
     };
 
+    /**
+     * What this couple's results contain, computed once.
+     *
+     * ── WHY IT IS ONE OBJECT ──────────────────────────────────────────────
+     * These three lines were written out twice, identically, once for the nav
+     * and once for the flat section list, and each line was its own judgement
+     * about when a section exists.
+     *
+     * Reflection's said ownership alone, while the `reflection` payload below
+     * requires ownership AND both partners having finished. So a couple who
+     * owned Relationship Reflection and had not finished it were handed four
+     * nav entries leading to four pages with nothing on them. Ellie: "No info
+     * filled in on our app's relationship reflection pages." Nothing was
+     * broken; the nav was answering a different question from the data.
+     *
+     * Intimacy already asked both questions, which is why it never did this.
+     * Reflection asks both now.
+     *
+     * Conflict keeps ownership alone, deliberately: half of Conflict Patterns
+     * is a person's own answers, and those render the moment they finish
+     * rather than waiting on their partner. It is the one section where a
+     * page with only your half on it is the intended page.
+     */
+    const sectionContents = {
+      hasReflection: ownership.ownsReflection && bothDone('ex3'),
+      intimacyReady: ownership.ownsIntimacy && bothDone('intimacy'),
+      conflictListed: ownership.ownsConflict,
+    };
+
     const expectations = (me.ex2_answers && partner?.ex2_answers)
       ? expectationsSummary({
           mine: me.ex2_answers,
@@ -680,16 +709,8 @@ export default async function handler(req) {
        * grouping the flat list itself, because a grouping invented in the app
        * is a second opinion about what the product is.
        */
-      nav: resultsNav({
-        hasReflection: ownership.ownsReflection,
-        intimacyReady: ownership.ownsIntimacy && bothDone('intimacy'),
-        conflictListed: ownership.ownsConflict,
-      }),
-      sections: sectionsWithLabels({
-        hasReflection: ownership.ownsReflection,
-        intimacyReady: ownership.ownsIntimacy && bothDone('intimacy'),
-        conflictListed: ownership.ownsConflict,
-      }),
+      nav: resultsNav(sectionContents),
+      sections: sectionsWithLabels(sectionContents),
     });
   } catch (e) {
     console.error('[results] failed:', e);

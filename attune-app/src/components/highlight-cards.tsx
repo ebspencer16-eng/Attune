@@ -593,7 +593,7 @@ function Body({ card, onDone, map }: { card: HighlightCard; onDone: () => void; 
       return (
         <View style={{ alignItems: 'center' }}>
           <Eyebrow>{card.eyebrow}</Eyebrow>
-          <Text style={[stat, { fontSize: 72, color: card.statColor || Palette.white }]}>{card.stat}</Text>
+          <Text style={[statAt(72), { color: card.statColor || Palette.white }]}>{card.stat}</Text>
           <Text style={[body, { marginBottom: Spacing.xxl }]}>{card.statLabel}</Text>
           <View style={{ flexDirection: 'row', gap: Spacing.xl }}>
             {(card.rings || []).map((r) => (
@@ -796,7 +796,31 @@ const body = { ...Type.body, color: `${WHITE}0.68)` } as const;
 const small = { ...Type.small, color: `${WHITE}0.55)` } as const;
 const label = { ...Type.eyebrow, color: `${WHITE}0.5)` } as const;
 const footer = { ...Type.eyebrow, color: `${WHITE}0.32)` } as const;
-const stat = {
-  ...Type.hero, color: Palette.white, fontSize: 64, lineHeight: 66,
+/**
+ * A big figure, with its line box.
+ *
+ * ── WHY THIS IS A FUNCTION ────────────────────────────────────────────────
+ * It was an object with fontSize 64 and lineHeight 66 on it, and the
+ * expectations card overrode the size to 72 and left the line height alone. A
+ * line box shorter than the glyph clips it, and React Native clips from the
+ * top, so "80%" lost its upper edge. Ellie: "Storycard 5 '80%' text is cut off
+ * on top."
+ *
+ * Nothing was wrong on the card that reported it either: card four sets no
+ * size and reads correctly at 64 in a 66 box. The bug was only ever in the
+ * override, which is the argument for not letting the two be set separately.
+ *
+ * The ratio is the original's, so the card that was already right does not
+ * move.
+ */
+const STAT_LINE_RATIO = 66 / 64;
+
+const statAt = (size: number) => ({
+  ...Type.hero,
+  color: Palette.white,
+  fontSize: size,
+  lineHeight: Math.ceil(size * STAT_LINE_RATIO),
   marginTop: Spacing.sm,
-} as const;
+});
+
+const stat = statAt(64);
