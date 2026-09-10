@@ -184,31 +184,6 @@ export const Spacing = {
   xs: 4, sm: 8, md: 12, lg: 16, xl: 24, xxl: 32, xxxl: 48,
 } as const;
 
-/**
- * Type for a two-column row.
- *
- * ── WHY A SEPARATE SCALE AND NOT JUST SMALLER ─────────────────────────────
- * Results pages were one stacked tile after another, so every page was a long
- * scroll and the length was the first thing a reader felt. Pairing what
- * belongs together into two columns halves that, but a column is about half
- * the width, and body at 15/24 in 155 points breaks into four-word lines that
- * read worse than the scroll did.
- *
- * So a column steps the size down and the leading down with it. Not smaller
- * for its own sake: small enough that a line still holds a phrase.
- *
- * Anything below `dense.small` is not a size, it is a decision to stop being
- * readable. If a pairing needs less than this, it is not a pairing.
- */
-export const Dense = {
-  cardTitle: { fontFamily: Fonts.body, fontSize: 15, lineHeight: 20, fontWeight: '700' },
-  body: { fontFamily: Fonts.body, fontSize: 14, lineHeight: 21, fontWeight: '400' },
-  small: { fontFamily: Fonts.body, fontSize: 12, lineHeight: 17, fontWeight: '400' },
-} as const;
-
-/** The gutter between two paired columns. */
-export const ColumnGap = 10;
-
 export const Radius = { sm: 8, md: 12, lg: 14, xl: 18, pill: 999 } as const;
 
 export const MaxContentWidth = 640;
