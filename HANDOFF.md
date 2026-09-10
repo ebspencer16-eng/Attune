@@ -862,3 +862,35 @@ whether the fact has ever left the website's source.
   structure. It has not been done for type scale and spacing.
 - Storycard download works but has never been exercised on a real device with
   a real share sheet.
+
+---
+
+## The scan for site-only facts (2026-09-10)
+
+Twenty top-level data tables in `src/App.jsx` and every prose string in that
+file, checked against everything under `api/`. Three real gaps, all fixed, and
+four pieces of dead copy that are Ellie's call.
+
+**How to repeat it.** For each data table in `src/App.jsx`, ask two questions:
+is it rendered on a page the app also has, and can the app read it. If the
+answer is yes and no, that is a gap. The prose scan is a regex for capitalised
+double-quoted strings over 45 characters ending in sentence punctuation, minus
+anything containing a code token, checked against the concatenated contents of
+`api/`. Most hits are legitimately site-only: marketing pages, the checklist,
+the budget tool, demo fixtures, auth errors.
+
+**Dead on the website, and nobody has ever seen it.** The Communication summary
+page and the `DIM_HEADLINES` table feeding it, reachable from no nav step;
+`EXP_COUPLE_CONTEXT`, ten paragraphs computed into a variable nothing renders;
+`INDIVIDUAL_TYPES.wired`, `.desc` and `.typeDesc`; `stressLine` on the
+highlights reel. All written and reviewed. Should show or should go, and that
+is a copy decision.
+
+## The endpoint gate earns its keep
+
+`check-results-endpoint.mjs` reads the app's own source for every
+`results.content.X` it consumes and requires each to exist in the real payload.
+It found `storycardStyle` on its first run: the app read it from `content`, the
+handler assembles it at the top level, so the storycards had been on their
+fallback since the day the field was added. **If you add a field a screen needs,
+put it where the app reads it and let this check confirm it.**
