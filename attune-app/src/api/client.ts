@@ -131,6 +131,14 @@ export type ResultsContent = {
   names: { a: string | null; b: string | null };
   /** The couple map's four quadrants, named and coloured by the server. */
   mapQuadrants?: { code: 'W' | 'X' | 'Y' | 'Z'; name: string; color: string; fill: string }[];
+  /**
+   * How the storycards are presented: ratio, the opener's stripe, the wordmark
+   * and the address. One copy, in api/_lib/storycard-style.js, which the
+   * website imports directly.
+   */
+  storycardStyle?: {
+    ratio: number; stripe: string[]; wordmark: string; siteLabel: string;
+  };
   /** What the two axes mean, so the map reads as a finding and not a picture. */
   axes?: { id: string; label: string; color: string; desc: string; poles: string[] }[];
   /** Each partner's own placement, in words. Null until that person has one. */

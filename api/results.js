@@ -33,6 +33,7 @@ import { intimacyResults } from './_lib/intimacy-results.js';
 import { reflectionResults } from './_lib/reflection-results.js';
 import { whatComesNext } from './_lib/what-comes-next.js';
 import { highlightCards } from './_lib/highlight-cards.js';
+import { STORYCARD_STYLE } from './_lib/storycard-style.js';
 import { personalityFeedback, commsProtocols, commsActionPlan } from './_lib/comms-plan.js';
 import { deriveAnniversaryInsights, reflectionActionTitle } from './_lib/reflection-insights.js';
 import { EXERCISES, EXERCISE_COLUMNS, isExerciseDone } from './_exercises.js';
@@ -565,6 +566,13 @@ export default async function handler(req) {
        * cards; the app draws its own. What neither does is invent a summary of
        * its own, which is what the app was doing here.
        */
+      /**
+       * How the cards are presented: ratio, the opener's stripe, the wordmark
+       * and the address, the grounds. Sent rather than written twice, because
+       * writing them twice is exactly how the two surfaces stopped looking
+       * like the same product. See api/_lib/storycard-style.js.
+       */
+      storycardStyle: STORYCARD_STYLE,
       highlights: highlightCards({
         dimensions: displayed.content?.dimensions || [],
         coupleTypeId: results.coupleType,

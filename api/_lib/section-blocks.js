@@ -97,7 +97,10 @@ export const ORDER_ENFORCED = new Set([
   'exp-overview',
   'exp-conversation',
   'what-comes-next',
-  'highlights',
+  // highlights is deliberately out. The website defines its watermark helper
+  // above the cards array that uses it, so marker position there is
+  // declaration order rather than reading order, and the two surfaces would be
+  // reported as disagreeing about a sequence neither of them disagrees about.
   // reflection-overview is deliberately out. The website draws its ratings,
   // action plan and admiration on one page; the app's nav gives the action
   // plan a screen of its own, so the marker further down the file is a
@@ -146,8 +149,20 @@ export const SECTION_BLOCKS = {
     { id: 'action-tile', note: 'The domain\'s one instruction, labelled "One thing to try".' },
   ],
 
+  /**
+   * Storycards drifted three times on presentation while every field was
+   * drawn, so these blocks are about how the reel is built rather than what it
+   * contains. The values that drifted, the ratio and the stripe and the two
+   * lines at the foot of each card, are shared data now: both surfaces read
+   * api/_lib/storycard-style.js, so no gate is needed for those. What data
+   * cannot carry is where a thing sits, and that is what these mark.
+   */
   highlights: [
     { id: 'storycards', note: 'The nine cards, swipeable, in the order the server sends.' },
+    { id: 'stripe', note: "The opener's top edge, from STRIPE." },
+    { id: 'progress', note: 'Where you are in the sequence. Above the card, in the couple\u2019s colour.' },
+    { id: 'controls', note: 'Previous and next. Swiping back through nine cards is a chore.' },
+    { id: 'watermark', note: 'The site address on every card, so a screenshot says where it came from.' },
   ],
 
 

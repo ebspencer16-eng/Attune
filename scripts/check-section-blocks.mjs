@@ -41,14 +41,34 @@ import { SECTION_BLOCKS, PLANNED, ORDER_ENFORCED, marker } from '../api/_lib/sec
 
 const ROOT = new URL('..', import.meta.url).pathname;
 
+/**
+ * Each surface is a list of files, not one file.
+ *
+ * This read one file per surface and reported four blocks missing from the app
+ * that the app draws. The website's results are one 15,700 line component and
+ * the app's are split across several, so a checker that assumes one file per
+ * surface is blind to whichever part of the app lives somewhere else. That is
+ * the same blind spot as matching on a literal name when the thing is reached
+ * through a registry: the file list has to follow the split.
+ *
+ * Add a file here when the app grows a new results component.
+ */
 const SURFACES = [
-  { name: 'website', file: 'src/App.jsx' },
-  { name: 'app', file: 'attune-app/src/components/results.tsx' },
+  { name: 'website', files: ['src/App.jsx'] },
+  {
+    name: 'app',
+    files: [
+      'attune-app/src/components/results.tsx',
+      'attune-app/src/components/highlight-cards.tsx',
+      'attune-app/src/components/conflict-results.tsx',
+      'attune-app/src/components/couple-map.tsx',
+    ],
+  },
 ];
 
 const sources = SURFACES.map((s) => ({
   ...s,
-  text: readFileSync(ROOT + s.file, 'utf8'),
+  text: s.files.map((f) => readFileSync(ROOT + f, 'utf8')).join('\n'),
 }));
 
 const problems = [];

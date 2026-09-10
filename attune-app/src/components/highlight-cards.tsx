@@ -66,6 +66,25 @@ const TONES: Record<string, [string, string, string]> = {
 const WHITE = 'rgba(255,255,255,';
 
 /**
+ * Presentation values, from the server.
+ *
+ * api/_lib/storycard-style.js is the single copy, the website imports it
+ * directly and /api/results sends it here on content.storycardStyle. This
+ * module-level object is set from the payload once the results screen has it.
+ *
+ * The literals below are a last resort for a payload written before that field
+ * existed, the same shape of fallback couple-map.tsx keeps for its axis names.
+ * They are not a second opinion: if they ever disagree with the module, the
+ * module is right.
+ */
+let SC = {
+  ratio: 9 / 16,
+  stripe: ['#E8673A', '#9B5DE5', '#1B5FE8'] as string[],
+  wordmark: 'Attune',
+  siteLabel: 'attune-relationships.com',
+};
+
+/**
  * The couple-type card's ground, from the couple's own colour.
  *
  * The website builds this gradient from the type colour, so every couple type
@@ -79,7 +98,7 @@ function typeGround(accent?: string | null): [string, string, string] {
 }
 
 /** Portrait, the ratio a story is. */
-const CARD_RATIO = 9 / 16;
+
 
 /**
  * The section as it sits on the results page: card one, and a way in.
@@ -91,14 +110,20 @@ const CARD_RATIO = 9 / 16;
  * with product chrome above it is not a story card.
  */
 export default function HighlightCards({
-  cards, onDone, accent,
-}: { cards: HighlightCard[]; onDone: () => void; accent?: string | null }) {
+  cards, onDone, accent, style,
+}: {
+  cards: HighlightCard[];
+  onDone: () => void;
+  accent?: string | null;
+  style?: Partial<typeof SC> | null;
+}) {
+  if (style) SC = { ...SC, ...style };
   const [open, setOpen] = useState(false);
   const [box, setBox] = useState({ width: Dimensions.get('window').width, height: 0 });
   if (!cards.length) return null;
 
-  const cardW = Math.min(box.width - Spacing.lg * 2, box.height ? box.height * CARD_RATIO : 9999);
-  const cardH = cardW / CARD_RATIO;
+  const cardW = Math.min(box.width - Spacing.lg * 2, box.height ? box.height * SC.ratio : 9999);
+  const cardH = cardW / SC.ratio;
 
   return (
     <View
@@ -137,8 +162,8 @@ function Reel({
   // Portrait, capped by the height available. A card that fills whatever space
   // is left is a different shape on every phone, and these are made to be
   // screenshotted.
-  const cardW = Math.min(width - Spacing.lg * 2, box.height ? box.height * CARD_RATIO : 9999);
-  const cardH = cardW / CARD_RATIO;
+  const cardW = Math.min(width - Spacing.lg * 2, box.height ? box.height * SC.ratio : 9999);
+  const cardH = cardW / SC.ratio;
   const tint = accent || c.accent;
 
   const goTo = (i: number) => {
@@ -184,6 +209,7 @@ function Reel({
         </View>
       </SafeAreaView>
 
+      {/* block: highlights/progress */}
       {/* ── PROGRESS, ABOVE THE CARD ────────────────────────────────────
           The website puts it here and paints the active bar in the couple's
           colour. The app had it underneath in a generic orange, so the one
@@ -227,6 +253,7 @@ function Reel({
         ))}
       </ScrollView>
 
+      {/* block: highlights/controls */}
       {/* ── PREVIOUS AND NEXT ───────────────────────────────────────────
           The website has both. Swiping is fine going forward and a chore
           going back, and on the last card a button is the only thing that
@@ -305,8 +332,9 @@ function Card({
         {/* The stripe across the top. It is on the website's opener and it is
             the first thing anyone sees of this product. */}
         {card.kind === 'opener' ? (
+          /* block: highlights/stripe */
           <LinearGradient
-            colors={[Palette.orange, '#9B5DE5', Palette.indigo]}
+            colors={SC.stripe as [string, string, string]}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 0 }}
             style={{ height: 5 }}
@@ -328,10 +356,11 @@ function Card({
             flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
           }}>
           <Text style={{ ...Type.cardTitle, fontFamily: Type.title.fontFamily, fontSize: 14, color: `${WHITE}0.55)` }}>
-            Attune
+            {SC.wordmark}
           </Text>
+          {/* block: highlights/watermark */}
           <Text style={{ ...Type.eyebrow, fontSize: 8, letterSpacing: 1.2, textTransform: 'lowercase', color: `${WHITE}0.35)` }}>
-            attune-relationships.com
+            {SC.siteLabel}
           </Text>
         </View>
       </LinearGradient>

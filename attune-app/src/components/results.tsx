@@ -358,6 +358,7 @@ function SectionBody({
         <HighlightCards
           cards={highlights}
           accent={results.content?.coupleType?.color || null}
+          style={results.content?.storycardStyle || null}
           onDone={() => onGoToSection('couple-type')}
         />
       );

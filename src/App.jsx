@@ -83,6 +83,7 @@ import {
 import { COUPLE_TYPES as NEW_COUPLE_TYPES } from "../api/_couple-types.js";
 import { INDIVIDUAL_TYPE_DISPLAY } from "../api/_individual-types.js";
 import { AXES } from "../api/_axes.js";
+import { STRIPE as SC_STRIPE, SITE_LABEL as SC_SITE } from "../api/_lib/storycard-style.js";
 import { individualBlurb, axisBand, axisRows } from "../api/_lib/individual-profile.js";
 import { pronounForm } from "../api/_lib/role-tokens.js";
 import { commsProtocols } from "../api/_lib/comms-plan.js";
@@ -9073,12 +9074,13 @@ function ResultsHighlights({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3
   // Shared watermark style
   const watermark = (
     <div style={{ position: "absolute", bottom: 16, right: 18, fontSize: "0.52rem", color: "rgba(255,255,255,0.35)", fontFamily: BFONT, letterSpacing: "0.12em", textTransform: "lowercase" }}>
-      attune-relationships.com
+      {/* block: highlights/watermark */}
+      {SC_SITE}
     </div>
   );
   const watermarkDark = (
     <div style={{ position: "absolute", bottom: 16, right: 18, fontSize: "0.52rem", color: "rgba(14,11,7,0.3)", fontFamily: BFONT, letterSpacing: "0.12em", textTransform: "lowercase" }}>
-      attune-relationships.com
+      {SC_SITE}
     </div>
   );
 
@@ -9165,7 +9167,8 @@ function ResultsHighlights({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3
       <style>{cardAnim}</style>
       <div onClick={advance} style={{ flex: 1, display: "flex", flexDirection: "column", cursor: "pointer", position: "relative", overflow: "hidden" }}>
         {watermark}
-        <div style={{ height: 5, background: "linear-gradient(90deg, #E8673A, #9B5DE5, #1B5FE8)", flexShrink: 0 }} />
+        {/* block: highlights/stripe */}
+        <div style={{ height: 5, background: `linear-gradient(90deg, ${SC_STRIPE.join(", ")})`, flexShrink: 0 }} />
         <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "2.5rem 2.5rem 2rem", textAlign: "center", animation: "cardReveal 0.5s cubic-bezier(0.22,1,0.36,1) both" }}>
           {portrait && (
             <div style={{ width: 80, height: 80, borderRadius: "50%", overflow: "hidden", marginBottom: "1.5rem", border: "2px solid rgba(255,255,255,0.15)", boxShadow: "0 8px 32px rgba(0,0,0,0.4)", animation: "popIn 0.5s 0.1s cubic-bezier(0.34,1.56,0.64,1) both" }}>
@@ -9315,7 +9318,7 @@ function ResultsHighlights({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3
       <style>{cardAnim}</style>
       <div style={{ flex: 1, display: "flex", flexDirection: "column", position: "relative", overflow: "hidden" }}>
         {watermark}
-        <div style={{ height: 5, background: "linear-gradient(90deg, #E8673A, #9B5DE5, #1B5FE8)", flexShrink: 0 }} />
+        <div style={{ height: 5, background: `linear-gradient(90deg, ${SC_STRIPE.join(", ")})`, flexShrink: 0 }} />
         <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "2.5rem 2.5rem", textAlign: "center", animation: "cardReveal 0.5s cubic-bezier(0.22,1,0.36,1) both" }}>
           <div style={{ width: 44, height: 2, background: "linear-gradient(90deg, #E8673A, #1B5FE8)", borderRadius: 2, marginBottom: "1.75rem", animation: "popIn 0.4s 0.1s both" }} />
           <div style={{ fontFamily: HFONT, fontSize: "clamp(1.6rem,4.4vw,2.15rem)", fontWeight: 700, color: "white", lineHeight: 1.2, marginBottom: "1rem", maxWidth: 320, animation: "fadeUp 0.5s 0.15s both" }}>We hope you continue to grow together throughout your Attune experience.</div>
@@ -9336,6 +9339,7 @@ function ResultsHighlights({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3
         </button>
       </div>}
 
+      {/* block: highlights/progress */}
       {inline && <div style={{ display: "flex", gap: 5, marginBottom: "1.25rem" }}>
         {Array.from({ length: TOTAL_CARDS }).map((_, i) => (
           <div key={i} onClick={() => setCardIdx(i)} style={{ height: 4, width: i === cardIdx ? 28 : 18, borderRadius: 2, background: i === cardIdx ? (coupleType?.color || "#E8673A") : i < cardIdx ? "rgba(0,0,0,0.25)" : "#E8DDD0", cursor: "pointer", transition: "all 0.2s" }} />
@@ -9354,6 +9358,8 @@ function ResultsHighlights({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3
       </>)}
 
       <div style={{ position: inline ? "static" : "absolute", bottom: inline ? undefined : 0, left: inline ? undefined : 0, right: inline ? undefined : 0, padding: inline ? "0" : "0 1.5rem 1.25rem", display: "flex", alignItems: "center", justifyContent: "space-between", gap: "1rem", marginTop: inline ? "1rem" : 0 }}>
+        
+        {/* block: highlights/controls */}
         {(!inline && !isMobile) ? <div style={{ width: 44, height: 44 }} /> : (
         <button onClick={() => cardIdx > 0 && setCardIdx(n => n - 1)} disabled={cardIdx === 0}
           style={{ width: 44, height: 44, borderRadius: "50%", background: cardIdx === 0 ? "transparent" : inline ? "rgba(0,0,0,0.07)" : "rgba(255,255,255,0.1)", border: cardIdx === 0 ? "none" : "1px solid " + (inline ? "rgba(0,0,0,0.12)" : "rgba(255,255,255,0.15)"), color: cardIdx === 0 ? "transparent" : inline ? "#0E0B07" : "white", fontSize: "1.1rem", cursor: cardIdx === 0 ? "default" : "pointer", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
