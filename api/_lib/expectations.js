@@ -77,10 +77,37 @@ export function normRespValue(value, isSelf, youName, themName) {
  * strings says they match, and that is the bug this exists to avoid.
  */
 export function agrees(yourValue, theirValue) {
+  // Unanswered is not a comparison. Everything else is.
+  if (yourValue == null || yourValue === '') return null;
+  if (theirValue == null || theirValue === '') return null;
+
   const you = sideOf(yourValue);
   const them = sideOf(theirValue);
-  if (you == null || them == null) return null;
-  if (you === 'na' || them === 'na') return null;
+
+  // ── "DOESN'T APPLY" IS AN ANSWER ────────────────────────────────────────
+  // This used to return null whenever either side said it, which dropped the
+  // row from the results entirely: out of the count, out of the percentage,
+  // out of the list of things to talk about.
+  //
+  // The website has never done that. It compares the two answers as a reader
+  // sees them, so "Doesn't apply" against "Primarily mine" is a difference and
+  // "Doesn't apply" from both is agreement. The two products therefore told
+  // the same couple different things, and the app was the optimistic one: the
+  // disagreements it dropped pushed categories to 100 per cent aligned that
+  // the website showed as gaps.
+  //
+  // Thirty-three of the possible answer pairs diverged, every one of them
+  // involving this value. The website's reading is kept because it is the one
+  // customers have been given and because it is right: one person saying a
+  // responsibility does not apply while the other says it is theirs is a
+  // mismatched expectation, which is the entire subject of this exercise.
+  if (you === 'na' || them === 'na') return you === them;
+
+  // A value neither side recognises falls back to comparing what was stored,
+  // which is what the website's display comparison did. Better than dropping
+  // an answer nobody has taught this function about.
+  if (you == null || them == null) return yourValue === theirValue;
+
   if (you === 'both' || them === 'both') return you === them;
   const youMean = you === 'self' ? 'you' : 'them';
   const theyMean = them === 'self' ? 'them' : 'you';
@@ -141,6 +168,15 @@ export function expectationsRows({ mine, theirs, youName = 'You', themName = 'Yo
   return [...respRows, ...lifeRows];
 }
 
+/**
+ * What the life questions are called, everywhere.
+ *
+ * The website has always shown them as this. The app invented "The bigger
+ * questions" for the same set, so the two products named a category of a
+ * customer's own results differently. One string, read by both.
+ */
+export const LIFE_CATEGORY_LABEL = 'Life & Values';
+
 /** The overview numbers, and one bucket per conversation screen. */
 export function expectationsSummary({ mine, theirs, youName, themName }) {
   const rows = expectationsRows({ mine, theirs, youName, themName });
@@ -161,6 +197,9 @@ export function expectationsSummary({ mine, theirs, youName, themName }) {
   });
 
   return {
+    // What the life questions are called, sent so the app stops naming a
+    // category of someone's own results differently from the website.
+    lifeLabel: LIFE_CATEGORY_LABEL,
     answered,
     aligned,
     differences: answered - aligned,

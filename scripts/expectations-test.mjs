@@ -31,7 +31,24 @@ ok('the other direction agrees too', agrees("Primarily my partner's", 'Primarily
 ok('balanced with balanced agrees', agrees('Balanced', 'Balanced') === true);
 ok('balanced against a claim disagrees', agrees('Balanced', 'Primarily mine') === false);
 ok('unanswered is not a comparison', agrees(null, 'Primarily mine') === null);
-ok('"doesn\'t apply" is not a comparison', agrees("Doesn't apply", 'Primarily mine') === null);
+
+// ── "DOESN'T APPLY" USED TO BE DROPPED, AND THAT WAS THE BUG ───────────────
+// This line asserted that it returns null, meaning the row leaves results
+// entirely. The website never behaved that way: it compared what a reader sees
+// and counted the row either as a difference or as agreement. So the same
+// couple got different percentages, different gap lists and different things
+// to talk about depending on which product they opened, and the app was always
+// the optimistic one.
+//
+// The rule changed on purpose. Only "nobody answered" drops a row now.
+// check-alignment-rule.mjs holds the two readings together across every
+// possible pair.
+ok('one partner saying it does not apply is a DIFFERENCE',
+  agrees("Doesn't apply", 'Primarily mine') === false);
+ok('both saying it does not apply is AGREEMENT',
+  agrees("Doesn't apply", "Doesn't apply") === true);
+ok('a row is only dropped when nobody answered',
+  agrees("Doesn't apply", '') === null);
 
 console.log('\n— A naive string comparison would get these wrong —');
 const naive = (a, b) => a === b;

@@ -31,7 +31,7 @@ import {
 // cannot alter which values reach the maths.
 const computeOverallExpectationsPctClient = (ex2, partnerEx2, userName, partnerName) =>
   overallExpectationsPct({ mine: ex2, theirs: partnerEx2, youName: userName, themName: partnerName });
-import { normRespValue, mirrorRespKey, mirrorLifeId } from "../api/_lib/expectations.js";
+import { agrees, normRespValue, mirrorRespKey, mirrorLifeId, LIFE_CATEGORY_LABEL } from "../api/_lib/expectations.js";
 import { reflectionActionTitle, deriveAnniversaryInsights, isSubstantive, quoted } from "../api/_lib/reflection-insights.js";
 // Default binding for the paths with no couple context: the workbook, the
 // share cards, anything outside the results tree. Components inside the
@@ -2985,7 +2985,7 @@ const FIXED_CATS = [
   ...RESPONSIBILITY_CATEGORIES,
   {
     id: "life",
-    label: "Life & Values",
+    label: LIFE_CATEGORY_LABEL,
     items: LIFE_QUESTIONS.map(q => q.text),
     color: "#9B5DE5",
   },
@@ -4203,7 +4203,14 @@ function ExpectationsResults({ myAnswers, partnerAnswers, userName, partnerName,
       const score = scoreRespClient(rawMine, rawTheirs, userName, partnerName);
       const mine = normRespVal(rawMine, true);
       const theirs = normRespVal(rawTheirs, false);
-      rows.push({ category: cat.label, catId: cat.id, item: substName(item, userName, partnerName), mine, theirs, aligned: mine === theirs, score });
+      // agrees() from api/_lib/expectations.js, not `mine === theirs`.
+      //
+      // Comparing the two display names happened to give the right answer for
+      // most pairs and the wrong one wherever "Doesn't apply" appeared, and the
+      // server had its own rule that dropped those rows instead. One couple,
+      // two products, two different sets of results. There is one rule now and
+      // this is a call to it.
+      rows.push({ category: cat.label, catId: cat.id, item: substName(item, userName, partnerName), mine, theirs, aligned: agrees(rawMine, rawTheirs) === true, score });
     });
   });
 

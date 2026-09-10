@@ -373,6 +373,8 @@ export type NextStepGroup = {
 };
 
 export type ExpectationsSummary = {
+  /** What the life questions are called. One string, shared with the site. */
+  lifeLabel?: string;
   answered: number;
   aligned: number;
   differences: number;

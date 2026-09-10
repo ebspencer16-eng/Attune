@@ -466,7 +466,9 @@ function ExpectationsOverview({
     ...summary.categories.filter((cat) => cat.answered > 0),
     ...(summary.life.length ? [{
       section: 'life',
-      label: 'The bigger questions',
+      // The website's name for this category, from the server. The app used
+      // to call it "The bigger questions", which is nowhere in the product.
+      label: summary.lifeLabel || 'Life & Values',
       answered: summary.life.length,
       aligned: summary.life.filter((r) => r.aligned).length,
       differences: summary.life.filter((r) => !r.aligned).length,
