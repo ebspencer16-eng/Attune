@@ -9382,8 +9382,26 @@ function AuthModal({ mode, onClose, onSuccess }) {
    * `sb` is passed in so the caller owns the import.
    */
   const completeLogin = async (sb, user) => {
-    // Fetch profile
-    const { data: profile } = await sb.from('profiles').select('*').eq('id', user.id).single();
+    // ── THE ERROR MATTERS HERE ──────────────────────────────────────────────
+    // This discarded it. A read that fails, a mobile cold start with no
+    // network yet, a transient auth or RLS hiccup, leaves `profile` undefined,
+    // and the restore block below then reads "the server has no answers" and
+    // deletes the local copy of every exercise. The dashboard says the
+    // exercise was never done and results lock, until some later load happens
+    // to succeed and puts them back.
+    //
+    // The server's copy is never at risk: answers are only written on
+    // completion and never written as null. But a couple watching their
+    // results disappear has no way to know that.
+    //
+    // `read` is what the rest of this function checks before clearing
+    // anything: absence is only absence when the server actually answered.
+    const { data: profile, error: profileErr } =
+      await sb.from('profiles').select('*').eq('id', user.id).single();
+    const read = { ok: !profileErr };
+    if (profileErr) {
+      console.warn('[Attune] profile read failed on sign-in; keeping local answers:', profileErr.message);
+    }
 
     const account = {
       id: user.id,
@@ -9421,19 +9439,19 @@ function AuthModal({ mode, onClose, onSuccess }) {
       // first three only, so an admin reset of a newer exercise left the
       // local copy in place and it kept reading as complete.
       if (profile?.ex1_answers) localStorage.setItem('attune_ex1', JSON.stringify(profile.ex1_answers));
-      else localStorage.removeItem('attune_ex1');
+      else if (read.ok) localStorage.removeItem('attune_ex1');
       if (profile?.intimacy_data) localStorage.setItem('attune_intimacy', JSON.stringify(profile.intimacy_data));
-      else localStorage.removeItem('attune_intimacy');
+      else if (read.ok) localStorage.removeItem('attune_intimacy');
       if (profile?.conflict_data) localStorage.setItem('attune_conflict', JSON.stringify(profile.conflict_data));
-      else localStorage.removeItem('attune_conflict');
+      else if (read.ok) localStorage.removeItem('attune_conflict');
     } catch {}
     try {
       if (profile?.ex2_answers) localStorage.setItem('attune_ex2', JSON.stringify(profile.ex2_answers));
-      else localStorage.removeItem('attune_ex2');
+      else if (read.ok) localStorage.removeItem('attune_ex2');
     } catch {}
     try {
       if (profile?.ex3_answers) localStorage.setItem('attune_ex3', JSON.stringify(profile.ex3_answers));
-      else localStorage.removeItem('attune_ex3');
+      else if (read.ok) localStorage.removeItem('attune_ex3');
     } catch {}
     // Prior-completion snapshots (for retake comparison). These exist only
     // when the user has re-taken an exercise. Stored in localStorage so
@@ -9466,12 +9484,12 @@ function AuthModal({ mode, onClose, onSuccess }) {
     // keep reading as complete.
     if (profile?.budget_data) {
       try { localStorage.setItem('attune_budget', JSON.stringify(profile.budget_data)); } catch {}
-    } else {
+    } else if (read.ok) {
       try { localStorage.removeItem('attune_budget'); } catch {}
     }
     if (profile?.checklist_data) {
       try { localStorage.setItem('attune_checklist', JSON.stringify(profile.checklist_data)); } catch {}
-    } else {
+    } else if (read.ok) {
       try { localStorage.removeItem('attune_checklist'); } catch {}
     }
     if (profile?.notes_data) {
@@ -11705,6 +11723,12 @@ export default function App() {
               ({ data: profile, error: profErr } = await sb.from('profiles').select('*').eq('id', session.user.id).maybeSingle());
               if (cancelled) return;
             }
+            // Everything below this point runs only on a read that succeeded,
+            // which is what makes it safe to treat a missing column as "the
+            // server has none" rather than "we did not hear back". Stated as a
+            // value so the clears further down can say so where they happen,
+            // instead of depending on a reader remembering this return.
+            const read = { ok: true };
             if (profErr) {
               // Couldn't read the profile. Leave the session and any existing
               // account state alone; the next load reconciles.
@@ -11801,11 +11825,11 @@ export default function App() {
             // real answers are stored server-side.
             try {
               if (profile?.ex1_answers)        localStorage.setItem('attune_ex1', JSON.stringify(profile.ex1_answers));
-              else                             localStorage.removeItem('attune_ex1');
+              else if (read.ok)                localStorage.removeItem('attune_ex1');
               if (profile?.ex2_answers)        localStorage.setItem('attune_ex2', JSON.stringify(profile.ex2_answers));
-              else                             localStorage.removeItem('attune_ex2');
+              else if (read.ok)                localStorage.removeItem('attune_ex2');
               if (profile?.ex3_answers)        localStorage.setItem('attune_ex3', JSON.stringify(profile.ex3_answers));
-              else                             localStorage.removeItem('attune_ex3');
+              else if (read.ok)                localStorage.removeItem('attune_ex3');
               if (profile?.ex1_answers_prior)  localStorage.setItem('attune_ex1_prior', JSON.stringify({ answers: profile.ex1_answers_prior, at: profile.ex1_prior_completed_at }));
               if (profile?.ex2_answers_prior)  localStorage.setItem('attune_ex2_prior', JSON.stringify({ answers: profile.ex2_answers_prior, at: profile.ex2_prior_completed_at }));
               if (profile?.ex3_answers_prior)  localStorage.setItem('attune_ex3_prior', JSON.stringify({ answers: profile.ex3_answers_prior, at: profile.ex3_prior_completed_at }));
@@ -11816,9 +11840,9 @@ export default function App() {
               if (profile?.ex3_progress && !profile?.ex3_answers) localStorage.setItem('attune_ex3_progress', JSON.stringify(profile.ex3_progress));
               // Same else-remove rule as the other hydration path.
               if (profile?.budget_data)        localStorage.setItem('attune_budget', JSON.stringify(profile.budget_data));
-              else                             localStorage.removeItem('attune_budget');
+              else if (read.ok)                localStorage.removeItem('attune_budget');
               if (profile?.checklist_data)     localStorage.setItem('attune_checklist', JSON.stringify(profile.checklist_data));
-              else                             localStorage.removeItem('attune_checklist');
+              else if (read.ok)                localStorage.removeItem('attune_checklist');
               if (profile?.notes_data)         localStorage.setItem('attune_notes', JSON.stringify(profile.notes_data));
               else                             localStorage.removeItem('attune_notes');
               if (profile?.intimacy_data)      { localStorage.setItem('attune_intimacy', JSON.stringify(profile.intimacy_data)); setIntimacyData(profile.intimacy_data); }
@@ -11826,7 +11850,7 @@ export default function App() {
               // on hydration or the answers do not survive a device change or a
               // sign-out. Else-remove so a second account cannot inherit them.
               if (profile?.conflict_data)      { localStorage.setItem('attune_conflict', JSON.stringify(profile.conflict_data)); setConflictData(profile.conflict_data); }
-              else                             { localStorage.removeItem('attune_conflict'); setConflictData(null); }
+              else if (read.ok)                { localStorage.removeItem('attune_conflict'); setConflictData(null); }
               if (profile?.profile_setup_complete) localStorage.setItem('attune_profile_setup_done', '1');
               // Invitee (Partner B) completion marker. Routing keys off
               // attune_partner_session; without it, an invitee who finished on
@@ -12032,9 +12056,10 @@ export default function App() {
                   const answers = JSON.parse(raw);
                   if (!answers || typeof answers !== 'object') return;
                   if (exNum === 1 && !isCurrentEx1(answers)) {
-                    // Stale local copy from before the exercise changed. Drop
-                    // it rather than pushing it, so the device stops showing a
-                    // completion the server has correctly cleared.
+                    // safe-clear: not a read result. This local copy predates
+                    // the two-part exercise, so it is discarded rather than
+                    // pushed. Nothing was read to decide it, and nothing on the
+                    // server is lost.
                     try { localStorage.removeItem('attune_ex1'); localStorage.removeItem('attune_ex1_progress'); } catch {}
                     console.warn('[Attune] local Ex1 answers predate the two-part exercise. Discarded rather than resynced.');
                     return;
