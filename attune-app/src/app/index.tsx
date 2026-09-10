@@ -30,6 +30,7 @@ import type { ApiError, HomeCard, HomeResponse } from '@/api/client';
 import { ScreenError, ScreenLoading } from '@/components/screen-states';
 import SignIn from '@/components/sign-in';
 import Settings from '@/components/settings';
+import { forgetLastSection } from '@/components/results';
 import {
   BlueGround, BottomTabInset, Colors, MaxContentWidth, Palette, Radius,
   Spacing, Type,
@@ -264,7 +265,10 @@ export default function HomeScreen() {
       {settingsOpen ? (
         <Settings
           onClose={() => setSettingsOpen(false)}
-          onSignedOut={() => { setSettingsOpen(false); setLoading(true); load(); }}
+          onSignedOut={() => {
+            forgetLastSection();
+            setSettingsOpen(false); setLoading(true); load();
+          }}
         />
       ) : null}
     </View>

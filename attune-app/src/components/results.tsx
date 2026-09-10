@@ -99,6 +99,18 @@ function interp(text: string | null | undefined, you: string, them: string): str
  */
 let lastSection: string | null = null;
 
+/**
+ * Forget where the last reader was.
+ *
+ * `lastSection` is module state, so it outlives a sign-out. Without this the
+ * next person to sign in on the same device lands on whatever section the
+ * previous one was reading, which at best is disorienting and at worst opens
+ * on Physical Intimacy for someone who has just arrived.
+ */
+export function forgetLastSection() {
+  lastSection = null;
+}
+
 export default function Results({
   results, owned = [], sections: fromServer, nav = [], highlights = [],
   expectations = null, intimacy = null, reflection = null, whatComesNext = null,
