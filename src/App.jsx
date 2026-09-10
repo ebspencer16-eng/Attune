@@ -86,6 +86,8 @@ import { INDIVIDUAL_TYPE_DISPLAY } from "../api/_individual-types.js";
 import { AXES, MAP_CAPTION } from "../api/_axes.js";
 import { commAlignmentPct } from "../api/_lib/comm-alignment.js";
 import { EXERCISES } from "../api/_exercises.js";
+import { CONFLICT_QUESTIONS } from "../api/_conflict-questions.js";
+import { WROTE_ROWS } from "../api/_conflict-results-prose.js";
 import { CLOSE_PCT as TM_CLOSE, STAGGER as TM_STAGGER, SBS_NEAR as TM_SBS_NEAR, SBS_STEP as TM_SBS_STEP } from "../api/_lib/track-marks.js";
 import { CATEGORY_INTRO } from "../api/_lib/category-intros.js";
 import { NEAR_AXIS_PROSE as NEAR_AXIS_PROSE_SHARED } from "../api/_lib/near-axis.js";
@@ -7775,7 +7777,9 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
         <Layout accent={BLUE}>
           <div style={{ maxWidth: 760 }}>
             <div style={{ fontSize: "0.62rem", letterSpacing: "0.22em", textTransform: "uppercase", color: BLUE, fontWeight: 700, fontFamily: BFONT, marginBottom: "0.6rem" }}>{cc.eyebrow}</div>
+            {/* block: conflict-snapshot/head */}
             <div style={{ fontSize: "clamp(1.4rem,3.5vw,1.85rem)", fontWeight: 700, fontFamily: HFONT, color: C.ink, marginBottom: "1rem" }}>{cc.snapshotTitle}</div>
+            {/* block: conflict-snapshot/openings */}
             <div style={{ fontSize: "0.62rem", letterSpacing: "0.16em", textTransform: "uppercase", color: C.muted, fontWeight: 700, fontFamily: BFONT, marginBottom: "0.6rem" }}>Conflict</div>
             <Card>
               <div style={{ display: "grid", gridTemplateColumns: COLS, gap: "0.5rem 1.25rem", marginBottom: "0.5rem" }}>
@@ -7797,6 +7801,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
                 it is about the same shared material, and a page of two lists
                 did not earn a nav entry of its own. */}
             <div style={{ marginTop: "1.75rem" }}>
+              {/* block: conflict-snapshot/repair */}
               <div style={{ fontSize: "0.62rem", letterSpacing: "0.16em", textTransform: "uppercase", color: C.muted, fontWeight: 700, fontFamily: BFONT, marginBottom: "0.6rem" }}>Repair</div>
               <Card>
                 <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: "1.75rem" }}>
@@ -7828,12 +7833,15 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
         <Layout accent={BLUE}>
           <div style={{ maxWidth: 660 }}>
             <div style={{ fontSize: "0.62rem", letterSpacing: "0.22em", textTransform: "uppercase", color: BLUE, fontWeight: 700, fontFamily: BFONT, marginBottom: "0.6rem" }}>{cc.eyebrow}</div>
+            {/* block: conflict-patterns/head */}
             <div style={{ fontSize: "clamp(1.4rem,3.5vw,1.85rem)", fontWeight: 700, fontFamily: HFONT, color: C.ink, marginBottom: "0.5rem" }}>{cc.patternsTitle}</div>
+            {/* block: conflict-patterns/privacy */}
             <div style={{ fontSize: "0.8rem", fontWeight: 600, color: "#B5546E", fontFamily: BFONT, lineHeight: 1.5, marginBottom: "0.9rem" }}>
               * {cc.patternsPrivacy}
             </div>
             <Card>
               <p style={{ fontSize: "0.86rem", color: C.muted, fontFamily: BFONT, lineHeight: 1.65, marginTop: 0, marginBottom: "0.6rem" }}>{cc.patternsIntro}</p>
+              {/* block: conflict-patterns/rows */}
               {conflictMine.ranked.map(p => <PatternRow key={p.key} p={p} />)}
               {conflictMine.flaggedCount === 0 && (
                 <p style={{ fontSize: "0.86rem", color: C.ink, fontFamily: BFONT, lineHeight: 1.7, marginTop: "1.1rem", marginBottom: 0, fontWeight: 600 }}>
@@ -7851,10 +7859,10 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
     // be read against each other. A vertical list of four quotes made the
     // reader hold one answer in their head while scrolling to its counterpart.
     if (section === "conflict-wrote") {
-      const QUESTIONS = [
-        { key: 'reflection', label: 'A disagreement that went better than expected' },
-        { key: 'appreciation', label: 'One thing I appreciate about how we handle conflict' },
-      ];
+      // WROTE_ROWS, not a copy of them. These two headings were typed here and
+      // the app had its own shorter pair, so the same two answers sat under
+      // different headings on the two products.
+      const QUESTIONS = WROTE_ROWS;
       const quoteCard = (name, text) => (
         <div style={{ background: "#FDF6EC", border: "1px solid #EBD9BE", borderRadius: 12, padding: "1rem 1.2rem" }}>
           <div style={{ fontSize: "0.6rem", letterSpacing: "0.14em", textTransform: "uppercase", color: "#9A6B2F", fontWeight: 700, fontFamily: BFONT, marginBottom: "0.5rem" }}>{name}</div>
@@ -7867,7 +7875,9 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
         <Layout accent={BLUE}>
           <div style={{ maxWidth: 720 }}>
             <div style={{ fontSize: "0.62rem", letterSpacing: "0.22em", textTransform: "uppercase", color: BLUE, fontWeight: 700, fontFamily: BFONT, marginBottom: "0.6rem" }}>{cc.eyebrow}</div>
+            {/* block: conflict-wrote/head */}
             <Head title={cc.wroteTitle} shared={true} />
+            {/* block: conflict-wrote/rows */}
             {QUESTIONS.map((q, i) => (
               <div key={q.key} style={{ marginBottom: i < QUESTIONS.length - 1 ? "2rem" : 0 }}>
                 <div style={{ fontSize: "0.62rem", letterSpacing: "0.14em", textTransform: "uppercase", color: C.muted, fontWeight: 700, fontFamily: BFONT, marginBottom: "0.7rem" }}>{q.label}</div>
@@ -7887,7 +7897,10 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
     // high-level read: each partner's own sense of how conflict goes, which is
     // the only shared, non-private number this exercise produces.
     const flagged = conflictMine.ranked.filter(p => (p.value ?? 0) >= 2);
-    const C0_LABELS = ['Really rocky', "We manage but it's hard", "We're okay", 'Pretty good', 'We handle it well'];
+    // The c0 question's own options, not a second copy of them. Typed out
+    // here, this was five strings the app could not read, which is why its
+    // Conflict at a glance had no chart: there was nothing to label the bars.
+    const C0_LABELS = (CONFLICT_QUESTIONS.find(q => q.id === 'c0')?.options || []).map(o => o.label);
     const myC0 = conflictMine.overall ?? 2;
     const theirC0 = conflictPairing?.b?.overall ?? 2;
     const c0Aligned = Math.abs(myC0 - theirC0) <= 1;
@@ -7906,6 +7919,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
             <div style={{ fontSize: "clamp(1.8rem,6vw,2.8rem)", fontWeight: 700, fontFamily: HFONT, lineHeight: 1.05, marginBottom: "0.6rem" }}>{userName} &amp; {partnerName}</div>
             {/* Q1, the one shared number this exercise produces. Everything
                 else on the risk side is private to each reader. */}
+            {/* block: conflict-overview/overall */}
             <div style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 14, padding: "1.1rem 1.25rem", marginBottom: "1.25rem" }}>
               <div style={{ fontSize: "0.55rem", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.35)", fontFamily: BFONT, fontWeight: 700, marginBottom: "0.8rem" }}>How you each describe conflict resolution in your relationship</div>
               {[[userName, myC0], [partnerName, theirC0]].map(([nm, v]) => (
@@ -7921,6 +7935,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
               ))}
             </div>
 
+            {/* block: conflict-overview/action-plan */}
             <div style={{ fontSize: "0.55rem", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.45)", fontFamily: BFONT, fontWeight: 700, marginBottom: "0.7rem" }}>Your action plan</div>
             <div style={{ display: "flex", flexDirection: "column", gap: "0.7rem" }}>
               {flagged.length > 0 ? flagged.map(p => (

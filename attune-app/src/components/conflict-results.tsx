@@ -89,10 +89,44 @@ export default function ConflictResultsView({
   );
 }
 
-/** Glance. Coloured ground, then one thing to try per pattern worth attention. */
+/**
+ * Conflict at a glance.
+ *
+ * ── WHAT THIS USED TO BE, AND WHY IT CHANGED ──────────────────────────────
+ * The website's page is one dark panel: the section eyebrow, both names set
+ * large, the one shared measure this exercise produces as two bars, then the
+ * action plan.
+ *
+ * The app's opened with "How conflict goes for you" and the reader's own
+ * written strength, and then went straight to the action cards. Two
+ * differences that matter:
+ *
+ * The names were missing, so the page that opens a section about the two of
+ * them did not name them.
+ *
+ * The shared measure was missing entirely. c0 asks each of you to describe how
+ * you handle disagreements, and it is the only number in Conflict Patterns
+ * that both people see. The app could not draw it because the five answer
+ * labels were typed inline in src/App.jsx: the values were on the payload all
+ * along with nothing to label them with. They are derived from the question
+ * now and sent as content.overallLabels.
+ *
+ * The written strength moved off this page. It belongs to What You Each Wrote,
+ * which is where the website puts it, next to the partner's answer to the same
+ * question rather than alone.
+ */
 function Glance({ data }: { data: Extract<ConflictResults, { ready: true }> }) {
-  const { you, content, names } = data;
+  const { you, partner, content, names } = data;
   const worth = you.ranked.filter((p) => p.band === 'worth_watching' || p.band === 'worth_attention');
+  const labels = content.overallLabels || [];
+
+  // Both sides of the one shared number, in the website's order: you, then
+  // them. A partner who has not finished has no value and is left out rather
+  // than drawn at zero, which would read as an answer.
+  const overalls = [
+    { name: names.you, value: you.overall },
+    { name: names.partner, value: partner?.overall ?? null },
+  ].filter((r) => r.value != null);
 
   return (
     <ScrollView contentContainerStyle={pad}>
@@ -100,39 +134,81 @@ function Glance({ data }: { data: Extract<ConflictResults, { ready: true }> }) {
         colors={['#16305C', '#1B5FE8']}
         start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}
         style={{ borderRadius: Radius.xl, padding: Spacing.xl }}>
-        <Text style={{ ...Type.eyebrow, color: 'rgba(255,255,255,0.6)' }}>
-          {content.copy.eyebrow || 'Conflict Patterns'}
-        </Text>
-        <Text style={{ ...Type.title, color: Palette.white, marginTop: Spacing.sm }}>
-          How conflict goes for you
-        </Text>
-        {you.strength ? (
-          <Text style={{ ...Type.body, color: 'rgba(255,255,255,0.85)', marginTop: Spacing.md }}>
-            {you.strength}
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: Spacing.sm }}>
+          <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: '#6C9BFF' }} />
+          <Text style={{ ...Type.eyebrow, color: 'rgba(255,255,255,0.7)' }}>
+            {content.copy.eyebrow || 'Conflict Patterns'}
           </Text>
+        </View>
+        <Text style={{ ...Type.hero, color: Palette.white, marginTop: Spacing.sm }}>
+          {names.you} & {names.partner}
+        </Text>
+
+        {/* block: conflict-overview/overall */}
+        {overalls.length ? (
+          <View
+            style={{
+              backgroundColor: 'rgba(255,255,255,0.06)', borderColor: 'rgba(255,255,255,0.12)',
+              borderWidth: 1, borderRadius: Radius.lg, padding: Spacing.lg, marginTop: Spacing.lg,
+            }}>
+            <Text style={{ ...Type.eyebrow, fontSize: 9, color: 'rgba(255,255,255,0.45)', marginBottom: Spacing.md }}>
+              How you each describe conflict resolution in your relationship
+            </Text>
+            {overalls.map((r) => (
+              <View key={r.name} style={{ marginBottom: Spacing.md }}>
+                <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: Spacing.xs }}>
+                  <Text style={{ ...Type.small, color: Palette.white, fontWeight: '700' }}>{r.name}</Text>
+                  <Text style={{ ...Type.small, color: 'rgba(255,255,255,0.8)' }}>
+                    {labels[r.value as number] || ''}
+                  </Text>
+                </View>
+                <View style={{ height: 5, borderRadius: Radius.pill, backgroundColor: 'rgba(255,255,255,0.14)', overflow: 'hidden' }}>
+                  <View
+                    style={{
+                      height: 5,
+                      width: `${(((r.value as number) + 1) / 5) * 100}%`,
+                      backgroundColor: Palette.white, opacity: 0.85,
+                    }}
+                  />
+                </View>
+              </View>
+            ))}
+          </View>
         ) : null}
       </LinearGradient>
 
+      {/* block: conflict-overview/action-plan */}
+      <Text style={{ ...Type.eyebrow, color: c.accentQuiet, marginTop: Spacing.xl, marginBottom: Spacing.md }}>
+        Your action plan
+      </Text>
       {worth.length ? (
-        <View style={{ marginTop: Spacing.xl }}>
+        <View>
           {worth.map((p) => {
             const action = content.patternActions[p.key];
             if (!action) return null;
             return (
               <View key={p.key} style={{ ...card, marginBottom: Spacing.md }}>
-                <Text style={{ ...Type.eyebrow, color: c.accentQuiet, marginBottom: Spacing.sm }}>
-                  One thing to try
-                </Text>
-                <Text style={{ ...Type.cardTitle, color: c.textStrong }}>{action.title}</Text>
+                {/* The pattern named opposite the label, as the website does,
+                    so a card can be tied back to the bar it came from. */}
+                <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'baseline', gap: Spacing.md }}>
+                  <Text style={{ ...Type.eyebrow, color: c.accentQuiet }}>One thing to try</Text>
+                  <Text style={{ ...Type.small, fontSize: 11, color: c.textMuted }}>{titleFor(p.key)}</Text>
+                </View>
+                <Text style={{ ...Type.cardTitle, color: c.textStrong, marginTop: Spacing.sm }}>{action.title}</Text>
                 <Text style={{ ...Type.body, color: c.text, marginTop: Spacing.sm }}>{action.body}</Text>
               </View>
             );
           })}
         </View>
       ) : (
-        <View style={{ ...card, marginTop: Spacing.xl }}>
+        <View style={{ ...card }}>
+          {content.noActionNeeded?.title ? (
+            <Text style={{ ...Type.cardTitle, color: c.textStrong, marginBottom: Spacing.sm }}>
+              {content.noActionNeeded.title}
+            </Text>
+          ) : null}
           <Text style={{ ...Type.body, color: c.text }}>
-            {content.copy.allClear || 'Nothing here is showing up often enough to need attention.'}
+            {content.noActionNeeded?.body || content.copy.allClear || ''}
           </Text>
         </View>
       )}
@@ -195,7 +271,9 @@ function Snapshot({ data }: { data: Extract<ConflictResults, { ready: true }> })
 
   return (
     <ScrollView contentContainerStyle={pad}>
+      {/* block: conflict-snapshot/head */}
       <PageHead copy={content.copy} title={content.copy.snapshotTitle} shared />
+      {/* block: conflict-snapshot/openings */}
       <View style={{ ...card }}>
         <Text style={{ ...Type.eyebrow, color: c.accentQuiet, marginBottom: Spacing.md }}>Conflict</Text>
         {content.snapshotRows.map((row) => {
@@ -228,6 +306,7 @@ function Snapshot({ data }: { data: Extract<ConflictResults, { ready: true }> })
             which is an empty string. So the fallback was the only thing that
             ever rendered: a sentence the website does not have, written in the
             app, which is the thing Ellie asked not to happen. */}
+        {/* block: conflict-snapshot/repair */}
         <Text style={{ ...Type.eyebrow, color: c.accentQuiet, marginBottom: Spacing.md }}>Repair</Text>
         <View style={{ flexDirection: 'row', gap: Spacing.lg }}>
           <RepairColumn title={`What ${names.you} wants`} items={you.repairRanking} />
@@ -251,10 +330,12 @@ function Patterns({
 }: { you: ConflictSummary; content: Extract<ConflictResults, { ready: true }>['content'] }) {
   return (
     <ScrollView contentContainerStyle={pad}>
+      {/* block: conflict-patterns/head */}
       <PageHead copy={content.copy} title={content.copy.patternsTitle} shared={false} />
       {/* The privacy line sits above the content, not below it, because someone
           reading their own worst pattern should know it is private before they
           read it rather than after. */}
+      {/* block: conflict-patterns/privacy */}
       <View
         style={{
           backgroundColor: '#FDF2F6', borderColor: '#F0C9DA', borderWidth: 1,
@@ -271,6 +352,7 @@ function Patterns({
         </Text>
       ) : null}
 
+      {/* block: conflict-patterns/rows */}
       {/* Worst first, as the server ranked them. */}
       {you.ranked.map((p) => {
         const v = p.value ?? 0;
@@ -317,11 +399,32 @@ function Patterns({
 /** What You Each Wrote. Only the questions you both answered knowing they were shared. */
 function Wrote({ data }: { data: Extract<ConflictResults, { ready: true }> }) {
   const { you, partner, names, content } = data;
-  const rows: { label: string; mine: string | null; theirs: string | null }[] = [
-    { label: 'What already works', mine: you.strength, theirs: partner?.strength ?? null },
-    { label: 'Looking back', mine: you.reflection, theirs: partner?.reflection ?? null },
-    { label: 'What you appreciate', mine: you.appreciation, theirs: partner?.appreciation ?? null },
-  ].filter((r) => r.mine || r.theirs);
+
+  /**
+   * The rows and their headings come from the server, in the server's order.
+   *
+   * This listed three rows with headings written here: 'What already works',
+   * 'Looking back' and 'What you appreciate'. The website shows two, under
+   * different headings again, so the same answers sat under different words on
+   * the two products and neither set was anywhere the other could read.
+   *
+   * The third row was `strength`, which is c8: a picked option, not written
+   * text. "The thing you do that most often helps you reset mid-conflict"
+   * answers with something like "Taking a break", and it was being printed as
+   * prose on a page called What You Each Wrote. The website has never shown
+   * it. Dropped here to match, and flagged: an answer collected and displayed
+   * nowhere is a question worth asking about, not one to quietly keep drawing
+   * in one place.
+   */
+  const written: Record<string, string | null> = {
+    reflection: you.reflection, appreciation: you.appreciation,
+  };
+  const theirWritten: Record<string, string | null> = {
+    reflection: partner?.reflection ?? null, appreciation: partner?.appreciation ?? null,
+  };
+  const rows = (content.wroteRows || [])
+    .map((r) => ({ label: r.label, mine: written[r.key] ?? null, theirs: theirWritten[r.key] ?? null }))
+    .filter((r) => r.mine || r.theirs);
 
   if (!rows.length) {
     return (
@@ -336,7 +439,9 @@ function Wrote({ data }: { data: Extract<ConflictResults, { ready: true }> }) {
 
   return (
     <ScrollView contentContainerStyle={pad}>
+      {/* block: conflict-wrote/head */}
       <PageHead copy={content.copy} title={content.copy.wroteTitle} shared />
+      {/* block: conflict-wrote/rows */}
       {rows.map((r) => (
         <View key={r.label} style={{ ...card, marginBottom: Spacing.md }}>
           <Text style={{ ...Type.eyebrow, color: c.accentQuiet, marginBottom: Spacing.md }}>{r.label}</Text>

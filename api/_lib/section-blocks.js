@@ -89,6 +89,14 @@
  * and linearly. Turn it on for a section once you have checked that they are.
  */
 export const ORDER_ENFORCED = new Set([
+  // All four conflict screens are marked inline and linearly on both surfaces,
+  // so file position is a fair proxy here. Order matters on the glance page in
+  // particular: the shared measure comes before the action plan, because the
+  // plan is a response to it.
+  'conflict-overview',
+  'conflict-snapshot',
+  'conflict-patterns',
+  'conflict-wrote',
   'couple-type',
   'comm-overview',
   'comm-domain',
@@ -183,6 +191,40 @@ export const SECTION_BLOCKS = {
     // restated three protocol titles the action plan already lists in full,
     // under a heading nobody wrote. Removed from both surfaces rather than
     // matched. The protocol copy itself is still used, on What Comes Next.
+  ],
+
+  /**
+   * Conflict Patterns, all four screens.
+   *
+   * ── WHY IT WAS NOT HERE BEFORE ────────────────────────────────────────
+   * It is the newest section and the spec never grew to cover it, so it was
+   * the one part of results with nothing checking the two surfaces contained
+   * the same things. They did not. The app had no shared conflict measure on
+   * its glance page, no page titles, no shared-or-private badge, a third
+   * written row the website does not show, and its own tab bar instead of the
+   * results nav. Every one of those was found by Ellie looking at two screens,
+   * which is the process this file exists to replace.
+   */
+  'conflict-overview': [
+    { id: 'overall', note: 'How you each describe conflict resolution. The one shared measure.' },
+    { id: 'action-plan', note: 'One thing to try per pattern worth attention, or the all-clear.' },
+  ],
+
+  'conflict-snapshot': [
+    { id: 'head', note: 'Title and the shared badge.' },
+    { id: 'openings', note: 'The three shared questions, both answers.' },
+    { id: 'repair', note: 'What helps each of you reset, both rankings.' },
+  ],
+
+  'conflict-patterns': [
+    { id: 'head', note: 'Title and the private badge.' },
+    { id: 'privacy', note: 'That this page is never visible to a partner.' },
+    { id: 'rows', note: 'Each pattern, its frequency, and its advice.' },
+  ],
+
+  'conflict-wrote': [
+    { id: 'head', note: 'Title and the shared badge.' },
+    { id: 'rows', note: 'Each written question, both answers.' },
   ],
 
   'couple-type': [

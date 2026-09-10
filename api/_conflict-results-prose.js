@@ -181,6 +181,26 @@ export const CONFLICT_RESULTS_COPY = {
   allClear: 'None of the four patterns are showing up often for you. That is worth knowing, and worth saying to {partner}.',
 };
 
+/**
+ * The two written questions shown on What You Each Wrote, in order.
+ *
+ * ── WHY THESE ARE NOT THE QUESTION TEXT ───────────────────────────────────
+ * The questions read as instructions: "A disagreement that ended better than
+ * you expected. What made it work:". These are the headings the website prints
+ * above each pair, which is a different job and already approved copy.
+ *
+ * They were written out in src/App.jsx, and the app had its own shorter pair,
+ * 'Looking back' and 'What you appreciate'. So the same two answers sat under
+ * different headings on the two products, and neither heading was anywhere the
+ * other could read.
+ *
+ * `key` matches the field on the conflict summary.
+ */
+export const WROTE_ROWS = [
+  { key: 'reflection', label: 'A disagreement that went better than expected' },
+  { key: 'appreciation', label: 'One thing I appreciate about how we handle conflict' },
+];
+
 /** Resolve {partner}, {a} and {b} the way the rest of the product does. */
 export function interpConflict(text, { partner, a, b } = {}) {
   if (!text) return text;

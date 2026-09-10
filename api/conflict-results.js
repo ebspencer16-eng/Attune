@@ -30,8 +30,10 @@ import { capabilitiesFor } from './_lib/ownership.js';
 import {
   PATTERN_COPY, PATTERN_ACTIONS, PATTERN_NOTES, BAND_COLORS, FREQUENCY_LABELS,
   SNAPSHOT_ROWS, SNAPSHOT_PROSE, OPENING_CHIPS, CONFLICT_RESULTS_COPY, NO_ACTION_NEEDED,
+  WROTE_ROWS,
   interpConflict,
 } from './_conflict-results-prose.js';
+import { CONFLICT_QUESTIONS } from './_conflict-questions.js';
 
 /**
  * Put the real names into every string in the content tree.
@@ -128,6 +130,21 @@ export default async function handler(req) {
         patternNotes: PATTERN_NOTES,
         bandColors: BAND_COLORS,
         frequencyLabels: FREQUENCY_LABELS,
+        /**
+         * The five answers to c0, in order, which is the one shared measure
+         * this exercise produces: how each of you describes the way you handle
+         * disagreements.
+         *
+         * Derived from the question rather than written out. src/App.jsx had
+         * them as a C0_LABELS array typed inline next to the chart, which is
+         * why the app's Conflict at a glance had no chart: the words were in a
+         * file the app cannot read, so there was nothing to label the bars
+         * with.
+         */
+        overallLabels: CONFLICT_QUESTIONS
+          .find((q) => q.id === 'c0')?.options.map((o) => o.label) || [],
+        /** The two rows on What You Each Wrote, with the website's headings. */
+        wroteRows: WROTE_ROWS,
         snapshotRows: SNAPSHOT_ROWS,
         snapshotProse: SNAPSHOT_PROSE,
         openingChips: OPENING_CHIPS,
