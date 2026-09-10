@@ -314,6 +314,29 @@ function Snapshot({ data }: { data: Extract<ConflictResults, { ready: true }> })
             <RepairColumn title={`What ${names.partner} wants`} items={partner.repairRanking} />
           ) : null}
         </View>
+
+        {/* ── WHAT YOU EACH DO ────────────────────────────────────────────
+            c8, which neither surface has ever shown. It is in the partner
+            allowlist, so both of you agreed to share it by answering it, and
+            it sat in the payload unread. The rankings above are what each of
+            you wants done; this is what each of you actually does, which is
+            the other half of the same question and belongs beside it.
+
+            The question's own text is the label, because a heading would be
+            customer copy. */}
+        {you.strength || partner?.strength ? (
+          <View style={{ marginTop: Spacing.lg, borderTopColor: c.border, borderTopWidth: 1, paddingTop: Spacing.lg }}>
+            <Text style={{ ...Type.small, color: c.textMuted, marginBottom: Spacing.md }}>
+              {content.resetQuestion}
+            </Text>
+            {you.strength ? (
+              <Chip name={names.you} text={you.strength} color={Palette.orange} />
+            ) : null}
+            {partner?.strength ? (
+              <Chip name={names.partner} text={partner.strength} color={Palette.ink} />
+            ) : null}
+          </View>
+        ) : null}
       </View>
     </ScrollView>
   );

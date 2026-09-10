@@ -145,6 +145,21 @@ export default async function handler(req) {
           .find((q) => q.id === 'c0')?.options.map((o) => o.label) || [],
         /** The two rows on What You Each Wrote, with the website's headings. */
         wroteRows: WROTE_ROWS,
+        /**
+         * The c8 question, verbatim, to label each person's `strength`.
+         *
+         * c8 is a picked option: "The thing you do that most often helps you
+         * reset mid-conflict". Both partners agreed to share it, it is in the
+         * partner allowlist, and neither surface has ever shown it. Ellie
+         * asked for it to be displayed, and Your Conflict Snapshot's Repair
+         * block is the place it belongs: that block is what helps each of you
+         * reset, and this is the half about what you each DO, next to the
+         * ranking of what you each want done for you.
+         *
+         * The question's own text is the label. Writing a heading here would
+         * be writing customer copy, which is Ellie's.
+         */
+        resetQuestion: CONFLICT_QUESTIONS.find((q) => q.id === 'c8')?.text || '',
         snapshotRows: SNAPSHOT_ROWS,
         snapshotProse: SNAPSHOT_PROSE,
         openingChips: OPENING_CHIPS,

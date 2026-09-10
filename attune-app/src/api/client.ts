@@ -1174,6 +1174,8 @@ export type ConflictResults =
         patternNotes: Record<string, string>;
         bandColors: string[];
         frequencyLabels: string[];
+        /** The c8 question text, labelling each person's reset answer. */
+        resetQuestion: string;
         /** The two rows on What You Each Wrote, with the website's headings. */
         wroteRows: { key: string; label: string }[];
         /** The five c0 answers in order, derived from the question itself. */

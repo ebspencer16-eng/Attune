@@ -86,6 +86,10 @@ import { AXES, MAP_CAPTION } from "../api/_axes.js";
 import { commAlignmentPct } from "../api/_lib/comm-alignment.js";
 import { EXERCISES } from "../api/_exercises.js";
 import { CONFLICT_QUESTIONS } from "../api/_conflict-questions.js";
+// The c8 question, verbatim, labelling each person's reset answer on Your
+// Conflict Snapshot. From the question itself, so it cannot drift from what
+// was asked.
+const RESET_QUESTION = CONFLICT_QUESTIONS.find(q => q.id === 'c8')?.text || '';
 import { WROTE_ROWS } from "../api/_conflict-results-prose.js";
 import { STORY_CATEGORIES } from "../api/_lib/reflection-results.js";
 import { CLOSE_PCT as TM_CLOSE, STAGGER as TM_STAGGER, SBS_NEAR as TM_SBS_NEAR, SBS_STEP as TM_SBS_STEP } from "../api/_lib/track-marks.js";
@@ -7882,6 +7886,32 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
                     </div>
                   ))}
                 </div>
+
+                {/* ── WHAT YOU EACH DO ────────────────────────────────────
+                    c8, which neither surface has ever shown. It is in the
+                    partner allowlist, so both of you agreed to share it by
+                    answering it, and it has sat in the payload unread. The
+                    rankings above are what each of you wants done; this is
+                    what each of you actually does, which is the other half of
+                    the same question and belongs beside it.
+
+                    The question's own text is the label. A heading here would
+                    be customer copy, which is Ellie's. */}
+                {(conflictMine.strength || conflictTheirs?.strength) && (
+                  <div style={{ marginTop: "1.5rem", paddingTop: "1.25rem", borderTop: `1px solid ${C.stone}` }}>
+                    <div style={{ fontSize: "0.78rem", color: C.muted, fontFamily: BFONT, lineHeight: 1.5, marginBottom: "0.8rem" }}>
+                      {RESET_QUESTION}
+                    </div>
+                    <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: "0.9rem" }}>
+                      {[[userName, conflictMine.strength], [partnerName, conflictTheirs?.strength]].map(([nm, v]) => (
+                        <div key={nm}>
+                          <div style={{ fontSize: "0.62rem", letterSpacing: "0.14em", textTransform: "uppercase", color: C.muted, fontWeight: 700, fontFamily: BFONT, marginBottom: "0.35rem" }}>{nm}</div>
+                          <Chip>{v || "\u2014"}</Chip>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </Card>
             </div>
           </div>

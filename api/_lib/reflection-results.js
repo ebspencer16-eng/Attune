@@ -22,25 +22,30 @@ import { promptFor } from './reflection-prompts.js';
 const scaleValue = (v) => (typeof v === 'number' && v >= 0 ? v : null);
 
 /**
- * The categories Side by Side groups its answers under, in order.
+ * The categories Side by Side groups its answers under, in the order the
+ * questions are asked.
  *
- * ── WHY THIS IS A LIST AND NOT THE QUESTIONS' OWN ORDER ───────────────────
- * The questions carry five categories. This shows four. "Getting Started",
- * which is the opening memory question, has never appeared here: the list was
- * three categories, then four in 1736324, and Getting Started was in neither.
+ * ── WHY "GETTING STARTED" IS BACK ─────────────────────────────────────────
+ * It was never here. The list was three categories, then four in 1736324, and
+ * Getting Started was in neither, so a_memory, "Something small that happened
+ * recently that made me smile about us", was a question this product asked two
+ * people to answer and then showed to neither of them.
  *
- * So a_memory is an answer this product asks two people to write and then
- * displays nowhere. That may be deliberate and it is not mine to decide, so
- * the list keeps exactly what the website shows today and the omission is
- * written down rather than quietly fixed by deriving the order.
+ * Ellie asked for it to be displayed. It goes first, because that is where the
+ * exercise asks it and because it is the gentlest thing on the page: a good
+ * opening for a section where the rest is harder.
  *
- * It was typed inside src/App.jsx, twice, which is why the app's Side by Side
- * had no grouping at all: it listed every answer flat because the grouping
- * lived somewhere it could not read.
+ * Derived from the questions rather than typed, so the day a category is added
+ * this follows instead of quietly dropping it the way it dropped this one.
  */
-export const STORY_CATEGORIES = [
-  'Milestones', "How We're Doing", 'Looking Forward', 'What Matters',
-];
+export const STORY_CATEGORIES = (() => {
+  const seen = [];
+  for (const q of ANNIVERSARY_QUESTIONS) {
+    if (q.type === 'scale') continue;
+    if (q.category && !seen.includes(q.category)) seen.push(q.category);
+  }
+  return seen;
+})();
 
 export function reflectionResults({ mine, theirs, youName = 'You', themName = 'Your partner' }) {
   if (!mine || !theirs) return null;
