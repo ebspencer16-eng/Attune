@@ -943,3 +943,49 @@ Pole labels in the side-by-side still wrap. They are whole sentences and the
 row is three columns on a phone; the website has the same problem at the same
 width. Reclaiming the margins bought a line or two. Short pole labels are the
 real fix and those are copy.
+
+## 2026-09-10, later — Ellie's second list
+
+**Correctness, the important one.** The storycards were computed from BLENDED
+scores, which mix each person's answers with their partner's view of them.
+Blending narrows every gap, so the app's "communication styles are N% aligned"
+was always the higher of the two figures and reached 100 for Ellie. The website
+has always used SELF gaps and says so in a comment. Same sort also picks the
+five slider dimensions, both call-outs and the closing conversation, so all
+four could differ between products. `api/_lib/comm-alignment.js` is the one
+rule now; `check-card-gaps.mjs` pins the behaviour.
+
+**Done from the list.** Both site strings say "all exercises". Placeholder
+greetings added. Home: greeting lower, finding higher, glow is now a real
+radial falloff (a wide white shadow, not concentric circles). Reflection nav
+no longer promises pages the payload cannot fill. Storycard 5's figure is no
+longer clipped. Marks stagger 7 instead of 11. Side-by-side bars are back to
+their old width (the row pulls into the tile's padding). Intimacy responses
+are behind a dropdown on both. Conflict follows the results nav, has its page
+headers and shared/private badges, and shows the c0 shared measure. Reflection
+Side by Side is grouped under its four headings.
+
+**Not changed, needs Ellie.**
+
+- Pole labels stay as full question text, per Ellie. They wrap; that is the
+  cost and it is accepted.
+- Two answers are collected and displayed nowhere. `c8` in Conflict ("The
+  thing you do that most often helps you reset mid-conflict") and `a_memory`
+  in Reflection (the opening memory question, whose category "Getting Started"
+  has never been in the Side by Side heading list). Both were being half-shown
+  on the app under app-invented headings; both now match the website, which
+  shows neither. Decide whether they should appear.
+- `repairTitle` in the conflict prose is used by neither surface.
+- Greeting placeholders in `ANYTIME` (`api/_lib/next-action.js`) need review.
+
+**Conflict exercise on the web: not reproduced.** Driven in a real browser
+against the demo it opens, begins and answers through ten of twelve questions
+with no page error and no console error; the probe stops at the ranking
+question, not the app. Two real defects on that path were fixed anyway (the
+gated-view redirect never knew about conflict, so an unowned conflict view
+rendered blank instead of returning to the dashboard; and the website computed
+hasConflict/hasWorkbook as `pkgKey === 'premium'` rather than from PKG_CAPS).
+Neither changes what Ellie can reach, because PKG_CAPS.premium.hasConflict is
+true. **What is needed to go further: what "not working" looked like.** No
+tile on the dashboard is an ownership problem; a tile that opens a blank page
+or errors is a different one, and the two have opposite fixes.
