@@ -1,21 +1,26 @@
 /**
  * Home.
  *
- * One prompt, not a list. The priority engine already decides what matters
- * most, and stacking four cards throws that away: a list of four things to do
- * is a list to feel behind on, which is the wrong feeling for a product about
- * a relationship.
+ * ── WHAT THIS SCREEN IS FOR ───────────────────────────────────────────────
+ * Somewhere to arrive, not a dashboard to check. The version before this one
+ * was a correct dashboard: a greeting, a prompt, a list, a research note, each
+ * competing on the same cream ground. Correct and cluttered.
  *
- * So the primary card is the screen. Everything else the engine returned sits
- * underneath as quiet one-line links, available without competing.
+ * So the page is one blue ground with two things on it. At the top, the
+ * greeting and one finding from the research, set as something to read, with
+ * no header over it. Everything the product wants from you is gathered into a
+ * single cream tile in the lower half, as three rows: what is next, what else
+ * is waiting, and something to return to.
  *
- * Renders whatever /api/home returns and routes on deepLink, never branching
- * on card kind, so adding a card kind server-side never needs an app release.
+ * The rows are ordered by the priority engine, not by this file. It renders
+ * what /api/home returns and routes on the target it is given, never branching
+ * on card kind, so a new kind ships server-side without an app release.
  */
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useFocusEffect } from 'expo-router';
-import { Linking, Pressable, RefreshControl, ScrollView, Text, View } from 'react-native';
+import { Linking, Pressable, RefreshControl, ScrollView, Text, View, useWindowDimensions } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 
@@ -25,7 +30,8 @@ import { ScreenError, ScreenLoading } from '@/components/screen-states';
 import SignIn from '@/components/sign-in';
 import Settings from '@/components/settings';
 import {
-  AccentFallback, AccentFor, BottomTabInset, Colors, MaxContentWidth, Palette, Radius, Spacing, Type,
+  AccentFallback, AccentFor, BlueGround, BottomTabInset, Colors, MaxContentWidth, Palette, Radius,
+  Spacing, Type,
 } from '@/constants/attune-theme';
 
 const c = Colors.light;
@@ -42,6 +48,10 @@ const APP_ROUTES = new Set(['/', '/insights', '/resources', '/notes']);
 
 export default function HomeScreen() {
   const router = useRouter();
+  // Where the tile starts. Just over half the screen, so the reading has the
+  // top of the page and the tile sits in the lower half without being pinned
+  // to the bottom, which would leave a band of blue under it on a tall phone.
+  const topHeight = useWindowDimensions().height * 0.52;
   const [data, setData] = useState<HomeResponse | null>(null);
   const [error, setError] = useState<ApiError | null>(null);
   const [loading, setLoading] = useState(true);
@@ -125,22 +135,28 @@ export default function HomeScreen() {
   }
   if (!data) return <Shell><ScreenLoading /></Shell>;
 
-  const rest = data.secondary ?? [];
+  // The engine returns up to three more. The tile shows one: Ellie asked for
+  // one other action item, and a tile with five rows is the list this screen
+  // was rebuilt to stop being. The rest stay reachable from their own tabs.
+  const alsoWaiting = (data.secondary ?? [])[0] || null;
 
   return (
-    <View style={{ flex: 1, backgroundColor: c.background }}>
-      {/* No gradient ground. Three hues running corner to corner behind the
-          greeting was the app introducing a palette the site does not have,
-          and it made this the only screen in the product with its own
-          background. The ground is the site's cream everywhere. Indigo is the
-          brand colour and appears once, on the wordmark. Orange is contrast
-          and appears once, on the thing the screen is asking you to do. */}
+    <View style={{ flex: 1, backgroundColor: BlueGround[0] }}>
+      {/* The ground. Two shades of one blue, from BlueGround, which the results
+          glance paints its lead panel with. Monochrome on purpose: the three
+          hue version of this screen was the app inventing a palette the site
+          does not have. */}
+      <LinearGradient
+        colors={[...BlueGround]}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 0.9, y: 1 }}
+        style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
+      />
+
       <SafeAreaView style={{ flex: 1 }} edges={['top']}>
         <ScrollView
           contentContainerStyle={{
-            padding: Spacing.xl,
-            // Clear of the floating tab bar. The research note is the last
-            // thing on the page and was running underneath Home and Insights.
+            flexGrow: 1,
             paddingBottom: BottomTabInset + Spacing.lg,
             maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center',
           }}
@@ -148,66 +164,89 @@ export default function HomeScreen() {
             <RefreshControl
               refreshing={refreshing}
               onRefresh={() => { setRefreshing(true); load(); }}
-              tintColor={c.textMuted}
+              tintColor="rgba(255,255,255,0.7)"
             />
           }>
-          {/* The wordmark and the way into Settings share a row. Settings is
-              where account deletion lives, which App Review has to be able to
-              find without being told where it is. */}
-          <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: Spacing.sm }}>
-            <Text style={{ ...Type.eyebrow, color: Palette.indigo }}>
-              Attune
-            </Text>
-            <Pressable
-              onPress={() => setSettingsOpen(true)}
-              hitSlop={12}
-              accessibilityRole="button"
-              accessibilityLabel="Settings"
-              style={{
-                paddingHorizontal: Spacing.md, paddingVertical: Spacing.xs,
-                borderRadius: Radius.pill, borderWidth: 1,
-                borderColor: c.border,
-              }}>
-              <Text style={{ ...Type.small, color: c.text, fontWeight: '700' }}>
-                Settings
-              </Text>
-            </Pressable>
-          </View>
-          {/* ── THE GREETING IS THE MASTHEAD ──────────────────────────────
-              Set large with real air under it. On a screen that has one thing
-              to ask for and two things waiting, the type is what makes it feel
-              considered rather than assembled: a page you are reading, not a
-              dashboard you are checking. */}
-          <Text
-            style={{
-              ...Type.hero, color: c.textStrong,
-              marginTop: Spacing.lg, marginBottom: Spacing.xxl,
-            }}>
-            {data.greeting}
-          </Text>
-
-          {data.primary ? <PrimaryCard card={data.primary} onPress={() => open(data.primary)} /> : null}
-
-          {rest.length ? (
-            <View style={{ marginTop: Spacing.xxl }}>
-              <Text style={{ ...Type.eyebrow, color: c.textMuted, marginBottom: Spacing.sm }}>
-                Also waiting
-              </Text>
-              {/* Rows on the page rather than a bordered box. Two items do not
-                  need a container to be a list, and a box around them makes a
-                  quiet screen busier than it is. */}
-              <View>
-                {rest.map((s, i) => (
-                  <SecondaryRow key={s.id} card={s} first={i === 0} onPress={() => open(s)} />
-                ))}
-              </View>
+          {/* ── ON THE BLUE ──────────────────────────────────────────────
+              Given a minimum height rather than a fixed one, so the tile
+              starts around half way down on a normal phone and is pushed
+              further only by a long finding. A fixed height would either crop
+              the reading or leave a hole above the tile on a small screen. */}
+          <View style={{ minHeight: topHeight, paddingHorizontal: Spacing.xl, justifyContent: 'space-between' }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: Spacing.sm }}>
+              <Text style={{ ...Type.eyebrow, color: 'rgba(255,255,255,0.75)' }}>Attune</Text>
+              {/* Settings is where account deletion lives, which App Review has
+                  to be able to find without being told where it is. */}
+              <Pressable
+                onPress={() => setSettingsOpen(true)}
+                hitSlop={12}
+                accessibilityRole="button"
+                accessibilityLabel="Settings"
+                style={{
+                  paddingHorizontal: Spacing.md, paddingVertical: Spacing.xs,
+                  borderRadius: Radius.pill, borderWidth: 1,
+                  borderColor: 'rgba(255,255,255,0.35)',
+                }}>
+                <Text style={{ ...Type.small, color: Palette.white, fontWeight: '700' }}>Settings</Text>
+              </Pressable>
             </View>
-          ) : null}
 
-          {data.research ? <ResearchNote finding={data.research} /> : null}
+            <View style={{ paddingBottom: Spacing.xxl }}>
+              <Text style={{ ...Type.hero, color: Palette.white, marginBottom: Spacing.xl }}>
+                {data.greeting}
+              </Text>
+              {data.research ? <ResearchNote finding={data.research} /> : null}
+            </View>
+          </View>
+
+          {/* ── THE TILE ─────────────────────────────────────────────────
+              One container, not three cards. Everything the product is asking
+              for lives here, which is what lets the blue above it stay quiet. */}
+          <View
+            style={{
+              backgroundColor: Palette.cream, borderRadius: Radius.xl,
+              marginHorizontal: Spacing.lg, paddingHorizontal: Spacing.lg,
+              paddingVertical: Spacing.xs,
+            }}>
+            {data.primary ? (
+              <TileRow
+                label="Next for you"
+                title={data.primary.title}
+                body={data.primary.body}
+                dot={accentForCard(data.primary)}
+                disabled={!!data.primary.disabled}
+                first
+                onPress={() => open(data.primary)}
+              />
+            ) : null}
+
+            {alsoWaiting ? (
+              <TileRow
+                label="Also waiting"
+                title={alsoWaiting.title}
+                body={alsoWaiting.body}
+                dot={accentForCard(alsoWaiting)}
+                disabled={!!alsoWaiting.disabled}
+                onPress={() => open(alsoWaiting)}
+              />
+            ) : null}
+
+            {/* One row, two states, both decided by the server. See
+                api/_lib/pick-up.js: a note to return to, or the newest In
+                Practice post when there is none. */}
+            {data.pickUp ? (
+              <TileRow
+                label={data.pickUp.label}
+                title={data.pickUp.title}
+                body={data.pickUp.preview}
+                dot={data.pickUp.kind === 'resume' ? Palette.indigo : Palette.clay}
+                onPress={() => open(data.pickUp as unknown as HomeCard)}
+              />
+            ) : null}
+          </View>
 
           {error ? (
-            <Text style={{ ...Type.small, color: c.textMuted, marginTop: Spacing.xl }}>
+            <Text style={{ ...Type.small, color: 'rgba(255,255,255,0.7)', marginTop: Spacing.lg, paddingHorizontal: Spacing.xl }}>
               Showing what we last loaded. Pull down to refresh.
             </Text>
           ) : null}
@@ -284,42 +323,35 @@ function PrimaryCard({ card, onPress }: { card: HomeCard; onPress: () => void })
 }
 
 /**
- * One research finding, with its citation.
+ * One research finding.
  *
- * ── WHY THIS IS ON THE HOME SCREEN ────────────────────────────────────────
- * The screen had a greeting, one prompt and a short list, which is a correct
- * dashboard and not a reason to open an app. This is the thing underneath the
- * product: it is built on relationship science, and saying so once a day, in
- * the product's own words, with the source named, is more convincing than any
- * amount of styling.
+ * ── NO HEADER, ON PURPOSE ─────────────────────────────────────────────────
+ * The body and the citation, and nothing above them. It had an "FROM THE
+ * RESEARCH" label and a headline before, which made it a section of a page.
+ * Without them it is a thing to read on the way in, which is what the top half
+ * of this screen is for. The finding still carries a title; the website's Our
+ * Purpose page uses it, and this screen does not.
  *
- * ── WHY IT LOOKS LIKE PRINT ───────────────────────────────────────────────
- * No card, no tint, no icon. A rule, a small label, the finding set in the
- * serif at reading size, and the citation underneath in the muted body face.
- * That is how a journal sets a pull quote and how the website's Our Purpose
- * page sets these same three findings. Putting it in a box would make it a
- * widget; leaving it on the page makes it something to read.
+ * The words and the citation come from the server, from api/_research.js, so
+ * the app and the website cannot attribute different claims to one source.
  *
- * The copy and the citation come from the server, from api/_research.js, so
- * the app and the website cannot end up attributing different claims to the
- * same source.
+ * KNOWN GAP: there are three findings and they rotate by day, so this screen
+ * repeats every third day. Ellie asked for a long list to rotate through, and
+ * that is copy for her to write: a claim about research is exactly the kind of
+ * sentence nobody here should be inventing. The shape each one needs is
+ * { title, body, source } in api/_research.js, and check-research.mjs holds
+ * each of them identical to the website's Our Purpose page.
  */
 function ResearchNote({ finding }: { finding: NonNullable<HomeResponse['research']> }) {
   return (
-    <View style={{ marginTop: Spacing.xxxl }}>
-      <View style={{ height: 1, backgroundColor: c.border, marginBottom: Spacing.lg }} />
-      <Text style={{ ...Type.eyebrow, color: c.textMuted, marginBottom: Spacing.md }}>
-        From the research
-      </Text>
-      <Text style={{ ...Type.title, color: c.textStrong, marginBottom: Spacing.sm }}>
-        {finding.title}
-      </Text>
-      <Text style={{ ...Type.body, color: c.textMuted, lineHeight: 24 }}>
+    <View>
+      <Text style={{ ...Type.title, fontSize: 20, lineHeight: 30, color: Palette.white }}>
         {finding.body}
       </Text>
       <Text
         style={{
-          ...Type.small, color: c.textMuted, fontStyle: 'italic', marginTop: Spacing.md,
+          ...Type.small, color: 'rgba(255,255,255,0.6)', fontStyle: 'italic',
+          marginTop: Spacing.md,
         }}>
         {finding.source}
       </Text>
@@ -349,32 +381,48 @@ function accentForCard(card: HomeCard): string {
   return AccentFor[fromRoute || ''] || AccentFor[fromId] || AccentFallback;
 }
 
-/** Everything else: one line each, present but not competing. */
-function SecondaryRow({ card, first, onPress }: { card: HomeCard; first: boolean; onPress: () => void }) {
-  const dim = !!card.disabled;
+/**
+ * One row of the tile.
+ *
+ * The label is the row's reason for existing rather than a heading above a
+ * group, because each of the three rows is here for a different reason and a
+ * shared heading could not say all three.
+ */
+function TileRow({
+  label, title, body, dot, disabled, first, onPress,
+}: {
+  label: string;
+  title: string;
+  body?: string | null;
+  dot: string;
+  disabled?: boolean;
+  first?: boolean;
+  onPress: () => void;
+}) {
   return (
     <Pressable
       onPress={onPress}
-      disabled={dim}
+      disabled={disabled}
       style={{
-        paddingVertical: Spacing.lg, paddingHorizontal: Spacing.lg,
+        paddingVertical: Spacing.lg,
         borderTopWidth: first ? 0 : 1, borderTopColor: c.border,
         flexDirection: 'row', alignItems: 'center', gap: Spacing.md,
-        opacity: dim ? 0.5 : 1,
+        opacity: disabled ? 0.5 : 1,
       }}>
-      {/* The exercise's colour as a dot rather than a stripe down the side.
-          Same lookup, so a row and the screen it opens still agree; a three
-          pixel bar on a borderless row reads as a leftover from a card. */}
-      <View style={{ width: 7, height: 7, borderRadius: 4, backgroundColor: accentForCard(card) }} />
+      {/* The section's own colour as a dot. Same lookup the row's destination
+          uses, so a row and the screen it opens agree on what colour that
+          thing is. */}
+      <View style={{ width: 7, height: 7, borderRadius: 4, backgroundColor: dot }} />
       <View style={{ flex: 1 }}>
-        <Text style={{ ...Type.cardTitle, color: c.textStrong }}>{card.title}</Text>
-        {card.body ? (
+        <Text style={{ ...Type.eyebrow, color: c.textMuted, marginBottom: 3 }}>{label}</Text>
+        <Text style={{ ...Type.cardTitle, color: c.textStrong }}>{title}</Text>
+        {body ? (
           <Text numberOfLines={1} style={{ ...Type.small, color: c.textMuted, marginTop: 2 }}>
-            {card.body}
+            {body}
           </Text>
         ) : null}
       </View>
-      {!dim ? <Text style={{ ...Type.body, color: Palette.orange }}>{'\u203A'}</Text> : null}
+      {!disabled ? <Text style={{ ...Type.body, color: Palette.orange }}>{'\u203A'}</Text> : null}
     </Pressable>
   );
 }

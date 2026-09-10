@@ -441,6 +441,19 @@ export type CatalogueItem = {
 };
 
 export type HomeResponse = {
+  /**
+   * The home tile's third row: something to return to. Two states, both
+   * decided server-side in api/_lib/pick-up.js so the app renders one shape.
+   * Null when there is neither a note nor a published post.
+   */
+  pickUp?: {
+    kind: 'resume' | 'discover';
+    label: string;
+    title: string;
+    preview: string | null;
+    app?: { route?: string; external?: string };
+    deepLink?: string;
+  } | null;
   /** One research finding a day, with its citation. From api/_research.js. */
   research?: { id: string; title: string; body: string; source: string };
   /** Flat list of add-on keys this person owns, derived server-side. */
@@ -476,7 +489,7 @@ export type HomeResponse = {
 
 // ── Client ─────────────────────────────────────────────────────────────────
 
-let baseUrl = 'https://attune-relationships.com';
+let baseUrl = 'https://www.attune-relationships.com';
 let getToken: () => Promise<string | null> = async () => null;
 let refresh: (() => Promise<boolean>) | null = null;
 

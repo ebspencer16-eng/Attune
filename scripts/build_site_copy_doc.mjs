@@ -4,9 +4,14 @@ import { Paragraph } from 'docx';
 import { run, eyebrow, title, h1, h2, body, small, bullet, rule, saveDoc, ORANGE, BLUE, INK, MUTED } from './_doc_style.mjs';
 
 const PAGES = [
-  ['home.html','Home'], ['purpose.html','Purpose'], ['how-it-works.html','How It Works'],
+  // how-it-works.html was retired into other pages in 5c1924e and deleted in
+  // 1316f37; reviews.html moved to the bottom of the FAQ page in 3e6d833 and
+  // its file was deleted once the rewrite made it unreachable. Both stayed on
+  // this list, so this generator has been reading two files that are not
+  // there. The testimonials it used to carry are covered by faq.html below.
+  ['home.html','Home'], ['purpose.html','Purpose'],
   ['offerings.html','Offerings'], ['faq.html','FAQ'], ['resources.html','Resources'],
-  ['reviews.html','Reviews'], ['start.html','Start'], ['contact.html','Contact'],
+  ['start.html','Start'], ['contact.html','Contact'],
 ];
 const strip = (s) => s.replace(/<[^>]+>/g,' ').replace(/&amp;/g,'&').replace(/&nbsp;/g,' ')
   .replace(/&#39;|&rsquo;|&lsquo;/g,"'").replace(/&quot;|&ldquo;|&rdquo;/g,'"').replace(/&[a-z]+;/g,' ').replace(/\s+/g,' ').trim();

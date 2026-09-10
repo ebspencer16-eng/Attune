@@ -34,7 +34,7 @@ import ConflictResultsView from '@/components/conflict-results';
 import HighlightCards from '@/components/highlight-cards';
 import { Eyebrow } from '@/components/screen-states';
 import {
-  BottomTabInset, Colors, MaxContentWidth, Palette, Radius, SectionColor, Spacing, Type,
+  BlueGround, BottomTabInset, Colors, MaxContentWidth, Palette, Radius, SectionColor, Spacing, Type,
 } from '@/constants/attune-theme';
 
 /**
@@ -1330,7 +1330,7 @@ function Glance({
             page is the shape of the pair across everything, and you cannot see
             a shape in four cards. */}
         <LinearGradient
-          colors={['#1B2A5E', '#2F55C4']}
+          colors={[...BlueGround]}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
           style={{ borderRadius: Radius.xl, padding: Spacing.xl }}>

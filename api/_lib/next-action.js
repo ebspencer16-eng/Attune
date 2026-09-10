@@ -65,6 +65,7 @@ function appTargetFor(deepLink) {
   if (view === 'results') return { route: '/insights' };
   if (view === 'home' || view === '') return { route: '/' };
   if (view === 'practice') return { route: '/resources' };
+  if (view === 'notes') return { route: '/notes' };
 
   // An exercise. Routed to Insights, carrying which one, so the app can open it
   // directly when it can ask it and show its row when it cannot.

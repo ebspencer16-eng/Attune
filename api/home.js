@@ -21,6 +21,7 @@ import { nextActions, greeting } from './_lib/next-action.js';
 import { EXERCISES, EXERCISE_COLUMNS, CORE_EXERCISES, isExerciseDone } from './_exercises.js';
 import { CATALOGUE } from './_catalogue.js';
 import { researchOfTheDay } from './_research.js';
+import { pickUp } from './_lib/pick-up.js';
 import { capabilitiesFor } from './_lib/ownership.js';
 
 const HEADERS = { 'Content-Type': 'application/json', 'X-Content-Type-Options': 'nosniff' };
@@ -153,6 +154,16 @@ export default async function handler(req) {
       }
     } catch { /* no posts table yet, or a read failure: the card just never raises */ }
 
+    // Their own most recently touched note, for the home screen's third row.
+    let lastNote = null;
+    try {
+      const nRes = await fetch(
+        `${supabaseUrl}/rest/v1/notes?owner_id=eq.${me.id}`
+        + '&select=title,body,anchor_context&order=updated_at.desc&limit=1',
+        { headers: svc });
+      lastNote = (await nRes.json().catch(() => []))?.[0] || null;
+    } catch { /* no notes table yet, or a read failure: the row falls back to a post */ }
+
     const state = {
       now: new Date().toISOString(),
       firstName: (me.name || '').trim().split(/\s+/)[0] || null,
@@ -222,6 +233,12 @@ export default async function handler(req) {
       // api/_research.js so they cannot drift from the website's Our Purpose
       // page, which says the same three things.
       research: researchOfTheDay(),
+      /**
+       * The home screen's third row: a note to return to, or the newest In
+       * Practice post when there is none. Two states, decided server-side so
+       * the app renders one shape either way. See api/_lib/pick-up.js.
+       */
+      pickUp: pickUp({ note: lastNote, inPractice }),
       // Per-exercise progress, so the Insights tab can show what is left
       // before results exist rather than a locked empty screen. Computed here
       // already; it was simply never returned.

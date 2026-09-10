@@ -28,6 +28,17 @@ export const Palette = {
 } as const;
 
 /**
+ * The blue ground, one definition.
+ *
+ * Two shades of the same blue, dark to light. It is monochrome on purpose: the
+ * home screen ran a three-hue gradient once and it was the app inventing a
+ * palette the site does not have. These two are the ones the results glance
+ * already paints its lead panel with, so the app has one blue ground rather
+ * than two that nearly match.
+ */
+export const BlueGround = ['#1B2A5E', '#2F55C4'] as const;
+
+/**
  * Section accents. Used consistently and never decoratively: a colour on this
  * app means "this belongs to that section", so borrowing one for emphasis
  * breaks the only signal it carries.
