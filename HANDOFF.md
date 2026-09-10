@@ -757,10 +757,16 @@ side has changed. Adopt a section by reading the *website's* render top to
 bottom and listing what it draws. The failures that follow are the work. Noted
 at the top of `section-blocks.js` so it survives.
 
-**Half done.** The app was verified against the live API before the new fields
-were deployed, so the axes and individual type blocks were correctly silent but
-have not been seen with real data. They need one look on the simulator now that
-the deploy is out.
+**Verified live.** The axes and individual type blocks were seen on the
+simulator against the deployed API: The Initiator and The Anchor, each with a
+blurb and two banded bars, in the website's order.
+
+**A deploy check that could never work.** For half an hour I reported the
+deploy as stuck because production served a different bundle hash than the
+local build. It cannot match: Vercel inlines the Supabase env vars and a
+developer's build has none, so the bundle content differs by construction. The
+deploy had been live the whole time. Check something env-independent instead,
+such as a static file under public/, or a string only the new code contains.
 
 **Not attempted, found on the way:**
 
