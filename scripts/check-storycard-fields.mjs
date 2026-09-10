@@ -134,6 +134,22 @@ for (const card of cards) {
   }
 }
 
+// ── AND THE PRESENTATION OBJECT ────────────────────────────────────────────
+// STORYCARD_STYLE is sent whole on every results payload. `tones`, the eight
+// card grounds, was in it from the start and the app read its own local table
+// instead: two copies of eight gradients, one of them never consulted, under a
+// module whose opening comment says neither surface holds its own copy of a
+// colour. Nothing noticed, because a value that is sent and ignored looks
+// exactly like a value that is used.
+const { STORYCARD_STYLE } = await import('../api/_lib/storycard-style.js');
+for (const key of Object.keys(STORYCARD_STYLE)) {
+  if (new RegExp(`\\b(SC|style)\\??\\.${key}\\b|\\b${key}:`).test(app)) continue;
+  problems.push(
+    `api/_lib/storycard-style.js sends .${key} on every results payload, and\n`
+    + '      the app never reads it. Either the app has its own copy of that value,\n'
+    + '      which is what this module exists to prevent, or it should not be sent.');
+}
+
 if (problems.length) {
   console.error('[check-storycard-fields] the app is not drawing what the server sends:');
   for (const p of problems) console.error(`  ${p}`);

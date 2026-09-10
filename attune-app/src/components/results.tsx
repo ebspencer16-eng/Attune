@@ -2406,6 +2406,8 @@ function Disclosure({ title, children }: { title: string; children: React.ReactN
 
 export type StorycardStyle = {
   ratio: number; stripe: string[]; wordmark: string; siteLabel: string;
+  /** The card grounds by tone. Sent since this type was written, read now. */
+  tones?: Record<string, string[]>;
 };
 
 export type CommDomain = {

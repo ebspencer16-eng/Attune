@@ -94,6 +94,17 @@ let SC = {
   stripe: ['#E8673A', '#9B5DE5', '#1B5FE8'] as string[],
   wordmark: 'Attune',
   siteLabel: 'attune-relationships.com',
+  /**
+   * The grounds were NOT here, so the server sent `tones` on every results
+   * payload and this file kept its own table and used that instead. Two
+   * copies of eight gradients, one of them unread, under a module whose
+   * opening comment says neither surface holds its own copy of a colour.
+   *
+   * They are here now, so the payload's win like every other value does, and
+   * the table below is what it always claimed to be: a fallback for a screen
+   * rendering before the style arrives.
+   */
+  tones: null as Record<string, unknown> | null,
 };
 
 /**
@@ -104,8 +115,26 @@ let SC = {
  * the colour on the type name instead, which is the one place it was least
  * visible.
  */
-function typeGround(accent?: string | null): [string, string, string] {
-  if (!accent) return TONES.type;
+/**
+ * A card's ground. The payload's table first, this file's as the fallback.
+ *
+ * Typed as a three-stop tuple because LinearGradient wants at least two known
+ * colours, and every ground in the product is three. A payload that sends
+ * something shorter falls back rather than being spread in half.
+ */
+type Ground = [string, string, string];
+
+const isGround = (v: unknown): v is Ground =>
+  Array.isArray(v) && v.length === 3 && v.every((x) => typeof x === 'string');
+
+function ground(tone: string): Ground {
+  const sent = SC.tones?.[tone];
+  if (isGround(sent)) return sent;
+  return TONES[tone] || TONES.night;
+}
+
+function typeGround(accent?: string | null): Ground {
+  if (!accent) return ground('type');
   return [`${accent}CC`, `${accent}66`, '#14102E'];
 }
 
@@ -386,7 +415,7 @@ function Card({
 }) {
   const tone = card.kind === 'couple-type'
     ? typeGround(card.accent)
-    : TONES[card.tone] || TONES.night;
+    : ground(card.tone);
 
   // The entrance the website gives every card: up and in, once, on arrival.
   // An instant swap is what made the app's reel feel like a carousel of

@@ -233,11 +233,16 @@ export default async function handler(req) {
       // read a top-level field that was never sent, so a couple who had both
       // finished were shown their exercise progress instead of their results.
       resultsReady,
-      // What is still outstanding, and whose it is. Sent so a waiting screen
-      // can say which exercise it is waiting on without deciding for itself
-      // which ones count: that decision is the gate's, and a surface that
-      // reimplements it is how this rule ended up with three versions.
-      resultsWaitingOn: gate.waitingOn,
+      // No waiting list here on purpose, though the gate computes one. This
+      // response already carries `exercises`, keyed by exercise, each with
+      // owned, mine and theirs, and the app's Insights screen already filters
+      // it to work out who owes what. A second field saying the same thing is
+      // the failure this whole codebase is organised against, and adding it
+      // here would have been that mistake made while fixing an instance of it.
+      //
+      // /api/results does send waitingOn, because its not-ready response
+      // carries no per-exercise state and a waiting screen there has nothing
+      // else to read.
       // What exists to buy, so the app renders the server's catalogue rather
       // than a copy that goes stale the moment an add-on is added or repriced.
       catalogue: CATALOGUE,
