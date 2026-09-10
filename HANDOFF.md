@@ -779,3 +779,44 @@ such as a static file under public/, or a string only the new code contains.
   surface. It is not ported: it has never been read by anyone and so has never
   been reviewed as copy. If the bars should say why, that is copy for Ellie and
   a new block in the spec.
+
+---
+
+## Where I stopped (2026-09-09, storycards and two lists)
+
+**The storycard lesson, which is the one worth carrying.** An audit that checks
+every field is drawn tells you nothing about whether two surfaces look alike. I
+reported the storycards as needing no work on exactly that basis and Ellie
+found the difference by looking, three times. Field coverage is not matching.
+
+The values that drifted are shared data now (`api/_lib/storycard-style.js`,
+read by the website directly and sent to the app on `content.storycardStyle`),
+and four structural blocks are marked and gated.
+
+**A real gap the storycard work exposed in check-section-blocks.mjs:** it read
+one file per surface. The app's results are split across four components, so
+every marker outside `results.tsx` was invisible and it reported four blocks
+missing that the app draws. Each surface is a list of files now. **Add to that
+list when the app grows a results component**, or the gate goes quietly blind
+again.
+
+**In Practice is wired.** It said "Nothing published yet" since it was built,
+while six pieces existed, because the app reads the `posts` table and those six
+are pages on the website. `api/_in-practice.js` is the index; `/api/posts`
+serves it when the table is empty and yields to a real post the moment one
+exists. Publishing to the table is still the right long-term answer.
+
+**Open, needs a decision from Ellie:**
+
+- Storycard download. The website has a Download button on every card and its
+  copy says "Download any to share or save". The app has none: capturing a view
+  as an image needs `react-native-view-shot` plus a share module, and the rule
+  here is no new dependencies without asking.
+- The Couple Type axis descriptions side by side. Asked for on one list, then
+  reverted with the rest of that page's columns. Putting only that one back is
+  small.
+- In Practice `Recent` is three across at every width, as asked. On a real
+  phone that is about 135 points a card. One breakpoint brings it back if it
+  reads badly.
+- The tab bar is a native translucent material, so over the blue home screen
+  its labels are lower contrast than on the cream screens.
