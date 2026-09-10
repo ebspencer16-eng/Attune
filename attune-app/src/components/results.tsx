@@ -1033,8 +1033,14 @@ function IntimacyDimensionView({
             draw this until the server carried positions, so the website had a
             screen the app did not. */}
         {dim.questions?.length ? (
-          <View style={{ marginTop: Spacing.xxl }}>
-            <Eyebrow>{`${dim.label} questions, side by side`}</Eyebrow>
+          /* Behind the same dropdown the Communication pages use, which is
+             what Ellie asked for. It used to sit open on the page, so the most
+             explicit content in the product was on screen the moment the page
+             loaded with no step in between.
+
+             The control is the shared Disclosure, not a copy of the comms one,
+             so the two cannot drift into looking almost alike. */
+          <Disclosure title={`Side by side ${dim.label.toLowerCase()} responses`}>
             <Legend you={you} them={them} />
             {/* block: intimacy-dimension/questions */}
             {dim.questions.map((q) => (
@@ -1060,7 +1066,7 @@ function IntimacyDimensionView({
                 </View>
               </View>
             ))}
-          </View>
+          </Disclosure>
         ) : null}
       </View>
     </ScrollView>
@@ -1904,6 +1910,23 @@ function CoupleType({ results, you, them }: { results: CoupleResults; you: strin
           quadrants={results.content?.mapQuadrants}
         />
 
+        {/* How the map is worked out, and a warning about expecting a
+            particular answer. Ellie's copy, from api/_axes.js by way of the
+            payload. The website has printed it under its map all along; the
+            app printed nothing, because the words lived inline in the
+            website's source. Small, because it is small print. */}
+        {(results.content?.mapCaption || []).map((para, i, all) => (
+          <Text
+            key={i}
+            style={{
+              ...Type.small, fontSize: 12, lineHeight: 17, color: c.textMuted,
+              marginTop: i === 0 ? Spacing.md : Spacing.sm,
+              marginBottom: i === all.length - 1 ? 0 : 0,
+            }}>
+            {para}
+          </Text>
+        ))}
+
         {/* block: couple-type/axes
 
             What the two axes mean. The map without these is a picture: two
@@ -1912,7 +1935,11 @@ function CoupleType({ results, you, them }: { results: CoupleResults; you: strin
         {/* Side by side, which is what Ellie asked for and what the website
             does on a wide screen. The two are halves of one explanation and
             reading them stacked means holding the first while you read the
-            second. Type steps down because a column is half the measure. */}
+            second. Type steps down because a column is half the measure.
+
+            One sentence each now. The pole lines that used to follow, with the
+            up and down arrows spelling out Engage versus Withdraw, were cut
+            from both surfaces: the label names both ends already. */}
         <View
           style={{
             flexDirection: 'row', alignItems: 'stretch', gap: 10,
@@ -1921,13 +1948,7 @@ function CoupleType({ results, you, them }: { results: CoupleResults; you: strin
           {(results.content?.axes || []).map((ax) => (
             <View key={ax.id} style={{ flex: 1, borderLeftColor: ax.color, borderLeftWidth: 3, paddingLeft: Spacing.sm }}>
               <Text style={{ ...Type.eyebrow, color: ax.color, marginBottom: Spacing.xs }}>{ax.label}</Text>
-              <Text style={{ ...Type.small, color: c.text, marginBottom: Spacing.sm }}>{ax.desc}</Text>
-              {ax.poles.map((pole, i) => (
-                <Text key={pole} style={{ ...Type.small, fontSize: 12, lineHeight: 17, color: c.textMuted, marginBottom: 2 }}>
-                  <Text style={{ color: ax.color, fontWeight: '700' }}>{i === 0 ? '\u2191 ' : '\u2193 '}</Text>
-                  {pole}
-                </Text>
-              ))}
+              <Text style={{ ...Type.small, color: c.text }}>{ax.desc}</Text>
             </View>
           ))}
         </View>
@@ -1969,20 +1990,63 @@ function CoupleType({ results, you, them }: { results: CoupleResults; you: strin
             </View>
           ))}
 
+        <Text style={{ ...Type.eyebrow, color: accent, marginTop: Spacing.xxl }}>Your couple type</Text>
+
         {/* block: couple-type/name */}
-        <Text style={{ ...Type.eyebrow, color: accent, marginTop: Spacing.xxl }}>Couple type</Text>
-        <Text style={{ ...Type.hero, color: c.textStrong, marginTop: Spacing.sm }}>{type.name}</Text>
-        <Text style={{ ...Type.body, color: c.textMuted, marginTop: Spacing.sm }}>
-          {interp(type.tagline, you, them)}
-        </Text>
+        {/* The website's type reveal: the name set large in white on a tile
+            filled with the type's own colour, its tagline under it, and the
+            name again oversized and barely visible in the corner.
+
+            The app set the same two strings as plain text on the page ground.
+            Every word matched and the moment did not: this is the line the
+            whole section builds to, and it read like a subheading. Ellie asked
+            for the coloured tile.
+
+            The colour is the type's, from the payload, so there is no second
+            copy of the palette here. */}
+        <LinearGradient
+          colors={[`${type.color || c.accent}ee`, `${type.color || c.accent}99`]}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={{
+            borderRadius: Radius.lg, overflow: 'hidden',
+            paddingHorizontal: Spacing.xl, paddingTop: Spacing.xl, paddingBottom: Spacing.lg,
+            marginTop: Spacing.md,
+          }}>
+          {/* The watermark. Positioned rather than laid out, so it cannot
+              push the name around when a type name is long, and clipped by
+              the tile's overflow like the website's is. */}
+          <Text
+            pointerEvents="none"
+            numberOfLines={1}
+            style={{
+              position: 'absolute', right: -10, bottom: -18,
+              ...Type.hero, fontSize: 76, lineHeight: 80,
+              color: 'rgba(255,255,255,0.10)',
+            }}>
+            {(type.name || '').replace(/^The /, '')}
+          </Text>
+          <Text style={{ ...Type.hero, fontSize: 38, lineHeight: 40, color: '#FFFFFF' }}>
+            {type.name}
+          </Text>
+          <Text style={{ ...Type.body, color: 'rgba(255,255,255,0.9)', fontWeight: '500', marginTop: Spacing.sm }}>
+            {interp(type.tagline, you, them)}
+          </Text>
+        </LinearGradient>
 
         {/* block: couple-type/description */}
         {/* `patterns`, which is what the website's "What this looks like in
             your relationship" tile prints. The app printed `description`, a
             different field with different words, so this tile said something
             else entirely on the two products. Near-axis overrides are already
-            applied server-side. */}
-        <View style={{ ...card(), marginTop: Spacing.xl, borderLeftColor: accent, borderLeftWidth: 3 }}>
+            applied server-side.
+
+            The heading was missing too, so the paragraph arrived unlabelled
+            and the reader had to work out what it was describing. */}
+        <View style={{ ...card(), marginTop: Spacing.lg }}>
+          <Text style={{ ...Type.eyebrow, color: type.color || accent, marginBottom: Spacing.md }}>
+            What this looks like in your relationship
+          </Text>
           <Text style={{ ...Type.body, color: c.text }}>
             {interp((type.patterns?.length ? type.patterns.join(' ') : type.description), you, them)}
           </Text>
@@ -2231,7 +2295,6 @@ function SideBySide({
   dims: ResultDimension[]; you: string; them: string; viewer: 'a' | 'b';
   label: string; rows?: CoupleResults['content'] extends never ? never : SbsRow[];
 }) {
-  const [open, setOpen] = useState(false);
   const keys = new Set(dims.map((d) => d.key));
   const qs = (rows || []).filter((r) => keys.has(r.dimension));
   if (!qs.length) return null;
@@ -2243,28 +2306,7 @@ function SideBySide({
   const P = '#6C7FFF';
 
   return (
-    <View
-      style={{
-        marginTop: Spacing.xl, borderRadius: Radius.lg,
-        backgroundColor: 'rgba(255,255,255,0.05)',
-        borderColor: 'rgba(255,255,255,0.14)', borderWidth: 1,
-        overflow: 'hidden',
-      }}>
-      <Pressable
-        onPress={() => setOpen((v) => !v)}
-        accessibilityRole="button"
-        style={{
-          flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
-          paddingVertical: Spacing.lg, paddingHorizontal: Spacing.lg,
-        }}>
-        <Text style={{ ...Type.eyebrow, color: 'rgba(255,255,255,0.85)', flex: 1 }}>
-          {`Side by side ${label.toLowerCase()} responses`}
-        </Text>
-        <Text style={{ color: 'rgba(255,255,255,0.6)', fontSize: 14 }}>{open ? '\u25B4' : '\u25BE'}</Text>
-      </Pressable>
-
-      {open ? (
-        <View style={{ paddingHorizontal: Spacing.lg, paddingBottom: Spacing.lg }}>
+    <Disclosure title={`Side by side ${label.toLowerCase()} responses`}>
           {/* The small dots carry no initial, so this is the only thing naming
               them. */}
           <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.md, marginBottom: Spacing.lg }}>
@@ -2301,6 +2343,50 @@ function SideBySide({
               />
             ))}
           </View>
+    </Disclosure>
+  );
+}
+
+/**
+ * A titled dropdown on a dark results ground.
+ *
+ * ── WHY IT IS ITS OWN COMPONENT ───────────────────────────────────────────
+ * Ellie asked for the intimacy responses to sit behind a dropdown "like
+ * comms". The obvious way to do that is to copy the comms chrome onto the
+ * intimacy page, and then there are two dropdowns that both happen to look
+ * alike until one of them is adjusted.
+ *
+ * This product's most expensive bug is the same rule kept by hand in two
+ * places, so the chrome is the thing that gets shared and the contents are
+ * what differ. Comms rows and intimacy rows are genuinely different shapes;
+ * the control around them is not.
+ */
+function Disclosure({ title, children }: { title: string; children: React.ReactNode }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <View
+      style={{
+        marginTop: Spacing.xl, borderRadius: Radius.lg,
+        backgroundColor: 'rgba(255,255,255,0.05)',
+        borderColor: 'rgba(255,255,255,0.14)', borderWidth: 1,
+        overflow: 'hidden',
+      }}>
+      <Pressable
+        onPress={() => setOpen((v) => !v)}
+        accessibilityRole="button"
+        accessibilityState={{ expanded: open }}
+        style={{
+          flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
+          paddingVertical: Spacing.lg, paddingHorizontal: Spacing.lg,
+        }}>
+        <Text style={{ ...Type.eyebrow, color: 'rgba(255,255,255,0.85)', flex: 1 }}>
+          {title}
+        </Text>
+        <Text style={{ color: 'rgba(255,255,255,0.6)', fontSize: 14 }}>{open ? '\u25B4' : '\u25BE'}</Text>
+      </Pressable>
+      {open ? (
+        <View style={{ paddingHorizontal: Spacing.lg, paddingBottom: Spacing.lg }}>
+          {children}
         </View>
       ) : null}
     </View>
@@ -2344,9 +2430,27 @@ function SbsQuestion({
   const dyReadOfYou = place(pct(row.readOfYou), 0);
   const dyReadOfThem = place(pct(row.readOfThem), 0);
 
+  /**
+   * The pole labels either side of the bar.
+   *
+   * These are whole sentences, not words: "Independent. Your own friendships
+   * and plans are part of how you stay yourself." In a fixed 86pt column at
+   * 11pt they wrapped to eight or nine lines and the row became a wall.
+   *
+   * The column takes whatever the bar does not need now, rather than a fixed
+   * width, and the dead space around the bar is cut to what the dots actually
+   * overhang. That is worth about fourteen points a side, which is a line or
+   * two off most rows.
+   *
+   * It does not eliminate the wrapping and nothing here can: three columns on
+   * a phone, with a sentence in each of the outer two, is the constraint. The
+   * website has the same problem at the same width and hides it by being read
+   * on a laptop. Short pole labels would fix it properly, and those are
+   * Ellie's words to write.
+   */
   const pole = {
-    ...Type.small, fontSize: 11, lineHeight: 15,
-    color: 'rgba(255,255,255,0.62)', width: 86,
+    ...Type.small, fontSize: 11, lineHeight: 14,
+    color: 'rgba(255,255,255,0.62)', flex: 1,
   };
 
   return (
@@ -2354,9 +2458,12 @@ function SbsQuestion({
       <Text style={{ ...Type.small, fontWeight: '600', color: Palette.white, marginBottom: Spacing.sm, lineHeight: 19 }}>
         {row.text}
       </Text>
-      <View style={{ flexDirection: 'row', alignItems: 'center', gap: Spacing.sm }}>
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
         <Text style={{ ...pole, textAlign: 'right' }}>{row.left}</Text>
-        <View style={{ flex: 1, paddingHorizontal: 12 }}>
+        {/* Fixed, so the labels flex around it instead of the other way round.
+            The padding is the dot overhang and nothing more: a 20pt dot at the
+            3% clamp hangs 10pt past the bar's end. */}
+        <View style={{ width: 104, paddingHorizontal: 10 }}>
           <View style={{ height: 6, borderRadius: 999, backgroundColor: 'rgba(255,255,255,0.14)', marginVertical: 16 }}>
             {/* readOfYou is the partner's answer ABOUT the reader, so it takes
                 the reader's colour and sits by the reader's own dot. */}

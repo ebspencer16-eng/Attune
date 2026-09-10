@@ -148,7 +148,9 @@ export type ResultsContent = {
     ratio: number; stripe: string[]; wordmark: string; siteLabel: string;
   };
   /** What the two axes mean, so the map reads as a finding and not a picture. */
-  axes?: { id: string; label: string; color: string; desc: string; poles: string[] }[];
+  axes?: { id: string; label: string; color: string; desc: string }[];
+  /** The small print under the couple map. Ellie's copy, from api/_axes.js. */
+  mapCaption?: string[];
   /** Each partner's own placement, in words. Null until that person has one. */
   individualTypes?: {
     a: IndividualProfile | null;

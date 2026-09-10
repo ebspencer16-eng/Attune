@@ -25,7 +25,7 @@ export const config = { runtime: 'edge' };
 import { sectionsWithLabels, resultsNav } from './_lib/results-sections.js';
 import { expectationsSummary } from './_lib/expectations.js';
 import { INDIVIDUAL_TYPE_DISPLAY, MAP_QUADRANTS } from './_individual-types.js';
-import { AXES } from './_axes.js';
+import { AXES, MAP_CAPTION } from './_axes.js';
 import { coupleTypeProse } from './_lib/near-axis.js';
 import { individualBlurb, axisRows } from './_lib/individual-profile.js';
 import { mapCoords } from './_lib/results.js';
@@ -284,6 +284,14 @@ function withContent(results, viewer, contentVersion, pronouns = {}) {
        * because the copy was inline in src/App.jsx.
        */
       axes: AXES,
+      /**
+       * The small print under the map. Ellie's copy, from api/_axes.js.
+       *
+       * The website printed it inline and the app printed nothing, which is
+       * the same shape as the axis copy before this: words that lived in a
+       * React DOM file the app cannot import. Sent, so both surfaces say it.
+       */
+      mapCaption: MAP_CAPTION,
       /**
        * Each partner's own placement, in words. Derived here, not stored,
        * for the same reason coords are: results are frozen, so a field added

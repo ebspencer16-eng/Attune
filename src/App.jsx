@@ -83,7 +83,7 @@ import {
 } from "../api/_anniversary-questions.js";
 import { COUPLE_TYPES as NEW_COUPLE_TYPES } from "../api/_couple-types.js";
 import { INDIVIDUAL_TYPE_DISPLAY } from "../api/_individual-types.js";
-import { AXES } from "../api/_axes.js";
+import { AXES, MAP_CAPTION } from "../api/_axes.js";
 import { CATEGORY_INTRO } from "../api/_lib/category-intros.js";
 import { NEAR_AXIS_PROSE as NEAR_AXIS_PROSE_SHARED } from "../api/_lib/near-axis.js";
 import { EXP_CAT_STARTERS as EXP_CAT_STARTERS_SHARED } from "../api/_lib/expectation-starters.js";
@@ -1957,14 +1957,16 @@ function CoupleMapSVG({ myS, partS, userName, partnerName, size = 480, hideCapti
         <polygon points={`${lowerTag.x},${lowerTagY} ${lowerTag.x - 5},${lowerTagY + 6} ${lowerTag.x + 5},${lowerTagY + 6}`} fill={lowerTag.color}/>
       </svg>
 
+      {/* MAP_CAPTION, not the words. It was written out here, which is why
+          the app printed nothing under its map: there was nowhere to read it
+          from. api/_axes.js holds it now and the payload carries it. */}
       {!hideCaption && (
       <div style={{ marginTop: "0.75rem" }}>
-        <p style={{ fontSize: "0.72rem", color: "#8C7A68", lineHeight: 1.65, margin: "0 0 0.5rem", fontWeight: 300, fontFamily: BFONT }}>
-          Where you each sit on this map is calculated from your responses. Scores for Conflict, Repair, and Stress determine placement on the Engage/Withdraw axis, and Expression, Feedback, and Needs scores determine placement on the Open/Guarded axis.
-        </p>
-        <p style={{ fontSize: "0.72rem", color: "#8C7A68", lineHeight: 1.65, margin: 0, fontWeight: 300, fontFamily: BFONT }}>
-          Two people who think they know their type will almost always land somewhere different than expected.
-        </p>
+        {MAP_CAPTION.map((para, i) => (
+          <p key={i} style={{ fontSize: "0.72rem", color: "#8C7A68", lineHeight: 1.65, margin: i === MAP_CAPTION.length - 1 ? 0 : "0 0 0.5rem", fontWeight: 300, fontFamily: BFONT }}>
+            {para}
+          </p>
+        ))}
       </div>
       )}
     </div>
@@ -6833,13 +6835,10 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
               {AXES.map(ax => (
                 <div key={ax.label} style={{ borderLeft: `3px solid ${ax.color}`, paddingLeft: "0.9rem" }}>
                   <div style={{ fontSize: "0.6rem", letterSpacing: "0.2em", textTransform: "uppercase", color: ax.color, fontFamily: BFONT, fontWeight: 700, marginBottom: "0.5rem" }}>{ax.label}</div>
-                  <p style={{ fontSize: "0.82rem", color: C.ink, fontFamily: BFONT, lineHeight: 1.65, margin: "0 0 0.65rem" }}>{ax.desc}</p>
-                  {ax.poles.map((p, i) => (
-                    <div key={i} style={{ fontSize: "0.72rem", color: C.muted, fontFamily: BFONT, marginBottom: "0.2rem" }}>
-                      <span style={{ fontWeight: 700, color: ax.color }}>{i === 0 ? "↑ " : "↓ "}</span>{p}
-                    </div>
-                  ))}
-                  
+                  {/* One sentence per axis. The pole lines that used to sit
+                      here, with the up and down arrows, were cut from both
+                      surfaces: the label names both ends already. */}
+                  <p style={{ fontSize: "0.82rem", color: C.ink, fontFamily: BFONT, lineHeight: 1.65, margin: 0 }}>{ax.desc}</p>
                 </div>
               ))}
             </div>
@@ -7600,7 +7599,23 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
             )}
 
             {/* block: intimacy-dimension/questions */}
-            <IntimacyResponseBreakdown dim={dimMatch} myAnswers={intimacyAnswers} partnerAnswers={partnerIntimacy?.answers} userName={userName} partnerName={partnerName} variant={intimacyVariant} />
+            {/* Behind a disclosure, the same as every Communication domain
+                page. It used to open expanded, which put the most explicit
+                content in the product on screen the moment the page loaded,
+                with no step in between. Ellie asked for the dropdown.
+
+                Same markup as the comms one deliberately, so the two read as
+                the same control rather than two things that both happen to
+                open. */}
+            <details style={{ marginTop: "1.5rem", background: "rgba(255,255,255,0.05)", borderRadius: 14, border: "1px solid rgba(255,255,255,0.14)" }}>
+              <summary style={{ listStyle: "none", cursor: "pointer", padding: "1.1rem 1.5rem", fontSize: "0.72rem", textTransform: "uppercase", letterSpacing: "0.1em", color: "rgba(255,255,255,0.85)", fontWeight: 700, fontFamily: BFONT, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                <span>Side by side {(INTIMACY_DIMENSIONS[idx]?.label || "").toLowerCase()} responses</span>
+                <span style={{ fontSize: "0.9rem", opacity: 0.6 }}>▾</span>
+              </summary>
+              <div style={{ padding: "0.5rem 1.5rem 1.5rem" }}>
+                <IntimacyResponseBreakdown dim={dimMatch} myAnswers={intimacyAnswers} partnerAnswers={partnerIntimacy?.answers} userName={userName} partnerName={partnerName} variant={intimacyVariant} />
+              </div>
+            </details>
 
             <NavButtons
               onBack={() => go(prevId)}
