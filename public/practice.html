@@ -120,22 +120,33 @@
   .section-eyebrow::before{content:'';width:28px;height:2.5px;border-radius:999px;background:linear-gradient(90deg,var(--orange),var(--indigo));flex-shrink:0}
   .section-eye-label{font-size:.6rem;letter-spacing:.26em;text-transform:uppercase;color:var(--clay);font-weight:700}
   .section-title{font-family:var(--hfont);font-size:clamp(1.5rem,2.5vw,2rem);font-weight:700;color:var(--ink);margin-bottom:var(--s-2xl);letter-spacing:-.015em}
-  .collections-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:var(--s-lg)}
-  /* Not a card. Four pastel boxes with icon chips is the most recognisable
-     generated-landing-page shape there is, and what this section actually is
-     is an index: four headings with the pieces under each. Set as one. */
+  /* One tile, four rows.
+     This was a two by two grid across the full measure, which spread four
+     short lists over the width of the page and put a lot of air between them.
+     What the section is is an index, and an index is a list. So: one narrow
+     tile, one row per collection, and an arrow on each heading through to that
+     category's full set. */
+  .collections-grid{display:block;max-width:620px;background:white;border:1.5px solid var(--stone);border-radius:18px;padding:var(--s-xl) var(--s-2xl)}
   .collection-card{background:none;border:0;border-radius:0;padding:0}
-  .coll-header{display:flex;align-items:flex-start;gap:var(--s-md);margin-bottom:var(--s-lg)}
+  .collection-card + .collection-card{border-top:1px solid var(--stone);margin-top:var(--s-lg);padding-top:var(--s-lg)}
+  .coll-header{display:flex;align-items:flex-start;gap:var(--s-md);margin-bottom:var(--s-md)}
+  /* The heading is the way through, so it says so. */
+  .coll-title-link{text-decoration:none;display:inline-flex;align-items:center;gap:.4rem;transition:gap .15s}
+  .coll-title-link:hover{gap:.65rem}
+  .coll-title-link .coll-arrow{color:var(--clay);font-size:.9rem;line-height:1}
   .coll-icon{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:1.1rem}
   .coll-title{font-family:var(--hfont);font-size:1.1rem;font-weight:700;color:var(--ink);line-height:1.2;margin-bottom:.2rem}
   .coll-desc{font-size:.78rem;color:var(--muted);line-height:1.55}
-  .coll-articles{display:flex;flex-direction:column;gap:.4rem;border-top:1px solid var(--stone);padding-top:var(--s-md)}
+  .coll-articles{display:flex;flex-direction:column;gap:.15rem}
   .coll-link{font-size:.8rem;color:var(--text);text-decoration:none;padding:.3rem 0;display:flex;align-items:center;gap:var(--s-xs);transition:color .15s;border-bottom:1px solid transparent}
   .coll-link:hover{color:var(--orange)}
   .coll-link span{font-size:.65rem;color:var(--muted);margin-left:auto;white-space:nowrap}
 
   /* RECENT POSTS */
   .posts-section{margin-bottom:5rem}
+  /* Three across, always. Six posts is two rows of three, and the
+     breakpoints that dropped it to two and then one turned that into three
+     rows of very wide tiles on a narrow window. */
   .posts-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--s-lg)}
   .post-card{background:white;border:1.5px solid var(--stone);border-radius:16px;overflow:hidden;text-decoration:none;display:flex;flex-direction:column;transition:transform .18s,box-shadow .18s,border-color .18s;box-shadow:0 1px 4px rgba(14,11,7,.06)}
   .post-card:hover{border-color:var(--clay)}
@@ -189,10 +200,8 @@
   @media(max-width:900px){
     .featured-article{grid-template-columns:1fr}
     .collections-grid{grid-template-columns:1fr}
-    .posts-grid{grid-template-columns:repeat(2,1fr)}
   }
   @media(max-width:640px){
-    .posts-grid{grid-template-columns:1fr}
     .nav-center,.nav-right .btn-nav,.nav-signin{display:none}
     .hamburger{display:flex}
     nav{padding:0 var(--s-lg)}
@@ -220,7 +229,6 @@
     .featured-title{font-size:1.5rem!important}
     .featured-excerpt{margin-bottom:1.25rem!important}
     .collections-grid{grid-template-columns:1fr!important}
-    .posts-grid{grid-template-columns:1fr!important}
     .coll-card{padding:1rem!important}
     .post-card{padding:.85rem!important}
     .category-bar-inner{gap:.4rem;padding:0 var(--s-md)}
@@ -237,7 +245,6 @@
     .collection-grid{grid-template-columns:1fr!important;gap:1rem!important}
     .collection-card{padding:0!important}
     .posts-section{padding:2rem 1.25rem 2.5rem!important;margin:0 -1.25rem!important}
-    .posts-grid{grid-template-columns:1fr!important;gap:.85rem!important}
     .cta-section,.cta-inner{padding:2.5rem 1.25rem!important}
   }
   .page-header{background:linear-gradient(150deg,#1c1940 0%,#282560 60%,#1e3a6e 100%);padding:calc(58px + 3.5rem) clamp(1.25rem,5vw,2.5rem) 3rem;position:relative;overflow:hidden;max-width:none;margin:0;width:100%;box-sizing:border-box}
@@ -356,7 +363,7 @@
       <div class="collection-card">
         <div class="coll-header">
           <div>
-            <p class="coll-title">Getting Started</p>
+            <a class="coll-title-link" href="/practice/getting-started"><p class="coll-title">Getting Started</p><span class="coll-arrow">→</span></a>
             <p class="coll-desc">For new users and couples approaching this for the first time.</p>
           </div>
         </div>
@@ -370,7 +377,7 @@
       <div class="collection-card">
         <div class="coll-header">
           <div>
-            <p class="coll-title">When It's Difficult</p>
+            <a class="coll-title-link" href="/practice/when-its-difficult"><p class="coll-title">When It's Difficult</p><span class="coll-arrow">→</span></a>
             <p class="coll-desc">Conflict, hard conversations, and how to repair after a hard moment.</p>
           </div>
         </div>
@@ -384,7 +391,7 @@
       <div class="collection-card">
         <div class="coll-header">
           <div>
-            <p class="coll-title">Understanding Each Other</p>
+            <a class="coll-title-link" href="/practice/understanding-each-other"><p class="coll-title">Understanding Each Other</p><span class="coll-arrow">→</span></a>
             <p class="coll-desc">Deeper reads on communication, attachment, and how people actually work.</p>
           </div>
         </div>
@@ -398,7 +405,7 @@
       <div class="collection-card">
         <div class="coll-header">
           <div>
-            <p class="coll-title">Methodology</p>
+            <a class="coll-title-link" href="/practice/couple-types"><p class="coll-title">Methodology</p><span class="coll-arrow">→</span></a>
             <p class="coll-desc">What the 10 couple types mean and how to work with yours specifically.</p>
           </div>
         </div>
