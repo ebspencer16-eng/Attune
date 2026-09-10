@@ -102,7 +102,7 @@ let lastSection: string | null = null;
 export default function Results({
   results, owned = [], sections: fromServer, nav = [], highlights = [],
   expectations = null, intimacy = null, reflection = null, whatComesNext = null,
-  commsPlan = null, reflectionPlan = null,
+  commsPlan = null, commDomains = [], commResponses = [], reflectionPlan = null,
 }: {
   results: CoupleResults;
   owned?: string[];
@@ -110,6 +110,8 @@ export default function Results({
   nav?: ResultsNavGroup[];
   highlights?: HighlightCard[];
   commsPlan?: CommsPlan | null;
+  commDomains?: CommDomain[];
+  commResponses?: SbsRow[];
   reflectionPlan?: ReflectionInsight[] | null;
   expectations?: ExpectationsSummary | null;
   intimacy?: IntimacyResults | null;
@@ -298,6 +300,8 @@ export default function Results({
           expectations={expectations}
           highlights={highlights}
           commsPlan={commsPlan}
+          commDomains={commDomains}
+          commResponses={commResponses}
           reflectionPlan={reflectionPlan}
           intimacy={intimacy}
           reflection={reflection}
@@ -332,13 +336,15 @@ export default function Results({
  */
 function SectionBody({
   section, results, conflict, conflictWaiting, byDomain, you, them, viewer, wideGap,
-  expectations, highlights, commsPlan, reflectionPlan,
+  expectations, highlights, commsPlan, commDomains, commResponses, reflectionPlan,
   intimacy, reflection, whatComesNext, onGoToSection,
 }: {
   section: string;
   expectations: ExpectationsSummary | null;
   highlights: HighlightCard[];
   commsPlan: CommsPlan | null;
+  commDomains: CommDomain[];
+  commResponses: SbsRow[];
   reflectionPlan: ReflectionInsight[] | null;
   intimacy: IntimacyResults | null;
   reflection: ReflectionResults | null;
@@ -385,7 +391,7 @@ function SectionBody({
   };
   const domainId = DOMAIN_SECTION[section];
   if (domainId) {
-    const d = results.content?.commDomains?.find((x) => x.id === domainId) ?? null;
+    const d = commDomains.find((x) => x.id === domainId) ?? null;
     return (
       <Domain
         title={d?.label || ''}
@@ -393,7 +399,7 @@ function SectionBody({
         dims={byDomain[domainId]}
         tile={commsPlan?.tiles?.find((t) => t.domain === domainId) ?? null}
         domain={d}
-        responses={results.content?.commResponses ?? []}
+        responses={commResponses}
         you={you}
         them={them}
         viewer={viewer}
@@ -2033,6 +2039,11 @@ function SideBySide({
     </View>
   );
 }
+
+export type CommDomain = {
+  id: string; label: string; color: string; dims: string[];
+  prose: string; ground: string[];
+};
 
 type SbsRow = {
   id: string; dimension: string; text: string; left: string; right: string;

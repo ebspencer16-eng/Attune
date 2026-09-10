@@ -371,6 +371,8 @@ function Results({ results, owned }: { results: ResultsResponse | null; owned: s
       nav={results.nav}
       highlights={results.highlights}
       commsPlan={results.commsPlan}
+      commDomains={results.commDomains ?? []}
+      commResponses={results.commResponses ?? []}
       reflectionPlan={results.reflectionPlan}
       expectations={results.expectations}
       intimacy={results.intimacy}

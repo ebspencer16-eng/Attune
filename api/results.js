@@ -82,7 +82,7 @@ function withLabels(results) {
  * `content` is additive. Nothing that already existed in the payload changes
  * shape, so the website keeps reading exactly what it read before.
  */
-function withContent(results, viewer, contentVersion, pronouns = {}, answers = {}) {
+function withContent(results, viewer, contentVersion, pronouns = {}) {
   if (!results) return results;
 
   // ── ROLE TOKENS, RESOLVED ON THE WAY OUT ─────────────────────────────────
@@ -470,9 +470,7 @@ export default async function handler(req) {
     const displayed = withContent(withLabels(results), viewerSide, contentVersion, {
       a: swapped ? partner.pronouns : me.pronouns,
       b: swapped ? me.pronouns : partner.pronouns,
-    // The raw Communication answers, for the side-by-side dropdown. Already
-    // viewer-relative: `mine` is whoever is asking.
-    }, { mine, theirs });
+    });
 
     return json({
       ok: true, ready: true, cached, recomputed: reason,
@@ -546,7 +544,7 @@ export default async function handler(req) {
        * The app had nothing here: it received scores and never an answer.
        * See api/_lib/side-by-side.js.
        */
-      commResponses: sideBySide(answers.mine, answers.theirs),
+      commResponses: sideBySide(mine, theirs),
       commsPlan: (() => {
         const copy = contentFor(contentVersion ?? null);
         const feedback = personalityFeedback({

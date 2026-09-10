@@ -141,25 +141,6 @@ export type ResultsContent = {
   storycardStyle?: {
     ratio: number; stripe: string[]; wordmark: string; siteLabel: string;
   };
-  /**
-   * The three Communication domain pages, with the paragraph each opens with
-   * and the gradient the website paints it. From api/_lib/comm-domains.js.
-   */
-  commDomains?: {
-    id: string; label: string; color: string; dims: string[];
-    prose: string; ground: string[];
-  }[];
-  /**
-   * Every Communication question with both answers and both cross-view reads,
-   * for the side-by-side dropdown. Already viewer-relative and already
-   * flipped where a question's scale runs the other way.
-   * See api/_lib/side-by-side.js.
-   */
-  commResponses?: {
-    id: string; dimension: string; text: string; left: string; right: string;
-    you: number | null; them: number | null;
-    readOfYou: number | null; readOfThem: number | null;
-  }[];
   /** What the two axes mean, so the map reads as a finding and not a picture. */
   axes?: { id: string; label: string; color: string; desc: string; poles: string[] }[];
   /** Each partner's own placement, in words. Null until that person has one. */
@@ -411,6 +392,22 @@ export type ResultsResponse =
       highlights?: HighlightCard[];
       /** The Communication action plan. */
       commsPlan?: CommsPlan | null;
+      /**
+       * The three Communication domain pages, with the paragraph each opens
+       * with and the gradient the website paints it. Top level, beside
+       * commsPlan, not inside content: content is what withContent builds and
+       * these are assembled by the handler.
+       */
+      commDomains?: {
+        id: string; label: string; color: string; dims: string[];
+        prose: string; ground: string[];
+      }[];
+      /** Every Communication question with both answers and both cross-views. */
+      commResponses?: {
+        id: string; dimension: string; text: string; left: string; right: string;
+        you: number | null; them: number | null;
+        readOfYou: number | null; readOfThem: number | null;
+      }[];
       /** The Reflection action plan. Null unless they own it and both finished. */
       reflectionPlan?: ReflectionInsight[] | null;
       /** What the couple owns, so nothing has to be inferred from the payload. */
