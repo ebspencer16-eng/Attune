@@ -18,7 +18,9 @@
  */
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Pressable, ScrollView, Text, View } from 'react-native';
+import { Pressable, ScrollView, Text, View ,
+  type ViewStyle,
+} from 'react-native';
 
 import CoupleMap from '@/components/couple-map';
 import EdgeFadedRow from '@/components/edge-faded-row';
@@ -34,7 +36,7 @@ import ConflictResultsView from '@/components/conflict-results';
 import HighlightCards from '@/components/highlight-cards';
 import { Eyebrow } from '@/components/screen-states';
 import {
-  BlueGround, BottomTabInset, Colors, MaxContentWidth, Palette, Radius, SectionColor, Spacing, Type,
+  BlueGround, ColumnGap, Dense, BottomTabInset, Colors, MaxContentWidth, Palette, Radius, SectionColor, Spacing, Type,
 } from '@/constants/attune-theme';
 
 /**
@@ -1435,6 +1437,32 @@ function Glance({
 }
 
 /** The couple type in full. Detail screen, so it stays on the warm ground. */
+/**
+ * Two columns, one row.
+ *
+ * ── WHY THIS IS A COMPONENT AND NOT A STYLE ───────────────────────────────
+ * Every results page was a single column of stacked tiles, so its length was
+ * the first thing a reader felt, and the pages that had the most to say felt
+ * the most like work. The fix is not less content. It is putting what belongs
+ * together next to itself.
+ *
+ * A pairing has to be earned: the two halves must be the same kind of thing,
+ * read against each other. Two partners' individual types are a pair. What
+ * comes naturally and what to watch for are a pair. A list of five action
+ * items is not a pair, and splitting it into two columns of two and three
+ * would just be a narrower list.
+ *
+ * Children take `flex: 1` and the text inside steps down to Dense. Anything
+ * that cannot survive that step is not a pairing; leave it full width.
+ */
+function Pair({ children, style }: { children: React.ReactNode; style?: ViewStyle }) {
+  return (
+    <View style={[{ flexDirection: 'row', gap: ColumnGap, alignItems: 'stretch' }, style]}>
+      {children}
+    </View>
+  );
+}
+
 function CoupleType({ results, you, them }: { results: CoupleResults; you: string; them: string }) {
   const type = results.content?.coupleType;
   if (!type) return null;
@@ -1485,20 +1513,20 @@ function CoupleType({ results, you, them }: { results: CoupleResults; you: strin
             What the two axes mean. The map without these is a picture: two
             dots in different corners and no way to know what the corners are.
             The copy is api/_axes.js, which the website reads too. */}
-        <View style={{ marginTop: results.content?.axes?.length ? Spacing.xl : 0, gap: Spacing.lg }}>
+        <Pair style={{ marginTop: results.content?.axes?.length ? Spacing.xl : 0 }}>
           {(results.content?.axes || []).map((ax) => (
-            <View key={ax.id} style={{ borderLeftColor: ax.color, borderLeftWidth: 3, paddingLeft: Spacing.md }}>
+            <View key={ax.id} style={{ flex: 1, borderLeftColor: ax.color, borderLeftWidth: 3, paddingLeft: Spacing.sm }}>
               <Text style={{ ...Type.eyebrow, color: ax.color, marginBottom: Spacing.xs }}>{ax.label}</Text>
-              <Text style={{ ...Type.body, color: c.text, marginBottom: Spacing.sm }}>{ax.desc}</Text>
+              <Text style={{ ...Dense.body, color: c.text, marginBottom: Spacing.sm }}>{ax.desc}</Text>
               {ax.poles.map((pole, i) => (
-                <Text key={pole} style={{ ...Type.small, color: c.textMuted, marginBottom: 2 }}>
+                <Text key={pole} style={{ ...Dense.small, color: c.textMuted, marginBottom: 2 }}>
                   <Text style={{ color: ax.color, fontWeight: '700' }}>{i === 0 ? '\u2191 ' : '\u2193 '}</Text>
                   {pole}
                 </Text>
               ))}
             </View>
           ))}
-        </View>
+        </Pair>
 
         {/* block: couple-type/individual-types
 
@@ -1512,30 +1540,38 @@ function CoupleType({ results, you, them }: { results: CoupleResults; you: strin
             Your individual types
           </Text>
         ) : null}
-        {[results.content?.individualTypes?.a, results.content?.individualTypes?.b]
-          .filter((p): p is NonNullable<typeof p> => !!p)
-          .map((p) => (
-            <View key={p.name} style={{ ...card(), marginBottom: Spacing.sm, borderTopColor: p.color, borderTopWidth: 4 }}>
-              <Text style={{ ...Type.eyebrow, color: p.color }}>{p.name}</Text>
-              <Text style={{ ...Type.title, color: c.textStrong, marginTop: Spacing.xs }}>{p.typeName}</Text>
-              <Text style={{ ...Type.body, color: c.textMuted, marginTop: Spacing.sm }}>{p.blurb}</Text>
-              <View style={{ marginTop: Spacing.md, gap: Spacing.sm }}>
-                {p.rows.map((r) => (
-                  <View key={r.axis}>
-                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 3 }}>
-                      <Text style={{ ...Type.small, color: c.textMuted }}>{r.label}</Text>
-                      <Text style={{ ...Type.small, color: p.color, fontWeight: '600' }}>{r.value}</Text>
+        {/* Side by side, because they are the same shape read against each
+            other. Stacked, the second person was most of a screen below the
+            first and the comparison had to be held in the reader's head. */}
+        <Pair>
+          {[results.content?.individualTypes?.a, results.content?.individualTypes?.b]
+            .filter((p): p is NonNullable<typeof p> => !!p)
+            .map((p) => (
+              <View key={p.name} style={{ ...card(), flex: 1, padding: Spacing.md, borderTopColor: p.color, borderTopWidth: 4 }}>
+                <Text style={{ ...Type.eyebrow, color: p.color }}>{p.name}</Text>
+                <Text style={{ ...Type.cardTitle, fontFamily: Type.title.fontFamily, fontSize: 18, lineHeight: 23, color: c.textStrong, marginTop: Spacing.xs }}>
+                  {p.typeName}
+                </Text>
+                <Text style={{ ...Dense.body, color: c.textMuted, marginTop: Spacing.sm }}>{p.blurb}</Text>
+                <View style={{ marginTop: Spacing.md, gap: Spacing.sm }}>
+                  {p.rows.map((r) => (
+                    <View key={r.axis}>
+                      {/* The band moves under the label in a column. Side by
+                          side they collided: "Engage/Withdraw" and "clearly
+                          engaged" do not fit on one 150 point line. */}
+                      <Text style={{ ...Dense.small, color: c.textMuted }}>{r.label}</Text>
+                      <Text style={{ ...Dense.small, color: p.color, fontWeight: '700', marginBottom: 3 }}>{r.value}</Text>
+                      {/* The bar is the same 0..1 the website draws, so a reader
+                          comparing the two screens sees the same fill. */}
+                      <View style={{ height: 4, borderRadius: 2, backgroundColor: c.border, overflow: 'hidden' }}>
+                        <View style={{ height: '100%', width: `${Math.round(r.score * 100)}%`, backgroundColor: p.color, borderRadius: 2 }} />
+                      </View>
                     </View>
-                    {/* The bar is the same 0..1 the website draws, so a reader
-                        comparing the two screens sees the same fill. */}
-                    <View style={{ height: 4, borderRadius: 2, backgroundColor: c.border, overflow: 'hidden' }}>
-                      <View style={{ height: '100%', width: `${Math.round(r.score * 100)}%`, backgroundColor: p.color, borderRadius: 2 }} />
-                    </View>
-                  </View>
-                ))}
+                  ))}
+                </View>
               </View>
-            </View>
-          ))}
+            ))}
+        </Pair>
 
         {/* block: couple-type/name */}
         <Text style={{ ...Type.eyebrow, color: accent, marginTop: Spacing.xxl }}>Couple type</Text>
@@ -1552,32 +1588,40 @@ function CoupleType({ results, you, them }: { results: CoupleResults; you: strin
         {/* The website's three blocks, in the website's order and with the
             website's headings. All three were absent because /api/results did
             not forward strengths, stickingPoints or tips. */}
-        {type.strengths?.length ? (
-          <View style={{ marginTop: Spacing.xl }}>
-            <Text style={{ ...Type.eyebrow, color: accent, marginBottom: Spacing.sm }}>
-              {/* block: couple-type/strengths */}
-              What comes naturally
-            </Text>
-            {type.strengths.slice(0, 2).map((t) => (
-              <View key={t} style={{ ...card(), marginBottom: Spacing.sm }}>
-                <Text style={{ ...Type.body, color: c.text }}>{interp(t, you, them)}</Text>
+        {/* The two halves of one thought, so they sit as a pair. The website
+            grids these side by side on a wide screen for the same reason: what
+            comes naturally is only half the picture until you can see what to
+            watch for next to it. */}
+        {type.strengths?.length || type.stickingPoints?.length ? (
+          <Pair style={{ marginTop: Spacing.xl }}>
+            {type.strengths?.length ? (
+              <View style={{ flex: 1 }}>
+                <Text style={{ ...Type.eyebrow, color: accent, marginBottom: Spacing.sm, minHeight: 28 }}>
+                  {/* block: couple-type/strengths */}
+                  What comes naturally
+                </Text>
+                {type.strengths.slice(0, 2).map((t) => (
+                  <View key={t} style={{ ...card(), padding: Spacing.md, marginBottom: Spacing.sm }}>
+                    <Text style={{ ...Dense.body, color: c.text }}>{interp(t, you, them)}</Text>
+                  </View>
+                ))}
               </View>
-            ))}
-          </View>
-        ) : null}
+            ) : null}
 
-        {type.stickingPoints?.length ? (
-          <View style={{ marginTop: Spacing.lg }}>
-            <Text style={{ ...Type.eyebrow, color: accent, marginBottom: Spacing.sm }}>
-              {/* block: couple-type/sticking-points */}
-              What&apos;s worth being aware of
-            </Text>
-            {type.stickingPoints.slice(0, 2).map((t) => (
-              <View key={t} style={{ ...card(), marginBottom: Spacing.sm }}>
-                <Text style={{ ...Type.body, color: c.text }}>{interp(t, you, them)}</Text>
+            {type.stickingPoints?.length ? (
+              <View style={{ flex: 1 }}>
+                <Text style={{ ...Type.eyebrow, color: accent, marginBottom: Spacing.sm, minHeight: 28 }}>
+                  {/* block: couple-type/sticking-points */}
+                  What&apos;s worth being aware of
+                </Text>
+                {type.stickingPoints.slice(0, 2).map((t) => (
+                  <View key={t} style={{ ...card(), padding: Spacing.md, marginBottom: Spacing.sm }}>
+                    <Text style={{ ...Dense.body, color: c.text }}>{interp(t, you, them)}</Text>
+                  </View>
+                ))}
               </View>
-            ))}
-          </View>
+            ) : null}
+          </Pair>
         ) : null}
 
         {/* No nuance card. The website's couple-type page does not render
