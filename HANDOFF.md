@@ -820,3 +820,45 @@ exists. Publishing to the table is still the right long-term answer.
   reads badly.
 - The tab bar is a native translucent material, so over the blue home screen
   its labels are lower contrast than on the cream screens.
+
+---
+
+## Where I stopped (2026-09-09, results parity)
+
+**The rule that was decided twice.** Whether two expectations answers agree was
+implemented in `src/App.jsx` and again in `api/_lib/expectations.js`, and they
+disagreed on 33 of the 81 possible answer pairs, all of them involving
+"Doesn't apply". The app was always the optimistic one. One rule now,
+`agrees()`, called by both; `check-alignment-rule.mjs` runs every pair through
+two readings and fails if they part again.
+
+**The gate that was missing, and it is the important one.** A ReferenceError in
+`/api/results` reached production and took the app's results screen down.
+Nothing in the build had ever *executed* the endpoint: every check reads source
+or exercises a module. `check-results-endpoint.mjs` now runs the real handler
+with only the network stubbed. If you add a field a screen depends on, add it
+to the list there with what breaks when it is missing.
+
+**Every results section is now on the ground the website paints it.** The app
+had been cream throughout while the site is dark and tinted per section. The
+colours are shared data, not copies: `comm-domains.js`, `intimacy-results.js`,
+`category-intros.js`, `side-by-side.js`.
+
+**A pattern worth knowing.** Three separate bugs this round were the same
+shape: something inline in `src/App.jsx` that the app could not read, so the
+app looked like it had made a different decision when it had simply never been
+given the words or the numbers. Before assuming the app chose to differ, check
+whether the fact has ever left the website's source.
+
+**Still open**
+
+- Ellie's item 4 asked for side-by-side views in *all* sections. Communication
+  has one. Expectations shows aligned and misaligned in full on its category
+  pages, which is that section's version. Intimacy already has per-question
+  comparison on each dimension page. Reflection has "Side by Side" as its own
+  page. Worth confirming with her that those count, rather than adding a
+  dropdown to sections that already show the comparison inline.
+- The page-by-page visual comparison she asked for is done for grounds and
+  structure. It has not been done for type scale and spacing.
+- Storycard download works but has never been exercised on a real device with
+  a real share sheet.
