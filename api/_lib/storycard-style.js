@@ -53,6 +53,42 @@ export function typeGround(accent) {
   return [`${accent}CC`, `${accent}66`, '#14102E'];
 }
 
+/**
+ * The two call-outs on the communication card.
+ *
+ * Green for where a couple is closest, orange for where they are furthest.
+ * On this card the colour IS the meaning: the two tiles carry a dimension
+ * name each and nothing else distinguishes "you agree here" from "you do
+ * not". The app drew both in the same grey, so the card said a couple had two
+ * notable dimensions and declined to say which was which.
+ *
+ * Not a judgement about the dimensions themselves. Neither end of any
+ * dimension is better than the other; this is about the size of the gap,
+ * which is the one thing on this card that does have a direction.
+ */
+export const CALLOUT_TONES = {
+  tune: { color: '#34D399', tint: 'rgba(16,185,129,0.14)', border: 'rgba(16,185,129,0.28)' },
+  diverge: { color: '#FF8C5A', tint: 'rgba(232,103,58,0.14)', border: 'rgba(232,103,58,0.28)' },
+};
+
+/** The two expectations donuts. Life & values, then Responsibilities. */
+export const RING_COLORS = { life: '#9B5DE5', responsibilities: '#1B5FE8' };
+
+/**
+ * What colour a big alignment percentage is printed in.
+ *
+ * The website has always stepped it: green from 70, blue from 50, orange
+ * below. The app printed every figure the same colour, so the number carried
+ * no reading at a glance and two very different results looked alike.
+ *
+ * A function rather than a table because the thresholds are the rule.
+ */
+export function statColor(pct) {
+  if (pct >= 70) return '#34D399';
+  if (pct >= 50) return '#60A5FA';
+  return '#FF8C5A';
+}
+
 /** Everything the app needs, in one object, for the payload. */
 export const STORYCARD_STYLE = {
   ratio: CARD_RATIO,

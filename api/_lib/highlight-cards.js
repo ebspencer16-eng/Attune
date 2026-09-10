@@ -21,6 +21,7 @@
 
 import { COUPLE_TYPES } from '../_couple-types.js';
 import { overallExpectationsPct } from './expectations-alignment.js';
+import { CALLOUT_TONES, RING_COLORS, statColor } from './storycard-style.js';
 
 /**
  * The one conversation, chosen by the widest communication gap.
@@ -113,9 +114,12 @@ export function highlightCards({
       lead: `${you} and ${them}'s communication styles are`,
       stat: `${commAlignPct}%`,
       statLabel: 'aligned',
+      // The colours come with the call-outs, from storycard-style.js, because
+      // on this card the colour is the meaning: two tiles carrying a dimension
+      // name each, and nothing else saying which is the close one.
       callouts: [
-        { label: "Where you're most in tune", value: closest?.label || null },
-        { label: 'Where you diverge most', value: widest?.label || null },
+        { label: "Where you're most in tune", value: closest?.label || null, ...CALLOUT_TONES.tune },
+        { label: 'Where you diverge most', value: widest?.label || null, ...CALLOUT_TONES.diverge },
       ],
       body: 'Explore your results to see what each of these means, with guidance built for the two of you.',
     });
@@ -134,10 +138,13 @@ export function highlightCards({
       id: 'expectations', kind: 'stat-rings', tone: 'blue',
       eyebrow: 'Expectations',
       stat: `${overall}%`,
+      // Stepped by the same thresholds the website steps it by. The app
+      // printed every figure in one colour, so 82% and 34% looked alike.
+      statColor: statColor(overall),
       statLabel: 'aligned overall',
       rings: [
-        { label: 'Life & values', pct: pct(lifeRows) },
-        { label: 'Responsibilities', pct: pct(respRows) },
+        { label: 'Life & values', pct: pct(lifeRows), color: RING_COLORS.life },
+        { label: 'Responsibilities', pct: pct(respRows), color: RING_COLORS.responsibilities },
       ],
     });
   }

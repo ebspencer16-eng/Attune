@@ -385,6 +385,17 @@ function SectionBody({
           cards={highlights}
           accent={results.content?.coupleType?.color || null}
           style={storycardStyle}
+          /* The website's couple type card is built around the map. The app's
+             had none, so the one card meant to place a couple showed them a
+             label instead. Same coordinates and quadrant table the couple type
+             page draws, passed in rather than duplicated onto the card. */
+          map={{
+            a: results.partners?.a ?? null,
+            b: results.partners?.b ?? null,
+            aName: results.content?.names?.a || 'You',
+            bName: results.content?.names?.b || 'Your partner',
+            quadrants: results.content?.mapQuadrants,
+          }}
           onDone={() => onGoToSection('couple-type')}
         />
       );

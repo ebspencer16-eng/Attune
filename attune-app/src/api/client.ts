@@ -197,10 +197,13 @@ export type HighlightCard = {
   typeLabel?: string;
   stat?: string;
   statLabel?: string;
+  /** Stepped by the website's thresholds, from api/_lib/storycard-style.js. */
+  statColor?: string;
   value?: string;
   quote?: string;
-  callouts?: { label: string; value: string | null }[];
-  rings?: { label: string; pct: number }[];
+  /** Colours come with the call-outs: on that card the colour is the meaning. */
+  callouts?: { label: string; value: string | null; color?: string; tint?: string; border?: string }[];
+  rings?: { label: string; pct: number; color?: string }[];
   rows?: { name: string; admired: string | null }[];
   dimensions?: { key: string; label: string; left: string | null; right: string | null; a: number | null; b: number | null }[];
 };

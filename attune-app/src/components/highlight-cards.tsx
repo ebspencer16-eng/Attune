@@ -46,7 +46,17 @@ import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-na
 import { captureRef } from 'react-native-view-shot';
 import * as Sharing from 'expo-sharing';
 
-import type { HighlightCard } from '@/api/client';
+import type { HighlightCard, PersonResults } from '@/api/client';
+import CoupleMap from '@/components/couple-map';
+
+/** What the couple type card needs to draw the same map the website's does. */
+export type MapData = {
+  a: PersonResults | null;
+  b: PersonResults | null;
+  aName: string;
+  bName: string;
+  quadrants?: { code: string; name: string; color: string; fill: string }[];
+};
 import {
   BottomTabInset, Colors, Palette, Radius, Spacing, Type,
 } from '@/constants/attune-theme';
@@ -112,12 +122,21 @@ function typeGround(accent?: string | null): [string, string, string] {
  * with product chrome above it is not a story card.
  */
 export default function HighlightCards({
-  cards, onDone, accent, style,
+  cards, onDone, accent, style, map,
 }: {
   cards: HighlightCard[];
   onDone: () => void;
   accent?: string | null;
   style?: Partial<typeof SC> | null;
+  /**
+   * What the couple type card draws its map from.
+   *
+   * Passed in rather than carried on the card, because the coordinates and
+   * the quadrant table are already on the results payload for the couple type
+   * page and a second copy on the card is a second copy of the same rule. The
+   * cards stay what they are: copy plus numbers.
+   */
+  map?: MapData | null;
 }) {
   if (style) SC = { ...SC, ...style };
   const [open, setOpen] = useState(false);
@@ -135,7 +154,7 @@ export default function HighlightCards({
         height: e.nativeEvent.layout.height - BottomTabInset - Spacing.xl,
       })}>
       <Pressable onPress={() => setOpen(true)} accessibilityRole="button">
-        <Card card={cards[0]} onDone={() => setOpen(true)} w={cardW} h={cardH} active />
+        <Card card={cards[0]} onDone={() => setOpen(true)} w={cardW} h={cardH} active map={map} />
       </Pressable>
 
       <Modal
@@ -146,6 +165,7 @@ export default function HighlightCards({
         <Reel
           cards={cards}
           accent={accent}
+          map={map}
           onClose={() => setOpen(false)}
           onDone={() => { setOpen(false); onDone(); }}
         />
@@ -155,8 +175,11 @@ export default function HighlightCards({
 }
 
 function Reel({
-  cards, onDone, onClose, accent,
-}: { cards: HighlightCard[]; onDone: () => void; onClose: () => void; accent?: string | null }) {
+  cards, onDone, onClose, accent, map,
+}: {
+  cards: HighlightCard[]; onDone: () => void; onClose: () => void;
+  accent?: string | null; map?: MapData | null;
+}) {
   const [index, setIndex] = useState(0);
   const pager = useRef<ScrollView>(null);
   const [box, setBox] = useState({ width: Dimensions.get('window').width, height: 0 });
@@ -280,7 +303,7 @@ function Reel({
             // someone decides the thing is broken.
             onPress={() => (i === cards.length - 1 ? onDone() : goTo(i + 1))}
             style={{ width, alignItems: 'center', justifyContent: 'flex-start' }}>
-            <Card card={card} onDone={onDone} w={cardW} h={cardH} active={i === index} shotRef={refFor(i)} />
+            <Card card={card} onDone={onDone} w={cardW} h={cardH} active={i === index} shotRef={refFor(i)} map={map} />
           </Pressable>
         ))}
       </ScrollView>
@@ -355,10 +378,11 @@ function Round({
 }
 
 function Card({
-  card, onDone, w, h, active, shotRef,
+  card, onDone, w, h, active, shotRef, map,
 }: {
   card: HighlightCard; onDone: () => void; w: number; h: number; active: boolean;
   shotRef?: React.RefObject<View | null>;
+  map?: MapData | null;
 }) {
   const tone = card.kind === 'couple-type'
     ? typeGround(card.accent)
@@ -402,7 +426,7 @@ function Card({
         ) : null}
 
         <View style={{ flex: 1, padding: Spacing.xl, justifyContent: 'center' }}>
-          <Body card={card} onDone={onDone} />
+          <Body card={card} onDone={onDone} map={map} />
         </View>
 
         {/* ── WHAT MAKES A SCREENSHOT STILL SAY WHERE IT CAME FROM ──────
@@ -428,7 +452,7 @@ function Card({
   );
 }
 
-function Body({ card, onDone }: { card: HighlightCard; onDone: () => void }) {
+function Body({ card, onDone, map }: { card: HighlightCard; onDone: () => void; map?: MapData | null }) {
   switch (card.kind) {
     case 'opener':
       return (
@@ -446,16 +470,42 @@ function Body({ card, onDone }: { card: HighlightCard; onDone: () => void }) {
       );
 
     case 'couple-type':
+      /**
+       * The website's card is built around the map. The app's drew the type
+       * name in hero type and no map at all, so the card that is supposed to
+       * show a couple where they sit showed them a label. Every string matched
+       * and the card was a different card, which is why it survived the block
+       * gate: presence is not shape.
+       *
+       * The map comes from the same coordinates and the same quadrant table
+       * the couple type page uses. It is not on the card data, because the
+       * card data is copy and the app already holds the numbers.
+       */
       return (
         <View style={{ alignItems: 'center' }}>
-          <Text style={[title, { textAlign: 'center' }]}>{card.title}</Text>
-          {card.typeName ? (
-            <Text style={[hero, { textAlign: 'center', marginTop: Spacing.xl, color: card.accent || Palette.white }]}>
-              {card.typeName}
-            </Text>
+          <Text style={[title, { textAlign: 'center', maxWidth: 320 }]}>{card.title}</Text>
+          {map ? (
+            <View style={{ marginTop: Spacing.md, marginBottom: Spacing.sm }}>
+              <CoupleMap
+                a={map.a}
+                b={map.b}
+                aName={map.aName}
+                bName={map.bName}
+                quadrants={map.quadrants}
+                size={168}
+              />
+            </View>
           ) : null}
-          <Text style={[label, { marginTop: Spacing.sm }]}>{card.typeLabel}</Text>
-          <Text style={[body, { textAlign: 'center', marginTop: Spacing.xl, maxWidth: 260 }]}>{card.body}</Text>
+          {/* "Your couple type: The Orbit" on one line, the way the website
+              writes it, rather than a label under a headline. */}
+          <Text style={[body, { textAlign: 'center', marginTop: map ? Spacing.sm : Spacing.xl, color: `${WHITE}0.85)` }]}>
+            {card.typeLabel}
+            {card.typeName ? ': ' : ''}
+            {card.typeName ? (
+              <Text style={{ fontWeight: '700', color: Palette.white }}>{card.typeName}</Text>
+            ) : null}
+          </Text>
+          <Text style={[body, { textAlign: 'center', marginTop: Spacing.sm, maxWidth: 260 }]}>{card.body}</Text>
         </View>
       );
 
@@ -486,14 +536,18 @@ function Body({ card, onDone }: { card: HighlightCard; onDone: () => void }) {
           <Text style={[body, { textAlign: 'center' }]}>{card.lead}</Text>
           <Text style={[stat, { textAlign: 'center' }]}>{card.stat}</Text>
           <Text style={[body, { textAlign: 'center', marginBottom: Spacing.xl }]}>{card.statLabel}</Text>
+          {/* Green for closest, orange for furthest, from the server. Both
+              tiles were the same grey here, so the card named two dimensions
+              and left the reader to guess which was the one they agree on. */}
           {(card.callouts || []).filter((x) => x.value).map((x) => (
             <View
               key={x.label}
               style={{
-                backgroundColor: `${WHITE}0.08)`, borderColor: `${WHITE}0.18)`, borderWidth: 1,
+                backgroundColor: x.tint || `${WHITE}0.08)`,
+                borderColor: x.border || `${WHITE}0.18)`, borderWidth: 1,
                 borderRadius: Radius.md, padding: Spacing.lg, marginBottom: Spacing.md,
               }}>
-              <Text style={label}>{x.label}</Text>
+              <Text style={[label, x.color ? { color: x.color } : null]}>{x.label}</Text>
               <Text style={[title, { fontSize: 20, marginTop: Spacing.xs }]}>{x.value}</Text>
             </View>
           ))}
@@ -502,13 +556,20 @@ function Body({ card, onDone }: { card: HighlightCard; onDone: () => void }) {
       );
 
     case 'stat-rings':
+      /* The figure is stepped by the same thresholds the website steps it by,
+         and the two rings carry their own colours. Both came from the server
+         rather than being written here, so there is no second palette. The app
+         printed all three in white, which meant 82% and 34% looked alike and
+         the two rings read as one measurement drawn twice. */
       return (
         <View style={{ alignItems: 'center' }}>
           <Eyebrow>{card.eyebrow}</Eyebrow>
-          <Text style={[stat, { fontSize: 72 }]}>{card.stat}</Text>
+          <Text style={[stat, { fontSize: 72, color: card.statColor || Palette.white }]}>{card.stat}</Text>
           <Text style={[body, { marginBottom: Spacing.xxl }]}>{card.statLabel}</Text>
           <View style={{ flexDirection: 'row', gap: Spacing.xl }}>
-            {(card.rings || []).map((r) => <Donut key={r.label} pct={r.pct} label={r.label} />)}
+            {(card.rings || []).map((r) => (
+              <Donut key={r.label} pct={r.pct} label={r.label} color={r.color} />
+            ))}
           </View>
         </View>
       );
@@ -609,7 +670,7 @@ function Body({ card, onDone }: { card: HighlightCard; onDone: () => void }) {
  * rather than a share of something, and is the one card where the website's
  * shape is doing the explaining.
  */
-function Donut({ pct, label }: { pct: number; label: string }) {
+function Donut({ pct, label, color }: { pct: number; label: string; color?: string | null }) {
   const SIZE = 84;
   const RING = 9;
   const clamped = Math.max(0, Math.min(100, pct));
@@ -638,7 +699,7 @@ function Donut({ pct, label }: { pct: number; label: string }) {
       style={{
         width: SIZE, height: SIZE, borderRadius: SIZE / 2,
         borderWidth: RING, borderColor: 'transparent',
-        borderTopColor: Palette.white, borderRightColor: Palette.white,
+        borderTopColor: color || Palette.white, borderRightColor: color || Palette.white,
         transform: [{ rotate: `${rotate}deg` }],
       }}
     />

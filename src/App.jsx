@@ -90,7 +90,7 @@ import { EXP_CAT_STARTERS as EXP_CAT_STARTERS_SHARED } from "../api/_lib/expecta
 import { REFLECTION_PROMPTS } from "../api/_lib/reflection-prompts.js";
 import { groundForDimension } from "../api/_lib/intimacy-results.js";
 import { COMM_DOMAINS } from "../api/_lib/comm-domains.js";
-import { STRIPE as SC_STRIPE, SITE_LABEL as SC_SITE } from "../api/_lib/storycard-style.js";
+import { STRIPE as SC_STRIPE, SITE_LABEL as SC_SITE, CALLOUT_TONES as SC_CALLOUT, RING_COLORS as SC_RING, statColor as scStatColor } from "../api/_lib/storycard-style.js";
 import { individualBlurb, axisBand, axisRows } from "../api/_lib/individual-profile.js";
 import { pronounForm } from "../api/_lib/role-tokens.js";
 import { commsProtocols } from "../api/_lib/comms-plan.js";
@@ -8770,12 +8770,12 @@ function ResultsHighlights({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3
             <div style={{ fontSize: "1.05rem", color: "rgba(255,255,255,0.72)", fontFamily: BFONT, fontWeight: 500, marginTop: "0.25rem", animation: "fadeUp 0.4s 0.22s both" }}>aligned</div>
           </div>
           <div style={{ display: "flex", flexDirection: "column", gap: "0.9rem", marginBottom: "1.75rem" }}>
-            <div style={{ background: "rgba(16,185,129,0.14)", border: "1px solid rgba(16,185,129,0.28)", borderRadius: 12, padding: "0.9rem 1.1rem", animation: "slideRight 0.4s 0.25s both" }}>
-              <div style={{ fontSize: "0.5rem", letterSpacing: "0.18em", textTransform: "uppercase", color: "#34d399", fontFamily: BFONT, fontWeight: 700, marginBottom: "0.3rem" }}>Where you're most in tune</div>
+            <div style={{ background: SC_CALLOUT.tune.tint, border: `1px solid ${SC_CALLOUT.tune.border}`, borderRadius: 12, padding: "0.9rem 1.1rem", animation: "slideRight 0.4s 0.25s both" }}>
+              <div style={{ fontSize: "0.5rem", letterSpacing: "0.18em", textTransform: "uppercase", color: SC_CALLOUT.tune.color, fontFamily: BFONT, fontWeight: 700, marginBottom: "0.3rem" }}>Where you're most in tune</div>
               <div style={{ fontFamily: HFONT, fontSize: "1.25rem", fontWeight: 700, color: "white" }}>{strengthMeta?.label || "Emotional Expression"}</div>
             </div>
-            <div style={{ background: "rgba(232,103,58,0.14)", border: "1px solid rgba(232,103,58,0.28)", borderRadius: 12, padding: "0.9rem 1.1rem", animation: "slideRight 0.4s 0.34s both" }}>
-              <div style={{ fontSize: "0.5rem", letterSpacing: "0.18em", textTransform: "uppercase", color: "#ff8c5a", fontFamily: BFONT, fontWeight: 700, marginBottom: "0.3rem" }}>Where you diverge most</div>
+            <div style={{ background: SC_CALLOUT.diverge.tint, border: `1px solid ${SC_CALLOUT.diverge.border}`, borderRadius: 12, padding: "0.9rem 1.1rem", animation: "slideRight 0.4s 0.34s both" }}>
+              <div style={{ fontSize: "0.5rem", letterSpacing: "0.18em", textTransform: "uppercase", color: SC_CALLOUT.diverge.color, fontFamily: BFONT, fontWeight: 700, marginBottom: "0.3rem" }}>Where you diverge most</div>
               <div style={{ fontFamily: HFONT, fontSize: "1.25rem", fontWeight: 700, color: "white" }}>{gapMeta?.label || "Conflict Style"}</div>
             </div>
           </div>
@@ -8790,11 +8790,11 @@ function ResultsHighlights({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3
       <div onClick={advance} style={{ flex: 1, display: "flex", flexDirection: "column", cursor: "pointer", position: "relative", overflow: "hidden", alignItems: "center", justifyContent: "center", padding: "2.75rem 2.25rem 2.75rem", textAlign: "center" }}>
         {watermark}
         <div style={{ fontSize: "0.55rem", letterSpacing: "0.28em", textTransform: "uppercase", color: "rgba(255,255,255,0.45)", fontFamily: BFONT, fontWeight: 700, marginBottom: "0.9rem", animation: "fadeUp 0.4s 0.05s both" }}>Expectations</div>
-        <div style={{ fontFamily: HFONT, fontSize: "clamp(4.5rem,14vw,7rem)", fontWeight: 700, color: alignPct >= 70 ? "#34d399" : alignPct >= 50 ? "#60a5fa" : "#ff8c5a", lineHeight: 0.85, letterSpacing: "-0.05em", marginBottom: "0.3rem", animation: "numCount 0.6s 0.1s cubic-bezier(0.34,1.56,0.64,1) both" }}>{alignPct}%</div>
+        <div style={{ fontFamily: HFONT, fontSize: "clamp(4.5rem,14vw,7rem)", fontWeight: 700, color: scStatColor(alignPct), lineHeight: 0.85, letterSpacing: "-0.05em", marginBottom: "0.3rem", animation: "numCount 0.6s 0.1s cubic-bezier(0.34,1.56,0.64,1) both" }}>{alignPct}%</div>
         <div style={{ fontSize: "1rem", color: "rgba(255,255,255,0.8)", fontFamily: BFONT, fontWeight: 500, marginBottom: "2.25rem", animation: "fadeUp 0.4s 0.25s both" }}>aligned overall</div>
         <div style={{ display: "flex", gap: "2.5rem", justifyContent: "center", animation: "fadeUp 0.4s 0.35s both" }}>
-          <Donut pct={lifeAlignPct} color="#9B5DE5" label="Life & values" />
-          <Donut pct={respAlignPct} color="#1B5FE8" label="Responsibilities" />
+          <Donut pct={lifeAlignPct} color={SC_RING.life} label="Life & values" />
+          <Donut pct={respAlignPct} color={SC_RING.responsibilities} label="Responsibilities" />
         </div>
       </div>
     </WrappedCard>,
