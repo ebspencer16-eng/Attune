@@ -117,6 +117,12 @@ export type ResultsContent = {
     name: string;
     tagline: string;
     description: string;
+    /**
+     * What the couple-type page prints, with near-axis overrides applied.
+     * `description` is a different field and stays only as a fallback for a
+     * payload written before this existed.
+     */
+    patterns?: string[];
     nuance: string;
     color: string;
     shade: string;
@@ -375,6 +381,8 @@ export type ExpectationsSummary = {
     /** The category's own id, and the paragraph the page opens with. */
     categoryId?: string;
     intro?: string | null;
+    /** True when the paragraph is written for this pairing rather than general. */
+    introIsForPair?: boolean;
     rows: ExpectationRow[];
     answered: number;
     aligned: number;

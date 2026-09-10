@@ -718,8 +718,12 @@ function ExpectationsConversation({
                 borderColor: 'rgba(255,255,255,0.13)', borderWidth: 1.5,
                 borderRadius: Radius.lg, padding: Spacing.lg, marginBottom: Spacing.lg,
               }}>
+              {/* The website names both people when the paragraph is the one
+                  written for their pairing, and stays general when it is not. */}
               <Text style={{ ...Type.eyebrow, color: accent, marginBottom: Spacing.sm }}>
-                Why this matters
+                {bucket.introIsForPair
+                  ? `How ${you} & ${them} need to approach these conversations`
+                  : 'How to approach these conversations'}
               </Text>
               <Text style={{ ...Type.body, color: 'rgba(255,255,255,0.85)', lineHeight: 24 }}>
                 {bucket.intro}
@@ -1913,8 +1917,15 @@ function CoupleType({ results, you, them }: { results: CoupleResults; you: strin
         </Text>
 
         {/* block: couple-type/description */}
+        {/* `patterns`, which is what the website's "What this looks like in
+            your relationship" tile prints. The app printed `description`, a
+            different field with different words, so this tile said something
+            else entirely on the two products. Near-axis overrides are already
+            applied server-side. */}
         <View style={{ ...card(), marginTop: Spacing.xl, borderLeftColor: accent, borderLeftWidth: 3 }}>
-          <Text style={{ ...Type.body, color: c.text }}>{interp(type.description, you, them)}</Text>
+          <Text style={{ ...Type.body, color: c.text }}>
+            {interp((type.patterns?.length ? type.patterns.join(' ') : type.description), you, them)}
+          </Text>
         </View>
 
         {/* The website's three blocks, in the website's order and with the

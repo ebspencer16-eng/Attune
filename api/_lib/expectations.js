@@ -22,6 +22,7 @@
 
 import { RESPONSIBILITY_CATEGORIES, LIFE_QUESTIONS, substName } from '../_questions.js';
 import { introFor } from './category-intros.js';
+import { starterFor } from './expectation-starters.js';
 
 /**
  * A responsibility key seen from the other side.
@@ -180,7 +181,7 @@ export const LIFE_CATEGORY_LABEL = 'Life & Values';
 
 
 /** The overview numbers, and one bucket per conversation screen. */
-export function expectationsSummary({ mine, theirs, youName, themName }) {
+export function expectationsSummary({ mine, theirs, youName, themName, coupleTypeId = null }) {
   const rows = expectationsRows({ mine, theirs, youName, themName });
   const answered = rows.length;
   const aligned = rows.filter((r) => r.aligned).length;
@@ -195,7 +196,16 @@ export function expectationsSummary({ mine, theirs, youName, themName }) {
       // with. The app had neither, so its category pages opened straight into
       // a list of rows.
       categoryId: cat.id,
-      intro: introFor(cat.id),
+      // The paragraph the page opens with. When the couple's type is known
+      // this is the one written for that pairing, which is what the website
+      // prints; the category's general introduction is the fallback. The app
+      // only ever had the fallback because the table was inline in
+      // src/App.jsx. See api/_lib/expectation-starters.js.
+      intro: starterFor(cat.id, coupleTypeId, introFor(cat.id)),
+      /** True when the paragraph is written for this pairing rather than
+       *  general, so the page can name both people above it the way the
+       *  website does. */
+      introIsForPair: starterFor(cat.id, coupleTypeId, null) != null,
       rows: inCat,
       answered: inCat.length,
       aligned: inCat.filter((r) => r.aligned).length,

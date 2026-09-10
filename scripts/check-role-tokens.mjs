@@ -32,7 +32,9 @@ import { resolveRoleTokens } from '../api/_lib/role-tokens.js';
 
 /** The fields /api/results forwards. Keep in step with withContent. */
 const FORWARDED = ['description', 'nuance'];
-const FORWARDED_LISTS = ['strengths', 'stickingPoints'];
+// `patterns` joined the forwarded set when the couple-type page started
+// printing it, so its tokens have to resolve too.
+const FORWARDED_LISTS = ['strengths', 'stickingPoints', 'patterns'];
 
 const DIFFERENT = [
   { name: 'Ada', axes: { open: 4.4, withdraw: 2.1 }, pronouns: 'she/her' },

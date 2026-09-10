@@ -26,6 +26,7 @@ import { sectionsWithLabels, resultsNav } from './_lib/results-sections.js';
 import { expectationsSummary } from './_lib/expectations.js';
 import { INDIVIDUAL_TYPE_DISPLAY, MAP_QUADRANTS } from './_individual-types.js';
 import { AXES } from './_axes.js';
+import { coupleTypeProse } from './_lib/near-axis.js';
 import { individualBlurb, axisRows } from './_lib/individual-profile.js';
 import { mapCoords } from './_lib/results.js';
 import { resolveRoleTokens } from './_lib/role-tokens.js';
@@ -121,6 +122,10 @@ function withContent(results, viewer, contentVersion, pronouns = {}) {
   // two people read the same results and each is {U} in their own view, so the
   // substitution belongs to whoever is rendering.
   const type = COUPLE_TYPES.find(t => t.id === results.coupleType) || null;
+
+  // The two prose lists this couple actually gets, with the near-axis
+  // overrides already chosen from their two axis scores.
+  const nearAxis = coupleTypeProse(type, a?.axes, b?.axes);
 
   /** Role tokens, resolved against these two people. See the note above. */
   // Pronouns live on the profile, not in the stored results, so they are
@@ -228,6 +233,23 @@ function withContent(results, viewer, contentVersion, pronouns = {}) {
         name: type.name,
         tagline: type.tagline,
         description: role(type.description),
+        /**
+         * What the couple-type page actually prints, with near-axis overrides
+         * applied.
+         *
+         * Two things were wrong before this. The app rendered `description`
+         * where the website's "What this looks like in your relationship" tile
+         * renders `patterns`, which is a different field with different words,
+         * so that tile said something else entirely on the two products. And
+         * neither the app nor the endpoint applied the near-axis variants,
+         * which the website has swapped in since they were written: a couple
+         * with a partner on an axis line read the overstated default in the
+         * app and the hedged version on the website.
+         *
+         * Both fixed here rather than in either renderer, so there is one
+         * implementation. See api/_lib/near-axis.js.
+         */
+        patterns: nearAxis.patterns.map(role),
         nuance: role(type.nuance),
         color: type.color,
         shade: type.shade,
@@ -237,7 +259,7 @@ function withContent(results, viewer, contentVersion, pronouns = {}) {
         // not show any of the three no matter how it was written: the data
         // never left the server.
         strengths: (type.strengths || []).map(role),
-        stickingPoints: (type.stickingPoints || []).map(role),
+        stickingPoints: nearAxis.stickingPoints.map(role),
         // phraseTry was not forwarded, so the app could not draw the nested
         // quote tile the website's couple-type tips end with no matter how it
         // was written: the words never left the server.
@@ -438,6 +460,9 @@ export default async function handler(req) {
           theirs: partner.ex2_answers,
           youName: me.name || 'You',
           themName: partner.name || 'Your partner',
+          // So each category page can open with the paragraph written for this
+          // pairing, which is what the website prints.
+          coupleTypeId: results?.coupleType || null,
         })
       : null;
 
