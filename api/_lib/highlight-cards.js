@@ -22,6 +22,7 @@
 import { COUPLE_TYPES } from '../_couple-types.js';
 import { overallExpectationsPct } from './expectations-alignment.js';
 import { CALLOUT_TONES, RING_COLORS, statColor } from './storycard-style.js';
+import { commAlignmentPct, selfGap } from './comm-alignment.js';
 
 /**
  * The one conversation, chosen by the widest communication gap.
@@ -67,16 +68,34 @@ export function highlightCards({
   const them = names?.them || 'Your partner';
   const type = COUPLE_TYPES.find((t) => t.id === coupleTypeId) || null;
 
-  const scored = dimensions.filter((d) => d.gap != null);
+  /**
+   * Self gaps, not the blended ones on `d.gap`.
+   *
+   * `d.gap` is the distance after each score is mixed with the partner's view
+   * of them. That is the right input for typing a couple and the wrong one for
+   * "how far apart are your answers": mixing two numbers moves each toward the
+   * other, so blended gaps are always the narrower pair.
+   *
+   * This read `d.gap`, and the website has always read self. So the two
+   * products computed every figure on these cards from different numbers, and
+   * the app's alignment percentage was always the higher of the two. Ellie's
+   * read 100% while the sliders on the card before it did not touch.
+   *
+   * The sort is used four more times below: which five dimensions the slider
+   * card shows, which dimension is "most in tune", which is "diverge most",
+   * and which conversation closes the reel. All four could differ between the
+   * two products, for the same reason.
+   *
+   * See api/_lib/comm-alignment.js.
+   */
+  const scored = dimensions
+    .map((d) => ({ ...d, gap: selfGap(d.a, d.b) }))
+    .filter((d) => d.gap != null);
   const byGap = [...scored].sort((a, b) => a.gap - b.gap);
   const closest = byGap[0] || null;
   const widest = byGap[byGap.length - 1] || null;
 
-  // The website's rule, not the alignment threshold: a gap of one point or
-  // less counts as aligned on this card.
-  const commAlignPct = scored.length
-    ? Math.round((scored.filter((d) => d.gap <= 1).length / scored.length) * 100)
-    : 0;
+  const commAlignPct = commAlignmentPct(scored.map((d) => d.gap));
 
   const cards = [];
 

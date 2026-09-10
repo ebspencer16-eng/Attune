@@ -84,6 +84,7 @@ import {
 import { COUPLE_TYPES as NEW_COUPLE_TYPES } from "../api/_couple-types.js";
 import { INDIVIDUAL_TYPE_DISPLAY } from "../api/_individual-types.js";
 import { AXES, MAP_CAPTION } from "../api/_axes.js";
+import { commAlignmentPct } from "../api/_lib/comm-alignment.js";
 import { CATEGORY_INTRO } from "../api/_lib/category-intros.js";
 import { NEAR_AXIS_PROSE as NEAR_AXIS_PROSE_SHARED } from "../api/_lib/near-axis.js";
 import { EXP_CAT_STARTERS as EXP_CAT_STARTERS_SHARED } from "../api/_lib/expectation-starters.js";
@@ -6680,7 +6681,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
   // ── PAGE: COUPLE TYPE ────────────────────────────────────────────────────────
   if (section === "couple-type") {
     const ct = coupleType;
-    if (!ct) return <Layout accent="#E8673A"><p style={{fontFamily:BFONT,color:C.muted}}>Complete both exercises to see your couple type.</p></Layout>;
+    if (!ct) return <Layout accent="#E8673A"><p style={{fontFamily:BFONT,color:C.muted}}>Complete all exercises to see your couple type.</p></Layout>;
     // Resolve "the expressive/guarded partner" role labels to real names when
     // the two partners actually differ on the Open/Guarded axis. Open-leaning
     // (openScore >= 3) reads as expressive; below that, guarded. If both sit on
@@ -8590,7 +8591,11 @@ function ResultsHighlights({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3
   // ── Storycard highlight helpers ──────────────────────────────────────────
   const uPos = pronoun(userPronouns, "pos");
   const pPos = pronoun(partnerPronouns, "pos");
-  const commAlignPct = feedback.length ? Math.round(feedback.filter(f => (f.gap ?? 0) <= 1).length / feedback.length * 100) : 0;
+  // From api/_lib/comm-alignment.js, which the app's cards read too. This was
+  // the same arithmetic written here by hand, with one difference that
+  // mattered: `f.gap ?? 0` counted a dimension with no gap as perfectly
+  // aligned, so an unanswered dimension quietly raised the figure.
+  const commAlignPct = commAlignmentPct(feedback.map(f => f.gap));
   const lifeAlignPct = lifeRows.length ? Math.round(lifeRows.filter(r => r.aligned).length / lifeRows.length * 100) : 0;
   const respAlignPct = allRows.length ? Math.round(allRows.filter(r => r.aligned).length / allRows.length * 100) : 0;
   const intimacyAlignPct = (intimacySum && intimacySum.dimSummary && intimacySum.dimSummary.length)
@@ -14049,7 +14054,7 @@ export default function App() {
                   <p style={{ fontFamily: font.display, fontSize: "2rem", fontWeight: 700, color: C.ink, marginBottom: "0.5rem", lineHeight: 1.1 }}>Exercise 2 Complete.</p>
                   <p style={{ fontSize: "0.78rem", letterSpacing: "0.1em", textTransform: "uppercase", color: "#1B5FE8", fontWeight: 700, fontFamily: font.body, marginBottom: "1.25rem" }}>Your expectations are recorded</p>
                   <p style={{ fontSize: "0.92rem", color: C.muted, fontFamily: font.body, fontWeight: 300, marginBottom: "0.75rem", lineHeight: 1.75 }}>That took honesty. Most couples don't have these conversations until they have to.</p>
-                  <p style={{ fontSize: "0.88rem", color: C.muted, fontFamily: font.body, fontWeight: 300, marginBottom: "2rem", lineHeight: 1.75 }}>{bothDone ? ("Your results are ready. Explore them on your own or together with " + partnerName + ".") : ("When " + partnerName + " finishes both exercises, you'll unlock your couple type and learn what that means for the two of you.")}</p>
+                  <p style={{ fontSize: "0.88rem", color: C.muted, fontFamily: font.body, fontWeight: 300, marginBottom: "2rem", lineHeight: 1.75 }}>{bothDone ? ("Your results are ready. Explore them on your own or together with " + partnerName + ".") : ("When " + partnerName + " finishes all exercises, you'll unlock your couple type and learn what that means for the two of you.")}</p>
                   <div style={{ display: "flex", gap: "0.75rem", justifyContent: "center", flexWrap: "wrap" }}>
                     
                     {bothDone
