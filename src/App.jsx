@@ -884,7 +884,7 @@ export function ExpectationsExercise({ partnerName, userName = "Partner A", onCo
       <style>{'@keyframes fadeIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}'}</style>
       <p style={{ fontSize: "0.62rem", letterSpacing: "0.2em", textTransform: "uppercase", color: "#1B5FE8", marginBottom: "1.25rem", fontFamily: font.body }}>Exercise 02 . What You Expect</p>
       <h2 style={{ fontFamily: font.display, fontSize: "clamp(2rem,5vw,2.8rem)", fontWeight: 700, color: C.ink, lineHeight: 1.1, marginBottom: "1.5rem" }}>
-        Relationship frustrations frequently<br /><em style={{ fontStyle: "italic", color: "#1B5FE8" }}>trace back to an unmet expectation,</em><br />whether conscious or not.
+        Relationship frustrations frequently<br /><em style={{ fontStyle: "normal", color: "inherit" }}>trace back to an unmet expectation,</em><br />whether conscious or not.
       </h2>
       <p style={{ fontSize: "0.95rem", color: C.muted, lineHeight: 1.85, fontFamily: font.body, fontWeight: 300, marginBottom: "1.75rem" }}>
         {isRevisited
@@ -920,7 +920,7 @@ export function ExpectationsExercise({ partnerName, userName = "Partner A", onCo
         <style>{"@keyframes fadeIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}"}</style>
         <p style={{ fontSize: "0.6rem", letterSpacing: "0.2em", textTransform: "uppercase", color: "#1B5FE8", marginBottom: "1.25rem", fontFamily: font.body }}>Exercise 02 · Before we start</p>
         <h2 style={{ fontFamily: font.display, fontSize: "clamp(1.5rem,4vw,2.2rem)", fontWeight: 700, color: C.ink, lineHeight: 1.1, marginBottom: "0.85rem" }}>
-          Who were the primary adults<br /><em style={{ fontStyle: "italic", color: "#1B5FE8" }}>in your home growing up?</em>
+          Who were the primary adults<br /><em style={{ fontStyle: "normal", color: "inherit" }}>in your home growing up?</em>
         </h2>
         <p style={{ fontSize: "0.88rem", color: C.muted, lineHeight: 1.75, fontFamily: font.body, fontWeight: 300, marginBottom: "2rem" }}>
           This shapes how you answer the next section, and helps us give you more personalized context in your results.
@@ -13836,7 +13836,7 @@ export default function App() {
                       <div style={{ fontSize: isMobile ? "0.55rem" : "0.62rem", letterSpacing: "0.24em", textTransform: "uppercase", color: "rgba(255,255,255,0.7)", fontFamily: BFONT, fontWeight: 700, marginBottom: isMobile ? "0.4rem" : "0.6rem" }}>Your Attune dashboard</div>
                       <div style={{ display: "flex", alignItems: "baseline", gap: "0.4rem", flexWrap: "wrap" }}>
                         <span style={{ fontFamily: "'Playfair Display', Georgia, serif", fontSize: isMobile ? "1.6rem" : "2.5rem", fontWeight: 700, lineHeight: 1, letterSpacing: "-.02em", color: "white" }}>{userName || "You"}</span>
-                        <span style={{ fontFamily: "'Playfair Display', Georgia, serif", fontSize: isMobile ? "1.1rem" : "1.7rem", fontWeight: 400, fontStyle: "italic", color: "rgba(255,255,255,0.6)", lineHeight: 1 }}>&</span>
+                        <span style={{ fontFamily: "'Playfair Display', Georgia, serif", fontSize: isMobile ? "1.1rem" : "1.7rem", fontWeight: 400, fontStyle: "normal", color: "rgba(255,255,255,0.6)", lineHeight: 1 }}>&</span>
                         <span style={{ fontFamily: "'Playfair Display', Georgia, serif", fontSize: isMobile ? "1.6rem" : "2.5rem", fontWeight: 700, lineHeight: 1, letterSpacing: "-.02em", color: "white" }}>{partnerName || "Partner"}</span>
                       </div>
                       <div style={{ fontSize: isMobile ? "0.78rem" : "0.92rem", color: "rgba(255,255,255,0.75)", fontFamily: BFONT, fontWeight: 300, marginTop: "0.6rem", lineHeight: 1.5 }}>
@@ -15387,10 +15387,20 @@ export default function App() {
                     <p style={{ fontSize: "0.82rem", color: "rgba(255,255,255,.4)", lineHeight: 1.7, fontFamily: BFONT, fontWeight: 300 }}>Understand each other deeply.<br/>And how to grow together.</p>
                   </div>
                   <div style={{ display: "grid", gridTemplateColumns: isMobile ? "repeat(2, 1fr)" : "repeat(3, 1fr)", gap: "1.5rem" }}>
+                    {/* The same three columns the static site's footer carries,
+                        in the same order and with the same labels.
+
+                        This footer had drifted into a second version: it listed
+                        "How it works" twice, pointing at /how-it-works, a page
+                        retired in 5c1924e and deleted for good in 1316f37. The
+                        route still resolves, because every path in this SPA
+                        returns index.html, so the link did not 404. It rendered
+                        a blank page instead, which is worse: nothing tells the
+                        reader anything went wrong. */}
                     {[
-                      { title: "Product", links: [["Home", "/home"], ["How it works", "/how-it-works"], ["Gifts & Packages", "/offerings"], ["Get started", "/portal"]] },
-                      { title: "Learn", links: [["How it works", "/how-it-works"], ["Packages & pricing", "/offerings"], ["Resources", "/resources"], ["FAQs", "/faq"], ["Reviews", "/reviews"]] },
-                      { title: "Support", links: [["FAQs", "/faq"], ["Contact us", "mailto:hello@attune-relationships.com"], ["Privacy policy", "/legal"], ["Terms of service", "/legal#terms"]] },
+                      { title: "Product", links: [["Packages", "/offerings"], ["Get started", "/start"], ["Wedding registry", "/wedding-registry"]] },
+                      { title: "Learn", links: [["Our Purpose", "/purpose"], ["In Practice", "/practice"], ["FAQs", "/faq"]] },
+                      { title: "Support", links: [["Contact", "/contact"], ["Privacy & Terms", "/legal"], ["Your privacy choices", "/privacy-choices"]] },
                     ].map(({ title, links }) => (
                       <div key={title}>
                         <div style={{ fontSize: "0.6rem", letterSpacing: "0.2em", textTransform: "uppercase", color: "rgba(255,255,255,.3)", fontFamily: BFONT, fontWeight: 700, marginBottom: "0.85rem" }}>{title}</div>

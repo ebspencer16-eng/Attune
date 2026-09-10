@@ -91,3 +91,23 @@
   --clay:   #C17F47;
   --green:  #10b981;
 }
+
+/**
+ * ── HEADINGS DO NOT ITALICISE ─────────────────────────────────────────────
+ * Every page hero was written as a plain half and an <em> half, which the
+ * browser renders in italic serif and which several pages also coloured. It
+ * read as two voices in one sentence.
+ *
+ * The <em> tags are left in the markup because they are how each headline is
+ * broken, and pulling twelve of them out by hand is twelve chances to drop a
+ * word. This turns off the styling instead, in one place, so a new page cannot
+ * reintroduce it by copying an old one.
+ *
+ * Body prose keeps its italics. This is scoped to headings.
+ */
+h1 em,
+h2 em,
+h3 em {
+  font-style: normal;
+  color: inherit;
+}

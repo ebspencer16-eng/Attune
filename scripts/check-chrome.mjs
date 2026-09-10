@@ -22,16 +22,24 @@
 // If a nav change ever has to be made in twenty files by hand and this gate
 // catches the one that was missed, that is the moment to build the generator.
 //
-// ── HOW IT WORKS AND COUPLE TYPES ──────────────────────────────────────────
-// Both were listed in the nav on 2 of 16 pages and in the footer on 2 of 13,
-// and nothing else linked either. Two pages we built that nobody could find.
-// They are now on every nav and every footer, so this gate has no recorded
-// exceptions: any difference it reports is drift.
+// ── HOW IT WORKS AND COUPLE TYPES: WHY THEY ARE NOT HERE ───────────────────
+// This paragraph used to say both pages were "now on every nav and every
+// footer". That was true for about a day and has been wrong ever since.
 //
-// The two surfaces label the same page differently. The nav says "How it
-// works", the footer says "Methodology" and rewrites /methodology to the same
-// file. That was the existing pattern on both surfaces and was kept rather
-// than unified, but one page with two names in one site is worth a look.
+// The two pages were retired into other pages deliberately. An audit of mine
+// measured reachability, found nothing linked them, called them orphaned, and
+// they were relinked everywhere on the strength of that framing. They were
+// unlinked again in 00752ef and deleted in 1316f37.
+//
+// The comment stayed. Anyone reading this file to understand the site's chrome
+// would have concluded /how-it-works was a live, linked page. Two links in
+// src/App.jsx's footer pointed there for weeks afterwards, and because every
+// path in that SPA returns index.html they did not 404: they rendered a blank
+// page, which nothing reports.
+//
+// So this gate now covers that footer too, below. And the lesson the stale
+// paragraph teaches is worth more than the paragraph: a gate's stated reason
+// rots exactly like the code it guards, and a wrong reason is read as fact.
 //
 // ── WHAT IS NOT COVERED, AND IT MATTERS ────────────────────────────────────
 // The <style> block inside <footer>. That block is not the footer's CSS: it
@@ -149,6 +157,58 @@ function compare(kind, openRe, tag, exempt, stripStyle) {
 const navs = compare('nav', '<nav[^>]*>', 'nav', new Set(NAV_EXEMPT.keys()), true);
 const foots = compare('footer', '<footer[^>]*class="[^"]*site-footer[^"]*"[^>]*>', 'footer', new Set(), true);
 
+/**
+ * The React app's footer, which is not in public/ and so was invisible above.
+ *
+ * It cannot share markup with the static footer: one is HTML in twenty-nine
+ * files, the other is JSX inside src/App.jsx. What they can share is where
+ * they send people. Labels and destinations are compared as a set; order,
+ * styling and column grouping are the app's own business.
+ *
+ * This is the check that was missing. The app's footer listed "How it works"
+ * twice, pointing at a page that no longer exists, while every static footer
+ * had already moved on to Our Purpose and In Practice.
+ */
+function appFooterLinks() {
+  const src = readFileSync(join(ROOT, 'src/App.jsx'), 'utf8');
+  const cols = [...src.matchAll(/\{\s*title:\s*"(Product|Learn|Support)",\s*links:\s*\[([\s\S]*?)\]\s*\}/g)];
+  const out = new Map();
+  for (const [, , body] of cols) {
+    for (const m of body.matchAll(/\["([^"]+)",\s*"([^"]+)"\]/g)) out.set(m[1], m[2]);
+  }
+  return { cols: cols.length, links: out };
+}
+
+function staticFooterLinks() {
+  const text = readFileSync(join(PUBLIC, 'home.html'), 'utf8');
+  const foot = blockOf(text, /<footer[^>]*class="[^"]*site-footer[^"]*"[^>]*>/, 'footer');
+  const out = new Map();
+  const links = foot?.match(/<div class="sf-links">[\s\S]*?<\/div>\s*<\/div>/)?.[0] || '';
+  for (const m of links.matchAll(/<a href="([^"]+)"[^>]*>([^<]+)<\/a>/g)) {
+    out.set(m[2].replace(/&amp;/g, '&').trim(), m[1]);
+  }
+  return out;
+}
+
+const app = appFooterLinks();
+const site = staticFooterLinks();
+if (!app.cols || !site.size) {
+  problems.push(
+    'could not read one of the two footers '
+    + `(app columns: ${app.cols}, site links: ${site.size}). `
+    + 'A gate that finds nothing passes for the wrong reason.');
+} else {
+  for (const [label, href] of site) {
+    if (!app.links.has(label)) problems.push(`src/App.jsx footer is missing "${label}" (${href})`);
+    else if (app.links.get(label) !== href) {
+      problems.push(`src/App.jsx footer sends "${label}" to ${app.links.get(label)}, the site sends it to ${href}`);
+    }
+  }
+  for (const [label, href] of app.links) {
+    if (!site.has(label)) problems.push(`src/App.jsx footer offers "${label}" (${href}), which no static footer does`);
+  }
+}
+
 if (problems.length) {
   console.error('[check-chrome] the shared chrome has drifted:');
   for (const p of problems) console.error(`  ${p}`);
@@ -162,4 +222,5 @@ if (problems.length) {
 
 console.log(
   `[check-chrome] one nav across ${navs} pages (${NAV_EXEMPT.size} named variants), `
-  + `one footer across ${foots}. Footer style blocks are NOT covered; see the header.`);
+  + `one footer across ${foots}, and src/App.jsx's ${site.size} footer links agree with it. `
+  + `Footer style blocks are NOT covered; see the header.`);
