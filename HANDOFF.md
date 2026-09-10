@@ -894,3 +894,52 @@ It found `storycardStyle` on its first run: the app read it from `content`, the
 handler assembles it at the top level, so the storycards had been on their
 fallback since the day the field was added. **If you add a field a screen needs,
 put it where the app reads it and let this check confirm it.**
+
+---
+
+## 2026-09-10 — Ellie's app notes, worked through
+
+Everything in Ellie's last list is done except the text-selection notes spec,
+which she deferred herself. Site and app both build; `npm run check` is green,
+`npm run smoke` reports 25 of 25, `expo export` bundles.
+
+**Four "Important" items**
+
+1. *Partner's conflict reads Pending.* `/api/partner-sync` deletes
+   `conflict_data` before responding and sends `conflictCompletedAt` and
+   `conflictPartnerView` instead. Both of `src/App.jsx`'s pollers read the
+   deleted name, including the one written specifically to stop this. Fixed;
+   `check-stripped-fields.mjs` follows the value from fetch to `.json()` so it
+   cannot recur.
+2. *Results open before every exercise is done.* The rule existed three times
+   and the three disagreed. `api/_lib/results-gate.js` is the only one now, and
+   it requires both partners through every **owned** exercise.
+   `check-results-gate.mjs` holds it statically and behaviourally.
+3. *Resources flashed then asked for sign-in.* Two real defects on that path,
+   both fixed: a failed keychain read was cached for the life of the process,
+   and an empty access token was reported as signed-out without trying the
+   refresh token. **Which one Ellie hit is not established.** The sign-in
+   screen prints the reason it appeared, so a recurrence will name itself.
+4. *Text selection notes and Notes tab.* Not started. Ellie's spec is in the
+   conversation of 2026-09-05; she said to do it after the app fixes.
+
+**Still Ellie's, not mine to write**
+
+- Two strings on the site still say results need "both exercises":
+  `src/App.jsx:6683` ("Complete both exercises to see your couple type.") and
+  `src/App.jsx:14052` ("When {partner} finishes both exercises, you'll unlock
+  your couple type"). Both were true under the old rule. They now understate it
+  for any couple who owns an add-on. Three other strings already say "all
+  exercises" and are now correct. The shape needed is one clause naming the
+  real condition, and it has to work for a core couple who genuinely own two.
+- The greeting rotates through three phrases: the time of day, "Welcome back"
+  and "Nice to see you again". Ellie asked for "a few other generic phrases".
+  They go in `ANYTIME` in `api/_lib/next-action.js`, one array, both surfaces.
+- The research findings list is still the original three, rotating daily.
+
+**Known limit, not a bug**
+
+Pole labels in the side-by-side still wrap. They are whole sentences and the
+row is three columns on a phone; the website has the same problem at the same
+width. Reclaiming the margins bought a line or two. Short pole labels are the
+real fix and those are copy.
