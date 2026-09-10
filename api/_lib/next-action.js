@@ -210,9 +210,40 @@ export function nextActions(state = {}) {
   return { primary: withApp[0], secondary: withApp.slice(1, 4) };
 }
 
-/** Greeting for the home screen. Time-of-day only, no streak, no guilt. */
+/**
+ * Greeting for the home screen. No streak, no guilt.
+ *
+ * ── WHY IT VARIES ─────────────────────────────────────────────────────────
+ * It was time of day and nothing else, so anyone who opens the app at the same
+ * hour each day was greeted with the same three words forever. Ellie asked for
+ * it to move between "welcome back", "good morning", "nice to see you again"
+ * and a few others.
+ *
+ * Those three are hers. The two other time-of-day forms were already here.
+ * ANYTIME is short on purpose: more phrases is a copy decision and copy is
+ * Ellie's, so the list is exactly what she has written rather than padded out
+ * with things that sound like her.
+ *
+ * ── WHY IT CHANGES HOURLY AND NOT PER REQUEST ─────────────────────────────
+ * A greeting that rerolls on every pull to refresh is a screen that will not
+ * sit still, and this one sits above a research finding that changes daily.
+ * Keyed to the hour, so it moves through the day and holds still while someone
+ * is using it.
+ *
+ * Someone's FIRST visit always gets the time of day. A first arrival greeted
+ * with "welcome back" is the product claiming a history it does not have.
+ */
+const ANYTIME = ['Welcome back', 'Nice to see you again'];
+
 export function greeting({ now, firstName, returning }) {
-  const h = new Date(now || Date.now()).getHours();
-  const part = h < 12 ? 'Good morning' : h < 18 ? 'Good afternoon' : 'Good evening';
-  return firstName ? `${part}, ${firstName}` : (returning ? 'Welcome back' : part);
+  const at = new Date(now || Date.now());
+  const h = at.getHours();
+  const timeOfDay = h < 12 ? 'Good morning' : h < 18 ? 'Good afternoon' : 'Good evening';
+
+  let part = timeOfDay;
+  if (returning) {
+    const options = [timeOfDay, ...ANYTIME];
+    part = options[Math.floor(at.getTime() / 3600000) % options.length];
+  }
+  return firstName ? `${part}, ${firstName}` : part;
 }

@@ -19,7 +19,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useFocusEffect } from 'expo-router';
-import { Linking, Pressable, RefreshControl, ScrollView, Text, View, useWindowDimensions } from 'react-native';
+import { Linking, Pressable, RefreshControl, ScrollView, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
@@ -188,25 +188,48 @@ export default function HomeScreen() {
                 brand colour. Settings keeps the row: it is where account
                 deletion lives, which App Review has to be able to find
                 without being told where it is. */}
-            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-end', marginTop: Spacing.sm }}>
+            {/* ── HELLO, AND THE WAY OUT ──────────────────────────────────
+                The greeting sits on the top line now, with the profile control
+                opposite it, because it was below a row that held nothing but a
+                Settings pill: the first thing on the screen was a button, and
+                the greeting had been pushed down the page to make room for it.
+
+                Ellie also could not find it. The pill sat under the simulator's
+                own gear icon, and "Settings" in a bordered pill reads as
+                preferences rather than as the place your account lives. A
+                profile glyph in the corner is where people look for that. */}
+            <View
+              style={{
+                flexDirection: 'row', alignItems: 'center',
+                justifyContent: 'space-between', gap: Spacing.md,
+                marginTop: Spacing.sm,
+              }}>
+              <Text style={{ ...Type.hero, color: Palette.white, flex: 1 }}>
+                {data.greeting}
+              </Text>
               <Pressable
                 onPress={() => setSettingsOpen(true)}
                 hitSlop={12}
                 accessibilityRole="button"
-                accessibilityLabel="Settings"
-                style={{
-                  paddingHorizontal: Spacing.md, paddingVertical: Spacing.xs,
-                  borderRadius: Radius.pill, borderWidth: 1,
-                  borderColor: 'rgba(255,255,255,0.35)',
-                }}>
-                <Text style={{ ...Type.small, color: Palette.white, fontWeight: '700' }}>Settings</Text>
+                accessibilityLabel="Your profile and settings"
+                style={{ padding: Spacing.xs }}>
+                <SymbolView
+                  name="person.crop.circle"
+                  size={30}
+                  tintColor={Palette.white}
+                  fallback={
+                    <View
+                      style={{
+                        width: 30, height: 30, borderRadius: 15, borderWidth: 1.5,
+                        borderColor: 'rgba(255,255,255,0.7)',
+                      }}
+                    />
+                  }
+                />
               </Pressable>
             </View>
 
-            <View style={{ paddingBottom: Spacing.xxl }}>
-              <Text style={{ ...Type.hero, color: Palette.white, marginBottom: Spacing.xxl }}>
-                {data.greeting}
-              </Text>
+            <View style={{ paddingTop: Spacing.xxl, paddingBottom: Spacing.xxl }}>
               {data.research ? <ResearchNote finding={data.research} /> : null}
             </View>
           </View>
@@ -368,6 +391,39 @@ function ResearchNote({ finding }: { finding: NonNullable<HomeResponse['research
        a size, pulls in from both sides and centres. Same colour, same
        family, different voice. */
     <View style={{ paddingHorizontal: Spacing.xl }}>
+      {/* ── THE GLOW ─────────────────────────────────────────────────────
+          Ellie asked for a circular glow behind the finding so it reads as
+          the spotlit thing on the screen rather than as more text on the
+          blue.
+
+          Three concentric circles, not a radial gradient. React Native has
+          no radial gradient, and the libraries that add one bring a native
+          module for a decoration. Stacked circles at falling opacity give a
+          soft edge that is indistinguishable at these values, and each is a
+          plain View.
+
+          Behind the text and not around it: absolutely positioned and not
+          hit-testable, so it cannot change the layout when the finding is
+          long or swallow a touch. */}
+      <View pointerEvents="none" style={StyleSheet.absoluteFill}>
+        <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+          {[
+            { size: 300, opacity: 0.05 },
+            { size: 220, opacity: 0.06 },
+            { size: 140, opacity: 0.07 },
+          ].map((ring) => (
+            <View
+              key={ring.size}
+              style={{
+                position: 'absolute',
+                width: ring.size, height: ring.size, borderRadius: ring.size / 2,
+                backgroundColor: `rgba(255,255,255,${ring.opacity})`,
+              }}
+            />
+          ))}
+        </View>
+      </View>
+
       <Text
         style={{
           ...Type.title, fontSize: 19, lineHeight: 29, fontWeight: '400',
