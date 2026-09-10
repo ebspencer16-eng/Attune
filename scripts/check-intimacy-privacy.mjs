@@ -63,7 +63,14 @@ if (!both) {
   problems.push('no payload was produced when both partners had finished');
 } else {
   const ALLOWED_TOP = ['overallState', 'overallDistancePct', 'dimensions', 'conversations'];
-  const ALLOWED_DIM = ['section', 'id', 'label', 'intro', 'state', 'distancePct',
+  // `positions` is the two partners' averages over the questions in this
+  // dimension. It is an aggregate of `questions`, which is already listed
+  // below and is the whole point of the screen, so it exposes nothing new: it
+  // exists because the website's overview plots each partner on a track and
+  // the app only had the distance between them. Listed deliberately, because
+  // this allowlist is the promise and a field nobody declared is a field
+  // nobody thought about.
+  const ALLOWED_DIM = ['section', 'id', 'label', 'intro', 'state', 'distancePct', 'positions',
     'body', 'reason', 'prompt', 'questions'];
   const ALLOWED_ROW = ['id', 'text', 'low', 'high', 'you', 'them'];
 

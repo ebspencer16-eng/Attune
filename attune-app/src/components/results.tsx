@@ -433,7 +433,7 @@ function SectionBody({
   if (section === 'reflection-story') return <ReflectionStory data={reflection} />;
   if (section === 'reflection-plan') return <ReflectionPlan data={reflection} insights={reflectionPlan} />;
 
-  if (section === 'intimacy-overview') return <IntimacyOverview data={intimacy} />;
+  if (section === 'intimacy-overview') return <IntimacyOverview data={intimacy} you={you} them={them} />;
   if (section === 'intimacy-plan') return <IntimacyConversations data={intimacy} />;
   if (section.startsWith('intimacy-')) {
     const dim = intimacy?.dimensions.find((d) => d.section === section) ?? null;
@@ -881,7 +881,7 @@ function DistanceBar({ pct, state }: { pct: number | null; state: string }) {
   );
 }
 
-function IntimacyOverview({ data }: { data: IntimacyResults | null }) {
+function IntimacyOverview({ data, you, them }: { data: IntimacyResults | null; you: string; them: string }) {
   if (!data) {
     return <Waiting title="Physical Intimacy" body="This opens when you have both finished the exercise." />;
   }
@@ -889,62 +889,79 @@ function IntimacyOverview({ data }: { data: IntimacyResults | null }) {
   // framing paragraph, so neither does this. One written here would be the app
   // telling a couple something the product never told them.
   return (
-    <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: ResultsBottomInset }}>
-      <View style={{ paddingHorizontal: Spacing.xl, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center' }}>
-        <Text style={{ ...Type.hero, color: c.textStrong }}>Physical Intimacy Expectations</Text>
+    /* Dark rose, which is the website's ground for this section. The app drew
+       it on cream. */
+    <View style={{ flex: 1 }}>
+      <LinearGradient
+        colors={['#4A1B33', '#A34468', '#C8703E']}
+        start={{ x: 0.1, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
+      />
+      <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: ResultsBottomInset }}>
+        <View style={{ paddingHorizontal: Spacing.xl, paddingTop: Spacing.md, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center' }}>
+          <Text style={{ ...Type.hero, color: Palette.white }}>Physical Intimacy Expectations</Text>
 
-        {/* block: intimacy-overview/where-you-each-land */}
-        <Text style={{ ...Type.cardTitle, color: c.textStrong, marginTop: Spacing.xl, marginBottom: Spacing.md }}>
-          Where you each land
-        </Text>
-        {/* One container, not one card per dimension.
-            The website puts "Where you each land" in a single panel with the
-            six dimensions as rows inside it. The app had six separate bordered
-            cards, which reads as six findings rather than one picture, and is
-            the same thing that was wrong on the Communication glance. */}
-        <View
-          style={{
-            backgroundColor: c.surface, borderColor: c.border, borderWidth: 1,
-            borderRadius: Radius.lg, overflow: 'hidden',
-          }}>
-          {data.dimensions.map((d, i) => (
-            <View
-              key={d.section}
-              style={{
-                padding: Spacing.lg,
-                borderTopWidth: i === 0 ? 0 : 1,
-                borderTopColor: c.border,
-              }}>
-              <Text style={{ ...Type.cardTitle, color: c.textStrong }}>{d.label}</Text>
-              {d.intro ? (
-                <Text style={{ ...Type.small, color: c.textMuted, marginTop: Spacing.xs }}>{d.intro}</Text>
-              ) : null}
-              <DistanceBar pct={d.distancePct} state={d.state} />
+          {/* One panel, a row per dimension, each partner on the track. The app
+              drew a card per dimension carrying one distance bar, which is a
+              score where the website shows two people. */}
+          <View
+            style={{
+              marginTop: Spacing.xl,
+              backgroundColor: 'rgba(255,255,255,0.12)',
+              borderColor: 'rgba(255,255,255,0.22)', borderWidth: 1,
+              borderRadius: Radius.lg, padding: Spacing.lg,
+            }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: Spacing.md }}>
+              {/* block: intimacy-overview/where-you-each-land */}
+              <Text style={{ ...Type.eyebrow, color: 'rgba(255,255,255,0.3)' }}>Where you each land</Text>
+              <View style={{ flexDirection: 'row', gap: Spacing.md }}>
+                {[{ n: you, col: YOU_COLOR }, { n: them, col: GLANCE_THEM }].map((x) => (
+                  <View key={x.n} style={{ flexDirection: 'row', alignItems: 'center', gap: Spacing.xs }}>
+                    <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: x.col }} />
+                    <Text style={{ ...Type.small, fontSize: 11, color: 'rgba(255,255,255,0.5)' }}>{x.n}</Text>
+                  </View>
+                ))}
+              </View>
             </View>
-          ))}
-        </View>
+            <View style={{ gap: Spacing.xs }}>
+              {data.dimensions.map((d) => (
+                <View key={d.section} style={{ flexDirection: 'row', alignItems: 'center', gap: Spacing.sm }}>
+                  <Text style={{ ...Type.small, fontSize: 11, color: 'rgba(255,255,255,0.65)', width: 100, lineHeight: 15 }}>
+                    {d.label}
+                  </Text>
+                  <View style={{ flex: 1 }}>
+                    <Slider
+                      you={d.positions?.you ?? null}
+                      them={d.positions?.them ?? null}
+                      youName={you}
+                      themName={them}
+                      onDark
+                    />
+                  </View>
+                </View>
+              ))}
+            </View>
+          </View>
 
-        {data.conversations.length ? (
-          <>
-              {/* block: intimacy-overview/action-plan */}
-            <Text style={{ ...Type.cardTitle, color: c.textStrong, marginTop: Spacing.xxl, marginBottom: Spacing.md }}>
+          {/* block: intimacy-overview/action-plan */}
+            <Text style={{ ...Type.cardTitle, color: Palette.white, marginTop: Spacing.xxl, marginBottom: Spacing.md }}>
               Your action plan
             </Text>
             {data.conversations.map((d) => (
               <View
                 key={d.section}
                 style={{
-                  backgroundColor: c.surface, borderColor: c.border, borderWidth: 1,
+                  backgroundColor: 'rgba(255,255,255,0.10)', borderColor: 'rgba(255,255,255,0.2)', borderWidth: 1,
                   borderRadius: Radius.lg, padding: Spacing.lg, marginBottom: Spacing.md,
                 }}>
                 <Text style={{ ...Type.eyebrow, color: c.accentQuiet }}>{d.label}</Text>
-                <Text style={{ ...Type.body, color: c.text, marginTop: Spacing.xs }}>{d.prompt}</Text>
+                <Text style={{ ...Type.body, color: 'rgba(255,255,255,0.85)', marginTop: Spacing.xs }}>{d.prompt}</Text>
               </View>
             ))}
-          </>
-        ) : null}
-      </View>
-    </ScrollView>
+        </View>
+      </ScrollView>
+    </View>
   );
 }
 

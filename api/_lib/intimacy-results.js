@@ -127,6 +127,19 @@ export function intimacyResults({ mine, theirs, variant = 'premarital' }) {
       // Both people's positions, question by question. This is the screen the
       // catalogue sells as "compared side by side".
       questions: questionRows(d.id, answersMine, answersTheirs, variant),
+      // ── AND THE TWO AVERAGES, FOR THE OVERVIEW ROW ───────────────────
+      // The website's overview plots each partner on a track per dimension.
+      // The app only had the distance between them, so it drew one bar where
+      // the website draws two people, which reads as a score rather than as a
+      // comparison. Averaged over the questions each of them answered.
+      positions: (() => {
+        const rows = questionRows(d.id, answersMine, answersTheirs, variant);
+        const mean = (side) => {
+          const vals = rows.map((r) => r[side]).filter((v) => v != null);
+          return vals.length ? vals.reduce((a, b) => a + b, 0) / vals.length : null;
+        };
+        return { you: mean('you'), them: mean('them') };
+      })(),
     };
   });
 

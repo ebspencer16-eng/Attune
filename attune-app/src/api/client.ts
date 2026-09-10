@@ -280,6 +280,12 @@ export type IntimacyDimension = {
   state: 'aligned' | 'discuss' | 'different' | 'unspoken';
   /** How far apart, as a percentage of the scale. Null when unanswered. */
   distancePct: number | null;
+  /**
+   * The two averages, 0 to 1, for the overview row. The website plots each
+   * partner on a track per dimension; the app only had the distance between
+   * them, which reads as a score rather than as a comparison.
+   */
+  positions?: { you: number | null; them: number | null };
   body: string | null;
   reason: string;
   prompt: string | null;
