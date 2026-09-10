@@ -1738,23 +1738,21 @@ function deriveNewCoupleType(myS, partS) {
 // Individual type metadata. individualBlurb, axisBand and axisRows now live in
 // api/_lib/individual-profile.js, so /api/results can send the same words to
 // the app instead of the panel existing only in this file.
+/**
+ * The four individual types as this file needs them: the display facts from
+ * api/_individual-types.js, plus the two axis labels.
+ *
+ * Three paragraphs per type lived here too. 9bb7da5 replaced them with
+ * individualBlurb, which builds the same write-up from the person's
+ * coordinates so it tracks how close to an axis they actually sit rather than
+ * reading identically for everyone in a quadrant. Nothing has rendered them
+ * since. Removed rather than left as a second, staler answer.
+ */
 const INDIVIDUAL_TYPES = {
-  W: { ...INDIVIDUAL_TYPE_DISPLAY.W, axis1: "Engage", axis2: "Open",
-       desc: "Moves toward resolution. Processes and expresses relatively freely.",
-       wired: "You move toward connection when things need addressing. You don't wait for an opening, you create one. You process outward, which means the people close to you usually know where you stand without having to ask. This makes you easy to know, and relatively easy to be in productive conflict with.",
-       typeDesc: "You engage quickly and express freely, which means the people close to you usually know where they stand, and they know where you stand too. You don't make them guess. Under pressure, you tend to reach toward the relationship rather than away from it, which can be genuinely stabilizing. The thing to stay aware of: your speed to engage can feel like a lot when someone else needs more time to get there." },
-  X: { ...INDIVIDUAL_TYPE_DISPLAY.X, axis1: "Engage", axis2: "Guarded",
-       desc: "Pushes toward resolution. Processes internally, shares selectively.",
-       wired: "You move toward resolution rather than away from it. When something needs addressing, you don't avoid the conversation. You process before you speak, which means your perspective is usually considered by the time it comes out. This makes you direct and deliberate, but sometimes harder to read in the middle of something.",
-       typeDesc: "You engage with problems directly but process privately before speaking, which means you tend to arrive at conversations with something considered to say. You don't react out loud. Under pressure, you want resolution, but you need your own thinking to be in order first. The thing to stay aware of: your internal processing can look like distance to someone who expresses more freely." },
-  Y: { ...INDIVIDUAL_TYPE_DISPLAY.Y, axis1: "Withdraw", axis2: "Open",
-       desc: "Needs space first. Carries and expresses feeling when ready.",
-       wired: "You need space to process before you can fully show up to a hard conversation. This isn't avoidance, it's how you get to something honest. You're emotionally expressive when you're ready, and the people close to you get real feeling when it comes. What you bring most is depth: you don't stay on the surface.",
-       typeDesc: "You process before you can share, taking the time you need to understand what's actually true for you before you say it. You're emotionally present and expressive when you get there. Under pressure, you need time, and pushing you before you're ready usually produces something incomplete. The thing to stay aware of: your withdrawal before sharing can read as avoidance to someone who engages more quickly." },
-  Z: { ...INDIVIDUAL_TYPE_DISPLAY.Z, axis1: "Withdraw", axis2: "Guarded",
-       desc: "Withdraws and holds things close. Real depth and feeling running quiet beneath the surface.",
-       wired: "You process privately and share selectively. There's usually more going on internally than what's visible from the outside. When you do speak, it carries weight precisely because you don't offer it carelessly. What you bring is steadiness: you don't react quickly, which means you don't create unnecessary chaos.",
-       typeDesc: "You carry things privately and surface them selectively, which means there's usually more going on internally than what's visible. You don't perform your inner life, and you don't dump it on the people around you. Under pressure, you go quiet and go deep. The thing to stay aware of: the people who love you most sometimes struggle to know what you're carrying, which can make them feel shut out without you intending it." },
+  W: { ...INDIVIDUAL_TYPE_DISPLAY.W, axis1: "Engage", axis2: "Open" },
+  X: { ...INDIVIDUAL_TYPE_DISPLAY.X, axis1: "Engage", axis2: "Guarded" },
+  Y: { ...INDIVIDUAL_TYPE_DISPLAY.Y, axis1: "Withdraw", axis2: "Open" },
+  Z: { ...INDIVIDUAL_TYPE_DISPLAY.Z, axis1: "Withdraw", axis2: "Guarded" },
 };
 
 
@@ -3239,54 +3237,6 @@ function Exercise01Flow({ userName, partnerName, onComplete, skipIntro = false, 
 
 
 // -- PERSONALITY RESULTS --
-// Per-dimension headline copy - unique per dim, 3 tiers by gap
-const DIM_HEADLINES = {
-  energy: [
-    "You recharge the same way.",
-    "Your energy rhythms are close.",
-    "You each restore in your own way.",
-  ],
-  decision: [
-    "You think through decisions the same way.",
-    "Your thinking styles complement each other.",
-    "You each bring a distinct perspective to decisions.",
-  ],
-  conflict: [
-    "You move through hard moments at a similar pace.",
-    "You approach hard conversations in a similar way.",
-    "You each have your own pace when things get hard.",
-  ],
-  affection: [
-    "You speak the same love language.",
-    "Your ways of showing care mostly overlap.",
-    "You each express and receive love in your own register.",
-  ],
-  planning: [
-    "You're wired the same way around structure.",
-    "You mostly see eye to eye on planning.",
-    "One of you finds comfort in structure; the other in flexibility.",
-  ],
-  expressiveness: [
-    "You're equally open with each other.",
-    "Your comfort with sharing is closely matched.",
-    "You each have your own relationship with emotional openness.",
-  ],
-  togetherness: [
-    "You want the same balance of together and apart.",
-    "Your togetherness needs are closely matched.",
-    "You each have your own sense of how close to stay.",
-  ],
-  change: [
-    "Change lands the same way for both of you.",
-    "You handle uncertainty with similar ease.",
-    "You each move through change at your own pace.",
-  ],
-};
-
-function dimHeadline(dim, gap) {
-  const tier = gap <= 1 ? 0 : gap <= 2.5 ? 1 : 2;
-  return DIM_HEADLINES[dim]?.[tier] || "You each bring something distinct here.";
-}
 
 // Conditionally wraps children in a WithSideNav or plain div
 function MaybeNav({ noSideNav, navItems, currentStep, onGo, accent, children }) {
@@ -3741,124 +3691,16 @@ function PersonalityResults({ myAnswers, partnerAnswers, userName, partnerName, 
   }
 
 
-  // -- SUMMARY -- dark navy, mirrors overview --
-  const coupleStrengths = sortedFeedback.filter(f => f.gap <= 1);
-  const coupleGrowth = sortedFeedback.filter(f => f.gap > 1);
-
-  // Each person's most distinct orientation (furthest from 3 = neutral)
-  const myStrongest = [...DIMS].sort((a,b) => Math.abs(myS[b]-3) - Math.abs(myS[a]-3))[0];
-  const partnerStrongest = [...DIMS].sort((a,b) => Math.abs(partS[b]-3) - Math.abs(partS[a]-3))[0];
-  const myOrientation = myS[myStrongest] < 3 ? DIM_META[myStrongest].ends[0] : DIM_META[myStrongest].ends[1];
-  const partnerOrientation = partS[partnerStrongest] < 3 ? DIM_META[partnerStrongest].ends[0] : DIM_META[partnerStrongest].ends[1];
-
-  return (
-    <MaybeNav noSideNav={noSideNav} navItems={personalityNavItems} currentStep={step} onGo={go} accent="#E8673A">
-      <ResultsSlide bg="linear-gradient(145deg, #0f0c29, #302b63, #24243e)">
-      <link href={FONT_URL} rel="stylesheet" />
-      <div style={{ color: "white" }}>
-        <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", marginBottom: "1rem" }}>
-          <div style={{ flex: 1 }}>
-            <div style={{ fontSize: "0.65rem", letterSpacing: "0.2em", textTransform: "uppercase", color: "rgba(255,255,255,0.4)", marginBottom: "0.3rem", fontFamily: BFONT }}>How You Work as a Couple</div>
-            <div style={{ fontSize: "clamp(1.6rem,5vw,2.2rem)", fontWeight: 700, fontFamily: HFONT, lineHeight: 1.0 }}>{userName} & {partnerName}</div>
-          </div>
-
-        </div>
-
-        {/* Strengths, green tinted tiles */}
-        {coupleStrengths.length > 0 && (
-          <div style={{ background: "rgba(76,175,80,0.12)", borderRadius: 16, padding: "1.1rem 1.25rem", marginBottom: "0.75rem", border: "1px solid rgba(76,175,80,0.25)" }}>
-            <div style={{ fontSize: "0.62rem", letterSpacing: "0.15em", textTransform: "uppercase", color: "#66BB6A", fontWeight: 700, marginBottom: "0.85rem", fontFamily: BFONT }}>* Your shared strengths</div>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.5rem" }}>
-              {coupleStrengths.map(f => {
-                const m = DIM_META[f.dim];
-                return (
-                  <div key={f.dim} onClick={() => go(domainStepOf(f.dim))}
-                    style={{ background: "rgba(255,255,255,0.07)", borderRadius: 10, padding: "0.75rem 0.85rem", cursor: "pointer", transition: "background 0.15s" }}
-                    onMouseEnter={e => e.currentTarget.style.background = "rgba(255,255,255,0.14)"}
-                    onMouseLeave={e => e.currentTarget.style.background = "rgba(255,255,255,0.07)"}>
-                    <div style={{ fontSize: "0.72rem", fontWeight: 700, color: "white", fontFamily: BFONT, lineHeight: 1.2, marginBottom: "0.2rem" }}>{m.label}</div>
-                    <div style={{ fontSize: "0.65rem", color: "#66BB6A", fontFamily: BFONT, lineHeight: 1.35 }}>{dimHeadline(f.dim, f.gap)}</div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        )}
-
-        {/* Growth, amber tinted tiles */}
-        {coupleGrowth.length > 0 && (
-          <div style={{ background: "rgba(255,152,0,0.1)", borderRadius: 16, padding: "1.1rem 1.25rem", marginBottom: "0.75rem", border: "1px solid rgba(255,152,0,0.2)" }}>
-            <div style={{ fontSize: "0.62rem", letterSpacing: "0.15em", textTransform: "uppercase", color: "#FFA726", fontWeight: 700, marginBottom: "0.85rem", fontFamily: BFONT }}>Where you can grow</div>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.5rem" }}>
-              {coupleGrowth.map(f => {
-                const m = DIM_META[f.dim];
-                return (
-                  <div key={f.dim} onClick={() => go(domainStepOf(f.dim))}
-                    style={{ background: "rgba(255,255,255,0.07)", borderRadius: 10, padding: "0.75rem 0.85rem", cursor: "pointer", transition: "background 0.15s" }}
-                    onMouseEnter={e => e.currentTarget.style.background = "rgba(255,255,255,0.14)"}
-                    onMouseLeave={e => e.currentTarget.style.background = "rgba(255,255,255,0.07)"}>
-                    <div style={{ fontSize: "0.72rem", fontWeight: 700, color: "white", fontFamily: BFONT, lineHeight: 1.2, marginBottom: "0.2rem" }}>{m.label}</div>
-                    <div style={{ fontSize: "0.63rem", color: "#FFA726", fontFamily: BFONT, lineHeight: 1.45 }}>{dimHeadline(f.dim, f.gap)}</div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        )}
-
-        {/* Individual profiles, 2 & 4: clear label, clickable */}
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.6rem", marginBottom: "0.75rem" }}>
-          {[[userName, myStrongest, myOrientation, myS, "#2196F3"],[partnerName, partnerStrongest, partnerOrientation, partS, "#9C27B0"]].map(([name, strongDim, orient, scores, color]) => (
-            <div key={name}
-              onClick={() => go(sortedFeedback.indexOf(sortedFeedback.find(f => f.dim === strongDim)) + 1)}
-              style={{ background: "rgba(255,255,255,0.07)", borderRadius: 14, padding: "1rem", cursor: "pointer", transition: "background 0.15s" }}
-              onMouseEnter={e => e.currentTarget.style.background = "rgba(255,255,255,0.13)"}
-              onMouseLeave={e => e.currentTarget.style.background = "rgba(255,255,255,0.07)"}>
-              <div style={{ fontSize: "0.65rem", textTransform: "uppercase", letterSpacing: "0.1em", color, fontWeight: 700, marginBottom: "0.5rem", fontFamily: BFONT }}>{name}</div>
-              <div style={{ fontSize: "0.75rem", fontWeight: 700, color: "white", fontFamily: BFONT, lineHeight: 1.25, marginBottom: "0.15rem" }}>{orient}</div>
-            </div>
-          ))}
-        </div>
-
-        {/* No "Your next moves" strip. It restated three protocol titles that
-            the action plan already carries in full, under a heading nobody
-            wrote, on a page whose action tiles say what to do. */}
-      </div>
-
-      {/* Raw responses */}
-      <div style={{ border: "1px solid rgba(255,255,255,0.1)", borderRadius: 14, overflow: "hidden", marginTop: "1rem" }}>
-        <button onClick={() => setShowRaw(s => !s)} style={{ width: "100%", background: "rgba(255,255,255,0.05)", border: "none", padding: "1rem 1.4rem", display: "flex", justifyContent: "space-between", alignItems: "center", cursor: "pointer", fontFamily: BFONT }}>
-          <span style={{ fontSize: "0.8rem", fontWeight: 600, color: "rgba(255,255,255,0.6)" }}>Individual responses</span>
-          <span style={{ fontSize: "0.85rem", color: "rgba(255,255,255,0.4)", fontWeight: 700 }}>{showRaw ? "^" : "v"}</span>
-        </button>
-        {showRaw && (
-          <div style={{ background: "rgba(255,255,255,0.03)", padding: "0 1.4rem 1.4rem" }}>
-            {PERSONALITY_QUESTIONS.map(q => {
-              const myV = myAnswers[q.id], theirV = partnerAnswers[q.id];
-              const m = DIM_META[q.dimension];
-              return (
-                <div key={q.id} style={{ borderBottom: "1px solid rgba(255,255,255,0.06)", padding: "0.9rem 0" }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: "0.4rem", marginBottom: "0.5rem" }}>
-                    <p style={{ fontSize: "0.8rem", color: "rgba(255,255,255,0.6)", margin: 0, lineHeight: 1.45, fontFamily: BFONT }}>{q.text}</p>
-                  </div>
-                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.5rem" }}>
-                    {[[userName, myV, "rgba(255,255,255,0.08)"],[partnerName, theirV, "rgba(255,255,255,0.05)"]].map(([name, v, bg]) => (
-                      <div key={name} style={{ background: bg, padding: "0.55rem 0.8rem", borderRadius: 8 }}>
-                        <p style={{ fontSize: "0.6rem", textTransform: "uppercase", letterSpacing: "0.1em", color: "rgba(255,255,255,0.65)", marginBottom: "0.2rem", fontFamily: BFONT }}>{name}</p>
-                        <p style={{ fontSize: "0.75rem", color: "rgba(255,255,255,0.85)", fontWeight: 500, fontFamily: BFONT, lineHeight: 1.4 }}>{v ? (v <= 2 ? ("A, " + (q.a.split(", ")[0] || q.a.substring(0,40)) + "...") : v === 3 ? "Neutral" : ("B, " + (q.b.split(", ")[0] || q.b.substring(0,40)) + "...")) : ", "}</p>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        )}
-      </div>
-      <NavButtons onBack={() => go(step - 1)} onNext={() => {}} nextLabel="Done" nextDisabled />
-    </ResultsSlide>
-    </MaybeNav>
-  );
+  // ── NO SUMMARY PAGE ──────────────────────────────────────────────────────
+  // A fourth Communication page lived here, reachable only by a step past the
+  // last domain, which no nav item and no next button produces. Deleted with
+  // its DIM_HEADLINES table, which was keyed to an older dimension set:
+  // energy, decision, affection, planning, expressiveness, togetherness and
+  // change, of which only energy and conflict still exist, so eight of the ten
+  // live dimensions fell through to a generic line.
+  //
+  // A step out of range renders nothing rather than a stale page.
+  return null;
 }
 
 
@@ -8719,10 +8561,6 @@ function ResultsHighlights({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3
   const myWithdraws = myStress < 2.5;
   const theyWithdraws = theirStress < 2.5;
   const stressMismatch = (mySeeks && theyWithdraws) || (myWithdraws && theySeeks);
-  const stressLine = stressMismatch
-    ? (mySeeks ? userName : partnerName) + " reaches in. " + (mySeeks ? partnerName : userName) + " pulls back."
-    : mySeeks && theySeeks ? "You both reach toward each other when things get hard."
-    : "You both tend to pull inward when things get hard.";
 
   const topConvo = sortedFeedback.filter(f => f.gap > 1.5).slice(0, 1)[0];
   const convoPrompt = topConvo ? {
